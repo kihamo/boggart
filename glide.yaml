@@ -1,0 +1,6 @@
+package: github.com/kihamo/boggart
+import:
+- package: github.com/go-sql-driver/mysql
+  version: 9181e3a86a19bacd63e68d43ae8b7b36320d8092
+- package: github.com/kihamo/shadow
+  version: 091f0383f11c1082132d75b0eb1c922b8056c2e5

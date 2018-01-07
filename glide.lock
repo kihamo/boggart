@@ -1,0 +1,185 @@
+hash: 09a4abbebe024226dcff17c1d581608442afc82b71a92663cf82603cf0dc25c0
+updated: 2018-01-07T05:03:45.672948234+03:00
+imports:
+- name: github.com/alexedwards/scs
+  version: dbad6751cfac0714e079d0ef9a8bc1d14d52de21
+  subpackages:
+  - stores/cookiestore
+  - stores/memstore
+- name: github.com/bsm/histogram
+  version: 253b217b3ad255d48994a6f74de4f82650f5e70d
+- name: github.com/bugsnag/osext
+  version: 0dd3f918b21bec95ace9dc86c7e70266cfc5c702
+- name: github.com/deckarep/golang-set
+  version: 1d4478f51bed434f1dadf96dcd9b43aabac66795
+- name: github.com/elazarl/go-bindata-assetfs
+  version: 30f82fa23fd844bd5bb1e5f216db87fd77b5eb43
+- name: github.com/go-gorp/gorp
+  version: 6a3c8a87d0457cf700e57046c41e19b7cf3c44fa
+- name: github.com/go-sql-driver/mysql
+  version: 9181e3a86a19bacd63e68d43ae8b7b36320d8092
+- name: github.com/golang/protobuf
+  version: 1e59b77b52bf8e4b449a57e6f79f21226d571845
+  subpackages:
+  - proto
+  - ptypes
+  - ptypes/any
+  - ptypes/duration
+  - ptypes/timestamp
+- name: github.com/google/uuid
+  version: dec09d789f3dba190787f8b4454c7d3c936fed9e
+- name: github.com/julienschmidt/httprouter
+  version: e1b9828bc9e5904baec057a154c09ca40fe7fae0
+- name: github.com/justinas/alice
+  version: 03f45bd4b7dad4734bc4620e46a35789349abb20
+- name: github.com/kardianos/osext
+  version: ae77be60afb1dcacde03767a8c37337fad28ac14
+- name: github.com/kihamo/go-workers
+  version: 40c3d0743c16cbff2ff82f8e3407d63166c51681
+  subpackages:
+  - dispatcher
+  - listener
+  - manager
+  - worker
+- name: github.com/kihamo/gotypes
+  version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
+- name: github.com/kihamo/shadow
+  version: 091f0383f11c1082132d75b0eb1c922b8056c2e5
+  subpackages:
+  - components/alerts
+  - components/alerts/instance
+  - components/alerts/internal
+  - components/alerts/internal/handlers
+  - components/config
+  - components/config/instance
+  - components/config/internal
+  - components/config/internal/handlers
+  - components/dashboard
+  - components/dashboard/auth
+  - components/dashboard/auth/providers/password
+  - components/dashboard/instance
+  - components/dashboard/internal
+  - components/dashboard/internal/handlers
+  - components/dashboard/runtime
+  - components/database
+  - components/grpc
+  - components/logger
+  - components/logger/instance
+  - components/logger/internal
+  - components/metrics
+  - components/profiling
+  - components/profiling/instance
+  - components/profiling/internal
+  - components/profiling/internal/handlers
+  - components/profiling/trace
+  - components/workers
+  - components/workers/instance
+  - components/workers/internal
+  - components/workers/internal/handlers
+- name: github.com/kihamo/snitch
+  version: e4d6b609e3e7317796ace171d60477ee95f8410e
+  subpackages:
+  - internal
+- name: github.com/lann/builder
+  version: f22ce00fd9394014049dad11c244859432bd6820
+- name: github.com/lann/ps
+  version: 62de8c46ede02a7675c4c79c84883eb164cb71e3
+- name: github.com/mailru/easyjson
+  version: 32fa128f234d041f196a9f3e0fea5ac9772c08e1
+  subpackages:
+  - buffer
+  - jlexer
+  - jwriter
+- name: github.com/markbates/goth
+  version: c1c166e3a8681da4ef77f8aa00088a9d01beb299
+  subpackages:
+  - providers/github
+  - providers/gitlab
+- name: github.com/OneOfOne/xxhash
+  version: 4e9e81466dc37c9fd94ce9ecf42020ef54112203
+- name: github.com/patrickmn/go-cache
+  version: a3647f8e31d79543b2d0f0ae2fe5c379d72cedc0
+- name: github.com/pborman/uuid
+  version: e533369306653d193b93dae055f6083cbf8ba54f
+- name: github.com/rs/xhandler
+  version: 1eb70cf1520d43c307a89c5dabb7a7efd132fccd
+- name: github.com/rs/xid
+  version: 02dd45c33376f85d1064355dc790dcc4850596b1
+- name: github.com/rs/xlog
+  version: 7ed5dc1cca34bb0c9e8f0e58dcf19b6dea3044d5
+  subpackages:
+  - internal/term
+- name: github.com/rubenv/sql-migrate
+  version: 6edbfbd6a369ee82463312ec67b2c92f97a1d4dc
+  subpackages:
+  - sqlparse
+- name: golang.org/x/crypto
+  version: 9477e0b78b9ac3d0b03822fd95422e2fe07627cd
+  subpackages:
+  - nacl/secretbox
+  - poly1305
+  - salsa20/salsa
+- name: golang.org/x/net
+  version: d866cfc389cec985d6fda2859936a575a55a3ab6
+  subpackages:
+  - context
+  - context/ctxhttp
+  - http2
+  - http2/hpack
+  - idna
+  - internal/timeseries
+  - lex/httplex
+  - trace
+- name: golang.org/x/oauth2
+  version: 09bba2746c7d9b3181efc10fdb29c59c582f4eb1
+  subpackages:
+  - internal
+- name: golang.org/x/text
+  version: 6eab0e8f74e86c598ec3b6fad4888e0c11482d48
+  subpackages:
+  - secure/bidirule
+  - transform
+  - unicode/bidi
+  - unicode/norm
+- name: google.golang.org/appengine
+  version: 5bee14b453b4c71be47ec1781b0fa61c2ea182db
+  subpackages:
+  - internal
+  - internal/base
+  - internal/datastore
+  - internal/log
+  - internal/remote_api
+  - internal/urlfetch
+  - urlfetch
+- name: google.golang.org/genproto
+  version: a8101f21cf983e773d0c1133ebc5424792003214
+  subpackages:
+  - googleapis/rpc/status
+- name: google.golang.org/grpc
+  version: e687fa4e6424368ece6e4fe727cea2c806a0fcb4
+  subpackages:
+  - balancer
+  - balancer/roundrobin
+  - codes
+  - connectivity
+  - credentials
+  - encoding
+  - grpclb/grpc_lb_v1/messages
+  - grpclog
+  - internal
+  - keepalive
+  - metadata
+  - naming
+  - peer
+  - resolver
+  - resolver/dns
+  - resolver/passthrough
+  - stats
+  - status
+  - tap
+  - transport
+- name: gopkg.in/gorp.v1
+  version: c87af80f3cc5036b55b83d77171e156791085e2e
+- name: gopkg.in/Masterminds/squirrel.v1
+  version: a6b93000bd219143c56c16e6cb1c4b91da3f224b
+testImports: []
