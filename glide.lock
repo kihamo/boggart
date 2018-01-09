@@ -1,6 +1,8 @@
-hash: 09a4abbebe024226dcff17c1d581608442afc82b71a92663cf82603cf0dc25c0
-updated: 2018-01-07T05:03:45.672948234+03:00
+hash: 8883fbf1a74b1269d426e3eb1b0a2db3d4f87a23b6668eb3a7d9d23751656283
+updated: 2018-01-09T08:06:12.215524426+03:00
 imports:
+- name: code.cloudfoundry.org/clock
+  version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
 - name: github.com/alexedwards/scs
   version: dbad6751cfac0714e079d0ef9a8bc1d14d52de21
   subpackages:
@@ -28,6 +30,10 @@ imports:
   - ptypes/timestamp
 - name: github.com/google/uuid
   version: dec09d789f3dba190787f8b4454c7d3c936fed9e
+- name: github.com/jacobsa/go-serial
+  version: 5786d1b837823f99ac8751a7e40811a546287bf3
+  subpackages:
+  - serial
 - name: github.com/julienschmidt/httprouter
   version: e1b9828bc9e5904baec057a154c09ca40fe7fae0
 - name: github.com/justinas/alice
@@ -35,7 +41,7 @@ imports:
 - name: github.com/kardianos/osext
   version: ae77be60afb1dcacde03767a8c37337fad28ac14
 - name: github.com/kihamo/go-workers
-  version: 40c3d0743c16cbff2ff82f8e3407d63166c51681
+  version: 0c0a610c9ca119ba9e23d8d3f0bfb5ca777fa8ca
   subpackages:
   - dispatcher
   - listener
@@ -44,7 +50,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 091f0383f11c1082132d75b0eb1c922b8056c2e5
+  version: ed95fc4809da195b49ac9a696f9821bc9a8d39d5
   subpackages:
   - components/alerts
   - components/alerts/instance
@@ -134,6 +140,10 @@ imports:
   version: 09bba2746c7d9b3181efc10fdb29c59c582f4eb1
   subpackages:
   - internal
+- name: golang.org/x/sys
+  version: d38bf781f16e180a1b2ad82697d2f81d7b7ecfac
+  subpackages:
+  - unix
 - name: golang.org/x/text
   version: 6eab0e8f74e86c598ec3b6fad4888e0c11482d48
   subpackages:
