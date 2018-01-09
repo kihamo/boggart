@@ -8,7 +8,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/jacobsa/go-serial/serial"
+	"github.com/goburrow/serial"
 )
 
 const (
@@ -23,10 +23,26 @@ const (
 	ParamDaylightSavingTime = 0x0001
 	ParamVersion            = 0x0005
 	ParamDiagnostics        = 0x0006
+
+	Channel1  = 0x00000001
+	Channel2  = 0x00000002
+	Channel3  = 0x00000004 // температура подачи [°C]
+	Channel4  = 0x00000008 // температура обратки [°C]
+	Channel5  = 0x00000010 // перепад температур [°C]
+	Channel6  = 0x00000020 // мощность [Гкал/ч]
+	Channel7  = 0x00000040 // энергия [Гкал]
+	Channel8  = 0x00000080 // объем [м^3]
+	Channel9  = 0x00000100 // расход [м^3/ч]
+	Channel10 = 0x00000200 // импульсный вход 1 [м^3]
+	Channel11 = 0x00000400 // импульсный вход 2 [м^3]
+	Channel12 = 0x00000800 // импульсный вход 3 [м^3]
+	Channel13 = 0x00001000 // импульсный вход 4 [м^3]
+	Channel14 = 0x00002000 // расход по энергии [м3/ч]
+	Channel20 = 0x00080000 // Время нормальной работы [ч]
 )
 
 type Pulsar struct {
-	config  serial.OpenOptions
+	config  *serial.Config
 	address []byte
 	port    string
 }
@@ -34,12 +50,32 @@ type Pulsar struct {
 func NewPulsar(port string, address []byte) (*Pulsar, error) {
 	return &Pulsar{
 		address: address,
-		port:    port,
+		config: &serial.Config{
+			Address:  port,
+			BaudRate: 9600,
+			Parity:   "N",
+			Timeout:  time.Second,
+		},
+		port: port,
 	}, nil
 }
 
+func (p *Pulsar) ReadMetrics(channel int64) ([]byte, error) {
+	bs := p.pad(big.NewInt(channel).Bytes(), 4)
+	response, err := p.Request(FunctionReadMetrics, bs)
+	if err != nil {
+		return nil, err
+	}
+
+	value := p.reverse(response)
+
+	//fmt.Println(math.Float32frombits(binary.BigEndian.Uint32(value)))
+
+	return value, nil
+}
+
 func (p *Pulsar) ReadTime() (time.Time, error) {
-	response, err := p.Request(FunctionReadTime, nil, 6)
+	response, err := p.Request(FunctionReadTime, nil)
 	if err != nil {
 		return time.Now(), err
 	}
@@ -55,22 +91,14 @@ func (p *Pulsar) ReadTime() (time.Time, error) {
 		time.Now().Location()), nil
 }
 
-func (p *Pulsar) ReadSettings(param int64) (interface{}, error) {
-	bs := append(big.NewInt(param).Bytes(), 0)
-
-	response, err := p.Request(FunctionReadSettings, bs, 8)
-	if err != nil {
-		return -1, err
-	}
-
-	fmt.Println(response)
-
-	return response, nil
+func (p *Pulsar) ReadSettings(param int64) ([]byte, error) {
+	bs := p.pad(big.NewInt(param).Bytes(), 2)
+	return p.Request(FunctionReadSettings, bs)
 }
 
 func (p *Pulsar) generateRequestId() []byte {
 	id, _ := rand.Int(rand.Reader, big.NewInt(0xFFFF))
-	return id.Bytes()
+	return p.pad(id.Bytes(), 2)
 }
 
 func (p *Pulsar) generateCRC16(packet []byte) []byte {
@@ -98,6 +126,18 @@ func (p *Pulsar) reverse(data []byte) []byte {
 	return data
 }
 
+func (p *Pulsar) pad(data []byte, n int) []byte {
+	if len(data) >= n {
+		return data
+	}
+
+	for i := len(data); i < n; i++ {
+		data = append(data, 0x0)
+	}
+
+	return data
+}
+
 func (p *Pulsar) HexString(data []byte) string {
 	var s string
 
@@ -105,36 +145,43 @@ func (p *Pulsar) HexString(data []byte) string {
 		s += fmt.Sprintf("%02x ", b)
 	}
 
-	return s[:len(s)-1]
+	if len(s) > 0 {
+		return s[:len(s)-1]
+	}
+
+	return ""
 }
 
-func (p *Pulsar) RequestRaw(request []byte, size uint) ([]byte, error) {
-	serial, err := serial.Open(serial.OpenOptions{
-		PortName:              p.port,
-		BaudRate:              9600,
-		DataBits:              8,
-		ParityMode:            serial.PARITY_NONE,
-		StopBits:              1,
-		InterCharacterTimeout: 0,
-		MinimumReadSize:       size,
-	})
+func (p *Pulsar) RequestRaw(request []byte) ([]byte, error) {
+	port, err := serial.Open(p.config)
 
 	if err != nil {
 		return nil, err
 	}
-	defer serial.Close()
+	defer port.Close()
 
-	if _, err := serial.Write(request); err != nil {
+	if _, err := port.Write(request); err != nil {
 		return nil, err
 	}
 
-	buffer := make([]byte, 128)
-	n, err := serial.Read(buffer)
+	buffer := bytes.NewBuffer(nil)
 
-	return buffer[:n], err
+	for {
+		b := make([]byte, 512)
+		n, err := port.Read(b)
+		if err != nil {
+			break
+		}
+
+		if n != 0 {
+			buffer.Write(b[:n])
+		}
+	}
+
+	return buffer.Bytes(), err
 }
 
-func (p *Pulsar) Request(function byte, data []byte, size uint) ([]byte, error) {
+func (p *Pulsar) Request(function byte, data []byte) ([]byte, error) {
 	var request []byte
 
 	// device address
@@ -159,7 +206,7 @@ func (p *Pulsar) Request(function byte, data []byte, size uint) ([]byte, error) 
 
 	fmt.Println("Request: ", request, p.HexString(request))
 
-	response, err := p.RequestRaw(request, 4+1+1+size+2+2)
+	response, err := p.RequestRaw(request)
 	if err != nil {
 		return nil, err
 	}
@@ -178,7 +225,7 @@ func (p *Pulsar) Request(function byte, data []byte, size uint) ([]byte, error) 
 	}
 
 	// check id
-	if bytes.Compare(response[l-4:l-2], requestId) != 0 {
+	if bytes.Compare(response[l-(2+len(requestId)):l-2], requestId) != 0 {
 		return nil, errors.New("Error ID of response packet")
 	}
 
