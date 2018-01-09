@@ -1,29 +1,43 @@
 package pulsar
 
+import (
+	"encoding/binary"
+	"time"
+)
+
 func (p *Pulsar) DaylightSavingTime() (bool, error) {
-	settings, err := p.ReadSettings(ParamDaylightSavingTime)
+	value, err := p.ReadSettings(ParamDaylightSavingTime)
 	if err != nil {
 		return false, err
 	}
 
-	return settings[0] == 1, nil
+	return binary.BigEndian.Uint64(value) == 1, nil
 }
 
 func (p *Pulsar) Diagnostics() ([]byte, error) {
-	settings, err := p.ReadSettings(ParamDiagnostics)
+	value, err := p.ReadSettings(ParamDiagnostics)
 	if err != nil {
 		return nil, err
 	}
 
 	// TODO: split result
-	return settings, nil
+	return value, nil
 }
 
 func (p *Pulsar) Version() (uint16, error) {
-	settings, err := p.ReadSettings(ParamVersion)
+	value, err := p.ReadSettings(ParamVersion)
 	if err != nil {
 		return 0, err
 	}
 
-	return uint16(settings[0]), nil
+	return uint16(binary.BigEndian.Uint64(value)), nil
+}
+
+func (p *Pulsar) OperatingTime() (time.Duration, error) {
+	value, err := p.ReadSettings(ParamOperatingTime)
+	if err != nil {
+		return -1, err
+	}
+
+	return time.Hour * time.Duration(binary.BigEndian.Uint64(value)), nil
 }

@@ -3,8 +3,10 @@ package pulsar
 import (
 	"bytes"
 	"crypto/rand"
+	"encoding/binary"
 	"errors"
 	"fmt"
+	"math"
 	"math/big"
 	"time"
 
@@ -20,25 +22,26 @@ const (
 	FunctionReadSettings  = 0x0A
 	FunctionWriteSettings = 0x0B
 
-	ParamDaylightSavingTime = 0x0001
-	ParamVersion            = 0x0005
+	ParamDaylightSavingTime = 0x0001 // uint16  | RW |    | признак автоперехода на летнее время 0 - выкл, 1 - вкл
+	ParamPulseDuration      = 0x0003 // float32 | RW | мс | длительность импульса
+	ParamPauseDuration      = 0x0004 // float32 | RW | мс | длительность паузы
+	ParamVersion            = 0x0005 // uint16  | R  |    | версия прошивки
 	ParamDiagnostics        = 0x0006
+	ParamOperatingTime      = 0x000C // uint32  | RW | ч  | время наработки
 
-	Channel1  = 0x00000001
-	Channel2  = 0x00000002
-	Channel3  = 0x00000004 // температура подачи [°C]
-	Channel4  = 0x00000008 // температура обратки [°C]
-	Channel5  = 0x00000010 // перепад температур [°C]
-	Channel6  = 0x00000020 // мощность [Гкал/ч]
-	Channel7  = 0x00000040 // энергия [Гкал]
-	Channel8  = 0x00000080 // объем [м^3]
-	Channel9  = 0x00000100 // расход [м^3/ч]
-	Channel10 = 0x00000200 // импульсный вход 1 [м^3]
-	Channel11 = 0x00000400 // импульсный вход 2 [м^3]
-	Channel12 = 0x00000800 // импульсный вход 3 [м^3]
-	Channel13 = 0x00001000 // импульсный вход 4 [м^3]
-	Channel14 = 0x00002000 // расход по энергии [м3/ч]
-	Channel20 = 0x00080000 // Время нормальной работы [ч]
+	Channel3  = 0x00000004 // float32 | °C     | температура подачи
+	Channel4  = 0x00000008 // float32 | °C     | температура обратки
+	Channel5  = 0x00000010 // float32 | °C     | перепад температур
+	Channel6  = 0x00000020 // float32 | гкал/ч | мощность
+	Channel7  = 0x00000040 // float32 | гкал   | энергия
+	Channel8  = 0x00000080 // float32 | м^3    | объем
+	Channel9  = 0x00000100 // float32 | м^3/ч  | расход
+	Channel10 = 0x00000200 // float32 | м^3    | импульсный вход 1
+	Channel11 = 0x00000400 // float32 | м^3    | импульсный вход 2
+	Channel12 = 0x00000800 // float32 | м^3    | импульсный вход 3
+	Channel13 = 0x00001000 // float32 | м^3    | импульсный вход 4
+	Channel14 = 0x00002000 // float32 | м3/ч   | расход по энергии === Channel6
+	Channel20 = 0x00080000 // uint32  | ч      | время нормальной работы
 )
 
 type Pulsar struct {
@@ -69,18 +72,21 @@ func (p *Pulsar) DeviceAddress() ([]byte, error) {
 	return response[4:8], nil
 }
 
-func (p *Pulsar) ReadMetrics(channel int64) ([]byte, error) {
+func (p *Pulsar) ReadMetrics(channel int64) ([][]byte, error) {
 	bs := p.pad(big.NewInt(channel).Bytes(), 4)
 	response, err := p.Request(FunctionReadMetrics, bs)
 	if err != nil {
 		return nil, err
 	}
 
+	metrics := math.Ceil(float64(len(response) / 4))
+	result := make([][]byte, 0, int64(metrics))
 	value := p.reverse(response)
+	for i := 0; i < len(value); i += 4 {
+		result = append(result, value[i:i+4])
+	}
 
-	//fmt.Println(math.Float32frombits(binary.BigEndian.Uint32(value)))
-
-	return value, nil
+	return result, nil
 }
 
 func (p *Pulsar) ReadTime() (time.Time, error) {
@@ -102,7 +108,12 @@ func (p *Pulsar) ReadTime() (time.Time, error) {
 
 func (p *Pulsar) ReadSettings(param int64) ([]byte, error) {
 	bs := p.pad(big.NewInt(param).Bytes(), 2)
-	return p.Request(FunctionReadSettings, bs)
+	response, err := p.Request(FunctionReadSettings, bs)
+	if err != nil {
+		return nil, err
+	}
+
+	return p.reverse(response), nil
 }
 
 func (p *Pulsar) generateRequestId() []byte {
@@ -147,7 +158,11 @@ func (p *Pulsar) pad(data []byte, n int) []byte {
 	return data
 }
 
-func (p *Pulsar) HexString(data []byte) string {
+func (p *Pulsar) ToFloat32(data []byte) float32 {
+	return math.Float32frombits(binary.BigEndian.Uint32(data))
+}
+
+func (p *Pulsar) ToString(data []byte) string {
 	var s string
 
 	for _, b := range data {
@@ -213,14 +228,14 @@ func (p *Pulsar) Request(function byte, data []byte) ([]byte, error) {
 	// check sum CRC16
 	request = append(request, p.generateCRC16(request)...)
 
-	fmt.Println("Request: ", request, p.HexString(request))
+	// fmt.Println("Request: ", request, p.ToString(request))
 
 	response, err := p.RequestRaw(request)
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Println("Response: ", response, p.HexString(response))
+	// fmt.Println("Response: ", response, p.ToString(response))
 
 	l = len(response)
 	if l < 10 {
