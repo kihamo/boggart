@@ -12,7 +12,7 @@ import (
 	dashboard "github.com/kihamo/shadow/components/dashboard/instance"
 	//database "github.com/kihamo/shadow/components/database/instance"
 	logger "github.com/kihamo/shadow/components/logger/instance"
-	// metrics "github.com/kihamo/shadow/components/metrics/instance"
+	metrics "github.com/kihamo/shadow/components/metrics/instance"
 	profiling "github.com/kihamo/shadow/components/profiling/instance"
 	workers "github.com/kihamo/shadow/components/workers/instance"
 )
@@ -34,7 +34,7 @@ func main() {
 			dashboard.NewComponent(),
 			//database.NewComponent(),
 			logger.NewComponent(),
-			// metrics.NewComponent(),
+			metrics.NewComponent(),
 			profiling.NewComponent(),
 			workers.NewComponent(),
 		},

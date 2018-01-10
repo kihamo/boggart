@@ -1,5 +1,5 @@
-hash: 0f503e91a267b98c655cada0a8801c23022fa4b7e989bfc16db482ef31dea576
-updated: 2018-01-10T12:14:11.632887022+03:00
+hash: 991f0c20845e6ce70afd1c55cb8c6a1856b371a9861a2e86ec906d3787323ba5
+updated: 2018-01-10T20:07:15.429248939+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -32,6 +32,12 @@ imports:
   - ptypes/timestamp
 - name: github.com/google/uuid
   version: dec09d789f3dba190787f8b4454c7d3c936fed9e
+- name: github.com/influxdata/influxdb
+  version: 009a7b203537e0fe34b8c14014523c7c0f1846c7
+  subpackages:
+  - client/v2
+  - models
+  - pkg/escape
 - name: github.com/julienschmidt/httprouter
   version: e1b9828bc9e5904baec057a154c09ca40fe7fae0
 - name: github.com/justinas/alice
@@ -39,16 +45,17 @@ imports:
 - name: github.com/kardianos/osext
   version: ae77be60afb1dcacde03767a8c37337fad28ac14
 - name: github.com/kihamo/go-workers
-  version: 0c0a610c9ca119ba9e23d8d3f0bfb5ca777fa8ca
+  version: 38a62daf735286ee1344c947f8f57d8349825310
   subpackages:
   - dispatcher
   - listener
   - manager
+  - task
   - worker
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 455f9f47f1ea6652c320bdd858ee67d479346a91
+  version: ba2c68fa4a2059c8c92d77f77993b5e835ad9bf4
   subpackages:
   - components/alerts
   - components/alerts/instance
@@ -71,6 +78,9 @@ imports:
   - components/logger/instance
   - components/logger/internal
   - components/metrics
+  - components/metrics/instance
+  - components/metrics/internal
+  - components/metrics/internal/handlers
   - components/profiling
   - components/profiling/instance
   - components/profiling/internal
@@ -83,7 +93,10 @@ imports:
 - name: github.com/kihamo/snitch
   version: e4d6b609e3e7317796ace171d60477ee95f8410e
   subpackages:
+  - collector
+  - collector/runtime
   - internal
+  - storage
 - name: github.com/lann/builder
   version: f22ce00fd9394014049dad11c244859432bd6820
 - name: github.com/lann/ps

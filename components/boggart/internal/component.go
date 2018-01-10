@@ -63,20 +63,30 @@ func (c *Component) Run() error {
 	taskSoftVideo := task.NewFunctionTask(c.taskSoftVideo)
 	taskSoftVideo.SetRepeats(-1)
 	taskSoftVideo.SetRepeatInterval(time.Hour * 8)
+	taskSoftVideo.SetName(c.GetName() + "-softvideo-updater")
 	c.workers.AddTask(taskSoftVideo)
 
 	taskPulsar := task.NewFunctionTask(c.taskPulsar)
 	taskPulsar.SetRepeats(-1)
 	taskPulsar.SetRepeatInterval(time.Minute * 3)
+	taskPulsar.SetName(c.GetName() + "-pulsar-updater")
 	c.workers.AddTask(taskPulsar)
 
 	return nil
 }
 
 func (c *Component) taskPulsar(context.Context) (interface{}, error) {
-	return nil, c.collector.CollectPulsar()
+	if c.config.GetBool(boggart.ConfigPulsarEnabled) {
+		return nil, c.collector.CollectPulsar()
+	}
+
+	return nil, nil
 }
 
 func (c *Component) taskSoftVideo(context.Context) (interface{}, error) {
-	return nil, c.collector.CollectSoftVideo()
+	if c.config.GetBool(boggart.ConfigSoftVideoEnabled) {
+		return nil, c.collector.CollectSoftVideo()
+	}
+
+	return nil, nil
 }
