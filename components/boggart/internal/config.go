@@ -2,24 +2,33 @@ package internal
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
 	"github.com/kihamo/shadow/components/config"
 )
 
 func (c *Component) GetConfigVariables() []config.Variable {
 	return []config.Variable{
 		config.NewVariable(
-			boggart.ConfigPulsarSerialPath,
+			boggart.ConfigPulsarSerialAddress,
 			config.ValueTypeString,
-			"/dev/ttyUSB0",
-			"Pulsar device path",
+			pulsar.DefaultSerialAddress,
+			"Serial port address",
 			true,
 			nil,
 			nil),
 		config.NewVariable(
-			boggart.ConfigPulsarAddress,
+			boggart.ConfigPulsarSerialTimeout,
+			config.ValueTypeDuration,
+			pulsar.DefaultTimeout,
+			"Serial port address",
+			true,
+			nil,
+			nil),
+		config.NewVariable(
+			boggart.ConfigPulsarDeviceAddress,
 			config.ValueTypeString,
 			nil,
-			"Pulsar address HEX value",
+			"Pulsar address HEX value (AABBCCDD). If empty system try to find device",
 			true,
 			nil,
 			nil),

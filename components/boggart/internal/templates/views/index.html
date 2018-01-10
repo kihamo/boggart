@@ -1,20 +1,212 @@
 {{ define "content" }}
 <div class="row">
-    <div class="col-md-12 col-sm-12 col-xs-12">
-        <div class="x_panel">
+    <div class="col-md-12">
+        <div class="">
             <div class="x_title">
-                <h2>Dashboard</h2>
+                <h2>Ресурсы</h2>
                 <div class="clearfix"></div>
             </div>
             <div class="x_content">
-                {{ if .error }}
-                <div class="alert alert-danger alert-dismissable">
-                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                    {{ .error }}
+                <div class="row">
+                    <div class="col-md-3 col-xs-12 widget widget_tally_box">
+                        <div class="x_panel">
+                            <div class="x_content">
+                                <div id="resource-heat-in" style="height:300px;">{{ .pulsarTemperatureIn }} {{ .pulsarDeviceAddress }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 col-xs-12 widget widget_tally_box">
+                        <div class="x_panel">
+                            <div class="x_content">
+                                <div id="resource-heat-out" style="height:300px;">{{ .pulsarTemperatureOut }} {{ .pulsarDeviceAddress }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 col-xs-12 widget widget_tally_box">
+                        <div class="x_panel">
+                            <div class="x_content">
+                                <div id="resource-heat-delta" style="height:300px;">{{ .pulsarTemperatureDelta }} {{ .pulsarDeviceAddress }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 col-xs-12 widget widget_tally_box">
+                        <div class="x_panel">
+                            <div class="x_content">
+                                <div id="resource-water-cold" style="height:300px;">Холодная вода</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 col-xs-12 widget widget_tally_box">
+                        <div class="x_panel">
+                            <div class="x_content">
+                                <div id="resource-water-hot" style="height:300px;">Горячая вода</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 col-xs-12 widget widget_tally_box">
+                        <div class="x_panel">
+                            <div class="x_content">
+                                <div id="resource-electricity" style="height:300px;">Электричество</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                {{ end }}
             </div>
         </div>
     </div>
 </div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="">
+            <div class="x_title">
+                <h2>Телекоммуникации</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="row">
+                    <div class="col-md-3 col-xs-12 widget widget_tally_box">
+                        <div class="x_panel">
+                            <div class="x_content">
+                                <div id="communication-internet" style="height:300px;">Интернет</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-xs-12 widget widget_tally_box">
+                        <div class="x_panel">
+                            <div class="x_content">
+                                <div id="communication-phone" style="height:300px;">Телефон</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-xs-12 widget widget_tally_box">
+                        <div class="x_panel">
+                            <div class="x_content">
+                                <div id="communication-wifi" style="height:300px;">WiFi клиенты</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="">
+            <div class="x_title">
+                <h2>Погода</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="row">
+                    <div class="col-md-3 col-xs-12 widget widget_tally_box">
+                        <div class="x_panel">
+                            <div class="x_content">
+                                <div id="weather-outdoor" style="height:300px;">Погода на улице</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-xs-12 widget widget_tally_box">
+                        <div class="x_panel">
+                            <div class="x_content">
+                                <div id="weather-indoor" style="height:300px;">Погода в квартире</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="">
+            <div class="x_title">
+                <h2>Охрана</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="row">
+                    <div class="col-md-3 col-xs-12 widget widget_tally_box">
+                        <div class="x_panel">
+                            <div class="x_content">
+                                <div id="security-webcam-street" style="height:300px;">Камера на улице</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-xs-12 widget widget_tally_box">
+                        <div class="x_panel">
+                            <div class="x_content">
+                                <div id="security-webcam-hall-1" style="height:300px;">Камера в общем корридоре у входной двери</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-xs-12 widget widget_tally_box">
+                        <div class="x_panel">
+                            <div class="x_content">
+                                <div id="security-webcam-hall-2" style="height:300px;">Камера в общем корридоре у лифта</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-xs-12 widget widget_tally_box">
+                        <div class="x_panel">
+                            <div class="x_content">
+                                <div id="security-intercom" style="height:300px;">Домофон</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-xs-12 widget widget_tally_box">
+                        <div class="x_panel">
+                            <div class="x_content">
+                                <div id="security-entrance-door" style="height:300px;">Входная дверь</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-xs-12 widget widget_tally_box">
+                        <div class="x_panel">
+                            <div class="x_content">
+                                <div id="security-aqua-care" style="height:300px;">Аквасторож</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-xs-12 widget widget_tally_box">
+                        <div class="x_panel">
+                            <div class="x_content">
+                                <div id="security-bell" style="height:300px;">Входной звонок</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
+
+{{ define "js" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/echarts/js/echarts.min.js" false) }}
+
+    {{ if .errors }}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            {{ range $e, $error := .errors }}
+            new PNotify({
+                title: 'Error',
+                text: '{{ $error }}',
+                type: 'error',
+                hide: false,
+                styling: 'bootstrap3'
+            });
+            {{ end }}
+        });
+    </script>
+{{ end }}
 {{ end }}

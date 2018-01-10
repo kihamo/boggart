@@ -1,5 +1,5 @@
-hash: 8883fbf1a74b1269d426e3eb1b0a2db3d4f87a23b6668eb3a7d9d23751656283
-updated: 2018-01-09T08:06:12.215524426+03:00
+hash: 0f503e91a267b98c655cada0a8801c23022fa4b7e989bfc16db482ef31dea576
+updated: 2018-01-10T12:14:11.632887022+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -20,6 +20,8 @@ imports:
   version: 6a3c8a87d0457cf700e57046c41e19b7cf3c44fa
 - name: github.com/go-sql-driver/mysql
   version: 9181e3a86a19bacd63e68d43ae8b7b36320d8092
+- name: github.com/goburrow/serial
+  version: 5efbe925ecf714f8ba147bf2226f2e7afc7111bc
 - name: github.com/golang/protobuf
   version: 1e59b77b52bf8e4b449a57e6f79f21226d571845
   subpackages:
@@ -30,10 +32,6 @@ imports:
   - ptypes/timestamp
 - name: github.com/google/uuid
   version: dec09d789f3dba190787f8b4454c7d3c936fed9e
-- name: github.com/jacobsa/go-serial
-  version: 5786d1b837823f99ac8751a7e40811a546287bf3
-  subpackages:
-  - serial
 - name: github.com/julienschmidt/httprouter
   version: e1b9828bc9e5904baec057a154c09ca40fe7fae0
 - name: github.com/justinas/alice
@@ -50,7 +48,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: ed95fc4809da195b49ac9a696f9821bc9a8d39d5
+  version: 455f9f47f1ea6652c320bdd858ee67d479346a91
   subpackages:
   - components/alerts
   - components/alerts/instance
@@ -140,10 +138,6 @@ imports:
   version: 09bba2746c7d9b3181efc10fdb29c59c582f4eb1
   subpackages:
   - internal
-- name: golang.org/x/sys
-  version: d38bf781f16e180a1b2ad82697d2f81d7b7ecfac
-  subpackages:
-  - unix
 - name: golang.org/x/text
   version: 6eab0e8f74e86c598ec3b6fad4888e0c11482d48
   subpackages:
