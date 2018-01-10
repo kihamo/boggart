@@ -32,5 +32,21 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			true,
 			nil,
 			nil),
+		config.NewVariable(
+			boggart.ConfigSoftVideoLogin,
+			config.ValueTypeString,
+			nil,
+			"Login of SoftVideo account",
+			true,
+			nil,
+			nil),
+		config.NewVariable(
+			boggart.ConfigSoftVideoPassword,
+			config.ValueTypeString,
+			nil,
+			"Password of SoftVideo account",
+			true,
+			[]string{config.ViewPassword},
+			nil),
 	}
 }

@@ -39,7 +39,8 @@ func (c *Component) GetDashboardRoutes() []dashboard.Route {
 				[]string{http.MethodGet},
 				"/"+c.GetName()+"/",
 				&handlers.IndexHandler{
-					Config: c.config,
+					Config:    c.config,
+					Collector: c,
 				},
 				"",
 				true),

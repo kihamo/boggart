@@ -1,7 +1,11 @@
 package internal
 
 import (
+	"context"
+	"time"
+
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/go-workers/task"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/dashboard"
@@ -11,9 +15,10 @@ import (
 )
 
 type Component struct {
-	config  config.Component
-	workers workers.Component
-	routes  []dashboard.Route
+	config    config.Component
+	workers   workers.Component
+	routes    []dashboard.Route
+	collector *MetricsCollector
 }
 
 func (c *Component) GetName() string {
@@ -49,12 +54,29 @@ func (c *Component) GetDependencies() []shadow.Dependency {
 func (c *Component) Init(a shadow.Application) error {
 	c.config = a.GetComponent(config.ComponentName).(config.Component)
 	c.workers = a.GetComponent(workers.ComponentName).(workers.Component)
+	c.collector = NewMetricsCollector(c)
 
 	return nil
 }
 
-func (c *Component) Run() (err error) {
-	// запуск задач на снятие показаний
+func (c *Component) Run() error {
+	taskSoftVideo := task.NewFunctionTask(c.taskSoftVideo)
+	taskSoftVideo.SetRepeats(-1)
+	taskSoftVideo.SetRepeatInterval(time.Hour * 8)
+	c.workers.AddTask(taskSoftVideo)
+
+	taskPulsar := task.NewFunctionTask(c.taskPulsar)
+	taskPulsar.SetRepeats(-1)
+	taskPulsar.SetRepeatInterval(time.Minute * 3)
+	c.workers.AddTask(taskPulsar)
 
 	return nil
+}
+
+func (c *Component) taskPulsar(context.Context) (interface{}, error) {
+	return nil, c.collector.CollectPulsar()
+}
+
+func (c *Component) taskSoftVideo(context.Context) (interface{}, error) {
+	return nil, c.collector.CollectSoftVideo()
 }

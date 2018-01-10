@@ -11,7 +11,10 @@
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
-                                <div id="resource-heat-in" style="height:300px;">{{ .pulsarTemperatureIn }} {{ .pulsarDeviceAddress }}</div>
+                                <div id="resource-heat-in" style="height:300px;">
+                                    In
+                                    {{ .boggart_pulsar_temperature_in_celsius.Value }}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -19,7 +22,10 @@
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
-                                <div id="resource-heat-out" style="height:300px;">{{ .pulsarTemperatureOut }} {{ .pulsarDeviceAddress }}</div>
+                                <div id="resource-heat-out" style="height:300px;">
+                                    Out
+                                    {{ .boggart_pulsar_temperature_out_celsius.Value }}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -27,7 +33,10 @@
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
-                                <div id="resource-heat-delta" style="height:300px;">{{ .pulsarTemperatureDelta }} {{ .pulsarDeviceAddress }}</div>
+                                <div id="resource-heat-delta" style="height:300px;">
+                                    Delta
+                                    {{ .boggart_pulsar_temperature_delta_celsius.Value }}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -73,7 +82,11 @@
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
-                                <div id="communication-internet" style="height:300px;">Интернет</div>
+                                <div id="communication-internet" style="height:300px;">
+                                    Интернет
+                                    {{ .boggart_softvideo_balance_rubles_total.Value }}
+                                    руб.
+                                </div>
                             </div>
                         </div>
                     </div>

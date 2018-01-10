@@ -1,69 +1,44 @@
 package handlers
 
 import (
-	"encoding/hex"
-
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
 	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/dashboard"
+	"github.com/kihamo/shadow/components/metrics"
+	"github.com/kihamo/snitch"
 )
 
 type IndexHandler struct {
 	dashboard.Handler
 
-	Config config.Component
+	Config    config.Component
+	Collector metrics.HasMetrics
 }
 
 func (h *IndexHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
+	// TODO: update metric value
+	if r.IsAjax() {
+
+		return
+	}
+
 	errors := []string{}
-	vars := map[string]interface{}{
-		"pulsarDeviceAddress":    "",
-		"pulsarTemperatureIn":    0,
-		"pulsarTemperatureOut":   0,
-		"pulsarTemperatureDelta": 0,
-	}
+	vars := map[string]interface{}{}
 
-	connection := pulsar.NewConnection(
-		h.Config.GetString(boggart.ConfigPulsarSerialAddress),
-		h.Config.GetDuration(boggart.ConfigPulsarSerialTimeout))
+	metricsChan := make(chan snitch.Metric, 10000)
 
-	var (
-		deviceAddress []byte
-		err           error
-	)
+	go func() {
+		h.Collector.Metrics().Collect(metricsChan)
+		close(metricsChan)
+	}()
 
-	deviceAddressConfig := h.Config.GetString(boggart.ConfigPulsarDeviceAddress)
-	if deviceAddressConfig == "" {
-		deviceAddress, err = connection.DeviceAddress()
-	} else {
-		deviceAddress, err = hex.DecodeString(deviceAddressConfig)
-	}
+	for metric := range metricsChan {
+		name := metric.Description().Name()
 
-	if err != nil {
-		errors = append(errors, "Pulsar DeviceAddress failed: "+err.Error())
-	}
-
-	if len(deviceAddress) == 4 {
-		vars["pulsarDeviceAddress"] = hex.EncodeToString(deviceAddress)
-		device := pulsar.NewDevice(deviceAddress, connection)
-
-		if value, err := device.TemperatureIn(); err == nil {
-			vars["pulsarTemperatureIn"] = value
+		if value, err := metric.Measure(); err != nil {
+			errors = append(errors, "Get metric "+name+" failed: "+err.Error())
 		} else {
-			errors = append(errors, "Pulsar TemperatureIn failed: "+err.Error())
-		}
-
-		if value, err := device.TemperatureOut(); err == nil {
-			vars["pulsarTemperatureOut"] = value
-		} else {
-			errors = append(errors, "Pulsar pulsarTemperatureOut failed: "+err.Error())
-		}
-
-		if value, err := device.TemperatureDelta(); err == nil {
-			vars["pulsarTemperatureDelta"] = value
-		} else {
-			errors = append(errors, "Pulsar TemperatureDelta failed: "+err.Error())
+			vars[name] = value
 		}
 	}
 
