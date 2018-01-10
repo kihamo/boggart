@@ -20,7 +20,15 @@ func (c *Component) GetTemplates() *assetfs.AssetFS {
 func (c *Component) GetDashboardMenu() dashboard.Menu {
 	routes := c.GetDashboardRoutes()
 
-	return dashboard.NewMenuWithRoute("Boggart", routes[0], "rocket", nil, nil)
+	return dashboard.NewMenuWithUrl(
+		"Boggart",
+		"/"+c.GetName()+"/",
+		"home",
+		[]dashboard.Menu{
+			dashboard.NewMenuWithRoute("Dashboard", routes[0], "", nil, nil),
+			dashboard.NewMenuWithRoute("Devices", routes[1], "", nil, nil),
+		},
+		nil)
 }
 
 func (c *Component) GetDashboardRoutes() []dashboard.Route {
@@ -33,6 +41,13 @@ func (c *Component) GetDashboardRoutes() []dashboard.Route {
 				&handlers.IndexHandler{
 					Config: c.config,
 				},
+				"",
+				true),
+			dashboard.NewRoute(
+				c.GetName(),
+				[]string{http.MethodGet},
+				"/"+c.GetName()+"/devices/",
+				&handlers.DevicesHandler{},
 				"",
 				true),
 		}
