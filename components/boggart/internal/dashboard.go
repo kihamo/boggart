@@ -26,7 +26,8 @@ func (c *Component) GetDashboardMenu() dashboard.Menu {
 		"home",
 		[]dashboard.Menu{
 			dashboard.NewMenuWithRoute("Dashboard", routes[0], "", nil, nil),
-			dashboard.NewMenuWithRoute("Devices", routes[1], "", nil, nil),
+			dashboard.NewMenuWithRoute("Detect", routes[1], "", nil, nil),
+			dashboard.NewMenuWithRoute("Devices", routes[2], "", nil, nil),
 		},
 		nil)
 }
@@ -42,6 +43,13 @@ func (c *Component) GetDashboardRoutes() []dashboard.Route {
 					Config:    c.config,
 					Collector: c,
 				},
+				"",
+				true),
+			dashboard.NewRoute(
+				c.GetName(),
+				[]string{http.MethodGet},
+				"/"+c.GetName()+"/detect/",
+				&handlers.DetectHandler{},
 				"",
 				true),
 			dashboard.NewRoute(
