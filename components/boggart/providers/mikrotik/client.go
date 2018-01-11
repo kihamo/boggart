@@ -2,7 +2,6 @@ package mikrotik
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"gopkg.in/routeros.v2"
@@ -36,15 +35,21 @@ func (c *Client) System() (map[string]string, error) {
 	return reply.Re[0].Map, nil
 }
 
-func (c *Client) WifiClients() ([]interface{}, error) {
+func (c *Client) WifiClients() ([]map[string]string, error) {
 	reply, err := c.client.RunArgs([]string{"/interface/wireless/registration-table/print"})
 	if err != nil {
 		return nil, err
 	}
 
-	for i, re := range reply.Re {
-		fmt.Println(i, re)
+	if len(reply.Re) == 0 {
+		return nil, errors.New("Empty reply from device")
 	}
 
-	return nil, nil
+	clients := make([]map[string]string, 0, len(reply.Re))
+
+	for _, re := range reply.Re {
+		clients = append(clients, re.Map)
+	}
+
+	return clients, nil
 }
