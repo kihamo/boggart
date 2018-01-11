@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/providers/mikrotik"
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
 	"github.com/kihamo/boggart/components/boggart/providers/softvideo"
 	"github.com/kihamo/snitch"
@@ -25,6 +26,7 @@ func (c *MetricsCollector) Describe(ch chan<- *snitch.Description) {
 	metricPulsarTemperatureOut.Describe(ch)
 	metricPulsarTemperatureDelta.Describe(ch)
 	metricSoftVideoBalance.Describe(ch)
+	metricMikrotikWifiClients.Describe(ch)
 }
 
 func (c *MetricsCollector) Collect(ch chan<- snitch.Metric) {
@@ -32,6 +34,7 @@ func (c *MetricsCollector) Collect(ch chan<- snitch.Metric) {
 	metricPulsarTemperatureOut.Collect(ch)
 	metricPulsarTemperatureDelta.Collect(ch)
 	metricSoftVideoBalance.Collect(ch)
+	metricMikrotikWifiClients.Collect(ch)
 }
 
 func (c *MetricsCollector) CollectPulsar() error {
@@ -94,6 +97,27 @@ func (c *MetricsCollector) CollectSoftVideo() error {
 	}
 
 	metricSoftVideoBalance.Set(float64(value))
+
+	return nil
+}
+
+func (c *MetricsCollector) CollectMikrotik() error {
+	client, err := mikrotik.NewClient(
+		c.component.config.GetString(boggart.ConfigMikrotikAddress),
+		c.component.config.GetString(boggart.ConfigMikrotikUsername),
+		c.component.config.GetString(boggart.ConfigMikrotikPassword),
+		c.component.config.GetDuration(boggart.ConfigMikrotikTimeout))
+
+	if err != nil {
+		return err
+	}
+
+	clients, err := client.WifiClients()
+	if err != nil {
+		return err
+	}
+
+	metricMikrotikWifiClients.Set(float64(len(clients)))
 
 	return nil
 }

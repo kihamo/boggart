@@ -1,0 +1,13 @@
+[Unit]
+Description=Boggart
+After=network.target
+
+[Service]
+ExecStart=/home/pi/go/bin/boggart
+EnvironmentFile=/home/pi/go/src/github.com/kihamo/boggart/cmd/boggart/boggart.env
+WorkingDirectory=/home/pi/go/src/github.com/kihamo/boggart/cmd/boggart
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target

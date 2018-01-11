@@ -6,3 +6,5 @@ import:
   version: ba2c68fa4a2059c8c92d77f77993b5e835ad9bf4
 - package: github.com/goburrow/serial
   version: 5efbe925ecf714f8ba147bf2226f2e7afc7111bc
+- package: github.com/go-routeros/routeros
+  version: 2dc19c12445caefdc2d128f7331dcc83284211ef

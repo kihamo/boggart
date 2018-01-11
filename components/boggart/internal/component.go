@@ -2,7 +2,6 @@ package internal
 
 import (
 	"context"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/go-workers/task"
@@ -62,15 +61,21 @@ func (c *Component) Init(a shadow.Application) error {
 func (c *Component) Run() error {
 	taskSoftVideo := task.NewFunctionTask(c.taskSoftVideo)
 	taskSoftVideo.SetRepeats(-1)
-	taskSoftVideo.SetRepeatInterval(time.Hour * 8)
+	taskSoftVideo.SetRepeatInterval(c.config.GetDuration(boggart.ConfigSoftVideoRepeatInterval))
 	taskSoftVideo.SetName(c.GetName() + "-softvideo-updater")
 	c.workers.AddTask(taskSoftVideo)
 
 	taskPulsar := task.NewFunctionTask(c.taskPulsar)
 	taskPulsar.SetRepeats(-1)
-	taskPulsar.SetRepeatInterval(time.Minute * 3)
+	taskPulsar.SetRepeatInterval(c.config.GetDuration(boggart.ConfigPulsarRepeatInterval))
 	taskPulsar.SetName(c.GetName() + "-pulsar-updater")
 	c.workers.AddTask(taskPulsar)
+
+	taskMikrotik := task.NewFunctionTask(c.taskMikrotik)
+	taskMikrotik.SetRepeats(-1)
+	taskMikrotik.SetRepeatInterval(c.config.GetDuration(boggart.ConfigMikrotikRepeatInterval))
+	taskMikrotik.SetName(c.GetName() + "-mikrotik-updater")
+	c.workers.AddTask(taskMikrotik)
 
 	return nil
 }
@@ -86,6 +91,14 @@ func (c *Component) taskPulsar(context.Context) (interface{}, error) {
 func (c *Component) taskSoftVideo(context.Context) (interface{}, error) {
 	if c.config.GetBool(boggart.ConfigSoftVideoEnabled) {
 		return nil, c.collector.CollectSoftVideo()
+	}
+
+	return nil, nil
+}
+
+func (c *Component) taskMikrotik(context.Context) (interface{}, error) {
+	if c.config.GetBool(boggart.ConfigMikrotikEnabled) {
+		return nil, c.collector.CollectMikrotik()
 	}
 
 	return nil, nil

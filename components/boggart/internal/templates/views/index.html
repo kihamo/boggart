@@ -100,7 +100,10 @@
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
-                                <div id="communication-wifi" style="height:300px;">WiFi клиенты</div>
+                                <div id="communication-wifi" style="height:300px;">
+                                    WiFi клиенты
+                                    {{ .boggart_mikrotik_wifi_clients_total.Value }}
+                                </div>
                             </div>
                         </div>
                     </div>
