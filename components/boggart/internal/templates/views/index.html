@@ -13,7 +13,13 @@
                             <div class="x_content">
                                 <div id="resource-heat-in" style="height:300px;">
                                     In
-                                    {{ .boggart_pulsar_temperature_in_celsius.Value }}
+                                    {{ .boggart_pulsar_temperature_in_celsius.Value }} C
+                                    <br />
+                                    Out
+                                    {{ .boggart_pulsar_temperature_out_celsius.Value }} C
+                                    <br />
+                                    Delta
+                                    {{ .boggart_pulsar_temperature_delta_celsius.Value }} C
                                 </div>
                             </div>
                         </div>
@@ -23,8 +29,8 @@
                         <div class="x_panel">
                             <div class="x_content">
                                 <div id="resource-heat-out" style="height:300px;">
-                                    Out
-                                    {{ .boggart_pulsar_temperature_out_celsius.Value }}
+                                    Показания энергии
+                                    {{ .boggart_pulsar_energy_gigacolories.Value }} gigacolories
                                 </div>
                             </div>
                         </div>
@@ -34,8 +40,8 @@
                         <div class="x_panel">
                             <div class="x_content">
                                 <div id="resource-heat-delta" style="height:300px;">
-                                    Delta
-                                    {{ .boggart_pulsar_temperature_delta_celsius.Value }}
+                                    Показания текущей мощности
+                                    {{ .boggart_pulsar_consumption_cubic_metres_per_hour.Value }} cubic metres per hour
                                 </div>
                             </div>
                         </div>
@@ -44,7 +50,10 @@
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
-                                <div id="resource-water-cold" style="height:300px;">Холодная вода</div>
+                                <div id="resource-water-cold" style="height:300px;">
+                                    Холодная вода
+                                    {{ .boggart_pulsar_cold_water_capacity_cubic_metres.Value }} cubic metres
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -52,7 +61,10 @@
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
-                                <div id="resource-water-hot" style="height:300px;">Горячая вода</div>
+                                <div id="resource-water-hot" style="height:300px;">
+                                    Горячая вода
+                                    {{ .boggart_pulsar_hot_water_capacity_cubic_metres.Value }} cubic metres
+                                </div>
                             </div>
                         </div>
                     </div>

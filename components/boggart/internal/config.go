@@ -51,6 +51,48 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			nil,
 			nil),
 		config.NewVariable(
+			boggart.ConfigPulsarColdWaterPulseInput,
+			config.ValueTypeInt64,
+			pulsar.Input1,
+			"Pulsar input number of cold water",
+			true,
+			[]string{config.ViewEnum},
+			map[string]interface{}{
+				config.ViewOptionEnumOptions: [][]interface{}{
+					{pulsar.Input1, "#1"},
+					{pulsar.Input2, "#2"},
+				},
+			}),
+		config.NewVariable(
+			boggart.ConfigPulsarColdWaterStartValue,
+			config.ValueTypeFloat64,
+			0,
+			"Pulsar start value of cold water (in m3)",
+			true,
+			nil,
+			nil),
+		config.NewVariable(
+			boggart.ConfigPulsarHotWaterPulseInput,
+			config.ValueTypeInt64,
+			pulsar.Input2,
+			"Pulsar input number of hot water",
+			true,
+			[]string{config.ViewEnum},
+			map[string]interface{}{
+				config.ViewOptionEnumOptions: [][]interface{}{
+					{pulsar.Input1, "#1"},
+					{pulsar.Input2, "#2"},
+				},
+			}),
+		config.NewVariable(
+			boggart.ConfigPulsarHotWaterStartValue,
+			config.ValueTypeFloat64,
+			0,
+			"Pulsar start value of hot water (in m3)",
+			true,
+			nil,
+			nil),
+		config.NewVariable(
 			boggart.ConfigSoftVideoEnabled,
 			config.ValueTypeBool,
 			true,

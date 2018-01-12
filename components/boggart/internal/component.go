@@ -14,10 +14,12 @@ import (
 )
 
 type Component struct {
-	config    config.Component
-	workers   workers.Component
-	routes    []dashboard.Route
-	collector *MetricsCollector
+	application shadow.Application
+	config      config.Component
+	logger      logger.Logger
+	workers     workers.Component
+	routes      []dashboard.Route
+	collector   *MetricsCollector
 }
 
 func (c *Component) GetName() string {
@@ -51,6 +53,7 @@ func (c *Component) GetDependencies() []shadow.Dependency {
 }
 
 func (c *Component) Init(a shadow.Application) error {
+	c.application = a
 	c.config = a.GetComponent(config.ComponentName).(config.Component)
 	c.workers = a.GetComponent(workers.ComponentName).(workers.Component)
 	c.collector = NewMetricsCollector(c)
@@ -59,6 +62,8 @@ func (c *Component) Init(a shadow.Application) error {
 }
 
 func (c *Component) Run() error {
+	c.logger = logger.NewOrNop(c.GetName(), c.application)
+
 	taskSoftVideo := task.NewFunctionTask(c.taskSoftVideo)
 	taskSoftVideo.SetRepeats(-1)
 	taskSoftVideo.SetRepeatInterval(c.config.GetDuration(boggart.ConfigSoftVideoRepeatInterval))
@@ -82,7 +87,14 @@ func (c *Component) Run() error {
 
 func (c *Component) taskPulsar(context.Context) (interface{}, error) {
 	if c.config.GetBool(boggart.ConfigPulsarEnabled) {
-		return nil, c.collector.CollectPulsar()
+		err := c.collector.CollectPulsar()
+		if err != nil {
+			c.logger.Error("Puslar updater failed", map[string]interface{}{
+				"error": err.Error(),
+			})
+		}
+
+		return nil, err
 	}
 
 	return nil, nil
@@ -90,7 +102,14 @@ func (c *Component) taskPulsar(context.Context) (interface{}, error) {
 
 func (c *Component) taskSoftVideo(context.Context) (interface{}, error) {
 	if c.config.GetBool(boggart.ConfigSoftVideoEnabled) {
-		return nil, c.collector.CollectSoftVideo()
+		err := c.collector.CollectSoftVideo()
+		if err != nil {
+			c.logger.Error("SoftVideo updater failed", map[string]interface{}{
+				"error": err.Error(),
+			})
+		}
+
+		return nil, err
 	}
 
 	return nil, nil
@@ -98,7 +117,14 @@ func (c *Component) taskSoftVideo(context.Context) (interface{}, error) {
 
 func (c *Component) taskMikrotik(context.Context) (interface{}, error) {
 	if c.config.GetBool(boggart.ConfigMikrotikEnabled) {
-		return nil, c.collector.CollectMikrotik()
+		err := c.collector.CollectMikrotik()
+		if err != nil {
+			c.logger.Error("Mikrotik updater failed", map[string]interface{}{
+				"error": err.Error(),
+			})
+		}
+
+		return nil, err
 	}
 
 	return nil, nil

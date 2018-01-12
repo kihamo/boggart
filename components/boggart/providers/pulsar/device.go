@@ -7,6 +7,9 @@ import (
 )
 
 const (
+	Input1 = iota + int64(1)
+	Input2
+
 	FunctionBadCommand    = 0x00
 	FunctionReadMetrics   = 0x01
 	FunctionReadTime      = 0x04
@@ -58,7 +61,7 @@ func (d *Device) Connection() *Connection {
 }
 
 func (d *Device) ReadMetrics(channel int64) ([][]byte, error) {
-	bs := Pad(big.NewInt(channel).Bytes(), 4)
+	bs := Pad(Reverse(big.NewInt(channel).Bytes()), 4)
 	response, err := d.connection.Request(d.address, FunctionReadMetrics, bs)
 	if err != nil {
 		return nil, err
