@@ -20,4 +20,6 @@ const (
 	ConfigMikrotikUsername          = ComponentName + ".mikrotik.username"
 	ConfigMikrotikPassword          = ComponentName + ".mikrotik.password"
 	ConfigMikrotikTimeout           = ComponentName + ".mikrotik.timeout"
+	ConfigDoorsEnabled              = ComponentName + ".doors.enabled"
+	ConfigDoorsEntrancePin          = ComponentName + ".doors.entrance-pin"
 )

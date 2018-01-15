@@ -3,6 +3,7 @@ package internal
 import (
 	"time"
 
+	"github.com/davecheney/gpio"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
 	"github.com/kihamo/shadow/components/config"
@@ -170,6 +171,22 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			time.Second*10,
 			"Request timeout",
 			true,
+			nil,
+			nil),
+		config.NewVariable(
+			boggart.ConfigDoorsEnabled,
+			config.ValueTypeBool,
+			true,
+			"Enabled doors provider",
+			false,
+			nil,
+			nil),
+		config.NewVariable(
+			boggart.ConfigDoorsEntrancePin,
+			config.ValueTypeInt,
+			gpio.GPIO17,
+			"Pin for entrance door reed switch",
+			false,
 			nil,
 			nil),
 	}

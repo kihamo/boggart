@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/providers/doors"
 	"github.com/kihamo/go-workers/task"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/config"
@@ -20,6 +21,8 @@ type Component struct {
 	workers     workers.Component
 	routes      []dashboard.Route
 	collector   *MetricsCollector
+
+	doorsEntrance *doors.Door
 }
 
 func (c *Component) GetName() string {
@@ -61,7 +64,7 @@ func (c *Component) Init(a shadow.Application) error {
 	return nil
 }
 
-func (c *Component) Run() error {
+func (c *Component) Run() (err error) {
 	c.logger = logger.NewOrNop(c.GetName(), c.application)
 
 	taskSoftVideo := task.NewFunctionTask(c.taskSoftVideo)
@@ -82,12 +85,23 @@ func (c *Component) Run() error {
 	taskMikrotik.SetName(c.GetName() + "-mikrotik-updater")
 	c.workers.AddTask(taskMikrotik)
 
+	c.doorsEntrance, err = doors.NewDoor(c.config.GetInt(boggart.ConfigDoorsEntrancePin))
+	if err != nil {
+		return err
+	}
+
+	if c.application.HasComponent(metrics.ComponentName) {
+		c.doorsEntrance.SetCallback(c.collector.UpdaterEntranceDoorsCallback)
+	}
+
+	c.collector.UpdaterDoors()
+
 	return nil
 }
 
 func (c *Component) taskPulsar(context.Context) (interface{}, error) {
 	if c.config.GetBool(boggart.ConfigPulsarEnabled) {
-		err := c.collector.CollectPulsar()
+		err := c.collector.UpdaterPulsar()
 		if err != nil {
 			c.logger.Error("Puslar updater failed", map[string]interface{}{
 				"error": err.Error(),
@@ -102,7 +116,7 @@ func (c *Component) taskPulsar(context.Context) (interface{}, error) {
 
 func (c *Component) taskSoftVideo(context.Context) (interface{}, error) {
 	if c.config.GetBool(boggart.ConfigSoftVideoEnabled) {
-		err := c.collector.CollectSoftVideo()
+		err := c.collector.UpdaterSoftVideo()
 		if err != nil {
 			c.logger.Error("SoftVideo updater failed", map[string]interface{}{
 				"error": err.Error(),
@@ -117,7 +131,7 @@ func (c *Component) taskSoftVideo(context.Context) (interface{}, error) {
 
 func (c *Component) taskMikrotik(context.Context) (interface{}, error) {
 	if c.config.GetBool(boggart.ConfigMikrotikEnabled) {
-		err := c.collector.CollectMikrotik()
+		err := c.collector.UpdaterMikrotik()
 		if err != nil {
 			c.logger.Error("Mikrotik updater failed", map[string]interface{}{
 				"error": err.Error(),

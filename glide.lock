@@ -1,5 +1,5 @@
-hash: 1932ed6b47adbaf216781b9e1900d20546a454ab3b01a1a96688e1208c6fb7e9
-updated: 2018-01-11T12:20:06.594837348+03:00
+hash: 8f2bf0f26bd6bc438f2225e877422962758dabf327689ccbad34c17d1ba3fab1
+updated: 2018-01-15T03:01:03.655408202+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -12,6 +12,8 @@ imports:
   version: 253b217b3ad255d48994a6f74de4f82650f5e70d
 - name: github.com/bugsnag/osext
   version: 0dd3f918b21bec95ace9dc86c7e70266cfc5c702
+- name: github.com/davecheney/gpio
+  version: a6de66e7e47065fca1a55c62c3f3cab3144694e6
 - name: github.com/deckarep/golang-set
   version: 1d4478f51bed434f1dadf96dcd9b43aabac66795
 - name: github.com/elazarl/go-bindata-assetfs
