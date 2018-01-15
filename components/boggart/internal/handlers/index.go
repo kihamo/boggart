@@ -4,7 +4,6 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/dashboard"
-	"github.com/kihamo/shadow/components/metrics"
 	"github.com/kihamo/snitch"
 )
 
@@ -12,7 +11,11 @@ type IndexHandler struct {
 	dashboard.Handler
 
 	Config    config.Component
-	Collector metrics.HasMetrics
+	Component boggart.Component
+}
+
+type MetricValue struct {
+	Value float64
 }
 
 func (h *IndexHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
@@ -28,7 +31,7 @@ func (h *IndexHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	metricsChan := make(chan snitch.Metric, 10000)
 
 	go func() {
-		h.Collector.Metrics().Collect(metricsChan)
+		h.Component.Metrics().Collect(metricsChan)
 		close(metricsChan)
 	}()
 
@@ -38,7 +41,13 @@ func (h *IndexHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		if value, err := metric.Measure(); err != nil {
 			errors = append(errors, "Get metric "+name+" failed: "+err.Error())
 		} else {
-			vars[name] = value
+			v := MetricValue{}
+
+			if value.Value != nil {
+				v.Value = *(value.Value)
+			}
+
+			vars[name] = v
 		}
 	}
 

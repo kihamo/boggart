@@ -7,10 +7,10 @@ import (
 	"github.com/davecheney/gpio"
 )
 
-const (
-	OPEN  = false
-	CLOSE = true
-)
+/* Pin state:
+ * 1 / true  - close
+ * 0 / false - open
+ */
 
 type Door struct {
 	mutex sync.RWMutex

@@ -22,7 +22,7 @@ type Component struct {
 	routes      []dashboard.Route
 	collector   *MetricsCollector
 
-	doorsEntrance *doors.Door
+	doorEntrance *doors.Door
 }
 
 func (c *Component) GetName() string {
@@ -79,16 +79,10 @@ func (c *Component) Run() (err error) {
 	taskPulsar.SetName(c.GetName() + "-pulsar-updater")
 	c.workers.AddTask(taskPulsar)
 
-	c.doorsEntrance, err = doors.NewDoor(c.config.GetInt(boggart.ConfigDoorsEntrancePin))
+	c.doorEntrance, err = doors.NewDoor(c.config.GetInt(boggart.ConfigDoorsEntrancePin))
 	if err != nil {
 		return err
 	}
-
-	if c.application.HasComponent(metrics.ComponentName) {
-		c.doorsEntrance.SetCallback(c.collector.UpdaterEntranceDoorsCallback)
-	}
-
-	c.collector.UpdaterDoors()
 
 	return nil
 }
@@ -121,4 +115,8 @@ func (c *Component) taskSoftVideo(context.Context) (interface{}, error) {
 	}
 
 	return nil, nil
+}
+
+func (c *Component) DoorEntrance() boggart.Door {
+	return c.doorEntrance
 }

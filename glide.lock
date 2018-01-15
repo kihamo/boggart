@@ -1,5 +1,5 @@
 hash: 8f2bf0f26bd6bc438f2225e877422962758dabf327689ccbad34c17d1ba3fab1
-updated: 2018-01-15T03:01:03.655408202+03:00
+updated: 2018-01-15T13:05:28.247983636+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -62,9 +62,6 @@ imports:
   version: ba2c68fa4a2059c8c92d77f77993b5e835ad9bf4
   subpackages:
   - components/alerts
-  - components/alerts/instance
-  - components/alerts/internal
-  - components/alerts/internal/handlers
   - components/config
   - components/config/instance
   - components/config/internal

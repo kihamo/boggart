@@ -194,7 +194,15 @@
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
-                                <div id="security-entrance-door" style="height:300px;">Входная дверь</div>
+                                <div id="security-entrance-door" style="height:300px;">
+                                    Входная дверь
+
+                                    {{ if eq .boggart_doors_entrance_status.Value 0.0 }}
+                                        Закрыта
+                                    {{ else }}
+                                        Открыта
+                                    {{ end }}
+                                </div>
                             </div>
                         </div>
                     </div>
