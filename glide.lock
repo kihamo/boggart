@@ -1,5 +1,5 @@
-hash: 8f2bf0f26bd6bc438f2225e877422962758dabf327689ccbad34c17d1ba3fab1
-updated: 2018-01-15T13:05:28.247983636+03:00
+hash: 46d91999e635a16cc0634d3a4239f4c0ca9e571b1f9a0d99d25b8bf040cfbc1b
+updated: 2018-01-15T17:02:32.456996183+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -59,7 +59,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: ba2c68fa4a2059c8c92d77f77993b5e835ad9bf4
+  version: 99ad096277968f153522b1a5662135a613e4f637
   subpackages:
   - components/alerts
   - components/config
@@ -113,6 +113,7 @@ imports:
   subpackages:
   - providers/github
   - providers/gitlab
+  - providers/gplus
 - name: github.com/OneOfOne/xxhash
   version: 4e9e81466dc37c9fd94ce9ecf42020ef54112203
 - name: github.com/patrickmn/go-cache
