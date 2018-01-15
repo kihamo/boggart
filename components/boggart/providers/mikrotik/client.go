@@ -53,3 +53,22 @@ func (c *Client) WifiClients() ([]map[string]string, error) {
 
 	return clients, nil
 }
+
+func (c *Client) EthernetStats() ([]map[string]string, error) {
+	reply, err := c.client.RunArgs([]string{"/interface/print", "stats"})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(reply.Re) == 0 {
+		return nil, errors.New("Empty reply from device")
+	}
+
+	stats := make([]map[string]string, 0, len(reply.Re))
+
+	for _, re := range reply.Re {
+		stats = append(stats, re.Map)
+	}
+
+	return stats, nil
+}

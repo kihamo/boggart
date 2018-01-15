@@ -79,12 +79,6 @@ func (c *Component) Run() (err error) {
 	taskPulsar.SetName(c.GetName() + "-pulsar-updater")
 	c.workers.AddTask(taskPulsar)
 
-	taskMikrotik := task.NewFunctionTask(c.taskMikrotik)
-	taskMikrotik.SetRepeats(-1)
-	taskMikrotik.SetRepeatInterval(c.config.GetDuration(boggart.ConfigMikrotikRepeatInterval))
-	taskMikrotik.SetName(c.GetName() + "-mikrotik-updater")
-	c.workers.AddTask(taskMikrotik)
-
 	c.doorsEntrance, err = doors.NewDoor(c.config.GetInt(boggart.ConfigDoorsEntrancePin))
 	if err != nil {
 		return err
@@ -119,21 +113,6 @@ func (c *Component) taskSoftVideo(context.Context) (interface{}, error) {
 		err := c.collector.UpdaterSoftVideo()
 		if err != nil {
 			c.logger.Error("SoftVideo updater failed", map[string]interface{}{
-				"error": err.Error(),
-			})
-		}
-
-		return nil, err
-	}
-
-	return nil, nil
-}
-
-func (c *Component) taskMikrotik(context.Context) (interface{}, error) {
-	if c.config.GetBool(boggart.ConfigMikrotikEnabled) {
-		err := c.collector.UpdaterMikrotik()
-		if err != nil {
-			c.logger.Error("Mikrotik updater failed", map[string]interface{}{
 				"error": err.Error(),
 			})
 		}
