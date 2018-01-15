@@ -2,6 +2,7 @@ package doors
 
 import (
 	"sync"
+	"sync/atomic"
 
 	"github.com/davecheney/gpio"
 )
@@ -15,8 +16,7 @@ type Door struct {
 	mutex sync.RWMutex
 
 	pin      gpio.Pin
-	// FIXME: sync/atomic
-	status   bool
+	status   int64
 	callback func(bool)
 }
 
@@ -27,19 +27,16 @@ func NewDoor(pin int) (*Door, error) {
 	}
 
 	d := &Door{
-		pin:    p,
-		status: p.Get(),
+		pin: p,
 	}
+	d.updateAndReturn()
 	p.BeginWatch(gpio.EdgeFalling, d.watch)
 
 	return d, nil
 }
 
 func (d *Door) IsOpen() bool {
-	d.mutex.RLock()
-	defer d.mutex.RUnlock()
-
-	return d.status == OPEN
+	return atomic.LoadInt64(&d.status) == 0
 }
 
 func (d *Door) IsClose() bool {
@@ -57,15 +54,26 @@ func (d *Door) SetCallback(callback func(bool)) {
 	d.callback = callback
 }
 
+func (d *Door) updateAndReturn() bool {
+	if d.pin.Get() {
+		atomic.StoreInt64(&d.status, 1)
+		return true
+	}
+
+	atomic.StoreInt64(&d.status, 0)
+	return false
+}
+
 func (d *Door) watch() {
-	d.mutex.Lock()
-	defer d.mutex.Unlock()
+	val := d.updateAndReturn()
 
-	d.status = d.pin.Get()
+	d.mutex.RLock()
+	cb := d.callback
+	d.mutex.RUnlock()
 
-	if d.callback != nil {
+	if cb != nil {
 		go func() {
-			d.callback(d.status)
+			cb(val)
 		}()
 	}
 }
