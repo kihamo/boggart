@@ -1,5 +1,5 @@
-hash: 46d91999e635a16cc0634d3a4239f4c0ca9e571b1f9a0d99d25b8bf040cfbc1b
-updated: 2018-01-15T17:02:32.456996183+03:00
+hash: e5a493fc36b561f4c320b3076039eba6cb80c5826f93e600adb9fa7546675cdc
+updated: 2018-01-15T17:56:45.599172138+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -59,7 +59,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 99ad096277968f153522b1a5662135a613e4f637
+  version: 7e2322b6f04e2daffa7907f41c0bd018d2d56365
   subpackages:
   - components/alerts
   - components/config

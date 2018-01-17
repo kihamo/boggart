@@ -1,4 +1,4 @@
-package pulsar
+package rs485
 
 import (
 	"crypto/rand"

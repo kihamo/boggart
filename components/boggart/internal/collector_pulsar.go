@@ -31,10 +31,6 @@ var (
 )
 
 func (c *MetricsCollector) UpdaterPulsar() error {
-	connection := pulsar.NewConnection(
-		c.component.config.GetString(boggart.ConfigPulsarSerialAddress),
-		c.component.config.GetDuration(boggart.ConfigPulsarSerialTimeout))
-
 	var (
 		deviceAddress []byte
 		err           error
@@ -42,7 +38,7 @@ func (c *MetricsCollector) UpdaterPulsar() error {
 
 	deviceAddressConfig := c.component.config.GetString(boggart.ConfigPulsarDeviceAddress)
 	if deviceAddressConfig == "" {
-		deviceAddress, err = connection.DeviceAddress()
+		deviceAddress, err = pulsar.DeviceAddress(c.component.ConnectionRS485())
 	} else {
 		deviceAddress, err = hex.DecodeString(deviceAddressConfig)
 	}
@@ -55,7 +51,7 @@ func (c *MetricsCollector) UpdaterPulsar() error {
 		return errors.New("Length of device address is wrong")
 	}
 
-	device := pulsar.NewDevice(deviceAddress, connection)
+	device := pulsar.NewDevice(deviceAddress, c.component.ConnectionRS485())
 
 	temperatureIn, err := device.TemperatureIn()
 	if err != nil {

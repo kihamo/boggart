@@ -2,8 +2,10 @@ package internal
 
 import (
 	"context"
+	"sync"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
 	"github.com/kihamo/boggart/components/boggart/providers/doors"
 	"github.com/kihamo/go-workers/task"
 	"github.com/kihamo/shadow"
@@ -15,6 +17,8 @@ import (
 )
 
 type Component struct {
+	mutex sync.RWMutex
+
 	application shadow.Application
 	config      config.Component
 	logger      logger.Logger
@@ -22,7 +26,8 @@ type Component struct {
 	routes      []dashboard.Route
 	collector   *MetricsCollector
 
-	doorEntrance *doors.Door
+	connectionRS485 *rs485.Connection
+	doorEntrance    *doors.Door
 }
 
 func (c *Component) GetName() string {
@@ -66,6 +71,8 @@ func (c *Component) Init(a shadow.Application) error {
 
 func (c *Component) Run() (err error) {
 	c.logger = logger.NewOrNop(c.GetName(), c.application)
+
+	c.initConnectionRS485()
 
 	taskSoftVideo := task.NewFunctionTask(c.taskSoftVideo)
 	taskSoftVideo.SetRepeats(-1)
@@ -115,6 +122,22 @@ func (c *Component) taskSoftVideo(context.Context) (interface{}, error) {
 	}
 
 	return nil, nil
+}
+
+func (c *Component) initConnectionRS485() {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	c.connectionRS485 = rs485.NewConnection(
+		c.config.GetString(boggart.ConfigRS485Address),
+		c.config.GetDuration(boggart.ConfigRS485Timeout))
+}
+
+func (c *Component) ConnectionRS485() *rs485.Connection {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	return c.connectionRS485
 }
 
 func (c *Component) DoorEntrance() boggart.Door {

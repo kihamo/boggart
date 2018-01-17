@@ -5,12 +5,29 @@ import (
 
 	"github.com/davecheney/gpio"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
 	"github.com/kihamo/shadow/components/config"
 )
 
 func (c *Component) GetConfigVariables() []config.Variable {
 	return []config.Variable{
+		config.NewVariable(
+			boggart.ConfigRS485Address,
+			config.ValueTypeString,
+			rs485.DefaultSerialAddress,
+			"Serial port address for RS485",
+			true,
+			nil,
+			nil),
+		config.NewVariable(
+			boggart.ConfigRS485Timeout,
+			config.ValueTypeDuration,
+			rs485.DefaultTimeout,
+			"Serial port timeout for RS485",
+			true,
+			nil,
+			nil),
 		config.NewVariable(
 			boggart.ConfigPulsarEnabled,
 			config.ValueTypeBool,
@@ -25,22 +42,6 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			time.Minute*15,
 			"Repeat interval for pulsar provider",
 			false,
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigPulsarSerialAddress,
-			config.ValueTypeString,
-			pulsar.DefaultSerialAddress,
-			"Serial port address",
-			true,
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigPulsarSerialTimeout,
-			config.ValueTypeDuration,
-			pulsar.DefaultTimeout,
-			"Serial port address",
-			true,
 			nil,
 			nil),
 		config.NewVariable(
@@ -190,4 +191,17 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			nil,
 			nil),
 	}
+}
+
+func (c *Component) GetConfigWatchers() []config.Watcher {
+	return []config.Watcher{
+		config.NewWatcher(c.GetName(), []string{
+			boggart.ConfigRS485Timeout,
+			boggart.ConfigRS485Address,
+		}, c.watchConnectionRS485),
+	}
+}
+
+func (c *Component) watchConnectionRS485(_ string, _ interface{}, _ interface{}) {
+	c.initConnectionRS485()
 }

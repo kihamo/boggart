@@ -1,10 +1,10 @@
 package boggart
 
 const (
+	ConfigRS485Address              = ComponentName + ".rs485.path"
+	ConfigRS485Timeout              = ComponentName + ".rs485.timeout"
 	ConfigPulsarEnabled             = ComponentName + ".pulsar.enabled"
 	ConfigPulsarRepeatInterval      = ComponentName + ".pulsar.repeat-interval"
-	ConfigPulsarSerialAddress       = ComponentName + ".pulsar.serial-path"
-	ConfigPulsarSerialTimeout       = ComponentName + ".pulsar.serial-timeout"
 	ConfigPulsarDeviceAddress       = ComponentName + ".pulsar.device-address"
 	ConfigPulsarColdWaterPulseInput = ComponentName + ".pulsar.cold-water.pulse-input"
 	ConfigPulsarColdWaterStartValue = ComponentName + ".pulsar.cold-water.start-value"

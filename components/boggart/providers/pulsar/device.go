@@ -1,9 +1,14 @@
 package pulsar
 
 import (
+	"bytes"
+	"errors"
+	"fmt"
 	"math"
 	"math/big"
 	"time"
+
+	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
 )
 
 const (
@@ -42,10 +47,10 @@ const (
 
 type Device struct {
 	address    []byte
-	connection *Connection
+	connection *rs485.Connection
 }
 
-func NewDevice(address []byte, connection *Connection) *Device {
+func NewDevice(address []byte, connection *rs485.Connection) *Device {
 	return &Device{
 		address:    address,
 		connection: connection,
@@ -56,20 +61,76 @@ func (d *Device) Address() []byte {
 	return d.address
 }
 
-func (d *Device) Connection() *Connection {
+func (d *Device) Connection() *rs485.Connection {
 	return d.connection
 }
 
+func (d *Device) Request(address []byte, function byte, data []byte) ([]byte, error) {
+	var request []byte
+
+	// device address
+	request = append(request, address...)
+
+	// function
+	request = append(request, function)
+
+	// length of packet
+	l := len(request) + 1 + len(data) + 2 + 2
+	request = append(request, byte(l))
+
+	// data in
+	request = append(request, data...)
+
+	// request id
+	requestId := rs485.GenerateRequestId()
+	request = append(request, requestId...)
+
+	// check sum CRC16
+	request = append(request, rs485.GenerateCRC16(request)...)
+
+	// fmt.Println("Request: ", request, p.ToString(request))
+
+	response, err := d.connection.Request(request)
+	if err != nil {
+		return nil, err
+	}
+
+	// fmt.Println("Response: ", response, p.ToString(response))
+
+	l = len(response)
+	if l < 10 {
+		return nil, errors.New("Error length of response packet")
+	}
+
+	// check crc16
+	crc16 := rs485.GenerateCRC16(response[:l-2])
+	if bytes.Compare(response[l-2:], crc16) != 0 {
+		return nil, errors.New("Error CRC16 of response packet")
+	}
+
+	// check id
+	if bytes.Compare(response[l-(2+len(requestId)):l-2], requestId) != 0 {
+		return nil, errors.New("Error ID of response packet")
+	}
+
+	// check error
+	if response[4] == FunctionBadCommand {
+		return nil, fmt.Errorf("Device returns error code #%d", response[6])
+	}
+
+	return response[6 : l-4], nil
+}
+
 func (d *Device) ReadMetrics(channel int64) ([][]byte, error) {
-	bs := Pad(Reverse(big.NewInt(channel).Bytes()), 4)
-	response, err := d.connection.Request(d.address, FunctionReadMetrics, bs)
+	bs := rs485.Pad(rs485.Reverse(big.NewInt(channel).Bytes()), 4)
+	response, err := d.Request(d.address, FunctionReadMetrics, bs)
 	if err != nil {
 		return nil, err
 	}
 
 	metrics := math.Ceil(float64(len(response) / 4))
 	result := make([][]byte, 0, int64(metrics))
-	value := Reverse(response)
+	value := rs485.Reverse(response)
 	for i := 0; i < len(value); i += 4 {
 		result = append(result, value[i:i+4])
 	}
@@ -78,7 +139,7 @@ func (d *Device) ReadMetrics(channel int64) ([][]byte, error) {
 }
 
 func (d *Device) ReadTime() (time.Time, error) {
-	response, err := d.connection.Request(d.address, FunctionReadTime, nil)
+	response, err := d.Request(d.address, FunctionReadTime, nil)
 	if err != nil {
 		return time.Now(), err
 	}
@@ -95,13 +156,13 @@ func (d *Device) ReadTime() (time.Time, error) {
 }
 
 func (d *Device) ReadSettings(param int64) ([]byte, error) {
-	bs := Pad(big.NewInt(param).Bytes(), 2)
-	response, err := d.connection.Request(d.address, FunctionReadSettings, bs)
+	bs := rs485.Pad(big.NewInt(param).Bytes(), 2)
+	response, err := d.Request(d.address, FunctionReadSettings, bs)
 	if err != nil {
 		return nil, err
 	}
 
-	return Reverse(response), nil
+	return rs485.Reverse(response), nil
 }
 
 func (d *Device) readMetricFloat32(channel int64) (float32, error) {
@@ -110,7 +171,7 @@ func (d *Device) readMetricFloat32(channel int64) (float32, error) {
 		return -1, err
 	}
 
-	return ToFloat32(value[0]), nil
+	return rs485.ToFloat32(value[0]), nil
 }
 
 func (d *Device) TemperatureIn() (float32, error) {
@@ -163,7 +224,7 @@ func (d *Device) DaylightSavingTime() (bool, error) {
 		return false, err
 	}
 
-	return ToUint64(value) == 1, nil
+	return rs485.ToUint64(value) == 1, nil
 }
 
 func (d *Device) Diagnostics() ([]byte, error) {
@@ -182,7 +243,7 @@ func (d *Device) Version() (uint16, error) {
 		return 0, err
 	}
 
-	return uint16(ToUint64(value)), nil
+	return uint16(rs485.ToUint64(value)), nil
 }
 
 func (d *Device) OperatingTime() (time.Duration, error) {
@@ -191,5 +252,5 @@ func (d *Device) OperatingTime() (time.Duration, error) {
 		return -1, err
 	}
 
-	return time.Hour * time.Duration(ToUint64(value)), nil
+	return time.Hour * time.Duration(rs485.ToUint64(value)), nil
 }
