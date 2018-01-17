@@ -5,7 +5,7 @@ const (
 	ConfigRS485Timeout              = ComponentName + ".rs485.timeout"
 	ConfigPulsarEnabled             = ComponentName + ".pulsar.enabled"
 	ConfigPulsarRepeatInterval      = ComponentName + ".pulsar.repeat-interval"
-	ConfigPulsarDeviceAddress       = ComponentName + ".pulsar.device-address"
+	ConfigPulsarHeatMeterAddress    = ComponentName + ".pulsar.heat-meter.address"
 	ConfigPulsarColdWaterPulseInput = ComponentName + ".pulsar.cold-water.pulse-input"
 	ConfigPulsarColdWaterStartValue = ComponentName + ".pulsar.cold-water.start-value"
 	ConfigPulsarHotWaterPulseInput  = ComponentName + ".pulsar.hot-water.pulse-input"

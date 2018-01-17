@@ -45,7 +45,7 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			nil,
 			nil),
 		config.NewVariable(
-			boggart.ConfigPulsarDeviceAddress,
+			boggart.ConfigPulsarHeatMeterAddress,
 			config.ValueTypeString,
 			nil,
 			"Pulsar address HEX value (AABBCCDD). If empty system try to find device",

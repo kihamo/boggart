@@ -45,27 +45,27 @@ const (
 	Channel20 = 0x00080000 // uint32  | ч      | время нормальной работы
 )
 
-type Device struct {
+type HeatMeter struct {
 	address    []byte
 	connection *rs485.Connection
 }
 
-func NewDevice(address []byte, connection *rs485.Connection) *Device {
-	return &Device{
+func NewHeatMeter(address []byte, connection *rs485.Connection) *HeatMeter {
+	return &HeatMeter{
 		address:    address,
 		connection: connection,
 	}
 }
 
-func (d *Device) Address() []byte {
+func (d *HeatMeter) Address() []byte {
 	return d.address
 }
 
-func (d *Device) Connection() *rs485.Connection {
+func (d *HeatMeter) Connection() *rs485.Connection {
 	return d.connection
 }
 
-func (d *Device) Request(address []byte, function byte, data []byte) ([]byte, error) {
+func (d *HeatMeter) Request(address []byte, function byte, data []byte) ([]byte, error) {
 	var request []byte
 
 	// device address
@@ -115,13 +115,13 @@ func (d *Device) Request(address []byte, function byte, data []byte) ([]byte, er
 
 	// check error
 	if response[4] == FunctionBadCommand {
-		return nil, fmt.Errorf("Device returns error code #%d", response[6])
+		return nil, fmt.Errorf("HeatMeter returns error code #%d", response[6])
 	}
 
 	return response[6 : l-4], nil
 }
 
-func (d *Device) ReadMetrics(channel int64) ([][]byte, error) {
+func (d *HeatMeter) ReadMetrics(channel int64) ([][]byte, error) {
 	bs := rs485.Pad(rs485.Reverse(big.NewInt(channel).Bytes()), 4)
 	response, err := d.Request(d.address, FunctionReadMetrics, bs)
 	if err != nil {
@@ -138,7 +138,7 @@ func (d *Device) ReadMetrics(channel int64) ([][]byte, error) {
 	return result, nil
 }
 
-func (d *Device) ReadTime() (time.Time, error) {
+func (d *HeatMeter) ReadTime() (time.Time, error) {
 	response, err := d.Request(d.address, FunctionReadTime, nil)
 	if err != nil {
 		return time.Now(), err
@@ -155,7 +155,7 @@ func (d *Device) ReadTime() (time.Time, error) {
 		time.Now().Location()), nil
 }
 
-func (d *Device) ReadSettings(param int64) ([]byte, error) {
+func (d *HeatMeter) ReadSettings(param int64) ([]byte, error) {
 	bs := rs485.Pad(big.NewInt(param).Bytes(), 2)
 	response, err := d.Request(d.address, FunctionReadSettings, bs)
 	if err != nil {
@@ -165,7 +165,7 @@ func (d *Device) ReadSettings(param int64) ([]byte, error) {
 	return rs485.Reverse(response), nil
 }
 
-func (d *Device) readMetricFloat32(channel int64) (float32, error) {
+func (d *HeatMeter) readMetricFloat32(channel int64) (float32, error) {
 	value, err := d.ReadMetrics(channel)
 	if err != nil {
 		return -1, err
@@ -174,51 +174,51 @@ func (d *Device) readMetricFloat32(channel int64) (float32, error) {
 	return rs485.ToFloat32(value[0]), nil
 }
 
-func (d *Device) TemperatureIn() (float32, error) {
+func (d *HeatMeter) TemperatureIn() (float32, error) {
 	return d.readMetricFloat32(Channel3)
 }
 
-func (d *Device) TemperatureOut() (float32, error) {
+func (d *HeatMeter) TemperatureOut() (float32, error) {
 	return d.readMetricFloat32(Channel4)
 }
 
-func (d *Device) TemperatureDelta() (float32, error) {
+func (d *HeatMeter) TemperatureDelta() (float32, error) {
 	return d.readMetricFloat32(Channel5)
 }
 
-func (d *Device) Power() (float32, error) {
+func (d *HeatMeter) Power() (float32, error) {
 	return d.readMetricFloat32(Channel6)
 }
 
-func (d *Device) Energy() (float32, error) {
+func (d *HeatMeter) Energy() (float32, error) {
 	return d.readMetricFloat32(Channel7)
 }
 
-func (d *Device) Capacity() (float32, error) {
+func (d *HeatMeter) Capacity() (float32, error) {
 	return d.readMetricFloat32(Channel8)
 }
 
-func (d *Device) Consumption() (float32, error) {
+func (d *HeatMeter) Consumption() (float32, error) {
 	return d.readMetricFloat32(Channel9)
 }
 
-func (d *Device) PulseInput1() (float32, error) {
+func (d *HeatMeter) PulseInput1() (float32, error) {
 	return d.readMetricFloat32(Channel10)
 }
 
-func (d *Device) PulseInput2() (float32, error) {
+func (d *HeatMeter) PulseInput2() (float32, error) {
 	return d.readMetricFloat32(Channel11)
 }
 
-func (d *Device) PulseInput3() (float32, error) {
+func (d *HeatMeter) PulseInput3() (float32, error) {
 	return d.readMetricFloat32(Channel12)
 }
 
-func (d *Device) PulseInput4() (float32, error) {
+func (d *HeatMeter) PulseInput4() (float32, error) {
 	return d.readMetricFloat32(Channel13)
 }
 
-func (d *Device) DaylightSavingTime() (bool, error) {
+func (d *HeatMeter) DaylightSavingTime() (bool, error) {
 	value, err := d.ReadSettings(ParamDaylightSavingTime)
 	if err != nil {
 		return false, err
@@ -227,7 +227,7 @@ func (d *Device) DaylightSavingTime() (bool, error) {
 	return rs485.ToUint64(value) == 1, nil
 }
 
-func (d *Device) Diagnostics() ([]byte, error) {
+func (d *HeatMeter) Diagnostics() ([]byte, error) {
 	value, err := d.ReadSettings(ParamDiagnostics)
 	if err != nil {
 		return nil, err
@@ -237,7 +237,7 @@ func (d *Device) Diagnostics() ([]byte, error) {
 	return value, nil
 }
 
-func (d *Device) Version() (uint16, error) {
+func (d *HeatMeter) Version() (uint16, error) {
 	value, err := d.ReadSettings(ParamVersion)
 	if err != nil {
 		return 0, err
@@ -246,7 +246,7 @@ func (d *Device) Version() (uint16, error) {
 	return uint16(rs485.ToUint64(value)), nil
 }
 
-func (d *Device) OperatingTime() (time.Duration, error) {
+func (d *HeatMeter) OperatingTime() (time.Duration, error) {
 	value, err := d.ReadSettings(ParamOperatingTime)
 	if err != nil {
 		return -1, err

@@ -36,7 +36,7 @@ func (c *MetricsCollector) UpdaterPulsar() error {
 		err           error
 	)
 
-	deviceAddressConfig := c.component.config.GetString(boggart.ConfigPulsarDeviceAddress)
+	deviceAddressConfig := c.component.config.GetString(boggart.ConfigPulsarHeatMeterAddress)
 	if deviceAddressConfig == "" {
 		deviceAddress, err = pulsar.DeviceAddress(c.component.ConnectionRS485())
 	} else {
@@ -51,7 +51,7 @@ func (c *MetricsCollector) UpdaterPulsar() error {
 		return errors.New("Length of device address is wrong")
 	}
 
-	device := pulsar.NewDevice(deviceAddress, c.component.ConnectionRS485())
+	device := pulsar.NewHeatMeter(deviceAddress, c.component.ConnectionRS485())
 
 	temperatureIn, err := device.TemperatureIn()
 	if err != nil {
