@@ -3,6 +3,9 @@ package boggart
 const (
 	ConfigRS485Address              = ComponentName + ".rs485.path"
 	ConfigRS485Timeout              = ComponentName + ".rs485.timeout"
+	ConfigMercuryEnabled            = ComponentName + ".mercury.enabled"
+	ConfigMercuryRepeatInterval     = ComponentName + ".mercury.repeat-interval"
+	ConfigMercuryDeviceAddress      = ComponentName + ".mercury.device-address"
 	ConfigPulsarEnabled             = ComponentName + ".pulsar.enabled"
 	ConfigPulsarRepeatInterval      = ComponentName + ".pulsar.repeat-interval"
 	ConfigPulsarHeatMeterAddress    = ComponentName + ".pulsar.heat-meter.address"

@@ -72,7 +72,17 @@
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
-                                <div id="resource-electricity" style="height:300px;">Электричество</div>
+                                <div id="resource-electricity" style="height:300px;">
+                                    Электричество<br />
+                                    T1: {{ .boggart_mercury_t1_watt_hour_total.Value }} W/h<br />
+                                    T2: {{ .boggart_mercury_t2_watt_hour_total.Value }} W/h<br />
+                                    T3: {{ .boggart_mercury_t3_watt_hour_total.Value }} W/h<br />
+                                    T4: {{ .boggart_mercury_t4_watt_hour_total.Value }} W/h<br />
+                                    Voltage: {{ .boggart_mercury_voltage_volt.Value }} W/h<br />
+                                    Amperage: {{ .boggart_mercury_amperage_ampere.Value }} A<br />
+                                    Power: {{ .boggart_mercury_power_watt.Value }} W<br />
+                                    Battery: {{ .boggart_mercury_battery_voltage_volt.Value }} V<br />
+                                </div>
                             </div>
                         </div>
                     </div>

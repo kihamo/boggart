@@ -74,11 +74,11 @@ func (c *Component) Run() (err error) {
 
 	c.initConnectionRS485()
 
-	taskSoftVideo := task.NewFunctionTask(c.taskSoftVideo)
-	taskSoftVideo.SetRepeats(-1)
-	taskSoftVideo.SetRepeatInterval(c.config.GetDuration(boggart.ConfigSoftVideoRepeatInterval))
-	taskSoftVideo.SetName(c.GetName() + "-softvideo-updater")
-	c.workers.AddTask(taskSoftVideo)
+	taskMercury := task.NewFunctionTask(c.taskMercury)
+	taskMercury.SetRepeats(-1)
+	taskMercury.SetRepeatInterval(c.config.GetDuration(boggart.ConfigMercuryRepeatInterval))
+	taskMercury.SetName(c.GetName() + "-mercury-updater")
+	c.workers.AddTask(taskMercury)
 
 	taskPulsar := task.NewFunctionTask(c.taskPulsar)
 	taskPulsar.SetRepeats(-1)
@@ -86,12 +86,33 @@ func (c *Component) Run() (err error) {
 	taskPulsar.SetName(c.GetName() + "-pulsar-updater")
 	c.workers.AddTask(taskPulsar)
 
+	taskSoftVideo := task.NewFunctionTask(c.taskSoftVideo)
+	taskSoftVideo.SetRepeats(-1)
+	taskSoftVideo.SetRepeatInterval(c.config.GetDuration(boggart.ConfigSoftVideoRepeatInterval))
+	taskSoftVideo.SetName(c.GetName() + "-softvideo-updater")
+	c.workers.AddTask(taskSoftVideo)
+
 	c.doorEntrance, err = doors.NewDoor(c.config.GetInt(boggart.ConfigDoorsEntrancePin))
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (c *Component) taskMercury(context.Context) (interface{}, error) {
+	if c.config.GetBool(boggart.ConfigMercuryEnabled) {
+		err := c.collector.UpdaterMercury()
+		if err != nil {
+			c.logger.Error("Mercury updater failed", map[string]interface{}{
+				"error": err.Error(),
+			})
+		}
+
+		return nil, err
+	}
+
+	return nil, nil
 }
 
 func (c *Component) taskPulsar(context.Context) (interface{}, error) {

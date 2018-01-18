@@ -65,7 +65,7 @@ func (d *ElectricityMeter200) Request(function byte, data []byte) ([]byte, error
 	// check sum CRC16
 	request = append(request, rs485.GenerateCRC16(request)...)
 
-	fmt.Println("Request: ", request, hex.EncodeToString(request))
+	//fmt.Println("Request: ", request, hex.EncodeToString(request))
 
 	response, err := d.connection.Request(request)
 	if err != nil {
