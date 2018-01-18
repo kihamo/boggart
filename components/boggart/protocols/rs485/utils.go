@@ -26,7 +26,7 @@ func GenerateCRC16(packet []byte) []byte {
 		}
 	}
 
-	return Reverse(big.NewInt(int64(result)).Bytes())
+	return Pad(Reverse(big.NewInt(int64(result)).Bytes()), 2)
 }
 
 func Reverse(data []byte) []byte {

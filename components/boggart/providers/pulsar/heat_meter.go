@@ -65,11 +65,11 @@ func (d *HeatMeter) Connection() *rs485.Connection {
 	return d.connection
 }
 
-func (d *HeatMeter) Request(address []byte, function byte, data []byte) ([]byte, error) {
+func (d *HeatMeter) Request(function byte, data []byte) ([]byte, error) {
 	var request []byte
 
 	// device address
-	request = append(request, address...)
+	request = append(request, d.address...)
 
 	// function
 	request = append(request, function)
@@ -123,7 +123,7 @@ func (d *HeatMeter) Request(address []byte, function byte, data []byte) ([]byte,
 
 func (d *HeatMeter) ReadMetrics(channel int64) ([][]byte, error) {
 	bs := rs485.Pad(rs485.Reverse(big.NewInt(channel).Bytes()), 4)
-	response, err := d.Request(d.address, FunctionReadMetrics, bs)
+	response, err := d.Request(FunctionReadMetrics, bs)
 	if err != nil {
 		return nil, err
 	}
@@ -139,9 +139,9 @@ func (d *HeatMeter) ReadMetrics(channel int64) ([][]byte, error) {
 }
 
 func (d *HeatMeter) ReadTime() (time.Time, error) {
-	response, err := d.Request(d.address, FunctionReadTime, nil)
+	response, err := d.Request(FunctionReadTime, nil)
 	if err != nil {
-		return time.Now(), err
+		return time.Time{}, err
 	}
 
 	return time.Date(
@@ -157,7 +157,7 @@ func (d *HeatMeter) ReadTime() (time.Time, error) {
 
 func (d *HeatMeter) ReadSettings(param int64) ([]byte, error) {
 	bs := rs485.Pad(big.NewInt(param).Bytes(), 2)
-	response, err := d.Request(d.address, FunctionReadSettings, bs)
+	response, err := d.Request(FunctionReadSettings, bs)
 	if err != nil {
 		return nil, err
 	}
