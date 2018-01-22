@@ -2,13 +2,16 @@ package internal
 
 import (
 	"context"
+	"fmt"
 	"sync"
+	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
 	"github.com/kihamo/boggart/components/boggart/providers/doors"
 	"github.com/kihamo/go-workers/task"
 	"github.com/kihamo/shadow"
+	"github.com/kihamo/shadow/components/annotations"
 	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/logger"
@@ -20,6 +23,7 @@ type Component struct {
 	mutex sync.RWMutex
 
 	application shadow.Application
+	annotations annotations.Component
 	config      config.Component
 	logger      logger.Logger
 	workers     workers.Component
@@ -40,6 +44,9 @@ func (c *Component) GetVersion() string {
 
 func (c *Component) GetDependencies() []shadow.Dependency {
 	return []shadow.Dependency{
+		{
+			Name: annotations.ComponentName,
+		},
 		{
 			Name:     config.ComponentName,
 			Required: true,
@@ -62,6 +69,7 @@ func (c *Component) GetDependencies() []shadow.Dependency {
 
 func (c *Component) Init(a shadow.Application) error {
 	c.application = a
+	c.annotations = a.GetComponent(annotations.ComponentName).(annotations.Component)
 	c.config = a.GetComponent(config.ComponentName).(config.Component)
 	c.workers = a.GetComponent(workers.ComponentName).(workers.Component)
 	c.collector = NewMetricsCollector(c)
@@ -95,6 +103,10 @@ func (c *Component) Run() (err error) {
 	c.doorEntrance, err = doors.NewDoor(c.config.GetInt(boggart.ConfigDoorsEntrancePin))
 	if err != nil {
 		return err
+	}
+
+	if c.application.HasComponent(annotations.ComponentName) {
+		c.doorEntrance.SetCallback(c.doorCallback)
 	}
 
 	return nil
@@ -163,4 +175,32 @@ func (c *Component) ConnectionRS485() *rs485.Connection {
 
 func (c *Component) DoorEntrance() boggart.Door {
 	return c.doorEntrance
+}
+
+func (c *Component) doorCallback(status bool, changed *time.Time) {
+	// door is open
+	if !status {
+		c.logger.Info("Entrance door opened")
+		return
+	}
+
+	if changed == nil {
+		changed = c.application.GetStartDate()
+	}
+
+	timeEnd := time.Now()
+	diff := timeEnd.Sub(*changed)
+
+	annotation := annotations.NewAnnotation(
+		"Door is open",
+		fmt.Sprintf("%.2f seconds", diff.Seconds()),
+		[]string{"door", "entrance"},
+		changed,
+		&timeEnd)
+
+	if err := c.annotations.Create(annotation); err != nil {
+		c.logger.Error("Create annotation failed", map[string]interface{}{
+			"error": err.Error(),
+		})
+	}
 }

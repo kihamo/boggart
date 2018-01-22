@@ -3,6 +3,8 @@ package doors
 import (
 	"sync"
 	"sync/atomic"
+	"time"
+	"unsafe"
 
 	"github.com/davecheney/gpio"
 )
@@ -15,9 +17,10 @@ import (
 type Door struct {
 	mutex sync.RWMutex
 
-	pin      gpio.Pin
-	status   int64
-	callback func(bool)
+	pin       gpio.Pin
+	status    int64
+	changedAt unsafe.Pointer
+	callback  func(bool, *time.Time)
 }
 
 func NewDoor(pin int) (*Door, error) {
@@ -47,11 +50,16 @@ func (d *Door) Destroy() {
 	d.pin.EndWatch()
 }
 
-func (d *Door) SetCallback(callback func(bool)) {
+func (d *Door) SetCallback(callback func(bool, *time.Time)) {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 
 	d.callback = callback
+}
+
+func (d *Door) ChangedAt() *time.Time {
+	p := atomic.LoadPointer(&d.changedAt)
+	return (*time.Time)(p)
 }
 
 func (d *Door) updateAndReturn() bool {
@@ -65,7 +73,16 @@ func (d *Door) updateAndReturn() bool {
 }
 
 func (d *Door) watch() {
-	val := d.updateAndReturn()
+	prevStatus := d.IsClose()
+	prevChanged := d.ChangedAt()
+	currentStatus := d.updateAndReturn()
+
+	if currentStatus == prevStatus {
+		return
+	}
+
+	now := time.Now()
+	atomic.StorePointer(&d.changedAt, unsafe.Pointer(&now))
 
 	d.mutex.RLock()
 	cb := d.callback
@@ -73,7 +90,7 @@ func (d *Door) watch() {
 
 	if cb != nil {
 		go func() {
-			cb(val)
+			cb(currentStatus, prevChanged)
 		}()
 	}
 }

@@ -72,7 +72,7 @@ func (d *ElectricityMeter200) Request(function byte, data []byte) ([]byte, error
 		return nil, err
 	}
 
-	fmt.Println("Response: ", response, hex.EncodeToString(response))
+	//fmt.Println("Response: ", response, hex.EncodeToString(response))
 
 	l := len(response)
 	if l < 7 {

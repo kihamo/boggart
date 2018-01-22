@@ -1,5 +1,5 @@
-hash: e5a493fc36b561f4c320b3076039eba6cb80c5826f93e600adb9fa7546675cdc
-updated: 2018-01-15T17:56:45.599172138+03:00
+hash: d777d0f22ce5a063c2c86b61613354e9490c7bed1478b5e675031ea2358b6a53
+updated: 2018-01-22T21:18:17.22780415+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -34,10 +34,14 @@ imports:
   - ptypes/any
   - ptypes/duration
   - ptypes/timestamp
+- name: github.com/google/go-querystring
+  version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
+  subpackages:
+  - query
 - name: github.com/google/uuid
   version: dec09d789f3dba190787f8b4454c7d3c936fed9e
 - name: github.com/influxdata/influxdb
-  version: 009a7b203537e0fe34b8c14014523c7c0f1846c7
+  version: c85043e9d1d1cadee0934771b2f0804b2147c5ae
   subpackages:
   - client/v2
   - models
@@ -48,6 +52,8 @@ imports:
   version: 03f45bd4b7dad4734bc4620e46a35789349abb20
 - name: github.com/kardianos/osext
   version: ae77be60afb1dcacde03767a8c37337fad28ac14
+- name: github.com/kihamo/go-grafana-api
+  version: b9af836f6e9ddb24b1bb5d3d498459d93816ed64
 - name: github.com/kihamo/go-workers
   version: 38a62daf735286ee1344c947f8f57d8349825310
   subpackages:
@@ -59,9 +65,13 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 7e2322b6f04e2daffa7907f41c0bd018d2d56365
+  version: 47fa66caf67f9584372b98de5afd11a3cbf44e15
   subpackages:
   - components/alerts
+  - components/annotations
+  - components/annotations/instance
+  - components/annotations/internal
+  - components/annotations/storage
   - components/config
   - components/config/instance
   - components/config/internal
