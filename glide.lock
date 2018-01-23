@@ -1,5 +1,5 @@
-hash: d777d0f22ce5a063c2c86b61613354e9490c7bed1478b5e675031ea2358b6a53
-updated: 2018-01-22T21:18:17.22780415+03:00
+hash: 295e3b5621e4c1ee2b24aeb0d6477544b352f4bcd9a7e6c4dbacf23fbe9414a9
+updated: 2018-01-23T19:47:18.758268621+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -65,9 +65,8 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 47fa66caf67f9584372b98de5afd11a3cbf44e15
+  version: 7068650977e633ffe20101ce2e3537ecb884fa8f
   subpackages:
-  - components/alerts
   - components/annotations
   - components/annotations/instance
   - components/annotations/internal
@@ -142,6 +141,8 @@ imports:
   version: 6edbfbd6a369ee82463312ec67b2c92f97a1d4dc
   subpackages:
   - sqlparse
+- name: github.com/technoweenie/multipartstreamer
+  version: a90a01d73ae432e2611d178c18367fbaa13e0154
 - name: golang.org/x/crypto
   version: 9477e0b78b9ac3d0b03822fd95422e2fe07627cd
   subpackages:
@@ -215,4 +216,6 @@ imports:
   version: 2dc19c12445caefdc2d128f7331dcc83284211ef
   subpackages:
   - proto
+- name: gopkg.in/telegram-bot-api.v4
+  version: 2022d04b94f50056a09962b1ac81cdd821d20a55
 testImports: []

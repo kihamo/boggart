@@ -7,7 +7,6 @@ import (
 
 	boggart "github.com/kihamo/boggart/components/boggart/instance"
 	"github.com/kihamo/shadow"
-	//alerts "github.com/kihamo/shadow/components/alerts/instance"
 	annotations "github.com/kihamo/shadow/components/annotations/instance"
 	config "github.com/kihamo/shadow/components/config/instance"
 	dashboard "github.com/kihamo/shadow/components/dashboard/instance"
@@ -30,7 +29,6 @@ func main() {
 		Build,
 		[]shadow.Component{
 			boggart.NewComponent(),
-			//alerts.NewComponent(),
 			annotations.NewComponent(),
 			config.NewComponent(),
 			dashboard.NewComponent(),

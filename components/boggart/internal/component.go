@@ -178,9 +178,14 @@ func (c *Component) DoorEntrance() boggart.Door {
 }
 
 func (c *Component) doorCallback(status bool, changed *time.Time) {
-	// door is open
 	if !status {
-		c.logger.Info("Entrance door opened")
+		annotation := annotations.NewAnnotation("Door is opened", "Entrance door opened", []string{"door", "entrance", "open"}, nil, nil)
+		if err := c.annotations.CreateInStorages(annotation, []string{annotations.StorageTelegram}); err != nil {
+			c.logger.Error("Create annotation failed", map[string]interface{}{
+				"error": err.Error(),
+			})
+		}
+
 		return
 	}
 
@@ -192,9 +197,9 @@ func (c *Component) doorCallback(status bool, changed *time.Time) {
 	diff := timeEnd.Sub(*changed)
 
 	annotation := annotations.NewAnnotation(
-		"Door is open",
-		fmt.Sprintf("%.2f seconds", diff.Seconds()),
-		[]string{"door", "entrance"},
+		"Door is closed",
+		fmt.Sprintf("Door was open for %.2f seconds", diff.Seconds()),
+		[]string{"door", "entrance", "close"},
 		changed,
 		&timeEnd)
 
