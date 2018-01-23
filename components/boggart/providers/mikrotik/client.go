@@ -72,3 +72,61 @@ func (c *Client) EthernetStats() ([]map[string]string, error) {
 
 	return stats, nil
 }
+
+func (c *Client) DNSStatic() (map[string]string, error) {
+	reply, err := c.client.RunArgs([]string{"/ip/dns/static/print"})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(reply.Re) == 0 {
+		return nil, errors.New("Empty reply from device")
+	}
+
+	table := make(map[string]string, len(reply.Re))
+	for _, re := range reply.Re {
+		if re.Map["disabled"] == "true" {
+			continue
+		}
+
+		table[re.Map["address"]] = re.Map["name"]
+	}
+
+	return table, nil
+}
+
+func (c *Client) ARPTable() (map[string]string, error) {
+	reply, err := c.client.RunArgs([]string{"/ip/arp/print"})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(reply.Re) == 0 {
+		return nil, errors.New("Empty reply from device")
+	}
+
+	table := make(map[string]string, len(reply.Re))
+	for _, re := range reply.Re {
+		table[re.Map["mac-address"]] = re.Map["address"]
+	}
+
+	return table, nil
+}
+
+func (c *Client) DHCPLease() (map[string]string, error) {
+	reply, err := c.client.RunArgs([]string{"/ip/dhcp-server/lease/print"})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(reply.Re) == 0 {
+		return nil, errors.New("Empty reply from device")
+	}
+
+	table := make(map[string]string, len(reply.Re))
+	for _, re := range reply.Re {
+		table[re.Map["mac-address"]] = re.Map["host-name"]
+	}
+
+	return table, nil
+}

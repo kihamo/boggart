@@ -9,7 +9,8 @@ import (
 	"github.com/davecheney/gpio"
 )
 
-/* Pin state:
+/*
+ * Pin state:
  * 1 / true  - close
  * 0 / false - open
  */
@@ -17,10 +18,10 @@ import (
 type Door struct {
 	mutex sync.RWMutex
 
-	pin       gpio.Pin
-	status    int64
-	changedAt unsafe.Pointer
-	callback  func(bool, *time.Time)
+	pin            gpio.Pin
+	status         int64
+	changedAt      unsafe.Pointer
+	callbackChange func(bool, *time.Time)
 }
 
 func NewDoor(pin int) (*Door, error) {
@@ -50,16 +51,16 @@ func (d *Door) Destroy() {
 	d.pin.EndWatch()
 }
 
-func (d *Door) SetCallback(callback func(bool, *time.Time)) {
-	d.mutex.Lock()
-	defer d.mutex.Unlock()
-
-	d.callback = callback
-}
-
 func (d *Door) ChangedAt() *time.Time {
 	p := atomic.LoadPointer(&d.changedAt)
 	return (*time.Time)(p)
+}
+
+func (d *Door) SetCallbackChange(callback func(bool, *time.Time)) {
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
+
+	d.callbackChange = callback
 }
 
 func (d *Door) updateAndReturn() bool {
@@ -85,7 +86,7 @@ func (d *Door) watch() {
 	atomic.StorePointer(&d.changedAt, unsafe.Pointer(&now))
 
 	d.mutex.RLock()
-	cb := d.callback
+	cb := d.callbackChange
 	d.mutex.RUnlock()
 
 	if cb != nil {

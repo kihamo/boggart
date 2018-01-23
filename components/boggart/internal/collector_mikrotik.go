@@ -42,6 +42,34 @@ func (c *MetricsCollector) CollectMikrotik(ch chan<- snitch.Metric) {
 		return
 	}
 
+	arp, err := client.ARPTable()
+	if err != nil {
+		c.component.logger.Error("Get ARP table failed", map[string]interface{}{
+			"provider": "mikrotik",
+			"error":    err.Error(),
+		})
+		return
+	}
+
+	dns, err := client.DNSStatic()
+	if err != nil {
+		c.component.logger.Error("Get DNS static table failed", map[string]interface{}{
+			"provider": "mikrotik",
+			"error":    err.Error(),
+		})
+		return
+	}
+
+	dhcp, err := client.DHCPLease()
+	if err != nil {
+		c.component.logger.Error("Get DHCP lease table failed", map[string]interface{}{
+			"provider": "mikrotik",
+			"error":    err.Error(),
+		})
+		return
+	}
+
+	// Wifi clients
 	clients, err := client.WifiClients()
 	if err != nil {
 		c.component.logger.Error("Get wifi clients failed", map[string]interface{}{
@@ -64,11 +92,14 @@ func (c *MetricsCollector) CollectMikrotik(ch chan<- snitch.Metric) {
 			return
 		}
 
+		name := mikrotik.GetNameByMac(client["mac-address"], arp, dns, dhcp)
+
 		sent, err := strconv.ParseFloat(bytes[0], 64)
 		if err != nil {
 			c.component.logger.Errorf("Failed convert sent bytes to float64 %s", bytes[0], map[string]interface{}{
 				"interface": client["interface"],
 				"mac":       client["mac-address"],
+				"name":      name,
 				"provider":  "mikrotik",
 				"error":     err.Error(),
 			})
@@ -80,6 +111,7 @@ func (c *MetricsCollector) CollectMikrotik(ch chan<- snitch.Metric) {
 			c.component.logger.Errorf("Failed convert received bytes to float64 %s", bytes[1], map[string]interface{}{
 				"interface": client["interface"],
 				"mac":       client["mac-address"],
+				"name":      name,
 				"provider":  "mikrotik",
 				"error":     err.Error(),
 			})
@@ -88,12 +120,15 @@ func (c *MetricsCollector) CollectMikrotik(ch chan<- snitch.Metric) {
 
 		metricMikrotikTrafficReceivedBytes.With(
 			"interface", client["interface"],
-			"mac", client["mac-address"]).Set(received)
+			"mac", client["mac-address"],
+			"name", name).Set(received)
 		metricMikrotikTrafficSentBytes.With(
 			"interface", client["interface"],
-			"mac", client["mac-address"]).Set(sent)
+			"mac", client["mac-address"],
+			"name", name).Set(sent)
 	}
 
+	// Ports on mikrotik
 	stats, err := client.EthernetStats()
 	if err != nil {
 		c.component.logger.Error("Get ethernet stats failed", map[string]interface{}{

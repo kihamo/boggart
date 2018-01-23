@@ -106,7 +106,7 @@ func (c *Component) Run() (err error) {
 	}
 
 	if c.application.HasComponent(annotations.ComponentName) {
-		c.doorEntrance.SetCallback(c.doorCallback)
+		c.doorEntrance.SetCallbackChange(c.doorCallback)
 	}
 
 	return nil
