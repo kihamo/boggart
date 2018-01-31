@@ -38,7 +38,7 @@ func (c *MetricsCollector) UpdaterMobile() error {
 		return err
 	}
 
-	metricMobileMegafonBalance.Set(float64(value))
+	metricMobileMegafonBalance.With("phone", megafonPhone).Set(float64(value))
 
 	remainders, err := client.Remainders()
 	if err != nil {
@@ -46,10 +46,10 @@ func (c *MetricsCollector) UpdaterMobile() error {
 		return err
 	}
 
-	metricMobileMegafonUsedVoice.Set(remainders.Voice)
-	metricMobileMegafonUsedSms.Set(remainders.Sms)
-	metricMobileMegafonUsedInternet.Set(remainders.Internet)
-	metricMobileMegafonUsedInternetProlongation.Set(remainders.InternetProlongation)
+	metricMobileMegafonUsedVoice.With("phone", megafonPhone).Set(remainders.Voice)
+	metricMobileMegafonUsedSms.With("phone", megafonPhone).Set(remainders.Sms)
+	metricMobileMegafonUsedInternet.With("phone", megafonPhone).Set(remainders.Internet)
+	metricMobileMegafonUsedInternetProlongation.With("phone", megafonPhone).Set(remainders.InternetProlongation)
 
 	return nil
 }
