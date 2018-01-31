@@ -88,6 +88,12 @@ func (c *Component) Run() (err error) {
 	taskMercury.SetName(c.GetName() + "-mercury-updater")
 	c.workers.AddTask(taskMercury)
 
+	taskMobile := task.NewFunctionTask(c.taskMobile)
+	taskMobile.SetRepeats(-1)
+	taskMobile.SetRepeatInterval(c.config.GetDuration(boggart.ConfigMobileRepeatInterval))
+	taskMobile.SetName(c.GetName() + "-mobile-updater")
+	c.workers.AddTask(taskMobile)
+
 	taskPulsar := task.NewFunctionTask(c.taskPulsar)
 	taskPulsar.SetRepeats(-1)
 	taskPulsar.SetRepeatInterval(c.config.GetDuration(boggart.ConfigPulsarRepeatInterval))
@@ -117,6 +123,21 @@ func (c *Component) taskMercury(context.Context) (interface{}, error) {
 		err := c.collector.UpdaterMercury()
 		if err != nil {
 			c.logger.Error("Mercury updater failed", map[string]interface{}{
+				"error": err.Error(),
+			})
+		}
+
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+func (c *Component) taskMobile(context.Context) (interface{}, error) {
+	if c.config.GetBool(boggart.ConfigMobileEnabled) {
+		err := c.collector.UpdaterMobile()
+		if err != nil {
+			c.logger.Error("Mobile updater failed", map[string]interface{}{
 				"error": err.Error(),
 			})
 		}

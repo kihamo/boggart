@@ -1,5 +1,5 @@
-hash: 295e3b5621e4c1ee2b24aeb0d6477544b352f4bcd9a7e6c4dbacf23fbe9414a9
-updated: 2018-01-23T19:47:18.758268621+03:00
+hash: 24e7b8328071ac1358eec39823ea95dc8eae1c923217753bc00cb9c209ef14f4
+updated: 2018-01-31T17:19:11.533375929+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -8,6 +8,8 @@ imports:
   subpackages:
   - stores/cookiestore
   - stores/memstore
+- name: github.com/andybalholm/cascadia
+  version: 349dd0209470eabd9514242c688c403c0926d266
 - name: github.com/bsm/histogram
   version: 253b217b3ad255d48994a6f74de4f82650f5e70d
 - name: github.com/bugsnag/osext
@@ -18,8 +20,6 @@ imports:
   version: 1d4478f51bed434f1dadf96dcd9b43aabac66795
 - name: github.com/elazarl/go-bindata-assetfs
   version: 30f82fa23fd844bd5bb1e5f216db87fd77b5eb43
-- name: github.com/go-gorp/gorp
-  version: 6a3c8a87d0457cf700e57046c41e19b7cf3c44fa
 - name: github.com/go-routeros/routeros
   version: 2dc19c12445caefdc2d128f7331dcc83284211ef
 - name: github.com/go-sql-driver/mysql
@@ -65,7 +65,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 7068650977e633ffe20101ce2e3537ecb884fa8f
+  version: 6290e08192a0ec9908ea6bb4b68a77584f4d3592
   subpackages:
   - components/annotations
   - components/annotations/instance
@@ -129,6 +129,8 @@ imports:
   version: a3647f8e31d79543b2d0f0ae2fe5c379d72cedc0
 - name: github.com/pborman/uuid
   version: e533369306653d193b93dae055f6083cbf8ba54f
+- name: github.com/PuerkitoBio/goquery
+  version: 09540e565986583836b5fc792fe951ec5fd201dd
 - name: github.com/rs/xhandler
   version: 1eb70cf1520d43c307a89c5dabb7a7efd132fccd
 - name: github.com/rs/xid
@@ -154,6 +156,8 @@ imports:
   subpackages:
   - context
   - context/ctxhttp
+  - html
+  - html/atom
   - http2
   - http2/hpack
   - idna

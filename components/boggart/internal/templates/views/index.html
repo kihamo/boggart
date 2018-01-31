@@ -115,7 +115,24 @@
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
-                                <div id="communication-phone" style="height:300px;">Телефон</div>
+                                <div id="communication-phone" style="height:300px;">
+                                    Минуты по тарифному плану
+                                    {{ .boggart_mobile_megafon_used_voice_minutes.Value }}
+                                    минут
+                                    <br />
+                                    SMS по тарифному плану
+                                    {{ .boggart_mobile_megafon_used_sms.Value }}
+                                    шт.
+                                    <br />
+                                    Интернет по тарифному плану
+                                    {{ .boggart_mobile_megafon_used_internet_gigabytes.Value }}
+                                    GB.
+                                    <br />
+                                    Автопродление
+                                    {{ .boggart_mobile_megafon_used_internet_prolongation_gigabytes.Value }}
+                                    GB
+                                    <br />
+                                </div>
                             </div>
                         </div>
                     </div>

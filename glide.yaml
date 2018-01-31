@@ -3,10 +3,12 @@ import:
 - package: github.com/go-sql-driver/mysql
   version: 9181e3a86a19bacd63e68d43ae8b7b36320d8092
 - package: github.com/kihamo/shadow
-  version: 7068650977e633ffe20101ce2e3537ecb884fa8f
+  version: 6290e08192a0ec9908ea6bb4b68a77584f4d3592
 - package: github.com/goburrow/serial
   version: 5efbe925ecf714f8ba147bf2226f2e7afc7111bc
 - package: github.com/go-routeros/routeros
   version: 2dc19c12445caefdc2d128f7331dcc83284211ef
 - package: github.com/davecheney/gpio
   version: a6de66e7e47065fca1a55c62c3f3cab3144694e6
+- package: github.com/PuerkitoBio/goquery
+  version: v1.3.0
