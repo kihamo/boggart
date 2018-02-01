@@ -246,6 +246,14 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			true,
 			[]string{config.ViewPassword},
 			nil),
+		config.NewVariable(
+			boggart.ConfigMonitoringExternalURL,
+			config.ValueTypeString,
+			nil,
+			"Monitoring external URL",
+			false,
+			nil,
+			nil),
 	}
 }
 

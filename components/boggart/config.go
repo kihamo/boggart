@@ -29,4 +29,5 @@ const (
 	ConfigSoftVideoRepeatInterval   = ComponentName + ".softvideo.repeat-interval"
 	ConfigSoftVideoLogin            = ComponentName + ".softvideo.login"
 	ConfigSoftVideoPassword         = ComponentName + ".softvideo.password"
+	ConfigMonitoringExternalURL     = ComponentName + ".monitoring-external-url"
 )
