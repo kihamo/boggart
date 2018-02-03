@@ -60,6 +60,15 @@ func (c *Component) GetDashboardRoutes() []dashboard.Route {
 				&handlers.DevicesHandler{},
 				"",
 				true),
+			dashboard.NewRoute(
+				c.GetName(),
+				[]string{http.MethodGet},
+				"/"+c.GetName()+"/hikvision/:place/:action/",
+				&handlers.HikvisionHandler{
+					Config: c.config,
+				},
+				"",
+				true),
 		}
 	}
 

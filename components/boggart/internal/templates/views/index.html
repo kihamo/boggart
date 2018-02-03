@@ -1,5 +1,5 @@
 {{ define "content" }}
-<div class="row">
+<div class="row boggart">
     <div class="col-md-12">
         <div class="">
             <div class="x_title">
@@ -8,6 +8,7 @@
             </div>
             <div class="x_content">
                 <div class="row">
+                    {{ if .Config.GetBool "boggart.pulsar.enabled" }}
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
@@ -24,7 +25,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
@@ -35,7 +35,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
@@ -46,7 +45,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
@@ -57,7 +55,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
@@ -68,7 +65,8 @@
                             </div>
                         </div>
                     </div>
-
+                    {{ end }}
+                    {{ if .Config.GetBool "boggart.mercury.enabled" }}
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
@@ -86,13 +84,14 @@
                             </div>
                         </div>
                     </div>
+                    {{ end }}
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row">
+<div class="row boggart">
     <div class="col-md-12">
         <div class="">
             <div class="x_title">
@@ -101,6 +100,7 @@
             </div>
             <div class="x_content">
                 <div class="row">
+                    {{ if .Config.GetBool "boggart.softvideo.enabled" }}
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
@@ -112,6 +112,8 @@
                             </div>
                         </div>
                     </div>
+                    {{ end }}
+                    {{ if .Config.GetBool "boggart.mobile.enabled" }}
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
@@ -136,6 +138,8 @@
                             </div>
                         </div>
                     </div>
+                    {{ end }}
+                    {{ if .Config.GetBool "boggart.mercury.enabled" }}
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
@@ -146,13 +150,14 @@
                             </div>
                         </div>
                     </div>
+                    {{ end }}
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row">
+<div class="row boggart">
     <div class="col-md-12">
         <div class="">
             <div class="x_title">
@@ -181,7 +186,7 @@
     </div>
 </div>
 
-<div class="row">
+<div class="row boggart">
     <div class="col-md-12">
         <div class="">
             <div class="x_title">
@@ -190,13 +195,17 @@
             </div>
             <div class="x_content">
                 <div class="row">
+                    {{ if .Config.GetBool "boggart.hikvision.street.enabled" }}
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
-                                <div id="security-webcam-street" style="height:300px;">Камера на улице</div>
+                                <div id="security-webcam-street" style="height:300px;">
+                                    <img src="/boggart/hikvision/street/preview" style="min-width:179px;max-width:239px;">
+                                </div>
                             </div>
                         </div>
                     </div>
+                    {{ end }}
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
@@ -218,6 +227,7 @@
                             </div>
                         </div>
                     </div>
+                    {{ if .Config.GetBool "boggart.doors.enabled" }}
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
@@ -233,6 +243,7 @@
                             </div>
                         </div>
                     </div>
+                    {{ end }}
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
@@ -252,6 +263,18 @@
         </div>
     </div>
 </div>
+{{ end }}
+
+{{ define "head" }}
+<style type="text/css">
+    .boggart .x_panel {
+        padding: 0;
+    }
+
+    .boggart .widget {
+        padding: 2px;
+    }
+</style>
 {{ end }}
 
 {{ define "js" }}

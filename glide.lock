@@ -1,5 +1,5 @@
-hash: 24e7b8328071ac1358eec39823ea95dc8eae1c923217753bc00cb9c209ef14f4
-updated: 2018-01-31T17:19:11.533375929+03:00
+hash: 143a85b0e316f347aadd22426ba09967c6a0c41ed73d7520df773fa5be1d5ee1
+updated: 2018-02-03T19:33:17.650127074+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -55,7 +55,7 @@ imports:
 - name: github.com/kihamo/go-grafana-api
   version: b9af836f6e9ddb24b1bb5d3d498459d93816ed64
 - name: github.com/kihamo/go-workers
-  version: 38a62daf735286ee1344c947f8f57d8349825310
+  version: c165adff05a79326dff02f60c17d6b03f76308f0
   subpackages:
   - dispatcher
   - listener
@@ -65,7 +65,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 6290e08192a0ec9908ea6bb4b68a77584f4d3592
+  version: 7744951fffc647b5c3da6174743de9ada1ff6046
   subpackages:
   - components/annotations
   - components/annotations/instance
