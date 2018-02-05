@@ -23,8 +23,8 @@ var (
 )
 
 func (c *MetricsCollector) UpdaterMobile() error {
-	megafonPhone := c.component.config.GetString(boggart.ConfigMobileMegafonPhone)
-	megafonPassword := c.component.config.GetString(boggart.ConfigMobileMegafonPassword)
+	megafonPhone := c.component.config.String(boggart.ConfigMobileMegafonPhone)
+	megafonPassword := c.component.config.String(boggart.ConfigMobileMegafonPassword)
 
 	if megafonPhone == "" || megafonPassword == "" {
 		return nil

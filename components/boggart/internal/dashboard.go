@@ -9,7 +9,7 @@ import (
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
-func (c *Component) GetTemplates() *assetfs.AssetFS {
+func (c *Component) DashboardTemplates() *assetfs.AssetFS {
 	return &assetfs.AssetFS{
 		Asset:     Asset,
 		AssetDir:  AssetDir,
@@ -18,28 +18,28 @@ func (c *Component) GetTemplates() *assetfs.AssetFS {
 	}
 }
 
-func (c *Component) GetDashboardMenu() dashboard.Menu {
-	routes := c.GetDashboardRoutes()
+func (c *Component) DashboardMenu() dashboard.Menu {
+	routes := c.DashboardRoutes()
 	menus := []dashboard.Menu{
 		dashboard.NewMenuWithRoute("Dashboard", routes[0], "", nil, nil),
 		dashboard.NewMenuWithRoute("Detect", routes[1], "", nil, nil),
 		dashboard.NewMenuWithRoute("Devices", routes[2], "", nil, nil),
 	}
 
-	if u := c.config.GetString(boggart.ConfigMonitoringExternalURL); u != "" {
+	if u := c.config.String(boggart.ConfigMonitoringExternalURL); u != "" {
 		menus = append(menus, dashboard.NewMenuWithUrl("Monitoring", u, "", nil, nil))
 	}
 
-	return dashboard.NewMenuWithUrl("Boggart", "/"+c.GetName()+"/", "home", menus, nil)
+	return dashboard.NewMenuWithUrl("Boggart", "/"+c.Name()+"/", "home", menus, nil)
 }
 
-func (c *Component) GetDashboardRoutes() []dashboard.Route {
+func (c *Component) DashboardRoutes() []dashboard.Route {
 	if c.routes == nil {
 		c.routes = []dashboard.Route{
 			dashboard.NewRoute(
-				c.GetName(),
+				c.Name(),
 				[]string{http.MethodGet},
-				"/"+c.GetName()+"/",
+				"/"+c.Name()+"/",
 				&handlers.IndexHandler{
 					Config:    c.config,
 					Component: c,
@@ -47,23 +47,23 @@ func (c *Component) GetDashboardRoutes() []dashboard.Route {
 				"",
 				true),
 			dashboard.NewRoute(
-				c.GetName(),
+				c.Name(),
 				[]string{http.MethodGet},
-				"/"+c.GetName()+"/detect/",
+				"/"+c.Name()+"/detect/",
 				&handlers.DetectHandler{},
 				"",
 				true),
 			dashboard.NewRoute(
-				c.GetName(),
+				c.Name(),
 				[]string{http.MethodGet},
-				"/"+c.GetName()+"/devices/",
+				"/"+c.Name()+"/devices/",
 				&handlers.DevicesHandler{},
 				"",
 				true),
 			dashboard.NewRoute(
-				c.GetName(),
+				c.Name(),
 				[]string{http.MethodGet},
-				"/"+c.GetName()+"/hikvision/:place/:action/",
+				"/"+c.Name()+"/hikvision/:place/:action/",
 				&handlers.HikvisionHandler{
 					Config: c.config,
 				},

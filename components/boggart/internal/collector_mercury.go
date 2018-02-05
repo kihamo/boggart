@@ -32,7 +32,7 @@ var (
 
 func (c *MetricsCollector) UpdaterMercury() error {
 	device := mercury.NewElectricityMeter200(
-		mercury.ConvertSerialNumber(c.component.config.GetString(boggart.ConfigMercuryDeviceAddress)),
+		mercury.ConvertSerialNumber(c.component.config.String(boggart.ConfigMercuryDeviceAddress)),
 		c.component.ConnectionRS485())
 
 	t1, t2, t3, t4, err := device.PowerCounters()

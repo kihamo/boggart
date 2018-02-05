@@ -34,15 +34,15 @@ type Component struct {
 	doorEntrance    *doors.Door
 }
 
-func (c *Component) GetName() string {
+func (c *Component) Name() string {
 	return boggart.ComponentName
 }
 
-func (c *Component) GetVersion() string {
+func (c *Component) Version() string {
 	return boggart.ComponentVersion
 }
 
-func (c *Component) GetDependencies() []shadow.Dependency {
+func (c *Component) Dependencies() []shadow.Dependency {
 	return []shadow.Dependency{
 		{
 			Name: annotations.ComponentName,
@@ -78,35 +78,35 @@ func (c *Component) Init(a shadow.Application) error {
 }
 
 func (c *Component) Run() (err error) {
-	c.logger = logger.NewOrNop(c.GetName(), c.application)
+	c.logger = logger.NewOrNop(c.Name(), c.application)
 
 	c.initConnectionRS485()
 
 	taskMercury := task.NewFunctionTask(c.taskMercury)
 	taskMercury.SetRepeats(-1)
-	taskMercury.SetRepeatInterval(c.config.GetDuration(boggart.ConfigMercuryRepeatInterval))
-	taskMercury.SetName(c.GetName() + "-mercury-updater")
+	taskMercury.SetRepeatInterval(c.config.Duration(boggart.ConfigMercuryRepeatInterval))
+	taskMercury.SetName(c.Name() + "-mercury-updater")
 	c.workers.AddTask(taskMercury)
 
 	taskMobile := task.NewFunctionTask(c.taskMobile)
 	taskMobile.SetRepeats(-1)
-	taskMobile.SetRepeatInterval(c.config.GetDuration(boggart.ConfigMobileRepeatInterval))
-	taskMobile.SetName(c.GetName() + "-mobile-updater")
+	taskMobile.SetRepeatInterval(c.config.Duration(boggart.ConfigMobileRepeatInterval))
+	taskMobile.SetName(c.Name() + "-mobile-updater")
 	c.workers.AddTask(taskMobile)
 
 	taskPulsar := task.NewFunctionTask(c.taskPulsar)
 	taskPulsar.SetRepeats(-1)
-	taskPulsar.SetRepeatInterval(c.config.GetDuration(boggart.ConfigPulsarRepeatInterval))
-	taskPulsar.SetName(c.GetName() + "-pulsar-updater")
+	taskPulsar.SetRepeatInterval(c.config.Duration(boggart.ConfigPulsarRepeatInterval))
+	taskPulsar.SetName(c.Name() + "-pulsar-updater")
 	c.workers.AddTask(taskPulsar)
 
 	taskSoftVideo := task.NewFunctionTask(c.taskSoftVideo)
 	taskSoftVideo.SetRepeats(-1)
-	taskSoftVideo.SetRepeatInterval(c.config.GetDuration(boggart.ConfigSoftVideoRepeatInterval))
-	taskSoftVideo.SetName(c.GetName() + "-softvideo-updater")
+	taskSoftVideo.SetRepeatInterval(c.config.Duration(boggart.ConfigSoftVideoRepeatInterval))
+	taskSoftVideo.SetName(c.Name() + "-softvideo-updater")
 	c.workers.AddTask(taskSoftVideo)
 
-	c.doorEntrance, err = doors.NewDoor(c.config.GetInt(boggart.ConfigDoorsEntrancePin))
+	c.doorEntrance, err = doors.NewDoor(c.config.Int(boggart.ConfigDoorsEntrancePin))
 	if err != nil {
 		return err
 	}
@@ -119,7 +119,7 @@ func (c *Component) Run() (err error) {
 }
 
 func (c *Component) taskMercury(context.Context) (interface{}, error) {
-	if c.config.GetBool(boggart.ConfigMercuryEnabled) {
+	if c.config.Bool(boggart.ConfigMercuryEnabled) {
 		err := c.collector.UpdaterMercury()
 		if err != nil {
 			c.logger.Error("Mercury updater failed", map[string]interface{}{
@@ -134,7 +134,7 @@ func (c *Component) taskMercury(context.Context) (interface{}, error) {
 }
 
 func (c *Component) taskMobile(context.Context) (interface{}, error) {
-	if c.config.GetBool(boggart.ConfigMobileEnabled) {
+	if c.config.Bool(boggart.ConfigMobileEnabled) {
 		err := c.collector.UpdaterMobile()
 		if err != nil {
 			c.logger.Error("Mobile updater failed", map[string]interface{}{
@@ -149,7 +149,7 @@ func (c *Component) taskMobile(context.Context) (interface{}, error) {
 }
 
 func (c *Component) taskPulsar(context.Context) (interface{}, error) {
-	if c.config.GetBool(boggart.ConfigPulsarEnabled) {
+	if c.config.Bool(boggart.ConfigPulsarEnabled) {
 		err := c.collector.UpdaterPulsar()
 		if err != nil {
 			c.logger.Error("Puslar updater failed", map[string]interface{}{
@@ -164,7 +164,7 @@ func (c *Component) taskPulsar(context.Context) (interface{}, error) {
 }
 
 func (c *Component) taskSoftVideo(context.Context) (interface{}, error) {
-	if c.config.GetBool(boggart.ConfigSoftVideoEnabled) {
+	if c.config.Bool(boggart.ConfigSoftVideoEnabled) {
 		err := c.collector.UpdaterSoftVideo()
 		if err != nil {
 			c.logger.Error("SoftVideo updater failed", map[string]interface{}{
@@ -183,8 +183,8 @@ func (c *Component) initConnectionRS485() {
 	defer c.mutex.Unlock()
 
 	c.connectionRS485 = rs485.NewConnection(
-		c.config.GetString(boggart.ConfigRS485Address),
-		c.config.GetDuration(boggart.ConfigRS485Timeout))
+		c.config.String(boggart.ConfigRS485Address),
+		c.config.Duration(boggart.ConfigRS485Timeout))
 }
 
 func (c *Component) ConnectionRS485() *rs485.Connection {
@@ -211,7 +211,7 @@ func (c *Component) doorCallback(status bool, changed *time.Time) {
 	}
 
 	if changed == nil {
-		changed = c.application.GetStartDate()
+		changed = c.application.StartDate()
 	}
 
 	timeEnd := time.Now()

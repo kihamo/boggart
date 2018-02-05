@@ -29,10 +29,10 @@ func (c *MetricsCollector) DescribeMikrotik(ch chan<- *snitch.Description) {
 
 func (c *MetricsCollector) CollectMikrotik(ch chan<- snitch.Metric) {
 	client, err := mikrotik.NewClient(
-		c.component.config.GetString(boggart.ConfigMikrotikAddress),
-		c.component.config.GetString(boggart.ConfigMikrotikUsername),
-		c.component.config.GetString(boggart.ConfigMikrotikPassword),
-		c.component.config.GetDuration(boggart.ConfigMikrotikTimeout))
+		c.component.config.String(boggart.ConfigMikrotikAddress),
+		c.component.config.String(boggart.ConfigMikrotikUsername),
+		c.component.config.String(boggart.ConfigMikrotikPassword),
+		c.component.config.Duration(boggart.ConfigMikrotikTimeout))
 
 	if err != nil {
 		c.component.logger.Error("Create client failed", map[string]interface{}{

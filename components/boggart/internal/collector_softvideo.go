@@ -16,8 +16,8 @@ var (
 
 func (c *MetricsCollector) UpdaterSoftVideo() error {
 	client := softvideo.NewClient(
-		c.component.config.GetString(boggart.ConfigSoftVideoLogin),
-		c.component.config.GetString(boggart.ConfigSoftVideoPassword))
+		c.component.config.String(boggart.ConfigSoftVideoLogin),
+		c.component.config.String(boggart.ConfigSoftVideoPassword))
 
 	value, err := client.Balance()
 	if err != nil {

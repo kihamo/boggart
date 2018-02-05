@@ -36,7 +36,7 @@ func (c *MetricsCollector) UpdaterPulsar() error {
 		err           error
 	)
 
-	deviceAddressConfig := c.component.config.GetString(boggart.ConfigPulsarHeatMeterAddress)
+	deviceAddressConfig := c.component.config.String(boggart.ConfigPulsarHeatMeterAddress)
 	if deviceAddressConfig == "" {
 		deviceAddress, err = pulsar.DeviceAddress(c.component.ConnectionRS485())
 	} else {
@@ -84,7 +84,7 @@ func (c *MetricsCollector) UpdaterPulsar() error {
 	metricPulsarConsumption.Set(float64(consumption))
 
 	var coldWaterCapacityFunc func() (float32, error)
-	switch c.component.config.GetInt64(boggart.ConfigPulsarColdWaterPulseInput) {
+	switch c.component.config.Int64(boggart.ConfigPulsarColdWaterPulseInput) {
 	case pulsar.Input1:
 		coldWaterCapacityFunc = device.PulseInput1
 	case pulsar.Input2:
@@ -98,11 +98,11 @@ func (c *MetricsCollector) UpdaterPulsar() error {
 		return fmt.Errorf("ColdWaterCapacityFunc error: %s", err.Error())
 	}
 	metricPulsarColdWaterCapacity.Set(
-		(c.component.config.GetFloat64(boggart.ConfigPulsarColdWaterStartValue)*1000 +
+		(c.component.config.Float64(boggart.ConfigPulsarColdWaterStartValue)*1000 +
 			float64(coldWaterCapacity*10)) / 1000)
 
 	var hotWaterCapacityFunc func() (float32, error)
-	switch c.component.config.GetInt64(boggart.ConfigPulsarHotWaterPulseInput) {
+	switch c.component.config.Int64(boggart.ConfigPulsarHotWaterPulseInput) {
 	case pulsar.Input1:
 		hotWaterCapacityFunc = device.PulseInput1
 	case pulsar.Input2:
@@ -116,7 +116,7 @@ func (c *MetricsCollector) UpdaterPulsar() error {
 		return fmt.Errorf("HotWaterCapacityFunc error: %s", err.Error())
 	}
 	metricPulsarHotWaterCapacity.Set(
-		(c.component.config.GetFloat64(boggart.ConfigPulsarHotWaterStartValue)*1000 +
+		(c.component.config.Float64(boggart.ConfigPulsarHotWaterStartValue)*1000 +
 			float64(hotWaterCapacity*10)) / 1000)
 
 	return nil

@@ -8,7 +8,7 @@
             </div>
             <div class="x_content">
                 <div class="row">
-                    {{ if .Config.GetBool "boggart.pulsar.enabled" }}
+                    {{ if .Config.Bool "boggart.pulsar.enabled" }}
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
@@ -66,7 +66,7 @@
                         </div>
                     </div>
                     {{ end }}
-                    {{ if .Config.GetBool "boggart.mercury.enabled" }}
+                    {{ if .Config.Bool "boggart.mercury.enabled" }}
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
@@ -100,7 +100,7 @@
             </div>
             <div class="x_content">
                 <div class="row">
-                    {{ if .Config.GetBool "boggart.softvideo.enabled" }}
+                    {{ if .Config.Bool "boggart.softvideo.enabled" }}
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
@@ -113,7 +113,7 @@
                         </div>
                     </div>
                     {{ end }}
-                    {{ if .Config.GetBool "boggart.mobile.enabled" }}
+                    {{ if .Config.Bool "boggart.mobile.enabled" }}
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
@@ -139,7 +139,7 @@
                         </div>
                     </div>
                     {{ end }}
-                    {{ if .Config.GetBool "boggart.mercury.enabled" }}
+                    {{ if .Config.Bool "boggart.mercury.enabled" }}
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
@@ -195,24 +195,30 @@
             </div>
             <div class="x_content">
                 <div class="row">
-                    {{ if .Config.GetBool "boggart.hikvision.street.enabled" }}
+                    {{ if .Config.Bool "boggart.hikvision.street.enabled" }}
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
                                 <div id="security-webcam-street" style="height:300px;">
+                                    Камера на улице<br />
                                     <img src="/boggart/hikvision/street/preview" style="min-width:179px;max-width:239px;">
                                 </div>
                             </div>
                         </div>
                     </div>
                     {{ end }}
+                    {{ if .Config.Bool "boggart.hikvision.hall.enabled" }}
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
-                                <div id="security-webcam-hall-1" style="height:300px;">Камера в общем корридоре у входной двери</div>
+                                <div id="security-webcam-hall-1" style="height:300px;">
+                                    Камера у входной двери<br />
+                                    <img src="/boggart/hikvision/hall/preview" style="min-width:179px;max-width:239px;">
+                                </div>
                             </div>
                         </div>
                     </div>
+                    {{ end }}
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">
@@ -227,7 +233,7 @@
                             </div>
                         </div>
                     </div>
-                    {{ if .Config.GetBool "boggart.doors.enabled" }}
+                    {{ if .Config.Bool "boggart.doors.enabled" }}
                     <div class="col-md-3 col-xs-12 widget widget_tally_box">
                         <div class="x_panel">
                             <div class="x_content">

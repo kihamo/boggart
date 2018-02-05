@@ -10,7 +10,7 @@ import (
 	"github.com/kihamo/shadow/components/config"
 )
 
-func (c *Component) GetConfigVariables() []config.Variable {
+func (c *Component) ConfigVariables() []config.Variable {
 	return []config.Variable{
 		config.NewVariable(
 			boggart.ConfigRS485Address,
@@ -46,6 +46,60 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			"Pin for door reed switch",
 			false,
 			"Doors",
+			nil,
+			nil),
+		config.NewVariable(
+			boggart.ConfigHikvisionHallEnabled,
+			config.ValueTypeBool,
+			false,
+			"Enabled",
+			true,
+			"HikVision on the hall",
+			nil,
+			nil),
+		config.NewVariable(
+			boggart.ConfigHikvisionHallHost,
+			config.ValueTypeString,
+			nil,
+			"Host",
+			true,
+			"HikVision on the hall",
+			nil,
+			nil),
+		config.NewVariable(
+			boggart.ConfigHikvisionHallPort,
+			config.ValueTypeInt64,
+			nil,
+			"Port",
+			true,
+			"HikVision on the hall",
+			nil,
+			nil),
+		config.NewVariable(
+			boggart.ConfigHikvisionHallUsername,
+			config.ValueTypeString,
+			"admin",
+			"Username",
+			true,
+			"HikVision on the hall",
+			nil,
+			nil),
+		config.NewVariable(
+			boggart.ConfigHikvisionHallPassword,
+			config.ValueTypeString,
+			nil,
+			"Password",
+			true,
+			"HikVision on the hall",
+			[]string{config.ViewPassword},
+			nil),
+		config.NewVariable(
+			boggart.ConfigHikvisionHallStreamingChannel,
+			config.ValueTypeInt64,
+			101,
+			"Streaming channel",
+			true,
+			"HikVision on the hall",
 			nil,
 			nil),
 		config.NewVariable(
@@ -340,9 +394,9 @@ func (c *Component) GetConfigVariables() []config.Variable {
 	}
 }
 
-func (c *Component) GetConfigWatchers() []config.Watcher {
+func (c *Component) ConfigWatchers() []config.Watcher {
 	return []config.Watcher{
-		config.NewWatcher(c.GetName(), []string{
+		config.NewWatcher(c.Name(), []string{
 			boggart.ConfigRS485Timeout,
 			boggart.ConfigRS485Address,
 		}, c.watchConnectionRS485),
