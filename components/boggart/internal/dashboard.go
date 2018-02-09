@@ -57,15 +57,17 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 				c.Name(),
 				[]string{http.MethodGet},
 				"/"+c.Name()+"/devices/",
-				&handlers.DevicesHandler{},
+				&handlers.DevicesHandler{
+					DeviceManager: c.devices,
+				},
 				"",
 				true),
 			dashboard.NewRoute(
 				c.Name(),
 				[]string{http.MethodGet},
-				"/"+c.Name()+"/hikvision/:place/:action/",
-				&handlers.HikvisionHandler{
-					Config: c.config,
+				"/"+c.Name()+"/camera/:place/:action/",
+				&handlers.CameraHandler{
+					DeviceManager: c.devices,
 				},
 				"",
 				true),

@@ -1,3 +1,48 @@
 {{ define "content" }}
 
+<div class="row">
+    <div class="x_panel">
+        <div class="x_title">
+            <h2>Devices</h2>
+            <div class="clearfix"></div>
+        </div>
+        <div class="x_content">
+            <table class="table table-striped datatable">
+                <thead>
+                <tr>
+                    <th>Type</th>
+                    <th class="md-col-2">Id</th>
+                    <th>Description</th>
+                    <th class="md-col-1">Enabled</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{ range $i, $device := .devices }}
+                <tr>
+                    <td>
+                        {{ range $t, $type := $device.Types }}
+                        <span class="label label-success">{{ $type }}</span>
+                        {{ end }}
+                    </td>
+                    <td>{{ $device.Id }}</td>
+                    <td>{{ $device.Description }}</td>
+                    <td>{{ if $device.Enabled }}Enabled{{ else }}Disabled{{ end }}</td>
+                </tr>
+                {{ end }}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{{ end }}
+
+{{ define "head" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-fixedheader-bs/css/fixedHeader.bootstrap.min.css" false) }}
+{{ end }}
+
+{{ define "js" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net/js/jquery.dataTables.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-fixedheader/js/dataTables.fixedHeader.min.js" false) }}
 {{ end }}

@@ -10,7 +10,6 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
 	"github.com/kihamo/boggart/components/boggart/providers/doors"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 	"github.com/kihamo/go-workers/task"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/annotations"
@@ -33,6 +32,8 @@ type Component struct {
 	workers     workers.Component
 	routes      []dashboard.Route
 	collector   *MetricsCollector
+
+	devices boggart.DeviceManager
 
 	connectionRS485 *rs485.Connection
 	doorEntrance    *doors.Door
@@ -85,6 +86,7 @@ func (c *Component) Init(a shadow.Application) error {
 	c.config = a.GetComponent(config.ComponentName).(config.Component)
 	c.workers = a.GetComponent(workers.ComponentName).(workers.Component)
 	c.collector = NewMetricsCollector(c)
+	c.devices = NewDeviceManager()
 
 	return nil
 }
@@ -95,6 +97,8 @@ func (c *Component) Run() (err error) {
 	if c.application.HasComponent(messengers.ComponentName) {
 		c.messenger = c.application.GetComponent(messengers.ComponentName).(messengers.Component).Messenger(messengers.MessengerTelegram)
 	}
+
+	c.initCameras()
 
 	c.initConnectionRS485()
 
@@ -216,17 +220,12 @@ func (c *Component) DoorEntrance() boggart.Door {
 
 func (c *Component) doorCallback(status bool, changed *time.Time) {
 	if c.messenger != nil {
-		if !c.config.Bool(boggart.ConfigHikvisionHallEnabled) {
+		device := c.devices.Device(boggart.DeviceCameraHallID)
+		if device == nil && !device.IsEnabled() {
 			return
 		}
 
-		isapi := hikvision.NewISAPI(
-			c.config.String(boggart.ConfigHikvisionHallHost),
-			c.config.Int64(boggart.ConfigHikvisionHallPort),
-			c.config.String(boggart.ConfigHikvisionHallUsername),
-			c.config.String(boggart.ConfigHikvisionHallPassword))
-
-		image, err := isapi.StreamingPicture(c.config.Uint64(boggart.ConfigHikvisionHallStreamingChannel))
+		image, err := device.(boggart.Camera).Snapshot(context.Background())
 		if err == nil {
 			if status {
 				// TODO: changeUserId

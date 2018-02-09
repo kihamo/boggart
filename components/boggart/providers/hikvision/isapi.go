@@ -1,6 +1,8 @@
 package hikvision
 
 import (
+	"encoding/xml"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"strconv"
@@ -30,4 +32,20 @@ func (a *ISAPI) do(request *http.Request) (*http.Response, error) {
 	}
 
 	return a.connection.Do(request)
+}
+
+func (a *ISAPI) doAndParse(request *http.Request, v interface{}) error {
+	response, err := a.do(request)
+	if err != nil {
+		return err
+	}
+
+	defer response.Body.Close()
+
+	content, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return err
+	}
+
+	return xml.Unmarshal(content, &v)
 }
