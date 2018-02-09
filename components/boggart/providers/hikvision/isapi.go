@@ -6,9 +6,35 @@ import (
 	"net"
 	"net/http"
 	"strconv"
+	"strings"
 
 	connection "github.com/kihamo/boggart/components/boggart/protocols/http"
 )
+
+type overrideFloat64 struct {
+	value float64
+}
+
+/**
+ *Проблемы с \n в ответе от видео регистратора
+ */
+func (f *overrideFloat64) Float64() float64 {
+	return f.value
+}
+
+func (f *overrideFloat64) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	var raw string
+	d.DecodeElement(&raw, &start)
+
+	value, err := strconv.ParseFloat(strings.TrimSpace(raw), 64)
+	if err != nil {
+		return err
+	}
+
+	*f = overrideFloat64{value}
+
+	return nil
+}
 
 type ISAPI struct {
 	connection *connection.Client

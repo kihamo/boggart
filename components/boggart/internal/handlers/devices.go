@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/devices"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
@@ -19,10 +20,10 @@ type DevicesHandler struct {
 }
 
 func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
-	devices := h.DeviceManager.Devices()
-	viewDevices := make([]*devicesHandlerDevice, 0, len(devices))
+	list := h.DeviceManager.Devices()
+	viewList := make([]*devicesHandlerDevice, 0, len(list))
 
-	for _, d := range devices {
+	for _, d := range list {
 		viewDevice := &devicesHandlerDevice{
 			Id:          d.Id(),
 			Description: d.Description(),
@@ -34,10 +35,14 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 			viewDevice.Types = append(viewDevice.Types, "camera")
 		}
 
-		viewDevices = append(viewDevices, viewDevice)
+		if _, ok := d.(*devices.VideoRecorderHikVision); ok {
+			viewDevice.Types = append(viewDevice.Types, "video recorder")
+		}
+
+		viewList = append(viewList, viewDevice)
 	}
 
 	h.Render(r.Context(), boggart.ComponentName, "devices", map[string]interface{}{
-		"devices": viewDevices,
+		"devices": viewList,
 	})
 }

@@ -35,9 +35,9 @@ type SystemStatusResponse struct {
 	CurrentDeviceTime time.Time `xml:"currentDeviceTime"`
 	DeviceUpTime      uint64    `xml:"deviceUpTime"`
 	Memory            []struct {
-		MemoryDescription string  `xml:"memoryDescription"`
-		MemoryUsage       float64 `xml:"memoryUsage"`
-		MemoryAvailable   float64 `xml:"memoryAvailable"`
+		MemoryDescription string          `xml:"memoryDescription"`
+		MemoryUsage       overrideFloat64 `xml:"memoryUsage"`
+		MemoryAvailable   overrideFloat64 `xml:"memoryAvailable"`
 	} `xml:"MemoryList>Memory"`
 }
 

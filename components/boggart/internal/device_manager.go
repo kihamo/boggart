@@ -41,7 +41,11 @@ func (m *DeviceManager) Devices() map[string]boggart.Device {
 }
 
 func (m *DeviceManager) Describe(ch chan<- *snitch.Description) {
-	m.storage.Range(func(key interface{}, device interface{}) bool {
+	m.storage.Range(func(_ interface{}, device interface{}) bool {
+		if !device.(boggart.Device).IsEnabled() {
+			return true
+		}
+
 		if collector, ok := device.(snitch.Collector); ok {
 			collector.Describe(ch)
 		}
@@ -51,7 +55,11 @@ func (m *DeviceManager) Describe(ch chan<- *snitch.Description) {
 }
 
 func (m *DeviceManager) Collect(ch chan<- snitch.Metric) {
-	m.storage.Range(func(key interface{}, device interface{}) bool {
+	m.storage.Range(func(_ interface{}, device interface{}) bool {
+		if !device.(boggart.Device).IsEnabled() {
+			return true
+		}
+
 		if collector, ok := device.(snitch.Collector); ok {
 			collector.Collect(ch)
 		}

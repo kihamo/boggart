@@ -98,6 +98,7 @@ func (c *Component) Run() (err error) {
 		c.messenger = c.application.GetComponent(messengers.ComponentName).(messengers.Component).Messenger(messengers.MessengerTelegram)
 	}
 
+	c.initVideoRecorders()
 	c.initCameras()
 
 	c.initConnectionRS485()
