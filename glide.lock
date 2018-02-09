@@ -1,5 +1,5 @@
-hash: 4559358683a151b5e5ec65243d3484db57e77bfbbe4b98ac47ed1c327b867624
-updated: 2018-02-04T00:02:22.671670323+03:00
+hash: df98af70896b27af0d57f891a0fb5f756fc4e6b9ef8d35f8b72cfcfa43a14671
+updated: 2018-02-05T18:14:46.215980447+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -65,7 +65,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 750706da276bee2d51fc57e05512e1aec93e9534
+  version: 690138ceeef4a97294606ce41fc63a453697a6a3
   subpackages:
   - components/annotations
   - components/annotations/instance
@@ -87,6 +87,12 @@ imports:
   - components/logger
   - components/logger/instance
   - components/logger/internal
+  - components/messengers
+  - components/messengers/instance
+  - components/messengers/internal
+  - components/messengers/internal/annotations
+  - components/messengers/internal/handlers
+  - components/messengers/platforms/telegram
   - components/metrics
   - components/metrics/instance
   - components/metrics/internal

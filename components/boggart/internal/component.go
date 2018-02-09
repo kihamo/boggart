@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"sync"
@@ -9,12 +10,14 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
 	"github.com/kihamo/boggart/components/boggart/providers/doors"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 	"github.com/kihamo/go-workers/task"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/annotations"
 	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/logger"
+	"github.com/kihamo/shadow/components/messengers"
 	"github.com/kihamo/shadow/components/metrics"
 	"github.com/kihamo/shadow/components/workers"
 )
@@ -26,6 +29,7 @@ type Component struct {
 	annotations annotations.Component
 	config      config.Component
 	logger      logger.Logger
+	messenger   messengers.Messenger
 	workers     workers.Component
 	routes      []dashboard.Route
 	collector   *MetricsCollector
@@ -58,7 +62,11 @@ func (c *Component) Dependencies() []shadow.Dependency {
 			Name: logger.ComponentName,
 		},
 		{
-			Name: metrics.ComponentName,
+			Name: messengers.ComponentName,
+		},
+		{
+			Name:     metrics.ComponentName,
+			Required: true,
 		},
 		{
 			Name:     workers.ComponentName,
@@ -69,7 +77,11 @@ func (c *Component) Dependencies() []shadow.Dependency {
 
 func (c *Component) Init(a shadow.Application) error {
 	c.application = a
-	c.annotations = a.GetComponent(annotations.ComponentName).(annotations.Component)
+
+	if a.HasComponent(annotations.ComponentName) {
+		c.annotations = a.GetComponent(annotations.ComponentName).(annotations.Component)
+	}
+
 	c.config = a.GetComponent(config.ComponentName).(config.Component)
 	c.workers = a.GetComponent(workers.ComponentName).(workers.Component)
 	c.collector = NewMetricsCollector(c)
@@ -79,6 +91,10 @@ func (c *Component) Init(a shadow.Application) error {
 
 func (c *Component) Run() (err error) {
 	c.logger = logger.NewOrNop(c.Name(), c.application)
+
+	if c.application.HasComponent(messengers.ComponentName) {
+		c.messenger = c.application.GetComponent(messengers.ComponentName).(messengers.Component).Messenger(messengers.MessengerTelegram)
+	}
 
 	c.initConnectionRS485()
 
@@ -199,14 +215,35 @@ func (c *Component) DoorEntrance() boggart.Door {
 }
 
 func (c *Component) doorCallback(status bool, changed *time.Time) {
-	if !status {
-		annotation := annotations.NewAnnotation("Door is opened", "Entrance door opened", []string{"door", "entrance", "open"}, nil, nil)
-		if err := c.annotations.CreateInStorages(annotation, []string{annotations.StorageTelegram}); err != nil {
-			c.logger.Error("Create annotation failed", map[string]interface{}{
-				"error": err.Error(),
-			})
+	if c.messenger != nil {
+		if !c.config.Bool(boggart.ConfigHikvisionHallEnabled) {
+			return
 		}
 
+		isapi := hikvision.NewISAPI(
+			c.config.String(boggart.ConfigHikvisionHallHost),
+			c.config.Int64(boggart.ConfigHikvisionHallPort),
+			c.config.String(boggart.ConfigHikvisionHallUsername),
+			c.config.String(boggart.ConfigHikvisionHallPassword))
+
+		image, err := isapi.StreamingPicture(c.config.Uint64(boggart.ConfigHikvisionHallStreamingChannel))
+		if err == nil {
+			if status {
+				// TODO: changeUserId
+				c.messenger.SendMessage("238815343", "Entrance door is opened")
+			} else {
+				// TODO: changeUserId
+				c.messenger.SendMessage("238815343", "Entrance door is closed")
+			}
+
+			time.AfterFunc(time.Second, func() {
+				// TODO: changeUserId
+				c.messenger.SendPhoto("238815343", "Hall snapshot", bytes.NewReader(image))
+			})
+		}
+	}
+
+	if c.annotations == nil || !status {
 		return
 	}
 
@@ -217,16 +254,18 @@ func (c *Component) doorCallback(status bool, changed *time.Time) {
 	timeEnd := time.Now()
 	diff := timeEnd.Sub(*changed)
 
-	annotation := annotations.NewAnnotation(
-		"Door is closed",
-		fmt.Sprintf("Door was open for %.2f seconds", diff.Seconds()),
-		[]string{"door", "entrance", "close"},
-		changed,
-		&timeEnd)
+	if c.annotations != nil {
+		annotation := annotations.NewAnnotation(
+			"Door is closed",
+			fmt.Sprintf("Door was open for %.2f seconds", diff.Seconds()),
+			[]string{"door", "entrance", "close"},
+			changed,
+			&timeEnd)
 
-	if err := c.annotations.Create(annotation); err != nil {
-		c.logger.Error("Create annotation failed", map[string]interface{}{
-			"error": err.Error(),
-		})
+		if err := c.annotations.Create(annotation); err != nil {
+			c.logger.Error("Create annotation failed", map[string]interface{}{
+				"error": err.Error(),
+			})
+		}
 	}
 }
