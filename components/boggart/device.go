@@ -13,6 +13,7 @@ type DeviceId int64
 
 const (
 	DeviceIdVideoRecorder DeviceId = iota
+	DeviceIdHeatMeter
 	DeviceIdCameraHall
 	DeviceIdCameraStreet
 	DeviceIdPhone
@@ -25,6 +26,7 @@ type DeviceType int64
 
 const (
 	DeviceTypeCamera DeviceType = iota
+	DeviceTypeHeatMeter
 	DeviceTypeInternetProvider
 	DeviceTypePhone
 	DeviceTypeRouter
@@ -84,6 +86,12 @@ type WaterMeter interface {
 
 type HeatMeter interface {
 	Device
+
+	TemperatureIn(context.Context) (float64, error)
+	TemperatureOut(context.Context) (float64, error)
+	TemperatureDelta(context.Context) (float64, error)
+	Energy(context.Context) (float64, error)
+	Consumption(context.Context) (float64, error)
 }
 
 type Router interface {

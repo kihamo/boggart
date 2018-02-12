@@ -186,9 +186,20 @@ func (c *Component) initPulsarMeters() {
 
 	provider := pulsar.NewHeatMeter(deviceAddress, c.ConnectionRS485())
 
+	// heat meter
+	deviceHeatMeter := devices.NewPulsarHeadMeter(provider, c.config.Duration(boggart.ConfigPulsarRepeatInterval))
+
+	if c.config.Bool(boggart.ConfigPulsarEnabled) {
+		deviceHeatMeter.Enable()
+	} else {
+		deviceHeatMeter.Disable()
+	}
+
+	c.devices.RegisterWithID(boggart.DeviceIdHeatMeter.String(), deviceHeatMeter)
+
 	// cold water
 	serialNumber := c.config.String(boggart.ConfigPulsarColdWaterSerialNumber)
-	device := devices.NewPulsarPulsedWaterMeter(
+	deviceWaterMeterCold := devices.NewPulsarPulsedWaterMeter(
 		serialNumber,
 		c.config.Float64(boggart.ConfigPulsarColdWaterStartValue),
 		provider,
@@ -196,17 +207,17 @@ func (c *Component) initPulsarMeters() {
 		c.config.Duration(boggart.ConfigPulsarRepeatInterval))
 
 	if c.config.Bool(boggart.ConfigPulsarEnabled) {
-		device.Enable()
+		deviceWaterMeterCold.Enable()
 	} else {
-		device.Disable()
+		deviceWaterMeterCold.Disable()
 	}
 
-	device.SetDescription("Pulsar pulsed cold water meter with serial number " + serialNumber)
-	c.devices.RegisterWithID(boggart.DeviceIdWaterMeterCold.String(), device)
+	deviceWaterMeterCold.SetDescription("Pulsar pulsed cold water meter with serial number " + serialNumber)
+	c.devices.RegisterWithID(boggart.DeviceIdWaterMeterCold.String(), deviceWaterMeterCold)
 
 	// hot water
 	serialNumber = c.config.String(boggart.ConfigPulsarHotWaterSerialNumber)
-	device = devices.NewPulsarPulsedWaterMeter(
+	deviceWaterMeterHot := devices.NewPulsarPulsedWaterMeter(
 		c.config.String(boggart.ConfigPulsarHotWaterSerialNumber),
 		c.config.Float64(boggart.ConfigPulsarHotWaterStartValue),
 		provider,
@@ -214,11 +225,11 @@ func (c *Component) initPulsarMeters() {
 		c.config.Duration(boggart.ConfigPulsarRepeatInterval))
 
 	if c.config.Bool(boggart.ConfigPulsarEnabled) {
-		device.Enable()
+		deviceWaterMeterHot.Enable()
 	} else {
-		device.Disable()
+		deviceWaterMeterHot.Disable()
 	}
 
-	device.SetDescription("Pulsar pulsed hot water meter with serial number " + serialNumber)
-	c.devices.RegisterWithID(boggart.DeviceIdWaterMeterHot.String(), device)
+	deviceWaterMeterHot.SetDescription("Pulsar pulsed hot water meter with serial number " + serialNumber)
+	c.devices.RegisterWithID(boggart.DeviceIdWaterMeterHot.String(), deviceWaterMeterHot)
 }

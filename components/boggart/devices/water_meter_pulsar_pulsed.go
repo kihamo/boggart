@@ -23,10 +23,10 @@ var (
 type PulsarPulsedWaterMeter struct {
 	boggart.DeviceBase
 
-	serialNumber string
-	volumeOffset float64
-	provider     *pulsar.HeatMeter
 	input        uint64
+	volumeOffset float64
+	serialNumber string
+	provider     *pulsar.HeatMeter
 	interval     time.Duration
 }
 

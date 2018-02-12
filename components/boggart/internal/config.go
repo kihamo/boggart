@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/davecheney/gpio"
@@ -364,8 +365,8 @@ func (c *Component) ConfigVariables() []config.Variable {
 			[]string{config.ViewEnum},
 			map[string]interface{}{
 				config.ViewOptionEnumOptions: [][]interface{}{
-					{pulsar.Input1, "#1"},
-					{pulsar.Input2, "#2"},
+					{strconv.FormatUint(pulsar.Input1, 10), "#1"},
+					{strconv.FormatUint(pulsar.Input2, 10), "#2"},
 				},
 			}),
 		config.NewVariable(
@@ -396,8 +397,8 @@ func (c *Component) ConfigVariables() []config.Variable {
 			[]string{config.ViewEnum},
 			map[string]interface{}{
 				config.ViewOptionEnumOptions: [][]interface{}{
-					{pulsar.Input1, "#1"},
-					{pulsar.Input2, "#2"},
+					{strconv.FormatUint(pulsar.Input1, 10), "#1"},
+					{strconv.FormatUint(pulsar.Input2, 10), "#2"},
 				},
 			}),
 		config.NewVariable(
