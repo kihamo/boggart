@@ -9,17 +9,27 @@ import (
 	"github.com/pborman/uuid"
 )
 
+type DeviceType int64
+
+const (
+	DeviceTypeCamera DeviceType = iota
+	DeviceTypePhone
+	DeviceTypeVideoRecorder
+)
+
 type DeviceManager interface {
 	snitch.Collector
 
 	Register(string, Device)
 	Device(string) Device
 	Devices() map[string]Device
+	DevicesByTypes([]DeviceType) map[string]Device
 }
 
 type Device interface {
 	Id() string
 	Description() string
+	Types() []DeviceType
 	IsEnabled() bool
 	Disable()
 	Enable()
@@ -115,6 +125,10 @@ func (d *DeviceBase) Description() string {
 
 func (d *DeviceBase) SetDescription(description string) {
 	d.description.Store(description)
+}
+
+func (d *DeviceBase) Types() []DeviceType {
+	return nil
 }
 
 func (d *DeviceBase) IsEnabled() bool {

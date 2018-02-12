@@ -50,6 +50,31 @@ func (m *DeviceManager) Devices() map[string]boggart.Device {
 	return devices
 }
 
+func (m *DeviceManager) DevicesByTypes(types []boggart.DeviceType) map[string]boggart.Device {
+	if len(types) == 0 {
+		return m.Devices()
+	}
+
+	devices := make(map[string]boggart.Device, 0)
+
+	m.storage.Range(func(key interface{}, device interface{}) bool {
+		d := device.(boggart.Device)
+
+		for _, t1 := range d.Types() {
+			for _, t2 := range types {
+				if t1.String() == t2.String() {
+					devices[key.(string)] = d
+					return true
+				}
+			}
+		}
+
+		return true
+	})
+
+	return devices
+}
+
 func (m *DeviceManager) Describe(ch chan<- *snitch.Description) {
 	m.storage.Range(func(_ interface{}, device interface{}) bool {
 		if !device.(boggart.Device).IsEnabled() {

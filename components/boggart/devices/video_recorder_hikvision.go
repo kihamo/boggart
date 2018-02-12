@@ -43,6 +43,12 @@ func NewVideoRecorderHikVision(isapi *hikvision.ISAPI) (*VideoRecorderHikVision,
 	return device, nil
 }
 
+func (d *VideoRecorderHikVision) Types() []boggart.DeviceType {
+	return []boggart.DeviceType{
+		boggart.DeviceTypeVideoRecorder,
+	}
+}
+
 func (d *VideoRecorderHikVision) Describe(ch chan<- *snitch.Description) {
 	if d.serialNumber == "" {
 		return

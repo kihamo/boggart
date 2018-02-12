@@ -45,6 +45,12 @@ func NewCameraHikVision(isapi *hikvision.ISAPI, channel uint64) (*HikVisionCamer
 	return device, nil
 }
 
+func (d *HikVisionCamera) Types() []boggart.DeviceType {
+	return []boggart.DeviceType{
+		boggart.DeviceTypeCamera,
+	}
+}
+
 func (d *HikVisionCamera) Snapshot(ctx context.Context) ([]byte, error) {
 	return d.isapi.StreamingPicture(ctx, d.channel)
 }

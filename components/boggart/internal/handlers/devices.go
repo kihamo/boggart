@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/devices"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
@@ -28,21 +27,13 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 		viewDevice := &devicesHandlerDevice{
 			Id:          d.Id(),
 			Description: d.Description(),
-			Types:       []string{},
+			Types:       make([]string, 0, len(d.Types())),
 			TasksCount:  len(d.Tasks()),
 			Enabled:     d.IsEnabled(),
 		}
 
-		if _, ok := d.(boggart.Camera); ok {
-			viewDevice.Types = append(viewDevice.Types, "camera")
-		}
-
-		if _, ok := d.(boggart.Phone); ok {
-			viewDevice.Types = append(viewDevice.Types, "phone")
-		}
-
-		if _, ok := d.(*devices.VideoRecorderHikVision); ok {
-			viewDevice.Types = append(viewDevice.Types, "video recorder")
+		for _, t := range d.Types() {
+			viewDevice.Types = append(viewDevice.Types, t.String())
 		}
 
 		viewList = append(viewList, viewDevice)
