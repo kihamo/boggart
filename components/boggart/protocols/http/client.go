@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/cookiejar"
@@ -103,27 +104,29 @@ func (c *Client) Reset() {
 	c.cookies = []*http.Cookie{}
 }
 
-func (c *Client) Get(u string) (*http.Response, error) {
+func (c *Client) Get(ctx context.Context, u string) (*http.Response, error) {
 	request, err := http.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
 		return nil, err
 	}
 
+	request = request.WithContext(ctx)
 	return c.Do(request)
 }
 
-func (c *Client) GetAjax(u string) (*http.Response, error) {
+func (c *Client) GetAjax(ctx context.Context, u string) (*http.Response, error) {
 	request, err := http.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
 		return nil, err
 	}
 
+	request = request.WithContext(ctx)
 	request.Header.Set("X-Requested-With", "XMLHttpRequest")
 
 	return c.Do(request)
 }
 
-func (c *Client) Post(u string, data map[string]string) (*http.Response, error) {
+func (c *Client) Post(ctx context.Context, u string, data map[string]string) (*http.Response, error) {
 	values := url.Values{}
 	for key, val := range data {
 		values[key] = []string{val}
@@ -134,6 +137,7 @@ func (c *Client) Post(u string, data map[string]string) (*http.Response, error) 
 		return nil, err
 	}
 
+	request = request.WithContext(ctx)
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	return c.Do(request)

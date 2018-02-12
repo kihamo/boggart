@@ -1,6 +1,7 @@
 package softvideo
 
 import (
+	"context"
 	"errors"
 	"regexp"
 	"strconv"
@@ -30,13 +31,13 @@ func NewClient(login, password string) *Client {
 	}
 }
 
-func (c *Client) Balance() (float64, error) {
-	_, err := c.connection.Get(AccountURL)
+func (c *Client) Balance(ctx context.Context) (float64, error) {
+	_, err := c.connection.Get(ctx, AccountURL)
 	if err != nil {
 		return -1, err
 	}
 
-	response, err := c.connection.Post(AccountURL, map[string]string{
+	response, err := c.connection.Post(ctx, AccountURL, map[string]string{
 		"bootstrap[username]": c.login,
 		"bootstrap[password]": c.password,
 		"bootstrap[send]:":    "<i class=\"icon-ok\"></i>",

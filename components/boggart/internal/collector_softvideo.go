@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"context"
+
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/softvideo"
 	"github.com/kihamo/snitch"
@@ -19,7 +21,7 @@ func (c *MetricsCollector) UpdaterSoftVideo() error {
 		c.component.config.String(boggart.ConfigSoftVideoLogin),
 		c.component.config.String(boggart.ConfigSoftVideoPassword))
 
-	value, err := client.Balance()
+	value, err := client.Balance(context.Background())
 	if err != nil {
 		// FIXME: logging
 		return err

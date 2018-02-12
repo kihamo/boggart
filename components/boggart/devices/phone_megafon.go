@@ -41,8 +41,8 @@ func (d *MegafonPhone) Number() string {
 	return d.provider.Number()
 }
 
-func (d *MegafonPhone) Balance(_ context.Context) (float64, error) {
-	return d.provider.Balance()
+func (d *MegafonPhone) Balance(ctx context.Context) (float64, error) {
+	return d.provider.Balance(ctx)
 }
 
 func (d *MegafonPhone) Describe(ch chan<- *snitch.Description) {
@@ -79,14 +79,14 @@ func (d *MegafonPhone) Tasks() []workers.Task {
 func (d *MegafonPhone) updater(ctx context.Context) (interface{}, error) {
 	number := d.Number()
 
-	value, err := d.provider.Balance()
+	value, err := d.provider.Balance(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	metricPhoneMegafonBalance.With("number", number).Set(float64(value))
 
-	remainders, err := d.provider.Remainders()
+	remainders, err := d.provider.Remainders(ctx)
 	if err != nil {
 		return nil, err
 	}

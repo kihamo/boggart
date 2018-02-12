@@ -1,6 +1,7 @@
 package mobile
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -45,10 +46,10 @@ func (m *Megafon) Number() string {
 	return m.phone
 }
 
-func (m *Megafon) auth() (string, error) {
+func (m *Megafon) auth(ctx context.Context) (string, error) {
 	m.connection.Reset()
 
-	response, err := m.connection.Get(MegafonLkLoginFormURL)
+	response, err := m.connection.Get(ctx, MegafonLkLoginFormURL)
 	if err != nil {
 		return "", err
 	}
@@ -78,7 +79,7 @@ func (m *Megafon) auth() (string, error) {
 		return "", errors.New("CSRF token not found")
 	}
 
-	response, err = m.connection.Post(MegafonLkURL+action, map[string]string{
+	response, err = m.connection.Post(ctx, MegafonLkURL+action, map[string]string{
 		"j_username": m.phone,
 		"j_password": m.password,
 		"CSRF":       token,
@@ -95,13 +96,13 @@ func (m *Megafon) auth() (string, error) {
 	return submatch[1], nil
 }
 
-func (m *Megafon) Balance() (float64, error) {
-	csrf, err := m.auth()
+func (m *Megafon) Balance(ctx context.Context) (float64, error) {
+	csrf, err := m.auth(ctx)
 	if err != nil {
 		return -1, err
 	}
 
-	response, err := m.connection.GetAjax(fmt.Sprintf("%s?CSRF=%s&_=%d", MegafonLkBalanceURL, csrf, time.Now().Unix()))
+	response, err := m.connection.GetAjax(ctx, fmt.Sprintf("%s?CSRF=%s&_=%d", MegafonLkBalanceURL, csrf, time.Now().Unix()))
 	if err != nil {
 		return -1, err
 	}
@@ -118,13 +119,13 @@ func (m *Megafon) Balance() (float64, error) {
 	return reply.Balance, nil
 }
 
-func (m *Megafon) Remainders() (*MegafonRemainders, error) {
-	csrf, err := m.auth()
+func (m *Megafon) Remainders(ctx context.Context) (*MegafonRemainders, error) {
+	csrf, err := m.auth(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := m.connection.GetAjax(fmt.Sprintf("%s?CSRF=%s&_=%d", MegafonLkRemaindersURL, csrf, time.Now().Unix()))
+	response, err := m.connection.GetAjax(ctx, fmt.Sprintf("%s?CSRF=%s&_=%d", MegafonLkRemaindersURL, csrf, time.Now().Unix()))
 	if err != nil {
 		return nil, err
 	}
