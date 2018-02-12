@@ -98,13 +98,14 @@ func (c *Component) Run() (err error) {
 		c.messenger = c.application.GetComponent(messengers.ComponentName).(messengers.Component).Messenger(messengers.MessengerTelegram)
 	}
 
+	c.initConnectionRS485()
+
 	c.initCameras()
 	c.initInternetProviders()
 	c.initPhones()
 	c.initRouters()
 	c.initVideoRecorders()
-
-	c.initConnectionRS485()
+	c.initPulsarMeters()
 
 	taskMercury := task.NewFunctionTask(c.taskMercury)
 	taskMercury.SetRepeats(-1)

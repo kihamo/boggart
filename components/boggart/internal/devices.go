@@ -1,11 +1,14 @@
 package internal
 
 import (
+	"encoding/hex"
+
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/devices"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 	"github.com/kihamo/boggart/components/boggart/providers/mikrotik"
 	"github.com/kihamo/boggart/components/boggart/providers/mobile"
+	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
 	"github.com/kihamo/boggart/components/boggart/providers/softvideo"
 )
 
@@ -154,4 +157,68 @@ func (c *Component) initRouters() {
 	}
 
 	c.devices.RegisterWithID(boggart.DeviceIdRouter.String(), device)
+}
+
+func (c *Component) initPulsarMeters() {
+	var (
+		deviceAddress []byte
+		err           error
+	)
+
+	deviceAddressConfig := c.config.String(boggart.ConfigPulsarHeatMeterAddress)
+	if deviceAddressConfig == "" {
+		deviceAddress, err = pulsar.DeviceAddress(c.ConnectionRS485())
+	} else {
+		deviceAddress, err = hex.DecodeString(deviceAddressConfig)
+	}
+
+	if err != nil {
+		c.logger.Error("Try to get pulsar heat meter address failed", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	if len(deviceAddress) != 4 {
+		c.logger.Error("Length of device address of pulsar heat meter is wrong")
+		return
+	}
+
+	provider := pulsar.NewHeatMeter(deviceAddress, c.ConnectionRS485())
+
+	// cold water
+	serialNumber := c.config.String(boggart.ConfigPulsarColdWaterSerialNumber)
+	device := devices.NewPulsarPulsedWaterMeter(
+		serialNumber,
+		c.config.Float64(boggart.ConfigPulsarColdWaterStartValue),
+		provider,
+		c.config.Uint64(boggart.ConfigPulsarColdWaterPulseInput),
+		c.config.Duration(boggart.ConfigPulsarRepeatInterval))
+
+	if c.config.Bool(boggart.ConfigPulsarEnabled) {
+		device.Enable()
+	} else {
+		device.Disable()
+	}
+
+	device.SetDescription("Pulsar pulsed cold water meter with serial number " + serialNumber)
+	c.devices.RegisterWithID(boggart.DeviceIdWaterMeterCold.String(), device)
+
+	// hot water
+	serialNumber = c.config.String(boggart.ConfigPulsarHotWaterSerialNumber)
+	device = devices.NewPulsarPulsedWaterMeter(
+		c.config.String(boggart.ConfigPulsarHotWaterSerialNumber),
+		c.config.Float64(boggart.ConfigPulsarHotWaterStartValue),
+		provider,
+		c.config.Uint64(boggart.ConfigPulsarHotWaterPulseInput),
+		c.config.Duration(boggart.ConfigPulsarRepeatInterval))
+
+	if c.config.Bool(boggart.ConfigPulsarEnabled) {
+		device.Enable()
+	} else {
+		device.Disable()
+	}
+
+	device.SetDescription("Pulsar pulsed hot water meter with serial number " + serialNumber)
+	c.devices.RegisterWithID(boggart.DeviceIdWaterMeterHot.String(), device)
 }

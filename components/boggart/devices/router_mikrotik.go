@@ -47,6 +47,8 @@ func NewMikrotikRouter(provider *mikrotik.Client, interval time.Duration) (*Mikr
 		return nil, errors.New("Serial number not found")
 	}
 
+	device.SetDescription("Mikrotik router with serial number " + device.serialNumber)
+
 	return device, nil
 }
 

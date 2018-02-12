@@ -28,6 +28,7 @@ func NewSoftVideoInternet(provider *softvideo.Client, interval time.Duration) *S
 		interval: interval,
 	}
 	device.Init()
+	device.SetDescription("SoftVideo internet provider for account " + provider.AccountID())
 
 	return device
 }

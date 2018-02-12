@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	Input1 = iota + int64(1)
+	Input1 = iota + uint64(1)
 	Input2
 
 	FunctionBadCommand    = 0x00

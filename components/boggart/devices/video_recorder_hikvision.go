@@ -37,7 +37,7 @@ func NewVideoRecorderHikVision(isapi *hikvision.ISAPI) (*VideoRecorderHikVision,
 	}
 
 	device.SetId(deviceInfo.DeviceID)
-	device.SetDescription(deviceInfo.SerialNumber)
+	device.SetDescription("HikVision video recorder with serial number " + deviceInfo.SerialNumber)
 	device.serialNumber = deviceInfo.SerialNumber
 
 	return device, nil

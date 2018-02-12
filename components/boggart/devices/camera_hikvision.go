@@ -39,7 +39,7 @@ func NewCameraHikVision(isapi *hikvision.ISAPI, channel uint64) (*HikVisionCamer
 	}
 
 	device.SetId(deviceInfo.DeviceID)
-	device.SetDescription(deviceInfo.SerialNumber)
+	device.SetDescription("HikVision camera with serial number " + deviceInfo.SerialNumber)
 	device.serialNumber = deviceInfo.SerialNumber
 
 	return device, nil

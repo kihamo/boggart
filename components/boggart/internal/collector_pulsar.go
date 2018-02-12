@@ -84,7 +84,7 @@ func (c *MetricsCollector) UpdaterPulsar() error {
 	metricPulsarConsumption.Set(float64(consumption))
 
 	var coldWaterCapacityFunc func() (float32, error)
-	switch c.component.config.Int64(boggart.ConfigPulsarColdWaterPulseInput) {
+	switch c.component.config.Uint64(boggart.ConfigPulsarColdWaterPulseInput) {
 	case pulsar.Input1:
 		coldWaterCapacityFunc = device.PulseInput1
 	case pulsar.Input2:
@@ -102,7 +102,7 @@ func (c *MetricsCollector) UpdaterPulsar() error {
 			float64(coldWaterCapacity*10)) / 1000)
 
 	var hotWaterCapacityFunc func() (float32, error)
-	switch c.component.config.Int64(boggart.ConfigPulsarHotWaterPulseInput) {
+	switch c.component.config.Uint64(boggart.ConfigPulsarHotWaterPulseInput) {
 	case pulsar.Input1:
 		hotWaterCapacityFunc = device.PulseInput1
 	case pulsar.Input2:

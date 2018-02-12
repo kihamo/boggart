@@ -17,6 +17,8 @@ const (
 	DeviceIdCameraStreet
 	DeviceIdPhone
 	DeviceIdRouter
+	DeviceIdWaterMeterCold
+	DeviceIdWaterMeterHot
 )
 
 type DeviceType int64
@@ -27,6 +29,7 @@ const (
 	DeviceTypePhone
 	DeviceTypeRouter
 	DeviceTypeVideoRecorder
+	DeviceTypeWaterMeter
 )
 
 type DeviceManager interface {
@@ -75,6 +78,8 @@ type ElectricityMeter interface {
 
 type WaterMeter interface {
 	Device
+
+	Volume(context.Context) (float64, error)
 }
 
 type HeatMeter interface {
