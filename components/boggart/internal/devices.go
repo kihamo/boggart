@@ -6,6 +6,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 	"github.com/kihamo/boggart/components/boggart/providers/mikrotik"
 	"github.com/kihamo/boggart/components/boggart/providers/mobile"
+	"github.com/kihamo/boggart/components/boggart/providers/softvideo"
 )
 
 func (c *Component) initVideoRecorders() {
@@ -32,7 +33,23 @@ func (c *Component) initVideoRecorders() {
 		device.Disable()
 	}
 
-	c.devices.Register(boggart.DeviceIdVideoRecorder.String(), device)
+	c.devices.RegisterWithID(boggart.DeviceIdVideoRecorder.String(), device)
+}
+
+func (c *Component) initInternetProviders() {
+	provider := softvideo.NewClient(
+		c.config.String(boggart.ConfigSoftVideoLogin),
+		c.config.String(boggart.ConfigSoftVideoPassword))
+
+	device := devices.NewSoftVideoInternet(provider, c.config.Duration(boggart.ConfigSoftVideoRepeatInterval))
+
+	if c.config.Bool(boggart.ConfigSoftVideoEnabled) {
+		device.Enable()
+	} else {
+		device.Disable()
+	}
+
+	c.devices.Register(device)
 }
 
 func (c *Component) initCameras() {
@@ -58,7 +75,7 @@ func (c *Component) initCameras() {
 			device.Disable()
 		}
 
-		c.devices.Register(boggart.DeviceIdCameraHall.String(), device)
+		c.devices.RegisterWithID(boggart.DeviceIdCameraHall.String(), device)
 	}
 
 	isapi = hikvision.NewISAPI(
@@ -83,7 +100,7 @@ func (c *Component) initCameras() {
 			device.Disable()
 		}
 
-		c.devices.Register(boggart.DeviceIdCameraStreet.String(), device)
+		c.devices.RegisterWithID(boggart.DeviceIdCameraStreet.String(), device)
 	}
 }
 
@@ -104,7 +121,7 @@ func (c *Component) initPhones() {
 		device.Disable()
 	}
 
-	c.devices.Register(boggart.DeviceIdPhone.String(), device)
+	c.devices.RegisterWithID(boggart.DeviceIdPhone.String(), device)
 }
 
 func (c *Component) initRouters() {
@@ -136,5 +153,5 @@ func (c *Component) initRouters() {
 		device.Disable()
 	}
 
-	c.devices.Register(boggart.DeviceIdRouter.String(), device)
+	c.devices.RegisterWithID(boggart.DeviceIdRouter.String(), device)
 }

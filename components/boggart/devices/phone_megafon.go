@@ -40,6 +40,7 @@ func NewMegafonPhone(provider *mobile.Megafon, interval time.Duration) *MegafonP
 func (d *MegafonPhone) Types() []boggart.DeviceType {
 	return []boggart.DeviceType{
 		boggart.DeviceTypePhone,
+		boggart.DeviceTypeInternetProvider,
 	}
 }
 

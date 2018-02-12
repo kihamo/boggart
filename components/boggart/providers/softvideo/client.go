@@ -31,6 +31,10 @@ func NewClient(login, password string) *Client {
 	}
 }
 
+func (c *Client) AccountID() string {
+	return c.login
+}
+
 func (c *Client) Balance(ctx context.Context) (float64, error) {
 	_, err := c.connection.Get(ctx, AccountURL)
 	if err != nil {

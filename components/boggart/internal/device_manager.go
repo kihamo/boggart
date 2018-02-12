@@ -6,6 +6,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/shadow/components/workers"
 	"github.com/kihamo/snitch"
+	"github.com/pborman/uuid"
 )
 
 type DeviceManager struct {
@@ -20,7 +21,13 @@ func NewDeviceManager(workers workers.Component) *DeviceManager {
 	}
 }
 
-func (m *DeviceManager) Register(id string, device boggart.Device) {
+func (m *DeviceManager) Register(device boggart.Device) string {
+	id := uuid.New()
+	m.RegisterWithID(id, device)
+	return id
+}
+
+func (m *DeviceManager) RegisterWithID(id string, device boggart.Device) {
 	m.storage.Store(id, device)
 
 	tasks := device.Tasks()

@@ -98,10 +98,11 @@ func (c *Component) Run() (err error) {
 		c.messenger = c.application.GetComponent(messengers.ComponentName).(messengers.Component).Messenger(messengers.MessengerTelegram)
 	}
 
-	c.initVideoRecorders()
 	c.initCameras()
+	c.initInternetProviders()
 	c.initPhones()
 	c.initRouters()
+	c.initVideoRecorders()
 
 	c.initConnectionRS485()
 
@@ -116,12 +117,6 @@ func (c *Component) Run() (err error) {
 	taskPulsar.SetRepeatInterval(c.config.Duration(boggart.ConfigPulsarRepeatInterval))
 	taskPulsar.SetName(c.Name() + "-pulsar-updater")
 	c.workers.AddTask(taskPulsar)
-
-	taskSoftVideo := task.NewFunctionTask(c.taskSoftVideo)
-	taskSoftVideo.SetRepeats(-1)
-	taskSoftVideo.SetRepeatInterval(c.config.Duration(boggart.ConfigSoftVideoRepeatInterval))
-	taskSoftVideo.SetName(c.Name() + "-softvideo-updater")
-	c.workers.AddTask(taskSoftVideo)
 
 	c.doorEntrance, err = doors.NewDoor(c.config.Int(boggart.ConfigDoorsEntrancePin))
 	if err != nil {
@@ -155,21 +150,6 @@ func (c *Component) taskPulsar(context.Context) (interface{}, error) {
 		err := c.collector.UpdaterPulsar()
 		if err != nil {
 			c.logger.Error("Puslar updater failed", map[string]interface{}{
-				"error": err.Error(),
-			})
-		}
-
-		return nil, err
-	}
-
-	return nil, nil
-}
-
-func (c *Component) taskSoftVideo(context.Context) (interface{}, error) {
-	if c.config.Bool(boggart.ConfigSoftVideoEnabled) {
-		err := c.collector.UpdaterSoftVideo()
-		if err != nil {
-			c.logger.Error("SoftVideo updater failed", map[string]interface{}{
 				"error": err.Error(),
 			})
 		}

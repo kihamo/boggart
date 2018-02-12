@@ -140,5 +140,4 @@ func (c *MetricsCollector) CollectPulsar(ch chan<- snitch.Metric) {
 	metricPulsarConsumption.Collect(ch)
 	metricPulsarColdWaterCapacity.Collect(ch)
 	metricPulsarHotWaterCapacity.Collect(ch)
-	metricSoftVideoBalance.Collect(ch)
 }

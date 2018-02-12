@@ -23,6 +23,7 @@ type DeviceType int64
 
 const (
 	DeviceTypeCamera DeviceType = iota
+	DeviceTypeInternetProvider
 	DeviceTypePhone
 	DeviceTypeRouter
 	DeviceTypeVideoRecorder
@@ -31,7 +32,8 @@ const (
 type DeviceManager interface {
 	snitch.Collector
 
-	Register(string, Device)
+	Register(Device) string
+	RegisterWithID(string, Device)
 	Device(string) Device
 	Devices() map[string]Device
 	DevicesByTypes([]DeviceType) map[string]Device
