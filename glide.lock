@@ -1,5 +1,5 @@
-hash: df98af70896b27af0d57f891a0fb5f756fc4e6b9ef8d35f8b72cfcfa43a14671
-updated: 2018-02-05T18:14:46.215980447+03:00
+hash: 3357cac5c5d66cbebee89a50f090d8cd0a034fe948f4942c255adbd5cfc15420
+updated: 2018-02-12T12:15:46.186501991+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -38,8 +38,6 @@ imports:
   version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
   subpackages:
   - query
-- name: github.com/google/uuid
-  version: dec09d789f3dba190787f8b4454c7d3c936fed9e
 - name: github.com/influxdata/influxdb
   version: c85043e9d1d1cadee0934771b2f0804b2147c5ae
   subpackages:
@@ -55,7 +53,7 @@ imports:
 - name: github.com/kihamo/go-grafana-api
   version: b9af836f6e9ddb24b1bb5d3d498459d93816ed64
 - name: github.com/kihamo/go-workers
-  version: c165adff05a79326dff02f60c17d6b03f76308f0
+  version: 18d9716fb1f1635083f3bcab4e739acdfadba86f
   subpackages:
   - dispatcher
   - listener
@@ -65,7 +63,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 690138ceeef4a97294606ce41fc63a453697a6a3
+  version: b03fdd2a5994e3bf6ea13368cd9629a45f1b5b48
   subpackages:
   - components/annotations
   - components/annotations/instance
@@ -134,13 +132,13 @@ imports:
 - name: github.com/patrickmn/go-cache
   version: a3647f8e31d79543b2d0f0ae2fe5c379d72cedc0
 - name: github.com/pborman/uuid
-  version: e533369306653d193b93dae055f6083cbf8ba54f
+  version: c65b2f87fee37d1c7854c9164a450713c28d50cd
 - name: github.com/PuerkitoBio/goquery
   version: 09540e565986583836b5fc792fe951ec5fd201dd
 - name: github.com/rs/xhandler
   version: 1eb70cf1520d43c307a89c5dabb7a7efd132fccd
 - name: github.com/rs/xid
-  version: 02dd45c33376f85d1064355dc790dcc4850596b1
+  version: 390d6a8eeb3caeef8befccd1f9fae78eee5a0b34
 - name: github.com/rs/xlog
   version: 7ed5dc1cca34bb0c9e8f0e58dcf19b6dea3044d5
   subpackages:
@@ -171,7 +169,7 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/oauth2
-  version: 09bba2746c7d9b3181efc10fdb29c59c582f4eb1
+  version: 543e37812f10c46c622c9575afd7ad22f22a12ba
   subpackages:
   - internal
 - name: golang.org/x/text
@@ -192,7 +190,7 @@ imports:
   - internal/urlfetch
   - urlfetch
 - name: google.golang.org/genproto
-  version: a8101f21cf983e773d0c1133ebc5424792003214
+  version: 2b5a72b8730b0b16380010cfe5286c42108d88e7
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc

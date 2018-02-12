@@ -4,21 +4,31 @@ import (
 	"sync"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/shadow/components/workers"
 	"github.com/kihamo/snitch"
 )
 
 type DeviceManager struct {
 	storage *sync.Map
+	workers workers.Component
 }
 
-func NewDeviceManager() *DeviceManager {
+func NewDeviceManager(workers workers.Component) *DeviceManager {
 	return &DeviceManager{
-		new(sync.Map),
+		storage: new(sync.Map),
+		workers: workers,
 	}
 }
 
 func (m *DeviceManager) Register(id string, device boggart.Device) {
 	m.storage.Store(id, device)
+
+	tasks := device.Tasks()
+	if len(tasks) > 0 {
+		for _, task := range tasks {
+			m.workers.AddTask(task)
+		}
+	}
 }
 
 func (m *DeviceManager) Device(id string) boggart.Device {

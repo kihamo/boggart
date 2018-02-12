@@ -16,17 +16,17 @@ var (
 )
 
 type VideoRecorderHikVision struct {
+	boggart.DeviceBase
+
 	isapi        *hikvision.ISAPI
-	id           string
-	description  string
 	serialNumber string
-	enabled      bool
 }
 
 func NewVideoRecorderHikVision(isapi *hikvision.ISAPI) (*VideoRecorderHikVision, error) {
 	device := &VideoRecorderHikVision{
 		isapi: isapi,
 	}
+	device.DeviceBase.Init()
 
 	ctx, ctxCancel := context.WithTimeout(context.Background(), time.Millisecond*300)
 	defer ctxCancel()
@@ -36,28 +36,11 @@ func NewVideoRecorderHikVision(isapi *hikvision.ISAPI) (*VideoRecorderHikVision,
 		return nil, err
 	}
 
-	device.enabled = true
-	device.id = deviceInfo.DeviceID
-	device.description = deviceInfo.SerialNumber
+	device.SetId(deviceInfo.DeviceID)
+	device.SetDescription(deviceInfo.SerialNumber)
 	device.serialNumber = deviceInfo.SerialNumber
 
 	return device, nil
-}
-
-func (d *VideoRecorderHikVision) Id() string {
-	return d.id
-}
-
-func (d *VideoRecorderHikVision) Position() (int64, int64) {
-	return 0, 0
-}
-
-func (d *VideoRecorderHikVision) Description() string {
-	return d.description
-}
-
-func (d *VideoRecorderHikVision) IsEnabled() bool {
-	return d.enabled
 }
 
 func (d *VideoRecorderHikVision) Describe(ch chan<- *snitch.Description) {

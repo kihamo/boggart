@@ -7,6 +7,7 @@ import (
 )
 
 type devicesHandlerDevice struct {
+	TasksCount  int
 	Id          string
 	Description string
 	Types       []string
@@ -28,11 +29,16 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 			Id:          d.Id(),
 			Description: d.Description(),
 			Types:       []string{},
+			TasksCount:  len(d.Tasks()),
 			Enabled:     d.IsEnabled(),
 		}
 
 		if _, ok := d.(boggart.Camera); ok {
 			viewDevice.Types = append(viewDevice.Types, "camera")
+		}
+
+		if _, ok := d.(boggart.Phone); ok {
+			viewDevice.Types = append(viewDevice.Types, "phone")
 		}
 
 		if _, ok := d.(*devices.VideoRecorderHikVision); ok {

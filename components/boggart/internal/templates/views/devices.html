@@ -13,6 +13,7 @@
                     <th>Type</th>
                     <th class="md-col-2">Id</th>
                     <th>Description</th>
+                    <th class="md-col-1">Tasks</th>
                     <th class="md-col-1">Enabled</th>
                 </tr>
                 </thead>
@@ -26,6 +27,7 @@
                     </td>
                     <td>{{ $device.Id }}</td>
                     <td>{{ $device.Description }}</td>
+                    <td>{{ $device.TasksCount }}</td>
                     <td>{{ if $device.Enabled }}Enabled{{ else }}Disabled{{ end }}</td>
                 </tr>
                 {{ end }}

@@ -41,6 +41,10 @@ func NewMegafon(phone, password string) *Megafon {
 	}
 }
 
+func (m *Megafon) Number() string {
+	return m.phone
+}
+
 func (m *Megafon) auth() (string, error) {
 	m.connection.Reset()
 

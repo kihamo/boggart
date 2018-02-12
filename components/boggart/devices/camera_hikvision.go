@@ -16,12 +16,11 @@ var (
 )
 
 type HikVisionCamera struct {
+	boggart.DeviceBase
+
 	isapi        *hikvision.ISAPI
 	channel      uint64
-	id           string
-	description  string
 	serialNumber string
-	enabled      bool
 }
 
 func NewCameraHikVision(isapi *hikvision.ISAPI, channel uint64) (*HikVisionCamera, error) {
@@ -29,6 +28,7 @@ func NewCameraHikVision(isapi *hikvision.ISAPI, channel uint64) (*HikVisionCamer
 		isapi:   isapi,
 		channel: channel,
 	}
+	device.DeviceBase.Init()
 
 	ctx, ctxCancel := context.WithTimeout(context.Background(), time.Millisecond*300)
 	defer ctxCancel()
@@ -38,28 +38,11 @@ func NewCameraHikVision(isapi *hikvision.ISAPI, channel uint64) (*HikVisionCamer
 		return nil, err
 	}
 
-	device.enabled = true
-	device.id = deviceInfo.DeviceID
-	device.description = deviceInfo.SerialNumber
+	device.SetId(deviceInfo.DeviceID)
+	device.SetDescription(deviceInfo.SerialNumber)
 	device.serialNumber = deviceInfo.SerialNumber
 
 	return device, nil
-}
-
-func (d *HikVisionCamera) Id() string {
-	return d.id
-}
-
-func (d *HikVisionCamera) Position() (int64, int64) {
-	return 0, 0
-}
-
-func (d *HikVisionCamera) Description() string {
-	return d.description
-}
-
-func (d *HikVisionCamera) IsEnabled() bool {
-	return d.enabled
 }
 
 func (d *HikVisionCamera) Snapshot(ctx context.Context) ([]byte, error) {
