@@ -4,6 +4,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/devices"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
+	"github.com/kihamo/boggart/components/boggart/providers/mikrotik"
 	"github.com/kihamo/boggart/components/boggart/providers/mobile"
 )
 
@@ -31,7 +32,7 @@ func (c *Component) initVideoRecorders() {
 		device.Disable()
 	}
 
-	c.devices.Register(boggart.DeviceVideoRecorderID, device)
+	c.devices.Register(boggart.DeviceIdVideoRecorder.String(), device)
 }
 
 func (c *Component) initCameras() {
@@ -57,7 +58,7 @@ func (c *Component) initCameras() {
 			device.Disable()
 		}
 
-		c.devices.Register(boggart.DeviceCameraHallID, device)
+		c.devices.Register(boggart.DeviceIdCameraHall.String(), device)
 	}
 
 	isapi = hikvision.NewISAPI(
@@ -82,7 +83,7 @@ func (c *Component) initCameras() {
 			device.Disable()
 		}
 
-		c.devices.Register(boggart.DeviceCameraStreetID, device)
+		c.devices.Register(boggart.DeviceIdCameraStreet.String(), device)
 	}
 }
 
@@ -103,5 +104,37 @@ func (c *Component) initPhones() {
 		device.Disable()
 	}
 
-	c.devices.Register(boggart.DevicePhoneID, device)
+	c.devices.Register(boggart.DeviceIdPhone.String(), device)
+}
+
+func (c *Component) initRouters() {
+	api, err := mikrotik.NewClient(
+		c.config.String(boggart.ConfigMikrotikAddress),
+		c.config.String(boggart.ConfigMikrotikUsername),
+		c.config.String(boggart.ConfigMikrotikPassword),
+		c.config.Duration(boggart.ConfigMikrotikTimeout))
+	if err != nil {
+		c.logger.Error("Init mikrotik api failed", map[string]interface{}{
+			"error":    err.Error(),
+			"address":  c.config.String(boggart.ConfigMikrotikAddress),
+			"username": c.config.String(boggart.ConfigMikrotikUsername),
+		})
+		return
+	}
+
+	device, err := devices.NewMikrotikRouter(api, c.config.Duration(boggart.ConfigMikrotikRepeatInterval))
+	if err != nil {
+		c.logger.Error("Init router device failed", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	if c.config.Bool(boggart.ConfigMikrotikEnabled) {
+		device.Enable()
+	} else {
+		device.Disable()
+	}
+
+	c.devices.Register(boggart.DeviceIdRouter.String(), device)
 }

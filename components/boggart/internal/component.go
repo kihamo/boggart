@@ -101,6 +101,7 @@ func (c *Component) Run() (err error) {
 	c.initVideoRecorders()
 	c.initCameras()
 	c.initPhones()
+	c.initRouters()
 
 	c.initConnectionRS485()
 
@@ -201,7 +202,7 @@ func (c *Component) DoorEntrance() boggart.Door {
 
 func (c *Component) doorCallback(status bool, changed *time.Time) {
 	if c.messenger != nil {
-		device := c.devices.Device(boggart.DeviceCameraHallID)
+		device := c.devices.Device(boggart.DeviceIdCameraHall.String())
 		if device == nil && !device.IsEnabled() {
 			return
 		}

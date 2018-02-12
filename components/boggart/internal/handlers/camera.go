@@ -20,10 +20,10 @@ func (h *CameraHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 		switch query.Get(":place") {
 		case "hall":
-			device = h.DeviceManager.Device(boggart.DeviceCameraHallID)
+			device = h.DeviceManager.Device(boggart.DeviceIdCameraHall.String())
 
 		case "street":
-			device = h.DeviceManager.Device(boggart.DeviceCameraStreetID)
+			device = h.DeviceManager.Device(boggart.DeviceIdCameraStreet.String())
 
 		default:
 			h.NotFound(w, r)

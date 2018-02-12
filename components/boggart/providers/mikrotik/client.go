@@ -35,6 +35,19 @@ func (c *Client) System() (map[string]string, error) {
 	return reply.Re[0].Map, nil
 }
 
+func (c *Client) SystemRouterboard() (map[string]string, error) {
+	reply, err := c.client.RunArgs([]string{"/system/routerboard/print"})
+	if err != nil {
+		return nil, nil
+	}
+
+	if len(reply.Re) == 0 {
+		return nil, errors.New("Empty reply from device")
+	}
+
+	return reply.Re[0].Map, nil
+}
+
 func (c *Client) WifiClients() ([]map[string]string, error) {
 	reply, err := c.client.RunArgs([]string{"/interface/wireless/registration-table/print"})
 	if err != nil {

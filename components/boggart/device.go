@@ -9,11 +9,22 @@ import (
 	"github.com/pborman/uuid"
 )
 
+type DeviceId int64
+
+const (
+	DeviceIdVideoRecorder DeviceId = iota
+	DeviceIdCameraHall
+	DeviceIdCameraStreet
+	DeviceIdPhone
+	DeviceIdRouter
+)
+
 type DeviceType int64
 
 const (
 	DeviceTypeCamera DeviceType = iota
 	DeviceTypePhone
+	DeviceTypeRouter
 	DeviceTypeVideoRecorder
 )
 
@@ -70,6 +81,8 @@ type HeatMeter interface {
 
 type Router interface {
 	Device
+
+	// TODO: public interface
 }
 
 type Thermometer interface {

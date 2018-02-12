@@ -83,6 +83,10 @@ func (d *MegafonPhone) Tasks() []workers.Task {
 }
 
 func (d *MegafonPhone) updater(ctx context.Context) (interface{}, error) {
+	if !d.IsEnabled() {
+		return nil, nil
+	}
+
 	number := d.Number()
 
 	value, err := d.provider.Balance(ctx)
