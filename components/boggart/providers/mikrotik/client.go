@@ -48,6 +48,19 @@ func (c *Client) SystemRouterboard() (map[string]string, error) {
 	return reply.Re[0].Map, nil
 }
 
+func (c *Client) SystemResource() (map[string]string, error) {
+	reply, err := c.client.RunArgs([]string{"/system/resource/print"})
+	if err != nil {
+		return nil, nil
+	}
+
+	if len(reply.Re) == 0 {
+		return nil, errors.New("Empty reply from device")
+	}
+
+	return reply.Re[0].Map, nil
+}
+
 func (c *Client) WifiClients() ([]map[string]string, error) {
 	reply, err := c.client.RunArgs([]string{"/interface/wireless/registration-table/print"})
 	if err != nil {
