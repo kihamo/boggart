@@ -2,11 +2,13 @@ package devices
 
 import (
 	"context"
-	"log"
+	"errors"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
+	"github.com/kihamo/go-workers"
+	"github.com/kihamo/go-workers/task"
 	"github.com/kihamo/snitch"
 )
 
@@ -21,12 +23,14 @@ type HikVisionCamera struct {
 	isapi        *hikvision.ISAPI
 	channel      uint64
 	serialNumber string
+	interval     time.Duration
 }
 
-func NewCameraHikVision(isapi *hikvision.ISAPI, channel uint64) (*HikVisionCamera, error) {
+func NewCameraHikVision(isapi *hikvision.ISAPI, channel uint64, interval time.Duration) (*HikVisionCamera, error) {
 	device := &HikVisionCamera{
-		isapi:   isapi,
-		channel: channel,
+		isapi:    isapi,
+		channel:  channel,
+		interval: interval,
 	}
 	device.DeviceBase.Init()
 
@@ -69,25 +73,37 @@ func (d *HikVisionCamera) Collect(ch chan<- snitch.Metric) {
 		return
 	}
 
-	ctx, ctxCancel := context.WithTimeout(context.Background(), time.Millisecond*300)
-	defer ctxCancel()
+	metricCameraHikVisionMemoryUsage.With("serial_number", d.serialNumber).Collect(ch)
+	metricCameraHikVisionMemoryAvailable.With("serial_number", d.serialNumber).Collect(ch)
+}
+
+func (d *HikVisionCamera) Tasks() []workers.Task {
+	taskUpdater := task.NewFunctionTask(d.updater)
+	taskUpdater.SetRepeats(-1)
+	taskUpdater.SetRepeatInterval(d.interval)
+	taskUpdater.SetName("device-camera-hikvision-updater-" + d.serialNumber)
+
+	return []workers.Task{
+		taskUpdater,
+	}
+}
+
+func (d *HikVisionCamera) updater(ctx context.Context) (interface{}, error) {
+	if !d.IsEnabled() {
+		return nil, nil
+	}
 
 	status, err := d.isapi.SystemStatus(ctx)
 	if err != nil {
-		log.Printf("Try to get system status for camera failed with error %s", err.Error())
-		return
+		return nil, err
 	}
 
 	if len(status.Memory) == 0 {
-		log.Print("Try to get system status for video recorder failed because response is wrong")
-		return
+		return nil, errors.New("Try to get system status for video recorder failed because response is wrong")
 	}
 
-	memoryUsage := metricCameraHikVisionMemoryUsage.With("serial_number", d.serialNumber)
-	memoryUsage.Set(status.Memory[0].MemoryUsage.Float64() * 1024 * 1024)
-	memoryUsage.Collect(ch)
+	metricCameraHikVisionMemoryUsage.With("serial_number", d.serialNumber).Set(status.Memory[0].MemoryUsage.Float64() * 1024 * 1024)
+	metricCameraHikVisionMemoryAvailable.With("serial_number", d.serialNumber).Set(status.Memory[0].MemoryAvailable.Float64() * 1024 * 1024)
 
-	memoryAvailable := metricCameraHikVisionMemoryAvailable.With("serial_number", d.serialNumber)
-	memoryAvailable.Set(status.Memory[0].MemoryAvailable.Float64() * 1024 * 1024)
-	memoryAvailable.Collect(ch)
+	return nil, nil
 }

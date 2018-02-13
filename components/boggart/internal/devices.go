@@ -19,7 +19,7 @@ func (c *Component) initVideoRecorders() {
 		c.config.String(boggart.ConfigVideoRecorderHikVisionUsername),
 		c.config.String(boggart.ConfigVideoRecorderHikVisionPassword))
 
-	device, err := devices.NewVideoRecorderHikVision(isapi)
+	device, err := devices.NewVideoRecorderHikVision(isapi, c.config.Duration(boggart.ConfigVideoRecorderHikVisionRepeatInterval))
 	if err != nil {
 		c.logger.Error("Init video recorder failed", map[string]interface{}{
 			"error":    err.Error(),
@@ -62,7 +62,10 @@ func (c *Component) initCameras() {
 		c.config.String(boggart.ConfigCameraHikVisionHallUsername),
 		c.config.String(boggart.ConfigCameraHikVisionHallPassword))
 
-	device, err := devices.NewCameraHikVision(isapi, c.config.Uint64(boggart.ConfigCameraHikVisionHallStreamingChannel))
+	device, err := devices.NewCameraHikVision(
+		isapi,
+		c.config.Uint64(boggart.ConfigCameraHikVisionHallStreamingChannel),
+		c.config.Duration(boggart.ConfigCameraHikVisionHallRepeatInterval))
 	if err != nil {
 		c.logger.Error("Init camera failed", map[string]interface{}{
 			"error":    err.Error(),
@@ -87,7 +90,10 @@ func (c *Component) initCameras() {
 		c.config.String(boggart.ConfigCameraHikVisionStreetUsername),
 		c.config.String(boggart.ConfigCameraHikVisionStreetPassword))
 
-	device, err = devices.NewCameraHikVision(isapi, c.config.Uint64(boggart.ConfigCameraHikVisionStreetStreamingChannel))
+	device, err = devices.NewCameraHikVision(
+		isapi,
+		c.config.Uint64(boggart.ConfigCameraHikVisionStreetStreamingChannel),
+		c.config.Duration(boggart.ConfigCameraHikVisionStreetRepeatInterval))
 	if err != nil {
 		c.logger.Error("Init camera failed", map[string]interface{}{
 			"error":    err.Error(),
