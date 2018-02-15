@@ -142,7 +142,7 @@ func (m *DeviceManager) Collect(ch chan<- snitch.Metric) {
 	})
 }
 
-func (m *DeviceManager) SetTickerExecuteTasksDuration(t time.Duration) {
+func (m *DeviceManager) SetTickerCheckerDuration(t time.Duration) {
 	m.tickerChecker.SetDuration(t)
 }
 
@@ -180,6 +180,10 @@ func (m *DeviceManager) checker(key string, device boggart.Device) {
 
 	select {
 	case <-ctx.Done():
+		if !device.IsEnabled() {
+			return
+		}
+
 		if ctx.Err() != nil && ctx.Err() != context.Canceled {
 			device.Disable()
 			m.Logger().Warn("Device has been disabled because the ping failed", map[string]interface{}{

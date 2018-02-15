@@ -30,7 +30,7 @@ func (c *Component) initVideoRecorders() {
 		return
 	}
 
-	if c.config.Bool(boggart.ConfigVideoRecorderHikVisionEnabled) {
+	if !c.config.Bool(boggart.ConfigVideoRecorderHikVisionEnabled) {
 		device.Enable()
 	} else {
 		device.Disable()

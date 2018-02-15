@@ -3,6 +3,7 @@ package devices
 import (
 	"context"
 	"errors"
+	"sync"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -20,6 +21,7 @@ var (
 type HikVisionCamera struct {
 	boggart.DeviceBase
 
+	mutex        sync.RWMutex
 	isapi        *hikvision.ISAPI
 	channel      uint64
 	serialNumber string
@@ -33,18 +35,7 @@ func NewCameraHikVision(isapi *hikvision.ISAPI, channel uint64, interval time.Du
 		interval: interval,
 	}
 	device.DeviceBase.Init()
-
-	ctx, ctxCancel := context.WithTimeout(context.Background(), time.Millisecond*300)
-	defer ctxCancel()
-
-	deviceInfo, err := isapi.SystemDeviceInfo(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	device.SetId(deviceInfo.DeviceID)
-	device.SetDescription("HikVision camera with serial number " + deviceInfo.SerialNumber)
-	device.serialNumber = deviceInfo.SerialNumber
+	device.SetDescription("HikVision camera")
 
 	return device, nil
 }
@@ -60,21 +51,21 @@ func (d *HikVisionCamera) Snapshot(ctx context.Context) ([]byte, error) {
 }
 
 func (d *HikVisionCamera) Describe(ch chan<- *snitch.Description) {
-	if d.serialNumber == "" {
+	if d.SerialNumber() == "" {
 		return
 	}
 
-	metricCameraHikVisionMemoryUsage.With("serial_number", d.serialNumber).Describe(ch)
-	metricCameraHikVisionMemoryAvailable.With("serial_number", d.serialNumber).Describe(ch)
+	metricCameraHikVisionMemoryUsage.With("serial_number", d.SerialNumber()).Describe(ch)
+	metricCameraHikVisionMemoryAvailable.With("serial_number", d.SerialNumber()).Describe(ch)
 }
 
 func (d *HikVisionCamera) Collect(ch chan<- snitch.Metric) {
-	if d.serialNumber == "" {
+	if d.SerialNumber() == "" {
 		return
 	}
 
-	metricCameraHikVisionMemoryUsage.With("serial_number", d.serialNumber).Collect(ch)
-	metricCameraHikVisionMemoryAvailable.With("serial_number", d.serialNumber).Collect(ch)
+	metricCameraHikVisionMemoryUsage.With("serial_number", d.SerialNumber()).Collect(ch)
+	metricCameraHikVisionMemoryAvailable.With("serial_number", d.SerialNumber()).Collect(ch)
 }
 
 func (d *HikVisionCamera) Ping(ctx context.Context) bool {
@@ -82,19 +73,56 @@ func (d *HikVisionCamera) Ping(ctx context.Context) bool {
 	return err == nil
 }
 
+func (d *HikVisionCamera) SerialNumber() string {
+	d.mutex.RLock()
+	defer d.mutex.RUnlock()
+
+	return d.serialNumber
+}
+
 func (d *HikVisionCamera) Tasks() []workers.Task {
-	taskUpdater := task.NewFunctionTask(d.updater)
+	taskSerialNumber := task.NewFunctionTillSuccessTask(d.taskSerialNumber)
+	taskSerialNumber.SetTimeout(time.Second * 5)
+	taskSerialNumber.SetRepeats(-1)
+	taskSerialNumber.SetRepeatInterval(time.Minute)
+	taskSerialNumber.SetName("device-camera-hikvision-serial-number")
+
+	taskUpdater := task.NewFunctionTask(d.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(d.interval)
-	taskUpdater.SetName("device-camera-hikvision-updater-" + d.serialNumber)
+	taskUpdater.SetName("device-camera-hikvision-updater-" + d.Id())
 
 	return []workers.Task{
+		taskSerialNumber,
 		taskUpdater,
 	}
 }
 
-func (d *HikVisionCamera) updater(ctx context.Context) (interface{}, error) {
+func (d *HikVisionCamera) taskSerialNumber(ctx context.Context) (interface{}, error) {
 	if !d.IsEnabled() {
+		return nil, errors.New("Device is disabled")
+	}
+
+	deviceInfo, err := d.isapi.SystemDeviceInfo(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if deviceInfo.SerialNumber == "" {
+		return nil, errors.New("Device returns empty serial number")
+	}
+
+	d.SetDescription("HikVision camera with serial number " + deviceInfo.SerialNumber)
+
+	d.mutex.Lock()
+	d.serialNumber = deviceInfo.SerialNumber
+	d.mutex.Unlock()
+
+	return nil, nil
+}
+
+func (d *HikVisionCamera) taskUpdater(ctx context.Context) (interface{}, error) {
+	if !d.IsEnabled() || d.SerialNumber() == "" {
 		return nil, nil
 	}
 
@@ -107,8 +135,8 @@ func (d *HikVisionCamera) updater(ctx context.Context) (interface{}, error) {
 		return nil, errors.New("Try to get system status for video recorder failed because response is wrong")
 	}
 
-	metricCameraHikVisionMemoryUsage.With("serial_number", d.serialNumber).Set(status.Memory[0].MemoryUsage.Float64() * 1024 * 1024)
-	metricCameraHikVisionMemoryAvailable.With("serial_number", d.serialNumber).Set(status.Memory[0].MemoryAvailable.Float64() * 1024 * 1024)
+	metricCameraHikVisionMemoryUsage.With("serial_number", d.SerialNumber()).Set(status.Memory[0].MemoryUsage.Float64() * 1024 * 1024)
+	metricCameraHikVisionMemoryAvailable.With("serial_number", d.SerialNumber()).Set(status.Memory[0].MemoryAvailable.Float64() * 1024 * 1024)
 
 	return nil, nil
 }

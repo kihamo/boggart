@@ -48,7 +48,7 @@ func NewISAPI(host string, port int64, username, password string) *ISAPI {
 		connection: connection.NewClient(),
 		username:   username,
 		password:   password,
-		address:    "http://" + net.JoinHostPort(host, strconv.FormatInt(port, 10)) + "/ISAPI/",
+		address:    "http://" + net.JoinHostPort(host, strconv.FormatInt(port, 10)) + "/ISAPI",
 	}
 }
 

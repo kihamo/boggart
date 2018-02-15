@@ -14,6 +14,15 @@ import (
 func (c *Component) ConfigVariables() []config.Variable {
 	return []config.Variable{
 		config.NewVariable(
+			boggart.ConfigDeviceManagerCheckInterval,
+			config.ValueTypeDuration,
+			time.Minute,
+			"Health check interval",
+			true,
+			"Device manager",
+			nil,
+			nil),
+		config.NewVariable(
 			boggart.ConfigRS485Address,
 			config.ValueTypeString,
 			rs485.DefaultSerialAddress,
@@ -488,12 +497,11 @@ func (c *Component) ConfigVariables() []config.Variable {
 func (c *Component) ConfigWatchers() []config.Watcher {
 	return []config.Watcher{
 		config.NewWatcher(c.Name(), []string{
-			boggart.ConfigRS485Timeout,
-			boggart.ConfigRS485Address,
-		}, c.watchConnectionRS485),
+			boggart.ConfigDeviceManagerCheckInterval,
+		}, c.watchDeviceManagerCheckInterval),
 	}
 }
 
-func (c *Component) watchConnectionRS485(_ string, _ interface{}, _ interface{}) {
-	c.initConnectionRS485()
+func (c *Component) watchDeviceManagerCheckInterval(_ string, newValue interface{}, _ interface{}) {
+	c.devices.SetTickerCheckerDuration(newValue.(time.Duration))
 }
