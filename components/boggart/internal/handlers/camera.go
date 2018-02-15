@@ -27,14 +27,21 @@ func (h *CameraHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 		default:
 			h.NotFound(w, r)
+			return
 		}
 
-		if device == nil && !device.IsEnabled() {
+		if device == nil || !device.IsEnabled() {
 			h.NotFound(w, r)
 			return
 		}
 
-		image, err := device.(boggart.Camera).Snapshot(r.Context())
+		camera, ok := device.(boggart.Camera)
+		if !ok {
+			h.NotFound(w, r)
+			return
+		}
+
+		image, err := camera.Snapshot(r.Context())
 		if err != nil {
 			h.NotFound(w, r)
 			return
