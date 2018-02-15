@@ -183,24 +183,26 @@ func (c *Component) DoorEntrance() boggart.Door {
 
 func (c *Component) doorCallback(status bool, changed *time.Time) {
 	if c.messenger != nil {
-		device := c.devices.Device(boggart.DeviceIdCameraHall.String())
-		if device == nil && !device.IsEnabled() {
-			return
+		if status {
+			// TODO: changeUserId
+			c.messenger.SendMessage("238815343", "Entrance door is opened")
+		} else {
+			// TODO: changeUserId
+			c.messenger.SendMessage("238815343", "Entrance door is closed")
 		}
 
-		image, err := device.(boggart.Camera).Snapshot(context.Background())
-		if err == nil {
-			if status {
-				// TODO: changeUserId
-				c.messenger.SendMessage("238815343", "Entrance door is opened")
-			} else {
-				// TODO: changeUserId
-				c.messenger.SendMessage("238815343", "Entrance door is closed")
-			}
-
+		device := c.devices.Device(boggart.DeviceIdCameraHall.String())
+		if device != nil && device.IsEnabled() {
 			time.AfterFunc(time.Second, func() {
-				// TODO: changeUserId
-				c.messenger.SendPhoto("238815343", "Hall snapshot", bytes.NewReader(image))
+				func(camera boggart.Camera) {
+					image, err := camera.Snapshot(context.Background())
+					if err == nil {
+						// TODO: changeUserId
+						c.messenger.SendPhoto("238815343", "Hall snapshot", bytes.NewReader(image))
+					} else {
+						c.logger.Errorf("Try to get snapshot failed with error %s", err.Error())
+					}
+				}(device.(boggart.Camera))
 			})
 		}
 	}

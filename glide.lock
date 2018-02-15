@@ -1,5 +1,5 @@
-hash: 3357cac5c5d66cbebee89a50f090d8cd0a034fe948f4942c255adbd5cfc15420
-updated: 2018-02-12T12:15:46.186501991+03:00
+hash: 0c37faa612b002b97b88e120c9b9067382c5985eb850f77fd63793922a6251dc
+updated: 2018-02-14T20:41:43.105763139+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -53,7 +53,7 @@ imports:
 - name: github.com/kihamo/go-grafana-api
   version: b9af836f6e9ddb24b1bb5d3d498459d93816ed64
 - name: github.com/kihamo/go-workers
-  version: 18d9716fb1f1635083f3bcab4e739acdfadba86f
+  version: fa57a9382a51f1f8c84544995163093df14b38ab
   subpackages:
   - dispatcher
   - listener
@@ -63,7 +63,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: b03fdd2a5994e3bf6ea13368cd9629a45f1b5b48
+  version: 16aa2a897b77b926eb202983b885ecbdaee858e0
   subpackages:
   - components/annotations
   - components/annotations/instance
@@ -194,9 +194,10 @@ imports:
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: e687fa4e6424368ece6e4fe727cea2c806a0fcb4
+  version: 6b51017f791ae1cfbec89c52efdf444b13b550ef
   subpackages:
   - balancer
+  - balancer/base
   - balancer/roundrobin
   - codes
   - connectivity
