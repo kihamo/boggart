@@ -22,19 +22,6 @@ func NewClient(address, username, password string, timeout time.Duration) (*Clie
 	}, nil
 }
 
-func (c *Client) System() (map[string]string, error) {
-	reply, err := c.client.RunArgs([]string{"/system/resource/print"})
-	if err != nil {
-		return nil, nil
-	}
-
-	if len(reply.Re) == 0 {
-		return nil, errors.New("Empty reply from device")
-	}
-
-	return reply.Re[0].Map, nil
-}
-
 func (c *Client) SystemRouterboard() (map[string]string, error) {
 	reply, err := c.client.RunArgs([]string{"/system/routerboard/print"})
 	if err != nil {

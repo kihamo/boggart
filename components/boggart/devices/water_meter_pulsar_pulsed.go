@@ -86,6 +86,11 @@ func (d *PulsarPulsedWaterMeter) Collect(ch chan<- snitch.Metric) {
 	metricWaterMeterPulsarPulsedPulses.With("serial_number", d.serialNumber).Collect(ch)
 }
 
+func (d *PulsarPulsedWaterMeter) Ping(_ context.Context) bool {
+	_, err := d.provider.Version()
+	return err == nil
+}
+
 func (d *PulsarPulsedWaterMeter) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(d.updater)
 	taskUpdater.SetRepeats(-1)

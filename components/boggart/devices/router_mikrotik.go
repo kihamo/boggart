@@ -81,6 +81,11 @@ func (d *MikrotikRouter) Collect(ch chan<- snitch.Metric) {
 	metricRouterMikrotikStorageAvailable.With("serial_number", d.serialNumber).Collect(ch)
 }
 
+func (d *MikrotikRouter) Ping(_ context.Context) bool {
+	_, err := d.provider.SystemResource()
+	return err == nil
+}
+
 func (d *MikrotikRouter) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(d.updater)
 	taskUpdater.SetRepeats(-1)

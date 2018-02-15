@@ -33,7 +33,7 @@ type Component struct {
 	routes      []dashboard.Route
 	collector   *MetricsCollector
 
-	devices boggart.DeviceManager
+	devices *DeviceManager
 
 	connectionRS485 *rs485.Connection
 	doorEntrance    *doors.Door
@@ -93,6 +93,7 @@ func (c *Component) Init(a shadow.Application) error {
 
 func (c *Component) Run() (err error) {
 	c.logger = logger.NewOrNop(c.Name(), c.application)
+	c.devices.SetLogger(c.logger)
 
 	if c.application.HasComponent(messengers.ComponentName) {
 		c.messenger = c.application.GetComponent(messengers.ComponentName).(messengers.Component).Messenger(messengers.MessengerTelegram)

@@ -51,6 +51,10 @@ func (d *SoftVideoInternet) Collect(ch chan<- snitch.Metric) {
 	metricInternetProviderSoftVideoBalance.With("account", d.provider.AccountID()).Collect(ch)
 }
 
+func (d *SoftVideoInternet) Ping(_ context.Context) bool {
+	return true
+}
+
 func (d *SoftVideoInternet) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(d.updater)
 	taskUpdater.SetRepeats(-1)

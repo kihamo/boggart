@@ -1,24 +1,56 @@
 package internal
 
 import (
+	"context"
 	"sync"
+	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	w "github.com/kihamo/go-workers"
+	"github.com/kihamo/shadow/components/logger"
 	"github.com/kihamo/shadow/components/workers"
 	"github.com/kihamo/snitch"
 	"github.com/pborman/uuid"
 )
 
 type DeviceManager struct {
-	storage *sync.Map
-	workers workers.Component
+	mutex          sync.RWMutex
+	storage        *sync.Map
+	workers        workers.Component
+	logger         logger.Logger
+	chanChecker    chan struct{}
+	tickerChecker  *w.Ticker
+	timeoutChecker time.Duration
 }
 
 func NewDeviceManager(workers workers.Component) *DeviceManager {
-	return &DeviceManager{
-		storage: new(sync.Map),
-		workers: workers,
+	manager := &DeviceManager{
+		storage:       new(sync.Map),
+		workers:       workers,
+		logger:        logger.NopLogger,
+		chanChecker:   make(chan struct{}, 1),
+		tickerChecker: w.NewTicker(time.Minute),
+		// TODO: setter for this option
+		timeoutChecker: time.Second * 2,
 	}
+
+	go manager.doCheck()
+
+	return manager
+}
+
+func (m *DeviceManager) SetLogger(logger logger.Logger) {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+
+	m.logger = logger
+}
+
+func (m *DeviceManager) Logger() logger.Logger {
+	m.mutex.RLock()
+	defer m.mutex.RUnlock()
+
+	return m.logger
 }
 
 func (m *DeviceManager) Register(device boggart.Device) string {
@@ -108,4 +140,83 @@ func (m *DeviceManager) Collect(ch chan<- snitch.Metric) {
 
 		return true
 	})
+}
+
+func (m *DeviceManager) SetTickerExecuteTasksDuration(t time.Duration) {
+	m.tickerChecker.SetDuration(t)
+}
+
+func (m *DeviceManager) Check() {
+	if len(m.chanChecker) == 0 {
+		m.chanChecker <- struct{}{}
+	}
+}
+
+func (m *DeviceManager) doCheck() {
+	for {
+		select {
+		case <-m.chanChecker:
+			for key, device := range m.Devices() {
+				// в параллель вешать нельзя, так как многие устройства висят на одной линии и
+				// запросы идут последовательно, поэтому не укладывается в таймаут
+				m.checker(key, device)
+			}
+
+		case <-m.tickerChecker.C():
+			m.Check()
+		}
+	}
+}
+
+func (m *DeviceManager) checker(key string, device boggart.Device) {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), m.timeoutChecker)
+	defer ctxCancel()
+
+	done := make(chan bool, 1)
+
+	go func() {
+		done <- device.Ping(ctx)
+	}()
+
+	select {
+	case <-ctx.Done():
+		if ctx.Err() != nil && ctx.Err() != context.Canceled {
+			device.Disable()
+			m.Logger().Warn("Device has been disabled because the ping failed", map[string]interface{}{
+				"device.key": key,
+				"device.id":  device.Id(),
+				"error":      ctx.Err().Error(),
+			})
+
+			// TODO: send event
+		}
+
+		return
+
+	case result := <-done:
+		if result == device.IsEnabled() {
+			return
+		}
+
+		if !result {
+			device.Disable()
+			m.Logger().Warn("Device has been disabled because the ping returns false", map[string]interface{}{
+				"device.key": key,
+				"device.id":  device.Id(),
+			})
+
+			// TODO: send event
+		} else {
+			device.Enable()
+
+			m.Logger().Info("Device has been enabled because the ping returns true", map[string]interface{}{
+				"device.key": key,
+				"device.id":  device.Id(),
+			})
+
+			// TODO: send event
+		}
+
+		return
+	}
 }

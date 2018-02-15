@@ -51,6 +51,7 @@ type Device interface {
 	IsEnabled() bool
 	Disable()
 	Enable()
+	Ping(context.Context) bool
 	Tasks() []workers.Task
 }
 
@@ -165,6 +166,10 @@ func (d *DeviceBase) IsEnabled() bool {
 
 func (d *DeviceBase) Enable() {
 	atomic.StoreUint64(&d.enabled, 1)
+}
+
+func (d *DeviceBase) Ping(_ context.Context) bool {
+	return false
 }
 
 func (d *DeviceBase) Disable() {

@@ -78,6 +78,11 @@ func (d *VideoRecorderHikVision) Collect(ch chan<- snitch.Metric) {
 	metricVideoRecorderHikVisionStorageAvailable.With("serial_number", d.serialNumber).Collect(ch)
 }
 
+func (d *VideoRecorderHikVision) Ping(ctx context.Context) bool {
+	_, err := d.isapi.SystemStatus(ctx)
+	return err == nil
+}
+
 func (d *VideoRecorderHikVision) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(d.updater)
 	taskUpdater.SetRepeats(-1)

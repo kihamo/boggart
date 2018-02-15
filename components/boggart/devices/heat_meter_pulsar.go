@@ -107,6 +107,11 @@ func (d *PulsarHeadMeter) Collect(ch chan<- snitch.Metric) {
 	metricHeatMeterPulsarConsumption.With("serial_number", d.serialNumber).Collect(ch)
 }
 
+func (d *PulsarHeadMeter) Ping(_ context.Context) bool {
+	_, err := d.provider.Version()
+	return err == nil
+}
+
 func (d *PulsarHeadMeter) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(d.updater)
 	taskUpdater.SetRepeats(-1)

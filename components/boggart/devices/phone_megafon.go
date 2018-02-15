@@ -83,6 +83,10 @@ func (d *MegafonPhone) Tasks() []workers.Task {
 	}
 }
 
+func (d *MegafonPhone) Ping(_ context.Context) bool {
+	return true
+}
+
 func (d *MegafonPhone) updater(ctx context.Context) (interface{}, error) {
 	if !d.IsEnabled() {
 		return nil, nil
