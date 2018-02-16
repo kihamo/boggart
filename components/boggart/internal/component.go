@@ -1,15 +1,11 @@
 package internal
 
 import (
-	"bytes"
 	"context"
-	"fmt"
 	"sync"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
-	"github.com/kihamo/boggart/components/boggart/providers/doors"
 	"github.com/kihamo/go-workers/task"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/annotations"
@@ -36,7 +32,6 @@ type Component struct {
 	devices *DeviceManager
 
 	connectionRS485 *rs485.Connection
-	doorEntrance    *doors.Door
 }
 
 func (c *Component) Name() string {
@@ -102,6 +97,7 @@ func (c *Component) Run() (err error) {
 
 	c.initConnectionRS485()
 
+	c.initGPIO()
 	c.initCameras()
 	c.initElectricityMeters()
 	c.initInternetProviders()
@@ -121,15 +117,6 @@ func (c *Component) Run() (err error) {
 	taskPulsar.SetRepeatInterval(c.config.Duration(boggart.ConfigPulsarRepeatInterval))
 	taskPulsar.SetName(c.Name() + "-pulsar-updater")
 	c.workers.AddTask(taskPulsar)
-
-	c.doorEntrance, err = doors.NewDoor(c.config.Int(boggart.ConfigDoorsEntrancePin))
-	if err != nil {
-		return err
-	}
-
-	if c.application.HasComponent(annotations.ComponentName) {
-		c.doorEntrance.SetCallbackChange(c.doorCallback)
-	}
 
 	return nil
 }
@@ -178,61 +165,4 @@ func (c *Component) ConnectionRS485() *rs485.Connection {
 	defer c.mutex.RUnlock()
 
 	return c.connectionRS485
-}
-
-func (c *Component) DoorEntrance() boggart.Door {
-	return c.doorEntrance
-}
-
-func (c *Component) doorCallback(status bool, changed *time.Time) {
-	if c.messenger != nil {
-		if status {
-			// TODO: changeUserId
-			c.messenger.SendMessage("238815343", "Entrance door is closed")
-		} else {
-			// TODO: changeUserId
-			c.messenger.SendMessage("238815343", "Entrance door is opened")
-		}
-
-		device := c.devices.Device(boggart.DeviceIdCameraHall.String())
-		if device != nil && device.IsEnabled() {
-			time.AfterFunc(time.Second, func() {
-				func(camera boggart.Camera) {
-					image, err := camera.Snapshot(context.Background())
-					if err == nil {
-						// TODO: changeUserId
-						c.messenger.SendPhoto("238815343", "Hall snapshot", bytes.NewReader(image))
-					} else {
-						c.logger.Errorf("Try to get snapshot failed with error %s", err.Error())
-					}
-				}(device.(boggart.Camera))
-			})
-		}
-	}
-
-	if c.annotations == nil || !status {
-		return
-	}
-
-	if changed == nil {
-		changed = c.application.StartDate()
-	}
-
-	timeEnd := time.Now()
-	diff := timeEnd.Sub(*changed)
-
-	if c.annotations != nil {
-		annotation := annotations.NewAnnotation(
-			"Door is closed",
-			fmt.Sprintf("Door was open for %.2f seconds", diff.Seconds()),
-			[]string{"door", "entrance", "close"},
-			changed,
-			&timeEnd)
-
-		if err := c.annotations.Create(annotation); err != nil {
-			c.logger.Error("Create annotation failed", map[string]interface{}{
-				"error": err.Error(),
-			})
-		}
-	}
 }

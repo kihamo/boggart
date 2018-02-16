@@ -17,7 +17,6 @@ func NewMetricsCollector(component *Component) *MetricsCollector {
 func (c *MetricsCollector) Describe(ch chan<- *snitch.Description) {
 	c.component.devices.Describe(ch)
 
-	c.DescribeDoors(ch)
 	c.DescribeMercury(ch)
 	c.DescribePulsar(ch)
 }
@@ -25,7 +24,6 @@ func (c *MetricsCollector) Describe(ch chan<- *snitch.Description) {
 func (c *MetricsCollector) Collect(ch chan<- snitch.Metric) {
 	c.component.devices.Collect(ch)
 
-	c.CollectDoors(ch)
 	c.CollectMercury(ch)
 	c.CollectPulsar(ch)
 }

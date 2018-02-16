@@ -240,7 +240,7 @@
                                 <div id="security-entrance-door" style="height:300px;">
                                     Входная дверь
 
-                                    {{ if eq .boggart_doors_entrance_status.Value 0.0 }}
+                                    {{ if eq .boggart_device_door_gpio_reed_switch_status.Value 0.0 }}
                                         Закрыта
                                     {{ else }}
                                         Открыта

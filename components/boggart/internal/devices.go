@@ -1,7 +1,11 @@
 package internal
 
 import (
+	"bytes"
+	"context"
 	"encoding/hex"
+	"fmt"
+	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/devices"
@@ -11,6 +15,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/mobile"
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
 	"github.com/kihamo/boggart/components/boggart/providers/softvideo"
+	"github.com/kihamo/shadow/components/annotations"
 )
 
 func (c *Component) initVideoRecorders() {
@@ -183,6 +188,78 @@ func (c *Component) initElectricityMeters() {
 	}
 
 	c.devices.RegisterWithID(boggart.DeviceIdElectricityMeter.String(), device)
+}
+
+func (c *Component) initGPIO() {
+	// TODO: replace callback to send sent
+	callback := func(status bool, changed *time.Time) {
+		if c.messenger != nil {
+			if status {
+				// TODO: changeUserId
+				c.messenger.SendMessage("238815343", "Entrance door is closed")
+			} else {
+				// TODO: changeUserId
+				c.messenger.SendMessage("238815343", "Entrance door is opened")
+			}
+
+			device := c.devices.Device(boggart.DeviceIdCameraHall.String())
+			if device != nil && device.IsEnabled() {
+				time.AfterFunc(time.Second, func() {
+					func(camera boggart.Camera) {
+						if image, err := camera.Snapshot(context.Background()); err == nil {
+							// TODO: changeUserId
+							c.messenger.SendPhoto("238815343", "Hall snapshot", bytes.NewReader(image))
+						} else {
+							c.logger.Errorf("Try to get snapshot failed with error %s", err.Error())
+						}
+					}(device.(boggart.Camera))
+				})
+			}
+		}
+
+		if c.annotations == nil || !status {
+			return
+		}
+
+		if changed == nil {
+			changed = c.application.StartDate()
+		}
+
+		timeEnd := time.Now()
+		diff := timeEnd.Sub(*changed)
+
+		if c.annotations != nil {
+			annotation := annotations.NewAnnotation(
+				"Door is closed",
+				fmt.Sprintf("Door was open for %.2f seconds", diff.Seconds()),
+				[]string{"door", "entrance", "close"},
+				changed,
+				&timeEnd)
+
+			if err := c.annotations.Create(annotation); err != nil {
+				c.logger.Error("Create annotation failed", map[string]interface{}{
+					"error": err.Error(),
+				})
+			}
+		}
+	}
+
+	device, err := devices.NewDoorGPIOReedSwitch(c.config.Int64(boggart.ConfigDoorsEntrancePin), callback)
+	if err != nil {
+		c.logger.Error("Init GPIO reed switch door failed", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return
+	}
+	device.SetDescription("Entrance door")
+
+	if c.config.Bool(boggart.ConfigDoorsEnabled) {
+		device.Enable()
+	} else {
+		device.Disable()
+	}
+
+	c.devices.RegisterWithID(boggart.DeviceIdEntranceDoor.String(), device)
 }
 
 func (c *Component) initPulsarMeters() {

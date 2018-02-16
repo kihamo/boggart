@@ -4,7 +4,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/davecheney/gpio"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
@@ -52,7 +51,7 @@ func (c *Component) ConfigVariables() []config.Variable {
 		config.NewVariable(
 			boggart.ConfigDoorsEntrancePin,
 			config.ValueTypeInt,
-			gpio.GPIO17,
+			nil,
 			"Pin for door reed switch",
 			false,
 			"Doors",

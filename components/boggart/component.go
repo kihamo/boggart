@@ -11,5 +11,4 @@ type Component interface {
 	metrics.HasMetrics
 
 	ConnectionRS485() *rs485.Connection
-	DoorEntrance() Door
 }
