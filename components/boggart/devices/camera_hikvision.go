@@ -81,7 +81,7 @@ func (d *HikVisionCamera) SerialNumber() string {
 }
 
 func (d *HikVisionCamera) Tasks() []workers.Task {
-	taskSerialNumber := task.NewFunctionTillSuccessTask(d.taskSerialNumber)
+	taskSerialNumber := task.NewFunctionTillStopTask(d.taskSerialNumber)
 	taskSerialNumber.SetTimeout(time.Second * 5)
 	taskSerialNumber.SetRepeats(-1)
 	taskSerialNumber.SetRepeatInterval(time.Minute)
@@ -98,18 +98,18 @@ func (d *HikVisionCamera) Tasks() []workers.Task {
 	}
 }
 
-func (d *HikVisionCamera) taskSerialNumber(ctx context.Context) (interface{}, error) {
+func (d *HikVisionCamera) taskSerialNumber(ctx context.Context) (interface{}, error, bool) {
 	if !d.IsEnabled() {
-		return nil, errors.New("Device is disabled")
+		return nil, nil, false
 	}
 
 	deviceInfo, err := d.isapi.SystemDeviceInfo(ctx)
 	if err != nil {
-		return nil, err
+		return nil, err, false
 	}
 
 	if deviceInfo.SerialNumber == "" {
-		return nil, errors.New("Device returns empty serial number")
+		return nil, errors.New("Device returns empty serial number"), false
 	}
 
 	d.SetDescription("HikVision camera with serial number " + deviceInfo.SerialNumber)
@@ -118,7 +118,7 @@ func (d *HikVisionCamera) taskSerialNumber(ctx context.Context) (interface{}, er
 	d.serialNumber = deviceInfo.SerialNumber
 	d.mutex.Unlock()
 
-	return nil, nil
+	return nil, nil, true
 }
 
 func (d *HikVisionCamera) taskUpdater(ctx context.Context) (interface{}, error) {
