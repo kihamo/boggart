@@ -6,6 +6,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/devices"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
+	"github.com/kihamo/boggart/components/boggart/providers/mercury"
 	"github.com/kihamo/boggart/components/boggart/providers/mikrotik"
 	"github.com/kihamo/boggart/components/boggart/providers/mobile"
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
@@ -163,6 +164,25 @@ func (c *Component) initRouters() {
 	}
 
 	c.devices.RegisterWithID(boggart.DeviceIdRouter.String(), device)
+}
+
+func (c *Component) initElectricityMeters() {
+	provider := mercury.NewElectricityMeter200(
+		mercury.ConvertSerialNumber(c.config.String(boggart.ConfigMercuryDeviceAddress)),
+		c.ConnectionRS485())
+
+	device := devices.NewMercury200ElectricityMeter(
+		c.config.String(boggart.ConfigMercuryDeviceAddress),
+		provider,
+		c.config.Duration(boggart.ConfigMercuryRepeatInterval))
+
+	if c.config.Bool(boggart.ConfigMikrotikEnabled) {
+		device.Enable()
+	} else {
+		device.Disable()
+	}
+
+	c.devices.RegisterWithID(boggart.DeviceIdElectricityMeter.String(), device)
 }
 
 func (c *Component) initPulsarMeters() {

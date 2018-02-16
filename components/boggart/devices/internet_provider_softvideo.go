@@ -56,7 +56,7 @@ func (d *SoftVideoInternet) Ping(_ context.Context) bool {
 }
 
 func (d *SoftVideoInternet) Tasks() []workers.Task {
-	taskUpdater := task.NewFunctionTask(d.updater)
+	taskUpdater := task.NewFunctionTask(d.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(d.interval)
 	taskUpdater.SetName("device-internet-provider-softvideo-updater-" + d.provider.AccountID())
@@ -66,7 +66,7 @@ func (d *SoftVideoInternet) Tasks() []workers.Task {
 	}
 }
 
-func (d *SoftVideoInternet) updater(ctx context.Context) (interface{}, error) {
+func (d *SoftVideoInternet) taskUpdater(ctx context.Context) (interface{}, error) {
 	if !d.IsEnabled() {
 		return nil, nil
 	}

@@ -88,7 +88,7 @@ func (d *VideoRecorderHikVision) Tasks() []workers.Task {
 	taskSerialNumber.SetRepeatInterval(time.Minute)
 	taskSerialNumber.SetName("device-video-recorder-hikvision-serial-number")
 
-	taskUpdater := task.NewFunctionTask(d.updater)
+	taskUpdater := task.NewFunctionTask(d.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(d.interval)
 	taskUpdater.SetName("device-video-recorder-hikvision-updater-" + d.Id())
@@ -122,7 +122,7 @@ func (d *VideoRecorderHikVision) taskSerialNumber(ctx context.Context) (interfac
 	return nil, nil
 }
 
-func (d *VideoRecorderHikVision) updater(ctx context.Context) (interface{}, error) {
+func (d *VideoRecorderHikVision) taskUpdater(ctx context.Context) (interface{}, error) {
 	if !d.IsEnabled() || d.SerialNumber() == "" {
 		return nil, nil
 	}

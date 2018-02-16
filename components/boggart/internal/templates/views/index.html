@@ -14,13 +14,13 @@
                             <div class="x_content">
                                 <div id="resource-heat-in" style="height:300px;">
                                     In
-                                    {{ .boggart_pulsar_temperature_in_celsius.Value }} C
+                                    {{ .boggart_device_heat_meter_pulsar_temperature_in_celsius.Value }} C
                                     <br />
                                     Out
-                                    {{ .boggart_pulsar_temperature_out_celsius.Value }} C
+                                    {{ .boggart_device_heat_meter_pulsar_temperature_out_celsius.Value }} C
                                     <br />
                                     Delta
-                                    {{ .boggart_pulsar_temperature_delta_celsius.Value }} C
+                                    {{ .boggart_device_heat_meter_pulsar_temperature_delta_celsius.Value }} C
                                 </div>
                             </div>
                         </div>
@@ -30,7 +30,7 @@
                             <div class="x_content">
                                 <div id="resource-heat-out" style="height:300px;">
                                     Показания энергии
-                                    {{ .boggart_pulsar_energy_gigacolories.Value }} gigacolories
+                                    {{ .boggart_device_heat_meter_pulsar_energy_gigacolories.Value }} gigacolories
                                 </div>
                             </div>
                         </div>
@@ -40,7 +40,7 @@
                             <div class="x_content">
                                 <div id="resource-heat-delta" style="height:300px;">
                                     Показания текущей мощности
-                                    {{ .boggart_pulsar_consumption_cubic_metres_per_hour.Value }} cubic metres per hour
+                                    {{ .boggart_device_heat_meter_pulsar_consumption_cubic_metres_per_hour.Value }} cubic metres per hour
                                 </div>
                             </div>
                         </div>
@@ -76,10 +76,10 @@
                                     T2: {{ .boggart_mercury_t2_watt_hour_total.Value }} W/h<br />
                                     T3: {{ .boggart_mercury_t3_watt_hour_total.Value }} W/h<br />
                                     T4: {{ .boggart_mercury_t4_watt_hour_total.Value }} W/h<br />
-                                    Voltage: {{ .boggart_mercury_voltage_volt.Value }} W/h<br />
-                                    Amperage: {{ .boggart_mercury_amperage_ampere.Value }} A<br />
-                                    Power: {{ .boggart_mercury_power_watt.Value }} W<br />
-                                    Battery: {{ .boggart_mercury_battery_voltage_volt.Value }} V<br />
+                                    Voltage: {{ .boggart_device_electricity_meter_mercury_200_voltage_volt.Value }} W/h<br />
+                                    Amperage: {{ .boggart_device_electricity_meter_mercury_200_amperage_ampere.Value }} A<br />
+                                    Power: {{ .boggart_device_electricity_meter_mercury_200_power_watt.Value }} W<br />
+                                    Battery: {{ .boggart_device_electricity_meter_mercury_200_battery_voltage_volt.Value }} V<br />
                                 </div>
                             </div>
                         </div>

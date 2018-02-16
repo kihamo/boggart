@@ -12,12 +12,13 @@ import (
 type DeviceId int64
 
 const (
-	DeviceIdVideoRecorder DeviceId = iota
-	DeviceIdHeatMeter
+	DeviceIdElectricityMeter DeviceId = iota
 	DeviceIdCameraHall
 	DeviceIdCameraStreet
+	DeviceIdHeatMeter
 	DeviceIdPhone
 	DeviceIdRouter
+	DeviceIdVideoRecorder
 	DeviceIdWaterMeterCold
 	DeviceIdWaterMeterHot
 )
@@ -26,6 +27,7 @@ type DeviceType int64
 
 const (
 	DeviceTypeCamera DeviceType = iota
+	DeviceTypeElectricityMeter
 	DeviceTypeHeatMeter
 	DeviceTypeInternetProvider
 	DeviceTypePhone
@@ -77,6 +79,11 @@ type Phone interface {
 
 type ElectricityMeter interface {
 	Device
+
+	Tariffs(context.Context) (map[string]float64, error)
+	Voltage(context.Context) (float64, error)
+	Amperage(context.Context) (float64, error)
+	Power(context.Context) (float64, error)
 }
 
 type WaterMeter interface {

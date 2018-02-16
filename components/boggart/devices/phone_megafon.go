@@ -73,7 +73,7 @@ func (d *MegafonPhone) Collect(ch chan<- snitch.Metric) {
 }
 
 func (d *MegafonPhone) Tasks() []workers.Task {
-	taskUpdater := task.NewFunctionTask(d.updater)
+	taskUpdater := task.NewFunctionTask(d.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(d.interval)
 	taskUpdater.SetName("device-phone-megafon-updater-" + d.Number())
@@ -87,7 +87,7 @@ func (d *MegafonPhone) Ping(_ context.Context) bool {
 	return true
 }
 
-func (d *MegafonPhone) updater(ctx context.Context) (interface{}, error) {
+func (d *MegafonPhone) taskUpdater(ctx context.Context) (interface{}, error) {
 	if !d.IsEnabled() {
 		return nil, nil
 	}

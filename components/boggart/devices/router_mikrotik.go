@@ -87,7 +87,7 @@ func (d *MikrotikRouter) Ping(_ context.Context) bool {
 }
 
 func (d *MikrotikRouter) Tasks() []workers.Task {
-	taskUpdater := task.NewFunctionTask(d.updater)
+	taskUpdater := task.NewFunctionTask(d.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(d.interval)
 	taskUpdater.SetName("device-router-mikrotik-updater-" + d.serialNumber)
@@ -97,7 +97,7 @@ func (d *MikrotikRouter) Tasks() []workers.Task {
 	}
 }
 
-func (d *MikrotikRouter) updater(ctx context.Context) (interface{}, error) {
+func (d *MikrotikRouter) taskUpdater(ctx context.Context) (interface{}, error) {
 	if !d.IsEnabled() {
 		return nil, nil
 	}

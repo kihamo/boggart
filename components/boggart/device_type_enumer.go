@@ -6,9 +6,9 @@ import (
 	"fmt"
 )
 
-const _DeviceTypeName = "CameraHeatMeterInternetProviderPhoneRouterVideoRecorderWaterMeter"
+const _DeviceTypeName = "CameraElectricityMeterHeatMeterInternetProviderPhoneRouterVideoRecorderWaterMeter"
 
-var _DeviceTypeIndex = [...]uint8{0, 6, 15, 31, 36, 42, 55, 65}
+var _DeviceTypeIndex = [...]uint8{0, 6, 22, 31, 47, 52, 58, 71, 81}
 
 func (i DeviceType) String() string {
 	if i < 0 || i >= DeviceType(len(_DeviceTypeIndex)-1) {
@@ -19,12 +19,13 @@ func (i DeviceType) String() string {
 
 var _DeviceTypeNameToValueMap = map[string]DeviceType{
 	_DeviceTypeName[0:6]:   0,
-	_DeviceTypeName[6:15]:  1,
-	_DeviceTypeName[15:31]: 2,
-	_DeviceTypeName[31:36]: 3,
-	_DeviceTypeName[36:42]: 4,
-	_DeviceTypeName[42:55]: 5,
-	_DeviceTypeName[55:65]: 6,
+	_DeviceTypeName[6:22]:  1,
+	_DeviceTypeName[22:31]: 2,
+	_DeviceTypeName[31:47]: 3,
+	_DeviceTypeName[47:52]: 4,
+	_DeviceTypeName[52:58]: 5,
+	_DeviceTypeName[58:71]: 6,
+	_DeviceTypeName[71:81]: 7,
 }
 
 // DeviceTypeString retrieves an enum value from the enum constants string name.

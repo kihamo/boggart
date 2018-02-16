@@ -113,7 +113,7 @@ func (d *PulsarHeadMeter) Ping(_ context.Context) bool {
 }
 
 func (d *PulsarHeadMeter) Tasks() []workers.Task {
-	taskUpdater := task.NewFunctionTask(d.updater)
+	taskUpdater := task.NewFunctionTask(d.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(d.interval)
 	taskUpdater.SetName("device-heat-meter-pulsar-updater-" + d.serialNumber)
@@ -123,7 +123,7 @@ func (d *PulsarHeadMeter) Tasks() []workers.Task {
 	}
 }
 
-func (d *PulsarHeadMeter) updater(ctx context.Context) (interface{}, error) {
+func (d *PulsarHeadMeter) taskUpdater(ctx context.Context) (interface{}, error) {
 	if !d.IsEnabled() {
 		return nil, nil
 	}

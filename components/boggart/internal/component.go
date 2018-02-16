@@ -103,6 +103,7 @@ func (c *Component) Run() (err error) {
 	c.initConnectionRS485()
 
 	c.initCameras()
+	c.initElectricityMeters()
 	c.initInternetProviders()
 	c.initPhones()
 	c.initRouters()
@@ -187,10 +188,10 @@ func (c *Component) doorCallback(status bool, changed *time.Time) {
 	if c.messenger != nil {
 		if status {
 			// TODO: changeUserId
-			c.messenger.SendMessage("238815343", "Entrance door is opened")
+			c.messenger.SendMessage("238815343", "Entrance door is closed")
 		} else {
 			// TODO: changeUserId
-			c.messenger.SendMessage("238815343", "Entrance door is closed")
+			c.messenger.SendMessage("238815343", "Entrance door is opened")
 		}
 
 		device := c.devices.Device(boggart.DeviceIdCameraHall.String())

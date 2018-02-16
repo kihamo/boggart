@@ -92,7 +92,7 @@ func (d *PulsarPulsedWaterMeter) Ping(_ context.Context) bool {
 }
 
 func (d *PulsarPulsedWaterMeter) Tasks() []workers.Task {
-	taskUpdater := task.NewFunctionTask(d.updater)
+	taskUpdater := task.NewFunctionTask(d.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(d.interval)
 	taskUpdater.SetName("device-water-meter-pulsar-pulsed-updater-" + d.serialNumber)
@@ -106,7 +106,7 @@ func (d *PulsarPulsedWaterMeter) volume(pulses uint64) float64 {
 	return (d.volumeOffset*PulsarPulsedWaterMeterScale + float64(pulses*10)) / PulsarPulsedWaterMeterScale
 }
 
-func (d *PulsarPulsedWaterMeter) updater(ctx context.Context) (interface{}, error) {
+func (d *PulsarPulsedWaterMeter) taskUpdater(ctx context.Context) (interface{}, error) {
 	if !d.IsEnabled() {
 		return nil, nil
 	}
