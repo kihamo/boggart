@@ -18,15 +18,14 @@ type TelegramListener struct {
 
 	devicesManager boggart.DevicesManager
 	messenger      *telegram.Telegram
-	to             string
+	chats          []string
 }
 
-func NewTelegramListener(messenger *telegram.Telegram, devicesManager boggart.DevicesManager) *TelegramListener {
+func NewTelegramListener(messenger *telegram.Telegram, devicesManager boggart.DevicesManager, chats []string) *TelegramListener {
 	t := &TelegramListener{
 		devicesManager: devicesManager,
 		messenger:      messenger,
-		// FIXME:
-		to: "238815343",
+		chats:          chats,
 	}
 	t.BaseListener.Init()
 
@@ -56,24 +55,22 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 
 		message := fmt.Sprintf("Device %s #%s (%s) is DOWN", args[1], device.Id(), device.Description())
 		if err == nil {
-			l.messenger.SendMessage(l.to, message)
+			l.send(message)
 		} else {
-			l.messenger.SendMessage(l.to, message+". Reason: "+err.(error).Error())
+			l.send(message + ". Reason: " + err.(error).Error())
 		}
 
 	case boggart.DeviceEventDeviceEnabledAfterCheck:
 		device := args[0].(boggart.Device)
-		l.messenger.SendMessage(
-			l.to,
-			fmt.Sprintf("Device %s #%s (%s) is UP", args[1], device.Id(), device.Description()))
+		l.send(fmt.Sprintf("Device %s #%s (%s) is UP", args[1], device.Id(), device.Description()))
 	}
 }
 
 func (l *TelegramListener) eventDoor(open bool, device boggart.Device, changed *time.Time) {
 	if open {
-		l.messenger.SendMessage(l.to, device.Description()+" is opened")
+		l.send(device.Description() + " is opened")
 	} else {
-		l.messenger.SendMessage(l.to, device.Description()+" is closed")
+		l.send(device.Description() + " is closed")
 	}
 
 	deviceCamera := l.devicesManager.Device(boggart.DeviceIdCameraHall.String())
@@ -81,10 +78,18 @@ func (l *TelegramListener) eventDoor(open bool, device boggart.Device, changed *
 		time.AfterFunc(time.Second, func() {
 			func(camera boggart.Camera) {
 				if image, err := camera.Snapshot(context.Background()); err == nil {
-					l.messenger.SendPhoto(l.to, "Hall snapshot", bytes.NewReader(image))
+					for _, chatId := range l.chats {
+						l.messenger.SendPhoto(chatId, "Hall snapshot", bytes.NewReader(image))
+					}
 				}
 			}(deviceCamera.(boggart.Camera))
 		})
+	}
+}
+
+func (l *TelegramListener) send(message string) {
+	for _, chatId := range l.chats {
+		l.messenger.SendMessage(chatId, message)
 	}
 }
 

@@ -13,7 +13,7 @@ import (
 func (c *Component) ConfigVariables() []config.Variable {
 	return []config.Variable{
 		config.NewVariable(
-			boggart.ConfigDeviceManagerCheckInterval,
+			boggart.ConfigDevicesManagerCheckInterval,
 			config.ValueTypeDuration,
 			time.Minute,
 			"Health check interval",
@@ -21,6 +21,17 @@ func (c *Component) ConfigVariables() []config.Variable {
 			"Device manager",
 			nil,
 			nil),
+		config.NewVariable(
+			boggart.ConfigListenerTelegramChats,
+			config.ValueTypeString,
+			nil,
+			"Chats for messages",
+			false,
+			"Listener Telegram",
+			[]string{config.ViewTags},
+			map[string]interface{}{
+				config.ViewOptionTagsDefaultText: "add a chat ID",
+			}),
 		config.NewVariable(
 			boggart.ConfigRS485Address,
 			config.ValueTypeString,
@@ -496,11 +507,11 @@ func (c *Component) ConfigVariables() []config.Variable {
 func (c *Component) ConfigWatchers() []config.Watcher {
 	return []config.Watcher{
 		config.NewWatcher(c.Name(), []string{
-			boggart.ConfigDeviceManagerCheckInterval,
-		}, c.watchDeviceManagerCheckInterval),
+			boggart.ConfigDevicesManagerCheckInterval,
+		}, c.watchDevicesManagerCheckInterval),
 	}
 }
 
-func (c *Component) watchDeviceManagerCheckInterval(_ string, newValue interface{}, _ interface{}) {
+func (c *Component) watchDevicesManagerCheckInterval(_ string, newValue interface{}, _ interface{}) {
 	c.devicesManager.SetTickerCheckerDuration(newValue.(time.Duration))
 }

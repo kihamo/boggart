@@ -58,7 +58,7 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 				[]string{http.MethodGet},
 				"/"+c.Name()+"/devices/",
 				&handlers.DevicesHandler{
-					DeviceManager: c.devicesManager,
+					DevicesManager: c.devicesManager,
 				},
 				"",
 				true),
@@ -67,7 +67,7 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 				[]string{http.MethodGet},
 				"/"+c.Name()+"/camera/:place/:action/",
 				&handlers.CameraHandler{
-					DeviceManager: c.devicesManager,
+					DevicesManager: c.devicesManager,
 				},
 				"",
 				true),

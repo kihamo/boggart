@@ -1,7 +1,8 @@
 package boggart
 
 const (
-	ConfigDeviceManagerCheckInterval            = ComponentName + ".device-manager.check-interval"
+	ConfigDevicesManagerCheckInterval           = ComponentName + ".devices-manager.check-interval"
+	ConfigListenerTelegramChats                 = ComponentName + ".listener.telegram.chats"
 	ConfigRS485Address                          = ComponentName + ".rs485.path"
 	ConfigRS485Timeout                          = ComponentName + ".rs485.timeout"
 	ConfigDoorsEnabled                          = ComponentName + ".doors.enabled"

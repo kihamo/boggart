@@ -81,7 +81,7 @@ func (c *Component) Init(a shadow.Application) error {
 
 func (c *Component) Run() (err error) {
 	c.logger = logger.NewOrNop(c.Name(), c.application)
-	c.devicesManager.SetTickerCheckerDuration(c.config.Duration(boggart.ConfigDeviceManagerCheckInterval))
+	c.devicesManager.SetTickerCheckerDuration(c.config.Duration(boggart.ConfigDevicesManagerCheckInterval))
 
 	c.initListeners()
 	c.initConnectionRS485()
