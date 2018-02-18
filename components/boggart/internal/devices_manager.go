@@ -13,7 +13,13 @@ import (
 	"github.com/pborman/uuid"
 )
 
+const (
+	DefaultTimeoutChecker = time.Second * 2
+)
+
 type DevicesManager struct {
+	mutex sync.RWMutex
+
 	storage        *sync.Map
 	workers        workers.Component
 	listeners      *manager.ListenersManager
@@ -24,13 +30,12 @@ type DevicesManager struct {
 
 func NewDevicesManager(workers workers.Component) *DevicesManager {
 	m := &DevicesManager{
-		storage:       new(sync.Map),
-		workers:       workers,
-		listeners:     manager.NewListenersManager(),
-		chanChecker:   make(chan struct{}, 1),
-		tickerChecker: w.NewTicker(time.Minute),
-		// TODO: setter for this option
-		timeoutChecker: time.Second * 2,
+		storage:        new(sync.Map),
+		workers:        workers,
+		listeners:      manager.NewListenersManager(),
+		chanChecker:    make(chan struct{}, 1),
+		tickerChecker:  w.NewTicker(time.Minute),
+		timeoutChecker: DefaultTimeoutChecker,
 	}
 
 	go m.doCheck()
@@ -153,8 +158,14 @@ func (m *DevicesManager) GetListenerMetadata(id string) w.Metadata {
 	return nil
 }
 
-func (m *DevicesManager) SetTickerCheckerDuration(t time.Duration) {
-	m.tickerChecker.SetDuration(t)
+func (m *DevicesManager) SetCheckerTickerDuration(duration time.Duration) {
+	m.tickerChecker.SetDuration(duration)
+}
+
+func (m *DevicesManager) SetCheckerTimeout(duration time.Duration) {
+	m.mutex.Lock()
+	m.timeoutChecker = duration
+	m.mutex.Unlock()
 }
 
 func (m *DevicesManager) Check() {
@@ -186,7 +197,11 @@ func (m *DevicesManager) doDeviceEvents(ch <-chan boggart.DeviceTriggerEvent) {
 }
 
 func (m *DevicesManager) checker(key string, device boggart.Device) {
-	ctx, ctxCancel := context.WithTimeout(context.Background(), m.timeoutChecker)
+	m.mutex.RLock()
+	timeout := m.timeoutChecker
+	m.mutex.RUnlock()
+
+	ctx, ctxCancel := context.WithTimeout(context.Background(), timeout)
 	defer ctxCancel()
 
 	done := make(chan bool, 1)

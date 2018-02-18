@@ -32,6 +32,7 @@ func NewAnnotationsListener(annotations annotations.Component, startDate *time.T
 func (l *AnnotationsListener) Events() []workers.Event {
 	return []workers.Event{
 		devices.EventDoorGPIOReedSwitchClose,
+		boggart.DeviceEventDeviceDisabledAfterCheck,
 	}
 }
 
@@ -49,15 +50,34 @@ func (l *AnnotationsListener) Run(_ context.Context, event workers.Event, t time
 		timeEnd := time.Now()
 		diff := timeEnd.Sub(*changed)
 
+		device := args[0].(boggart.Device)
+
+		tags := make([]string, 0, len(device.Types()))
+		for _, deviceType := range device.Types() {
+			tags = append(tags, deviceType.String())
+		}
+		tags = append(tags, "door closed")
+
 		annotation := annotations.NewAnnotation(
 			"Door is closed",
 			fmt.Sprintf("Door was open for %.2f seconds", diff.Seconds()),
-			[]string{"door", "close"},
+			tags,
 			changed,
 			&timeEnd)
 
-		// TODO: err log
 		l.annotations.Create(annotation)
+
+	case boggart.DeviceEventDeviceDisabledAfterCheck:
+		device := args[0].(boggart.Device)
+
+		tags := make([]string, 0, len(device.Types()))
+		for _, deviceType := range device.Types() {
+			tags = append(tags, deviceType.String())
+		}
+		tags = append(tags, "device disabled")
+
+		annotation := annotations.NewAnnotation("Device is disabled", device.Description(), tags, &t, nil)
+		l.annotations.CreateInStorages(annotation, []string{annotations.StorageGrafana})
 	}
 }
 

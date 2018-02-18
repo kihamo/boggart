@@ -22,6 +22,15 @@ func (c *Component) ConfigVariables() []config.Variable {
 			nil,
 			nil),
 		config.NewVariable(
+			boggart.ConfigDevicesManagerCheckTimeout,
+			config.ValueTypeDuration,
+			DefaultTimeoutChecker,
+			"Health check timeout",
+			true,
+			"Device manager",
+			nil,
+			nil),
+		config.NewVariable(
 			boggart.ConfigListenerTelegramChats,
 			config.ValueTypeString,
 			nil,
@@ -509,9 +518,16 @@ func (c *Component) ConfigWatchers() []config.Watcher {
 		config.NewWatcher(c.Name(), []string{
 			boggart.ConfigDevicesManagerCheckInterval,
 		}, c.watchDevicesManagerCheckInterval),
+		config.NewWatcher(c.Name(), []string{
+			boggart.ConfigDevicesManagerCheckTimeout,
+		}, c.watchDevicesManagerCheckTimeout),
 	}
 }
 
 func (c *Component) watchDevicesManagerCheckInterval(_ string, newValue interface{}, _ interface{}) {
-	c.devicesManager.SetTickerCheckerDuration(newValue.(time.Duration))
+	c.devicesManager.SetCheckerTickerDuration(newValue.(time.Duration))
+}
+
+func (c *Component) watchDevicesManagerCheckTimeout(_ string, newValue interface{}, _ interface{}) {
+	c.devicesManager.SetCheckerTimeout(newValue.(time.Duration))
 }
