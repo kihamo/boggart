@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	EventDoorGPIOReedSwitchOpen  = event.NewBaseEvent(boggart.ComponentName + "_device_door_gpio_reed_switch_open")
-	EventDoorGPIOReedSwitchClose = event.NewBaseEvent(boggart.ComponentName + "_device_door_gpio_reed_switch_close")
+	EventDoorGPIOReedSwitchOpen  = event.NewBaseEvent("DeviceDoorGPIOReedSwitchOpen")
+	EventDoorGPIOReedSwitchClose = event.NewBaseEvent("DeviceDoorGPIOReedSwitchClose")
 
 	metricDoorGPIOReedSwitchStatus = snitch.NewGauge(boggart.ComponentName+"_device_door_gpio_reed_switch_status", "Door status")
 )
