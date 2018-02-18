@@ -1,16 +1,28 @@
 package handlers
 
 import (
+	"time"
+
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/go-workers"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
-type devicesHandlerDevice struct {
+type deviceViewHandlerDevice struct {
 	TasksCount  int
 	Id          string
 	Description string
 	Types       []string
 	Enabled     bool
+}
+
+type listenerViewHandlerDevice struct {
+	Id           string
+	Name         string
+	Events       map[string]string
+	Fires        int64
+	FirstFiredAt *time.Time
+	LastFiredAt  *time.Time
 }
 
 type DevicesHandler struct {
@@ -20,11 +32,12 @@ type DevicesHandler struct {
 }
 
 func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
-	list := h.DeviceManager.Devices()
-	viewList := make([]*devicesHandlerDevice, 0, len(list))
+	// devices
+	devicesList := h.DeviceManager.Devices()
+	devicesListView := make([]*deviceViewHandlerDevice, 0, len(devicesList))
 
-	for _, d := range list {
-		viewDevice := &devicesHandlerDevice{
+	for _, d := range devicesList {
+		viewDevice := &deviceViewHandlerDevice{
 			Id:          d.Id(),
 			Description: d.Description(),
 			Types:       make([]string, 0, len(d.Types())),
@@ -36,10 +49,38 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 			viewDevice.Types = append(viewDevice.Types, t.String())
 		}
 
-		viewList = append(viewList, viewDevice)
+		devicesListView = append(devicesListView, viewDevice)
+	}
+
+	// listeners
+	listenersListView := make([]listenerViewHandlerDevice, 0, 0)
+
+	for _, item := range h.DeviceManager.Listeners() {
+		listener := listenerViewHandlerDevice{
+			Id:     item.Id(),
+			Name:   item.Name(),
+			Events: make(map[string]string, 0),
+		}
+
+		md := h.DeviceManager.GetListenerMetadata(item.Id())
+		if md == nil {
+			continue
+		}
+
+		listener.Fires = md[workers.ListenerMetadataFires].(int64)
+		listener.FirstFiredAt = md[workers.ListenerMetadataFirstFiredAt].(*time.Time)
+		listener.LastFiredAt = md[workers.ListenerMetadataLastFireAt].(*time.Time)
+
+		events := md[workers.ListenerMetadataEvents].([]workers.Event)
+		for _, event := range events {
+			listener.Events[event.Id()] = event.Name()
+		}
+
+		listenersListView = append(listenersListView, listener)
 	}
 
 	h.Render(r.Context(), boggart.ComponentName, "devices", map[string]interface{}{
-		"devices": viewList,
+		"devices":   devicesListView,
+		"listeners": listenersListView,
 	})
 }

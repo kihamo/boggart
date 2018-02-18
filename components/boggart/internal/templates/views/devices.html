@@ -36,6 +36,53 @@
         </div>
     </div>
 </div>
+
+<div class="row">
+    <div class="x_panel">
+        <div class="x_title">
+            <h2><i class="fa fa-deaf"></i> Listeners</h2>
+            <div class="clearfix"></div>
+        </div>
+        <div class="x_content">
+            <div class="table-responsive">
+                <table class="table table-striped datatable">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Events</th>
+                        <th>Fires</th>
+                        <th>First fired</th>
+                        <th>Last fired</th>
+                    </tr>
+                    </thead>
+                    {{ range $l, $listener := .listeners }}
+                    <tr>
+                        <td>{{ $listener.Id }}</td>
+                        <td>{{ $listener.Name }}</td>
+                        <td>
+                            {{ range $eventId, $eventName := $listener.Events }}
+                            <span class="label label-info">{{ $eventName }}</span>
+                            {{ end }}
+                        </td>
+                        <td>{{ $listener.Fires }}</td>
+                        <td>
+                            {{ if $listener.FirstFiredAt }}
+                            <script type="application/javascript">document.write(dateToString('{{ $listener.FirstFiredAt.Format "2006-01-02T15:04:05Z07:00" }}'))</script>
+                            {{ end }}
+                        </td>
+                        <td>
+                            {{ if $listener.LastFiredAt }}
+                            <script type="application/javascript">document.write(dateToString('{{ $listener.LastFiredAt.Format "2006-01-02T15:04:05Z07:00" }}'))</script>
+                            {{ end }}
+                        </td>
+                    </tr>
+                    {{ end }}
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 {{ end }}
 
 {{ define "head" }}

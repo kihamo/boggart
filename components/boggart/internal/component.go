@@ -5,9 +5,7 @@ import (
 	"sync"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/internal/listeners"
 	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
-	w "github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/annotations"
@@ -23,10 +21,8 @@ type Component struct {
 	mutex sync.RWMutex
 
 	application shadow.Application
-	annotations annotations.Component
 	config      config.Component
 	logger      logger.Logger
-	messenger   messengers.Messenger
 	workers     workers.Component
 	routes      []dashboard.Route
 	collector   *MetricsCollector
@@ -75,10 +71,6 @@ func (c *Component) Dependencies() []shadow.Dependency {
 func (c *Component) Init(a shadow.Application) error {
 	c.application = a
 
-	if a.HasComponent(annotations.ComponentName) {
-		c.annotations = a.GetComponent(annotations.ComponentName).(annotations.Component)
-	}
-
 	c.config = a.GetComponent(config.ComponentName).(config.Component)
 	c.workers = a.GetComponent(workers.ComponentName).(workers.Component)
 	c.collector = NewMetricsCollector(c)
@@ -91,12 +83,8 @@ func (c *Component) Run() (err error) {
 	c.logger = logger.NewOrNop(c.Name(), c.application)
 	c.devicesManager.SetTickerCheckerDuration(c.config.Duration(boggart.ConfigDeviceManagerCheckInterval))
 	c.devicesManager.SetLogger(c.logger)
-	c.devicesManager.Attach(w.EventAll, listeners.NewLoggingListener(c.logger))
 
-	if c.application.HasComponent(messengers.ComponentName) {
-		c.messenger = c.application.GetComponent(messengers.ComponentName).(messengers.Component).Messenger(messengers.MessengerTelegram)
-	}
-
+	c.initListeners()
 	c.initConnectionRS485()
 
 	c.initGPIO()

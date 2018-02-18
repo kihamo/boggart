@@ -7,10 +7,14 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/protocols/gpio"
+	"github.com/kihamo/go-workers/event"
 	"github.com/kihamo/snitch"
 )
 
 var (
+	EventDoorGPIOReedSwitchOpen  = event.NewBaseEvent(boggart.ComponentName + "_device_door_gpio_reed_switch_open")
+	EventDoorGPIOReedSwitchClose = event.NewBaseEvent(boggart.ComponentName + "_device_door_gpio_reed_switch_close")
+
 	metricDoorGPIOReedSwitchStatus = snitch.NewGauge(boggart.ComponentName+"_device_door_gpio_reed_switch_status", "Door status")
 )
 
@@ -20,7 +24,7 @@ type DoorGPIOReedSwitch struct {
 	pin gpio.GPIOPin
 }
 
-func NewDoorGPIOReedSwitch(pin int64, callback func(status bool, last *time.Time)) (*DoorGPIOReedSwitch, error) {
+func NewDoorGPIOReedSwitch(pin int64) (*DoorGPIOReedSwitch, error) {
 	p, err := gpio.NewPin(pin, gpio.PIN_IN)
 	if err != nil {
 		return nil, err
@@ -30,9 +34,9 @@ func NewDoorGPIOReedSwitch(pin int64, callback func(status bool, last *time.Time
 		pin: p,
 	}
 	device.Init()
-	device.SetDescription("GPIO reed switch")
+	device.SetDescription("Door GPIO reed switch")
 
-	p.SetCallbackChange(callback)
+	p.SetCallbackChange(device.callback)
 
 	return device, nil
 }
@@ -69,4 +73,12 @@ func (d *DoorGPIOReedSwitch) Collect(ch chan<- snitch.Metric) {
 
 func (d *DoorGPIOReedSwitch) Ping(_ context.Context) bool {
 	return true
+}
+
+func (d *DoorGPIOReedSwitch) callback(status bool, changed *time.Time) {
+	if status {
+		d.TriggerEvent(EventDoorGPIOReedSwitchClose, changed)
+	} else {
+		d.TriggerEvent(EventDoorGPIOReedSwitchOpen, changed)
+	}
 }

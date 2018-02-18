@@ -72,6 +72,11 @@ func (m *DevicesManager) RegisterWithID(id string, device boggart.Device) {
 			m.workers.AddTask(task)
 		}
 	}
+
+	events := device.TriggerEventChannel()
+	if events != nil {
+		go m.doDeviceEvents(events)
+	}
 }
 
 func (m *DevicesManager) Device(id string) boggart.Device {
@@ -154,6 +159,18 @@ func (m *DevicesManager) DeAttach(event w.Event, listener w.Listener) {
 	m.listeners.DeAttach(event, listener)
 }
 
+func (m *DevicesManager) Listeners() []w.Listener {
+	return m.listeners.Listeners()
+}
+
+func (m *DevicesManager) GetListenerMetadata(id string) w.Metadata {
+	if item := m.listeners.GetById(id); item != nil {
+		return item.Metadata()
+	}
+
+	return nil
+}
+
 func (m *DevicesManager) SetTickerCheckerDuration(t time.Duration) {
 	m.tickerChecker.SetDuration(t)
 }
@@ -177,6 +194,12 @@ func (m *DevicesManager) doCheck() {
 		case <-m.tickerChecker.C():
 			m.Check()
 		}
+	}
+}
+
+func (m *DevicesManager) doDeviceEvents(ch <-chan boggart.DeviceTriggerEvent) {
+	for event := range ch {
+		m.listeners.AsyncTrigger(event.Event(), event.Arguments()...)
 	}
 }
 

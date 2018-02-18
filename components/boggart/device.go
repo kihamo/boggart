@@ -2,11 +2,14 @@ package boggart
 
 import (
 	"context"
-	"sync/atomic"
 
 	"github.com/kihamo/go-workers"
+	"github.com/kihamo/go-workers/event"
 	"github.com/kihamo/snitch"
-	"github.com/pborman/uuid"
+)
+
+var (
+	DeviceEventDeviceRegister = event.NewBaseEvent("DeviceRegister")
 )
 
 type DeviceId int64
@@ -48,6 +51,13 @@ type DevicesManager interface {
 	DevicesByTypes([]DeviceType) map[string]Device
 	Attach(workers.Event, workers.Listener)
 	DeAttach(workers.Event, workers.Listener)
+	Listeners() []workers.Listener
+	GetListenerMetadata(id string) workers.Metadata
+}
+
+type DeviceTriggerEvent interface {
+	Event() workers.Event
+	Arguments() []interface{}
 }
 
 type Device interface {
@@ -59,6 +69,7 @@ type Device interface {
 	Enable()
 	Ping(context.Context) bool
 	Tasks() []workers.Task
+	TriggerEventChannel() <-chan DeviceTriggerEvent
 }
 
 type ReedSwitch interface {
@@ -126,67 +137,4 @@ type WaterDetector interface {
 
 type MotionDetector interface {
 	Device
-}
-
-type DeviceBase struct {
-	id          atomic.Value
-	description atomic.Value
-	enabled     uint64
-}
-
-func (d *DeviceBase) Init() {
-	d.SetId(uuid.New())
-	d.Enable()
-}
-
-func (d *DeviceBase) Id() string {
-	var id string
-
-	if value := d.id.Load(); value != nil {
-		id = value.(string)
-	}
-
-	return id
-}
-
-func (d *DeviceBase) SetId(id string) {
-	d.id.Store(id)
-}
-
-func (d *DeviceBase) Description() string {
-	var description string
-
-	if value := d.description.Load(); value != nil {
-		description = value.(string)
-	}
-
-	return description
-}
-
-func (d *DeviceBase) SetDescription(description string) {
-	d.description.Store(description)
-}
-
-func (d *DeviceBase) Types() []DeviceType {
-	return nil
-}
-
-func (d *DeviceBase) IsEnabled() bool {
-	return atomic.LoadUint64(&d.enabled) == 1
-}
-
-func (d *DeviceBase) Enable() {
-	atomic.StoreUint64(&d.enabled, 1)
-}
-
-func (d *DeviceBase) Ping(_ context.Context) bool {
-	return false
-}
-
-func (d *DeviceBase) Disable() {
-	atomic.StoreUint64(&d.enabled, 0)
-}
-
-func (d *DeviceBase) Tasks() []workers.Task {
-	return nil
 }
