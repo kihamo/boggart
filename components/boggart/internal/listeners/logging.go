@@ -33,6 +33,28 @@ func (l *LoggingListener) Run(_ context.Context, event workers.Event, t time.Tim
 			"device_manager.id": args[1],
 		})
 
+	case boggart.DeviceEventDeviceDisabledAfterCheck:
+		err := args[2]
+
+		if err == nil {
+			l.logger.Warn("Device has been disabled because the ping returns false", map[string]interface{}{
+				"device.id":  args[0].(boggart.Device).Id(),
+				"device.key": args[1],
+			})
+		} else {
+			l.logger.Warn("Device has been disabled because the ping failed", map[string]interface{}{
+				"device.id":  args[0].(boggart.Device).Id(),
+				"device.key": args[1],
+				"error":      err.(error).Error(),
+			})
+		}
+
+	case boggart.DeviceEventDeviceEnabledAfterCheck:
+		l.logger.Info("Device has been enabled because the ping returns true", map[string]interface{}{
+			"device.id":  args[0].(boggart.Device).Id(),
+			"device.key": args[1],
+		})
+
 	default:
 		l.logger.Info("Fire unknown event", map[string]interface{}{
 			"event.id":   event.Id(),

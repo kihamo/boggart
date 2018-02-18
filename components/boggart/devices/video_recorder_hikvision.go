@@ -30,15 +30,15 @@ type VideoRecorderHikVision struct {
 	interval     time.Duration
 }
 
-func NewVideoRecorderHikVision(isapi *hikvision.ISAPI, interval time.Duration) (*VideoRecorderHikVision, error) {
+func NewVideoRecorderHikVision(isapi *hikvision.ISAPI, interval time.Duration) *VideoRecorderHikVision {
 	device := &VideoRecorderHikVision{
 		isapi:    isapi,
 		interval: interval,
 	}
-	device.DeviceBase.Init()
+	device.Init()
 	device.SetDescription("HikVision video recorder")
 
-	return device, nil
+	return device
 }
 
 func (d *VideoRecorderHikVision) Types() []boggart.DeviceType {
@@ -48,25 +48,27 @@ func (d *VideoRecorderHikVision) Types() []boggart.DeviceType {
 }
 
 func (d *VideoRecorderHikVision) Describe(ch chan<- *snitch.Description) {
-	if d.SerialNumber() == "" {
+	serialNumber := d.SerialNumber()
+	if serialNumber == "" {
 		return
 	}
 
-	metricVideoRecorderHikVisionMemoryUsage.With("serial_number", d.SerialNumber()).Describe(ch)
-	metricVideoRecorderHikVisionMemoryAvailable.With("serial_number", d.SerialNumber()).Describe(ch)
-	metricVideoRecorderHikVisionStorageUsage.With("serial_number", d.SerialNumber()).Describe(ch)
-	metricVideoRecorderHikVisionStorageAvailable.With("serial_number", d.SerialNumber()).Describe(ch)
+	metricVideoRecorderHikVisionMemoryUsage.With("serial_number", serialNumber).Describe(ch)
+	metricVideoRecorderHikVisionMemoryAvailable.With("serial_number", serialNumber).Describe(ch)
+	metricVideoRecorderHikVisionStorageUsage.With("serial_number", serialNumber).Describe(ch)
+	metricVideoRecorderHikVisionStorageAvailable.With("serial_number", serialNumber).Describe(ch)
 }
 
 func (d *VideoRecorderHikVision) Collect(ch chan<- snitch.Metric) {
-	if d.SerialNumber() == "" {
+	serialNumber := d.SerialNumber()
+	if serialNumber == "" {
 		return
 	}
 
-	metricVideoRecorderHikVisionMemoryUsage.With("serial_number", d.SerialNumber()).Collect(ch)
-	metricVideoRecorderHikVisionMemoryAvailable.With("serial_number", d.SerialNumber()).Collect(ch)
-	metricVideoRecorderHikVisionStorageUsage.With("serial_number", d.SerialNumber()).Collect(ch)
-	metricVideoRecorderHikVisionStorageAvailable.With("serial_number", d.SerialNumber()).Collect(ch)
+	metricVideoRecorderHikVisionMemoryUsage.With("serial_number", serialNumber).Collect(ch)
+	metricVideoRecorderHikVisionMemoryAvailable.With("serial_number", serialNumber).Collect(ch)
+	metricVideoRecorderHikVisionStorageUsage.With("serial_number", serialNumber).Collect(ch)
+	metricVideoRecorderHikVisionStorageAvailable.With("serial_number", serialNumber).Collect(ch)
 }
 
 func (d *VideoRecorderHikVision) Ping(ctx context.Context) bool {
@@ -123,7 +125,12 @@ func (d *VideoRecorderHikVision) taskSerialNumber(ctx context.Context) (interfac
 }
 
 func (d *VideoRecorderHikVision) taskUpdater(ctx context.Context) (interface{}, error) {
-	if !d.IsEnabled() || d.SerialNumber() == "" {
+	if !d.IsEnabled() {
+		return nil, nil
+	}
+
+	serialNumber := d.SerialNumber()
+	if serialNumber == "" {
 		return nil, nil
 	}
 
@@ -136,8 +143,8 @@ func (d *VideoRecorderHikVision) taskUpdater(ctx context.Context) (interface{}, 
 		return nil, errors.New("Try to get system status for video recorder failed because response is wrong")
 	}
 
-	metricVideoRecorderHikVisionMemoryUsage.With("serial_number", d.SerialNumber()).Set(status.Memory[0].MemoryUsage.Float64() * 1024 * 1024)
-	metricVideoRecorderHikVisionMemoryAvailable.With("serial_number", d.SerialNumber()).Set(status.Memory[0].MemoryAvailable.Float64() * 1024 * 1024)
+	metricVideoRecorderHikVisionMemoryUsage.With("serial_number", serialNumber).Set(status.Memory[0].MemoryUsage.Float64() * 1024 * 1024)
+	metricVideoRecorderHikVisionMemoryAvailable.With("serial_number", serialNumber).Set(status.Memory[0].MemoryAvailable.Float64() * 1024 * 1024)
 
 	storage, err := d.isapi.ContentManagementStorage(ctx)
 	if err != nil {
@@ -148,13 +155,13 @@ func (d *VideoRecorderHikVision) taskUpdater(ctx context.Context) (interface{}, 
 		for _, hdd := range storage.HDD {
 			// TODO: send event if status isn't OK
 
-			metricVideoRecorderHikVisionStorageUsage.With("serial_number", d.SerialNumber()).With(
+			metricVideoRecorderHikVisionStorageUsage.With("serial_number", serialNumber).With(
 				"id", strconv.FormatUint(hdd.ID, 10),
 				"name", hdd.Name,
 				"type", "hdd",
 			).Set(float64((hdd.Capacity - hdd.FreeSpace) * 1024 * 1024))
 
-			metricVideoRecorderHikVisionStorageAvailable.With("serial_number", d.SerialNumber()).With(
+			metricVideoRecorderHikVisionStorageAvailable.With("serial_number", serialNumber).With(
 				"id", strconv.FormatUint(hdd.ID, 10),
 				"name", hdd.Name,
 				"type", "hdd",

@@ -3,6 +3,7 @@ package listeners
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -34,6 +35,8 @@ func NewTelegramListener(messenger *telegram.Telegram, devicesManager boggart.De
 
 func (l *TelegramListener) Events() []workers.Event {
 	return []workers.Event{
+		boggart.DeviceEventDeviceDisabledAfterCheck,
+		boggart.DeviceEventDeviceEnabledAfterCheck,
 		devices.EventDoorGPIOReedSwitchOpen,
 		devices.EventDoorGPIOReedSwitchClose,
 	}
@@ -46,6 +49,23 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 
 	case devices.EventDoorGPIOReedSwitchClose:
 		l.eventDoor(false, args[0].(boggart.Device), args[1].(*time.Time))
+
+	case boggart.DeviceEventDeviceDisabledAfterCheck:
+		device := args[0].(boggart.Device)
+		err := args[2]
+
+		message := fmt.Sprintf("Device %s #%s (%s) is DOWN", args[1], device.Id(), device.Description())
+		if err == nil {
+			l.messenger.SendMessage(l.to, message)
+		} else {
+			l.messenger.SendMessage(l.to, message+". Reason: "+err.(error).Error())
+		}
+
+	case boggart.DeviceEventDeviceEnabledAfterCheck:
+		device := args[0].(boggart.Device)
+		l.messenger.SendMessage(
+			l.to,
+			fmt.Sprintf("Device %s #%s (%s) is UP", args[1], device.Id(), device.Description()))
 	}
 }
 

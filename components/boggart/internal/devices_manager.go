@@ -8,17 +8,14 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	w "github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/manager"
-	"github.com/kihamo/shadow/components/logger"
 	"github.com/kihamo/shadow/components/workers"
 	"github.com/kihamo/snitch"
 	"github.com/pborman/uuid"
 )
 
 type DevicesManager struct {
-	mutex          sync.RWMutex
 	storage        *sync.Map
 	workers        workers.Component
-	logger         logger.Logger
 	listeners      *manager.ListenersManager
 	chanChecker    chan struct{}
 	tickerChecker  *w.Ticker
@@ -29,7 +26,6 @@ func NewDevicesManager(workers workers.Component) *DevicesManager {
 	m := &DevicesManager{
 		storage:       new(sync.Map),
 		workers:       workers,
-		logger:        logger.NopLogger,
 		listeners:     manager.NewListenersManager(),
 		chanChecker:   make(chan struct{}, 1),
 		tickerChecker: w.NewTicker(time.Minute),
@@ -40,20 +36,6 @@ func NewDevicesManager(workers workers.Component) *DevicesManager {
 	go m.doCheck()
 
 	return m
-}
-
-func (m *DevicesManager) SetLogger(logger logger.Logger) {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-
-	m.logger = logger
-}
-
-func (m *DevicesManager) Logger() logger.Logger {
-	m.mutex.RLock()
-	defer m.mutex.RUnlock()
-
-	return m.logger
 }
 
 func (m *DevicesManager) Register(device boggart.Device) string {
@@ -221,13 +203,7 @@ func (m *DevicesManager) checker(key string, device boggart.Device) {
 
 		if ctx.Err() != nil && ctx.Err() != context.Canceled {
 			device.Disable()
-			m.Logger().Warn("Device has been disabled because the ping failed", map[string]interface{}{
-				"device.key": key,
-				"device.id":  device.Id(),
-				"error":      ctx.Err().Error(),
-			})
-
-			// TODO: send event
+			m.listeners.AsyncTrigger(boggart.DeviceEventDeviceDisabledAfterCheck, device, key, ctx.Err())
 		}
 
 		return
@@ -239,21 +215,10 @@ func (m *DevicesManager) checker(key string, device boggart.Device) {
 
 		if !result {
 			device.Disable()
-			m.Logger().Warn("Device has been disabled because the ping returns false", map[string]interface{}{
-				"device.key": key,
-				"device.id":  device.Id(),
-			})
-
-			// TODO: send event
+			m.listeners.AsyncTrigger(boggart.DeviceEventDeviceDisabledAfterCheck, device, key, nil)
 		} else {
 			device.Enable()
-
-			m.Logger().Info("Device has been enabled because the ping returns true", map[string]interface{}{
-				"device.key": key,
-				"device.id":  device.Id(),
-			})
-
-			// TODO: send event
+			m.listeners.AsyncTrigger(boggart.DeviceEventDeviceEnabledAfterCheck, device, key)
 		}
 
 		return

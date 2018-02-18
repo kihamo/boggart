@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -27,32 +28,21 @@ var (
 type MikrotikRouter struct {
 	boggart.DeviceBase
 
+	mutex        sync.RWMutex
 	provider     *mikrotik.Client
 	serialNumber string
 	interval     time.Duration
 }
 
-func NewMikrotikRouter(provider *mikrotik.Client, interval time.Duration) (*MikrotikRouter, error) {
+func NewMikrotikRouter(provider *mikrotik.Client, interval time.Duration) *MikrotikRouter {
 	device := &MikrotikRouter{
 		provider: provider,
 		interval: interval,
 	}
 	device.Init()
+	device.SetDescription("Mikrotik router")
 
-	system, err := provider.SystemRouterboard()
-	if err != nil {
-		return nil, err
-	}
-
-	var ok bool
-	device.serialNumber, ok = system["serial-number"]
-	if !ok {
-		return nil, errors.New("Serial number not found")
-	}
-
-	device.SetDescription("Mikrotik router with serial number " + device.serialNumber)
-
-	return device, nil
+	return device
 }
 
 func (d *MikrotikRouter) Types() []boggart.DeviceType {
@@ -62,23 +52,33 @@ func (d *MikrotikRouter) Types() []boggart.DeviceType {
 }
 
 func (d *MikrotikRouter) Describe(ch chan<- *snitch.Description) {
-	metricRouterMikrotikTrafficReceivedBytes.With("serial_number", d.serialNumber).Describe(ch)
-	metricRouterMikrotikTrafficSentBytes.With("serial_number", d.serialNumber).Describe(ch)
-	metricRouterMikrotikWifiClients.With("serial_number", d.serialNumber).Describe(ch)
-	metricRouterMikrotikMemoryUsage.With("serial_number", d.serialNumber).Describe(ch)
-	metricRouterMikrotikMemoryAvailable.With("serial_number", d.serialNumber).Describe(ch)
-	metricRouterMikrotikStorageUsage.With("serial_number", d.serialNumber).Describe(ch)
-	metricRouterMikrotikStorageAvailable.With("serial_number", d.serialNumber).Describe(ch)
+	serialNumber := d.SerialNumber()
+	if serialNumber == "" {
+		return
+	}
+
+	metricRouterMikrotikTrafficReceivedBytes.With("serial_number", serialNumber).Describe(ch)
+	metricRouterMikrotikTrafficSentBytes.With("serial_number", serialNumber).Describe(ch)
+	metricRouterMikrotikWifiClients.With("serial_number", serialNumber).Describe(ch)
+	metricRouterMikrotikMemoryUsage.With("serial_number", serialNumber).Describe(ch)
+	metricRouterMikrotikMemoryAvailable.With("serial_number", serialNumber).Describe(ch)
+	metricRouterMikrotikStorageUsage.With("serial_number", serialNumber).Describe(ch)
+	metricRouterMikrotikStorageAvailable.With("serial_number", serialNumber).Describe(ch)
 }
 
 func (d *MikrotikRouter) Collect(ch chan<- snitch.Metric) {
-	metricRouterMikrotikTrafficReceivedBytes.With("serial_number", d.serialNumber).Collect(ch)
-	metricRouterMikrotikTrafficSentBytes.With("serial_number", d.serialNumber).Collect(ch)
-	metricRouterMikrotikWifiClients.With("serial_number", d.serialNumber).Collect(ch)
-	metricRouterMikrotikMemoryUsage.With("serial_number", d.serialNumber).Collect(ch)
-	metricRouterMikrotikMemoryAvailable.With("serial_number", d.serialNumber).Collect(ch)
-	metricRouterMikrotikStorageUsage.With("serial_number", d.serialNumber).Collect(ch)
-	metricRouterMikrotikStorageAvailable.With("serial_number", d.serialNumber).Collect(ch)
+	serialNumber := d.SerialNumber()
+	if serialNumber == "" {
+		return
+	}
+
+	metricRouterMikrotikTrafficReceivedBytes.With("serial_number", serialNumber).Collect(ch)
+	metricRouterMikrotikTrafficSentBytes.With("serial_number", serialNumber).Collect(ch)
+	metricRouterMikrotikWifiClients.With("serial_number", serialNumber).Collect(ch)
+	metricRouterMikrotikMemoryUsage.With("serial_number", serialNumber).Collect(ch)
+	metricRouterMikrotikMemoryAvailable.With("serial_number", serialNumber).Collect(ch)
+	metricRouterMikrotikStorageUsage.With("serial_number", serialNumber).Collect(ch)
+	metricRouterMikrotikStorageAvailable.With("serial_number", serialNumber).Collect(ch)
 }
 
 func (d *MikrotikRouter) Ping(_ context.Context) bool {
@@ -86,19 +86,62 @@ func (d *MikrotikRouter) Ping(_ context.Context) bool {
 	return err == nil
 }
 
+func (d *MikrotikRouter) SerialNumber() string {
+	d.mutex.RLock()
+	defer d.mutex.RUnlock()
+
+	return d.serialNumber
+}
+
 func (d *MikrotikRouter) Tasks() []workers.Task {
+	taskSerialNumber := task.NewFunctionTillStopTask(d.taskSerialNumber)
+	taskSerialNumber.SetTimeout(time.Second * 5)
+	taskSerialNumber.SetRepeats(-1)
+	taskSerialNumber.SetRepeatInterval(time.Minute)
+	taskSerialNumber.SetName("device-router-mikrotik-serial-number")
+
 	taskUpdater := task.NewFunctionTask(d.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(d.interval)
 	taskUpdater.SetName("device-router-mikrotik-updater-" + d.serialNumber)
 
 	return []workers.Task{
+		taskSerialNumber,
 		taskUpdater,
 	}
 }
 
+func (d *MikrotikRouter) taskSerialNumber(ctx context.Context) (interface{}, error, bool) {
+	if !d.IsEnabled() {
+		return nil, nil, false
+	}
+
+	system, err := d.provider.SystemRouterboard()
+	if err != nil {
+		return nil, err, false
+	}
+
+	serialNumber, ok := system["serial-number"]
+	if !ok {
+		return nil, errors.New("Serial number not found"), false
+	}
+
+	d.mutex.Lock()
+	d.serialNumber = serialNumber
+	d.mutex.Unlock()
+
+	d.SetDescription("Mikrotik router with serial number " + serialNumber)
+
+	return nil, nil, true
+}
+
 func (d *MikrotikRouter) taskUpdater(ctx context.Context) (interface{}, error) {
 	if !d.IsEnabled() {
+		return nil, nil
+	}
+
+	serialNumber := d.SerialNumber()
+	if serialNumber == "" {
 		return nil, nil
 	}
 
@@ -123,7 +166,7 @@ func (d *MikrotikRouter) taskUpdater(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	metricRouterMikrotikWifiClients.With("serial_number", d.serialNumber).Set(float64(len(clients)))
+	metricRouterMikrotikWifiClients.With("serial_number", serialNumber).Set(float64(len(clients)))
 
 	for _, client := range clients {
 		bytes := strings.Split(client["bytes"], ",")
@@ -143,11 +186,11 @@ func (d *MikrotikRouter) taskUpdater(ctx context.Context) (interface{}, error) {
 			return nil, err
 		}
 
-		metricRouterMikrotikTrafficReceivedBytes.With("serial_number", d.serialNumber).With(
+		metricRouterMikrotikTrafficReceivedBytes.With("serial_number", serialNumber).With(
 			"interface", client["interface"],
 			"mac", client["mac-address"],
 			"name", name).Set(received)
-		metricRouterMikrotikTrafficSentBytes.With("serial_number", d.serialNumber).With(
+		metricRouterMikrotikTrafficSentBytes.With("serial_number", serialNumber).With(
 			"interface", client["interface"],
 			"mac", client["mac-address"],
 			"name", name).Set(sent)
@@ -170,10 +213,10 @@ func (d *MikrotikRouter) taskUpdater(ctx context.Context) (interface{}, error) {
 			return nil, err
 		}
 
-		metricRouterMikrotikTrafficReceivedBytes.With("serial_number", d.serialNumber).With(
+		metricRouterMikrotikTrafficReceivedBytes.With("serial_number", serialNumber).With(
 			"interface", stat["name"],
 			"mac", stat["mac-address"]).Set(received)
-		metricRouterMikrotikTrafficSentBytes.With("serial_number", d.serialNumber).With(
+		metricRouterMikrotikTrafficSentBytes.With("serial_number", serialNumber).With(
 			"interface", stat["name"],
 			"mac", stat["mac-address"]).Set(sent)
 	}
@@ -187,25 +230,25 @@ func (d *MikrotikRouter) taskUpdater(ctx context.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	metricRouterMikrotikMemoryAvailable.With("serial_number", d.serialNumber).Set(memoryFree)
+	metricRouterMikrotikMemoryAvailable.With("serial_number", serialNumber).Set(memoryFree)
 
 	memoryTotal, err := strconv.ParseFloat(resource["total-memory"], 64)
 	if err != nil {
 		return nil, err
 	}
-	metricRouterMikrotikMemoryUsage.With("serial_number", d.serialNumber).Set(memoryTotal - memoryFree)
+	metricRouterMikrotikMemoryUsage.With("serial_number", serialNumber).Set(memoryTotal - memoryFree)
 
 	storageFree, err := strconv.ParseFloat(resource["free-hdd-space"], 64)
 	if err != nil {
 		return nil, err
 	}
-	metricRouterMikrotikStorageAvailable.With("serial_number", d.serialNumber).Set(storageFree)
+	metricRouterMikrotikStorageAvailable.With("serial_number", serialNumber).Set(storageFree)
 
 	storageSpace, err := strconv.ParseFloat(resource["total-hdd-space"], 64)
 	if err != nil {
 		return nil, err
 	}
-	metricRouterMikrotikStorageUsage.With("serial_number", d.serialNumber).Set(storageSpace - storageFree)
+	metricRouterMikrotikStorageUsage.With("serial_number", serialNumber).Set(storageSpace - storageFree)
 
 	return nil, nil
 }

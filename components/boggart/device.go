@@ -9,7 +9,9 @@ import (
 )
 
 var (
-	DeviceEventDeviceRegister = event.NewBaseEvent("DeviceRegister")
+	DeviceEventDeviceRegister           = event.NewBaseEvent("DeviceRegister")
+	DeviceEventDeviceDisabledAfterCheck = event.NewBaseEvent("DeviceDisabledAfterCheck")
+	DeviceEventDeviceEnabledAfterCheck  = event.NewBaseEvent("DeviceEnabledAfterCheck")
 )
 
 type DeviceId int64
