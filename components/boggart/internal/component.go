@@ -108,6 +108,8 @@ func (c *Component) Run() (err error) {
 	taskPulsar.SetName(c.Name() + "-pulsar-updater")
 	c.workers.AddTask(taskPulsar)
 
+	c.devicesManager.Ready()
+
 	return nil
 }
 

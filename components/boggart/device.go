@@ -9,6 +9,7 @@ import (
 )
 
 var (
+	DeviceEventSystemReady              = event.NewBaseEvent("DevicesManagerReady")
 	DeviceEventDeviceRegister           = event.NewBaseEvent("DeviceRegister")
 	DeviceEventDeviceDisabledAfterCheck = event.NewBaseEvent("DeviceDisabledAfterCheck")
 	DeviceEventDeviceEnabledAfterCheck  = event.NewBaseEvent("DeviceEnabledAfterCheck")

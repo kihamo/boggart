@@ -33,6 +33,7 @@ func (l *AnnotationsListener) Events() []workers.Event {
 	return []workers.Event{
 		devices.EventDoorGPIOReedSwitchClose,
 		boggart.DeviceEventDeviceDisabledAfterCheck,
+		boggart.DeviceEventSystemReady,
 	}
 }
 
@@ -58,14 +59,12 @@ func (l *AnnotationsListener) Run(_ context.Context, event workers.Event, t time
 		}
 		tags = append(tags, "door closed")
 
-		annotation := annotations.NewAnnotation(
+		l.annotations.Create(annotations.NewAnnotation(
 			"Door is closed",
 			fmt.Sprintf("Door was open for %.2f seconds", diff.Seconds()),
 			tags,
 			changed,
-			&timeEnd)
-
-		l.annotations.Create(annotation)
+			&timeEnd))
 
 	case boggart.DeviceEventDeviceDisabledAfterCheck:
 		device := args[0].(boggart.Device)
@@ -76,8 +75,14 @@ func (l *AnnotationsListener) Run(_ context.Context, event workers.Event, t time
 		}
 		tags = append(tags, "device disabled")
 
-		annotation := annotations.NewAnnotation("Device is disabled", device.Description(), tags, &t, nil)
-		l.annotations.CreateInStorages(annotation, []string{annotations.StorageGrafana})
+		l.annotations.CreateInStorages(
+			annotations.NewAnnotation("Device is disabled", device.Description(), tags, &t, nil),
+			[]string{annotations.StorageGrafana})
+
+	case boggart.DeviceEventSystemReady:
+		l.annotations.CreateInStorages(
+			annotations.NewAnnotation("System is ready", "", []string{"system"}, &t, nil),
+			[]string{annotations.StorageGrafana})
 	}
 }
 

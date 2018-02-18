@@ -36,6 +36,7 @@ func (l *TelegramListener) Events() []workers.Event {
 	return []workers.Event{
 		boggart.DeviceEventDeviceDisabledAfterCheck,
 		boggart.DeviceEventDeviceEnabledAfterCheck,
+		boggart.DeviceEventSystemReady,
 		devices.EventDoorGPIOReedSwitchOpen,
 		devices.EventDoorGPIOReedSwitchClose,
 	}
@@ -63,6 +64,9 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 	case boggart.DeviceEventDeviceEnabledAfterCheck:
 		device := args[0].(boggart.Device)
 		l.send(fmt.Sprintf("Device is up %s #%s (%s)", args[1], device.Id(), device.Description()))
+
+	case boggart.DeviceEventSystemReady:
+		l.send("Hello. I'm online and ready")
 	}
 }
 
