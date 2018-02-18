@@ -38,7 +38,7 @@ const (
 	DeviceTypeWaterMeter
 )
 
-type DeviceManager interface {
+type DevicesManager interface {
 	snitch.Collector
 
 	Register(Device) string
@@ -46,6 +46,8 @@ type DeviceManager interface {
 	Device(string) Device
 	Devices() map[string]Device
 	DevicesByTypes([]DeviceType) map[string]Device
+	Attach(workers.Event, workers.Listener)
+	DeAttach(workers.Event, workers.Listener)
 }
 
 type Device interface {

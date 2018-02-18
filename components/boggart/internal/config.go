@@ -502,5 +502,5 @@ func (c *Component) ConfigWatchers() []config.Watcher {
 }
 
 func (c *Component) watchDeviceManagerCheckInterval(_ string, newValue interface{}, _ interface{}) {
-	c.devices.SetTickerCheckerDuration(newValue.(time.Duration))
+	c.devicesManager.SetTickerCheckerDuration(newValue.(time.Duration))
 }

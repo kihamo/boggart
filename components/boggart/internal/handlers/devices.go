@@ -16,7 +16,7 @@ type devicesHandlerDevice struct {
 type DevicesHandler struct {
 	dashboard.Handler
 
-	DeviceManager boggart.DeviceManager
+	DeviceManager boggart.DevicesManager
 }
 
 func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {

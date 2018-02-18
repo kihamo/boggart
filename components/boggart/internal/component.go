@@ -5,7 +5,9 @@ import (
 	"sync"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/internal/listeners"
 	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
+	w "github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/annotations"
@@ -29,9 +31,8 @@ type Component struct {
 	routes      []dashboard.Route
 	collector   *MetricsCollector
 
-	devices *DeviceManager
-
 	connectionRS485 *rs485.Connection
+	devicesManager  *DevicesManager
 }
 
 func (c *Component) Name() string {
@@ -81,15 +82,16 @@ func (c *Component) Init(a shadow.Application) error {
 	c.config = a.GetComponent(config.ComponentName).(config.Component)
 	c.workers = a.GetComponent(workers.ComponentName).(workers.Component)
 	c.collector = NewMetricsCollector(c)
-	c.devices = NewDeviceManager(c.workers)
+	c.devicesManager = NewDevicesManager(c.workers)
 
 	return nil
 }
 
 func (c *Component) Run() (err error) {
 	c.logger = logger.NewOrNop(c.Name(), c.application)
-	c.devices.SetTickerCheckerDuration(c.config.Duration(boggart.ConfigDeviceManagerCheckInterval))
-	c.devices.SetLogger(c.logger)
+	c.devicesManager.SetTickerCheckerDuration(c.config.Duration(boggart.ConfigDeviceManagerCheckInterval))
+	c.devicesManager.SetLogger(c.logger)
+	c.devicesManager.Attach(w.EventAll, listeners.NewLoggingListener(c.logger))
 
 	if c.application.HasComponent(messengers.ComponentName) {
 		c.messenger = c.application.GetComponent(messengers.ComponentName).(messengers.Component).Messenger(messengers.MessengerTelegram)
@@ -165,4 +167,8 @@ func (c *Component) ConnectionRS485() *rs485.Connection {
 	defer c.mutex.RUnlock()
 
 	return c.connectionRS485
+}
+
+func (c *Component) DevicesManager() boggart.DevicesManager {
+	return c.devicesManager
 }

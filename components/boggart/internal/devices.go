@@ -42,7 +42,7 @@ func (c *Component) initVideoRecorders() {
 		device.Disable()
 	}
 
-	c.devices.RegisterWithID(boggart.DeviceIdVideoRecorder.String(), device)
+	c.devicesManager.RegisterWithID(boggart.DeviceIdVideoRecorder.String(), device)
 }
 
 func (c *Component) initInternetProviders() {
@@ -58,7 +58,7 @@ func (c *Component) initInternetProviders() {
 		device.Disable()
 	}
 
-	c.devices.Register(device)
+	c.devicesManager.Register(device)
 }
 
 func (c *Component) initCameras() {
@@ -87,7 +87,7 @@ func (c *Component) initCameras() {
 			device.Disable()
 		}
 
-		c.devices.RegisterWithID(boggart.DeviceIdCameraHall.String(), device)
+		c.devicesManager.RegisterWithID(boggart.DeviceIdCameraHall.String(), device)
 	}
 
 	isapi = hikvision.NewISAPI(
@@ -115,7 +115,7 @@ func (c *Component) initCameras() {
 			device.Disable()
 		}
 
-		c.devices.RegisterWithID(boggart.DeviceIdCameraStreet.String(), device)
+		c.devicesManager.RegisterWithID(boggart.DeviceIdCameraStreet.String(), device)
 	}
 }
 
@@ -136,7 +136,7 @@ func (c *Component) initPhones() {
 		device.Disable()
 	}
 
-	c.devices.RegisterWithID(boggart.DeviceIdPhone.String(), device)
+	c.devicesManager.RegisterWithID(boggart.DeviceIdPhone.String(), device)
 }
 
 func (c *Component) initRouters() {
@@ -168,7 +168,7 @@ func (c *Component) initRouters() {
 		device.Disable()
 	}
 
-	c.devices.RegisterWithID(boggart.DeviceIdRouter.String(), device)
+	c.devicesManager.RegisterWithID(boggart.DeviceIdRouter.String(), device)
 }
 
 func (c *Component) initElectricityMeters() {
@@ -187,7 +187,7 @@ func (c *Component) initElectricityMeters() {
 		device.Disable()
 	}
 
-	c.devices.RegisterWithID(boggart.DeviceIdElectricityMeter.String(), device)
+	c.devicesManager.RegisterWithID(boggart.DeviceIdElectricityMeter.String(), device)
 }
 
 func (c *Component) initGPIO() {
@@ -202,7 +202,7 @@ func (c *Component) initGPIO() {
 				c.messenger.SendMessage("238815343", "Entrance door is opened")
 			}
 
-			device := c.devices.Device(boggart.DeviceIdCameraHall.String())
+			device := c.devicesManager.Device(boggart.DeviceIdCameraHall.String())
 			if device != nil && device.IsEnabled() {
 				time.AfterFunc(time.Second, func() {
 					func(camera boggart.Camera) {
@@ -259,7 +259,7 @@ func (c *Component) initGPIO() {
 		device.Disable()
 	}
 
-	c.devices.RegisterWithID(boggart.DeviceIdEntranceDoor.String(), device)
+	c.devicesManager.RegisterWithID(boggart.DeviceIdEntranceDoor.String(), device)
 }
 
 func (c *Component) initPulsarMeters() {
@@ -298,7 +298,7 @@ func (c *Component) initPulsarMeters() {
 		deviceHeatMeter.Disable()
 	}
 
-	c.devices.RegisterWithID(boggart.DeviceIdHeatMeter.String(), deviceHeatMeter)
+	c.devicesManager.RegisterWithID(boggart.DeviceIdHeatMeter.String(), deviceHeatMeter)
 
 	// cold water
 	serialNumber := c.config.String(boggart.ConfigPulsarColdWaterSerialNumber)
@@ -316,7 +316,7 @@ func (c *Component) initPulsarMeters() {
 	}
 
 	deviceWaterMeterCold.SetDescription("Pulsar pulsed cold water meter with serial number " + serialNumber)
-	c.devices.RegisterWithID(boggart.DeviceIdWaterMeterCold.String(), deviceWaterMeterCold)
+	c.devicesManager.RegisterWithID(boggart.DeviceIdWaterMeterCold.String(), deviceWaterMeterCold)
 
 	// hot water
 	serialNumber = c.config.String(boggart.ConfigPulsarHotWaterSerialNumber)
@@ -334,5 +334,5 @@ func (c *Component) initPulsarMeters() {
 	}
 
 	deviceWaterMeterHot.SetDescription("Pulsar pulsed hot water meter with serial number " + serialNumber)
-	c.devices.RegisterWithID(boggart.DeviceIdWaterMeterHot.String(), deviceWaterMeterHot)
+	c.devicesManager.RegisterWithID(boggart.DeviceIdWaterMeterHot.String(), deviceWaterMeterHot)
 }

@@ -7,60 +7,64 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	w "github.com/kihamo/go-workers"
+	"github.com/kihamo/go-workers/manager"
 	"github.com/kihamo/shadow/components/logger"
 	"github.com/kihamo/shadow/components/workers"
 	"github.com/kihamo/snitch"
 	"github.com/pborman/uuid"
 )
 
-type DeviceManager struct {
+type DevicesManager struct {
 	mutex          sync.RWMutex
 	storage        *sync.Map
 	workers        workers.Component
 	logger         logger.Logger
+	listeners      *manager.ListenersManager
 	chanChecker    chan struct{}
 	tickerChecker  *w.Ticker
 	timeoutChecker time.Duration
 }
 
-func NewDeviceManager(workers workers.Component) *DeviceManager {
-	manager := &DeviceManager{
+func NewDevicesManager(workers workers.Component) *DevicesManager {
+	m := &DevicesManager{
 		storage:       new(sync.Map),
 		workers:       workers,
 		logger:        logger.NopLogger,
+		listeners:     manager.NewListenersManager(),
 		chanChecker:   make(chan struct{}, 1),
 		tickerChecker: w.NewTicker(time.Minute),
 		// TODO: setter for this option
 		timeoutChecker: time.Second * 2,
 	}
 
-	go manager.doCheck()
+	go m.doCheck()
 
-	return manager
+	return m
 }
 
-func (m *DeviceManager) SetLogger(logger logger.Logger) {
+func (m *DevicesManager) SetLogger(logger logger.Logger) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
 	m.logger = logger
 }
 
-func (m *DeviceManager) Logger() logger.Logger {
+func (m *DevicesManager) Logger() logger.Logger {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 
 	return m.logger
 }
 
-func (m *DeviceManager) Register(device boggart.Device) string {
+func (m *DevicesManager) Register(device boggart.Device) string {
 	id := uuid.New()
 	m.RegisterWithID(id, device)
 	return id
 }
 
-func (m *DeviceManager) RegisterWithID(id string, device boggart.Device) {
+func (m *DevicesManager) RegisterWithID(id string, device boggart.Device) {
 	m.storage.Store(id, device)
+	m.listeners.AsyncTrigger(boggart.DeviceEventDeviceRegister, device, id)
 
 	tasks := device.Tasks()
 	if len(tasks) > 0 {
@@ -70,7 +74,7 @@ func (m *DeviceManager) RegisterWithID(id string, device boggart.Device) {
 	}
 }
 
-func (m *DeviceManager) Device(id string) boggart.Device {
+func (m *DevicesManager) Device(id string) boggart.Device {
 	if d, ok := m.storage.Load(id); ok {
 		return d.(boggart.Device)
 	}
@@ -78,7 +82,7 @@ func (m *DeviceManager) Device(id string) boggart.Device {
 	return nil
 }
 
-func (m *DeviceManager) Devices() map[string]boggart.Device {
+func (m *DevicesManager) Devices() map[string]boggart.Device {
 	devices := make(map[string]boggart.Device, 0)
 
 	m.storage.Range(func(key interface{}, device interface{}) bool {
@@ -89,7 +93,7 @@ func (m *DeviceManager) Devices() map[string]boggart.Device {
 	return devices
 }
 
-func (m *DeviceManager) DevicesByTypes(types []boggart.DeviceType) map[string]boggart.Device {
+func (m *DevicesManager) DevicesByTypes(types []boggart.DeviceType) map[string]boggart.Device {
 	if len(types) == 0 {
 		return m.Devices()
 	}
@@ -114,7 +118,7 @@ func (m *DeviceManager) DevicesByTypes(types []boggart.DeviceType) map[string]bo
 	return devices
 }
 
-func (m *DeviceManager) Describe(ch chan<- *snitch.Description) {
+func (m *DevicesManager) Describe(ch chan<- *snitch.Description) {
 	m.storage.Range(func(_ interface{}, device interface{}) bool {
 		if !device.(boggart.Device).IsEnabled() {
 			return true
@@ -128,7 +132,7 @@ func (m *DeviceManager) Describe(ch chan<- *snitch.Description) {
 	})
 }
 
-func (m *DeviceManager) Collect(ch chan<- snitch.Metric) {
+func (m *DevicesManager) Collect(ch chan<- snitch.Metric) {
 	m.storage.Range(func(_ interface{}, device interface{}) bool {
 		if !device.(boggart.Device).IsEnabled() {
 			return true
@@ -142,17 +146,25 @@ func (m *DeviceManager) Collect(ch chan<- snitch.Metric) {
 	})
 }
 
-func (m *DeviceManager) SetTickerCheckerDuration(t time.Duration) {
+func (m *DevicesManager) Attach(event w.Event, listener w.Listener) {
+	m.listeners.Attach(event, listener)
+}
+
+func (m *DevicesManager) DeAttach(event w.Event, listener w.Listener) {
+	m.listeners.DeAttach(event, listener)
+}
+
+func (m *DevicesManager) SetTickerCheckerDuration(t time.Duration) {
 	m.tickerChecker.SetDuration(t)
 }
 
-func (m *DeviceManager) Check() {
+func (m *DevicesManager) Check() {
 	if len(m.chanChecker) == 0 {
 		m.chanChecker <- struct{}{}
 	}
 }
 
-func (m *DeviceManager) doCheck() {
+func (m *DevicesManager) doCheck() {
 	for {
 		select {
 		case <-m.chanChecker:
@@ -168,7 +180,7 @@ func (m *DeviceManager) doCheck() {
 	}
 }
 
-func (m *DeviceManager) checker(key string, device boggart.Device) {
+func (m *DevicesManager) checker(key string, device boggart.Device) {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), m.timeoutChecker)
 	defer ctxCancel()
 

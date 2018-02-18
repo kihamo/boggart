@@ -8,7 +8,7 @@ import (
 type CameraHandler struct {
 	dashboard.Handler
 
-	DeviceManager boggart.DeviceManager
+	DeviceManager boggart.DevicesManager
 }
 
 func (h *CameraHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
