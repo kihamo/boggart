@@ -103,7 +103,7 @@ func (d *MikrotikRouter) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(d.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(d.interval)
-	taskUpdater.SetName("device-router-mikrotik-updater-" + d.serialNumber)
+	taskUpdater.SetName("device-router-mikrotik-updater-" + d.Id())
 
 	return []workers.Task{
 		taskSerialNumber,

@@ -1,12 +1,10 @@
 package internal
 
 import (
-	"context"
 	"sync"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
-	"github.com/kihamo/go-workers/task"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/annotations"
 	"github.com/kihamo/shadow/components/config"
@@ -25,7 +23,6 @@ type Component struct {
 	logger      logger.Logger
 	workers     workers.Component
 	routes      []dashboard.Route
-	collector   *MetricsCollector
 
 	connectionRS485 *rs485.Connection
 	devicesManager  *DevicesManager
@@ -73,7 +70,6 @@ func (c *Component) Init(a shadow.Application) error {
 
 	c.config = a.GetComponent(config.ComponentName).(config.Component)
 	c.workers = a.GetComponent(workers.ComponentName).(workers.Component)
-	c.collector = NewMetricsCollector(c)
 	c.devicesManager = NewDevicesManager(c.workers)
 
 	return nil
@@ -96,51 +92,9 @@ func (c *Component) Run() (err error) {
 	c.initVideoRecorders()
 	c.initPulsarMeters()
 
-	taskMercury := task.NewFunctionTask(c.taskMercury)
-	taskMercury.SetRepeats(-1)
-	taskMercury.SetRepeatInterval(c.config.Duration(boggart.ConfigMercuryRepeatInterval))
-	taskMercury.SetName(c.Name() + "-mercury-updater")
-	c.workers.AddTask(taskMercury)
-
-	taskPulsar := task.NewFunctionTask(c.taskPulsar)
-	taskPulsar.SetRepeats(-1)
-	taskPulsar.SetRepeatInterval(c.config.Duration(boggart.ConfigPulsarRepeatInterval))
-	taskPulsar.SetName(c.Name() + "-pulsar-updater")
-	c.workers.AddTask(taskPulsar)
-
 	c.devicesManager.Ready()
 
 	return nil
-}
-
-func (c *Component) taskMercury(context.Context) (interface{}, error) {
-	if c.config.Bool(boggart.ConfigMercuryEnabled) {
-		err := c.collector.UpdaterMercury()
-		if err != nil {
-			c.logger.Error("Mercury updater failed", map[string]interface{}{
-				"error": err.Error(),
-			})
-		}
-
-		return nil, err
-	}
-
-	return nil, nil
-}
-
-func (c *Component) taskPulsar(context.Context) (interface{}, error) {
-	if c.config.Bool(boggart.ConfigPulsarEnabled) {
-		err := c.collector.UpdaterPulsar()
-		if err != nil {
-			c.logger.Error("Puslar updater failed", map[string]interface{}{
-				"error": err.Error(),
-			})
-		}
-
-		return nil, err
-	}
-
-	return nil, nil
 }
 
 func (c *Component) initConnectionRS485() {
