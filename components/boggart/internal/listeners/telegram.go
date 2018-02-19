@@ -27,7 +27,7 @@ func NewTelegramListener(messenger *telegram.Telegram, devicesManager boggart.De
 		messenger:      messenger,
 		chats:          chats,
 	}
-	t.BaseListener.Init()
+	t.Init()
 
 	return t
 }
@@ -36,7 +36,9 @@ func (l *TelegramListener) Events() []workers.Event {
 	return []workers.Event{
 		boggart.DeviceEventDeviceDisabledAfterCheck,
 		boggart.DeviceEventDeviceEnabledAfterCheck,
-		boggart.DeviceEventSystemReady,
+		boggart.DeviceEventDevicesManagerReady,
+		boggart.DeviceEventWifiClientConnected,
+		boggart.DeviceEventWifiClientDisconnected,
 		devices.EventDoorGPIOReedSwitchOpen,
 		devices.EventDoorGPIOReedSwitchClose,
 	}
@@ -65,8 +67,14 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 		device := args[0].(boggart.Device)
 		l.send(fmt.Sprintf("Device is up %s #%s (%s)", args[1], device.Id(), device.Description()))
 
-	case boggart.DeviceEventSystemReady:
+	case boggart.DeviceEventDevicesManagerReady:
 		l.send("Hello. I'm online and ready")
+
+	case boggart.DeviceEventWifiClientConnected:
+		l.send(fmt.Sprintf("%s connected to %s", args[0], args[1]))
+
+	case boggart.DeviceEventWifiClientDisconnected:
+		l.send(fmt.Sprintf("%s disconnected to %s", args[0], args[1]))
 	}
 }
 

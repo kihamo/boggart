@@ -9,10 +9,13 @@ import (
 )
 
 var (
-	DeviceEventSystemReady              = event.NewBaseEvent("DevicesManagerReady")
+	DeviceEventSyslogReceive            = event.NewBaseEvent("SyslogReceive")
+	DeviceEventDevicesManagerReady      = event.NewBaseEvent("DevicesManagerReady")
 	DeviceEventDeviceRegister           = event.NewBaseEvent("DeviceRegister")
 	DeviceEventDeviceDisabledAfterCheck = event.NewBaseEvent("DeviceDisabledAfterCheck")
 	DeviceEventDeviceEnabledAfterCheck  = event.NewBaseEvent("DeviceEnabledAfterCheck")
+	DeviceEventWifiClientConnected      = event.NewBaseEvent("WifiClientConnected")
+	DeviceEventWifiClientDisconnected   = event.NewBaseEvent("WifiClientDisconnected")
 )
 
 type DeviceId int64

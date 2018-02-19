@@ -24,7 +24,7 @@ func NewAnnotationsListener(annotations annotations.Component, startDate *time.T
 		annotations: annotations,
 		startDate:   startDate,
 	}
-	t.BaseListener.Init()
+	t.Init()
 
 	return t
 }
@@ -33,7 +33,7 @@ func (l *AnnotationsListener) Events() []workers.Event {
 	return []workers.Event{
 		devices.EventDoorGPIOReedSwitchClose,
 		boggart.DeviceEventDeviceDisabledAfterCheck,
-		boggart.DeviceEventSystemReady,
+		boggart.DeviceEventDevicesManagerReady,
 	}
 }
 
@@ -79,7 +79,7 @@ func (l *AnnotationsListener) Run(_ context.Context, event workers.Event, t time
 			annotations.NewAnnotation("Device is disabled", device.Description(), tags, &t, nil),
 			[]string{annotations.StorageGrafana})
 
-	case boggart.DeviceEventSystemReady:
+	case boggart.DeviceEventDevicesManagerReady:
 		l.annotations.CreateInStorages(
 			annotations.NewAnnotation("System is ready", "", []string{"system"}, &t, nil),
 			[]string{annotations.StorageGrafana})

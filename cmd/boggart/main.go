@@ -11,6 +11,7 @@ import (
 	config "github.com/kihamo/shadow/components/config/instance"
 	dashboard "github.com/kihamo/shadow/components/dashboard/instance"
 	//database "github.com/kihamo/shadow/components/database/instance"
+	syslog "github.com/kihamo/boggart/components/syslog/instance"
 	logger "github.com/kihamo/shadow/components/logger/instance"
 	messengers "github.com/kihamo/shadow/components/messengers/instance"
 	metrics "github.com/kihamo/shadow/components/metrics/instance"
@@ -38,6 +39,7 @@ func main() {
 			messengers.NewComponent(),
 			metrics.NewComponent(),
 			profiling.NewComponent(),
+			syslog.NewComponent(),
 			workers.NewComponent(),
 		},
 	)

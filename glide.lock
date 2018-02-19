@@ -1,5 +1,5 @@
-hash: 5da8e7e0ea4c04c78d2b274dd21acef70beeb4cc0d9ef612fba4614e545994eb
-updated: 2018-02-18T21:55:24.149263523+03:00
+hash: 11411c98123d7aa053154b66f47e45504440b7a926c9e502bee301c9f3970816
+updated: 2018-02-19T22:02:54.628695638+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -128,6 +128,8 @@ imports:
   - providers/github
   - providers/gitlab
   - providers/gplus
+- name: github.com/mcuadros/go-syslog
+  version: 9cf13b7327c0e153da3cba3540c2ae2b879c3859
 - name: github.com/OneOfOne/xxhash
   version: 4e9e81466dc37c9fd94ce9ecf42020ef54112203
 - name: github.com/patrickmn/go-cache
@@ -222,6 +224,13 @@ imports:
   version: c87af80f3cc5036b55b83d77171e156791085e2e
 - name: gopkg.in/Masterminds/squirrel.v1
   version: a6b93000bd219143c56c16e6cb1c4b91da3f224b
+- name: gopkg.in/mcuadros/go-syslog.v2
+  version: 9cf13b7327c0e153da3cba3540c2ae2b879c3859
+  subpackages:
+  - format
+  - internal/syslogparser
+  - internal/syslogparser/rfc3164
+  - internal/syslogparser/rfc5424
 - name: gopkg.in/routeros.v2
   version: 2dc19c12445caefdc2d128f7331dcc83284211ef
   subpackages:

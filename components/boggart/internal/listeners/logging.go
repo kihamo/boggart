@@ -20,7 +20,7 @@ func NewLoggingListener(logger logger.Logger) *LoggingListener {
 	t := &LoggingListener{
 		logger: logger,
 	}
-	t.BaseListener.Init()
+	t.Init()
 
 	return t
 }
@@ -55,8 +55,11 @@ func (l *LoggingListener) Run(_ context.Context, event workers.Event, t time.Tim
 			"device.key": args[1],
 		})
 
+	case boggart.DeviceEventSyslogReceive:
+		l.logger.Debug("Syslog message receive", args[0].(map[string]interface{}))
+
 	default:
-		l.logger.Info("Fire unknown event", map[string]interface{}{
+		l.logger.Debug("Fire unknown event", map[string]interface{}{
 			"event.id":   event.Id(),
 			"event.name": event.Name(),
 			"args":       args,

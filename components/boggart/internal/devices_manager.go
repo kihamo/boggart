@@ -147,7 +147,11 @@ func (m *DevicesManager) DeAttach(event w.Event, listener w.Listener) {
 }
 
 func (m *DevicesManager) Ready() {
-	m.listeners.AsyncTrigger(boggart.DeviceEventSystemReady)
+	m.listeners.AsyncTrigger(boggart.DeviceEventDevicesManagerReady)
+}
+
+func (m *DevicesManager) ListenersManager() *manager.ListenersManager {
+	return m.listeners
 }
 
 func (m *DevicesManager) Listeners() []w.Listener {

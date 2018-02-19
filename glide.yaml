@@ -12,3 +12,5 @@ import:
   version: a6de66e7e47065fca1a55c62c3f3cab3144694e6
 - package: github.com/PuerkitoBio/goquery
   version: v1.3.0
+- package: github.com/mcuadros/go-syslog
+  version: v2.2.1

@@ -5,6 +5,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/internal/listeners"
+	"github.com/kihamo/boggart/components/syslog"
 	w "github.com/kihamo/go-workers"
 	"github.com/kihamo/shadow/components/annotations"
 	"github.com/kihamo/shadow/components/messengers"
@@ -13,6 +14,14 @@ import (
 
 func (c *Component) initListeners() {
 	c.devicesManager.Attach(w.EventAll, listeners.NewLoggingListener(c.logger))
+
+	if c.application.HasComponent(syslog.ComponentName) {
+		syslogListener := listeners.NewSyslogListener(c.devicesManager.ListenersManager())
+
+		for _, event := range syslogListener.Events() {
+			c.devicesManager.Attach(event, syslogListener)
+		}
+	}
 
 	if c.application.HasComponent(messengers.ComponentName) {
 		messenger := c.application.GetComponent(messengers.ComponentName).(messengers.Component).
