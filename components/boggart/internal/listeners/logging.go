@@ -25,6 +25,12 @@ func NewLoggingListener(logger logger.Logger) *LoggingListener {
 	return t
 }
 
+func (l *LoggingListener) Events() []workers.Event {
+	return []workers.Event{
+		workers.EventAll,
+	}
+}
+
 func (l *LoggingListener) Run(_ context.Context, event workers.Event, t time.Time, args ...interface{}) {
 	switch event {
 	case boggart.DeviceEventDeviceRegister:

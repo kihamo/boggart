@@ -75,6 +75,7 @@ type Device interface {
 	Enable()
 	Ping(context.Context) bool
 	Tasks() []workers.Task
+	Listeners() []workers.ListenerWithEvents
 	TriggerEventChannel() <-chan DeviceTriggerEvent
 }
 

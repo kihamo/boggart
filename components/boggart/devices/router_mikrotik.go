@@ -3,6 +3,9 @@ package devices
 import (
 	"context"
 	"errors"
+	"fmt"
+	"net"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -11,6 +14,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/mikrotik"
 	"github.com/kihamo/go-workers"
+	"github.com/kihamo/go-workers/listener"
 	"github.com/kihamo/go-workers/task"
 	"github.com/kihamo/snitch"
 )
@@ -23,6 +27,8 @@ var (
 	metricRouterMikrotikMemoryAvailable      = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_memory_available_bytes", "Memory available in Mikrotik router")
 	metricRouterMikrotikStorageUsage         = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_storage_usage_bytes", "Storage usage in Mikrotik router")
 	metricRouterMikrotikStorageAvailable     = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_storage_available_bytes", "Storage available in Mikrotik router")
+
+	wifiClientRegexp = regexp.MustCompile(`^([^@]+)@([^:\s]+):\s+([^\s,]+)`)
 )
 
 type MikrotikRouter struct {
@@ -34,6 +40,23 @@ type MikrotikRouter struct {
 	interval     time.Duration
 }
 
+type MikrotikRouterListener struct {
+	listener.BaseListener
+
+	router *MikrotikRouter
+}
+
+type MikrotikRouterMac struct {
+	Address string
+	ARP     struct {
+		IP      string
+		Comment string
+	}
+	DHCP struct {
+		Hostname string
+	}
+}
+
 func NewMikrotikRouter(provider *mikrotik.Client, interval time.Duration) *MikrotikRouter {
 	device := &MikrotikRouter{
 		provider: provider,
@@ -43,6 +66,15 @@ func NewMikrotikRouter(provider *mikrotik.Client, interval time.Duration) *Mikro
 	device.SetDescription("Mikrotik router")
 
 	return device
+}
+
+func NewMikrotikRouterListener(router *MikrotikRouter) *MikrotikRouterListener {
+	l := &MikrotikRouterListener{
+		router: router,
+	}
+	l.Init()
+
+	return l
 }
 
 func (d *MikrotikRouter) Types() []boggart.DeviceType {
@@ -109,6 +141,41 @@ func (d *MikrotikRouter) Tasks() []workers.Task {
 		taskSerialNumber,
 		taskUpdater,
 	}
+}
+
+func (d *MikrotikRouter) Listeners() []workers.ListenerWithEvents {
+	return []workers.ListenerWithEvents{
+		NewMikrotikRouterListener(d),
+	}
+}
+
+func (d *MikrotikRouter) Mac(mac string) *MikrotikRouterMac {
+	info := &MikrotikRouterMac{
+		Address: mac,
+	}
+
+	if !d.IsEnabled() {
+		return info
+	}
+
+	if d.SerialNumber() == "" {
+		return info
+	}
+
+	if arp, err := d.provider.ARPTable(); err == nil {
+		if record, ok := arp[mac]; ok {
+			info.ARP.IP = record["address"]
+			info.ARP.Comment = record["comment"]
+		}
+	}
+
+	if dhcp, err := d.provider.DHCPLease(); err == nil {
+		if record, ok := dhcp[mac]; ok {
+			info.DHCP.Hostname = record
+		}
+	}
+
+	return info
 }
 
 func (d *MikrotikRouter) taskSerialNumber(ctx context.Context) (interface{}, error, bool) {
@@ -251,4 +318,51 @@ func (d *MikrotikRouter) taskUpdater(ctx context.Context) (interface{}, error) {
 	metricRouterMikrotikStorageUsage.With("serial_number", serialNumber).Set(storageSpace - storageFree)
 
 	return nil, nil
+}
+
+func (l *MikrotikRouterListener) Events() []workers.Event {
+	return []workers.Event{
+		boggart.DeviceEventSyslogReceive,
+	}
+}
+
+func (l *MikrotikRouterListener) Name() string {
+	return boggart.ComponentName + ".device.router.mikrotik." + l.router.SerialNumber()
+}
+
+func (l *MikrotikRouterListener) Run(_ context.Context, event workers.Event, t time.Time, args ...interface{}) {
+	switch event {
+	case boggart.DeviceEventSyslogReceive:
+		message := args[0].(map[string]interface{})
+
+		tag, ok := message["tag"]
+		if !ok {
+			return
+		}
+
+		content, ok := message["content"]
+		if !ok {
+			return
+		}
+
+		// TODO: check hostname
+
+		check := wifiClientRegexp.FindStringSubmatch(fmt.Sprintf("%s:%s", tag, content))
+		if len(check) < 4 {
+			return
+		}
+
+		if _, err := net.ParseMAC(check[1]); err != nil {
+			return
+		}
+
+		mac := l.router.Mac(check[1])
+
+		switch check[3] {
+		case "connected":
+			l.router.TriggerEvent(boggart.DeviceEventWifiClientConnected, mac, check[2])
+		case "disconnected":
+			l.router.TriggerEvent(boggart.DeviceEventWifiClientDisconnected, mac, check[2])
+		}
+	}
 }

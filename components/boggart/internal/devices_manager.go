@@ -60,6 +60,13 @@ func (m *DevicesManager) RegisterWithID(id string, device boggart.Device) {
 		}
 	}
 
+	listeners := device.Listeners()
+	if len(listeners) > 0 {
+		for _, listener := range listeners {
+			m.listeners.AddListener(listener)
+		}
+	}
+
 	events := device.TriggerEventChannel()
 	if events != nil {
 		go m.doDeviceEvents(events)
@@ -156,6 +163,10 @@ func (m *DevicesManager) ListenersManager() *manager.ListenersManager {
 
 func (m *DevicesManager) Listeners() []w.Listener {
 	return m.listeners.Listeners()
+}
+
+func (m *DevicesManager) AddListener(listener w.ListenerWithEvents) {
+	m.listeners.AddListener(listener)
 }
 
 func (m *DevicesManager) GetListenerMetadata(id string) w.Metadata {

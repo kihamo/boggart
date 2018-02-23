@@ -69,6 +69,10 @@ func (d *DeviceBase) Disable() {
 	atomic.StoreUint64(&d.enabled, 0)
 }
 
+func (d *DeviceBase) Listeners() []workers.ListenerWithEvents {
+	return nil
+}
+
 func (d *DeviceBase) Tasks() []workers.Task {
 	return nil
 }

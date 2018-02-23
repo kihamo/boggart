@@ -108,7 +108,7 @@ func (c *Client) DNSStatic() (map[string]string, error) {
 	return table, nil
 }
 
-func (c *Client) ARPTable() (map[string]string, error) {
+func (c *Client) ARPTable() (map[string]map[string]string, error) {
 	reply, err := c.client.RunArgs([]string{"/ip/arp/print"})
 	if err != nil {
 		return nil, err
@@ -118,9 +118,9 @@ func (c *Client) ARPTable() (map[string]string, error) {
 		return nil, errors.New("Empty reply from device")
 	}
 
-	table := make(map[string]string, len(reply.Re))
+	table := make(map[string]map[string]string, len(reply.Re))
 	for _, re := range reply.Re {
-		table[re.Map["mac-address"]] = re.Map["address"]
+		table[re.Map["mac-address"]] = re.Map
 	}
 
 	return table, nil

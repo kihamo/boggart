@@ -1,8 +1,9 @@
 package mikrotik
 
-func GetNameByMac(mac string, arp, dns, dhcp map[string]string) (name string) {
-	if ip, ok := arp[mac]; ok {
-		if dnsName, ok := dns[ip]; ok {
+func GetNameByMac(mac string, arp map[string]map[string]string, dns, dhcp map[string]string) (name string) {
+	arpRecord, arpFound := arp[mac]
+	if arpFound {
+		if dnsName, ok := dns[arpRecord["address"]]; ok {
 			name = dnsName
 		}
 	}
@@ -11,6 +12,10 @@ func GetNameByMac(mac string, arp, dns, dhcp map[string]string) (name string) {
 		if dhcpHost, ok := dhcp[mac]; ok {
 			name = dhcpHost
 		}
+	}
+
+	if name == "" && arpFound && arpRecord["comment"] != "" {
+		return arpRecord["comment"]
 	}
 
 	return name
