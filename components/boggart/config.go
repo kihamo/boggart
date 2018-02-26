@@ -55,4 +55,9 @@ const (
 	ConfigSoftVideoLogin                        = ComponentName + ".softvideo.login"
 	ConfigSoftVideoPassword                     = ComponentName + ".softvideo.password"
 	ConfigMonitoringExternalURL                 = ComponentName + ".monitoring-external-url"
+	ConfigApcupsdEnabled                        = ComponentName + ".apcupsd.enabled"
+	ConfigApcupsdRepeatInterval                 = ComponentName + ".apcupsd.repeat-interval"
+	ConfigApcupsdNISAddress                     = ComponentName + ".apcupsd.nis.address"
+	ConfigApcupsdFileStatus                     = ComponentName + ".apcupsd.file.status"
+	ConfigApcupsdFileEvents                     = ComponentName + ".apcupsd.file.events"
 )

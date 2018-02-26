@@ -21,21 +21,20 @@ var (
 )
 
 type PulsarHeadMeter struct {
-	boggart.DeviceBase
+	boggart.DeviceWithSerialNumber
 
-	serialNumber string
-	provider     *pulsar.HeatMeter
-	interval     time.Duration
+	provider *pulsar.HeatMeter
+	interval time.Duration
 }
 
 func NewPulsarHeadMeter(provider *pulsar.HeatMeter, interval time.Duration) *PulsarHeadMeter {
 	device := &PulsarHeadMeter{
-		serialNumber: hex.EncodeToString(provider.Address()),
-		provider:     provider,
-		interval:     interval,
+		provider: provider,
+		interval: interval,
 	}
 	device.Init()
-	device.SetDescription("Pulsar heat meter with serial number " + device.serialNumber)
+	device.SetSerialNumber(hex.EncodeToString(provider.Address()))
+	device.SetDescription("Pulsar heat meter with serial number " + device.SerialNumber())
 
 	return device
 }
@@ -92,19 +91,23 @@ func (d *PulsarHeadMeter) Consumption(context.Context) (float64, error) {
 }
 
 func (d *PulsarHeadMeter) Describe(ch chan<- *snitch.Description) {
-	metricHeatMeterPulsarTemperatureIn.With("serial_number", d.serialNumber).Describe(ch)
-	metricHeatMeterPulsarTemperatureOut.With("serial_number", d.serialNumber).Describe(ch)
-	metricHeatMeterPulsarTemperatureDelta.With("serial_number", d.serialNumber).Describe(ch)
-	metricHeatMeterPulsarEnergy.With("serial_number", d.serialNumber).Describe(ch)
-	metricHeatMeterPulsarConsumption.With("serial_number", d.serialNumber).Describe(ch)
+	serialNumber := d.SerialNumber()
+
+	metricHeatMeterPulsarTemperatureIn.With("serial_number", serialNumber).Describe(ch)
+	metricHeatMeterPulsarTemperatureOut.With("serial_number", serialNumber).Describe(ch)
+	metricHeatMeterPulsarTemperatureDelta.With("serial_number", serialNumber).Describe(ch)
+	metricHeatMeterPulsarEnergy.With("serial_number", serialNumber).Describe(ch)
+	metricHeatMeterPulsarConsumption.With("serial_number", serialNumber).Describe(ch)
 }
 
 func (d *PulsarHeadMeter) Collect(ch chan<- snitch.Metric) {
-	metricHeatMeterPulsarTemperatureIn.With("serial_number", d.serialNumber).Collect(ch)
-	metricHeatMeterPulsarTemperatureOut.With("serial_number", d.serialNumber).Collect(ch)
-	metricHeatMeterPulsarTemperatureDelta.With("serial_number", d.serialNumber).Collect(ch)
-	metricHeatMeterPulsarEnergy.With("serial_number", d.serialNumber).Collect(ch)
-	metricHeatMeterPulsarConsumption.With("serial_number", d.serialNumber).Collect(ch)
+	serialNumber := d.SerialNumber()
+
+	metricHeatMeterPulsarTemperatureIn.With("serial_number", serialNumber).Collect(ch)
+	metricHeatMeterPulsarTemperatureOut.With("serial_number", serialNumber).Collect(ch)
+	metricHeatMeterPulsarTemperatureDelta.With("serial_number", serialNumber).Collect(ch)
+	metricHeatMeterPulsarEnergy.With("serial_number", serialNumber).Collect(ch)
+	metricHeatMeterPulsarConsumption.With("serial_number", serialNumber).Collect(ch)
 }
 
 func (d *PulsarHeadMeter) Ping(_ context.Context) bool {
@@ -116,7 +119,7 @@ func (d *PulsarHeadMeter) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(d.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(d.interval)
-	taskUpdater.SetName("device-heat-meter-pulsar-updater-" + d.serialNumber)
+	taskUpdater.SetName("device-heat-meter-pulsar-updater-" + d.SerialNumber())
 
 	return []workers.Task{
 		taskUpdater,
@@ -128,32 +131,34 @@ func (d *PulsarHeadMeter) taskUpdater(ctx context.Context) (interface{}, error) 
 		return nil, nil
 	}
 
+	serialNumber := d.SerialNumber()
+
 	if value, err := d.TemperatureIn(ctx); err == nil {
-		metricHeatMeterPulsarTemperatureIn.With("serial_number", d.serialNumber).Set(value)
+		metricHeatMeterPulsarTemperatureIn.With("serial_number", serialNumber).Set(value)
 	} else {
 		return nil, err
 	}
 
 	if value, err := d.TemperatureOut(ctx); err == nil {
-		metricHeatMeterPulsarTemperatureOut.With("serial_number", d.serialNumber).Set(value)
+		metricHeatMeterPulsarTemperatureOut.With("serial_number", serialNumber).Set(value)
 	} else {
 		return nil, err
 	}
 
 	if value, err := d.TemperatureDelta(ctx); err == nil {
-		metricHeatMeterPulsarTemperatureDelta.With("serial_number", d.serialNumber).Set(value)
+		metricHeatMeterPulsarTemperatureDelta.With("serial_number", serialNumber).Set(value)
 	} else {
 		return nil, err
 	}
 
 	if value, err := d.Energy(ctx); err == nil {
-		metricHeatMeterPulsarEnergy.With("serial_number", d.serialNumber).Set(value)
+		metricHeatMeterPulsarEnergy.With("serial_number", serialNumber).Set(value)
 	} else {
 		return nil, err
 	}
 
 	if value, err := d.Consumption(ctx); err == nil {
-		metricHeatMeterPulsarConsumption.With("serial_number", d.serialNumber).Set(value)
+		metricHeatMeterPulsarConsumption.With("serial_number", serialNumber).Set(value)
 	} else {
 		return nil, err
 	}

@@ -73,12 +73,12 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 	case boggart.DeviceEventWifiClientConnected:
 		mac := args[1].(*devices.MikrotikRouterMac)
 
-		l.send(fmt.Sprintf("%s with pi %s (%s, %s) connected to %s", mac.Address, mac.ARP.IP, mac.ARP.Comment, mac.DHCP.Hostname, args[2]))
+		l.send(fmt.Sprintf("%s with IP %s (%s, %s) connected to %s", mac.Address, mac.ARP.IP, mac.ARP.Comment, mac.DHCP.Hostname, args[2]))
 
 	case boggart.DeviceEventWifiClientDisconnected:
 		mac := args[1].(*devices.MikrotikRouterMac)
 
-		l.send(fmt.Sprintf("%s with pi %s (%s, %s) disconnected to %s", mac.Address, mac.ARP.IP, mac.ARP.Comment, mac.DHCP.Hostname, args[2]))
+		l.send(fmt.Sprintf("%s with IP %s (%s, %s) disconnected to %s", mac.Address, mac.ARP.IP, mac.ARP.Comment, mac.DHCP.Hostname, args[2]))
 	}
 }
 

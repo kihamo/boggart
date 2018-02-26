@@ -5,6 +5,9 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/devices"
+	"github.com/kihamo/boggart/components/boggart/protocols/apcupsd"
+	"github.com/kihamo/boggart/components/boggart/protocols/apcupsd/file"
+	"github.com/kihamo/boggart/components/boggart/protocols/apcupsd/nis"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 	"github.com/kihamo/boggart/components/boggart/providers/mercury"
 	"github.com/kihamo/boggart/components/boggart/providers/mikrotik"
@@ -245,4 +248,28 @@ func (c *Component) initPulsarMeters() {
 
 	deviceWaterMeterHot.SetDescription("Pulsar pulsed hot water meter with serial number " + serialNumber)
 	c.devicesManager.RegisterWithID(boggart.DeviceIdWaterMeterHot.String(), deviceWaterMeterHot)
+}
+
+func (c *Component) initUPS() {
+	var client *apcupsd.Client
+
+	if address := c.config.String(boggart.ConfigApcupsdNISAddress); address != "" {
+		client = apcupsd.NewClient(
+			nis.NewStatusReader(address),
+			nis.NewEventsReader(address))
+	} else {
+		client = apcupsd.NewClient(
+			file.NewStatusReader(c.config.String(boggart.ConfigApcupsdFileStatus)),
+			file.NewEventsReader(c.config.String(boggart.ConfigApcupsdFileEvents)))
+	}
+
+	device := devices.NewApcupsdUPS(client, c.config.Duration(boggart.ConfigApcupsdRepeatInterval))
+
+	if c.config.Bool(boggart.ConfigApcupsdEnabled) {
+		device.Enable()
+	} else {
+		device.Disable()
+	}
+
+	c.devicesManager.RegisterWithID(boggart.DeviceIdUPS.String(), device)
 }

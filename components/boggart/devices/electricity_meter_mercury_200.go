@@ -27,21 +27,20 @@ var (
 )
 
 type Mercury200ElectricityMeter struct {
-	boggart.DeviceBase
+	boggart.DeviceWithSerialNumber
 
-	provider     *mercury.ElectricityMeter200
-	serialNumber string
-	interval     time.Duration
+	provider *mercury.ElectricityMeter200
+	interval time.Duration
 }
 
 func NewMercury200ElectricityMeter(serialNumber string, provider *mercury.ElectricityMeter200, interval time.Duration) *Mercury200ElectricityMeter {
 	device := &Mercury200ElectricityMeter{
-		provider:     provider,
-		serialNumber: serialNumber,
-		interval:     interval,
+		provider: provider,
+		interval: interval,
 	}
 	device.Init()
-	device.SetDescription("Mercury 200 electricity meter with serial number " + device.serialNumber)
+	device.SetSerialNumber(serialNumber)
+	device.SetDescription("Mercury 200 electricity meter with serial number " + serialNumber)
 
 	return device
 }
@@ -98,19 +97,23 @@ func (d *Mercury200ElectricityMeter) BatteryVoltage(_ context.Context) (float64,
 }
 
 func (d *Mercury200ElectricityMeter) Describe(ch chan<- *snitch.Description) {
-	metricElectricityMeterMercuryTariff.With("serial_number", d.serialNumber).Describe(ch)
-	metricElectricityMeterMercuryVoltage.With("serial_number", d.serialNumber).Describe(ch)
-	metricElectricityMeterMercuryAmperage.With("serial_number", d.serialNumber).Describe(ch)
-	metricElectricityMeterMercuryPower.With("serial_number", d.serialNumber).Describe(ch)
-	metricElectricityMeterMercuryBatteryVoltage.With("serial_number", d.serialNumber).Describe(ch)
+	serialNumber := d.SerialNumber()
+
+	metricElectricityMeterMercuryTariff.With("serial_number", serialNumber).Describe(ch)
+	metricElectricityMeterMercuryVoltage.With("serial_number", serialNumber).Describe(ch)
+	metricElectricityMeterMercuryAmperage.With("serial_number", serialNumber).Describe(ch)
+	metricElectricityMeterMercuryPower.With("serial_number", serialNumber).Describe(ch)
+	metricElectricityMeterMercuryBatteryVoltage.With("serial_number", serialNumber).Describe(ch)
 }
 
 func (d *Mercury200ElectricityMeter) Collect(ch chan<- snitch.Metric) {
-	metricElectricityMeterMercuryTariff.With("serial_number", d.serialNumber).Collect(ch)
-	metricElectricityMeterMercuryVoltage.With("serial_number", d.serialNumber).Collect(ch)
-	metricElectricityMeterMercuryAmperage.With("serial_number", d.serialNumber).Collect(ch)
-	metricElectricityMeterMercuryPower.With("serial_number", d.serialNumber).Collect(ch)
-	metricElectricityMeterMercuryBatteryVoltage.With("serial_number", d.serialNumber).Collect(ch)
+	serialNumber := d.SerialNumber()
+
+	metricElectricityMeterMercuryTariff.With("serial_number", serialNumber).Collect(ch)
+	metricElectricityMeterMercuryVoltage.With("serial_number", serialNumber).Collect(ch)
+	metricElectricityMeterMercuryAmperage.With("serial_number", serialNumber).Collect(ch)
+	metricElectricityMeterMercuryPower.With("serial_number", serialNumber).Collect(ch)
+	metricElectricityMeterMercuryBatteryVoltage.With("serial_number", serialNumber).Collect(ch)
 }
 
 func (d *Mercury200ElectricityMeter) Ping(_ context.Context) bool {
@@ -122,7 +125,7 @@ func (d *Mercury200ElectricityMeter) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(d.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(d.interval)
-	taskUpdater.SetName("device-electricity-meter-mercury-200-updater-" + d.serialNumber)
+	taskUpdater.SetName("device-electricity-meter-mercury-200-updater-" + d.SerialNumber())
 
 	return []workers.Task{
 		taskUpdater,
@@ -139,7 +142,9 @@ func (d *Mercury200ElectricityMeter) taskUpdater(ctx context.Context) (interface
 		return nil, err
 	}
 
-	metricTariff := metricElectricityMeterMercuryTariff.With("serial_number", d.serialNumber)
+	serialNumber := d.SerialNumber()
+
+	metricTariff := metricElectricityMeterMercuryTariff.With("serial_number", serialNumber)
 	metricTariff.With("tariff", Mercury200ElectricityMeterTariff1).Set(tariffs[Mercury200ElectricityMeterTariff1])
 	metricTariff.With("tariff", Mercury200ElectricityMeterTariff2).Set(tariffs[Mercury200ElectricityMeterTariff2])
 	metricTariff.With("tariff", Mercury200ElectricityMeterTariff3).Set(tariffs[Mercury200ElectricityMeterTariff3])
@@ -150,15 +155,15 @@ func (d *Mercury200ElectricityMeter) taskUpdater(ctx context.Context) (interface
 	if err != nil {
 		return nil, err
 	}
-	metricElectricityMeterMercuryVoltage.With("serial_number", d.serialNumber).Set(voltage)
-	metricElectricityMeterMercuryAmperage.With("serial_number", d.serialNumber).Set(amperage)
-	metricElectricityMeterMercuryPower.With("serial_number", d.serialNumber).Set(float64(power))
+	metricElectricityMeterMercuryVoltage.With("serial_number", serialNumber).Set(voltage)
+	metricElectricityMeterMercuryAmperage.With("serial_number", serialNumber).Set(amperage)
+	metricElectricityMeterMercuryPower.With("serial_number", serialNumber).Set(float64(power))
 
 	voltage, err = d.BatteryVoltage(ctx)
 	if err != nil {
 		return nil, nil
 	}
-	metricElectricityMeterMercuryBatteryVoltage.With("serial_number", d.serialNumber).Set(voltage)
+	metricElectricityMeterMercuryBatteryVoltage.With("serial_number", serialNumber).Set(voltage)
 
 	return nil, nil
 }

@@ -21,24 +21,23 @@ var (
 )
 
 type PulsarPulsedWaterMeter struct {
-	boggart.DeviceBase
+	boggart.DeviceWithSerialNumber
 
 	input        uint64
 	volumeOffset float64
-	serialNumber string
 	provider     *pulsar.HeatMeter
 	interval     time.Duration
 }
 
 func NewPulsarPulsedWaterMeter(serialNumber string, volumeOffset float64, provider *pulsar.HeatMeter, input uint64, interval time.Duration) *PulsarPulsedWaterMeter {
 	device := &PulsarPulsedWaterMeter{
-		serialNumber: serialNumber,
 		volumeOffset: volumeOffset,
 		provider:     provider,
 		input:        input,
 		interval:     interval,
 	}
 	device.Init()
+	device.SetSerialNumber(serialNumber)
 
 	return device
 }
@@ -77,13 +76,17 @@ func (d *PulsarPulsedWaterMeter) Pulses(_ context.Context) (uint64, error) {
 }
 
 func (d *PulsarPulsedWaterMeter) Describe(ch chan<- *snitch.Description) {
-	metricWaterMeterPulsarPulsedVolume.With("serial_number", d.serialNumber).Describe(ch)
-	metricWaterMeterPulsarPulsedPulses.With("serial_number", d.serialNumber).Describe(ch)
+	serialNumber := d.SerialNumber()
+
+	metricWaterMeterPulsarPulsedVolume.With("serial_number", serialNumber).Describe(ch)
+	metricWaterMeterPulsarPulsedPulses.With("serial_number", serialNumber).Describe(ch)
 }
 
 func (d *PulsarPulsedWaterMeter) Collect(ch chan<- snitch.Metric) {
-	metricWaterMeterPulsarPulsedVolume.With("serial_number", d.serialNumber).Collect(ch)
-	metricWaterMeterPulsarPulsedPulses.With("serial_number", d.serialNumber).Collect(ch)
+	serialNumber := d.SerialNumber()
+
+	metricWaterMeterPulsarPulsedVolume.With("serial_number", serialNumber).Collect(ch)
+	metricWaterMeterPulsarPulsedPulses.With("serial_number", serialNumber).Collect(ch)
 }
 
 func (d *PulsarPulsedWaterMeter) Ping(_ context.Context) bool {
@@ -95,7 +98,7 @@ func (d *PulsarPulsedWaterMeter) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(d.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(d.interval)
-	taskUpdater.SetName("device-water-meter-pulsar-pulsed-updater-" + d.serialNumber)
+	taskUpdater.SetName("device-water-meter-pulsar-pulsed-updater-" + d.SerialNumber())
 
 	return []workers.Task{
 		taskUpdater,
@@ -116,8 +119,10 @@ func (d *PulsarPulsedWaterMeter) taskUpdater(ctx context.Context) (interface{}, 
 		return nil, err
 	}
 
-	metricWaterMeterPulsarPulsedPulses.With("serial_number", d.serialNumber).Set(float64(pulses))
-	metricWaterMeterPulsarPulsedVolume.With("serial_number", d.serialNumber).Set(d.volume(pulses))
+	serialNumber := d.SerialNumber()
+
+	metricWaterMeterPulsarPulsedPulses.With("serial_number", serialNumber).Set(float64(pulses))
+	metricWaterMeterPulsarPulsedVolume.With("serial_number", serialNumber).Set(d.volume(pulses))
 
 	return nil, nil
 }

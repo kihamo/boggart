@@ -3,7 +3,6 @@ package devices
 import (
 	"context"
 	"errors"
-	"sync"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -19,13 +18,11 @@ var (
 )
 
 type HikVisionCamera struct {
-	boggart.DeviceBase
+	boggart.DeviceWithSerialNumber
 
-	mutex        sync.RWMutex
-	isapi        *hikvision.ISAPI
-	channel      uint64
-	serialNumber string
-	interval     time.Duration
+	isapi    *hikvision.ISAPI
+	channel  uint64
+	interval time.Duration
 }
 
 func NewCameraHikVision(isapi *hikvision.ISAPI, channel uint64, interval time.Duration) *HikVisionCamera {
@@ -75,13 +72,6 @@ func (d *HikVisionCamera) Ping(ctx context.Context) bool {
 	return err == nil
 }
 
-func (d *HikVisionCamera) SerialNumber() string {
-	d.mutex.RLock()
-	defer d.mutex.RUnlock()
-
-	return d.serialNumber
-}
-
 func (d *HikVisionCamera) Tasks() []workers.Task {
 	taskSerialNumber := task.NewFunctionTillStopTask(d.taskSerialNumber)
 	taskSerialNumber.SetTimeout(time.Second * 5)
@@ -114,11 +104,8 @@ func (d *HikVisionCamera) taskSerialNumber(ctx context.Context) (interface{}, er
 		return nil, errors.New("Device returns empty serial number"), false
 	}
 
+	d.SetSerialNumber(deviceInfo.SerialNumber)
 	d.SetDescription("HikVision camera with serial number " + deviceInfo.SerialNumber)
-
-	d.mutex.Lock()
-	d.serialNumber = deviceInfo.SerialNumber
-	d.mutex.Unlock()
 
 	return nil, nil, true
 }

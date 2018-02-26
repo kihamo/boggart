@@ -8,7 +8,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -32,12 +31,10 @@ var (
 )
 
 type MikrotikRouter struct {
-	boggart.DeviceBase
+	boggart.DeviceWithSerialNumber
 
-	mutex        sync.RWMutex
-	provider     *mikrotik.Client
-	serialNumber string
-	interval     time.Duration
+	provider *mikrotik.Client
+	interval time.Duration
 }
 
 type MikrotikRouterListener struct {
@@ -118,13 +115,6 @@ func (d *MikrotikRouter) Ping(_ context.Context) bool {
 	return err == nil
 }
 
-func (d *MikrotikRouter) SerialNumber() string {
-	d.mutex.RLock()
-	defer d.mutex.RUnlock()
-
-	return d.serialNumber
-}
-
 func (d *MikrotikRouter) Tasks() []workers.Task {
 	taskSerialNumber := task.NewFunctionTillStopTask(d.taskSerialNumber)
 	taskSerialNumber.SetTimeout(time.Second * 5)
@@ -193,10 +183,7 @@ func (d *MikrotikRouter) taskSerialNumber(ctx context.Context) (interface{}, err
 		return nil, errors.New("Serial number not found"), false
 	}
 
-	d.mutex.Lock()
-	d.serialNumber = serialNumber
-	d.mutex.Unlock()
-
+	d.SetSerialNumber(serialNumber)
 	d.SetDescription("Mikrotik router with serial number " + serialNumber)
 
 	return nil, nil, true

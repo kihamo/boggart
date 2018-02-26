@@ -28,6 +28,7 @@ const (
 	DeviceIdEntranceDoor
 	DeviceIdPhone
 	DeviceIdRouter
+	DeviceIdUPS
 	DeviceIdVideoRecorder
 	DeviceIdWaterMeterCold
 	DeviceIdWaterMeterHot
@@ -43,6 +44,7 @@ const (
 	DeviceTypeInternetProvider
 	DeviceTypePhone
 	DeviceTypeRouter
+	DeviceTypeUPS
 	DeviceTypeVideoRecorder
 	DeviceTypeWaterMeter
 )
