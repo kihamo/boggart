@@ -2,12 +2,14 @@ package mikrotik
 
 import (
 	"errors"
+	"sync"
 	"time"
 
 	"gopkg.in/routeros.v2"
 )
 
 type Client struct {
+	mutex  sync.Mutex
 	client *routeros.Client
 }
 
@@ -22,8 +24,15 @@ func NewClient(address, username, password string, timeout time.Duration) (*Clie
 	}, nil
 }
 
+func (c *Client) runArgs(sentence []string) (*routeros.Reply, error) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	return c.client.RunArgs(sentence)
+}
+
 func (c *Client) SystemRouterboard() (map[string]string, error) {
-	reply, err := c.client.RunArgs([]string{"/system/routerboard/print"})
+	reply, err := c.runArgs([]string{"/system/routerboard/print"})
 	if err != nil {
 		return nil, nil
 	}
@@ -36,7 +45,7 @@ func (c *Client) SystemRouterboard() (map[string]string, error) {
 }
 
 func (c *Client) SystemResource() (map[string]string, error) {
-	reply, err := c.client.RunArgs([]string{"/system/resource/print"})
+	reply, err := c.runArgs([]string{"/system/resource/print"})
 	if err != nil {
 		return nil, nil
 	}
@@ -49,7 +58,7 @@ func (c *Client) SystemResource() (map[string]string, error) {
 }
 
 func (c *Client) WifiClients() ([]map[string]string, error) {
-	reply, err := c.client.RunArgs([]string{"/interface/wireless/registration-table/print"})
+	reply, err := c.runArgs([]string{"/interface/wireless/registration-table/print"})
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +77,7 @@ func (c *Client) WifiClients() ([]map[string]string, error) {
 }
 
 func (c *Client) EthernetStats() ([]map[string]string, error) {
-	reply, err := c.client.RunArgs([]string{"/interface/print", "stats"})
+	reply, err := c.runArgs([]string{"/interface/print", "stats"})
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +96,7 @@ func (c *Client) EthernetStats() ([]map[string]string, error) {
 }
 
 func (c *Client) DNSStatic() (map[string]string, error) {
-	reply, err := c.client.RunArgs([]string{"/ip/dns/static/print"})
+	reply, err := c.runArgs([]string{"/ip/dns/static/print"})
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +118,7 @@ func (c *Client) DNSStatic() (map[string]string, error) {
 }
 
 func (c *Client) ARPTable() (map[string]map[string]string, error) {
-	reply, err := c.client.RunArgs([]string{"/ip/arp/print"})
+	reply, err := c.runArgs([]string{"/ip/arp/print"})
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +136,7 @@ func (c *Client) ARPTable() (map[string]map[string]string, error) {
 }
 
 func (c *Client) DHCPLease() (map[string]string, error) {
-	reply, err := c.client.RunArgs([]string{"/ip/dhcp-server/lease/print"})
+	reply, err := c.runArgs([]string{"/ip/dhcp-server/lease/print"})
 	if err != nil {
 		return nil, err
 	}
