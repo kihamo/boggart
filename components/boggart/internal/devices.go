@@ -13,6 +13,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/mikrotik"
 	"github.com/kihamo/boggart/components/boggart/providers/mobile"
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
+	"github.com/kihamo/boggart/components/boggart/providers/samsung/tv"
 	"github.com/kihamo/boggart/components/boggart/providers/softvideo"
 )
 
@@ -272,4 +273,11 @@ func (c *Component) initUPS() {
 	}
 
 	c.devicesManager.RegisterWithID(boggart.DeviceIdUPS.String(), device)
+}
+
+func (c *Component) initTV() {
+	api := tv.NewApiV2("192.168.88.169", tv.ApiV2DefaultPort)
+
+	device := devices.NewSamsungTV(api)
+	c.devicesManager.RegisterWithID(boggart.DeviceIdTV.String(), device)
 }

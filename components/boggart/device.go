@@ -28,6 +28,7 @@ const (
 	DeviceIdEntranceDoor
 	DeviceIdPhone
 	DeviceIdRouter
+	DeviceIdTV
 	DeviceIdUPS
 	DeviceIdVideoRecorder
 	DeviceIdWaterMeterCold
@@ -44,6 +45,7 @@ const (
 	DeviceTypeInternetProvider
 	DeviceTypePhone
 	DeviceTypeRouter
+	DeviceTypeTV
 	DeviceTypeUPS
 	DeviceTypeVideoRecorder
 	DeviceTypeWaterMeter
@@ -146,4 +148,10 @@ type WaterDetector interface {
 
 type MotionDetector interface {
 	Device
+}
+
+type TV interface {
+}
+
+type UPS interface {
 }

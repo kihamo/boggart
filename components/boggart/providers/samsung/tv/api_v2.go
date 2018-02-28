@@ -1,0 +1,196 @@
+package tv
+
+import (
+	"context"
+	"encoding/json"
+	"net"
+	"strconv"
+
+	"github.com/kihamo/boggart/components/boggart/protocols/http"
+)
+
+const (
+	ApiV2BasePath    = "/api/v2/"
+	ApiV2DefaultPort = 8001
+)
+
+type ApiV2DeviceResponse struct {
+	Device struct {
+		OS                string
+		CountryCode       string
+		Description       string
+		DeveloperIP       string
+		DeveloperMode     string
+		UID               string
+		FirmwareVersion   string
+		ID                string
+		IP                string
+		Model             string
+		ModelName         string
+		Name              string
+		NetworkType       string
+		Resolution        string
+		Type              string
+		UDN               string
+		WifiMac           string
+		FrameTVSupport    bool
+		GamePadSupport    bool
+		ImeSyncedSupport  bool
+		VoiceSupport      bool
+		SmartHubAgreement bool
+	}
+	ID      string
+	Name    string
+	Remote  string
+	Type    string
+	Version string
+	Support struct {
+		DRMPlayReady         bool
+		DRMWideVine          bool
+		DMPAvailable         bool
+		EDENAvailable        bool
+		FrameTVSupport       bool
+		ImeSyncedSupport     bool
+		RemoteAvailable      bool
+		RemoteFourDirections bool
+		RemoteTouchPad       bool
+		RemoteVoiceControl   bool
+	}
+}
+
+func (r *ApiV2DeviceResponse) UnmarshalJSON(b []byte) error {
+	var t map[string]interface{}
+
+	if err := json.Unmarshal(b, &t); err != nil {
+		return err
+	}
+
+	r.ID = t["id"].(string)
+	r.Name = t["name"].(string)
+	r.Remote = t["remote"].(string)
+	r.Type = t["type"].(string)
+	r.Version = t["version"].(string)
+
+	if device, ok := t["device"]; ok {
+		if deviceMap, ok := device.(map[string]interface{}); ok {
+			r.Device.OS = deviceMap["OS"].(string)
+			r.Device.CountryCode = deviceMap["countryCode"].(string)
+			r.Device.Description = deviceMap["description"].(string)
+			r.Device.DeveloperIP = deviceMap["developerIP"].(string)
+			r.Device.DeveloperMode = deviceMap["developerMode"].(string)
+			r.Device.UID = deviceMap["duid"].(string)
+			r.Device.FirmwareVersion = deviceMap["firmwareVersion"].(string)
+			r.Device.ID = deviceMap["id"].(string)
+			r.Device.IP = deviceMap["ip"].(string)
+			r.Device.Model = deviceMap["model"].(string)
+			r.Device.ModelName = deviceMap["modelName"].(string)
+			r.Device.Name = deviceMap["name"].(string)
+			r.Device.NetworkType = deviceMap["networkType"].(string)
+			r.Device.Resolution = deviceMap["resolution"].(string)
+			r.Device.Type = deviceMap["type"].(string)
+			r.Device.UDN = deviceMap["udn"].(string)
+			r.Device.WifiMac = deviceMap["wifiMac"].(string)
+
+			if flag, ok := deviceMap["FrameTVSupport"]; ok {
+				r.Device.FrameTVSupport = flag == "true"
+			}
+
+			if flag, ok := deviceMap["GamePadSupport"]; ok {
+				r.Device.GamePadSupport = flag == "true"
+			}
+
+			if flag, ok := deviceMap["ImeSyncedSupport"]; ok {
+				r.Device.ImeSyncedSupport = flag == "true"
+			}
+
+			if flag, ok := deviceMap["VoiceSupport"]; ok {
+				r.Device.VoiceSupport = flag == "true"
+			}
+
+			if flag, ok := deviceMap["smartHubAgreement"]; ok {
+				r.Device.SmartHubAgreement = flag == "true"
+			}
+		}
+	}
+
+	if isSupport, ok := t["isSupport"]; ok {
+		var isSupportMap map[string]string
+
+		if err := json.Unmarshal([]byte(isSupport.(string)), &isSupportMap); err != nil {
+			return err
+		}
+
+		if flag, ok := isSupportMap["DMP_DRM_PLAYREADY"]; ok {
+			r.Support.DRMPlayReady = flag == "true"
+		}
+
+		if flag, ok := isSupportMap["DMP_DRM_WIDEVINE"]; ok {
+			r.Support.DRMWideVine = flag == "true"
+		}
+
+		if flag, ok := isSupportMap["DMP_available"]; ok {
+			r.Support.DMPAvailable = flag == "true"
+		}
+
+		if flag, ok := isSupportMap["EDEN_available"]; ok {
+			r.Support.EDENAvailable = flag == "true"
+		}
+
+		if flag, ok := isSupportMap["FrameTVSupport"]; ok {
+			r.Support.FrameTVSupport = flag == "true"
+		}
+
+		if flag, ok := isSupportMap["ImeSyncedSupport"]; ok {
+			r.Support.ImeSyncedSupport = flag == "true"
+		}
+
+		if flag, ok := isSupportMap["remote_available"]; ok {
+			r.Support.RemoteAvailable = flag == "true"
+		}
+
+		if flag, ok := isSupportMap["remote_fourDirections"]; ok {
+			r.Support.RemoteFourDirections = flag == "true"
+		}
+
+		if flag, ok := isSupportMap["remote_touchPad"]; ok {
+			r.Support.RemoteTouchPad = flag == "true"
+		}
+
+		if flag, ok := isSupportMap["remote_voiceControl"]; ok {
+			r.Support.RemoteVoiceControl = flag == "true"
+		}
+	}
+
+	return nil
+}
+
+type ApiV2 struct {
+	address string
+	client  *http.Client
+}
+
+func NewApiV2(host string, port int) *ApiV2 {
+	return &ApiV2{
+		address: net.JoinHostPort(host, strconv.Itoa(port)),
+		client:  http.NewClient(),
+	}
+}
+
+func (a *ApiV2) Device(ctx context.Context) (ApiV2DeviceResponse, error) {
+	reply := ApiV2DeviceResponse{}
+
+	response, err := a.client.Get(ctx, "http://"+a.address+ApiV2BasePath)
+	if err != nil {
+		return reply, err
+	}
+
+	if err := http.JsonUnmarshal(response, &reply); err != nil {
+		return reply, err
+	}
+
+	return reply, nil
+}
+
+func (a *ApiV2) SendCommand(command string) error {
+	return nil
+}
