@@ -2,16 +2,20 @@ package devices
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/protocols/apcupsd"
 	"github.com/kihamo/go-workers"
+	"github.com/kihamo/go-workers/event"
 	"github.com/kihamo/go-workers/task"
 	"github.com/kihamo/snitch"
 )
 
 var (
+	EventUPSApcupsdStatusChanged = event.NewBaseEvent("DeviceUPSApcupsdStatusChanged")
+
 	metricUPSApcupsdLineVoltage             = snitch.NewGauge(boggart.ComponentName+"_device_ups_apcupsd_line_voltage_volt", "The current line voltage as returned by the UPS")
 	metricUPSApcupsdLoadPercent             = snitch.NewGauge(boggart.ComponentName+"_device_ups_apcupsd_load_percent", "The percentage of load capacity as estimated by the UPS")
 	metricUPSApcupsdBatteryChargePercent    = snitch.NewGauge(boggart.ComponentName+"_device_ups_apcupsd_battery_charge_percent", "The percentage charge on the batteries")
@@ -32,8 +36,10 @@ var (
 type ApcupsdUPS struct {
 	boggart.DeviceWithSerialNumber
 
-	client   *apcupsd.Client
-	interval time.Duration
+	mutex      sync.Mutex
+	client     *apcupsd.Client
+	interval   time.Duration
+	lastStatus apcupsd.Status
 }
 
 func NewApcupsdUPS(client *apcupsd.Client, interval time.Duration) *ApcupsdUPS {
@@ -100,9 +106,14 @@ func (d *ApcupsdUPS) Collect(ch chan<- snitch.Metric) {
 }
 
 func (d *ApcupsdUPS) Ping(ctx context.Context) bool {
+	// ONLINE REPLACEBATT -- батарея нуждается в замене
+	// ONLINE REPLACEBATT NOBATT -- если срок жизни батарейки истек
+	// ONLINE NOBATT -- батарея вытащена при горячей замене
+	// ONBATT -- работает от батарейки
+
 	status, err := d.client.Status(ctx)
 	if err == nil && status.Status != nil {
-		return *status.Status == "ONLINE"
+		return (*status.Status).IsOnline || (*status.Status).IsOnBattery
 	}
 
 	return false
@@ -155,6 +166,18 @@ func (d *ApcupsdUPS) taskUpdater(ctx context.Context) (interface{}, error) {
 	status, err := d.client.Status(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	if status.Status != nil {
+		var prevStatus apcupsd.Status
+
+		d.mutex.Lock()
+		prevStatus, d.lastStatus = d.lastStatus, status
+		d.mutex.Unlock()
+
+		if prevStatus.Status != nil && prevStatus.Status.String() != status.Status.String() {
+			d.TriggerEvent(EventUPSApcupsdStatusChanged, status, prevStatus)
+		}
 	}
 
 	if status.LineVoltage != nil {

@@ -25,7 +25,7 @@ func (c *Component) initVideoRecorders() {
 		c.config.String(boggart.ConfigVideoRecorderHikVisionPassword))
 
 	device := devices.NewVideoRecorderHikVision(isapi, c.config.Duration(boggart.ConfigVideoRecorderHikVisionRepeatInterval))
-	if !c.config.Bool(boggart.ConfigVideoRecorderHikVisionEnabled) {
+	if c.config.Bool(boggart.ConfigVideoRecorderHikVisionEnabled) {
 		device.Enable()
 	} else {
 		device.Disable()

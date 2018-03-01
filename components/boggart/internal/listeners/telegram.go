@@ -8,6 +8,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/devices"
+	"github.com/kihamo/boggart/components/boggart/protocols/apcupsd"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/listener"
 	"github.com/kihamo/shadow/components/messengers/platforms/telegram"
@@ -41,6 +42,7 @@ func (l *TelegramListener) Events() []workers.Event {
 		boggart.DeviceEventWifiClientDisconnected,
 		devices.EventDoorGPIOReedSwitchOpen,
 		devices.EventDoorGPIOReedSwitchClose,
+		devices.EventUPSApcupsdStatusChanged,
 	}
 }
 
@@ -51,6 +53,46 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 
 	case devices.EventDoorGPIOReedSwitchClose:
 		l.eventDoor(false, args[0].(boggart.Device), args[1].(*time.Time))
+
+	case devices.EventUPSApcupsdStatusChanged:
+		current := args[1]
+		prev := args[2]
+
+		if current != nil && prev != nil {
+			status := current.(apcupsd.Status)
+			var (
+				message string
+				reason  string
+			)
+
+			if status.Status != nil {
+				if (*status.Status).IsOnBattery {
+					message = "UPS switch to battery"
+
+					if status.LastTransfer != nil {
+						reason = *status.LastTransfer
+					}
+				} else if (*status.Status).IsOnline {
+					message = "UPS switch to power"
+
+					if status.LastTransfer != nil {
+						reason = *status.LastTransfer
+					}
+
+					if status.XOnBattery != nil || status.XOffBattery != nil {
+						diff := status.XOffBattery.Sub(*status.XOnBattery)
+
+						message += fmt.Sprintf(". Offline for %.2f seconds", diff.Seconds())
+					}
+				}
+			}
+
+			if reason != "" {
+				l.send(fmt.Sprintf("%s. Reason: %s", message, reason))
+			} else {
+				l.send(message)
+			}
+		}
 
 	case boggart.DeviceEventDeviceDisabledAfterCheck:
 		device := args[0].(boggart.Device)

@@ -6,6 +6,28 @@ import (
 	"time"
 )
 
+type StatusStatus struct {
+	AsString string
+
+	IsCal               bool
+	IsTrim              bool
+	IsBoost             bool
+	IsOnline            bool
+	IsOnBattery         bool
+	IsOverload          bool
+	IsLowBattery        bool
+	IsReplaceBattery    bool
+	IsNoBattery         bool
+	IsSlave             bool
+	IsSlaveDown         bool
+	IsCommunicationLost bool
+	IsShuttingDown      bool
+}
+
+func (s *StatusStatus) String() string {
+	return s.AsString
+}
+
 type Status struct {
 	APC                         *string
 	Date                        *time.Time
@@ -16,7 +38,7 @@ type Status struct {
 	Model                       *string
 	UPSMode                     *string
 	StartTime                   *time.Time
-	Status                      *string
+	Status                      *StatusStatus
 	LineVoltage                 *float64
 	LoadPercent                 *float64
 	BatteryChargePercent        *float64

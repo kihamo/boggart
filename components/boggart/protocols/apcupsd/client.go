@@ -76,6 +76,20 @@ const (
 	StatusFieldFirmware                    = "FIRMWARE"  // The firmware revision number as reported by the UPS.
 	StatusFieldAPCModel                    = "APCMODEL"  // The old APC model identification code.
 	StatusFieldEndAPC                      = "END APC"   // The time and date that the STATUS record was written.
+
+	StatusStatusCal               = "CAL"
+	StatusStatusTrim              = "TRIM"
+	StatusStatusBoost             = "BOOST"
+	StatusStatusOnline            = "ONLINE"
+	StatusStatusOnBattery         = "ONBATT"
+	StatusStatusOverload          = "OVERLOAD"
+	StatusStatusLowBattery        = "LOWBATT"
+	StatusStatusReplaceBattery    = "REPLACEBATT"
+	StatusStatusNoBattery         = "NOBATT"
+	StatusStatusSlave             = "SLAVE"
+	StatusStatusSlaveDown         = "SLAVEDOWN"
+	StatusStatusCommunicationLost = "COMMLOST"
+	StatusStatusShuttingDown      = "SHUTTING"
 )
 
 type Client struct {
@@ -129,7 +143,44 @@ func (c *Client) Status(ctx context.Context) (Status, error) {
 		case StatusFieldStartTime:
 			status.StartTime, err = ParseTime(timeFormatLong, value)
 		case StatusFieldStatus:
-			status.Status = ParseString(value)
+			s := ParseString(value)
+			if s != nil && *s != "" {
+				status.Status = &StatusStatus{
+					AsString: *s,
+				}
+
+				for _, name := range strings.Fields(*s) {
+					switch name {
+					case StatusStatusCal:
+						status.Status.IsCal = true
+					case StatusStatusTrim:
+						status.Status.IsTrim = true
+					case StatusStatusBoost:
+						status.Status.IsBoost = true
+					case StatusStatusOnline:
+						status.Status.IsOnline = true
+					case StatusStatusOnBattery:
+						status.Status.IsOnBattery = true
+					case StatusStatusOverload:
+						status.Status.IsOverload = true
+					case StatusStatusLowBattery:
+						status.Status.IsLowBattery = true
+					case StatusStatusReplaceBattery:
+						status.Status.IsReplaceBattery = true
+					case StatusStatusNoBattery:
+						status.Status.IsNoBattery = true
+					case StatusStatusSlave:
+						status.Status.IsSlave = true
+					case StatusStatusSlaveDown:
+						status.Status.IsSlaveDown = true
+					case StatusStatusCommunicationLost:
+						status.Status.IsCommunicationLost = true
+					case StatusStatusShuttingDown:
+						status.Status.IsShuttingDown = true
+					}
+				}
+			}
+
 		case StatusFieldLineVoltage:
 			status.LineVoltage, err = ParseFloat(value)
 		case StatusFieldLoadPercent:
