@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"net"
 	"net/url"
 	"strconv"
@@ -187,6 +188,7 @@ type ApiV2 struct {
 	address string
 	client  *http.Client
 	connect *websocket.Conn
+	info    *ApiV2DeviceResponse
 }
 
 func NewApiV2(host string) *ApiV2 {
@@ -196,13 +198,38 @@ func NewApiV2(host string) *ApiV2 {
 	}
 }
 
-func (a *ApiV2) Connect() (*websocket.Conn, error) {
+func (a *ApiV2) support() *ApiV2DeviceResponse {
 	a.mutex.RLock()
-	if a.connect != nil {
-		defer a.mutex.RUnlock()
-		return a.connect, nil
-	} else {
-		a.mutex.RUnlock()
+	info := a.info
+	a.mutex.RUnlock()
+
+	if info != nil {
+		return info
+	}
+
+	device, err := a.Device(context.Background())
+	if err != nil {
+		return &ApiV2DeviceResponse{}
+	}
+
+	a.mutex.Lock()
+	a.info = &device
+	a.mutex.Unlock()
+
+	return &device
+}
+
+func (a *ApiV2) RemoteControlConnect() (*websocket.Conn, error) {
+	if !a.support().Support.RemoteAvailable {
+		return nil, errors.New("Remote control isn't supported")
+	}
+
+	a.mutex.RLock()
+	connect := a.connect
+	a.mutex.RUnlock()
+
+	if connect != nil {
+		return connect, nil
 	}
 
 	dialer := websocket.Dialer{
@@ -247,7 +274,7 @@ func (a *ApiV2) Device(ctx context.Context) (ApiV2DeviceResponse, error) {
 }
 
 func (a *ApiV2) SendCommand(command string) error {
-	connect, err := a.Connect()
+	connect, err := a.RemoteControlConnect()
 	if err != nil {
 		return err
 	}
