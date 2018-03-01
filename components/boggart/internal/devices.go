@@ -276,7 +276,7 @@ func (c *Component) initUPS() {
 }
 
 func (c *Component) initTV() {
-	api := tv.NewApiV2("192.168.88.169", tv.ApiV2DefaultPort)
+	api := tv.NewApiV2("192.168.88.169")
 
 	device := devices.NewSamsungTV(api)
 	c.devicesManager.RegisterWithID(boggart.DeviceIdTV.String(), device)

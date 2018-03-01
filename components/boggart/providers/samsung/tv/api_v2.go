@@ -2,16 +2,23 @@ package tv
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"net"
+	"net/url"
 	"strconv"
+	"sync"
+	"time"
 
+	"github.com/gorilla/websocket"
 	"github.com/kihamo/boggart/components/boggart/protocols/http"
 )
 
 const (
-	ApiV2BasePath    = "/api/v2/"
-	ApiV2DefaultPort = 8001
+	ApiV2BasePath      = "/api/v2/"
+	ApiV2LegacyPort    = 55000
+	ApiV2WebSocketPort = 8001
+	ApiV2ApplicationId = "SamsungTV"
 )
 
 type ApiV2DeviceResponse struct {
@@ -164,16 +171,64 @@ func (r *ApiV2DeviceResponse) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-type ApiV2 struct {
-	address string
-	client  *http.Client
+type ApiV2SendCommandRequest struct {
+	Method string `json:"method"`
+	Params struct {
+		Cmd          string
+		DataOfCmd    string
+		Option       bool
+		TypeOfRemote string
+	} `json:"params"`
 }
 
-func NewApiV2(host string, port int) *ApiV2 {
+type ApiV2 struct {
+	mutex sync.RWMutex
+
+	address string
+	client  *http.Client
+	connect *websocket.Conn
+}
+
+func NewApiV2(host string) *ApiV2 {
 	return &ApiV2{
-		address: net.JoinHostPort(host, strconv.Itoa(port)),
+		address: net.JoinHostPort(host, strconv.Itoa(ApiV2WebSocketPort)),
 		client:  http.NewClient(),
 	}
+}
+
+func (a *ApiV2) Connect() (*websocket.Conn, error) {
+	a.mutex.RLock()
+	if a.connect != nil {
+		defer a.mutex.RUnlock()
+		return a.connect, nil
+	} else {
+		a.mutex.RUnlock()
+	}
+
+	dialer := websocket.Dialer{
+		HandshakeTimeout: time.Second,
+	}
+
+	u := url.URL{
+		Scheme:  "ws",
+		Host:    a.address,
+		Path:    ApiV2BasePath + "channels/samsung.remote.control",
+		RawPath: "name=" + base64.StdEncoding.EncodeToString([]byte(ApiV2ApplicationId)),
+	}
+
+	connect, _, err := dialer.Dial(u.String(), nil)
+
+	if err == nil {
+		_, _, err = connect.ReadMessage()
+	}
+
+	if err == nil {
+		a.mutex.Lock()
+		a.connect = connect
+		a.mutex.Unlock()
+	}
+
+	return connect, err
 }
 
 func (a *ApiV2) Device(ctx context.Context) (ApiV2DeviceResponse, error) {
@@ -192,5 +247,25 @@ func (a *ApiV2) Device(ctx context.Context) (ApiV2DeviceResponse, error) {
 }
 
 func (a *ApiV2) SendCommand(command string) error {
-	return nil
+	connect, err := a.Connect()
+	if err != nil {
+		return err
+	}
+
+	msg := ApiV2SendCommandRequest{
+		Method: "ms.remote.control",
+		Params: struct {
+			Cmd          string
+			DataOfCmd    string
+			Option       bool
+			TypeOfRemote string
+		}{
+			Cmd:          "Click",
+			DataOfCmd:    command,
+			Option:       false,
+			TypeOfRemote: "SendRemoteKey",
+		},
+	}
+
+	return connect.WriteJSON(msg)
 }
