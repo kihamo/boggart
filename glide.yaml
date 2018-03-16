@@ -3,10 +3,10 @@ import:
 - package: github.com/go-sql-driver/mysql
   version: 9181e3a86a19bacd63e68d43ae8b7b36320d8092
 - package: github.com/kihamo/shadow
-  version: ff39e2b218b0799c22c6ebb15200f0beba6bb8fe
+  version: b850946f232f77cd2548e218ee538eddb6113288
 - package: github.com/goburrow/serial
   version: 5efbe925ecf714f8ba147bf2226f2e7afc7111bc
-- package: github.com/go-routeros/routeros
+- package: gopkg.in/routeros.v2
   version: 2dc19c12445caefdc2d128f7331dcc83284211ef
 - package: github.com/davecheney/gpio
   version: a6de66e7e47065fca1a55c62c3f3cab3144694e6
@@ -14,3 +14,5 @@ import:
   version: v1.3.0
 - package: github.com/mcuadros/go-syslog
   version: v2.2.1
+- package: github.com/gorilla/websocket
+  version: 0647012449a1878977514a346b26637dd022446c

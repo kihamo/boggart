@@ -1,5 +1,5 @@
-hash: 11411c98123d7aa053154b66f47e45504440b7a926c9e502bee301c9f3970816
-updated: 2018-02-23T22:11:28.80890704+03:00
+hash: 5382d318d1e7bc2e9fbeb42626fc71bc36e9f67a52024375ffb4cd7f8dd694ad
+updated: 2018-03-16T17:41:52.941540505+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -9,7 +9,7 @@ imports:
   - stores/cookiestore
   - stores/memstore
 - name: github.com/andybalholm/cascadia
-  version: 349dd0209470eabd9514242c688c403c0926d266
+  version: 901648c87902174f774fac311d7f176f8647bdaa
 - name: github.com/bsm/histogram
   version: 253b217b3ad255d48994a6f74de4f82650f5e70d
 - name: github.com/bugsnag/osext
@@ -20,8 +20,6 @@ imports:
   version: 1d4478f51bed434f1dadf96dcd9b43aabac66795
 - name: github.com/elazarl/go-bindata-assetfs
   version: 30f82fa23fd844bd5bb1e5f216db87fd77b5eb43
-- name: github.com/go-routeros/routeros
-  version: 2dc19c12445caefdc2d128f7331dcc83284211ef
 - name: github.com/go-sql-driver/mysql
   version: 9181e3a86a19bacd63e68d43ae8b7b36320d8092
 - name: github.com/goburrow/serial
@@ -33,11 +31,14 @@ imports:
   - ptypes
   - ptypes/any
   - ptypes/duration
+  - ptypes/struct
   - ptypes/timestamp
 - name: github.com/google/go-querystring
   version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
   subpackages:
   - query
+- name: github.com/gorilla/websocket
+  version: 0647012449a1878977514a346b26637dd022446c
 - name: github.com/influxdata/influxdb
   version: c85043e9d1d1cadee0934771b2f0804b2147c5ae
   subpackages:
@@ -53,7 +54,7 @@ imports:
 - name: github.com/kihamo/go-grafana-api
   version: b9af836f6e9ddb24b1bb5d3d498459d93816ed64
 - name: github.com/kihamo/go-workers
-  version: 37726d8d6f549ded4f83223b22e3daf164a4abcd
+  version: 8b1fc0ba7f64321299cac99c52c7ae10fa0362f1
   subpackages:
   - dispatcher
   - event
@@ -64,7 +65,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: ff39e2b218b0799c22c6ebb15200f0beba6bb8fe
+  version: b850946f232f77cd2548e218ee538eddb6113288
   subpackages:
   - components/annotations
   - components/annotations/instance
@@ -113,7 +114,7 @@ imports:
   - internal
   - storage
 - name: github.com/lann/builder
-  version: f22ce00fd9394014049dad11c244859432bd6820
+  version: 1b87b36280d04fe7882d1512bf038ea2967ad534
 - name: github.com/lann/ps
   version: 62de8c46ede02a7675c4c79c84883eb164cb71e3
 - name: github.com/mailru/easyjson
@@ -141,7 +142,7 @@ imports:
 - name: github.com/rs/xhandler
   version: 1eb70cf1520d43c307a89c5dabb7a7efd132fccd
 - name: github.com/rs/xid
-  version: 390d6a8eeb3caeef8befccd1f9fae78eee5a0b34
+  version: 705291fb22314c68b7f5d8c0674cb19954ca8f81
 - name: github.com/rs/xlog
   version: 7ed5dc1cca34bb0c9e8f0e58dcf19b6dea3044d5
   subpackages:
@@ -172,7 +173,7 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/oauth2
-  version: 543e37812f10c46c622c9575afd7ad22f22a12ba
+  version: fdc9e635145ae97e6c2cb777c48305600cf515cb
   subpackages:
   - internal
 - name: golang.org/x/text
@@ -193,7 +194,7 @@ imports:
   - internal/urlfetch
   - urlfetch
 - name: google.golang.org/genproto
-  version: 2b5a72b8730b0b16380010cfe5286c42108d88e7
+  version: f8c8703595236ae70fdf8789ecb656ea0bcdcf46
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
