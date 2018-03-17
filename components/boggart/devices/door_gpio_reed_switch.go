@@ -85,7 +85,7 @@ func (d *DoorGPIOReedSwitch) Collect(ch chan<- snitch.Metric) {
 }
 
 func (d *DoorGPIOReedSwitch) Ping(_ context.Context) bool {
-	return true
+	return d.pin() != nil
 }
 
 func (d *DoorGPIOReedSwitch) Tasks() []workers.Task {
