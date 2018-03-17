@@ -158,13 +158,7 @@ func (c *Component) initElectricityMeters() {
 }
 
 func (c *Component) initGPIO() {
-	device, err := devices.NewDoorGPIOReedSwitch(c.config.Int64(boggart.ConfigDoorsEntrancePin))
-	if err != nil {
-		c.logger.Error("Init GPIO reed switch door failed", map[string]interface{}{
-			"error": err.Error(),
-		})
-		return
-	}
+	device := devices.NewDoorGPIOReedSwitch(c.config.Int64(boggart.ConfigDoorsEntrancePin))
 	device.SetDescription("Entrance door")
 
 	if c.config.Bool(boggart.ConfigDoorsEnabled) {
