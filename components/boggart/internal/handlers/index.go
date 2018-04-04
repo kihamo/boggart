@@ -17,7 +17,6 @@ type MetricValue struct {
 func (h *IndexHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	// TODO: update metric value
 	if r.IsAjax() {
-
 		return
 	}
 

@@ -16,7 +16,7 @@ func (c *Component) DashboardTemplates() *assetfs.AssetFS {
 func (c *Component) DashboardMenu() dashboard.Menu {
 	routes := c.DashboardRoutes()
 
-	menus := dashboard.NewMenu("Dashboard").
+	menus := dashboard.NewMenu("Smart home").
 		WithIcon("home").
 		WithChild(dashboard.NewMenu("Dashboard").WithRoute(routes[0])).
 		WithChild(dashboard.NewMenu("Detect").WithRoute(routes[1])).

@@ -3,18 +3,18 @@
 <div class="row">
     <div class="x_panel">
         <div class="x_title">
-            <h2>Devices</h2>
+            <h2>{{ i18n "Devices" . }}</h2>
             <div class="clearfix"></div>
         </div>
         <div class="x_content">
             <table class="table table-striped datatable">
                 <thead>
                 <tr>
-                    <th>Type</th>
-                    <th class="md-col-2">Id</th>
-                    <th>Description</th>
-                    <th class="md-col-1">Tasks</th>
-                    <th class="md-col-1">Status</th>
+                    <th>{{ i18n "Type" . }}</th>
+                    <th class="md-col-2">{{ i18n "ID" . }}</th>
+                    <th>{{ i18n "Description" . }}</th>
+                    <th class="md-col-1">{{ i18n "Tasks" . }}</th>
+                    <th class="md-col-1">{{ i18n "Status" . }}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -22,13 +22,13 @@
                 <tr>
                     <td>
                         {{ range $t, $type := $device.Types }}
-                        <span class="label label-success">{{ $type }}</span>
+                        <span class="label label-success">{{ i18n $type $ }}</span>
                         {{ end }}
                     </td>
                     <td>{{ $device.Id }}</td>
                     <td>{{ $device.Description }}</td>
                     <td>{{ $device.TasksCount }}</td>
-                    <td>{{ if $device.Enabled }}Enabled{{ else }}Disabled{{ end }}</td>
+                    <td>{{ if $device.Enabled }}{{ i18n "Enabled" $ }}{{ else }}{{ i18n "Disabled" $ }}{{ end }}</td>
                 </tr>
                 {{ end }}
                 </tbody>
@@ -40,7 +40,7 @@
 <div class="row">
     <div class="x_panel">
         <div class="x_title">
-            <h2><i class="fa fa-deaf"></i> Listeners</h2>
+            <h2><i class="fa fa-deaf"></i> {{ i18n "Listeners" . }}</h2>
             <div class="clearfix"></div>
         </div>
         <div class="x_content">
@@ -48,12 +48,12 @@
                 <table class="table table-striped datatable">
                     <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Events</th>
-                        <th>Fires</th>
-                        <th>First fired</th>
-                        <th>Last fired</th>
+                        <th>{{ i18n "ID" . }}</th>
+                        <th>{{ i18n "Name" . }}</th>
+                        <th>{{ i18n "Events" . }}</th>
+                        <th>{{ i18n "Fires" . }}</th>
+                        <th>{{ i18n "First fired" . }}</th>
+                        <th>{{ i18n "Last fired" . }}</th>
                     </tr>
                     </thead>
                     {{ range $l, $listener := .listeners }}
