@@ -9,6 +9,7 @@ import (
 	"github.com/kihamo/shadow/components/annotations"
 	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/dashboard"
+	"github.com/kihamo/shadow/components/i18n"
 	"github.com/kihamo/shadow/components/logger"
 	"github.com/kihamo/shadow/components/messengers"
 	"github.com/kihamo/shadow/components/metrics"
@@ -47,6 +48,9 @@ func (c *Component) Dependencies() []shadow.Dependency {
 		},
 		{
 			Name: dashboard.ComponentName,
+		},
+		{
+			Name: i18n.ComponentName,
 		},
 		{
 			Name: logger.ComponentName,

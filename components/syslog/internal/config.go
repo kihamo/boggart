@@ -7,23 +7,13 @@ import (
 
 func (c *Component) ConfigVariables() []config.Variable {
 	return []config.Variable{
-		config.NewVariable(
-			syslog.ConfigHost,
-			config.ValueTypeString,
-			"localhost",
-			"Host",
-			false,
-			"Listen",
-			nil,
-			nil),
-		config.NewVariable(
-			syslog.ConfigPort,
-			config.ValueTypeInt,
-			514,
-			"Port number",
-			false,
-			"Listen",
-			nil,
-			nil),
+		config.NewVariable(syslog.ConfigHost, config.ValueTypeString).
+			WithUsage("Host").
+			WithGroup("Listen").
+			WithDefault("localhost"),
+		config.NewVariable(syslog.ConfigPort, config.ValueTypeInt).
+			WithUsage("Port number").
+			WithGroup("Listen").
+			WithDefault(514),
 	}
 }

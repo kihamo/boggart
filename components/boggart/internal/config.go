@@ -12,558 +12,243 @@ import (
 
 func (c *Component) ConfigVariables() []config.Variable {
 	return []config.Variable{
-		config.NewVariable(
-			boggart.ConfigDevicesManagerCheckInterval,
-			config.ValueTypeDuration,
-			time.Minute,
-			"Health check interval",
-			true,
-			"Device manager",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigDevicesManagerCheckTimeout,
-			config.ValueTypeDuration,
-			DefaultTimeoutChecker,
-			"Health check timeout",
-			true,
-			"Device manager",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigListenerTelegramChats,
-			config.ValueTypeString,
-			nil,
-			"Chats for messages",
-			false,
-			"Listener Telegram",
-			[]string{config.ViewTags},
-			map[string]interface{}{
-				config.ViewOptionTagsDefaultText: "add a chat ID",
-			}),
-		config.NewVariable(
-			boggart.ConfigRS485Address,
-			config.ValueTypeString,
-			rs485.DefaultSerialAddress,
-			"Serial port address",
-			false,
-			"RS485 protocol",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigRS485Timeout,
-			config.ValueTypeDuration,
-			rs485.DefaultTimeout,
-			"Serial port timeout",
-			false,
-			"RS485 protocol",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigDoorsEnabled,
-			config.ValueTypeBool,
-			false,
-			"Enabled",
-			false,
-			"Doors",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigDoorsEntrancePin,
-			config.ValueTypeInt,
-			nil,
-			"Pin for door reed switch",
-			false,
-			"Doors",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigVideoRecorderHikVisionEnabled,
-			config.ValueTypeBool,
-			false,
-			"Enabled",
-			false,
-			"HikVision video recorder",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigVideoRecorderHikVisionRepeatInterval,
-			config.ValueTypeDuration,
-			time.Minute,
-			"Repeat interval",
-			false,
-			"HikVision video recorder",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigVideoRecorderHikVisionHost,
-			config.ValueTypeString,
-			nil,
-			"Host",
-			false,
-			"HikVision video recorder",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigVideoRecorderHikVisionPort,
-			config.ValueTypeInt64,
-			nil,
-			"Port",
-			false,
-			"HikVision video recorder",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigVideoRecorderHikVisionUsername,
-			config.ValueTypeString,
-			"admin",
-			"Username",
-			false,
-			"HikVision video recorder",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigVideoRecorderHikVisionPassword,
-			config.ValueTypeString,
-			nil,
-			"Password",
-			false,
-			"HikVision video recorder",
-			[]string{config.ViewPassword},
-			nil),
-		config.NewVariable(
-			boggart.ConfigCameraHikVisionHallEnabled,
-			config.ValueTypeBool,
-			false,
-			"Enabled",
-			false,
-			"HikVision on the hall",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigCameraHikVisionHallRepeatInterval,
-			config.ValueTypeDuration,
-			time.Minute,
-			"Repeat interval",
-			false,
-			"HikVision on the hall",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigCameraHikVisionHallHost,
-			config.ValueTypeString,
-			nil,
-			"Host",
-			false,
-			"HikVision on the hall",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigCameraHikVisionHallPort,
-			config.ValueTypeInt64,
-			nil,
-			"Port",
-			false,
-			"HikVision on the hall",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigCameraHikVisionHallUsername,
-			config.ValueTypeString,
-			"admin",
-			"Username",
-			false,
-			"HikVision on the hall",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigCameraHikVisionHallPassword,
-			config.ValueTypeString,
-			nil,
-			"Password",
-			false,
-			"HikVision on the hall",
-			[]string{config.ViewPassword},
-			nil),
-		config.NewVariable(
-			boggart.ConfigCameraHikVisionHallStreamingChannel,
-			config.ValueTypeInt64,
-			101,
-			"Streaming channel",
-			false,
-			"HikVision on the hall",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigCameraHikVisionStreetEnabled,
-			config.ValueTypeBool,
-			false,
-			"Enabled",
-			false,
-			"HikVision on the street",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigCameraHikVisionStreetRepeatInterval,
-			config.ValueTypeDuration,
-			time.Minute,
-			"Repeat interval",
-			false,
-			"HikVision on the street",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigCameraHikVisionStreetHost,
-			config.ValueTypeString,
-			nil,
-			"Host",
-			false,
-			"HikVision on the street",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigCameraHikVisionStreetPort,
-			config.ValueTypeInt64,
-			nil,
-			"Port",
-			false,
-			"HikVision on the street",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigCameraHikVisionStreetUsername,
-			config.ValueTypeString,
-			"admin",
-			"Username",
-			false,
-			"HikVision on the street",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigCameraHikVisionStreetPassword,
-			config.ValueTypeString,
-			nil,
-			"Password",
-			false,
-			"HikVision on the street",
-			[]string{config.ViewPassword},
-			nil),
-		config.NewVariable(
-			boggart.ConfigCameraHikVisionStreetStreamingChannel,
-			config.ValueTypeInt64,
-			101,
-			"Streaming channel",
-			false,
-			"HikVision on the street",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigMercuryEnabled,
-			config.ValueTypeBool,
-			false,
-			"Enabled",
-			false,
-			"Mercury devices",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigMercuryRepeatInterval,
-			config.ValueTypeDuration,
-			time.Minute*2,
-			"Repeat interval",
-			false,
-			"Mercury devices",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigMercuryDeviceAddress,
-			config.ValueTypeString,
-			nil,
-			"Device address in format XXXXXX (last 6 digits of device serial number)",
-			false,
-			"Mercury devices",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigMikrotikEnabled,
-			config.ValueTypeBool,
-			false,
-			"Enabled",
-			false,
-			"Mikrotik devices",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigMikrotikRepeatInterval,
-			config.ValueTypeDuration,
-			time.Minute*5,
-			"Repeat interval",
-			false,
-			"Mikrotik devices",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigMikrotikAddress,
-			config.ValueTypeString,
-			"192.168.88.1:8728",
-			"API address in format host:port",
-			false,
-			"Mikrotik devices",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigMikrotikUsername,
-			config.ValueTypeString,
-			"admin",
-			"Username",
-			false,
-			"Mikrotik devices",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigMikrotikPassword,
-			config.ValueTypeString,
-			nil,
-			"Password",
-			false,
-			"Mikrotik devices",
-			[]string{config.ViewPassword},
-			nil),
-		config.NewVariable(
-			boggart.ConfigMikrotikTimeout,
-			config.ValueTypeDuration,
-			time.Second*10,
-			"Request timeout",
-			false,
-			"Mikrotik devices",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigMobileEnabled,
-			config.ValueTypeBool,
-			false,
-			"Enabled",
-			false,
-			"Mobile accounts",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigMobileRepeatInterval,
-			config.ValueTypeDuration,
-			time.Minute*30,
-			"Repeat interval",
-			false,
-			"Mobile accounts",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigMobileMegafonPhone,
-			config.ValueTypeString,
-			nil,
-			"Phone number",
-			false,
-			"Mobile Megafon accounts",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigMobileMegafonPassword,
-			config.ValueTypeString,
-			nil,
-			"Password",
-			false,
-			"Mobile Megafon accounts",
-			[]string{config.ViewPassword},
-			nil),
-		config.NewVariable(
-			boggart.ConfigPulsarEnabled,
-			config.ValueTypeBool,
-			false,
-			"Enabled",
-			false,
-			"Pulsar devices",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigPulsarRepeatInterval,
-			config.ValueTypeDuration,
-			time.Minute*15,
-			"Repeat interval",
-			false,
-			"Pulsar devices",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigPulsarHeatMeterAddress,
-			config.ValueTypeString,
-			nil,
-			"Device address HEX value (AABBCCDD). If empty system try to find device",
-			false,
-			"Pulsar devices",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigPulsarColdWaterSerialNumber,
-			config.ValueTypeString,
-			nil,
-			"Device address of cold water meter in format AABBCCDD",
-			false,
-			"Pulsar devices",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigPulsarColdWaterPulseInput,
-			config.ValueTypeUint64,
-			pulsar.Input1,
-			"Input number of cold water meter in heat meter",
-			false,
-			"Pulsar devices",
-			[]string{config.ViewEnum},
-			map[string]interface{}{
+		config.NewVariable(boggart.ConfigDevicesManagerCheckInterval, config.ValueTypeDuration).
+			WithUsage("Health check interval").
+			WithGroup("Device manager").
+			WithEditable(true).
+			WithDefault(time.Minute),
+		config.NewVariable(boggart.ConfigDevicesManagerCheckTimeout, config.ValueTypeDuration).
+			WithUsage("Health check timeout").
+			WithGroup("Device manager").
+			WithEditable(true).
+			WithDefault(DefaultTimeoutChecker),
+		config.NewVariable(boggart.ConfigListenerTelegramChats, config.ValueTypeString).
+			WithUsage("Chats for messages").
+			WithGroup("Listener Telegram").
+			WithView([]string{config.ViewTags}).
+			WithViewOptions(map[string]interface{}{config.ViewOptionTagsDefaultText: "add a chat ID"}),
+		config.NewVariable(boggart.ConfigRS485Address, config.ValueTypeString).
+			WithUsage("Serial port address").
+			WithGroup("RS485 protocol").
+			WithDefault(rs485.DefaultSerialAddress),
+		config.NewVariable(boggart.ConfigRS485Timeout, config.ValueTypeDuration).
+			WithUsage("Serial port timeout").
+			WithGroup("RS485 protocol").
+			WithDefault(rs485.DefaultTimeout),
+		config.NewVariable(boggart.ConfigDoorsEnabled, config.ValueTypeBool).
+			WithUsage("Enabled").
+			WithGroup("Doors"),
+		config.NewVariable(boggart.ConfigDoorsEntrancePin, config.ValueTypeInt).
+			WithUsage("Pin for door reed switch").
+			WithGroup("Doors"),
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionEnabled, config.ValueTypeBool).
+			WithUsage("Enabled").
+			WithGroup("HikVision video recorder"),
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionRepeatInterval, config.ValueTypeDuration).
+			WithUsage("Repeat interval").
+			WithGroup("HikVision video recorder").
+			WithDefault(time.Minute),
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionHost, config.ValueTypeString).
+			WithUsage("Host").
+			WithGroup("HikVision video recorder"),
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionPort, config.ValueTypeInt64).
+			WithUsage("Port").
+			WithGroup("HikVision video recorder"),
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionUsername, config.ValueTypeString).
+			WithUsage("Username").
+			WithGroup("HikVision video recorder").
+			WithDefault("admin"),
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionPassword, config.ValueTypeString).
+			WithUsage("Password").
+			WithGroup("HikVision video recorder").
+			WithView([]string{config.ViewPassword}),
+		config.NewVariable(boggart.ConfigCameraHikVisionHallEnabled, config.ValueTypeBool).
+			WithUsage("Enabled").
+			WithGroup("HikVision on the hall"),
+		config.NewVariable(boggart.ConfigCameraHikVisionHallRepeatInterval, config.ValueTypeDuration).
+			WithUsage("Repeat interval").
+			WithGroup("HikVision on the hall").
+			WithDefault(time.Minute),
+		config.NewVariable(boggart.ConfigCameraHikVisionHallHost, config.ValueTypeString).
+			WithUsage("Host").
+			WithGroup("HikVision on the hall"),
+		config.NewVariable(boggart.ConfigCameraHikVisionHallPort, config.ValueTypeInt64).
+			WithUsage("Port").
+			WithGroup("HikVision on the hall"),
+		config.NewVariable(boggart.ConfigCameraHikVisionHallUsername, config.ValueTypeString).
+			WithUsage("Username").
+			WithGroup("HikVision on the hall").
+			WithDefault("admin"),
+		config.NewVariable(boggart.ConfigCameraHikVisionHallPassword, config.ValueTypeString).
+			WithUsage("Password").
+			WithGroup("HikVision on the hall").
+			WithView([]string{config.ViewPassword}),
+		config.NewVariable(boggart.ConfigCameraHikVisionHallStreamingChannel, config.ValueTypeInt64).
+			WithUsage("Streaming channel").
+			WithGroup("HikVision on the hall").
+			WithDefault(101),
+		config.NewVariable(boggart.ConfigCameraHikVisionStreetEnabled, config.ValueTypeBool).
+			WithUsage("Enabled").
+			WithGroup("HikVision on the street"),
+		config.NewVariable(boggart.ConfigCameraHikVisionStreetRepeatInterval, config.ValueTypeDuration).
+			WithUsage("Repeat interval").
+			WithGroup("HikVision on the street").
+			WithDefault(time.Minute),
+		config.NewVariable(boggart.ConfigCameraHikVisionStreetHost, config.ValueTypeString).
+			WithUsage("Host").
+			WithGroup("HikVision on the street"),
+		config.NewVariable(boggart.ConfigCameraHikVisionStreetPort, config.ValueTypeInt64).
+			WithUsage("Port").
+			WithGroup("HikVision on the street"),
+		config.NewVariable(boggart.ConfigCameraHikVisionStreetUsername, config.ValueTypeString).
+			WithUsage("Username").
+			WithGroup("HikVision on the street").
+			WithDefault("admin"),
+		config.NewVariable(boggart.ConfigCameraHikVisionStreetPassword, config.ValueTypeString).
+			WithUsage("Password").
+			WithGroup("HikVision on the street").
+			WithView([]string{config.ViewPassword}),
+		config.NewVariable(boggart.ConfigCameraHikVisionStreetStreamingChannel, config.ValueTypeInt64).
+			WithUsage("Streaming channel").
+			WithGroup("HikVision on the street").
+			WithDefault(101),
+		config.NewVariable(boggart.ConfigMercuryEnabled, config.ValueTypeBool).
+			WithUsage("Enabled").
+			WithGroup("Mercury devices"),
+		config.NewVariable(boggart.ConfigMercuryRepeatInterval, config.ValueTypeDuration).
+			WithUsage("Repeat interval").
+			WithGroup("Mercury devices").
+			WithDefault(time.Minute * 2),
+		config.NewVariable(boggart.ConfigMercuryDeviceAddress, config.ValueTypeString).
+			WithUsage("Device address in format XXXXXX (last 6 digits of device serial number)").
+			WithGroup("Mercury devices"),
+		config.NewVariable(boggart.ConfigMikrotikEnabled, config.ValueTypeBool).
+			WithUsage("Enabled").
+			WithGroup("Mikrotik devices"),
+		config.NewVariable(boggart.ConfigMikrotikRepeatInterval, config.ValueTypeDuration).
+			WithUsage("Repeat interval").
+			WithGroup("Mikrotik devices").
+			WithDefault(time.Minute * 5),
+		config.NewVariable(boggart.ConfigMikrotikAddress, config.ValueTypeString).
+			WithUsage("API address in format host:port").
+			WithGroup("Mikrotik devices").
+			WithDefault("192.168.88.1:8728"),
+		config.NewVariable(boggart.ConfigMikrotikUsername, config.ValueTypeString).
+			WithUsage("Username").
+			WithGroup("Mikrotik devices").
+			WithDefault("admin"),
+		config.NewVariable(boggart.ConfigMikrotikPassword, config.ValueTypeString).
+			WithUsage("Password").
+			WithGroup("Mikrotik devices").
+			WithView([]string{config.ViewPassword}),
+		config.NewVariable(boggart.ConfigMikrotikTimeout, config.ValueTypeDuration).
+			WithUsage("Request timeout").
+			WithGroup("Mikrotik devices").
+			WithDefault(time.Second * 10),
+		config.NewVariable(boggart.ConfigMobileEnabled, config.ValueTypeBool).
+			WithUsage("Enabled").
+			WithGroup("Mobile accounts"),
+		config.NewVariable(boggart.ConfigMobileRepeatInterval, config.ValueTypeDuration).
+			WithUsage("Repeat interval").
+			WithGroup("Mobile accounts").
+			WithDefault(time.Minute * 30),
+		config.NewVariable(boggart.ConfigMobileMegafonPhone, config.ValueTypeString).
+			WithUsage("Phone number").
+			WithGroup("Mobile Megafon accounts"),
+		config.NewVariable(boggart.ConfigMobileMegafonPassword, config.ValueTypeString).
+			WithUsage("Password").
+			WithGroup("Mobile Megafon accounts").
+			WithView([]string{config.ViewPassword}),
+		config.NewVariable(boggart.ConfigPulsarEnabled, config.ValueTypeBool).
+			WithUsage("Enabled").
+			WithGroup("Pulsar devices"),
+		config.NewVariable(boggart.ConfigPulsarRepeatInterval, config.ValueTypeDuration).
+			WithUsage("Repeat interval").
+			WithGroup("Pulsar devices").
+			WithDefault(time.Minute * 15),
+		config.NewVariable(boggart.ConfigPulsarHeatMeterAddress, config.ValueTypeString).
+			WithUsage("Device address HEX value (AABBCCDD). If empty system try to find device").
+			WithGroup("Pulsar devices"),
+		config.NewVariable(boggart.ConfigPulsarColdWaterSerialNumber, config.ValueTypeString).
+			WithUsage("Device address of cold water meter in format AABBCCDD").
+			WithGroup("Pulsar devices"),
+		config.NewVariable(boggart.ConfigPulsarColdWaterPulseInput, config.ValueTypeUint64).
+			WithUsage("Input number of cold water meter in heat meter").
+			WithGroup("Pulsar devices").
+			WithDefault(pulsar.Input1).
+			WithView([]string{config.ViewEnum}).
+			WithViewOptions(map[string]interface{}{
 				config.ViewOptionEnumOptions: [][]interface{}{
 					{strconv.FormatUint(pulsar.Input1, 10), "#1"},
 					{strconv.FormatUint(pulsar.Input2, 10), "#2"},
 				},
 			}),
-		config.NewVariable(
-			boggart.ConfigPulsarColdWaterStartValue,
-			config.ValueTypeFloat64,
-			0,
-			"Start value of cold water meter (in m3)",
-			false,
-			"Pulsar devices",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigPulsarHotWaterSerialNumber,
-			config.ValueTypeString,
-			nil,
-			"Device address of hot water meter in format AABBCCDD",
-			false,
-			"Pulsar devices",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigPulsarHotWaterPulseInput,
-			config.ValueTypeUint64,
-			pulsar.Input2,
-			"Input number of hot water meter",
-			false,
-			"Pulsar devices",
-			[]string{config.ViewEnum},
-			map[string]interface{}{
+		config.NewVariable(boggart.ConfigPulsarColdWaterStartValue, config.ValueTypeFloat64).
+			WithUsage("Start value of cold water meter (in m3)").
+			WithGroup("Pulsar devices").
+			WithDefault(0),
+		config.NewVariable(boggart.ConfigPulsarHotWaterSerialNumber, config.ValueTypeString).
+			WithUsage("Device address of hot water meter in format AABBCCDD").
+			WithGroup("Pulsar devices"),
+		config.NewVariable(boggart.ConfigPulsarHotWaterPulseInput, config.ValueTypeUint64).
+			WithUsage("Input number of hot water meter").
+			WithGroup("Pulsar devices").
+			WithDefault(pulsar.Input2).
+			WithView([]string{config.ViewEnum}).
+			WithViewOptions(map[string]interface{}{
 				config.ViewOptionEnumOptions: [][]interface{}{
 					{strconv.FormatUint(pulsar.Input1, 10), "#1"},
 					{strconv.FormatUint(pulsar.Input2, 10), "#2"},
 				},
 			}),
-		config.NewVariable(
-			boggart.ConfigPulsarHotWaterStartValue,
-			config.ValueTypeFloat64,
-			0,
-			"Start value of hot water (in m3)",
-			false,
-			"Pulsar devices",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigSoftVideoEnabled,
-			config.ValueTypeBool,
-			false,
-			"Enabled",
-			false,
-			"SoftVideo provider",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigSoftVideoRepeatInterval,
-			config.ValueTypeDuration,
-			time.Hour*12,
-			"Repeat interval",
-			false,
-			"SoftVideo provider",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigSoftVideoLogin,
-			config.ValueTypeString,
-			nil,
-			"Login",
-			false,
-			"SoftVideo provider",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigSoftVideoPassword,
-			config.ValueTypeString,
-			nil,
-			"Password",
-			false,
-			"SoftVideo provider",
-			[]string{config.ViewPassword},
-			nil),
-		config.NewVariable(
-			boggart.ConfigMonitoringExternalURL,
-			config.ValueTypeString,
-			nil,
-			"Monitoring external URL",
-			false,
-			"Others",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigApcupsdEnabled,
-			config.ValueTypeBool,
-			false,
-			"Enabled",
-			false,
-			"Apcupsd",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigApcupsdRepeatInterval,
-			config.ValueTypeDuration,
-			time.Minute,
-			"Repeat interval",
-			false,
-			"Apcupsd",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigApcupsdNISAddress,
-			config.ValueTypeString,
-			"127.0.0.1:3551",
-			"NIS address",
-			false,
-			"Apcupsd",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigApcupsdFileStatus,
-			config.ValueTypeString,
-			"/var/log/apcupsd.status",
-			"File status",
-			false,
-			"Apcupsd",
-			nil,
-			nil),
-		config.NewVariable(
-			boggart.ConfigApcupsdFileEvents,
-			config.ValueTypeString,
-			"/var/log/apcupsd.events",
-			"File events",
-			false,
-			"Apcupsd",
-			nil,
-			nil),
+		config.NewVariable(boggart.ConfigPulsarHotWaterStartValue, config.ValueTypeFloat64).
+			WithUsage("Start value of hot water (in m3)").
+			WithGroup("Pulsar devices").
+			WithDefault(0),
+		config.NewVariable(boggart.ConfigSoftVideoEnabled, config.ValueTypeBool).
+			WithUsage("Enabled").
+			WithGroup("SoftVideo provider"),
+		config.NewVariable(boggart.ConfigSoftVideoRepeatInterval, config.ValueTypeDuration).
+			WithUsage("Repeat interval").
+			WithGroup("SoftVideo provider").
+			WithDefault(time.Hour * 12),
+		config.NewVariable(boggart.ConfigSoftVideoLogin, config.ValueTypeString).
+			WithUsage("Login").
+			WithGroup("SoftVideo provider"),
+		config.NewVariable(boggart.ConfigSoftVideoPassword, config.ValueTypeString).
+			WithUsage("Password").
+			WithGroup("SoftVideo provider").
+			WithView([]string{config.ViewPassword}),
+		config.NewVariable(boggart.ConfigMonitoringExternalURL, config.ValueTypeString).
+			WithUsage("Monitoring external URL"),
+		config.NewVariable(boggart.ConfigApcupsdEnabled, config.ValueTypeBool).
+			WithUsage("Enabled").
+			WithGroup("Apcupsd"),
+		config.NewVariable(boggart.ConfigApcupsdRepeatInterval, config.ValueTypeDuration).
+			WithUsage("Repeat interval").
+			WithGroup("Apcupsd").
+			WithDefault(time.Minute),
+		config.NewVariable(boggart.ConfigApcupsdNISAddress, config.ValueTypeString).
+			WithUsage("NIS address").
+			WithGroup("Apcupsd").
+			WithDefault("127.0.0.1:3551"),
+		config.NewVariable(boggart.ConfigApcupsdFileStatus, config.ValueTypeString).
+			WithUsage("File status").
+			WithGroup("Apcupsd").
+			WithDefault("/var/log/apcupsd.status"),
+		config.NewVariable(boggart.ConfigApcupsdFileEvents, config.ValueTypeString).
+			WithUsage("File events").
+			WithGroup("Apcupsd").
+			WithDefault("/var/log/apcupsd.events"),
 	}
 }
 
 func (c *Component) ConfigWatchers() []config.Watcher {
 	return []config.Watcher{
-		config.NewWatcher(c.Name(), []string{
+		config.NewWatcher([]string{
 			boggart.ConfigDevicesManagerCheckInterval,
 		}, c.watchDevicesManagerCheckInterval),
-		config.NewWatcher(c.Name(), []string{
+		config.NewWatcher([]string{
 			boggart.ConfigDevicesManagerCheckTimeout,
 		}, c.watchDevicesManagerCheckTimeout),
 	}

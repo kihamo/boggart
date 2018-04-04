@@ -2,16 +2,12 @@ package handlers
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/snitch"
 )
 
 type IndexHandler struct {
 	dashboard.Handler
-
-	Config    config.Component
-	Component boggart.Component
 }
 
 type MetricValue struct {
@@ -31,7 +27,7 @@ func (h *IndexHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	metricsChan := make(chan snitch.Metric, 10000)
 
 	go func() {
-		h.Component.Metrics().Collect(metricsChan)
+		r.Component().(boggart.Component).Metrics().Collect(metricsChan)
 		close(metricsChan)
 	}()
 
@@ -53,5 +49,5 @@ func (h *IndexHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 	vars["errors"] = errors
 
-	h.Render(r.Context(), boggart.ComponentName, "index", vars)
+	h.Render(r.Context(), "index", vars)
 }

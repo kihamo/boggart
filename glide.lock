@@ -1,5 +1,5 @@
-hash: 5382d318d1e7bc2e9fbeb42626fc71bc36e9f67a52024375ffb4cd7f8dd694ad
-updated: 2018-03-16T17:41:52.941540505+03:00
+hash: d20881492be57f2bdf221fdcd6cd6cc6218c56136a2a71bd1c569d27096b5516
+updated: 2018-04-04T14:28:25.805972065+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -14,6 +14,10 @@ imports:
   version: 253b217b3ad255d48994a6f74de4f82650f5e70d
 - name: github.com/bugsnag/osext
   version: 0dd3f918b21bec95ace9dc86c7e70266cfc5c702
+- name: github.com/chai2010/gettext-go
+  version: bf70f2a70fb1b1f36d90d671a72795984eab0fcb
+  subpackages:
+  - gettext/mo
 - name: github.com/davecheney/gpio
   version: a6de66e7e47065fca1a55c62c3f3cab3144694e6
 - name: github.com/deckarep/golang-set
@@ -65,7 +69,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: b850946f232f77cd2548e218ee538eddb6113288
+  version: f2e885ab6ef450ccee3ebe0b78d54f131fb72295
   subpackages:
   - components/annotations
   - components/annotations/instance
@@ -84,6 +88,10 @@ imports:
   - components/dashboard/runtime
   - components/database
   - components/grpc
+  - components/i18n
+  - components/i18n/instance
+  - components/i18n/internal
+  - components/i18n/internationalization
   - components/logger
   - components/logger/instance
   - components/logger/internal
@@ -129,6 +137,12 @@ imports:
   - providers/github
   - providers/gitlab
   - providers/gplus
+- name: github.com/mattn/kinako
+  version: 332c0a7e205a29536e672337a4bea6c7a96b04c1
+  subpackages:
+  - ast
+  - parser
+  - vm
 - name: github.com/mcuadros/go-syslog
   version: 9cf13b7327c0e153da3cba3540c2ae2b879c3859
 - name: github.com/OneOfOne/xxhash
@@ -173,18 +187,20 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/oauth2
-  version: fdc9e635145ae97e6c2cb777c48305600cf515cb
+  version: 921ae394b9430ed4fb549668d7b087601bd60a81
   subpackages:
   - internal
 - name: golang.org/x/text
   version: 6eab0e8f74e86c598ec3b6fad4888e0c11482d48
   subpackages:
+  - internal/tag
+  - language
   - secure/bidirule
   - transform
   - unicode/bidi
   - unicode/norm
 - name: google.golang.org/appengine
-  version: 5bee14b453b4c71be47ec1781b0fa61c2ea182db
+  version: ad39d7fab7c60b2493fdc318c3d2cdb2128f92a4
   subpackages:
   - internal
   - internal/base
@@ -194,11 +210,11 @@ imports:
   - internal/urlfetch
   - urlfetch
 - name: google.golang.org/genproto
-  version: f8c8703595236ae70fdf8789ecb656ea0bcdcf46
+  version: 35de2414665fc36f56b72d982c5af480d86de5ab
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 6b51017f791ae1cfbec89c52efdf444b13b550ef
+  version: 1e2570b1b19ade82d8dbb31bba4e65e9f9ef5b34
   subpackages:
   - balancer
   - balancer/base
@@ -207,6 +223,7 @@ imports:
   - connectivity
   - credentials
   - encoding
+  - encoding/proto
   - grpclb/grpc_lb_v1/messages
   - grpclog
   - internal
@@ -237,5 +254,5 @@ imports:
   subpackages:
   - proto
 - name: gopkg.in/telegram-bot-api.v4
-  version: 2022d04b94f50056a09962b1ac81cdd821d20a55
+  version: 0e0af0c480ea98e982d5f4d45fb39577c6ab1e3e
 testImports: []

@@ -27,13 +27,13 @@ type listenerViewHandlerDevice struct {
 
 type DevicesHandler struct {
 	dashboard.Handler
-
-	DevicesManager boggart.DevicesManager
 }
 
 func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
+	dm := r.Component().(boggart.Component).DevicesManager()
+
 	// devices
-	devicesList := h.DevicesManager.Devices()
+	devicesList := dm.Devices()
 	devicesListView := make([]*deviceViewHandlerDevice, 0, len(devicesList))
 
 	for _, d := range devicesList {
@@ -55,14 +55,14 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 	// listeners
 	listenersListView := make([]listenerViewHandlerDevice, 0, 0)
 
-	for _, item := range h.DevicesManager.Listeners() {
+	for _, item := range dm.Listeners() {
 		listener := listenerViewHandlerDevice{
 			Id:     item.Id(),
 			Name:   item.Name(),
 			Events: make(map[string]string, 0),
 		}
 
-		md := h.DevicesManager.GetListenerMetadata(item.Id())
+		md := dm.GetListenerMetadata(item.Id())
 		if md == nil {
 			continue
 		}
@@ -79,7 +79,7 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 		listenersListView = append(listenersListView, listener)
 	}
 
-	h.Render(r.Context(), boggart.ComponentName, "devices", map[string]interface{}{
+	h.Render(r.Context(), "devices", map[string]interface{}{
 		"devices":   devicesListView,
 		"listeners": listenersListView,
 	})
