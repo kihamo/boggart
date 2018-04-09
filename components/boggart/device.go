@@ -14,6 +14,8 @@ var (
 	DeviceEventDeviceRegister           = event.NewBaseEvent("DeviceRegister")
 	DeviceEventDeviceDisabledAfterCheck = event.NewBaseEvent("DeviceDisabledAfterCheck")
 	DeviceEventDeviceEnabledAfterCheck  = event.NewBaseEvent("DeviceEnabledAfterCheck")
+	DeviceEventDeviceEnabled            = event.NewBaseEvent("DeviceEnabled")
+	DeviceEventDeviceDisabled           = event.NewBaseEvent("DeviceDisabled")
 	DeviceEventWifiClientConnected      = event.NewBaseEvent("WifiClientConnected")
 	DeviceEventWifiClientDisconnected   = event.NewBaseEvent("WifiClientDisconnected")
 )

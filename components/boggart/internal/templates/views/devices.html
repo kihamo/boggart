@@ -1,13 +1,13 @@
 {{ define "content" }}
 
-<div class="row">
+<div class="row" id="devices">
     <div class="x_panel">
         <div class="x_title">
             <h2>{{ i18n "Devices" . }}</h2>
             <div class="clearfix"></div>
         </div>
         <div class="x_content">
-            <table class="table table-striped datatable">
+            <table class="table table-striped">
                 <thead>
                 <tr>
                     <th>{{ i18n "Type" . }}</th>
@@ -17,27 +17,12 @@
                     <th class="md-col-1">{{ i18n "Status" . }}</th>
                 </tr>
                 </thead>
-                <tbody>
-                {{ range $i, $device := .devices }}
-                <tr>
-                    <td>
-                        {{ range $t, $type := $device.Types }}
-                        <span class="label label-success">{{ i18n $type $ }}</span>
-                        {{ end }}
-                    </td>
-                    <td>{{ $device.Id }}</td>
-                    <td>{{ $device.Description }}</td>
-                    <td>{{ $device.TasksCount }}</td>
-                    <td>{{ if $device.Enabled }}{{ i18n "Enabled" $ }}{{ else }}{{ i18n "Disabled" $ }}{{ end }}</td>
-                </tr>
-                {{ end }}
-                </tbody>
             </table>
         </div>
     </div>
 </div>
 
-<div class="row">
+<div class="row" id="listeners">
     <div class="x_panel">
         <div class="x_title">
             <h2><i class="fa fa-deaf"></i> {{ i18n "Listeners" . }}</h2>
@@ -45,7 +30,7 @@
         </div>
         <div class="x_content">
             <div class="table-responsive">
-                <table class="table table-striped datatable">
+                <table class="table table-striped">
                     <thead>
                     <tr>
                         <th>{{ i18n "ID" . }}</th>
@@ -56,28 +41,6 @@
                         <th>{{ i18n "Last fired" . }}</th>
                     </tr>
                     </thead>
-                    {{ range $l, $listener := .listeners }}
-                    <tr>
-                        <td>{{ $listener.Id }}</td>
-                        <td>{{ $listener.Name }}</td>
-                        <td>
-                            {{ range $eventId, $eventName := $listener.Events }}
-                            <span class="label label-info">{{ $eventName }}</span>
-                            {{ end }}
-                        </td>
-                        <td>{{ $listener.Fires }}</td>
-                        <td>
-                            {{ if $listener.FirstFiredAt }}
-                            <script type="application/javascript">document.write(dateToString('{{ $listener.FirstFiredAt.Format "2006-01-02T15:04:05Z07:00" }}'))</script>
-                            {{ end }}
-                        </td>
-                        <td>
-                            {{ if $listener.LastFiredAt }}
-                            <script type="application/javascript">document.write(dateToString('{{ $listener.LastFiredAt.Format "2006-01-02T15:04:05Z07:00" }}'))</script>
-                            {{ end }}
-                        </td>
-                    </tr>
-                    {{ end }}
                 </table>
             </div>
         </div>
@@ -94,4 +57,5 @@
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net/js/jquery.dataTables.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-fixedheader/js/dataTables.fixedHeader.min.js" false) }}
+    {{ staticHTML (staticURL "/boggart/assets/js/devices.js" false) }}
 {{ end }}

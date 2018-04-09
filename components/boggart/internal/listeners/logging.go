@@ -39,6 +39,16 @@ func (l *LoggingListener) Run(_ context.Context, event workers.Event, t time.Tim
 			"device_manager.id": args[1],
 		})
 
+	case boggart.DeviceEventDeviceEnabled:
+		l.logger.Info("Device has been enabled manually", map[string]interface{}{
+			"device.id": args[0].(boggart.Device).Id(),
+		})
+
+	case boggart.DeviceEventDeviceDisabled:
+		l.logger.Info("Device has been disabled manually", map[string]interface{}{
+			"device.id": args[0].(boggart.Device).Id(),
+		})
+
 	case boggart.DeviceEventDeviceDisabledAfterCheck:
 		err := args[2]
 

@@ -8,21 +8,24 @@ import (
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
-type deviceViewHandlerDevice struct {
-	TasksCount  int
-	Id          string
-	Description string
-	Types       []string
-	Enabled     bool
+// easyjson:json
+type deviceHandlerDevice struct {
+	RegisterId  string   `json:"register_id"`
+	Id          string   `json:"id"`
+	TasksCount  int      `json:"tasks_count"`
+	Description string   `json:"description"`
+	Types       []string `json:"types"`
+	Enabled     bool     `json:"enabled"`
 }
 
-type listenerViewHandlerDevice struct {
-	Id           string
-	Name         string
-	Events       map[string]string
-	Fires        int64
-	FirstFiredAt *time.Time
-	LastFiredAt  *time.Time
+// easyjson:json
+type deviceHandlerListener struct {
+	Id         string            `json:"id"`
+	Name       string            `json:"name"`
+	Events     map[string]string `json:"events"`
+	Fires      int64             `json:"fires"`
+	FiredFirst *time.Time        `json:"fire_first"`
+	FiredLast  *time.Time        `json:"fire_last"`
 }
 
 type DevicesHandler struct {
@@ -30,57 +33,81 @@ type DevicesHandler struct {
 }
 
 func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
+	if !r.IsAjax() {
+		h.Render(r.Context(), "devices", nil)
+		return
+	}
+
 	dm := r.Component().(boggart.Component).DevicesManager()
 
-	// devices
-	devicesList := dm.Devices()
-	devicesListView := make([]*deviceViewHandlerDevice, 0, len(devicesList))
+	entities := struct {
+		Draw     int         `json:"draw"`
+		Total    int         `json:"recordsTotal"`
+		Filtered int         `json:"recordsFiltered"`
+		Data     interface{} `json:"data"`
+		Error    string      `json:"error,omitempty"`
+	}{}
+	entities.Draw = 1
 
-	for _, d := range devicesList {
-		viewDevice := &deviceViewHandlerDevice{
-			Id:          d.Id(),
-			Description: d.Description(),
-			Types:       make([]string, 0, len(d.Types())),
-			TasksCount:  len(d.Tasks()),
-			Enabled:     d.IsEnabled(),
+	switch r.URL().Query().Get("entity") {
+	case "devices":
+		list := make([]deviceHandlerDevice, 0, 0)
+
+		for registerId, d := range dm.Devices() {
+			item := deviceHandlerDevice{
+				RegisterId:  registerId,
+				Id:          d.Id(),
+				Description: d.Description(),
+				Types:       make([]string, 0, len(d.Types())),
+				TasksCount:  len(d.Tasks()),
+				Enabled:     d.IsEnabled(),
+			}
+
+			for _, t := range d.Types() {
+				item.Types = append(item.Types, t.String())
+			}
+
+			list = append(list, item)
 		}
 
-		for _, t := range d.Types() {
-			viewDevice.Types = append(viewDevice.Types, t.String())
+		entities.Data = list
+		entities.Total = len(list)
+
+	case "listeners":
+		list := make([]deviceHandlerListener, 0, 0)
+
+		for _, l := range dm.Listeners() {
+			item := deviceHandlerListener{
+				Id:     l.Id(),
+				Name:   l.Name(),
+				Events: make(map[string]string, 0),
+			}
+
+			md := dm.GetListenerMetadata(l.Id())
+			if md == nil {
+				continue
+			}
+
+			item.Fires = md[workers.ListenerMetadataFires].(int64)
+			item.FiredFirst = md[workers.ListenerMetadataFirstFiredAt].(*time.Time)
+			item.FiredLast = md[workers.ListenerMetadataLastFireAt].(*time.Time)
+
+			events := md[workers.ListenerMetadataEvents].([]workers.Event)
+			for _, event := range events {
+				item.Events[event.Id()] = event.Name()
+			}
+
+			list = append(list, item)
 		}
 
-		devicesListView = append(devicesListView, viewDevice)
+		entities.Data = list
+		entities.Total = len(list)
+
+	default:
+		h.NotFound(w, r)
+		return
 	}
 
-	// listeners
-	listenersListView := make([]listenerViewHandlerDevice, 0, 0)
-
-	for _, item := range dm.Listeners() {
-		listener := listenerViewHandlerDevice{
-			Id:     item.Id(),
-			Name:   item.Name(),
-			Events: make(map[string]string, 0),
-		}
-
-		md := dm.GetListenerMetadata(item.Id())
-		if md == nil {
-			continue
-		}
-
-		listener.Fires = md[workers.ListenerMetadataFires].(int64)
-		listener.FirstFiredAt = md[workers.ListenerMetadataFirstFiredAt].(*time.Time)
-		listener.LastFiredAt = md[workers.ListenerMetadataLastFireAt].(*time.Time)
-
-		events := md[workers.ListenerMetadataEvents].([]workers.Event)
-		for _, event := range events {
-			listener.Events[event.Id()] = event.Name()
-		}
-
-		listenersListView = append(listenersListView, listener)
-	}
-
-	h.Render(r.Context(), "devices", map[string]interface{}{
-		"devices":   devicesListView,
-		"listeners": listenersListView,
-	})
+	entities.Filtered = entities.Total
+	w.SendJSON(entities)
 }

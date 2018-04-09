@@ -59,6 +59,7 @@ func (d *DeviceBase) IsEnabled() bool {
 
 func (d *DeviceBase) Enable() {
 	atomic.StoreUint64(&d.enabled, 1)
+	d.TriggerEvent(DeviceEventDeviceEnabled, d)
 }
 
 func (d *DeviceBase) Ping(_ context.Context) bool {
@@ -67,6 +68,7 @@ func (d *DeviceBase) Ping(_ context.Context) bool {
 
 func (d *DeviceBase) Disable() {
 	atomic.StoreUint64(&d.enabled, 0)
+	d.TriggerEvent(DeviceEventDeviceDisabled, d)
 }
 
 func (d *DeviceBase) Listeners() []workers.ListenerWithEvents {
@@ -86,5 +88,7 @@ func (d *DeviceBase) TriggerEvent(event workers.Event, args ...interface{}) {
 		return
 	}
 
-	d.triggerEventsChannel <- NewDeviceTriggerEventBase(event, append([]interface{}{d}, args...))
+	go func() {
+		d.triggerEventsChannel <- NewDeviceTriggerEventBase(event, append([]interface{}{d}, args...))
+	}()
 }

@@ -35,6 +35,7 @@ func (l *AnnotationsListener) Events() []workers.Event {
 		devices.EventDoorGPIOReedSwitchClose,
 		devices.EventUPSApcupsdStatusChanged,
 		boggart.DeviceEventDeviceDisabledAfterCheck,
+		boggart.DeviceEventDeviceDisabled,
 		boggart.DeviceEventDevicesManagerReady,
 	}
 }
@@ -101,7 +102,7 @@ func (l *AnnotationsListener) Run(_ context.Context, event workers.Event, t time
 				[]string{annotations.StorageGrafana})
 		}
 
-	case boggart.DeviceEventDeviceDisabledAfterCheck:
+	case boggart.DeviceEventDeviceDisabledAfterCheck, boggart.DeviceEventDeviceDisabled:
 		device := args[0].(boggart.Device)
 
 		tags := make([]string, 0, len(device.Types()))
@@ -109,6 +110,10 @@ func (l *AnnotationsListener) Run(_ context.Context, event workers.Event, t time
 			tags = append(tags, deviceType.String())
 		}
 		tags = append(tags, "device disabled")
+
+		if event == boggart.DeviceEventDeviceDisabled {
+			tags = append(tags, "manually")
+		}
 
 		l.annotations.CreateInStorages(
 			annotations.NewAnnotation("Device is disabled", device.Description(), tags, &t, nil),
