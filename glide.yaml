@@ -3,7 +3,7 @@ import:
 - package: github.com/go-sql-driver/mysql
   version: 9181e3a86a19bacd63e68d43ae8b7b36320d8092
 - package: github.com/kihamo/shadow
-  version: f2e885ab6ef450ccee3ebe0b78d54f131fb72295
+  version: c827d74c8e4148a40f6af3cf91c48f22c27910e8
 - package: github.com/goburrow/serial
   version: 5efbe925ecf714f8ba147bf2226f2e7afc7111bc
 - package: gopkg.in/routeros.v2
@@ -16,3 +16,5 @@ import:
   version: v2.2.1
 - package: github.com/gorilla/websocket
   version: 0647012449a1878977514a346b26637dd022446c
+- package: github.com/vikstrous/zengge-lightcontrol/control
+  version: 6613d030df9fdbfb24debdf69d36787067d0cddb

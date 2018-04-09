@@ -97,6 +97,7 @@ func (c *Component) Run() (err error) {
 	c.initPulsarMeters()
 	c.initUPS()
 	c.initTV()
+	c.initLight()
 
 	c.devicesManager.Ready()
 

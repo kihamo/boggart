@@ -26,6 +26,7 @@ const (
 	DeviceIdCameraStreet
 	DeviceIdHeatMeter
 	DeviceIdEntranceDoor
+	DeviceIdLight
 	DeviceIdPhone
 	DeviceIdRouter
 	DeviceIdTV
@@ -43,6 +44,7 @@ const (
 	DeviceTypeElectricityMeter
 	DeviceTypeHeatMeter
 	DeviceTypeInternetProvider
+	DeviceTypeLight
 	DeviceTypePhone
 	DeviceTypeRouter
 	DeviceTypeTV

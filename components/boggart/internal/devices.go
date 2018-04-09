@@ -15,6 +15,8 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
 	"github.com/kihamo/boggart/components/boggart/providers/samsung/tv"
 	"github.com/kihamo/boggart/components/boggart/providers/softvideo"
+	"github.com/vikstrous/zengge-lightcontrol/local"
+	"github.com/vikstrous/zengge-lightcontrol/manage"
 )
 
 func (c *Component) initVideoRecorders() {
@@ -274,4 +276,25 @@ func (c *Component) initTV() {
 
 	device := devices.NewSamsungTV(api)
 	c.devicesManager.RegisterWithID(boggart.DeviceIdTV.String(), device)
+}
+
+func (c *Component) initLight() {
+	transport, err := local.NewTransport("192.168.88.165:5577")
+	if err != nil {
+		c.logger.Error("Init transport of Zengge light failed", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	manager, err := manage.NewManager("192.168.88.165:48899")
+	if err != nil {
+		c.logger.Error("Init manager of Zengge light failed", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	device := devices.NewZenggeLight(transport, manager)
+	c.devicesManager.RegisterWithID(boggart.DeviceIdLight.String(), device)
 }

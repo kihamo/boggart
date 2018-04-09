@@ -1,5 +1,5 @@
-hash: d20881492be57f2bdf221fdcd6cd6cc6218c56136a2a71bd1c569d27096b5516
-updated: 2018-04-04T14:28:25.805972065+03:00
+hash: a8c08ae6c9212f201bad86d5a21a711eeaa6aa68e4d454dea42c7eefb5d0b281
+updated: 2018-04-09T22:57:03.578159173+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -69,7 +69,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: f2e885ab6ef450ccee3ebe0b78d54f131fb72295
+  version: c827d74c8e4148a40f6af3cf91c48f22c27910e8
   subpackages:
   - components/annotations
   - components/annotations/instance
@@ -91,6 +91,7 @@ imports:
   - components/i18n
   - components/i18n/instance
   - components/i18n/internal
+  - components/i18n/internal/handlers
   - components/i18n/internationalization
   - components/logger
   - components/logger/instance
@@ -167,6 +168,12 @@ imports:
   - sqlparse
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
+- name: github.com/vikstrous/zengge-lightcontrol
+  version: 6613d030df9fdbfb24debdf69d36787067d0cddb
+  subpackages:
+  - control
+  - local
+  - manage
 - name: golang.org/x/crypto
   version: 9477e0b78b9ac3d0b03822fd95422e2fe07627cd
   subpackages:
@@ -200,7 +207,7 @@ imports:
   - unicode/bidi
   - unicode/norm
 - name: google.golang.org/appengine
-  version: ad39d7fab7c60b2493fdc318c3d2cdb2128f92a4
+  version: 0a24098c0ec68416ec050f567f75df563d6b231e
   subpackages:
   - internal
   - internal/base
@@ -210,11 +217,11 @@ imports:
   - internal/urlfetch
   - urlfetch
 - name: google.golang.org/genproto
-  version: 35de2414665fc36f56b72d982c5af480d86de5ab
+  version: ce84044298496ef4b54b4a0a0909ba593cc60e30
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 1e2570b1b19ade82d8dbb31bba4e65e9f9ef5b34
+  version: d89cded64628466c4ab532d1f0ba5c220459ebe8
   subpackages:
   - balancer
   - balancer/base
