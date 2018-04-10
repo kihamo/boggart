@@ -23,7 +23,7 @@ type DevicesManager struct {
 	storage        *sync.Map
 	workers        workers.Component
 	listeners      *manager.ListenersManager
-	chanChecker    chan struct{}
+	chanChecker    chan string
 	tickerChecker  *w.Ticker
 	timeoutChecker time.Duration
 }
@@ -33,7 +33,7 @@ func NewDevicesManager(workers workers.Component) *DevicesManager {
 		storage:        new(sync.Map),
 		workers:        workers,
 		listeners:      manager.NewListenersManager(),
-		chanChecker:    make(chan struct{}, 1),
+		chanChecker:    make(chan string),
 		tickerChecker:  w.NewTicker(time.Minute),
 		timeoutChecker: DefaultTimeoutChecker,
 	}
@@ -71,6 +71,8 @@ func (m *DevicesManager) RegisterWithID(id string, device boggart.Device) {
 	if events != nil {
 		go m.doDeviceEvents(events)
 	}
+
+	m.CheckByKeys(id)
 }
 
 func (m *DevicesManager) Device(id string) boggart.Device {
@@ -188,18 +190,29 @@ func (m *DevicesManager) SetCheckerTimeout(duration time.Duration) {
 }
 
 func (m *DevicesManager) Check() {
-	if len(m.chanChecker) == 0 {
-		m.chanChecker <- struct{}{}
-	}
+	keys := make([]string, 0, 0)
+
+	m.storage.Range(func(key interface{}, device interface{}) bool {
+		keys = append(keys, key.(string))
+		return true
+	})
+
+	m.CheckByKeys(keys...)
+}
+
+func (m *DevicesManager) CheckByKeys(keys ...string) {
+	go func() {
+		for _, key := range keys {
+			m.chanChecker <- key
+		}
+	}()
 }
 
 func (m *DevicesManager) doCheck() {
 	for {
 		select {
-		case <-m.chanChecker:
-			for key, device := range m.Devices() {
-				// в параллель вешать нельзя, так как многие устройства висят на одной линии и
-				// запросы идут последовательно, поэтому не укладывается в таймаут
+		case key := <-m.chanChecker:
+			if device := m.Device(key); device != nil {
 				m.checker(key, device)
 			}
 
