@@ -22,6 +22,10 @@ const (
 	ApiV2ApplicationId = "SamsungTV"
 )
 
+const (
+	KeyPower = "KEY_POWER"
+)
+
 type ApiV2DeviceResponse struct {
 	Device struct {
 		OS                string
@@ -185,7 +189,7 @@ type ApiV2SendCommandRequest struct {
 type ApiV2 struct {
 	mutex sync.RWMutex
 
-	address string
+	host    string
 	client  *http.Client
 	connect *websocket.Conn
 	info    *ApiV2DeviceResponse
@@ -193,9 +197,13 @@ type ApiV2 struct {
 
 func NewApiV2(host string) *ApiV2 {
 	return &ApiV2{
-		address: net.JoinHostPort(host, strconv.Itoa(ApiV2WebSocketPort)),
-		client:  http.NewClient(),
+		host:   host,
+		client: http.NewClient(),
 	}
+}
+
+func (a *ApiV2) Host() string {
+	return a.host
 }
 
 func (a *ApiV2) support() *ApiV2DeviceResponse {
@@ -238,7 +246,7 @@ func (a *ApiV2) RemoteControlConnect() (*websocket.Conn, error) {
 
 	u := url.URL{
 		Scheme:  "ws",
-		Host:    a.address,
+		Host:    net.JoinHostPort(a.host, strconv.Itoa(ApiV2WebSocketPort)),
 		Path:    ApiV2BasePath + "channels/samsung.remote.control",
 		RawPath: "name=" + base64.StdEncoding.EncodeToString([]byte(ApiV2ApplicationId)),
 	}
@@ -261,7 +269,13 @@ func (a *ApiV2) RemoteControlConnect() (*websocket.Conn, error) {
 func (a *ApiV2) Device(ctx context.Context) (ApiV2DeviceResponse, error) {
 	reply := ApiV2DeviceResponse{}
 
-	response, err := a.client.Get(ctx, "http://"+a.address+ApiV2BasePath)
+	u := url.URL{
+		Scheme:  "http",
+		Host:    net.JoinHostPort(a.host, strconv.Itoa(ApiV2WebSocketPort)),
+		Path:    ApiV2BasePath,
+	}
+
+	response, err := a.client.Get(ctx, u.String())
 	if err != nil {
 		return reply, err
 	}

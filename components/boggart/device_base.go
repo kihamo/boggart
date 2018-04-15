@@ -57,18 +57,22 @@ func (d *DeviceBase) IsEnabled() bool {
 	return atomic.LoadUint64(&d.enabled) == 1
 }
 
-func (d *DeviceBase) Enable() {
+func (d *DeviceBase) Enable() error {
 	atomic.StoreUint64(&d.enabled, 1)
 	d.TriggerEvent(DeviceEventDeviceEnabled, d)
+
+	return nil
 }
 
 func (d *DeviceBase) Ping(_ context.Context) bool {
 	return false
 }
 
-func (d *DeviceBase) Disable() {
+func (d *DeviceBase) Disable() error {
 	atomic.StoreUint64(&d.enabled, 0)
 	d.TriggerEvent(DeviceEventDeviceDisabled, d)
+
+	return nil
 }
 
 func (d *DeviceBase) Listeners() []workers.ListenerWithEvents {

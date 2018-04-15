@@ -54,14 +54,22 @@ func (d *ZenggeLight) Ping(ctx context.Context) bool {
 	return state.IsOn
 }
 
-func (d *ZenggeLight) Enable() {
-	d.DeviceBase.Enable()
-	d.controller.SetPower(true)
+func (d *ZenggeLight) Enable() error {
+	err := d.controller.SetPower(true)
+	if err != nil {
+		return err
+	}
+
+	return d.DeviceBase.Enable()
 }
 
-func (d *ZenggeLight) Disable() {
-	d.DeviceBase.Disable()
-	d.controller.SetPower(false)
+func (d *ZenggeLight) Disable() error {
+	err := d.controller.SetPower(false)
+	if err != nil {
+		return err
+	}
+
+	return d.DeviceBase.Disable()
 }
 
 func (d *ZenggeLight) Tasks() []workers.Task {

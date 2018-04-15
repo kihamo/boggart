@@ -1,5 +1,5 @@
-hash: a8c08ae6c9212f201bad86d5a21a711eeaa6aa68e4d454dea42c7eefb5d0b281
-updated: 2018-04-09T22:57:03.578159173+03:00
+hash: 7b0aafffac73af95218cfbc070dd0465d22a1222ffb9919291d900c82785359c
+updated: 2018-04-15T15:03:30.892559478+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -22,8 +22,16 @@ imports:
   version: a6de66e7e47065fca1a55c62c3f3cab3144694e6
 - name: github.com/deckarep/golang-set
   version: 1d4478f51bed434f1dadf96dcd9b43aabac66795
+- name: github.com/dhickie/go-lgtv
+  version: 54744414160ef8c4689fb1d5915e5540c4a67486
+  subpackages:
+  - connection
+  - control
+  - util/ip
 - name: github.com/elazarl/go-bindata-assetfs
   version: 30f82fa23fd844bd5bb1e5f216db87fd77b5eb43
+- name: github.com/ghthor/gowol
+  version: eb42ead1b24e9226bddb05004815f6e72280f879
 - name: github.com/go-sql-driver/mysql
   version: 9181e3a86a19bacd63e68d43ae8b7b36320d8092
 - name: github.com/goburrow/serial
@@ -194,7 +202,7 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/oauth2
-  version: 921ae394b9430ed4fb549668d7b087601bd60a81
+  version: fdc9e635145ae97e6c2cb777c48305600cf515cb
   subpackages:
   - internal
 - name: golang.org/x/text
@@ -207,7 +215,7 @@ imports:
   - unicode/bidi
   - unicode/norm
 - name: google.golang.org/appengine
-  version: 0a24098c0ec68416ec050f567f75df563d6b231e
+  version: 5bee14b453b4c71be47ec1781b0fa61c2ea182db
   subpackages:
   - internal
   - internal/base
@@ -217,11 +225,11 @@ imports:
   - internal/urlfetch
   - urlfetch
 - name: google.golang.org/genproto
-  version: ce84044298496ef4b54b4a0a0909ba593cc60e30
+  version: f8c8703595236ae70fdf8789ecb656ea0bcdcf46
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: d89cded64628466c4ab532d1f0ba5c220459ebe8
+  version: d11072e7ca9811b1100b80ca0269ac831f06d024
   subpackages:
   - balancer
   - balancer/base

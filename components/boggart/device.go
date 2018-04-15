@@ -31,7 +31,8 @@ const (
 	DeviceIdLight
 	DeviceIdPhone
 	DeviceIdRouter
-	DeviceIdTV
+	DeviceIdTVBedroom
+	DeviceIdTVLivingRoom
 	DeviceIdUPS
 	DeviceIdVideoRecorder
 	DeviceIdWaterMeterCold
@@ -79,8 +80,8 @@ type Device interface {
 	Description() string
 	Types() []DeviceType
 	IsEnabled() bool
-	Disable()
-	Enable()
+	Disable() error
+	Enable() error
 	Ping(context.Context) bool
 	Tasks() []workers.Task
 	Listeners() []workers.ListenerWithEvents

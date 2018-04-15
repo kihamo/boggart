@@ -3,9 +3,11 @@ package devices
 import (
 	"context"
 	"errors"
+	"sync"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/protocols/wol"
 	"github.com/kihamo/boggart/components/boggart/providers/samsung/tv"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
@@ -44,7 +46,10 @@ PORT      STATE SERVICE
 type SamsungTV struct {
 	boggart.DeviceWithSerialNumber
 
-	api *tv.ApiV2
+	mutex sync.RWMutex
+	api   *tv.ApiV2
+
+	mac string
 }
 
 func NewSamsungTV(api *tv.ApiV2) *SamsungTV {
@@ -66,6 +71,32 @@ func (d *SamsungTV) Types() []boggart.DeviceType {
 func (d *SamsungTV) Ping(ctx context.Context) bool {
 	_, err := d.api.Device(ctx)
 	return err == nil
+}
+
+func (d *SamsungTV) Enable() error {
+	err := d.PowerOn()
+	if err != nil {
+		return err
+	}
+
+	return d.DeviceBase.Enable()
+}
+
+func (d *SamsungTV) Disable() error {
+	err := d.PowerOff()
+	if err != nil {
+		return err
+	}
+
+	return d.DeviceBase.Disable()
+}
+
+func (d *SamsungTV) PowerOn() error {
+	return wol.WakeUp("9C:8C:6E:CF:3F:EE", "192.168.88.169", "255.255.255.0")
+}
+
+func (d *SamsungTV) PowerOff() error {
+	return d.api.SendCommand(tv.KeyPower)
 }
 
 func (d *SamsungTV) Tasks() []workers.Task {
@@ -96,6 +127,10 @@ func (d *SamsungTV) taskSerialNumber(ctx context.Context) (interface{}, error, b
 
 	d.SetSerialNumber(deviceInfo.ID)
 	d.SetDescription("Samsung TV with serial number " + deviceInfo.ID)
+
+	d.mutex.Lock()
+	d.mac = deviceInfo.Device.WifiMac
+	d.mutex.Unlock()
 
 	return nil, nil, true
 }

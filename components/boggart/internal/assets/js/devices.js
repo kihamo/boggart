@@ -36,10 +36,10 @@ $(document).ready(function () {
                         var content;
 
                         if (row.enabled) {
-                            content = '<button type="button" class="btn btn-danger btn-icon" data-toggle="modal" data-target="#modal" data-modal-title="Confirm disable device #' + row.register_id + '" data-modal-callback="deviceToggle(\'' + row.register_id + '\');">' +
+                            content = '<button type="button" class="btn btn-danger btn-icon" data-toggle="modal" data-target="#modal" data-modal-title="Confirm disable device #' + row.id + '" data-modal-callback="deviceToggle(\'' + row.register_id + '\');">' +
                                 '<i class="glyphicon glyphicon-remove" title="Disable device"></i>'
                         } else {
-                            content = '<button type="button" class="btn btn-success btn-icon" data-toggle="modal" data-target="#modal" data-modal-title="Confirm enable device #' + row.register_id + '" data-modal-callback="deviceToggle(\'' + row.register_id + '\');">' +
+                            content = '<button type="button" class="btn btn-success btn-icon" data-toggle="modal" data-target="#modal" data-modal-title="Confirm enable device #' + row.id + '" data-modal-callback="deviceToggle(\'' + row.register_id + '\');">' +
                                 '<i class="glyphicon glyphicon-ok" title="Enable device"></i>'
                         }
 

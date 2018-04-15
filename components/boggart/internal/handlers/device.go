@@ -10,6 +10,12 @@ type deviceHandlerResponseSuccess struct {
 	Result string `json:"result"`
 }
 
+// easyjson:json
+type deviceHandlerResponseFailed struct {
+	Result  string `json:"result"`
+	Message string `json:"message"`
+}
+
 type DeviceHandler struct {
 	dashboard.Handler
 }
@@ -37,15 +43,24 @@ func (h *DeviceHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 	switch action {
 	case "toggle":
+		var err error
+
 		if device.IsEnabled() {
-			device.Disable()
+			err = device.Disable()
 		} else {
-			device.Enable()
+			err = device.Enable()
 		}
 
-		w.SendJSON(deviceHandlerResponseSuccess{
-			Result: "success",
-		})
+		if err == nil {
+			w.SendJSON(deviceHandlerResponseSuccess{
+				Result: "success",
+			})
+		} else {
+			w.SendJSON(deviceHandlerResponseFailed{
+				Result:  "failed",
+				Message: err.Error(),
+			})
+		}
 	default:
 		h.NotFound(w, r)
 		return

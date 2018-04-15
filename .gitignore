@@ -2,3 +2,4 @@
 vendor/*
 cmd/boggart/boggart
 cmd/boggart/boggart.env
+cmd/boggart/items.yaml

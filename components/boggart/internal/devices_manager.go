@@ -249,8 +249,9 @@ func (m *DevicesManager) checker(key string, device boggart.Device) {
 		}
 
 		if ctx.Err() != nil && ctx.Err() != context.Canceled {
-			device.Disable()
-			m.listeners.AsyncTrigger(boggart.DeviceEventDeviceDisabledAfterCheck, device, key, ctx.Err())
+			if err := device.Disable(); err == nil {
+				m.listeners.AsyncTrigger(boggart.DeviceEventDeviceDisabledAfterCheck, device, key, ctx.Err())
+			}
 		}
 
 		return
@@ -261,11 +262,13 @@ func (m *DevicesManager) checker(key string, device boggart.Device) {
 		}
 
 		if !result {
-			device.Disable()
-			m.listeners.AsyncTrigger(boggart.DeviceEventDeviceDisabledAfterCheck, device, key, nil)
+			if err := device.Disable(); err == nil {
+				m.listeners.AsyncTrigger(boggart.DeviceEventDeviceDisabledAfterCheck, device, key, nil)
+			}
 		} else {
-			device.Enable()
-			m.listeners.AsyncTrigger(boggart.DeviceEventDeviceEnabledAfterCheck, device, key)
+			if err := device.Enable(); err == nil {
+				m.listeners.AsyncTrigger(boggart.DeviceEventDeviceEnabledAfterCheck, device, key)
+			}
 		}
 
 		return
