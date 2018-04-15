@@ -67,7 +67,9 @@ type DevicesManager interface {
 	Attach(workers.Event, workers.Listener)
 	DeAttach(workers.Event, workers.Listener)
 	Listeners() []workers.Listener
-	GetListenerMetadata(id string) workers.Metadata
+	GetListenerMetadata(string) workers.Metadata
+	Check()
+	CheckByKeys(...string)
 }
 
 type DeviceTriggerEvent interface {

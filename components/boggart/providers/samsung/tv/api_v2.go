@@ -270,9 +270,9 @@ func (a *ApiV2) Device(ctx context.Context) (ApiV2DeviceResponse, error) {
 	reply := ApiV2DeviceResponse{}
 
 	u := url.URL{
-		Scheme:  "http",
-		Host:    net.JoinHostPort(a.host, strconv.Itoa(ApiV2WebSocketPort)),
-		Path:    ApiV2BasePath,
+		Scheme: "http",
+		Host:   net.JoinHostPort(a.host, strconv.Itoa(ApiV2WebSocketPort)),
+		Path:   ApiV2BasePath,
 	}
 
 	response, err := a.client.Get(ctx, u.String())

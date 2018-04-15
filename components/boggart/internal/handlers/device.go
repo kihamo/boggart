@@ -35,7 +35,8 @@ func (h *DeviceHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		return
 	}
 
-	device := r.Component().(boggart.Component).DevicesManager().Device(deviceId)
+	dm := r.Component().(boggart.Component).DevicesManager()
+	device := dm.Device(deviceId)
 	if device == nil {
 		h.NotFound(w, r)
 		return
@@ -61,6 +62,14 @@ func (h *DeviceHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 				Message: err.Error(),
 			})
 		}
+
+	case "check":
+		dm.CheckByKeys(deviceId)
+
+		w.SendJSON(deviceHandlerResponseSuccess{
+			Result: "success",
+		})
+
 	default:
 		h.NotFound(w, r)
 		return

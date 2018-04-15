@@ -43,7 +43,9 @@ $(document).ready(function () {
                                 '<i class="glyphicon glyphicon-ok" title="Enable device"></i>'
                         }
 
-                        return '<div class="btn-group btn-group-xs">' + content + '</button></div>';
+                        return '<div class="btn-group btn-group-xs">' + content + '</button>' +
+                            '<button type="button" class="btn btn-info btn-icon device-check"><i class="glyphicon glyphicon-refresh" title="Check"></i></button>' +
+                            '</div>';
                     }
                 }
             ]
@@ -103,11 +105,35 @@ $(document).ready(function () {
             ]
         });
 
+    $('#devices table tbody').on('click', 'button.device-check', function (e) {
+        e.preventDefault();
+        var deviceId = tableDevices.row($(this).closest('tr')).data().register_id;
+
+        $.ajax({
+            type: 'POST',
+            url: '/boggart/devices/' + deviceId + '/check',
+            success: function() {
+                tableDevices.ajax.reload();
+            }
+        });
+    });
+
     window.deviceToggle = function(deviceId) {
         $.ajax({
             type: 'POST',
             url: '/boggart/devices/' + deviceId + '/toggle',
-            success: function() {
+            success: function(r) {
+                if (r.result === 'failed') {
+                    new PNotify({
+                        title: 'Error',
+                        text: r.message,
+                        type: 'error',
+                        hide: false,
+                        styling: 'bootstrap3'
+                    });
+                    return
+                }
+
                 tableDevices.ajax.reload();
             }
         });
