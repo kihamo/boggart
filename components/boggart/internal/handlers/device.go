@@ -7,7 +7,8 @@ import (
 
 // easyjson:json
 type deviceHandlerResponseSuccess struct {
-	Result string `json:"result"`
+	Data   interface{} `json:"data,omitempty"`
+	Result string      `json:"result"`
 }
 
 // easyjson:json
@@ -68,6 +69,12 @@ func (h *DeviceHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 		w.SendJSON(deviceHandlerResponseSuccess{
 			Result: "success",
+		})
+
+	case "ping":
+		w.SendJSON(deviceHandlerResponseSuccess{
+			Result: "success",
+			Data:   device.Ping(r.Context()),
 		})
 
 	default:

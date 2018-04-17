@@ -25,8 +25,8 @@ msgstr "Описание"
 msgid "Tasks"
 msgstr "Задач"
 
-msgid "Status"
-msgstr "Статус"
+msgid "Actions"
+msgstr "Действия"
 
 msgid "Enabled"
 msgstr "Включено"

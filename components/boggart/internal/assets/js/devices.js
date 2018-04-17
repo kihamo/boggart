@@ -45,6 +45,7 @@ $(document).ready(function () {
 
                         return '<div class="btn-group btn-group-xs">' + content + '</button>' +
                             '<button type="button" class="btn btn-info btn-icon device-check"><i class="glyphicon glyphicon-refresh" title="Check"></i></button>' +
+                            '<button type="button" class="btn btn-warning btn-icon device-ping"><i class="glyphicon glyphicon-resize-small" title="Ping"></i></button>' +
                             '</div>';
                     }
                 }
@@ -114,6 +115,35 @@ $(document).ready(function () {
             url: '/boggart/devices/' + deviceId + '/check',
             success: function() {
                 tableDevices.ajax.reload();
+            }
+        });
+    });
+
+    $('#devices table tbody').on('click', 'button.device-ping', function (e) {
+        e.preventDefault();
+        var device = tableDevices.row($(this).closest('tr')).data();
+
+        $.ajax({
+            type: 'POST',
+            url: '/boggart/devices/' + device.register_id + '/ping',
+            success: function(r) {
+                if (r.data !== 'undefined') {
+                    if (!r.data) {
+                        new PNotify({
+                            title: 'Offline',
+                            text: 'Device ' + device.id + ' is offline',
+                            type: 'error',
+                            styling: 'bootstrap3'
+                        });
+                    } else {
+                        new PNotify({
+                            title: 'Online',
+                            text: 'Device ' + device.id + ' is online',
+                            type: 'success',
+                            styling: 'bootstrap3'
+                        });
+                    }
+                }
             }
         });
     });

@@ -36,6 +36,14 @@ func easyjson3073ac56DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			continue
 		}
 		switch key {
+		case "data":
+			if m, ok := out.Data.(easyjson.Unmarshaler); ok {
+				m.UnmarshalEasyJSON(in)
+			} else if m, ok := out.Data.(json.Unmarshaler); ok {
+				_ = m.UnmarshalJSON(in.Raw())
+			} else {
+				out.Data = in.Interface()
+			}
 		case "result":
 			out.Result = string(in.String())
 		default:
@@ -52,6 +60,22 @@ func easyjson3073ac56EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 	out.RawByte('{')
 	first := true
 	_ = first
+	if in.Data != nil {
+		const prefix string = ",\"data\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if m, ok := in.Data.(easyjson.Marshaler); ok {
+			m.MarshalEasyJSON(out)
+		} else if m, ok := in.Data.(json.Marshaler); ok {
+			out.Raw(m.MarshalJSON())
+		} else {
+			out.Raw(json.Marshal(in.Data))
+		}
+	}
 	{
 		const prefix string = ",\"result\":"
 		if first {
