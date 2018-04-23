@@ -52,6 +52,7 @@ const (
 	DeviceTypeRouter
 	DeviceTypeTV
 	DeviceTypeUPS
+	DeviceTypePC
 	DeviceTypeVideoRecorder
 	DeviceTypeWaterMeter
 )

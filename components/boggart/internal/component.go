@@ -87,6 +87,7 @@ func (c *Component) Run() (err error) {
 	c.initListeners()
 	c.initConnectionRS485()
 
+	c.initPC()
 	c.initGPIO()
 	c.initCameras()
 	c.initElectricityMeters()
