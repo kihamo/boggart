@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/protocols/wol"
 	"github.com/kihamo/boggart/components/boggart/providers/samsung/tv"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
@@ -44,7 +43,9 @@ PORT      STATE SERVICE
 */
 
 type SamsungTV struct {
-	boggart.DeviceWithSerialNumber
+	boggart.DeviceBase
+	boggart.DeviceSerialNumber
+	boggart.DeviceWOL
 
 	mutex sync.RWMutex
 	api   *tv.ApiV2
@@ -83,16 +84,13 @@ func (d *SamsungTV) Enable() error {
 }
 
 func (d *SamsungTV) Disable() error {
-	err := d.PowerOff()
-	if err != nil {
-		return err
-	}
+	d.PowerOff()
 
 	return d.DeviceBase.Disable()
 }
 
 func (d *SamsungTV) PowerOn() error {
-	return wol.WakeUp("9C:8C:6E:CF:3F:EE", "192.168.88.169", "255.255.255.0")
+	return d.WakeUp()
 }
 
 func (d *SamsungTV) PowerOff() error {

@@ -21,7 +21,8 @@ var (
 )
 
 type VideoRecorderHikVision struct {
-	boggart.DeviceWithSerialNumber
+	boggart.DeviceBase
+	boggart.DeviceSerialNumber
 
 	isapi    *hikvision.ISAPI
 	interval time.Duration

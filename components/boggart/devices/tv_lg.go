@@ -13,6 +13,7 @@ const (
 
 type LGTV struct {
 	boggart.DeviceBase
+	boggart.DeviceWOL
 
 	control *control.LgTv
 }
@@ -51,7 +52,7 @@ func (d *LGTV) Ping(ctx context.Context) bool {
 }
 
 func (d *LGTV) Enable() error {
-	err := d.control.TurnOn()
+	err := d.WakeUp()
 	if err != nil {
 		return err
 	}

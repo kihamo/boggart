@@ -19,7 +19,8 @@ const (
 )
 
 type ZenggeLight struct {
-	boggart.DeviceWithSerialNumber
+	boggart.DeviceBase
+	boggart.DeviceSerialNumber
 
 	controller *control.Controller
 	manager    *manage.Manager

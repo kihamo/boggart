@@ -34,7 +34,8 @@ var (
 )
 
 type ApcupsdUPS struct {
-	boggart.DeviceWithSerialNumber
+	boggart.DeviceBase
+	boggart.DeviceSerialNumber
 
 	mutex      sync.Mutex
 	client     *apcupsd.Client

@@ -18,7 +18,8 @@ var (
 )
 
 type HikVisionCamera struct {
-	boggart.DeviceWithSerialNumber
+	boggart.DeviceBase
+	boggart.DeviceSerialNumber
 
 	isapi    *hikvision.ISAPI
 	channel  uint64

@@ -21,7 +21,8 @@ var (
 )
 
 type PulsarPulsedWaterMeter struct {
-	boggart.DeviceWithSerialNumber
+	boggart.DeviceBase
+	boggart.DeviceSerialNumber
 
 	input        uint64
 	volumeOffset float64

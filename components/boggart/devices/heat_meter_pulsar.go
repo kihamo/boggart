@@ -21,7 +21,8 @@ var (
 )
 
 type PulsarHeadMeter struct {
-	boggart.DeviceWithSerialNumber
+	boggart.DeviceBase
+	boggart.DeviceSerialNumber
 
 	provider *pulsar.HeatMeter
 	interval time.Duration

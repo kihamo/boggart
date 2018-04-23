@@ -31,7 +31,8 @@ var (
 )
 
 type MikrotikRouter struct {
-	boggart.DeviceWithSerialNumber
+	boggart.DeviceBase
+	boggart.DeviceSerialNumber
 
 	provider *mikrotik.Client
 	interval time.Duration

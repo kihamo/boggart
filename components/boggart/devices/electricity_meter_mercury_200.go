@@ -27,7 +27,8 @@ var (
 )
 
 type Mercury200ElectricityMeter struct {
-	boggart.DeviceWithSerialNumber
+	boggart.DeviceBase
+	boggart.DeviceSerialNumber
 
 	provider *mercury.ElectricityMeter200
 	interval time.Duration
