@@ -22,3 +22,8 @@ import:
   version: ~v1.1
 - package: github.com/ghthor/gowol
   version: eb42ead1b24e9226bddb05004815f6e72280f879
+# https://github.com/hybridgroup/gobot/issues/560
+- package: gobot.io/x/gobot
+  version: ~1.11
+- package: periph.io/x/periph
+  version: ~v2.3.0

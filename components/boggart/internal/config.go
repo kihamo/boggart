@@ -240,6 +240,21 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithUsage("File events").
 			WithGroup("Apcupsd").
 			WithDefault("/var/log/apcupsd.events"),
+		config.NewVariable(boggart.ConfigSensorBME280Enabled, config.ValueTypeBool).
+			WithUsage("Enabled").
+			WithGroup("Sensor 280"),
+		config.NewVariable(boggart.ConfigSensorBME280RepeatInterval, config.ValueTypeDuration).
+			WithUsage("Repeat interval").
+			WithGroup("Sensor 280").
+			WithDefault(time.Minute),
+		config.NewVariable(boggart.ConfigSensorBME280Bus, config.ValueTypeInt).
+			WithUsage("Bus number").
+			WithGroup("Sensor 280").
+			WithDefault(1),
+		config.NewVariable(boggart.ConfigSensorBME280Address, config.ValueTypeInt).
+			WithUsage("Address").
+			WithGroup("Sensor 280").
+			WithDefault(0x76),
 	}
 }
 

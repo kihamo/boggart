@@ -60,4 +60,8 @@ const (
 	ConfigApcupsdNISAddress                     = ComponentName + ".apcupsd.nis.address"
 	ConfigApcupsdFileStatus                     = ComponentName + ".apcupsd.file.status"
 	ConfigApcupsdFileEvents                     = ComponentName + ".apcupsd.file.events"
+	ConfigSensorBME280Enabled                   = ComponentName + ".sensor-bme280.enabled"
+	ConfigSensorBME280RepeatInterval            = ComponentName + ".sensor-bme280.repeat-interval"
+	ConfigSensorBME280Bus                       = ComponentName + ".sensor-bme280.bus"
+	ConfigSensorBME280Address                   = ComponentName + ".sensor-bme280.address"
 )

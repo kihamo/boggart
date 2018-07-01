@@ -1,5 +1,5 @@
-hash: 7b0aafffac73af95218cfbc070dd0465d22a1222ffb9919291d900c82785359c
-updated: 2018-04-15T15:03:30.892559478+03:00
+hash: 6a4cb181e809efa14a385bcd681eecf5ef72ebad605f3cee5f379a52ed85eef5
+updated: 2018-07-01T19:32:59.791637+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -51,6 +51,10 @@ imports:
   - query
 - name: github.com/gorilla/websocket
   version: 0647012449a1878977514a346b26637dd022446c
+- name: github.com/hashicorp/errwrap
+  version: 7554cd9344cec97297fa6649b055a8c98c2a1e55
+- name: github.com/hashicorp/go-multierror
+  version: b7773ae218740a7be65057fc60b366a49b538a44
 - name: github.com/influxdata/influxdb
   version: c85043e9d1d1cadee0934771b2f0804b2147c5ae
   subpackages:
@@ -155,11 +159,13 @@ imports:
 - name: github.com/mcuadros/go-syslog
   version: 9cf13b7327c0e153da3cba3540c2ae2b879c3859
 - name: github.com/OneOfOne/xxhash
-  version: 4e9e81466dc37c9fd94ce9ecf42020ef54112203
+  version: 6def279d2ce6c81a79dd1c1be580f03bb216fb8a
 - name: github.com/patrickmn/go-cache
   version: a3647f8e31d79543b2d0f0ae2fe5c379d72cedc0
 - name: github.com/pborman/uuid
   version: c65b2f87fee37d1c7854c9164a450713c28d50cd
+- name: github.com/pkg/errors
+  version: 816c9085562cd7ee03e7f8188a1cfd942858cded
 - name: github.com/PuerkitoBio/goquery
   version: 09540e565986583836b5fc792fe951ec5fd201dd
 - name: github.com/rs/xhandler
@@ -174,6 +180,10 @@ imports:
   version: 6edbfbd6a369ee82463312ec67b2c92f97a1d4dc
   subpackages:
   - sqlparse
+- name: github.com/sigurn/crc8
+  version: e55481d6f45c5a8f040343bace9013571dae103e
+- name: github.com/sigurn/utils
+  version: f19e41f79f8f006116f682c1af454591bc278ad4
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
 - name: github.com/vikstrous/zengge-lightcontrol
@@ -182,6 +192,14 @@ imports:
   - control
   - local
   - manage
+- name: gobot.io/x/gobot
+  version: 635adea96f788ab19bf77470b075f8db44d34fa0
+  subpackages:
+  - drivers/gpio
+  - drivers/i2c
+  - drivers/spi
+  - platforms/raspi
+  - sysfs
 - name: golang.org/x/crypto
   version: 9477e0b78b9ac3d0b03822fd95422e2fe07627cd
   subpackages:
@@ -202,7 +220,7 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/oauth2
-  version: fdc9e635145ae97e6c2cb777c48305600cf515cb
+  version: 921ae394b9430ed4fb549668d7b087601bd60a81
   subpackages:
   - internal
 - name: golang.org/x/text
@@ -215,7 +233,7 @@ imports:
   - unicode/bidi
   - unicode/norm
 - name: google.golang.org/appengine
-  version: 5bee14b453b4c71be47ec1781b0fa61c2ea182db
+  version: 0a24098c0ec68416ec050f567f75df563d6b231e
   subpackages:
   - internal
   - internal/base
@@ -225,7 +243,7 @@ imports:
   - internal/urlfetch
   - urlfetch
 - name: google.golang.org/genproto
-  version: f8c8703595236ae70fdf8789ecb656ea0bcdcf46
+  version: 51d0944304c3cbce4afe9e5247e21100037bff78
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
@@ -270,4 +288,18 @@ imports:
   - proto
 - name: gopkg.in/telegram-bot-api.v4
   version: 0e0af0c480ea98e982d5f4d45fb39577c6ab1e3e
+- name: periph.io/x/periph
+  version: c0de80b1b075a2019fced09524f2318cf690a685
+  subpackages:
+  - conn
+  - conn/gpio
+  - conn/gpio/gpioreg
+  - conn/i2c
+  - conn/i2c/i2creg
+  - conn/pin
+  - conn/spi
+  - conn/spi/spireg
+  - devices
+  - host/fs
+  - host/sysfs
 testImports: []

@@ -18,6 +18,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/softvideo"
 	"github.com/vikstrous/zengge-lightcontrol/local"
 	"github.com/vikstrous/zengge-lightcontrol/manage"
+	"gobot.io/x/gobot/platforms/raspi"
 )
 
 func (c *Component) initVideoRecorders() {
@@ -324,4 +325,20 @@ func (c *Component) initPC() {
 
 	deviceRPi := devices.NewDesktopPC()
 	c.devicesManager.Register(deviceRPi)
+}
+
+func (c *Component) initSensor() {
+	deviceBME280 := devices.NewBME280Sensor(
+		raspi.NewAdaptor(),
+		c.config.Duration(boggart.ConfigSensorBME280RepeatInterval),
+		c.config.Int(boggart.ConfigSensorBME280Bus),
+		c.config.Int(boggart.ConfigSensorBME280Address))
+
+	if c.config.Bool(boggart.ConfigSensorBME280Enabled) {
+		deviceBME280.Enable()
+	} else {
+		deviceBME280.Disable()
+	}
+
+	c.devicesManager.Register(deviceBME280)
 }

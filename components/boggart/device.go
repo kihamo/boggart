@@ -55,6 +55,9 @@ const (
 	DeviceTypePC
 	DeviceTypeVideoRecorder
 	DeviceTypeWaterMeter
+	DeviceTypeThermometer
+	DeviceTypeBarometer
+	DeviceTypeHygrometer
 )
 
 type DevicesManager interface {

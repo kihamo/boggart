@@ -89,7 +89,7 @@ func templatesViewsDetectHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "templates/views/detect.html", size: 0, mode: os.FileMode(420), modTime: time.Unix(1515662635, 0)}
+	info := bindataFileInfo{name: "templates/views/detect.html", size: 0, mode: os.FileMode(420), modTime: time.Unix(1526562220, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -109,7 +109,7 @@ func templatesViewsDevicesHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "templates/views/devices.html", size: 2347, mode: os.FileMode(420), modTime: time.Unix(1523996762, 0)}
+	info := bindataFileInfo{name: "templates/views/devices.html", size: 2347, mode: os.FileMode(420), modTime: time.Unix(1526562220, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -129,7 +129,7 @@ func templatesViewsIndexHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "templates/views/index.html", size: 14461, mode: os.FileMode(420), modTime: time.Unix(1518814225, 0)}
+	info := bindataFileInfo{name: "templates/views/index.html", size: 14461, mode: os.FileMode(420), modTime: time.Unix(1526562220, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -149,7 +149,7 @@ func assetsJsDevicesJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/js/devices.js", size: 6102, mode: os.FileMode(420), modTime: time.Unix(1523996656, 0)}
+	info := bindataFileInfo{name: "assets/js/devices.js", size: 6102, mode: os.FileMode(420), modTime: time.Unix(1526562220, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -169,7 +169,7 @@ func localesRuLc_messagesBoggartMo() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "locales/ru/LC_MESSAGES/boggart.mo", size: 713, mode: os.FileMode(420), modTime: time.Unix(1523996763, 0)}
+	info := bindataFileInfo{name: "locales/ru/LC_MESSAGES/boggart.mo", size: 713, mode: os.FileMode(420), modTime: time.Unix(1530468824, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -189,7 +189,7 @@ func localesRuLc_messagesDevicesMo() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "locales/ru/LC_MESSAGES/devices.mo", size: 1052, mode: os.FileMode(420), modTime: time.Unix(1523996763, 0)}
+	info := bindataFileInfo{name: "locales/ru/LC_MESSAGES/devices.mo", size: 1052, mode: os.FileMode(420), modTime: time.Unix(1530468824, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
