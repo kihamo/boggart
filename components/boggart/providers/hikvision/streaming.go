@@ -8,6 +8,10 @@ import (
 )
 
 func (a *ISAPI) StreamingPicture(ctx context.Context, channel uint64) ([]byte, error) {
+	if channel < 101 {
+		return nil, fmt.Errorf("Unknown channel %d", channel)
+	}
+
 	u := fmt.Sprintf("%s/Streaming/channels/%d/picture", a.address, channel)
 
 	request, err := http.NewRequest(http.MethodGet, u, nil)

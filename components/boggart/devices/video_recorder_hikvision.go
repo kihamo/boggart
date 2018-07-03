@@ -3,7 +3,9 @@ package devices
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -20,18 +22,25 @@ var (
 	metricVideoRecorderHikVisionStorageAvailable = snitch.NewGauge(boggart.ComponentName+"_device_video_recorder_hikvision_storage_available_bytes", "Storage available in HikVision video recorder")
 )
 
+const (
+	VideoRecorderHikVisionIgnoreInterval = time.Second * 5
+)
+
 type VideoRecorderHikVision struct {
 	boggart.DeviceBase
 	boggart.DeviceSerialNumber
 
-	isapi    *hikvision.ISAPI
-	interval time.Duration
+	isapi                 *hikvision.ISAPI
+	interval              time.Duration
+	mutex                 sync.Mutex
+	alertStreamingHistory map[string]time.Time
 }
 
 func NewVideoRecorderHikVision(isapi *hikvision.ISAPI, interval time.Duration) *VideoRecorderHikVision {
 	device := &VideoRecorderHikVision{
-		isapi:    isapi,
-		interval: interval,
+		isapi:                 isapi,
+		interval:              interval,
+		alertStreamingHistory: make(map[string]time.Time),
 	}
 	device.Init()
 	device.SetDescription("HikVision video recorder")
@@ -109,6 +118,10 @@ func (d *VideoRecorderHikVision) taskSerialNumber(ctx context.Context) (interfac
 	d.SetSerialNumber(deviceInfo.SerialNumber)
 	d.SetDescription("HikVision video recorder with serial number " + deviceInfo.SerialNumber)
 
+	if err := d.startAlertStreaming(); err != nil {
+		return nil, err, false
+	}
+
 	return nil, nil, true
 }
 
@@ -158,4 +171,37 @@ func (d *VideoRecorderHikVision) taskUpdater(ctx context.Context) (interface{}, 
 	}
 
 	return nil, nil
+}
+
+func (d *VideoRecorderHikVision) startAlertStreaming() error {
+	stream, err := d.isapi.EventNotificationAlertStream(context.Background())
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		for {
+			event, err := stream.NextAlert()
+			if err != nil || !d.IsEnabled() || event.EventState != hikvision.EventEventStateActive {
+				continue
+			}
+
+			id := fmt.Sprintf("%d-%s", event.DynChannelID, event.EventType)
+
+			d.mutex.Lock()
+			lastFire, ok := d.alertStreamingHistory[id]
+			d.alertStreamingHistory[id] = event.DateTime
+			d.mutex.Unlock()
+
+			if !ok || event.DateTime.Sub(lastFire) > VideoRecorderHikVisionIgnoreInterval {
+				d.TriggerEvent(boggart.DeviceEventHikvisionEventNotificationAlert, event)
+			}
+		}
+	}()
+
+	return nil
+}
+
+func (d *VideoRecorderHikVision) Snapshot(ctx context.Context, streaming uint64, input uint64) ([]byte, error) {
+	return d.isapi.StreamingPicture(ctx, streaming*100+input)
 }

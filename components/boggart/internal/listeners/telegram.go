@@ -9,6 +9,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/devices"
 	"github.com/kihamo/boggart/components/boggart/protocols/apcupsd"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/listener"
 	"github.com/kihamo/shadow/components/messengers/platforms/telegram"
@@ -35,6 +36,7 @@ func NewTelegramListener(messenger *telegram.Telegram, devicesManager boggart.De
 
 func (l *TelegramListener) Events() []workers.Event {
 	return []workers.Event{
+		boggart.DeviceEventHikvisionEventNotificationAlert,
 		boggart.DeviceEventDeviceDisabledAfterCheck,
 		boggart.DeviceEventDeviceEnabledAfterCheck,
 		boggart.DeviceEventDevicesManagerReady,
@@ -49,10 +51,26 @@ func (l *TelegramListener) Events() []workers.Event {
 func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Time, args ...interface{}) {
 	switch event {
 	case devices.EventDoorGPIOReedSwitchOpen:
-		l.eventDoor(true, args[0].(boggart.Device), args[1].(*time.Time))
+		l.sendMessage(args[0].(boggart.Device).Description() + " is opened")
+
+		if camera := l.devicesManager.Device(boggart.DeviceIdCameraHall.String()); camera != nil {
+			time.AfterFunc(time.Second, func() {
+				func(camera boggart.Camera) {
+					l.sendSnapshotCamera(camera.(boggart.Camera))
+				}(camera.(boggart.Camera))
+			})
+		}
 
 	case devices.EventDoorGPIOReedSwitchClose:
-		l.eventDoor(false, args[0].(boggart.Device), args[1].(*time.Time))
+		l.sendMessage(args[0].(boggart.Device).Description() + " is closed")
+
+		if camera := l.devicesManager.Device(boggart.DeviceIdCameraHall.String()); camera != nil {
+			time.AfterFunc(time.Second, func() {
+				func(camera boggart.Camera) {
+					l.sendSnapshotCamera(camera.(boggart.Camera))
+				}(camera.(boggart.Camera))
+			})
+		}
 
 	case devices.EventUPSApcupsdStatusChanged:
 		current := args[1]
@@ -88,9 +106,9 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 			}
 
 			if reason != "" {
-				l.send(fmt.Sprintf("%s. Reason: %s", message, reason))
+				l.sendMessage(fmt.Sprintf("%s. Reason: %s", message, reason))
 			} else {
-				l.send(message)
+				l.sendMessage(message)
 			}
 		}
 
@@ -100,52 +118,98 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 
 		message := fmt.Sprintf("Device is down %s #%s (%s)", args[1], device.Id(), device.Description())
 		if err == nil {
-			l.send(message)
+			l.sendMessage(message)
 		} else {
-			l.send(message + ". Reason: " + err.(error).Error())
+			l.sendMessage(message + ". Reason: " + err.(error).Error())
 		}
 
 	case boggart.DeviceEventDeviceEnabledAfterCheck:
 		device := args[0].(boggart.Device)
-		l.send(fmt.Sprintf("Device is up %s #%s (%s)", args[1], device.Id(), device.Description()))
+		l.sendMessage(fmt.Sprintf("Device is up %s #%s (%s)", args[1], device.Id(), device.Description()))
 
 	case boggart.DeviceEventDevicesManagerReady:
-		l.send("Hello. I'm online and ready")
+		l.sendMessage("Hello. I'm online and ready")
 
 	case boggart.DeviceEventWifiClientConnected:
 		mac := args[1].(*devices.MikrotikRouterMac)
 
-		l.send(fmt.Sprintf("%s with IP %s (%s, %s) connected to %s", mac.Address, mac.ARP.IP, mac.ARP.Comment, mac.DHCP.Hostname, args[2]))
+		l.sendMessage(fmt.Sprintf("%s with IP %s (%s, %s) connected to %s", mac.Address, mac.ARP.IP, mac.ARP.Comment, mac.DHCP.Hostname, args[2]))
 
 	case boggart.DeviceEventWifiClientDisconnected:
 		mac := args[1].(*devices.MikrotikRouterMac)
 
-		l.send(fmt.Sprintf("%s with IP %s (%s, %s) disconnected to %s", mac.Address, mac.ARP.IP, mac.ARP.Comment, mac.DHCP.Hostname, args[2]))
+		l.sendMessage(fmt.Sprintf("%s with IP %s (%s, %s) disconnected to %s", mac.Address, mac.ARP.IP, mac.ARP.Comment, mac.DHCP.Hostname, args[2]))
+
+	case boggart.DeviceEventHikvisionEventNotificationAlert:
+		event := args[1].(*hikvision.EventNotificationAlertStreamResponse)
+
+		// FIXME: ID прибит гвоздями, нужен реальный
+		videoRecorderDevice := l.devicesManager.Device(boggart.DeviceIdVideoRecorder.String()).(boggart.VideoRecorder)
+
+		switch event.EventType {
+		case hikvision.EventTypeIO:
+		case hikvision.EventTypeVMD:
+			go func() {
+				l.sendSnapshotFromVideoRecorder(videoRecorderDevice, event)
+			}()
+
+			l.sendMessage(fmt.Sprintf("Hikvision alert %s %s", event.EventType, event.EventDescription))
+
+		case hikvision.EventTypeVideoLoss:
+		case hikvision.EventTypeShelterAlarm:
+		case hikvision.EventTypeFaceDetection:
+		case hikvision.EventTypeDefocus:
+		case hikvision.EventTypeAudioException:
+		case hikvision.EventTypeSceneChangeDetection:
+		case hikvision.EventTypeFieldDetection:
+		case hikvision.EventTypeLineDetection:
+		case hikvision.EventTypeRegionEntrance:
+		case hikvision.EventTypeRegionExiting:
+		case hikvision.EventTypeLoitering:
+		case hikvision.EventTypeGroup:
+		case hikvision.EventTypeRapidMove:
+		case hikvision.EventTypeParking:
+		case hikvision.EventTypeUnattendedBaggage:
+		case hikvision.EventTypeAttendedBaggage:
+		case hikvision.EventTypePIR:
+		case hikvision.EventTypePeopleDetection:
+		default:
+			go func() {
+				l.sendSnapshotFromVideoRecorder(videoRecorderDevice, event)
+			}()
+
+			l.sendMessage(fmt.Sprintf("Hikvision alert with unknown type %s", event.EventType))
+		}
 	}
 }
 
-func (l *TelegramListener) eventDoor(open bool, device boggart.Device, changed *time.Time) {
-	if open {
-		l.send(device.Description() + " is opened")
+func (l *TelegramListener) sendSnapshotFromVideoRecorder(videoRecorder boggart.VideoRecorder, event *hikvision.EventNotificationAlertStreamResponse) {
+	if !videoRecorder.IsEnabled() {
+		return
+	}
+
+	if image, err := videoRecorder.Snapshot(context.Background(), event.DynChannelID, 1); err == nil {
+		for _, chatId := range l.chats {
+			l.messenger.SendPhoto(chatId, videoRecorder.Description()+" snapshot", bytes.NewReader(image))
+		}
 	} else {
-		l.send(device.Description() + " is closed")
-	}
-
-	deviceCamera := l.devicesManager.Device(boggart.DeviceIdCameraHall.String())
-	if deviceCamera != nil && deviceCamera.IsEnabled() {
-		time.AfterFunc(time.Second, func() {
-			func(camera boggart.Camera) {
-				if image, err := camera.Snapshot(context.Background()); err == nil {
-					for _, chatId := range l.chats {
-						l.messenger.SendPhoto(chatId, "Hall snapshot", bytes.NewReader(image))
-					}
-				}
-			}(deviceCamera.(boggart.Camera))
-		})
+		fmt.Println("sendSnapshotFromVideoRecorder", err)
 	}
 }
 
-func (l *TelegramListener) send(message string) {
+func (l *TelegramListener) sendSnapshotCamera(camera boggart.Camera) {
+	if !camera.IsEnabled() {
+		return
+	}
+
+	if image, err := camera.Snapshot(context.Background()); err == nil {
+		for _, chatId := range l.chats {
+			l.messenger.SendPhoto(chatId, camera.Description()+" snapshot", bytes.NewReader(image))
+		}
+	}
+}
+
+func (l *TelegramListener) sendMessage(message string) {
 	for _, chatId := range l.chats {
 		l.messenger.SendMessage(chatId, message)
 	}

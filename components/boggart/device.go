@@ -9,15 +9,16 @@ import (
 )
 
 var (
-	DeviceEventSyslogReceive            = event.NewBaseEvent("SyslogReceive")
-	DeviceEventDevicesManagerReady      = event.NewBaseEvent("DevicesManagerReady")
-	DeviceEventDeviceRegister           = event.NewBaseEvent("DeviceRegister")
-	DeviceEventDeviceDisabledAfterCheck = event.NewBaseEvent("DeviceDisabledAfterCheck")
-	DeviceEventDeviceEnabledAfterCheck  = event.NewBaseEvent("DeviceEnabledAfterCheck")
-	DeviceEventDeviceEnabled            = event.NewBaseEvent("DeviceEnabled")
-	DeviceEventDeviceDisabled           = event.NewBaseEvent("DeviceDisabled")
-	DeviceEventWifiClientConnected      = event.NewBaseEvent("WifiClientConnected")
-	DeviceEventWifiClientDisconnected   = event.NewBaseEvent("WifiClientDisconnected")
+	DeviceEventSyslogReceive                   = event.NewBaseEvent("SyslogReceive")
+	DeviceEventDevicesManagerReady             = event.NewBaseEvent("DevicesManagerReady")
+	DeviceEventDeviceRegister                  = event.NewBaseEvent("DeviceRegister")
+	DeviceEventDeviceDisabledAfterCheck        = event.NewBaseEvent("DeviceDisabledAfterCheck")
+	DeviceEventDeviceEnabledAfterCheck         = event.NewBaseEvent("DeviceEnabledAfterCheck")
+	DeviceEventDeviceEnabled                   = event.NewBaseEvent("DeviceEnabled")
+	DeviceEventDeviceDisabled                  = event.NewBaseEvent("DeviceDisabled")
+	DeviceEventWifiClientConnected             = event.NewBaseEvent("WifiClientConnected")
+	DeviceEventWifiClientDisconnected          = event.NewBaseEvent("WifiClientDisconnected")
+	DeviceEventHikvisionEventNotificationAlert = event.NewBaseEvent("HikvisionEventNotificationAlert ")
 )
 
 type DeviceId int64
@@ -105,6 +106,12 @@ type Camera interface {
 	Device
 
 	Snapshot(context.Context) ([]byte, error)
+}
+
+type VideoRecorder interface {
+	Device
+
+	Snapshot(context.Context, uint64, uint64) ([]byte, error)
 }
 
 type Phone interface {
