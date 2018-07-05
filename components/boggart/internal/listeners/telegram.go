@@ -42,6 +42,8 @@ func (l *TelegramListener) Events() []workers.Event {
 		boggart.DeviceEventDevicesManagerReady,
 		boggart.DeviceEventWifiClientConnected,
 		boggart.DeviceEventWifiClientDisconnected,
+		boggart.DeviceEventVPNClientConnected,
+		boggart.DeviceEventVPNClientDisconnected,
 		devices.EventDoorGPIOReedSwitchOpen,
 		devices.EventDoorGPIOReedSwitchClose,
 		devices.EventUPSApcupsdStatusChanged,
@@ -140,6 +142,12 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 
 		l.sendMessage(fmt.Sprintf("%s with IP %s (%s, %s) disconnected to %s", mac.Address, mac.ARP.IP, mac.ARP.Comment, mac.DHCP.Hostname, args[2]))
 
+	case boggart.DeviceEventVPNClientConnected:
+		l.sendMessage(fmt.Sprintf("VPN user %s with IP %s connected", args[1], args[2]))
+
+	case boggart.DeviceEventVPNClientDisconnected:
+		l.sendMessage(fmt.Sprintf("VPN user %s disconnected", args[1]))
+
 	case boggart.DeviceEventHikvisionEventNotificationAlert:
 		event := args[1].(*hikvision.EventNotificationAlertStreamResponse)
 
@@ -153,7 +161,7 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 				l.sendSnapshotFromVideoRecorder(videoRecorderDevice, event)
 			}()
 
-			l.sendMessage(fmt.Sprintf("Hikvision alert %s %s", event.EventType, event.EventDescription))
+			l.sendMessage(fmt.Sprintf("Hikvision alert %s %s into %d channel", event.EventType, event.EventDescription, event.DynChannelID))
 
 		case hikvision.EventTypeVideoLoss:
 		case hikvision.EventTypeShelterAlarm:
@@ -178,7 +186,7 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 				l.sendSnapshotFromVideoRecorder(videoRecorderDevice, event)
 			}()
 
-			l.sendMessage(fmt.Sprintf("Hikvision alert with unknown type %s", event.EventType))
+			l.sendMessage(fmt.Sprintf("Hikvision alert with unknown type %s into %d channel", event.EventType, event.DynChannelID))
 		}
 	}
 }

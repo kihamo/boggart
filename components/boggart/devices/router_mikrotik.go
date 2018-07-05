@@ -3,7 +3,6 @@ package devices
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net"
 	"regexp"
 	"strconv"
@@ -28,6 +27,7 @@ var (
 	metricRouterMikrotikStorageAvailable     = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_storage_available_bytes", "Storage available in Mikrotik router")
 
 	wifiClientRegexp = regexp.MustCompile(`^([^@]+)@([^:\s]+):\s+([^\s,]+)`)
+	vpnClientRegexp  = regexp.MustCompile(`^(\S+) logged (in|out), (.+?)$`)
 )
 
 type MikrotikRouter struct {
@@ -333,24 +333,40 @@ func (l *MikrotikRouterListener) Run(_ context.Context, event workers.Event, t t
 			return
 		}
 
-		// TODO: check hostname
+		switch tag {
+		case "wifi":
+			// TODO: check hostname
 
-		check := wifiClientRegexp.FindStringSubmatch(fmt.Sprintf("%s:%s", tag, content))
-		if len(check) < 4 {
-			return
-		}
+			check := wifiClientRegexp.FindStringSubmatch(content.(string))
+			if len(check) < 4 {
+				return
+			}
 
-		if _, err := net.ParseMAC(check[1]); err != nil {
-			return
-		}
+			if _, err := net.ParseMAC(check[1]); err != nil {
+				return
+			}
 
-		mac := l.router.Mac(check[1])
+			mac := l.router.Mac(check[1])
 
-		switch check[3] {
-		case "connected":
-			l.router.TriggerEvent(boggart.DeviceEventWifiClientConnected, mac, check[2])
-		case "disconnected":
-			l.router.TriggerEvent(boggart.DeviceEventWifiClientDisconnected, mac, check[2])
+			switch check[3] {
+			case "connected":
+				l.router.TriggerEvent(boggart.DeviceEventWifiClientConnected, mac, check[2])
+			case "disconnected":
+				l.router.TriggerEvent(boggart.DeviceEventWifiClientDisconnected, mac, check[2])
+			}
+
+		case "vpn":
+			check := vpnClientRegexp.FindStringSubmatch(content.(string))
+			if len(check) < 2 {
+				return
+			}
+
+			switch check[2] {
+			case "in":
+				l.router.TriggerEvent(boggart.DeviceEventVPNClientConnected, check[1], check[3])
+			case "out":
+				l.router.TriggerEvent(boggart.DeviceEventVPNClientDisconnected, check[1])
+			}
 		}
 	}
 }

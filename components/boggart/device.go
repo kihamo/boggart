@@ -18,6 +18,8 @@ var (
 	DeviceEventDeviceDisabled                  = event.NewBaseEvent("DeviceDisabled")
 	DeviceEventWifiClientConnected             = event.NewBaseEvent("WifiClientConnected")
 	DeviceEventWifiClientDisconnected          = event.NewBaseEvent("WifiClientDisconnected")
+	DeviceEventVPNClientConnected              = event.NewBaseEvent("VPNClientConnected")
+	DeviceEventVPNClientDisconnected           = event.NewBaseEvent("VPNClientDisconnected")
 	DeviceEventHikvisionEventNotificationAlert = event.NewBaseEvent("HikvisionEventNotificationAlert ")
 )
 
