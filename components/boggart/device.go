@@ -71,12 +71,9 @@ type DevicesManager interface {
 	Device(string) Device
 	Devices() map[string]Device
 	DevicesByTypes([]DeviceType) map[string]Device
-	Attach(workers.Event, workers.Listener)
-	DeAttach(workers.Event, workers.Listener)
-	Listeners() []workers.Listener
-	GetListenerMetadata(string) workers.Metadata
 	Check()
 	CheckByKeys(...string)
+	IsReady() bool
 }
 
 type DeviceTriggerEvent interface {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/go-workers"
+	"github.com/kihamo/go-workers/manager"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
@@ -30,6 +31,16 @@ type deviceHandlerListener struct {
 
 type DevicesHandler struct {
 	dashboard.Handler
+
+	devicesManager   boggart.DevicesManager
+	listenersManager *manager.ListenersManager
+}
+
+func NewDevicesHandler(devicesManager boggart.DevicesManager, listenersManager *manager.ListenersManager) *DevicesHandler {
+	return &DevicesHandler{
+		devicesManager:   devicesManager,
+		listenersManager: listenersManager,
+	}
 }
 
 func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
@@ -37,8 +48,6 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 		h.Render(r.Context(), "devices", nil)
 		return
 	}
-
-	dm := r.Component().(boggart.Component).DevicesManager()
 
 	entities := struct {
 		Draw     int         `json:"draw"`
@@ -53,7 +62,7 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 	case "devices":
 		list := make([]deviceHandlerDevice, 0, 0)
 
-		for registerId, d := range dm.Devices() {
+		for registerId, d := range h.devicesManager.Devices() {
 			item := deviceHandlerDevice{
 				RegisterId:  registerId,
 				Id:          d.Id(),
@@ -76,18 +85,19 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 	case "listeners":
 		list := make([]deviceHandlerListener, 0, 0)
 
-		for _, l := range dm.Listeners() {
+		for _, l := range h.listenersManager.Listeners() {
 			item := deviceHandlerListener{
 				Id:     l.Id(),
 				Name:   l.Name(),
 				Events: make(map[string]string, 0),
 			}
 
-			md := dm.GetListenerMetadata(l.Id())
-			if md == nil {
+			listener := h.listenersManager.GetById(l.Id())
+			if listener == nil {
 				continue
 			}
 
+			md := listener.Metadata()
 			item.Fires = md[workers.ListenerMetadataFires].(int64)
 			item.FiredFirst = md[workers.ListenerMetadataFirstFiredAt].(*time.Time)
 			item.FiredLast = md[workers.ListenerMetadataLastFireAt].(*time.Time)

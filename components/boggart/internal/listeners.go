@@ -11,7 +11,7 @@ import (
 )
 
 func (c *Component) initListeners() {
-	c.devicesManager.AddListener(listeners.NewLoggingListener(c.logger))
+	c.listenersManager.AddListener(listeners.NewLoggingListener(c.logger))
 
 	if c.application.HasComponent(messengers.ComponentName) {
 		messenger := c.application.GetComponent(messengers.ComponentName).(messengers.Component).
@@ -28,17 +28,19 @@ func (c *Component) initListeners() {
 			}
 
 			if len(chats) > 0 {
-				c.devicesManager.AddListener(listeners.NewTelegramListener(
+				c.listenersManager.AddListener(listeners.NewTelegramListener(
 					messenger.(*telegram.Telegram),
 					c.devicesManager,
+					c.securityManager,
 					chats))
 			}
 		}
 	}
 
 	if c.application.HasComponent(annotations.ComponentName) {
-		c.devicesManager.AddListener(listeners.NewAnnotationsListener(
+		c.listenersManager.AddListener(listeners.NewAnnotationsListener(
 			c.application.GetComponent(annotations.ComponentName).(annotations.Component),
-			c.application.StartDate()))
+			c.application.StartDate(),
+			c.devicesManager))
 	}
 }

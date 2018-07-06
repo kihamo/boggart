@@ -18,16 +18,18 @@ import (
 type TelegramListener struct {
 	listener.BaseListener
 
-	devicesManager boggart.DevicesManager
-	messenger      *telegram.Telegram
-	chats          []string
+	devicesManager  boggart.DevicesManager
+	securityManager boggart.SecurityManager
+	messenger       *telegram.Telegram
+	chats           []string
 }
 
-func NewTelegramListener(messenger *telegram.Telegram, devicesManager boggart.DevicesManager, chats []string) *TelegramListener {
+func NewTelegramListener(messenger *telegram.Telegram, devicesManager boggart.DevicesManager, securityManager boggart.SecurityManager, chats []string) *TelegramListener {
 	t := &TelegramListener{
-		devicesManager: devicesManager,
-		messenger:      messenger,
-		chats:          chats,
+		devicesManager:  devicesManager,
+		securityManager: securityManager,
+		messenger:       messenger,
+		chats:           chats,
 	}
 	t.Init()
 
@@ -36,6 +38,8 @@ func NewTelegramListener(messenger *telegram.Telegram, devicesManager boggart.De
 
 func (l *TelegramListener) Events() []workers.Event {
 	return []workers.Event{
+		boggart.SecurityOpen,
+		boggart.SecurityClosed,
 		boggart.DeviceEventHikvisionEventNotificationAlert,
 		boggart.DeviceEventDeviceDisabledAfterCheck,
 		boggart.DeviceEventDeviceEnabledAfterCheck,
@@ -52,6 +56,12 @@ func (l *TelegramListener) Events() []workers.Event {
 
 func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Time, args ...interface{}) {
 	switch event {
+	case boggart.SecurityOpen:
+		l.sendMessage("System is open")
+
+	case boggart.SecurityClosed:
+		l.sendMessage("System is closed")
+
 	case devices.EventDoorGPIOReedSwitchOpen:
 		l.sendMessage(args[0].(boggart.Device).Description() + " is opened")
 
@@ -115,6 +125,10 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 		}
 
 	case boggart.DeviceEventDeviceDisabledAfterCheck:
+		if !l.devicesManager.IsReady() {
+			return
+		}
+
 		device := args[0].(boggart.Device)
 		err := args[2]
 
@@ -126,11 +140,12 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 		}
 
 	case boggart.DeviceEventDeviceEnabledAfterCheck:
+		if !l.devicesManager.IsReady() {
+			return
+		}
+
 		device := args[0].(boggart.Device)
 		l.sendMessage(fmt.Sprintf("Device is up %s #%s (%s)", args[1], device.Id(), device.Description()))
-
-	case boggart.DeviceEventDevicesManagerReady:
-		l.sendMessage("Hello. I'm online and ready")
 
 	case boggart.DeviceEventWifiClientConnected:
 		mac := args[1].(*devices.MikrotikRouterMac)
@@ -188,6 +203,9 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 
 			l.sendMessage(fmt.Sprintf("Hikvision alert with unknown type %s into %d channel", event.EventType, event.DynChannelID))
 		}
+
+	case boggart.DeviceEventDevicesManagerReady:
+		l.sendMessage(fmt.Sprintf("Hello. I'm online and ready. System status is %s", l.securityManager.Status().String()))
 	}
 }
 

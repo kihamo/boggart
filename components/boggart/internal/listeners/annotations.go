@@ -16,14 +16,16 @@ import (
 type AnnotationsListener struct {
 	listener.BaseListener
 
-	annotations annotations.Component
-	startDate   *time.Time
+	annotations    annotations.Component
+	startDate      *time.Time
+	devicesManager boggart.DevicesManager
 }
 
-func NewAnnotationsListener(annotations annotations.Component, startDate *time.Time) *AnnotationsListener {
+func NewAnnotationsListener(annotations annotations.Component, startDate *time.Time, devicesManager boggart.DevicesManager) *AnnotationsListener {
 	t := &AnnotationsListener{
-		annotations: annotations,
-		startDate:   startDate,
+		annotations:    annotations,
+		startDate:      startDate,
+		devicesManager: devicesManager,
 	}
 	t.Init()
 
@@ -103,6 +105,10 @@ func (l *AnnotationsListener) Run(_ context.Context, event workers.Event, t time
 		}
 
 	case boggart.DeviceEventDeviceDisabledAfterCheck, boggart.DeviceEventDeviceDisabled:
+		if !l.devicesManager.IsReady() {
+			return
+		}
+
 		device := args[0].(boggart.Device)
 
 		tags := make([]string, 0, len(device.Types()))

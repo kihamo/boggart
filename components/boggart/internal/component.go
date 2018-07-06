@@ -5,6 +5,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
+	"github.com/kihamo/go-workers/manager"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/annotations"
 	"github.com/kihamo/shadow/components/config"
@@ -25,8 +26,10 @@ type Component struct {
 	workers     workers.Component
 	routes      []dashboard.Route
 
-	connectionRS485 *rs485.Connection
-	devicesManager  *DevicesManager
+	connectionRS485  *rs485.Connection
+	listenersManager *manager.ListenersManager
+	devicesManager   *DevicesManager
+	securityManager  *SecurityManager
 }
 
 func (c *Component) Name() string {
@@ -74,7 +77,10 @@ func (c *Component) Init(a shadow.Application) error {
 
 	c.config = a.GetComponent(config.ComponentName).(config.Component)
 	c.workers = a.GetComponent(workers.ComponentName).(workers.Component)
-	c.devicesManager = NewDevicesManager(c.workers)
+
+	c.listenersManager = manager.NewListenersManager()
+	c.devicesManager = NewDevicesManager(c.workers, c.listenersManager)
+	c.securityManager = NewSecurityManager(c.devicesManager, c.listenersManager)
 
 	return nil
 }
@@ -120,8 +126,4 @@ func (c *Component) ConnectionRS485() *rs485.Connection {
 	defer c.mutex.RUnlock()
 
 	return c.connectionRS485
-}
-
-func (c *Component) DevicesManager() boggart.DevicesManager {
-	return c.devicesManager
 }

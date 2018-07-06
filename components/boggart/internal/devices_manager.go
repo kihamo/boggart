@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -15,11 +16,15 @@ import (
 
 const (
 	DefaultTimeoutChecker = time.Second * 2
+
+	devicesManagerNotReady = int64(iota)
+	devicesManagerReady
 )
 
 type DevicesManager struct {
 	mutex sync.RWMutex
 
+	ready          int64
 	storage        *sync.Map
 	workers        workers.Component
 	listeners      *manager.ListenersManager
@@ -28,11 +33,12 @@ type DevicesManager struct {
 	timeoutChecker time.Duration
 }
 
-func NewDevicesManager(workers workers.Component) *DevicesManager {
+func NewDevicesManager(workers workers.Component, listeners *manager.ListenersManager) *DevicesManager {
 	m := &DevicesManager{
+		ready:          devicesManagerNotReady,
 		storage:        new(sync.Map),
 		workers:        workers,
-		listeners:      manager.NewListenersManager(),
+		listeners:      listeners,
 		chanChecker:    make(chan string),
 		tickerChecker:  w.NewTicker(time.Minute),
 		timeoutChecker: DefaultTimeoutChecker,
@@ -147,36 +153,17 @@ func (m *DevicesManager) Collect(ch chan<- snitch.Metric) {
 	})
 }
 
-func (m *DevicesManager) Attach(event w.Event, listener w.Listener) {
-	m.listeners.Attach(event, listener)
-}
-
-func (m *DevicesManager) DeAttach(event w.Event, listener w.Listener) {
-	m.listeners.DeAttach(event, listener)
-}
-
 func (m *DevicesManager) Ready() {
-	m.listeners.AsyncTrigger(boggart.DeviceEventDevicesManagerReady)
-}
+	if !m.IsReady() {
+		atomic.StoreInt64(&m.ready, devicesManagerReady)
+		m.listeners.AsyncTrigger(boggart.DeviceEventDevicesManagerReady)
 
-func (m *DevicesManager) ListenersManager() *manager.ListenersManager {
-	return m.listeners
-}
-
-func (m *DevicesManager) Listeners() []w.Listener {
-	return m.listeners.Listeners()
-}
-
-func (m *DevicesManager) AddListener(listener w.ListenerWithEvents) {
-	m.listeners.AddListener(listener)
-}
-
-func (m *DevicesManager) GetListenerMetadata(id string) w.Metadata {
-	if item := m.listeners.GetById(id); item != nil {
-		return item.Metadata()
+		// TODO: запускать рутину автоматического опроса только после завершения инициализации
 	}
+}
 
-	return nil
+func (m *DevicesManager) IsReady() bool {
+	return atomic.LoadInt64(&m.ready) == devicesManagerReady
 }
 
 func (m *DevicesManager) SetCheckerTickerDuration(duration time.Duration) {

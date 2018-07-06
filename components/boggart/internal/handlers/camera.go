@@ -7,6 +7,14 @@ import (
 
 type CameraHandler struct {
 	dashboard.Handler
+
+	devicesManager boggart.DevicesManager
+}
+
+func NewCameraHandler(devicesManager boggart.DevicesManager) *CameraHandler {
+	return &CameraHandler{
+		devicesManager: devicesManager,
+	}
 }
 
 func (h *CameraHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
@@ -18,10 +26,10 @@ func (h *CameraHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 		switch query.Get(":place") {
 		case "hall":
-			device = r.Component().(boggart.Component).DevicesManager().Device(boggart.DeviceIdCameraHall.String())
+			device = h.devicesManager.Device(boggart.DeviceIdCameraHall.String())
 
 		case "street":
-			device = r.Component().(boggart.Component).DevicesManager().Device(boggart.DeviceIdCameraStreet.String())
+			device = h.devicesManager.Device(boggart.DeviceIdCameraStreet.String())
 
 		default:
 			h.NotFound(w, r)

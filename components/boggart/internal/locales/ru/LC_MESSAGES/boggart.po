@@ -19,8 +19,8 @@ msgid "Dashboard"
 msgstr "Панель управления"
 
 msgctxt "menu"
-msgid "Detect"
-msgstr "Детекция"
+msgid "Security"
+msgstr "Охрана"
 
 msgctxt "menu"
 msgid "Devices"

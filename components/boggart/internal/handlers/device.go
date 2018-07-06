@@ -19,6 +19,14 @@ type deviceHandlerResponseFailed struct {
 
 type DeviceHandler struct {
 	dashboard.Handler
+
+	devicesManager boggart.DevicesManager
+}
+
+func NewDeviceHandler(devicesManager boggart.DevicesManager) *DeviceHandler {
+	return &DeviceHandler{
+		devicesManager: devicesManager,
+	}
 }
 
 func (h *DeviceHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
@@ -36,8 +44,7 @@ func (h *DeviceHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		return
 	}
 
-	dm := r.Component().(boggart.Component).DevicesManager()
-	device := dm.Device(deviceId)
+	device := h.devicesManager.Device(deviceId)
 	if device == nil {
 		h.NotFound(w, r)
 		return
@@ -65,7 +72,7 @@ func (h *DeviceHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 	case "check":
-		dm.CheckByKeys(deviceId)
+		h.devicesManager.CheckByKeys(deviceId)
 
 		w.SendJSON(deviceHandlerResponseSuccess{
 			Result: "success",
