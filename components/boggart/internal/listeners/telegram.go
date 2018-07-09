@@ -57,10 +57,22 @@ func (l *TelegramListener) Events() []workers.Event {
 func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Time, args ...interface{}) {
 	switch event {
 	case boggart.SecurityOpen:
-		l.sendMessage("System is open")
+		status := args[0].(boggart.SecurityStatus)
+
+		if status == boggart.SecurityStatusOpenForce {
+			l.sendMessage("System is force open")
+		} else {
+			l.sendMessage("System is open with auto mode")
+		}
 
 	case boggart.SecurityClosed:
-		l.sendMessage("System is closed")
+		status := args[0].(boggart.SecurityStatus)
+
+		if status == boggart.SecurityStatusClosedForce {
+			l.sendMessage("System is force closed")
+		} else {
+			l.sendMessage("System is closed with auto mode")
+		}
 
 	case devices.EventDoorGPIOReedSwitchOpen:
 		l.sendMessage(args[0].(boggart.Device).Description() + " is opened")
@@ -153,6 +165,8 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 		l.sendMessage(fmt.Sprintf("%s with IP %s (%s, %s) connected to %s", mac.Address, mac.ARP.IP, mac.ARP.Comment, mac.DHCP.Hostname, args[2]))
 
 	case boggart.DeviceEventWifiClientDisconnected:
+		// TODO: игнорировать маки из белого списка
+
 		mac := args[1].(*devices.MikrotikRouterMac)
 
 		l.sendMessage(fmt.Sprintf("%s with IP %s (%s, %s) disconnected to %s", mac.Address, mac.ARP.IP, mac.ARP.Comment, mac.DHCP.Hostname, args[2]))
@@ -164,6 +178,10 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 		l.sendMessage(fmt.Sprintf("VPN user %s disconnected", args[1]))
 
 	case boggart.DeviceEventHikvisionEventNotificationAlert:
+		if l.securityManager.IsOpen() {
+			return
+		}
+
 		event := args[1].(*hikvision.EventNotificationAlertStreamResponse)
 
 		// FIXME: ID прибит гвоздями, нужен реальный

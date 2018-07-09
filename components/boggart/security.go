@@ -25,6 +25,7 @@ type SecurityManager interface {
 	Status() SecurityStatus
 	IsOpen() bool
 	IsClosed() bool
+	IsForce() bool
 	Close()
 	Open()
 	CloseForce()

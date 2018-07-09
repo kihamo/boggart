@@ -45,9 +45,9 @@ func (s *SecurityManager) setStatus(status boggart.SecurityStatus) {
 
 	if prev != current {
 		if current {
-			s.listeners.AsyncTrigger(boggart.SecurityOpen)
+			s.listeners.AsyncTrigger(boggart.SecurityOpen, status)
 		} else {
-			s.listeners.AsyncTrigger(boggart.SecurityClosed)
+			s.listeners.AsyncTrigger(boggart.SecurityClosed, status)
 		}
 	}
 }
@@ -58,6 +58,10 @@ func (s *SecurityManager) IsClosed() bool {
 
 func (s *SecurityManager) IsOpen() bool {
 	return !s.IsClosed()
+}
+
+func (s *SecurityManager) IsForce() bool {
+	return s.Status() == boggart.SecurityStatusOpenForce || s.Status() == boggart.SecurityStatusClosedForce
 }
 
 func (s *SecurityManager) Close() {

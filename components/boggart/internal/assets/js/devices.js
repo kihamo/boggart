@@ -1,6 +1,7 @@
 $(document).ready(function () {
     var tableDevices = $('#devices table')
         .DataTable({
+            pageLength: 50,
             language: {
                 url: '/dashboard/datatables/i18n.json'
             },
@@ -22,7 +23,8 @@ $(document).ready(function () {
                     }
                 },
                 {
-                    data: 'id'
+                    data: 'id',
+                    visible: false
                 },
                 {
                     data: 'description'

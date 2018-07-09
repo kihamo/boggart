@@ -1,0 +1,61 @@
+{{ define "content" }}
+{{ staticHTML (staticURL "/boggart/assets/js/security.js" false) }}
+
+<li role="presentation" class="dropdown">
+    <a href="javascript:void(0);" class="dropdown-toggle info-number" data-toggle="dropdown" aria-expanded="false">
+        {{ if or (eq .SecurityStatus "open") (eq .SecurityStatus "open_force") }}
+            <i class="fa fa-unlock"></i>
+        {{ else }}
+            <i class="fa fa-lock"></i>
+        {{ end }}
+
+        {{ if or (eq .SecurityStatus "open") (eq .SecurityStatus "closed") }}
+            <span class="badge bg-green">A</span>
+        {{ end }}
+    </a>
+    <ul class="dropdown-menu dropdown-usermenu pull-right">
+        {{ if ne .SecurityStatus "closed_force" }}
+            <li>
+                <a href="javascript:securityChangeStatus('closed_force');">
+                    <span class="badge bg-red pull-right">{{ i18n "force" . }}</span>
+                    <span>{{ i18n "Close" . }}</span>
+                </a>
+            </li>
+        {{ end }}
+
+        {{ if ne .SecurityStatus "open_force" }}
+        <li>
+            <a href="javascript:securityChangeStatus('open_force');">
+                <span class="badge bg-red pull-right">{{ i18n "force" . }}</span>
+                <span>{{ i18n "Open" . }}</span>
+            </a>
+        </li>
+        {{ end }}
+
+        {{ if ne .SecurityStatus "closed" }}
+        <li>
+            <a href="javascript:securityChangeStatus('closed');">
+                <span class="badge bg-green pull-right">{{ i18n "auto" . }}</span>
+                <span>{{ i18n "Close" . }}</span>
+            </a>
+        </li>
+        {{ end }}
+
+        {{ if ne .SecurityStatus "open" }}
+        <li>
+            <a href="javascript:securityChangeStatus('open');">
+                <span class="badge bg-green pull-right">{{ i18n "auto" . }}</span>
+                <span>{{ i18n "Open" . }}</span>
+            </a>
+        </li>
+        {{ end }}
+
+        <li>
+            <a href="/{{ .ComponentName }}/devices/">
+                <span class="badge bg-green pull-right">{{ .DevicesCount }}</span>
+                <span>{{ i18n "Devices" . }}</span>
+            </a>
+        </li>
+    </ul>
+</li>
+{{ end }}

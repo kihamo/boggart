@@ -18,7 +18,17 @@ func NewSecurityHandler(securityManager boggart.SecurityManager) *SecurityHandle
 }
 
 func (h *SecurityHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
-	h.Render(r.Context(), "security", map[string]interface{}{
-		"status": h.securityManager.Status(),
-	})
+	switch r.Original().FormValue("status") {
+	case boggart.SecurityStatusOpen.String():
+		h.securityManager.Open()
+
+	case boggart.SecurityStatusClosed.String():
+		h.securityManager.Close()
+
+	case boggart.SecurityStatusOpenForce.String():
+		h.securityManager.OpenForce()
+
+	case boggart.SecurityStatusClosedForce.String():
+		h.securityManager.CloseForce()
+	}
 }
