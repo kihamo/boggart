@@ -24,6 +24,6 @@ import:
   version: eb42ead1b24e9226bddb05004815f6e72280f879
 # https://github.com/hybridgroup/gobot/issues/560
 - package: gobot.io/x/gobot
-  version: ~1.11
+  version: 635adea96f788ab19bf77470b075f8db44d34fa0
 - package: periph.io/x/periph
   version: ~v2.3.0

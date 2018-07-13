@@ -1,5 +1,5 @@
-hash: 83bffc4c66793e90b32ac9f9725975afb271665f2474de6c670b57f4e225a108
-updated: 2018-07-14T00:45:32.693953+03:00
+hash: 1e832cf07cf34ae63220da07bb3c0490b7b37a24c418e1106d2e9831b94fb0b6
+updated: 2018-07-14T00:59:36.653946+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -224,7 +224,7 @@ imports:
   - local
   - manage
 - name: gobot.io/x/gobot
-  version: c1d0e3ce485df0b45076d1d93b7d9240b770d5fc
+  version: 635adea96f788ab19bf77470b075f8db44d34fa0
   subpackages:
   - drivers/gpio
   - drivers/i2c
@@ -330,7 +330,6 @@ imports:
   - conn/gpio/gpioreg
   - conn/i2c
   - conn/i2c/i2creg
-  - conn/physic
   - conn/pin
   - conn/spi
   - conn/spi/spireg
