@@ -1,5 +1,5 @@
-hash: 6a754e831f590917718805600eaaea20fc207bed5bdf7f25c838583ac0a790e7
-updated: 2018-07-07T11:10:25.539729+03:00
+hash: 83bffc4c66793e90b32ac9f9725975afb271665f2474de6c670b57f4e225a108
+updated: 2018-07-14T00:45:32.693953+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -10,6 +10,10 @@ imports:
   - stores/memstore
 - name: github.com/andybalholm/cascadia
   version: 901648c87902174f774fac311d7f176f8647bdaa
+- name: github.com/beorn7/perks
+  version: 3a771d992973f24aa725d07868b467d1ddfceafb
+  subpackages:
+  - quantile
 - name: github.com/bsm/histogram
   version: 253b217b3ad255d48994a6f74de4f82650f5e70d
 - name: github.com/bugsnag/osext
@@ -55,6 +59,8 @@ imports:
   version: 7554cd9344cec97297fa6649b055a8c98c2a1e55
 - name: github.com/hashicorp/go-multierror
   version: b7773ae218740a7be65057fc60b366a49b538a44
+- name: github.com/heptiolabs/healthcheck
+  version: da5fdee475fb09de87c5d4a50da233b7d28767b1
 - name: github.com/influxdata/influxdb
   version: c85043e9d1d1cadee0934771b2f0804b2147c5ae
   subpackages:
@@ -81,7 +87,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: c59288287e5fd9fe9c6164959d86ffc75c88ee42
+  version: 26e3e43768a9f3ab02ddc6738be6ab3e1054a97b
   subpackages:
   - components/annotations
   - components/annotations/instance
@@ -108,6 +114,7 @@ imports:
   - components/logger
   - components/logger/instance
   - components/logger/internal
+  - components/logger/output
   - components/messengers
   - components/messengers/instance
   - components/messengers/internal
@@ -156,6 +163,10 @@ imports:
   - ast
   - parser
   - vm
+- name: github.com/matttproud/golang_protobuf_extensions
+  version: c12348ce28de40eed0136aa2b644d0ee0650e56c
+  subpackages:
+  - pbutil
 - name: github.com/mcuadros/go-syslog
   version: 9cf13b7327c0e153da3cba3540c2ae2b879c3859
 - name: github.com/OneOfOne/xxhash
@@ -166,6 +177,26 @@ imports:
   version: c65b2f87fee37d1c7854c9164a450713c28d50cd
 - name: github.com/pkg/errors
   version: 816c9085562cd7ee03e7f8188a1cfd942858cded
+- name: github.com/prometheus/client_golang
+  version: bcbbc08eb2ddff3af83bbf11e7ec13b4fd730b6e
+  subpackages:
+  - prometheus
+- name: github.com/prometheus/client_model
+  version: 5c3871d89910bfb32f5fcab2aa4b9ec68e65a99f
+  subpackages:
+  - go
+- name: github.com/prometheus/common
+  version: 7600349dcfe1abd18d72d3a1770870d9800a7801
+  subpackages:
+  - expfmt
+  - internal/bitbucket.org/ww/goautoneg
+  - model
+- name: github.com/prometheus/procfs
+  version: ae68e2d4c00fed4943b5f6698d504a5fe083da8a
+  subpackages:
+  - internal/util
+  - nfs
+  - xfs
 - name: github.com/PuerkitoBio/goquery
   version: 09540e565986583836b5fc792fe951ec5fd201dd
 - name: github.com/rs/xhandler
@@ -193,7 +224,7 @@ imports:
   - local
   - manage
 - name: gobot.io/x/gobot
-  version: 635adea96f788ab19bf77470b075f8db44d34fa0
+  version: c1d0e3ce485df0b45076d1d93b7d9240b770d5fc
   subpackages:
   - drivers/gpio
   - drivers/i2c
@@ -258,6 +289,7 @@ imports:
   - encoding
   - encoding/proto
   - grpclog
+  - health/grpc_health_v1
   - internal
   - internal/backoff
   - internal/channelz
@@ -298,6 +330,7 @@ imports:
   - conn/gpio/gpioreg
   - conn/i2c
   - conn/i2c/i2creg
+  - conn/physic
   - conn/pin
   - conn/spi
   - conn/spi/spireg

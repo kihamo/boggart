@@ -126,6 +126,7 @@ func (s *SecurityManager) Run(_ context.Context, event workers.Event, t time.Tim
 			}
 		}
 
+	case boggart.SecurityOpen:
 		// TODO: снимаем с охраны камеры
 
 	// после опроса устройств устанавливаем текущий статус контура
