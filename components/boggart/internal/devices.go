@@ -3,7 +3,6 @@ package internal
 import (
 	"encoding/hex"
 
-	"github.com/dhickie/go-lgtv/control"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/devices"
 	"github.com/kihamo/boggart/components/boggart/protocols/apcupsd"
@@ -282,18 +281,20 @@ func (c *Component) initTV() {
 	c.devicesManager.RegisterWithID(boggart.DeviceIdTVBedroom.String(), deviceSamsung)
 
 	// LG
-	ctrl, err := control.NewTV("192.168.88.162", "", "")
-	if err != nil {
-		c.logger.Error("Init control of LG TV failed", map[string]interface{}{
-			"error": err.Error(),
-		})
-		return
-	}
-	ctrl.ClientKey = "3d097186c0fb4abf96b03d251a573613"
+	/*
+		ctrl, err := control.NewTV("192.168.88.162", "", "")
+		if err != nil {
+			c.logger.Error("Init control of LG TV failed", map[string]interface{}{
+				"error": err.Error(),
+			})
+			return
+		}
+		ctrl.ClientKey = "3d097186c0fb4abf96b03d251a573613"
 
-	deviceLG := devices.NewLGTV(ctrl)
-	deviceLG.SetMac("38:8C:50:68:FB:F4")
-	c.devicesManager.RegisterWithID(boggart.DeviceIdTVLivingRoom.String(), deviceLG)
+		deviceLG := devices.NewLGTV(ctrl)
+		deviceLG.SetMac("38:8C:50:68:FB:F4")
+		c.devicesManager.RegisterWithID(boggart.DeviceIdTVLivingRoom.String(), deviceLG)
+	*/
 }
 
 func (c *Component) initLight() {
