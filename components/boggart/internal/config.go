@@ -35,6 +35,20 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithUsage("Serial port timeout").
 			WithGroup("RS485 protocol").
 			WithDefault(rs485.DefaultTimeout),
+		config.NewVariable(boggart.ConfigMQTTEnabled, config.ValueTypeBool).
+			WithUsage("Enabled").
+			WithGroup("MQTT"),
+		config.NewVariable(boggart.ConfigMQTTServers, config.ValueTypeString).
+			WithUsage("Server").
+			WithGroup("MQTT").
+			WithDefault("tcp://localhost:1883"),
+		config.NewVariable(boggart.ConfigMQTTUsername, config.ValueTypeString).
+			WithUsage("Username").
+			WithGroup("MQTT"),
+		config.NewVariable(boggart.ConfigMQTTPassword, config.ValueTypeString).
+			WithUsage("Password").
+			WithGroup("MQTT").
+			WithView([]string{config.ViewPassword}),
 		config.NewVariable(boggart.ConfigDoorsEnabled, config.ValueTypeBool).
 			WithUsage("Enabled").
 			WithGroup("Doors"),
@@ -221,25 +235,27 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithView([]string{config.ViewPassword}),
 		config.NewVariable(boggart.ConfigMonitoringExternalURL, config.ValueTypeString).
 			WithUsage("Monitoring external URL"),
-		config.NewVariable(boggart.ConfigApcupsdEnabled, config.ValueTypeBool).
-			WithUsage("Enabled").
-			WithGroup("Apcupsd"),
-		config.NewVariable(boggart.ConfigApcupsdRepeatInterval, config.ValueTypeDuration).
-			WithUsage("Repeat interval").
-			WithGroup("Apcupsd").
-			WithDefault(time.Minute),
-		config.NewVariable(boggart.ConfigApcupsdNISAddress, config.ValueTypeString).
-			WithUsage("NIS address").
-			WithGroup("Apcupsd").
-			WithDefault("127.0.0.1:3551"),
-		config.NewVariable(boggart.ConfigApcupsdFileStatus, config.ValueTypeString).
-			WithUsage("File status").
-			WithGroup("Apcupsd").
-			WithDefault("/var/log/apcupsd.status"),
-		config.NewVariable(boggart.ConfigApcupsdFileEvents, config.ValueTypeString).
-			WithUsage("File events").
-			WithGroup("Apcupsd").
-			WithDefault("/var/log/apcupsd.events"),
+		/*
+			config.NewVariable(boggart.ConfigApcupsdEnabled, config.ValueTypeBool).
+				WithUsage("Enabled").
+				WithGroup("Apcupsd"),
+			config.NewVariable(boggart.ConfigApcupsdRepeatInterval, config.ValueTypeDuration).
+				WithUsage("Repeat interval").
+				WithGroup("Apcupsd").
+				WithDefault(time.Minute),
+			config.NewVariable(boggart.ConfigApcupsdNISAddress, config.ValueTypeString).
+				WithUsage("NIS address").
+				WithGroup("Apcupsd").
+				WithDefault("127.0.0.1:3551"),
+			config.NewVariable(boggart.ConfigApcupsdFileStatus, config.ValueTypeString).
+				WithUsage("File status").
+				WithGroup("Apcupsd").
+				WithDefault("/var/log/apcupsd.status"),
+			config.NewVariable(boggart.ConfigApcupsdFileEvents, config.ValueTypeString).
+				WithUsage("File events").
+				WithGroup("Apcupsd").
+				WithDefault("/var/log/apcupsd.events"),
+		*/
 		config.NewVariable(boggart.ConfigSensorBME280Enabled, config.ValueTypeBool).
 			WithUsage("Enabled").
 			WithGroup("Sensor 280"),

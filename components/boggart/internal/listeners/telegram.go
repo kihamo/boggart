@@ -8,7 +8,6 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/devices"
-	"github.com/kihamo/boggart/components/boggart/protocols/apcupsd"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/listener"
@@ -50,7 +49,7 @@ func (l *TelegramListener) Events() []workers.Event {
 		boggart.DeviceEventVPNClientDisconnected,
 		devices.EventDoorGPIOReedSwitchOpen,
 		devices.EventDoorGPIOReedSwitchClose,
-		devices.EventUPSApcupsdStatusChanged,
+		// devices.EventUPSApcupsdStatusChanged,
 	}
 }
 
@@ -95,47 +94,47 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 				}(camera.(boggart.Camera))
 			})
 		}
+		/*
+			case devices.EventUPSApcupsdStatusChanged:
+				current := args[1]
+				prev := args[2]
 
-	case devices.EventUPSApcupsdStatusChanged:
-		current := args[1]
-		prev := args[2]
+				if current != nil && prev != nil {
+					status := current.(apcupsd.Status)
+					var (
+						message string
+						reason  string
+					)
 
-		if current != nil && prev != nil {
-			status := current.(apcupsd.Status)
-			var (
-				message string
-				reason  string
-			)
+					if status.Status != nil {
+						if (*status.Status).IsOnBattery {
+							message = "UPS switch to battery"
 
-			if status.Status != nil {
-				if (*status.Status).IsOnBattery {
-					message = "UPS switch to battery"
+							if status.LastTransfer != nil {
+								reason = *status.LastTransfer
+							}
+						} else if (*status.Status).IsOnline {
+							message = "UPS switch to power"
 
-					if status.LastTransfer != nil {
-						reason = *status.LastTransfer
+							if status.LastTransfer != nil {
+								reason = *status.LastTransfer
+							}
+
+							if status.XOnBattery != nil || status.XOffBattery != nil {
+								diff := status.XOffBattery.Sub(*status.XOnBattery)
+
+								message += fmt.Sprintf(". Offline for %.2f seconds", diff.Seconds())
+							}
+						}
 					}
-				} else if (*status.Status).IsOnline {
-					message = "UPS switch to power"
 
-					if status.LastTransfer != nil {
-						reason = *status.LastTransfer
-					}
-
-					if status.XOnBattery != nil || status.XOffBattery != nil {
-						diff := status.XOffBattery.Sub(*status.XOnBattery)
-
-						message += fmt.Sprintf(". Offline for %.2f seconds", diff.Seconds())
+					if reason != "" {
+						l.sendMessage(fmt.Sprintf("%s. Reason: %s", message, reason))
+					} else {
+						l.sendMessage(message)
 					}
 				}
-			}
-
-			if reason != "" {
-				l.sendMessage(fmt.Sprintf("%s. Reason: %s", message, reason))
-			} else {
-				l.sendMessage(message)
-			}
-		}
-
+		*/
 	case boggart.DeviceEventDeviceDisabledAfterCheck:
 		if !l.devicesManager.IsReady() {
 			return

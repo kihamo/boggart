@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"net/url"
 	"strings"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -12,6 +13,20 @@ import (
 
 func (c *Component) initListeners() {
 	c.listenersManager.AddListener(listeners.NewLoggingListener(c.logger))
+
+	if c.config.Bool(boggart.ConfigMQTTEnabled) {
+		servers := make([]*url.URL, 0)
+		for _, u := range strings.Split(c.config.String(boggart.ConfigMQTTServers), ";") {
+			if p, err := url.Parse(u); err == nil {
+				servers = append(servers, p)
+			}
+		}
+
+		c.listenersManager.AddListener(listeners.NewMQTTListener(
+			servers,
+			c.config.String(boggart.ConfigMQTTUsername),
+			c.config.String(boggart.ConfigMQTTPassword)))
+	}
 
 	if c.application.HasComponent(messengers.ComponentName) {
 		messenger := c.application.GetComponent(messengers.ComponentName).(messengers.Component).

@@ -102,7 +102,7 @@ func (c *Component) Run() (err error) {
 	c.initRouters()
 	c.initVideoRecorders()
 	c.initPulsarMeters()
-	c.initUPS()
+	//c.initUPS()
 	c.initTV()
 	c.initLight()
 	c.initSensor()

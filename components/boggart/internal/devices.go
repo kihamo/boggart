@@ -5,9 +5,6 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/devices"
-	"github.com/kihamo/boggart/components/boggart/protocols/apcupsd"
-	"github.com/kihamo/boggart/components/boggart/protocols/apcupsd/file"
-	"github.com/kihamo/boggart/components/boggart/protocols/apcupsd/nis"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 	"github.com/kihamo/boggart/components/boggart/providers/mercury"
 	"github.com/kihamo/boggart/components/boggart/providers/mikrotik"
@@ -248,6 +245,7 @@ func (c *Component) initPulsarMeters() {
 	c.devicesManager.RegisterWithID(boggart.DeviceIdWaterMeterHot.String(), deviceWaterMeterHot)
 }
 
+/*
 func (c *Component) initUPS() {
 	var client *apcupsd.Client
 
@@ -271,7 +269,7 @@ func (c *Component) initUPS() {
 
 	c.devicesManager.RegisterWithID(boggart.DeviceIdUPS.String(), device)
 }
-
+*/
 func (c *Component) initTV() {
 	// Samsung
 	api := tv.NewApiV2("192.168.88.169")

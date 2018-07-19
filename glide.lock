@@ -1,5 +1,5 @@
-hash: 9d55bfb93804b5d686f6e62768a46f57e45cf96e5244450229bc61d586083993
-updated: 2018-07-16T22:43:57.877037+03:00
+hash: 4b7209325f3bda6a5be0b31328765c4507ed47c7972f37e4395789e480d0fe7d
+updated: 2018-07-19T18:39:26.875869+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -32,6 +32,10 @@ imports:
   - connection
   - control
   - util/ip
+- name: github.com/eclipse/paho.mqtt.golang
+  version: 36d01c2b4cbeb3d2a12063e4880ce30800af9560
+  subpackages:
+  - packets
 - name: github.com/elazarl/go-bindata-assetfs
   version: 38087fe4dafb822e541b3f7955075cc1c30bd294
 - name: github.com/ghthor/gowol
@@ -249,7 +253,9 @@ imports:
   - idna
   - internal/timeseries
   - lex/httplex
+  - proxy
   - trace
+  - websocket
 - name: golang.org/x/oauth2
   version: 921ae394b9430ed4fb549668d7b087601bd60a81
   subpackages:

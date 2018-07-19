@@ -7,7 +7,6 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/devices"
-	"github.com/kihamo/boggart/components/boggart/protocols/apcupsd"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/listener"
 	"github.com/kihamo/shadow/components/annotations"
@@ -35,7 +34,7 @@ func NewAnnotationsListener(annotations annotations.Component, startDate *time.T
 func (l *AnnotationsListener) Events() []workers.Event {
 	return []workers.Event{
 		devices.EventDoorGPIOReedSwitchClose,
-		devices.EventUPSApcupsdStatusChanged,
+		// devices.EventUPSApcupsdStatusChanged,
 		boggart.DeviceEventDeviceDisabledAfterCheck,
 		boggart.DeviceEventDeviceDisabled,
 		boggart.DeviceEventDevicesManagerReady,
@@ -70,40 +69,40 @@ func (l *AnnotationsListener) Run(_ context.Context, event workers.Event, t time
 			tags,
 			changed,
 			&timeEnd))
+		/*
+			case devices.EventUPSApcupsdStatusChanged:
+				if args[1] == nil || args[2] == nil {
+					break
+				}
 
-	case devices.EventUPSApcupsdStatusChanged:
-		if args[1] == nil || args[2] == nil {
-			break
-		}
+				statusCurrent := args[1].(apcupsd.Status)
+				if statusCurrent.Status == nil || statusCurrent.XOnBattery == nil || statusCurrent.XOffBattery == nil {
+					break
+				}
 
-		statusCurrent := args[1].(apcupsd.Status)
-		if statusCurrent.Status == nil || statusCurrent.XOnBattery == nil || statusCurrent.XOffBattery == nil {
-			break
-		}
+				statusPrev := args[2].(apcupsd.Status)
+				if statusPrev.Status == nil {
+					break
+				}
 
-		statusPrev := args[2].(apcupsd.Status)
-		if statusPrev.Status == nil {
-			break
-		}
+				if (*statusCurrent.Status).IsOnline && !(*statusPrev.Status).IsOnline {
+					diff := statusCurrent.XOffBattery.Sub(*statusCurrent.XOnBattery)
 
-		if (*statusCurrent.Status).IsOnline && !(*statusPrev.Status).IsOnline {
-			diff := statusCurrent.XOffBattery.Sub(*statusCurrent.XOnBattery)
+					var reason string
+					if statusCurrent.LastTransfer != nil {
+						reason = *statusCurrent.LastTransfer
+					}
 
-			var reason string
-			if statusCurrent.LastTransfer != nil {
-				reason = *statusCurrent.LastTransfer
-			}
-
-			l.annotations.CreateInStorages(
-				annotations.NewAnnotation(
-					"UPS switched",
-					fmt.Sprintf("UPS switched to power. Offline for %.2f seconds with reason %s", diff.Seconds(), reason),
-					[]string{"UPS"},
-					statusCurrent.XOnBattery,
-					statusCurrent.XOffBattery),
-				[]string{annotations.StorageGrafana})
-		}
-
+					l.annotations.CreateInStorages(
+						annotations.NewAnnotation(
+							"UPS switched",
+							fmt.Sprintf("UPS switched to power. Offline for %.2f seconds with reason %s", diff.Seconds(), reason),
+							[]string{"UPS"},
+							statusCurrent.XOnBattery,
+							statusCurrent.XOffBattery),
+						[]string{annotations.StorageGrafana})
+				}
+		*/
 	case boggart.DeviceEventDeviceDisabledAfterCheck, boggart.DeviceEventDeviceDisabled:
 		if !l.devicesManager.IsReady() {
 			return

@@ -36,7 +36,7 @@ const (
 	DeviceIdRouter
 	DeviceIdTVBedroom
 	// DeviceIdTVLivingRoom
-	DeviceIdUPS
+	// DeviceIdUPS
 	DeviceIdVideoRecorder
 	DeviceIdWaterMeterCold
 	DeviceIdWaterMeterHot

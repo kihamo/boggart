@@ -27,3 +27,5 @@ import:
   version: 635adea96f788ab19bf77470b075f8db44d34fa0
 - package: periph.io/x/periph
   version: ~v2.3.0
+- package: github.com/eclipse/paho.mqtt.golang
+  version: ~v1.1
