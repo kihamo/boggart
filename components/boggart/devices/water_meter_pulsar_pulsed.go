@@ -2,6 +2,8 @@ package devices
 
 import (
 	"context"
+	"reflect"
+	"sync"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -20,6 +22,11 @@ var (
 	metricWaterMeterPulsarPulsedPulses = snitch.NewGauge(boggart.ComponentName+"_device_water_meter_pulsar_pulsed_pulses", "Pulsar volume of water in pulses")
 )
 
+type PulsarPulsedWaterMeterChanged struct {
+	Volume float64
+	Pulses uint64
+}
+
 type PulsarPulsedWaterMeter struct {
 	boggart.DeviceBase
 	boggart.DeviceSerialNumber
@@ -28,6 +35,9 @@ type PulsarPulsedWaterMeter struct {
 	volumeOffset float64
 	provider     *pulsar.HeatMeter
 	interval     time.Duration
+
+	mutex      sync.Mutex
+	lastValues PulsarPulsedWaterMeterChanged
 }
 
 func NewPulsarPulsedWaterMeter(serialNumber string, volumeOffset float64, provider *pulsar.HeatMeter, input uint64, interval time.Duration) *PulsarPulsedWaterMeter {
@@ -121,9 +131,23 @@ func (d *PulsarPulsedWaterMeter) taskUpdater(ctx context.Context) (interface{}, 
 	}
 
 	serialNumber := d.SerialNumber()
+	currentValues := PulsarPulsedWaterMeterChanged{
+		Volume: d.volume(pulses),
+		Pulses: pulses,
+	}
 
-	metricWaterMeterPulsarPulsedPulses.With("serial_number", serialNumber).Set(float64(pulses))
-	metricWaterMeterPulsarPulsedVolume.With("serial_number", serialNumber).Set(d.volume(pulses))
+	metricWaterMeterPulsarPulsedPulses.With("serial_number", serialNumber).Set(float64(currentValues.Pulses))
+	metricWaterMeterPulsarPulsedVolume.With("serial_number", serialNumber).Set(currentValues.Volume)
+
+	d.mutex.Lock()
+	if !reflect.DeepEqual(d.lastValues, currentValues) {
+		d.lastValues = currentValues
+		d.mutex.Unlock()
+
+		d.TriggerEvent(boggart.DeviceEventPulsarPulsedChanged, currentValues, serialNumber)
+	} else {
+		d.mutex.Unlock()
+	}
 
 	return nil, nil
 }

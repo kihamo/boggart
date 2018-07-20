@@ -35,7 +35,7 @@ type Mercury200ElectricityMeterChange struct {
 	Tariff4        float64
 	Voltage        float64
 	Amperage       float64
-	Power          float64
+	Power          int64
 	BatteryVoltage float64
 }
 
@@ -160,17 +160,18 @@ func (d *Mercury200ElectricityMeter) taskUpdater(ctx context.Context) (interface
 	}
 
 	serialNumber := d.SerialNumber()
-	currentValues := Mercury200ElectricityMeterChange{}
+	currentValues := Mercury200ElectricityMeterChange{
+		Tariff1: tariffs[Mercury200ElectricityMeterTariff1],
+		Tariff2: tariffs[Mercury200ElectricityMeterTariff2],
+		Tariff3: tariffs[Mercury200ElectricityMeterTariff3],
+		Tariff4: tariffs[Mercury200ElectricityMeterTariff4],
+	}
 
 	metricTariff := metricElectricityMeterMercuryTariff.With("serial_number", serialNumber)
-	currentValues.Tariff1 = tariffs[Mercury200ElectricityMeterTariff1]
-	metricTariff.With("tariff", Mercury200ElectricityMeterTariff1).Set(tariffs[Mercury200ElectricityMeterTariff1])
-	currentValues.Tariff2 = tariffs[Mercury200ElectricityMeterTariff2]
-	metricTariff.With("tariff", Mercury200ElectricityMeterTariff2).Set(tariffs[Mercury200ElectricityMeterTariff2])
-	currentValues.Tariff3 = tariffs[Mercury200ElectricityMeterTariff3]
-	metricTariff.With("tariff", Mercury200ElectricityMeterTariff3).Set(tariffs[Mercury200ElectricityMeterTariff3])
-	currentValues.Tariff4 = tariffs[Mercury200ElectricityMeterTariff4]
-	metricTariff.With("tariff", Mercury200ElectricityMeterTariff4).Set(tariffs[Mercury200ElectricityMeterTariff4])
+	metricTariff.With("tariff", Mercury200ElectricityMeterTariff1).Set(currentValues.Tariff1)
+	metricTariff.With("tariff", Mercury200ElectricityMeterTariff2).Set(currentValues.Tariff2)
+	metricTariff.With("tariff", Mercury200ElectricityMeterTariff3).Set(currentValues.Tariff3)
+	metricTariff.With("tariff", Mercury200ElectricityMeterTariff4).Set(currentValues.Tariff4)
 
 	// optimization
 	voltage, amperage, power, err := d.provider.ParamsCurrent()
@@ -178,10 +179,11 @@ func (d *Mercury200ElectricityMeter) taskUpdater(ctx context.Context) (interface
 		return nil, err
 	}
 	currentValues.Voltage = voltage
-	metricElectricityMeterMercuryVoltage.With("serial_number", serialNumber).Set(voltage)
 	currentValues.Amperage = amperage
+	currentValues.Power = power
+
+	metricElectricityMeterMercuryVoltage.With("serial_number", serialNumber).Set(voltage)
 	metricElectricityMeterMercuryAmperage.With("serial_number", serialNumber).Set(amperage)
-	currentValues.Power = float64(power)
 	metricElectricityMeterMercuryPower.With("serial_number", serialNumber).Set(float64(power))
 
 	voltage, err = d.BatteryVoltage(ctx)
