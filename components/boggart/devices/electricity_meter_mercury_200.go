@@ -2,6 +2,8 @@ package devices
 
 import (
 	"context"
+	"reflect"
+	"sync"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -26,12 +28,26 @@ var (
 	metricElectricityMeterMercuryBatteryVoltage = snitch.NewGauge(boggart.ComponentName+"_device_electricity_meter_mercury_200_battery_voltage_volt", "Mercury 200 electricity meter current battery voltage")
 )
 
+type Mercury200ElectricityMeterChange struct {
+	Tariff1        float64
+	Tariff2        float64
+	Tariff3        float64
+	Tariff4        float64
+	Voltage        float64
+	Amperage       float64
+	Power          float64
+	BatteryVoltage float64
+}
+
 type Mercury200ElectricityMeter struct {
 	boggart.DeviceBase
 	boggart.DeviceSerialNumber
 
 	provider *mercury.ElectricityMeter200
 	interval time.Duration
+
+	mutex      sync.Mutex
+	lastValues Mercury200ElectricityMeterChange
 }
 
 func NewMercury200ElectricityMeter(serialNumber string, provider *mercury.ElectricityMeter200, interval time.Duration) *Mercury200ElectricityMeter {
@@ -144,11 +160,16 @@ func (d *Mercury200ElectricityMeter) taskUpdater(ctx context.Context) (interface
 	}
 
 	serialNumber := d.SerialNumber()
+	currentValues := Mercury200ElectricityMeterChange{}
 
 	metricTariff := metricElectricityMeterMercuryTariff.With("serial_number", serialNumber)
+	currentValues.Tariff1 = tariffs[Mercury200ElectricityMeterTariff1]
 	metricTariff.With("tariff", Mercury200ElectricityMeterTariff1).Set(tariffs[Mercury200ElectricityMeterTariff1])
+	currentValues.Tariff2 = tariffs[Mercury200ElectricityMeterTariff2]
 	metricTariff.With("tariff", Mercury200ElectricityMeterTariff2).Set(tariffs[Mercury200ElectricityMeterTariff2])
+	currentValues.Tariff3 = tariffs[Mercury200ElectricityMeterTariff3]
 	metricTariff.With("tariff", Mercury200ElectricityMeterTariff3).Set(tariffs[Mercury200ElectricityMeterTariff3])
+	currentValues.Tariff4 = tariffs[Mercury200ElectricityMeterTariff4]
 	metricTariff.With("tariff", Mercury200ElectricityMeterTariff4).Set(tariffs[Mercury200ElectricityMeterTariff4])
 
 	// optimization
@@ -156,15 +177,29 @@ func (d *Mercury200ElectricityMeter) taskUpdater(ctx context.Context) (interface
 	if err != nil {
 		return nil, err
 	}
+	currentValues.Voltage = voltage
 	metricElectricityMeterMercuryVoltage.With("serial_number", serialNumber).Set(voltage)
+	currentValues.Amperage = amperage
 	metricElectricityMeterMercuryAmperage.With("serial_number", serialNumber).Set(amperage)
+	currentValues.Power = float64(power)
 	metricElectricityMeterMercuryPower.With("serial_number", serialNumber).Set(float64(power))
 
 	voltage, err = d.BatteryVoltage(ctx)
 	if err != nil {
 		return nil, nil
 	}
+	currentValues.BatteryVoltage = voltage
 	metricElectricityMeterMercuryBatteryVoltage.With("serial_number", serialNumber).Set(voltage)
+
+	d.mutex.Lock()
+	if !reflect.DeepEqual(d.lastValues, currentValues) {
+		d.lastValues = currentValues
+		d.mutex.Unlock()
+
+		d.TriggerEvent(boggart.DeviceEventMercury200Changed, currentValues, serialNumber)
+	} else {
+		d.mutex.Unlock()
+	}
 
 	return nil, nil
 }

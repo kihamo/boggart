@@ -3,6 +3,8 @@ package devices
 import (
 	"context"
 	"encoding/hex"
+	"reflect"
+	"sync"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -20,12 +22,23 @@ var (
 	metricHeatMeterPulsarConsumption      = snitch.NewGauge(boggart.ComponentName+"_device_heat_meter_pulsar_consumption_cubic_metres_per_hour", "Pulsar consumption")
 )
 
+type PulsarHeadMeterChange struct {
+	TemperatureIn    float64
+	TemperatureOut   float64
+	TemperatureDelta float64
+	Energy           float64
+	Consumption      float64
+}
+
 type PulsarHeadMeter struct {
 	boggart.DeviceBase
 	boggart.DeviceSerialNumber
 
 	provider *pulsar.HeatMeter
 	interval time.Duration
+
+	mutex      sync.Mutex
+	lastValues PulsarHeadMeterChange
 }
 
 func NewPulsarHeadMeter(provider *pulsar.HeatMeter, interval time.Duration) *PulsarHeadMeter {
@@ -133,35 +146,51 @@ func (d *PulsarHeadMeter) taskUpdater(ctx context.Context) (interface{}, error) 
 	}
 
 	serialNumber := d.SerialNumber()
+	currentValues := PulsarHeadMeterChange{}
 
 	if value, err := d.TemperatureIn(ctx); err == nil {
+		currentValues.TemperatureIn = value
 		metricHeatMeterPulsarTemperatureIn.With("serial_number", serialNumber).Set(value)
 	} else {
 		return nil, err
 	}
 
 	if value, err := d.TemperatureOut(ctx); err == nil {
+		currentValues.TemperatureOut = value
 		metricHeatMeterPulsarTemperatureOut.With("serial_number", serialNumber).Set(value)
 	} else {
 		return nil, err
 	}
 
 	if value, err := d.TemperatureDelta(ctx); err == nil {
+		currentValues.TemperatureDelta = value
 		metricHeatMeterPulsarTemperatureDelta.With("serial_number", serialNumber).Set(value)
 	} else {
 		return nil, err
 	}
 
 	if value, err := d.Energy(ctx); err == nil {
+		currentValues.Energy = value
 		metricHeatMeterPulsarEnergy.With("serial_number", serialNumber).Set(value)
 	} else {
 		return nil, err
 	}
 
 	if value, err := d.Consumption(ctx); err == nil {
+		currentValues.Consumption = value
 		metricHeatMeterPulsarConsumption.With("serial_number", serialNumber).Set(value)
 	} else {
 		return nil, err
+	}
+
+	d.mutex.Lock()
+	if !reflect.DeepEqual(d.lastValues, currentValues) {
+		d.lastValues = currentValues
+		d.mutex.Unlock()
+
+		d.TriggerEvent(boggart.DeviceEventPulsarChanged, currentValues, serialNumber)
+	} else {
+		d.mutex.Unlock()
 	}
 
 	return nil, nil

@@ -23,6 +23,8 @@ var (
 	DeviceEventHikvisionEventNotificationAlert = event.NewBaseEvent("HikvisionEventNotificationAlert ")
 	DeviceEventSoftVideoBalanceChanged         = event.NewBaseEvent("SoftVideoBalanceChanged ")
 	DeviceEventMegafonBalanceChanged           = event.NewBaseEvent("SoftMegafonBalanceChanged ")
+	DeviceEventPulsarChanged                   = event.NewBaseEvent("PulsarChanged ")
+	DeviceEventMercury200Changed               = event.NewBaseEvent("Mercury200Changed ")
 )
 
 type DeviceId int64

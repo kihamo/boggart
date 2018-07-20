@@ -40,20 +40,14 @@ func NewMQTTListener(servers []*url.URL, username, password string) *MQTTListene
 
 func (l *MQTTListener) Events() []workers.Event {
 	return []workers.Event{
-		boggart.SecurityOpen,
-		boggart.SecurityClosed,
-		boggart.DeviceEventHikvisionEventNotificationAlert,
-		boggart.DeviceEventDeviceDisabledAfterCheck,
-		boggart.DeviceEventDeviceEnabledAfterCheck,
-		boggart.DeviceEventDevicesManagerReady,
 		boggart.DeviceEventWifiClientConnected,
 		boggart.DeviceEventWifiClientDisconnected,
 		boggart.DeviceEventVPNClientConnected,
 		boggart.DeviceEventVPNClientDisconnected,
 		boggart.DeviceEventSoftVideoBalanceChanged,
 		boggart.DeviceEventMegafonBalanceChanged,
-		devices.EventDoorGPIOReedSwitchOpen,
-		devices.EventDoorGPIOReedSwitchClose,
+		boggart.DeviceEventPulsarChanged,
+		boggart.DeviceEventMercury200Changed,
 	}
 }
 
@@ -87,6 +81,27 @@ func (l *MQTTListener) Run(_ context.Context, event workers.Event, t time.Time, 
 
 	case boggart.DeviceEventMegafonBalanceChanged:
 		l.mqtt.Publish(fmt.Sprintf("boggart/service/megafon/%s/balance", args[2]), 0, true, l.float64(args[1].(float64)))
+
+	case boggart.DeviceEventPulsarChanged:
+		values := args[1].(devices.PulsarHeadMeterChange)
+
+		l.mqtt.Publish(fmt.Sprintf("boggart/meter/pulsar/%s/temperature_in", args[2]), 0, true, l.float64(values.TemperatureIn))
+		l.mqtt.Publish(fmt.Sprintf("boggart/meter/pulsar/%s/temperature_out", args[2]), 0, true, l.float64(values.TemperatureOut))
+		l.mqtt.Publish(fmt.Sprintf("boggart/meter/pulsar/%s/temperature_delta", args[2]), 0, true, l.float64(values.TemperatureDelta))
+		l.mqtt.Publish(fmt.Sprintf("boggart/meter/pulsar/%s/energy", args[2]), 0, true, l.float64(values.Energy))
+		l.mqtt.Publish(fmt.Sprintf("boggart/meter/pulsar/%s/consumption", args[2]), 0, true, l.float64(values.Consumption))
+
+	case boggart.DeviceEventMercury200Changed:
+		values := args[1].(devices.Mercury200ElectricityMeterChange)
+
+		l.mqtt.Publish(fmt.Sprintf("boggart/meter/mercury200/%s/tariff_1", args[2]), 0, true, l.float64(values.Tariff1))
+		l.mqtt.Publish(fmt.Sprintf("boggart/meter/mercury200/%s/tariff_2", args[2]), 0, true, l.float64(values.Tariff2))
+		l.mqtt.Publish(fmt.Sprintf("boggart/meter/mercury200/%s/tariff_3", args[2]), 0, true, l.float64(values.Tariff3))
+		l.mqtt.Publish(fmt.Sprintf("boggart/meter/mercury200/%s/tariff_4", args[2]), 0, true, l.float64(values.Tariff4))
+		l.mqtt.Publish(fmt.Sprintf("boggart/meter/mercury200/%s/voltage", args[2]), 0, true, l.float64(values.Voltage))
+		l.mqtt.Publish(fmt.Sprintf("boggart/meter/mercury200/%s/amperage", args[2]), 0, true, l.float64(values.Amperage))
+		l.mqtt.Publish(fmt.Sprintf("boggart/meter/mercury200/%s/power", args[2]), 0, true, l.float64(values.Power))
+		l.mqtt.Publish(fmt.Sprintf("boggart/meter/mercury200/%s/battery_voltage", args[2]), 0, true, l.float64(values.BatteryVoltage))
 	}
 }
 
