@@ -53,6 +53,7 @@ func (l *MQTTListener) Events() []workers.Event {
 		boggart.DeviceEventPulsarChanged,
 		boggart.DeviceEventPulsarPulsedChanged,
 		boggart.DeviceEventMercury200Changed,
+		boggart.DeviceEventBME280Changed,
 	}
 }
 
@@ -113,6 +114,14 @@ func (l *MQTTListener) Run(_ context.Context, event workers.Event, t time.Time, 
 		l.publish(fmt.Sprintf("meter/mercury200/%s/amperage", args[2]), true, values.Amperage)
 		l.publish(fmt.Sprintf("meter/mercury200/%s/power", args[2]), true, values.Power)
 		l.publish(fmt.Sprintf("meter/mercury200/%s/battery_voltage", args[2]), true, values.BatteryVoltage)
+
+	case boggart.DeviceEventBME280Changed:
+		values := args[1].(devices.BME280SensorChange)
+
+		l.publish(fmt.Sprintf("meter/bme280/%s/temperature", args[2]), true, values.Temperature)
+		l.publish(fmt.Sprintf("meter/bme280/%s/altitude", args[2]), true, values.Altitude)
+		l.publish(fmt.Sprintf("meter/bme280/%s/humidity", args[2]), true, values.Humidity)
+		l.publish(fmt.Sprintf("meter/bme280/%s/pressure", args[2]), true, values.Pressure)
 	}
 }
 

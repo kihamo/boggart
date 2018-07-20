@@ -26,6 +26,7 @@ var (
 	DeviceEventPulsarChanged                   = event.NewBaseEvent("PulsarChanged")
 	DeviceEventPulsarPulsedChanged             = event.NewBaseEvent("PulsarPulsedChanged")
 	DeviceEventMercury200Changed               = event.NewBaseEvent("Mercury200Changed")
+	DeviceEventBME280Changed                   = event.NewBaseEvent("BME280")
 )
 
 type DeviceId int64

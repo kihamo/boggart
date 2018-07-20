@@ -2,6 +2,9 @@ package devices
 
 import (
 	"context"
+	"fmt"
+	"reflect"
+	"sync"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -18,11 +21,22 @@ var (
 	metricSensorBME280Pressure    = snitch.NewGauge(boggart.ComponentName+"_device_sensor_bme280_pressure_psi", "Pressure")
 )
 
+type BME280SensorChange struct {
+	Temperature float64
+	Altitude    float64
+	Humidity    float64
+	Pressure    float64
+}
+
 type BME280Sensor struct {
 	boggart.DeviceBase
+	boggart.DeviceSerialNumber
 
 	driver   *i2c.BME280Driver
 	interval time.Duration
+
+	mutex      sync.Mutex
+	lastValues BME280SensorChange
 }
 
 func NewBME280Sensor(connector i2c.Connector, interval time.Duration, bus int, address int) *BME280Sensor {
@@ -37,6 +51,7 @@ func NewBME280Sensor(connector i2c.Connector, interval time.Duration, bus int, a
 	}
 
 	device.Init()
+	device.SetSerialNumber(fmt.Sprintf("%d_%d", bus, address))
 	device.SetDescription("Sensor BME280")
 
 	return device
@@ -89,28 +104,45 @@ func (d *BME280Sensor) taskUpdater(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
+	serialNumber := d.SerialNumber()
+	currentValues := BME280SensorChange{}
+
 	if value, err := d.driver.Temperature(); err == nil {
-		metricSensorBME280Temperature.Set(float64(value))
+		currentValues.Temperature = float64(value)
+		metricSensorBME280Temperature.With("serial_number", serialNumber).Set(currentValues.Temperature)
 	} else {
 		return nil, err
 	}
 
 	if value, err := d.driver.Altitude(); err == nil {
-		metricSensorBME280Altitude.Set(float64(value))
+		currentValues.Altitude = float64(value)
+		metricSensorBME280Altitude.With("serial_number", serialNumber).Set(currentValues.Altitude)
 	} else {
 		return nil, err
 	}
 
 	if value, err := d.driver.Humidity(); err == nil {
-		metricSensorBME280Humidity.Set(float64(value))
+		currentValues.Humidity = float64(value)
+		metricSensorBME280Humidity.With("serial_number", serialNumber).Set(currentValues.Humidity)
 	} else {
 		return nil, err
 	}
 
 	if value, err := d.driver.Pressure(); err == nil {
-		metricSensorBME280Pressure.Set(float64(int(value/133.322*10)) / 10)
+		currentValues.Pressure = float64(int(value/133.322*10)) / 10
+		metricSensorBME280Pressure.With("serial_number", serialNumber).Set(currentValues.Pressure)
 	} else {
 		return nil, err
+	}
+
+	d.mutex.Lock()
+	if !reflect.DeepEqual(d.lastValues, currentValues) {
+		d.lastValues = currentValues
+		d.mutex.Unlock()
+
+		d.TriggerEvent(boggart.DeviceEventBME280Changed, currentValues, serialNumber)
+	} else {
+		d.mutex.Unlock()
 	}
 
 	return nil, nil
