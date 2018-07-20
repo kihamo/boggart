@@ -118,7 +118,7 @@ func (s *SecurityManager) Run(_ context.Context, event workers.Event, t time.Tim
 		// выключаем устройства, которые не должны работать в закрытом контуре
 		activeDevices := s.devicesManager.DevicesByTypes([]boggart.DeviceType{
 			boggart.DeviceTypeTV,
-			boggart.DeviceTypeLight,
+			// boggart.DeviceTypeLight,
 		})
 		for _, device := range activeDevices {
 			if device.IsEnabled() {

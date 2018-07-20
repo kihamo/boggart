@@ -1,5 +1,6 @@
 package devices
 
+/*
 import (
 	"context"
 	"sync"
@@ -245,3 +246,4 @@ func (d *ApcupsdUPS) taskUpdater(ctx context.Context) (interface{}, error) {
 
 	return nil, nil
 }
+*/

@@ -21,6 +21,8 @@ var (
 	DeviceEventVPNClientConnected              = event.NewBaseEvent("VPNClientConnected")
 	DeviceEventVPNClientDisconnected           = event.NewBaseEvent("VPNClientDisconnected")
 	DeviceEventHikvisionEventNotificationAlert = event.NewBaseEvent("HikvisionEventNotificationAlert ")
+	DeviceEventSoftVideoBalanceChanged         = event.NewBaseEvent("SoftVideoBalanceChanged ")
+	DeviceEventMegafonBalanceChanged           = event.NewBaseEvent("SoftMegafonBalanceChanged ")
 )
 
 type DeviceId int64
@@ -31,7 +33,7 @@ const (
 	DeviceIdCameraStreet
 	DeviceIdHeatMeter
 	DeviceIdEntranceDoor
-	DeviceIdLight
+	// DeviceIdLight
 	DeviceIdPhone
 	DeviceIdRouter
 	DeviceIdTVBedroom
@@ -50,11 +52,11 @@ const (
 	DeviceTypeElectricityMeter
 	DeviceTypeHeatMeter
 	DeviceTypeInternetProvider
-	DeviceTypeLight
+	// DeviceTypeLight
 	DeviceTypePhone
 	DeviceTypeRouter
 	DeviceTypeTV
-	DeviceTypeUPS
+	// DeviceTypeUPS
 	DeviceTypePC
 	DeviceTypeVideoRecorder
 	DeviceTypeWaterMeter

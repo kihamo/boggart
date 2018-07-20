@@ -12,8 +12,6 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
 	"github.com/kihamo/boggart/components/boggart/providers/samsung/tv"
 	"github.com/kihamo/boggart/components/boggart/providers/softvideo"
-	"github.com/vikstrous/zengge-lightcontrol/local"
-	"github.com/vikstrous/zengge-lightcontrol/manage"
 	"gobot.io/x/gobot/platforms/raspi"
 )
 
@@ -295,6 +293,7 @@ func (c *Component) initTV() {
 	*/
 }
 
+/*
 func (c *Component) initLight() {
 	transport, err := local.NewTransport("192.168.88.165:5577")
 	if err != nil {
@@ -315,7 +314,7 @@ func (c *Component) initLight() {
 	device := devices.NewZenggeLight(transport, manager)
 	c.devicesManager.RegisterWithID(boggart.DeviceIdLight.String(), device)
 }
-
+*/
 func (c *Component) initPC() {
 	deviceAi := devices.NewDesktopPC()
 	deviceAi.SetMac("50:AF:73:24:B6:7A")

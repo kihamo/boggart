@@ -1,5 +1,6 @@
 package devices
 
+/*
 import (
 	"context"
 	"fmt"
@@ -105,3 +106,4 @@ func (d *ZenggeLight) taskSerialNumber(ctx context.Context) (interface{}, error,
 
 	return nil, nil, true
 }
+*/

@@ -76,7 +76,15 @@ func (d *SoftVideoInternet) taskUpdater(ctx context.Context) (interface{}, error
 		return nil, err
 	}
 
-	metricInternetProviderSoftVideoBalance.With("account", d.provider.AccountID()).Set(float64(value))
+	metricBalance := metricInternetProviderSoftVideoBalance.With("account", d.provider.AccountID())
+	balance := float64(value)
+
+	if balance == metricBalance.Value() {
+		return nil, nil
+	}
+
+	metricBalance.Set(balance)
+	d.TriggerEvent(boggart.DeviceEventSoftVideoBalanceChanged, float64(value), d.provider.AccountID())
 
 	return nil, nil
 }
