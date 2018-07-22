@@ -187,6 +187,26 @@ func (d *MikrotikRouter) taskSerialNumber(ctx context.Context) (interface{}, err
 	d.SetSerialNumber(serialNumber)
 	d.SetDescription("Mikrotik router with serial number " + serialNumber)
 
+	// wifi clients
+	clients, err := d.provider.WifiClients()
+	if err != nil {
+		return nil, err, false
+	}
+
+	for _, connection := range clients {
+		d.TriggerEvent(boggart.DeviceEventWifiClientConnected, d.Mac(connection["mac-address"]), connection["interface"])
+	}
+
+	// vpn clients
+	connections, err := d.provider.PPPActiveConnections()
+	if err != nil {
+		return nil, err, false
+	}
+
+	for _, connection := range connections {
+		d.TriggerEvent(boggart.DeviceEventVPNClientConnected, connection["name"], connection["address"])
+	}
+
 	return nil, nil, true
 }
 

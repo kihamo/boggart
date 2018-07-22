@@ -16,6 +16,9 @@ import (
 
 const (
 	TopicPrefix = boggart.ComponentName + "/"
+
+	ValueOff = 0
+	ValueOn  = 1
 )
 
 type MQTTListener struct {
@@ -67,20 +70,20 @@ func (l *MQTTListener) Run(_ context.Context, event workers.Event, t time.Time, 
 		l.publish(fmt.Sprintf("wifi/clients/%s/comment", macAddress), false, mac.ARP.Comment)
 		l.publish(fmt.Sprintf("wifi/clients/%s/hostname", macAddress), false, mac.DHCP.Hostname)
 		l.publish(fmt.Sprintf("wifi/clients/%s/interface", macAddress), false, args[2])
-		l.publish(fmt.Sprintf("wifi/clients/%s/state", macAddress), true, "ON")
+		l.publish(fmt.Sprintf("wifi/clients/%s/state", macAddress), true, ValueOn)
 
 	case boggart.DeviceEventWifiClientDisconnected:
 		mac := args[1].(*devices.MikrotikRouterMac)
 		macAddress := strings.Replace(mac.Address, ":", "-", -1)
 
-		l.publish(fmt.Sprintf("wifi/clients/%s/state", macAddress), true, "OFF")
+		l.publish(fmt.Sprintf("wifi/clients/%s/state", macAddress), true, ValueOff)
 
 	case boggart.DeviceEventVPNClientConnected:
 		l.publish(fmt.Sprintf("vpn/clients/%s/ip", args[1]), false, args[2])
-		l.publish(fmt.Sprintf("vpn/clients/%s/state", args[1]), true, "ON")
+		l.publish(fmt.Sprintf("vpn/clients/%s/state", args[1]), true, ValueOn)
 
 	case boggart.DeviceEventVPNClientDisconnected:
-		l.publish(fmt.Sprintf("vpn/clients/%s/state", args[1]), true, "OFF")
+		l.publish(fmt.Sprintf("vpn/clients/%s/state", args[1]), true, ValueOff)
 
 	case boggart.DeviceEventSoftVideoBalanceChanged:
 		l.publish(fmt.Sprintf("service/softvideo/%s/balance", args[2]), true, args[1])
@@ -133,7 +136,7 @@ func (l *MQTTListener) publish(topic string, retained bool, payload interface{})
 	switch value := payload.(type) {
 	case float64:
 		payload = fmt.Sprintf("%.2f", value)
-	case uint64, int64:
+	case uint64, int64, int:
 		payload = fmt.Sprintf("%d", value)
 	}
 

@@ -76,6 +76,25 @@ func (c *Client) WifiClients() ([]map[string]string, error) {
 	return clients, nil
 }
 
+func (c *Client) PPPActiveConnections() ([]map[string]string, error) {
+	reply, err := c.runArgs([]string{"/ppp/active/print"})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(reply.Re) == 0 {
+		return nil, errors.New("Empty reply from device")
+	}
+
+	clients := make([]map[string]string, 0, len(reply.Re))
+
+	for _, re := range reply.Re {
+		clients = append(clients, re.Map)
+	}
+
+	return clients, nil
+}
+
 func (c *Client) EthernetStats() ([]map[string]string, error) {
 	reply, err := c.runArgs([]string{"/interface/print", "stats"})
 	if err != nil {
