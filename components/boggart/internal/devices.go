@@ -155,6 +155,7 @@ func (c *Component) initElectricityMeters() {
 	c.devicesManager.RegisterWithID(boggart.DeviceIdElectricityMeter.String(), device)
 }
 
+/*
 func (c *Component) initGPIO() {
 	device := devices.NewDoorGPIOReedSwitch(c.config.Int64(boggart.ConfigDoorsEntrancePin))
 	device.SetDescription("Entrance door")
@@ -167,7 +168,7 @@ func (c *Component) initGPIO() {
 
 	c.devicesManager.RegisterWithID(boggart.DeviceIdEntranceDoor.String(), device)
 }
-
+*/
 func (c *Component) initPulsarMeters() {
 	var (
 		deviceAddress []byte

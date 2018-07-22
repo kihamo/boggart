@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/devices"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/listener"
 	"github.com/kihamo/go-workers/manager"
@@ -89,31 +88,32 @@ func (s *SecurityManager) Events() []workers.Event {
 		boggart.DeviceEventHikvisionEventNotificationAlert,
 		boggart.DeviceEventDeviceEnabled,
 		boggart.DeviceEventDeviceEnabledAfterCheck,
-		devices.EventDoorGPIOReedSwitchOpen,
-		devices.EventDoorGPIOReedSwitchClose,
+		//devices.EventDoorGPIOReedSwitchOpen,
+		//devices.EventDoorGPIOReedSwitchClose,
 	}
 }
 
 func (s *SecurityManager) Run(_ context.Context, event workers.Event, t time.Time, args ...interface{}) {
 	switch event {
-	case devices.EventDoorGPIOReedSwitchOpen:
-		if s.IsOpen() {
-			if s.checkClosed() {
-				s.Close()
+	/*
+		case devices.EventDoorGPIOReedSwitchOpen:
+			if s.IsOpen() {
+				if s.checkClosed() {
+					s.Close()
+				}
+			} else {
+				s.Open()
 			}
-		} else {
-			s.Open()
-		}
 
-	case devices.EventDoorGPIOReedSwitchClose:
-		if s.IsOpen() {
-			if s.checkClosed() {
-				s.Close()
+		case devices.EventDoorGPIOReedSwitchClose:
+			if s.IsOpen() {
+				if s.checkClosed() {
+					s.Close()
+				}
+			} else {
+				s.Open()
 			}
-		} else {
-			s.Open()
-		}
-
+	*/
 	case boggart.SecurityClosed:
 		// выключаем устройства, которые не должны работать в закрытом контуре
 		activeDevices := s.devicesManager.DevicesByTypes([]boggart.DeviceType{

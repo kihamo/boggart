@@ -36,7 +36,7 @@ const (
 	DeviceIdCameraHall
 	DeviceIdCameraStreet
 	DeviceIdHeatMeter
-	DeviceIdEntranceDoor
+	// DeviceIdEntranceDoor
 	// DeviceIdLight
 	DeviceIdPhone
 	DeviceIdRouter
@@ -52,7 +52,7 @@ type DeviceType int64
 
 const (
 	DeviceTypeCamera DeviceType = iota
-	DeviceTypeDoor
+	// DeviceTypeDoor
 	DeviceTypeElectricityMeter
 	DeviceTypeHeatMeter
 	DeviceTypeInternetProvider

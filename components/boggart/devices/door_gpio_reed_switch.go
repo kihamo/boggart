@@ -1,5 +1,6 @@
 package devices
 
+/*
 import (
 	"context"
 	"strconv"
@@ -134,3 +135,4 @@ func (d *DoorGPIOReedSwitch) callback(status bool, changed *time.Time) {
 		d.TriggerEvent(EventDoorGPIOReedSwitchOpen, changed)
 	}
 }
+*/
