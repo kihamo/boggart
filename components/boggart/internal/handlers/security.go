@@ -1,5 +1,6 @@
 package handlers
 
+/*
 import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/shadow/components/dashboard"
@@ -32,3 +33,4 @@ func (h *SecurityHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request)
 		h.securityManager.CloseForce()
 	}
 }
+*/

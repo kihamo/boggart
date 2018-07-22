@@ -1,5 +1,6 @@
 package boggart
 
+/*
 import (
 	"time"
 
@@ -32,3 +33,4 @@ type SecurityManager interface {
 	OpenForce()
 	PrepareOpen(time.Duration)
 }
+*/

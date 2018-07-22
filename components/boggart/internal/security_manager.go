@@ -1,5 +1,6 @@
 package internal
 
+/*
 import (
 	"context"
 	"sync/atomic"
@@ -95,25 +96,24 @@ func (s *SecurityManager) Events() []workers.Event {
 
 func (s *SecurityManager) Run(_ context.Context, event workers.Event, t time.Time, args ...interface{}) {
 	switch event {
-	/*
-		case devices.EventDoorGPIOReedSwitchOpen:
-			if s.IsOpen() {
-				if s.checkClosed() {
-					s.Close()
-				}
-			} else {
-				s.Open()
+	case devices.EventDoorGPIOReedSwitchOpen:
+		if s.IsOpen() {
+			if s.checkClosed() {
+				s.Close()
 			}
+		} else {
+			s.Open()
+		}
 
-		case devices.EventDoorGPIOReedSwitchClose:
-			if s.IsOpen() {
-				if s.checkClosed() {
-					s.Close()
-				}
-			} else {
-				s.Open()
+	case devices.EventDoorGPIOReedSwitchClose:
+		if s.IsOpen() {
+			if s.checkClosed() {
+				s.Close()
 			}
-	*/
+		} else {
+			s.Open()
+		}
+
 	case boggart.SecurityClosed:
 		// выключаем устройства, которые не должны работать в закрытом контуре
 		activeDevices := s.devicesManager.DevicesByTypes([]boggart.DeviceType{
@@ -129,7 +129,7 @@ func (s *SecurityManager) Run(_ context.Context, event workers.Event, t time.Tim
 	case boggart.SecurityOpen:
 		// TODO: снимаем с охраны камеры
 
-	// после опроса устройств устанавливаем текущий статус контура
+		// после опроса устройств устанавливаем текущий статус контура
 	case boggart.DeviceEventDevicesManagerReady:
 		switch s.Status() {
 		case boggart.SecurityStatusClosedForce, boggart.SecurityStatusOpenForce:
@@ -177,3 +177,4 @@ func (s *SecurityManager) checkClosed() bool {
 
 	return true
 }
+*/

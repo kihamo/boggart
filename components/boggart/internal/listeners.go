@@ -46,7 +46,7 @@ func (c *Component) initListeners() {
 				c.listenersManager.AddListener(listeners.NewTelegramListener(
 					messenger.(*telegram.Telegram),
 					c.devicesManager,
-					c.securityManager,
+					// c.securityManager,
 					chats))
 			}
 		}

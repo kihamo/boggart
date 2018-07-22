@@ -29,7 +29,7 @@ type Component struct {
 	connectionRS485  *rs485.Connection
 	listenersManager *manager.ListenersManager
 	devicesManager   *DevicesManager
-	securityManager  *SecurityManager
+	// securityManager  *SecurityManager
 }
 
 func (c *Component) Name() string {
@@ -80,7 +80,7 @@ func (c *Component) Init(a shadow.Application) error {
 
 	c.listenersManager = manager.NewListenersManager()
 	c.devicesManager = NewDevicesManager(c.workers, c.listenersManager)
-	c.securityManager = NewSecurityManager(c.devicesManager, c.listenersManager)
+	// c.securityManager = NewSecurityManager(c.devicesManager, c.listenersManager)
 
 	return nil
 }

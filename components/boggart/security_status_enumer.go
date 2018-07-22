@@ -2,6 +2,7 @@
 
 package boggart
 
+/*
 import (
 	"fmt"
 )
@@ -49,3 +50,4 @@ func (i SecurityStatus) IsASecurityStatus() bool {
 	}
 	return false
 }
+*/

@@ -20,7 +20,7 @@ func (c *Component) DashboardMenu() dashboard.Menu {
 	menus := dashboard.NewMenu("Smart home").
 		WithIcon("home").
 		WithChild(dashboard.NewMenu("Dashboard").WithRoute(routes[1])).
-		WithChild(dashboard.NewMenu("Devices").WithRoute(routes[3]))
+		WithChild(dashboard.NewMenu("Devices").WithRoute(routes[2]))
 
 	if u := c.config.String(boggart.ConfigMonitoringExternalURL); u != "" {
 		menus = menus.WithChild(dashboard.NewMenu("Monitoring").WithUrl(u))
@@ -36,9 +36,11 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 			dashboard.NewRoute("/"+c.Name()+"/", &handlers.IndexHandler{}).
 				WithMethods([]string{http.MethodGet}).
 				WithAuth(true),
-			dashboard.NewRoute("/"+c.Name()+"/security/", handlers.NewSecurityHandler(c.securityManager)).
-				WithMethods([]string{http.MethodPost}).
-				WithAuth(true),
+			/*
+				dashboard.NewRoute("/"+c.Name()+"/security/", handlers.NewSecurityHandler(c.securityManager)).
+					WithMethods([]string{http.MethodPost}).
+					WithAuth(true),
+			*/
 			dashboard.NewRoute("/"+c.Name()+"/devices/", handlers.NewDevicesHandler(c.devicesManager, c.listenersManager)).
 				WithMethods([]string{http.MethodGet}).
 				WithAuth(true),
@@ -58,8 +60,8 @@ func (c *Component) DashboardToolbar(ctx context.Context) string {
 
 	content, _ := c.application.GetComponent(dashboard.ComponentName).(dashboard.Component).Renderer().
 		RenderLayoutAndReturn(ctx, c.Name(), "toolbar", "blank", map[string]interface{}{
-			"SecurityStatus": c.securityManager.Status().String(),
-			"DevicesCount":   devicesCount,
+			// "SecurityStatus": c.securityManager.Status().String(),
+			"DevicesCount": devicesCount,
 		})
 	return content
 }

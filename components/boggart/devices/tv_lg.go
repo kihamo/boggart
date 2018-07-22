@@ -1,5 +1,6 @@
 package devices
 
+/*
 import (
 	"context"
 
@@ -68,3 +69,4 @@ func (d *LGTV) Disable() error {
 
 	return d.DeviceBase.Disable()
 }
+*/

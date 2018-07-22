@@ -17,18 +17,18 @@ import (
 type TelegramListener struct {
 	listener.BaseListener
 
-	devicesManager  boggart.DevicesManager
-	securityManager boggart.SecurityManager
-	messenger       *telegram.Telegram
-	chats           []string
+	devicesManager boggart.DevicesManager
+	//securityManager boggart.SecurityManager
+	messenger *telegram.Telegram
+	chats     []string
 }
 
-func NewTelegramListener(messenger *telegram.Telegram, devicesManager boggart.DevicesManager, securityManager boggart.SecurityManager, chats []string) *TelegramListener {
+func NewTelegramListener(messenger *telegram.Telegram, devicesManager boggart.DevicesManager /*, securityManager boggart.SecurityManager*/, chats []string) *TelegramListener {
 	t := &TelegramListener{
-		devicesManager:  devicesManager,
-		securityManager: securityManager,
-		messenger:       messenger,
-		chats:           chats,
+		devicesManager: devicesManager,
+		//securityManager: securityManager,
+		messenger: messenger,
+		chats:     chats,
 	}
 	t.Init()
 
@@ -37,8 +37,8 @@ func NewTelegramListener(messenger *telegram.Telegram, devicesManager boggart.De
 
 func (l *TelegramListener) Events() []workers.Event {
 	return []workers.Event{
-		boggart.SecurityOpen,
-		boggart.SecurityClosed,
+		//boggart.SecurityOpen,
+		//boggart.SecurityClosed,
 		boggart.DeviceEventHikvisionEventNotificationAlert,
 		boggart.DeviceEventDeviceDisabledAfterCheck,
 		boggart.DeviceEventDeviceEnabledAfterCheck,
@@ -55,86 +55,87 @@ func (l *TelegramListener) Events() []workers.Event {
 
 func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Time, args ...interface{}) {
 	switch event {
-	case boggart.SecurityOpen:
-		status := args[0].(boggart.SecurityStatus)
+	/*
+		case boggart.SecurityOpen:
+			status := args[0].(boggart.SecurityStatus)
 
-		if status == boggart.SecurityStatusOpenForce {
-			l.sendMessage("System is force open")
-		} else {
-			l.sendMessage("System is open with auto mode")
-		}
+			if status == boggart.SecurityStatusOpenForce {
+				l.sendMessage("System is force open")
+			} else {
+				l.sendMessage("System is open with auto mode")
+			}
 
-	case boggart.SecurityClosed:
-		status := args[0].(boggart.SecurityStatus)
+		case boggart.SecurityClosed:
+			status := args[0].(boggart.SecurityStatus)
 
-		if status == boggart.SecurityStatusClosedForce {
-			l.sendMessage("System is force closed")
-		} else {
-			l.sendMessage("System is closed with auto mode")
-		}
-		/*
-			case devices.EventDoorGPIOReedSwitchOpen:
-				l.sendMessage(args[0].(boggart.Device).Description() + " is opened")
+			if status == boggart.SecurityStatusClosedForce {
+				l.sendMessage("System is force closed")
+			} else {
+				l.sendMessage("System is closed with auto mode")
+			}
 
-				if camera := l.devicesManager.Device(boggart.DeviceIdCameraHall.String()); camera != nil {
-					time.AfterFunc(time.Second, func() {
-						func(camera boggart.Camera) {
-							l.sendSnapshotCamera(camera.(boggart.Camera))
-						}(camera.(boggart.Camera))
-					})
-				}
+		case devices.EventDoorGPIOReedSwitchOpen:
+			l.sendMessage(args[0].(boggart.Device).Description() + " is opened")
 
-			case devices.EventDoorGPIOReedSwitchClose:
-				l.sendMessage(args[0].(boggart.Device).Description() + " is closed")
+			if camera := l.devicesManager.Device(boggart.DeviceIdCameraHall.String()); camera != nil {
+				time.AfterFunc(time.Second, func() {
+					func(camera boggart.Camera) {
+						l.sendSnapshotCamera(camera.(boggart.Camera))
+					}(camera.(boggart.Camera))
+				})
+			}
 
-				if camera := l.devicesManager.Device(boggart.DeviceIdCameraHall.String()); camera != nil {
-					time.AfterFunc(time.Second, func() {
-						func(camera boggart.Camera) {
-							l.sendSnapshotCamera(camera.(boggart.Camera))
-						}(camera.(boggart.Camera))
-					})
-				}
-				/*
-					case devices.EventUPSApcupsdStatusChanged:
-						current := args[1]
-						prev := args[2]
+		case devices.EventDoorGPIOReedSwitchClose:
+			l.sendMessage(args[0].(boggart.Device).Description() + " is closed")
 
-						if current != nil && prev != nil {
-							status := current.(apcupsd.Status)
-							var (
-								message string
-								reason  string
-							)
+			if camera := l.devicesManager.Device(boggart.DeviceIdCameraHall.String()); camera != nil {
+				time.AfterFunc(time.Second, func() {
+					func(camera boggart.Camera) {
+						l.sendSnapshotCamera(camera.(boggart.Camera))
+					}(camera.(boggart.Camera))
+				})
+			}
 
-							if status.Status != nil {
-								if (*status.Status).IsOnBattery {
-									message = "UPS switch to battery"
+		case devices.EventUPSApcupsdStatusChanged:
+			current := args[1]
+			prev := args[2]
 
-									if status.LastTransfer != nil {
-										reason = *status.LastTransfer
-									}
-								} else if (*status.Status).IsOnline {
-									message = "UPS switch to power"
+			if current != nil && prev != nil {
+				status := current.(apcupsd.Status)
+				var (
+					message string
+					reason  string
+				)
 
-									if status.LastTransfer != nil {
-										reason = *status.LastTransfer
-									}
+				if status.Status != nil {
+					if (*status.Status).IsOnBattery {
+						message = "UPS switch to battery"
 
-									if status.XOnBattery != nil || status.XOffBattery != nil {
-										diff := status.XOffBattery.Sub(*status.XOnBattery)
-
-										message += fmt.Sprintf(". Offline for %.2f seconds", diff.Seconds())
-									}
-								}
-							}
-
-							if reason != "" {
-								l.sendMessage(fmt.Sprintf("%s. Reason: %s", message, reason))
-							} else {
-								l.sendMessage(message)
-							}
+						if status.LastTransfer != nil {
+							reason = *status.LastTransfer
 						}
-		*/
+					} else if (*status.Status).IsOnline {
+						message = "UPS switch to power"
+
+						if status.LastTransfer != nil {
+							reason = *status.LastTransfer
+						}
+
+						if status.XOnBattery != nil || status.XOffBattery != nil {
+							diff := status.XOffBattery.Sub(*status.XOnBattery)
+
+							message += fmt.Sprintf(". Offline for %.2f seconds", diff.Seconds())
+						}
+					}
+				}
+
+				if reason != "" {
+					l.sendMessage(fmt.Sprintf("%s. Reason: %s", message, reason))
+				} else {
+					l.sendMessage(message)
+				}
+			}
+	*/
 	case boggart.DeviceEventDeviceDisabledAfterCheck:
 		if !l.devicesManager.IsReady() {
 			return
@@ -177,9 +178,11 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 		l.sendMessage(fmt.Sprintf("VPN user %s disconnected", args[1]))
 
 	case boggart.DeviceEventHikvisionEventNotificationAlert:
-		if l.securityManager.IsOpen() {
-			return
-		}
+		/*
+			if l.securityManager.IsOpen() {
+				return
+			}
+		*/
 
 		event := args[1].(*hikvision.EventNotificationAlertStreamResponse)
 
@@ -222,7 +225,8 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 		}
 
 	case boggart.DeviceEventDevicesManagerReady:
-		l.sendMessage(fmt.Sprintf("Hello. I'm online and ready. System status is %s", l.securityManager.Status().String()))
+		// l.sendMessage(fmt.Sprintf("Hello. I'm online and ready. System status is %s", l.securityManager.Status().String()))
+		l.sendMessage("Hello. I'm online and ready")
 	}
 }
 
