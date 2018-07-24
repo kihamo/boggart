@@ -6,6 +6,7 @@ import (
 	//_ "github.com/go-sql-driver/mysql"
 
 	boggart "github.com/kihamo/boggart/components/boggart/instance"
+	openhab "github.com/kihamo/boggart/components/openhab/instance"
 	"github.com/kihamo/shadow"
 	annotations "github.com/kihamo/shadow/components/annotations/instance"
 	config "github.com/kihamo/shadow/components/config/instance"
@@ -32,6 +33,7 @@ func main() {
 		Build,
 		[]shadow.Component{
 			boggart.NewComponent(),
+			openhab.NewComponent(),
 			annotations.NewComponent(),
 			config.NewComponent(),
 			dashboard.NewComponent(),

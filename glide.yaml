@@ -29,3 +29,7 @@ import:
   version: ~v2.3.0
 - package: github.com/eclipse/paho.mqtt.golang
   version: ~v1.1
+- package: github.com/go-swagger/go-swagger
+  version: ~0.15.0
+- package: github.com/go-openapi/runtime
+- package: github.com/mitchellh/gox

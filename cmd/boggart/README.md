@@ -5,6 +5,10 @@ sudo journalctl -f -u boggart.service
 ```
 
 ```
-cd $GOPATH/src/github.com/kihamo/boggart/cmd/boggart && go build && rm -rf $GOPATH/bin/boggart && go install github.com/kihamo/boggart/cmd/boggart
+GOARM=7 gox -output="cmd/boggart/boggart" -osarch="linux/arm" ./cmd/boggart/
+cp -f $GOPATH/src/github.com/kihamo/boggart/cmd/boggart/boggart $GOPATH/bin/boggart
+
+cd $GOPATH/src/github.com/kihamo/boggart/cmd/boggart && go build -v && rm -rf $GOPATH/bin/boggart && go install github.com/kihamo/boggart/cmd/boggart
+
 sudo systemctl restart boggart.service && sudo journalctl -f -u boggart.service
 ```

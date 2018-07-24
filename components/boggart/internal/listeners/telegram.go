@@ -171,11 +171,11 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 
 		l.sendMessage(fmt.Sprintf("%s with IP %s (%s, %s) disconnected to %s", mac.Address, mac.ARP.IP, mac.ARP.Comment, mac.DHCP.Hostname, args[2]))
 	/*
-	case boggart.DeviceEventVPNClientConnected:
-		l.sendMessage(fmt.Sprintf("VPN user %s with IP %s connected", args[1], args[2]))
+		case boggart.DeviceEventVPNClientConnected:
+			l.sendMessage(fmt.Sprintf("VPN user %s with IP %s connected", args[1], args[2]))
 
-	case boggart.DeviceEventVPNClientDisconnected:
-		l.sendMessage(fmt.Sprintf("VPN user %s disconnected", args[1]))
+		case boggart.DeviceEventVPNClientDisconnected:
+			l.sendMessage(fmt.Sprintf("VPN user %s disconnected", args[1]))
 	*/
 	case boggart.DeviceEventHikvisionEventNotificationAlert:
 		/*

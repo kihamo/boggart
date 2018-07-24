@@ -1,5 +1,5 @@
-hash: 4b7209325f3bda6a5be0b31328765c4507ed47c7972f37e4395789e480d0fe7d
-updated: 2018-07-19T18:39:26.875869+03:00
+hash: 40dd5f52ab8989feb7f762ebf18be144be8e7d7aa6778ff2f84baf494e0f6e60
+updated: 2018-07-24T23:23:45.087449+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -10,6 +10,8 @@ imports:
   - stores/memstore
 - name: github.com/andybalholm/cascadia
   version: 901648c87902174f774fac311d7f176f8647bdaa
+- name: github.com/asaskevich/govalidator
+  version: f9ffefc3facfbe0caee3fea233cbb6e8208f4541
 - name: github.com/beorn7/perks
   version: 3a771d992973f24aa725d07868b467d1ddfceafb
   subpackages:
@@ -28,10 +30,6 @@ imports:
   version: 1d4478f51bed434f1dadf96dcd9b43aabac66795
 - name: github.com/dhickie/go-lgtv
   version: 54744414160ef8c4689fb1d5915e5540c4a67486
-  subpackages:
-  - connection
-  - control
-  - util/ip
 - name: github.com/eclipse/paho.mqtt.golang
   version: 36d01c2b4cbeb3d2a12063e4880ce30800af9560
   subpackages:
@@ -40,8 +38,38 @@ imports:
   version: 38087fe4dafb822e541b3f7955075cc1c30bd294
 - name: github.com/ghthor/gowol
   version: eb42ead1b24e9226bddb05004815f6e72280f879
+- name: github.com/go-openapi/analysis
+  version: 3c8fe72ed5d307113ef76c7c3035964d7e4d4b73
+- name: github.com/go-openapi/errors
+  version: b2b2befaf267d082d779bcef52d682a47c779517
+- name: github.com/go-openapi/jsonpointer
+  version: 3a0015ad55fa9873f41605d3e8f28cd279c32ab2
+- name: github.com/go-openapi/jsonreference
+  version: 3fb327e6747da3043567ee86abd02bb6376b6be2
+- name: github.com/go-openapi/loads
+  version: 2a2b323bab96e6b1fdee110e57d959322446e9c9
+- name: github.com/go-openapi/runtime
+  version: 9a3091f566c0811ef4d54b535179bc0fc484a11f
+  subpackages:
+  - client
+  - logger
+  - middleware
+  - middleware/denco
+  - middleware/header
+  - middleware/untyped
+  - security
+- name: github.com/go-openapi/spec
+  version: bce47c9386f9ecd6b86f450478a80103c3fe1402
+- name: github.com/go-openapi/strfmt
+  version: 913ee058e387ac83a67e2d9f13acecdcd5769fc6
+- name: github.com/go-openapi/swag
+  version: becd2f08beafcca035645a8a101e0e3e18140458
+- name: github.com/go-openapi/validate
+  version: 9a6e517cddf1ddd47449be5d06a6a786e51d9986
 - name: github.com/go-sql-driver/mysql
   version: 9181e3a86a19bacd63e68d43ae8b7b36320d8092
+- name: github.com/go-swagger/go-swagger
+  version: 84da4f998602ef20ebd60a576756996162a1ca66
 - name: github.com/goburrow/serial
   version: 5efbe925ecf714f8ba147bf2226f2e7afc7111bc
 - name: github.com/golang/protobuf
@@ -173,6 +201,8 @@ imports:
   - pbutil
 - name: github.com/mcuadros/go-syslog
   version: 9cf13b7327c0e153da3cba3540c2ae2b879c3859
+- name: github.com/mitchellh/mapstructure
+  version: f15292f7a699fcc1a38a80977f80a046874ba8ac
 - name: github.com/OneOfOne/xxhash
   version: 6def279d2ce6c81a79dd1c1be580f03bb216fb8a
 - name: github.com/patrickmn/go-cache
@@ -203,6 +233,10 @@ imports:
   - xfs
 - name: github.com/PuerkitoBio/goquery
   version: 09540e565986583836b5fc792fe951ec5fd201dd
+- name: github.com/PuerkitoBio/purell
+  version: 975f53781597ed779763b7b65566e74c4004d8de
+- name: github.com/PuerkitoBio/urlesc
+  version: de5bf2ad457846296e2031421a34e2568e304e35
 - name: github.com/rs/xhandler
   version: 1eb70cf1520d43c307a89c5dabb7a7efd132fccd
 - name: github.com/rs/xid
@@ -225,8 +259,6 @@ imports:
   version: 6613d030df9fdbfb24debdf69d36787067d0cddb
   subpackages:
   - control
-  - local
-  - manage
 - name: gobot.io/x/gobot
   version: 635adea96f788ab19bf77470b075f8db44d34fa0
   subpackages:
@@ -269,6 +301,7 @@ imports:
   - transform
   - unicode/bidi
   - unicode/norm
+  - width
 - name: google.golang.org/appengine
   version: 0a24098c0ec68416ec050f567f75df563d6b231e
   subpackages:
@@ -322,12 +355,19 @@ imports:
   - internal/syslogparser
   - internal/syslogparser/rfc3164
   - internal/syslogparser/rfc5424
+- name: gopkg.in/mgo.v2
+  version: 9856a29383ce1c59f308dd1cf0363a79b5bef6b5
+  subpackages:
+  - bson
+  - internal/json
 - name: gopkg.in/routeros.v2
   version: 2dc19c12445caefdc2d128f7331dcc83284211ef
   subpackages:
   - proto
 - name: gopkg.in/telegram-bot-api.v4
   version: 0e0af0c480ea98e982d5f4d45fb39577c6ab1e3e
+- name: gopkg.in/yaml.v2
+  version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
 - name: periph.io/x/periph
   version: c0de80b1b075a2019fced09524f2318cf690a685
   subpackages:
