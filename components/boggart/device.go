@@ -33,8 +33,8 @@ type DeviceId int64
 
 const (
 	DeviceIdElectricityMeter DeviceId = iota
-	DeviceIdCameraHall
-	DeviceIdCameraStreet
+	//DeviceIdCameraHall
+	//DeviceIdCameraStreet
 	DeviceIdHeatMeter
 	// DeviceIdEntranceDoor
 	// DeviceIdLight

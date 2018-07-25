@@ -48,6 +48,7 @@ func (c *Component) initInternetProviders() {
 	c.devicesManager.Register(device)
 }
 
+/*
 func (c *Component) initCameras() {
 	isapi := hikvision.NewISAPI(
 		c.config.String(boggart.ConfigCameraHikVisionHallHost),
@@ -89,7 +90,7 @@ func (c *Component) initCameras() {
 
 	c.devicesManager.RegisterWithID(boggart.DeviceIdCameraStreet.String(), device)
 }
-
+*/
 func (c *Component) initPhones() {
 	megafonPhone := c.config.String(boggart.ConfigMobileMegafonPhone)
 	megafonPassword := c.config.String(boggart.ConfigMobileMegafonPassword)

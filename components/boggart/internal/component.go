@@ -95,7 +95,7 @@ func (c *Component) Run() (err error) {
 
 	c.initPC()
 	//c.initGPIO()
-	c.initCameras()
+	//c.initCameras()
 	c.initElectricityMeters()
 	c.initInternetProviders()
 	c.initPhones()

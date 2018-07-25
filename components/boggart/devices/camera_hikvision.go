@@ -1,5 +1,6 @@
 package devices
 
+/*
 import (
 	"context"
 	"errors"
@@ -135,3 +136,4 @@ func (d *HikVisionCamera) taskUpdater(ctx context.Context) (interface{}, error) 
 
 	return nil, nil
 }
+*/
