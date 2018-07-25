@@ -39,7 +39,7 @@ func (l *TelegramListener) Events() []workers.Event {
 	return []workers.Event{
 		//boggart.SecurityOpen,
 		//boggart.SecurityClosed,
-		boggart.DeviceEventHikvisionEventNotificationAlert,
+		//boggart.DeviceEventHikvisionEventNotificationAlert,
 		boggart.DeviceEventDeviceDisabledAfterCheck,
 		boggart.DeviceEventDeviceEnabledAfterCheck,
 		boggart.DeviceEventDevicesManagerReady,
@@ -171,59 +171,57 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 
 		l.sendMessage(fmt.Sprintf("%s with IP %s (%s, %s) disconnected to %s", mac.Address, mac.ARP.IP, mac.ARP.Comment, mac.DHCP.Hostname, args[2]))
 	/*
-		case boggart.DeviceEventVPNClientConnected:
-			l.sendMessage(fmt.Sprintf("VPN user %s with IP %s connected", args[1], args[2]))
+			case boggart.DeviceEventVPNClientConnected:
+				l.sendMessage(fmt.Sprintf("VPN user %s with IP %s connected", args[1], args[2]))
 
-		case boggart.DeviceEventVPNClientDisconnected:
-			l.sendMessage(fmt.Sprintf("VPN user %s disconnected", args[1]))
-	*/
-	case boggart.DeviceEventHikvisionEventNotificationAlert:
-		/*
+			case boggart.DeviceEventVPNClientDisconnected:
+				l.sendMessage(fmt.Sprintf("VPN user %s disconnected", args[1]))
+
+		case boggart.DeviceEventHikvisionEventNotificationAlert:
 			if l.securityManager.IsOpen() {
 				return
 			}
-		*/
 
-		event := args[1].(*hikvision.EventNotificationAlertStreamResponse)
+			event := args[1].(*hikvision.EventNotificationAlertStreamResponse)
 
-		// FIXME: ID прибит гвоздями, нужен реальный
-		videoRecorderDevice := l.devicesManager.Device(boggart.DeviceIdVideoRecorder.String()).(boggart.VideoRecorder)
+			// FIXME: ID прибит гвоздями, нужен реальный
+			videoRecorderDevice := l.devicesManager.Device(boggart.DeviceIdVideoRecorder.String()).(boggart.VideoRecorder)
 
-		switch event.EventType {
-		case hikvision.EventTypeIO:
-		case hikvision.EventTypeVMD:
-			go func() {
-				l.sendSnapshotFromVideoRecorder(videoRecorderDevice, event)
-			}()
+			switch event.EventType {
+			case hikvision.EventTypeIO:
+			case hikvision.EventTypeVMD:
+				go func() {
+					l.sendSnapshotFromVideoRecorder(videoRecorderDevice, event)
+				}()
 
-			l.sendMessage(fmt.Sprintf("Hikvision alert %s %s into %d channel", event.EventType, event.EventDescription, event.DynChannelID))
+				l.sendMessage(fmt.Sprintf("Hikvision alert %s %s into %d channel", event.EventType, event.EventDescription, event.DynChannelID))
 
-		case hikvision.EventTypeVideoLoss:
-		case hikvision.EventTypeShelterAlarm:
-		case hikvision.EventTypeFaceDetection:
-		case hikvision.EventTypeDefocus:
-		case hikvision.EventTypeAudioException:
-		case hikvision.EventTypeSceneChangeDetection:
-		case hikvision.EventTypeFieldDetection:
-		case hikvision.EventTypeLineDetection:
-		case hikvision.EventTypeRegionEntrance:
-		case hikvision.EventTypeRegionExiting:
-		case hikvision.EventTypeLoitering:
-		case hikvision.EventTypeGroup:
-		case hikvision.EventTypeRapidMove:
-		case hikvision.EventTypeParking:
-		case hikvision.EventTypeUnattendedBaggage:
-		case hikvision.EventTypeAttendedBaggage:
-		case hikvision.EventTypePIR:
-		case hikvision.EventTypePeopleDetection:
-		default:
-			go func() {
-				l.sendSnapshotFromVideoRecorder(videoRecorderDevice, event)
-			}()
+			case hikvision.EventTypeVideoLoss:
+			case hikvision.EventTypeShelterAlarm:
+			case hikvision.EventTypeFaceDetection:
+			case hikvision.EventTypeDefocus:
+			case hikvision.EventTypeAudioException:
+			case hikvision.EventTypeSceneChangeDetection:
+			case hikvision.EventTypeFieldDetection:
+			case hikvision.EventTypeLineDetection:
+			case hikvision.EventTypeRegionEntrance:
+			case hikvision.EventTypeRegionExiting:
+			case hikvision.EventTypeLoitering:
+			case hikvision.EventTypeGroup:
+			case hikvision.EventTypeRapidMove:
+			case hikvision.EventTypeParking:
+			case hikvision.EventTypeUnattendedBaggage:
+			case hikvision.EventTypeAttendedBaggage:
+			case hikvision.EventTypePIR:
+			case hikvision.EventTypePeopleDetection:
+			default:
+				go func() {
+					l.sendSnapshotFromVideoRecorder(videoRecorderDevice, event)
+				}()
 
-			l.sendMessage(fmt.Sprintf("Hikvision alert with unknown type %s into %d channel", event.EventType, event.DynChannelID))
-		}
-
+				l.sendMessage(fmt.Sprintf("Hikvision alert with unknown type %s into %d channel", event.EventType, event.DynChannelID))
+			}
+	*/
 	case boggart.DeviceEventDevicesManagerReady:
 		// l.sendMessage(fmt.Sprintf("Hello. I'm online and ready. System status is %s", l.securityManager.Status().String()))
 		l.sendMessage("Hello. I'm online and ready")

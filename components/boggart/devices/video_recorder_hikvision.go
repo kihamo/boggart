@@ -116,7 +116,7 @@ func (d *VideoRecorderHikVision) taskSerialNumber(ctx context.Context) (interfac
 	}
 
 	d.SetSerialNumber(deviceInfo.SerialNumber)
-	d.SetDescription("HikVision video recorder with serial number " + deviceInfo.SerialNumber)
+	d.SetDescription(d.Description() + " with serial number " + deviceInfo.SerialNumber)
 
 	if err := d.startAlertStreaming(); err != nil {
 		return nil, err, false
@@ -195,7 +195,7 @@ func (d *VideoRecorderHikVision) startAlertStreaming() error {
 			d.mutex.Unlock()
 
 			if !ok || event.DateTime.Sub(lastFire) > VideoRecorderHikVisionIgnoreInterval {
-				d.TriggerEvent(boggart.DeviceEventHikvisionEventNotificationAlert, event)
+				d.TriggerEvent(boggart.DeviceEventHikvisionEventNotificationAlert, event, d.SerialNumber())
 			}
 		}
 	}()

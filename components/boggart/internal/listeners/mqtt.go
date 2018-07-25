@@ -10,6 +10,7 @@ import (
 	m "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/devices"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/listener"
 )
@@ -47,6 +48,7 @@ func NewMQTTListener(servers []*url.URL, username, password string) *MQTTListene
 
 func (l *MQTTListener) Events() []workers.Event {
 	return []workers.Event{
+		boggart.DeviceEventHikvisionEventNotificationAlert,
 		boggart.DeviceEventWifiClientConnected,
 		boggart.DeviceEventWifiClientDisconnected,
 		boggart.DeviceEventVPNClientConnected,
@@ -62,6 +64,12 @@ func (l *MQTTListener) Events() []workers.Event {
 
 func (l *MQTTListener) Run(_ context.Context, event workers.Event, t time.Time, args ...interface{}) {
 	switch event {
+	case boggart.DeviceEventHikvisionEventNotificationAlert:
+		event := args[1].(*hikvision.EventNotificationAlertStreamResponse)
+		id := strings.Replace(args[2].(string), "/", "-", -1)
+
+		l.publish(fmt.Sprintf("cctv/%s/%d/%s", id, event.DynChannelID, event.EventType), false, event.EventDescription)
+
 	case boggart.DeviceEventWifiClientConnected:
 		mac := args[1].(*devices.MikrotikRouterMac)
 		macAddress := l.macAddress(mac.Address)

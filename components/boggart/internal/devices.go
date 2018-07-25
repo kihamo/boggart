@@ -16,20 +16,59 @@ import (
 )
 
 func (c *Component) initVideoRecorders() {
-	isapi := hikvision.NewISAPI(
-		c.config.String(boggart.ConfigVideoRecorderHikVisionHost),
-		c.config.Int64(boggart.ConfigVideoRecorderHikVisionPort),
-		c.config.String(boggart.ConfigVideoRecorderHikVisionUsername),
-		c.config.String(boggart.ConfigVideoRecorderHikVisionPassword))
+	var (
+		isapi  *hikvision.ISAPI
+		device *devices.VideoRecorderHikVision
+	)
 
-	device := devices.NewVideoRecorderHikVision(isapi, c.config.Duration(boggart.ConfigVideoRecorderHikVisionRepeatInterval))
-	if c.config.Bool(boggart.ConfigVideoRecorderHikVisionEnabled) {
+	isapi = hikvision.NewISAPI(
+		c.config.String(boggart.ConfigVideoRecorderHikVisionHomeHost),
+		c.config.Int64(boggart.ConfigVideoRecorderHikVisionHomePort),
+		c.config.String(boggart.ConfigVideoRecorderHikVisionHomeUsername),
+		c.config.String(boggart.ConfigVideoRecorderHikVisionHomePassword))
+
+	device = devices.NewVideoRecorderHikVision(isapi, c.config.Duration(boggart.ConfigVideoRecorderHikVisionHomeRepeatInterval))
+	device.SetDescription("Home video recorder")
+	if c.config.Bool(boggart.ConfigVideoRecorderHikVisionHomeEnabled) {
 		device.Enable()
 	} else {
 		device.Disable()
 	}
 
-	c.devicesManager.RegisterWithID(boggart.DeviceIdVideoRecorder.String(), device)
+	//c.devicesManager.RegisterWithID(boggart.DeviceIdVideoRecorder.String(), device)
+	c.devicesManager.Register(device)
+
+	isapi = hikvision.NewISAPI(
+		c.config.String(boggart.ConfigVideoRecorderHikVisionVacationHomeHost),
+		c.config.Int64(boggart.ConfigVideoRecorderHikVisionVacationHomePort),
+		c.config.String(boggart.ConfigVideoRecorderHikVisionVacationHomeUsername),
+		c.config.String(boggart.ConfigVideoRecorderHikVisionVacationHomePassword))
+
+	device = devices.NewVideoRecorderHikVision(isapi, c.config.Duration(boggart.ConfigVideoRecorderHikVisionVacationHomeRepeatInterval))
+	device.SetDescription("Vacation home video recorder")
+	if c.config.Bool(boggart.ConfigVideoRecorderHikVisionVacationHomeEnabled) {
+		device.Enable()
+	} else {
+		device.Disable()
+	}
+
+	c.devicesManager.Register(device)
+
+	isapi = hikvision.NewISAPI(
+		c.config.String(boggart.ConfigVideoRecorderHikVisionGarageHost),
+		c.config.Int64(boggart.ConfigVideoRecorderHikVisionGaragePort),
+		c.config.String(boggart.ConfigVideoRecorderHikVisionGarageUsername),
+		c.config.String(boggart.ConfigVideoRecorderHikVisionGaragePassword))
+
+	device = devices.NewVideoRecorderHikVision(isapi, c.config.Duration(boggart.ConfigVideoRecorderHikVisionGarageRepeatInterval))
+	device.SetDescription("Garage video recorder")
+	if c.config.Bool(boggart.ConfigVideoRecorderHikVisionGarageEnabled) {
+		device.Enable()
+	} else {
+		device.Disable()
+	}
+
+	c.devicesManager.Register(device)
 }
 
 func (c *Component) initInternetProviders() {

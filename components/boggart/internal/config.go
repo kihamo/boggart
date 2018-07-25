@@ -57,26 +57,68 @@ func (c *Component) ConfigVariables() []config.Variable {
 				WithUsage("Pin for door reed switch").
 				WithGroup("Doors"),
 		*/
-		config.NewVariable(boggart.ConfigVideoRecorderHikVisionEnabled, config.ValueTypeBool).
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionHomeEnabled, config.ValueTypeBool).
 			WithUsage("Enabled").
-			WithGroup("HikVision video recorder"),
-		config.NewVariable(boggart.ConfigVideoRecorderHikVisionRepeatInterval, config.ValueTypeDuration).
+			WithGroup("Home video recorder"),
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionHomeRepeatInterval, config.ValueTypeDuration).
 			WithUsage("Repeat interval").
-			WithGroup("HikVision video recorder").
+			WithGroup("Home video recorder").
 			WithDefault(time.Minute),
-		config.NewVariable(boggart.ConfigVideoRecorderHikVisionHost, config.ValueTypeString).
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionHomeHost, config.ValueTypeString).
 			WithUsage("Host").
-			WithGroup("HikVision video recorder"),
-		config.NewVariable(boggart.ConfigVideoRecorderHikVisionPort, config.ValueTypeInt64).
+			WithGroup("Home video recorder"),
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionHomePort, config.ValueTypeInt64).
 			WithUsage("Port").
-			WithGroup("HikVision video recorder"),
-		config.NewVariable(boggart.ConfigVideoRecorderHikVisionUsername, config.ValueTypeString).
+			WithGroup("Home video recorder"),
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionHomeUsername, config.ValueTypeString).
 			WithUsage("Username").
-			WithGroup("HikVision video recorder").
+			WithGroup("Home video recorder").
 			WithDefault("admin"),
-		config.NewVariable(boggart.ConfigVideoRecorderHikVisionPassword, config.ValueTypeString).
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionHomePassword, config.ValueTypeString).
 			WithUsage("Password").
-			WithGroup("HikVision video recorder").
+			WithGroup("Home video recorder").
+			WithView([]string{config.ViewPassword}),
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionVacationHomeEnabled, config.ValueTypeBool).
+			WithUsage("Enabled").
+			WithGroup("Vacation home video recorder"),
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionVacationHomeRepeatInterval, config.ValueTypeDuration).
+			WithUsage("Repeat interval").
+			WithGroup("Vacation home video recorder").
+			WithDefault(time.Minute),
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionVacationHomeHost, config.ValueTypeString).
+			WithUsage("Host").
+			WithGroup("Vacation home video recorder"),
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionVacationHomePort, config.ValueTypeInt64).
+			WithUsage("Port").
+			WithGroup("Vacation home video recorder"),
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionVacationHomeUsername, config.ValueTypeString).
+			WithUsage("Username").
+			WithGroup("Vacation home video recorder").
+			WithDefault("admin"),
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionVacationHomePassword, config.ValueTypeString).
+			WithUsage("Password").
+			WithGroup("Vacation home video recorder").
+			WithView([]string{config.ViewPassword}),
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionGarageEnabled, config.ValueTypeBool).
+			WithUsage("Enabled").
+			WithGroup("Garage video recorder"),
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionGarageRepeatInterval, config.ValueTypeDuration).
+			WithUsage("Repeat interval").
+			WithGroup("Garage video recorder").
+			WithDefault(time.Minute),
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionGarageHost, config.ValueTypeString).
+			WithUsage("Host").
+			WithGroup("Garage video recorder"),
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionGaragePort, config.ValueTypeInt64).
+			WithUsage("Port").
+			WithGroup("Garage video recorder"),
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionGarageUsername, config.ValueTypeString).
+			WithUsage("Username").
+			WithGroup("Garage video recorder").
+			WithDefault("admin"),
+		config.NewVariable(boggart.ConfigVideoRecorderHikVisionGaragePassword, config.ValueTypeString).
+			WithUsage("Password").
+			WithGroup("Garage video recorder").
 			WithView([]string{config.ViewPassword}),
 		/*
 			config.NewVariable(boggart.ConfigCameraHikVisionHallEnabled, config.ValueTypeBool).
