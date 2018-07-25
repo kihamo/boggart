@@ -51,9 +51,9 @@ const (
 type DeviceType int64
 
 const (
-	DeviceTypeCamera DeviceType = iota
+	// DeviceTypeCamera DeviceType = iota
 	// DeviceTypeDoor
-	DeviceTypeElectricityMeter
+	DeviceTypeElectricityMeter DeviceType = iota
 	DeviceTypeHeatMeter
 	DeviceTypeInternetProvider
 	// DeviceTypeLight
@@ -61,7 +61,7 @@ const (
 	DeviceTypeRouter
 	DeviceTypeTV
 	// DeviceTypeUPS
-	DeviceTypePC
+	// DeviceTypePC
 	DeviceTypeVideoRecorder
 	DeviceTypeWaterMeter
 	DeviceTypeThermometer

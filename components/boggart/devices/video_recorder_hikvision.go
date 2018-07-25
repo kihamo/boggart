@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 	"sync"
 	"time"
 
@@ -12,16 +11,16 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
-	"github.com/kihamo/snitch"
 )
 
+/*
 var (
 	metricVideoRecorderHikVisionMemoryUsage      = snitch.NewGauge(boggart.ComponentName+"_device_video_recorder_hikvision_memory_usage_bytes", "Memory usage in HikVision video recorder")
 	metricVideoRecorderHikVisionMemoryAvailable  = snitch.NewGauge(boggart.ComponentName+"_device_video_recorder_hikvision_memory_available_bytes", "Memory available in HikVision video recorder")
 	metricVideoRecorderHikVisionStorageUsage     = snitch.NewGauge(boggart.ComponentName+"_device_video_recorder_hikvision_storage_usage_bytes", "Storage usage in HikVision video recorder")
 	metricVideoRecorderHikVisionStorageAvailable = snitch.NewGauge(boggart.ComponentName+"_device_video_recorder_hikvision_storage_available_bytes", "Storage available in HikVision video recorder")
 )
-
+*/
 const (
 	VideoRecorderHikVisionIgnoreInterval = time.Second * 5
 )
@@ -54,6 +53,7 @@ func (d *VideoRecorderHikVision) Types() []boggart.DeviceType {
 	}
 }
 
+/*
 func (d *VideoRecorderHikVision) Describe(ch chan<- *snitch.Description) {
 	serialNumber := d.SerialNumber()
 	if serialNumber == "" {
@@ -77,7 +77,7 @@ func (d *VideoRecorderHikVision) Collect(ch chan<- snitch.Metric) {
 	metricVideoRecorderHikVisionStorageUsage.With("serial_number", serialNumber).Collect(ch)
 	metricVideoRecorderHikVisionStorageAvailable.With("serial_number", serialNumber).Collect(ch)
 }
-
+*/
 func (d *VideoRecorderHikVision) Ping(ctx context.Context) bool {
 	_, err := d.isapi.SystemStatus(ctx)
 	return err == nil
@@ -89,15 +89,15 @@ func (d *VideoRecorderHikVision) Tasks() []workers.Task {
 	taskSerialNumber.SetRepeats(-1)
 	taskSerialNumber.SetRepeatInterval(time.Minute)
 	taskSerialNumber.SetName("device-video-recorder-hikvision-serial-number")
-
-	taskUpdater := task.NewFunctionTask(d.taskUpdater)
-	taskUpdater.SetRepeats(-1)
-	taskUpdater.SetRepeatInterval(d.interval)
-	taskUpdater.SetName("device-video-recorder-hikvision-updater-" + d.Id())
-
+	/*
+		taskUpdater := task.NewFunctionTask(d.taskUpdater)
+		taskUpdater.SetRepeats(-1)
+		taskUpdater.SetRepeatInterval(d.interval)
+		taskUpdater.SetName("device-video-recorder-hikvision-updater-" + d.Id())
+	*/
 	return []workers.Task{
 		taskSerialNumber,
-		taskUpdater,
+		//taskUpdater,
 	}
 }
 
@@ -125,6 +125,7 @@ func (d *VideoRecorderHikVision) taskSerialNumber(ctx context.Context) (interfac
 	return nil, nil, true
 }
 
+/*
 func (d *VideoRecorderHikVision) taskUpdater(ctx context.Context) (interface{}, error) {
 	if !d.IsEnabled() {
 		return nil, nil
@@ -172,7 +173,7 @@ func (d *VideoRecorderHikVision) taskUpdater(ctx context.Context) (interface{}, 
 
 	return nil, nil
 }
-
+*/
 func (d *VideoRecorderHikVision) startAlertStreaming() error {
 	stream, err := d.isapi.EventNotificationAlertStream(context.Background())
 	if err != nil {

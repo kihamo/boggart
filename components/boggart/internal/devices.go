@@ -316,7 +316,7 @@ func (c *Component) initLight() {
 	device := devices.NewZenggeLight(transport, manager)
 	c.devicesManager.RegisterWithID(boggart.DeviceIdLight.String(), device)
 }
-*/
+
 func (c *Component) initPC() {
 	deviceAi := devices.NewDesktopPC()
 	deviceAi.SetMac("50:AF:73:24:B6:7A")
@@ -326,7 +326,7 @@ func (c *Component) initPC() {
 	deviceRPi := devices.NewDesktopPC()
 	c.devicesManager.Register(deviceRPi)
 }
-
+*/
 func (c *Component) initSensor() {
 	deviceBME280 := devices.NewBME280Sensor(
 		raspi.NewAdaptor(),

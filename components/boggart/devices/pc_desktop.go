@@ -1,5 +1,6 @@
 package devices
 
+/*
 import (
 	"context"
 
@@ -37,3 +38,4 @@ func (d *DesktopPC) Enable() error {
 
 	return d.DeviceBase.Enable()
 }
+*/
