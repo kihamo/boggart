@@ -27,6 +27,7 @@ var (
 	DeviceEventPulsarPulsedChanged             = event.NewBaseEvent("PulsarPulsedChanged")
 	DeviceEventMercury200Changed               = event.NewBaseEvent("Mercury200Changed")
 	DeviceEventBME280Changed                   = event.NewBaseEvent("BME280")
+	DeviceEventGPIOPinChanged                  = event.NewBaseEvent("DeviceEventGPIOPinChanged")
 )
 
 type DeviceId int64
@@ -52,7 +53,6 @@ type DeviceType int64
 
 const (
 	// DeviceTypeCamera DeviceType = iota
-	// DeviceTypeDoor
 	DeviceTypeElectricityMeter DeviceType = iota
 	DeviceTypeHeatMeter
 	DeviceTypeInternetProvider
@@ -67,6 +67,7 @@ const (
 	DeviceTypeThermometer
 	DeviceTypeBarometer
 	DeviceTypeHygrometer
+	DeviceTypeGPIOPin
 )
 
 type DevicesManager interface {

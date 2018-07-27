@@ -59,6 +59,7 @@ func (l *MQTTListener) Events() []workers.Event {
 		boggart.DeviceEventPulsarPulsedChanged,
 		boggart.DeviceEventMercury200Changed,
 		boggart.DeviceEventBME280Changed,
+		boggart.DeviceEventGPIOPinChanged,
 	}
 }
 
@@ -137,6 +138,13 @@ func (l *MQTTListener) Run(_ context.Context, event workers.Event, t time.Time, 
 		l.publish(fmt.Sprintf("meter/bme280/%s/altitude", args[2]), true, values.Altitude)
 		l.publish(fmt.Sprintf("meter/bme280/%s/humidity", args[2]), true, values.Humidity)
 		l.publish(fmt.Sprintf("meter/bme280/%s/pressure", args[2]), true, values.Pressure)
+
+	case boggart.DeviceEventGPIOPinChanged:
+		if args[2].(bool) {
+			l.publish(fmt.Sprintf("gpio/%d", args[1]), true, ValueOn)
+		} else {
+			l.publish(fmt.Sprintf("gpio/%d", args[1]), true, ValueOff)
+		}
 	}
 }
 

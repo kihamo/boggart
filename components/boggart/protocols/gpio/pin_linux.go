@@ -43,7 +43,7 @@ func NewPin(number int64, mode PinMode) (GPIOPin, error) {
 		number: number,
 	}
 	pin.updateAndReturn()
-	p.BeginWatch(g.EdgeFalling, pin.watch)
+	p.BeginWatch(g.EdgeRising, pin.watch)
 
 	return pin, nil
 }

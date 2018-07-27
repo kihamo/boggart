@@ -3,11 +3,11 @@ Description=Boggart
 After=network.target
 
 [Service]
-ExecStart=/home/pi/go/bin/boggart
+ExecStart=/home/pi/go/src/github.com/kihamo/boggart/cmd/boggart/boggart.sh
 EnvironmentFile=/home/pi/go/src/github.com/kihamo/boggart/cmd/boggart/boggart.env
 WorkingDirectory=/home/pi/go/src/github.com/kihamo/boggart/cmd/boggart
 Restart=always
-User=pi
+User=root
 
 [Install]
 WantedBy=multi-user.target

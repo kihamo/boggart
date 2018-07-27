@@ -2,6 +2,8 @@ package internal
 
 import (
 	"encoding/hex"
+	"strconv"
+	"strings"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/devices"
@@ -195,20 +197,27 @@ func (c *Component) initElectricityMeters() {
 	c.devicesManager.RegisterWithID(boggart.DeviceIdElectricityMeter.String(), device)
 }
 
-/*
 func (c *Component) initGPIO() {
-	device := devices.NewDoorGPIOReedSwitch(c.config.Int64(boggart.ConfigDoorsEntrancePin))
-	device.SetDescription("Entrance door")
+	pins := strings.Split(c.config.String(boggart.ConfigGPIOPins), ",")
 
-	if c.config.Bool(boggart.ConfigDoorsEnabled) {
-		device.Enable()
-	} else {
-		device.Disable()
+	for _, pin := range pins {
+		number, err := strconv.ParseInt(pin, 10, 64)
+		if err != nil {
+			continue
+		}
+
+		device := devices.NewGPIOPin(number)
+
+		if c.config.Bool(boggart.ConfigGPIOEnabled) {
+			device.Enable()
+		} else {
+			device.Disable()
+		}
+
+		c.devicesManager.Register(device)
 	}
-
-	c.devicesManager.RegisterWithID(boggart.DeviceIdEntranceDoor.String(), device)
 }
-*/
+
 func (c *Component) initPulsarMeters() {
 	var (
 		deviceAddress []byte

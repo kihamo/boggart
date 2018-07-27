@@ -1,5 +1,5 @@
 ```
-cp /home/pi/go/src/github.com/kihamo/boggart/cmd/boggart/boggart.service /lib/systemd/system/boggart.service
+sudo cp /home/pi/go/src/github.com/kihamo/boggart/cmd/boggart/boggart.service /lib/systemd/system/boggart.service
 sudo systemctl daemon-reload
 sudo journalctl -f -u boggart.service
 ```

@@ -49,14 +49,12 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithUsage("Password").
 			WithGroup("MQTT").
 			WithView([]string{config.ViewPassword}),
-		/*
-			config.NewVariable(boggart.ConfigDoorsEnabled, config.ValueTypeBool).
-				WithUsage("Enabled").
-				WithGroup("Doors"),
-			config.NewVariable(boggart.ConfigDoorsEntrancePin, config.ValueTypeInt).
-				WithUsage("Pin for door reed switch").
-				WithGroup("Doors"),
-		*/
+		config.NewVariable(boggart.ConfigGPIOEnabled, config.ValueTypeBool).
+			WithUsage("Enabled").
+			WithGroup("GPIO"),
+		config.NewVariable(boggart.ConfigGPIOPins, config.ValueTypeString).
+			WithUsage("Pins listener").
+			WithGroup("GPIO"),
 		config.NewVariable(boggart.ConfigVideoRecorderHikVisionHomeEnabled, config.ValueTypeBool).
 			WithUsage("Enabled").
 			WithGroup("Home video recorder"),
