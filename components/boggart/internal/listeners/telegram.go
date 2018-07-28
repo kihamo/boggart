@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/devices"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/listener"
@@ -43,10 +42,10 @@ func (l *TelegramListener) Events() []workers.Event {
 		boggart.DeviceEventDeviceDisabledAfterCheck,
 		boggart.DeviceEventDeviceEnabledAfterCheck,
 		boggart.DeviceEventDevicesManagerReady,
-		boggart.DeviceEventWifiClientConnected,
-		boggart.DeviceEventWifiClientDisconnected,
-		boggart.DeviceEventVPNClientConnected,
-		boggart.DeviceEventVPNClientDisconnected,
+		//boggart.DeviceEventWifiClientConnected,
+		//boggart.DeviceEventWifiClientDisconnected,
+		//boggart.DeviceEventVPNClientConnected,
+		//boggart.DeviceEventVPNClientDisconnected,
 		//devices.EventDoorGPIOReedSwitchOpen,
 		//devices.EventDoorGPIOReedSwitchClose,
 		// devices.EventUPSApcupsdStatusChanged,
@@ -158,24 +157,24 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 
 		device := args[0].(boggart.Device)
 		l.sendMessage(fmt.Sprintf("Device is up %s #%s (%s)", args[1], device.Id(), device.Description()))
-
-	case boggart.DeviceEventWifiClientConnected:
-		mac := args[1].(*devices.MikrotikRouterMac)
-
-		l.sendMessage(fmt.Sprintf("%s with IP %s (%s, %s) connected to %s", mac.Address, mac.ARP.IP, mac.ARP.Comment, mac.DHCP.Hostname, args[2]))
-
-	case boggart.DeviceEventWifiClientDisconnected:
-		// TODO: игнорировать маки из белого списка
-
-		mac := args[1].(*devices.MikrotikRouterMac)
-
-		l.sendMessage(fmt.Sprintf("%s with IP %s (%s, %s) disconnected to %s", mac.Address, mac.ARP.IP, mac.ARP.Comment, mac.DHCP.Hostname, args[2]))
 	/*
-			case boggart.DeviceEventVPNClientConnected:
-				l.sendMessage(fmt.Sprintf("VPN user %s with IP %s connected", args[1], args[2]))
+		case boggart.DeviceEventWifiClientConnected:
+			mac := args[1].(*devices.MikrotikRouterMac)
 
-			case boggart.DeviceEventVPNClientDisconnected:
-				l.sendMessage(fmt.Sprintf("VPN user %s disconnected", args[1]))
+			l.sendMessage(fmt.Sprintf("%s with IP %s (%s, %s) connected to %s", mac.Address, mac.ARP.IP, mac.ARP.Comment, mac.DHCP.Hostname, args[2]))
+
+		case boggart.DeviceEventWifiClientDisconnected:
+			// TODO: игнорировать маки из белого списка
+
+			mac := args[1].(*devices.MikrotikRouterMac)
+
+			l.sendMessage(fmt.Sprintf("%s with IP %s (%s, %s) disconnected to %s", mac.Address, mac.ARP.IP, mac.ARP.Comment, mac.DHCP.Hostname, args[2]))
+
+		case boggart.DeviceEventVPNClientConnected:
+			l.sendMessage(fmt.Sprintf("VPN user %s with IP %s connected", args[1], args[2]))
+
+		case boggart.DeviceEventVPNClientDisconnected:
+			l.sendMessage(fmt.Sprintf("VPN user %s disconnected", args[1]))
 
 		case boggart.DeviceEventHikvisionEventNotificationAlert:
 			if l.securityManager.IsOpen() {

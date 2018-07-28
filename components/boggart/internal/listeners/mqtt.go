@@ -75,6 +75,8 @@ func (l *MQTTListener) Run(_ context.Context, event workers.Event, t time.Time, 
 		mac := args[1].(*devices.MikrotikRouterMac)
 		macAddress := l.macAddress(mac.Address)
 
+		l.publish("wifi/clients/last/on/mac", false, macAddress)
+
 		l.publish(fmt.Sprintf("wifi/clients/%s/ip", macAddress), false, mac.ARP.IP)
 		l.publish(fmt.Sprintf("wifi/clients/%s/comment", macAddress), false, mac.ARP.Comment)
 		l.publish(fmt.Sprintf("wifi/clients/%s/hostname", macAddress), false, mac.DHCP.Hostname)
@@ -85,16 +87,22 @@ func (l *MQTTListener) Run(_ context.Context, event workers.Event, t time.Time, 
 		mac := args[1].(*devices.MikrotikRouterMac)
 		macAddress := l.macAddress(mac.Address)
 
+		l.publish("wifi/clients/last/off/mac", false, macAddress)
+
 		l.publish(fmt.Sprintf("wifi/clients/%s/state", macAddress), true, ValueOff)
 
 	case boggart.DeviceEventVPNClientConnected:
 		macAddress := l.macAddress(args[1].(string))
+
+		l.publish("vpn/clients/last/on/mac", false, macAddress)
 
 		l.publish(fmt.Sprintf("vpn/clients/%s/ip", macAddress), false, args[2])
 		l.publish(fmt.Sprintf("vpn/clients/%s/state", macAddress), true, ValueOn)
 
 	case boggart.DeviceEventVPNClientDisconnected:
 		macAddress := l.macAddress(args[1].(string))
+
+		l.publish("vpn/clients/last/off/mac", false, macAddress)
 
 		l.publish(fmt.Sprintf("vpn/clients/%s/state", macAddress), true, ValueOff)
 
