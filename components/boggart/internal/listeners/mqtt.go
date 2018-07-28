@@ -76,6 +76,10 @@ func (l *MQTTListener) Run(_ context.Context, event workers.Event, t time.Time, 
 		macAddress := l.macAddress(mac.Address)
 
 		l.publish("wifi/clients/last/on/mac", false, macAddress)
+		l.publish("wifi/clients/last/on/ip", false, mac.ARP.IP)
+		l.publish("wifi/clients/last/on/comment", false, mac.ARP.Comment)
+		l.publish("wifi/clients/last/on/hostname", false, mac.DHCP.Hostname)
+		l.publish("wifi/clients/last/on/interface", false, args[2])
 
 		l.publish(fmt.Sprintf("wifi/clients/%s/ip", macAddress), false, mac.ARP.IP)
 		l.publish(fmt.Sprintf("wifi/clients/%s/comment", macAddress), false, mac.ARP.Comment)
@@ -88,23 +92,32 @@ func (l *MQTTListener) Run(_ context.Context, event workers.Event, t time.Time, 
 		macAddress := l.macAddress(mac.Address)
 
 		l.publish("wifi/clients/last/off/mac", false, macAddress)
+		l.publish("wifi/clients/last/off/ip", false, mac.ARP.IP)
+		l.publish("wifi/clients/last/off/comment", false, mac.ARP.Comment)
+		l.publish("wifi/clients/last/off/hostname", false, mac.DHCP.Hostname)
+		l.publish("wifi/clients/last/off/interface", false, args[2])
 
+		l.publish(fmt.Sprintf("wifi/clients/%s/ip", macAddress), false, mac.ARP.IP)
+		l.publish(fmt.Sprintf("wifi/clients/%s/comment", macAddress), false, mac.ARP.Comment)
+		l.publish(fmt.Sprintf("wifi/clients/%s/hostname", macAddress), false, mac.DHCP.Hostname)
+		l.publish(fmt.Sprintf("wifi/clients/%s/interface", macAddress), false, args[2])
 		l.publish(fmt.Sprintf("wifi/clients/%s/state", macAddress), true, ValueOff)
 
 	case boggart.DeviceEventVPNClientConnected:
-		macAddress := l.macAddress(args[1].(string))
+		login := l.macAddress(args[1].(string))
 
-		l.publish("vpn/clients/last/on/mac", false, macAddress)
+		l.publish("vpn/clients/last/on/login", false, login)
+		l.publish("vpn/clients/last/on/ip", false, args[2])
 
-		l.publish(fmt.Sprintf("vpn/clients/%s/ip", macAddress), false, args[2])
-		l.publish(fmt.Sprintf("vpn/clients/%s/state", macAddress), true, ValueOn)
+		l.publish(fmt.Sprintf("vpn/clients/%s/ip", login), false, args[2])
+		l.publish(fmt.Sprintf("vpn/clients/%s/state", login), true, ValueOn)
 
 	case boggart.DeviceEventVPNClientDisconnected:
-		macAddress := l.macAddress(args[1].(string))
+		login := l.macAddress(args[1].(string))
 
-		l.publish("vpn/clients/last/off/mac", false, macAddress)
+		l.publish("vpn/clients/last/off/login", false, login)
 
-		l.publish(fmt.Sprintf("vpn/clients/%s/state", macAddress), true, ValueOff)
+		l.publish(fmt.Sprintf("vpn/clients/%s/state", login), true, ValueOff)
 
 	case boggart.DeviceEventSoftVideoBalanceChanged:
 		l.publish(fmt.Sprintf("service/softvideo/%s/balance", args[2]), true, args[1])
