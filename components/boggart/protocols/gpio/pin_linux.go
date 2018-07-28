@@ -3,6 +3,7 @@
 package gpio
 
 import (
+	"fmt"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -18,7 +19,7 @@ type Pin struct {
 	number         int64
 	status         int64
 	changedAt      unsafe.Pointer
-	callbackChange func(bool, *time.Time)
+	callbackChange func(bool, time.Time, *time.Time)
 }
 
 func NewPin(number int64, mode PinMode) (GPIOPin, error) {
@@ -42,31 +43,37 @@ func NewPin(number int64, mode PinMode) (GPIOPin, error) {
 		pin:    p,
 		number: number,
 	}
-	pin.updateAndReturn()
-	p.BeginWatch(g.EdgeRising, pin.watch)
+
+	if _, err = pin.updateAndReturn(); err != nil {
+		return nil, err
+	}
+
+	if err = p.BeginWatch(g.EdgeRising, pin.watch); err != nil {
+		return nil, err
+	}
 
 	return pin, nil
 }
 
-func (p *Pin) updateAndReturn() bool {
+func (p *Pin) updateAndReturn() (bool, error) {
 	if p.pin.Get() {
 		atomic.StoreInt64(&p.status, 1)
-		return true
+		return true, p.pin.Err()
 	}
 
 	atomic.StoreInt64(&p.status, 0)
-	return false
+	return false, p.pin.Err()
 }
 
 func (p *Pin) watch() {
-	prevStatus := p.Status()
-	prevChanged := p.ChangedAt()
-	currentStatus := p.updateAndReturn()
+	currentStatus, err := p.updateAndReturn()
 
-	if currentStatus == prevStatus {
+	if err != nil {
+		fmt.Printf("Get read pin failed with error %s\n", err.Error())
 		return
 	}
 
+	prevChangedAt := p.ChangedAt()
 	now := time.Now()
 	atomic.StorePointer(&p.changedAt, unsafe.Pointer(&now))
 
@@ -76,7 +83,7 @@ func (p *Pin) watch() {
 
 	if cb != nil {
 		go func() {
-			cb(currentStatus, prevChanged)
+			cb(currentStatus, now, prevChangedAt)
 		}()
 	}
 }
@@ -90,7 +97,7 @@ func (p *Pin) ChangedAt() *time.Time {
 	return (*time.Time)(t)
 }
 
-func (p *Pin) SetCallbackChange(callback func(bool, *time.Time)) {
+func (p *Pin) SetCallbackChange(callback func(bool, time.Time, *time.Time)) {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 

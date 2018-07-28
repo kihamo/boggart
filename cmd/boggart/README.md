@@ -1,5 +1,5 @@
 ```
-sudo cp /home/pi/go/src/github.com/kihamo/boggart/cmd/boggart/boggart.service /lib/systemd/system/boggart.service
+sudo cp -f /home/pi/go/src/github.com/kihamo/boggart/cmd/boggart/boggart.service /lib/systemd/system/boggart.service
 sudo systemctl daemon-reload
 sudo journalctl -f -u boggart.service
 ```
@@ -10,5 +10,7 @@ cp -f $GOPATH/src/github.com/kihamo/boggart/cmd/boggart/boggart $GOPATH/bin/bogg
 
 cd $GOPATH/src/github.com/kihamo/boggart/cmd/boggart && go build -v && rm -rf $GOPATH/bin/boggart && go install github.com/kihamo/boggart/cmd/boggart
 
+systemctl stor boggart.service
 sudo systemctl restart boggart.service && sudo journalctl -f -u boggart.service
+sudo systemctl start boggart.service && sudo journalctl -f -u boggart.service
 ```

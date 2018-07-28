@@ -12,7 +12,7 @@ import (
 	"github.com/kihamo/go-workers/task"
 )
 
-type DoorGPIOPin struct {
+type GPIOPin struct {
 	boggart.DeviceBase
 
 	mutex     sync.RWMutex
@@ -20,8 +20,8 @@ type DoorGPIOPin struct {
 	pinNumber int64
 }
 
-func NewGPIOPin(pin int64) *DoorGPIOPin {
-	device := &DoorGPIOPin{
+func NewGPIOPin(pin int64) *GPIOPin {
+	device := &GPIOPin{
 		pinNumber: pin,
 	}
 	device.Init()
@@ -30,17 +30,17 @@ func NewGPIOPin(pin int64) *DoorGPIOPin {
 	return device
 }
 
-func (d *DoorGPIOPin) Types() []boggart.DeviceType {
+func (d *GPIOPin) Types() []boggart.DeviceType {
 	return []boggart.DeviceType{
 		boggart.DeviceTypeGPIOPin,
 	}
 }
 
-func (d *DoorGPIOPin) IsOn() bool {
+func (d *GPIOPin) IsOn() bool {
 	return !d.IsOff()
 }
 
-func (d *DoorGPIOPin) IsOff() bool {
+func (d *GPIOPin) IsOff() bool {
 	if pin := d.pin(); pin != nil {
 		return pin.Status()
 	}
@@ -48,12 +48,12 @@ func (d *DoorGPIOPin) IsOff() bool {
 	return false
 }
 
-func (d *DoorGPIOPin) Ping(_ context.Context) bool {
+func (d *GPIOPin) Ping(_ context.Context) bool {
 	return true
 	//return d.pin() != nil
 }
 
-func (d *DoorGPIOPin) Tasks() []workers.Task {
+func (d *GPIOPin) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTillStopTask(d.taskPin)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(time.Second)
@@ -64,13 +64,14 @@ func (d *DoorGPIOPin) Tasks() []workers.Task {
 	}
 }
 
-func (d *DoorGPIOPin) taskPin(ctx context.Context) (interface{}, error, bool) {
+func (d *GPIOPin) taskPin(ctx context.Context) (interface{}, error, bool) {
 	if !d.IsEnabled() {
 		return nil, nil, false
 	}
 
 	pin, err := gpio.NewPin(d.pinNumber, gpio.PIN_IN)
 	if err != nil {
+		fmt.Printf("Init pin failed with error %s\n", err.Error())
 		return nil, err, false
 	}
 
@@ -83,17 +84,17 @@ func (d *DoorGPIOPin) taskPin(ctx context.Context) (interface{}, error, bool) {
 	return nil, nil, true
 }
 
-func (d *DoorGPIOPin) pin() gpio.GPIOPin {
+func (d *GPIOPin) pin() gpio.GPIOPin {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 
 	return d.pinGPIO
 }
 
-func (d *DoorGPIOPin) callback(status bool, changed *time.Time) {
+func (d *GPIOPin) callback(status bool, changedAt time.Time, prevChangedAt *time.Time) {
 	if status {
-		d.TriggerEvent(boggart.DeviceEventGPIOPinChanged, d.pinNumber, true, changed)
+		d.TriggerEvent(boggart.DeviceEventGPIOPinChanged, d.pinNumber, true, changedAt, prevChangedAt)
 	} else {
-		d.TriggerEvent(boggart.DeviceEventGPIOPinChanged, d.pinNumber, false, changed)
+		d.TriggerEvent(boggart.DeviceEventGPIOPinChanged, d.pinNumber, false, changedAt, prevChangedAt)
 	}
 }

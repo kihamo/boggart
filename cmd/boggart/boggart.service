@@ -3,7 +3,7 @@ Description=Boggart
 After=network.target
 
 [Service]
-ExecStart=/home/pi/go/src/github.com/kihamo/boggart/cmd/boggart/boggart.sh
+ExecStart=/home/pi/go/src/github.com/kihamo/boggart/cmd/boggart/boggart
 EnvironmentFile=/home/pi/go/src/github.com/kihamo/boggart/cmd/boggart/boggart.env
 WorkingDirectory=/home/pi/go/src/github.com/kihamo/boggart/cmd/boggart
 Restart=always

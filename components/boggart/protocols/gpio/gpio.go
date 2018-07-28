@@ -8,7 +8,7 @@ type GPIOPin interface {
 	Number() int64
 	Status() bool
 	ChangedAt() *time.Time
-	SetCallbackChange(callback func(bool, *time.Time))
+	SetCallbackChange(callback func(bool, time.Time, *time.Time))
 }
 
 type PinMode int64
