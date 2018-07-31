@@ -3,14 +3,13 @@ package listeners
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"strings"
 	"time"
 
-	m "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/devices"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/listener"
 )
@@ -25,23 +24,13 @@ const (
 type MQTTListener struct {
 	listener.BaseListener
 
-	mqtt m.Client
+	client mqtt.Component
 }
 
-func NewMQTTListener(servers []*url.URL, username, password string) *MQTTListener {
-	l := &MQTTListener{}
-
-	opts := &m.ClientOptions{
-		Servers:  servers,
-		ClientID: l.Name(),
-		Username: username,
-		Password: password,
+func NewMQTTListener(client mqtt.Component) *MQTTListener {
+	l := &MQTTListener{
+		client: client,
 	}
-
-	l.Init()
-	l.mqtt = m.NewClient(opts)
-
-	l.mqtt.Connect().WaitTimeout(time.Second * 2)
 
 	return l
 }
@@ -170,7 +159,7 @@ func (l *MQTTListener) Run(_ context.Context, event workers.Event, t time.Time, 
 }
 
 func (l *MQTTListener) Name() string {
-	return boggart.ComponentName + ".mqtt"
+	return boggart.ComponentName + ".client"
 }
 
 func (l *MQTTListener) publish(topic string, retained bool, payload interface{}) {
@@ -181,7 +170,7 @@ func (l *MQTTListener) publish(topic string, retained bool, payload interface{})
 		payload = fmt.Sprintf("%d", value)
 	}
 
-	l.mqtt.Publish(TopicPrefix+topic, 0, retained, payload)
+	l.client.Publish(TopicPrefix+topic, 0, retained, payload)
 }
 
 func (l *MQTTListener) macAddress(address string) string {

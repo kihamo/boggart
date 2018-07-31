@@ -5,6 +5,8 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
+	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/components/syslog"
 	"github.com/kihamo/go-workers/manager"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/annotations"
@@ -62,8 +64,14 @@ func (c *Component) Dependencies() []shadow.Dependency {
 			Name: messengers.ComponentName,
 		},
 		{
+			Name: mqtt.ComponentName,
+		},
+		{
 			Name:     metrics.ComponentName,
 			Required: true,
+		},
+		{
+			Name: syslog.ComponentName,
 		},
 		{
 			Name:     workers.ComponentName,

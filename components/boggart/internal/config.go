@@ -35,20 +35,6 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithUsage("Serial port timeout").
 			WithGroup("RS485 protocol").
 			WithDefault(rs485.DefaultTimeout),
-		config.NewVariable(boggart.ConfigMQTTEnabled, config.ValueTypeBool).
-			WithUsage("Enabled").
-			WithGroup("MQTT"),
-		config.NewVariable(boggart.ConfigMQTTServers, config.ValueTypeString).
-			WithUsage("Server").
-			WithGroup("MQTT").
-			WithDefault("tcp://localhost:1883"),
-		config.NewVariable(boggart.ConfigMQTTUsername, config.ValueTypeString).
-			WithUsage("Username").
-			WithGroup("MQTT"),
-		config.NewVariable(boggart.ConfigMQTTPassword, config.ValueTypeString).
-			WithUsage("Password").
-			WithGroup("MQTT").
-			WithView([]string{config.ViewPassword}),
 		config.NewVariable(boggart.ConfigGPIOEnabled, config.ValueTypeBool).
 			WithUsage("Enabled").
 			WithGroup("GPIO"),

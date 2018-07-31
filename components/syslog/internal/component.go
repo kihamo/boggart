@@ -5,7 +5,6 @@ import (
 	"os"
 	"sync"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/syslog"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/config"
@@ -33,10 +32,6 @@ func (c *Component) Dependencies() []shadow.Dependency {
 	return []shadow.Dependency{
 		{
 			Name:     config.ComponentName,
-			Required: true,
-		},
-		{
-			Name:     boggart.ComponentName,
 			Required: true,
 		},
 		{

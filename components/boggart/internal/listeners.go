@@ -1,11 +1,11 @@
 package internal
 
 import (
-	"net/url"
 	"strings"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/internal/listeners"
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/shadow/components/annotations"
 	"github.com/kihamo/shadow/components/messengers"
 	"github.com/kihamo/shadow/components/messengers/platforms/telegram"
@@ -14,18 +14,8 @@ import (
 func (c *Component) initListeners() {
 	c.listenersManager.AddListener(listeners.NewLoggingListener(c.logger))
 
-	if c.config.Bool(boggart.ConfigMQTTEnabled) {
-		servers := make([]*url.URL, 0)
-		for _, u := range strings.Split(c.config.String(boggart.ConfigMQTTServers), ";") {
-			if p, err := url.Parse(u); err == nil {
-				servers = append(servers, p)
-			}
-		}
-
-		c.listenersManager.AddListener(listeners.NewMQTTListener(
-			servers,
-			c.config.String(boggart.ConfigMQTTUsername),
-			c.config.String(boggart.ConfigMQTTPassword)))
+	if c.application.HasComponent(mqtt.ComponentName) {
+		c.listenersManager.AddListener(listeners.NewMQTTListener(c.application.GetComponent(mqtt.ComponentName).(mqtt.Component)))
 	}
 
 	if c.application.HasComponent(messengers.ComponentName) {
