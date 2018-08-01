@@ -11,9 +11,9 @@ import (
 
 	m "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/components/mqtt/subscribes"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/config"
-	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/logger"
 )
 
@@ -38,9 +38,6 @@ func (c *Component) Dependencies() []shadow.Dependency {
 		{
 			Name:     config.ComponentName,
 			Required: true,
-		},
-		{
-			Name: dashboard.ComponentName,
 		},
 		{
 			Name: logger.ComponentName,
@@ -93,6 +90,16 @@ func (c *Component) initClient() {
 	client.Connect().Wait()
 
 	c.client = client
+
+	defaultSubscribers := []mqtt.Subscriber{
+		subscribes.NewOwnTracksSubscribe(),
+	}
+
+	for _, s := range defaultSubscribers {
+		client.SubscribeMultiple(s.Filters(), func(client m.Client, message m.Message) {
+			s.Callback(c, message)
+		})
+	}
 }
 
 func (c *Component) Client() m.Client {

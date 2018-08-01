@@ -1,5 +1,5 @@
-hash: 40dd5f52ab8989feb7f762ebf18be144be8e7d7aa6778ff2f84baf494e0f6e60
-updated: 2018-07-24T23:23:45.087449+03:00
+hash: a4ddb8defa9410523a2162b95551ae9f094031ef57b077a699c85482078a5c97
+updated: 2018-08-01T00:31:17.754455+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -201,8 +201,12 @@ imports:
   - pbutil
 - name: github.com/mcuadros/go-syslog
   version: 9cf13b7327c0e153da3cba3540c2ae2b879c3859
+- name: github.com/mitchellh/gox
+  version: e05df8dccde397491cd731693a93d4506b5850d3
 - name: github.com/mitchellh/mapstructure
   version: f15292f7a699fcc1a38a80977f80a046874ba8ac
+- name: github.com/mmcloughlin/geohash
+  version: 3b756d8ac3d9d9b1217f28a9e6cbba629e1815b3
 - name: github.com/OneOfOne/xxhash
   version: 6def279d2ce6c81a79dd1c1be580f03bb216fb8a
 - name: github.com/patrickmn/go-cache
