@@ -202,7 +202,8 @@ func (d *VideoRecorderHikVision) startAlertStreaming() error {
 
 	return nil
 }
-
+/*
 func (d *VideoRecorderHikVision) Snapshot(ctx context.Context, streaming uint64, input uint64) ([]byte, error) {
 	return d.isapi.StreamingPicture(ctx, streaming*100+input)
 }
+*/

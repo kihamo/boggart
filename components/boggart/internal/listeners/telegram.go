@@ -1,13 +1,13 @@
 package listeners
 
 import (
-	"bytes"
+	//"bytes"
 	"context"
 	"fmt"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
+	//"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/listener"
 	"github.com/kihamo/shadow/components/messengers/platforms/telegram"
@@ -226,7 +226,7 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 		l.sendMessage("Hello. I'm online and ready")
 	}
 }
-
+/*
 func (l *TelegramListener) sendSnapshotFromVideoRecorder(videoRecorder boggart.VideoRecorder, event *hikvision.EventNotificationAlertStreamResponse) {
 	if !videoRecorder.IsEnabled() {
 		return
@@ -252,7 +252,7 @@ func (l *TelegramListener) sendSnapshotCamera(camera boggart.Camera) {
 		}
 	}
 }
-
+*/
 func (l *TelegramListener) sendMessage(message string) {
 	for _, chatId := range l.chats {
 		l.messenger.SendMessage(chatId, message)
