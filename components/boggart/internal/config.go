@@ -38,8 +38,11 @@ func (c *Component) ConfigVariables() []config.Variable {
 		config.NewVariable(boggart.ConfigGPIOEnabled, config.ValueTypeBool).
 			WithUsage("Enabled").
 			WithGroup("GPIO"),
-		config.NewVariable(boggart.ConfigGPIOPins, config.ValueTypeString).
-			WithUsage("Pins listener").
+		config.NewVariable(boggart.ConfigGPIOPinsIn, config.ValueTypeString).
+			WithUsage("Pins IN listener").
+			WithGroup("GPIO"),
+		config.NewVariable(boggart.ConfigGPIOPinsOut, config.ValueTypeString).
+			WithUsage("Pins OUT listener").
 			WithGroup("GPIO"),
 		config.NewVariable(boggart.ConfigVideoRecorderHikVisionHomeEnabled, config.ValueTypeBool).
 			WithUsage("Enabled").

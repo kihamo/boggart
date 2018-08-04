@@ -226,6 +226,7 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 		l.sendMessage("Hello. I'm online and ready")
 	}
 }
+
 /*
 func (l *TelegramListener) sendSnapshotFromVideoRecorder(videoRecorder boggart.VideoRecorder, event *hikvision.EventNotificationAlertStreamResponse) {
 	if !videoRecorder.IsEnabled() {

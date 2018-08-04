@@ -11,7 +11,6 @@ import (
 
 	m "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kihamo/boggart/components/mqtt"
-	"github.com/kihamo/boggart/components/mqtt/subscribes"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/logger"
@@ -90,16 +89,6 @@ func (c *Component) initClient() {
 	client.Connect().Wait()
 
 	c.client = client
-
-	defaultSubscribers := []mqtt.Subscriber{
-		subscribes.NewOwnTracksSubscribe(),
-	}
-
-	for _, s := range defaultSubscribers {
-		client.SubscribeMultiple(s.Filters(), func(client m.Client, message m.Message) {
-			s.Callback(c, message)
-		})
-	}
 }
 
 func (c *Component) Client() m.Client {
@@ -113,22 +102,8 @@ func (c *Component) Publish(topic string, qos byte, retained bool, payload inter
 	return c.Client().Publish(topic, qos, retained, payload)
 }
 
-func (c *Component) Subscribe(topic string, qos byte, callback m.MessageHandler) m.Token {
-	return c.Client().Subscribe(topic, qos, callback)
-}
-
-func (c *Component) SubscribeMultiple(filters map[string]byte, callback m.MessageHandler) m.Token {
-	return c.Client().SubscribeMultiple(filters, callback)
-}
-
-func (c *Component) Unsubscribe(topics ...string) m.Token {
-	return c.Client().Unsubscribe(topics...)
-}
-
-func (c *Component) AddRoute(topic string, callback m.MessageHandler) {
-	c.Client().AddRoute(topic, callback)
-}
-
-func (c *Component) OptionsReader() m.ClientOptionsReader {
-	return c.Client().OptionsReader()
+func (c *Component) Subscribe(subscriber mqtt.Subscriber) m.Token {
+	return c.Client().SubscribeMultiple(subscriber.Filters(), func(client m.Client, message m.Message) {
+		subscriber.Callback(c, message)
+	})
 }

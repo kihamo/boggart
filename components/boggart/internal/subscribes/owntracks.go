@@ -8,8 +8,7 @@ import (
 	"github.com/mmcloughlin/geohash"
 )
 
-type OwnTracksSubscribe struct {
-}
+type OwnTracksSubscribe struct{}
 
 func NewOwnTracksSubscribe() *OwnTracksSubscribe {
 	return &OwnTracksSubscribe{}

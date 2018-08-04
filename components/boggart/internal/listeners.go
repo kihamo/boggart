@@ -14,9 +14,7 @@ import (
 func (c *Component) initListeners() {
 	c.listenersManager.AddListener(listeners.NewLoggingListener(c.logger))
 
-	if c.application.HasComponent(mqtt.ComponentName) {
-		c.listenersManager.AddListener(listeners.NewMQTTListener(c.application.GetComponent(mqtt.ComponentName).(mqtt.Component)))
-	}
+	c.listenersManager.AddListener(listeners.NewMQTTListener(c.application.GetComponent(mqtt.ComponentName).(mqtt.Component)))
 
 	if c.application.HasComponent(messengers.ComponentName) {
 		messenger := c.application.GetComponent(messengers.ComponentName).(messengers.Component).

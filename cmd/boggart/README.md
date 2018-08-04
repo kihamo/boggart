@@ -13,4 +13,7 @@ cd $GOPATH/src/github.com/kihamo/boggart/cmd/boggart && go build -v && rm -rf $G
 sudo systemctl stop boggart.service
 sudo systemctl restart boggart.service && sudo journalctl -f -u boggart.service
 sudo systemctl start boggart.service && sudo journalctl -f -u boggart.service
+
+sudo echo "22" > /sys/class/gpio/unexport
+sudo echo "27" > /sys/class/gpio/unexport
 ```

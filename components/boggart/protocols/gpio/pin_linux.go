@@ -104,6 +104,33 @@ func (p *Pin) SetCallbackChange(callback func(bool, time.Time, *time.Time)) {
 	p.callbackChange = callback
 }
 
+func (p *Pin) Up() error {
+	p.pin.Set()
+	return p.pin.Err()
+}
+
+func (p *Pin) Down() error {
+	p.pin.Clear()
+	return p.pin.Err()
+}
+
+func (p *Pin) Mode() (PinMode, error) {
+	m := p.pin.Mode()
+
+	switch m {
+	case g.ModeInput:
+		return PIN_IN, p.pin.Err()
+
+	case g.ModeOutput:
+		return PIN_OUT, p.pin.Err()
+
+	case g.ModePWM:
+		return PIN_PWM, p.pin.Err()
+	}
+
+	return -1, p.pin.Err()
+}
+
 /**
  * Pin status:
  * 1 / true  - close

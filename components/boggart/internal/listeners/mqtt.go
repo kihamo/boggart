@@ -31,6 +31,7 @@ func NewMQTTListener(client mqtt.Component) *MQTTListener {
 	l := &MQTTListener{
 		client: client,
 	}
+	l.Init()
 
 	return l
 }
@@ -159,7 +160,7 @@ func (l *MQTTListener) Run(_ context.Context, event workers.Event, t time.Time, 
 }
 
 func (l *MQTTListener) Name() string {
-	return boggart.ComponentName + ".client"
+	return boggart.ComponentName + ".mqtt"
 }
 
 func (l *MQTTListener) publish(topic string, retained bool, payload interface{}) {

@@ -64,7 +64,8 @@ func (c *Component) Dependencies() []shadow.Dependency {
 			Name: messengers.ComponentName,
 		},
 		{
-			Name: mqtt.ComponentName,
+			Name:     mqtt.ComponentName,
+			Required: true,
 		},
 		{
 			Name:     metrics.ComponentName,
@@ -114,6 +115,8 @@ func (c *Component) Run() (err error) {
 	c.initTV()
 	// c.initLight()
 	c.initSensor()
+
+	c.initMQTT()
 
 	c.devicesManager.Ready()
 

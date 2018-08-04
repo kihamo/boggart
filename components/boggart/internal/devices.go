@@ -2,11 +2,13 @@ package internal
 
 import (
 	"encoding/hex"
+	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/devices"
+	"github.com/kihamo/boggart/components/boggart/protocols/gpio"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 	"github.com/kihamo/boggart/components/boggart/providers/mercury"
 	"github.com/kihamo/boggart/components/boggart/providers/mikrotik"
@@ -198,15 +200,15 @@ func (c *Component) initElectricityMeters() {
 }
 
 func (c *Component) initGPIO() {
-	pins := strings.Split(c.config.String(boggart.ConfigGPIOPins), ",")
+	pinsIn := strings.Split(c.config.String(boggart.ConfigGPIOPinsIn), ",")
 
-	for _, pin := range pins {
+	for _, pin := range pinsIn {
 		number, err := strconv.ParseInt(pin, 10, 64)
 		if err != nil {
 			continue
 		}
 
-		device := devices.NewGPIOPin(number)
+		device := devices.NewGPIOPin(number, gpio.PIN_IN)
 
 		if c.config.Bool(boggart.ConfigGPIOEnabled) {
 			device.Enable()
@@ -214,7 +216,26 @@ func (c *Component) initGPIO() {
 			device.Disable()
 		}
 
-		c.devicesManager.Register(device)
+		c.devicesManager.RegisterWithID(fmt.Sprintf("pin.in.%d", number), device)
+	}
+
+	pinsOut := strings.Split(c.config.String(boggart.ConfigGPIOPinsOut), ",")
+
+	for _, pin := range pinsOut {
+		number, err := strconv.ParseInt(pin, 10, 64)
+		if err != nil {
+			continue
+		}
+
+		device := devices.NewGPIOPin(number, gpio.PIN_OUT)
+
+		if c.config.Bool(boggart.ConfigGPIOEnabled) {
+			device.Enable()
+		} else {
+			device.Disable()
+		}
+
+		c.devicesManager.RegisterWithID(fmt.Sprintf("pin.out.%d", number), device)
 	}
 }
 
