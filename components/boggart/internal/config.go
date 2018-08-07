@@ -304,6 +304,9 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithUsage("Address").
 			WithGroup("Sensor 280").
 			WithDefault(0x76),
+		config.NewVariable(boggart.ConfigOwnTracksEnabled, config.ValueTypeBool).
+			WithUsage("Enabled").
+			WithGroup("OwnTracks"),
 	}
 }
 

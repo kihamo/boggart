@@ -1,0 +1,13 @@
+[Unit]
+Description=Boggart server
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/boggart-server
+EnvironmentFile=/home/kihamo/cmd/server/boggart.env
+WorkingDirectory=/home/kihamo/cmd/server
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target

@@ -151,7 +151,7 @@ func (l *MQTTListener) Run(_ context.Context, event workers.Event, t time.Time, 
 		l.publish(fmt.Sprintf("meter/bme280/%s/pressure", args[2]), true, values.Pressure)
 
 	case boggart.DeviceEventGPIOPinChanged:
-		if args[2].(bool) {
+		if args[2].(uint64) == 0 {
 			l.publish(fmt.Sprintf("gpio/%d", args[1]), true, ValueOn)
 		} else {
 			l.publish(fmt.Sprintf("gpio/%d", args[1]), true, ValueOff)

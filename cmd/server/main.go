@@ -1,19 +1,16 @@
-package main // import "github.com/kihamo/boggart/cmd/boggart"
+package main // import "github.com/kihamo/boggart/cmd/server"
 
 import (
 	"log"
 
-	//_ "github.com/go-sql-driver/mysql"
-
 	boggart "github.com/kihamo/boggart/components/boggart/instance"
 	mqtt "github.com/kihamo/boggart/components/mqtt/instance"
 	openhab "github.com/kihamo/boggart/components/openhab/instance"
+	syslog "github.com/kihamo/boggart/components/syslog/instance"
 	"github.com/kihamo/shadow"
 	annotations "github.com/kihamo/shadow/components/annotations/instance"
 	config "github.com/kihamo/shadow/components/config/instance"
 	dashboard "github.com/kihamo/shadow/components/dashboard/instance"
-	//database "github.com/kihamo/shadow/components/database/instance"
-	syslog "github.com/kihamo/boggart/components/syslog/instance"
 	i18n "github.com/kihamo/shadow/components/i18n/instance"
 	logger "github.com/kihamo/shadow/components/logger/instance"
 	messengers "github.com/kihamo/shadow/components/messengers/instance"

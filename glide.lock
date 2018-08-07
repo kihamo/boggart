@@ -1,5 +1,5 @@
-hash: a4ddb8defa9410523a2162b95551ae9f094031ef57b077a699c85482078a5c97
-updated: 2018-08-01T00:31:17.754455+03:00
+hash: 45d0a9cf306d66cdce37b8bc75e168a2bf67be1ffa76bad0a32efcdaf76c6712
+updated: 2018-08-05T03:23:04.262074+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -39,7 +39,9 @@ imports:
 - name: github.com/ghthor/gowol
   version: eb42ead1b24e9226bddb05004815f6e72280f879
 - name: github.com/go-openapi/analysis
-  version: 3c8fe72ed5d307113ef76c7c3035964d7e4d4b73
+  version: 7c1bef8f6d9fa6148ce0d8a0ebf5339a084a6639
+  subpackages:
+  - internal
 - name: github.com/go-openapi/errors
   version: b2b2befaf267d082d779bcef52d682a47c779517
 - name: github.com/go-openapi/jsonpointer
@@ -59,13 +61,13 @@ imports:
   - middleware/untyped
   - security
 - name: github.com/go-openapi/spec
-  version: bce47c9386f9ecd6b86f450478a80103c3fe1402
+  version: 384415f06ee238aae1df5caad877de6ceac3a5c4
 - name: github.com/go-openapi/strfmt
   version: 913ee058e387ac83a67e2d9f13acecdcd5769fc6
 - name: github.com/go-openapi/swag
   version: becd2f08beafcca035645a8a101e0e3e18140458
 - name: github.com/go-openapi/validate
-  version: 9a6e517cddf1ddd47449be5d06a6a786e51d9986
+  version: 4f81262a03dbefe1003f745d3d0a03cbeea98d50
 - name: github.com/go-sql-driver/mysql
   version: 9181e3a86a19bacd63e68d43ae8b7b36320d8092
 - name: github.com/go-swagger/go-swagger
@@ -257,6 +259,8 @@ imports:
   version: e55481d6f45c5a8f040343bace9013571dae103e
 - name: github.com/sigurn/utils
   version: f19e41f79f8f006116f682c1af454591bc278ad4
+- name: github.com/stianeikeland/go-rpio
+  version: 3abdd2207d33843c1c3fbea540bdf07990075c03
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
 - name: github.com/vikstrous/zengge-lightcontrol

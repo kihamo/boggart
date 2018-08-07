@@ -1,8 +1,5 @@
 .idea
 vendor/*
-cmd/boggart/boggart
-cmd/boggart/boggart.env
-cmd/boggart/items.yaml
 /openhab
 /openhab-ai
 components/openhab/swagger.json

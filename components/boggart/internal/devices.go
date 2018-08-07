@@ -8,7 +8,6 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/devices"
-	"github.com/kihamo/boggart/components/boggart/protocols/gpio"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 	"github.com/kihamo/boggart/components/boggart/providers/mercury"
 	"github.com/kihamo/boggart/components/boggart/providers/mikrotik"
@@ -16,6 +15,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
 	"github.com/kihamo/boggart/components/boggart/providers/samsung/tv"
 	"github.com/kihamo/boggart/components/boggart/providers/softvideo"
+	"github.com/stianeikeland/go-rpio"
 	"gobot.io/x/gobot/platforms/raspi"
 )
 
@@ -25,116 +25,65 @@ func (c *Component) initVideoRecorders() {
 		device *devices.VideoRecorderHikVision
 	)
 
-	isapi = hikvision.NewISAPI(
-		c.config.String(boggart.ConfigVideoRecorderHikVisionHomeHost),
-		c.config.Int64(boggart.ConfigVideoRecorderHikVisionHomePort),
-		c.config.String(boggart.ConfigVideoRecorderHikVisionHomeUsername),
-		c.config.String(boggart.ConfigVideoRecorderHikVisionHomePassword))
-
-	device = devices.NewVideoRecorderHikVision(isapi, c.config.Duration(boggart.ConfigVideoRecorderHikVisionHomeRepeatInterval))
-	device.SetDescription("Home video recorder")
 	if c.config.Bool(boggart.ConfigVideoRecorderHikVisionHomeEnabled) {
-		device.Enable()
-	} else {
-		device.Disable()
+		isapi = hikvision.NewISAPI(
+			c.config.String(boggart.ConfigVideoRecorderHikVisionHomeHost),
+			c.config.Int64(boggart.ConfigVideoRecorderHikVisionHomePort),
+			c.config.String(boggart.ConfigVideoRecorderHikVisionHomeUsername),
+			c.config.String(boggart.ConfigVideoRecorderHikVisionHomePassword))
+
+		device = devices.NewVideoRecorderHikVision(isapi, c.config.Duration(boggart.ConfigVideoRecorderHikVisionHomeRepeatInterval))
+		device.SetDescription("Home video recorder")
+
+		c.devicesManager.Register(device)
 	}
 
-	//c.devicesManager.RegisterWithID(boggart.DeviceIdVideoRecorder.String(), device)
-	c.devicesManager.Register(device)
-
-	isapi = hikvision.NewISAPI(
-		c.config.String(boggart.ConfigVideoRecorderHikVisionVacationHomeHost),
-		c.config.Int64(boggart.ConfigVideoRecorderHikVisionVacationHomePort),
-		c.config.String(boggart.ConfigVideoRecorderHikVisionVacationHomeUsername),
-		c.config.String(boggart.ConfigVideoRecorderHikVisionVacationHomePassword))
-
-	device = devices.NewVideoRecorderHikVision(isapi, c.config.Duration(boggart.ConfigVideoRecorderHikVisionVacationHomeRepeatInterval))
-	device.SetDescription("Vacation home video recorder")
 	if c.config.Bool(boggart.ConfigVideoRecorderHikVisionVacationHomeEnabled) {
-		device.Enable()
-	} else {
-		device.Disable()
+		isapi = hikvision.NewISAPI(
+			c.config.String(boggart.ConfigVideoRecorderHikVisionVacationHomeHost),
+			c.config.Int64(boggart.ConfigVideoRecorderHikVisionVacationHomePort),
+			c.config.String(boggart.ConfigVideoRecorderHikVisionVacationHomeUsername),
+			c.config.String(boggart.ConfigVideoRecorderHikVisionVacationHomePassword))
+
+		device = devices.NewVideoRecorderHikVision(isapi, c.config.Duration(boggart.ConfigVideoRecorderHikVisionVacationHomeRepeatInterval))
+		device.SetDescription("Vacation home video recorder")
+
+		c.devicesManager.Register(device)
 	}
 
-	c.devicesManager.Register(device)
-
-	isapi = hikvision.NewISAPI(
-		c.config.String(boggart.ConfigVideoRecorderHikVisionGarageHost),
-		c.config.Int64(boggart.ConfigVideoRecorderHikVisionGaragePort),
-		c.config.String(boggart.ConfigVideoRecorderHikVisionGarageUsername),
-		c.config.String(boggart.ConfigVideoRecorderHikVisionGaragePassword))
-
-	device = devices.NewVideoRecorderHikVision(isapi, c.config.Duration(boggart.ConfigVideoRecorderHikVisionGarageRepeatInterval))
-	device.SetDescription("Garage video recorder")
 	if c.config.Bool(boggart.ConfigVideoRecorderHikVisionGarageEnabled) {
-		device.Enable()
-	} else {
-		device.Disable()
-	}
+		isapi = hikvision.NewISAPI(
+			c.config.String(boggart.ConfigVideoRecorderHikVisionGarageHost),
+			c.config.Int64(boggart.ConfigVideoRecorderHikVisionGaragePort),
+			c.config.String(boggart.ConfigVideoRecorderHikVisionGarageUsername),
+			c.config.String(boggart.ConfigVideoRecorderHikVisionGaragePassword))
 
-	c.devicesManager.Register(device)
+		device = devices.NewVideoRecorderHikVision(isapi, c.config.Duration(boggart.ConfigVideoRecorderHikVisionGarageRepeatInterval))
+		device.SetDescription("Garage video recorder")
+
+		c.devicesManager.Register(device)
+	}
 }
 
 func (c *Component) initInternetProviders() {
+	if !c.config.Bool(boggart.ConfigSoftVideoEnabled) {
+		return
+	}
+
 	provider := softvideo.NewClient(
 		c.config.String(boggart.ConfigSoftVideoLogin),
 		c.config.String(boggart.ConfigSoftVideoPassword))
 
 	device := devices.NewSoftVideoInternet(provider, c.config.Duration(boggart.ConfigSoftVideoRepeatInterval))
 
-	if c.config.Bool(boggart.ConfigSoftVideoEnabled) {
-		device.Enable()
-	} else {
-		device.Disable()
-	}
-
 	c.devicesManager.Register(device)
 }
 
-/*
-func (c *Component) initCameras() {
-	isapi := hikvision.NewISAPI(
-		c.config.String(boggart.ConfigCameraHikVisionHallHost),
-		c.config.Int64(boggart.ConfigCameraHikVisionHallPort),
-		c.config.String(boggart.ConfigCameraHikVisionHallUsername),
-		c.config.String(boggart.ConfigCameraHikVisionHallPassword))
-
-	device := devices.NewCameraHikVision(
-		isapi,
-		c.config.Uint64(boggart.ConfigCameraHikVisionHallStreamingChannel),
-		c.config.Duration(boggart.ConfigCameraHikVisionHallRepeatInterval))
-	device.SetDescription(device.Description() + " on hall")
-
-	if c.config.Bool(boggart.ConfigCameraHikVisionHallEnabled) {
-		device.Enable()
-	} else {
-		device.Disable()
-	}
-
-	c.devicesManager.RegisterWithID(boggart.DeviceIdCameraHall.String(), device)
-
-	isapi = hikvision.NewISAPI(
-		c.config.String(boggart.ConfigCameraHikVisionStreetHost),
-		c.config.Int64(boggart.ConfigCameraHikVisionStreetPort),
-		c.config.String(boggart.ConfigCameraHikVisionStreetUsername),
-		c.config.String(boggart.ConfigCameraHikVisionStreetPassword))
-
-	device = devices.NewCameraHikVision(
-		isapi,
-		c.config.Uint64(boggart.ConfigCameraHikVisionStreetStreamingChannel),
-		c.config.Duration(boggart.ConfigCameraHikVisionStreetRepeatInterval))
-	device.SetDescription(device.Description() + " on street")
-
-	if c.config.Bool(boggart.ConfigCameraHikVisionStreetEnabled) {
-		device.Enable()
-	} else {
-		device.Disable()
-	}
-
-	c.devicesManager.RegisterWithID(boggart.DeviceIdCameraStreet.String(), device)
-}
-*/
 func (c *Component) initPhones() {
+	if !c.config.Bool(boggart.ConfigMobileEnabled) {
+		return
+	}
+
 	megafonPhone := c.config.String(boggart.ConfigMobileMegafonPhone)
 	megafonPassword := c.config.String(boggart.ConfigMobileMegafonPassword)
 
@@ -145,16 +94,14 @@ func (c *Component) initPhones() {
 	providerMegafon := mobile.NewMegafon(megafonPhone, megafonPassword)
 	device := devices.NewMegafonPhone(providerMegafon, c.config.Duration(boggart.ConfigMobileRepeatInterval))
 
-	if c.config.Bool(boggart.ConfigMobileEnabled) {
-		device.Enable()
-	} else {
-		device.Disable()
-	}
-
 	c.devicesManager.RegisterWithID(boggart.DeviceIdPhone.String(), device)
 }
 
 func (c *Component) initRouters() {
+	if !c.config.Bool(boggart.ConfigMikrotikEnabled) {
+		return
+	}
+
 	api, err := mikrotik.NewClient(
 		c.config.String(boggart.ConfigMikrotikAddress),
 		c.config.String(boggart.ConfigMikrotikUsername),
@@ -171,16 +118,14 @@ func (c *Component) initRouters() {
 
 	device := devices.NewMikrotikRouter(api, c.config.Duration(boggart.ConfigMikrotikRepeatInterval))
 
-	if c.config.Bool(boggart.ConfigMikrotikEnabled) {
-		device.Enable()
-	} else {
-		device.Disable()
-	}
-
 	c.devicesManager.RegisterWithID(boggart.DeviceIdRouter.String(), device)
 }
 
 func (c *Component) initElectricityMeters() {
+	if !c.config.Bool(boggart.ConfigMercuryEnabled) {
+		return
+	}
+
 	provider := mercury.NewElectricityMeter200(
 		mercury.ConvertSerialNumber(c.config.String(boggart.ConfigMercuryDeviceAddress)),
 		c.ConnectionRS485())
@@ -190,25 +135,23 @@ func (c *Component) initElectricityMeters() {
 		provider,
 		c.config.Duration(boggart.ConfigMercuryRepeatInterval))
 
-	if c.config.Bool(boggart.ConfigMikrotikEnabled) {
-		device.Enable()
-	} else {
-		device.Disable()
-	}
-
 	c.devicesManager.RegisterWithID(boggart.DeviceIdElectricityMeter.String(), device)
 }
 
 func (c *Component) initGPIO() {
+	if !c.config.Bool(boggart.ConfigGPIOEnabled) {
+		return
+	}
+
 	pinsIn := strings.Split(c.config.String(boggart.ConfigGPIOPinsIn), ",")
 
 	for _, pin := range pinsIn {
-		number, err := strconv.ParseInt(pin, 10, 64)
+		number, err := strconv.ParseUint(pin, 10, 64)
 		if err != nil {
 			continue
 		}
 
-		device := devices.NewGPIOPin(number, gpio.PIN_IN)
+		device := devices.NewGPIOPin(number, rpio.Input)
 
 		if c.config.Bool(boggart.ConfigGPIOEnabled) {
 			device.Enable()
@@ -222,12 +165,12 @@ func (c *Component) initGPIO() {
 	pinsOut := strings.Split(c.config.String(boggart.ConfigGPIOPinsOut), ",")
 
 	for _, pin := range pinsOut {
-		number, err := strconv.ParseInt(pin, 10, 64)
+		number, err := strconv.ParseUint(pin, 10, 64)
 		if err != nil {
 			continue
 		}
 
-		device := devices.NewGPIOPin(number, gpio.PIN_OUT)
+		device := devices.NewGPIOPin(number, rpio.Output)
 
 		if c.config.Bool(boggart.ConfigGPIOEnabled) {
 			device.Enable()
@@ -240,6 +183,10 @@ func (c *Component) initGPIO() {
 }
 
 func (c *Component) initPulsarMeters() {
+	if !c.config.Bool(boggart.ConfigPulsarEnabled) {
+		return
+	}
+
 	var (
 		deviceAddress []byte
 		err           error
@@ -269,12 +216,6 @@ func (c *Component) initPulsarMeters() {
 	// heat meter
 	deviceHeatMeter := devices.NewPulsarHeadMeter(provider, c.config.Duration(boggart.ConfigPulsarRepeatInterval))
 
-	if c.config.Bool(boggart.ConfigPulsarEnabled) {
-		deviceHeatMeter.Enable()
-	} else {
-		deviceHeatMeter.Disable()
-	}
-
 	c.devicesManager.RegisterWithID(boggart.DeviceIdHeatMeter.String(), deviceHeatMeter)
 
 	// cold water
@@ -285,12 +226,6 @@ func (c *Component) initPulsarMeters() {
 		provider,
 		c.config.Uint64(boggart.ConfigPulsarColdWaterPulseInput),
 		c.config.Duration(boggart.ConfigPulsarRepeatInterval))
-
-	if c.config.Bool(boggart.ConfigPulsarEnabled) {
-		deviceWaterMeterCold.Enable()
-	} else {
-		deviceWaterMeterCold.Disable()
-	}
 
 	deviceWaterMeterCold.SetDescription("Pulsar pulsed cold water meter with serial number " + serialNumber)
 	c.devicesManager.RegisterWithID(boggart.DeviceIdWaterMeterCold.String(), deviceWaterMeterCold)
@@ -304,41 +239,10 @@ func (c *Component) initPulsarMeters() {
 		c.config.Uint64(boggart.ConfigPulsarHotWaterPulseInput),
 		c.config.Duration(boggart.ConfigPulsarRepeatInterval))
 
-	if c.config.Bool(boggart.ConfigPulsarEnabled) {
-		deviceWaterMeterHot.Enable()
-	} else {
-		deviceWaterMeterHot.Disable()
-	}
-
 	deviceWaterMeterHot.SetDescription("Pulsar pulsed hot water meter with serial number " + serialNumber)
 	c.devicesManager.RegisterWithID(boggart.DeviceIdWaterMeterHot.String(), deviceWaterMeterHot)
 }
 
-/*
-func (c *Component) initUPS() {
-	var client *apcupsd.Client
-
-	if address := c.config.String(boggart.ConfigApcupsdNISAddress); address != "" {
-		client = apcupsd.NewClient(
-			nis.NewStatusReader(address),
-			nis.NewEventsReader(address))
-	} else {
-		client = apcupsd.NewClient(
-			file.NewStatusReader(c.config.String(boggart.ConfigApcupsdFileStatus)),
-			file.NewEventsReader(c.config.String(boggart.ConfigApcupsdFileEvents)))
-	}
-
-	device := devices.NewApcupsdUPS(client, c.config.Duration(boggart.ConfigApcupsdRepeatInterval))
-
-	if c.config.Bool(boggart.ConfigApcupsdEnabled) {
-		device.Enable()
-	} else {
-		device.Disable()
-	}
-
-	c.devicesManager.RegisterWithID(boggart.DeviceIdUPS.String(), device)
-}
-*/
 func (c *Component) initTV() {
 	// Samsung
 	api := tv.NewApiV2("192.168.88.169")
@@ -346,68 +250,18 @@ func (c *Component) initTV() {
 	deviceSamsung := devices.NewSamsungTV(api)
 	deviceSamsung.SetMac("9C:8C:6E:CF:3F:EE")
 	c.devicesManager.RegisterWithID(boggart.DeviceIdTVBedroom.String(), deviceSamsung)
-
-	// LG
-	/*
-		ctrl, err := control.NewTV("192.168.88.162", "", "")
-		if err != nil {
-			c.logger.Error("Init control of LG TV failed", map[string]interface{}{
-				"error": err.Error(),
-			})
-			return
-		}
-		ctrl.ClientKey = "3d097186c0fb4abf96b03d251a573613"
-
-		deviceLG := devices.NewLGTV(ctrl)
-		deviceLG.SetMac("38:8C:50:68:FB:F4")
-		c.devicesManager.RegisterWithID(boggart.DeviceIdTVLivingRoom.String(), deviceLG)
-	*/
 }
 
-/*
-func (c *Component) initLight() {
-	transport, err := local.NewTransport("192.168.88.165:5577")
-	if err != nil {
-		c.logger.Error("Init transport of Zengge light failed", map[string]interface{}{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	manager, err := manage.NewManager("192.168.88.165:48899")
-	if err != nil {
-		c.logger.Error("Init manager of Zengge light failed", map[string]interface{}{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	device := devices.NewZenggeLight(transport, manager)
-	c.devicesManager.RegisterWithID(boggart.DeviceIdLight.String(), device)
-}
-
-func (c *Component) initPC() {
-	deviceAi := devices.NewDesktopPC()
-	deviceAi.SetMac("50:AF:73:24:B6:7A")
-
-	c.devicesManager.Register(deviceAi)
-
-	deviceRPi := devices.NewDesktopPC()
-	c.devicesManager.Register(deviceRPi)
-}
-*/
 func (c *Component) initSensor() {
+	if !c.config.Bool(boggart.ConfigSensorBME280Enabled) {
+		return
+	}
+
 	deviceBME280 := devices.NewBME280Sensor(
 		raspi.NewAdaptor(),
 		c.config.Duration(boggart.ConfigSensorBME280RepeatInterval),
 		c.config.Int(boggart.ConfigSensorBME280Bus),
 		c.config.Int(boggart.ConfigSensorBME280Address))
-
-	if c.config.Bool(boggart.ConfigSensorBME280Enabled) {
-		deviceBME280.Enable()
-	} else {
-		deviceBME280.Disable()
-	}
 
 	c.devicesManager.Register(deviceBME280)
 }

@@ -8,8 +8,6 @@ import:
   version: 5efbe925ecf714f8ba147bf2226f2e7afc7111bc
 - package: gopkg.in/routeros.v2
   version: 2dc19c12445caefdc2d128f7331dcc83284211ef
-- package: github.com/davecheney/gpio
-  version: a6de66e7e47065fca1a55c62c3f3cab3144694e6
 - package: github.com/PuerkitoBio/goquery
   version: v1.3.0
 - package: github.com/mcuadros/go-syslog
@@ -34,3 +32,5 @@ import:
 - package: github.com/go-openapi/runtime
 - package: github.com/mitchellh/gox
 - package: github.com/mmcloughlin/geohash
+- package: github.com/stianeikeland/go-rpio
+  version: ~4.1.0

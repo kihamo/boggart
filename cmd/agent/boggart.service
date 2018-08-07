@@ -1,0 +1,13 @@
+[Unit]
+Description=Boggart agent
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/boggart-agent
+EnvironmentFile=/home/pi/cmd/agent/boggart.env
+WorkingDirectory=/home/pi/cmd/agent
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target

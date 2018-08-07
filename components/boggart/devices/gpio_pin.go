@@ -2,33 +2,56 @@ package devices
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/protocols/gpio"
-	"github.com/kihamo/go-workers"
-	"github.com/kihamo/go-workers/task"
+	"github.com/stianeikeland/go-rpio"
 )
+
+var initGPIO sync.Once
 
 type GPIOPin struct {
 	boggart.DeviceBase
 
-	mutex  sync.RWMutex
-	gpio   gpio.GPIOPin
-	number int64
-	mode   gpio.PinMode
+	pin   rpio.Pin
+	value uint64
 }
 
-func NewGPIOPin(pin int64, mode gpio.PinMode) *GPIOPin {
+func NewGPIOPin(number uint64, mode rpio.Mode) *GPIOPin {
+	initGPIO.Do(func() {
+		if err := rpio.Open(); err != nil {
+			fmt.Println("Failed init GPIO with error", err.Error())
+		}
+	})
+
 	device := &GPIOPin{
-		number: pin,
-		mode:   mode,
+		pin: rpio.Pin(number),
 	}
+	device.pin.Mode(mode)
+
+	modeAsString := "unknown"
+	switch mode {
+	case rpio.Input:
+		modeAsString = "input"
+	case rpio.Output:
+		modeAsString = "output"
+	case rpio.Clock:
+		modeAsString = "clock"
+	case rpio.Pwm:
+		modeAsString = "pwm"
+	}
+
 	device.Init()
-	device.SetDescription(fmt.Sprintf("GPIO pin #%d with %s mode", pin, mode))
+	device.SetDescription(fmt.Sprintf("GPIO pin #%d with %s mode", number, modeAsString))
+
+	if mode == rpio.Input {
+		go func() {
+			device.edgeDetected()
+		}()
+	}
 
 	return device
 }
@@ -39,102 +62,30 @@ func (d *GPIOPin) Types() []boggart.DeviceType {
 	}
 }
 
-func (d *GPIOPin) IsOn() bool {
-	return !d.IsOff()
-}
-
-func (d *GPIOPin) IsOff() bool {
-	if pin := d.pin(); pin != nil {
-		return pin.Status()
-	}
-
-	return false
-}
-
-func (d *GPIOPin) IsReadable() bool {
-	return d.mode == gpio.PIN_IN
-}
-
-func (d *GPIOPin) IsWritable() bool {
-	return d.mode == gpio.PIN_OUT
-}
-
-func (d *GPIOPin) Up() error {
-	if !d.IsWritable() {
-		return errors.New("GPIO isn't writable")
-	}
-
-	if pin := d.pin(); pin != nil {
-		return pin.Up()
-	}
-
-	return nil
-}
-
-func (d *GPIOPin) Down() error {
-	if !d.IsWritable() {
-		return errors.New("GPIO isn't writable")
-	}
-
-	if pin := d.pin(); pin != nil {
-		return pin.Down()
-	}
-
-	return nil
-}
-
 func (d *GPIOPin) Ping(_ context.Context) bool {
-	pin := d.pin()
-	if pin == nil {
-		return true
-	}
-
-	_, err := pin.Mode()
-	return err == nil
+	return true
 }
 
-func (d *GPIOPin) Tasks() []workers.Task {
-	taskUpdater := task.NewFunctionTillStopTask(d.taskPin)
-	taskUpdater.SetRepeats(-1)
-	taskUpdater.SetRepeatInterval(time.Second)
-	taskUpdater.SetName("device-gpio-pin-" + d.Id())
-
-	return []workers.Task{
-		taskUpdater,
-	}
+func (d *GPIOPin) High() {
+	d.pin.High()
 }
 
-func (d *GPIOPin) taskPin(ctx context.Context) (interface{}, error, bool) {
-	if !d.IsEnabled() {
-		return nil, nil, false
-	}
-
-	pin, err := gpio.NewPin(d.number, d.mode)
-	if err != nil {
-		fmt.Printf("Init pin failed with error %s\n", err.Error())
-		return nil, err, false
-	}
-
-	pin.SetCallbackChange(d.callback)
-
-	d.mutex.Lock()
-	d.gpio = pin
-	d.mutex.Unlock()
-
-	return nil, nil, true
+func (d *GPIOPin) Low() {
+	d.pin.Low()
 }
 
-func (d *GPIOPin) pin() gpio.GPIOPin {
-	d.mutex.RLock()
-	defer d.mutex.RUnlock()
+func (d *GPIOPin) edgeDetected() {
+	d.pin.Detect(rpio.AnyEdge)
 
-	return d.gpio
-}
+	for {
+		prev := atomic.LoadUint64(&d.value)
+		current := uint64(d.pin.Read())
 
-func (d *GPIOPin) callback(status bool, changedAt time.Time, prevChangedAt *time.Time) {
-	if status {
-		d.TriggerEvent(boggart.DeviceEventGPIOPinChanged, d.number, true, changedAt, prevChangedAt)
-	} else {
-		d.TriggerEvent(boggart.DeviceEventGPIOPinChanged, d.number, false, changedAt, prevChangedAt)
+		if prev != current {
+			atomic.StoreUint64(&d.value, current)
+			d.TriggerEvent(boggart.DeviceEventGPIOPinChanged, uint64(d.pin), current)
+		}
+
+		time.Sleep(500 * time.Millisecond)
 	}
 }

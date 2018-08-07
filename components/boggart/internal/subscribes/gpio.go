@@ -46,33 +46,17 @@ func (s *GPIOSubscribe) Callback(client mqtt.Component, message m.Message) {
 
 	device := s.devicesManager.Device(fmt.Sprintf("pin.out.%d", number))
 	if device == nil {
-		fmt.Println(number, "device not found")
 		return
 	}
 
 	deviceGPIO, ok := device.(*devices.GPIOPin)
-	if !ok {
+	if !ok || !device.IsEnabled() {
 		return
-	}
-
-	if !device.IsEnabled() {
-		fmt.Println(number, "device disabled")
-		return
-	}
-
-	if !deviceGPIO.IsWritable() {
-		fmt.Println(number, "device not writeable")
 	}
 
 	if bytes.Equal(message.Payload(), []byte(`1`)) {
-		fmt.Println(number, "UP")
-		err = deviceGPIO.Up()
+		deviceGPIO.High()
 	} else {
-		fmt.Println(number, "DOWN")
-		err = deviceGPIO.Down()
-	}
-
-	if err != nil {
-		fmt.Println(err.Error())
+		deviceGPIO.Low()
 	}
 }
