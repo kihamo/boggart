@@ -24,7 +24,7 @@ var (
 
 func main() {
 	application, err := shadow.NewApp(
-		"Boggart",
+		"Boggart Agent",
 		Version,
 		Build,
 		[]shadow.Component{

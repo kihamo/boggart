@@ -26,7 +26,7 @@ var (
 
 func main() {
 	application, err := shadow.NewApp(
-		"Boggart",
+		"Boggart Server",
 		Version,
 		Build,
 		[]shadow.Component{
@@ -36,7 +36,6 @@ func main() {
 			annotations.NewComponent(),
 			config.NewComponent(),
 			dashboard.NewComponent(),
-			//database.NewComponent(),
 			i18n.NewComponent(),
 			logger.NewComponent(),
 			messengers.NewComponent(),
