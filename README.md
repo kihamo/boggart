@@ -12,6 +12,7 @@ sudo cp -f /home/kihamo/cmd/server/boggart.service /lib/systemd/system/boggart.s
 sudo cp -f /home/kihamo/cmd/server/boggart /usr/local/bin/boggart-server
 sudo chmod +x /usr/local/bin/boggart-server
 sudo systemctl daemon-reload
+sudo systemctl enable boggart.service
 sudo systemctl start boggart.service && sudo journalctl -f -u boggart.service
 ```
 #### Update
@@ -30,11 +31,12 @@ sudo cp -f /home/pi/cmd/agent/boggart.service /lib/systemd/system/boggart.servic
 sudo cp -f /home/pi/cmd/agent/boggart /usr/local/bin/boggart-agent
 sudo chmod +x /usr/local/bin/boggart-agent
 sudo systemctl daemon-reload
+sudo systemctl enable boggart.service
 sudo systemctl start boggart.service && sudo journalctl -f -u boggart.service
 ```
 #### Update
 ```
-GOARM=7 gox -output="cmd/agent/boggart" -osarch="linux/arm" ./cmd/agent/
+GOARM=7 gox -output="cmd/agent/boggart" -osarch="linux/arm"  -ldflags="-X 'main.Version=v.0.1' -X 'main.Build=1'" ./cmd/agent/
 sudo cp -f /home/pi/cmd/agent/boggart /usr/local/bin/boggart-agent
 sudo chmod +x /usr/local/bin/boggart-agent
 sudo systemctl restart boggart.service && sudo journalctl -f -u boggart.service

@@ -14,10 +14,10 @@ import (
 var initGPIO sync.Once
 
 type GPIOPin struct {
-	boggart.DeviceBase
-
-	pin   rpio.Pin
 	value uint64
+
+	boggart.DeviceBase
+	pin rpio.Pin
 }
 
 func NewGPIOPin(number uint64, mode rpio.Mode) *GPIOPin {
@@ -75,8 +75,6 @@ func (d *GPIOPin) Low() {
 }
 
 func (d *GPIOPin) edgeDetected() {
-	d.pin.Detect(rpio.AnyEdge)
-
 	for {
 		prev := atomic.LoadUint64(&d.value)
 		current := uint64(d.pin.Read())
