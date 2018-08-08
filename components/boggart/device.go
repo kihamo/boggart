@@ -57,7 +57,7 @@ const (
 	DeviceTypeThermometer
 	DeviceTypeBarometer
 	DeviceTypeHygrometer
-	DeviceTypeGPIOPin
+	DeviceTypeGPIO
 )
 
 type DevicesManager interface {

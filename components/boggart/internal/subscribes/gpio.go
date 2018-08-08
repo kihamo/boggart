@@ -10,6 +10,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/devices"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/shadow/components/logger"
 )
 
 const (
@@ -18,11 +19,13 @@ const (
 
 type GPIOSubscribe struct {
 	devicesManager boggart.DevicesManager
+	logger         logger.Logger
 }
 
-func NewGPIOSubscribe(devicesManager boggart.DevicesManager) *GPIOSubscribe {
+func NewGPIOSubscribe(m boggart.DevicesManager, l logger.Logger) *GPIOSubscribe {
 	return &GPIOSubscribe{
-		devicesManager: devicesManager,
+		devicesManager: m,
+		logger:         l,
 	}
 }
 
@@ -44,7 +47,7 @@ func (s *GPIOSubscribe) Callback(client mqtt.Component, message m.Message) {
 		return
 	}
 
-	device := s.devicesManager.Device(fmt.Sprintf("pin.out.%d", number))
+	device := s.devicesManager.Device(fmt.Sprintf("pin.%d", number))
 	if device == nil {
 		return
 	}
@@ -55,8 +58,12 @@ func (s *GPIOSubscribe) Callback(client mqtt.Component, message m.Message) {
 	}
 
 	if bytes.Equal(message.Payload(), []byte(`1`)) {
-		deviceGPIO.High()
+		err = deviceGPIO.High()
 	} else {
-		deviceGPIO.Low()
+		err = deviceGPIO.Low()
+	}
+
+	if err != nil {
+		s.logger.Errorf("Out %s failed with error %s", message.Payload(), err.Error())
 	}
 }

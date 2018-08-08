@@ -1,5 +1,5 @@
-hash: 511ba70d31e94e7615bac19f8c438c5994c64e435ac69e6024dc477b8424e66a
-updated: 2018-08-08T19:03:59.417021+03:00
+hash: 1a3bf3b71dadabbc6fe80ae3be0646f64fa9aee4d2dea8498d638d46242a7576
+updated: 2018-08-09T00:59:03.166178+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -255,8 +255,6 @@ imports:
   version: e55481d6f45c5a8f040343bace9013571dae103e
 - name: github.com/sigurn/utils
   version: f19e41f79f8f006116f682c1af454591bc278ad4
-- name: github.com/stianeikeland/go-rpio
-  version: 3abdd2207d33843c1c3fbea540bdf07990075c03
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
 - name: gobot.io/x/gobot
@@ -378,7 +376,6 @@ imports:
   - conn/i2c
   - conn/i2c/i2creg
   - conn/onewire
-  - conn/onewire/onewirereg
   - conn/physic
   - conn/pin
   - conn/pin/pinreg

@@ -97,6 +97,11 @@ func (c *Component) Init(a shadow.Application) error {
 
 func (c *Component) Run() (err error) {
 	c.logger = logger.NewOrNop(c.Name(), c.application)
+
+	if _, err := host.Init(); err != nil {
+		return err
+	}
+
 	c.devicesManager.SetCheckerTickerDuration(c.config.Duration(boggart.ConfigDevicesManagerCheckInterval))
 	c.devicesManager.SetCheckerTimeout(c.config.Duration(boggart.ConfigDevicesManagerCheckTimeout))
 
@@ -143,10 +148,6 @@ func (c *Component) RS485() *rs485.Connection {
 func (c *Component) initOneWire() (err error) {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
-
-	if _, err := host.Init(); err != nil {
-		return err
-	}
 
 	//c.connectionOneWire, err = onewirereg.Open("")
 	//return err

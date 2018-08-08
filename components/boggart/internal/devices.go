@@ -15,8 +15,8 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
 	"github.com/kihamo/boggart/components/boggart/providers/samsung/tv"
 	"github.com/kihamo/boggart/components/boggart/providers/softvideo"
-	"github.com/stianeikeland/go-rpio"
 	"gobot.io/x/gobot/platforms/raspi"
+	"periph.io/x/periph/conn/gpio/gpioreg"
 )
 
 func (c *Component) initVideoRecorders() {
@@ -143,15 +143,35 @@ func (c *Component) initGPIO() {
 		return
 	}
 
-	pinsIn := strings.Split(c.config.String(boggart.ConfigGPIOPinsIn), ",")
+	pins := strings.Split(c.config.String(boggart.ConfigGPIOPins), ",")
 
-	for _, pin := range pinsIn {
-		number, err := strconv.ParseUint(pin, 10, 64)
+	for _, pin := range pins {
+		opts := strings.Split(pin, ":")
+
+		number, err := strconv.ParseUint(opts[0], 10, 64)
 		if err != nil {
 			continue
 		}
 
-		device := devices.NewGPIOPin(number, rpio.Input)
+		g := gpioreg.ByName(fmt.Sprintf("GPIO%d", number))
+		if g == nil {
+			c.logger.Warnf("GPIO %d not found", number)
+			continue
+		}
+
+		var mode devices.GPIOMode
+		if len(opts) > 1 {
+			switch opts[1] {
+			case "in":
+				mode = devices.GPIOModeIn
+			case "out":
+				mode = devices.GPIOModeOut
+			default:
+				mode = devices.GPIOModeDefault
+			}
+		}
+
+		device := devices.NewGPIOPin(g, mode)
 
 		if c.config.Bool(boggart.ConfigGPIOEnabled) {
 			device.Enable()
@@ -159,26 +179,7 @@ func (c *Component) initGPIO() {
 			device.Disable()
 		}
 
-		c.devicesManager.RegisterWithID(fmt.Sprintf("pin.in.%d", number), device)
-	}
-
-	pinsOut := strings.Split(c.config.String(boggart.ConfigGPIOPinsOut), ",")
-
-	for _, pin := range pinsOut {
-		number, err := strconv.ParseUint(pin, 10, 64)
-		if err != nil {
-			continue
-		}
-
-		device := devices.NewGPIOPin(number, rpio.Output)
-
-		if c.config.Bool(boggart.ConfigGPIOEnabled) {
-			device.Enable()
-		} else {
-			device.Disable()
-		}
-
-		c.devicesManager.RegisterWithID(fmt.Sprintf("pin.out.%d", number), device)
+		c.devicesManager.RegisterWithID(fmt.Sprintf("pin.%d", number), device)
 	}
 }
 

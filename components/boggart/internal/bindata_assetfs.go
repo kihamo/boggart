@@ -127,7 +127,7 @@ func localesRuLc_messagesBoggartMo() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "locales/ru/LC_MESSAGES/boggart.mo", size: 711, mode: os.FileMode(420), modTime: time.Unix(1533730670, 0)}
+	info := bindataFileInfo{name: "locales/ru/LC_MESSAGES/boggart.mo", size: 711, mode: os.FileMode(420), modTime: time.Unix(1533765594, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -147,7 +147,7 @@ func localesRuLc_messagesDevicesMo() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "locales/ru/LC_MESSAGES/devices.mo", size: 1052, mode: os.FileMode(420), modTime: time.Unix(1533730670, 0)}
+	info := bindataFileInfo{name: "locales/ru/LC_MESSAGES/devices.mo", size: 1052, mode: os.FileMode(420), modTime: time.Unix(1533765594, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
