@@ -1,5 +1,5 @@
-hash: f4caa6f8a4eae35d99dbc0b4e20118926ed884d4b72db744c3317119199eaa0d
-updated: 2018-08-08T15:21:59.872501+03:00
+hash: 511ba70d31e94e7615bac19f8c438c5994c64e435ac69e6024dc477b8424e66a
+updated: 2018-08-08T19:03:59.417021+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -260,7 +260,7 @@ imports:
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
 - name: gobot.io/x/gobot
-  version: 635adea96f788ab19bf77470b075f8db44d34fa0
+  version: c1d0e3ce485df0b45076d1d93b7d9240b770d5fc
   subpackages:
   - drivers/gpio
   - drivers/i2c
@@ -369,17 +369,37 @@ imports:
 - name: gopkg.in/yaml.v2
   version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
 - name: periph.io/x/periph
-  version: c0de80b1b075a2019fced09524f2318cf690a685
+  version: f34a1b4e75c5935f6269723ae45eacd0aa1d1a2a
   subpackages:
   - conn
   - conn/gpio
   - conn/gpio/gpioreg
+  - conn/gpio/gpiostream
   - conn/i2c
   - conn/i2c/i2creg
+  - conn/onewire
+  - conn/onewire/onewirereg
+  - conn/physic
   - conn/pin
+  - conn/pin/pinreg
   - conn/spi
   - conn/spi/spireg
-  - devices
+  - devices/ds18b20
+  - host
+  - host/allwinner
+  - host/am335x
+  - host/bcm283x
+  - host/beagle/black
+  - host/beagle/bone
+  - host/beagle/green
+  - host/chip
+  - host/cpu
+  - host/distro
   - host/fs
+  - host/odroidc1
+  - host/pine64
+  - host/pmem
+  - host/rpi
   - host/sysfs
+  - host/videocore
 testImports: []

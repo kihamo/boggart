@@ -18,9 +18,9 @@ import:
   version: eb42ead1b24e9226bddb05004815f6e72280f879
 # https://github.com/hybridgroup/gobot/issues/560
 - package: gobot.io/x/gobot
-  version: 635adea96f788ab19bf77470b075f8db44d34fa0
+  version: ~v1.11.1
 - package: periph.io/x/periph
-  version: ~v2.3.0
+  version: ~v3.1.0
 - package: github.com/eclipse/paho.mqtt.golang
   version: ~v1.1
 - package: github.com/go-swagger/go-swagger

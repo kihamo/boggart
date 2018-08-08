@@ -50,6 +50,7 @@ func (l *MQTTListener) Events() []workers.Event {
 		boggart.DeviceEventMercury200Changed,
 		boggart.DeviceEventBME280Changed,
 		boggart.DeviceEventGPIOPinChanged,
+		boggart.DeviceEventDS18B20Changed,
 	}
 }
 
@@ -156,6 +157,9 @@ func (l *MQTTListener) Run(_ context.Context, event workers.Event, t time.Time, 
 		} else {
 			l.publish(fmt.Sprintf("gpio/%d", args[1]), true, ValueOff)
 		}
+
+	case boggart.DeviceEventDS18B20Changed:
+		l.publish(fmt.Sprintf("meter/ds18b20/%s", args[2]), true, args[1])
 	}
 }
 

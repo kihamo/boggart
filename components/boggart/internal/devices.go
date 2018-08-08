@@ -128,7 +128,7 @@ func (c *Component) initElectricityMeters() {
 
 	provider := mercury.NewElectricityMeter200(
 		mercury.ConvertSerialNumber(c.config.String(boggart.ConfigMercuryDeviceAddress)),
-		c.ConnectionRS485())
+		c.RS485())
 
 	device := devices.NewMercury200ElectricityMeter(
 		c.config.String(boggart.ConfigMercuryDeviceAddress),
@@ -194,7 +194,7 @@ func (c *Component) initPulsarMeters() {
 
 	deviceAddressConfig := c.config.String(boggart.ConfigPulsarHeatMeterAddress)
 	if deviceAddressConfig == "" {
-		deviceAddress, err = pulsar.DeviceAddress(c.ConnectionRS485())
+		deviceAddress, err = pulsar.DeviceAddress(c.RS485())
 	} else {
 		deviceAddress, err = hex.DecodeString(deviceAddressConfig)
 	}
@@ -211,7 +211,7 @@ func (c *Component) initPulsarMeters() {
 		return
 	}
 
-	provider := pulsar.NewHeatMeter(deviceAddress, c.ConnectionRS485())
+	provider := pulsar.NewHeatMeter(deviceAddress, c.RS485())
 
 	// heat meter
 	deviceHeatMeter := devices.NewPulsarHeadMeter(provider, c.config.Duration(boggart.ConfigPulsarRepeatInterval))
@@ -253,15 +253,17 @@ func (c *Component) initTV() {
 }
 
 func (c *Component) initSensor() {
-	if !c.config.Bool(boggart.ConfigSensorBME280Enabled) {
-		return
+	if c.config.Bool(boggart.ConfigSensorBME280Enabled) {
+		deviceBME280 := devices.NewBME280Sensor(
+			raspi.NewAdaptor(),
+			c.config.Duration(boggart.ConfigSensorBME280RepeatInterval),
+			c.config.Int(boggart.ConfigSensorBME280Bus),
+			c.config.Int(boggart.ConfigSensorBME280Address))
+
+		c.devicesManager.Register(deviceBME280)
 	}
 
-	deviceBME280 := devices.NewBME280Sensor(
-		raspi.NewAdaptor(),
-		c.config.Duration(boggart.ConfigSensorBME280RepeatInterval),
-		c.config.Int(boggart.ConfigSensorBME280Bus),
-		c.config.Int(boggart.ConfigSensorBME280Address))
-
-	c.devicesManager.Register(deviceBME280)
+	// TODO:
+	//device := devices.NewDS18B20Sensor(c.OneWire(), onewire.Address(0x7a00000131825228), 9)
+	//c.devicesManager.Register(device)
 }

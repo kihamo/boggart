@@ -7,6 +7,8 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"fmt"
+
 	w "github.com/ghthor/gowol"
 	"github.com/kihamo/go-workers"
 	"github.com/pborman/uuid"
@@ -49,8 +51,8 @@ func (d *DeviceBase) Description() string {
 	return description
 }
 
-func (d *DeviceBase) SetDescription(description string) {
-	d.description.Store(description)
+func (d *DeviceBase) SetDescription(description string, v ...interface{}) {
+	d.description.Store(fmt.Sprintf(description, v...))
 }
 
 func (d *DeviceBase) Types() []DeviceType {

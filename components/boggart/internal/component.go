@@ -17,6 +17,8 @@ import (
 	"github.com/kihamo/shadow/components/messengers"
 	"github.com/kihamo/shadow/components/metrics"
 	"github.com/kihamo/shadow/components/workers"
+	"periph.io/x/periph/conn/onewire"
+	"periph.io/x/periph/host"
 )
 
 type Component struct {
@@ -28,9 +30,10 @@ type Component struct {
 	workers     workers.Component
 	routes      []dashboard.Route
 
-	connectionRS485  *rs485.Connection
-	listenersManager *manager.ListenersManager
-	devicesManager   *DevicesManager
+	connectionRS485   *rs485.Connection
+	connectionOneWire onewire.Bus
+	listenersManager  *manager.ListenersManager
+	devicesManager    *DevicesManager
 }
 
 func (c *Component) Name() string {
@@ -88,7 +91,6 @@ func (c *Component) Init(a shadow.Application) error {
 
 	c.listenersManager = manager.NewListenersManager()
 	c.devicesManager = NewDevicesManager(c.workers, c.listenersManager)
-	// c.securityManager = NewSecurityManager(c.devicesManager, c.listenersManager)
 
 	return nil
 }
@@ -99,7 +101,11 @@ func (c *Component) Run() (err error) {
 	c.devicesManager.SetCheckerTimeout(c.config.Duration(boggart.ConfigDevicesManagerCheckTimeout))
 
 	c.initListeners()
-	c.initConnectionRS485()
+	c.initRS485()
+
+	if err := c.initOneWire(); err != nil {
+		return err
+	}
 
 	c.initGPIO()
 	c.initElectricityMeters()
@@ -118,7 +124,7 @@ func (c *Component) Run() (err error) {
 	return nil
 }
 
-func (c *Component) initConnectionRS485() {
+func (c *Component) initRS485() {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
@@ -127,9 +133,29 @@ func (c *Component) initConnectionRS485() {
 		c.config.Duration(boggart.ConfigRS485Timeout))
 }
 
-func (c *Component) ConnectionRS485() *rs485.Connection {
+func (c *Component) RS485() *rs485.Connection {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
 	return c.connectionRS485
+}
+
+func (c *Component) initOneWire() (err error) {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	if _, err := host.Init(); err != nil {
+		return err
+	}
+
+	//c.connectionOneWire, err = onewirereg.Open("")
+	//return err
+	return nil
+}
+
+func (c *Component) OneWire() onewire.Bus {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	return c.connectionOneWire
 }
