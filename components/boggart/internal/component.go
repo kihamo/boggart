@@ -31,7 +31,6 @@ type Component struct {
 	connectionRS485  *rs485.Connection
 	listenersManager *manager.ListenersManager
 	devicesManager   *DevicesManager
-	// securityManager  *SecurityManager
 }
 
 func (c *Component) Name() string {
@@ -102,18 +101,14 @@ func (c *Component) Run() (err error) {
 	c.initListeners()
 	c.initConnectionRS485()
 
-	//c.initPC()
 	c.initGPIO()
-	//c.initCameras()
 	c.initElectricityMeters()
 	c.initInternetProviders()
 	c.initPhones()
 	c.initRouters()
 	c.initVideoRecorders()
 	c.initPulsarMeters()
-	//c.initUPS()
 	c.initTV()
-	// c.initLight()
 	c.initSensor()
 
 	c.initMQTT()

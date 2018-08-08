@@ -357,14 +357,3 @@ func (d *ElectricityMeter200) LastPowerOffDatetime() (time.Time, error) {
 func (d *ElectricityMeter200) LastPowerOnDatetime() (time.Time, error) {
 	return d.responseDatetime(FunctionReadLastPowerOnDatetime, nil)
 }
-
-/*
-func (d *ElectricityMeter200) Test() interface{} {
-	response, err := d.Request(0x21, nil)
-
-	fmt.Println(response, err)
-	fmt.Println(hex.EncodeToString(response))
-
-	return nil
-}
-*/

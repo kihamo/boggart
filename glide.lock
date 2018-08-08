@@ -1,5 +1,5 @@
-hash: 45d0a9cf306d66cdce37b8bc75e168a2bf67be1ffa76bad0a32efcdaf76c6712
-updated: 2018-08-05T03:23:04.262074+03:00
+hash: f4caa6f8a4eae35d99dbc0b4e20118926ed884d4b72db744c3317119199eaa0d
+updated: 2018-08-08T15:21:59.872501+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -24,12 +24,8 @@ imports:
   version: bf70f2a70fb1b1f36d90d671a72795984eab0fcb
   subpackages:
   - gettext/mo
-- name: github.com/davecheney/gpio
-  version: a6de66e7e47065fca1a55c62c3f3cab3144694e6
 - name: github.com/deckarep/golang-set
   version: 1d4478f51bed434f1dadf96dcd9b43aabac66795
-- name: github.com/dhickie/go-lgtv
-  version: 54744414160ef8c4689fb1d5915e5540c4a67486
 - name: github.com/eclipse/paho.mqtt.golang
   version: 36d01c2b4cbeb3d2a12063e4880ce30800af9560
   subpackages:
@@ -263,10 +259,6 @@ imports:
   version: 3abdd2207d33843c1c3fbea540bdf07990075c03
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
-- name: github.com/vikstrous/zengge-lightcontrol
-  version: 6613d030df9fdbfb24debdf69d36787067d0cddb
-  subpackages:
-  - control
 - name: gobot.io/x/gobot
   version: 635adea96f788ab19bf77470b075f8db44d34fa0
   subpackages:

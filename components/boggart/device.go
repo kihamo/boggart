@@ -34,17 +34,10 @@ type DeviceId int64
 
 const (
 	DeviceIdElectricityMeter DeviceId = iota
-	//DeviceIdCameraHall
-	//DeviceIdCameraStreet
 	DeviceIdHeatMeter
-	// DeviceIdEntranceDoor
-	// DeviceIdLight
 	DeviceIdPhone
 	DeviceIdRouter
 	DeviceIdTVBedroom
-	// DeviceIdTVLivingRoom
-	// DeviceIdUPS
-	// DeviceIdVideoRecorder
 	DeviceIdWaterMeterCold
 	DeviceIdWaterMeterHot
 )
@@ -52,16 +45,12 @@ const (
 type DeviceType int64
 
 const (
-	// DeviceTypeCamera DeviceType = iota
 	DeviceTypeElectricityMeter DeviceType = iota
 	DeviceTypeHeatMeter
 	DeviceTypeInternetProvider
-	// DeviceTypeLight
 	DeviceTypePhone
 	DeviceTypeRouter
 	DeviceTypeTV
-	// DeviceTypeUPS
-	// DeviceTypePC
 	DeviceTypeVideoRecorder
 	DeviceTypeWaterMeter
 	DeviceTypeThermometer
@@ -175,7 +164,5 @@ type MotionDetector interface {
 }
 
 type TV interface {
-}
-
-type UPS interface {
+	Device
 }

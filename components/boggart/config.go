@@ -53,7 +53,6 @@ const (
 	ConfigSoftVideoRepeatInterval                          = ComponentName + ".softvideo.repeat-interval"
 	ConfigSoftVideoLogin                                   = ComponentName + ".softvideo.login"
 	ConfigSoftVideoPassword                                = ComponentName + ".softvideo.password"
-	ConfigMonitoringExternalURL                            = ComponentName + ".monitoring-external-url"
 	ConfigSensorBME280Enabled                              = ComponentName + ".sensor-bme280.enabled"
 	ConfigSensorBME280RepeatInterval                       = ComponentName + ".sensor-bme280.repeat-interval"
 	ConfigSensorBME280Bus                                  = ComponentName + ".sensor-bme280.bus"

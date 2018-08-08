@@ -107,58 +107,6 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithUsage("Password").
 			WithGroup("Garage video recorder").
 			WithView([]string{config.ViewPassword}),
-		/*
-			config.NewVariable(boggart.ConfigCameraHikVisionHallEnabled, config.ValueTypeBool).
-				WithUsage("Enabled").
-				WithGroup("HikVision on the hall"),
-			config.NewVariable(boggart.ConfigCameraHikVisionHallRepeatInterval, config.ValueTypeDuration).
-				WithUsage("Repeat interval").
-				WithGroup("HikVision on the hall").
-				WithDefault(time.Minute),
-			config.NewVariable(boggart.ConfigCameraHikVisionHallHost, config.ValueTypeString).
-				WithUsage("Host").
-				WithGroup("HikVision on the hall"),
-			config.NewVariable(boggart.ConfigCameraHikVisionHallPort, config.ValueTypeInt64).
-				WithUsage("Port").
-				WithGroup("HikVision on the hall"),
-			config.NewVariable(boggart.ConfigCameraHikVisionHallUsername, config.ValueTypeString).
-				WithUsage("Username").
-				WithGroup("HikVision on the hall").
-				WithDefault("admin"),
-			config.NewVariable(boggart.ConfigCameraHikVisionHallPassword, config.ValueTypeString).
-				WithUsage("Password").
-				WithGroup("HikVision on the hall").
-				WithView([]string{config.ViewPassword}),
-			config.NewVariable(boggart.ConfigCameraHikVisionHallStreamingChannel, config.ValueTypeInt64).
-				WithUsage("Streaming channel").
-				WithGroup("HikVision on the hall").
-				WithDefault(101),
-			config.NewVariable(boggart.ConfigCameraHikVisionStreetEnabled, config.ValueTypeBool).
-				WithUsage("Enabled").
-				WithGroup("HikVision on the street"),
-			config.NewVariable(boggart.ConfigCameraHikVisionStreetRepeatInterval, config.ValueTypeDuration).
-				WithUsage("Repeat interval").
-				WithGroup("HikVision on the street").
-				WithDefault(time.Minute),
-			config.NewVariable(boggart.ConfigCameraHikVisionStreetHost, config.ValueTypeString).
-				WithUsage("Host").
-				WithGroup("HikVision on the street"),
-			config.NewVariable(boggart.ConfigCameraHikVisionStreetPort, config.ValueTypeInt64).
-				WithUsage("Port").
-				WithGroup("HikVision on the street"),
-			config.NewVariable(boggart.ConfigCameraHikVisionStreetUsername, config.ValueTypeString).
-				WithUsage("Username").
-				WithGroup("HikVision on the street").
-				WithDefault("admin"),
-			config.NewVariable(boggart.ConfigCameraHikVisionStreetPassword, config.ValueTypeString).
-				WithUsage("Password").
-				WithGroup("HikVision on the street").
-				WithView([]string{config.ViewPassword}),
-			config.NewVariable(boggart.ConfigCameraHikVisionStreetStreamingChannel, config.ValueTypeInt64).
-				WithUsage("Streaming channel").
-				WithGroup("HikVision on the street").
-				WithDefault(101),
-		*/
 		config.NewVariable(boggart.ConfigMercuryEnabled, config.ValueTypeBool).
 			WithUsage("Enabled").
 			WithGroup("Mercury devices"),
@@ -266,29 +214,6 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithUsage("Password").
 			WithGroup("SoftVideo provider").
 			WithView([]string{config.ViewPassword}),
-		config.NewVariable(boggart.ConfigMonitoringExternalURL, config.ValueTypeString).
-			WithUsage("Monitoring external URL"),
-		/*
-			config.NewVariable(boggart.ConfigApcupsdEnabled, config.ValueTypeBool).
-				WithUsage("Enabled").
-				WithGroup("Apcupsd"),
-			config.NewVariable(boggart.ConfigApcupsdRepeatInterval, config.ValueTypeDuration).
-				WithUsage("Repeat interval").
-				WithGroup("Apcupsd").
-				WithDefault(time.Minute),
-			config.NewVariable(boggart.ConfigApcupsdNISAddress, config.ValueTypeString).
-				WithUsage("NIS address").
-				WithGroup("Apcupsd").
-				WithDefault("127.0.0.1:3551"),
-			config.NewVariable(boggart.ConfigApcupsdFileStatus, config.ValueTypeString).
-				WithUsage("File status").
-				WithGroup("Apcupsd").
-				WithDefault("/var/log/apcupsd.status"),
-			config.NewVariable(boggart.ConfigApcupsdFileEvents, config.ValueTypeString).
-				WithUsage("File events").
-				WithGroup("Apcupsd").
-				WithDefault("/var/log/apcupsd.events"),
-		*/
 		config.NewVariable(boggart.ConfigSensorBME280Enabled, config.ValueTypeBool).
 			WithUsage("Enabled").
 			WithGroup("Sensor 280"),
