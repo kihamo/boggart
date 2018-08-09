@@ -1,5 +1,5 @@
-hash: 1a3bf3b71dadabbc6fe80ae3be0646f64fa9aee4d2dea8498d638d46242a7576
-updated: 2018-08-09T00:59:03.166178+03:00
+hash: 946724cec87ef4c2417a894bddc7a7eaa4718e5cc04c113e313bc5c2027075e3
+updated: 2018-08-09T17:56:39.625636+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -63,7 +63,7 @@ imports:
 - name: github.com/go-openapi/swag
   version: becd2f08beafcca035645a8a101e0e3e18140458
 - name: github.com/go-openapi/validate
-  version: 4f81262a03dbefe1003f745d3d0a03cbeea98d50
+  version: 7c1911976134d3a24d0c03127505163c9f16aa3b
 - name: github.com/go-sql-driver/mysql
   version: 9181e3a86a19bacd63e68d43ae8b7b36320d8092
 - name: github.com/go-swagger/go-swagger
@@ -257,6 +257,8 @@ imports:
   version: f19e41f79f8f006116f682c1af454591bc278ad4
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
+- name: github.com/yryz/ds18b20
+  version: 3cf383a406247c49e48a80014f3e17ddee418742
 - name: gobot.io/x/gobot
   version: c1d0e3ce485df0b45076d1d93b7d9240b770d5fc
   subpackages:
@@ -375,13 +377,11 @@ imports:
   - conn/gpio/gpiostream
   - conn/i2c
   - conn/i2c/i2creg
-  - conn/onewire
   - conn/physic
   - conn/pin
   - conn/pin/pinreg
   - conn/spi
   - conn/spi/spireg
-  - devices/ds18b20
   - host
   - host/allwinner
   - host/am335x

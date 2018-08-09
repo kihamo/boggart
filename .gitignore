@@ -3,3 +3,4 @@ vendor/*
 /openhab
 /openhab-ai
 components/openhab/swagger.json
+cmd/test

@@ -17,7 +17,6 @@ import (
 	"github.com/kihamo/shadow/components/messengers"
 	"github.com/kihamo/shadow/components/metrics"
 	"github.com/kihamo/shadow/components/workers"
-	"periph.io/x/periph/conn/onewire"
 	"periph.io/x/periph/host"
 )
 
@@ -30,10 +29,9 @@ type Component struct {
 	workers     workers.Component
 	routes      []dashboard.Route
 
-	connectionRS485   *rs485.Connection
-	connectionOneWire onewire.Bus
-	listenersManager  *manager.ListenersManager
-	devicesManager    *DevicesManager
+	connectionRS485  *rs485.Connection
+	listenersManager *manager.ListenersManager
+	devicesManager   *DevicesManager
 }
 
 func (c *Component) Name() string {
@@ -108,10 +106,6 @@ func (c *Component) Run() (err error) {
 	c.initListeners()
 	c.initRS485()
 
-	if err := c.initOneWire(); err != nil {
-		return err
-	}
-
 	c.initGPIO()
 	c.initElectricityMeters()
 	c.initInternetProviders()
@@ -143,20 +137,4 @@ func (c *Component) RS485() *rs485.Connection {
 	defer c.mutex.RUnlock()
 
 	return c.connectionRS485
-}
-
-func (c *Component) initOneWire() (err error) {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	//c.connectionOneWire, err = onewirereg.Open("")
-	//return err
-	return nil
-}
-
-func (c *Component) OneWire() onewire.Bus {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	return c.connectionOneWire
 }

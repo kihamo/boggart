@@ -15,6 +15,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
 	"github.com/kihamo/boggart/components/boggart/providers/samsung/tv"
 	"github.com/kihamo/boggart/components/boggart/providers/softvideo"
+	"github.com/yryz/ds18b20"
 	"gobot.io/x/gobot/platforms/raspi"
 	"periph.io/x/periph/conn/gpio/gpioreg"
 )
@@ -264,7 +265,11 @@ func (c *Component) initSensor() {
 		c.devicesManager.Register(deviceBME280)
 	}
 
-	// TODO:
-	//device := devices.NewDS18B20Sensor(c.OneWire(), onewire.Address(0x7a00000131825228), 9)
-	//c.devicesManager.Register(device)
+	sensors, err := ds18b20.Sensors()
+	if err == nil {
+		for _, sensor := range sensors {
+			device := devices.NewDS18B20Sensor(sensor)
+			c.devicesManager.Register(device)
+		}
+	}
 }
