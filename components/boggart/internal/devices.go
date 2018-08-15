@@ -13,7 +13,6 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/mikrotik"
 	"github.com/kihamo/boggart/components/boggart/providers/mobile"
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
-	"github.com/kihamo/boggart/components/boggart/providers/samsung/tv"
 	"github.com/kihamo/boggart/components/boggart/providers/softvideo"
 	"github.com/yryz/ds18b20"
 	"gobot.io/x/gobot/platforms/raspi"
@@ -245,15 +244,6 @@ func (c *Component) initPulsarMeters() {
 	c.devicesManager.RegisterWithID(boggart.DeviceIdWaterMeterHot.String(), deviceWaterMeterHot)
 }
 
-func (c *Component) initTV() {
-	// Samsung
-	api := tv.NewApiV2("192.168.88.169")
-
-	deviceSamsung := devices.NewSamsungTV(api)
-	deviceSamsung.SetMac("9C:8C:6E:CF:3F:EE")
-	c.devicesManager.RegisterWithID(boggart.DeviceIdTVBedroom.String(), deviceSamsung)
-}
-
 func (c *Component) initSensor() {
 	if c.config.Bool(boggart.ConfigSensorBME280Enabled) {
 		deviceBME280 := devices.NewBME280Sensor(
@@ -266,7 +256,7 @@ func (c *Component) initSensor() {
 	}
 
 	sensors, err := ds18b20.Sensors()
-	if err == nil {
+	if err == nil && len(sensors) > 0 && sensors[0] != "not found." {
 		for _, sensor := range sensors {
 			device := devices.NewDS18B20Sensor(sensor)
 			c.devicesManager.Register(device)

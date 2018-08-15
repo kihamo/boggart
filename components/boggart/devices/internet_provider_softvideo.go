@@ -2,20 +2,18 @@ package devices
 
 import (
 	"context"
+	"sync/atomic"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/softvideo"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
-	"github.com/kihamo/snitch"
-)
-
-var (
-	metricInternetProviderSoftVideoBalance = snitch.NewGauge(boggart.ComponentName+"_device_internet_provider_softvideo_balance_rubles_total", "SoftVideo balance in rubles")
 )
 
 type SoftVideoInternet struct {
+	lastValue int64
+
 	boggart.DeviceBase
 
 	provider *softvideo.Client
@@ -43,14 +41,6 @@ func (d *SoftVideoInternet) Balance(ctx context.Context) (float64, error) {
 	return d.provider.Balance(ctx)
 }
 
-func (d *SoftVideoInternet) Describe(ch chan<- *snitch.Description) {
-	metricInternetProviderSoftVideoBalance.With("account", d.provider.AccountID()).Describe(ch)
-}
-
-func (d *SoftVideoInternet) Collect(ch chan<- snitch.Metric) {
-	metricInternetProviderSoftVideoBalance.With("account", d.provider.AccountID()).Collect(ch)
-}
-
 func (d *SoftVideoInternet) Ping(_ context.Context) bool {
 	return true
 }
@@ -76,15 +66,12 @@ func (d *SoftVideoInternet) taskUpdater(ctx context.Context) (interface{}, error
 		return nil, err
 	}
 
-	metricBalance := metricInternetProviderSoftVideoBalance.With("account", d.provider.AccountID())
-	balance := float64(value)
+	current := int64(value * 100)
+	prev := atomic.LoadInt64(&d.lastValue)
 
-	if balance == metricBalance.Value() {
-		return nil, nil
+	if current != prev {
+		d.TriggerEvent(boggart.DeviceEventSoftVideoBalanceChanged, value, d.provider.AccountID())
 	}
-
-	metricBalance.Set(balance)
-	d.TriggerEvent(boggart.DeviceEventSoftVideoBalanceChanged, float64(value), d.provider.AccountID())
 
 	return nil, nil
 }

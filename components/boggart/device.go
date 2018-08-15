@@ -38,7 +38,6 @@ const (
 	DeviceIdHeatMeter
 	DeviceIdPhone
 	DeviceIdRouter
-	DeviceIdTVBedroom
 	DeviceIdWaterMeterCold
 	DeviceIdWaterMeterHot
 )
@@ -51,7 +50,6 @@ const (
 	DeviceTypeInternetProvider
 	DeviceTypePhone
 	DeviceTypeRouter
-	DeviceTypeTV
 	DeviceTypeVideoRecorder
 	DeviceTypeWaterMeter
 	DeviceTypeThermometer
