@@ -21,6 +21,7 @@ var (
 	metricRouterMikrotikTrafficReceivedBytes = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_traffic_received_bytes", "Mikrotik traffic received bytes")
 	metricRouterMikrotikTrafficSentBytes     = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_traffic_sent_bytes", "Mikrotik traffic sent bytes")
 	metricRouterMikrotikWifiClients          = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_wifi_clients_total", "Mikrotik wifi clients online")
+	metricRouterMikrotikCPULoad              = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_cpu_load_percent", "CPU load in percents")
 	metricRouterMikrotikMemoryUsage          = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_memory_usage_bytes", "Memory usage in Mikrotik router")
 	metricRouterMikrotikMemoryAvailable      = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_memory_available_bytes", "Memory available in Mikrotik router")
 	metricRouterMikrotikStorageUsage         = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_storage_usage_bytes", "Storage usage in Mikrotik router")
@@ -90,6 +91,7 @@ func (d *MikrotikRouter) Describe(ch chan<- *snitch.Description) {
 	metricRouterMikrotikTrafficReceivedBytes.With("serial_number", serialNumber).Describe(ch)
 	metricRouterMikrotikTrafficSentBytes.With("serial_number", serialNumber).Describe(ch)
 	metricRouterMikrotikWifiClients.With("serial_number", serialNumber).Describe(ch)
+	metricRouterMikrotikCPULoad.With("serial_number", serialNumber).Describe(ch)
 	metricRouterMikrotikMemoryUsage.With("serial_number", serialNumber).Describe(ch)
 	metricRouterMikrotikMemoryAvailable.With("serial_number", serialNumber).Describe(ch)
 	metricRouterMikrotikStorageUsage.With("serial_number", serialNumber).Describe(ch)
@@ -105,6 +107,7 @@ func (d *MikrotikRouter) Collect(ch chan<- snitch.Metric) {
 	metricRouterMikrotikTrafficReceivedBytes.With("serial_number", serialNumber).Collect(ch)
 	metricRouterMikrotikTrafficSentBytes.With("serial_number", serialNumber).Collect(ch)
 	metricRouterMikrotikWifiClients.With("serial_number", serialNumber).Collect(ch)
+	metricRouterMikrotikCPULoad.With("serial_number", serialNumber).Collect(ch)
 	metricRouterMikrotikMemoryUsage.With("serial_number", serialNumber).Collect(ch)
 	metricRouterMikrotikMemoryAvailable.With("serial_number", serialNumber).Collect(ch)
 	metricRouterMikrotikStorageUsage.With("serial_number", serialNumber).Collect(ch)
@@ -300,6 +303,12 @@ func (d *MikrotikRouter) taskUpdater(ctx context.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	cpuLoad, err := strconv.ParseFloat(resource["cpu-load"], 64)
+	if err != nil {
+		return nil, err
+	}
+	metricRouterMikrotikCPULoad.With("serial_number", serialNumber).Set(cpuLoad)
 
 	memoryFree, err := strconv.ParseFloat(resource["free-memory"], 64)
 	if err != nil {
