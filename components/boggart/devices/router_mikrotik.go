@@ -26,6 +26,8 @@ var (
 	metricRouterMikrotikMemoryAvailable      = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_memory_available_bytes", "Memory available in Mikrotik router")
 	metricRouterMikrotikStorageUsage         = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_storage_usage_bytes", "Storage usage in Mikrotik router")
 	metricRouterMikrotikStorageAvailable     = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_storage_available_bytes", "Storage available in Mikrotik router")
+	metricRouterMikrotikVoltage              = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_voltage_volt", "Voltage")
+	metricRouterMikrotikTemperature          = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_temperature_celsius", "Temperature")
 
 	wifiClientRegexp = regexp.MustCompile(`^([^@]+)@([^:\s]+):\s+([^\s,]+)`)
 	vpnClientRegexp  = regexp.MustCompile(`^(\S+) logged (in|out), (.+?)$`)
@@ -96,6 +98,8 @@ func (d *MikrotikRouter) Describe(ch chan<- *snitch.Description) {
 	metricRouterMikrotikMemoryAvailable.With("serial_number", serialNumber).Describe(ch)
 	metricRouterMikrotikStorageUsage.With("serial_number", serialNumber).Describe(ch)
 	metricRouterMikrotikStorageAvailable.With("serial_number", serialNumber).Describe(ch)
+	metricRouterMikrotikVoltage.With("serial_number", serialNumber).Describe(ch)
+	metricRouterMikrotikTemperature.With("serial_number", serialNumber).Describe(ch)
 }
 
 func (d *MikrotikRouter) Collect(ch chan<- snitch.Metric) {
@@ -112,6 +116,8 @@ func (d *MikrotikRouter) Collect(ch chan<- snitch.Metric) {
 	metricRouterMikrotikMemoryAvailable.With("serial_number", serialNumber).Collect(ch)
 	metricRouterMikrotikStorageUsage.With("serial_number", serialNumber).Collect(ch)
 	metricRouterMikrotikStorageAvailable.With("serial_number", serialNumber).Collect(ch)
+	metricRouterMikrotikVoltage.With("serial_number", serialNumber).Collect(ch)
+	metricRouterMikrotikTemperature.With("serial_number", serialNumber).Collect(ch)
 }
 
 func (d *MikrotikRouter) Ping(_ context.Context) bool {
@@ -333,6 +339,14 @@ func (d *MikrotikRouter) taskUpdater(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 	metricRouterMikrotikStorageUsage.With("serial_number", serialNumber).Set(storageSpace - storageFree)
+
+	health, err := d.provider.SystemHealth()
+	if err != nil {
+		return nil, err
+	}
+
+	metricRouterMikrotikVoltage.With("serial_number", serialNumber).Set(health.Voltage)
+	metricRouterMikrotikTemperature.With("serial_number", serialNumber).Set(float64(health.Temperature))
 
 	return nil, nil
 }
