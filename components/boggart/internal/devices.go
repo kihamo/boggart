@@ -173,6 +173,10 @@ func (c *Component) initGPIO() {
 
 		device := devices.NewGPIOPin(g, mode)
 
+		if len(opts) > 2 {
+			device.SetDescription(opts[2])
+		}
+
 		if c.config.Bool(boggart.ConfigGPIOEnabled) {
 			device.Enable()
 		} else {
