@@ -1,5 +1,5 @@
-hash: 946724cec87ef4c2417a894bddc7a7eaa4718e5cc04c113e313bc5c2027075e3
-updated: 2018-08-09T17:56:39.625636+03:00
+hash: d08e60f7043913fdef27b3a3babb37b83233ca9fc203bad2a529b3d08123c784
+updated: 2018-08-31T11:50:56.55119+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -32,22 +32,24 @@ imports:
   - packets
 - name: github.com/elazarl/go-bindata-assetfs
   version: 38087fe4dafb822e541b3f7955075cc1c30bd294
+- name: github.com/fsnotify/fsnotify
+  version: c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9
 - name: github.com/ghthor/gowol
   version: eb42ead1b24e9226bddb05004815f6e72280f879
 - name: github.com/go-openapi/analysis
-  version: 7c1bef8f6d9fa6148ce0d8a0ebf5339a084a6639
+  version: b006789cd277d4fa4d16767046d694a256c6a218
   subpackages:
   - internal
 - name: github.com/go-openapi/errors
-  version: b2b2befaf267d082d779bcef52d682a47c779517
+  version: 87bb653288778f8b0d922c5c3fb8b3f00a47ff28
 - name: github.com/go-openapi/jsonpointer
-  version: 3a0015ad55fa9873f41605d3e8f28cd279c32ab2
+  version: 52eb3d4b47c6a51ce2693c8e614a15a07c1af435
 - name: github.com/go-openapi/jsonreference
-  version: 3fb327e6747da3043567ee86abd02bb6376b6be2
+  version: 1c6a3fa339f2743b7b0fd2b842fc455eca2fa9eb
 - name: github.com/go-openapi/loads
-  version: 2a2b323bab96e6b1fdee110e57d959322446e9c9
+  version: fd899182a268dcf25de088722375311d9dee2662
 - name: github.com/go-openapi/runtime
-  version: 9a3091f566c0811ef4d54b535179bc0fc484a11f
+  version: 95364c1e5610d0e7bc98d445a483036a36888329
   subpackages:
   - client
   - logger
@@ -57,13 +59,13 @@ imports:
   - middleware/untyped
   - security
 - name: github.com/go-openapi/spec
-  version: 384415f06ee238aae1df5caad877de6ceac3a5c4
+  version: f1468acb3b29cdd5c5f6fa29435d2d2d6e6c9ff1
 - name: github.com/go-openapi/strfmt
-  version: 913ee058e387ac83a67e2d9f13acecdcd5769fc6
+  version: 6292e8b5de3b3535638b89eb165304ffa1e7cfae
 - name: github.com/go-openapi/swag
-  version: becd2f08beafcca035645a8a101e0e3e18140458
+  version: 0dc164b7900e799f72456fa00bbdfbd362deed9b
 - name: github.com/go-openapi/validate
-  version: 7c1911976134d3a24d0c03127505163c9f16aa3b
+  version: e0648ff405079d973622f8b2bf739ed3a1c5cd9b
 - name: github.com/go-sql-driver/mysql
   version: 9181e3a86a19bacd63e68d43ae8b7b36320d8092
 - name: github.com/go-swagger/go-swagger
@@ -200,9 +202,9 @@ imports:
 - name: github.com/mcuadros/go-syslog
   version: 9cf13b7327c0e153da3cba3540c2ae2b879c3859
 - name: github.com/mitchellh/gox
-  version: e05df8dccde397491cd731693a93d4506b5850d3
+  version: 51ed453898ca5579fea9ad1f08dff6b121d9f2e8
 - name: github.com/mitchellh/mapstructure
-  version: f15292f7a699fcc1a38a80977f80a046874ba8ac
+  version: fa473d140ef3c6adf42d6b391fe76707f1f243c8
 - name: github.com/mmcloughlin/geohash
   version: 3b756d8ac3d9d9b1217f28a9e6cbba629e1815b3
 - name: github.com/OneOfOne/xxhash

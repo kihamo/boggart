@@ -1,12 +1,11 @@
-package main // import "github.com/kihamo/boggart/cmd/agent"
+package main // import "github.com/kihamo/boggart/cmd/roborock"
 
 import (
 	"log"
 
-	boggart "github.com/kihamo/boggart/components/boggart/instance"
 	mqtt "github.com/kihamo/boggart/components/mqtt/instance"
+	roborock "github.com/kihamo/boggart/components/roborock/instance"
 	"github.com/kihamo/shadow"
-	annotations "github.com/kihamo/shadow/components/annotations/instance"
 	config "github.com/kihamo/shadow/components/config/instance"
 	dashboard "github.com/kihamo/shadow/components/dashboard/instance"
 	i18n "github.com/kihamo/shadow/components/i18n/instance"
@@ -24,15 +23,14 @@ var (
 
 func main() {
 	application, err := shadow.NewApp(
-		"Boggart Agent",
+		"Boggart Roborock",
 		Version,
 		Build,
 		[]shadow.Component{
 			mqtt.NewComponent(),
-			boggart.NewComponent(),
-			annotations.NewComponent(),
 			config.NewComponent(),
 			dashboard.NewComponent(),
+			roborock.NewComponent(),
 			i18n.NewComponent(),
 			logger.NewComponent(),
 			messengers.NewComponent(),
