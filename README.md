@@ -49,6 +49,8 @@ GOARM=7 gox -output="cmd/roborock/boggart" -osarch="linux/arm" -ldflags="-s -w -
 sudo cp -f /home/cleaner/boggart.env /etc/default/boggart-roborock
 sudo cp -f /home/cleaner/boggart.service /etc/init.d/boggart-roborock && sudo chmod +x /etc/init.d/boggart-roborock
 sudo cp -f /home/cleaner/boggart /usr/local/bin/boggart-roborock && sudo chmod +x /usr/local/bin/boggart-roborock
+sudo update-rc.d boggart-roborock defaults
+sudo update-rc.d boggart-roborock enable
 sudo service boggart-roborock restart
 ```
 #### Update
