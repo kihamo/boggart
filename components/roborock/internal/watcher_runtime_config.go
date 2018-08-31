@@ -60,6 +60,8 @@ func (c *Component) runtimeConfigWatcher(fileName string) error {
 		if !ok || prevValue != value {
 			cacheRuntimeConfig[key] = value
 			c.mqtt.Publish(roborock.MQTTTopicPrefix+"runtime/"+key, 0, false, value)
+
+			c.logger.Debugf("Roborock runtime config %s changed from %s to %s", key, prevValue, value)
 		}
 
 		cacheRuntimeConfigLock.Unlock()

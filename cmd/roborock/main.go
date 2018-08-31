@@ -5,6 +5,7 @@ import (
 
 	mqtt "github.com/kihamo/boggart/components/mqtt/instance"
 	roborock "github.com/kihamo/boggart/components/roborock/instance"
+	voice "github.com/kihamo/boggart/components/voice/instance"
 	"github.com/kihamo/shadow"
 	config "github.com/kihamo/shadow/components/config/instance"
 	dashboard "github.com/kihamo/shadow/components/dashboard/instance"
@@ -31,6 +32,7 @@ func main() {
 			config.NewComponent(),
 			dashboard.NewComponent(),
 			roborock.NewComponent(),
+			voice.NewComponent(),
 			i18n.NewComponent(),
 			logger.NewComponent(),
 			messengers.NewComponent(),

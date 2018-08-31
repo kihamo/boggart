@@ -7,13 +7,11 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/components/roborock"
 	"github.com/kihamo/shadow"
-	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/logger"
 )
 
 type Component struct {
 	application shadow.Application
-	config      config.Component
 	logger      logger.Logger
 	mqtt        mqtt.Component
 
@@ -31,10 +29,6 @@ func (c *Component) Version() string {
 func (c *Component) Dependencies() []shadow.Dependency {
 	return []shadow.Dependency{
 		{
-			Name:     config.ComponentName,
-			Required: true,
-		},
-		{
 			Name: logger.ComponentName,
 		},
 		{
@@ -46,7 +40,6 @@ func (c *Component) Dependencies() []shadow.Dependency {
 
 func (c *Component) Init(a shadow.Application) (err error) {
 	c.application = a
-	c.config = a.GetComponent(config.ComponentName).(config.Component)
 	c.mqtt = a.GetComponent(mqtt.ComponentName).(mqtt.Component)
 	c.files = map[string]func(string) error{
 		roborock.FileRuntimeConfig: c.runtimeConfigWatcher,
