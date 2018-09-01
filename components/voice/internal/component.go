@@ -12,7 +12,7 @@ import (
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/effects"
 	"github.com/faiface/beep/mp3"
-	"github.com/faiface/beep/speaker"
+	play "github.com/faiface/beep/speaker"
 	"github.com/faiface/beep/wav"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/components/voice"
@@ -72,20 +72,15 @@ func (c *Component) Speech(text string) error {
 	return c.SpeechWithOptions(
 		text,
 		c.config.Int64(voice.ConfigSpeechVolume),
-		c.config.Float64(voice.ConfigYandexSpeechKitCloudSpeed))
+		c.config.Float64(voice.ConfigYandexSpeechKitCloudSpeed),
+		c.config.String(voice.ConfigYandexSpeechKitCloudSpeaker))
 }
 
-func (c *Component) SpeechWithOptions(text string, volume int64, speed float64) error {
+func (c *Component) SpeechWithOptions(text string, volume int64, speed float64, speaker string) error {
 	if volume < 0 {
 		volume = 0
 	} else if volume > 100 {
 		volume = 100
-	}
-
-	if speed < 0.1 {
-		speed = 0.1
-	} else if speed > 3 {
-		speed = 3
 	}
 
 	if volume == 0 {
@@ -94,6 +89,16 @@ func (c *Component) SpeechWithOptions(text string, volume int64, speed float64) 
 		})
 
 		return nil
+	}
+
+	if speed < 0.1 {
+		speed = 0.1
+	} else if speed > 3 {
+		speed = 3
+	}
+
+	if speaker == "" {
+		speaker = c.config.String(voice.ConfigYandexSpeechKitCloudSpeaker)
 	}
 
 	text = strings.TrimSpace(text)
@@ -109,7 +114,7 @@ func (c *Component) SpeechWithOptions(text string, volume int64, speed float64) 
 		context.Background(),
 		text,
 		c.config.String(voice.ConfigYandexSpeechKitCloudLanguage),
-		c.config.String(voice.ConfigYandexSpeechKitCloudSpeaker),
+		speaker,
 		c.config.String(voice.ConfigYandexSpeechKitCloudEmotion),
 		c.config.String(voice.ConfigYandexSpeechKitCloudFormat),
 		c.config.String(voice.ConfigYandexSpeechKitCloudQuality),
@@ -163,8 +168,8 @@ func (c *Component) SpeechWithOptions(text string, volume int64, speed float64) 
 	}
 
 	// play
-	speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/10))
-	speaker.Play(&streamWithEffects)
+	play.Init(format.SampleRate, format.SampleRate.N(time.Second/10))
+	play.Play(&streamWithEffects)
 
 	return nil
 }
