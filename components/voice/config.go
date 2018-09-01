@@ -1,6 +1,8 @@
 package voice
 
 const (
+	ConfigSpeechVolume = ComponentName + ".speech.volume"
+
 	ConfigYandexSpeechKitCloudKey      = ComponentName + ".yandex_speechkit_cloud.key"
 	ConfigYandexSpeechKitCloudLanguage = ComponentName + ".yandex_speechkit_cloud.language"
 	ConfigYandexSpeechKitCloudFormat   = ComponentName + ".yandex_speechkit_cloud.format"

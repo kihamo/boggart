@@ -1,11 +1,19 @@
 package internal
 
 import (
+	"bytes"
 	"context"
 	"errors"
-	"fmt"
+	"io/ioutil"
+	"strings"
 	"sync"
+	"time"
 
+	"github.com/faiface/beep"
+	"github.com/faiface/beep/effects"
+	"github.com/faiface/beep/mp3"
+	"github.com/faiface/beep/speaker"
+	"github.com/faiface/beep/wav"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/components/voice"
 	yandex "github.com/kihamo/boggart/components/voice/providers/yandex_speechkit_cloud"
@@ -61,10 +69,28 @@ func (c *Component) Run(wg *sync.WaitGroup) error {
 }
 
 func (c *Component) Speech(text string) error {
-	c.logger.Debugf("Speach text %s", text)
+	volumePercent := c.config.Int64(voice.ConfigSpeechVolume)
+	if volumePercent < 0 {
+		volumePercent = 0
+	} else if volumePercent > 100 {
+		volumePercent = 100
+	}
+
+	if volumePercent == 0 {
+		c.logger.Error("Skip speech text because volume is 0", map[string]interface{}{
+			"text": text,
+		})
+
+		return nil
+	}
+
+	text = strings.TrimSpace(text)
+	text = strings.ToLower(text)
+
+	c.logger.Debugf("Speech text %s", text)
 
 	if c.provider == nil {
-		return errors.New("Provider not found")
+		return errors.New("Speech provider not found")
 	}
 
 	file, err := c.provider.Generate(
@@ -78,10 +104,55 @@ func (c *Component) Speech(text string) error {
 		c.config.Float64(voice.ConfigYandexSpeechKitCloudSpeed))
 
 	if err != nil {
+		c.logger.Error("Error speech text", map[string]interface{}{
+			"text": text,
+		})
+
 		return err
 	}
 
-	fmt.Println(file)
+	f := ioutil.NopCloser(bytes.NewReader(file))
+
+	// decode
+	var (
+		stream beep.StreamSeekCloser
+		format beep.Format
+	)
+
+	switch c.config.String(voice.ConfigYandexSpeechKitCloudFormat) {
+	case yandex.FormatMP3:
+		stream, format, err = mp3.Decode(f)
+
+	case yandex.FormatWAV:
+		stream, format, err = wav.Decode(f)
+
+	default:
+		err = errors.New("Unknown format of audio file")
+	}
+
+	f.Close()
+
+	if err != nil {
+		c.logger.Error("Failed decode audio file for speech", map[string]interface{}{
+			"error":  err.Error(),
+			"format": c.config.String(voice.ConfigYandexSpeechKitCloudFormat),
+			"text":   text,
+		})
+
+		return err
+	}
+
+	// sound effects
+	streamWithEffects := effects.Volume{
+		Streamer: stream,
+		Base:     2,
+		Volume:   -float64(100-volumePercent) / 100.0 * 5,
+		Silent:   false,
+	}
+
+	// play
+	speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/10))
+	speaker.Play(&streamWithEffects)
 
 	return nil
 }

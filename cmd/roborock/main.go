@@ -14,7 +14,6 @@ import (
 	messengers "github.com/kihamo/shadow/components/messengers/instance"
 	metrics "github.com/kihamo/shadow/components/metrics/instance"
 	profiling "github.com/kihamo/shadow/components/profiling/instance"
-	workers "github.com/kihamo/shadow/components/workers/instance"
 )
 
 var (
@@ -38,7 +37,6 @@ func main() {
 			messengers.NewComponent(),
 			metrics.NewComponent(),
 			profiling.NewComponent(),
-			workers.NewComponent(),
 		},
 	)
 

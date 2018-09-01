@@ -2,8 +2,10 @@ package yandex_speechkit_cloud
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
+	h "net/http"
 	"net/url"
 
 	"github.com/kihamo/boggart/components/boggart/protocols/http"
@@ -14,7 +16,7 @@ const (
 	FormatWAV  = "wav"
 	FormatOPUS = "opus"
 
-	QualityHi = "quality"
+	QualityHi = "hi"
 	QualityLo = "lo"
 
 	LanguageRussian   = "ru-RU"
@@ -62,7 +64,11 @@ func (c *YandexSpeechKitCloud) Generate(ctx context.Context, text, lang, speaker
 	values := u.Query()
 	values.Add("text", text)
 	values.Add("format", format)
-	values.Add("quality", quality)
+
+	if format == FormatWAV {
+		values.Add("quality", quality)
+	}
+
 	values.Add("lang", lang)
 	values.Add("speaker", speaker)
 	values.Add("speed", fmt.Sprintf("%.1f", speed))
@@ -74,6 +80,10 @@ func (c *YandexSpeechKitCloud) Generate(ctx context.Context, text, lang, speaker
 		return nil, err
 	}
 	defer response.Body.Close()
+
+	if response.StatusCode != h.StatusOK {
+		return nil, errors.New("Returns not 200 OK response")
+	}
 
 	return ioutil.ReadAll(response.Body)
 }

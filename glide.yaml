@@ -30,3 +30,5 @@ import:
 - package: github.com/yryz/ds18b20
 - package: github.com/fsnotify/fsnotify
   version: ~v1.4.7
+- package: github.com/faiface/beep
+  version: 63cc6fbbac46dba1a03e55f0ebc965d6c82ca8e1

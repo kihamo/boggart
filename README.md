@@ -43,12 +43,31 @@ sudo systemctl restart boggart.service && sudo journalctl -f -u boggart.service
 ```
 
 ## Agent Roborock
+Кросс компиляция не возможна из-за ошибок, поэтому собирать надо на реальном устройстве. Подойдет Raspberry PI, так как платформа на нем аналогичная
+
+Для библиотеки https://github.com/hajimehoshi/oto
+```
+apt install libasound2-dev
+```
+Иначе будет ошибка
+```
+# github.com/kihamo/boggart/vendor/github.com/hajimehoshi/oto
+vendor/github.com/hajimehoshi/oto/player_linux.go:23:28: fatal error: alsa/asoundlib.h: No such file or directory
+ #include <alsa/asoundlib.h>
+                            ^
+compilation terminated.
+```
 
 // TODO: агент должен стартовать после инициализации wifi, иначе MQTT соединение пустое
 
+#### Build on RPi
+```
+cd $GOPATH/src/github.com/kihamo/boggart/cmd/roborock/
+go build -ldflags "-s -w -X 'main.Version=`date +"%y%m%d"`' -X 'main.Build=`date +"%H%M%S"`'" -o boggart ./
+```
+
 #### First
 ```
-GOARM=7 gox -output="cmd/roborock/boggart" -osarch="linux/arm" -ldflags="-s -w -X 'main.Version=`date +"%y%m%d"`' -X 'main.Build=`date +"%H%M%S"`'" ./cmd/roborock/
 sudo cp -f /home/cleaner/boggart.env /etc/default/boggart-roborock
 sudo cp -f /home/cleaner/boggart.service /etc/init.d/boggart-roborock && sudo chmod +x /etc/init.d/boggart-roborock
 sudo cp -f /home/cleaner/boggart /usr/local/bin/boggart-roborock && sudo chmod +x /usr/local/bin/boggart-roborock
@@ -58,7 +77,6 @@ sudo service boggart-roborock restart
 ```
 #### Update
 ```
-GOARM=7 gox -output="cmd/roborock/boggart" -osarch="linux/arm" -ldflags="-s -w -X 'main.Version=`date +"%y%m%d"`' -X 'main.Build=`date +"%H%M%S"`'" ./cmd/roborock/
 sudo cp -f /home/cleaner/boggart.env /etc/default/boggart-roborock
 sudo cp -f /home/cleaner/boggart /usr/local/bin/boggart-roborock && sudo chmod +x /usr/local/bin/boggart-roborock
 sudo service boggart-roborock restart

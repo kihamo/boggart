@@ -1,5 +1,5 @@
-hash: d08e60f7043913fdef27b3a3babb37b83233ca9fc203bad2a529b3d08123c784
-updated: 2018-08-31T11:50:56.55119+03:00
+hash: 350bc0997401672a7cd143dcda3103592b8c817930cbf435a3cda24b824981bb
+updated: 2018-09-01T14:36:28.186148+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -32,6 +32,13 @@ imports:
   - packets
 - name: github.com/elazarl/go-bindata-assetfs
   version: 38087fe4dafb822e541b3f7955075cc1c30bd294
+- name: github.com/faiface/beep
+  version: 63cc6fbbac46dba1a03e55f0ebc965d6c82ca8e1
+  subpackages:
+  - effects
+  - mp3
+  - speaker
+  - wav
 - name: github.com/fsnotify/fsnotify
   version: c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9
 - name: github.com/ghthor/gowol
@@ -85,8 +92,29 @@ imports:
   version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
   subpackages:
   - query
+- name: github.com/gopherjs/gopherjs
+  version: 0210a2f0f73c96103378b0b935f39868e5731809
+  subpackages:
+  - js
+- name: github.com/gopherjs/gopherwasm
+  version: 439a940b7e31356a8c7a087104aa27b4b69fbcfd
+  subpackages:
+  - js
 - name: github.com/gorilla/websocket
   version: 0647012449a1878977514a346b26637dd022446c
+- name: github.com/hajimehoshi/go-mp3
+  version: 90191ee719ddc192865cd96bdc8013ef1ed6dbea
+  subpackages:
+  - internal/bits
+  - internal/consts
+  - internal/frame
+  - internal/frameheader
+  - internal/huffman
+  - internal/imdct
+  - internal/maindata
+  - internal/sideinfo
+- name: github.com/hajimehoshi/oto
+  version: f48c4541b748ac0a09e8d207588ecc890ca47615
 - name: github.com/hashicorp/errwrap
   version: 7554cd9344cec97297fa6649b055a8c98c2a1e55
 - name: github.com/hashicorp/go-multierror
@@ -275,6 +303,35 @@ imports:
   - nacl/secretbox
   - poly1305
   - salsa20/salsa
+- name: golang.org/x/exp
+  version: 3d87b88a115fa4e65fadcbf34e6a60e8040cec41
+  subpackages:
+  - shiny/driver/gldriver
+  - shiny/driver/internal/drawer
+  - shiny/driver/internal/errscreen
+  - shiny/driver/internal/event
+  - shiny/driver/internal/lifecycler
+  - shiny/driver/internal/win32
+  - shiny/driver/internal/x11key
+  - shiny/screen
+- name: golang.org/x/image
+  version: c73c2afc3b812cdd6385de5a50616511c4a3d458
+  subpackages:
+  - math/f64
+- name: golang.org/x/mobile
+  version: fe88d2776746c733e1628c7ac9d9add9c9a280ed
+  subpackages:
+  - app
+  - app/internal/callfn
+  - event/key
+  - event/lifecycle
+  - event/mouse
+  - event/paint
+  - event/size
+  - event/touch
+  - geom
+  - gl
+  - internal/mobileinit
 - name: golang.org/x/net
   version: d866cfc389cec985d6fda2859936a575a55a3ab6
   subpackages:
@@ -294,6 +351,11 @@ imports:
   version: 921ae394b9430ed4fb549668d7b087601bd60a81
   subpackages:
   - internal
+- name: golang.org/x/sys
+  version: fa5fdf94c78965f1aa8423f0cc50b8b8d728b05a
+  subpackages:
+  - unix
+  - windows
 - name: golang.org/x/text
   version: 6eab0e8f74e86c598ec3b6fad4888e0c11482d48
   subpackages:

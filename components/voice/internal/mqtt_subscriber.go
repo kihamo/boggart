@@ -1,8 +1,6 @@
 package internal
 
 import (
-	"fmt"
-
 	m "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/components/voice"
@@ -24,12 +22,10 @@ func NewMQTTSubscribe(speaker Speaker) *MQTTSubscribe {
 
 func (s *MQTTSubscribe) Filters() map[string]byte {
 	return map[string]byte{
-		voice.MQTTTopic: 0,
+		voice.MQTTTopicSimpleText: 0,
 	}
 }
 
 func (s *MQTTSubscribe) Callback(client mqtt.Component, message m.Message) {
-	err := s.speaker.Speech(string(message.Payload()))
-
-	fmt.Println("Result speech", err)
+	s.speaker.Speech(string(message.Payload()))
 }

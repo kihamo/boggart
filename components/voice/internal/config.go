@@ -8,6 +8,11 @@ import (
 
 func (c *Component) ConfigVariables() []config.Variable {
 	return []config.Variable{
+		config.NewVariable(voice.ConfigSpeechVolume, config.ValueTypeInt).
+			WithUsage("Volume percent between 0 and 100").
+			WithGroup("Speech").
+			WithEditable(true).
+			WithDefault(50),
 		config.NewVariable(voice.ConfigYandexSpeechKitCloudKey, config.ValueTypeString).
 			WithUsage("API key").
 			WithGroup("Yandex SpeechKit Cloud"),
@@ -20,7 +25,7 @@ func (c *Component) ConfigVariables() []config.Variable {
 				config.ViewOptionEnumOptions: [][]interface{}{
 					{yandex.FormatMP3, "MP3"},
 					{yandex.FormatWAV, "WAV"},
-					{yandex.FormatOPUS, "OPUS"},
+					// {yandex.FormatOPUS, "OPUS"},
 				},
 			}).
 			WithDefault(yandex.FormatMP3),
