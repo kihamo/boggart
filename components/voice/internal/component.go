@@ -69,14 +69,26 @@ func (c *Component) Run(wg *sync.WaitGroup) error {
 }
 
 func (c *Component) Speech(text string) error {
-	volumePercent := c.config.Int64(voice.ConfigSpeechVolume)
-	if volumePercent < 0 {
-		volumePercent = 0
-	} else if volumePercent > 100 {
-		volumePercent = 100
+	return c.SpeechWithOptions(
+		text,
+		c.config.Int64(voice.ConfigSpeechVolume),
+		c.config.Float64(voice.ConfigYandexSpeechKitCloudSpeed))
+}
+
+func (c *Component) SpeechWithOptions(text string, volume int64, speed float64) error {
+	if volume < 0 {
+		volume = 0
+	} else if volume > 100 {
+		volume = 100
 	}
 
-	if volumePercent == 0 {
+	if speed < 0.1 {
+		speed = 0.1
+	} else if speed > 3 {
+		speed = 3
+	}
+
+	if volume == 0 {
 		c.logger.Error("Skip speech text because volume is 0", map[string]interface{}{
 			"text": text,
 		})
@@ -101,7 +113,7 @@ func (c *Component) Speech(text string) error {
 		c.config.String(voice.ConfigYandexSpeechKitCloudEmotion),
 		c.config.String(voice.ConfigYandexSpeechKitCloudFormat),
 		c.config.String(voice.ConfigYandexSpeechKitCloudQuality),
-		c.config.Float64(voice.ConfigYandexSpeechKitCloudSpeed))
+		speed)
 
 	if err != nil {
 		c.logger.Error("Error speech text", map[string]interface{}{
@@ -146,7 +158,7 @@ func (c *Component) Speech(text string) error {
 	streamWithEffects := effects.Volume{
 		Streamer: stream,
 		Base:     2,
-		Volume:   -float64(100-volumePercent) / 100.0 * 5,
+		Volume:   -float64(100-volume) / 100.0 * 5,
 		Silent:   false,
 	}
 

@@ -6,6 +6,5 @@ import (
 
 type Component interface {
 	shadow.Component
-
-	Speech(string) error
+	Speaker
 }
