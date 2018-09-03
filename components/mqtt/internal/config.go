@@ -1,6 +1,7 @@
 package internal
 
 import (
+	m "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/shadow/components/config"
 )
@@ -21,6 +22,10 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithGroup("Connect").
 			WithView([]string{config.ViewPassword}).
 			WithEditable(true),
+		config.NewVariable(mqtt.ConfigConnectionTimeout, config.ValueTypeDuration).
+			WithUsage("Timeout").
+			WithGroup("Connect").
+			WithDefault(m.NewClientOptions().ConnectTimeout),
 	}
 }
 

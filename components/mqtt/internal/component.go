@@ -19,9 +19,11 @@ import (
 type Component struct {
 	application shadow.Application
 	config      config.Component
+	logger      logger.Logger
 
-	mutex  sync.RWMutex
-	client m.Client
+	mutex       sync.RWMutex
+	client      m.Client
+	subscribers []mqtt.Subscriber
 }
 
 func (c *Component) Name() string {
@@ -47,48 +49,70 @@ func (c *Component) Dependencies() []shadow.Dependency {
 func (c *Component) Init(a shadow.Application) error {
 	c.application = a
 	c.config = a.GetComponent(config.ComponentName).(config.Component)
+	c.subscribers = make([]mqtt.Subscriber, 0)
 
 	return nil
 }
 
 func (c *Component) Run() (err error) {
-	lg := logger.NewOrNop(c.Name(), c.application)
+	c.logger = logger.NewOrNop(c.Name(), c.application)
 
-	m.ERROR = NewMQTTLogger(lg.Error, lg.Errorf)
-	m.CRITICAL = NewMQTTLogger(lg.Panic, lg.Panicf)
-	m.WARN = NewMQTTLogger(lg.Warn, lg.Warnf)
-	m.DEBUG = NewMQTTLogger(lg.Debug, lg.Debugf)
+	m.ERROR = NewMQTTLogger(c.logger.Error, c.logger.Errorf)
+	m.CRITICAL = NewMQTTLogger(c.logger.Panic, c.logger.Panicf)
+	m.WARN = NewMQTTLogger(c.logger.Warn, c.logger.Warnf)
+	m.DEBUG = NewMQTTLogger(c.logger.Debug, c.logger.Debugf)
 
-	c.initClient()
+	// auto reconnect
+	go func() {
+		duration := c.config.Duration(mqtt.ConfigConnectionTimeout) + time.Second*30
+		ticker := time.NewTicker(duration)
+
+		for ; true; <-ticker.C {
+			err := c.initClient()
+			if err != nil {
+				c.logger.Errorf("Init MQTT client failed with error %s", err.Error())
+			} else {
+				return
+			}
+		}
+	}()
 
 	return nil
 }
 
-func (c *Component) initClient() {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
+func (c *Component) initClient() (err error) {
+	opts := m.NewClientOptions()
+	opts.Username = c.config.String(mqtt.ConfigUsername)
+	opts.Password = c.config.String(mqtt.ConfigPassword)
+	opts.ConnectTimeout = c.config.Duration(mqtt.ConfigConnectionTimeout)
 
-	servers := make([]*url.URL, 0)
+	opts.Servers = make([]*url.URL, 0)
 	for _, u := range strings.Split(c.config.String(mqtt.ConfigServers), ";") {
 		if p, err := url.Parse(u); err == nil {
-			servers = append(servers, p)
+			opts.Servers = append(opts.Servers, p)
 		}
 	}
 
 	h := md5.New()
 	io.WriteString(h, time.Now().Format(time.RFC3339Nano))
-
-	opts := &m.ClientOptions{
-		Servers:  servers,
-		ClientID: fmt.Sprintf("%x\n", h.Sum(nil)),
-		Username: c.config.String(mqtt.ConfigUsername),
-		Password: c.config.String(mqtt.ConfigPassword),
-	}
+	opts.ClientID = fmt.Sprintf("%x\n", h.Sum(nil))
 
 	client := m.NewClient(opts)
-	client.Connect().Wait()
+	token := client.Connect()
 
-	c.client = client
+	token.Wait()
+	err = token.Error()
+	if err == nil {
+		c.mutex.Lock()
+		c.client = client
+
+		for _, subscriber := range c.subscribers {
+			c.subscribeByClient(client, subscriber)
+		}
+		c.mutex.Unlock()
+	}
+
+	return err
 }
 
 func (c *Component) Client() m.Client {
@@ -99,11 +123,40 @@ func (c *Component) Client() m.Client {
 }
 
 func (c *Component) Publish(topic string, qos byte, retained bool, payload interface{}) m.Token {
-	return c.Client().Publish(topic, qos, retained, payload)
+	client := c.Client()
+	if client == nil {
+		c.logger.Warn("Client isn't init. Publish skipping", map[string]interface{}{
+			"topic":    topic,
+			"qos":      qos,
+			"retained": retained,
+			"payload":  payload,
+		})
+
+		return nil
+	}
+
+	return client.Publish(topic, qos, retained, payload)
 }
 
 func (c *Component) Subscribe(subscriber mqtt.Subscriber) m.Token {
-	return c.Client().SubscribeMultiple(subscriber.Filters(), func(client m.Client, message m.Message) {
+	c.mutex.Lock()
+	c.subscribers = append(c.subscribers, subscriber)
+	c.mutex.Unlock()
+
+	client := c.Client()
+	if client == nil {
+		return nil
+	}
+
+	return c.subscribeByClient(client, subscriber)
+}
+
+func (c *Component) subscribeByClient(client m.Client, subscriber mqtt.Subscriber) m.Token {
+	c.logger.Debug("Add subscriber", map[string]interface{}{
+		"filters": subscriber.Filters(),
+	})
+
+	return client.SubscribeMultiple(subscriber.Filters(), func(client m.Client, message m.Message) {
 		subscriber.Callback(c, message)
 	})
 }
