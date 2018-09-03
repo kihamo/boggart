@@ -5,14 +5,14 @@ import (
 	"bytes"
 	"context"
 	"encoding/xml"
-	"io/ioutil"
-	"mime/multipart"
+	"fmt"
+	"io"
 	"net/http"
 	"time"
 )
 
 const (
-	boundary = "boundary"
+	connectionAttemptDuration = time.Second * 10
 
 	EventTypeIO                   = "IO"
 	EventTypeVMD                  = "VMD"
@@ -60,46 +60,102 @@ type EventNotificationAlertStreamResponse struct {
 }
 
 type AlertStreaming struct {
-	reader *bufio.Reader
+	connection Connection
+	request    *http.Request
+	alerts     chan *EventNotificationAlertStreamResponse
+	errors     chan error
 }
 
-func (s *AlertStreaming) NextAlert() (*EventNotificationAlertStreamResponse, error) {
-	buf := bytes.NewBuffer([]byte("--" + boundary + "\n"))
+func NewAlertStreaming(client Connection, request *http.Request) *AlertStreaming {
+	return &AlertStreaming{
+		connection: client,
+		request:    request,
+	}
+}
 
-	var (
-		isStart bool
-		event   *EventNotificationAlertStreamResponse
-	)
+func (s *AlertStreaming) Start() {
+	s.alerts = make(chan *EventNotificationAlertStreamResponse)
+	s.errors = make(chan error)
+
+	go func() {
+		ticker := time.NewTicker(connectionAttemptDuration)
+		for ; true; <-ticker.C {
+			response, err := s.connection.Do(s.request)
+			if err != nil {
+				s.errors <- err
+				continue
+			}
+
+			if response.StatusCode != http.StatusOK {
+				s.errors <- fmt.Errorf("Response status %d isn't OK", response.StatusCode, response)
+				continue
+			}
+
+			go func() {
+				s.read(response)
+			}()
+
+			break
+		}
+	}()
+}
+
+func (s *AlertStreaming) read(response *http.Response) {
+	reader := bufio.NewReader(response.Body)
+	buf := bytes.NewBuffer(nil)
 
 	for {
-		line, err := s.reader.ReadBytes('\n')
-		if err != nil {
-			return nil, err
-		}
+		select {
+		case <-s.request.Context().Done():
+			buf.Reset()
+			close(s.alerts)
+			close(s.errors)
+			return
 
-		if bytes.HasPrefix(line, []byte("--"+boundary)) {
-			if isStart {
-				reader := multipart.NewReader(buf, boundary)
-
-				part, err := reader.NextPart()
-				if err != nil {
-					return nil, err
-				}
-
-				content, _ := ioutil.ReadAll(part)
-				event = &EventNotificationAlertStreamResponse{}
-
-				if err := xml.Unmarshal(content, event); err != nil {
-					return nil, err
-				}
-
-				return event, nil
+		default:
+			line, err := reader.ReadBytes('\n')
+			if err == io.EOF || len(line) == 0 {
+				continue
 			}
-		} else {
+
+			if err != nil {
+				s.errors <- err
+				continue
+			}
+
+			if bytes.HasPrefix(line, []byte("<EventNotificationAlert")) {
+				buf.Write(line)
+				continue
+			} else if buf.Len() == 0 { // если сообщение не началось игнорируем весь контент
+				continue
+			}
+
 			buf.Write(line)
-			isStart = true
+
+			// если сообщение заканчивается запускаем алгоритм
+			if !bytes.HasPrefix(line, []byte("</EventNotificationAlert>")) {
+				continue
+			}
+
+			event := &EventNotificationAlertStreamResponse{}
+			err = xml.Unmarshal(buf.Bytes(), event)
+			buf.Reset()
+
+			if err != nil {
+				s.errors <- err
+			} else {
+				s.alerts <- event
+			}
 		}
 	}
+}
+
+func (s *AlertStreaming) NextAlert() <-chan *EventNotificationAlertStreamResponse {
+	return s.alerts
+}
+
+func (s *AlertStreaming) NextError() <-chan error {
+	return s.errors
 }
 
 func (a *ISAPI) EventNotificationAlertStream(ctx context.Context) (*AlertStreaming, error) {
@@ -108,12 +164,8 @@ func (a *ISAPI) EventNotificationAlertStream(ctx context.Context) (*AlertStreami
 		return nil, err
 	}
 
-	response, err := a.do(request.WithContext(ctx))
-	if err != nil {
-		return nil, err
-	}
+	stream := NewAlertStreaming(a, request.WithContext(ctx))
+	stream.Start()
 
-	return &AlertStreaming{
-		reader: bufio.NewReader(response.Body),
-	}, nil
+	return stream, nil
 }

@@ -87,27 +87,37 @@ func (d *VideoRecorderHikVision) taskSerialNumber(ctx context.Context) (interfac
 }
 
 func (d *VideoRecorderHikVision) startAlertStreaming() error {
-	stream, err := d.isapi.EventNotificationAlertStream(context.Background())
+	ctx := context.Background()
+
+	stream, err := d.isapi.EventNotificationAlertStream(ctx)
 	if err != nil {
 		return err
 	}
 
 	go func() {
 		for {
-			event, err := stream.NextAlert()
-			if err != nil || !d.IsEnabled() || event.EventState != hikvision.EventEventStateActive {
-				continue
-			}
+			select {
+			case event := <-stream.NextAlert():
+				if !d.IsEnabled() || event.EventState != hikvision.EventEventStateActive {
+					continue
+				}
 
-			id := fmt.Sprintf("%d-%s", event.DynChannelID, event.EventType)
+				id := fmt.Sprintf("%d-%s", event.DynChannelID, event.EventType)
 
-			d.mutex.Lock()
-			lastFire, ok := d.alertStreamingHistory[id]
-			d.alertStreamingHistory[id] = event.DateTime
-			d.mutex.Unlock()
+				d.mutex.Lock()
+				lastFire, ok := d.alertStreamingHistory[id]
+				d.alertStreamingHistory[id] = event.DateTime
+				d.mutex.Unlock()
 
-			if !ok || event.DateTime.Sub(lastFire) > VideoRecorderHikVisionIgnoreInterval {
-				d.TriggerEvent(boggart.DeviceEventHikvisionEventNotificationAlert, event, d.SerialNumber())
+				if !ok || event.DateTime.Sub(lastFire) > VideoRecorderHikVisionIgnoreInterval {
+					d.TriggerEvent(boggart.DeviceEventHikvisionEventNotificationAlert, event, d.SerialNumber())
+				}
+
+			case _ = <-stream.NextError():
+				// TODO: log errors
+
+			case <-ctx.Done():
+				return
 			}
 		}
 	}()

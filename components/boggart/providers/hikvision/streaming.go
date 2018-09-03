@@ -21,7 +21,7 @@ func (a *ISAPI) StreamingPicture(ctx context.Context, channel uint64) ([]byte, e
 
 	request = request.WithContext(ctx)
 
-	response, err := a.do(request)
+	response, err := a.Do(request)
 	if err != nil {
 		return nil, err
 	}

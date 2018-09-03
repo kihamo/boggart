@@ -31,7 +31,7 @@ func (a *ISAPI) ContentManagementStorage(ctx context.Context) (ContentManagement
 	}
 
 	request = request.WithContext(ctx)
-	err = a.doAndParse(request, &result)
+	err = a.DoAndParse(request, &result)
 
 	return result, err
 }

@@ -11,6 +11,10 @@ import (
 	connection "github.com/kihamo/boggart/components/boggart/protocols/http"
 )
 
+type Connection interface {
+	Do(request *http.Request) (*http.Response, error)
+}
+
 type overrideFloat64 struct {
 	value float64
 }
@@ -37,7 +41,7 @@ func (f *overrideFloat64) UnmarshalXML(d *xml.Decoder, start xml.StartElement) e
 }
 
 type ISAPI struct {
-	connection *connection.Client
+	connection Connection
 	username   string
 	password   string
 	address    string
@@ -52,7 +56,7 @@ func NewISAPI(host string, port int64, username, password string) *ISAPI {
 	}
 }
 
-func (a *ISAPI) do(request *http.Request) (*http.Response, error) {
+func (a *ISAPI) Do(request *http.Request) (*http.Response, error) {
 	if _, _, ok := request.BasicAuth(); !ok {
 		request.SetBasicAuth(a.username, a.password)
 	}
@@ -60,8 +64,8 @@ func (a *ISAPI) do(request *http.Request) (*http.Response, error) {
 	return a.connection.Do(request)
 }
 
-func (a *ISAPI) doAndParse(request *http.Request, v interface{}) error {
-	response, err := a.do(request)
+func (a *ISAPI) DoAndParse(request *http.Request, v interface{}) error {
+	response, err := a.Do(request)
 	if err != nil {
 		return err
 	}

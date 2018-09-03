@@ -50,7 +50,7 @@ func (a *ISAPI) SystemDeviceInfo(ctx context.Context) (SystemDeviceInfoResponse,
 	}
 
 	request = request.WithContext(ctx)
-	err = a.doAndParse(request, &result)
+	err = a.DoAndParse(request, &result)
 
 	return result, err
 }
@@ -64,7 +64,7 @@ func (a *ISAPI) SystemStatus(ctx context.Context) (SystemStatusResponse, error) 
 	}
 
 	request = request.WithContext(ctx)
-	err = a.doAndParse(request, &result)
+	err = a.DoAndParse(request, &result)
 
 	return result, err
 }
