@@ -1,5 +1,5 @@
 hash: 350bc0997401672a7cd143dcda3103592b8c817930cbf435a3cda24b824981bb
-updated: 2018-09-01T14:36:28.186148+03:00
+updated: 2018-09-03T14:05:16.475172+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -136,7 +136,7 @@ imports:
 - name: github.com/kihamo/go-grafana-api
   version: b9af836f6e9ddb24b1bb5d3d498459d93816ed64
 - name: github.com/kihamo/go-workers
-  version: 8b1fc0ba7f64321299cac99c52c7ae10fa0362f1
+  version: af007d1826733cfa7441f492b26e20f8142be621
   subpackages:
   - dispatcher
   - event

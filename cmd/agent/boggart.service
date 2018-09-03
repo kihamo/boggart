@@ -4,8 +4,8 @@ After=network.target
 
 [Service]
 ExecStart=/usr/local/bin/boggart-agent
-EnvironmentFile=/home/pi/cmd/agent/boggart.env
-WorkingDirectory=/home/pi/cmd/agent
+EnvironmentFile=/home/pi/go/src/github.com/kihamo/boggart/cmd/agent/boggart.env
+WorkingDirectory=/home/pi/go/src/github.com/kihamo/boggart/cmd/agent
 Restart=always
 User=root
 

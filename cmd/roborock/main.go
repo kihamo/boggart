@@ -11,7 +11,6 @@ import (
 	dashboard "github.com/kihamo/shadow/components/dashboard/instance"
 	i18n "github.com/kihamo/shadow/components/i18n/instance"
 	logger "github.com/kihamo/shadow/components/logger/instance"
-	messengers "github.com/kihamo/shadow/components/messengers/instance"
 	metrics "github.com/kihamo/shadow/components/metrics/instance"
 	profiling "github.com/kihamo/shadow/components/profiling/instance"
 )
@@ -34,7 +33,6 @@ func main() {
 			voice.NewComponent(),
 			i18n.NewComponent(),
 			logger.NewComponent(),
-			messengers.NewComponent(),
 			metrics.NewComponent(),
 			profiling.NewComponent(),
 		},

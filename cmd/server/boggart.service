@@ -4,8 +4,8 @@ After=network.target
 
 [Service]
 ExecStart=/usr/local/bin/boggart-server
-EnvironmentFile=/home/kihamo/cmd/server/boggart.env
-WorkingDirectory=/home/kihamo/cmd/server
+EnvironmentFile=/home/kihamo/go/src/github.com/kihamo/boggart/cmd/server/boggart.env
+WorkingDirectory=/home/kihamo/go/src/github.com/kihamo/boggart/cmd/server
 Restart=always
 User=root
 
