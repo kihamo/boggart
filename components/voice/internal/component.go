@@ -12,10 +12,10 @@ import (
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/effects"
 	"github.com/faiface/beep/mp3"
-	play "github.com/faiface/beep/speaker"
 	"github.com/faiface/beep/wav"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/components/voice"
+	play "github.com/kihamo/boggart/components/voice/beep"
 	yandex "github.com/kihamo/boggart/components/voice/providers/yandex_speechkit_cloud"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/config"
@@ -168,8 +168,27 @@ func (c *Component) SpeechWithOptions(text string, volume int64, speed float64, 
 	}
 
 	// play
-	play.Init(format.SampleRate, format.SampleRate.N(time.Second/10))
-	play.Play(&streamWithEffects)
+	err = play.Init(format.SampleRate, format.SampleRate.N(time.Second/10))
+
+	if err != nil {
+		c.logger.Error("Failed init player for speech", map[string]interface{}{
+			"error":  err.Error(),
+			"format": c.config.String(voice.ConfigYandexSpeechKitCloudFormat),
+			"text":   text,
+		})
+
+		return err
+	}
+	//play.Play(&streamWithEffects)
+
+	done := make(chan struct{})
+	play.Play(beep.Seq(&streamWithEffects, beep.Callback(func() {
+		close(done)
+	})))
+	<-done
+
+	// free resources
+	play.Close()
 
 	return nil
 }
