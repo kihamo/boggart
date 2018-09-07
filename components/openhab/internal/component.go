@@ -10,10 +10,12 @@ import (
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/dashboard"
+	"github.com/kihamo/shadow/components/messengers"
 )
 
 type Component struct {
-	config config.Component
+	application shadow.Application
+	config      config.Component
 
 	mutex  sync.RWMutex
 	apiUrl *url.URL
@@ -36,10 +38,14 @@ func (c *Component) Dependencies() []shadow.Dependency {
 		{
 			Name: dashboard.ComponentName,
 		},
+		{
+			Name: messengers.ComponentName,
+		},
 	}
 }
 
 func (c *Component) Init(a shadow.Application) error {
+	c.application = a
 	c.config = a.GetComponent(config.ComponentName).(config.Component)
 
 	return nil

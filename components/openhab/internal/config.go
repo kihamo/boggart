@@ -13,6 +13,12 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithUsage("API URL").
 			WithGroup("API").
 			WithEditable(true),
+		config.NewVariable(openhab.ConfigTelegramChats, config.ValueTypeString).
+			WithUsage("Chats for messages").
+			WithGroup("Messenger Telegram").
+			WithEditable(true).
+			WithView([]string{config.ViewTags}).
+			WithViewOptions(map[string]interface{}{config.ViewOptionTagsDefaultText: "add a chat ID"}),
 	}
 }
 

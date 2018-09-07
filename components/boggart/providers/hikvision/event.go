@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	connectionAttemptDuration = time.Second * 10
+	connectionAttemptDuration = time.Minute
 
 	EventTypeIO                   = "IO"
 	EventTypeVMD                  = "VMD"
