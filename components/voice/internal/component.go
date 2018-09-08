@@ -22,6 +22,7 @@ type Component struct {
 	config      config.Component
 	logger      logger.Logger
 	provider    *yandex.YandexSpeechKitCloud
+	audioPlayer *players.AudioPlayer
 }
 
 func (c *Component) Name() string {
@@ -51,6 +52,7 @@ func (c *Component) Dependencies() []shadow.Dependency {
 func (c *Component) Init(a shadow.Application) (err error) {
 	c.application = a
 	c.config = a.GetComponent(config.ComponentName).(config.Component)
+	c.audioPlayer = players.NewAudio()
 
 	return nil
 }
@@ -123,10 +125,9 @@ func (c *Component) SpeechWithOptions(text string, volume int64, speed float64, 
 		return err
 	}
 
-	p := players.NewAudio()
-	p.Volume(volume)
+	c.audioPlayer.Volume(volume)
 
-	err = p.PlayFromReader(ioutil.NopCloser(bytes.NewReader(file)))
+	err = c.audioPlayer.PlayFromReader(ioutil.NopCloser(bytes.NewReader(file)))
 	if err != nil {
 		c.logger.Error("Failed play speech text", map[string]interface{}{
 			"error":  err.Error(),
@@ -138,4 +139,59 @@ func (c *Component) SpeechWithOptions(text string, volume int64, speed float64, 
 	}
 
 	return nil
+}
+
+func (c *Component) PlayURL(url string) error {
+	err := c.audioPlayer.PlayFromURL(url)
+	if err != nil {
+		c.logger.Error("Failed play URL", map[string]interface{}{
+			"error": err.Error(),
+			"url":   url,
+		})
+	} else {
+		c.logger.Debug("Player play URL", map[string]interface{}{
+			"url": url,
+		})
+	}
+
+	return err
+}
+
+func (c *Component) Play() error {
+	err := c.audioPlayer.Play()
+	if err != nil {
+		c.logger.Error("Failed play player", map[string]interface{}{
+			"error": err.Error(),
+		})
+	} else {
+		c.logger.Debug("Player play")
+	}
+
+	return err
+}
+
+func (c *Component) Pause() error {
+	err := c.audioPlayer.Pause()
+	if err != nil {
+		c.logger.Error("Failed pause player", map[string]interface{}{
+			"error": err.Error(),
+		})
+	} else {
+		c.logger.Debug("Player pause")
+	}
+
+	return err
+}
+
+func (c *Component) Stop() error {
+	err := c.audioPlayer.Stop()
+	if err != nil {
+		c.logger.Error("Failed stop player", map[string]interface{}{
+			"error": err.Error(),
+		})
+	} else {
+		c.logger.Debug("Player stopped")
+	}
+
+	return err
 }

@@ -23,13 +23,13 @@ const (
 
 var (
 	ErrorAlreadyPlaying     = errors.New("Already playing")
-	ErrorNotPlaying         = errors.New("Not playing")
 	ErrorUnknownAudioFormat = errors.New("Unknown audio format")
 	ErrorStreamEmpty        = errors.New("Stream isn't set")
 )
 
 type AudioPlayer struct {
 	playing       int64
+	pause         int64
 	volumePercent int64
 
 	mutex   sync.RWMutex
@@ -151,7 +151,7 @@ func (p *AudioPlayer) Play() error {
 		}
 	}
 
-	go p.run()
+	go p.play()
 
 	return nil
 }
@@ -164,6 +164,7 @@ func (p *AudioPlayer) Stop() error {
 }
 
 func (p *AudioPlayer) Pause() error {
+	atomic.StoreInt64(&p.pause, 1)
 	p.getSpeaker().Close()
 
 	return nil
@@ -211,7 +212,9 @@ func (p *AudioPlayer) initSpeaker() error {
 		return ErrorStreamEmpty
 	}
 
+	// FIXME: magic
 	numBytes := int(time.Second/10*time.Duration(stream.SampleRate())/time.Second) * 4
+
 	speaker, err := oto.NewPlayer(stream.SampleRate(), 2, 2, numBytes)
 	if err != nil {
 		return err
@@ -259,18 +262,17 @@ func (p *AudioPlayer) getStream() *StreamWrapper {
 	return p.stream
 }
 
-func (p *AudioPlayer) run() {
+func (p *AudioPlayer) play() {
 	atomic.StoreInt64(&p.playing, 1)
+	atomic.StoreInt64(&p.pause, 0)
+
 	defer func() {
 		atomic.StoreInt64(&p.playing, 0)
 
-		speaker := p.getSpeaker()
-		stream := p.getStream()
+		p.getSpeaker().Close()
 
-		// если ничего принудительно не закрывали, то поток закончился
-		if !speaker.IsClosed() && !stream.IsClosed() {
-			speaker.Close()
-			stream.Close()
+		if atomic.LoadInt64(&p.pause) != 1 {
+			p.getStream().Close()
 		}
 	}()
 
