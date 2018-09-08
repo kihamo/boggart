@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io"
 	"io/ioutil"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/components/voice"
@@ -21,6 +23,7 @@ type Component struct {
 	application shadow.Application
 	config      config.Component
 	logger      logger.Logger
+	mqtt        mqtt.Component
 	provider    *yandex.YandexSpeechKitCloud
 	audioPlayer *players.AudioPlayer
 }
@@ -52,6 +55,7 @@ func (c *Component) Dependencies() []shadow.Dependency {
 func (c *Component) Init(a shadow.Application) (err error) {
 	c.application = a
 	c.config = a.GetComponent(config.ComponentName).(config.Component)
+	c.mqtt = a.GetComponent(mqtt.ComponentName).(mqtt.Component)
 	c.audioPlayer = players.NewAudio()
 
 	return nil
@@ -61,6 +65,13 @@ func (c *Component) Run(wg *sync.WaitGroup) error {
 	c.logger = logger.NewOrNop(c.Name(), c.application)
 	c.provider = yandex.NewYandexSpeechKitCloud(c.config.String(voice.ConfigYandexSpeechKitCloudKey), c.config.Bool(config.ConfigDebug))
 	c.application.GetComponent(mqtt.ComponentName).(mqtt.Component).Subscribe(NewMQTTSubscribe(c))
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		c.audioPlayerStatusUpdater()
+	}()
 
 	return nil
 }
@@ -127,7 +138,7 @@ func (c *Component) SpeechWithOptions(text string, volume int64, speed float64, 
 
 	c.audioPlayer.Volume(volume)
 
-	err = c.audioPlayer.PlayFromReader(ioutil.NopCloser(bytes.NewReader(file)))
+	err = c.PlayReader(ioutil.NopCloser(bytes.NewReader(file)))
 	if err != nil {
 		c.logger.Error("Failed play speech text", map[string]interface{}{
 			"error":  err.Error(),
@@ -139,6 +150,19 @@ func (c *Component) SpeechWithOptions(text string, volume int64, speed float64, 
 	}
 
 	return nil
+}
+
+func (c *Component) PlayReader(reader io.ReadCloser) error {
+	err := c.audioPlayer.PlayFromReader(reader)
+	if err != nil {
+		c.logger.Error("Failed play reader", map[string]interface{}{
+			"error": err.Error(),
+		})
+	} else {
+		c.logger.Debug("Player play reader")
+	}
+
+	return err
 }
 
 func (c *Component) PlayURL(url string) error {
@@ -194,4 +218,18 @@ func (c *Component) Stop() error {
 	}
 
 	return err
+}
+
+func (c *Component) audioPlayerStatusUpdater() {
+	var lastStatus players.Status
+
+	for {
+		status := c.audioPlayer.Status()
+		if status != lastStatus {
+			c.mqtt.Publish(voice.MQTTTopicPlayerStatus, 0, false, status.String())
+			lastStatus = status
+		}
+
+		time.Sleep(time.Second)
+	}
 }

@@ -28,8 +28,7 @@ var (
 )
 
 type AudioPlayer struct {
-	playing       int64
-	pause         int64
+	status        int64
 	volumePercent int64
 
 	mutex   sync.RWMutex
@@ -38,15 +37,14 @@ type AudioPlayer struct {
 }
 
 func NewAudio() *AudioPlayer {
-	return &AudioPlayer{}
-}
+	p := &AudioPlayer{}
+	p.setStatus(StatusStopped)
 
-func (p *AudioPlayer) IsPlaying() bool {
-	return atomic.LoadInt64(&p.playing) == 1
+	return p
 }
 
 func (p *AudioPlayer) PlayFromURL(url string) error {
-	if p.IsPlaying() {
+	if p.Status() == StatusPlaying {
 		return ErrorAlreadyPlaying
 	}
 
@@ -95,7 +93,7 @@ func (p *AudioPlayer) PlayFromURL(url string) error {
 }
 
 func (p *AudioPlayer) PlayFromReader(reader io.ReadCloser) error {
-	if p.IsPlaying() {
+	if p.Status() == StatusPlaying {
 		return ErrorAlreadyPlaying
 	}
 
@@ -124,7 +122,7 @@ func (p *AudioPlayer) PlayFromReader(reader io.ReadCloser) error {
 }
 
 func (p *AudioPlayer) PlayFromFile(file string) error {
-	if p.IsPlaying() {
+	if p.Status() == StatusPlaying {
 		return ErrorAlreadyPlaying
 	}
 
@@ -137,7 +135,7 @@ func (p *AudioPlayer) PlayFromFile(file string) error {
 }
 
 func (p *AudioPlayer) Play() error {
-	if p.IsPlaying() {
+	if p.Status() == StatusPlaying {
 		return ErrorAlreadyPlaying
 	}
 
@@ -157,6 +155,7 @@ func (p *AudioPlayer) Play() error {
 }
 
 func (p *AudioPlayer) Stop() error {
+	p.setStatus(StatusStopped)
 	p.getSpeaker().Close()
 	p.getStream().Close()
 
@@ -164,7 +163,7 @@ func (p *AudioPlayer) Stop() error {
 }
 
 func (p *AudioPlayer) Pause() error {
-	atomic.StoreInt64(&p.pause, 1)
+	p.setStatus(StatusPause)
 	p.getSpeaker().Close()
 
 	return nil
@@ -262,16 +261,21 @@ func (p *AudioPlayer) getStream() *StreamWrapper {
 	return p.stream
 }
 
+func (p *AudioPlayer) setStatus(status Status) {
+	atomic.StoreInt64(&p.status, status.Int64())
+}
+
+func (p *AudioPlayer) Status() Status {
+	return Status(atomic.LoadInt64(&p.status))
+}
+
 func (p *AudioPlayer) play() {
-	atomic.StoreInt64(&p.playing, 1)
-	atomic.StoreInt64(&p.pause, 0)
+	p.setStatus(StatusPlaying)
 
 	defer func() {
-		atomic.StoreInt64(&p.playing, 0)
-
 		p.getSpeaker().Close()
 
-		if atomic.LoadInt64(&p.pause) != 1 {
+		if p.Status() != StatusPause {
 			p.getStream().Close()
 		}
 	}()
