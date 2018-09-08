@@ -2,6 +2,7 @@ package players
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -9,7 +10,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/hajimehoshi/go-mp3"
+	"github.com/faiface/beep"
+	"github.com/faiface/beep/flac"
+	"github.com/faiface/beep/mp3"
+	"github.com/faiface/beep/wav"
 	"github.com/hajimehoshi/oto"
 )
 
@@ -18,7 +22,9 @@ import (
 */
 
 const (
-	AudioFormatMP3 = "mp3"
+	AudioFormatMP3  = "mp3"
+	AudioFormatWAV  = "wav"
+	AudioFormatFLAC = "flac"
 )
 
 var (
@@ -30,14 +36,17 @@ var (
 type AudioPlayer struct {
 	status        int64
 	volumePercent int64
+	done          chan struct{}
 
 	mutex   sync.RWMutex
-	speaker *SpeakerWrapper
-	stream  *StreamWrapper
+	speaker *speakerWrapper
+	stream  *streamWrapper
 }
 
 func NewAudio() *AudioPlayer {
-	p := &AudioPlayer{}
+	p := &AudioPlayer{
+		done: make(chan struct{}, 1),
+	}
 	p.setStatus(StatusStopped)
 	p.SetVolume(50)
 
@@ -156,9 +165,14 @@ func (p *AudioPlayer) Play() error {
 }
 
 func (p *AudioPlayer) Stop() error {
+	if p.Status() == StatusPlaying {
+		p.done <- struct{}{}
+	} else {
+		p.getSpeaker().Close()
+		p.getStream().Close()
+	}
+
 	p.setStatus(StatusStopped)
-	p.getSpeaker().Close()
-	p.getStream().Close()
 
 	return nil
 }
@@ -166,7 +180,7 @@ func (p *AudioPlayer) Stop() error {
 func (p *AudioPlayer) Pause() error {
 	if p.Status() == StatusPlaying {
 		p.setStatus(StatusPause)
-		p.getSpeaker().Close()
+		p.done <- struct{}{}
 	}
 
 	return nil
@@ -174,24 +188,6 @@ func (p *AudioPlayer) Pause() error {
 
 func (p *AudioPlayer) Volume() int64 {
 	return atomic.LoadInt64(&p.volumePercent)
-}
-
-func (p *AudioPlayer) VolumeUp() error {
-	vol := p.Volume()
-	if vol == 100 {
-		return nil
-	}
-
-	return p.SetVolume(vol + 1)
-}
-
-func (p *AudioPlayer) VolumeDown() error {
-	vol := p.Volume()
-	if vol == 0 {
-		return nil
-	}
-
-	return p.SetVolume(vol - 1)
 }
 
 func (p *AudioPlayer) SetVolume(percent int64) error {
@@ -202,6 +198,7 @@ func (p *AudioPlayer) SetVolume(percent int64) error {
 	}
 
 	atomic.StoreInt64(&p.volumePercent, percent)
+	p.getStream().Volume(percent)
 
 	return nil
 }
@@ -218,50 +215,65 @@ func (p *AudioPlayer) initSpeaker() error {
 		return ErrorStreamEmpty
 	}
 
-	// FIXME: magic
-	numBytes := int(time.Second/10*time.Duration(stream.SampleRate())/time.Second) * 4
+	bufferSize := stream.format.SampleRate.N(time.Second / 10)
+	numBytes := bufferSize * 4
 
-	speaker, err := oto.NewPlayer(stream.SampleRate(), 2, 2, numBytes)
+	player, err := oto.NewPlayer(stream.SampleRate(), stream.ChannelNum(), stream.BytesPerSample(), numBytes)
 	if err != nil {
 		return err
 	}
 
+	player.SetUnderrunCallback(func() {
+		fmt.Println("UNDERRUN, YOUR CODE IS SLOW")
+	})
+
 	p.mutex.Lock()
-	p.speaker = NewSpeakerWrapper(speaker)
+	p.speaker = NewSpeakerWrapper(player, bufferSize, numBytes)
 	p.mutex.Unlock()
 
 	return nil
 }
 
-func (p *AudioPlayer) initStream(s io.ReadCloser, format string) error {
+func (p *AudioPlayer) initStream(s io.ReadCloser, f string) (err error) {
 	p.getStream().Close()
 
-	switch format {
-	case AudioFormatMP3:
-		stream, err := mp3.NewDecoder(s)
-		if err != nil {
-			return err
-		}
+	var (
+		source beep.StreamSeekCloser
+		format beep.Format
+	)
 
-		p.mutex.Lock()
-		p.stream = NewStreamWrapper(stream)
-		p.mutex.Unlock()
+	switch f {
+	case AudioFormatMP3:
+		source, format, err = mp3.Decode(s)
+	case AudioFormatWAV:
+		source, format, err = wav.Decode(s)
+	case AudioFormatFLAC:
+		source, format, err = flac.Decode(s)
 
 	default:
 		return ErrorUnknownAudioFormat
 	}
 
+	if err != nil {
+		return err
+	}
+
+	p.mutex.Lock()
+	p.stream = NewStreamWrapper(source, format)
+	p.stream.Volume(p.Volume())
+	p.mutex.Unlock()
+
 	return nil
 }
 
-func (p *AudioPlayer) getSpeaker() *SpeakerWrapper {
+func (p *AudioPlayer) getSpeaker() *speakerWrapper {
 	p.mutex.RLock()
 	defer p.mutex.RUnlock()
 
 	return p.speaker
 }
 
-func (p *AudioPlayer) getStream() *StreamWrapper {
+func (p *AudioPlayer) getStream() *streamWrapper {
 	p.mutex.RLock()
 	defer p.mutex.RUnlock()
 
@@ -284,8 +296,47 @@ func (p *AudioPlayer) play() {
 
 		if p.Status() != StatusPause {
 			p.getStream().Close()
+			p.setStatus(StatusStopped)
 		}
 	}()
 
-	_, _ = io.Copy(p.getSpeaker(), p.getStream())
+	speaker := p.getSpeaker()
+	stream := p.getStream()
+
+	samples := make([][2]float64, speaker.BufferSize())
+	buf := make([]byte, speaker.NumBytes())
+
+	for {
+		select {
+		case <-p.done:
+			return
+
+		default:
+			if _, ok := stream.Stream(samples); !ok {
+				return
+			}
+
+			for i := range samples {
+				for c := range samples[i] {
+					val := samples[i][c]
+
+					if val < -1 {
+						val = -1
+					}
+
+					if val > +1 {
+						val = +1
+					}
+
+					valInt16 := int16(val * (1<<15 - 1))
+					buf[i*4+c*2+0] = byte(valInt16)
+					buf[i*4+c*2+1] = byte(valInt16 >> 8)
+				}
+			}
+
+			if _, err := speaker.Write(buf); err != nil {
+				return
+			}
+		}
+	}
 }

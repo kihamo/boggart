@@ -1,5 +1,5 @@
 hash: 350bc0997401672a7cd143dcda3103592b8c817930cbf435a3cda24b824981bb
-updated: 2018-09-03T14:05:16.475172+03:00
+updated: 2018-09-09T02:47:11.825796+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -36,8 +36,8 @@ imports:
   version: 63cc6fbbac46dba1a03e55f0ebc965d6c82ca8e1
   subpackages:
   - effects
+  - flac
   - mp3
-  - speaker
   - wav
 - name: github.com/fsnotify/fsnotify
   version: c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9
@@ -56,7 +56,7 @@ imports:
 - name: github.com/go-openapi/loads
   version: fd899182a268dcf25de088722375311d9dee2662
 - name: github.com/go-openapi/runtime
-  version: 95364c1e5610d0e7bc98d445a483036a36888329
+  version: d9c45e0a7fc845ce535233f4022219b66b240fd5
   subpackages:
   - client
   - logger
@@ -70,7 +70,7 @@ imports:
 - name: github.com/go-openapi/strfmt
   version: 6292e8b5de3b3535638b89eb165304ffa1e7cfae
 - name: github.com/go-openapi/swag
-  version: 0dc164b7900e799f72456fa00bbdfbd362deed9b
+  version: dd0dad036e67ae93c27dc64337b3f76296f3a5f0
 - name: github.com/go-openapi/validate
   version: e0648ff405079d973622f8b2bf739ed3a1c5cd9b
 - name: github.com/go-sql-driver/mysql
@@ -121,6 +121,8 @@ imports:
   version: b7773ae218740a7be65057fc60b366a49b538a44
 - name: github.com/heptiolabs/healthcheck
   version: da5fdee475fb09de87c5d4a50da233b7d28767b1
+- name: github.com/icza/bitio
+  version: b25b30b425083d5b200f092711bac9027828452c
 - name: github.com/influxdata/influxdb
   version: c85043e9d1d1cadee0934771b2f0804b2147c5ae
   subpackages:
@@ -229,6 +231,22 @@ imports:
   - pbutil
 - name: github.com/mcuadros/go-syslog
   version: 9cf13b7327c0e153da3cba3540c2ae2b879c3859
+- name: github.com/mewkiz/flac
+  version: c28568d4b15b142e7893f7635450d16bef3f833c
+  subpackages:
+  - frame
+  - internal/bits
+  - internal/hashutil
+  - internal/hashutil/crc16
+  - internal/hashutil/crc8
+  - internal/ioutilx
+  - internal/utf8
+  - meta
+- name: github.com/mewkiz/pkg
+  version: c19a6f9fa6f8bc8710e243710ee205c13688b998
+  subpackages:
+  - errutil
+  - term
 - name: github.com/mitchellh/gox
   version: 51ed453898ca5579fea9ad1f08dff6b121d9f2e8
 - name: github.com/mitchellh/mapstructure
@@ -304,7 +322,7 @@ imports:
   - poly1305
   - salsa20/salsa
 - name: golang.org/x/exp
-  version: 3d87b88a115fa4e65fadcbf34e6a60e8040cec41
+  version: e88728d35e99800368f4acc0969018db6b0d3dd5
   subpackages:
   - shiny/driver/gldriver
   - shiny/driver/internal/drawer
@@ -319,7 +337,7 @@ imports:
   subpackages:
   - math/f64
 - name: golang.org/x/mobile
-  version: fe88d2776746c733e1628c7ac9d9add9c9a280ed
+  version: 0ff817254b04da935cce10d2d1270ccf047fbbd7
   subpackages:
   - app
   - app/internal/callfn
@@ -352,7 +370,7 @@ imports:
   subpackages:
   - internal
 - name: golang.org/x/sys
-  version: fa5fdf94c78965f1aa8423f0cc50b8b8d728b05a
+  version: 917fdcba135dcbaccd57425db91723541b4427c8
   subpackages:
   - unix
   - windows

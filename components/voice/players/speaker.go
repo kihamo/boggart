@@ -1,36 +1,44 @@
 package players
 
 import (
-	"io"
 	"sync/atomic"
+
+	"github.com/hajimehoshi/oto"
 )
 
-type SpeakerWrapper struct {
-	closed int64
-
-	original io.WriteCloser
+type speakerWrapper struct {
+	closed     int64
+	bufferSize int
+	numBytes   int
+	player     *oto.Player
 }
 
-func NewSpeakerWrapper(original io.WriteCloser) *SpeakerWrapper {
-	return &SpeakerWrapper{
-		original: original,
+func NewSpeakerWrapper(player *oto.Player, bufferSize, numBytes int) *speakerWrapper {
+	return &speakerWrapper{
+		bufferSize: bufferSize,
+		numBytes:   numBytes,
+		player:     player,
 	}
 }
 
-func (w *SpeakerWrapper) Write(p []byte) (int, error) {
-	if w == nil {
-		return -1, nil
-	}
-
-	return w.original.Write(p)
+func (w *speakerWrapper) BufferSize() int {
+	return w.bufferSize
 }
 
-func (w *SpeakerWrapper) Close() error {
+func (w *speakerWrapper) NumBytes() int {
+	return w.numBytes
+}
+
+func (w *speakerWrapper) Write(data []byte) (int, error) {
+	return w.player.Write(data)
+}
+
+func (w *speakerWrapper) Close() error {
 	if w == nil {
 		return nil
 	}
 
-	err := w.original.Close()
+	err := w.player.Close()
 	if err == nil {
 		atomic.StoreInt64(&w.closed, 1)
 	}
@@ -38,7 +46,7 @@ func (w *SpeakerWrapper) Close() error {
 	return err
 }
 
-func (w *SpeakerWrapper) IsClosed() bool {
+func (w *speakerWrapper) IsClosed() bool {
 	if w == nil {
 		return true
 	}
