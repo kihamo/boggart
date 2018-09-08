@@ -39,6 +39,7 @@ type AudioPlayer struct {
 func NewAudio() *AudioPlayer {
 	p := &AudioPlayer{}
 	p.setStatus(StatusStopped)
+	p.SetVolume(50)
 
 	return p
 }
@@ -163,31 +164,37 @@ func (p *AudioPlayer) Stop() error {
 }
 
 func (p *AudioPlayer) Pause() error {
-	p.setStatus(StatusPause)
-	p.getSpeaker().Close()
+	if p.Status() == StatusPlaying {
+		p.setStatus(StatusPause)
+		p.getSpeaker().Close()
+	}
 
 	return nil
 }
 
+func (p *AudioPlayer) Volume() int64 {
+	return atomic.LoadInt64(&p.volumePercent)
+}
+
 func (p *AudioPlayer) VolumeUp() error {
-	vol := atomic.LoadInt64(&p.volumePercent)
+	vol := p.Volume()
 	if vol == 100 {
 		return nil
 	}
 
-	return p.Volume(vol + 1)
+	return p.SetVolume(vol + 1)
 }
 
 func (p *AudioPlayer) VolumeDown() error {
-	vol := atomic.LoadInt64(&p.volumePercent)
+	vol := p.Volume()
 	if vol == 0 {
 		return nil
 	}
 
-	return p.Volume(vol - 1)
+	return p.SetVolume(vol - 1)
 }
 
-func (p *AudioPlayer) Volume(percent int64) error {
+func (p *AudioPlayer) SetVolume(percent int64) error {
 	if percent > 100 {
 		percent = 100
 	} else if percent < 0 {

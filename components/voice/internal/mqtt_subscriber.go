@@ -1,8 +1,9 @@
 package internal
 
 import (
-	"bytes"
 	"encoding/json"
+	"strconv"
+	"strings"
 
 	m "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kihamo/boggart/components/mqtt"
@@ -28,12 +29,11 @@ func NewMQTTSubscribe(player voice.Component) *MQTTSubscribe {
 
 func (s *MQTTSubscribe) Filters() map[string]byte {
 	return map[string]byte{
-		voice.MQTTTopicSimpleText:  0,
-		voice.MQTTTopicJSONText:    0,
-		voice.MQTTTopicPlayerURL:   0,
-		voice.MQTTTopicPlayerPause: 0,
-		voice.MQTTTopicPlayerStop:  0,
-		voice.MQTTTopicPlayerPlay:  0,
+		voice.MQTTTopicSimpleText:      0,
+		voice.MQTTTopicJSONText:        0,
+		voice.MQTTTopicPlayerURL:       0,
+		voice.MQTTTopicPlayerAction:    0,
+		voice.MQTTTopicPlayerVolumeSet: 0,
 	}
 }
 
@@ -52,19 +52,22 @@ func (s *MQTTSubscribe) Callback(client mqtt.Component, message m.Message) {
 	case voice.MQTTTopicPlayerURL:
 		s.player.PlayURL(string(message.Payload()))
 
-	case voice.MQTTTopicPlayerPause:
-		if bytes.Compare(message.Payload(), []byte("1")) == 0 {
-			s.player.Pause()
-		}
-
-	case voice.MQTTTopicPlayerStop:
-		if bytes.Compare(message.Payload(), []byte("1")) == 0 {
+	case voice.MQTTTopicPlayerAction:
+		switch strings.ToLower(string(message.Payload())) {
+		case "stop":
 			s.player.Stop()
+
+		case "pause":
+			s.player.Pause()
+
+		case "play":
+			s.player.Play()
 		}
 
-	case voice.MQTTTopicPlayerPlay:
-		if bytes.Compare(message.Payload(), []byte("1")) == 0 {
-			s.player.Play()
+	case voice.MQTTTopicPlayerVolumeSet:
+		volume, err := strconv.ParseInt(string(message.Payload()), 10, 64)
+		if err == nil {
+			s.player.SetVolume(volume)
 		}
 	}
 }

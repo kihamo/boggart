@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"strings"
@@ -65,12 +66,13 @@ func (c *Component) Run(wg *sync.WaitGroup) error {
 	c.logger = logger.NewOrNop(c.Name(), c.application)
 	c.provider = yandex.NewYandexSpeechKitCloud(c.config.String(voice.ConfigYandexSpeechKitCloudKey), c.config.Bool(config.ConfigDebug))
 	c.application.GetComponent(mqtt.ComponentName).(mqtt.Component).Subscribe(NewMQTTSubscribe(c))
+	c.audioPlayer.SetVolume(c.config.Int64(voice.ConfigSpeechVolume))
 
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 
-		c.audioPlayerStatusUpdater()
+		c.audioPlayerUpdater()
 	}()
 
 	return nil
@@ -136,7 +138,7 @@ func (c *Component) SpeechWithOptions(text string, volume int64, speed float64, 
 		return err
 	}
 
-	c.audioPlayer.Volume(volume)
+	c.audioPlayer.SetVolume(volume)
 
 	err = c.PlayReader(ioutil.NopCloser(bytes.NewReader(file)))
 	if err != nil {
@@ -152,8 +154,12 @@ func (c *Component) SpeechWithOptions(text string, volume int64, speed float64, 
 	return nil
 }
 
-func (c *Component) PlayReader(reader io.ReadCloser) error {
-	err := c.audioPlayer.PlayFromReader(reader)
+func (c *Component) PlayReader(reader io.ReadCloser) (err error) {
+	err = c.audioPlayer.Stop()
+	if err == nil {
+		err = c.audioPlayer.PlayFromReader(reader)
+	}
+
 	if err != nil {
 		c.logger.Error("Failed play reader", map[string]interface{}{
 			"error": err.Error(),
@@ -165,8 +171,12 @@ func (c *Component) PlayReader(reader io.ReadCloser) error {
 	return err
 }
 
-func (c *Component) PlayURL(url string) error {
-	err := c.audioPlayer.PlayFromURL(url)
+func (c *Component) PlayURL(url string) (err error) {
+	err = c.audioPlayer.Stop()
+	if err == nil {
+		err = c.audioPlayer.PlayFromURL(url)
+	}
+
 	if err != nil {
 		c.logger.Error("Failed play URL", map[string]interface{}{
 			"error": err.Error(),
@@ -220,14 +230,41 @@ func (c *Component) Stop() error {
 	return err
 }
 
-func (c *Component) audioPlayerStatusUpdater() {
-	var lastStatus players.Status
+func (c *Component) Volume() int64 {
+	return c.audioPlayer.Volume()
+}
+
+func (c *Component) SetVolume(percent int64) error {
+	err := c.audioPlayer.SetVolume(percent)
+	if err != nil {
+		c.logger.Error("Failed set volume player", map[string]interface{}{
+			"error":  err.Error(),
+			"volume": percent,
+		})
+	} else {
+		c.logger.Debugf("Player set volume %d", percent)
+	}
+
+	return err
+}
+
+func (c *Component) audioPlayerUpdater() {
+	var (
+		lastStatus players.Status
+		lastVolume int64
+	)
 
 	for {
 		status := c.audioPlayer.Status()
 		if status != lastStatus {
 			c.mqtt.Publish(voice.MQTTTopicPlayerStatus, 0, false, status.String())
 			lastStatus = status
+		}
+
+		volume := c.audioPlayer.Volume()
+		if volume != lastVolume {
+			c.mqtt.Publish(voice.MQTTTopicPlayerVolume, 0, false, fmt.Sprintf("%d", volume))
+			lastVolume = volume
 		}
 
 		time.Sleep(time.Second)

@@ -16,4 +16,6 @@ type Component interface {
 	Play() error
 	Pause() error
 	Stop() error
+	Volume() int64
+	SetVolume(percent int64) error
 }
