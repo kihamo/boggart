@@ -255,16 +255,20 @@ func (c *Component) audioPlayerUpdater() {
 	)
 
 	for {
-		status := c.audioPlayer.Status()
-		if status != lastStatus {
-			c.mqtt.Publish(voice.MQTTTopicPlayerStatus, 0, false, status.String())
-			lastStatus = status
-		}
+		client := c.mqtt.Client()
 
-		volume := c.audioPlayer.Volume()
-		if volume != lastVolume {
-			c.mqtt.Publish(voice.MQTTTopicPlayerVolume, 0, false, fmt.Sprintf("%d", volume))
-			lastVolume = volume
+		if client != nil && client.IsConnected() {
+			status := c.audioPlayer.Status()
+			if status != lastStatus {
+				c.mqtt.Publish(voice.MQTTTopicPlayerStatus, 0, false, status.String())
+				lastStatus = status
+			}
+
+			volume := c.audioPlayer.Volume()
+			if volume != lastVolume {
+				c.mqtt.Publish(voice.MQTTTopicPlayerVolume, 0, false, fmt.Sprintf("%d", volume))
+				lastVolume = volume
+			}
 		}
 
 		time.Sleep(time.Second)
