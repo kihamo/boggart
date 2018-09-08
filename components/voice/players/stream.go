@@ -23,7 +23,7 @@ func NewStreamWrapper(original Stream) *StreamWrapper {
 	}
 }
 
-func(w *StreamWrapper) Read(p []byte) (int, error) {
+func (w *StreamWrapper) Read(p []byte) (int, error) {
 	if w == nil {
 		return -1, nil
 	}
@@ -31,7 +31,7 @@ func(w *StreamWrapper) Read(p []byte) (int, error) {
 	return w.original.Read(p)
 }
 
-func(w *StreamWrapper) Close() error {
+func (w *StreamWrapper) Close() error {
 	if w == nil {
 		return nil
 	}
@@ -44,7 +44,7 @@ func(w *StreamWrapper) Close() error {
 	return err
 }
 
-func(w *StreamWrapper) SampleRate() int {
+func (w *StreamWrapper) SampleRate() int {
 	if w == nil {
 		return 0
 	}
@@ -52,7 +52,7 @@ func(w *StreamWrapper) SampleRate() int {
 	return w.original.SampleRate()
 }
 
-func(w *StreamWrapper) IsClosed() bool {
+func (w *StreamWrapper) IsClosed() bool {
 	if w == nil {
 		return true
 	}

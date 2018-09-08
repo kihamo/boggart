@@ -7,15 +7,10 @@ import (
 	"io/ioutil"
 	"strings"
 	"sync"
-	"time"
 
-	"github.com/faiface/beep"
-	"github.com/faiface/beep/effects"
-	"github.com/faiface/beep/mp3"
-	"github.com/faiface/beep/wav"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/components/voice"
-	play "github.com/kihamo/boggart/components/voice/beep"
+	"github.com/kihamo/boggart/components/voice/players"
 	yandex "github.com/kihamo/boggart/components/voice/providers/yandex_speechkit_cloud"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/config"
@@ -128,29 +123,12 @@ func (c *Component) SpeechWithOptions(text string, volume int64, speed float64, 
 		return err
 	}
 
-	f := ioutil.NopCloser(bytes.NewReader(file))
+	p := players.NewAudio()
+	p.Volume(volume)
 
-	// decode
-	var (
-		stream beep.StreamSeekCloser
-		format beep.Format
-	)
-
-	switch c.config.String(voice.ConfigYandexSpeechKitCloudFormat) {
-	case yandex.FormatMP3:
-		stream, format, err = mp3.Decode(f)
-
-	case yandex.FormatWAV:
-		stream, format, err = wav.Decode(f)
-
-	default:
-		err = errors.New("Unknown format of audio file")
-	}
-
-	f.Close()
-
+	err = p.PlayFromReader(ioutil.NopCloser(bytes.NewReader(file)))
 	if err != nil {
-		c.logger.Error("Failed decode audio file for speech", map[string]interface{}{
+		c.logger.Error("Failed play speech text", map[string]interface{}{
 			"error":  err.Error(),
 			"format": c.config.String(voice.ConfigYandexSpeechKitCloudFormat),
 			"text":   text,
@@ -158,37 +136,6 @@ func (c *Component) SpeechWithOptions(text string, volume int64, speed float64, 
 
 		return err
 	}
-
-	// sound effects
-	streamWithEffects := effects.Volume{
-		Streamer: stream,
-		Base:     2,
-		Volume:   -float64(100-volume) / 100.0 * 5,
-		Silent:   false,
-	}
-
-	// play
-	err = play.Init(format.SampleRate, format.SampleRate.N(time.Second/10))
-
-	if err != nil {
-		c.logger.Error("Failed init player for speech", map[string]interface{}{
-			"error":  err.Error(),
-			"format": c.config.String(voice.ConfigYandexSpeechKitCloudFormat),
-			"text":   text,
-		})
-
-		return err
-	}
-	//play.Play(&streamWithEffects)
-
-	done := make(chan struct{})
-	play.Play(beep.Seq(&streamWithEffects, beep.Callback(func() {
-		close(done)
-	})))
-	<-done
-
-	// free resources
-	play.Close()
 
 	return nil
 }

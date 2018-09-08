@@ -3,10 +3,8 @@ package players
 import (
 	"errors"
 	"io"
-	"mime"
 	"net/http"
 	"os"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -190,10 +188,6 @@ func (p *AudioPlayer) VolumeDown() error {
 }
 
 func (p *AudioPlayer) Volume(percent int64) error {
-	if !p.IsPlaying() {
-		return ErrorNotPlaying
-	}
-
 	if percent > 100 {
 		percent = 100
 	} else if percent < 0 {
@@ -281,43 +275,4 @@ func (p *AudioPlayer) run() {
 	}()
 
 	_, _ = io.Copy(p.getSpeaker(), p.getStream())
-}
-
-func mimeIsAllow(mime string) bool {
-	return mime == "audio/mpeg" || mime == "audio/vnd.wave" || mime == "audio/ogg"
-}
-
-func mimeFromHeader(header http.Header) (string, error) {
-	contentType := header.Get("Content-type")
-	if contentType == "" {
-		return "", ErrorUnknownAudioFormat
-	}
-
-	for _, v := range strings.Split(contentType, ",") {
-		t, _, err := mime.ParseMediaType(v)
-		if err != nil {
-			return "", err
-		}
-
-		if mimeIsAllow(t) {
-			return t, nil
-		}
-	}
-
-	return "", nil
-}
-
-func mimeFromData(data io.Reader) (string, error) {
-	buf := make([]byte, 128)
-
-	if _, err := data.Read(buf); err != nil {
-		return "", err
-	}
-
-	t := http.DetectContentType(buf)
-	if mimeIsAllow(t) {
-		return t, nil
-	}
-
-	return "", nil
 }

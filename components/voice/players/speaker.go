@@ -17,15 +17,15 @@ func NewSpeakerWrapper(original io.WriteCloser) *SpeakerWrapper {
 	}
 }
 
-func(w *SpeakerWrapper) Write(p []byte) (int, error) {
+func (w *SpeakerWrapper) Write(p []byte) (int, error) {
 	if w == nil {
-		return  -1, nil
+		return -1, nil
 	}
 
 	return w.original.Write(p)
 }
 
-func(w *SpeakerWrapper) Close() error {
+func (w *SpeakerWrapper) Close() error {
 	if w == nil {
 		return nil
 	}
@@ -38,7 +38,7 @@ func(w *SpeakerWrapper) Close() error {
 	return err
 }
 
-func(w *SpeakerWrapper) IsClosed() bool {
+func (w *SpeakerWrapper) IsClosed() bool {
 	if w == nil {
 		return true
 	}
