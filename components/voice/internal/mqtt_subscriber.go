@@ -16,10 +16,10 @@ type SpeechRequest struct {
 }
 
 type MQTTSubscribe struct {
-	speaker voice.Speaker
+	speaker voice.Component
 }
 
-func NewMQTTSubscribe(speaker voice.Speaker) *MQTTSubscribe {
+func NewMQTTSubscribe(speaker voice.Component) *MQTTSubscribe {
 	return &MQTTSubscribe{
 		speaker: speaker,
 	}
