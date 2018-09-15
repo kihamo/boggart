@@ -157,6 +157,8 @@ func (d *CameraHikVision) Callback(client mqtt.Component, message m.Message) {
 		return
 	}
 
+	var err error
+
 	channelId, err := strconv.ParseUint(parts[0], 10, 64)
 	if err != nil {
 		return
@@ -165,11 +167,9 @@ func (d *CameraHikVision) Callback(client mqtt.Component, message m.Message) {
 	switch strings.ToLower(parts[1]) {
 	case "preset":
 		presetId, err := strconv.ParseUint(string(message.Payload()), 10, 64)
-		if err != nil {
-			return
+		if err == nil {
+			err = d.isapi.PTZPresetGoTo(context.Background(), channelId, presetId)
 		}
-
-		d.isapi.PTZPresetGoTo(context.Background(), channelId, presetId)
 
 	case "relative":
 		var request struct {
@@ -178,8 +178,9 @@ func (d *CameraHikVision) Callback(client mqtt.Component, message m.Message) {
 			Zoom int64 `xml:"zoom,omitempty"`
 		}
 
-		if err := json.Unmarshal(message.Payload(), &request); err == nil {
-			d.isapi.PTZRelative(context.Background(), channelId, request.X, request.Y, request.Zoom)
+		err = json.Unmarshal(message.Payload(), &request)
+		if err == nil {
+			err = d.isapi.PTZRelative(context.Background(), channelId, request.X, request.Y, request.Zoom)
 		}
 
 	case "absolute":
@@ -189,19 +190,39 @@ func (d *CameraHikVision) Callback(client mqtt.Component, message m.Message) {
 			Zoom      uint64 `json:"zoom,omitempty"`
 		}
 
-		if err := json.Unmarshal(message.Payload(), &request); err == nil {
-			d.isapi.PTZAbsolute(context.Background(), channelId, request.Elevation, request.Azimuth, request.Zoom)
+		err = json.Unmarshal(message.Payload(), &request)
+		if err == nil {
+			err = d.isapi.PTZAbsolute(context.Background(), channelId, request.Elevation, request.Azimuth, request.Zoom)
 		}
 
 	case "continuous":
 		var request struct {
-			Pan     int64    `json:"pan,omitempty"`
-			Tilt    int64    `json:"tilt,omitempty"`
-			Zoom    int64    `json:"zoom,omitempty"`
+			Pan  int64 `json:"pan,omitempty"`
+			Tilt int64 `json:"tilt,omitempty"`
+			Zoom int64 `json:"zoom,omitempty"`
 		}
 
-		if err := json.Unmarshal(message.Payload(), &request); err == nil {
-			d.isapi.PTZContinuous(context.Background(), channelId, request.Pan, request.Tilt, request.Zoom)
+		err = json.Unmarshal(message.Payload(), &request)
+		if err == nil {
+			err = d.isapi.PTZContinuous(context.Background(), channelId, request.Pan, request.Tilt, request.Zoom)
 		}
+
+	case "momentary":
+		var request struct {
+			Pan      int64         `json:"pan,omitempty"`
+			Tilt     int64         `json:"tilt,omitempty"`
+			Zoom     int64         `json:"zoom,omitempty"`
+			Duration time.Duration `json:"duration,omitempty"`
+		}
+
+		err = json.Unmarshal(message.Payload(), &request)
+		if err == nil {
+			duration := time.Duration(request.Duration) * time.Millisecond
+			err = d.isapi.PTZMomentary(context.Background(), channelId, request.Pan, request.Tilt, request.Zoom, duration)
+		}
+	}
+
+	if err != nil {
+		fmt.Println(err.Error(), parts, string(message.Payload()))
 	}
 }

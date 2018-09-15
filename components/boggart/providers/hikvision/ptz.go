@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 const (
@@ -19,10 +20,13 @@ type PTZData struct {
 }
 
 type PTZDataContinuous struct {
-	XMLName xml.Name `xml:"PTZData"`
-	Pan     int64    `xml:"pan,omitempty"`
-	Tilt    int64    `xml:"tilt,omitempty"`
-	Zoom    int64    `xml:"zoom,omitempty"`
+	XMLName   xml.Name `xml:"PTZData"`
+	Pan       int64    `xml:"pan,omitempty"`
+	Tilt      int64    `xml:"tilt,omitempty"`
+	Zoom      int64    `xml:"zoom,omitempty"`
+	Momentary struct {
+		Duration int64 `xml:"duration"`
+	} `xml:"Momentary,omitempty"`
 }
 
 type PTZDataRelative struct {
@@ -158,6 +162,52 @@ func (a *ISAPI) PTZContinuous(ctx context.Context, channel uint64, pan, tilt, zo
 		Tilt: tilt,
 		Zoom: zoom,
 	}
+
+	result := ResponseStatus{}
+
+	err := a.DoXML(ctx, http.MethodPut, u, data, &result)
+	if err != nil {
+		return err
+	}
+
+	if result.StatusCode != 1 {
+		return errors.New(result.StatusString)
+	}
+
+	return nil
+}
+
+func (a *ISAPI) PTZMomentary(ctx context.Context, channel uint64, pan, tilt, zoom int64, duration time.Duration) error {
+	if pan < -100 {
+		pan = -100
+	} else if pan > 100 {
+		pan = 100
+	}
+
+	if tilt < -100 {
+		tilt = -100
+	} else if tilt > 100 {
+		tilt = 100
+	}
+
+	if zoom < -100 {
+		zoom = -100
+	} else if zoom > 100 {
+		zoom = 100
+	}
+
+	if duration < 0 {
+		duration = 0
+	}
+
+	u := a.address + proxyPTZPrefixURL + "/channels/" + strconv.FormatUint(channel, 10) + "/momentary"
+
+	data := PTZDataContinuous{
+		Pan:  pan,
+		Tilt: tilt,
+		Zoom: zoom,
+	}
+	data.Momentary.Duration = int64(duration.Seconds() * 1000)
 
 	result := ResponseStatus{}
 
