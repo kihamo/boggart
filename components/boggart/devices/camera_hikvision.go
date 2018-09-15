@@ -32,6 +32,8 @@ type CameraHikVision struct {
 	mutex                 sync.Mutex
 	alertStreamingHistory map[string]time.Time
 	mqtt                  mqtt.Component
+
+	ptzChannels map[uint64]hikvision.PTZChannel
 }
 
 func NewCameraHikVision(isapi *hikvision.ISAPI, interval time.Duration, m mqtt.Component) *CameraHikVision {
@@ -39,7 +41,8 @@ func NewCameraHikVision(isapi *hikvision.ISAPI, interval time.Duration, m mqtt.C
 		isapi:                 isapi,
 		interval:              interval,
 		alertStreamingHistory: make(map[string]time.Time),
-		mqtt: m,
+		mqtt:        m,
+		ptzChannels: make(map[uint64]hikvision.PTZChannel, 0),
 	}
 	device.Init()
 	device.SetDescription("HikVision camera")
@@ -86,6 +89,12 @@ func (d *CameraHikVision) taskSerialNumber(ctx context.Context) (interface{}, er
 
 	d.SetSerialNumber(deviceInfo.SerialNumber)
 	d.SetDescription(d.Description() + " with serial number " + deviceInfo.SerialNumber)
+
+	if list, err := d.isapi.PTZChannels(ctx); err == nil {
+		for _, channel := range list.Channels {
+			d.ptzChannels[channel.ID] = channel
+		}
+	}
 
 	if err := d.startAlertStreaming(); err != nil {
 		return nil, err, false
@@ -146,7 +155,7 @@ func (d *CameraHikVision) Filters() map[string]byte {
 }
 
 func (d *CameraHikVision) Callback(client mqtt.Component, message m.Message) {
-	if !d.IsEnabled() {
+	if !d.IsEnabled() || len(d.ptzChannels) == 0 {
 		return
 	}
 
@@ -161,6 +170,11 @@ func (d *CameraHikVision) Callback(client mqtt.Component, message m.Message) {
 
 	channelId, err := strconv.ParseUint(parts[0], 10, 64)
 	if err != nil {
+		return
+	}
+
+	_, ok := d.ptzChannels[channelId]
+	if !ok {
 		return
 	}
 

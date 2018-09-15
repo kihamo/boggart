@@ -9,7 +9,9 @@ import (
 )
 
 func (c *Component) DashboardRoutes() []dashboard.Route {
-	proxyHandler := &handlers.ProxyHandler{}
+	proxyHandler := &handlers.ProxyHandler{
+		Component: c,
+	}
 
 	m := c.application.GetComponent(messengers.ComponentName)
 	if m != nil {

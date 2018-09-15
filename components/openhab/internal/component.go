@@ -2,7 +2,6 @@ package internal
 
 import (
 	"net/url"
-	"sync"
 
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/kihamo/boggart/components/openhab"
@@ -16,9 +15,6 @@ import (
 type Component struct {
 	application shadow.Application
 	config      config.Component
-
-	mutex  sync.RWMutex
-	apiUrl *url.URL
 }
 
 func (c *Component) Name() string {
@@ -51,23 +47,13 @@ func (c *Component) Init(a shadow.Application) error {
 	return nil
 }
 
-func (c *Component) Run() (err error) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	c.apiUrl, err = url.Parse(c.config.String(openhab.ConfigAPIURL))
+func (c *Component) Client() *apiclient.OpenHABREST {
+	u, err := url.Parse(c.config.String(openhab.ConfigAPIURL))
 	if err != nil {
-		return err
+		return nil
 	}
 
-	return nil
-}
-
-func (c *Component) Client() *apiclient.OpenHABREST {
-	c.mutex.RLock()
-	transport := httptransport.New(c.apiUrl.Host, "/rest", []string{c.apiUrl.Scheme})
-	c.mutex.RUnlock()
-
+	transport := httptransport.New(u.Host, "/rest", []string{u.Scheme})
 	transport.Debug = c.config.Bool(config.ConfigDebug)
 
 	return apiclient.New(transport, nil)

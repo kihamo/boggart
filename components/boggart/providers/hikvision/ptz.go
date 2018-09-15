@@ -13,6 +13,31 @@ const (
 	proxyPTZPrefixURL = "/PTZCtrl"
 )
 
+type PTZStatus struct {
+	AbsoluteHigh PTZDataAbsoluteHigh `xml:"AbsoluteHigh"`
+}
+
+type PTZChannelList struct {
+	Channels []PTZChannel `xml:"PTZChannel"`
+}
+
+type PTZChannel struct {
+	ID                   uint64 `xml:"id"`
+	Enabled              bool   `xml:"enabled"`
+	VideoInputID         uint64 `xml:"videoInputID"`
+	PanMaxSpeed          uint64 `xml:"panMaxSpeed"`
+	TiltMaxSpeed         uint64 `xml:"tiltMaxSpeed"`
+	PresetSpeed          uint64 `xml:"presetSpeed"`
+	AutoPatrolSpeed      uint64 `xml:"autoPatrolSpeed"`
+	KeyBoardControlSpeed string `xml:"keyBoardControlSpeed"`
+	ControlProtocol      string `xml:"controlProtocol"`
+	DefaultPresetID      uint64 `xml:"defaultPresetID"`
+	PanSupport           bool   `xml:"panSupport"`
+	TiltSupport          bool   `xml:"tiltSupport"`
+	ZoomSupport          bool   `xml:"zoomSupport"`
+	ManualControlSpeed   string `xml:"manualControlSpeed"`
+}
+
 type PTZData struct {
 	XMLName      xml.Name             `xml:"PTZData"`
 	Relative     *PTZDataRelative     `xml:"Relative,omitempty"`
@@ -39,6 +64,18 @@ type PTZDataAbsoluteHigh struct {
 	Elevation    int64  `xml:"elevation,omitempty"`
 	Azimuth      uint64 `xml:"azimuth,omitempty"`
 	AbsoluteZoom uint64 `xml:"absoluteZoom,omitempty"`
+}
+
+func (a *ISAPI) PTZChannels(ctx context.Context) (list PTZChannelList, err error) {
+	u := a.address + proxyPTZPrefixURL + "/channels"
+	err = a.DoXML(ctx, http.MethodGet, u, nil, &list)
+	return list, err
+}
+
+func (a *ISAPI) PTZStatus(ctx context.Context, channel uint64) (status PTZStatus, err error) {
+	u := a.address + proxyPTZPrefixURL + "/channels/" + strconv.FormatUint(channel, 10) + "/status"
+	err = a.DoXML(ctx, http.MethodGet, u, nil, &status)
+	return status, err
 }
 
 func (a *ISAPI) PTZPresetGoTo(ctx context.Context, channel, preset uint64) error {

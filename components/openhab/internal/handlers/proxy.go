@@ -18,6 +18,7 @@ import (
 type ProxyHandler struct {
 	dashboard.Handler
 
+	Component  openhab.Component
 	Messengers messengers.Component
 }
 
@@ -33,7 +34,11 @@ func (h *ProxyHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 			return
 		}
 
-		client := dashboard.ComponentFromContext(r.Context()).(openhab.Component).Client()
+		client := h.Component.Client()
+		if client == nil {
+			http.Error(w, "Client not initialization", http.StatusServiceUnavailable)
+			return
+		}
 
 		// TODO: cache
 		status, err := client.Things.GetByUID(&things.GetByUIDParams{
@@ -76,6 +81,7 @@ func (h *ProxyHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 		w.WriteHeader(response.StatusCode)
 		w.Write(body)
+		return
 	}
 
 	h.NotFound(w, r)
