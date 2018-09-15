@@ -192,5 +192,16 @@ func (d *CameraHikVision) Callback(client mqtt.Component, message m.Message) {
 		if err := json.Unmarshal(message.Payload(), &request); err == nil {
 			d.isapi.PTZAbsolute(context.Background(), channelId, request.Elevation, request.Azimuth, request.Zoom)
 		}
+
+	case "continuous":
+		var request struct {
+			Pan     int64    `json:"pan,omitempty"`
+			Tilt    int64    `json:"tilt,omitempty"`
+			Zoom    int64    `json:"zoom,omitempty"`
+		}
+
+		if err := json.Unmarshal(message.Payload(), &request); err == nil {
+			d.isapi.PTZContinuous(context.Background(), channelId, request.Pan, request.Tilt, request.Zoom)
+		}
 	}
 }

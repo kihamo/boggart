@@ -18,6 +18,13 @@ type PTZData struct {
 	AbsoluteHigh *PTZDataAbsoluteHigh `xml:"AbsoluteHigh,omitempty"`
 }
 
+type PTZDataContinuous struct {
+	XMLName xml.Name `xml:"PTZData"`
+	Pan     int64    `xml:"pan,omitempty"`
+	Tilt    int64    `xml:"tilt,omitempty"`
+	Zoom    int64    `xml:"zoom,omitempty"`
+}
+
 type PTZDataRelative struct {
 	PositionX    int64 `xml:"positionX,omitempty"`
 	PositionY    int64 `xml:"positionY,omitempty"`
@@ -109,6 +116,47 @@ func (a *ISAPI) PTZAbsolute(ctx context.Context, channel uint64, elevation int64
 			Azimuth:      azimuth,
 			AbsoluteZoom: absoluteZoom,
 		},
+	}
+
+	result := ResponseStatus{}
+
+	err := a.DoXML(ctx, http.MethodPut, u, data, &result)
+	if err != nil {
+		return err
+	}
+
+	if result.StatusCode != 1 {
+		return errors.New(result.StatusString)
+	}
+
+	return nil
+}
+
+func (a *ISAPI) PTZContinuous(ctx context.Context, channel uint64, pan, tilt, zoom int64) error {
+	if pan < -100 {
+		pan = -100
+	} else if pan > 100 {
+		pan = 100
+	}
+
+	if tilt < -100 {
+		tilt = -100
+	} else if tilt > 100 {
+		tilt = 100
+	}
+
+	if zoom < -100 {
+		zoom = -100
+	} else if zoom > 100 {
+		zoom = 100
+	}
+
+	u := a.address + proxyPTZPrefixURL + "/channels/" + strconv.FormatUint(channel, 10) + "/continuous"
+
+	data := PTZDataContinuous{
+		Pan:  pan,
+		Tilt: tilt,
+		Zoom: zoom,
 	}
 
 	result := ResponseStatus{}
