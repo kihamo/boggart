@@ -12,8 +12,4 @@ func (c *Component) initMQTT() {
 	if c.config.Bool(boggart.ConfigOwnTracksEnabled) {
 		m.Subscribe(subscribes.NewOwnTracksSubscribe())
 	}
-
-	if c.config.Bool(boggart.ConfigGPIOEnabled) {
-		m.Subscribe(subscribes.NewGPIOSubscribe(c.devicesManager, c.logger))
-	}
 }

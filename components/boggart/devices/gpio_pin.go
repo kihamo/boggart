@@ -1,10 +1,13 @@
 package devices
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 
+	m "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/mqtt"
 	"periph.io/x/periph/conn/gpio"
 	"periph.io/x/periph/conn/pin"
 )
@@ -12,6 +15,8 @@ import (
 type GPIOMode int64
 
 const (
+	GPIOMQTTTopicPrefix = boggart.ComponentName + "/gpio/"
+
 	GPIOModeDefault GPIOMode = iota
 	GPIOModeIn
 	GPIOModeOut
@@ -99,5 +104,23 @@ func (d *GPIOPin) waitForEdge() {
 
 	for p.WaitForEdge(-1) {
 		d.TriggerEvent(boggart.DeviceEventGPIOPinChanged, d.pin.Number(), d.Read())
+	}
+}
+
+func (d *GPIOPin) Filters() map[string]byte {
+	return map[string]byte{
+		fmt.Sprintf("%s/%d", GPIOMQTTTopicPrefix, d.pin.Number()): 0,
+	}
+}
+
+func (d *GPIOPin) Callback(client mqtt.Component, message m.Message) {
+	if !d.IsEnabled() {
+		return
+	}
+
+	if bytes.Equal(message.Payload(), []byte(`1`)) {
+		d.High()
+	} else {
+		d.Low()
 	}
 }

@@ -105,6 +105,7 @@ func (c *Component) Run() (err error) {
 
 	c.initListeners()
 	c.initRS485()
+	c.initMQTT()
 
 	c.initGPIO()
 	c.initElectricityMeters()
@@ -114,8 +115,6 @@ func (c *Component) Run() (err error) {
 	c.initVideoRecorders()
 	c.initPulsarMeters()
 	c.initSensor()
-
-	c.initMQTT()
 
 	c.devicesManager.Ready()
 

@@ -60,17 +60,10 @@ type EventNotificationAlertStreamResponse struct {
 }
 
 type AlertStreaming struct {
-	connection Connection
-	request    *http.Request
-	alerts     chan *EventNotificationAlertStreamResponse
-	errors     chan error
-}
-
-func NewAlertStreaming(client Connection, request *http.Request) *AlertStreaming {
-	return &AlertStreaming{
-		connection: client,
-		request:    request,
-	}
+	isapi   *ISAPI
+	context context.Context
+	alerts  chan *EventNotificationAlertStreamResponse
+	errors  chan error
 }
 
 func (s *AlertStreaming) Start() {
@@ -80,7 +73,7 @@ func (s *AlertStreaming) Start() {
 	go func() {
 		ticker := time.NewTicker(connectionAttemptDuration)
 		for ; true; <-ticker.C {
-			response, err := s.connection.Do(s.request)
+			response, err := s.isapi.Do(s.context, http.MethodGet, s.isapi.address+"/Event/notification/alertStream", nil)
 			if err != nil {
 				s.errors <- err
 				continue
@@ -106,7 +99,7 @@ func (s *AlertStreaming) read(response *http.Response) {
 
 	for {
 		select {
-		case <-s.request.Context().Done():
+		case <-s.context.Done():
 			buf.Reset()
 			close(s.alerts)
 			close(s.errors)
@@ -159,12 +152,10 @@ func (s *AlertStreaming) NextError() <-chan error {
 }
 
 func (a *ISAPI) EventNotificationAlertStream(ctx context.Context) (*AlertStreaming, error) {
-	request, err := http.NewRequest(http.MethodGet, a.address+"/Event/notification/alertStream", nil)
-	if err != nil {
-		return nil, err
+	stream := &AlertStreaming{
+		isapi:   a,
+		context: ctx,
 	}
-
-	stream := NewAlertStreaming(a, request.WithContext(ctx))
 	stream.Start()
 
 	return stream, nil

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 )
 
 func (a *ISAPI) StreamingPicture(ctx context.Context, channel uint64) ([]byte, error) {
@@ -12,16 +13,9 @@ func (a *ISAPI) StreamingPicture(ctx context.Context, channel uint64) ([]byte, e
 		return nil, fmt.Errorf("Unknown channel %d", channel)
 	}
 
-	u := fmt.Sprintf("%s/Streaming/channels/%d/picture", a.address, channel)
+	u := a.address + "/Streaming/channels/" + strconv.FormatUint(channel, 10) + "/picture"
 
-	request, err := http.NewRequest(http.MethodGet, u, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	request = request.WithContext(ctx)
-
-	response, err := a.Do(request)
+	response, err := a.Do(ctx, http.MethodGet, u, nil)
 	if err != nil {
 		return nil, err
 	}

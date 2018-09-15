@@ -2,19 +2,25 @@ package devices
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
+	m "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 )
 
 const (
 	VideoRecorderHikVisionIgnoreInterval = time.Second * 5
+	VideoRecorderMQTTTopicPrefix         = boggart.ComponentName + "/video-recorder/"
 )
 
 type VideoRecorderHikVision struct {
@@ -25,13 +31,15 @@ type VideoRecorderHikVision struct {
 	interval              time.Duration
 	mutex                 sync.Mutex
 	alertStreamingHistory map[string]time.Time
+	mqtt                  mqtt.Component
 }
 
-func NewVideoRecorderHikVision(isapi *hikvision.ISAPI, interval time.Duration) *VideoRecorderHikVision {
+func NewVideoRecorderHikVision(isapi *hikvision.ISAPI, interval time.Duration, m mqtt.Component) *VideoRecorderHikVision {
 	device := &VideoRecorderHikVision{
 		isapi:                 isapi,
 		interval:              interval,
 		alertStreamingHistory: make(map[string]time.Time),
+		mqtt: m,
 	}
 	device.Init()
 	device.SetDescription("HikVision video recorder")
@@ -83,6 +91,7 @@ func (d *VideoRecorderHikVision) taskSerialNumber(ctx context.Context) (interfac
 		return nil, err, false
 	}
 
+	d.mqtt.Subscribe(d)
 	return nil, nil, true
 }
 
@@ -123,4 +132,65 @@ func (d *VideoRecorderHikVision) startAlertStreaming() error {
 	}()
 
 	return nil
+}
+
+func (d *VideoRecorderHikVision) Filters() map[string]byte {
+	sn := strings.Replace(d.SerialNumber(), "/", "_", -1)
+	if sn == "" {
+		return map[string]byte{}
+	}
+
+	return map[string]byte{
+		VideoRecorderMQTTTopicPrefix + sn + "/ptz/#": 0,
+	}
+}
+
+func (d *VideoRecorderHikVision) Callback(client mqtt.Component, message m.Message) {
+	if !d.IsEnabled() {
+		return
+	}
+
+	receivedChannelId := message.Topic()[len(VideoRecorderMQTTTopicPrefix+d.SerialNumber()+"/ptz/"):]
+	parts := strings.Split(receivedChannelId, "/")
+
+	if len(parts) < 2 {
+		return
+	}
+
+	channelId, err := strconv.ParseUint(parts[0], 10, 64)
+	if err != nil {
+		return
+	}
+
+	switch strings.ToLower(parts[1]) {
+	case "presets":
+		presetId, err := strconv.ParseUint(string(message.Payload()), 10, 64)
+		if err != nil {
+			return
+		}
+
+		d.isapi.PTZPresetGoTo(context.Background(), channelId, presetId)
+
+	case "relative":
+		var request struct {
+			X    int64 `xml:"x,omitempty"`
+			Y    int64 `xml:"y,omitempty"`
+			Zoom int64 `xml:"zoom,omitempty"`
+		}
+
+		if err := json.Unmarshal(message.Payload(), &request); err == nil {
+			d.isapi.PTZRelative(context.Background(), channelId, request.X, request.Y, request.Zoom)
+		}
+
+	case "absolute":
+		var request struct {
+			Elevation int64  `json:"elevation,omitempty"`
+			Azimuth   uint64 `json:"azimuth,omitempty"`
+			Zoom      uint64 `json:"zoom,omitempty"`
+		}
+
+		if err := json.Unmarshal(message.Payload(), &request); err == nil {
+			d.isapi.PTZAbsolute(context.Background(), channelId, request.Elevation, request.Azimuth, request.Zoom)
+		}
+	}
 }

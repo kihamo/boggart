@@ -41,30 +41,14 @@ type SystemStatusResponse struct {
 	} `xml:"MemoryList>Memory"`
 }
 
-func (a *ISAPI) SystemDeviceInfo(ctx context.Context) (SystemDeviceInfoResponse, error) {
-	result := SystemDeviceInfoResponse{}
-
-	request, err := http.NewRequest(http.MethodGet, a.address+"/System/deviceInfo", nil)
-	if err != nil {
-		return result, err
-	}
-
-	request = request.WithContext(ctx)
-	err = a.DoAndParse(request, &result)
+func (a *ISAPI) SystemDeviceInfo(ctx context.Context) (result SystemDeviceInfoResponse, err error) {
+	err = a.DoXML(ctx, http.MethodGet, a.address+"/System/deviceInfo", nil, &result)
 
 	return result, err
 }
 
-func (a *ISAPI) SystemStatus(ctx context.Context) (SystemStatusResponse, error) {
-	result := SystemStatusResponse{}
-
-	request, err := http.NewRequest(http.MethodGet, a.address+"/System/status", nil)
-	if err != nil {
-		return result, err
-	}
-
-	request = request.WithContext(ctx)
-	err = a.DoAndParse(request, &result)
+func (a *ISAPI) SystemStatus(ctx context.Context) (result SystemStatusResponse, err error) {
+	err = a.DoXML(ctx, http.MethodGet, a.address+"/System/status", nil, &result)
 
 	return result, err
 }

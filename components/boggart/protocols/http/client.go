@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 )
 
 const (
@@ -50,6 +51,11 @@ func (c *Client) WithUserAgent(agent string) *Client {
 	defer c.mutex.Unlock()
 
 	c.userAgent = agent
+	return c
+}
+
+func (c *Client) WithTimeout(timeout time.Duration) *Client {
+	c.connection.Timeout = timeout
 	return c
 }
 

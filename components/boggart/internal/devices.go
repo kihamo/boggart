@@ -14,6 +14,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/mobile"
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
 	"github.com/kihamo/boggart/components/boggart/providers/softvideo"
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/yryz/ds18b20"
 	"gobot.io/x/gobot/platforms/raspi"
 	"periph.io/x/periph/conn/gpio/gpioreg"
@@ -25,6 +26,8 @@ func (c *Component) initVideoRecorders() {
 		device *devices.VideoRecorderHikVision
 	)
 
+	m := c.application.GetComponent(mqtt.ComponentName).(mqtt.Component)
+
 	if c.config.Bool(boggart.ConfigVideoRecorderHikVisionHomeEnabled) {
 		isapi = hikvision.NewISAPI(
 			c.config.String(boggart.ConfigVideoRecorderHikVisionHomeHost),
@@ -32,7 +35,7 @@ func (c *Component) initVideoRecorders() {
 			c.config.String(boggart.ConfigVideoRecorderHikVisionHomeUsername),
 			c.config.String(boggart.ConfigVideoRecorderHikVisionHomePassword))
 
-		device = devices.NewVideoRecorderHikVision(isapi, c.config.Duration(boggart.ConfigVideoRecorderHikVisionHomeRepeatInterval))
+		device = devices.NewVideoRecorderHikVision(isapi, c.config.Duration(boggart.ConfigVideoRecorderHikVisionHomeRepeatInterval), m)
 		device.SetDescription("Home video recorder")
 
 		c.devicesManager.Register(device)
@@ -45,7 +48,7 @@ func (c *Component) initVideoRecorders() {
 			c.config.String(boggart.ConfigVideoRecorderHikVisionVacationHomeUsername),
 			c.config.String(boggart.ConfigVideoRecorderHikVisionVacationHomePassword))
 
-		device = devices.NewVideoRecorderHikVision(isapi, c.config.Duration(boggart.ConfigVideoRecorderHikVisionVacationHomeRepeatInterval))
+		device = devices.NewVideoRecorderHikVision(isapi, c.config.Duration(boggart.ConfigVideoRecorderHikVisionVacationHomeRepeatInterval), m)
 		device.SetDescription("Vacation home video recorder")
 
 		c.devicesManager.Register(device)
@@ -58,7 +61,7 @@ func (c *Component) initVideoRecorders() {
 			c.config.String(boggart.ConfigVideoRecorderHikVisionGarageUsername),
 			c.config.String(boggart.ConfigVideoRecorderHikVisionGaragePassword))
 
-		device = devices.NewVideoRecorderHikVision(isapi, c.config.Duration(boggart.ConfigVideoRecorderHikVisionGarageRepeatInterval))
+		device = devices.NewVideoRecorderHikVision(isapi, c.config.Duration(boggart.ConfigVideoRecorderHikVisionGarageRepeatInterval), m)
 		device.SetDescription("Garage video recorder")
 
 		c.devicesManager.Register(device)
@@ -144,6 +147,7 @@ func (c *Component) initGPIO() {
 	}
 
 	pins := strings.Split(c.config.String(boggart.ConfigGPIOPins), ",")
+	m := c.application.GetComponent(mqtt.ComponentName).(mqtt.Component)
 
 	for _, pin := range pins {
 		opts := strings.Split(pin, ":")
@@ -184,6 +188,10 @@ func (c *Component) initGPIO() {
 		}
 
 		c.devicesManager.RegisterWithID(fmt.Sprintf("pin.%d", number), device)
+
+		if device.Mode() == devices.GPIOModeOut {
+			m.Subscribe(device)
+		}
 	}
 }
 

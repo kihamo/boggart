@@ -22,16 +22,7 @@ type ContentManagementStorageResponse struct {
 	} `xml:"nasList>nas"`
 }
 
-func (a *ISAPI) ContentManagementStorage(ctx context.Context) (ContentManagementStorageResponse, error) {
-	result := ContentManagementStorageResponse{}
-
-	request, err := http.NewRequest(http.MethodGet, a.address+"/ContentMgmt/Storage", nil)
-	if err != nil {
-		return result, err
-	}
-
-	request = request.WithContext(ctx)
-	err = a.DoAndParse(request, &result)
-
+func (a *ISAPI) ContentManagementStorage(ctx context.Context) (result ContentManagementStorageResponse, err error) {
+	err = a.DoXML(ctx, http.MethodGet, a.address+"/ContentMgmt/Storage", nil, &result)
 	return result, err
 }
