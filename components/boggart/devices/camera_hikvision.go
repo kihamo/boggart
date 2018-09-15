@@ -19,11 +19,11 @@ import (
 )
 
 const (
-	VideoRecorderHikVisionIgnoreInterval = time.Second * 5
-	VideoRecorderMQTTTopicPrefix         = boggart.ComponentName + "/video-recorder/"
+	CameraHikVisionIgnoreInterval = time.Second * 5
+	CameraMQTTTopicPrefix         = boggart.ComponentName + "/camera/"
 )
 
-type VideoRecorderHikVision struct {
+type CameraHikVision struct {
 	boggart.DeviceBase
 	boggart.DeviceSerialNumber
 
@@ -34,43 +34,43 @@ type VideoRecorderHikVision struct {
 	mqtt                  mqtt.Component
 }
 
-func NewVideoRecorderHikVision(isapi *hikvision.ISAPI, interval time.Duration, m mqtt.Component) *VideoRecorderHikVision {
-	device := &VideoRecorderHikVision{
+func NewCameraHikVision(isapi *hikvision.ISAPI, interval time.Duration, m mqtt.Component) *CameraHikVision {
+	device := &CameraHikVision{
 		isapi:                 isapi,
 		interval:              interval,
 		alertStreamingHistory: make(map[string]time.Time),
 		mqtt: m,
 	}
 	device.Init()
-	device.SetDescription("HikVision video recorder")
+	device.SetDescription("HikVision camera")
 
 	return device
 }
 
-func (d *VideoRecorderHikVision) Types() []boggart.DeviceType {
+func (d *CameraHikVision) Types() []boggart.DeviceType {
 	return []boggart.DeviceType{
-		boggart.DeviceTypeVideoRecorder,
+		boggart.DeviceTypeCamera,
 	}
 }
 
-func (d *VideoRecorderHikVision) Ping(ctx context.Context) bool {
+func (d *CameraHikVision) Ping(ctx context.Context) bool {
 	_, err := d.isapi.SystemStatus(ctx)
 	return err == nil
 }
 
-func (d *VideoRecorderHikVision) Tasks() []workers.Task {
+func (d *CameraHikVision) Tasks() []workers.Task {
 	taskSerialNumber := task.NewFunctionTillStopTask(d.taskSerialNumber)
 	taskSerialNumber.SetTimeout(time.Second * 5)
 	taskSerialNumber.SetRepeats(-1)
 	taskSerialNumber.SetRepeatInterval(time.Minute)
-	taskSerialNumber.SetName("device-video-recorder-hikvision-serial-number")
+	taskSerialNumber.SetName("device-camera-hikvision-serial-number")
 
 	return []workers.Task{
 		taskSerialNumber,
 	}
 }
 
-func (d *VideoRecorderHikVision) taskSerialNumber(ctx context.Context) (interface{}, error, bool) {
+func (d *CameraHikVision) taskSerialNumber(ctx context.Context) (interface{}, error, bool) {
 	if !d.IsEnabled() {
 		return nil, nil, false
 	}
@@ -95,7 +95,7 @@ func (d *VideoRecorderHikVision) taskSerialNumber(ctx context.Context) (interfac
 	return nil, nil, true
 }
 
-func (d *VideoRecorderHikVision) startAlertStreaming() error {
+func (d *CameraHikVision) startAlertStreaming() error {
 	ctx := context.Background()
 
 	stream, err := d.isapi.EventNotificationAlertStream(ctx)
@@ -118,7 +118,7 @@ func (d *VideoRecorderHikVision) startAlertStreaming() error {
 				d.alertStreamingHistory[id] = event.DateTime
 				d.mutex.Unlock()
 
-				if !ok || event.DateTime.Sub(lastFire) > VideoRecorderHikVisionIgnoreInterval {
+				if !ok || event.DateTime.Sub(lastFire) > CameraHikVisionIgnoreInterval {
 					d.TriggerEvent(boggart.DeviceEventHikvisionEventNotificationAlert, event, d.SerialNumber())
 				}
 
@@ -134,23 +134,23 @@ func (d *VideoRecorderHikVision) startAlertStreaming() error {
 	return nil
 }
 
-func (d *VideoRecorderHikVision) Filters() map[string]byte {
+func (d *CameraHikVision) Filters() map[string]byte {
 	sn := strings.Replace(d.SerialNumber(), "/", "_", -1)
 	if sn == "" {
 		return map[string]byte{}
 	}
 
 	return map[string]byte{
-		VideoRecorderMQTTTopicPrefix + sn + "/ptz/#": 0,
+		CameraMQTTTopicPrefix + sn + "/ptz/#": 0,
 	}
 }
 
-func (d *VideoRecorderHikVision) Callback(client mqtt.Component, message m.Message) {
+func (d *CameraHikVision) Callback(client mqtt.Component, message m.Message) {
 	if !d.IsEnabled() {
 		return
 	}
 
-	receivedChannelId := message.Topic()[len(VideoRecorderMQTTTopicPrefix+d.SerialNumber()+"/ptz/"):]
+	receivedChannelId := message.Topic()[len(CameraMQTTTopicPrefix+d.SerialNumber()+"/ptz/"):]
 	parts := strings.Split(receivedChannelId, "/")
 
 	if len(parts) < 2 {
@@ -163,7 +163,7 @@ func (d *VideoRecorderHikVision) Callback(client mqtt.Component, message m.Messa
 	}
 
 	switch strings.ToLower(parts[1]) {
-	case "presets":
+	case "preset":
 		presetId, err := strconv.ParseUint(string(message.Payload()), 10, 64)
 		if err != nil {
 			return

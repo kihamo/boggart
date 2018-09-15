@@ -3,6 +3,7 @@ package internal
 import (
 	"encoding/hex"
 	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -20,49 +21,29 @@ import (
 	"periph.io/x/periph/conn/gpio/gpioreg"
 )
 
-func (c *Component) initVideoRecorders() {
-	var (
-		isapi  *hikvision.ISAPI
-		device *devices.VideoRecorderHikVision
-	)
-
+func (c *Component) initCameras() {
 	m := c.application.GetComponent(mqtt.ComponentName).(mqtt.Component)
 
-	if c.config.Bool(boggart.ConfigVideoRecorderHikVisionHomeEnabled) {
-		isapi = hikvision.NewISAPI(
-			c.config.String(boggart.ConfigVideoRecorderHikVisionHomeHost),
-			c.config.Int64(boggart.ConfigVideoRecorderHikVisionHomePort),
-			c.config.String(boggart.ConfigVideoRecorderHikVisionHomeUsername),
-			c.config.String(boggart.ConfigVideoRecorderHikVisionHomePassword))
+	for _, address := range strings.Split(c.config.String(boggart.ConfigCameraHikVisionAddresses), ",") {
+		address = strings.TrimSpace(address)
+		if address == "" {
+			c.logger.Warn("Camera address is empty")
+			continue
+		}
 
-		device = devices.NewVideoRecorderHikVision(isapi, c.config.Duration(boggart.ConfigVideoRecorderHikVisionHomeRepeatInterval), m)
-		device.SetDescription("Home video recorder")
+		u, err := url.Parse(address)
+		if err != nil {
+			c.logger.Warn("Bad camera address " + address)
+			continue
+		}
 
-		c.devicesManager.Register(device)
-	}
+		port, _ := strconv.ParseInt(u.Port(), 10, 64)
+		password, _ := u.User.Password()
 
-	if c.config.Bool(boggart.ConfigVideoRecorderHikVisionVacationHomeEnabled) {
-		isapi = hikvision.NewISAPI(
-			c.config.String(boggart.ConfigVideoRecorderHikVisionVacationHomeHost),
-			c.config.Int64(boggart.ConfigVideoRecorderHikVisionVacationHomePort),
-			c.config.String(boggart.ConfigVideoRecorderHikVisionVacationHomeUsername),
-			c.config.String(boggart.ConfigVideoRecorderHikVisionVacationHomePassword))
+		isapi := hikvision.NewISAPI(u.Hostname(), port, u.User.Username(), password)
 
-		device = devices.NewVideoRecorderHikVision(isapi, c.config.Duration(boggart.ConfigVideoRecorderHikVisionVacationHomeRepeatInterval), m)
-		device.SetDescription("Vacation home video recorder")
-
-		c.devicesManager.Register(device)
-	}
-
-	if c.config.Bool(boggart.ConfigVideoRecorderHikVisionGarageEnabled) {
-		isapi = hikvision.NewISAPI(
-			c.config.String(boggart.ConfigVideoRecorderHikVisionGarageHost),
-			c.config.Int64(boggart.ConfigVideoRecorderHikVisionGaragePort),
-			c.config.String(boggart.ConfigVideoRecorderHikVisionGarageUsername),
-			c.config.String(boggart.ConfigVideoRecorderHikVisionGaragePassword))
-
-		device = devices.NewVideoRecorderHikVision(isapi, c.config.Duration(boggart.ConfigVideoRecorderHikVisionGarageRepeatInterval), m)
-		device.SetDescription("Garage video recorder")
+		device := devices.NewCameraHikVision(isapi, c.config.Duration(boggart.ConfigCameraHikVisionRepeatInterval), m)
+		device.SetDescription(device.Description() + " on " + u.Host)
 
 		c.devicesManager.Register(device)
 	}

@@ -50,7 +50,7 @@ const (
 	DeviceTypeInternetProvider
 	DeviceTypePhone
 	DeviceTypeRouter
-	DeviceTypeVideoRecorder
+	DeviceTypeCamera
 	DeviceTypeWaterMeter
 	DeviceTypeThermometer
 	DeviceTypeBarometer
@@ -87,81 +87,4 @@ type Device interface {
 	Tasks() []workers.Task
 	Listeners() []workers.ListenerWithEvents
 	TriggerEventChannel() <-chan DeviceTriggerEvent
-}
-
-type ReedSwitch interface {
-	Device
-
-	IsOpen() bool
-	IsClose() bool
-}
-
-type Camera interface {
-	Device
-
-	Snapshot(context.Context) ([]byte, error)
-}
-
-type VideoRecorder interface {
-	Device
-
-	Snapshot(context.Context, uint64, uint64) ([]byte, error)
-}
-
-type Phone interface {
-	Device
-
-	Number() string
-	Balance(context.Context) (float64, error)
-}
-
-type ElectricityMeter interface {
-	Device
-
-	Tariffs(context.Context) (map[string]float64, error)
-	Voltage(context.Context) (float64, error)
-	Amperage(context.Context) (float64, error)
-	Power(context.Context) (float64, error)
-}
-
-type WaterMeter interface {
-	Device
-
-	Volume(context.Context) (float64, error)
-}
-
-type HeatMeter interface {
-	Device
-
-	TemperatureIn(context.Context) (float64, error)
-	TemperatureOut(context.Context) (float64, error)
-	TemperatureDelta(context.Context) (float64, error)
-	Energy(context.Context) (float64, error)
-	Consumption(context.Context) (float64, error)
-}
-
-type Router interface {
-	Device
-
-	// TODO: public interface
-}
-
-type Thermometer interface {
-	Device
-}
-
-type Barometer interface {
-	Device
-}
-
-type WaterDetector interface {
-	Device
-}
-
-type MotionDetector interface {
-	Device
-}
-
-type TV interface {
-	Device
 }
