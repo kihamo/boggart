@@ -23,17 +23,22 @@ const (
 	CameraMQTTTopicPrefix         = boggart.ComponentName + "/camera/"
 )
 
+type cameraHikVisionPTZChannel struct {
+	Channel hikvision.PTZChannel
+	Status  *hikvision.PTZStatus
+}
+
 type CameraHikVision struct {
 	boggart.DeviceBase
 	boggart.DeviceSerialNumber
 
 	isapi                 *hikvision.ISAPI
 	interval              time.Duration
-	mutex                 sync.Mutex
+	mutex                 sync.RWMutex
 	alertStreamingHistory map[string]time.Time
 	mqtt                  mqtt.Component
 
-	ptzChannels map[uint64]hikvision.PTZChannel
+	ptzChannels map[uint64]cameraHikVisionPTZChannel
 }
 
 func NewCameraHikVision(isapi *hikvision.ISAPI, interval time.Duration, m mqtt.Component) *CameraHikVision {
@@ -41,8 +46,7 @@ func NewCameraHikVision(isapi *hikvision.ISAPI, interval time.Duration, m mqtt.C
 		isapi:                 isapi,
 		interval:              interval,
 		alertStreamingHistory: make(map[string]time.Time),
-		mqtt:        m,
-		ptzChannels: make(map[uint64]hikvision.PTZChannel, 0),
+		mqtt: m,
 	}
 	device.Init()
 	device.SetDescription("HikVision camera")
@@ -68,8 +72,15 @@ func (d *CameraHikVision) Tasks() []workers.Task {
 	taskSerialNumber.SetRepeatInterval(time.Minute)
 	taskSerialNumber.SetName("device-camera-hikvision-serial-number")
 
+	taskPTZStatus := task.NewFunctionTillStopTask(d.taskPTZStatus)
+	taskPTZStatus.SetTimeout(time.Second * 5)
+	taskPTZStatus.SetRepeats(-1)
+	taskPTZStatus.SetRepeatInterval(time.Minute)
+	taskPTZStatus.SetName("device-camera-hikvision-ptz-status")
+
 	return []workers.Task{
 		taskSerialNumber,
+		taskPTZStatus,
 	}
 }
 
@@ -90,11 +101,18 @@ func (d *CameraHikVision) taskSerialNumber(ctx context.Context) (interface{}, er
 	d.SetSerialNumber(deviceInfo.SerialNumber)
 	d.SetDescription(d.Description() + " with serial number " + deviceInfo.SerialNumber)
 
+	ptzChannels := make(map[uint64]cameraHikVisionPTZChannel, 0)
 	if list, err := d.isapi.PTZChannels(ctx); err == nil {
 		for _, channel := range list.Channels {
-			d.ptzChannels[channel.ID] = channel
+			ptzChannels[channel.ID] = cameraHikVisionPTZChannel{
+				Channel: channel,
+			}
 		}
 	}
+
+	d.mutex.Lock()
+	d.ptzChannels = ptzChannels
+	d.mutex.Unlock()
 
 	if err := d.startAlertStreaming(); err != nil {
 		return nil, err, false
@@ -102,6 +120,53 @@ func (d *CameraHikVision) taskSerialNumber(ctx context.Context) (interface{}, er
 
 	d.mqtt.Subscribe(d)
 	return nil, nil, true
+}
+
+func (d *CameraHikVision) taskPTZStatus(ctx context.Context) (interface{}, error, bool) {
+	d.mutex.RLock()
+	defer d.mutex.RUnlock()
+
+	if !d.IsEnabled() || d.ptzChannels == nil {
+		return nil, nil, false
+	}
+
+	if len(d.ptzChannels) == 0 {
+		return nil, nil, true
+	}
+
+	stop := true
+
+	for id, channel := range d.ptzChannels {
+		if !channel.Channel.Enabled {
+			continue
+		}
+
+		status, err := d.isapi.PTZStatus(ctx, channel.Channel.ID)
+		if err != nil {
+			// TODO: log
+			continue
+		}
+
+		stop = false
+		topicPrefix := CameraMQTTTopicPrefix + d.SerialNumber() + "/ptz/" + strconv.FormatUint(channel.Channel.ID, 10) + "/status/"
+
+		if channel.Status == nil || channel.Status.AbsoluteHigh.Elevation != status.AbsoluteHigh.Elevation {
+			d.mqtt.Publish(topicPrefix+"elevation", 0, false, strconv.FormatInt(status.AbsoluteHigh.Elevation, 10))
+		}
+
+		if channel.Status == nil || channel.Status.AbsoluteHigh.Azimuth != status.AbsoluteHigh.Azimuth {
+			d.mqtt.Publish(topicPrefix+"azimuth", 0, false, strconv.FormatUint(status.AbsoluteHigh.Azimuth, 10))
+		}
+
+		if channel.Status == nil || channel.Status.AbsoluteHigh.AbsoluteZoom != status.AbsoluteHigh.AbsoluteZoom {
+			d.mqtt.Publish(topicPrefix+"zoom", 0, false, strconv.FormatUint(status.AbsoluteHigh.AbsoluteZoom, 10))
+		}
+
+		channel.Status = &status
+		d.ptzChannels[id] = channel
+	}
+
+	return nil, nil, stop
 }
 
 func (d *CameraHikVision) startAlertStreaming() error {
@@ -155,7 +220,7 @@ func (d *CameraHikVision) Filters() map[string]byte {
 }
 
 func (d *CameraHikVision) Callback(client mqtt.Component, message m.Message) {
-	if !d.IsEnabled() || len(d.ptzChannels) == 0 {
+	if !d.IsEnabled() || d.ptzChannels == nil || len(d.ptzChannels) == 0 {
 		return
 	}
 
@@ -179,6 +244,32 @@ func (d *CameraHikVision) Callback(client mqtt.Component, message m.Message) {
 	}
 
 	switch strings.ToLower(parts[1]) {
+	case "move":
+		switch string(message.Payload()) {
+		case "stop":
+			err = d.move(channelId, 0, 0, 0, 0)
+		case "right":
+			err = d.move(channelId, 1, 0, 0, 0)
+		case "left":
+			err = d.move(channelId, -1, 0, 0, 0)
+		case "up":
+			err = d.move(channelId, 0, 1, 0, 0)
+		case "up-right":
+			err = d.move(channelId, 1, 1, 0, 0)
+		case "up-left":
+			err = d.move(channelId, -1, 1, 0, 0)
+		case "down":
+			err = d.move(channelId, 0, -1, 0, 0)
+		case "down-right":
+			err = d.move(channelId, 1, -1, 0, 0)
+		case "down-left":
+			err = d.move(channelId, -1, -1, 0, 0)
+		case "narrow":
+			err = d.move(channelId, 0, 0, 1, 0)
+		case "wide":
+			err = d.move(channelId, 0, 0, -1, 0)
+		}
+
 	case "preset":
 		presetId, err := strconv.ParseUint(string(message.Payload()), 10, 64)
 		if err == nil {
@@ -239,4 +330,16 @@ func (d *CameraHikVision) Callback(client mqtt.Component, message m.Message) {
 	if err != nil {
 		fmt.Println(err.Error(), parts, string(message.Payload()))
 	}
+}
+
+func (d *CameraHikVision) move(channelId uint64, panDirection, tiltDirection, zoomDirection int64, duration time.Duration) error {
+	pan := panDirection
+	tilt := tiltDirection
+	zoom := zoomDirection
+
+	if duration > 0 {
+		return d.isapi.PTZMomentary(context.Background(), channelId, pan, tilt, zoom, duration)
+	}
+
+	return d.isapi.PTZContinuous(context.Background(), channelId, pan, tilt, zoom)
 }
