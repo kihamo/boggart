@@ -17,6 +17,7 @@ import (
 	yandex "github.com/kihamo/boggart/components/voice/providers/yandex_speechkit_cloud"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/config"
+	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/logger"
 )
 
@@ -27,6 +28,7 @@ type Component struct {
 	mqtt        mqtt.Component
 	provider    *yandex.YandexSpeechKitCloud
 	audioPlayer *players.AudioPlayer
+	routes      []dashboard.Route
 }
 
 func (c *Component) Name() string {
@@ -132,7 +134,8 @@ func (c *Component) SpeechWithOptions(text string, volume int64, speed float64, 
 
 	if err != nil {
 		c.logger.Error("Error speech text", map[string]interface{}{
-			"text": text,
+			"text":  text,
+			"error": err.Error(),
 		})
 
 		return err
