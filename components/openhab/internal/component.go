@@ -32,7 +32,8 @@ func (c *Component) Dependencies() []shadow.Dependency {
 			Required: true,
 		},
 		{
-			Name: dashboard.ComponentName,
+			Name:     dashboard.ComponentName,
+			Required: true,
 		},
 		{
 			Name: messengers.ComponentName,

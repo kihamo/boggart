@@ -32,3 +32,4 @@ import:
   version: ~v1.4.7
 - package: github.com/faiface/beep
   version: 63cc6fbbac46dba1a03e55f0ebc965d6c82ca8e1
+- package: github.com/mattn/go-mjpeg

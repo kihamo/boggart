@@ -1,5 +1,5 @@
-hash: 350bc0997401672a7cd143dcda3103592b8c817930cbf435a3cda24b824981bb
-updated: 2018-09-09T02:47:11.825796+03:00
+hash: 36f6bf03c166ef6dd7292004cea6b9960bce76bcf7522cd6a468c9cc7195adb2
+updated: 2018-09-18T02:56:43.133448+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -25,7 +25,7 @@ imports:
   subpackages:
   - gettext/mo
 - name: github.com/deckarep/golang-set
-  version: 1d4478f51bed434f1dadf96dcd9b43aabac66795
+  version: cbaa98ba5575e67703b32b4b19f73c91f3c4159e
 - name: github.com/eclipse/paho.mqtt.golang
   version: 36d01c2b4cbeb3d2a12063e4880ce30800af9560
   subpackages:
@@ -219,6 +219,8 @@ imports:
   - providers/github
   - providers/gitlab
   - providers/gplus
+- name: github.com/mattn/go-mjpeg
+  version: a9cedbfd1cd85caa2ad2411c22dc3fbe88d2f0eb
 - name: github.com/mattn/kinako
   version: 332c0a7e205a29536e672337a4bea6c7a96b04c1
   subpackages:
