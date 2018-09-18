@@ -23,42 +23,42 @@
 
                 <form class="form-horizontal form-label-left" role="form" method="post" id="send-mail" action="/voice/message/" novalidate>
                     <div class="item form-group">
-                        <label for="to" class="control-label col-md-3 col-sm-3 col-xs-12">
+                        <label for="volume" class="control-label col-md-3 col-sm-3 col-xs-12">
                             {{ i18n "Volume" . }} <span class="required">*</span>
                         </label>
                         <div class="col-md-6 col-sm-6 col-xs-12">
-                            <input type="range" min="1" max="100" step="1" class="form-control" id="volume" name="volume" value="{{ config "voice.speech.volume" 50 }}" required="required">
+                            <input type="range" min="1" max="100" step="1" class="form-control" id="volume" name="volume" value="{{ .volume }}" required="required">
                         </div>
                     </div>
                     <div class="item form-group">
-                        <label for="subject" class="control-label col-md-3 col-sm-3 col-xs-12">
+                        <label for="speed" class="control-label col-md-3 col-sm-3 col-xs-12">
                             {{ i18n "Speed" . }} <span class="required">*</span>
                         </label>
                         <div class="col-md-6 col-sm-6 col-xs-12">
-                            <input type="range" min="0" max="3" step="0.1" class="form-control" id="speed" name="speed" value="{{ config "voice.yandex_speechkit_cloud.speed" 1 }}" required="required">
+                            <input type="range" min="0" max="3" step="0.1" class="form-control" id="speed" name="speed" value="{{ .speed }}" required="required">
                         </div>
                     </div>
                     <div class="item form-group">
-                        <label for="subject" class="control-label col-md-3 col-sm-3 col-xs-12">
+                        <label for="speaker" class="control-label col-md-3 col-sm-3 col-xs-12">
                         {{ i18n "Speaker" . }} <span class="required">*</span>
                         </label>
                         <div class="col-md-6 col-sm-6 col-xs-12">
                             <select class="form-control select2" name="speaker" id="speaker" required="required">
-                                <option value="jane"{{ if eq (config "voice.yandex_speechkit_cloud.speaker" "alyss") "jane" }} selected="selected"{{ end }}>{{ i18n "Jane (female)" . }}</option>
-                                <option value="oksana"{{ if eq (config "voice.yandex_speechkit_cloud.speaker" "alyss") "oksana" }} selected="selected"{{ end }}>{{ i18n "Oksana (female)" . }}</option>
-                                <option value="alyss"{{ if eq (config "voice.yandex_speechkit_cloud.speaker" "alyss") "alyss" }} selected="selected"{{ end }}>{{ i18n "Alyss (female)" . }}</option>
-                                <option value="omazh"{{ if eq (config "voice.yandex_speechkit_cloud.speaker" "alyss") "omazh" }} selected="selected"{{ end }}>{{ i18n "Omazh (female)" . }}</option>
-                                <option value="zahar"{{ if eq (config "voice.yandex_speechkit_cloud.speaker" "alyss") "zahar" }} selected="selected"{{ end }}>{{ i18n "Zahar (male)" . }}</option>
-                                <option value="ermil"{{ if eq (config "voice.yandex_speechkit_cloud.speaker" "alyss") "ermil" }} selected="selected"{{ end }}>{{ i18n "Ermil (male)" . }}</option>
+                                <option value="jane"{{ if eq .speaker "jane" }} selected="selected"{{ end }}>{{ i18n "Jane (female)" . }}</option>
+                                <option value="oksana"{{ if eq .speaker "oksana" }} selected="selected"{{ end }}>{{ i18n "Oksana (female)" . }}</option>
+                                <option value="alyss"{{ if eq .speaker "alyss" }} selected="selected"{{ end }}>{{ i18n "Alyss (female)" . }}</option>
+                                <option value="omazh"{{ if eq .speaker "omazh" }} selected="selected"{{ end }}>{{ i18n "Omazh (female)" . }}</option>
+                                <option value="zahar"{{ if eq .speaker "zahar" }} selected="selected"{{ end }}>{{ i18n "Zahar (male)" . }}</option>
+                                <option value="ermil"{{ if eq .speaker "ermil" }} selected="selected"{{ end }}>{{ i18n "Ermil (male)" . }}</option>
                             </select>
                         </div>
                     </div>
                     <div class="item form-group">
-                        <label for="message" class="control-label col-md-3 col-sm-3 col-xs-12">
-                            {{ i18n "Message" . }} <span class="required">*</span>
+                        <label for="text" class="control-label col-md-3 col-sm-3 col-xs-12">
+                            {{ i18n "Text" . }} <span class="required">*</span>
                         </label>
                         <div class="col-md-6 col-sm-6 col-xs-12">
-                            <textarea class="form-control resizable_textarea" rows="4" name="message" id="message" required="required"></textarea>
+                            <textarea class="form-control resizable_textarea" rows="4" name="text" id="text" required="required">{{ .text }}</textarea>
                         </div>
                     </div>
                     <div class="ln_solid"></div>

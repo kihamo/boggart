@@ -15,8 +15,15 @@ type MessageHandler struct {
 }
 
 func (h *MessageHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
+	config := r.Config()
 	locale := i18n.NewOrNopFromRequest(r)
-	vars := map[string]interface{}{}
+
+	vars := map[string]interface{}{
+		"volume":  config.Int64(voice.ConfigSpeechVolume),
+		"speed":   config.Float64(voice.ConfigYandexSpeechKitCloudSpeed),
+		"text":    "",
+		"speaker": config.String(voice.ConfigYandexSpeechKitCloudSpeaker),
+	}
 
 	if r.IsPost() {
 		var (
@@ -28,14 +35,19 @@ func (h *MessageHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 		volume, err = strconv.ParseInt(r.Original().FormValue("volume"), 10, 64)
 
 		if err == nil {
+			vars["volume"] = volume
 			speed, err = strconv.ParseFloat(r.Original().FormValue("speed"), 64)
 		}
 
 		if err == nil {
-			message := r.Original().FormValue("message")
+			text := r.Original().FormValue("text")
 			speaker := r.Original().FormValue("speaker")
 
-			err = h.Component.SpeechWithOptions(message, volume, speed, speaker)
+			vars["speed"] = speed
+			vars["text"] = text
+			vars["speaker"] = speaker
+
+			err = h.Component.SpeechWithOptions(text, volume, speed, speaker)
 		}
 
 		if err != nil {
