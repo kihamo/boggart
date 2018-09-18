@@ -151,15 +151,15 @@ func (d *CameraHikVision) taskPTZStatus(ctx context.Context) (interface{}, error
 		topicPrefix := CameraMQTTTopicPrefix + d.SerialNumber() + "/ptz/" + strconv.FormatUint(channel.Channel.ID, 10) + "/status/"
 
 		if channel.Status == nil || channel.Status.AbsoluteHigh.Elevation != status.AbsoluteHigh.Elevation {
-			d.mqtt.Publish(topicPrefix+"elevation", 0, false, strconv.FormatInt(status.AbsoluteHigh.Elevation, 10))
+			d.mqtt.Publish(topicPrefix+"elevation", 1, false, strconv.FormatInt(status.AbsoluteHigh.Elevation, 10))
 		}
 
 		if channel.Status == nil || channel.Status.AbsoluteHigh.Azimuth != status.AbsoluteHigh.Azimuth {
-			d.mqtt.Publish(topicPrefix+"azimuth", 0, false, strconv.FormatUint(status.AbsoluteHigh.Azimuth, 10))
+			d.mqtt.Publish(topicPrefix+"azimuth", 1, false, strconv.FormatUint(status.AbsoluteHigh.Azimuth, 10))
 		}
 
 		if channel.Status == nil || channel.Status.AbsoluteHigh.AbsoluteZoom != status.AbsoluteHigh.AbsoluteZoom {
-			d.mqtt.Publish(topicPrefix+"zoom", 0, false, strconv.FormatUint(status.AbsoluteHigh.AbsoluteZoom, 10))
+			d.mqtt.Publish(topicPrefix+"zoom", 1, false, strconv.FormatUint(status.AbsoluteHigh.AbsoluteZoom, 10))
 		}
 
 		channel.Status = &status
@@ -325,6 +325,10 @@ func (d *CameraHikVision) Callback(client mqtt.Component, message m.Message) {
 			duration := time.Duration(request.Duration) * time.Millisecond
 			err = d.isapi.PTZMomentary(context.Background(), channelId, request.Pan, request.Tilt, request.Zoom, duration)
 		}
+	}
+
+	if err == nil {
+		_, err = d.Tasks()[1].Run(context.Background())
 	}
 
 	if err != nil {
