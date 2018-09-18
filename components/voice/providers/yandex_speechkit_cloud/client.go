@@ -81,9 +81,13 @@ func (c *YandexSpeechKitCloud) Generate(ctx context.Context, text, lang, speaker
 	}
 	defer response.Body.Close()
 
-	if response.StatusCode != h.StatusOK {
-		return nil, errors.New("Returns not 200 OK response")
+	switch response.StatusCode {
+	case h.StatusOK:
+		return ioutil.ReadAll(response.Body)
+
+	case h.StatusLocked:
+		return nil, errors.New("API key is locked, please contact Yandex support team")
 	}
 
-	return ioutil.ReadAll(response.Body)
+	return nil, errors.New("Returns not 200 OK response")
 }
