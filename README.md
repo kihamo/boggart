@@ -91,4 +91,5 @@ sudo systemctl start boggart.service && sudo journalctl -f -u boggart.service
 
 sudo echo "22" > /sys/class/gpio/unexport
 sudo echo "27" > /sys/class/gpio/unexport
+sudo echo "5" > /sys/class/gpio/unexport
 ```

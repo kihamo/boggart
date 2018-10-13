@@ -3,7 +3,9 @@ package handlers
 import (
 	"bytes"
 	"fmt"
-	"image/jpeg"
+
+	"github.com/hybridgroup/mjpeg"
+	// "image/jpeg"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -14,9 +16,9 @@ import (
 	"github.com/kihamo/boggart/components/openhab"
 	"github.com/kihamo/boggart/components/openhab/client/things"
 	"github.com/kihamo/shadow/components/dashboard"
-	"github.com/kihamo/shadow/components/logger"
+	// "github.com/kihamo/shadow/components/logger"
 	"github.com/kihamo/shadow/components/messengers"
-	"github.com/mattn/go-mjpeg"
+	// "github.com/mattn/go-mjpeg"
 )
 
 const (
@@ -72,8 +74,8 @@ func (h *ProxyHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		switch strings.ToLower(query.Get(queryParamStream)) {
-		case streamMJPEG:
-			h.proxymjpegStream(configVal.(string), w, r)
+		//case streamMJPEG:
+		//	h.proxymjpegStream(configVal.(string), w, r)
 
 		default:
 			h.proxy(configVal.(string), w, r)
@@ -85,6 +87,7 @@ func (h *ProxyHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	h.NotFound(w, r)
 }
 
+/*
 func (h *ProxyHandler) proxymjpegStream(u string, w *dashboard.Response, r *dashboard.Request) {
 	var stream *mjpeg.Stream
 
@@ -149,7 +152,7 @@ func (h *ProxyHandler) proxymjpegStream(u string, w *dashboard.Response, r *dash
 
 	stream.ServeHTTP(w, r.Original())
 }
-
+*/
 func (h *ProxyHandler) proxy(u string, w *dashboard.Response, r *dashboard.Request) {
 	response, err := http.Get(u)
 	if err != nil {

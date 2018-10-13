@@ -3,16 +3,17 @@ package main // import "github.com/kihamo/boggart/cmd/roborock"
 import (
 	"log"
 
-	mqtt "github.com/kihamo/boggart/components/mqtt/instance"
-	roborock "github.com/kihamo/boggart/components/roborock/instance"
-	voice "github.com/kihamo/boggart/components/voice/instance"
+	_ "github.com/kihamo/boggart/components/mqtt/instance"
+	_ "github.com/kihamo/boggart/components/roborock/instance"
+	_ "github.com/kihamo/boggart/components/voice/instance"
 	"github.com/kihamo/shadow"
-	config "github.com/kihamo/shadow/components/config/instance"
-	dashboard "github.com/kihamo/shadow/components/dashboard/instance"
-	i18n "github.com/kihamo/shadow/components/i18n/instance"
-	logger "github.com/kihamo/shadow/components/logger/instance"
-	metrics "github.com/kihamo/shadow/components/metrics/instance"
-	profiling "github.com/kihamo/shadow/components/profiling/instance"
+	_ "github.com/kihamo/shadow/components/config/instance"
+	_ "github.com/kihamo/shadow/components/dashboard/instance"
+	_ "github.com/kihamo/shadow/components/i18n/instance"
+	_ "github.com/kihamo/shadow/components/logger/instance"
+	_ "github.com/kihamo/shadow/components/metrics/instance"
+	_ "github.com/kihamo/shadow/components/profiling/instance"
+	_ "github.com/kihamo/shadow/components/tracing/instance"
 )
 
 var (
@@ -21,28 +22,11 @@ var (
 )
 
 func main() {
-	application, err := shadow.NewApp(
-		"Boggart Roborock",
-		Version,
-		Build,
-		[]shadow.Component{
-			mqtt.NewComponent(),
-			config.NewComponent(),
-			dashboard.NewComponent(),
-			roborock.NewComponent(),
-			voice.NewComponent(),
-			i18n.NewComponent(),
-			logger.NewComponent(),
-			metrics.NewComponent(),
-			profiling.NewComponent(),
-		},
-	)
+	shadow.SetName("Boggart Roborock")
+	shadow.SetVersion(Version)
+	shadow.SetBuild(Build)
 
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	if err = application.Run(); err != nil {
+	if err := shadow.Run(); err != nil {
 		log.Fatal(err.Error())
 	}
 }

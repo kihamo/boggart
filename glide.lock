@@ -1,5 +1,5 @@
-hash: 36f6bf03c166ef6dd7292004cea6b9960bce76bcf7522cd6a468c9cc7195adb2
-updated: 2018-09-18T02:56:43.133448+03:00
+hash: 973af718d0e5863717f86c09f45e3dba25f911e7ab64b5f5be39f069ba8be861
+updated: 2018-10-14T01:55:25.529606+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -24,6 +24,8 @@ imports:
   version: bf70f2a70fb1b1f36d90d671a72795984eab0fcb
   subpackages:
   - gettext/mo
+- name: github.com/codahale/hdrhistogram
+  version: 3a0bb77429bd3a61596f5e8a3172445844342120
 - name: github.com/deckarep/golang-set
   version: cbaa98ba5575e67703b32b4b19f73c91f3c4159e
 - name: github.com/eclipse/paho.mqtt.golang
@@ -43,20 +45,25 @@ imports:
   version: c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9
 - name: github.com/ghthor/gowol
   version: eb42ead1b24e9226bddb05004815f6e72280f879
+- name: github.com/globalsign/mgo
+  version: 1ca0a4f7cbcbe61c005d1bd43fdd8bb8b71df6bc
+  subpackages:
+  - bson
+  - internal/json
 - name: github.com/go-openapi/analysis
-  version: b006789cd277d4fa4d16767046d694a256c6a218
+  version: c701774f4e604d952e4e8c56dee260be696e33c3
   subpackages:
   - internal
 - name: github.com/go-openapi/errors
-  version: 87bb653288778f8b0d922c5c3fb8b3f00a47ff28
+  version: d9664f9fab8994271e573ed69cf2adfc09b7a800
 - name: github.com/go-openapi/jsonpointer
-  version: 52eb3d4b47c6a51ce2693c8e614a15a07c1af435
+  version: ef5f0afec364d3b9396b7b77b43dbe26bf1f8004
 - name: github.com/go-openapi/jsonreference
-  version: 1c6a3fa339f2743b7b0fd2b842fc455eca2fa9eb
+  version: 8483a886a90412cd6858df4ea3483dce9c8e35a3
 - name: github.com/go-openapi/loads
-  version: fd899182a268dcf25de088722375311d9dee2662
+  version: 150d36912387ec2f607be674c5be309ddccc0eed
 - name: github.com/go-openapi/runtime
-  version: d9c45e0a7fc845ce535233f4022219b66b240fd5
+  version: 231d7876b7019dbcbfc97a7ba764379497b67c1d
   subpackages:
   - client
   - logger
@@ -66,13 +73,13 @@ imports:
   - middleware/untyped
   - security
 - name: github.com/go-openapi/spec
-  version: f1468acb3b29cdd5c5f6fa29435d2d2d6e6c9ff1
+  version: 5bae59e25b21498baea7f9d46e9c147ec106a42e
 - name: github.com/go-openapi/strfmt
-  version: 6292e8b5de3b3535638b89eb165304ffa1e7cfae
+  version: 35fe47352985e13cc75f13120d70d26fd764ed51
 - name: github.com/go-openapi/swag
-  version: dd0dad036e67ae93c27dc64337b3f76296f3a5f0
+  version: 5899d5c5e619fda5fa86e14795a835f473ca284c
 - name: github.com/go-openapi/validate
-  version: e0648ff405079d973622f8b2bf739ed3a1c5cd9b
+  version: d2eab7d93009e9215fc85b2faa2c2f2a98c2af48
 - name: github.com/go-sql-driver/mysql
   version: 9181e3a86a19bacd63e68d43ae8b7b36320d8092
 - name: github.com/go-swagger/go-swagger
@@ -93,15 +100,23 @@ imports:
   subpackages:
   - query
 - name: github.com/gopherjs/gopherjs
-  version: 0210a2f0f73c96103378b0b935f39868e5731809
+  version: 1babbf986f6fcb1156d0646cdba5c4f81bc32849
   subpackages:
   - js
 - name: github.com/gopherjs/gopherwasm
-  version: 439a940b7e31356a8c7a087104aa27b4b69fbcfd
+  version: b0e1786f520333e4546f02930c5ca8a929b38841
   subpackages:
   - js
 - name: github.com/gorilla/websocket
   version: 0647012449a1878977514a346b26637dd022446c
+- name: github.com/grpc-ecosystem/go-grpc-middleware
+  version: c250d6563d4d4c20252cd865923440e829844f4e
+  subpackages:
+  - logging
+- name: github.com/grpc-ecosystem/grpc-opentracing
+  version: 8e809c8a86450a29b90dcc9efbf062d0fe6d9746
+  subpackages:
+  - go/otgrpc
 - name: github.com/hajimehoshi/go-mp3
   version: 90191ee719ddc192865cd96bdc8013ef1ed6dbea
   subpackages:
@@ -121,6 +136,8 @@ imports:
   version: b7773ae218740a7be65057fc60b366a49b538a44
 - name: github.com/heptiolabs/healthcheck
   version: da5fdee475fb09de87c5d4a50da233b7d28767b1
+- name: github.com/hybridgroup/mjpeg
+  version: 4680f319790ebffe28bbee775ecd1725693731ca
 - name: github.com/icza/bitio
   version: b25b30b425083d5b200f092711bac9027828452c
 - name: github.com/influxdata/influxdb
@@ -149,7 +166,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: a97f41a0a30cc3e313d32e22e672e6676c6cb80a
+  version: a63a7476f57a2b49550b7ed3e0dc1e2c7d0346ac
   subpackages:
   - components/annotations
   - components/annotations/instance
@@ -168,12 +185,15 @@ imports:
   - components/dashboard/runtime
   - components/database
   - components/grpc
+  - components/grpc/stats
   - components/i18n
   - components/i18n/instance
   - components/i18n/internal
   - components/i18n/internal/handlers
   - components/i18n/internationalization
   - components/logger
+  - components/logger/grpc
+  - components/logger/http
   - components/logger/instance
   - components/logger/internal
   - components/logger/output
@@ -184,6 +204,8 @@ imports:
   - components/messengers/internal/handlers
   - components/messengers/platforms/telegram
   - components/metrics
+  - components/metrics/grpc
+  - components/metrics/http
   - components/metrics/instance
   - components/metrics/internal
   - components/metrics/internal/handlers
@@ -192,10 +214,17 @@ imports:
   - components/profiling/internal
   - components/profiling/internal/handlers
   - components/profiling/trace
+  - components/tracing
+  - components/tracing/grpc
+  - components/tracing/http
+  - components/tracing/instance
+  - components/tracing/internal
   - components/workers
   - components/workers/instance
   - components/workers/internal
   - components/workers/internal/handlers
+  - misc/http
+  - misc/time
 - name: github.com/kihamo/snitch
   version: e4d6b609e3e7317796ace171d60477ee95f8410e
   subpackages:
@@ -252,11 +281,20 @@ imports:
 - name: github.com/mitchellh/gox
   version: 51ed453898ca5579fea9ad1f08dff6b121d9f2e8
 - name: github.com/mitchellh/mapstructure
-  version: fa473d140ef3c6adf42d6b391fe76707f1f243c8
+  version: 3536a929edddb9a5b34bd6861dc4a9647cb459fe
 - name: github.com/mmcloughlin/geohash
-  version: 3b756d8ac3d9d9b1217f28a9e6cbba629e1815b3
+  version: f7f2bcae3294530249c63fcb6fb6d5e83eee4e73
 - name: github.com/OneOfOne/xxhash
   version: 6def279d2ce6c81a79dd1c1be580f03bb216fb8a
+- name: github.com/opentracing-contrib/go-stdlib
+  version: 07a764486eb10927e8cf38337918a40d430524ee
+  subpackages:
+  - nethttp
+- name: github.com/opentracing/opentracing-go
+  version: 1949ddbfd147afd4d964a9f00b24eb291e0e7c38
+  subpackages:
+  - ext
+  - log
 - name: github.com/patrickmn/go-cache
   version: a3647f8e31d79543b2d0f0ae2fe5c379d72cedc0
 - name: github.com/pborman/uuid
@@ -289,6 +327,8 @@ imports:
   version: 975f53781597ed779763b7b65566e74c4004d8de
 - name: github.com/PuerkitoBio/urlesc
   version: de5bf2ad457846296e2031421a34e2568e304e35
+- name: github.com/putsi/paparazzogo
+  version: bec63fd585dca3c9893ee4a6efd6dcc57d60cace
 - name: github.com/rs/xhandler
   version: 1eb70cf1520d43c307a89c5dabb7a7efd132fccd
 - name: github.com/rs/xid
@@ -307,6 +347,29 @@ imports:
   version: f19e41f79f8f006116f682c1af454591bc278ad4
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
+- name: github.com/uber/jaeger-client-go
+  version: 1a782e2da844727691fef1757c72eb190c2909f0
+  subpackages:
+  - config
+  - internal/baggage
+  - internal/baggage/remote
+  - internal/spanlog
+  - internal/throttler
+  - internal/throttler/remote
+  - log
+  - rpcmetrics
+  - thrift
+  - thrift-gen/agent
+  - thrift-gen/baggage
+  - thrift-gen/jaeger
+  - thrift-gen/sampling
+  - thrift-gen/zipkincore
+  - transport
+  - utils
+- name: github.com/uber/jaeger-lib
+  version: ed3a127ec5fef7ae9ea95b01b542c47fbd999ce5
+  subpackages:
+  - metrics
 - name: github.com/yryz/ds18b20
   version: 3cf383a406247c49e48a80014f3e17ddee418742
 - name: gobot.io/x/gobot
@@ -317,6 +380,8 @@ imports:
   - drivers/spi
   - platforms/raspi
   - sysfs
+- name: gocv.io/x/gocv
+  version: bc016e27fba3560070e16affd605768d68110867
 - name: golang.org/x/crypto
   version: 9477e0b78b9ac3d0b03822fd95422e2fe07627cd
   subpackages:
@@ -324,7 +389,7 @@ imports:
   - poly1305
   - salsa20/salsa
 - name: golang.org/x/exp
-  version: e88728d35e99800368f4acc0969018db6b0d3dd5
+  version: d8bb7a16721e319e95865be2662b889387204776
   subpackages:
   - shiny/driver/gldriver
   - shiny/driver/internal/drawer
@@ -335,11 +400,11 @@ imports:
   - shiny/driver/internal/x11key
   - shiny/screen
 - name: golang.org/x/image
-  version: c73c2afc3b812cdd6385de5a50616511c4a3d458
+  version: 991ec62608f3c0da01d400756917825d1e2fd528
   subpackages:
   - math/f64
 - name: golang.org/x/mobile
-  version: 0ff817254b04da935cce10d2d1270ccf047fbbd7
+  version: 92f3b9caf7ba8f4f9c10074225afcba0cba47a62
   subpackages:
   - app
   - app/internal/callfn
@@ -372,7 +437,7 @@ imports:
   subpackages:
   - internal
 - name: golang.org/x/sys
-  version: 917fdcba135dcbaccd57425db91723541b4427c8
+  version: fa43e7bc11baaae89f3f902b2b4d832b68234844
   subpackages:
   - unix
   - windows
@@ -439,17 +504,12 @@ imports:
   - internal/syslogparser
   - internal/syslogparser/rfc3164
   - internal/syslogparser/rfc5424
-- name: gopkg.in/mgo.v2
-  version: 9856a29383ce1c59f308dd1cf0363a79b5bef6b5
-  subpackages:
-  - bson
-  - internal/json
 - name: gopkg.in/routeros.v2
   version: 2dc19c12445caefdc2d128f7331dcc83284211ef
   subpackages:
   - proto
 - name: gopkg.in/telegram-bot-api.v4
-  version: 0e0af0c480ea98e982d5f4d45fb39577c6ab1e3e
+  version: 9860bdfd3a171ceafb6e1eafa163482a6ef92643
 - name: gopkg.in/yaml.v2
   version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
 - name: periph.io/x/periph
