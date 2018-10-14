@@ -8,7 +8,10 @@ import (
 	"strconv"
 	"time"
 
-	tracing "github.com/kihamo/shadow/components/tracing/http"
+	"github.com/kihamo/shadow/components/tracing"
+	tracingHttp "github.com/kihamo/shadow/components/tracing/http"
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/log"
 )
 
 const (
@@ -69,24 +72,49 @@ type PTZDataAbsoluteHigh struct {
 }
 
 func (a *ISAPI) PTZChannels(ctx context.Context) (list PTZChannelList, err error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, ComponentName+".PTZStatus")
+	defer span.Finish()
+
 	u := a.address + proxyPTZPrefixURL + "/channels"
 
-	ctx = tracing.OperationNameToContext(ctx, ComponentName+".PTZChannels")
+	ctx = tracingHttp.OperationNameToContext(ctx, ComponentName+".PTZChannels")
 
 	err = a.DoXML(ctx, http.MethodGet, u, nil, &list)
+	if err != nil {
+		tracing.SpanError(span, err)
+	}
+
 	return list, err
 }
 
 func (a *ISAPI) PTZStatus(ctx context.Context, channel uint64) (status PTZStatus, err error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, ComponentName+".PTZStatus")
+	defer span.Finish()
+
 	u := a.address + proxyPTZPrefixURL + "/channels/" + strconv.FormatUint(channel, 10) + "/status"
 
-	ctx = tracing.OperationNameToContext(ctx, ComponentName+".PTZStatus")
-
 	err = a.DoXML(ctx, http.MethodGet, u, nil, &status)
+	if err != nil {
+		tracing.SpanError(span, err)
+	} else {
+		span.LogFields(
+			log.Uint64("azimuth", status.AbsoluteHigh.Azimuth),
+			log.Int64("elevation", status.AbsoluteHigh.Elevation),
+			log.Uint64("zoom", status.AbsoluteHigh.AbsoluteZoom),
+		)
+	}
+
 	return status, err
 }
 
 func (a *ISAPI) PTZPresetGoTo(ctx context.Context, channel, preset uint64) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, ComponentName+".PTZRelative")
+	defer span.Finish()
+
+	span.LogFields(
+		log.Uint64("preset", preset),
+	)
+
 	u := a.address + proxyPTZPrefixURL + "/channels/" +
 		strconv.FormatUint(channel, 10) +
 		"/presets/" +
@@ -95,26 +123,39 @@ func (a *ISAPI) PTZPresetGoTo(ctx context.Context, channel, preset uint64) error
 
 	result := ResponseStatus{}
 
-	ctx = tracing.OperationNameToContext(ctx, ComponentName+".PTZPresetGoTo")
+	ctx = tracingHttp.OperationNameToContext(ctx, ComponentName+".PTZPresetGoTo")
 
 	err := a.DoXML(ctx, http.MethodPut, u, nil, &result)
 	if err != nil {
+		tracing.SpanError(span, err)
 		return err
 	}
 
 	if result.StatusCode != 1 {
-		return errors.New(result.StatusString)
+		err := errors.New(result.StatusString)
+
+		tracing.SpanError(span, err)
+		return err
 	}
 
 	return nil
 }
 
 func (a *ISAPI) PTZRelative(ctx context.Context, channel uint64, x, y, zoom int64) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, ComponentName+".PTZRelative")
+	defer span.Finish()
+
 	if zoom < -100 {
 		zoom = -100
 	} else if zoom > 100 {
 		zoom = 100
 	}
+
+	span.LogFields(
+		log.Int64("x", x),
+		log.Int64("y", y),
+		log.Int64("zoom", zoom),
+	)
 
 	u := a.address + proxyPTZPrefixURL + "/channels/" + strconv.FormatUint(channel, 10) + "/relative"
 
@@ -128,21 +169,26 @@ func (a *ISAPI) PTZRelative(ctx context.Context, channel uint64, x, y, zoom int6
 
 	result := ResponseStatus{}
 
-	ctx = tracing.OperationNameToContext(ctx, ComponentName+".PTZRelative")
-
 	err := a.DoXML(ctx, http.MethodPut, u, data, &result)
 	if err != nil {
+		tracing.SpanError(span, err)
 		return err
 	}
 
 	if result.StatusCode != 1 {
-		return errors.New(result.StatusString)
+		err := errors.New(result.StatusString)
+
+		tracing.SpanError(span, err)
+		return err
 	}
 
 	return nil
 }
 
 func (a *ISAPI) PTZAbsolute(ctx context.Context, channel uint64, elevation int64, azimuth, absoluteZoom uint64) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, ComponentName+".PTZAbsolute")
+	defer span.Finish()
+
 	if elevation < -900 {
 		elevation = -900
 	} else if elevation > 2700 {
@@ -161,6 +207,12 @@ func (a *ISAPI) PTZAbsolute(ctx context.Context, channel uint64, elevation int64
 		absoluteZoom = 1000
 	}
 
+	span.LogFields(
+		log.Int64("elevation", elevation),
+		log.Uint64("azimuth", azimuth),
+		log.Uint64("absolute_zoom", absoluteZoom),
+	)
+
 	u := a.address + proxyPTZPrefixURL + "/channels/" + strconv.FormatUint(channel, 10) + "/absolute"
 
 	data := PTZData{
@@ -173,21 +225,26 @@ func (a *ISAPI) PTZAbsolute(ctx context.Context, channel uint64, elevation int64
 
 	result := ResponseStatus{}
 
-	ctx = tracing.OperationNameToContext(ctx, ComponentName+".PTZAbsolute")
-
 	err := a.DoXML(ctx, http.MethodPut, u, data, &result)
 	if err != nil {
+		tracing.SpanError(span, err)
 		return err
 	}
 
 	if result.StatusCode != 1 {
-		return errors.New(result.StatusString)
+		err := errors.New(result.StatusString)
+
+		tracing.SpanError(span, err)
+		return err
 	}
 
 	return nil
 }
 
 func (a *ISAPI) PTZContinuous(ctx context.Context, channel uint64, pan, tilt, zoom int64) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, ComponentName+".PTZContinuous")
+	defer span.Finish()
+
 	if pan < -100 {
 		pan = -100
 	} else if pan > 100 {
@@ -206,6 +263,12 @@ func (a *ISAPI) PTZContinuous(ctx context.Context, channel uint64, pan, tilt, zo
 		zoom = 100
 	}
 
+	span.LogFields(
+		log.Int64("pan", pan),
+		log.Int64("tilt", tilt),
+		log.Int64("zoom", zoom),
+	)
+
 	u := a.address + proxyPTZPrefixURL + "/channels/" + strconv.FormatUint(channel, 10) + "/continuous"
 
 	data := PTZDataContinuous{
@@ -216,21 +279,26 @@ func (a *ISAPI) PTZContinuous(ctx context.Context, channel uint64, pan, tilt, zo
 
 	result := ResponseStatus{}
 
-	ctx = tracing.OperationNameToContext(ctx, ComponentName+".PTZContinuous")
-
 	err := a.DoXML(ctx, http.MethodPut, u, data, &result)
 	if err != nil {
+		tracing.SpanError(span, err)
 		return err
 	}
 
 	if result.StatusCode != 1 {
-		return errors.New(result.StatusString)
+		err := errors.New(result.StatusString)
+
+		tracing.SpanError(span, err)
+		return err
 	}
 
 	return nil
 }
 
 func (a *ISAPI) PTZMomentary(ctx context.Context, channel uint64, pan, tilt, zoom int64, duration time.Duration) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, ComponentName+".PTZMomentary")
+	defer span.Finish()
+
 	if pan < -100 {
 		pan = -100
 	} else if pan > 100 {
@@ -253,6 +321,12 @@ func (a *ISAPI) PTZMomentary(ctx context.Context, channel uint64, pan, tilt, zoo
 		duration = 0
 	}
 
+	span.LogFields(
+		log.Int64("pan", pan),
+		log.Int64("tilt", tilt),
+		log.Int64("zoom", zoom),
+	)
+
 	u := a.address + proxyPTZPrefixURL + "/channels/" + strconv.FormatUint(channel, 10) + "/momentary"
 
 	data := PTZDataContinuous{
@@ -264,15 +338,17 @@ func (a *ISAPI) PTZMomentary(ctx context.Context, channel uint64, pan, tilt, zoo
 
 	result := ResponseStatus{}
 
-	ctx = tracing.OperationNameToContext(ctx, ComponentName+".PTZMomentary")
-
 	err := a.DoXML(ctx, http.MethodPut, u, data, &result)
 	if err != nil {
+		tracing.SpanError(span, err)
 		return err
 	}
 
 	if result.StatusCode != 1 {
-		return errors.New(result.StatusString)
+		err := errors.New(result.StatusString)
+
+		tracing.SpanError(span, err)
+		return err
 	}
 
 	return nil
