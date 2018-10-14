@@ -157,7 +157,7 @@ func (h *ProxyHandler) proxymjpegStream(u string, w *dashboard.Response, r *dash
 */
 func (h *ProxyHandler) proxy(u string, w *dashboard.Response, r *dashboard.Request) {
 	ctx := tracing.ComponentNameToContext(r.Context(), openhab.ComponentName)
-	ctx = tracing.ComponentNameToContext(ctx, openhab.ComponentName+".proxy")
+	ctx = tracing.OperationNameToContext(ctx, openhab.ComponentName+".proxy")
 
 	response, err := httpClient.NewClient().Get(ctx, u)
 	if err != nil {
