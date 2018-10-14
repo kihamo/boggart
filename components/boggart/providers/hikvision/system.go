@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	tracing "github.com/kihamo/shadow/components/tracing/http"
+	"github.com/kihamo/shadow/components/tracing"
+	"github.com/opentracing/opentracing-go"
 )
 
 type SystemDeviceInfoResponse struct {
@@ -44,17 +45,25 @@ type SystemStatusResponse struct {
 }
 
 func (a *ISAPI) SystemDeviceInfo(ctx context.Context) (result SystemDeviceInfoResponse, err error) {
-	ctx = tracing.OperationNameToContext(ctx, ComponentName+".SystemDeviceInfo")
+	span, ctx := opentracing.StartSpanFromContext(ctx, ComponentName+".system.device_info")
+	defer span.Finish()
 
 	err = a.DoXML(ctx, http.MethodGet, a.address+"/System/deviceInfo", nil, &result)
+	if err != nil {
+		tracing.SpanError(span, err)
+	}
 
 	return result, err
 }
 
 func (a *ISAPI) SystemStatus(ctx context.Context) (result SystemStatusResponse, err error) {
-	ctx = tracing.OperationNameToContext(ctx, ComponentName+".SystemStatus")
+	span, ctx := opentracing.StartSpanFromContext(ctx, ComponentName+".system.status")
+	defer span.Finish()
 
 	err = a.DoXML(ctx, http.MethodGet, a.address+"/System/status", nil, &result)
+	if err != nil {
+		tracing.SpanError(span, err)
+	}
 
 	return result, err
 }
