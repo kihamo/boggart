@@ -7,7 +7,10 @@ import (
 	"strconv"
 
 	"github.com/kihamo/boggart/components/boggart/protocols/http"
-	tracing "github.com/kihamo/shadow/components/tracing/http"
+	"github.com/kihamo/shadow/components/tracing"
+	tracingHttp "github.com/kihamo/shadow/components/tracing/http"
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/log"
 )
 
 const (
@@ -38,13 +41,16 @@ func (c *Client) AccountID() string {
 }
 
 func (c *Client) Balance(ctx context.Context) (float64, error) {
+	ctx = tracingHttp.ComponentNameToContext(ctx, ComponentName)
+
+	span, ctx := opentracing.StartSpanFromContext(ctx, ComponentName+".balance")
+	defer span.Finish()
+
 	_, err := c.connection.Get(ctx, AccountURL)
 	if err != nil {
+		tracing.SpanError(span, err)
 		return -1, err
 	}
-
-	ctx = tracing.ComponentNameToContext(ctx, ComponentName)
-	ctx = tracing.OperationNameToContext(ctx, ComponentName+".balance")
 
 	response, err := c.connection.Post(ctx, AccountURL, map[string]string{
 		"bootstrap[username]": c.login,
@@ -53,13 +59,25 @@ func (c *Client) Balance(ctx context.Context) (float64, error) {
 	})
 
 	if err != nil {
+		tracing.SpanError(span, err)
 		return -1, err
 	}
 
 	submatch := balanceRegexp.FindStringSubmatch(http.BodyFromResponse(response))
 	if len(submatch) != 2 {
-		return -1, errors.New("Balance string not found in page")
+		err := errors.New("Balance string not found in page")
+
+		tracing.SpanError(span, err)
+		return -1, err
 	}
 
-	return strconv.ParseFloat(submatch[1], 10)
+	balance, err := strconv.ParseFloat(submatch[1], 10)
+	if err != nil {
+		tracing.SpanError(span, err)
+		return -1, err
+	}
+
+	span.LogFields(log.Float64("balance", balance))
+
+	return balance, nil
 }

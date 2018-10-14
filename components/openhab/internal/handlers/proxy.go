@@ -3,37 +3,25 @@ package handlers
 import (
 	"bytes"
 	"fmt"
-
-	httpClient "github.com/kihamo/boggart/components/boggart/protocols/http"
-	tracing "github.com/kihamo/shadow/components/tracing/http"
-	// "image/jpeg"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
+	httpClient "github.com/kihamo/boggart/components/boggart/protocols/http"
 	"github.com/kihamo/boggart/components/openhab"
 	"github.com/kihamo/boggart/components/openhab/client/things"
 	"github.com/kihamo/shadow/components/dashboard"
-	// "github.com/kihamo/shadow/components/logger"
 	"github.com/kihamo/shadow/components/messengers"
-	// "github.com/mattn/go-mjpeg"
+	"github.com/kihamo/shadow/components/tracing"
+	tracingHttp "github.com/kihamo/shadow/components/tracing/http"
+	"github.com/opentracing/opentracing-go"
 )
 
 const (
 	queryParamSendToMessenger = "send"
-	queryParamStream          = "stream"
-
-	//streamMJPEG = "mjpeg"
 )
-
-/*
-var (
-	mjpegLock    sync.RWMutex
-	mjpegStreams = map[string]*mjpeg.Stream{}
-)
-*/
 
 type ProxyHandler struct {
 	dashboard.Handler
@@ -60,107 +48,43 @@ func (h *ProxyHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 			return
 		}
 
+		span, ctx := opentracing.StartSpanFromContext(r.Context(), openhab.ComponentName+".api.things.GetByUID")
+
 		// TODO: cache
 		status, err := client.Things.GetByUID(&things.GetByUIDParams{
 			ThingUID: id,
-			Context:  r.Context(),
+			Context:  ctx,
 		})
 
 		if err != nil {
+			tracing.SpanError(span, err)
 			break
 		}
 
 		configVal, ok := status.Payload.Configuration[configKey]
 		if !ok {
+			tracing.SpanError(span, fmt.Errorf("%s not found in response", configKey))
 			break
 		}
 
-		switch strings.ToLower(query.Get(queryParamStream)) {
-		//case streamMJPEG:
-		//	h.proxymjpegStream(configVal.(string), w, r)
+		span.Finish()
 
-		default:
-			h.proxy(configVal.(string), w, r)
-		}
-
+		h.proxy(configVal.(string), w, r)
 		return
 	}
 
 	h.NotFound(w, r)
 }
 
-/*
-func (h *ProxyHandler) proxymjpegStream(u string, w *dashboard.Response, r *dashboard.Request) {
-	var stream *mjpeg.Stream
-
-	mjpegLock.RLock()
-	stream, ok := mjpegStreams[u]
-	mjpegLock.RUnlock()
-
-	if !ok {
-		dec, err := mjpeg.NewDecoderFromURL(u)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusServiceUnavailable)
-			return
-		}
-
-		stream = mjpeg.NewStreamWithInterval(r.Config().Duration(openhab.ConfigProxyMJPEGInterval))
-
-		go func(u string, l logger.Logger) {
-			defer func() {
-				mjpegLock.Lock()
-				delete(mjpegStreams, u)
-				mjpegLock.Unlock()
-
-				l.Warnf("MJPEG stream for %s is down", u)
-			}()
-
-			var buf bytes.Buffer
-			for {
-				img, err := dec.Decode()
-				if err != nil {
-					l.Errorf("MJPEG stream for %s MJPEG decode failed", u, map[string]interface{}{
-						"error": err.Error(),
-					})
-					break
-				}
-				buf.Reset()
-				err = jpeg.Encode(&buf, img, nil)
-				if err != nil {
-					l.Errorf("MJPEG stream for %s JPEG encode failed", u, map[string]interface{}{
-						"error": err.Error(),
-					})
-					break
-				}
-				err = stream.Update(buf.Bytes())
-				if err != nil {
-					l.Errorf("MJPEG stream for %s stream update failed", u, map[string]interface{}{
-						"error": err.Error(),
-					})
-					break
-				}
-			}
-		}(u, dashboard.LoggerFromContext(r.Context()))
-
-		mjpegLock.Lock()
-		mjpegStreams[u] = stream
-		mjpegLock.Unlock()
-	}
-
-	if send := r.URL().Query().Get(queryParamSendToMessenger); r.IsPost() && h.Messengers != nil {
-		h.sendFileToMessenger(send, stream.Current(), w, r)
-		return
-	}
-
-	stream.ServeHTTP(w, r.Original())
-}
-*/
 func (h *ProxyHandler) proxy(u string, w *dashboard.Response, r *dashboard.Request) {
-	ctx := tracing.ComponentNameToContext(r.Context(), openhab.ComponentName)
-	ctx = tracing.OperationNameToContext(ctx, openhab.ComponentName+".proxy")
+	ctx := tracingHttp.ComponentNameToContext(r.Context(), openhab.ComponentName)
+
+	span, ctx := opentracing.StartSpanFromContext(ctx, openhab.ComponentName+".proxy")
+	defer span.Finish()
 
 	response, err := httpClient.NewClient().Get(ctx, u)
 	if err != nil {
+		tracing.SpanError(span, err)
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
@@ -168,6 +92,7 @@ func (h *ProxyHandler) proxy(u string, w *dashboard.Response, r *dashboard.Reque
 
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
+		tracing.SpanError(span, err)
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}

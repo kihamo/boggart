@@ -10,7 +10,10 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/kihamo/boggart/components/boggart/protocols/http"
-	tracing "github.com/kihamo/shadow/components/tracing/http"
+	"github.com/kihamo/shadow/components/tracing"
+	tracingHttp "github.com/kihamo/shadow/components/tracing/http"
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/log"
 )
 
 const (
@@ -52,8 +55,8 @@ func (m *Megafon) Number() string {
 func (m *Megafon) auth(ctx context.Context) (string, error) {
 	m.connection.Reset()
 
-	ctx = tracing.ComponentNameToContext(ctx, MegafonLkComponentName)
-	ctx = tracing.OperationNameToContext(ctx, MegafonLkComponentName+".auth.get")
+	ctx = tracingHttp.ComponentNameToContext(ctx, MegafonLkComponentName)
+	ctx = tracingHttp.OperationNameToContext(ctx, MegafonLkComponentName+".auth.get")
 
 	response, err := m.connection.Get(ctx, MegafonLkLoginFormURL)
 	if err != nil {
@@ -85,7 +88,7 @@ func (m *Megafon) auth(ctx context.Context) (string, error) {
 		return "", errors.New("CSRF token not found")
 	}
 
-	ctx = tracing.OperationNameToContext(ctx, MegafonLkComponentName+".auth.post")
+	ctx = tracingHttp.OperationNameToContext(ctx, MegafonLkComponentName+".auth.post")
 
 	response, err = m.connection.Post(ctx, MegafonLkURL+action, map[string]string{
 		"j_username": m.phone,
@@ -105,16 +108,20 @@ func (m *Megafon) auth(ctx context.Context) (string, error) {
 }
 
 func (m *Megafon) Balance(ctx context.Context) (float64, error) {
+	ctx = tracingHttp.ComponentNameToContext(ctx, MegafonLkComponentName)
+
+	span, ctx := opentracing.StartSpanFromContext(ctx, MegafonLkComponentName+".balance")
+	defer span.Finish()
+
 	csrf, err := m.auth(ctx)
 	if err != nil {
+		tracing.SpanError(span, err)
 		return -1, err
 	}
 
-	ctx = tracing.ComponentNameToContext(ctx, MegafonLkComponentName)
-	ctx = tracing.OperationNameToContext(ctx, MegafonLkComponentName+".balance")
-
 	response, err := m.connection.GetAjax(ctx, fmt.Sprintf("%s?CSRF=%s&_=%d", MegafonLkBalanceURL, csrf, time.Now().Unix()))
 	if err != nil {
+		tracing.SpanError(span, err)
 		return -1, err
 	}
 
@@ -124,23 +131,30 @@ func (m *Megafon) Balance(ctx context.Context) (float64, error) {
 	}{}
 
 	if err := decoder.Decode(&reply); err != nil {
+		tracing.SpanError(span, err)
 		return -1, err
 	}
+
+	span.LogFields(log.Float64("balance", reply.Balance))
 
 	return reply.Balance, nil
 }
 
 func (m *Megafon) Remainders(ctx context.Context) (*MegafonRemainders, error) {
+	ctx = tracingHttp.ComponentNameToContext(ctx, MegafonLkComponentName)
+
+	span, ctx := opentracing.StartSpanFromContext(ctx, MegafonLkComponentName+".remainders")
+	defer span.Finish()
+
 	csrf, err := m.auth(ctx)
 	if err != nil {
+		tracing.SpanError(span, err)
 		return nil, err
 	}
 
-	ctx = tracing.ComponentNameToContext(ctx, MegafonLkComponentName)
-	ctx = tracing.OperationNameToContext(ctx, MegafonLkComponentName+".remainders")
-
 	response, err := m.connection.GetAjax(ctx, fmt.Sprintf("%s?CSRF=%s&_=%d", MegafonLkRemaindersURL, csrf, time.Now().Unix()))
 	if err != nil {
+		tracing.SpanError(span, err)
 		return nil, err
 	}
 
@@ -160,6 +174,7 @@ func (m *Megafon) Remainders(ctx context.Context) (*MegafonRemainders, error) {
 	}{}
 
 	if err := decoder.Decode(&reply); err != nil {
+		tracing.SpanError(span, err)
 		return nil, err
 	}
 
@@ -186,6 +201,13 @@ func (m *Megafon) Remainders(ctx context.Context) (*MegafonRemainders, error) {
 			}
 		}
 	}
+
+	span.LogFields(
+		log.Float64("voice", ret.Voice),
+		log.Float64("sms", ret.Sms),
+		log.Float64("internet", ret.Internet),
+		log.Float64("internet_prolongation", ret.InternetProlongation),
+	)
 
 	return ret, nil
 }

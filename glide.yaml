@@ -3,7 +3,7 @@ import:
 - package: github.com/go-sql-driver/mysql
   version: 9181e3a86a19bacd63e68d43ae8b7b36320d8092
 - package: github.com/kihamo/shadow
-  version: c15a8b73acf4b03d51f77c897b8717cddee57f3e
+  version: 4056ab1765442b2299c6b0f6574d4b3ac6a8b63d
 - package: github.com/goburrow/serial
   version: 5efbe925ecf714f8ba147bf2226f2e7afc7111bc
 - package: gopkg.in/routeros.v2
@@ -32,4 +32,3 @@ import:
   version: ~v1.4.7
 - package: github.com/faiface/beep
   version: 63cc6fbbac46dba1a03e55f0ebc965d6c82ca8e1
-- package: github.com/mattn/go-mjpeg
