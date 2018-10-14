@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 	"time"
+
+	tracing "github.com/kihamo/shadow/components/tracing/http"
 )
 
 type SystemDeviceInfoResponse struct {
@@ -42,12 +44,16 @@ type SystemStatusResponse struct {
 }
 
 func (a *ISAPI) SystemDeviceInfo(ctx context.Context) (result SystemDeviceInfoResponse, err error) {
+	ctx = tracing.OperationNameToContext(ctx, ComponentName+".SystemDeviceInfo")
+
 	err = a.DoXML(ctx, http.MethodGet, a.address+"/System/deviceInfo", nil, &result)
 
 	return result, err
 }
 
 func (a *ISAPI) SystemStatus(ctx context.Context) (result SystemStatusResponse, err error) {
+	ctx = tracing.OperationNameToContext(ctx, ComponentName+".SystemStatus")
+
 	err = a.DoXML(ctx, http.MethodGet, a.address+"/System/status", nil, &result)
 
 	return result, err

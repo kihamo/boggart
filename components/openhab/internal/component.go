@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"net/http"
 	"net/url"
 
 	httptransport "github.com/go-openapi/runtime/client"
@@ -10,6 +11,7 @@ import (
 	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/messengers"
+	"github.com/opentracing-contrib/go-stdlib/nethttp"
 )
 
 type Component struct {
@@ -54,7 +56,11 @@ func (c *Component) Client() *apiclient.OpenHABREST {
 		return nil
 	}
 
-	transport := httptransport.New(u.Host, "/rest", []string{u.Scheme})
+	httpClient := &http.Client{
+		Transport: &nethttp.Transport{},
+	}
+
+	transport := httptransport.NewWithClient(u.Host, "/rest", []string{u.Scheme}, httpClient)
 	transport.Debug = c.config.Bool(config.ConfigDebug)
 
 	return apiclient.New(transport, nil)

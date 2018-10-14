@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/hybridgroup/mjpeg"
+	httpClient "github.com/kihamo/boggart/components/boggart/protocols/http"
+	tracing "github.com/kihamo/shadow/components/tracing/http"
 	// "image/jpeg"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/kihamo/boggart/components/openhab"
@@ -25,13 +25,15 @@ const (
 	queryParamSendToMessenger = "send"
 	queryParamStream          = "stream"
 
-	streamMJPEG = "mjpeg"
+	//streamMJPEG = "mjpeg"
 )
 
+/*
 var (
 	mjpegLock    sync.RWMutex
 	mjpegStreams = map[string]*mjpeg.Stream{}
 )
+*/
 
 type ProxyHandler struct {
 	dashboard.Handler
@@ -154,7 +156,10 @@ func (h *ProxyHandler) proxymjpegStream(u string, w *dashboard.Response, r *dash
 }
 */
 func (h *ProxyHandler) proxy(u string, w *dashboard.Response, r *dashboard.Request) {
-	response, err := http.Get(u)
+	ctx := tracing.ComponentNameToContext(r.Context(), openhab.ComponentName)
+	ctx = tracing.ComponentNameToContext(ctx, openhab.ComponentName+".proxy")
+
+	response, err := httpClient.NewClient().Get(ctx, u)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return

@@ -11,6 +11,10 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	tracing "github.com/kihamo/shadow/components/tracing/http"
+	"github.com/opentracing-contrib/go-stdlib/nethttp"
+	"github.com/opentracing/opentracing-go"
 )
 
 const (
@@ -28,8 +32,10 @@ type Client struct {
 
 func NewClient() *Client {
 	client := &Client{
-		connection: &http.Client{},
-		userAgent:  DefaultUserAgent,
+		connection: &http.Client{
+			Transport: &nethttp.Transport{},
+		},
+		userAgent: DefaultUserAgent,
 	}
 
 	client.Reset()
@@ -81,6 +87,9 @@ func (c *Client) Do(request *http.Request) (*http.Response, error) {
 			fmt.Printf("\n\n%q", dump)
 		}
 	}
+
+	request, closer := tracing.TraceRequest(opentracing.GlobalTracer(), request)
+	defer closer.Finish()
 
 	response, err := c.connection.Do(request)
 	if err != nil {

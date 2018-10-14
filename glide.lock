@@ -1,5 +1,5 @@
-hash: 973af718d0e5863717f86c09f45e3dba25f911e7ab64b5f5be39f069ba8be861
-updated: 2018-10-14T01:55:25.529606+03:00
+hash: b13ed80524c78a249a6c7bca7446f650354ea8c92d45289698dddf98dc2ab400
+updated: 2018-10-14T21:22:10.966537+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -136,8 +136,6 @@ imports:
   version: b7773ae218740a7be65057fc60b366a49b538a44
 - name: github.com/heptiolabs/healthcheck
   version: da5fdee475fb09de87c5d4a50da233b7d28767b1
-- name: github.com/hybridgroup/mjpeg
-  version: 4680f319790ebffe28bbee775ecd1725693731ca
 - name: github.com/icza/bitio
   version: b25b30b425083d5b200f092711bac9027828452c
 - name: github.com/influxdata/influxdb
@@ -166,7 +164,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: a63a7476f57a2b49550b7ed3e0dc1e2c7d0346ac
+  version: c15a8b73acf4b03d51f77c897b8717cddee57f3e
   subpackages:
   - components/annotations
   - components/annotations/instance

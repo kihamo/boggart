@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	tracing "github.com/kihamo/shadow/components/tracing/http"
 )
 
 const (
@@ -68,12 +70,18 @@ type PTZDataAbsoluteHigh struct {
 
 func (a *ISAPI) PTZChannels(ctx context.Context) (list PTZChannelList, err error) {
 	u := a.address + proxyPTZPrefixURL + "/channels"
+
+	ctx = tracing.OperationNameToContext(ctx, ComponentName+".PTZChannels")
+
 	err = a.DoXML(ctx, http.MethodGet, u, nil, &list)
 	return list, err
 }
 
 func (a *ISAPI) PTZStatus(ctx context.Context, channel uint64) (status PTZStatus, err error) {
 	u := a.address + proxyPTZPrefixURL + "/channels/" + strconv.FormatUint(channel, 10) + "/status"
+
+	ctx = tracing.OperationNameToContext(ctx, ComponentName+".PTZStatus")
+
 	err = a.DoXML(ctx, http.MethodGet, u, nil, &status)
 	return status, err
 }
@@ -86,6 +94,8 @@ func (a *ISAPI) PTZPresetGoTo(ctx context.Context, channel, preset uint64) error
 		"/goto"
 
 	result := ResponseStatus{}
+
+	ctx = tracing.OperationNameToContext(ctx, ComponentName+".PTZPresetGoTo")
 
 	err := a.DoXML(ctx, http.MethodPut, u, nil, &result)
 	if err != nil {
@@ -117,6 +127,8 @@ func (a *ISAPI) PTZRelative(ctx context.Context, channel uint64, x, y, zoom int6
 	}
 
 	result := ResponseStatus{}
+
+	ctx = tracing.OperationNameToContext(ctx, ComponentName+".PTZRelative")
 
 	err := a.DoXML(ctx, http.MethodPut, u, data, &result)
 	if err != nil {
@@ -161,6 +173,8 @@ func (a *ISAPI) PTZAbsolute(ctx context.Context, channel uint64, elevation int64
 
 	result := ResponseStatus{}
 
+	ctx = tracing.OperationNameToContext(ctx, ComponentName+".PTZAbsolute")
+
 	err := a.DoXML(ctx, http.MethodPut, u, data, &result)
 	if err != nil {
 		return err
@@ -201,6 +215,8 @@ func (a *ISAPI) PTZContinuous(ctx context.Context, channel uint64, pan, tilt, zo
 	}
 
 	result := ResponseStatus{}
+
+	ctx = tracing.OperationNameToContext(ctx, ComponentName+".PTZContinuous")
 
 	err := a.DoXML(ctx, http.MethodPut, u, data, &result)
 	if err != nil {
@@ -247,6 +263,8 @@ func (a *ISAPI) PTZMomentary(ctx context.Context, channel uint64, pan, tilt, zoo
 	data.Momentary.Duration = int64(duration.Seconds() * 1000)
 
 	result := ResponseStatus{}
+
+	ctx = tracing.OperationNameToContext(ctx, ComponentName+".PTZMomentary")
 
 	err := a.DoXML(ctx, http.MethodPut, u, data, &result)
 	if err != nil {

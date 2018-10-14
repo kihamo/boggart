@@ -3,6 +3,8 @@ package hikvision
 import (
 	"context"
 	"net/http"
+
+	tracing "github.com/kihamo/shadow/components/tracing/http"
 )
 
 type ContentManagementStorageResponse struct {
@@ -23,6 +25,8 @@ type ContentManagementStorageResponse struct {
 }
 
 func (a *ISAPI) ContentManagementStorage(ctx context.Context) (result ContentManagementStorageResponse, err error) {
+	ctx = tracing.OperationNameToContext(ctx, ComponentName+".ContentManagementStorage")
+
 	err = a.DoXML(ctx, http.MethodGet, a.address+"/ContentMgmt/Storage", nil, &result)
 	return result, err
 }

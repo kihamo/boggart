@@ -11,6 +11,11 @@ import (
 	"strconv"
 
 	connection "github.com/kihamo/boggart/components/boggart/protocols/http"
+	tracing "github.com/kihamo/shadow/components/tracing/http"
+)
+
+const (
+	ComponentName = "hikvision"
 )
 
 type ResponseStatus struct {
@@ -45,6 +50,8 @@ func (a *ISAPI) Do(ctx context.Context, method, url string, body io.Reader) (*ht
 }
 
 func (a *ISAPI) DoRequest(ctx context.Context, request *http.Request) (*http.Response, error) {
+	ctx = tracing.ComponentNameToContext(ctx, ComponentName)
+
 	if _, _, ok := request.BasicAuth(); !ok {
 		request.SetBasicAuth(a.username, a.password)
 	}

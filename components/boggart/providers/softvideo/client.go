@@ -7,10 +7,12 @@ import (
 	"strconv"
 
 	"github.com/kihamo/boggart/components/boggart/protocols/http"
+	tracing "github.com/kihamo/shadow/components/tracing/http"
 )
 
 const (
-	AccountURL = "https://user.softvideo.ru/"
+	AccountURL    = "https://user.softvideo.ru/"
+	ComponentName = "softvideo"
 )
 
 var (
@@ -40,6 +42,9 @@ func (c *Client) Balance(ctx context.Context) (float64, error) {
 	if err != nil {
 		return -1, err
 	}
+
+	ctx = tracing.ComponentNameToContext(ctx, ComponentName)
+	ctx = tracing.OperationNameToContext(ctx, ComponentName+".balance")
 
 	response, err := c.connection.Post(ctx, AccountURL, map[string]string{
 		"bootstrap[username]": c.login,

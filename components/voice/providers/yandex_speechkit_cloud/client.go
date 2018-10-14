@@ -9,9 +9,12 @@ import (
 	"net/url"
 
 	"github.com/kihamo/boggart/components/boggart/protocols/http"
+	tracing "github.com/kihamo/shadow/components/tracing/http"
 )
 
 const (
+	ComponentName = "yandex_speechkit_cloud"
+
 	FormatMP3  = "mp3"
 	FormatWAV  = "wav"
 	FormatOPUS = "opus"
@@ -75,7 +78,10 @@ func (c *YandexSpeechKitCloud) Generate(ctx context.Context, text, lang, speaker
 	values.Add("emotion", emotion)
 	u.RawQuery = values.Encode()
 
-	response, err := c.client.Get(context.Background(), u.String())
+	ctx = tracing.ComponentNameToContext(ctx, ComponentName)
+	ctx = tracing.OperationNameToContext(ctx, ComponentName+".generate")
+
+	response, err := c.client.Get(ctx, u.String())
 	if err != nil {
 		return nil, err
 	}
