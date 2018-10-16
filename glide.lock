@@ -1,5 +1,5 @@
-hash: cf17f442436d56f680b6462474138e3e78df22df2033d43ae9115aab5f2c436d
-updated: 2018-10-14T23:48:11.047133+03:00
+hash: 4031bdd8374d33ade48b552be612d0fb76a5c735c248398a01554c503b33862e
+updated: 2018-10-16T23:14:55.128001+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -46,7 +46,7 @@ imports:
 - name: github.com/ghthor/gowol
   version: eb42ead1b24e9226bddb05004815f6e72280f879
 - name: github.com/globalsign/mgo
-  version: 1ca0a4f7cbcbe61c005d1bd43fdd8bb8b71df6bc
+  version: eeefdecb41b842af6dc652aaea4026e8403e62df
   subpackages:
   - bson
   - internal/json
@@ -164,7 +164,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 4056ab1765442b2299c6b0f6574d4b3ac6a8b63d
+  version: f80c4240358c8ce49cf09cb0cb782c7136359cc4
   subpackages:
   - components/annotations
   - components/annotations/instance

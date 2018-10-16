@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"context"
 	"encoding/json"
 	"strconv"
 	"strings"
@@ -37,17 +38,17 @@ func (s *MQTTSubscribe) Filters() map[string]byte {
 	}
 }
 
-func (s *MQTTSubscribe) Callback(client mqtt.Component, message m.Message) {
+func (s *MQTTSubscribe) Callback(ctx context.Context, client mqtt.Component, message m.Message) {
 	switch message.Topic() {
 	case voice.MQTTTopicJSONText:
 		var request SpeechRequest
 
 		if err := json.Unmarshal(message.Payload(), &request); err == nil {
-			s.player.SpeechWithOptions(request.Text, request.Volume, request.Speed, request.Speaker)
+			s.player.SpeechWithOptions(ctx, request.Text, request.Volume, request.Speed, request.Speaker)
 		}
 
 	case voice.MQTTTopicSimpleText:
-		s.player.Speech(string(message.Payload()))
+		s.player.Speech(ctx, string(message.Payload()))
 
 	case voice.MQTTTopicPlayerURL:
 		s.player.PlayURL(string(message.Payload()))

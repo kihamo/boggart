@@ -219,7 +219,7 @@ func (d *CameraHikVision) Filters() map[string]byte {
 	}
 }
 
-func (d *CameraHikVision) Callback(client mqtt.Component, message m.Message) {
+func (d *CameraHikVision) Callback(ctx context.Context, client mqtt.Component, message m.Message) {
 	if !d.IsEnabled() || d.ptzChannels == nil || len(d.ptzChannels) == 0 {
 		return
 	}
@@ -247,33 +247,33 @@ func (d *CameraHikVision) Callback(client mqtt.Component, message m.Message) {
 	case "move":
 		switch string(message.Payload()) {
 		case "stop":
-			err = d.move(channelId, 0, 0, 0, 0)
+			err = d.move(ctx, channelId, 0, 0, 0, 0)
 		case "right":
-			err = d.move(channelId, 1, 0, 0, 0)
+			err = d.move(ctx, channelId, 1, 0, 0, 0)
 		case "left":
-			err = d.move(channelId, -1, 0, 0, 0)
+			err = d.move(ctx, channelId, -1, 0, 0, 0)
 		case "up":
-			err = d.move(channelId, 0, 1, 0, 0)
+			err = d.move(ctx, channelId, 0, 1, 0, 0)
 		case "up-right":
-			err = d.move(channelId, 1, 1, 0, 0)
+			err = d.move(ctx, channelId, 1, 1, 0, 0)
 		case "up-left":
-			err = d.move(channelId, -1, 1, 0, 0)
+			err = d.move(ctx, channelId, -1, 1, 0, 0)
 		case "down":
-			err = d.move(channelId, 0, -1, 0, 0)
+			err = d.move(ctx, channelId, 0, -1, 0, 0)
 		case "down-right":
-			err = d.move(channelId, 1, -1, 0, 0)
+			err = d.move(ctx, channelId, 1, -1, 0, 0)
 		case "down-left":
-			err = d.move(channelId, -1, -1, 0, 0)
+			err = d.move(ctx, channelId, -1, -1, 0, 0)
 		case "narrow":
-			err = d.move(channelId, 0, 0, 1, 0)
+			err = d.move(ctx, channelId, 0, 0, 1, 0)
 		case "wide":
-			err = d.move(channelId, 0, 0, -1, 0)
+			err = d.move(ctx, channelId, 0, 0, -1, 0)
 		}
 
 	case "preset":
 		presetId, err := strconv.ParseUint(string(message.Payload()), 10, 64)
 		if err == nil {
-			err = d.isapi.PTZPresetGoTo(context.Background(), channelId, presetId)
+			err = d.isapi.PTZPresetGoTo(ctx, channelId, presetId)
 		}
 
 	case "relative":
@@ -285,7 +285,7 @@ func (d *CameraHikVision) Callback(client mqtt.Component, message m.Message) {
 
 		err = json.Unmarshal(message.Payload(), &request)
 		if err == nil {
-			err = d.isapi.PTZRelative(context.Background(), channelId, request.X, request.Y, request.Zoom)
+			err = d.isapi.PTZRelative(ctx, channelId, request.X, request.Y, request.Zoom)
 		}
 
 	case "absolute":
@@ -297,7 +297,7 @@ func (d *CameraHikVision) Callback(client mqtt.Component, message m.Message) {
 
 		err = json.Unmarshal(message.Payload(), &request)
 		if err == nil {
-			err = d.isapi.PTZAbsolute(context.Background(), channelId, request.Elevation, request.Azimuth, request.Zoom)
+			err = d.isapi.PTZAbsolute(ctx, channelId, request.Elevation, request.Azimuth, request.Zoom)
 		}
 
 	case "continuous":
@@ -309,7 +309,7 @@ func (d *CameraHikVision) Callback(client mqtt.Component, message m.Message) {
 
 		err = json.Unmarshal(message.Payload(), &request)
 		if err == nil {
-			err = d.isapi.PTZContinuous(context.Background(), channelId, request.Pan, request.Tilt, request.Zoom)
+			err = d.isapi.PTZContinuous(ctx, channelId, request.Pan, request.Tilt, request.Zoom)
 		}
 
 	case "momentary":
@@ -323,12 +323,12 @@ func (d *CameraHikVision) Callback(client mqtt.Component, message m.Message) {
 		err = json.Unmarshal(message.Payload(), &request)
 		if err == nil {
 			duration := time.Duration(request.Duration) * time.Millisecond
-			err = d.isapi.PTZMomentary(context.Background(), channelId, request.Pan, request.Tilt, request.Zoom, duration)
+			err = d.isapi.PTZMomentary(ctx, channelId, request.Pan, request.Tilt, request.Zoom, duration)
 		}
 	}
 
 	if err == nil {
-		_, err = d.Tasks()[1].Run(context.Background())
+		_, err = d.Tasks()[1].Run(ctx)
 	}
 
 	if err != nil {
@@ -336,14 +336,14 @@ func (d *CameraHikVision) Callback(client mqtt.Component, message m.Message) {
 	}
 }
 
-func (d *CameraHikVision) move(channelId uint64, panDirection, tiltDirection, zoomDirection int64, duration time.Duration) error {
+func (d *CameraHikVision) move(ctx context.Context, channelId uint64, panDirection, tiltDirection, zoomDirection int64, duration time.Duration) error {
 	pan := panDirection
 	tilt := tiltDirection
 	zoom := zoomDirection
 
 	if duration > 0 {
-		return d.isapi.PTZMomentary(context.Background(), channelId, pan, tilt, zoom, duration)
+		return d.isapi.PTZMomentary(ctx, channelId, pan, tilt, zoom, duration)
 	}
 
-	return d.isapi.PTZContinuous(context.Background(), channelId, pan, tilt, zoom)
+	return d.isapi.PTZContinuous(ctx, channelId, pan, tilt, zoom)
 }

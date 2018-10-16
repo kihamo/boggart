@@ -80,15 +80,16 @@ func (c *Component) Run(wg *sync.WaitGroup) error {
 	return nil
 }
 
-func (c *Component) Speech(text string) error {
+func (c *Component) Speech(ctx context.Context, text string) error {
 	return c.SpeechWithOptions(
+		ctx,
 		text,
 		c.config.Int64(voice.ConfigSpeechVolume),
 		c.config.Float64(voice.ConfigYandexSpeechKitCloudSpeed),
 		c.config.String(voice.ConfigYandexSpeechKitCloudSpeaker))
 }
 
-func (c *Component) SpeechWithOptions(text string, volume int64, speed float64, speaker string) error {
+func (c *Component) SpeechWithOptions(ctx context.Context, text string, volume int64, speed float64, speaker string) error {
 	if volume < 0 {
 		volume = 0
 	} else if volume > 100 {
@@ -123,7 +124,7 @@ func (c *Component) SpeechWithOptions(text string, volume int64, speed float64, 
 	}
 
 	file, err := c.provider.Generate(
-		context.Background(),
+		ctx,
 		text,
 		c.config.String(voice.ConfigYandexSpeechKitCloudLanguage),
 		speaker,

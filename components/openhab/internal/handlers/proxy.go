@@ -48,7 +48,7 @@ func (h *ProxyHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 			return
 		}
 
-		span, ctx := opentracing.StartSpanFromContext(r.Context(), openhab.ComponentName+".api.things.GetByUID")
+		span, ctx := opentracing.StartSpanFromContext(r.Context(), h.Component.Name()+".api.things.GetByUID")
 
 		// TODO: cache
 		status, err := client.Things.GetByUID(&things.GetByUIDParams{
@@ -77,9 +77,9 @@ func (h *ProxyHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 }
 
 func (h *ProxyHandler) proxy(u string, w *dashboard.Response, r *dashboard.Request) {
-	ctx := tracingHttp.ComponentNameToContext(r.Context(), openhab.ComponentName)
+	ctx := tracingHttp.ComponentNameToContext(r.Context(), h.Component.Name())
 
-	span, ctx := opentracing.StartSpanFromContext(ctx, openhab.ComponentName+".proxy")
+	span, ctx := opentracing.StartSpanFromContext(ctx, h.Component.Name()+".proxy")
 	defer span.Finish()
 
 	response, err := httpClient.NewClient().Get(ctx, u)

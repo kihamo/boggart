@@ -79,7 +79,7 @@ sudo service boggart-roborock restart
 ```
 sudo cp -f /home/cleaner/boggart.env /etc/default/boggart-roborock
 sudo cp -f /home/cleaner/boggart /usr/local/bin/boggart-roborock && sudo chmod +x /usr/local/bin/boggart-roborock
-sudo service boggart-roborock restart
+sudo service boggart-roborock stop && sudo service boggart-roborock start
 ```
 
 ## Other

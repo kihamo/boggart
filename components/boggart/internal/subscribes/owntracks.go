@@ -1,6 +1,7 @@
 package subscribes
 
 import (
+	"context"
 	"encoding/json"
 
 	m "github.com/eclipse/paho.mqtt.golang"
@@ -20,7 +21,7 @@ func (s *OwnTracksSubscribe) Filters() map[string]byte {
 	}
 }
 
-func (s *OwnTracksSubscribe) Callback(client mqtt.Component, message m.Message) {
+func (s *OwnTracksSubscribe) Callback(_ context.Context, client mqtt.Component, message m.Message) {
 	var payload map[string]interface{}
 
 	err := json.Unmarshal(message.Payload(), &payload)

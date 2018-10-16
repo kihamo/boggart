@@ -47,7 +47,7 @@ func (h *MessageHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 			vars["text"] = text
 			vars["speaker"] = speaker
 
-			err = h.Component.SpeechWithOptions(text, volume, speed, speaker)
+			err = h.Component.SpeechWithOptions(r.Context(), text, volume, speed, speaker)
 		}
 
 		if err != nil {

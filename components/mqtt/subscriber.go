@@ -1,10 +1,12 @@
 package mqtt
 
 import (
+	"context"
+
 	m "github.com/eclipse/paho.mqtt.golang"
 )
 
 type Subscriber interface {
 	Filters() map[string]byte
-	Callback(Component, m.Message)
+	Callback(context.Context, Component, m.Message)
 }

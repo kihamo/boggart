@@ -113,7 +113,7 @@ func (d *GPIOPin) Filters() map[string]byte {
 	}
 }
 
-func (d *GPIOPin) Callback(client mqtt.Component, message m.Message) {
+func (d *GPIOPin) Callback(_ context.Context, client mqtt.Component, message m.Message) {
 	if !d.IsEnabled() {
 		return
 	}
