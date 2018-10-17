@@ -121,7 +121,10 @@ func (d *GPIOPin) Callback(ctx context.Context, client mqtt.Component, message m
 		return
 	}
 
-	span, ctx := opentracing.StartSpanFromContext(ctx, d.pin.Name())
+	span, ctx := opentracing.StartSpanFromContext(ctx, boggart.ComponentName + "gpio")
+	span.LogFields(
+		log.String("name", d.pin.Name()),
+		log.Int("number", d.pin.Number()))
 	defer span.Finish()
 
 	var err error
