@@ -3,7 +3,6 @@ package internal
 import (
 	"net"
 	"os"
-	"sync"
 
 	"github.com/kihamo/boggart/components/syslog"
 	"github.com/kihamo/shadow"
@@ -48,7 +47,7 @@ func (c *Component) Init(a shadow.Application) error {
 	return nil
 }
 
-func (c *Component) Run(wg *sync.WaitGroup) error {
+func (c *Component) Run() error {
 	components, err := c.application.GetComponents()
 	if err != nil {
 		return err
@@ -62,26 +61,20 @@ func (c *Component) Run(wg *sync.WaitGroup) error {
 		}
 	}
 
-	go func(l logger.Logger) {
-		defer wg.Done()
+	server := rsyslog.NewServer()
+	server.SetFormat(rsyslog.Automatic)
+	server.SetHandler(c)
 
-		server := rsyslog.NewServer()
-		server.SetFormat(rsyslog.Automatic)
-		server.SetHandler(c)
+	addr := net.JoinHostPort(c.config.String(syslog.ConfigHost), c.config.String(syslog.ConfigPort))
+	if err := server.ListenUDP(addr); err != nil {
+		c.logger.Printf("Failed to listen [%d]: %s\n", os.Getpid(), err.Error())
+		return err
+	}
 
-		addr := net.JoinHostPort(c.config.String(syslog.ConfigHost), c.config.String(syslog.ConfigPort))
-		if err := server.ListenUDP(addr); err != nil {
-			l.Fatalf("Failed to listen [%d]: %s\n", os.Getpid(), err.Error())
-			return
-		}
-
-		if err := server.Boot(); err != nil {
-			l.Fatalf("Failed to boot [%d]: %s\n", os.Getpid(), err.Error())
-			return
-		}
-
-		server.Wait()
-	}(c.logger)
+	if err := server.Boot(); err != nil {
+		c.logger.Printf("Failed to boot [%d]: %s\n", os.Getpid(), err.Error())
+		return err
+	}
 
 	return nil
 }

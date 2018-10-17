@@ -1,5 +1,5 @@
-hash: 1b8ee7aed167e9e3170b57e73566e5d88c9f9bf9a201457ab7061d01774e2964
-updated: 2018-10-17T00:12:05.769766+03:00
+hash: ca98f09a319b157ea9a9347c5e8dc05af7ec23f697e42602f2eaa2076e357f35
+updated: 2018-10-17T22:25:49.841748+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -100,7 +100,7 @@ imports:
   subpackages:
   - query
 - name: github.com/gopherjs/gopherjs
-  version: 1babbf986f6fcb1156d0646cdba5c4f81bc32849
+  version: 0766667cb4d1cfb8d5fde1fe210ae41ead3cf589
   subpackages:
   - js
 - name: github.com/gopherjs/gopherwasm
@@ -164,7 +164,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 77040bd5a823304e7c5ffab318799606596ffbb8
+  version: 52a0f655928d058c09e7b3276f656d24d5c45a20
   subpackages:
   - components/annotations
   - components/annotations/instance
@@ -432,6 +432,10 @@ imports:
   version: 921ae394b9430ed4fb549668d7b087601bd60a81
   subpackages:
   - internal
+- name: golang.org/x/sync
+  version: 1d60e4601c6fd243af51cc01ddf169918a5407ca
+  subpackages:
+  - errgroup
 - name: golang.org/x/sys
   version: fa43e7bc11baaae89f3f902b2b4d832b68234844
   subpackages:

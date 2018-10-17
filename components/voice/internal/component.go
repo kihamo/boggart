@@ -8,7 +8,6 @@ import (
 	"io"
 	"io/ioutil"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/kihamo/boggart/components/mqtt"
@@ -64,19 +63,13 @@ func (c *Component) Init(a shadow.Application) (err error) {
 	return nil
 }
 
-func (c *Component) Run(wg *sync.WaitGroup) error {
+func (c *Component) Run() error {
 	c.logger = logger.NewOrNop(c.Name(), c.application)
 	c.provider = yandex.NewYandexSpeechKitCloud(c.config.String(voice.ConfigYandexSpeechKitCloudKey), c.config.Bool(config.ConfigDebug))
 	c.application.GetComponent(mqtt.ComponentName).(mqtt.Component).Subscribe(NewMQTTSubscribe(c))
 	c.audioPlayer.SetVolume(c.config.Int64(voice.ConfigSpeechVolume))
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		c.audioPlayerUpdater()
-	}()
-
+	c.audioPlayerUpdater()
 	return nil
 }
 

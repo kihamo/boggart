@@ -72,19 +72,29 @@ func (c *Component) Run() (err error) {
 	m.DEBUG = NewMQTTLogger(c.logger.Debug, c.logger.Debugf)
 
 	// auto reconnect
-	go func() {
-		duration := c.config.Duration(mqtt.ConfigConnectionTimeout) + time.Second*30
-		ticker := time.NewTicker(duration)
+	duration := c.config.Duration(mqtt.ConfigConnectionTimeout) + time.Second*30
+	ticker := time.NewTicker(duration)
 
-		for ; true; <-ticker.C {
-			err := c.initClient()
-			if err != nil {
-				c.logger.Errorf("Init MQTT client failed with error %s", err.Error())
-			} else {
-				return
-			}
+	for ; true; <-ticker.C {
+		err := c.initClient()
+		if err != nil {
+			c.logger.Errorf("Init MQTT client failed with error %s", err.Error())
+		} else {
+			break
 		}
-	}()
+	}
+
+	ticker.Stop()
+
+	return nil
+}
+
+func (c *Component) Shutdown() error {
+	client := c.Client()
+
+	if client != nil {
+		client.Disconnect(250)
+	}
 
 	return nil
 }

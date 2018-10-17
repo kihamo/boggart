@@ -1,8 +1,6 @@
 package internal
 
 import (
-	"sync"
-
 	"github.com/fsnotify/fsnotify"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/components/roborock"
@@ -48,7 +46,7 @@ func (c *Component) Init(a shadow.Application) (err error) {
 	return nil
 }
 
-func (c *Component) Run(wg *sync.WaitGroup) error {
+func (c *Component) Run() error {
 	c.logger = logger.NewOrNop(c.Name(), c.application)
 
 	watcher, err := fsnotify.NewWatcher()
@@ -56,48 +54,36 @@ func (c *Component) Run(wg *sync.WaitGroup) error {
 		return err
 	}
 
-	go func() {
-		defer wg.Done()
-
-		for {
-			select {
-			case event, ok := <-watcher.Events:
-				if !ok {
-					return
-				}
-
-				if event.Op&fsnotify.Write == fsnotify.Write {
-					c.logger.Debugf("Watched file modified", map[string]interface{}{
-						"file": event.Name,
-					})
-
-					// call watcher
-					if w, ok := c.files[event.Name]; ok {
-						if err := w(event.Name); err != nil {
-							c.logger.Error("Watcher callback return error", map[string]interface{}{
-								"error": err.Error(),
-								"file":  event.Name,
-							})
-						}
-					}
-				}
-
-			case err, ok := <-watcher.Errors:
-				if !ok {
-					return
-				}
-
-				c.logger.Error("File watcher return error", map[string]interface{}{
-					"error": err.Error(),
-				})
-			}
-		}
-	}()
-
 	// watch file
 	for file := range c.files {
 		if err = watcher.Add(file); err != nil {
 			return err
+		}
+	}
+
+	for {
+		select {
+		case event := <-watcher.Events:
+			if event.Op&fsnotify.Write == fsnotify.Write {
+				c.logger.Debugf("Watched file modified", map[string]interface{}{
+					"file": event.Name,
+				})
+
+				// call watcher
+				if w, ok := c.files[event.Name]; ok {
+					if err := w(event.Name); err != nil {
+						c.logger.Error("Watcher callback return error", map[string]interface{}{
+							"error": err.Error(),
+							"file":  event.Name,
+						})
+					}
+				}
+			}
+
+		case err := <-watcher.Errors:
+			c.logger.Error("File watcher return error", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}
 
