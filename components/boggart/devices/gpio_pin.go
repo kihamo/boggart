@@ -8,6 +8,9 @@ import (
 	m "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/shadow/components/tracing"
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/log"
 	"periph.io/x/periph/conn/gpio"
 	"periph.io/x/periph/conn/pin"
 )
@@ -109,18 +112,29 @@ func (d *GPIOPin) waitForEdge() {
 
 func (d *GPIOPin) Filters() map[string]byte {
 	return map[string]byte{
-		fmt.Sprintf("%s/%d", GPIOMQTTTopicPrefix, d.pin.Number()): 0,
+		fmt.Sprintf("%s%d", GPIOMQTTTopicPrefix, d.pin.Number()): 0,
 	}
 }
 
-func (d *GPIOPin) Callback(_ context.Context, client mqtt.Component, message m.Message) {
+func (d *GPIOPin) Callback(ctx context.Context, client mqtt.Component, message m.Message) {
 	if !d.IsEnabled() {
 		return
 	}
 
+	span, ctx := opentracing.StartSpanFromContext(ctx, d.pin.Name())
+	defer span.Finish()
+
+	var err error
+
 	if bytes.Equal(message.Payload(), []byte(`1`)) {
-		d.High()
+		err = d.High()
+		span.LogFields(log.String("out", "high"))
 	} else {
-		d.Low()
+		err = d.Low()
+		span.LogFields(log.String("out", "low"))
+	}
+
+	if err != nil {
+		tracing.SpanError(span, err)
 	}
 }

@@ -1,5 +1,5 @@
-hash: ca98f09a319b157ea9a9347c5e8dc05af7ec23f697e42602f2eaa2076e357f35
-updated: 2018-10-17T22:25:49.841748+03:00
+hash: e20ec581030f11115aece96295cf17387c75d70bf1e05bc508355cbdf0991b88
+updated: 2018-10-18T00:38:06.570185+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -29,7 +29,7 @@ imports:
 - name: github.com/deckarep/golang-set
   version: cbaa98ba5575e67703b32b4b19f73c91f3c4159e
 - name: github.com/eclipse/paho.mqtt.golang
-  version: 36d01c2b4cbeb3d2a12063e4880ce30800af9560
+  version: c95f2f508baf22ddc8625d0097b1ceb8abc508b3
   subpackages:
   - packets
 - name: github.com/elazarl/go-bindata-assetfs
@@ -164,7 +164,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 52a0f655928d058c09e7b3276f656d24d5c45a20
+  version: 3ba87f1737e868e125713f6265eabc2e7e4f5724
   subpackages:
   - components/annotations
   - components/annotations/instance

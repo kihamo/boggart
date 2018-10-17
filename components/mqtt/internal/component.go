@@ -18,6 +18,7 @@ import (
 	"github.com/kihamo/shadow/components/tracing"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
+	"github.com/opentracing/opentracing-go/log"
 )
 
 type Component struct {
@@ -177,6 +178,7 @@ func (c *Component) subscribeByClient(client m.Client, subscriber mqtt.Subscribe
 
 	return client.SubscribeMultiple(subscriber.Filters(), func(client m.Client, message m.Message) {
 		span := c.tracer.StartSpan(message.Topic())
+		span.LogFields(log.String("payload", string(message.Payload())))
 		ext.Component.Set(span, c.Name())
 		defer span.Finish()
 

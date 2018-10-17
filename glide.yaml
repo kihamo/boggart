@@ -3,7 +3,7 @@ import:
 - package: github.com/go-sql-driver/mysql
   version: 9181e3a86a19bacd63e68d43ae8b7b36320d8092
 - package: github.com/kihamo/shadow
-  version: 52a0f655928d058c09e7b3276f656d24d5c45a20
+  version: 3ba87f1737e868e125713f6265eabc2e7e4f5724
 - package: github.com/goburrow/serial
   version: 5efbe925ecf714f8ba147bf2226f2e7afc7111bc
 - package: gopkg.in/routeros.v2
@@ -21,7 +21,7 @@ import:
 - package: periph.io/x/periph
   version: ~v3.1.0
 - package: github.com/eclipse/paho.mqtt.golang
-  version: ~v1.1
+  version: c95f2f508baf22ddc8625d0097b1ceb8abc508b3
 - package: github.com/go-swagger/go-swagger
   version: ~0.15.0
 - package: github.com/go-openapi/runtime
