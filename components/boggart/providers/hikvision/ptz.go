@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/kihamo/shadow/components/tracing"
-	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/log"
 )
 
@@ -71,7 +70,7 @@ type PTZDataAbsoluteHigh struct {
 }
 
 func (a *ISAPI) PTZChannels(ctx context.Context) (list PTZChannelList, err error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, ComponentName+".ptz.channels")
+	span, ctx := tracing.StartSpanFromContext(ctx, ComponentName, "ptz.channels")
 	defer span.Finish()
 
 	u := a.address + proxyPTZPrefixURL + "/channels"
@@ -85,7 +84,7 @@ func (a *ISAPI) PTZChannels(ctx context.Context) (list PTZChannelList, err error
 }
 
 func (a *ISAPI) PTZStatus(ctx context.Context, channel uint64) (status PTZStatus, err error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, ComponentName+".ptz.status")
+	span, ctx := tracing.StartSpanFromContext(ctx, ComponentName, "ptz.status")
 	defer span.Finish()
 
 	u := a.address + proxyPTZPrefixURL + "/channels/" + strconv.FormatUint(channel, 10) + "/status"
@@ -105,7 +104,7 @@ func (a *ISAPI) PTZStatus(ctx context.Context, channel uint64) (status PTZStatus
 }
 
 func (a *ISAPI) PTZPresetGoTo(ctx context.Context, channel, preset uint64) error {
-	span, ctx := opentracing.StartSpanFromContext(ctx, ComponentName+".ptz.preset_goto")
+	span, ctx := tracing.StartSpanFromContext(ctx, ComponentName, "ptz.preset_goto")
 	defer span.Finish()
 
 	span.LogFields(
@@ -137,7 +136,7 @@ func (a *ISAPI) PTZPresetGoTo(ctx context.Context, channel, preset uint64) error
 }
 
 func (a *ISAPI) PTZRelative(ctx context.Context, channel uint64, x, y, zoom int64) error {
-	span, ctx := opentracing.StartSpanFromContext(ctx, ComponentName+".ptz.relative")
+	span, ctx := tracing.StartSpanFromContext(ctx, ComponentName, "ptz.relative")
 	defer span.Finish()
 
 	if zoom < -100 {
@@ -181,7 +180,7 @@ func (a *ISAPI) PTZRelative(ctx context.Context, channel uint64, x, y, zoom int6
 }
 
 func (a *ISAPI) PTZAbsolute(ctx context.Context, channel uint64, elevation int64, azimuth, absoluteZoom uint64) error {
-	span, ctx := opentracing.StartSpanFromContext(ctx, ComponentName+".ptz.absolute")
+	span, ctx := tracing.StartSpanFromContext(ctx, ComponentName, "ptz.absolute")
 	defer span.Finish()
 
 	if elevation < -900 {
@@ -237,7 +236,7 @@ func (a *ISAPI) PTZAbsolute(ctx context.Context, channel uint64, elevation int64
 }
 
 func (a *ISAPI) PTZContinuous(ctx context.Context, channel uint64, pan, tilt, zoom int64) error {
-	span, ctx := opentracing.StartSpanFromContext(ctx, ComponentName+".ptz.continuous")
+	span, ctx := tracing.StartSpanFromContext(ctx, ComponentName, "ptz.continuous")
 	defer span.Finish()
 
 	if pan < -100 {
@@ -291,7 +290,7 @@ func (a *ISAPI) PTZContinuous(ctx context.Context, channel uint64, pan, tilt, zo
 }
 
 func (a *ISAPI) PTZMomentary(ctx context.Context, channel uint64, pan, tilt, zoom int64, duration time.Duration) error {
-	span, ctx := opentracing.StartSpanFromContext(ctx, ComponentName+".ptz.momentary")
+	span, ctx := tracing.StartSpanFromContext(ctx, ComponentName, "ptz.momentary")
 	defer span.Finish()
 
 	if pan < -100 {

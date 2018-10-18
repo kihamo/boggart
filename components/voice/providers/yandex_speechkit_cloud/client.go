@@ -9,7 +9,7 @@ import (
 	"net/url"
 
 	"github.com/kihamo/boggart/components/boggart/protocols/http"
-	tracing "github.com/kihamo/shadow/components/tracing/http"
+	"github.com/kihamo/shadow/components/tracing"
 )
 
 const (
@@ -60,7 +60,10 @@ func NewYandexSpeechKitCloud(key string, debug bool) *YandexSpeechKitCloud {
 	}
 }
 
-func (c *YandexSpeechKitCloud) Generate(ctx context.Context, text, lang, speaker, emotion, format, quality string, speed float64) ([]byte, error) {
+func (c *YandexSpeechKitCloud) Generate(ctx context.Context, text, lang, speaker, emotion, format, quality string, speed float64) (content []byte, err error) {
+	span, ctx := tracing.StartSpanFromContext(ctx, ComponentName, "generate")
+	defer span.Finish()
+
 	u := *(c.baseURL)
 	u.Path = "generate"
 
@@ -78,22 +81,25 @@ func (c *YandexSpeechKitCloud) Generate(ctx context.Context, text, lang, speaker
 	values.Add("emotion", emotion)
 	u.RawQuery = values.Encode()
 
-	ctx = tracing.ComponentNameToContext(ctx, ComponentName)
-	ctx = tracing.OperationNameToContext(ctx, ComponentName+".generate")
-
 	response, err := c.client.Get(ctx, u.String())
+	if err == nil {
+		defer response.Body.Close()
+
+		switch response.StatusCode {
+		case h.StatusOK:
+			content, err = ioutil.ReadAll(response.Body)
+
+		case h.StatusLocked:
+			err = errors.New("API key is locked, please contact Yandex support team")
+
+		default:
+			err = errors.New("Returns not 200 OK response")
+		}
+	}
+
 	if err != nil {
-		return nil, err
-	}
-	defer response.Body.Close()
-
-	switch response.StatusCode {
-	case h.StatusOK:
-		return ioutil.ReadAll(response.Body)
-
-	case h.StatusLocked:
-		return nil, errors.New("API key is locked, please contact Yandex support team")
+		tracing.SpanError(span, err)
 	}
 
-	return nil, errors.New("Returns not 200 OK response")
+	return content, err
 }

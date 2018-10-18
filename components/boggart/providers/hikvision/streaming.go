@@ -8,11 +8,10 @@ import (
 	"strconv"
 
 	"github.com/kihamo/shadow/components/tracing"
-	"github.com/opentracing/opentracing-go"
 )
 
 func (a *ISAPI) StreamingPicture(ctx context.Context, channel uint64) ([]byte, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, ComponentName+".streaming.picture")
+	span, ctx := tracing.StartSpanFromContext(ctx, ComponentName, "streaming.picture")
 	defer span.Finish()
 
 	if channel < 101 {

@@ -11,6 +11,7 @@ import (
 	_ "github.com/kihamo/shadow/components/dashboard/instance"
 	_ "github.com/kihamo/shadow/components/i18n/instance"
 	_ "github.com/kihamo/shadow/components/logger/instance"
+	_ "github.com/kihamo/shadow/components/messengers/instance"
 	_ "github.com/kihamo/shadow/components/metrics/instance"
 	_ "github.com/kihamo/shadow/components/profiling/instance"
 	_ "github.com/kihamo/shadow/components/tracing/instance"

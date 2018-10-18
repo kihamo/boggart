@@ -16,8 +16,6 @@ import (
 	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/logger"
 	"github.com/kihamo/shadow/components/tracing"
-	"github.com/opentracing/opentracing-go"
-	"github.com/opentracing/opentracing-go/ext"
 	"github.com/opentracing/opentracing-go/log"
 )
 
@@ -25,7 +23,6 @@ type Component struct {
 	application shadow.Application
 	config      config.Component
 	logger      logger.Logger
-	tracer      opentracing.Tracer
 
 	mutex       sync.RWMutex
 	client      m.Client
@@ -65,7 +62,6 @@ func (c *Component) Init(a shadow.Application) error {
 
 func (c *Component) Run() (err error) {
 	c.logger = logger.NewOrNop(c.Name(), c.application)
-	c.tracer = tracing.NewOrNop(c.application)
 
 	m.ERROR = NewMQTTLogger(c.logger.Error, c.logger.Errorf)
 	m.CRITICAL = NewMQTTLogger(c.logger.Panic, c.logger.Panicf)
@@ -177,11 +173,10 @@ func (c *Component) subscribeByClient(client m.Client, subscriber mqtt.Subscribe
 	})
 
 	return client.SubscribeMultiple(subscriber.Filters(), func(client m.Client, message m.Message) {
-		span := c.tracer.StartSpan(message.Topic())
-		span.LogFields(log.String("payload", string(message.Payload())))
-		ext.Component.Set(span, c.Name())
+		span, ctx := tracing.StartSpanFromContext(context.Background(), c.Name(), message.Topic())
 		defer span.Finish()
 
-		subscriber.Callback(opentracing.ContextWithSpan(context.Background(), span), c, message)
+		span.LogFields(log.String("payload", string(message.Payload())))
+		subscriber.Callback(ctx, c, message)
 	})
 }

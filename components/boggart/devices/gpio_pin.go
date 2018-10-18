@@ -9,7 +9,6 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/shadow/components/tracing"
-	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/log"
 	"periph.io/x/periph/conn/gpio"
 	"periph.io/x/periph/conn/pin"
@@ -121,7 +120,7 @@ func (d *GPIOPin) Callback(ctx context.Context, client mqtt.Component, message m
 		return
 	}
 
-	span, ctx := opentracing.StartSpanFromContext(ctx, boggart.ComponentName + ".gpio")
+	span, ctx := tracing.StartSpanFromContext(ctx, "gpio", "set")
 	span.LogFields(
 		log.String("name", d.pin.Name()),
 		log.Int("number", d.pin.Number()))

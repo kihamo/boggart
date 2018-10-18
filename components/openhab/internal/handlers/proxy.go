@@ -15,8 +15,6 @@ import (
 	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/messengers"
 	"github.com/kihamo/shadow/components/tracing"
-	tracingHttp "github.com/kihamo/shadow/components/tracing/http"
-	"github.com/opentracing/opentracing-go"
 )
 
 const (
@@ -48,7 +46,7 @@ func (h *ProxyHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 			return
 		}
 
-		span, ctx := opentracing.StartSpanFromContext(r.Context(), h.Component.Name()+".api.things.GetByUID")
+		span, ctx := tracing.StartSpanFromContext(r.Context(), h.Component.Name(), "api.things.GetByUID")
 
 		// TODO: cache
 		status, err := client.Things.GetByUID(&things.GetByUIDParams{
@@ -77,9 +75,7 @@ func (h *ProxyHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 }
 
 func (h *ProxyHandler) proxy(u string, w *dashboard.Response, r *dashboard.Request) {
-	ctx := tracingHttp.ComponentNameToContext(r.Context(), h.Component.Name())
-
-	span, ctx := opentracing.StartSpanFromContext(ctx, h.Component.Name()+".proxy")
+	span, ctx := tracing.StartSpanFromContext(r.Context(), h.Component.Name(), "handler.proxy")
 	defer span.Finish()
 
 	response, err := httpClient.NewClient().Get(ctx, u)

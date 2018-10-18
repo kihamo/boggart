@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/kihamo/shadow/components/tracing"
-	"github.com/opentracing/opentracing-go"
 )
 
 type ContentManagementStorageResponse struct {
@@ -26,7 +25,7 @@ type ContentManagementStorageResponse struct {
 }
 
 func (a *ISAPI) ContentManagementStorage(ctx context.Context) (result ContentManagementStorageResponse, err error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, ComponentName+".content_management.storage")
+	span, ctx := tracing.StartSpanFromContext(ctx, ComponentName, "content_management.storage")
 	defer span.Finish()
 
 	err = a.DoXML(ctx, http.MethodGet, a.address+"/ContentMgmt/Storage", nil, &result)

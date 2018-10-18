@@ -8,8 +8,6 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart/protocols/http"
 	"github.com/kihamo/shadow/components/tracing"
-	tracingHttp "github.com/kihamo/shadow/components/tracing/http"
-	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/log"
 )
 
@@ -41,9 +39,7 @@ func (c *Client) AccountID() string {
 }
 
 func (c *Client) Balance(ctx context.Context) (float64, error) {
-	ctx = tracingHttp.ComponentNameToContext(ctx, ComponentName)
-
-	span, ctx := opentracing.StartSpanFromContext(ctx, ComponentName+".balance")
+	span, ctx := tracing.StartSpanFromContext(ctx, ComponentName, "balance")
 	defer span.Finish()
 
 	_, err := c.connection.Get(ctx, AccountURL)

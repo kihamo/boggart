@@ -64,6 +64,7 @@ compilation terminated.
 ```
 cd $GOPATH/src/github.com/kihamo/boggart/cmd/roborock/
 go build -ldflags "-s -w -X 'main.Version=`date +"%y%m%d"`' -X 'main.Build=`date +"%H%M%S"`'" -o boggart ./
+md5sum boggart
 ```
 
 #### First
@@ -77,10 +78,12 @@ sudo service boggart-roborock restart
 ```
 #### Update
 ```
+md5sum boggart /home/cleaner/boggart
 sudo cp -f /home/cleaner/boggart.env /etc/default/boggart-roborock
 sudo cp -f /home/cleaner/boggart /usr/local/bin/boggart-roborock && sudo chmod +x /usr/local/bin/boggart-roborock
 sudo service boggart-roborock stop
 sudo service boggart-roborock start
+    tail -f /var/log/boggart-roborock.log
 ```
 
 ## Other

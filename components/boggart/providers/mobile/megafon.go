@@ -12,12 +12,11 @@ import (
 	"github.com/kihamo/boggart/components/boggart/protocols/http"
 	"github.com/kihamo/shadow/components/tracing"
 	tracingHttp "github.com/kihamo/shadow/components/tracing/http"
-	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/log"
 )
 
 const (
-	MegafonLkComponentName = "Megafon lk"
+	MegafonLkComponentName = "megafon"
 
 	MegafonLkURL           = "https://lk.megafon.ru"
 	MegafonLkLoginFormURL  = MegafonLkURL + "/login/"
@@ -110,7 +109,7 @@ func (m *Megafon) auth(ctx context.Context) (string, error) {
 func (m *Megafon) Balance(ctx context.Context) (float64, error) {
 	ctx = tracingHttp.ComponentNameToContext(ctx, MegafonLkComponentName)
 
-	span, ctx := opentracing.StartSpanFromContext(ctx, MegafonLkComponentName+".balance")
+	span, ctx := tracing.StartSpanFromContext(ctx, MegafonLkComponentName, "balance")
 	defer span.Finish()
 
 	csrf, err := m.auth(ctx)
@@ -143,7 +142,7 @@ func (m *Megafon) Balance(ctx context.Context) (float64, error) {
 func (m *Megafon) Remainders(ctx context.Context) (*MegafonRemainders, error) {
 	ctx = tracingHttp.ComponentNameToContext(ctx, MegafonLkComponentName)
 
-	span, ctx := opentracing.StartSpanFromContext(ctx, MegafonLkComponentName+".remainders")
+	span, ctx := tracing.StartSpanFromContext(ctx, MegafonLkComponentName, "remainders")
 	defer span.Finish()
 
 	csrf, err := m.auth(ctx)
