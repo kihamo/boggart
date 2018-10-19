@@ -18,6 +18,8 @@ import (
 	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/logger"
+	"github.com/kihamo/shadow/components/tracing"
+	"github.com/opentracing/opentracing-go/log"
 )
 
 type Component struct {
@@ -83,14 +85,18 @@ func (c *Component) Speech(ctx context.Context, text string) error {
 }
 
 func (c *Component) SpeechWithOptions(ctx context.Context, text string, volume int64, speed float64, speaker string) error {
+	span, ctx := tracing.StartSpanFromContext(ctx, voice.ComponentName, "speech_with_options")
+	defer span.Finish()
+
 	if volume < 0 {
 		volume = 0
 	} else if volume > 100 {
 		volume = 100
 	}
+	span.LogFields(log.Int64("volume", volume))
 
 	if volume == 0 {
-		c.logger.Error("Skip speech text because volume is 0", map[string]interface{}{
+		c.logger.Warn("Skip speech text because volume is 0", map[string]interface{}{
 			"text": text,
 		})
 
@@ -102,10 +108,12 @@ func (c *Component) SpeechWithOptions(ctx context.Context, text string, volume i
 	} else if speed > 3 {
 		speed = 3
 	}
+	span.LogFields(log.Float64("speed", speed))
 
 	if speaker == "" {
 		speaker = c.config.String(voice.ConfigYandexSpeechKitCloudSpeaker)
 	}
+	span.LogFields(log.String("speaker", speaker))
 
 	text = strings.TrimSpace(text)
 	text = strings.ToLower(text)
@@ -113,7 +121,10 @@ func (c *Component) SpeechWithOptions(ctx context.Context, text string, volume i
 	c.logger.Debugf("Speech text %s", text)
 
 	if c.provider == nil {
-		return errors.New("Speech provider not found")
+		err := errors.New("Speech provider not found")
+
+		tracing.SpanError(span, err)
+		return err
 	}
 
 	file, err := c.provider.Generate(
@@ -135,9 +146,18 @@ func (c *Component) SpeechWithOptions(ctx context.Context, text string, volume i
 		return err
 	}
 
-	c.audioPlayer.SetVolume(volume)
+	err = c.SetVolume(ctx, volume)
+	if err != nil {
+		c.logger.Error("Failed set volume", map[string]interface{}{
+			"error":  err.Error(),
+			"format": c.config.String(voice.ConfigYandexSpeechKitCloudFormat),
+			"text":   text,
+		})
 
-	err = c.PlayReader(ioutil.NopCloser(bytes.NewReader(file)))
+		return err
+	}
+
+	err = c.PlayReader(ctx, ioutil.NopCloser(bytes.NewReader(file)))
 	if err != nil {
 		c.logger.Error("Failed play speech text", map[string]interface{}{
 			"error":  err.Error(),
@@ -151,7 +171,10 @@ func (c *Component) SpeechWithOptions(ctx context.Context, text string, volume i
 	return nil
 }
 
-func (c *Component) PlayReader(reader io.ReadCloser) (err error) {
+func (c *Component) PlayReader(ctx context.Context, reader io.ReadCloser) (err error) {
+	span, ctx := tracing.StartSpanFromContext(ctx, voice.ComponentName, "player.play.reader")
+	defer span.Finish()
+
 	err = c.audioPlayer.Stop()
 	if err == nil {
 		err = c.audioPlayer.PlayFromReader(reader)
@@ -161,6 +184,8 @@ func (c *Component) PlayReader(reader io.ReadCloser) (err error) {
 		c.logger.Error("Failed play reader", map[string]interface{}{
 			"error": err.Error(),
 		})
+
+		tracing.SpanError(span, err)
 	} else {
 		c.logger.Debug("Player play reader")
 	}
@@ -168,7 +193,12 @@ func (c *Component) PlayReader(reader io.ReadCloser) (err error) {
 	return err
 }
 
-func (c *Component) PlayURL(url string) (err error) {
+func (c *Component) PlayURL(ctx context.Context, url string) (err error) {
+	span, ctx := tracing.StartSpanFromContext(ctx, voice.ComponentName, "player.play.url")
+	defer span.Finish()
+
+	span.LogFields(log.String("url", url))
+
 	err = c.audioPlayer.Stop()
 	if err == nil {
 		err = c.audioPlayer.PlayFromURL(url)
@@ -179,6 +209,8 @@ func (c *Component) PlayURL(url string) (err error) {
 			"error": err.Error(),
 			"url":   url,
 		})
+
+		tracing.SpanError(span, err)
 	} else {
 		c.logger.Debug("Player play URL", map[string]interface{}{
 			"url": url,
@@ -188,12 +220,17 @@ func (c *Component) PlayURL(url string) (err error) {
 	return err
 }
 
-func (c *Component) Play() error {
+func (c *Component) Play(ctx context.Context) error {
+	span, ctx := tracing.StartSpanFromContext(ctx, voice.ComponentName, "player.play")
+	defer span.Finish()
+
 	err := c.audioPlayer.Play()
 	if err != nil {
 		c.logger.Error("Failed play player", map[string]interface{}{
 			"error": err.Error(),
 		})
+
+		tracing.SpanError(span, err)
 	} else {
 		c.logger.Debug("Player play")
 	}
@@ -201,12 +238,17 @@ func (c *Component) Play() error {
 	return err
 }
 
-func (c *Component) Pause() error {
+func (c *Component) Pause(ctx context.Context) error {
+	span, ctx := tracing.StartSpanFromContext(ctx, voice.ComponentName, "player.pause")
+	defer span.Finish()
+
 	err := c.audioPlayer.Pause()
 	if err != nil {
 		c.logger.Error("Failed pause player", map[string]interface{}{
 			"error": err.Error(),
 		})
+
+		tracing.SpanError(span, err)
 	} else {
 		c.logger.Debug("Player pause")
 	}
@@ -214,12 +256,17 @@ func (c *Component) Pause() error {
 	return err
 }
 
-func (c *Component) Stop() error {
+func (c *Component) Stop(ctx context.Context) error {
+	span, ctx := tracing.StartSpanFromContext(ctx, voice.ComponentName, "player.stop")
+	defer span.Finish()
+
 	err := c.audioPlayer.Stop()
 	if err != nil {
 		c.logger.Error("Failed stop player", map[string]interface{}{
 			"error": err.Error(),
 		})
+
+		tracing.SpanError(span, err)
 	} else {
 		c.logger.Debug("Player stopped")
 	}
@@ -227,17 +274,27 @@ func (c *Component) Stop() error {
 	return err
 }
 
-func (c *Component) Volume() int64 {
+func (c *Component) Volume(ctx context.Context) int64 {
+	span, ctx := tracing.StartSpanFromContext(ctx, voice.ComponentName, "player.volume.get")
+	defer span.Finish()
+
 	return c.audioPlayer.Volume()
 }
 
-func (c *Component) SetVolume(percent int64) error {
+func (c *Component) SetVolume(ctx context.Context, percent int64) error {
+	span, ctx := tracing.StartSpanFromContext(ctx, voice.ComponentName, "player.volume.set")
+	defer span.Finish()
+
+	span.LogFields(log.Int64("percent", percent))
+
 	err := c.audioPlayer.SetVolume(percent)
 	if err != nil {
 		c.logger.Error("Failed set volume player", map[string]interface{}{
 			"error":  err.Error(),
 			"volume": percent,
 		})
+
+		tracing.SpanError(span, err)
 	} else {
 		c.logger.Debugf("Player set volume %d", percent)
 	}

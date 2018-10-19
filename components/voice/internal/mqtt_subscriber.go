@@ -51,24 +51,24 @@ func (s *MQTTSubscribe) Callback(ctx context.Context, client mqtt.Component, mes
 		s.player.Speech(ctx, string(message.Payload()))
 
 	case voice.MQTTTopicPlayerURL:
-		s.player.PlayURL(string(message.Payload()))
+		s.player.PlayURL(ctx, string(message.Payload()))
 
 	case voice.MQTTTopicPlayerAction:
 		switch strings.ToLower(string(message.Payload())) {
 		case "stop":
-			s.player.Stop()
+			s.player.Stop(ctx)
 
 		case "pause":
-			s.player.Pause()
+			s.player.Pause(ctx)
 
 		case "play":
-			s.player.Play()
+			s.player.Play(ctx)
 		}
 
 	case voice.MQTTTopicPlayerVolumeSet:
 		volume, err := strconv.ParseInt(string(message.Payload()), 10, 64)
 		if err == nil {
-			s.player.SetVolume(volume)
+			s.player.SetVolume(ctx, volume)
 		}
 	}
 }
