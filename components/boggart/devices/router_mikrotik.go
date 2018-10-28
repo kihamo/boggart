@@ -26,6 +26,8 @@ var (
 	metricRouterMikrotikMemoryAvailable      = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_memory_available_bytes", "Memory available in Mikrotik router")
 	metricRouterMikrotikStorageUsage         = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_storage_usage_bytes", "Storage usage in Mikrotik router")
 	metricRouterMikrotikStorageAvailable     = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_storage_available_bytes", "Storage available in Mikrotik router")
+	metricRouterMikrotikDiskUsage            = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_disk_usage_bytes", "Disk usage in Mikrotik router")
+	metricRouterMikrotikDiskAvailable        = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_disk_available_bytes", "Disk available in Mikrotik router")
 	metricRouterMikrotikVoltage              = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_voltage_volt", "Voltage")
 	metricRouterMikrotikTemperature          = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_temperature_celsius", "Temperature")
 
@@ -98,6 +100,8 @@ func (d *MikrotikRouter) Describe(ch chan<- *snitch.Description) {
 	metricRouterMikrotikMemoryAvailable.With("serial_number", serialNumber).Describe(ch)
 	metricRouterMikrotikStorageUsage.With("serial_number", serialNumber).Describe(ch)
 	metricRouterMikrotikStorageAvailable.With("serial_number", serialNumber).Describe(ch)
+	metricRouterMikrotikDiskUsage.With("serial_number", serialNumber).Describe(ch)
+	metricRouterMikrotikDiskAvailable.With("serial_number", serialNumber).Describe(ch)
 	metricRouterMikrotikVoltage.With("serial_number", serialNumber).Describe(ch)
 	metricRouterMikrotikTemperature.With("serial_number", serialNumber).Describe(ch)
 }
@@ -116,6 +120,8 @@ func (d *MikrotikRouter) Collect(ch chan<- snitch.Metric) {
 	metricRouterMikrotikMemoryAvailable.With("serial_number", serialNumber).Collect(ch)
 	metricRouterMikrotikStorageUsage.With("serial_number", serialNumber).Collect(ch)
 	metricRouterMikrotikStorageAvailable.With("serial_number", serialNumber).Collect(ch)
+	metricRouterMikrotikDiskUsage.With("serial_number", serialNumber).Collect(ch)
+	metricRouterMikrotikDiskAvailable.With("serial_number", serialNumber).Collect(ch)
 	metricRouterMikrotikVoltage.With("serial_number", serialNumber).Collect(ch)
 	metricRouterMikrotikTemperature.With("serial_number", serialNumber).Collect(ch)
 }
@@ -339,6 +345,22 @@ func (d *MikrotikRouter) taskUpdater(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 	metricRouterMikrotikStorageUsage.With("serial_number", serialNumber).Set(storageSpace - storageFree)
+
+	disks, err := d.provider.SystemDisk(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, disk := range disks {
+		metricRouterMikrotikDiskUsage.With("serial_number", serialNumber).With(
+			"name", disk.Name,
+			"label", disk.Label,
+		).Set(float64(disk.Size - disk.Free))
+		metricRouterMikrotikDiskAvailable.With("serial_number", serialNumber).With(
+			"name", disk.Name,
+			"label", disk.Label,
+		).Set(float64(disk.Free))
+	}
 
 	health, err := d.provider.SystemHealth()
 	if err != nil {

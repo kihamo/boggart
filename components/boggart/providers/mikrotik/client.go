@@ -1,12 +1,21 @@
 package mikrotik
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/kihamo/gotypes"
+	"github.com/kihamo/shadow/components/tracing"
 	"gopkg.in/routeros.v2"
+)
+
+const (
+	ComponentName = "mikrotik"
 )
 
 type Client struct {
@@ -25,15 +34,44 @@ func NewClient(address, username, password string, timeout time.Duration) (*Clie
 	}, nil
 }
 
-func (c *Client) runArgs(sentence []string) (*routeros.Reply, error) {
+func (c *Client) do(sentence []string) (*routeros.Reply, error) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
 	return c.client.RunArgs(sentence)
 }
 
+func (c *Client) doConvert(ctx context.Context, sentence []string, result interface{}) error {
+	span, ctx := tracing.StartSpanFromContext(ctx, ComponentName, "call")
+	defer span.Finish()
+
+	span.SetTag("sentence", strings.Join(sentence, " "))
+
+	reply, err := c.do(sentence)
+	if err != nil {
+		tracing.SpanError(span, err)
+		return err
+	}
+
+	records := make([]interface{}, 0, len(reply.Re))
+	for _, re := range reply.Re {
+		records = append(records, re.Map)
+	}
+
+	converter := gotypes.NewConverter(records, result)
+	if !converter.Valid() {
+		err = fmt.Errorf("Failed convert fields: ", strings.Join(converter.GetInvalidFields(), ","))
+	}
+
+	if err != nil {
+		tracing.SpanError(span, err)
+	}
+
+	return err
+}
+
 func (c *Client) SystemRouterboard() (map[string]string, error) {
-	reply, err := c.runArgs([]string{"/system/routerboard/print"})
+	reply, err := c.do([]string{"/system/routerboard/print"})
 	if err != nil {
 		return nil, nil
 	}
@@ -46,7 +84,7 @@ func (c *Client) SystemRouterboard() (map[string]string, error) {
 }
 
 func (c *Client) SystemResource() (map[string]string, error) {
-	reply, err := c.runArgs([]string{"/system/resource/print"})
+	reply, err := c.do([]string{"/system/resource/print"})
 	if err != nil {
 		return nil, nil
 	}
@@ -59,7 +97,7 @@ func (c *Client) SystemResource() (map[string]string, error) {
 }
 
 func (c *Client) SystemHealth() (*SystemHealth, error) {
-	reply, err := c.runArgs([]string{"/system/health/print"})
+	reply, err := c.do([]string{"/system/health/print"})
 	if err != nil {
 		return nil, nil
 	}
@@ -85,7 +123,7 @@ func (c *Client) SystemHealth() (*SystemHealth, error) {
 }
 
 func (c *Client) WifiClients() ([]map[string]string, error) {
-	reply, err := c.runArgs([]string{"/interface/wireless/registration-table/print"})
+	reply, err := c.do([]string{"/interface/wireless/registration-table/print"})
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +142,7 @@ func (c *Client) WifiClients() ([]map[string]string, error) {
 }
 
 func (c *Client) PPPActiveConnections() ([]map[string]string, error) {
-	reply, err := c.runArgs([]string{"/ppp/active/print"})
+	reply, err := c.do([]string{"/ppp/active/print"})
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +161,7 @@ func (c *Client) PPPActiveConnections() ([]map[string]string, error) {
 }
 
 func (c *Client) EthernetStats() ([]map[string]string, error) {
-	reply, err := c.runArgs([]string{"/interface/print", "stats"})
+	reply, err := c.do([]string{"/interface/print", "stats"})
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +180,7 @@ func (c *Client) EthernetStats() ([]map[string]string, error) {
 }
 
 func (c *Client) DNSStatic() (map[string]string, error) {
-	reply, err := c.runArgs([]string{"/ip/dns/static/print"})
+	reply, err := c.do([]string{"/ip/dns/static/print"})
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +202,7 @@ func (c *Client) DNSStatic() (map[string]string, error) {
 }
 
 func (c *Client) ARPTable() (map[string]map[string]string, error) {
-	reply, err := c.runArgs([]string{"/ip/arp/print"})
+	reply, err := c.do([]string{"/ip/arp/print"})
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +220,7 @@ func (c *Client) ARPTable() (map[string]map[string]string, error) {
 }
 
 func (c *Client) DHCPLease() (map[string]string, error) {
-	reply, err := c.runArgs([]string{"/ip/dhcp-server/lease/print"})
+	reply, err := c.do([]string{"/ip/dhcp-server/lease/print"})
 	if err != nil {
 		return nil, err
 	}
