@@ -2,7 +2,6 @@ package mikrotik
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -33,20 +32,16 @@ func NewClient(address, username, password string, timeout time.Duration) (*Clie
 	}, nil
 }
 
-func (c *Client) do(sentence []string) (*routeros.Reply, error) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	return c.client.RunArgs(sentence)
-}
-
 func (c *Client) doConvert(ctx context.Context, sentence []string, result interface{}) error {
 	span, ctx := tracing.StartSpanFromContext(ctx, ComponentName, "call")
 	defer span.Finish()
 
 	span.SetTag("sentence", strings.Join(sentence, " "))
 
-	reply, err := c.do(sentence)
+	c.mutex.Lock()
+	reply, err := c.client.RunArgs(sentence)
+	c.mutex.Unlock()
+
 	if err != nil {
 		tracing.SpanError(span, err)
 		return err
@@ -67,42 +62,4 @@ func (c *Client) doConvert(ctx context.Context, sentence []string, result interf
 	}
 
 	return err
-}
-
-func (c *Client) WifiClients() ([]map[string]string, error) {
-	reply, err := c.do([]string{"/interface/wireless/registration-table/print"})
-	if err != nil {
-		return nil, err
-	}
-
-	if len(reply.Re) == 0 {
-		return nil, errors.New("Empty reply from device")
-	}
-
-	clients := make([]map[string]string, 0, len(reply.Re))
-
-	for _, re := range reply.Re {
-		clients = append(clients, re.Map)
-	}
-
-	return clients, nil
-}
-
-func (c *Client) EthernetStats() ([]map[string]string, error) {
-	reply, err := c.do([]string{"/interface/print", "stats"})
-	if err != nil {
-		return nil, err
-	}
-
-	if len(reply.Re) == 0 {
-		return nil, errors.New("Empty reply from device")
-	}
-
-	stats := make([]map[string]string, 0, len(reply.Re))
-
-	for _, re := range reply.Re {
-		stats = append(stats, re.Map)
-	}
-
-	return stats, nil
 }

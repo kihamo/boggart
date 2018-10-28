@@ -212,18 +212,18 @@ func (d *MikrotikRouter) taskSerialNumber(ctx context.Context) (interface{}, err
 	d.SetDescription("Mikrotik router with serial number " + system.SerialNumber)
 
 	// wifi clients
-	clients, err := d.provider.WifiClients()
+	clients, err := d.provider.InterfaceWirelessRegistrationTable(ctx)
 	if err != nil {
 		return nil, err, false
 	}
 
 	for _, connection := range clients {
-		mac, err := d.Mac(ctx, connection["mac-address"])
+		mac, err := d.Mac(ctx, connection.MacAddress)
 		if err != nil {
 			return nil, err, false
 		}
 
-		d.TriggerEvent(boggart.DeviceEventWifiClientConnected, mac, connection["interface"])
+		d.TriggerEvent(boggart.DeviceEventWifiClientConnected, mac, connection.Interface)
 	}
 
 	// vpn clients
@@ -265,7 +265,7 @@ func (d *MikrotikRouter) taskUpdater(ctx context.Context) (interface{}, error) {
 	}
 
 	// Wifi clients
-	clients, err := d.provider.WifiClients()
+	clients, err := d.provider.InterfaceWirelessRegistrationTable(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -273,12 +273,12 @@ func (d *MikrotikRouter) taskUpdater(ctx context.Context) (interface{}, error) {
 	metricRouterMikrotikWifiClients.With("serial_number", serialNumber).Set(float64(len(clients)))
 
 	for _, client := range clients {
-		bytes := strings.Split(client["bytes"], ",")
+		bytes := strings.Split(client.Bytes, ",")
 		if len(bytes) != 2 {
 			return nil, err
 		}
 
-		name := mikrotik.GetNameByMac(client["mac-address"], arp, dns, leases)
+		name := mikrotik.GetNameByMac(client.MacAddress, arp, dns, leases)
 
 		sent, err := strconv.ParseFloat(bytes[0], 64)
 		if err != nil {
@@ -291,38 +291,28 @@ func (d *MikrotikRouter) taskUpdater(ctx context.Context) (interface{}, error) {
 		}
 
 		metricRouterMikrotikTrafficReceivedBytes.With("serial_number", serialNumber).With(
-			"interface", client["interface"],
-			"mac", client["mac-address"],
+			"interface", client.Interface,
+			"mac", client.MacAddress,
 			"name", name).Set(received)
 		metricRouterMikrotikTrafficSentBytes.With("serial_number", serialNumber).With(
-			"interface", client["interface"],
-			"mac", client["mac-address"],
+			"interface", client.Interface,
+			"mac", client.MacAddress,
 			"name", name).Set(sent)
 	}
 
 	// Ports on mikrotik
-	stats, err := d.provider.EthernetStats()
+	stats, err := d.provider.InterfaceStats(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, stat := range stats {
-		sent, err := strconv.ParseFloat(stat["tx-byte"], 64)
-		if err != nil {
-			return nil, err
-		}
-
-		received, err := strconv.ParseFloat(stat["rx-byte"], 64)
-		if err != nil {
-			return nil, err
-		}
-
 		metricRouterMikrotikTrafficReceivedBytes.With("serial_number", serialNumber).With(
-			"interface", stat["name"],
-			"mac", stat["mac-address"]).Set(received)
+			"interface", stat.Name,
+			"mac", stat.MacAddress).Set(float64(stat.RXByte))
 		metricRouterMikrotikTrafficSentBytes.With("serial_number", serialNumber).With(
-			"interface", stat["name"],
-			"mac", stat["mac-address"]).Set(sent)
+			"interface", stat.Name,
+			"mac", stat.MacAddress).Set(float64(stat.TXByte))
 	}
 
 	resource, err := d.provider.SystemResource(ctx)
