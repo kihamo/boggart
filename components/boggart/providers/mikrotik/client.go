@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -68,58 +67,6 @@ func (c *Client) doConvert(ctx context.Context, sentence []string, result interf
 	}
 
 	return err
-}
-
-func (c *Client) SystemRouterboard() (map[string]string, error) {
-	reply, err := c.do([]string{"/system/routerboard/print"})
-	if err != nil {
-		return nil, nil
-	}
-
-	if len(reply.Re) == 0 {
-		return nil, errors.New("Empty reply from device")
-	}
-
-	return reply.Re[0].Map, nil
-}
-
-func (c *Client) SystemResource() (map[string]string, error) {
-	reply, err := c.do([]string{"/system/resource/print"})
-	if err != nil {
-		return nil, nil
-	}
-
-	if len(reply.Re) == 0 {
-		return nil, errors.New("Empty reply from device")
-	}
-
-	return reply.Re[0].Map, nil
-}
-
-func (c *Client) SystemHealth() (*SystemHealth, error) {
-	reply, err := c.do([]string{"/system/health/print"})
-	if err != nil {
-		return nil, nil
-	}
-
-	if len(reply.Re) == 0 {
-		return nil, errors.New("Empty reply from device")
-	}
-
-	voltage, err := strconv.ParseFloat(reply.Re[0].Map["voltage"], 64)
-	if err != nil {
-		return nil, errors.New("Parse voltage value failed")
-	}
-
-	temperature, err := strconv.ParseUint(reply.Re[0].Map["temperature"], 10, 64)
-	if err != nil {
-		return nil, errors.New("Parse temperature value failed")
-	}
-
-	return &SystemHealth{
-		Voltage:     voltage,
-		Temperature: temperature,
-	}, nil
 }
 
 func (c *Client) WifiClients() ([]map[string]string, error) {

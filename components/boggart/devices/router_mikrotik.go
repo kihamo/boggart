@@ -126,8 +126,8 @@ func (d *MikrotikRouter) Collect(ch chan<- snitch.Metric) {
 	metricRouterMikrotikTemperature.With("serial_number", serialNumber).Collect(ch)
 }
 
-func (d *MikrotikRouter) Ping(_ context.Context) bool {
-	_, err := d.provider.SystemResource()
+func (d *MikrotikRouter) Ping(ctx context.Context) bool {
+	_, err := d.provider.SystemResource(ctx)
 	return err == nil
 }
 
@@ -189,18 +189,17 @@ func (d *MikrotikRouter) taskSerialNumber(ctx context.Context) (interface{}, err
 		return nil, nil, false
 	}
 
-	system, err := d.provider.SystemRouterboard()
+	system, err := d.provider.SystemRouterboard(ctx)
 	if err != nil {
 		return nil, err, false
 	}
 
-	serialNumber, ok := system["serial-number"]
-	if !ok {
-		return nil, errors.New("Serial number not found"), false
+	if system.SerialNumber == "" {
+		return nil, errors.New("Serial number is empty"), false
 	}
 
-	d.SetSerialNumber(serialNumber)
-	d.SetDescription("Mikrotik router with serial number " + serialNumber)
+	d.SetSerialNumber(system.SerialNumber)
+	d.SetDescription("Mikrotik router with serial number " + system.SerialNumber)
 
 	// wifi clients
 	clients, err := d.provider.WifiClients()
@@ -311,40 +310,16 @@ func (d *MikrotikRouter) taskUpdater(ctx context.Context) (interface{}, error) {
 			"mac", stat["mac-address"]).Set(sent)
 	}
 
-	resource, err := d.provider.SystemResource()
+	resource, err := d.provider.SystemResource(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	cpuLoad, err := strconv.ParseFloat(resource["cpu-load"], 64)
-	if err != nil {
-		return nil, err
-	}
-	metricRouterMikrotikCPULoad.With("serial_number", serialNumber).Set(cpuLoad)
-
-	memoryFree, err := strconv.ParseFloat(resource["free-memory"], 64)
-	if err != nil {
-		return nil, err
-	}
-	metricRouterMikrotikMemoryAvailable.With("serial_number", serialNumber).Set(memoryFree)
-
-	memoryTotal, err := strconv.ParseFloat(resource["total-memory"], 64)
-	if err != nil {
-		return nil, err
-	}
-	metricRouterMikrotikMemoryUsage.With("serial_number", serialNumber).Set(memoryTotal - memoryFree)
-
-	storageFree, err := strconv.ParseFloat(resource["free-hdd-space"], 64)
-	if err != nil {
-		return nil, err
-	}
-	metricRouterMikrotikStorageAvailable.With("serial_number", serialNumber).Set(storageFree)
-
-	storageSpace, err := strconv.ParseFloat(resource["total-hdd-space"], 64)
-	if err != nil {
-		return nil, err
-	}
-	metricRouterMikrotikStorageUsage.With("serial_number", serialNumber).Set(storageSpace - storageFree)
+	metricRouterMikrotikCPULoad.With("serial_number", serialNumber).Set(float64(resource.CPULoad))
+	metricRouterMikrotikMemoryAvailable.With("serial_number", serialNumber).Set(float64(resource.FreeMemory))
+	metricRouterMikrotikMemoryUsage.With("serial_number", serialNumber).Set(float64(resource.TotalMemory - resource.FreeMemory))
+	metricRouterMikrotikStorageAvailable.With("serial_number", serialNumber).Set(float64(resource.FreeHDDSpace))
+	metricRouterMikrotikStorageUsage.With("serial_number", serialNumber).Set(float64(resource.TotalHDDSpace - resource.FreeHDDSpace))
 
 	disks, err := d.provider.SystemDisk(ctx)
 	if err != nil {
@@ -362,7 +337,7 @@ func (d *MikrotikRouter) taskUpdater(ctx context.Context) (interface{}, error) {
 		).Set(float64(disk.Free))
 	}
 
-	health, err := d.provider.SystemHealth()
+	health, err := d.provider.SystemHealth(ctx)
 	if err != nil {
 		return nil, err
 	}

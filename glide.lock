@@ -1,5 +1,5 @@
 hash: 2629a5d896a4845f72e4394172bb0ba3db5398b86dee5708d513a3df6a5da5e0
-updated: 2018-10-18T14:26:46.283507+03:00
+updated: 2018-10-28T11:12:19.318462+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -323,8 +323,6 @@ imports:
   version: 975f53781597ed779763b7b65566e74c4004d8de
 - name: github.com/PuerkitoBio/urlesc
   version: de5bf2ad457846296e2031421a34e2568e304e35
-- name: github.com/putsi/paparazzogo
-  version: bec63fd585dca3c9893ee4a6efd6dcc57d60cace
 - name: github.com/rs/xhandler
   version: 1eb70cf1520d43c307a89c5dabb7a7efd132fccd
 - name: github.com/rs/xid
@@ -376,8 +374,6 @@ imports:
   - drivers/spi
   - platforms/raspi
   - sysfs
-- name: gocv.io/x/gocv
-  version: bc016e27fba3560070e16affd605768d68110867
 - name: golang.org/x/crypto
   version: 9477e0b78b9ac3d0b03822fd95422e2fe07627cd
   subpackages:
