@@ -17,7 +17,7 @@ const (
 )
 
 var (
-	balanceRegexp = regexp.MustCompile(`badge-success">([^\s]+)[^<]*</span>`)
+	balanceRegexp = regexp.MustCompile(`(?:badge-success|badge-important)">([^\s]+)[^<]*</span>`)
 )
 
 type Client struct {
