@@ -51,52 +51,52 @@ type SystemDisk struct {
 	Size  uint64 `json:"size"`
 }
 
-func (c *Client) SystemHealth(ctx context.Context) (*SystemHealth, error) {
-	var result []*SystemHealth
+func (c *Client) SystemHealth(ctx context.Context) (result SystemHealth, err error) {
+	var list []SystemHealth
 
-	err := c.doConvert(ctx, []string{"/system/health/print"}, &result)
+	err = c.doConvert(ctx, []string{"/system/health/print"}, &list)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 
-	if len(result) == 0 {
-		return nil, errors.New("Empty response")
+	if len(list) == 0 {
+		return result, errors.New("Empty response")
 	}
 
-	return result[0], nil
+	return list[0], nil
 }
 
-func (c *Client) SystemRouterboard(ctx context.Context) (*SystemRouterboard, error) {
-	var result []*SystemRouterboard
+func (c *Client) SystemRouterboard(ctx context.Context) (result SystemRouterboard, err error) {
+	var list []SystemRouterboard
 
-	err := c.doConvert(ctx, []string{"/system/routerboard/print"}, &result)
+	err = c.doConvert(ctx, []string{"/system/routerboard/print"}, &list)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 
-	if len(result) == 0 {
-		return nil, errors.New("Empty response")
+	if len(list) == 0 {
+		return result, errors.New("Empty response")
 	}
 
-	return result[0], nil
+	return list[0], nil
 }
 
-func (c *Client) SystemResource(ctx context.Context) (*SystemResource, error) {
-	var result []*SystemResource
+func (c *Client) SystemResource(ctx context.Context) (result SystemResource, err error) {
+	var list []SystemResource
 
-	err := c.doConvert(ctx, []string{"/system/resource/print"}, &result)
+	err = c.doConvert(ctx, []string{"/system/resource/print"}, &list)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 
-	if len(result) == 0 {
-		return nil, errors.New("Empty response")
+	if len(list) == 0 {
+		return result, errors.New("Empty response")
 	}
 
-	return result[0], nil
+	return list[0], nil
 }
 
-func (c *Client) SystemDisk(ctx context.Context) (result []*SystemDisk, err error) {
+func (c *Client) SystemDisk(ctx context.Context) (result []SystemDisk, err error) {
 	err = c.doConvert(ctx, []string{"/disk/print"}, &result)
 	return result, err
 }

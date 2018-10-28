@@ -155,33 +155,43 @@ func (d *MikrotikRouter) Listeners() []workers.ListenerWithEvents {
 	}
 }
 
-func (d *MikrotikRouter) Mac(mac string) *MikrotikRouterMac {
+func (d *MikrotikRouter) Mac(ctx context.Context, mac string) (*MikrotikRouterMac, error) {
+	if !d.IsEnabled() {
+		return nil, errors.New("Device is disabled")
+	}
+
+	if d.SerialNumber() == "" {
+		return nil, errors.New("Serial number is empty")
+	}
+
 	info := &MikrotikRouterMac{
 		Address: mac,
 	}
 
-	if !d.IsEnabled() {
-		return info
-	}
-
-	if d.SerialNumber() == "" {
-		return info
-	}
-
-	if arp, err := d.provider.ARPTable(); err == nil {
-		if record, ok := arp[mac]; ok {
-			info.ARP.IP = record["address"]
-			info.ARP.Comment = record["comment"]
+	if table, err := d.provider.IPARP(ctx); err == nil {
+		for _, row := range table {
+			if row.MacAddress == mac {
+				info.ARP.IP = row.Address
+				info.ARP.Comment = row.Comment
+				break
+			}
 		}
+	} else {
+		return nil, err
 	}
 
-	if dhcp, err := d.provider.DHCPLease(); err == nil {
-		if record, ok := dhcp[mac]; ok {
-			info.DHCP.Hostname = record
+	if leases, err := d.provider.IPDHCPServerLease(ctx); err == nil {
+		for _, lease := range leases {
+			if lease.MacAddress == mac {
+				info.DHCP.Hostname = lease.MacAddress
+				break
+			}
 		}
+	} else {
+		return nil, err
 	}
 
-	return info
+	return info, nil
 }
 
 func (d *MikrotikRouter) taskSerialNumber(ctx context.Context) (interface{}, error, bool) {
@@ -208,17 +218,22 @@ func (d *MikrotikRouter) taskSerialNumber(ctx context.Context) (interface{}, err
 	}
 
 	for _, connection := range clients {
-		d.TriggerEvent(boggart.DeviceEventWifiClientConnected, d.Mac(connection["mac-address"]), connection["interface"])
+		mac, err := d.Mac(ctx, connection["mac-address"])
+		if err != nil {
+			return nil, err, false
+		}
+
+		d.TriggerEvent(boggart.DeviceEventWifiClientConnected, mac, connection["interface"])
 	}
 
 	// vpn clients
-	connections, err := d.provider.PPPActiveConnections()
+	connections, err := d.provider.PPPActive(ctx)
 	if err != nil {
 		return nil, err, false
 	}
 
 	for _, connection := range connections {
-		d.TriggerEvent(boggart.DeviceEventVPNClientConnected, connection["name"], connection["address"])
+		d.TriggerEvent(boggart.DeviceEventVPNClientConnected, connection.Name, connection.Address)
 	}
 
 	return nil, nil, true
@@ -234,17 +249,17 @@ func (d *MikrotikRouter) taskUpdater(ctx context.Context) (interface{}, error) {
 		return nil, nil
 	}
 
-	arp, err := d.provider.ARPTable()
+	arp, err := d.provider.IPARP(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	dns, err := d.provider.DNSStatic()
+	dns, err := d.provider.IPDNSStatic(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	dhcp, err := d.provider.DHCPLease()
+	leases, err := d.provider.IPDHCPServerLease(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -263,7 +278,7 @@ func (d *MikrotikRouter) taskUpdater(ctx context.Context) (interface{}, error) {
 			return nil, err
 		}
 
-		name := mikrotik.GetNameByMac(client["mac-address"], arp, dns, dhcp)
+		name := mikrotik.GetNameByMac(client["mac-address"], arp, dns, leases)
 
 		sent, err := strconv.ParseFloat(bytes[0], 64)
 		if err != nil {
@@ -358,7 +373,7 @@ func (l *MikrotikRouterListener) Name() string {
 	return boggart.ComponentName + ".device.router.mikrotik." + l.router.SerialNumber()
 }
 
-func (l *MikrotikRouterListener) Run(_ context.Context, event workers.Event, t time.Time, args ...interface{}) {
+func (l *MikrotikRouterListener) Run(ctx context.Context, event workers.Event, t time.Time, args ...interface{}) {
 	switch event {
 	case boggart.DeviceEventSyslogReceive:
 		message := args[0].(map[string]interface{})
@@ -386,7 +401,10 @@ func (l *MikrotikRouterListener) Run(_ context.Context, event workers.Event, t t
 				return
 			}
 
-			mac := l.router.Mac(check[1])
+			mac, err := l.router.Mac(ctx, check[1])
+			if err != nil {
+				return
+			}
 
 			switch check[3] {
 			case "connected":

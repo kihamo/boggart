@@ -59,7 +59,7 @@ func (c *Client) doConvert(ctx context.Context, sentence []string, result interf
 
 	converter := gotypes.NewConverter(records, result)
 	if !converter.Valid() {
-		err = fmt.Errorf("Failed convert fields: ", strings.Join(converter.GetInvalidFields(), ","))
+		err = fmt.Errorf("Failed convert fields: %v", strings.Join(converter.GetInvalidFields(), ","))
 	}
 
 	if err != nil {
@@ -71,25 +71,6 @@ func (c *Client) doConvert(ctx context.Context, sentence []string, result interf
 
 func (c *Client) WifiClients() ([]map[string]string, error) {
 	reply, err := c.do([]string{"/interface/wireless/registration-table/print"})
-	if err != nil {
-		return nil, err
-	}
-
-	if len(reply.Re) == 0 {
-		return nil, errors.New("Empty reply from device")
-	}
-
-	clients := make([]map[string]string, 0, len(reply.Re))
-
-	for _, re := range reply.Re {
-		clients = append(clients, re.Map)
-	}
-
-	return clients, nil
-}
-
-func (c *Client) PPPActiveConnections() ([]map[string]string, error) {
-	reply, err := c.do([]string{"/ppp/active/print"})
 	if err != nil {
 		return nil, err
 	}
@@ -124,62 +105,4 @@ func (c *Client) EthernetStats() ([]map[string]string, error) {
 	}
 
 	return stats, nil
-}
-
-func (c *Client) DNSStatic() (map[string]string, error) {
-	reply, err := c.do([]string{"/ip/dns/static/print"})
-	if err != nil {
-		return nil, err
-	}
-
-	if len(reply.Re) == 0 {
-		return nil, errors.New("Empty reply from device")
-	}
-
-	table := make(map[string]string, len(reply.Re))
-	for _, re := range reply.Re {
-		if re.Map["disabled"] == "true" {
-			continue
-		}
-
-		table[re.Map["address"]] = re.Map["name"]
-	}
-
-	return table, nil
-}
-
-func (c *Client) ARPTable() (map[string]map[string]string, error) {
-	reply, err := c.do([]string{"/ip/arp/print"})
-	if err != nil {
-		return nil, err
-	}
-
-	if len(reply.Re) == 0 {
-		return nil, errors.New("Empty reply from device")
-	}
-
-	table := make(map[string]map[string]string, len(reply.Re))
-	for _, re := range reply.Re {
-		table[re.Map["mac-address"]] = re.Map
-	}
-
-	return table, nil
-}
-
-func (c *Client) DHCPLease() (map[string]string, error) {
-	reply, err := c.do([]string{"/ip/dhcp-server/lease/print"})
-	if err != nil {
-		return nil, err
-	}
-
-	if len(reply.Re) == 0 {
-		return nil, errors.New("Empty reply from device")
-	}
-
-	table := make(map[string]string, len(reply.Re))
-	for _, re := range reply.Re {
-		table[re.Map["mac-address"]] = re.Map["host-name"]
-	}
-
-	return table, nil
 }
