@@ -1,5 +1,5 @@
-hash: 2629a5d896a4845f72e4394172bb0ba3db5398b86dee5708d513a3df6a5da5e0
-updated: 2018-10-28T11:12:19.318462+03:00
+hash: fcf1a6dac58d83d87bfc47e72ee15dd445e4a10fac38bccb7c37dea351e89fe7
+updated: 2018-10-29T04:15:04.746291+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
@@ -164,7 +164,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 8d2ab8b2104a75eff65e29176eeac51032a58b48
+  version: 806219007fa8b90cba7f62dce2fcd5a587a4969f
   subpackages:
   - components/annotations
   - components/annotations/instance
@@ -217,6 +217,7 @@ imports:
   - components/tracing/http
   - components/tracing/instance
   - components/tracing/internal
+  - components/tracing/internal/tracer
   - components/workers
   - components/workers/instance
   - components/workers/internal
