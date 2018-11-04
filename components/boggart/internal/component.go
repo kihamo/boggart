@@ -13,7 +13,7 @@ import (
 	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/i18n"
-	"github.com/kihamo/shadow/components/logger"
+	"github.com/kihamo/shadow/components/logging"
 	"github.com/kihamo/shadow/components/messengers"
 	"github.com/kihamo/shadow/components/metrics"
 	"github.com/kihamo/shadow/components/workers"
@@ -25,7 +25,7 @@ type Component struct {
 
 	application shadow.Application
 	config      config.Component
-	logger      logger.Logger
+	logger      logging.Logger
 	workers     workers.Component
 	routes      []dashboard.Route
 
@@ -58,7 +58,7 @@ func (c *Component) Dependencies() []shadow.Dependency {
 			Name: i18n.ComponentName,
 		},
 		{
-			Name: logger.ComponentName,
+			Name: logging.ComponentName,
 		},
 		{
 			Name: messengers.ComponentName,
@@ -94,7 +94,7 @@ func (c *Component) Init(a shadow.Application) error {
 }
 
 func (c *Component) Run() (err error) {
-	c.logger = logger.NewOrNop(c.Name(), c.application)
+	c.logger = logging.DefaultLogger().Named(c.Name())
 
 	if _, err := host.Init(); err != nil {
 		return err

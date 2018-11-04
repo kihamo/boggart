@@ -1,15 +1,15 @@
-hash: fcf1a6dac58d83d87bfc47e72ee15dd445e4a10fac38bccb7c37dea351e89fe7
-updated: 2018-10-29T04:15:04.746291+03:00
+hash: 7090f2007b45c88a2204c2e1940285fb3f79b513c3987ee699570d5b752e0fe1
+updated: 2018-11-04T03:11:25.702166+03:00
 imports:
 - name: code.cloudfoundry.org/clock
-  version: e9dc86bbf0e5bbe6bf7ff5a6f71e048959b61f71
+  version: 02e53af36e6c978af692887ed449b74026d76fec
 - name: github.com/alexedwards/scs
   version: dbad6751cfac0714e079d0ef9a8bc1d14d52de21
   subpackages:
   - stores/cookiestore
   - stores/memstore
 - name: github.com/andybalholm/cascadia
-  version: 901648c87902174f774fac311d7f176f8647bdaa
+  version: 680b6a57bda4f657485ad44bdea42342ead737bc
 - name: github.com/asaskevich/govalidator
   version: f9ffefc3facfbe0caee3fea233cbb6e8208f4541
 - name: github.com/beorn7/perks
@@ -17,15 +17,13 @@ imports:
   subpackages:
   - quantile
 - name: github.com/bsm/histogram
-  version: 253b217b3ad255d48994a6f74de4f82650f5e70d
+  version: e219932777c945c7a221ce0e7ace7712c59c8bac
 - name: github.com/bugsnag/osext
   version: 0dd3f918b21bec95ace9dc86c7e70266cfc5c702
 - name: github.com/chai2010/gettext-go
   version: bf70f2a70fb1b1f36d90d671a72795984eab0fcb
   subpackages:
   - gettext/mo
-- name: github.com/codahale/hdrhistogram
-  version: 3a0bb77429bd3a61596f5e8a3172445844342120
 - name: github.com/deckarep/golang-set
   version: cbaa98ba5575e67703b32b4b19f73c91f3c4159e
 - name: github.com/eclipse/paho.mqtt.golang
@@ -63,7 +61,7 @@ imports:
 - name: github.com/go-openapi/loads
   version: 150d36912387ec2f607be674c5be309ddccc0eed
 - name: github.com/go-openapi/runtime
-  version: 231d7876b7019dbcbfc97a7ba764379497b67c1d
+  version: aadb2cc7b8862fdab251bf60a8b9d2a951c9746c
   subpackages:
   - client
   - logger
@@ -75,7 +73,7 @@ imports:
 - name: github.com/go-openapi/spec
   version: 5bae59e25b21498baea7f9d46e9c147ec106a42e
 - name: github.com/go-openapi/strfmt
-  version: 35fe47352985e13cc75f13120d70d26fd764ed51
+  version: b7bbaf9c758e8bee9311b1bb94262cd30f79dc16
 - name: github.com/go-openapi/swag
   version: 5899d5c5e619fda5fa86e14795a835f473ca284c
 - name: github.com/go-openapi/validate
@@ -96,11 +94,13 @@ imports:
   - ptypes/struct
   - ptypes/timestamp
 - name: github.com/google/go-querystring
-  version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
+  version: 44c6ddd0a2342c386950e880b658017258da92fc
   subpackages:
   - query
+- name: github.com/google/uuid
+  version: 9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8
 - name: github.com/gopherjs/gopherjs
-  version: 0766667cb4d1cfb8d5fde1fe210ae41ead3cf589
+  version: d547d1d9531ed93dbdebcbff7f83e7c876a1e0ee
   subpackages:
   - js
 - name: github.com/gopherjs/gopherwasm
@@ -129,11 +129,11 @@ imports:
   - internal/maindata
   - internal/sideinfo
 - name: github.com/hajimehoshi/oto
-  version: f48c4541b748ac0a09e8d207588ecc890ca47615
+  version: 3a9bb05c78a0583c0f5a6c041eeb05a6ceec8ef9
 - name: github.com/hashicorp/errwrap
-  version: 7554cd9344cec97297fa6649b055a8c98c2a1e55
+  version: 8a6fb523712970c966eefc6b39ed2c5e74880354
 - name: github.com/hashicorp/go-multierror
-  version: b7773ae218740a7be65057fc60b366a49b538a44
+  version: 886a7fbe3eb1c874d46f623bfa70af45f425b3d1
 - name: github.com/heptiolabs/healthcheck
   version: da5fdee475fb09de87c5d4a50da233b7d28767b1
 - name: github.com/icza/bitio
@@ -164,7 +164,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 806219007fa8b90cba7f62dce2fcd5a587a4969f
+  version: 6dd50ab8adb0551d7f535d2f38c822e015117b94
   subpackages:
   - components/annotations
   - components/annotations/instance
@@ -189,12 +189,11 @@ imports:
   - components/i18n/internal
   - components/i18n/internal/handlers
   - components/i18n/internationalization
-  - components/logger
-  - components/logger/grpc
-  - components/logger/http
-  - components/logger/instance
-  - components/logger/internal
-  - components/logger/output
+  - components/logging
+  - components/logging/grpc
+  - components/logging/http
+  - components/logging/instance
+  - components/logging/internal
   - components/messengers
   - components/messengers/instance
   - components/messengers/internal
@@ -225,14 +224,14 @@ imports:
   - misc/http
   - misc/time
 - name: github.com/kihamo/snitch
-  version: e4d6b609e3e7317796ace171d60477ee95f8410e
+  version: 8906b9856597ab79107425f4823321d40cc6af08
   subpackages:
   - collector
   - collector/runtime
   - internal
   - storage
 - name: github.com/lann/builder
-  version: 1b87b36280d04fe7882d1512bf038ea2967ad534
+  version: 47ae307949d02aa1f1069fdafc00ca08e1dbabac
 - name: github.com/lann/ps
   version: 62de8c46ede02a7675c4c79c84883eb164cb71e3
 - name: github.com/mailru/easyjson
@@ -271,12 +270,12 @@ imports:
   - internal/utf8
   - meta
 - name: github.com/mewkiz/pkg
-  version: c19a6f9fa6f8bc8710e243710ee205c13688b998
+  version: 831cefa80f6f53f6910e8b7754febb20159427de
   subpackages:
   - errutil
   - term
 - name: github.com/mitchellh/gox
-  version: 51ed453898ca5579fea9ad1f08dff6b121d9f2e8
+  version: 9cc487598128d0963ff9dcc51176e722788ec645
 - name: github.com/mitchellh/mapstructure
   version: 3536a929edddb9a5b34bd6861dc4a9647cb459fe
 - name: github.com/mmcloughlin/geohash
@@ -284,22 +283,22 @@ imports:
 - name: github.com/OneOfOne/xxhash
   version: 6def279d2ce6c81a79dd1c1be580f03bb216fb8a
 - name: github.com/opentracing-contrib/go-stdlib
-  version: 07a764486eb10927e8cf38337918a40d430524ee
+  version: c9628a4f0148d7e441a4af66dc0b1653cd941c20
   subpackages:
   - nethttp
 - name: github.com/opentracing/opentracing-go
-  version: 1949ddbfd147afd4d964a9f00b24eb291e0e7c38
+  version: be550b025b433cdfa2f11efb962afa2ea3c4d967
   subpackages:
   - ext
   - log
 - name: github.com/patrickmn/go-cache
-  version: a3647f8e31d79543b2d0f0ae2fe5c379d72cedc0
+  version: 5633e0862627c011927fa39556acae8b1f1df58a
 - name: github.com/pborman/uuid
-  version: c65b2f87fee37d1c7854c9164a450713c28d50cd
+  version: 8b1b92947f46224e3b97bb1a3a5b0382be00d31e
 - name: github.com/pkg/errors
-  version: 816c9085562cd7ee03e7f8188a1cfd942858cded
+  version: 059132a15dd08d6704c67711dae0cf35ab991756
 - name: github.com/prometheus/client_golang
-  version: bcbbc08eb2ddff3af83bbf11e7ec13b4fd730b6e
+  version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
   - prometheus
 - name: github.com/prometheus/client_model
@@ -307,13 +306,13 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: 7600349dcfe1abd18d72d3a1770870d9800a7801
+  version: 7e9e6cabbd393fc208072eedef99188d0ce788b6
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: ae68e2d4c00fed4943b5f6698d504a5fe083da8a
+  version: 185b4288413d2a0dd0806f78c90dde719829e5ae
   subpackages:
   - internal/util
   - nfs
@@ -324,14 +323,6 @@ imports:
   version: 975f53781597ed779763b7b65566e74c4004d8de
 - name: github.com/PuerkitoBio/urlesc
   version: de5bf2ad457846296e2031421a34e2568e304e35
-- name: github.com/rs/xhandler
-  version: 1eb70cf1520d43c307a89c5dabb7a7efd132fccd
-- name: github.com/rs/xid
-  version: 705291fb22314c68b7f5d8c0674cb19954ca8f81
-- name: github.com/rs/xlog
-  version: 131980fab91b04c953b9dcb438298a7f06cf76cb
-  subpackages:
-  - internal/term
 - name: github.com/rubenv/sql-migrate
   version: 6edbfbd6a369ee82463312ec67b2c92f97a1d4dc
   subpackages:
@@ -362,11 +353,23 @@ imports:
   - transport
   - utils
 - name: github.com/uber/jaeger-lib
-  version: ed3a127ec5fef7ae9ea95b01b542c47fbd999ce5
+  version: 1fc5c315e03c871d98a3df762234414d185115d7
   subpackages:
   - metrics
 - name: github.com/yryz/ds18b20
   version: 3cf383a406247c49e48a80014f3e17ddee418742
+- name: go.uber.org/atomic
+  version: 1ea20fb1cbb1cc08cbd0d913a96dead89aa18289
+- name: go.uber.org/multierr
+  version: 3c4937480c32f4c13a875a1829af76c98ca3d40a
+- name: go.uber.org/zap
+  version: ff33455a0e382e8a81d14dd7c922020b6b5e7982
+  subpackages:
+  - buffer
+  - internal/bufferpool
+  - internal/color
+  - internal/exit
+  - zapcore
 - name: gobot.io/x/gobot
   version: c1d0e3ce485df0b45076d1d93b7d9240b770d5fc
   subpackages:
@@ -382,7 +385,7 @@ imports:
   - poly1305
   - salsa20/salsa
 - name: golang.org/x/exp
-  version: d8bb7a16721e319e95865be2662b889387204776
+  version: 42ba7d4b6eb299bf56fcfc4f0541a857ad0e2da3
   subpackages:
   - shiny/driver/gldriver
   - shiny/driver/internal/drawer
@@ -393,11 +396,11 @@ imports:
   - shiny/driver/internal/x11key
   - shiny/screen
 - name: golang.org/x/image
-  version: 991ec62608f3c0da01d400756917825d1e2fd528
+  version: 63626fb251ce5d89650d28bc5d6ccd7d63a70fef
   subpackages:
   - math/f64
 - name: golang.org/x/mobile
-  version: 92f3b9caf7ba8f4f9c10074225afcba0cba47a62
+  version: a27dd33d354d004b2de14a791df5af8a00f68b8e
   subpackages:
   - app
   - app/internal/callfn
@@ -426,7 +429,7 @@ imports:
   - trace
   - websocket
 - name: golang.org/x/oauth2
-  version: 921ae394b9430ed4fb549668d7b087601bd60a81
+  version: 232e45548389bd9357411a6922a07c5fd4068bda
   subpackages:
   - internal
 - name: golang.org/x/sync
@@ -434,7 +437,7 @@ imports:
   subpackages:
   - errgroup
 - name: golang.org/x/sys
-  version: fa43e7bc11baaae89f3f902b2b4d832b68234844
+  version: 9b800f95dbbc54abff0acf7ee32d88ba4e328c89
   subpackages:
   - unix
   - windows
@@ -449,7 +452,7 @@ imports:
   - unicode/norm
   - width
 - name: google.golang.org/appengine
-  version: 0a24098c0ec68416ec050f567f75df563d6b231e
+  version: 4a4468ece617fc8205e99368fa2200e9d1fad421
   subpackages:
   - internal
   - internal/base
@@ -459,7 +462,7 @@ imports:
   - internal/urlfetch
   - urlfetch
 - name: google.golang.org/genproto
-  version: 51d0944304c3cbce4afe9e5247e21100037bff78
+  version: c830210a61dfaa790e1920f8d0470fc27bc2efbe
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc

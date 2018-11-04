@@ -14,7 +14,7 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/config"
-	"github.com/kihamo/shadow/components/logger"
+	"github.com/kihamo/shadow/components/logging"
 	"github.com/kihamo/shadow/components/tracing"
 	"github.com/opentracing/opentracing-go/log"
 )
@@ -22,7 +22,7 @@ import (
 type Component struct {
 	application shadow.Application
 	config      config.Component
-	logger      logger.Logger
+	logger      logging.Logger
 
 	mutex       sync.RWMutex
 	client      m.Client
@@ -44,7 +44,7 @@ func (c *Component) Dependencies() []shadow.Dependency {
 			Required: true,
 		},
 		{
-			Name: logger.ComponentName,
+			Name: logging.ComponentName,
 		},
 		{
 			Name: tracing.ComponentName,
@@ -61,7 +61,7 @@ func (c *Component) Init(a shadow.Application) error {
 }
 
 func (c *Component) Run() (err error) {
-	c.logger = logger.NewOrNop(c.Name(), c.application)
+	c.logger = logging.DefaultLogger().Named(c.Name())
 
 	m.ERROR = NewMQTTLogger(c.logger.Error, c.logger.Errorf)
 	m.CRITICAL = NewMQTTLogger(c.logger.Panic, c.logger.Panicf)
@@ -75,7 +75,7 @@ func (c *Component) Run() (err error) {
 	for ; true; <-ticker.C {
 		err := c.initClient()
 		if err != nil {
-			c.logger.Errorf("Init MQTT client failed with error %s", err.Error())
+			c.logger.Error("Init MQTT client failed with error " + err.Error())
 		} else {
 			break
 		}
@@ -141,12 +141,12 @@ func (c *Component) Client() m.Client {
 func (c *Component) Publish(topic string, qos byte, retained bool, payload interface{}) m.Token {
 	client := c.Client()
 	if client == nil {
-		c.logger.Warn("Client isn't init. Publish skipping", map[string]interface{}{
-			"topic":    topic,
-			"qos":      qos,
-			"retained": retained,
-			"payload":  payload,
-		})
+		c.logger.Warn("Client isn't init. Publish skipping",
+			"topic", topic,
+			"qos", qos,
+			"retained", retained,
+			"payload", payload,
+		)
 
 		return nil
 	}
@@ -168,9 +168,7 @@ func (c *Component) Subscribe(subscriber mqtt.Subscriber) m.Token {
 }
 
 func (c *Component) subscribeByClient(client m.Client, subscriber mqtt.Subscriber) m.Token {
-	c.logger.Debug("Add subscriber", map[string]interface{}{
-		"filters": subscriber.Filters(),
-	})
+	c.logger.Debug("Add subscriber", "filters", subscriber.Filters())
 
 	return client.SubscribeMultiple(subscriber.Filters(), func(client m.Client, message m.Message) {
 		span, ctx := tracing.StartSpanFromContext(context.Background(), c.Name(), message.Topic())

@@ -1,19 +1,21 @@
 package internal
 
 import (
+	"fmt"
+
 	m "github.com/eclipse/paho.mqtt.golang"
 )
 
 const (
-	fieldMQTTComponent = "mqtt.component"
+	fieldMQTTComponent = "component"
 )
 
 type MQTTLogger struct {
-	ln func(v ...interface{})
-	f  func(format string, v ...interface{})
+	ln func(string, ...interface{})
+	f  func(string, ...interface{})
 }
 
-func NewMQTTLogger(ln func(v ...interface{}), f func(format string, v ...interface{})) *MQTTLogger {
+func NewMQTTLogger(ln func(string, ...interface{}), f func(string, ...interface{})) *MQTTLogger {
 	return &MQTTLogger{
 		ln: ln,
 		f:  f,
@@ -21,42 +23,42 @@ func NewMQTTLogger(ln func(v ...interface{}), f func(format string, v ...interfa
 }
 
 func (l MQTTLogger) Println(v ...interface{}) {
-	values := make([]interface{}, 0, len(v))
-	fields := make(map[string]interface{}, 1)
+	fields := make([]interface{}, 0, len(v)+1)
+	var msg string
 
 	for _, value := range v {
 		switch value {
 		case m.NET:
-			fields[fieldMQTTComponent] = "net"
+			fields = append(fields, fieldMQTTComponent, "net")
 		case m.PNG:
-			fields[fieldMQTTComponent] = "pinger"
+			fields = append(fields, fieldMQTTComponent, "pinger")
 		case m.CLI:
-			fields[fieldMQTTComponent] = "client"
+			fields = append(fields, fieldMQTTComponent, "client")
 		case m.DEC:
-			fields[fieldMQTTComponent] = "decode"
+			fields = append(fields, fieldMQTTComponent, "decode")
 		case m.MES:
-			fields[fieldMQTTComponent] = "message"
+			fields = append(fields, fieldMQTTComponent, "message")
 		case m.STR:
-			fields[fieldMQTTComponent] = "store"
+			fields = append(fields, fieldMQTTComponent, "store")
 		case m.MID:
-			fields[fieldMQTTComponent] = "msgids"
+			fields = append(fields, fieldMQTTComponent, "msgids")
 		case m.TST:
-			fields[fieldMQTTComponent] = "test"
+			fields = append(fields, fieldMQTTComponent, "test")
 		case m.STA:
-			fields[fieldMQTTComponent] = "state"
+			fields = append(fields, fieldMQTTComponent, "state")
 		case m.ERR:
-			fields[fieldMQTTComponent] = "error"
+			fields = append(fields, fieldMQTTComponent, "error")
 
 		default:
-			values = append(values, value)
+			if len(fields) == 2 {
+				msg = fmt.Sprintf("%v", value)
+			} else {
+				fields = append(fields, value)
+			}
 		}
 	}
 
-	if len(fields) > 0 {
-		values = append(values, fields)
-	}
-
-	l.ln(values...)
+	l.ln(msg, fields...)
 }
 
 func (l MQTTLogger) Printf(format string, v ...interface{}) {

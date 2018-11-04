@@ -17,7 +17,7 @@ import (
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/dashboard"
-	"github.com/kihamo/shadow/components/logger"
+	"github.com/kihamo/shadow/components/logging"
 	"github.com/kihamo/shadow/components/tracing"
 	"github.com/opentracing/opentracing-go/log"
 )
@@ -25,7 +25,7 @@ import (
 type Component struct {
 	application shadow.Application
 	config      config.Component
-	logger      logger.Logger
+	logger      logging.Logger
 	mqtt        mqtt.Component
 	provider    *yandex.YandexSpeechKitCloud
 	audioPlayer *players.AudioPlayer
@@ -47,7 +47,7 @@ func (c *Component) Dependencies() []shadow.Dependency {
 			Required: true,
 		},
 		{
-			Name: logger.ComponentName,
+			Name: logging.ComponentName,
 		},
 		{
 			Name:     mqtt.ComponentName,
@@ -66,7 +66,7 @@ func (c *Component) Init(a shadow.Application) (err error) {
 }
 
 func (c *Component) Run() error {
-	c.logger = logger.NewOrNop(c.Name(), c.application)
+	c.logger = logging.DefaultLogger().Named(c.Name())
 	c.provider = yandex.NewYandexSpeechKitCloud(c.config.String(voice.ConfigYandexSpeechKitCloudKey), c.config.Bool(config.ConfigDebug))
 	c.application.GetComponent(mqtt.ComponentName).(mqtt.Component).Subscribe(NewMQTTSubscribe(c))
 	c.audioPlayer.SetVolume(c.config.Int64(voice.ConfigSpeechVolume))
@@ -96,9 +96,7 @@ func (c *Component) SpeechWithOptions(ctx context.Context, text string, volume i
 	span.LogFields(log.Int64("volume", volume))
 
 	if volume == 0 {
-		c.logger.Warn("Skip speech text because volume is 0", map[string]interface{}{
-			"text": text,
-		})
+		c.logger.Warn("Skip speech text because volume is 0", "text", text)
 
 		return nil
 	}
@@ -118,7 +116,7 @@ func (c *Component) SpeechWithOptions(ctx context.Context, text string, volume i
 	text = strings.TrimSpace(text)
 	text = strings.ToLower(text)
 
-	c.logger.Debugf("Speech text %s", text)
+	c.logger.Debug("Speech text" + text)
 
 	if c.provider == nil {
 		err := errors.New("Speech provider not found")
@@ -138,33 +136,36 @@ func (c *Component) SpeechWithOptions(ctx context.Context, text string, volume i
 		speed)
 
 	if err != nil {
-		c.logger.Error("Error speech text", map[string]interface{}{
-			"text":  text,
-			"error": err.Error(),
-		})
+		c.logger.Error("Error speech text",
+			"text", text,
+			"error", err.Error(),
+		)
 
+		tracing.SpanError(span, err)
 		return err
 	}
 
 	err = c.SetVolume(ctx, volume)
 	if err != nil {
-		c.logger.Error("Failed set volume", map[string]interface{}{
-			"error":  err.Error(),
-			"format": c.config.String(voice.ConfigYandexSpeechKitCloudFormat),
-			"text":   text,
-		})
+		c.logger.Error("Failed set volume",
+			"error", err.Error(),
+			"format", c.config.String(voice.ConfigYandexSpeechKitCloudFormat),
+			"text", text,
+		)
 
+		tracing.SpanError(span, err)
 		return err
 	}
 
 	err = c.PlayReader(ctx, ioutil.NopCloser(bytes.NewReader(file)))
 	if err != nil {
-		c.logger.Error("Failed play speech text", map[string]interface{}{
-			"error":  err.Error(),
-			"format": c.config.String(voice.ConfigYandexSpeechKitCloudFormat),
-			"text":   text,
-		})
+		c.logger.Error("Failed play speech text",
+			"error", err.Error(),
+			"format", c.config.String(voice.ConfigYandexSpeechKitCloudFormat),
+			"text", text,
+		)
 
+		tracing.SpanError(span, err)
 		return err
 	}
 
@@ -181,9 +182,7 @@ func (c *Component) PlayReader(ctx context.Context, reader io.ReadCloser) (err e
 	}
 
 	if err != nil {
-		c.logger.Error("Failed play reader", map[string]interface{}{
-			"error": err.Error(),
-		})
+		c.logger.Error("Failed play reader", "error", err.Error())
 
 		tracing.SpanError(span, err)
 	} else {
@@ -205,16 +204,14 @@ func (c *Component) PlayURL(ctx context.Context, url string) (err error) {
 	}
 
 	if err != nil {
-		c.logger.Error("Failed play URL", map[string]interface{}{
-			"error": err.Error(),
-			"url":   url,
-		})
+		c.logger.Error("Failed play URL",
+			"error", err.Error(),
+			"url", url,
+		)
 
 		tracing.SpanError(span, err)
 	} else {
-		c.logger.Debug("Player play URL", map[string]interface{}{
-			"url": url,
-		})
+		c.logger.Debug("Player play URL", "url", url)
 	}
 
 	return err
@@ -226,9 +223,7 @@ func (c *Component) Play(ctx context.Context) error {
 
 	err := c.audioPlayer.Play()
 	if err != nil {
-		c.logger.Error("Failed play player", map[string]interface{}{
-			"error": err.Error(),
-		})
+		c.logger.Error("Failed play player", "error", err.Error())
 
 		tracing.SpanError(span, err)
 	} else {
@@ -244,9 +239,7 @@ func (c *Component) Pause(ctx context.Context) error {
 
 	err := c.audioPlayer.Pause()
 	if err != nil {
-		c.logger.Error("Failed pause player", map[string]interface{}{
-			"error": err.Error(),
-		})
+		c.logger.Error("Failed pause player", "error", err.Error())
 
 		tracing.SpanError(span, err)
 	} else {
@@ -262,9 +255,7 @@ func (c *Component) Stop(ctx context.Context) error {
 
 	err := c.audioPlayer.Stop()
 	if err != nil {
-		c.logger.Error("Failed stop player", map[string]interface{}{
-			"error": err.Error(),
-		})
+		c.logger.Error("Failed stop player", "error", err.Error())
 
 		tracing.SpanError(span, err)
 	} else {
@@ -289,10 +280,10 @@ func (c *Component) SetVolume(ctx context.Context, percent int64) error {
 
 	err := c.audioPlayer.SetVolume(percent)
 	if err != nil {
-		c.logger.Error("Failed set volume player", map[string]interface{}{
-			"error":  err.Error(),
-			"volume": percent,
-		})
+		c.logger.Error("Failed set volume player",
+			"error", err.Error(),
+			"volume", percent,
+		)
 
 		tracing.SpanError(span, err)
 	} else {

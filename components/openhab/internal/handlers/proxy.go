@@ -139,17 +139,13 @@ func (h *ProxyHandler) sendFileToMessenger(messenger string, body []byte, w *das
 		case "image/jpeg", "image/png", "image/gif", "image/webp":
 			for _, chatId := range chats {
 				if err := m.SendPhoto(chatId, description, bytes.NewReader(body)); err != nil {
-					dashboard.LoggerFromContext(r.Context()).Errorf("Failed send message to %s", messenger, map[string]interface{}{
-						"error": err.Error(),
-					})
+					h.Logger().Error("Failed send message to "+messenger, "error", err.Error())
 					return
 				}
 			}
 		default:
 			// TODO: send file
-			dashboard.LoggerFromContext(r.Context()).Warn("Send file not implemented", map[string]interface{}{
-				"mime": mime,
-			})
+			h.Logger().Warn("Send file not implemented", "mime", mime)
 		}
 	}(r.URL().Query())
 }

@@ -2,7 +2,6 @@ package players
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -222,10 +221,6 @@ func (p *AudioPlayer) initSpeaker() error {
 	if err != nil {
 		return err
 	}
-
-	player.SetUnderrunCallback(func() {
-		fmt.Println("UNDERRUN, YOUR CODE IS SLOW")
-	})
 
 	p.mutex.Lock()
 	p.speaker = NewSpeakerWrapper(player, bufferSize, numBytes)

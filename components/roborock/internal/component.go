@@ -5,12 +5,12 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/components/roborock"
 	"github.com/kihamo/shadow"
-	"github.com/kihamo/shadow/components/logger"
+	"github.com/kihamo/shadow/components/logging"
 )
 
 type Component struct {
 	application shadow.Application
-	logger      logger.Logger
+	logger      logging.Logger
 	mqtt        mqtt.Component
 
 	files map[string]func(string) error
@@ -27,7 +27,7 @@ func (c *Component) Version() string {
 func (c *Component) Dependencies() []shadow.Dependency {
 	return []shadow.Dependency{
 		{
-			Name: logger.ComponentName,
+			Name: logging.ComponentName,
 		},
 		{
 			Name:     mqtt.ComponentName,
@@ -47,7 +47,7 @@ func (c *Component) Init(a shadow.Application) (err error) {
 }
 
 func (c *Component) Run() error {
-	c.logger = logger.NewOrNop(c.Name(), c.application)
+	c.logger = logging.DefaultLogger().Named(c.Name())
 
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -65,25 +65,21 @@ func (c *Component) Run() error {
 		select {
 		case event := <-watcher.Events:
 			if event.Op&fsnotify.Write == fsnotify.Write {
-				c.logger.Debugf("Watched file modified", map[string]interface{}{
-					"file": event.Name,
-				})
+				c.logger.Debug("Watched file modified", "file", event.Name)
 
 				// call watcher
 				if w, ok := c.files[event.Name]; ok {
 					if err := w(event.Name); err != nil {
-						c.logger.Error("Watcher callback return error", map[string]interface{}{
-							"error": err.Error(),
-							"file":  event.Name,
-						})
+						c.logger.Error("Watcher callback return error",
+							"error", err.Error(),
+							"file", event.Name,
+						)
 					}
 				}
 			}
 
 		case err := <-watcher.Errors:
-			c.logger.Error("File watcher return error", map[string]interface{}{
-				"error": err.Error(),
-			})
+			c.logger.Error("File watcher return error", "error", err.Error())
 		}
 	}
 

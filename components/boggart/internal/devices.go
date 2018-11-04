@@ -92,11 +92,11 @@ func (c *Component) initRouters() {
 		c.config.String(boggart.ConfigMikrotikPassword),
 		c.config.Duration(boggart.ConfigMikrotikTimeout))
 	if err != nil {
-		c.logger.Error("Init mikrotik api failed", map[string]interface{}{
-			"error":    err.Error(),
-			"address":  c.config.String(boggart.ConfigMikrotikAddress),
-			"username": c.config.String(boggart.ConfigMikrotikUsername),
-		})
+		c.logger.Error("Init mikrotik api failed",
+			"error", err.Error(),
+			"address", c.config.String(boggart.ConfigMikrotikAddress),
+			"username", c.config.String(boggart.ConfigMikrotikUsername),
+		)
 		return
 	}
 
@@ -194,9 +194,7 @@ func (c *Component) initPulsarMeters() {
 	}
 
 	if err != nil {
-		c.logger.Error("Try to get pulsar heat meter address failed", map[string]interface{}{
-			"error": err.Error(),
-		})
+		c.logger.Error("Try to get pulsar heat meter address failed", "error", err.Error())
 		return
 	}
 

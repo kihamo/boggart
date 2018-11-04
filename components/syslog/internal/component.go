@@ -7,7 +7,7 @@ import (
 	"github.com/kihamo/boggart/components/syslog"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/config"
-	"github.com/kihamo/shadow/components/logger"
+	"github.com/kihamo/shadow/components/logging"
 	rsyslog "gopkg.in/mcuadros/go-syslog.v2"
 	"gopkg.in/mcuadros/go-syslog.v2/format"
 )
@@ -15,7 +15,7 @@ import (
 type Component struct {
 	application shadow.Application
 	config      config.Component
-	logger      logger.Logger
+	logger      logging.Logger
 	handlers    []syslog.HasHandler
 }
 
@@ -34,7 +34,7 @@ func (c *Component) Dependencies() []shadow.Dependency {
 			Required: true,
 		},
 		{
-			Name: logger.ComponentName,
+			Name: logging.ComponentName,
 		},
 	}
 }
@@ -53,7 +53,7 @@ func (c *Component) Run() error {
 		return err
 	}
 
-	c.logger = logger.NewOrNop(c.Name(), c.application)
+	c.logger = logging.DefaultLogger().Named(c.Name())
 
 	for _, component := range components {
 		if handler, ok := component.(syslog.HasHandler); ok {
@@ -67,12 +67,12 @@ func (c *Component) Run() error {
 
 	addr := net.JoinHostPort(c.config.String(syslog.ConfigHost), c.config.String(syslog.ConfigPort))
 	if err := server.ListenUDP(addr); err != nil {
-		c.logger.Printf("Failed to listen [%d]: %s\n", os.Getpid(), err.Error())
+		c.logger.Fatalf("Failed to listen [%d]: %s\n", os.Getpid(), err.Error())
 		return err
 	}
 
 	if err := server.Boot(); err != nil {
-		c.logger.Printf("Failed to boot [%d]: %s\n", os.Getpid(), err.Error())
+		c.logger.Fatalf("Failed to boot [%d]: %s\n", os.Getpid(), err.Error())
 		return err
 	}
 
@@ -81,11 +81,11 @@ func (c *Component) Run() error {
 
 func (c *Component) Handle(message format.LogParts, length int64, err error) {
 	if err != nil {
-		c.logger.Error("Handler with error", map[string]interface{}{
-			"error":   err,
-			"length":  length,
-			"message": message,
-		})
+		c.logger.Error("Handler with error",
+			"error", err,
+			"length", length,
+			"message", message,
+		)
 	}
 
 	for _, h := range c.handlers {
