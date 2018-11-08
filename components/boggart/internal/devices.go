@@ -82,27 +82,37 @@ func (c *Component) initPhones() {
 }
 
 func (c *Component) initRouters() {
-	if !c.config.Bool(boggart.ConfigMikrotikEnabled) {
-		return
+	for _, address := range strings.Split(c.config.String(boggart.ConfigMikrotikAddresses), ",") {
+		address = strings.TrimSpace(address)
+		if address == "" {
+			c.logger.Warn("Mikroti address is empty")
+			continue
+		}
+
+		u, err := url.Parse(address)
+		if err != nil {
+			c.logger.Warn("Bad Mikroti address " + address)
+			continue
+		}
+
+		username := u.User.Username()
+		password, _ := u.User.Password()
+
+		api, err := mikrotik.NewClient(u.Host, username, password, c.config.Duration(boggart.ConfigMikrotikTimeout))
+		if err != nil {
+			c.logger.Error("Init mikrotik api failed",
+				"error", err.Error(),
+				"address", u.Host,
+				"username", username,
+			)
+			return
+		}
+
+		device := devices.NewMikrotikRouter(api, c.config.Duration(boggart.ConfigMikrotikRepeatInterval))
+		device.SetDescription(device.Description() + " on " + u.Host)
+
+		c.devicesManager.Register(device)
 	}
-
-	api, err := mikrotik.NewClient(
-		c.config.String(boggart.ConfigMikrotikAddress),
-		c.config.String(boggart.ConfigMikrotikUsername),
-		c.config.String(boggart.ConfigMikrotikPassword),
-		c.config.Duration(boggart.ConfigMikrotikTimeout))
-	if err != nil {
-		c.logger.Error("Init mikrotik api failed",
-			"error", err.Error(),
-			"address", c.config.String(boggart.ConfigMikrotikAddress),
-			"username", c.config.String(boggart.ConfigMikrotikUsername),
-		)
-		return
-	}
-
-	device := devices.NewMikrotikRouter(api, c.config.Duration(boggart.ConfigMikrotikRepeatInterval))
-
-	c.devicesManager.RegisterWithID(boggart.DeviceIdRouter.String(), device)
 }
 
 func (c *Component) initElectricityMeters() {

@@ -2,6 +2,7 @@ package mikrotik
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -15,6 +16,14 @@ import (
 const (
 	ComponentName = "mikrotik"
 )
+
+var (
+	ErrEmptyResponse = errors.New("empty response")
+)
+
+func IsEmptyResponse(err error) bool {
+	return err == ErrEmptyResponse
+}
 
 type Client struct {
 	mutex  sync.Mutex
@@ -45,6 +54,10 @@ func (c *Client) doConvert(ctx context.Context, sentence []string, result interf
 	if err != nil {
 		tracing.SpanError(span, err)
 		return err
+	}
+
+	if len(reply.Re) == 0 || (len(reply.Re[0].List) == 0 && len(reply.Re[0].Map) == 0) {
+		return nil
 	}
 
 	records := make([]interface{}, 0, len(reply.Re))

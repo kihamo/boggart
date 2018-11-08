@@ -59,25 +59,14 @@ func (c *Component) ConfigVariables() []config.Variable {
 		config.NewVariable(boggart.ConfigMercuryDeviceAddress, config.ValueTypeString).
 			WithUsage("Device address in format XXXXXX (last 6 digits of device serial number)").
 			WithGroup("Mercury devices"),
-		config.NewVariable(boggart.ConfigMikrotikEnabled, config.ValueTypeBool).
-			WithUsage("Enabled").
-			WithGroup("Mikrotik devices"),
 		config.NewVariable(boggart.ConfigMikrotikRepeatInterval, config.ValueTypeDuration).
 			WithUsage("Repeat interval").
 			WithGroup("Mikrotik devices").
 			WithDefault(time.Minute * 5),
-		config.NewVariable(boggart.ConfigMikrotikAddress, config.ValueTypeString).
+		config.NewVariable(boggart.ConfigMikrotikAddresses, config.ValueTypeString).
 			WithUsage("API address in format host:port").
 			WithGroup("Mikrotik devices").
-			WithDefault("192.168.88.1:8728"),
-		config.NewVariable(boggart.ConfigMikrotikUsername, config.ValueTypeString).
-			WithUsage("Username").
-			WithGroup("Mikrotik devices").
-			WithDefault("admin"),
-		config.NewVariable(boggart.ConfigMikrotikPassword, config.ValueTypeString).
-			WithUsage("Password").
-			WithGroup("Mikrotik devices").
-			WithView([]string{config.ViewPassword}),
+			WithView([]string{config.ViewTags}),
 		config.NewVariable(boggart.ConfigMikrotikTimeout, config.ValueTypeDuration).
 			WithUsage("Request timeout").
 			WithGroup("Mikrotik devices").

@@ -2,7 +2,6 @@ package mikrotik
 
 import (
 	"context"
-	"errors"
 )
 
 type SystemHealth struct {
@@ -60,7 +59,7 @@ func (c *Client) SystemHealth(ctx context.Context) (result SystemHealth, err err
 	}
 
 	if len(list) == 0 {
-		return result, errors.New("Empty response")
+		return result, ErrEmptyResponse
 	}
 
 	return list[0], nil
@@ -75,7 +74,7 @@ func (c *Client) SystemRouterboard(ctx context.Context) (result SystemRouterboar
 	}
 
 	if len(list) == 0 {
-		return result, errors.New("Empty response")
+		return result, ErrEmptyResponse
 	}
 
 	return list[0], nil
@@ -90,7 +89,7 @@ func (c *Client) SystemResource(ctx context.Context) (result SystemResource, err
 	}
 
 	if len(list) == 0 {
-		return result, errors.New("Empty response")
+		return result, ErrEmptyResponse
 	}
 
 	return list[0], nil

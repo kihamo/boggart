@@ -37,7 +37,6 @@ const (
 	DeviceIdElectricityMeter DeviceId = iota
 	DeviceIdHeatMeter
 	DeviceIdPhone
-	DeviceIdRouter
 	DeviceIdWaterMeterCold
 	DeviceIdWaterMeterHot
 )

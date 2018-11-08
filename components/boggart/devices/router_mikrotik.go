@@ -209,7 +209,6 @@ func (d *MikrotikRouter) taskSerialNumber(ctx context.Context) (interface{}, err
 	}
 
 	d.SetSerialNumber(system.SerialNumber)
-	d.SetDescription("Mikrotik router with serial number " + system.SerialNumber)
 
 	// wifi clients
 	clients, err := d.provider.InterfaceWirelessRegistrationTable(ctx)
@@ -250,105 +249,105 @@ func (d *MikrotikRouter) taskUpdater(ctx context.Context) (interface{}, error) {
 	}
 
 	arp, err := d.provider.IPARP(ctx)
-	if err != nil {
+	if err != nil && !mikrotik.IsEmptyResponse(err) {
 		return nil, err
 	}
 
 	dns, err := d.provider.IPDNSStatic(ctx)
-	if err != nil {
+	if err != nil && !mikrotik.IsEmptyResponse(err) {
 		return nil, err
 	}
 
 	leases, err := d.provider.IPDHCPServerLease(ctx)
-	if err != nil {
+	if err != nil && !mikrotik.IsEmptyResponse(err) {
 		return nil, err
 	}
 
 	// Wifi clients
 	clients, err := d.provider.InterfaceWirelessRegistrationTable(ctx)
-	if err != nil {
+	if err == nil {
+		metricRouterMikrotikWifiClients.With("serial_number", serialNumber).Set(float64(len(clients)))
+
+		for _, client := range clients {
+			bytes := strings.Split(client.Bytes, ",")
+			if len(bytes) != 2 {
+				return nil, err
+			}
+
+			name := mikrotik.GetNameByMac(client.MacAddress, arp, dns, leases)
+
+			sent, err := strconv.ParseFloat(bytes[0], 64)
+			if err != nil {
+				return nil, err
+			}
+
+			received, err := strconv.ParseFloat(bytes[1], 64)
+			if err == nil {
+				metricRouterMikrotikTrafficReceivedBytes.With("serial_number", serialNumber).With(
+					"interface", client.Interface,
+					"mac", client.MacAddress,
+					"name", name).Set(received)
+				metricRouterMikrotikTrafficSentBytes.With("serial_number", serialNumber).With(
+					"interface", client.Interface,
+					"mac", client.MacAddress,
+					"name", name).Set(sent)
+			} else if !mikrotik.IsEmptyResponse(err) {
+				return nil, err
+			}
+		}
+	} else if !mikrotik.IsEmptyResponse(err) {
 		return nil, err
-	}
-
-	metricRouterMikrotikWifiClients.With("serial_number", serialNumber).Set(float64(len(clients)))
-
-	for _, client := range clients {
-		bytes := strings.Split(client.Bytes, ",")
-		if len(bytes) != 2 {
-			return nil, err
-		}
-
-		name := mikrotik.GetNameByMac(client.MacAddress, arp, dns, leases)
-
-		sent, err := strconv.ParseFloat(bytes[0], 64)
-		if err != nil {
-			return nil, err
-		}
-
-		received, err := strconv.ParseFloat(bytes[1], 64)
-		if err != nil {
-			return nil, err
-		}
-
-		metricRouterMikrotikTrafficReceivedBytes.With("serial_number", serialNumber).With(
-			"interface", client.Interface,
-			"mac", client.MacAddress,
-			"name", name).Set(received)
-		metricRouterMikrotikTrafficSentBytes.With("serial_number", serialNumber).With(
-			"interface", client.Interface,
-			"mac", client.MacAddress,
-			"name", name).Set(sent)
 	}
 
 	// Ports on mikrotik
 	stats, err := d.provider.InterfaceStats(ctx)
-	if err != nil {
+	if err == nil {
+		for _, stat := range stats {
+			metricRouterMikrotikTrafficReceivedBytes.With("serial_number", serialNumber).With(
+				"interface", stat.Name,
+				"mac", stat.MacAddress).Set(float64(stat.RXByte))
+			metricRouterMikrotikTrafficSentBytes.With("serial_number", serialNumber).With(
+				"interface", stat.Name,
+				"mac", stat.MacAddress).Set(float64(stat.TXByte))
+		}
+	} else if !mikrotik.IsEmptyResponse(err) {
 		return nil, err
-	}
-
-	for _, stat := range stats {
-		metricRouterMikrotikTrafficReceivedBytes.With("serial_number", serialNumber).With(
-			"interface", stat.Name,
-			"mac", stat.MacAddress).Set(float64(stat.RXByte))
-		metricRouterMikrotikTrafficSentBytes.With("serial_number", serialNumber).With(
-			"interface", stat.Name,
-			"mac", stat.MacAddress).Set(float64(stat.TXByte))
 	}
 
 	resource, err := d.provider.SystemResource(ctx)
-	if err != nil {
+	if err == nil {
+		metricRouterMikrotikCPULoad.With("serial_number", serialNumber).Set(float64(resource.CPULoad))
+		metricRouterMikrotikMemoryAvailable.With("serial_number", serialNumber).Set(float64(resource.FreeMemory))
+		metricRouterMikrotikMemoryUsage.With("serial_number", serialNumber).Set(float64(resource.TotalMemory - resource.FreeMemory))
+		metricRouterMikrotikStorageAvailable.With("serial_number", serialNumber).Set(float64(resource.FreeHDDSpace))
+		metricRouterMikrotikStorageUsage.With("serial_number", serialNumber).Set(float64(resource.TotalHDDSpace - resource.FreeHDDSpace))
+	} else if !mikrotik.IsEmptyResponse(err) {
 		return nil, err
 	}
-
-	metricRouterMikrotikCPULoad.With("serial_number", serialNumber).Set(float64(resource.CPULoad))
-	metricRouterMikrotikMemoryAvailable.With("serial_number", serialNumber).Set(float64(resource.FreeMemory))
-	metricRouterMikrotikMemoryUsage.With("serial_number", serialNumber).Set(float64(resource.TotalMemory - resource.FreeMemory))
-	metricRouterMikrotikStorageAvailable.With("serial_number", serialNumber).Set(float64(resource.FreeHDDSpace))
-	metricRouterMikrotikStorageUsage.With("serial_number", serialNumber).Set(float64(resource.TotalHDDSpace - resource.FreeHDDSpace))
 
 	disks, err := d.provider.SystemDisk(ctx)
-	if err != nil {
+	if err == nil {
+		for _, disk := range disks {
+			metricRouterMikrotikDiskUsage.With("serial_number", serialNumber).With(
+				"name", disk.Name,
+				"label", disk.Label,
+			).Set(float64(disk.Size - disk.Free))
+			metricRouterMikrotikDiskAvailable.With("serial_number", serialNumber).With(
+				"name", disk.Name,
+				"label", disk.Label,
+			).Set(float64(disk.Free))
+		}
+	} else if !mikrotik.IsEmptyResponse(err) {
 		return nil, err
-	}
-
-	for _, disk := range disks {
-		metricRouterMikrotikDiskUsage.With("serial_number", serialNumber).With(
-			"name", disk.Name,
-			"label", disk.Label,
-		).Set(float64(disk.Size - disk.Free))
-		metricRouterMikrotikDiskAvailable.With("serial_number", serialNumber).With(
-			"name", disk.Name,
-			"label", disk.Label,
-		).Set(float64(disk.Free))
 	}
 
 	health, err := d.provider.SystemHealth(ctx)
-	if err != nil {
+	if err == nil {
+		metricRouterMikrotikVoltage.With("serial_number", serialNumber).Set(health.Voltage)
+		metricRouterMikrotikTemperature.With("serial_number", serialNumber).Set(float64(health.Temperature))
+	} else if !mikrotik.IsEmptyResponse(err) {
 		return nil, err
 	}
-
-	metricRouterMikrotikVoltage.With("serial_number", serialNumber).Set(health.Voltage)
-	metricRouterMikrotikTemperature.With("serial_number", serialNumber).Set(float64(health.Temperature))
 
 	return nil, nil
 }
