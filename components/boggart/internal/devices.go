@@ -105,7 +105,7 @@ func (c *Component) initRouters() {
 				"address", u.Host,
 				"username", username,
 			)
-			return
+			continue
 		}
 
 		device := devices.NewMikrotikRouter(api, c.config.Duration(boggart.ConfigMikrotikRepeatInterval))
