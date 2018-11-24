@@ -20,9 +20,8 @@ import (
 )
 
 type Component struct {
-	application shadow.Application
-	config      config.Component
-	logger      logging.Logger
+	config config.Component
+	logger logging.Logger
 
 	mutex       sync.RWMutex
 	client      m.Client
@@ -52,15 +51,9 @@ func (c *Component) Dependencies() []shadow.Dependency {
 	}
 }
 
-func (c *Component) Init(a shadow.Application) error {
-	c.application = a
-	c.config = a.GetComponent(config.ComponentName).(config.Component)
+func (c *Component) Run(a shadow.Application, ready chan<- struct{}) error {
 	c.subscribers = make([]mqtt.Subscriber, 0)
 
-	return nil
-}
-
-func (c *Component) Run() (err error) {
 	c.logger = logging.DefaultLogger().Named(c.Name())
 
 	m.ERROR = NewMQTTLogger(c.logger.Error, c.logger.Errorf)
@@ -68,9 +61,14 @@ func (c *Component) Run() (err error) {
 	m.WARN = NewMQTTLogger(c.logger.Warn, c.logger.Warnf)
 	m.DEBUG = NewMQTTLogger(c.logger.Debug, c.logger.Debugf)
 
+	<-a.ReadyComponent(config.ComponentName)
+	c.config = a.GetComponent(config.ComponentName).(config.Component)
+
 	// auto reconnect
 	duration := c.config.Duration(mqtt.ConfigConnectionTimeout) + time.Second*30
 	ticker := time.NewTicker(duration)
+
+	ready <- struct{}{}
 
 	for ; true; <-ticker.C {
 		err := c.initClient()

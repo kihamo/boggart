@@ -15,6 +15,7 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 
 	m := c.application.GetComponent(messengers.ComponentName)
 	if m != nil {
+		<-c.application.ReadyComponent(messengers.ComponentName)
 		proxyHandler.Messengers = m.(messengers.Component)
 	}
 

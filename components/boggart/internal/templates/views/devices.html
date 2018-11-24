@@ -57,5 +57,5 @@
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net/js/jquery.dataTables.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-fixedheader/js/dataTables.fixedHeader.min.js" false) }}
-    {{ staticHTML (staticURL "/boggart/assets/js/devices.js" false) }}
+    {{ staticHTML (staticURL (print "/" .ComponentName "/assets/js/devices.js") false) }}
 {{ end }}

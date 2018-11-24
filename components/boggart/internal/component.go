@@ -26,7 +26,6 @@ type Component struct {
 	application shadow.Application
 	config      config.Component
 	logger      logging.Logger
-	workers     workers.Component
 	routes      []dashboard.Route
 
 	connectionRS485  *rs485.Connection
@@ -83,22 +82,23 @@ func (c *Component) Dependencies() []shadow.Dependency {
 
 func (c *Component) Init(a shadow.Application) error {
 	c.application = a
-
-	c.config = a.GetComponent(config.ComponentName).(config.Component)
-	c.workers = a.GetComponent(workers.ComponentName).(workers.Component)
-
-	c.listenersManager = manager.NewListenersManager()
-	c.devicesManager = NewDevicesManager(c.workers, c.listenersManager)
-
 	return nil
 }
 
-func (c *Component) Run() (err error) {
+func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
+	c.listenersManager = manager.NewListenersManager()
+
+	<-a.ReadyComponent(workers.ComponentName)
+	c.devicesManager = NewDevicesManager(a.GetComponent(workers.ComponentName).(workers.Component), c.listenersManager)
+
 	c.logger = logging.DefaultLogger().Named(c.Name())
 
 	if _, err := host.Init(); err != nil {
 		return err
 	}
+
+	<-a.ReadyComponent(config.ComponentName)
+	c.config = a.GetComponent(config.ComponentName).(config.Component)
 
 	c.devicesManager.SetCheckerTickerDuration(c.config.Duration(boggart.ConfigDevicesManagerCheckInterval))
 	c.devicesManager.SetCheckerTimeout(c.config.Duration(boggart.ConfigDevicesManagerCheckTimeout))

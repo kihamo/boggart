@@ -13,10 +13,10 @@ import (
 )
 
 type Component struct {
-	application shadow.Application
-	config      config.Component
-	logger      logging.Logger
-	handlers    []syslog.HasHandler
+	logger   logging.Logger
+	handlers []syslog.HasHandler
+
+	server *rsyslog.Server
 }
 
 func (c *Component) Name() string {
@@ -39,41 +39,48 @@ func (c *Component) Dependencies() []shadow.Dependency {
 	}
 }
 
-func (c *Component) Init(a shadow.Application) error {
-	c.application = a
-	c.config = a.GetComponent(config.ComponentName).(config.Component)
-	c.handlers = make([]syslog.HasHandler, 0, 0)
-
-	return nil
-}
-
-func (c *Component) Run() error {
-	components, err := c.application.GetComponents()
+func (c *Component) Run(a shadow.Application, ready chan<- struct{}) error {
+	components, err := a.GetComponents()
 	if err != nil {
 		return err
 	}
 
+	c.server = rsyslog.NewServer()
+	c.server.SetFormat(rsyslog.Automatic)
+	c.server.SetHandler(c)
+
 	c.logger = logging.DefaultLogger().Named(c.Name())
 
+	c.handlers = make([]syslog.HasHandler, 0, 0)
 	for _, component := range components {
 		if handler, ok := component.(syslog.HasHandler); ok {
 			c.handlers = append(c.handlers, handler)
 		}
 	}
 
-	server := rsyslog.NewServer()
-	server.SetFormat(rsyslog.Automatic)
-	server.SetHandler(c)
+	<-a.ReadyComponent(config.ComponentName)
+	cfg := a.GetComponent(config.ComponentName).(config.Component)
 
-	addr := net.JoinHostPort(c.config.String(syslog.ConfigHost), c.config.String(syslog.ConfigPort))
-	if err := server.ListenUDP(addr); err != nil {
+	addr := net.JoinHostPort(cfg.String(syslog.ConfigHost), cfg.String(syslog.ConfigPort))
+	if err := c.server.ListenUDP(addr); err != nil {
 		c.logger.Fatalf("Failed to listen [%d]: %s\n", os.Getpid(), err.Error())
 		return err
 	}
 
-	if err := server.Boot(); err != nil {
+	if err := c.server.Boot(); err != nil {
 		c.logger.Fatalf("Failed to boot [%d]: %s\n", os.Getpid(), err.Error())
 		return err
+	}
+
+	ready <- struct{}{}
+
+	c.server.Wait()
+	return nil
+}
+
+func (c *Component) Shutdown() error {
+	if c.server != nil {
+		return c.server.Kill()
 	}
 
 	return nil

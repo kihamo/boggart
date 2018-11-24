@@ -81,8 +81,31 @@ func (l *LoggingListener) Run(_ context.Context, event workers.Event, t time.Tim
 
 		l.logger.Debug("Syslog message receive", fields...)
 
+	case boggart.DeviceEventDevicesManagerReady:
+		l.logger.Debug("Device manager is ready")
+
+	case boggart.DeviceEventWifiClientConnected,
+		boggart.DeviceEventWifiClientDisconnected,
+		boggart.DeviceEventVPNClientConnected,
+		boggart.DeviceEventVPNClientDisconnected,
+		boggart.DeviceEventHikvisionEventNotificationAlert,
+		boggart.DeviceEventSoftVideoBalanceChanged,
+		boggart.DeviceEventMegafonBalanceChanged,
+		boggart.DeviceEventPulsarChanged,
+		boggart.DeviceEventPulsarPulsedChanged,
+		boggart.DeviceEventMercury200Changed,
+		boggart.DeviceEventBME280Changed,
+		boggart.DeviceEventGPIOPinChanged,
+		boggart.DeviceEventDS18B20Changed:
+
+		l.logger.Debug("Fire skip event",
+			"event.id", event.Id(),
+			"event.name", event.Name(),
+			"args", args,
+		)
+
 	default:
-		l.logger.Debug("Fire unknown event",
+		l.logger.Warn("Fire unknown event",
 			"event.id", event.Id(),
 			"event.name", event.Name(),
 			"args", args,

@@ -9,9 +9,8 @@ import (
 )
 
 type Component struct {
-	application shadow.Application
-	logger      logging.Logger
-	mqtt        mqtt.Component
+	logger logging.Logger
+	mqtt   mqtt.Component
 
 	files map[string]func(string) error
 }
@@ -36,17 +35,11 @@ func (c *Component) Dependencies() []shadow.Dependency {
 	}
 }
 
-func (c *Component) Init(a shadow.Application) (err error) {
-	c.application = a
-	c.mqtt = a.GetComponent(mqtt.ComponentName).(mqtt.Component)
+func (c *Component) Run(a shadow.Application, ready chan<- struct{}) error {
 	c.files = map[string]func(string) error{
 		roborock.FileRuntimeConfig: c.runtimeConfigWatcher,
 	}
 
-	return nil
-}
-
-func (c *Component) Run() error {
 	c.logger = logging.DefaultLogger().Named(c.Name())
 
 	watcher, err := fsnotify.NewWatcher()
@@ -54,12 +47,17 @@ func (c *Component) Run() error {
 		return err
 	}
 
+	<-a.ReadyComponent(mqtt.ComponentName)
+	c.mqtt = a.GetComponent(mqtt.ComponentName).(mqtt.Component)
+
 	// watch file
 	for file := range c.files {
 		if err = watcher.Add(file); err != nil {
 			return err
 		}
 	}
+
+	ready <- struct{}{}
 
 	for {
 		select {

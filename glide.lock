@@ -1,5 +1,5 @@
-hash: b05a088b9754498170475cdd7adb073ec9f022279138bd151d9d1f93d758a472
-updated: 2018-11-04T14:06:53.980925+03:00
+hash: b86e4488b2fd7a5bdc4b23a71f5353976e90b1e16eefc3282f908851832a0a11
+updated: 2018-11-24T03:22:32.828599+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: 02e53af36e6c978af692887ed449b74026d76fec
@@ -24,6 +24,8 @@ imports:
   version: bf70f2a70fb1b1f36d90d671a72795984eab0fcb
   subpackages:
   - gettext/mo
+- name: github.com/codahale/hdrhistogram
+  version: 3a0bb77429bd3a61596f5e8a3172445844342120
 - name: github.com/deckarep/golang-set
   version: cbaa98ba5575e67703b32b4b19f73c91f3c4159e
 - name: github.com/eclipse/paho.mqtt.golang
@@ -49,17 +51,17 @@ imports:
   - bson
   - internal/json
 - name: github.com/go-openapi/analysis
-  version: c701774f4e604d952e4e8c56dee260be696e33c3
+  version: e2f3fdbb7ed0e56e070ccbfb6fc75b288a33c014
   subpackages:
   - internal
 - name: github.com/go-openapi/errors
-  version: d9664f9fab8994271e573ed69cf2adfc09b7a800
+  version: 7a7ff1b7b8020f22574411a32f28b4d168d69237
 - name: github.com/go-openapi/jsonpointer
   version: ef5f0afec364d3b9396b7b77b43dbe26bf1f8004
 - name: github.com/go-openapi/jsonreference
   version: 8483a886a90412cd6858df4ea3483dce9c8e35a3
 - name: github.com/go-openapi/loads
-  version: 150d36912387ec2f607be674c5be309ddccc0eed
+  version: d72cd69e9468f55c6369c5481c3d011401728c72
 - name: github.com/go-openapi/runtime
   version: aadb2cc7b8862fdab251bf60a8b9d2a951c9746c
   subpackages:
@@ -75,7 +77,7 @@ imports:
 - name: github.com/go-openapi/strfmt
   version: b7bbaf9c758e8bee9311b1bb94262cd30f79dc16
 - name: github.com/go-openapi/swag
-  version: 5899d5c5e619fda5fa86e14795a835f473ca284c
+  version: 1d29f06aebd59ccdf11ae04aa0334ded96e2d909
 - name: github.com/go-openapi/validate
   version: d2eab7d93009e9215fc85b2faa2c2f2a98c2af48
 - name: github.com/go-sql-driver/mysql
@@ -104,7 +106,7 @@ imports:
   subpackages:
   - js
 - name: github.com/gopherjs/gopherwasm
-  version: b0e1786f520333e4546f02930c5ca8a929b38841
+  version: 9c36104a24b8823669aeec409d3d05c372206fac
   subpackages:
   - js
 - name: github.com/gorilla/websocket
@@ -164,7 +166,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: fc7150a064f32222b97d0d414c9d17d90055eac3
+  version: 72e4530aff9ebc949fe93996dc36b12f82faaca8
   subpackages:
   - components/annotations
   - components/annotations/instance
@@ -270,7 +272,7 @@ imports:
   - internal/utf8
   - meta
 - name: github.com/mewkiz/pkg
-  version: 831cefa80f6f53f6910e8b7754febb20159427de
+  version: 9729f4f4ff2bb0cfa96b0929d335196be35fecdc
   subpackages:
   - errutil
   - term
@@ -306,7 +308,7 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: 7e9e6cabbd393fc208072eedef99188d0ce788b6
+  version: aeab699e26f4d4089dba5e522e5d9babd2adbaf7
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
@@ -353,7 +355,7 @@ imports:
   - transport
   - utils
 - name: github.com/uber/jaeger-lib
-  version: 1fc5c315e03c871d98a3df762234414d185115d7
+  version: ed3a127ec5fef7ae9ea95b01b542c47fbd999ce5
   subpackages:
   - metrics
 - name: github.com/yryz/ds18b20
@@ -385,7 +387,7 @@ imports:
   - poly1305
   - salsa20/salsa
 - name: golang.org/x/exp
-  version: 42ba7d4b6eb299bf56fcfc4f0541a857ad0e2da3
+  version: a3060d491354240eda536d676ced8bb702018b7e
   subpackages:
   - shiny/driver/gldriver
   - shiny/driver/internal/drawer
@@ -396,7 +398,7 @@ imports:
   - shiny/driver/internal/x11key
   - shiny/screen
 - name: golang.org/x/image
-  version: 63626fb251ce5d89650d28bc5d6ccd7d63a70fef
+  version: cd38e8056d9b27bb2f265effa37fb0ea6b8a7f0f
   subpackages:
   - math/f64
 - name: golang.org/x/mobile
@@ -429,7 +431,7 @@ imports:
   - trace
   - websocket
 - name: golang.org/x/oauth2
-  version: 232e45548389bd9357411a6922a07c5fd4068bda
+  version: 8f65e3013ebad444f13bc19536f7865efc793816
   subpackages:
   - internal
 - name: golang.org/x/sync
@@ -437,7 +439,7 @@ imports:
   subpackages:
   - errgroup
 - name: golang.org/x/sys
-  version: 9b800f95dbbc54abff0acf7ee32d88ba4e328c89
+  version: 62eef0e2fa9b2c385f7b2778e763486da6880d37
   subpackages:
   - unix
   - windows
@@ -462,11 +464,11 @@ imports:
   - internal/urlfetch
   - urlfetch
 - name: google.golang.org/genproto
-  version: c830210a61dfaa790e1920f8d0470fc27bc2efbe
+  version: b5d43981345bdb2c233eb4bf3277847b48c6fdc6
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 168a6198bcb0ef175f7dacec0b8691fc141dc9b8
+  version: 2e463a05d100327ca47ac218281906921038fd95
   subpackages:
   - balancer
   - balancer/base
@@ -481,7 +483,9 @@ imports:
   - internal
   - internal/backoff
   - internal/channelz
+  - internal/envconfig
   - internal/grpcrand
+  - internal/transport
   - keepalive
   - metadata
   - naming
@@ -492,9 +496,8 @@ imports:
   - stats
   - status
   - tap
-  - transport
 - name: gopkg.in/gorp.v1
-  version: c87af80f3cc5036b55b83d77171e156791085e2e
+  version: 6a667da9c028871f98598d85413e3fc4c6daa52e
 - name: gopkg.in/Masterminds/squirrel.v1
   version: a6b93000bd219143c56c16e6cb1c4b91da3f224b
 - name: gopkg.in/mcuadros/go-syslog.v2

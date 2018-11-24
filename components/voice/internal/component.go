@@ -23,10 +23,8 @@ import (
 )
 
 type Component struct {
-	application shadow.Application
 	config      config.Component
 	logger      logging.Logger
-	mqtt        mqtt.Component
 	provider    *yandex.YandexSpeechKitCloud
 	audioPlayer *players.AudioPlayer
 	routes      []dashboard.Route
@@ -56,22 +54,47 @@ func (c *Component) Dependencies() []shadow.Dependency {
 	}
 }
 
-func (c *Component) Init(a shadow.Application) (err error) {
-	c.application = a
-	c.config = a.GetComponent(config.ComponentName).(config.Component)
-	c.mqtt = a.GetComponent(mqtt.ComponentName).(mqtt.Component)
+func (c *Component) Run(a shadow.Application, ready chan<- struct{}) error {
 	c.audioPlayer = players.NewAudio()
-
-	return nil
-}
-
-func (c *Component) Run() error {
 	c.logger = logging.DefaultLogger().Named(c.Name())
-	c.provider = yandex.NewYandexSpeechKitCloud(c.config.String(voice.ConfigYandexSpeechKitCloudKey), c.config.Bool(config.ConfigDebug))
-	c.application.GetComponent(mqtt.ComponentName).(mqtt.Component).Subscribe(NewMQTTSubscribe(c))
-	c.audioPlayer.SetVolume(c.config.Int64(voice.ConfigSpeechVolume))
 
-	c.audioPlayerUpdater()
+	<-a.ReadyComponent(config.ComponentName)
+	c.config = a.GetComponent(config.ComponentName).(config.Component)
+	c.provider = yandex.NewYandexSpeechKitCloud(c.config.String(voice.ConfigYandexSpeechKitCloudKey), c.config.Bool(config.ConfigDebug))
+	c.SetVolume(context.Background(), c.config.Int64(voice.ConfigSpeechVolume))
+
+	<-a.ReadyComponent(mqtt.ComponentName)
+	m := a.GetComponent(mqtt.ComponentName).(mqtt.Component)
+	m.Subscribe(NewMQTTSubscribe(c))
+
+	ready <- struct{}{}
+
+	// audio updater
+	var (
+		lastStatus players.Status
+		lastVolume int64
+	)
+
+	for {
+		client := m.Client()
+
+		if client != nil && client.IsConnected() {
+			status := c.audioPlayer.Status()
+			if status != lastStatus {
+				m.Publish(voice.MQTTTopicPlayerStatus, 0, false, status.String())
+				lastStatus = status
+			}
+
+			volume := c.audioPlayer.Volume()
+			if volume != lastVolume {
+				m.Publish(voice.MQTTTopicPlayerVolume, 0, false, fmt.Sprintf("%d", volume))
+				lastVolume = volume
+			}
+		}
+
+		time.Sleep(time.Second)
+	}
+
 	return nil
 }
 
@@ -119,7 +142,7 @@ func (c *Component) SpeechWithOptions(ctx context.Context, text string, volume i
 	c.logger.Debug("Speech text" + text)
 
 	if c.provider == nil {
-		err := errors.New("Speech provider not found")
+		err := errors.New("speech provider not found")
 
 		tracing.SpanError(span, err)
 		return err
@@ -291,31 +314,4 @@ func (c *Component) SetVolume(ctx context.Context, percent int64) error {
 	}
 
 	return err
-}
-
-func (c *Component) audioPlayerUpdater() {
-	var (
-		lastStatus players.Status
-		lastVolume int64
-	)
-
-	for {
-		client := c.mqtt.Client()
-
-		if client != nil && client.IsConnected() {
-			status := c.audioPlayer.Status()
-			if status != lastStatus {
-				c.mqtt.Publish(voice.MQTTTopicPlayerStatus, 0, false, status.String())
-				lastStatus = status
-			}
-
-			volume := c.audioPlayer.Volume()
-			if volume != lastVolume {
-				c.mqtt.Publish(voice.MQTTTopicPlayerVolume, 0, false, fmt.Sprintf("%d", volume))
-				lastVolume = volume
-			}
-		}
-
-		time.Sleep(time.Second)
-	}
 }
