@@ -7,17 +7,19 @@
             <div class="clearfix"></div>
         </div>
         <div class="x_content">
-            <table class="table table-striped">
-                <thead>
-                <tr>
-                    <th>{{ i18n "Type" . }}</th>
-                    <th class="md-col-2">{{ i18n "ID" . }}</th>
-                    <th>{{ i18n "Description" . }}</th>
-                    <th class="md-col-1">{{ i18n "Tasks" . }}</th>
-                    <th class="md-col-1">{{ i18n "Actions" . }}</th>
-                </tr>
-                </thead>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-striped dt-responsive nowrap" style="width:100%">
+                    <thead>
+                    <tr>
+                        <th>{{ i18n "Type" . }}</th>
+                        <th class="md-col-2">{{ i18n "ID" . }}</th>
+                        <th>{{ i18n "Description" . }}</th>
+                        <th class="md-col-1">{{ i18n "Tasks" . }}</th>
+                        <th class="md-col-1">{{ i18n "Actions" . }}</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -30,13 +32,13 @@
         </div>
         <div class="x_content">
             <div class="table-responsive">
-                <table class="table table-striped">
+                <table class="table table-striped dt-responsive nowrap" style="width:100%">
                     <thead>
                     <tr>
-                        <th>{{ i18n "ID" . }}</th>
                         <th>{{ i18n "Name" . }}</th>
-                        <th>{{ i18n "Events" . }}</th>
                         <th>{{ i18n "Fires" . }}</th>
+                        <th>{{ i18n "ID" . }}</th>
+                        <th>{{ i18n "Events" . }}</th>
                         <th>{{ i18n "First fired" . }}</th>
                         <th>{{ i18n "Last fired" . }}</th>
                     </tr>
@@ -50,12 +52,13 @@
 
 {{ define "head" }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" false) }}
-    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-fixedheader-bs/css/fixedHeader.bootstrap.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" false) }}
 {{ end }}
 
 {{ define "js" }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net/js/jquery.dataTables.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
-    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-fixedheader/js/dataTables.fixedHeader.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive/js/dataTables.responsive.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
     {{ staticHTML (staticURL (print "/" .ComponentName "/assets/js/devices.js") false) }}
 {{ end }}

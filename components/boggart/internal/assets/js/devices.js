@@ -65,10 +65,13 @@ $(document).ready(function () {
             },
             columns: [
                 {
-                    data: 'id'
+                    data: 'name'
                 },
                 {
-                    data: 'name'
+                    data: 'fires'
+                },
+                {
+                    data: 'id'
                 },
                 {
                     data: 'events',
@@ -81,9 +84,6 @@ $(document).ready(function () {
 
                         return content;
                     }
-                },
-                {
-                    data: 'fires'
                 },
                 {
                     data: 'fire_first',
