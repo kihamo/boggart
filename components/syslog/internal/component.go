@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"net"
 	"os"
 
@@ -10,6 +11,10 @@ import (
 	"github.com/kihamo/shadow/components/logging"
 	rsyslog "gopkg.in/mcuadros/go-syslog.v2"
 	"gopkg.in/mcuadros/go-syslog.v2/format"
+)
+
+var (
+	tags = [2]string{"tag", "client"}
 )
 
 type Component struct {
@@ -94,6 +99,15 @@ func (c *Component) Handle(message format.LogParts, length int64, err error) {
 			"message", message,
 		)
 	}
+
+	fields := make([]string, 0, len(tags)*2)
+	for _, tag := range tags {
+		if value, ok := message[tag]; ok {
+			fields = append(fields, tag, fmt.Sprintf("%v", value))
+		}
+	}
+
+	metricHandled.With(fields...).Inc()
 
 	for _, h := range c.handlers {
 		go h.SyslogHandler(message)

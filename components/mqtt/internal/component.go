@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -149,6 +150,17 @@ func (c *Component) Publish(topic string, qos byte, retained bool, payload inter
 		return nil
 	}
 
+	r := "0"
+	if retained {
+		r = "1"
+	}
+
+	metricPublish.With(
+		"topic", topic,
+		"qos", strconv.Itoa(int(qos)),
+		"retained", r,
+	).Inc()
+
 	return client.Publish(topic, qos, retained, payload)
 }
 
@@ -173,6 +185,18 @@ func (c *Component) subscribeByClient(client m.Client, subscriber mqtt.Subscribe
 		defer span.Finish()
 
 		span.LogFields(log.String("payload", string(message.Payload())))
+
+		r := "0"
+		if message.Retained() {
+			r = "1"
+		}
+
+		metricSubscribe.With(
+			"topic", message.Topic(),
+			"qos", strconv.Itoa(int(message.Qos())),
+			"retained", r,
+		).Inc()
+
 		subscriber.Callback(ctx, c, message)
 	})
 }
