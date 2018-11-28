@@ -4,6 +4,8 @@ import (
 	"encoding/binary"
 	"net"
 	"time"
+
+	"github.com/kihamo/boggart/components/boggart/providers/broadlink/internal"
 )
 
 const (
@@ -16,13 +18,9 @@ const (
 	WifiSecurityWPATKIP
 )
 
-const (
-	DevicePort = 80
-)
-
 var broadCastAddr = &net.UDPAddr{
 	IP:   net.IPv4bcast,
-	Port: DevicePort,
+	Port: 80,
 }
 
 // Порядок подключения:
@@ -31,12 +29,6 @@ var broadCastAddr = &net.UDPAddr{
 // - Запустить Setup
 // - Подключиться к сети указанной в Setup и через Discover обнаружить устройство
 func SetupWiFi(SSID, password string, securityMode int) (err error) {
-	conn, err := net.ListenUDP("udp4", nil)
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-
 	var packet [0x88]byte
 
 	// 0x26 14 (Always 14)
@@ -62,7 +54,13 @@ func SetupWiFi(SSID, password string, securityMode int) (err error) {
 	packet[0x86] = byte(securityMode)
 
 	// 0x20-0x21 Checksum as a little-endian 16 bit integer
-	binary.LittleEndian.PutUint16(packet[0x20:], checksum(packet[:]))
+	binary.LittleEndian.PutUint16(packet[0x20:], internal.Checksum(packet[:]))
+
+	conn, err := net.ListenUDP("udp4", nil)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
 
 	if _, err = conn.WriteTo(packet[:], broadCastAddr); err != nil {
 		return err
@@ -71,13 +69,34 @@ func SetupWiFi(SSID, password string, securityMode int) (err error) {
 	return nil
 }
 
-func DiscoverDevices() (devices []*Device, err error) {
-	ifaceAddr, err := LocalAddr()
+func DiscoverDevices() (devices []Device, err error) {
+	/*
+		Offset       Contents
+		0x00-0x07    00
+		0x08-0x0b    Current offset from GMT as a little-endian 32 bit integer
+		0x0c-0x0d    Current year as a little-endian 16 bit integer
+		0x0e         Current number of seconds past the minute
+		0x0f         Current number of minutes past the hour
+		0x10         Current number of hours past midnight
+		0x11         Current day of the week (Monday = 1, Tuesday = 2, etc)
+		0x12         Current day in month
+		0x13         Current month
+		0x14-0x17    00
+		0x18-0x1b    Local IP address
+		0x1c-0x1d    Source port as a little-endian 16 bit integer
+		0x1e-0x1f    00
+		0x20-0x21    Checksum as a little-endian 16 bit integer
+		0x22-0x25    00
+		0x26         06
+		0x27-0x2f    00
+	*/
+
+	addrInterface, err := internal.LocalAddr()
 	if err != nil {
 		return nil, err
 	}
 
-	conn, err := net.ListenUDP("udp4", ifaceAddr)
+	conn, err := net.ListenUDP("udp4", addrInterface)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +136,7 @@ func DiscoverDevices() (devices []*Device, err error) {
 	packet[0x13] = byte(now.Month())
 
 	// 0x18-0x1b Local IP address
-	ip4 := ifaceAddr.IP.To4()
+	ip4 := addrInterface.IP.To4()
 	packet[0x18], packet[0x19], packet[0x1a], packet[0x1b] = ip4[3], ip4[2], ip4[1], ip4[0]
 
 	// 0x1c-0x1d Source port as a little-endian 16 bit integer
@@ -126,10 +145,10 @@ func DiscoverDevices() (devices []*Device, err error) {
 	packet[0x26] = 0x06
 
 	// 0x20-0x21 Checksum as a little-endian 16 bit integer
-	binary.LittleEndian.PutUint16(packet[0x20:], checksum(packet[:]))
+	binary.LittleEndian.PutUint16(packet[0x20:], internal.Checksum(packet[:]))
 
 	// send request packet
-	err = conn.SetDeadline(time.Now().Add(time.Second * 5))
+	err = conn.SetDeadline(time.Now().Add(internal.DefaultTimeout))
 	if err != nil {
 		return nil, err
 	}
@@ -139,8 +158,8 @@ func DiscoverDevices() (devices []*Device, err error) {
 	}
 
 	// read response packet
-	devices = make([]*Device, 0)
-	response := make([]byte, 2048)
+	devices = make([]Device, 0)
+	response := make([]byte, internal.DefaultBufferSize)
 
 	for {
 		size, addr, err := conn.ReadFromUDP(response)
@@ -176,7 +195,7 @@ func DiscoverDevices() (devices []*Device, err error) {
 			mac = append(mac, r[i])
 		}
 
-		devices = append(devices, NewDevice(int(r[0x35])<<8|int(r[0x34]), mac, *addr, *ifaceAddr))
+		devices = append(devices, NewDevice(int(r[0x35])<<8|int(r[0x34]), mac, *addr, *addrInterface))
 	}
 
 	return devices, nil

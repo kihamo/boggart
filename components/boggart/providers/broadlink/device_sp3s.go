@@ -5,20 +5,21 @@ import (
 	"errors"
 	"fmt"
 	"net"
+
+	"github.com/kihamo/boggart/components/boggart/providers/broadlink/internal"
 )
 
-type SP3SDevice struct {
-	Device
+type SP3S struct {
+	*internal.Device
 }
 
-func NewSP3SDevice(mac net.HardwareAddr, addr, iface net.UDPAddr) *SP3SDevice {
-	d := &SP3SDevice{}
-	d.Device = *NewDevice(TypeSP3S, mac, addr, iface)
-
-	return d
+func NewSP3S(mac net.HardwareAddr, addr, iface net.UDPAddr) *SP3S {
+	return &SP3S{
+		Device: internal.NewDevice(KindSP3S, mac, addr, iface),
+	}
 }
 
-func (d *SP3SDevice) PowerOn() error {
+func (d *SP3S) PowerOn() error {
 	payload := make([]byte, 16)
 	payload[0] = 2
 	payload[4] = 1
@@ -26,7 +27,7 @@ func (d *SP3SDevice) PowerOn() error {
 	return d.Cmd(0x6a, payload)
 }
 
-func (d *SP3SDevice) PowerOff() error {
+func (d *SP3S) PowerOff() error {
 	payload := make([]byte, 16)
 	payload[0] = 2
 	payload[4] = 0
@@ -34,7 +35,7 @@ func (d *SP3SDevice) PowerOff() error {
 	return d.Cmd(0x6a, payload)
 }
 
-func (d *SP3SDevice) Power() (bool, error) {
+func (d *SP3S) PowerState() (bool, error) {
 	payload := make([]byte, 16)
 	payload[0] = 1
 
@@ -43,7 +44,7 @@ func (d *SP3SDevice) Power() (bool, error) {
 		return false, err
 	}
 
-	data, err := d.decodePacket(response)
+	data, err := d.DecodePacket(response)
 	if err != nil {
 		return false, err
 	}
@@ -51,7 +52,7 @@ func (d *SP3SDevice) Power() (bool, error) {
 	return data[4] != 0, nil
 }
 
-func (d *SP3SDevice) Energy() (float64, error) {
+func (d *SP3S) Energy() (float64, error) {
 	payload := []byte{8, 0, 254, 1, 5, 1, 0, 0, 0, 45}
 	response, err := d.Call(0x6a, payload)
 	if err != nil {
@@ -60,10 +61,10 @@ func (d *SP3SDevice) Energy() (float64, error) {
 
 	rescode := binary.LittleEndian.Uint16(response[0x22:0x24])
 	if rescode != 0 {
-		return -1, errors.New("response code isnt' 0")
+		return -1, errors.New("response code isn't 0")
 	}
 
-	data, err := d.decodePacket(response)
+	data, err := d.DecodePacket(response)
 	if err != nil {
 		return -1, err
 	}

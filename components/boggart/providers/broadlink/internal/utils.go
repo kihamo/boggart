@@ -1,10 +1,14 @@
-package broadlink
+package internal
 
 import (
 	"crypto/aes"
 	"crypto/cipher"
 	"errors"
 	"net"
+)
+
+const (
+	DefaultBufferSize = 2048
 )
 
 func LocalAddr() (*net.UDPAddr, error) {
@@ -26,7 +30,7 @@ func LocalAddr() (*net.UDPAddr, error) {
 	return nil, errors.New("IP not found")
 }
 
-func checksum(packet []byte) (sum uint16) {
+func Checksum(packet []byte) (sum uint16) {
 	sum = 0xbeaf
 	for _, b := range packet {
 		sum += uint16(b)
