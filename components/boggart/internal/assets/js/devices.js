@@ -23,8 +23,7 @@ $(document).ready(function () {
                     }
                 },
                 {
-                    data: 'id',
-                    visible: false
+                    data: 'id'
                 },
                 {
                     data: 'description'

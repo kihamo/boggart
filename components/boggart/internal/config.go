@@ -163,6 +163,10 @@ func (c *Component) ConfigVariables() []config.Variable {
 		config.NewVariable(boggart.ConfigOwnTracksEnabled, config.ValueTypeBool).
 			WithUsage("Enabled").
 			WithGroup("OwnTracks"),
+		config.NewVariable(boggart.ConfigSocketsBroadlink, config.ValueTypeString).
+			WithUsage("Address of Broadlink in format ip:mac").
+			WithGroup("Sockets").
+			WithView([]string{config.ViewTags}),
 	}
 }
 

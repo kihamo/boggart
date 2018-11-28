@@ -3,32 +3,11 @@ package internal
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"errors"
-	"net"
 )
 
 const (
 	DefaultBufferSize = 2048
 )
-
-func LocalAddr() (*net.UDPAddr, error) {
-	addresses, err := net.InterfaceAddrs()
-	if err != nil {
-		return nil, err
-	}
-
-	for _, address := range addresses {
-		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-			if ipnet.IP.To4() != nil {
-				return &net.UDPAddr{
-					IP: ipnet.IP,
-				}, err
-			}
-		}
-	}
-
-	return nil, errors.New("IP not found")
-}
 
 func Checksum(packet []byte) (sum uint16) {
 	sum = 0xbeaf

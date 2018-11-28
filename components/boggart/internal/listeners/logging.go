@@ -96,7 +96,9 @@ func (l *LoggingListener) Run(_ context.Context, event workers.Event, t time.Tim
 		boggart.DeviceEventMercury200Changed,
 		boggart.DeviceEventBME280Changed,
 		boggart.DeviceEventGPIOPinChanged,
-		boggart.DeviceEventDS18B20Changed:
+		boggart.DeviceEventDS18B20Changed,
+		boggart.DeviceEventSocketStateChanged,
+		boggart.DeviceEventSocketPowerChanged:
 
 		l.logger.Debug("Fire skip event",
 			"event.id", event.Id(),

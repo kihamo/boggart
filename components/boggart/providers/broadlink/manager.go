@@ -2,6 +2,7 @@ package broadlink
 
 import (
 	"encoding/binary"
+	"errors"
 	"net"
 	"time"
 
@@ -18,9 +19,32 @@ const (
 	WifiSecurityWPATKIP
 )
 
+const (
+	DevicePort = 80
+)
+
 var broadCastAddr = &net.UDPAddr{
 	IP:   net.IPv4bcast,
-	Port: 80,
+	Port: DevicePort,
+}
+
+func LocalAddr() (*net.UDPAddr, error) {
+	addresses, err := net.InterfaceAddrs()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, address := range addresses {
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return &net.UDPAddr{
+					IP: ipnet.IP,
+				}, err
+			}
+		}
+	}
+
+	return nil, errors.New("IP not found")
 }
 
 // Порядок подключения:
@@ -91,7 +115,7 @@ func DiscoverDevices() (devices []Device, err error) {
 		0x27-0x2f    00
 	*/
 
-	addrInterface, err := internal.LocalAddr()
+	addrInterface, err := LocalAddr()
 	if err != nil {
 		return nil, err
 	}

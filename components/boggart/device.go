@@ -29,6 +29,8 @@ var (
 	DeviceEventBME280Changed                   = event.NewBaseEvent("BME280")
 	DeviceEventGPIOPinChanged                  = event.NewBaseEvent("GPIOPinChanged")
 	DeviceEventDS18B20Changed                  = event.NewBaseEvent("DS18B20Changed")
+	DeviceEventSocketStateChanged              = event.NewBaseEvent("SocketStateChanged")
+	DeviceEventSocketPowerChanged              = event.NewBaseEvent("SocketPowerChanged")
 )
 
 type DeviceId int64
@@ -55,6 +57,7 @@ const (
 	DeviceTypeBarometer
 	DeviceTypeHygrometer
 	DeviceTypeGPIO
+	DeviceTypeSocket
 )
 
 type DevicesManager interface {

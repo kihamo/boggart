@@ -25,8 +25,6 @@ const (
 )
 
 type GPIOPin struct {
-	value uint64
-
 	boggart.DeviceBase
 	pin  pin.Pin
 	mode GPIOMode

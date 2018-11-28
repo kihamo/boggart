@@ -6,7 +6,6 @@ import (
 	"crypto/cipher"
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"net"
 	"sync"
 	"sync/atomic"
@@ -162,8 +161,6 @@ func (d *Device) Call(cmd byte, payload []byte) ([]byte, error) {
 }
 
 func (d *Device) Auth(id []byte, name string) error {
-	fmt.Println("Auth", id, name)
-
 	/*
 		Offset        Contents
 		0x00-0x03     00

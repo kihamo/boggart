@@ -51,6 +51,8 @@ func (l *MQTTListener) Events() []workers.Event {
 		boggart.DeviceEventBME280Changed,
 		boggart.DeviceEventGPIOPinChanged,
 		boggart.DeviceEventDS18B20Changed,
+		boggart.DeviceEventSocketStateChanged,
+		boggart.DeviceEventSocketPowerChanged,
 	}
 }
 
@@ -160,6 +162,16 @@ func (l *MQTTListener) Run(_ context.Context, event workers.Event, t time.Time, 
 
 	case boggart.DeviceEventDS18B20Changed:
 		l.publish(fmt.Sprintf("meter/ds18b20/%s", args[2]), true, args[1])
+
+	case boggart.DeviceEventSocketStateChanged:
+		if args[1].(bool) {
+			l.publish(fmt.Sprintf("socket/%s/state", args[2]), true, ValueOn)
+		} else {
+			l.publish(fmt.Sprintf("socket/%s/state", args[2]), true, ValueOff)
+		}
+
+	case boggart.DeviceEventSocketPowerChanged:
+		l.publish(fmt.Sprintf("socket/%s/power", args[2]), true, args[1])
 	}
 }
 

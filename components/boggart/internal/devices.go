@@ -3,12 +3,14 @@ package internal
 import (
 	"encoding/hex"
 	"fmt"
+	"net"
 	"net/url"
 	"strconv"
 	"strings"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/devices"
+	"github.com/kihamo/boggart/components/boggart/providers/broadlink"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 	"github.com/kihamo/boggart/components/boggart/providers/mercury"
 	"github.com/kihamo/boggart/components/boggart/providers/mikrotik"
@@ -262,5 +264,50 @@ func (c *Component) initSensor() {
 			device := devices.NewDS18B20Sensor(sensor)
 			c.devicesManager.Register(device)
 		}
+	}
+}
+
+func (c *Component) initSockets() {
+	addresses := strings.Split(c.config.String(boggart.ConfigSocketsBroadlink), ",")
+	if len(addresses) == 0 {
+		return
+	}
+
+	localAddr, err := broadlink.LocalAddr()
+	if err != nil {
+		c.logger.Warn("Get local address is failed")
+		return
+	}
+
+	m := c.application.GetComponent(mqtt.ComponentName).(mqtt.Component)
+
+	for _, address := range addresses {
+		address = strings.TrimSpace(address)
+		if address == "" {
+			c.logger.Warn("Socket address of Broadlink is empty")
+			continue
+		}
+
+		parts := strings.SplitN(address, ":", 2)
+		if len(parts) != 2 {
+			c.logger.Warn("Socket address of Broadlink is wrong " + address)
+			continue
+		}
+
+		mac, err := net.ParseMAC(parts[1])
+		if err != nil {
+			c.logger.Warn("Socket address of Broadlink is wrong MAC address " + address)
+			continue
+		}
+
+		ip := net.UDPAddr{
+			IP:   net.ParseIP(parts[0]),
+			Port: broadlink.DevicePort,
+		}
+
+		device := devices.NewBroadlinkSP3SSocket(broadlink.NewSP3S(mac, ip, *localAddr))
+		c.devicesManager.Register(device)
+
+		m.Subscribe(device)
 	}
 }
