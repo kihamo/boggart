@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -150,8 +151,10 @@ func (d *BroadlinkSP3SSocket) Power() (float64, error) {
 }
 
 func (d *BroadlinkSP3SSocket) Filters() map[string]byte {
+	mac := strings.Replace(d.provider.MAC().String(), ":", "-", -1)
+
 	return map[string]byte{
-		fmt.Sprintf("%s%s/set", SocketBroadlinkSP3SMQTTTopicPrefix, d.SerialNumber()): 0,
+		fmt.Sprintf("%s%s/set", SocketBroadlinkSP3SMQTTTopicPrefix, mac): 0,
 	}
 }
 
