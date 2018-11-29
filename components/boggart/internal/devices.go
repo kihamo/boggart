@@ -87,13 +87,13 @@ func (c *Component) initRouters() {
 	for _, address := range strings.Split(c.config.String(boggart.ConfigMikrotikAddresses), ",") {
 		address = strings.TrimSpace(address)
 		if address == "" {
-			c.logger.Warn("Mikroti address is empty")
+			c.logger.Warn("Mikrotik address is empty")
 			continue
 		}
 
 		u, err := url.Parse(address)
 		if err != nil {
-			c.logger.Warn("Bad Mikroti address " + address)
+			c.logger.Warn("Bad Mikrotik address " + address)
 			continue
 		}
 
@@ -102,7 +102,7 @@ func (c *Component) initRouters() {
 
 		api, err := mikrotik.NewClient(u.Host, username, password, c.config.Duration(boggart.ConfigMikrotikTimeout))
 		if err != nil {
-			c.logger.Error("Init mikrotik api failed",
+			c.logger.Error("Init Mikrotik api failed",
 				"error", err.Error(),
 				"address", u.Host,
 				"username", username,
@@ -110,7 +110,7 @@ func (c *Component) initRouters() {
 			continue
 		}
 
-		device := devices.NewMikrotikRouter(api, c.config.Duration(boggart.ConfigMikrotikRepeatInterval))
+		device := devices.NewMikrotikRouter(api, u.Hostname()+":514", c.config.Duration(boggart.ConfigMikrotikRepeatInterval))
 		device.SetDescription(device.Description() + " on " + u.Host)
 
 		c.devicesManager.Register(device)

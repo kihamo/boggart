@@ -39,8 +39,9 @@ type MikrotikRouter struct {
 	boggart.DeviceBase
 	boggart.DeviceSerialNumber
 
-	provider *mikrotik.Client
-	interval time.Duration
+	provider     *mikrotik.Client
+	syslogClient string
+	interval     time.Duration
 }
 
 type MikrotikRouterListener struct {
@@ -60,10 +61,11 @@ type MikrotikRouterMac struct {
 	}
 }
 
-func NewMikrotikRouter(provider *mikrotik.Client, interval time.Duration) *MikrotikRouter {
+func NewMikrotikRouter(provider *mikrotik.Client, syslogHostname string, interval time.Duration) *MikrotikRouter {
 	device := &MikrotikRouter{
-		provider: provider,
-		interval: interval,
+		provider:     provider,
+		syslogClient: syslogHostname,
+		interval:     interval,
 	}
 	device.Init()
 	device.SetDescription("Mikrotik router")
@@ -367,6 +369,11 @@ func (l *MikrotikRouterListener) Run(ctx context.Context, event workers.Event, t
 	case boggart.DeviceEventSyslogReceive:
 		message := args[0].(map[string]interface{})
 
+		client, ok := message["client"]
+		if !ok || client != l.router.syslogClient {
+			return
+		}
+
 		tag, ok := message["tag"]
 		if !ok {
 			return
@@ -379,8 +386,6 @@ func (l *MikrotikRouterListener) Run(ctx context.Context, event workers.Event, t
 
 		switch tag {
 		case "wifi":
-			// TODO: check hostname
-
 			check := wifiClientRegexp.FindStringSubmatch(content.(string))
 			if len(check) < 4 {
 				return
