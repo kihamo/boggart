@@ -2,5 +2,5 @@ package mqtt
 
 const (
 	ComponentName    = "mqtt"
-	ComponentVersion = "1.0.0"
+	ComponentVersion = "2.0.0"
 )

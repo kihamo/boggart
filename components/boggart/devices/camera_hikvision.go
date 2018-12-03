@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	m "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 	"github.com/kihamo/boggart/components/mqtt"
@@ -46,7 +45,7 @@ func NewCameraHikVision(isapi *hikvision.ISAPI, interval time.Duration, m mqtt.C
 		isapi:                 isapi,
 		interval:              interval,
 		alertStreamingHistory: make(map[string]time.Time),
-		mqtt: m,
+		mqtt:                  m,
 	}
 	device.Init()
 	device.SetDescription("HikVision camera")
@@ -95,7 +94,7 @@ func (d *CameraHikVision) taskSerialNumber(ctx context.Context) (interface{}, er
 	}
 
 	if deviceInfo.SerialNumber == "" {
-		return nil, errors.New("Device returns empty serial number"), false
+		return nil, errors.New("device returns empty serial number"), false
 	}
 
 	d.SetSerialNumber(deviceInfo.SerialNumber)
@@ -118,7 +117,9 @@ func (d *CameraHikVision) taskSerialNumber(ctx context.Context) (interface{}, er
 		return nil, err, false
 	}
 
-	d.mqtt.Subscribe(d)
+	topic := CameraMQTTTopicPrefix + strings.Replace(deviceInfo.SerialNumber, "/", "_", -1) + "/ptz/#"
+	d.mqtt.Subscribe(topic, 0, d.mqttCallback)
+
 	return nil, nil, true
 }
 
@@ -208,18 +209,7 @@ func (d *CameraHikVision) startAlertStreaming() error {
 	return nil
 }
 
-func (d *CameraHikVision) Filters() map[string]byte {
-	sn := strings.Replace(d.SerialNumber(), "/", "_", -1)
-	if sn == "" {
-		return map[string]byte{}
-	}
-
-	return map[string]byte{
-		CameraMQTTTopicPrefix + sn + "/ptz/#": 0,
-	}
-}
-
-func (d *CameraHikVision) Callback(ctx context.Context, client mqtt.Component, message m.Message) {
+func (d *CameraHikVision) mqttCallback(ctx context.Context, client mqtt.Component, message mqtt.Message) {
 	if !d.IsEnabled() || d.ptzChannels == nil || len(d.ptzChannels) == 0 {
 		return
 	}

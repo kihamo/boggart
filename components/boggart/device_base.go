@@ -81,14 +81,6 @@ func (d *DeviceBase) Disable() error {
 	return nil
 }
 
-func (d *DeviceBase) Listeners() []workers.ListenerWithEvents {
-	return nil
-}
-
-func (d *DeviceBase) Tasks() []workers.Task {
-	return nil
-}
-
 func (d *DeviceBase) TriggerEventChannel() <-chan DeviceTriggerEvent {
 	return d.triggerEventsChannel
 }
@@ -177,7 +169,7 @@ func (d *DeviceWOL) SetSubnet(subnet string) {
 func (d *DeviceWOL) WakeUp() error {
 	mac := d.Mac()
 	if mac == nil {
-		return errors.New("Mac isn't set")
+		return errors.New("mac isn't set")
 	}
 
 	var broadcastAddress net.IP

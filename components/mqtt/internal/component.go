@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 	"crypto/md5"
+	"errors"
 	"fmt"
 	"io"
 	"net/url"
@@ -21,12 +22,14 @@ import (
 )
 
 type Component struct {
-	config config.Component
-	logger logging.Logger
+	application shadow.Application
+	components  []shadow.Component
+	config      config.Component
+	logger      logging.Logger
 
 	mutex       sync.RWMutex
 	client      m.Client
-	subscribers []mqtt.Subscriber
+	subscribers map[string]mqtt.Subscriber
 }
 
 func (c *Component) Name() string {
@@ -52,9 +55,17 @@ func (c *Component) Dependencies() []shadow.Dependency {
 	}
 }
 
-func (c *Component) Run(a shadow.Application, ready chan<- struct{}) error {
-	c.subscribers = make([]mqtt.Subscriber, 0)
+func (c *Component) Init(a shadow.Application) error {
+	c.application = a
+	return nil
+}
 
+func (c *Component) Run(a shadow.Application, ready chan<- struct{}) (err error) {
+	if c.components, err = a.GetComponents(); err != nil {
+		return err
+	}
+
+	c.subscribers = make(map[string]mqtt.Subscriber, 0)
 	c.logger = logging.DefaultLogger().Named(c.Name())
 
 	m.ERROR = NewMQTTLogger(c.logger.Error, c.logger.Errorf)
@@ -65,28 +76,84 @@ func (c *Component) Run(a shadow.Application, ready chan<- struct{}) error {
 	<-a.ReadyComponent(config.ComponentName)
 	c.config = a.GetComponent(config.ComponentName).(config.Component)
 
-	// auto reconnect
-	duration := c.config.Duration(mqtt.ConfigConnectionTimeout) + time.Second*30
-	ticker := time.NewTicker(duration)
+	if err := c.initClient(); err != nil {
+		return err
+	}
 
 	ready <- struct{}{}
 
+	return c.initSubscribers()
+}
+
+func (c *Component) initClient() error {
+	attempts := c.config.Int64(mqtt.ConfigConnectionAttempts)
+
+	// auto reconnect
+	//duration := c.config.Duration(mqtt.ConfigConnectionTimeout) + time.Second*30
+	duration := time.Second * 5
+	ticker := time.NewTicker(duration)
+	defer ticker.Stop()
+
 	for ; true; <-ticker.C {
-		err := c.initClient()
-		if err != nil {
+		opts := m.NewClientOptions()
+		opts.Username = c.config.String(mqtt.ConfigUsername)
+		opts.Password = c.config.String(mqtt.ConfigPassword)
+		opts.ConnectTimeout = c.config.Duration(mqtt.ConfigConnectionTimeout)
+
+		opts.Servers = make([]*url.URL, 0)
+		for _, u := range strings.Split(c.config.String(mqtt.ConfigServers), ";") {
+			if p, err := url.Parse(u); err == nil {
+				opts.Servers = append(opts.Servers, p)
+			}
+		}
+
+		h := md5.New()
+		io.WriteString(h, time.Now().Format(time.RFC3339Nano))
+		opts.ClientID = fmt.Sprintf("%x\n", h.Sum(nil))
+
+		client := m.NewClient(opts)
+		token := client.Connect()
+
+		token.Wait()
+		attempts--
+
+		if err := token.Error(); err != nil {
 			c.logger.Error("Init MQTT client failed with error " + err.Error())
+
+			if attempts == 0 {
+				c.logger.Error("Init MQTT client failed because exhausted number of connection attempts")
+				return errors.New("exhausted number of connection attempts")
+			}
 		} else {
+			c.mutex.Lock()
+			c.client = client
+			c.mutex.Unlock()
+
 			break
 		}
 	}
 
-	ticker.Stop()
+	return nil
+}
+
+func (c *Component) initSubscribers() error {
+	for _, component := range c.components {
+		if componentSubscribers, ok := component.(mqtt.HasSubscribers); ok {
+			for _, sub := range componentSubscribers.MQTTSubscribers() {
+				if err := c.Subscribe(sub.Topic(), sub.QOS(), sub.Callback()); err != nil {
+					return err
+				}
+			}
+		}
+	}
 
 	return nil
 }
 
 func (c *Component) Shutdown() error {
-	client := c.Client()
+	c.mutex.RLock()
+	client := c.client
+	c.mutex.RUnlock()
 
 	if client != nil {
 		client.Disconnect(250)
@@ -95,61 +162,24 @@ func (c *Component) Shutdown() error {
 	return nil
 }
 
-func (c *Component) initClient() (err error) {
-	opts := m.NewClientOptions()
-	opts.Username = c.config.String(mqtt.ConfigUsername)
-	opts.Password = c.config.String(mqtt.ConfigPassword)
-	opts.ConnectTimeout = c.config.Duration(mqtt.ConfigConnectionTimeout)
-
-	opts.Servers = make([]*url.URL, 0)
-	for _, u := range strings.Split(c.config.String(mqtt.ConfigServers), ";") {
-		if p, err := url.Parse(u); err == nil {
-			opts.Servers = append(opts.Servers, p)
-		}
-	}
-
-	h := md5.New()
-	io.WriteString(h, time.Now().Format(time.RFC3339Nano))
-	opts.ClientID = fmt.Sprintf("%x\n", h.Sum(nil))
-
-	client := m.NewClient(opts)
-	token := client.Connect()
-
-	token.Wait()
-	err = token.Error()
-	if err == nil {
-		c.mutex.Lock()
-		c.client = client
-
-		for _, subscriber := range c.subscribers {
-			c.subscribeByClient(client, subscriber)
-		}
-		c.mutex.Unlock()
-	}
-
-	return err
-}
-
 func (c *Component) Client() m.Client {
+	c.mutex.RLock()
+	client := c.client
+	c.mutex.RUnlock()
+
+	if client != nil {
+		return client
+	}
+
+	<-c.application.ReadyComponent(c.Name())
+
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
 	return c.client
 }
 
-func (c *Component) Publish(topic string, qos byte, retained bool, payload interface{}) m.Token {
-	client := c.Client()
-	if client == nil {
-		c.logger.Warn("Client isn't init. Publish skipping",
-			"topic", topic,
-			"qos", qos,
-			"retained", retained,
-			"payload", payload,
-		)
-
-		return nil
-	}
-
+func (c *Component) Publish(topic string, qos byte, retained bool, payload interface{}) error {
 	r := "0"
 	if retained {
 		r = "1"
@@ -161,26 +191,84 @@ func (c *Component) Publish(topic string, qos byte, retained bool, payload inter
 		"retained", r,
 	).Inc()
 
-	return client.Publish(topic, qos, retained, payload)
+	token := c.Client().Publish(topic, qos, retained, payload)
+	token.Wait()
+
+	return token.Error()
 }
 
-func (c *Component) Subscribe(subscriber mqtt.Subscriber) m.Token {
-	c.mutex.Lock()
-	c.subscribers = append(c.subscribers, subscriber)
+func (c *Component) AddRoute(topic string, callback mqtt.MessageHandler) {
+	c.Client().AddRoute(topic, c.wrapCallback(callback))
+
+	c.mutex.RLock()
+	sub, ok := c.subscribers[topic]
 	c.mutex.Unlock()
 
-	client := c.Client()
-	if client == nil {
-		return nil
+	if !ok {
+		return
 	}
 
-	return c.subscribeByClient(client, subscriber)
+	c.mutex.Lock()
+	c.subscribers[topic] = mqtt.NewSubscriber(topic, sub.QOS(), callback)
+	c.mutex.Unlock()
 }
 
-func (c *Component) subscribeByClient(client m.Client, subscriber mqtt.Subscriber) m.Token {
-	c.logger.Debug("Add subscriber", "filters", subscriber.Filters())
+func (c *Component) Unsubscribe(topic string) error {
+	if token := c.Client().Unsubscribe(topic); token.Wait() && token.Error() != nil {
+		return token.Error()
+	}
 
-	return client.SubscribeMultiple(subscriber.Filters(), func(client m.Client, message m.Message) {
+	delete(c.subscribers, topic)
+	c.logger.Debug("Unsubscribe", "topic", topic)
+
+	return nil
+}
+
+func (c *Component) Subscribe(topic string, qos byte, callback mqtt.MessageHandler) error {
+	token := c.Client().Subscribe(topic, qos, c.wrapCallback(callback))
+	if token.Wait() && token.Error() != nil {
+		return token.Error()
+	}
+
+	c.mutex.Lock()
+	c.subscribers[topic] = mqtt.NewSubscriber(topic, qos, callback)
+	c.mutex.Unlock()
+
+	c.logger.Debug("Subscribe", "topic", topic, "qos", qos)
+
+	return nil
+}
+
+func (c *Component) SubscribeMultiple(filters map[string]byte, callback mqtt.MessageHandler) error {
+	token := c.Client().SubscribeMultiple(filters, c.wrapCallback(callback))
+
+	if token.Wait() && token.Error() != nil {
+		return token.Error()
+	}
+
+	for topic, qos := range filters {
+		c.mutex.Lock()
+		c.subscribers[topic] = mqtt.NewSubscriber(topic, qos, callback)
+		c.mutex.Unlock()
+
+		c.logger.Debug("Subscribe", "topic", topic, "qos", qos)
+	}
+
+	return nil
+}
+
+func (c *Component) SubscribeSubscribers(subscribers []mqtt.Subscriber) error {
+	for _, sub := range subscribers {
+		if err := c.Subscribe(sub.Topic(), sub.QOS(), sub.Callback()); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (c *Component) wrapCallback(callback mqtt.MessageHandler) func(client m.Client, message m.Message) {
+	return func(client m.Client, message m.Message) {
 		span, ctx := tracing.StartSpanFromContext(context.Background(), c.Name(), message.Topic())
 		defer span.Finish()
 
@@ -197,6 +285,6 @@ func (c *Component) subscribeByClient(client m.Client, subscriber mqtt.Subscribe
 			"retained", r,
 		).Inc()
 
-		subscriber.Callback(ctx, c, message)
-	})
+		callback(ctx, c, message)
+	}
 }

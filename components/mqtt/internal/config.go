@@ -22,6 +22,10 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithGroup("Connect").
 			WithView([]string{config.ViewPassword}).
 			WithEditable(true),
+		config.NewVariable(mqtt.ConfigConnectionAttempts, config.ValueTypeInt64).
+			WithUsage("Attempts (if 0 unlimited)").
+			WithGroup("Connect").
+			WithDefault(mqtt.DefaultConnectionAttempts),
 		config.NewVariable(mqtt.ConfigConnectionTimeout, config.ValueTypeDuration).
 			WithUsage("Timeout").
 			WithGroup("Connect").
@@ -40,5 +44,7 @@ func (c *Component) ConfigWatchers() []config.Watcher {
 }
 
 func (c *Component) watchConnect(_ string, _ interface{}, _ interface{}) {
-	c.initClient()
+	if err := c.initClient(); err == nil {
+		c.initSubscribers()
+	}
 }

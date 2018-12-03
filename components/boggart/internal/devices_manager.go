@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/mqtt"
 	w "github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/manager"
 	"github.com/kihamo/shadow/components/workers"
@@ -26,6 +27,7 @@ type DevicesManager struct {
 
 	ready          int64
 	storage        *sync.Map
+	mqtt           mqtt.Component
 	workers        workers.Component
 	listeners      *manager.ListenersManager
 	chanChecker    chan string
@@ -33,10 +35,11 @@ type DevicesManager struct {
 	timeoutChecker time.Duration
 }
 
-func NewDevicesManager(workers workers.Component, listeners *manager.ListenersManager) *DevicesManager {
+func NewDevicesManager(mqtt mqtt.Component, workers workers.Component, listeners *manager.ListenersManager) *DevicesManager {
 	m := &DevicesManager{
 		ready:          devicesManagerNotReady,
 		storage:        new(sync.Map),
+		mqtt:           mqtt,
 		workers:        workers,
 		listeners:      listeners,
 		chanChecker:    make(chan string),
@@ -59,16 +62,18 @@ func (m *DevicesManager) RegisterWithID(id string, device boggart.Device) {
 	m.storage.Store(id, device)
 	m.listeners.AsyncTrigger(boggart.DeviceEventDeviceRegister, device, id)
 
-	tasks := device.Tasks()
-	if len(tasks) > 0 {
-		for _, task := range tasks {
+	if subs, ok := device.(boggart.DeviceHasMQTTSubscribers); ok {
+		m.mqtt.SubscribeSubscribers(subs.MQTTSubscribers())
+	}
+
+	if tasks, ok := device.(boggart.DeviceHasTasks); ok {
+		for _, task := range tasks.Tasks() {
 			m.workers.AddTask(task)
 		}
 	}
 
-	listeners := device.Listeners()
-	if len(listeners) > 0 {
-		for _, listener := range listeners {
+	if listeners, ok := device.(boggart.DeviceHasListeners); ok {
+		for _, listener := range listeners.Listeners() {
 			m.listeners.AddListener(listener)
 		}
 	}

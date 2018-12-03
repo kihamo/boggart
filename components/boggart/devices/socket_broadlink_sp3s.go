@@ -8,7 +8,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	m "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/broadlink"
 	"github.com/kihamo/boggart/components/mqtt"
@@ -150,36 +149,35 @@ func (d *BroadlinkSP3SSocket) Power() (float64, error) {
 	return d.provider.Power()
 }
 
-func (d *BroadlinkSP3SSocket) Filters() map[string]byte {
+func (d *BroadlinkSP3SSocket) MQTTSubscribers() []mqtt.Subscriber {
 	mac := strings.Replace(d.provider.MAC().String(), ":", "-", -1)
+	topic := fmt.Sprintf("%s%s/set", SocketBroadlinkSP3SMQTTTopicPrefix, mac)
 
-	return map[string]byte{
-		fmt.Sprintf("%s%s/set", SocketBroadlinkSP3SMQTTTopicPrefix, mac): 0,
-	}
-}
+	return []mqtt.Subscriber{
+		mqtt.NewSubscriber(topic, 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+			if !d.IsEnabled() {
+				return
+			}
 
-func (d *BroadlinkSP3SSocket) Callback(ctx context.Context, client mqtt.Component, message m.Message) {
-	if !d.IsEnabled() {
-		return
-	}
+			span, ctx := tracing.StartSpanFromContext(ctx, "socket", "set")
+			span.LogFields(
+				log.String("mac", d.provider.MAC().String()),
+				log.String("ip", d.provider.Addr().String()))
+			defer span.Finish()
 
-	span, ctx := tracing.StartSpanFromContext(ctx, "socket", "set")
-	span.LogFields(
-		log.String("mac", d.provider.MAC().String()),
-		log.String("ip", d.provider.Addr().String()))
-	defer span.Finish()
+			var err error
 
-	var err error
+			if bytes.Equal(message.Payload(), []byte(`1`)) {
+				err = d.On()
+				span.LogFields(log.String("state", "on"))
+			} else {
+				err = d.Off()
+				span.LogFields(log.String("state", "off"))
+			}
 
-	if bytes.Equal(message.Payload(), []byte(`1`)) {
-		err = d.On()
-		span.LogFields(log.String("state", "on"))
-	} else {
-		err = d.Off()
-		span.LogFields(log.String("state", "off"))
-	}
-
-	if err != nil {
-		tracing.SpanError(span, err)
+			if err != nil {
+				tracing.SpanError(span, err)
+			}
+		}),
 	}
 }

@@ -23,6 +23,7 @@ import (
 )
 
 type Component struct {
+	application shadow.Application
 	config      config.Component
 	logger      logging.Logger
 	provider    *yandex.YandexSpeechKitCloud
@@ -54,6 +55,11 @@ func (c *Component) Dependencies() []shadow.Dependency {
 	}
 }
 
+func (c *Component) Init(a shadow.Application) error {
+	c.application = a
+	return nil
+}
+
 func (c *Component) Run(a shadow.Application, ready chan<- struct{}) error {
 	c.audioPlayer = players.NewAudio()
 	c.logger = logging.DefaultLogger().Named(c.Name())
@@ -65,7 +71,6 @@ func (c *Component) Run(a shadow.Application, ready chan<- struct{}) error {
 
 	<-a.ReadyComponent(mqtt.ComponentName)
 	m := a.GetComponent(mqtt.ComponentName).(mqtt.Component)
-	m.Subscribe(NewMQTTSubscribe(c))
 
 	ready <- struct{}{}
 

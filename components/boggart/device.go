@@ -3,6 +3,7 @@ package boggart
 import (
 	"context"
 
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/event"
 	"github.com/kihamo/snitch"
@@ -86,7 +87,15 @@ type Device interface {
 	Disable() error
 	Enable() error
 	Ping(context.Context) bool
-	Tasks() []workers.Task
-	Listeners() []workers.ListenerWithEvents
 	TriggerEventChannel() <-chan DeviceTriggerEvent
 }
+
+type DeviceHasTasks interface {
+	Tasks() []workers.Task
+}
+
+type DeviceHasListeners interface {
+	Listeners() []workers.ListenerWithEvents
+}
+
+type DeviceHasMQTTSubscribers mqtt.HasSubscribers

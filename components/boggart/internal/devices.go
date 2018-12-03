@@ -140,7 +140,6 @@ func (c *Component) initGPIO() {
 	}
 
 	pins := strings.Split(c.config.String(boggart.ConfigGPIOPins), ",")
-	m := c.application.GetComponent(mqtt.ComponentName).(mqtt.Component)
 
 	for _, pin := range pins {
 		opts := strings.Split(pin, ":")
@@ -181,10 +180,6 @@ func (c *Component) initGPIO() {
 		}
 
 		c.devicesManager.RegisterWithID(fmt.Sprintf("pin.%d", number), device)
-
-		if device.Mode() == devices.GPIOModeOut {
-			m.Subscribe(device)
-		}
 	}
 }
 
@@ -279,8 +274,6 @@ func (c *Component) initSockets() {
 		return
 	}
 
-	m := c.application.GetComponent(mqtt.ComponentName).(mqtt.Component)
-
 	for _, address := range addresses {
 		address = strings.TrimSpace(address)
 		if address == "" {
@@ -307,7 +300,5 @@ func (c *Component) initSockets() {
 
 		device := devices.NewBroadlinkSP3SSocket(broadlink.NewSP3S(mac, ip, *localAddr))
 		c.devicesManager.Register(device)
-
-		m.Subscribe(device)
 	}
 }

@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 
-	m "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/shadow/components/tracing"
@@ -107,34 +106,39 @@ func (d *GPIOPin) waitForEdge() {
 	}
 }
 
-func (d *GPIOPin) Filters() map[string]byte {
-	return map[string]byte{
-		fmt.Sprintf("%s%d", GPIOMQTTTopicPrefix, d.pin.Number()): 0,
-	}
-}
-
-func (d *GPIOPin) Callback(ctx context.Context, client mqtt.Component, message m.Message) {
-	if !d.IsEnabled() {
-		return
+func (d *GPIOPin) MQTTSubscribers() []mqtt.Subscriber {
+	if d.Mode() != GPIOModeOut {
+		return nil
 	}
 
-	span, ctx := tracing.StartSpanFromContext(ctx, "gpio", "set")
-	span.LogFields(
-		log.String("name", d.pin.Name()),
-		log.Int("number", d.pin.Number()))
-	defer span.Finish()
+	return []mqtt.Subscriber{
+		mqtt.NewSubscriber(
+			fmt.Sprintf("%s%d", GPIOMQTTTopicPrefix, d.pin.Number()),
+			0,
+			func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+				if !d.IsEnabled() {
+					return
+				}
 
-	var err error
+				span, ctx := tracing.StartSpanFromContext(ctx, "gpio", "set")
+				span.LogFields(
+					log.String("name", d.pin.Name()),
+					log.Int("number", d.pin.Number()))
+				defer span.Finish()
 
-	if bytes.Equal(message.Payload(), []byte(`1`)) {
-		err = d.High()
-		span.LogFields(log.String("out", "high"))
-	} else {
-		err = d.Low()
-		span.LogFields(log.String("out", "low"))
-	}
+				var err error
 
-	if err != nil {
-		tracing.SpanError(span, err)
+				if bytes.Equal(message.Payload(), []byte(`1`)) {
+					err = d.High()
+					span.LogFields(log.String("out", "high"))
+				} else {
+					err = d.Low()
+					span.LogFields(log.String("out", "low"))
+				}
+
+				if err != nil {
+					tracing.SpanError(span, err)
+				}
+			}),
 	}
 }

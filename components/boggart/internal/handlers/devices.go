@@ -68,8 +68,12 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				Id:          d.Id(),
 				Description: d.Description(),
 				Types:       make([]string, 0, len(d.Types())),
-				TasksCount:  len(d.Tasks()),
+				TasksCount:  0,
 				Enabled:     d.IsEnabled(),
+			}
+
+			if tasks, ok := d.(boggart.DeviceHasTasks); ok {
+				item.TasksCount = len(tasks.Tasks())
 			}
 
 			for _, t := range d.Types() {

@@ -89,7 +89,10 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 	c.listenersManager = manager.NewListenersManager()
 
 	<-a.ReadyComponent(workers.ComponentName)
-	c.devicesManager = NewDevicesManager(a.GetComponent(workers.ComponentName).(workers.Component), c.listenersManager)
+	c.devicesManager = NewDevicesManager(
+		a.GetComponent(mqtt.ComponentName).(mqtt.Component),
+		a.GetComponent(workers.ComponentName).(workers.Component),
+		c.listenersManager)
 
 	c.logger = logging.DefaultLogger().Named(c.Name())
 
@@ -105,7 +108,6 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 
 	c.initListeners()
 	c.initRS485()
-	c.initMQTT()
 
 	c.initGPIO()
 	c.initElectricityMeters()
