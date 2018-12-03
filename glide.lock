@@ -1,5 +1,5 @@
-hash: 60fcba21c171c92258073be19772c263dc5499fe4dd07af1c69df65f880091af
-updated: 2018-12-04T00:31:51.14405+03:00
+hash: 40f4d85089e226050e8f6f81889c0214c26095ff8d318e0e1771f686335c4db0
+updated: 2018-12-04T02:14:23.392561+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: 02e53af36e6c978af692887ed449b74026d76fec
@@ -24,6 +24,8 @@ imports:
   version: bf70f2a70fb1b1f36d90d671a72795984eab0fcb
   subpackages:
   - gettext/mo
+- name: github.com/codahale/hdrhistogram
+  version: 3a0bb77429bd3a61596f5e8a3172445844342120
 - name: github.com/deckarep/golang-set
   version: cbaa98ba5575e67703b32b4b19f73c91f3c4159e
 - name: github.com/eclipse/paho.mqtt.golang
@@ -351,7 +353,7 @@ imports:
   - transport
   - utils
 - name: github.com/uber/jaeger-lib
-  version: 3fa9aa04b65a266a1bbe0a5c8ac1408281b2a64a
+  version: ed3a127ec5fef7ae9ea95b01b542c47fbd999ce5
   subpackages:
   - metrics
 - name: github.com/yryz/ds18b20

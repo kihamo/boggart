@@ -30,3 +30,5 @@ import:
   version: ~v1.4.7
 - package: github.com/faiface/beep
   version: 63cc6fbbac46dba1a03e55f0ebc965d6c82ca8e1
+- package: github.com/uber/jaeger-lib
+  version: ed3a127ec5fef7ae9ea95b01b542c47fbd999ce5

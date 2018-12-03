@@ -1,0 +1,46 @@
+{{ define "content" }}
+
+<div class="row" id="devices">
+    <div class="x_panel">
+        <div class="x_title">
+            <h2>{{ i18n "Subscriptions" . }}</h2>
+            <div class="clearfix"></div>
+        </div>
+        <div class="x_content">
+            <div class="table-responsive">
+                <table class="table table-striped dt-responsive nowrap" style="width:100%">
+                    <thead>
+                    <tr>
+                        <th class="md-col-1">#</th>
+                        <th>{{ i18n "Topic" . }}</th>
+                        <th class="md-col-1">{{ i18n "QOS" . }}</th>
+                        <th class="md-col-2">{{ i18n "Callbacks" . }}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{ range $i, $subscription := .subscriptions }}
+                    <tr>
+                        <td>{{ add $i 1 }}</td>
+                        <td>{{ $subscription.Topic }}</td>
+                        <td>{{ $subscription.QOS }}</td>
+                        <td>{{ $subscription.Len }}</td>
+                    {{ end }}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
+
+{{ define "head" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" false) }}
+{{ end }}
+
+{{ define "js" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net/js/jquery.dataTables.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive/js/dataTables.responsive.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
+{{ end }}

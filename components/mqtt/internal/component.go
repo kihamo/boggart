@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"container/list"
 	"context"
 	"crypto/md5"
 	"errors"
@@ -16,6 +17,7 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/config"
+	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/logging"
 	"github.com/kihamo/shadow/components/tracing"
 	"github.com/opentracing/opentracing-go/log"
@@ -27,9 +29,10 @@ type Component struct {
 	config      config.Component
 	logger      logging.Logger
 
-	mutex       sync.RWMutex
-	client      m.Client
-	subscribers map[string]mqtt.Subscriber
+	mutex         sync.RWMutex
+	routes        []dashboard.Route
+	client        m.Client
+	subscriptions *list.List
 }
 
 func (c *Component) Name() string {
@@ -65,7 +68,7 @@ func (c *Component) Run(a shadow.Application, ready chan<- struct{}) (err error)
 		return err
 	}
 
-	c.subscribers = make(map[string]mqtt.Subscriber, 0)
+	c.subscriptions = list.New()
 	c.logger = logging.DefaultLogger().Named(c.Name())
 
 	m.ERROR = NewMQTTLogger(c.logger.Error, c.logger.Errorf)
@@ -198,18 +201,26 @@ func (c *Component) Publish(topic string, qos byte, retained bool, payload inter
 }
 
 func (c *Component) AddRoute(topic string, callback mqtt.MessageHandler) {
-	c.Client().AddRoute(topic, c.wrapCallback(callback))
+	subscription := mqtt.NewSubscription(topic, 0, callback)
 
+	var e *list.Element
 	c.mutex.RLock()
-	sub, ok := c.subscribers[topic]
-	c.mutex.Unlock()
-
-	if !ok {
-		return
+	for e = c.subscriptions.Front(); e != nil; e = e.Next() {
+		if e.Value.(mqtt.Subscription).Match(topic) {
+			subscription = subscription.Merge(e.Value.(mqtt.Subscription))
+			break
+		}
 	}
+	c.mutex.RUnlock()
+
+	c.Client().AddRoute(topic, c.wrapCallback(subscription.Callback))
 
 	c.mutex.Lock()
-	c.subscribers[topic] = mqtt.NewSubscriber(topic, sub.QOS(), callback)
+	if e != nil {
+		e.Value = subscription
+	} else {
+		c.subscriptions.PushBack(subscription)
+	}
 	c.mutex.Unlock()
 }
 
@@ -218,20 +229,44 @@ func (c *Component) Unsubscribe(topic string) error {
 		return token.Error()
 	}
 
-	delete(c.subscribers, topic)
+	c.mutex.Lock()
+	for e := c.subscriptions.Front(); e != nil; e = e.Next() {
+		if e.Value.(mqtt.Subscription).Match(topic) {
+			c.subscriptions.Remove(e)
+			break
+		}
+	}
+	c.mutex.Unlock()
+
 	c.logger.Debug("Unsubscribe", "topic", topic)
 
 	return nil
 }
 
 func (c *Component) Subscribe(topic string, qos byte, callback mqtt.MessageHandler) error {
-	token := c.Client().Subscribe(topic, qos, c.wrapCallback(callback))
+	subscription := mqtt.NewSubscription(topic, qos, callback)
+
+	var e *list.Element
+	c.mutex.RLock()
+	for e = c.subscriptions.Front(); e != nil; e = e.Next() {
+		if e.Value.(mqtt.Subscription).Match(topic) {
+			subscription = subscription.Merge(e.Value.(mqtt.Subscription))
+			break
+		}
+	}
+	c.mutex.RUnlock()
+
+	token := c.Client().Subscribe(topic, qos, c.wrapCallback(subscription.Callback))
 	if token.Wait() && token.Error() != nil {
 		return token.Error()
 	}
 
 	c.mutex.Lock()
-	c.subscribers[topic] = mqtt.NewSubscriber(topic, qos, callback)
+	if e != nil {
+		e.Value = subscription
+	} else {
+		c.subscriptions.PushBack(subscription)
+	}
 	c.mutex.Unlock()
 
 	c.logger.Debug("Subscribe", "topic", topic, "qos", qos)
@@ -240,18 +275,10 @@ func (c *Component) Subscribe(topic string, qos byte, callback mqtt.MessageHandl
 }
 
 func (c *Component) SubscribeMultiple(filters map[string]byte, callback mqtt.MessageHandler) error {
-	token := c.Client().SubscribeMultiple(filters, c.wrapCallback(callback))
-
-	if token.Wait() && token.Error() != nil {
-		return token.Error()
-	}
-
 	for topic, qos := range filters {
-		c.mutex.Lock()
-		c.subscribers[topic] = mqtt.NewSubscriber(topic, qos, callback)
-		c.mutex.Unlock()
-
-		c.logger.Debug("Subscribe", "topic", topic, "qos", qos)
+		if err := c.Subscribe(topic, qos, callback); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -265,6 +292,17 @@ func (c *Component) SubscribeSubscribers(subscribers []mqtt.Subscriber) error {
 	}
 
 	return nil
+}
+
+func (c *Component) Subscriptions() []mqtt.Subscription {
+	c.mutex.RLock()
+	subscriptions := make([]mqtt.Subscription, 0, c.subscriptions.Len())
+	for e := c.subscriptions.Front(); e != nil; e = e.Next() {
+		subscriptions = append(subscriptions, e.Value.(mqtt.Subscription))
+	}
+	c.mutex.RUnlock()
+
+	return subscriptions
 }
 
 func (c *Component) wrapCallback(callback mqtt.MessageHandler) func(client m.Client, message m.Message) {

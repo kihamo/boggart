@@ -17,6 +17,7 @@ type Component interface {
 	Subscribe(topic string, qos byte, callback MessageHandler) error
 	SubscribeMultiple(filters map[string]byte, callback MessageHandler) error
 	SubscribeSubscribers([]Subscriber) error
+	Subscriptions() []Subscription
 }
 
 type Message m.Message
