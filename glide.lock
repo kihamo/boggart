@@ -1,5 +1,5 @@
-hash: 1ebdf2a04512a8b48372851049ae15386582329cca2392d514679e0452cdf9da
-updated: 2018-11-25T12:49:21.731207+03:00
+hash: 60fcba21c171c92258073be19772c263dc5499fe4dd07af1c69df65f880091af
+updated: 2018-12-04T00:31:51.14405+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: 02e53af36e6c978af692887ed449b74026d76fec
@@ -17,15 +17,13 @@ imports:
   subpackages:
   - quantile
 - name: github.com/bsm/histogram
-  version: e219932777c945c7a221ce0e7ace7712c59c8bac
+  version: 2b0b912bb289c8e5ad4c8dd996fc22f759834d8d
 - name: github.com/bugsnag/osext
   version: 0dd3f918b21bec95ace9dc86c7e70266cfc5c702
 - name: github.com/chai2010/gettext-go
   version: bf70f2a70fb1b1f36d90d671a72795984eab0fcb
   subpackages:
   - gettext/mo
-- name: github.com/codahale/hdrhistogram
-  version: 3a0bb77429bd3a61596f5e8a3172445844342120
 - name: github.com/deckarep/golang-set
   version: cbaa98ba5575e67703b32b4b19f73c91f3c4159e
 - name: github.com/eclipse/paho.mqtt.golang
@@ -43,8 +41,6 @@ imports:
   - wav
 - name: github.com/fsnotify/fsnotify
   version: c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9
-- name: github.com/ghthor/gowol
-  version: eb42ead1b24e9226bddb05004815f6e72280f879
 - name: github.com/globalsign/mgo
   version: eeefdecb41b842af6dc652aaea4026e8403e62df
   subpackages:
@@ -61,7 +57,7 @@ imports:
 - name: github.com/go-openapi/jsonreference
   version: 8483a886a90412cd6858df4ea3483dce9c8e35a3
 - name: github.com/go-openapi/loads
-  version: d72cd69e9468f55c6369c5481c3d011401728c72
+  version: 74628589c3b94e3526a842d24f46589980f5ab22
 - name: github.com/go-openapi/runtime
   version: aadb2cc7b8862fdab251bf60a8b9d2a951c9746c
   subpackages:
@@ -73,9 +69,9 @@ imports:
   - middleware/untyped
   - security
 - name: github.com/go-openapi/spec
-  version: 5bae59e25b21498baea7f9d46e9c147ec106a42e
+  version: 5b6cdde3200976e3ecceb2868706ee39b6aff3e4
 - name: github.com/go-openapi/strfmt
-  version: b7bbaf9c758e8bee9311b1bb94262cd30f79dc16
+  version: e471370ae57ac74eaf0afe816a66e4ddd7f1b027
 - name: github.com/go-openapi/swag
   version: 1d29f06aebd59ccdf11ae04aa0334ded96e2d909
 - name: github.com/go-openapi/validate
@@ -289,7 +285,7 @@ imports:
   subpackages:
   - nethttp
 - name: github.com/opentracing/opentracing-go
-  version: be550b025b433cdfa2f11efb962afa2ea3c4d967
+  version: 8b5a441dc60e8d9bb9bf9d22060b6d94fa599983
   subpackages:
   - ext
   - log
@@ -308,13 +304,13 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: aeab699e26f4d4089dba5e522e5d9babd2adbaf7
+  version: 4724e9255275ce38f7179b2478abeae4e28c904f
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: 185b4288413d2a0dd0806f78c90dde719829e5ae
+  version: aa55a523dc0a8297edf51bb75e8eec13eb3be45d
   subpackages:
   - internal/util
   - nfs
@@ -355,7 +351,7 @@ imports:
   - transport
   - utils
 - name: github.com/uber/jaeger-lib
-  version: ed3a127ec5fef7ae9ea95b01b542c47fbd999ce5
+  version: 3fa9aa04b65a266a1bbe0a5c8ac1408281b2a64a
   subpackages:
   - metrics
 - name: github.com/yryz/ds18b20
@@ -387,7 +383,7 @@ imports:
   - poly1305
   - salsa20/salsa
 - name: golang.org/x/exp
-  version: a3060d491354240eda536d676ced8bb702018b7e
+  version: d9c527d6d0b47a696ffac0deae40c20e56c9e1c5
   subpackages:
   - shiny/driver/gldriver
   - shiny/driver/internal/drawer
@@ -402,7 +398,7 @@ imports:
   subpackages:
   - math/f64
 - name: golang.org/x/mobile
-  version: a27dd33d354d004b2de14a791df5af8a00f68b8e
+  version: ca3c58166ed802c9810ffc499b01bc1cd2e0153a
   subpackages:
   - app
   - app/internal/callfn
@@ -431,7 +427,7 @@ imports:
   - trace
   - websocket
 - name: golang.org/x/oauth2
-  version: 8f65e3013ebad444f13bc19536f7865efc793816
+  version: d668ce993890a79bda886613ee587a69dd5da7a6
   subpackages:
   - internal
 - name: golang.org/x/sync
@@ -439,7 +435,7 @@ imports:
   subpackages:
   - errgroup
 - name: golang.org/x/sys
-  version: 62eef0e2fa9b2c385f7b2778e763486da6880d37
+  version: 4ed8d59d0b35e1e29334a206d1b3f38b1e5dfb31
   subpackages:
   - unix
   - windows
@@ -454,7 +450,7 @@ imports:
   - unicode/norm
   - width
 - name: google.golang.org/appengine
-  version: 4a4468ece617fc8205e99368fa2200e9d1fad421
+  version: a37df1387b4521194676d88c79230c613610d5f4
   subpackages:
   - internal
   - internal/base
@@ -464,7 +460,7 @@ imports:
   - internal/urlfetch
   - urlfetch
 - name: google.golang.org/genproto
-  version: b5d43981345bdb2c233eb4bf3277847b48c6fdc6
+  version: bd91e49a0898e27abb88c339b432fa53d7497ac0
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
@@ -514,7 +510,7 @@ imports:
 - name: gopkg.in/telegram-bot-api.v4
   version: 9860bdfd3a171ceafb6e1eafa163482a6ef92643
 - name: gopkg.in/yaml.v2
-  version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
+  version: 51d6538a90f86fe93ac480b35f37b2be17fef232
 - name: periph.io/x/periph
   version: f34a1b4e75c5935f6269723ae45eacd0aa1d1a2a
   subpackages:

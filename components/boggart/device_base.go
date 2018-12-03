@@ -2,14 +2,11 @@ package boggart
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"net"
 	"sync"
 	"sync/atomic"
 
-	"fmt"
-
-	w "github.com/ghthor/gowol"
 	"github.com/kihamo/go-workers"
 	"github.com/pborman/uuid"
 )
@@ -164,26 +161,4 @@ func (d *DeviceWOL) SetSubnet(subnet string) {
 	d.mutex.Lock()
 	d.subnet = net.ParseIP(subnet)
 	d.mutex.Unlock()
-}
-
-func (d *DeviceWOL) WakeUp() error {
-	mac := d.Mac()
-	if mac == nil {
-		return errors.New("mac isn't set")
-	}
-
-	var broadcastAddress net.IP
-
-	ip := d.IP()
-	subnet := d.Subnet()
-	if ip != nil && subnet != nil {
-		broadcastAddress = net.IP{0, 0, 0, 0}
-		for i := 0; i < 4; i++ {
-			broadcastAddress[i] = (ip[i] & subnet[i]) | ^subnet[i]
-		}
-	} else {
-		broadcastAddress = net.IP{255, 255, 255, 255}
-	}
-
-	return w.MagicWake(mac.String(), broadcastAddress.String())
 }
