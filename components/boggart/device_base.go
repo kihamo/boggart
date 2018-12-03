@@ -3,7 +3,6 @@ package boggart
 import (
 	"context"
 	"fmt"
-	"net"
 	"sync"
 	"sync/atomic"
 
@@ -107,58 +106,5 @@ func (d *DeviceSerialNumber) SerialNumber() string {
 func (d *DeviceSerialNumber) SetSerialNumber(serialNumber string) {
 	d.mutex.Lock()
 	d.serialNumber = serialNumber
-	d.mutex.Unlock()
-}
-
-type DeviceWOL struct {
-	mutex  sync.RWMutex
-	mac    net.HardwareAddr
-	ip     net.IP
-	subnet net.IP
-}
-
-func (d *DeviceWOL) Mac() net.HardwareAddr {
-	d.mutex.RLock()
-	defer d.mutex.RUnlock()
-
-	return d.mac
-}
-
-func (d *DeviceWOL) SetMac(mac string) error {
-	parsed, err := net.ParseMAC(mac)
-	if err != nil {
-		return err
-	}
-
-	d.mutex.Lock()
-	d.mac = parsed
-	d.mutex.Unlock()
-
-	return nil
-}
-
-func (d *DeviceWOL) IP() net.IP {
-	d.mutex.RLock()
-	defer d.mutex.RUnlock()
-
-	return d.ip
-}
-
-func (d *DeviceWOL) SetIP(ip string) {
-	d.mutex.Lock()
-	d.ip = net.ParseIP(ip)
-	d.mutex.Unlock()
-}
-
-func (d *DeviceWOL) Subnet() net.IP {
-	d.mutex.RLock()
-	defer d.mutex.RUnlock()
-
-	return d.subnet
-}
-
-func (d *DeviceWOL) SetSubnet(subnet string) {
-	d.mutex.Lock()
-	d.subnet = net.ParseIP(subnet)
 	d.mutex.Unlock()
 }
