@@ -217,7 +217,7 @@ func (c *Component) AddRoute(topic string, callback mqtt.MessageHandler) {
 	}
 	c.mutex.RUnlock()
 
-	c.Client().AddRoute(topic, c.wrapCallback(subscription.Callback))
+	c.Client().AddRoute(topic, c.wrapCallback(topic, subscription.QOS(), subscription.Callback))
 
 	c.mutex.Lock()
 	if e != nil {
@@ -260,7 +260,7 @@ func (c *Component) Subscribe(topic string, qos byte, callback mqtt.MessageHandl
 	}
 	c.mutex.RUnlock()
 
-	token := c.Client().Subscribe(topic, qos, c.wrapCallback(subscription.Callback))
+	token := c.Client().Subscribe(topic, qos, c.wrapCallback(topic, qos, subscription.Callback))
 	if token.Wait() && token.Error() != nil {
 		return token.Error()
 	}
@@ -309,12 +309,17 @@ func (c *Component) Subscriptions() []mqtt.Subscription {
 	return subscriptions
 }
 
-func (c *Component) wrapCallback(callback mqtt.MessageHandler) func(client m.Client, message m.Message) {
+func (c *Component) wrapCallback(topic string, qos byte, callback mqtt.MessageHandler) func(client m.Client, message m.Message) {
 	return func(client m.Client, message m.Message) {
-		span, ctx := tracing.StartSpanFromContext(context.Background(), c.Name(), message.Topic())
+		span, ctx := tracing.StartSpanFromContext(context.Background(), c.Name(), topic)
 		defer span.Finish()
 
-		span.LogFields(log.String("payload", string(message.Payload())))
+		span.LogFields(
+			log.String("topic", string(message.Topic())),
+			log.Int("qos", int(message.Qos())),
+			log.String("payload", string(message.Payload())),
+			log.Bool("retained", message.Retained()),
+		)
 
 		r := "0"
 		if message.Retained() {
@@ -322,8 +327,8 @@ func (c *Component) wrapCallback(callback mqtt.MessageHandler) func(client m.Cli
 		}
 
 		metricSubscribe.With(
-			"topic", message.Topic(),
-			"qos", strconv.Itoa(int(message.Qos())),
+			"topic", topic,
+			"qos", strconv.Itoa(int(qos)),
 			"retained", r,
 		).Inc()
 
