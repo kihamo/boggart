@@ -3,7 +3,6 @@ package devices
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -151,7 +150,7 @@ func (d *BroadlinkSP3SSocket) Power() (float64, error) {
 
 func (d *BroadlinkSP3SSocket) MQTTSubscribers() []mqtt.Subscriber {
 	mac := strings.Replace(d.provider.MAC().String(), ":", "-", -1)
-	topic := fmt.Sprintf("%s%s/set", SocketBroadlinkSP3SMQTTTopicPrefix, mac)
+	topic := SocketBroadlinkSP3SMQTTTopicPrefix + mac + "/set"
 
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(topic, 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {

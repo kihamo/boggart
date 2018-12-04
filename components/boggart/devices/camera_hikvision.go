@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"sync"
@@ -117,8 +118,33 @@ func (d *CameraHikVision) taskSerialNumber(ctx context.Context) (interface{}, er
 		return nil, err, false
 	}
 
-	topic := CameraMQTTTopicPrefix + strings.Replace(deviceInfo.SerialNumber, "/", "_", -1) + "/ptz/#"
-	d.mqtt.Subscribe(topic, 0, d.mqttCallback)
+	if len(ptzChannels) == 0 {
+		return nil, nil, true
+	}
+
+	if err := d.mqtt.Subscribe(d.generateMQTTTopic("ptz", "+", "move"), 0, d.callbackMQTTAbsolute); err != nil {
+		return nil, err, false
+	}
+
+	if err := d.mqtt.Subscribe(d.generateMQTTTopic("ptz", "+", "absolute"), 0, d.callbackMQTTAbsolute); err != nil {
+		return nil, err, false
+	}
+
+	if err := d.mqtt.Subscribe(d.generateMQTTTopic("ptz", "+", "continuous"), 0, d.callbackMQTTContinuous); err != nil {
+		return nil, err, false
+	}
+
+	if err := d.mqtt.Subscribe(d.generateMQTTTopic("ptz", "+", "relative"), 0, d.callbackMQTTRelative); err != nil {
+		return nil, err, false
+	}
+
+	if err := d.mqtt.Subscribe(d.generateMQTTTopic("ptz", "+", "preset"), 0, d.callbackMQTTPreset); err != nil {
+		return nil, err, false
+	}
+
+	if err := d.mqtt.Subscribe(d.generateMQTTTopic("ptz", "+", "momentary"), 0, d.callbackMQTTMomentary); err != nil {
+		return nil, err, false
+	}
 
 	return nil, nil, true
 }
@@ -142,29 +168,12 @@ func (d *CameraHikVision) taskPTZStatus(ctx context.Context) (interface{}, error
 			continue
 		}
 
-		status, err := d.isapi.PTZStatus(ctx, channel.Channel.ID)
-		if err != nil {
-			// TODO: log
+		if err := d.updateStatusByChannelId(ctx, id); err != nil {
+			log.Printf("failed updated status for %s device in channel %d", d.SerialNumber(), id)
 			continue
 		}
 
 		stop = false
-		topicPrefix := CameraMQTTTopicPrefix + d.SerialNumber() + "/ptz/" + strconv.FormatUint(channel.Channel.ID, 10) + "/status/"
-
-		if channel.Status == nil || channel.Status.AbsoluteHigh.Elevation != status.AbsoluteHigh.Elevation {
-			d.mqtt.Publish(topicPrefix+"elevation", 1, false, strconv.FormatInt(status.AbsoluteHigh.Elevation, 10))
-		}
-
-		if channel.Status == nil || channel.Status.AbsoluteHigh.Azimuth != status.AbsoluteHigh.Azimuth {
-			d.mqtt.Publish(topicPrefix+"azimuth", 1, false, strconv.FormatUint(status.AbsoluteHigh.Azimuth, 10))
-		}
-
-		if channel.Status == nil || channel.Status.AbsoluteHigh.AbsoluteZoom != status.AbsoluteHigh.AbsoluteZoom {
-			d.mqtt.Publish(topicPrefix+"zoom", 1, false, strconv.FormatUint(status.AbsoluteHigh.AbsoluteZoom, 10))
-		}
-
-		channel.Status = &status
-		d.ptzChannels[id] = channel
 	}
 
 	return nil, nil, stop
@@ -209,131 +218,274 @@ func (d *CameraHikVision) startAlertStreaming() error {
 	return nil
 }
 
-func (d *CameraHikVision) mqttCallback(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-	if !d.IsEnabled() || d.ptzChannels == nil || len(d.ptzChannels) == 0 {
-		return
+func (d *CameraHikVision) updateStatusByChannelId(ctx context.Context, channelId uint64) error {
+	channel, ok := d.ptzChannels[channelId]
+	if !ok {
+		return fmt.Errorf("channel %d not found", channelId)
 	}
 
-	receivedChannelId := message.Topic()[len(CameraMQTTTopicPrefix+d.SerialNumber()+"/ptz/"):]
-	parts := strings.Split(receivedChannelId, "/")
-
-	if len(parts) < 2 {
-		return
-	}
-
-	var err error
-
-	channelId, err := strconv.ParseUint(parts[0], 10, 64)
+	status, err := d.isapi.PTZStatus(ctx, channelId)
 	if err != nil {
-		return
+		return err
+	}
+
+	if channel.Status == nil || channel.Status.AbsoluteHigh.Elevation != status.AbsoluteHigh.Elevation {
+		d.mqtt.Publish(d.generateMQTTTopic("ptz", "elevation"), 1, false, strconv.FormatInt(status.AbsoluteHigh.Elevation, 10))
+	}
+
+	if channel.Status == nil || channel.Status.AbsoluteHigh.Azimuth != status.AbsoluteHigh.Azimuth {
+		d.mqtt.Publish(d.generateMQTTTopic("ptz", "azimuth"), 1, false, strconv.FormatUint(status.AbsoluteHigh.Azimuth, 10))
+	}
+
+	if channel.Status == nil || channel.Status.AbsoluteHigh.AbsoluteZoom != status.AbsoluteHigh.AbsoluteZoom {
+		d.mqtt.Publish(d.generateMQTTTopic("ptz", "zoom"), 1, false, strconv.FormatUint(status.AbsoluteHigh.AbsoluteZoom, 10))
+	}
+
+	channel.Status = &status
+	d.ptzChannels[channelId] = channel
+
+	return nil
+}
+
+func (d *CameraHikVision) checkTopic(topic string) (uint64, error) {
+	if !d.IsEnabled() {
+		return 0, errors.New("device is disabled")
+	}
+
+	if d.ptzChannels == nil || len(d.ptzChannels) == 0 {
+		return 0, errors.New("channels is empty")
+	}
+
+	parts := mqtt.RouteSplit(topic)
+
+	channelId, err := strconv.ParseUint(parts[4], 10, 64)
+	if err != nil {
+		return 0, err
 	}
 
 	_, ok := d.ptzChannels[channelId]
 	if !ok {
+		return 0, fmt.Errorf("channel %d not found", channelId)
+	}
+
+	return channelId, nil
+}
+
+func (d *CameraHikVision) generateMQTTTopic(parts ...string) string {
+	return CameraMQTTTopicPrefix + strings.Replace(d.SerialNumber(), "/", "_", -1) + "/" + strings.Join(parts, "/")
+}
+
+func (d *CameraHikVision) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+	var err error
+	defer func() {
+		if err != nil {
+			log.Printf("Callback for device %s for topic %s with body %s failed with error %s",
+				d.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
+		}
+	}()
+
+	channelId, err := d.checkTopic(message.Topic())
+	if err != nil {
 		return
 	}
 
-	switch strings.ToLower(parts[1]) {
-	case "move":
-		switch string(message.Payload()) {
-		case "stop":
-			err = d.move(ctx, channelId, 0, 0, 0, 0)
-		case "right":
-			err = d.move(ctx, channelId, 1, 0, 0, 0)
-		case "left":
-			err = d.move(ctx, channelId, -1, 0, 0, 0)
-		case "up":
-			err = d.move(ctx, channelId, 0, 1, 0, 0)
-		case "up-right":
-			err = d.move(ctx, channelId, 1, 1, 0, 0)
-		case "up-left":
-			err = d.move(ctx, channelId, -1, 1, 0, 0)
-		case "down":
-			err = d.move(ctx, channelId, 0, -1, 0, 0)
-		case "down-right":
-			err = d.move(ctx, channelId, 1, -1, 0, 0)
-		case "down-left":
-			err = d.move(ctx, channelId, -1, -1, 0, 0)
-		case "narrow":
-			err = d.move(ctx, channelId, 0, 0, 1, 0)
-		case "wide":
-			err = d.move(ctx, channelId, 0, 0, -1, 0)
-		}
-
-	case "preset":
-		presetId, err := strconv.ParseUint(string(message.Payload()), 10, 64)
-		if err == nil {
-			err = d.isapi.PTZPresetGoTo(ctx, channelId, presetId)
-		}
-
-	case "relative":
-		var request struct {
-			X    int64 `xml:"x,omitempty"`
-			Y    int64 `xml:"y,omitempty"`
-			Zoom int64 `xml:"zoom,omitempty"`
-		}
-
-		err = json.Unmarshal(message.Payload(), &request)
-		if err == nil {
-			err = d.isapi.PTZRelative(ctx, channelId, request.X, request.Y, request.Zoom)
-		}
-
-	case "absolute":
-		var request struct {
-			Elevation int64  `json:"elevation,omitempty"`
-			Azimuth   uint64 `json:"azimuth,omitempty"`
-			Zoom      uint64 `json:"zoom,omitempty"`
-		}
-
-		err = json.Unmarshal(message.Payload(), &request)
-		if err == nil {
-			err = d.isapi.PTZAbsolute(ctx, channelId, request.Elevation, request.Azimuth, request.Zoom)
-		}
-
-	case "continuous":
-		var request struct {
-			Pan  int64 `json:"pan,omitempty"`
-			Tilt int64 `json:"tilt,omitempty"`
-			Zoom int64 `json:"zoom,omitempty"`
-		}
-
-		err = json.Unmarshal(message.Payload(), &request)
-		if err == nil {
-			err = d.isapi.PTZContinuous(ctx, channelId, request.Pan, request.Tilt, request.Zoom)
-		}
-
-	case "momentary":
-		var request struct {
-			Pan      int64         `json:"pan,omitempty"`
-			Tilt     int64         `json:"tilt,omitempty"`
-			Zoom     int64         `json:"zoom,omitempty"`
-			Duration time.Duration `json:"duration,omitempty"`
-		}
-
-		err = json.Unmarshal(message.Payload(), &request)
-		if err == nil {
-			duration := time.Duration(request.Duration) * time.Millisecond
-			err = d.isapi.PTZMomentary(ctx, channelId, request.Pan, request.Tilt, request.Zoom, duration)
-		}
+	var request struct {
+		Elevation int64  `json:"elevation,omitempty"`
+		Azimuth   uint64 `json:"azimuth,omitempty"`
+		Zoom      uint64 `json:"zoom,omitempty"`
 	}
 
-	if err == nil {
-		_, err = d.Tasks()[1].Run(ctx)
-	}
-
+	err = json.Unmarshal(message.Payload(), &request)
 	if err != nil {
-		fmt.Println(err.Error(), parts, string(message.Payload()))
+		return
 	}
+
+	err = d.isapi.PTZAbsolute(ctx, channelId, request.Elevation, request.Azimuth, request.Zoom)
+	if err != nil {
+		return
+	}
+
+	err = d.updateStatusByChannelId(ctx, channelId)
 }
 
-func (d *CameraHikVision) move(ctx context.Context, channelId uint64, panDirection, tiltDirection, zoomDirection int64, duration time.Duration) error {
-	pan := panDirection
-	tilt := tiltDirection
-	zoom := zoomDirection
+func (d *CameraHikVision) callbackMQTTContinuous(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+	var err error
+	defer func() {
+		if err != nil {
+			log.Printf("Callback for device %s for topic %s with body %s failed with error %s",
+				d.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
+		}
+	}()
 
-	if duration > 0 {
-		return d.isapi.PTZMomentary(ctx, channelId, pan, tilt, zoom, duration)
+	channelId, err := d.checkTopic(message.Topic())
+	if err != nil {
+		return
 	}
 
-	return d.isapi.PTZContinuous(ctx, channelId, pan, tilt, zoom)
+	var request struct {
+		Pan  int64 `json:"pan,omitempty"`
+		Tilt int64 `json:"tilt,omitempty"`
+		Zoom int64 `json:"zoom,omitempty"`
+	}
+
+	err = json.Unmarshal(message.Payload(), &request)
+	if err != nil {
+		return
+	}
+
+	err = d.isapi.PTZContinuous(ctx, channelId, request.Pan, request.Tilt, request.Zoom)
+	if err != nil {
+		return
+	}
+
+	err = d.updateStatusByChannelId(ctx, channelId)
+}
+
+func (d *CameraHikVision) callbackMQTTRelative(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+	var err error
+	defer func() {
+		if err != nil {
+			log.Printf("Callback for device %s for topic %s with body %s failed with error %s",
+				d.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
+		}
+	}()
+
+	channelId, err := d.checkTopic(message.Topic())
+	if err != nil {
+		return
+	}
+
+	var request struct {
+		X    int64 `xml:"x,omitempty"`
+		Y    int64 `xml:"y,omitempty"`
+		Zoom int64 `xml:"zoom,omitempty"`
+	}
+
+	err = json.Unmarshal(message.Payload(), &request)
+	if err != nil {
+		return
+	}
+
+	err = d.isapi.PTZRelative(ctx, channelId, request.X, request.Y, request.Zoom)
+	if err != nil {
+		return
+	}
+
+	err = d.updateStatusByChannelId(ctx, channelId)
+}
+
+func (d *CameraHikVision) callbackMQTTPreset(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+	var err error
+	defer func() {
+		if err != nil {
+			log.Printf("Callback for device %s for topic %s with body %s failed with error %s",
+				d.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
+		}
+	}()
+
+	channelId, err := d.checkTopic(message.Topic())
+	if err != nil {
+		return
+	}
+
+	presetId, err := strconv.ParseUint(string(message.Payload()), 10, 64)
+	if err != nil {
+		return
+	}
+
+	err = d.isapi.PTZPresetGoTo(ctx, channelId, presetId)
+	if err != nil {
+		return
+	}
+
+	err = d.updateStatusByChannelId(ctx, channelId)
+}
+
+func (d *CameraHikVision) callbackMQTTMomentary(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+	var err error
+	defer func() {
+		if err != nil {
+			log.Printf("Callback for device %s for topic %s with body %s failed with error %s",
+				d.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
+		}
+	}()
+
+	channelId, err := d.checkTopic(message.Topic())
+	if err != nil {
+		return
+	}
+
+	var request struct {
+		Pan      int64         `json:"pan,omitempty"`
+		Tilt     int64         `json:"tilt,omitempty"`
+		Zoom     int64         `json:"zoom,omitempty"`
+		Duration time.Duration `json:"duration,omitempty"`
+	}
+
+	err = json.Unmarshal(message.Payload(), &request)
+	if err != nil {
+		return
+	}
+
+	duration := time.Duration(request.Duration) * time.Millisecond
+	err = d.isapi.PTZMomentary(ctx, channelId, request.Pan, request.Tilt, request.Zoom, duration)
+	if err != nil {
+		return
+	}
+
+	err = d.updateStatusByChannelId(ctx, channelId)
+}
+
+func (d *CameraHikVision) callbackMQTTMove(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+	var err error
+	defer func() {
+		if err != nil {
+			log.Printf("Callback for device %s for topic %s with body %s failed with error %s",
+				d.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
+		}
+	}()
+
+	channelId, err := d.checkTopic(message.Topic())
+	if err != nil {
+		return
+	}
+
+	var pan, tilt, zoom int64
+
+	switch string(message.Payload()) {
+	case "right":
+		pan = 1
+	case "left":
+		pan = -1
+	case "up":
+		tilt = 1
+	case "up-right":
+		pan = 1
+		tilt = 1
+	case "up-left":
+		pan = -1
+		tilt = 1
+	case "down":
+		tilt = -1
+	case "down-right":
+		pan = 1
+		tilt = -1
+	case "down-left":
+		pan = -1
+		tilt = -1
+	case "narrow":
+		zoom = 1
+	case "wide":
+		zoom = -1
+	case "stop":
+	default:
+		err = fmt.Errorf("unknown operation %s", string(message.Payload()))
+	}
+
+	err = d.isapi.PTZContinuous(ctx, channelId, pan, tilt, zoom)
+	if err != nil {
+		return
+	}
+
+	err = d.updateStatusByChannelId(ctx, channelId)
 }

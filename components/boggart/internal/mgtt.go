@@ -17,7 +17,7 @@ func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 	}
 
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber("owntracks/#", 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+		mqtt.NewSubscriber("owntracks/+/+", 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
 			var payload map[string]interface{}
 
 			err := json.Unmarshal(message.Payload(), &payload)
