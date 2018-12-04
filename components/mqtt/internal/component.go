@@ -3,10 +3,8 @@ package internal
 import (
 	"container/list"
 	"context"
-	"crypto/md5"
 	"errors"
 	"fmt"
-	"io"
 	"net/url"
 	"strconv"
 	"strings"
@@ -97,23 +95,29 @@ func (c *Component) initClient() error {
 	ticker := time.NewTicker(duration)
 	defer ticker.Stop()
 
-	for ; true; <-ticker.C {
-		opts := m.NewClientOptions()
-		opts.Username = c.config.String(mqtt.ConfigUsername)
-		opts.Password = c.config.String(mqtt.ConfigPassword)
-		opts.ConnectTimeout = c.config.Duration(mqtt.ConfigConnectionTimeout)
+	opts := m.NewClientOptions()
+	opts.Username = c.config.String(mqtt.ConfigUsername)
+	opts.Password = c.config.String(mqtt.ConfigPassword)
+	opts.ConnectTimeout = c.config.Duration(mqtt.ConfigConnectionTimeout)
+	opts.CleanSession = true
+	opts.OnConnectionLost = func(client m.Client, reason error) {
+		c.logger.Warn("Connection lost", "error", reason.Error())
+	}
 
-		opts.Servers = make([]*url.URL, 0)
-		for _, u := range strings.Split(c.config.String(mqtt.ConfigServers), ";") {
-			if p, err := url.Parse(u); err == nil {
-				opts.Servers = append(opts.Servers, p)
-			}
+	opts.Servers = make([]*url.URL, 0)
+	for _, u := range strings.Split(c.config.String(mqtt.ConfigServers), ";") {
+		if p, err := url.Parse(u); err == nil {
+			opts.Servers = append(opts.Servers, p)
 		}
+	}
 
-		h := md5.New()
-		io.WriteString(h, time.Now().Format(time.RFC3339Nano))
-		opts.ClientID = fmt.Sprintf("%x\n", h.Sum(nil))
+	name := c.application.Name()
+	if len(name) > 10 {
+		name = name[0:9]
+	}
+	opts.ClientID = fmt.Sprintf("%s_v%d", name, c.application.BuildDate().Unix())
 
+	for ; true; <-ticker.C {
 		client := m.NewClient(opts)
 		token := client.Connect()
 
