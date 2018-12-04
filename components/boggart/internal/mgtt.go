@@ -4,12 +4,17 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/mmcloughlin/geohash"
 )
 
 func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 	<-c.application.ReadyComponent(c.Name())
+
+	if !c.config.Bool(boggart.ConfigOwnTracksEnabled) {
+		return nil
+	}
 
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber("owntracks/#", 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {

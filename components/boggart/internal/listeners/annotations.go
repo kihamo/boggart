@@ -13,16 +13,18 @@ import (
 type AnnotationsListener struct {
 	listener.BaseListener
 
-	annotations    annotations.Component
-	startDate      *time.Time
-	devicesManager boggart.DevicesManager
+	annotations     annotations.Component
+	startDate       *time.Time
+	applicationName string
+	devicesManager  boggart.DevicesManager
 }
 
-func NewAnnotationsListener(annotations annotations.Component, startDate *time.Time, devicesManager boggart.DevicesManager) *AnnotationsListener {
+func NewAnnotationsListener(annotations annotations.Component, applicationName string, startDate *time.Time, devicesManager boggart.DevicesManager) *AnnotationsListener {
 	t := &AnnotationsListener{
-		annotations:    annotations,
-		startDate:      startDate,
-		devicesManager: devicesManager,
+		annotations:     annotations,
+		applicationName: applicationName,
+		startDate:       startDate,
+		devicesManager:  devicesManager,
 	}
 	t.Init()
 
@@ -55,6 +57,7 @@ func (l *AnnotationsListener) Run(_ context.Context, event workers.Event, t time
 		if event == boggart.DeviceEventDeviceDisabled {
 			tags = append(tags, "manually")
 		}
+		tags = append(tags, l.applicationName)
 
 		l.annotations.CreateInStorages(
 			annotations.NewAnnotation("Device is disabled", device.Description(), tags, &t, nil),
@@ -62,7 +65,7 @@ func (l *AnnotationsListener) Run(_ context.Context, event workers.Event, t time
 
 	case boggart.DeviceEventDevicesManagerReady:
 		l.annotations.CreateInStorages(
-			annotations.NewAnnotation("System is ready", "", []string{"system"}, &t, nil),
+			annotations.NewAnnotation("System is ready", "", []string{"system", l.applicationName}, &t, nil),
 			[]string{annotations.StorageGrafana})
 	}
 }

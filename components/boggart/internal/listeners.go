@@ -43,6 +43,7 @@ func (c *Component) initListeners() {
 	if c.application.HasComponent(annotations.ComponentName) {
 		c.listenersManager.AddListener(listeners.NewAnnotationsListener(
 			c.application.GetComponent(annotations.ComponentName).(annotations.Component),
+			c.application.Name(),
 			c.application.StartDate(),
 			c.devicesManager))
 	}

@@ -35,9 +35,6 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithUsage("Serial port timeout").
 			WithGroup("RS485 protocol").
 			WithDefault(rs485.DefaultTimeout),
-		config.NewVariable(boggart.ConfigGPIOEnabled, config.ValueTypeBool).
-			WithUsage("Enabled").
-			WithGroup("GPIO"),
 		config.NewVariable(boggart.ConfigGPIOPins, config.ValueTypeString).
 			WithUsage("Pins listener").
 			WithGroup("GPIO"),
@@ -49,9 +46,6 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithUsage("Repeat interval").
 			WithGroup("Cameras").
 			WithDefault(time.Minute),
-		config.NewVariable(boggart.ConfigMercuryEnabled, config.ValueTypeBool).
-			WithUsage("Enabled").
-			WithGroup("Mercury devices"),
 		config.NewVariable(boggart.ConfigMercuryRepeatInterval, config.ValueTypeDuration).
 			WithUsage("Repeat interval").
 			WithGroup("Mercury devices").

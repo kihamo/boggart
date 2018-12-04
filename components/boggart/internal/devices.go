@@ -24,9 +24,14 @@ import (
 )
 
 func (c *Component) initCameras() {
+	addresses := c.config.String(boggart.ConfigCameraHikVisionAddresses)
+	if addresses == "" {
+		return
+	}
+
 	m := c.application.GetComponent(mqtt.ComponentName).(mqtt.Component)
 
-	for _, address := range strings.Split(c.config.String(boggart.ConfigCameraHikVisionAddresses), ",") {
+	for _, address := range strings.Split(addresses, ",") {
 		address = strings.TrimSpace(address)
 		if address == "" {
 			c.logger.Warn("Camera address is empty")
@@ -84,7 +89,12 @@ func (c *Component) initPhones() {
 }
 
 func (c *Component) initRouters() {
-	for _, address := range strings.Split(c.config.String(boggart.ConfigMikrotikAddresses), ",") {
+	addresses := c.config.String(boggart.ConfigMikrotikAddresses)
+	if addresses == "" {
+		return
+	}
+
+	for _, address := range strings.Split(addresses, ",") {
 		address = strings.TrimSpace(address)
 		if address == "" {
 			c.logger.Warn("Mikrotik address is empty")
@@ -118,13 +128,12 @@ func (c *Component) initRouters() {
 }
 
 func (c *Component) initElectricityMeters() {
-	if !c.config.Bool(boggart.ConfigMercuryEnabled) {
+	address := c.config.String(boggart.ConfigMercuryDeviceAddress)
+	if address == "" {
 		return
 	}
 
-	provider := mercury.NewElectricityMeter200(
-		mercury.ConvertSerialNumber(c.config.String(boggart.ConfigMercuryDeviceAddress)),
-		c.RS485())
+	provider := mercury.NewElectricityMeter200(mercury.ConvertSerialNumber(address), c.RS485())
 
 	device := devices.NewMercury200ElectricityMeter(
 		c.config.String(boggart.ConfigMercuryDeviceAddress),
@@ -135,13 +144,12 @@ func (c *Component) initElectricityMeters() {
 }
 
 func (c *Component) initGPIO() {
-	if !c.config.Bool(boggart.ConfigGPIOEnabled) {
+	addresses := c.config.String(boggart.ConfigGPIOPins)
+	if addresses == "" {
 		return
 	}
 
-	pins := strings.Split(c.config.String(boggart.ConfigGPIOPins), ",")
-
-	for _, pin := range pins {
+	for _, pin := range strings.Split(addresses, ",") {
 		opts := strings.Split(pin, ":")
 
 		number, err := strconv.ParseUint(opts[0], 10, 64)
@@ -171,12 +179,6 @@ func (c *Component) initGPIO() {
 
 		if len(opts) > 2 {
 			device.SetDescription(opts[2])
-		}
-
-		if c.config.Bool(boggart.ConfigGPIOEnabled) {
-			device.Enable()
-		} else {
-			device.Disable()
 		}
 
 		c.devicesManager.RegisterWithID(fmt.Sprintf("pin.%d", number), device)
@@ -263,8 +265,8 @@ func (c *Component) initSensor() {
 }
 
 func (c *Component) initSockets() {
-	addresses := strings.Split(c.config.String(boggart.ConfigSocketsBroadlink), ",")
-	if len(addresses) == 0 {
+	addresses := c.config.String(boggart.ConfigSocketsBroadlink)
+	if addresses == "" {
 		return
 	}
 
@@ -274,7 +276,7 @@ func (c *Component) initSockets() {
 		return
 	}
 
-	for _, address := range addresses {
+	for _, address := range strings.Split(addresses, ",") {
 		address = strings.TrimSpace(address)
 		if address == "" {
 			c.logger.Warn("Socket address of Broadlink is empty")
