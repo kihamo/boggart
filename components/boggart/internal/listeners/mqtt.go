@@ -155,9 +155,9 @@ func (l *MQTTListener) Run(_ context.Context, event workers.Event, t time.Time, 
 
 	case boggart.DeviceEventGPIOPinChanged:
 		if args[2].(bool) {
-			l.publish(fmt.Sprintf("gpio/%d", args[1]), true, ValueOn)
+			l.publishWithQOS(fmt.Sprintf("gpio/%d", args[1]), 2, true, ValueOn)
 		} else {
-			l.publish(fmt.Sprintf("gpio/%d", args[1]), true, ValueOff)
+			l.publishWithQOS(fmt.Sprintf("gpio/%d", args[1]), 2, true, ValueOff)
 		}
 
 	case boggart.DeviceEventDS18B20Changed:
@@ -181,7 +181,7 @@ func (l *MQTTListener) Name() string {
 	return boggart.ComponentName + ".mqtt"
 }
 
-func (l *MQTTListener) publish(topic string, retained bool, payload interface{}) {
+func (l *MQTTListener) publishWithQOS(topic string, qos byte, retained bool, payload interface{}) {
 	switch value := payload.(type) {
 	case float64:
 		payload = fmt.Sprintf("%.2f", value)
@@ -189,7 +189,11 @@ func (l *MQTTListener) publish(topic string, retained bool, payload interface{})
 		payload = fmt.Sprintf("%d", value)
 	}
 
-	l.client.Publish(TopicPrefix+topic, 0, retained, payload)
+	l.client.Publish(TopicPrefix+topic, qos, retained, payload)
+}
+
+func (l *MQTTListener) publish(topic string, retained bool, payload interface{}) {
+	l.publishWithQOS(topic, 0, retained, payload)
 }
 
 func (l *MQTTListener) macAddress(address string) string {
