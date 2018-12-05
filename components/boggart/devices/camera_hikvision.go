@@ -229,16 +229,18 @@ func (d *CameraHikVision) updateStatusByChannelId(ctx context.Context, channelId
 		return err
 	}
 
+	channelAsString := strconv.FormatUint(channelId, 10)
+
 	if channel.Status == nil || channel.Status.AbsoluteHigh.Elevation != status.AbsoluteHigh.Elevation {
-		d.mqtt.Publish(d.generateMQTTTopic("ptz", "elevation"), 1, false, strconv.FormatInt(status.AbsoluteHigh.Elevation, 10))
+		d.mqtt.Publish(d.generateMQTTTopic("ptz", channelAsString, "status", "elevation", ), 1, false, strconv.FormatInt(status.AbsoluteHigh.Elevation, 10))
 	}
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.Azimuth != status.AbsoluteHigh.Azimuth {
-		d.mqtt.Publish(d.generateMQTTTopic("ptz", "azimuth"), 1, false, strconv.FormatUint(status.AbsoluteHigh.Azimuth, 10))
+		d.mqtt.Publish(d.generateMQTTTopic("ptz", channelAsString, "status", "azimuth"), 1, false, strconv.FormatUint(status.AbsoluteHigh.Azimuth, 10))
 	}
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.AbsoluteZoom != status.AbsoluteHigh.AbsoluteZoom {
-		d.mqtt.Publish(d.generateMQTTTopic("ptz", "zoom"), 1, false, strconv.FormatUint(status.AbsoluteHigh.AbsoluteZoom, 10))
+		d.mqtt.Publish(d.generateMQTTTopic("ptz", channelAsString, "status", "zoom"), 1, false, strconv.FormatUint(status.AbsoluteHigh.AbsoluteZoom, 10))
 	}
 
 	channel.Status = &status
