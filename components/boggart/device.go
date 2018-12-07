@@ -75,6 +75,7 @@ type DevicesManager interface {
 }
 
 type DeviceTriggerEvent interface {
+	Context() context.Context
 	Event() workers.Event
 	Arguments() []interface{}
 }

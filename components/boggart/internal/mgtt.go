@@ -41,7 +41,7 @@ func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 			}
 
 			hash := geohash.Encode(lat.(float64), lon.(float64))
-			client.Publish(message.Topic()+"/geohash", message.Qos(), message.Retained(), hash)
+			client.Publish(ctx, message.Topic()+"/geohash", message.Qos(), message.Retained(), hash)
 		}),
 	}
 }

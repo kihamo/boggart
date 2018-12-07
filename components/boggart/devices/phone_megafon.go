@@ -104,7 +104,7 @@ func (d *MegafonPhone) taskUpdater(ctx context.Context) (interface{}, error) {
 
 	if balance != metricBalance.Value() {
 		metricBalance.Set(balance)
-		d.TriggerEvent(boggart.DeviceEventMegafonBalanceChanged, float64(value), number)
+		d.TriggerEvent(ctx, boggart.DeviceEventMegafonBalanceChanged, float64(value), number)
 	}
 
 	remainders, err := d.provider.Remainders(ctx)

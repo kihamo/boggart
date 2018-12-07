@@ -4,6 +4,8 @@ import:
   version: 9181e3a86a19bacd63e68d43ae8b7b36320d8092
 - package: github.com/kihamo/shadow
   version: d7095fbc53d3306745badb53b7df57dca05a914a
+- package: github.com/kihamo/go-workers
+  version: 5fbca9be0fd9cd11bb6aa398d071d0f6f7fd287c
 - package: github.com/goburrow/serial
   version: 5efbe925ecf714f8ba147bf2226f2e7afc7111bc
 - package: gopkg.in/routeros.v2

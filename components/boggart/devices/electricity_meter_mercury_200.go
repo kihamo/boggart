@@ -198,7 +198,7 @@ func (d *Mercury200ElectricityMeter) taskUpdater(ctx context.Context) (interface
 		d.lastValues = currentValues
 		d.mutex.Unlock()
 
-		d.TriggerEvent(boggart.DeviceEventMercury200Changed, currentValues, serialNumber)
+		d.TriggerEvent(ctx, boggart.DeviceEventMercury200Changed, currentValues, serialNumber)
 	} else {
 		d.mutex.Unlock()
 	}

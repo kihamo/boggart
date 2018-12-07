@@ -100,9 +100,10 @@ func (d *GPIOPin) Read() bool {
 func (d *GPIOPin) waitForEdge() {
 	p := d.pin.(gpio.PinIn)
 	p.In(gpio.PullNoChange, gpio.BothEdges)
+	ctx := context.Background()
 
 	for p.WaitForEdge(-1) {
-		d.TriggerEvent(boggart.DeviceEventGPIOPinChanged, d.pin.Number(), d.Read())
+		d.TriggerEvent(ctx, boggart.DeviceEventGPIOPinChanged, d.pin.Number(), d.Read())
 	}
 }
 

@@ -186,7 +186,17 @@ func (c *Component) Client() m.Client {
 	return c.client
 }
 
-func (c *Component) Publish(topic string, qos byte, retained bool, payload interface{}) error {
+func (c *Component) Publish(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
+	span, _ := tracing.StartSpanFromContext(ctx, c.Name(), "mqtt_publish")
+	span = span.SetTag("topic", topic)
+	defer span.Finish()
+
+	span.LogFields(
+		log.Int("qos", int(qos)),
+		log.String("payload", fmt.Sprintf("%v", payload)),
+		log.Bool("retained", retained),
+	)
+
 	r := "0"
 	if retained {
 		r = "1"
@@ -201,7 +211,13 @@ func (c *Component) Publish(topic string, qos byte, retained bool, payload inter
 	token := c.Client().Publish(topic, qos, retained, payload)
 	token.Wait()
 
-	return token.Error()
+	err := token.Error()
+
+	if err != nil {
+		tracing.SpanError(span, err)
+	}
+
+	return err
 }
 
 func (c *Component) AddRoute(topic string, callback mqtt.MessageHandler) {
@@ -311,11 +327,11 @@ func (c *Component) Subscriptions() []mqtt.Subscription {
 
 func (c *Component) wrapCallback(topic string, qos byte, callback mqtt.MessageHandler) func(client m.Client, message m.Message) {
 	return func(client m.Client, message m.Message) {
-		span, ctx := tracing.StartSpanFromContext(context.Background(), c.Name(), topic)
+		span, ctx := tracing.StartSpanFromContext(context.Background(), c.Name(), "mqtt_callback")
+		span = span.SetTag("topic", message.Topic())
 		defer span.Finish()
 
 		span.LogFields(
-			log.String("topic", string(message.Topic())),
 			log.Int("qos", int(message.Qos())),
 			log.String("payload", string(message.Payload())),
 			log.Bool("retained", message.Retained()),

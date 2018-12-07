@@ -95,7 +95,7 @@ func (d *BroadlinkSP3SSocket) taskUpdater(ctx context.Context) (interface{}, err
 
 	last := atomic.LoadInt64(&d.state)
 	if last == 0 || (last == 1) != state {
-		d.TriggerEvent(boggart.DeviceEventSocketStateChanged, state, serialNumber)
+		d.TriggerEvent(ctx, boggart.DeviceEventSocketStateChanged, state, serialNumber)
 
 		if state {
 			atomic.StoreInt64(&d.state, 1)
@@ -116,7 +116,7 @@ func (d *BroadlinkSP3SSocket) taskUpdater(ctx context.Context) (interface{}, err
 
 	if current != prev {
 		atomic.StoreInt64(&d.lastValue, current)
-		d.TriggerEvent(boggart.DeviceEventSocketPowerChanged, value, serialNumber)
+		d.TriggerEvent(ctx, boggart.DeviceEventSocketPowerChanged, value, serialNumber)
 	}
 
 	return nil, nil
@@ -126,19 +126,19 @@ func (d *BroadlinkSP3SSocket) State() (bool, error) {
 	return d.provider.State()
 }
 
-func (d *BroadlinkSP3SSocket) On() error {
+func (d *BroadlinkSP3SSocket) On(ctx context.Context) error {
 	err := d.provider.On()
 	if err == nil {
-		d.taskUpdater(context.Background())
+		d.taskUpdater(ctx)
 	}
 
 	return err
 }
 
-func (d *BroadlinkSP3SSocket) Off() error {
+func (d *BroadlinkSP3SSocket) Off(ctx context.Context) error {
 	err := d.provider.Off()
 	if err == nil {
-		d.taskUpdater(context.Background())
+		d.taskUpdater(ctx)
 	}
 
 	return err
@@ -167,10 +167,10 @@ func (d *BroadlinkSP3SSocket) MQTTSubscribers() []mqtt.Subscriber {
 			var err error
 
 			if bytes.Equal(message.Payload(), []byte(`1`)) {
-				err = d.On()
+				err = d.On(ctx)
 				span.LogFields(log.String("state", "on"))
 			} else {
-				err = d.Off()
+				err = d.Off(ctx)
 				span.LogFields(log.String("state", "off"))
 			}
 

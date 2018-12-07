@@ -60,7 +60,7 @@ func (m *DevicesManager) Register(device boggart.Device) string {
 
 func (m *DevicesManager) RegisterWithID(id string, device boggart.Device) {
 	m.storage.Store(id, device)
-	m.listeners.AsyncTrigger(boggart.DeviceEventDeviceRegister, device, id)
+	m.listeners.AsyncTrigger(context.TODO(), boggart.DeviceEventDeviceRegister, device, id)
 
 	if subs, ok := device.(boggart.DeviceHasMQTTSubscribers); ok {
 		m.mqtt.SubscribeSubscribers(subs.MQTTSubscribers())
@@ -161,7 +161,7 @@ func (m *DevicesManager) Collect(ch chan<- snitch.Metric) {
 func (m *DevicesManager) Ready() {
 	if !m.IsReady() {
 		atomic.StoreInt64(&m.ready, devicesManagerReady)
-		m.listeners.AsyncTrigger(boggart.DeviceEventDevicesManagerReady)
+		m.listeners.AsyncTrigger(context.TODO(), boggart.DeviceEventDevicesManagerReady)
 
 		// TODO: запускать рутину автоматического опроса только после завершения инициализации
 	}
@@ -216,7 +216,7 @@ func (m *DevicesManager) doCheck() {
 
 func (m *DevicesManager) doDeviceEvents(ch <-chan boggart.DeviceTriggerEvent) {
 	for event := range ch {
-		m.listeners.AsyncTrigger(event.Event(), event.Arguments()...)
+		m.listeners.AsyncTrigger(event.Context(), event.Event(), event.Arguments()...)
 	}
 }
 
@@ -225,7 +225,7 @@ func (m *DevicesManager) checker(key string, device boggart.Device) {
 	timeout := m.timeoutChecker
 	m.mutex.RUnlock()
 
-	ctx, ctxCancel := context.WithTimeout(context.Background(), timeout)
+	ctx, ctxCancel := context.WithTimeout(context.TODO(), timeout)
 	defer ctxCancel()
 
 	done := make(chan bool, 1)
@@ -242,7 +242,7 @@ func (m *DevicesManager) checker(key string, device boggart.Device) {
 
 		if ctx.Err() != nil && ctx.Err() != context.Canceled {
 			if err := device.Disable(); err == nil {
-				m.listeners.AsyncTrigger(boggart.DeviceEventDeviceDisabledAfterCheck, device, key, ctx.Err())
+				m.listeners.AsyncTrigger(ctx, boggart.DeviceEventDeviceDisabledAfterCheck, device, key, ctx.Err())
 			}
 		}
 
@@ -255,11 +255,11 @@ func (m *DevicesManager) checker(key string, device boggart.Device) {
 
 		if !result {
 			if err := device.Disable(); err == nil {
-				m.listeners.AsyncTrigger(boggart.DeviceEventDeviceDisabledAfterCheck, device, key, nil)
+				m.listeners.AsyncTrigger(ctx, boggart.DeviceEventDeviceDisabledAfterCheck, device, key, nil)
 			}
 		} else {
 			if err := device.Enable(); err == nil {
-				m.listeners.AsyncTrigger(boggart.DeviceEventDeviceEnabledAfterCheck, device, key)
+				m.listeners.AsyncTrigger(ctx, boggart.DeviceEventDeviceEnabledAfterCheck, device, key)
 			}
 		}
 
