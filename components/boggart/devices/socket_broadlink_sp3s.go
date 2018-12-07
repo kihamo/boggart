@@ -95,13 +95,13 @@ func (d *BroadlinkSP3SSocket) taskUpdater(ctx context.Context) (interface{}, err
 
 	last := atomic.LoadInt64(&d.state)
 	if last == 0 || (last == 1) != state {
-		d.TriggerEvent(ctx, boggart.DeviceEventSocketStateChanged, state, serialNumber)
-
 		if state {
 			atomic.StoreInt64(&d.state, 1)
 		} else {
 			atomic.StoreInt64(&d.state, -1)
 		}
+
+		d.TriggerEvent(ctx, boggart.DeviceEventSocketStateChanged, state, serialNumber)
 	}
 
 	value, err := d.Power()
