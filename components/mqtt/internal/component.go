@@ -23,6 +23,8 @@ import (
 )
 
 type Component struct {
+	lostConnections uint64
+
 	application shadow.Application
 	components  []shadow.Component
 	config      config.Component
@@ -32,7 +34,6 @@ type Component struct {
 	routes          []dashboard.Route
 	client          m.Client
 	subscriptions   *list.List
-	lostConnections uint64
 }
 
 func (c *Component) Name() string {
