@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	m "github.com/eclipse/paho.mqtt.golang"
@@ -27,10 +28,11 @@ type Component struct {
 	config      config.Component
 	logger      logging.Logger
 
-	mutex         sync.RWMutex
-	routes        []dashboard.Route
-	client        m.Client
-	subscriptions *list.List
+	mutex           sync.RWMutex
+	routes          []dashboard.Route
+	client          m.Client
+	subscriptions   *list.List
+	lostConnections uint64
 }
 
 func (c *Component) Name() string {
@@ -100,8 +102,27 @@ func (c *Component) initClient() error {
 	opts.Password = c.config.String(mqtt.ConfigPassword)
 	opts.ConnectTimeout = c.config.Duration(mqtt.ConfigConnectionTimeout)
 	opts.CleanSession = true
+	opts.OnConnect = func(client m.Client) {
+		if atomic.LoadUint64(&c.lostConnections) == 0 {
+			return
+		}
+
+		for _, sub := range c.Subscriptions() {
+			topic := sub.Topic()
+			qos := sub.QOS()
+
+			token := client.Subscribe(topic, sub.QOS(), c.wrapCallback(sub.Topic(), qos, sub.Callback))
+			token.Wait()
+			if err := token.Error(); err != nil {
+				c.logger.Error("Resubscribe failed", "topic", topic, "qos", qos, "error", err.Error())
+			} else {
+				c.logger.Debug("Resubscribe", "topic", topic, "qos", qos)
+			}
+		}
+	}
 	opts.OnConnectionLost = func(client m.Client, reason error) {
-		c.logger.Warn("Connection lost", "error", reason.Error())
+		atomic.AddUint64(&c.lostConnections, 1)
+		c.logger.Error("Connection lost", "error", reason.Error(), "count", atomic.LoadUint64(&c.lostConnections))
 	}
 
 	opts.Servers = make([]*url.URL, 0)

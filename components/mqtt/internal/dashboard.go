@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/elazarl/go-bindata-assetfs"
@@ -33,4 +34,16 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 	}
 
 	return c.routes
+}
+
+func (c *Component) LivenessCheck() map[string]dashboard.HealthCheck {
+	return map[string]dashboard.HealthCheck{
+		c.Name() + "_client_is_connect": func() error {
+			if c.Client().IsConnectionOpen() {
+				return nil
+			}
+
+			return errors.New("connection is closed")
+		},
+	}
 }
