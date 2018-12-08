@@ -71,9 +71,10 @@ md5sum boggart
 ```
 sudo cp -f /home/cleaner/boggart.env /etc/default/boggart-roborock
 sudo cp -f /home/cleaner/boggart.service /etc/init.d/boggart-roborock && sudo chmod +x /etc/init.d/boggart-roborock
+sudo cp -f /home/cleaner/boggart.conf /etc/init/boggart-roborock.conf
 sudo cp -f /home/cleaner/boggart /usr/local/bin/boggart-roborock && sudo chmod +x /usr/local/bin/boggart-roborock
-sudo update-rc.d boggart-roborock defaults 90
-sudo update-rc.d boggart-roborock enable
+# sudo update-rc.d boggart-roborock defaults 90
+# sudo update-rc.d boggart-roborock enable
 sudo service boggart-roborock restart
 ```
 #### Update
