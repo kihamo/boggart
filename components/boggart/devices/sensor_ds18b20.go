@@ -73,7 +73,7 @@ func (d *DS18B20Sensor) taskUpdater(ctx context.Context) (interface{}, error) {
 
 	if prev != current {
 		atomic.StoreInt64(&d.lastValue, current)
-		d.TriggerEvent(boggart.DeviceEventDS18B20Changed, value, d.SerialNumber())
+		d.TriggerEvent(ctx, boggart.DeviceEventDS18B20Changed, value, d.SerialNumber())
 	}
 
 	return nil, nil

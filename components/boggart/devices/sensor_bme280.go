@@ -140,7 +140,7 @@ func (d *BME280Sensor) taskUpdater(ctx context.Context) (interface{}, error) {
 		d.lastValues = currentValues
 		d.mutex.Unlock()
 
-		d.TriggerEvent(boggart.DeviceEventBME280Changed, currentValues, serialNumber)
+		d.TriggerEvent(ctx, boggart.DeviceEventBME280Changed, currentValues, serialNumber)
 	} else {
 		d.mutex.Unlock()
 	}

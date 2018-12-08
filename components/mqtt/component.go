@@ -11,7 +11,7 @@ type Component interface {
 	shadow.Component
 
 	Client() m.Client
-	Publish(topic string, qos byte, retained bool, payload interface{}) error
+	Publish(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error
 	AddRoute(topic string, callback MessageHandler)
 	Unsubscribe(topic string) error
 	Subscribe(topic string, qos byte, callback MessageHandler) error

@@ -2,6 +2,7 @@ package internal
 
 import (
 	"bufio"
+	"context"
 	"os"
 	"regexp"
 	"sync"
@@ -59,7 +60,7 @@ func (c *Component) runtimeConfigWatcher(fileName string) error {
 
 		if !ok || prevValue != value {
 			cacheRuntimeConfig[key] = value
-			c.mqtt.Publish(roborock.MQTTTopicPrefix+"runtime/"+key, 0, false, value)
+			c.mqtt.Publish(context.Background(), roborock.MQTTTopicPrefix+"runtime/"+key, 0, false, value)
 
 			c.logger.Debug("Roborock runtime config " + key + " changed from " + prevValue + " to " + value)
 		}

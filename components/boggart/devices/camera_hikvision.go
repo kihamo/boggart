@@ -46,7 +46,7 @@ func NewCameraHikVision(isapi *hikvision.ISAPI, interval time.Duration, m mqtt.C
 		isapi:                 isapi,
 		interval:              interval,
 		alertStreamingHistory: make(map[string]time.Time),
-		mqtt:                  m,
+		mqtt: m,
 	}
 	device.Init()
 	device.SetDescription("HikVision camera")
@@ -203,7 +203,7 @@ func (d *CameraHikVision) startAlertStreaming() error {
 				d.mutex.Unlock()
 
 				if !ok || event.DateTime.Sub(lastFire) > CameraHikVisionIgnoreInterval {
-					d.TriggerEvent(boggart.DeviceEventHikvisionEventNotificationAlert, event, d.SerialNumber())
+					d.TriggerEvent(ctx, boggart.DeviceEventHikvisionEventNotificationAlert, event, d.SerialNumber())
 				}
 
 			case _ = <-stream.NextError():
@@ -229,16 +229,18 @@ func (d *CameraHikVision) updateStatusByChannelId(ctx context.Context, channelId
 		return err
 	}
 
+	channelAsString := strconv.FormatUint(channelId, 10)
+
 	if channel.Status == nil || channel.Status.AbsoluteHigh.Elevation != status.AbsoluteHigh.Elevation {
-		d.mqtt.Publish(d.generateMQTTTopic("ptz", "elevation"), 1, false, strconv.FormatInt(status.AbsoluteHigh.Elevation, 10))
+		d.mqtt.Publish(ctx, d.generateMQTTTopic("ptz", channelAsString, "status", "elevation"), 1, false, strconv.FormatInt(status.AbsoluteHigh.Elevation, 10))
 	}
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.Azimuth != status.AbsoluteHigh.Azimuth {
-		d.mqtt.Publish(d.generateMQTTTopic("ptz", "azimuth"), 1, false, strconv.FormatUint(status.AbsoluteHigh.Azimuth, 10))
+		d.mqtt.Publish(ctx, d.generateMQTTTopic("ptz", channelAsString, "status", "azimuth"), 1, false, strconv.FormatUint(status.AbsoluteHigh.Azimuth, 10))
 	}
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.AbsoluteZoom != status.AbsoluteHigh.AbsoluteZoom {
-		d.mqtt.Publish(d.generateMQTTTopic("ptz", "zoom"), 1, false, strconv.FormatUint(status.AbsoluteHigh.AbsoluteZoom, 10))
+		d.mqtt.Publish(ctx, d.generateMQTTTopic("ptz", channelAsString, "status", "zoom"), 1, false, strconv.FormatUint(status.AbsoluteHigh.AbsoluteZoom, 10))
 	}
 
 	channel.Status = &status

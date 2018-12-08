@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	m "github.com/eclipse/paho.mqtt.golang"
@@ -22,15 +23,17 @@ import (
 )
 
 type Component struct {
+	lostConnections uint64
+
 	application shadow.Application
 	components  []shadow.Component
 	config      config.Component
 	logger      logging.Logger
 
-	mutex         sync.RWMutex
-	routes        []dashboard.Route
-	client        m.Client
-	subscriptions *list.List
+	mutex           sync.RWMutex
+	routes          []dashboard.Route
+	client          m.Client
+	subscriptions   *list.List
 }
 
 func (c *Component) Name() string {
@@ -100,8 +103,27 @@ func (c *Component) initClient() error {
 	opts.Password = c.config.String(mqtt.ConfigPassword)
 	opts.ConnectTimeout = c.config.Duration(mqtt.ConfigConnectionTimeout)
 	opts.CleanSession = true
+	opts.OnConnect = func(client m.Client) {
+		if atomic.LoadUint64(&c.lostConnections) == 0 {
+			return
+		}
+
+		for _, sub := range c.Subscriptions() {
+			topic := sub.Topic()
+			qos := sub.QOS()
+
+			token := client.Subscribe(topic, sub.QOS(), c.wrapCallback(sub.Topic(), qos, sub.Callback))
+			token.Wait()
+			if err := token.Error(); err != nil {
+				c.logger.Error("Resubscribe failed", "topic", topic, "qos", qos, "error", err.Error())
+			} else {
+				c.logger.Debug("Resubscribe", "topic", topic, "qos", qos)
+			}
+		}
+	}
 	opts.OnConnectionLost = func(client m.Client, reason error) {
-		c.logger.Warn("Connection lost", "error", reason.Error())
+		atomic.AddUint64(&c.lostConnections, 1)
+		c.logger.Error("Connection lost", "error", reason.Error(), "count", atomic.LoadUint64(&c.lostConnections))
 	}
 
 	opts.Servers = make([]*url.URL, 0)
@@ -186,7 +208,17 @@ func (c *Component) Client() m.Client {
 	return c.client
 }
 
-func (c *Component) Publish(topic string, qos byte, retained bool, payload interface{}) error {
+func (c *Component) Publish(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
+	span, _ := tracing.StartSpanFromContext(ctx, c.Name(), "mqtt_publish")
+	span = span.SetTag("topic", topic)
+	defer span.Finish()
+
+	span.LogFields(
+		log.Int("qos", int(qos)),
+		log.String("payload", fmt.Sprintf("%v", payload)),
+		log.Bool("retained", retained),
+	)
+
 	r := "0"
 	if retained {
 		r = "1"
@@ -201,7 +233,13 @@ func (c *Component) Publish(topic string, qos byte, retained bool, payload inter
 	token := c.Client().Publish(topic, qos, retained, payload)
 	token.Wait()
 
-	return token.Error()
+	err := token.Error()
+
+	if err != nil {
+		tracing.SpanError(span, err)
+	}
+
+	return err
 }
 
 func (c *Component) AddRoute(topic string, callback mqtt.MessageHandler) {
@@ -311,11 +349,11 @@ func (c *Component) Subscriptions() []mqtt.Subscription {
 
 func (c *Component) wrapCallback(topic string, qos byte, callback mqtt.MessageHandler) func(client m.Client, message m.Message) {
 	return func(client m.Client, message m.Message) {
-		span, ctx := tracing.StartSpanFromContext(context.Background(), c.Name(), topic)
+		span, ctx := tracing.StartSpanFromContext(context.Background(), c.Name(), "mqtt_callback")
+		span = span.SetTag("topic", message.Topic())
 		defer span.Finish()
 
 		span.LogFields(
-			log.String("topic", string(message.Topic())),
 			log.Int("qos", int(message.Qos())),
 			log.String("payload", string(message.Payload())),
 			log.Bool("retained", message.Retained()),

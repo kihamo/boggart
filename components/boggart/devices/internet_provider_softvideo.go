@@ -70,7 +70,7 @@ func (d *SoftVideoInternet) taskUpdater(ctx context.Context) (interface{}, error
 	prev := atomic.LoadInt64(&d.lastValue)
 
 	if current != prev {
-		d.TriggerEvent(boggart.DeviceEventSoftVideoBalanceChanged, value, d.provider.AccountID())
+		d.TriggerEvent(ctx, boggart.DeviceEventSoftVideoBalanceChanged, value, d.provider.AccountID())
 	}
 
 	return nil, nil

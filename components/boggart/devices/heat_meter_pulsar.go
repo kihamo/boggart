@@ -188,7 +188,7 @@ func (d *PulsarHeadMeter) taskUpdater(ctx context.Context) (interface{}, error) 
 		d.lastValues = currentValues
 		d.mutex.Unlock()
 
-		d.TriggerEvent(boggart.DeviceEventPulsarChanged, currentValues, serialNumber)
+		d.TriggerEvent(ctx, boggart.DeviceEventPulsarChanged, currentValues, serialNumber)
 	} else {
 		d.mutex.Unlock()
 	}

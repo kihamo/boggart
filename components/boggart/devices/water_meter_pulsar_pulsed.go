@@ -144,7 +144,7 @@ func (d *PulsarPulsedWaterMeter) taskUpdater(ctx context.Context) (interface{}, 
 		d.lastValues = currentValues
 		d.mutex.Unlock()
 
-		d.TriggerEvent(boggart.DeviceEventPulsarPulsedChanged, currentValues, serialNumber)
+		d.TriggerEvent(ctx, boggart.DeviceEventPulsarPulsedChanged, currentValues, serialNumber)
 	} else {
 		d.mutex.Unlock()
 	}
