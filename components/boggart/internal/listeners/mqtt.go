@@ -73,49 +73,55 @@ func (l *MQTTListener) Run(ctx context.Context, event workers.Event, t time.Time
 		mac := args[1].(*devices.MikrotikRouterMac)
 		macAddress := l.macAddress(mac.Address)
 
-		l.publish(ctx, "wifi/clients/last/on/mac", false, macAddress)
-		l.publish(ctx, "wifi/clients/last/on/ip", false, mac.ARP.IP)
-		l.publish(ctx, "wifi/clients/last/on/comment", false, mac.ARP.Comment)
-		l.publish(ctx, "wifi/clients/last/on/hostname", false, mac.DHCP.Hostname)
-		l.publish(ctx, "wifi/clients/last/on/interface", false, args[2])
+		topicPrefix := "router/" + args[3].(string) + "/wifi/clients/last/on/"
+		l.publish(ctx, topicPrefix+"mac", false, macAddress)
+		l.publish(ctx, topicPrefix+"ip", false, mac.ARP.IP)
+		l.publish(ctx, topicPrefix+"comment", false, mac.ARP.Comment)
+		l.publish(ctx, topicPrefix+"hostname", false, mac.DHCP.Hostname)
+		l.publish(ctx, topicPrefix+"interface", false, args[2])
 
-		l.publish(ctx, fmt.Sprintf("wifi/clients/%s/ip", macAddress), false, mac.ARP.IP)
-		l.publish(ctx, fmt.Sprintf("wifi/clients/%s/comment", macAddress), false, mac.ARP.Comment)
-		l.publish(ctx, fmt.Sprintf("wifi/clients/%s/hostname", macAddress), false, mac.DHCP.Hostname)
-		l.publish(ctx, fmt.Sprintf("wifi/clients/%s/interface", macAddress), false, args[2])
-		l.publish(ctx, fmt.Sprintf("wifi/clients/%s/state", macAddress), true, ValueOn)
+		topicPrefix = "router/" + args[3].(string) + "/wifi/clients/" + macAddress + "/"
+		l.publish(ctx, topicPrefix+"ip", false, mac.ARP.IP)
+		l.publish(ctx, topicPrefix+"comment", false, mac.ARP.Comment)
+		l.publish(ctx, topicPrefix+"hostname", false, mac.DHCP.Hostname)
+		l.publish(ctx, topicPrefix+"interface", false, args[2])
+		l.publish(ctx, topicPrefix+"state", true, ValueOn)
 
 	case boggart.DeviceEventWifiClientDisconnected:
 		mac := args[1].(*devices.MikrotikRouterMac)
 		macAddress := l.macAddress(mac.Address)
 
-		l.publish(ctx, "wifi/clients/last/off/mac", false, macAddress)
-		l.publish(ctx, "wifi/clients/last/off/ip", false, mac.ARP.IP)
-		l.publish(ctx, "wifi/clients/last/off/comment", false, mac.ARP.Comment)
-		l.publish(ctx, "wifi/clients/last/off/hostname", false, mac.DHCP.Hostname)
-		l.publish(ctx, "wifi/clients/last/off/interface", false, args[2])
+		topicPrefix := "router/" + args[3].(string) + "/wifi/clients/last/off/"
+		l.publish(ctx, topicPrefix+"mac", false, macAddress)
+		l.publish(ctx, topicPrefix+"ip", false, mac.ARP.IP)
+		l.publish(ctx, topicPrefix+"comment", false, mac.ARP.Comment)
+		l.publish(ctx, topicPrefix+"hostname", false, mac.DHCP.Hostname)
+		l.publish(ctx, topicPrefix+"interface", false, args[2])
 
-		l.publish(ctx, fmt.Sprintf("wifi/clients/%s/ip", macAddress), false, mac.ARP.IP)
-		l.publish(ctx, fmt.Sprintf("wifi/clients/%s/comment", macAddress), false, mac.ARP.Comment)
-		l.publish(ctx, fmt.Sprintf("wifi/clients/%s/hostname", macAddress), false, mac.DHCP.Hostname)
-		l.publish(ctx, fmt.Sprintf("wifi/clients/%s/interface", macAddress), false, args[2])
-		l.publish(ctx, fmt.Sprintf("wifi/clients/%s/state", macAddress), true, ValueOff)
+		topicPrefix = "router/" + args[3].(string) + "/wifi/clients/" + macAddress + "/"
+		l.publish(ctx, topicPrefix+"ip", false, mac.ARP.IP)
+		l.publish(ctx, topicPrefix+"comment", false, mac.ARP.Comment)
+		l.publish(ctx, topicPrefix+"hostname", false, mac.DHCP.Hostname)
+		l.publish(ctx, topicPrefix+"interface", false, args[2])
+		l.publish(ctx, topicPrefix+"state", true, ValueOff)
 
 	case boggart.DeviceEventVPNClientConnected:
 		login := l.macAddress(args[1].(string))
 
-		l.publish(ctx, "vpn/clients/last/on/login", false, login)
-		l.publish(ctx, "vpn/clients/last/on/ip", false, args[2])
+		topicPrefix := "router/" + args[3].(string) + "/vpn/clients/last/on/"
+		l.publish(ctx, topicPrefix+"login", false, login)
+		l.publish(ctx, topicPrefix+"ip", false, args[2])
 
-		l.publish(ctx, fmt.Sprintf("vpn/clients/%s/ip", login), false, args[2])
-		l.publish(ctx, fmt.Sprintf("vpn/clients/%s/state", login), true, ValueOn)
+		topicPrefix = "router/" + args[3].(string) + "/vpn/clients/" + login + "/"
+		l.publish(ctx, topicPrefix+"ip", false, args[2])
+		l.publish(ctx, topicPrefix+"state", false, ValueOn)
 
 	case boggart.DeviceEventVPNClientDisconnected:
 		login := l.macAddress(args[1].(string))
+		topicPrefix := "router/" + args[2].(string) + "vpn/clients/"
 
-		l.publish(ctx, "vpn/clients/last/off/login", false, login)
-
-		l.publish(ctx, fmt.Sprintf("vpn/clients/%s/state", login), true, ValueOff)
+		l.publish(ctx, topicPrefix+"last/off/login", false, login)
+		l.publish(ctx, topicPrefix+login+"/state", true, ValueOff)
 
 	case boggart.DeviceEventSoftVideoBalanceChanged:
 		l.publish(ctx, fmt.Sprintf("service/softvideo/%s/balance", args[2]), true, args[1])

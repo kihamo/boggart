@@ -224,7 +224,7 @@ func (d *MikrotikRouter) taskSerialNumber(ctx context.Context) (interface{}, err
 			return nil, err, false
 		}
 
-		d.TriggerEvent(ctx, boggart.DeviceEventWifiClientConnected, mac, connection.Interface)
+		d.TriggerEvent(ctx, boggart.DeviceEventWifiClientConnected, mac, connection.Interface, system.SerialNumber)
 	}
 
 	// vpn clients
@@ -234,7 +234,7 @@ func (d *MikrotikRouter) taskSerialNumber(ctx context.Context) (interface{}, err
 	}
 
 	for _, connection := range connections {
-		d.TriggerEvent(ctx, boggart.DeviceEventVPNClientConnected, connection.Name, connection.Address)
+		d.TriggerEvent(ctx, boggart.DeviceEventVPNClientConnected, connection.Name, connection.Address, system.SerialNumber)
 	}
 
 	return nil, nil, true
@@ -402,9 +402,9 @@ func (l *MikrotikRouterListener) Run(ctx context.Context, event workers.Event, t
 
 			switch check[3] {
 			case "connected":
-				l.router.TriggerEvent(ctx, boggart.DeviceEventWifiClientConnected, mac, check[2])
+				l.router.TriggerEvent(ctx, boggart.DeviceEventWifiClientConnected, mac, check[2], l.router.SerialNumber())
 			case "disconnected":
-				l.router.TriggerEvent(ctx, boggart.DeviceEventWifiClientDisconnected, mac, check[2])
+				l.router.TriggerEvent(ctx, boggart.DeviceEventWifiClientDisconnected, mac, check[2], l.router.SerialNumber())
 			}
 
 		case "vpn":
@@ -415,9 +415,9 @@ func (l *MikrotikRouterListener) Run(ctx context.Context, event workers.Event, t
 
 			switch check[2] {
 			case "in":
-				l.router.TriggerEvent(ctx, boggart.DeviceEventVPNClientConnected, check[1], check[3])
+				l.router.TriggerEvent(ctx, boggart.DeviceEventVPNClientConnected, check[1], check[3], l.router.SerialNumber())
 			case "out":
-				l.router.TriggerEvent(ctx, boggart.DeviceEventVPNClientDisconnected, check[1])
+				l.router.TriggerEvent(ctx, boggart.DeviceEventVPNClientDisconnected, check[1], l.router.SerialNumber())
 			}
 		}
 	}
