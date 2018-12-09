@@ -7,6 +7,7 @@ import (
 	"io"
 	"net"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -37,6 +38,7 @@ type Client struct {
 
 	client    *routeros.Client
 	connected uint64
+	mutex     sync.Mutex
 }
 
 func NewClient(address, username, password string, timeout time.Duration) *Client {
@@ -51,6 +53,9 @@ func NewClient(address, username, password string, timeout time.Duration) *Clien
 }
 
 func (c *Client) connect() (err error) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
 	c.conn, err = c.dialer.Dial("tcp", c.address)
 	if err != nil {
 		return err
@@ -85,6 +90,13 @@ func (c *Client) isRetry(err error) bool {
 	return err == io.EOF
 }
 
+func (c *Client) safeRunArgs(sentence []string) (*routeros.Reply, error) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	return c.client.RunArgs(sentence)
+}
+
 func (c *Client) doConvert(ctx context.Context, sentence []string, result interface{}) error {
 	if atomic.LoadUint64(&c.connected) == 0 {
 		if err := c.connect(); err != nil {
@@ -101,12 +113,12 @@ func (c *Client) doConvert(ctx context.Context, sentence []string, result interf
 
 	span.SetTag("sentence", strings.Join(sentence, " "))
 
-	reply, err := c.client.RunArgs(sentence)
+	reply, err := c.safeRunArgs(sentence)
 	if err != nil && c.isRetry(err) {
 		atomic.StoreUint64(&c.connected, 0)
 
 		if err = c.connect(); err == nil {
-			reply, err = c.client.RunArgs(sentence)
+			reply, err = c.safeRunArgs(sentence)
 		}
 	}
 
