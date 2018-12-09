@@ -110,15 +110,7 @@ func (c *Component) initRouters() {
 		username := u.User.Username()
 		password, _ := u.User.Password()
 
-		api, err := mikrotik.NewClient(u.Host, username, password, c.config.Duration(boggart.ConfigMikrotikTimeout))
-		if err != nil {
-			c.logger.Error("Init Mikrotik api failed",
-				"error", err.Error(),
-				"address", u.Host,
-				"username", username,
-			)
-			continue
-		}
+		api := mikrotik.NewClient(u.Host, username, password, c.config.Duration(boggart.ConfigMikrotikTimeout))
 
 		device := devices.NewMikrotikRouter(api, u.Hostname()+":514", c.config.Duration(boggart.ConfigMikrotikRepeatInterval))
 		device.SetDescription(device.Description() + " on " + u.Host)

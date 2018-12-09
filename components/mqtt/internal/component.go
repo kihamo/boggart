@@ -30,10 +30,10 @@ type Component struct {
 	config      config.Component
 	logger      logging.Logger
 
-	mutex           sync.RWMutex
-	routes          []dashboard.Route
-	client          m.Client
-	subscriptions   *list.List
+	mutex         sync.RWMutex
+	routes        []dashboard.Route
+	client        m.Client
+	subscriptions *list.List
 }
 
 func (c *Component) Name() string {

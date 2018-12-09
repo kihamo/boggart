@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"net"
 	"strings"
-	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/kihamo/gotypes"
@@ -26,30 +28,87 @@ func IsEmptyResponse(err error) bool {
 }
 
 type Client struct {
-	mutex  sync.Mutex
-	client *routeros.Client
+	address  string
+	username string
+	password string
+
+	dialer *net.Dialer
+	conn   net.Conn
+
+	client    *routeros.Client
+	connected uint64
 }
 
-func NewClient(address, username, password string, timeout time.Duration) (*Client, error) {
-	client, err := routeros.DialTimeout(address, username, password, timeout)
+func NewClient(address, username, password string, timeout time.Duration) *Client {
+	return &Client{
+		address:  address,
+		username: username,
+		password: password,
+		dialer: &net.Dialer{
+			Timeout: timeout,
+		},
+	}
+}
+
+func (c *Client) connect() (err error) {
+	c.conn, err = c.dialer.Dial("tcp", c.address)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &Client{
-		client: client,
-	}, nil
+	if c.dialer.Timeout > 0 {
+		c.conn.SetDeadline(time.Now().Add(c.dialer.Timeout))
+	}
+
+	c.client, err = routeros.NewClient(c.conn)
+	if err != nil {
+		c.conn.Close()
+		return err
+	}
+
+	err = c.client.Login(c.username, c.password)
+	if err != nil {
+		c.conn.Close()
+		return err
+	}
+
+	atomic.StoreUint64(&c.connected, 1)
+
+	return nil
+}
+
+func (c *Client) isRetry(err error) bool {
+	if netError, ok := err.(net.Error); ok && netError.Timeout() {
+		return true
+	}
+
+	return err == io.EOF
 }
 
 func (c *Client) doConvert(ctx context.Context, sentence []string, result interface{}) error {
+	if atomic.LoadUint64(&c.connected) == 0 {
+		if err := c.connect(); err != nil {
+			return err
+		}
+	}
+
+	if c.dialer.Timeout > 0 {
+		c.conn.SetDeadline(time.Now().Add(c.dialer.Timeout))
+	}
+
 	span, ctx := tracing.StartSpanFromContext(ctx, ComponentName, "call")
 	defer span.Finish()
 
 	span.SetTag("sentence", strings.Join(sentence, " "))
 
-	c.mutex.Lock()
 	reply, err := c.client.RunArgs(sentence)
-	c.mutex.Unlock()
+	if err != nil && c.isRetry(err) {
+		atomic.StoreUint64(&c.connected, 0)
+
+		if err = c.connect(); err == nil {
+			reply, err = c.client.RunArgs(sentence)
+		}
+	}
 
 	if err != nil {
 		tracing.SpanError(span, err)
@@ -67,7 +126,7 @@ func (c *Client) doConvert(ctx context.Context, sentence []string, result interf
 
 	converter := gotypes.NewConverter(records, result)
 	if !converter.Valid() {
-		err = fmt.Errorf("Failed convert fields: %v", strings.Join(converter.GetInvalidFields(), ","))
+		err = fmt.Errorf("failed convert fields: %v", strings.Join(converter.GetInvalidFields(), ","))
 	}
 
 	if err != nil {
