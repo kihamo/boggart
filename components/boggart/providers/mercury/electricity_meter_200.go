@@ -76,13 +76,13 @@ func (d *ElectricityMeter200) Request(function byte, data []byte) ([]byte, error
 
 	l := len(response)
 	if l < 7 {
-		return nil, errors.New("Error length of response packet")
+		return nil, errors.New("error length of response packet")
 	}
 
 	// check crc16
 	crc16 := rs485.GenerateCRC16(response[:l-2])
 	if bytes.Compare(response[l-2:], crc16) != 0 {
-		return nil, errors.New("Error CRC16 of response packet")
+		return nil, errors.New("error CRC16 of response packet")
 	}
 
 	return response[5 : l-2], nil

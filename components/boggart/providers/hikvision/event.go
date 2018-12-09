@@ -80,7 +80,7 @@ func (s *AlertStreaming) Start() {
 			}
 
 			if response.StatusCode != http.StatusOK {
-				s.errors <- fmt.Errorf("Response status %d isn't OK", response.StatusCode, response)
+				s.errors <- fmt.Errorf("response status %d isn't OK", response.StatusCode)
 				continue
 			}
 

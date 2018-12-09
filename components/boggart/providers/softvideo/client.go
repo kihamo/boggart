@@ -61,7 +61,7 @@ func (c *Client) Balance(ctx context.Context) (float64, error) {
 
 	submatch := balanceRegexp.FindStringSubmatch(http.BodyFromResponse(response))
 	if len(submatch) != 2 {
-		err := errors.New("Balance string not found in page")
+		err := errors.New("balance string not found in page")
 
 		tracing.SpanError(span, err)
 		return -1, err

@@ -69,17 +69,17 @@ func (m *Megafon) auth(ctx context.Context) (string, error) {
 
 	selectorFormAction := doc.Find("form[class~=form-login-autofill]")
 	if selectorFormAction.Length() == 0 {
-		return "", errors.New("Selector of login form returns empty result")
+		return "", errors.New("selector of login form returns empty result")
 	}
 
 	action, ok := selectorFormAction.First().Attr("action")
 	if !ok || action == "" {
-		return "", errors.New("Action for login form not found")
+		return "", errors.New("action for login form not found")
 	}
 
 	selectorCSRF := selectorFormAction.Find("input[name=CSRF]")
 	if selectorCSRF.Length() == 0 {
-		return "", errors.New("Selector of CSRF token returns empty result")
+		return "", errors.New("selector of CSRF token returns empty result")
 	}
 
 	token, ok := selectorCSRF.First().Attr("value")

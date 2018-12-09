@@ -159,11 +159,11 @@ func (d *MikrotikRouter) Listeners() []workers.ListenerWithEvents {
 
 func (d *MikrotikRouter) Mac(ctx context.Context, mac string) (*MikrotikRouterMac, error) {
 	if !d.IsEnabled() {
-		return nil, errors.New("Device is disabled")
+		return nil, errors.New("device is disabled")
 	}
 
 	if d.SerialNumber() == "" {
-		return nil, errors.New("Serial number is empty")
+		return nil, errors.New("serial number is empty")
 	}
 
 	info := &MikrotikRouterMac{
@@ -207,7 +207,7 @@ func (d *MikrotikRouter) taskSerialNumber(ctx context.Context) (interface{}, err
 	}
 
 	if system.SerialNumber == "" {
-		return nil, errors.New("Serial number is empty"), false
+		return nil, errors.New("serial number is empty"), false
 	}
 
 	d.SetSerialNumber(system.SerialNumber)

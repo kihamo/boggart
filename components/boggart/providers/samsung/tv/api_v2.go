@@ -229,7 +229,7 @@ func (a *ApiV2) support() *ApiV2DeviceResponse {
 
 func (a *ApiV2) RemoteControlConnect() (*websocket.Conn, error) {
 	if !a.support().Support.RemoteAvailable {
-		return nil, errors.New("Remote control isn't supported")
+		return nil, errors.New("remote control isn't supported")
 	}
 
 	a.mutex.RLock()

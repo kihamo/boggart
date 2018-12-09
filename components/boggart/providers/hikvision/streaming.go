@@ -15,7 +15,7 @@ func (a *ISAPI) StreamingPicture(ctx context.Context, channel uint64) ([]byte, e
 	defer span.Finish()
 
 	if channel < 101 {
-		err := fmt.Errorf("Unknown channel %d", channel)
+		err := fmt.Errorf("unknown channel %d", channel)
 
 		tracing.SpanError(span, err)
 		return nil, err
