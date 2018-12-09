@@ -118,7 +118,7 @@ func (l *MQTTListener) Run(ctx context.Context, event workers.Event, t time.Time
 
 	case boggart.DeviceEventVPNClientDisconnected:
 		login := l.macAddress(args[1].(string))
-		topicPrefix := "router/" + args[2].(string) + "vpn/clients/"
+		topicPrefix := "router/" + args[2].(string) + "/vpn/clients/"
 
 		l.publish(ctx, topicPrefix+"last/off/login", false, login)
 		l.publish(ctx, topicPrefix+login+"/state", true, ValueOff)
