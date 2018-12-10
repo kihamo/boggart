@@ -5,6 +5,9 @@ import (
 	"crypto/cipher"
 )
 
+// https://github.com/mjg59/python-broadlink/blob/5cfb92ee12f1afc2e5a997a9f3121f33b5b2ece0/protocol.md
+// https://github.com/mixcode/broadlink/blob/59c23b4e7b1ab5188aafc54ca46ff794a5aec6a2/remotecontrol.go
+
 const (
 	DefaultBufferSize = 2048
 )

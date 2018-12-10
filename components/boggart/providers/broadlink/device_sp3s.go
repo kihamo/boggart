@@ -2,7 +2,6 @@ package broadlink
 
 import (
 	"encoding/binary"
-	"errors"
 	"fmt"
 	"net"
 	"strconv"
@@ -60,9 +59,9 @@ func (d *SP3S) Power() (float64, error) {
 		return -1, err
 	}
 
-	code := binary.LittleEndian.Uint16(response[0x22:0x24])
-	if code != 0 {
-		return -1, errors.New("failed to read power value")
+	responseCode := binary.LittleEndian.Uint16(response[0x22:0x24])
+	if responseCode != 0 {
+		return -1, fmt.Errorf("failed to read power value code (%04x)", responseCode)
 	}
 
 	data, err := d.DecodePacket(response)
