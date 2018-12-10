@@ -38,7 +38,8 @@ type BroadlinkSP3SSocket struct {
 
 func NewBroadlinkSP3SSocket(provider *broadlink.SP3S) *BroadlinkSP3SSocket {
 	device := &BroadlinkSP3SSocket{
-		provider: provider,
+		provider:  provider,
+		lastValue: -1,
 	}
 	device.Init()
 	device.SetSerialNumber(provider.MAC().String())
