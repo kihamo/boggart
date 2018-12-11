@@ -208,7 +208,7 @@ func (c *Component) Client() m.Client {
 	return c.client
 }
 
-func (c *Component) Publish(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
+func (c *Component) Publish(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) (err error) {
 	span, _ := tracing.StartSpanFromContext(ctx, c.Name(), "mqtt_publish")
 	span = span.SetTag("topic", topic)
 	defer span.Finish()
@@ -230,10 +230,15 @@ func (c *Component) Publish(ctx context.Context, topic string, qos byte, retaine
 		"retained", r,
 	).Inc()
 
-	token := c.Client().Publish(topic, qos, retained, payload)
-	token.Wait()
+	client := c.Client()
+	if client != nil {
+		token := client.Publish(topic, qos, retained, payload)
+		token.Wait()
 
-	err := token.Error()
+		err = token.Error()
+	} else {
+		err = errors.New("can't initialize client of MQTT")
+	}
 
 	if err != nil {
 		tracing.SpanError(span, err)
@@ -255,7 +260,12 @@ func (c *Component) AddRoute(topic string, callback mqtt.MessageHandler) {
 	}
 	c.mutex.RUnlock()
 
-	c.Client().AddRoute(topic, c.wrapCallback(topic, subscription.QOS(), subscription.Callback))
+	client := c.Client()
+	if client == nil {
+		return
+	}
+
+	client.AddRoute(topic, c.wrapCallback(topic, subscription.QOS(), subscription.Callback))
 
 	c.mutex.Lock()
 	if e != nil {
@@ -267,7 +277,12 @@ func (c *Component) AddRoute(topic string, callback mqtt.MessageHandler) {
 }
 
 func (c *Component) Unsubscribe(topic string) error {
-	if token := c.Client().Unsubscribe(topic); token.Wait() && token.Error() != nil {
+	client := c.Client()
+	if client == nil {
+		return errors.New("can't initialize client of MQTT")
+	}
+
+	if token := client.Unsubscribe(topic); token.Wait() && token.Error() != nil {
 		return token.Error()
 	}
 
@@ -298,7 +313,12 @@ func (c *Component) Subscribe(topic string, qos byte, callback mqtt.MessageHandl
 	}
 	c.mutex.RUnlock()
 
-	token := c.Client().Subscribe(topic, qos, c.wrapCallback(topic, qos, subscription.Callback))
+	client := c.Client()
+	if client == nil {
+		return errors.New("can't initialize client of MQTT")
+	}
+
+	token := client.Subscribe(topic, qos, c.wrapCallback(topic, qos, subscription.Callback))
 	if token.Wait() && token.Error() != nil {
 		return token.Error()
 	}
