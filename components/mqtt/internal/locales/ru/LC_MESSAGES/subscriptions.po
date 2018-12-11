@@ -21,3 +21,6 @@ msgstr "QOS"
 
 msgid "Callbacks"
 msgstr "Коллбеков"
+
+msgid "Calls"
+msgstr "Вызовов"

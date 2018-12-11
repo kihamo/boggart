@@ -248,8 +248,8 @@ func (c *Component) AddRoute(topic string, callback mqtt.MessageHandler) {
 	var e *list.Element
 	c.mutex.RLock()
 	for e = c.subscriptions.Front(); e != nil; e = e.Next() {
-		if e.Value.(mqtt.Subscription).Match(topic) {
-			subscription = subscription.Merge(e.Value.(mqtt.Subscription))
+		if e.Value.(*mqtt.Subscription).Match(topic) {
+			subscription = subscription.Merge(e.Value.(*mqtt.Subscription))
 			break
 		}
 	}
@@ -273,7 +273,7 @@ func (c *Component) Unsubscribe(topic string) error {
 
 	c.mutex.Lock()
 	for e := c.subscriptions.Front(); e != nil; e = e.Next() {
-		if e.Value.(mqtt.Subscription).Match(topic) {
+		if e.Value.(*mqtt.Subscription).Match(topic) {
 			c.subscriptions.Remove(e)
 			break
 		}
@@ -291,8 +291,8 @@ func (c *Component) Subscribe(topic string, qos byte, callback mqtt.MessageHandl
 	var e *list.Element
 	c.mutex.RLock()
 	for e = c.subscriptions.Front(); e != nil; e = e.Next() {
-		if e.Value.(mqtt.Subscription).Match(topic) {
-			subscription = subscription.Merge(e.Value.(mqtt.Subscription))
+		if e.Value.(*mqtt.Subscription).Match(topic) {
+			subscription = subscription.Merge(e.Value.(*mqtt.Subscription))
 			break
 		}
 	}
@@ -336,11 +336,11 @@ func (c *Component) SubscribeSubscribers(subscribers []mqtt.Subscriber) error {
 	return nil
 }
 
-func (c *Component) Subscriptions() []mqtt.Subscription {
+func (c *Component) Subscriptions() []*mqtt.Subscription {
 	c.mutex.RLock()
-	subscriptions := make([]mqtt.Subscription, 0, c.subscriptions.Len())
+	subscriptions := make([]*mqtt.Subscription, 0, c.subscriptions.Len())
 	for e := c.subscriptions.Front(); e != nil; e = e.Next() {
-		subscriptions = append(subscriptions, e.Value.(mqtt.Subscription))
+		subscriptions = append(subscriptions, e.Value.(*mqtt.Subscription))
 	}
 	c.mutex.RUnlock()
 

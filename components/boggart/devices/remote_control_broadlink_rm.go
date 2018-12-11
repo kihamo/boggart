@@ -47,7 +47,7 @@ func (d *BroadlinkRMRemoteControl) Ping(_ context.Context) bool {
 
 func (d *BroadlinkRMRemoteControl) MQTTSubscribers() []mqtt.Subscriber {
 	mac := strings.Replace(d.provider.MAC().String(), ":", "-", -1)
-	topicCode := RemoteControlBroadlinkRMMQTTTopicPrefix + mac + "/code/"
+	topicCode := RemoteControlBroadlinkRMMQTTTopicPrefix + mac + "/command/"
 
 	type codeRequest struct {
 		Code  string `json:"code"`
@@ -55,7 +55,7 @@ func (d *BroadlinkRMRemoteControl) MQTTSubscribers() []mqtt.Subscriber {
 	}
 
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(topicCode+"raw/count", 0, d.wrapMQTTSubscriber("code_raw_count", func(message mqtt.Message, span opentracing.Span) error {
+		mqtt.NewSubscriber(topicCode+"raw/count", 0, d.wrapMQTTSubscriber("command_raw_count", func(message mqtt.Message, span opentracing.Span) error {
 			var request codeRequest
 
 			err := json.Unmarshal(message.Payload(), &request)
@@ -70,10 +70,10 @@ func (d *BroadlinkRMRemoteControl) MQTTSubscribers() []mqtt.Subscriber {
 
 			return err
 		})),
-		mqtt.NewSubscriber(topicCode+"raw", 0, d.wrapMQTTSubscriber("code_raw", func(message mqtt.Message, span opentracing.Span) error {
+		mqtt.NewSubscriber(topicCode+"raw", 0, d.wrapMQTTSubscriber("command_raw", func(message mqtt.Message, span opentracing.Span) error {
 			return d.provider.SendRemoteControlCodeRawAsString(string(message.Payload()), 0)
 		})),
-		mqtt.NewSubscriber(topicCode+"ir/count", 0, d.wrapMQTTSubscriber("code_ir_count", func(message mqtt.Message, span opentracing.Span) error {
+		mqtt.NewSubscriber(topicCode+"ir/count", 0, d.wrapMQTTSubscriber("command_ir_count", func(message mqtt.Message, span opentracing.Span) error {
 			var request codeRequest
 
 			err := json.Unmarshal(message.Payload(), &request)
@@ -88,7 +88,7 @@ func (d *BroadlinkRMRemoteControl) MQTTSubscribers() []mqtt.Subscriber {
 
 			return err
 		})),
-		mqtt.NewSubscriber(topicCode+"ir", 0, d.wrapMQTTSubscriber("code_raw", func(message mqtt.Message, span opentracing.Span) error {
+		mqtt.NewSubscriber(topicCode+"ir", 0, d.wrapMQTTSubscriber("command_ir", func(message mqtt.Message, span opentracing.Span) error {
 			return d.provider.SendIRRemoteControlCodeAsString(string(message.Payload()), 0)
 		})),
 	}

@@ -14,7 +14,8 @@
                         <th class="md-col-1">#</th>
                         <th>{{ i18n "Topic" . }}</th>
                         <th class="md-col-1">{{ i18n "QOS" . }}</th>
-                        <th class="md-col-2">{{ i18n "Callbacks" . }}</th>
+                        <th class="md-col-1">{{ i18n "Callbacks" . }}</th>
+                        <th class="md-col-1">{{ i18n "Calls" . }}</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -24,6 +25,7 @@
                         <td>{{ $subscription.Topic }}</td>
                         <td>{{ $subscription.QOS }}</td>
                         <td>{{ $subscription.Len }}</td>
+                        <td>{{ $subscription.Calls }}</td>
                     {{ end }}
                     </tbody>
                 </table>
