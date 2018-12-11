@@ -43,7 +43,7 @@ func NewBroadlinkSP3SSocket(provider *broadlink.SP3S) *BroadlinkSP3SSocket {
 	}
 	device.Init()
 	device.SetSerialNumber(provider.MAC().String())
-	device.SetDescription("Socket of Broadlink with IP " + provider.Addr().String() + " and MAC" + provider.MAC().String())
+	device.SetDescription("Socket of Broadlink with IP " + provider.Addr().String() + " and MAC " + provider.MAC().String())
 
 	return device
 }
@@ -130,7 +130,7 @@ func (d *BroadlinkSP3SSocket) State() (bool, error) {
 func (d *BroadlinkSP3SSocket) On(ctx context.Context) error {
 	err := d.provider.On()
 	if err == nil {
-		d.taskUpdater(ctx)
+		_, err = d.taskUpdater(ctx)
 	}
 
 	return err
@@ -139,7 +139,7 @@ func (d *BroadlinkSP3SSocket) On(ctx context.Context) error {
 func (d *BroadlinkSP3SSocket) Off(ctx context.Context) error {
 	err := d.provider.Off()
 	if err == nil {
-		d.taskUpdater(ctx)
+		_, err = d.taskUpdater(ctx)
 	}
 
 	return err
@@ -159,7 +159,7 @@ func (d *BroadlinkSP3SSocket) MQTTSubscribers() []mqtt.Subscriber {
 				return
 			}
 
-			span, ctx := tracing.StartSpanFromContext(ctx, "socket", "set")
+			span, ctx := tracing.StartSpanFromContext(ctx, boggart.DeviceTypeSocket.String(), "set")
 			span.LogFields(
 				log.String("mac", d.provider.MAC().String()),
 				log.String("ip", d.provider.Addr().String()))

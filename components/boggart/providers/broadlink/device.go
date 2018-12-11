@@ -6,10 +6,16 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/broadlink/internal"
 )
 
+type RemoteType int
+
 const (
 	KindRM3Mini   = 0x2737
 	KindRMProPlus = 0x279d
 	KindSP3S      = 0x947a
+
+	RemoteIR       RemoteType = 0x26
+	RemoteRF433Mhz RemoteType = 0xb2
+	RemoteRF315Mhz RemoteType = 0xd7
 )
 
 type Device interface {

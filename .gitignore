@@ -1,6 +1,5 @@
 .idea
 vendor/*
-/openhab
-/openhab-ai
+/openhab2
 components/openhab/swagger.json
 cmd/test

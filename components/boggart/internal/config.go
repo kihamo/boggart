@@ -161,6 +161,10 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithUsage("Address of Broadlink in format ip:mac").
 			WithGroup("Sockets").
 			WithView([]string{config.ViewTags}),
+		config.NewVariable(boggart.ConfigRemoteControlBroadlink, config.ValueTypeString).
+			WithUsage("Address of Broadlink in format ip:mac").
+			WithGroup("Remote control").
+			WithView([]string{config.ViewTags}),
 	}
 }
 

@@ -10,14 +10,6 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/broadlink/internal"
 )
 
-type RemoteType int
-
-const (
-	RemoteIR       RemoteType = 0x26
-	RemoteRF433Mhz RemoteType = 0xb2
-	RemoteRF315Mhz RemoteType = 0xd7
-)
-
 type RM3Mini struct {
 	*internal.Device
 }
@@ -181,7 +173,7 @@ func (d *RM3Mini) SendRemoteControlCodeRaw(code []byte, count int) error {
 	return d.SendRemoteControlCode(remoteType, code[4:], count)
 }
 
-func (d *RM3Mini) SendRemoteControlCodeAsString(code string, count int) error {
+func (d *RM3Mini) SendRemoteControlCodeRawAsString(code string, count int) error {
 	decoded, err := hex.DecodeString(code)
 	if err != nil {
 		return err
@@ -201,30 +193,4 @@ func (d *RM3Mini) SendIRRemoteControlCodeAsString(code string, count int) error 
 	}
 
 	return d.SendRemoteControlCode(RemoteIR, decoded, count)
-}
-
-func (d *RM3Mini) SendRF433MhzRemoteControlCode(code []byte, count int) error {
-	return d.SendRemoteControlCode(RemoteRF433Mhz, code, count)
-}
-
-func (d *RM3Mini) SendRF433MhzRemoteControlCodeAsString(code string, count int) error {
-	decoded, err := hex.DecodeString(code)
-	if err != nil {
-		return err
-	}
-
-	return d.SendRemoteControlCode(RemoteRF433Mhz, decoded, count)
-}
-
-func (d *RM3Mini) SendRF315MhzRemoteControlCode(code []byte, count int) error {
-	return d.SendRemoteControlCode(RemoteRF315Mhz, code, count)
-}
-
-func (d *RM3Mini) SendRF315MhzRemoteControlCodeAsString(code string, count int) error {
-	decoded, err := hex.DecodeString(code)
-	if err != nil {
-		return err
-	}
-
-	return d.SendRemoteControlCode(RemoteRF315Mhz, decoded, count)
 }

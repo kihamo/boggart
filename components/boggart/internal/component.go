@@ -118,6 +118,7 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 	c.initPulsarMeters()
 	c.initSensor()
 	c.initSockets()
+	c.initRemoteControl()
 
 	c.devicesManager.Ready()
 

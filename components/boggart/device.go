@@ -59,6 +59,7 @@ const (
 	DeviceTypeHygrometer
 	DeviceTypeGPIO
 	DeviceTypeSocket
+	DeviceTypeRemoteControll
 )
 
 type DevicesManager interface {

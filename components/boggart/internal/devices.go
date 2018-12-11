@@ -296,3 +296,44 @@ func (c *Component) initSockets() {
 		c.devicesManager.Register(device)
 	}
 }
+
+func (c *Component) initRemoteControl() {
+	addresses := c.config.String(boggart.ConfigRemoteControlBroadlink)
+	if addresses == "" {
+		return
+	}
+
+	localAddr, err := broadlink.LocalAddr()
+	if err != nil {
+		c.logger.Warn("Get local address is failed")
+		return
+	}
+
+	for _, address := range strings.Split(addresses, ",") {
+		address = strings.TrimSpace(address)
+		if address == "" {
+			c.logger.Warn("Remote control address of Broadlink is empty")
+			continue
+		}
+
+		parts := strings.SplitN(address, ":", 2)
+		if len(parts) != 2 {
+			c.logger.Warn("Remote control address of Broadlink is wrong " + address)
+			continue
+		}
+
+		mac, err := net.ParseMAC(parts[1])
+		if err != nil {
+			c.logger.Warn("Remote control address of Broadlink is wrong MAC address " + address)
+			continue
+		}
+
+		ip := net.UDPAddr{
+			IP:   net.ParseIP(parts[0]),
+			Port: broadlink.DevicePort,
+		}
+
+		device := devices.NewBroadlinkRMRemoteControl(broadlink.NewRM3Mini(mac, ip, *localAddr))
+		c.devicesManager.Register(device)
+	}
+}
