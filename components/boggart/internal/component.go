@@ -114,10 +114,11 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 	c.initInternetProviders()
 	c.initPhones()
 	c.initRouters()
-	c.initCameras()
 	c.initPulsarMeters()
 	c.initSensor()
 	c.initSockets()
+
+	c.initCameras()
 	c.initRemoteControl()
 
 	c.devicesManager.Ready()

@@ -26,13 +26,15 @@ type BroadlinkRMRemoteControl struct {
 	provider *broadlink.RM3Mini
 }
 
-func NewBroadlinkRMRemoteControl(provider *broadlink.RM3Mini) *BroadlinkRMRemoteControl {
+func NewBroadlinkRMRemoteControl(provider *broadlink.RM3Mini, m mqtt.Component) *BroadlinkRMRemoteControl {
 	device := &BroadlinkRMRemoteControl{
 		provider: provider,
 	}
 	device.Init()
 	device.SetSerialNumber(provider.MAC().String())
 	device.SetDescription("Socket of Broadlink with IP " + provider.Addr().String() + " and MAC " + provider.MAC().String())
+
+	m.Publish(context.Background(), device.prefixMQTTTopic()+"capture/state", 2, true, "0")
 
 	return device
 }
@@ -48,8 +50,7 @@ func (d *BroadlinkRMRemoteControl) Ping(_ context.Context) bool {
 }
 
 func (d *BroadlinkRMRemoteControl) MQTTSubscribers() []mqtt.Subscriber {
-	mac := strings.Replace(d.provider.MAC().String(), ":", "-", -1)
-	topicCode := RemoteControlBroadlinkRMMQTTTopicPrefix + mac + "/command/"
+	topicCode := d.prefixMQTTTopic()
 
 	type codeRequest struct {
 		Code  string `json:"code"`
@@ -108,8 +109,12 @@ func (d *BroadlinkRMRemoteControl) MQTTSubscribers() []mqtt.Subscriber {
 			func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 				return d.provider.SendIRRemoteControlCodeAsString(string(message.Payload()), 0)
 			})),
-		mqtt.NewSubscriber(topicCode+"capture/start", 0, d.wrapMQTTSubscriber("command_capture_start",
+		mqtt.NewSubscriber(topicCode+"capture", 0, d.wrapMQTTSubscriber("command_capture_start",
 			func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
+				if string(message.Payload()) != "1" {
+					return nil
+				}
+
 				if err := d.provider.StartCaptureRemoteControlCode(); err != nil {
 					return err
 				}
@@ -133,6 +138,11 @@ func (d *BroadlinkRMRemoteControl) MQTTSubscribers() []mqtt.Subscriber {
 				}
 
 				// стартуем новую запись
+				err := client.Publish(ctx, topicCode+"capture/state", 2, true, "1")
+				if err != nil {
+					return err
+				}
+
 				select {
 				case <-captureFlush:
 				case <-captureTimer.C:
@@ -140,6 +150,10 @@ func (d *BroadlinkRMRemoteControl) MQTTSubscribers() []mqtt.Subscriber {
 				case <-captureDone:
 					return nil
 				}
+
+				defer func() {
+					client.Publish(ctx, topicCode+"capture/state", 2, true, "0")
+				}()
 
 				remoteType, code, err := d.provider.ReadCapturedRemoteControlCodeAsString()
 				if err != nil {
@@ -157,10 +171,13 @@ func (d *BroadlinkRMRemoteControl) MQTTSubscribers() []mqtt.Subscriber {
 				}
 
 				return nil
-
 			})),
-		mqtt.NewSubscriber(topicCode+"capture/stop", 0, d.wrapMQTTSubscriber("command_capture_stop",
+		mqtt.NewSubscriber(topicCode+"capture", 0, d.wrapMQTTSubscriber("command_capture_stop",
 			func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
+				if string(message.Payload()) != "0" {
+					return nil
+				}
+
 				if len(captureFlush) == 0 {
 					captureFlush <- struct{}{}
 				}
@@ -168,6 +185,11 @@ func (d *BroadlinkRMRemoteControl) MQTTSubscribers() []mqtt.Subscriber {
 				return nil
 			})),
 	}
+}
+
+func (d *BroadlinkRMRemoteControl) prefixMQTTTopic() string {
+	mac := strings.Replace(d.provider.MAC().String(), ":", "-", -1)
+	return RemoteControlBroadlinkRMMQTTTopicPrefix + mac + "/command/"
 }
 
 func (d *BroadlinkRMRemoteControl) wrapMQTTSubscriber(operationName string, fn func(context.Context, mqtt.Component, mqtt.Message) error) mqtt.MessageHandler {

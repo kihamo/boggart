@@ -29,6 +29,7 @@ func (c *Component) initCameras() {
 		return
 	}
 
+	<-c.application.ReadyComponent(mqtt.ComponentName)
 	m := c.application.GetComponent(mqtt.ComponentName).(mqtt.Component)
 
 	for _, address := range strings.Split(addresses, ",") {
@@ -309,6 +310,9 @@ func (c *Component) initRemoteControl() {
 		return
 	}
 
+	<-c.application.ReadyComponent(mqtt.ComponentName)
+	m := c.application.GetComponent(mqtt.ComponentName).(mqtt.Component)
+
 	for _, address := range strings.Split(addresses, ",") {
 		address = strings.TrimSpace(address)
 		if address == "" {
@@ -333,7 +337,7 @@ func (c *Component) initRemoteControl() {
 			Port: broadlink.DevicePort,
 		}
 
-		device := devices.NewBroadlinkRMRemoteControl(broadlink.NewRM3Mini(mac, ip, *localAddr))
+		device := devices.NewBroadlinkRMRemoteControl(broadlink.NewRM3Mini(mac, ip, *localAddr), m)
 		c.devicesManager.Register(device)
 	}
 }
