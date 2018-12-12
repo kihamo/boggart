@@ -337,7 +337,7 @@ func (c *Component) initRemoteControl() {
 			Port: broadlink.DevicePort,
 		}
 
-		device := devices.NewBroadlinkRMRemoteControl(broadlink.NewRM3Mini(mac, ip, *localAddr), m)
+		device := devices.NewBroadlinkRMRemoteControl(broadlink.NewRMProPlus(mac, ip, *localAddr), m)
 		c.devicesManager.Register(device)
 	}
 }

@@ -23,10 +23,10 @@ type BroadlinkRMRemoteControl struct {
 	boggart.DeviceBase
 	boggart.DeviceSerialNumber
 
-	provider *broadlink.RM3Mini
+	provider *broadlink.RMProPlus
 }
 
-func NewBroadlinkRMRemoteControl(provider *broadlink.RM3Mini, m mqtt.Component) *BroadlinkRMRemoteControl {
+func NewBroadlinkRMRemoteControl(provider *broadlink.RMProPlus, m mqtt.Component) *BroadlinkRMRemoteControl {
 	device := &BroadlinkRMRemoteControl{
 		provider: provider,
 	}
@@ -109,6 +109,14 @@ func (d *BroadlinkRMRemoteControl) MQTTSubscribers() []mqtt.Subscriber {
 			func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 				return d.provider.SendIRRemoteControlCodeAsString(string(message.Payload()), 0)
 			})),
+		mqtt.NewSubscriber(topicCode+"rf315mhz", 0, d.wrapMQTTSubscriber("command_rf315mhz",
+			func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+				return d.provider.SendRF315MhzRemoteControlCodeAsString(string(message.Payload()), 0)
+			})),
+		mqtt.NewSubscriber(topicCode+"rf433mhz", 0, d.wrapMQTTSubscriber("command_rf433mhz",
+			func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+				return d.provider.SendRF433MhzRemoteControlCodeAsString(string(message.Payload()), 0)
+			})),
 		mqtt.NewSubscriber(topicCode+"capture", 0, d.wrapMQTTSubscriber("command_capture_start",
 			func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
 				if string(message.Payload()) != "1" {
@@ -164,8 +172,19 @@ func (d *BroadlinkRMRemoteControl) MQTTSubscribers() []mqtt.Subscriber {
 					return nil
 				}
 
-				if remoteType == broadlink.RemoteIR {
-					if err = client.Publish(ctx, topicCode+"capture/ir", 0, false, code); err != nil {
+				var topicCaptureCode string
+
+				switch remoteType {
+				case broadlink.RemoteIR:
+					topicCaptureCode = "ir"
+				case broadlink.RemoteRF315Mhz:
+					topicCaptureCode = "rf315mhz"
+				case broadlink.RemoteRF433Mhz:
+					topicCaptureCode = "rf433mhz"
+				}
+
+				if topicCaptureCode != "" {
+					if err = client.Publish(ctx, topicCode+"capture/"+topicCaptureCode, 0, false, code); err != nil {
 						return err
 					}
 				}
