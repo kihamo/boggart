@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	DefaultTimeout = 500 * time.Millisecond
+	DefaultTimeout = time.Second
 
 	CommandAuth = 0x0065
 )

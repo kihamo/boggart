@@ -10,6 +10,10 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/broadlink/internal"
 )
 
+var (
+	ErrSignalNotCaptured = errors.New("signal not captured")
+)
+
 type RM3Mini struct {
 	*internal.Device
 }
@@ -61,7 +65,7 @@ func (d *RM3Mini) ReadCapturedRemoteControlCodeRaw() ([]byte, error) {
 	responseCode := binary.LittleEndian.Uint16(response[0x22:0x24])
 	if responseCode != 0 {
 		if responseCode == 0xfff6 {
-			return nil, errors.New("signal not captured")
+			return nil, ErrSignalNotCaptured
 		}
 
 		return nil, errors.New("failed to read capturing remote control code")
