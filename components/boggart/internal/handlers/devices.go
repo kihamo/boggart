@@ -13,8 +13,9 @@ import (
 type deviceHandlerDevice struct {
 	RegisterId  string   `json:"register_id"`
 	Id          string   `json:"id"`
-	TasksCount  int      `json:"tasks_count"`
 	Description string   `json:"description"`
+	Tasks       []string `json:"tasks"`
+	MQTTTopics  []string `json:"mqtt_topics"`
 	Types       []string `json:"types"`
 	Enabled     bool     `json:"enabled"`
 }
@@ -68,16 +69,25 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				Id:          d.Id(),
 				Description: d.Description(),
 				Types:       make([]string, 0, len(d.Types())),
-				TasksCount:  0,
+				Tasks:       make([]string, 0),
+				MQTTTopics:  make([]string, 0),
 				Enabled:     d.IsEnabled(),
 			}
 
 			if tasks, ok := d.(boggart.DeviceHasTasks); ok {
-				item.TasksCount = len(tasks.Tasks())
+				for _, task := range tasks.Tasks() {
+					item.Tasks = append(item.Tasks, task.Name())
+				}
 			}
 
 			for _, t := range d.Types() {
 				item.Types = append(item.Types, t.String())
+			}
+
+			if subscribers, ok := d.(boggart.DeviceHasMQTTSubscribers); ok {
+				for _, topic := range subscribers.MQTTSubscribers() {
+					item.MQTTTopics = append(item.MQTTTopics, topic.Topic())
+				}
 			}
 
 			list = append(list, item)

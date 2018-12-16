@@ -26,10 +26,16 @@ $(document).ready(function () {
                     data: 'id'
                 },
                 {
-                    data: 'description'
+                    data: 'tasks',
+                    render: function (tasks) {
+                        return tasks.length;
+                    }
                 },
                 {
-                    data: 'tasks_count'
+                    data: 'mqtt_topics',
+                    render: function (topics) {
+                        return topics.length;
+                    }
                 },
                 {
                     data: 'enabled',
@@ -49,6 +55,33 @@ $(document).ready(function () {
                             '<button type="button" class="btn btn-warning btn-icon device-ping"><i class="glyphicon glyphicon-resize-small" title="Ping"></i></button>' +
                             '</div>';
                     }
+                },
+                {
+                    data: 'description'
+                },
+                {
+                    data: 'tasks',
+                    render: function (tasks) {
+                        var content = '';
+
+                        for (var i in tasks) {
+                            content += '<span class="label label-primary">' + tasks[i] + '</span> ';
+                        }
+
+                        return content;
+                    }
+                },
+                {
+                    data: 'mqtt_topics',
+                    render: function (topics) {
+                        var content = '';
+
+                        for (var i in topics) {
+                            content += '<span class="label label-info">' + topics[i] + '</span> ';
+                        }
+
+                        return content;
+                    }
                 }
             ]
         });
@@ -67,22 +100,10 @@ $(document).ready(function () {
                     data: 'name'
                 },
                 {
-                    data: 'fires'
-                },
-                {
                     data: 'id'
                 },
                 {
-                    data: 'events',
-                    render: function (data) {
-                        var content = '';
-
-                        for (var eventId in data) {
-                            content += '<span class="label label-info">' + data[eventId] + '</span> ';
-                        }
-
-                        return content;
-                    }
+                    data: 'fires'
                 },
                 {
                     data: 'fire_first',
@@ -102,6 +123,18 @@ $(document).ready(function () {
                         }
 
                         return dateToString(date);
+                    }
+                },
+                {
+                    data: 'events',
+                    render: function (data) {
+                        var content = '';
+
+                        for (var eventId in data) {
+                            content += '<span class="label label-info">' + data[eventId] + '</span> ';
+                        }
+
+                        return content;
                     }
                 }
             ]
