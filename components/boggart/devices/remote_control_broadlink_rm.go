@@ -41,7 +41,7 @@ func NewBroadlinkRMRemoteControl(provider *broadlink.RMProPlus, m mqtt.Component
 
 func (d *BroadlinkRMRemoteControl) Types() []boggart.DeviceType {
 	return []boggart.DeviceType{
-		boggart.DeviceTypeRemoteControll,
+		boggart.DeviceTypeRemoteControl,
 	}
 }
 
@@ -217,7 +217,7 @@ func (d *BroadlinkRMRemoteControl) wrapMQTTSubscriber(operationName string, fn f
 			return
 		}
 
-		span, ctx := tracing.StartSpanFromContext(ctx, boggart.DeviceTypeRemoteControll.String(), operationName)
+		span, ctx := tracing.StartSpanFromContext(ctx, boggart.DeviceTypeRemoteControl.String(), operationName)
 		span.LogFields(
 			log.String("mac", d.provider.MAC().String()),
 			log.String("ip", d.provider.Addr().String()))

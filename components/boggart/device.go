@@ -32,6 +32,7 @@ var (
 	DeviceEventDS18B20Changed                  = event.NewBaseEvent("DS18B20Changed")
 	DeviceEventSocketStateChanged              = event.NewBaseEvent("SocketStateChanged")
 	DeviceEventSocketPowerChanged              = event.NewBaseEvent("SocketPowerChanged")
+	DeviceEventLEDStateChanged                 = event.NewBaseEvent("LEDStateChanged")
 )
 
 type DeviceId int64
@@ -59,7 +60,8 @@ const (
 	DeviceTypeHygrometer
 	DeviceTypeGPIO
 	DeviceTypeSocket
-	DeviceTypeRemoteControll
+	DeviceTypeRemoteControl
+	DeviceTypeLED
 )
 
 type DevicesManager interface {

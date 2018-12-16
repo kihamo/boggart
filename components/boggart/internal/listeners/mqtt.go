@@ -54,6 +54,7 @@ func (l *MQTTListener) Events() []workers.Event {
 		boggart.DeviceEventDS18B20Changed,
 		boggart.DeviceEventSocketStateChanged,
 		boggart.DeviceEventSocketPowerChanged,
+		boggart.DeviceEventLEDStateChanged,
 	}
 }
 
@@ -183,6 +184,15 @@ func (l *MQTTListener) Run(ctx context.Context, event workers.Event, t time.Time
 			l.publish(ctx, fmt.Sprintf("socket/%s/state", mac), true, ValueOff)
 		}
 
+	case boggart.DeviceEventLEDStateChanged:
+		sn := l.macAddress(args[2].(string))
+
+		if args[1].(bool) {
+			l.publish(ctx, fmt.Sprintf("led/%s/state", sn), true, ValueOn)
+		} else {
+			l.publish(ctx, fmt.Sprintf("led/%s/state", sn), true, ValueOff)
+		}
+
 	case boggart.DeviceEventSocketPowerChanged:
 		l.publish(ctx, fmt.Sprintf("socket/%s/power", l.macAddress(args[2].(string))), true, args[1])
 	}
@@ -210,5 +220,8 @@ func (l *MQTTListener) publish(ctx context.Context, topic string, retained bool,
 }
 
 func (l *MQTTListener) macAddress(address string) string {
-	return strings.Replace(address, ":", "-", -1)
+	address = strings.Replace(address, ":", "-", -1)
+	address = strings.Replace(address, ",", "-", -1)
+
+	return address
 }

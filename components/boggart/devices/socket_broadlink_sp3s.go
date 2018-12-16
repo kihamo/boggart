@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	SocketBroadlinkSP3SUpdateInterval  = time.Second * 3 // // as e-control app, refresh every 3 sec
+	SocketBroadlinkSP3SUpdateInterval  = time.Second * 3 // as e-control app, refresh every 3 sec
 	SocketBroadlinkSP3SMQTTTopicPrefix = boggart.ComponentName + "/socket/"
 )
 

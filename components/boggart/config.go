@@ -38,4 +38,5 @@ const (
 	ConfigOwnTracksEnabled              = ComponentName + ".own-tracks.enabled"
 	ConfigSocketsBroadlink              = ComponentName + ".sockets.broadlink"
 	ConfigRemoteControlBroadlink        = ComponentName + ".remote-control.broadlink"
+	ConfigLEDZengge                     = ComponentName + ".led.zengge"
 )

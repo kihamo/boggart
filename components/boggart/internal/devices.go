@@ -18,6 +18,8 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
 	"github.com/kihamo/boggart/components/boggart/providers/softvideo"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/vikstrous/zengge-lightcontrol/control"
+	"github.com/vikstrous/zengge-lightcontrol/local"
 	"github.com/yryz/ds18b20"
 	"gobot.io/x/gobot/platforms/raspi"
 	"periph.io/x/periph/conn/gpio/gpioreg"
@@ -338,6 +340,31 @@ func (c *Component) initRemoteControl() {
 		}
 
 		device := devices.NewBroadlinkRMRemoteControl(broadlink.NewRMProPlus(mac, ip, *localAddr), m)
+		c.devicesManager.Register(device)
+	}
+}
+
+func (c *Component) initLED() {
+	addresses := c.config.String(boggart.ConfigLEDZengge)
+	if addresses == "" {
+		return
+	}
+
+	for _, ip := range strings.Split(addresses, ",") {
+		ip = strings.TrimSpace(ip)
+		if ip == "" {
+			c.logger.Warn("IP address of Zengge LED is empty")
+			continue
+		}
+
+		address := net.JoinHostPort(ip, strconv.Itoa(devices.ZenggeLEDPortCommand))
+		transport, err := local.NewTransport(address)
+		if err != nil {
+			c.logger.Warn("Address of Zengge LED is wrong", "address", address)
+			continue
+		}
+
+		device := devices.NewZenggeLED(&control.Controller{Transport: transport})
 		c.devicesManager.Register(device)
 	}
 }
