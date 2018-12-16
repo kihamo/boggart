@@ -2,6 +2,7 @@ package devices
 
 import (
 	"context"
+	"fmt"
 	"sync/atomic"
 	"time"
 
@@ -11,11 +12,16 @@ import (
 	"github.com/yryz/ds18b20"
 )
 
+const (
+	DS18B20SensorMQTTTopicPrefix = boggart.ComponentName + "/meter/ds18b20/"
+)
+
 type DS18B20Sensor struct {
 	lastValue int64
 
 	boggart.DeviceBase
 	boggart.DeviceSerialNumber
+	boggart.DeviceMQTT
 
 	addr string
 }
@@ -73,7 +79,8 @@ func (d *DS18B20Sensor) taskUpdater(ctx context.Context) (interface{}, error) {
 
 	if prev != current {
 		atomic.StoreInt64(&d.lastValue, current)
-		d.TriggerEvent(ctx, boggart.DeviceEventDS18B20Changed, value, d.SerialNumber())
+
+		d.MQTTPublish(ctx, DS18B20SensorMQTTTopicPrefix+d.SerialNumber(), 0, true, fmt.Sprintf("%.2f", value))
 	}
 
 	return nil, nil

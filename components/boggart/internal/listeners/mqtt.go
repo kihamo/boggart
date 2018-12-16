@@ -51,10 +51,6 @@ func (l *MQTTListener) Events() []workers.Event {
 		boggart.DeviceEventMercury200Changed,
 		boggart.DeviceEventBME280Changed,
 		boggart.DeviceEventGPIOPinChanged,
-		boggart.DeviceEventDS18B20Changed,
-		boggart.DeviceEventSocketStateChanged,
-		boggart.DeviceEventSocketPowerChanged,
-		boggart.DeviceEventLEDStateChanged,
 	}
 }
 
@@ -171,30 +167,6 @@ func (l *MQTTListener) Run(ctx context.Context, event workers.Event, t time.Time
 		} else {
 			l.publishWithQOS(ctx, fmt.Sprintf("gpio/%d", args[1]), 2, true, ValueOff)
 		}
-
-	case boggart.DeviceEventDS18B20Changed:
-		l.publish(ctx, fmt.Sprintf("meter/ds18b20/%s", args[2]), true, args[1])
-
-	case boggart.DeviceEventSocketStateChanged:
-		mac := l.macAddress(args[2].(string))
-
-		if args[1].(bool) {
-			l.publish(ctx, fmt.Sprintf("socket/%s/state", mac), true, ValueOn)
-		} else {
-			l.publish(ctx, fmt.Sprintf("socket/%s/state", mac), true, ValueOff)
-		}
-
-	case boggart.DeviceEventLEDStateChanged:
-		sn := l.macAddress(args[2].(string))
-
-		if args[1].(bool) {
-			l.publish(ctx, fmt.Sprintf("led/%s/state", sn), true, ValueOn)
-		} else {
-			l.publish(ctx, fmt.Sprintf("led/%s/state", sn), true, ValueOff)
-		}
-
-	case boggart.DeviceEventSocketPowerChanged:
-		l.publish(ctx, fmt.Sprintf("socket/%s/power", l.macAddress(args[2].(string))), true, args[1])
 	}
 }
 

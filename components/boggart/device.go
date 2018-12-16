@@ -29,10 +29,6 @@ var (
 	DeviceEventMercury200Changed               = event.NewBaseEvent("Mercury200Changed")
 	DeviceEventBME280Changed                   = event.NewBaseEvent("BME280")
 	DeviceEventGPIOPinChanged                  = event.NewBaseEvent("GPIOPinChanged")
-	DeviceEventDS18B20Changed                  = event.NewBaseEvent("DS18B20Changed")
-	DeviceEventSocketStateChanged              = event.NewBaseEvent("SocketStateChanged")
-	DeviceEventSocketPowerChanged              = event.NewBaseEvent("SocketPowerChanged")
-	DeviceEventLEDStateChanged                 = event.NewBaseEvent("LEDStateChanged")
 )
 
 type DeviceId int64
@@ -100,6 +96,10 @@ type DeviceHasTasks interface {
 
 type DeviceHasListeners interface {
 	Listeners() []workers.ListenerWithEvents
+}
+
+type DeviceHasMQTTClient interface {
+	SetMQTTClient(mqtt.Component)
 }
 
 type DeviceHasMQTTSubscribers mqtt.HasSubscribers

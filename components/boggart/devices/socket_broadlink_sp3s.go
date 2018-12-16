@@ -3,6 +3,7 @@ package devices
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -32,6 +33,7 @@ type BroadlinkSP3SSocket struct {
 
 	boggart.DeviceBase
 	boggart.DeviceSerialNumber
+	boggart.DeviceMQTT
 
 	provider *broadlink.SP3S
 }
@@ -93,16 +95,21 @@ func (d *BroadlinkSP3SSocket) taskUpdater(ctx context.Context) (interface{}, err
 	}
 
 	serialNumber := d.SerialNumber()
+	topicPrefix := SocketBroadlinkSP3SMQTTTopicPrefix + strings.Replace(serialNumber, ":", "-", -1) + "/"
 
 	last := atomic.LoadInt64(&d.state)
 	if last == 0 || (last == 1) != state {
+		var mqttValue []byte
+
 		if state {
 			atomic.StoreInt64(&d.state, 1)
+			mqttValue = []byte(`1`)
 		} else {
 			atomic.StoreInt64(&d.state, -1)
+			mqttValue = []byte(`0`)
 		}
 
-		d.TriggerEvent(ctx, boggart.DeviceEventSocketStateChanged, state, serialNumber)
+		d.MQTTPublish(ctx, topicPrefix+"state", 0, true, mqttValue)
 	}
 
 	value, err := d.Power()
@@ -117,7 +124,8 @@ func (d *BroadlinkSP3SSocket) taskUpdater(ctx context.Context) (interface{}, err
 
 	if current != prev {
 		atomic.StoreInt64(&d.lastValue, current)
-		d.TriggerEvent(ctx, boggart.DeviceEventSocketPowerChanged, value, serialNumber)
+
+		d.MQTTPublish(ctx, topicPrefix+"power", 0, true, fmt.Sprintf("%.2f", value))
 	}
 
 	return nil, nil

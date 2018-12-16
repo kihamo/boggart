@@ -29,6 +29,7 @@ type ZenggeLED struct {
 
 	boggart.DeviceBase
 	boggart.DeviceSerialNumber
+	boggart.DeviceMQTT
 
 	controller *control.Controller
 }
@@ -100,13 +101,20 @@ func (d *ZenggeLED) taskUpdater(ctx context.Context) (interface{}, error) {
 
 	last := atomic.LoadInt64(&d.state)
 	if last == 0 || (last == 1) != state.IsOn {
+		var mqttValue []byte
+
 		if state.IsOn {
 			atomic.StoreInt64(&d.state, 1)
+			mqttValue = []byte(`1`)
 		} else {
 			atomic.StoreInt64(&d.state, -1)
+			mqttValue = []byte(`0`)
 		}
 
-		d.TriggerEvent(ctx, boggart.DeviceEventLEDStateChanged, state.IsOn, d.SerialNumber())
+		sn := strings.Replace(d.SerialNumber(), ":", "-", -1)
+		sn = strings.Replace(sn, ",", "-", -1)
+
+		d.MQTTPublish(ctx, ZenggeLEDMQTTTopicPrefix+sn+"/state", 0, true, mqttValue)
 	}
 
 	return nil, nil

@@ -2,10 +2,12 @@ package boggart
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"sync/atomic"
 
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/pborman/uuid"
 )
@@ -107,4 +109,26 @@ func (d *DeviceSerialNumber) SetSerialNumber(serialNumber string) {
 	d.mutex.Lock()
 	d.serialNumber = serialNumber
 	d.mutex.Unlock()
+}
+
+type DeviceMQTT struct {
+	mutex  sync.RWMutex
+	client mqtt.Component
+}
+
+func (d *DeviceMQTT) SetMQTTClient(client mqtt.Component) {
+	d.mutex.Lock()
+	d.client = client
+	d.mutex.Unlock()
+}
+
+func (d *DeviceMQTT) MQTTPublish(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
+	d.mutex.RLock()
+	defer d.mutex.RUnlock()
+
+	if d.client == nil {
+		return errors.New("MQTT client isn't init")
+	}
+
+	return d.client.Publish(ctx, topic, qos, retained, payload)
 }

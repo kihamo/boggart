@@ -62,6 +62,10 @@ func (m *DevicesManager) RegisterWithID(id string, device boggart.Device) {
 	m.storage.Store(id, device)
 	m.listeners.AsyncTrigger(context.TODO(), boggart.DeviceEventDeviceRegister, device, id)
 
+	if mqttClient, ok := device.(boggart.DeviceHasMQTTClient); ok {
+		mqttClient.SetMQTTClient(m.mqtt)
+	}
+
 	if subs, ok := device.(boggart.DeviceHasMQTTSubscribers); ok {
 		m.mqtt.SubscribeSubscribers(subs.MQTTSubscribers())
 	}
