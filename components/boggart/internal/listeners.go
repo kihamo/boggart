@@ -5,7 +5,6 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/internal/listeners"
-	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/shadow/components/annotations"
 	"github.com/kihamo/shadow/components/messengers"
 	"github.com/kihamo/shadow/components/messengers/platforms/telegram"
@@ -13,8 +12,6 @@ import (
 
 func (c *Component) initListeners() {
 	c.listenersManager.AddListener(listeners.NewLoggingListener(c.logger))
-
-	c.listenersManager.AddListener(listeners.NewMQTTListener(c.application.GetComponent(mqtt.ComponentName).(mqtt.Component)))
 
 	if c.application.HasComponent(messengers.ComponentName) {
 		messenger := c.application.GetComponent(messengers.ComponentName).(messengers.Component).

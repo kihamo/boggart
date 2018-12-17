@@ -84,17 +84,6 @@ func (l *LoggingListener) Run(_ context.Context, event workers.Event, t time.Tim
 	case boggart.DeviceEventDevicesManagerReady:
 		l.logger.Debug("Device manager is ready")
 
-	case boggart.DeviceEventWifiClientConnected,
-		boggart.DeviceEventWifiClientDisconnected,
-		boggart.DeviceEventVPNClientConnected,
-		boggart.DeviceEventVPNClientDisconnected:
-
-		l.logger.Debug("Fire skip event",
-			"event.id", event.Id(),
-			"event.name", event.Name(),
-			"args", args,
-		)
-
 	default:
 		l.logger.Warn("Fire unknown event",
 			"event.id", event.Id(),

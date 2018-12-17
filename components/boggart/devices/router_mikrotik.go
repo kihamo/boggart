@@ -17,6 +17,15 @@ import (
 	"github.com/kihamo/snitch"
 )
 
+const (
+	MikrotikRouterMQTTTopicWiFiMACState         boggart.DeviceMQTTTopic = boggart.ComponentName + "/router/+/wifi/clients/+/state"
+	MikrotikRouterMQTTTopicWiFiConnectedMAC     boggart.DeviceMQTTTopic = boggart.ComponentName + "/router/+/wifi/clients/last/on/mac"
+	MikrotikRouterMQTTTopicWiFiDisconnectedMAC  boggart.DeviceMQTTTopic = boggart.ComponentName + "/router/+/wifi/clients/last/on/mac"
+	MikrotikRouterMQTTTopicVPNLoginState        boggart.DeviceMQTTTopic = boggart.ComponentName + "/router/+/vpn/clients/+/state"
+	MikrotikRouterMQTTTopicVPNConnectedLogin    boggart.DeviceMQTTTopic = boggart.ComponentName + "/router/+/vpn/clients/last/on/login"
+	MikrotikRouterMQTTTopicVPNDisconnectedLogin boggart.DeviceMQTTTopic = boggart.ComponentName + "/router/+/vpn/clients/last/off/login"
+)
+
 var (
 	metricRouterMikrotikTrafficReceivedBytes = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_traffic_received_bytes", "Mikrotik traffic received bytes")
 	metricRouterMikrotikTrafficSentBytes     = snitch.NewGauge(boggart.ComponentName+"_device_router_mikrotik_traffic_sent_bytes", "Mikrotik traffic sent bytes")
@@ -38,6 +47,7 @@ var (
 type MikrotikRouter struct {
 	boggart.DeviceBase
 	boggart.DeviceSerialNumber
+	boggart.DeviceMQTT
 
 	provider     *mikrotik.Client
 	syslogClient string
@@ -211,6 +221,7 @@ func (d *MikrotikRouter) taskSerialNumber(ctx context.Context) (interface{}, err
 	}
 
 	d.SetSerialNumber(system.SerialNumber)
+	sn := system.SerialNumber
 
 	// wifi clients
 	clients, err := d.provider.InterfaceWirelessRegistrationTable(ctx)
@@ -224,7 +235,10 @@ func (d *MikrotikRouter) taskSerialNumber(ctx context.Context) (interface{}, err
 			return nil, err, false
 		}
 
-		d.TriggerEvent(ctx, boggart.DeviceEventWifiClientConnected, mac, connection.Interface, system.SerialNumber)
+		login := strings.Replace(mac.Address, ":", "-", -1)
+
+		d.MQTTPublishAsync(ctx, MikrotikRouterMQTTTopicWiFiConnectedMAC.Format(sn), 0, false, login)
+		d.MQTTPublishAsync(ctx, MikrotikRouterMQTTTopicWiFiMACState.Format(sn, login), 0, false, []byte(`1`))
 	}
 
 	// vpn clients
@@ -234,7 +248,10 @@ func (d *MikrotikRouter) taskSerialNumber(ctx context.Context) (interface{}, err
 	}
 
 	for _, connection := range connections {
-		d.TriggerEvent(ctx, boggart.DeviceEventVPNClientConnected, connection.Name, connection.Address, system.SerialNumber)
+		login := strings.Replace(connection.Name, ":", "-", -1)
+
+		d.MQTTPublishAsync(ctx, MikrotikRouterMQTTTopicVPNConnectedLogin.Format(sn), 0, false, login)
+		d.MQTTPublishAsync(ctx, MikrotikRouterMQTTTopicVPNLoginState.Format(sn, login), 0, false, []byte(`1`))
 	}
 
 	return nil, nil, true
@@ -354,6 +371,17 @@ func (d *MikrotikRouter) taskUpdater(ctx context.Context) (interface{}, error) {
 	return nil, nil
 }
 
+func (d *MikrotikRouter) MQTTTopics() []boggart.DeviceMQTTTopic {
+	return []boggart.DeviceMQTTTopic{
+		MikrotikRouterMQTTTopicWiFiMACState,
+		MikrotikRouterMQTTTopicWiFiConnectedMAC,
+		MikrotikRouterMQTTTopicWiFiDisconnectedMAC,
+		MikrotikRouterMQTTTopicVPNLoginState,
+		MikrotikRouterMQTTTopicVPNConnectedLogin,
+		MikrotikRouterMQTTTopicVPNDisconnectedLogin,
+	}
+}
+
 func (l *MikrotikRouterListener) Events() []workers.Event {
 	return []workers.Event{
 		boggart.DeviceEventSyslogReceive,
@@ -400,11 +428,16 @@ func (l *MikrotikRouterListener) Run(ctx context.Context, event workers.Event, t
 				return
 			}
 
+			sn := l.router.SerialNumber()
+			login := strings.Replace(mac.Address, ":", "-", -1)
+
 			switch check[3] {
 			case "connected":
-				l.router.TriggerEvent(ctx, boggart.DeviceEventWifiClientConnected, mac, check[2], l.router.SerialNumber())
+				l.router.MQTTPublishAsync(ctx, MikrotikRouterMQTTTopicWiFiConnectedMAC.Format(sn), 0, false, login)
+				l.router.MQTTPublishAsync(ctx, MikrotikRouterMQTTTopicWiFiMACState.Format(sn, login), 0, false, []byte(`1`))
 			case "disconnected":
-				l.router.TriggerEvent(ctx, boggart.DeviceEventWifiClientDisconnected, mac, check[2], l.router.SerialNumber())
+				l.router.MQTTPublishAsync(ctx, MikrotikRouterMQTTTopicWiFiDisconnectedMAC.Format(sn), 0, false, login)
+				l.router.MQTTPublishAsync(ctx, MikrotikRouterMQTTTopicWiFiMACState.Format(sn, login), 0, false, []byte(`0`))
 			}
 
 		case "vpn":
@@ -413,11 +446,16 @@ func (l *MikrotikRouterListener) Run(ctx context.Context, event workers.Event, t
 				return
 			}
 
+			sn := l.router.SerialNumber()
+			login := strings.Replace(check[1], ":", "-", -1)
+
 			switch check[2] {
 			case "in":
-				l.router.TriggerEvent(ctx, boggart.DeviceEventVPNClientConnected, check[1], check[3], l.router.SerialNumber())
+				l.router.MQTTPublishAsync(ctx, MikrotikRouterMQTTTopicVPNConnectedLogin.Format(sn), 0, false, login)
+				l.router.MQTTPublishAsync(ctx, MikrotikRouterMQTTTopicVPNLoginState.Format(sn, login), 0, false, []byte(`1`))
 			case "out":
-				l.router.TriggerEvent(ctx, boggart.DeviceEventVPNClientDisconnected, check[1], l.router.SerialNumber())
+				l.router.MQTTPublishAsync(ctx, MikrotikRouterMQTTTopicVPNDisconnectedLogin.Format(sn), 0, false, login)
+				l.router.MQTTPublishAsync(ctx, MikrotikRouterMQTTTopicVPNLoginState.Format(sn, login), 0, false, []byte(`0`))
 			}
 		}
 	}

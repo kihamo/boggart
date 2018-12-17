@@ -19,10 +19,6 @@ var (
 	DeviceEventDeviceEnabledAfterCheck  = event.NewBaseEvent("DeviceEnabledAfterCheck")
 	DeviceEventDeviceEnabled            = event.NewBaseEvent("DeviceEnabled")
 	DeviceEventDeviceDisabled           = event.NewBaseEvent("DeviceDisabled")
-	DeviceEventWifiClientConnected      = event.NewBaseEvent("WifiClientConnected")
-	DeviceEventWifiClientDisconnected   = event.NewBaseEvent("WifiClientDisconnected")
-	DeviceEventVPNClientConnected       = event.NewBaseEvent("VPNClientConnected")
-	DeviceEventVPNClientDisconnected    = event.NewBaseEvent("VPNClientDisconnected")
 )
 
 type DeviceId int64
