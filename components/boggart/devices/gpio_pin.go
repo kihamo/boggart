@@ -16,7 +16,7 @@ import (
 type GPIOMode int64
 
 const (
-	GPIOMQTTTopicPrefix = boggart.ComponentName + "/gpio/"
+	GPIOMQTTTopicPin boggart.DeviceMQTTTopic = boggart.ComponentName + "/gpio/+"
 
 	GPIOModeDefault GPIOMode = iota
 	GPIOModeIn
@@ -107,6 +107,12 @@ func (d *GPIOPin) waitForEdge() {
 	}
 }
 
+func (d *GPIOPin) MQTTTopics() []boggart.DeviceMQTTTopic {
+	return []boggart.DeviceMQTTTopic{
+		GPIOMQTTTopicPin,
+	}
+}
+
 func (d *GPIOPin) MQTTSubscribers() []mqtt.Subscriber {
 	if d.Mode() != GPIOModeOut {
 		return nil
@@ -114,7 +120,7 @@ func (d *GPIOPin) MQTTSubscribers() []mqtt.Subscriber {
 
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(
-			fmt.Sprintf("%s%d", GPIOMQTTTopicPrefix, d.pin.Number()),
+			GPIOMQTTTopicPin.Format(d.pin.Number()),
 			0,
 			func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
 				if !d.IsEnabled() {

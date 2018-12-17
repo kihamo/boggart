@@ -146,6 +146,6 @@ func (d *DeviceMQTT) MQTTPublish(ctx context.Context, topic string, qos byte, re
 
 func (d *DeviceMQTT) MQTTPublishAsync(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) {
 	go func() {
-		d.MQTTPublishAsync(ctx, topic, qos, retained, payload)
+		d.MQTTPublish(ctx, topic, qos, retained, payload)
 	}()
 }

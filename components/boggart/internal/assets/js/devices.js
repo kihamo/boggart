@@ -38,6 +38,12 @@ $(document).ready(function () {
                     }
                 },
                 {
+                    data: 'mqtt_subscribers',
+                    render: function (subscribers) {
+                        return subscribers.length;
+                    }
+                },
+                {
                     data: 'enabled',
                     render: function (data, type, row) {
                         var content;
@@ -65,7 +71,7 @@ $(document).ready(function () {
                         var content = '';
 
                         for (var i in tasks) {
-                            content += '<span class="label label-primary">' + tasks[i] + '</span> ';
+                            content += '<span class="label label-warning">' + tasks[i] + '</span> ';
                         }
 
                         return content;
@@ -77,7 +83,19 @@ $(document).ready(function () {
                         var content = '';
 
                         for (var i in topics) {
-                            content += '<span class="label label-info">' + topics[i] + '</span> ';
+                            content += '<span class="label label-primary">' + topics[i] + '</span> ';
+                        }
+
+                        return content;
+                    }
+                },
+                {
+                    data: 'mqtt_subscribers',
+                    render: function (subscribers) {
+                        var content = '';
+
+                        for (var i in subscribers) {
+                            content += '<span class="label label-info">' + subscribers[i] + '</span> ';
                         }
 
                         return content;

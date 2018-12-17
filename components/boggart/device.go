@@ -2,6 +2,8 @@ package boggart
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
@@ -102,3 +104,28 @@ type DeviceHasMQTTClient interface {
 }
 
 type DeviceHasMQTTSubscribers mqtt.HasSubscribers
+
+type DeviceMQTTTopic string
+
+type DeviceHasMQTTTopics interface {
+	MQTTTopics() []DeviceMQTTTopic
+}
+
+func (t DeviceMQTTTopic) String() string {
+	return string(t)
+}
+
+func (t DeviceMQTTTopic) Format(args ...interface{}) string {
+	parts := mqtt.RouteSplit(t.String())
+
+	for _, arg := range args {
+		for i, topic := range parts {
+			if topic == "+" {
+				parts[i] = fmt.Sprintf("%v", arg)
+				break
+			}
+		}
+	}
+
+	return strings.Join(parts, "/")
+}

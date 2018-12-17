@@ -18,8 +18,11 @@ import (
 )
 
 const (
-	SocketBroadlinkSP3SUpdateInterval  = time.Second * 3 // as e-control app, refresh every 3 sec
-	SocketBroadlinkSP3SMQTTTopicPrefix = boggart.ComponentName + "/socket/"
+	SocketBroadlinkSP3SUpdateInterval = time.Second * 3 // as e-control app, refresh every 3 sec
+
+	SocketBroadlinkSP3SMQTTTopicState boggart.DeviceMQTTTopic = boggart.ComponentName + "/socket/+/state"
+	SocketBroadlinkSP3SMQTTTopicPower boggart.DeviceMQTTTopic = boggart.ComponentName + "/socket/+/power"
+	SocketBroadlinkSP3SMQTTTopicSet   boggart.DeviceMQTTTopic = boggart.ComponentName + "/socket/+/set"
 )
 
 var (
@@ -94,7 +97,7 @@ func (d *BroadlinkSP3SSocket) taskUpdater(ctx context.Context) (interface{}, err
 	}
 
 	serialNumber := d.SerialNumber()
-	topicPrefix := SocketBroadlinkSP3SMQTTTopicPrefix + strings.Replace(serialNumber, ":", "-", -1) + "/"
+	serialNumberMQTT := strings.Replace(serialNumber, ":", "-", -1)
 
 	last := atomic.LoadInt64(&d.state)
 	if last == 0 || (last == 1) != state {
@@ -108,7 +111,7 @@ func (d *BroadlinkSP3SSocket) taskUpdater(ctx context.Context) (interface{}, err
 			mqttValue = []byte(`0`)
 		}
 
-		d.MQTTPublishAsync(ctx, topicPrefix+"state", 0, true, mqttValue)
+		d.MQTTPublishAsync(ctx, SocketBroadlinkSP3SMQTTTopicState.Format(serialNumberMQTT), 0, true, mqttValue)
 	}
 
 	value, err := d.Power()
@@ -124,7 +127,7 @@ func (d *BroadlinkSP3SSocket) taskUpdater(ctx context.Context) (interface{}, err
 	if current != prev {
 		atomic.StoreInt64(&d.lastValue, current)
 
-		d.MQTTPublishAsync(ctx, topicPrefix+"power", 0, true, value)
+		d.MQTTPublishAsync(ctx, SocketBroadlinkSP3SMQTTTopicPower.Format(serialNumberMQTT), 0, true, value)
 	}
 
 	return nil, nil
@@ -156,12 +159,19 @@ func (d *BroadlinkSP3SSocket) Power() (float64, error) {
 	return d.provider.Power()
 }
 
+func (d *BroadlinkSP3SSocket) MQTTTopics() []boggart.DeviceMQTTTopic {
+	return []boggart.DeviceMQTTTopic{
+		SocketBroadlinkSP3SMQTTTopicState,
+		SocketBroadlinkSP3SMQTTTopicPower,
+		SocketBroadlinkSP3SMQTTTopicSet,
+	}
+}
+
 func (d *BroadlinkSP3SSocket) MQTTSubscribers() []mqtt.Subscriber {
 	mac := strings.Replace(d.provider.MAC().String(), ":", "-", -1)
-	topic := SocketBroadlinkSP3SMQTTTopicPrefix + mac + "/set"
 
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(topic, 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+		mqtt.NewSubscriber(SocketBroadlinkSP3SMQTTTopicSet.Format(mac), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
 			if !d.IsEnabled() {
 				return
 			}

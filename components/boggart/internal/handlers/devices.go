@@ -11,13 +11,14 @@ import (
 
 // easyjson:json
 type deviceHandlerDevice struct {
-	RegisterId  string   `json:"register_id"`
-	Id          string   `json:"id"`
-	Description string   `json:"description"`
-	Tasks       []string `json:"tasks"`
-	MQTTTopics  []string `json:"mqtt_topics"`
-	Types       []string `json:"types"`
-	Enabled     bool     `json:"enabled"`
+	RegisterId      string   `json:"register_id"`
+	Id              string   `json:"id"`
+	Description     string   `json:"description"`
+	Tasks           []string `json:"tasks"`
+	MQTTTopics      []string `json:"mqtt_topics"`
+	MQTTSubscribers []string `json:"mqtt_subscribers"`
+	Types           []string `json:"types"`
+	Enabled         bool     `json:"enabled"`
 }
 
 // easyjson:json
@@ -65,13 +66,14 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 
 		for registerId, d := range h.devicesManager.Devices() {
 			item := deviceHandlerDevice{
-				RegisterId:  registerId,
-				Id:          d.Id(),
-				Description: d.Description(),
-				Types:       make([]string, 0, len(d.Types())),
-				Tasks:       make([]string, 0),
-				MQTTTopics:  make([]string, 0),
-				Enabled:     d.IsEnabled(),
+				RegisterId:      registerId,
+				Id:              d.Id(),
+				Description:     d.Description(),
+				Types:           make([]string, 0, len(d.Types())),
+				Tasks:           make([]string, 0),
+				MQTTTopics:      make([]string, 0),
+				MQTTSubscribers: make([]string, 0),
+				Enabled:         d.IsEnabled(),
 			}
 
 			if tasks, ok := d.(boggart.DeviceHasTasks); ok {
@@ -84,9 +86,15 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				item.Types = append(item.Types, t.String())
 			}
 
+			if topics, ok := d.(boggart.DeviceHasMQTTTopics); ok {
+				for _, topic := range topics.MQTTTopics() {
+					item.MQTTTopics = append(item.MQTTTopics, topic.String())
+				}
+			}
+
 			if subscribers, ok := d.(boggart.DeviceHasMQTTSubscribers); ok {
 				for _, topic := range subscribers.MQTTSubscribers() {
-					item.MQTTTopics = append(item.MQTTTopics, topic.Topic())
+					item.MQTTSubscribers = append(item.MQTTSubscribers, topic.Topic())
 				}
 			}
 

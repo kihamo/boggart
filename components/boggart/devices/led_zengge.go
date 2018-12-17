@@ -20,8 +20,10 @@ const (
 	ZenggeLEDPortCommand = 5577
 	ZenggeLEDPortWifi    = 48899
 
-	ZenggeLEDUpdateInterval  = time.Second * 3
-	ZenggeLEDMQTTTopicPrefix = boggart.ComponentName + "/led/"
+	ZenggeLEDUpdateInterval = time.Second * 3
+
+	ZenggeLEDMQTTTopicPower boggart.DeviceMQTTTopic = boggart.ComponentName + "/led/+/power"
+	ZenggeLEDMQTTTopicState boggart.DeviceMQTTTopic = boggart.ComponentName + "/led/+/state"
 )
 
 type ZenggeLED struct {
@@ -114,7 +116,7 @@ func (d *ZenggeLED) taskUpdater(ctx context.Context) (interface{}, error) {
 		sn := strings.Replace(d.SerialNumber(), ":", "-", -1)
 		sn = strings.Replace(sn, ",", "-", -1)
 
-		d.MQTTPublishAsync(ctx, ZenggeLEDMQTTTopicPrefix+sn+"/state", 0, true, mqttValue)
+		d.MQTTPublishAsync(ctx, ZenggeLEDMQTTTopicState.Format(sn), 0, true, mqttValue)
 	}
 
 	return nil, nil
@@ -138,11 +140,18 @@ func (d *ZenggeLED) Off(ctx context.Context) error {
 	return err
 }
 
+func (d *ZenggeLED) MQTTTopics() []boggart.DeviceMQTTTopic {
+	return []boggart.DeviceMQTTTopic{
+		ZenggeLEDMQTTTopicPower,
+		ZenggeLEDMQTTTopicState,
+	}
+}
+
 func (d *ZenggeLED) MQTTSubscribers() []mqtt.Subscriber {
 	sn := strings.Replace(d.SerialNumber(), ".", "-", -1)
 
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(ZenggeLEDMQTTTopicPrefix+sn+"/power", 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+		mqtt.NewSubscriber(ZenggeLEDMQTTTopicPower.Format(sn), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
 			if !d.IsEnabled() {
 				return
 			}

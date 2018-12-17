@@ -26,7 +26,7 @@ msgid "Tasks"
 msgstr "Задач"
 
 msgid "MQTT subscribers"
-msgstr "MQTT подписок"
+msgstr "MQTT подписки"
 
 msgid "MQTT topics"
 msgstr "MQTT топики"
