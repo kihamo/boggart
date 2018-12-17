@@ -30,8 +30,8 @@ var (
 )
 
 type BroadlinkSP3SSocket struct {
-	state     int64
-	lastValue int64
+	state int64
+	power int64
 
 	boggart.DeviceBase
 	boggart.DeviceSerialNumber
@@ -42,8 +42,8 @@ type BroadlinkSP3SSocket struct {
 
 func NewBroadlinkSP3SSocket(provider *broadlink.SP3S) *BroadlinkSP3SSocket {
 	device := &BroadlinkSP3SSocket{
-		provider:  provider,
-		lastValue: -1,
+		provider: provider,
+		power:    -1,
 	}
 	device.Init()
 	device.SetSerialNumber(provider.MAC().String())
@@ -99,8 +99,8 @@ func (d *BroadlinkSP3SSocket) taskUpdater(ctx context.Context) (interface{}, err
 	serialNumber := d.SerialNumber()
 	serialNumberMQTT := strings.Replace(serialNumber, ":", "-", -1)
 
-	last := atomic.LoadInt64(&d.state)
-	if last == 0 || (last == 1) != state {
+	prevState := atomic.LoadInt64(&d.state)
+	if prevState == 0 || (prevState == 1) != state {
 		var mqttValue []byte
 
 		if state {
@@ -121,11 +121,11 @@ func (d *BroadlinkSP3SSocket) taskUpdater(ctx context.Context) (interface{}, err
 
 	metricSocketBroadlinkSP3SPower.With("serial_number", serialNumber).Set(value)
 
-	current := int64(value * 100)
-	prev := atomic.LoadInt64(&d.lastValue)
+	currentPower := int64(value * 100)
+	prevPower := atomic.LoadInt64(&d.power)
 
-	if current != prev {
-		atomic.StoreInt64(&d.lastValue, current)
+	if currentPower != prevPower {
+		atomic.StoreInt64(&d.power, currentPower)
 
 		d.MQTTPublishAsync(ctx, SocketBroadlinkSP3SMQTTTopicPower.Format(serialNumberMQTT), 0, true, value)
 	}

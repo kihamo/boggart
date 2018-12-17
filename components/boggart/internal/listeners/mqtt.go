@@ -46,7 +46,6 @@ func (l *MQTTListener) Events() []workers.Event {
 		boggart.DeviceEventVPNClientDisconnected,
 		boggart.DeviceEventMegafonBalanceChanged,
 		boggart.DeviceEventPulsarChanged,
-		boggart.DeviceEventPulsarPulsedChanged,
 		boggart.DeviceEventMercury200Changed,
 		boggart.DeviceEventBME280Changed,
 		boggart.DeviceEventGPIOPinChanged,
@@ -130,12 +129,6 @@ func (l *MQTTListener) Run(ctx context.Context, event workers.Event, t time.Time
 		l.publish(ctx, fmt.Sprintf("meter/pulsar/%s/temperature_delta", args[2]), true, values.TemperatureDelta)
 		l.publish(ctx, fmt.Sprintf("meter/pulsar/%s/energy", args[2]), true, values.Energy)
 		l.publish(ctx, fmt.Sprintf("meter/pulsar/%s/consumption", args[2]), true, values.Consumption)
-
-	case boggart.DeviceEventPulsarPulsedChanged:
-		values := args[1].(devices.PulsarPulsedWaterMeterChanged)
-
-		l.publish(ctx, fmt.Sprintf("meter/pulsar/%s/volume", args[2]), true, values.Volume)
-		l.publish(ctx, fmt.Sprintf("meter/pulsar/%s/pulses", args[2]), true, values.Pulses)
 
 	case boggart.DeviceEventMercury200Changed:
 		values := args[1].(devices.Mercury200ElectricityMeterChange)

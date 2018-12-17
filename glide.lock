@@ -1,5 +1,5 @@
 hash: 361aa85d6264ef5771f8d9774c3c6ba560b4021117162f74972c46568f59f159
-updated: 2018-12-07T23:47:29.671696+03:00
+updated: 2018-12-17T11:50:47.376567+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: 02e53af36e6c978af692887ed449b74026d76fec
@@ -17,7 +17,7 @@ imports:
   subpackages:
   - quantile
 - name: github.com/bsm/histogram
-  version: 2b0b912bb289c8e5ad4c8dd996fc22f759834d8d
+  version: e219932777c945c7a221ce0e7ace7712c59c8bac
 - name: github.com/bugsnag/osext
   version: 0dd3f918b21bec95ace9dc86c7e70266cfc5c702
 - name: github.com/chai2010/gettext-go
@@ -287,7 +287,7 @@ imports:
   subpackages:
   - nethttp
 - name: github.com/opentracing/opentracing-go
-  version: 8b5a441dc60e8d9bb9bf9d22060b6d94fa599983
+  version: be550b025b433cdfa2f11efb962afa2ea3c4d967
   subpackages:
   - ext
   - log
@@ -306,13 +306,13 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: 4724e9255275ce38f7179b2478abeae4e28c904f
+  version: aeab699e26f4d4089dba5e522e5d9babd2adbaf7
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: aa55a523dc0a8297edf51bb75e8eec13eb3be45d
+  version: 185b4288413d2a0dd0806f78c90dde719829e5ae
   subpackages:
   - internal/util
   - nfs
@@ -323,6 +323,8 @@ imports:
   version: 975f53781597ed779763b7b65566e74c4004d8de
 - name: github.com/PuerkitoBio/urlesc
   version: de5bf2ad457846296e2031421a34e2568e304e35
+- name: github.com/robbiet480/go.nut
+  version: 246697bfaea771ddfe4ce0d754e6e2a7b8214f0f
 - name: github.com/rubenv/sql-migrate
   version: 6edbfbd6a369ee82463312ec67b2c92f97a1d4dc
   subpackages:
@@ -356,6 +358,12 @@ imports:
   version: ed3a127ec5fef7ae9ea95b01b542c47fbd999ce5
   subpackages:
   - metrics
+- name: github.com/vikstrous/zengge-lightcontrol
+  version: d4f65c59389e1295a93c3ae785647e3aadfe23df
+  subpackages:
+  - control
+  - local
+  - remote
 - name: github.com/yryz/ds18b20
   version: 3cf383a406247c49e48a80014f3e17ddee418742
 - name: go.uber.org/atomic
@@ -429,7 +437,7 @@ imports:
   - trace
   - websocket
 - name: golang.org/x/oauth2
-  version: d668ce993890a79bda886613ee587a69dd5da7a6
+  version: 8f65e3013ebad444f13bc19536f7865efc793816
   subpackages:
   - internal
 - name: golang.org/x/sync
@@ -437,7 +445,7 @@ imports:
   subpackages:
   - errgroup
 - name: golang.org/x/sys
-  version: 4ed8d59d0b35e1e29334a206d1b3f38b1e5dfb31
+  version: 62eef0e2fa9b2c385f7b2778e763486da6880d37
   subpackages:
   - unix
   - windows
@@ -452,7 +460,7 @@ imports:
   - unicode/norm
   - width
 - name: google.golang.org/appengine
-  version: a37df1387b4521194676d88c79230c613610d5f4
+  version: 4a4468ece617fc8205e99368fa2200e9d1fad421
   subpackages:
   - internal
   - internal/base
@@ -462,7 +470,7 @@ imports:
   - internal/urlfetch
   - urlfetch
 - name: google.golang.org/genproto
-  version: bd91e49a0898e27abb88c339b432fa53d7497ac0
+  version: b5d43981345bdb2c233eb4bf3277847b48c6fdc6
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc

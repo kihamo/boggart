@@ -2,8 +2,7 @@ package devices
 
 import (
 	"context"
-	"reflect"
-	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -15,6 +14,9 @@ import (
 
 const (
 	PulsarPulsedWaterMeterScale = 1000
+
+	PulsarPulsedWaterMeterMQTTTopicPulses boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/pulsar/+/pulses"
+	PulsarPulsedWaterMeterMQTTTopicVolume boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/pulsar/+/volume"
 )
 
 var (
@@ -22,22 +24,17 @@ var (
 	metricWaterMeterPulsarPulsedPulses = snitch.NewGauge(boggart.ComponentName+"_device_water_meter_pulsar_pulsed_pulses", "Pulsar volume of water in pulses")
 )
 
-type PulsarPulsedWaterMeterChanged struct {
-	Volume float64
-	Pulses uint64
-}
-
 type PulsarPulsedWaterMeter struct {
+	pulses uint64
+
 	boggart.DeviceBase
 	boggart.DeviceSerialNumber
+	boggart.DeviceMQTT
 
 	input        uint64
 	volumeOffset float64
 	provider     *pulsar.HeatMeter
 	interval     time.Duration
-
-	mutex      sync.Mutex
-	lastValues PulsarPulsedWaterMeterChanged
 }
 
 func NewPulsarPulsedWaterMeter(serialNumber string, volumeOffset float64, provider *pulsar.HeatMeter, input uint64, interval time.Duration) *PulsarPulsedWaterMeter {
@@ -131,23 +128,25 @@ func (d *PulsarPulsedWaterMeter) taskUpdater(ctx context.Context) (interface{}, 
 	}
 
 	serialNumber := d.SerialNumber()
-	currentValues := PulsarPulsedWaterMeterChanged{
-		Volume: d.volume(pulses),
-		Pulses: pulses,
-	}
+	volume := d.volume(pulses)
 
-	metricWaterMeterPulsarPulsedPulses.With("serial_number", serialNumber).Set(float64(currentValues.Pulses))
-	metricWaterMeterPulsarPulsedVolume.With("serial_number", serialNumber).Set(currentValues.Volume)
+	metricWaterMeterPulsarPulsedPulses.With("serial_number", serialNumber).Set(float64(pulses))
+	metricWaterMeterPulsarPulsedVolume.With("serial_number", serialNumber).Set(volume)
 
-	d.mutex.Lock()
-	if !reflect.DeepEqual(d.lastValues, currentValues) {
-		d.lastValues = currentValues
-		d.mutex.Unlock()
+	prevPulses := atomic.LoadUint64(&d.pulses)
+	if pulses != prevPulses {
+		atomic.StoreUint64(&d.pulses, pulses)
 
-		d.TriggerEvent(ctx, boggart.DeviceEventPulsarPulsedChanged, currentValues, serialNumber)
-	} else {
-		d.mutex.Unlock()
+		d.MQTTPublishAsync(ctx, PulsarPulsedWaterMeterMQTTTopicPulses.Format(serialNumber), 0, true, pulses)
+		d.MQTTPublishAsync(ctx, PulsarPulsedWaterMeterMQTTTopicVolume.Format(serialNumber), 0, true, volume)
 	}
 
 	return nil, nil
+}
+
+func (d *PulsarPulsedWaterMeter) MQTTTopics() []boggart.DeviceMQTTTopic {
+	return []boggart.DeviceMQTTTopic{
+		PulsarPulsedWaterMeterMQTTTopicPulses,
+		PulsarPulsedWaterMeterMQTTTopicVolume,
+	}
 }

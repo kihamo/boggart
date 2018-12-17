@@ -91,7 +91,6 @@ func (l *LoggingListener) Run(_ context.Context, event workers.Event, t time.Tim
 		boggart.DeviceEventHikvisionEventNotificationAlert,
 		boggart.DeviceEventMegafonBalanceChanged,
 		boggart.DeviceEventPulsarChanged,
-		boggart.DeviceEventPulsarPulsedChanged,
 		boggart.DeviceEventMercury200Changed,
 		boggart.DeviceEventBME280Changed,
 		boggart.DeviceEventGPIOPinChanged:
