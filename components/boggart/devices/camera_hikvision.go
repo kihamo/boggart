@@ -20,7 +20,17 @@ import (
 
 const (
 	CameraHikVisionIgnoreInterval = time.Second * 5
-	CameraMQTTTopicPrefix         = boggart.ComponentName + "/camera/"
+
+	CameraHikVisionMQTTTopicEvent              boggart.DeviceMQTTTopic = boggart.ComponentName + "/cctv/+/+/+"
+	CameraHikVisionMQTTTopicPTZMove            boggart.DeviceMQTTTopic = boggart.ComponentName + "/cctv/+/ptz/+/move"
+	CameraHikVisionMQTTTopicPTZAbsolute        boggart.DeviceMQTTTopic = boggart.ComponentName + "/cctv/+/ptz/+/absolute"
+	CameraHikVisionMQTTTopicPTZContinuous      boggart.DeviceMQTTTopic = boggart.ComponentName + "/cctv/+/ptz/+/continuous"
+	CameraHikVisionMQTTTopicPTZRelative        boggart.DeviceMQTTTopic = boggart.ComponentName + "/cctv/+/ptz/+/relative"
+	CameraHikVisionMQTTTopicPTZPreset          boggart.DeviceMQTTTopic = boggart.ComponentName + "/cctv/+/ptz/+/preset"
+	CameraHikVisionMQTTTopicPTZMomentary       boggart.DeviceMQTTTopic = boggart.ComponentName + "/cctv/+/ptz/+/momentary"
+	CameraHikVisionMQTTTopicPTZStatusElevation boggart.DeviceMQTTTopic = boggart.ComponentName + "/cctv/+/ptz/+/status/elevation"
+	CameraHikVisionMQTTTopicPTZStatusAzimuth   boggart.DeviceMQTTTopic = boggart.ComponentName + "/cctv/+/ptz/+/status/azimuth"
+	CameraHikVisionMQTTTopicPTZStatusZoom      boggart.DeviceMQTTTopic = boggart.ComponentName + "/cctv/+/ptz/+/status/zoom"
 )
 
 type cameraHikVisionPTZChannel struct {
@@ -31,22 +41,21 @@ type cameraHikVisionPTZChannel struct {
 type CameraHikVision struct {
 	boggart.DeviceBase
 	boggart.DeviceSerialNumber
+	boggart.DeviceMQTT
 
 	isapi                 *hikvision.ISAPI
 	interval              time.Duration
 	mutex                 sync.RWMutex
 	alertStreamingHistory map[string]time.Time
-	mqtt                  mqtt.Component
 
 	ptzChannels map[uint64]cameraHikVisionPTZChannel
 }
 
-func NewCameraHikVision(isapi *hikvision.ISAPI, interval time.Duration, m mqtt.Component) *CameraHikVision {
+func NewCameraHikVision(isapi *hikvision.ISAPI, interval time.Duration) *CameraHikVision {
 	device := &CameraHikVision{
 		isapi:                 isapi,
 		interval:              interval,
 		alertStreamingHistory: make(map[string]time.Time),
-		mqtt: m,
 	}
 	device.Init()
 	device.SetDescription("HikVision camera")
@@ -122,27 +131,29 @@ func (d *CameraHikVision) taskSerialNumber(ctx context.Context) (interface{}, er
 		return nil, nil, true
 	}
 
-	if err := d.mqtt.Subscribe(d.generateMQTTTopic("ptz", "+", "move"), 0, d.callbackMQTTAbsolute); err != nil {
+	sn := strings.Replace(d.SerialNumber(), "/", "-", -1)
+
+	if err := d.MQTTSubscribe(CameraHikVisionMQTTTopicPTZMove.Format(sn), 0, d.callbackMQTTAbsolute); err != nil {
 		return nil, err, false
 	}
 
-	if err := d.mqtt.Subscribe(d.generateMQTTTopic("ptz", "+", "absolute"), 0, d.callbackMQTTAbsolute); err != nil {
+	if err := d.MQTTSubscribe(CameraHikVisionMQTTTopicPTZAbsolute.Format(sn), 0, d.callbackMQTTAbsolute); err != nil {
 		return nil, err, false
 	}
 
-	if err := d.mqtt.Subscribe(d.generateMQTTTopic("ptz", "+", "continuous"), 0, d.callbackMQTTContinuous); err != nil {
+	if err := d.MQTTSubscribe(CameraHikVisionMQTTTopicPTZContinuous.Format(sn), 0, d.callbackMQTTContinuous); err != nil {
 		return nil, err, false
 	}
 
-	if err := d.mqtt.Subscribe(d.generateMQTTTopic("ptz", "+", "relative"), 0, d.callbackMQTTRelative); err != nil {
+	if err := d.MQTTSubscribe(CameraHikVisionMQTTTopicPTZRelative.Format(sn), 0, d.callbackMQTTRelative); err != nil {
 		return nil, err, false
 	}
 
-	if err := d.mqtt.Subscribe(d.generateMQTTTopic("ptz", "+", "preset"), 0, d.callbackMQTTPreset); err != nil {
+	if err := d.MQTTSubscribe(CameraHikVisionMQTTTopicPTZPreset.Format(sn), 0, d.callbackMQTTPreset); err != nil {
 		return nil, err, false
 	}
 
-	if err := d.mqtt.Subscribe(d.generateMQTTTopic("ptz", "+", "momentary"), 0, d.callbackMQTTMomentary); err != nil {
+	if err := d.MQTTSubscribe(CameraHikVisionMQTTTopicPTZMomentary.Format(sn), 0, d.callbackMQTTMomentary); err != nil {
 		return nil, err, false
 	}
 
@@ -179,6 +190,21 @@ func (d *CameraHikVision) taskPTZStatus(ctx context.Context) (interface{}, error
 	return nil, nil, stop
 }
 
+func (d *CameraHikVision) MQTTTopics() []boggart.DeviceMQTTTopic {
+	return []boggart.DeviceMQTTTopic{
+		CameraHikVisionMQTTTopicEvent,
+		CameraHikVisionMQTTTopicPTZMove,
+		CameraHikVisionMQTTTopicPTZAbsolute,
+		CameraHikVisionMQTTTopicPTZContinuous,
+		CameraHikVisionMQTTTopicPTZRelative,
+		CameraHikVisionMQTTTopicPTZPreset,
+		CameraHikVisionMQTTTopicPTZMomentary,
+		CameraHikVisionMQTTTopicPTZStatusElevation,
+		CameraHikVisionMQTTTopicPTZStatusAzimuth,
+		CameraHikVisionMQTTTopicPTZStatusZoom,
+	}
+}
+
 func (d *CameraHikVision) startAlertStreaming() error {
 	ctx := context.Background()
 
@@ -188,6 +214,8 @@ func (d *CameraHikVision) startAlertStreaming() error {
 	}
 
 	go func() {
+		sn := strings.Replace(d.SerialNumber(), "/", "-", -1)
+
 		for {
 			select {
 			case event := <-stream.NextAlert():
@@ -195,15 +223,15 @@ func (d *CameraHikVision) startAlertStreaming() error {
 					continue
 				}
 
-				id := fmt.Sprintf("%d-%s", event.DynChannelID, event.EventType)
+				cacheKey := fmt.Sprintf("%d-%s", event.DynChannelID, event.EventType)
 
 				d.mutex.Lock()
-				lastFire, ok := d.alertStreamingHistory[id]
-				d.alertStreamingHistory[id] = event.DateTime
+				lastFire, ok := d.alertStreamingHistory[cacheKey]
+				d.alertStreamingHistory[cacheKey] = event.DateTime
 				d.mutex.Unlock()
 
 				if !ok || event.DateTime.Sub(lastFire) > CameraHikVisionIgnoreInterval {
-					d.TriggerEvent(ctx, boggart.DeviceEventHikvisionEventNotificationAlert, event, d.SerialNumber())
+					d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicEvent.Format(sn, event.DynChannelID, event.EventType), 0, false, event.EventDescription)
 				}
 
 			case _ = <-stream.NextError():
@@ -229,18 +257,18 @@ func (d *CameraHikVision) updateStatusByChannelId(ctx context.Context, channelId
 		return err
 	}
 
-	channelAsString := strconv.FormatUint(channelId, 10)
+	sn := strings.Replace(d.SerialNumber(), "/", "_", -1)
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.Elevation != status.AbsoluteHigh.Elevation {
-		d.mqtt.Publish(ctx, d.generateMQTTTopic("ptz", channelAsString, "status", "elevation"), 1, false, strconv.FormatInt(status.AbsoluteHigh.Elevation, 10))
+		d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicPTZStatusElevation.Format(sn, channelId), 1, false, status.AbsoluteHigh.Elevation)
 	}
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.Azimuth != status.AbsoluteHigh.Azimuth {
-		d.mqtt.Publish(ctx, d.generateMQTTTopic("ptz", channelAsString, "status", "azimuth"), 1, false, strconv.FormatUint(status.AbsoluteHigh.Azimuth, 10))
+		d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicPTZStatusAzimuth.Format(sn, channelId), 1, false, status.AbsoluteHigh.Azimuth)
 	}
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.AbsoluteZoom != status.AbsoluteHigh.AbsoluteZoom {
-		d.mqtt.Publish(ctx, d.generateMQTTTopic("ptz", channelAsString, "status", "zoom"), 1, false, strconv.FormatUint(status.AbsoluteHigh.AbsoluteZoom, 10))
+		d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicPTZStatusZoom.Format(sn, channelId), 1, false, status.AbsoluteHigh.AbsoluteZoom)
 	}
 
 	channel.Status = &status
@@ -271,10 +299,6 @@ func (d *CameraHikVision) checkTopic(topic string) (uint64, error) {
 	}
 
 	return channelId, nil
-}
-
-func (d *CameraHikVision) generateMQTTTopic(parts ...string) string {
-	return CameraMQTTTopicPrefix + strings.Replace(d.SerialNumber(), "/", "_", -1) + "/" + strings.Join(parts, "/")
 }
 
 func (d *CameraHikVision) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, message mqtt.Message) {

@@ -149,3 +149,14 @@ func (d *DeviceMQTT) MQTTPublishAsync(ctx context.Context, topic string, qos byt
 		d.MQTTPublish(ctx, topic, qos, retained, payload)
 	}()
 }
+
+func (d *DeviceMQTT) MQTTSubscribe(topic string, qos byte, callback mqtt.MessageHandler) error {
+	d.mutex.RLock()
+	defer d.mutex.RUnlock()
+
+	if d.client == nil {
+		return errors.New("MQTT client isn't init")
+	}
+
+	return d.client.Subscribe(topic, qos, callback)
+}

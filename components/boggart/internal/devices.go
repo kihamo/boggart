@@ -31,9 +31,6 @@ func (c *Component) initCameras() {
 		return
 	}
 
-	<-c.application.ReadyComponent(mqtt.ComponentName)
-	m := c.application.GetComponent(mqtt.ComponentName).(mqtt.Component)
-
 	for _, address := range strings.Split(addresses, ",") {
 		address = strings.TrimSpace(address)
 		if address == "" {
@@ -52,7 +49,7 @@ func (c *Component) initCameras() {
 
 		isapi := hikvision.NewISAPI(u.Hostname(), port, u.User.Username(), password)
 
-		device := devices.NewCameraHikVision(isapi, c.config.Duration(boggart.ConfigCameraHikVisionRepeatInterval), m)
+		device := devices.NewCameraHikVision(isapi, c.config.Duration(boggart.ConfigCameraHikVisionRepeatInterval))
 		device.SetDescription(device.Description() + " on " + u.Host)
 
 		c.devicesManager.Register(device)

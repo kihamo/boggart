@@ -8,7 +8,6 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/devices"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/listener"
@@ -39,7 +38,6 @@ func NewMQTTListener(client mqtt.Component) *MQTTListener {
 
 func (l *MQTTListener) Events() []workers.Event {
 	return []workers.Event{
-		boggart.DeviceEventHikvisionEventNotificationAlert,
 		boggart.DeviceEventWifiClientConnected,
 		boggart.DeviceEventWifiClientDisconnected,
 		boggart.DeviceEventVPNClientConnected,
@@ -53,12 +51,6 @@ func (l *MQTTListener) Run(ctx context.Context, event workers.Event, t time.Time
 	defer span.Finish()
 
 	switch event {
-	case boggart.DeviceEventHikvisionEventNotificationAlert:
-		event := args[1].(*hikvision.EventNotificationAlertStreamResponse)
-		id := strings.Replace(args[2].(string), "/", "-", -1)
-
-		l.publish(ctx, fmt.Sprintf("cctv/%s/%d/%s", id, event.DynChannelID, event.EventType), false, event.EventDescription)
-
 	case boggart.DeviceEventWifiClientConnected:
 		mac := args[1].(*devices.MikrotikRouterMac)
 		macAddress := l.macAddress(mac.Address)
