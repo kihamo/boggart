@@ -64,25 +64,33 @@ func (d *GPIOPin) Mode() GPIOMode {
 	return d.mode
 }
 
-func (d *GPIOPin) High() error {
+func (d *GPIOPin) High(ctx context.Context) error {
 	if d.Mode() == GPIOModeIn {
 		return nil
 	}
 
 	if g, ok := d.pin.(gpio.PinOut); ok {
-		return g.Out(gpio.High)
+		if err := g.Out(gpio.High); err != nil {
+			return err
+		}
+
+		d.MQTTPublishAsync(ctx, GPIOMQTTTopicPinState.Format(d.pin.Number()), 2, true, []byte(`1`))
 	}
 
 	return nil
 }
 
-func (d *GPIOPin) Low() error {
+func (d *GPIOPin) Low(ctx context.Context) error {
 	if d.Mode() == GPIOModeIn {
 		return nil
 	}
 
 	if g, ok := d.pin.(gpio.PinOut); ok {
-		return g.Out(gpio.Low)
+		if err := g.Out(gpio.Low); err != nil {
+			return err
+		}
+
+		d.MQTTPublishAsync(ctx, GPIOMQTTTopicPinState.Format(d.pin.Number()), 2, true, []byte(`0`))
 	}
 
 	return nil
@@ -148,10 +156,10 @@ func (d *GPIOPin) MQTTSubscribers() []mqtt.Subscriber {
 				var err error
 
 				if bytes.Equal(message.Payload(), []byte(`1`)) {
-					err = d.High()
+					err = d.High(ctx)
 					span.LogFields(log.String("out", "high"))
 				} else {
-					err = d.Low()
+					err = d.Low(ctx)
 					span.LogFields(log.String("out", "low"))
 				}
 
