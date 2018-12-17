@@ -8,6 +8,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/mercury"
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 	"github.com/kihamo/snitch"
@@ -19,14 +20,14 @@ const (
 	Mercury200ElectricityMeterTariff3 = "t3"
 	Mercury200ElectricityMeterTariff4 = "t4"
 
-	Mercury200ElectricityMeterMQTTTopicTariff1        boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/mercury200/+/tariff_1"
-	Mercury200ElectricityMeterMQTTTopicTariff2        boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/mercury200/+/tariff_2"
-	Mercury200ElectricityMeterMQTTTopicTariff3        boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/mercury200/+/tariff_3"
-	Mercury200ElectricityMeterMQTTTopicTariff4        boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/mercury200/+/tariff_4"
-	Mercury200ElectricityMeterMQTTTopicVoltage        boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/mercury200/+/voltage"
-	Mercury200ElectricityMeterMQTTTopicAmperage       boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/mercury200/+/amperage"
-	Mercury200ElectricityMeterMQTTTopicPower          boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/mercury200/+/power"
-	Mercury200ElectricityMeterMQTTTopicBatteryVoltage boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/mercury200/+/battery_voltage"
+	Mercury200ElectricityMeterMQTTTopicTariff1        mqtt.Topic = boggart.ComponentName + "/meter/mercury200/+/tariff_1"
+	Mercury200ElectricityMeterMQTTTopicTariff2        mqtt.Topic = boggart.ComponentName + "/meter/mercury200/+/tariff_2"
+	Mercury200ElectricityMeterMQTTTopicTariff3        mqtt.Topic = boggart.ComponentName + "/meter/mercury200/+/tariff_3"
+	Mercury200ElectricityMeterMQTTTopicTariff4        mqtt.Topic = boggart.ComponentName + "/meter/mercury200/+/tariff_4"
+	Mercury200ElectricityMeterMQTTTopicVoltage        mqtt.Topic = boggart.ComponentName + "/meter/mercury200/+/voltage"
+	Mercury200ElectricityMeterMQTTTopicAmperage       mqtt.Topic = boggart.ComponentName + "/meter/mercury200/+/amperage"
+	Mercury200ElectricityMeterMQTTTopicPower          mqtt.Topic = boggart.ComponentName + "/meter/mercury200/+/power"
+	Mercury200ElectricityMeterMQTTTopicBatteryVoltage mqtt.Topic = boggart.ComponentName + "/meter/mercury200/+/battery_voltage"
 )
 
 var (
@@ -248,8 +249,8 @@ func (d *Mercury200ElectricityMeter) taskUpdater(ctx context.Context) (interface
 	return nil, nil
 }
 
-func (d *Mercury200ElectricityMeter) MQTTTopics() []boggart.DeviceMQTTTopic {
-	return []boggart.DeviceMQTTTopic{
+func (d *Mercury200ElectricityMeter) MQTTTopics() []mqtt.Topic {
+	return []mqtt.Topic{
 		Mercury200ElectricityMeterMQTTTopicTariff1,
 		Mercury200ElectricityMeterMQTTTopicTariff2,
 		Mercury200ElectricityMeterMQTTTopicTariff3,

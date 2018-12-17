@@ -17,18 +17,18 @@ import (
 const (
 	RemoteControlBroadlinkRMCaptureDuration = time.Second * 15
 
-	RemoteControlBroadlinkRMMQTTTopicCommand         boggart.DeviceMQTTTopic = boggart.ComponentName + "/remote-control/+/command"
-	RemoteControlBroadlinkRMMQTTTopicRawCount        boggart.DeviceMQTTTopic = boggart.ComponentName + "/remote-control/+/command/raw/count"
-	RemoteControlBroadlinkRMMQTTTopicRaw             boggart.DeviceMQTTTopic = boggart.ComponentName + "/remote-control/+/command/raw"
-	RemoteControlBroadlinkRMMQTTTopicIRCount         boggart.DeviceMQTTTopic = boggart.ComponentName + "/remote-control/+/command/ir/count"
-	RemoteControlBroadlinkRMMQTTTopicIR              boggart.DeviceMQTTTopic = boggart.ComponentName + "/remote-control/+/command/ir"
-	RemoteControlBroadlinkRMMQTTTopicRF315mhz        boggart.DeviceMQTTTopic = boggart.ComponentName + "/remote-control/+/command/rf315mhz"
-	RemoteControlBroadlinkRMMQTTTopicRF433mhz        boggart.DeviceMQTTTopic = boggart.ComponentName + "/remote-control/+/command/rf433mhz"
-	RemoteControlBroadlinkRMMQTTTopicCapture         boggart.DeviceMQTTTopic = boggart.ComponentName + "/remote-control/+/command/capture"
-	RemoteControlBroadlinkRMMQTTTopicCaptureState    boggart.DeviceMQTTTopic = boggart.ComponentName + "/remote-control/+/command/capture/state"
-	RemoteControlBroadlinkRMMQTTTopicCaptureIR       boggart.DeviceMQTTTopic = boggart.ComponentName + "/remote-control/+/command/capture/ir"
-	RemoteControlBroadlinkRMMQTTTopicCaptureRF315mhz boggart.DeviceMQTTTopic = boggart.ComponentName + "/remote-control/+/command/capture/rf315mhz"
-	RemoteControlBroadlinkRMMQTTTopicCaptureRF433mhz boggart.DeviceMQTTTopic = boggart.ComponentName + "/remote-control/+/command/capture/rf433mhz"
+	RemoteControlBroadlinkRMMQTTTopicCommand         mqtt.Topic = boggart.ComponentName + "/remote-control/+/command"
+	RemoteControlBroadlinkRMMQTTTopicRawCount        mqtt.Topic = boggart.ComponentName + "/remote-control/+/command/raw/count"
+	RemoteControlBroadlinkRMMQTTTopicRaw             mqtt.Topic = boggart.ComponentName + "/remote-control/+/command/raw"
+	RemoteControlBroadlinkRMMQTTTopicIRCount         mqtt.Topic = boggart.ComponentName + "/remote-control/+/command/ir/count"
+	RemoteControlBroadlinkRMMQTTTopicIR              mqtt.Topic = boggart.ComponentName + "/remote-control/+/command/ir"
+	RemoteControlBroadlinkRMMQTTTopicRF315mhz        mqtt.Topic = boggart.ComponentName + "/remote-control/+/command/rf315mhz"
+	RemoteControlBroadlinkRMMQTTTopicRF433mhz        mqtt.Topic = boggart.ComponentName + "/remote-control/+/command/rf433mhz"
+	RemoteControlBroadlinkRMMQTTTopicCapture         mqtt.Topic = boggart.ComponentName + "/remote-control/+/command/capture"
+	RemoteControlBroadlinkRMMQTTTopicCaptureState    mqtt.Topic = boggart.ComponentName + "/remote-control/+/command/capture/state"
+	RemoteControlBroadlinkRMMQTTTopicCaptureIR       mqtt.Topic = boggart.ComponentName + "/remote-control/+/command/capture/ir"
+	RemoteControlBroadlinkRMMQTTTopicCaptureRF315mhz mqtt.Topic = boggart.ComponentName + "/remote-control/+/command/capture/rf315mhz"
+	RemoteControlBroadlinkRMMQTTTopicCaptureRF433mhz mqtt.Topic = boggart.ComponentName + "/remote-control/+/command/capture/rf433mhz"
 )
 
 type BroadlinkRMRemoteControl struct {
@@ -67,8 +67,8 @@ func (d *BroadlinkRMRemoteControl) Ping(_ context.Context) bool {
 	return true
 }
 
-func (d *BroadlinkRMRemoteControl) MQTTTopics() []boggart.DeviceMQTTTopic {
-	return []boggart.DeviceMQTTTopic{
+func (d *BroadlinkRMRemoteControl) MQTTTopics() []mqtt.Topic {
+	return []mqtt.Topic{
 		RemoteControlBroadlinkRMMQTTTopicCommand,
 		RemoteControlBroadlinkRMMQTTTopicRawCount,
 		RemoteControlBroadlinkRMMQTTTopicRaw,

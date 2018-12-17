@@ -22,8 +22,8 @@ const (
 
 	ZenggeLEDUpdateInterval = time.Second * 3
 
-	ZenggeLEDMQTTTopicPower boggart.DeviceMQTTTopic = boggart.ComponentName + "/led/+/power"
-	ZenggeLEDMQTTTopicState boggart.DeviceMQTTTopic = boggart.ComponentName + "/led/+/state"
+	ZenggeLEDMQTTTopicPower mqtt.Topic = boggart.ComponentName + "/led/+/power"
+	ZenggeLEDMQTTTopicState mqtt.Topic = boggart.ComponentName + "/led/+/state"
 )
 
 type ZenggeLED struct {
@@ -140,8 +140,8 @@ func (d *ZenggeLED) Off(ctx context.Context) error {
 	return err
 }
 
-func (d *ZenggeLED) MQTTTopics() []boggart.DeviceMQTTTopic {
-	return []boggart.DeviceMQTTTopic{
+func (d *ZenggeLED) MQTTTopics() []mqtt.Topic {
+	return []mqtt.Topic{
 		ZenggeLEDMQTTTopicPower,
 		ZenggeLEDMQTTTopicState,
 	}

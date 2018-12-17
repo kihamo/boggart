@@ -16,8 +16,8 @@ import (
 type GPIOMode int64
 
 const (
-	GPIOMQTTTopicPinState boggart.DeviceMQTTTopic = boggart.ComponentName + "/gpio/+"
-	GPIOMQTTTopicPinSet   boggart.DeviceMQTTTopic = boggart.ComponentName + "/gpio/+/set"
+	GPIOMQTTTopicPinState mqtt.Topic = boggart.ComponentName + "/gpio/+"
+	GPIOMQTTTopicPinSet   mqtt.Topic = boggart.ComponentName + "/gpio/+/set"
 
 	GPIOModeDefault GPIOMode = iota
 	GPIOModeIn
@@ -126,8 +126,8 @@ func (d *GPIOPin) waitForEdge() {
 	}
 }
 
-func (d *GPIOPin) MQTTTopics() []boggart.DeviceMQTTTopic {
-	return []boggart.DeviceMQTTTopic{
+func (d *GPIOPin) MQTTTopics() []mqtt.Topic {
+	return []mqtt.Topic{
 		GPIOMQTTTopicPinState,
 		GPIOMQTTTopicPinSet,
 	}

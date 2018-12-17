@@ -7,6 +7,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 	"github.com/kihamo/snitch"
@@ -15,8 +16,8 @@ import (
 const (
 	PulsarPulsedWaterMeterScale = 1000
 
-	PulsarPulsedWaterMeterMQTTTopicPulses boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/pulsar/+/pulses"
-	PulsarPulsedWaterMeterMQTTTopicVolume boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/pulsar/+/volume"
+	PulsarPulsedWaterMeterMQTTTopicPulses mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/pulses"
+	PulsarPulsedWaterMeterMQTTTopicVolume mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/volume"
 )
 
 var (
@@ -144,8 +145,8 @@ func (d *PulsarPulsedWaterMeter) taskUpdater(ctx context.Context) (interface{}, 
 	return nil, nil
 }
 
-func (d *PulsarPulsedWaterMeter) MQTTTopics() []boggart.DeviceMQTTTopic {
-	return []boggart.DeviceMQTTTopic{
+func (d *PulsarPulsedWaterMeter) MQTTTopics() []mqtt.Topic {
+	return []mqtt.Topic{
 		PulsarPulsedWaterMeterMQTTTopicPulses,
 		PulsarPulsedWaterMeterMQTTTopicVolume,
 	}

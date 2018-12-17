@@ -7,12 +7,13 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/mobile"
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 )
 
 const (
-	MegafonPhoneMQTTTopicBalance boggart.DeviceMQTTTopic = boggart.ComponentName + "/service/megafon/+/balance"
+	MegafonPhoneMQTTTopicBalance mqtt.Topic = boggart.ComponentName + "/service/megafon/+/balance"
 )
 
 type MegafonPhone struct {
@@ -95,8 +96,8 @@ func (d *MegafonPhone) taskUpdater(ctx context.Context) (interface{}, error) {
 	return nil, nil
 }
 
-func (d *MegafonPhone) MQTTTopics() []boggart.DeviceMQTTTopic {
-	return []boggart.DeviceMQTTTopic{
+func (d *MegafonPhone) MQTTTopics() []mqtt.Topic {
+	return []mqtt.Topic{
 		MegafonPhoneMQTTTopicBalance,
 	}
 }

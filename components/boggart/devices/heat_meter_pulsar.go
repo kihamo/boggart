@@ -9,17 +9,18 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 	"github.com/kihamo/snitch"
 )
 
 const (
-	PulsarHeadMeterMQTTTopicTemperatureIn    boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/pulsar/+/temperature_in"
-	PulsarHeadMeterMQTTTopicTemperatureOut   boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/pulsar/+/temperature_out"
-	PulsarHeadMeterMQTTTopicTemperatureDelta boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/pulsar/+/temperature_delta"
-	PulsarHeadMeterMQTTTopicEnergy           boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/pulsar/+/energy"
-	PulsarHeadMeterMQTTTopicConsumption      boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/pulsar/+/consumption"
+	PulsarHeadMeterMQTTTopicTemperatureIn    mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/temperature_in"
+	PulsarHeadMeterMQTTTopicTemperatureOut   mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/temperature_out"
+	PulsarHeadMeterMQTTTopicTemperatureDelta mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/temperature_delta"
+	PulsarHeadMeterMQTTTopicEnergy           mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/energy"
+	PulsarHeadMeterMQTTTopicConsumption      mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/consumption"
 )
 
 var (
@@ -219,8 +220,8 @@ func (d *PulsarHeadMeter) taskUpdater(ctx context.Context) (interface{}, error) 
 	return nil, nil
 }
 
-func (d *PulsarHeadMeter) MQTTTopics() []boggart.DeviceMQTTTopic {
-	return []boggart.DeviceMQTTTopic{
+func (d *PulsarHeadMeter) MQTTTopics() []mqtt.Topic {
+	return []mqtt.Topic{
 		PulsarHeadMeterMQTTTopicTemperatureIn,
 		PulsarHeadMeterMQTTTopicTemperatureOut,
 		PulsarHeadMeterMQTTTopicTemperatureDelta,

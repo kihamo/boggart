@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 	"github.com/kihamo/snitch"
@@ -15,10 +16,10 @@ import (
 )
 
 const (
-	BME280SensorMQTTTopicTemperature boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/bme280/+/temperature"
-	BME280SensorMQTTTopicAltitude    boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/bme280/+/altitude"
-	BME280SensorMQTTTopicHumidity    boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/bme280/+/humidity"
-	BME280SensorMQTTTopicPressure    boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/bme280/+/pressure"
+	BME280SensorMQTTTopicTemperature mqtt.Topic = boggart.ComponentName + "/meter/bme280/+/temperature"
+	BME280SensorMQTTTopicAltitude    mqtt.Topic = boggart.ComponentName + "/meter/bme280/+/altitude"
+	BME280SensorMQTTTopicHumidity    mqtt.Topic = boggart.ComponentName + "/meter/bme280/+/humidity"
+	BME280SensorMQTTTopicPressure    mqtt.Topic = boggart.ComponentName + "/meter/bme280/+/pressure"
 )
 
 var (
@@ -172,8 +173,8 @@ func (d *BME280Sensor) taskUpdater(ctx context.Context) (interface{}, error) {
 	return nil, nil
 }
 
-func (d *BME280Sensor) MQTTTopics() []boggart.DeviceMQTTTopic {
-	return []boggart.DeviceMQTTTopic{
+func (d *BME280Sensor) MQTTTopics() []mqtt.Topic {
+	return []mqtt.Topic{
 		BME280SensorMQTTTopicTemperature,
 		BME280SensorMQTTTopicAltitude,
 		BME280SensorMQTTTopicHumidity,

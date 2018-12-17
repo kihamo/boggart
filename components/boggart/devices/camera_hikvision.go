@@ -21,16 +21,16 @@ import (
 const (
 	CameraHikVisionIgnoreInterval = time.Second * 5
 
-	CameraHikVisionMQTTTopicEvent              boggart.DeviceMQTTTopic = boggart.ComponentName + "/cctv/+/+/+"
-	CameraHikVisionMQTTTopicPTZMove            boggart.DeviceMQTTTopic = boggart.ComponentName + "/cctv/+/ptz/+/move"
-	CameraHikVisionMQTTTopicPTZAbsolute        boggart.DeviceMQTTTopic = boggart.ComponentName + "/cctv/+/ptz/+/absolute"
-	CameraHikVisionMQTTTopicPTZContinuous      boggart.DeviceMQTTTopic = boggart.ComponentName + "/cctv/+/ptz/+/continuous"
-	CameraHikVisionMQTTTopicPTZRelative        boggart.DeviceMQTTTopic = boggart.ComponentName + "/cctv/+/ptz/+/relative"
-	CameraHikVisionMQTTTopicPTZPreset          boggart.DeviceMQTTTopic = boggart.ComponentName + "/cctv/+/ptz/+/preset"
-	CameraHikVisionMQTTTopicPTZMomentary       boggart.DeviceMQTTTopic = boggart.ComponentName + "/cctv/+/ptz/+/momentary"
-	CameraHikVisionMQTTTopicPTZStatusElevation boggart.DeviceMQTTTopic = boggart.ComponentName + "/cctv/+/ptz/+/status/elevation"
-	CameraHikVisionMQTTTopicPTZStatusAzimuth   boggart.DeviceMQTTTopic = boggart.ComponentName + "/cctv/+/ptz/+/status/azimuth"
-	CameraHikVisionMQTTTopicPTZStatusZoom      boggart.DeviceMQTTTopic = boggart.ComponentName + "/cctv/+/ptz/+/status/zoom"
+	CameraHikVisionMQTTTopicEvent              mqtt.Topic = boggart.ComponentName + "/cctv/+/+/+"
+	CameraHikVisionMQTTTopicPTZMove            mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/move"
+	CameraHikVisionMQTTTopicPTZAbsolute        mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/absolute"
+	CameraHikVisionMQTTTopicPTZContinuous      mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/continuous"
+	CameraHikVisionMQTTTopicPTZRelative        mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/relative"
+	CameraHikVisionMQTTTopicPTZPreset          mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/preset"
+	CameraHikVisionMQTTTopicPTZMomentary       mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/momentary"
+	CameraHikVisionMQTTTopicPTZStatusElevation mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/elevation"
+	CameraHikVisionMQTTTopicPTZStatusAzimuth   mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/azimuth"
+	CameraHikVisionMQTTTopicPTZStatusZoom      mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/zoom"
 )
 
 type cameraHikVisionPTZChannel struct {
@@ -190,8 +190,8 @@ func (d *CameraHikVision) taskPTZStatus(ctx context.Context) (interface{}, error
 	return nil, nil, stop
 }
 
-func (d *CameraHikVision) MQTTTopics() []boggart.DeviceMQTTTopic {
-	return []boggart.DeviceMQTTTopic{
+func (d *CameraHikVision) MQTTTopics() []mqtt.Topic {
+	return []mqtt.Topic{
 		CameraHikVisionMQTTTopicEvent,
 		CameraHikVisionMQTTTopicPTZMove,
 		CameraHikVisionMQTTTopicPTZAbsolute,

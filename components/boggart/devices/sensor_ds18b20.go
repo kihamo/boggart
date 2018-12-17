@@ -6,13 +6,14 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 	"github.com/yryz/ds18b20"
 )
 
 const (
-	DS18B20SensorMQTTTopic boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/ds18b20/+"
+	DS18B20SensorMQTTTopic mqtt.Topic = boggart.ComponentName + "/meter/ds18b20/+"
 )
 
 type DS18B20Sensor struct {
@@ -85,8 +86,8 @@ func (d *DS18B20Sensor) taskUpdater(ctx context.Context) (interface{}, error) {
 	return nil, nil
 }
 
-func (d *DS18B20Sensor) MQTTTopics() []boggart.DeviceMQTTTopic {
-	return []boggart.DeviceMQTTTopic{
+func (d *DS18B20Sensor) MQTTTopics() []mqtt.Topic {
+	return []mqtt.Topic{
 		DS18B20SensorMQTTTopic,
 	}
 }

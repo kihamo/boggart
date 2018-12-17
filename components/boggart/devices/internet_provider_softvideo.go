@@ -7,12 +7,13 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/softvideo"
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 )
 
 const (
-	SoftVideoInternetMQTTTopicBalance boggart.DeviceMQTTTopic = boggart.ComponentName + "/service/softvideo/+/balance"
+	SoftVideoInternetMQTTTopicBalance mqtt.Topic = boggart.ComponentName + "/service/softvideo/+/balance"
 )
 
 type SoftVideoInternet struct {
@@ -85,8 +86,8 @@ func (d *SoftVideoInternet) taskUpdater(ctx context.Context) (interface{}, error
 	return nil, nil
 }
 
-func (d *SoftVideoInternet) MQTTTopics() []boggart.DeviceMQTTTopic {
-	return []boggart.DeviceMQTTTopic{
+func (d *SoftVideoInternet) MQTTTopics() []mqtt.Topic {
+	return []mqtt.Topic{
 		SoftVideoInternetMQTTTopicBalance,
 	}
 }

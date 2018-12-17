@@ -11,6 +11,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/mikrotik"
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/listener"
 	"github.com/kihamo/go-workers/task"
@@ -18,12 +19,12 @@ import (
 )
 
 const (
-	MikrotikRouterMQTTTopicWiFiMACState         boggart.DeviceMQTTTopic = boggart.ComponentName + "/router/+/wifi/clients/+/state"
-	MikrotikRouterMQTTTopicWiFiConnectedMAC     boggart.DeviceMQTTTopic = boggart.ComponentName + "/router/+/wifi/clients/last/on/mac"
-	MikrotikRouterMQTTTopicWiFiDisconnectedMAC  boggart.DeviceMQTTTopic = boggart.ComponentName + "/router/+/wifi/clients/last/on/mac"
-	MikrotikRouterMQTTTopicVPNLoginState        boggart.DeviceMQTTTopic = boggart.ComponentName + "/router/+/vpn/clients/+/state"
-	MikrotikRouterMQTTTopicVPNConnectedLogin    boggart.DeviceMQTTTopic = boggart.ComponentName + "/router/+/vpn/clients/last/on/login"
-	MikrotikRouterMQTTTopicVPNDisconnectedLogin boggart.DeviceMQTTTopic = boggart.ComponentName + "/router/+/vpn/clients/last/off/login"
+	MikrotikRouterMQTTTopicWiFiMACState         mqtt.Topic = boggart.ComponentName + "/router/+/wifi/clients/+/state"
+	MikrotikRouterMQTTTopicWiFiConnectedMAC     mqtt.Topic = boggart.ComponentName + "/router/+/wifi/clients/last/on/mac"
+	MikrotikRouterMQTTTopicWiFiDisconnectedMAC  mqtt.Topic = boggart.ComponentName + "/router/+/wifi/clients/last/on/mac"
+	MikrotikRouterMQTTTopicVPNLoginState        mqtt.Topic = boggart.ComponentName + "/router/+/vpn/clients/+/state"
+	MikrotikRouterMQTTTopicVPNConnectedLogin    mqtt.Topic = boggart.ComponentName + "/router/+/vpn/clients/last/on/login"
+	MikrotikRouterMQTTTopicVPNDisconnectedLogin mqtt.Topic = boggart.ComponentName + "/router/+/vpn/clients/last/off/login"
 )
 
 var (
@@ -371,8 +372,8 @@ func (d *MikrotikRouter) taskUpdater(ctx context.Context) (interface{}, error) {
 	return nil, nil
 }
 
-func (d *MikrotikRouter) MQTTTopics() []boggart.DeviceMQTTTopic {
-	return []boggart.DeviceMQTTTopic{
+func (d *MikrotikRouter) MQTTTopics() []mqtt.Topic {
+	return []mqtt.Topic{
 		MikrotikRouterMQTTTopicWiFiMACState,
 		MikrotikRouterMQTTTopicWiFiConnectedMAC,
 		MikrotikRouterMQTTTopicWiFiDisconnectedMAC,

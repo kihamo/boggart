@@ -20,9 +20,9 @@ import (
 const (
 	SocketBroadlinkSP3SUpdateInterval = time.Second * 3 // as e-control app, refresh every 3 sec
 
-	SocketBroadlinkSP3SMQTTTopicState boggart.DeviceMQTTTopic = boggart.ComponentName + "/socket/+/state"
-	SocketBroadlinkSP3SMQTTTopicPower boggart.DeviceMQTTTopic = boggart.ComponentName + "/socket/+/power"
-	SocketBroadlinkSP3SMQTTTopicSet   boggart.DeviceMQTTTopic = boggart.ComponentName + "/socket/+/set"
+	SocketBroadlinkSP3SMQTTTopicState mqtt.Topic = boggart.ComponentName + "/socket/+/state"
+	SocketBroadlinkSP3SMQTTTopicPower mqtt.Topic = boggart.ComponentName + "/socket/+/power"
+	SocketBroadlinkSP3SMQTTTopicSet   mqtt.Topic = boggart.ComponentName + "/socket/+/set"
 )
 
 var (
@@ -159,8 +159,8 @@ func (d *BroadlinkSP3SSocket) Power() (float64, error) {
 	return d.provider.Power()
 }
 
-func (d *BroadlinkSP3SSocket) MQTTTopics() []boggart.DeviceMQTTTopic {
-	return []boggart.DeviceMQTTTopic{
+func (d *BroadlinkSP3SSocket) MQTTTopics() []mqtt.Topic {
+	return []mqtt.Topic{
 		SocketBroadlinkSP3SMQTTTopicState,
 		SocketBroadlinkSP3SMQTTTopicPower,
 		SocketBroadlinkSP3SMQTTTopicSet,

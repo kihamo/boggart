@@ -9,10 +9,10 @@
 package internal
 
 import (
+	"github.com/elazarl/go-bindata-assetfs"
 	"bytes"
 	"compress/gzip"
 	"fmt"
-	"github.com/elazarl/go-bindata-assetfs"
 	"io"
 	"io/ioutil"
 	"os"
@@ -87,7 +87,7 @@ func templatesViewsDevicesHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "templates/views/devices.html", size: 3019, mode: os.FileMode(420), modTime: time.Unix(1545007593, 0)}
+	info := bindataFileInfo{name: "templates/views/devices.html", size: 3019, mode: os.FileMode(420), modTime: time.Unix(1545035724, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -107,7 +107,7 @@ func assetsJsDevicesJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/js/devices.js", size: 7874, mode: os.FileMode(420), modTime: time.Unix(1545007693, 0)}
+	info := bindataFileInfo{name: "assets/js/devices.js", size: 7874, mode: os.FileMode(420), modTime: time.Unix(1545035724, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -127,7 +127,7 @@ func localesRuLc_messagesBoggartMo() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "locales/ru/LC_MESSAGES/boggart.mo", size: 476, mode: os.FileMode(420), modTime: time.Unix(1545010709, 0)}
+	info := bindataFileInfo{name: "locales/ru/LC_MESSAGES/boggart.mo", size: 476, mode: os.FileMode(420), modTime: time.Unix(1545056230, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -147,7 +147,7 @@ func localesRuLc_messagesDevicesMo() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "locales/ru/LC_MESSAGES/devices.mo", size: 1153, mode: os.FileMode(420), modTime: time.Unix(1545010709, 0)}
+	info := bindataFileInfo{name: "locales/ru/LC_MESSAGES/devices.mo", size: 1153, mode: os.FileMode(420), modTime: time.Unix(1545056230, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -204,8 +204,8 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"templates/views/devices.html":      templatesViewsDevicesHtml,
-	"assets/js/devices.js":              assetsJsDevicesJs,
+	"templates/views/devices.html": templatesViewsDevicesHtml,
+	"assets/js/devices.js": assetsJsDevicesJs,
 	"locales/ru/LC_MESSAGES/boggart.mo": localesRuLc_messagesBoggartMo,
 	"locales/ru/LC_MESSAGES/devices.mo": localesRuLc_messagesDevicesMo,
 }
@@ -249,7 +249,6 @@ type bintree struct {
 	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
-
 var _bintree = &bintree{nil, map[string]*bintree{
 	"assets": &bintree{nil, map[string]*bintree{
 		"js": &bintree{nil, map[string]*bintree{
@@ -317,6 +316,7 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
+
 
 func assetFS() *assetfs.AssetFS {
 	assetInfo := func(path string) (os.FileInfo, error) {
