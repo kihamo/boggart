@@ -44,7 +44,6 @@ func (l *MQTTListener) Events() []workers.Event {
 		boggart.DeviceEventWifiClientDisconnected,
 		boggart.DeviceEventVPNClientConnected,
 		boggart.DeviceEventVPNClientDisconnected,
-		boggart.DeviceEventMegafonBalanceChanged,
 	}
 }
 
@@ -113,9 +112,6 @@ func (l *MQTTListener) Run(ctx context.Context, event workers.Event, t time.Time
 
 		l.publish(ctx, topicPrefix+"last/off/login", false, login)
 		l.publish(ctx, topicPrefix+login+"/state", true, ValueOff)
-
-	case boggart.DeviceEventMegafonBalanceChanged:
-		l.publish(ctx, fmt.Sprintf("service/megafon/%s/balance", args[2]), true, args[1])
 	}
 }
 

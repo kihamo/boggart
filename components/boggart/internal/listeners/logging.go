@@ -88,8 +88,7 @@ func (l *LoggingListener) Run(_ context.Context, event workers.Event, t time.Tim
 		boggart.DeviceEventWifiClientDisconnected,
 		boggart.DeviceEventVPNClientConnected,
 		boggart.DeviceEventVPNClientDisconnected,
-		boggart.DeviceEventHikvisionEventNotificationAlert,
-		boggart.DeviceEventMegafonBalanceChanged:
+		boggart.DeviceEventHikvisionEventNotificationAlert:
 
 		l.logger.Debug("Fire skip event",
 			"event.id", event.Id(),
