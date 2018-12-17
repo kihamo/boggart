@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
+	"strconv"
 	"strings"
 	"time"
 
@@ -86,13 +86,13 @@ func (c *Component) Run(a shadow.Application, ready chan<- struct{}) error {
 		if client != nil && client.IsConnected() {
 			status := c.audioPlayer.Status()
 			if status != lastStatus {
-				m.Publish(context.Background(), voice.MQTTTopicPlayerStatus, 0, false, status.String())
+				m.Publish(context.Background(), MQTTTopicPlayerStatus.String(), 0, false, status.String())
 				lastStatus = status
 			}
 
 			volume := c.audioPlayer.Volume()
 			if volume != lastVolume {
-				m.Publish(context.Background(), voice.MQTTTopicPlayerVolume, 0, false, fmt.Sprintf("%d", volume))
+				m.Publish(context.Background(), MQTTTopicPlayerVolume.String(), 0, false, strconv.FormatInt(volume, 10))
 				lastVolume = volume
 			}
 		}
