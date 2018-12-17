@@ -167,9 +167,9 @@ func (d *PulsarHeadMeter) taskUpdater(ctx context.Context) (interface{}, error) 
 	if current, err := d.TemperatureOut(ctx); err == nil {
 		metricHeatMeterPulsarTemperatureOut.With("serial_number", serialNumber).Set(current)
 
-		prev := math.Float64frombits(atomic.LoadUint64(&d.temperatureIn))
+		prev := math.Float64frombits(atomic.LoadUint64(&d.temperatureOut))
 		if current != prev {
-			atomic.StoreUint64(&d.temperatureIn, math.Float64bits(current))
+			atomic.StoreUint64(&d.temperatureOut, math.Float64bits(current))
 
 			d.MQTTPublishAsync(ctx, PulsarHeadMeterMQTTTopicTemperatureOut.Format(serialNumber), 0, true, current)
 		}
@@ -180,9 +180,9 @@ func (d *PulsarHeadMeter) taskUpdater(ctx context.Context) (interface{}, error) 
 	if current, err := d.TemperatureDelta(ctx); err == nil {
 		metricHeatMeterPulsarTemperatureDelta.With("serial_number", serialNumber).Set(current)
 
-		prev := math.Float64frombits(atomic.LoadUint64(&d.temperatureIn))
+		prev := math.Float64frombits(atomic.LoadUint64(&d.temperatureDelta))
 		if current != prev {
-			atomic.StoreUint64(&d.temperatureIn, math.Float64bits(current))
+			atomic.StoreUint64(&d.temperatureDelta, math.Float64bits(current))
 
 			d.MQTTPublishAsync(ctx, PulsarHeadMeterMQTTTopicTemperatureDelta.Format(serialNumber), 0, true, current)
 		}
@@ -193,9 +193,9 @@ func (d *PulsarHeadMeter) taskUpdater(ctx context.Context) (interface{}, error) 
 	if current, err := d.Energy(ctx); err == nil {
 		metricHeatMeterPulsarEnergy.With("serial_number", serialNumber).Set(current)
 
-		prev := math.Float64frombits(atomic.LoadUint64(&d.temperatureIn))
+		prev := math.Float64frombits(atomic.LoadUint64(&d.energy))
 		if current != prev {
-			atomic.StoreUint64(&d.temperatureIn, math.Float64bits(current))
+			atomic.StoreUint64(&d.energy, math.Float64bits(current))
 
 			d.MQTTPublishAsync(ctx, PulsarHeadMeterMQTTTopicEnergy.Format(serialNumber), 0, true, current)
 		}
@@ -206,9 +206,9 @@ func (d *PulsarHeadMeter) taskUpdater(ctx context.Context) (interface{}, error) 
 	if current, err := d.Consumption(ctx); err == nil {
 		metricHeatMeterPulsarConsumption.With("serial_number", serialNumber).Set(current)
 
-		prev := math.Float64frombits(atomic.LoadUint64(&d.temperatureIn))
+		prev := math.Float64frombits(atomic.LoadUint64(&d.consumption))
 		if current != prev {
-			atomic.StoreUint64(&d.temperatureIn, math.Float64bits(current))
+			atomic.StoreUint64(&d.consumption, math.Float64bits(current))
 
 			d.MQTTPublishAsync(ctx, PulsarHeadMeterMQTTTopicConsumption.Format(serialNumber), 0, true, current)
 		}

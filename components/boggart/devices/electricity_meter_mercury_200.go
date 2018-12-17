@@ -2,8 +2,8 @@ package devices
 
 import (
 	"context"
-	"reflect"
-	"sync"
+	"math"
+	"sync/atomic"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -18,6 +18,15 @@ const (
 	Mercury200ElectricityMeterTariff2 = "t2"
 	Mercury200ElectricityMeterTariff3 = "t3"
 	Mercury200ElectricityMeterTariff4 = "t4"
+
+	Mercury200ElectricityMeterMQTTTopicTariff1        boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/mercury200/+/tariff_1"
+	Mercury200ElectricityMeterMQTTTopicTariff2        boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/mercury200/+/tariff_2"
+	Mercury200ElectricityMeterMQTTTopicTariff3        boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/mercury200/+/tariff_3"
+	Mercury200ElectricityMeterMQTTTopicTariff4        boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/mercury200/+/tariff_4"
+	Mercury200ElectricityMeterMQTTTopicVoltage        boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/mercury200/+/voltage"
+	Mercury200ElectricityMeterMQTTTopicAmperage       boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/mercury200/+/amperage"
+	Mercury200ElectricityMeterMQTTTopicPower          boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/mercury200/+/power"
+	Mercury200ElectricityMeterMQTTTopicBatteryVoltage boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/mercury200/+/battery_voltage"
 )
 
 var (
@@ -28,26 +37,22 @@ var (
 	metricElectricityMeterMercuryBatteryVoltage = snitch.NewGauge(boggart.ComponentName+"_device_electricity_meter_mercury_200_battery_voltage_volt", "Mercury 200 electricity meter current battery voltage")
 )
 
-type Mercury200ElectricityMeterChange struct {
-	Tariff1        float64
-	Tariff2        float64
-	Tariff3        float64
-	Tariff4        float64
-	Voltage        float64
-	Amperage       float64
-	Power          int64
-	BatteryVoltage float64
-}
-
 type Mercury200ElectricityMeter struct {
+	tariff1        uint64
+	tariff2        uint64
+	tariff3        uint64
+	tariff4        uint64
+	voltage        uint64
+	amperage       uint64
+	power          int64
+	batteryVoltage uint64
+
 	boggart.DeviceBase
 	boggart.DeviceSerialNumber
+	boggart.DeviceMQTT
 
 	provider *mercury.ElectricityMeter200
 	interval time.Duration
-
-	mutex      sync.Mutex
-	lastValues Mercury200ElectricityMeterChange
 }
 
 func NewMercury200ElectricityMeter(serialNumber string, provider *mercury.ElectricityMeter200, interval time.Duration) *Mercury200ElectricityMeter {
@@ -160,48 +165,98 @@ func (d *Mercury200ElectricityMeter) taskUpdater(ctx context.Context) (interface
 	}
 
 	serialNumber := d.SerialNumber()
-	currentValues := Mercury200ElectricityMeterChange{
-		Tariff1: tariffs[Mercury200ElectricityMeterTariff1],
-		Tariff2: tariffs[Mercury200ElectricityMeterTariff2],
-		Tariff3: tariffs[Mercury200ElectricityMeterTariff3],
-		Tariff4: tariffs[Mercury200ElectricityMeterTariff4],
-	}
 
 	metricTariff := metricElectricityMeterMercuryTariff.With("serial_number", serialNumber)
-	metricTariff.With("tariff", Mercury200ElectricityMeterTariff1).Set(currentValues.Tariff1)
-	metricTariff.With("tariff", Mercury200ElectricityMeterTariff2).Set(currentValues.Tariff2)
-	metricTariff.With("tariff", Mercury200ElectricityMeterTariff3).Set(currentValues.Tariff3)
-	metricTariff.With("tariff", Mercury200ElectricityMeterTariff4).Set(currentValues.Tariff4)
+	metricTariff.With("tariff", Mercury200ElectricityMeterTariff1).Set(tariffs[Mercury200ElectricityMeterTariff1])
+	metricTariff.With("tariff", Mercury200ElectricityMeterTariff2).Set(tariffs[Mercury200ElectricityMeterTariff2])
+	metricTariff.With("tariff", Mercury200ElectricityMeterTariff3).Set(tariffs[Mercury200ElectricityMeterTariff3])
+	metricTariff.With("tariff", Mercury200ElectricityMeterTariff4).Set(tariffs[Mercury200ElectricityMeterTariff4])
+
+	prevTariff1 := math.Float64frombits(atomic.LoadUint64(&d.tariff1))
+	if tariffs[Mercury200ElectricityMeterTariff1] != prevTariff1 {
+		atomic.StoreUint64(&d.tariff1, math.Float64bits(tariffs[Mercury200ElectricityMeterTariff1]))
+
+		d.MQTTPublishAsync(ctx, Mercury200ElectricityMeterMQTTTopicTariff1.Format(serialNumber), 0, true, tariffs[Mercury200ElectricityMeterTariff1])
+	}
+
+	prevTariff2 := math.Float64frombits(atomic.LoadUint64(&d.tariff2))
+	if tariffs[Mercury200ElectricityMeterTariff2] != prevTariff2 {
+		atomic.StoreUint64(&d.tariff2, math.Float64bits(tariffs[Mercury200ElectricityMeterTariff2]))
+
+		d.MQTTPublishAsync(ctx, Mercury200ElectricityMeterMQTTTopicTariff2.Format(serialNumber), 0, true, tariffs[Mercury200ElectricityMeterTariff2])
+	}
+
+	prevTariff3 := math.Float64frombits(atomic.LoadUint64(&d.tariff3))
+	if tariffs[Mercury200ElectricityMeterTariff3] != prevTariff3 {
+		atomic.StoreUint64(&d.tariff3, math.Float64bits(tariffs[Mercury200ElectricityMeterTariff3]))
+
+		d.MQTTPublishAsync(ctx, Mercury200ElectricityMeterMQTTTopicTariff3.Format(serialNumber), 0, true, tariffs[Mercury200ElectricityMeterTariff3])
+	}
+
+	prevTariff4 := math.Float64frombits(atomic.LoadUint64(&d.tariff4))
+	if tariffs[Mercury200ElectricityMeterTariff4] != prevTariff4 {
+		atomic.StoreUint64(&d.tariff4, math.Float64bits(tariffs[Mercury200ElectricityMeterTariff4]))
+
+		d.MQTTPublishAsync(ctx, Mercury200ElectricityMeterMQTTTopicTariff4.Format(serialNumber), 0, true, tariffs[Mercury200ElectricityMeterTariff4])
+	}
 
 	// optimization
 	voltage, amperage, power, err := d.provider.ParamsCurrent()
 	if err != nil {
 		return nil, err
 	}
-	currentValues.Voltage = voltage
-	currentValues.Amperage = amperage
-	currentValues.Power = power
 
 	metricElectricityMeterMercuryVoltage.With("serial_number", serialNumber).Set(voltage)
 	metricElectricityMeterMercuryAmperage.With("serial_number", serialNumber).Set(amperage)
 	metricElectricityMeterMercuryPower.With("serial_number", serialNumber).Set(float64(power))
 
-	voltage, err = d.BatteryVoltage(ctx)
+	prevVoltage := math.Float64frombits(atomic.LoadUint64(&d.voltage))
+	if voltage != prevVoltage {
+		atomic.StoreUint64(&d.voltage, math.Float64bits(voltage))
+
+		d.MQTTPublishAsync(ctx, Mercury200ElectricityMeterMQTTTopicVoltage.Format(serialNumber), 0, true, voltage)
+	}
+
+	prevAmperage := math.Float64frombits(atomic.LoadUint64(&d.amperage))
+	if amperage != prevAmperage {
+		atomic.StoreUint64(&d.amperage, math.Float64bits(amperage))
+
+		d.MQTTPublishAsync(ctx, Mercury200ElectricityMeterMQTTTopicAmperage.Format(serialNumber), 0, true, amperage)
+	}
+
+	prevPower := atomic.LoadInt64(&d.power)
+	if power != prevPower {
+		atomic.StoreInt64(&d.power, power)
+
+		d.MQTTPublishAsync(ctx, Mercury200ElectricityMeterMQTTTopicPower.Format(serialNumber), 0, true, power)
+	}
+
+	batteryVoltage, err := d.BatteryVoltage(ctx)
 	if err != nil {
 		return nil, nil
 	}
-	currentValues.BatteryVoltage = voltage
-	metricElectricityMeterMercuryBatteryVoltage.With("serial_number", serialNumber).Set(voltage)
 
-	d.mutex.Lock()
-	if !reflect.DeepEqual(d.lastValues, currentValues) {
-		d.lastValues = currentValues
-		d.mutex.Unlock()
+	metricElectricityMeterMercuryBatteryVoltage.With("serial_number", serialNumber).Set(batteryVoltage)
 
-		d.TriggerEvent(ctx, boggart.DeviceEventMercury200Changed, currentValues, serialNumber)
-	} else {
-		d.mutex.Unlock()
+	prevBatteryVoltage := math.Float64frombits(atomic.LoadUint64(&d.batteryVoltage))
+	if batteryVoltage != prevBatteryVoltage {
+		atomic.StoreUint64(&d.batteryVoltage, math.Float64bits(batteryVoltage))
+
+		d.MQTTPublishAsync(ctx, Mercury200ElectricityMeterMQTTTopicBatteryVoltage.Format(serialNumber), 0, true, batteryVoltage)
 	}
 
 	return nil, nil
+}
+
+func (d *Mercury200ElectricityMeter) MQTTTopics() []boggart.DeviceMQTTTopic {
+	return []boggart.DeviceMQTTTopic{
+		Mercury200ElectricityMeterMQTTTopicTariff1,
+		Mercury200ElectricityMeterMQTTTopicTariff2,
+		Mercury200ElectricityMeterMQTTTopicTariff3,
+		Mercury200ElectricityMeterMQTTTopicTariff4,
+		Mercury200ElectricityMeterMQTTTopicVoltage,
+		Mercury200ElectricityMeterMQTTTopicAmperage,
+		Mercury200ElectricityMeterMQTTTopicPower,
+		Mercury200ElectricityMeterMQTTTopicBatteryVoltage,
+	}
 }

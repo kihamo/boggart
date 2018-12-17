@@ -6,6 +6,7 @@ import (
 	"crypto/cipher"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"net"
 	"sync"
 	"sync/atomic"
@@ -99,8 +100,6 @@ func (d *Device) request(cmd byte, payload []byte, waitResult bool) ([]byte, err
 		}
 	}
 
-	d.incPacketsCounter()
-
 	deadline := time.Now().Add(d.getTimeout())
 
 	conn, err := net.ListenUDP("udp4", &d.addrInterface)
@@ -146,8 +145,10 @@ func (d *Device) Call(cmd byte, payload []byte) ([]byte, error) {
 	// TODO: Checksum check
 
 	// verify packet counter
-	if d.getPacketsCounter() != binary.LittleEndian.Uint16(result[0x28:]) {
-		return nil, errors.New("invalid packet counter")
+	pcWant := d.getPacketsCounter()
+	pcHave := binary.LittleEndian.Uint16(result[0x28:])
+	if pcWant != pcHave {
+		return nil, fmt.Errorf("invalid packet counter want %d have %d", pcWant, pcHave)
 	}
 
 	// verify MAC address
@@ -258,6 +259,8 @@ func (d *Device) buildCmdPacket(cmd byte, payload []byte) (packet []byte) {
 	copy(packet, regularPacketHeader)
 	packet[0x24], packet[0x25] = 0x2a, 0x27
 	packet[0x26] = cmd
+
+	d.incPacketsCounter()
 	binary.LittleEndian.PutUint16(packet[0x28:], d.getPacketsCounter())
 
 	for i, part := range d.addrMAC {

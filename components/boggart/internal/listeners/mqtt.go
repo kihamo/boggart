@@ -45,7 +45,6 @@ func (l *MQTTListener) Events() []workers.Event {
 		boggart.DeviceEventVPNClientConnected,
 		boggart.DeviceEventVPNClientDisconnected,
 		boggart.DeviceEventMegafonBalanceChanged,
-		boggart.DeviceEventMercury200Changed,
 		boggart.DeviceEventBME280Changed,
 		boggart.DeviceEventGPIOPinChanged,
 	}
@@ -119,18 +118,6 @@ func (l *MQTTListener) Run(ctx context.Context, event workers.Event, t time.Time
 
 	case boggart.DeviceEventMegafonBalanceChanged:
 		l.publish(ctx, fmt.Sprintf("service/megafon/%s/balance", args[2]), true, args[1])
-
-	case boggart.DeviceEventMercury200Changed:
-		values := args[1].(devices.Mercury200ElectricityMeterChange)
-
-		l.publish(ctx, fmt.Sprintf("meter/mercury200/%s/tariff_1", args[2]), true, values.Tariff1)
-		l.publish(ctx, fmt.Sprintf("meter/mercury200/%s/tariff_2", args[2]), true, values.Tariff2)
-		l.publish(ctx, fmt.Sprintf("meter/mercury200/%s/tariff_3", args[2]), true, values.Tariff3)
-		l.publish(ctx, fmt.Sprintf("meter/mercury200/%s/tariff_4", args[2]), true, values.Tariff4)
-		l.publish(ctx, fmt.Sprintf("meter/mercury200/%s/voltage", args[2]), true, values.Voltage)
-		l.publish(ctx, fmt.Sprintf("meter/mercury200/%s/amperage", args[2]), true, values.Amperage)
-		l.publish(ctx, fmt.Sprintf("meter/mercury200/%s/power", args[2]), true, values.Power)
-		l.publish(ctx, fmt.Sprintf("meter/mercury200/%s/battery_voltage", args[2]), true, values.BatteryVoltage)
 
 	case boggart.DeviceEventBME280Changed:
 		values := args[1].(devices.BME280SensorChange)
