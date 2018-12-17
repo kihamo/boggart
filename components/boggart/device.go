@@ -25,7 +25,6 @@ var (
 	DeviceEventVPNClientDisconnected           = event.NewBaseEvent("VPNClientDisconnected")
 	DeviceEventHikvisionEventNotificationAlert = event.NewBaseEvent("HikvisionEventNotificationAlert")
 	DeviceEventMegafonBalanceChanged           = event.NewBaseEvent("SoftMegafonBalanceChanged")
-	DeviceEventPulsarChanged                   = event.NewBaseEvent("PulsarChanged")
 	DeviceEventMercury200Changed               = event.NewBaseEvent("Mercury200Changed")
 	DeviceEventBME280Changed                   = event.NewBaseEvent("BME280")
 	DeviceEventGPIOPinChanged                  = event.NewBaseEvent("GPIOPinChanged")

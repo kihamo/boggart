@@ -3,8 +3,8 @@ package devices
 import (
 	"context"
 	"encoding/hex"
-	"reflect"
-	"sync"
+	"math"
+	"sync/atomic"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -12,6 +12,14 @@ import (
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 	"github.com/kihamo/snitch"
+)
+
+const (
+	PulsarHeadMeterMQTTTopicTemperatureIn    boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/pulsar/+/temperature_in"
+	PulsarHeadMeterMQTTTopicTemperatureOut   boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/pulsar/+/temperature_out"
+	PulsarHeadMeterMQTTTopicTemperatureDelta boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/pulsar/+/temperature_delta"
+	PulsarHeadMeterMQTTTopicEnergy           boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/pulsar/+/energy"
+	PulsarHeadMeterMQTTTopicConsumption      boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/pulsar/+/consumption"
 )
 
 var (
@@ -22,23 +30,19 @@ var (
 	metricHeatMeterPulsarConsumption      = snitch.NewGauge(boggart.ComponentName+"_device_heat_meter_pulsar_consumption_cubic_metres_per_hour", "Pulsar consumption")
 )
 
-type PulsarHeadMeterChange struct {
-	TemperatureIn    float64
-	TemperatureOut   float64
-	TemperatureDelta float64
-	Energy           float64
-	Consumption      float64
-}
-
 type PulsarHeadMeter struct {
+	temperatureIn    uint64
+	temperatureOut   uint64
+	temperatureDelta uint64
+	energy           uint64
+	consumption      uint64
+
 	boggart.DeviceBase
 	boggart.DeviceSerialNumber
+	boggart.DeviceMQTT
 
 	provider *pulsar.HeatMeter
 	interval time.Duration
-
-	mutex      sync.Mutex
-	lastValues PulsarHeadMeterChange
 }
 
 func NewPulsarHeadMeter(provider *pulsar.HeatMeter, interval time.Duration) *PulsarHeadMeter {
@@ -146,52 +150,81 @@ func (d *PulsarHeadMeter) taskUpdater(ctx context.Context) (interface{}, error) 
 	}
 
 	serialNumber := d.SerialNumber()
-	currentValues := PulsarHeadMeterChange{}
 
-	if value, err := d.TemperatureIn(ctx); err == nil {
-		currentValues.TemperatureIn = value
-		metricHeatMeterPulsarTemperatureIn.With("serial_number", serialNumber).Set(value)
+	if current, err := d.TemperatureIn(ctx); err == nil {
+		metricHeatMeterPulsarTemperatureIn.With("serial_number", serialNumber).Set(current)
+
+		prev := math.Float64frombits(atomic.LoadUint64(&d.temperatureIn))
+		if current != prev {
+			atomic.StoreUint64(&d.temperatureIn, math.Float64bits(current))
+
+			d.MQTTPublishAsync(ctx, PulsarHeadMeterMQTTTopicTemperatureIn.Format(serialNumber), 0, true, current)
+		}
 	} else {
 		return nil, err
 	}
 
-	if value, err := d.TemperatureOut(ctx); err == nil {
-		currentValues.TemperatureOut = value
-		metricHeatMeterPulsarTemperatureOut.With("serial_number", serialNumber).Set(value)
+	if current, err := d.TemperatureOut(ctx); err == nil {
+		metricHeatMeterPulsarTemperatureOut.With("serial_number", serialNumber).Set(current)
+
+		prev := math.Float64frombits(atomic.LoadUint64(&d.temperatureIn))
+		if current != prev {
+			atomic.StoreUint64(&d.temperatureIn, math.Float64bits(current))
+
+			d.MQTTPublishAsync(ctx, PulsarHeadMeterMQTTTopicTemperatureOut.Format(serialNumber), 0, true, current)
+		}
 	} else {
 		return nil, err
 	}
 
-	if value, err := d.TemperatureDelta(ctx); err == nil {
-		currentValues.TemperatureDelta = value
-		metricHeatMeterPulsarTemperatureDelta.With("serial_number", serialNumber).Set(value)
+	if current, err := d.TemperatureDelta(ctx); err == nil {
+		metricHeatMeterPulsarTemperatureDelta.With("serial_number", serialNumber).Set(current)
+
+		prev := math.Float64frombits(atomic.LoadUint64(&d.temperatureIn))
+		if current != prev {
+			atomic.StoreUint64(&d.temperatureIn, math.Float64bits(current))
+
+			d.MQTTPublishAsync(ctx, PulsarHeadMeterMQTTTopicTemperatureDelta.Format(serialNumber), 0, true, current)
+		}
 	} else {
 		return nil, err
 	}
 
-	if value, err := d.Energy(ctx); err == nil {
-		currentValues.Energy = value
-		metricHeatMeterPulsarEnergy.With("serial_number", serialNumber).Set(value)
+	if current, err := d.Energy(ctx); err == nil {
+		metricHeatMeterPulsarEnergy.With("serial_number", serialNumber).Set(current)
+
+		prev := math.Float64frombits(atomic.LoadUint64(&d.temperatureIn))
+		if current != prev {
+			atomic.StoreUint64(&d.temperatureIn, math.Float64bits(current))
+
+			d.MQTTPublishAsync(ctx, PulsarHeadMeterMQTTTopicEnergy.Format(serialNumber), 0, true, current)
+		}
 	} else {
 		return nil, err
 	}
 
-	if value, err := d.Consumption(ctx); err == nil {
-		currentValues.Consumption = value
-		metricHeatMeterPulsarConsumption.With("serial_number", serialNumber).Set(value)
+	if current, err := d.Consumption(ctx); err == nil {
+		metricHeatMeterPulsarConsumption.With("serial_number", serialNumber).Set(current)
+
+		prev := math.Float64frombits(atomic.LoadUint64(&d.temperatureIn))
+		if current != prev {
+			atomic.StoreUint64(&d.temperatureIn, math.Float64bits(current))
+
+			d.MQTTPublishAsync(ctx, PulsarHeadMeterMQTTTopicConsumption.Format(serialNumber), 0, true, current)
+		}
 	} else {
 		return nil, err
-	}
-
-	d.mutex.Lock()
-	if !reflect.DeepEqual(d.lastValues, currentValues) {
-		d.lastValues = currentValues
-		d.mutex.Unlock()
-
-		d.TriggerEvent(ctx, boggart.DeviceEventPulsarChanged, currentValues, serialNumber)
-	} else {
-		d.mutex.Unlock()
 	}
 
 	return nil, nil
+}
+
+func (d *PulsarHeadMeter) MQTTTopics() []boggart.DeviceMQTTTopic {
+	return []boggart.DeviceMQTTTopic{
+		PulsarHeadMeterMQTTTopicTemperatureIn,
+		PulsarHeadMeterMQTTTopicTemperatureOut,
+		PulsarHeadMeterMQTTTopicTemperatureDelta,
+		PulsarHeadMeterMQTTTopicEnergy,
+		PulsarHeadMeterMQTTTopicConsumption,
+	}
 }
