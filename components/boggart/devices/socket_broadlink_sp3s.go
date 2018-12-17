@@ -3,7 +3,6 @@ package devices
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -109,7 +108,7 @@ func (d *BroadlinkSP3SSocket) taskUpdater(ctx context.Context) (interface{}, err
 			mqttValue = []byte(`0`)
 		}
 
-		d.MQTTPublish(ctx, topicPrefix+"state", 0, true, mqttValue)
+		d.MQTTPublishAsync(ctx, topicPrefix+"state", 0, true, mqttValue)
 	}
 
 	value, err := d.Power()
@@ -125,7 +124,7 @@ func (d *BroadlinkSP3SSocket) taskUpdater(ctx context.Context) (interface{}, err
 	if current != prev {
 		atomic.StoreInt64(&d.lastValue, current)
 
-		d.MQTTPublish(ctx, topicPrefix+"power", 0, true, fmt.Sprintf("%.2f", value))
+		d.MQTTPublishAsync(ctx, topicPrefix+"power", 0, true, value)
 	}
 
 	return nil, nil

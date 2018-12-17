@@ -130,5 +130,22 @@ func (d *DeviceMQTT) MQTTPublish(ctx context.Context, topic string, qos byte, re
 		return errors.New("MQTT client isn't init")
 	}
 
+	switch value := payload.(type) {
+	case string, []byte:
+		// skip
+	case float64:
+		payload = fmt.Sprintf("%.2f", value)
+	case uint64, int64, int:
+		payload = fmt.Sprintf("%d", value)
+	default:
+		payload = fmt.Sprintf("%s", payload)
+	}
+
 	return d.client.Publish(ctx, topic, qos, retained, payload)
+}
+
+func (d *DeviceMQTT) MQTTPublishAsync(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) {
+	go func() {
+		d.MQTTPublishAsync(ctx, topic, qos, retained, payload)
+	}()
 }

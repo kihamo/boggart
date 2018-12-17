@@ -11,10 +11,16 @@ import (
 	"github.com/kihamo/go-workers/task"
 )
 
+const (
+	SoftVideoInternetMQTTTopicPrefix = boggart.ComponentName + "/service/softvideo/"
+)
+
 type SoftVideoInternet struct {
 	lastValue int64
 
 	boggart.DeviceBase
+	boggart.DeviceSerialNumber
+	boggart.DeviceMQTT
 
 	provider *softvideo.Client
 	interval time.Duration
@@ -26,6 +32,7 @@ func NewSoftVideoInternet(provider *softvideo.Client, interval time.Duration) *S
 		interval: interval,
 	}
 	device.Init()
+	device.SetSerialNumber(provider.AccountID())
 	device.SetDescription("SoftVideo internet provider for account " + provider.AccountID())
 
 	return device
@@ -70,7 +77,7 @@ func (d *SoftVideoInternet) taskUpdater(ctx context.Context) (interface{}, error
 	prev := atomic.LoadInt64(&d.lastValue)
 
 	if current != prev {
-		d.TriggerEvent(ctx, boggart.DeviceEventSoftVideoBalanceChanged, value, d.provider.AccountID())
+		d.MQTTPublishAsync(ctx, SoftVideoInternetMQTTTopicPrefix+d.SerialNumber()+"/balance", 0, true, value)
 	}
 
 	return nil, nil

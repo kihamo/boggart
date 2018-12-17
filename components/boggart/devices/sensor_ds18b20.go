@@ -2,7 +2,6 @@ package devices
 
 import (
 	"context"
-	"fmt"
 	"sync/atomic"
 	"time"
 
@@ -80,7 +79,7 @@ func (d *DS18B20Sensor) taskUpdater(ctx context.Context) (interface{}, error) {
 	if prev != current {
 		atomic.StoreInt64(&d.lastValue, current)
 
-		d.MQTTPublish(ctx, DS18B20SensorMQTTTopicPrefix+d.SerialNumber(), 0, true, fmt.Sprintf("%.2f", value))
+		d.MQTTPublishAsync(ctx, DS18B20SensorMQTTTopicPrefix+d.SerialNumber(), 0, true, value)
 	}
 
 	return nil, nil

@@ -114,7 +114,7 @@ func (d *ZenggeLED) taskUpdater(ctx context.Context) (interface{}, error) {
 		sn := strings.Replace(d.SerialNumber(), ":", "-", -1)
 		sn = strings.Replace(sn, ",", "-", -1)
 
-		d.MQTTPublish(ctx, ZenggeLEDMQTTTopicPrefix+sn+"/state", 0, true, mqttValue)
+		d.MQTTPublishAsync(ctx, ZenggeLEDMQTTTopicPrefix+sn+"/state", 0, true, mqttValue)
 	}
 
 	return nil, nil
