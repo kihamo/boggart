@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	SoftVideoInternetMQTTTopicPrefix = boggart.ComponentName + "/service/softvideo/"
+	SoftVideoInternetMQTTTopicBalance boggart.DeviceMQTTTopic = boggart.ComponentName + "/service/softvideo/+/balance"
 )
 
 type SoftVideoInternet struct {
@@ -77,8 +77,16 @@ func (d *SoftVideoInternet) taskUpdater(ctx context.Context) (interface{}, error
 	prev := atomic.LoadInt64(&d.lastValue)
 
 	if current != prev {
-		d.MQTTPublishAsync(ctx, SoftVideoInternetMQTTTopicPrefix+d.SerialNumber()+"/balance", 0, true, value)
+		atomic.StoreInt64(&d.lastValue, current)
+
+		d.MQTTPublishAsync(ctx, SoftVideoInternetMQTTTopicBalance.Format(d.SerialNumber()), 0, true, value)
 	}
 
 	return nil, nil
+}
+
+func (d *SoftVideoInternet) MQTTTopics() []boggart.DeviceMQTTTopic {
+	return []boggart.DeviceMQTTTopic{
+		SoftVideoInternetMQTTTopicBalance,
+	}
 }

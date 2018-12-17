@@ -16,7 +16,8 @@ import (
 type GPIOMode int64
 
 const (
-	GPIOMQTTTopicPin boggart.DeviceMQTTTopic = boggart.ComponentName + "/gpio/+"
+	GPIOMQTTTopicPinState boggart.DeviceMQTTTopic = boggart.ComponentName + "/gpio/+"
+	GPIOMQTTTopicPinSet   boggart.DeviceMQTTTopic = boggart.ComponentName + "/gpio/+/set"
 
 	GPIOModeDefault GPIOMode = iota
 	GPIOModeIn
@@ -25,6 +26,8 @@ const (
 
 type GPIOPin struct {
 	boggart.DeviceBase
+	boggart.DeviceMQTT
+
 	pin  pin.Pin
 	mode GPIOMode
 }
@@ -103,13 +106,22 @@ func (d *GPIOPin) waitForEdge() {
 	ctx := context.Background()
 
 	for p.WaitForEdge(-1) {
-		d.TriggerEvent(ctx, boggart.DeviceEventGPIOPinChanged, d.pin.Number(), d.Read())
+		var mqttValue []byte
+
+		if d.Read() {
+			mqttValue = []byte(`1`)
+		} else {
+			mqttValue = []byte(`0`)
+		}
+
+		d.MQTTPublishAsync(ctx, GPIOMQTTTopicPinState.Format(d.pin.Number()), 2, true, mqttValue)
 	}
 }
 
 func (d *GPIOPin) MQTTTopics() []boggart.DeviceMQTTTopic {
 	return []boggart.DeviceMQTTTopic{
-		GPIOMQTTTopicPin,
+		GPIOMQTTTopicPinState,
+		GPIOMQTTTopicPinSet,
 	}
 }
 
@@ -120,7 +132,7 @@ func (d *GPIOPin) MQTTSubscribers() []mqtt.Subscriber {
 
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(
-			GPIOMQTTTopicPin.Format(d.pin.Number()),
+			GPIOMQTTTopicPinSet.Format(d.pin.Number()),
 			0,
 			func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
 				if !d.IsEnabled() {

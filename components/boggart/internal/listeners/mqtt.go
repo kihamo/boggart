@@ -45,8 +45,6 @@ func (l *MQTTListener) Events() []workers.Event {
 		boggart.DeviceEventVPNClientConnected,
 		boggart.DeviceEventVPNClientDisconnected,
 		boggart.DeviceEventMegafonBalanceChanged,
-		boggart.DeviceEventBME280Changed,
-		boggart.DeviceEventGPIOPinChanged,
 	}
 }
 
@@ -118,21 +116,6 @@ func (l *MQTTListener) Run(ctx context.Context, event workers.Event, t time.Time
 
 	case boggart.DeviceEventMegafonBalanceChanged:
 		l.publish(ctx, fmt.Sprintf("service/megafon/%s/balance", args[2]), true, args[1])
-
-	case boggart.DeviceEventBME280Changed:
-		values := args[1].(devices.BME280SensorChange)
-
-		l.publish(ctx, fmt.Sprintf("meter/bme280/%s/temperature", args[2]), true, values.Temperature)
-		l.publish(ctx, fmt.Sprintf("meter/bme280/%s/altitude", args[2]), true, values.Altitude)
-		l.publish(ctx, fmt.Sprintf("meter/bme280/%s/humidity", args[2]), true, values.Humidity)
-		l.publish(ctx, fmt.Sprintf("meter/bme280/%s/pressure", args[2]), true, values.Pressure)
-
-	case boggart.DeviceEventGPIOPinChanged:
-		if args[2].(bool) {
-			l.publishWithQOS(ctx, fmt.Sprintf("gpio/%d", args[1]), 2, true, ValueOn)
-		} else {
-			l.publishWithQOS(ctx, fmt.Sprintf("gpio/%d", args[1]), 2, true, ValueOff)
-		}
 	}
 }
 

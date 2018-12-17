@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	DS18B20SensorMQTTTopicPrefix = boggart.ComponentName + "/meter/ds18b20/"
+	DS18B20SensorMQTTTopic boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/ds18b20/+"
 )
 
 type DS18B20Sensor struct {
@@ -79,8 +79,14 @@ func (d *DS18B20Sensor) taskUpdater(ctx context.Context) (interface{}, error) {
 	if prev != current {
 		atomic.StoreInt64(&d.lastValue, current)
 
-		d.MQTTPublishAsync(ctx, DS18B20SensorMQTTTopicPrefix+d.SerialNumber(), 0, true, value)
+		d.MQTTPublishAsync(ctx, DS18B20SensorMQTTTopic.Format(d.SerialNumber()), 0, true, value)
 	}
 
 	return nil, nil
+}
+
+func (d *DS18B20Sensor) MQTTTopics() []boggart.DeviceMQTTTopic {
+	return []boggart.DeviceMQTTTopic{
+		DS18B20SensorMQTTTopic,
+	}
 }

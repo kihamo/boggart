@@ -3,8 +3,8 @@ package devices
 import (
 	"context"
 	"fmt"
-	"reflect"
-	"sync"
+	"math"
+	"sync/atomic"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -14,6 +14,13 @@ import (
 	"gobot.io/x/gobot/drivers/i2c"
 )
 
+const (
+	BME280SensorMQTTTopicTemperature boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/bme280/+/temperature"
+	BME280SensorMQTTTopicAltitude    boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/bme280/+/altitude"
+	BME280SensorMQTTTopicHumidity    boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/bme280/+/humidity"
+	BME280SensorMQTTTopicPressure    boggart.DeviceMQTTTopic = boggart.ComponentName + "/meter/bme280/+/pressure"
+)
+
 var (
 	metricSensorBME280Temperature = snitch.NewGauge(boggart.ComponentName+"_device_sensor_bme280_temperature_celsius", "Temperature")
 	metricSensorBME280Altitude    = snitch.NewGauge(boggart.ComponentName+"_device_sensor_bme280_altitude_metre", "Altitude")
@@ -21,22 +28,18 @@ var (
 	metricSensorBME280Pressure    = snitch.NewGauge(boggart.ComponentName+"_device_sensor_bme280_pressure_psi", "Pressure")
 )
 
-type BME280SensorChange struct {
-	Temperature float64
-	Altitude    float64
-	Humidity    float64
-	Pressure    float64
-}
-
 type BME280Sensor struct {
+	temperature uint64
+	altitude    uint64
+	humidity    uint64
+	pressure    uint64
+
 	boggart.DeviceBase
 	boggart.DeviceSerialNumber
+	boggart.DeviceMQTT
 
 	driver   *i2c.BME280Driver
 	interval time.Duration
-
-	mutex      sync.Mutex
-	lastValues BME280SensorChange
 }
 
 func NewBME280Sensor(connector i2c.Connector, interval time.Duration, bus int, address int) *BME280Sensor {
@@ -105,45 +108,75 @@ func (d *BME280Sensor) taskUpdater(ctx context.Context) (interface{}, error) {
 	}
 
 	serialNumber := d.SerialNumber()
-	currentValues := BME280SensorChange{}
 
 	if value, err := d.driver.Temperature(); err == nil {
-		currentValues.Temperature = float64(value)
-		metricSensorBME280Temperature.With("serial_number", serialNumber).Set(currentValues.Temperature)
+		current := float64(value)
+
+		metricSensorBME280Temperature.With("serial_number", serialNumber).Set(current)
+
+		prev := math.Float64frombits(atomic.LoadUint64(&d.temperature))
+		if current != prev {
+			atomic.StoreUint64(&d.temperature, math.Float64bits(current))
+
+			d.MQTTPublishAsync(ctx, BME280SensorMQTTTopicTemperature.Format(serialNumber), 0, true, current)
+		}
 	} else {
 		return nil, err
 	}
 
 	if value, err := d.driver.Altitude(); err == nil {
-		currentValues.Altitude = float64(value)
-		metricSensorBME280Altitude.With("serial_number", serialNumber).Set(currentValues.Altitude)
+		current := float64(value)
+
+		metricSensorBME280Altitude.With("serial_number", serialNumber).Set(current)
+
+		prev := math.Float64frombits(atomic.LoadUint64(&d.altitude))
+		if current != prev {
+			atomic.StoreUint64(&d.altitude, math.Float64bits(current))
+
+			d.MQTTPublishAsync(ctx, BME280SensorMQTTTopicAltitude.Format(serialNumber), 0, true, current)
+		}
 	} else {
 		return nil, err
 	}
 
 	if value, err := d.driver.Humidity(); err == nil {
-		currentValues.Humidity = float64(value)
-		metricSensorBME280Humidity.With("serial_number", serialNumber).Set(currentValues.Humidity)
+		current := float64(value)
+
+		metricSensorBME280Humidity.With("serial_number", serialNumber).Set(current)
+
+		prev := math.Float64frombits(atomic.LoadUint64(&d.humidity))
+		if current != prev {
+			atomic.StoreUint64(&d.humidity, math.Float64bits(current))
+
+			d.MQTTPublishAsync(ctx, BME280SensorMQTTTopicHumidity.Format(serialNumber), 0, true, current)
+		}
 	} else {
 		return nil, err
 	}
 
 	if value, err := d.driver.Pressure(); err == nil {
-		currentValues.Pressure = float64(int(value/133.322*10)) / 10
-		metricSensorBME280Pressure.With("serial_number", serialNumber).Set(currentValues.Pressure)
+		current := float64(int(value/133.322*10)) / 10
+
+		metricSensorBME280Pressure.With("serial_number", serialNumber).Set(current)
+
+		prev := math.Float64frombits(atomic.LoadUint64(&d.pressure))
+		if current != prev {
+			atomic.StoreUint64(&d.pressure, math.Float64bits(current))
+
+			d.MQTTPublishAsync(ctx, BME280SensorMQTTTopicPressure.Format(serialNumber), 0, true, current)
+		}
 	} else {
 		return nil, err
 	}
 
-	d.mutex.Lock()
-	if !reflect.DeepEqual(d.lastValues, currentValues) {
-		d.lastValues = currentValues
-		d.mutex.Unlock()
-
-		d.TriggerEvent(ctx, boggart.DeviceEventBME280Changed, currentValues, serialNumber)
-	} else {
-		d.mutex.Unlock()
-	}
-
 	return nil, nil
+}
+
+func (d *BME280Sensor) MQTTTopics() []boggart.DeviceMQTTTopic {
+	return []boggart.DeviceMQTTTopic{
+		BME280SensorMQTTTopicTemperature,
+		BME280SensorMQTTTopicAltitude,
+		BME280SensorMQTTTopicHumidity,
+		BME280SensorMQTTTopicPressure,
+	}
 }
