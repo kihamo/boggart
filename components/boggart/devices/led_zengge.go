@@ -22,12 +22,16 @@ const (
 
 	ZenggeLEDUpdateInterval = time.Second * 3
 
-	ZenggeLEDMQTTTopicPower mqtt.Topic = boggart.ComponentName + "/led/+/power"
-	ZenggeLEDMQTTTopicState mqtt.Topic = boggart.ComponentName + "/led/+/state"
+	ZenggeLEDMQTTTopicPower      mqtt.Topic = boggart.ComponentName + "/led/+/power"
+	ZenggeLEDMQTTTopicColor      mqtt.Topic = boggart.ComponentName + "/led/+/color"
+	ZenggeLEDMQTTTopicStatePower mqtt.Topic = boggart.ComponentName + "/led/+/state/power"
+	ZenggeLEDMQTTTopicStateColor mqtt.Topic = boggart.ComponentName + "/led/+/state/color"
+	ZenggeLEDMQTTTopicStateMode  mqtt.Topic = boggart.ComponentName + "/led/+/state/mode"
 )
 
 type ZenggeLED struct {
-	state int64
+	statePower int64
+	stateMode  uint64
 
 	boggart.DeviceBase
 	boggart.DeviceSerialNumber
@@ -56,6 +60,8 @@ func NewZenggeLED(controller *control.Controller) *ZenggeLED {
 		} else {
 			sn = address[:index]
 		}
+
+		sn = strings.Replace(sn, ".", "-", -1)
 
 	case *remote.RemoteTransport:
 		sn = strings.Replace(l.MAC, ":", "-", -1)
@@ -101,23 +107,32 @@ func (d *ZenggeLED) taskUpdater(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	last := atomic.LoadInt64(&d.state)
-	if last == 0 || (last == 1) != state.IsOn {
+	sn := d.SerialNumber()
+
+	prevPower := atomic.LoadInt64(&d.statePower)
+	if prevPower == 0 || (prevPower == 1) != state.IsOn {
 		var mqttValue []byte
 
 		if state.IsOn {
-			atomic.StoreInt64(&d.state, 1)
+			atomic.StoreInt64(&d.statePower, 1)
 			mqttValue = []byte(`1`)
 		} else {
-			atomic.StoreInt64(&d.state, -1)
+			atomic.StoreInt64(&d.statePower, -1)
 			mqttValue = []byte(`0`)
 		}
 
-		sn := strings.Replace(d.SerialNumber(), ":", "-", -1)
-		sn = strings.Replace(sn, ",", "-", -1)
-
-		d.MQTTPublishAsync(ctx, ZenggeLEDMQTTTopicState.Format(sn), 0, true, mqttValue)
+		d.MQTTPublishAsync(ctx, ZenggeLEDMQTTTopicStatePower.Format(sn), 0, true, mqttValue)
 	}
+
+	currentMode := uint64(state.Mode)
+	prevMode := atomic.LoadUint64(&d.stateMode)
+	if prevMode != currentMode {
+		atomic.StoreUint64(&d.stateMode, currentMode)
+
+		d.MQTTPublishAsync(ctx, ZenggeLEDMQTTTopicStateMode.Format(sn), 0, true, currentMode)
+	}
+
+	d.MQTTPublishAsync(ctx, ZenggeLEDMQTTTopicStateColor.Format(sn), 0, true, state.Color.Format())
 
 	return nil, nil
 }
@@ -143,12 +158,15 @@ func (d *ZenggeLED) Off(ctx context.Context) error {
 func (d *ZenggeLED) MQTTTopics() []mqtt.Topic {
 	return []mqtt.Topic{
 		ZenggeLEDMQTTTopicPower,
-		ZenggeLEDMQTTTopicState,
+		ZenggeLEDMQTTTopicColor,
+		ZenggeLEDMQTTTopicStatePower,
+		ZenggeLEDMQTTTopicStateColor,
+		ZenggeLEDMQTTTopicStateMode,
 	}
 }
 
 func (d *ZenggeLED) MQTTSubscribers() []mqtt.Subscriber {
-	sn := strings.Replace(d.SerialNumber(), ".", "-", -1)
+	sn := d.SerialNumber()
 
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(ZenggeLEDMQTTTopicPower.Format(sn), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
@@ -160,6 +178,16 @@ func (d *ZenggeLED) MQTTSubscribers() []mqtt.Subscriber {
 				d.On(ctx)
 			} else {
 				d.Off(ctx)
+			}
+		}),
+		mqtt.NewSubscriber(ZenggeLEDMQTTTopicColor.Format(sn), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+			if !d.IsEnabled() {
+				return
+			}
+
+			color := control.ParseColorString(string(message.Payload()))
+			if color != nil {
+				d.controller.SetColor(*color)
 			}
 		}),
 	}
