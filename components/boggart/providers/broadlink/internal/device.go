@@ -100,15 +100,13 @@ func (d *Device) request(cmd byte, payload []byte, waitResult bool) ([]byte, err
 		}
 	}
 
-	deadline := time.Now().Add(d.getTimeout())
-
 	conn, err := net.ListenUDP("udp4", &d.addrInterface)
 	if err != nil {
 		return nil, err
 	}
 	defer conn.Close()
 
-	err = conn.SetDeadline(deadline) // set timeout to connection
+	err = conn.SetDeadline(time.Now().Add(d.getTimeout())) // set timeout to connection
 	if err != nil {
 		return nil, err
 	}

@@ -17,9 +17,8 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/mobile"
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
 	"github.com/kihamo/boggart/components/boggart/providers/softvideo"
+	"github.com/kihamo/boggart/components/boggart/providers/wifiled"
 	"github.com/kihamo/boggart/components/mqtt"
-	"github.com/vikstrous/zengge-lightcontrol/control"
-	"github.com/vikstrous/zengge-lightcontrol/local"
 	"github.com/yryz/ds18b20"
 	"gobot.io/x/gobot/platforms/raspi"
 	"periph.io/x/periph/conn/gpio/gpioreg"
@@ -342,26 +341,19 @@ func (c *Component) initRemoteControl() {
 }
 
 func (c *Component) initLED() {
-	addresses := c.config.String(boggart.ConfigLEDZengge)
+	addresses := c.config.String(boggart.ConfigLEDWiFi)
 	if addresses == "" {
 		return
 	}
 
-	for _, ip := range strings.Split(addresses, ",") {
-		ip = strings.TrimSpace(ip)
-		if ip == "" {
-			c.logger.Warn("IP address of Zengge LED is empty")
+	for _, host := range strings.Split(addresses, ",") {
+		host = strings.TrimSpace(host)
+		if host == "" {
+			c.logger.Warn("Hostname or IP address of WiFi LED is empty")
 			continue
 		}
 
-		address := net.JoinHostPort(ip, strconv.Itoa(devices.ZenggeLEDPortCommand))
-		transport, err := local.NewTransport(address)
-		if err != nil {
-			c.logger.Warn("Address of Zengge LED is wrong", "address", address)
-			continue
-		}
-
-		device := devices.NewZenggeLED(&control.Controller{Transport: transport})
+		device := devices.NewWiFiLED(wifiled.NewBulb(host))
 		c.devicesManager.Register(device)
 	}
 }
