@@ -4,8 +4,15 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"math"
 	"regexp"
 	"strconv"
+	"strings"
+)
+
+var (
+	reColor1 = regexp.MustCompile("^#?([0-9a-f]{2}[0-9a-f]{2}[0-9a-f]{2})$")
+	reColor2 = regexp.MustCompile("^#?([0-9a-f])([0-9a-f])([0-9a-f])$")
 )
 
 type Color struct {
@@ -36,6 +43,40 @@ func (c Color) Uint64() (value uint64) {
 	return
 }
 
+func (c Color) HSV() (h uint32, s, v float64) {
+	r := float64(c.Red) / 255
+	g := float64(c.Green) / 255
+	b := float64(c.Blue) / 255
+
+	max := math.Max(math.Max(r, g), b)
+	min := math.Min(math.Min(r, g), b)
+
+	if max == min {
+		h = 0
+	} else if max == r {
+		if g >= b {
+			h = uint32(60 * ((g - b) / (max - min)))
+		} else {
+			h = uint32(60*((g-b)/(max-min)) + 360)
+		}
+	} else if max == g {
+		h = uint32(60*((b-r)/(max-min)) + 120)
+	} else if max == b {
+		h = uint32(60*((r-g)/(max-min)) + 240)
+	}
+
+	h %= 360
+
+	if max == 0 {
+		s = 0
+	} else {
+		s = (1 - min/max) * 100
+	}
+
+	v = max * 100
+	return
+}
+
 func (c Color) String() string {
 	if c.UseWarmWhite {
 		return strconv.FormatUint(uint64(c.WarmWhite), 10)
@@ -62,21 +103,73 @@ func ColorFromHEX(color string) (*Color, error) {
 }
 
 func ColorFromString(color string) (*Color, error) {
-	if matched, _ := regexp.Match("#?[0-9a-f]{6}", []byte(color)); matched {
-		if color[0] == '#' {
-			color = color[1:]
-		}
+	color = strings.ToLower(color)
 
-		return ColorFromHEX(color)
+	// HEX: #aabbcc
+	if matches := reColor1.FindStringSubmatch(color); len(matches) > 0 {
+		return ColorFromHEX(matches[1])
 	}
 
-	if matched, _ := regexp.Match("#?[0-9a-f]{3}", []byte(color)); matched {
-		if color[0] == '#' {
-			color = color[1:]
+	// HEX: #abc
+	if matches := reColor2.FindStringSubmatch(color); len(matches) > 0 {
+		return ColorFromHEX(strings.Repeat(matches[1], 2) + strings.Repeat(matches[2], 2) + strings.Repeat(matches[3], 2))
+	}
+
+	// HSB: 358,98,100
+	parts := strings.Split(color, ",")
+	if len(parts) == 3 {
+		// 0...360
+		hue, err := strconv.ParseFloat(parts[0], 64)
+		if err != nil {
+			return nil, err
 		}
 
-		expandedName := fmt.Sprintf("%c%c%c%c%c%c", color[0], color[0], color[1], color[1], color[2], color[2])
-		return ColorFromHEX(expandedName)
+		// 0...100
+		saturation, err := strconv.ParseFloat(parts[1], 64)
+		if err != nil {
+			return nil, err
+		}
+
+		if saturation > 1 {
+			saturation /= 100
+		}
+
+		// 0...100
+		value, err := strconv.ParseFloat(parts[2], 64)
+		if err != nil {
+			return nil, err
+		}
+
+		if value > 1 {
+			value /= 100
+		}
+
+		var r, g, b float64
+		c := value * saturation
+		x := c * (1 - math.Abs(math.Mod(hue/60, 2)-1))
+		m := value - c
+
+		switch {
+		case hue < 60:
+			r, g, b = c, x, 0
+		case hue < 120:
+			r, g, b = x, c, 0
+		case hue < 180:
+			r, g, b = 0, c, x
+		case hue < 240:
+			r, g, b = 0, x, c
+		case hue < 300:
+			r, g, b = x, 0, c
+		default:
+			r, g, b = c, 0, x
+		}
+
+		return &Color{
+			Red:    uint8(math.Floor((r + m) * 255)),
+			Green:  uint8(math.Floor((g + m) * 255)),
+			Blue:   uint8(math.Floor((b + m) * 255)),
+			UseRGB: true,
+		}, nil
 	}
 
 	return nil, errors.New("wrong color format")

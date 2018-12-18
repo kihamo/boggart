@@ -3,6 +3,7 @@ package devices
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -18,13 +19,15 @@ import (
 const (
 	WiFiLEDUpdateInterval = time.Second * 3
 
-	WiFiLEDMQTTTopicPower      mqtt.Topic = boggart.ComponentName + "/led/+/power"
-	WiFiLEDMQTTTopicColor      mqtt.Topic = boggart.ComponentName + "/led/+/color"
-	WiFiLEDMQTTTopicMode       mqtt.Topic = boggart.ComponentName + "/led/+/mode"
-	WiFiLEDMQTTTopicStatePower mqtt.Topic = boggart.ComponentName + "/led/+/state/power"
-	WiFiLEDMQTTTopicStateColor mqtt.Topic = boggart.ComponentName + "/led/+/state/color"
-	WiFiLEDMQTTTopicStateMode  mqtt.Topic = boggart.ComponentName + "/led/+/state/mode"
-	WiFiLEDMQTTTopicStateSpeed mqtt.Topic = boggart.ComponentName + "/led/+/state/speed"
+	WiFiLEDMQTTTopicPower         mqtt.Topic = boggart.ComponentName + "/led/+/power"
+	WiFiLEDMQTTTopicColor         mqtt.Topic = boggart.ComponentName + "/led/+/color"
+	WiFiLEDMQTTTopicMode          mqtt.Topic = boggart.ComponentName + "/led/+/mode"
+	WiFiLEDMQTTTopicSpeed         mqtt.Topic = boggart.ComponentName + "/led/+/speed"
+	WiFiLEDMQTTTopicStatePower    mqtt.Topic = boggart.ComponentName + "/led/+/state/power"
+	WiFiLEDMQTTTopicStateColor    mqtt.Topic = boggart.ComponentName + "/led/+/state/color"
+	WiFiLEDMQTTTopicStateColorHSV mqtt.Topic = boggart.ComponentName + "/led/+/state/color/hsv"
+	WiFiLEDMQTTTopicStateMode     mqtt.Topic = boggart.ComponentName + "/led/+/state/mode"
+	WiFiLEDMQTTTopicStateSpeed    mqtt.Topic = boggart.ComponentName + "/led/+/state/speed"
 )
 
 type WiFiLED struct {
@@ -121,7 +124,12 @@ func (d *WiFiLED) taskUpdater(ctx context.Context) (interface{}, error) {
 	if prevColor != currentColor {
 		atomic.StoreUint64(&d.stateColor, currentColor)
 
+		// in HEX
 		d.MQTTPublishAsync(ctx, WiFiLEDMQTTTopicStateColor.Format(sn), 0, true, state.Color.String())
+
+		// in HSV
+		h, s, v := state.Color.HSV()
+		d.MQTTPublishAsync(ctx, WiFiLEDMQTTTopicStateColorHSV.Format(sn), 0, true, fmt.Sprintf("%d,%.2f,%.2f", h, s, v))
 	}
 
 	return nil, nil
@@ -150,8 +158,10 @@ func (d *WiFiLED) MQTTTopics() []mqtt.Topic {
 		WiFiLEDMQTTTopicPower,
 		WiFiLEDMQTTTopicColor,
 		WiFiLEDMQTTTopicMode,
+		WiFiLEDMQTTTopicSpeed,
 		WiFiLEDMQTTTopicStatePower,
 		WiFiLEDMQTTTopicStateColor,
+		WiFiLEDMQTTTopicStateColorHSV,
 		WiFiLEDMQTTTopicStateMode,
 		WiFiLEDMQTTTopicStateSpeed,
 	}
@@ -189,42 +199,34 @@ func (d *WiFiLED) MQTTSubscribers() []mqtt.Subscriber {
 				return
 			}
 
-			var (
-				err   error
-				mode  *wifiled.Mode
-				speed uint8
-			)
-
-			parts := strings.Fields(string(message.Payload()))
-			if len(parts) == 2 {
-				mode, err = wifiled.ModeFromString(strings.TrimSpace(parts[0]))
-				if err != nil {
-					return
-				}
-
-				s, err := strconv.ParseInt(strings.TrimSpace(parts[1]), 10, 64)
-				if err != nil {
-					return
-				}
-
-				speed = uint8(s)
-			} else if len(parts) == 1 {
-				mode, err = wifiled.ModeFromString(strings.TrimSpace(parts[0]))
-				if err != nil {
-					return
-				}
-
-				state, err := d.bulb.State(ctx)
-				if err != nil {
-					return
-				}
-
-				speed = state.Speed
-			} else {
+			mode, err := wifiled.ModeFromString(strings.TrimSpace(string(message.Payload())))
+			if err != nil {
 				return
 			}
 
-			d.bulb.SetMode(ctx, *mode, speed)
+			state, err := d.bulb.State(ctx)
+			if err != nil {
+				return
+			}
+
+			d.bulb.SetMode(ctx, *mode, state.Speed)
+		}),
+		mqtt.NewSubscriber(WiFiLEDMQTTTopicSpeed.Format(sn), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+			if !d.IsEnabled() {
+				return
+			}
+
+			speed, err := strconv.ParseInt(strings.TrimSpace(string(message.Payload())), 10, 64)
+			if err != nil {
+				return
+			}
+
+			state, err := d.bulb.State(ctx)
+			if err != nil {
+				return
+			}
+
+			d.bulb.SetMode(ctx, state.Mode, uint8(speed))
 		}),
 	}
 }
