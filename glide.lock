@@ -1,5 +1,5 @@
-hash: 361aa85d6264ef5771f8d9774c3c6ba560b4021117162f74972c46568f59f159
-updated: 2018-12-18T03:08:21.643533+03:00
+hash: 8c312e4bf72133cc6956d42f5e2f976e1b81cbe35d5c5e4156434303d266c1bb
+updated: 2018-12-22T15:37:01.382069+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: 02e53af36e6c978af692887ed449b74026d76fec
@@ -43,6 +43,8 @@ imports:
   - wav
 - name: github.com/fsnotify/fsnotify
   version: c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9
+- name: github.com/ghthor/gowol
+  version: eb42ead1b24e9226bddb05004815f6e72280f879
 - name: github.com/globalsign/mgo
   version: eeefdecb41b842af6dc652aaea4026e8403e62df
   subpackages:
