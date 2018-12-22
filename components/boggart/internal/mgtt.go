@@ -24,7 +24,7 @@ func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(MQTTTopicOwnTracks.String(), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-			if c.config.Bool(boggart.ConfigOwnTracksEnabled) {
+			if !c.config.Bool(boggart.ConfigOwnTracksEnabled) {
 				return
 			}
 
@@ -59,6 +59,10 @@ func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 			client.Publish(ctx, MQTTTopicOwnTracksGeoHash.Format(route[len(route)-2], route[len(route)-1]), message.Qos(), message.Retained(), hash)
 		}),
 		mqtt.NewSubscriber(MQTTTopicWOL.String(), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+			if !c.config.Bool(boggart.ConfigWOLEnabled) {
+				return
+			}
+
 			route := mqtt.RouteSplit(message.Topic())
 			if len(route) < 1 {
 				return
