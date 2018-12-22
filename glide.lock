@@ -1,5 +1,5 @@
-hash: 8c312e4bf72133cc6956d42f5e2f976e1b81cbe35d5c5e4156434303d266c1bb
-updated: 2018-12-22T15:37:01.382069+03:00
+hash: 09bd19cbea5b39481f9db77b293b11c204cfac0b3c1b2a81f9d573d0bb8554a8
+updated: 2018-12-22T17:53:52.463618+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: 02e53af36e6c978af692887ed449b74026d76fec
@@ -28,6 +28,12 @@ imports:
   version: 3a0bb77429bd3a61596f5e8a3172445844342120
 - name: github.com/deckarep/golang-set
   version: cbaa98ba5575e67703b32b4b19f73c91f3c4159e
+- name: github.com/dhickie/go-lgtv
+  version: 54744414160ef8c4689fb1d5915e5540c4a67486
+  subpackages:
+  - connection
+  - control
+  - util/ip
 - name: github.com/eclipse/paho.mqtt.golang
   version: c95f2f508baf22ddc8625d0097b1ceb8abc508b3
   subpackages:
@@ -333,6 +339,8 @@ imports:
   version: e55481d6f45c5a8f040343bace9013571dae103e
 - name: github.com/sigurn/utils
   version: f19e41f79f8f006116f682c1af454591bc278ad4
+- name: github.com/snabb/webostv
+  version: bae6b85a37a6ea235af0571b9f3ff944651a6581
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
 - name: github.com/uber/jaeger-client-go

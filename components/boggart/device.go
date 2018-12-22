@@ -46,6 +46,7 @@ const (
 	DeviceTypeSocket
 	DeviceTypeRemoteControl
 	DeviceTypeLED
+	DeviceTypeTV
 )
 
 type DevicesManager interface {

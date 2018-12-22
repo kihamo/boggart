@@ -133,10 +133,16 @@ func (d *DeviceMQTT) MQTTPublish(ctx context.Context, topic string, qos byte, re
 	switch value := payload.(type) {
 	case string, []byte:
 		// skip
-	case float64:
+	case float64, float32:
 		payload = fmt.Sprintf("%.2f", value)
-	case uint64, int64, int:
+	case uint64, uint32, uint16, uint8, uint, int64, int32, int16, int8, int:
 		payload = fmt.Sprintf("%d", value)
+	case bool:
+		if value {
+			payload = []byte(`1`)
+		} else {
+			payload = []byte(`0`)
+		}
 	default:
 		payload = fmt.Sprintf("%s", payload)
 	}

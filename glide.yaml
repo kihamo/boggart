@@ -34,3 +34,5 @@ import:
   version: 63cc6fbbac46dba1a03e55f0ebc965d6c82ca8e1
 - package: github.com/ghthor/gowol
   version: eb42ead1b24e9226bddb05004815f6e72280f879
+- package: github.com/snabb/webostv
+  version: bae6b85a37a6ea235af0571b9f3ff944651a6581

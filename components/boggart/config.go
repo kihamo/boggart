@@ -39,4 +39,5 @@ const (
 	ConfigSocketsBroadlink              = ComponentName + ".sockets.broadlink"
 	ConfigRemoteControlBroadlink        = ComponentName + ".remote-control.broadlink"
 	ConfigLEDWiFi                       = ComponentName + ".led.wifi"
+	ConfigTVLGWebOS                     = ComponentName + ".tv.lg-webos"
 )

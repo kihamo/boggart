@@ -166,8 +166,12 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithGroup("Remote control").
 			WithView([]string{config.ViewTags}),
 		config.NewVariable(boggart.ConfigLEDWiFi, config.ValueTypeString).
-			WithUsage("Address of WiFi LED in format hostname or ip (without port)").
+			WithUsage("Address of WiFi LED in format hostname or ip without port").
 			WithGroup("LED control").
+			WithView([]string{config.ViewTags}),
+		config.NewVariable(boggart.ConfigTVLGWebOS, config.ValueTypeString).
+			WithUsage("Address of LG on WebOS in format hostname or ip without port and register key").
+			WithGroup("TV").
 			WithView([]string{config.ViewTags}),
 	}
 }
