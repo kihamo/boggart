@@ -21,16 +21,22 @@ import (
 const (
 	CameraHikVisionIgnoreInterval = time.Second * 5
 
-	CameraHikVisionMQTTTopicEvent              mqtt.Topic = boggart.ComponentName + "/cctv/+/+/+"
-	CameraHikVisionMQTTTopicPTZMove            mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/move"
-	CameraHikVisionMQTTTopicPTZAbsolute        mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/absolute"
-	CameraHikVisionMQTTTopicPTZContinuous      mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/continuous"
-	CameraHikVisionMQTTTopicPTZRelative        mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/relative"
-	CameraHikVisionMQTTTopicPTZPreset          mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/preset"
-	CameraHikVisionMQTTTopicPTZMomentary       mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/momentary"
-	CameraHikVisionMQTTTopicPTZStatusElevation mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/elevation"
-	CameraHikVisionMQTTTopicPTZStatusAzimuth   mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/azimuth"
-	CameraHikVisionMQTTTopicPTZStatusZoom      mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/zoom"
+	CameraHikVisionMQTTTopicEvent                mqtt.Topic = boggart.ComponentName + "/cctv/+/+/+"
+	CameraHikVisionMQTTTopicPTZMove              mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/move"
+	CameraHikVisionMQTTTopicPTZAbsolute          mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/absolute"
+	CameraHikVisionMQTTTopicPTZContinuous        mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/continuous"
+	CameraHikVisionMQTTTopicPTZRelative          mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/relative"
+	CameraHikVisionMQTTTopicPTZPreset            mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/preset"
+	CameraHikVisionMQTTTopicPTZMomentary         mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/momentary"
+	CameraHikVisionMQTTTopicPTZStatusElevation   mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/elevation"
+	CameraHikVisionMQTTTopicPTZStatusAzimuth     mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/azimuth"
+	CameraHikVisionMQTTTopicPTZStatusZoom        mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/zoom"
+	CameraHikVisionMQTTTopicStateUpTime          mqtt.Topic = boggart.ComponentName + "/cctv/+/state/uptime"
+	CameraHikVisionMQTTTopicStateMemoryUsage     mqtt.Topic = boggart.ComponentName + "/cctv/+/state/memory/usage"
+	CameraHikVisionMQTTTopicStateMemoryAvailable mqtt.Topic = boggart.ComponentName + "/cctv/+/state/memory/available"
+	CameraHikVisionMQTTTopicStateHDDCapacity     mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/capacity"
+	CameraHikVisionMQTTTopicStateHDDFree         mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/free"
+	CameraHikVisionMQTTTopicStateHDDUsage        mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/usage"
 )
 
 type cameraHikVisionPTZChannel struct {
@@ -87,9 +93,16 @@ func (d *CameraHikVision) Tasks() []workers.Task {
 	taskPTZStatus.SetRepeatInterval(time.Minute)
 	taskPTZStatus.SetName("device-camera-hikvision-ptz-status")
 
+	taskState := task.NewFunctionTask(d.taskState)
+	taskState.SetTimeout(time.Second * 30)
+	taskState.SetRepeats(-1)
+	taskState.SetRepeatInterval(time.Minute * 15)
+	taskState.SetName("device-camera-hikvision-state")
+
 	return []workers.Task{
 		taskSerialNumber,
 		taskPTZStatus,
+		taskState,
 	}
 }
 
@@ -123,9 +136,9 @@ func (d *CameraHikVision) taskSerialNumber(ctx context.Context) (interface{}, er
 	d.ptzChannels = ptzChannels
 	d.mutex.Unlock()
 
-	if err := d.startAlertStreaming(); err != nil {
-		return nil, err, false
-	}
+	//if err := d.startAlertStreaming(); err != nil {
+	//	return nil, err, false
+	//}
 
 	if len(ptzChannels) == 0 {
 		return nil, nil, true
@@ -190,6 +203,39 @@ func (d *CameraHikVision) taskPTZStatus(ctx context.Context) (interface{}, error
 	return nil, nil, stop
 }
 
+func (d *CameraHikVision) taskState(ctx context.Context) (interface{}, error) {
+	d.mutex.RLock()
+	defer d.mutex.RUnlock()
+
+	if !d.IsEnabled() {
+		return nil, nil
+	}
+
+	status, err := d.isapi.SystemStatus(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	sn := strings.Replace(d.SerialNumber(), "/", "-", -1)
+
+	d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicStateUpTime.Format(sn), 1, false, status.DeviceUpTime)
+	d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicStateMemoryAvailable.Format(sn), 1, false, uint64(status.Memory[0].MemoryAvailable.Float64())*1048576)
+	d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicStateMemoryUsage.Format(sn), 1, false, uint64(status.Memory[0].MemoryUsage.Float64())*1048576)
+
+	storage, err := d.isapi.ContentManagementStorage(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, hdd := range storage.HDD {
+		d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicStateHDDCapacity.Format(sn, hdd.ID), 1, false, hdd.Capacity*1048576)
+		d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicStateHDDFree.Format(sn, hdd.ID), 1, false, hdd.FreeSpace*1048576)
+		d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicStateHDDUsage.Format(sn, hdd.ID), 1, false, (hdd.Capacity-hdd.FreeSpace)*1048576)
+	}
+
+	return nil, nil
+}
+
 func (d *CameraHikVision) MQTTTopics() []mqtt.Topic {
 	return []mqtt.Topic{
 		CameraHikVisionMQTTTopicEvent,
@@ -202,6 +248,12 @@ func (d *CameraHikVision) MQTTTopics() []mqtt.Topic {
 		CameraHikVisionMQTTTopicPTZStatusElevation,
 		CameraHikVisionMQTTTopicPTZStatusAzimuth,
 		CameraHikVisionMQTTTopicPTZStatusZoom,
+		CameraHikVisionMQTTTopicStateUpTime,
+		CameraHikVisionMQTTTopicStateMemoryUsage,
+		CameraHikVisionMQTTTopicStateMemoryAvailable,
+		CameraHikVisionMQTTTopicStateHDDCapacity,
+		CameraHikVisionMQTTTopicStateHDDFree,
+		CameraHikVisionMQTTTopicStateHDDUsage,
 	}
 }
 

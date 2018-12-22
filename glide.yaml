@@ -21,7 +21,7 @@ import:
 - package: periph.io/x/periph
   version: ~v3.1.0
 - package: github.com/eclipse/paho.mqtt.golang
-  version: c95f2f508baf22ddc8625d0097b1ceb8abc508b3
+  version: 379fd9f99ba5b1f02c9fffb5e5952416ef9301dc
 - package: github.com/go-swagger/go-swagger
   version: ~0.15.0
 - package: github.com/go-openapi/runtime

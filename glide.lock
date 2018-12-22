@@ -1,5 +1,5 @@
-hash: 09bd19cbea5b39481f9db77b293b11c204cfac0b3c1b2a81f9d573d0bb8554a8
-updated: 2018-12-22T17:53:52.463618+03:00
+hash: 2e7c00e8e478621e9a3b5f2d531628d5da9f1a8314d546c0ec50348d954120f3
+updated: 2018-12-23T00:04:41.539247+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: 02e53af36e6c978af692887ed449b74026d76fec
@@ -28,14 +28,8 @@ imports:
   version: 3a0bb77429bd3a61596f5e8a3172445844342120
 - name: github.com/deckarep/golang-set
   version: cbaa98ba5575e67703b32b4b19f73c91f3c4159e
-- name: github.com/dhickie/go-lgtv
-  version: 54744414160ef8c4689fb1d5915e5540c4a67486
-  subpackages:
-  - connection
-  - control
-  - util/ip
 - name: github.com/eclipse/paho.mqtt.golang
-  version: c95f2f508baf22ddc8625d0097b1ceb8abc508b3
+  version: 379fd9f99ba5b1f02c9fffb5e5952416ef9301dc
   subpackages:
   - packets
 - name: github.com/elazarl/go-bindata-assetfs
