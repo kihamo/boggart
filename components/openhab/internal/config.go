@@ -1,8 +1,6 @@
 package internal
 
 import (
-	"time"
-
 	"github.com/kihamo/boggart/components/openhab"
 	"github.com/kihamo/shadow/components/config"
 )
@@ -19,10 +17,5 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithEditable(true).
 			WithView([]string{config.ViewTags}).
 			WithViewOptions(map[string]interface{}{config.ViewOptionTagsDefaultText: "add a chat ID"}),
-		config.NewVariable(openhab.ConfigProxyMJPEGInterval, config.ValueTypeDuration).
-			WithUsage("MJPEG stream interval").
-			WithGroup("Proxy").
-			WithEditable(true).
-			WithDefault(time.Millisecond * 500),
 	}
 }
