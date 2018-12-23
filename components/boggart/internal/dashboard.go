@@ -6,6 +6,7 @@ import (
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart/internal/handlers"
 	"github.com/kihamo/shadow/components/dashboard"
+	"github.com/kihamo/shadow/components/messengers"
 )
 
 func (c *Component) DashboardTemplates() *assetfs.AssetFS {
@@ -23,6 +24,15 @@ func (c *Component) DashboardMenu() dashboard.Menu {
 func (c *Component) DashboardRoutes() []dashboard.Route {
 	if c.routes == nil {
 		devicesHandler := handlers.NewDevicesHandler(c.devicesManager, c.listenersManager)
+		cameraHandler := &handlers.CameraHandler{
+			DevicesManager: c.devicesManager,
+		}
+
+		m := c.application.GetComponent(messengers.ComponentName)
+		if m != nil {
+			<-c.application.ReadyComponent(messengers.ComponentName)
+			cameraHandler.Messengers = m.(messengers.Component)
+		}
 
 		c.routes = []dashboard.Route{
 			dashboard.RouteFromAssetFS(c),
@@ -35,6 +45,8 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 			dashboard.NewRoute("/"+c.Name()+"/devices/:device/:action", handlers.NewDeviceHandler(c.devicesManager)).
 				WithMethods([]string{http.MethodGet, http.MethodPost}).
 				WithAuth(true),
+			dashboard.NewRoute("/"+c.Name()+"/camera/:sn/:channel", cameraHandler).
+				WithMethods([]string{http.MethodGet, http.MethodPost}),
 		}
 	}
 

@@ -1,16 +1,17 @@
 package hikvision
 
 import (
+	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 
 	"github.com/kihamo/shadow/components/tracing"
 )
 
-func (a *ISAPI) StreamingPicture(ctx context.Context, channel uint64) ([]byte, error) {
+func (a *ISAPI) StreamingPictureToWriter(ctx context.Context, channel uint64, writer io.Writer) error {
 	span, ctx := tracing.StartSpanFromContext(ctx, ComponentName, "streaming.picture")
 	defer span.Finish()
 
@@ -18,7 +19,7 @@ func (a *ISAPI) StreamingPicture(ctx context.Context, channel uint64) ([]byte, e
 		err := fmt.Errorf("unknown channel %d", channel)
 
 		tracing.SpanError(span, err)
-		return nil, err
+		return err
 	}
 
 	u := a.address + "/Streaming/channels/" + strconv.FormatUint(channel, 10) + "/picture"
@@ -26,14 +27,26 @@ func (a *ISAPI) StreamingPicture(ctx context.Context, channel uint64) ([]byte, e
 	response, err := a.Do(ctx, http.MethodGet, u, nil)
 	if err != nil {
 		tracing.SpanError(span, err)
-		return nil, err
+		return err
 	}
 
-	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
+	_, err = io.Copy(writer, response.Body)
+	response.Body.Close()
+
 	if err != nil {
 		tracing.SpanError(span, err)
 	}
 
-	return body, err
+	return err
+}
+
+func (a *ISAPI) StreamingPicture(ctx context.Context, channel uint64) ([]byte, error) {
+	buf := &bytes.Buffer{}
+
+	err := a.StreamingPictureToWriter(ctx, channel, buf)
+	if err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
 }

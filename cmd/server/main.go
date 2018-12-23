@@ -5,7 +5,6 @@ import (
 
 	_ "github.com/kihamo/boggart/components/boggart/instance"
 	_ "github.com/kihamo/boggart/components/mqtt/instance"
-	_ "github.com/kihamo/boggart/components/openhab/instance"
 	_ "github.com/kihamo/boggart/components/syslog/instance"
 	"github.com/kihamo/shadow"
 	_ "github.com/kihamo/shadow/components/annotations/instance"

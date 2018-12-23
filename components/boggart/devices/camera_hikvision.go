@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"strconv"
 	"strings"
@@ -19,7 +20,8 @@ import (
 )
 
 const (
-	CameraHikVisionIgnoreInterval = time.Second * 5
+	MB                            uint64 = 1024 * 1024
+	CameraHikVisionIgnoreInterval        = time.Second * 5
 
 	CameraHikVisionMQTTTopicEvent                mqtt.Topic = boggart.ComponentName + "/cctv/+/+/+"
 	CameraHikVisionMQTTTopicPTZMove              mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/move"
@@ -219,8 +221,8 @@ func (d *CameraHikVision) taskState(ctx context.Context) (interface{}, error) {
 	sn := strings.Replace(d.SerialNumber(), "/", "-", -1)
 
 	d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicStateUpTime.Format(sn), 1, false, status.DeviceUpTime)
-	d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicStateMemoryAvailable.Format(sn), 1, false, uint64(status.Memory[0].MemoryAvailable.Float64())*1048576)
-	d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicStateMemoryUsage.Format(sn), 1, false, uint64(status.Memory[0].MemoryUsage.Float64())*1048576)
+	d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicStateMemoryAvailable.Format(sn), 1, false, uint64(status.Memory[0].MemoryAvailable.Float64())*MB)
+	d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicStateMemoryUsage.Format(sn), 1, false, uint64(status.Memory[0].MemoryUsage.Float64())*MB)
 
 	storage, err := d.isapi.ContentManagementStorage(ctx)
 	if err != nil {
@@ -228,9 +230,9 @@ func (d *CameraHikVision) taskState(ctx context.Context) (interface{}, error) {
 	}
 
 	for _, hdd := range storage.HDD {
-		d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicStateHDDCapacity.Format(sn, hdd.ID), 1, false, hdd.Capacity*1048576)
-		d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicStateHDDFree.Format(sn, hdd.ID), 1, false, hdd.FreeSpace*1048576)
-		d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicStateHDDUsage.Format(sn, hdd.ID), 1, false, (hdd.Capacity-hdd.FreeSpace)*1048576)
+		d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicStateHDDCapacity.Format(sn, hdd.ID), 1, false, hdd.Capacity*MB)
+		d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicStateHDDFree.Format(sn, hdd.ID), 1, false, hdd.FreeSpace*MB)
+		d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicStateHDDUsage.Format(sn, hdd.ID), 1, false, (hdd.Capacity-hdd.FreeSpace)*MB)
 	}
 
 	return nil, nil
@@ -566,4 +568,8 @@ func (d *CameraHikVision) callbackMQTTMove(ctx context.Context, client mqtt.Comp
 	}
 
 	err = d.updateStatusByChannelId(ctx, channelId)
+}
+
+func (d *CameraHikVision) Snapshot(ctx context.Context, channel uint64, writer io.Writer) error {
+	return d.isapi.StreamingPictureToWriter(ctx, channel, writer)
 }
