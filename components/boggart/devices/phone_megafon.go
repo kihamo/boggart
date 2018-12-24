@@ -82,7 +82,7 @@ func (d *MegafonPhone) taskStateUpdater(ctx context.Context) (interface{}, error
 	if current != prev {
 		atomic.StoreInt64(&d.lastValue, current)
 
-		d.MQTTPublishAsync(ctx, MegafonPhoneMQTTTopicBalance.Format(d.Number()), 0, true, value)
+		d.MQTTPublishAsync(ctx, MegafonPhoneMQTTTopicBalance.Format(d.SerialNumber()), 0, true, value)
 	}
 
 	/*
@@ -97,6 +97,6 @@ func (d *MegafonPhone) taskStateUpdater(ctx context.Context) (interface{}, error
 
 func (d *MegafonPhone) MQTTTopics() []mqtt.Topic {
 	return []mqtt.Topic{
-		MegafonPhoneMQTTTopicBalance,
+		mqtt.Topic(MegafonPhoneMQTTTopicBalance.Format(d.SerialNumber())),
 	}
 }

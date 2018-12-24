@@ -128,8 +128,8 @@ func (d *GPIOPin) waitForEdge() {
 
 func (d *GPIOPin) MQTTTopics() []mqtt.Topic {
 	return []mqtt.Topic{
-		GPIOMQTTTopicPinState,
-		GPIOMQTTTopicPinSet,
+		mqtt.Topic(GPIOMQTTTopicPinState.Format(d.pin.Number())),
+		mqtt.Topic(GPIOMQTTTopicPinSet.Format(d.pin.Number())),
 	}
 }
 

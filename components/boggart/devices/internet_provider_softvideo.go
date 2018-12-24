@@ -85,6 +85,6 @@ func (d *SoftVideoInternet) taskUpdater(ctx context.Context) (interface{}, error
 
 func (d *SoftVideoInternet) MQTTTopics() []mqtt.Topic {
 	return []mqtt.Topic{
-		SoftVideoInternetMQTTTopicBalance,
+		mqtt.Topic(SoftVideoInternetMQTTTopicBalance.Format(d.SerialNumber())),
 	}
 }

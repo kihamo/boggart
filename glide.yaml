@@ -36,3 +36,5 @@ import:
   version: eb42ead1b24e9226bddb05004815f6e72280f879
 - package: github.com/snabb/webostv
   version: bae6b85a37a6ea235af0571b9f3ff944651a6581
+- package: github.com/robbiet480/go.nut
+  version: 246697bfaea771ddfe4ce0d754e6e2a7b8214f0f

@@ -45,6 +45,7 @@ const (
 	DeviceTypeRemoteControl
 	DeviceTypeLED
 	DeviceTypeTV
+	DeviceTypeUPS
 )
 
 type DeviceStatus uint64

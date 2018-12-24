@@ -6,7 +6,6 @@ import (
 	"net"
 	"net/http"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -201,7 +200,7 @@ func (d *LGWebOSTV) taskLiveness(ctx context.Context) (interface{}, error) {
 }
 
 func (d *LGWebOSTV) initMQTTSubscribers() {
-	sn := strings.Replace(d.SerialNumber(), ":", "-", -1)
+	sn := d.SerialNumberMQTTEscaped()
 
 	d.MQTTSubscribe(TVLGWebOSMQTTTopicApplication.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
 		if client, err := d.Client(); err == nil {
@@ -255,7 +254,7 @@ func (d *LGWebOSTV) initMQTTSubscribers() {
 
 func (d *LGWebOSTV) monitorForegroundAppInfo(s webostv.ForegroundAppInfo) error {
 	ctx := context.Background()
-	sn := strings.Replace(d.SerialNumber(), ":", "-", -1)
+	sn := d.SerialNumberMQTTEscaped()
 
 	d.MQTTPublishAsync(ctx, TVLGWebOSMQTTTopicStateApplication.Format(sn), 2, true, s.AppId)
 
@@ -273,7 +272,7 @@ func (d *LGWebOSTV) monitorForegroundAppInfo(s webostv.ForegroundAppInfo) error 
 
 func (d *LGWebOSTV) monitorAudio(s webostv.AudioStatus) error {
 	ctx := context.Background()
-	sn := strings.Replace(d.SerialNumber(), ":", "-", -1)
+	sn := d.SerialNumberMQTTEscaped()
 
 	d.MQTTPublishAsync(ctx, TVLGWebOSMQTTTopicStateMute.Format(sn), 2, true, s.Mute)
 	d.MQTTPublishAsync(ctx, TVLGWebOSMQTTTopicStateVolume.Format(sn), 2, true, s.Volume)
@@ -283,7 +282,7 @@ func (d *LGWebOSTV) monitorAudio(s webostv.AudioStatus) error {
 
 func (d *LGWebOSTV) monitorTvCurrentChannel(s webostv.TvCurrentChannel) error {
 	ctx := context.Background()
-	sn := strings.Replace(d.SerialNumber(), ":", "-", -1)
+	sn := d.SerialNumberMQTTEscaped()
 
 	d.MQTTPublishAsync(ctx, TVLGWebOSMQTTTopicStateChannelNumber.Format(sn), 2, true, s.ChannelNumber)
 

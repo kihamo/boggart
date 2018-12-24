@@ -4,11 +4,20 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 	"sync/atomic"
 
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/pborman/uuid"
+)
+
+var replacerMQTTName = strings.NewReplacer(
+	":", "-",
+	"/", "-",
+	"_", "-",
+	",", "-",
+	".", "-",
 )
 
 type DeviceBase struct {
@@ -62,6 +71,10 @@ func (d *DeviceSerialNumber) SerialNumber() string {
 	defer d.mutex.RUnlock()
 
 	return d.serialNumber
+}
+
+func (d *DeviceSerialNumber) SerialNumberMQTTEscaped() string {
+	return MQTTNameReplace(d.SerialNumber())
 }
 
 func (d *DeviceSerialNumber) SetSerialNumber(serialNumber string) {
@@ -134,4 +147,9 @@ func WrapMQTTSubscribeDeviceIsOnline(device Device, callback mqtt.MessageHandler
 			callback(ctx, client, message)
 		}
 	}
+}
+
+func MQTTNameReplace(name string) string {
+	name = strings.ToLower(name)
+	return replacerMQTTName.Replace(name)
 }

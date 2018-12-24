@@ -8,7 +8,6 @@ import (
 	"io"
 	"log"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -138,7 +137,7 @@ func (d *CameraHikVision) taskLiveness(ctx context.Context) (interface{}, error)
 
 		d.SetSerialNumber(deviceInfo.SerialNumber)
 		d.initOnce.Do(func() {
-			sn := strings.Replace(deviceInfo.SerialNumber, "/", "-", -1)
+			sn := d.SerialNumberMQTTEscaped()
 
 			d.MQTTSubscribe(CameraHikVisionMQTTTopicPTZMove.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTAbsolute))
 			d.MQTTSubscribe(CameraHikVisionMQTTTopicPTZAbsolute.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTAbsolute))
@@ -199,7 +198,7 @@ func (d *CameraHikVision) taskState(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	sn := strings.Replace(d.SerialNumber(), "/", "-", -1)
+	sn := d.SerialNumberMQTTEscaped()
 
 	d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicStateUpTime.Format(sn), 1, false, status.DeviceUpTime)
 	d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicStateMemoryAvailable.Format(sn), 1, false, uint64(status.Memory[0].MemoryAvailable.Float64())*MB)
@@ -249,7 +248,7 @@ func (d *CameraHikVision) startAlertStreaming() error {
 	}
 
 	go func() {
-		sn := strings.Replace(d.SerialNumber(), "/", "-", -1)
+		sn := d.SerialNumberMQTTEscaped()
 
 		for {
 			select {
@@ -292,7 +291,7 @@ func (d *CameraHikVision) updateStatusByChannelId(ctx context.Context, channelId
 		return err
 	}
 
-	sn := strings.Replace(d.SerialNumber(), "/", "_", -1)
+	sn := d.SerialNumberMQTTEscaped()
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.Elevation != status.AbsoluteHigh.Elevation {
 		d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicPTZStatusElevation.Format(sn, channelId), 1, false, status.AbsoluteHigh.Elevation)

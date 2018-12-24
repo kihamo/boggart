@@ -119,6 +119,7 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 	c.initRemoteControl()
 	c.initLED()
 	c.initTV()
+	c.initUPS()
 
 	c.devicesManager.Ready()
 

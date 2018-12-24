@@ -142,8 +142,10 @@ func (d *PulsarPulsedWaterMeter) taskStateUpdater(ctx context.Context) (interfac
 }
 
 func (d *PulsarPulsedWaterMeter) MQTTTopics() []mqtt.Topic {
+	sn := d.SerialNumberMQTTEscaped()
+
 	return []mqtt.Topic{
-		PulsarPulsedWaterMeterMQTTTopicPulses,
-		PulsarPulsedWaterMeterMQTTTopicVolume,
+		mqtt.Topic(PulsarPulsedWaterMeterMQTTTopicPulses.Format(sn)),
+		mqtt.Topic(PulsarPulsedWaterMeterMQTTTopicVolume.Format(sn)),
 	}
 }

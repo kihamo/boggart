@@ -87,12 +87,14 @@ func (d *SamsungTV) taskLiveness(ctx context.Context) (interface{}, error) {
 }
 
 func (d *SamsungTV) initMQTTSubscribers() {
-	sn := strings.Split(d.SerialNumber(), ":")
-	if len(sn) < 2 {
+	parts := strings.Split(d.SerialNumber(), ":")
+	if len(parts) < 2 {
 		return
 	}
 
-	d.MQTTSubscribe(TVSamsungMQTTTopicPower.Format(sn[1]), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
+	sn := boggart.MQTTNameReplace(parts[1])
+
+	d.MQTTSubscribe(TVSamsungMQTTTopicPower.Format(sn), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
 		if bytes.Equal(message.Payload(), []byte(`1`)) {
 			d.mutex.RLock()
 			mac := d.mac

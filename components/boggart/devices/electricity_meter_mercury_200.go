@@ -252,14 +252,16 @@ func (d *Mercury200ElectricityMeter) taskStateUpdater(ctx context.Context) (inte
 }
 
 func (d *Mercury200ElectricityMeter) MQTTTopics() []mqtt.Topic {
+	sn := d.SerialNumberMQTTEscaped()
+
 	return []mqtt.Topic{
-		Mercury200ElectricityMeterMQTTTopicTariff1,
-		Mercury200ElectricityMeterMQTTTopicTariff2,
-		Mercury200ElectricityMeterMQTTTopicTariff3,
-		Mercury200ElectricityMeterMQTTTopicTariff4,
-		Mercury200ElectricityMeterMQTTTopicVoltage,
-		Mercury200ElectricityMeterMQTTTopicAmperage,
-		Mercury200ElectricityMeterMQTTTopicPower,
-		Mercury200ElectricityMeterMQTTTopicBatteryVoltage,
+		mqtt.Topic(Mercury200ElectricityMeterMQTTTopicTariff1.Format(sn)),
+		mqtt.Topic(Mercury200ElectricityMeterMQTTTopicTariff2.Format(sn)),
+		mqtt.Topic(Mercury200ElectricityMeterMQTTTopicTariff3.Format(sn)),
+		mqtt.Topic(Mercury200ElectricityMeterMQTTTopicTariff4.Format(sn)),
+		mqtt.Topic(Mercury200ElectricityMeterMQTTTopicVoltage.Format(sn)),
+		mqtt.Topic(Mercury200ElectricityMeterMQTTTopicAmperage.Format(sn)),
+		mqtt.Topic(Mercury200ElectricityMeterMQTTTopicPower.Format(sn)),
+		mqtt.Topic(Mercury200ElectricityMeterMQTTTopicBatteryVoltage.Format(sn)),
 	}
 }

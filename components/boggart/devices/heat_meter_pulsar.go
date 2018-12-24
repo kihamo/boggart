@@ -224,11 +224,13 @@ func (d *PulsarHeadMeter) taskStateUpdater(ctx context.Context) (interface{}, er
 }
 
 func (d *PulsarHeadMeter) MQTTTopics() []mqtt.Topic {
+	sn := d.SerialNumber()
+
 	return []mqtt.Topic{
-		PulsarHeadMeterMQTTTopicTemperatureIn,
-		PulsarHeadMeterMQTTTopicTemperatureOut,
-		PulsarHeadMeterMQTTTopicTemperatureDelta,
-		PulsarHeadMeterMQTTTopicEnergy,
-		PulsarHeadMeterMQTTTopicConsumption,
+		mqtt.Topic(PulsarHeadMeterMQTTTopicTemperatureIn.Format(sn)),
+		mqtt.Topic(PulsarHeadMeterMQTTTopicTemperatureOut.Format(sn)),
+		mqtt.Topic(PulsarHeadMeterMQTTTopicTemperatureDelta.Format(sn)),
+		mqtt.Topic(PulsarHeadMeterMQTTTopicEnergy.Format(sn)),
+		mqtt.Topic(PulsarHeadMeterMQTTTopicConsumption.Format(sn)),
 	}
 }

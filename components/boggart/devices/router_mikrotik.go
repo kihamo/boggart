@@ -230,7 +230,7 @@ func (d *MikrotikRouter) taskLiveness(ctx context.Context) (interface{}, error) 
 			return nil, err
 		}
 
-		login := strings.Replace(mac.Address, ":", "-", -1)
+		login := boggart.MQTTNameReplace(mac.Address)
 
 		d.MQTTPublishAsync(ctx, MikrotikRouterMQTTTopicWiFiConnectedMAC.Format(sn), 0, false, login)
 		d.MQTTPublishAsync(ctx, MikrotikRouterMQTTTopicWiFiMACState.Format(sn, login), 0, false, true)
@@ -243,7 +243,7 @@ func (d *MikrotikRouter) taskLiveness(ctx context.Context) (interface{}, error) 
 	}
 
 	for _, connection := range connections {
-		login := strings.Replace(connection.Name, ":", "-", -1)
+		login := boggart.MQTTNameReplace(connection.Name)
 
 		d.MQTTPublishAsync(ctx, MikrotikRouterMQTTTopicVPNConnectedLogin.Format(sn), 0, false, login)
 		d.MQTTPublishAsync(ctx, MikrotikRouterMQTTTopicVPNLoginState.Format(sn, login), 0, false, true)
@@ -424,7 +424,7 @@ func (l *MikrotikRouterListener) Run(ctx context.Context, event workers.Event, t
 			}
 
 			sn := l.router.SerialNumber()
-			login := strings.Replace(mac.Address, ":", "-", -1)
+			login := boggart.MQTTNameReplace(mac.Address)
 
 			switch check[3] {
 			case "connected":
@@ -442,7 +442,7 @@ func (l *MikrotikRouterListener) Run(ctx context.Context, event workers.Event, t
 			}
 
 			sn := l.router.SerialNumber()
-			login := strings.Replace(check[1], ":", "-", -1)
+			login := boggart.MQTTNameReplace(check[1])
 
 			switch check[2] {
 			case "in":

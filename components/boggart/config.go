@@ -40,4 +40,5 @@ const (
 	ConfigLEDWiFi                       = ComponentName + ".led.wifi"
 	ConfigTVLGWebOS                     = ComponentName + ".tv.lg-webos"
 	ConfigTVSamsung                     = ComponentName + ".tv.samsung"
+	ConfigUPSNUT                        = ComponentName + ".ups.nut"
 )

@@ -3,7 +3,6 @@ package devices
 import (
 	"bytes"
 	"context"
-	"strings"
 	"sync/atomic"
 	"time"
 
@@ -92,7 +91,7 @@ func (d *BroadlinkSP3SSocket) taskStateUpdater(ctx context.Context) (interface{}
 	d.UpdateStatus(boggart.DeviceStatusOnline)
 
 	serialNumber := d.SerialNumber()
-	serialNumberMQTT := strings.Replace(serialNumber, ":", "-", -1)
+	serialNumberMQTT := d.SerialNumberMQTTEscaped()
 
 	prevState := atomic.LoadInt64(&d.state)
 	if prevState == 0 || (prevState == 1) != state {
@@ -155,18 +154,20 @@ func (d *BroadlinkSP3SSocket) Power() (float64, error) {
 }
 
 func (d *BroadlinkSP3SSocket) MQTTTopics() []mqtt.Topic {
+	sn := d.SerialNumberMQTTEscaped()
+
 	return []mqtt.Topic{
-		SocketBroadlinkSP3SMQTTTopicState,
-		SocketBroadlinkSP3SMQTTTopicPower,
-		SocketBroadlinkSP3SMQTTTopicSet,
+		mqtt.Topic(SocketBroadlinkSP3SMQTTTopicState.Format(sn)),
+		mqtt.Topic(SocketBroadlinkSP3SMQTTTopicPower.Format(sn)),
+		mqtt.Topic(SocketBroadlinkSP3SMQTTTopicSet.Format(sn)),
 	}
 }
 
 func (d *BroadlinkSP3SSocket) MQTTSubscribers() []mqtt.Subscriber {
-	mac := strings.Replace(d.provider.MAC().String(), ":", "-", -1)
+	sn := d.SerialNumberMQTTEscaped()
 
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(SocketBroadlinkSP3SMQTTTopicSet.Format(mac), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+		mqtt.NewSubscriber(SocketBroadlinkSP3SMQTTTopicSet.Format(sn), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
 			if d.Status() != boggart.DeviceStatusOnline {
 				return
 			}

@@ -170,5 +170,9 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithUsage("Address of Samsung in format hostname").
 			WithGroup("TV").
 			WithView([]string{config.ViewTags}),
+		config.NewVariable(boggart.ConfigUPSNUT, config.ValueTypeString).
+			WithUsage("Address of UPS NUT in format hostname:name").
+			WithGroup("UPS").
+			WithView([]string{config.ViewTags}),
 	}
 }

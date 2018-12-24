@@ -393,3 +393,27 @@ func (c *Component) initTV() {
 		}
 	}
 }
+
+func (c *Component) initUPS() {
+	addresses := c.config.String(boggart.ConfigUPSNUT)
+	if addresses == "" {
+		return
+	}
+
+	for _, address := range strings.Split(addresses, ",") {
+		address = strings.TrimSpace(address)
+		if address == "" {
+			c.logger.Warn("Hostname of UPS NUT is empty")
+			continue
+		}
+
+		parts := strings.SplitN(address, ":", 2)
+		if len(parts) != 2 {
+			c.logger.Warn("Wrong address of UPS NUT " + address)
+			continue
+		}
+
+		device := devices.NewUPSNUT(parts[0], parts[1])
+		c.devicesManager.Register(device)
+	}
+}

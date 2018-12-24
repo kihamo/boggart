@@ -142,10 +142,12 @@ func (d *BME280Sensor) taskStateUpdater(ctx context.Context) (interface{}, error
 }
 
 func (d *BME280Sensor) MQTTTopics() []mqtt.Topic {
+	sn := d.SerialNumberMQTTEscaped()
+
 	return []mqtt.Topic{
-		BME280SensorMQTTTopicTemperature,
-		BME280SensorMQTTTopicAltitude,
-		BME280SensorMQTTTopicHumidity,
-		BME280SensorMQTTTopicPressure,
+		mqtt.Topic(BME280SensorMQTTTopicTemperature.Format(sn)),
+		mqtt.Topic(BME280SensorMQTTTopicAltitude.Format(sn)),
+		mqtt.Topic(BME280SensorMQTTTopicHumidity.Format(sn)),
+		mqtt.Topic(BME280SensorMQTTTopicPressure.Format(sn)),
 	}
 }
