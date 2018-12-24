@@ -360,29 +360,36 @@ func (c *Component) initLED() {
 
 func (c *Component) initTV() {
 	addresses := c.config.String(boggart.ConfigTVLGWebOS)
-	if addresses == "" {
-		return
+	if addresses != "" {
+		for _, address := range strings.Split(addresses, ",") {
+			address = strings.TrimSpace(address)
+			if address == "" {
+				c.logger.Warn("Hostname or IP address of LG TV is empty")
+				continue
+			}
+
+			parts := strings.SplitN(address, ":", 2)
+			if len(parts) != 2 {
+				c.logger.Warn("Wrong address of LG TV " + address)
+				continue
+			}
+
+			device := devices.NewLGWebOSTV(parts[0], parts[1])
+			c.devicesManager.Register(device)
+		}
 	}
 
-	for _, address := range strings.Split(addresses, ",") {
-		address = strings.TrimSpace(address)
-		if address == "" {
-			c.logger.Warn("Hostname or IP address of LG TV is empty")
-			continue
-		}
+	addresses = c.config.String(boggart.ConfigTVSamsung)
+	if addresses != "" {
+		for _, address := range strings.Split(addresses, ",") {
+			address = strings.TrimSpace(address)
+			if address == "" {
+				c.logger.Warn("Hostname or IP address of Samsung TV is empty")
+				continue
+			}
 
-		parts := strings.SplitN(address, ":", 2)
-		if len(parts) != 2 {
-			c.logger.Warn("Wrong address of LG TV " + address)
-			continue
+			device := devices.NewSamsungTV(address)
+			c.devicesManager.Register(device)
 		}
-
-		device, err := devices.NewLGWebOSTV(parts[0], parts[1])
-		if err != nil {
-			c.logger.Warn("Failed connect to LG TV", "hostname", parts[0], "error", err.Error())
-			continue
-		}
-
-		c.devicesManager.Register(device)
 	}
 }

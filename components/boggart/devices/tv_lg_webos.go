@@ -56,7 +56,7 @@ type LGWebOSTV struct {
 	key    string
 }
 
-func NewLGWebOSTV(host, key string) (*LGWebOSTV, error) {
+func NewLGWebOSTV(host, key string) *LGWebOSTV {
 	device := &LGWebOSTV{
 		host: host,
 		key:  key,
@@ -64,7 +64,7 @@ func NewLGWebOSTV(host, key string) (*LGWebOSTV, error) {
 	device.Init()
 	device.SetDescription("LG TV WebOS")
 
-	return device, nil
+	return device
 }
 
 func (d *LGWebOSTV) Types() []boggart.DeviceType {
@@ -156,7 +156,6 @@ func (d *LGWebOSTV) taskSerialNumber(ctx context.Context) (interface{}, error, b
 		}
 
 		d.SetSerialNumber(deviceInfo.DeviceId)
-		d.SetDescription(d.Description() + " with serial number " + deviceInfo.DeviceId)
 	}
 
 	sn := strings.Replace(d.SerialNumber(), ":", "-", -1)

@@ -63,7 +63,7 @@ func NewMercury200ElectricityMeter(serialNumber string, provider *mercury.Electr
 	}
 	device.Init()
 	device.SetSerialNumber(serialNumber)
-	device.SetDescription("Mercury 200 electricity meter with serial number " + serialNumber)
+	device.SetDescription("Mercury 200 electricity meter")
 
 	return device
 }

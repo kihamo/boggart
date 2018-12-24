@@ -34,7 +34,7 @@ func NewSoftVideoInternet(provider *softvideo.Client, interval time.Duration) *S
 	}
 	device.Init()
 	device.SetSerialNumber(provider.AccountID())
-	device.SetDescription("SoftVideo internet provider for account " + provider.AccountID())
+	device.SetDescription("SoftVideo internet provider")
 
 	return device
 }

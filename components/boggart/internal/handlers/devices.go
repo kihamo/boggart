@@ -14,6 +14,8 @@ type deviceHandlerDevice struct {
 	RegisterId      string   `json:"register_id"`
 	Id              string   `json:"id"`
 	Description     string   `json:"description"`
+	SerialNumber    string   `json:"serial_number"`
+	Status          string   `json:"status"`
 	Tasks           []string `json:"tasks"`
 	MQTTTopics      []string `json:"mqtt_topics"`
 	MQTTSubscribers []string `json:"mqtt_subscribers"`
@@ -69,11 +71,16 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				RegisterId:      registerId,
 				Id:              d.Id(),
 				Description:     d.Description(),
+				Status:          d.Status().String(),
 				Types:           make([]string, 0, len(d.Types())),
 				Tasks:           make([]string, 0),
 				MQTTTopics:      make([]string, 0),
 				MQTTSubscribers: make([]string, 0),
 				Enabled:         d.IsEnabled(),
+			}
+
+			if sn, ok := d.(boggart.DeviceHasSerialNumber); ok {
+				item.SerialNumber = sn.SerialNumber()
 			}
 
 			if tasks, ok := d.(boggart.DeviceHasTasks); ok {

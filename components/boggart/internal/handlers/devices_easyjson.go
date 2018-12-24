@@ -236,6 +236,10 @@ func easyjson65411fd3DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.Id = string(in.String())
 		case "description":
 			out.Description = string(in.String())
+		case "serial_number":
+			out.SerialNumber = string(in.String())
+		case "status":
+			out.Status = string(in.String())
 		case "tasks":
 			if in.IsNull() {
 				in.Skip()
@@ -373,6 +377,26 @@ func easyjson65411fd3EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.RawString(prefix)
 		}
 		out.String(string(in.Description))
+	}
+	{
+		const prefix string = ",\"serial_number\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.SerialNumber))
+	}
+	{
+		const prefix string = ",\"status\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Status))
 	}
 	{
 		const prefix string = ",\"tasks\":"

@@ -53,7 +53,7 @@ func NewPulsarHeadMeter(provider *pulsar.HeatMeter, interval time.Duration) *Pul
 	}
 	device.Init()
 	device.SetSerialNumber(hex.EncodeToString(provider.Address()))
-	device.SetDescription("Pulsar heat meter with serial number " + device.SerialNumber())
+	device.SetDescription("Pulsar heat meter")
 
 	return device
 }

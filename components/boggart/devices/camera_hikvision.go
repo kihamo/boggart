@@ -123,7 +123,6 @@ func (d *CameraHikVision) taskSerialNumber(ctx context.Context) (interface{}, er
 	}
 
 	d.SetSerialNumber(deviceInfo.SerialNumber)
-	d.SetDescription(d.Description() + " with serial number " + deviceInfo.SerialNumber)
 
 	ptzChannels := make(map[uint64]cameraHikVisionPTZChannel, 0)
 	if list, err := d.isapi.PTZChannels(ctx); err == nil {
@@ -137,6 +136,8 @@ func (d *CameraHikVision) taskSerialNumber(ctx context.Context) (interface{}, er
 	d.mutex.Lock()
 	d.ptzChannels = ptzChannels
 	d.mutex.Unlock()
+
+	d.UpdateStatus(boggart.DeviceStatusOnline)
 
 	//if err := d.startAlertStreaming(); err != nil {
 	//	return nil, err, false

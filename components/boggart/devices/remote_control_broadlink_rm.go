@@ -45,7 +45,7 @@ func NewBroadlinkRMRemoteControl(provider *broadlink.RMProPlus, m mqtt.Component
 	}
 	device.Init()
 	device.SetSerialNumber(provider.MAC().String())
-	device.SetDescription("Socket of Broadlink with IP " + provider.Addr().String() + " and MAC " + provider.MAC().String())
+	device.SetDescription("Socket of Broadlink")
 
 	return device
 }

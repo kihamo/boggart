@@ -33,7 +33,7 @@ func NewDS18B20Sensor(addr string) *DS18B20Sensor {
 
 	device.Init()
 	device.SetSerialNumber(addr)
-	device.SetDescription("Sensor DS18B20 with address %s", device.SerialNumber())
+	device.SetDescription("Sensor DS18B20")
 
 	return device
 }

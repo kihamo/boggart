@@ -13,30 +13,22 @@ import (
 )
 
 type DeviceBase struct {
-	id                   atomic.Value
+	id                   string
 	description          atomic.Value
+	status               uint64
 	enabled              uint64
 	triggerEventsChannel chan DeviceTriggerEvent
 }
 
 func (d *DeviceBase) Init() {
 	d.triggerEventsChannel = make(chan DeviceTriggerEvent)
-	d.SetId(uuid.New())
+	d.id = uuid.New()
+	d.UpdateStatus(DeviceStatusInitializing)
 	d.Enable()
 }
 
 func (d *DeviceBase) Id() string {
-	var id string
-
-	if value := d.id.Load(); value != nil {
-		id = value.(string)
-	}
-
-	return id
-}
-
-func (d *DeviceBase) SetId(id string) {
-	d.id.Store(id)
+	return d.id
 }
 
 func (d *DeviceBase) Description() string {
@@ -55,6 +47,14 @@ func (d *DeviceBase) SetDescription(description string, v ...interface{}) {
 
 func (d *DeviceBase) Types() []DeviceType {
 	return nil
+}
+
+func (d *DeviceBase) Status() DeviceStatus {
+	return DeviceStatus(atomic.LoadUint64(&d.status))
+}
+
+func (d *DeviceBase) UpdateStatus(status DeviceStatus) {
+	atomic.StoreUint64(&d.status, uint64(status))
 }
 
 func (d *DeviceBase) IsEnabled() bool {

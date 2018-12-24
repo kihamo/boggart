@@ -49,6 +49,18 @@ const (
 	DeviceTypeTV
 )
 
+type DeviceStatus uint64
+
+const (
+	DeviceStatusUnknown DeviceStatus = iota
+	DeviceStatusUninitialized
+	DeviceStatusInitializing
+	DeviceStatusOnline
+	DeviceStatusOffline
+	DeviceStatusRemoving
+	DeviceStatusRemoved
+)
+
 type DevicesManager interface {
 	snitch.Collector
 
@@ -72,11 +84,17 @@ type Device interface {
 	Id() string
 	Description() string
 	Types() []DeviceType
+	Status() DeviceStatus
+
 	IsEnabled() bool
 	Disable() error
 	Enable() error
 	Ping(context.Context) bool
 	TriggerEventChannel() <-chan DeviceTriggerEvent
+}
+
+type DeviceHasSerialNumber interface {
+	SerialNumber() string
 }
 
 type DeviceHasTasks interface {

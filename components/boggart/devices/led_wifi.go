@@ -48,7 +48,7 @@ func NewWiFiLED(bulb *wifiled.Bulb) *WiFiLED {
 		bulb: bulb,
 	}
 	device.Init()
-	device.SetDescription("LED WiFi " + bulb.Host())
+	device.SetDescription("LED WiFi")
 	device.SetSerialNumber(bulb.Host())
 
 	return device

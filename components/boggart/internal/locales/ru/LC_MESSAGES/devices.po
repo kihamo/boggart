@@ -19,6 +19,12 @@ msgstr "Тип"
 msgid "ID"
 msgstr "ID"
 
+msgid "Status"
+msgstr "Статус"
+
+msgid "Serial number"
+msgstr "Серийный номер"
+
 msgid "Description"
 msgstr "Описание"
 

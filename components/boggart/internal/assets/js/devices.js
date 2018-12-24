@@ -26,6 +26,27 @@ $(document).ready(function () {
                     data: 'id'
                 },
                 {
+                    data: 'status',
+                    render: function (status) {
+                        switch(status.toLowerCase()) {
+                            case 'online':
+                                return '<span class="label label-success">' + status + '</span>';
+
+                            case 'offline':
+                                return '<span class="label label-danger">' + status + '</span>';
+
+                            case 'removing':
+                                return '<span class="label label-info">' + status + '</span>';
+
+                            case 'removed':
+                                return '<span class="label label-warning">' + status + '</span>';
+
+                            default:
+                                return '<span class="label label-default">' + status + '</span>';
+                        }
+                    }
+                },
+                {
                     data: 'tasks',
                     render: function (tasks) {
                         return tasks.length;
@@ -61,6 +82,9 @@ $(document).ready(function () {
                             '<button type="button" class="btn btn-warning btn-icon device-ping"><i class="glyphicon glyphicon-resize-small" title="Ping"></i></button>' +
                             '</div>';
                     }
+                },
+                {
+                    data: 'serial_number'
                 },
                 {
                     data: 'description'

@@ -176,6 +176,10 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithUsage("Address of LG on WebOS in format hostname or ip without port and register key").
 			WithGroup("TV").
 			WithView([]string{config.ViewTags}),
+		config.NewVariable(boggart.ConfigTVSamsung, config.ValueTypeString).
+			WithUsage("Address of Samsung in format hostname").
+			WithGroup("TV").
+			WithView([]string{config.ViewTags}),
 	}
 }
 

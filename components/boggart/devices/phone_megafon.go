@@ -20,6 +20,7 @@ type MegafonPhone struct {
 	lastValue int64
 
 	boggart.DeviceBase
+	boggart.DeviceSerialNumber
 	boggart.DeviceMQTT
 
 	provider *mobile.Megafon
@@ -32,7 +33,8 @@ func NewMegafonPhone(provider *mobile.Megafon, interval time.Duration) *MegafonP
 		interval: interval,
 	}
 	device.Init()
-	device.SetDescription("Mobile phone " + device.Number() + " of Megafon")
+	device.SetSerialNumber(device.Number())
+	device.SetDescription("Mobile phone")
 
 	return device
 }
