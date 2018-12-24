@@ -57,10 +57,12 @@ func (d *DeviceBase) UpdateStatus(status DeviceStatus) {
 	atomic.StoreUint64(&d.status, uint64(status))
 }
 
+// deprecated
 func (d *DeviceBase) IsEnabled() bool {
 	return atomic.LoadUint64(&d.enabled) == 1
 }
 
+// deprecated
 func (d *DeviceBase) Enable() error {
 	atomic.StoreUint64(&d.enabled, 1)
 	d.TriggerEvent(context.TODO(), DeviceEventDeviceEnabled, d)
@@ -68,10 +70,12 @@ func (d *DeviceBase) Enable() error {
 	return nil
 }
 
+// deprecated
 func (d *DeviceBase) Ping(_ context.Context) bool {
 	return false
 }
 
+// deprecated
 func (d *DeviceBase) Disable() error {
 	atomic.StoreUint64(&d.enabled, 0)
 	d.TriggerEvent(context.TODO(), DeviceEventDeviceDisabled, d)
@@ -79,10 +83,12 @@ func (d *DeviceBase) Disable() error {
 	return nil
 }
 
+// deprecated
 func (d *DeviceBase) TriggerEventChannel() <-chan DeviceTriggerEvent {
 	return d.triggerEventsChannel
 }
 
+// deprecated
 func (d *DeviceBase) TriggerEvent(ctx context.Context, event workers.Event, args ...interface{}) {
 	if d.triggerEventsChannel == nil {
 		return
@@ -112,6 +118,8 @@ func (d *DeviceSerialNumber) SetSerialNumber(serialNumber string) {
 }
 
 type DeviceMQTT struct {
+	Device
+
 	mutex  sync.RWMutex
 	client mqtt.Component
 }
@@ -165,4 +173,19 @@ func (d *DeviceMQTT) MQTTSubscribe(topic string, qos byte, callback mqtt.Message
 	}
 
 	return d.client.Subscribe(topic, qos, callback)
+}
+
+func (d *DeviceMQTT) MQTTSubscribeDeviceIsOnline(topic string, qos byte, callback mqtt.MessageHandler) error {
+	d.mutex.RLock()
+	defer d.mutex.RUnlock()
+
+	if d.client == nil {
+		return errors.New("MQTT client isn't init")
+	}
+
+	return d.client.Subscribe(topic, qos, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+		if d.Status() == DeviceStatusOnline {
+			callback(ctx, client, message)
+		}
+	})
 }

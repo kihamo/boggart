@@ -28,8 +28,11 @@ msgstr "Серийный номер"
 msgid "Description"
 msgstr "Описание"
 
-msgid "Tasks"
+msgid "Tasks count"
 msgstr "Задач"
+
+msgid "Tasks"
+msgstr "Задачи"
 
 msgid "MQTT subscribers"
 msgstr "MQTT подписки"

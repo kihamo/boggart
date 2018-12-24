@@ -22,15 +22,10 @@ type DS18B20Sensor struct {
 	boggart.DeviceBase
 	boggart.DeviceSerialNumber
 	boggart.DeviceMQTT
-
-	addr string
 }
 
 func NewDS18B20Sensor(addr string) *DS18B20Sensor {
-	device := &DS18B20Sensor{
-		addr: addr,
-	}
-
+	device := &DS18B20Sensor{}
 	device.Init()
 	device.SetSerialNumber(addr)
 	device.SetDescription("Sensor DS18B20")
@@ -45,31 +40,57 @@ func (d *DS18B20Sensor) Types() []boggart.DeviceType {
 }
 
 func (d *DS18B20Sensor) Ping(_ context.Context) bool {
-	_, err := d.Temperature()
-	return err == nil
-}
-
-func (d *DS18B20Sensor) Temperature() (float64, error) {
-	return ds18b20.Temperature(d.addr)
+	return true
 }
 
 func (d *DS18B20Sensor) Tasks() []workers.Task {
-	taskUpdater := task.NewFunctionTask(d.taskUpdater)
-	taskUpdater.SetRepeats(-1)
-	taskUpdater.SetRepeatInterval(time.Minute)
-	taskUpdater.SetName("device-sensor-ds18b20-updater-" + d.SerialNumber())
+	sn := d.SerialNumber()
+
+	taskLiveness := task.NewFunctionTask(d.taskLiveness)
+	taskLiveness.SetTimeout(time.Second * 5)
+	taskLiveness.SetRepeats(-1)
+	taskLiveness.SetRepeatInterval(time.Minute)
+	taskLiveness.SetName("device-sensor-ds18b20-liveness-" + sn)
+
+	taskStateUpdater := task.NewFunctionTask(d.taskStateUpdater)
+	taskStateUpdater.SetRepeats(-1)
+	taskStateUpdater.SetRepeatInterval(time.Minute)
+	taskStateUpdater.SetName("device-sensor-ds18b20-state-updater-" + sn)
 
 	return []workers.Task{
-		taskUpdater,
+		taskLiveness,
+		taskStateUpdater,
 	}
 }
 
-func (d *DS18B20Sensor) taskUpdater(ctx context.Context) (interface{}, error) {
-	if !d.IsEnabled() {
+func (d *DS18B20Sensor) taskLiveness(ctx context.Context) (interface{}, error) {
+	devices, err := ds18b20.Sensors()
+	if err != nil {
+		d.UpdateStatus(boggart.DeviceStatusOffline)
+		return nil, err
+	}
+
+	sn := d.SerialNumber()
+
+	for _, device := range devices {
+		if device == sn {
+			d.UpdateStatus(boggart.DeviceStatusOnline)
+			return nil, nil
+		}
+	}
+
+	d.UpdateStatus(boggart.DeviceStatusOffline)
+	return nil, nil
+}
+
+func (d *DS18B20Sensor) taskStateUpdater(ctx context.Context) (interface{}, error) {
+	if d.Status() != boggart.DeviceStatusOnline {
 		return nil, nil
 	}
 
-	value, err := d.Temperature()
+	sn := d.SerialNumber()
+
+	value, err := ds18b20.Temperature(sn)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +101,7 @@ func (d *DS18B20Sensor) taskUpdater(ctx context.Context) (interface{}, error) {
 	if prev != current {
 		atomic.StoreInt64(&d.lastValue, current)
 
-		d.MQTTPublishAsync(ctx, DS18B20SensorMQTTTopic.Format(d.SerialNumber()), 0, true, value)
+		d.MQTTPublishAsync(ctx, DS18B20SensorMQTTTopic.Format(sn), 0, true, value)
 	}
 
 	return nil, nil

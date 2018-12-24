@@ -108,11 +108,7 @@ func (d *SamsungTV) initMQTTSubscribers() {
 		}
 	})
 
-	d.MQTTSubscribe(TVSamsungMQTTTopicKey.Format(sn[1]), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
-		if d.Status() != boggart.DeviceStatusOnline {
-			return
-		}
-
+	d.MQTTSubscribeDeviceIsOnline(TVSamsungMQTTTopicKey.Format(sn[1]), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
 		d.client.SendCommand(string(message.Payload()))
 	})
 }

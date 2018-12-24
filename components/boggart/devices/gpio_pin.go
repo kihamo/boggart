@@ -26,6 +26,7 @@ const (
 
 type GPIOPin struct {
 	boggart.DeviceBase
+	boggart.DeviceSerialNumber
 	boggart.DeviceMQTT
 
 	pin  pin.Pin
@@ -39,6 +40,7 @@ func NewGPIOPin(p pin.Pin, m GPIOMode) *GPIOPin {
 	}
 
 	device.Init()
+	device.SetSerialNumber(p.Name())
 	device.SetDescription(fmt.Sprintf("%s %s", p.Name(), p.Function()))
 
 	if _, ok := p.(gpio.PinIn); ok {
@@ -46,6 +48,8 @@ func NewGPIOPin(p pin.Pin, m GPIOMode) *GPIOPin {
 			device.waitForEdge()
 		}()
 	}
+
+	device.UpdateStatus(boggart.DeviceStatusOnline)
 
 	return device
 }

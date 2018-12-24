@@ -86,10 +86,15 @@ type Device interface {
 	Types() []DeviceType
 	Status() DeviceStatus
 
+	// deprecated
 	IsEnabled() bool
+	// deprecated
 	Disable() error
+	// deprecated
 	Enable() error
+	// deprecated
 	Ping(context.Context) bool
+	// deprecated
 	TriggerEventChannel() <-chan DeviceTriggerEvent
 }
 

@@ -77,7 +77,7 @@ func (d *WiFiLED) Tasks() []workers.Task {
 }
 
 func (d *WiFiLED) taskUpdater(ctx context.Context) (interface{}, error) {
-	if !d.IsEnabled() {
+	if d.Status() != boggart.DeviceStatusOnline {
 		return nil, nil
 	}
 
