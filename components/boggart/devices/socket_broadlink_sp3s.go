@@ -43,6 +43,7 @@ type BroadlinkSP3SSocket struct {
 func NewBroadlinkSP3SSocket(provider *broadlink.SP3S) *BroadlinkSP3SSocket {
 	device := &BroadlinkSP3SSocket{
 		provider: provider,
+		state:    0,
 		power:    -1,
 	}
 	device.Init()
@@ -70,13 +71,8 @@ func (d *BroadlinkSP3SSocket) Collect(ch chan<- snitch.Metric) {
 	metricSocketBroadlinkSP3SPower.With("serial_number", serialNumber).Collect(ch)
 }
 
-func (d *BroadlinkSP3SSocket) Ping(_ context.Context) bool {
-	_, err := d.Power()
-	return err == nil
-}
-
 func (d *BroadlinkSP3SSocket) Tasks() []workers.Task {
-	taskUpdater := task.NewFunctionTask(d.taskUpdater)
+	taskUpdater := task.NewFunctionTask(d.taskStateUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(SocketBroadlinkSP3SUpdateInterval)
 	taskUpdater.SetName("device-socket-broadlink-sp3s-updater-" + d.SerialNumber())
@@ -86,15 +82,14 @@ func (d *BroadlinkSP3SSocket) Tasks() []workers.Task {
 	}
 }
 
-func (d *BroadlinkSP3SSocket) taskUpdater(ctx context.Context) (interface{}, error) {
-	if !d.IsEnabled() {
-		return nil, nil
-	}
-
+func (d *BroadlinkSP3SSocket) taskStateUpdater(ctx context.Context) (interface{}, error) {
 	state, err := d.State()
 	if err != nil {
+		d.UpdateStatus(boggart.DeviceStatusOffline)
 		return nil, err
 	}
+
+	d.UpdateStatus(boggart.DeviceStatusOnline)
 
 	serialNumber := d.SerialNumber()
 	serialNumberMQTT := strings.Replace(serialNumber, ":", "-", -1)
@@ -140,7 +135,7 @@ func (d *BroadlinkSP3SSocket) State() (bool, error) {
 func (d *BroadlinkSP3SSocket) On(ctx context.Context) error {
 	err := d.provider.On()
 	if err == nil {
-		_, err = d.taskUpdater(ctx)
+		_, err = d.taskStateUpdater(ctx)
 	}
 
 	return err
@@ -149,7 +144,7 @@ func (d *BroadlinkSP3SSocket) On(ctx context.Context) error {
 func (d *BroadlinkSP3SSocket) Off(ctx context.Context) error {
 	err := d.provider.Off()
 	if err == nil {
-		_, err = d.taskUpdater(ctx)
+		_, err = d.taskStateUpdater(ctx)
 	}
 
 	return err
@@ -172,7 +167,7 @@ func (d *BroadlinkSP3SSocket) MQTTSubscribers() []mqtt.Subscriber {
 
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(SocketBroadlinkSP3SMQTTTopicSet.Format(mac), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-			if !d.IsEnabled() {
+			if d.Status() != boggart.DeviceStatusOnline {
 				return
 			}
 

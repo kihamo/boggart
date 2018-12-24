@@ -23,9 +23,6 @@ $(document).ready(function () {
                     }
                 },
                 {
-                    data: 'id'
-                },
-                {
                     data: 'status',
                     render: function (status) {
                         switch(status.toLowerCase()) {
@@ -65,26 +62,10 @@ $(document).ready(function () {
                     }
                 },
                 {
-                    data: 'enabled',
-                    render: function (data, type, row) {
-                        var content;
-
-                        if (row.enabled) {
-                            content = '<button type="button" class="btn btn-danger btn-icon" data-toggle="modal" data-target="#modal" data-modal-title="Confirm disable device #' + row.id + '" data-modal-callback="deviceToggle(\'' + row.register_id + '\');">' +
-                                '<i class="glyphicon glyphicon-remove" title="Disable device"></i>'
-                        } else {
-                            content = '<button type="button" class="btn btn-success btn-icon" data-toggle="modal" data-target="#modal" data-modal-title="Confirm enable device #' + row.id + '" data-modal-callback="deviceToggle(\'' + row.register_id + '\');">' +
-                                '<i class="glyphicon glyphicon-ok" title="Enable device"></i>'
-                        }
-
-                        return '<div class="btn-group btn-group-xs">' + content + '</button>' +
-                            '<button type="button" class="btn btn-info btn-icon device-check"><i class="glyphicon glyphicon-refresh" title="Check"></i></button>' +
-                            '<button type="button" class="btn btn-warning btn-icon device-ping"><i class="glyphicon glyphicon-resize-small" title="Ping"></i></button>' +
-                            '</div>';
-                    }
+                    data: 'serial_number'
                 },
                 {
-                    data: 'serial_number'
+                    data: 'id'
                 },
                 {
                     data: 'description'

@@ -332,8 +332,6 @@ func easyjson65411fd3DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 				}
 				in.Delim(']')
 			}
-		case "enabled":
-			out.Enabled = bool(in.Bool())
 		default:
 			in.SkipRecursive()
 		}
@@ -481,16 +479,6 @@ func easyjson65411fd3EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			}
 			out.RawByte(']')
 		}
-	}
-	{
-		const prefix string = ",\"enabled\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.Bool(bool(in.Enabled))
 	}
 	out.RawByte('}')
 }

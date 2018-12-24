@@ -60,10 +60,6 @@ func (d *GPIOPin) Types() []boggart.DeviceType {
 	}
 }
 
-func (d *GPIOPin) Ping(_ context.Context) bool {
-	return true
-}
-
 func (d *GPIOPin) Mode() GPIOMode {
 	return d.mode
 }
@@ -147,10 +143,6 @@ func (d *GPIOPin) MQTTSubscribers() []mqtt.Subscriber {
 			GPIOMQTTTopicPinSet.Format(d.pin.Number()),
 			0,
 			func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-				if !d.IsEnabled() {
-					return
-				}
-
 				span, ctx := tracing.StartSpanFromContext(ctx, "gpio", "set")
 				span.LogFields(
 					log.String("name", d.pin.Name()),

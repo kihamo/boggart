@@ -2,6 +2,7 @@ package devices
 
 import (
 	"context"
+	"math"
 	"sync/atomic"
 	"time"
 
@@ -44,6 +45,7 @@ func NewPulsarPulsedWaterMeter(serialNumber string, volumeOffset float64, provid
 		provider:     provider,
 		input:        input,
 		interval:     interval,
+		pulses:       math.MaxUint64,
 	}
 	device.Init()
 	device.SetSerialNumber(serialNumber)
@@ -98,19 +100,14 @@ func (d *PulsarPulsedWaterMeter) Collect(ch chan<- snitch.Metric) {
 	metricWaterMeterPulsarPulsedPulses.With("serial_number", serialNumber).Collect(ch)
 }
 
-func (d *PulsarPulsedWaterMeter) Ping(_ context.Context) bool {
-	_, err := d.provider.Version()
-	return err == nil
-}
-
 func (d *PulsarPulsedWaterMeter) Tasks() []workers.Task {
-	taskUpdater := task.NewFunctionTask(d.taskUpdater)
-	taskUpdater.SetRepeats(-1)
-	taskUpdater.SetRepeatInterval(d.interval)
-	taskUpdater.SetName("device-water-meter-pulsar-pulsed-updater-" + d.SerialNumber())
+	taskStateUpdater := task.NewFunctionTask(d.taskStateUpdater)
+	taskStateUpdater.SetRepeats(-1)
+	taskStateUpdater.SetRepeatInterval(d.interval)
+	taskStateUpdater.SetName("device-water-meter-pulsar-pulsed-state-updater-" + d.SerialNumber())
 
 	return []workers.Task{
-		taskUpdater,
+		taskStateUpdater,
 	}
 }
 
@@ -118,17 +115,16 @@ func (d *PulsarPulsedWaterMeter) volume(pulses uint64) float64 {
 	return (d.volumeOffset*PulsarPulsedWaterMeterScale + float64(pulses*10)) / PulsarPulsedWaterMeterScale
 }
 
-func (d *PulsarPulsedWaterMeter) taskUpdater(ctx context.Context) (interface{}, error) {
-	if !d.IsEnabled() {
-		return nil, nil
-	}
-
+func (d *PulsarPulsedWaterMeter) taskStateUpdater(ctx context.Context) (interface{}, error) {
 	pulses, err := d.Pulses(ctx)
 	if err != nil {
+		d.UpdateStatus(boggart.DeviceStatusOffline)
 		return nil, err
 	}
 
+	d.UpdateStatus(boggart.DeviceStatusOnline)
 	serialNumber := d.SerialNumber()
+
 	volume := d.volume(pulses)
 
 	metricWaterMeterPulsarPulsedPulses.With("serial_number", serialNumber).Set(float64(pulses))

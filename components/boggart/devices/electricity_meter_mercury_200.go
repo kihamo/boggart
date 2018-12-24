@@ -60,6 +60,15 @@ func NewMercury200ElectricityMeter(serialNumber string, provider *mercury.Electr
 	device := &Mercury200ElectricityMeter{
 		provider: provider,
 		interval: interval,
+
+		tariff1:        math.MaxUint64,
+		tariff2:        math.MaxUint64,
+		tariff3:        math.MaxUint64,
+		tariff4:        math.MaxUint64,
+		voltage:        math.MaxUint64,
+		amperage:       math.MaxUint64,
+		power:          math.MaxInt64,
+		batteryVoltage: math.MaxUint64,
 	}
 	device.Init()
 	device.SetSerialNumber(serialNumber)
@@ -139,32 +148,25 @@ func (d *Mercury200ElectricityMeter) Collect(ch chan<- snitch.Metric) {
 	metricElectricityMeterMercuryBatteryVoltage.With("serial_number", serialNumber).Collect(ch)
 }
 
-func (d *Mercury200ElectricityMeter) Ping(_ context.Context) bool {
-	_, _, err := d.provider.Version()
-	return err == nil
-}
-
 func (d *Mercury200ElectricityMeter) Tasks() []workers.Task {
-	taskUpdater := task.NewFunctionTask(d.taskUpdater)
-	taskUpdater.SetRepeats(-1)
-	taskUpdater.SetRepeatInterval(d.interval)
-	taskUpdater.SetName("device-electricity-meter-mercury-200-updater-" + d.SerialNumber())
+	taskStateUpdater := task.NewFunctionTask(d.taskStateUpdater)
+	taskStateUpdater.SetRepeats(-1)
+	taskStateUpdater.SetRepeatInterval(d.interval)
+	taskStateUpdater.SetName("device-electricity-meter-mercury-200-state-updater-" + d.SerialNumber())
 
 	return []workers.Task{
-		taskUpdater,
+		taskStateUpdater,
 	}
 }
 
-func (d *Mercury200ElectricityMeter) taskUpdater(ctx context.Context) (interface{}, error) {
-	if !d.IsEnabled() {
-		return nil, nil
-	}
-
+func (d *Mercury200ElectricityMeter) taskStateUpdater(ctx context.Context) (interface{}, error) {
 	tariffs, err := d.Tariffs(ctx)
 	if err != nil {
+		d.UpdateStatus(boggart.DeviceStatusOffline)
 		return nil, err
 	}
 
+	d.UpdateStatus(boggart.DeviceStatusOnline)
 	serialNumber := d.SerialNumber()
 
 	metricTariff := metricElectricityMeterMercuryTariff.With("serial_number", serialNumber)

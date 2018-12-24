@@ -139,26 +139,21 @@ func (d *MikrotikRouter) Collect(ch chan<- snitch.Metric) {
 	metricRouterMikrotikTemperature.With("serial_number", serialNumber).Collect(ch)
 }
 
-func (d *MikrotikRouter) Ping(ctx context.Context) bool {
-	_, err := d.provider.SystemResource(ctx)
-	return err == nil
-}
-
 func (d *MikrotikRouter) Tasks() []workers.Task {
-	taskSerialNumber := task.NewFunctionTillStopTask(d.taskSerialNumber)
-	taskSerialNumber.SetTimeout(time.Second * 5)
-	taskSerialNumber.SetRepeats(-1)
-	taskSerialNumber.SetRepeatInterval(time.Minute)
-	taskSerialNumber.SetName("device-router-mikrotik-serial-number")
+	taskLiveness := task.NewFunctionTask(d.taskLiveness)
+	taskLiveness.SetTimeout(time.Second * 5)
+	taskLiveness.SetRepeats(-1)
+	taskLiveness.SetRepeatInterval(time.Minute)
+	taskLiveness.SetName("device-router-mikrotik-liveness")
 
-	taskUpdater := task.NewFunctionTask(d.taskUpdater)
-	taskUpdater.SetRepeats(-1)
-	taskUpdater.SetRepeatInterval(d.interval)
-	taskUpdater.SetName("device-router-mikrotik-updater-" + d.Id())
+	taskStateUpdater := task.NewFunctionTask(d.taskStateUpdater)
+	taskStateUpdater.SetRepeats(-1)
+	taskStateUpdater.SetRepeatInterval(d.interval)
+	taskStateUpdater.SetName("device-router-mikrotik-updater-" + d.Id())
 
 	return []workers.Task{
-		taskSerialNumber,
-		taskUpdater,
+		taskLiveness,
+		taskStateUpdater,
 	}
 }
 
@@ -169,10 +164,6 @@ func (d *MikrotikRouter) Listeners() []workers.ListenerWithEvents {
 }
 
 func (d *MikrotikRouter) Mac(ctx context.Context, mac string) (*MikrotikRouterMac, error) {
-	if !d.IsEnabled() {
-		return nil, errors.New("device is disabled")
-	}
-
 	if d.SerialNumber() == "" {
 		return nil, errors.New("serial number is empty")
 	}
@@ -207,18 +198,21 @@ func (d *MikrotikRouter) Mac(ctx context.Context, mac string) (*MikrotikRouterMa
 	return info, nil
 }
 
-func (d *MikrotikRouter) taskSerialNumber(ctx context.Context) (interface{}, error, bool) {
-	if !d.IsEnabled() {
-		return nil, nil, false
-	}
-
+func (d *MikrotikRouter) taskLiveness(ctx context.Context) (interface{}, error) {
 	system, err := d.provider.SystemRouterboard(ctx)
 	if err != nil {
-		return nil, err, false
+		d.UpdateStatus(boggart.DeviceStatusOffline)
+		return nil, err
 	}
 
 	if system.SerialNumber == "" {
-		return nil, errors.New("serial number is empty"), false
+		d.UpdateStatus(boggart.DeviceStatusOffline)
+		return nil, errors.New("serial number is empty")
+	}
+
+	d.UpdateStatus(boggart.DeviceStatusOnline)
+	if d.SerialNumber() != "" {
+		return nil, nil
 	}
 
 	d.SetSerialNumber(system.SerialNumber)
@@ -227,39 +221,39 @@ func (d *MikrotikRouter) taskSerialNumber(ctx context.Context) (interface{}, err
 	// wifi clients
 	clients, err := d.provider.InterfaceWirelessRegistrationTable(ctx)
 	if err != nil {
-		return nil, err, false
+		return nil, err
 	}
 
 	for _, connection := range clients {
 		mac, err := d.Mac(ctx, connection.MacAddress)
 		if err != nil {
-			return nil, err, false
+			return nil, err
 		}
 
 		login := strings.Replace(mac.Address, ":", "-", -1)
 
 		d.MQTTPublishAsync(ctx, MikrotikRouterMQTTTopicWiFiConnectedMAC.Format(sn), 0, false, login)
-		d.MQTTPublishAsync(ctx, MikrotikRouterMQTTTopicWiFiMACState.Format(sn, login), 0, false, []byte(`1`))
+		d.MQTTPublishAsync(ctx, MikrotikRouterMQTTTopicWiFiMACState.Format(sn, login), 0, false, true)
 	}
 
 	// vpn clients
 	connections, err := d.provider.PPPActive(ctx)
 	if err != nil {
-		return nil, err, false
+		return nil, err
 	}
 
 	for _, connection := range connections {
 		login := strings.Replace(connection.Name, ":", "-", -1)
 
 		d.MQTTPublishAsync(ctx, MikrotikRouterMQTTTopicVPNConnectedLogin.Format(sn), 0, false, login)
-		d.MQTTPublishAsync(ctx, MikrotikRouterMQTTTopicVPNLoginState.Format(sn, login), 0, false, []byte(`1`))
+		d.MQTTPublishAsync(ctx, MikrotikRouterMQTTTopicVPNLoginState.Format(sn, login), 0, false, true)
 	}
 
-	return nil, nil, true
+	return nil, nil
 }
 
-func (d *MikrotikRouter) taskUpdater(ctx context.Context) (interface{}, error) {
-	if !d.IsEnabled() {
+func (d *MikrotikRouter) taskStateUpdater(ctx context.Context) (interface{}, error) {
+	if d.Status() != boggart.DeviceStatusOnline {
 		return nil, nil
 	}
 

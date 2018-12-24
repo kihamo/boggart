@@ -12,16 +12,6 @@ import (
 
 func (c *Component) ConfigVariables() []config.Variable {
 	return []config.Variable{
-		config.NewVariable(boggart.ConfigDevicesManagerCheckInterval, config.ValueTypeDuration).
-			WithUsage("Health check interval").
-			WithGroup("Device manager").
-			WithEditable(true).
-			WithDefault(time.Minute),
-		config.NewVariable(boggart.ConfigDevicesManagerCheckTimeout, config.ValueTypeDuration).
-			WithUsage("Health check timeout").
-			WithGroup("Device manager").
-			WithEditable(true).
-			WithDefault(DefaultTimeoutChecker),
 		config.NewVariable(boggart.ConfigListenerTelegramChats, config.ValueTypeString).
 			WithUsage("Chats for messages").
 			WithGroup("Listener Telegram").
@@ -181,23 +171,4 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithGroup("TV").
 			WithView([]string{config.ViewTags}),
 	}
-}
-
-func (c *Component) ConfigWatchers() []config.Watcher {
-	return []config.Watcher{
-		config.NewWatcher([]string{
-			boggart.ConfigDevicesManagerCheckInterval,
-		}, c.watchDevicesManagerCheckInterval),
-		config.NewWatcher([]string{
-			boggart.ConfigDevicesManagerCheckTimeout,
-		}, c.watchDevicesManagerCheckTimeout),
-	}
-}
-
-func (c *Component) watchDevicesManagerCheckInterval(_ string, newValue interface{}, _ interface{}) {
-	c.devicesManager.SetCheckerTickerDuration(newValue.(time.Duration))
-}
-
-func (c *Component) watchDevicesManagerCheckTimeout(_ string, newValue interface{}, _ interface{}) {
-	c.devicesManager.SetCheckerTimeout(newValue.(time.Duration))
 }

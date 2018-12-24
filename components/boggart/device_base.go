@@ -8,23 +8,18 @@ import (
 	"sync/atomic"
 
 	"github.com/kihamo/boggart/components/mqtt"
-	"github.com/kihamo/go-workers"
 	"github.com/pborman/uuid"
 )
 
 type DeviceBase struct {
-	id                   string
-	description          atomic.Value
-	status               uint64
-	enabled              uint64
-	triggerEventsChannel chan DeviceTriggerEvent
+	id          string
+	description atomic.Value
+	status      uint64
 }
 
 func (d *DeviceBase) Init() {
-	d.triggerEventsChannel = make(chan DeviceTriggerEvent)
 	d.id = uuid.New()
 	d.UpdateStatus(DeviceStatusInitializing)
-	d.Enable()
 }
 
 func (d *DeviceBase) Id() string {
@@ -55,48 +50,6 @@ func (d *DeviceBase) Status() DeviceStatus {
 
 func (d *DeviceBase) UpdateStatus(status DeviceStatus) {
 	atomic.StoreUint64(&d.status, uint64(status))
-}
-
-// deprecated
-func (d *DeviceBase) IsEnabled() bool {
-	return atomic.LoadUint64(&d.enabled) == 1
-}
-
-// deprecated
-func (d *DeviceBase) Enable() error {
-	atomic.StoreUint64(&d.enabled, 1)
-	d.TriggerEvent(context.TODO(), DeviceEventDeviceEnabled, d)
-
-	return nil
-}
-
-// deprecated
-func (d *DeviceBase) Ping(_ context.Context) bool {
-	return false
-}
-
-// deprecated
-func (d *DeviceBase) Disable() error {
-	atomic.StoreUint64(&d.enabled, 0)
-	d.TriggerEvent(context.TODO(), DeviceEventDeviceDisabled, d)
-
-	return nil
-}
-
-// deprecated
-func (d *DeviceBase) TriggerEventChannel() <-chan DeviceTriggerEvent {
-	return d.triggerEventsChannel
-}
-
-// deprecated
-func (d *DeviceBase) TriggerEvent(ctx context.Context, event workers.Event, args ...interface{}) {
-	if d.triggerEventsChannel == nil {
-		return
-	}
-
-	go func() {
-		d.triggerEventsChannel <- NewDeviceTriggerEventBase(ctx, event, append([]interface{}{d}, args...))
-	}()
 }
 
 type DeviceSerialNumber struct {
@@ -175,17 +128,10 @@ func (d *DeviceMQTT) MQTTSubscribe(topic string, qos byte, callback mqtt.Message
 	return d.client.Subscribe(topic, qos, callback)
 }
 
-func (d *DeviceMQTT) MQTTSubscribeDeviceIsOnline(topic string, qos byte, callback mqtt.MessageHandler) error {
-	d.mutex.RLock()
-	defer d.mutex.RUnlock()
-
-	if d.client == nil {
-		return errors.New("MQTT client isn't init")
-	}
-
-	return d.client.Subscribe(topic, qos, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-		if d.Status() == DeviceStatusOnline {
+func WrapMQTTSubscribeDeviceIsOnline(device Device, callback mqtt.MessageHandler) mqtt.MessageHandler {
+	return func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+		if device.Status() == DeviceStatusOnline {
 			callback(ctx, client, message)
 		}
-	})
+	}
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -46,6 +47,11 @@ type WiFiLED struct {
 func NewWiFiLED(bulb *wifiled.Bulb) *WiFiLED {
 	device := &WiFiLED{
 		bulb: bulb,
+
+		statePower: -1,
+		stateMode:  math.MaxUint64,
+		stateSpeed: math.MaxUint64,
+		stateColor: math.MaxUint64,
 	}
 	device.Init()
 	device.SetDescription("LED WiFi")
@@ -60,11 +66,6 @@ func (d *WiFiLED) Types() []boggart.DeviceType {
 	}
 }
 
-func (d *WiFiLED) Ping(ctx context.Context) bool {
-	_, err := d.bulb.Time(ctx)
-	return err == nil
-}
-
 func (d *WiFiLED) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(d.taskUpdater)
 	taskUpdater.SetRepeats(-1)
@@ -77,15 +78,13 @@ func (d *WiFiLED) Tasks() []workers.Task {
 }
 
 func (d *WiFiLED) taskUpdater(ctx context.Context) (interface{}, error) {
-	if d.Status() != boggart.DeviceStatusOnline {
-		return nil, nil
-	}
-
 	state, err := d.bulb.State(ctx)
 	if err != nil {
+		d.UpdateStatus(boggart.DeviceStatusOffline)
 		return nil, err
 	}
 
+	d.UpdateStatus(boggart.DeviceStatusOnline)
 	sn := d.serialNumberEscaped()
 
 	prevPower := atomic.LoadInt64(&d.statePower)
@@ -172,7 +171,7 @@ func (d *WiFiLED) MQTTSubscribers() []mqtt.Subscriber {
 
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(WiFiLEDMQTTTopicPower.Format(sn), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-			if !d.IsEnabled() {
+			if d.Status() != boggart.DeviceStatusOnline {
 				return
 			}
 
@@ -183,7 +182,7 @@ func (d *WiFiLED) MQTTSubscribers() []mqtt.Subscriber {
 			}
 		}),
 		mqtt.NewSubscriber(WiFiLEDMQTTTopicColor.Format(sn), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-			if !d.IsEnabled() {
+			if d.Status() != boggart.DeviceStatusOnline {
 				return
 			}
 
@@ -195,7 +194,7 @@ func (d *WiFiLED) MQTTSubscribers() []mqtt.Subscriber {
 			d.bulb.SetColorPersist(ctx, *color)
 		}),
 		mqtt.NewSubscriber(WiFiLEDMQTTTopicMode.Format(sn), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-			if !d.IsEnabled() {
+			if d.Status() != boggart.DeviceStatusOnline {
 				return
 			}
 
@@ -212,7 +211,7 @@ func (d *WiFiLED) MQTTSubscribers() []mqtt.Subscriber {
 			d.bulb.SetMode(ctx, *mode, state.Speed)
 		}),
 		mqtt.NewSubscriber(WiFiLEDMQTTTopicSpeed.Format(sn), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-			if !d.IsEnabled() {
+			if d.Status() != boggart.DeviceStatusOnline {
 				return
 			}
 

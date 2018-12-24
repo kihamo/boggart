@@ -75,10 +75,6 @@ func (d *LGWebOSTV) Types() []boggart.DeviceType {
 	}
 }
 
-func (d *LGWebOSTV) Ping(ctx context.Context) bool {
-	return true
-}
-
 func (d *LGWebOSTV) Tasks() []workers.Task {
 	taskLiveness := task.NewFunctionTask(d.taskLiveness)
 	taskLiveness.SetTimeout(time.Second * 10)
@@ -207,44 +203,44 @@ func (d *LGWebOSTV) taskLiveness(ctx context.Context) (interface{}, error) {
 func (d *LGWebOSTV) initMQTTSubscribers() {
 	sn := strings.Replace(d.SerialNumber(), ":", "-", -1)
 
-	d.MQTTSubscribeDeviceIsOnline(TVLGWebOSMQTTTopicApplication.Format(sn), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
+	d.MQTTSubscribe(TVLGWebOSMQTTTopicApplication.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
 		if client, err := d.Client(); err == nil {
 			client.ApplicationManagerLaunch(string(message.Payload()), nil)
 		}
-	})
+	}))
 
-	d.MQTTSubscribeDeviceIsOnline(TVLGWebOSMQTTTopicMute.Format(sn), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
+	d.MQTTSubscribe(TVLGWebOSMQTTTopicMute.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
 		if client, err := d.Client(); err == nil {
 			client.AudioSetMute(bytes.Equal(message.Payload(), []byte(`1`)))
 		}
-	})
+	}))
 
-	d.MQTTSubscribeDeviceIsOnline(TVLGWebOSMQTTTopicVolume.Format(sn), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
+	d.MQTTSubscribe(TVLGWebOSMQTTTopicVolume.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
 		vol, err := strconv.ParseInt(string(message.Payload()), 10, 64)
 		if err == nil {
 			if client, err := d.Client(); err == nil {
 				client.AudioSetVolume(int(vol))
 			}
 		}
-	})
+	}))
 
-	d.MQTTSubscribeDeviceIsOnline(TVLGWebOSMQTTTopicVolumeUp.Format(sn), 0, func(_ context.Context, _ mqtt.Component, _ mqtt.Message) {
+	d.MQTTSubscribe(TVLGWebOSMQTTTopicVolumeUp.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(_ context.Context, _ mqtt.Component, _ mqtt.Message) {
 		if client, err := d.Client(); err == nil {
 			client.AudioVolumeUp()
 		}
-	})
+	}))
 
-	d.MQTTSubscribeDeviceIsOnline(TVLGWebOSMQTTTopicVolumeDown.Format(sn), 0, func(_ context.Context, _ mqtt.Component, _ mqtt.Message) {
+	d.MQTTSubscribe(TVLGWebOSMQTTTopicVolumeDown.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(_ context.Context, _ mqtt.Component, _ mqtt.Message) {
 		if client, err := d.Client(); err == nil {
 			client.AudioVolumeDown()
 		}
-	})
+	}))
 
-	d.MQTTSubscribeDeviceIsOnline(TVLGWebOSMQTTTopicToast.Format(sn), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
+	d.MQTTSubscribe(TVLGWebOSMQTTTopicToast.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
 		if client, err := d.Client(); err == nil {
 			client.SystemNotificationsCreateToast(string(message.Payload()))
 		}
-	})
+	}))
 
 	d.MQTTSubscribe(TVLGWebOSMQTTTopicPower.Format(sn), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
 		if bytes.Equal(message.Payload(), []byte(`1`)) {
@@ -261,19 +257,15 @@ func (d *LGWebOSTV) monitorForegroundAppInfo(s webostv.ForegroundAppInfo) error 
 	ctx := context.Background()
 	sn := strings.Replace(d.SerialNumber(), ":", "-", -1)
 
-	if err := d.MQTTPublish(ctx, TVLGWebOSMQTTTopicStateApplication.Format(sn), 2, true, s.AppId); err != nil {
-		return err
-	}
+	d.MQTTPublishAsync(ctx, TVLGWebOSMQTTTopicStateApplication.Format(sn), 2, true, s.AppId)
 
 	// TODO: cache
 	if s.AppId == "" {
-		if err := d.MQTTPublish(ctx, TVLGWebOSMQTTTopicStatePower.Format(sn), 2, true, false); err != nil {
-			return err
-		}
+		d.UpdateStatus(boggart.DeviceStatusOffline)
+
+		d.MQTTPublishAsync(ctx, TVLGWebOSMQTTTopicStatePower.Format(sn), 2, true, false)
 	} else {
-		if err := d.MQTTPublish(ctx, TVLGWebOSMQTTTopicStatePower.Format(sn), 2, true, true); err != nil {
-			return err
-		}
+		d.MQTTPublishAsync(ctx, TVLGWebOSMQTTTopicStatePower.Format(sn), 2, true, true)
 	}
 
 	return nil
@@ -283,13 +275,8 @@ func (d *LGWebOSTV) monitorAudio(s webostv.AudioStatus) error {
 	ctx := context.Background()
 	sn := strings.Replace(d.SerialNumber(), ":", "-", -1)
 
-	if err := d.MQTTPublish(ctx, TVLGWebOSMQTTTopicStateMute.Format(sn), 2, true, s.Mute); err != nil {
-		return err
-	}
-
-	if err := d.MQTTPublish(ctx, TVLGWebOSMQTTTopicStateVolume.Format(sn), 2, true, s.Volume); err != nil {
-		return err
-	}
+	d.MQTTPublishAsync(ctx, TVLGWebOSMQTTTopicStateMute.Format(sn), 2, true, s.Mute)
+	d.MQTTPublishAsync(ctx, TVLGWebOSMQTTTopicStateVolume.Format(sn), 2, true, s.Volume)
 
 	return nil
 }
@@ -298,9 +285,7 @@ func (d *LGWebOSTV) monitorTvCurrentChannel(s webostv.TvCurrentChannel) error {
 	ctx := context.Background()
 	sn := strings.Replace(d.SerialNumber(), ":", "-", -1)
 
-	if err := d.MQTTPublish(ctx, TVLGWebOSMQTTTopicStateChannelNumber.Format(sn), 2, true, s.ChannelNumber); err != nil {
-		return err
-	}
+	d.MQTTPublishAsync(ctx, TVLGWebOSMQTTTopicStateChannelNumber.Format(sn), 2, true, s.ChannelNumber)
 
 	return nil
 }

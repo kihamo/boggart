@@ -50,6 +50,12 @@ func NewPulsarHeadMeter(provider *pulsar.HeatMeter, interval time.Duration) *Pul
 	device := &PulsarHeadMeter{
 		provider: provider,
 		interval: interval,
+
+		temperatureIn:    math.MaxUint64,
+		temperatureOut:   math.MaxUint64,
+		temperatureDelta: math.MaxUint64,
+		energy:           math.MaxUint64,
+		consumption:      math.MaxUint64,
 	}
 	device.Init()
 	device.SetSerialNumber(hex.EncodeToString(provider.Address()))
@@ -129,27 +135,24 @@ func (d *PulsarHeadMeter) Collect(ch chan<- snitch.Metric) {
 	metricHeatMeterPulsarConsumption.With("serial_number", serialNumber).Collect(ch)
 }
 
-func (d *PulsarHeadMeter) Ping(_ context.Context) bool {
-	_, err := d.provider.Version()
-	return err == nil
-}
-
 func (d *PulsarHeadMeter) Tasks() []workers.Task {
-	taskUpdater := task.NewFunctionTask(d.taskUpdater)
-	taskUpdater.SetRepeats(-1)
-	taskUpdater.SetRepeatInterval(d.interval)
-	taskUpdater.SetName("device-heat-meter-pulsar-updater-" + d.SerialNumber())
+	taskStateUpdater := task.NewFunctionTask(d.taskStateUpdater)
+	taskStateUpdater.SetRepeats(-1)
+	taskStateUpdater.SetRepeatInterval(d.interval)
+	taskStateUpdater.SetName("device-heat-meter-pulsar-state-updater-" + d.SerialNumber())
 
 	return []workers.Task{
-		taskUpdater,
+		taskStateUpdater,
 	}
 }
 
-func (d *PulsarHeadMeter) taskUpdater(ctx context.Context) (interface{}, error) {
-	if !d.IsEnabled() {
-		return nil, nil
+func (d *PulsarHeadMeter) taskStateUpdater(ctx context.Context) (interface{}, error) {
+	if _, err := d.provider.Version(); err != nil {
+		d.UpdateStatus(boggart.DeviceStatusOffline)
+		return nil, err
 	}
 
+	d.UpdateStatus(boggart.DeviceStatusOnline)
 	serialNumber := d.SerialNumber()
 
 	if current, err := d.TemperatureIn(ctx); err == nil {

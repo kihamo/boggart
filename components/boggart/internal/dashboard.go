@@ -42,9 +42,6 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 			dashboard.NewRoute("/"+c.Name()+"/devices/", devicesHandler).
 				WithMethods([]string{http.MethodGet}).
 				WithAuth(true),
-			dashboard.NewRoute("/"+c.Name()+"/devices/:device/:action", handlers.NewDeviceHandler(c.devicesManager)).
-				WithMethods([]string{http.MethodGet, http.MethodPost}).
-				WithAuth(true),
 			dashboard.NewRoute("/"+c.Name()+"/camera/:sn/:channel", cameraHandler).
 				WithMethods([]string{http.MethodGet, http.MethodPost}),
 		}

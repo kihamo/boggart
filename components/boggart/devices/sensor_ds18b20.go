@@ -25,7 +25,9 @@ type DS18B20Sensor struct {
 }
 
 func NewDS18B20Sensor(addr string) *DS18B20Sensor {
-	device := &DS18B20Sensor{}
+	device := &DS18B20Sensor{
+		lastValue: -1,
+	}
 	device.Init()
 	device.SetSerialNumber(addr)
 	device.SetDescription("Sensor DS18B20")
@@ -37,10 +39,6 @@ func (d *DS18B20Sensor) Types() []boggart.DeviceType {
 	return []boggart.DeviceType{
 		boggart.DeviceTypeThermometer,
 	}
-}
-
-func (d *DS18B20Sensor) Ping(_ context.Context) bool {
-	return true
 }
 
 func (d *DS18B20Sensor) Tasks() []workers.Task {

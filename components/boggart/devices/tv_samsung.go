@@ -37,7 +37,7 @@ func NewSamsungTV(host string) *SamsungTV {
 		client: tv.NewApiV2(host),
 	}
 	device.Init()
-	device.SetDescription("LG TV WebOS")
+	device.SetDescription("Samsung TV")
 
 	return device
 }
@@ -46,10 +46,6 @@ func (d *SamsungTV) Types() []boggart.DeviceType {
 	return []boggart.DeviceType{
 		boggart.DeviceTypeTV,
 	}
-}
-
-func (d *SamsungTV) Ping(ctx context.Context) bool {
-	return d.Status() == boggart.DeviceStatusOnline
 }
 
 func (d *SamsungTV) Tasks() []workers.Task {
@@ -108,7 +104,7 @@ func (d *SamsungTV) initMQTTSubscribers() {
 		}
 	})
 
-	d.MQTTSubscribeDeviceIsOnline(TVSamsungMQTTTopicKey.Format(sn[1]), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
+	d.MQTTSubscribe(TVSamsungMQTTTopicKey.Format(sn[1]), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
 		d.client.SendCommand(string(message.Payload()))
-	})
+	}))
 }

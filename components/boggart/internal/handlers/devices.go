@@ -20,7 +20,6 @@ type deviceHandlerDevice struct {
 	MQTTTopics      []string `json:"mqtt_topics"`
 	MQTTSubscribers []string `json:"mqtt_subscribers"`
 	Types           []string `json:"types"`
-	Enabled         bool     `json:"enabled"`
 }
 
 // easyjson:json
@@ -76,7 +75,6 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				Tasks:           make([]string, 0),
 				MQTTTopics:      make([]string, 0),
 				MQTTSubscribers: make([]string, 0),
-				Enabled:         d.IsEnabled(),
 			}
 
 			if sn, ok := d.(boggart.DeviceHasSerialNumber); ok {

@@ -11,7 +11,6 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
-	"github.com/kihamo/snitch"
 	"gobot.io/x/gobot/drivers/i2c"
 )
 
@@ -20,13 +19,6 @@ const (
 	BME280SensorMQTTTopicAltitude    mqtt.Topic = boggart.ComponentName + "/meter/bme280/+/altitude"
 	BME280SensorMQTTTopicHumidity    mqtt.Topic = boggart.ComponentName + "/meter/bme280/+/humidity"
 	BME280SensorMQTTTopicPressure    mqtt.Topic = boggart.ComponentName + "/meter/bme280/+/pressure"
-)
-
-var (
-	metricSensorBME280Temperature = snitch.NewGauge(boggart.ComponentName+"_device_sensor_bme280_temperature_celsius", "Temperature")
-	metricSensorBME280Altitude    = snitch.NewGauge(boggart.ComponentName+"_device_sensor_bme280_altitude_metre", "Altitude")
-	metricSensorBME280Humidity    = snitch.NewGauge(boggart.ComponentName+"_device_sensor_bme280_humidity_percent", "Humidity")
-	metricSensorBME280Pressure    = snitch.NewGauge(boggart.ComponentName+"_device_sensor_bme280_pressure_psi", "Pressure")
 )
 
 type BME280Sensor struct {
@@ -52,6 +44,11 @@ func NewBME280Sensor(connector i2c.Connector, interval time.Duration, bus int, a
 	device := &BME280Sensor{
 		driver:   driver,
 		interval: interval,
+
+		temperature: math.MaxUint64,
+		altitude:    math.MaxUint64,
+		humidity:    math.MaxUint64,
+		pressure:    math.MaxUint64,
 	}
 
 	device.Init()
@@ -69,51 +66,28 @@ func (d *BME280Sensor) Types() []boggart.DeviceType {
 	}
 }
 
-func (d *BME280Sensor) Describe(ch chan<- *snitch.Description) {
-	metricSensorBME280Temperature.Describe(ch)
-	metricSensorBME280Altitude.Describe(ch)
-	metricSensorBME280Humidity.Describe(ch)
-	metricSensorBME280Pressure.Describe(ch)
-}
-
-func (d *BME280Sensor) Collect(ch chan<- snitch.Metric) {
-	metricSensorBME280Temperature.Collect(ch)
-	metricSensorBME280Altitude.Collect(ch)
-	metricSensorBME280Humidity.Collect(ch)
-	metricSensorBME280Pressure.Collect(ch)
-}
-
-func (d *BME280Sensor) Ping(_ context.Context) bool {
-	_, err := d.driver.Temperature()
-	return err == nil
-}
-
 func (d *BME280Sensor) Tasks() []workers.Task {
-	taskUpdater := task.NewFunctionTask(d.taskUpdater)
-	taskUpdater.SetRepeats(-1)
-	taskUpdater.SetRepeatInterval(d.interval)
-	taskUpdater.SetName("device-sensor-bme280-updater-" + d.driver.Name())
+	taskStateUpdater := task.NewFunctionTask(d.taskStateUpdater)
+	taskStateUpdater.SetRepeats(-1)
+	taskStateUpdater.SetRepeatInterval(d.interval)
+	taskStateUpdater.SetName("device-sensor-bme280-state-updater-" + d.driver.Name())
 
 	return []workers.Task{
-		taskUpdater,
+		taskStateUpdater,
 	}
 }
 
-func (d *BME280Sensor) taskUpdater(ctx context.Context) (interface{}, error) {
-	if !d.IsEnabled() {
-		return nil, nil
-	}
-
+func (d *BME280Sensor) taskStateUpdater(ctx context.Context) (interface{}, error) {
 	if err := d.driver.Start(); err != nil {
+		d.UpdateStatus(boggart.DeviceStatusOffline)
 		return nil, err
 	}
 
+	d.UpdateStatus(boggart.DeviceStatusOnline)
 	serialNumber := d.SerialNumber()
 
 	if value, err := d.driver.Temperature(); err == nil {
 		current := float64(value)
-
-		metricSensorBME280Temperature.With("serial_number", serialNumber).Set(current)
 
 		prev := math.Float64frombits(atomic.LoadUint64(&d.temperature))
 		if current != prev {
@@ -128,8 +102,6 @@ func (d *BME280Sensor) taskUpdater(ctx context.Context) (interface{}, error) {
 	if value, err := d.driver.Altitude(); err == nil {
 		current := float64(value)
 
-		metricSensorBME280Altitude.With("serial_number", serialNumber).Set(current)
-
 		prev := math.Float64frombits(atomic.LoadUint64(&d.altitude))
 		if current != prev {
 			atomic.StoreUint64(&d.altitude, math.Float64bits(current))
@@ -143,8 +115,6 @@ func (d *BME280Sensor) taskUpdater(ctx context.Context) (interface{}, error) {
 	if value, err := d.driver.Humidity(); err == nil {
 		current := float64(value)
 
-		metricSensorBME280Humidity.With("serial_number", serialNumber).Set(current)
-
 		prev := math.Float64frombits(atomic.LoadUint64(&d.humidity))
 		if current != prev {
 			atomic.StoreUint64(&d.humidity, math.Float64bits(current))
@@ -157,8 +127,6 @@ func (d *BME280Sensor) taskUpdater(ctx context.Context) (interface{}, error) {
 
 	if value, err := d.driver.Pressure(); err == nil {
 		current := float64(int(value/133.322*10)) / 10
-
-		metricSensorBME280Pressure.With("serial_number", serialNumber).Set(current)
 
 		prev := math.Float64frombits(atomic.LoadUint64(&d.pressure))
 		if current != prev {

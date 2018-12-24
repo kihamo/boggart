@@ -31,6 +31,8 @@ func NewMegafonPhone(provider *mobile.Megafon, interval time.Duration) *MegafonP
 	device := &MegafonPhone{
 		provider: provider,
 		interval: interval,
+
+		lastValue: -1,
 	}
 	device.Init()
 	device.SetSerialNumber(device.Number())
@@ -55,29 +57,24 @@ func (d *MegafonPhone) Balance(ctx context.Context) (float64, error) {
 }
 
 func (d *MegafonPhone) Tasks() []workers.Task {
-	taskUpdater := task.NewFunctionTask(d.taskUpdater)
-	taskUpdater.SetRepeats(-1)
-	taskUpdater.SetRepeatInterval(d.interval)
-	taskUpdater.SetName("device-phone-megafon-updater-" + d.Number())
+	taskStateUpdater := task.NewFunctionTask(d.taskStateUpdater)
+	taskStateUpdater.SetRepeats(-1)
+	taskStateUpdater.SetRepeatInterval(d.interval)
+	taskStateUpdater.SetName("device-phone-megafon-state-updater-" + d.Number())
 
 	return []workers.Task{
-		taskUpdater,
+		taskStateUpdater,
 	}
 }
 
-func (d *MegafonPhone) Ping(_ context.Context) bool {
-	return true
-}
-
-func (d *MegafonPhone) taskUpdater(ctx context.Context) (interface{}, error) {
-	if !d.IsEnabled() {
-		return nil, nil
-	}
-
+func (d *MegafonPhone) taskStateUpdater(ctx context.Context) (interface{}, error) {
 	value, err := d.provider.Balance(ctx)
 	if err != nil {
+		d.UpdateStatus(boggart.DeviceStatusOffline)
 		return nil, err
 	}
+
+	d.UpdateStatus(boggart.DeviceStatusOnline)
 
 	current := int64(value * 100)
 	prev := atomic.LoadInt64(&d.lastValue)

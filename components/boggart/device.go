@@ -1,8 +1,6 @@
 package boggart
 
 import (
-	"context"
-
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/event"
@@ -69,15 +67,7 @@ type DevicesManager interface {
 	Device(string) Device
 	Devices() map[string]Device
 	DevicesByTypes([]DeviceType) map[string]Device
-	Check()
-	CheckByKeys(...string)
 	IsReady() bool
-}
-
-type DeviceTriggerEvent interface {
-	Context() context.Context
-	Event() workers.Event
-	Arguments() []interface{}
 }
 
 type Device interface {
@@ -85,17 +75,6 @@ type Device interface {
 	Description() string
 	Types() []DeviceType
 	Status() DeviceStatus
-
-	// deprecated
-	IsEnabled() bool
-	// deprecated
-	Disable() error
-	// deprecated
-	Enable() error
-	// deprecated
-	Ping(context.Context) bool
-	// deprecated
-	TriggerEventChannel() <-chan DeviceTriggerEvent
 }
 
 type DeviceHasSerialNumber interface {

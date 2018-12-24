@@ -31,6 +31,8 @@ func NewSoftVideoInternet(provider *softvideo.Client, interval time.Duration) *S
 	device := &SoftVideoInternet{
 		provider: provider,
 		interval: interval,
+
+		lastValue: -1,
 	}
 	device.Init()
 	device.SetSerialNumber(provider.AccountID())
@@ -49,10 +51,6 @@ func (d *SoftVideoInternet) Balance(ctx context.Context) (float64, error) {
 	return d.provider.Balance(ctx)
 }
 
-func (d *SoftVideoInternet) Ping(_ context.Context) bool {
-	return true
-}
-
 func (d *SoftVideoInternet) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(d.taskUpdater)
 	taskUpdater.SetRepeats(-1)
@@ -65,14 +63,13 @@ func (d *SoftVideoInternet) Tasks() []workers.Task {
 }
 
 func (d *SoftVideoInternet) taskUpdater(ctx context.Context) (interface{}, error) {
-	if !d.IsEnabled() {
-		return nil, nil
-	}
-
 	value, err := d.provider.Balance(ctx)
 	if err != nil {
+		d.UpdateStatus(boggart.DeviceStatusOffline)
 		return nil, err
 	}
+
+	d.UpdateStatus(boggart.DeviceStatusOnline)
 
 	current := int64(value * 100)
 	prev := atomic.LoadInt64(&d.lastValue)

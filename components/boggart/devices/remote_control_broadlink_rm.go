@@ -9,6 +9,8 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/broadlink"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/go-workers"
+	"github.com/kihamo/go-workers/task"
 	"github.com/kihamo/shadow/components/tracing"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/log"
@@ -63,8 +65,23 @@ func (d *BroadlinkRMRemoteControl) Types() []boggart.DeviceType {
 	}
 }
 
-func (d *BroadlinkRMRemoteControl) Ping(_ context.Context) bool {
-	return true
+func (d *BroadlinkRMRemoteControl) Tasks() []workers.Task {
+	taskLiveness := task.NewFunctionTask(d.taskLiveness)
+	taskLiveness.SetTimeout(time.Second * 5)
+	taskLiveness.SetRepeats(-1)
+	taskLiveness.SetRepeatInterval(time.Second * 30)
+	taskLiveness.SetName("remote-control-broadlink-rm-liveness")
+
+	return []workers.Task{
+		taskLiveness,
+	}
+}
+
+func (d *BroadlinkRMRemoteControl) taskLiveness(ctx context.Context) (interface{}, error) {
+	// TODO:
+	d.UpdateStatus(boggart.DeviceStatusOnline)
+
+	return nil, nil
 }
 
 func (d *BroadlinkRMRemoteControl) MQTTTopics() []mqtt.Topic {
@@ -241,7 +258,7 @@ func (d *BroadlinkRMRemoteControl) MQTTSubscribers() []mqtt.Subscriber {
 
 func (d *BroadlinkRMRemoteControl) wrapMQTTSubscriber(operationName string, fn func(context.Context, mqtt.Component, mqtt.Message) error) mqtt.MessageHandler {
 	return func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-		if !d.IsEnabled() {
+		if d.Status() != boggart.DeviceStatusOnline {
 			return
 		}
 

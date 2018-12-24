@@ -51,9 +51,11 @@ type CameraHikVision struct {
 	boggart.DeviceSerialNumber
 	boggart.DeviceMQTT
 
+	mutex    sync.RWMutex
+	initOnce sync.Once
+
 	isapi                 *hikvision.ISAPI
 	interval              time.Duration
-	mutex                 sync.RWMutex
 	alertStreamingHistory map[string]time.Time
 
 	ptzChannels map[uint64]cameraHikVisionPTZChannel
@@ -77,17 +79,12 @@ func (d *CameraHikVision) Types() []boggart.DeviceType {
 	}
 }
 
-func (d *CameraHikVision) Ping(ctx context.Context) bool {
-	_, err := d.isapi.SystemStatus(ctx)
-	return err == nil
-}
-
 func (d *CameraHikVision) Tasks() []workers.Task {
-	taskSerialNumber := task.NewFunctionTillStopTask(d.taskSerialNumber)
-	taskSerialNumber.SetTimeout(time.Second * 5)
-	taskSerialNumber.SetRepeats(-1)
-	taskSerialNumber.SetRepeatInterval(time.Minute)
-	taskSerialNumber.SetName("device-camera-hikvision-serial-number")
+	taskLiveness := task.NewFunctionTask(d.taskLiveness)
+	taskLiveness.SetTimeout(time.Second * 5)
+	taskLiveness.SetRepeats(-1)
+	taskLiveness.SetRepeatInterval(time.Minute)
+	taskLiveness.SetName("device-camera-hikvision-liveness")
 
 	taskPTZStatus := task.NewFunctionTillStopTask(d.taskPTZStatus)
 	taskPTZStatus.SetTimeout(time.Second * 5)
@@ -102,85 +99,68 @@ func (d *CameraHikVision) Tasks() []workers.Task {
 	taskState.SetName("device-camera-hikvision-state")
 
 	return []workers.Task{
-		taskSerialNumber,
+		taskLiveness,
 		taskPTZStatus,
 		taskState,
 	}
 }
 
-func (d *CameraHikVision) taskSerialNumber(ctx context.Context) (interface{}, error, bool) {
-	if !d.IsEnabled() {
-		return nil, nil, false
-	}
-
+func (d *CameraHikVision) taskLiveness(ctx context.Context) (interface{}, error) {
 	deviceInfo, err := d.isapi.SystemDeviceInfo(ctx)
 	if err != nil {
-		return nil, err, false
+		d.UpdateStatus(boggart.DeviceStatusOffline)
+		return nil, err
 	}
 
 	if deviceInfo.SerialNumber == "" {
-		return nil, errors.New("device returns empty serial number"), false
+		d.UpdateStatus(boggart.DeviceStatusOffline)
+		return nil, errors.New("device returns empty serial number")
 	}
-
-	d.SetSerialNumber(deviceInfo.SerialNumber)
-
-	ptzChannels := make(map[uint64]cameraHikVisionPTZChannel, 0)
-	if list, err := d.isapi.PTZChannels(ctx); err == nil {
-		for _, channel := range list.Channels {
-			ptzChannels[channel.ID] = cameraHikVisionPTZChannel{
-				Channel: channel,
-			}
-		}
-	}
-
-	d.mutex.Lock()
-	d.ptzChannels = ptzChannels
-	d.mutex.Unlock()
 
 	d.UpdateStatus(boggart.DeviceStatusOnline)
+	if d.SerialNumber() == "" {
+		ptzChannels := make(map[uint64]cameraHikVisionPTZChannel, 0)
+		if list, err := d.isapi.PTZChannels(ctx); err == nil {
+			for _, channel := range list.Channels {
+				ptzChannels[channel.ID] = cameraHikVisionPTZChannel{
+					Channel: channel,
+				}
+			}
+		}
 
-	//if err := d.startAlertStreaming(); err != nil {
-	//	return nil, err, false
-	//}
+		d.mutex.Lock()
+		d.ptzChannels = ptzChannels
+		d.mutex.Unlock()
 
-	if len(ptzChannels) == 0 {
-		return nil, nil, true
+		//if err := d.startAlertStreaming(); err != nil {
+		//	return nil, err, false
+		//}
+
+		d.SetSerialNumber(deviceInfo.SerialNumber)
+		d.initOnce.Do(func() {
+			sn := strings.Replace(deviceInfo.SerialNumber, "/", "-", -1)
+
+			d.MQTTSubscribe(CameraHikVisionMQTTTopicPTZMove.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTAbsolute))
+			d.MQTTSubscribe(CameraHikVisionMQTTTopicPTZAbsolute.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTAbsolute))
+			d.MQTTSubscribe(CameraHikVisionMQTTTopicPTZContinuous.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTContinuous))
+			d.MQTTSubscribe(CameraHikVisionMQTTTopicPTZRelative.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTRelative))
+			d.MQTTSubscribe(CameraHikVisionMQTTTopicPTZPreset.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTPreset))
+			d.MQTTSubscribe(CameraHikVisionMQTTTopicPTZMomentary.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTMomentary))
+		})
 	}
 
-	sn := strings.Replace(d.SerialNumber(), "/", "-", -1)
-
-	if err := d.MQTTSubscribe(CameraHikVisionMQTTTopicPTZMove.Format(sn), 0, d.callbackMQTTAbsolute); err != nil {
-		return nil, err, false
-	}
-
-	if err := d.MQTTSubscribe(CameraHikVisionMQTTTopicPTZAbsolute.Format(sn), 0, d.callbackMQTTAbsolute); err != nil {
-		return nil, err, false
-	}
-
-	if err := d.MQTTSubscribe(CameraHikVisionMQTTTopicPTZContinuous.Format(sn), 0, d.callbackMQTTContinuous); err != nil {
-		return nil, err, false
-	}
-
-	if err := d.MQTTSubscribe(CameraHikVisionMQTTTopicPTZRelative.Format(sn), 0, d.callbackMQTTRelative); err != nil {
-		return nil, err, false
-	}
-
-	if err := d.MQTTSubscribe(CameraHikVisionMQTTTopicPTZPreset.Format(sn), 0, d.callbackMQTTPreset); err != nil {
-		return nil, err, false
-	}
-
-	if err := d.MQTTSubscribe(CameraHikVisionMQTTTopicPTZMomentary.Format(sn), 0, d.callbackMQTTMomentary); err != nil {
-		return nil, err, false
-	}
-
-	return nil, nil, true
+	return nil, nil
 }
 
 func (d *CameraHikVision) taskPTZStatus(ctx context.Context) (interface{}, error, bool) {
+	if d.Status() != boggart.DeviceStatusOnline {
+		return nil, nil, false
+	}
+
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 
-	if !d.IsEnabled() || d.ptzChannels == nil {
+	if d.ptzChannels == nil {
 		return nil, nil, false
 	}
 
@@ -207,12 +187,12 @@ func (d *CameraHikVision) taskPTZStatus(ctx context.Context) (interface{}, error
 }
 
 func (d *CameraHikVision) taskState(ctx context.Context) (interface{}, error) {
-	d.mutex.RLock()
-	defer d.mutex.RUnlock()
-
-	if !d.IsEnabled() {
+	if d.Status() != boggart.DeviceStatusOnline {
 		return nil, nil
 	}
+
+	d.mutex.RLock()
+	defer d.mutex.RUnlock()
 
 	status, err := d.isapi.SystemStatus(ctx)
 	if err != nil {
@@ -274,7 +254,7 @@ func (d *CameraHikVision) startAlertStreaming() error {
 		for {
 			select {
 			case event := <-stream.NextAlert():
-				if !d.IsEnabled() || event.EventState != hikvision.EventEventStateActive {
+				if event.EventState != hikvision.EventEventStateActive {
 					continue
 				}
 
@@ -333,10 +313,6 @@ func (d *CameraHikVision) updateStatusByChannelId(ctx context.Context, channelId
 }
 
 func (d *CameraHikVision) checkTopic(topic string) (uint64, error) {
-	if !d.IsEnabled() {
-		return 0, errors.New("device is disabled")
-	}
-
 	if d.ptzChannels == nil || len(d.ptzChannels) == 0 {
 		return 0, errors.New("channels is empty")
 	}

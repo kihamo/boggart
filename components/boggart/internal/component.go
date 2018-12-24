@@ -103,9 +103,6 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 	<-a.ReadyComponent(config.ComponentName)
 	c.config = a.GetComponent(config.ComponentName).(config.Component)
 
-	c.devicesManager.SetCheckerTickerDuration(c.config.Duration(boggart.ConfigDevicesManagerCheckInterval))
-	c.devicesManager.SetCheckerTimeout(c.config.Duration(boggart.ConfigDevicesManagerCheckTimeout))
-
 	c.initListeners()
 	c.initRS485()
 
