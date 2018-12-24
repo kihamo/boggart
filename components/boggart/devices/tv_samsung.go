@@ -71,6 +71,10 @@ func (d *SamsungTV) taskLiveness(ctx context.Context) (interface{}, error) {
 		return nil, nil
 	}
 
+	if d.Status() == boggart.DeviceStatusOnline {
+		return nil, nil
+	}
+
 	d.UpdateStatus(boggart.DeviceStatusOnline)
 
 	if d.SerialNumber() == "" {
@@ -80,13 +84,13 @@ func (d *SamsungTV) taskLiveness(ctx context.Context) (interface{}, error) {
 		d.mac = info.Device.WifiMac
 		d.mutex.Unlock()
 
-		d.initOnce.Do(d.initDevice)
+		d.initOnce.Do(d.initMQTTSubscribers)
 	}
 
 	return nil, nil
 }
 
-func (d *SamsungTV) initDevice() {
+func (d *SamsungTV) initMQTTSubscribers() {
 	sn := strings.Split(d.SerialNumber(), ":")
 	if len(sn) < 2 {
 		return
