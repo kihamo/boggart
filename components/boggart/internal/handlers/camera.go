@@ -95,14 +95,24 @@ func (h *CameraHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 		buf := &bytes.Buffer{}
 		if err := device.Snapshot(r.Context(), ch, buf); err != nil {
+			h.Logger().Warn("Failed get snapshot", "error", err, "device", device.Description())
+
 			h.NotFound(w, r)
+			return
 		}
 
 		w.WriteHeader(http.StatusNoContent)
 
 		go func(query url.Values) {
 			description := fmt.Sprintf("%s at %s", device.Description(), time.Now().Format(time.RFC1123Z))
-			mime := http.DetectContentType(buf.Bytes()[:256])
+
+			var mime string
+
+			if buf.Len() < 256 {
+				mime = http.DetectContentType(buf.Bytes())
+			} else {
+				mime = http.DetectContentType(buf.Bytes()[:256])
+			}
 
 			switch mime {
 			case "image/jpeg", "image/png", "image/gif", "image/webp":
@@ -121,8 +131,8 @@ func (h *CameraHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		return
 	}
 
-	err = device.Snapshot(r.Context(), ch, w)
-	if err != nil {
+	if err = device.Snapshot(r.Context(), ch, w); err != nil {
 		h.NotFound(w, r)
+		return
 	}
 }
