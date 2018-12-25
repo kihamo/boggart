@@ -74,7 +74,7 @@ func (d *DeviceSerialNumber) SerialNumber() string {
 }
 
 func (d *DeviceSerialNumber) SerialNumberMQTTEscaped() string {
-	return MQTTNameReplace(d.SerialNumber())
+	return mqtt.NameReplace(d.SerialNumber())
 }
 
 func (d *DeviceSerialNumber) SetSerialNumber(serialNumber string) {
@@ -147,9 +147,4 @@ func WrapMQTTSubscribeDeviceIsOnline(device Device, callback mqtt.MessageHandler
 			callback(ctx, client, message)
 		}
 	}
-}
-
-func MQTTNameReplace(name string) string {
-	name = strings.ToLower(name)
-	return replacerMQTTName.Replace(name)
 }

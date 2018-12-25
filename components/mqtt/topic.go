@@ -5,6 +5,14 @@ import (
 	"strings"
 )
 
+var replacerMQTTName = strings.NewReplacer(
+	":", "-",
+	"/", "-",
+	"_", "-",
+	",", "-",
+	".", "-",
+)
+
 type Topic string
 
 func (t Topic) String() string {
@@ -17,11 +25,16 @@ func (t Topic) Format(args ...interface{}) string {
 	for _, arg := range args {
 		for i, topic := range parts {
 			if topic == "+" {
-				parts[i] = fmt.Sprintf("%v", arg)
+				parts[i] = NameReplace(fmt.Sprintf("%v", arg))
 				break
 			}
 		}
 	}
 
 	return strings.Join(parts, "/")
+}
+
+func NameReplace(name string) string {
+	name = strings.ToLower(name)
+	return replacerMQTTName.Replace(name)
 }

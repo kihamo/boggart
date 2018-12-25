@@ -92,7 +92,7 @@ func (d *SamsungTV) initMQTTSubscribers() {
 		return
 	}
 
-	sn := boggart.MQTTNameReplace(parts[1])
+	sn := mqtt.NameReplace(parts[1])
 
 	d.MQTTSubscribe(TVSamsungMQTTTopicPower.Format(sn), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
 		if bytes.Equal(message.Payload(), []byte(`1`)) {
