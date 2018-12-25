@@ -1,5 +1,5 @@
-hash: 83dd95016866e25c824ed6631b87923432ada7b09f6820d15b8c9756c89b0f6f
-updated: 2018-12-25T01:43:06.610513+03:00
+hash: 87784b9576f82b44109a4f681eb8170ae1965747860882a7252b194d76128478
+updated: 2018-12-25T22:35:33.741111+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: 02e53af36e6c978af692887ed449b74026d76fec
@@ -110,7 +110,7 @@ imports:
   subpackages:
   - js
 - name: github.com/gorilla/websocket
-  version: 0647012449a1878977514a346b26637dd022446c
+  version: 66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d
 - name: github.com/grpc-ecosystem/go-grpc-middleware
   version: c250d6563d4d4c20252cd865923440e829844f4e
   subpackages:

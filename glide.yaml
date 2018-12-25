@@ -15,7 +15,7 @@ import:
 - package: github.com/mcuadros/go-syslog
   version: v2.2.1
 - package: github.com/gorilla/websocket
-  version: 0647012449a1878977514a346b26637dd022446c
+  version: ~v1.4
 - package: gobot.io/x/gobot
   version: ~v1.11.1
 - package: periph.io/x/periph
