@@ -145,11 +145,14 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithGroup("Sensor 280").
 			WithDefault(0x76),
 		config.NewVariable(boggart.ConfigOwnTracksEnabled, config.ValueTypeBool).
-			WithUsage("Enabled").
-			WithGroup("OwnTracks"),
+			WithUsage("OwnTracks enabled").
+			WithGroup("MQTT subscribers"),
 		config.NewVariable(boggart.ConfigWOLEnabled, config.ValueTypeBool).
-			WithUsage("Enabled").
-			WithGroup("Wake-on-LAN"),
+			WithUsage("Wake-on-LAN enabled").
+			WithGroup("MQTT subscribers"),
+		config.NewVariable(boggart.ConfigAnnotationsEnabled, config.ValueTypeBool).
+			WithUsage("Annotations enabled").
+			WithGroup("MQTT subscribers"),
 		config.NewVariable(boggart.ConfigSocketsBroadlink, config.ValueTypeString).
 			WithUsage("Address of Broadlink in format ip:mac").
 			WithGroup("Sockets").

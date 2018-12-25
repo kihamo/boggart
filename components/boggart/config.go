@@ -35,6 +35,7 @@ const (
 	ConfigSensorBME280Address           = ComponentName + ".sensor-bme280.address"
 	ConfigOwnTracksEnabled              = ComponentName + ".own-tracks.enabled"
 	ConfigWOLEnabled                    = ComponentName + ".wol.enabled"
+	ConfigAnnotationsEnabled            = ComponentName + ".annotations.enabled"
 	ConfigSocketsBroadlink              = ComponentName + ".sockets.broadlink"
 	ConfigRemoteControlBroadlink        = ComponentName + ".remote-control.broadlink"
 	ConfigLEDWiFi                       = ComponentName + ".led.wifi"

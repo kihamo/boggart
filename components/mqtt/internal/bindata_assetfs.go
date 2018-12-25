@@ -106,7 +106,7 @@ func localesRuLc_messagesMqttMo() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "locales/ru/LC_MESSAGES/mqtt.mo", size: 457, mode: os.FileMode(420), modTime: time.Unix(1545056943, 0)}
+	info := bindataFileInfo{name: "locales/ru/LC_MESSAGES/mqtt.mo", size: 457, mode: os.FileMode(420), modTime: time.Unix(1545745326, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -126,7 +126,7 @@ func localesRuLc_messagesSubscriptionsMo() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "locales/ru/LC_MESSAGES/subscriptions.mo", size: 640, mode: os.FileMode(420), modTime: time.Unix(1545056943, 0)}
+	info := bindataFileInfo{name: "locales/ru/LC_MESSAGES/subscriptions.mo", size: 640, mode: os.FileMode(420), modTime: time.Unix(1545745326, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
