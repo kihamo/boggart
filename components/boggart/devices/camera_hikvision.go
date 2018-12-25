@@ -22,22 +22,25 @@ const (
 	MB                            uint64 = 1024 * 1024
 	CameraHikVisionIgnoreInterval        = time.Second * 5
 
-	CameraHikVisionMQTTTopicEvent                mqtt.Topic = boggart.ComponentName + "/cctv/+/+/+"
-	CameraHikVisionMQTTTopicPTZMove              mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/move"
-	CameraHikVisionMQTTTopicPTZAbsolute          mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/absolute"
-	CameraHikVisionMQTTTopicPTZContinuous        mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/continuous"
-	CameraHikVisionMQTTTopicPTZRelative          mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/relative"
-	CameraHikVisionMQTTTopicPTZPreset            mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/preset"
-	CameraHikVisionMQTTTopicPTZMomentary         mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/momentary"
-	CameraHikVisionMQTTTopicPTZStatusElevation   mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/elevation"
-	CameraHikVisionMQTTTopicPTZStatusAzimuth     mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/azimuth"
-	CameraHikVisionMQTTTopicPTZStatusZoom        mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/zoom"
-	CameraHikVisionMQTTTopicStateUpTime          mqtt.Topic = boggart.ComponentName + "/cctv/+/state/uptime"
-	CameraHikVisionMQTTTopicStateMemoryUsage     mqtt.Topic = boggart.ComponentName + "/cctv/+/state/memory/usage"
-	CameraHikVisionMQTTTopicStateMemoryAvailable mqtt.Topic = boggart.ComponentName + "/cctv/+/state/memory/available"
-	CameraHikVisionMQTTTopicStateHDDCapacity     mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/capacity"
-	CameraHikVisionMQTTTopicStateHDDFree         mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/free"
-	CameraHikVisionMQTTTopicStateHDDUsage        mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/usage"
+	CameraHikVisionMQTTTopicEvent                     mqtt.Topic = boggart.ComponentName + "/cctv/+/+/+"
+	CameraHikVisionMQTTTopicPTZMove                   mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/move"
+	CameraHikVisionMQTTTopicPTZAbsolute               mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/absolute"
+	CameraHikVisionMQTTTopicPTZContinuous             mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/continuous"
+	CameraHikVisionMQTTTopicPTZRelative               mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/relative"
+	CameraHikVisionMQTTTopicPTZPreset                 mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/preset"
+	CameraHikVisionMQTTTopicPTZMomentary              mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/momentary"
+	CameraHikVisionMQTTTopicPTZStatusElevation        mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/elevation"
+	CameraHikVisionMQTTTopicPTZStatusAzimuth          mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/azimuth"
+	CameraHikVisionMQTTTopicPTZStatusZoom             mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/zoom"
+	CameraHikVisionMQTTTopicStateModel                mqtt.Topic = boggart.ComponentName + "/cctv/+/state/model"
+	CameraHikVisionMQTTTopicStateFirmwareVersion      mqtt.Topic = boggart.ComponentName + "/cctv/+/state/firmware/version"
+	CameraHikVisionMQTTTopicStateFirmwareReleasedDate mqtt.Topic = boggart.ComponentName + "/cctv/+/state/firmware/release-date"
+	CameraHikVisionMQTTTopicStateUpTime               mqtt.Topic = boggart.ComponentName + "/cctv/+/state/uptime"
+	CameraHikVisionMQTTTopicStateMemoryUsage          mqtt.Topic = boggart.ComponentName + "/cctv/+/state/memory/usage"
+	CameraHikVisionMQTTTopicStateMemoryAvailable      mqtt.Topic = boggart.ComponentName + "/cctv/+/state/memory/available"
+	CameraHikVisionMQTTTopicStateHDDCapacity          mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/capacity"
+	CameraHikVisionMQTTTopicStateHDDFree              mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/free"
+	CameraHikVisionMQTTTopicStateHDDUsage             mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/usage"
 )
 
 type cameraHikVisionPTZChannel struct {
@@ -136,6 +139,11 @@ func (d *CameraHikVision) taskLiveness(ctx context.Context) (interface{}, error)
 		//}
 
 		d.SetSerialNumber(deviceInfo.SerialNumber)
+
+		d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicStateModel.Format(deviceInfo.SerialNumber), 0, true, deviceInfo.Model)
+		d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicStateFirmwareVersion.Format(deviceInfo.SerialNumber), 0, true, deviceInfo.FirmwareVersion)
+		d.MQTTPublishAsync(ctx, CameraHikVisionMQTTTopicStateFirmwareReleasedDate.Format(deviceInfo.SerialNumber), 0, true, deviceInfo.FirmwareReleasedDate)
+
 		d.initOnce.Do(func() {
 			sn := d.SerialNumberMQTTEscaped()
 
@@ -230,6 +238,9 @@ func (d *CameraHikVision) MQTTTopics() []mqtt.Topic {
 		CameraHikVisionMQTTTopicPTZStatusElevation,
 		CameraHikVisionMQTTTopicPTZStatusAzimuth,
 		CameraHikVisionMQTTTopicPTZStatusZoom,
+		CameraHikVisionMQTTTopicStateModel,
+		CameraHikVisionMQTTTopicStateFirmwareVersion,
+		CameraHikVisionMQTTTopicStateFirmwareReleasedDate,
 		CameraHikVisionMQTTTopicStateUpTime,
 		CameraHikVisionMQTTTopicStateMemoryUsage,
 		CameraHikVisionMQTTTopicStateMemoryAvailable,
