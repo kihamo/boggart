@@ -16,8 +16,10 @@ import (
 )
 
 const (
-	TVSamsungMQTTTopicPower mqtt.Topic = boggart.ComponentName + "/tv/+/power"
-	TVSamsungMQTTTopicKey   mqtt.Topic = boggart.ComponentName + "/tv/+/key"
+	TVSamsungMQTTTopicPower           mqtt.Topic = boggart.ComponentName + "/tv/+/power"
+	TVSamsungMQTTTopicKey             mqtt.Topic = boggart.ComponentName + "/tv/+/key"
+	TVSamsungMQTTTopicDeviceID        mqtt.Topic = boggart.ComponentName + "/tv/+/device/id"
+	TVSamsungMQTTTopicDeviceModelName mqtt.Topic = boggart.ComponentName + "/tv/+/device/model-name"
 )
 
 type SamsungTV struct {
@@ -80,6 +82,9 @@ func (d *SamsungTV) taskLiveness(ctx context.Context) (interface{}, error) {
 		d.mac = info.Device.WifiMac
 		d.mutex.Unlock()
 
+		d.MQTTPublishAsync(ctx, TVSamsungMQTTTopicDeviceID.Format(info.ID), 0, false, info.Device.ID)
+		d.MQTTPublishAsync(ctx, TVSamsungMQTTTopicDeviceModelName.Format(info.ID), 0, false, info.Device.Name)
+
 		d.initOnce.Do(d.initMQTTSubscribers)
 	}
 
@@ -92,7 +97,7 @@ func (d *SamsungTV) initMQTTSubscribers() {
 		return
 	}
 
-	sn := mqtt.NameReplace(parts[1])
+	sn := d.SerialNumber()
 
 	d.MQTTSubscribe(TVSamsungMQTTTopicPower.Format(sn), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
 		if bytes.Equal(message.Payload(), []byte(`1`)) {

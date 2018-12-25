@@ -128,7 +128,7 @@ func (d *UPSNUT) taskStateUpdater(ctx context.Context) (interface{}, error) {
 			d.variables[v.Name] = v.Value
 			name := mqtt.NameReplace(v.Name)
 
-			d.MQTTPublishAsync(ctx, UPSNUTMQTTTopicVariable.Format(d.ups, name), 1, false, v.Value)
+			d.MQTTPublishAsync(ctx, UPSNUTMQTTTopicVariable.Format(d.ups, name), 2, true, v.Value)
 		}
 	}
 
