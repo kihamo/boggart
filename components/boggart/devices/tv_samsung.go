@@ -76,14 +76,20 @@ func (d *SamsungTV) taskLiveness(ctx context.Context) (interface{}, error) {
 	d.UpdateStatus(boggart.DeviceStatusOnline)
 
 	if d.SerialNumber() == "" {
-		d.SetSerialNumber(info.ID)
+		parts := strings.Split(info.ID, ":")
+		if len(parts) > 1 {
+			d.SetSerialNumber(parts[1])
+		} else {
+			d.SetSerialNumber(info.ID)
+		}
 
 		d.mutex.Lock()
 		d.mac = info.Device.WifiMac
 		d.mutex.Unlock()
 
-		d.MQTTPublishAsync(ctx, TVSamsungMQTTTopicDeviceID.Format(info.ID), 0, false, info.Device.ID)
-		d.MQTTPublishAsync(ctx, TVSamsungMQTTTopicDeviceModelName.Format(info.ID), 0, false, info.Device.Name)
+		sn := d.SerialNumber()
+		d.MQTTPublishAsync(ctx, TVSamsungMQTTTopicDeviceID.Format(sn), 0, false, info.Device.ID)
+		d.MQTTPublishAsync(ctx, TVSamsungMQTTTopicDeviceModelName.Format(sn), 0, false, info.Device.Name)
 
 		d.initOnce.Do(d.initMQTTSubscribers)
 	}
@@ -92,11 +98,6 @@ func (d *SamsungTV) taskLiveness(ctx context.Context) (interface{}, error) {
 }
 
 func (d *SamsungTV) initMQTTSubscribers() {
-	parts := strings.Split(d.SerialNumber(), ":")
-	if len(parts) < 2 {
-		return
-	}
-
 	sn := d.SerialNumber()
 
 	d.MQTTSubscribe(TVSamsungMQTTTopicPower.Format(sn), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
@@ -111,7 +112,7 @@ func (d *SamsungTV) initMQTTSubscribers() {
 		}
 	})
 
-	d.MQTTSubscribe(TVSamsungMQTTTopicKey.Format(sn[1]), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
+	d.MQTTSubscribe(TVSamsungMQTTTopicKey.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
 		d.client.SendCommand(string(message.Payload()))
 	}))
 }
