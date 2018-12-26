@@ -10,6 +10,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/shadow/components/annotations"
+	"github.com/kihamo/shadow/components/messengers"
 	"github.com/mmcloughlin/geohash"
 )
 
@@ -17,6 +18,7 @@ const (
 	MQTTTopicGrafanaAnnotationGrafana mqtt.Topic = "annotation/grafana"
 	MQTTTopicOwnTracks                mqtt.Topic = "owntracks/+/+"
 	MQTTTopicOwnTracksGeoHash         mqtt.Topic = "owntracks/+/+/geohash"
+	MQTTTopicMessenger                mqtt.Topic = "messenger/+/+"
 	MQTTTopicWOL                      mqtt.Topic = boggart.ComponentName + "/wol/+"
 	MQTTTopicWOLWithIPAndSubnet       mqtt.Topic = boggart.ComponentName + "/wol/+/+/+"
 )
@@ -26,7 +28,7 @@ func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 
 	subscribers := []mqtt.Subscriber{
 		mqtt.NewSubscriber(MQTTTopicOwnTracks.String(), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-			if !c.config.Bool(boggart.ConfigOwnTracksEnabled) {
+			if !c.config.Bool(boggart.ConfigMQTTOwnTracksEnabled) {
 				return
 			}
 
@@ -62,7 +64,7 @@ func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 			client.Publish(ctx, MQTTTopicOwnTracksGeoHash.Format(route[len(route)-2], route[len(route)-1]), message.Qos(), message.Retained(), hash)
 		}),
 		mqtt.NewSubscriber(MQTTTopicWOL.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
-			if !c.config.Bool(boggart.ConfigWOLEnabled) {
+			if !c.config.Bool(boggart.ConfigMQTTWOLEnabled) {
 				return
 			}
 
@@ -107,7 +109,7 @@ func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 		cmp := c.application.GetComponent(annotations.ComponentName).(annotations.Component)
 
 		subscribers = append(subscribers, mqtt.NewSubscriber(MQTTTopicGrafanaAnnotationGrafana.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
-			if !c.config.Bool(boggart.ConfigAnnotationsEnabled) {
+			if !c.config.Bool(boggart.ConfigMQTTAnnotationsEnabled) {
 				return
 			}
 
@@ -129,6 +131,32 @@ func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 
 			if err != nil {
 				c.logger.Warn("Failed send Grafana annotation", "error", err.Error())
+			}
+		}))
+	}
+
+	if c.application.HasComponent(messengers.ComponentName) {
+		cmp := c.application.GetComponent(messengers.ComponentName).(messengers.Component)
+
+		subscribers = append(subscribers, mqtt.NewSubscriber(MQTTTopicMessenger.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
+			if !c.config.Bool(boggart.ConfigMQTTMessengersEnabled) {
+				return
+			}
+
+			parts := mqtt.RouteSplit(message.Topic())
+			if len(parts) < 3 {
+				return
+			}
+
+			messenger := cmp.Messenger(parts[len(parts)-2])
+			if messenger == nil {
+				c.logger.Warn("Messenger " + parts[len(parts)-2] + " not found")
+				return
+			}
+
+			err := messenger.SendMessage(parts[len(parts)-1], string(message.Payload()))
+			if err != nil {
+				c.logger.Error("Failed send message", "messenger", parts[len(parts)-2], "message", string(message.Payload()))
 			}
 		}))
 	}
