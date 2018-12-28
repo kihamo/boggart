@@ -1,0 +1,377 @@
+swagger: "2.0"
+info:
+  description: "This is an unofficial documentation of the local API used by the Home app to communicate with the device."
+  version: "0.0.1"
+  title: "Google Home"
+  termsOfService: ""
+  contact:
+    email: "dev@kihamo.ru"
+  license:
+    name: "MIT"
+    url: "https://github.com/rithvikvibhu/GHLocalApi/blob/master/LICENSE.md"
+basePath: "/"
+tags:
+  - name: "info"
+    description: "Device Info"
+  - name: "settings"
+    description: "Device Settings"
+  - name: "assistant"
+    description: "Assistant"
+  - name: "bluetooth"
+    description: "Bluetooth"
+  - name: "wifi"
+    description: "Wifi"
+  - name: "static"
+    description: "Static Files"
+schemes:
+  - "http"
+paths:
+  /setup/eureka_info:
+    get:
+      tags:
+        - "info"
+      summary: "This gives most of the device info"
+      description: "This gives most of the device info"
+      operationId: "getEurekaInfo"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "options"
+          in: "query"
+          description: "Set detail mode"
+          required: false
+          type: "string"
+          enum:
+            - "detail"
+      responses:
+        200:
+          description: "returned device information"
+          schema:
+            $ref: "#/definitions/EurekaInfo"
+  /setup/get_app_device_id:
+    post:
+      tags:
+        - "info"
+      summary: "This gives certificate by device ID"
+      description: "The app_id in the request is mandatory and refers to Chromecast backdrop/screensaver app. It has to be set to E8C28D3C"
+      operationId: "getAppDeviceID"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Application ID"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              app_id:
+                type: "string"
+                enum:
+                  - "E8C28D3C"
+            required:
+              - app_id
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "object"
+            properties:
+              app_device_id:
+                type: "string"
+              certificate:
+                type: "string"
+              signed_data:
+                type: "string"
+            required:
+              - app_device_id
+              - certificate
+              - signed_data
+  /setup/offer:
+    get:
+      tags:
+        - "info"
+      summary: "This gives a token which is used by the Home app to get offers"
+      description: "This gives a token which is used by the Home app to get offers. The offers themselves are not stored on the device. A new token is generated for every request."
+      operationId: "getOffer"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "returned new token"
+          schema:
+            type: "object"
+            properties:
+              token:
+                type: "string"
+            required:
+              - token
+  /setup/supported_timezones:
+    get:
+      tags:
+        - "info"
+      summary: "Simply returns a list of all supported timezones"
+      description: "Simply returns a list of all supported timezones"
+      operationId: "getSupportedTimezones"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "returned supported timezones list"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Timezone"
+  /setup/supported_locales:
+    get:
+      tags:
+        - "info"
+      summary: "Simply returns a list of all supported locales"
+      description: "Simply returns a list of all supported locales"
+      operationId: "getSupportedLocales"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "returned supported locales list"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Locale"
+  /setup/test_internet_download_speed:
+    post:
+      tags:
+        - "info"
+      summary: "This endpoint tests internet download speed"
+      description: "This endpoint tests internet download speed. Any sample file URL can be provided."
+      operationId: "postTestInternetDownloadSpeed"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "URL for test"
+          schema:
+            type: "object"
+            properties:
+              url:
+                type: "string"
+            required:
+              - url
+      responses:
+        200:
+          description: "returned test result"
+          schema:
+            $ref: "#/definitions/TestInternetDownloadSpeed"
+  /setup/set_eureka_info:
+    post:
+      tags:
+        - "settings"
+      summary: "This can set custom values to some options"
+      description: "Only fields to be modified need to be sent, not all. Sending non-existant fields will still return a 200 OK, but they are not saved."
+      operationId: "setEurekaInfo"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "List fields for set"
+          required: true
+          schema:
+            $ref: "#/definitions/SetEurekaInfo"
+      responses:
+        200:
+          description: "successful operation"
+definitions:
+  EurekaInfo:
+    type: "object"
+    properties:
+      version:
+        type: "integer"
+        format: "int64"
+      build_version:
+        type: "string"
+      cast_build_revision:
+        type: "string"
+      release_track:
+        type: "string"
+      uptime:
+        type: "number"
+        format: "float"
+      location:
+        "$ref": "#/definitions/Location"
+      locale:
+        type: "string"
+      timezone:
+        type: "string"
+      time_format:
+        type: "integer"
+        format: "int64"
+      ip_address:
+        type: "string"
+      mac_address:
+        type: "string"
+      hotspot_bssid:
+        type: "string"
+      bssid:
+        type: "string"
+      ssid:
+        type: "string"
+      signal_level:
+        type: "integer"
+        format: "int64"
+      wpa_configured:
+        type: "boolean"
+      wpa_id:
+        type: "integer"
+        format: "int64"
+      wpa_state:
+        type: "integer"
+        format: "int64"
+      tos_accepted:
+        type: "boolean"
+      noise_level:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+      public_key:
+        type: "string"
+      ssdp_udn:
+        type: "string"
+      setup_state:
+        type: "integer"
+        format: "int64"
+      setup_stats:
+        "$ref": "#/definitions/SetupStats"
+      connected:
+        type: "boolean"
+      ethernet_connected:
+        type: "boolean"
+      has_update:
+        type: "boolean"
+      closed_caption: # XXX: ???
+        type: "object"
+      opt_in:
+        "$ref": "#/definitions/OptIn"
+      detail:
+        "$ref": "#/definitions/Detail"
+  Location:
+    type: "object"
+    properties:
+      country_code:
+        type: "string"
+      latitude:
+        type: "number"
+        format: "float"
+      longitude:
+        type: "number"
+        format: "float"
+  SetupStats:
+    type: "object"
+    properties:
+      historically_succeeded:
+        type: "boolean"
+      num_check_connectivity:
+        type: "integer"
+        format: "int64"
+      num_connect_wifi:
+        type: "integer"
+        format: "int64"
+      num_connected_wifi_not_saved:
+        type: "integer"
+        format: "int64"
+      num_initial_eureka_info:
+        type: "integer"
+        format: "int64"
+      num_obtain_ip:
+        type: "integer"
+        format: "int64"
+  OptIn:
+    type: "object"
+    properties:
+      crash:
+        type: "boolean"
+      opencast:
+        type: "boolean"
+      stats:
+        type: "boolean"
+  Detail:
+    type: "object"
+    properties:
+      icon_list:
+        type: "array"
+        items:
+          "$ref": "#/definitions/DetailIconListItem"
+      locale:
+        "$ref": "#/definitions/Locale"
+      manufacturer:
+        type: "string"
+      model_name:
+        type: "string"
+      timezone:
+        "$ref": "#/definitions/Timezone"
+  DetailIconListItem:
+    type: "object"
+    properties:
+      depth:
+        type: "integer"
+        format: "int64"
+      height:
+        type: "integer"
+        format: "int64"
+      width:
+        type: "integer"
+        format: "int64"
+      mimetype:
+        type: "string"
+      url:
+        type: "string"
+  Locale:
+    type: "object"
+    properties:
+      display_string:
+        type: "string"
+      locale:
+        type: "string"
+    required:
+      - display_string
+  Timezone:
+    type: "object"
+    properties:
+      display_string:
+        type: "string"
+      offset:
+        type: "integer"
+        format: "int64"
+      timezone:
+        type: "string"
+    required:
+      - display_string
+      - offset
+  SetEurekaInfo:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+  TestInternetDownloadSpeed:
+    type: "object"
+    properties:
+      bytes_received:
+        type: "integer"
+        format: "int64"
+      response_code:
+        type: "integer"
+        format: "int64"
+      time_for_data_fetch:
+        type: "integer"
+        format: "int64"
+      time_for_http_response:
+        type: "integer"
+        format: "int64"
+    required:
+      - bytes_received
+      - response_code
+      - time_for_data_fetch
+      - time_for_http_response
+externalDocs:
+  description: "Find out more about Google Home API"
+  url: "https://rithvikvibhu.github.io/GHLocalApi/"

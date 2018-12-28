@@ -120,6 +120,7 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 	c.initLED()
 	c.initTV()
 	c.initUPS()
+	c.initSmartSpeakers()
 
 	c.devicesManager.Ready()
 

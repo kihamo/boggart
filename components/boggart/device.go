@@ -46,6 +46,7 @@ const (
 	DeviceTypeLED
 	DeviceTypeTV
 	DeviceTypeUPS
+	DeviceTypeSmartSpeaker
 )
 
 type DeviceStatus uint64

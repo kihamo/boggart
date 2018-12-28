@@ -180,5 +180,9 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithUsage("Address of UPS NUT in format hostname:name").
 			WithGroup("UPS").
 			WithView([]string{config.ViewTags}),
+		config.NewVariable(boggart.ConfigSmartSpeakerGoogleHomeMini, config.ValueTypeString).
+			WithUsage("Address of Google Home Mini (only hostname)").
+			WithGroup("Smart speaker").
+			WithView([]string{config.ViewTags}),
 	}
 }

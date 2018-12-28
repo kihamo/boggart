@@ -43,4 +43,5 @@ const (
 	ConfigTVLGWebOS                     = ComponentName + ".tv.lg-webos"
 	ConfigTVSamsung                     = ComponentName + ".tv.samsung"
 	ConfigUPSNUT                        = ComponentName + ".ups.nut"
+	ConfigSmartSpeakerGoogleHomeMini    = ComponentName + ".smart-speaker.google-home-mini.address"
 )

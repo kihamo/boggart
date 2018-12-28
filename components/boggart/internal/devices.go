@@ -417,3 +417,21 @@ func (c *Component) initUPS() {
 		c.devicesManager.Register(device)
 	}
 }
+
+func (c *Component) initSmartSpeakers() {
+	addresses := c.config.String(boggart.ConfigSmartSpeakerGoogleHomeMini)
+	if addresses == "" {
+		return
+	}
+
+	for _, host := range strings.Split(addresses, ",") {
+		host = strings.TrimSpace(host)
+		if host == "" {
+			c.logger.Warn("Hostname of Google Home Mini is empty")
+			continue
+		}
+
+		device := devices.NewGoogleHomeMiniSmartSpeaker(host)
+		c.devicesManager.Register(device)
+	}
+}
