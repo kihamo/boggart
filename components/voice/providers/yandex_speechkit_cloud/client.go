@@ -1,10 +1,11 @@
 package yandex_speechkit_cloud
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	h "net/http"
 	"net/url"
 
@@ -45,12 +46,12 @@ type YandexSpeechKitCloud struct {
 	baseURL *url.URL
 }
 
-func NewYandexSpeechKitCloud(key string, debug bool) *YandexSpeechKitCloud {
+func NewYandexSpeechKitCloud(key string) *YandexSpeechKitCloud {
 	values := url.Values{}
 	values.Add("key", key)
 
 	return &YandexSpeechKitCloud{
-		client: http.NewClient().WithDebug(debug),
+		client: http.NewClient(),
 		key:    key,
 		baseURL: &url.URL{
 			Scheme:   "https",
@@ -60,10 +61,12 @@ func NewYandexSpeechKitCloud(key string, debug bool) *YandexSpeechKitCloud {
 	}
 }
 
-func (c *YandexSpeechKitCloud) Generate(ctx context.Context, text, lang, speaker, emotion, format, quality string, speed float64) (content []byte, err error) {
-	span, ctx := tracing.StartSpanFromContext(ctx, ComponentName, "generate")
-	defer span.Finish()
+func (c *YandexSpeechKitCloud) WithDebug(debug bool) *YandexSpeechKitCloud {
+	c.client.WithDebug(debug)
+	return c
+}
 
+func (c *YandexSpeechKitCloud) GenerateURL(ctx context.Context, text, lang, speaker, emotion, format, quality string, speed float64) string {
 	u := *(c.baseURL)
 	u.Path = "generate"
 
@@ -81,19 +84,30 @@ func (c *YandexSpeechKitCloud) Generate(ctx context.Context, text, lang, speaker
 	values.Add("emotion", emotion)
 	u.RawQuery = values.Encode()
 
-	response, err := c.client.Get(ctx, u.String())
+	return u.String()
+}
+
+func (c *YandexSpeechKitCloud) Generate(ctx context.Context, text, lang, speaker, emotion, format, quality string, speed float64) (content io.Reader, err error) {
+	span, ctx := tracing.StartSpanFromContext(ctx, ComponentName, "generate")
+	defer span.Finish()
+
+	u := c.GenerateURL(ctx, text, lang, speaker, emotion, format, quality, speed)
+
+	response, err := c.client.Get(ctx, u)
 	if err == nil {
 		defer response.Body.Close()
 
 		switch response.StatusCode {
 		case h.StatusOK:
-			content, err = ioutil.ReadAll(response.Body)
+			b := &bytes.Buffer{}
+			_, err = io.Copy(b, response.Body)
+			content = b
 
 		case h.StatusLocked:
 			err = errors.New("API key is locked, please contact Yandex support team")
 
 		default:
-			err = errors.New("Returns not 200 OK response")
+			err = errors.New("returns not 200 OK response")
 		}
 	}
 

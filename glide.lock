@@ -1,5 +1,5 @@
-hash: 87784b9576f82b44109a4f681eb8170ae1965747860882a7252b194d76128478
-updated: 2018-12-25T22:35:33.741111+03:00
+hash: d4aa29e68009a354751c85b41c534e987075afddf12921ddb2ca3ddd10a1366c
+updated: 2018-12-28T23:10:10.343906+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: 02e53af36e6c978af692887ed449b74026d76fec
@@ -12,6 +12,14 @@ imports:
   version: 680b6a57bda4f657485ad44bdea42342ead737bc
 - name: github.com/asaskevich/govalidator
   version: f9ffefc3facfbe0caee3fea233cbb6e8208f4541
+- name: github.com/barnybug/go-cast
+  version: 5be61902f81864905136552a2178b219efceed61
+  subpackages:
+  - api
+  - controllers
+  - events
+  - log
+  - net
 - name: github.com/beorn7/perks
   version: 3a771d992973f24aa725d07868b467d1ddfceafb
   subpackages:
@@ -86,6 +94,10 @@ imports:
   version: 84da4f998602ef20ebd60a576756996162a1ca66
 - name: github.com/goburrow/serial
   version: 5efbe925ecf714f8ba147bf2226f2e7afc7111bc
+- name: github.com/gogo/protobuf
+  version: 30433562cfbf487fe1df7cd26c7bab168d2f14d0
+  subpackages:
+  - proto
 - name: github.com/golang/protobuf
   version: b4deda0973fb4c70b50d226b1af49f3da59f5265
   subpackages:

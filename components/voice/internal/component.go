@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"io"
@@ -66,7 +65,8 @@ func (c *Component) Run(a shadow.Application, ready chan<- struct{}) error {
 
 	<-a.ReadyComponent(config.ComponentName)
 	c.config = a.GetComponent(config.ComponentName).(config.Component)
-	c.provider = yandex.NewYandexSpeechKitCloud(c.config.String(voice.ConfigYandexSpeechKitCloudKey), c.config.Bool(config.ConfigDebug))
+	c.provider = yandex.NewYandexSpeechKitCloud(c.config.String(voice.ConfigYandexSpeechKitCloudKey)).
+		WithDebug(c.config.Bool(config.ConfigDebug))
 	c.SetVolume(context.Background(), c.config.Int64(voice.ConfigSpeechVolume))
 
 	<-a.ReadyComponent(mqtt.ComponentName)
@@ -153,7 +153,7 @@ func (c *Component) SpeechWithOptions(ctx context.Context, text string, volume i
 		return err
 	}
 
-	file, err := c.provider.Generate(
+	buf, err := c.provider.Generate(
 		ctx,
 		text,
 		c.config.String(voice.ConfigYandexSpeechKitCloudLanguage),
@@ -185,7 +185,7 @@ func (c *Component) SpeechWithOptions(ctx context.Context, text string, volume i
 		return err
 	}
 
-	err = c.PlayReader(ctx, ioutil.NopCloser(bytes.NewReader(file)))
+	err = c.PlayReader(ctx, ioutil.NopCloser(buf))
 	if err != nil {
 		c.logger.Error("Failed play speech text",
 			"error", err.Error(),
