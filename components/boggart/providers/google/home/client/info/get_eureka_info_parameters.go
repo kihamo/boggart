@@ -67,6 +67,11 @@ type GetEurekaInfoParams struct {
 
 	*/
 	Options *string
+	/*Params
+	  Show only params (comma separated)
+
+	*/
+	Params *string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -117,6 +122,17 @@ func (o *GetEurekaInfoParams) SetOptions(options *string) {
 	o.Options = options
 }
 
+// WithParams adds the params to the get eureka info params
+func (o *GetEurekaInfoParams) WithParams(params *string) *GetEurekaInfoParams {
+	o.SetParams(params)
+	return o
+}
+
+// SetParams adds the params to the get eureka info params
+func (o *GetEurekaInfoParams) SetParams(params *string) {
+	o.Params = params
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *GetEurekaInfoParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -135,6 +151,22 @@ func (o *GetEurekaInfoParams) WriteToRequest(r runtime.ClientRequest, reg strfmt
 		qOptions := qrOptions
 		if qOptions != "" {
 			if err := r.SetQueryParam("options", qOptions); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	if o.Params != nil {
+
+		// query param params
+		var qrParams string
+		if o.Params != nil {
+			qrParams = *o.Params
+		}
+		qParams := qrParams
+		if qParams != "" {
+			if err := r.SetQueryParam("params", qParams); err != nil {
 				return err
 			}
 		}

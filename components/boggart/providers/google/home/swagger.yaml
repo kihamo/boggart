@@ -1,3 +1,4 @@
+# https://ludeeus.github.io/googledevices/
 swagger: "2.0"
 info:
   description: "This is an unofficial documentation of the local API used by the Home app to communicate with the device."
@@ -43,6 +44,29 @@ paths:
           type: "string"
           enum:
             - "detail"
+        - name: "params"
+          in: "query"
+          description: "Show only params (comma separated)"
+          required: false
+          type: "string"
+          #enum:
+          #  - "version"
+          #  - "audio"
+          #  - "name"
+          #  - "build_info"
+          #  - "detail"
+          #  - "device_info"
+          #  - "net"
+          #  - "wifi"
+          #  - "setup"
+          #  - "settings"
+          #  - "opt_in"
+          #  - "opencast"
+          #  - "multizone"
+          #  - "proxy"
+          #  - "night_mode_params"
+          #  - "user_eq"
+          #  - "room_equalizer"
       responses:
         200:
           description: "returned device information"
@@ -184,9 +208,7 @@ definitions:
   EurekaInfo:
     type: "object"
     properties:
-      version:
-        type: "integer"
-        format: "int64"
+      # default
       build_version:
         type: "string"
       cast_build_revision:
@@ -231,8 +253,6 @@ definitions:
       noise_level:
         type: "integer"
         format: "int64"
-      name:
-        type: "string"
       public_key:
         type: "string"
       ssdp_udn:
@@ -241,7 +261,7 @@ definitions:
         type: "integer"
         format: "int64"
       setup_stats:
-        "$ref": "#/definitions/SetupStats"
+        $ref: "#/definitions/Stats"
       connected:
         type: "boolean"
       ethernet_connected:
@@ -250,10 +270,242 @@ definitions:
         type: "boolean"
       closed_caption: # XXX: ???
         type: "object"
-      opt_in:
-        "$ref": "#/definitions/OptIn"
+      # filtered by params
+      audio:
+        $ref: "#/definitions/Audio"
+      build_info:
+        $ref: "#/definitions/BuildInfo"
       detail:
-        "$ref": "#/definitions/Detail"
+        $ref: "#/definitions/Detail"
+      device_info:
+        $ref: "#/definitions/DeviceInfo"
+      multizone:
+        $ref: "#/definitions/Multizone"
+      name:
+        type: "string"
+      net:
+        $ref: "#/definitions/Net"
+      night_mode_params:
+        $ref: "#/definitions/NightModeParams"
+      opt_in:
+        $ref: "#/definitions/OptIn"
+      proxy:
+        $ref: "#/definitions/Proxy"
+      settings:
+        $ref: "#/definitions/Settings"
+      setup:
+        $ref: "#/definitions/Setup"
+      user_eq:
+        $ref: "#/definitions/UserEq"
+      version:
+        type: "integer"
+        format: "int64"
+      wifi:
+  Audio:
+    type: "object"
+    properties:
+      digital:
+        type: "boolean"
+  BuildInfo:
+    type: "object"
+    properties:
+      build_type:
+        type: "integer"
+        format: "int64"
+      cast_build_revision:
+        type: "string"
+      cast_control_version:
+        type: "string"
+      preview_channel_state:
+        type: "integer"
+        format: "int64"
+      release_track:
+        type: "string"
+      system_build_number:
+        type: "string"
+  Detail:
+    type: "object"
+    properties:
+      icon_list:
+        type: "array"
+        items:
+          $ref: "#/definitions/DetailIconListItem"
+      locale:
+        $ref: "#/definitions/Locale"
+      manufacturer:
+        type: "string"
+      model_name:
+        type: "string"
+      timezone:
+        $ref: "#/definitions/Timezone"
+  DeviceInfo:
+    type: "object"
+    properties:
+      4k_blocked:
+        type: "integer"
+        format: "int64"
+      capabilities:
+        type: "object"
+        properties:
+          aogh_supported:
+            type: "boolean"
+          assistant_supported:
+            type: "boolean"
+          audio_hdr_supported:
+            type: "boolean"
+          audio_surround_mode_supported:
+            type: "boolean"
+          ble_supported:
+            type: "boolean"
+          bluetooth_audio_sink_supported:
+            type: "boolean"
+          bluetooth_audio_source_supported:
+            type: "boolean"
+          bluetooth_supported:
+            type: "boolean"
+          cloudcast_supported:
+            type: "boolean"
+          content_filters_supported:
+            type: "boolean"
+          display_supported:
+            type: "boolean"
+          fdr_supported:
+            type: "boolean"
+          hdmi_prefer_50hz_supported:
+            type: "boolean"
+          hdmi_prefer_high_fps_supported:
+            type: "boolean"
+          hotspot_supported:
+            type: "boolean"
+          https_setup_supported:
+            type: "boolean"
+          input_management_supported:
+            type: "boolean"
+          keep_hotspot_until_connected_supported:
+            type: "boolean"
+          multi_user_supported:
+            type: "boolean"
+          multizone_supported:
+            type: "boolean"
+          night_mode_supported:
+            type: "boolean"
+          night_mode_supported_v2:
+            type: "boolean"
+          opencast_supported:
+            type: "boolean"
+          preview_channel_supported:
+            type: "boolean"
+          reboot_supported:
+            type: "boolean"
+          remote_ducking_supported:
+            type: "boolean"
+          setup_supported:
+            type: "boolean"
+          sleep_mode_supported:
+            type: "boolean"
+          stats_supported:
+            type: "boolean"
+          system_sound_effects_supported:
+            type: "boolean"
+          ui_flipping_supported:
+            type: "boolean"
+          user_eq_supported:
+            type: "boolean"
+          wifi_auto_save_supported:
+            type: "boolean"
+          wifi_regulatory_domain_locked:
+            type: "boolean"
+          wifi_supported:
+            type: "boolean"
+      cloud_device_id:
+        type: "string"
+      factory_country_code:
+        type: "string"
+      hotspot_bssid:
+        type: "string"
+      local_authorization_token_hash:
+        type: "string"
+      mac_address:
+        type: "string"
+      manufacturer:
+        type: "string"
+      model_name:
+        type: "string"
+      product_name:
+        type: "string"
+      public_key:
+        type: "string"
+      ssdp_udn:
+        type: "string"
+      uptime:
+        type: "number"
+        format: "float"
+  Multizone:
+    type: "object"
+  Net:
+    type: "object"
+    properties:
+      ethernet_connected:
+        type: "boolean"
+      ip_address:
+        type: "string"
+      online:
+        type: "boolean"
+  NightModeParams:
+    type: "object"
+  OptIn:
+    type: "object"
+    properties:
+      crash:
+        type: "boolean"
+      opencast:
+        type: "boolean"
+      stats:
+        type: "boolean"
+  Proxy:
+    type: "object"
+    properties:
+      mode:
+        type: "string"
+  Settings:
+    type: "object"
+    properties:
+      closed_caption:
+        type: "object"
+      control_notifications:
+        type: "integer"
+        format: "int64"
+      country_code:
+        type: "string"
+      locale:
+        type: "string"
+      network_standby:
+        type: "integer"
+        format: "int64"
+      system_sound_effects:
+        type: "boolean"
+      time_format:
+        type: "integer"
+        format: "int64"
+      timezone:
+        type: "string"
+      wake_on_cast:
+        type: "integer"
+        format: "int64"
+  Setup:
+    type: "object"
+    properties:
+      setup_state:
+        type: "integer"
+        format: "int64"
+      setup_stats:
+        $ref: "#/definitions/Stats"
+      ssid_suffix:
+        type: "string"
+      tos_accepted:
+        type: "boolean"
+  UserEq:
+    type: "object"
   Location:
     type: "object"
     properties:
@@ -265,7 +517,7 @@ definitions:
       longitude:
         type: "number"
         format: "float"
-  SetupStats:
+  Stats:
     type: "object"
     properties:
       historically_succeeded:
@@ -285,30 +537,6 @@ definitions:
       num_obtain_ip:
         type: "integer"
         format: "int64"
-  OptIn:
-    type: "object"
-    properties:
-      crash:
-        type: "boolean"
-      opencast:
-        type: "boolean"
-      stats:
-        type: "boolean"
-  Detail:
-    type: "object"
-    properties:
-      icon_list:
-        type: "array"
-        items:
-          "$ref": "#/definitions/DetailIconListItem"
-      locale:
-        "$ref": "#/definitions/Locale"
-      manufacturer:
-        type: "string"
-      model_name:
-        type: "string"
-      timezone:
-        "$ref": "#/definitions/Timezone"
   DetailIconListItem:
     type: "object"
     properties:
@@ -347,11 +575,6 @@ definitions:
     required:
       - display_string
       - offset
-  SetEurekaInfo:
-    type: "object"
-    properties:
-      name:
-        type: "string"
   TestInternetDownloadSpeed:
     type: "object"
     properties:
@@ -372,6 +595,13 @@ definitions:
       - response_code
       - time_for_data_fetch
       - time_for_http_response
+  SetEurekaInfo:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      settings:
+        $ref: "#/definitions/Settings"
 externalDocs:
   description: "Find out more about Google Home API"
   url: "https://rithvikvibhu.github.io/GHLocalApi/"

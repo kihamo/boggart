@@ -72,8 +72,9 @@ func (d *GoogleHomeMiniSmartSpeaker) Client() *client.GoogleHome {
 func (d *GoogleHomeMiniSmartSpeaker) taskLiveness(ctx context.Context) (interface{}, error) {
 	ctrl := d.Client()
 
-	mode := "detail"
-	response, err := ctrl.Info.GetEurekaInfo(info.NewGetEurekaInfoParams().WithOptions(&mode))
+	response, err := ctrl.Info.GetEurekaInfo(info.NewGetEurekaInfoParams().
+		WithOptions(home.EurekaInfoOptionDetail.Value()).
+		WithParams(home.EurekaInfoParamDeviceInfo.Value()))
 	if err != nil {
 		d.UpdateStatus(boggart.DeviceStatusOffline)
 		return nil, err
@@ -85,8 +86,8 @@ func (d *GoogleHomeMiniSmartSpeaker) taskLiveness(ctx context.Context) (interfac
 
 	d.UpdateStatus(boggart.DeviceStatusOnline)
 
-	if d.SerialNumber() == "" {
-		d.SetSerialNumber(response.Payload.MacAddress)
+	if d.SerialNumber() == "" && response.Payload != nil{
+		d.SetSerialNumber(response.Payload.DeviceInfo.MacAddress)
 	}
 
 	return nil, nil

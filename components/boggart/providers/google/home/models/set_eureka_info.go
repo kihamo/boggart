@@ -8,6 +8,7 @@ package models
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
@@ -17,10 +18,40 @@ type SetEurekaInfo struct {
 
 	// name
 	Name string `json:"name,omitempty"`
+
+	// settings
+	Settings *Settings `json:"settings,omitempty"`
 }
 
 // Validate validates this set eureka info
 func (m *SetEurekaInfo) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateSettings(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *SetEurekaInfo) validateSettings(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Settings) { // not required
+		return nil
+	}
+
+	if m.Settings != nil {
+		if err := m.Settings.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("settings")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 

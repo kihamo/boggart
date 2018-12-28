@@ -11,9 +11,9 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// SetupStats setup stats
-// swagger:model SetupStats
-type SetupStats struct {
+// Stats stats
+// swagger:model Stats
+type Stats struct {
 
 	// historically succeeded
 	HistoricallySucceeded bool `json:"historically_succeeded,omitempty"`
@@ -34,13 +34,13 @@ type SetupStats struct {
 	NumObtainIP int64 `json:"num_obtain_ip,omitempty"`
 }
 
-// Validate validates this setup stats
-func (m *SetupStats) Validate(formats strfmt.Registry) error {
+// Validate validates this stats
+func (m *Stats) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (m *SetupStats) MarshalBinary() ([]byte, error) {
+func (m *Stats) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -48,8 +48,8 @@ func (m *SetupStats) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *SetupStats) UnmarshalBinary(b []byte) error {
-	var res SetupStats
+func (m *Stats) UnmarshalBinary(b []byte) error {
+	var res Stats
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
