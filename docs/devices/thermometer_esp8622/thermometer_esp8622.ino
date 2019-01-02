@@ -1,0 +1,79 @@
+#include "config.h"
+#include "ESP8266WiFi.h"
+
+// -- program --
+ADC_MODE(ADC_VCC);
+
+#ifdef DEBUG_ESP_PORT
+#define DEBUG_MSG(...) DEBUG_ESP_PORT.print( __VA_ARGS__ )
+#define DEBUG_MSG_F(...) DEBUG_ESP_PORT.printf( __VA_ARGS__ )
+#define DEBUG_MSG_LN(...) DEBUG_ESP_PORT.println( __VA_ARGS__ )
+#else
+#define DEBUG_MSG(...)
+#define DEBUG_MSG_F(...)
+#define DEBUG_MSG_LN(...)
+#endif
+
+unsigned long loopTiming = 0;
+
+void connectSerial() {
+  #ifdef DEBUG_ESP_PORT
+    Serial.begin(SERIAL_SPEED);
+    while (!Serial);
+
+    int br = Serial.baudRate();
+
+    DEBUG_MSG_F("Serial is %d bps \n", br);
+    DEBUG_MSG("Sketch MD5: ");
+    DEBUG_MSG_LN(ESP.getSketchMD5());
+  #endif
+}
+
+void connectWiFi() {
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  DEBUG_MSG("Connecting");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    DEBUG_MSG(".");
+  }
+
+  DEBUG_MSG_LN();
+  DEBUG_MSG("Connected, IP address: ");
+  DEBUG_MSG_LN(WiFi.localIP());
+
+  #ifdef DEBUG_ESP_PORT
+    WiFi.printDiag(Serial);
+  #endif
+}
+
+void setup() {
+  connectSerial();
+  connectWiFi();
+
+  String mac = String(WiFi.macAddress());
+  mac.replace(":", "-");
+  mac.toLowerCase();
+
+  String mqttTopicPrefix = String(MQTT_TOPIC_PREFIX + mac + "/");
+
+  DEBUG_MSG_LN(mqttTopicPrefix);
+
+  loopTiming = millis() - LOOP_DELAY;
+}
+
+void loop() {
+  unsigned long currentMillis = millis();
+  if (currentMillis < loopTiming + LOOP_DELAY) {
+    return;
+  }
+  loopTiming = currentMillis;
+
+  float volts = (float) ESP.getVcc() / 1023.00;
+  unsigned int freeHeap = ESP.getFreeHeap();
+
+  DEBUG_MSG("VCC: ");
+  DEBUG_MSG_LN(String(volts, 2));
+
+  DEBUG_MSG("Free heap: ");
+  DEBUG_MSG_LN(String(freeHeap));
+}
