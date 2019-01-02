@@ -30,6 +30,10 @@ void connectSerial() {
 }
 
 void connectWiFi() {
+  if (WiFi.isConnected()) {
+    return;
+  }
+  
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   DEBUG_MSG("Connecting");
   while (WiFi.status() != WL_CONNECTED) {
@@ -48,7 +52,6 @@ void connectWiFi() {
 
 void setup() {
   connectSerial();
-  connectWiFi();
 
   String mac = String(WiFi.macAddress());
   mac.replace(":", "-");
@@ -62,6 +65,8 @@ void setup() {
 }
 
 void loop() {
+  connectWiFi();
+
   unsigned long currentMillis = millis();
   if (currentMillis < loopTiming + LOOP_DELAY) {
     return;
