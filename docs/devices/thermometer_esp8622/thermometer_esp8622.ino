@@ -1,5 +1,5 @@
 #include "config.h"
-#include "ESP8266WiFi.h"
+#include <ESP8266WiFi.h>
 
 // -- program --
 ADC_MODE(ADC_VCC);
@@ -16,10 +16,12 @@ ADC_MODE(ADC_VCC);
 
 unsigned long loopTiming = 0;
 
-void connectSerial() {
+void setup() {
   #ifdef DEBUG_ESP_PORT
     Serial.begin(SERIAL_SPEED);
-    while (!Serial);
+    while (!Serial) {
+      yield();
+    };
 
     int br = Serial.baudRate();
 
@@ -27,31 +29,6 @@ void connectSerial() {
     DEBUG_MSG("Sketch MD5: ");
     DEBUG_MSG_LN(ESP.getSketchMD5());
   #endif
-}
-
-void connectWiFi() {
-  if (WiFi.isConnected()) {
-    return;
-  }
-  
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  DEBUG_MSG("Connecting");
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    DEBUG_MSG(".");
-  }
-
-  DEBUG_MSG_LN();
-  DEBUG_MSG("Connected, IP address: ");
-  DEBUG_MSG_LN(WiFi.localIP());
-
-  #ifdef DEBUG_ESP_PORT
-    WiFi.printDiag(Serial);
-  #endif
-}
-
-void setup() {
-  connectSerial();
 
   String mac = String(WiFi.macAddress());
   mac.replace(":", "-");
@@ -65,7 +42,30 @@ void setup() {
 }
 
 void loop() {
-  connectWiFi();
+  if (!WiFi.isConnected()) {
+    long wifiTimeout = millis();
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    
+    DEBUG_MSG("WiFi connecting");
+    
+    while (WiFi.status() != WL_CONNECTED && (millis() - wifiTimeout < WIFI_CONNECTION_TIMEOUT_MS)) {
+      DEBUG_MSG(".");
+      yield();
+    }
+
+    if(WiFi.status() != WL_CONNECTED) {
+      DEBUG_MSG_LN("WiFi connecting failed");
+      return;
+    }
+  
+    DEBUG_MSG_LN();
+    DEBUG_MSG("Connected, IP address: ");
+    DEBUG_MSG_LN(WiFi.localIP());
+  
+    #ifdef DEBUG_ESP_PORT
+      WiFi.printDiag(Serial);
+    #endif
+  }
 
   unsigned long currentMillis = millis();
   if (currentMillis < loopTiming + LOOP_DELAY) {
