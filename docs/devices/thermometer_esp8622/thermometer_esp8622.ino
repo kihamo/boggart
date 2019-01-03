@@ -1,5 +1,6 @@
 #include "config.h"
 #include <ESP8266WiFi.h>
+#include <Wire.h>
 
 // -- program --
 ADC_MODE(ADC_VCC);
@@ -30,6 +31,13 @@ void setup() {
     DEBUG_MSG_LN(ESP.getSketchMD5());
   #endif
 
+  Wire.begin(D2, D1);
+  Wire.setClock(100000);
+
+  I2C_Scanner();
+
+  WiFi.mode(WIFI_STA);
+
   String mac = String(WiFi.macAddress());
   mac.replace(":", "-");
   mac.toLowerCase();
@@ -46,12 +54,13 @@ void loop() {
     long wifiTimeout = millis();
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     
-    DEBUG_MSG("WiFi connecting");
+    DEBUG_MSG("WiFi connecting ");
     
     while (WiFi.status() != WL_CONNECTED && (millis() - wifiTimeout < WIFI_CONNECTION_TIMEOUT_MS)) {
       DEBUG_MSG(".");
       yield();
     }
+    DEBUG_MSG_LN();
 
     if(WiFi.status() != WL_CONNECTED) {
       DEBUG_MSG_LN("WiFi connecting failed");
