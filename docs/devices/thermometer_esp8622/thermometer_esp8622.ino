@@ -1,6 +1,8 @@
 #include "config.h"
 #include <ESP8266WiFi.h>
 #include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BME280.h>
 
 // -- program --
 ADC_MODE(ADC_VCC);
@@ -17,34 +19,27 @@ ADC_MODE(ADC_VCC);
 
 unsigned long loopTiming = 0;
 
+Adafruit_BME280 bme; // I2C
+
 void setup() {
   #ifdef DEBUG_ESP_PORT
     Serial.begin(SERIAL_SPEED);
     while (!Serial) {
       yield();
     };
-
-    int br = Serial.baudRate();
-
-    DEBUG_MSG_F("Serial is %d bps \n", br);
-    DEBUG_MSG("Sketch MD5: ");
-    DEBUG_MSG_LN(ESP.getSketchMD5());
   #endif
 
   Wire.begin(D2, D1);
   Wire.setClock(100000);
 
-  I2C_Scanner();
+  if (!bme.begin(0x76)) {
+    Serial.println("Could not find a valid BME280 sensor, check wiring!");
+    while (1);
+  }
+  DEBUG_MSG_LN("BME280 connected");
 
   WiFi.mode(WIFI_STA);
-
-  String mac = String(WiFi.macAddress());
-  mac.replace(":", "-");
-  mac.toLowerCase();
-
-  String mqttTopicPrefix = String(MQTT_TOPIC_PREFIX + mac + "/");
-
-  DEBUG_MSG_LN(mqttTopicPrefix);
+  WiFi.persistent(false);
 
   loopTiming = millis() - LOOP_DELAY;
 }
@@ -54,25 +49,25 @@ void loop() {
     long wifiTimeout = millis();
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     
-    DEBUG_MSG("WiFi connecting ");
+    //DEBUG_MSG("WiFi connecting ");
     
     while (WiFi.status() != WL_CONNECTED && (millis() - wifiTimeout < WIFI_CONNECTION_TIMEOUT_MS)) {
-      DEBUG_MSG(".");
+      //DEBUG_MSG(".");
       yield();
     }
-    DEBUG_MSG_LN();
+    //DEBUG_MSG_LN();
 
     if(WiFi.status() != WL_CONNECTED) {
-      DEBUG_MSG_LN("WiFi connecting failed");
+      //DEBUG_MSG_LN("WiFi connecting failed");
       return;
     }
   
-    DEBUG_MSG_LN();
-    DEBUG_MSG("Connected, IP address: ");
-    DEBUG_MSG_LN(WiFi.localIP());
+    //DEBUG_MSG_LN();
+    //DEBUG_MSG("Connected, IP address: ");
+    //DEBUG_MSG_LN(WiFi.localIP());
   
     #ifdef DEBUG_ESP_PORT
-      WiFi.printDiag(Serial);
+      //WiFi.printDiag(Serial);
     #endif
   }
 
@@ -82,12 +77,14 @@ void loop() {
   }
   loopTiming = currentMillis;
 
-  float volts = (float) ESP.getVcc() / 1023.00;
-  unsigned int freeHeap = ESP.getFreeHeap();
-
-  DEBUG_MSG("VCC: ");
-  DEBUG_MSG_LN(String(volts, 2));
+  //float volts = (float) ESP.getVcc() / 1023.00;
+  //DEBUG_MSG("VCC: ");
+  //DEBUG_MSG_LN(String(volts, 2));
 
   DEBUG_MSG("Free heap: ");
-  DEBUG_MSG_LN(String(freeHeap));
+  DEBUG_MSG_LN(ESP.getFreeHeap());
+
+  float temperature = bme.readTemperature();
+  DEBUG_MSG("Temperature: ");
+  DEBUG_MSG_LN(String(temperature, 2));
 }
