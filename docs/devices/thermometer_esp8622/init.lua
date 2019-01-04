@@ -1,7 +1,7 @@
 dofile("config.lua")
 
-local MQTT_CLIENT_ID = wifi.sta.gethostname()
-local MQTT_TOPIC = "/esp8266/"..string.gsub(wifi.sta.getmac(),":","-").."/"
+MQTT_CLIENT_ID = wifi.sta.gethostname()
+MQTT_TOPIC = "/esp8266/"..string.gsub(wifi.sta.getmac(),":","-").."/"
 
 -- program
 local TMR_WIFI_STATUS = 0
@@ -146,7 +146,7 @@ end
 
 -- I2C und BME280 init
 i2c.setup(0, GPIO_SDA, GPIO_SCL, i2c.SLOW)
-bme280.setup(nil, nil, nil, 0)
+bme280.setup()
 
 -- MQTT init
 m = mqtt.Client(MQTT_CLIENT_ID, 120, MQTT_USER, MQTT_PASSWORD)
