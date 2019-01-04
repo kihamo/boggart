@@ -33,3 +33,8 @@ SPI is much simpler than I2C. Master and slave are linked by three data wires, u
 ## Links
 
 - https://github.com/andyprv/workshop/blob/master/Demo/bme280test/bme280test.ino
+
+## NodeMCU
+
+esptool.py --port=/dev/cu.SLAB_USBtoUART write_flash -fm=dio -fs=4MB 0x00000 ~/web-server/firmware/adc,bit,cron,crypto,file,gpio,http,i2c,mqtt,net,node,ow,rotary,rtctime,sjson,spi,tmr,uart,wifi-integer.bin
+
