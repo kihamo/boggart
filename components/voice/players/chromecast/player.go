@@ -307,9 +307,12 @@ func (p *Player) doEvents(ch chan events.Event) {
 
 				case "FINISHED", "IDLE":
 					p.setStatus(players.StatusStopped)
+
+				case "PAUSED":
+					p.setStatus(players.StatusPause)
 				}
 
-				//fmt.Println("events.MediaStatus")
+				// fmt.Println("events.MediaStatus", t.PlayerState)
 
 			default:
 				//fmt.Printf("Unknown event: %#v\n", t)
