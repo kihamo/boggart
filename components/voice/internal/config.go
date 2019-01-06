@@ -93,7 +93,7 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithUsage("Enable ALSA player").
 			WithGroup("ALSA").
 			WithEditable(false).
-			WithDefault(true),
+			WithDefault(false),
 		config.NewVariable(voice.ConfigPlayerChromecastAddresses, config.ValueTypeString).
 			WithUsage("Addresses in format host:port").
 			WithGroup("Chromecast").
