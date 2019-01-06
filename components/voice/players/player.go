@@ -19,6 +19,8 @@ type Player interface {
 	Pause() error
 	Volume() (int64, error)
 	SetVolume(percent int64) error
+	Mute() (bool, error)
+	SetMute(mute bool) error
 	Close()
 	Status() Status
 }

@@ -113,6 +113,7 @@ func (c *Component) playersUpdater() {
 
 	storeLastStatus := make(map[string]int64, len(c.players))
 	storeLastVolume := make(map[string]int64, len(c.players))
+	storeLastMute := make(map[string]bool, len(c.players))
 
 	for {
 		client := m.Client()
@@ -122,20 +123,39 @@ func (c *Component) playersUpdater() {
 				lastStatus, ok := storeLastStatus[name]
 
 				if !ok || status.Int64() != lastStatus {
-					err := m.Publish(context.Background(), MQTTTopicPlayerStatus.Format(name), 0, false, status.String())
+					err := m.Publish(context.Background(), MQTTTopicPlayerStateStatus.Format(name), 0, false, status.String())
 					if err == nil {
 						storeLastStatus[name] = status.Int64()
 					}
 				}
 
 				volume, err := player.Volume()
-				if err != nil {
+				if err == nil {
 					lastVolume, ok := storeLastVolume[name]
 
 					if !ok || volume != lastVolume {
-						err := m.Publish(context.Background(), MQTTTopicPlayerVolume.Format(name), 0, false, strconv.FormatInt(volume, 10))
+						err := m.Publish(context.Background(), MQTTTopicPlayerStateVolume.Format(name), 0, false, strconv.FormatInt(volume, 10))
 						if err == nil {
-							lastVolume = volume
+							storeLastVolume[name] = volume
+						}
+					}
+				}
+
+				mute, err := player.Mute()
+				if err == nil {
+					lastMute, ok := storeLastMute[name]
+
+					if !ok || mute != lastMute {
+						var mqttValue []byte
+						if mute {
+							mqttValue = []byte(`1`)
+						} else {
+							mqttValue = []byte(`0`)
+						}
+
+						err := m.Publish(context.Background(), MQTTTopicPlayerStateMute.Format(name), 0, false, mqttValue)
+						if err == nil {
+							storeLastMute[name] = mute
 						}
 					}
 				}
@@ -399,6 +419,32 @@ func (c *Component) SetVolume(ctx context.Context, player string, percent int64)
 		tracing.SpanError(span, err)
 	} else {
 		c.logger.Debugf("Player set volume %d", percent)
+	}
+
+	return err
+}
+
+func (c *Component) SetMute(ctx context.Context, player string, mute bool) (err error) {
+	span, ctx := tracing.StartSpanFromContext(ctx, voice.ComponentName, "player.mute.set")
+	defer span.Finish()
+
+	span.LogFields(log.Bool("mute", mute))
+
+	if p, ok := c.players[player]; ok {
+		err = p.SetMute(mute)
+	} else {
+		err = errors.New("Player " + player + "not found")
+	}
+
+	if err != nil {
+		c.logger.Error("Failed set mute player",
+			"error", err.Error(),
+			"mute", mute,
+		)
+
+		tracing.SpanError(span, err)
+	} else {
+		c.logger.Debugf("Player set mute %v", mute)
 	}
 
 	return err

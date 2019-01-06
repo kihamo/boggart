@@ -54,12 +54,28 @@ func (w *streamWrapper) BytesPerSample() int {
 	return w.format.Precision
 }
 
-func (w *streamWrapper) Volume(v int64) {
+func (w *streamWrapper) SetVolume(v int64) {
 	if w == nil {
 		return
 	}
 
 	w.source.Volume = -float64(100-v) / 100.0 * 5
+}
+
+func (w *streamWrapper) Mute() bool {
+	if w == nil {
+		return false
+	}
+
+	return w.source.Silent
+}
+
+func (w *streamWrapper) SetMute(v bool) {
+	if w == nil {
+		return
+	}
+
+	w.source.Silent = v
 }
 
 func (w *streamWrapper) Stream(samples [][2]float64) (n int, ok bool) {

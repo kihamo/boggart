@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"strconv"
@@ -11,13 +12,15 @@ import (
 )
 
 const (
-	MQTTTopicSimpleText      mqtt.Topic = voice.ComponentName + "/speech/+/text"
-	MQTTTopicJSONText        mqtt.Topic = voice.ComponentName + "/speech/+/json"
-	MQTTTopicPlayerURL       mqtt.Topic = voice.ComponentName + "/player/+/url"
-	MQTTTopicPlayerStatus    mqtt.Topic = voice.ComponentName + "/player/+/status"
-	MQTTTopicPlayerAction    mqtt.Topic = voice.ComponentName + "/player/+/action"
-	MQTTTopicPlayerVolume    mqtt.Topic = voice.ComponentName + "/player/+/volume"
-	MQTTTopicPlayerVolumeSet mqtt.Topic = voice.ComponentName + "/player/+/volume/value"
+	MQTTTopicSimpleText        mqtt.Topic = voice.ComponentName + "/speech/+/text"
+	MQTTTopicJSONText          mqtt.Topic = voice.ComponentName + "/speech/+/json"
+	MQTTTopicPlayerURL         mqtt.Topic = voice.ComponentName + "/player/+/url"
+	MQTTTopicPlayerAction      mqtt.Topic = voice.ComponentName + "/player/+/action"
+	MQTTTopicPlayerVolume      mqtt.Topic = voice.ComponentName + "/player/+/volume"
+	MQTTTopicPlayerMute        mqtt.Topic = voice.ComponentName + "/player/+/mute"
+	MQTTTopicPlayerStateStatus mqtt.Topic = voice.ComponentName + "/player/+/state/status"
+	MQTTTopicPlayerStateVolume mqtt.Topic = voice.ComponentName + "/player/+/state/volume"
+	MQTTTopicPlayerStateMute   mqtt.Topic = voice.ComponentName + "/player/+/state/mute"
 )
 
 type SpeechRequest struct {
@@ -76,7 +79,7 @@ func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 				c.Play(ctx, route[len(route)-2])
 			}
 		}),
-		mqtt.NewSubscriber(MQTTTopicPlayerVolumeSet.String(), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+		mqtt.NewSubscriber(MQTTTopicPlayerVolume.String(), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
 			route := mqtt.RouteSplit(message.Topic())
 			if len(route) < 3 {
 				return
@@ -86,6 +89,14 @@ func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 			if err == nil {
 				c.SetVolume(ctx, route[len(route)-2], volume)
 			}
+		}),
+		mqtt.NewSubscriber(MQTTTopicPlayerMute.String(), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+			route := mqtt.RouteSplit(message.Topic())
+			if len(route) < 3 {
+				return
+			}
+
+			c.SetMute(ctx, route[len(route)-2], bytes.Equal(message.Payload(), []byte(`1`)))
 		}),
 	}
 }

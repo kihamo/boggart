@@ -30,6 +30,7 @@ type Player struct {
 	connected int64
 	status    int64
 	volume    int64
+	mute      int64
 }
 
 func New(ip string, port int64) *Player {
@@ -176,16 +177,12 @@ func (p *Player) SetVolume(percent int64) error {
 	return p.setVolume(&level, nil)
 }
 
-func (p *Player) Mute(mute bool) error {
+func (p *Player) Mute() (bool, error) {
+	return atomic.LoadInt64(&p.mute) == 1, nil
+}
+
+func (p *Player) SetMute(mute bool) error {
 	return p.setVolume(nil, &mute)
-}
-
-func (p *Player) MuteOn() error {
-	return p.Mute(true)
-}
-
-func (p *Player) MuteOff() error {
-	return p.Mute(false)
 }
 
 // FIXME: библиотека криво обрабатывает закрытие коннекта, сам коннект скидывает
@@ -294,6 +291,12 @@ func (p *Player) doEvents(ch chan events.Event) {
 
 			case events.StatusUpdated:
 				atomic.StoreInt64(&p.volume, int64(math.Round(t.Level*100)))
+
+				if t.Muted {
+					atomic.StoreInt64(&p.mute, 1)
+				} else {
+					atomic.StoreInt64(&p.mute, 0)
+				}
 
 				//fmt.Println("events.StatusUpdated", t.Level, t.Muted, t)
 

@@ -164,6 +164,6 @@ func (d *GoogleHomeMiniSmartSpeaker) initMQTTSubscribers() {
 	}))
 
 	d.MQTTSubscribe(GoogleHomeMiniSmartSpeakerMQTTTopicMute.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) {
-		d.ClientChromecast().Mute(bytes.Equal(message.Payload(), []byte(`1`)))
+		d.ClientChromecast().SetMute(bytes.Equal(message.Payload(), []byte(`1`)))
 	}))
 }

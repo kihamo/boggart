@@ -192,8 +192,17 @@ func (p *Player) SetVolume(percent int64) error {
 	}
 
 	atomic.StoreInt64(&p.volumePercent, percent)
-	p.getStream().Volume(percent)
+	p.getStream().SetVolume(percent)
 
+	return nil
+}
+
+func (p *Player) Mute() (bool, error) {
+	return p.getStream().Mute(), nil
+}
+
+func (p *Player) SetMute(mute bool) error {
+	p.getStream().SetMute(mute)
 	return nil
 }
 
@@ -251,7 +260,7 @@ func (p *Player) initStream(s io.ReadCloser, f string) (err error) {
 	p.mutex.Lock()
 	p.stream = NewStreamWrapper(source, format)
 	v, _ := p.Volume()
-	p.stream.Volume(v)
+	p.stream.SetVolume(v)
 	p.mutex.Unlock()
 
 	return nil

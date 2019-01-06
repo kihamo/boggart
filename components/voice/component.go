@@ -21,4 +21,5 @@ type Component interface {
 	Stop(ctx context.Context, player string) error
 	Volume(ctx context.Context, player string) (volume int64, err error)
 	SetVolume(ctx context.Context, player string, percent int64) error
+	SetMute(ctx context.Context, player string, mute bool) error
 }
