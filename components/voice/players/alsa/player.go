@@ -1,4 +1,4 @@
-package players
+package alsa
 
 import (
 	"errors"
@@ -14,6 +14,7 @@ import (
 	"github.com/faiface/beep/mp3"
 	"github.com/faiface/beep/wav"
 	"github.com/hajimehoshi/oto"
+	"github.com/kihamo/boggart/components/voice/players"
 )
 
 /*
@@ -27,12 +28,10 @@ const (
 )
 
 var (
-	ErrorAlreadyPlaying     = errors.New("Already playing")
-	ErrorUnknownAudioFormat = errors.New("Unknown audio format")
-	ErrorStreamEmpty        = errors.New("Stream isn't set")
+	ErrorStreamEmpty = errors.New("stream isn't set")
 )
 
-type AudioPlayer struct {
+type Player struct {
 	status        int64
 	volumePercent int64
 	done          chan struct{}
@@ -42,19 +41,36 @@ type AudioPlayer struct {
 	stream  *streamWrapper
 }
 
-func NewAudio() *AudioPlayer {
-	p := &AudioPlayer{
+func New() *Player {
+	p := &Player{
 		done: make(chan struct{}, 1),
 	}
-	p.setStatus(StatusStopped)
+	p.setStatus(players.StatusStopped)
 	p.SetVolume(50)
 
 	return p
 }
 
-func (p *AudioPlayer) PlayFromURL(url string) error {
-	if p.Status() == StatusPlaying {
-		return ErrorAlreadyPlaying
+func (p *Player) PlayFromURL(url string) error {
+	if p.Status() == players.StatusPlaying {
+		return players.ErrorAlreadyPlaying
+	}
+
+	mimeType, err := players.MimeTypeFromURL(url)
+	if err != nil {
+		return err
+	}
+
+	var format string
+
+	switch mimeType {
+	case players.MIMETypeMPEG:
+		format = AudioFormatMP3
+
+		// TODO: wav, flac
+
+	default:
+		return players.ErrorUnknownAudioFormat
 	}
 
 	client := &http.Client{
@@ -73,27 +89,6 @@ func (p *AudioPlayer) PlayFromURL(url string) error {
 		return err
 	}
 
-	mimeType, err := mimeFromHeader(response.Header)
-	if err != nil {
-		return err
-	}
-
-	if mimeType == "" {
-		mimeType, err = mimeFromData(response.Body)
-	}
-
-	var format string
-
-	switch mimeType {
-	case "audio/mpeg":
-		format = AudioFormatMP3
-
-		// TODO: wav, flac
-
-	default:
-		return ErrorUnknownAudioFormat
-	}
-
 	if err := p.initStream(response.Body, format); err != nil {
 		return err
 	}
@@ -101,12 +96,12 @@ func (p *AudioPlayer) PlayFromURL(url string) error {
 	return p.Play()
 }
 
-func (p *AudioPlayer) PlayFromReader(reader io.ReadCloser) error {
-	if p.Status() == StatusPlaying {
-		return ErrorAlreadyPlaying
+func (p *Player) PlayFromReader(reader io.ReadCloser) error {
+	if p.Status() == players.StatusPlaying {
+		return players.ErrorAlreadyPlaying
 	}
 
-	mimeType, err := mimeFromData(reader)
+	mimeType, err := players.MimeTypeFromData(reader)
 	if err != nil {
 		return err
 	}
@@ -120,7 +115,7 @@ func (p *AudioPlayer) PlayFromReader(reader io.ReadCloser) error {
 		// TODO: wav, flac
 
 	default:
-		return ErrorUnknownAudioFormat
+		return players.ErrorUnknownAudioFormat
 	}
 
 	if err := p.initStream(reader, format); err != nil {
@@ -130,9 +125,9 @@ func (p *AudioPlayer) PlayFromReader(reader io.ReadCloser) error {
 	return p.Play()
 }
 
-func (p *AudioPlayer) PlayFromFile(file string) error {
-	if p.Status() == StatusPlaying {
-		return ErrorAlreadyPlaying
+func (p *Player) PlayFromFile(file string) error {
+	if p.Status() == players.StatusPlaying {
+		return players.ErrorAlreadyPlaying
 	}
 
 	f, err := os.Open(file)
@@ -143,9 +138,9 @@ func (p *AudioPlayer) PlayFromFile(file string) error {
 	return p.PlayFromReader(f)
 }
 
-func (p *AudioPlayer) Play() error {
-	if p.Status() == StatusPlaying {
-		return ErrorAlreadyPlaying
+func (p *Player) Play() error {
+	if p.Status() == players.StatusPlaying {
+		return players.ErrorAlreadyPlaying
 	}
 
 	if p.getStream().IsClosed() {
@@ -163,33 +158,33 @@ func (p *AudioPlayer) Play() error {
 	return nil
 }
 
-func (p *AudioPlayer) Stop() error {
-	if p.Status() == StatusPlaying {
+func (p *Player) Stop() error {
+	if p.Status() == players.StatusPlaying {
 		p.done <- struct{}{}
 	} else {
 		p.getSpeaker().Close()
 		p.getStream().Close()
 	}
 
-	p.setStatus(StatusStopped)
+	p.setStatus(players.StatusStopped)
 
 	return nil
 }
 
-func (p *AudioPlayer) Pause() error {
-	if p.Status() == StatusPlaying {
-		p.setStatus(StatusPause)
+func (p *Player) Pause() error {
+	if p.Status() == players.StatusPlaying {
+		p.setStatus(players.StatusPause)
 		p.done <- struct{}{}
 	}
 
 	return nil
 }
 
-func (p *AudioPlayer) Volume() int64 {
-	return atomic.LoadInt64(&p.volumePercent)
+func (p *Player) Volume() (int64, error) {
+	return atomic.LoadInt64(&p.volumePercent), nil
 }
 
-func (p *AudioPlayer) SetVolume(percent int64) error {
+func (p *Player) SetVolume(percent int64) error {
 	if percent > 100 {
 		percent = 100
 	} else if percent < 0 {
@@ -202,11 +197,11 @@ func (p *AudioPlayer) SetVolume(percent int64) error {
 	return nil
 }
 
-func (p *AudioPlayer) Close() {
+func (p *Player) Close() {
 	p.Stop()
 }
 
-func (p *AudioPlayer) initSpeaker() error {
+func (p *Player) initSpeaker() error {
 	p.getSpeaker().Close()
 
 	stream := p.getStream()
@@ -229,7 +224,7 @@ func (p *AudioPlayer) initSpeaker() error {
 	return nil
 }
 
-func (p *AudioPlayer) initStream(s io.ReadCloser, f string) (err error) {
+func (p *Player) initStream(s io.ReadCloser, f string) (err error) {
 	p.getStream().Close()
 
 	var (
@@ -246,7 +241,7 @@ func (p *AudioPlayer) initStream(s io.ReadCloser, f string) (err error) {
 		source, format, err = flac.Decode(s)
 
 	default:
-		return ErrorUnknownAudioFormat
+		return players.ErrorUnknownAudioFormat
 	}
 
 	if err != nil {
@@ -255,43 +250,44 @@ func (p *AudioPlayer) initStream(s io.ReadCloser, f string) (err error) {
 
 	p.mutex.Lock()
 	p.stream = NewStreamWrapper(source, format)
-	p.stream.Volume(p.Volume())
+	v, _ := p.Volume()
+	p.stream.Volume(v)
 	p.mutex.Unlock()
 
 	return nil
 }
 
-func (p *AudioPlayer) getSpeaker() *speakerWrapper {
+func (p *Player) getSpeaker() *speakerWrapper {
 	p.mutex.RLock()
 	defer p.mutex.RUnlock()
 
 	return p.speaker
 }
 
-func (p *AudioPlayer) getStream() *streamWrapper {
+func (p *Player) getStream() *streamWrapper {
 	p.mutex.RLock()
 	defer p.mutex.RUnlock()
 
 	return p.stream
 }
 
-func (p *AudioPlayer) setStatus(status Status) {
+func (p *Player) setStatus(status players.Status) {
 	atomic.StoreInt64(&p.status, status.Int64())
 }
 
-func (p *AudioPlayer) Status() Status {
-	return Status(atomic.LoadInt64(&p.status))
+func (p *Player) Status() players.Status {
+	return players.Status(atomic.LoadInt64(&p.status))
 }
 
-func (p *AudioPlayer) play() {
-	p.setStatus(StatusPlaying)
+func (p *Player) play() {
+	p.setStatus(players.StatusPlaying)
 
 	defer func() {
 		p.getSpeaker().Close()
 
-		if p.Status() != StatusPause {
+		if p.Status() != players.StatusPause {
 			p.getStream().Close()
-			p.setStatus(StatusStopped)
+			p.setStatus(players.StatusStopped)
 		}
 	}()
 

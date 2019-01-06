@@ -1,4 +1,4 @@
-package players
+package alsa
 
 import (
 	"sync/atomic"

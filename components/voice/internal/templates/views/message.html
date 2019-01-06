@@ -23,6 +23,18 @@
 
                 <form class="form-horizontal form-label-left" role="form" method="post" id="send-mail" action="/{{ .ComponentName }}/message/" novalidate>
                     <div class="item form-group">
+                        <label for="player" class="control-label col-md-3 col-sm-3 col-xs-12">
+                        {{ i18n "Player" . }} <span class="required">*</span>
+                        </label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <select class="form-control select2" name="player" id="player" required="required">
+                                {{ range $i, $player := .players }}
+                                    <option value="{{ $player }}"{{ if eq $player $.player }} selected="selected"{{ end }}>{{ $player }}</option>
+                                {{ end }}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="item form-group">
                         <label for="volume" class="control-label col-md-3 col-sm-3 col-xs-12">
                             {{ i18n "Volume" . }} <span class="required">*</span>
                         </label>

@@ -89,5 +89,14 @@ func (c *Component) ConfigVariables() []config.Variable {
 				},
 			}).
 			WithDefault(yandex.EmotionNeutral),
+		config.NewVariable(voice.ConfigPlayerALSAEnabled, config.ValueTypeBool).
+			WithUsage("Enable ALSA player").
+			WithGroup("ALSA").
+			WithEditable(false).
+			WithDefault(true),
+		config.NewVariable(voice.ConfigPlayerChromecastAddresses, config.ValueTypeString).
+			WithUsage("Addresses in format host:port").
+			WithGroup("Chromecast").
+			WithView([]string{config.ViewTags}),
 	}
 }

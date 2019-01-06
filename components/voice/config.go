@@ -1,6 +1,9 @@
 package voice
 
 const (
+	ConfigPlayerALSAEnabled         = ComponentName + ".player.alsa.enabled"
+	ConfigPlayerChromecastAddresses = ComponentName + ".player.chromecast.addresses"
+
 	ConfigSpeechVolume = ComponentName + ".speech.volume"
 
 	ConfigYandexSpeechKitCloudKey      = ComponentName + ".yandex_speechkit_cloud.key"

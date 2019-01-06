@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"io"
-	"io/ioutil"
 	"strconv"
 	"strings"
 	"time"
@@ -12,6 +11,8 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/components/voice"
 	"github.com/kihamo/boggart/components/voice/players"
+	"github.com/kihamo/boggart/components/voice/players/alsa"
+	"github.com/kihamo/boggart/components/voice/players/chromecast"
 	yandex "github.com/kihamo/boggart/components/voice/providers/yandex_speechkit_cloud"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/config"
@@ -25,9 +26,10 @@ type Component struct {
 	application shadow.Application
 	config      config.Component
 	logger      logging.Logger
-	provider    *yandex.YandexSpeechKitCloud
-	audioPlayer *players.AudioPlayer
 	routes      []dashboard.Route
+
+	textToSpeechProvider *yandex.YandexSpeechKitCloud
+	players              map[string]players.Player
 }
 
 func (c *Component) Name() string {
@@ -56,65 +58,113 @@ func (c *Component) Dependencies() []shadow.Dependency {
 
 func (c *Component) Init(a shadow.Application) error {
 	c.application = a
+	c.players = make(map[string]players.Player, 0)
 	return nil
 }
 
 func (c *Component) Run(a shadow.Application, ready chan<- struct{}) error {
-	c.audioPlayer = players.NewAudio()
 	c.logger = logging.DefaultLogger().Named(c.Name())
 
 	<-a.ReadyComponent(config.ComponentName)
 	c.config = a.GetComponent(config.ComponentName).(config.Component)
-	c.provider = yandex.NewYandexSpeechKitCloud(c.config.String(voice.ConfigYandexSpeechKitCloudKey)).
+	c.textToSpeechProvider = yandex.NewYandexSpeechKitCloud(c.config.String(voice.ConfigYandexSpeechKitCloudKey)).
 		WithDebug(c.config.Bool(config.ConfigDebug))
-	c.SetVolume(context.Background(), c.config.Int64(voice.ConfigSpeechVolume))
 
-	<-a.ReadyComponent(mqtt.ComponentName)
-	m := a.GetComponent(mqtt.ComponentName).(mqtt.Component)
+	if c.config.Bool(voice.ConfigPlayerALSAEnabled) {
+		c.players["alsa"] = alsa.New()
+	}
+
+	addresses := c.config.String(voice.ConfigPlayerChromecastAddresses)
+	if addresses != "" {
+		for _, address := range strings.Split(addresses, ",") {
+			address = strings.TrimSpace(address)
+			if address == "" {
+				c.logger.Warn("Chromecast address is empty")
+				continue
+			}
+
+			parts := strings.SplitN(address, ":", 2)
+			if len(parts) != 2 {
+				c.logger.Warn("Bad Chromecast address " + address)
+				continue
+			}
+
+			playerID := mqtt.NameReplace("chromecast/" + strings.ToLower(parts[0]))
+			port, err := strconv.ParseInt(parts[1], 10, 64)
+			if err != nil {
+				c.logger.Warn("Bad Chromecast address "+address, "error", err.Error())
+				continue
+			}
+
+			c.players[playerID] = chromecast.New(parts[0], port)
+		}
+	}
+
+	go c.playersUpdater()
 
 	ready <- struct{}{}
 
-	// audio updater
-	var (
-		lastStatus players.Status
-		lastVolume int64
-	)
+	return nil
+}
+
+func (c *Component) playersUpdater() {
+	<-c.application.ReadyComponent(mqtt.ComponentName)
+	m := c.application.GetComponent(mqtt.ComponentName).(mqtt.Component)
+
+	storeLastStatus := make(map[string]int64, len(c.players))
+	storeLastVolume := make(map[string]int64, len(c.players))
 
 	for {
 		client := m.Client()
-
 		if client != nil && client.IsConnected() {
-			status := c.audioPlayer.Status()
-			if status != lastStatus {
-				m.Publish(context.Background(), MQTTTopicPlayerStatus.String(), 0, false, status.String())
-				lastStatus = status
-			}
+			for name, player := range c.players {
+				status := player.Status()
+				lastStatus, ok := storeLastStatus[name]
 
-			volume := c.audioPlayer.Volume()
-			if volume != lastVolume {
-				m.Publish(context.Background(), MQTTTopicPlayerVolume.String(), 0, false, strconv.FormatInt(volume, 10))
-				lastVolume = volume
+				if !ok || status.Int64() != lastStatus {
+					err := m.Publish(context.Background(), MQTTTopicPlayerStatus.Format(name), 0, false, status.String())
+					if err == nil {
+						storeLastStatus[name] = status.Int64()
+					}
+				}
+
+				volume, err := player.Volume()
+				if err != nil {
+					lastVolume, ok := storeLastVolume[name]
+
+					if !ok || volume != lastVolume {
+						err := m.Publish(context.Background(), MQTTTopicPlayerVolume.Format(name), 0, false, strconv.FormatInt(volume, 10))
+						if err == nil {
+							lastVolume = volume
+						}
+					}
+				}
 			}
 		}
 
 		time.Sleep(time.Second)
 	}
-
-	return nil
 }
 
-func (c *Component) Speech(ctx context.Context, text string) error {
+func (c *Component) Players() map[string]players.Player {
+	return c.players
+}
+
+func (c *Component) Speech(ctx context.Context, player string, text string) error {
 	return c.SpeechWithOptions(
 		ctx,
+		player,
 		text,
 		c.config.Int64(voice.ConfigSpeechVolume),
 		c.config.Float64(voice.ConfigYandexSpeechKitCloudSpeed),
 		c.config.String(voice.ConfigYandexSpeechKitCloudSpeaker))
 }
 
-func (c *Component) SpeechWithOptions(ctx context.Context, text string, volume int64, speed float64, speaker string) error {
+func (c *Component) SpeechWithOptions(ctx context.Context, player string, text string, volume int64, speed float64, speaker string) error {
 	span, ctx := tracing.StartSpanFromContext(ctx, voice.ComponentName, "speech_with_options")
 	defer span.Finish()
+
+	span.LogFields(log.String("player", player))
 
 	if volume < 0 {
 		volume = 0
@@ -146,14 +196,27 @@ func (c *Component) SpeechWithOptions(ctx context.Context, text string, volume i
 
 	c.logger.Debug("Speech text" + text)
 
-	if c.provider == nil {
-		err := errors.New("speech provider not found")
+	if c.textToSpeechProvider == nil {
+		err := errors.New("text to speech provider not found")
 
 		tracing.SpanError(span, err)
 		return err
 	}
 
-	buf, err := c.provider.Generate(
+	err := c.SetVolume(ctx, player, volume)
+	if err != nil {
+		c.logger.Error("Failed set volume",
+			"error", err.Error(),
+			"format", c.config.String(voice.ConfigYandexSpeechKitCloudFormat),
+			"text", text,
+			"player", player,
+		)
+
+		tracing.SpanError(span, err)
+		return err
+	}
+
+	u := c.textToSpeechProvider.GenerateURL(
 		ctx,
 		text,
 		c.config.String(voice.ConfigYandexSpeechKitCloudLanguage),
@@ -163,34 +226,13 @@ func (c *Component) SpeechWithOptions(ctx context.Context, text string, volume i
 		c.config.String(voice.ConfigYandexSpeechKitCloudQuality),
 		speed)
 
-	if err != nil {
-		c.logger.Error("Error speech text",
-			"text", text,
-			"error", err.Error(),
-		)
-
-		tracing.SpanError(span, err)
-		return err
-	}
-
-	err = c.SetVolume(ctx, volume)
-	if err != nil {
-		c.logger.Error("Failed set volume",
-			"error", err.Error(),
-			"format", c.config.String(voice.ConfigYandexSpeechKitCloudFormat),
-			"text", text,
-		)
-
-		tracing.SpanError(span, err)
-		return err
-	}
-
-	err = c.PlayReader(ctx, ioutil.NopCloser(buf))
+	err = c.PlayURL(ctx, player, u)
 	if err != nil {
 		c.logger.Error("Failed play speech text",
 			"error", err.Error(),
 			"format", c.config.String(voice.ConfigYandexSpeechKitCloudFormat),
 			"text", text,
+			"player", player,
 		)
 
 		tracing.SpanError(span, err)
@@ -200,13 +242,17 @@ func (c *Component) SpeechWithOptions(ctx context.Context, text string, volume i
 	return nil
 }
 
-func (c *Component) PlayReader(ctx context.Context, reader io.ReadCloser) (err error) {
+func (c *Component) PlayReader(ctx context.Context, player string, reader io.ReadCloser) (err error) {
 	span, ctx := tracing.StartSpanFromContext(ctx, voice.ComponentName, "player.play.reader")
 	defer span.Finish()
 
-	err = c.audioPlayer.Stop()
-	if err == nil {
-		err = c.audioPlayer.PlayFromReader(reader)
+	if p, ok := c.players[player]; ok {
+		err = p.Stop()
+		if err == nil {
+			err = p.PlayFromReader(reader)
+		}
+	} else {
+		err = errors.New("Player " + player + "not found")
 	}
 
 	if err != nil {
@@ -220,21 +266,26 @@ func (c *Component) PlayReader(ctx context.Context, reader io.ReadCloser) (err e
 	return err
 }
 
-func (c *Component) PlayURL(ctx context.Context, url string) (err error) {
+func (c *Component) PlayURL(ctx context.Context, player string, url string) (err error) {
 	span, ctx := tracing.StartSpanFromContext(ctx, voice.ComponentName, "player.play.url")
 	defer span.Finish()
 
 	span.LogFields(log.String("url", url))
 
-	err = c.audioPlayer.Stop()
-	if err == nil {
-		err = c.audioPlayer.PlayFromURL(url)
+	if p, ok := c.players[player]; ok {
+		err = p.Stop()
+		if err == nil {
+			err = p.PlayFromURL(url)
+		}
+	} else {
+		err = errors.New("Player " + player + "not found")
 	}
 
 	if err != nil {
 		c.logger.Error("Failed play URL",
 			"error", err.Error(),
 			"url", url,
+			"player", player,
 		)
 
 		tracing.SpanError(span, err)
@@ -245,11 +296,16 @@ func (c *Component) PlayURL(ctx context.Context, url string) (err error) {
 	return err
 }
 
-func (c *Component) Play(ctx context.Context) error {
+func (c *Component) Play(ctx context.Context, player string) (err error) {
 	span, ctx := tracing.StartSpanFromContext(ctx, voice.ComponentName, "player.play")
 	defer span.Finish()
 
-	err := c.audioPlayer.Play()
+	if p, ok := c.players[player]; ok {
+		err = p.Play()
+	} else {
+		err = errors.New("Player " + player + "not found")
+	}
+
 	if err != nil {
 		c.logger.Error("Failed play player", "error", err.Error())
 
@@ -261,11 +317,16 @@ func (c *Component) Play(ctx context.Context) error {
 	return err
 }
 
-func (c *Component) Pause(ctx context.Context) error {
+func (c *Component) Pause(ctx context.Context, player string) (err error) {
 	span, ctx := tracing.StartSpanFromContext(ctx, voice.ComponentName, "player.pause")
 	defer span.Finish()
 
-	err := c.audioPlayer.Pause()
+	if p, ok := c.players[player]; ok {
+		err = p.Pause()
+	} else {
+		err = errors.New("Player " + player + "not found")
+	}
+
 	if err != nil {
 		c.logger.Error("Failed pause player", "error", err.Error())
 
@@ -277,11 +338,16 @@ func (c *Component) Pause(ctx context.Context) error {
 	return err
 }
 
-func (c *Component) Stop(ctx context.Context) error {
+func (c *Component) Stop(ctx context.Context, player string) (err error) {
 	span, ctx := tracing.StartSpanFromContext(ctx, voice.ComponentName, "player.stop")
 	defer span.Finish()
 
-	err := c.audioPlayer.Stop()
+	if p, ok := c.players[player]; ok {
+		err = p.Stop()
+	} else {
+		err = errors.New("Player " + player + "not found")
+	}
+
 	if err != nil {
 		c.logger.Error("Failed stop player", "error", err.Error())
 
@@ -293,20 +359,37 @@ func (c *Component) Stop(ctx context.Context) error {
 	return err
 }
 
-func (c *Component) Volume(ctx context.Context) int64 {
+func (c *Component) Volume(ctx context.Context, player string) (volume int64, err error) {
 	span, ctx := tracing.StartSpanFromContext(ctx, voice.ComponentName, "player.volume.get")
 	defer span.Finish()
 
-	return c.audioPlayer.Volume()
+	if p, ok := c.players[player]; ok {
+		volume, err = p.Volume()
+	} else {
+		err = errors.New("Player " + player + "not found")
+	}
+
+	if err != nil {
+		c.logger.Error("Failed get player volume", "error", err.Error())
+
+		tracing.SpanError(span, err)
+	}
+
+	return volume, err
 }
 
-func (c *Component) SetVolume(ctx context.Context, percent int64) error {
+func (c *Component) SetVolume(ctx context.Context, player string, percent int64) (err error) {
 	span, ctx := tracing.StartSpanFromContext(ctx, voice.ComponentName, "player.volume.set")
 	defer span.Finish()
 
 	span.LogFields(log.Int64("percent", percent))
 
-	err := c.audioPlayer.SetVolume(percent)
+	if p, ok := c.players[player]; ok {
+		err = p.SetVolume(percent)
+	} else {
+		err = errors.New("Player " + player + "not found")
+	}
+
 	if err != nil {
 		c.logger.Error("Failed set volume player",
 			"error", err.Error(),
@@ -319,4 +402,12 @@ func (c *Component) SetVolume(ctx context.Context, percent int64) error {
 	}
 
 	return err
+}
+
+func (c *Component) Shutdown() error {
+	for _, player := range c.players {
+		player.Close()
+	}
+
+	return nil
 }

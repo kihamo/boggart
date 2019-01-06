@@ -3,21 +3,16 @@ package devices
 import (
 	"bytes"
 	"context"
-	"fmt"
-	"math"
-	"net"
 	"strconv"
 	"sync"
 	"time"
 
-	"github.com/barnybug/go-cast"
-	"github.com/barnybug/go-cast/controllers"
-	"github.com/barnybug/go-cast/events"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/google/home"
 	"github.com/kihamo/boggart/components/boggart/providers/google/home/client"
 	"github.com/kihamo/boggart/components/boggart/providers/google/home/client/info"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/components/voice/players/chromecast"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 )
@@ -38,7 +33,7 @@ type GoogleHomeMiniSmartSpeaker struct {
 	initOnce sync.Once
 
 	clientGoogleHome *client.GoogleHome
-	clientChromecast *cast.Client
+	clientChromecast *chromecast.Player
 	host             string
 }
 
@@ -97,43 +92,22 @@ func (d *GoogleHomeMiniSmartSpeaker) ClientGoogleHome() *client.GoogleHome {
 	return ctrl
 }
 
-func (d *GoogleHomeMiniSmartSpeaker) ClientChromecast() (*cast.Client, error) {
+func (d *GoogleHomeMiniSmartSpeaker) ClientChromecast() *chromecast.Player {
 	d.mutex.RLock()
 	c := d.clientChromecast
 	d.mutex.RUnlock()
 
 	if c != nil {
-		return c, nil
+		return c
 	}
 
-	ctrl := cast.NewClient(net.ParseIP(d.host), 8009)
-	err := ctrl.Connect(context.Background())
-	if err != nil {
-		return nil, err
-	}
-
-	// TODO: fix quit
-	go func() {
-		sn := d.SerialNumberMQTTEscaped()
-		ctx := context.Background()
-
-		for event := range ctrl.Events {
-			switch t := event.(type) {
-			case events.StatusUpdated:
-				d.MQTTPublishAsync(ctx, GoogleHomeMiniSmartSpeakerMQTTTopicStateVolume.Format(sn), 2, true, int64(math.Round(t.Level*100)))
-				d.MQTTPublishAsync(ctx, GoogleHomeMiniSmartSpeakerMQTTTopicStateMute.Format(sn), 2, true, t.Muted)
-
-			default:
-				fmt.Println("FIXME GHM:", t)
-			}
-		}
-	}()
+	ctrl := chromecast.New(d.host, chromecast.DefaultPort)
 
 	d.mutex.Lock()
 	d.clientChromecast = ctrl
 	d.mutex.Unlock()
 
-	return ctrl, nil
+	return ctrl
 }
 
 func (d *GoogleHomeMiniSmartSpeaker) UpdateStatus(status boggart.DeviceStatus) {
@@ -181,49 +155,15 @@ func (d *GoogleHomeMiniSmartSpeaker) initMQTTSubscribers() {
 	sn := d.SerialNumberMQTTEscaped()
 
 	d.MQTTSubscribe(GoogleHomeMiniSmartSpeakerMQTTTopicVolume.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) {
-		volume, err := strconv.ParseFloat(string(message.Payload()), 64)
+		volume, err := strconv.ParseInt(string(message.Payload()), 10, 64)
 		if err != nil {
 			return
 		}
 
-		if volume > 100 {
-			volume = 100
-		} else if volume < 0 {
-			volume = 0
-		}
-
-		volume /= 100
-
-		ctrl, err := d.ClientChromecast()
-		if err != nil {
-			return
-		}
-
-		receiver := ctrl.Receiver()
-
-		// иначе делает двойной запрос на установку к колонке
-		response, err := receiver.GetVolume(ctx)
-		if err != nil {
-			return
-		}
-
-		_, _ = receiver.SetVolume(ctx, &controllers.Volume{
-			Level: &volume,
-			Muted: response.Muted,
-		})
+		d.ClientChromecast().SetVolume(volume)
 	}))
 
 	d.MQTTSubscribe(GoogleHomeMiniSmartSpeakerMQTTTopicMute.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) {
-		mute := bytes.Equal(message.Payload(), []byte(`1`))
-
-		ctrl, err := d.ClientChromecast()
-		if err != nil {
-			return
-		}
-
-		receiver := ctrl.Receiver()
-		_, _ = receiver.SetVolume(ctx, &controllers.Volume{
-			Muted: &mute,
-		})
+		d.ClientChromecast().Mute(bytes.Equal(message.Payload(), []byte(`1`)))
 	}))
 }

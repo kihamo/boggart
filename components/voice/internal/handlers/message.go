@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"sort"
 	"strconv"
 
 	"github.com/kihamo/boggart/components/voice"
@@ -23,31 +24,48 @@ func (h *MessageHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 		"speed":   config.Float64(voice.ConfigYandexSpeechKitCloudSpeed),
 		"text":    "",
 		"speaker": config.String(voice.ConfigYandexSpeechKitCloudSpeaker),
+		"player":  "",
+	}
+
+	players := h.Component.Players()
+	viewPlayers := make([]string, 0, len(players))
+	for name := range players {
+		viewPlayers = append(viewPlayers, name)
+	}
+	sort.Strings(viewPlayers)
+	vars["players"] = viewPlayers
+
+	if len(viewPlayers) > 0 {
+		vars["player"] = viewPlayers[0]
 	}
 
 	if r.IsPost() {
+		original := r.Original()
+
 		var (
 			err    error
 			volume int64
 			speed  float64
 		)
 
-		volume, err = strconv.ParseInt(r.Original().FormValue("volume"), 10, 64)
+		volume, err = strconv.ParseInt(original.FormValue("volume"), 10, 64)
 
 		if err == nil {
 			vars["volume"] = volume
-			speed, err = strconv.ParseFloat(r.Original().FormValue("speed"), 64)
+			speed, err = strconv.ParseFloat(original.FormValue("speed"), 64)
 		}
 
 		if err == nil {
-			text := r.Original().FormValue("text")
-			speaker := r.Original().FormValue("speaker")
+			player := original.FormValue("player")
+			text := original.FormValue("text")
+			speaker := original.FormValue("speaker")
 
 			vars["speed"] = speed
+			vars["player"] = player
 			vars["text"] = text
 			vars["speaker"] = speaker
 
-			err = h.Component.SpeechWithOptions(r.Context(), text, volume, speed, speaker)
+			err = h.Component.SpeechWithOptions(r.Context(), player, text, volume, speed, speaker)
 		}
 
 		if err != nil {

@@ -73,7 +73,7 @@ func (c *Component) Run(a shadow.Application, ready chan<- struct{}) (err error)
 	c.logger = logging.DefaultLogger().Named(c.Name())
 
 	m.ERROR = NewMQTTLogger(c.logger.Error, c.logger.Errorf)
-	m.CRITICAL = NewMQTTLogger(c.logger.Panic, c.logger.Panicf)
+	m.CRITICAL = NewMQTTLogger(c.logger.Error, c.logger.Errorf)
 	m.WARN = NewMQTTLogger(c.logger.Warn, c.logger.Warnf)
 	m.DEBUG = NewMQTTLogger(c.logger.Debug, c.logger.Debugf)
 
