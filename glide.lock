@@ -1,5 +1,5 @@
-hash: d4aa29e68009a354751c85b41c534e987075afddf12921ddb2ca3ddd10a1366c
-updated: 2018-12-28T23:10:10.343906+03:00
+hash: 3acd633547e99e0e51fc9f0749711999a11ea7012766639509e3d3a81352231b
+updated: 2019-01-06T16:22:51.958701+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: 02e53af36e6c978af692887ed449b74026d76fec
@@ -43,7 +43,7 @@ imports:
 - name: github.com/elazarl/go-bindata-assetfs
   version: 38087fe4dafb822e541b3f7955075cc1c30bd294
 - name: github.com/faiface/beep
-  version: 63cc6fbbac46dba1a03e55f0ebc965d6c82ca8e1
+  version: 082eb9168dd13b6829788ac8246f152d63665753
   subpackages:
   - effects
   - flac
