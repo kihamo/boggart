@@ -103,24 +103,10 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 	<-a.ReadyComponent(config.ComponentName)
 	c.config = a.GetComponent(config.ComponentName).(config.Component)
 
-	c.initListeners()
-	c.initRS485()
-
-	c.initGPIO()
-	c.initElectricityMeters()
-	c.initInternetProviders()
-	c.initPhones()
-	c.initRouters()
-	c.initPulsarMeters()
-	c.initSensor()
-	c.initSockets()
-
-	c.initCameras()
-	c.initRemoteControl()
-	c.initLED()
-	c.initTV()
-	c.initUPS()
-	c.initSmartSpeakers()
+	err := c.initConfigFromYaml()
+	if err != nil {
+		return err
+	}
 
 	c.devicesManager.Ready()
 

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/url"
 	"strconv"
 	"sync"
 	"time"
@@ -57,22 +58,40 @@ type CameraHikVision struct {
 	initOnce sync.Once
 
 	isapi                 *hikvision.ISAPI
-	interval              time.Duration
 	alertStreamingHistory map[string]time.Time
 
 	ptzChannels map[uint64]cameraHikVisionPTZChannel
 }
 
-func NewCameraHikVision(isapi *hikvision.ISAPI, interval time.Duration) *CameraHikVision {
+func (d CameraHikVision) Create(config map[string]interface{}) (boggart.Device, error) {
+	address, ok := config["address"]
+	if !ok {
+		return nil, errors.New("config option address isn't set")
+	}
+
+	if address == "" {
+		return nil, errors.New("config option address is empty")
+	}
+
+	val := address.(string)
+
+	u, err := url.Parse(val)
+	if err != nil {
+		return nil, errors.New("config option address has bad value " + val)
+	}
+
+	port, _ := strconv.ParseInt(u.Port(), 10, 64)
+	password, _ := u.User.Password()
+
 	device := &CameraHikVision{
-		isapi:                 isapi,
-		interval:              interval,
+		isapi:                 hikvision.NewISAPI(u.Hostname(), port, u.User.Username(), password),
 		alertStreamingHistory: make(map[string]time.Time),
 	}
+
 	device.Init()
 	device.SetDescription("HikVision camera")
 
-	return device
+	return device, nil
 }
 
 func (d *CameraHikVision) Types() []boggart.DeviceType {

@@ -2,6 +2,7 @@ package devices
 
 import (
 	"context"
+	"errors"
 	"sync/atomic"
 	"time"
 
@@ -24,21 +25,36 @@ type SoftVideoInternet struct {
 	boggart.DeviceMQTT
 
 	provider *softvideo.Client
-	interval time.Duration
 }
 
-func NewSoftVideoInternet(provider *softvideo.Client, interval time.Duration) *SoftVideoInternet {
-	device := &SoftVideoInternet{
-		provider: provider,
-		interval: interval,
+func (d SoftVideoInternet) Create(config map[string]interface{}) (boggart.Device, error) {
+	login, ok := config["login"]
+	if !ok {
+		return nil, errors.New("config option login isn't set")
+	}
 
+	if login == "" {
+		return nil, errors.New("config option login is empty")
+	}
+
+	password, ok := config["password"]
+	if !ok {
+		return nil, errors.New("config option password isn't set")
+	}
+
+	if password == "" {
+		return nil, errors.New("config option password is empty")
+	}
+
+	device := &SoftVideoInternet{
+		provider:  softvideo.NewClient(login.(string), password.(string)),
 		lastValue: -1,
 	}
 	device.Init()
-	device.SetSerialNumber(provider.AccountID())
+	device.SetSerialNumber(login.(string))
 	device.SetDescription("SoftVideo internet provider")
 
-	return device
+	return device, nil
 }
 
 func (d *SoftVideoInternet) Types() []boggart.DeviceType {
@@ -54,7 +70,7 @@ func (d *SoftVideoInternet) Balance(ctx context.Context) (float64, error) {
 func (d *SoftVideoInternet) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(d.taskUpdater)
 	taskUpdater.SetRepeats(-1)
-	taskUpdater.SetRepeatInterval(d.interval)
+	taskUpdater.SetRepeatInterval(time.Hour)
 	taskUpdater.SetName("device-internet-provider-softvideo-updater-" + d.provider.AccountID())
 
 	return []workers.Task{

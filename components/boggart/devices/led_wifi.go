@@ -3,6 +3,7 @@ package devices
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"math"
 	"strconv"
@@ -44,9 +45,18 @@ type WiFiLED struct {
 	bulb *wifiled.Bulb
 }
 
-func NewWiFiLED(bulb *wifiled.Bulb) *WiFiLED {
+func (d WiFiLED) Create(config map[string]interface{}) (boggart.Device, error) {
+	address, ok := config["address"]
+	if !ok {
+		return nil, errors.New("config option address isn't set")
+	}
+
+	if address == "" {
+		return nil, errors.New("config option address is empty")
+	}
+
 	device := &WiFiLED{
-		bulb: bulb,
+		bulb: wifiled.NewBulb(address.(string)),
 
 		statePower: -1,
 		stateMode:  math.MaxUint64,
@@ -55,9 +65,9 @@ func NewWiFiLED(bulb *wifiled.Bulb) *WiFiLED {
 	}
 	device.Init()
 	device.SetDescription("LED WiFi")
-	device.SetSerialNumber(bulb.Host())
+	device.SetSerialNumber(address.(string))
 
-	return device
+	return device, nil
 }
 
 func (d *WiFiLED) Types() []boggart.DeviceType {

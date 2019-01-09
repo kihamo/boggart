@@ -29,17 +29,35 @@ type UPSNUT struct {
 	variables map[string]interface{}
 }
 
-func NewUPSNUT(host, ups string) *UPSNUT {
+func (d UPSNUT) Create(config map[string]interface{}) (boggart.Device, error) {
+	host, ok := config["host"]
+	if !ok {
+		return nil, errors.New("config option host isn't set")
+	}
+
+	if host == "" {
+		return nil, errors.New("config option host is empty")
+	}
+
+	ups, ok := config["ups"]
+	if !ok {
+		return nil, errors.New("config option ups isn't set")
+	}
+
+	if ups == "" {
+		return nil, errors.New("config option ups is empty")
+	}
+
 	device := &UPSNUT{
-		host:      host,
-		ups:       ups,
+		host:      host.(string),
+		ups:       ups.(string),
 		variables: make(map[string]interface{}, 0),
 	}
 
 	device.Init()
 	device.SetDescription("UPS NUT")
 
-	return device
+	return device, nil
 }
 
 func (d *UPSNUT) Types() []boggart.DeviceType {

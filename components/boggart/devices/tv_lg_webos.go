@@ -3,6 +3,7 @@ package devices
 import (
 	"bytes"
 	"context"
+	"errors"
 	"net"
 	"net/http"
 	"strconv"
@@ -57,15 +58,33 @@ type LGWebOSTV struct {
 	key    string
 }
 
-func NewLGWebOSTV(host, key string) *LGWebOSTV {
+func (d LGWebOSTV) Create(config map[string]interface{}) (boggart.Device, error) {
+	host, ok := config["host"]
+	if !ok {
+		return nil, errors.New("config option host isn't set")
+	}
+
+	if host == "" {
+		return nil, errors.New("config option host is empty")
+	}
+
+	key, ok := config["key"]
+	if !ok {
+		return nil, errors.New("config option key isn't set")
+	}
+
+	if key == "" {
+		return nil, errors.New("config option key is empty")
+	}
+
 	device := &LGWebOSTV{
-		host: host,
-		key:  key,
+		host: host.(string),
+		key:  key.(string),
 	}
 	device.Init()
 	device.SetDescription("LG TV WebOS")
 
-	return device
+	return device, nil
 }
 
 func (d *LGWebOSTV) Types() []boggart.DeviceType {

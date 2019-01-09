@@ -3,6 +3,7 @@ package devices
 import (
 	"bytes"
 	"context"
+	"errors"
 	"strings"
 	"sync"
 	"time"
@@ -34,14 +35,23 @@ type SamsungTV struct {
 	mac    string
 }
 
-func NewSamsungTV(host string) *SamsungTV {
+func (d SamsungTV) Create(config map[string]interface{}) (boggart.Device, error) {
+	host, ok := config["host"]
+	if !ok {
+		return nil, errors.New("config option host isn't set")
+	}
+
+	if host == "" {
+		return nil, errors.New("config option host is empty")
+	}
+
 	device := &SamsungTV{
-		client: tv.NewApiV2(host),
+		client: tv.NewApiV2(host.(string)),
 	}
 	device.Init()
 	device.SetDescription("Samsung TV")
 
-	return device
+	return device, nil
 }
 
 func (d *SamsungTV) Types() []boggart.DeviceType {

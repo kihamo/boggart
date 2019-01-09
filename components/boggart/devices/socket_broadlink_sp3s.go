@@ -3,6 +3,8 @@ package devices
 import (
 	"bytes"
 	"context"
+	"errors"
+	"net"
 	"sync/atomic"
 	"time"
 
@@ -39,17 +41,50 @@ type BroadlinkSP3SSocket struct {
 	provider *broadlink.SP3S
 }
 
-func NewBroadlinkSP3SSocket(provider *broadlink.SP3S) *BroadlinkSP3SSocket {
+func (d BroadlinkSP3SSocket) Create(config map[string]interface{}) (boggart.Device, error) {
+	localAddr, err := broadlink.LocalAddr()
+	if err != nil {
+		return nil, err
+	}
+
+	ipConfig, ok := config["ip"]
+	if !ok {
+		return nil, errors.New("config option ip isn't set")
+	}
+
+	if ipConfig == "" {
+		return nil, errors.New("config option ip is empty")
+	}
+
+	macConfig, ok := config["mac"]
+	if !ok {
+		return nil, errors.New("config option mac isn't set")
+	}
+
+	if macConfig == "" {
+		return nil, errors.New("config option mac is empty")
+	}
+
+	mac, err := net.ParseMAC(macConfig.(string))
+	if err != nil {
+		return nil, err
+	}
+
+	ip := net.UDPAddr{
+		IP:   net.ParseIP(ipConfig.(string)),
+		Port: broadlink.DevicePort,
+	}
+
 	device := &BroadlinkSP3SSocket{
-		provider: provider,
+		provider: broadlink.NewSP3S(mac, ip, *localAddr),
 		state:    0,
 		power:    -1,
 	}
 	device.Init()
-	device.SetSerialNumber(provider.MAC().String())
+	device.SetSerialNumber(mac.String())
 	device.SetDescription("Socket of Broadlink")
 
-	return device
+	return device, nil
 }
 
 func (d *BroadlinkSP3SSocket) Types() []boggart.DeviceType {

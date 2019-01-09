@@ -1,6 +1,9 @@
 package boggart
 
 import (
+	"errors"
+	"sync"
+
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/event"
@@ -16,6 +19,42 @@ var (
 	DeviceEventDeviceEnabled            = event.NewBaseEvent("DeviceEnabled")
 	DeviceEventDeviceDisabled           = event.NewBaseEvent("DeviceDisabled")
 )
+
+var (
+	deviceKindsMutex sync.RWMutex
+	deviceKinds      = make(map[string]DeviceKind)
+)
+
+func RegisterKind(name string, kind DeviceKind) {
+	deviceKindsMutex.Lock()
+	defer deviceKindsMutex.Unlock()
+
+	if kind == nil {
+		panic("Device kind is nil")
+	}
+
+	if _, dup := deviceKinds[name]; dup {
+		panic("RegisterKind called twice for device kind " + name)
+	}
+
+	deviceKinds[name] = kind
+}
+
+func GetKind(name string) (DeviceKind, error) {
+	deviceKindsMutex.RLock()
+	defer deviceKindsMutex.RUnlock()
+
+	kind, ok := deviceKinds[name]
+	if !ok {
+		return nil, errors.New("Device kind " + name + " isn't register")
+	}
+
+	return kind, nil
+}
+
+type DeviceKind interface {
+	Create(config map[string]interface{}) (Device, error)
+}
 
 type DeviceId int64
 

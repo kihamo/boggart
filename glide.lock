@@ -1,5 +1,5 @@
-hash: 3acd633547e99e0e51fc9f0749711999a11ea7012766639509e3d3a81352231b
-updated: 2019-01-06T16:22:51.958701+03:00
+hash: 550d674092bccd8b462b91f98d978931753ca1102da16bbd05393263177ebfce
+updated: 2019-01-10T01:53:46.230852+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: 02e53af36e6c978af692887ed449b74026d76fec
@@ -144,10 +144,6 @@ imports:
   - internal/sideinfo
 - name: github.com/hajimehoshi/oto
   version: 3a9bb05c78a0583c0f5a6c041eeb05a6ceec8ef9
-- name: github.com/hashicorp/errwrap
-  version: 8a6fb523712970c966eefc6b39ed2c5e74880354
-- name: github.com/hashicorp/go-multierror
-  version: 886a7fbe3eb1c874d46f623bfa70af45f425b3d1
 - name: github.com/heptiolabs/healthcheck
   version: da5fdee475fb09de87c5d4a50da233b7d28767b1
 - name: github.com/icza/bitio
@@ -178,7 +174,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: d7095fbc53d3306745badb53b7df57dca05a914a
+  version: 1cf5ac30be17a4557b6db3a87396f6a77df7185d
   subpackages:
   - components/annotations
   - components/annotations/instance
@@ -343,10 +339,6 @@ imports:
   version: 6edbfbd6a369ee82463312ec67b2c92f97a1d4dc
   subpackages:
   - sqlparse
-- name: github.com/sigurn/crc8
-  version: e55481d6f45c5a8f040343bace9013571dae103e
-- name: github.com/sigurn/utils
-  version: f19e41f79f8f006116f682c1af454591bc278ad4
 - name: github.com/snabb/webostv
   version: bae6b85a37a6ea235af0571b9f3ff944651a6581
 - name: github.com/technoweenie/multipartstreamer
@@ -390,12 +382,6 @@ imports:
   - zapcore
 - name: gobot.io/x/gobot
   version: c1d0e3ce485df0b45076d1d93b7d9240b770d5fc
-  subpackages:
-  - drivers/gpio
-  - drivers/i2c
-  - drivers/spi
-  - platforms/raspi
-  - sysfs
 - name: golang.org/x/crypto
   version: 9477e0b78b9ac3d0b03822fd95422e2fe07627cd
   subpackages:

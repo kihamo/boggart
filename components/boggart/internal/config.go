@@ -28,14 +28,6 @@ func (c *Component) ConfigVariables() []config.Variable {
 		config.NewVariable(boggart.ConfigGPIOPins, config.ValueTypeString).
 			WithUsage("Pins listener").
 			WithGroup("GPIO"),
-		config.NewVariable(boggart.ConfigCameraHikVisionAddresses, config.ValueTypeString).
-			WithUsage("Addresses").
-			WithGroup("Cameras").
-			WithView([]string{config.ViewTags}),
-		config.NewVariable(boggart.ConfigCameraHikVisionRepeatInterval, config.ValueTypeDuration).
-			WithUsage("Repeat interval").
-			WithGroup("Cameras").
-			WithDefault(time.Minute),
 		config.NewVariable(boggart.ConfigMercuryRepeatInterval, config.ValueTypeDuration).
 			WithUsage("Repeat interval").
 			WithGroup("Mercury devices").
@@ -43,32 +35,6 @@ func (c *Component) ConfigVariables() []config.Variable {
 		config.NewVariable(boggart.ConfigMercuryDeviceAddress, config.ValueTypeString).
 			WithUsage("Device address in format XXXXXX (last 6 digits of device serial number)").
 			WithGroup("Mercury devices"),
-		config.NewVariable(boggart.ConfigMikrotikRepeatInterval, config.ValueTypeDuration).
-			WithUsage("Repeat interval").
-			WithGroup("Mikrotik devices").
-			WithDefault(time.Minute * 5),
-		config.NewVariable(boggart.ConfigMikrotikAddresses, config.ValueTypeString).
-			WithUsage("API address in format host:port").
-			WithGroup("Mikrotik devices").
-			WithView([]string{config.ViewTags}),
-		config.NewVariable(boggart.ConfigMikrotikTimeout, config.ValueTypeDuration).
-			WithUsage("Request timeout").
-			WithGroup("Mikrotik devices").
-			WithDefault(time.Second * 10),
-		config.NewVariable(boggart.ConfigMobileEnabled, config.ValueTypeBool).
-			WithUsage("Enabled").
-			WithGroup("Mobile accounts"),
-		config.NewVariable(boggart.ConfigMobileRepeatInterval, config.ValueTypeDuration).
-			WithUsage("Repeat interval").
-			WithGroup("Mobile accounts").
-			WithDefault(time.Minute * 30),
-		config.NewVariable(boggart.ConfigMobileMegafonPhone, config.ValueTypeString).
-			WithUsage("Phone number").
-			WithGroup("Mobile Megafon accounts"),
-		config.NewVariable(boggart.ConfigMobileMegafonPassword, config.ValueTypeString).
-			WithUsage("Password").
-			WithGroup("Mobile Megafon accounts").
-			WithView([]string{config.ViewPassword}),
 		config.NewVariable(boggart.ConfigPulsarEnabled, config.ValueTypeBool).
 			WithUsage("Enabled").
 			WithGroup("Pulsar devices"),
@@ -115,35 +81,6 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithUsage("Start value of hot water (in m3)").
 			WithGroup("Pulsar devices").
 			WithDefault(0),
-		config.NewVariable(boggart.ConfigSoftVideoEnabled, config.ValueTypeBool).
-			WithUsage("Enabled").
-			WithGroup("SoftVideo provider"),
-		config.NewVariable(boggart.ConfigSoftVideoRepeatInterval, config.ValueTypeDuration).
-			WithUsage("Repeat interval").
-			WithGroup("SoftVideo provider").
-			WithDefault(time.Hour * 12),
-		config.NewVariable(boggart.ConfigSoftVideoLogin, config.ValueTypeString).
-			WithUsage("Login").
-			WithGroup("SoftVideo provider"),
-		config.NewVariable(boggart.ConfigSoftVideoPassword, config.ValueTypeString).
-			WithUsage("Password").
-			WithGroup("SoftVideo provider").
-			WithView([]string{config.ViewPassword}),
-		config.NewVariable(boggart.ConfigSensorBME280Enabled, config.ValueTypeBool).
-			WithUsage("Enabled").
-			WithGroup("Sensor 280"),
-		config.NewVariable(boggart.ConfigSensorBME280RepeatInterval, config.ValueTypeDuration).
-			WithUsage("Repeat interval").
-			WithGroup("Sensor 280").
-			WithDefault(time.Minute),
-		config.NewVariable(boggart.ConfigSensorBME280Bus, config.ValueTypeInt).
-			WithUsage("Bus number").
-			WithGroup("Sensor 280").
-			WithDefault(1),
-		config.NewVariable(boggart.ConfigSensorBME280Address, config.ValueTypeInt).
-			WithUsage("Address").
-			WithGroup("Sensor 280").
-			WithDefault(0x76),
 		config.NewVariable(boggart.ConfigMQTTOwnTracksEnabled, config.ValueTypeBool).
 			WithUsage("OwnTracks enabled").
 			WithGroup("MQTT subscribers"),
@@ -156,33 +93,9 @@ func (c *Component) ConfigVariables() []config.Variable {
 		config.NewVariable(boggart.ConfigMQTTMessengersEnabled, config.ValueTypeBool).
 			WithUsage("Messengers enabled").
 			WithGroup("MQTT subscribers"),
-		config.NewVariable(boggart.ConfigSocketsBroadlink, config.ValueTypeString).
-			WithUsage("Address of Broadlink in format ip:mac").
-			WithGroup("Sockets").
-			WithView([]string{config.ViewTags}),
-		config.NewVariable(boggart.ConfigRemoteControlBroadlink, config.ValueTypeString).
-			WithUsage("Address of Broadlink in format ip:mac").
-			WithGroup("Remote control").
-			WithView([]string{config.ViewTags}),
-		config.NewVariable(boggart.ConfigLEDWiFi, config.ValueTypeString).
-			WithUsage("Address of WiFi LED in format hostname or ip without port").
-			WithGroup("LED control").
-			WithView([]string{config.ViewTags}),
-		config.NewVariable(boggart.ConfigTVLGWebOS, config.ValueTypeString).
-			WithUsage("Address of LG on WebOS in format hostname or ip without port and register key").
-			WithGroup("TV").
-			WithView([]string{config.ViewTags}),
-		config.NewVariable(boggart.ConfigTVSamsung, config.ValueTypeString).
-			WithUsage("Address of Samsung in format hostname").
-			WithGroup("TV").
-			WithView([]string{config.ViewTags}),
-		config.NewVariable(boggart.ConfigUPSNUT, config.ValueTypeString).
-			WithUsage("Address of UPS NUT in format hostname:name").
-			WithGroup("UPS").
-			WithView([]string{config.ViewTags}),
-		config.NewVariable(boggart.ConfigSmartSpeakerGoogleHomeMini, config.ValueTypeString).
-			WithUsage("Address of Google Home Mini (only hostname)").
-			WithGroup("Smart speaker").
-			WithView([]string{config.ViewTags}),
+		config.NewVariable(boggart.ConfigConfigYAML, config.ValueTypeString).
+			WithUsage("Absolute path to YAML config").
+			WithGroup("Config").
+			WithDefault("config.yaml"),
 	}
 }

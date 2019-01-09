@@ -3,6 +3,8 @@ package devices
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"net"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -40,15 +42,48 @@ type BroadlinkRMRemoteControl struct {
 	provider *broadlink.RMProPlus
 }
 
-func NewBroadlinkRMRemoteControl(provider *broadlink.RMProPlus, m mqtt.Component) *BroadlinkRMRemoteControl {
+func (d BroadlinkRMRemoteControl) Create(config map[string]interface{}) (boggart.Device, error) {
+	localAddr, err := broadlink.LocalAddr()
+	if err != nil {
+		return nil, err
+	}
+
+	ipConfig, ok := config["ip"]
+	if !ok {
+		return nil, errors.New("config option ip isn't set")
+	}
+
+	if ipConfig == "" {
+		return nil, errors.New("config option ip is empty")
+	}
+
+	macConfig, ok := config["mac"]
+	if !ok {
+		return nil, errors.New("config option mac isn't set")
+	}
+
+	if macConfig == "" {
+		return nil, errors.New("config option mac is empty")
+	}
+
+	mac, err := net.ParseMAC(macConfig.(string))
+	if err != nil {
+		return nil, err
+	}
+
+	ip := net.UDPAddr{
+		IP:   net.ParseIP(ipConfig.(string)),
+		Port: broadlink.DevicePort,
+	}
+
 	device := &BroadlinkRMRemoteControl{
-		provider: provider,
+		provider: broadlink.NewRMProPlus(mac, ip, *localAddr),
 	}
 	device.Init()
-	device.SetSerialNumber(provider.MAC().String())
+	device.SetSerialNumber(mac.String())
 	device.SetDescription("Socket of Broadlink")
 
-	return device
+	return device, nil
 }
 
 func (d *BroadlinkRMRemoteControl) SetMQTTClient(client mqtt.Component) {

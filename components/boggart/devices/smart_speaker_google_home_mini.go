@@ -3,6 +3,7 @@ package devices
 import (
 	"bytes"
 	"context"
+	"errors"
 	"strconv"
 	"sync"
 	"time"
@@ -37,14 +38,23 @@ type GoogleHomeMiniSmartSpeaker struct {
 	host             string
 }
 
-func NewGoogleHomeMiniSmartSpeaker(host string) *GoogleHomeMiniSmartSpeaker {
+func (d GoogleHomeMiniSmartSpeaker) Create(config map[string]interface{}) (boggart.Device, error) {
+	host, ok := config["host"]
+	if !ok {
+		return nil, errors.New("config option host isn't set")
+	}
+
+	if host == "" {
+		return nil, errors.New("config option host is empty")
+	}
+
 	device := &GoogleHomeMiniSmartSpeaker{
-		host: host,
+		host: host.(string),
 	}
 	device.Init()
 	device.SetDescription("Google Home Mini")
 
-	return device
+	return device, nil
 }
 
 func (d *GoogleHomeMiniSmartSpeaker) Types() []boggart.DeviceType {

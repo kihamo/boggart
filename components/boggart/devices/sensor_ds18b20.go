@@ -2,6 +2,7 @@ package devices
 
 import (
 	"context"
+	"errors"
 	"sync/atomic"
 	"time"
 
@@ -24,15 +25,24 @@ type DS18B20Sensor struct {
 	boggart.DeviceMQTT
 }
 
-func NewDS18B20Sensor(addr string) *DS18B20Sensor {
+func (d DS18B20Sensor) Create(config map[string]interface{}) (boggart.Device, error) {
+	address, ok := config["address"]
+	if !ok {
+		return nil, errors.New("config option address isn't set")
+	}
+
+	if address == "" {
+		return nil, errors.New("config option address is empty")
+	}
+
 	device := &DS18B20Sensor{
 		lastValue: -1,
 	}
 	device.Init()
-	device.SetSerialNumber(addr)
+	device.SetSerialNumber(address.(string))
 	device.SetDescription("Sensor DS18B20")
 
-	return device
+	return device, nil
 }
 
 func (d *DS18B20Sensor) Types() []boggart.DeviceType {

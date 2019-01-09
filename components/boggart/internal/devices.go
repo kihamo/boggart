@@ -3,119 +3,70 @@ package internal
 import (
 	"encoding/hex"
 	"fmt"
-	"net"
-	"net/url"
+	"io/ioutil"
 	"strconv"
 	"strings"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/devices"
-	"github.com/kihamo/boggart/components/boggart/providers/broadlink"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 	"github.com/kihamo/boggart/components/boggart/providers/mercury"
-	"github.com/kihamo/boggart/components/boggart/providers/mikrotik"
-	"github.com/kihamo/boggart/components/boggart/providers/mobile"
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
-	"github.com/kihamo/boggart/components/boggart/providers/softvideo"
-	"github.com/kihamo/boggart/components/boggart/providers/wifiled"
-	"github.com/kihamo/boggart/components/mqtt"
-	"github.com/yryz/ds18b20"
-	"gobot.io/x/gobot/platforms/raspi"
+	"gopkg.in/yaml.v2"
 	"periph.io/x/periph/conn/gpio/gpioreg"
 )
 
-func (c *Component) initCameras() {
-	addresses := c.config.String(boggart.ConfigCameraHikVisionAddresses)
-	if addresses == "" {
-		return
+type FileYAML struct {
+	Devices []DeviceYAML
+}
+
+type DeviceYAML struct {
+	Enabled *bool
+	Type    string
+	Config  map[string]interface{}
+}
+
+func (c *Component) initConfigFromYaml() error {
+	fileName := c.config.String(boggart.ConfigConfigYAML)
+	if fileName == "" {
+		return nil
 	}
 
-	for _, address := range strings.Split(addresses, ",") {
-		address = strings.TrimSpace(address)
-		if address == "" {
-			c.logger.Warn("Camera address is empty")
+	var fileYAML FileYAML
+
+	data, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		return err
+	}
+
+	err = yaml.Unmarshal(data, &fileYAML)
+	if err != nil {
+		return err
+	}
+
+	for _, deviceYAML := range fileYAML.Devices {
+		if deviceYAML.Enabled != nil && !*deviceYAML.Enabled {
 			continue
 		}
 
-		u, err := url.Parse(address)
+		if deviceYAML.Type == "" {
+			// TODO: error
+			continue
+		}
+
+		kind, err := boggart.GetKind(deviceYAML.Type)
 		if err != nil {
-			c.logger.Warn("Bad camera address " + address)
-			continue
+			return err
 		}
 
-		port, _ := strconv.ParseInt(u.Port(), 10, 64)
-		password, _ := u.User.Password()
-
-		isapi := hikvision.NewISAPI(u.Hostname(), port, u.User.Username(), password)
-
-		device := devices.NewCameraHikVision(isapi, c.config.Duration(boggart.ConfigCameraHikVisionRepeatInterval))
-		device.SetDescription(device.Description() + " on " + u.Host)
+		device, err := kind.Create(deviceYAML.Config)
+		if err != nil {
+			return err
+		}
 
 		c.devicesManager.Register(device)
 	}
-}
 
-func (c *Component) initInternetProviders() {
-	if !c.config.Bool(boggart.ConfigSoftVideoEnabled) {
-		return
-	}
-
-	provider := softvideo.NewClient(
-		c.config.String(boggart.ConfigSoftVideoLogin),
-		c.config.String(boggart.ConfigSoftVideoPassword))
-
-	device := devices.NewSoftVideoInternet(provider, c.config.Duration(boggart.ConfigSoftVideoRepeatInterval))
-
-	c.devicesManager.Register(device)
-}
-
-func (c *Component) initPhones() {
-	if !c.config.Bool(boggart.ConfigMobileEnabled) {
-		return
-	}
-
-	megafonPhone := c.config.String(boggart.ConfigMobileMegafonPhone)
-	megafonPassword := c.config.String(boggart.ConfigMobileMegafonPassword)
-
-	if megafonPhone == "" || megafonPassword == "" {
-		return
-	}
-
-	providerMegafon := mobile.NewMegafon(megafonPhone, megafonPassword)
-	device := devices.NewMegafonPhone(providerMegafon, c.config.Duration(boggart.ConfigMobileRepeatInterval))
-
-	c.devicesManager.RegisterWithID(boggart.DeviceIdPhone.String(), device)
-}
-
-func (c *Component) initRouters() {
-	addresses := c.config.String(boggart.ConfigMikrotikAddresses)
-	if addresses == "" {
-		return
-	}
-
-	for _, address := range strings.Split(addresses, ",") {
-		address = strings.TrimSpace(address)
-		if address == "" {
-			c.logger.Warn("Mikrotik address is empty")
-			continue
-		}
-
-		u, err := url.Parse(address)
-		if err != nil {
-			c.logger.Warn("Bad Mikrotik address " + address)
-			continue
-		}
-
-		username := u.User.Username()
-		password, _ := u.User.Password()
-
-		api := mikrotik.NewClient(u.Host, username, password, c.config.Duration(boggart.ConfigMikrotikTimeout))
-
-		device := devices.NewMikrotikRouter(api, u.Hostname()+":514", c.config.Duration(boggart.ConfigMikrotikRepeatInterval))
-		device.SetDescription(device.Description() + " on " + u.Host)
-
-		c.devicesManager.Register(device)
-	}
+	return nil
 }
 
 func (c *Component) initElectricityMeters() {
@@ -233,205 +184,4 @@ func (c *Component) initPulsarMeters() {
 
 	deviceWaterMeterHot.SetDescription("Pulsar pulsed hot water meter with serial number " + serialNumber)
 	c.devicesManager.RegisterWithID(boggart.DeviceIdWaterMeterHot.String(), deviceWaterMeterHot)
-}
-
-func (c *Component) initSensor() {
-	if c.config.Bool(boggart.ConfigSensorBME280Enabled) {
-		deviceBME280 := devices.NewBME280Sensor(
-			raspi.NewAdaptor(),
-			c.config.Duration(boggart.ConfigSensorBME280RepeatInterval),
-			c.config.Int(boggart.ConfigSensorBME280Bus),
-			c.config.Int(boggart.ConfigSensorBME280Address))
-
-		c.devicesManager.Register(deviceBME280)
-	}
-
-	sensors, err := ds18b20.Sensors()
-	if err == nil && len(sensors) > 0 && sensors[0] != "not found." {
-		for _, sensor := range sensors {
-			device := devices.NewDS18B20Sensor(sensor)
-			c.devicesManager.Register(device)
-		}
-	}
-}
-
-func (c *Component) initSockets() {
-	addresses := c.config.String(boggart.ConfigSocketsBroadlink)
-	if addresses == "" {
-		return
-	}
-
-	localAddr, err := broadlink.LocalAddr()
-	if err != nil {
-		c.logger.Warn("Get local address is failed")
-		return
-	}
-
-	for _, address := range strings.Split(addresses, ",") {
-		address = strings.TrimSpace(address)
-		if address == "" {
-			c.logger.Warn("Socket address of Broadlink is empty")
-			continue
-		}
-
-		parts := strings.SplitN(address, ":", 2)
-		if len(parts) != 2 {
-			c.logger.Warn("Socket address of Broadlink is wrong " + address)
-			continue
-		}
-
-		mac, err := net.ParseMAC(parts[1])
-		if err != nil {
-			c.logger.Warn("Socket address of Broadlink is wrong MAC address " + address)
-			continue
-		}
-
-		ip := net.UDPAddr{
-			IP:   net.ParseIP(parts[0]),
-			Port: broadlink.DevicePort,
-		}
-
-		device := devices.NewBroadlinkSP3SSocket(broadlink.NewSP3S(mac, ip, *localAddr))
-		c.devicesManager.Register(device)
-	}
-}
-
-func (c *Component) initRemoteControl() {
-	addresses := c.config.String(boggart.ConfigRemoteControlBroadlink)
-	if addresses == "" {
-		return
-	}
-
-	localAddr, err := broadlink.LocalAddr()
-	if err != nil {
-		c.logger.Warn("Get local address is failed")
-		return
-	}
-
-	<-c.application.ReadyComponent(mqtt.ComponentName)
-	m := c.application.GetComponent(mqtt.ComponentName).(mqtt.Component)
-
-	for _, address := range strings.Split(addresses, ",") {
-		address = strings.TrimSpace(address)
-		if address == "" {
-			c.logger.Warn("Remote control address of Broadlink is empty")
-			continue
-		}
-
-		parts := strings.SplitN(address, ":", 2)
-		if len(parts) != 2 {
-			c.logger.Warn("Remote control address of Broadlink is wrong " + address)
-			continue
-		}
-
-		mac, err := net.ParseMAC(parts[1])
-		if err != nil {
-			c.logger.Warn("Remote control address of Broadlink is wrong MAC address " + address)
-			continue
-		}
-
-		ip := net.UDPAddr{
-			IP:   net.ParseIP(parts[0]),
-			Port: broadlink.DevicePort,
-		}
-
-		device := devices.NewBroadlinkRMRemoteControl(broadlink.NewRMProPlus(mac, ip, *localAddr), m)
-		c.devicesManager.Register(device)
-	}
-}
-
-func (c *Component) initLED() {
-	addresses := c.config.String(boggart.ConfigLEDWiFi)
-	if addresses == "" {
-		return
-	}
-
-	for _, host := range strings.Split(addresses, ",") {
-		host = strings.TrimSpace(host)
-		if host == "" {
-			c.logger.Warn("Hostname or IP address of WiFi LED is empty")
-			continue
-		}
-
-		device := devices.NewWiFiLED(wifiled.NewBulb(host))
-		c.devicesManager.Register(device)
-	}
-}
-
-func (c *Component) initTV() {
-	addresses := c.config.String(boggart.ConfigTVLGWebOS)
-	if addresses != "" {
-		for _, address := range strings.Split(addresses, ",") {
-			address = strings.TrimSpace(address)
-			if address == "" {
-				c.logger.Warn("Hostname or IP address of LG TV is empty")
-				continue
-			}
-
-			parts := strings.SplitN(address, ":", 2)
-			if len(parts) != 2 {
-				c.logger.Warn("Wrong address of LG TV " + address)
-				continue
-			}
-
-			device := devices.NewLGWebOSTV(parts[0], parts[1])
-			c.devicesManager.Register(device)
-		}
-	}
-
-	addresses = c.config.String(boggart.ConfigTVSamsung)
-	if addresses != "" {
-		for _, address := range strings.Split(addresses, ",") {
-			address = strings.TrimSpace(address)
-			if address == "" {
-				c.logger.Warn("Hostname or IP address of Samsung TV is empty")
-				continue
-			}
-
-			device := devices.NewSamsungTV(address)
-			c.devicesManager.Register(device)
-		}
-	}
-}
-
-func (c *Component) initUPS() {
-	addresses := c.config.String(boggart.ConfigUPSNUT)
-	if addresses == "" {
-		return
-	}
-
-	for _, address := range strings.Split(addresses, ",") {
-		address = strings.TrimSpace(address)
-		if address == "" {
-			c.logger.Warn("Hostname of UPS NUT is empty")
-			continue
-		}
-
-		parts := strings.SplitN(address, ":", 2)
-		if len(parts) != 2 {
-			c.logger.Warn("Wrong address of UPS NUT " + address)
-			continue
-		}
-
-		device := devices.NewUPSNUT(parts[0], parts[1])
-		c.devicesManager.Register(device)
-	}
-}
-
-func (c *Component) initSmartSpeakers() {
-	addresses := c.config.String(boggart.ConfigSmartSpeakerGoogleHomeMini)
-	if addresses == "" {
-		return
-	}
-
-	for _, host := range strings.Split(addresses, ",") {
-		host = strings.TrimSpace(host)
-		if host == "" {
-			c.logger.Warn("Hostname of Google Home Mini is empty")
-			continue
-		}
-
-		device := devices.NewGoogleHomeMiniSmartSpeaker(host)
-		c.devicesManager.Register(device)
-	}
 }
