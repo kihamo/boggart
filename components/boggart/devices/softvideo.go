@@ -21,8 +21,8 @@ type SoftVideo struct {
 	lastValue int64
 
 	boggart.DeviceBindBase
-	boggart.DeviceSerialNumber
-	boggart.DeviceMQTT
+	boggart.DeviceBindSerialNumber
+	boggart.DeviceBindMQTT
 
 	provider *softvideo.Client
 }
@@ -64,7 +64,7 @@ func (d *SoftVideo) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(d.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(time.Hour)
-	taskUpdater.SetName("device-internet-provider-softvideo-updater-" + d.provider.AccountID())
+	taskUpdater.SetName("bind-softvideo-updater-" + d.provider.AccountID())
 
 	return []workers.Task{
 		taskUpdater,

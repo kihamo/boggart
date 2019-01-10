@@ -39,8 +39,8 @@ type PulsarHeadMeter struct {
 	consumption      uint64
 
 	boggart.DeviceBindBase
-	boggart.DeviceSerialNumber
-	boggart.DeviceMQTT
+	boggart.DeviceBindSerialNumber
+	boggart.DeviceBindMQTT
 
 	provider *pulsar.HeatMeter
 	interval time.Duration
@@ -132,7 +132,7 @@ func (d *PulsarHeadMeter) Tasks() []workers.Task {
 	taskStateUpdater := task.NewFunctionTask(d.taskStateUpdater)
 	taskStateUpdater.SetRepeats(-1)
 	taskStateUpdater.SetRepeatInterval(d.interval)
-	taskStateUpdater.SetName("device-heat-meter-pulsar-state-updater-" + d.SerialNumber())
+	taskStateUpdater.SetName("bind-pulsar-heat-meter-state-updater-" + d.SerialNumber())
 
 	return []workers.Task{
 		taskStateUpdater,

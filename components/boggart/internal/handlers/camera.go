@@ -49,7 +49,7 @@ func (h *CameraHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		return
 	}
 
-	bind, ok := device.Bind().(*devices.CameraHikVision)
+	bind, ok := device.Bind().(*devices.HikVision)
 	if !ok {
 		h.NotFound(w, r)
 		return

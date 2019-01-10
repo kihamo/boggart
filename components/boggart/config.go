@@ -4,7 +4,6 @@ const (
 	ConfigListenerTelegramChats       = ComponentName + ".listener.telegram.chats"
 	ConfigRS485Address                = ComponentName + ".rs485.path"
 	ConfigRS485Timeout                = ComponentName + ".rs485.timeout"
-	ConfigGPIOPins                    = ComponentName + ".gpio.pins"
 	ConfigMercuryRepeatInterval       = ComponentName + ".mercury.repeat-interval"
 	ConfigMercuryDeviceAddress        = ComponentName + ".mercury.device-address"
 	ConfigPulsarEnabled               = ComponentName + ".pulsar.enabled"

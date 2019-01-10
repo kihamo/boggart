@@ -2,15 +2,11 @@ package internal
 
 import (
 	"encoding/hex"
-	"fmt"
-	"strconv"
-	"strings"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/devices"
 	"github.com/kihamo/boggart/components/boggart/providers/mercury"
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
-	"periph.io/x/periph/conn/gpio/gpioreg"
 )
 
 func (c *Component) initElectricityMeters() {
@@ -27,43 +23,6 @@ func (c *Component) initElectricityMeters() {
 		c.config.Duration(boggart.ConfigMercuryRepeatInterval))
 
 	c.devicesManager.RegisterWithID(boggart.DeviceIdElectricityMeter.String(), device, "mercury", "", nil, nil)
-}
-
-func (c *Component) initGPIO() {
-	addresses := c.config.String(boggart.ConfigGPIOPins)
-	if addresses == "" {
-		return
-	}
-
-	for _, pin := range strings.Split(addresses, ",") {
-		opts := strings.Split(pin, ":")
-
-		number, err := strconv.ParseUint(opts[0], 10, 64)
-		if err != nil {
-			continue
-		}
-
-		g := gpioreg.ByName(fmt.Sprintf("GPIO%d", number))
-		if g == nil {
-			c.logger.Warnf("GPIO %d not found", number)
-			continue
-		}
-
-		var mode devices.GPIOMode
-		if len(opts) > 1 {
-			switch opts[1] {
-			case "in":
-				mode = devices.GPIOModeIn
-			case "out":
-				mode = devices.GPIOModeOut
-			default:
-				mode = devices.GPIOModeDefault
-			}
-		}
-
-		device := devices.NewGPIOPin(g, mode)
-		c.devicesManager.RegisterWithID(fmt.Sprintf("pin.%d", number), device, "gpio", "", nil, nil)
-	}
 }
 
 func (c *Component) initPulsarMeters() {

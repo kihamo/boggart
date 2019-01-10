@@ -49,8 +49,8 @@ type Mercury200ElectricityMeter struct {
 	batteryVoltage uint64
 
 	boggart.DeviceBindBase
-	boggart.DeviceSerialNumber
-	boggart.DeviceMQTT
+	boggart.DeviceBindSerialNumber
+	boggart.DeviceBindMQTT
 
 	provider *mercury.ElectricityMeter200
 	interval time.Duration
@@ -145,7 +145,7 @@ func (d *Mercury200ElectricityMeter) Tasks() []workers.Task {
 	taskStateUpdater := task.NewFunctionTask(d.taskStateUpdater)
 	taskStateUpdater.SetRepeats(-1)
 	taskStateUpdater.SetRepeatInterval(d.interval)
-	taskStateUpdater.SetName("device-electricity-meter-mercury-200-state-updater-" + d.SerialNumber())
+	taskStateUpdater.SetName("bind-mercury-200-state-updater-" + d.SerialNumber())
 
 	return []workers.Task{
 		taskStateUpdater,

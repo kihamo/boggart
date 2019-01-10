@@ -25,9 +25,6 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithUsage("Serial port timeout").
 			WithGroup("RS485 protocol").
 			WithDefault(rs485.DefaultTimeout),
-		config.NewVariable(boggart.ConfigGPIOPins, config.ValueTypeString).
-			WithUsage("Pins listener").
-			WithGroup("GPIO"),
 		config.NewVariable(boggart.ConfigMercuryRepeatInterval, config.ValueTypeDuration).
 			WithUsage("Repeat interval").
 			WithGroup("Mercury devices").

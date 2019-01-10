@@ -17,16 +17,16 @@ import (
 )
 
 const (
-	TVSamsungMQTTTopicPower           mqtt.Topic = boggart.ComponentName + "/tv/+/power"
-	TVSamsungMQTTTopicKey             mqtt.Topic = boggart.ComponentName + "/tv/+/key"
-	TVSamsungMQTTTopicDeviceID        mqtt.Topic = boggart.ComponentName + "/tv/+/device/id"
-	TVSamsungMQTTTopicDeviceModelName mqtt.Topic = boggart.ComponentName + "/tv/+/device/model-name"
+	SamsungTizenMQTTTopicPower           mqtt.Topic = boggart.ComponentName + "/tv/+/power"
+	SamsungTizenMQTTTopicKey             mqtt.Topic = boggart.ComponentName + "/tv/+/key"
+	SamsungTizenMQTTTopicDeviceID        mqtt.Topic = boggart.ComponentName + "/tv/+/device/id"
+	SamsungTizenMQTTTopicDeviceModelName mqtt.Topic = boggart.ComponentName + "/tv/+/device/model-name"
 )
 
-type SamsungTV struct {
+type SamsungTizen struct {
 	boggart.DeviceBindBase
-	boggart.DeviceSerialNumber
-	boggart.DeviceMQTT
+	boggart.DeviceBindSerialNumber
+	boggart.DeviceBindMQTT
 
 	mutex    sync.RWMutex
 	initOnce sync.Once
@@ -35,7 +35,7 @@ type SamsungTV struct {
 	mac    string
 }
 
-func (d SamsungTV) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
+func (d SamsungTizen) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
 	host, ok := config["host"]
 	if !ok {
 		return nil, errors.New("config option host isn't set")
@@ -45,7 +45,7 @@ func (d SamsungTV) CreateBind(config map[string]interface{}) (boggart.DeviceBind
 		return nil, errors.New("config option host is empty")
 	}
 
-	device := &SamsungTV{
+	device := &SamsungTizen{
 		client: tv.NewApiV2(host.(string)),
 	}
 	device.Init()
@@ -53,19 +53,19 @@ func (d SamsungTV) CreateBind(config map[string]interface{}) (boggart.DeviceBind
 	return device, nil
 }
 
-func (d *SamsungTV) Tasks() []workers.Task {
+func (d *SamsungTizen) Tasks() []workers.Task {
 	taskLiveness := task.NewFunctionTask(d.taskLiveness)
 	taskLiveness.SetTimeout(time.Second * 5)
 	taskLiveness.SetRepeats(-1)
 	taskLiveness.SetRepeatInterval(time.Second * 30)
-	taskLiveness.SetName("device-tv-samsung-liveness")
+	taskLiveness.SetName("bind-samsung-tizen-liveness")
 
 	return []workers.Task{
 		taskLiveness,
 	}
 }
 
-func (d *SamsungTV) taskLiveness(ctx context.Context) (interface{}, error) {
+func (d *SamsungTizen) taskLiveness(ctx context.Context) (interface{}, error) {
 	info, err := d.client.Device(ctx)
 	if err != nil {
 		d.UpdateStatus(boggart.DeviceStatusOffline)
@@ -91,8 +91,8 @@ func (d *SamsungTV) taskLiveness(ctx context.Context) (interface{}, error) {
 		d.mutex.Unlock()
 
 		sn := d.SerialNumber()
-		d.MQTTPublishAsync(ctx, TVSamsungMQTTTopicDeviceID.Format(sn), 0, false, info.Device.ID)
-		d.MQTTPublishAsync(ctx, TVSamsungMQTTTopicDeviceModelName.Format(sn), 0, false, info.Device.Name)
+		d.MQTTPublishAsync(ctx, SamsungTizenMQTTTopicDeviceID.Format(sn), 0, false, info.Device.ID)
+		d.MQTTPublishAsync(ctx, SamsungTizenMQTTTopicDeviceModelName.Format(sn), 0, false, info.Device.Name)
 
 		d.initOnce.Do(d.initMQTTSubscribers)
 	}
@@ -100,10 +100,10 @@ func (d *SamsungTV) taskLiveness(ctx context.Context) (interface{}, error) {
 	return nil, nil
 }
 
-func (d *SamsungTV) initMQTTSubscribers() {
+func (d *SamsungTizen) initMQTTSubscribers() {
 	sn := d.SerialNumber()
 
-	d.MQTTSubscribe(TVSamsungMQTTTopicPower.Format(sn), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
+	d.MQTTSubscribe(SamsungTizenMQTTTopicPower.Format(sn), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
 		if bytes.Equal(message.Payload(), []byte(`1`)) {
 			d.mutex.RLock()
 			mac := d.mac
@@ -115,7 +115,7 @@ func (d *SamsungTV) initMQTTSubscribers() {
 		}
 	})
 
-	d.MQTTSubscribe(TVSamsungMQTTTopicKey.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
+	d.MQTTSubscribe(SamsungTizenMQTTTopicKey.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
 		d.client.SendCommand(string(message.Payload()))
 	}))
 }

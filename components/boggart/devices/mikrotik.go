@@ -48,8 +48,8 @@ var (
 
 type Mikrotik struct {
 	boggart.DeviceBindBase
-	boggart.DeviceSerialNumber
-	boggart.DeviceMQTT
+	boggart.DeviceBindSerialNumber
+	boggart.DeviceBindMQTT
 
 	provider     *mikrotik.Client
 	host         string
@@ -156,12 +156,12 @@ func (d *Mikrotik) Tasks() []workers.Task {
 	taskLiveness.SetTimeout(time.Second * 5)
 	taskLiveness.SetRepeats(-1)
 	taskLiveness.SetRepeatInterval(time.Minute)
-	taskLiveness.SetName("device-router-mikrotik-liveness")
+	taskLiveness.SetName("bind-mikrotik-liveness")
 
 	taskStateUpdater := task.NewFunctionTask(d.taskStateUpdater)
 	taskStateUpdater.SetRepeats(-1)
 	taskStateUpdater.SetRepeatInterval(time.Minute * 5)
-	taskStateUpdater.SetName("device-router-mikrotik-updater-" + d.host)
+	taskStateUpdater.SetName("bind-mikrotik-updater-" + d.host)
 
 	return []workers.Task{
 		taskLiveness,

@@ -39,8 +39,8 @@ type WiFiLED struct {
 	stateColor uint64
 
 	boggart.DeviceBindBase
-	boggart.DeviceSerialNumber
-	boggart.DeviceMQTT
+	boggart.DeviceBindSerialNumber
+	boggart.DeviceBindMQTT
 
 	bulb *wifiled.Bulb
 }
@@ -73,7 +73,7 @@ func (d *WiFiLED) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(d.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(WiFiLEDUpdateInterval)
-	taskUpdater.SetName("device-led-wifi-updater-" + d.SerialNumber())
+	taskUpdater.SetName("bind-led-wifi-updater-" + d.SerialNumber())
 
 	return []workers.Task{
 		taskUpdater,

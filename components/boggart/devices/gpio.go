@@ -3,12 +3,16 @@ package devices
 import (
 	"bytes"
 	"context"
+	"errors"
+	"fmt"
+	"strings"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/shadow/components/tracing"
 	"github.com/opentracing/opentracing-go/log"
 	"periph.io/x/periph/conn/gpio"
+	"periph.io/x/periph/conn/gpio/gpioreg"
 	"periph.io/x/periph/conn/pin"
 )
 
@@ -23,25 +27,50 @@ const (
 	GPIOModeOut
 )
 
-type GPIOPin struct {
+type GPIO struct {
 	boggart.DeviceBindBase
-	boggart.DeviceSerialNumber
-	boggart.DeviceMQTT
+	boggart.DeviceBindSerialNumber
+	boggart.DeviceBindMQTT
 
 	pin  pin.Pin
 	mode GPIOMode
 }
 
-func NewGPIOPin(p pin.Pin, m GPIOMode) *GPIOPin {
-	device := &GPIOPin{
-		pin:  p,
-		mode: m,
+func (d GPIO) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
+	pinConfig, ok := config["pin"]
+	if !ok {
+		return nil, errors.New("config option pin isn't set")
+	}
+
+	modeConfig, ok := config["mode"]
+	if !ok {
+		return nil, errors.New("config option mode isn't set")
+	}
+
+	g := gpioreg.ByName(fmt.Sprintf("GPIO%d", pinConfig))
+	if g == nil {
+		return nil, fmt.Errorf("GPIO %d not found", pinConfig)
+	}
+
+	var mode GPIOMode
+	switch strings.ToLower(modeConfig.(string)) {
+	case "in":
+		mode = GPIOModeIn
+	case "out":
+		mode = GPIOModeOut
+	default:
+		mode = GPIOModeDefault
+	}
+
+	device := &GPIO{
+		pin:  g,
+		mode: mode,
 	}
 
 	device.Init()
-	device.SetSerialNumber(p.Name())
+	device.SetSerialNumber(g.Name())
 
-	if _, ok := p.(gpio.PinIn); ok {
+	if _, ok := g.(gpio.PinIn); ok {
 		go func() {
 			device.waitForEdge()
 		}()
@@ -49,14 +78,14 @@ func NewGPIOPin(p pin.Pin, m GPIOMode) *GPIOPin {
 
 	device.UpdateStatus(boggart.DeviceStatusOnline)
 
-	return device
+	return device, nil
 }
 
-func (d *GPIOPin) Mode() GPIOMode {
+func (d *GPIO) Mode() GPIOMode {
 	return d.mode
 }
 
-func (d *GPIOPin) High(ctx context.Context) error {
+func (d *GPIO) High(ctx context.Context) error {
 	if d.Mode() == GPIOModeIn {
 		return nil
 	}
@@ -72,7 +101,7 @@ func (d *GPIOPin) High(ctx context.Context) error {
 	return nil
 }
 
-func (d *GPIOPin) Low(ctx context.Context) error {
+func (d *GPIO) Low(ctx context.Context) error {
 	if d.Mode() == GPIOModeIn {
 		return nil
 	}
@@ -88,7 +117,7 @@ func (d *GPIOPin) Low(ctx context.Context) error {
 	return nil
 }
 
-func (d *GPIOPin) Read() bool {
+func (d *GPIO) Read() bool {
 	if d.Mode() == GPIOModeOut {
 		return false
 	}
@@ -100,7 +129,7 @@ func (d *GPIOPin) Read() bool {
 	return false
 }
 
-func (d *GPIOPin) waitForEdge() {
+func (d *GPIO) waitForEdge() {
 	p := d.pin.(gpio.PinIn)
 	p.In(gpio.PullNoChange, gpio.BothEdges)
 	ctx := context.Background()
@@ -118,14 +147,14 @@ func (d *GPIOPin) waitForEdge() {
 	}
 }
 
-func (d *GPIOPin) MQTTTopics() []mqtt.Topic {
+func (d *GPIO) MQTTTopics() []mqtt.Topic {
 	return []mqtt.Topic{
 		mqtt.Topic(GPIOMQTTTopicPinState.Format(d.pin.Number())),
 		mqtt.Topic(GPIOMQTTTopicPinSet.Format(d.pin.Number())),
 	}
 }
 
-func (d *GPIOPin) MQTTSubscribers() []mqtt.Subscriber {
+func (d *GPIO) MQTTSubscribers() []mqtt.Subscriber {
 	if d.Mode() != GPIOModeOut {
 		return nil
 	}

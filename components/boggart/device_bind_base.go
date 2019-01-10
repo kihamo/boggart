@@ -26,42 +26,42 @@ func (d *DeviceBindBase) UpdateStatus(status DeviceStatus) {
 	atomic.StoreUint64(&d.status, uint64(status))
 }
 
-type DeviceSerialNumber struct {
+type DeviceBindSerialNumber struct {
 	mutex        sync.RWMutex
 	serialNumber string
 }
 
-func (d *DeviceSerialNumber) SerialNumber() string {
+func (d *DeviceBindSerialNumber) SerialNumber() string {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 
 	return d.serialNumber
 }
 
-func (d *DeviceSerialNumber) SerialNumberMQTTEscaped() string {
+func (d *DeviceBindSerialNumber) SerialNumberMQTTEscaped() string {
 	return mqtt.NameReplace(d.SerialNumber())
 }
 
-func (d *DeviceSerialNumber) SetSerialNumber(serialNumber string) {
+func (d *DeviceBindSerialNumber) SetSerialNumber(serialNumber string) {
 	d.mutex.Lock()
 	d.serialNumber = serialNumber
 	d.mutex.Unlock()
 }
 
-type DeviceMQTT struct {
+type DeviceBindMQTT struct {
 	Device
 
 	mutex  sync.RWMutex
 	client mqtt.Component
 }
 
-func (d *DeviceMQTT) SetMQTTClient(client mqtt.Component) {
+func (d *DeviceBindMQTT) SetMQTTClient(client mqtt.Component) {
 	d.mutex.Lock()
 	d.client = client
 	d.mutex.Unlock()
 }
 
-func (d *DeviceMQTT) MQTTPublish(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
+func (d *DeviceBindMQTT) MQTTPublish(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 
@@ -89,13 +89,13 @@ func (d *DeviceMQTT) MQTTPublish(ctx context.Context, topic string, qos byte, re
 	return d.client.Publish(ctx, topic, qos, retained, payload)
 }
 
-func (d *DeviceMQTT) MQTTPublishAsync(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) {
+func (d *DeviceBindMQTT) MQTTPublishAsync(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) {
 	go func() {
 		d.MQTTPublish(ctx, topic, qos, retained, payload)
 	}()
 }
 
-func (d *DeviceMQTT) MQTTSubscribe(topic string, qos byte, callback mqtt.MessageHandler) error {
+func (d *DeviceBindMQTT) MQTTSubscribe(topic string, qos byte, callback mqtt.MessageHandler) error {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 

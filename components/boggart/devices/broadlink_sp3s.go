@@ -35,8 +35,8 @@ type BroadlinkSP3S struct {
 	power int64
 
 	boggart.DeviceBindBase
-	boggart.DeviceSerialNumber
-	boggart.DeviceMQTT
+	boggart.DeviceBindSerialNumber
+	boggart.DeviceBindMQTT
 
 	provider *broadlink.SP3S
 }
@@ -102,7 +102,7 @@ func (d *BroadlinkSP3S) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(d.taskStateUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(BroadlinkSP3SUpdateInterval)
-	taskUpdater.SetName("device-socket-broadlink-sp3s-updater-" + d.SerialNumber())
+	taskUpdater.SetName("bind-broadlink-sp3s-updater-" + d.SerialNumber())
 
 	return []workers.Task{
 		taskUpdater,

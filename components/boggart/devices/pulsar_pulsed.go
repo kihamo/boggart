@@ -30,8 +30,8 @@ type PulsarPulsedWaterMeter struct {
 	pulses uint64
 
 	boggart.DeviceBindBase
-	boggart.DeviceSerialNumber
-	boggart.DeviceMQTT
+	boggart.DeviceBindSerialNumber
+	boggart.DeviceBindMQTT
 
 	input        uint64
 	volumeOffset float64
@@ -98,7 +98,7 @@ func (d *PulsarPulsedWaterMeter) Tasks() []workers.Task {
 	taskStateUpdater := task.NewFunctionTask(d.taskStateUpdater)
 	taskStateUpdater.SetRepeats(-1)
 	taskStateUpdater.SetRepeatInterval(d.interval)
-	taskStateUpdater.SetName("device-water-meter-pulsar-pulsed-state-updater-" + d.SerialNumber())
+	taskStateUpdater.SetName("bind-pulsar-pulsed-state-updater-" + d.SerialNumber())
 
 	return []workers.Task{
 		taskStateUpdater,

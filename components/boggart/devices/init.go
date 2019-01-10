@@ -5,15 +5,17 @@ import (
 )
 
 func init() {
-	boggart.RegisterDeviceType("camera_hikvision", CameraHikVision{})
-	boggart.RegisterDeviceType("led_wifi", WiFiLED{})
-	boggart.RegisterDeviceType("softvideo", SoftVideo{})
 	boggart.RegisterDeviceType("broadlink_rm", BroadlinkRM{})
-	boggart.RegisterDeviceType("mikrotik", Mikrotik{})
-	boggart.RegisterDeviceType("sensor_ds18b20", DS18B20Sensor{})
-	boggart.RegisterDeviceType("smart_speaker_google_home_mini", GoogleHomeMiniSmartSpeaker{})
 	boggart.RegisterDeviceType("broadlink_sp3s", BroadlinkSP3S{})
-	boggart.RegisterDeviceType("tv_lg_webos", LGWebOSTV{})
-	boggart.RegisterDeviceType("tv_samsung", SamsungTV{})
+	boggart.RegisterDeviceType("ds18b20", DS18B20{})
+	boggart.RegisterDeviceType("google_home_mini", GoogleHomeMini{})
+	boggart.RegisterDeviceType("gpio", GPIO{})
+	boggart.RegisterDeviceType("hikvision", HikVision{})
+	boggart.RegisterDeviceType("led_wifi", WiFiLED{})
+	boggart.RegisterDeviceType("lg_webos", LGWebOS{})
+	boggart.RegisterDeviceType("mikrotik", Mikrotik{})
 	boggart.RegisterDeviceType("nut", NUT{})
+	boggart.RegisterDeviceType("samsung_tizen", SamsungTizen{})
+	boggart.RegisterDeviceType("softvideo", SoftVideo{})
+
 }

@@ -20,8 +20,8 @@ type MegafonPhone struct {
 	lastValue int64
 
 	boggart.DeviceBindBase
-	boggart.DeviceSerialNumber
-	boggart.DeviceMQTT
+	boggart.DeviceBindSerialNumber
+	boggart.DeviceBindMQTT
 
 	provider *mobile.Megafon
 	interval time.Duration
@@ -52,7 +52,7 @@ func (d *MegafonPhone) Tasks() []workers.Task {
 	taskStateUpdater := task.NewFunctionTask(d.taskStateUpdater)
 	taskStateUpdater.SetRepeats(-1)
 	taskStateUpdater.SetRepeatInterval(d.interval)
-	taskStateUpdater.SetName("device-phone-megafon-state-updater-" + d.Number())
+	taskStateUpdater.SetName("bind-megafon-state-updater-" + d.Number())
 
 	return []workers.Task{
 		taskStateUpdater,

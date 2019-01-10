@@ -14,18 +14,18 @@ import (
 )
 
 const (
-	DS18B20SensorMQTTTopic mqtt.Topic = boggart.ComponentName + "/meter/ds18b20/+"
+	DS18B20MQTTTopic mqtt.Topic = boggart.ComponentName + "/meter/ds18b20/+"
 )
 
-type DS18B20Sensor struct {
+type DS18B20 struct {
 	lastValue int64
 
 	boggart.DeviceBindBase
-	boggart.DeviceSerialNumber
-	boggart.DeviceMQTT
+	boggart.DeviceBindSerialNumber
+	boggart.DeviceBindMQTT
 }
 
-func (d DS18B20Sensor) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
+func (d DS18B20) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
 	address, ok := config["address"]
 	if !ok {
 		return nil, errors.New("config option address isn't set")
@@ -35,7 +35,7 @@ func (d DS18B20Sensor) CreateBind(config map[string]interface{}) (boggart.Device
 		return nil, errors.New("config option address is empty")
 	}
 
-	device := &DS18B20Sensor{
+	device := &DS18B20{
 		lastValue: -1,
 	}
 	device.Init()
@@ -44,19 +44,19 @@ func (d DS18B20Sensor) CreateBind(config map[string]interface{}) (boggart.Device
 	return device, nil
 }
 
-func (d *DS18B20Sensor) Tasks() []workers.Task {
+func (d *DS18B20) Tasks() []workers.Task {
 	sn := d.SerialNumber()
 
 	taskLiveness := task.NewFunctionTask(d.taskLiveness)
 	taskLiveness.SetTimeout(time.Second * 5)
 	taskLiveness.SetRepeats(-1)
 	taskLiveness.SetRepeatInterval(time.Minute)
-	taskLiveness.SetName("device-sensor-ds18b20-liveness-" + sn)
+	taskLiveness.SetName("bind-ds18b20-liveness-" + sn)
 
 	taskStateUpdater := task.NewFunctionTask(d.taskStateUpdater)
 	taskStateUpdater.SetRepeats(-1)
 	taskStateUpdater.SetRepeatInterval(time.Minute)
-	taskStateUpdater.SetName("device-sensor-ds18b20-state-updater-" + sn)
+	taskStateUpdater.SetName("bind-ds18b20-state-updater-" + sn)
 
 	return []workers.Task{
 		taskLiveness,
@@ -64,7 +64,7 @@ func (d *DS18B20Sensor) Tasks() []workers.Task {
 	}
 }
 
-func (d *DS18B20Sensor) taskLiveness(ctx context.Context) (interface{}, error) {
+func (d *DS18B20) taskLiveness(ctx context.Context) (interface{}, error) {
 	devices, err := ds18b20.Sensors()
 	if err != nil {
 		d.UpdateStatus(boggart.DeviceStatusOffline)
@@ -84,7 +84,7 @@ func (d *DS18B20Sensor) taskLiveness(ctx context.Context) (interface{}, error) {
 	return nil, nil
 }
 
-func (d *DS18B20Sensor) taskStateUpdater(ctx context.Context) (interface{}, error) {
+func (d *DS18B20) taskStateUpdater(ctx context.Context) (interface{}, error) {
 	if d.Status() != boggart.DeviceStatusOnline {
 		return nil, nil
 	}
@@ -102,14 +102,14 @@ func (d *DS18B20Sensor) taskStateUpdater(ctx context.Context) (interface{}, erro
 	if prev != current {
 		atomic.StoreInt64(&d.lastValue, current)
 
-		d.MQTTPublishAsync(ctx, DS18B20SensorMQTTTopic.Format(sn), 0, true, value)
+		d.MQTTPublishAsync(ctx, DS18B20MQTTTopic.Format(sn), 0, true, value)
 	}
 
 	return nil, nil
 }
 
-func (d *DS18B20Sensor) MQTTTopics() []mqtt.Topic {
+func (d *DS18B20) MQTTTopics() []mqtt.Topic {
 	return []mqtt.Topic{
-		mqtt.Topic(DS18B20SensorMQTTTopic.Format(d.SerialNumberMQTTEscaped())),
+		mqtt.Topic(DS18B20MQTTTopic.Format(d.SerialNumberMQTTEscaped())),
 	}
 }

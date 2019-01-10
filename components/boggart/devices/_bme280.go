@@ -28,8 +28,8 @@ type BME280Sensor struct {
 	pressure    uint64
 
 	boggart.DeviceBindBase
-	boggart.DeviceSerialNumber
-	boggart.DeviceMQTT
+	boggart.DeviceBindSerialNumber
+	boggart.DeviceBindMQTT
 
 	driver   *i2c.BME280Driver
 	interval time.Duration
@@ -61,7 +61,7 @@ func (d *BME280Sensor) Tasks() []workers.Task {
 	taskStateUpdater := task.NewFunctionTask(d.taskStateUpdater)
 	taskStateUpdater.SetRepeats(-1)
 	taskStateUpdater.SetRepeatInterval(d.interval)
-	taskStateUpdater.SetName("device-sensor-bme280-state-updater-" + d.driver.Name())
+	taskStateUpdater.SetName("bind-bme280-state-updater-" + d.driver.Name())
 
 	return []workers.Task{
 		taskStateUpdater,

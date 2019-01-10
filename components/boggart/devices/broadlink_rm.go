@@ -36,8 +36,8 @@ const (
 
 type BroadlinkRM struct {
 	boggart.DeviceBindBase
-	boggart.DeviceSerialNumber
-	boggart.DeviceMQTT
+	boggart.DeviceBindSerialNumber
+	boggart.DeviceBindMQTT
 
 	provider *broadlink.RMProPlus
 }
@@ -86,7 +86,7 @@ func (d BroadlinkRM) CreateBind(config map[string]interface{}) (boggart.DeviceBi
 }
 
 func (d *BroadlinkRM) SetMQTTClient(client mqtt.Component) {
-	d.DeviceMQTT.SetMQTTClient(client)
+	d.DeviceBindMQTT.SetMQTTClient(client)
 
 	client.Publish(context.Background(), BroadlinkRMMQTTTopicCaptureState.Format(d.SerialNumberMQTTEscaped()), 2, true, "0")
 }
@@ -96,7 +96,7 @@ func (d *BroadlinkRM) Tasks() []workers.Task {
 	taskLiveness.SetTimeout(time.Second * 5)
 	taskLiveness.SetRepeats(-1)
 	taskLiveness.SetRepeatInterval(time.Second * 30)
-	taskLiveness.SetName("remote-control-broadlink-rm-liveness")
+	taskLiveness.SetName("bind-broadlink-rm-liveness")
 
 	return []workers.Task{
 		taskLiveness,

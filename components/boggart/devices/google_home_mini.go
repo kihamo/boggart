@@ -19,16 +19,16 @@ import (
 )
 
 const (
-	GoogleHomeMiniSmartSpeakerMQTTTopicVolume      mqtt.Topic = boggart.ComponentName + "/smart-speaker/+/volume"
-	GoogleHomeMiniSmartSpeakerMQTTTopicMute        mqtt.Topic = boggart.ComponentName + "/smart-speaker/+/mute"
-	GoogleHomeMiniSmartSpeakerMQTTTopicStateVolume mqtt.Topic = boggart.ComponentName + "/smart-speaker/+/state/volume"
-	GoogleHomeMiniSmartSpeakerMQTTTopicStateMute   mqtt.Topic = boggart.ComponentName + "/smart-speaker/+/state/mute"
+	GoogleHomeMiniMQTTTopicVolume      mqtt.Topic = boggart.ComponentName + "/smart-speaker/+/volume"
+	GoogleHomeMiniMQTTTopicMute        mqtt.Topic = boggart.ComponentName + "/smart-speaker/+/mute"
+	GoogleHomeMiniMQTTTopicStateVolume mqtt.Topic = boggart.ComponentName + "/smart-speaker/+/state/volume"
+	GoogleHomeMiniMQTTTopicStateMute   mqtt.Topic = boggart.ComponentName + "/smart-speaker/+/state/mute"
 )
 
-type GoogleHomeMiniSmartSpeaker struct {
+type GoogleHomeMini struct {
 	boggart.DeviceBindBase
-	boggart.DeviceSerialNumber
-	boggart.DeviceMQTT
+	boggart.DeviceBindSerialNumber
+	boggart.DeviceBindMQTT
 
 	mutex    sync.RWMutex
 	initOnce sync.Once
@@ -38,7 +38,7 @@ type GoogleHomeMiniSmartSpeaker struct {
 	host             string
 }
 
-func (d GoogleHomeMiniSmartSpeaker) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
+func (d GoogleHomeMini) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
 	host, ok := config["host"]
 	if !ok {
 		return nil, errors.New("config option host isn't set")
@@ -48,7 +48,7 @@ func (d GoogleHomeMiniSmartSpeaker) CreateBind(config map[string]interface{}) (b
 		return nil, errors.New("config option host is empty")
 	}
 
-	device := &GoogleHomeMiniSmartSpeaker{
+	device := &GoogleHomeMini{
 		host: host.(string),
 	}
 	device.Init()
@@ -56,28 +56,28 @@ func (d GoogleHomeMiniSmartSpeaker) CreateBind(config map[string]interface{}) (b
 	return device, nil
 }
 
-func (d *GoogleHomeMiniSmartSpeaker) Tasks() []workers.Task {
+func (d *GoogleHomeMini) Tasks() []workers.Task {
 	taskLiveness := task.NewFunctionTask(d.taskLiveness)
 	taskLiveness.SetTimeout(time.Second * 10)
 	taskLiveness.SetRepeats(-1)
 	taskLiveness.SetRepeatInterval(time.Second * 30)
-	taskLiveness.SetName("device-smart-home-google-home-mini-liveness")
+	taskLiveness.SetName("bind-google-home-mini-liveness")
 
 	return []workers.Task{
 		taskLiveness,
 	}
 }
 
-func (d *GoogleHomeMiniSmartSpeaker) MQTTTopics() []mqtt.Topic {
+func (d *GoogleHomeMini) MQTTTopics() []mqtt.Topic {
 	return []mqtt.Topic{
-		GoogleHomeMiniSmartSpeakerMQTTTopicVolume,
-		GoogleHomeMiniSmartSpeakerMQTTTopicMute,
-		GoogleHomeMiniSmartSpeakerMQTTTopicStateVolume,
-		GoogleHomeMiniSmartSpeakerMQTTTopicStateMute,
+		GoogleHomeMiniMQTTTopicVolume,
+		GoogleHomeMiniMQTTTopicMute,
+		GoogleHomeMiniMQTTTopicStateVolume,
+		GoogleHomeMiniMQTTTopicStateMute,
 	}
 }
 
-func (d *GoogleHomeMiniSmartSpeaker) ClientGoogleHome() *client.GoogleHome {
+func (d *GoogleHomeMini) ClientGoogleHome() *client.GoogleHome {
 	d.mutex.RLock()
 	c := d.clientGoogleHome
 	d.mutex.RUnlock()
@@ -95,7 +95,7 @@ func (d *GoogleHomeMiniSmartSpeaker) ClientGoogleHome() *client.GoogleHome {
 	return ctrl
 }
 
-func (d *GoogleHomeMiniSmartSpeaker) ClientChromecast() *chromecast.Player {
+func (d *GoogleHomeMini) ClientChromecast() *chromecast.Player {
 	d.mutex.RLock()
 	c := d.clientChromecast
 	d.mutex.RUnlock()
@@ -113,7 +113,7 @@ func (d *GoogleHomeMiniSmartSpeaker) ClientChromecast() *chromecast.Player {
 	return ctrl
 }
 
-func (d *GoogleHomeMiniSmartSpeaker) UpdateStatus(status boggart.DeviceStatus) {
+func (d *GoogleHomeMini) UpdateStatus(status boggart.DeviceStatus) {
 	if status == boggart.DeviceStatusOffline && status != d.Status() {
 		d.mutex.Lock()
 		d.clientGoogleHome = nil
@@ -129,7 +129,7 @@ func (d *GoogleHomeMiniSmartSpeaker) UpdateStatus(status boggart.DeviceStatus) {
 	d.DeviceBindBase.UpdateStatus(status)
 }
 
-func (d *GoogleHomeMiniSmartSpeaker) taskLiveness(ctx context.Context) (interface{}, error) {
+func (d *GoogleHomeMini) taskLiveness(ctx context.Context) (interface{}, error) {
 	ctrl := d.ClientGoogleHome()
 
 	response, err := ctrl.Info.GetEurekaInfo(info.NewGetEurekaInfoParams().
@@ -154,10 +154,10 @@ func (d *GoogleHomeMiniSmartSpeaker) taskLiveness(ctx context.Context) (interfac
 	return nil, nil
 }
 
-func (d *GoogleHomeMiniSmartSpeaker) initMQTTSubscribers() {
+func (d *GoogleHomeMini) initMQTTSubscribers() {
 	sn := d.SerialNumberMQTTEscaped()
 
-	d.MQTTSubscribe(GoogleHomeMiniSmartSpeakerMQTTTopicVolume.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) {
+	d.MQTTSubscribe(GoogleHomeMiniMQTTTopicVolume.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) {
 		volume, err := strconv.ParseInt(string(message.Payload()), 10, 64)
 		if err != nil {
 			return
@@ -166,7 +166,7 @@ func (d *GoogleHomeMiniSmartSpeaker) initMQTTSubscribers() {
 		d.ClientChromecast().SetVolume(volume)
 	}))
 
-	d.MQTTSubscribe(GoogleHomeMiniSmartSpeakerMQTTTopicMute.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) {
+	d.MQTTSubscribe(GoogleHomeMiniMQTTTopicMute.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) {
 		d.ClientChromecast().SetMute(bytes.Equal(message.Payload(), []byte(`1`)))
 	}))
 }

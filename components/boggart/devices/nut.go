@@ -19,8 +19,8 @@ const (
 
 type NUT struct {
 	boggart.DeviceBindBase
-	boggart.DeviceSerialNumber
-	boggart.DeviceMQTT
+	boggart.DeviceBindSerialNumber
+	boggart.DeviceBindMQTT
 
 	host string
 	ups  string
@@ -64,12 +64,12 @@ func (d *NUT) Tasks() []workers.Task {
 	taskLiveness.SetTimeout(time.Second * 5)
 	taskLiveness.SetRepeats(-1)
 	taskLiveness.SetRepeatInterval(time.Second * 30)
-	taskLiveness.SetName("ups-nut-liveness-" + d.ups)
+	taskLiveness.SetName("bind-nut-liveness-" + d.ups)
 
 	taskStateUpdater := task.NewFunctionTask(d.taskStateUpdater)
 	taskStateUpdater.SetRepeats(-1)
 	taskStateUpdater.SetRepeatInterval(time.Minute)
-	taskStateUpdater.SetName("ups-nut-state-updater-" + d.ups)
+	taskStateUpdater.SetName("bind-nut-state-updater-" + d.ups)
 
 	return []workers.Task{
 		taskLiveness,
