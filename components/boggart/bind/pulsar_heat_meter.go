@@ -23,6 +23,8 @@ const (
 	PulsarHeatMeterMQTTTopicTemperatureDelta mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/temperature_delta"
 	PulsarHeatMeterMQTTTopicEnergy           mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/energy"
 	PulsarHeatMeterMQTTTopicConsumption      mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/consumption"
+	PulsarHeatMeterMQTTTopicCapacity         mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/capacity"
+	PulsarHeatMeterMQTTTopicPower            mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/power"
 	PulsarHeatMeterMQTTTopicInputPulses      mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/input/+/pulses"
 	PulsarHeatMeterMQTTTopicInputVolume      mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/input/+/volume"
 )
@@ -33,6 +35,8 @@ type PulsarHeatMeter struct {
 	temperatureDelta uint64
 	energy           uint64
 	consumption      uint64
+	capacity         uint64
+	power            uint64
 	input1           uint64
 	input2           uint64
 	input3           uint64
@@ -96,6 +100,8 @@ func (d PulsarHeatMeter) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 		temperatureDelta: math.MaxUint64,
 		energy:           math.MaxUint64,
 		consumption:      math.MaxUint64,
+		capacity:         math.MaxUint64,
+		power:            math.MaxUint64,
 		input1:           math.MaxUint64,
 		input2:           math.MaxUint64,
 		input3:           math.MaxUint64,
@@ -182,6 +188,30 @@ func (d *PulsarHeatMeter) taskStateUpdater(ctx context.Context) (interface{}, er
 			atomic.StoreUint64(&d.consumption, math.Float64bits(current))
 
 			d.MQTTPublishAsync(ctx, PulsarHeatMeterMQTTTopicConsumption.Format(serialNumber), 0, true, current)
+		}
+	} else {
+		// TODO: log
+	}
+
+	if currentVal, err := d.provider.Capacity(); err == nil {
+		current := float64(currentVal)
+		prev := math.Float64frombits(atomic.LoadUint64(&d.capacity))
+		if current != prev {
+			atomic.StoreUint64(&d.capacity, math.Float64bits(current))
+
+			d.MQTTPublishAsync(ctx, PulsarHeatMeterMQTTTopicCapacity.Format(serialNumber), 0, true, current)
+		}
+	} else {
+		// TODO: log
+	}
+
+	if currentVal, err := d.provider.Power(); err == nil {
+		current := float64(currentVal)
+		prev := math.Float64frombits(atomic.LoadUint64(&d.power))
+		if current != prev {
+			atomic.StoreUint64(&d.power, math.Float64bits(current))
+
+			d.MQTTPublishAsync(ctx, PulsarHeatMeterMQTTTopicPower.Format(serialNumber), 0, true, current)
 		}
 	} else {
 		// TODO: log

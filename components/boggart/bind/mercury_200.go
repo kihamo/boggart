@@ -152,7 +152,7 @@ func (d *Mercury200) taskStateUpdater(ctx context.Context) (interface{}, error) 
 		// TODO: log
 	}
 
-	if current, err := d.provider.BatteryVoltage(); err != nil {
+	if current, err := d.provider.BatteryVoltage(); err == nil {
 		if prev := math.Float64frombits(atomic.LoadUint64(&d.batteryVoltage)); current != prev {
 			atomic.StoreUint64(&d.batteryVoltage, math.Float64bits(current))
 			d.MQTTPublishAsync(ctx, Mercury200MQTTTopicBatteryVoltage.Format(serialNumber), 0, true, current)
