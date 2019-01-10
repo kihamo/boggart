@@ -1,4 +1,4 @@
-package devices
+package bind
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
@@ -15,6 +15,7 @@ func init() {
 	boggart.RegisterDeviceType("lg_webos", LGWebOS{})
 	boggart.RegisterDeviceType("mikrotik", Mikrotik{})
 	boggart.RegisterDeviceType("nut", NUT{})
+	boggart.RegisterDeviceType("pulsar_heat_meter", PulsarHeatMeter{})
 	boggart.RegisterDeviceType("samsung_tizen", SamsungTizen{})
 	boggart.RegisterDeviceType("softvideo", SoftVideo{})
 

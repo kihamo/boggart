@@ -12,9 +12,6 @@ import (
 )
 
 const (
-	Input1 = iota + uint64(1)
-	Input2
-
 	FunctionBadCommand    = 0x00
 	FunctionReadMetrics   = 0x01
 	FunctionReadTime      = 0x04

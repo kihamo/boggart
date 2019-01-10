@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/devices"
+	"github.com/kihamo/boggart/components/boggart/bind"
 	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/messengers"
 )
@@ -49,7 +49,7 @@ func (h *CameraHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		return
 	}
 
-	bind, ok := device.Bind().(*devices.HikVision)
+	bind, ok := device.Bind().(*bind.HikVision)
 	if !ok {
 		h.NotFound(w, r)
 		return

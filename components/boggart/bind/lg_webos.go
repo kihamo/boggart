@@ -1,4 +1,4 @@
-package devices
+package bind
 
 import (
 	"bytes"

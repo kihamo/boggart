@@ -79,7 +79,11 @@ $(document).ready(function () {
                         var content = '';
 
                         for (var i in tasks) {
-                            content += '<span class="label label-warning">' + tasks[i] + '</span> ';
+                            if (i > 0) {
+                                content += '<br />';
+                            }
+
+                            content += '<span class="label label-warning">' + tasks[i] + '</span>';
                         }
 
                         return content;
@@ -91,7 +95,11 @@ $(document).ready(function () {
                         var content = '';
 
                         for (var i in topics) {
-                            content += '<span class="label label-primary">' + topics[i] + '</span> ';
+                            if (i > 0) {
+                                content += '<br />';
+                            }
+
+                            content += '<span class="label label-primary">' + topics[i] + '</span>';
                         }
 
                         return content;
