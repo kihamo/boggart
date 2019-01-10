@@ -3,7 +3,6 @@ package bind
 import (
 	"bytes"
 	"context"
-	"errors"
 	"strings"
 	"sync"
 	"time"
@@ -25,7 +24,6 @@ const (
 
 type SamsungTizen struct {
 	boggart.DeviceBindBase
-	boggart.DeviceBindSerialNumber
 	boggart.DeviceBindMQTT
 
 	mutex    sync.RWMutex
@@ -35,18 +33,19 @@ type SamsungTizen struct {
 	mac    string
 }
 
-func (d SamsungTizen) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
-	host, ok := config["host"]
-	if !ok {
-		return nil, errors.New("config option host isn't set")
-	}
+type SamsungTizenConfig struct {
+	Host string `valid:"host,required"`
+}
 
-	if host == "" {
-		return nil, errors.New("config option host is empty")
-	}
+func (d SamsungTizen) Config() interface{} {
+	return &SamsungTizenConfig{}
+}
+
+func (d SamsungTizen) CreateBind(c interface{}) (boggart.DeviceBind, error) {
+	config := c.(*SamsungTizenConfig)
 
 	device := &SamsungTizen{
-		client: tv.NewApiV2(host.(string)),
+		client: tv.NewApiV2(config.Host),
 	}
 	device.Init()
 

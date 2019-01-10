@@ -3,7 +3,6 @@ package bind
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"math"
 	"strconv"
@@ -39,32 +38,31 @@ type WiFiLED struct {
 	stateColor uint64
 
 	boggart.DeviceBindBase
-	boggart.DeviceBindSerialNumber
 	boggart.DeviceBindMQTT
 
 	bulb *wifiled.Bulb
 }
 
-func (d WiFiLED) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
-	address, ok := config["address"]
-	if !ok {
-		return nil, errors.New("config option address isn't set")
-	}
+type WiFiLEDConfig struct {
+	Address string `valid:"host,required"`
+}
 
-	if address == "" {
-		return nil, errors.New("config option address is empty")
-	}
+func (d WiFiLED) Config() interface{} {
+	return &WiFiLEDConfig{}
+}
+
+func (d WiFiLED) CreateBind(c interface{}) (boggart.DeviceBind, error) {
+	config := c.(*WiFiLEDConfig)
 
 	device := &WiFiLED{
-		bulb: wifiled.NewBulb(address.(string)),
-
+		bulb:       wifiled.NewBulb(config.Address),
 		statePower: -1,
 		stateMode:  math.MaxUint64,
 		stateSpeed: math.MaxUint64,
 		stateColor: math.MaxUint64,
 	}
 	device.Init()
-	device.SetSerialNumber(address.(string))
+	device.SetSerialNumber(config.Address)
 
 	return device, nil
 }

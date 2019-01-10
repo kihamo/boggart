@@ -11,7 +11,10 @@ import (
 )
 
 type DeviceBindBase struct {
-	status uint64
+	mutex sync.RWMutex
+
+	serialNumber string
+	status       uint64
 }
 
 func (d *DeviceBindBase) Init() {
@@ -26,23 +29,18 @@ func (d *DeviceBindBase) UpdateStatus(status DeviceStatus) {
 	atomic.StoreUint64(&d.status, uint64(status))
 }
 
-type DeviceBindSerialNumber struct {
-	mutex        sync.RWMutex
-	serialNumber string
-}
-
-func (d *DeviceBindSerialNumber) SerialNumber() string {
+func (d *DeviceBindBase) SerialNumber() string {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 
 	return d.serialNumber
 }
 
-func (d *DeviceBindSerialNumber) SerialNumberMQTTEscaped() string {
+func (d *DeviceBindBase) SerialNumberMQTTEscaped() string {
 	return mqtt.NameReplace(d.SerialNumber())
 }
 
-func (d *DeviceBindSerialNumber) SetSerialNumber(serialNumber string) {
+func (d *DeviceBindBase) SetSerialNumber(serialNumber string) {
 	d.mutex.Lock()
 	d.serialNumber = serialNumber
 	d.mutex.Unlock()

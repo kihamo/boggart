@@ -10,7 +10,7 @@ type Device struct {
 	t           string
 	description string
 	tags        []string
-	config      map[string]interface{}
+	config      interface{}
 }
 
 func (d *Device) Bind() boggart.DeviceBind {
@@ -33,6 +33,6 @@ func (d *Device) Tags() []string {
 	return d.tags
 }
 
-func (d *Device) Config() map[string]interface{} {
+func (d *Device) Config() interface{} {
 	return d.config
 }

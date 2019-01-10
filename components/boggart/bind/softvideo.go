@@ -2,7 +2,6 @@ package bind
 
 import (
 	"context"
-	"errors"
 	"sync/atomic"
 	"time"
 
@@ -21,37 +20,29 @@ type SoftVideo struct {
 	lastValue int64
 
 	boggart.DeviceBindBase
-	boggart.DeviceBindSerialNumber
 	boggart.DeviceBindMQTT
 
 	provider *softvideo.Client
 }
 
-func (d SoftVideo) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
-	login, ok := config["login"]
-	if !ok {
-		return nil, errors.New("config option login isn't set")
-	}
+type SoftVideoConfig struct {
+	Login    string `valid:"required"`
+	Password string `valid:"required"`
+}
 
-	if login == "" {
-		return nil, errors.New("config option login is empty")
-	}
+func (d SoftVideo) Config() interface{} {
+	return &SoftVideoConfig{}
+}
 
-	password, ok := config["password"]
-	if !ok {
-		return nil, errors.New("config option password isn't set")
-	}
-
-	if password == "" {
-		return nil, errors.New("config option password is empty")
-	}
+func (d SoftVideo) CreateBind(c interface{}) (boggart.DeviceBind, error) {
+	config := c.(*SoftVideoConfig)
 
 	device := &SoftVideo{
-		provider:  softvideo.NewClient(login.(string), password.(string)),
+		provider:  softvideo.NewClient(config.Login, config.Password),
 		lastValue: -1,
 	}
 	device.Init()
-	device.SetSerialNumber(login.(string))
+	device.SetSerialNumber(config.Login)
 
 	return device, nil
 }

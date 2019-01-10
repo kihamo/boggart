@@ -111,7 +111,11 @@ $(document).ready(function () {
                         var content = '';
 
                         for (var i in subscribers) {
-                            content += '<span class="label label-info">' + subscribers[i] + '</span> ';
+                            if (i > 0) {
+                                content += '<br />';
+                            }
+
+                            content += '<span class="label label-info">' + subscribers[i] + '</span>';
                         }
 
                         return content;
@@ -120,7 +124,7 @@ $(document).ready(function () {
                 {
                     data: 'config',
                     render: function (config) {
-                        return JSON.stringify(config);
+                        return '<pre><code class="yaml">' + config + '</code></pre>';
                     }
                 }
             ]

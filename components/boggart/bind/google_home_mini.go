@@ -3,7 +3,6 @@ package bind
 import (
 	"bytes"
 	"context"
-	"errors"
 	"strconv"
 	"sync"
 	"time"
@@ -27,7 +26,6 @@ const (
 
 type GoogleHomeMini struct {
 	boggart.DeviceBindBase
-	boggart.DeviceBindSerialNumber
 	boggart.DeviceBindMQTT
 
 	mutex    sync.RWMutex
@@ -38,18 +36,19 @@ type GoogleHomeMini struct {
 	host             string
 }
 
-func (d GoogleHomeMini) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
-	host, ok := config["host"]
-	if !ok {
-		return nil, errors.New("config option host isn't set")
-	}
+type GoogleHomeMiniConfig struct {
+	Host string `valid:"host,required"`
+}
 
-	if host == "" {
-		return nil, errors.New("config option host is empty")
-	}
+func (d GoogleHomeMini) Config() interface{} {
+	return &GoogleHomeMiniConfig{}
+}
+
+func (d GoogleHomeMini) CreateBind(c interface{}) (boggart.DeviceBind, error) {
+	config := c.(*GoogleHomeMiniConfig)
 
 	device := &GoogleHomeMini{
-		host: host.(string),
+		host: config.Host,
 	}
 	device.Init()
 

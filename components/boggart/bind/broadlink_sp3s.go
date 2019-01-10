@@ -3,7 +3,6 @@ package bind
 import (
 	"bytes"
 	"context"
-	"errors"
 	"net"
 	"sync/atomic"
 	"time"
@@ -35,43 +34,35 @@ type BroadlinkSP3S struct {
 	power int64
 
 	boggart.DeviceBindBase
-	boggart.DeviceBindSerialNumber
 	boggart.DeviceBindMQTT
 
 	provider *broadlink.SP3S
 }
 
-func (d BroadlinkSP3S) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
+type BroadlinkSP3SConfig struct {
+	IP  string `valid:"ip,required"`
+	MAC string `valid:"mac,required"`
+}
+
+func (d BroadlinkSP3S) Config() interface{} {
+	return &BroadlinkSP3SConfig{}
+}
+
+func (d BroadlinkSP3S) CreateBind(c interface{}) (boggart.DeviceBind, error) {
+	config := c.(*BroadlinkSP3SConfig)
+
 	localAddr, err := broadlink.LocalAddr()
 	if err != nil {
 		return nil, err
 	}
 
-	ipConfig, ok := config["ip"]
-	if !ok {
-		return nil, errors.New("config option ip isn't set")
-	}
-
-	if ipConfig == "" {
-		return nil, errors.New("config option ip is empty")
-	}
-
-	macConfig, ok := config["mac"]
-	if !ok {
-		return nil, errors.New("config option mac isn't set")
-	}
-
-	if macConfig == "" {
-		return nil, errors.New("config option mac is empty")
-	}
-
-	mac, err := net.ParseMAC(macConfig.(string))
+	mac, err := net.ParseMAC(config.MAC)
 	if err != nil {
 		return nil, err
 	}
 
 	ip := net.UDPAddr{
-		IP:   net.ParseIP(ipConfig.(string)),
+		IP:   net.ParseIP(config.IP),
 		Port: broadlink.DevicePort,
 	}
 

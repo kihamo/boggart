@@ -19,41 +19,28 @@ const (
 
 type NUT struct {
 	boggart.DeviceBindBase
-	boggart.DeviceBindSerialNumber
 	boggart.DeviceBindMQTT
 
-	host string
-	ups  string
+	config *NUTConfig
 
 	mutex     sync.Mutex
 	variables map[string]interface{}
 }
 
-func (d NUT) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
-	host, ok := config["host"]
-	if !ok {
-		return nil, errors.New("config option host isn't set")
-	}
+type NUTConfig struct {
+	Host string `valid:"host,required"`
+	UPS  string `valid:"required"`
+}
 
-	if host == "" {
-		return nil, errors.New("config option host is empty")
-	}
+func (d NUT) Config() interface{} {
+	return &NUTConfig{}
+}
 
-	ups, ok := config["ups"]
-	if !ok {
-		return nil, errors.New("config option ups isn't set")
-	}
-
-	if ups == "" {
-		return nil, errors.New("config option ups is empty")
-	}
-
+func (d NUT) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 	device := &NUT{
-		host:      host.(string),
-		ups:       ups.(string),
+		config:    c.(*NUTConfig),
 		variables: make(map[string]interface{}, 0),
 	}
-
 	device.Init()
 
 	return device, nil
@@ -64,12 +51,12 @@ func (d *NUT) Tasks() []workers.Task {
 	taskLiveness.SetTimeout(time.Second * 5)
 	taskLiveness.SetRepeats(-1)
 	taskLiveness.SetRepeatInterval(time.Second * 30)
-	taskLiveness.SetName("bind-nut-liveness-" + d.ups)
+	taskLiveness.SetName("bind-nut-liveness-" + d.config.UPS)
 
 	taskStateUpdater := task.NewFunctionTask(d.taskStateUpdater)
 	taskStateUpdater.SetRepeats(-1)
 	taskStateUpdater.SetRepeatInterval(time.Minute)
-	taskStateUpdater.SetName("bind-nut-state-updater-" + d.ups)
+	taskStateUpdater.SetName("bind-nut-state-updater-" + d.config.UPS)
 
 	return []workers.Task{
 		taskLiveness,
@@ -79,12 +66,12 @@ func (d *NUT) Tasks() []workers.Task {
 
 func (d *NUT) MQTTTopics() []mqtt.Topic {
 	return []mqtt.Topic{
-		mqtt.Topic(NUTMQTTTopicVariable.Format(d.ups)),
+		mqtt.Topic(NUTMQTTTopicVariable.Format(d.config.UPS)),
 	}
 }
 
 func (d *NUT) getUPS() (ups nut.UPS, err error) {
-	client, err := nut.Connect(d.host)
+	client, err := nut.Connect(d.config.Host)
 	if err != nil {
 		return ups, err
 	}
@@ -95,7 +82,7 @@ func (d *NUT) getUPS() (ups nut.UPS, err error) {
 	}
 
 	for _, device := range devices {
-		if device.Name == d.ups {
+		if device.Name == d.config.UPS {
 			for _, v := range device.Variables {
 				if v.Name == "device.serial" {
 					d.SetSerialNumber(v.Value.(string))
@@ -139,7 +126,7 @@ func (d *NUT) taskStateUpdater(ctx context.Context) (interface{}, error) {
 			d.variables[v.Name] = v.Value
 			name := mqtt.NameReplace(v.Name)
 
-			d.MQTTPublishAsync(ctx, NUTMQTTTopicVariable.Format(d.ups, name), 2, true, v.Value)
+			d.MQTTPublishAsync(ctx, NUTMQTTTopicVariable.Format(d.config.UPS, name), 2, true, v.Value)
 		}
 	}
 

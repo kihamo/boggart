@@ -48,13 +48,11 @@ var (
 
 type Mikrotik struct {
 	boggart.DeviceBindBase
-	boggart.DeviceBindSerialNumber
 	boggart.DeviceBindMQTT
 
 	provider     *mikrotik.Client
 	host         string
 	syslogClient string
-	interval     time.Duration
 }
 
 type MikrotikListener struct {
@@ -74,29 +72,32 @@ type MikrotikMac struct {
 	}
 }
 
-func (d Mikrotik) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
-	address, ok := config["address"]
-	if !ok {
-		return nil, errors.New("config option address isn't set")
-	}
+type MikrotikConfig struct {
+	Address      string `valid:"url,required"`
+	SyslogClient string `valid:"host"`
+}
 
-	if address == "" {
-		return nil, errors.New("config option address is empty")
-	}
+func (d Mikrotik) Config() interface{} {
+	return &MikrotikConfig{}
+}
 
-	u, err := url.Parse(address.(string))
-	if err != nil {
-		return nil, errors.New("Bad Mikrotik address " + address.(string))
-	}
+func (d Mikrotik) CreateBind(c interface{}) (boggart.DeviceBind, error) {
+	config := c.(*MikrotikConfig)
 
+	u, _ := url.Parse(config.Address)
 	username := u.User.Username()
 	password, _ := u.User.Password()
 
 	device := &Mikrotik{
 		provider:     mikrotik.NewClient(u.Host, username, password, time.Second*10),
 		host:         u.Host + "-" + u.Port(),
-		syslogClient: u.Hostname() + ":514",
+		syslogClient: config.SyslogClient,
 	}
+
+	if device.syslogClient == "" {
+		device.syslogClient = u.Hostname() + ":514"
+	}
+
 	device.Init()
 
 	return device, nil

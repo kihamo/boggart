@@ -51,7 +51,6 @@ type HikVisionPTZChannel struct {
 
 type HikVision struct {
 	boggart.DeviceBindBase
-	boggart.DeviceBindSerialNumber
 	boggart.DeviceBindMQTT
 
 	mutex    sync.RWMutex
@@ -63,23 +62,18 @@ type HikVision struct {
 	ptzChannels map[uint64]HikVisionPTZChannel
 }
 
-func (d HikVision) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
-	address, ok := config["address"]
-	if !ok {
-		return nil, errors.New("config option address isn't set")
-	}
+type HikVisionConfig struct {
+	Address string `valid:"url,required"`
+}
 
-	if address == "" {
-		return nil, errors.New("config option address is empty")
-	}
+func (d HikVision) Config() interface{} {
+	return &HikVisionConfig{}
+}
 
-	val := address.(string)
+func (d HikVision) CreateBind(c interface{}) (boggart.DeviceBind, error) {
+	config := c.(*HikVisionConfig)
 
-	u, err := url.Parse(val)
-	if err != nil {
-		return nil, errors.New("config option address has bad value " + val)
-	}
-
+	u, _ := url.Parse(config.Address)
 	port, _ := strconv.ParseInt(u.Port(), 10, 64)
 	password, _ := u.User.Password()
 

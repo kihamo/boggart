@@ -2,7 +2,6 @@ package bind
 
 import (
 	"context"
-	"errors"
 	"math"
 	"sync/atomic"
 	"time"
@@ -35,41 +34,39 @@ type Mercury200 struct {
 	batteryVoltage uint64
 
 	boggart.DeviceBindBase
-	boggart.DeviceBindSerialNumber
 	boggart.DeviceBindMQTT
 
 	provider *mercury.ElectricityMeter200
 }
 
-func (d Mercury200) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
-	rs485Address, ok := config["rs485_address"]
-	if !ok {
-		return nil, errors.New("config option rs485_address isn't set")
-	}
+type Mercury200Config struct {
+	RS485 struct {
+		Address string `valid:"required"`
+		Timeout string
+	} `valid:"required"`
+	Address string `valid:"required"`
+}
+
+func (d Mercury200) Config() interface{} {
+	return &Mercury200Config{}
+}
+
+func (d Mercury200) CreateBind(c interface{}) (boggart.DeviceBind, error) {
+	config := c.(*Mercury200Config)
 
 	var err error
 	timeout := time.Second
 
-	rs485Timeout, ok := config["rs485_timeout"]
-	if ok {
-		timeout, err = time.ParseDuration(rs485Timeout.(string))
+	if config.RS485.Timeout != "" {
+		timeout, err = time.ParseDuration(config.RS485.Timeout)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	conn := rs485.NewConnection(rs485Address.(string), timeout)
-
-	address, ok := config["address"]
-	if !ok {
-		return nil, errors.New("config option address isn't set")
-	}
-
-	if address == "" {
-		return nil, errors.New("config option address is empty")
-	}
-
-	provider := mercury.NewElectricityMeter200(mercury.ConvertSerialNumber(address.(string)), conn)
+	provider := mercury.NewElectricityMeter200(
+		mercury.ConvertSerialNumber(config.Address),
+		rs485.NewConnection(config.RS485.Address, timeout))
 
 	device := &Mercury200{
 		provider: provider,
@@ -86,7 +83,7 @@ func (d Mercury200) CreateBind(config map[string]interface{}) (boggart.DeviceBin
 	device.Init()
 
 	// TODO: read real serial number
-	device.SetSerialNumber(address.(string))
+	device.SetSerialNumber(config.Address)
 
 	// TODO: MQTT publish version
 

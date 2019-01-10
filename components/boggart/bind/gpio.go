@@ -3,7 +3,6 @@ package bind
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -29,31 +28,31 @@ const (
 
 type GPIO struct {
 	boggart.DeviceBindBase
-	boggart.DeviceBindSerialNumber
 	boggart.DeviceBindMQTT
 
 	pin  pin.Pin
 	mode GPIOMode
 }
 
-func (d GPIO) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
-	pinConfig, ok := config["pin"]
-	if !ok {
-		return nil, errors.New("config option pin isn't set")
-	}
+type GPIOConfig struct {
+	Pin  uint64 `valid:"required"`
+	Mode string `valid:"in(in|out)"`
+}
 
-	modeConfig, ok := config["mode"]
-	if !ok {
-		return nil, errors.New("config option mode isn't set")
-	}
+func (d GPIO) Config() interface{} {
+	return &GPIOConfig{}
+}
 
-	g := gpioreg.ByName(fmt.Sprintf("GPIO%d", pinConfig))
+func (d GPIO) CreateBind(c interface{}) (boggart.DeviceBind, error) {
+	config := c.(*GPIOConfig)
+
+	g := gpioreg.ByName(fmt.Sprintf("GPIO%d", config.Pin))
 	if g == nil {
-		return nil, fmt.Errorf("GPIO %d not found", pinConfig)
+		return nil, fmt.Errorf("GPIO %d not found", config.Pin)
 	}
 
 	var mode GPIOMode
-	switch strings.ToLower(modeConfig.(string)) {
+	switch strings.ToLower(config.Mode) {
 	case "in":
 		mode = GPIOModeIn
 	case "out":

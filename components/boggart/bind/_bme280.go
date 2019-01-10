@@ -28,7 +28,6 @@ type BME280Sensor struct {
 	pressure    uint64
 
 	boggart.DeviceBindBase
-	boggart.DeviceBindSerialNumber
 	boggart.DeviceBindMQTT
 
 	driver   *i2c.BME280Driver

@@ -38,13 +38,13 @@ func NewDevicesManager(mqtt mqtt.Component, workers workers.Component, listeners
 	}
 }
 
-func (m *DevicesManager) Register(device boggart.DeviceBind, t string, description string, tags []string, config map[string]interface{}) string {
+func (m *DevicesManager) Register(device boggart.DeviceBind, t string, description string, tags []string, config interface{}) string {
 	id := uuid.New()
 	m.RegisterWithID(id, device, t, description, tags, config)
 	return id
 }
 
-func (m *DevicesManager) RegisterWithID(id string, bind boggart.DeviceBind, t string, description string, tags []string, config map[string]interface{}) {
+func (m *DevicesManager) RegisterWithID(id string, bind boggart.DeviceBind, t string, description string, tags []string, config interface{}) {
 	if id == "" {
 		id = uuid.New()
 	}

@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"sync"
 
+	"github.com/asaskevich/govalidator"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/components/syslog"
@@ -17,6 +18,7 @@ import (
 	"github.com/kihamo/shadow/components/messengers"
 	"github.com/kihamo/shadow/components/metrics"
 	"github.com/kihamo/shadow/components/workers"
+	"github.com/mitchellh/mapstructure"
 	"gopkg.in/yaml.v2"
 	"periph.io/x/periph/host"
 )
@@ -159,15 +161,31 @@ func (c *Component) initConfigFromYaml() error {
 			return err
 		}
 
-		device, err := kind.CreateBind(d.Config)
+		var cfg interface{}
+
+		if prepare := kind.Config(); prepare != nil {
+			if err := mapstructure.Decode(d.Config, &prepare); err != nil {
+				return err
+			}
+
+			if _, err = govalidator.ValidateStruct(prepare); err != nil {
+				return err
+			}
+
+			cfg = prepare
+		} else {
+			cfg = d.Config
+		}
+
+		device, err := kind.CreateBind(cfg)
 		if err != nil {
 			return err
 		}
 
 		if d.ID != nil && *d.ID != "" {
-			c.devicesManager.RegisterWithID(*d.ID, device, d.Type, d.Description, d.Tags, d.Config)
+			c.devicesManager.RegisterWithID(*d.ID, device, d.Type, d.Description, d.Tags, cfg)
 		} else {
-			c.devicesManager.Register(device, d.Type, d.Description, d.Tags, d.Config)
+			c.devicesManager.Register(device, d.Type, d.Description, d.Tags, cfg)
 		}
 	}
 

@@ -2,7 +2,6 @@ package bind
 
 import (
 	"context"
-	"errors"
 	"sync/atomic"
 	"time"
 
@@ -21,25 +20,25 @@ type DS18B20 struct {
 	lastValue int64
 
 	boggart.DeviceBindBase
-	boggart.DeviceBindSerialNumber
 	boggart.DeviceBindMQTT
 }
 
-func (d DS18B20) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
-	address, ok := config["address"]
-	if !ok {
-		return nil, errors.New("config option address isn't set")
-	}
+type DS18B20Config struct {
+	Address string `valid:"required"`
+}
 
-	if address == "" {
-		return nil, errors.New("config option address is empty")
-	}
+func (d DS18B20) Config() interface{} {
+	return &DS18B20Config{}
+}
+
+func (d DS18B20) CreateBind(c interface{}) (boggart.DeviceBind, error) {
+	config := c.(*DS18B20Config)
 
 	device := &DS18B20{
 		lastValue: -1,
 	}
 	device.Init()
-	device.SetSerialNumber(address.(string))
+	device.SetSerialNumber(config.Address)
 
 	return device, nil
 }

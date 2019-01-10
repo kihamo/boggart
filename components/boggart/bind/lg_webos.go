@@ -3,7 +3,6 @@ package bind
 import (
 	"bytes"
 	"context"
-	"errors"
 	"net"
 	"net/http"
 	"strconv"
@@ -47,39 +46,27 @@ var defaultDialerLGWebOS = webostv.Dialer{
 
 type LGWebOS struct {
 	boggart.DeviceBindBase
-	boggart.DeviceBindSerialNumber
 	boggart.DeviceBindMQTT
 
 	mutex    sync.RWMutex
 	initOnce sync.Once
 
 	client *webostv.Tv
-	host   string
-	key    string
+	config *LGWebOSConfig
 }
 
-func (d LGWebOS) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
-	host, ok := config["host"]
-	if !ok {
-		return nil, errors.New("config option host isn't set")
-	}
+type LGWebOSConfig struct {
+	Host string `valid:"host,required"`
+	Key  string `valid:"required"`
+}
 
-	if host == "" {
-		return nil, errors.New("config option host is empty")
-	}
+func (d LGWebOS) Config() interface{} {
+	return &LGWebOSConfig{}
+}
 
-	key, ok := config["key"]
-	if !ok {
-		return nil, errors.New("config option key isn't set")
-	}
-
-	if key == "" {
-		return nil, errors.New("config option key is empty")
-	}
-
+func (d LGWebOS) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 	device := &LGWebOS{
-		host: host.(string),
-		key:  key.(string),
+		config: c.(*LGWebOSConfig),
 	}
 	device.Init()
 
@@ -123,7 +110,7 @@ func (d *LGWebOS) Client() (*webostv.Tv, error) {
 		return c, nil
 	}
 
-	client, err := defaultDialerLGWebOS.Dial(d.host)
+	client, err := defaultDialerLGWebOS.Dial(d.config.Host)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +141,7 @@ func (d *LGWebOS) taskLiveness(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	_, err = client.Register(d.key)
+	_, err = client.Register(d.config.Key)
 	if err != nil {
 		d.UpdateStatus(boggart.DeviceStatusOffline)
 		return nil, err

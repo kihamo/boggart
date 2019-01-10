@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"bytes"
 	"time"
+
+	"gopkg.in/yaml.v2"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/go-workers"
@@ -11,17 +14,17 @@ import (
 
 // easyjson:json
 type deviceHandlerDevice struct {
-	RegisterId      string                 `json:"register_id"`
-	Id              string                 `json:"id"`
-	Type            string                 `json:"type"`
-	Description     string                 `json:"description"`
-	SerialNumber    string                 `json:"serial_number"`
-	Status          string                 `json:"status"`
-	Tasks           []string               `json:"tasks"`
-	MQTTTopics      []string               `json:"mqtt_topics"`
-	MQTTSubscribers []string               `json:"mqtt_subscribers"`
-	Tags            []string               `json:"tags"`
-	Config          map[string]interface{} `json:"config"`
+	RegisterId      string   `json:"register_id"`
+	Id              string   `json:"id"`
+	Type            string   `json:"type"`
+	Description     string   `json:"description"`
+	SerialNumber    string   `json:"serial_number"`
+	Status          string   `json:"status"`
+	Tasks           []string `json:"tasks"`
+	MQTTTopics      []string `json:"mqtt_topics"`
+	MQTTSubscribers []string `json:"mqtt_subscribers"`
+	Tags            []string `json:"tags"`
+	Config          string   `json:"config"`
 }
 
 // easyjson:json
@@ -66,8 +69,15 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 	switch r.URL().Query().Get("entity") {
 	case "devices":
 		list := make([]deviceHandlerDevice, 0, 0)
+		buf := bytes.NewBuffer(nil)
+		enc := yaml.NewEncoder(buf)
 
 		for registerId, d := range h.devicesManager.Devices() {
+			buf.Reset()
+			if err := enc.Encode(d.Config()); err != nil {
+				panic(err.Error())
+			}
+
 			bind := d.Bind()
 
 			item := deviceHandlerDevice{
@@ -75,16 +85,13 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				Id:              d.Id(),
 				Type:            d.Type(),
 				Description:     d.Description(),
+				SerialNumber:    bind.SerialNumber(),
 				Status:          bind.Status().String(),
 				Tags:            make([]string, 0, len(d.Tags())),
 				Tasks:           make([]string, 0),
 				MQTTTopics:      make([]string, 0),
 				MQTTSubscribers: make([]string, 0),
-				Config:          d.Config(),
-			}
-
-			if sn, ok := bind.(boggart.DeviceBindHasSerialNumber); ok {
-				item.SerialNumber = sn.SerialNumber()
+				Config:          buf.String(),
 			}
 
 			if tasks, ok := bind.(boggart.DeviceBindHasTasks); ok {

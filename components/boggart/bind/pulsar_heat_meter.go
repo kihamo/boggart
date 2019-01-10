@@ -3,7 +3,6 @@ package bind
 import (
 	"context"
 	"encoding/hex"
-	"errors"
 	"math"
 	"sync/atomic"
 	"time"
@@ -38,67 +37,58 @@ type PulsarHeatMeter struct {
 	input2           uint64
 	input3           uint64
 	input4           uint64
-	input1offset     float64
-	input2offset     float64
-	input3offset     float64
-	input4offset     float64
 
 	boggart.DeviceBindBase
-	boggart.DeviceBindSerialNumber
 	boggart.DeviceBindMQTT
 
+	config   *PulsarHeatMeterConfig
 	provider *pulsar.HeatMeter
 }
 
-func (d PulsarHeatMeter) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
-	rs485Address, ok := config["rs485_address"]
-	if !ok {
-		return nil, errors.New("config option rs485_address isn't set")
-	}
+type PulsarHeatMeterConfig struct {
+	RS485 struct {
+		Address string `valid:"required"`
+		Timeout string
+	} `valid:"required"`
+	Address      string
+	Input1Offset float64 `mapstructure:"input1_offset",valid:"float"`
+	Input2Offset float64 `mapstructure:"input2_offset",valid:"float"`
+	Input3Offset float64 `mapstructure:"input3_offset",valid:"float"`
+	Input4Offset float64 `mapstructure:"input4_offset",valid:"float"`
+}
+
+func (d PulsarHeatMeter) Config() interface{} {
+	return &PulsarHeatMeterConfig{}
+}
+
+func (d PulsarHeatMeter) CreateBind(c interface{}) (boggart.DeviceBind, error) {
+	config := c.(*PulsarHeatMeterConfig)
 
 	var err error
 	timeout := time.Second
 
-	rs485Timeout, ok := config["rs485_timeout"]
-	if ok {
-		timeout, err = time.ParseDuration(rs485Timeout.(string))
+	if config.RS485.Timeout != "" {
+		timeout, err = time.ParseDuration(config.RS485.Timeout)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	conn := rs485.NewConnection(rs485Address.(string), timeout)
+	conn := rs485.NewConnection(config.RS485.Address, timeout)
 
 	var deviceAddress []byte
-
-	address, ok := config["address"]
-	if !ok || address == "" {
+	if config.Address == "" {
 		deviceAddress, err = pulsar.DeviceAddress(conn)
 	} else {
-		deviceAddress, err = hex.DecodeString(address.(string))
+		deviceAddress, err = hex.DecodeString(config.Address)
 	}
 
 	if err != nil {
 		return nil, err
 	}
 
-	if offset, ok := config["input1_offset"]; ok {
-		d.input1offset = offset.(float64)
-	}
-
-	if offset, ok := config["input2_offset"]; ok {
-		d.input1offset = offset.(float64)
-	}
-
-	if offset, ok := config["input3_offset"]; ok {
-		d.input1offset = offset.(float64)
-	}
-
-	if offset, ok := config["input4_offset"]; ok {
-		d.input1offset = offset.(float64)
-	}
-
 	device := &PulsarHeatMeter{
+		config:   config,
 		provider: pulsar.NewHeatMeter(deviceAddress, conn),
 
 		temperatureIn:    math.MaxUint64,
@@ -205,7 +195,7 @@ func (d *PulsarHeatMeter) taskStateUpdater(ctx context.Context) (interface{}, er
 			atomic.StoreUint64(&d.input1, current)
 
 			d.MQTTPublishAsync(ctx, PulsarHeatMeterMQTTTopicInputPulses.Format(serialNumber, 1), 0, true, current)
-			d.MQTTPublishAsync(ctx, PulsarHeatMeterMQTTTopicInputVolume.Format(serialNumber, 1), 0, true, d.inputVolume(current, d.input1offset))
+			d.MQTTPublishAsync(ctx, PulsarHeatMeterMQTTTopicInputVolume.Format(serialNumber, 1), 0, true, d.inputVolume(current, d.config.Input1Offset))
 		}
 	} else {
 		// TODO: log
@@ -218,7 +208,7 @@ func (d *PulsarHeatMeter) taskStateUpdater(ctx context.Context) (interface{}, er
 			atomic.StoreUint64(&d.input2, current)
 
 			d.MQTTPublishAsync(ctx, PulsarHeatMeterMQTTTopicInputPulses.Format(serialNumber, 2), 0, true, current)
-			d.MQTTPublishAsync(ctx, PulsarHeatMeterMQTTTopicInputVolume.Format(serialNumber, 2), 0, true, d.inputVolume(current, d.input2offset))
+			d.MQTTPublishAsync(ctx, PulsarHeatMeterMQTTTopicInputVolume.Format(serialNumber, 2), 0, true, d.inputVolume(current, d.config.Input2Offset))
 		}
 	} else {
 		// TODO: log
@@ -231,7 +221,7 @@ func (d *PulsarHeatMeter) taskStateUpdater(ctx context.Context) (interface{}, er
 			atomic.StoreUint64(&d.input3, current)
 
 			d.MQTTPublishAsync(ctx, PulsarHeatMeterMQTTTopicInputPulses.Format(serialNumber, 3), 0, true, current)
-			d.MQTTPublishAsync(ctx, PulsarHeatMeterMQTTTopicInputVolume.Format(serialNumber, 3), 0, true, d.inputVolume(current, d.input3offset))
+			d.MQTTPublishAsync(ctx, PulsarHeatMeterMQTTTopicInputVolume.Format(serialNumber, 3), 0, true, d.inputVolume(current, d.config.Input3Offset))
 		}
 	} else {
 		// TODO: log
@@ -244,7 +234,7 @@ func (d *PulsarHeatMeter) taskStateUpdater(ctx context.Context) (interface{}, er
 			atomic.StoreUint64(&d.input4, current)
 
 			d.MQTTPublishAsync(ctx, PulsarHeatMeterMQTTTopicInputPulses.Format(serialNumber, 4), 0, true, current)
-			d.MQTTPublishAsync(ctx, PulsarHeatMeterMQTTTopicInputVolume.Format(serialNumber, 4), 0, true, d.inputVolume(current, d.input4offset))
+			d.MQTTPublishAsync(ctx, PulsarHeatMeterMQTTTopicInputVolume.Format(serialNumber, 4), 0, true, d.inputVolume(current, d.config.Input4Offset))
 		}
 	} else {
 		// TODO: log

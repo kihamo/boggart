@@ -20,7 +20,6 @@ type MegafonPhone struct {
 	lastValue int64
 
 	boggart.DeviceBindBase
-	boggart.DeviceBindSerialNumber
 	boggart.DeviceBindMQTT
 
 	provider *mobile.Megafon
