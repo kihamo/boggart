@@ -7,6 +7,7 @@ import (
 type Device struct {
 	bind        boggart.DeviceBind
 	id          string
+	t           string
 	description string
 	tags        []string
 	config      map[string]interface{}
@@ -18,6 +19,10 @@ func (d *Device) Bind() boggart.DeviceBind {
 
 func (d *Device) Id() string {
 	return d.id
+}
+
+func (d *Device) Type() string {
+	return d.t
 }
 
 func (d *Device) Description() string {

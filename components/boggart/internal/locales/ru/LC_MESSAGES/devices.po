@@ -13,6 +13,9 @@ msgstr ""
 msgid "Devices"
 msgstr "Устройства"
 
+msgid "Type"
+msgstr "Тип"
+
 msgid "Tags"
 msgstr "Тэги"
 

@@ -234,6 +234,8 @@ func easyjson65411fd3DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.RegisterId = string(in.String())
 		case "id":
 			out.Id = string(in.String())
+		case "type":
+			out.Type = string(in.String())
 		case "description":
 			out.Description = string(in.String())
 		case "serial_number":
@@ -391,6 +393,16 @@ func easyjson65411fd3EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.RawString(prefix)
 		}
 		out.String(string(in.Id))
+	}
+	{
+		const prefix string = ",\"type\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Type))
 	}
 	{
 		const prefix string = ",\"description\":"

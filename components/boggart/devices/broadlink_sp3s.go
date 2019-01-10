@@ -19,18 +19,18 @@ import (
 )
 
 const (
-	SocketBroadlinkSP3SUpdateInterval = time.Second * 3 // as e-control app, refresh every 3 sec
+	BroadlinkSP3SUpdateInterval = time.Second * 3 // as e-control app, refresh every 3 sec
 
-	SocketBroadlinkSP3SMQTTTopicState mqtt.Topic = boggart.ComponentName + "/socket/+/state"
-	SocketBroadlinkSP3SMQTTTopicPower mqtt.Topic = boggart.ComponentName + "/socket/+/power"
-	SocketBroadlinkSP3SMQTTTopicSet   mqtt.Topic = boggart.ComponentName + "/socket/+/set"
+	BroadlinkSP3SMQTTTopicState mqtt.Topic = boggart.ComponentName + "/socket/+/state"
+	BroadlinkSP3SMQTTTopicPower mqtt.Topic = boggart.ComponentName + "/socket/+/power"
+	BroadlinkSP3SMQTTTopicSet   mqtt.Topic = boggart.ComponentName + "/socket/+/set"
 )
 
 var (
-	metricSocketBroadlinkSP3SPower = snitch.NewGauge(boggart.ComponentName+"_device_socket_broadlink_sp3s_power_watt", "Broadlink SP3S socket current power")
+	metricBroadlinkSP3SPower = snitch.NewGauge(boggart.ComponentName+"_device_socket_broadlink_sp3s_power_watt", "Broadlink SP3S socket current power")
 )
 
-type BroadlinkSP3SSocket struct {
+type BroadlinkSP3S struct {
 	state int64
 	power int64
 
@@ -41,7 +41,7 @@ type BroadlinkSP3SSocket struct {
 	provider *broadlink.SP3S
 }
 
-func (d BroadlinkSP3SSocket) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
+func (d BroadlinkSP3S) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
 	localAddr, err := broadlink.LocalAddr()
 	if err != nil {
 		return nil, err
@@ -75,7 +75,7 @@ func (d BroadlinkSP3SSocket) CreateBind(config map[string]interface{}) (boggart.
 		Port: broadlink.DevicePort,
 	}
 
-	device := &BroadlinkSP3SSocket{
+	device := &BroadlinkSP3S{
 		provider: broadlink.NewSP3S(mac, ip, *localAddr),
 		state:    0,
 		power:    -1,
@@ -86,22 +86,22 @@ func (d BroadlinkSP3SSocket) CreateBind(config map[string]interface{}) (boggart.
 	return device, nil
 }
 
-func (d *BroadlinkSP3SSocket) Describe(ch chan<- *snitch.Description) {
+func (d *BroadlinkSP3S) Describe(ch chan<- *snitch.Description) {
 	serialNumber := d.SerialNumber()
 
-	metricSocketBroadlinkSP3SPower.With("serial_number", serialNumber).Describe(ch)
+	metricBroadlinkSP3SPower.With("serial_number", serialNumber).Describe(ch)
 }
 
-func (d *BroadlinkSP3SSocket) Collect(ch chan<- snitch.Metric) {
+func (d *BroadlinkSP3S) Collect(ch chan<- snitch.Metric) {
 	serialNumber := d.SerialNumber()
 
-	metricSocketBroadlinkSP3SPower.With("serial_number", serialNumber).Collect(ch)
+	metricBroadlinkSP3SPower.With("serial_number", serialNumber).Collect(ch)
 }
 
-func (d *BroadlinkSP3SSocket) Tasks() []workers.Task {
+func (d *BroadlinkSP3S) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(d.taskStateUpdater)
 	taskUpdater.SetRepeats(-1)
-	taskUpdater.SetRepeatInterval(SocketBroadlinkSP3SUpdateInterval)
+	taskUpdater.SetRepeatInterval(BroadlinkSP3SUpdateInterval)
 	taskUpdater.SetName("device-socket-broadlink-sp3s-updater-" + d.SerialNumber())
 
 	return []workers.Task{
@@ -109,7 +109,7 @@ func (d *BroadlinkSP3SSocket) Tasks() []workers.Task {
 	}
 }
 
-func (d *BroadlinkSP3SSocket) taskStateUpdater(ctx context.Context) (interface{}, error) {
+func (d *BroadlinkSP3S) taskStateUpdater(ctx context.Context) (interface{}, error) {
 	state, err := d.State()
 	if err != nil {
 		d.UpdateStatus(boggart.DeviceStatusOffline)
@@ -133,7 +133,7 @@ func (d *BroadlinkSP3SSocket) taskStateUpdater(ctx context.Context) (interface{}
 			mqttValue = []byte(`0`)
 		}
 
-		d.MQTTPublishAsync(ctx, SocketBroadlinkSP3SMQTTTopicState.Format(serialNumberMQTT), 0, true, mqttValue)
+		d.MQTTPublishAsync(ctx, BroadlinkSP3SMQTTTopicState.Format(serialNumberMQTT), 0, true, mqttValue)
 	}
 
 	value, err := d.Power()
@@ -141,7 +141,7 @@ func (d *BroadlinkSP3SSocket) taskStateUpdater(ctx context.Context) (interface{}
 		return nil, nil
 	}
 
-	metricSocketBroadlinkSP3SPower.With("serial_number", serialNumber).Set(value)
+	metricBroadlinkSP3SPower.With("serial_number", serialNumber).Set(value)
 
 	currentPower := int64(value * 100)
 	prevPower := atomic.LoadInt64(&d.power)
@@ -149,17 +149,17 @@ func (d *BroadlinkSP3SSocket) taskStateUpdater(ctx context.Context) (interface{}
 	if currentPower != prevPower {
 		atomic.StoreInt64(&d.power, currentPower)
 
-		d.MQTTPublishAsync(ctx, SocketBroadlinkSP3SMQTTTopicPower.Format(serialNumberMQTT), 0, true, value)
+		d.MQTTPublishAsync(ctx, BroadlinkSP3SMQTTTopicPower.Format(serialNumberMQTT), 0, true, value)
 	}
 
 	return nil, nil
 }
 
-func (d *BroadlinkSP3SSocket) State() (bool, error) {
+func (d *BroadlinkSP3S) State() (bool, error) {
 	return d.provider.State()
 }
 
-func (d *BroadlinkSP3SSocket) On(ctx context.Context) error {
+func (d *BroadlinkSP3S) On(ctx context.Context) error {
 	err := d.provider.On()
 	if err == nil {
 		_, err = d.taskStateUpdater(ctx)
@@ -168,7 +168,7 @@ func (d *BroadlinkSP3SSocket) On(ctx context.Context) error {
 	return err
 }
 
-func (d *BroadlinkSP3SSocket) Off(ctx context.Context) error {
+func (d *BroadlinkSP3S) Off(ctx context.Context) error {
 	err := d.provider.Off()
 	if err == nil {
 		_, err = d.taskStateUpdater(ctx)
@@ -177,25 +177,25 @@ func (d *BroadlinkSP3SSocket) Off(ctx context.Context) error {
 	return err
 }
 
-func (d *BroadlinkSP3SSocket) Power() (float64, error) {
+func (d *BroadlinkSP3S) Power() (float64, error) {
 	return d.provider.Power()
 }
 
-func (d *BroadlinkSP3SSocket) MQTTTopics() []mqtt.Topic {
+func (d *BroadlinkSP3S) MQTTTopics() []mqtt.Topic {
 	sn := d.SerialNumberMQTTEscaped()
 
 	return []mqtt.Topic{
-		mqtt.Topic(SocketBroadlinkSP3SMQTTTopicState.Format(sn)),
-		mqtt.Topic(SocketBroadlinkSP3SMQTTTopicPower.Format(sn)),
-		mqtt.Topic(SocketBroadlinkSP3SMQTTTopicSet.Format(sn)),
+		mqtt.Topic(BroadlinkSP3SMQTTTopicState.Format(sn)),
+		mqtt.Topic(BroadlinkSP3SMQTTTopicPower.Format(sn)),
+		mqtt.Topic(BroadlinkSP3SMQTTTopicSet.Format(sn)),
 	}
 }
 
-func (d *BroadlinkSP3SSocket) MQTTSubscribers() []mqtt.Subscriber {
+func (d *BroadlinkSP3S) MQTTSubscribers() []mqtt.Subscriber {
 	sn := d.SerialNumberMQTTEscaped()
 
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(SocketBroadlinkSP3SMQTTTopicSet.Format(sn), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+		mqtt.NewSubscriber(BroadlinkSP3SMQTTTopicSet.Format(sn), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
 			if d.Status() != boggart.DeviceStatusOnline {
 				return
 			}

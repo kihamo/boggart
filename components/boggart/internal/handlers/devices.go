@@ -13,6 +13,7 @@ import (
 type deviceHandlerDevice struct {
 	RegisterId      string                 `json:"register_id"`
 	Id              string                 `json:"id"`
+	Type            string                 `json:"type"`
 	Description     string                 `json:"description"`
 	SerialNumber    string                 `json:"serial_number"`
 	Status          string                 `json:"status"`
@@ -72,6 +73,7 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 			item := deviceHandlerDevice{
 				RegisterId:      registerId,
 				Id:              d.Id(),
+				Type:            d.Type(),
 				Description:     d.Description(),
 				Status:          bind.Status().String(),
 				Tags:            make([]string, 0, len(d.Tags())),
@@ -81,11 +83,11 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				Config:          d.Config(),
 			}
 
-			if sn, ok := bind.(boggart.DeviceHasSerialNumber); ok {
+			if sn, ok := bind.(boggart.DeviceBindHasSerialNumber); ok {
 				item.SerialNumber = sn.SerialNumber()
 			}
 
-			if tasks, ok := bind.(boggart.DeviceHasTasks); ok {
+			if tasks, ok := bind.(boggart.DeviceBindHasTasks); ok {
 				for _, task := range tasks.Tasks() {
 					item.Tasks = append(item.Tasks, task.Name())
 				}
@@ -93,13 +95,13 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 
 			item.Tags = append(item.Tags, d.Tags()...)
 
-			if topics, ok := bind.(boggart.DeviceHasMQTTTopics); ok {
+			if topics, ok := bind.(boggart.DeviceBindHasMQTTTopics); ok {
 				for _, topic := range topics.MQTTTopics() {
 					item.MQTTTopics = append(item.MQTTTopics, topic.String())
 				}
 			}
 
-			if subscribers, ok := bind.(boggart.DeviceHasMQTTSubscribers); ok {
+			if subscribers, ok := bind.(boggart.DeviceBindHasMQTTSubscribers); ok {
 				for _, topic := range subscribers.MQTTSubscribers() {
 					item.MQTTSubscribers = append(item.MQTTSubscribers, topic.Topic())
 				}

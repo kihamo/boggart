@@ -38,13 +38,13 @@ func NewDevicesManager(mqtt mqtt.Component, workers workers.Component, listeners
 	}
 }
 
-func (m *DevicesManager) Register(device boggart.DeviceBind, description string, tags []string, config map[string]interface{}) string {
+func (m *DevicesManager) Register(device boggart.DeviceBind, t string, description string, tags []string, config map[string]interface{}) string {
 	id := uuid.New()
-	m.RegisterWithID(id, device, description, tags, config)
+	m.RegisterWithID(id, device, t, description, tags, config)
 	return id
 }
 
-func (m *DevicesManager) RegisterWithID(id string, bind boggart.DeviceBind, description string, tags []string, config map[string]interface{}) {
+func (m *DevicesManager) RegisterWithID(id string, bind boggart.DeviceBind, t string, description string, tags []string, config map[string]interface{}) {
 	if id == "" {
 		id = uuid.New()
 	}
@@ -52,27 +52,28 @@ func (m *DevicesManager) RegisterWithID(id string, bind boggart.DeviceBind, desc
 	m.storage.Store(id, &Device{
 		bind:        bind,
 		id:          id,
+		t:           t,
 		description: description,
 		tags:        tags,
 		config:      config,
 	})
 	m.listeners.AsyncTrigger(context.TODO(), boggart.DeviceEventDeviceRegister, bind, id)
 
-	if mqttClient, ok := bind.(boggart.DeviceHasMQTTClient); ok {
+	if mqttClient, ok := bind.(boggart.DeviceBindHasMQTTClient); ok {
 		mqttClient.SetMQTTClient(m.mqtt)
 	}
 
-	if subs, ok := bind.(boggart.DeviceHasMQTTSubscribers); ok {
+	if subs, ok := bind.(boggart.DeviceBindHasMQTTSubscribers); ok {
 		m.mqtt.SubscribeSubscribers(subs.MQTTSubscribers())
 	}
 
-	if tasks, ok := bind.(boggart.DeviceHasTasks); ok {
+	if tasks, ok := bind.(boggart.DeviceBindHasTasks); ok {
 		for _, task := range tasks.Tasks() {
 			m.workers.AddTask(task)
 		}
 	}
 
-	if listeners, ok := bind.(boggart.DeviceHasListeners); ok {
+	if listeners, ok := bind.(boggart.DeviceBindHasListeners); ok {
 		for _, listener := range listeners.Listeners() {
 			m.listeners.AddListener(listener)
 		}

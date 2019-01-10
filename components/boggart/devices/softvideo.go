@@ -14,10 +14,10 @@ import (
 )
 
 const (
-	SoftVideoInternetMQTTTopicBalance mqtt.Topic = boggart.ComponentName + "/service/softvideo/+/balance"
+	SoftVideoMQTTTopicBalance mqtt.Topic = boggart.ComponentName + "/service/softvideo/+/balance"
 )
 
-type SoftVideoInternet struct {
+type SoftVideo struct {
 	lastValue int64
 
 	boggart.DeviceBindBase
@@ -27,7 +27,7 @@ type SoftVideoInternet struct {
 	provider *softvideo.Client
 }
 
-func (d SoftVideoInternet) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
+func (d SoftVideo) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
 	login, ok := config["login"]
 	if !ok {
 		return nil, errors.New("config option login isn't set")
@@ -46,7 +46,7 @@ func (d SoftVideoInternet) CreateBind(config map[string]interface{}) (boggart.De
 		return nil, errors.New("config option password is empty")
 	}
 
-	device := &SoftVideoInternet{
+	device := &SoftVideo{
 		provider:  softvideo.NewClient(login.(string), password.(string)),
 		lastValue: -1,
 	}
@@ -56,11 +56,11 @@ func (d SoftVideoInternet) CreateBind(config map[string]interface{}) (boggart.De
 	return device, nil
 }
 
-func (d *SoftVideoInternet) Balance(ctx context.Context) (float64, error) {
+func (d *SoftVideo) Balance(ctx context.Context) (float64, error) {
 	return d.provider.Balance(ctx)
 }
 
-func (d *SoftVideoInternet) Tasks() []workers.Task {
+func (d *SoftVideo) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(d.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(time.Hour)
@@ -71,7 +71,7 @@ func (d *SoftVideoInternet) Tasks() []workers.Task {
 	}
 }
 
-func (d *SoftVideoInternet) taskUpdater(ctx context.Context) (interface{}, error) {
+func (d *SoftVideo) taskUpdater(ctx context.Context) (interface{}, error) {
 	value, err := d.provider.Balance(ctx)
 	if err != nil {
 		d.UpdateStatus(boggart.DeviceStatusOffline)
@@ -86,14 +86,14 @@ func (d *SoftVideoInternet) taskUpdater(ctx context.Context) (interface{}, error
 	if current != prev {
 		atomic.StoreInt64(&d.lastValue, current)
 
-		d.MQTTPublishAsync(ctx, SoftVideoInternetMQTTTopicBalance.Format(d.SerialNumber()), 0, true, value)
+		d.MQTTPublishAsync(ctx, SoftVideoMQTTTopicBalance.Format(d.SerialNumber()), 0, true, value)
 	}
 
 	return nil, nil
 }
 
-func (d *SoftVideoInternet) MQTTTopics() []mqtt.Topic {
+func (d *SoftVideo) MQTTTopics() []mqtt.Topic {
 	return []mqtt.Topic{
-		mqtt.Topic(SoftVideoInternetMQTTTopicBalance.Format(d.SerialNumber())),
+		mqtt.Topic(SoftVideoMQTTTopicBalance.Format(d.SerialNumber())),
 	}
 }

@@ -11,6 +11,9 @@ $(document).ready(function () {
             },
             columns: [
                 {
+                    data: 'type',
+                },
+                {
                     data: 'tags',
                     render: function (tags) {
                         var content = '';

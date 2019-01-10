@@ -21,38 +21,38 @@ var (
 )
 
 var (
-	deviceKindsMutex sync.RWMutex
-	deviceKinds      = make(map[string]DeviceKind)
+	deviceTypesMutex sync.RWMutex
+	deviceTypes      = make(map[string]DeviceType)
 )
 
-func RegisterKind(name string, kind DeviceKind) {
-	deviceKindsMutex.Lock()
-	defer deviceKindsMutex.Unlock()
+func RegisterDeviceType(name string, kind DeviceType) {
+	deviceTypesMutex.Lock()
+	defer deviceTypesMutex.Unlock()
 
 	if kind == nil {
-		panic("Device kind is nil")
+		panic("Device type name is nil")
 	}
 
-	if _, dup := deviceKinds[name]; dup {
-		panic("RegisterKind called twice for device kind " + name)
+	if _, dup := deviceTypes[name]; dup {
+		panic("Register called twice for device type " + name)
 	}
 
-	deviceKinds[name] = kind
+	deviceTypes[name] = kind
 }
 
-func GetKind(name string) (DeviceKind, error) {
-	deviceKindsMutex.RLock()
-	defer deviceKindsMutex.RUnlock()
+func GetDeviceType(name string) (DeviceType, error) {
+	deviceTypesMutex.RLock()
+	defer deviceTypesMutex.RUnlock()
 
-	kind, ok := deviceKinds[name]
+	kind, ok := deviceTypes[name]
 	if !ok {
-		return nil, errors.New("Device kind " + name + " isn't register")
+		return nil, errors.New("Device type " + name + " isn't register")
 	}
 
 	return kind, nil
 }
 
-type DeviceKind interface {
+type DeviceType interface {
 	CreateBind(config map[string]interface{}) (DeviceBind, error)
 }
 
@@ -80,8 +80,8 @@ const (
 type DevicesManager interface {
 	snitch.Collector
 
-	Register(device DeviceBind, description string, tags []string, config map[string]interface{}) string
-	RegisterWithID(id string, bind DeviceBind, description string, tags []string, config map[string]interface{})
+	Register(device DeviceBind, t string, description string, tags []string, config map[string]interface{}) string
+	RegisterWithID(id string, bind DeviceBind, t string, description string, tags []string, config map[string]interface{})
 	Device(id string) Device
 	Devices() map[string]Device
 	IsReady() bool
@@ -90,6 +90,7 @@ type DevicesManager interface {
 type Device interface {
 	Bind() DeviceBind
 	Id() string
+	Type() string
 	Description() string
 	Tags() []string
 	Config() map[string]interface{}
@@ -99,24 +100,24 @@ type DeviceBind interface {
 	Status() DeviceStatus
 }
 
-type DeviceHasSerialNumber interface {
+type DeviceBindHasSerialNumber interface {
 	SerialNumber() string
 }
 
-type DeviceHasTasks interface {
+type DeviceBindHasTasks interface {
 	Tasks() []workers.Task
 }
 
-type DeviceHasListeners interface {
+type DeviceBindHasListeners interface {
 	Listeners() []workers.ListenerWithEvents
 }
 
-type DeviceHasMQTTClient interface {
+type DeviceBindHasMQTTClient interface {
 	SetMQTTClient(mqtt.Component)
 }
 
-type DeviceHasMQTTSubscribers mqtt.HasSubscribers
+type DeviceBindHasMQTTSubscribers mqtt.HasSubscribers
 
-type DeviceHasMQTTTopics interface {
+type DeviceBindHasMQTTTopics interface {
 	MQTTTopics() []mqtt.Topic
 }

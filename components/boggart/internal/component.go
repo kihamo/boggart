@@ -172,7 +172,7 @@ func (c *Component) initConfigFromYaml() error {
 			continue
 		}
 
-		kind, err := boggart.GetKind(d.Type)
+		kind, err := boggart.GetDeviceType(d.Type)
 		if err != nil {
 			return err
 		}
@@ -183,9 +183,9 @@ func (c *Component) initConfigFromYaml() error {
 		}
 
 		if d.ID != nil && *d.ID != "" {
-			c.devicesManager.RegisterWithID(*d.ID, device, d.Description, d.Tags, d.Config)
+			c.devicesManager.RegisterWithID(*d.ID, device, d.Type, d.Description, d.Tags, d.Config)
 		} else {
-			c.devicesManager.Register(device, d.Description, d.Tags, d.Config)
+			c.devicesManager.Register(device, d.Type, d.Description, d.Tags, d.Config)
 		}
 	}
 

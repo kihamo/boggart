@@ -26,7 +26,7 @@ func (c *Component) initElectricityMeters() {
 		provider,
 		c.config.Duration(boggart.ConfigMercuryRepeatInterval))
 
-	c.devicesManager.RegisterWithID(boggart.DeviceIdElectricityMeter.String(), device, "", nil, nil)
+	c.devicesManager.RegisterWithID(boggart.DeviceIdElectricityMeter.String(), device, "mercury", "", nil, nil)
 }
 
 func (c *Component) initGPIO() {
@@ -62,7 +62,7 @@ func (c *Component) initGPIO() {
 		}
 
 		device := devices.NewGPIOPin(g, mode)
-		c.devicesManager.RegisterWithID(fmt.Sprintf("pin.%d", number), device, "", nil, nil)
+		c.devicesManager.RegisterWithID(fmt.Sprintf("pin.%d", number), device, "gpio", "", nil, nil)
 	}
 }
 
@@ -98,7 +98,7 @@ func (c *Component) initPulsarMeters() {
 	// heat meter
 	deviceHeatMeter := devices.NewPulsarHeadMeter(provider, c.config.Duration(boggart.ConfigPulsarRepeatInterval))
 
-	c.devicesManager.RegisterWithID(boggart.DeviceIdHeatMeter.String(), deviceHeatMeter, "", nil, nil)
+	c.devicesManager.RegisterWithID(boggart.DeviceIdHeatMeter.String(), deviceHeatMeter, "pulsar", "", nil, nil)
 
 	// cold water
 	serialNumber := c.config.String(boggart.ConfigPulsarColdWaterSerialNumber)
@@ -109,7 +109,7 @@ func (c *Component) initPulsarMeters() {
 		c.config.Uint64(boggart.ConfigPulsarColdWaterPulseInput),
 		c.config.Duration(boggart.ConfigPulsarRepeatInterval))
 
-	c.devicesManager.RegisterWithID(boggart.DeviceIdWaterMeterCold.String(), deviceWaterMeterCold, "", nil, nil)
+	c.devicesManager.RegisterWithID(boggart.DeviceIdWaterMeterCold.String(), deviceWaterMeterCold, "pulsar", "", nil, nil)
 
 	// hot water
 	serialNumber = c.config.String(boggart.ConfigPulsarHotWaterSerialNumber)
@@ -120,5 +120,5 @@ func (c *Component) initPulsarMeters() {
 		c.config.Uint64(boggart.ConfigPulsarHotWaterPulseInput),
 		c.config.Duration(boggart.ConfigPulsarRepeatInterval))
 
-	c.devicesManager.RegisterWithID(boggart.DeviceIdWaterMeterHot.String(), deviceWaterMeterHot, "", nil, nil)
+	c.devicesManager.RegisterWithID(boggart.DeviceIdWaterMeterHot.String(), deviceWaterMeterHot, "pulsar", "", nil, nil)
 }

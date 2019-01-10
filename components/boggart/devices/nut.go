@@ -14,10 +14,10 @@ import (
 )
 
 const (
-	UPSNUTMQTTTopicVariable mqtt.Topic = boggart.ComponentName + "/ups/+/+"
+	NUTMQTTTopicVariable mqtt.Topic = boggart.ComponentName + "/ups/+/+"
 )
 
-type UPSNUT struct {
+type NUT struct {
 	boggart.DeviceBindBase
 	boggart.DeviceSerialNumber
 	boggart.DeviceMQTT
@@ -29,7 +29,7 @@ type UPSNUT struct {
 	variables map[string]interface{}
 }
 
-func (d UPSNUT) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
+func (d NUT) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
 	host, ok := config["host"]
 	if !ok {
 		return nil, errors.New("config option host isn't set")
@@ -48,7 +48,7 @@ func (d UPSNUT) CreateBind(config map[string]interface{}) (boggart.DeviceBind, e
 		return nil, errors.New("config option ups is empty")
 	}
 
-	device := &UPSNUT{
+	device := &NUT{
 		host:      host.(string),
 		ups:       ups.(string),
 		variables: make(map[string]interface{}, 0),
@@ -59,7 +59,7 @@ func (d UPSNUT) CreateBind(config map[string]interface{}) (boggart.DeviceBind, e
 	return device, nil
 }
 
-func (d *UPSNUT) Tasks() []workers.Task {
+func (d *NUT) Tasks() []workers.Task {
 	taskLiveness := task.NewFunctionTask(d.taskLiveness)
 	taskLiveness.SetTimeout(time.Second * 5)
 	taskLiveness.SetRepeats(-1)
@@ -77,13 +77,13 @@ func (d *UPSNUT) Tasks() []workers.Task {
 	}
 }
 
-func (d *UPSNUT) MQTTTopics() []mqtt.Topic {
+func (d *NUT) MQTTTopics() []mqtt.Topic {
 	return []mqtt.Topic{
-		mqtt.Topic(UPSNUTMQTTTopicVariable.Format(d.ups)),
+		mqtt.Topic(NUTMQTTTopicVariable.Format(d.ups)),
 	}
 }
 
-func (d *UPSNUT) getUPS() (ups nut.UPS, err error) {
+func (d *NUT) getUPS() (ups nut.UPS, err error) {
 	client, err := nut.Connect(d.host)
 	if err != nil {
 		return ups, err
@@ -110,7 +110,7 @@ func (d *UPSNUT) getUPS() (ups nut.UPS, err error) {
 	return ups, errors.New("device not found")
 }
 
-func (d *UPSNUT) taskLiveness(ctx context.Context) (interface{}, error) {
+func (d *NUT) taskLiveness(ctx context.Context) (interface{}, error) {
 	_, err := d.getUPS()
 	if err != nil {
 		d.UpdateStatus(boggart.DeviceStatusOffline)
@@ -121,7 +121,7 @@ func (d *UPSNUT) taskLiveness(ctx context.Context) (interface{}, error) {
 	return nil, nil
 }
 
-func (d *UPSNUT) taskStateUpdater(ctx context.Context) (interface{}, error) {
+func (d *NUT) taskStateUpdater(ctx context.Context) (interface{}, error) {
 	if d.Status() != boggart.DeviceStatusOnline {
 		return nil, nil
 	}
@@ -139,7 +139,7 @@ func (d *UPSNUT) taskStateUpdater(ctx context.Context) (interface{}, error) {
 			d.variables[v.Name] = v.Value
 			name := mqtt.NameReplace(v.Name)
 
-			d.MQTTPublishAsync(ctx, UPSNUTMQTTTopicVariable.Format(d.ups, name), 2, true, v.Value)
+			d.MQTTPublishAsync(ctx, NUTMQTTTopicVariable.Format(d.ups, name), 2, true, v.Value)
 		}
 	}
 
