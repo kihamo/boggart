@@ -56,15 +56,6 @@ type DeviceType interface {
 	CreateBind(config map[string]interface{}) (DeviceBind, error)
 }
 
-type DeviceId int64
-
-const (
-	DeviceIdElectricityMeter DeviceId = iota
-	DeviceIdHeatMeter
-	DeviceIdWaterMeterCold
-	DeviceIdWaterMeterHot
-)
-
 type DeviceStatus uint64
 
 const (

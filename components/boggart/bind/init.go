@@ -13,6 +13,7 @@ func init() {
 	boggart.RegisterDeviceType("hikvision", HikVision{})
 	boggart.RegisterDeviceType("led_wifi", WiFiLED{})
 	boggart.RegisterDeviceType("lg_webos", LGWebOS{})
+	boggart.RegisterDeviceType("mercury200", Mercury200{})
 	boggart.RegisterDeviceType("mikrotik", Mikrotik{})
 	boggart.RegisterDeviceType("nut", NUT{})
 	boggart.RegisterDeviceType("pulsar_heat_meter", PulsarHeatMeter{})

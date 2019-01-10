@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/components/syslog"
 	"github.com/kihamo/go-workers/manager"
@@ -30,7 +29,6 @@ type Component struct {
 	logger      logging.Logger
 	routes      []dashboard.Route
 
-	connectionRS485  *rs485.Connection
 	listenersManager *manager.ListenersManager
 	devicesManager   *DevicesManager
 }
@@ -126,22 +124,6 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 	c.devicesManager.Ready()
 
 	return nil
-}
-
-func (c *Component) initRS485() {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	c.connectionRS485 = rs485.NewConnection(
-		c.config.String(boggart.ConfigRS485Address),
-		c.config.Duration(boggart.ConfigRS485Timeout))
-}
-
-func (c *Component) RS485() *rs485.Connection {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	return c.connectionRS485
 }
 
 func (c *Component) initConfigFromYaml() error {

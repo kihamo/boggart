@@ -277,43 +277,43 @@ func (d *ElectricityMeter200) BatteryVoltage() (float64, error) {
 }
 
 // PowerCounters returns value of T1, T2, T3 and T4 in W/h
-func (d *ElectricityMeter200) PowerCounters() (int64, int64, int64, int64, error) {
+func (d *ElectricityMeter200) PowerCounters() (uint64, uint64, uint64, uint64, error) {
 	response, err := d.Request(FunctionReadPowerCounters, nil)
 	if err != nil {
-		return -1, -1, -1, -1, err
+		return 0, 0, 0, 0, err
 	}
 
-	t1, err := strconv.ParseInt(hex.EncodeToString(response[0:4]), 10, 0)
+	t1, err := strconv.ParseUint(hex.EncodeToString(response[0:4]), 10, 0)
 	if err != nil {
-		return -1, -1, -1, -1, err
+		return 0, 0, 0, 0, err
 	}
 
-	t2, err := strconv.ParseInt(hex.EncodeToString(response[4:8]), 10, 0)
+	t2, err := strconv.ParseUint(hex.EncodeToString(response[4:8]), 10, 0)
 	if err != nil {
-		return -1, -1, -1, -1, err
+		return 0, 0, 0, 0, err
 	}
 
-	t3, err := strconv.ParseInt(hex.EncodeToString(response[8:12]), 10, 0)
+	t3, err := strconv.ParseUint(hex.EncodeToString(response[8:12]), 10, 0)
 	if err != nil {
-		return -1, -1, -1, -1, err
+		return 0, 0, 0, 0, err
 	}
 
-	t4, err := strconv.ParseInt(hex.EncodeToString(response[12:16]), 10, 0)
+	t4, err := strconv.ParseUint(hex.EncodeToString(response[12:16]), 10, 0)
 	if err != nil {
-		return -1, -1, -1, -1, err
+		return 0, 0, 0, 0, err
 	}
 
 	return t1 * 10, t2 * 10, t3 * 10, t4 * 10, err
 }
 
 // PowerUser return power in W
-func (d *ElectricityMeter200) PowerCurrent() (int64, error) {
+func (d *ElectricityMeter200) PowerCurrent() (uint64, error) {
 	response, err := d.Request(FunctionReadPowerCurrent, nil)
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
-	return strconv.ParseInt(hex.EncodeToString(response), 10, 0)
+	return strconv.ParseUint(hex.EncodeToString(response), 10, 0)
 }
 
 func (d *ElectricityMeter200) DaylightSavingTime() (bool, error) {
@@ -326,25 +326,25 @@ func (d *ElectricityMeter200) DaylightSavingTime() (bool, error) {
 }
 
 // ParamsCurrent returns current value of voltage in V, amperage in A, power in W
-func (d *ElectricityMeter200) ParamsCurrent() (float64, float64, int64, error) {
+func (d *ElectricityMeter200) ParamsCurrent() (uint64, float64, uint64, error) {
 	response, err := d.Request(FunctionReadParamsCurrent, nil)
 	if err != nil {
-		return -1, -1, -1, err
+		return 0, 0, 0, err
 	}
 
-	voltage, err := strconv.ParseFloat(hex.EncodeToString(response[0:2]), 10)
+	voltage, err := strconv.ParseUint(hex.EncodeToString(response[0:2]), 10, 0)
 	if err != nil {
-		return -1, -1, -1, err
+		return 0, 0, 0, err
 	}
 
 	amperage, err := strconv.ParseFloat(hex.EncodeToString(response[2:4]), 10)
 	if err != nil {
-		return -1, -1, -1, err
+		return 0, 0, 0, err
 	}
 
-	power, err := strconv.ParseInt(hex.EncodeToString(response[4:7]), 10, 0)
+	power, err := strconv.ParseUint(hex.EncodeToString(response[4:7]), 10, 0)
 	if err != nil {
-		return -1, -1, -1, err
+		return 0, 0, 0, err
 	}
 
 	return voltage / 10, amperage / 100, power, nil
