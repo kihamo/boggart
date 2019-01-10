@@ -66,7 +66,7 @@ func (d Mercury200) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 
 	provider := mercury.NewElectricityMeter200(
 		mercury.ConvertSerialNumber(config.Address),
-		rs485.NewConnection(config.RS485.Address, timeout))
+		rs485.GetConnection(config.RS485.Address, timeout))
 
 	device := &Mercury200{
 		provider: provider,

@@ -74,7 +74,7 @@ func (d PulsarHeatMeter) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 		}
 	}
 
-	conn := rs485.NewConnection(config.RS485.Address, timeout)
+	conn := rs485.GetConnection(config.RS485.Address, timeout)
 
 	var deviceAddress []byte
 	if config.Address == "" {
