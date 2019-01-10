@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/kihamo/boggart/components/mqtt"
 )
@@ -101,6 +102,10 @@ func (d *DeviceBindMQTT) MQTTPublish(ctx context.Context, topic string, qos byte
 		} else {
 			payload = []byte(`0`)
 		}
+	case time.Time:
+		payload = value.Format(time.RFC3339)
+	case *time.Time:
+		payload = value.Format(time.RFC3339)
 	default:
 		payload = fmt.Sprintf("%s", payload)
 	}

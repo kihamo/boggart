@@ -3,12 +3,12 @@ package bind
 import (
 	"context"
 	"math"
+	"sync"
 	"sync/atomic"
 	"time"
 
-	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
-
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
 	"github.com/kihamo/boggart/components/boggart/providers/mercury"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
@@ -16,26 +16,37 @@ import (
 )
 
 const (
-	Mercury200MQTTTopicTariff         mqtt.Topic = boggart.ComponentName + "/meter/mercury200/+/tariff/+"
-	Mercury200MQTTTopicVoltage        mqtt.Topic = boggart.ComponentName + "/meter/mercury200/+/voltage"
-	Mercury200MQTTTopicAmperage       mqtt.Topic = boggart.ComponentName + "/meter/mercury200/+/amperage"
-	Mercury200MQTTTopicPower          mqtt.Topic = boggart.ComponentName + "/meter/mercury200/+/power"
-	Mercury200MQTTTopicBatteryVoltage mqtt.Topic = boggart.ComponentName + "/meter/mercury200/+/battery_voltage"
+	Mercury200MQTTTopicTariff          mqtt.Topic = boggart.ComponentName + "/meter/mercury200/+/tariff/+"
+	Mercury200MQTTTopicVoltage         mqtt.Topic = boggart.ComponentName + "/meter/mercury200/+/voltage"
+	Mercury200MQTTTopicAmperage        mqtt.Topic = boggart.ComponentName + "/meter/mercury200/+/amperage"
+	Mercury200MQTTTopicPower           mqtt.Topic = boggart.ComponentName + "/meter/mercury200/+/power"
+	Mercury200MQTTTopicBatteryVoltage  mqtt.Topic = boggart.ComponentName + "/meter/mercury200/+/battery_voltage"
+	Mercury200MQTTTopicLastPowerOff    mqtt.Topic = boggart.ComponentName + "/meter/mercury200/+/last-power-off"
+	Mercury200MQTTTopicLastPowerOn     mqtt.Topic = boggart.ComponentName + "/meter/mercury200/+/last-power-on"
+	Mercury200MQTTTopicMakeDate        mqtt.Topic = boggart.ComponentName + "/meter/mercury200/+/make-date"
+	Mercury200MQTTTopicFirmwareDate    mqtt.Topic = boggart.ComponentName + "/meter/mercury200/+/firmware/date"
+	Mercury200MQTTTopicFirmwareVersion mqtt.Topic = boggart.ComponentName + "/meter/mercury200/+/firmware/version"
 )
 
 type Mercury200 struct {
-	tariff1        uint64
-	tariff2        uint64
-	tariff3        uint64
-	tariff4        uint64
-	voltage        uint64
-	amperage       uint64
-	power          uint64
-	batteryVoltage uint64
+	tariff1         uint64
+	tariff2         uint64
+	tariff3         uint64
+	tariff4         uint64
+	voltage         uint64
+	amperage        uint64
+	power           uint64
+	batteryVoltage  uint64
+	lastPowerOff    int64
+	lastPowerOn     int64
+	makeDate        int64
+	firmwareDate    int64
+	firmwareVersion string
 
 	boggart.DeviceBindBase
 	boggart.DeviceBindMQTT
 
+	mutex    sync.Mutex
 	provider *mercury.ElectricityMeter200
 }
 
@@ -161,6 +172,53 @@ func (d *Mercury200) taskStateUpdater(ctx context.Context) (interface{}, error) 
 		// TODO: log
 	}
 
+	if val, err := d.provider.LastPowerOffDatetime(); err == nil {
+		current := val.Unix()
+		if prev := atomic.LoadInt64(&d.lastPowerOff); current != prev {
+			atomic.StoreInt64(&d.lastPowerOff, current)
+			d.MQTTPublishAsync(ctx, Mercury200MQTTTopicLastPowerOff.Format(serialNumber), 0, true, val)
+		}
+	} else {
+		// TODO: log
+	}
+
+	if val, err := d.provider.LastPowerOnDatetime(); err == nil {
+		current := val.Unix()
+		if prev := atomic.LoadInt64(&d.lastPowerOn); current != prev {
+			atomic.StoreInt64(&d.lastPowerOn, current)
+			d.MQTTPublishAsync(ctx, Mercury200MQTTTopicLastPowerOn.Format(serialNumber), 0, true, val)
+		}
+	} else {
+		// TODO: log
+	}
+
+	if val, err := d.provider.MakeDate(); err == nil {
+		current := val.Unix()
+		if prev := atomic.LoadInt64(&d.makeDate); current != prev {
+			atomic.StoreInt64(&d.makeDate, current)
+			d.MQTTPublishAsync(ctx, Mercury200MQTTTopicMakeDate.Format(serialNumber), 0, true, val)
+		}
+	} else {
+		// TODO: log
+	}
+
+	if version, date, err := d.provider.Version(); err == nil {
+		current := date.Unix()
+		if prev := atomic.LoadInt64(&d.firmwareDate); current != prev {
+			atomic.StoreInt64(&d.firmwareDate, current)
+			d.MQTTPublishAsync(ctx, Mercury200MQTTTopicFirmwareDate.Format(serialNumber), 0, true, date)
+		}
+
+		d.mutex.Lock()
+		if version != d.firmwareVersion {
+			d.firmwareVersion = version
+			d.MQTTPublishAsync(ctx, Mercury200MQTTTopicFirmwareVersion.Format(serialNumber), 0, true, version)
+		}
+		d.mutex.Unlock()
+	} else {
+		// TODO: log
+	}
+
 	return nil, nil
 }
 
@@ -176,5 +234,10 @@ func (d *Mercury200) MQTTTopics() []mqtt.Topic {
 		mqtt.Topic(Mercury200MQTTTopicAmperage.Format(sn)),
 		mqtt.Topic(Mercury200MQTTTopicPower.Format(sn)),
 		mqtt.Topic(Mercury200MQTTTopicBatteryVoltage.Format(sn)),
+		mqtt.Topic(Mercury200MQTTTopicLastPowerOff.Format(sn)),
+		mqtt.Topic(Mercury200MQTTTopicLastPowerOn.Format(sn)),
+		mqtt.Topic(Mercury200MQTTTopicMakeDate.Format(sn)),
+		mqtt.Topic(Mercury200MQTTTopicFirmwareDate.Format(sn)),
+		mqtt.Topic(Mercury200MQTTTopicFirmwareVersion.Format(sn)),
 	}
 }

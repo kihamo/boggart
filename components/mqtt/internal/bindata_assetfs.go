@@ -8,10 +8,10 @@
 package internal
 
 import (
-	"github.com/elazarl/go-bindata-assetfs"
 	"bytes"
 	"compress/gzip"
 	"fmt"
+	"github.com/elazarl/go-bindata-assetfs"
 	"io"
 	"io/ioutil"
 	"os"
@@ -86,7 +86,7 @@ func templatesViewsSubscriptionsHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "templates/views/subscriptions.html", size: 2154, mode: os.FileMode(420), modTime: time.Unix(1545056931, 0)}
+	info := bindataFileInfo{name: "templates/views/subscriptions.html", size: 2154, mode: os.FileMode(420), modTime: time.Unix(1545075537, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -106,7 +106,7 @@ func localesRuLc_messagesMqttMo() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "locales/ru/LC_MESSAGES/mqtt.mo", size: 457, mode: os.FileMode(420), modTime: time.Unix(1545745326, 0)}
+	info := bindataFileInfo{name: "locales/ru/LC_MESSAGES/mqtt.mo", size: 457, mode: os.FileMode(420), modTime: time.Unix(1547162996, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -126,7 +126,7 @@ func localesRuLc_messagesSubscriptionsMo() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "locales/ru/LC_MESSAGES/subscriptions.mo", size: 640, mode: os.FileMode(420), modTime: time.Unix(1545745326, 0)}
+	info := bindataFileInfo{name: "locales/ru/LC_MESSAGES/subscriptions.mo", size: 640, mode: os.FileMode(420), modTime: time.Unix(1547162996, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -183,8 +183,8 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"templates/views/subscriptions.html": templatesViewsSubscriptionsHtml,
-	"locales/ru/LC_MESSAGES/mqtt.mo": localesRuLc_messagesMqttMo,
+	"templates/views/subscriptions.html":      templatesViewsSubscriptionsHtml,
+	"locales/ru/LC_MESSAGES/mqtt.mo":          localesRuLc_messagesMqttMo,
 	"locales/ru/LC_MESSAGES/subscriptions.mo": localesRuLc_messagesSubscriptionsMo,
 }
 
@@ -227,11 +227,12 @@ type bintree struct {
 	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
+
 var _bintree = &bintree{nil, map[string]*bintree{
 	"locales": &bintree{nil, map[string]*bintree{
 		"ru": &bintree{nil, map[string]*bintree{
 			"LC_MESSAGES": &bintree{nil, map[string]*bintree{
-				"mqtt.mo": &bintree{localesRuLc_messagesMqttMo, map[string]*bintree{}},
+				"mqtt.mo":          &bintree{localesRuLc_messagesMqttMo, map[string]*bintree{}},
 				"subscriptions.mo": &bintree{localesRuLc_messagesSubscriptionsMo, map[string]*bintree{}},
 			}},
 		}},
@@ -289,7 +290,6 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
-
 
 func assetFS() *assetfs.AssetFS {
 	assetInfo := func(path string) (os.FileInfo, error) {

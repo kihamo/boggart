@@ -286,6 +286,8 @@ func (d *PulsarHeatMeter) MQTTTopics() []mqtt.Topic {
 		mqtt.Topic(PulsarHeatMeterMQTTTopicTemperatureDelta.Format(sn)),
 		mqtt.Topic(PulsarHeatMeterMQTTTopicEnergy.Format(sn)),
 		mqtt.Topic(PulsarHeatMeterMQTTTopicConsumption.Format(sn)),
+		mqtt.Topic(PulsarHeatMeterMQTTTopicCapacity.Format(sn)),
+		mqtt.Topic(PulsarHeatMeterMQTTTopicPower.Format(sn)),
 		mqtt.Topic(PulsarHeatMeterMQTTTopicInputPulses.Format(sn, 1)),
 		mqtt.Topic(PulsarHeatMeterMQTTTopicInputVolume.Format(sn, 1)),
 		mqtt.Topic(PulsarHeatMeterMQTTTopicInputPulses.Format(sn, 2)),
