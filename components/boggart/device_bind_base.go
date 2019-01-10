@@ -4,60 +4,25 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
 	"sync"
 	"sync/atomic"
 
 	"github.com/kihamo/boggart/components/mqtt"
-	"github.com/pborman/uuid"
 )
 
-var replacerMQTTName = strings.NewReplacer(
-	":", "-",
-	"/", "-",
-	"_", "-",
-	",", "-",
-	".", "-",
-)
-
-type DeviceBase struct {
-	id          string
-	description atomic.Value
-	status      uint64
+type DeviceBindBase struct {
+	status uint64
 }
 
-func (d *DeviceBase) Init() {
-	d.id = uuid.New()
+func (d *DeviceBindBase) Init() {
 	d.UpdateStatus(DeviceStatusInitializing)
 }
 
-func (d *DeviceBase) Id() string {
-	return d.id
-}
-
-func (d *DeviceBase) Description() string {
-	var description string
-
-	if value := d.description.Load(); value != nil {
-		description = value.(string)
-	}
-
-	return description
-}
-
-func (d *DeviceBase) SetDescription(description string, v ...interface{}) {
-	d.description.Store(fmt.Sprintf(description, v...))
-}
-
-func (d *DeviceBase) Types() []DeviceType {
-	return nil
-}
-
-func (d *DeviceBase) Status() DeviceStatus {
+func (d *DeviceBindBase) Status() DeviceStatus {
 	return DeviceStatus(atomic.LoadUint64(&d.status))
 }
 
-func (d *DeviceBase) UpdateStatus(status DeviceStatus) {
+func (d *DeviceBindBase) UpdateStatus(status DeviceStatus) {
 	atomic.StoreUint64(&d.status, uint64(status))
 }
 
@@ -141,9 +106,9 @@ func (d *DeviceMQTT) MQTTSubscribe(topic string, qos byte, callback mqtt.Message
 	return d.client.Subscribe(topic, qos, callback)
 }
 
-func WrapMQTTSubscribeDeviceIsOnline(device Device, callback mqtt.MessageHandler) mqtt.MessageHandler {
+func WrapMQTTSubscribeDeviceIsOnline(bind DeviceBind, callback mqtt.MessageHandler) mqtt.MessageHandler {
 	return func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-		if device.Status() == DeviceStatusOnline {
+		if bind.Status() == DeviceStatusOnline {
 			callback(ctx, client, message)
 		}
 	}

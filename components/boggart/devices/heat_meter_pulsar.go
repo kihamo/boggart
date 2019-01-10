@@ -38,7 +38,7 @@ type PulsarHeadMeter struct {
 	energy           uint64
 	consumption      uint64
 
-	boggart.DeviceBase
+	boggart.DeviceBindBase
 	boggart.DeviceSerialNumber
 	boggart.DeviceMQTT
 
@@ -59,15 +59,8 @@ func NewPulsarHeadMeter(provider *pulsar.HeatMeter, interval time.Duration) *Pul
 	}
 	device.Init()
 	device.SetSerialNumber(hex.EncodeToString(provider.Address()))
-	device.SetDescription("Pulsar heat meter")
 
 	return device
-}
-
-func (d *PulsarHeadMeter) Types() []boggart.DeviceType {
-	return []boggart.DeviceType{
-		boggart.DeviceTypeHeatMeter,
-	}
 }
 
 func (d *PulsarHeadMeter) TemperatureIn(context.Context) (float64, error) {

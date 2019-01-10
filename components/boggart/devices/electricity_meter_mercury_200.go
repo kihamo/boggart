@@ -48,7 +48,7 @@ type Mercury200ElectricityMeter struct {
 	power          int64
 	batteryVoltage uint64
 
-	boggart.DeviceBase
+	boggart.DeviceBindBase
 	boggart.DeviceSerialNumber
 	boggart.DeviceMQTT
 
@@ -72,15 +72,8 @@ func NewMercury200ElectricityMeter(serialNumber string, provider *mercury.Electr
 	}
 	device.Init()
 	device.SetSerialNumber(serialNumber)
-	device.SetDescription("Mercury 200 electricity meter")
 
 	return device
-}
-
-func (d *Mercury200ElectricityMeter) Types() []boggart.DeviceType {
-	return []boggart.DeviceType{
-		boggart.DeviceTypeElectricityMeter,
-	}
 }
 
 func (d *Mercury200ElectricityMeter) Tariffs(_ context.Context) (map[string]float64, error) {

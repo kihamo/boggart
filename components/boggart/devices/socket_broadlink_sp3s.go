@@ -34,14 +34,14 @@ type BroadlinkSP3SSocket struct {
 	state int64
 	power int64
 
-	boggart.DeviceBase
+	boggart.DeviceBindBase
 	boggart.DeviceSerialNumber
 	boggart.DeviceMQTT
 
 	provider *broadlink.SP3S
 }
 
-func (d BroadlinkSP3SSocket) Create(config map[string]interface{}) (boggart.Device, error) {
+func (d BroadlinkSP3SSocket) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
 	localAddr, err := broadlink.LocalAddr()
 	if err != nil {
 		return nil, err
@@ -82,15 +82,8 @@ func (d BroadlinkSP3SSocket) Create(config map[string]interface{}) (boggart.Devi
 	}
 	device.Init()
 	device.SetSerialNumber(mac.String())
-	device.SetDescription("Socket of Broadlink")
 
 	return device, nil
-}
-
-func (d *BroadlinkSP3SSocket) Types() []boggart.DeviceType {
-	return []boggart.DeviceType{
-		boggart.DeviceTypeSocket,
-	}
 }
 
 func (d *BroadlinkSP3SSocket) Describe(ch chan<- *snitch.Description) {
@@ -207,7 +200,7 @@ func (d *BroadlinkSP3SSocket) MQTTSubscribers() []mqtt.Subscriber {
 				return
 			}
 
-			span, ctx := tracing.StartSpanFromContext(ctx, boggart.DeviceTypeSocket.String(), "set")
+			span, ctx := tracing.StartSpanFromContext(ctx, "socket", "set")
 			span.LogFields(
 				log.String("mac", d.provider.MAC().String()),
 				log.String("ip", d.provider.Addr().String()))

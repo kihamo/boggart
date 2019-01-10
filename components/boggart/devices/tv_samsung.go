@@ -24,7 +24,7 @@ const (
 )
 
 type SamsungTV struct {
-	boggart.DeviceBase
+	boggart.DeviceBindBase
 	boggart.DeviceSerialNumber
 	boggart.DeviceMQTT
 
@@ -35,7 +35,7 @@ type SamsungTV struct {
 	mac    string
 }
 
-func (d SamsungTV) Create(config map[string]interface{}) (boggart.Device, error) {
+func (d SamsungTV) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
 	host, ok := config["host"]
 	if !ok {
 		return nil, errors.New("config option host isn't set")
@@ -49,15 +49,8 @@ func (d SamsungTV) Create(config map[string]interface{}) (boggart.Device, error)
 		client: tv.NewApiV2(host.(string)),
 	}
 	device.Init()
-	device.SetDescription("Samsung TV")
 
 	return device, nil
-}
-
-func (d *SamsungTV) Types() []boggart.DeviceType {
-	return []boggart.DeviceType{
-		boggart.DeviceTypeTV,
-	}
 }
 
 func (d *SamsungTV) Tasks() []workers.Task {

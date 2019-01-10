@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"io/ioutil"
 	"sync"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -17,6 +18,7 @@ import (
 	"github.com/kihamo/shadow/components/messengers"
 	"github.com/kihamo/shadow/components/metrics"
 	"github.com/kihamo/shadow/components/workers"
+	"gopkg.in/yaml.v2"
 	"periph.io/x/periph/host"
 )
 
@@ -31,6 +33,19 @@ type Component struct {
 	connectionRS485  *rs485.Connection
 	listenersManager *manager.ListenersManager
 	devicesManager   *DevicesManager
+}
+
+type FileYAML struct {
+	Devices []DeviceYAML
+}
+
+type DeviceYAML struct {
+	Enabled     *bool
+	Type        string
+	ID          *string
+	Description string
+	Tags        []string
+	Config      map[string]interface{}
 }
 
 func (c *Component) Name() string {
@@ -127,4 +142,52 @@ func (c *Component) RS485() *rs485.Connection {
 	defer c.mutex.RUnlock()
 
 	return c.connectionRS485
+}
+
+func (c *Component) initConfigFromYaml() error {
+	fileName := c.config.String(boggart.ConfigConfigYAML)
+	if fileName == "" {
+		return nil
+	}
+
+	var fileYAML FileYAML
+
+	data, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		return err
+	}
+
+	err = yaml.Unmarshal(data, &fileYAML)
+	if err != nil {
+		return err
+	}
+
+	for _, d := range fileYAML.Devices {
+		if d.Enabled != nil && !*d.Enabled {
+			continue
+		}
+
+		if d.Type == "" {
+			// TODO: error
+			continue
+		}
+
+		kind, err := boggart.GetKind(d.Type)
+		if err != nil {
+			return err
+		}
+
+		device, err := kind.CreateBind(d.Config)
+		if err != nil {
+			return err
+		}
+
+		if d.ID != nil && *d.ID != "" {
+			c.devicesManager.RegisterWithID(*d.ID, device, d.Description, d.Tags, d.Config)
+		} else {
+			c.devicesManager.Register(device, d.Description, d.Tags, d.Config)
+		}
+	}
+
+	return nil
 }

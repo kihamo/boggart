@@ -20,12 +20,12 @@ const (
 type DS18B20Sensor struct {
 	lastValue int64
 
-	boggart.DeviceBase
+	boggart.DeviceBindBase
 	boggart.DeviceSerialNumber
 	boggart.DeviceMQTT
 }
 
-func (d DS18B20Sensor) Create(config map[string]interface{}) (boggart.Device, error) {
+func (d DS18B20Sensor) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
 	address, ok := config["address"]
 	if !ok {
 		return nil, errors.New("config option address isn't set")
@@ -40,15 +40,8 @@ func (d DS18B20Sensor) Create(config map[string]interface{}) (boggart.Device, er
 	}
 	device.Init()
 	device.SetSerialNumber(address.(string))
-	device.SetDescription("Sensor DS18B20")
 
 	return device, nil
-}
-
-func (d *DS18B20Sensor) Types() []boggart.DeviceType {
-	return []boggart.DeviceType{
-		boggart.DeviceTypeThermometer,
-	}
 }
 
 func (d *DS18B20Sensor) Tasks() []workers.Task {

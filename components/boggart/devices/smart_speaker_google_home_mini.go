@@ -26,7 +26,7 @@ const (
 )
 
 type GoogleHomeMiniSmartSpeaker struct {
-	boggart.DeviceBase
+	boggart.DeviceBindBase
 	boggart.DeviceSerialNumber
 	boggart.DeviceMQTT
 
@@ -38,7 +38,7 @@ type GoogleHomeMiniSmartSpeaker struct {
 	host             string
 }
 
-func (d GoogleHomeMiniSmartSpeaker) Create(config map[string]interface{}) (boggart.Device, error) {
+func (d GoogleHomeMiniSmartSpeaker) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
 	host, ok := config["host"]
 	if !ok {
 		return nil, errors.New("config option host isn't set")
@@ -52,15 +52,8 @@ func (d GoogleHomeMiniSmartSpeaker) Create(config map[string]interface{}) (bogga
 		host: host.(string),
 	}
 	device.Init()
-	device.SetDescription("Google Home Mini")
 
 	return device, nil
-}
-
-func (d *GoogleHomeMiniSmartSpeaker) Types() []boggart.DeviceType {
-	return []boggart.DeviceType{
-		boggart.DeviceTypeSmartSpeaker,
-	}
 }
 
 func (d *GoogleHomeMiniSmartSpeaker) Tasks() []workers.Task {
@@ -133,7 +126,7 @@ func (d *GoogleHomeMiniSmartSpeaker) UpdateStatus(status boggart.DeviceStatus) {
 		d.mutex.Unlock()
 	}
 
-	d.DeviceBase.UpdateStatus(status)
+	d.DeviceBindBase.UpdateStatus(status)
 }
 
 func (d *GoogleHomeMiniSmartSpeaker) taskLiveness(ctx context.Context) (interface{}, error) {

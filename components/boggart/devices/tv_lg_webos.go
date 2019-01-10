@@ -46,7 +46,7 @@ var defaultDialerLGWebOSTV = webostv.Dialer{
 }
 
 type LGWebOSTV struct {
-	boggart.DeviceBase
+	boggart.DeviceBindBase
 	boggart.DeviceSerialNumber
 	boggart.DeviceMQTT
 
@@ -58,7 +58,7 @@ type LGWebOSTV struct {
 	key    string
 }
 
-func (d LGWebOSTV) Create(config map[string]interface{}) (boggart.Device, error) {
+func (d LGWebOSTV) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
 	host, ok := config["host"]
 	if !ok {
 		return nil, errors.New("config option host isn't set")
@@ -82,15 +82,8 @@ func (d LGWebOSTV) Create(config map[string]interface{}) (boggart.Device, error)
 		key:  key.(string),
 	}
 	device.Init()
-	device.SetDescription("LG TV WebOS")
 
 	return device, nil
-}
-
-func (d *LGWebOSTV) Types() []boggart.DeviceType {
-	return []boggart.DeviceType{
-		boggart.DeviceTypeTV,
-	}
 }
 
 func (d *LGWebOSTV) Tasks() []workers.Task {
@@ -151,7 +144,7 @@ func (d *LGWebOSTV) UpdateStatus(status boggart.DeviceStatus) {
 		d.mutex.Unlock()
 	}
 
-	d.DeviceBase.UpdateStatus(status)
+	d.DeviceBindBase.UpdateStatus(status)
 }
 
 func (d *LGWebOSTV) taskLiveness(ctx context.Context) (interface{}, error) {

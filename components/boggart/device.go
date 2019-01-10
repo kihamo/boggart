@@ -53,7 +53,7 @@ func GetKind(name string) (DeviceKind, error) {
 }
 
 type DeviceKind interface {
-	Create(config map[string]interface{}) (Device, error)
+	CreateBind(config map[string]interface{}) (DeviceBind, error)
 }
 
 type DeviceId int64
@@ -61,31 +61,8 @@ type DeviceId int64
 const (
 	DeviceIdElectricityMeter DeviceId = iota
 	DeviceIdHeatMeter
-	DeviceIdPhone
 	DeviceIdWaterMeterCold
 	DeviceIdWaterMeterHot
-)
-
-type DeviceType int64
-
-const (
-	DeviceTypeElectricityMeter DeviceType = iota
-	DeviceTypeHeatMeter
-	DeviceTypeInternetProvider
-	DeviceTypePhone
-	DeviceTypeRouter
-	DeviceTypeCamera
-	DeviceTypeWaterMeter
-	DeviceTypeThermometer
-	DeviceTypeBarometer
-	DeviceTypeHygrometer
-	DeviceTypeGPIO
-	DeviceTypeSocket
-	DeviceTypeRemoteControl
-	DeviceTypeLED
-	DeviceTypeTV
-	DeviceTypeUPS
-	DeviceTypeSmartSpeaker
 )
 
 type DeviceStatus uint64
@@ -103,18 +80,22 @@ const (
 type DevicesManager interface {
 	snitch.Collector
 
-	Register(Device) string
-	RegisterWithID(string, Device)
-	Device(string) Device
+	Register(device DeviceBind, description string, tags []string, config map[string]interface{}) string
+	RegisterWithID(id string, bind DeviceBind, description string, tags []string, config map[string]interface{})
+	Device(id string) Device
 	Devices() map[string]Device
-	DevicesByTypes([]DeviceType) map[string]Device
 	IsReady() bool
 }
 
 type Device interface {
+	Bind() DeviceBind
 	Id() string
 	Description() string
-	Types() []DeviceType
+	Tags() []string
+	Config() map[string]interface{}
+}
+
+type DeviceBind interface {
 	Status() DeviceStatus
 }
 

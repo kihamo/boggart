@@ -35,14 +35,14 @@ const (
 )
 
 type BroadlinkRMRemoteControl struct {
-	boggart.DeviceBase
+	boggart.DeviceBindBase
 	boggart.DeviceSerialNumber
 	boggart.DeviceMQTT
 
 	provider *broadlink.RMProPlus
 }
 
-func (d BroadlinkRMRemoteControl) Create(config map[string]interface{}) (boggart.Device, error) {
+func (d BroadlinkRMRemoteControl) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
 	localAddr, err := broadlink.LocalAddr()
 	if err != nil {
 		return nil, err
@@ -81,7 +81,6 @@ func (d BroadlinkRMRemoteControl) Create(config map[string]interface{}) (boggart
 	}
 	device.Init()
 	device.SetSerialNumber(mac.String())
-	device.SetDescription("Socket of Broadlink")
 
 	return device, nil
 }
@@ -90,12 +89,6 @@ func (d *BroadlinkRMRemoteControl) SetMQTTClient(client mqtt.Component) {
 	d.DeviceMQTT.SetMQTTClient(client)
 
 	client.Publish(context.Background(), RemoteControlBroadlinkRMMQTTTopicCaptureState.Format(d.SerialNumberMQTTEscaped()), 2, true, "0")
-}
-
-func (d *BroadlinkRMRemoteControl) Types() []boggart.DeviceType {
-	return []boggart.DeviceType{
-		boggart.DeviceTypeRemoteControl,
-	}
 }
 
 func (d *BroadlinkRMRemoteControl) Tasks() []workers.Task {
@@ -297,7 +290,7 @@ func (d *BroadlinkRMRemoteControl) wrapMQTTSubscriber(operationName string, fn f
 			return
 		}
 
-		span, ctx := tracing.StartSpanFromContext(ctx, boggart.DeviceTypeRemoteControl.String(), operationName)
+		span, ctx := tracing.StartSpanFromContext(ctx, "remote-control", operationName)
 		span.LogFields(
 			log.String("mac", d.provider.MAC().String()),
 			log.String("ip", d.provider.Addr().String()))

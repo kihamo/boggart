@@ -3,7 +3,6 @@ package devices
 import (
 	"bytes"
 	"context"
-	"fmt"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
@@ -25,7 +24,7 @@ const (
 )
 
 type GPIOPin struct {
-	boggart.DeviceBase
+	boggart.DeviceBindBase
 	boggart.DeviceSerialNumber
 	boggart.DeviceMQTT
 
@@ -41,7 +40,6 @@ func NewGPIOPin(p pin.Pin, m GPIOMode) *GPIOPin {
 
 	device.Init()
 	device.SetSerialNumber(p.Name())
-	device.SetDescription(fmt.Sprintf("%s %s", p.Name(), p.Function()))
 
 	if _, ok := p.(gpio.PinIn); ok {
 		go func() {
@@ -52,12 +50,6 @@ func NewGPIOPin(p pin.Pin, m GPIOMode) *GPIOPin {
 	device.UpdateStatus(boggart.DeviceStatusOnline)
 
 	return device
-}
-
-func (d *GPIOPin) Types() []boggart.DeviceType {
-	return []boggart.DeviceType{
-		boggart.DeviceTypeGPIO,
-	}
 }
 
 func (d *GPIOPin) Mode() GPIOMode {

@@ -20,14 +20,14 @@ const (
 type SoftVideoInternet struct {
 	lastValue int64
 
-	boggart.DeviceBase
+	boggart.DeviceBindBase
 	boggart.DeviceSerialNumber
 	boggart.DeviceMQTT
 
 	provider *softvideo.Client
 }
 
-func (d SoftVideoInternet) Create(config map[string]interface{}) (boggart.Device, error) {
+func (d SoftVideoInternet) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
 	login, ok := config["login"]
 	if !ok {
 		return nil, errors.New("config option login isn't set")
@@ -52,15 +52,8 @@ func (d SoftVideoInternet) Create(config map[string]interface{}) (boggart.Device
 	}
 	device.Init()
 	device.SetSerialNumber(login.(string))
-	device.SetDescription("SoftVideo internet provider")
 
 	return device, nil
-}
-
-func (d *SoftVideoInternet) Types() []boggart.DeviceType {
-	return []boggart.DeviceType{
-		boggart.DeviceTypeInternetProvider,
-	}
 }
 
 func (d *SoftVideoInternet) Balance(ctx context.Context) (float64, error) {

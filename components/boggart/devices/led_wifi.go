@@ -38,14 +38,14 @@ type WiFiLED struct {
 	stateSpeed uint64
 	stateColor uint64
 
-	boggart.DeviceBase
+	boggart.DeviceBindBase
 	boggart.DeviceSerialNumber
 	boggart.DeviceMQTT
 
 	bulb *wifiled.Bulb
 }
 
-func (d WiFiLED) Create(config map[string]interface{}) (boggart.Device, error) {
+func (d WiFiLED) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
 	address, ok := config["address"]
 	if !ok {
 		return nil, errors.New("config option address isn't set")
@@ -64,16 +64,9 @@ func (d WiFiLED) Create(config map[string]interface{}) (boggart.Device, error) {
 		stateColor: math.MaxUint64,
 	}
 	device.Init()
-	device.SetDescription("LED WiFi")
 	device.SetSerialNumber(address.(string))
 
 	return device, nil
-}
-
-func (d *WiFiLED) Types() []boggart.DeviceType {
-	return []boggart.DeviceType{
-		boggart.DeviceTypeLED,
-	}
 }
 
 func (d *WiFiLED) Tasks() []workers.Task {

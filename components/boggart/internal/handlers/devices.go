@@ -11,15 +11,16 @@ import (
 
 // easyjson:json
 type deviceHandlerDevice struct {
-	RegisterId      string   `json:"register_id"`
-	Id              string   `json:"id"`
-	Description     string   `json:"description"`
-	SerialNumber    string   `json:"serial_number"`
-	Status          string   `json:"status"`
-	Tasks           []string `json:"tasks"`
-	MQTTTopics      []string `json:"mqtt_topics"`
-	MQTTSubscribers []string `json:"mqtt_subscribers"`
-	Types           []string `json:"types"`
+	RegisterId      string                 `json:"register_id"`
+	Id              string                 `json:"id"`
+	Description     string                 `json:"description"`
+	SerialNumber    string                 `json:"serial_number"`
+	Status          string                 `json:"status"`
+	Tasks           []string               `json:"tasks"`
+	MQTTTopics      []string               `json:"mqtt_topics"`
+	MQTTSubscribers []string               `json:"mqtt_subscribers"`
+	Tags            []string               `json:"tags"`
+	Config          map[string]interface{} `json:"config"`
 }
 
 // easyjson:json
@@ -66,38 +67,39 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 		list := make([]deviceHandlerDevice, 0, 0)
 
 		for registerId, d := range h.devicesManager.Devices() {
+			bind := d.Bind()
+
 			item := deviceHandlerDevice{
 				RegisterId:      registerId,
 				Id:              d.Id(),
 				Description:     d.Description(),
-				Status:          d.Status().String(),
-				Types:           make([]string, 0, len(d.Types())),
+				Status:          bind.Status().String(),
+				Tags:            make([]string, 0, len(d.Tags())),
 				Tasks:           make([]string, 0),
 				MQTTTopics:      make([]string, 0),
 				MQTTSubscribers: make([]string, 0),
+				Config:          d.Config(),
 			}
 
-			if sn, ok := d.(boggart.DeviceHasSerialNumber); ok {
+			if sn, ok := bind.(boggart.DeviceHasSerialNumber); ok {
 				item.SerialNumber = sn.SerialNumber()
 			}
 
-			if tasks, ok := d.(boggart.DeviceHasTasks); ok {
+			if tasks, ok := bind.(boggart.DeviceHasTasks); ok {
 				for _, task := range tasks.Tasks() {
 					item.Tasks = append(item.Tasks, task.Name())
 				}
 			}
 
-			for _, t := range d.Types() {
-				item.Types = append(item.Types, t.String())
-			}
+			item.Tags = append(item.Tags, d.Tags()...)
 
-			if topics, ok := d.(boggart.DeviceHasMQTTTopics); ok {
+			if topics, ok := bind.(boggart.DeviceHasMQTTTopics); ok {
 				for _, topic := range topics.MQTTTopics() {
 					item.MQTTTopics = append(item.MQTTTopics, topic.String())
 				}
 			}
 
-			if subscribers, ok := d.(boggart.DeviceHasMQTTSubscribers); ok {
+			if subscribers, ok := bind.(boggart.DeviceHasMQTTSubscribers); ok {
 				for _, topic := range subscribers.MQTTSubscribers() {
 					item.MQTTSubscribers = append(item.MQTTSubscribers, topic.Topic())
 				}

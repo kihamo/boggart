@@ -3,7 +3,6 @@ package internal
 import (
 	"encoding/hex"
 	"fmt"
-	"io/ioutil"
 	"strconv"
 	"strings"
 
@@ -11,63 +10,8 @@ import (
 	"github.com/kihamo/boggart/components/boggart/devices"
 	"github.com/kihamo/boggart/components/boggart/providers/mercury"
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
-	"gopkg.in/yaml.v2"
 	"periph.io/x/periph/conn/gpio/gpioreg"
 )
-
-type FileYAML struct {
-	Devices []DeviceYAML
-}
-
-type DeviceYAML struct {
-	Enabled *bool
-	Type    string
-	Config  map[string]interface{}
-}
-
-func (c *Component) initConfigFromYaml() error {
-	fileName := c.config.String(boggart.ConfigConfigYAML)
-	if fileName == "" {
-		return nil
-	}
-
-	var fileYAML FileYAML
-
-	data, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		return err
-	}
-
-	err = yaml.Unmarshal(data, &fileYAML)
-	if err != nil {
-		return err
-	}
-
-	for _, deviceYAML := range fileYAML.Devices {
-		if deviceYAML.Enabled != nil && !*deviceYAML.Enabled {
-			continue
-		}
-
-		if deviceYAML.Type == "" {
-			// TODO: error
-			continue
-		}
-
-		kind, err := boggart.GetKind(deviceYAML.Type)
-		if err != nil {
-			return err
-		}
-
-		device, err := kind.Create(deviceYAML.Config)
-		if err != nil {
-			return err
-		}
-
-		c.devicesManager.Register(device)
-	}
-
-	return nil
-}
 
 func (c *Component) initElectricityMeters() {
 	address := c.config.String(boggart.ConfigMercuryDeviceAddress)
@@ -82,7 +26,7 @@ func (c *Component) initElectricityMeters() {
 		provider,
 		c.config.Duration(boggart.ConfigMercuryRepeatInterval))
 
-	c.devicesManager.RegisterWithID(boggart.DeviceIdElectricityMeter.String(), device)
+	c.devicesManager.RegisterWithID(boggart.DeviceIdElectricityMeter.String(), device, "", nil, nil)
 }
 
 func (c *Component) initGPIO() {
@@ -118,12 +62,7 @@ func (c *Component) initGPIO() {
 		}
 
 		device := devices.NewGPIOPin(g, mode)
-
-		if len(opts) > 2 {
-			device.SetDescription(opts[2])
-		}
-
-		c.devicesManager.RegisterWithID(fmt.Sprintf("pin.%d", number), device)
+		c.devicesManager.RegisterWithID(fmt.Sprintf("pin.%d", number), device, "", nil, nil)
 	}
 }
 
@@ -159,7 +98,7 @@ func (c *Component) initPulsarMeters() {
 	// heat meter
 	deviceHeatMeter := devices.NewPulsarHeadMeter(provider, c.config.Duration(boggart.ConfigPulsarRepeatInterval))
 
-	c.devicesManager.RegisterWithID(boggart.DeviceIdHeatMeter.String(), deviceHeatMeter)
+	c.devicesManager.RegisterWithID(boggart.DeviceIdHeatMeter.String(), deviceHeatMeter, "", nil, nil)
 
 	// cold water
 	serialNumber := c.config.String(boggart.ConfigPulsarColdWaterSerialNumber)
@@ -170,8 +109,7 @@ func (c *Component) initPulsarMeters() {
 		c.config.Uint64(boggart.ConfigPulsarColdWaterPulseInput),
 		c.config.Duration(boggart.ConfigPulsarRepeatInterval))
 
-	deviceWaterMeterCold.SetDescription("Pulsar pulsed cold water meter with serial number " + serialNumber)
-	c.devicesManager.RegisterWithID(boggart.DeviceIdWaterMeterCold.String(), deviceWaterMeterCold)
+	c.devicesManager.RegisterWithID(boggart.DeviceIdWaterMeterCold.String(), deviceWaterMeterCold, "", nil, nil)
 
 	// hot water
 	serialNumber = c.config.String(boggart.ConfigPulsarHotWaterSerialNumber)
@@ -182,6 +120,5 @@ func (c *Component) initPulsarMeters() {
 		c.config.Uint64(boggart.ConfigPulsarHotWaterPulseInput),
 		c.config.Duration(boggart.ConfigPulsarRepeatInterval))
 
-	deviceWaterMeterHot.SetDescription("Pulsar pulsed hot water meter with serial number " + serialNumber)
-	c.devicesManager.RegisterWithID(boggart.DeviceIdWaterMeterHot.String(), deviceWaterMeterHot)
+	c.devicesManager.RegisterWithID(boggart.DeviceIdWaterMeterHot.String(), deviceWaterMeterHot, "", nil, nil)
 }

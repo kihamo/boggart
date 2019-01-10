@@ -47,12 +47,7 @@ func (l *AnnotationsListener) Run(_ context.Context, event workers.Event, t time
 		}
 
 		device := args[0].(boggart.Device)
-
-		tags := make([]string, 0, len(device.Types()))
-		for _, deviceType := range device.Types() {
-			tags = append(tags, deviceType.String())
-		}
-		tags = append(tags, "device disabled")
+		tags := append(device.Tags(), "device disabled")
 
 		if event == boggart.DeviceEventDeviceDisabled {
 			tags = append(tags, "manually")

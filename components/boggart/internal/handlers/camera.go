@@ -29,10 +29,10 @@ type CameraHandler struct {
 func (h *CameraHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	q := r.URL().Query()
 
-	sn := q.Get(":sn")
+	id := q.Get(":id")
 	channel := q.Get(":channel")
 
-	if sn == "" || channel == "" {
+	if id == "" || channel == "" {
 		h.NotFound(w, r)
 		return
 	}
@@ -43,31 +43,14 @@ func (h *CameraHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		return
 	}
 
-	sn = strings.Replace(sn, "/", "_", -1)
-
-	devicesList := h.DevicesManager.DevicesByTypes([]boggart.DeviceType{boggart.DeviceTypeCamera})
-	if len(devicesList) == 0 {
+	device := h.DevicesManager.Device(id)
+	if device == nil {
 		h.NotFound(w, r)
 		return
 	}
 
-	var device *devices.CameraHikVision
-
-	for _, d := range devicesList {
-		hv, ok := d.(*devices.CameraHikVision)
-		if !ok {
-			continue
-		}
-
-		if strings.Replace(hv.SerialNumber(), "/", "_", -1) != sn {
-			continue
-		}
-
-		device = hv
-		break
-	}
-
-	if device == nil {
+	bind, ok := device.Bind().(*devices.CameraHikVision)
+	if !ok {
 		h.NotFound(w, r)
 		return
 	}
@@ -94,7 +77,7 @@ func (h *CameraHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		buf := &bytes.Buffer{}
-		if err := device.Snapshot(r.Context(), ch, buf); err != nil {
+		if err := bind.Snapshot(r.Context(), ch, buf); err != nil {
 			h.Logger().Warn("Failed get snapshot", "error", err, "device", device.Description())
 
 			h.NotFound(w, r)
@@ -131,7 +114,7 @@ func (h *CameraHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		return
 	}
 
-	if err = device.Snapshot(r.Context(), ch, w); err != nil {
+	if err = bind.Snapshot(r.Context(), ch, w); err != nil {
 		h.NotFound(w, r)
 		return
 	}

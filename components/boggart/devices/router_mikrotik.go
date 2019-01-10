@@ -47,11 +47,12 @@ var (
 )
 
 type MikrotikRouter struct {
-	boggart.DeviceBase
+	boggart.DeviceBindBase
 	boggart.DeviceSerialNumber
 	boggart.DeviceMQTT
 
 	provider     *mikrotik.Client
+	host         string
 	syslogClient string
 	interval     time.Duration
 }
@@ -73,7 +74,7 @@ type MikrotikRouterMac struct {
 	}
 }
 
-func (d MikrotikRouter) Create(config map[string]interface{}) (boggart.Device, error) {
+func (d MikrotikRouter) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
 	address, ok := config["address"]
 	if !ok {
 		return nil, errors.New("config option address isn't set")
@@ -93,10 +94,10 @@ func (d MikrotikRouter) Create(config map[string]interface{}) (boggart.Device, e
 
 	device := &MikrotikRouter{
 		provider:     mikrotik.NewClient(u.Host, username, password, time.Second*10),
+		host:         u.Host + "-" + u.Port(),
 		syslogClient: u.Hostname() + ":514",
 	}
 	device.Init()
-	device.SetDescription("Mikrotik router on " + u.Host)
 
 	return device, nil
 }
@@ -108,12 +109,6 @@ func NewMikrotikRouterListener(router *MikrotikRouter) *MikrotikRouterListener {
 	l.Init()
 
 	return l
-}
-
-func (d *MikrotikRouter) Types() []boggart.DeviceType {
-	return []boggart.DeviceType{
-		boggart.DeviceTypeRouter,
-	}
 }
 
 func (d *MikrotikRouter) Describe(ch chan<- *snitch.Description) {
@@ -166,7 +161,7 @@ func (d *MikrotikRouter) Tasks() []workers.Task {
 	taskStateUpdater := task.NewFunctionTask(d.taskStateUpdater)
 	taskStateUpdater.SetRepeats(-1)
 	taskStateUpdater.SetRepeatInterval(time.Minute * 5)
-	taskStateUpdater.SetName("device-router-mikrotik-updater-" + d.Id())
+	taskStateUpdater.SetName("device-router-mikrotik-updater-" + d.host)
 
 	return []workers.Task{
 		taskLiveness,

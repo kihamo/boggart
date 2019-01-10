@@ -50,7 +50,7 @@ type cameraHikVisionPTZChannel struct {
 }
 
 type CameraHikVision struct {
-	boggart.DeviceBase
+	boggart.DeviceBindBase
 	boggart.DeviceSerialNumber
 	boggart.DeviceMQTT
 
@@ -63,7 +63,7 @@ type CameraHikVision struct {
 	ptzChannels map[uint64]cameraHikVisionPTZChannel
 }
 
-func (d CameraHikVision) Create(config map[string]interface{}) (boggart.Device, error) {
+func (d CameraHikVision) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
 	address, ok := config["address"]
 	if !ok {
 		return nil, errors.New("config option address isn't set")
@@ -89,15 +89,8 @@ func (d CameraHikVision) Create(config map[string]interface{}) (boggart.Device, 
 	}
 
 	device.Init()
-	device.SetDescription("HikVision camera")
 
 	return device, nil
-}
-
-func (d *CameraHikVision) Types() []boggart.DeviceType {
-	return []boggart.DeviceType{
-		boggart.DeviceTypeCamera,
-	}
 }
 
 func (d *CameraHikVision) Tasks() []workers.Task {

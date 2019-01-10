@@ -18,7 +18,7 @@ const (
 )
 
 type UPSNUT struct {
-	boggart.DeviceBase
+	boggart.DeviceBindBase
 	boggart.DeviceSerialNumber
 	boggart.DeviceMQTT
 
@@ -29,7 +29,7 @@ type UPSNUT struct {
 	variables map[string]interface{}
 }
 
-func (d UPSNUT) Create(config map[string]interface{}) (boggart.Device, error) {
+func (d UPSNUT) CreateBind(config map[string]interface{}) (boggart.DeviceBind, error) {
 	host, ok := config["host"]
 	if !ok {
 		return nil, errors.New("config option host isn't set")
@@ -55,15 +55,8 @@ func (d UPSNUT) Create(config map[string]interface{}) (boggart.Device, error) {
 	}
 
 	device.Init()
-	device.SetDescription("UPS NUT")
 
 	return device, nil
-}
-
-func (d *UPSNUT) Types() []boggart.DeviceType {
-	return []boggart.DeviceType{
-		boggart.DeviceTypeUPS,
-	}
 }
 
 func (d *UPSNUT) Tasks() []workers.Task {

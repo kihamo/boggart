@@ -13,8 +13,8 @@ msgstr ""
 msgid "Devices"
 msgstr "Устройства"
 
-msgid "Type"
-msgstr "Тип"
+msgid "Tags"
+msgstr "Тэги"
 
 msgid "ID"
 msgstr "ID"
@@ -39,6 +39,9 @@ msgstr "MQTT подписки"
 
 msgid "MQTT topics"
 msgstr "MQTT топики"
+
+msgid "Config"
+msgstr "Конфигурация"
 
 msgid "Actions"
 msgstr "Действия"

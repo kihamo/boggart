@@ -27,7 +27,7 @@ type BME280Sensor struct {
 	humidity    uint64
 	pressure    uint64
 
-	boggart.DeviceBase
+	boggart.DeviceBindBase
 	boggart.DeviceSerialNumber
 	boggart.DeviceMQTT
 
@@ -53,17 +53,8 @@ func NewBME280Sensor(connector i2c.Connector, interval time.Duration, bus int, a
 
 	device.Init()
 	device.SetSerialNumber(fmt.Sprintf("%d_%d", bus, address))
-	device.SetDescription("Sensor BME280")
 
 	return device
-}
-
-func (d *BME280Sensor) Types() []boggart.DeviceType {
-	return []boggart.DeviceType{
-		boggart.DeviceTypeThermometer,
-		boggart.DeviceTypeBarometer,
-		boggart.DeviceTypeHygrometer,
-	}
 }
 
 func (d *BME280Sensor) Tasks() []workers.Task {

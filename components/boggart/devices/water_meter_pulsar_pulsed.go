@@ -29,7 +29,7 @@ var (
 type PulsarPulsedWaterMeter struct {
 	pulses uint64
 
-	boggart.DeviceBase
+	boggart.DeviceBindBase
 	boggart.DeviceSerialNumber
 	boggart.DeviceMQTT
 
@@ -51,12 +51,6 @@ func NewPulsarPulsedWaterMeter(serialNumber string, volumeOffset float64, provid
 	device.SetSerialNumber(serialNumber)
 
 	return device
-}
-
-func (d *PulsarPulsedWaterMeter) Types() []boggart.DeviceType {
-	return []boggart.DeviceType{
-		boggart.DeviceTypeWaterMeter,
-	}
 }
 
 func (d *PulsarPulsedWaterMeter) Volume(ctx context.Context) (float64, error) {

@@ -11,12 +11,12 @@ $(document).ready(function () {
             },
             columns: [
                 {
-                    data: 'types',
-                    render: function (types) {
+                    data: 'tags',
+                    render: function (tags) {
                         var content = '';
 
-                        for (var i in types) {
-                            content += '<span class="label label-success">' + types[i] + '</span> ';
+                        for (var i in tags) {
+                            content += '<span class="label label-success">' + tags[i] + '</span> ';
                         }
 
                         return content;
@@ -104,6 +104,12 @@ $(document).ready(function () {
                         }
 
                         return content;
+                    }
+                },
+                {
+                    data: 'config',
+                    render: function (config) {
+                        return JSON.stringify(config);
                     }
                 }
             ]
