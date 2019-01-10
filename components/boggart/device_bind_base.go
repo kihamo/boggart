@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 	"sync"
 	"sync/atomic"
 
@@ -70,10 +71,30 @@ func (d *DeviceBindMQTT) MQTTPublish(ctx context.Context, topic string, qos byte
 	switch value := payload.(type) {
 	case string, []byte:
 		// skip
-	case float64, float32:
-		payload = fmt.Sprintf("%.2f", value)
-	case uint64, uint32, uint16, uint8, uint, int64, int32, int16, int8, int:
-		payload = fmt.Sprintf("%d", value)
+	case float64:
+		payload = strconv.FormatFloat(value, 'f', -1, 64)
+	case float32:
+		payload = strconv.FormatFloat(float64(value), 'f', -1, 64)
+	case int64:
+		payload = strconv.FormatInt(value, 10)
+	case int32:
+		payload = strconv.FormatInt(int64(value), 10)
+	case int16:
+		payload = strconv.FormatInt(int64(value), 10)
+	case int8:
+		payload = strconv.FormatInt(int64(value), 10)
+	case int:
+		payload = strconv.FormatInt(int64(value), 10)
+	case uint64:
+		payload = strconv.FormatUint(value, 10)
+	case uint32:
+		payload = strconv.FormatUint(uint64(value), 10)
+	case uint16:
+		payload = strconv.FormatUint(uint64(value), 10)
+	case uint8:
+		payload = strconv.FormatUint(uint64(value), 10)
+	case uint:
+		payload = strconv.FormatUint(uint64(value), 10)
 	case bool:
 		if value {
 			payload = []byte(`1`)
