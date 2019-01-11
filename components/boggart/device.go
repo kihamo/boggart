@@ -35,13 +35,13 @@ type DevicesManager interface {
 	Register(device DeviceBind, t string, description string, tags []string, config interface{}) string
 	RegisterWithID(id string, bind DeviceBind, t string, description string, tags []string, config interface{})
 	Device(id string) Device
-	Devices() map[string]Device
+	Devices() []Device
 	IsReady() bool
 }
 
 type Device interface {
 	Bind() DeviceBind
-	Id() string
+	ID() string
 	Type() string
 	Description() string
 	Tags() []string

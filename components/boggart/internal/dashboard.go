@@ -18,12 +18,12 @@ func (c *Component) DashboardMenu() dashboard.Menu {
 
 	return dashboard.NewMenu("Smart home").
 		WithIcon("home").
-		WithRoute(routes[1])
+		WithChild(dashboard.NewMenu("Devices").WithRoute(routes[1])).
+		WithChild(dashboard.NewMenu("Config YAML").WithUrl("/" + c.Name() + "/config/view"))
 }
 
 func (c *Component) DashboardRoutes() []dashboard.Route {
 	if c.routes == nil {
-		devicesHandler := handlers.NewDevicesHandler(c.devicesManager, c.listenersManager)
 		cameraHandler := &handlers.CameraHandler{
 			DevicesManager: c.devicesManager,
 		}
@@ -36,14 +36,13 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 
 		c.routes = []dashboard.Route{
 			dashboard.RouteFromAssetFS(c),
-			dashboard.NewRoute("/"+c.Name()+"/", devicesHandler).
-				WithMethods([]string{http.MethodGet}).
-				WithAuth(true),
-			dashboard.NewRoute("/"+c.Name()+"/devices/", devicesHandler).
+			dashboard.NewRoute("/"+c.Name()+"/devices/", handlers.NewDevicesHandler(c.devicesManager, c.listenersManager)).
 				WithMethods([]string{http.MethodGet}).
 				WithAuth(true),
 			dashboard.NewRoute("/"+c.Name()+"/camera/:id/:channel", cameraHandler).
 				WithMethods([]string{http.MethodGet, http.MethodPost}),
+			dashboard.NewRoute("/"+c.Name()+"/config/:action", handlers.NewConfigHandler(c.devicesManager)).
+				WithMethods([]string{http.MethodGet}),
 		}
 	}
 

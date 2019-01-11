@@ -1,9 +1,39 @@
 {{ define "content" }}
+<div class="modal fade" id="config-yaml" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">{{ i18n "Config YAML" . }}</h4>
+            </div>
+            <div class="modal-body">
+                <iframe src="/boggart/config/modal" width="100%" frameborder="0"></iframe>
+            </div>
+            <div class="modal-footer">
+                <a href="/boggart/config/download" class="btn btn-success">{{ i18n "Download" . }}</a>
+                <button type="button" class="btn btn-default" data-dismiss="modal">{{ i18n "Close" . }}</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="row" id="devices">
     <div class="x_panel">
         <div class="x_title">
             <h2>{{ i18n "Devices" . }}</h2>
+            <ul class="nav navbar-right panel_toolbox">
+                <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                <li>
+                    <a href="javascript:void(0)" data-toggle="modal" data-target="#config-yaml" data-modal-title="{{ i18n "Config YAML" . }}">
+                        <i class="glyphicon glyphicon-list-alt" data-toggle="tooltip" title="{{ i18n "Config YAML" . }}" data-placement="bottom"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="/boggart/config/download" title="{{ i18n "Config YAML download" . }}" data-toggle="tooltip" data-placement="bottom">
+                        <i class="glyphicon glyphicon-download-alt"></i>
+                    </a>
+                </li>
+            </ul>
             <div class="clearfix"></div>
         </div>
         <div class="x_content">

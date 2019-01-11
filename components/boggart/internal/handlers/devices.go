@@ -14,7 +14,6 @@ import (
 
 // easyjson:json
 type deviceHandlerDevice struct {
-	RegisterId      string   `json:"register_id"`
 	Id              string   `json:"id"`
 	Type            string   `json:"type"`
 	Description     string   `json:"description"`
@@ -72,7 +71,7 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 		buf := bytes.NewBuffer(nil)
 		enc := yaml.NewEncoder(buf)
 
-		for registerId, d := range h.devicesManager.Devices() {
+		for _, d := range h.devicesManager.Devices() {
 			buf.Reset()
 			if err := enc.Encode(d.Config()); err != nil {
 				panic(err.Error())
@@ -81,8 +80,7 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 			bind := d.Bind()
 
 			item := deviceHandlerDevice{
-				RegisterId:      registerId,
-				Id:              d.Id(),
+				Id:              d.ID(),
 				Type:            d.Type(),
 				Description:     d.Description(),
 				SerialNumber:    bind.SerialNumber(),

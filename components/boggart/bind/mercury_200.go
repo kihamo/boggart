@@ -129,7 +129,7 @@ func (d *Mercury200) taskStateUpdater(ctx context.Context) (interface{}, error) 
 	}
 
 	if prevT2 := atomic.LoadUint64(&d.tariff2); currentT2 != prevT2 {
-		atomic.StoreUint64(&d.tariff1, currentT2)
+		atomic.StoreUint64(&d.tariff2, currentT2)
 		d.MQTTPublishAsync(ctx, Mercury200MQTTTopicTariff.Format(serialNumber, 2), 0, true, currentT2)
 	}
 

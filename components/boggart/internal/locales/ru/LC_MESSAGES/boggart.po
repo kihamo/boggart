@@ -13,3 +13,12 @@ msgstr ""
 msgctxt "menu"
 msgid "Smart home"
 msgstr "Умный дом"
+
+msgid "Config YAML"
+msgstr "YAML конфигурация"
+
+msgid "Config YAML download"
+msgstr "Скачать YAML конфигурацию"
+
+msgid "Config copied"
+msgstr "Конфигурация скопирована"

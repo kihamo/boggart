@@ -35,18 +35,18 @@ func (l *LoggingListener) Run(_ context.Context, event workers.Event, t time.Tim
 	switch event {
 	case boggart.DeviceEventDeviceRegister:
 		l.logger.Debug("Register device",
-			"device.id", args[0].(boggart.Device).Id(),
+			"device.id", args[0].(boggart.Device).ID(),
 			"device_manager.id", args[1],
 		)
 
 	case boggart.DeviceEventDeviceEnabled:
 		l.logger.Info("Device has been enabled manually",
-			"device.id", args[0].(boggart.Device).Id(),
+			"device.id", args[0].(boggart.Device).ID(),
 		)
 
 	case boggart.DeviceEventDeviceDisabled:
 		l.logger.Info("Device has been disabled manually",
-			"device.id", args[0].(boggart.Device).Id(),
+			"device.id", args[0].(boggart.Device).ID(),
 		)
 
 	case boggart.DeviceEventDeviceDisabledAfterCheck:
@@ -54,12 +54,12 @@ func (l *LoggingListener) Run(_ context.Context, event workers.Event, t time.Tim
 
 		if err == nil {
 			l.logger.Warn("Device has been disabled because the ping returns false",
-				"device.id", args[0].(boggart.Device).Id(),
+				"device.id", args[0].(boggart.Device).ID(),
 				"device.key", args[1],
 			)
 		} else {
 			l.logger.Warn("Device has been disabled because the ping failed",
-				"device.id", args[0].(boggart.Device).Id(),
+				"device.id", args[0].(boggart.Device).ID(),
 				"device.key", args[1],
 				"error", err.(error).Error(),
 			)
@@ -67,7 +67,7 @@ func (l *LoggingListener) Run(_ context.Context, event workers.Event, t time.Tim
 
 	case boggart.DeviceEventDeviceEnabledAfterCheck:
 		l.logger.Info("Device has been enabled because the ping returns true",
-			"device.id", args[0].(boggart.Device).Id(),
+			"device.id", args[0].(boggart.Device).ID(),
 			"device.key", args[1],
 		)
 

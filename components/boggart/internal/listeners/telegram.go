@@ -51,7 +51,7 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 		device := args[0].(boggart.Device)
 		err := args[2]
 
-		message := fmt.Sprintf("Device is down %s #%s (%s)", args[1], device.Id(), device.Description())
+		message := fmt.Sprintf("Device is down %s #%s (%s)", args[1], device.ID(), device.Description())
 		if err == nil {
 			l.sendMessage(message)
 		} else {
@@ -64,7 +64,7 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 		}
 
 		device := args[0].(boggart.Device)
-		l.sendMessage("Device is up %s #%s (%s)", args[1], device.Id(), device.Description())
+		l.sendMessage("Device is up %s #%s (%s)", args[1], device.ID(), device.Description())
 
 	case boggart.DeviceEventDevicesManagerReady:
 		l.sendMessage("Hello. I'm %s and I'm online and ready", l.application.Name())

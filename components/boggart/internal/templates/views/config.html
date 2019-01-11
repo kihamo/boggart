@@ -1,0 +1,57 @@
+{{ define "content" }}
+    {{ if not .modal }}
+    <script type="application/javascript">
+        $(document).ready(function () {
+            if(ClipboardJS.isSupported()) {
+                var cb = new ClipboardJS("#copy-button");
+                cb.on('success', function(e) {
+                    $('#copy-button').tooltip({
+                        title: '{{ i18n "Config copied" . }}'
+                    }).tooltip('show');
+                    e.clearSelection();
+                });
+                cb.on('error', function(e) {
+                    e.clearSelection();
+                });
+            } else {
+                $('#copy-button').hide();
+            }
+        });
+    </script>
+    <div class="row" id="devices">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>{{ i18n "Config YAML" . }}</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                    <li class="dropdown">
+                        <a href="javascript:void(0);" data-placement="bottom" data-clipboard-action="copy" data-clipboard-target="#yaml" id="copy-button"><i class="glyphicon glyphicon-copy"></i></a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="/boggart/config/download" data-toggle="tooltip" title="{{ i18n "Config YAML download" . }}"><i class="glyphicon glyphicon-download-alt"></i></a>
+                    </li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+    {{ else }}
+    <style type="text/css">
+        body { background: none !important }
+    </style>
+    {{ end }}
+            <pre><code class="yaml" id="yaml">{{ .yaml|raw }}</code></pre>
+        </div>
+    {{ if not .modal }}
+        </div>
+    </div>
+    {{ end }}
+{{ end }}
+
+{{ define "head" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/highlightjs/css/tomorrow.min.css" false) }}
+{{ end }}
+
+{{ define "js" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/highlightjs/js/highlight.pack.min.js" false) }}
+    {{ staticHTML (staticURL (print "/" .ComponentName "/assets/vendor/clipboard.js/clipboard.min.js") false) }}
+{{ end }}

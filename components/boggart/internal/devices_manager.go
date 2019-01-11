@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"sort"
 	"sync"
 	"sync/atomic"
 
@@ -88,12 +89,20 @@ func (m *DevicesManager) Device(id string) boggart.Device {
 	return nil
 }
 
-func (m *DevicesManager) Devices() map[string]boggart.Device {
-	devices := make(map[string]boggart.Device, 0)
+func (m *DevicesManager) Devices() []boggart.Device {
+	devices := make([]boggart.Device, 0)
 
 	m.storage.Range(func(key interface{}, device interface{}) bool {
-		devices[key.(string)] = device.(boggart.Device)
+		devices = append(devices, device.(boggart.Device))
 		return true
+	})
+
+	sort.Slice(devices, func(i, j int) bool {
+		if devices[i].Type() == devices[j].Type() {
+			return devices[i].ID() < devices[j].ID()
+		}
+
+		return devices[i].Type() < devices[j].Type()
 	})
 
 	return devices

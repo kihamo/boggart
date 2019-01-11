@@ -17,7 +17,7 @@ func (d *Device) Bind() boggart.DeviceBind {
 	return d.bind
 }
 
-func (d *Device) Id() string {
+func (d *Device) ID() string {
 	return d.id
 }
 

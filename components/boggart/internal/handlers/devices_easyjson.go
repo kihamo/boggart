@@ -230,8 +230,6 @@ func easyjson65411fd3DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			continue
 		}
 		switch key {
-		case "register_id":
-			out.RegisterId = string(in.String())
 		case "id":
 			out.Id = string(in.String())
 		case "type":
@@ -350,16 +348,6 @@ func easyjson65411fd3EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 	out.RawByte('{')
 	first := true
 	_ = first
-	{
-		const prefix string = ",\"register_id\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.String(string(in.RegisterId))
-	}
 	{
 		const prefix string = ",\"id\":"
 		if first {
