@@ -43,17 +43,13 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 
 	prevPower := atomic.LoadInt64(&b.statePower)
 	if prevPower == 0 || (prevPower == 1) != state.Power {
-		var mqttValue []byte
-
 		if state.Power {
 			atomic.StoreInt64(&b.statePower, 1)
-			mqttValue = []byte(`1`)
 		} else {
 			atomic.StoreInt64(&b.statePower, -1)
-			mqttValue = []byte(`0`)
 		}
 
-		b.MQTTPublishAsync(ctx, MQTTTopicStatePower.Format(host), 0, true, mqttValue)
+		b.MQTTPublishAsync(ctx, MQTTTopicStatePower.Format(host), 0, true, state.Power)
 	}
 
 	currentMode := uint64(state.Mode)
