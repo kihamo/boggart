@@ -10,10 +10,14 @@ import (
 	"github.com/kihamo/go-workers/task"
 )
 
+const (
+	DefaultUpdaterInterval = time.Minute
+)
+
 func (b *Bind) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(b.taskUpdater)
 	taskUpdater.SetRepeats(-1)
-	taskUpdater.SetRepeatInterval(time.Hour)
+	taskUpdater.SetRepeatInterval(b.updaterInterval)
 	taskUpdater.SetName("bind-softvideo-updater-" + b.provider.AccountID())
 
 	return []workers.Task{
