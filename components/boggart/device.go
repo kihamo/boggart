@@ -32,8 +32,9 @@ const (
 type DevicesManager interface {
 	snitch.Collector
 
-	Register(device DeviceBind, t string, description string, tags []string, config interface{}) string
-	RegisterWithID(id string, bind DeviceBind, t string, description string, tags []string, config interface{})
+	Register(device DeviceBind, t string, description string, tags []string, config interface{}) (string, error)
+	RegisterWithID(id string, bind DeviceBind, t string, description string, tags []string, config interface{}) error
+	Unregister(id string) error
 	Device(id string) Device
 	Devices() []Device
 	IsReady() bool
@@ -46,6 +47,10 @@ type Device interface {
 	Description() string
 	Tags() []string
 	Config() interface{}
+	Tasks() []workers.Task
+	Listeners() []workers.ListenerWithEvents
+	MQTTSubscribers() []mqtt.Subscriber
+	MQTTTopics() []mqtt.Topic
 }
 
 type DeviceBind interface {
@@ -69,7 +74,9 @@ type DeviceBindHasMQTTClient interface {
 	SetMQTTClient(mqtt.Component)
 }
 
-type DeviceBindHasMQTTSubscribers mqtt.HasSubscribers
+type DeviceBindHasMQTTSubscribers interface {
+	MQTTSubscribers() []mqtt.Subscriber
+}
 
 type DeviceBindHasMQTTTopics interface {
 	MQTTTopics() []mqtt.Topic

@@ -1,5 +1,9 @@
 package mqtt
 
+import (
+	"context"
+)
+
 type HasSubscribers interface {
 	MQTTSubscribers() []Subscriber
 }
@@ -7,7 +11,7 @@ type HasSubscribers interface {
 type Subscriber interface {
 	Topic() string
 	QOS() byte
-	Callback() MessageHandler
+	Call(context.Context, Component, Message)
 }
 
 type SubscriberSimple struct {
@@ -32,6 +36,6 @@ func (s *SubscriberSimple) QOS() byte {
 	return s.qos
 }
 
-func (s *SubscriberSimple) Callback() MessageHandler {
-	return s.callback
+func (s *SubscriberSimple) Call(ctx context.Context, client Component, message Message) {
+	s.callback(ctx, client, message)
 }

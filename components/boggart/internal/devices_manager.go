@@ -39,46 +39,81 @@ func NewDevicesManager(mqtt mqtt.Component, workers workers.Component, listeners
 	}
 }
 
-func (m *DevicesManager) Register(device boggart.DeviceBind, t string, description string, tags []string, config interface{}) string {
+func (m *DevicesManager) Register(device boggart.DeviceBind, t string, description string, tags []string, config interface{}) (string, error) {
 	id := uuid.New()
-	m.RegisterWithID(id, device, t, description, tags, config)
-	return id
+	err := m.RegisterWithID(id, device, t, description, tags, config)
+	return id, err
 }
 
-func (m *DevicesManager) RegisterWithID(id string, bind boggart.DeviceBind, t string, description string, tags []string, config interface{}) {
+func (m *DevicesManager) RegisterWithID(id string, bind boggart.DeviceBind, t string, description string, tags []string, config interface{}) error {
 	if id == "" {
 		id = uuid.New()
 	}
 
-	m.storage.Store(id, &Device{
+	device := &DeviceItem{
 		bind:        bind,
 		id:          id,
 		t:           t,
 		description: description,
 		tags:        tags,
 		config:      config,
-	})
+	}
+	m.storage.Store(id, device)
 	m.listeners.AsyncTrigger(context.TODO(), boggart.DeviceEventDeviceRegister, bind, id)
 
+	// register mqtt
 	if mqttClient, ok := bind.(boggart.DeviceBindHasMQTTClient); ok {
 		mqttClient.SetMQTTClient(m.mqtt)
 	}
 
-	if subs, ok := bind.(boggart.DeviceBindHasMQTTSubscribers); ok {
-		m.mqtt.SubscribeSubscribers(subs.MQTTSubscribers())
-	}
-
-	if tasks, ok := bind.(boggart.DeviceBindHasTasks); ok {
-		for _, task := range tasks.Tasks() {
-			m.workers.AddTask(task)
+	for _, subscriber := range device.MQTTSubscribers() {
+		if err := m.mqtt.SubscribeSubscriber(subscriber); err != nil {
+			return err
 		}
 	}
 
-	if listeners, ok := bind.(boggart.DeviceBindHasListeners); ok {
-		for _, listener := range listeners.Listeners() {
-			m.listeners.AddListener(listener)
-		}
+	// register tasks
+	for _, task := range device.Tasks() {
+		m.workers.AddTask(task)
 	}
+
+	// register listeners
+	for _, listener := range device.Listeners() {
+		m.listeners.AddListener(listener)
+	}
+
+	return nil
+}
+
+func (m *DevicesManager) Unregister(id string) error {
+	d, ok := m.storage.Load(id)
+	if !ok {
+		return nil
+	}
+
+	device := d.(*DeviceItem)
+
+	// unregister mqtt
+	if err := m.mqtt.UnsubscribeSubscribers(device.MQTTSubscribers()); err != nil {
+		return err
+	}
+
+	if mqttClient, ok := device.Bind().(boggart.DeviceBindHasMQTTClient); ok {
+		mqttClient.SetMQTTClient(nil)
+	}
+
+	// remove tasks
+	for _, task := range device.Tasks() {
+		m.workers.RemoveTask(task)
+	}
+
+	// remove listeners
+	for _, listener := range device.Listeners() {
+		m.listeners.RemoveListener(listener)
+	}
+
+	m.storage.Delete(id)
+	return nil
 }
 
 func (m *DevicesManager) Device(id string) boggart.Device {
@@ -110,7 +145,7 @@ func (m *DevicesManager) Devices() []boggart.Device {
 
 func (m *DevicesManager) Describe(ch chan<- *snitch.Description) {
 	m.storage.Range(func(_ interface{}, device interface{}) bool {
-		if collector, ok := device.(snitch.Collector); ok {
+		if collector, ok := device.(*DeviceItem).Bind().(snitch.Collector); ok {
 			collector.Describe(ch)
 		}
 
@@ -120,7 +155,7 @@ func (m *DevicesManager) Describe(ch chan<- *snitch.Description) {
 
 func (m *DevicesManager) Collect(ch chan<- snitch.Metric) {
 	m.storage.Range(func(_ interface{}, device interface{}) bool {
-		if collector, ok := device.(snitch.Collector); ok {
+		if collector, ok := device.(*DeviceItem).Bind().(snitch.Collector); ok {
 			collector.Collect(ch)
 		}
 

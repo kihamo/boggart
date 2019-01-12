@@ -92,29 +92,34 @@ func (d *SamsungTizen) taskLiveness(ctx context.Context) (interface{}, error) {
 		sn := d.SerialNumber()
 		d.MQTTPublishAsync(ctx, SamsungTizenMQTTTopicDeviceID.Format(sn), 0, false, info.Device.ID)
 		d.MQTTPublishAsync(ctx, SamsungTizenMQTTTopicDeviceModelName.Format(sn), 0, false, info.Device.Name)
-
-		d.initOnce.Do(d.initMQTTSubscribers)
 	}
 
 	return nil, nil
 }
 
-func (d *SamsungTizen) initMQTTSubscribers() {
-	sn := d.SerialNumber()
+func (d *SamsungTizen) MQTTSubscribers() []mqtt.Subscriber {
+	return []mqtt.Subscriber{
+		mqtt.NewSubscriber(SamsungTizenMQTTTopicPower.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
+			if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 2) {
+				return
+			}
 
-	d.MQTTSubscribe(SamsungTizenMQTTTopicPower.Format(sn), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
-		if bytes.Equal(message.Payload(), []byte(`1`)) {
-			d.mutex.RLock()
-			mac := d.mac
-			d.mutex.RUnlock()
+			if bytes.Equal(message.Payload(), []byte(`1`)) {
+				d.mutex.RLock()
+				mac := d.mac
+				d.mutex.RUnlock()
 
-			wol.MagicWake(mac, "255.255.255.255")
-		} else if d.Status() == boggart.DeviceStatusOnline {
-			d.client.SendCommand(tv.KeyPower)
-		}
-	})
+				wol.MagicWake(mac, "255.255.255.255")
+			} else if d.Status() == boggart.DeviceStatusOnline {
+				d.client.SendCommand(tv.KeyPower)
+			}
+		}),
+		mqtt.NewSubscriber(SamsungTizenMQTTTopicKey.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
+			if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 2) {
+				return
+			}
 
-	d.MQTTSubscribe(SamsungTizenMQTTTopicKey.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
-		d.client.SendCommand(string(message.Payload()))
-	}))
+			d.client.SendCommand(string(message.Payload()))
+		})),
+	}
 }

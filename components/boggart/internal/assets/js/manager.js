@@ -6,7 +6,7 @@ $(document).ready(function () {
                 url: '/dashboard/datatables/i18n.json'
             },
             ajax: {
-                url: '/boggart/devices/?entity=devices',
+                url: '/boggart/manager/?entity=devices',
                 dataSrc: 'data'
             },
             columns: [
@@ -62,6 +62,13 @@ $(document).ready(function () {
                     data: 'mqtt_subscribers',
                     render: function (subscribers) {
                         return subscribers.length;
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<button type="button" class="btn btn-danger btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Confirm unregister device #' + row.id + '" data-modal-callback="deviceUnregister(\'' + row.id + '\');">' +
+                            '<i class="glyphicon glyphicon-trash" title="Unregister device"></i>'
                     }
                 },
                 {
@@ -136,7 +143,7 @@ $(document).ready(function () {
                 url: '/dashboard/datatables/i18n.json'
             },
             ajax: {
-                url: '/boggart/devices/?entity=listeners',
+                url: '/boggart/manager/?entity=listeners',
                 dataSrc: 'data'
             },
             columns: [
@@ -183,4 +190,26 @@ $(document).ready(function () {
                 }
             ]
         });
+
+    window.deviceUnregister = function(deviceId) {
+        $.ajax({
+            type: 'POST',
+            url: '/boggart/manager/' + deviceId + '/unregister',
+            success: function(r) {
+                if (r.result === 'failed') {
+                    new PNotify({
+                        title: 'Error',
+                        text: r.message,
+                        type: 'error',
+                        hide: false,
+                        styling: 'bootstrap3'
+                    });
+                    return
+                }
+
+                tableDevices.ajax.reload();
+                tableListeners.ajax.reload();
+            }
+        });
+    }
 });

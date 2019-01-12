@@ -43,6 +43,8 @@ func (h *ConfigHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 	buf := bytes.NewBuffer(nil)
 	enc := yaml.NewEncoder(buf)
+	defer enc.Close()
+
 	devices := h.devicesManager.Devices()
 
 	config := &configYAML{
@@ -62,7 +64,6 @@ func (h *ConfigHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	if err := enc.Encode(config); err != nil {
 		panic(err.Error())
 	}
-	enc.Close()
 
 	switch action {
 	case "download":

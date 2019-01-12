@@ -125,7 +125,6 @@ func (d *HikVision) taskLiveness(ctx context.Context) (interface{}, error) {
 		return nil, errors.New("device returns empty serial number")
 	}
 
-	d.UpdateStatus(boggart.DeviceStatusOnline)
 	if d.SerialNumber() == "" {
 		ptzChannels := make(map[uint64]HikVisionPTZChannel, 0)
 		if list, err := d.isapi.PTZChannels(ctx); err == nil {
@@ -149,18 +148,9 @@ func (d *HikVision) taskLiveness(ctx context.Context) (interface{}, error) {
 		d.MQTTPublishAsync(ctx, HikVisionMQTTTopicStateModel.Format(deviceInfo.SerialNumber), 0, true, deviceInfo.Model)
 		d.MQTTPublishAsync(ctx, HikVisionMQTTTopicStateFirmwareVersion.Format(deviceInfo.SerialNumber), 0, true, deviceInfo.FirmwareVersion)
 		d.MQTTPublishAsync(ctx, HikVisionMQTTTopicStateFirmwareReleasedDate.Format(deviceInfo.SerialNumber), 0, true, deviceInfo.FirmwareReleasedDate)
-
-		d.initOnce.Do(func() {
-			sn := d.SerialNumberMQTTEscaped()
-
-			d.MQTTSubscribe(HikVisionMQTTTopicPTZMove.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTAbsolute))
-			d.MQTTSubscribe(HikVisionMQTTTopicPTZAbsolute.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTAbsolute))
-			d.MQTTSubscribe(HikVisionMQTTTopicPTZContinuous.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTContinuous))
-			d.MQTTSubscribe(HikVisionMQTTTopicPTZRelative.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTRelative))
-			d.MQTTSubscribe(HikVisionMQTTTopicPTZPreset.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTPreset))
-			d.MQTTSubscribe(HikVisionMQTTTopicPTZMomentary.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTMomentary))
-		})
 	}
+
+	d.UpdateStatus(boggart.DeviceStatusOnline)
 
 	return nil, nil
 }
@@ -253,6 +243,17 @@ func (d *HikVision) MQTTTopics() []mqtt.Topic {
 		HikVisionMQTTTopicStateHDDCapacity,
 		HikVisionMQTTTopicStateHDDFree,
 		HikVisionMQTTTopicStateHDDUsage,
+	}
+}
+
+func (d *HikVision) MQTTSubscribers() []mqtt.Subscriber {
+	return []mqtt.Subscriber{
+		mqtt.NewSubscriber(HikVisionMQTTTopicPTZMove.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTAbsolute)),
+		mqtt.NewSubscriber(HikVisionMQTTTopicPTZAbsolute.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTAbsolute)),
+		mqtt.NewSubscriber(HikVisionMQTTTopicPTZContinuous.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTContinuous)),
+		mqtt.NewSubscriber(HikVisionMQTTTopicPTZRelative.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTRelative)),
+		mqtt.NewSubscriber(HikVisionMQTTTopicPTZPreset.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTPreset)),
+		mqtt.NewSubscriber(HikVisionMQTTTopicPTZMomentary.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTMomentary)),
 	}
 }
 
@@ -349,6 +350,10 @@ func (d *HikVision) checkTopic(topic string) (uint64, error) {
 }
 
 func (d *HikVision) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+	if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 4) {
+		return
+	}
+
 	var err error
 	defer func() {
 		if err != nil {
@@ -382,6 +387,10 @@ func (d *HikVision) callbackMQTTAbsolute(ctx context.Context, client mqtt.Compon
 }
 
 func (d *HikVision) callbackMQTTContinuous(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+	if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 4) {
+		return
+	}
+
 	var err error
 	defer func() {
 		if err != nil {
@@ -415,6 +424,10 @@ func (d *HikVision) callbackMQTTContinuous(ctx context.Context, client mqtt.Comp
 }
 
 func (d *HikVision) callbackMQTTRelative(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+	if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 4) {
+		return
+	}
+
 	var err error
 	defer func() {
 		if err != nil {
@@ -448,6 +461,10 @@ func (d *HikVision) callbackMQTTRelative(ctx context.Context, client mqtt.Compon
 }
 
 func (d *HikVision) callbackMQTTPreset(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+	if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 4) {
+		return
+	}
+
 	var err error
 	defer func() {
 		if err != nil {
@@ -475,6 +492,10 @@ func (d *HikVision) callbackMQTTPreset(ctx context.Context, client mqtt.Componen
 }
 
 func (d *HikVision) callbackMQTTMomentary(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+	if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 4) {
+		return
+	}
+
 	var err error
 	defer func() {
 		if err != nil {

@@ -183,9 +183,13 @@ func (c *Component) initConfigFromYaml() error {
 		}
 
 		if d.ID != nil && *d.ID != "" {
-			c.devicesManager.RegisterWithID(*d.ID, device, d.Type, d.Description, d.Tags, cfg)
+			err = c.devicesManager.RegisterWithID(*d.ID, device, d.Type, d.Description, d.Tags, cfg)
 		} else {
-			c.devicesManager.Register(device, d.Type, d.Description, d.Tags, cfg)
+			_, err = c.devicesManager.Register(device, d.Type, d.Description, d.Tags, cfg)
+		}
+
+		if err != nil {
+			return err
 		}
 	}
 

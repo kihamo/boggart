@@ -143,29 +143,34 @@ func (d *GoogleHomeMini) taskLiveness(ctx context.Context) (interface{}, error) 
 		return nil, nil
 	}
 
-	d.UpdateStatus(boggart.DeviceStatusOnline)
-
 	if d.SerialNumber() == "" && response.Payload != nil {
 		d.SetSerialNumber(response.Payload.DeviceInfo.MacAddress)
-		d.initOnce.Do(d.initMQTTSubscribers)
 	}
 
+	d.UpdateStatus(boggart.DeviceStatusOnline)
 	return nil, nil
 }
 
-func (d *GoogleHomeMini) initMQTTSubscribers() {
-	sn := d.SerialNumberMQTTEscaped()
+func (d *GoogleHomeMini) MQTTSubscribers() []mqtt.Subscriber {
+	return []mqtt.Subscriber{
+		mqtt.NewSubscriber(GoogleHomeMiniMQTTTopicVolume.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) {
+			if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 2) {
+				return
+			}
 
-	d.MQTTSubscribe(GoogleHomeMiniMQTTTopicVolume.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) {
-		volume, err := strconv.ParseInt(string(message.Payload()), 10, 64)
-		if err != nil {
-			return
-		}
+			volume, err := strconv.ParseInt(string(message.Payload()), 10, 64)
+			if err != nil {
+				return
+			}
 
-		d.ClientChromecast().SetVolume(volume)
-	}))
+			d.ClientChromecast().SetVolume(volume)
+		})),
+		mqtt.NewSubscriber(GoogleHomeMiniMQTTTopicMute.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) {
+			if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 2) {
+				return
+			}
 
-	d.MQTTSubscribe(GoogleHomeMiniMQTTTopicMute.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) {
-		d.ClientChromecast().SetMute(bytes.Equal(message.Payload(), []byte(`1`)))
-	}))
+			d.ClientChromecast().SetMute(bytes.Equal(message.Payload(), []byte(`1`)))
+		})),
+	}
 }

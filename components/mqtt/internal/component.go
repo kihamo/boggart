@@ -112,9 +112,7 @@ func (c *Component) initClient() error {
 			topic := sub.Topic()
 			qos := sub.QOS()
 
-			token := client.Subscribe(topic, sub.QOS(), c.wrapCallback(sub.Topic(), qos, sub.Callback))
-			token.Wait()
-			if err := token.Error(); err != nil {
+			if err := c.clientSubscribe(topic, qos, sub); err != nil {
 				c.logger.Error("Resubscribe failed", "topic", topic, "qos", qos, "error", err.Error())
 			} else {
 				c.logger.Debug("Resubscribe", "topic", topic, "qos", qos)
@@ -167,9 +165,9 @@ func (c *Component) initClient() error {
 
 func (c *Component) initSubscribers() error {
 	for _, component := range c.components {
-		if componentSubscribers, ok := component.(mqtt.HasSubscribers); ok {
-			for _, sub := range componentSubscribers.MQTTSubscribers() {
-				if err := c.Subscribe(sub.Topic(), sub.QOS(), sub.Callback()); err != nil {
+		if subscribers, ok := component.(mqtt.HasSubscribers); ok {
+			for _, subscriber := range subscribers.MQTTSubscribers() {
+				if err := c.SubscribeSubscriber(subscriber); err != nil {
 					return err
 				}
 			}
@@ -208,7 +206,47 @@ func (c *Component) Client() m.Client {
 	return c.client
 }
 
+func (c *Component) clientSubscribe(topic string, qos byte, subscription *mqtt.Subscription) error {
+	client := c.Client()
+	if client == nil {
+		return errors.New("can't initialize client of MQTT")
+	}
+
+	// wrap tracing
+	callback := func(client m.Client, message m.Message) {
+		span, ctx := tracing.StartSpanFromContext(context.Background(), c.Name(), "subscribe_callback")
+		span = span.SetTag("topic", message.Topic())
+		defer span.Finish()
+
+		span.LogFields(
+			log.Int("qos", int(message.Qos())),
+			log.String("payload", string(message.Payload())),
+			log.Bool("retained", message.Retained()),
+		)
+
+		r := "0"
+		if message.Retained() {
+			r = "1"
+		}
+
+		metricSubscribe.With(
+			"topic", topic,
+			"qos", strconv.Itoa(int(qos)),
+			"retained", r,
+		).Inc()
+
+		subscription.Callback(ctx, c, message)
+	}
+
+	token := client.Subscribe(topic, qos, callback)
+	token.Wait()
+
+	return token.Error()
+}
+
 func (c *Component) Publish(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) (err error) {
+	// TODO: cache topics
+
 	span, _ := tracing.StartSpanFromContext(ctx, c.Name(), "mqtt_publish")
 	span = span.SetTag("topic", topic)
 	defer span.Finish()
@@ -247,35 +285,6 @@ func (c *Component) Publish(ctx context.Context, topic string, qos byte, retaine
 	return err
 }
 
-func (c *Component) AddRoute(topic string, callback mqtt.MessageHandler) {
-	subscription := mqtt.NewSubscription(topic, 0, callback)
-
-	var e *list.Element
-	c.mutex.RLock()
-	for e = c.subscriptions.Front(); e != nil; e = e.Next() {
-		if e.Value.(*mqtt.Subscription).Match(topic) {
-			subscription = subscription.Merge(e.Value.(*mqtt.Subscription))
-			break
-		}
-	}
-	c.mutex.RUnlock()
-
-	client := c.Client()
-	if client == nil {
-		return
-	}
-
-	client.AddRoute(topic, c.wrapCallback(topic, subscription.QOS(), subscription.Callback))
-
-	c.mutex.Lock()
-	if e != nil {
-		e.Value = subscription
-	} else {
-		c.subscriptions.PushBack(subscription)
-	}
-	c.mutex.Unlock()
-}
-
 func (c *Component) Unsubscribe(topic string) error {
 	client := c.Client()
 	if client == nil {
@@ -287,71 +296,137 @@ func (c *Component) Unsubscribe(topic string) error {
 	}
 
 	c.mutex.Lock()
-	for e := c.subscriptions.Front(); e != nil; e = e.Next() {
-		if e.Value.(*mqtt.Subscription).Match(topic) {
-			c.subscriptions.Remove(e)
-			break
+	defer c.mutex.Unlock()
+
+	for element := c.subscriptions.Front(); element != nil; element = element.Next() {
+		subscription := element.Value.(*mqtt.Subscription)
+
+		for _, subscriber := range subscription.Subscribers() {
+			if subscriber.Topic() == topic {
+				subscription.RemoveSubscriber(subscriber)
+			}
+		}
+
+		if subscription.Len() == 0 {
+			topic := subscription.Topic()
+
+			token := client.Unsubscribe(topic)
+			token.Wait()
+			err := token.Error()
+
+			if err == nil {
+				c.subscriptions.Remove(element)
+				c.logger.Debug("Unsubscribe", "topic", topic)
+			} else {
+				c.logger.Error("Unsubscribe failed", "error", err.Error())
+				return err
+			}
 		}
 	}
-	c.mutex.Unlock()
-
-	c.logger.Debug("Unsubscribe", "topic", topic)
 
 	return nil
 }
 
-func (c *Component) Subscribe(topic string, qos byte, callback mqtt.MessageHandler) error {
-	subscription := mqtt.NewSubscription(topic, qos, callback)
-
-	var e *list.Element
-	c.mutex.RLock()
-	for e = c.subscriptions.Front(); e != nil; e = e.Next() {
-		if e.Value.(*mqtt.Subscription).Match(topic) {
-			subscription = subscription.Merge(e.Value.(*mqtt.Subscription))
-			break
-		}
-	}
-	c.mutex.RUnlock()
-
+func (c *Component) UnsubscribeSubscriber(subscriber mqtt.Subscriber) error {
 	client := c.Client()
 	if client == nil {
 		return errors.New("can't initialize client of MQTT")
 	}
 
-	token := client.Subscribe(topic, qos, c.wrapCallback(topic, qos, subscription.Callback))
-	if token.Wait() && token.Error() != nil {
-		return token.Error()
+	var element *list.Element
+
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	for element = c.subscriptions.Front(); element != nil; element = element.Next() {
+		subscription := element.Value.(*mqtt.Subscription)
+
+		if result := subscription.RemoveSubscriber(subscriber); result {
+			if subscription.Len() == 0 {
+				topic := subscriber.Topic()
+
+				token := client.Unsubscribe(topic)
+				token.Wait()
+				err := token.Error()
+
+				if err == nil {
+					c.subscriptions.Remove(element)
+					c.logger.Debug("Unsubscribe", "topic", topic)
+				} else {
+					c.logger.Error("Unsubscribe failed", "error", err.Error())
+
+					// fallback
+					subscription.AddSubscriber(subscriber)
+
+					return err
+				}
+			}
+
+			break
+		}
+	}
+
+	return nil
+}
+
+func (c *Component) UnsubscribeSubscribers(subscribers []mqtt.Subscriber) error {
+	for _, subscriber := range subscribers {
+		if err := c.UnsubscribeSubscriber(subscriber); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (c *Component) Subscribe(topic string, qos byte, callback mqtt.MessageHandler) (mqtt.Subscriber, error) {
+	subscriber := mqtt.NewSubscriber(topic, qos, callback)
+	if err := c.SubscribeSubscriber(subscriber); err != nil {
+		return nil, err
+	}
+
+	return subscriber, nil
+}
+
+func (c *Component) SubscribeSubscriber(subscriber mqtt.Subscriber) error {
+	var (
+		element      *list.Element
+		subscription *mqtt.Subscription
+	)
+
+	topic := subscriber.Topic()
+	qos := subscriber.QOS()
+
+	//  ищем подходящие подписки
+	c.mutex.RLock()
+	for element = c.subscriptions.Front(); element != nil; element = element.Next() {
+		s := element.Value.(*mqtt.Subscription)
+		if s.Match(topic) {
+			s.AddSubscriber(subscriber)
+			subscription = s
+			break
+		}
+	}
+	c.mutex.RUnlock()
+
+	// если подписка не найдена, то создаем новую
+	if subscription == nil {
+		subscription = mqtt.NewSubscription(subscriber)
+	}
+
+	if err := c.clientSubscribe(topic, qos, subscription); err != nil {
+		return err
 	}
 
 	c.mutex.Lock()
-	if e != nil {
-		e.Value = subscription
+	if element != nil {
+		element.Value = subscription
 	} else {
 		c.subscriptions.PushBack(subscription)
 	}
 	c.mutex.Unlock()
 
 	c.logger.Debug("Subscribe", "topic", topic, "qos", qos)
-
-	return nil
-}
-
-func (c *Component) SubscribeMultiple(filters map[string]byte, callback mqtt.MessageHandler) error {
-	for topic, qos := range filters {
-		if err := c.Subscribe(topic, qos, callback); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (c *Component) SubscribeSubscribers(subscribers []mqtt.Subscriber) error {
-	for _, sub := range subscribers {
-		if err := c.Subscribe(sub.Topic(), sub.QOS(), sub.Callback()); err != nil {
-			return err
-		}
-	}
 
 	return nil
 }
@@ -365,31 +440,4 @@ func (c *Component) Subscriptions() []*mqtt.Subscription {
 	c.mutex.RUnlock()
 
 	return subscriptions
-}
-
-func (c *Component) wrapCallback(topic string, qos byte, callback mqtt.MessageHandler) func(client m.Client, message m.Message) {
-	return func(client m.Client, message m.Message) {
-		span, ctx := tracing.StartSpanFromContext(context.Background(), c.Name(), "mqtt_callback")
-		span = span.SetTag("topic", message.Topic())
-		defer span.Finish()
-
-		span.LogFields(
-			log.Int("qos", int(message.Qos())),
-			log.String("payload", string(message.Payload())),
-			log.Bool("retained", message.Retained()),
-		)
-
-		r := "0"
-		if message.Retained() {
-			r = "1"
-		}
-
-		metricSubscribe.With(
-			"topic", topic,
-			"qos", strconv.Itoa(int(qos)),
-			"retained", r,
-		).Inc()
-
-		callback(ctx, c, message)
-	}
 }

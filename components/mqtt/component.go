@@ -12,11 +12,14 @@ type Component interface {
 
 	Client() m.Client
 	Publish(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error
-	AddRoute(topic string, callback MessageHandler)
+
 	Unsubscribe(topic string) error
-	Subscribe(topic string, qos byte, callback MessageHandler) error
-	SubscribeMultiple(filters map[string]byte, callback MessageHandler) error
-	SubscribeSubscribers([]Subscriber) error
+	UnsubscribeSubscriber(Subscriber) error
+	UnsubscribeSubscribers([]Subscriber) error
+
+	Subscribe(topic string, qos byte, callback MessageHandler) (Subscriber, error)
+	SubscribeSubscriber(Subscriber) error
+
 	Subscriptions() []*Subscription
 }
 

@@ -29,7 +29,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="/boggart/config/download" title="{{ i18n "Config YAML download" . }}" data-toggle="tooltip" data-placement="bottom">
+                    <a href="/boggart/config/download" title="{{ i18n "Download" . }}" data-toggle="tooltip" data-placement="bottom">
                         <i class="glyphicon glyphicon-download-alt"></i>
                     </a>
                 </li>
@@ -47,6 +47,7 @@
                         <th class="md-col-1">{{ i18n "Tasks count" . }}</th>
                         <th class="md-col-1">{{ i18n "MQTT topics" . }}</th>
                         <th class="md-col-1">{{ i18n "MQTT subscribers" . }}</th>
+                        <th class="md-col-1">{{ i18n "Actions" . }}</th>
                         <th>{{ i18n "Serial number" . }}</th>
                         <th class="md-col-2">{{ i18n "ID" . }}</th>
                         <th>{{ i18n "Description" . }}</th>
@@ -100,5 +101,5 @@
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive/js/dataTables.responsive.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/highlightjs/js/highlight.pack.min.js" false) }}
-    {{ staticHTML (staticURL (print "/" .ComponentName "/assets/js/devices.js") false) }}
+    {{ staticHTML (staticURL (print "/" .ComponentName "/assets/js/manager.js") false) }}
 {{ end }}

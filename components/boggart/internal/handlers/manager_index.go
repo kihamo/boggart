@@ -4,16 +4,15 @@ import (
 	"bytes"
 	"time"
 
-	"gopkg.in/yaml.v2"
-
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/manager"
 	"github.com/kihamo/shadow/components/dashboard"
+	"gopkg.in/yaml.v2"
 )
 
 // easyjson:json
-type deviceHandlerDevice struct {
+type managerIndexHandlerDevice struct {
 	Id              string   `json:"id"`
 	Type            string   `json:"type"`
 	Description     string   `json:"description"`
@@ -27,7 +26,7 @@ type deviceHandlerDevice struct {
 }
 
 // easyjson:json
-type deviceHandlerListener struct {
+type managerIndexListener struct {
 	Id         string            `json:"id"`
 	Name       string            `json:"name"`
 	Events     map[string]string `json:"events"`
@@ -36,23 +35,24 @@ type deviceHandlerListener struct {
 	FiredLast  *time.Time        `json:"fire_last"`
 }
 
-type DevicesHandler struct {
+// TODO: rename to ManagerHandler
+type ManagerIndexHandler struct {
 	dashboard.Handler
 
 	devicesManager   boggart.DevicesManager
 	listenersManager *manager.ListenersManager
 }
 
-func NewDevicesHandler(devicesManager boggart.DevicesManager, listenersManager *manager.ListenersManager) *DevicesHandler {
-	return &DevicesHandler{
+func NewManagerIndexHandler(devicesManager boggart.DevicesManager, listenersManager *manager.ListenersManager) *ManagerIndexHandler {
+	return &ManagerIndexHandler{
 		devicesManager:   devicesManager,
 		listenersManager: listenersManager,
 	}
 }
 
-func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
+func (h *ManagerIndexHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	if !r.IsAjax() {
-		h.Render(r.Context(), "devices", nil)
+		h.Render(r.Context(), "manager_index", nil)
 		return
 	}
 
@@ -67,9 +67,10 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 
 	switch r.URL().Query().Get("entity") {
 	case "devices":
-		list := make([]deviceHandlerDevice, 0, 0)
+		list := make([]managerIndexHandlerDevice, 0, 0)
 		buf := bytes.NewBuffer(nil)
 		enc := yaml.NewEncoder(buf)
+		defer enc.Close()
 
 		for _, d := range h.devicesManager.Devices() {
 			buf.Reset()
@@ -77,39 +78,29 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				panic(err.Error())
 			}
 
-			bind := d.Bind()
-
-			item := deviceHandlerDevice{
+			item := managerIndexHandlerDevice{
 				Id:              d.ID(),
 				Type:            d.Type(),
 				Description:     d.Description(),
-				SerialNumber:    bind.SerialNumber(),
-				Status:          bind.Status().String(),
-				Tags:            make([]string, 0, len(d.Tags())),
-				Tasks:           make([]string, 0),
-				MQTTTopics:      make([]string, 0),
-				MQTTSubscribers: make([]string, 0),
+				SerialNumber:    d.Bind().SerialNumber(),
+				Status:          d.Bind().Status().String(),
+				Tags:            d.Tags(),
+				Tasks:           make([]string, 0, len(d.Tasks())),
+				MQTTTopics:      make([]string, 0, len(d.MQTTTopics())),
+				MQTTSubscribers: make([]string, 0, len(d.MQTTSubscribers())),
 				Config:          buf.String(),
 			}
 
-			if tasks, ok := bind.(boggart.DeviceBindHasTasks); ok {
-				for _, task := range tasks.Tasks() {
-					item.Tasks = append(item.Tasks, task.Name())
-				}
+			for _, task := range d.Tasks() {
+				item.Tasks = append(item.Tasks, task.Name())
 			}
 
-			item.Tags = append(item.Tags, d.Tags()...)
-
-			if topics, ok := bind.(boggart.DeviceBindHasMQTTTopics); ok {
-				for _, topic := range topics.MQTTTopics() {
-					item.MQTTTopics = append(item.MQTTTopics, topic.String())
-				}
+			for _, topic := range d.MQTTTopics() {
+				item.MQTTTopics = append(item.MQTTTopics, topic.String())
 			}
 
-			if subscribers, ok := bind.(boggart.DeviceBindHasMQTTSubscribers); ok {
-				for _, topic := range subscribers.MQTTSubscribers() {
-					item.MQTTSubscribers = append(item.MQTTSubscribers, topic.Topic())
-				}
+			for _, topic := range d.MQTTSubscribers() {
+				item.MQTTSubscribers = append(item.MQTTSubscribers, topic.Topic())
 			}
 
 			list = append(list, item)
@@ -119,10 +110,10 @@ func (h *DevicesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 		entities.Total = len(list)
 
 	case "listeners":
-		list := make([]deviceHandlerListener, 0, 0)
+		list := make([]managerIndexListener, 0, 0)
 
 		for _, l := range h.listenersManager.Listeners() {
-			item := deviceHandlerListener{
+			item := managerIndexListener{
 				Id:     l.Id(),
 				Name:   l.Name(),
 				Events: make(map[string]string, 0),

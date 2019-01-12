@@ -36,8 +36,11 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 
 		c.routes = []dashboard.Route{
 			dashboard.RouteFromAssetFS(c),
-			dashboard.NewRoute("/"+c.Name()+"/devices/", handlers.NewDevicesHandler(c.devicesManager, c.listenersManager)).
+			dashboard.NewRoute("/"+c.Name()+"/manager/", handlers.NewManagerIndexHandler(c.devicesManager, c.listenersManager)).
 				WithMethods([]string{http.MethodGet}).
+				WithAuth(true),
+			dashboard.NewRoute("/"+c.Name()+"/manager/:id/unregister", handlers.NewManagerUnregisterHandler(c.devicesManager)).
+				WithMethods([]string{http.MethodPost}).
 				WithAuth(true),
 			dashboard.NewRoute("/"+c.Name()+"/camera/:id/:channel", cameraHandler).
 				WithMethods([]string{http.MethodGet, http.MethodPost}),

@@ -17,8 +17,11 @@ msgstr "Умный дом"
 msgid "Config YAML"
 msgstr "YAML конфигурация"
 
-msgid "Config YAML download"
-msgstr "Скачать YAML конфигурацию"
+msgid "Download"
+msgstr "Скачать"
+
+msgid "Close"
+msgstr "Закрыть"
 
 msgid "Config copied"
 msgstr "Конфигурация скопирована"

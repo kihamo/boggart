@@ -38,10 +38,6 @@ func (d *DeviceBindBase) SerialNumber() string {
 	return d.serialNumber
 }
 
-func (d *DeviceBindBase) SerialNumberMQTTEscaped() string {
-	return mqtt.NameReplace(d.SerialNumber())
-}
-
 func (d *DeviceBindBase) SetSerialNumber(serialNumber string) {
 	d.mutex.Lock()
 	d.serialNumber = serialNumber
@@ -49,7 +45,7 @@ func (d *DeviceBindBase) SetSerialNumber(serialNumber string) {
 }
 
 type DeviceBindMQTT struct {
-	Device
+	DeviceBind
 
 	mutex  sync.RWMutex
 	client mqtt.Component
@@ -59,6 +55,10 @@ func (d *DeviceBindMQTT) SetMQTTClient(client mqtt.Component) {
 	d.mutex.Lock()
 	d.client = client
 	d.mutex.Unlock()
+}
+
+func (d *DeviceBindMQTT) SerialNumberMQTTEscaped() string {
+	return mqtt.NameReplace(d.SerialNumber())
 }
 
 func (d *DeviceBindMQTT) MQTTPublish(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
@@ -119,15 +119,19 @@ func (d *DeviceBindMQTT) MQTTPublishAsync(ctx context.Context, topic string, qos
 	}()
 }
 
-func (d *DeviceBindMQTT) MQTTSubscribe(topic string, qos byte, callback mqtt.MessageHandler) error {
-	d.mutex.RLock()
-	defer d.mutex.RUnlock()
+func (d *DeviceBindMQTT) CheckSerialNumberInMQTTTopic(topic string, offset int) bool {
+	sn := d.SerialNumberMQTTEscaped()
 
-	if d.client == nil {
-		return errors.New("MQTT client isn't init")
+	if sn == "" {
+		return false
 	}
 
-	return d.client.Subscribe(topic, qos, callback)
+	routes := mqtt.RouteSplit(topic)
+	if len(routes) < offset {
+		return false
+	}
+
+	return routes[len(routes)-offset] == sn
 }
 
 func WrapMQTTSubscribeDeviceIsOnline(bind DeviceBind, callback mqtt.MessageHandler) mqtt.MessageHandler {
