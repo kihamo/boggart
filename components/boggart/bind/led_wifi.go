@@ -62,7 +62,6 @@ func (d WiFiLED) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 		stateColor: math.MaxUint64,
 	}
 	device.Init()
-	device.SetSerialNumber(config.Address)
 
 	return device, nil
 }
@@ -84,6 +83,8 @@ func (d *WiFiLED) taskUpdater(ctx context.Context) (interface{}, error) {
 		d.UpdateStatus(boggart.DeviceStatusOffline)
 		return nil, err
 	}
+
+	d.SetSerialNumber(strconv.FormatUint(uint64(state.DeviceName), 10))
 
 	d.UpdateStatus(boggart.DeviceStatusOnline)
 	sn := d.SerialNumberMQTTEscaped()
@@ -154,26 +155,26 @@ func (d *WiFiLED) Off(ctx context.Context) error {
 }
 
 func (d *WiFiLED) MQTTTopics() []mqtt.Topic {
-	sn := d.SerialNumberMQTTEscaped()
+	host := mqtt.NameReplace(d.bulb.Host())
 
 	return []mqtt.Topic{
-		mqtt.Topic(WiFiLEDMQTTTopicPower.Format(sn)),
-		mqtt.Topic(WiFiLEDMQTTTopicColor.Format(sn)),
-		mqtt.Topic(WiFiLEDMQTTTopicMode.Format(sn)),
-		mqtt.Topic(WiFiLEDMQTTTopicSpeed.Format(sn)),
-		mqtt.Topic(WiFiLEDMQTTTopicStatePower.Format(sn)),
-		mqtt.Topic(WiFiLEDMQTTTopicStateColor.Format(sn)),
-		mqtt.Topic(WiFiLEDMQTTTopicStateColorHSV.Format(sn)),
-		mqtt.Topic(WiFiLEDMQTTTopicStateMode.Format(sn)),
-		mqtt.Topic(WiFiLEDMQTTTopicStateSpeed.Format(sn)),
+		mqtt.Topic(WiFiLEDMQTTTopicPower.Format(host)),
+		mqtt.Topic(WiFiLEDMQTTTopicColor.Format(host)),
+		mqtt.Topic(WiFiLEDMQTTTopicMode.Format(host)),
+		mqtt.Topic(WiFiLEDMQTTTopicSpeed.Format(host)),
+		mqtt.Topic(WiFiLEDMQTTTopicStatePower.Format(host)),
+		mqtt.Topic(WiFiLEDMQTTTopicStateColor.Format(host)),
+		mqtt.Topic(WiFiLEDMQTTTopicStateColorHSV.Format(host)),
+		mqtt.Topic(WiFiLEDMQTTTopicStateMode.Format(host)),
+		mqtt.Topic(WiFiLEDMQTTTopicStateSpeed.Format(host)),
 	}
 }
 
 func (d *WiFiLED) MQTTSubscribers() []mqtt.Subscriber {
-	sn := d.SerialNumberMQTTEscaped()
+	host := mqtt.NameReplace(d.bulb.Host())
 
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(WiFiLEDMQTTTopicPower.Format(sn), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+		mqtt.NewSubscriber(WiFiLEDMQTTTopicPower.Format(host), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
 			if d.Status() != boggart.DeviceStatusOnline {
 				return
 			}
@@ -184,7 +185,7 @@ func (d *WiFiLED) MQTTSubscribers() []mqtt.Subscriber {
 				d.Off(ctx)
 			}
 		}),
-		mqtt.NewSubscriber(WiFiLEDMQTTTopicColor.Format(sn), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+		mqtt.NewSubscriber(WiFiLEDMQTTTopicColor.Format(host), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
 			if d.Status() != boggart.DeviceStatusOnline {
 				return
 			}
@@ -196,7 +197,7 @@ func (d *WiFiLED) MQTTSubscribers() []mqtt.Subscriber {
 
 			d.bulb.SetColorPersist(ctx, *color)
 		}),
-		mqtt.NewSubscriber(WiFiLEDMQTTTopicMode.Format(sn), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+		mqtt.NewSubscriber(WiFiLEDMQTTTopicMode.Format(host), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
 			if d.Status() != boggart.DeviceStatusOnline {
 				return
 			}
@@ -213,7 +214,7 @@ func (d *WiFiLED) MQTTSubscribers() []mqtt.Subscriber {
 
 			d.bulb.SetMode(ctx, *mode, state.Speed)
 		}),
-		mqtt.NewSubscriber(WiFiLEDMQTTTopicSpeed.Format(sn), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+		mqtt.NewSubscriber(WiFiLEDMQTTTopicSpeed.Format(host), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
 			if d.Status() != boggart.DeviceStatusOnline {
 				return
 			}
