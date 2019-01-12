@@ -7,5 +7,7 @@ type Config struct {
 }
 
 func (Type) Config() interface{} {
-	return &Config{}
+	return &Config{
+		UpdaterInterval: DefaultUpdaterInterval.String(),
+	}
 }

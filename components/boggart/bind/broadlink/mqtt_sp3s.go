@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	SP3SUpdateInterval = time.Second * 3 // as e-control app, refresh every 3 sec
+	SP3SDefaultUpdateInterval = time.Second * 3 // as e-control app, refresh every 3 sec
 
 	SP3SMQTTTopicState mqtt.Topic = boggart.ComponentName + "/socket/+/state"
 	SP3SMQTTTopicPower mqtt.Topic = boggart.ComponentName + "/socket/+/power"

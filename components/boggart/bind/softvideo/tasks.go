@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	DefaultUpdaterInterval = time.Minute
+	DefaultUpdaterInterval = time.Hour
 )
 
 func (b *Bind) Tasks() []workers.Task {

@@ -2,6 +2,7 @@ package broadlink
 
 import (
 	"context"
+	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/broadlink"
@@ -14,7 +15,8 @@ type BindSP3S struct {
 	boggart.DeviceBindBase
 	boggart.DeviceBindMQTT
 
-	provider *broadlink.SP3S
+	provider        *broadlink.SP3S
+	updaterInterval time.Duration
 }
 
 func (b *BindSP3S) State() (bool, error) {

@@ -9,18 +9,12 @@ import (
 
 type Type struct{}
 
-func (t Type) CreateBind(c interface{}) (bind boggart.DeviceBind, err error) {
+func (t Type) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 	config := c.(*Config)
 
-	var updaterInterval time.Duration
-
-	if config.UpdaterInterval != "" {
-		updaterInterval, err = time.ParseDuration(config.UpdaterInterval)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		updaterInterval = DefaultUpdaterInterval
+	updaterInterval, err := time.ParseDuration(config.UpdaterInterval)
+	if err != nil {
+		return nil, err
 	}
 
 	device := &Bind{

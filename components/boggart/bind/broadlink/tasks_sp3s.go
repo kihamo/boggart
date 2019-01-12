@@ -13,7 +13,7 @@ import (
 func (b *BindSP3S) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(b.taskStateUpdater)
 	taskUpdater.SetRepeats(-1)
-	taskUpdater.SetRepeatInterval(SP3SUpdateInterval)
+	taskUpdater.SetRepeatInterval(b.updaterInterval)
 	taskUpdater.SetName("bind-broadlink-sp3s-updater-" + b.SerialNumber())
 
 	return []workers.Task{
@@ -35,17 +35,13 @@ func (b *BindSP3S) taskStateUpdater(ctx context.Context) (interface{}, error) {
 
 	prevState := atomic.LoadInt64(&b.state)
 	if prevState == 0 || (prevState == 1) != state {
-		var mqttValue []byte
-
 		if state {
 			atomic.StoreInt64(&b.state, 1)
-			mqttValue = []byte(`1`)
 		} else {
 			atomic.StoreInt64(&b.state, -1)
-			mqttValue = []byte(`0`)
 		}
 
-		b.MQTTPublishAsync(ctx, SP3SMQTTTopicState.Format(serialNumberMQTT), 0, true, mqttValue)
+		b.MQTTPublishAsync(ctx, SP3SMQTTTopicState.Format(serialNumberMQTT), 0, true, state)
 	}
 
 	value, err := b.Power()

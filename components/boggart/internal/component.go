@@ -110,13 +110,15 @@ func (c *Component) Dependencies() []shadow.Dependency {
 
 func (c *Component) Init(a shadow.Application) error {
 	c.application = a
+	c.listenersManager = manager.NewListenersManager()
+
 	return nil
 }
 
 func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
-	c.listenersManager = manager.NewListenersManager()
-
+	<-a.ReadyComponent(mqtt.ComponentName)
 	<-a.ReadyComponent(workers.ComponentName)
+
 	c.devicesManager = NewDevicesManager(
 		a.GetComponent(mqtt.ComponentName).(mqtt.Component),
 		a.GetComponent(workers.ComponentName).(workers.Component),
