@@ -202,7 +202,7 @@ func (d *HikVision) taskState(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	sn := d.SerialNumberMQTTEscaped()
+	sn := mqtt.NameReplace(d.SerialNumber())
 
 	d.MQTTPublishAsync(ctx, HikVisionMQTTTopicStateUpTime.Format(sn), 1, false, status.DeviceUpTime)
 	d.MQTTPublishAsync(ctx, HikVisionMQTTTopicStateMemoryAvailable.Format(sn), 1, false, uint64(status.Memory[0].MemoryAvailable.Float64())*MB)
@@ -266,7 +266,7 @@ func (d *HikVision) startAlertStreaming() error {
 	}
 
 	go func() {
-		sn := d.SerialNumberMQTTEscaped()
+		sn := mqtt.NameReplace(d.SerialNumber())
 
 		for {
 			select {
@@ -309,7 +309,7 @@ func (d *HikVision) updateStatusByChannelId(ctx context.Context, channelId uint6
 		return err
 	}
 
-	sn := d.SerialNumberMQTTEscaped()
+	sn := mqtt.NameReplace(d.SerialNumber())
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.Elevation != status.AbsoluteHigh.Elevation {
 		d.MQTTPublishAsync(ctx, HikVisionMQTTTopicPTZStatusElevation.Format(sn, channelId), 1, false, status.AbsoluteHigh.Elevation)
@@ -350,7 +350,7 @@ func (d *HikVision) checkTopic(topic string) (uint64, error) {
 }
 
 func (d *HikVision) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-	if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 4) {
+	if !boggart.CheckSerialNumberInMQTTTopic(d, message.Topic(), 4) {
 		return
 	}
 
@@ -387,7 +387,7 @@ func (d *HikVision) callbackMQTTAbsolute(ctx context.Context, client mqtt.Compon
 }
 
 func (d *HikVision) callbackMQTTContinuous(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-	if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 4) {
+	if !boggart.CheckSerialNumberInMQTTTopic(d, message.Topic(), 4) {
 		return
 	}
 
@@ -424,7 +424,7 @@ func (d *HikVision) callbackMQTTContinuous(ctx context.Context, client mqtt.Comp
 }
 
 func (d *HikVision) callbackMQTTRelative(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-	if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 4) {
+	if !boggart.CheckSerialNumberInMQTTTopic(d, message.Topic(), 4) {
 		return
 	}
 
@@ -461,7 +461,7 @@ func (d *HikVision) callbackMQTTRelative(ctx context.Context, client mqtt.Compon
 }
 
 func (d *HikVision) callbackMQTTPreset(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-	if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 4) {
+	if !boggart.CheckSerialNumberInMQTTTopic(d, message.Topic(), 4) {
 		return
 	}
 
@@ -492,7 +492,7 @@ func (d *HikVision) callbackMQTTPreset(ctx context.Context, client mqtt.Componen
 }
 
 func (d *HikVision) callbackMQTTMomentary(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-	if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 4) {
+	if !boggart.CheckSerialNumberInMQTTTopic(d, message.Topic(), 4) {
 		return
 	}
 

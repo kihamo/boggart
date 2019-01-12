@@ -109,6 +109,6 @@ func (d *DS18B20) taskStateUpdater(ctx context.Context) (interface{}, error) {
 
 func (d *DS18B20) MQTTTopics() []mqtt.Topic {
 	return []mqtt.Topic{
-		mqtt.Topic(DS18B20MQTTTopic.Format(d.SerialNumberMQTTEscaped())),
+		mqtt.Topic(DS18B20MQTTTopic.Format(mqtt.NameReplace(d.SerialNumber()))),
 	}
 }

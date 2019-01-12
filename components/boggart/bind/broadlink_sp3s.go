@@ -110,7 +110,7 @@ func (d *BroadlinkSP3S) taskStateUpdater(ctx context.Context) (interface{}, erro
 	d.UpdateStatus(boggart.DeviceStatusOnline)
 
 	serialNumber := d.SerialNumber()
-	serialNumberMQTT := d.SerialNumberMQTTEscaped()
+	serialNumberMQTT := mqtt.NameReplace(serialNumber)
 
 	prevState := atomic.LoadInt64(&d.state)
 	if prevState == 0 || (prevState == 1) != state {
@@ -173,7 +173,7 @@ func (d *BroadlinkSP3S) Power() (float64, error) {
 }
 
 func (d *BroadlinkSP3S) MQTTTopics() []mqtt.Topic {
-	sn := d.SerialNumberMQTTEscaped()
+	sn := mqtt.NameReplace(d.SerialNumber())
 
 	return []mqtt.Topic{
 		mqtt.Topic(BroadlinkSP3SMQTTTopicState.Format(sn)),
@@ -183,7 +183,7 @@ func (d *BroadlinkSP3S) MQTTTopics() []mqtt.Topic {
 }
 
 func (d *BroadlinkSP3S) MQTTSubscribers() []mqtt.Subscriber {
-	sn := d.SerialNumberMQTTEscaped()
+	sn := mqtt.NameReplace(d.SerialNumber())
 
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(BroadlinkSP3SMQTTTopicSet.Format(sn), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {

@@ -79,7 +79,7 @@ func (d BroadlinkRM) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 func (d *BroadlinkRM) SetMQTTClient(client mqtt.Component) {
 	d.DeviceBindMQTT.SetMQTTClient(client)
 
-	client.Publish(context.Background(), BroadlinkRMMQTTTopicCaptureState.Format(d.SerialNumberMQTTEscaped()), 2, true, "0")
+	client.Publish(context.Background(), BroadlinkRMMQTTTopicCaptureState.Format(mqtt.NameReplace(d.SerialNumber())), 2, true, "0")
 }
 
 func (d *BroadlinkRM) Tasks() []workers.Task {
@@ -102,7 +102,7 @@ func (d *BroadlinkRM) taskLiveness(ctx context.Context) (interface{}, error) {
 }
 
 func (d *BroadlinkRM) MQTTTopics() []mqtt.Topic {
-	sn := d.SerialNumberMQTTEscaped()
+	sn := mqtt.NameReplace(d.SerialNumber())
 
 	return []mqtt.Topic{
 		mqtt.Topic(BroadlinkRMMQTTTopicCommand.Format(sn)),
@@ -133,7 +133,7 @@ func (d *BroadlinkRM) MQTTSubscribers() []mqtt.Subscriber {
 	captureTimer := time.NewTimer(0)
 	<-captureTimer.C
 
-	sn := d.SerialNumberMQTTEscaped()
+	sn := mqtt.NameReplace(d.SerialNumber())
 
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(BroadlinkRMMQTTTopicRawCount.Format(sn), 0, d.wrapMQTTSubscriber("command_raw_count",

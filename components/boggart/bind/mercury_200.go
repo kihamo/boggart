@@ -223,7 +223,7 @@ func (d *Mercury200) taskStateUpdater(ctx context.Context) (interface{}, error) 
 }
 
 func (d *Mercury200) MQTTTopics() []mqtt.Topic {
-	sn := d.SerialNumberMQTTEscaped()
+	sn := mqtt.NameReplace(d.SerialNumber())
 
 	return []mqtt.Topic{
 		mqtt.Topic(Mercury200MQTTTopicTariff.Format(sn, 1)),

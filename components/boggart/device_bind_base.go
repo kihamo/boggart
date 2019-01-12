@@ -45,8 +45,6 @@ func (d *DeviceBindBase) SetSerialNumber(serialNumber string) {
 }
 
 type DeviceBindMQTT struct {
-	DeviceBind
-
 	mutex  sync.RWMutex
 	client mqtt.Component
 }
@@ -55,10 +53,6 @@ func (d *DeviceBindMQTT) SetMQTTClient(client mqtt.Component) {
 	d.mutex.Lock()
 	d.client = client
 	d.mutex.Unlock()
-}
-
-func (d *DeviceBindMQTT) SerialNumberMQTTEscaped() string {
-	return mqtt.NameReplace(d.SerialNumber())
 }
 
 func (d *DeviceBindMQTT) MQTTPublish(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
@@ -119,8 +113,8 @@ func (d *DeviceBindMQTT) MQTTPublishAsync(ctx context.Context, topic string, qos
 	}()
 }
 
-func (d *DeviceBindMQTT) CheckSerialNumberInMQTTTopic(topic string, offset int) bool {
-	sn := d.SerialNumberMQTTEscaped()
+func CheckSerialNumberInMQTTTopic(bind DeviceBind, topic string, offset int) bool {
+	sn := mqtt.NameReplace(bind.SerialNumber())
 
 	if sn == "" {
 		return false

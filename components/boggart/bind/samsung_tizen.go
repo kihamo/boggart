@@ -100,7 +100,7 @@ func (d *SamsungTizen) taskLiveness(ctx context.Context) (interface{}, error) {
 func (d *SamsungTizen) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(SamsungTizenMQTTTopicPower.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
-			if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 2) {
+			if !boggart.CheckSerialNumberInMQTTTopic(d, message.Topic(), 2) {
 				return
 			}
 
@@ -115,7 +115,7 @@ func (d *SamsungTizen) MQTTSubscribers() []mqtt.Subscriber {
 			}
 		}),
 		mqtt.NewSubscriber(SamsungTizenMQTTTopicKey.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
-			if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 2) {
+			if !boggart.CheckSerialNumberInMQTTTopic(d, message.Topic(), 2) {
 				return
 			}
 

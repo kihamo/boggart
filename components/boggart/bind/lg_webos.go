@@ -200,7 +200,7 @@ func (d *LGWebOS) taskLiveness(ctx context.Context) (interface{}, error) {
 func (d *LGWebOS) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(LGWebOSMQTTTopicApplication.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
-			if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 2) {
+			if !boggart.CheckSerialNumberInMQTTTopic(d, message.Topic(), 2) {
 				return
 			}
 
@@ -209,7 +209,7 @@ func (d *LGWebOS) MQTTSubscribers() []mqtt.Subscriber {
 			}
 		})),
 		mqtt.NewSubscriber(LGWebOSMQTTTopicMute.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
-			if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 2) {
+			if !boggart.CheckSerialNumberInMQTTTopic(d, message.Topic(), 2) {
 				return
 			}
 
@@ -218,7 +218,7 @@ func (d *LGWebOS) MQTTSubscribers() []mqtt.Subscriber {
 			}
 		})),
 		mqtt.NewSubscriber(LGWebOSMQTTTopicVolume.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
-			if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 2) {
+			if !boggart.CheckSerialNumberInMQTTTopic(d, message.Topic(), 2) {
 				return
 			}
 
@@ -230,7 +230,7 @@ func (d *LGWebOS) MQTTSubscribers() []mqtt.Subscriber {
 			}
 		})),
 		mqtt.NewSubscriber(LGWebOSMQTTTopicVolumeUp.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
-			if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 3) {
+			if !boggart.CheckSerialNumberInMQTTTopic(d, message.Topic(), 3) {
 				return
 			}
 
@@ -239,7 +239,7 @@ func (d *LGWebOS) MQTTSubscribers() []mqtt.Subscriber {
 			}
 		})),
 		mqtt.NewSubscriber(LGWebOSMQTTTopicVolumeDown.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
-			if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 3) {
+			if !boggart.CheckSerialNumberInMQTTTopic(d, message.Topic(), 3) {
 				return
 			}
 
@@ -248,7 +248,7 @@ func (d *LGWebOS) MQTTSubscribers() []mqtt.Subscriber {
 			}
 		})),
 		mqtt.NewSubscriber(LGWebOSMQTTTopicToast.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
-			if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 2) {
+			if !boggart.CheckSerialNumberInMQTTTopic(d, message.Topic(), 2) {
 				return
 			}
 
@@ -257,7 +257,7 @@ func (d *LGWebOS) MQTTSubscribers() []mqtt.Subscriber {
 			}
 		})),
 		mqtt.NewSubscriber(LGWebOSMQTTTopicPower.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
-			if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 2) {
+			if !boggart.CheckSerialNumberInMQTTTopic(d, message.Topic(), 2) {
 				return
 			}
 
@@ -274,7 +274,7 @@ func (d *LGWebOS) MQTTSubscribers() []mqtt.Subscriber {
 
 func (d *LGWebOS) monitorForegroundAppInfo(s webostv.ForegroundAppInfo) error {
 	ctx := context.Background()
-	sn := d.SerialNumberMQTTEscaped()
+	sn := mqtt.NameReplace(d.SerialNumber())
 
 	d.MQTTPublishAsync(ctx, LGWebOSMQTTTopicStateApplication.Format(sn), 2, true, s.AppId)
 
@@ -292,7 +292,7 @@ func (d *LGWebOS) monitorForegroundAppInfo(s webostv.ForegroundAppInfo) error {
 
 func (d *LGWebOS) monitorAudio(s webostv.AudioStatus) error {
 	ctx := context.Background()
-	sn := d.SerialNumberMQTTEscaped()
+	sn := mqtt.NameReplace(d.SerialNumber())
 
 	d.MQTTPublishAsync(ctx, LGWebOSMQTTTopicStateMute.Format(sn), 2, true, s.Mute)
 	d.MQTTPublishAsync(ctx, LGWebOSMQTTTopicStateVolume.Format(sn), 2, true, s.Volume)
@@ -302,7 +302,7 @@ func (d *LGWebOS) monitorAudio(s webostv.AudioStatus) error {
 
 func (d *LGWebOS) monitorTvCurrentChannel(s webostv.TvCurrentChannel) error {
 	ctx := context.Background()
-	sn := d.SerialNumberMQTTEscaped()
+	sn := mqtt.NameReplace(d.SerialNumber())
 
 	d.MQTTPublishAsync(ctx, LGWebOSMQTTTopicStateChannelNumber.Format(sn), 2, true, s.ChannelNumber)
 

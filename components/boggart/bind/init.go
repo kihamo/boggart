@@ -2,6 +2,7 @@ package bind
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/bind/led_wifi"
 )
 
 func init() {
@@ -11,7 +12,7 @@ func init() {
 	boggart.RegisterDeviceType("google_home_mini", GoogleHomeMini{})
 	boggart.RegisterDeviceType("gpio", GPIO{})
 	boggart.RegisterDeviceType("hikvision", HikVision{})
-	boggart.RegisterDeviceType("led_wifi", WiFiLED{})
+	boggart.RegisterDeviceType("led_wifi", led_wifi.Bind{})
 	boggart.RegisterDeviceType("lg_webos", LGWebOS{})
 	boggart.RegisterDeviceType("mercury200", Mercury200{})
 	boggart.RegisterDeviceType("mikrotik", Mikrotik{})

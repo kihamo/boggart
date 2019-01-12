@@ -154,7 +154,7 @@ func (d *GoogleHomeMini) taskLiveness(ctx context.Context) (interface{}, error) 
 func (d *GoogleHomeMini) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(GoogleHomeMiniMQTTTopicVolume.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) {
-			if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 2) {
+			if !boggart.CheckSerialNumberInMQTTTopic(d, message.Topic(), 2) {
 				return
 			}
 
@@ -166,7 +166,7 @@ func (d *GoogleHomeMini) MQTTSubscribers() []mqtt.Subscriber {
 			d.ClientChromecast().SetVolume(volume)
 		})),
 		mqtt.NewSubscriber(GoogleHomeMiniMQTTTopicMute.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) {
-			if !d.CheckSerialNumberInMQTTTopic(message.Topic(), 2) {
+			if !boggart.CheckSerialNumberInMQTTTopic(d, message.Topic(), 2) {
 				return
 			}
 
