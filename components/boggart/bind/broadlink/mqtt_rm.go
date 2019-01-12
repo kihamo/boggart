@@ -31,7 +31,9 @@ const (
 func (b *BindRM) SetMQTTClient(client mqtt.Component) {
 	b.DeviceBindMQTT.SetMQTTClient(client)
 
-	client.Publish(context.Background(), RMMQTTTopicCaptureState.Format(mqtt.NameReplace(b.SerialNumber())), 2, true, false)
+	if client != nil {
+		client.Publish(context.Background(), RMMQTTTopicCaptureState.Format(mqtt.NameReplace(b.SerialNumber())), 2, true, false)
+	}
 }
 
 func (b *BindRM) MQTTTopics() []mqtt.Topic {
