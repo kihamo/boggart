@@ -1,7 +1,9 @@
 package broadlink
 
 import (
+	"errors"
 	"net"
+	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/broadlink"
@@ -12,12 +14,17 @@ type TypeRM struct{}
 func (t TypeRM) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 	config := c.(*ConfigRM)
 
-	localAddr, err := broadlink.LocalAddr()
+	mac, err := net.ParseMAC(config.MAC)
 	if err != nil {
 		return nil, err
 	}
 
-	mac, err := net.ParseMAC(config.MAC)
+	captureDuration, err := time.ParseDuration(config.CaptureDuration)
+	if err != nil {
+		return nil, err
+	}
+
+	localAddr, err := broadlink.LocalAddr()
 	if err != nil {
 		return nil, err
 	}
@@ -27,11 +34,30 @@ func (t TypeRM) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 		Port: broadlink.DevicePort,
 	}
 
+	var provider interface{}
+
+	switch config.Model {
+	case "rm3mini":
+		provider = broadlink.NewRMMini(mac, ip, *localAddr)
+
+	case "rm2proplus":
+		provider = broadlink.NewRM2ProPlus3(mac, ip, *localAddr)
+
+	default:
+		return nil, errors.New("unknown model " + config.Model)
+	}
+
 	device := &BindRM{
-		provider: broadlink.NewRMProPlus(mac, ip, *localAddr),
+		provider:        provider,
+		mac:             mac,
+		ip:              ip,
+		captureDuration: captureDuration,
 	}
 	device.Init()
 	device.SetSerialNumber(mac.String())
+
+	// TODO: check open UDP port
+	device.UpdateStatus(boggart.DeviceStatusOnline)
 
 	return device, nil
 }

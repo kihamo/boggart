@@ -24,6 +24,8 @@ func (c *Component) DashboardMenu() dashboard.Menu {
 
 func (c *Component) DashboardRoutes() []dashboard.Route {
 	if c.routes == nil {
+		<-c.application.ReadyComponent(c.Name())
+
 		cameraHandler := &handlers.CameraHandler{
 			DevicesManager: c.devicesManager,
 		}

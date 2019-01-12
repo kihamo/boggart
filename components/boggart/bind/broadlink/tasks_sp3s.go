@@ -14,7 +14,7 @@ func (b *BindSP3S) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(b.taskStateUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(b.updaterInterval)
-	taskUpdater.SetName("bind-broadlink-sp3s-updater-" + b.SerialNumber())
+	taskUpdater.SetName("bind-broadlink:sp3s-updater-" + b.SerialNumber())
 
 	return []workers.Task{
 		taskUpdater,

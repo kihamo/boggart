@@ -14,17 +14,17 @@ var (
 	ErrSignalNotCaptured = errors.New("signal not captured")
 )
 
-type RM3Mini struct {
+type RMMini struct {
 	*internal.Device
 }
 
-func NewRM3Mini(mac net.HardwareAddr, addr, iface net.UDPAddr) *RM3Mini {
-	return &RM3Mini{
-		Device: internal.NewDevice(KindRM3Mini, mac, addr, iface),
+func NewRMMini(mac net.HardwareAddr, addr, iface net.UDPAddr) *RMMini {
+	return &RMMini{
+		Device: internal.NewDevice(KindRMMini, mac, addr, iface),
 	}
 }
 
-func (d *RM3Mini) StartCaptureRemoteControlCode() error {
+func (d *RMMini) StartCaptureRemoteControlCode() error {
 	/*
 		Offset    Contents
 		0x00      0x03
@@ -47,7 +47,7 @@ func (d *RM3Mini) StartCaptureRemoteControlCode() error {
 	return nil
 }
 
-func (d *RM3Mini) ReadCapturedRemoteControlCodeRaw() ([]byte, error) {
+func (d *RMMini) ReadCapturedRemoteControlCodeRaw() ([]byte, error) {
 	/*
 		Offset    Contents
 		0x00      0x04
@@ -95,7 +95,7 @@ func (d *RM3Mini) ReadCapturedRemoteControlCodeRaw() ([]byte, error) {
 	//return data[8:8+sz], nil
 }
 
-func (d *RM3Mini) ReadCapturedRemoteControlCodeRawAsString() (string, error) {
+func (d *RMMini) ReadCapturedRemoteControlCodeRawAsString() (string, error) {
 	code, err := d.ReadCapturedRemoteControlCodeRaw()
 	if err != nil {
 		return "", err
@@ -104,7 +104,7 @@ func (d *RM3Mini) ReadCapturedRemoteControlCodeRawAsString() (string, error) {
 	return fmt.Sprintf("%04x", code), nil
 }
 
-func (d *RM3Mini) ReadCapturedRemoteControlCode() (RemoteType, []byte, error) {
+func (d *RMMini) ReadCapturedRemoteControlCode() (RemoteType, []byte, error) {
 	code, err := d.ReadCapturedRemoteControlCodeRaw()
 	if err != nil {
 		return -1, nil, err
@@ -117,7 +117,7 @@ func (d *RM3Mini) ReadCapturedRemoteControlCode() (RemoteType, []byte, error) {
 	return RemoteType(binary.LittleEndian.Uint16(code[0:2])), code[4:], nil
 }
 
-func (d *RM3Mini) ReadCapturedRemoteControlCodeAsString() (RemoteType, string, error) {
+func (d *RMMini) ReadCapturedRemoteControlCodeAsString() (RemoteType, string, error) {
 	remoteType, code, err := d.ReadCapturedRemoteControlCode()
 	if err != nil {
 		return remoteType, "", err
@@ -126,7 +126,7 @@ func (d *RM3Mini) ReadCapturedRemoteControlCodeAsString() (RemoteType, string, e
 	return remoteType, fmt.Sprintf("%04x", code), err
 }
 
-func (d *RM3Mini) SendRemoteControlCode(remoteType RemoteType, code []byte, count int) error {
+func (d *RMMini) SendRemoteControlCode(remoteType RemoteType, code []byte, count int) error {
 	/*
 		Offset    Contents
 		0x00      0x02
@@ -162,7 +162,7 @@ func (d *RM3Mini) SendRemoteControlCode(remoteType RemoteType, code []byte, coun
 	return nil
 }
 
-func (d *RM3Mini) SendRemoteControlCodeRaw(code []byte, count int) error {
+func (d *RMMini) SendRemoteControlCodeRaw(code []byte, count int) error {
 	if len(code) < 2 {
 		return errors.New("wrong length of code")
 	}
@@ -177,7 +177,7 @@ func (d *RM3Mini) SendRemoteControlCodeRaw(code []byte, count int) error {
 	return d.SendRemoteControlCode(remoteType, code[4:], count)
 }
 
-func (d *RM3Mini) SendRemoteControlCodeRawAsString(code string, count int) error {
+func (d *RMMini) SendRemoteControlCodeRawAsString(code string, count int) error {
 	decoded, err := hex.DecodeString(code)
 	if err != nil {
 		return err
@@ -186,11 +186,11 @@ func (d *RM3Mini) SendRemoteControlCodeRawAsString(code string, count int) error
 	return d.SendRemoteControlCodeRaw(decoded, count)
 }
 
-func (d *RM3Mini) SendIRRemoteControlCode(code []byte, count int) error {
+func (d *RMMini) SendIRRemoteControlCode(code []byte, count int) error {
 	return d.SendRemoteControlCode(RemoteIR, code, count)
 }
 
-func (d *RM3Mini) SendIRRemoteControlCodeAsString(code string, count int) error {
+func (d *RMMini) SendIRRemoteControlCodeAsString(code string, count int) error {
 	decoded, err := hex.DecodeString(code)
 	if err != nil {
 		return err

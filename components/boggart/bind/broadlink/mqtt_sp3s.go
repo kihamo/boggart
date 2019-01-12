@@ -3,7 +3,6 @@ package broadlink
 import (
 	"bytes"
 	"context"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
@@ -12,8 +11,6 @@ import (
 )
 
 const (
-	SP3SDefaultUpdateInterval = time.Second * 3 // as e-control app, refresh every 3 sec
-
 	SP3SMQTTTopicState mqtt.Topic = boggart.ComponentName + "/socket/+/state"
 	SP3SMQTTTopicPower mqtt.Topic = boggart.ComponentName + "/socket/+/power"
 	SP3SMQTTTopicSet   mqtt.Topic = boggart.ComponentName + "/socket/+/set"

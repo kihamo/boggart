@@ -1,6 +1,7 @@
 package broadlink
 
 import (
+	"errors"
 	"net"
 	"time"
 
@@ -33,8 +34,21 @@ func (t TypeSP3S) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 		Port: broadlink.DevicePort,
 	}
 
+	var provider *broadlink.SP3S
+
+	switch config.Model {
+	case "sp3seu":
+		provider = broadlink.NewSP3SEU(mac, ip, *localAddr)
+
+	case "sp3sus":
+		provider = broadlink.NewSP3SUS(mac, ip, *localAddr)
+
+	default:
+		return nil, errors.New("unknown model " + config.Model)
+	}
+
 	device := &BindSP3S{
-		provider:        broadlink.NewSP3S(mac, ip, *localAddr),
+		provider:        provider,
 		state:           0,
 		power:           -1,
 		updaterInterval: updaterInterval,
