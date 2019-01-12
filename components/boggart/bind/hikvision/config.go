@@ -1,7 +1,7 @@
-package led_wifi
+package hikvision
 
 type Config struct {
-	Address string `valid:"host,required"`
+	Address string `valid:"url,required"`
 }
 
 func (t Type) Config() interface{} {

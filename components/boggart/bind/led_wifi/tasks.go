@@ -82,7 +82,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 
 		// in HSV
 		h, s, v := state.Color.HSV()
-		b.MQTTPublishAsync(ctx, MQTTTopicStateColorHSV.Format(host), 0, true, fmt.Sprintf("%b,%.2f,%.2f", h, s, v))
+		b.MQTTPublishAsync(ctx, MQTTTopicStateColorHSV.Format(host), 0, true, fmt.Sprintf("%d,%.2f,%.2f", h, s, v))
 	}
 
 	return nil, nil

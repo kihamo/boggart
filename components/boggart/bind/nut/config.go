@@ -1,7 +1,8 @@
-package led_wifi
+package nut
 
 type Config struct {
-	Address string `valid:"host,required"`
+	Host string `valid:"host,required"`
+	UPS  string `valid:"required"`
 }
 
 func (t Type) Config() interface{} {

@@ -1,7 +1,8 @@
-package led_wifi
+package gpio
 
 type Config struct {
-	Address string `valid:"host,required"`
+	Pin  uint64 `valid:"required"`
+	Mode string `valid:"in(in|out)"`
 }
 
 func (t Type) Config() interface{} {

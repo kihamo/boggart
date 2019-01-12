@@ -1,7 +1,7 @@
-package led_wifi
+package google_home_mini
 
 type Config struct {
-	Address string `valid:"host,required"`
+	Host string `valid:"host,required"`
 }
 
 func (t Type) Config() interface{} {

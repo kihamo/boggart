@@ -37,6 +37,13 @@ func GetDeviceType(name string) (DeviceType, error) {
 	return kind, nil
 }
 
+func GetDeviceTypes() map[string]DeviceType {
+	deviceTypesMutex.RLock()
+	defer deviceTypesMutex.RUnlock()
+
+	return deviceTypes
+}
+
 type DeviceType interface {
 	Config() interface{}
 	CreateBind(config interface{}) (DeviceBind, error)

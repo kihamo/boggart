@@ -52,7 +52,9 @@ func NewManagerIndexHandler(devicesManager boggart.DevicesManager, listenersMana
 
 func (h *ManagerIndexHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	if !r.IsAjax() {
-		h.Render(r.Context(), "manager_index", nil)
+		h.Render(r.Context(), "manager_index", map[string]interface{}{
+			"device_types": boggart.GetDeviceTypes(),
+		})
 		return
 	}
 
