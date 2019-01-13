@@ -21,41 +21,41 @@ var (
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {
-	serialNumber := b.SerialNumber()
-	if serialNumber == "" {
+	sn := b.SerialNumber()
+	if sn == "" {
 		return
 	}
 
-	metricTrafficReceivedBytes.With("serial_number", serialNumber).Describe(ch)
-	metricTrafficSentBytes.With("serial_number", serialNumber).Describe(ch)
-	metricWifiClients.With("serial_number", serialNumber).Describe(ch)
-	metricCPULoad.With("serial_number", serialNumber).Describe(ch)
-	metricMemoryUsage.With("serial_number", serialNumber).Describe(ch)
-	metricMemoryAvailable.With("serial_number", serialNumber).Describe(ch)
-	metricStorageUsage.With("serial_number", serialNumber).Describe(ch)
-	metricStorageAvailable.With("serial_number", serialNumber).Describe(ch)
-	metricDiskUsage.With("serial_number", serialNumber).Describe(ch)
-	metricDiskAvailable.With("serial_number", serialNumber).Describe(ch)
-	metricVoltage.With("serial_number", serialNumber).Describe(ch)
-	metricTemperature.With("serial_number", serialNumber).Describe(ch)
+	metricTrafficReceivedBytes.With("serial_number", sn).Describe(ch)
+	metricTrafficSentBytes.With("serial_number", sn).Describe(ch)
+	metricWifiClients.With("serial_number", sn).Describe(ch)
+	metricCPULoad.With("serial_number", sn).Describe(ch)
+	metricMemoryUsage.With("serial_number", sn).Describe(ch)
+	metricMemoryAvailable.With("serial_number", sn).Describe(ch)
+	metricStorageUsage.With("serial_number", sn).Describe(ch)
+	metricStorageAvailable.With("serial_number", sn).Describe(ch)
+	metricDiskUsage.With("serial_number", sn).Describe(ch)
+	metricDiskAvailable.With("serial_number", sn).Describe(ch)
+	metricVoltage.With("serial_number", sn).Describe(ch)
+	metricTemperature.With("serial_number", sn).Describe(ch)
 }
 
 func (b *Bind) Collect(ch chan<- snitch.Metric) {
-	serialNumber := b.SerialNumber()
-	if serialNumber == "" {
+	sn := b.SerialNumber()
+	if sn == "" {
 		return
 	}
 
-	metricTrafficReceivedBytes.With("serial_number", serialNumber).Collect(ch)
-	metricTrafficSentBytes.With("serial_number", serialNumber).Collect(ch)
-	metricWifiClients.With("serial_number", serialNumber).Collect(ch)
-	metricCPULoad.With("serial_number", serialNumber).Collect(ch)
-	metricMemoryUsage.With("serial_number", serialNumber).Collect(ch)
-	metricMemoryAvailable.With("serial_number", serialNumber).Collect(ch)
-	metricStorageUsage.With("serial_number", serialNumber).Collect(ch)
-	metricStorageAvailable.With("serial_number", serialNumber).Collect(ch)
-	metricDiskUsage.With("serial_number", serialNumber).Collect(ch)
-	metricDiskAvailable.With("serial_number", serialNumber).Collect(ch)
-	metricVoltage.With("serial_number", serialNumber).Collect(ch)
-	metricTemperature.With("serial_number", serialNumber).Collect(ch)
+	metricTrafficReceivedBytes.With("serial_number", sn).Collect(ch)
+	metricTrafficSentBytes.With("serial_number", sn).Collect(ch)
+	metricWifiClients.With("serial_number", sn).Collect(ch)
+	metricCPULoad.With("serial_number", sn).Collect(ch)
+	metricMemoryUsage.With("serial_number", sn).Collect(ch)
+	metricMemoryAvailable.With("serial_number", sn).Collect(ch)
+	metricStorageUsage.With("serial_number", sn).Collect(ch)
+	metricStorageAvailable.With("serial_number", sn).Collect(ch)
+	metricDiskUsage.With("serial_number", sn).Collect(ch)
+	metricDiskAvailable.With("serial_number", sn).Collect(ch)
+	metricVoltage.With("serial_number", sn).Collect(ch)
+	metricTemperature.With("serial_number", sn).Collect(ch)
 }

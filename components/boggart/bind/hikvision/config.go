@@ -9,7 +9,7 @@ import (
 const (
 	DefaultLivenessInterval = time.Minute
 	DefaultLivenessTimeout  = time.Second * 5
-	DefaultUpdaterInterval  = time.Minute * 10
+	DefaultUpdaterInterval  = time.Minute
 	DefaultUpdaterTimeout   = time.Second * 30
 	DefaultPTZInterval      = time.Minute
 	DefaultPTZTimeout       = time.Second * 5

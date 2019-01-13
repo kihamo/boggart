@@ -128,26 +128,38 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()
 
+	sn := b.SerialNumber()
+	snMQTT := mqtt.NameReplace(sn)
+
 	status, err := b.isapi.SystemStatus(ctx)
-	if err != nil {
-		return nil, err
+	if err == nil {
+		b.MQTTPublishAsync(ctx, MQTTTopicStateUpTime.Format(snMQTT), 1, false, status.DeviceUpTime)
+		metricUpTime.With("serial_number", sn).Set(float64(status.DeviceUpTime))
+
+		memoryUsage := uint64(status.Memory[0].MemoryUsage.Float64()) * MB
+		b.MQTTPublishAsync(ctx, MQTTTopicStateMemoryUsage.Format(snMQTT), 1, false, memoryUsage)
+		metricMemoryUsage.With("serial_number", sn).Set(float64(memoryUsage))
+
+		memoryAvailable := uint64(status.Memory[0].MemoryAvailable.Float64()) * MB
+		b.MQTTPublishAsync(ctx, MQTTTopicStateMemoryAvailable.Format(snMQTT), 1, false, memoryAvailable)
+		metricMemoryAvailable.With("serial_number", sn).Set(float64(memoryAvailable))
+	} else {
+		// TODO: log
 	}
-
-	sn := mqtt.NameReplace(b.SerialNumber())
-
-	b.MQTTPublishAsync(ctx, MQTTTopicStateUpTime.Format(sn), 1, false, status.DeviceUpTime)
-	b.MQTTPublishAsync(ctx, MQTTTopicStateMemoryAvailable.Format(sn), 1, false, uint64(status.Memory[0].MemoryAvailable.Float64())*MB)
-	b.MQTTPublishAsync(ctx, MQTTTopicStateMemoryUsage.Format(sn), 1, false, uint64(status.Memory[0].MemoryUsage.Float64())*MB)
 
 	storage, err := b.isapi.ContentManagementStorage(ctx)
-	if err != nil {
-		return nil, err
-	}
+	if err == nil {
+		for _, hdd := range storage.HDD {
+			b.MQTTPublishAsync(ctx, MQTTTopicStateHDDCapacity.Format(snMQTT, hdd.ID), 1, false, hdd.Capacity*MB)
 
-	for _, hdd := range storage.HDD {
-		b.MQTTPublishAsync(ctx, MQTTTopicStateHDDCapacity.Format(sn, hdd.ID), 1, false, hdd.Capacity*MB)
-		b.MQTTPublishAsync(ctx, MQTTTopicStateHDDFree.Format(sn, hdd.ID), 1, false, hdd.FreeSpace*MB)
-		b.MQTTPublishAsync(ctx, MQTTTopicStateHDDUsage.Format(sn, hdd.ID), 1, false, (hdd.Capacity-hdd.FreeSpace)*MB)
+			b.MQTTPublishAsync(ctx, MQTTTopicStateHDDUsage.Format(snMQTT, hdd.ID), 1, false, (hdd.Capacity-hdd.FreeSpace)*MB)
+			metricStorageUsage.With("serial_number", sn).With("name", hdd.Name).Set(float64((hdd.Capacity - hdd.FreeSpace) * MB))
+
+			b.MQTTPublishAsync(ctx, MQTTTopicStateHDDFree.Format(snMQTT, hdd.ID), 1, false, hdd.FreeSpace*MB)
+			metricStorageAvailable.With("serial_number", sn).With("name", hdd.Name).Set(float64(hdd.FreeSpace * MB))
+		}
+	} else {
+		// TODO: log
 	}
 
 	return nil, nil
