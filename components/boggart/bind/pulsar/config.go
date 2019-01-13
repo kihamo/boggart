@@ -1,4 +1,4 @@
-package pulsar_heat_meter
+package pulsar
 
 import (
 	"time"

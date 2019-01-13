@@ -17,7 +17,7 @@ import (
 	_ "github.com/kihamo/boggart/components/boggart/bind/mercury"
 	_ "github.com/kihamo/boggart/components/boggart/bind/mikrotik"
 	_ "github.com/kihamo/boggart/components/boggart/bind/nut"
-	_ "github.com/kihamo/boggart/components/boggart/bind/pulsar_heat_meter"
+	_ "github.com/kihamo/boggart/components/boggart/bind/pulsar"
 	_ "github.com/kihamo/boggart/components/boggart/bind/samsung_tizen"
 	_ "github.com/kihamo/boggart/components/boggart/bind/softvideo"
 	"github.com/kihamo/boggart/components/mqtt"
