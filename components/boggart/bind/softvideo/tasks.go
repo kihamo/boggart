@@ -5,6 +5,7 @@ import (
 	"sync/atomic"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 )
@@ -35,7 +36,9 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	if current != prev {
 		atomic.StoreInt64(&b.lastValue, current)
 
-		b.MQTTPublishAsync(ctx, MQTTTopicBalance.Format(b.SerialNumber()), 0, true, value)
+		sn := b.SerialNumber()
+		b.MQTTPublishAsync(ctx, MQTTTopicBalance.Format(mqtt.NameReplace(sn)), 0, true, value)
+		metricBalance.With("account", sn).Set(value)
 	}
 
 	return nil, nil
