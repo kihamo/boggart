@@ -3,7 +3,6 @@ package samsung_tizen
 import (
 	"context"
 	"strings"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/go-workers"
@@ -12,9 +11,9 @@ import (
 
 func (b *Bind) Tasks() []workers.Task {
 	taskLiveness := task.NewFunctionTask(b.taskLiveness)
-	taskLiveness.SetTimeout(time.Second * 5)
+	taskLiveness.SetTimeout(b.livenessTimeout)
 	taskLiveness.SetRepeats(-1)
-	taskLiveness.SetRepeatInterval(time.Second * 30)
+	taskLiveness.SetRepeatInterval(b.livenessInterval)
 	taskLiveness.SetName("bind-samsung-tizen-liveness")
 
 	return []workers.Task{
@@ -33,8 +32,6 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		return nil, nil
 	}
 
-	b.UpdateStatus(boggart.DeviceStatusOnline)
-
 	if b.SerialNumber() == "" {
 		parts := strings.Split(info.ID, ":")
 		if len(parts) > 1 {
@@ -51,6 +48,7 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		b.MQTTPublishAsync(ctx, MQTTTopicDeviceID.Format(sn), 0, false, info.Device.ID)
 		b.MQTTPublishAsync(ctx, MQTTTopicDeviceModelName.Format(sn), 0, false, info.Device.Name)
 	}
+	b.UpdateStatus(boggart.DeviceStatusOnline)
 
 	return nil, nil
 }
