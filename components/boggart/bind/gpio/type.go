@@ -19,14 +19,14 @@ func (t Type) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 		return nil, fmt.Errorf("GPIO %d not found", config.Pin)
 	}
 
-	var mode GPIOMode
+	var mode Mode
 	switch strings.ToLower(config.Mode) {
 	case "in":
-		mode = GPIOModeIn
+		mode = ModeIn
 	case "out":
-		mode = GPIOModeOut
+		mode = ModeOut
 	default:
-		mode = GPIOModeDefault
+		mode = ModeDefault
 	}
 
 	device := &Bind{

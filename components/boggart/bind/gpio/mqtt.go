@@ -11,25 +11,24 @@ import (
 )
 
 const (
-	TopicPinState mqtt.Topic = boggart.ComponentName + "/gpio/+"
-	TopicPinSet   mqtt.Topic = boggart.ComponentName + "/gpio/+/set"
+	MQTTTopicPinState mqtt.Topic = boggart.ComponentName + "/gpio/+"
+	MQTTTopicPinSet   mqtt.Topic = boggart.ComponentName + "/gpio/+/set"
 )
 
 func (d *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
-		mqtt.Topic(TopicPinState.Format(d.pin.Number())),
-		mqtt.Topic(TopicPinSet.Format(d.pin.Number())),
+		mqtt.Topic(MQTTTopicPinState.Format(d.pin.Number())),
 	}
 }
 
 func (d *Bind) MQTTSubscribers() []mqtt.Subscriber {
-	if d.Mode() != GPIOModeOut {
+	if d.Mode() != ModeOut {
 		return nil
 	}
 
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(
-			TopicPinSet.Format(d.pin.Number()),
+			MQTTTopicPinSet.Format(d.pin.Number()),
 			0,
 			func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
 				span, ctx := tracing.StartSpanFromContext(ctx, "gpio", "set")

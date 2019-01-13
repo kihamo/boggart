@@ -8,12 +8,12 @@ import (
 	"periph.io/x/periph/conn/pin"
 )
 
-type GPIOMode int64
+type Mode int64
 
 const (
-	GPIOModeDefault GPIOMode = iota
-	GPIOModeIn
-	GPIOModeOut
+	ModeDefault Mode = iota
+	ModeIn
+	ModeOut
 )
 
 type Bind struct {
@@ -21,15 +21,15 @@ type Bind struct {
 	boggart.DeviceBindMQTT
 
 	pin  pin.Pin
-	mode GPIOMode
+	mode Mode
 }
 
-func (d *Bind) Mode() GPIOMode {
+func (d *Bind) Mode() Mode {
 	return d.mode
 }
 
 func (d *Bind) High(ctx context.Context) error {
-	if d.Mode() == GPIOModeIn {
+	if d.Mode() == ModeIn {
 		return nil
 	}
 
@@ -38,14 +38,14 @@ func (d *Bind) High(ctx context.Context) error {
 			return err
 		}
 
-		d.MQTTPublishAsync(ctx, TopicPinState.Format(d.pin.Number()), 2, true, []byte(`1`))
+		d.MQTTPublishAsync(ctx, MQTTTopicPinState.Format(d.pin.Number()), 2, true, []byte(`1`))
 	}
 
 	return nil
 }
 
 func (d *Bind) Low(ctx context.Context) error {
-	if d.Mode() == GPIOModeIn {
+	if d.Mode() == ModeIn {
 		return nil
 	}
 
@@ -54,14 +54,14 @@ func (d *Bind) Low(ctx context.Context) error {
 			return err
 		}
 
-		d.MQTTPublishAsync(ctx, TopicPinState.Format(d.pin.Number()), 2, true, []byte(`0`))
+		d.MQTTPublishAsync(ctx, MQTTTopicPinState.Format(d.pin.Number()), 2, true, []byte(`0`))
 	}
 
 	return nil
 }
 
 func (d *Bind) Read() bool {
-	if d.Mode() == GPIOModeOut {
+	if d.Mode() == ModeOut {
 		return false
 	}
 
@@ -86,6 +86,6 @@ func (d *Bind) waitForEdge() {
 			mqttValue = []byte(`0`)
 		}
 
-		d.MQTTPublishAsync(ctx, TopicPinState.Format(d.pin.Number()), 2, true, mqttValue)
+		d.MQTTPublishAsync(ctx, MQTTTopicPinState.Format(d.pin.Number()), 2, true, mqttValue)
 	}
 }
