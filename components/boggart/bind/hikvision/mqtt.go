@@ -35,18 +35,8 @@ const (
 	MQTTTopicStateHDDUsage             mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/usage"
 )
 
-func (d *Bind) MQTTPublishes() []mqtt.Topic {
-	return []mqtt.Topic{
-		MQTTTopicEvent,
-		MQTTTopicPTZMove,
-		MQTTTopicPTZAbsolute,
-		MQTTTopicPTZContinuous,
-		MQTTTopicPTZRelative,
-		MQTTTopicPTZPreset,
-		MQTTTopicPTZMomentary,
-		MQTTTopicPTZStatusElevation,
-		MQTTTopicPTZStatusAzimuth,
-		MQTTTopicPTZStatusZoom,
+func (b *Bind) MQTTPublishes() []mqtt.Topic {
+	topics := []mqtt.Topic{
 		MQTTTopicStateModel,
 		MQTTTopicStateFirmwareVersion,
 		MQTTTopicStateFirmwareReleasedDate,
@@ -57,52 +47,70 @@ func (d *Bind) MQTTPublishes() []mqtt.Topic {
 		MQTTTopicStateHDDFree,
 		MQTTTopicStateHDDUsage,
 	}
+
+	if b.eventsEnabled {
+		topics = append(topics, MQTTTopicEvent)
+	}
+
+	if b.ptzEnabled {
+		topics = append(topics,
+			MQTTTopicPTZStatusElevation,
+			MQTTTopicPTZStatusAzimuth,
+			MQTTTopicPTZStatusZoom,
+		)
+	}
+
+	return topics
 }
 
-func (d *Bind) MQTTSubscribers() []mqtt.Subscriber {
+func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
+	if !b.ptzEnabled {
+		return nil
+	}
+
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTTopicPTZMove.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTAbsolute)),
-		mqtt.NewSubscriber(MQTTTopicPTZAbsolute.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTAbsolute)),
-		mqtt.NewSubscriber(MQTTTopicPTZContinuous.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTContinuous)),
-		mqtt.NewSubscriber(MQTTTopicPTZRelative.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTRelative)),
-		mqtt.NewSubscriber(MQTTTopicPTZPreset.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTPreset)),
-		mqtt.NewSubscriber(MQTTTopicPTZMomentary.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(d, d.callbackMQTTMomentary)),
+		mqtt.NewSubscriber(MQTTTopicPTZMove.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTAbsolute)),
+		mqtt.NewSubscriber(MQTTTopicPTZAbsolute.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTAbsolute)),
+		mqtt.NewSubscriber(MQTTTopicPTZContinuous.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTContinuous)),
+		mqtt.NewSubscriber(MQTTTopicPTZRelative.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTRelative)),
+		mqtt.NewSubscriber(MQTTTopicPTZPreset.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTPreset)),
+		mqtt.NewSubscriber(MQTTTopicPTZMomentary.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTMomentary)),
 	}
 }
 
-func (d *Bind) updateStatusByChannelId(ctx context.Context, channelId uint64) error {
-	channel, ok := d.ptzChannels[channelId]
+func (b *Bind) updateStatusByChannelId(ctx context.Context, channelId uint64) error {
+	channel, ok := b.ptzChannels[channelId]
 	if !ok {
 		return fmt.Errorf("channel %d not found", channelId)
 	}
 
-	status, err := d.isapi.PTZStatus(ctx, channelId)
+	status, err := b.isapi.PTZStatus(ctx, channelId)
 	if err != nil {
 		return err
 	}
 
-	sn := mqtt.NameReplace(d.SerialNumber())
+	sn := mqtt.NameReplace(b.SerialNumber())
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.Elevation != status.AbsoluteHigh.Elevation {
-		d.MQTTPublishAsync(ctx, MQTTTopicPTZStatusElevation.Format(sn, channelId), 1, false, status.AbsoluteHigh.Elevation)
+		b.MQTTPublishAsync(ctx, MQTTTopicPTZStatusElevation.Format(sn, channelId), 1, false, status.AbsoluteHigh.Elevation)
 	}
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.Azimuth != status.AbsoluteHigh.Azimuth {
-		d.MQTTPublishAsync(ctx, MQTTTopicPTZStatusAzimuth.Format(sn, channelId), 1, false, status.AbsoluteHigh.Azimuth)
+		b.MQTTPublishAsync(ctx, MQTTTopicPTZStatusAzimuth.Format(sn, channelId), 1, false, status.AbsoluteHigh.Azimuth)
 	}
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.AbsoluteZoom != status.AbsoluteHigh.AbsoluteZoom {
-		d.MQTTPublishAsync(ctx, MQTTTopicPTZStatusZoom.Format(sn, channelId), 1, false, status.AbsoluteHigh.AbsoluteZoom)
+		b.MQTTPublishAsync(ctx, MQTTTopicPTZStatusZoom.Format(sn, channelId), 1, false, status.AbsoluteHigh.AbsoluteZoom)
 	}
 
 	channel.Status = &status
-	d.ptzChannels[channelId] = channel
+	b.ptzChannels[channelId] = channel
 
 	return nil
 }
 
-func (d *Bind) checkTopic(topic string) (uint64, error) {
-	if d.ptzChannels == nil || len(d.ptzChannels) == 0 {
+func (b *Bind) checkTopic(topic string) (uint64, error) {
+	if b.ptzChannels == nil || len(b.ptzChannels) == 0 {
 		return 0, errors.New("channels is empty")
 	}
 
@@ -113,7 +121,7 @@ func (d *Bind) checkTopic(topic string) (uint64, error) {
 		return 0, err
 	}
 
-	_, ok := d.ptzChannels[channelId]
+	_, ok := b.ptzChannels[channelId]
 	if !ok {
 		return 0, fmt.Errorf("channel %d not found", channelId)
 	}
@@ -121,8 +129,8 @@ func (d *Bind) checkTopic(topic string) (uint64, error) {
 	return channelId, nil
 }
 
-func (d *Bind) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-	if !boggart.CheckSerialNumberInMQTTTopic(d, message.Topic(), 4) {
+func (b *Bind) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+	if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 4) {
 		return
 	}
 
@@ -130,11 +138,11 @@ func (d *Bind) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, 
 	defer func() {
 		if err != nil {
 			log.Printf("Callback for device %s for topic %s with body %s failed with error %s",
-				d.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
+				b.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
 		}
 	}()
 
-	channelId, err := d.checkTopic(message.Topic())
+	channelId, err := b.checkTopic(message.Topic())
 	if err != nil {
 		return
 	}
@@ -150,16 +158,16 @@ func (d *Bind) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, 
 		return
 	}
 
-	err = d.isapi.PTZAbsolute(ctx, channelId, request.Elevation, request.Azimuth, request.Zoom)
+	err = b.isapi.PTZAbsolute(ctx, channelId, request.Elevation, request.Azimuth, request.Zoom)
 	if err != nil {
 		return
 	}
 
-	err = d.updateStatusByChannelId(ctx, channelId)
+	err = b.updateStatusByChannelId(ctx, channelId)
 }
 
-func (d *Bind) callbackMQTTContinuous(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-	if !boggart.CheckSerialNumberInMQTTTopic(d, message.Topic(), 4) {
+func (b *Bind) callbackMQTTContinuous(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+	if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 4) {
 		return
 	}
 
@@ -167,11 +175,11 @@ func (d *Bind) callbackMQTTContinuous(ctx context.Context, client mqtt.Component
 	defer func() {
 		if err != nil {
 			log.Printf("Callback for device %s for topic %s with body %s failed with error %s",
-				d.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
+				b.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
 		}
 	}()
 
-	channelId, err := d.checkTopic(message.Topic())
+	channelId, err := b.checkTopic(message.Topic())
 	if err != nil {
 		return
 	}
@@ -187,16 +195,16 @@ func (d *Bind) callbackMQTTContinuous(ctx context.Context, client mqtt.Component
 		return
 	}
 
-	err = d.isapi.PTZContinuous(ctx, channelId, request.Pan, request.Tilt, request.Zoom)
+	err = b.isapi.PTZContinuous(ctx, channelId, request.Pan, request.Tilt, request.Zoom)
 	if err != nil {
 		return
 	}
 
-	err = d.updateStatusByChannelId(ctx, channelId)
+	err = b.updateStatusByChannelId(ctx, channelId)
 }
 
-func (d *Bind) callbackMQTTRelative(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-	if !boggart.CheckSerialNumberInMQTTTopic(d, message.Topic(), 4) {
+func (b *Bind) callbackMQTTRelative(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+	if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 4) {
 		return
 	}
 
@@ -204,11 +212,11 @@ func (d *Bind) callbackMQTTRelative(ctx context.Context, client mqtt.Component, 
 	defer func() {
 		if err != nil {
 			log.Printf("Callback for device %s for topic %s with body %s failed with error %s",
-				d.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
+				b.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
 		}
 	}()
 
-	channelId, err := d.checkTopic(message.Topic())
+	channelId, err := b.checkTopic(message.Topic())
 	if err != nil {
 		return
 	}
@@ -224,16 +232,16 @@ func (d *Bind) callbackMQTTRelative(ctx context.Context, client mqtt.Component, 
 		return
 	}
 
-	err = d.isapi.PTZRelative(ctx, channelId, request.X, request.Y, request.Zoom)
+	err = b.isapi.PTZRelative(ctx, channelId, request.X, request.Y, request.Zoom)
 	if err != nil {
 		return
 	}
 
-	err = d.updateStatusByChannelId(ctx, channelId)
+	err = b.updateStatusByChannelId(ctx, channelId)
 }
 
-func (d *Bind) callbackMQTTPreset(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-	if !boggart.CheckSerialNumberInMQTTTopic(d, message.Topic(), 4) {
+func (b *Bind) callbackMQTTPreset(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+	if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 4) {
 		return
 	}
 
@@ -241,11 +249,11 @@ func (d *Bind) callbackMQTTPreset(ctx context.Context, client mqtt.Component, me
 	defer func() {
 		if err != nil {
 			log.Printf("Callback for device %s for topic %s with body %s failed with error %s",
-				d.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
+				b.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
 		}
 	}()
 
-	channelId, err := d.checkTopic(message.Topic())
+	channelId, err := b.checkTopic(message.Topic())
 	if err != nil {
 		return
 	}
@@ -255,16 +263,16 @@ func (d *Bind) callbackMQTTPreset(ctx context.Context, client mqtt.Component, me
 		return
 	}
 
-	err = d.isapi.PTZPresetGoTo(ctx, channelId, presetId)
+	err = b.isapi.PTZPresetGoTo(ctx, channelId, presetId)
 	if err != nil {
 		return
 	}
 
-	err = d.updateStatusByChannelId(ctx, channelId)
+	err = b.updateStatusByChannelId(ctx, channelId)
 }
 
-func (d *Bind) callbackMQTTMomentary(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-	if !boggart.CheckSerialNumberInMQTTTopic(d, message.Topic(), 4) {
+func (b *Bind) callbackMQTTMomentary(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+	if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 4) {
 		return
 	}
 
@@ -272,11 +280,11 @@ func (d *Bind) callbackMQTTMomentary(ctx context.Context, client mqtt.Component,
 	defer func() {
 		if err != nil {
 			log.Printf("Callback for device %s for topic %s with body %s failed with error %s",
-				d.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
+				b.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
 		}
 	}()
 
-	channelId, err := d.checkTopic(message.Topic())
+	channelId, err := b.checkTopic(message.Topic())
 	if err != nil {
 		return
 	}
@@ -294,24 +302,24 @@ func (d *Bind) callbackMQTTMomentary(ctx context.Context, client mqtt.Component,
 	}
 
 	duration := time.Duration(request.Duration) * time.Millisecond
-	err = d.isapi.PTZMomentary(ctx, channelId, request.Pan, request.Tilt, request.Zoom, duration)
+	err = b.isapi.PTZMomentary(ctx, channelId, request.Pan, request.Tilt, request.Zoom, duration)
 	if err != nil {
 		return
 	}
 
-	err = d.updateStatusByChannelId(ctx, channelId)
+	err = b.updateStatusByChannelId(ctx, channelId)
 }
 
-func (d *Bind) callbackMQTTMove(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+func (b *Bind) callbackMQTTMove(ctx context.Context, client mqtt.Component, message mqtt.Message) {
 	var err error
 	defer func() {
 		if err != nil {
 			log.Printf("Callback for device %s for topic %s with body %s failed with error %s",
-				d.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
+				b.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
 		}
 	}()
 
-	channelId, err := d.checkTopic(message.Topic())
+	channelId, err := b.checkTopic(message.Topic())
 	if err != nil {
 		return
 	}
@@ -348,10 +356,10 @@ func (d *Bind) callbackMQTTMove(ctx context.Context, client mqtt.Component, mess
 		err = fmt.Errorf("unknown operation %s", string(message.Payload()))
 	}
 
-	err = d.isapi.PTZContinuous(ctx, channelId, pan, tilt, zoom)
+	err = b.isapi.PTZContinuous(ctx, channelId, pan, tilt, zoom)
 	if err != nil {
 		return
 	}
 
-	err = d.updateStatusByChannelId(ctx, channelId)
+	err = b.updateStatusByChannelId(ctx, channelId)
 }

@@ -189,6 +189,7 @@ func (c *Component) initConfigFromYaml() error {
 					mapstructure.StringToIPNetHookFunc(),
 					StringToIPHookFunc(),
 					StringToMACHookFunc(),
+					StringToURLHookFunc(),
 				),
 			})
 

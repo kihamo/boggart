@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/url"
 	"sync"
 	"time"
 
@@ -13,11 +14,10 @@ import (
 )
 
 const (
-	MB             uint64 = 1024 * 1024
-	IgnoreInterval        = time.Second * 5
+	MB uint64 = 1024 * 1024
 )
 
-type HikVisionPTZChannel struct {
+type PTZChannel struct {
 	Channel hikvision.PTZChannel
 	Status  *hikvision.PTZStatus
 }
@@ -30,21 +30,32 @@ type Bind struct {
 	initOnce sync.Once
 
 	isapi                 *hikvision.ISAPI
+	address               url.URL
 	alertStreamingHistory map[string]time.Time
 
-	ptzChannels map[uint64]HikVisionPTZChannel
+	ptzChannels map[uint64]PTZChannel
+
+	livenessInterval     time.Duration
+	livenessTimeout      time.Duration
+	updaterInterval      time.Duration
+	updaterTimeout       time.Duration
+	ptzInterval          time.Duration
+	ptzTimeout           time.Duration
+	ptzEnabled           bool
+	eventsEnabled        bool
+	eventsIgnoreInterval time.Duration
 }
 
-func (d *Bind) startAlertStreaming() error {
+func (b *Bind) startAlertStreaming() error {
 	ctx := context.Background()
 
-	stream, err := d.isapi.EventNotificationAlertStream(ctx)
+	stream, err := b.isapi.EventNotificationAlertStream(ctx)
 	if err != nil {
 		return err
 	}
 
 	go func() {
-		sn := mqtt.NameReplace(d.SerialNumber())
+		sn := mqtt.NameReplace(b.SerialNumber())
 
 		for {
 			select {
@@ -55,13 +66,13 @@ func (d *Bind) startAlertStreaming() error {
 
 				cacheKey := fmt.Sprintf("%d-%s", event.DynChannelID, event.EventType)
 
-				d.mutex.Lock()
-				lastFire, ok := d.alertStreamingHistory[cacheKey]
-				d.alertStreamingHistory[cacheKey] = event.DateTime
-				d.mutex.Unlock()
+				b.mutex.Lock()
+				lastFire, ok := b.alertStreamingHistory[cacheKey]
+				b.alertStreamingHistory[cacheKey] = event.DateTime
+				b.mutex.Unlock()
 
-				if !ok || event.DateTime.Sub(lastFire) > IgnoreInterval {
-					d.MQTTPublishAsync(ctx, MQTTTopicEvent.Format(sn, event.DynChannelID, event.EventType), 0, false, event.EventDescription)
+				if !ok || event.DateTime.Sub(lastFire) > b.eventsIgnoreInterval {
+					b.MQTTPublishAsync(ctx, MQTTTopicEvent.Format(sn, event.DynChannelID, event.EventType), 0, false, event.EventDescription)
 				}
 
 			case _ = <-stream.NextError():
@@ -76,6 +87,6 @@ func (d *Bind) startAlertStreaming() error {
 	return nil
 }
 
-func (d *Bind) Snapshot(ctx context.Context, channel uint64, writer io.Writer) error {
-	return d.isapi.StreamingPictureToWriter(ctx, channel, writer)
+func (b *Bind) Snapshot(ctx context.Context, channel uint64, writer io.Writer) error {
+	return b.isapi.StreamingPictureToWriter(ctx, channel, writer)
 }

@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	"net"
+	"net/url"
 	"reflect"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -59,6 +60,31 @@ func StringToMACHookFunc() mapstructure.DecodeHookFunc {
 
 			return boggart.HardwareAddr{
 				HardwareAddr: a,
+			}, nil
+		}
+
+		return data, nil
+	}
+}
+
+func StringToURLHookFunc() mapstructure.DecodeHookFunc {
+	return func(f reflect.Type, t reflect.Type, data interface{}) (interface{}, error) {
+		if f.Kind() != reflect.String {
+			return data, nil
+		}
+
+		if t == reflect.TypeOf(url.URL{}) {
+			return url.Parse(data.(string))
+		}
+
+		if t == reflect.TypeOf(boggart.URL{}) {
+			u, err := url.Parse(data.(string))
+			if err != nil {
+				return boggart.URL{}, err
+			}
+
+			return boggart.URL{
+				URL: *u,
 			}, nil
 		}
 

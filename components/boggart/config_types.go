@@ -2,6 +2,7 @@ package boggart
 
 import (
 	"net"
+	"net/url"
 )
 
 type IP struct {
@@ -18,4 +19,12 @@ type HardwareAddr struct {
 
 func (addr HardwareAddr) MarshalText() ([]byte, error) {
 	return []byte(addr.String()), nil
+}
+
+type URL struct {
+	url.URL
+}
+
+func (u URL) MarshalText() ([]byte, error) {
+	return []byte(u.String()), nil
 }

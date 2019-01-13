@@ -1,7 +1,6 @@
 package hikvision
 
 import (
-	"net/url"
 	"strconv"
 	"time"
 
@@ -14,13 +13,22 @@ type Type struct{}
 func (t Type) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 	config := c.(*Config)
 
-	u, _ := url.Parse(config.Address)
-	port, _ := strconv.ParseInt(u.Port(), 10, 64)
-	password, _ := u.User.Password()
+	port, _ := strconv.ParseInt(config.Address.Port(), 10, 64)
+	password, _ := config.Address.User.Password()
 
 	device := &Bind{
-		isapi:                 hikvision.NewISAPI(u.Hostname(), port, u.User.Username(), password),
+		isapi:                 hikvision.NewISAPI(config.Address.Hostname(), port, config.Address.User.Username(), password),
 		alertStreamingHistory: make(map[string]time.Time),
+		address:               config.Address.URL,
+		livenessInterval:      config.LivenessInterval,
+		livenessTimeout:       config.LivenessTimeout,
+		updaterInterval:       config.UpdaterInterval,
+		updaterTimeout:        config.UpdaterTimeout,
+		ptzInterval:           config.PTZInterval,
+		ptzTimeout:            config.PTZTimeout,
+		ptzEnabled:            config.PTZEnabled,
+		eventsEnabled:         config.EventsEnabled,
+		eventsIgnoreInterval:  config.EventsIgnoreInterval,
 	}
 
 	device.Init()

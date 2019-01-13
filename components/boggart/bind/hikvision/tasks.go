@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"log"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
@@ -12,99 +11,106 @@ import (
 	"github.com/kihamo/go-workers/task"
 )
 
-func (d *Bind) Tasks() []workers.Task {
-	taskLiveness := task.NewFunctionTask(d.taskLiveness)
-	taskLiveness.SetTimeout(time.Second * 5)
+func (b *Bind) Tasks() []workers.Task {
+	taskLiveness := task.NewFunctionTask(b.taskLiveness)
+	taskLiveness.SetTimeout(b.livenessTimeout)
 	taskLiveness.SetRepeats(-1)
-	taskLiveness.SetRepeatInterval(time.Minute)
-	taskLiveness.SetName("bind-hikvision-liveness")
+	taskLiveness.SetRepeatInterval(b.livenessInterval)
+	taskLiveness.SetName("bind-hikvision-liveness-" + b.address.Host)
 
-	taskPTZStatus := task.NewFunctionTillStopTask(d.taskPTZStatus)
-	taskPTZStatus.SetTimeout(time.Second * 5)
-	taskPTZStatus.SetRepeats(-1)
-	taskPTZStatus.SetRepeatInterval(time.Minute)
-	taskPTZStatus.SetName("bind-hikvision-ptz-status")
-
-	taskState := task.NewFunctionTask(d.taskState)
-	taskState.SetTimeout(time.Second * 30)
+	taskState := task.NewFunctionTask(b.taskUpdater)
+	taskState.SetTimeout(b.updaterTimeout)
 	taskState.SetRepeats(-1)
-	taskState.SetRepeatInterval(time.Minute * 15)
-	taskState.SetName("bind-hikvision-state")
+	taskState.SetRepeatInterval(b.updaterInterval)
+	taskState.SetName("bind-hikvision-updater-" + b.address.Host)
 
-	return []workers.Task{
+	tasks := []workers.Task{
 		taskLiveness,
-		taskPTZStatus,
 		taskState,
 	}
+
+	if b.ptzEnabled {
+		taskPTZStatus := task.NewFunctionTillStopTask(b.taskPTZ)
+		taskPTZStatus.SetTimeout(b.ptzTimeout)
+		taskPTZStatus.SetRepeats(-1)
+		taskPTZStatus.SetRepeatInterval(b.ptzInterval)
+		taskPTZStatus.SetName("bind-hikvision-ptz-" + b.address.Host)
+
+		tasks = append(tasks, taskPTZStatus)
+	}
+
+	return tasks
 }
 
-func (d *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
-	deviceInfo, err := d.isapi.SystemDeviceInfo(ctx)
+func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
+	deviceInfo, err := b.isapi.SystemDeviceInfo(ctx)
 	if err != nil {
-		d.UpdateStatus(boggart.DeviceStatusOffline)
+		b.UpdateStatus(boggart.DeviceStatusOffline)
 		return nil, err
 	}
 
 	if deviceInfo.SerialNumber == "" {
-		d.UpdateStatus(boggart.DeviceStatusOffline)
+		b.UpdateStatus(boggart.DeviceStatusOffline)
 		return nil, errors.New("device returns empty serial number")
 	}
 
-	if d.SerialNumber() == "" {
-		ptzChannels := make(map[uint64]HikVisionPTZChannel, 0)
-		if list, err := d.isapi.PTZChannels(ctx); err == nil {
+	if b.SerialNumber() == "" {
+		ptzChannels := make(map[uint64]PTZChannel, 0)
+		if list, err := b.isapi.PTZChannels(ctx); err == nil {
 			for _, channel := range list.Channels {
-				ptzChannels[channel.ID] = HikVisionPTZChannel{
+				ptzChannels[channel.ID] = PTZChannel{
 					Channel: channel,
 				}
 			}
 		}
 
-		d.mutex.Lock()
-		d.ptzChannels = ptzChannels
-		d.mutex.Unlock()
+		b.mutex.Lock()
+		b.ptzChannels = ptzChannels
+		b.mutex.Unlock()
 
-		//if err := d.startAlertStreaming(); err != nil {
-		//	return nil, err, false
-		//}
+		if b.eventsEnabled {
+			if err := b.startAlertStreaming(); err != nil {
+				return nil, err
+			}
+		}
 
-		d.SetSerialNumber(deviceInfo.SerialNumber)
+		b.SetSerialNumber(deviceInfo.SerialNumber)
 
-		d.MQTTPublishAsync(ctx, MQTTTopicStateModel.Format(deviceInfo.SerialNumber), 0, true, deviceInfo.Model)
-		d.MQTTPublishAsync(ctx, MQTTTopicStateFirmwareVersion.Format(deviceInfo.SerialNumber), 0, true, deviceInfo.FirmwareVersion)
-		d.MQTTPublishAsync(ctx, MQTTTopicStateFirmwareReleasedDate.Format(deviceInfo.SerialNumber), 0, true, deviceInfo.FirmwareReleasedDate)
+		b.MQTTPublishAsync(ctx, MQTTTopicStateModel.Format(deviceInfo.SerialNumber), 0, true, deviceInfo.Model)
+		b.MQTTPublishAsync(ctx, MQTTTopicStateFirmwareVersion.Format(deviceInfo.SerialNumber), 0, true, deviceInfo.FirmwareVersion)
+		b.MQTTPublishAsync(ctx, MQTTTopicStateFirmwareReleasedDate.Format(deviceInfo.SerialNumber), 0, true, deviceInfo.FirmwareReleasedDate)
 	}
 
-	d.UpdateStatus(boggart.DeviceStatusOnline)
+	b.UpdateStatus(boggart.DeviceStatusOnline)
 
 	return nil, nil
 }
 
-func (d *Bind) taskPTZStatus(ctx context.Context) (interface{}, error, bool) {
-	if d.Status() != boggart.DeviceStatusOnline {
+func (b *Bind) taskPTZ(ctx context.Context) (interface{}, error, bool) {
+	if b.Status() != boggart.DeviceStatusOnline {
 		return nil, nil, false
 	}
 
-	d.mutex.RLock()
-	defer d.mutex.RUnlock()
+	b.mutex.RLock()
+	defer b.mutex.RUnlock()
 
-	if d.ptzChannels == nil {
+	if b.ptzChannels == nil {
 		return nil, nil, false
 	}
 
-	if len(d.ptzChannels) == 0 {
+	if len(b.ptzChannels) == 0 {
 		return nil, nil, true
 	}
 
 	stop := true
 
-	for id, channel := range d.ptzChannels {
+	for id, channel := range b.ptzChannels {
 		if !channel.Channel.Enabled {
 			continue
 		}
 
-		if err := d.updateStatusByChannelId(ctx, id); err != nil {
-			log.Printf("failed updated status for %s device in channel %d", d.SerialNumber(), id)
+		if err := b.updateStatusByChannelId(ctx, id); err != nil {
+			log.Printf("failed updated status for %s device in channel %d", b.SerialNumber(), id)
 			continue
 		}
 
@@ -114,34 +120,34 @@ func (d *Bind) taskPTZStatus(ctx context.Context) (interface{}, error, bool) {
 	return nil, nil, stop
 }
 
-func (d *Bind) taskState(ctx context.Context) (interface{}, error) {
-	if d.Status() != boggart.DeviceStatusOnline {
+func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
+	if b.Status() != boggart.DeviceStatusOnline {
 		return nil, nil
 	}
 
-	d.mutex.RLock()
-	defer d.mutex.RUnlock()
+	b.mutex.RLock()
+	defer b.mutex.RUnlock()
 
-	status, err := d.isapi.SystemStatus(ctx)
+	status, err := b.isapi.SystemStatus(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	sn := mqtt.NameReplace(d.SerialNumber())
+	sn := mqtt.NameReplace(b.SerialNumber())
 
-	d.MQTTPublishAsync(ctx, MQTTTopicStateUpTime.Format(sn), 1, false, status.DeviceUpTime)
-	d.MQTTPublishAsync(ctx, MQTTTopicStateMemoryAvailable.Format(sn), 1, false, uint64(status.Memory[0].MemoryAvailable.Float64())*MB)
-	d.MQTTPublishAsync(ctx, MQTTTopicStateMemoryUsage.Format(sn), 1, false, uint64(status.Memory[0].MemoryUsage.Float64())*MB)
+	b.MQTTPublishAsync(ctx, MQTTTopicStateUpTime.Format(sn), 1, false, status.DeviceUpTime)
+	b.MQTTPublishAsync(ctx, MQTTTopicStateMemoryAvailable.Format(sn), 1, false, uint64(status.Memory[0].MemoryAvailable.Float64())*MB)
+	b.MQTTPublishAsync(ctx, MQTTTopicStateMemoryUsage.Format(sn), 1, false, uint64(status.Memory[0].MemoryUsage.Float64())*MB)
 
-	storage, err := d.isapi.ContentManagementStorage(ctx)
+	storage, err := b.isapi.ContentManagementStorage(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, hdd := range storage.HDD {
-		d.MQTTPublishAsync(ctx, MQTTTopicStateHDDCapacity.Format(sn, hdd.ID), 1, false, hdd.Capacity*MB)
-		d.MQTTPublishAsync(ctx, MQTTTopicStateHDDFree.Format(sn, hdd.ID), 1, false, hdd.FreeSpace*MB)
-		d.MQTTPublishAsync(ctx, MQTTTopicStateHDDUsage.Format(sn, hdd.ID), 1, false, (hdd.Capacity-hdd.FreeSpace)*MB)
+		b.MQTTPublishAsync(ctx, MQTTTopicStateHDDCapacity.Format(sn, hdd.ID), 1, false, hdd.Capacity*MB)
+		b.MQTTPublishAsync(ctx, MQTTTopicStateHDDFree.Format(sn, hdd.ID), 1, false, hdd.FreeSpace*MB)
+		b.MQTTPublishAsync(ctx, MQTTTopicStateHDDUsage.Format(sn, hdd.ID), 1, false, (hdd.Capacity-hdd.FreeSpace)*MB)
 	}
 
 	return nil, nil
