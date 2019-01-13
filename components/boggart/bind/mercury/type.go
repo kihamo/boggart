@@ -2,7 +2,6 @@ package mercury
 
 import (
 	"math"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
 	"github.com/kihamo/boggart/components/boggart/providers/mercury"
@@ -15,19 +14,9 @@ type Type struct{}
 func (t Type) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 	config := c.(*Config)
 
-	var err error
-	timeout := time.Second
-
-	if config.RS485.Timeout != "" {
-		timeout, err = time.ParseDuration(config.RS485.Timeout)
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	provider := mercury.NewElectricityMeter200(
 		mercury.ConvertSerialNumber(config.Address),
-		rs485.GetConnection(config.RS485.Address, timeout))
+		rs485.GetConnection(config.RS485Address, config.RS485Timeout))
 
 	device := &Bind{
 		provider: provider,
@@ -40,6 +29,8 @@ func (t Type) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 		amperage:       math.MaxUint64,
 		power:          math.MaxInt64,
 		batteryVoltage: math.MaxUint64,
+
+		updaterInterval: config.UpdaterInterval,
 	}
 	device.Init()
 

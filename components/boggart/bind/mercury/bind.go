@@ -2,6 +2,7 @@ package mercury
 
 import (
 	"sync"
+	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/mercury"
@@ -27,4 +28,6 @@ type Bind struct {
 
 	mutex    sync.Mutex
 	provider *mercury.ElectricityMeter200
+
+	updaterInterval time.Duration
 }

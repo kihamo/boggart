@@ -1,13 +1,24 @@
 package mercury
 
+import (
+	"time"
+)
+
+const (
+	DefaultRS485Timeout    = time.Second * 5
+	DefaultUpdaterInterval = time.Minute
+)
+
 type Config struct {
-	RS485 struct {
-		Address string `valid:"required"`
-		Timeout string
-	} `valid:"required"`
-	Address string `valid:"required"`
+	RS485Address    string        `mapstructure:"rs485_address" yaml:"rs485_address" valid:"required"`
+	RS485Timeout    time.Duration `mapstructure:"rs485_timeout" yaml:"rs485_timeout"`
+	Address         string        `valid:"required"`
+	UpdaterInterval time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 }
 
 func (t Type) Config() interface{} {
-	return &Config{}
+	return &Config{
+		RS485Timeout:    DefaultRS485Timeout,
+		UpdaterInterval: DefaultUpdaterInterval,
+	}
 }

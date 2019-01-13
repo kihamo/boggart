@@ -18,8 +18,8 @@ const (
 	MQTTTopicFirmwareVersion mqtt.Topic = boggart.ComponentName + "/meter/mercury/+/firmware/version"
 )
 
-func (d *Bind) MQTTPublishes() []mqtt.Topic {
-	sn := mqtt.NameReplace(d.SerialNumber())
+func (b *Bind) MQTTPublishes() []mqtt.Topic {
+	sn := mqtt.NameReplace(b.SerialNumber())
 
 	return []mqtt.Topic{
 		mqtt.Topic(MQTTTopicTariff.Format(sn, 1)),
