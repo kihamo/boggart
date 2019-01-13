@@ -13,18 +13,13 @@ type TypeSP3S struct{}
 func (t TypeSP3S) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 	config := c.(*ConfigSP3S)
 
-	mac, err := net.ParseMAC(config.MAC)
-	if err != nil {
-		return nil, err
-	}
-
 	localAddr, err := broadlink.LocalAddr()
 	if err != nil {
 		return nil, err
 	}
 
 	ip := net.UDPAddr{
-		IP:   net.ParseIP(config.IP),
+		IP:   config.IP.IP,
 		Port: broadlink.DevicePort,
 	}
 
@@ -32,10 +27,10 @@ func (t TypeSP3S) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 
 	switch config.Model {
 	case "sp3seu":
-		provider = broadlink.NewSP3SEU(mac, ip, *localAddr)
+		provider = broadlink.NewSP3SEU(config.MAC.HardwareAddr, ip, *localAddr)
 
 	case "sp3sus":
-		provider = broadlink.NewSP3SUS(mac, ip, *localAddr)
+		provider = broadlink.NewSP3SUS(config.MAC.HardwareAddr, ip, *localAddr)
 
 	default:
 		return nil, errors.New("unknown model " + config.Model)
@@ -48,7 +43,7 @@ func (t TypeSP3S) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 		updaterInterval: config.UpdaterInterval,
 	}
 	device.Init()
-	device.SetSerialNumber(mac.String())
+	device.SetSerialNumber(config.MAC.String())
 
 	return device, nil
 }

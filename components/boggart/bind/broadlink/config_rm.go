@@ -2,6 +2,8 @@ package broadlink
 
 import (
 	"time"
+
+	"github.com/kihamo/boggart/components/boggart"
 )
 
 const (
@@ -9,9 +11,9 @@ const (
 )
 
 type ConfigRM struct {
-	IP              string `valid:"ip,required"`
-	MAC             string `valid:"mac,required"`
-	Model           string `valid:"in(rm3mini|rm2proplus),required"`
+	IP              boggart.IP           `valid:",required"`
+	MAC             boggart.HardwareAddr `valid:",required"`
+	Model           string               `valid:"in(rm3mini|rm2proplus),required"`
 	CaptureDuration time.Duration
 }
 

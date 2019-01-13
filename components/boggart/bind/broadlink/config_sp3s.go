@@ -2,6 +2,8 @@ package broadlink
 
 import (
 	"time"
+
+	"github.com/kihamo/boggart/components/boggart"
 )
 
 const (
@@ -9,10 +11,10 @@ const (
 )
 
 type ConfigSP3S struct {
-	IP              string        `valid:"ip,required"`
-	MAC             string        `valid:"mac,required"`
-	Model           string        `valid:"in(sp3seu|sp3sus),required"`
-	UpdaterInterval time.Duration `mapstructure:"updater_interval"`
+	IP              boggart.IP           `valid:",required"`
+	MAC             boggart.HardwareAddr `valid:",required"`
+	Model           string               `valid:"in(sp3seu|sp3sus),required"`
+	UpdaterInterval time.Duration        `mapstructure:"updater_interval"`
 }
 
 func (t TypeSP3S) Config() interface{} {
