@@ -1,7 +1,8 @@
-package google_home_mini
+package google_home
 
 import (
 	"sync"
+	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/google/home"
@@ -17,8 +18,11 @@ type Bind struct {
 	initOnce sync.Once
 
 	clientGoogleHome *client.GoogleHome
-	clientChromecast *chromecast.Player
+	clientChromeCast *chromecast.Player
 	host             string
+
+	livenessInterval time.Duration
+	livenessTimeout  time.Duration
 }
 
 func (b *Bind) ClientGoogleHome() *client.GoogleHome {
@@ -39,9 +43,9 @@ func (b *Bind) ClientGoogleHome() *client.GoogleHome {
 	return ctrl
 }
 
-func (b *Bind) ClientChromecast() *chromecast.Player {
+func (b *Bind) ClientChromeCast() *chromecast.Player {
 	b.mutex.RLock()
-	c := b.clientChromecast
+	c := b.clientChromeCast
 	b.mutex.RUnlock()
 
 	if c != nil {
@@ -51,7 +55,7 @@ func (b *Bind) ClientChromecast() *chromecast.Player {
 	ctrl := chromecast.New(b.host, chromecast.DefaultPort)
 
 	b.mutex.Lock()
-	b.clientChromecast = ctrl
+	b.clientChromeCast = ctrl
 	b.mutex.Unlock()
 
 	return ctrl
@@ -62,11 +66,11 @@ func (b *Bind) UpdateStatus(status boggart.DeviceStatus) {
 		b.mutex.Lock()
 		b.clientGoogleHome = nil
 
-		if b.clientChromecast != nil {
-			go b.clientChromecast.Close()
+		if b.clientChromeCast != nil {
+			go b.clientChromeCast.Close()
 		}
 
-		b.clientChromecast = nil
+		b.clientChromeCast = nil
 		b.mutex.Unlock()
 	}
 

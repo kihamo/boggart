@@ -1,4 +1,4 @@
-package google_home_mini
+package google_home
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
@@ -10,7 +10,9 @@ func (t Type) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 	config := c.(*Config)
 
 	device := &Bind{
-		host: config.Host,
+		host:             config.Host,
+		livenessInterval: config.LivenessInterval,
+		livenessTimeout:  config.LivenessTimeout,
 	}
 	device.Init()
 

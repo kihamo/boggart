@@ -1,4 +1,4 @@
-package google_home_mini
+package google_home
 
 import (
 	"bytes"
@@ -37,14 +37,14 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return
 			}
 
-			b.ClientChromecast().SetVolume(volume)
+			b.ClientChromeCast().SetVolume(volume)
 		})),
 		mqtt.NewSubscriber(MQTTTopicMute.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) {
 			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
 				return
 			}
 
-			b.ClientChromecast().SetMute(bytes.Equal(message.Payload(), []byte(`1`)))
+			b.ClientChromeCast().SetMute(bytes.Equal(message.Payload(), []byte(`1`)))
 		})),
 	}
 }

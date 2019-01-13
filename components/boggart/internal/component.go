@@ -9,7 +9,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	_ "github.com/kihamo/boggart/components/boggart/bind/broadlink"
 	_ "github.com/kihamo/boggart/components/boggart/bind/ds18b20"
-	_ "github.com/kihamo/boggart/components/boggart/bind/google_home_mini"
+	_ "github.com/kihamo/boggart/components/boggart/bind/google_home"
 	_ "github.com/kihamo/boggart/components/boggart/bind/gpio"
 	_ "github.com/kihamo/boggart/components/boggart/bind/hikvision"
 	_ "github.com/kihamo/boggart/components/boggart/bind/led_wifi"

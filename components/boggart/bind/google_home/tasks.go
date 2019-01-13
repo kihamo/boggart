@@ -1,8 +1,7 @@
-package google_home_mini
+package google_home
 
 import (
 	"context"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/google/home"
@@ -13,10 +12,10 @@ import (
 
 func (b *Bind) Tasks() []workers.Task {
 	taskLiveness := task.NewFunctionTask(b.taskLiveness)
-	taskLiveness.SetTimeout(time.Second * 10)
+	taskLiveness.SetTimeout(b.livenessTimeout)
 	taskLiveness.SetRepeats(-1)
-	taskLiveness.SetRepeatInterval(time.Second * 30)
-	taskLiveness.SetName("bind-google-home-mini-liveness")
+	taskLiveness.SetRepeatInterval(b.livenessInterval)
+	taskLiveness.SetName("bind-google-home:mini-liveness-" + b.host)
 
 	return []workers.Task{
 		taskLiveness,
