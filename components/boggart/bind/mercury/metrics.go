@@ -6,11 +6,11 @@ import (
 )
 
 var (
-	metricTariff         = snitch.NewGauge(boggart.ComponentName+"_bind_mercury_200_tariff_watts", "Mercury 200 tariff in watts")
-	metricVoltage        = snitch.NewGauge(boggart.ComponentName+"_bind_mercury_200_voltage_volts", "Mercury 200 voltage in volts")
-	metricAmperage       = snitch.NewGauge(boggart.ComponentName+"_bind_mercury_200_amperage_amperes", "Mercury 200 amperage in amperes")
-	metricPower          = snitch.NewGauge(boggart.ComponentName+"_bind_mercury_200_power_watts", "Mercury 200 current power in watts")
-	metricBatteryVoltage = snitch.NewGauge(boggart.ComponentName+"_bind_mercury_200_battery_voltage_volts", "Mercury 200 battery voltage in volts")
+	metricTariff         = snitch.NewGauge(boggart.ComponentName+"_bind_mercury_tariff_watts", "Mercury 200 tariff in watts")
+	metricVoltage        = snitch.NewGauge(boggart.ComponentName+"_bind_mercury_voltage_volts", "Mercury 200 voltage in volts")
+	metricAmperage       = snitch.NewGauge(boggart.ComponentName+"_bind_mercury_amperage_amperes", "Mercury 200 amperage in amperes")
+	metricPower          = snitch.NewGauge(boggart.ComponentName+"_bind_mercury_power_watts", "Mercury 200 current power in watts")
+	metricBatteryVoltage = snitch.NewGauge(boggart.ComponentName+"_bind_mercury_battery_voltage_volts", "Mercury 200 battery voltage in volts")
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {

@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	DefaultRS485Timeout    = time.Second * 5
+	DefaultRS485Timeout    = time.Second
 	DefaultUpdaterInterval = time.Minute
 )
 

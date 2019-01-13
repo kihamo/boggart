@@ -1,6 +1,8 @@
 package pulsar_heat_meter
 
 import (
+	"time"
+
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
 )
@@ -27,6 +29,8 @@ type Bind struct {
 
 	config   *Config
 	provider *pulsar.HeatMeter
+
+	updaterInterval time.Duration
 }
 
 func (b *Bind) inputVolume(pulses uint64, offset float64) float64 {

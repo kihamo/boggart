@@ -3,7 +3,6 @@ package pulsar_heat_meter
 import (
 	"encoding/hex"
 	"math"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
@@ -16,16 +15,7 @@ func (t Type) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 	config := c.(*Config)
 
 	var err error
-	timeout := time.Second
-
-	if config.RS485.Timeout != "" {
-		timeout, err = time.ParseDuration(config.RS485.Timeout)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	conn := rs485.GetConnection(config.RS485.Address, timeout)
+	conn := rs485.GetConnection(config.RS485Address, config.RS485Timeout)
 
 	var deviceAddress []byte
 	if config.Address == "" {
@@ -53,6 +43,8 @@ func (t Type) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 		input2:           math.MaxUint64,
 		input3:           math.MaxUint64,
 		input4:           math.MaxUint64,
+
+		updaterInterval: config.UpdaterInterval,
 	}
 	device.Init()
 	device.SetSerialNumber(hex.EncodeToString(deviceAddress))
