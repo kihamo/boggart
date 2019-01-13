@@ -186,8 +186,9 @@ func (c *Component) initConfigFromYaml() error {
 				DecodeHook: mapstructure.ComposeDecodeHookFunc(
 					mapstructure.StringToTimeHookFunc(time.RFC3339),
 					mapstructure.StringToTimeDurationHookFunc(),
-					mapstructure.StringToIPHookFunc(),
 					mapstructure.StringToIPNetHookFunc(),
+					StringToIPHookFunc(),
+					StringToMACHookFunc(),
 				),
 			})
 
