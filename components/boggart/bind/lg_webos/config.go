@@ -10,15 +10,15 @@ const (
 )
 
 type Config struct {
-	Host             string `valid:"host,required"`
-	Key              string `valid:"required"`
-	LivenessInterval string `mapstructure:"liveness_interval" yaml:"liveness_interval"`
-	LivenessTimeout  string `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
+	Host             string        `valid:"host,required"`
+	Key              string        `valid:"required"`
+	LivenessInterval time.Duration `mapstructure:"liveness_interval" yaml:"liveness_interval"`
+	LivenessTimeout  time.Duration `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
 }
 
 func (t Type) Config() interface{} {
 	return &Config{
-		LivenessInterval: DefaultLivenessInterval.String(),
-		LivenessTimeout:  DefaultLivenessTimeout.String(),
+		LivenessInterval: DefaultLivenessInterval,
+		LivenessTimeout:  DefaultLivenessTimeout,
 	}
 }

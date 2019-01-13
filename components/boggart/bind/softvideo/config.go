@@ -9,13 +9,13 @@ const (
 )
 
 type Config struct {
-	Login           string `valid:"required"`
-	Password        string `valid:"required"`
-	UpdaterInterval string `mapstructure:"updater_interval" yaml:"updater_interval"`
+	Login           string        `valid:"required"`
+	Password        string        `valid:"required"`
+	UpdaterInterval time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 }
 
 func (Type) Config() interface{} {
 	return &Config{
-		UpdaterInterval: DefaultUpdaterInterval.String(),
+		UpdaterInterval: DefaultUpdaterInterval,
 	}
 }

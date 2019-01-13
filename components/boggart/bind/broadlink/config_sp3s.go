@@ -9,14 +9,14 @@ const (
 )
 
 type ConfigSP3S struct {
-	IP              string `valid:"ip,required"`
-	MAC             string `valid:"mac,required"`
-	Model           string `valid:"in(sp3seu|sp3sus),required"`
-	UpdaterInterval string `mapstructure:"updater_interval"`
+	IP              string        `valid:"ip,required"`
+	MAC             string        `valid:"mac,required"`
+	Model           string        `valid:"in(sp3seu|sp3sus),required"`
+	UpdaterInterval time.Duration `mapstructure:"updater_interval"`
 }
 
 func (t TypeSP3S) Config() interface{} {
 	return &ConfigSP3S{
-		UpdaterInterval: SP3SDefaultUpdateInterval.String(),
+		UpdaterInterval: SP3SDefaultUpdateInterval,
 	}
 }

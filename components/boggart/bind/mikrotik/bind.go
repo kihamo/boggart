@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"regexp"
+	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/mikrotik"
@@ -21,6 +22,10 @@ type Bind struct {
 	provider     *mikrotik.Client
 	host         string
 	syslogClient string
+
+	livenessInterval time.Duration
+	livenessTimeout  time.Duration
+	updaterInterval  time.Duration
 }
 
 type Mac struct {

@@ -3,7 +3,6 @@ package broadlink
 import (
 	"errors"
 	"net"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/broadlink"
@@ -15,11 +14,6 @@ func (t TypeRM) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 	config := c.(*ConfigRM)
 
 	mac, err := net.ParseMAC(config.MAC)
-	if err != nil {
-		return nil, err
-	}
-
-	captureDuration, err := time.ParseDuration(config.CaptureDuration)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +45,7 @@ func (t TypeRM) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 		provider:        provider,
 		mac:             mac,
 		ip:              ip,
-		captureDuration: captureDuration,
+		captureDuration: config.CaptureDuration,
 	}
 	device.Init()
 	device.SetSerialNumber(mac.String())

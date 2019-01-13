@@ -18,13 +18,12 @@ func (t Type) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 	password, _ := u.User.Password()
 
 	device := &Bind{
-		provider:     mikrotik.NewClient(u.Host, username, password, time.Second*10),
-		host:         u.Host + "-" + u.Port(),
-		syslogClient: config.SyslogClient,
-	}
-
-	if device.syslogClient == "" {
-		device.syslogClient = u.Hostname() + ":514"
+		provider:         mikrotik.NewClient(u.Host, username, password, time.Second*10),
+		host:             u.Host + "-" + u.Port(),
+		syslogClient:     config.SyslogClient,
+		livenessInterval: config.LivenessInterval,
+		livenessTimeout:  config.LivenessTimeout,
+		updaterInterval:  config.UpdaterInterval,
 	}
 
 	device.Init()

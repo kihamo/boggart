@@ -3,6 +3,7 @@ package internal
 import (
 	"io/ioutil"
 	"sync"
+	"time"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/kihamo/boggart/components/boggart"
@@ -179,7 +180,22 @@ func (c *Component) initConfigFromYaml() error {
 		var cfg interface{}
 
 		if prepare := kind.Config(); prepare != nil {
-			if err := mapstructure.Decode(d.Config, &prepare); err != nil {
+			mapStructureDecoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+				Metadata: nil,
+				Result:   &prepare,
+				DecodeHook: mapstructure.ComposeDecodeHookFunc(
+					mapstructure.StringToTimeHookFunc(time.RFC3339),
+					mapstructure.StringToTimeDurationHookFunc(),
+					mapstructure.StringToIPHookFunc(),
+					mapstructure.StringToIPNetHookFunc(),
+				),
+			})
+
+			if err != nil {
+				return err
+			}
+
+			if err := mapStructureDecoder.Decode(d.Config); err != nil {
 				return err
 			}
 

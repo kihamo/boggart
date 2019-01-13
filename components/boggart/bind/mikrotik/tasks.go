@@ -5,7 +5,6 @@ import (
 	"errors"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/mikrotik"
@@ -16,14 +15,14 @@ import (
 
 func (b *Bind) Tasks() []workers.Task {
 	taskLiveness := task.NewFunctionTask(b.taskLiveness)
-	taskLiveness.SetTimeout(time.Second * 5)
+	taskLiveness.SetTimeout(b.livenessTimeout)
 	taskLiveness.SetRepeats(-1)
-	taskLiveness.SetRepeatInterval(time.Minute)
-	taskLiveness.SetName("bind-mikrotik-liveness")
+	taskLiveness.SetRepeatInterval(b.livenessInterval)
+	taskLiveness.SetName("bind-mikrotik-liveness-" + b.host)
 
-	taskStateUpdater := task.NewFunctionTask(b.taskStateUpdater)
+	taskStateUpdater := task.NewFunctionTask(b.taskUpdater)
 	taskStateUpdater.SetRepeats(-1)
-	taskStateUpdater.SetRepeatInterval(time.Minute * 5)
+	taskStateUpdater.SetRepeatInterval(b.updaterInterval)
 	taskStateUpdater.SetName("bind-mikrotik-updater-" + b.host)
 
 	return []workers.Task{
@@ -86,7 +85,7 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	return nil, nil
 }
 
-func (b *Bind) taskStateUpdater(ctx context.Context) (interface{}, error) {
+func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	if b.Status() != boggart.DeviceStatusOnline {
 		return nil, nil
 	}

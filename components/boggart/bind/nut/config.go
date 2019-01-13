@@ -12,12 +12,12 @@ type Config struct {
 	Host            string `valid:"host,required"`
 	Username        string
 	Password        string
-	UPS             string `valid:"required"`
-	UpdaterInterval string `mapstructure:"updater_interval" yaml:"updater_interval"`
+	UPS             string        `valid:"required"`
+	UpdaterInterval time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 }
 
 func (t Type) Config() interface{} {
 	return &Config{
-		UpdaterInterval: DefaultUpdaterInterval.String(),
+		UpdaterInterval: DefaultUpdaterInterval,
 	}
 }

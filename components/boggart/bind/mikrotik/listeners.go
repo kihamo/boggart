@@ -14,22 +14,26 @@ import (
 type Listener struct {
 	listener.BaseListener
 
-	router *Bind
+	bind *Bind
 }
 
-func NewListener(router *Bind) *Listener {
+func (b *Bind) Listeners() []workers.ListenerWithEvents {
+	if b.syslogClient == "" {
+		return nil
+	}
+
+	return []workers.ListenerWithEvents{
+		NewListener(b),
+	}
+}
+
+func NewListener(bind *Bind) *Listener {
 	l := &Listener{
-		router: router,
+		bind: bind,
 	}
 	l.Init()
 
 	return l
-}
-
-func (b *Bind) Listeners() []workers.ListenerWithEvents {
-	return []workers.ListenerWithEvents{
-		NewListener(b),
-	}
 }
 
 func (l *Listener) Events() []workers.Event {
@@ -39,7 +43,7 @@ func (l *Listener) Events() []workers.Event {
 }
 
 func (l *Listener) Name() string {
-	return "bind-mikrotik-" + l.router.host
+	return "bind-mikrotik-" + l.bind.host
 }
 
 func (l *Listener) Run(ctx context.Context, event workers.Event, t time.Time, args ...interface{}) {
@@ -48,7 +52,7 @@ func (l *Listener) Run(ctx context.Context, event workers.Event, t time.Time, ar
 		message := args[0].(map[string]interface{})
 
 		client, ok := message["client"]
-		if !ok || client != l.router.syslogClient {
+		if !ok || client != l.bind.syslogClient {
 			return
 		}
 
@@ -73,21 +77,21 @@ func (l *Listener) Run(ctx context.Context, event workers.Event, t time.Time, ar
 				return
 			}
 
-			mac, err := l.router.Mac(ctx, check[1])
+			mac, err := l.bind.Mac(ctx, check[1])
 			if err != nil {
 				return
 			}
 
-			sn := l.router.SerialNumber()
+			sn := l.bind.SerialNumber()
 			login := mqtt.NameReplace(mac.Address)
 
 			switch check[3] {
 			case "connected":
-				l.router.MQTTPublishAsync(ctx, MQTTTopicWiFiConnectedMAC.Format(sn), 0, false, login)
-				l.router.MQTTPublishAsync(ctx, MQTTTopicWiFiMACState.Format(sn, login), 0, false, []byte(`1`))
+				l.bind.MQTTPublishAsync(ctx, MQTTTopicWiFiConnectedMAC.Format(sn), 0, false, login)
+				l.bind.MQTTPublishAsync(ctx, MQTTTopicWiFiMACState.Format(sn, login), 0, false, []byte(`1`))
 			case "disconnected":
-				l.router.MQTTPublishAsync(ctx, MQTTTopicWiFiDisconnectedMAC.Format(sn), 0, false, login)
-				l.router.MQTTPublishAsync(ctx, MQTTTopicWiFiMACState.Format(sn, login), 0, false, []byte(`0`))
+				l.bind.MQTTPublishAsync(ctx, MQTTTopicWiFiDisconnectedMAC.Format(sn), 0, false, login)
+				l.bind.MQTTPublishAsync(ctx, MQTTTopicWiFiMACState.Format(sn, login), 0, false, []byte(`0`))
 			}
 
 		case "vpn":
@@ -96,16 +100,16 @@ func (l *Listener) Run(ctx context.Context, event workers.Event, t time.Time, ar
 				return
 			}
 
-			sn := l.router.SerialNumber()
+			sn := l.bind.SerialNumber()
 			login := mqtt.NameReplace(check[1])
 
 			switch check[2] {
 			case "in":
-				l.router.MQTTPublishAsync(ctx, MQTTTopicVPNConnectedLogin.Format(sn), 0, false, login)
-				l.router.MQTTPublishAsync(ctx, MQTTTopicVPNLoginState.Format(sn, login), 0, false, []byte(`1`))
+				l.bind.MQTTPublishAsync(ctx, MQTTTopicVPNConnectedLogin.Format(sn), 0, false, login)
+				l.bind.MQTTPublishAsync(ctx, MQTTTopicVPNLoginState.Format(sn, login), 0, false, []byte(`1`))
 			case "out":
-				l.router.MQTTPublishAsync(ctx, MQTTTopicVPNDisconnectedLogin.Format(sn), 0, false, login)
-				l.router.MQTTPublishAsync(ctx, MQTTTopicVPNLoginState.Format(sn, login), 0, false, []byte(`0`))
+				l.bind.MQTTPublishAsync(ctx, MQTTTopicVPNDisconnectedLogin.Format(sn), 0, false, login)
+				l.bind.MQTTPublishAsync(ctx, MQTTTopicVPNLoginState.Format(sn, login), 0, false, []byte(`0`))
 			}
 		}
 	}
