@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -114,8 +115,11 @@ func (h *CameraHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		return
 	}
 
-	if err = bind.Snapshot(r.Context(), ch, w); err != nil {
+	buf := bytes.NewBuffer(nil)
+	if err = bind.Snapshot(r.Context(), ch, buf); err != nil {
 		h.NotFound(w, r)
 		return
 	}
+
+	io.Copy(w, buf)
 }

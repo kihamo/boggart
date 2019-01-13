@@ -18,7 +18,7 @@ func (c *Component) DashboardMenu() dashboard.Menu {
 
 	return dashboard.NewMenu("Smart home").
 		WithIcon("home").
-		WithChild(dashboard.NewMenu("Devices").WithRoute(routes[1])).
+		WithChild(dashboard.NewMenu("Manager").WithRoute(routes[1])).
 		WithChild(dashboard.NewMenu("Config YAML").WithUrl("/" + c.Name() + "/config/view"))
 }
 

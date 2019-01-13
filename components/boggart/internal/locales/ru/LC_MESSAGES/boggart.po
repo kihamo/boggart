@@ -14,6 +14,10 @@ msgctxt "menu"
 msgid "Smart home"
 msgstr "Умный дом"
 
+msgctxt "menu"
+msgid "Manager"
+msgstr "Менеджер"
+
 msgid "Config YAML"
 msgstr "YAML конфигурация"
 
