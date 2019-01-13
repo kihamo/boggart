@@ -58,8 +58,8 @@ type DeviceBind interface {
 	SerialNumber() string
 }
 
-type DeviceConfig interface {
-	Validate() bool
+type DeviceBindCloser interface {
+	Close() error
 }
 
 type DeviceBindHasTasks interface {

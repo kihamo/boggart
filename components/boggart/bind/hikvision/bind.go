@@ -32,6 +32,7 @@ type Bind struct {
 	isapi                 *hikvision.ISAPI
 	address               url.URL
 	alertStreamingHistory map[string]time.Time
+	alertStreamingCancel  context.CancelFunc
 
 	ptzChannels map[uint64]PTZChannel
 
@@ -47,7 +48,8 @@ type Bind struct {
 }
 
 func (b *Bind) startAlertStreaming() error {
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+	b.alertStreamingCancel = cancel
 
 	stream, err := b.isapi.EventNotificationAlertStream(ctx)
 	if err != nil {
@@ -79,6 +81,7 @@ func (b *Bind) startAlertStreaming() error {
 				// TODO: log errors
 
 			case <-ctx.Done():
+				b.alertStreamingCancel = nil
 				return
 			}
 		}
@@ -89,4 +92,12 @@ func (b *Bind) startAlertStreaming() error {
 
 func (b *Bind) Snapshot(ctx context.Context, channel uint64, writer io.Writer) error {
 	return b.isapi.StreamingPictureToWriter(ctx, channel, writer)
+}
+
+func (b *Bind) Close() error {
+	if b.alertStreamingCancel != nil {
+		b.alertStreamingCancel()
+	}
+
+	return nil
 }

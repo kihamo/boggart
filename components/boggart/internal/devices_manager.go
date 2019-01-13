@@ -113,6 +113,11 @@ func (m *DevicesManager) Unregister(id string) error {
 	}
 
 	m.storage.Delete(id)
+
+	if closer, ok := device.Bind().(boggart.DeviceBindCloser); ok {
+		return closer.Close()
+	}
+
 	return nil
 }
 
