@@ -11,18 +11,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type configYAMLDevice struct {
-	Type        string
-	ID          string
-	Description string
-	Tags        []string
-	Config      interface{}
-}
-
-type configYAML struct {
-	Devices []configYAMLDevice
-}
-
 type ConfigHandler struct {
 	dashboard.Handler
 
@@ -45,23 +33,7 @@ func (h *ConfigHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	enc := yaml.NewEncoder(buf)
 	defer enc.Close()
 
-	devices := h.devicesManager.Devices()
-
-	config := &configYAML{
-		Devices: make([]configYAMLDevice, 0, len(devices)),
-	}
-
-	for _, d := range devices {
-		config.Devices = append(config.Devices, configYAMLDevice{
-			Type:        d.Type(),
-			ID:          d.ID(),
-			Description: d.Description(),
-			Tags:        d.Tags(),
-			Config:      d.Config(),
-		})
-	}
-
-	if err := enc.Encode(config); err != nil {
+	if err := enc.Encode(h.devicesManager.Devices()); err != nil {
 		panic(err.Error())
 	}
 

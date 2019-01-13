@@ -23,6 +23,14 @@ type DeviceItem struct {
 	cacheMQTTPublishes   []mqtt.Topic
 }
 
+type deviceItemYaml struct {
+	Type        string
+	ID          string
+	Description string
+	Tags        []string
+	Config      interface{}
+}
+
 func (d *DeviceItem) Bind() boggart.DeviceBind {
 	return d.bind
 }
@@ -109,4 +117,14 @@ func (d *DeviceItem) MQTTPublishes() []mqtt.Topic {
 	}
 
 	return d.cacheMQTTPublishes
+}
+
+func (d *DeviceItem) MarshalYAML() (interface{}, error) {
+	return deviceItemYaml{
+		Type:        d.Type(),
+		ID:          d.ID(),
+		Description: d.Description(),
+		Tags:        d.Tags(),
+		Config:      d.Config(),
+	}, nil
 }

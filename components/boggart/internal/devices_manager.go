@@ -129,7 +129,7 @@ func (m *DevicesManager) Device(id string) boggart.Device {
 	return nil
 }
 
-func (m *DevicesManager) Devices() []boggart.Device {
+func (m *DevicesManager) Devices() boggart.DeviceList {
 	devices := make([]boggart.Device, 0)
 
 	m.storage.Range(func(key interface{}, device interface{}) bool {

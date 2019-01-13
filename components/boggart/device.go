@@ -29,17 +29,6 @@ const (
 	DeviceStatusRemoved
 )
 
-type DevicesManager interface {
-	snitch.Collector
-
-	Register(device DeviceBind, t string, description string, tags []string, config interface{}) (string, error)
-	RegisterWithID(id string, bind DeviceBind, t string, description string, tags []string, config interface{}) error
-	Unregister(id string) error
-	Device(id string) Device
-	Devices() []Device
-	IsReady() bool
-}
-
 type Device interface {
 	Bind() DeviceBind
 	ID() string
@@ -52,6 +41,8 @@ type Device interface {
 	MQTTSubscribers() []mqtt.Subscriber
 	MQTTPublishes() []mqtt.Topic
 }
+
+type DeviceList []Device
 
 type DeviceBind interface {
 	Status() DeviceStatus
@@ -80,4 +71,23 @@ type DeviceBindHasMQTTSubscribers interface {
 
 type DeviceBindHasMQTTPublishes interface {
 	MQTTPublishes() []mqtt.Topic
+}
+
+type DevicesManager interface {
+	snitch.Collector
+
+	Register(device DeviceBind, t string, description string, tags []string, config interface{}) (string, error)
+	RegisterWithID(id string, bind DeviceBind, t string, description string, tags []string, config interface{}) error
+	Unregister(id string) error
+	Device(id string) Device
+	Devices() DeviceList
+	IsReady() bool
+}
+
+func (l DeviceList) MarshalYAML() (interface{}, error) {
+	return struct {
+		Devices []Device
+	}{
+		Devices: l,
+	}, nil
 }
