@@ -7,13 +7,9 @@ import (
 )
 
 var (
-	BindEventSyslogReceive            = event.NewBaseEvent("SyslogReceive")
-	BindEventDevicesManagerReady      = event.NewBaseEvent("DevicesManagerReady")
-	BindEventDeviceRegister           = event.NewBaseEvent("DeviceRegister")
-	BindEventDeviceDisabledAfterCheck = event.NewBaseEvent("DeviceDisabledAfterCheck")
-	BindEventDeviceEnabledAfterCheck  = event.NewBaseEvent("DeviceEnabledAfterCheck")
-	BindEventDeviceEnabled            = event.NewBaseEvent("DeviceEnabled")
-	BindEventDeviceDisabled           = event.NewBaseEvent("DeviceDisabled")
+	BindEventSyslogReceive  = event.NewBaseEvent("SyslogReceive")
+	BindEventManagerReady   = event.NewBaseEvent("ManagerReady")
+	BindEventDeviceDisabled = event.NewBaseEvent("DeviceDisabled")
 )
 
 type BindStatus uint64
@@ -28,7 +24,7 @@ const (
 	BindStatusRemoved
 )
 
-type Device interface {
+type BindItem interface {
 	Bind() Bind
 	ID() string
 	Type() string

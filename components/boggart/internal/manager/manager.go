@@ -59,7 +59,6 @@ func (m *Manager) RegisterWithID(id string, bind boggart.Bind, t string, descrip
 		config:      config,
 	}
 	m.storage.Store(id, bindItem)
-	m.listeners.AsyncTrigger(context.TODO(), boggart.BindEventDeviceRegister, bind, id)
 
 	// register mqtt
 	if mqttClient, ok := bind.(boggart.BindHasMQTTClient); ok {
@@ -121,9 +120,9 @@ func (m *Manager) Unregister(id string) error {
 	return nil
 }
 
-func (m *Manager) Bind(id string) boggart.Device {
+func (m *Manager) Bind(id string) boggart.BindItem {
 	if d, ok := m.storage.Load(id); ok {
-		return d.(boggart.Device)
+		return d.(boggart.BindItem)
 	}
 
 	return nil
@@ -171,7 +170,7 @@ func (m *Manager) Collect(ch chan<- snitch.Metric) {
 func (m *Manager) Ready() {
 	if !m.IsReady() {
 		atomic.StoreInt64(&m.ready, managerReady)
-		m.listeners.AsyncTrigger(context.TODO(), boggart.BindEventDevicesManagerReady)
+		m.listeners.AsyncTrigger(context.TODO(), boggart.BindEventManagerReady)
 	}
 }
 

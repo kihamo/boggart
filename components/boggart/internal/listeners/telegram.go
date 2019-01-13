@@ -37,38 +37,14 @@ func NewTelegramListener(messenger *telegram.Telegram, manager *manager.Manager,
 
 func (l *TelegramListener) Events() []workers.Event {
 	return []workers.Event{
-		boggart.BindEventDeviceDisabledAfterCheck,
-		boggart.BindEventDeviceEnabledAfterCheck,
-		boggart.BindEventDevicesManagerReady,
+		boggart.BindEventManagerReady,
 	}
 }
 
 func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Time, args ...interface{}) {
 	switch event {
-	case boggart.BindEventDeviceDisabledAfterCheck:
-		if !l.manager.IsReady() {
-			return
-		}
 
-		device := args[0].(boggart.Device)
-		err := args[2]
-
-		message := fmt.Sprintf("Device is down %s #%s (%s)", args[1], device.ID(), device.Description())
-		if err == nil {
-			l.sendMessage(message)
-		} else {
-			l.sendMessage(message + ". Reason: " + err.(error).Error())
-		}
-
-	case boggart.BindEventDeviceEnabledAfterCheck:
-		if !l.manager.IsReady() {
-			return
-		}
-
-		device := args[0].(boggart.Device)
-		l.sendMessage("Device is up %s #%s (%s)", args[1], device.ID(), device.Description())
-
-	case boggart.BindEventDevicesManagerReady:
+	case boggart.BindEventManagerReady:
 		l.sendMessage("Hello. I'm %s and I'm online and ready", l.application.Name())
 	}
 }

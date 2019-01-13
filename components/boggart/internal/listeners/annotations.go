@@ -35,32 +35,13 @@ func NewAnnotationsListener(annotations annotations.Component, applicationName s
 
 func (l *AnnotationsListener) Events() []workers.Event {
 	return []workers.Event{
-		boggart.BindEventDeviceDisabledAfterCheck,
-		boggart.BindEventDeviceDisabled,
-		boggart.BindEventDevicesManagerReady,
+		boggart.BindEventManagerReady,
 	}
 }
 
 func (l *AnnotationsListener) Run(_ context.Context, event workers.Event, t time.Time, args ...interface{}) {
 	switch event {
-	case boggart.BindEventDeviceDisabledAfterCheck, boggart.BindEventDeviceDisabled:
-		if !l.manager.IsReady() {
-			return
-		}
-
-		device := args[0].(boggart.Device)
-		tags := append(device.Tags(), "device disabled")
-
-		if event == boggart.BindEventDeviceDisabled {
-			tags = append(tags, "manually")
-		}
-		tags = append(tags, l.applicationName)
-
-		l.annotations.CreateInStorages(
-			annotations.NewAnnotation("Device is disabled", device.Description(), tags, &t, nil),
-			[]string{annotations.StorageGrafana})
-
-	case boggart.BindEventDevicesManagerReady:
+	case boggart.BindEventManagerReady:
 		l.annotations.CreateInStorages(
 			annotations.NewAnnotation("System is ready", "", []string{"system", l.applicationName}, &t, nil),
 			[]string{annotations.StorageGrafana})
