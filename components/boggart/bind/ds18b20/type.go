@@ -10,8 +10,12 @@ func (t Type) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 	config := c.(*Config)
 
 	device := &Bind{
-		lastValue: -1,
+		lastValue:        -1,
+		livenessInterval: config.LivenessInterval,
+		livenessTimeout:  config.LivenessTimeout,
+		updaterInterval:  config.UpdaterInterval,
 	}
+
 	device.Init()
 	device.SetSerialNumber(config.Address)
 

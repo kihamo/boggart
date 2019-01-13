@@ -14,7 +14,7 @@ func (b *Bind) Tasks() []workers.Task {
 	taskLiveness.SetTimeout(b.livenessTimeout)
 	taskLiveness.SetRepeats(-1)
 	taskLiveness.SetRepeatInterval(b.livenessInterval)
-	taskLiveness.SetName("bind-samsung-tizen-liveness")
+	taskLiveness.SetName("bind-samsung-tizen-liveness-" + b.client.Host())
 
 	return []workers.Task{
 		taskLiveness,

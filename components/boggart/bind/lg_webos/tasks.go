@@ -13,7 +13,7 @@ func (b *Bind) Tasks() []workers.Task {
 	taskLiveness.SetTimeout(b.livenessTimeout)
 	taskLiveness.SetRepeats(-1)
 	taskLiveness.SetRepeatInterval(b.livenessInterval)
-	taskLiveness.SetName("bind-lg-webos-liveness")
+	taskLiveness.SetName("bind-lg-webos-liveness-" + b.host)
 
 	return []workers.Task{
 		taskLiveness,

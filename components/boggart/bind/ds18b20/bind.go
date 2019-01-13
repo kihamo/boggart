@@ -1,6 +1,8 @@
 package ds18b20
 
 import (
+	"time"
+
 	"github.com/kihamo/boggart/components/boggart"
 )
 
@@ -9,4 +11,8 @@ type Bind struct {
 
 	boggart.DeviceBindBase
 	boggart.DeviceBindMQTT
+
+	livenessInterval time.Duration
+	livenessTimeout  time.Duration
+	updaterInterval  time.Duration
 }

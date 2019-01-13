@@ -3,9 +3,9 @@ package ds18b20
 import (
 	"context"
 	"sync/atomic"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 	"github.com/yryz/ds18b20"
@@ -15,15 +15,15 @@ func (b *Bind) Tasks() []workers.Task {
 	sn := b.SerialNumber()
 
 	taskLiveness := task.NewFunctionTask(b.taskLiveness)
-	taskLiveness.SetTimeout(time.Second * 5)
+	taskLiveness.SetTimeout(b.livenessTimeout)
 	taskLiveness.SetRepeats(-1)
-	taskLiveness.SetRepeatInterval(time.Minute)
+	taskLiveness.SetRepeatInterval(b.livenessInterval)
 	taskLiveness.SetName("bind-ds18b20-liveness-" + sn)
 
-	taskStateUpdater := task.NewFunctionTask(b.taskStateUpdater)
+	taskStateUpdater := task.NewFunctionTask(b.taskUpdater)
 	taskStateUpdater.SetRepeats(-1)
-	taskStateUpdater.SetRepeatInterval(time.Minute)
-	taskStateUpdater.SetName("bind-ds18b20-state-updater-" + sn)
+	taskStateUpdater.SetRepeatInterval(b.updaterInterval)
+	taskStateUpdater.SetName("bind-ds18b20-updater-" + sn)
 
 	return []workers.Task{
 		taskLiveness,
@@ -51,7 +51,7 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	return nil, nil
 }
 
-func (b *Bind) taskStateUpdater(ctx context.Context) (interface{}, error) {
+func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	if b.Status() != boggart.DeviceStatusOnline {
 		return nil, nil
 	}
@@ -69,7 +69,8 @@ func (b *Bind) taskStateUpdater(ctx context.Context) (interface{}, error) {
 	if prev != current {
 		atomic.StoreInt64(&b.lastValue, current)
 
-		b.MQTTPublishAsync(ctx, MQTTTopicValue.Format(sn), 0, true, value)
+		b.MQTTPublishAsync(ctx, MQTTTopicValue.Format(mqtt.NameReplace(sn)), 0, true, value)
+		metricValue.With("serial_number", sn).Set(value)
 	}
 
 	return nil, nil
