@@ -3,9 +3,7 @@ package internal
 import (
 	"io/ioutil"
 	"sync"
-	"time"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/kihamo/boggart/components/boggart"
 	_ "github.com/kihamo/boggart/components/boggart/bind/broadlink"
 	_ "github.com/kihamo/boggart/components/boggart/bind/ds18b20"
@@ -33,7 +31,6 @@ import (
 	"github.com/kihamo/shadow/components/messengers"
 	"github.com/kihamo/shadow/components/metrics"
 	"github.com/kihamo/shadow/components/workers"
-	"github.com/mitchellh/mapstructure"
 	"gopkg.in/yaml.v2"
 	"periph.io/x/periph/host"
 )
@@ -51,10 +48,10 @@ type Component struct {
 }
 
 type FileYAML struct {
-	Devices []DeviceYAML
+	Devices []BindYAML
 }
 
-type DeviceYAML struct {
+type BindYAML struct {
 	Enabled     *bool
 	Type        string
 	ID          *string
@@ -178,48 +175,20 @@ func (c *Component) initConfigFromYaml() error {
 			return err
 		}
 
-		var cfg interface{}
-
-		if prepare := kind.Config(); prepare != nil {
-			mapStructureDecoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-				Metadata: nil,
-				Result:   &prepare,
-				DecodeHook: mapstructure.ComposeDecodeHookFunc(
-					mapstructure.StringToTimeHookFunc(time.RFC3339),
-					mapstructure.StringToTimeDurationHookFunc(),
-					mapstructure.StringToIPNetHookFunc(),
-					StringToIPHookFunc(),
-					StringToMACHookFunc(),
-					StringToURLHookFunc(),
-				),
-			})
-
-			if err != nil {
-				return err
-			}
-
-			if err := mapStructureDecoder.Decode(d.Config); err != nil {
-				return err
-			}
-
-			if _, err = govalidator.ValidateStruct(prepare); err != nil {
-				return err
-			}
-
-			cfg = prepare
-		} else {
-			cfg = d.Config
+		cfg, err := boggart.ValidateBindConfig(kind, d.Config)
+		if err != nil {
+			return err
 		}
 
-		device, err := kind.CreateBind(cfg)
+		bind, err := kind.CreateBind(cfg)
 		if err != nil {
 			return err
 		}
 
 		if d.ID != nil && *d.ID != "" {
-			err = c.devicesManager.RegisterWithID(*d.ID, device, d.Type, d.Description, d.Tags, cfg)
+			_, err = c.devicesManager.RegisterWithID(*d.ID, bind, d.Type, d.Description, d.Tags, cfg)
 		} else {
-			_, err = c.devicesManager.Register(device, d.Type, d.Description, d.Tags, cfg)
+			_, err = c.devicesManager.Register(bind, d.Type, d.Description, d.Tags, cfg)
 		}
 
 		if err != nil {

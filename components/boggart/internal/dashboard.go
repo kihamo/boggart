@@ -43,7 +43,10 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 				WithMethods([]string{http.MethodGet}).
 				WithAuth(true),
 			dashboard.NewRoute("/"+c.Name()+"/bind/", bindHandler).
-				WithMethods([]string{http.MethodGet}).
+				WithMethods([]string{http.MethodGet, http.MethodPost}).
+				WithAuth(true),
+			dashboard.NewRoute("/"+c.Name()+"/bind/:id/", bindHandler).
+				WithMethods([]string{http.MethodGet, http.MethodPost}).
 				WithAuth(true),
 			dashboard.NewRoute("/"+c.Name()+"/bind/:id/:action", bindHandler).
 				WithMethods([]string{http.MethodPost}).

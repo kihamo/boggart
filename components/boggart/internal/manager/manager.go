@@ -39,13 +39,12 @@ func NewManager(mqtt mqtt.Component, workers workers.Component, listeners *manag
 	}
 }
 
-func (m *Manager) Register(bind boggart.Bind, t string, description string, tags []string, config interface{}) (string, error) {
+func (m *Manager) Register(bind boggart.Bind, t string, description string, tags []string, config interface{}) (boggart.BindItem, error) {
 	id := uuid.New()
-	err := m.RegisterWithID(id, bind, t, description, tags, config)
-	return id, err
+	return m.RegisterWithID(id, bind, t, description, tags, config)
 }
 
-func (m *Manager) RegisterWithID(id string, bind boggart.Bind, t string, description string, tags []string, config interface{}) error {
+func (m *Manager) RegisterWithID(id string, bind boggart.Bind, t string, description string, tags []string, config interface{}) (boggart.BindItem, error) {
 	if id == "" {
 		id = uuid.New()
 	}
@@ -67,7 +66,7 @@ func (m *Manager) RegisterWithID(id string, bind boggart.Bind, t string, descrip
 
 	for _, subscriber := range bindItem.MQTTSubscribers() {
 		if err := m.mqtt.SubscribeSubscriber(subscriber); err != nil {
-			return err
+			return nil, err
 		}
 	}
 
@@ -81,7 +80,7 @@ func (m *Manager) RegisterWithID(id string, bind boggart.Bind, t string, descrip
 		m.listeners.AddListener(listener)
 	}
 
-	return nil
+	return bindItem, nil
 }
 
 func (m *Manager) Unregister(id string) error {

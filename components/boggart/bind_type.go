@@ -3,6 +3,10 @@ package boggart
 import (
 	"errors"
 	"sync"
+	"time"
+
+	"github.com/asaskevich/govalidator"
+	"github.com/mitchellh/mapstructure"
 )
 
 var (
@@ -47,4 +51,39 @@ func GetBindTypes() map[string]BindType {
 type BindType interface {
 	Config() interface{}
 	CreateBind(config interface{}) (Bind, error)
+}
+
+func ValidateBindConfig(t BindType, config map[string]interface{}) (cfg interface{}, err error) {
+	if prepare := t.Config(); prepare != nil {
+		mapStructureDecoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+			Metadata: nil,
+			Result:   &prepare,
+			DecodeHook: mapstructure.ComposeDecodeHookFunc(
+				mapstructure.StringToTimeHookFunc(time.RFC3339),
+				mapstructure.StringToTimeDurationHookFunc(),
+				mapstructure.StringToIPNetHookFunc(),
+				StringToIPHookFunc(),
+				StringToMACHookFunc(),
+				StringToURLHookFunc(),
+			),
+		})
+
+		if err != nil {
+			return cfg, err
+		}
+
+		if err := mapStructureDecoder.Decode(config); err != nil {
+			return cfg, err
+		}
+
+		if _, err = govalidator.ValidateStruct(prepare); err != nil {
+			return cfg, err
+		}
+
+		cfg = prepare
+	} else {
+		cfg = config
+	}
+
+	return cfg, err
 }

@@ -23,7 +23,7 @@ type BindItem struct {
 	cacheMQTTPublishes   []mqtt.Topic
 }
 
-type deviceItemYaml struct {
+type BindItemYaml struct {
 	Type        string
 	ID          string
 	Description string
@@ -124,7 +124,7 @@ func (d *BindItem) MQTTPublishes() []mqtt.Topic {
 }
 
 func (d *BindItem) MarshalYAML() (interface{}, error) {
-	return deviceItemYaml{
+	return BindItemYaml{
 		Type:        d.Type(),
 		ID:          d.ID(),
 		Description: d.Description(),

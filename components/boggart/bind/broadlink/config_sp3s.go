@@ -14,7 +14,7 @@ type ConfigSP3S struct {
 	IP              boggart.IP           `valid:",required"`
 	MAC             boggart.HardwareAddr `valid:",required"`
 	Model           string               `valid:"in(sp3seu|sp3sus),required"`
-	UpdaterInterval time.Duration        `mapstructure:"updater_interval"`
+	UpdaterInterval time.Duration        `mapstructure:"updater_interval" yaml:"updater_interval"`
 }
 
 func (t TypeSP3S) Config() interface{} {

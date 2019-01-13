@@ -1,4 +1,4 @@
-package internal
+package boggart
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 	"net/url"
 	"reflect"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -26,14 +25,14 @@ func StringToIPHookFunc() mapstructure.DecodeHookFunc {
 			return ip, nil
 		}
 
-		if t == reflect.TypeOf(boggart.IP{}) {
+		if t == reflect.TypeOf(IP{}) {
 			ip := net.ParseIP(data.(string))
 
 			if ip == nil {
 				return net.IP{}, fmt.Errorf("failed parsing ip %v", data)
 			}
 
-			return boggart.IP{
+			return IP{
 				IP: ip,
 			}, nil
 		}
@@ -52,13 +51,13 @@ func StringToMACHookFunc() mapstructure.DecodeHookFunc {
 			return net.ParseMAC(data.(string))
 		}
 
-		if t == reflect.TypeOf(boggart.HardwareAddr{}) {
+		if t == reflect.TypeOf(HardwareAddr{}) {
 			a, err := net.ParseMAC(data.(string))
 			if err != nil {
-				return boggart.HardwareAddr{}, err
+				return HardwareAddr{}, err
 			}
 
-			return boggart.HardwareAddr{
+			return HardwareAddr{
 				HardwareAddr: a,
 			}, nil
 		}
@@ -77,13 +76,13 @@ func StringToURLHookFunc() mapstructure.DecodeHookFunc {
 			return url.Parse(data.(string))
 		}
 
-		if t == reflect.TypeOf(boggart.URL{}) {
+		if t == reflect.TypeOf(URL{}) {
 			u, err := url.Parse(data.(string))
 			if err != nil {
-				return boggart.URL{}, err
+				return URL{}, err
 			}
 
-			return boggart.URL{
+			return URL{
 				URL: *u,
 			}, nil
 		}
