@@ -53,9 +53,9 @@ $(document).ready(function () {
                     }
                 },
                 {
-                    data: 'mqtt_topics',
-                    render: function (topics) {
-                        return topics.length;
+                    data: 'mqtt_publishes',
+                    render: function (publishes) {
+                        return publishes.length;
                     }
                 },
                 {
@@ -97,16 +97,16 @@ $(document).ready(function () {
                     }
                 },
                 {
-                    data: 'mqtt_topics',
-                    render: function (topics) {
+                    data: 'mqtt_publishes',
+                    render: function (publishes) {
                         var content = '';
 
-                        for (var i in topics) {
+                        for (var i in publishes) {
                             if (i > 0) {
                                 content += '<br />';
                             }
 
-                            content += '<span class="label label-primary">' + topics[i] + '</span>';
+                            content += '<span class="label label-primary">' + publishes[i] + '</span>';
                         }
 
                         return content;

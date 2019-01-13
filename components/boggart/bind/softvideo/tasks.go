@@ -3,15 +3,10 @@ package softvideo
 import (
 	"context"
 	"sync/atomic"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
-)
-
-const (
-	DefaultUpdaterInterval = time.Hour
 )
 
 func (b *Bind) Tasks() []workers.Task {

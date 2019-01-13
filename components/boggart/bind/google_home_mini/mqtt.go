@@ -16,7 +16,7 @@ const (
 	MQTTTopicStateMute   mqtt.Topic = boggart.ComponentName + "/smart-speaker/+/state/mute"
 )
 
-func (b *Bind) MQTTTopics() []mqtt.Topic {
+func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
 		MQTTTopicVolume,
 		MQTTTopicMute,

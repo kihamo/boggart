@@ -19,7 +19,7 @@ type managerIndexHandlerDevice struct {
 	SerialNumber    string   `json:"serial_number"`
 	Status          string   `json:"status"`
 	Tasks           []string `json:"tasks"`
-	MQTTTopics      []string `json:"mqtt_topics"`
+	MQTTPublishes   []string `json:"mqtt_publishes"`
 	MQTTSubscribers []string `json:"mqtt_subscribers"`
 	Tags            []string `json:"tags"`
 	Config          string   `json:"config"`
@@ -88,7 +88,7 @@ func (h *ManagerIndexHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Requ
 				Status:          d.Bind().Status().String(),
 				Tags:            d.Tags(),
 				Tasks:           make([]string, 0, len(d.Tasks())),
-				MQTTTopics:      make([]string, 0, len(d.MQTTTopics())),
+				MQTTPublishes:   make([]string, 0, len(d.MQTTPublishes())),
 				MQTTSubscribers: make([]string, 0, len(d.MQTTSubscribers())),
 				Config:          buf.String(),
 			}
@@ -97,8 +97,8 @@ func (h *ManagerIndexHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Requ
 				item.Tasks = append(item.Tasks, task.Name())
 			}
 
-			for _, topic := range d.MQTTTopics() {
-				item.MQTTTopics = append(item.MQTTTopics, topic.String())
+			for _, topic := range d.MQTTPublishes() {
+				item.MQTTPublishes = append(item.MQTTPublishes, topic.String())
 			}
 
 			for _, topic := range d.MQTTSubscribers() {

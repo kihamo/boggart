@@ -15,7 +15,7 @@ const (
 	TopicPinSet   mqtt.Topic = boggart.ComponentName + "/gpio/+/set"
 )
 
-func (d *Bind) MQTTTopics() []mqtt.Topic {
+func (d *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
 		mqtt.Topic(TopicPinState.Format(d.pin.Number())),
 		mqtt.Topic(TopicPinSet.Format(d.pin.Number())),

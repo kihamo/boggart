@@ -17,7 +17,7 @@ const (
 	MQTTTopicInputVolume      mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/input/+/volume"
 )
 
-func (b *Bind) MQTTTopics() []mqtt.Topic {
+func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	sn := b.SerialNumber()
 
 	return []mqtt.Topic{

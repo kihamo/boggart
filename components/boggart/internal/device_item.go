@@ -20,7 +20,7 @@ type DeviceItem struct {
 	cacheTasks           []workers.Task
 	cacheListeners       []workers.ListenerWithEvents
 	cacheMQTTSubscribers []mqtt.Subscriber
-	cacheMQTTTopics      []mqtt.Topic
+	cacheMQTTPublishes   []mqtt.Topic
 }
 
 func (d *DeviceItem) Bind() boggart.DeviceBind {
@@ -95,8 +95,8 @@ func (d *DeviceItem) MQTTSubscribers() []mqtt.Subscriber {
 	return d.cacheMQTTSubscribers
 }
 
-func (d *DeviceItem) MQTTTopics() []mqtt.Topic {
-	c, ok := d.Bind().(boggart.DeviceBindHasMQTTTopics)
+func (d *DeviceItem) MQTTPublishes() []mqtt.Topic {
+	c, ok := d.Bind().(boggart.DeviceBindHasMQTTPublishes)
 	if !ok {
 		return nil
 	}
@@ -104,9 +104,9 @@ func (d *DeviceItem) MQTTTopics() []mqtt.Topic {
 	d.cacheMutex.Lock()
 	defer d.cacheMutex.Unlock()
 
-	if d.cacheMQTTTopics == nil {
-		d.cacheMQTTTopics = c.MQTTTopics()
+	if d.cacheMQTTPublishes == nil {
+		d.cacheMQTTPublishes = c.MQTTPublishes()
 	}
 
-	return d.cacheMQTTTopics
+	return d.cacheMQTTPublishes
 }

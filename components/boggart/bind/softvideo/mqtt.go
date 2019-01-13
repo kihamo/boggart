@@ -9,7 +9,7 @@ const (
 	MQTTTopicBalance mqtt.Topic = boggart.ComponentName + "/service/softvideo/+/balance"
 )
 
-func (b *Bind) MQTTTopics() []mqtt.Topic {
+func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
 		mqtt.Topic(MQTTTopicBalance.Format(b.SerialNumber())),
 	}

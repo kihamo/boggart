@@ -36,7 +36,7 @@ func (b *BindRM) SetMQTTClient(client mqtt.Component) {
 	}
 }
 
-func (b *BindRM) MQTTTopics() []mqtt.Topic {
+func (b *BindRM) MQTTPublishes() []mqtt.Topic {
 	sn := mqtt.NameReplace(b.SerialNumber())
 
 	topics := make([]mqtt.Topic, 0)

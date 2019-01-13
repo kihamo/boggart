@@ -29,8 +29,11 @@ type Bind struct {
 	mutex    sync.RWMutex
 	initOnce sync.Once
 
-	client *webostv.Tv
-	config *Config
+	client           *webostv.Tv
+	host             string
+	key              string
+	livenessInterval time.Duration
+	livenessTimeout  time.Duration
 }
 
 func (b *Bind) Client() (*webostv.Tv, error) {
@@ -42,7 +45,7 @@ func (b *Bind) Client() (*webostv.Tv, error) {
 		return c, nil
 	}
 
-	client, err := defaultDialerLGWebOS.Dial(b.config.Host)
+	client, err := defaultDialerLGWebOS.Dial(b.host)
 	if err != nil {
 		return nil, err
 	}

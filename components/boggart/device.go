@@ -50,7 +50,7 @@ type Device interface {
 	Tasks() []workers.Task
 	Listeners() []workers.ListenerWithEvents
 	MQTTSubscribers() []mqtt.Subscriber
-	MQTTTopics() []mqtt.Topic
+	MQTTPublishes() []mqtt.Topic
 }
 
 type DeviceBind interface {
@@ -78,6 +78,6 @@ type DeviceBindHasMQTTSubscribers interface {
 	MQTTSubscribers() []mqtt.Subscriber
 }
 
-type DeviceBindHasMQTTTopics interface {
-	MQTTTopics() []mqtt.Topic
+type DeviceBindHasMQTTPublishes interface {
+	MQTTPublishes() []mqtt.Topic
 }

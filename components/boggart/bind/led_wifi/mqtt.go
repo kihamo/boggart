@@ -23,7 +23,7 @@ const (
 	MQTTTopicStateSpeed    mqtt.Topic = boggart.ComponentName + "/led/+/state/speed"
 )
 
-func (b *Bind) MQTTTopics() []mqtt.Topic {
+func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	host := mqtt.NameReplace(b.bulb.Host())
 
 	return []mqtt.Topic{

@@ -40,8 +40,8 @@ msgstr "Задачи"
 msgid "MQTT subscribers"
 msgstr "MQTT подписки"
 
-msgid "MQTT topics"
-msgstr "MQTT топики"
+msgid "MQTT publishes"
+msgstr "MQTT публикации"
 
 msgid "Config"
 msgstr "Конфигурация"

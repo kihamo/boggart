@@ -25,14 +25,8 @@ const (
 	MQTTTopicStatePower         mqtt.Topic = boggart.ComponentName + "/tv/+/state/power"
 )
 
-func (b *Bind) MQTTTopics() []mqtt.Topic {
+func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
-		MQTTTopicMute,
-		MQTTTopicVolume,
-		MQTTTopicVolumeUp,
-		MQTTTopicVolumeDown,
-		MQTTTopicToast,
-		MQTTTopicPower,
 		MQTTTopicStateMute,
 		MQTTTopicStateVolume,
 		MQTTTopicStateApplication,

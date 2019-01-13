@@ -131,7 +131,7 @@ func (d *BME280Sensor) taskStateUpdater(ctx context.Context) (interface{}, error
 	return nil, nil
 }
 
-func (d *BME280Sensor) MQTTTopics() []mqtt.Topic {
+func (d *BME280Sensor) MQTTPublishes() []mqtt.Topic {
 	sn := d.SerialNumberMQTTEscaped()
 
 	return []mqtt.Topic{

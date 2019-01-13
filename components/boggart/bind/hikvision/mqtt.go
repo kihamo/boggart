@@ -35,7 +35,7 @@ const (
 	MQTTTopicStateHDDUsage             mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/usage"
 )
 
-func (d *Bind) MQTTTopics() []mqtt.Topic {
+func (d *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
 		MQTTTopicEvent,
 		MQTTTopicPTZMove,

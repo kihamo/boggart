@@ -9,7 +9,7 @@ const (
 	MQTTTopicVariable mqtt.Topic = boggart.ComponentName + "/ups/+/+"
 )
 
-func (b *Bind) MQTTTopics() []mqtt.Topic {
+func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
 		mqtt.Topic(MQTTTopicVariable.Format(b.config.UPS)),
 	}

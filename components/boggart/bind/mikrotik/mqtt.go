@@ -14,7 +14,7 @@ const (
 	MQTTTopicVPNDisconnectedLogin mqtt.Topic = boggart.ComponentName + "/router/+/vpn/clients/last/off/login"
 )
 
-func (b *Bind) MQTTTopics() []mqtt.Topic {
+func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
 		MQTTTopicWiFiMACState,
 		MQTTTopicWiFiConnectedMAC,

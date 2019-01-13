@@ -16,7 +16,7 @@ const (
 	SP3SMQTTTopicSet   mqtt.Topic = boggart.ComponentName + "/socket/+/set"
 )
 
-func (b *BindSP3S) MQTTTopics() []mqtt.Topic {
+func (b *BindSP3S) MQTTPublishes() []mqtt.Topic {
 	sn := mqtt.NameReplace(b.SerialNumber())
 
 	return []mqtt.Topic{

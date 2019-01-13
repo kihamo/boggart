@@ -2,7 +2,6 @@ package lg_webos
 
 import (
 	"context"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/go-workers"
@@ -11,9 +10,9 @@ import (
 
 func (b *Bind) Tasks() []workers.Task {
 	taskLiveness := task.NewFunctionTask(b.taskLiveness)
-	taskLiveness.SetTimeout(time.Second * 10)
+	taskLiveness.SetTimeout(b.livenessTimeout)
 	taskLiveness.SetRepeats(-1)
-	taskLiveness.SetRepeatInterval(time.Second * 30)
+	taskLiveness.SetRepeatInterval(b.livenessInterval)
 	taskLiveness.SetName("bind-lg-webos-liveness")
 
 	return []workers.Task{
@@ -28,7 +27,7 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	_, err = client.Register(b.config.Key)
+	_, err = client.Register(b.key)
 	if err != nil {
 		b.UpdateStatus(boggart.DeviceStatusOffline)
 		return nil, err

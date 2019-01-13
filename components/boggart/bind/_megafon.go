@@ -86,7 +86,7 @@ func (d *MegafonPhone) taskStateUpdater(ctx context.Context) (interface{}, error
 	return nil, nil
 }
 
-func (d *MegafonPhone) MQTTTopics() []mqtt.Topic {
+func (d *MegafonPhone) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
 		mqtt.Topic(MegafonPhoneMQTTTopicBalance.Format(d.SerialNumber())),
 	}

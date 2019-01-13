@@ -9,7 +9,7 @@ const (
 	MQTTTopicValue mqtt.Topic = boggart.ComponentName + "/meter/ds18b20/+"
 )
 
-func (b *Bind) MQTTTopics() []mqtt.Topic {
+func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
 		mqtt.Topic(MQTTTopicValue.Format(mqtt.NameReplace(b.SerialNumber()))),
 	}
