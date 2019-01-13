@@ -5,5 +5,5 @@ import (
 )
 
 func init() {
-	boggart.RegisterDeviceType("google_home:mini", Type{})
+	boggart.RegisterBindType("google_home:mini", Type{})
 }

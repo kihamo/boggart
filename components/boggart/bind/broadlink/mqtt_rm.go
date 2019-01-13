@@ -29,7 +29,7 @@ const (
 )
 
 func (b *BindRM) SetMQTTClient(client mqtt.Component) {
-	b.DeviceBindMQTT.SetMQTTClient(client)
+	b.BindMQTT.SetMQTTClient(client)
 
 	if client != nil {
 		client.Publish(context.Background(), RMMQTTTopicCaptureState.Format(mqtt.NameReplace(b.SerialNumber())), 2, true, false)
@@ -245,7 +245,7 @@ func (b *BindRM) MQTTSubscribers() []mqtt.Subscriber {
 
 func (b *BindRM) wrapMQTTSubscriber(operationName string, fn func(context.Context, mqtt.Component, mqtt.Message) error) mqtt.MessageHandler {
 	return func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-		if b.Status() != boggart.DeviceStatusOnline {
+		if b.Status() != boggart.BindStatusOnline {
 			return
 		}
 

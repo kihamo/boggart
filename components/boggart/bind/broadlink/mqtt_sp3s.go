@@ -31,7 +31,7 @@ func (b *BindSP3S) MQTTSubscribers() []mqtt.Subscriber {
 
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(SP3SMQTTTopicSet.Format(sn), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-			if b.Status() != boggart.DeviceStatusOnline {
+			if b.Status() != boggart.BindStatusOnline {
 				return
 			}
 

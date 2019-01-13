@@ -11,8 +11,8 @@ import (
 )
 
 type Bind struct {
-	boggart.DeviceBindBase
-	boggart.DeviceBindMQTT
+	boggart.BindBase
+	boggart.BindMQTT
 
 	host            string
 	username        string

@@ -32,13 +32,13 @@ func (b *Bind) Tasks() []workers.Task {
 func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	state, err := b.bulb.State(ctx)
 	if err != nil {
-		b.UpdateStatus(boggart.DeviceStatusOffline)
+		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, err
 	}
 
 	b.SetSerialNumber(strconv.FormatUint(uint64(state.DeviceName), 10))
 
-	b.UpdateStatus(boggart.DeviceStatusOnline)
+	b.UpdateStatus(boggart.BindStatusOnline)
 	host := mqtt.NameReplace(b.bulb.Host())
 
 	prevPower := atomic.LoadInt64(&b.statePower)

@@ -23,8 +23,8 @@ type Bind struct {
 	firmwareDate    int64
 	firmwareVersion string
 
-	boggart.DeviceBindBase
-	boggart.DeviceBindMQTT
+	boggart.BindBase
+	boggart.BindMQTT
 
 	mutex    sync.Mutex
 	provider *mercury.ElectricityMeter200

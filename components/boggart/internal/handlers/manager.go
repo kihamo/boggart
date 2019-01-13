@@ -4,15 +4,17 @@ import (
 	"bytes"
 	"time"
 
+	"github.com/kihamo/boggart/components/boggart/internal/manager"
+
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/go-workers"
-	"github.com/kihamo/go-workers/manager"
+	listeners "github.com/kihamo/go-workers/manager"
 	"github.com/kihamo/shadow/components/dashboard"
 	"gopkg.in/yaml.v2"
 )
 
 // easyjson:json
-type managerIndexHandlerDevice struct {
+type managerHandlerDevice struct {
 	Id              string   `json:"id"`
 	Type            string   `json:"type"`
 	Description     string   `json:"description"`
@@ -26,7 +28,7 @@ type managerIndexHandlerDevice struct {
 }
 
 // easyjson:json
-type managerIndexListener struct {
+type managerListener struct {
 	Id         string            `json:"id"`
 	Name       string            `json:"name"`
 	Events     map[string]string `json:"events"`
@@ -36,24 +38,24 @@ type managerIndexListener struct {
 }
 
 // TODO: rename to ManagerHandler
-type ManagerIndexHandler struct {
+type ManagerHandler struct {
 	dashboard.Handler
 
-	devicesManager   boggart.DevicesManager
-	listenersManager *manager.ListenersManager
+	manager          *manager.Manager
+	listenersManager *listeners.ListenersManager
 }
 
-func NewManagerIndexHandler(devicesManager boggart.DevicesManager, listenersManager *manager.ListenersManager) *ManagerIndexHandler {
-	return &ManagerIndexHandler{
-		devicesManager:   devicesManager,
+func NewManagerHandler(manager *manager.Manager, listenersManager *listeners.ListenersManager) *ManagerHandler {
+	return &ManagerHandler{
+		manager:          manager,
 		listenersManager: listenersManager,
 	}
 }
 
-func (h *ManagerIndexHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
+func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	if !r.IsAjax() {
-		h.Render(r.Context(), "manager_index", map[string]interface{}{
-			"device_types": boggart.GetDeviceTypes(),
+		h.Render(r.Context(), "manager", map[string]interface{}{
+			"device_types": boggart.GetBindTypes(),
 		})
 		return
 	}
@@ -69,18 +71,18 @@ func (h *ManagerIndexHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Requ
 
 	switch r.URL().Query().Get("entity") {
 	case "devices":
-		list := make([]managerIndexHandlerDevice, 0, 0)
+		list := make([]managerHandlerDevice, 0, 0)
 		buf := bytes.NewBuffer(nil)
 		enc := yaml.NewEncoder(buf)
 		defer enc.Close()
 
-		for _, d := range h.devicesManager.Devices() {
+		for _, d := range h.manager.BindItems() {
 			buf.Reset()
 			if err := enc.Encode(d.Config()); err != nil {
 				panic(err.Error())
 			}
 
-			item := managerIndexHandlerDevice{
+			item := managerHandlerDevice{
 				Id:              d.ID(),
 				Type:            d.Type(),
 				Description:     d.Description(),
@@ -112,10 +114,10 @@ func (h *ManagerIndexHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Requ
 		entities.Total = len(list)
 
 	case "listeners":
-		list := make([]managerIndexListener, 0, 0)
+		list := make([]managerListener, 0, 0)
 
 		for _, l := range h.listenersManager.Listeners() {
-			item := managerIndexListener{
+			item := managerListener{
 				Id:     l.Id(),
 				Name:   l.Name(),
 				Events: make(map[string]string, 0),

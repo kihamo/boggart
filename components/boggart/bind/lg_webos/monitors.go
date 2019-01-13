@@ -16,7 +16,7 @@ func (b *Bind) monitorForegroundAppInfo(s webostv.ForegroundAppInfo) error {
 
 	// TODO: cache
 	if s.AppId == "" {
-		b.UpdateStatus(boggart.DeviceStatusOffline)
+		b.UpdateStatus(boggart.BindStatusOffline)
 
 		b.MQTTPublishAsync(ctx, MQTTTopicStatePower.Format(sn), 2, true, false)
 	} else {

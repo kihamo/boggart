@@ -30,7 +30,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				b.mutex.RUnlock()
 
 				wol.MagicWake(mac, "255.255.255.255")
-			} else if b.Status() == boggart.DeviceStatusOnline {
+			} else if b.Status() == boggart.BindStatusOnline {
 				b.client.SendCommand(tv.KeyPower)
 			}
 		}),

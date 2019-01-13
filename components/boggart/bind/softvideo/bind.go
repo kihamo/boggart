@@ -11,8 +11,8 @@ import (
 type Bind struct {
 	lastValue int64
 
-	boggart.DeviceBindBase
-	boggart.DeviceBindMQTT
+	boggart.BindBase
+	boggart.BindMQTT
 
 	provider        *softvideo.Client
 	updaterInterval time.Duration

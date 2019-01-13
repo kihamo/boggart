@@ -7,5 +7,5 @@ import (
 )
 
 func (c *Component) SyslogHandler(message map[string]interface{}) {
-	c.listenersManager.AsyncTrigger(context.TODO(), boggart.DeviceEventSyslogReceive, message)
+	c.listenersManager.AsyncTrigger(context.TODO(), boggart.BindEventSyslogReceive, message)
 }

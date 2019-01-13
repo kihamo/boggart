@@ -5,5 +5,5 @@ import (
 )
 
 func init() {
-	boggart.RegisterDeviceType("ds18b20:w1", Type{})
+	boggart.RegisterBindType("ds18b20:w1", Type{})
 }

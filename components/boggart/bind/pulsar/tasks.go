@@ -24,11 +24,11 @@ func (b *Bind) Tasks() []workers.Task {
 
 func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	if _, err := b.provider.Version(); err != nil {
-		b.UpdateStatus(boggart.DeviceStatusOffline)
+		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, err
 	}
 
-	b.UpdateStatus(boggart.DeviceStatusOnline)
+	b.UpdateStatus(boggart.BindStatusOnline)
 
 	sn := b.SerialNumber()
 	snMQTT := mqtt.NameReplace(sn)

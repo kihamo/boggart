@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kihamo/boggart/components/boggart/internal/manager"
+
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/listener"
@@ -15,18 +17,18 @@ import (
 type TelegramListener struct {
 	listener.BaseListener
 
-	application    shadow.Application
-	devicesManager boggart.DevicesManager
-	messenger      *telegram.Telegram
-	chats          []string
+	application shadow.Application
+	manager     *manager.Manager
+	messenger   *telegram.Telegram
+	chats       []string
 }
 
-func NewTelegramListener(messenger *telegram.Telegram, devicesManager boggart.DevicesManager, application shadow.Application, chats []string) *TelegramListener {
+func NewTelegramListener(messenger *telegram.Telegram, manager *manager.Manager, application shadow.Application, chats []string) *TelegramListener {
 	t := &TelegramListener{
-		application:    application,
-		devicesManager: devicesManager,
-		messenger:      messenger,
-		chats:          chats,
+		application: application,
+		manager:     manager,
+		messenger:   messenger,
+		chats:       chats,
 	}
 	t.Init()
 
@@ -35,16 +37,16 @@ func NewTelegramListener(messenger *telegram.Telegram, devicesManager boggart.De
 
 func (l *TelegramListener) Events() []workers.Event {
 	return []workers.Event{
-		boggart.DeviceEventDeviceDisabledAfterCheck,
-		boggart.DeviceEventDeviceEnabledAfterCheck,
-		boggart.DeviceEventDevicesManagerReady,
+		boggart.BindEventDeviceDisabledAfterCheck,
+		boggart.BindEventDeviceEnabledAfterCheck,
+		boggart.BindEventDevicesManagerReady,
 	}
 }
 
 func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Time, args ...interface{}) {
 	switch event {
-	case boggart.DeviceEventDeviceDisabledAfterCheck:
-		if !l.devicesManager.IsReady() {
+	case boggart.BindEventDeviceDisabledAfterCheck:
+		if !l.manager.IsReady() {
 			return
 		}
 
@@ -58,15 +60,15 @@ func (l *TelegramListener) Run(_ context.Context, event workers.Event, t time.Ti
 			l.sendMessage(message + ". Reason: " + err.(error).Error())
 		}
 
-	case boggart.DeviceEventDeviceEnabledAfterCheck:
-		if !l.devicesManager.IsReady() {
+	case boggart.BindEventDeviceEnabledAfterCheck:
+		if !l.manager.IsReady() {
 			return
 		}
 
 		device := args[0].(boggart.Device)
 		l.sendMessage("Device is up %s #%s (%s)", args[1], device.ID(), device.Description())
 
-	case boggart.DeviceEventDevicesManagerReady:
+	case boggart.BindEventDevicesManagerReady:
 		l.sendMessage("Hello. I'm %s and I'm online and ready", l.application.Name())
 	}
 }

@@ -38,7 +38,7 @@ func NewListener(bind *Bind) *Listener {
 
 func (l *Listener) Events() []workers.Event {
 	return []workers.Event{
-		boggart.DeviceEventSyslogReceive,
+		boggart.BindEventSyslogReceive,
 	}
 }
 
@@ -48,7 +48,7 @@ func (l *Listener) Name() string {
 
 func (l *Listener) Run(ctx context.Context, event workers.Event, t time.Time, args ...interface{}) {
 	switch event {
-	case boggart.DeviceEventSyslogReceive:
+	case boggart.BindEventSyslogReceive:
 		message := args[0].(map[string]interface{})
 
 		client, ok := message["client"]

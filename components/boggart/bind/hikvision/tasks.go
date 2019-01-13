@@ -45,12 +45,12 @@ func (b *Bind) Tasks() []workers.Task {
 func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	deviceInfo, err := b.isapi.SystemDeviceInfo(ctx)
 	if err != nil {
-		b.UpdateStatus(boggart.DeviceStatusOffline)
+		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, err
 	}
 
 	if deviceInfo.SerialNumber == "" {
-		b.UpdateStatus(boggart.DeviceStatusOffline)
+		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, errors.New("device returns empty serial number")
 	}
 
@@ -81,13 +81,13 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		b.MQTTPublishAsync(ctx, MQTTTopicStateFirmwareReleasedDate.Format(deviceInfo.SerialNumber), 0, true, deviceInfo.FirmwareReleasedDate)
 	}
 
-	b.UpdateStatus(boggart.DeviceStatusOnline)
+	b.UpdateStatus(boggart.BindStatusOnline)
 
 	return nil, nil
 }
 
 func (b *Bind) taskPTZ(ctx context.Context) (interface{}, error, bool) {
-	if b.Status() != boggart.DeviceStatusOnline {
+	if b.Status() != boggart.BindStatusOnline {
 		return nil, nil, false
 	}
 
@@ -121,7 +121,7 @@ func (b *Bind) taskPTZ(ctx context.Context) (interface{}, error, bool) {
 }
 
 func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
-	if b.Status() != boggart.DeviceStatusOnline {
+	if b.Status() != boggart.BindStatusOnline {
 		return nil, nil
 	}
 

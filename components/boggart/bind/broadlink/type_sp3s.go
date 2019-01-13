@@ -10,7 +10,7 @@ import (
 
 type TypeSP3S struct{}
 
-func (t TypeSP3S) CreateBind(c interface{}) (boggart.DeviceBind, error) {
+func (t TypeSP3S) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*ConfigSP3S)
 
 	localAddr, err := broadlink.LocalAddr()

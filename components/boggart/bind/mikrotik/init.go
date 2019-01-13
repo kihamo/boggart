@@ -5,5 +5,5 @@ import (
 )
 
 func init() {
-	boggart.RegisterDeviceType("mikrotik", Type{})
+	boggart.RegisterBindType("mikrotik", Type{})
 }

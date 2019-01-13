@@ -4,33 +4,32 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/event"
-	"github.com/kihamo/snitch"
 )
 
 var (
-	DeviceEventSyslogReceive            = event.NewBaseEvent("SyslogReceive")
-	DeviceEventDevicesManagerReady      = event.NewBaseEvent("DevicesManagerReady")
-	DeviceEventDeviceRegister           = event.NewBaseEvent("DeviceRegister")
-	DeviceEventDeviceDisabledAfterCheck = event.NewBaseEvent("DeviceDisabledAfterCheck")
-	DeviceEventDeviceEnabledAfterCheck  = event.NewBaseEvent("DeviceEnabledAfterCheck")
-	DeviceEventDeviceEnabled            = event.NewBaseEvent("DeviceEnabled")
-	DeviceEventDeviceDisabled           = event.NewBaseEvent("DeviceDisabled")
+	BindEventSyslogReceive            = event.NewBaseEvent("SyslogReceive")
+	BindEventDevicesManagerReady      = event.NewBaseEvent("DevicesManagerReady")
+	BindEventDeviceRegister           = event.NewBaseEvent("DeviceRegister")
+	BindEventDeviceDisabledAfterCheck = event.NewBaseEvent("DeviceDisabledAfterCheck")
+	BindEventDeviceEnabledAfterCheck  = event.NewBaseEvent("DeviceEnabledAfterCheck")
+	BindEventDeviceEnabled            = event.NewBaseEvent("DeviceEnabled")
+	BindEventDeviceDisabled           = event.NewBaseEvent("DeviceDisabled")
 )
 
-type DeviceStatus uint64
+type BindStatus uint64
 
 const (
-	DeviceStatusUnknown DeviceStatus = iota
-	DeviceStatusUninitialized
-	DeviceStatusInitializing
-	DeviceStatusOnline
-	DeviceStatusOffline
-	DeviceStatusRemoving
-	DeviceStatusRemoved
+	BindStatusUnknown BindStatus = iota
+	BindStatusUninitialized
+	BindStatusInitializing
+	BindStatusOnline
+	BindStatusOffline
+	BindStatusRemoving
+	BindStatusRemoved
 )
 
 type Device interface {
-	Bind() DeviceBind
+	Bind() Bind
 	ID() string
 	Type() string
 	Description() string
@@ -42,52 +41,31 @@ type Device interface {
 	MQTTPublishes() []mqtt.Topic
 }
 
-type DeviceList []Device
-
-type DeviceBind interface {
-	Status() DeviceStatus
+type Bind interface {
+	Status() BindStatus
 	SerialNumber() string
 }
 
-type DeviceBindCloser interface {
+type BindCloser interface {
 	Close() error
 }
 
-type DeviceBindHasTasks interface {
+type BindHasTasks interface {
 	Tasks() []workers.Task
 }
 
-type DeviceBindHasListeners interface {
+type BindHasListeners interface {
 	Listeners() []workers.ListenerWithEvents
 }
 
-type DeviceBindHasMQTTClient interface {
+type BindHasMQTTClient interface {
 	SetMQTTClient(mqtt.Component)
 }
 
-type DeviceBindHasMQTTSubscribers interface {
+type BindHasMQTTSubscribers interface {
 	MQTTSubscribers() []mqtt.Subscriber
 }
 
-type DeviceBindHasMQTTPublishes interface {
+type BindHasMQTTPublishes interface {
 	MQTTPublishes() []mqtt.Topic
-}
-
-type DevicesManager interface {
-	snitch.Collector
-
-	Register(device DeviceBind, t string, description string, tags []string, config interface{}) (string, error)
-	RegisterWithID(id string, bind DeviceBind, t string, description string, tags []string, config interface{}) error
-	Unregister(id string) error
-	Device(id string) Device
-	Devices() DeviceList
-	IsReady() bool
-}
-
-func (l DeviceList) MarshalYAML() (interface{}, error) {
-	return struct {
-		Devices []Device
-	}{
-		Devices: l,
-	}, nil
 }

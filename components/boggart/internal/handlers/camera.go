@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kihamo/boggart/components/boggart/internal/manager"
+
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/bind/hikvision"
 	"github.com/kihamo/shadow/components/dashboard"
@@ -23,7 +25,7 @@ const (
 type CameraHandler struct {
 	dashboard.Handler
 
-	DevicesManager boggart.DevicesManager
+	DevicesManager *manager.Manager
 	Messengers     messengers.Component
 }
 
@@ -44,13 +46,13 @@ func (h *CameraHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		return
 	}
 
-	device := h.DevicesManager.Device(id)
-	if device == nil {
+	bindItem := h.DevicesManager.Bind(id)
+	if bindItem == nil {
 		h.NotFound(w, r)
 		return
 	}
 
-	bind, ok := device.Bind().(*hikvision.Bind)
+	bind, ok := bindItem.Bind().(*hikvision.Bind)
 	if !ok {
 		h.NotFound(w, r)
 		return
@@ -79,7 +81,7 @@ func (h *CameraHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 		buf := &bytes.Buffer{}
 		if err := bind.Snapshot(r.Context(), ch, buf); err != nil {
-			h.Logger().Warn("Failed get snapshot", "error", err, "device", device.Description())
+			h.Logger().Warn("Failed get snapshot", "error", err, "device", bindItem.Description())
 
 			h.NotFound(w, r)
 			return
@@ -88,7 +90,7 @@ func (h *CameraHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		w.WriteHeader(http.StatusNoContent)
 
 		go func(query url.Values) {
-			description := fmt.Sprintf("%s at %s", device.Description(), time.Now().Format(time.RFC1123Z))
+			description := fmt.Sprintf("%s at %s", bindItem.Description(), time.Now().Format(time.RFC1123Z))
 
 			var mime string
 

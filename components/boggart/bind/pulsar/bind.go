@@ -24,8 +24,8 @@ type Bind struct {
 	input3           uint64
 	input4           uint64
 
-	boggart.DeviceBindBase
-	boggart.DeviceBindMQTT
+	boggart.BindBase
+	boggart.BindMQTT
 
 	config   *Config
 	provider *pulsar.HeatMeter

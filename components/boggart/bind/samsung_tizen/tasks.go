@@ -24,11 +24,11 @@ func (b *Bind) Tasks() []workers.Task {
 func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	info, err := b.client.Device(ctx)
 	if err != nil {
-		b.UpdateStatus(boggart.DeviceStatusOffline)
+		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, nil
 	}
 
-	if b.Status() == boggart.DeviceStatusOnline {
+	if b.Status() == boggart.BindStatusOnline {
 		return nil, nil
 	}
 
@@ -48,7 +48,7 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		b.MQTTPublishAsync(ctx, MQTTTopicDeviceID.Format(sn), 0, false, info.Device.ID)
 		b.MQTTPublishAsync(ctx, MQTTTopicDeviceModelName.Format(sn), 0, false, info.Device.Name)
 	}
-	b.UpdateStatus(boggart.DeviceStatusOnline)
+	b.UpdateStatus(boggart.BindStatusOnline)
 
 	return nil, nil
 }

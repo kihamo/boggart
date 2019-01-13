@@ -19,8 +19,8 @@ const (
 type MegafonPhone struct {
 	lastValue int64
 
-	boggart.DeviceBindBase
-	boggart.DeviceBindMQTT
+	boggart.BindBase
+	boggart.BindMQTT
 
 	provider *mobile.Megafon
 	interval time.Duration
@@ -61,11 +61,11 @@ func (d *MegafonPhone) Tasks() []workers.Task {
 func (d *MegafonPhone) taskStateUpdater(ctx context.Context) (interface{}, error) {
 	value, err := d.provider.Balance(ctx)
 	if err != nil {
-		d.UpdateStatus(boggart.DeviceStatusOffline)
+		d.UpdateStatus(boggart.BindStatusOffline)
 		return nil, err
 	}
 
-	d.UpdateStatus(boggart.DeviceStatusOnline)
+	d.UpdateStatus(boggart.BindStatusOnline)
 
 	current := int64(value * 100)
 	prev := atomic.LoadInt64(&d.lastValue)

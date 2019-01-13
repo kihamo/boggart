@@ -9,8 +9,8 @@ import (
 )
 
 type BindRM struct {
-	boggart.DeviceBindBase
-	boggart.DeviceBindMQTT
+	boggart.BindBase
+	boggart.BindMQTT
 
 	provider        interface{}
 	mac             net.HardwareAddr

@@ -13,8 +13,8 @@ type Bind struct {
 	stateSpeed uint64
 	stateColor uint64
 
-	boggart.DeviceBindBase
-	boggart.DeviceBindMQTT
+	boggart.BindBase
+	boggart.BindMQTT
 
 	bulb *wifiled.Bulb
 }

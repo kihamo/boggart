@@ -101,7 +101,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			if bytes.Equal(message.Payload(), []byte(`1`)) {
 				wol.MagicWake(b.SerialNumber(), "255.255.255.255")
-			} else if b.Status() == boggart.DeviceStatusOnline {
+			} else if b.Status() == boggart.BindStatusOnline {
 				if client, err := b.Client(); err == nil {
 					client.SystemTurnOff()
 				}

@@ -5,5 +5,5 @@ import (
 )
 
 func init() {
-	boggart.RegisterDeviceType("gpio", Type{})
+	boggart.RegisterBindType("gpio", Type{})
 }

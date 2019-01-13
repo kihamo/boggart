@@ -23,8 +23,8 @@ var defaultDialerLGWebOS = webostv.Dialer{
 }
 
 type Bind struct {
-	boggart.DeviceBindBase
-	boggart.DeviceBindMQTT
+	boggart.BindBase
+	boggart.BindMQTT
 
 	mutex    sync.RWMutex
 	initOnce sync.Once
@@ -59,12 +59,12 @@ func (b *Bind) Client() (*webostv.Tv, error) {
 	return client, nil
 }
 
-func (b *Bind) UpdateStatus(status boggart.DeviceStatus) {
-	if status == boggart.DeviceStatusOffline && status != b.Status() {
+func (b *Bind) UpdateStatus(status boggart.BindStatus) {
+	if status == boggart.BindStatusOffline && status != b.Status() {
 		b.mutex.Lock()
 		b.client = nil
 		b.mutex.Unlock()
 	}
 
-	b.DeviceBindBase.UpdateStatus(status)
+	b.BindBase.UpdateStatus(status)
 }

@@ -1,0 +1,48 @@
+{{ define "content" }}
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>{{ i18n "Bind" . }}</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+            {{ if .error }}
+                <div class="alert alert-danger alert-dismissable">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                {{ .error }}
+                </div>
+            {{ end }}
+
+            {{ if .message }}
+                <div class="alert alert-info alert-dismissable">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                {{ .message }}
+                </div>
+            {{ end }}
+
+                <form class="form-horizontal form-label-left" role="form" method="post" id="send-yaml" action="/{{ .ComponentName }}/bind/" novalidate>
+                    <div class="item form-group">
+                        <label for="yaml" class="control-label col-md-3 col-sm-3 col-xs-12">
+                        {{ i18n "YAML" . }} <span class="required">*</span>
+                        </label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <textarea class="form-control resizable_textarea" rows="10" name="yaml" id="yaml" required="required">{{ .yaml }}</textarea>
+                        </div>
+                    </div>
+                    <div class="ln_solid"></div>
+                    <div class="form-group">
+                        <div class="col-md-6 col-md-offset-3">
+                            <button id="send" type="submit" class="btn btn-success">{{ i18n "Create" . }}</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
+
+{{ define "js" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/validator/js/validator.min.js" false) }}
+{{ end }}

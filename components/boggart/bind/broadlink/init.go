@@ -5,6 +5,6 @@ import (
 )
 
 func init() {
-	boggart.RegisterDeviceType("broadlink:rm", TypeRM{})
-	boggart.RegisterDeviceType("broadlink:sp3s", TypeSP3S{})
+	boggart.RegisterBindType("broadlink:rm", TypeRM{})
+	boggart.RegisterBindType("broadlink:sp3s", TypeSP3S{})
 }

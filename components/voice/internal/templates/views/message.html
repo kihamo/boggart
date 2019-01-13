@@ -21,7 +21,7 @@
                 </div>
                 {{ end }}
 
-                <form class="form-horizontal form-label-left" role="form" method="post" id="send-mail" action="/{{ .ComponentName }}/message/" novalidate>
+                <form class="form-horizontal form-label-left" role="form" method="post" id="send-message" action="/{{ .ComponentName }}/message/" novalidate>
                     <div class="item form-group">
                         <label for="player" class="control-label col-md-3 col-sm-3 col-xs-12">
                         {{ i18n "Player" . }} <span class="required">*</span>

@@ -24,11 +24,11 @@ func (b *BindSP3S) Tasks() []workers.Task {
 func (b *BindSP3S) taskStateUpdater(ctx context.Context) (interface{}, error) {
 	state, err := b.State()
 	if err != nil {
-		b.UpdateStatus(boggart.DeviceStatusOffline)
+		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, err
 	}
 
-	b.UpdateStatus(boggart.DeviceStatusOnline)
+	b.UpdateStatus(boggart.BindStatusOnline)
 
 	serialNumber := b.SerialNumber()
 	serialNumberMQTT := mqtt.NameReplace(serialNumber)

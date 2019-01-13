@@ -10,7 +10,7 @@ import (
 
 type TypeRM struct{}
 
-func (t TypeRM) CreateBind(c interface{}) (boggart.DeviceBind, error) {
+func (t TypeRM) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*ConfigRM)
 
 	localAddr, err := broadlink.LocalAddr()
@@ -46,7 +46,7 @@ func (t TypeRM) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 	device.SetSerialNumber(config.MAC.String())
 
 	// TODO: check open (ping) UDP port
-	device.UpdateStatus(boggart.DeviceStatusOnline)
+	device.UpdateStatus(boggart.BindStatusOnline)
 
 	return device, nil
 }

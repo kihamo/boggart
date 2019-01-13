@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/internal/manager"
 	"github.com/kihamo/shadow/components/dashboard"
 	"gopkg.in/yaml.v2"
 )
@@ -14,12 +14,12 @@ import (
 type ConfigHandler struct {
 	dashboard.Handler
 
-	devicesManager boggart.DevicesManager
+	manager *manager.Manager
 }
 
-func NewConfigHandler(devicesManager boggart.DevicesManager) *ConfigHandler {
+func NewConfigHandler(manager *manager.Manager) *ConfigHandler {
 	return &ConfigHandler{
-		devicesManager: devicesManager,
+		manager: manager,
 	}
 }
 
@@ -33,7 +33,7 @@ func (h *ConfigHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	enc := yaml.NewEncoder(buf)
 	defer enc.Close()
 
-	if err := enc.Encode(h.devicesManager.Devices()); err != nil {
+	if err := enc.Encode(h.manager.BindItems()); err != nil {
 		panic(err.Error())
 	}
 

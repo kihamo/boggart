@@ -25,12 +25,12 @@ func (b *Bind) Tasks() []workers.Task {
 func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	currentT1, currentT2, currentT3, currentT4, err := b.provider.PowerCounters()
 	if err != nil {
-		b.UpdateStatus(boggart.DeviceStatusOffline)
+		b.UpdateStatus(boggart.BindStatusOffline)
 		// TODO: log
 		return nil, err
 	}
 
-	b.UpdateStatus(boggart.DeviceStatusOnline)
+	b.UpdateStatus(boggart.BindStatusOnline)
 
 	sn := b.SerialNumber()
 	snMQTT := mqtt.NameReplace(sn)

@@ -33,23 +33,23 @@ func (l *LoggingListener) Events() []workers.Event {
 
 func (l *LoggingListener) Run(_ context.Context, event workers.Event, t time.Time, args ...interface{}) {
 	switch event {
-	case boggart.DeviceEventDeviceRegister:
+	case boggart.BindEventDeviceRegister:
 		l.logger.Debug("Register device",
 			"device.id", args[0].(boggart.Device).ID(),
 			"device_manager.id", args[1],
 		)
 
-	case boggart.DeviceEventDeviceEnabled:
+	case boggart.BindEventDeviceEnabled:
 		l.logger.Info("Device has been enabled manually",
 			"device.id", args[0].(boggart.Device).ID(),
 		)
 
-	case boggart.DeviceEventDeviceDisabled:
+	case boggart.BindEventDeviceDisabled:
 		l.logger.Info("Device has been disabled manually",
 			"device.id", args[0].(boggart.Device).ID(),
 		)
 
-	case boggart.DeviceEventDeviceDisabledAfterCheck:
+	case boggart.BindEventDeviceDisabledAfterCheck:
 		err := args[2]
 
 		if err == nil {
@@ -65,13 +65,13 @@ func (l *LoggingListener) Run(_ context.Context, event workers.Event, t time.Tim
 			)
 		}
 
-	case boggart.DeviceEventDeviceEnabledAfterCheck:
+	case boggart.BindEventDeviceEnabledAfterCheck:
 		l.logger.Info("Device has been enabled because the ping returns true",
 			"device.id", args[0].(boggart.Device).ID(),
 			"device.key", args[1],
 		)
 
-	case boggart.DeviceEventSyslogReceive:
+	case boggart.BindEventSyslogReceive:
 		fields := make([]interface{}, 0)
 		record := args[0].(map[string]interface{})
 
@@ -81,7 +81,7 @@ func (l *LoggingListener) Run(_ context.Context, event workers.Event, t time.Tim
 
 		l.logger.Debug("Syslog message receive", fields...)
 
-	case boggart.DeviceEventDevicesManagerReady:
+	case boggart.BindEventDevicesManagerReady:
 		l.logger.Debug("Device manager is ready")
 
 	default:

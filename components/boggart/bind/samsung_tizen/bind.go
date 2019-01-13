@@ -9,8 +9,8 @@ import (
 )
 
 type Bind struct {
-	boggart.DeviceBindBase
-	boggart.DeviceBindMQTT
+	boggart.BindBase
+	boggart.BindMQTT
 
 	mutex    sync.RWMutex
 	initOnce sync.Once

@@ -20,9 +20,10 @@ import (
 	_ "github.com/kihamo/boggart/components/boggart/bind/pulsar"
 	_ "github.com/kihamo/boggart/components/boggart/bind/samsung_tizen"
 	_ "github.com/kihamo/boggart/components/boggart/bind/softvideo"
+	"github.com/kihamo/boggart/components/boggart/internal/manager"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/components/syslog"
-	"github.com/kihamo/go-workers/manager"
+	w "github.com/kihamo/go-workers/manager"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/annotations"
 	"github.com/kihamo/shadow/components/config"
@@ -45,8 +46,8 @@ type Component struct {
 	logger      logging.Logger
 	routes      []dashboard.Route
 
-	listenersManager *manager.ListenersManager
-	devicesManager   *DevicesManager
+	listenersManager *w.ListenersManager
+	devicesManager   *manager.Manager
 }
 
 type FileYAML struct {
@@ -111,7 +112,7 @@ func (c *Component) Dependencies() []shadow.Dependency {
 
 func (c *Component) Init(a shadow.Application) error {
 	c.application = a
-	c.listenersManager = manager.NewListenersManager()
+	c.listenersManager = w.NewListenersManager()
 
 	return nil
 }
@@ -120,7 +121,7 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 	<-a.ReadyComponent(mqtt.ComponentName)
 	<-a.ReadyComponent(workers.ComponentName)
 
-	c.devicesManager = NewDevicesManager(
+	c.devicesManager = manager.NewManager(
 		a.GetComponent(mqtt.ComponentName).(mqtt.Component),
 		a.GetComponent(workers.ComponentName).(workers.Component),
 		c.listenersManager)
@@ -172,7 +173,7 @@ func (c *Component) initConfigFromYaml() error {
 			continue
 		}
 
-		kind, err := boggart.GetDeviceType(d.Type)
+		kind, err := boggart.GetBindType(d.Type)
 		if err != nil {
 			return err
 		}

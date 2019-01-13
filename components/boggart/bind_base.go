@@ -12,50 +12,50 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
-type DeviceBindBase struct {
+type BindBase struct {
 	mutex sync.RWMutex
 
 	serialNumber string
 	status       uint64
 }
 
-func (d *DeviceBindBase) Init() {
-	d.UpdateStatus(DeviceStatusInitializing)
+func (d *BindBase) Init() {
+	d.UpdateStatus(BindStatusInitializing)
 }
 
-func (d *DeviceBindBase) Status() DeviceStatus {
-	return DeviceStatus(atomic.LoadUint64(&d.status))
+func (d *BindBase) Status() BindStatus {
+	return BindStatus(atomic.LoadUint64(&d.status))
 }
 
-func (d *DeviceBindBase) UpdateStatus(status DeviceStatus) {
+func (d *BindBase) UpdateStatus(status BindStatus) {
 	atomic.StoreUint64(&d.status, uint64(status))
 }
 
-func (d *DeviceBindBase) SerialNumber() string {
+func (d *BindBase) SerialNumber() string {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 
 	return d.serialNumber
 }
 
-func (d *DeviceBindBase) SetSerialNumber(serialNumber string) {
+func (d *BindBase) SetSerialNumber(serialNumber string) {
 	d.mutex.Lock()
 	d.serialNumber = serialNumber
 	d.mutex.Unlock()
 }
 
-type DeviceBindMQTT struct {
+type BindMQTT struct {
 	mutex  sync.RWMutex
 	client mqtt.Component
 }
 
-func (d *DeviceBindMQTT) SetMQTTClient(client mqtt.Component) {
+func (d *BindMQTT) SetMQTTClient(client mqtt.Component) {
 	d.mutex.Lock()
 	d.client = client
 	d.mutex.Unlock()
 }
 
-func (d *DeviceBindMQTT) MQTTPublish(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
+func (d *BindMQTT) MQTTPublish(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 
@@ -107,13 +107,13 @@ func (d *DeviceBindMQTT) MQTTPublish(ctx context.Context, topic string, qos byte
 	return d.client.Publish(ctx, topic, qos, retained, payload)
 }
 
-func (d *DeviceBindMQTT) MQTTPublishAsync(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) {
+func (d *BindMQTT) MQTTPublishAsync(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) {
 	go func() {
 		d.MQTTPublish(ctx, topic, qos, retained, payload)
 	}()
 }
 
-func CheckSerialNumberInMQTTTopic(bind DeviceBind, topic string, offset int) bool {
+func CheckSerialNumberInMQTTTopic(bind Bind, topic string, offset int) bool {
 	sn := mqtt.NameReplace(bind.SerialNumber())
 
 	if sn == "" {
@@ -128,9 +128,9 @@ func CheckSerialNumberInMQTTTopic(bind DeviceBind, topic string, offset int) boo
 	return routes[len(routes)-offset] == sn
 }
 
-func WrapMQTTSubscribeDeviceIsOnline(bind DeviceBind, callback mqtt.MessageHandler) mqtt.MessageHandler {
+func WrapMQTTSubscribeDeviceIsOnline(bind Bind, callback mqtt.MessageHandler) mqtt.MessageHandler {
 	return func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-		if bind.Status() == DeviceStatusOnline {
+		if bind.Status() == BindStatusOnline {
 			callback(ctx, client, message)
 		}
 	}

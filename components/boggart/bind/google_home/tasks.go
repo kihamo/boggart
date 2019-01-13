@@ -29,11 +29,11 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		WithOptions(home.EurekaInfoOptionDetail.Value()).
 		WithParams(home.EurekaInfoParamDeviceInfo.Value()))
 	if err != nil {
-		b.UpdateStatus(boggart.DeviceStatusOffline)
+		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, err
 	}
 
-	if b.Status() == boggart.DeviceStatusOnline {
+	if b.Status() == boggart.BindStatusOnline {
 		return nil, nil
 	}
 
@@ -41,6 +41,6 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		b.SetSerialNumber(response.Payload.DeviceInfo.MacAddress)
 	}
 
-	b.UpdateStatus(boggart.DeviceStatusOnline)
+	b.UpdateStatus(boggart.BindStatusOnline)
 	return nil, nil
 }

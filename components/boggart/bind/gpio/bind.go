@@ -17,8 +17,8 @@ const (
 )
 
 type Bind struct {
-	boggart.DeviceBindBase
-	boggart.DeviceBindMQTT
+	boggart.BindBase
+	boggart.BindMQTT
 
 	pin  pin.Pin
 	mode Mode

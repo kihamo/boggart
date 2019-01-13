@@ -12,8 +12,8 @@ type BindSP3S struct {
 	state int64
 	power int64
 
-	boggart.DeviceBindBase
-	boggart.DeviceBindMQTT
+	boggart.BindBase
+	boggart.BindMQTT
 
 	provider        *broadlink.SP3S
 	updaterInterval time.Duration

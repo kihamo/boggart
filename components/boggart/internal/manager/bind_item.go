@@ -1,4 +1,4 @@
-package internal
+package manager
 
 import (
 	"sync"
@@ -8,8 +8,8 @@ import (
 	"github.com/kihamo/go-workers"
 )
 
-type DeviceItem struct {
-	bind        boggart.DeviceBind
+type BindItem struct {
+	bind        boggart.Bind
 	id          string
 	t           string
 	description string
@@ -31,32 +31,36 @@ type deviceItemYaml struct {
 	Config      interface{}
 }
 
-func (d *DeviceItem) Bind() boggart.DeviceBind {
+func (d *BindItem) Bind() boggart.Bind {
 	return d.bind
 }
 
-func (d *DeviceItem) ID() string {
+func (d *BindItem) ID() string {
 	return d.id
 }
 
-func (d *DeviceItem) Type() string {
+func (d *BindItem) SetID(id string) {
+	d.id = id
+}
+
+func (d *BindItem) Type() string {
 	return d.t
 }
 
-func (d *DeviceItem) Description() string {
+func (d *BindItem) Description() string {
 	return d.description
 }
 
-func (d *DeviceItem) Tags() []string {
+func (d *BindItem) Tags() []string {
 	return d.tags
 }
 
-func (d *DeviceItem) Config() interface{} {
+func (d *BindItem) Config() interface{} {
 	return d.config
 }
 
-func (d *DeviceItem) Tasks() []workers.Task {
-	c, ok := d.Bind().(boggart.DeviceBindHasTasks)
+func (d *BindItem) Tasks() []workers.Task {
+	c, ok := d.Bind().(boggart.BindHasTasks)
 	if !ok {
 		return nil
 	}
@@ -71,8 +75,8 @@ func (d *DeviceItem) Tasks() []workers.Task {
 	return d.cacheTasks
 }
 
-func (d *DeviceItem) Listeners() []workers.ListenerWithEvents {
-	c, ok := d.Bind().(boggart.DeviceBindHasListeners)
+func (d *BindItem) Listeners() []workers.ListenerWithEvents {
+	c, ok := d.Bind().(boggart.BindHasListeners)
 	if !ok {
 		return nil
 	}
@@ -87,8 +91,8 @@ func (d *DeviceItem) Listeners() []workers.ListenerWithEvents {
 	return d.cacheListeners
 }
 
-func (d *DeviceItem) MQTTSubscribers() []mqtt.Subscriber {
-	c, ok := d.Bind().(boggart.DeviceBindHasMQTTSubscribers)
+func (d *BindItem) MQTTSubscribers() []mqtt.Subscriber {
+	c, ok := d.Bind().(boggart.BindHasMQTTSubscribers)
 	if !ok {
 		return nil
 	}
@@ -103,8 +107,8 @@ func (d *DeviceItem) MQTTSubscribers() []mqtt.Subscriber {
 	return d.cacheMQTTSubscribers
 }
 
-func (d *DeviceItem) MQTTPublishes() []mqtt.Topic {
-	c, ok := d.Bind().(boggart.DeviceBindHasMQTTPublishes)
+func (d *BindItem) MQTTPublishes() []mqtt.Topic {
+	c, ok := d.Bind().(boggart.BindHasMQTTPublishes)
 	if !ok {
 		return nil
 	}
@@ -119,7 +123,7 @@ func (d *DeviceItem) MQTTPublishes() []mqtt.Topic {
 	return d.cacheMQTTPublishes
 }
 
-func (d *DeviceItem) MarshalYAML() (interface{}, error) {
+func (d *BindItem) MarshalYAML() (interface{}, error) {
 	return deviceItemYaml{
 		Type:        d.Type(),
 		ID:          d.ID(),

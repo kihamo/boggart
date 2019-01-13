@@ -5,5 +5,5 @@ import (
 )
 
 func init() {
-	boggart.RegisterDeviceType("led_wifi", Type{})
+	boggart.RegisterBindType("led_wifi", Type{})
 }

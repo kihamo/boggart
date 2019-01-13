@@ -5,5 +5,5 @@ import (
 )
 
 func init() {
-	boggart.RegisterDeviceType("hikvision", Type{})
+	boggart.RegisterBindType("hikvision", Type{})
 }

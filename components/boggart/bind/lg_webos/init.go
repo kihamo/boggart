@@ -5,5 +5,5 @@ import (
 )
 
 func init() {
-	boggart.RegisterDeviceType("lg_webos", Type{})
+	boggart.RegisterBindType("lg_webos", Type{})
 }

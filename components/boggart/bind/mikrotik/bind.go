@@ -16,8 +16,8 @@ var (
 )
 
 type Bind struct {
-	boggart.DeviceBindBase
-	boggart.DeviceBindMQTT
+	boggart.BindBase
+	boggart.BindMQTT
 
 	provider     *mikrotik.Client
 	host         string

@@ -23,31 +23,31 @@ func (b *Bind) Tasks() []workers.Task {
 func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	client, err := b.Client()
 	if err != nil {
-		b.UpdateStatus(boggart.DeviceStatusOffline)
+		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, err
 	}
 
 	_, err = client.Register(b.key)
 	if err != nil {
-		b.UpdateStatus(boggart.DeviceStatusOffline)
+		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, err
 	}
 
-	if b.Status() == boggart.DeviceStatusOnline {
+	if b.Status() == boggart.BindStatusOnline {
 		return nil, nil
 	}
 
 	if b.SerialNumber() == "" {
 		deviceInfo, err := client.GetCurrentSWInformation()
 		if err != nil {
-			b.UpdateStatus(boggart.DeviceStatusOffline)
+			b.UpdateStatus(boggart.BindStatusOffline)
 			return nil, err
 		}
 
 		b.SetSerialNumber(deviceInfo.DeviceId)
 	}
 
-	b.UpdateStatus(boggart.DeviceStatusOnline)
+	b.UpdateStatus(boggart.BindStatusOnline)
 
 	// set tv subscribers
 	// TODO: close if OFFLINE

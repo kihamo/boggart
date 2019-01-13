@@ -34,7 +34,7 @@ func (b *Bind) Tasks() []workers.Task {
 func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	devices, err := ds18b20.Sensors()
 	if err != nil {
-		b.UpdateStatus(boggart.DeviceStatusOffline)
+		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, err
 	}
 
@@ -42,17 +42,17 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 
 	for _, device := range devices {
 		if device == sn {
-			b.UpdateStatus(boggart.DeviceStatusOnline)
+			b.UpdateStatus(boggart.BindStatusOnline)
 			return nil, nil
 		}
 	}
 
-	b.UpdateStatus(boggart.DeviceStatusOffline)
+	b.UpdateStatus(boggart.BindStatusOffline)
 	return nil, nil
 }
 
 func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
-	if b.Status() != boggart.DeviceStatusOnline {
+	if b.Status() != boggart.BindStatusOnline {
 		return nil, nil
 	}
 

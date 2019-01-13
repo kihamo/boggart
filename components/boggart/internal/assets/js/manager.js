@@ -194,7 +194,7 @@ $(document).ready(function () {
     window.deviceUnregister = function(deviceId) {
         $.ajax({
             type: 'POST',
-            url: '/boggart/manager/' + deviceId + '/unregister',
+            url: '/boggart/bind/' + deviceId + '/unregister',
             success: function(r) {
                 if (r.result === 'failed') {
                     new PNotify({

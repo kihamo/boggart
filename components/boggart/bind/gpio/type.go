@@ -11,7 +11,7 @@ import (
 
 type Type struct{}
 
-func (t Type) CreateBind(c interface{}) (boggart.DeviceBind, error) {
+func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
 	g := gpioreg.ByName(fmt.Sprintf("GPIO%d", config.Pin))
@@ -43,7 +43,7 @@ func (t Type) CreateBind(c interface{}) (boggart.DeviceBind, error) {
 		}()
 	}
 
-	device.UpdateStatus(boggart.DeviceStatusOnline)
+	device.UpdateStatus(boggart.BindStatusOnline)
 
 	return device, nil
 }

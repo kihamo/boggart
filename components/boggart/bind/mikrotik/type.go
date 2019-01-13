@@ -10,7 +10,7 @@ import (
 
 type Type struct{}
 
-func (t Type) CreateBind(c interface{}) (boggart.DeviceBind, error) {
+func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
 	u, _ := url.Parse(config.Address)

@@ -27,8 +27,8 @@ type BME280Sensor struct {
 	humidity    uint64
 	pressure    uint64
 
-	boggart.DeviceBindBase
-	boggart.DeviceBindMQTT
+	boggart.BindBase
+	boggart.BindMQTT
 
 	driver   *i2c.BME280Driver
 	interval time.Duration
@@ -69,11 +69,11 @@ func (d *BME280Sensor) Tasks() []workers.Task {
 
 func (d *BME280Sensor) taskStateUpdater(ctx context.Context) (interface{}, error) {
 	if err := d.driver.Start(); err != nil {
-		d.UpdateStatus(boggart.DeviceStatusOffline)
+		d.UpdateStatus(boggart.BindStatusOffline)
 		return nil, err
 	}
 
-	d.UpdateStatus(boggart.DeviceStatusOnline)
+	d.UpdateStatus(boggart.BindStatusOnline)
 	serialNumber := d.SerialNumber()
 
 	if value, err := d.driver.Temperature(); err == nil {

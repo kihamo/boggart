@@ -5,5 +5,5 @@ import (
 )
 
 func init() {
-	boggart.RegisterDeviceType("softvideo", Type{})
+	boggart.RegisterBindType("softvideo", Type{})
 }

@@ -34,16 +34,16 @@ func (b *Bind) Tasks() []workers.Task {
 func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	system, err := b.provider.SystemRouterboard(ctx)
 	if err != nil {
-		b.UpdateStatus(boggart.DeviceStatusOffline)
+		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, err
 	}
 
 	if system.SerialNumber == "" {
-		b.UpdateStatus(boggart.DeviceStatusOffline)
+		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, errors.New("serial number is empty")
 	}
 
-	b.UpdateStatus(boggart.DeviceStatusOnline)
+	b.UpdateStatus(boggart.BindStatusOnline)
 	if b.SerialNumber() != "" {
 		return nil, nil
 	}
@@ -86,7 +86,7 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 }
 
 func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
-	if b.Status() != boggart.DeviceStatusOnline {
+	if b.Status() != boggart.BindStatusOnline {
 		return nil, nil
 	}
 

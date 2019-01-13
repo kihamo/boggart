@@ -24,11 +24,11 @@ func (b *Bind) Tasks() []workers.Task {
 func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	value, err := b.provider.Balance(ctx)
 	if err != nil {
-		b.UpdateStatus(boggart.DeviceStatusOffline)
+		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, err
 	}
 
-	b.UpdateStatus(boggart.DeviceStatusOnline)
+	b.UpdateStatus(boggart.BindStatusOnline)
 
 	current := int64(value * 100)
 	prev := atomic.LoadInt64(&b.lastValue)
