@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/internal/manager"
 	"github.com/kihamo/shadow/components/dashboard"
 	"gopkg.in/yaml.v2"
@@ -14,17 +15,41 @@ import (
 type ConfigHandler struct {
 	dashboard.Handler
 
-	manager *manager.Manager
+	manager   *manager.Manager
+	component boggart.Component
 }
 
-func NewConfigHandler(manager *manager.Manager) *ConfigHandler {
+func NewConfigHandler(manager *manager.Manager, component boggart.Component) *ConfigHandler {
 	return &ConfigHandler{
-		manager: manager,
+		manager:   manager,
+		component: component,
 	}
 }
 
 func (h *ConfigHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	action := r.URL().Query().Get(":action")
+
+	if action == "reload" && r.IsPost() {
+		type response struct {
+			Result  string `json:"result"`
+			Message string `json:"message,omitempty"`
+		}
+
+		if err := h.component.ReloadConfig(); err != nil {
+			w.SendJSON(response{
+				Result:  "failed",
+				Message: err.Error(),
+			})
+
+		} else {
+			w.SendJSON(response{
+				Result: "success",
+			})
+		}
+
+		return
+	}
+
 	if action != "download" && action != "modal" && action != "view" {
 		h.NotFound(w, r)
 	}

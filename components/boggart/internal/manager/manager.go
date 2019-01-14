@@ -119,6 +119,16 @@ func (m *Manager) Unregister(id string) error {
 	return nil
 }
 
+func (m *Manager) UnregisterAll() error {
+	for _, item := range m.BindItems() {
+		if err := m.Unregister(item.ID()); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (m *Manager) Bind(id string) boggart.BindItem {
 	if d, ok := m.storage.Load(id); ok {
 		return d.(boggart.BindItem)

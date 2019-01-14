@@ -16,6 +16,9 @@ msgstr "Привязки"
 msgid "Add bind"
 msgstr "Добавить привязку"
 
+msgid "Reload config file"
+msgstr "Перезагрузить из файла конфигурации"
+
 msgid "Type"
 msgstr "Тип"
 

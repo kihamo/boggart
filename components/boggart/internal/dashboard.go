@@ -26,9 +26,9 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 	if c.routes == nil {
 		<-c.application.ReadyComponent(c.Name())
 
-		bindHandler := handlers.NewBindHandler(c.devicesManager)
+		bindHandler := handlers.NewBindHandler(c.manager)
 		cameraHandler := &handlers.CameraHandler{
-			DevicesManager: c.devicesManager,
+			DevicesManager: c.manager,
 		}
 
 		m := c.application.GetComponent(messengers.ComponentName)
@@ -39,7 +39,7 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 
 		c.routes = []dashboard.Route{
 			dashboard.RouteFromAssetFS(c),
-			dashboard.NewRoute("/"+c.Name()+"/manager/", handlers.NewManagerHandler(c.devicesManager, c.listenersManager)).
+			dashboard.NewRoute("/"+c.Name()+"/manager/", handlers.NewManagerHandler(c.manager, c.listenersManager)).
 				WithMethods([]string{http.MethodGet}).
 				WithAuth(true),
 			dashboard.NewRoute("/"+c.Name()+"/bind/", bindHandler).
@@ -53,8 +53,8 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 				WithAuth(true),
 			dashboard.NewRoute("/"+c.Name()+"/camera/:id/:channel", cameraHandler).
 				WithMethods([]string{http.MethodGet, http.MethodPost}),
-			dashboard.NewRoute("/"+c.Name()+"/config/:action", handlers.NewConfigHandler(c.devicesManager)).
-				WithMethods([]string{http.MethodGet}),
+			dashboard.NewRoute("/"+c.Name()+"/config/:action", handlers.NewConfigHandler(c.manager, c)).
+				WithMethods([]string{http.MethodGet, http.MethodPost}),
 		}
 	}
 

@@ -30,7 +30,7 @@ func (c *Component) initListeners() {
 			if len(chats) > 0 {
 				c.listenersManager.AddListener(listeners.NewTelegramListener(
 					messenger.(*telegram.Telegram),
-					c.devicesManager,
+					c.manager,
 					c.application,
 					chats))
 			}
@@ -42,6 +42,6 @@ func (c *Component) initListeners() {
 			c.application.GetComponent(annotations.ComponentName).(annotations.Component),
 			c.application.Name(),
 			c.application.StartDate(),
-			c.devicesManager))
+			c.manager))
 	}
 }

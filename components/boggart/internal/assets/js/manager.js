@@ -218,6 +218,27 @@ $(document).ready(function () {
         });
     };
 
+    window.reloadConfig = function() {
+        $.ajax({
+            type: 'POST',
+            url: '/boggart/config/reload',
+            success: function(r) {
+                if (r.result === 'failed') {
+                    new PNotify({
+                        title: 'Error',
+                        text: r.message,
+                        type: 'error',
+                        hide: false,
+                        styling: 'bootstrap3'
+                    });
+                    return
+                }
+
+                refreshTables();
+            }
+        });
+    };
+
     window.refreshTables = function() {
         tableDevices.ajax.reload();
         tableListeners.ajax.reload();

@@ -6,5 +6,5 @@ import (
 
 func (c *Component) Metrics() snitch.Collector {
 	<-c.application.ReadyComponent(c.Name())
-	return c.devicesManager
+	return c.manager
 }

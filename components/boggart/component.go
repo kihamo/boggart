@@ -8,4 +8,6 @@ import (
 type Component interface {
 	shadow.Component
 	metrics.HasMetrics
+
+	ReloadConfig() error
 }

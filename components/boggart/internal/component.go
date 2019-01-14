@@ -44,7 +44,7 @@ type Component struct {
 	routes      []dashboard.Route
 
 	listenersManager *w.ListenersManager
-	devicesManager   *manager.Manager
+	manager          *manager.Manager
 }
 
 type FileYAML struct {
@@ -118,7 +118,7 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 	<-a.ReadyComponent(mqtt.ComponentName)
 	<-a.ReadyComponent(workers.ComponentName)
 
-	c.devicesManager = manager.NewManager(
+	c.manager = manager.NewManager(
 		a.GetComponent(mqtt.ComponentName).(mqtt.Component),
 		a.GetComponent(workers.ComponentName).(workers.Component),
 		c.listenersManager)
@@ -132,12 +132,20 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 	<-a.ReadyComponent(config.ComponentName)
 	c.config = a.GetComponent(config.ComponentName).(config.Component)
 
-	err := c.initConfigFromYaml()
-	if err != nil {
+	c.ReloadConfig()
+	c.manager.Ready()
+
+	return nil
+}
+
+func (c *Component) ReloadConfig() error {
+	if err := c.manager.UnregisterAll(); err != nil {
 		return err
 	}
 
-	c.devicesManager.Ready()
+	if err := c.initConfigFromYaml(); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -186,9 +194,9 @@ func (c *Component) initConfigFromYaml() error {
 		}
 
 		if d.ID != nil && *d.ID != "" {
-			_, err = c.devicesManager.RegisterWithID(*d.ID, bind, d.Type, d.Description, d.Tags, cfg)
+			_, err = c.manager.RegisterWithID(*d.ID, bind, d.Type, d.Description, d.Tags, cfg)
 		} else {
-			_, err = c.devicesManager.Register(bind, d.Type, d.Description, d.Tags, cfg)
+			_, err = c.manager.Register(bind, d.Type, d.Description, d.Tags, cfg)
 		}
 
 		if err != nil {
