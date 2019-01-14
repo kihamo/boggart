@@ -9,9 +9,6 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/broadlink"
 	"github.com/kihamo/boggart/components/mqtt"
-	"github.com/kihamo/shadow/components/tracing"
-	"github.com/opentracing/opentracing-go"
-	"github.com/opentracing/opentracing-go/log"
 )
 
 const (
@@ -74,7 +71,7 @@ func (b *BindRM) MQTTSubscribers() []mqtt.Subscriber {
 		<-captureTimer.C
 
 		subscribers = append(subscribers,
-			mqtt.NewSubscriber(RMMQTTTopicCapture.Format(sn), 0, b.wrapMQTTSubscriber("command_capture_start",
+			mqtt.NewSubscriber(RMMQTTTopicCapture.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b,
 				func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
 					if bytes.Equal(message.Payload(), []byte(`1`)) { // start
 						if err := capture.StartCaptureRemoteControlCode(); err != nil {
@@ -113,7 +110,9 @@ func (b *BindRM) MQTTSubscribers() []mqtt.Subscriber {
 							return nil
 						}
 
-						b.MQTTPublishAsync(ctx, RMMQTTTopicCaptureState.Format(sn), 2, true, false)
+						if err := b.MQTTPublishAsync(ctx, RMMQTTTopicCaptureState.Format(sn), 2, true, false); err != nil {
+							return err
+						}
 
 						remoteType, code, err := capture.ReadCapturedRemoteControlCodeAsString()
 						if err != nil {
@@ -159,27 +158,19 @@ func (b *BindRM) MQTTSubscribers() []mqtt.Subscriber {
 	// IR support
 	if ir, ok := b.provider.(BindRMSupportIR); ok {
 		subscribers = append(subscribers,
-			mqtt.NewSubscriber(RMMQTTTopicIR.Format(sn), 0, b.wrapMQTTSubscriber("command_ir",
+			mqtt.NewSubscriber(RMMQTTTopicIR.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b,
 				func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 					return ir.SendIRRemoteControlCodeAsString(string(message.Payload()), 0)
 				})),
-			mqtt.NewSubscriber(RMMQTTTopicIRCount.Format(sn), 0, b.wrapMQTTSubscriber("command_ir_count",
+			mqtt.NewSubscriber(RMMQTTTopicIRCount.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b,
 				func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 					var request codeRequest
 
-					err := json.Unmarshal(message.Payload(), &request)
-					if err == nil {
-						if span := opentracing.SpanFromContext(ctx); span != nil {
-							span.LogFields(
-								log.String("code", request.Code),
-								log.Int("count", request.Count),
-							)
-						}
-
-						err = ir.SendIRRemoteControlCodeAsString(request.Code, request.Count)
+					if err := json.Unmarshal(message.Payload(), &request); err != nil {
+						return err
 					}
 
-					return err
+					return ir.SendIRRemoteControlCodeAsString(request.Code, request.Count)
 				})),
 		)
 	}
@@ -187,27 +178,19 @@ func (b *BindRM) MQTTSubscribers() []mqtt.Subscriber {
 	// RF315mhz support
 	if rf315mhz, ok := b.provider.(BindRMSupportRF315Mhz); ok {
 		subscribers = append(subscribers,
-			mqtt.NewSubscriber(RMMQTTTopicRF315mhz.Format(sn), 0, b.wrapMQTTSubscriber("command_rf315mhz",
+			mqtt.NewSubscriber(RMMQTTTopicRF315mhz.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b,
 				func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 					return rf315mhz.SendRF315MhzRemoteControlCodeAsString(string(message.Payload()), 0)
 				})),
-			mqtt.NewSubscriber(RMMQTTTopicRF315mhzCount.Format(sn), 0, b.wrapMQTTSubscriber("command_rf315mhz_count",
+			mqtt.NewSubscriber(RMMQTTTopicRF315mhzCount.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b,
 				func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 					var request codeRequest
 
-					err := json.Unmarshal(message.Payload(), &request)
-					if err == nil {
-						if span := opentracing.SpanFromContext(ctx); span != nil {
-							span.LogFields(
-								log.String("code", request.Code),
-								log.Int("count", request.Count),
-							)
-						}
-
-						err = rf315mhz.SendRF315MhzRemoteControlCodeAsString(request.Code, request.Count)
+					if err := json.Unmarshal(message.Payload(), &request); err != nil {
+						return err
 					}
 
-					return err
+					return rf315mhz.SendRF315MhzRemoteControlCodeAsString(request.Code, request.Count)
 				})),
 		)
 	}
@@ -215,48 +198,22 @@ func (b *BindRM) MQTTSubscribers() []mqtt.Subscriber {
 	// RF433mhz support
 	if rf433mhz, ok := b.provider.(BindRMSupportRF433Mhz); ok {
 		subscribers = append(subscribers,
-			mqtt.NewSubscriber(RMMQTTTopicRF433mhz.Format(sn), 0, b.wrapMQTTSubscriber("command_rf433mhz",
+			mqtt.NewSubscriber(RMMQTTTopicRF433mhz.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b,
 				func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 					return rf433mhz.SendRF433MhzRemoteControlCodeAsString(string(message.Payload()), 0)
 				})),
-			mqtt.NewSubscriber(RMMQTTTopicRF433mhzCount.Format(sn), 0, b.wrapMQTTSubscriber("command_rf433mhz_count",
+			mqtt.NewSubscriber(RMMQTTTopicRF433mhzCount.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b,
 				func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 					var request codeRequest
 
-					err := json.Unmarshal(message.Payload(), &request)
-					if err == nil {
-						if span := opentracing.SpanFromContext(ctx); span != nil {
-							span.LogFields(
-								log.String("code", request.Code),
-								log.Int("count", request.Count),
-							)
-						}
-
-						err = rf433mhz.SendRF433MhzRemoteControlCodeAsString(request.Code, request.Count)
+					if err := json.Unmarshal(message.Payload(), &request); err != nil {
+						return err
 					}
 
-					return err
+					return rf433mhz.SendRF433MhzRemoteControlCodeAsString(request.Code, request.Count)
 				})),
 		)
 	}
 
 	return subscribers
-}
-
-func (b *BindRM) wrapMQTTSubscriber(operationName string, fn func(context.Context, mqtt.Component, mqtt.Message) error) mqtt.MessageHandler {
-	return func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-		if b.Status() != boggart.BindStatusOnline {
-			return
-		}
-
-		span, ctx := tracing.StartSpanFromContext(ctx, "remote-control", operationName)
-		span.LogFields(
-			log.String("mac", b.mac.String()),
-			log.String("ip", b.ip.String()))
-		defer span.Finish()
-
-		if err := fn(ctx, client, message); err != nil {
-			tracing.SpanError(span, err)
-		}
-	}
 }

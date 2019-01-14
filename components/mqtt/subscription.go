@@ -5,6 +5,8 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+
+	"github.com/pkg/errors"
 )
 
 type Subscription struct {
@@ -81,18 +83,58 @@ func (c *Subscription) QOS() byte {
 	return byte(atomic.LoadUint64(&c.qos))
 }
 
-func (c *Subscription) Callback(ctx context.Context, client Component, message Message) {
+func (c *Subscription) Callback(ctx context.Context, client Component, message Message) (err error) {
 	atomic.AddUint64(&c.calls, 1)
 
 	c.mutex.RLock()
 	subscribers := c.subscribers
 	c.mutex.RUnlock()
 
+	if len(subscribers) == 0 {
+		return nil
+	}
+
+	errCh := make(chan error)
+	doneCh := make(chan struct{})
+
+	go func() {
+		for {
+			select {
+			case result := <-errCh:
+				if result != nil {
+					if err == nil {
+						err = errors.Wrap(result, "Call returned error")
+					} else {
+						err = errors.Wrap(result, err.Error())
+					}
+				}
+
+			case <-doneCh:
+				return
+			}
+		}
+	}()
+
+	var wg sync.WaitGroup
 	for _, sub := range subscribers {
+		wg.Add(1)
+
 		go func(s Subscriber) {
-			sub.Call(ctx, client, message)
+			defer wg.Done()
+
+			if errCall := s.Call(ctx, client, message); errCall != nil {
+				errCh <- errCall
+			}
 		}(sub)
 	}
+
+	wg.Wait()
+	doneCh <- struct{}{}
+
+	close(doneCh)
+	close(errCh)
+
+	return err
 }
 
 func (c *Subscription) Len() int {

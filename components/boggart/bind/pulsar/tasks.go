@@ -40,7 +40,8 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			atomic.StoreUint64(&b.temperatureIn, math.Float64bits(current))
 			metricTemperatureIn.With("serial_number", sn).Set(current)
 
-			b.MQTTPublishAsync(ctx, MQTTTopicTemperatureIn.Format(snMQTT), 0, true, current)
+			// TODO:
+			_ = b.MQTTPublishAsync(ctx, MQTTTopicTemperatureIn.Format(snMQTT), 0, true, current)
 		}
 	} else {
 		// TODO: log
@@ -53,7 +54,8 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			atomic.StoreUint64(&b.temperatureOut, math.Float64bits(current))
 			metricTemperatureOut.With("serial_number", sn).Set(current)
 
-			b.MQTTPublishAsync(ctx, MQTTTopicTemperatureOut.Format(snMQTT), 0, true, current)
+			// TODO:
+			_ = b.MQTTPublishAsync(ctx, MQTTTopicTemperatureOut.Format(snMQTT), 0, true, current)
 		}
 	} else {
 		// TODO: log
@@ -66,7 +68,8 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			atomic.StoreUint64(&b.temperatureDelta, math.Float64bits(current))
 			metricTemperatureDelta.With("serial_number", sn).Set(current)
 
-			b.MQTTPublishAsync(ctx, MQTTTopicTemperatureDelta.Format(snMQTT), 0, true, current)
+			// TODO:
+			_ = b.MQTTPublishAsync(ctx, MQTTTopicTemperatureDelta.Format(snMQTT), 0, true, current)
 		}
 	} else {
 		// TODO: log
@@ -79,7 +82,8 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			atomic.StoreUint64(&b.energy, math.Float64bits(current))
 			metricEnergy.With("serial_number", sn).Set(current)
 
-			b.MQTTPublishAsync(ctx, MQTTTopicEnergy.Format(snMQTT), 0, true, current)
+			// TODO:
+			_ = b.MQTTPublishAsync(ctx, MQTTTopicEnergy.Format(snMQTT), 0, true, current)
 		}
 	} else {
 		// TODO: log
@@ -92,7 +96,8 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			atomic.StoreUint64(&b.consumption, math.Float64bits(current))
 			metricConsumption.With("serial_number", sn).Set(current)
 
-			b.MQTTPublishAsync(ctx, MQTTTopicConsumption.Format(snMQTT), 0, true, current)
+			// TODO:
+			_ = b.MQTTPublishAsync(ctx, MQTTTopicConsumption.Format(snMQTT), 0, true, current)
 		}
 	} else {
 		// TODO: log
@@ -105,7 +110,8 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			atomic.StoreUint64(&b.capacity, math.Float64bits(current))
 			metricCapacity.With("serial_number", sn).Set(current)
 
-			b.MQTTPublishAsync(ctx, MQTTTopicCapacity.Format(snMQTT), 0, true, current)
+			// TODO:
+			_ = b.MQTTPublishAsync(ctx, MQTTTopicCapacity.Format(snMQTT), 0, true, current)
 		}
 	} else {
 		// TODO: log
@@ -118,7 +124,8 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			atomic.StoreUint64(&b.power, math.Float64bits(current))
 			metricPower.With("serial_number", sn).Set(current)
 
-			b.MQTTPublishAsync(ctx, MQTTTopicPower.Format(snMQTT), 0, true, current)
+			// TODO:
+			_ = b.MQTTPublishAsync(ctx, MQTTTopicPower.Format(snMQTT), 0, true, current)
 		}
 	} else {
 		// TODO: log
@@ -131,11 +138,13 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		if current != prev {
 			atomic.StoreUint64(&b.input1, current)
 
-			b.MQTTPublishAsync(ctx, MQTTTopicInputPulses.Format(snMQTT, 1), 0, true, current)
+			// TODO:
+			_ = b.MQTTPublishAsync(ctx, MQTTTopicInputPulses.Format(snMQTT, 1), 0, true, current)
 			metricInputPulses.With("serial_number", sn).With("input", "1").Set(float64(current))
 
 			volume := b.inputVolume(current, b.config.Input1Offset)
-			b.MQTTPublishAsync(ctx, MQTTTopicInputVolume.Format(snMQTT, 1), 0, true, volume)
+			// TODO:
+			_ = b.MQTTPublishAsync(ctx, MQTTTopicInputVolume.Format(snMQTT, 1), 0, true, volume)
 			metricInputVolume.With("serial_number", sn).With("input", "1").Set(volume)
 		}
 	} else {
@@ -148,11 +157,13 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		if current != prev {
 			atomic.StoreUint64(&b.input2, current)
 
-			b.MQTTPublishAsync(ctx, MQTTTopicInputPulses.Format(snMQTT, 2), 0, true, current)
+			// TODO:
+			_ = b.MQTTPublishAsync(ctx, MQTTTopicInputPulses.Format(snMQTT, 2), 0, true, current)
 			metricInputPulses.With("serial_number", sn).With("input", "2").Set(float64(current))
 
 			volume := b.inputVolume(current, b.config.Input2Offset)
-			b.MQTTPublishAsync(ctx, MQTTTopicInputVolume.Format(snMQTT, 2), 0, true, volume)
+			// TODO:
+			_ = b.MQTTPublishAsync(ctx, MQTTTopicInputVolume.Format(snMQTT, 2), 0, true, volume)
 			metricInputVolume.With("serial_number", sn).With("input", "2").Set(volume)
 		}
 	} else {
@@ -165,11 +176,13 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		if current != prev {
 			atomic.StoreUint64(&b.input3, current)
 
-			b.MQTTPublishAsync(ctx, MQTTTopicInputPulses.Format(snMQTT, 3), 0, true, current)
+			// TODO:
+			_ = b.MQTTPublishAsync(ctx, MQTTTopicInputPulses.Format(snMQTT, 3), 0, true, current)
 			metricInputPulses.With("serial_number", sn).With("input", "3").Set(float64(current))
 
 			volume := b.inputVolume(current, b.config.Input3Offset)
-			b.MQTTPublishAsync(ctx, MQTTTopicInputVolume.Format(snMQTT, 3), 0, true, volume)
+			// TODO:
+			_ = b.MQTTPublishAsync(ctx, MQTTTopicInputVolume.Format(snMQTT, 3), 0, true, volume)
 			metricInputVolume.With("serial_number", sn).With("input", "3").Set(volume)
 		}
 	} else {
@@ -182,11 +195,13 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		if current != prev {
 			atomic.StoreUint64(&b.input4, current)
 
-			b.MQTTPublishAsync(ctx, MQTTTopicInputPulses.Format(snMQTT, 4), 0, true, current)
+			// TODO:
+			_ = b.MQTTPublishAsync(ctx, MQTTTopicInputPulses.Format(snMQTT, 4), 0, true, current)
 			metricInputPulses.With("serial_number", sn).With("input", "4").Set(float64(current))
 
 			volume := b.inputVolume(current, b.config.Input4Offset)
-			b.MQTTPublishAsync(ctx, MQTTTopicInputVolume.Format(snMQTT, 4), 0, true, volume)
+			// TODO:
+			_ = b.MQTTPublishAsync(ctx, MQTTTopicInputVolume.Format(snMQTT, 4), 0, true, volume)
 			metricInputVolume.With("serial_number", sn).With("input", "4").Set(volume)
 		}
 	} else {

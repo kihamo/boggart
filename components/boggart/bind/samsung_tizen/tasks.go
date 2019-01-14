@@ -45,8 +45,9 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		b.mutex.Unlock()
 
 		sn := b.SerialNumber()
-		b.MQTTPublishAsync(ctx, MQTTTopicDeviceID.Format(sn), 0, false, info.Device.ID)
-		b.MQTTPublishAsync(ctx, MQTTTopicDeviceModelName.Format(sn), 0, false, info.Device.Name)
+		// TODO:
+		_ = b.MQTTPublishAsync(ctx, MQTTTopicDeviceID.Format(sn), 0, false, info.Device.ID)
+		_ = b.MQTTPublishAsync(ctx, MQTTTopicDeviceModelName.Format(sn), 0, false, info.Device.Name)
 	}
 	b.UpdateStatus(boggart.BindStatusOnline)
 

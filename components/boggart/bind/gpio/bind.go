@@ -38,7 +38,9 @@ func (d *Bind) High(ctx context.Context) error {
 			return err
 		}
 
-		d.MQTTPublishAsync(ctx, MQTTTopicPinState.Format(d.pin.Number()), 2, true, []byte(`1`))
+		if err := d.MQTTPublishAsync(ctx, MQTTTopicPinState.Format(d.pin.Number()), 2, true, true); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -54,7 +56,9 @@ func (d *Bind) Low(ctx context.Context) error {
 			return err
 		}
 
-		d.MQTTPublishAsync(ctx, MQTTTopicPinState.Format(d.pin.Number()), 2, true, []byte(`0`))
+		if err := d.MQTTPublishAsync(ctx, MQTTTopicPinState.Format(d.pin.Number()), 2, true, false); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -78,14 +82,7 @@ func (d *Bind) waitForEdge() {
 	ctx := context.Background()
 
 	for p.WaitForEdge(-1) {
-		var mqttValue []byte
-
-		if d.Read() {
-			mqttValue = []byte(`1`)
-		} else {
-			mqttValue = []byte(`0`)
-		}
-
-		d.MQTTPublishAsync(ctx, MQTTTopicPinState.Format(d.pin.Number()), 2, true, mqttValue)
+		// TODO: log
+		_ = d.MQTTPublishAsync(ctx, MQTTTopicPinState.Format(d.pin.Number()), 2, true, d.Read())
 	}
 }

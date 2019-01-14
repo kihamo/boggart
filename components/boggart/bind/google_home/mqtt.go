@@ -27,24 +27,24 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTTopicVolume.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) {
+		mqtt.NewSubscriber(MQTTTopicVolume.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
-				return
+				return nil
 			}
 
 			volume, err := strconv.ParseInt(string(message.Payload()), 10, 64)
 			if err != nil {
-				return
+				return err
 			}
 
-			b.ClientChromeCast().SetVolume(volume)
+			return b.ClientChromeCast().SetVolume(volume)
 		})),
-		mqtt.NewSubscriber(MQTTTopicMute.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) {
+		mqtt.NewSubscriber(MQTTTopicMute.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
-				return
+				return nil
 			}
 
-			b.ClientChromeCast().SetMute(bytes.Equal(message.Payload(), []byte(`1`)))
+			return b.ClientChromeCast().SetMute(bytes.Equal(message.Payload(), []byte(`1`)))
 		})),
 	}
 }

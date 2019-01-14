@@ -69,8 +69,10 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	if prev != current {
 		atomic.StoreInt64(&b.lastValue, current)
 
-		b.MQTTPublishAsync(ctx, MQTTTopicValue.Format(mqtt.NameReplace(sn)), 0, true, value)
 		metricValue.With("serial_number", sn).Set(value)
+		if err := b.MQTTPublishAsync(ctx, MQTTTopicValue.Format(mqtt.NameReplace(sn)), 0, true, value); err != nil {
+			return nil, err
+		}
 	}
 
 	return nil, nil

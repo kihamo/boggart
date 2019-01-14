@@ -146,14 +146,7 @@ func (c *Component) playersUpdater() {
 					lastMute, ok := storeLastMute[name]
 
 					if !ok || mute != lastMute {
-						var mqttValue []byte
-						if mute {
-							mqttValue = []byte(`1`)
-						} else {
-							mqttValue = []byte(`0`)
-						}
-
-						err := m.Publish(context.Background(), MQTTTopicPlayerStateMute.Format(name), 0, false, mqttValue)
+						err := m.Publish(context.Background(), MQTTTopicPlayerStateMute.Format(name), 0, false, mute)
 						if err == nil {
 							storeLastMute[name] = mute
 						}

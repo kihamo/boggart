@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 
@@ -92,15 +91,18 @@ func (b *Bind) updateStatusByChannelId(ctx context.Context, channelId uint64) er
 	sn := mqtt.NameReplace(b.SerialNumber())
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.Elevation != status.AbsoluteHigh.Elevation {
-		b.MQTTPublishAsync(ctx, MQTTTopicPTZStatusElevation.Format(sn, channelId), 1, false, status.AbsoluteHigh.Elevation)
+		// TODO:
+		_ = b.MQTTPublishAsync(ctx, MQTTTopicPTZStatusElevation.Format(sn, channelId), 1, false, status.AbsoluteHigh.Elevation)
 	}
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.Azimuth != status.AbsoluteHigh.Azimuth {
-		b.MQTTPublishAsync(ctx, MQTTTopicPTZStatusAzimuth.Format(sn, channelId), 1, false, status.AbsoluteHigh.Azimuth)
+		// TODO:
+		_ = b.MQTTPublishAsync(ctx, MQTTTopicPTZStatusAzimuth.Format(sn, channelId), 1, false, status.AbsoluteHigh.Azimuth)
 	}
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.AbsoluteZoom != status.AbsoluteHigh.AbsoluteZoom {
-		b.MQTTPublishAsync(ctx, MQTTTopicPTZStatusZoom.Format(sn, channelId), 1, false, status.AbsoluteHigh.AbsoluteZoom)
+		// TODO:
+		_ = b.MQTTPublishAsync(ctx, MQTTTopicPTZStatusZoom.Format(sn, channelId), 1, false, status.AbsoluteHigh.AbsoluteZoom)
 	}
 
 	channel.Status = &status
@@ -129,22 +131,14 @@ func (b *Bind) checkTopic(topic string) (uint64, error) {
 	return channelId, nil
 }
 
-func (b *Bind) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+func (b *Bind) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
 	if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 4) {
-		return
+		return nil
 	}
-
-	var err error
-	defer func() {
-		if err != nil {
-			log.Printf("Callback for device %s for topic %s with body %s failed with error %s",
-				b.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
-		}
-	}()
 
 	channelId, err := b.checkTopic(message.Topic())
 	if err != nil {
-		return
+		return err
 	}
 
 	var request struct {
@@ -153,35 +147,25 @@ func (b *Bind) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, 
 		Zoom      uint64 `json:"zoom,omitempty"`
 	}
 
-	err = json.Unmarshal(message.Payload(), &request)
-	if err != nil {
-		return
+	if err := json.Unmarshal(message.Payload(), &request); err != nil {
+		return err
 	}
 
-	err = b.isapi.PTZAbsolute(ctx, channelId, request.Elevation, request.Azimuth, request.Zoom)
-	if err != nil {
-		return
+	if err := b.isapi.PTZAbsolute(ctx, channelId, request.Elevation, request.Azimuth, request.Zoom); err != nil {
+		return err
 	}
 
-	err = b.updateStatusByChannelId(ctx, channelId)
+	return b.updateStatusByChannelId(ctx, channelId)
 }
 
-func (b *Bind) callbackMQTTContinuous(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+func (b *Bind) callbackMQTTContinuous(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
 	if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 4) {
-		return
+		return nil
 	}
-
-	var err error
-	defer func() {
-		if err != nil {
-			log.Printf("Callback for device %s for topic %s with body %s failed with error %s",
-				b.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
-		}
-	}()
 
 	channelId, err := b.checkTopic(message.Topic())
 	if err != nil {
-		return
+		return err
 	}
 
 	var request struct {
@@ -190,35 +174,25 @@ func (b *Bind) callbackMQTTContinuous(ctx context.Context, client mqtt.Component
 		Zoom int64 `json:"zoom,omitempty"`
 	}
 
-	err = json.Unmarshal(message.Payload(), &request)
-	if err != nil {
-		return
+	if err := json.Unmarshal(message.Payload(), &request); err != nil {
+		return err
 	}
 
-	err = b.isapi.PTZContinuous(ctx, channelId, request.Pan, request.Tilt, request.Zoom)
-	if err != nil {
-		return
+	if err = b.isapi.PTZContinuous(ctx, channelId, request.Pan, request.Tilt, request.Zoom); err != nil {
+		return err
 	}
 
-	err = b.updateStatusByChannelId(ctx, channelId)
+	return b.updateStatusByChannelId(ctx, channelId)
 }
 
-func (b *Bind) callbackMQTTRelative(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+func (b *Bind) callbackMQTTRelative(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
 	if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 4) {
-		return
+		return nil
 	}
-
-	var err error
-	defer func() {
-		if err != nil {
-			log.Printf("Callback for device %s for topic %s with body %s failed with error %s",
-				b.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
-		}
-	}()
 
 	channelId, err := b.checkTopic(message.Topic())
 	if err != nil {
-		return
+		return err
 	}
 
 	var request struct {
@@ -227,66 +201,47 @@ func (b *Bind) callbackMQTTRelative(ctx context.Context, client mqtt.Component, 
 		Zoom int64 `xml:"zoom,omitempty"`
 	}
 
-	err = json.Unmarshal(message.Payload(), &request)
-	if err != nil {
-		return
+	if err := json.Unmarshal(message.Payload(), &request); err != nil {
+		return err
 	}
 
-	err = b.isapi.PTZRelative(ctx, channelId, request.X, request.Y, request.Zoom)
-	if err != nil {
-		return
+	if err := b.isapi.PTZRelative(ctx, channelId, request.X, request.Y, request.Zoom); err != nil {
+		return err
 	}
 
-	err = b.updateStatusByChannelId(ctx, channelId)
+	return b.updateStatusByChannelId(ctx, channelId)
 }
 
-func (b *Bind) callbackMQTTPreset(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+func (b *Bind) callbackMQTTPreset(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
 	if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 4) {
-		return
+		return nil
 	}
-
-	var err error
-	defer func() {
-		if err != nil {
-			log.Printf("Callback for device %s for topic %s with body %s failed with error %s",
-				b.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
-		}
-	}()
 
 	channelId, err := b.checkTopic(message.Topic())
 	if err != nil {
-		return
+		return err
 	}
 
 	presetId, err := strconv.ParseUint(string(message.Payload()), 10, 64)
 	if err != nil {
-		return
+		return err
 	}
 
-	err = b.isapi.PTZPresetGoTo(ctx, channelId, presetId)
-	if err != nil {
-		return
+	if err := b.isapi.PTZPresetGoTo(ctx, channelId, presetId); err != nil {
+		return err
 	}
 
-	err = b.updateStatusByChannelId(ctx, channelId)
+	return b.updateStatusByChannelId(ctx, channelId)
 }
 
-func (b *Bind) callbackMQTTMomentary(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+func (b *Bind) callbackMQTTMomentary(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
 	if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 4) {
-		return
+		return nil
 	}
-
-	var err error
-	defer func() {
-		if err != nil {
-			log.Printf("Callback for device %s for topic %s with body %s failed with error %s",
-				b.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
-		}
-	}()
 
 	channelId, err := b.checkTopic(message.Topic())
 	if err != nil {
-		return
+		return err
 	}
 
 	var request struct {
@@ -296,32 +251,23 @@ func (b *Bind) callbackMQTTMomentary(ctx context.Context, client mqtt.Component,
 		Duration time.Duration `json:"duration,omitempty"`
 	}
 
-	err = json.Unmarshal(message.Payload(), &request)
-	if err != nil {
-		return
+	if err := json.Unmarshal(message.Payload(), &request); err != nil {
+		return err
 	}
 
 	duration := time.Duration(request.Duration) * time.Millisecond
-	err = b.isapi.PTZMomentary(ctx, channelId, request.Pan, request.Tilt, request.Zoom, duration)
-	if err != nil {
-		return
+	if err := b.isapi.PTZMomentary(ctx, channelId, request.Pan, request.Tilt, request.Zoom, duration); err != nil {
+		return err
 	}
 
-	err = b.updateStatusByChannelId(ctx, channelId)
+	return b.updateStatusByChannelId(ctx, channelId)
 }
 
-func (b *Bind) callbackMQTTMove(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-	var err error
-	defer func() {
-		if err != nil {
-			log.Printf("Callback for device %s for topic %s with body %s failed with error %s",
-				b.SerialNumber(), err.Error(), message.Topic(), string(message.Payload()))
-		}
-	}()
-
+/*
+func (b *Bind) callbackMQTTMove(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
 	channelId, err := b.checkTopic(message.Topic())
 	if err != nil {
-		return
+		return err
 	}
 
 	var pan, tilt, zoom int64
@@ -353,13 +299,13 @@ func (b *Bind) callbackMQTTMove(ctx context.Context, client mqtt.Component, mess
 		zoom = -1
 	case "stop":
 	default:
-		err = fmt.Errorf("unknown operation %s", string(message.Payload()))
+		return errors.New("unknown operation " + string(message.Payload()))
 	}
 
-	err = b.isapi.PTZContinuous(ctx, channelId, pan, tilt, zoom)
-	if err != nil {
-		return
+	if err := b.isapi.PTZContinuous(ctx, channelId, pan, tilt, zoom); err != nil {
+		return err
 	}
 
-	err = b.updateStatusByChannelId(ctx, channelId)
+	return b.updateStatusByChannelId(ctx, channelId)
 }
+*/

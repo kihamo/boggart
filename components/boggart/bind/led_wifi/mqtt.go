@@ -43,46 +43,46 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	host := mqtt.NameReplace(b.bulb.Host())
 
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTTopicPower.Format(host), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) {
+		mqtt.NewSubscriber(MQTTTopicPower.Format(host), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if bytes.Equal(message.Payload(), []byte(`1`)) {
-				b.On(ctx)
-			} else {
-				b.Off(ctx)
+				return b.On(ctx)
 			}
+
+			return b.Off(ctx)
 		})),
-		mqtt.NewSubscriber(MQTTTopicColor.Format(host), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) {
+		mqtt.NewSubscriber(MQTTTopicColor.Format(host), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			color, err := wifiled.ColorFromString(string(message.Payload()))
 			if err != nil {
-				return
+				return err
 			}
 
-			b.bulb.SetColorPersist(ctx, *color)
+			return b.bulb.SetColorPersist(ctx, *color)
 		})),
-		mqtt.NewSubscriber(MQTTTopicMode.Format(host), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) {
+		mqtt.NewSubscriber(MQTTTopicMode.Format(host), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			mode, err := wifiled.ModeFromString(strings.TrimSpace(string(message.Payload())))
 			if err != nil {
-				return
+				return err
 			}
 
 			state, err := b.bulb.State(ctx)
 			if err != nil {
-				return
+				return err
 			}
 
-			b.bulb.SetMode(ctx, *mode, state.Speed)
+			return b.bulb.SetMode(ctx, *mode, state.Speed)
 		})),
-		mqtt.NewSubscriber(MQTTTopicSpeed.Format(host), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) {
+		mqtt.NewSubscriber(MQTTTopicSpeed.Format(host), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			speed, err := strconv.ParseInt(strings.TrimSpace(string(message.Payload())), 10, 64)
 			if err != nil {
-				return
+				return err
 			}
 
 			state, err := b.bulb.State(ctx)
 			if err != nil {
-				return
+				return err
 			}
 
-			b.bulb.SetMode(ctx, state.Mode, uint8(speed))
+			return b.bulb.SetMode(ctx, state.Mode, uint8(speed))
 		})),
 	}
 }

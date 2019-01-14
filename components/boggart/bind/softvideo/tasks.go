@@ -37,8 +37,10 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		atomic.StoreInt64(&b.lastValue, current)
 
 		sn := b.SerialNumber()
-		b.MQTTPublishAsync(ctx, MQTTTopicBalance.Format(mqtt.NameReplace(sn)), 0, true, value)
 		metricBalance.With("account", sn).Set(value)
+		if err := b.MQTTPublishAsync(ctx, MQTTTopicBalance.Format(mqtt.NameReplace(sn)), 0, true, value); err != nil {
+			return nil, err
+		}
 	}
 
 	return nil, nil

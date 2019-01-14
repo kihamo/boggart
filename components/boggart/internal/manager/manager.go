@@ -2,6 +2,7 @@ package manager
 
 import (
 	"context"
+	"errors"
 	"sort"
 	"sync"
 	"sync/atomic"
@@ -47,6 +48,10 @@ func (m *Manager) Register(bind boggart.Bind, t string, description string, tags
 func (m *Manager) RegisterWithID(id string, bind boggart.Bind, t string, description string, tags []string, config interface{}) (boggart.BindItem, error) {
 	if id == "" {
 		id = uuid.New()
+	} else {
+		if existsBind := m.Bind(id); existsBind != nil {
+			return nil, errors.New("bind item with id " + id + " already exist")
+		}
 	}
 
 	bindItem := &BindItem{

@@ -3,6 +3,7 @@ package samsung_tizen
 import (
 	"bytes"
 	"context"
+	"errors"
 
 	"github.com/ghthor/gowol"
 	"github.com/kihamo/boggart/components/boggart"
@@ -19,9 +20,9 @@ const (
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTTopicPower.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
+		mqtt.NewSubscriber(MQTTTopicPower.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
-				return
+				return nil
 			}
 
 			if bytes.Equal(message.Payload(), []byte(`1`)) {
@@ -29,17 +30,21 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				mac := b.mac
 				b.mutex.RUnlock()
 
-				wol.MagicWake(mac, "255.255.255.255")
-			} else if b.Status() == boggart.BindStatusOnline {
-				b.client.SendCommand(tv.KeyPower)
-			}
-		}),
-		mqtt.NewSubscriber(MQTTTopicKey.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
-			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
-				return
+				return wol.MagicWake(mac, "255.255.255.255")
 			}
 
-			b.client.SendCommand(string(message.Payload()))
+			if b.Status() != boggart.BindStatusOnline {
+				return errors.New("bind isn't online")
+			}
+
+			return b.client.SendCommand(tv.KeyPower)
+		}),
+		mqtt.NewSubscriber(MQTTTopicKey.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
+				return nil
+			}
+
+			return b.client.SendCommand(string(message.Payload()))
 		})),
 	}
 }

@@ -15,92 +15,84 @@ import (
 )
 
 const (
-	MQTTTopicGrafanaAnnotationGrafana mqtt.Topic = "annotation/grafana"
-	MQTTTopicOwnTracks                mqtt.Topic = "owntracks/+/+"
-	MQTTTopicOwnTracksGeoHash         mqtt.Topic = "owntracks/+/+/geohash"
-	MQTTTopicMessenger                mqtt.Topic = "messenger/+/+"
-	MQTTTopicWOL                      mqtt.Topic = boggart.ComponentName + "/wol/+"
-	MQTTTopicWOLWithIPAndSubnet       mqtt.Topic = boggart.ComponentName + "/wol/+/+/+"
+	MQTTTopicAnnotationGrafana  mqtt.Topic = "annotation/grafana"
+	MQTTTopicOwnTracks          mqtt.Topic = "owntracks/+/+"
+	MQTTTopicOwnTracksGeoHash   mqtt.Topic = "owntracks/+/+/geohash"
+	MQTTTopicMessenger          mqtt.Topic = "messenger/+/+"
+	MQTTTopicWOL                mqtt.Topic = boggart.ComponentName + "/wol/+"
+	MQTTTopicWOLWithIPAndSubnet mqtt.Topic = boggart.ComponentName + "/wol/+/+/+"
 )
 
 func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 	<-c.application.ReadyComponent(c.Name())
 
 	subscribers := []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTTopicOwnTracks.String(), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
+		mqtt.NewSubscriber(MQTTTopicOwnTracks.String(), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
 			if !c.config.Bool(boggart.ConfigMQTTOwnTracksEnabled) {
-				return
+				return nil
 			}
 
 			route := mqtt.RouteSplit(message.Topic())
 			if len(route) < 2 {
-				return
+				return errors.New("bad topic name")
 			}
 
 			var payload map[string]interface{}
 
-			err := json.Unmarshal(message.Payload(), &payload)
-			if err != nil {
-				c.logger.Warn("Failed parse request of OwnTracks", "error", err.Error())
-				return
+			if err := json.Unmarshal(message.Payload(), &payload); err != nil {
+				return err
 			}
 
 			t, ok := payload["_type"]
 			if !ok || t != "location" {
-				return
+				return errors.New("location not found in payload")
 			}
 
 			lat, ok := payload["lat"]
 			if !ok {
-				return
+				return errors.New("lat not found in payload")
 			}
 
 			lon, ok := payload["lon"]
 			if !ok {
-				return
+				return errors.New("lon not found in payload")
 			}
 
 			hash := geohash.Encode(lat.(float64), lon.(float64))
-			client.Publish(ctx, MQTTTopicOwnTracksGeoHash.Format(route[len(route)-2], route[len(route)-1]), message.Qos(), message.Retained(), hash)
+			return client.Publish(ctx, MQTTTopicOwnTracksGeoHash.Format(route[len(route)-2], route[len(route)-1]), message.Qos(), message.Retained(), hash)
 		}),
-		mqtt.NewSubscriber(MQTTTopicWOL.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
+		mqtt.NewSubscriber(MQTTTopicWOL.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !c.config.Bool(boggart.ConfigMQTTWOLEnabled) {
-				return
+				return nil
 			}
 
 			route := mqtt.RouteSplit(message.Topic())
 			if len(route) < 1 {
-				return
+				return errors.New("bad topic name")
 			}
 
 			mac, err := net.ParseMAC(route[len(route)-1])
 			if err != nil {
-				c.logger.Warn("Failed parse MAC address for WOL", "error", err.Error())
-				return
+				return err
 			}
 
-			if err := c.WOL(mac, nil, nil); err != nil {
-				c.logger.Warn("Failed send WOL magic packet", "error", err.Error())
-			}
+			return c.WOL(mac, nil, nil)
 		}),
-		mqtt.NewSubscriber(MQTTTopicWOLWithIPAndSubnet.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
+		mqtt.NewSubscriber(MQTTTopicWOLWithIPAndSubnet.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			route := mqtt.RouteSplit(message.Topic())
 			if len(route) < 3 {
-				return
+				return errors.New("bad topic name")
 			}
 
 			mac, err := net.ParseMAC(route[len(route)-3])
 			if err != nil {
-				c.logger.Warn("Failed parse MAC address for WOL", "error", err.Error())
-				return
+				return err
 			}
 
 			subnet := net.ParseIP(route[len(route)-1])
 			ip := net.ParseIP(route[len(route)-2])
 
-			if err := c.WOL(mac, ip, subnet); err != nil {
-				c.logger.Warn("Failed send WOL magic packet", "error", err.Error())
-			}
+			return c.WOL(mac, ip, subnet)
 		}),
 	}
 
@@ -108,9 +100,9 @@ func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 		<-c.application.ReadyComponent(annotations.ComponentName)
 		cmp := c.application.GetComponent(annotations.ComponentName).(annotations.Component)
 
-		subscribers = append(subscribers, mqtt.NewSubscriber(MQTTTopicGrafanaAnnotationGrafana.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
+		subscribers = append(subscribers, mqtt.NewSubscriber(MQTTTopicAnnotationGrafana.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !c.config.Bool(boggart.ConfigMQTTAnnotationsEnabled) {
-				return
+				return nil
 			}
 
 			var request struct {
@@ -119,45 +111,35 @@ func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 				Tags  []string `json:"tags,omitempty"`
 			}
 
-			err := json.Unmarshal(message.Payload(), &request)
-			if err != nil {
-				c.logger.Warn("Failed parse request of Grafana annotation", "error", err.Error())
-				return
+			if err := json.Unmarshal(message.Payload(), &request); err != nil {
+				return err
 			}
 
-			err = cmp.CreateInStorages(
+			return cmp.CreateInStorages(
 				annotations.NewAnnotation(request.Title, request.Text, request.Tags, nil, nil),
 				[]string{annotations.StorageGrafana})
-
-			if err != nil {
-				c.logger.Warn("Failed send Grafana annotation", "error", err.Error())
-			}
 		}))
 	}
 
 	if c.application.HasComponent(messengers.ComponentName) {
 		cmp := c.application.GetComponent(messengers.ComponentName).(messengers.Component)
 
-		subscribers = append(subscribers, mqtt.NewSubscriber(MQTTTopicMessenger.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
+		subscribers = append(subscribers, mqtt.NewSubscriber(MQTTTopicMessenger.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !c.config.Bool(boggart.ConfigMQTTMessengersEnabled) {
-				return
+				return nil
 			}
 
 			parts := mqtt.RouteSplit(message.Topic())
 			if len(parts) < 3 {
-				return
+				return errors.New("bad topic name")
 			}
 
 			messenger := cmp.Messenger(parts[len(parts)-2])
 			if messenger == nil {
-				c.logger.Warn("Messenger " + parts[len(parts)-2] + " not found")
-				return
+				return errors.New("messenger " + parts[len(parts)-2] + " not found")
 			}
 
-			err := messenger.SendMessage(parts[len(parts)-1], string(message.Payload()))
-			if err != nil {
-				c.logger.Error("Failed send message", "messenger", parts[len(parts)-2], "message", string(message.Payload()))
-			}
+			return messenger.SendMessage(parts[len(parts)-1], string(message.Payload()))
 		}))
 	}
 

@@ -52,7 +52,8 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			b.variables[v.Name] = v.Value
 			name := mqtt.NameReplace(v.Name)
 
-			b.MQTTPublishAsync(ctx, MQTTTopicVariable.Format(snMQTT, name), 2, true, v.Value)
+			// TODO:
+			_ = b.MQTTPublishAsync(ctx, MQTTTopicVariable.Format(snMQTT, name), 2, true, v.Value)
 		}
 	}
 

@@ -2,6 +2,7 @@ package nut
 
 import (
 	"context"
+	"errors"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
@@ -40,12 +41,17 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTTopicCommand.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(_ context.Context, _ mqtt.Component, message mqtt.Message) {
+		mqtt.NewSubscriber(MQTTTopicCommand.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
-				return
+				return nil
 			}
 
-			b.SendCommand(string(message.Payload()))
+			result, err := b.SendCommand(string(message.Payload()))
+			if !result {
+				return errors.New("nut returned not OK result")
+			}
+
+			return err
 		})),
 	}
 }

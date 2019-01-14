@@ -49,7 +49,8 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			atomic.StoreInt64(&b.statePower, -1)
 		}
 
-		b.MQTTPublishAsync(ctx, MQTTTopicStatePower.Format(host), 0, true, state.Power)
+		// TODO:
+		_ = b.MQTTPublishAsync(ctx, MQTTTopicStatePower.Format(host), 0, true, state.Power)
 	}
 
 	currentMode := uint64(state.Mode)
@@ -57,7 +58,8 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	if prevMode != currentMode {
 		atomic.StoreUint64(&b.stateMode, currentMode)
 
-		b.MQTTPublishAsync(ctx, MQTTTopicStateMode.Format(host), 0, true, currentMode)
+		// TODO:
+		_ = b.MQTTPublishAsync(ctx, MQTTTopicStateMode.Format(host), 0, true, currentMode)
 	}
 
 	currentSpeed := uint64(state.Speed)
@@ -65,7 +67,8 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	if prevSpeed != currentSpeed {
 		atomic.StoreUint64(&b.stateSpeed, currentSpeed)
 
-		b.MQTTPublishAsync(ctx, MQTTTopicStateSpeed.Format(host), 0, true, currentSpeed)
+		// TODO:
+		_ = b.MQTTPublishAsync(ctx, MQTTTopicStateSpeed.Format(host), 0, true, currentSpeed)
 	}
 
 	currentColor := state.Color.Uint64()
@@ -74,11 +77,13 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		atomic.StoreUint64(&b.stateColor, currentColor)
 
 		// in HEX
-		b.MQTTPublishAsync(ctx, MQTTTopicStateColor.Format(host), 0, true, state.Color.String())
+		// TODO:
+		_ = b.MQTTPublishAsync(ctx, MQTTTopicStateColor.Format(host), 0, true, state.Color.String())
 
 		// in HSV
 		h, s, v := state.Color.HSV()
-		b.MQTTPublishAsync(ctx, MQTTTopicStateColorHSV.Format(host), 0, true, fmt.Sprintf("%d,%.2f,%.2f", h, s, v))
+		// TODO:
+		_ = b.MQTTPublishAsync(ctx, MQTTTopicStateColorHSV.Format(host), 0, true, fmt.Sprintf("%d,%.2f,%.2f", h, s, v))
 	}
 
 	return nil, nil

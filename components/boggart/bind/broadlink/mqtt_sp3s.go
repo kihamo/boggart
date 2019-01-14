@@ -6,8 +6,6 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
-	"github.com/kihamo/shadow/components/tracing"
-	"github.com/opentracing/opentracing-go/log"
 )
 
 const (
@@ -30,30 +28,12 @@ func (b *BindSP3S) MQTTSubscribers() []mqtt.Subscriber {
 	sn := mqtt.NameReplace(b.SerialNumber())
 
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(SP3SMQTTTopicSet.Format(sn), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) {
-			if b.Status() != boggart.BindStatusOnline {
-				return
-			}
-
-			span, ctx := tracing.StartSpanFromContext(ctx, "socket", "set")
-			span.LogFields(
-				log.String("mac", b.provider.MAC().String()),
-				log.String("ip", b.provider.Addr().String()))
-			defer span.Finish()
-
-			var err error
-
+		mqtt.NewSubscriber(SP3SMQTTTopicSet.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
 			if bytes.Equal(message.Payload(), []byte(`1`)) {
-				err = b.On(ctx)
-				span.LogFields(log.String("state", "on"))
-			} else {
-				err = b.Off(ctx)
-				span.LogFields(log.String("state", "off"))
+				return b.On(ctx)
 			}
 
-			if err != nil {
-				tracing.SpanError(span, err)
-			}
-		}),
+			return b.Off(ctx)
+		})),
 	}
 }

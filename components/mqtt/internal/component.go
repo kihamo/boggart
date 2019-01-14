@@ -235,7 +235,17 @@ func (c *Component) clientSubscribe(topic string, qos byte, subscription *mqtt.S
 			"retained", r,
 		).Inc()
 
-		subscription.Callback(ctx, c, message)
+		if err := subscription.Callback(ctx, c, message); err != nil {
+			tracing.SpanError(span, err)
+			c.logger.Error(
+				"message", "Call MQTT subscriber failed",
+				"error", err.Error(),
+				"topic", topic,
+				"qos", strconv.Itoa(int(qos)),
+				"retained", r,
+				"payload", string(message.Payload()),
+			)
+		}
 	}
 
 	token := client.Subscribe(topic, qos, callback)
@@ -246,6 +256,7 @@ func (c *Component) clientSubscribe(topic string, qos byte, subscription *mqtt.S
 
 func (c *Component) Publish(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) (err error) {
 	// TODO: cache topics
+	payload = c.convertPayload(payload)
 
 	span, _ := tracing.StartSpanFromContext(ctx, c.Name(), "mqtt_publish")
 	span = span.SetTag("topic", topic)
@@ -280,9 +291,23 @@ func (c *Component) Publish(ctx context.Context, topic string, qos byte, retaine
 
 	if err != nil {
 		tracing.SpanError(span, err)
+		c.logger.Error(
+			"message", "Publish MQTT topic failed",
+			"error", err.Error(),
+			"topic", topic,
+			"qos", strconv.Itoa(int(qos)),
+			"retained", r,
+			"payload", fmt.Sprintf("%v", payload),
+		)
 	}
 
 	return err
+}
+
+func (c *Component) PublishAsync(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) {
+	go func() {
+		c.Publish(ctx, topic, qos, retained, payload)
+	}()
 }
 
 func (c *Component) Unsubscribe(topic string) error {
@@ -440,4 +465,49 @@ func (c *Component) Subscriptions() []*mqtt.Subscription {
 	c.mutex.RUnlock()
 
 	return subscriptions
+}
+
+func (c *Component) convertPayload(payload interface{}) interface{} {
+	switch value := payload.(type) {
+	case string, []byte:
+		// skip
+	case float64:
+		return strconv.FormatFloat(value, 'f', -1, 64)
+	case float32:
+		return strconv.FormatFloat(float64(value), 'f', -1, 64)
+	case int64:
+		return strconv.FormatInt(value, 10)
+	case int32:
+		return strconv.FormatInt(int64(value), 10)
+	case int16:
+		return strconv.FormatInt(int64(value), 10)
+	case int8:
+		return strconv.FormatInt(int64(value), 10)
+	case int:
+		return strconv.FormatInt(int64(value), 10)
+	case uint64:
+		return strconv.FormatUint(value, 10)
+	case uint32:
+		return strconv.FormatUint(uint64(value), 10)
+	case uint16:
+		return strconv.FormatUint(uint64(value), 10)
+	case uint8:
+		return strconv.FormatUint(uint64(value), 10)
+	case uint:
+		return strconv.FormatUint(uint64(value), 10)
+	case bool:
+		if value {
+			return []byte(`1`)
+		}
+
+		return []byte(`0`)
+	case time.Time:
+		return value.Format(time.RFC3339)
+	case *time.Time:
+		return value.Format(time.RFC3339)
+	default:
+		return fmt.Sprintf("%s", payload)
+	}
+
+	return payload
 }

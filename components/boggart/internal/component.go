@@ -132,7 +132,10 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 	<-a.ReadyComponent(config.ComponentName)
 	c.config = a.GetComponent(config.ComponentName).(config.Component)
 
-	c.ReloadConfig()
+	if err := c.ReloadConfig(); err != nil {
+		return err
+	}
+
 	c.manager.Ready()
 
 	return nil

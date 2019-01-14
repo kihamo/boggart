@@ -12,6 +12,7 @@ type Component interface {
 
 	Client() m.Client
 	Publish(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error
+	PublishAsync(ctx context.Context, topic string, qos byte, retained bool, payload interface{})
 
 	Unsubscribe(topic string) error
 	UnsubscribeSubscriber(Subscriber) error
@@ -25,4 +26,4 @@ type Component interface {
 
 type Message m.Message
 
-type MessageHandler func(ctx context.Context, client Component, message Message)
+type MessageHandler func(ctx context.Context, client Component, message Message) error

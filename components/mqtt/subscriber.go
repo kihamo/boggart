@@ -11,7 +11,7 @@ type HasSubscribers interface {
 type Subscriber interface {
 	Topic() string
 	QOS() byte
-	Call(context.Context, Component, Message)
+	Call(context.Context, Component, Message) error
 }
 
 type SubscriberSimple struct {
@@ -36,6 +36,6 @@ func (s *SubscriberSimple) QOS() byte {
 	return s.qos
 }
 
-func (s *SubscriberSimple) Call(ctx context.Context, client Component, message Message) {
-	s.callback(ctx, client, message)
+func (s *SubscriberSimple) Call(ctx context.Context, client Component, message Message) error {
+	return s.callback(ctx, client, message)
 }

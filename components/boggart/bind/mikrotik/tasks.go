@@ -65,8 +65,9 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 
 		login := mqtt.NameReplace(mac.Address)
 
-		b.MQTTPublishAsync(ctx, MQTTTopicWiFiConnectedMAC.Format(sn), 0, false, login)
-		b.MQTTPublishAsync(ctx, MQTTTopicWiFiMACState.Format(sn, login), 0, false, true)
+		// TODO:
+		_ = b.MQTTPublishAsync(ctx, MQTTTopicWiFiConnectedMAC.Format(sn), 0, false, login)
+		_ = b.MQTTPublishAsync(ctx, MQTTTopicWiFiMACState.Format(sn, login), 0, false, true)
 	}
 
 	// vpn clients
@@ -78,8 +79,9 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	for _, connection := range connections {
 		login := mqtt.NameReplace(connection.Name)
 
-		b.MQTTPublishAsync(ctx, MQTTTopicVPNConnectedLogin.Format(sn), 0, false, login)
-		b.MQTTPublishAsync(ctx, MQTTTopicVPNLoginState.Format(sn, login), 0, false, true)
+		// TODO:
+		_ = b.MQTTPublishAsync(ctx, MQTTTopicVPNConnectedLogin.Format(sn), 0, false, login)
+		_ = b.MQTTPublishAsync(ctx, MQTTTopicVPNLoginState.Format(sn, login), 0, false, true)
 	}
 
 	return nil, nil

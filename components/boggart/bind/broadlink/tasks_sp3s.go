@@ -41,7 +41,8 @@ func (b *BindSP3S) taskStateUpdater(ctx context.Context) (interface{}, error) {
 			atomic.StoreInt64(&b.state, -1)
 		}
 
-		b.MQTTPublishAsync(ctx, SP3SMQTTTopicState.Format(serialNumberMQTT), 0, true, state)
+		// TODO:
+		_ = b.MQTTPublishAsync(ctx, SP3SMQTTTopicState.Format(serialNumberMQTT), 0, true, state)
 	}
 
 	value, err := b.Power()
@@ -57,7 +58,9 @@ func (b *BindSP3S) taskStateUpdater(ctx context.Context) (interface{}, error) {
 	if currentPower != prevPower {
 		atomic.StoreInt64(&b.power, currentPower)
 
-		b.MQTTPublishAsync(ctx, SP3SMQTTTopicPower.Format(serialNumberMQTT), 0, true, value)
+		if err := b.MQTTPublishAsync(ctx, SP3SMQTTTopicPower.Format(serialNumberMQTT), 0, true, value); err != nil {
+			return nil, err
+		}
 	}
 
 	return nil, nil
