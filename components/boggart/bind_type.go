@@ -35,7 +35,7 @@ func GetBindType(name string) (BindType, error) {
 
 	kind, ok := bindTypes[name]
 	if !ok {
-		return nil, errors.New("Bind type " + name + " isn't register")
+		return nil, errors.New("bind type " + name + " isn't register")
 	}
 
 	return kind, nil

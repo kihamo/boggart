@@ -13,6 +13,9 @@ msgstr ""
 msgid "Bindings"
 msgstr "Привязки"
 
+msgid "Add bind"
+msgstr "Добавить привязку"
+
 msgid "Type"
 msgstr "Тип"
 

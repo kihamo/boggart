@@ -24,12 +24,17 @@
             <ul class="nav navbar-right panel_toolbox">
                 <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
                 <li>
-                    <a href="javascript:void(0)" data-toggle="modal" data-target="#config-yaml" data-modal-title="{{ i18n "Config YAML" . }}">
-                        <i class="glyphicon glyphicon-list-alt" data-toggle="tooltip" title="{{ i18n "Config YAML" . }}" data-placement="bottom"></i>
+                    <a href="/boggart/bind">
+                        <i class="glyphicon glyphicon-plus" title="{{ i18n "Add bind" . }}" data-toggle="tooltip" data-placement="bottom"></i>
                     </a>
                 </li>
                 <li>
-                    <a href="/boggart/config/download" title="{{ i18n "Download" . }}" data-toggle="tooltip" data-placement="bottom">
+                    <a href="javascript:void(0)" data-toggle="modal" data-target="#config-yaml" data-modal-title="{{ i18n "Config YAML" . }}">
+                        <i class="glyphicon glyphicon-list-alt" title="{{ i18n "Config YAML" . }}" data-toggle="tooltip" data-placement="bottom"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="/boggart/config/download" title="{{ i18n "Download YAML" . }}" data-toggle="tooltip" data-placement="bottom">
                         <i class="glyphicon glyphicon-download-alt"></i>
                     </a>
                 </li>

@@ -90,7 +90,12 @@ func (h *BindHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 		buf.WriteString(code)
 
-		if bind, upgraded, err := h.registerByYAML(buf.Bytes()); err == nil {
+		var (
+			bind     boggart.BindItem
+			upgraded bool
+		)
+
+		if bind, upgraded, err = h.registerByYAML(buf.Bytes()); err == nil {
 			if upgraded {
 				message = "Bind " + bind.ID() + " upgraded"
 			} else {
@@ -102,17 +107,29 @@ func (h *BindHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		defer enc.Close()
 
 		if bindItem == nil {
-			err = enc.Encode(&BindYAML{})
+			err = enc.Encode(&BindYAML{
+				Description: "Description of new bind",
+				Tags:        []string{"tag_label"},
+				Config: map[string]interface{}{
+					"config_key": "config_value",
+				},
+			})
 		} else {
 			err = enc.Encode(bindItem)
 		}
 	}
 
-	h.Render(r.Context(), "bind", map[string]interface{}{
+	vars := map[string]interface{}{
 		"yaml":    buf.String(),
 		"error":   err,
 		"message": message,
-	})
+	}
+
+	if bindItem != nil {
+		vars["bindId"] = bindItem.ID()
+	}
+
+	h.Render(r.Context(), "bind", vars)
 }
 
 func (h *BindHandler) registerByYAML(code []byte) (bindItem boggart.BindItem, upgraded bool, err error) {

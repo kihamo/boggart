@@ -76,34 +76,34 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 		enc := yaml.NewEncoder(buf)
 		defer enc.Close()
 
-		for _, d := range h.manager.BindItems() {
+		for _, bindItem := range h.manager.BindItems() {
 			buf.Reset()
-			if err := enc.Encode(d.Config()); err != nil {
+			if err := enc.Encode(bindItem); err != nil {
 				panic(err.Error())
 			}
 
 			item := managerHandlerDevice{
-				Id:              d.ID(),
-				Type:            d.Type(),
-				Description:     d.Description(),
-				SerialNumber:    d.Bind().SerialNumber(),
-				Status:          d.Bind().Status().String(),
-				Tags:            d.Tags(),
-				Tasks:           make([]string, 0, len(d.Tasks())),
-				MQTTPublishes:   make([]string, 0, len(d.MQTTPublishes())),
-				MQTTSubscribers: make([]string, 0, len(d.MQTTSubscribers())),
+				Id:              bindItem.ID(),
+				Type:            bindItem.Type(),
+				Description:     bindItem.Description(),
+				SerialNumber:    bindItem.Bind().SerialNumber(),
+				Status:          bindItem.Bind().Status().String(),
+				Tags:            bindItem.Tags(),
+				Tasks:           make([]string, 0, len(bindItem.Tasks())),
+				MQTTPublishes:   make([]string, 0, len(bindItem.MQTTPublishes())),
+				MQTTSubscribers: make([]string, 0, len(bindItem.MQTTSubscribers())),
 				Config:          buf.String(),
 			}
 
-			for _, task := range d.Tasks() {
+			for _, task := range bindItem.Tasks() {
 				item.Tasks = append(item.Tasks, task.Name())
 			}
 
-			for _, topic := range d.MQTTPublishes() {
+			for _, topic := range bindItem.MQTTPublishes() {
 				item.MQTTPublishes = append(item.MQTTPublishes, topic.String())
 			}
 
-			for _, topic := range d.MQTTSubscribers() {
+			for _, topic := range bindItem.MQTTSubscribers() {
 				item.MQTTSubscribers = append(item.MQTTSubscribers, topic.Topic())
 			}
 

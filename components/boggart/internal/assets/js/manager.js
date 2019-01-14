@@ -67,8 +67,14 @@ $(document).ready(function () {
                 {
                     data: null,
                     render: function (data, type, row) {
-                        return '<button type="button" class="btn btn-danger btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Confirm unregister device #' + row.id + '" data-modal-callback="deviceUnregister(\'' + row.id + '\');">' +
-                            '<i class="glyphicon glyphicon-trash" title="Unregister device"></i>'
+                        return '<div class="btn-group" role="group">' +
+                            '<a href="/boggart/bind/' + row.id + '/" class="btn btn-warning btn-icon btn-xs">' +
+                            '<i class="glyphicon glyphicon-edit" title="Edit bind"></i>' +
+                            '</a>' +
+                            '<button type="button" class="btn btn-danger btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Confirm unregister device #' + row.id + '" data-modal-callback="bindUnregister(\'' + row.id + '\');">' +
+                            '<i class="glyphicon glyphicon-trash" title="Unregister bind"></i>' +
+                            '</button>' +
+                            '</div>';
                     }
                 },
                 {
@@ -191,10 +197,10 @@ $(document).ready(function () {
             ]
         });
 
-    window.deviceUnregister = function(deviceId) {
+    window.bindUnregister = function(id) {
         $.ajax({
             type: 'POST',
-            url: '/boggart/bind/' + deviceId + '/unregister',
+            url: '/boggart/bind/' + id + '/unregister',
             success: function(r) {
                 if (r.result === 'failed') {
                     new PNotify({
@@ -207,9 +213,13 @@ $(document).ready(function () {
                     return
                 }
 
-                tableDevices.ajax.reload();
-                tableListeners.ajax.reload();
+                refreshTables();
             }
         });
-    }
+    };
+
+    window.refreshTables = function() {
+        tableDevices.ajax.reload();
+        tableListeners.ajax.reload();
+    };
 });
