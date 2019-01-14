@@ -50,7 +50,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		}
 
 		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTTopicStatePower.Format(host), 0, true, state.Power)
+		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStatePower.Format(host), 0, true, state.Power)
 	}
 
 	currentMode := uint64(state.Mode)
@@ -59,7 +59,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		atomic.StoreUint64(&b.stateMode, currentMode)
 
 		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTTopicStateMode.Format(host), 0, true, currentMode)
+		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMode.Format(host), 0, true, currentMode)
 	}
 
 	currentSpeed := uint64(state.Speed)
@@ -68,7 +68,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		atomic.StoreUint64(&b.stateSpeed, currentSpeed)
 
 		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTTopicStateSpeed.Format(host), 0, true, currentSpeed)
+		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateSpeed.Format(host), 0, true, currentSpeed)
 	}
 
 	currentColor := state.Color.Uint64()
@@ -78,12 +78,12 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 
 		// in HEX
 		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTTopicStateColor.Format(host), 0, true, state.Color.String())
+		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateColor.Format(host), 0, true, state.Color.String())
 
 		// in HSV
 		h, s, v := state.Color.HSV()
 		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTTopicStateColorHSV.Format(host), 0, true, fmt.Sprintf("%d,%.2f,%.2f", h, s, v))
+		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateColorHSV.Format(host), 0, true, fmt.Sprintf("%d,%.2f,%.2f", h, s, v))
 	}
 
 	return nil, nil

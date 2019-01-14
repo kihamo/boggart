@@ -41,7 +41,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			metricTemperatureIn.With("serial_number", sn).Set(current)
 
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTTopicTemperatureIn.Format(snMQTT), 0, true, current)
+			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicTemperatureIn.Format(snMQTT), 0, true, current)
 		}
 	} else {
 		// TODO: log
@@ -55,7 +55,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			metricTemperatureOut.With("serial_number", sn).Set(current)
 
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTTopicTemperatureOut.Format(snMQTT), 0, true, current)
+			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicTemperatureOut.Format(snMQTT), 0, true, current)
 		}
 	} else {
 		// TODO: log
@@ -69,7 +69,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			metricTemperatureDelta.With("serial_number", sn).Set(current)
 
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTTopicTemperatureDelta.Format(snMQTT), 0, true, current)
+			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicTemperatureDelta.Format(snMQTT), 0, true, current)
 		}
 	} else {
 		// TODO: log
@@ -83,7 +83,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			metricEnergy.With("serial_number", sn).Set(current)
 
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTTopicEnergy.Format(snMQTT), 0, true, current)
+			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicEnergy.Format(snMQTT), 0, true, current)
 		}
 	} else {
 		// TODO: log
@@ -97,7 +97,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			metricConsumption.With("serial_number", sn).Set(current)
 
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTTopicConsumption.Format(snMQTT), 0, true, current)
+			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicConsumption.Format(snMQTT), 0, true, current)
 		}
 	} else {
 		// TODO: log
@@ -111,7 +111,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			metricCapacity.With("serial_number", sn).Set(current)
 
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTTopicCapacity.Format(snMQTT), 0, true, current)
+			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicCapacity.Format(snMQTT), 0, true, current)
 		}
 	} else {
 		// TODO: log
@@ -125,7 +125,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			metricPower.With("serial_number", sn).Set(current)
 
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTTopicPower.Format(snMQTT), 0, true, current)
+			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicPower.Format(snMQTT), 0, true, current)
 		}
 	} else {
 		// TODO: log
@@ -139,12 +139,12 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			atomic.StoreUint64(&b.input1, current)
 
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTTopicInputPulses.Format(snMQTT, 1), 0, true, current)
+			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicInputPulses.Format(snMQTT, 1), 0, true, current)
 			metricInputPulses.With("serial_number", sn).With("input", "1").Set(float64(current))
 
 			volume := b.inputVolume(current, b.config.Input1Offset)
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTTopicInputVolume.Format(snMQTT, 1), 0, true, volume)
+			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicInputVolume.Format(snMQTT, 1), 0, true, volume)
 			metricInputVolume.With("serial_number", sn).With("input", "1").Set(volume)
 		}
 	} else {
@@ -158,12 +158,12 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			atomic.StoreUint64(&b.input2, current)
 
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTTopicInputPulses.Format(snMQTT, 2), 0, true, current)
+			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicInputPulses.Format(snMQTT, 2), 0, true, current)
 			metricInputPulses.With("serial_number", sn).With("input", "2").Set(float64(current))
 
 			volume := b.inputVolume(current, b.config.Input2Offset)
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTTopicInputVolume.Format(snMQTT, 2), 0, true, volume)
+			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicInputVolume.Format(snMQTT, 2), 0, true, volume)
 			metricInputVolume.With("serial_number", sn).With("input", "2").Set(volume)
 		}
 	} else {
@@ -177,12 +177,12 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			atomic.StoreUint64(&b.input3, current)
 
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTTopicInputPulses.Format(snMQTT, 3), 0, true, current)
+			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicInputPulses.Format(snMQTT, 3), 0, true, current)
 			metricInputPulses.With("serial_number", sn).With("input", "3").Set(float64(current))
 
 			volume := b.inputVolume(current, b.config.Input3Offset)
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTTopicInputVolume.Format(snMQTT, 3), 0, true, volume)
+			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicInputVolume.Format(snMQTT, 3), 0, true, volume)
 			metricInputVolume.With("serial_number", sn).With("input", "3").Set(volume)
 		}
 	} else {
@@ -196,12 +196,12 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			atomic.StoreUint64(&b.input4, current)
 
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTTopicInputPulses.Format(snMQTT, 4), 0, true, current)
+			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicInputPulses.Format(snMQTT, 4), 0, true, current)
 			metricInputPulses.With("serial_number", sn).With("input", "4").Set(float64(current))
 
 			volume := b.inputVolume(current, b.config.Input4Offset)
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTTopicInputVolume.Format(snMQTT, 4), 0, true, volume)
+			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicInputVolume.Format(snMQTT, 4), 0, true, volume)
 			metricInputVolume.With("serial_number", sn).With("input", "4").Set(volume)
 		}
 	} else {

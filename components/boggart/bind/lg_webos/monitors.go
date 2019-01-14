@@ -12,7 +12,7 @@ func (b *Bind) monitorForegroundAppInfo(s webostv.ForegroundAppInfo) error {
 	ctx := context.Background()
 	sn := mqtt.NameReplace(b.SerialNumber())
 
-	if err := b.MQTTPublishAsync(ctx, MQTTTopicStateApplication.Format(sn), 2, true, s.AppId); err != nil {
+	if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateApplication.Format(sn), 2, true, s.AppId); err != nil {
 		return err
 	}
 
@@ -21,23 +21,23 @@ func (b *Bind) monitorForegroundAppInfo(s webostv.ForegroundAppInfo) error {
 		b.UpdateStatus(boggart.BindStatusOffline)
 	}
 
-	return b.MQTTPublishAsync(ctx, MQTTTopicStatePower.Format(sn), 2, true, s.AppId != "")
+	return b.MQTTPublishAsync(ctx, MQTTPublishTopicStatePower.Format(sn), 2, true, s.AppId != "")
 }
 
 func (b *Bind) monitorAudio(s webostv.AudioStatus) error {
 	ctx := context.Background()
 	sn := mqtt.NameReplace(b.SerialNumber())
 
-	if err := b.MQTTPublishAsync(ctx, MQTTTopicStateMute.Format(sn), 2, true, s.Mute); err != nil {
+	if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMute.Format(sn), 2, true, s.Mute); err != nil {
 		return err
 	}
 
-	return b.MQTTPublishAsync(ctx, MQTTTopicStateVolume.Format(sn), 2, true, s.Volume)
+	return b.MQTTPublishAsync(ctx, MQTTPublishTopicStateVolume.Format(sn), 2, true, s.Volume)
 }
 
 func (b *Bind) monitorTvCurrentChannel(s webostv.TvCurrentChannel) error {
 	ctx := context.Background()
 	sn := mqtt.NameReplace(b.SerialNumber())
 
-	return b.MQTTPublishAsync(ctx, MQTTTopicStateChannelNumber.Format(sn), 2, true, s.ChannelNumber)
+	return b.MQTTPublishAsync(ctx, MQTTPublishTopicStateChannelNumber.Format(sn), 2, true, s.ChannelNumber)
 }

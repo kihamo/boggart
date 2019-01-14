@@ -75,7 +75,7 @@ func (b *Bind) startAlertStreaming() error {
 
 				if !ok || event.DateTime.Sub(lastFire) > b.eventsIgnoreInterval {
 					// TODO: log
-					_ = b.MQTTPublishAsync(ctx, MQTTTopicEvent.Format(sn, event.DynChannelID, event.EventType), 0, false, event.EventDescription)
+					_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicEvent.Format(sn, event.DynChannelID, event.EventType), 0, false, event.EventDescription)
 				}
 
 			case _ = <-stream.NextError():

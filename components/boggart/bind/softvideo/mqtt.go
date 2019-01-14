@@ -6,11 +6,11 @@ import (
 )
 
 const (
-	MQTTTopicBalance mqtt.Topic = boggart.ComponentName + "/service/softvideo/+/balance"
+	MQTTPublishTopicBalance mqtt.Topic = boggart.ComponentName + "/service/softvideo/+/balance"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
-		mqtt.Topic(MQTTTopicBalance.Format(b.SerialNumber())),
+		mqtt.Topic(MQTTPublishTopicBalance.Format(b.SerialNumber())),
 	}
 }

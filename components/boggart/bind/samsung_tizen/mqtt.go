@@ -12,15 +12,22 @@ import (
 )
 
 const (
-	MQTTTopicPower           mqtt.Topic = boggart.ComponentName + "/tv/+/power"
-	MQTTTopicKey             mqtt.Topic = boggart.ComponentName + "/tv/+/key"
-	MQTTTopicDeviceID        mqtt.Topic = boggart.ComponentName + "/tv/+/device/id"
-	MQTTTopicDeviceModelName mqtt.Topic = boggart.ComponentName + "/tv/+/device/model-name"
+	MQTTSubscribeTopicPower         mqtt.Topic = boggart.ComponentName + "/tv/+/power"
+	MQTTSubscribeTopicKey           mqtt.Topic = boggart.ComponentName + "/tv/+/key"
+	MQTTPublishTopicDeviceID        mqtt.Topic = boggart.ComponentName + "/tv/+/device/id"
+	MQTTPublishTopicDeviceModelName mqtt.Topic = boggart.ComponentName + "/tv/+/device/model-name"
 )
+
+func (d *Bind) MQTTPublishes() []mqtt.Topic {
+	return []mqtt.Topic{
+		MQTTPublishTopicDeviceID,
+		MQTTPublishTopicDeviceModelName,
+	}
+}
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTTopicPower.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(MQTTSubscribeTopicPower.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
 				return nil
 			}
@@ -39,7 +46,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			return b.client.SendCommand(tv.KeyPower)
 		}),
-		mqtt.NewSubscriber(MQTTTopicKey.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(MQTTSubscribeTopicKey.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
 				return nil
 			}

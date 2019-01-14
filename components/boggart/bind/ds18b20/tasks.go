@@ -70,7 +70,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		atomic.StoreInt64(&b.lastValue, current)
 
 		metricValue.With("serial_number", sn).Set(value)
-		if err := b.MQTTPublishAsync(ctx, MQTTTopicValue.Format(mqtt.NameReplace(sn)), 0, true, value); err != nil {
+		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicValue.Format(mqtt.NameReplace(sn)), 0, true, value); err != nil {
 			return nil, err
 		}
 	}

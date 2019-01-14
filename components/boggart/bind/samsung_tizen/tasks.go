@@ -46,8 +46,8 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 
 		sn := b.SerialNumber()
 		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTTopicDeviceID.Format(sn), 0, false, info.Device.ID)
-		_ = b.MQTTPublishAsync(ctx, MQTTTopicDeviceModelName.Format(sn), 0, false, info.Device.Name)
+		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicDeviceID.Format(sn), 0, false, info.Device.ID)
+		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicDeviceModelName.Format(sn), 0, false, info.Device.Name)
 	}
 	b.UpdateStatus(boggart.BindStatusOnline)
 

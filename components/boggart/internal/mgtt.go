@@ -15,19 +15,19 @@ import (
 )
 
 const (
-	MQTTTopicAnnotationGrafana  mqtt.Topic = "annotation/grafana"
-	MQTTTopicOwnTracks          mqtt.Topic = "owntracks/+/+"
-	MQTTTopicOwnTracksGeoHash   mqtt.Topic = "owntracks/+/+/geohash"
-	MQTTTopicMessenger          mqtt.Topic = "messenger/+/+"
-	MQTTTopicWOL                mqtt.Topic = boggart.ComponentName + "/wol/+"
-	MQTTTopicWOLWithIPAndSubnet mqtt.Topic = boggart.ComponentName + "/wol/+/+/+"
+	MQTTSubscribeTopicOwnTracks          mqtt.Topic = "owntracks/+/+"
+	MQTTPublishTopicOwnTracksGeoHash     mqtt.Topic = "owntracks/+/+/geohash"
+	MQTTSubscribeTopicAnnotationGrafana  mqtt.Topic = "annotation/grafana"
+	MQTTSubscribeTopicMessenger          mqtt.Topic = "messenger/+/+"
+	MQTTSubscribeTopicWOL                mqtt.Topic = boggart.ComponentName + "/wol/+"
+	MQTTSubscribeTopicWOLWithIPAndSubnet mqtt.Topic = boggart.ComponentName + "/wol/+/+/+"
 )
 
 func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 	<-c.application.ReadyComponent(c.Name())
 
 	subscribers := []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTTopicOwnTracks.String(), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(MQTTSubscribeTopicOwnTracks.String(), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
 			if !c.config.Bool(boggart.ConfigMQTTOwnTracksEnabled) {
 				return nil
 			}
@@ -59,9 +59,9 @@ func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 			}
 
 			hash := geohash.Encode(lat.(float64), lon.(float64))
-			return client.Publish(ctx, MQTTTopicOwnTracksGeoHash.Format(route[len(route)-2], route[len(route)-1]), message.Qos(), message.Retained(), hash)
+			return client.Publish(ctx, MQTTPublishTopicOwnTracksGeoHash.Format(route[len(route)-2], route[len(route)-1]), message.Qos(), message.Retained(), hash)
 		}),
-		mqtt.NewSubscriber(MQTTTopicWOL.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(MQTTSubscribeTopicWOL.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !c.config.Bool(boggart.ConfigMQTTWOLEnabled) {
 				return nil
 			}
@@ -78,7 +78,7 @@ func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 
 			return c.WOL(mac, nil, nil)
 		}),
-		mqtt.NewSubscriber(MQTTTopicWOLWithIPAndSubnet.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(MQTTSubscribeTopicWOLWithIPAndSubnet.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			route := mqtt.RouteSplit(message.Topic())
 			if len(route) < 3 {
 				return errors.New("bad topic name")
@@ -100,7 +100,7 @@ func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 		<-c.application.ReadyComponent(annotations.ComponentName)
 		cmp := c.application.GetComponent(annotations.ComponentName).(annotations.Component)
 
-		subscribers = append(subscribers, mqtt.NewSubscriber(MQTTTopicAnnotationGrafana.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+		subscribers = append(subscribers, mqtt.NewSubscriber(MQTTSubscribeTopicAnnotationGrafana.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !c.config.Bool(boggart.ConfigMQTTAnnotationsEnabled) {
 				return nil
 			}
@@ -124,7 +124,7 @@ func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 	if c.application.HasComponent(messengers.ComponentName) {
 		cmp := c.application.GetComponent(messengers.ComponentName).(messengers.Component)
 
-		subscribers = append(subscribers, mqtt.NewSubscriber(MQTTTopicMessenger.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+		subscribers = append(subscribers, mqtt.NewSubscriber(MQTTSubscribeTopicMessenger.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !c.config.Bool(boggart.ConfigMQTTMessengersEnabled) {
 				return nil
 			}

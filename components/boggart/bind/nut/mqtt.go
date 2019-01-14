@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	MQTTTopicVariable mqtt.Topic = boggart.ComponentName + "/ups/+/variable/+"
-	MQTTTopicCommand  mqtt.Topic = boggart.ComponentName + "/ups/+/command"
+	MQTTPublishTopicVariable  mqtt.Topic = boggart.ComponentName + "/ups/+/variable/+"
+	MQTTSubscribeTopicCommand mqtt.Topic = boggart.ComponentName + "/ups/+/command"
 )
 
 /*
@@ -35,13 +35,13 @@ test.panel.stop - Stop a UPS panel test
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
-		mqtt.Topic(MQTTTopicVariable.String()),
+		mqtt.Topic(MQTTPublishTopicVariable.String()),
 	}
 }
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTTopicCommand.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(MQTTSubscribeTopicCommand.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
 				return nil
 			}

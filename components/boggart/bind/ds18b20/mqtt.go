@@ -6,11 +6,11 @@ import (
 )
 
 const (
-	MQTTTopicValue mqtt.Topic = boggart.ComponentName + "/meter/ds18b20/+"
+	MQTTPublishTopicValue mqtt.Topic = boggart.ComponentName + "/meter/ds18b20/+"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
-		mqtt.Topic(MQTTTopicValue.Format(mqtt.NameReplace(b.SerialNumber()))),
+		mqtt.Topic(MQTTPublishTopicValue.Format(mqtt.NameReplace(b.SerialNumber()))),
 	}
 }

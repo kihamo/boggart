@@ -9,13 +9,13 @@ import (
 )
 
 const (
-	MQTTTopicPinState mqtt.Topic = boggart.ComponentName + "/gpio/+"
-	MQTTTopicPinSet   mqtt.Topic = boggart.ComponentName + "/gpio/+/set"
+	MQTTPublishTopicPinState mqtt.Topic = boggart.ComponentName + "/gpio/+"
+	MQTTSubscribeTopicPinSet mqtt.Topic = boggart.ComponentName + "/gpio/+/set"
 )
 
 func (d *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
-		mqtt.Topic(MQTTTopicPinState.Format(d.pin.Number())),
+		mqtt.Topic(MQTTPublishTopicPinState.Format(d.pin.Number())),
 	}
 }
 
@@ -26,7 +26,7 @@ func (d *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(
-			MQTTTopicPinSet.Format(d.pin.Number()),
+			MQTTSubscribeTopicPinSet.Format(d.pin.Number()),
 			0,
 			func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
 				if bytes.Equal(message.Payload(), []byte(`1`)) {

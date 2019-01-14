@@ -13,49 +13,49 @@ import (
 )
 
 const (
-	MQTTTopicEvent                     mqtt.Topic = boggart.ComponentName + "/cctv/+/+/+"
-	MQTTTopicPTZMove                   mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/move"
-	MQTTTopicPTZAbsolute               mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/absolute"
-	MQTTTopicPTZContinuous             mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/continuous"
-	MQTTTopicPTZRelative               mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/relative"
-	MQTTTopicPTZPreset                 mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/preset"
-	MQTTTopicPTZMomentary              mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/momentary"
-	MQTTTopicPTZStatusElevation        mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/elevation"
-	MQTTTopicPTZStatusAzimuth          mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/azimuth"
-	MQTTTopicPTZStatusZoom             mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/zoom"
-	MQTTTopicStateModel                mqtt.Topic = boggart.ComponentName + "/cctv/+/state/model"
-	MQTTTopicStateFirmwareVersion      mqtt.Topic = boggart.ComponentName + "/cctv/+/state/firmware/version"
-	MQTTTopicStateFirmwareReleasedDate mqtt.Topic = boggart.ComponentName + "/cctv/+/state/firmware/release-date"
-	MQTTTopicStateUpTime               mqtt.Topic = boggart.ComponentName + "/cctv/+/state/uptime"
-	MQTTTopicStateMemoryUsage          mqtt.Topic = boggart.ComponentName + "/cctv/+/state/memory/usage"
-	MQTTTopicStateMemoryAvailable      mqtt.Topic = boggart.ComponentName + "/cctv/+/state/memory/available"
-	MQTTTopicStateHDDCapacity          mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/capacity"
-	MQTTTopicStateHDDFree              mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/free"
-	MQTTTopicStateHDDUsage             mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/usage"
+	MQTTSubscribeTopicPTZMove                 mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/move"
+	MQTTSubscribeTopicPTZAbsolute             mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/absolute"
+	MQTTSubscribeTopicPTZContinuous           mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/continuous"
+	MQTTSubscribeTopicPTZRelative             mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/relative"
+	MQTTSubscribeTopicPTZPreset               mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/preset"
+	MQTTSubscribeTopicPTZMomentary            mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/momentary"
+	MQTTPublishTopicEvent                     mqtt.Topic = boggart.ComponentName + "/cctv/+/+/+"
+	MQTTPublishTopicPTZStatusElevation        mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/elevation"
+	MQTTPublishTopicPTZStatusAzimuth          mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/azimuth"
+	MQTTPublishTopicPTZStatusZoom             mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/zoom"
+	MQTTPublishTopicStateModel                mqtt.Topic = boggart.ComponentName + "/cctv/+/state/model"
+	MQTTPublishTopicStateFirmwareVersion      mqtt.Topic = boggart.ComponentName + "/cctv/+/state/firmware/version"
+	MQTTPublishTopicStateFirmwareReleasedDate mqtt.Topic = boggart.ComponentName + "/cctv/+/state/firmware/release-date"
+	MQTTPublishTopicStateUpTime               mqtt.Topic = boggart.ComponentName + "/cctv/+/state/uptime"
+	MQTTPublishTopicStateMemoryUsage          mqtt.Topic = boggart.ComponentName + "/cctv/+/state/memory/usage"
+	MQTTPublishTopicStateMemoryAvailable      mqtt.Topic = boggart.ComponentName + "/cctv/+/state/memory/available"
+	MQTTPublishTopicStateHDDCapacity          mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/capacity"
+	MQTTPublishTopicStateHDDFree              mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/free"
+	MQTTPublishTopicStateHDDUsage             mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/usage"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	topics := []mqtt.Topic{
-		MQTTTopicStateModel,
-		MQTTTopicStateFirmwareVersion,
-		MQTTTopicStateFirmwareReleasedDate,
-		MQTTTopicStateUpTime,
-		MQTTTopicStateMemoryUsage,
-		MQTTTopicStateMemoryAvailable,
-		MQTTTopicStateHDDCapacity,
-		MQTTTopicStateHDDFree,
-		MQTTTopicStateHDDUsage,
+		MQTTPublishTopicStateModel,
+		MQTTPublishTopicStateFirmwareVersion,
+		MQTTPublishTopicStateFirmwareReleasedDate,
+		MQTTPublishTopicStateUpTime,
+		MQTTPublishTopicStateMemoryUsage,
+		MQTTPublishTopicStateMemoryAvailable,
+		MQTTPublishTopicStateHDDCapacity,
+		MQTTPublishTopicStateHDDFree,
+		MQTTPublishTopicStateHDDUsage,
 	}
 
 	if b.eventsEnabled {
-		topics = append(topics, MQTTTopicEvent)
+		topics = append(topics, MQTTPublishTopicEvent)
 	}
 
 	if b.ptzEnabled {
 		topics = append(topics,
-			MQTTTopicPTZStatusElevation,
-			MQTTTopicPTZStatusAzimuth,
-			MQTTTopicPTZStatusZoom,
+			MQTTPublishTopicPTZStatusElevation,
+			MQTTPublishTopicPTZStatusAzimuth,
+			MQTTPublishTopicPTZStatusZoom,
 		)
 	}
 
@@ -68,12 +68,12 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	}
 
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTTopicPTZMove.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTAbsolute)),
-		mqtt.NewSubscriber(MQTTTopicPTZAbsolute.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTAbsolute)),
-		mqtt.NewSubscriber(MQTTTopicPTZContinuous.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTContinuous)),
-		mqtt.NewSubscriber(MQTTTopicPTZRelative.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTRelative)),
-		mqtt.NewSubscriber(MQTTTopicPTZPreset.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTPreset)),
-		mqtt.NewSubscriber(MQTTTopicPTZMomentary.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTMomentary)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicPTZMove.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTAbsolute)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicPTZAbsolute.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTAbsolute)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicPTZContinuous.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTContinuous)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicPTZRelative.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTRelative)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicPTZPreset.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTPreset)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicPTZMomentary.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTMomentary)),
 	}
 }
 
@@ -92,17 +92,17 @@ func (b *Bind) updateStatusByChannelId(ctx context.Context, channelId uint64) er
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.Elevation != status.AbsoluteHigh.Elevation {
 		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTTopicPTZStatusElevation.Format(sn, channelId), 1, false, status.AbsoluteHigh.Elevation)
+		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusElevation.Format(sn, channelId), 1, false, status.AbsoluteHigh.Elevation)
 	}
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.Azimuth != status.AbsoluteHigh.Azimuth {
 		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTTopicPTZStatusAzimuth.Format(sn, channelId), 1, false, status.AbsoluteHigh.Azimuth)
+		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusAzimuth.Format(sn, channelId), 1, false, status.AbsoluteHigh.Azimuth)
 	}
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.AbsoluteZoom != status.AbsoluteHigh.AbsoluteZoom {
 		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTTopicPTZStatusZoom.Format(sn, channelId), 1, false, status.AbsoluteHigh.AbsoluteZoom)
+		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusZoom.Format(sn, channelId), 1, false, status.AbsoluteHigh.AbsoluteZoom)
 	}
 
 	channel.Status = &status
