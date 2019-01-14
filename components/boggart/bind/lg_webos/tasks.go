@@ -59,7 +59,12 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 			b.monitorForegroundAppInfo(state)
 		}
 
-		client.ApplicationManagerMonitorForegroundAppInfo(b.monitorForegroundAppInfo, quit)
+		err = client.ApplicationManagerMonitorForegroundAppInfo(b.monitorForegroundAppInfo, quit)
+		if err != nil {
+			b.UpdateStatus(boggart.BindStatusOffline)
+		}
+
+		// TODO: send to quit ???
 	}()
 
 	go func() {
@@ -68,7 +73,10 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 			b.monitorAudio(state)
 		}
 
-		client.AudioMonitorStatus(b.monitorAudio, quit)
+		err = client.AudioMonitorStatus(b.monitorAudio, quit)
+		if err != nil {
+			b.UpdateStatus(boggart.BindStatusOffline)
+		}
 	}()
 
 	go func() {
@@ -77,7 +85,10 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 			b.monitorTvCurrentChannel(state)
 		}
 
-		client.TvMonitorCurrentChannel(b.monitorTvCurrentChannel, quit)
+		err = client.TvMonitorCurrentChannel(b.monitorTvCurrentChannel, quit)
+		if err != nil {
+			b.UpdateStatus(boggart.BindStatusOffline)
+		}
 	}()
 
 	return nil, nil
