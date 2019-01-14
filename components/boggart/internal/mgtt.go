@@ -122,6 +122,7 @@ func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 	}
 
 	if c.application.HasComponent(messengers.ComponentName) {
+		<-c.application.ReadyComponent(messengers.ComponentName)
 		cmp := c.application.GetComponent(messengers.ComponentName).(messengers.Component)
 
 		subscribers = append(subscribers, mqtt.NewSubscriber(MQTTSubscribeTopicMessenger.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {

@@ -222,6 +222,7 @@ func (c *Component) clientSubscribe(topic string, qos byte, subscription *mqtt.S
 			log.Int("qos", int(message.Qos())),
 			log.String("payload", string(message.Payload())),
 			log.Bool("retained", message.Retained()),
+			log.String("topic.subscribe", topic),
 		)
 
 		r := "0"
@@ -238,9 +239,10 @@ func (c *Component) clientSubscribe(topic string, qos byte, subscription *mqtt.S
 		if err := subscription.Callback(ctx, c, message); err != nil {
 			tracing.SpanError(span, err)
 			c.logger.Error(
-				"message", "Call MQTT subscriber failed",
+				"Call MQTT subscriber failed",
 				"error", err.Error(),
-				"topic", topic,
+				"topic.subscribe", topic,
+				"topic.call", message.Topic(),
 				"qos", strconv.Itoa(int(qos)),
 				"retained", r,
 				"payload", string(message.Payload()),
@@ -292,7 +294,7 @@ func (c *Component) Publish(ctx context.Context, topic string, qos byte, retaine
 	if err != nil {
 		tracing.SpanError(span, err)
 		c.logger.Error(
-			"message", "Publish MQTT topic failed",
+			"Publish MQTT topic failed",
 			"error", err.Error(),
 			"topic", topic,
 			"qos", strconv.Itoa(int(qos)),

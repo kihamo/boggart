@@ -7,9 +7,8 @@ import (
 )
 
 var (
-	BindEventSyslogReceive  = event.NewBaseEvent("SyslogReceive")
-	BindEventManagerReady   = event.NewBaseEvent("ManagerReady")
-	BindEventDeviceDisabled = event.NewBaseEvent("DeviceDisabled")
+	BindEventSyslogReceive = event.NewBaseEvent("SyslogReceive")
+	BindEventManagerReady  = event.NewBaseEvent("ManagerReady")
 )
 
 type BindStatus uint64
