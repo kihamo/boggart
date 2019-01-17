@@ -1,5 +1,5 @@
-hash: 37bed3f9f1f4fc200b6c2cdc797e4343bd0704fda14c9eb8b31d1d3e65c676fb
-updated: 2019-01-18T00:07:12.190406+03:00
+hash: fd6dfe477f68fa3e8eae3a11a70bf54a87238acb1ba569407a7595298376754d
+updated: 2019-01-18T00:39:12.920882+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: 02e53af36e6c978af692887ed449b74026d76fec
@@ -36,6 +36,8 @@ imports:
   version: 3a0bb77429bd3a61596f5e8a3172445844342120
 - name: github.com/deckarep/golang-set
   version: cbaa98ba5575e67703b32b4b19f73c91f3c4159e
+- name: github.com/denisbrodbeck/machineid
+  version: e2e48f90c87f1f77286682531a46ff99e95d8089
 - name: github.com/eclipse/paho.mqtt.golang
   version: 379fd9f99ba5b1f02c9fffb5e5952416ef9301dc
   subpackages:
@@ -445,6 +447,7 @@ imports:
   subpackages:
   - unix
   - windows
+  - windows/registry
 - name: golang.org/x/text
   version: 6eab0e8f74e86c598ec3b6fad4888e0c11482d48
   subpackages:

@@ -44,3 +44,5 @@ import:
   version: 5be61902f81864905136552a2178b219efceed61
 - package: gopkg.in/yaml.v2
   version: ~v2.2
+- package: github.com/denisbrodbeck/machineid
+  version: ~v1.0
