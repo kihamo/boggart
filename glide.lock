@@ -1,5 +1,5 @@
-hash: eb55dc180b80d6b73488aca94fda68fe6c40187421d7a8bbbe7d6e6a8ecfe857
-updated: 2019-01-10T23:46:45.493671+03:00
+hash: 37bed3f9f1f4fc200b6c2cdc797e4343bd0704fda14c9eb8b31d1d3e65c676fb
+updated: 2019-01-18T00:07:12.190406+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: 02e53af36e6c978af692887ed449b74026d76fec
@@ -143,7 +143,7 @@ imports:
   - internal/maindata
   - internal/sideinfo
 - name: github.com/hajimehoshi/oto
-  version: 3a9bb05c78a0583c0f5a6c041eeb05a6ceec8ef9
+  version: 69b46d84898282d901717ca51635af708da6c086
 - name: github.com/heptiolabs/healthcheck
   version: da5fdee475fb09de87c5d4a50da233b7d28767b1
 - name: github.com/icza/bitio
@@ -174,7 +174,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: d6c196a899f09bcdf8a7ab241c6b382b98282436
+  version: 23ec7ca577f22e29959831c02176bae9a406e351
   subpackages:
   - components/annotations
   - components/annotations/instance

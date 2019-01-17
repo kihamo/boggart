@@ -3,7 +3,9 @@ package google_home
 import (
 	"bytes"
 	"context"
+	"errors"
 	"strconv"
+	"strings"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
@@ -15,6 +17,7 @@ const (
 	MQTTSubscribeTopicPause     mqtt.Topic = boggart.ComponentName + "/smart-speaker/+/pause"
 	MQTTSubscribeTopicStop      mqtt.Topic = boggart.ComponentName + "/smart-speaker/+/stop"
 	MQTTSubscribeTopicPlay      mqtt.Topic = boggart.ComponentName + "/smart-speaker/+/play"
+	MQTTSubscribeTopicAction    mqtt.Topic = boggart.ComponentName + "/smart-speaker/+/action"
 	MQTTPublishTopicStateStatus mqtt.Topic = boggart.ComponentName + "/smart-speaker/+/state/status"
 	MQTTPublishTopicStateVolume mqtt.Topic = boggart.ComponentName + "/smart-speaker/+/state/volume"
 	MQTTPublishTopicStateMute   mqtt.Topic = boggart.ComponentName + "/smart-speaker/+/state/mute"
@@ -73,6 +76,26 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			}
 
 			return b.ClientChromeCast().Play()
+		})),
+		mqtt.NewSubscriber(MQTTSubscribeTopicAction.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
+				return nil
+			}
+
+			action := string(message.Payload())
+
+			switch strings.ToLower(action) {
+			case "stop":
+				return b.ClientChromeCast().Stop()
+
+			case "pause":
+				return b.ClientChromeCast().Pause()
+
+			case "play":
+				return b.ClientChromeCast().Play()
+			}
+
+			return errors.New("unknown action " + action)
 		})),
 	}
 }
