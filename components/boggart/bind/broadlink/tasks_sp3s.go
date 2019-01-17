@@ -11,7 +11,7 @@ import (
 )
 
 func (b *BindSP3S) Tasks() []workers.Task {
-	taskUpdater := task.NewFunctionTask(b.taskStateUpdater)
+	taskUpdater := task.NewFunctionTask(b.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(b.updaterInterval)
 	taskUpdater.SetName("bind-broadlink:sp3s-updater-" + b.SerialNumber())
@@ -21,7 +21,7 @@ func (b *BindSP3S) Tasks() []workers.Task {
 	}
 }
 
-func (b *BindSP3S) taskStateUpdater(ctx context.Context) (interface{}, error) {
+func (b *BindSP3S) taskUpdater(ctx context.Context) (interface{}, error) {
 	state, err := b.State()
 	if err != nil {
 		b.UpdateStatus(boggart.BindStatusOffline)

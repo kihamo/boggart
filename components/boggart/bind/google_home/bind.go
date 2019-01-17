@@ -20,9 +20,13 @@ type Bind struct {
 	clientGoogleHome *client.GoogleHome
 	clientChromeCast *chromecast.Player
 	host             string
+	status           int64
+	volume           int64
+	mute             int64
 
 	livenessInterval time.Duration
 	livenessTimeout  time.Duration
+	updaterInterval  time.Duration
 }
 
 func (b *Bind) ClientGoogleHome() *client.GoogleHome {

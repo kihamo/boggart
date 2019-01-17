@@ -2,6 +2,8 @@
     {{ if not .modal }}
     <script type="application/javascript">
         $(document).ready(function () {
+            hljs.initHighlightingOnLoad();
+
             if(ClipboardJS.isSupported()) {
                 var cb = new ClipboardJS("#copy-button");
                 cb.on('success', function(e) {
@@ -39,9 +41,10 @@
         body { background: none !important }
     </style>
     {{ end }}
-            <pre><code class="yaml" id="yaml">{{ .yaml|raw }}</code></pre>
-        </div>
+
+            <pre style="padding: 0;"><code class="yaml" id="yaml">{{ .yaml|raw }}</code></pre>
     {{ if not .modal }}
+            </div>
         </div>
     </div>
     {{ end }}

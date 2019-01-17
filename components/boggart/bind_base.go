@@ -75,10 +75,8 @@ func (d *BindMQTT) MQTTPublishAsync(ctx context.Context, topic string, qos byte,
 	return nil
 }
 
-func CheckSerialNumberInMQTTTopic(bind Bind, topic string, offset int) bool {
-	sn := mqtt.NameReplace(bind.SerialNumber())
-
-	if sn == "" {
+func CheckValueInMQTTTopic(topic string, value string, offset int) bool {
+	if value == "" {
 		return false
 	}
 
@@ -87,7 +85,11 @@ func CheckSerialNumberInMQTTTopic(bind Bind, topic string, offset int) bool {
 		return false
 	}
 
-	return routes[len(routes)-offset] == sn
+	return routes[len(routes)-offset] == value
+}
+
+func CheckSerialNumberInMQTTTopic(bind Bind, topic string, offset int) bool {
+	return CheckValueInMQTTTopic(topic, mqtt.NameReplace(bind.SerialNumber()), offset)
 }
 
 func WrapMQTTSubscribeDeviceIsOnline(bind Bind, callback mqtt.MessageHandler) mqtt.MessageHandler {

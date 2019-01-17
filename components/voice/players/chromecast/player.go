@@ -243,8 +243,7 @@ func (p *Player) connect(ctx context.Context) (*cast.Client, error) {
 	if atomic.LoadInt64(&p.connected) != 1 {
 		client := cast.NewClient(p.host, p.port)
 
-		err := client.Connect(ctx)
-		if err != nil {
+		if err := client.Connect(ctx); err != nil {
 			return nil, err
 		}
 
