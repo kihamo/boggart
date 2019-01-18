@@ -1,5 +1,5 @@
-hash: fd6dfe477f68fa3e8eae3a11a70bf54a87238acb1ba569407a7595298376754d
-updated: 2019-01-18T00:39:12.920882+03:00
+hash: ef84d25373842ead4a4519a33ad6747d92bd51bebd38f2715b16facaed4b017e
+updated: 2019-01-18T18:37:02.228005+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: 02e53af36e6c978af692887ed449b74026d76fec
@@ -308,7 +308,7 @@ imports:
 - name: github.com/pborman/uuid
   version: 8b1b92947f46224e3b97bb1a3a5b0382be00d31e
 - name: github.com/pkg/errors
-  version: 059132a15dd08d6704c67711dae0cf35ab991756
+  version: ba968bfe8b2f7e042a574c888954fccecfa385b4
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:

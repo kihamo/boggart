@@ -8,6 +8,8 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
+	er "github.com/pkg/errors"
+	"go.uber.org/multierr"
 )
 
 func (b *BindSP3S) Tasks() []workers.Task {
@@ -32,6 +34,7 @@ func (b *BindSP3S) taskUpdater(ctx context.Context) (interface{}, error) {
 
 	serialNumber := b.SerialNumber()
 	serialNumberMQTT := mqtt.NameReplace(serialNumber)
+	var result error
 
 	prevState := atomic.LoadInt64(&b.state)
 	if prevState == 0 || (prevState == 1) != state {
@@ -41,27 +44,29 @@ func (b *BindSP3S) taskUpdater(ctx context.Context) (interface{}, error) {
 			atomic.StoreInt64(&b.state, -1)
 		}
 
-		// TODO:
-		_ = b.MQTTPublishAsync(ctx, SP3SMQTTPublishTopicState.Format(serialNumberMQTT), 0, true, state)
-	}
-
-	value, err := b.Power()
-	if err != nil {
-		return nil, nil
-	}
-
-	metricSP3SPower.With("serial_number", serialNumber).Set(value)
-
-	currentPower := int64(value * 100)
-	prevPower := atomic.LoadInt64(&b.power)
-
-	if currentPower != prevPower {
-		atomic.StoreInt64(&b.power, currentPower)
-
-		if err := b.MQTTPublishAsync(ctx, SP3SMQTTPublishTopicPower.Format(serialNumberMQTT), 0, true, value); err != nil {
-			return nil, err
+		if err := b.MQTTPublishAsync(ctx, SP3SMQTTPublishTopicState.Format(serialNumberMQTT), 0, true, state); err != nil {
+			result = multierr.Append(result, err)
 		}
 	}
 
-	return nil, nil
+	value, err := b.Power()
+	if err == nil {
+		currentPower := int64(value * 100)
+		prevPower := atomic.LoadInt64(&b.power)
+
+		if currentPower != prevPower {
+			atomic.StoreInt64(&b.power, currentPower)
+			metricSP3SPower.With("serial_number", serialNumber).Set(value)
+
+			if err := b.MQTTPublishAsync(ctx, SP3SMQTTPublishTopicPower.Format(serialNumberMQTT), 0, true, value); err != nil {
+				result = multierr.Append(result, err)
+			}
+		}
+	}
+
+	if result != nil {
+		result = er.Wrap(result, "Failed send to MQTT")
+	}
+
+	return nil, result
 }
