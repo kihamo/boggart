@@ -46,7 +46,7 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	deviceInfo, err := b.isapi.SystemDeviceInfo(ctx)
 	if err != nil {
 		b.UpdateStatus(boggart.BindStatusOffline)
-		return nil, err
+		return nil, nil
 	}
 
 	if deviceInfo.SerialNumber == "" {

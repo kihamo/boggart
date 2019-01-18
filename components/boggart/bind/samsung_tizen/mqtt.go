@@ -18,7 +18,7 @@ const (
 	MQTTPublishTopicDeviceModelName mqtt.Topic = boggart.ComponentName + "/tv/+/device/model-name"
 )
 
-func (d *Bind) MQTTPublishes() []mqtt.Topic {
+func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
 		MQTTPublishTopicDeviceID,
 		MQTTPublishTopicDeviceModelName,

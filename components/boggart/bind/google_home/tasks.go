@@ -38,7 +38,7 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		WithParams(home.EurekaInfoParamDeviceInfo.Value()))
 	if err != nil {
 		b.UpdateStatus(boggart.BindStatusOffline)
-		return nil, err
+		return nil, nil
 	}
 
 	if b.Status() == boggart.BindStatusOnline {

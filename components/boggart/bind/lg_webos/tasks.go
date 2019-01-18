@@ -24,13 +24,13 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	client, err := b.Client()
 	if err != nil {
 		b.UpdateStatus(boggart.BindStatusOffline)
-		return nil, err
+		return nil, nil
 	}
 
 	_, err = client.Register(b.key)
 	if err != nil {
 		b.UpdateStatus(boggart.BindStatusOffline)
-		return nil, err
+		return nil, nil
 	}
 
 	if b.Status() == boggart.BindStatusOnline {
