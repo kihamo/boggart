@@ -12,6 +12,7 @@ import (
 	"github.com/barnybug/go-cast"
 	"github.com/barnybug/go-cast/controllers"
 	"github.com/barnybug/go-cast/events"
+	"github.com/kihamo/boggart/components/storage"
 	"github.com/kihamo/boggart/components/voice/players"
 )
 
@@ -58,12 +59,12 @@ func (p *Player) PlayFromURL(url string) error {
 	//	return players.ErrorAlreadyPlaying
 	//}
 
-	mimeType, err := players.MimeTypeFromURL(url)
+	mimeType, err := storage.MimeTypeFromURL(url)
 	if err != nil {
 		return err
 	}
 
-	if mimeType == players.MIMETypeUnknown {
+	if mimeType == storage.MIMETypeUnknown {
 		return players.ErrorUnknownAudioFormat
 	}
 

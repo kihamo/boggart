@@ -1,13 +1,12 @@
-package players
+package storage
 
 import (
+	"errors"
 	"io"
 	"mime"
 	"net/http"
 	"strings"
 )
-
-type MIMEType string
 
 var (
 	defaultHTTPClient = &http.Client{
@@ -22,6 +21,12 @@ const (
 	MIMETypeOGG     = MIMEType("audio/ogg")
 )
 
+var (
+	ErrorUnknownMIMEType = errors.New("unknown mime type")
+)
+
+type MIMEType string
+
 func (m MIMEType) String() string {
 	return string(m)
 }
@@ -29,7 +34,7 @@ func (m MIMEType) String() string {
 func MimeTypeFromHTTPHeader(header http.Header) (MIMEType, error) {
 	contentType := header.Get("Content-type")
 	if contentType == "" {
-		return MIMETypeUnknown, ErrorUnknownAudioFormat
+		return MIMETypeUnknown, ErrorUnknownMIMEType
 	}
 
 	for _, v := range strings.Split(contentType, ",") {

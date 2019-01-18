@@ -96,7 +96,7 @@ func (c *Component) SaveURLToFile(namespace, url string, force bool) (string, er
 	}
 
 	// TODO: extension of file
-	id := hex.EncodeToString(hasher.Sum(nil)) + ".mp3"
+	id := hex.EncodeToString(hasher.Sum(nil))
 	filePath := filepath.Join(path, id)
 
 	file, err := os.Open(filePath)

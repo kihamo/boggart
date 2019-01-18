@@ -61,5 +61,9 @@ func (h *FSHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		return
 	}
 
+	if mime, err := storage.MimeTypeFromData(file); err == nil {
+		w.Header().Set("Content-Type", mime.String())
+	}
+
 	fileHandler.ServeHTTP(w, r.Original())
 }

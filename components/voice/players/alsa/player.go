@@ -14,6 +14,7 @@ import (
 	"github.com/faiface/beep/mp3"
 	"github.com/faiface/beep/wav"
 	"github.com/hajimehoshi/oto"
+	"github.com/kihamo/boggart/components/storage"
 	"github.com/kihamo/boggart/components/voice/players"
 )
 
@@ -56,7 +57,7 @@ func (p *Player) PlayFromURL(url string) error {
 		return players.ErrorAlreadyPlaying
 	}
 
-	mimeType, err := players.MimeTypeFromURL(url)
+	mimeType, err := storage.MimeTypeFromURL(url)
 	if err != nil {
 		return err
 	}
@@ -64,7 +65,7 @@ func (p *Player) PlayFromURL(url string) error {
 	var format string
 
 	switch mimeType {
-	case players.MIMETypeMPEG:
+	case storage.MIMETypeMPEG:
 		format = AudioFormatMP3
 
 		// TODO: wav, flac
@@ -101,7 +102,7 @@ func (p *Player) PlayFromReader(reader io.ReadCloser) error {
 		return players.ErrorAlreadyPlaying
 	}
 
-	mimeType, err := players.MimeTypeFromData(reader)
+	mimeType, err := storage.MimeTypeFromData(reader)
 	if err != nil {
 		return err
 	}
