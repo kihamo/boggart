@@ -1,10 +1,11 @@
 package internal
 
 import (
+	"net/http"
+
 	"github.com/kihamo/boggart/components/storage"
 	"github.com/kihamo/boggart/components/storage/internal/handlers"
 	"github.com/kihamo/shadow/components/dashboard"
-	"net/http"
 )
 
 func (c *Component) DashboardRoutes() []dashboard.Route {

@@ -2,10 +2,11 @@ package voice
 
 import (
 	"context"
+	"io"
+
 	"github.com/kihamo/boggart/components/voice/players"
 	yandex "github.com/kihamo/boggart/components/voice/providers/yandex_speechkit_cloud"
 	"github.com/kihamo/shadow"
-	"io"
 )
 
 type Component interface {

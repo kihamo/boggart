@@ -1,10 +1,10 @@
 package internal
 
 import (
-	"github.com/kihamo/boggart/components/storage"
 	"net/http"
 
 	"github.com/elazarl/go-bindata-assetfs"
+	"github.com/kihamo/boggart/components/storage"
 	"github.com/kihamo/boggart/components/voice/internal/handlers"
 	"github.com/kihamo/shadow/components/dashboard"
 )

@@ -1,7 +1,9 @@
 package handlers
 
 import (
-	"fmt"
+	"net/http"
+	"strconv"
+
 	"github.com/kihamo/boggart/components/storage"
 	"github.com/kihamo/boggart/components/voice"
 	"github.com/kihamo/shadow/components/dashboard"
@@ -19,47 +21,80 @@ type FileHandler struct {
 }
 
 func (h *FileHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
-	message := r.URL().Query().Get(":message")
+	q := r.URL().Query()
+	message := q.Get(":message")
+	message = voice.TrimMessage(message)
 
 	if message == "" {
 		h.NotFound(w, r)
 		return
 	}
 
-	// TODO: check exists
-
-	/*
-		data, err := base64.StdEncoding.DecodeString(message)
-		fmt.Println(data, err)
-		if err != nil {
-			h.NotFound(w, r)
-			return
-		}
-	*/
 	provider := h.Voice.TextToSpeechProvider()
 	if provider == nil {
 		h.NotFound(w, r)
 		return
 	}
 
-	config := dashboard.ConfigFromContext(r.Context())
+	ctx := r.Context()
+	config := dashboard.ConfigFromContext(ctx)
 
-	providerURL := provider.GenerateURL(
-		r.Context(),
-		message,
-		config.String(voice.ConfigYandexSpeechKitCloudLanguage),
-		config.String(voice.ConfigYandexSpeechKitCloudSpeaker),
-		config.String(voice.ConfigYandexSpeechKitCloudEmotion),
-		config.String(voice.ConfigYandexSpeechKitCloudFormat),
-		config.String(voice.ConfigYandexSpeechKitCloudQuality),
-		config.Float64(voice.ConfigYandexSpeechKitCloudSpeed))
+	var (
+		err                                         error
+		speed                                       float64
+		language, speaker, emotion, format, quality string
+	)
 
-	storageURL, err := h.Storage.SaveURLToFile("voice", providerURL, false)
+	if qSpeed := q.Get("speed"); qSpeed != "" {
+		speed, err = strconv.ParseFloat(qSpeed, 64)
+		if err != nil {
+			h.NotFound(w, r)
+			return
+		}
+	} else {
+		speed = config.Float64(voice.ConfigYandexSpeechKitCloudSpeed)
+	}
+
+	if qLanguage := q.Get("language"); qLanguage != "" {
+		language = qLanguage
+	} else {
+		language = config.String(voice.ConfigYandexSpeechKitCloudLanguage)
+	}
+
+	if qSpeaker := q.Get("speaker"); qSpeaker != "" {
+		speaker = qSpeaker
+	} else {
+		speaker = config.String(voice.ConfigYandexSpeechKitCloudSpeaker)
+	}
+
+	if qEmotion := q.Get("emotion"); qEmotion != "" {
+		emotion = qEmotion
+	} else {
+		emotion = config.String(voice.ConfigYandexSpeechKitCloudEmotion)
+	}
+
+	if qFormat := q.Get("format"); qFormat != "" {
+		format = qFormat
+	} else {
+		format = config.String(voice.ConfigYandexSpeechKitCloudFormat)
+	}
+
+	if qQuality := q.Get("quality"); qQuality != "" {
+		quality = qQuality
+	} else {
+		quality = config.String(voice.ConfigYandexSpeechKitCloudQuality)
+	}
+
+	providerURL, err := provider.GenerateURL(ctx, message, language, speaker, emotion, format, quality, speed)
+	if err != nil {
+		h.NotFound(w, r)
+		return
+	}
+
+	storageURL, err := h.Storage.SaveURLToFile(StorageFileNameSpace, providerURL, false)
 	if err != nil && err != storage.ErrFileAlreadyExist {
 		panic(err.Error())
 	}
 
-	fmt.Println(storageURL)
-
-	// h.Redirect(storageURL, http.StatusTemporaryRedirect, w, r)
+	h.Redirect(storageURL, http.StatusTemporaryRedirect, w, r)
 }

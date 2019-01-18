@@ -3,6 +3,11 @@ package internal
 import (
 	"context"
 	"errors"
+	"io"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/components/storage"
 	"github.com/kihamo/boggart/components/voice"
@@ -16,10 +21,6 @@ import (
 	"github.com/kihamo/shadow/components/logging"
 	"github.com/kihamo/shadow/components/tracing"
 	"github.com/opentracing/opentracing-go/log"
-	"io"
-	"strconv"
-	"strings"
-	"time"
 )
 
 type Component struct {
@@ -233,7 +234,7 @@ func (c *Component) SpeechWithOptions(ctx context.Context, player string, text s
 		return err
 	}
 
-	u := c.textToSpeechProvider.GenerateURL(
+	u, err := c.textToSpeechProvider.GenerateURL(
 		ctx,
 		text,
 		c.config.String(voice.ConfigYandexSpeechKitCloudLanguage),
@@ -242,6 +243,18 @@ func (c *Component) SpeechWithOptions(ctx context.Context, player string, text s
 		c.config.String(voice.ConfigYandexSpeechKitCloudFormat),
 		c.config.String(voice.ConfigYandexSpeechKitCloudQuality),
 		speed)
+
+	if err != nil {
+		c.logger.Error("Failed generate URL for play speech text",
+			"error", err.Error(),
+			"format", c.config.String(voice.ConfigYandexSpeechKitCloudFormat),
+			"text", text,
+			"player", player,
+		)
+
+		tracing.SpanError(span, err)
+		return err
+	}
 
 	err = c.PlayURL(ctx, player, u)
 	if err != nil {

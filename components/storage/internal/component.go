@@ -4,15 +4,16 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
-	"github.com/kihamo/boggart/components/storage"
-	"github.com/kihamo/shadow"
-	"github.com/kihamo/shadow/components/config"
-	"github.com/kihamo/shadow/components/dashboard"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/kihamo/boggart/components/storage"
+	"github.com/kihamo/shadow"
+	"github.com/kihamo/shadow/components/config"
+	"github.com/kihamo/shadow/components/dashboard"
 )
 
 var (
