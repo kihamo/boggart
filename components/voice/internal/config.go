@@ -8,11 +8,6 @@ import (
 
 func (c *Component) ConfigVariables() []config.Variable {
 	return []config.Variable{
-		config.NewVariable(voice.ConfigSpeechVolume, config.ValueTypeInt).
-			WithUsage("Volume percent between 0 and 100").
-			WithGroup("Speech").
-			WithEditable(true).
-			WithDefault(50),
 		config.NewVariable(voice.ConfigYandexSpeechKitCloudKey, config.ValueTypeString).
 			WithUsage("API key").
 			WithGroup("Yandex SpeechKit Cloud"),
@@ -89,14 +84,5 @@ func (c *Component) ConfigVariables() []config.Variable {
 				},
 			}).
 			WithDefault(yandex.EmotionNeutral),
-		config.NewVariable(voice.ConfigPlayerALSAEnabled, config.ValueTypeBool).
-			WithUsage("Enable ALSA player").
-			WithGroup("ALSA").
-			WithEditable(false).
-			WithDefault(false),
-		config.NewVariable(voice.ConfigPlayerChromecastAddresses, config.ValueTypeString).
-			WithUsage("Addresses in format host:port").
-			WithGroup("Chromecast").
-			WithView([]string{config.ViewTags}),
 	}
 }

@@ -20,6 +20,7 @@ import (
 	_ "github.com/kihamo/boggart/components/mqtt/instance"
 	_ "github.com/kihamo/boggart/components/storage/instance"
 	_ "github.com/kihamo/boggart/components/syslog/instance"
+	_ "github.com/kihamo/boggart/components/voice/instance"
 	"github.com/kihamo/shadow"
 	_ "github.com/kihamo/shadow/components/annotations/instance"
 	_ "github.com/kihamo/shadow/components/config/instance"
