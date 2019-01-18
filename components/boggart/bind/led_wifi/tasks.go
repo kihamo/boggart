@@ -7,11 +7,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/kihamo/boggart/components/mqtt"
-
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
+	"go.uber.org/multierr"
 )
 
 const (
@@ -40,6 +40,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 
 	b.UpdateStatus(boggart.BindStatusOnline)
 	host := mqtt.NameReplace(b.bulb.Host())
+	var result error
 
 	prevPower := atomic.LoadInt64(&b.statePower)
 	if prevPower == 0 || (prevPower == 1) != state.Power {
@@ -49,8 +50,9 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			atomic.StoreInt64(&b.statePower, -1)
 		}
 
-		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStatePower.Format(host), 0, true, state.Power)
+		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicStatePower.Format(host), 0, true, state.Power); err != nil {
+			result = multierr.Append(result, err)
+		}
 	}
 
 	currentMode := uint64(state.Mode)
@@ -58,8 +60,9 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	if prevMode != currentMode {
 		atomic.StoreUint64(&b.stateMode, currentMode)
 
-		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMode.Format(host), 0, true, currentMode)
+		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMode.Format(host), 0, true, currentMode); err != nil {
+			result = multierr.Append(result, err)
+		}
 	}
 
 	currentSpeed := uint64(state.Speed)
@@ -67,8 +70,9 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	if prevSpeed != currentSpeed {
 		atomic.StoreUint64(&b.stateSpeed, currentSpeed)
 
-		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateSpeed.Format(host), 0, true, currentSpeed)
+		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateSpeed.Format(host), 0, true, currentSpeed); err != nil {
+			result = multierr.Append(result, err)
+		}
 	}
 
 	currentColor := state.Color.Uint64()
@@ -77,14 +81,16 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		atomic.StoreUint64(&b.stateColor, currentColor)
 
 		// in HEX
-		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateColor.Format(host), 0, true, state.Color.String())
+		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateColor.Format(host), 0, true, state.Color.String()); err != nil {
+			result = multierr.Append(result, err)
+		}
 
 		// in HSV
 		h, s, v := state.Color.HSV()
-		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateColorHSV.Format(host), 0, true, fmt.Sprintf("%d,%.2f,%.2f", h, s, v))
+		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateColorHSV.Format(host), 0, true, fmt.Sprintf("%d,%.2f,%.2f", h, s, v)); err != nil {
+			result = multierr.Append(result, err)
+		}
 	}
 
-	return nil, nil
+	return nil, result
 }

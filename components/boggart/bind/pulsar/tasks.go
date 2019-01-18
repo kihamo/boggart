@@ -9,6 +9,7 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
+	"go.uber.org/multierr"
 )
 
 func (b *Bind) Tasks() []workers.Task {
@@ -32,6 +33,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 
 	sn := b.SerialNumber()
 	snMQTT := mqtt.NameReplace(sn)
+	var result error
 
 	if currentVal, err := b.provider.TemperatureIn(); err == nil {
 		current := float64(currentVal)
@@ -40,11 +42,12 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			atomic.StoreUint64(&b.temperatureIn, math.Float64bits(current))
 			metricTemperatureIn.With("serial_number", sn).Set(current)
 
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicTemperatureIn.Format(snMQTT), 0, true, current)
+			if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicTemperatureIn.Format(snMQTT), 0, true, current); err != nil {
+				result = multierr.Append(result, err)
+			}
 		}
 	} else {
-		// TODO: log
+		result = multierr.Append(result, err)
 	}
 
 	if currentVal, err := b.provider.TemperatureOut(); err == nil {
@@ -54,11 +57,12 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			atomic.StoreUint64(&b.temperatureOut, math.Float64bits(current))
 			metricTemperatureOut.With("serial_number", sn).Set(current)
 
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicTemperatureOut.Format(snMQTT), 0, true, current)
+			if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicTemperatureOut.Format(snMQTT), 0, true, current); err != nil {
+				result = multierr.Append(result, err)
+			}
 		}
 	} else {
-		// TODO: log
+		result = multierr.Append(result, err)
 	}
 
 	if currentVal, err := b.provider.TemperatureDelta(); err == nil {
@@ -68,11 +72,12 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			atomic.StoreUint64(&b.temperatureDelta, math.Float64bits(current))
 			metricTemperatureDelta.With("serial_number", sn).Set(current)
 
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicTemperatureDelta.Format(snMQTT), 0, true, current)
+			if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicTemperatureDelta.Format(snMQTT), 0, true, current); err != nil {
+				result = multierr.Append(result, err)
+			}
 		}
 	} else {
-		// TODO: log
+		result = multierr.Append(result, err)
 	}
 
 	if currentVal, err := b.provider.Energy(); err == nil {
@@ -82,11 +87,12 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			atomic.StoreUint64(&b.energy, math.Float64bits(current))
 			metricEnergy.With("serial_number", sn).Set(current)
 
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicEnergy.Format(snMQTT), 0, true, current)
+			if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicEnergy.Format(snMQTT), 0, true, current); err != nil {
+				result = multierr.Append(result, err)
+			}
 		}
 	} else {
-		// TODO: log
+		result = multierr.Append(result, err)
 	}
 
 	if currentVal, err := b.provider.Consumption(); err == nil {
@@ -96,11 +102,12 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			atomic.StoreUint64(&b.consumption, math.Float64bits(current))
 			metricConsumption.With("serial_number", sn).Set(current)
 
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicConsumption.Format(snMQTT), 0, true, current)
+			if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicConsumption.Format(snMQTT), 0, true, current); err != nil {
+				result = multierr.Append(result, err)
+			}
 		}
 	} else {
-		// TODO: log
+		result = multierr.Append(result, err)
 	}
 
 	if currentVal, err := b.provider.Capacity(); err == nil {
@@ -110,11 +117,12 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			atomic.StoreUint64(&b.capacity, math.Float64bits(current))
 			metricCapacity.With("serial_number", sn).Set(current)
 
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicCapacity.Format(snMQTT), 0, true, current)
+			if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicCapacity.Format(snMQTT), 0, true, current); err != nil {
+				result = multierr.Append(result, err)
+			}
 		}
 	} else {
-		// TODO: log
+		result = multierr.Append(result, err)
 	}
 
 	if currentVal, err := b.provider.Power(); err == nil {
@@ -124,11 +132,12 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			atomic.StoreUint64(&b.power, math.Float64bits(current))
 			metricPower.With("serial_number", sn).Set(current)
 
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicPower.Format(snMQTT), 0, true, current)
+			if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPower.Format(snMQTT), 0, true, current); err != nil {
+				result = multierr.Append(result, err)
+			}
 		}
 	} else {
-		// TODO: log
+		result = multierr.Append(result, err)
 	}
 
 	// inputs
@@ -138,17 +147,19 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		if current != prev {
 			atomic.StoreUint64(&b.input1, current)
 
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicInputPulses.Format(snMQTT, 1), 0, true, current)
 			metricInputPulses.With("serial_number", sn).With("input", "1").Set(float64(current))
+			if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicInputPulses.Format(snMQTT, 1), 0, true, current); err != nil {
+				result = multierr.Append(result, err)
+			}
 
 			volume := b.inputVolume(current, b.config.Input1Offset)
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicInputVolume.Format(snMQTT, 1), 0, true, volume)
 			metricInputVolume.With("serial_number", sn).With("input", "1").Set(volume)
+			if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicInputVolume.Format(snMQTT, 1), 0, true, volume); err != nil {
+				result = multierr.Append(result, err)
+			}
 		}
 	} else {
-		// TODO: log
+		result = multierr.Append(result, err)
 	}
 
 	if currentVal, err := b.provider.PulseInput2(); err == nil {
@@ -157,17 +168,19 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		if current != prev {
 			atomic.StoreUint64(&b.input2, current)
 
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicInputPulses.Format(snMQTT, 2), 0, true, current)
 			metricInputPulses.With("serial_number", sn).With("input", "2").Set(float64(current))
+			if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicInputPulses.Format(snMQTT, 2), 0, true, current); err != nil {
+				result = multierr.Append(result, err)
+			}
 
 			volume := b.inputVolume(current, b.config.Input2Offset)
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicInputVolume.Format(snMQTT, 2), 0, true, volume)
 			metricInputVolume.With("serial_number", sn).With("input", "2").Set(volume)
+			if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicInputVolume.Format(snMQTT, 2), 0, true, volume); err != nil {
+				result = multierr.Append(result, err)
+			}
 		}
 	} else {
-		// TODO: log
+		result = multierr.Append(result, err)
 	}
 
 	if currentVal, err := b.provider.PulseInput3(); err == nil {
@@ -176,17 +189,20 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		if current != prev {
 			atomic.StoreUint64(&b.input3, current)
 
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicInputPulses.Format(snMQTT, 3), 0, true, current)
 			metricInputPulses.With("serial_number", sn).With("input", "3").Set(float64(current))
+			if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicInputPulses.Format(snMQTT, 3), 0, true, current); err != nil {
+				result = multierr.Append(result, err)
+			}
 
 			volume := b.inputVolume(current, b.config.Input3Offset)
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicInputVolume.Format(snMQTT, 3), 0, true, volume)
 			metricInputVolume.With("serial_number", sn).With("input", "3").Set(volume)
+			if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicInputVolume.Format(snMQTT, 3), 0, true, volume); err != nil {
+				result = multierr.Append(result, err)
+			}
+
 		}
 	} else {
-		// TODO: log
+		result = multierr.Append(result, err)
 	}
 
 	if currentVal, err := b.provider.PulseInput4(); err == nil {
@@ -195,18 +211,20 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		if current != prev {
 			atomic.StoreUint64(&b.input4, current)
 
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicInputPulses.Format(snMQTT, 4), 0, true, current)
 			metricInputPulses.With("serial_number", sn).With("input", "4").Set(float64(current))
+			if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicInputPulses.Format(snMQTT, 4), 0, true, current); err != nil {
+				result = multierr.Append(result, err)
+			}
 
 			volume := b.inputVolume(current, b.config.Input4Offset)
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicInputVolume.Format(snMQTT, 4), 0, true, volume)
 			metricInputVolume.With("serial_number", sn).With("input", "4").Set(volume)
+			if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicInputVolume.Format(snMQTT, 4), 0, true, volume); err != nil {
+				result = multierr.Append(result, err)
+			}
 		}
 	} else {
-		// TODO: log
+		result = multierr.Append(result, err)
 	}
 
-	return nil, nil
+	return nil, result
 }
