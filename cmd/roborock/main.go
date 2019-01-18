@@ -3,6 +3,7 @@ package main // import "github.com/kihamo/boggart/cmd/roborock"
 import (
 	"log"
 
+	_ "github.com/kihamo/boggart/components/boggart/bind/alsa"
 	_ "github.com/kihamo/boggart/components/mqtt/instance"
 	_ "github.com/kihamo/boggart/components/roborock/instance"
 	_ "github.com/kihamo/boggart/components/voice/instance"

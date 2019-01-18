@@ -14,8 +14,7 @@ type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
 
-	mutex    sync.RWMutex
-	initOnce sync.Once
+	mutex sync.RWMutex
 
 	clientGoogleHome *client.GoogleHome
 	clientChromeCast *chromecast.Player
