@@ -4,9 +4,9 @@ import (
 	"log"
 
 	_ "github.com/kihamo/boggart/components/boggart/bind/alsa"
+	_ "github.com/kihamo/boggart/components/boggart/bind/xiaomi"
+	_ "github.com/kihamo/boggart/components/boggart/instance"
 	_ "github.com/kihamo/boggart/components/mqtt/instance"
-	_ "github.com/kihamo/boggart/components/roborock/instance"
-	_ "github.com/kihamo/boggart/components/voice/instance"
 	"github.com/kihamo/shadow"
 	_ "github.com/kihamo/shadow/components/config/instance"
 	_ "github.com/kihamo/shadow/components/dashboard/instance"
@@ -16,6 +16,7 @@ import (
 	_ "github.com/kihamo/shadow/components/metrics/instance"
 	_ "github.com/kihamo/shadow/components/profiling/instance"
 	_ "github.com/kihamo/shadow/components/tracing/instance"
+	_ "github.com/kihamo/shadow/components/workers/instance"
 )
 
 var (

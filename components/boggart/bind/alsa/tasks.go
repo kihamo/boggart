@@ -14,7 +14,7 @@ func (b *Bind) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(b.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(b.updaterInterval)
-	taskUpdater.SetName("bind-google-home:mini-updater-" + b.SerialNumber())
+	taskUpdater.SetName("bind-alsa-updater-" + b.SerialNumber())
 
 	return []workers.Task{
 		taskUpdater,

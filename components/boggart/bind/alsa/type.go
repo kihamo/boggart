@@ -1,6 +1,8 @@
 package alsa
 
 import (
+	"os"
+
 	"github.com/denisbrodbeck/machineid"
 	"github.com/kihamo/boggart/components/boggart"
 	a "github.com/kihamo/boggart/components/voice/players/alsa"
@@ -13,7 +15,10 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	sn, err := machineid.ID()
 	if err != nil {
-		return nil, err
+		sn, err = os.Hostname()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	device := &Bind{

@@ -78,7 +78,7 @@ func MimeTypeFromURL(url string) (MIMEType, error) {
 	}
 
 	// GET fallback
-	if response.StatusCode == http.StatusBadRequest {
+	if response.StatusCode != http.StatusOK {
 		request, err = http.NewRequest(http.MethodGet, url, nil)
 		if err != nil {
 			return MIMETypeUnknown, err

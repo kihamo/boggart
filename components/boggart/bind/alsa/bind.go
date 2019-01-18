@@ -8,13 +8,13 @@ import (
 )
 
 type Bind struct {
-	boggart.BindBase
-	boggart.BindMQTT
-
-	player *a.Player
-
 	status          int64
 	volume          int64
 	mute            int64
 	updaterInterval time.Duration
+
+	boggart.BindBase
+	boggart.BindMQTT
+
+	player *a.Player
 }

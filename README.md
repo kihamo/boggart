@@ -83,8 +83,7 @@ md5sum /home/cleaner/boggart
 sudo cp -f /home/cleaner/boggart.env /etc/default/boggart-roborock
 sudo cp -f /home/cleaner/boggart /usr/local/bin/boggart-roborock && sudo chmod +x /usr/local/bin/boggart-roborock
 sudo /etc/init.d/boggart-roborock stop
-sudo /etc/init.d/boggart-roborock start
-tail -f /var/log/boggart-roborock.log
+sudo /etc/init.d/boggart-roborock start && tail -f /var/log/boggart-roborock.log
 ```
 
 ## Other
