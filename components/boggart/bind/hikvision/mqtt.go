@@ -10,6 +10,8 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
+	er "github.com/pkg/errors"
+	"go.uber.org/multierr"
 )
 
 const (
@@ -89,26 +91,34 @@ func (b *Bind) updateStatusByChannelId(ctx context.Context, channelId uint64) er
 	}
 
 	sn := mqtt.NameReplace(b.SerialNumber())
+	var result error
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.Elevation != status.AbsoluteHigh.Elevation {
-		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusElevation.Format(sn, channelId), 1, false, status.AbsoluteHigh.Elevation)
+		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusElevation.Format(sn, channelId), 1, false, status.AbsoluteHigh.Elevation); err != nil {
+			result = multierr.Append(result, err)
+		}
 	}
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.Azimuth != status.AbsoluteHigh.Azimuth {
-		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusAzimuth.Format(sn, channelId), 1, false, status.AbsoluteHigh.Azimuth)
+		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusAzimuth.Format(sn, channelId), 1, false, status.AbsoluteHigh.Azimuth); err != nil {
+			result = multierr.Append(result, err)
+		}
 	}
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.AbsoluteZoom != status.AbsoluteHigh.AbsoluteZoom {
-		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusZoom.Format(sn, channelId), 1, false, status.AbsoluteHigh.AbsoluteZoom)
+		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusZoom.Format(sn, channelId), 1, false, status.AbsoluteHigh.AbsoluteZoom); err != nil {
+			result = multierr.Append(result, err)
+		}
 	}
 
 	channel.Status = &status
 	b.ptzChannels[channelId] = channel
 
-	return nil
+	if result != nil {
+		result = er.Wrap(result, "Failed send to MQTT")
+	}
+
+	return result
 }
 
 func (b *Bind) checkTopic(topic string) (uint64, error) {

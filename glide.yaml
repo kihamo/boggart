@@ -46,3 +46,7 @@ import:
   version: ~v2.2
 - package: github.com/denisbrodbeck/machineid
   version: ~v1.0
+- package: github.com/pkg/errors
+  version: ~v0.8
+- package: go.uber.org/multierr
+  version: ~v1.1
