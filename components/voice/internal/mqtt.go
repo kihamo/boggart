@@ -35,15 +35,15 @@ func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 	<-c.application.ReadyComponent(c.Name())
 
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTSubscribeTopicSimpleText.String(), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(MQTTSubscribeTopicSimpleText.String(), 0, c.wrapMQTTSubscribe(func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
 			route := mqtt.RouteSplit(message.Topic())
 			if len(route) < 3 {
 				return errors.New("bad topic name")
 			}
 
 			return c.Speech(ctx, route[len(route)-2], string(message.Payload()))
-		}),
-		mqtt.NewSubscriber(MQTTSubscribeTopicJSONText.String(), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
+		})),
+		mqtt.NewSubscriber(MQTTSubscribeTopicJSONText.String(), 0, c.wrapMQTTSubscribe(func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
 			route := mqtt.RouteSplit(message.Topic())
 			if len(route) < 3 {
 				return errors.New("bad topic name")
@@ -56,16 +56,16 @@ func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 			}
 
 			return c.SpeechWithOptions(ctx, route[len(route)-2], request.Text, request.Volume, request.Speed, request.Speaker)
-		}),
-		mqtt.NewSubscriber(MQTTSubscribeTopicPlayerURL.String(), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
+		})),
+		mqtt.NewSubscriber(MQTTSubscribeTopicPlayerURL.String(), 0, c.wrapMQTTSubscribe(func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
 			route := mqtt.RouteSplit(message.Topic())
 			if len(route) < 3 {
 				return errors.New("bad topic name")
 			}
 
 			return c.PlayURL(ctx, route[len(route)-2], string(message.Payload()))
-		}),
-		mqtt.NewSubscriber(MQTTSubscribeTopicPlayerAction.String(), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
+		})),
+		mqtt.NewSubscriber(MQTTSubscribeTopicPlayerAction.String(), 0, c.wrapMQTTSubscribe(func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
 			route := mqtt.RouteSplit(message.Topic())
 			if len(route) < 3 {
 				return errors.New("bad topic name")
@@ -83,8 +83,8 @@ func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 			}
 
 			return errors.New("bad action")
-		}),
-		mqtt.NewSubscriber(MQTTSubscribeTopicPlayerVolume.String(), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
+		})),
+		mqtt.NewSubscriber(MQTTSubscribeTopicPlayerVolume.String(), 0, c.wrapMQTTSubscribe(func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
 			route := mqtt.RouteSplit(message.Topic())
 			if len(route) < 3 {
 				return errors.New("bad topic name")
@@ -96,14 +96,24 @@ func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 			}
 
 			return c.SetVolume(ctx, route[len(route)-2], volume)
-		}),
-		mqtt.NewSubscriber(MQTTSubscribeTopicPlayerMute.String(), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
+		})),
+		mqtt.NewSubscriber(MQTTSubscribeTopicPlayerMute.String(), 0, c.wrapMQTTSubscribe(func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
 			route := mqtt.RouteSplit(message.Topic())
 			if len(route) < 3 {
 				return errors.New("bad topic name")
 			}
 
 			return c.SetMute(ctx, route[len(route)-2], bytes.Equal(message.Payload(), []byte(`1`)))
-		}),
+		})),
+	}
+}
+
+func (c *Component) wrapMQTTSubscribe(f func(ctx context.Context, client mqtt.Component, message mqtt.Message) error) mqtt.MessageHandler {
+	return func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
+		if len(c.players) == 0 {
+			return nil
+		}
+
+		return f(ctx, client, message)
 	}
 }

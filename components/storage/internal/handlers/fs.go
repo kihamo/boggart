@@ -10,20 +10,10 @@ import (
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
-const (
-	routePrefix = "/" + storage.ComponentName + "/"
-)
-
 type FSHandler struct {
 	dashboard.Handler
 
-	separator string
-}
-
-func NewFSHandler() *FSHandler {
-	return &FSHandler{
-		separator: string(os.PathSeparator),
-	}
+	Component storage.Component
 }
 
 func (h *FSHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
@@ -33,49 +23,17 @@ func (h *FSHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		return
 	}
 
-	namespaces := dashboard.ConfigFromContext(r.Context()).String(storage.ConfigFileNameSpaces)
-	if namespaces == "" {
+	path, err := h.Component.NamespacePath(namespace)
+	if err != nil {
 		h.NotFound(w, r)
 		return
 	}
 
-	var (
-		fileHandler http.Handler
-		path        string
-		prefix      string
-		err         error
-	)
-
-	for _, n := range strings.Split(namespaces, ",") {
-		parts := strings.Split(n, ":")
-		if len(parts) < 2 {
-			continue
-		}
-
-		ns := strings.ToLower(strings.TrimSpace(parts[0]))
-		if ns != namespace {
-			continue
-		}
-
-		path = strings.TrimRight(strings.TrimSpace(parts[1]), h.separator)
-		path = filepath.FromSlash(path)
-		path, err = filepath.Abs(path)
-
-		if err != nil {
-			continue
-		}
-
-		prefix = routePrefix + namespace + "/"
-		fileHandler = http.StripPrefix(prefix, http.FileServer(http.Dir(path)))
-	}
-
-	if fileHandler == nil {
-		h.NotFound(w, r)
-		return
-	}
+	prefix := storage.RouteFileStoragePrefix + namespace + "/"
+	fileHandler := http.StripPrefix(prefix, http.FileServer(http.Dir(path)))
 
 	fileName := strings.TrimPrefix(r.URL().Path, prefix)
-	fileName = strings.TrimLeft(fileName, h.separator)
+	fileName = strings.TrimLeft(fileName, storage.Separator)
 	fileName = filepath.FromSlash(fileName)
 	fileName = filepath.Join(path, strings.TrimLeft(fileName, "/"))
 

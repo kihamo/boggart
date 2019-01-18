@@ -2,10 +2,10 @@ package voice
 
 import (
 	"context"
-	"io"
-
 	"github.com/kihamo/boggart/components/voice/players"
+	yandex "github.com/kihamo/boggart/components/voice/providers/yandex_speechkit_cloud"
 	"github.com/kihamo/shadow"
+	"io"
 )
 
 type Component interface {
@@ -22,4 +22,5 @@ type Component interface {
 	Volume(ctx context.Context, player string) (volume int64, err error)
 	SetVolume(ctx context.Context, player string, percent int64) error
 	SetMute(ctx context.Context, player string, mute bool) error
+	TextToSpeechProvider() *yandex.YandexSpeechKitCloud
 }

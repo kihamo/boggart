@@ -3,12 +3,8 @@ package internal
 import (
 	"context"
 	"errors"
-	"io"
-	"strconv"
-	"strings"
-	"time"
-
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/components/storage"
 	"github.com/kihamo/boggart/components/voice"
 	"github.com/kihamo/boggart/components/voice/players"
 	"github.com/kihamo/boggart/components/voice/players/alsa"
@@ -20,6 +16,10 @@ import (
 	"github.com/kihamo/shadow/components/logging"
 	"github.com/kihamo/shadow/components/tracing"
 	"github.com/opentracing/opentracing-go/log"
+	"io"
+	"strconv"
+	"strings"
+	"time"
 )
 
 type Component struct {
@@ -51,6 +51,10 @@ func (c *Component) Dependencies() []shadow.Dependency {
 		},
 		{
 			Name:     mqtt.ComponentName,
+			Required: true,
+		},
+		{
+			Name:     storage.ComponentName,
 			Required: true,
 		},
 	}
@@ -100,9 +104,9 @@ func (c *Component) Run(a shadow.Application, ready chan<- struct{}) error {
 		}
 	}
 
-	go c.playersUpdater()
-
-	ready <- struct{}{}
+	if len(c.players) > 0 {
+		go c.playersUpdater()
+	}
 
 	return nil
 }
@@ -441,6 +445,10 @@ func (c *Component) SetMute(ctx context.Context, player string, mute bool) (err 
 	}
 
 	return err
+}
+
+func (c *Component) TextToSpeechProvider() *yandex.YandexSpeechKitCloud {
+	return c.textToSpeechProvider
 }
 
 func (c *Component) Shutdown() error {

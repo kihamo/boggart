@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"github.com/kihamo/boggart/components/storage"
 	"net/http"
 
 	"github.com/elazarl/go-bindata-assetfs"
@@ -20,12 +21,19 @@ func (c *Component) DashboardMenu() dashboard.Menu {
 
 func (c *Component) DashboardRoutes() []dashboard.Route {
 	if c.routes == nil {
+		<-c.application.ReadyComponent(storage.ComponentName)
+
 		c.routes = []dashboard.Route{
 			dashboard.NewRoute("/"+c.Name()+"/message/", &handlers.MessageHandler{
 				Component: c,
 			}).
 				WithMethods([]string{http.MethodGet, http.MethodPost}).
 				WithAuth(true),
+			dashboard.NewRoute("/"+c.Name()+"/file/:message", &handlers.FileHandler{
+				Voice:   c,
+				Storage: c.application.GetComponent(storage.ComponentName).(storage.Component),
+			}).
+				WithMethods([]string{http.MethodGet}),
 		}
 	}
 
