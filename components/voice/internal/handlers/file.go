@@ -22,7 +22,7 @@ type FileHandler struct {
 
 func (h *FileHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	q := r.URL().Query()
-	message := q.Get(":message")
+	message := q.Get("message")
 	message = voice.TrimMessage(message)
 
 	if message == "" {

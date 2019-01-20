@@ -18,7 +18,7 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 		<-c.application.ReadyComponent(storage.ComponentName)
 
 		c.routes = []dashboard.Route{
-			dashboard.NewRoute("/"+c.Name()+"/file/:message", &handlers.FileHandler{
+			dashboard.NewRoute("/"+c.Name()+"/file/", &handlers.FileHandler{
 				Voice:   c,
 				Storage: c.application.GetComponent(storage.ComponentName).(storage.Component),
 			}).
