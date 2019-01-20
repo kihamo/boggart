@@ -5,6 +5,7 @@ import (
 	"errors"
 	"math"
 	"net"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -20,8 +21,10 @@ import (
 )
 
 type Bind struct {
-	volume int64
-	mute   int64
+	volume      int64
+	mute        int64
+	status      atomic.Value
+	mediaStatus atomic.Value
 
 	boggart.BindBase
 	boggart.BindMQTT
@@ -176,21 +179,39 @@ func (b *Bind) doEvents() {
 				}
 
 			case controllers.MediaStatus:
-				// TODO: content id
-				// TODO: state to MQTT
+				ctx := context.Background()
+				sn := mqtt.NameReplace(b.SerialNumber())
 
-				switch t.PlayerState {
-				case "PLAYING":
-					//p.setStatus(players.StatusPlaying)
+				prev := b.status.Load()
+				if prev == nil || prev.(string) != t.PlayerState {
+					b.status.Store(t.PlayerState)
 
-				case "FINISHED", "IDLE":
-					//p.setStatus(players.StatusStopped)
+					_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateStatus.Format(sn), 0, true, strings.ToLower(t.PlayerState))
+				}
 
-				case "PAUSED":
-					//p.setStatus(players.StatusPause)
+				if t.PlayerState == "IDLE" && t.IdleReason == "FINISHED" {
+					// TODO: error log
+					_, _ = b.receiver.QuitApp(ctx)
+				}
+
+				if t.Media != nil {
+					prev := b.mediaStatus.Load()
+					if prev != nil {
+						prevMedia := prev.(*controllers.MediaStatusMedia)
+						if t.Media.ContentId != prevMedia.ContentId {
+							b.mediaStatus.Store(t.Media)
+
+							_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateContent.Format(sn), 0, true, t.Media.ContentId)
+						}
+					} else {
+						b.mediaStatus.Store(t.Media)
+
+						_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateContent.Format(sn), 0, true, t.Media.ContentId)
+					}
 				}
 
 			default:
+				// TODO: log
 				// fmt.Printf("Unknown event: %#v\n", t)
 			}
 		}

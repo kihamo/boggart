@@ -43,6 +43,7 @@ func (h *FileHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		err                                         error
 		speed                                       float64
 		language, speaker, emotion, format, quality string
+		force                                       bool
 	)
 
 	if qSpeed := q.Get("speed"); qSpeed != "" {
@@ -53,6 +54,14 @@ func (h *FileHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		}
 	} else {
 		speed = config.Float64(voice.ConfigYandexSpeechKitCloudSpeed)
+	}
+
+	if qForce := q.Get("force"); qForce != "" {
+		force, err = strconv.ParseBool(qForce)
+		if err != nil {
+			h.NotFound(w, r)
+			return
+		}
 	}
 
 	if qLanguage := q.Get("language"); qLanguage != "" {
@@ -91,7 +100,7 @@ func (h *FileHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		return
 	}
 
-	storageURL, err := h.Storage.SaveURLToFile(StorageFileNameSpace, providerURL, false)
+	storageURL, err := h.Storage.SaveURLToFile(StorageFileNameSpace, providerURL, force)
 	if err != nil && err != storage.ErrFileAlreadyExist {
 		panic(err.Error())
 	}

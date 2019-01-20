@@ -22,7 +22,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		livenessTimeout:  config.LivenessTimeout,
 	}
 	device.Init()
-	device.SetSerialNumber(config.Host.String() + "-" + strconv.Itoa(config.Port))
+	device.SetSerialNumber(config.Host.String() + ":" + strconv.Itoa(config.Port))
 
 	if err := device.initCast(); err != nil {
 		return nil, err

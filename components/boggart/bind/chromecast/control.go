@@ -84,7 +84,17 @@ func (b *Bind) Resume(ctx context.Context) error {
 }
 
 func (b *Bind) Stop(ctx context.Context) error {
-	_, err := b.receiver.QuitApp(ctx)
+	ctrl, err := b.Media(ctx)
+	if err != nil {
+		return err
+	}
+
+	_, err = ctrl.Stop(ctx)
+	if err != nil {
+		return err
+	}
+
+	_, err = b.receiver.QuitApp(ctx)
 	return err
 }
 

@@ -10,13 +10,11 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
 	device := &Bind{
-		host:             config.Host,
+		host: config.Host.IP,
+		port: config.Port,
+
 		livenessInterval: config.LivenessInterval,
 		livenessTimeout:  config.LivenessTimeout,
-		updaterInterval:  config.UpdaterInterval,
-		status:           -1,
-		volume:           -1,
-		mute:             0,
 	}
 	device.Init()
 

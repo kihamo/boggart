@@ -1,64 +1,42 @@
 package google_home
 
 import (
+	"net"
+	"strconv"
 	"sync"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/google/home"
 	"github.com/kihamo/boggart/components/boggart/providers/google/home/client"
-	"github.com/kihamo/boggart/components/voice/players/chromecast"
 )
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
 
-	mutex sync.RWMutex
+	mutex  sync.RWMutex
+	client *client.GoogleHome
 
-	clientGoogleHome *client.GoogleHome
-	clientChromeCast *chromecast.Player
-	host             string
-	status           int64
-	volume           int64
-	mute             int64
+	host net.IP
+	port int
 
 	livenessInterval time.Duration
 	livenessTimeout  time.Duration
-	updaterInterval  time.Duration
 }
 
 func (b *Bind) ClientGoogleHome() *client.GoogleHome {
 	b.mutex.RLock()
-	c := b.clientGoogleHome
+	c := b.client
 	b.mutex.RUnlock()
 
 	if c != nil {
 		return c
 	}
 
-	ctrl := home.NewClient(b.host)
+	ctrl := home.NewClient(b.host.String() + ":" + strconv.Itoa(b.port))
 
 	b.mutex.Lock()
-	b.clientGoogleHome = ctrl
-	b.mutex.Unlock()
-
-	return ctrl
-}
-
-func (b *Bind) ClientChromeCast() *chromecast.Player {
-	b.mutex.RLock()
-	c := b.clientChromeCast
-	b.mutex.RUnlock()
-
-	if c != nil {
-		return c
-	}
-
-	ctrl := chromecast.New(b.host, chromecast.DefaultPort)
-
-	b.mutex.Lock()
-	b.clientChromeCast = ctrl
+	b.client = ctrl
 	b.mutex.Unlock()
 
 	return ctrl
@@ -67,27 +45,9 @@ func (b *Bind) ClientChromeCast() *chromecast.Player {
 func (b *Bind) UpdateStatus(status boggart.BindStatus) {
 	if status == boggart.BindStatusOffline && status != b.Status() {
 		b.mutex.Lock()
-		b.clientGoogleHome = nil
-
-		if b.clientChromeCast != nil {
-			go b.clientChromeCast.Close()
-		}
-
-		b.clientChromeCast = nil
+		b.client = nil
 		b.mutex.Unlock()
 	}
 
 	b.BindBase.UpdateStatus(status)
-}
-
-func (b *Bind) Close() error {
-	b.mutex.RLock()
-	c := b.clientChromeCast
-	b.mutex.RUnlock()
-
-	if c != nil {
-		c.Close()
-	}
-
-	return nil
 }

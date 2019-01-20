@@ -12,19 +12,20 @@ import (
 )
 
 const (
-	MQTTPrefix = boggart.ComponentName + "/s/+/"
+	MQTTPrefix = boggart.ComponentName + "/chromecast/+/"
 
-	MQTTSubscribeTopicVolume    mqtt.Topic = MQTTPrefix + "volume"
-	MQTTSubscribeTopicMute      mqtt.Topic = MQTTPrefix + "mute"
-	MQTTSubscribeTopicPause     mqtt.Topic = MQTTPrefix + "pause"
-	MQTTSubscribeTopicStop      mqtt.Topic = MQTTPrefix + "stop"
-	MQTTSubscribeTopicPlay      mqtt.Topic = MQTTPrefix + "play"
-	MQTTSubscribeTopicResume    mqtt.Topic = MQTTPrefix + "resume"
-	MQTTSubscribeTopicSeek      mqtt.Topic = MQTTPrefix + "seek"
-	MQTTSubscribeTopicAction    mqtt.Topic = MQTTPrefix + "action"
-	MQTTPublishTopicStateStatus mqtt.Topic = MQTTPrefix + "state/status"
-	MQTTPublishTopicStateVolume mqtt.Topic = MQTTPrefix + "state/volume"
-	MQTTPublishTopicStateMute   mqtt.Topic = MQTTPrefix + "state/mute"
+	MQTTSubscribeTopicVolume     mqtt.Topic = MQTTPrefix + "volume"
+	MQTTSubscribeTopicMute       mqtt.Topic = MQTTPrefix + "mute"
+	MQTTSubscribeTopicPause      mqtt.Topic = MQTTPrefix + "pause"
+	MQTTSubscribeTopicStop       mqtt.Topic = MQTTPrefix + "stop"
+	MQTTSubscribeTopicPlay       mqtt.Topic = MQTTPrefix + "play"
+	MQTTSubscribeTopicResume     mqtt.Topic = MQTTPrefix + "resume"
+	MQTTSubscribeTopicSeek       mqtt.Topic = MQTTPrefix + "seek"
+	MQTTSubscribeTopicAction     mqtt.Topic = MQTTPrefix + "action"
+	MQTTPublishTopicStateStatus  mqtt.Topic = MQTTPrefix + "state/status"
+	MQTTPublishTopicStateVolume  mqtt.Topic = MQTTPrefix + "state/volume"
+	MQTTPublishTopicStateMute    mqtt.Topic = MQTTPrefix + "state/mute"
+	MQTTPublishTopicStateContent mqtt.Topic = MQTTPrefix + "state/content"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
@@ -32,6 +33,7 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 		MQTTPublishTopicStateStatus,
 		MQTTPublishTopicStateVolume,
 		MQTTPublishTopicStateMute,
+		MQTTPublishTopicStateContent,
 	}
 }
 

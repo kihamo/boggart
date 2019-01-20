@@ -13,7 +13,7 @@ func (b *Bind) Tasks() []workers.Task {
 	taskLiveness.SetTimeout(b.livenessTimeout)
 	taskLiveness.SetRepeats(-1)
 	taskLiveness.SetRepeatInterval(b.livenessInterval)
-	taskLiveness.SetName("bind-chromecast-" + b.host.String())
+	taskLiveness.SetName("bind-chromecast-liveness-" + b.host.String())
 
 	return []workers.Task{
 		taskLiveness,
