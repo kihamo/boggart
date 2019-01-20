@@ -1,5 +1,5 @@
-hash: ef84d25373842ead4a4519a33ad6747d92bd51bebd38f2715b16facaed4b017e
-updated: 2019-01-18T18:37:02.228005+03:00
+hash: 53452b0b5179a49440c2c2d15d79b945b054aa4ff2bb4d88d934a9f4abd5a72c
+updated: 2019-01-20T06:57:27.268067+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: 02e53af36e6c978af692887ed449b74026d76fec
@@ -13,7 +13,9 @@ imports:
 - name: github.com/asaskevich/govalidator
   version: f9ffefc3facfbe0caee3fea233cbb6e8208f4541
 - name: github.com/barnybug/go-cast
-  version: 5be61902f81864905136552a2178b219efceed61
+  version: b61c40dba9ee2184fc4a2fceee9a0d0a4633ef76
+  repo: git@github.com:kihamo/go-cast.git
+  vcs: git
   subpackages:
   - api
   - controllers
@@ -299,7 +301,7 @@ imports:
   subpackages:
   - nethttp
 - name: github.com/opentracing/opentracing-go
-  version: be550b025b433cdfa2f11efb962afa2ea3c4d967
+  version: 1949ddbfd147afd4d964a9f00b24eb291e0e7c38
   subpackages:
   - ext
   - log

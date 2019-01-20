@@ -10,10 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kihamo/boggart/components/boggart/internal/manager"
-
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/bind/hikvision"
+	"github.com/kihamo/boggart/components/boggart/internal/manager"
 	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/messengers"
 )

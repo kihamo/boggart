@@ -196,3 +196,11 @@ func (c *Component) initConfigFromYaml() error {
 
 	return nil
 }
+
+func (c *Component) Shutdown() error {
+	if c.manager != nil {
+		return c.manager.UnregisterAll()
+	}
+
+	return nil
+}

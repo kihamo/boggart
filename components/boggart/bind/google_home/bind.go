@@ -79,3 +79,15 @@ func (b *Bind) UpdateStatus(status boggart.BindStatus) {
 
 	b.BindBase.UpdateStatus(status)
 }
+
+func (b *Bind) Close() error {
+	b.mutex.RLock()
+	c := b.clientChromeCast
+	b.mutex.RUnlock()
+
+	if c != nil {
+		c.Close()
+	}
+
+	return nil
+}

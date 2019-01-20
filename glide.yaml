@@ -41,7 +41,9 @@ import:
 - package: github.com/robbiet480/go.nut
   version: 246697bfaea771ddfe4ce0d754e6e2a7b8214f0f
 - package: github.com/barnybug/go-cast
-  version: 5be61902f81864905136552a2178b219efceed61
+  version: b61c40dba9ee2184fc4a2fceee9a0d0a4633ef76
+  repo:    git@github.com:kihamo/go-cast.git
+  vcs:     git
 - package: gopkg.in/yaml.v2
   version: ~v2.2
 - package: github.com/denisbrodbeck/machineid
