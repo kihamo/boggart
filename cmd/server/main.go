@@ -17,6 +17,7 @@ import (
 	_ "github.com/kihamo/boggart/components/boggart/bind/pulsar"
 	_ "github.com/kihamo/boggart/components/boggart/bind/samsung_tizen"
 	_ "github.com/kihamo/boggart/components/boggart/bind/softvideo"
+	_ "github.com/kihamo/boggart/components/boggart/bind/wol"
 	_ "github.com/kihamo/boggart/components/boggart/instance"
 	_ "github.com/kihamo/boggart/components/mqtt/instance"
 	_ "github.com/kihamo/boggart/components/storage/instance"

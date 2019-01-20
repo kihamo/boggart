@@ -15,9 +15,6 @@ func (c *Component) ConfigVariables() []config.Variable {
 		config.NewVariable(boggart.ConfigMQTTOwnTracksEnabled, config.ValueTypeBool).
 			WithUsage("OwnTracks enabled").
 			WithGroup("MQTT subscribers"),
-		config.NewVariable(boggart.ConfigMQTTWOLEnabled, config.ValueTypeBool).
-			WithUsage("Wake-on-LAN enabled").
-			WithGroup("MQTT subscribers"),
 		config.NewVariable(boggart.ConfigMQTTAnnotationsEnabled, config.ValueTypeBool).
 			WithUsage("Annotations enabled").
 			WithGroup("MQTT subscribers"),
