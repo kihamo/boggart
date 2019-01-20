@@ -42,11 +42,7 @@ func (t TypeRM) CreateBind(c interface{}) (boggart.Bind, error) {
 		ip:              ip,
 		captureDuration: config.CaptureDuration,
 	}
-	device.Init()
 	device.SetSerialNumber(config.MAC.String())
-
-	// TODO: check open (ping) UDP port
-	device.UpdateStatus(boggart.BindStatusOnline)
 
 	return device, nil
 }

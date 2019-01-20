@@ -27,7 +27,7 @@ func (b *BindSP3S) MQTTSubscribers() []mqtt.Subscriber {
 	sn := mqtt.NameReplace(b.SerialNumber())
 
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(SP3SMQTTSubscribeTopicSet.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(SP3SMQTTSubscribeTopicSet.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
 			if bytes.Equal(message.Payload(), []byte(`1`)) {
 				return b.On(ctx)
 			}

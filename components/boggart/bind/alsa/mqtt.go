@@ -40,7 +40,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	sn := mqtt.NameReplace(b.SerialNumber())
 
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTSubscribeTopicVolume.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(MQTTSubscribeTopicVolume.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			volume, err := strconv.ParseInt(string(message.Payload()), 10, 64)
 			if err != nil {
 				return err
@@ -48,30 +48,30 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			return b.SetVolume(volume)
 		})),
-		mqtt.NewSubscriber(MQTTSubscribeTopicMute.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(MQTTSubscribeTopicMute.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			return b.SetMute(bytes.Equal(message.Payload(), []byte(`1`)))
 		})),
-		mqtt.NewSubscriber(MQTTSubscribeTopicPause.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(MQTTSubscribeTopicPause.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			return b.Pause()
 		})),
-		mqtt.NewSubscriber(MQTTSubscribeTopicStop.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(MQTTSubscribeTopicStop.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			return b.Stop()
 		})),
-		mqtt.NewSubscriber(MQTTSubscribeTopicPlay.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(MQTTSubscribeTopicPlay.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if u := string(message.Payload()); u != "" {
 				return b.PlayFromURL(u)
 			}
 
 			return b.Play()
 		})),
-		mqtt.NewSubscriber(MQTTSubscribeTopicResume.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(MQTTSubscribeTopicResume.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if u := string(message.Payload()); u != "" {
 				return b.PlayFromURL(u)
 			}
 
 			return b.Play()
 		})),
-		mqtt.NewSubscriber(MQTTSubscribeTopicAction.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(MQTTSubscribeTopicAction.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			action := string(message.Payload())
 
 			switch strings.ToLower(action) {

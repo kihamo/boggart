@@ -4,28 +4,41 @@ import (
 	"context"
 	"errors"
 	"sync"
-	"sync/atomic"
 
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
 type BindBase struct {
-	mutex sync.RWMutex
-
+	statusGetter BindStatusGetter
+	statusSetter BindStatusSetter
+	mutex        sync.RWMutex
 	serialNumber string
-	status       uint64
 }
 
-func (d *BindBase) Init() {
-	d.UpdateStatus(BindStatusInitializing)
+func (d *BindBase) SetStatusManager(getter BindStatusGetter, setter BindStatusSetter) {
+	d.mutex.Lock()
+	d.statusGetter = getter
+	d.statusSetter = setter
+	d.mutex.Unlock()
 }
 
 func (d *BindBase) Status() BindStatus {
-	return BindStatus(atomic.LoadUint64(&d.status))
+	d.mutex.RLock()
+	defer d.mutex.RUnlock()
+
+	if d.statusGetter != nil {
+		return d.statusGetter()
+	}
+
+	return BindStatusUnknown
 }
 
 func (d *BindBase) UpdateStatus(status BindStatus) {
-	atomic.StoreUint64(&d.status, uint64(status))
+	d.mutex.RLock()
+	if d.statusSetter != nil {
+		d.statusSetter(status)
+	}
+	d.mutex.RUnlock()
 }
 
 func (d *BindBase) SerialNumber() string {
@@ -92,9 +105,9 @@ func CheckSerialNumberInMQTTTopic(bind Bind, topic string, offset int) bool {
 	return CheckValueInMQTTTopic(topic, mqtt.NameReplace(bind.SerialNumber()), offset)
 }
 
-func WrapMQTTSubscribeDeviceIsOnline(bind Bind, callback mqtt.MessageHandler) mqtt.MessageHandler {
+func WrapMQTTSubscribeDeviceIsOnline(status BindStatusGetter, callback mqtt.MessageHandler) mqtt.MessageHandler {
 	return func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-		if bind.Status() == BindStatusOnline {
+		if status() == BindStatusOnline {
 			return callback(ctx, client, message)
 		}
 

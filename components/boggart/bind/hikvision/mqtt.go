@@ -70,12 +70,12 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	}
 
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTSubscribeTopicPTZMove.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTAbsolute)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicPTZAbsolute.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTAbsolute)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicPTZContinuous.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTContinuous)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicPTZRelative.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTRelative)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicPTZPreset.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTPreset)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicPTZMomentary.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, b.callbackMQTTMomentary)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicPTZMove.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTAbsolute)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicPTZAbsolute.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTAbsolute)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicPTZContinuous.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTContinuous)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicPTZRelative.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTRelative)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicPTZPreset.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTPreset)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicPTZMomentary.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTMomentary)),
 	}
 }
 

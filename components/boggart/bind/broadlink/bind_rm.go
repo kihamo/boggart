@@ -17,6 +17,7 @@ type BindRM struct {
 	ip              net.UDPAddr
 	captureDuration time.Duration
 }
+
 type BindRMSupportCapture interface {
 	StartCaptureRemoteControlCode() error
 	ReadCapturedRemoteControlCodeAsString() (broadlink.RemoteType, string, error)
@@ -32,4 +33,10 @@ type BindRMSupportRF315Mhz interface {
 
 type BindRMSupportRF433Mhz interface {
 	SendRF433MhzRemoteControlCodeAsString(code string, count int) error
+}
+
+func (b *BindRM) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.BindStatusSetter) {
+	b.BindBase.SetStatusManager(getter, setter)
+
+	b.UpdateStatus(boggart.BindStatusOnline)
 }

@@ -46,7 +46,6 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 		updaterInterval: config.UpdaterInterval,
 	}
-	device.Init()
 	device.SetSerialNumber(hex.EncodeToString(deviceAddress))
 
 	return device, nil

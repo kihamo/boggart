@@ -30,14 +30,18 @@ type BindItem interface {
 	Description() string
 	Tags() []string
 	Config() interface{}
+	Status() BindStatus
 	Tasks() []workers.Task
 	Listeners() []workers.ListenerWithEvents
 	MQTTSubscribers() []mqtt.Subscriber
 	MQTTPublishes() []mqtt.Topic
 }
 
+type BindStatusGetter func() BindStatus
+type BindStatusSetter func(BindStatus)
+
 type Bind interface {
-	Status() BindStatus
+	SetStatusManager(BindStatusGetter, BindStatusSetter)
 	SerialNumber() string
 }
 

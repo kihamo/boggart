@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"sort"
+	"strings"
 	"sync"
 	"sync/atomic"
 
@@ -18,6 +19,8 @@ import (
 const (
 	managerNotReady = int64(iota)
 	managerReady
+
+	MQTTPublishTopicBindStatus mqtt.Topic = boggart.ComponentName + "/bind/+/status"
 )
 
 type Manager struct {
@@ -62,15 +65,21 @@ func (m *Manager) RegisterWithID(id string, bind boggart.Bind, t string, descrip
 		tags:        tags,
 		config:      config,
 	}
-	m.storage.Store(id, bindItem)
+
+	statusUpdate := m.itemStatusUpdate(bindItem)
+	statusUpdate(boggart.BindStatusInitializing)
+
+	bind.SetStatusManager(bindItem.Status, m.bindStatusUpdate(bindItem))
 
 	// register mqtt
 	if mqttClient, ok := bind.(boggart.BindHasMQTTClient); ok {
 		mqttClient.SetMQTTClient(m.mqtt)
 	}
 
+	// TODO: обвешать подписки враппером, что бы только в online можно было посылать
 	for _, subscriber := range bindItem.MQTTSubscribers() {
 		if err := m.mqtt.SubscribeSubscriber(subscriber); err != nil {
+			statusUpdate(boggart.BindStatusUninitialized)
 			return nil, err
 		}
 	}
@@ -85,6 +94,8 @@ func (m *Manager) RegisterWithID(id string, bind boggart.Bind, t string, descrip
 		m.listeners.AddListener(listener)
 	}
 
+	m.storage.Store(id, bindItem)
+
 	return bindItem, nil
 }
 
@@ -96,8 +107,12 @@ func (m *Manager) Unregister(id string) error {
 
 	bindItem := d.(*BindItem)
 
+	statusUpdate := m.itemStatusUpdate(bindItem)
+	statusUpdate(boggart.BindStatusRemoving)
+
 	// unregister mqtt
 	if err := m.mqtt.UnsubscribeSubscribers(bindItem.MQTTSubscribers()); err != nil {
+		statusUpdate(boggart.BindStatusUnknown)
 		return err
 	}
 
@@ -118,9 +133,13 @@ func (m *Manager) Unregister(id string) error {
 	m.storage.Delete(id)
 
 	if closer, ok := bindItem.Bind().(boggart.BindCloser); ok {
-		return closer.Close()
+		if err := closer.Close(); err != nil {
+			statusUpdate(boggart.BindStatusUnknown)
+			return err
+		}
 	}
 
+	statusUpdate(boggart.BindStatusRemoved)
 	return nil
 }
 
@@ -190,4 +209,46 @@ func (m *Manager) Ready() {
 
 func (m *Manager) IsReady() bool {
 	return atomic.LoadInt64(&m.ready) == managerReady
+}
+
+func (m *Manager) itemStatusUpdate(item *BindItem) boggart.BindStatusSetter {
+	return func(status boggart.BindStatus) {
+		if status == item.Status() {
+			return
+		}
+
+		item.updateStatus(status)
+
+		m.mqtt.PublishAsync(
+			context.Background(),
+			MQTTPublishTopicBindStatus.Format(mqtt.NameReplace(item.id)),
+			0,
+			false,
+			strings.ToLower(status.String()))
+	}
+}
+
+func (m *Manager) bindStatusUpdate(item *BindItem) boggart.BindStatusSetter {
+	return func(status boggart.BindStatus) {
+		switch status {
+		// allow statuses
+		case boggart.BindStatusOnline, boggart.BindStatusOffline, boggart.BindStatusUnknown, boggart.BindStatusRemoved:
+			if status == item.Status() {
+				return
+			}
+
+			item.updateStatus(status)
+
+			m.mqtt.PublishAsync(
+				context.Background(),
+				MQTTPublishTopicBindStatus.Format(mqtt.NameReplace(item.id)),
+				0,
+				false,
+				strings.ToLower(status.String()))
+
+		default:
+			// TODO: deny log
+			// fmt.Println("Deny change status " + status.String() + " ID " + item.id)
+		}
+	}
 }

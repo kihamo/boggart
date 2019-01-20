@@ -11,11 +11,10 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
 	device := &Bind{
-		provider:        softvideo.NewClient(config.Login, config.Password),
+		provider:        softvideo.NewClient(config.Login, config.Password, config.Debug),
 		lastValue:       -1,
 		updaterInterval: config.UpdaterInterval,
 	}
-	device.Init()
 	device.SetSerialNumber(config.Login)
 
 	return device, nil

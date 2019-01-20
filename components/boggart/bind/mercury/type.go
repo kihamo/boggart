@@ -32,7 +32,6 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 		updaterInterval: config.UpdaterInterval,
 	}
-	device.Init()
 
 	// TODO: read real serial number
 	device.SetSerialNumber(config.Address)

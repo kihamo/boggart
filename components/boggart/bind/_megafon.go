@@ -33,7 +33,6 @@ func NewMegafonPhone(provider *mobile.Megafon, interval time.Duration) *MegafonP
 
 		lastValue: -1,
 	}
-	device.Init()
 	device.SetSerialNumber(device.Number())
 
 	return device

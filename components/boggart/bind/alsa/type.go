@@ -24,10 +24,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		done: make(chan struct{}, 1),
 	}
 
-	device.Init()
 	device.SetSerialNumber(sn)
-	device.UpdateStatus(boggart.BindStatusOnline)
-
 	device.setPlayerStatus(StatusStopped)
 	device.SetVolume(config.Volume)
 	device.SetMute(config.Mute)

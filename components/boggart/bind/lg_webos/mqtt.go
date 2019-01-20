@@ -38,7 +38,7 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTSubscribeTopicApplication.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(MQTTSubscribeTopicApplication.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
 				return nil
 			}
@@ -51,7 +51,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			_, err = client.ApplicationManagerLaunch(string(message.Payload()), nil)
 			return err
 		})),
-		mqtt.NewSubscriber(MQTTSubscribeTopicMute.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(MQTTSubscribeTopicMute.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
 				return nil
 			}
@@ -63,7 +63,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			return client.AudioSetMute(bytes.Equal(message.Payload(), []byte(`1`)))
 		})),
-		mqtt.NewSubscriber(MQTTSubscribeTopicVolume.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(MQTTSubscribeTopicVolume.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
 				return nil
 			}
@@ -80,7 +80,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			return client.AudioSetVolume(int(vol))
 		})),
-		mqtt.NewSubscriber(MQTTSubscribeTopicVolumeUp.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(MQTTSubscribeTopicVolumeUp.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 3) {
 				return nil
 			}
@@ -92,7 +92,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			return client.AudioVolumeUp()
 		})),
-		mqtt.NewSubscriber(MQTTSubscribeTopicVolumeDown.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(MQTTSubscribeTopicVolumeDown.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 3) {
 				return nil
 			}
@@ -104,7 +104,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			return client.AudioVolumeDown()
 		})),
-		mqtt.NewSubscriber(MQTTSubscribeTopicToast.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(MQTTSubscribeTopicToast.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
 				return nil
 			}

@@ -31,7 +31,5 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		eventsIgnoreInterval:  config.EventsIgnoreInterval,
 	}
 
-	device.Init()
-
 	return device, nil
 }

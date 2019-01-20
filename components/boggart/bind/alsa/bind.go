@@ -30,17 +30,23 @@ var (
 )
 
 type Bind struct {
+	boggart.BindBase
+	boggart.BindMQTT
+
 	playerStatus int64
 	volume       int64
 	mute         int64
 	done         chan struct{}
 
-	boggart.BindBase
-	boggart.BindMQTT
-
 	mutex   sync.RWMutex
 	speaker *speakerWrapper
 	stream  *streamWrapper
+}
+
+func (b *Bind) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.BindStatusSetter) {
+	b.BindBase.SetStatusManager(getter, setter)
+
+	b.UpdateStatus(boggart.BindStatusOnline)
 }
 
 func (b *Bind) Close() error {

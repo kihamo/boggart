@@ -16,7 +16,6 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		livenessInterval: config.LivenessInterval,
 		livenessTimeout:  config.LivenessTimeout,
 	}
-	device.Init()
 
 	return device, nil
 }

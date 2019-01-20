@@ -42,7 +42,6 @@ func (t TypeSP3S) CreateBind(c interface{}) (boggart.Bind, error) {
 		power:           -1,
 		updaterInterval: config.UpdaterInterval,
 	}
-	device.Init()
 	device.SetSerialNumber(config.MAC.String())
 
 	return device, nil

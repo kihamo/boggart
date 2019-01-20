@@ -2,6 +2,7 @@ package manager
 
 import (
 	"sync"
+	"sync/atomic"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
@@ -15,6 +16,7 @@ type BindItem struct {
 	description string
 	tags        []string
 	config      interface{}
+	status      uint64
 
 	cacheMutex           sync.Mutex
 	cacheTasks           []workers.Task
@@ -57,6 +59,14 @@ func (d *BindItem) Tags() []string {
 
 func (d *BindItem) Config() interface{} {
 	return d.config
+}
+
+func (d *BindItem) Status() boggart.BindStatus {
+	return boggart.BindStatus(atomic.LoadUint64(&d.status))
+}
+
+func (d *BindItem) updateStatus(status boggart.BindStatus) {
+	atomic.StoreUint64(&d.status, uint64(status))
 }
 
 func (d *BindItem) Tasks() []workers.Task {

@@ -26,7 +26,5 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		updaterInterval:  config.UpdaterInterval,
 	}
 
-	device.Init()
-
 	return device, nil
 }

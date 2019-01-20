@@ -50,7 +50,6 @@ func NewBME280Sensor(connector i2c.Connector, interval time.Duration, bus int, a
 		pressure:    math.MaxUint64,
 	}
 
-	device.Init()
 	device.SetSerialNumber(fmt.Sprintf("%d_%d", bus, address))
 
 	return device

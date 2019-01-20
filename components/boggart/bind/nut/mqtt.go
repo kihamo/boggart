@@ -41,7 +41,7 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTSubscribeTopicCommand.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(MQTTSubscribeTopicCommand.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
 				return nil
 			}

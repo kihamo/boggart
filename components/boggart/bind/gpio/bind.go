@@ -24,21 +24,27 @@ type Bind struct {
 	mode Mode
 }
 
-func (d *Bind) Mode() Mode {
-	return d.mode
+func (b *Bind) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.BindStatusSetter) {
+	b.BindBase.SetStatusManager(getter, setter)
+
+	b.UpdateStatus(boggart.BindStatusOnline)
 }
 
-func (d *Bind) High(ctx context.Context) error {
-	if d.Mode() == ModeIn {
+func (b *Bind) Mode() Mode {
+	return b.mode
+}
+
+func (b *Bind) High(ctx context.Context) error {
+	if b.Mode() == ModeIn {
 		return nil
 	}
 
-	if g, ok := d.pin.(gpio.PinOut); ok {
+	if g, ok := b.pin.(gpio.PinOut); ok {
 		if err := g.Out(gpio.High); err != nil {
 			return err
 		}
 
-		if err := d.MQTTPublishAsync(ctx, MQTTPublishTopicPinState.Format(d.pin.Number()), 2, true, true); err != nil {
+		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPinState.Format(b.pin.Number()), 2, true, true); err != nil {
 			return err
 		}
 	}
@@ -46,17 +52,17 @@ func (d *Bind) High(ctx context.Context) error {
 	return nil
 }
 
-func (d *Bind) Low(ctx context.Context) error {
-	if d.Mode() == ModeIn {
+func (b *Bind) Low(ctx context.Context) error {
+	if b.Mode() == ModeIn {
 		return nil
 	}
 
-	if g, ok := d.pin.(gpio.PinOut); ok {
+	if g, ok := b.pin.(gpio.PinOut); ok {
 		if err := g.Out(gpio.Low); err != nil {
 			return err
 		}
 
-		if err := d.MQTTPublishAsync(ctx, MQTTPublishTopicPinState.Format(d.pin.Number()), 2, true, false); err != nil {
+		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPinState.Format(b.pin.Number()), 2, true, false); err != nil {
 			return err
 		}
 	}
@@ -64,25 +70,25 @@ func (d *Bind) Low(ctx context.Context) error {
 	return nil
 }
 
-func (d *Bind) Read() bool {
-	if d.Mode() == ModeOut {
+func (b *Bind) Read() bool {
+	if b.Mode() == ModeOut {
 		return false
 	}
 
-	if g, ok := d.pin.(gpio.PinIn); ok {
+	if g, ok := b.pin.(gpio.PinIn); ok {
 		return g.Read() == gpio.High
 	}
 
 	return false
 }
 
-func (d *Bind) waitForEdge() {
-	p := d.pin.(gpio.PinIn)
+func (b *Bind) waitForEdge() {
+	p := b.pin.(gpio.PinIn)
 	p.In(gpio.PullNoChange, gpio.BothEdges)
 	ctx := context.Background()
 
 	for p.WaitForEdge(-1) {
 		// TODO: log
-		_ = d.MQTTPublishAsync(ctx, MQTTPublishTopicPinState.Format(d.pin.Number()), 2, true, d.Read())
+		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicPinState.Format(b.pin.Number()), 2, true, b.Read())
 	}
 }

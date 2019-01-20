@@ -23,6 +23,12 @@ type RoborockRootBind struct {
 	watchFiles map[string]func(string) error
 }
 
+func (b *RoborockRootBind) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.BindStatusSetter) {
+	b.BindBase.SetStatusManager(getter, setter)
+
+	b.UpdateStatus(boggart.BindStatusOnline)
+}
+
 func (b *RoborockRootBind) InitDeviceID(fileName string) error {
 	content, err := ioutil.ReadFile(fileName)
 	if err != nil {

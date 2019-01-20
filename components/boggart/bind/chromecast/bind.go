@@ -53,11 +53,6 @@ func (b *Bind) initCast() error {
 	b.heartbeat = controllers.NewHeartbeatController(b.conn, b.events, cast.TransportSender, cast.TransportReceiver)
 	b.receiver = controllers.NewReceiverController(b.conn, b.events, cast.DefaultSender, cast.DefaultReceiver)
 
-	// FIXME: пинг-понг написан не корректно, рутина там никогда не завершится, поэтому достаточно стартовать один раз
-	if err := b.heartbeat.Start(context.Background()); err != nil {
-		return err
-	}
-
 	go b.doEvents()
 
 	return nil
@@ -74,6 +69,10 @@ func (b *Bind) Connect(_ context.Context) error {
 	// open TCP connection
 	err := b.conn.Connect(ctx, b.host, b.port)
 	if err != nil {
+		return err
+	}
+
+	if err := b.heartbeat.Start(context.Background()); err != nil {
 		return err
 	}
 

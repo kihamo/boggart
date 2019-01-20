@@ -14,8 +14,6 @@ func (t RoborockRootType) CreateBind(c interface{}) (boggart.Bind, error) {
 		watchFiles:         make(map[string]func(string) error, 0),
 	}
 
-	device.Init()
-
 	if config.DeviceIDFile != "" {
 		if err := device.InitDeviceID(config.DeviceIDFile); err != nil {
 			return nil, err
@@ -31,8 +29,6 @@ func (t RoborockRootType) CreateBind(c interface{}) (boggart.Bind, error) {
 	if err := device.StartWatch(); err != nil {
 		return nil, err
 	}
-
-	device.UpdateStatus(boggart.BindStatusOnline)
 
 	return device, nil
 }

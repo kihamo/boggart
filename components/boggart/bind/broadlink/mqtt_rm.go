@@ -71,7 +71,7 @@ func (b *BindRM) MQTTSubscribers() []mqtt.Subscriber {
 		<-captureTimer.C
 
 		subscribers = append(subscribers,
-			mqtt.NewSubscriber(RMMQTTSubscribeTopicCapture.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b,
+			mqtt.NewSubscriber(RMMQTTSubscribeTopicCapture.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
 				func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
 					if bytes.Equal(message.Payload(), []byte(`1`)) { // start
 						if err := capture.StartCaptureRemoteControlCode(); err != nil {
@@ -158,11 +158,11 @@ func (b *BindRM) MQTTSubscribers() []mqtt.Subscriber {
 	// IR support
 	if ir, ok := b.provider.(BindRMSupportIR); ok {
 		subscribers = append(subscribers,
-			mqtt.NewSubscriber(RMMQTTSubscribeTopicIR.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b,
+			mqtt.NewSubscriber(RMMQTTSubscribeTopicIR.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
 				func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 					return ir.SendIRRemoteControlCodeAsString(string(message.Payload()), 0)
 				})),
-			mqtt.NewSubscriber(RMMQTTSubscribeTopicIRCount.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b,
+			mqtt.NewSubscriber(RMMQTTSubscribeTopicIRCount.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
 				func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 					var request codeRequest
 
@@ -178,11 +178,11 @@ func (b *BindRM) MQTTSubscribers() []mqtt.Subscriber {
 	// RF315mhz support
 	if rf315mhz, ok := b.provider.(BindRMSupportRF315Mhz); ok {
 		subscribers = append(subscribers,
-			mqtt.NewSubscriber(RMMQTTSubscribeTopicRF315mhz.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b,
+			mqtt.NewSubscriber(RMMQTTSubscribeTopicRF315mhz.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
 				func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 					return rf315mhz.SendRF315MhzRemoteControlCodeAsString(string(message.Payload()), 0)
 				})),
-			mqtt.NewSubscriber(RMMQTTSubscribeTopicRF315mhzCount.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b,
+			mqtt.NewSubscriber(RMMQTTSubscribeTopicRF315mhzCount.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
 				func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 					var request codeRequest
 
@@ -198,11 +198,11 @@ func (b *BindRM) MQTTSubscribers() []mqtt.Subscriber {
 	// RF433mhz support
 	if rf433mhz, ok := b.provider.(BindRMSupportRF433Mhz); ok {
 		subscribers = append(subscribers,
-			mqtt.NewSubscriber(RMMQTTSubscribeTopicRF433mhz.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b,
+			mqtt.NewSubscriber(RMMQTTSubscribeTopicRF433mhz.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
 				func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 					return rf433mhz.SendRF433MhzRemoteControlCodeAsString(string(message.Payload()), 0)
 				})),
-			mqtt.NewSubscriber(RMMQTTSubscribeTopicRF433mhzCount.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b,
+			mqtt.NewSubscriber(RMMQTTSubscribeTopicRF433mhzCount.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
 				func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 					var request codeRequest
 

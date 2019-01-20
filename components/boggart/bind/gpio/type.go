@@ -34,7 +34,6 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		mode: mode,
 	}
 
-	device.Init()
 	device.SetSerialNumber(g.Name())
 
 	if _, ok := g.(gpio.PinIn); ok {
@@ -42,8 +41,6 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 			device.waitForEdge()
 		}()
 	}
-
-	device.UpdateStatus(boggart.BindStatusOnline)
 
 	return device, nil
 }

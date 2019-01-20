@@ -19,7 +19,6 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		stateSpeed: math.MaxUint64,
 		stateColor: math.MaxUint64,
 	}
-	device.Init()
 
 	return device, nil
 }

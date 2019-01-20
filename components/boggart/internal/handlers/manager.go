@@ -87,7 +87,7 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				Type:            bindItem.Type(),
 				Description:     bindItem.Description(),
 				SerialNumber:    bindItem.Bind().SerialNumber(),
-				Status:          bindItem.Bind().Status().String(),
+				Status:          bindItem.Status().String(),
 				Tags:            bindItem.Tags(),
 				Tasks:           make([]string, 0, len(bindItem.Tasks())),
 				MQTTPublishes:   make([]string, 0, len(bindItem.MQTTPublishes())),
