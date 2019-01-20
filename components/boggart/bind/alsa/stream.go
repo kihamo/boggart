@@ -1,6 +1,7 @@
 package alsa
 
 import (
+	"sync"
 	"sync/atomic"
 
 	"github.com/faiface/beep"
@@ -10,17 +11,18 @@ import (
 type streamWrapper struct {
 	closed int64
 
+	mutex  sync.Mutex
 	source effects.Volume
 	format beep.Format
 }
 
-func NewStreamWrapper(source beep.StreamSeekCloser, format beep.Format) *streamWrapper {
+func NewStreamWrapper(source beep.StreamSeekCloser, format beep.Format, volume int64, mute bool) *streamWrapper {
 	return &streamWrapper{
 		source: effects.Volume{
 			Streamer: source,
 			Base:     2,
-			Volume:   -float64(100-50) / 100.0 * 5,
-			Silent:   false,
+			Volume:   -float64(100-volume) / 100.0 * 5,
+			Silent:   mute,
 		},
 		format: format,
 	}
@@ -59,15 +61,9 @@ func (w *streamWrapper) SetVolume(v int64) {
 		return
 	}
 
+	w.mutex.Lock()
 	w.source.Volume = -float64(100-v) / 100.0 * 5
-}
-
-func (w *streamWrapper) Mute() bool {
-	if w == nil {
-		return false
-	}
-
-	return w.source.Silent
+	w.mutex.Unlock()
 }
 
 func (w *streamWrapper) SetMute(v bool) {
@@ -75,7 +71,9 @@ func (w *streamWrapper) SetMute(v bool) {
 		return
 	}
 
+	w.mutex.Lock()
 	w.source.Silent = v
+	w.mutex.Unlock()
 }
 
 func (w *streamWrapper) Stream(samples [][2]float64) (n int, ok bool) {

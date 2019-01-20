@@ -12,15 +12,18 @@ import (
 )
 
 const (
-	MQTTSubscribeTopicVolume    mqtt.Topic = boggart.ComponentName + "/alsa/+/volume"
-	MQTTSubscribeTopicMute      mqtt.Topic = boggart.ComponentName + "/alsa/+/mute"
-	MQTTSubscribeTopicPause     mqtt.Topic = boggart.ComponentName + "/alsa/+/pause"
-	MQTTSubscribeTopicStop      mqtt.Topic = boggart.ComponentName + "/alsa/+/stop"
-	MQTTSubscribeTopicPlay      mqtt.Topic = boggart.ComponentName + "/alsa/+/play"
-	MQTTSubscribeTopicAction    mqtt.Topic = boggart.ComponentName + "/alsa/+/action"
-	MQTTPublishTopicStateStatus mqtt.Topic = boggart.ComponentName + "/alsa/+/state/status"
-	MQTTPublishTopicStateVolume mqtt.Topic = boggart.ComponentName + "/alsa/+/state/volume"
-	MQTTPublishTopicStateMute   mqtt.Topic = boggart.ComponentName + "/alsa/+/state/mute"
+	MQTTPrefix = boggart.ComponentName + "/alsa/+/"
+
+	MQTTSubscribeTopicVolume    mqtt.Topic = MQTTPrefix + "volume"
+	MQTTSubscribeTopicMute      mqtt.Topic = MQTTPrefix + "mute"
+	MQTTSubscribeTopicPause     mqtt.Topic = MQTTPrefix + "pause"
+	MQTTSubscribeTopicStop      mqtt.Topic = MQTTPrefix + "stop"
+	MQTTSubscribeTopicPlay      mqtt.Topic = MQTTPrefix + "play"
+	MQTTSubscribeTopicResume    mqtt.Topic = MQTTPrefix + "resume"
+	MQTTSubscribeTopicAction    mqtt.Topic = MQTTPrefix + "action"
+	MQTTPublishTopicStateStatus mqtt.Topic = MQTTPrefix + "state/status"
+	MQTTPublishTopicStateVolume mqtt.Topic = MQTTPrefix + "state/volume"
+	MQTTPublishTopicStateMute   mqtt.Topic = MQTTPrefix + "state/mute"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
@@ -43,36 +46,43 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return err
 			}
 
-			return b.player.SetVolume(volume)
+			return b.SetVolume(volume)
 		})),
 		mqtt.NewSubscriber(MQTTSubscribeTopicMute.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			return b.player.SetMute(bytes.Equal(message.Payload(), []byte(`1`)))
+			return b.SetMute(bytes.Equal(message.Payload(), []byte(`1`)))
 		})),
 		mqtt.NewSubscriber(MQTTSubscribeTopicPause.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			return b.player.Pause()
+			return b.Pause()
 		})),
 		mqtt.NewSubscriber(MQTTSubscribeTopicStop.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			return b.player.Stop()
+			return b.Stop()
 		})),
 		mqtt.NewSubscriber(MQTTSubscribeTopicPlay.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if u := string(message.Payload()); u != "" {
-				return b.player.PlayFromURL(u)
+				return b.PlayFromURL(u)
 			}
 
-			return b.player.Play()
+			return b.Play()
+		})),
+		mqtt.NewSubscriber(MQTTSubscribeTopicResume.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+			if u := string(message.Payload()); u != "" {
+				return b.PlayFromURL(u)
+			}
+
+			return b.Play()
 		})),
 		mqtt.NewSubscriber(MQTTSubscribeTopicAction.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			action := string(message.Payload())
 
 			switch strings.ToLower(action) {
 			case "stop":
-				return b.player.Stop()
+				return b.Stop()
 
 			case "pause":
-				return b.player.Pause()
+				return b.Pause()
 
-			case "play":
-				return b.player.Play()
+			case "play", "resume":
+				return b.Play()
 			}
 
 			return errors.New("unknown action " + action)

@@ -5,7 +5,6 @@ import (
 
 	"github.com/denisbrodbeck/machineid"
 	"github.com/kihamo/boggart/components/boggart"
-	a "github.com/kihamo/boggart/components/voice/players/alsa"
 )
 
 type Type struct{}
@@ -22,16 +21,16 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	}
 
 	device := &Bind{
-		player:          a.New(),
-		updaterInterval: config.UpdaterInterval,
-		status:          -1,
-		volume:          -1,
-		mute:            0,
+		done: make(chan struct{}, 1),
 	}
 
 	device.Init()
 	device.SetSerialNumber(sn)
 	device.UpdateStatus(boggart.BindStatusOnline)
+
+	device.setPlayerStatus(StatusStopped)
+	device.SetVolume(config.Volume)
+	device.SetMute(config.Mute)
 
 	return device, nil
 }

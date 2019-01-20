@@ -1,19 +1,18 @@
 package alsa
 
-import (
-	"time"
-)
-
 const (
-	DefaultUpdateInterval = time.Second * 3
+	DefaultVolume = 50
+	DefaultMute   = false
 )
 
 type Config struct {
-	UpdaterInterval time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
+	Volume int64 `valid:"range(0|100)"`
+	Mute   bool
 }
 
 func (t Type) Config() interface{} {
 	return &Config{
-		UpdaterInterval: DefaultUpdateInterval,
+		Volume: DefaultVolume,
+		Mute:   DefaultMute,
 	}
 }
