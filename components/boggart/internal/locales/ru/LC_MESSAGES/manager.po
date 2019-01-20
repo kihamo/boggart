@@ -19,6 +19,9 @@ msgstr "Добавить привязку"
 msgid "Reload config file"
 msgstr "Перезагрузить из файла конфигурации"
 
+msgid "Refresh data"
+msgstr "Обновить данные"
+
 msgid "Type"
 msgstr "Тип"
 
