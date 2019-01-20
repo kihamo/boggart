@@ -19,7 +19,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	device := &Bind{
 		provider:         mikrotik.NewClient(u.Host, username, password, time.Second*10),
-		host:             u.Host + "-" + u.Port(),
+		host:             u.Host,
 		syslogClient:     config.SyslogClient,
 		livenessInterval: config.LivenessInterval,
 		livenessTimeout:  config.LivenessTimeout,

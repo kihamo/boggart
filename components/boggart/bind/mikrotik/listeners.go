@@ -43,7 +43,7 @@ func (l *Listener) Events() []workers.Event {
 }
 
 func (l *Listener) Name() string {
-	return "bind-mikrotik-" + l.bind.host
+	return "bind-mikrotik-" + l.bind.syslogClient
 }
 
 func (l *Listener) Run(ctx context.Context, event workers.Event, t time.Time, args ...interface{}) {
