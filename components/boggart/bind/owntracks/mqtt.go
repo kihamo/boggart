@@ -56,6 +56,7 @@ const (
 
 	// custom
 	MQTTSubscribeTopicCommand             mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/cmd/+"
+	MQTTPublishTopicRegion                mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/region/+"
 	MQTTPublishTopicUserStateLat          mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/state/lat"
 	MQTTPublishTopicUserStateLon          mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/state/lon"
 	MQTTPublishTopicUserStateGeoHash      mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/state/geohash"
@@ -68,7 +69,7 @@ const (
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	return []mqtt.Topic{
+	topics := []mqtt.Topic{
 		mqtt.Topic(MQTTPublishTopicUserStateLat.Format(b.user, b.device)),
 		mqtt.Topic(MQTTPublishTopicUserStateLon.Format(b.user, b.device)),
 		mqtt.Topic(MQTTPublishTopicUserStateGeoHash.Format(b.user, b.device)),
@@ -79,6 +80,17 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 		mqtt.Topic(MQTTPublishTopicUserStateConnection.Format(b.user, b.device)),
 		mqtt.Topic(MQTTPublishTopicUserStateLocation.Format(b.user, b.device)),
 	}
+
+	if len(b.regions) > 0 {
+		for name := range b.regions {
+			topics = append(
+				topics,
+				mqtt.Topic(MQTTPublishTopicRegion.Format(b.user, b.device, name)),
+			)
+		}
+	}
+
+	return topics
 }
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
@@ -156,6 +168,17 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 
 	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateLon.Format(b.user, b.device), q, r, *payload.Lon); e != nil {
 		err = multierr.Append(err, e)
+	}
+
+	if len(b.regions) > 0 {
+		for name, region := range b.regions {
+			distance := calculateDistance(*payload.Lat, *payload.Lon, region.Lat, region.Lon)
+			check := distance < region.GeoFence
+
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicRegion.Format(b.user, b.device, name), q, r, check); e != nil {
+				err = multierr.Append(err, e)
+			}
+		}
 	}
 
 	hash := geohash.Encode(*payload.Lat, *payload.Lon)
