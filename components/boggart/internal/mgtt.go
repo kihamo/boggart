@@ -9,12 +9,9 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/shadow/components/annotations"
 	"github.com/kihamo/shadow/components/messengers"
-	"github.com/mmcloughlin/geohash"
 )
 
 const (
-	MQTTSubscribeTopicOwnTracks         mqtt.Topic = "owntracks/+/+"
-	MQTTPublishTopicOwnTracksGeoHash    mqtt.Topic = "owntracks/+/+/geohash"
 	MQTTSubscribeTopicAnnotationGrafana mqtt.Topic = "annotation/grafana"
 	MQTTSubscribeTopicMessenger         mqtt.Topic = "messenger/+/+"
 )
@@ -22,42 +19,7 @@ const (
 func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 	<-c.application.ReadyComponent(c.Name())
 
-	subscribers := []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTSubscribeTopicOwnTracks.String(), 0, func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-			if !c.config.Bool(boggart.ConfigMQTTOwnTracksEnabled) {
-				return nil
-			}
-
-			route := mqtt.RouteSplit(message.Topic())
-			if len(route) < 2 {
-				return errors.New("bad topic name")
-			}
-
-			var payload map[string]interface{}
-
-			if err := json.Unmarshal(message.Payload(), &payload); err != nil {
-				return err
-			}
-
-			t, ok := payload["_type"]
-			if !ok || t != "location" {
-				return errors.New("location not found in payload")
-			}
-
-			lat, ok := payload["lat"]
-			if !ok {
-				return errors.New("lat not found in payload")
-			}
-
-			lon, ok := payload["lon"]
-			if !ok {
-				return errors.New("lon not found in payload")
-			}
-
-			hash := geohash.Encode(lat.(float64), lon.(float64))
-			return client.Publish(ctx, MQTTPublishTopicOwnTracksGeoHash.Format(route[len(route)-2], route[len(route)-1]), message.Qos(), message.Retained(), hash)
-		}),
-	}
+	subscribers := make([]mqtt.Subscriber, 0, 2)
 
 	if c.application.HasComponent(annotations.ComponentName) {
 		<-c.application.ReadyComponent(annotations.ComponentName)
