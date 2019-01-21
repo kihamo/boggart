@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"sync/atomic"
 
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/components/storage"
@@ -141,7 +140,7 @@ func (b *Bind) Pause() error {
 }
 
 func (b *Bind) Volume() int64 {
-	return atomic.LoadInt64(&b.volume)
+	return b.volume.Load()
 }
 
 func (b *Bind) SetVolume(percent int64) error {
@@ -151,12 +150,10 @@ func (b *Bind) SetVolume(percent int64) error {
 		percent = 0
 	}
 
-	prev := b.Volume()
-	if percent == prev {
+	if ok := b.volume.Set(percent); !ok {
 		return nil
 	}
 
-	atomic.StoreInt64(&b.volume, percent)
 	b.getStream().SetVolume(percent)
 
 	sn := mqtt.NameReplace(b.SerialNumber())
@@ -165,20 +162,14 @@ func (b *Bind) SetVolume(percent int64) error {
 }
 
 func (b *Bind) Mute() bool {
-	return atomic.LoadInt64(&b.mute) == 1
+	return b.mute.Load()
 }
 
 func (b *Bind) SetMute(mute bool) error {
-	prev := b.Mute()
-	if mute == prev {
+	if ok := b.mute.Set(mute); !ok {
 		return nil
 	}
 
-	if mute {
-		atomic.StoreInt64(&b.mute, 1)
-	} else {
-		atomic.StoreInt64(&b.mute, -1)
-	}
 	b.getStream().SetMute(mute)
 
 	sn := mqtt.NameReplace(b.SerialNumber())

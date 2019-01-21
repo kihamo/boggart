@@ -226,9 +226,9 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 	}
 
 	if payload.Batt != nil {
-		if ok := b.batt.Set(*payload.Batt); ok {
-			metricBatteryLevel.With("user", b.user, "device", b.device).Set(*payload.Batt)
+		metricBatteryLevel.With("user", b.user, "device", b.device).Set(*payload.Batt)
 
+		if ok := b.batt.Set(*payload.Batt); ok {
 			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateBatteryLevel.Format(b.user, b.device), q, r, *payload.Batt); e != nil {
 				err = multierr.Append(err, e)
 			}
@@ -236,9 +236,9 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 	}
 
 	if payload.Vel != nil {
-		if ok := b.vel.Set(*payload.Vel); ok {
-			metricVelocity.With("user", b.user, "device", b.device).Set(float64(*payload.Vel))
+		metricVelocity.With("user", b.user, "device", b.device).Set(float64(*payload.Vel))
 
+		if ok := b.vel.Set(*payload.Vel); ok {
 			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateVelocity.Format(b.user, b.device), q, r, *payload.Vel); e != nil {
 				err = multierr.Append(err, e)
 			}

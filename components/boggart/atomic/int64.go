@@ -16,3 +16,7 @@ func (v *Int64) Set(value int64) bool {
 	old := a.SwapInt64(&v.v, value)
 	return old != value
 }
+
+func (v *Int64) Load() int64 {
+	return a.LoadInt64(&v.v)
+}

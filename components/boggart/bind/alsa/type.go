@@ -5,6 +5,7 @@ import (
 
 	"github.com/denisbrodbeck/machineid"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/atomic"
 )
 
 type Type struct{}
@@ -21,7 +22,10 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	}
 
 	device := &Bind{
-		done: make(chan struct{}, 1),
+		done:         make(chan struct{}, 1),
+		playerStatus: atomic.NewInt64(),
+		volume:       atomic.NewInt64(),
+		mute:         atomic.NewBool(),
 	}
 
 	device.SetSerialNumber(sn)

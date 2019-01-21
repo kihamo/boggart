@@ -5,7 +5,6 @@ import (
 	"errors"
 	"io"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/faiface/beep"
@@ -14,6 +13,7 @@ import (
 	"github.com/faiface/beep/wav"
 	"github.com/hajimehoshi/oto"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
@@ -33,9 +33,9 @@ type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
 
-	playerStatus int64
-	volume       int64
-	mute         int64
+	playerStatus *atomic.Int64
+	volume       *atomic.Int64
+	mute         *atomic.Bool
 	done         chan struct{}
 
 	mutex   sync.RWMutex
@@ -122,19 +122,18 @@ func (b *Bind) getStream() *streamWrapper {
 }
 
 func (b *Bind) setPlayerStatus(status Status) {
-	prev := atomic.LoadInt64(&b.playerStatus)
-	if status.Int64() != prev {
-		atomic.StoreInt64(&b.playerStatus, status.Int64())
-
-		sn := mqtt.NameReplace(b.SerialNumber())
-		ctx := context.Background()
-
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateStatus.Format(sn), 0, true, status.String())
+	if ok := b.playerStatus.Set(status.Int64()); !ok {
+		return
 	}
+
+	sn := mqtt.NameReplace(b.SerialNumber())
+	ctx := context.Background()
+
+	_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateStatus.Format(sn), 0, true, status.String())
 }
 
 func (b *Bind) PlayerStatus() Status {
-	return Status(atomic.LoadInt64(&b.playerStatus))
+	return Status(b.playerStatus.Load())
 }
 
 func (b *Bind) play() {

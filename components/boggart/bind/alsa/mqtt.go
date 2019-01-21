@@ -12,18 +12,18 @@ import (
 )
 
 const (
-	MQTTPrefix = boggart.ComponentName + "/alsa/+/"
+	MQTTPrefix mqtt.Topic = boggart.ComponentName + "/alsa/+/"
 
-	MQTTSubscribeTopicVolume    mqtt.Topic = MQTTPrefix + "volume"
-	MQTTSubscribeTopicMute      mqtt.Topic = MQTTPrefix + "mute"
-	MQTTSubscribeTopicPause     mqtt.Topic = MQTTPrefix + "pause"
-	MQTTSubscribeTopicStop      mqtt.Topic = MQTTPrefix + "stop"
-	MQTTSubscribeTopicPlay      mqtt.Topic = MQTTPrefix + "play"
-	MQTTSubscribeTopicResume    mqtt.Topic = MQTTPrefix + "resume"
-	MQTTSubscribeTopicAction    mqtt.Topic = MQTTPrefix + "action"
-	MQTTPublishTopicStateStatus mqtt.Topic = MQTTPrefix + "state/status"
-	MQTTPublishTopicStateVolume mqtt.Topic = MQTTPrefix + "state/volume"
-	MQTTPublishTopicStateMute   mqtt.Topic = MQTTPrefix + "state/mute"
+	MQTTSubscribeTopicVolume    = MQTTPrefix + "volume"
+	MQTTSubscribeTopicMute      = MQTTPrefix + "mute"
+	MQTTSubscribeTopicPause     = MQTTPrefix + "pause"
+	MQTTSubscribeTopicStop      = MQTTPrefix + "stop"
+	MQTTSubscribeTopicPlay      = MQTTPrefix + "play"
+	MQTTSubscribeTopicResume    = MQTTPrefix + "resume"
+	MQTTSubscribeTopicAction    = MQTTPrefix + "action"
+	MQTTPublishTopicStateStatus = MQTTPrefix + "state/status"
+	MQTTPublishTopicStateVolume = MQTTPrefix + "state/volume"
+	MQTTPublishTopicStateMute   = MQTTPrefix + "state/mute"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {

@@ -16,3 +16,7 @@ func (v *Uint64) Set(value uint64) bool {
 	old := a.SwapUint64(&v.v, value)
 	return old != value
 }
+
+func (v *Uint64) Load() uint64 {
+	return a.LoadUint64(&v.v)
+}

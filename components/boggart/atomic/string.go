@@ -5,7 +5,7 @@ import (
 )
 
 type String struct {
-	m sync.Mutex
+	m sync.RWMutex
 	v string
 }
 
@@ -20,4 +20,11 @@ func (v *String) Set(value string) bool {
 	v.m.Unlock()
 
 	return old != value
+}
+
+func (v *String) Load() string {
+	v.m.RLock()
+	defer v.m.RUnlock()
+
+	return v.v
 }
