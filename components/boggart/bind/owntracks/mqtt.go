@@ -43,29 +43,31 @@ In MQTT mode apps subscribe to:
 
 const (
 	// owntracks
-	MQTTOwnTracksSubscribeTopicUserLocation mqtt.Topic = "owntracks/+/+"
-	MQTTOwnTracksSubscribeTopicTransition   mqtt.Topic = "owntracks/+/+/event"
-	MQTTOwnTracksSubscribeTopicStep         mqtt.Topic = "owntracks/+/+/step"
-	MQTTOwnTracksSubscribeTopicBeacon       mqtt.Topic = "owntracks/+/+/beacon"
-	MQTTOwnTracksSubscribeTopicDump         mqtt.Topic = "owntracks/+/+/dump"
-	MQTTOwnTracksSubscribeTopicWayPoints    mqtt.Topic = "owntracks/+/+/waypoint"
-	MQTTOwnTracksPublishTopicCommand        mqtt.Topic = "owntracks/+/+/cmd"
-	MQTTOwnTracksPublishTopicUserLocation   mqtt.Topic = "owntracks/+/+"
-	MQTTOwnTracksPublishTopicTransition     mqtt.Topic = "owntracks/+/+/event"
-	MQTTOwnTracksPublishTopicCard           mqtt.Topic = "owntracks/+/+/info"
+	MQTTOwnTracksPrefix                     mqtt.Topic = "owntracks/+/+"
+	MQTTOwnTracksSubscribeTopicUserLocation            = MQTTOwnTracksPrefix
+	MQTTOwnTracksSubscribeTopicTransition              = MQTTOwnTracksPrefix + "/event"
+	MQTTOwnTracksSubscribeTopicStep                    = MQTTOwnTracksPrefix + "/step"
+	MQTTOwnTracksSubscribeTopicBeacon                  = MQTTOwnTracksPrefix + "/beacon"
+	MQTTOwnTracksSubscribeTopicDump                    = MQTTOwnTracksPrefix + "/dump"
+	MQTTOwnTracksSubscribeTopicWayPoints               = MQTTOwnTracksPrefix + "/waypoint"
+	MQTTOwnTracksPublishTopicCommand                   = MQTTOwnTracksPrefix + "/cmd"
+	MQTTOwnTracksPublishTopicUserLocation              = MQTTOwnTracksPrefix
+	MQTTOwnTracksPublishTopicTransition                = MQTTOwnTracksPrefix + "/event"
+	MQTTOwnTracksPublishTopicCard                      = MQTTOwnTracksPrefix + "/info"
 
 	// custom
-	MQTTSubscribeTopicCommand             mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/cmd/+"
-	MQTTPublishTopicRegion                mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/region/+"
-	MQTTPublishTopicUserStateLat          mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/state/lat"
-	MQTTPublishTopicUserStateLon          mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/state/lon"
-	MQTTPublishTopicUserStateGeoHash      mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/state/geohash"
-	MQTTPublishTopicUserStateAccuracy     mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/state/accuracy"
-	MQTTPublishTopicUserStateAltitude     mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/state/altitude"
-	MQTTPublishTopicUserStateBatteryLevel mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/state/battery-level"
-	MQTTPublishTopicUserStateVelocity     mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/state/velocity"
-	MQTTPublishTopicUserStateConnection   mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/state/connection"
-	MQTTPublishTopicUserStateLocation     mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/state/location"
+	MQTTPrefix                            mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/"
+	MQTTSubscribeTopicCommand                        = MQTTPrefix + "cmd/+"
+	MQTTPublishTopicRegion                           = MQTTPrefix + "region/+"
+	MQTTPublishTopicUserStateLat                     = MQTTPrefix + "state/lat"
+	MQTTPublishTopicUserStateLon                     = MQTTPrefix + "state/lon"
+	MQTTPublishTopicUserStateGeoHash                 = MQTTPrefix + "state/geohash"
+	MQTTPublishTopicUserStateAccuracy                = MQTTPrefix + "state/accuracy"
+	MQTTPublishTopicUserStateAltitude                = MQTTPrefix + "state/altitude"
+	MQTTPublishTopicUserStateBatteryLevel            = MQTTPrefix + "state/battery-level"
+	MQTTPublishTopicUserStateVelocity                = MQTTPrefix + "state/velocity"
+	MQTTPublishTopicUserStateConnection              = MQTTPrefix + "state/connection"
+	MQTTPublishTopicUserStateLocation                = MQTTPrefix + "state/location"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
@@ -158,16 +160,26 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 		return errors.New("lat not found in payload")
 	}
 
-	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateLat.Format(b.user, b.device), q, r, *payload.Lat); e != nil {
-		err = multierr.Append(err, e)
+	var changeLocation bool
+
+	if ok := b.lat.Set(*payload.Lat); ok {
+		changeLocation = true
+
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateLat.Format(b.user, b.device), q, r, *payload.Lat); e != nil {
+			err = multierr.Append(err, e)
+		}
 	}
 
 	if payload.Lon == nil {
 		return errors.New("lon not found in payload")
 	}
 
-	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateLon.Format(b.user, b.device), q, r, *payload.Lon); e != nil {
-		err = multierr.Append(err, e)
+	if ok := b.lon.Set(*payload.Lon); ok {
+		changeLocation = true
+
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateLon.Format(b.user, b.device), q, r, *payload.Lon); e != nil {
+			err = multierr.Append(err, e)
+		}
 	}
 
 	if len(b.regions) > 0 {
@@ -175,47 +187,61 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 			distance := calculateDistance(*payload.Lat, *payload.Lon, region.Lat, region.Lon)
 			check := distance < region.GeoFence
 
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicRegion.Format(b.user, b.device, name), q, r, check); e != nil {
-				err = multierr.Append(err, e)
+			if ok := b.region[name].Set(check); ok {
+				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicRegion.Format(b.user, b.device, name), q, r, check); e != nil {
+					err = multierr.Append(err, e)
+				}
 			}
 		}
 	}
 
 	hash := geohash.Encode(*payload.Lat, *payload.Lon)
-	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateGeoHash.Format(b.user, b.device), q, r, hash); e != nil {
-		err = multierr.Append(err, e)
+	if ok := b.geoHash.Set(hash); ok {
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateGeoHash.Format(b.user, b.device), q, r, hash); e != nil {
+			err = multierr.Append(err, e)
+		}
 	}
 
 	if payload.Acc != nil {
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateAccuracy.Format(b.user, b.device), q, r, *payload.Acc); e != nil {
-			err = multierr.Append(err, e)
+		if ok := b.acc.Set(*payload.Acc); ok {
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateAccuracy.Format(b.user, b.device), q, r, *payload.Acc); e != nil {
+				err = multierr.Append(err, e)
+			}
 		}
 	}
 
 	if payload.Alt != nil {
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateAltitude.Format(b.user, b.device), q, r, *payload.Alt); e != nil {
+		if ok := b.alt.Set(*payload.Alt); ok {
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateAltitude.Format(b.user, b.device), q, r, *payload.Alt); e != nil {
+				err = multierr.Append(err, e)
+			}
+		}
+	}
+
+	if changeLocation {
+		location := strconv.FormatFloat(*payload.Lat, 'f', -1, 64) + "," + strconv.FormatFloat(*payload.Lon, 'f', -1, 64)
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateLocation.Format(b.user, b.device), q, r, location); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
 
-	location := strconv.FormatFloat(*payload.Lat, 'f', -1, 64) + "," + strconv.FormatFloat(*payload.Lon, 'f', -1, 64)
-	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateLocation.Format(b.user, b.device), q, r, location); e != nil {
-		err = multierr.Append(err, e)
-	}
-
 	if payload.Batt != nil {
-		metricBatteryLevel.With("user", b.user, "device", b.device).Set(*payload.Batt)
+		if ok := b.batt.Set(*payload.Batt); ok {
+			metricBatteryLevel.With("user", b.user, "device", b.device).Set(*payload.Batt)
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateBatteryLevel.Format(b.user, b.device), q, r, *payload.Batt); e != nil {
-			err = multierr.Append(err, e)
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateBatteryLevel.Format(b.user, b.device), q, r, *payload.Batt); e != nil {
+				err = multierr.Append(err, e)
+			}
 		}
 	}
 
 	if payload.Vel != nil {
-		metricVelocity.With("user", b.user, "device", b.device).Set(float64(*payload.Vel))
+		if ok := b.vel.Set(*payload.Vel); ok {
+			metricVelocity.With("user", b.user, "device", b.device).Set(float64(*payload.Vel))
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateVelocity.Format(b.user, b.device), q, r, *payload.Vel); e != nil {
-			err = multierr.Append(err, e)
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateVelocity.Format(b.user, b.device), q, r, *payload.Vel); e != nil {
+				err = multierr.Append(err, e)
+			}
 		}
 	}
 
@@ -232,8 +258,10 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 			v = "unknown"
 		}
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateConnection.Format(b.user, b.device), q, r, v); e != nil {
-			err = multierr.Append(err, e)
+		if ok := b.conn.Set(v); ok {
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateConnection.Format(b.user, b.device), q, r, v); e != nil {
+				err = multierr.Append(err, e)
+			}
 		}
 	}
 
