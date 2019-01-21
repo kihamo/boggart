@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
 )
 
@@ -12,17 +13,17 @@ const (
 )
 
 type Bind struct {
-	temperatureIn    uint64
-	temperatureOut   uint64
-	temperatureDelta uint64
-	energy           uint64
-	consumption      uint64
-	capacity         uint64
-	power            uint64
-	input1           uint64
-	input2           uint64
-	input3           uint64
-	input4           uint64
+	temperatureIn    *atomic.Float32
+	temperatureOut   *atomic.Float32
+	temperatureDelta *atomic.Float32
+	energy           *atomic.Float32
+	consumption      *atomic.Float32
+	capacity         *atomic.Float32
+	power            *atomic.Float32
+	input1           *atomic.Float32
+	input2           *atomic.Float32
+	input3           *atomic.Float32
+	input4           *atomic.Float32
 
 	boggart.BindBase
 	boggart.BindMQTT
@@ -33,6 +34,6 @@ type Bind struct {
 	updaterInterval time.Duration
 }
 
-func (b *Bind) inputVolume(pulses uint64, offset float64) float64 {
-	return (offset*InputScale + float64(pulses*10)) / InputScale
+func (b *Bind) inputVolume(pulses float32, offset float32) float32 {
+	return (offset*InputScale + pulses*10) / InputScale
 }

@@ -13,6 +13,12 @@ func NewString() *String {
 	return &String{}
 }
 
+func NewStringDefault(value string) *String {
+	return &String{
+		v: value,
+	}
+}
+
 func (v *String) Set(value string) bool {
 	v.m.Lock()
 	old := v.v

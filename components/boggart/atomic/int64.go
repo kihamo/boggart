@@ -12,6 +12,12 @@ func NewInt64() *Int64 {
 	return &Int64{}
 }
 
+func NewInt64Default(value int64) *Int64 {
+	return &Int64{
+		v: value,
+	}
+}
+
 func (v *Int64) Set(value int64) bool {
 	old := a.SwapInt64(&v.v, value)
 	return old != value

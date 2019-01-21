@@ -12,6 +12,16 @@ func NewBool() *Bool {
 	return &Bool{}
 }
 
+func NewBoolDefault(value bool) *Bool {
+	v := &Bool{}
+
+	if value {
+		v.v = 1
+	}
+
+	return v
+}
+
 func (v *Bool) Set(value bool) bool {
 	var current uint32
 	if value {

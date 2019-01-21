@@ -6,15 +6,17 @@ import (
 )
 
 const (
-	MQTTPublishTopicTemperatureIn    mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/temperature_in"
-	MQTTPublishTopicTemperatureOut   mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/temperature_out"
-	MQTTPublishTopicTemperatureDelta mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/temperature_delta"
-	MQTTPublishTopicEnergy           mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/energy"
-	MQTTPublishTopicConsumption      mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/consumption"
-	MQTTPublishTopicCapacity         mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/capacity"
-	MQTTPublishTopicPower            mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/power"
-	MQTTPublishTopicInputPulses      mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/input/+/pulses"
-	MQTTPublishTopicInputVolume      mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/input/+/volume"
+	MQTTPrefix mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/"
+
+	MQTTPublishTopicTemperatureIn    = MQTTPrefix + "temperature_in"
+	MQTTPublishTopicTemperatureOut   = MQTTPrefix + "temperature_out"
+	MQTTPublishTopicTemperatureDelta = MQTTPrefix + "temperature_delta"
+	MQTTPublishTopicEnergy           = MQTTPrefix + "energy"
+	MQTTPublishTopicConsumption      = MQTTPrefix + "consumption"
+	MQTTPublishTopicCapacity         = MQTTPrefix + "capacity"
+	MQTTPublishTopicPower            = MQTTPrefix + "power"
+	MQTTPublishTopicInputPulses      = MQTTPrefix + "input/+/pulses"
+	MQTTPublishTopicInputVolume      = MQTTPrefix + "input/+/volume"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {

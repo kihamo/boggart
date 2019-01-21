@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
 )
@@ -32,17 +33,17 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		config:   config,
 		provider: pulsar.NewHeatMeter(deviceAddress, conn),
 
-		temperatureIn:    math.MaxUint64,
-		temperatureOut:   math.MaxUint64,
-		temperatureDelta: math.MaxUint64,
-		energy:           math.MaxUint64,
-		consumption:      math.MaxUint64,
-		capacity:         math.MaxUint64,
-		power:            math.MaxUint64,
-		input1:           math.MaxUint64,
-		input2:           math.MaxUint64,
-		input3:           math.MaxUint64,
-		input4:           math.MaxUint64,
+		temperatureIn:    atomic.NewFloat32Default(math.MaxFloat32),
+		temperatureOut:   atomic.NewFloat32Default(math.MaxFloat32),
+		temperatureDelta: atomic.NewFloat32Default(math.MaxFloat32),
+		energy:           atomic.NewFloat32Default(math.MaxFloat32),
+		consumption:      atomic.NewFloat32Default(math.MaxFloat32),
+		capacity:         atomic.NewFloat32Default(math.MaxFloat32),
+		power:            atomic.NewFloat32Default(math.MaxFloat32),
+		input1:           atomic.NewFloat32Default(math.MaxFloat32),
+		input2:           atomic.NewFloat32Default(math.MaxFloat32),
+		input3:           atomic.NewFloat32Default(math.MaxFloat32),
+		input4:           atomic.NewFloat32Default(math.MaxFloat32),
 
 		updaterInterval: config.UpdaterInterval,
 	}
