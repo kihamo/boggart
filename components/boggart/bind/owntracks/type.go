@@ -10,6 +10,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
 	return &Bind{
-		devices: config.Devices,
+		user:   config.User,
+		device: config.Device,
 	}, nil
 }

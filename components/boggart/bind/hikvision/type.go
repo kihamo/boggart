@@ -17,7 +17,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	password, _ := config.Address.User.Password()
 
 	device := &Bind{
-		isapi:                 hikvision.NewISAPI(config.Address.Hostname(), port, config.Address.User.Username(), password),
+		isapi: hikvision.NewISAPI(config.Address.Hostname(), port, config.Address.User.Username(), password),
 		alertStreamingHistory: make(map[string]time.Time),
 		address:               config.Address.URL,
 		livenessInterval:      config.LivenessInterval,

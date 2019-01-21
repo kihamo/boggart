@@ -9,21 +9,16 @@ import (
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	tasks := make([]workers.Task, 0, len(b.devices))
-	for user, device := range b.devices {
-		task := task.NewFunctionTillSuccessTask(b.taskWayPoints(user, device))
-		task.SetRepeats(-1)
-		task.SetRepeatInterval(time.Second * 10)
-		task.SetName("bind-owntracks-waypoints-" + user + "-" + device)
+	taskWayPoints := task.NewFunctionTillSuccessTask(b.taskWayPoints)
+	taskWayPoints.SetRepeats(-1)
+	taskWayPoints.SetRepeatInterval(time.Second * 10)
+	taskWayPoints.SetName("bind-owntracks-waypoints-" + b.user + "-" + b.device)
 
-		tasks = append(tasks, task)
+	return []workers.Task{
+		taskWayPoints,
 	}
-
-	return tasks
 }
 
-func (b *Bind) taskWayPoints(user, device string) func(context.Context) (interface{}, error) {
-	return func(context.Context) (interface{}, error) {
-		return nil, b.CommandWayPoints(user, device)
-	}
+func (b *Bind) taskWayPoints(context.Context) (interface{}, error) {
+	return nil, b.CommandWayPoints()
 }

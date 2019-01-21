@@ -8,7 +8,8 @@ type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
 
-	devices map[string]string
+	user   string
+	device string
 }
 
 func (b *Bind) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.BindStatusSetter) {

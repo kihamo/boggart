@@ -5,11 +5,6 @@ import (
 	"encoding/json"
 )
 
-type Command struct {
-	Type   string `json:"_type"`
-	Action string `json:"action"`
-}
-
 var (
 	// TODO: setWaypoints, setConfiguration
 
@@ -31,27 +26,27 @@ var (
 	}
 )
 
-func (b *Bind) Command(user, device string, cmd *Command) error {
+func (b *Bind) Command(cmd *Command) error {
 	payload, err := json.Marshal(cmd)
 	if err != nil {
 		return err
 	}
 
-	return b.MQTTPublish(context.Background(), MQTTSubscribeTopicCommand.Format(user, device), 2, false, payload)
+	return b.MQTTPublish(context.Background(), MQTTOwnTracksPublishTopicCommand.Format(b.user, b.device), 2, false, payload)
 }
 
-func (b *Bind) CommandReportLocation(user, device string) error {
-	return b.Command(user, device, commandReportLocation)
+func (b *Bind) CommandReportLocation() error {
+	return b.Command(commandReportLocation)
 }
 
-func (b *Bind) CommandRestart(user, device string) error {
-	return b.Command(user, device, commandRestart)
+func (b *Bind) CommandRestart() error {
+	return b.Command(commandRestart)
 }
 
-func (b *Bind) CommandReconnect(user, device string) error {
-	return b.Command(user, device, commandReconnect)
+func (b *Bind) CommandReconnect() error {
+	return b.Command(commandReconnect)
 }
 
-func (b *Bind) CommandWayPoints(user, device string) error {
-	return b.Command(user, device, commandWayPoints)
+func (b *Bind) CommandWayPoints() error {
+	return b.Command(commandWayPoints)
 }

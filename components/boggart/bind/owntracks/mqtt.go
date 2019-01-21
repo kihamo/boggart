@@ -6,6 +6,7 @@ import (
 	"errors"
 	"strconv"
 
+	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/mmcloughlin/geohash"
 	"go.uber.org/multierr"
@@ -41,169 +42,183 @@ In MQTT mode apps subscribe to:
 */
 
 const (
-	MQTTSubscribeTopicUserLocation mqtt.Topic = "owntracks/+/+"
-	MQTTSubscribeTopicCommand      mqtt.Topic = "owntracks/+/+/cmd"
-	MQTTSubscribeTopicTransition   mqtt.Topic = "owntracks/+/+/event"
-	MQTTSubscribeTopicStep         mqtt.Topic = "owntracks/+/+/step"
-	MQTTSubscribeTopicBeacon       mqtt.Topic = "owntracks/+/+/beacon"
-	MQTTSubscribeTopicDump         mqtt.Topic = "owntracks/+/+/dump"
-	MQTTSubscribeTopicWayPoints    mqtt.Topic = "owntracks/+/+/waypoint"
+	// owntracks
+	MQTTOwnTracksSubscribeTopicUserLocation mqtt.Topic = "owntracks/+/+"
+	MQTTOwnTracksSubscribeTopicTransition   mqtt.Topic = "owntracks/+/+/event"
+	MQTTOwnTracksSubscribeTopicStep         mqtt.Topic = "owntracks/+/+/step"
+	MQTTOwnTracksSubscribeTopicBeacon       mqtt.Topic = "owntracks/+/+/beacon"
+	MQTTOwnTracksSubscribeTopicDump         mqtt.Topic = "owntracks/+/+/dump"
+	MQTTOwnTracksSubscribeTopicWayPoints    mqtt.Topic = "owntracks/+/+/waypoint"
+	MQTTOwnTracksPublishTopicCommand        mqtt.Topic = "owntracks/+/+/cmd"
+	MQTTOwnTracksPublishTopicUserLocation   mqtt.Topic = "owntracks/+/+"
+	MQTTOwnTracksPublishTopicTransition     mqtt.Topic = "owntracks/+/+/event"
+	MQTTOwnTracksPublishTopicCard           mqtt.Topic = "owntracks/+/+/info"
 
-	MQTTPublishTopicCommand      mqtt.Topic = "owntracks/+/+/cmd"
-	MQTTPublishTopicUserLocation mqtt.Topic = "owntracks/+/+"
-	MQTTPublishTopicTransition   mqtt.Topic = "owntracks/+/+/event"
-	MQTTPublishTopicCard         mqtt.Topic = "owntracks/+/+/info"
-
-	MQTTPublishTopicUserStateGeoHash      mqtt.Topic = "owntracks/+/+/state/geohash"
-	MQTTPublishTopicUserStateBatteryLevel mqtt.Topic = "owntracks/+/+/state/battery-level"
-	MQTTPublishTopicUserStateVelocity     mqtt.Topic = "owntracks/+/+/state/velocity"
-	MQTTPublishTopicUserStateConnection   mqtt.Topic = "owntracks/+/+/state/connection"
-	MQTTPublishTopicUserStateLocation     mqtt.Topic = "owntracks/+/+/state/location"
+	// custom
+	MQTTSubscribeTopicCommand             mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/cmd/+"
+	MQTTPublishTopicUserStateLat          mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/state/lat"
+	MQTTPublishTopicUserStateLon          mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/state/lon"
+	MQTTPublishTopicUserStateGeoHash      mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/state/geohash"
+	MQTTPublishTopicUserStateAccuracy     mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/state/accuracy"
+	MQTTPublishTopicUserStateAltitude     mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/state/altitude"
+	MQTTPublishTopicUserStateBatteryLevel mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/state/battery-level"
+	MQTTPublishTopicUserStateVelocity     mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/state/velocity"
+	MQTTPublishTopicUserStateConnection   mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/state/connection"
+	MQTTPublishTopicUserStateLocation     mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/state/location"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
-		MQTTPublishTopicUserStateGeoHash,
-		MQTTPublishTopicUserStateBatteryLevel,
-		MQTTPublishTopicUserStateVelocity,
-		MQTTPublishTopicUserStateConnection,
-		MQTTPublishTopicUserStateLocation,
+		mqtt.Topic(MQTTPublishTopicUserStateLat.Format(b.user, b.device)),
+		mqtt.Topic(MQTTPublishTopicUserStateLon.Format(b.user, b.device)),
+		mqtt.Topic(MQTTPublishTopicUserStateGeoHash.Format(b.user, b.device)),
+		mqtt.Topic(MQTTPublishTopicUserStateAccuracy.Format(b.user, b.device)),
+		mqtt.Topic(MQTTPublishTopicUserStateAltitude.Format(b.user, b.device)),
+		mqtt.Topic(MQTTPublishTopicUserStateBatteryLevel.Format(b.user, b.device)),
+		mqtt.Topic(MQTTPublishTopicUserStateVelocity.Format(b.user, b.device)),
+		mqtt.Topic(MQTTPublishTopicUserStateConnection.Format(b.user, b.device)),
+		mqtt.Topic(MQTTPublishTopicUserStateLocation.Format(b.user, b.device)),
 	}
 }
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		/*
-			acc Accuracy of the reported location in meters without unit (iOS,Android/integer/meters/optional)
-			alt Altitude measured above sea level (iOS,Android/integer/meters/optional)
-			batt Device battery level (iOS,Android/integer/percent/optional)
-			cog Course over ground (iOS/integer/degree/optional)
-			lat latitude (iOS,Android/float/meters/required)
-			lon longitude (iOS,Android/float/meters/required)
-			rad radius around the region when entering/leaving (iOS/integer/meters/optional)
-			t trigger for the location report (iOS,Android/string/optional)
-				p ping issued randomly by background task (iOS,Android)
-				c circular region enter/leave event (iOS,Android)
-				b beacon region enter/leave event (iOS)
-				r response to a reportLocation cmd message (iOS,Android)
-				u manual publish requested by the user (iOS,Android)
-				t timer based publish in move move (iOS)
-				v updated by Settings/Privacy/Locations Services/System Services/Frequent Locations monitoring (iOS)
-				tid Tracker ID used to display the initials of a user (iOS,Android/string/optional) required for http mode
-			tst UNIX epoch timestamp in seconds of the location fix (iOS,Android/integer/epoch/required)
-			vac vertical accuracy of the alt element (iOS/integer/meters/optional)
-			vel velocity (iOS,Android/integer/kmh/optional)
-			p barometric pressure (iOS/float/kPa/optional/extended data)
-			conn Internet connectivity status (route to host) when the message is created (iOS,Android/string/optional/extended data)
-				w phone is connected to a WiFi connection (iOS,Android)
-				o phone is offline (iOS,Android)
-				m mobile data (iOS,Android)
-			topic (only in HTTP payloads) contains the original publish topic (e.g. owntracks/jane/phone). (iOS)
-			inregions contains a list of regions the device is currently in (e.g. ["Home","Garage"]). Might be empty. (iOS,Android/list of strings/optional)
-		*/
-		mqtt.NewSubscriber(MQTTSubscribeTopicUserLocation.String(), 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) (err error) {
-			route := mqtt.RouteSplit(message.Topic())
-			if len(route) < 2 {
-				return errors.New("bad topic name")
-			}
+		mqtt.NewSubscriber(MQTTSubscribeTopicCommand.Format(b.user, b.device, "report-location"), 0, b.subscribeCommand(commandReportLocation)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicCommand.Format(b.user, b.device, "restart"), 0, b.subscribeCommand(commandRestart)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicCommand.Format(b.user, b.device, "reconnect"), 0, b.subscribeCommand(commandReconnect)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicCommand.Format(b.user, b.device, "waypoints"), 0, b.subscribeCommand(commandWayPoints)),
+		mqtt.NewSubscriber(MQTTOwnTracksSubscribeTopicUserLocation.Format(b.user, b.device), 0, b.subscribeUserLocation),
+	}
+}
 
-			user := route[len(route)-2]
-			device := route[len(route)-1]
-			q := message.Qos()
-			r := message.Retained()
+/*
+	acc Accuracy of the reported location in meters without unit (iOS,Android/integer/meters/optional)
+	alt Altitude measured above sea level (iOS,Android/integer/meters/optional)
+	batt Device battery level (iOS,Android/integer/percent/optional)
+	cog Course over ground (iOS/integer/degree/optional)
+	lat latitude (iOS,Android/float/meters/required)
+	lon longitude (iOS,Android/float/meters/required)
+	rad radius around the region when entering/leaving (iOS/integer/meters/optional)
+	t trigger for the location report (iOS,Android/string/optional)
+		p ping issued randomly by background task (iOS,Android)
+		c circular region enter/leave event (iOS,Android)
+		b beacon region enter/leave event (iOS)
+		r response to a reportLocation cmd message (iOS,Android)
+		u manual publish requested by the user (iOS,Android)
+		t timer based publish in move move (iOS)
+		v updated by Settings/Privacy/Locations Services/System Services/Frequent Locations monitoring (iOS)
+		tid Tracker ID used to display the initials of a user (iOS,Android/string/optional) required for http mode
+	tst UNIX epoch timestamp in seconds of the location fix (iOS,Android/integer/epoch/required)
+	vac vertical accuracy of the alt element (iOS/integer/meters/optional)
+	vel velocity (iOS,Android/integer/kmh/optional)
+	p barometric pressure (iOS/float/kPa/optional/extended data)
+	conn Internet connectivity status (route to host) when the message is created (iOS,Android/string/optional/extended data)
+		w phone is connected to a WiFi connection (iOS,Android)
+		o phone is offline (iOS,Android)
+		m mobile data (iOS,Android)
+	topic (only in HTTP payloads) contains the original publish topic (e.g. owntracks/jane/phone). (iOS)
+	inregions contains a list of regions the device is currently in (e.g. ["Home","Garage"]). Might be empty. (iOS,Android/list of strings/optional)
+*/
+func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, message mqtt.Message) (err error) {
+	route := mqtt.RouteSplit(message.Topic())
+	if len(route) < 2 {
+		return errors.New("bad topic name")
+	}
 
-			var payload map[string]interface{}
-			if err := json.Unmarshal(message.Payload(), &payload); err != nil {
-				return err
-			}
+	q := message.Qos()
+	r := message.Retained()
 
-			t, ok := payload["_type"]
-			if ok && t == "lwt" {
-				// skip last will and testament
-				return nil
-			}
+	var payload *Location
+	if err := json.Unmarshal(message.Payload(), &payload); err != nil {
+		return err
+	}
 
-			if !ok || t != "location" {
-				return errors.New("location not found in payload")
-			}
+	if payload.Type == "lwt" {
+		// skip last will and testament
+		return nil
+	}
 
-			lat, ok := payload["lat"]
-			if !ok {
-				return errors.New("lat not found in payload")
-			}
+	if payload.Type != "location" {
+		return errors.New("location not found in payload")
+	}
 
-			lon, ok := payload["lon"]
-			if !ok {
-				return errors.New("lon not found in payload")
-			}
+	if payload.Lat == nil {
+		return errors.New("lat not found in payload")
+	}
 
-			location := strconv.FormatFloat(lat.(float64), 'f', -1, 64) + "," + strconv.FormatFloat(lon.(float64), 'f', -1, 64)
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateLocation.Format(user, device), q, r, location); e != nil {
-				err = multierr.Append(err, e)
-			}
+	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateLat.Format(b.user, b.device), q, r, *payload.Lat); e != nil {
+		err = multierr.Append(err, e)
+	}
 
-			if batteryLevel, ok := payload["batt"]; ok {
-				metricBatteryLevel.With("user", user, "device", device).Set(batteryLevel.(float64))
+	if payload.Lon == nil {
+		return errors.New("lon not found in payload")
+	}
 
-				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateBatteryLevel.Format(user, device), q, r, batteryLevel); e != nil {
-					err = multierr.Append(err, e)
-				}
-			}
+	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateLon.Format(b.user, b.device), q, r, *payload.Lon); e != nil {
+		err = multierr.Append(err, e)
+	}
 
-			if velocity, ok := payload["vel"]; ok {
-				metricVelocity.With("user", user, "device", device).Set(velocity.(float64))
+	hash := geohash.Encode(*payload.Lat, *payload.Lon)
+	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateGeoHash.Format(b.user, b.device), q, r, hash); e != nil {
+		err = multierr.Append(err, e)
+	}
 
-				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateVelocity.Format(user, device), q, r, velocity); e != nil {
-					err = multierr.Append(err, e)
-				}
-			}
+	if payload.Acc != nil {
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateAccuracy.Format(b.user, b.device), q, r, *payload.Acc); e != nil {
+			err = multierr.Append(err, e)
+		}
+	}
 
-			if connection, ok := payload["conn"]; ok {
-				var v string
-				switch connection {
-				case "w":
-					v = "wifi"
-				case "o":
-					v = "offline"
-				case "m":
-					v = "mobile"
-				default:
-					v = "unknown"
-				}
+	if payload.Alt != nil {
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateAltitude.Format(b.user, b.device), q, r, *payload.Alt); e != nil {
+			err = multierr.Append(err, e)
+		}
+	}
 
-				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateConnection.Format(user, device), q, r, v); e != nil {
-					err = multierr.Append(err, e)
-				}
-			}
+	location := strconv.FormatFloat(*payload.Lat, 'f', -1, 64) + "," + strconv.FormatFloat(*payload.Lon, 'f', -1, 64)
+	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateLocation.Format(b.user, b.device), q, r, location); e != nil {
+		err = multierr.Append(err, e)
+	}
 
-			hash := geohash.Encode(lat.(float64), lon.(float64))
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateGeoHash.Format(user, device), q, r, hash); e != nil {
-				err = multierr.Append(err, e)
-			}
+	if payload.Batt != nil {
+		metricBatteryLevel.With("user", b.user, "device", b.device).Set(*payload.Batt)
 
-			return err
-		}),
-		mqtt.NewSubscriber(MQTTSubscribeTopicWayPoints.String(), 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) (err error) {
-			route := mqtt.RouteSplit(message.Topic())
-			if len(route) < 2 {
-				return errors.New("bad topic name")
-			}
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateBatteryLevel.Format(b.user, b.device), q, r, *payload.Batt); e != nil {
+			err = multierr.Append(err, e)
+		}
+	}
 
-			/*
-				user := route[len(route)-2]
-				device := route[len(route)-1]
-				q := message.Qos()
-				r := message.Retained()
-			*/
+	if payload.Vel != nil {
+		metricVelocity.With("user", b.user, "device", b.device).Set(float64(*payload.Vel))
 
-			var payload map[string]interface{}
-			if err := json.Unmarshal(message.Payload(), &payload); err != nil {
-				return err
-			}
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateVelocity.Format(b.user, b.device), q, r, *payload.Vel); e != nil {
+			err = multierr.Append(err, e)
+		}
+	}
 
-			// fmt.Println(payload)
+	if payload.Conn != nil {
+		var v string
+		switch *payload.Conn {
+		case "w":
+			v = "wifi"
+		case "o":
+			v = "offline"
+		case "m":
+			v = "mobile"
+		default:
+			v = "unknown"
+		}
 
-			return nil
-		}),
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateConnection.Format(b.user, b.device), q, r, v); e != nil {
+			err = multierr.Append(err, e)
+		}
+	}
+
+	return err
+}
+
+func (b *Bind) subscribeCommand(cmd *Command) mqtt.MessageHandler {
+	return func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+		return b.Command(cmd)
 	}
 }

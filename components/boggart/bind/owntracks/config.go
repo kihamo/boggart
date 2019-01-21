@@ -1,7 +1,8 @@
 package owntracks
 
 type Config struct {
-	Devices map[string]string
+	User   string `valid:"required"`
+	Device string `valid:"required"`
 }
 
 func (Type) Config() interface{} {
