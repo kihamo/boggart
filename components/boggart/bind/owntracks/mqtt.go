@@ -190,7 +190,7 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 	if len(b.config.WayPoints) > 0 {
 		existsRegions := make(map[string]struct{})
 
-		if b.config.WayPointsCheckInRegionEnabled {
+		if b.config.WayPointsCheckInRegionEnabled && payload.InRegions != nil {
 			for _, name := range *payload.InRegions {
 				if _, ok := b.wayPointsCheck[name]; ok {
 					existsRegions[name] = struct{}{}
