@@ -9,32 +9,29 @@ type Type struct{}
 
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
-	region := make(map[string]*atomic.Bool, len(config.Regions))
+	wayPointsCheck := make(map[string]*atomic.BoolNull, len(config.WayPoints))
 
-	if len(config.Regions) > 0 {
-		for n, r := range config.Regions {
-			if r.GeoFence <= 0 {
-				r.GeoFence = DefaultGeoFence
+	if len(config.WayPoints) > 0 {
+		for n, r := range config.WayPoints {
+			if r.Radius <= 0 {
+				r.Radius = DefaultPointRadius
 			}
 
-			config.Regions[n] = r
-			region[n] = atomic.NewBool()
+			config.WayPoints[n] = r
+			wayPointsCheck[n] = atomic.NewBoolNull()
 		}
 	}
 
 	return &Bind{
-		user:    config.User,
-		device:  config.Device,
-		regions: config.Regions,
-
-		lat:     atomic.NewFloat64(),
-		lon:     atomic.NewFloat64(),
-		geoHash: atomic.NewString(),
-		conn:    atomic.NewString(),
-		acc:     atomic.NewInt64(),
-		alt:     atomic.NewInt64(),
-		batt:    atomic.NewFloat64(),
-		vel:     atomic.NewInt64(),
-		region:  region,
+		config:         config,
+		lat:            atomic.NewFloat64(),
+		lon:            atomic.NewFloat64(),
+		geoHash:        atomic.NewString(),
+		conn:           atomic.NewString(),
+		acc:            atomic.NewInt64(),
+		alt:            atomic.NewInt64(),
+		batt:           atomic.NewFloat64(),
+		vel:            atomic.NewInt64(),
+		wayPointsCheck: wayPointsCheck,
 	}, nil
 }

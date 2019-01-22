@@ -5,48 +5,56 @@ import (
 	"encoding/json"
 )
 
-var (
-	// TODO: setWaypoints, setConfiguration
-
-	commandReportLocation = &Command{
-		Type:   "cmd",
-		Action: "reportLocation",
-	}
-	commandRestart = &Command{
-		Type:   "cmd",
-		Action: "restart",
-	}
-	commandReconnect = &Command{
-		Type:   "cmd",
-		Action: "reconnect",
-	}
-	commandWayPoints = &Command{
-		Type:   "cmd",
-		Action: "waypoints",
-	}
-)
-
-func (b *Bind) Command(cmd *Command) error {
+func (b *Bind) sendCommand(cmd interface{}) error {
 	payload, err := json.Marshal(cmd)
 	if err != nil {
 		return err
 	}
 
-	return b.MQTTPublish(context.Background(), MQTTOwnTracksPublishTopicCommand.Format(b.user, b.device), 2, false, payload)
+	return b.MQTTPublish(context.Background(), MQTTOwnTracksPublishTopicCommand.Format(b.config.User, b.config.Device), 2, false, payload)
 }
 
 func (b *Bind) CommandReportLocation() error {
-	return b.Command(commandReportLocation)
+	return b.sendCommand(&CommandPayload{
+		Type:   "cmd",
+		Action: "reportLocation",
+	})
 }
 
 func (b *Bind) CommandRestart() error {
-	return b.Command(commandRestart)
+	return b.sendCommand(&CommandPayload{
+		Type:   "cmd",
+		Action: "restart",
+	})
 }
 
 func (b *Bind) CommandReconnect() error {
-	return b.Command(commandReconnect)
+	return b.sendCommand(&CommandPayload{
+		Type:   "cmd",
+		Action: "reconnect",
+	})
 }
 
 func (b *Bind) CommandWayPoints() error {
-	return b.Command(commandWayPoints)
+	return b.sendCommand(&CommandPayload{
+		Type:   "cmd",
+		Action: "waypoints",
+	})
+}
+
+func (b *Bind) CommandSetWayPoints(points []WayPointPayload) error {
+	for i := range points {
+		points[i].Type = "waypoint"
+	}
+
+	return b.sendCommand(&SetWayPointsPayload{
+		CommandPayload: CommandPayload{
+			Type:   "cmd",
+			Action: "setWaypoints",
+		},
+		WayPoints: WayPointsPayload{
+			Type:      "waypoints",
+			WayPoints: points,
+		},
+	})
 }
