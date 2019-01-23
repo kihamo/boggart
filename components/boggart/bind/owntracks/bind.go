@@ -1,6 +1,8 @@
 package owntracks
 
 import (
+	"sync"
+
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/atomic"
 )
@@ -20,6 +22,9 @@ type Bind struct {
 	batt           *atomic.Float64
 	vel            *atomic.Int64
 	wayPointsCheck map[string]*atomic.BoolNull
+
+	mutex                    sync.Mutex
+	wayPointsCheckUnregister map[string]*atomic.BoolNull
 }
 
 func (b *Bind) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.BindStatusSetter) {

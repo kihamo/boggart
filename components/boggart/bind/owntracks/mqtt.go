@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/mmcloughlin/geohash"
 	"go.uber.org/multierr"
@@ -192,32 +193,56 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 
 		if b.config.WayPointsCheckInRegionEnabled && payload.InRegions != nil {
 			for _, name := range *payload.InRegions {
+				var cache *atomic.BoolNull
+				existsRegions[name] = struct{}{}
+
 				if _, ok := b.wayPointsCheck[name]; ok {
-					existsRegions[name] = struct{}{}
+					cache = b.wayPointsCheck[name]
+				} else {
+					b.mutex.Lock()
+					cache, ok = b.wayPointsCheckUnregister[name]
+					if !ok {
+						cache = atomic.NewBoolNull()
+						b.wayPointsCheckUnregister[name] = cache
+					}
+					b.mutex.Unlock()
 				}
 
-				name = mqtt.NameReplace(name)
-				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, name), q, r, true); e != nil {
-					err = multierr.Append(err, e)
+				if ok := cache.Set(true); ok {
+					if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, mqtt.NameReplace(name)), q, r, true); e != nil {
+						err = multierr.Append(err, e)
+					}
 				}
 			}
-		}
 
-		if b.config.WayPointsCheckDistanceEnabled && b.validAccuracy(payload.Acc) {
-			for name, point := range b.config.WayPoints {
+			// все остальные не зарегистрированные в бинде отсылаем как false
+			for name, cache := range b.wayPointsCheckUnregister {
 				if _, ok := existsRegions[name]; ok {
 					continue
 				}
 
-				distance := calculateDistance(*payload.Lat, *payload.Lon, point.Lat, point.Lon)
-				checkResult := distance < point.Radius
-
-				if ok := b.wayPointsCheck[name].Set(checkResult); ok {
-					name = mqtt.NameReplace(name)
-
-					if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, name), q, r, checkResult); e != nil {
+				if ok := cache.Set(false); ok {
+					if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, mqtt.NameReplace(name)), q, r, false); e != nil {
 						err = multierr.Append(err, e)
 					}
+				}
+			}
+		}
+
+		for name, point := range b.config.WayPoints {
+			if _, ok := existsRegions[name]; ok {
+				continue
+			}
+
+			var checkResult bool
+
+			if b.config.WayPointsCheckDistanceEnabled && b.validAccuracy(payload.Acc) {
+				checkResult = calculateDistance(*payload.Lat, *payload.Lon, point.Lat, point.Lon) < point.Radius
+			}
+
+			if ok := b.wayPointsCheck[name].Set(checkResult); ok {
+				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, mqtt.NameReplace(name)), q, r, checkResult); e != nil {
+					err = multierr.Append(err, e)
 				}
 			}
 		}
@@ -321,6 +346,18 @@ func (b *Bind) subscribeSyncWayPoints(ctx context.Context, _ mqtt.Component, mes
 	for _, point := range payloadList.WayPoints {
 		existsTst[point.Tst] = struct{}{}
 		existsDesc[point.Desc] = struct{}{}
+
+		// заполняем кэш не зарегистрированных в конфигурации точек, но зарегистрированных на устройстве
+		// необходимо, чтобы каждый раз не слать в MQTT статус по ним
+		if b.config.WayPointsCheckInRegionEnabled {
+			if _, ok := b.config.WayPoints[point.Desc]; !ok {
+				b.mutex.Lock()
+				if _, ok := b.wayPointsCheckUnregister[point.Desc]; !ok {
+					b.wayPointsCheckUnregister[point.Desc] = atomic.NewBoolNull()
+				}
+				b.mutex.Unlock()
+			}
+		}
 	}
 
 	points := make([]WayPointPayload, 0, len(b.config.WayPoints))

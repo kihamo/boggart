@@ -23,15 +23,16 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	}
 
 	return &Bind{
-		config:         config,
-		lat:            atomic.NewFloat64(),
-		lon:            atomic.NewFloat64(),
-		geoHash:        atomic.NewString(),
-		conn:           atomic.NewString(),
-		acc:            atomic.NewInt64(),
-		alt:            atomic.NewInt64(),
-		batt:           atomic.NewFloat64(),
-		vel:            atomic.NewInt64(),
-		wayPointsCheck: wayPointsCheck,
+		config:                   config,
+		lat:                      atomic.NewFloat64(),
+		lon:                      atomic.NewFloat64(),
+		geoHash:                  atomic.NewString(),
+		conn:                     atomic.NewString(),
+		acc:                      atomic.NewInt64(),
+		alt:                      atomic.NewInt64(),
+		batt:                     atomic.NewFloat64(),
+		vel:                      atomic.NewInt64(),
+		wayPointsCheck:           wayPointsCheck,
+		wayPointsCheckUnregister: make(map[string]*atomic.BoolNull, 0),
 	}, nil
 }
