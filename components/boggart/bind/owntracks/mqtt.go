@@ -73,6 +73,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 		mqtt.NewSubscriber(MQTTSubscribeTopicCommand.Format(b.config.User, b.config.Device, "reconnect"), 0, b.subscribeCommand(b.CommandReconnect)),
 		mqtt.NewSubscriber(MQTTSubscribeTopicCommand.Format(b.config.User, b.config.Device, "waypoints"), 0, b.subscribeCommand(b.CommandWayPoints)),
 		mqtt.NewSubscriber(MQTTOwnTracksSubscribeTopicUserLocation.Format(b.config.User, b.config.Device), 0, b.subscribeUserLocation),
+		mqtt.NewSubscriber(MQTTOwnTracksSubscribeTopicTransition.Format(b.config.User, b.config.Device), 0, b.subscribeTransition),
 	}
 
 	if b.config.RegionsSyncEnabled {
