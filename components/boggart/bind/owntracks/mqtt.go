@@ -3,7 +3,6 @@ package owntracks
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"strconv"
 	"time"
 
@@ -13,35 +12,6 @@ import (
 	"github.com/mmcloughlin/geohash"
 	"go.uber.org/multierr"
 )
-
-/*
-https://owntracks.org/booklet/tech/json/
-
-Android
-- card
-- cmd
-- configuration
-- encrypted
-- location
-- lwt
-- transition
-- waypoint
-- waypoints
-
-In MQTT mode the apps publish to:
-- owntracks/user/device with _type=location for location updates, and with _type=lwt
-- owntracks/user/device/cmd with _type=cmd for remote commands
-- owntracks/user/device/event with _type=transition for enter/leave events
-- owntracks/user/device/step to report step counter
-- owntracks/user/device/beacon for beacon ranging
-- owntracks/user/device/dump for config dumps
-
-In MQTT mode apps subscribe to:
-- owntracks/user/device/cmd if remote commands are enabled
-- owntracks/+/+ for seeing other user's locations, depending on broker ACL
-- owntracks/+/+/event for transition messages (enter/leave)
-- owntracks/+/+/info for obtaining cards.
-*/
 
 const (
 	// owntracks
@@ -85,13 +55,12 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 		mqtt.Topic(MQTTPublishTopicUserStateLocation.Format(b.config.User, b.config.Device)),
 	}
 
-	if len(b.config.WayPoints) > 0 {
-		for name := range b.config.WayPoints {
-			topics = append(
-				topics,
-				mqtt.Topic(MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, name)),
-			)
+	if !b.config.UnregisterPointsAllowed {
+		for name := range b.getAllRegions() {
+			topics = append(topics, mqtt.Topic(MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, name)))
 		}
+	} else {
+		topics = append(topics, mqtt.Topic(MQTTPublishTopicRegion.Format(b.config.User, b.config.Device)))
 	}
 
 	return topics
@@ -106,61 +75,95 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 		mqtt.NewSubscriber(MQTTOwnTracksSubscribeTopicUserLocation.Format(b.config.User, b.config.Device), 0, b.subscribeUserLocation),
 	}
 
-	if b.config.WayPointsSyncEnabled {
+	if b.config.RegionsSyncEnabled {
 		subscribers = append(
 			subscribers,
-			mqtt.NewSubscriber(MQTTOwnTracksSubscribeTopicWayPoints.Format(b.config.User, b.config.Device), 0, b.subscribeSyncWayPoints),
+			mqtt.NewSubscriber(MQTTOwnTracksSubscribeTopicWayPoints.Format(b.config.User, b.config.Device), 0, b.subscribeSyncRegions),
 		)
 	}
 
 	return subscribers
 }
 
-/*
-	acc Accuracy of the reported location in meters without unit (iOS,Android/integer/meters/optional)
-	alt Altitude measured above sea level (iOS,Android/integer/meters/optional)
-	batt Device battery level (iOS,Android/integer/percent/optional)
-	cog Course over ground (iOS/integer/degree/optional)
-	lat latitude (iOS,Android/float/meters/required)
-	lon longitude (iOS,Android/float/meters/required)
-	rad radius around the region when entering/leaving (iOS/integer/meters/optional)
-	t trigger for the location report (iOS,Android/string/optional)
-		p ping issued randomly by background task (iOS,Android)
-		c circular region enter/leave event (iOS,Android)
-		b beacon region enter/leave event (iOS)
-		r response to a reportLocation cmd message (iOS,Android)
-		u manual publish requested by the user (iOS,Android)
-		t timer based publish in move move (iOS)
-		v updated by Settings/Privacy/Locations Services/System Services/Frequent Locations monitoring (iOS)
-		tid Tracker ID used to display the initials of a user (iOS,Android/string/optional) required for http mode
-	tst UNIX epoch timestamp in seconds of the location fix (iOS,Android/integer/epoch/required)
-	vac vertical accuracy of the alt element (iOS/integer/meters/optional)
-	vel velocity (iOS,Android/integer/kmh/optional)
-	p barometric pressure (iOS/float/kPa/optional/extended data)
-	conn Internet connectivity status (route to host) when the message is created (iOS,Android/string/optional/extended data)
-		w phone is connected to a WiFi connection (iOS,Android)
-		o phone is offline (iOS,Android)
-		m mobile data (iOS,Android)
-	topic (only in HTTP payloads) contains the original publish topic (e.g. owntracks/jane/phone). (iOS)
-	inregions contains a list of regions the device is currently in (e.g. ["Home","Garage"]). Might be empty. (iOS,Android/list of strings/optional)
-*/
+func (b *Bind) notifyRegionEvent(ctx context.Context, payload *LocationPayload, q byte, r bool) (err error) {
+	alreadyNotify := make(map[string]struct{})
+
+	if b.config.CheckInRegionEnabled && payload.InRegions != nil {
+		for _, name := range *payload.InRegions {
+			alreadyNotify[name] = struct{}{}
+
+			var checker *atomic.BoolNull
+
+			if b.config.UnregisterPointsAllowed {
+				checker = b.getOrSetRegionChecker(name)
+			} else {
+				checker, _ = b.getRegionChecker(name)
+			}
+
+			if checker != nil {
+				if ok := checker.Set(true); ok {
+					if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, mqtt.NameReplace(name)), q, r, true); e != nil {
+						err = multierr.Append(err, e)
+					}
+				}
+			}
+		}
+	}
+
+	if b.config.CheckDistanceEnabled && b.validAccuracy(payload.Acc) {
+		for name, point := range b.getAllRegions() {
+			if _, ok := alreadyNotify[name]; ok {
+				continue
+			}
+
+			checker, ok := b.getRegionChecker(name)
+			if !ok {
+				continue
+			}
+
+			alreadyNotify[name] = struct{}{}
+
+			checkResult := calculateDistance(*payload.Lat, *payload.Lon, point.Lat, point.Lon) < point.Radius
+
+			if ok := checker.Set(checkResult); ok {
+				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, mqtt.NameReplace(name)), q, r, checkResult); e != nil {
+					err = multierr.Append(err, e)
+				}
+			}
+		}
+	}
+
+	for name, checker := range b.getAllRegionCheckers() {
+		if _, ok := alreadyNotify[name]; ok {
+			continue
+		}
+
+		if ok := checker.Set(false); ok {
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, mqtt.NameReplace(name)), q, r, false); e != nil {
+				err = multierr.Append(err, e)
+			}
+		}
+	}
+
+	return err
+}
+
 func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, message mqtt.Message) (err error) {
+	// skip lwt
+	var payloadLWT *LWTPayload
+	if err = json.Unmarshal(message.Payload(), &payloadLWT); err == nil {
+		if err = payloadLWT.Valid(); err == nil {
+			return nil
+		}
+	}
+
 	var payload *LocationPayload
-	if err := json.Unmarshal(message.Payload(), &payload); err != nil {
+	if err = json.Unmarshal(message.Payload(), &payload); err != nil {
 		return err
 	}
 
-	if payload.Type == "lwt" {
-		// skip last will and testament
-		return nil
-	}
-
-	if payload.Type != "location" {
-		return errors.New("location not found in payload")
-	}
-
-	if payload.Lat == nil {
-		return errors.New("lat not found in payload")
+	if err = payload.Valid(); err != nil {
+		return err
 	}
 
 	var changeLocation bool
@@ -175,10 +178,6 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 		}
 	}
 
-	if payload.Lon == nil {
-		return errors.New("lon not found in payload")
-	}
-
 	if ok := b.lon.Set(*payload.Lon); ok {
 		changeLocation = true
 
@@ -188,64 +187,8 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 	}
 
 	// detect event
-	if len(b.config.WayPoints) > 0 {
-		existsRegions := make(map[string]struct{})
-
-		if b.config.WayPointsCheckInRegionEnabled && payload.InRegions != nil {
-			for _, name := range *payload.InRegions {
-				var cache *atomic.BoolNull
-				existsRegions[name] = struct{}{}
-
-				if _, ok := b.wayPointsCheck[name]; ok {
-					cache = b.wayPointsCheck[name]
-				} else {
-					b.mutex.Lock()
-					cache, ok = b.wayPointsCheckUnregister[name]
-					if !ok {
-						cache = atomic.NewBoolNull()
-						b.wayPointsCheckUnregister[name] = cache
-					}
-					b.mutex.Unlock()
-				}
-
-				if ok := cache.Set(true); ok {
-					if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, mqtt.NameReplace(name)), q, r, true); e != nil {
-						err = multierr.Append(err, e)
-					}
-				}
-			}
-
-			// все остальные не зарегистрированные в бинде отсылаем как false
-			for name, cache := range b.wayPointsCheckUnregister {
-				if _, ok := existsRegions[name]; ok {
-					continue
-				}
-
-				if ok := cache.Set(false); ok {
-					if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, mqtt.NameReplace(name)), q, r, false); e != nil {
-						err = multierr.Append(err, e)
-					}
-				}
-			}
-		}
-
-		for name, point := range b.config.WayPoints {
-			if _, ok := existsRegions[name]; ok {
-				continue
-			}
-
-			var checkResult bool
-
-			if b.config.WayPointsCheckDistanceEnabled && b.validAccuracy(payload.Acc) {
-				checkResult = calculateDistance(*payload.Lat, *payload.Lon, point.Lat, point.Lon) < point.Radius
-			}
-
-			if ok := b.wayPointsCheck[name].Set(checkResult); ok {
-				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, mqtt.NameReplace(name)), q, r, checkResult); e != nil {
-					err = multierr.Append(err, e)
-				}
-			}
-		}
+	if e := b.notifyRegionEvent(ctx, payload, message.Qos(), message.Retained()); e != nil {
+		err = multierr.Append(err, e)
 	}
 
 	hash := geohash.Encode(*payload.Lat, *payload.Lon)
@@ -321,53 +264,88 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 	return err
 }
 
-func (b *Bind) subscribeSyncWayPoints(ctx context.Context, _ mqtt.Component, message mqtt.Message) (err error) {
+// обработка единичного события попадания/уход из региона.
+// !!! Это событие не означает что в других регионах ситуация поменялась
+func (b *Bind) subscribeTransition(ctx context.Context, _ mqtt.Component, message mqtt.Message) (err error) {
+	var payload *TransitionPayload
+	if err = json.Unmarshal(message.Payload(), &payload); err != nil {
+		return err
+	}
+
+	if err = payload.Valid(); err != nil {
+		return err
+	}
+
+	var check *atomic.BoolNull
+	if b.config.UnregisterPointsAllowed {
+		check = b.getOrSetRegionChecker(payload.Desc)
+	} else {
+		check, _ = b.getRegionChecker(payload.Desc)
+	}
+
+	if check != nil {
+		checkResult := payload.IsEnter()
+
+		if ok := check.Set(checkResult); ok {
+			name := mqtt.NameReplace(payload.Desc)
+
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, name), message.Qos(), message.Retained(), checkResult); e != nil {
+				err = multierr.Append(err, e)
+			}
+		}
+	}
+
+	return nil
+}
+
+func (b *Bind) subscribeSyncRegions(ctx context.Context, _ mqtt.Component, message mqtt.Message) (err error) {
 	// _type == waypoint
 	// одиночное добавление, вручную внесли новый пункт в список (или результат синка уже)
 	// такие добавления игнорируем, тикет все равно дернет запрос всего списка
 	var payloadOne *WayPointPayload
-	if err = json.Unmarshal(message.Payload(), &payloadOne); err == nil && payloadOne.Type == "waypoint" {
-		return nil
+	if err = json.Unmarshal(message.Payload(), &payloadOne); err == nil {
+		if err = payloadOne.Valid(); err == nil {
+			return nil
+		}
 	}
 
 	// _type == waypoints
-	var payloadList *WayPointsPayload
-	if err = json.Unmarshal(message.Payload(), &payloadList); err != nil {
+	var payload *WayPointsPayload
+	if err = json.Unmarshal(message.Payload(), &payload); err != nil {
 		return err
 	}
 
-	if payloadList.Type != "waypoints" {
-		return errors.New("payload isn't waypoints")
+	if err = payload.Valid(); err != nil {
+		return err
 	}
 
 	existsDesc := make(map[string]struct{})
 	existsTst := make(map[int64]struct{})
 
-	for _, point := range payloadList.WayPoints {
+	for _, point := range payload.WayPoints {
 		existsTst[point.Tst] = struct{}{}
 		existsDesc[point.Desc] = struct{}{}
 
-		// заполняем кэш не зарегистрированных в конфигурации точек, но зарегистрированных на устройстве
-		// необходимо, чтобы каждый раз не слать в MQTT статус по ним
-		if b.config.WayPointsCheckInRegionEnabled {
-			if _, ok := b.config.WayPoints[point.Desc]; !ok {
-				b.mutex.Lock()
-				if _, ok := b.wayPointsCheckUnregister[point.Desc]; !ok {
-					b.wayPointsCheckUnregister[point.Desc] = atomic.NewBoolNull()
-				}
-				b.mutex.Unlock()
-			}
+		// регистрируем новый регион, который не определен в конфиге
+		if b.config.UnregisterPointsAllowed {
+			b.registerRegion(point.Desc, Point{
+				Lat:    point.Lat,
+				Lon:    point.Lon,
+				Radius: point.Rad,
+			})
 		}
 	}
 
-	points := make([]WayPointPayload, 0, len(b.config.WayPoints))
+	existsRegions := b.getAllRegions()
+	newRegions := make([]WayPointPayload, 0, len(existsRegions))
 	lastTst := time.Now().Unix()
-	for id, point := range b.config.WayPoints {
-		if _, ok := existsDesc[id]; ok {
+	for name, point := range existsRegions {
+		// точка зарегистрирована и у нас и на девайсе, пропускаем
+		if _, ok := existsDesc[name]; ok {
 			continue
 		}
 
-		// generate tst
+		// генерируем tst
 		for {
 			lastTst++
 
@@ -377,8 +355,8 @@ func (b *Bind) subscribeSyncWayPoints(ctx context.Context, _ mqtt.Component, mes
 			}
 		}
 
-		points = append(points, WayPointPayload{
-			Desc: id,
+		newRegions = append(newRegions, WayPointPayload{
+			Desc: name,
 			Lat:  point.Lat,
 			Lon:  point.Lon,
 			Rad:  point.Radius,
@@ -386,11 +364,11 @@ func (b *Bind) subscribeSyncWayPoints(ctx context.Context, _ mqtt.Component, mes
 		})
 	}
 
-	if len(points) == 0 {
+	if len(newRegions) == 0 {
 		return nil
 	}
 
-	return b.CommandSetWayPoints(points)
+	return b.CommandSetWayPoints(newRegions)
 }
 
 func (b *Bind) subscribeCommand(cmd func() error) mqtt.MessageHandler {

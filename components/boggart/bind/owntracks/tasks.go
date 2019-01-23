@@ -9,7 +9,7 @@ import (
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	if !b.config.WayPointsSyncEnabled {
+	if !b.config.RegionsSyncEnabled {
 		return nil
 	}
 

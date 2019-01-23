@@ -8,31 +8,28 @@ import (
 type Type struct{}
 
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
-	config := c.(*Config)
-	wayPointsCheck := make(map[string]*atomic.BoolNull, len(config.WayPoints))
-
-	if len(config.WayPoints) > 0 {
-		for n, r := range config.WayPoints {
-			if r.Radius <= 0 {
-				r.Radius = DefaultPointRadius
-			}
-
-			config.WayPoints[n] = r
-			wayPointsCheck[n] = atomic.NewBoolNull()
-		}
+	device := &Bind{
+		config:   c.(*Config),
+		lat:      atomic.NewFloat64(),
+		lon:      atomic.NewFloat64(),
+		geoHash:  atomic.NewString(),
+		conn:     atomic.NewString(),
+		acc:      atomic.NewInt64(),
+		alt:      atomic.NewInt64(),
+		batt:     atomic.NewFloat64(),
+		vel:      atomic.NewInt64(),
+		regions:  make(map[string]Point),
+		checkers: make(map[string]*atomic.BoolNull),
 	}
 
-	return &Bind{
-		config:                   config,
-		lat:                      atomic.NewFloat64(),
-		lon:                      atomic.NewFloat64(),
-		geoHash:                  atomic.NewString(),
-		conn:                     atomic.NewString(),
-		acc:                      atomic.NewInt64(),
-		alt:                      atomic.NewInt64(),
-		batt:                     atomic.NewFloat64(),
-		vel:                      atomic.NewInt64(),
-		wayPointsCheck:           wayPointsCheck,
-		wayPointsCheckUnregister: make(map[string]*atomic.BoolNull, 0),
-	}, nil
+	for name, region := range device.config.Regions {
+		if region.Radius <= 0 {
+			region.Radius = DefaultPointRadius
+		}
+
+		device.config.Regions[name] = region
+		device.registerRegion(name, region)
+	}
+
+	return device, nil
 }
