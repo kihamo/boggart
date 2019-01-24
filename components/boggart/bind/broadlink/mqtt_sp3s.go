@@ -9,9 +9,11 @@ import (
 )
 
 const (
-	SP3SMQTTPublishTopicState mqtt.Topic = boggart.ComponentName + "/socket/+/state"
-	SP3SMQTTPublishTopicPower mqtt.Topic = boggart.ComponentName + "/socket/+/power"
-	SP3SMQTTSubscribeTopicSet mqtt.Topic = boggart.ComponentName + "/socket/+/set"
+	SP3SMQTTPrefix mqtt.Topic = boggart.ComponentName + "/socket/+/"
+
+	SP3SMQTTPublishTopicState = SP3SMQTTPrefix + "state"
+	SP3SMQTTPublishTopicPower = SP3SMQTTPrefix + "power"
+	SP3SMQTTSubscribeTopicSet = SP3SMQTTPrefix + "set"
 )
 
 func (b *BindSP3S) MQTTPublishes() []mqtt.Topic {

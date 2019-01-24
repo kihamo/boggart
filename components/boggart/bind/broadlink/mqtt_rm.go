@@ -12,17 +12,19 @@ import (
 )
 
 const (
-	RMMQTTSubscribeTopicCapture       mqtt.Topic = boggart.ComponentName + "/remote-control/+/capture"
-	RMMQTTPublishTopicCaptureState    mqtt.Topic = boggart.ComponentName + "/remote-control/+/capture/state"
-	RMMQTTSubscribeTopicIR            mqtt.Topic = boggart.ComponentName + "/remote-control/+/ir"
-	RMMQTTSubscribeTopicIRCount       mqtt.Topic = boggart.ComponentName + "/remote-control/+/ir/count"
-	RMMQTTPublishTopicIRCapture       mqtt.Topic = boggart.ComponentName + "/remote-control/+/capture/ir"
-	RMMQTTSubscribeTopicRF315mhz      mqtt.Topic = boggart.ComponentName + "/remote-control/+/rf315mhz"
-	RMMQTTSubscribeTopicRF315mhzCount mqtt.Topic = boggart.ComponentName + "/remote-control/+/rf315mhz/count"
-	RMMQTTPublishTopicRF315mhzCapture mqtt.Topic = boggart.ComponentName + "/remote-control/+/capture/rf315mhz"
-	RMMQTTSubscribeTopicRF433mhz      mqtt.Topic = boggart.ComponentName + "/remote-control/+/rf433mhz"
-	RMMQTTSubscribeTopicRF433mhzCount mqtt.Topic = boggart.ComponentName + "/remote-control/+/rf433mhz/count"
-	RMMQTTPublishTopicRF433mhzCapture mqtt.Topic = boggart.ComponentName + "/remote-control/+/capture/rf433mhz"
+	RMMQTTPrefix mqtt.Topic = boggart.ComponentName + "/remote-control/+/"
+
+	RMMQTTSubscribeTopicCapture       = RMMQTTPrefix + "capture"
+	RMMQTTPublishTopicCaptureState    = RMMQTTPrefix + "capture/state"
+	RMMQTTSubscribeTopicIR            = RMMQTTPrefix + "ir"
+	RMMQTTSubscribeTopicIRCount       = RMMQTTPrefix + "ir/count"
+	RMMQTTPublishTopicIRCapture       = RMMQTTPrefix + "capture/ir"
+	RMMQTTSubscribeTopicRF315mhz      = RMMQTTPrefix + "rf315mhz"
+	RMMQTTSubscribeTopicRF315mhzCount = RMMQTTPrefix + "rf315mhz/count"
+	RMMQTTPublishTopicRF315mhzCapture = RMMQTTPrefix + "capture/rf315mhz"
+	RMMQTTSubscribeTopicRF433mhz      = RMMQTTPrefix + "rf433mhz"
+	RMMQTTSubscribeTopicRF433mhzCount = RMMQTTPrefix + "rf433mhz/count"
+	RMMQTTPublishTopicRF433mhzCapture = RMMQTTPrefix + "capture/rf433mhz"
 )
 
 func (b *BindRM) SetMQTTClient(client mqtt.Component) {
@@ -97,8 +99,7 @@ func (b *BindRM) MQTTSubscribers() []mqtt.Subscriber {
 						}
 
 						// стартуем новую запись
-						err := b.MQTTPublish(ctx, RMMQTTPublishTopicCaptureState.Format(sn), 2, true, true)
-						if err != nil {
+						if err := b.MQTTPublish(ctx, RMMQTTPublishTopicCaptureState.Format(sn), 2, true, true); err != nil {
 							return err
 						}
 
