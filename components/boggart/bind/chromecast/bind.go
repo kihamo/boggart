@@ -7,30 +7,29 @@ import (
 	"net"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
-
-	"go.uber.org/multierr"
 
 	"github.com/barnybug/go-cast"
 	"github.com/barnybug/go-cast/controllers"
 	"github.com/barnybug/go-cast/events"
 	castnet "github.com/barnybug/go-cast/net"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/boggart/components/mqtt"
+	"go.uber.org/multierr"
 )
 
 type Bind struct {
-	volume      int64
-	mute        int64
-	status      atomic.Value
-	mediaStatus atomic.Value
-
 	boggart.BindBase
 	boggart.BindMQTT
 
 	host net.IP
 	port int
+
+	volume         *atomic.Uint32Null
+	mute           *atomic.BoolNull
+	status         *atomic.String
+	mediaContentID *atomic.String
 
 	events chan events.Event
 	mutex  sync.RWMutex
@@ -158,22 +157,12 @@ func (b *Bind) doEvents() {
 				ctx := context.Background()
 				sn := mqtt.NameReplace(b.SerialNumber())
 
-				currentVolume := int64(math.Round(t.Level * 100))
-				prevVolume := atomic.LoadInt64(&b.volume)
-				if currentVolume != prevVolume {
-					atomic.StoreInt64(&b.volume, currentVolume)
-
-					_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateVolume.Format(sn), 0, true, currentVolume)
+				volume := uint32(math.Round(t.Level * 100))
+				if ok := b.volume.Set(volume); ok {
+					_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateVolume.Format(sn), 0, true, volume)
 				}
 
-				prevMute := atomic.LoadInt64(&b.mute) == 1
-				if t.Muted != prevMute {
-					if t.Muted {
-						atomic.StoreInt64(&b.mute, 1)
-					} else {
-						atomic.StoreInt64(&b.mute, 0)
-					}
-
+				if ok := b.mute.Set(t.Muted); ok {
 					_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMute.Format(sn), 0, true, t.Muted)
 				}
 
@@ -181,10 +170,7 @@ func (b *Bind) doEvents() {
 				ctx := context.Background()
 				sn := mqtt.NameReplace(b.SerialNumber())
 
-				prev := b.status.Load()
-				if prev == nil || prev.(string) != t.PlayerState {
-					b.status.Store(t.PlayerState)
-
+				if ok := b.status.Set(t.PlayerState); ok {
 					_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateStatus.Format(sn), 0, true, strings.ToLower(t.PlayerState))
 				}
 
@@ -194,17 +180,7 @@ func (b *Bind) doEvents() {
 				}
 
 				if t.Media != nil {
-					prev := b.mediaStatus.Load()
-					if prev != nil {
-						prevMedia := prev.(*controllers.MediaStatusMedia)
-						if t.Media.ContentId != prevMedia.ContentId {
-							b.mediaStatus.Store(t.Media)
-
-							_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateContent.Format(sn), 0, true, t.Media.ContentId)
-						}
-					} else {
-						b.mediaStatus.Store(t.Media)
-
+					if ok := b.mediaContentID.Set(t.Media.ContentId); ok {
 						_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateContent.Format(sn), 0, true, t.Media.ContentId)
 					}
 				}
