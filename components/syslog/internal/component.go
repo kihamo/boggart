@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"sync"
 
 	"github.com/kihamo/boggart/components/syslog"
 	"github.com/kihamo/shadow"
@@ -21,6 +22,7 @@ type Component struct {
 	logger   logging.Logger
 	handlers []syslog.HasHandler
 
+	mutex  sync.Mutex
 	server *rsyslog.Server
 }
 
@@ -50,9 +52,9 @@ func (c *Component) Run(a shadow.Application, ready chan<- struct{}) error {
 		return err
 	}
 
-	c.server = rsyslog.NewServer()
-	c.server.SetFormat(rsyslog.Automatic)
-	c.server.SetHandler(c)
+	server := rsyslog.NewServer()
+	server.SetFormat(rsyslog.Automatic)
+	server.SetHandler(c)
 
 	c.logger = logging.DefaultLogger().Named(c.Name())
 
@@ -67,23 +69,30 @@ func (c *Component) Run(a shadow.Application, ready chan<- struct{}) error {
 	cfg := a.GetComponent(config.ComponentName).(config.Component)
 
 	addr := net.JoinHostPort(cfg.String(syslog.ConfigHost), cfg.String(syslog.ConfigPort))
-	if err := c.server.ListenUDP(addr); err != nil {
+	if err := server.ListenUDP(addr); err != nil {
 		c.logger.Fatalf("Failed to listen [%d]: %s\n", os.Getpid(), err.Error())
 		return err
 	}
 
-	if err := c.server.Boot(); err != nil {
+	if err := server.Boot(); err != nil {
 		c.logger.Fatalf("Failed to boot [%d]: %s\n", os.Getpid(), err.Error())
 		return err
 	}
 
+	c.mutex.Lock()
+	c.server = server
+	c.mutex.Unlock()
+
 	ready <- struct{}{}
 
-	c.server.Wait()
+	server.Wait()
 	return nil
 }
 
 func (c *Component) Shutdown() error {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
 	if c.server != nil {
 		return c.server.Kill()
 	}

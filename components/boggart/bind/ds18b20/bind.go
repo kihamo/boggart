@@ -4,13 +4,14 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/atomic"
 )
 
 type Bind struct {
-	lastValue int64
-
 	boggart.BindBase
 	boggart.BindMQTT
+
+	temperature *atomic.Float32Null
 
 	livenessInterval time.Duration
 	livenessTimeout  time.Duration

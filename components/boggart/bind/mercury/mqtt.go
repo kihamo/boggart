@@ -6,16 +6,18 @@ import (
 )
 
 const (
-	MQTTPublishTopicTariff          mqtt.Topic = boggart.ComponentName + "/meter/mercury/+/tariff/+"
-	MQTTPublishTopicVoltage         mqtt.Topic = boggart.ComponentName + "/meter/mercury/+/voltage"
-	MQTTPublishTopicAmperage        mqtt.Topic = boggart.ComponentName + "/meter/mercury/+/amperage"
-	MQTTPublishTopicPower           mqtt.Topic = boggart.ComponentName + "/meter/mercury/+/power"
-	MQTTPublishTopicBatteryVoltage  mqtt.Topic = boggart.ComponentName + "/meter/mercury/+/battery_voltage"
-	MQTTPublishTopicLastPowerOff    mqtt.Topic = boggart.ComponentName + "/meter/mercury/+/last-power-off"
-	MQTTPublishTopicLastPowerOn     mqtt.Topic = boggart.ComponentName + "/meter/mercury/+/last-power-on"
-	MQTTPublishTopicMakeDate        mqtt.Topic = boggart.ComponentName + "/meter/mercury/+/make-date"
-	MQTTPublishTopicFirmwareDate    mqtt.Topic = boggart.ComponentName + "/meter/mercury/+/firmware/date"
-	MQTTPublishTopicFirmwareVersion mqtt.Topic = boggart.ComponentName + "/meter/mercury/+/firmware/version"
+	MQTTPrefix mqtt.Topic = boggart.ComponentName + "/meter/mercury/+/"
+
+	MQTTPublishTopicTariff          = MQTTPrefix + "tariff/+"
+	MQTTPublishTopicVoltage         = MQTTPrefix + "voltage"
+	MQTTPublishTopicAmperage        = MQTTPrefix + "amperage"
+	MQTTPublishTopicPower           = MQTTPrefix + "power"
+	MQTTPublishTopicBatteryVoltage  = MQTTPrefix + "battery_voltage"
+	MQTTPublishTopicLastPowerOff    = MQTTPrefix + "last-power-off"
+	MQTTPublishTopicLastPowerOn     = MQTTPrefix + "last-power-on"
+	MQTTPublishTopicMakeDate        = MQTTPrefix + "make-date"
+	MQTTPublishTopicFirmwareDate    = MQTTPrefix + "firmware/date"
+	MQTTPublishTopicFirmwareVersion = MQTTPrefix + "firmware/version"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {

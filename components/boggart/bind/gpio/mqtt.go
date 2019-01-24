@@ -8,8 +8,10 @@ import (
 )
 
 const (
-	MQTTPublishTopicPinState mqtt.Topic = boggart.ComponentName + "/gpio/+"
-	MQTTSubscribeTopicPinSet mqtt.Topic = boggart.ComponentName + "/gpio/+/set"
+	MQTTPrefix mqtt.Topic = boggart.ComponentName + "/gpio/+"
+
+	MQTTPublishTopicPinState = MQTTPrefix
+	MQTTSubscribeTopicPinSet = MQTTPrefix + "/set"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {

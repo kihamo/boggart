@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"sync/atomic"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -40,57 +39,37 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 
 	b.UpdateStatus(boggart.BindStatusOnline)
 	host := mqtt.NameReplace(b.bulb.Host())
-	var result error
 
-	prevPower := atomic.LoadInt64(&b.statePower)
-	if prevPower == 0 || (prevPower == 1) != state.Power {
-		if state.Power {
-			atomic.StoreInt64(&b.statePower, 1)
-		} else {
-			atomic.StoreInt64(&b.statePower, -1)
-		}
-
-		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicStatePower.Format(host), 0, true, state.Power); err != nil {
-			result = multierr.Append(result, err)
+	if ok := b.power.Set(state.Power); ok {
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStatePower.Format(host), 0, true, state.Power); e != nil {
+			err = multierr.Append(err, e)
 		}
 	}
 
-	currentMode := uint64(state.Mode)
-	prevMode := atomic.LoadUint64(&b.stateMode)
-	if prevMode != currentMode {
-		atomic.StoreUint64(&b.stateMode, currentMode)
-
-		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMode.Format(host), 0, true, currentMode); err != nil {
-			result = multierr.Append(result, err)
+	if ok := b.mode.Set(uint32(state.Mode)); ok {
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMode.Format(host), 0, true, state.Mode); e != nil {
+			err = multierr.Append(err, err)
 		}
 	}
 
-	currentSpeed := uint64(state.Speed)
-	prevSpeed := atomic.LoadUint64(&b.stateSpeed)
-	if prevSpeed != currentSpeed {
-		atomic.StoreUint64(&b.stateSpeed, currentSpeed)
-
-		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateSpeed.Format(host), 0, true, currentSpeed); err != nil {
-			result = multierr.Append(result, err)
+	if ok := b.speed.Set(uint32(state.Speed)); ok {
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateSpeed.Format(host), 0, true, state.Speed); e != nil {
+			err = multierr.Append(err, e)
 		}
 	}
 
-	currentColor := state.Color.Uint64()
-	prevColor := atomic.LoadUint64(&b.stateColor)
-	if prevColor != currentColor {
-		atomic.StoreUint64(&b.stateColor, currentColor)
-
+	if ok := b.color.Set(uint32(state.Color.Uint64())); ok {
 		// in HEX
-		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateColor.Format(host), 0, true, state.Color.String()); err != nil {
-			result = multierr.Append(result, err)
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateColor.Format(host), 0, true, state.Color.String()); e != nil {
+			err = multierr.Append(err, e)
 		}
 
 		// in HSV
 		h, s, v := state.Color.HSV()
-		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateColorHSV.Format(host), 0, true, fmt.Sprintf("%d,%.2f,%.2f", h, s, v)); err != nil {
-			result = multierr.Append(result, err)
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateColorHSV.Format(host), 0, true, fmt.Sprintf("%d,%.2f,%.2f", h, s, v)); e != nil {
+			err = multierr.Append(err, e)
 		}
 	}
 
-	return nil, result
+	return nil, err
 }

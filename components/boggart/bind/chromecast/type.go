@@ -5,6 +5,7 @@ import (
 
 	"github.com/barnybug/go-cast/log"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/atomic"
 )
 
 type Type struct{}
@@ -17,6 +18,11 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	device := &Bind{
 		host: config.Host.IP,
 		port: config.Port,
+
+		volume:         atomic.NewUint32Null(),
+		mute:           atomic.NewBoolNull(),
+		status:         atomic.NewString(),
+		mediaContentID: atomic.NewString(),
 
 		livenessInterval: config.LivenessInterval,
 		livenessTimeout:  config.LivenessTimeout,

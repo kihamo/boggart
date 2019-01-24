@@ -4,19 +4,20 @@ import (
 	"context"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/providers/wifiled"
 )
 
 type Bind struct {
-	statePower int64
-	stateMode  uint64
-	stateSpeed uint64
-	stateColor uint64
-
 	boggart.BindBase
 	boggart.BindMQTT
 
 	bulb *wifiled.Bulb
+
+	power *atomic.BoolNull
+	mode  *atomic.Uint32Null
+	speed *atomic.Uint32Null
+	color *atomic.Uint32Null
 }
 
 func (b *Bind) On(ctx context.Context) error {

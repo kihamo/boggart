@@ -10,14 +10,14 @@ type Type struct{}
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	device := &Bind{
 		config:   c.(*Config),
-		lat:      atomic.NewFloat64(),
-		lon:      atomic.NewFloat64(),
+		lat:      atomic.NewFloat32Null(),
+		lon:      atomic.NewFloat32Null(),
 		geoHash:  atomic.NewString(),
 		conn:     atomic.NewString(),
-		acc:      atomic.NewInt64(),
-		alt:      atomic.NewInt64(),
-		batt:     atomic.NewFloat64(),
-		vel:      atomic.NewInt64(),
+		acc:      atomic.NewInt32Null(),
+		alt:      atomic.NewInt32Null(),
+		batt:     atomic.NewFloat32Null(),
+		vel:      atomic.NewInt32Null(),
 		regions:  make(map[string]Point),
 		checkers: make(map[string]*atomic.BoolNull),
 	}

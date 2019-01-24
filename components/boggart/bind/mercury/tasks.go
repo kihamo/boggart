@@ -2,13 +2,12 @@ package mercury
 
 import (
 	"context"
-	"math"
-	"sync/atomic"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
+	"go.uber.org/multierr"
 )
 
 func (b *Bind) Tasks() []workers.Task {
@@ -23,10 +22,9 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
-	currentT1, currentT2, currentT3, currentT4, err := b.provider.PowerCounters()
+	t1, t2, t3, t4, err := b.provider.PowerCounters()
 	if err != nil {
 		b.UpdateStatus(boggart.BindStatusOffline)
-		// TODO: log
 		return nil, err
 	}
 
@@ -36,122 +34,124 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	snMQTT := mqtt.NameReplace(sn)
 	mTariff := metricTariff.With("serial_number", sn)
 
-	if prevT1 := atomic.LoadUint64(&b.tariff1); currentT1 != prevT1 {
-		atomic.StoreUint64(&b.tariff1, currentT1)
-		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicTariff.Format(snMQTT, 1), 0, true, currentT1)
-		mTariff.With("tariff", "1").Set(float64(currentT1))
+	if ok := b.tariff1.Set(uint32(t1)); ok {
+		mTariff.With("tariff", "1").Set(float64(t1))
+
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicTariff.Format(snMQTT, 1), 0, true, t1); e != nil {
+			err = multierr.Append(err, e)
+		}
 	}
 
-	if prevT2 := atomic.LoadUint64(&b.tariff2); currentT2 != prevT2 {
-		atomic.StoreUint64(&b.tariff2, currentT2)
-		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicTariff.Format(snMQTT, 2), 0, true, currentT2)
-		mTariff.With("tariff", "2").Set(float64(currentT2))
+	if ok := b.tariff2.Set(uint32(t2)); ok {
+		mTariff.With("tariff", "2").Set(float64(t2))
+
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicTariff.Format(snMQTT, 2), 0, true, t2); e != nil {
+			err = multierr.Append(err, e)
+		}
 	}
 
-	if prevT3 := atomic.LoadUint64(&b.tariff3); currentT3 != prevT3 {
-		atomic.StoreUint64(&b.tariff3, currentT3)
-		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicTariff.Format(snMQTT, 3), 0, true, currentT3)
-		mTariff.With("tariff", "3").Set(float64(currentT3))
+	if ok := b.tariff3.Set(uint32(t3)); ok {
+		mTariff.With("tariff", "3").Set(float64(t3))
+
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicTariff.Format(snMQTT, 3), 0, true, t3); e != nil {
+			err = multierr.Append(err, e)
+		}
 	}
 
-	if prevT4 := atomic.LoadUint64(&b.tariff4); currentT4 != prevT4 {
-		atomic.StoreUint64(&b.tariff4, currentT4)
-		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicTariff.Format(snMQTT, 4), 0, true, currentT4)
-		mTariff.With("tariff", "4").Set(float64(currentT4))
+	if ok := b.tariff4.Set(uint32(t4)); ok {
+		mTariff.With("tariff", "4").Set(float64(t4))
+
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicTariff.Format(snMQTT, 4), 0, true, t4); e != nil {
+			err = multierr.Append(err, e)
+		}
 	}
 
 	// optimization
-	if currentVoltage, currentAmperage, currentPower, err := b.provider.ParamsCurrent(); err == nil {
-		if prevVoltage := atomic.LoadUint64(&b.voltage); currentVoltage != prevVoltage {
-			atomic.StoreUint64(&b.voltage, currentVoltage)
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicVoltage.Format(snMQTT), 0, true, currentVoltage)
-			metricVoltage.With("serial_number", sn).Set(float64(currentVoltage))
+	if voltage, amperage, power, e := b.provider.ParamsCurrent(); e == nil {
+		if ok := b.voltage.Set(uint32(voltage)); ok {
+			metricVoltage.With("serial_number", sn).Set(float64(voltage))
+
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicVoltage.Format(snMQTT), 0, true, voltage); e != nil {
+				err = multierr.Append(err, e)
+			}
 		}
 
-		if prevAmperage := math.Float64frombits(atomic.LoadUint64(&b.amperage)); currentAmperage != prevAmperage {
-			atomic.StoreUint64(&b.amperage, math.Float64bits(currentAmperage))
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicAmperage.Format(snMQTT), 0, true, currentAmperage)
-			metricAmperage.With("serial_number", sn).Set(currentAmperage)
+		if ok := b.amperage.Set(float32(amperage)); ok {
+			metricAmperage.With("serial_number", sn).Set(amperage)
+
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicAmperage.Format(snMQTT), 0, true, amperage); e != nil {
+				err = multierr.Append(err, e)
+			}
 		}
 
-		if prevPower := atomic.LoadUint64(&b.power); currentPower != prevPower {
-			atomic.StoreUint64(&b.power, currentPower)
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicPower.Format(snMQTT), 0, true, currentPower)
-			metricPower.With("serial_number", sn).Set(float64(currentPower))
-		}
-	} else {
-		// TODO: log
-	}
+		if ok := b.power.Set(uint32(power)); ok {
+			metricPower.With("serial_number", sn).Set(float64(power))
 
-	if current, err := b.provider.BatteryVoltage(); err == nil {
-		if prev := math.Float64frombits(atomic.LoadUint64(&b.batteryVoltage)); current != prev {
-			atomic.StoreUint64(&b.batteryVoltage, math.Float64bits(current))
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicBatteryVoltage.Format(snMQTT), 0, true, current)
-			metricBatteryVoltage.With("serial_number", sn).Set(float64(current))
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicPower.Format(snMQTT), 0, true, power); e != nil {
+				err = multierr.Append(err, e)
+			}
 		}
 	} else {
-		// TODO: log
+		err = multierr.Append(err, e)
 	}
 
-	if val, err := b.provider.LastPowerOffDatetime(); err == nil {
-		current := val.Unix()
-		if prev := atomic.LoadInt64(&b.lastPowerOff); current != prev {
-			atomic.StoreInt64(&b.lastPowerOff, current)
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicLastPowerOff.Format(snMQTT), 0, true, val)
+	if voltage, e := b.provider.BatteryVoltage(); e == nil {
+		if ok := b.batteryVoltage.Set(float32(voltage)); ok {
+			metricBatteryVoltage.With("serial_number", sn).Set(voltage)
+
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicBatteryVoltage.Format(snMQTT), 0, true, voltage); e != nil {
+				err = multierr.Append(err, e)
+			}
 		}
 	} else {
-		// TODO: log
+		err = multierr.Append(err, e)
 	}
 
-	if val, err := b.provider.LastPowerOnDatetime(); err == nil {
-		current := val.Unix()
-		if prev := atomic.LoadInt64(&b.lastPowerOn); current != prev {
-			atomic.StoreInt64(&b.lastPowerOn, current)
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicLastPowerOn.Format(snMQTT), 0, true, val)
+	if date, e := b.provider.LastPowerOffDatetime(); e == nil {
+		if ok := b.lastPowerOffDate.Set(uint32(date.Unix())); ok {
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicLastPowerOff.Format(snMQTT), 0, true, date); e != nil {
+				err = multierr.Append(err, e)
+			}
 		}
 	} else {
-		// TODO: log
+		err = multierr.Append(err, e)
 	}
 
-	if val, err := b.provider.MakeDate(); err == nil {
-		current := val.Unix()
-		if prev := atomic.LoadInt64(&b.makeDate); current != prev {
-			atomic.StoreInt64(&b.makeDate, current)
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicMakeDate.Format(snMQTT), 0, true, val)
+	if date, e := b.provider.LastPowerOnDatetime(); e == nil {
+		if ok := b.lastPowerOnDate.Set(uint32(date.Unix())); ok {
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicLastPowerOn.Format(snMQTT), 0, true, date); e != nil {
+				err = multierr.Append(err, e)
+			}
 		}
 	} else {
-		// TODO: log
+		err = multierr.Append(err, e)
 	}
 
-	if version, date, err := b.provider.Version(); err == nil {
-		current := date.Unix()
-		if prev := atomic.LoadInt64(&b.firmwareDate); current != prev {
-			atomic.StoreInt64(&b.firmwareDate, current)
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicFirmwareDate.Format(snMQTT), 0, true, date)
+	if date, e := b.provider.MakeDate(); e == nil {
+		if ok := b.makeDate.Set(uint32(date.Unix())); ok {
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicMakeDate.Format(snMQTT), 0, true, date); e != nil {
+				err = multierr.Append(err, e)
+			}
 		}
-
-		b.mutex.Lock()
-		if version != b.firmwareVersion {
-			b.firmwareVersion = version
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicFirmwareVersion.Format(snMQTT), 0, true, version)
-		}
-		b.mutex.Unlock()
 	} else {
-		// TODO: log
+		err = multierr.Append(err, e)
 	}
 
-	return nil, nil
+	if version, date, e := b.provider.Version(); e == nil {
+		if ok := b.firmwareDate.Set(uint32(date.Unix())); ok {
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicFirmwareDate.Format(snMQTT), 0, true, date); e != nil {
+				err = multierr.Append(err, e)
+			}
+		}
+
+		if ok := b.firmwareVersion.Set(version); ok {
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicFirmwareVersion.Format(snMQTT), 0, true, version); e != nil {
+				err = multierr.Append(err, e)
+			}
+		}
+	} else {
+		err = multierr.Append(err, e)
+	}
+
+	return nil, err
 }

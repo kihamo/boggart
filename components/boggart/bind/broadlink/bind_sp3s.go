@@ -5,15 +5,16 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/providers/broadlink"
 )
 
 type BindSP3S struct {
-	state int64
-	power int64
-
 	boggart.BindBase
 	boggart.BindMQTT
+
+	state *atomic.BoolNull
+	power *atomic.Float32Null
 
 	provider        *broadlink.SP3S
 	updaterInterval time.Duration

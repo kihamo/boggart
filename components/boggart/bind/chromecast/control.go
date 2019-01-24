@@ -3,7 +3,6 @@ package chromecast
 import (
 	"context"
 	"errors"
-	"sync/atomic"
 
 	"github.com/barnybug/go-cast/controllers"
 	"github.com/kihamo/boggart/components/boggart"
@@ -24,8 +23,8 @@ func (b *Bind) setVolume(ctx context.Context, level *float64, muted *bool) error
 	return err
 }
 
-func (b *Bind) Volume() (int64, error) {
-	return atomic.LoadInt64(&b.volume), nil
+func (b *Bind) Volume() int64 {
+	return int64(b.volume.Load())
 }
 
 func (b *Bind) SetVolume(ctx context.Context, percent int64) error {
@@ -40,8 +39,8 @@ func (b *Bind) SetVolume(ctx context.Context, percent int64) error {
 	return b.setVolume(ctx, &level, nil)
 }
 
-func (b *Bind) Mute() (bool, error) {
-	return atomic.LoadInt64(&b.mute) == 1, nil
+func (b *Bind) Mute() bool {
+	return b.mute.Load()
 }
 
 func (b *Bind) SetMute(ctx context.Context, mute bool) error {

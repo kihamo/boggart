@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/providers/broadlink"
 )
 
@@ -38,9 +39,9 @@ func (t TypeSP3S) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	device := &BindSP3S{
 		provider:        provider,
-		state:           0,
-		power:           -1,
 		updaterInterval: config.UpdaterInterval,
+		state:           atomic.NewBoolNull(),
+		power:           atomic.NewFloat32Null(),
 	}
 	device.SetSerialNumber(config.MAC.String())
 

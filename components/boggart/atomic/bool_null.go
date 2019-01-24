@@ -11,24 +11,26 @@ const (
 )
 
 type BoolNull struct {
-	v uint32
+	Uint32
 }
 
 func NewBoolNull() *BoolNull {
-	return &BoolNull{
-		v: boolNull,
-	}
+	v := &BoolNull{}
+	v.Uint32.Set(boolNull)
+	return v
 }
 
 func NewBoolNullDefault(value bool) *BoolNull {
-	v := NewBoolNull()
+	var current uint32
 
 	if value {
-		v.v = boolTrue
+		current = boolTrue
 	} else {
-		v.v = boolFalse
+		current = boolFalse
 	}
 
+	v := &BoolNull{}
+	v.Uint32.Set(current)
 	return v
 }
 
@@ -47,4 +49,12 @@ func (v *BoolNull) Set(value bool) bool {
 
 func (v *BoolNull) Load() bool {
 	return a.LoadUint32(&v.v) == boolTrue
+}
+
+func (v *BoolNull) IsNil() bool {
+	return v.Uint32.Load() == boolNull
+}
+
+func (v *BoolNull) Nil() bool {
+	return v.Uint32.Set(boolNull)
 }
