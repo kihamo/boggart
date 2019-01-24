@@ -13,17 +13,17 @@ const (
 )
 
 type Bind struct {
-	temperatureIn    *atomic.Float32
-	temperatureOut   *atomic.Float32
-	temperatureDelta *atomic.Float32
-	energy           *atomic.Float32
-	consumption      *atomic.Float32
-	capacity         *atomic.Float32
-	power            *atomic.Float32
-	input1           *atomic.Float32
-	input2           *atomic.Float32
-	input3           *atomic.Float32
-	input4           *atomic.Float32
+	temperatureIn    *atomic.Float32Null
+	temperatureOut   *atomic.Float32Null
+	temperatureDelta *atomic.Float32Null
+	energy           *atomic.Float32Null
+	consumption      *atomic.Float32Null
+	capacity         *atomic.Float32Null
+	power            *atomic.Float32Null
+	input1           *atomic.Float32Null
+	input2           *atomic.Float32Null
+	input3           *atomic.Float32Null
+	input4           *atomic.Float32Null
 
 	boggart.BindBase
 	boggart.BindMQTT
