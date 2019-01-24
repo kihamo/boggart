@@ -1,33 +1,32 @@
 package mercury
 
 import (
-	"sync"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/providers/mercury"
 )
 
 type Bind struct {
-	tariff1         uint64
-	tariff2         uint64
-	tariff3         uint64
-	tariff4         uint64
-	voltage         uint64
-	amperage        uint64
-	power           uint64
-	batteryVoltage  uint64
-	lastPowerOff    int64
-	lastPowerOn     int64
-	makeDate        int64
-	firmwareDate    int64
-	firmwareVersion string
-
 	boggart.BindBase
 	boggart.BindMQTT
 
-	mutex    sync.Mutex
 	provider *mercury.ElectricityMeter200
+
+	tariff1          *atomic.Uint32Null
+	tariff2          *atomic.Uint32Null
+	tariff3          *atomic.Uint32Null
+	tariff4          *atomic.Uint32Null
+	voltage          *atomic.Uint32Null
+	amperage         *atomic.Float32Null
+	power            *atomic.Uint32Null
+	batteryVoltage   *atomic.Float32Null
+	lastPowerOffDate *atomic.Uint32Null
+	lastPowerOnDate  *atomic.Uint32Null
+	makeDate         *atomic.Uint32Null
+	firmwareDate     *atomic.Uint32Null
+	firmwareVersion  *atomic.String
 
 	updaterInterval time.Duration
 }

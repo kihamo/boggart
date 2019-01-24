@@ -13,14 +13,14 @@ type Bind struct {
 
 	config *Config
 
-	lat     *atomic.Float64
-	lon     *atomic.Float64
+	lat     *atomic.Float32Null
+	lon     *atomic.Float32Null
 	geoHash *atomic.String
 	conn    *atomic.String
-	acc     *atomic.Int64
-	alt     *atomic.Int64
-	batt    *atomic.Float64
-	vel     *atomic.Int64
+	acc     *atomic.Int32Null
+	alt     *atomic.Int32Null
+	batt    *atomic.Float32Null
+	vel     *atomic.Int32Null
 
 	mutex    sync.RWMutex
 	regions  map[string]Point
