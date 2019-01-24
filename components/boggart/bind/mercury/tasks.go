@@ -84,7 +84,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			}
 		}
 
-		if ok := b.voltage.Set(uint32(power)); ok {
+		if ok := b.power.Set(uint32(power)); ok {
 			metricPower.With("serial_number", sn).Set(float64(power))
 
 			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicPower.Format(snMQTT), 0, true, power); e != nil {

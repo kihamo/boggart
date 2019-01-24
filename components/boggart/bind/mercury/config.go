@@ -6,7 +6,13 @@ import (
 
 const (
 	DefaultRS485Timeout    = time.Second
-	DefaultUpdaterInterval = time.Minute
+
+	/*
+	При отсутствии тока в последовательной цепи и значении напряжения, равном 1,15Uном, испытательный выход
+	счётчика не создаёт более одного импульса в течение времени, равного 4,4 мин и 3,5 мин для счётчиков класса
+	точности 1 и 2 соответственно.
+	 */
+	DefaultUpdaterInterval = time.Minute * 5
 )
 
 type Config struct {
