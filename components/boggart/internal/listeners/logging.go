@@ -44,7 +44,7 @@ func (l *LoggingListener) Run(_ context.Context, event workers.Event, t time.Tim
 		l.logger.Debug("Syslog message receive", fields...)
 
 	case boggart.BindEventManagerReady:
-		l.logger.Debug("Manager is ready")
+		l.logger.Info("Manager is ready")
 
 	default:
 		l.logger.Warn("Fire unknown event",

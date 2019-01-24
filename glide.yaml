@@ -52,3 +52,5 @@ import:
   version: ~v0.8
 - package: go.uber.org/multierr
   version: ~v1.1
+- package: github.com/kihamo/go-grafana-api
+  version: b9af836f6e9ddb24b1bb5d3d498459d93816ed64

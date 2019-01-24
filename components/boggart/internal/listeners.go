@@ -5,7 +5,6 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/internal/listeners"
-	"github.com/kihamo/shadow/components/annotations"
 	"github.com/kihamo/shadow/components/messengers"
 	"github.com/kihamo/shadow/components/messengers/platforms/telegram"
 )
@@ -35,13 +34,5 @@ func (c *Component) initListeners() {
 					chats))
 			}
 		}
-	}
-
-	if c.application.HasComponent(annotations.ComponentName) {
-		c.listenersManager.AddListener(listeners.NewAnnotationsListener(
-			c.application.GetComponent(annotations.ComponentName).(annotations.Component),
-			c.application.Name(),
-			c.application.StartDate(),
-			c.manager))
 	}
 }

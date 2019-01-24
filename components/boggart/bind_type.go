@@ -65,6 +65,8 @@ func ValidateBindConfig(t BindType, config map[string]interface{}) (cfg interfac
 				StringToIPHookFunc(),
 				StringToMACHookFunc(),
 				StringToURLHookFunc(),
+				mapstructure.StringToSliceHookFunc(","),
+				mapstructure.StringToSliceHookFunc(";"),
 			),
 		})
 

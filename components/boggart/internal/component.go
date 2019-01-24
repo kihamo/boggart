@@ -10,7 +10,6 @@ import (
 	"github.com/kihamo/boggart/components/syslog"
 	w "github.com/kihamo/go-workers/manager"
 	"github.com/kihamo/shadow"
-	"github.com/kihamo/shadow/components/annotations"
 	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/i18n"
@@ -57,9 +56,6 @@ func (c *Component) Version() string {
 
 func (c *Component) Dependencies() []shadow.Dependency {
 	return []shadow.Dependency{
-		{
-			Name: annotations.ComponentName,
-		},
 		{
 			Name:     config.ComponentName,
 			Required: true,

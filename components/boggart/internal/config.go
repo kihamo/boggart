@@ -12,9 +12,6 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithGroup("Listener Telegram").
 			WithView([]string{config.ViewTags}).
 			WithViewOptions(map[string]interface{}{config.ViewOptionTagsDefaultText: "add a chat ID"}),
-		config.NewVariable(boggart.ConfigMQTTAnnotationsEnabled, config.ValueTypeBool).
-			WithUsage("Annotations enabled").
-			WithGroup("MQTT subscribers"),
 		config.NewVariable(boggart.ConfigMQTTMessengersEnabled, config.ValueTypeBool).
 			WithUsage("Messengers enabled").
 			WithGroup("MQTT subscribers"),
