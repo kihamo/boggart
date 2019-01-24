@@ -12,15 +12,17 @@ import (
 )
 
 const (
-	MQTTSubscribeTopicPower       mqtt.Topic = boggart.ComponentName + "/led/+/power"
-	MQTTSubscribeTopicColor       mqtt.Topic = boggart.ComponentName + "/led/+/color"
-	MQTTSubscribeTopicMode        mqtt.Topic = boggart.ComponentName + "/led/+/mode"
-	MQTTSubscribeTopicSpeed       mqtt.Topic = boggart.ComponentName + "/led/+/speed"
-	MQTTPublishTopicStatePower    mqtt.Topic = boggart.ComponentName + "/led/+/state/power"
-	MQTTPublishTopicStateColor    mqtt.Topic = boggart.ComponentName + "/led/+/state/color"
-	MQTTPublishTopicStateColorHSV mqtt.Topic = boggart.ComponentName + "/led/+/state/color/hsv"
-	MQTTPublishTopicStateMode     mqtt.Topic = boggart.ComponentName + "/led/+/state/mode"
-	MQTTPublishTopicStateSpeed    mqtt.Topic = boggart.ComponentName + "/led/+/state/speed"
+	MQTTPrefix mqtt.Topic = boggart.ComponentName + "/led/+/"
+
+	MQTTSubscribeTopicPower       = MQTTPrefix + "power"
+	MQTTSubscribeTopicColor       = MQTTPrefix + "color"
+	MQTTSubscribeTopicMode        = MQTTPrefix + "mode"
+	MQTTSubscribeTopicSpeed       = MQTTPrefix + "speed"
+	MQTTPublishTopicStatePower    = MQTTPrefix + "state/power"
+	MQTTPublishTopicStateColor    = MQTTPrefix + "state/color"
+	MQTTPublishTopicStateColorHSV = MQTTPrefix + "state/color/hsv"
+	MQTTPublishTopicStateMode     = MQTTPrefix + "state/mode"
+	MQTTPublishTopicStateSpeed    = MQTTPrefix + "state/speed"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
