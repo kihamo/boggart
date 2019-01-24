@@ -1,7 +1,6 @@
 package broadlink
 
 import (
-	"bytes"
 	"context"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -28,7 +27,7 @@ func (b *BindSP3S) MQTTSubscribers() []mqtt.Subscriber {
 
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(SP3SMQTTSubscribeTopicSet.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-			if bytes.Equal(message.Payload(), []byte(`1`)) {
+			if message.IsTrue() {
 				return b.On(ctx)
 			}
 

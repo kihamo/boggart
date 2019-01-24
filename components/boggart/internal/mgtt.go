@@ -2,7 +2,6 @@ package internal
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -36,7 +35,7 @@ func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 				Tags  []string `json:"tags,omitempty"`
 			}
 
-			if err := json.Unmarshal(message.Payload(), &request); err != nil {
+			if err := message.UnmarshalJSON(&request); err != nil {
 				return err
 			}
 
@@ -65,7 +64,7 @@ func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 				return errors.New("messenger " + parts[len(parts)-2] + " not found")
 			}
 
-			return messenger.SendMessage(parts[len(parts)-1], string(message.Payload()))
+			return messenger.SendMessage(parts[len(parts)-1], message.String())
 		}))
 	}
 

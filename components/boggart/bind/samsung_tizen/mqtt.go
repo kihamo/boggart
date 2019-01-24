@@ -1,7 +1,6 @@
 package samsung_tizen
 
 import (
-	"bytes"
 	"context"
 	"errors"
 
@@ -32,7 +31,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return nil
 			}
 
-			if bytes.Equal(message.Payload(), []byte(`1`)) {
+			if message.IsTrue() {
 				b.mutex.RLock()
 				mac := b.mac
 				b.mutex.RUnlock()
@@ -51,7 +50,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return nil
 			}
 
-			return b.client.SendCommand(string(message.Payload()))
+			return b.client.SendCommand(message.String())
 		})),
 	}
 }

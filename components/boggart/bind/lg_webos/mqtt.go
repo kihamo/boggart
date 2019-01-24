@@ -1,7 +1,6 @@
 package lg_webos
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"strconv"
@@ -48,7 +47,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return err
 			}
 
-			_, err = client.ApplicationManagerLaunch(string(message.Payload()), nil)
+			_, err = client.ApplicationManagerLaunch(message.String(), nil)
 			return err
 		})),
 		mqtt.NewSubscriber(MQTTSubscribeTopicMute.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
@@ -61,14 +60,14 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return err
 			}
 
-			return client.AudioSetMute(bytes.Equal(message.Payload(), []byte(`1`)))
+			return client.AudioSetMute(message.IsTrue())
 		})),
 		mqtt.NewSubscriber(MQTTSubscribeTopicVolume.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
 				return nil
 			}
 
-			vol, err := strconv.ParseInt(string(message.Payload()), 10, 64)
+			vol, err := strconv.ParseInt(message.String(), 10, 64)
 			if err != nil {
 				return err
 			}
@@ -114,7 +113,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return err
 			}
 
-			_, err = client.SystemNotificationsCreateToast(string(message.Payload()))
+			_, err = client.SystemNotificationsCreateToast(message.String())
 			return err
 		})),
 		mqtt.NewSubscriber(MQTTSubscribeTopicPower.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
@@ -122,7 +121,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return nil
 			}
 
-			if bytes.Equal(message.Payload(), []byte(`1`)) {
+			if message.IsTrue() {
 				return wol.MagicWake(b.SerialNumber(), "255.255.255.255")
 			}
 

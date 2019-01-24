@@ -1,7 +1,6 @@
 package chromecast
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"strconv"
@@ -44,7 +43,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return nil
 			}
 
-			volume, err := strconv.ParseInt(string(message.Payload()), 10, 64)
+			volume, err := strconv.ParseInt(message.String(), 10, 64)
 			if err != nil {
 				return err
 			}
@@ -56,7 +55,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return nil
 			}
 
-			return b.SetMute(ctx, bytes.Equal(message.Payload(), []byte(`1`)))
+			return b.SetMute(ctx, message.IsTrue())
 		})),
 		mqtt.NewSubscriber(MQTTSubscribeTopicPause.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
@@ -77,7 +76,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return nil
 			}
 
-			if u := string(message.Payload()); u != "" {
+			if u := message.String(); u != "" {
 				return b.PlayFromURL(ctx, u)
 			}
 
@@ -88,7 +87,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return nil
 			}
 
-			second, err := strconv.ParseUint(string(message.Payload()), 10, 64)
+			second, err := strconv.ParseUint(message.String(), 10, 64)
 			if err != nil {
 				return err
 			}
@@ -107,7 +106,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return nil
 			}
 
-			action := string(message.Payload())
+			action := message.String()
 
 			switch strings.ToLower(action) {
 			case "stop":

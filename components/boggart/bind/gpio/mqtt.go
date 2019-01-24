@@ -1,7 +1,6 @@
 package gpio
 
 import (
-	"bytes"
 	"context"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -29,7 +28,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			MQTTSubscribeTopicPinSet.Format(b.pin.Number()),
 			0,
 			func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-				if bytes.Equal(message.Payload(), []byte(`1`)) {
+				if message.IsTrue() {
 					return b.High(ctx)
 				}
 

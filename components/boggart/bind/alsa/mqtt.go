@@ -1,7 +1,6 @@
 package alsa
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"strconv"
@@ -41,7 +40,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(MQTTSubscribeTopicVolume.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			volume, err := strconv.ParseInt(string(message.Payload()), 10, 64)
+			volume, err := strconv.ParseInt(message.String(), 10, 64)
 			if err != nil {
 				return err
 			}
@@ -49,7 +48,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			return b.SetVolume(volume)
 		})),
 		mqtt.NewSubscriber(MQTTSubscribeTopicMute.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			return b.SetMute(bytes.Equal(message.Payload(), []byte(`1`)))
+			return b.SetMute(message.IsTrue())
 		})),
 		mqtt.NewSubscriber(MQTTSubscribeTopicPause.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			return b.Pause()
@@ -58,21 +57,21 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			return b.Stop()
 		})),
 		mqtt.NewSubscriber(MQTTSubscribeTopicPlay.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if u := string(message.Payload()); u != "" {
+			if u := message.String(); u != "" {
 				return b.PlayFromURL(u)
 			}
 
 			return b.Play()
 		})),
 		mqtt.NewSubscriber(MQTTSubscribeTopicResume.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if u := string(message.Payload()); u != "" {
+			if u := message.String(); u != "" {
 				return b.PlayFromURL(u)
 			}
 
 			return b.Play()
 		})),
 		mqtt.NewSubscriber(MQTTSubscribeTopicAction.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			action := string(message.Payload())
+			action := message.String()
 
 			switch strings.ToLower(action) {
 			case "stop":

@@ -1,7 +1,6 @@
 package led_wifi
 
 import (
-	"bytes"
 	"context"
 	"strconv"
 	"strings"
@@ -40,14 +39,14 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(MQTTSubscribeTopicPower.Format(host), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if bytes.Equal(message.Payload(), []byte(`1`)) {
+			if message.IsTrue() {
 				return b.On(ctx)
 			}
 
 			return b.Off(ctx)
 		})),
 		mqtt.NewSubscriber(MQTTSubscribeTopicColor.Format(host), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			color, err := wifiled.ColorFromString(string(message.Payload()))
+			color, err := wifiled.ColorFromString(message.String())
 			if err != nil {
 				return err
 			}
@@ -55,7 +54,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			return b.bulb.SetColorPersist(ctx, *color)
 		})),
 		mqtt.NewSubscriber(MQTTSubscribeTopicMode.Format(host), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			mode, err := wifiled.ModeFromString(strings.TrimSpace(string(message.Payload())))
+			mode, err := wifiled.ModeFromString(strings.TrimSpace(message.String()))
 			if err != nil {
 				return err
 			}
@@ -68,7 +67,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			return b.bulb.SetMode(ctx, *mode, state.Speed)
 		})),
 		mqtt.NewSubscriber(MQTTSubscribeTopicSpeed.Format(host), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			speed, err := strconv.ParseInt(strings.TrimSpace(string(message.Payload())), 10, 64)
+			speed, err := strconv.ParseInt(strings.TrimSpace(message.String()), 10, 64)
 			if err != nil {
 				return err
 			}

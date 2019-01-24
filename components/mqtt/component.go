@@ -24,6 +24,13 @@ type Component interface {
 	Subscriptions() []*Subscription
 }
 
-type Message m.Message
+type Message interface {
+	m.Message
+
+	UnmarshalJSON(interface{}) error
+	IsTrue() bool
+	IsFalse() bool
+	String() string
+}
 
 type MessageHandler func(ctx context.Context, client Component, message Message) error

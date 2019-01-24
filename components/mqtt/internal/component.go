@@ -236,7 +236,7 @@ func (c *Component) clientSubscribe(topic string, qos byte, subscription *mqtt.S
 			"retained", r,
 		).Inc()
 
-		if err := subscription.Callback(ctx, c, message); err != nil {
+		if err := subscription.Callback(ctx, c, newMessage(message)); err != nil {
 			tracing.SpanError(span, err)
 			c.logger.Error(
 				"Call MQTT subscriber failed",
@@ -499,10 +499,10 @@ func (c *Component) convertPayload(payload interface{}) interface{} {
 		return strconv.FormatUint(uint64(value), 10)
 	case bool:
 		if value {
-			return []byte(`1`)
+			return PayloadTrue
 		}
 
-		return []byte(`0`)
+		return PayloadFalse
 	case time.Time:
 		return value.Format(time.RFC3339)
 	case *time.Time:

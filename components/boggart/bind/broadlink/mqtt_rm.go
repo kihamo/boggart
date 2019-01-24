@@ -1,9 +1,7 @@
 package broadlink
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -73,7 +71,7 @@ func (b *BindRM) MQTTSubscribers() []mqtt.Subscriber {
 		subscribers = append(subscribers,
 			mqtt.NewSubscriber(RMMQTTSubscribeTopicCapture.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
 				func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-					if bytes.Equal(message.Payload(), []byte(`1`)) { // start
+					if message.IsTrue() { // start
 						if err := capture.StartCaptureRemoteControlCode(); err != nil {
 							return err
 						}
@@ -160,13 +158,13 @@ func (b *BindRM) MQTTSubscribers() []mqtt.Subscriber {
 		subscribers = append(subscribers,
 			mqtt.NewSubscriber(RMMQTTSubscribeTopicIR.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
 				func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-					return ir.SendIRRemoteControlCodeAsString(string(message.Payload()), 0)
+					return ir.SendIRRemoteControlCodeAsString(message.String(), 0)
 				})),
 			mqtt.NewSubscriber(RMMQTTSubscribeTopicIRCount.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
 				func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 					var request codeRequest
 
-					if err := json.Unmarshal(message.Payload(), &request); err != nil {
+					if err := message.UnmarshalJSON(&request); err != nil {
 						return err
 					}
 
@@ -180,13 +178,13 @@ func (b *BindRM) MQTTSubscribers() []mqtt.Subscriber {
 		subscribers = append(subscribers,
 			mqtt.NewSubscriber(RMMQTTSubscribeTopicRF315mhz.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
 				func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-					return rf315mhz.SendRF315MhzRemoteControlCodeAsString(string(message.Payload()), 0)
+					return rf315mhz.SendRF315MhzRemoteControlCodeAsString(message.String(), 0)
 				})),
 			mqtt.NewSubscriber(RMMQTTSubscribeTopicRF315mhzCount.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
 				func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 					var request codeRequest
 
-					if err := json.Unmarshal(message.Payload(), &request); err != nil {
+					if err := message.UnmarshalJSON(&request); err != nil {
 						return err
 					}
 
@@ -200,13 +198,13 @@ func (b *BindRM) MQTTSubscribers() []mqtt.Subscriber {
 		subscribers = append(subscribers,
 			mqtt.NewSubscriber(RMMQTTSubscribeTopicRF433mhz.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
 				func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-					return rf433mhz.SendRF433MhzRemoteControlCodeAsString(string(message.Payload()), 0)
+					return rf433mhz.SendRF433MhzRemoteControlCodeAsString(message.String(), 0)
 				})),
 			mqtt.NewSubscriber(RMMQTTSubscribeTopicRF433mhzCount.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
 				func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 					var request codeRequest
 
-					if err := json.Unmarshal(message.Payload(), &request); err != nil {
+					if err := message.UnmarshalJSON(&request); err != nil {
 						return err
 					}
 

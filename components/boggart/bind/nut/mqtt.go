@@ -46,7 +46,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return nil
 			}
 
-			result, err := b.SendCommand(string(message.Payload()))
+			result, err := b.SendCommand(message.String())
 			if !result {
 				return errors.New("nut returned not OK result")
 			}

@@ -2,7 +2,6 @@ package hikvision
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -157,7 +156,7 @@ func (b *Bind) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, 
 		Zoom      uint64 `json:"zoom,omitempty"`
 	}
 
-	if err := json.Unmarshal(message.Payload(), &request); err != nil {
+	if err := message.UnmarshalJSON(&request); err != nil {
 		return err
 	}
 
@@ -184,7 +183,7 @@ func (b *Bind) callbackMQTTContinuous(ctx context.Context, client mqtt.Component
 		Zoom int64 `json:"zoom,omitempty"`
 	}
 
-	if err := json.Unmarshal(message.Payload(), &request); err != nil {
+	if err := message.UnmarshalJSON(&request); err != nil {
 		return err
 	}
 
@@ -211,7 +210,7 @@ func (b *Bind) callbackMQTTRelative(ctx context.Context, client mqtt.Component, 
 		Zoom int64 `xml:"zoom,omitempty"`
 	}
 
-	if err := json.Unmarshal(message.Payload(), &request); err != nil {
+	if err := message.UnmarshalJSON(&request); err != nil {
 		return err
 	}
 
@@ -232,7 +231,7 @@ func (b *Bind) callbackMQTTPreset(ctx context.Context, client mqtt.Component, me
 		return err
 	}
 
-	presetId, err := strconv.ParseUint(string(message.Payload()), 10, 64)
+	presetId, err := strconv.ParseUint(message.String(), 10, 64)
 	if err != nil {
 		return err
 	}
@@ -261,7 +260,7 @@ func (b *Bind) callbackMQTTMomentary(ctx context.Context, client mqtt.Component,
 		Duration time.Duration `json:"duration,omitempty"`
 	}
 
-	if err := json.Unmarshal(message.Payload(), &request); err != nil {
+	if err := message.UnmarshalJSON(&request); err != nil {
 		return err
 	}
 
@@ -282,7 +281,7 @@ func (b *Bind) callbackMQTTMove(ctx context.Context, client mqtt.Component, mess
 
 	var pan, tilt, zoom int64
 
-	switch string(message.Payload()) {
+	switch message.String() {
 	case "right":
 		pan = 1
 	case "left":
@@ -309,7 +308,7 @@ func (b *Bind) callbackMQTTMove(ctx context.Context, client mqtt.Component, mess
 		zoom = -1
 	case "stop":
 	default:
-		return errors.New("unknown operation " + string(message.Payload()))
+		return errors.New("unknown operation " + message.String())
 	}
 
 	if err := b.isapi.PTZContinuous(ctx, channelId, pan, tilt, zoom); err != nil {
