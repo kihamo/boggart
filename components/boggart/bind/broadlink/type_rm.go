@@ -36,13 +36,13 @@ func (t TypeRM) CreateBind(c interface{}) (boggart.Bind, error) {
 		return nil, errors.New("unknown model " + config.Model)
 	}
 
-	device := &BindRM{
+	bind := &BindRM{
 		provider:        provider,
 		mac:             config.MAC.HardwareAddr,
 		ip:              ip,
 		captureDuration: config.CaptureDuration,
 	}
-	device.SetSerialNumber(config.MAC.String())
+	bind.SetSerialNumber(config.MAC.String())
 
-	return device, nil
+	return bind, nil
 }

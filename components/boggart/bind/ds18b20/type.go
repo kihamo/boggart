@@ -10,14 +10,14 @@ type Type struct{}
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
-	device := &Bind{
+	bind := &Bind{
 		temperature:      atomic.NewFloat32Null(),
 		livenessInterval: config.LivenessInterval,
 		livenessTimeout:  config.LivenessTimeout,
 		updaterInterval:  config.UpdaterInterval,
 	}
 
-	device.SetSerialNumber(config.Address)
+	bind.SetSerialNumber(config.Address)
 
-	return device, nil
+	return bind, nil
 }

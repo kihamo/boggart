@@ -29,18 +29,18 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		mode = ModeDefault
 	}
 
-	device := &Bind{
+	bind := &Bind{
 		pin:  g,
 		mode: mode,
 	}
 
-	device.SetSerialNumber(g.Name())
+	bind.SetSerialNumber(g.Name())
 
 	if _, ok := g.(gpio.PinIn); ok {
 		go func() {
-			device.waitForEdge()
+			bind.waitForEdge()
 		}()
 	}
 
-	return device, nil
+	return bind, nil
 }

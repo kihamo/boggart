@@ -40,7 +40,7 @@ func NewBME280Sensor(connector i2c.Connector, interval time.Duration, bus int, a
 		i2c.WithBus(bus),
 		i2c.WithAddress(address))
 
-	device := &BME280Sensor{
+	bind := &BME280Sensor{
 		driver:   driver,
 		interval: interval,
 
@@ -50,9 +50,9 @@ func NewBME280Sensor(connector i2c.Connector, interval time.Duration, bus int, a
 		pressure:    math.MaxUint64,
 	}
 
-	device.SetSerialNumber(fmt.Sprintf("%d_%d", bus, address))
+	bind.SetSerialNumber(fmt.Sprintf("%d_%d", bus, address))
 
-	return device
+	return bind
 }
 
 func (d *BME280Sensor) Tasks() []workers.Task {

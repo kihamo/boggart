@@ -17,7 +17,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	username := u.User.Username()
 	password, _ := u.User.Password()
 
-	device := &Bind{
+	bind := &Bind{
 		provider:         mikrotik.NewClient(u.Host, username, password, time.Second*10),
 		host:             u.Host,
 		syslogClient:     config.SyslogClient,
@@ -26,5 +26,5 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		updaterInterval:  config.UpdaterInterval,
 	}
 
-	return device, nil
+	return bind, nil
 }

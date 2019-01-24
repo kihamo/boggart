@@ -37,13 +37,13 @@ func (t TypeSP3S) CreateBind(c interface{}) (boggart.Bind, error) {
 		return nil, errors.New("unknown model " + config.Model)
 	}
 
-	device := &BindSP3S{
+	bind := &BindSP3S{
 		provider:        provider,
 		updaterInterval: config.UpdaterInterval,
 		state:           atomic.NewBoolNull(),
 		power:           atomic.NewFloat32Null(),
 	}
-	device.SetSerialNumber(config.MAC.String())
+	bind.SetSerialNumber(config.MAC.String())
 
-	return device, nil
+	return bind, nil
 }

@@ -9,26 +9,26 @@ type RoborockRootType struct{}
 func (t RoborockRootType) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*RoborockRootConfig)
 
-	device := &RoborockRootBind{
+	bind := &RoborockRootBind{
 		cacheRuntimeConfig: make(map[string]string, 11),
 		watchFiles:         make(map[string]func(string) error, 0),
 	}
 
 	if config.DeviceIDFile != "" {
-		if err := device.InitDeviceID(config.DeviceIDFile); err != nil {
+		if err := bind.InitDeviceID(config.DeviceIDFile); err != nil {
 			return nil, err
 		}
 	}
 
 	if config.RuntimeConfigFile != "" {
-		if err := device.AddWatchRuntimeConfig(config.RuntimeConfigFile); err != nil {
+		if err := bind.AddWatchRuntimeConfig(config.RuntimeConfigFile); err != nil {
 			return nil, err
 		}
 	}
 
-	if err := device.StartWatch(); err != nil {
+	if err := bind.StartWatch(); err != nil {
 		return nil, err
 	}
 
-	return device, nil
+	return bind, nil
 }

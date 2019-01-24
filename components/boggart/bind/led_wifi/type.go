@@ -11,7 +11,7 @@ type Type struct{}
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
-	device := &Bind{
+	bind := &Bind{
 		bulb:  wifiled.NewBulb(config.Address),
 		power: atomic.NewBoolNull(),
 		mode:  atomic.NewUint32Null(),
@@ -19,5 +19,5 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		color: atomic.NewUint32Null(),
 	}
 
-	return device, nil
+	return bind, nil
 }

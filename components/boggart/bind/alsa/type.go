@@ -21,14 +21,14 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		}
 	}
 
-	device := &Bind{
+	bind := &Bind{
 		done:         make(chan struct{}, 1),
 		playerStatus: atomic.NewInt64Default(StatusStopped.Int64()),
 		volume:       atomic.NewInt64Default(config.Volume),
 		mute:         atomic.NewBoolDefault(config.Mute),
 	}
 
-	device.SetSerialNumber(sn)
+	bind.SetSerialNumber(sn)
 
-	return device, nil
+	return bind, nil
 }

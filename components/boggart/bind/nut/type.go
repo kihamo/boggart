@@ -9,7 +9,7 @@ type Type struct{}
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
-	device := &Bind{
+	bind := &Bind{
 		host:            config.Host,
 		ups:             config.UPS,
 		username:        config.Username,
@@ -18,5 +18,5 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		variables:       make(map[string]interface{}, 0),
 	}
 
-	return device, nil
+	return bind, nil
 }

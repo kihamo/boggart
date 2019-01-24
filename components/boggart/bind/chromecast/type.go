@@ -15,7 +15,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	log.Debug = config.Debug
 
-	device := &Bind{
+	bind := &Bind{
 		host: config.Host.IP,
 		port: config.Port,
 
@@ -27,11 +27,11 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		livenessInterval: config.LivenessInterval,
 		livenessTimeout:  config.LivenessTimeout,
 	}
-	device.SetSerialNumber(config.Host.String() + ":" + strconv.Itoa(config.Port))
+	bind.SetSerialNumber(config.Host.String() + ":" + strconv.Itoa(config.Port))
 
-	if err := device.initCast(); err != nil {
+	if err := bind.initCast(); err != nil {
 		return nil, err
 	}
 
-	return device, nil
+	return bind, nil
 }

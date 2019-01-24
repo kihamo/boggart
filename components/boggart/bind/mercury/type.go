@@ -16,7 +16,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		mercury.ConvertSerialNumber(config.Address),
 		rs485.GetConnection(config.RS485Address, config.RS485Timeout))
 
-	device := &Bind{
+	bind := &Bind{
 		provider: provider,
 
 		tariff1:          atomic.NewUint32Null(),
@@ -37,9 +37,9 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	}
 
 	// TODO: read real serial number
-	device.SetSerialNumber(config.Address)
+	bind.SetSerialNumber(config.Address)
 
 	// TODO: MQTT publish version
 
-	return device, nil
+	return bind, nil
 }

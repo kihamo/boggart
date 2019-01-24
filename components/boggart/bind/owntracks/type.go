@@ -8,7 +8,7 @@ import (
 type Type struct{}
 
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
-	device := &Bind{
+	bind := &Bind{
 		config:   c.(*Config),
 		lat:      atomic.NewFloat32Null(),
 		lon:      atomic.NewFloat32Null(),
@@ -22,14 +22,14 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		checkers: make(map[string]*atomic.BoolNull),
 	}
 
-	for name, region := range device.config.Regions {
+	for name, region := range bind.config.Regions {
 		if region.Radius <= 0 {
 			region.Radius = DefaultPointRadius
 		}
 
-		device.config.Regions[name] = region
-		device.registerRegion(name, region)
+		bind.config.Regions[name] = region
+		bind.registerRegion(name, region)
 	}
 
-	return device, nil
+	return bind, nil
 }

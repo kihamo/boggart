@@ -9,12 +9,12 @@ type Type struct{}
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
-	device := &Bind{
+	bind := &Bind{
 		host:             config.Host,
 		key:              config.Key,
 		livenessInterval: config.LivenessInterval,
 		livenessTimeout:  config.LivenessTimeout,
 	}
 
-	return device, nil
+	return bind, nil
 }

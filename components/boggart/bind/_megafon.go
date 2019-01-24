@@ -27,15 +27,15 @@ type MegafonPhone struct {
 }
 
 func NewMegafonPhone(provider *mobile.Megafon, interval time.Duration) *MegafonPhone {
-	device := &MegafonPhone{
+	bind := &MegafonPhone{
 		provider: provider,
 		interval: interval,
 
 		lastValue: -1,
 	}
-	device.SetSerialNumber(device.Number())
+	bind.SetSerialNumber(bind.Number())
 
-	return device
+	return bind
 }
 
 func (d *MegafonPhone) Number() string {

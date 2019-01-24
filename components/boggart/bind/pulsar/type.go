@@ -28,7 +28,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		return nil, err
 	}
 
-	device := &Bind{
+	bind := &Bind{
 		config:   config,
 		provider: pulsar.NewHeatMeter(deviceAddress, conn),
 
@@ -46,7 +46,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 		updaterInterval: config.UpdaterInterval,
 	}
-	device.SetSerialNumber(hex.EncodeToString(deviceAddress))
+	bind.SetSerialNumber(hex.EncodeToString(deviceAddress))
 
-	return device, nil
+	return bind, nil
 }
