@@ -2,6 +2,7 @@ package softvideo
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/providers/softvideo"
 )
 
@@ -12,7 +13,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	device := &Bind{
 		provider:        softvideo.NewClient(config.Login, config.Password, config.Debug),
-		lastValue:       -1,
+		balance:         atomic.NewFloat32Null(),
 		updaterInterval: config.UpdaterInterval,
 	}
 	device.SetSerialNumber(config.Login)

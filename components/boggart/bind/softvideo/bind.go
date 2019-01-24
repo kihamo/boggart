@@ -5,11 +5,12 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/providers/softvideo"
 )
 
 type Bind struct {
-	lastValue int64
+	balance *atomic.Float32Null
 
 	boggart.BindBase
 	boggart.BindMQTT
