@@ -33,7 +33,7 @@ func (b *Bind) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.
 	b.UpdateStatus(boggart.BindStatusOnline)
 }
 
-func (b *Bind) validAccuracy(acc *int64) bool {
+func (b *Bind) validAccuracy(acc *int64, maxAccuracy int64) bool {
 	if acc == nil {
 		return false
 	}
@@ -43,7 +43,7 @@ func (b *Bind) validAccuracy(acc *int64) bool {
 		return false
 	}
 
-	if b.config.MaxAccuracy > 0 && value > b.config.MaxAccuracy {
+	if maxAccuracy > 0 && value > maxAccuracy {
 		return false
 	}
 

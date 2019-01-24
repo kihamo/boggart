@@ -111,8 +111,13 @@ func (b *Bind) notifyRegionEvent(ctx context.Context, payload *LocationPayload, 
 		}
 	}
 
-	if b.config.CheckDistanceEnabled && b.validAccuracy(payload.Acc) {
+	if b.config.CheckDistanceEnabled && b.validAccuracy(payload.Acc, b.config.MaxAccuracy) {
 		for name, point := range b.getAllRegions() {
+			// если точно больше радиуса, то вероятность ошибки большая, пропускаем
+			if !b.validAccuracy(payload.Acc, int64(point.Radius)) {
+				continue
+			}
+
 			if _, ok := alreadyNotify[name]; ok {
 				continue
 			}
@@ -187,16 +192,23 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 		}
 	}
 
-	// detect event
-	if e := b.notifyRegionEvent(ctx, payload, message.Qos(), message.Retained()); e != nil {
-		err = multierr.Append(err, e)
-	}
-
 	hash := geohash.Encode(*payload.Lat, *payload.Lon)
 	if ok := b.geoHash.Set(hash); ok {
 		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateGeoHash.Format(b.config.User, b.config.Device), q, r, hash); e != nil {
 			err = multierr.Append(err, e)
 		}
+	}
+
+	if changeLocation {
+		location := strconv.FormatFloat(*payload.Lat, 'f', -1, 64) + "," + strconv.FormatFloat(*payload.Lon, 'f', -1, 64)
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateLocation.Format(b.config.User, b.config.Device), q, r, location); e != nil {
+			err = multierr.Append(err, e)
+		}
+	}
+
+	// detect event
+	if e := b.notifyRegionEvent(ctx, payload, message.Qos(), message.Retained()); e != nil {
+		err = multierr.Append(err, e)
 	}
 
 	if payload.Acc != nil {
@@ -212,13 +224,6 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateAltitude.Format(b.config.User, b.config.Device), q, r, *payload.Alt); e != nil {
 				err = multierr.Append(err, e)
 			}
-		}
-	}
-
-	if changeLocation {
-		location := strconv.FormatFloat(*payload.Lat, 'f', -1, 64) + "," + strconv.FormatFloat(*payload.Lon, 'f', -1, 64)
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateLocation.Format(b.config.User, b.config.Device), q, r, location); e != nil {
-			err = multierr.Append(err, e)
 		}
 	}
 
