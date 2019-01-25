@@ -47,7 +47,27 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return errors.New("bad topic name")
 			}
 
-			request, err := http.NewRequest(http.MethodGet, message.String(), nil)
+			var (
+				mime storage.MIMEType
+				name string
+				url  string
+
+				payload FilePayload
+			)
+
+			if err := message.UnmarshalJSON(&payload); err == nil {
+				mime = storage.MIMEType(payload.MIME)
+				name = payload.Name
+				url = payload.URL
+			} else {
+				url = message.String()
+			}
+
+			if url == "" {
+				return errors.New("url fields is empty")
+			}
+
+			request, err := http.NewRequest(http.MethodGet, url, nil)
 			if err != nil {
 				return err
 			}
@@ -58,32 +78,37 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			}
 			defer response.Body.Close()
 
-			mimeType, err := storage.MimeTypeFromHTTPHeader(response.Header)
-			if err != nil {
-				copyBody := &bytes.Buffer{}
-				if _, err := io.CopyN(copyBody, response.Body, 128); err != nil {
-					return err
-				}
-
-				mimeType, err = storage.MimeTypeFromData(bytes.NewBuffer(copyBody.Bytes()))
+			if mime == storage.MIMETypeUnknown {
+				mime, err = storage.MimeTypeFromHTTPHeader(response.Header)
 				if err != nil {
-					return err
-				}
+					copyBody := &bytes.Buffer{}
+					if _, err := io.CopyN(copyBody, response.Body, 128); err != nil {
+						return err
+					}
 
-				// довычитываем все остальное, так как body уже порвался на две части до 128 и послке
-				if _, err := io.Copy(copyBody, response.Body); err != nil {
-					return err
-				}
+					mime, err = storage.MimeTypeFromData(bytes.NewBuffer(copyBody.Bytes()))
+					if err != nil {
+						return err
+					}
 
-				// присваиваем обратно, чтобы с этим можно было проджолжать работать
-				response.Body = ioutil.NopCloser(copyBody)
-				defer copyBody.Reset()
+					// довычитываем все остальное, так как body уже порвался на две части до 128 и послке
+					if _, err := io.Copy(copyBody, response.Body); err != nil {
+						return err
+					}
+
+					// присваиваем обратно, чтобы с этим можно было проджолжать работать
+					response.Body = ioutil.NopCloser(copyBody)
+					defer copyBody.Reset()
+				}
 			}
 
 			to := routes[len(routes)-1]
-			name := "File at " + time.Now().Format(time.RFC1123Z)
 
-			switch mimeType {
+			if name == "" {
+				name = "File at " + time.Now().Format(time.RFC1123Z)
+			}
+
+			switch mime {
 			case storage.MIMETypeJPEG:
 				err = b.SendPhoto(to, name, response.Body)
 
