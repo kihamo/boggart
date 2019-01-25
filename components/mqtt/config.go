@@ -8,4 +8,10 @@ const (
 	ConfigPassword           = ComponentName + ".password"
 	ConfigConnectionAttempts = ComponentName + ".connection.attempts"
 	ConfigConnectionTimeout  = ComponentName + ".connection.timeout"
+	ConfigClearSession       = ComponentName + ".clear-session"
+	ConfigLWTEnabled         = ComponentName + ".lwt.enabled"
+	ConfigLWTTopic           = ComponentName + ".lwt.topic"
+	ConfigLWTPayload         = ComponentName + ".lwt.payload"
+	ConfigLWTQOS             = ComponentName + ".lwt.qos"
+	ConfigLWTRetained        = ComponentName + ".lwt.retained"
 )

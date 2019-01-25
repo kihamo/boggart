@@ -102,7 +102,14 @@ func (c *Component) initClient() error {
 	opts.Username = c.config.String(mqtt.ConfigUsername)
 	opts.Password = c.config.String(mqtt.ConfigPassword)
 	opts.ConnectTimeout = c.config.Duration(mqtt.ConfigConnectionTimeout)
-	opts.CleanSession = true
+	opts.CleanSession = c.config.Bool(mqtt.ConfigClearSession)
+
+	opts.WillEnabled = c.config.Bool(mqtt.ConfigLWTEnabled)
+	opts.WillTopic = c.config.String(mqtt.ConfigLWTTopic)
+	opts.WillPayload = []byte(c.config.String(mqtt.ConfigLWTPayload))
+	opts.WillQos = byte(c.config.Int(mqtt.ConfigLWTQOS))
+	opts.WillRetained = c.config.Bool(mqtt.ConfigLWTRetained)
+
 	opts.OnConnect = func(client m.Client) {
 		if atomic.LoadUint64(&c.lostConnections) == 0 {
 			return
@@ -177,16 +184,27 @@ func (c *Component) initSubscribers() error {
 	return nil
 }
 
-func (c *Component) Shutdown() error {
+func (c *Component) Shutdown() (err error) {
 	c.mutex.RLock()
 	client := c.client
 	c.mutex.RUnlock()
 
 	if client != nil {
+		if c.config.Bool(mqtt.ConfigLWTEnabled) {
+			token := client.Publish(
+				c.config.String(mqtt.ConfigLWTTopic),
+				byte(c.config.Int(mqtt.ConfigLWTQOS)),
+				c.config.Bool(mqtt.ConfigLWTRetained),
+				[]byte(c.config.String(mqtt.ConfigLWTPayload)))
+			token.Wait()
+
+			err = token.Error()
+		}
+
 		client.Disconnect(250)
 	}
 
-	return nil
+	return err
 }
 
 func (c *Component) Client() m.Client {

@@ -1,7 +1,10 @@
 package internal
 
 import (
+	"strings"
+
 	m "github.com/eclipse/paho.mqtt.golang"
+	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/shadow/components/config"
 )
@@ -30,6 +33,45 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithUsage("Timeout").
 			WithGroup("Connect").
 			WithDefault(m.NewClientOptions().ConnectTimeout),
+		config.NewVariable(mqtt.ConfigClearSession, config.ValueTypeBool).
+			WithUsage("Clear session").
+			WithGroup("Connect").
+			WithDefault(true),
+		config.NewVariable(mqtt.ConfigLWTEnabled, config.ValueTypeBool).
+			WithUsage("Enabled").
+			WithGroup("Last Will and Testament").
+			WithDefault(false),
+		config.NewVariable(mqtt.ConfigLWTTopic, config.ValueTypeString).
+			WithUsage("Topic").
+			WithGroup("Last Will and Testament").
+			WithDefaultFunc(func() interface{} {
+				name := strings.TrimSpace(c.application.Name())
+				name = strings.ToLower(name)
+				name = strings.Join(strings.Fields(name), " ")
+				name = strings.Replace(name, " ", "-", -1)
+
+				return boggart.ComponentName + "/" + name + "/status"
+			}),
+		config.NewVariable(mqtt.ConfigLWTPayload, config.ValueTypeString).
+			WithUsage("Payload").
+			WithGroup("Last Will and Testament").
+			WithDefault("0"),
+		config.NewVariable(mqtt.ConfigLWTQOS, config.ValueTypeInt64).
+			WithUsage("OQS").
+			WithGroup("Last Will and Testament").
+			WithDefault(0).
+			WithView([]string{config.ViewEnum}).
+			WithViewOptions(map[string]interface{}{
+				config.ViewOptionEnumOptions: [][]interface{}{
+					{"0", "At most once"},
+					{"1", "At least once"},
+					{"2", "Exactly once"},
+				},
+			}),
+		config.NewVariable(mqtt.ConfigLWTRetained, config.ValueTypeBool).
+			WithUsage("Retained").
+			WithGroup("Last Will and Testament").
+			WithDefault(false),
 	}
 }
 
