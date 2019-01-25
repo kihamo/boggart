@@ -19,6 +19,7 @@ const (
 	MIMETypeMPEG    = MIMEType("audio/mpeg")
 	MIMETypeWAVE    = MIMEType("audio/vnd.wave")
 	MIMETypeOGG     = MIMEType("audio/ogg")
+	MIMETypeJPEG    = MIMEType("image/jpeg")
 )
 
 var (

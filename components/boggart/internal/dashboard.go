@@ -42,7 +42,7 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 				WithMethods([]string{http.MethodPost}).
 				WithAuth(true),
 			dashboard.NewRoute("/"+c.Name()+"/camera/:id/:channel", handlers.NewCameraHandler(c.manager)).
-				WithMethods([]string{http.MethodGet, http.MethodPost}),
+				WithMethods([]string{http.MethodGet, http.MethodPost, http.MethodHead}),
 			dashboard.NewRoute("/"+c.Name()+"/config/:action", handlers.NewConfigHandler(c.manager, c)).
 				WithMethods([]string{http.MethodGet, http.MethodPost}).
 				WithAuth(true),

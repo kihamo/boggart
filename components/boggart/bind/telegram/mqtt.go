@@ -1,8 +1,11 @@
 package telegram
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -44,11 +47,6 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return errors.New("bad topic name")
 			}
 
-			mimeType, err := storage.MimeTypeFromURL(message.String())
-			if err != nil {
-				return err
-			}
-
 			request, err := http.NewRequest(http.MethodGet, message.String(), nil)
 			if err != nil {
 				return err
@@ -59,6 +57,28 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return err
 			}
 			defer response.Body.Close()
+
+			mimeType, err := storage.MimeTypeFromHTTPHeader(response.Header)
+			if err != nil {
+				copyBody := &bytes.Buffer{}
+				if _, err := io.CopyN(copyBody, response.Body, 128); err != nil {
+					return err
+				}
+
+				mimeType, err = storage.MimeTypeFromData(bytes.NewBuffer(copyBody.Bytes()))
+				if err != nil {
+					return err
+				}
+
+				// довычитываем все остальное, так как body уже порвался на две части до 128 и послке
+				if _, err := io.Copy(copyBody, response.Body); err != nil {
+					return err
+				}
+
+				// присваиваем обратно, чтобы с этим можно было проджолжать работать
+				response.Body = ioutil.NopCloser(copyBody)
+				defer copyBody.Reset()
+			}
 
 			to := routes[len(routes)-1]
 			name := "File at " + time.Now().Format(time.RFC1123Z)

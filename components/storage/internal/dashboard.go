@@ -14,7 +14,7 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 			dashboard.NewRoute(storage.RouteFileStoragePrefix+":namespace/*filepath", &handlers.FSHandler{
 				Component: c,
 			}).
-				WithMethods([]string{http.MethodGet}),
+				WithMethods([]string{http.MethodGet, http.MethodHead}),
 		}
 	}
 

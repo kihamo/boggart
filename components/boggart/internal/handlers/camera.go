@@ -57,5 +57,6 @@ func (h *CameraHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Length", strconv.FormatInt(int64(buf.Len()), 10))
 	io.Copy(w, buf)
 }

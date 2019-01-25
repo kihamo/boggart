@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/kihamo/boggart/components/storage"
@@ -63,7 +64,10 @@ func (h *FSHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 	if mime, err := storage.MimeTypeFromData(file); err == nil {
 		w.Header().Set("Content-Type", mime.String())
+		w.Header().Set("Content-Length", strconv.FormatInt(stat.Size(), 10))
 	}
 
-	fileHandler.ServeHTTP(w, r.Original())
+	if r.IsGet() {
+		fileHandler.ServeHTTP(w, r.Original())
+	}
 }
