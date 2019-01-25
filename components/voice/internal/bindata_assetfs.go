@@ -6,10 +6,10 @@
 package internal
 
 import (
+	"github.com/elazarl/go-bindata-assetfs"
 	"bytes"
 	"compress/gzip"
 	"fmt"
-	"github.com/elazarl/go-bindata-assetfs"
 	"io"
 	"io/ioutil"
 	"os"
@@ -84,7 +84,7 @@ func templatesViewsMessageHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "templates/views/message.html", size: 5432, mode: os.FileMode(420), modTime: time.Unix(1547415124, 0)}
+	info := bindataFileInfo{name: "templates/views/message.html", size: 5432, mode: os.FileMode(420), modTime: time.Unix(1547565392, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -183,7 +183,6 @@ type bintree struct {
 	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
-
 var _bintree = &bintree{nil, map[string]*bintree{
 	"templates": &bintree{nil, map[string]*bintree{
 		"views": &bintree{nil, map[string]*bintree{
@@ -238,6 +237,7 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
+
 
 func assetFS() *assetfs.AssetFS {
 	assetInfo := func(path string) (os.FileInfo, error) {

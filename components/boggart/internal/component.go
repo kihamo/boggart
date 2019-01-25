@@ -14,7 +14,6 @@ import (
 	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/i18n"
 	"github.com/kihamo/shadow/components/logging"
-	"github.com/kihamo/shadow/components/messengers"
 	"github.com/kihamo/shadow/components/metrics"
 	"github.com/kihamo/shadow/components/workers"
 	"gopkg.in/yaml.v2"
@@ -70,9 +69,6 @@ func (c *Component) Dependencies() []shadow.Dependency {
 			Name: logging.ComponentName,
 		},
 		{
-			Name: messengers.ComponentName,
-		},
-		{
 			Name:     mqtt.ComponentName,
 			Required: true,
 		},
@@ -101,10 +97,12 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 	<-a.ReadyComponent(mqtt.ComponentName)
 	<-a.ReadyComponent(workers.ComponentName)
 
+	c.mutex.Lock()
 	c.manager = manager.NewManager(
 		a.GetComponent(mqtt.ComponentName).(mqtt.Component),
 		a.GetComponent(workers.ComponentName).(workers.Component),
 		c.listenersManager)
+	c.mutex.Unlock()
 
 	c.logger = logging.DefaultLogger().Named(c.Name())
 
@@ -194,8 +192,12 @@ func (c *Component) initConfigFromYaml() error {
 }
 
 func (c *Component) Shutdown() error {
-	if c.manager != nil {
-		return c.manager.UnregisterAll()
+	c.mutex.Lock()
+	m := c.manager
+	c.mutex.Unlock()
+
+	if m != nil {
+		return m.UnregisterAll()
 	}
 
 	return nil

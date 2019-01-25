@@ -1,5 +1,5 @@
-hash: 484560e4c129f0789b2f1122bf7d59fa7d2ecfaf94ae1d5429a9c9c31b316964
-updated: 2019-01-20T18:00:57.558491+03:00
+hash: 3af4422229bf2490d817d95f2e1875c3c875ca89190f4f13022dc8fbd17e28fa
+updated: 2019-01-25T14:11:08.057464+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: 02e53af36e6c978af692887ed449b74026d76fec
@@ -62,12 +62,6 @@ imports:
   subpackages:
   - bson
   - internal/json
-- name: github.com/go-kit/kit
-  version: 8a8a1bb8700078c22421bc35bdcfb140b57c1b3a
-  subpackages:
-  - log
-- name: github.com/go-logfmt/logfmt
-  version: 07c9b44f60d7ffdfb7d8efe1ad539965737836dc
 - name: github.com/go-openapi/analysis
   version: e2f3fdbb7ed0e56e070ccbfb6fc75b288a33c014
   subpackages:
@@ -250,8 +244,6 @@ imports:
   - collector/runtime
   - internal
   - storage
-- name: github.com/kr/logfmt
-  version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
 - name: github.com/lann/builder
   version: 47ae307949d02aa1f1069fdafc00ca08e1dbabac
 - name: github.com/lann/ps
@@ -302,18 +294,6 @@ imports:
   version: 3536a929edddb9a5b34bd6861dc4a9647cb459fe
 - name: github.com/mmcloughlin/geohash
   version: f7f2bcae3294530249c63fcb6fb6d5e83eee4e73
-- name: github.com/oliverpool/go-chromecast
-  version: 1b89e250b9bc562b6c645e829576a8367d9e0c34
-  subpackages:
-  - client
-  - command
-  - command/heartbeat
-  - command/media
-  - command/media/defaultreceiver
-  - gogoprotobuf
-  - gogoprotobuf/pb
-  - log
-  - net
 - name: github.com/OneOfOne/xxhash
   version: 6def279d2ce6c81a79dd1c1be580f03bb216fb8a
 - name: github.com/opentracing-contrib/go-stdlib
