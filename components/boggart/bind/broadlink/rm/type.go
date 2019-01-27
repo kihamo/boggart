@@ -41,6 +41,9 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		mac:             config.MAC.HardwareAddr,
 		ip:              ip,
 		captureDuration: config.CaptureDuration,
+
+		livenessInterval: config.LivenessInterval,
+		livenessTimeout:  config.LivenessTimeout,
 	}
 	bind.SetSerialNumber(config.MAC.String())
 

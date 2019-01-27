@@ -16,6 +16,9 @@ type Bind struct {
 	mac             net.HardwareAddr
 	ip              net.UDPAddr
 	captureDuration time.Duration
+
+	livenessInterval time.Duration
+	livenessTimeout  time.Duration
 }
 
 type SupportCapture interface {
@@ -33,12 +36,4 @@ type SupportRF315Mhz interface {
 
 type SupportRF433Mhz interface {
 	SendRF433MhzRemoteControlCodeAsString(code string, count int) error
-}
-
-func (b *Bind) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.BindStatusSetter) {
-	b.BindBase.SetStatusManager(getter, setter)
-
-	// TODO: ping?
-
-	b.UpdateStatus(boggart.BindStatusOnline)
 }

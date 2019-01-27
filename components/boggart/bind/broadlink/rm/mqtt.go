@@ -72,7 +72,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 		subscribers = append(subscribers,
 			mqtt.NewSubscriber(MQTTSubscribeTopicCapture.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
-				func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
+				func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 					if message.IsTrue() { // start
 						if err := capture.StartCaptureRemoteControlCode(); err != nil {
 							return err
