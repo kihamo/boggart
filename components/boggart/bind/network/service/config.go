@@ -1,4 +1,4 @@
-package network
+package service
 
 import (
 	"time"
@@ -10,15 +10,16 @@ const (
 	DefaultUpdaterInterval = time.Minute
 )
 
-type ConfigPing struct {
+type Config struct {
 	Hostname        string `valid:"host,required"`
+	Port            int    `valid:"port,required"`
 	Retry           int
 	Timeout         time.Duration
 	UpdaterInterval time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 }
 
-func (t TypePing) Config() interface{} {
-	return &ConfigPing{
+func (t Type) Config() interface{} {
+	return &Config{
 		Retry:           DefaultRetry,
 		Timeout:         DefaultTimeout,
 		UpdaterInterval: DefaultUpdaterInterval,

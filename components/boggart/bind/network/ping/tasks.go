@@ -1,4 +1,4 @@
-package network
+package ping
 
 import (
 	"context"
@@ -10,18 +10,18 @@ import (
 	"go.uber.org/multierr"
 )
 
-func (b *BindPing) Tasks() []workers.Task {
+func (b *Bind) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(b.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(b.updaterInterval)
-	taskUpdater.SetName("bind-network:ping-updater-" + b.SerialNumber())
+	taskUpdater.SetName("bind-network:ping-updater-" + b.hostname)
 
 	return []workers.Task{
 		taskUpdater,
 	}
 }
 
-func (b *BindPing) taskUpdater(ctx context.Context) (interface{}, error) {
+func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	pinger, err := ping.NewPinger(b.hostname)
 	if err != nil {
 		return nil, err
@@ -37,14 +37,14 @@ func (b *BindPing) taskUpdater(ctx context.Context) (interface{}, error) {
 
 	online := stats.PacketsRecv != 0
 	if ok := b.online.Set(online); ok {
-		if e := b.MQTTPublishAsync(ctx, PingMQTTPublishTopicOnline.Format(h), 0, true, online); e != nil {
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicOnline.Format(h), 0, true, online); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
 
 	latency := uint32(stats.MaxRtt.Nanoseconds() / 1e+6)
 	if ok := b.latency.Set(latency); ok {
-		if e := b.MQTTPublishAsync(ctx, PingMQTTPublishTopicLatency.Format(h), 0, true, latency); e != nil {
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicLatency.Format(h), 0, true, latency); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}

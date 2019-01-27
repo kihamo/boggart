@@ -1,4 +1,4 @@
-package network
+package service
 
 import (
 	"time"
@@ -7,11 +7,11 @@ import (
 	"github.com/kihamo/boggart/components/boggart/atomic"
 )
 
-type BindPing struct {
+type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
 
-	hostname        string
+	address         string
 	retry           int
 	timeout         time.Duration
 	updaterInterval time.Duration
@@ -20,7 +20,7 @@ type BindPing struct {
 	latency *atomic.Uint32Null
 }
 
-func (b *BindPing) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.BindStatusSetter) {
+func (b *Bind) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.BindStatusSetter) {
 	b.BindBase.SetStatusManager(getter, setter)
 
 	b.UpdateStatus(boggart.BindStatusOnline)
