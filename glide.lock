@@ -1,5 +1,5 @@
-hash: 3af4422229bf2490d817d95f2e1875c3c875ca89190f4f13022dc8fbd17e28fa
-updated: 2019-01-25T14:11:08.057464+03:00
+hash: 3ec69663b611c245af972cb430c5a4702473f07f1523930140dee0559a72e5ed
+updated: 2019-01-27T20:06:50.12383+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: 02e53af36e6c978af692887ed449b74026d76fec
@@ -345,6 +345,8 @@ imports:
   - sqlparse
 - name: github.com/snabb/webostv
   version: bae6b85a37a6ea235af0571b9f3ff944651a6581
+- name: github.com/sparrc/go-ping
+  version: ef3ab45e41b017889941ea5bb796dd502d2b5a1b
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
 - name: github.com/uber/jaeger-client-go
@@ -424,14 +426,20 @@ imports:
 - name: golang.org/x/net
   version: d866cfc389cec985d6fda2859936a575a55a3ab6
   subpackages:
+  - bpf
   - context
   - context/ctxhttp
   - html
   - html/atom
   - http2
   - http2/hpack
+  - icmp
   - idna
+  - internal/iana
+  - internal/socket
   - internal/timeseries
+  - ipv4
+  - ipv6
   - lex/httplex
   - proxy
   - trace

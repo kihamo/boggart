@@ -5,12 +5,16 @@ import (
 	"strings"
 )
 
+const (
+	TopicSeparator = "-"
+)
+
 var replacerMQTTName = strings.NewReplacer(
-	":", "-",
-	"/", "-",
-	"_", "-",
-	",", "-",
-	".", "-",
+	":", TopicSeparator,
+	"/", TopicSeparator,
+	"_", TopicSeparator,
+	",", TopicSeparator,
+	".", TopicSeparator,
 )
 
 type Topic string
@@ -36,5 +40,7 @@ func (t Topic) Format(args ...interface{}) string {
 
 func NameReplace(name string) string {
 	name = strings.ToLower(name)
+	name = strings.Trim(name, TopicSeparator)
+
 	return replacerMQTTName.Replace(name)
 }
