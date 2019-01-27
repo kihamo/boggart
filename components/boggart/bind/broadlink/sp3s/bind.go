@@ -1,4 +1,4 @@
-package broadlink
+package sp3s
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/broadlink"
 )
 
-type BindSP3S struct {
+type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
 
@@ -20,11 +20,11 @@ type BindSP3S struct {
 	updaterInterval time.Duration
 }
 
-func (b *BindSP3S) State() (bool, error) {
+func (b *Bind) State() (bool, error) {
 	return b.provider.State()
 }
 
-func (b *BindSP3S) On(ctx context.Context) error {
+func (b *Bind) On(ctx context.Context) error {
 	err := b.provider.On()
 	if err == nil {
 		_, err = b.taskUpdater(ctx)
@@ -33,7 +33,7 @@ func (b *BindSP3S) On(ctx context.Context) error {
 	return err
 }
 
-func (b *BindSP3S) Off(ctx context.Context) error {
+func (b *Bind) Off(ctx context.Context) error {
 	err := b.provider.Off()
 	if err == nil {
 		_, err = b.taskUpdater(ctx)
@@ -42,6 +42,6 @@ func (b *BindSP3S) Off(ctx context.Context) error {
 	return err
 }
 
-func (b *BindSP3S) Power() (float64, error) {
+func (b *Bind) Power() (float64, error) {
 	return b.provider.Power()
 }

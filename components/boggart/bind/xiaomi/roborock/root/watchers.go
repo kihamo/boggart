@@ -1,4 +1,4 @@
-package xiaomi
+package root
 
 import (
 	"bufio"
@@ -8,7 +8,7 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
-func (b *RoborockRootBind) runtimeConfigWatcher(fileName string) error {
+func (b *Bind) runtimeConfigWatcher(fileName string) error {
 	f, err := os.Open(fileName)
 	if err != nil {
 		return err

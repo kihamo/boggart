@@ -1,4 +1,4 @@
-package broadlink
+package sp3s
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"go.uber.org/multierr"
 )
 
-func (b *BindSP3S) Tasks() []workers.Task {
+func (b *Bind) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(b.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(b.updaterInterval)
@@ -21,7 +21,7 @@ func (b *BindSP3S) Tasks() []workers.Task {
 	}
 }
 
-func (b *BindSP3S) taskUpdater(ctx context.Context) (interface{}, error) {
+func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	state, err := b.State()
 	if err != nil {
 		b.UpdateStatus(boggart.BindStatusOffline)
@@ -34,16 +34,16 @@ func (b *BindSP3S) taskUpdater(ctx context.Context) (interface{}, error) {
 	serialNumberMQTT := mqtt.NameReplace(serialNumber)
 
 	if ok := b.state.Set(state); ok {
-		if e := b.MQTTPublishAsync(ctx, SP3SMQTTPublishTopicState.Format(serialNumberMQTT), 0, true, state); e != nil {
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicState.Format(serialNumberMQTT), 0, true, state); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
 
 	if power, e := b.Power(); e == nil {
 		if ok := b.power.Set(float32(power)); ok {
-			metricSP3SPower.With("serial_number", serialNumber).Set(power)
+			metricPower.With("serial_number", serialNumber).Set(power)
 
-			if e := b.MQTTPublishAsync(ctx, SP3SMQTTPublishTopicPower.Format(serialNumberMQTT), 0, true, power); e != nil {
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicPower.Format(serialNumberMQTT), 0, true, power); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}

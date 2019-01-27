@@ -1,4 +1,4 @@
-package broadlink
+package rm
 
 import (
 	"errors"
@@ -8,9 +8,9 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/broadlink"
 )
 
-type TypeRM struct{}
+type Type struct{}
 
-func (t TypeRM) CreateBind(c interface{}) (boggart.Bind, error) {
+func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*ConfigRM)
 
 	localAddr, err := broadlink.LocalAddr()
@@ -36,7 +36,7 @@ func (t TypeRM) CreateBind(c interface{}) (boggart.Bind, error) {
 		return nil, errors.New("unknown model " + config.Model)
 	}
 
-	bind := &BindRM{
+	bind := &Bind{
 		provider:        provider,
 		mac:             config.MAC.HardwareAddr,
 		ip:              ip,

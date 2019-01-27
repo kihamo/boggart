@@ -1,4 +1,4 @@
-package xiaomi
+package root
 
 import (
 	"io/ioutil"
@@ -13,7 +13,7 @@ import (
 
 var reRuntimeConfigLine = regexp.MustCompile(`(?m)\s*([[:alnum:]_]+)\s*=\s*([^;]+);`)
 
-type RoborockRootBind struct {
+type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
 
@@ -23,13 +23,13 @@ type RoborockRootBind struct {
 	watchFiles map[string]func(string) error
 }
 
-func (b *RoborockRootBind) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.BindStatusSetter) {
+func (b *Bind) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.BindStatusSetter) {
 	b.BindBase.SetStatusManager(getter, setter)
 
 	b.UpdateStatus(boggart.BindStatusOnline)
 }
 
-func (b *RoborockRootBind) InitDeviceID(fileName string) error {
+func (b *Bind) InitDeviceID(fileName string) error {
 	content, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		return err
@@ -40,7 +40,7 @@ func (b *RoborockRootBind) InitDeviceID(fileName string) error {
 	return nil
 }
 
-func (b *RoborockRootBind) AddWatchRuntimeConfig(fileName string) error {
+func (b *Bind) AddWatchRuntimeConfig(fileName string) error {
 	if _, err := os.Stat(fileName); err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func (b *RoborockRootBind) AddWatchRuntimeConfig(fileName string) error {
 	return nil
 }
 
-func (b *RoborockRootBind) StartWatch() error {
+func (b *Bind) StartWatch() error {
 	if len(b.watchFiles) == 0 {
 		return nil
 	}

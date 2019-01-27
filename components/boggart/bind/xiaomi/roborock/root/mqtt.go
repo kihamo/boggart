@@ -1,4 +1,4 @@
-package xiaomi
+package root
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
@@ -9,7 +9,7 @@ const (
 	MQTTPublishTopicRuntimeConfig mqtt.Topic = boggart.ComponentName + "/+/runtime/+"
 )
 
-func (b *RoborockRootBind) MQTTPublishes() []mqtt.Topic {
+func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	sn := mqtt.NameReplace(b.SerialNumber())
 
 	return []mqtt.Topic{
@@ -17,7 +17,7 @@ func (b *RoborockRootBind) MQTTPublishes() []mqtt.Topic {
 	}
 }
 
-func (b *RoborockRootBind) SetMQTTClient(client mqtt.Component) {
+func (b *Bind) SetMQTTClient(client mqtt.Component) {
 	b.BindMQTT.SetMQTTClient(client)
 
 	if client != nil {

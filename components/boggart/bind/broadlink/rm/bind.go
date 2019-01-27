@@ -1,4 +1,4 @@
-package broadlink
+package rm
 
 import (
 	"net"
@@ -8,7 +8,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/broadlink"
 )
 
-type BindRM struct {
+type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
 
@@ -18,25 +18,27 @@ type BindRM struct {
 	captureDuration time.Duration
 }
 
-type BindRMSupportCapture interface {
+type SupportCapture interface {
 	StartCaptureRemoteControlCode() error
 	ReadCapturedRemoteControlCodeAsString() (broadlink.RemoteType, string, error)
 }
 
-type BindRMSupportIR interface {
+type SupportIR interface {
 	SendIRRemoteControlCodeAsString(code string, count int) error
 }
 
-type BindRMSupportRF315Mhz interface {
+type SupportRF315Mhz interface {
 	SendRF315MhzRemoteControlCodeAsString(code string, count int) error
 }
 
-type BindRMSupportRF433Mhz interface {
+type SupportRF433Mhz interface {
 	SendRF433MhzRemoteControlCodeAsString(code string, count int) error
 }
 
-func (b *BindRM) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.BindStatusSetter) {
+func (b *Bind) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.BindStatusSetter) {
 	b.BindBase.SetStatusManager(getter, setter)
+
+	// TODO: ping?
 
 	b.UpdateStatus(boggart.BindStatusOnline)
 }

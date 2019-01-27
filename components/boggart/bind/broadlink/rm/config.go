@@ -1,4 +1,4 @@
-package broadlink
+package rm
 
 import (
 	"time"
@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	RMCaptureDuration = time.Second * 15
+	DefaultCaptureDuration = time.Second * 15
 )
 
 type ConfigRM struct {
@@ -17,8 +17,8 @@ type ConfigRM struct {
 	CaptureDuration time.Duration        `mapstructure:"capture_interval" yaml:"capture_interval"`
 }
 
-func (t TypeRM) Config() interface{} {
+func (t Type) Config() interface{} {
 	return &ConfigRM{
-		CaptureDuration: RMCaptureDuration,
+		CaptureDuration: DefaultCaptureDuration,
 	}
 }

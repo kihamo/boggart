@@ -1,4 +1,4 @@
-package broadlink
+package sp3s
 
 import (
 	"errors"
@@ -9,10 +9,10 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/broadlink"
 )
 
-type TypeSP3S struct{}
+type Type struct{}
 
-func (t TypeSP3S) CreateBind(c interface{}) (boggart.Bind, error) {
-	config := c.(*ConfigSP3S)
+func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
+	config := c.(*Config)
 
 	localAddr, err := broadlink.LocalAddr()
 	if err != nil {
@@ -37,7 +37,7 @@ func (t TypeSP3S) CreateBind(c interface{}) (boggart.Bind, error) {
 		return nil, errors.New("unknown model " + config.Model)
 	}
 
-	bind := &BindSP3S{
+	bind := &Bind{
 		provider:        provider,
 		updaterInterval: config.UpdaterInterval,
 		state:           atomic.NewBoolNull(),

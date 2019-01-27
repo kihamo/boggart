@@ -1,15 +1,15 @@
-package xiaomi
+package root
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
 )
 
-type RoborockRootType struct{}
+type Type struct{}
 
-func (t RoborockRootType) CreateBind(c interface{}) (boggart.Bind, error) {
-	config := c.(*RoborockRootConfig)
+func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
+	config := c.(*Config)
 
-	bind := &RoborockRootBind{
+	bind := &Bind{
 		cacheRuntimeConfig: make(map[string]string, 11),
 		watchFiles:         make(map[string]func(string) error, 0),
 	}
