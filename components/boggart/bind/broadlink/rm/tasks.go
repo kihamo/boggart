@@ -2,7 +2,6 @@ package rm
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -30,8 +29,6 @@ func (b *Bind) Tasks() []workers.Task {
 func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	pinger, err := ping.NewPinger(b.ip.IP.String())
 	if err != nil {
-		fmt.Println(err.Error())
-
 		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, err
 	}
