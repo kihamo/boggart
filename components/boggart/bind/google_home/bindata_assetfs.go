@@ -18,8 +18,8 @@ import (
 	"time"
 )
 
-func bindataRead(data []byte, name string) ([]byte, error) {
-	gz, err := gzip.NewReader(bytes.NewBuffer(data))
+func bindataRead(data, name string) ([]byte, error) {
+	gz, err := gzip.NewReader(strings.NewReader(data))
 	if err != nil {
 		return nil, fmt.Errorf("Read %q: %v", name, err)
 	}
@@ -69,7 +69,7 @@ func (fi bindataFileInfo) Sys() interface{} {
 	return nil
 }
 
-var _templatesViewsWidgetHtml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xca\xca\xca\xca\x02\x04\x00\x00\xff\xff\xe6\x8d\xea\x02\x04\x00\x00\x00")
+var _templatesViewsWidgetHtml = "\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xca\xca\xca\xca\x02\x04\x00\x00\xff\xff\xe6\x8d\xea\x02\x04\x00\x00\x00"
 
 func templatesViewsWidgetHtmlBytes() ([]byte, error) {
 	return bindataRead(
@@ -84,7 +84,7 @@ func templatesViewsWidgetHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "templates/views/widget.html", size: 4, mode: os.FileMode(420), modTime: time.Unix(1548634417, 0)}
+	info := bindataFileInfo{name: "templates/views/widget.html", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

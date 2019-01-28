@@ -213,8 +213,8 @@ func (h *BindHandler) actionWidget(w *dashboard.Response, r *dashboard.Request, 
 	if render := dashboard.RenderFromContext(r.Context()); render != nil {
 		fs := widget.WidgetTemplates()
 		if fs != nil {
-			if !render.IsRegisterComponent(componentName) {
-				err := render.RegisterComponent(componentName, fs)
+			if !render.IsRegisterNamespace(componentName) {
+				err := render.RegisterNamespace(componentName, fs)
 				if err != nil {
 					panic(err)
 				}

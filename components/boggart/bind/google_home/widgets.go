@@ -9,11 +9,7 @@ import (
 )
 
 func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
-	fmt.Println("33333")
-	fmt.Println(r.URL().String())
-	fmt.Println(b.Config())
-
-	t.Render(r.Context(), "bind", nil)
+	fmt.Fprint(w, "widget")
 }
 
 func (t Type) WidgetTemplates() *assetfs.AssetFS {

@@ -5,9 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/elazarl/go-bindata-assetfs"
-
 	"github.com/asaskevich/govalidator"
+	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/mitchellh/mapstructure"
 )

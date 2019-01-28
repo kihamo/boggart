@@ -11,6 +11,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers/manager"
+	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/workers"
 	"github.com/kihamo/snitch"
 	"github.com/pborman/uuid"
