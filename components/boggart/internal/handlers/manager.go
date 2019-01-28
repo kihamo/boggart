@@ -25,6 +25,7 @@ type managerHandlerDevice struct {
 	MQTTSubscribers []string `json:"mqtt_subscribers"`
 	Tags            []string `json:"tags"`
 	Config          string   `json:"config"`
+	HasWidget       bool     `json:"has_widget"`
 }
 
 // easyjson:json
@@ -93,6 +94,10 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				MQTTPublishes:   make([]string, 0, len(bindItem.MQTTPublishes())),
 				MQTTSubscribers: make([]string, 0, len(bindItem.MQTTSubscribers())),
 				Config:          buf.String(),
+			}
+
+			if _, ok := bindItem.BindType().(boggart.BindTypeHasWidget); ok {
+				item.HasWidget = ok
 			}
 
 			for _, task := range bindItem.Tasks() {

@@ -74,14 +74,21 @@ $(document).ready(function () {
                 {
                     data: null,
                     render: function (data, type, row) {
-                        return '<div class="btn-group" role="group">' +
-                            '<a href="/boggart/bind/' + row.id + '/" class="btn btn-warning btn-icon btn-xs">' +
+                        var content = '<div class="btn-group" role="group">';
+
+                        if (row.has_widget) {
+                            content += '<a href="/boggart/bind/' + row.id + '/widget/" class="btn btn-info btn-icon btn-xs">' +
+                                '<i class="glyphicon glyphicon-new-window" title="Open widget"></i>' +
+                                '</a>';
+                        }
+
+                        return content + '<a href="/boggart/bind/' + row.id + '/" class="btn btn-warning btn-icon btn-xs">' +
                             '<i class="glyphicon glyphicon-edit" title="Edit bind"></i>' +
                             '</a>' +
                             '<button type="button" class="btn btn-danger btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Confirm unregister device #' + row.id + '" data-modal-callback="bindUnregister(\'' + row.id + '\');">' +
                             '<i class="glyphicon glyphicon-trash" title="Unregister bind"></i>' +
                             '</button>' +
-                            '</div>';
+                            '</div>'
                     }
                 },
                 {
@@ -231,7 +238,7 @@ $(document).ready(function () {
     window.bindUnregister = function (id) {
         $.ajax({
             type: 'POST',
-            url: '/boggart/bind/' + id + '/unregister',
+            url: '/boggart/bind/' + id + '/unregister/',
             success: function (r) {
                 if (r.result === 'failed') {
                     new PNotify({

@@ -1,10 +1,14 @@
 package manager
 
-type BindItemsList []*BindItem
+import (
+	"github.com/kihamo/boggart/components/boggart"
+)
+
+type BindItemsList []boggart.BindItem
 
 func (l BindItemsList) MarshalYAML() (interface{}, error) {
 	return struct {
-		Devices []*BindItem
+		Devices []boggart.BindItem
 	}{
 		Devices: l,
 	}, nil

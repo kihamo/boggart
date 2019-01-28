@@ -57,8 +57,14 @@ func (m *Manager) RegisterWithID(id string, bind boggart.Bind, t string, descrip
 		}
 	}
 
+	bindType, err := boggart.GetBindType(t)
+	if err != nil {
+		return nil, err
+	}
+
 	bindItem := &BindItem{
 		bind:        bind,
+		bindType:    bindType,
 		id:          id,
 		t:           t,
 		description: description,
@@ -162,10 +168,10 @@ func (m *Manager) Bind(id string) boggart.BindItem {
 }
 
 func (m *Manager) BindItems() BindItemsList {
-	items := make([]*BindItem, 0)
+	items := make([]boggart.BindItem, 0)
 
 	m.storage.Range(func(key interface{}, item interface{}) bool {
-		items = append(items, item.(*BindItem))
+		items = append(items, item.(boggart.BindItem))
 		return true
 	})
 

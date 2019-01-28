@@ -334,6 +334,8 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			}
 		case "config":
 			out.Config = string(in.String())
+		case "has_widget":
+			out.HasWidget = bool(in.Bool())
 		default:
 			in.SkipRecursive()
 		}
@@ -491,6 +493,16 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.RawString(prefix)
 		}
 		out.String(string(in.Config))
+	}
+	{
+		const prefix string = ",\"has_widget\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Bool(bool(in.HasWidget))
 	}
 	out.RawByte('}')
 }

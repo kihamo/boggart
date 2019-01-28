@@ -25,6 +25,7 @@ const (
 
 type BindItem interface {
 	Bind() Bind
+	BindType() BindType
 	ID() string
 	Type() string
 	Description() string

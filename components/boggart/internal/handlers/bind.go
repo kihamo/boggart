@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"net/http"
 
@@ -48,6 +49,10 @@ func (h *BindHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	switch q.Get(":action") {
 	case "unregister":
 		h.actionDelete(w, r, bindItem)
+		return
+
+	case "widget":
+		h.actionWidget(w, r, bindItem)
 		return
 
 	case "":
@@ -187,4 +192,35 @@ func (h *BindHandler) actionDelete(w *dashboard.Response, r *dashboard.Request, 
 	w.SendJSON(response{
 		Result: "success",
 	})
+}
+
+func (h *BindHandler) actionWidget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
+	if b == nil {
+		h.NotFound(w, r)
+		return
+	}
+
+	widget, ok := b.BindType().(boggart.BindTypeHasWidget)
+	if !ok {
+		h.NotFound(w, r)
+		return
+	}
+
+	componentName := boggart.ComponentName + "/widget/" + b.Type()
+
+	r = r.WithContext(context.WithValue(r.Context(), dashboard.ComponentContextKey, componentName))
+
+	if render := dashboard.RenderFromContext(r.Context()); render != nil {
+		fs := widget.WidgetTemplates()
+		if fs != nil {
+			if !render.IsRegisterComponent(componentName) {
+				err := render.RegisterComponent(componentName, fs)
+				if err != nil {
+					panic(err)
+				}
+			}
+		}
+	}
+
+	widget.Widget(w, r, b)
 }

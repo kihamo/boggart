@@ -11,6 +11,7 @@ import (
 
 type BindItem struct {
 	bind        boggart.Bind
+	bindType    boggart.BindType
 	id          string
 	t           string
 	description string
@@ -33,112 +34,116 @@ type BindItemYaml struct {
 	Config      interface{}
 }
 
-func (d *BindItem) Bind() boggart.Bind {
-	return d.bind
+func (i *BindItem) Bind() boggart.Bind {
+	return i.bind
 }
 
-func (d *BindItem) ID() string {
-	return d.id
+func (i *BindItem) BindType() boggart.BindType {
+	return i.bindType
 }
 
-func (d *BindItem) SetID(id string) {
-	d.id = id
+func (i *BindItem) ID() string {
+	return i.id
 }
 
-func (d *BindItem) Type() string {
-	return d.t
+func (i *BindItem) SetID(id string) {
+	i.id = id
 }
 
-func (d *BindItem) Description() string {
-	return d.description
+func (i *BindItem) Type() string {
+	return i.t
 }
 
-func (d *BindItem) Tags() []string {
-	return d.tags
+func (i *BindItem) Description() string {
+	return i.description
 }
 
-func (d *BindItem) Config() interface{} {
-	return d.config
+func (i *BindItem) Tags() []string {
+	return i.tags
 }
 
-func (d *BindItem) Status() boggart.BindStatus {
-	return boggart.BindStatus(atomic.LoadUint64(&d.status))
+func (i *BindItem) Config() interface{} {
+	return i.config
 }
 
-func (d *BindItem) updateStatus(status boggart.BindStatus) {
-	atomic.StoreUint64(&d.status, uint64(status))
+func (i *BindItem) Status() boggart.BindStatus {
+	return boggart.BindStatus(atomic.LoadUint64(&i.status))
 }
 
-func (d *BindItem) Tasks() []workers.Task {
-	c, ok := d.Bind().(boggart.BindHasTasks)
+func (i *BindItem) updateStatus(status boggart.BindStatus) {
+	atomic.StoreUint64(&i.status, uint64(status))
+}
+
+func (i *BindItem) Tasks() []workers.Task {
+	c, ok := i.Bind().(boggart.BindHasTasks)
 	if !ok {
 		return nil
 	}
 
-	d.cacheMutex.Lock()
-	defer d.cacheMutex.Unlock()
+	i.cacheMutex.Lock()
+	defer i.cacheMutex.Unlock()
 
-	if d.cacheTasks == nil {
-		d.cacheTasks = c.Tasks()
+	if i.cacheTasks == nil {
+		i.cacheTasks = c.Tasks()
 	}
 
-	return d.cacheTasks
+	return i.cacheTasks
 }
 
-func (d *BindItem) Listeners() []workers.ListenerWithEvents {
-	c, ok := d.Bind().(boggart.BindHasListeners)
+func (i *BindItem) Listeners() []workers.ListenerWithEvents {
+	c, ok := i.Bind().(boggart.BindHasListeners)
 	if !ok {
 		return nil
 	}
 
-	d.cacheMutex.Lock()
-	defer d.cacheMutex.Unlock()
+	i.cacheMutex.Lock()
+	defer i.cacheMutex.Unlock()
 
-	if d.cacheListeners == nil {
-		d.cacheListeners = c.Listeners()
+	if i.cacheListeners == nil {
+		i.cacheListeners = c.Listeners()
 	}
 
-	return d.cacheListeners
+	return i.cacheListeners
 }
 
-func (d *BindItem) MQTTSubscribers() []mqtt.Subscriber {
-	c, ok := d.Bind().(boggart.BindHasMQTTSubscribers)
+func (i *BindItem) MQTTSubscribers() []mqtt.Subscriber {
+	c, ok := i.Bind().(boggart.BindHasMQTTSubscribers)
 	if !ok {
 		return nil
 	}
 
-	d.cacheMutex.Lock()
-	defer d.cacheMutex.Unlock()
+	i.cacheMutex.Lock()
+	defer i.cacheMutex.Unlock()
 
-	if d.cacheMQTTSubscribers == nil {
-		d.cacheMQTTSubscribers = c.MQTTSubscribers()
+	if i.cacheMQTTSubscribers == nil {
+		i.cacheMQTTSubscribers = c.MQTTSubscribers()
 	}
 
-	return d.cacheMQTTSubscribers
+	return i.cacheMQTTSubscribers
 }
 
-func (d *BindItem) MQTTPublishes() []mqtt.Topic {
-	c, ok := d.Bind().(boggart.BindHasMQTTPublishes)
+func (i *BindItem) MQTTPublishes() []mqtt.Topic {
+	c, ok := i.Bind().(boggart.BindHasMQTTPublishes)
 	if !ok {
 		return nil
 	}
 
-	d.cacheMutex.Lock()
-	defer d.cacheMutex.Unlock()
+	i.cacheMutex.Lock()
+	defer i.cacheMutex.Unlock()
 
-	if d.cacheMQTTPublishes == nil {
-		d.cacheMQTTPublishes = c.MQTTPublishes()
+	if i.cacheMQTTPublishes == nil {
+		i.cacheMQTTPublishes = c.MQTTPublishes()
 	}
 
-	return d.cacheMQTTPublishes
+	return i.cacheMQTTPublishes
 }
 
-func (d *BindItem) MarshalYAML() (interface{}, error) {
+func (i *BindItem) MarshalYAML() (interface{}, error) {
 	return BindItemYaml{
-		Type:        d.Type(),
-		ID:          d.ID(),
-		Description: d.Description(),
-		Tags:        d.Tags(),
-		Config:      d.Config(),
+		Type:        i.Type(),
+		ID:          i.ID(),
+		Description: i.Description(),
+		Tags:        i.Tags(),
+		Config:      i.Config(),
 	}, nil
 }

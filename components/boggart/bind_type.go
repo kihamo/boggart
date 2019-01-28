@@ -5,7 +5,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/elazarl/go-bindata-assetfs"
+
 	"github.com/asaskevich/govalidator"
+	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -51,6 +54,11 @@ func GetBindTypes() map[string]BindType {
 type BindType interface {
 	Config() interface{}
 	CreateBind(config interface{}) (Bind, error)
+}
+
+type BindTypeHasWidget interface {
+	Widget(*dashboard.Response, *dashboard.Request, BindItem)
+	WidgetTemplates() *assetfs.AssetFS
 }
 
 func ValidateBindConfig(t BindType, config map[string]interface{}) (cfg interface{}, err error) {
