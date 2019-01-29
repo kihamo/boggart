@@ -1,5 +1,5 @@
-hash: b34af0446b30935e1f3e8aa9e021163b1444e0b476f88b1f9a68d2fdbcca8944
-updated: 2019-01-29T02:00:57.152986+03:00
+hash: 20142147cd286f0f0d786a0fbc3b753dd784e6cd8e391643880b597e2f093b34
+updated: 2019-01-29T03:06:37.931197+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: 02e53af36e6c978af692887ed449b74026d76fec
@@ -178,7 +178,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 94f9a277228eda6a1daca0754e7182cfdcdd13dd
+  version: 528b00a5f25ad8e9da9d77ef30e51df09fede820
   subpackages:
   - components/annotations
   - components/annotations/instance

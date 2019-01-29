@@ -206,21 +206,8 @@ func (h *BindHandler) actionWidget(w *dashboard.Response, r *dashboard.Request, 
 		return
 	}
 
-	componentName := boggart.ComponentName + "/widget/" + b.Type()
-
-	r = r.WithContext(context.WithValue(r.Context(), dashboard.ComponentContextKey, componentName))
-
-	if render := dashboard.RenderFromContext(r.Context()); render != nil {
-		fs := widget.WidgetTemplates()
-		if fs != nil {
-			if !render.IsRegisterNamespace(componentName) {
-				err := render.RegisterNamespace(componentName, fs)
-				if err != nil {
-					panic(err)
-				}
-			}
-		}
-	}
+	// TODO: fixme
+	r = r.WithContext(context.WithValue(r.Context(), dashboard.ComponentContextKey, boggart.ComponentName+"-bind-"+b.Type()))
 
 	widget.Widget(w, r, b)
 }

@@ -63,6 +63,26 @@ func (m *Manager) RegisterWithID(id string, bind boggart.Bind, t string, descrip
 		return nil, err
 	}
 
+	// register widget
+	if widget, ok := bindType.(boggart.BindTypeHasWidget); ok {
+		if fs := widget.WidgetAssetFS(); fs != nil {
+			name := boggart.ComponentName + "-bind-" + t
+
+			// templates
+			render := m.dashboard.Renderer()
+			if !render.IsRegisterNamespace(name) {
+				if err := render.RegisterNamespace(name, fs); err != nil {
+					return nil, err
+				}
+			}
+
+			// asset fs
+			m.dashboard.RegisterAssetFS(name, fs)
+
+			// i18n
+		}
+	}
+
 	bindItem := &BindItem{
 		bind:        bind,
 		bindType:    bindType,

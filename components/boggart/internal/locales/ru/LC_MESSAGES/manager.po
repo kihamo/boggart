@@ -22,6 +22,9 @@ msgstr "Перезагрузить из файла конфигурации"
 msgid "Refresh data"
 msgstr "Обновить данные"
 
+msgid "Bind types"
+msgstr "Типы привязок"
+
 msgid "Type"
 msgstr "Тип"
 
