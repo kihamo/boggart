@@ -29,15 +29,17 @@ type Manager struct {
 
 	ready     int64
 	storage   *sync.Map
+	dashboard dashboard.Component
 	mqtt      mqtt.Component
 	workers   workers.Component
 	listeners *manager.ListenersManager
 }
 
-func NewManager(mqtt mqtt.Component, workers workers.Component, listeners *manager.ListenersManager) *Manager {
+func NewManager(dashboard dashboard.Component, mqtt mqtt.Component, workers workers.Component, listeners *manager.ListenersManager) *Manager {
 	return &Manager{
 		ready:     managerNotReady,
 		storage:   new(sync.Map),
+		dashboard: dashboard,
 		mqtt:      mqtt,
 		workers:   workers,
 		listeners: listeners,

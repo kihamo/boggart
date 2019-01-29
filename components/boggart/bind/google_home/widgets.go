@@ -12,6 +12,6 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	fmt.Fprint(w, "widget")
 }
 
-func (t Type) WidgetTemplates() *assetfs.AssetFS {
+func (t Type) WidgetAssetFS() *assetfs.AssetFS {
 	return assetFS()
 }

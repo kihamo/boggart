@@ -99,6 +99,7 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 
 	c.mutex.Lock()
 	c.manager = manager.NewManager(
+		a.GetComponent(dashboard.ComponentName).(dashboard.Component),
 		a.GetComponent(mqtt.ComponentName).(mqtt.Component),
 		a.GetComponent(workers.ComponentName).(workers.Component),
 		c.listenersManager)
