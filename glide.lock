@@ -1,5 +1,5 @@
-hash: e01e77ae0b928753aac5e4e9f6291684e71ff14c596aea639ecb78198829c2e5
-updated: 2019-01-30T23:51:51.600331+03:00
+hash: 085e3c5d2072df37e5dd34805ac4d57745d0c48a43578331ad131fc2b2b2fcd7
+updated: 2019-01-31T00:42:41.988806+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: 02e53af36e6c978af692887ed449b74026d76fec
@@ -13,7 +13,7 @@ imports:
 - name: github.com/asaskevich/govalidator
   version: f9ffefc3facfbe0caee3fea233cbb6e8208f4541
 - name: github.com/barnybug/go-cast
-  version: 356a0cf96822f80cec9e49e119545eb3d7e4c188
+  version: 2bd907ad55c2f7a81c5b130e6d7e6f84de55aa40
   repo: git@github.com:kihamo/go-cast.git
   vcs: git
   subpackages:

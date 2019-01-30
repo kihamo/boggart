@@ -9,5 +9,6 @@ type Component interface {
 	shadow.Component
 	metrics.HasMetrics
 
-	ReloadConfig() error
+	ReloadConfig() (int, error)
+	ReloadConfigByID(id string) error
 }

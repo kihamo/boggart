@@ -41,7 +41,7 @@ import:
 - package: github.com/robbiet480/go.nut
   version: 246697bfaea771ddfe4ce0d754e6e2a7b8214f0f
 - package: github.com/barnybug/go-cast
-  version: 356a0cf96822f80cec9e49e119545eb3d7e4c188
+  version: 2bd907ad55c2f7a81c5b130e6d7e6f84de55aa40
   repo:    git@github.com:kihamo/go-cast.git
   vcs:     git
 - package: gopkg.in/yaml.v2

@@ -1,7 +1,9 @@
 package internal
 
 import (
+	"errors"
 	"io/ioutil"
+	"strconv"
 	"sync"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -121,7 +123,9 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 	<-a.ReadyComponent(config.ComponentName)
 	c.config = a.GetComponent(config.ComponentName).(config.Component)
 
-	if err := c.ReloadConfig(); err != nil {
+	if loaded, err := c.ReloadConfig(); err == nil {
+		c.logger.Debug("Loaded " + strconv.FormatInt(int64(loaded), 10) + " binds from " + c.config.String(boggart.ConfigConfigYAML) + " file")
+	} else {
 		return err
 	}
 
@@ -130,59 +134,83 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 	return nil
 }
 
-func (c *Component) ReloadConfig() error {
+func (c *Component) ReloadConfig() (int, error) {
 	if err := c.manager.UnregisterAll(); err != nil {
+		return -1, err
+	}
+
+	loaded, err := c.initConfigFromYaml("")
+	if err != nil {
+		return -1, err
+	}
+
+	return loaded, nil
+}
+
+func (c *Component) ReloadConfigByID(id string) error {
+	if err := c.manager.Unregister(id); err != nil {
 		return err
 	}
 
-	if err := c.initConfigFromYaml(); err != nil {
+	loaded, err := c.initConfigFromYaml(id)
+	if err != nil {
 		return err
+	}
+
+	if loaded == 0 {
+		return errors.New("id " + id + " not found in file")
 	}
 
 	return nil
 }
 
-func (c *Component) initConfigFromYaml() error {
+func (c *Component) initConfigFromYaml(id string) (int, error) {
 	fileName := c.config.String(boggart.ConfigConfigYAML)
 	if fileName == "" {
-		return nil
+		return -1, nil
 	}
 
 	var fileYAML FileYAML
 
 	data, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		return err
+		return -1, err
 	}
 
 	err = yaml.Unmarshal(data, &fileYAML)
 	if err != nil {
-		return err
+		return -1, err
 	}
 
+	var loaded int
 	for _, d := range fileYAML.Devices {
+		if id != "" {
+			if d.ID == nil || *d.ID == "" || *d.ID != id {
+				continue
+			}
+		}
+
 		if d.Enabled != nil && !*d.Enabled {
 			continue
 		}
 
 		if d.Type == "" {
-			// TODO: error
-			continue
+			return -1, errors.New("empty type")
 		}
 
 		kind, err := boggart.GetBindType(d.Type)
 		if err != nil {
-			return err
+			return -1, err
 		}
 
 		cfg, err := boggart.ValidateBindConfig(kind, d.Config)
 		if err != nil {
-			return err
+			return -1, err
 		}
 
 		bind, err := kind.CreateBind(cfg)
 		if err != nil {
-			return err
+			return -1, err
 		}
 
 		if d.ID != nil && *d.ID != "" {
@@ -192,11 +220,13 @@ func (c *Component) initConfigFromYaml() error {
 		}
 
 		if err != nil {
-			return err
+			return -1, err
 		}
+
+		loaded++
 	}
 
-	return nil
+	return loaded, nil
 }
 
 func (c *Component) Shutdown() error {

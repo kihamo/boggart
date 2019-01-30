@@ -27,7 +27,8 @@ func NewConfigHandler(manager *manager.Manager, component boggart.Component) *Co
 }
 
 func (h *ConfigHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
-	action := r.URL().Query().Get(":action")
+	q := r.URL().Query()
+	action := q.Get(":action")
 
 	if action == "reload" && r.IsPost() {
 		type response struct {
@@ -35,15 +36,33 @@ func (h *ConfigHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 			Message string `json:"message,omitempty"`
 		}
 
-		if err := h.component.ReloadConfig(); err != nil {
+		// reload by ID
+		if id := q.Get("id"); id != "" {
+			if err := h.component.ReloadConfigByID(id); err != nil {
+				w.SendJSON(response{
+					Result:  "failed",
+					Message: err.Error(),
+				})
+			} else {
+				w.SendJSON(response{
+					Result:  "success",
+					Message: "Bind " + id + " reloaded from file",
+				})
+			}
+
+			return
+		}
+
+		// reload all
+		if loaded, err := h.component.ReloadConfig(); err != nil {
 			w.SendJSON(response{
 				Result:  "failed",
 				Message: err.Error(),
 			})
-
 		} else {
 			w.SendJSON(response{
-				Result: "success",
+				Result:  "success",
+				Message: "Loaded " + strconv.FormatInt(int64(loaded), 10) + " binds",
 			})
 		}
 

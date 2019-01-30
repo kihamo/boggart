@@ -85,6 +85,9 @@ $(document).ready(function () {
                         return content + '<a href="/boggart/bind/' + row.id + '/" class="btn btn-warning btn-icon btn-xs">' +
                             '<i class="glyphicon glyphicon-edit" title="Edit bind"></i>' +
                             '</a>' +
+                            '<button type="button" class="btn btn-primary btn-icon btn-xs" onclick="reloadConfig(\'' + row.id + '\');">' +
+                            '<i class="glyphicon glyphicon-upload" title="Reload from config file"></i>' +
+                            '</a>' +
                             '<button type="button" class="btn btn-danger btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Confirm unregister device #' + row.id + '" data-modal-callback="bindUnregister(\'' + row.id + '\');">' +
                             '<i class="glyphicon glyphicon-trash" title="Unregister bind"></i>' +
                             '</button>' +
@@ -256,10 +259,16 @@ $(document).ready(function () {
         });
     };
 
-    window.reloadConfig = function () {
+    window.reloadConfig = function (id) {
+        var url = '/boggart/config/reload';
+
+        if (typeof id !== 'undefined') {
+            url += '?id=' + id
+        }
+
         $.ajax({
             type: 'POST',
-            url: '/boggart/config/reload',
+            url: url,
             success: function (r) {
                 if (r.result === 'failed') {
                     new PNotify({
@@ -269,7 +278,14 @@ $(document).ready(function () {
                         hide: false,
                         styling: 'bootstrap3'
                     });
-                    return
+                } else if (r.message !== 'undefined') {
+                    new PNotify({
+                        title: 'Success',
+                        text: r.message,
+                        type: 'success',
+                        hide: false,
+                        styling: 'bootstrap3'
+                    });
                 }
 
                 refreshTables();
