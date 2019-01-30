@@ -64,7 +64,7 @@ func (c *Component) DashboardMiddleware() []func(http.Handler) http.Handler {
 				}
 
 				// авторизация по умолчанию
-				if route := dashboard.RouteFromContext(r.Context()); route != nil && route.Auth() {
+				if route := dashboard.RouteFromContext(r.Context()); route != nil && (route.Auth() || route.HandlerName() == "AssetsHandler") {
 					next.ServeHTTP(w, r)
 					return
 				}
