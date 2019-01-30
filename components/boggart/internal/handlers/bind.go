@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"bytes"
-	"context"
 	"errors"
 	"net/http"
 
@@ -206,8 +205,6 @@ func (h *BindHandler) actionWidget(w *dashboard.Response, r *dashboard.Request, 
 		return
 	}
 
-	// TODO: fixme
-	r = r.WithContext(context.WithValue(r.Context(), dashboard.ComponentContextKey, boggart.ComponentName+"-bind-"+b.Type()))
-
+	r = r.WithContext(dashboard.ContextWithTemplateNamespace(r.Context(), boggart.ComponentName+"-bind-"+b.Type()))
 	widget.Widget(w, r, b)
 }

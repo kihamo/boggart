@@ -1,5 +1,5 @@
-hash: 20142147cd286f0f0d786a0fbc3b753dd784e6cd8e391643880b597e2f093b34
-updated: 2019-01-29T03:06:37.931197+03:00
+hash: 4f968cfa19159406661e3b7e85cfc8cdffded3cf636533256987a8882eae759c
+updated: 2019-01-30T16:21:55.875392+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: 02e53af36e6c978af692887ed449b74026d76fec
@@ -178,7 +178,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 528b00a5f25ad8e9da9d77ef30e51df09fede820
+  version: f5a611881191230cfa1b5bdaeabd1b1c1c3a4cac
   subpackages:
   - components/annotations
   - components/annotations/instance
@@ -459,8 +459,10 @@ imports:
   - windows
   - windows/registry
 - name: golang.org/x/text
-  version: 6eab0e8f74e86c598ec3b6fad4888e0c11482d48
+  version: e6919f6577db79269a6443b9dc46d18f2238fb5d
   subpackages:
+  - internal/language
+  - internal/language/compact
   - internal/tag
   - language
   - secure/bidirule

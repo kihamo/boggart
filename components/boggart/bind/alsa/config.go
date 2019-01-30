@@ -6,8 +6,9 @@ const (
 )
 
 type Config struct {
-	Volume int64 `valid:"range(0|100)"`
-	Mute   bool
+	Volume        int64 `valid:"range(0|100)"`
+	Mute          bool
+	WidgetFileURL string `mapstructure:"widget_file_url" yaml:"widget_file_url"`
 }
 
 func (t Type) Config() interface{} {

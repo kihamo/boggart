@@ -97,9 +97,16 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 	<-a.ReadyComponent(mqtt.ComponentName)
 	<-a.ReadyComponent(workers.ComponentName)
 
+	var i18nCmp i18n.Component
+	if a.HasComponent(i18n.ComponentName) {
+		<-a.ReadyComponent(i18n.ComponentName)
+		i18nCmp = a.GetComponent(i18n.ComponentName).(i18n.Component)
+	}
+
 	c.mutex.Lock()
 	c.manager = manager.NewManager(
 		a.GetComponent(dashboard.ComponentName).(dashboard.Component),
+		i18nCmp,
 		a.GetComponent(mqtt.ComponentName).(mqtt.Component),
 		a.GetComponent(workers.ComponentName).(workers.Component),
 		c.listenersManager)

@@ -21,6 +21,7 @@ type Config struct {
 	Name             string
 	LivenessInterval time.Duration `mapstructure:"liveness_interval" yaml:"liveness_interval"`
 	LivenessTimeout  time.Duration `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
+	WidgetFileURL    string        `mapstructure:"widget_file_url" yaml:"widget_file_url"`
 }
 
 func (t Type) Config() interface{} {

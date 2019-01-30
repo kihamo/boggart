@@ -41,7 +41,7 @@ func (a *ISAPI) StreamingPictureToWriter(ctx context.Context, channel uint64, wr
 }
 
 func (a *ISAPI) StreamingPicture(ctx context.Context, channel uint64) ([]byte, error) {
-	buf := &bytes.Buffer{}
+	buf := bytes.NewBuffer(nil)
 
 	err := a.StreamingPictureToWriter(ctx, channel, buf)
 	if err != nil {

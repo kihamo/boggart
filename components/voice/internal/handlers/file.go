@@ -6,6 +6,7 @@ import (
 
 	"github.com/kihamo/boggart/components/storage"
 	"github.com/kihamo/boggart/components/voice"
+	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
@@ -37,7 +38,7 @@ func (h *FileHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	}
 
 	ctx := r.Context()
-	config := dashboard.ConfigFromContext(ctx)
+	cfg := config.ConfigFromContext(ctx)
 
 	var (
 		err                                         error
@@ -53,7 +54,7 @@ func (h *FileHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 			return
 		}
 	} else {
-		speed = config.Float64(voice.ConfigYandexSpeechKitCloudSpeed)
+		speed = cfg.Float64(voice.ConfigYandexSpeechKitCloudSpeed)
 	}
 
 	if qForce := q.Get("force"); qForce != "" {
@@ -67,31 +68,31 @@ func (h *FileHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	if qLanguage := q.Get("language"); qLanguage != "" {
 		language = qLanguage
 	} else {
-		language = config.String(voice.ConfigYandexSpeechKitCloudLanguage)
+		language = cfg.String(voice.ConfigYandexSpeechKitCloudLanguage)
 	}
 
 	if qSpeaker := q.Get("speaker"); qSpeaker != "" {
 		speaker = qSpeaker
 	} else {
-		speaker = config.String(voice.ConfigYandexSpeechKitCloudSpeaker)
+		speaker = cfg.String(voice.ConfigYandexSpeechKitCloudSpeaker)
 	}
 
 	if qEmotion := q.Get("emotion"); qEmotion != "" {
 		emotion = qEmotion
 	} else {
-		emotion = config.String(voice.ConfigYandexSpeechKitCloudEmotion)
+		emotion = cfg.String(voice.ConfigYandexSpeechKitCloudEmotion)
 	}
 
 	if qFormat := q.Get("format"); qFormat != "" {
 		format = qFormat
 	} else {
-		format = config.String(voice.ConfigYandexSpeechKitCloudFormat)
+		format = cfg.String(voice.ConfigYandexSpeechKitCloudFormat)
 	}
 
 	if qQuality := q.Get("quality"); qQuality != "" {
 		quality = qQuality
 	} else {
-		quality = config.String(voice.ConfigYandexSpeechKitCloudQuality)
+		quality = cfg.String(voice.ConfigYandexSpeechKitCloudQuality)
 	}
 
 	providerURL, err := provider.GenerateURL(ctx, message, language, speaker, emotion, format, quality, speed)

@@ -12,6 +12,7 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers/manager"
 	"github.com/kihamo/shadow/components/dashboard"
+	"github.com/kihamo/shadow/components/i18n"
 	"github.com/kihamo/shadow/components/workers"
 	"github.com/kihamo/snitch"
 	"github.com/pborman/uuid"
@@ -30,16 +31,18 @@ type Manager struct {
 	ready     int64
 	storage   *sync.Map
 	dashboard dashboard.Component
+	i18n      i18n.Component
 	mqtt      mqtt.Component
 	workers   workers.Component
 	listeners *manager.ListenersManager
 }
 
-func NewManager(dashboard dashboard.Component, mqtt mqtt.Component, workers workers.Component, listeners *manager.ListenersManager) *Manager {
+func NewManager(dashboard dashboard.Component, i18n i18n.Component, mqtt mqtt.Component, workers workers.Component, listeners *manager.ListenersManager) *Manager {
 	return &Manager{
 		ready:     managerNotReady,
 		storage:   new(sync.Map),
 		dashboard: dashboard,
+		i18n:      i18n,
 		mqtt:      mqtt,
 		workers:   workers,
 		listeners: listeners,
@@ -82,6 +85,10 @@ func (m *Manager) RegisterWithID(id string, bind boggart.Bind, t string, descrip
 			m.dashboard.RegisterAssetFS(name, fs)
 
 			// i18n
+			if m.i18n != nil {
+				fs.Prefix = "locales"
+				m.i18n.LoadLocaleFromFiles(name, i18n.FromAssetFS(fs))
+			}
 		}
 	}
 
@@ -193,7 +200,7 @@ func (m *Manager) Bind(id string) boggart.BindItem {
 func (m *Manager) BindItems() BindItemsList {
 	items := make([]boggart.BindItem, 0)
 
-	m.storage.Range(func(key interface{}, item interface{}) bool {
+	m.storage.Range(func(_ interface{}, item interface{}) bool {
 		items = append(items, item.(boggart.BindItem))
 		return true
 	})
