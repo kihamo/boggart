@@ -13,6 +13,7 @@ const (
 	DefaultUpdaterTimeout   = time.Second * 30
 	DefaultPTZInterval      = time.Minute
 	DefaultPTZTimeout       = time.Second * 5
+	DefaultWidgetChannel    = 101
 )
 
 type Config struct {
@@ -26,6 +27,7 @@ type Config struct {
 	PTZEnabled           bool          `mapstructure:"ptz_enabled" yaml:"ptz_enabled,omitempty"`
 	EventsEnabled        bool          `mapstructure:"events_enabled" yaml:"events_enabled,omitempty"`
 	EventsIgnoreInterval time.Duration `mapstructure:"events_ignore_interval" yaml:"events_ignore_interval,omitempty"`
+	WidgetChannel        uint64        `mapstructure:"widget_channel" yaml:"widget_channel,omitempty"`
 }
 
 func (t Type) Config() interface{} {
@@ -36,5 +38,6 @@ func (t Type) Config() interface{} {
 		UpdaterTimeout:   DefaultUpdaterTimeout,
 		PTZInterval:      DefaultPTZInterval,
 		PTZTimeout:       DefaultPTZTimeout,
+		WidgetChannel:    DefaultWidgetChannel,
 	}
 }

@@ -58,13 +58,21 @@ func (c *Component) DashboardMiddleware() []func(http.Handler) http.Handler {
 	return []func(http.Handler) http.Handler{
 		func(next http.Handler) http.Handler {
 			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				if dashboard.TemplateNamespaceFromContext(r.Context()) != c.Name() {
+				ctx := r.Context()
+
+				if dashboard.TemplateNamespaceFromContext(ctx) != c.Name() {
 					next.ServeHTTP(w, r)
 					return
 				}
 
-				// авторизация по умолчанию
-				if route := dashboard.RouteFromContext(r.Context()); route != nil && (route.Auth() || route.HandlerName() == "AssetsHandler") {
+				// уже авторизован общей авторизацией
+				if request := dashboard.RequestFromContext(ctx); request != nil && request.User().IsAuthorized() {
+					next.ServeHTTP(w, r)
+					return
+				}
+
+				// для защищенных маршрутов сработает мидлваря с общей авторизацией
+				if route := dashboard.RouteFromContext(ctx); route != nil && (route.Auth() || route.HandlerName() == "AssetsHandler") {
 					next.ServeHTTP(w, r)
 					return
 				}

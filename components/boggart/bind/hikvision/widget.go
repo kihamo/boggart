@@ -10,17 +10,19 @@ import (
 )
 
 func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
-	channel := r.URL().Query().Get("channel")
+	var (
+		ch  uint64
+		err error
+	)
 
-	if channel == "" {
-		t.NotFound(w, r)
-		return
-	}
-
-	ch, err := strconv.ParseUint(channel, 10, 64)
-	if err != nil {
-		t.NotFound(w, r)
-		return
+	if channel := r.URL().Query().Get("channel"); channel == "" {
+		ch = b.Config().(*Config).WidgetChannel
+	} else {
+		ch, err = strconv.ParseUint(channel, 10, 64)
+		if err != nil {
+			t.NotFound(w, r)
+			return
+		}
 	}
 
 	bind, ok := b.Bind().(*Bind)
