@@ -1,7 +1,6 @@
 package boggart
 
 const (
-	ConfigListenerTelegramChats = ComponentName + ".listener.telegram.chats"
-	ConfigMQTTMessengersEnabled = ComponentName + ".mqtt.messengers.enabled"
-	ConfigConfigYAML            = ComponentName + ".config.yaml"
+	ConfigConfigYAML = ComponentName + ".config.yaml"
+	ConfigAccessKeys = ComponentName + ".access-keys"
 )

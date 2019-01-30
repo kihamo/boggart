@@ -17,11 +17,12 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		"url":    b.Config().(*Config).WidgetFileURL,
 		"volume": bind.Volume(),
 	}
+	domain := dashboard.TemplateNamespaceFromContext(r.Context())
 
 	status := bind.status.Load()
 	isPlaying := status == "PLAYING" || status == "BUFFERING"
 	if isPlaying {
-		data["error"] = i18n.Locale(r.Context()).Translate(boggart.ComponentName+"-bind-"+b.Type(), "Already playing", "")
+		data["error"] = i18n.Locale(r.Context()).Translate(domain, "Already playing", "")
 	}
 
 	if r.IsPost() {
@@ -43,7 +44,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			if err != nil {
 				data["error"] = err.Error()
 			} else {
-				data["message"] = i18n.Locale(r.Context()).Translate(boggart.ComponentName+"-bind-"+b.Type(), "File playing", "")
+				data["message"] = i18n.Locale(r.Context()).Translate(domain, "File playing", "")
 			}
 		}
 	}

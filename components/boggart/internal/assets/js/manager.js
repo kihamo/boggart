@@ -77,7 +77,7 @@ $(document).ready(function () {
                         var content = '<div class="btn-group" role="group">';
 
                         if (row.has_widget) {
-                            content += '<a href="/boggart/bind/' + row.id + '/widget/" class="btn btn-info btn-icon btn-xs">' +
+                            content += '<a href="/boggart/widget/' + row.id + '/" class="btn btn-info btn-icon btn-xs">' +
                                 '<i class="glyphicon glyphicon-new-window" title="Open widget"></i>' +
                                 '</a>';
                         }

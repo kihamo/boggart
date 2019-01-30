@@ -6,9 +6,12 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
+	"github.com/kihamo/shadow/components/dashboard"
 )
 
-type Type struct{}
+type Type struct {
+	dashboard.Handler
+}
 
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
@@ -17,7 +20,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	password, _ := config.Address.User.Password()
 
 	bind := &Bind{
-		isapi:                 hikvision.NewISAPI(config.Address.Hostname(), port, config.Address.User.Username(), password),
+		isapi: hikvision.NewISAPI(config.Address.Hostname(), port, config.Address.User.Username(), password),
 		alertStreamingHistory: make(map[string]time.Time),
 		address:               config.Address.URL,
 		livenessInterval:      config.LivenessInterval,

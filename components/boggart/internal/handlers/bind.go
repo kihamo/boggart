@@ -50,10 +50,6 @@ func (h *BindHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		h.actionDelete(w, r, bindItem)
 		return
 
-	case "widget":
-		h.actionWidget(w, r, bindItem)
-		return
-
 	case "":
 		h.actionCreateOrUpdate(w, r, bindItem)
 		return
@@ -191,20 +187,4 @@ func (h *BindHandler) actionDelete(w *dashboard.Response, r *dashboard.Request, 
 	w.SendJSON(response{
 		Result: "success",
 	})
-}
-
-func (h *BindHandler) actionWidget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
-	if b == nil {
-		h.NotFound(w, r)
-		return
-	}
-
-	widget, ok := b.BindType().(boggart.BindTypeHasWidget)
-	if !ok {
-		h.NotFound(w, r)
-		return
-	}
-
-	r = r.WithContext(dashboard.ContextWithTemplateNamespace(r.Context(), boggart.ComponentName+"-bind-"+b.Type()))
-	widget.Widget(w, r, b)
 }

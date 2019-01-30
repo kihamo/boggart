@@ -2,8 +2,10 @@ package internal
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/elazarl/go-bindata-assetfs"
+	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/internal/handlers"
 	"github.com/kihamo/shadow/components/dashboard"
 )
@@ -41,13 +43,62 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 			dashboard.NewRoute("/"+c.Name()+"/bind/:id/:action/*path", bindHandler).
 				WithMethods([]string{http.MethodGet, http.MethodPost}).
 				WithAuth(true),
-			dashboard.NewRoute("/"+c.Name()+"/camera/:id/:channel", handlers.NewCameraHandler(c.manager)).
-				WithMethods([]string{http.MethodGet, http.MethodPost, http.MethodHead}),
 			dashboard.NewRoute("/"+c.Name()+"/config/:action", handlers.NewConfigHandler(c.manager, c)).
 				WithMethods([]string{http.MethodGet, http.MethodPost}).
 				WithAuth(true),
+			dashboard.NewRoute("/"+c.Name()+"/widget/:id", handlers.NewWidgetHandler(c.manager)).
+				WithMethods([]string{http.MethodGet, http.MethodPost}),
 		}
 	}
 
 	return c.routes
+}
+
+func (c *Component) DashboardMiddleware() []func(http.Handler) http.Handler {
+	return []func(http.Handler) http.Handler{
+		func(next http.Handler) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if dashboard.TemplateNamespaceFromContext(r.Context()) != c.Name() {
+					next.ServeHTTP(w, r)
+					return
+				}
+
+				// авторизация по умолчанию
+				if route := dashboard.RouteFromContext(r.Context()); route != nil && route.Auth() {
+					next.ServeHTTP(w, r)
+					return
+				}
+
+				keysConfig := c.config.String(boggart.ConfigAccessKeys)
+				if keysConfig == "" {
+					next.ServeHTTP(w, r)
+					return
+				}
+
+				keys := strings.Split(keysConfig, ",")
+				if len(keys) == 0 {
+					next.ServeHTTP(w, r)
+					return
+				}
+
+				key := strings.TrimSpace(r.URL.Query().Get("key"))
+				if key == "" {
+					http.Error(w, http.StatusText(http.StatusUnauthorized), 401)
+					return
+				}
+
+				for _, k := range keys {
+					k = strings.TrimSpace(k)
+
+					if k == key {
+						next.ServeHTTP(w, r)
+						return
+					}
+				}
+
+				http.Error(w, http.StatusText(http.StatusUnauthorized), 401)
+				return
+			})
+		},
+	}
 }

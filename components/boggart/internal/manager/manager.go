@@ -69,7 +69,7 @@ func (m *Manager) RegisterWithID(id string, bind boggart.Bind, t string, descrip
 	}
 
 	// register widget
-	if widget, ok := bindType.(boggart.BindTypeHasWidget); ok {
+	if widget, ok := bindType.(boggart.BindTypeHasWidgetAssetFS); ok {
 		if fs := widget.WidgetAssetFS(); fs != nil {
 			name := boggart.ComponentName + "-bind-" + t
 

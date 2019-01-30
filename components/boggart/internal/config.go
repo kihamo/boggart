@@ -9,7 +9,11 @@ func (c *Component) ConfigVariables() []config.Variable {
 	return []config.Variable{
 		config.NewVariable(boggart.ConfigConfigYAML, config.ValueTypeString).
 			WithUsage("Absolute path to YAML config").
-			WithGroup("Config").
 			WithDefault("config.yaml"),
+		config.NewVariable(boggart.ConfigAccessKeys, config.ValueTypeString).
+			WithUsage("Access keys").
+			WithEditable(true).
+			WithView([]string{config.ViewTags}).
+			WithViewOptions(map[string]interface{}{config.ViewOptionTagsDefaultText: "add a key"}),
 	}
 }

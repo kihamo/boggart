@@ -57,6 +57,9 @@ type BindType interface {
 
 type BindTypeHasWidget interface {
 	Widget(*dashboard.Response, *dashboard.Request, BindItem)
+}
+
+type BindTypeHasWidgetAssetFS interface {
 	WidgetAssetFS() *assetfs.AssetFS
 }
 
