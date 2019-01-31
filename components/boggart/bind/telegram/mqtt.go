@@ -17,18 +17,29 @@ import (
 const (
 	MQTTPrefix mqtt.Topic = boggart.ComponentName + "/telegram/+/"
 
-	MQTTSubscribeTopicMessage = MQTTPrefix + "message/+"
-	MQTTSubscribeTopicFile    = MQTTPrefix + "file/+"
-	MQTTPublishTopicFileAudio = MQTTPrefix + "file/audio/+"
-	MQTTPublishTopicFileVoice = MQTTPrefix + "file/voice/+"
+	MQTTSubscribeTopicSendMessage  = MQTTPrefix + "send/+/message"
+	MQTTSubscribeTopicSendFile     = MQTTPrefix + "send/+/file"
+	MQTTPublishTopicReceiveMessage = MQTTPrefix + "receive/+/message"
+	MQTTPublishTopicReceiveAudio   = MQTTPrefix + "receive/+/audio"
+	MQTTPublishTopicReceiveVoice   = MQTTPrefix + "receive/+/voice"
 )
+
+func (b *Bind) MQTTPublishes() []mqtt.Topic {
+	sn := mqtt.NameReplace(b.SerialNumber())
+
+	return []mqtt.Topic{
+		mqtt.Topic(MQTTPublishTopicReceiveMessage.Format(sn)),
+		mqtt.Topic(MQTTPublishTopicReceiveAudio.Format(sn)),
+		mqtt.Topic(MQTTPublishTopicReceiveVoice.Format(sn)),
+	}
+}
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	sn := mqtt.NameReplace(b.SerialNumber())
 
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTSubscribeTopicMessage.Format(sn), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 3) {
+		mqtt.NewSubscriber(MQTTSubscribeTopicSendMessage.Format(sn), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 4) {
 				return nil
 			}
 
@@ -37,10 +48,10 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return errors.New("bad topic name")
 			}
 
-			return b.SendMessage(routes[len(routes)-1], message.String())
+			return b.SendMessage(routes[len(routes)-2], message.String())
 		}),
-		mqtt.NewSubscriber(MQTTSubscribeTopicFile.Format(sn), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 3) {
+		mqtt.NewSubscriber(MQTTSubscribeTopicSendFile.Format(sn), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 4) {
 				return nil
 			}
 

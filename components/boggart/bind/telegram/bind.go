@@ -2,7 +2,6 @@ package telegram
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"strconv"
 
@@ -112,7 +111,11 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 					continue
 				}
 
-				fmt.Println(u.Message.Text)
+				ctx := context.Background()
+
+				if u.Message.Text != "" {
+					b.MQTTPublishAsync(ctx, MQTTPublishTopicReceiveMessage.Format(sn, u.Message.Chat.ID), 1, false, u.Message.Text)
+				}
 
 				var (
 					fileID    string
@@ -121,10 +124,10 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 
 				if u.Message.Voice != nil {
 					fileID = u.Message.Voice.FileID
-					mqttTopic = MQTTPublishTopicFileVoice.Format(sn, u.Message.Chat.ID)
+					mqttTopic = MQTTPublishTopicReceiveVoice.Format(sn, u.Message.Chat.ID)
 				} else if u.Message.Audio != nil {
 					fileID = u.Message.Audio.FileID
-					mqttTopic = MQTTPublishTopicFileAudio.Format(sn, u.Message.Chat.ID)
+					mqttTopic = MQTTPublishTopicReceiveAudio.Format(sn, u.Message.Chat.ID)
 				}
 
 				if fileID == "" {
@@ -137,7 +140,7 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 					continue
 				}
 
-				b.MQTTPublishAsync(context.Background(), mqttTopic, 1, false, link)
+				b.MQTTPublishAsync(ctx, mqttTopic, 1, false, link)
 
 			case <-b.done:
 				return
