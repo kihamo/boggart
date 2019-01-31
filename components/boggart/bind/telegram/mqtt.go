@@ -19,6 +19,8 @@ const (
 
 	MQTTSubscribeTopicMessage = MQTTPrefix + "message/+"
 	MQTTSubscribeTopicFile    = MQTTPrefix + "file/+"
+	MQTTPublishTopicFileAudio = MQTTPrefix + "file/audio/+"
+	MQTTPublishTopicFileVoice = MQTTPrefix + "file/voice/+"
 )
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {

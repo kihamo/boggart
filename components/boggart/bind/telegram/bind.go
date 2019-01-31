@@ -1,10 +1,12 @@
 package telegram
 
 import (
+	"context"
 	"io"
 	"strconv"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/mqtt"
 	"gopkg.in/telegram-bot-api.v4"
 )
 
@@ -13,6 +15,7 @@ type Bind struct {
 	boggart.BindMQTT
 
 	client *tgbotapi.BotAPI
+	done   chan struct{}
 }
 
 func (b *Bind) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.BindStatusSetter) {
@@ -91,4 +94,52 @@ func (b *Bind) chatId(to string) (int64, error) {
 	}
 
 	return int64(chatId), err
+}
+
+func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
+	go func() {
+		sn := mqtt.NameReplace(b.SerialNumber())
+
+		for {
+			select {
+			case u := <-ch:
+				// TODO: фильтрация по чату
+
+				// TODO: фильтрация по юзеру
+
+				if u.Message == nil {
+					continue
+				}
+
+				var (
+					fileID    string
+					mqttTopic string
+				)
+
+				if u.Message.Voice != nil {
+					fileID = u.Message.Voice.FileID
+					mqttTopic = MQTTPublishTopicFileVoice.Format(sn, u.Message.Chat.ID)
+				} else if u.Message.Audio != nil {
+					fileID = u.Message.Audio.FileID
+					mqttTopic = MQTTPublishTopicFileAudio.Format(sn, u.Message.Chat.ID)
+				}
+
+				link, err := b.client.GetFileDirectURL(fileID)
+				if err != nil {
+					// TODO: log
+					continue
+				}
+
+				b.MQTTPublishAsync(context.Background(), mqttTopic, 1, false, link)
+
+			case <-b.done:
+				return
+			}
+		}
+	}()
+}
+
+func (b *Bind) Close() (err error) {
+	close(b.done)
+	return nil
 }

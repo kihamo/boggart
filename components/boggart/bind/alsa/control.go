@@ -26,7 +26,14 @@ func (b *Bind) PlayFromURL(url string) error {
 	case storage.MIMETypeMPEG:
 		format = AudioFormatMP3
 
-		// TODO: wav, flac
+	case storage.MIMETypeOGG:
+		format = AudioFormatOGG
+
+	case storage.MIMETypeWAVE:
+		format = AudioFormatWAV
+
+	case storage.MIMETypeFLAC:
+		format = AudioFormatFLAC
 
 	default:
 		return ErrorUnknownAudioFormat
@@ -68,10 +75,17 @@ func (b *Bind) PlayFromReader(reader io.ReadCloser) error {
 	var format string
 
 	switch mimeType {
-	case "audio/mpeg":
+	case storage.MIMETypeMPEG:
 		format = AudioFormatMP3
 
-		// TODO: wav, flac
+	case storage.MIMETypeOGG:
+		format = AudioFormatOGG
+
+	case storage.MIMETypeWAVE:
+		format = AudioFormatWAV
+
+	case storage.MIMETypeFLAC:
+		format = AudioFormatFLAC
 
 	default:
 		return ErrorUnknownAudioFormat

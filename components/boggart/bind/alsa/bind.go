@@ -10,6 +10,7 @@ import (
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/flac"
 	"github.com/faiface/beep/mp3"
+	"github.com/faiface/beep/vorbis"
 	"github.com/faiface/beep/wav"
 	"github.com/hajimehoshi/oto"
 	"github.com/kihamo/boggart/components/boggart"
@@ -21,6 +22,7 @@ const (
 	AudioFormatMP3  = "mp3"
 	AudioFormatWAV  = "wav"
 	AudioFormatFLAC = "flac"
+	AudioFormatOGG  = "ogg"
 )
 
 var (
@@ -91,6 +93,8 @@ func (b *Bind) initStream(s io.ReadCloser, f string) (err error) {
 		source, format, err = wav.Decode(s)
 	case AudioFormatFLAC:
 		source, format, err = flac.Decode(s)
+	case AudioFormatOGG:
+		source, format, err = vorbis.Decode(s)
 
 	default:
 		return ErrorUnknownAudioFormat

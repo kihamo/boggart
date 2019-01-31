@@ -15,11 +15,13 @@ var (
 )
 
 const (
-	MIMETypeUnknown = MIMEType("")
-	MIMETypeMPEG    = MIMEType("audio/mpeg")
-	MIMETypeWAVE    = MIMEType("audio/vnd.wave")
-	MIMETypeOGG     = MIMEType("audio/ogg")
-	MIMETypeJPEG    = MIMEType("image/jpeg")
+	MIMETypeUnknown     = MIMEType("")
+	MIMETypeJPEG        = MIMEType("image/jpeg")
+	MIMETypeMPEG        = MIMEType("audio/mpeg")
+	MIMETypeWAVE        = MIMEType("audio/vnd.wave")
+	MIMETypeFLAC        = MIMEType("audio/flac")
+	MIMETypeOGG         = MIMEType("application/ogg")
+	MIMETypeOctetStream = MIMEType("application/octet-stream")
 )
 
 var (
@@ -67,7 +69,8 @@ func MimeTypeFromData(data io.Reader) (MIMEType, error) {
 	return MIMEType(t), nil
 }
 
-func MimeTypeFromURL(url string) (MIMEType, error) {
+func MimeTypeFromURL(url string) (mimeType MIMEType, err error) {
+	// попытка вычитать HEAD
 	request, err := http.NewRequest(http.MethodHead, url, nil)
 	if err != nil {
 		return MIMETypeUnknown, err
@@ -78,25 +81,30 @@ func MimeTypeFromURL(url string) (MIMEType, error) {
 		return MIMETypeUnknown, err
 	}
 
-	// GET fallback
-	if response.StatusCode != http.StatusOK {
-		request, err = http.NewRequest(http.MethodGet, url, nil)
-		if err != nil {
-			return MIMETypeUnknown, err
-		}
-
-		response, err = defaultHTTPClient.Do(request)
-		if err != nil {
-			return MIMETypeUnknown, err
+	if response.StatusCode == http.StatusOK {
+		mimeType, err = MimeTypeFromHTTPHeader(response.Header)
+		if err == nil && mimeType != MIMETypeOctetStream {
+			return mimeType, nil
 		}
 	}
 
-	mimeType, err := MimeTypeFromHTTPHeader(response.Header)
+	// если не удалось, то делает GET
+	request, err = http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return MIMETypeUnknown, err
 	}
 
-	if mimeType == MIMETypeUnknown {
+	response, err = defaultHTTPClient.Do(request)
+	if err != nil {
+		return MIMETypeUnknown, err
+	}
+
+	mimeType, err = MimeTypeFromHTTPHeader(response.Header)
+	if err != nil {
+		return MIMETypeUnknown, err
+	}
+
+	if mimeType == MIMETypeUnknown || mimeType == MIMETypeOctetStream {
 		mimeType, err = MimeTypeFromData(response.Body)
 	}
 
