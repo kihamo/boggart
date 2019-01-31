@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"strconv"
 
@@ -111,6 +112,8 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 					continue
 				}
 
+				fmt.Println(u.Message.Text)
+
 				var (
 					fileID    string
 					mqttTopic string
@@ -122,6 +125,10 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 				} else if u.Message.Audio != nil {
 					fileID = u.Message.Audio.FileID
 					mqttTopic = MQTTPublishTopicFileAudio.Format(sn, u.Message.Chat.ID)
+				}
+
+				if fileID == "" {
+					continue
 				}
 
 				link, err := b.client.GetFileDirectURL(fileID)

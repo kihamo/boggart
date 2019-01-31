@@ -1,5 +1,5 @@
 hash: 085e3c5d2072df37e5dd34805ac4d57745d0c48a43578331ad131fc2b2b2fcd7
-updated: 2019-01-31T00:42:41.988806+03:00
+updated: 2019-01-31T14:11:43.930909+03:00
 imports:
 - name: code.cloudfoundry.org/clock
   version: 02e53af36e6c978af692887ed449b74026d76fec
@@ -52,6 +52,7 @@ imports:
   - effects
   - flac
   - mp3
+  - vorbis
   - wav
 - name: github.com/fsnotify/fsnotify
   version: c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9
@@ -158,6 +159,10 @@ imports:
   - client/v2
   - models
   - pkg/escape
+- name: github.com/jfreymuth/oggvorbis
+  version: ae597dfe1dbbe0024c3ef962f9f8a8f7de3f158b
+- name: github.com/jfreymuth/vorbis
+  version: 2f16367d086d143e8e946cc5ee24618147d673dc
 - name: github.com/julienschmidt/httprouter
   version: e1b9828bc9e5904baec057a154c09ca40fe7fae0
 - name: github.com/justinas/alice
