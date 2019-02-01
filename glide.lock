@@ -1,8 +1,31 @@
-hash: 085e3c5d2072df37e5dd34805ac4d57745d0c48a43578331ad131fc2b2b2fcd7
-updated: 2019-01-31T14:11:43.930909+03:00
+hash: b42edc6b5f96bd76ddd234199d682f7617088ce5199840bfb0390f0dda78e072
+updated: 2019-02-01T13:30:39.435396+03:00
 imports:
+- name: cloud.google.com/go
+  version: b2f67320b4ef8ea4a3b762e54394254d11fa2844
+  subpackages:
+  - compute/metadata
+  - firestore
+  - firestore/apiv1beta1
+  - iam
+  - internal
+  - internal/btree
+  - internal/fields
+  - internal/optional
+  - internal/trace
+  - internal/version
+  - storage
 - name: code.cloudfoundry.org/clock
   version: 02e53af36e6c978af692887ed449b74026d76fec
+- name: firebase.google.com/go
+  version: d66173809ba9d56b97a4e69df7f832c9a93cd323
+  subpackages:
+  - auth
+  - db
+  - iid
+  - internal
+  - messaging
+  - storage
 - name: github.com/alexedwards/scs
   version: dbad6751cfac0714e079d0ef9a8bc1d14d52de21
   subpackages:
@@ -107,17 +130,24 @@ imports:
   version: b4deda0973fb4c70b50d226b1af49f3da59f5265
   subpackages:
   - proto
+  - protoc-gen-go/descriptor
   - ptypes
   - ptypes/any
   - ptypes/duration
+  - ptypes/empty
   - ptypes/struct
   - ptypes/timestamp
+  - ptypes/wrappers
 - name: github.com/google/go-querystring
   version: 44c6ddd0a2342c386950e880b658017258da92fc
   subpackages:
   - query
 - name: github.com/google/uuid
   version: 9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8
+- name: github.com/googleapis/gax-go
+  version: ddfab93c3faef4935403ac75a7c11f0e731dc181
+  subpackages:
+  - v2
 - name: github.com/gopherjs/gopherjs
   version: d547d1d9531ed93dbdebcbff7f83e7c876a1e0ee
   subpackages:
@@ -149,6 +179,10 @@ imports:
   - internal/sideinfo
 - name: github.com/hajimehoshi/oto
   version: 69b46d84898282d901717ca51635af708da6c086
+- name: github.com/hashicorp/golang-lru
+  version: 20f1fb78b0740ba8c3cb143a61e86ba5c8669768
+  subpackages:
+  - simplelru
 - name: github.com/heptiolabs/healthcheck
   version: da5fdee475fb09de87c5d4a50da233b7d28767b1
 - name: github.com/icza/bitio
@@ -379,6 +413,23 @@ imports:
   - metrics
 - name: github.com/yryz/ds18b20
   version: 3cf383a406247c49e48a80014f3e17ddee418742
+- name: go.opencensus.io
+  version: 3cbb6ce43853260092b2858e37d5b692b57b432b
+  subpackages:
+  - exemplar
+  - internal
+  - internal/tagencoding
+  - plugin/ocgrpc
+  - plugin/ochttp
+  - plugin/ochttp/propagation/b3
+  - stats
+  - stats/internal
+  - stats/view
+  - tag
+  - trace
+  - trace/internal
+  - trace/propagation
+  - trace/tracestate
 - name: go.uber.org/atomic
   version: 1ea20fb1cbb1cc08cbd0d913a96dead89aa18289
 - name: go.uber.org/multierr
@@ -452,7 +503,10 @@ imports:
 - name: golang.org/x/oauth2
   version: 8f65e3013ebad444f13bc19536f7865efc793816
   subpackages:
+  - google
   - internal
+  - jws
+  - jwt
 - name: golang.org/x/sync
   version: 1d60e4601c6fd243af51cc01ddf169918a5407ca
   subpackages:
@@ -475,20 +529,45 @@ imports:
   - unicode/bidi
   - unicode/norm
   - width
+- name: google.golang.org/api
+  version: b7b8eee3e7a942b68d7513082b6793866a911b63
+  subpackages:
+  - gensupport
+  - googleapi
+  - googleapi/internal/uritemplates
+  - googleapi/transport
+  - identitytoolkit/v3
+  - internal
+  - iterator
+  - option
+  - storage/v1
+  - transport
+  - transport/grpc
+  - transport/http
+  - transport/http/internal/propagation
 - name: google.golang.org/appengine
   version: 4a4468ece617fc8205e99368fa2200e9d1fad421
   subpackages:
   - internal
+  - internal/app_identity
   - internal/base
   - internal/datastore
   - internal/log
+  - internal/modules
   - internal/remote_api
+  - internal/socket
   - internal/urlfetch
+  - socket
   - urlfetch
 - name: google.golang.org/genproto
   version: b5d43981345bdb2c233eb4bf3277847b48c6fdc6
   subpackages:
+  - googleapis/api/annotations
+  - googleapis/firestore/v1beta1
+  - googleapis/iam/v1
+  - googleapis/rpc/code
   - googleapis/rpc/status
+  - googleapis/type/latlng
 - name: google.golang.org/grpc
   version: 2e463a05d100327ca47ac218281906921038fd95
   subpackages:
@@ -498,6 +577,7 @@ imports:
   - codes
   - connectivity
   - credentials
+  - credentials/oauth
   - encoding
   - encoding/proto
   - grpclog

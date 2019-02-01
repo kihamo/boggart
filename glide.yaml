@@ -56,3 +56,5 @@ import:
   version: b9af836f6e9ddb24b1bb5d3d498459d93816ed64
 - package: github.com/sparrc/go-ping
   version: ef3ab45e41b017889941ea5bb796dd502d2b5a1b
+- package: firebase.google.com/go
+  version: ~v3.5

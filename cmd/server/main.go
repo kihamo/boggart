@@ -6,6 +6,7 @@ import (
 	_ "github.com/kihamo/boggart/components/boggart/bind/broadlink"
 	_ "github.com/kihamo/boggart/components/boggart/bind/chromecast"
 	_ "github.com/kihamo/boggart/components/boggart/bind/ds18b20"
+	_ "github.com/kihamo/boggart/components/boggart/bind/fcm"
 	_ "github.com/kihamo/boggart/components/boggart/bind/google_home"
 	_ "github.com/kihamo/boggart/components/boggart/bind/gpio"
 	_ "github.com/kihamo/boggart/components/boggart/bind/grafana"
