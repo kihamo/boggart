@@ -115,7 +115,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				}
 			}
 
-			to := routes[len(routes)-1]
+			to := routes[len(routes)-2]
 
 			if name == "" {
 				name = "File at " + time.Now().Format(time.RFC1123Z)
