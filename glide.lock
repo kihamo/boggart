@@ -1,8 +1,8 @@
-hash: b42edc6b5f96bd76ddd234199d682f7617088ce5199840bfb0390f0dda78e072
-updated: 2019-02-01T13:30:39.435396+03:00
+hash: fc1284f5bbd80bfd1ccc4ba19d241a726558ccf74806a28d28a595b1cc68b7e7
+updated: 2019-02-03T02:28:44.702684+03:00
 imports:
 - name: cloud.google.com/go
-  version: b2f67320b4ef8ea4a3b762e54394254d11fa2844
+  version: 756b0e0009e81a539e95b2821201b2bf1153a475
   subpackages:
   - compute/metadata
   - firestore
@@ -217,7 +217,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 555989ce72f0ffe945e5b46ed0be45eb504be43f
+  version: 8151b12b42bcf282ce0000b3fd7538d254234f09
   subpackages:
   - components/annotations
   - components/annotations/instance
@@ -530,7 +530,7 @@ imports:
   - unicode/norm
   - width
 - name: google.golang.org/api
-  version: b7b8eee3e7a942b68d7513082b6793866a911b63
+  version: 0549de6b75e7bf41c9d10dd064cd3d35e55521ad
   subpackages:
   - gensupport
   - googleapi

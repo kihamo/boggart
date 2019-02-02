@@ -96,8 +96,10 @@ func (c *Component) Init(a shadow.Application) error {
 }
 
 func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
-	<-a.ReadyComponent(mqtt.ComponentName)
-	<-a.ReadyComponent(workers.ComponentName)
+	<-a.ReadyComponent(config.ComponentName)
+	c.config = a.GetComponent(config.ComponentName).(config.Component)
+
+	<-a.ReadyComponent(mqtt.ComponentName, workers.ComponentName)
 
 	var i18nCmp i18n.Component
 	if a.HasComponent(i18n.ComponentName) {
@@ -119,9 +121,6 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 	if _, err := host.Init(); err != nil {
 		return err
 	}
-
-	<-a.ReadyComponent(config.ComponentName)
-	c.config = a.GetComponent(config.ComponentName).(config.Component)
 
 	if loaded, err := c.ReloadConfig(); err == nil {
 		c.logger.Debug("Loaded " + strconv.FormatInt(int64(loaded), 10) + " binds from " + c.config.String(boggart.ConfigConfigYAML) + " file")
