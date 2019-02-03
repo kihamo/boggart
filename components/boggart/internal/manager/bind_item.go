@@ -10,6 +10,8 @@ import (
 )
 
 type BindItem struct {
+	status uint64
+
 	bind        boggart.Bind
 	bindType    boggart.BindType
 	id          string
@@ -17,7 +19,6 @@ type BindItem struct {
 	description string
 	tags        []string
 	config      interface{}
-	status      uint64
 
 	cacheMutex           sync.Mutex
 	cacheTasks           []workers.Task
