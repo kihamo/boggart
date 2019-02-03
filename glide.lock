@@ -1,5 +1,5 @@
-hash: fc1284f5bbd80bfd1ccc4ba19d241a726558ccf74806a28d28a595b1cc68b7e7
-updated: 2019-02-03T02:28:44.702684+03:00
+hash: ce841c30e54b4341bdbcd2b3fd704ed6aaf9dca8540429745de820c4db381fc2
+updated: 2019-02-03T17:00:03.879022+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -217,7 +217,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 8151b12b42bcf282ce0000b3fd7538d254234f09
+  version: ba003ead1f151f9dab2fb376eb1707683b887f63
   subpackages:
   - components/annotations
   - components/annotations/instance
@@ -414,7 +414,7 @@ imports:
 - name: github.com/yryz/ds18b20
   version: 3cf383a406247c49e48a80014f3e17ddee418742
 - name: go.opencensus.io
-  version: 3cbb6ce43853260092b2858e37d5b692b57b432b
+  version: 7a32882185281dc6ea972e9b80d6a58448359977
   subpackages:
   - exemplar
   - internal
@@ -530,7 +530,7 @@ imports:
   - unicode/norm
   - width
 - name: google.golang.org/api
-  version: 0549de6b75e7bf41c9d10dd064cd3d35e55521ad
+  version: 2332327d474b8b265f7d524cac166fe335d821a9
   subpackages:
   - gensupport
   - googleapi
