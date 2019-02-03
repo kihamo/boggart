@@ -13,6 +13,7 @@ import (
 	"github.com/kihamo/boggart/components/openhab"
 	"github.com/kihamo/boggart/components/openhab/client/things"
 	"github.com/kihamo/shadow/components/dashboard"
+	"github.com/kihamo/shadow/components/logging"
 	"github.com/kihamo/shadow/components/messengers"
 	"github.com/kihamo/shadow/components/tracing"
 )
@@ -139,13 +140,13 @@ func (h *ProxyHandler) sendFileToMessenger(messenger string, body []byte, w *das
 		case "image/jpeg", "image/png", "image/gif", "image/webp":
 			for _, chatId := range chats {
 				if err := m.SendPhoto(chatId, description, bytes.NewReader(body)); err != nil {
-					h.Logger().Error("Failed send message to "+messenger, "error", err.Error())
+					logging.Log(r.Context()).Error("Failed send message to "+messenger, "error", err.Error())
 					return
 				}
 			}
 		default:
 			// TODO: send file
-			h.Logger().Warn("Send file not implemented", "mime", mime)
+			logging.Log(r.Context()).Warn("Send file not implemented", "mime", mime)
 		}
 	}(r.URL().Query())
 }
