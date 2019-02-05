@@ -5,6 +5,7 @@ import (
 
 	_ "github.com/kihamo/boggart/components/boggart/bind/ds18b20"
 	_ "github.com/kihamo/boggart/components/boggart/bind/gpio"
+	_ "github.com/kihamo/boggart/components/boggart/bind/telegram"
 	_ "github.com/kihamo/boggart/components/boggart/instance"
 	_ "github.com/kihamo/boggart/components/mqtt/instance"
 	"github.com/kihamo/shadow"

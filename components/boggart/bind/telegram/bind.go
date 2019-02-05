@@ -2,7 +2,9 @@ package telegram
 
 import (
 	"context"
+	"fmt"
 	"io"
+	"net/url"
 	"strconv"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -36,7 +38,7 @@ func (b *Bind) SendMessage(to, message string) error {
 	return err
 }
 
-func (b *Bind) SendPhoto(to, name string, file io.Reader) error {
+func (b *Bind) SendPhoto(to, name string, file io.Reader, size int64) error {
 	chatId, err := b.chatId(to)
 	if err != nil {
 		return err
@@ -45,7 +47,7 @@ func (b *Bind) SendPhoto(to, name string, file io.Reader) error {
 	msg := tgbotapi.NewPhotoUpload(chatId, tgbotapi.FileReader{
 		Name:   name,
 		Reader: file,
-		Size:   -1,
+		Size:   size,
 	})
 	msg.Caption = name
 
@@ -53,7 +55,7 @@ func (b *Bind) SendPhoto(to, name string, file io.Reader) error {
 	return err
 }
 
-func (b *Bind) SendAudio(to, name string, file io.Reader) error {
+func (b *Bind) SendAudio(to, name string, file io.Reader, size int64) error {
 	chatId, err := b.chatId(to)
 	if err != nil {
 		return err
@@ -62,7 +64,7 @@ func (b *Bind) SendAudio(to, name string, file io.Reader) error {
 	msg := tgbotapi.NewAudioUpload(chatId, tgbotapi.FileReader{
 		Name:   name,
 		Reader: file,
-		Size:   -1,
+		Size:   size,
 	})
 	msg.Caption = name
 
@@ -70,7 +72,7 @@ func (b *Bind) SendAudio(to, name string, file io.Reader) error {
 	return err
 }
 
-func (b *Bind) SendDocument(to, name string, file io.Reader) error {
+func (b *Bind) SendDocument(to, name string, file io.Reader, size int64) error {
 	chatId, err := b.chatId(to)
 	if err != nil {
 		return err
@@ -79,11 +81,29 @@ func (b *Bind) SendDocument(to, name string, file io.Reader) error {
 	msg := tgbotapi.NewDocumentUpload(chatId, tgbotapi.FileReader{
 		Name:   name,
 		Reader: file,
-		Size:   -1,
+		Size:   size,
 	})
 	msg.Caption = name
 
 	_, err = b.client.Send(msg)
+	return err
+}
+
+func (b *Bind) SendFileAsURL(to, name, u string) error {
+	chatId, err := b.chatId(to)
+	if err != nil {
+		return err
+	}
+
+	if _, err = url.Parse(u); err != nil {
+		return err
+	}
+
+	msg := tgbotapi.NewMessage(chatId, fmt.Sprintf("%s [view](%s)", name, u))
+	msg.ParseMode = "Markdown"
+
+	_, err = b.client.Send(msg)
+
 	return err
 }
 

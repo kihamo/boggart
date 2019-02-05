@@ -19,6 +19,7 @@ const (
 
 	MQTTSubscribeTopicSendMessage  = MQTTPrefix + "send/+/message"
 	MQTTSubscribeTopicSendFile     = MQTTPrefix + "send/+/file"
+	MQTTSubscribeTopicSendFileURL  = MQTTPrefix + "send/+/file/url"
 	MQTTPublishTopicReceiveMessage = MQTTPrefix + "receive/+/message"
 	MQTTPublishTopicReceiveAudio   = MQTTPrefix + "receive/+/audio"
 	MQTTPublishTopicReceiveVoice   = MQTTPrefix + "receive/+/voice"
@@ -123,16 +124,28 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			switch mime {
 			case storage.MIMETypeJPEG:
-				err = b.SendPhoto(to, name, response.Body)
+				err = b.SendPhoto(to, name, response.Body, response.ContentLength)
 
 			case storage.MIMETypeMPEG, storage.MIMETypeWAVE, storage.MIMETypeOGG:
-				err = b.SendAudio(to, name, response.Body)
+				err = b.SendAudio(to, name, response.Body, response.ContentLength)
 
 			default:
-				err = b.SendDocument(to, name, response.Body)
+				err = b.SendDocument(to, name, response.Body, response.ContentLength)
 			}
 
 			return err
+		}),
+		mqtt.NewSubscriber(MQTTSubscribeTopicSendFileURL.Format(sn), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 5) {
+				return nil
+			}
+
+			routes := mqtt.RouteSplit(message.Topic())
+			if len(routes) < 1 {
+				return errors.New("bad topic name")
+			}
+
+			return b.SendFileAsURL(routes[len(routes)-3], "File at "+time.Now().Format(time.RFC1123Z), message.String())
 		}),
 	}
 }

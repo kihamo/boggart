@@ -58,3 +58,5 @@ import:
   version: ef3ab45e41b017889941ea5bb796dd502d2b5a1b
 - package: firebase.google.com/go
   version: ~v3.5
+- package: gopkg.in/telegram-bot-api.v4
+  version: ~v4.6
