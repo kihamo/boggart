@@ -27,13 +27,14 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		err      error
 		attempts int
 		latency  uint32
+		conn     net.Conn
 	)
 
 	for {
 		attempts++
 
 		startTime := time.Now()
-		conn, err := net.DialTimeout("tcp", b.address, b.timeout)
+		conn, err = net.DialTimeout("tcp", b.address, b.timeout)
 		latency = uint32(time.Now().Sub(startTime).Nanoseconds() / 1e+6)
 
 		if err == nil {
@@ -55,9 +56,11 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		}
 	}
 
-	if ok := b.latency.Set(latency); ok {
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicLatency.Format(h), 0, true, latency); e != nil {
-			err = multierr.Append(err, e)
+	if online {
+		if ok := b.latency.Set(latency); ok {
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicLatency.Format(h), 0, true, latency); e != nil {
+				err = multierr.Append(err, e)
+			}
 		}
 	}
 
