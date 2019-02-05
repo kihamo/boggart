@@ -6,6 +6,9 @@ import (
 
 type Bind struct {
 	boggart.BindBase
+	boggart.BindMQTT
+
+	config *Config
 }
 
 func (b *Bind) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.BindStatusSetter) {

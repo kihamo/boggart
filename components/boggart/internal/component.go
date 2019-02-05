@@ -141,7 +141,9 @@ func (c *Component) registerDefaultBinds() error {
 	}
 
 	cfg, err := boggart.ValidateBindConfig(kind, map[string]interface{}{
-		"build": c.application.Build(),
+		"application_name":    c.application.Name(),
+		"application_version": c.application.Version(),
+		"application_build":   c.application.Build(),
 	})
 	if err != nil {
 		return err
@@ -153,7 +155,7 @@ func (c *Component) registerDefaultBinds() error {
 	}
 
 	id := mqtt.NameReplace(c.application.Name())
-	_, err = c.manager.RegisterWithID(id, bind, c.Name(), c.application.Name(), nil, nil)
+	_, err = c.manager.RegisterWithID(id, bind, c.Name(), c.application.Name(), []string{c.Name()}, cfg)
 	return err
 }
 
