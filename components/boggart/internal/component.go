@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/kihamo/boggart/components/boggart"
+	_ "github.com/kihamo/boggart/components/boggart/bind/boggart"
 	"github.com/kihamo/boggart/components/boggart/internal/manager"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/components/syslog"
@@ -133,8 +134,35 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 	return nil
 }
 
+func (c *Component) registerDefaultBinds() error {
+	kind, err := boggart.GetBindType(c.Name())
+	if err != nil {
+		return err
+	}
+
+	cfg, err := boggart.ValidateBindConfig(kind, map[string]interface{}{
+		"build": c.application.Build(),
+	})
+	if err != nil {
+		return err
+	}
+
+	bind, err := kind.CreateBind(cfg)
+	if err != nil {
+		return err
+	}
+
+	id := mqtt.NameReplace(c.application.Name())
+	_, err = c.manager.RegisterWithID(id, bind, c.Name(), c.application.Name(), nil, nil)
+	return err
+}
+
 func (c *Component) ReloadConfig() (int, error) {
 	if err := c.manager.UnregisterAll(); err != nil {
+		return -1, err
+	}
+
+	if err := c.registerDefaultBinds(); err != nil {
 		return -1, err
 	}
 

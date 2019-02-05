@@ -258,8 +258,8 @@ func (m *Manager) itemStatusUpdate(item *BindItem) boggart.BindStatusSetter {
 		m.mqtt.PublishAsync(
 			context.Background(),
 			MQTTPublishTopicBindStatus.Format(mqtt.NameReplace(item.id)),
-			0,
-			false,
+			1,
+			true,
 			strings.ToLower(status.String()))
 	}
 }
@@ -278,8 +278,8 @@ func (m *Manager) bindStatusUpdate(item *BindItem) boggart.BindStatusSetter {
 			m.mqtt.PublishAsync(
 				context.Background(),
 				MQTTPublishTopicBindStatus.Format(mqtt.NameReplace(item.id)),
-				0,
-				false,
+				1,
+				true,
 				strings.ToLower(status.String()))
 
 		default:
