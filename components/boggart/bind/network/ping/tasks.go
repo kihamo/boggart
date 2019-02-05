@@ -42,10 +42,12 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		}
 	}
 
-	latency := uint32(stats.MaxRtt.Nanoseconds() / 1e+6)
-	if ok := b.latency.Set(latency); ok {
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicLatency.Format(h), 0, true, latency); e != nil {
-			err = multierr.Append(err, e)
+	if online {
+		latency := uint32(stats.MaxRtt.Nanoseconds() / 1e+6)
+		if ok := b.latency.Set(latency); ok {
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicLatency.Format(h), 0, true, latency); e != nil {
+				err = multierr.Append(err, e)
+			}
 		}
 	}
 
