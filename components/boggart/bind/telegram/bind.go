@@ -151,5 +151,6 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 
 func (b *Bind) Close() (err error) {
 	close(b.done)
+	b.client.StopReceivingUpdates()
 	return nil
 }
