@@ -1,5 +1,5 @@
-hash: 8ae45fa6261261bf4aeba5146df524a29f12d95678ae7c1a4db122f41316a464
-updated: 2019-02-03T21:49:05.351904+03:00
+hash: 029ceb168491d4a4e4dd2daac05c827cba33f5f37a466ac4982d7d3994d83f35
+updated: 2019-02-07T22:23:30.305499+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -64,7 +64,7 @@ imports:
 - name: github.com/denisbrodbeck/machineid
   version: e2e48f90c87f1f77286682531a46ff99e95d8089
 - name: github.com/eclipse/paho.mqtt.golang
-  version: 379fd9f99ba5b1f02c9fffb5e5952416ef9301dc
+  version: cb7eb9363b4469c601b1a714447653b720e4e43a
   subpackages:
   - packets
 - name: github.com/elazarl/go-bindata-assetfs
@@ -220,9 +220,6 @@ imports:
   version: 53ab1458a551b0155bb43a1d5a30b9a270d4465b
   subpackages:
   - components/annotations
-  - components/annotations/instance
-  - components/annotations/internal
-  - components/annotations/storage
   - components/config
   - components/config/instance
   - components/config/internal
