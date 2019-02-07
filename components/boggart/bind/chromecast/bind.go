@@ -71,7 +71,7 @@ func (b *Bind) Connect(_ context.Context) error {
 		return err
 	}
 
-	if err := b.heartbeat.Start(context.Background()); err != nil {
+	if err := b.heartbeat.Start(ctx); err != nil {
 		return err
 	}
 
