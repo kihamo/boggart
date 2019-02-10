@@ -58,6 +58,8 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 
 	if online {
 		if ok := b.latency.Set(latency); ok {
+			metricLatency.With("address", b.address).Set(float64(latency))
+
 			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicLatency.Format(h), 0, true, latency); e != nil {
 				err = multierr.Append(err, e)
 			}
