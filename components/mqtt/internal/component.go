@@ -111,6 +111,9 @@ func (c *Component) initClient() error {
 	opts.WillRetained = c.config.Bool(mqtt.ConfigLWTRetained)
 
 	opts.OnConnect = func(client m.Client) {
+		c.logger.Debug("Connect to MQTT broker")
+		metricConnect.Inc()
+
 		if atomic.LoadUint64(&c.lostConnections) == 0 {
 			return
 		}
@@ -129,6 +132,7 @@ func (c *Component) initClient() error {
 	opts.OnConnectionLost = func(client m.Client, reason error) {
 		atomic.AddUint64(&c.lostConnections, 1)
 		c.logger.Error("Connection lost", "error", reason.Error(), "count", atomic.LoadUint64(&c.lostConnections))
+		metricConnectionLost.Inc()
 	}
 
 	opts.Servers = make([]*url.URL, 0)
