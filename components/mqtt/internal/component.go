@@ -492,6 +492,9 @@ func (c *Component) Subscriptions() []*mqtt.Subscription {
 }
 
 func (c *Component) convertPayload(payload interface{}) interface{} {
+	// TODO: rgb
+	// TODO: hsv
+
 	switch value := payload.(type) {
 	case string, []byte:
 		// skip

@@ -133,7 +133,7 @@ func (b *Bind) setPlayerStatus(status Status) {
 	sn := mqtt.NameReplace(b.SerialNumber())
 	ctx := context.Background()
 
-	_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateStatus.Format(sn), 0, true, status.String())
+	_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateStatus.Format(sn), status.String())
 }
 
 func (b *Bind) PlayerStatus() Status {

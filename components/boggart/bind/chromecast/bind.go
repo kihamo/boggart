@@ -159,11 +159,11 @@ func (b *Bind) doEvents() {
 
 				volume := uint32(math.Round(t.Level * 100))
 				if ok := b.volume.Set(volume); ok {
-					_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateVolume.Format(sn), 0, true, volume)
+					_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateVolume.Format(sn), volume)
 				}
 
 				if ok := b.mute.Set(t.Muted); ok {
-					_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMute.Format(sn), 0, true, t.Muted)
+					_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMute.Format(sn), t.Muted)
 				}
 
 			case controllers.MediaStatus:
@@ -171,7 +171,7 @@ func (b *Bind) doEvents() {
 				sn := mqtt.NameReplace(b.SerialNumber())
 
 				if ok := b.status.Set(t.PlayerState); ok {
-					_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateStatus.Format(sn), 0, true, strings.ToLower(t.PlayerState))
+					_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateStatus.Format(sn), strings.ToLower(t.PlayerState))
 				}
 
 				if t.PlayerState == "IDLE" && t.IdleReason == "FINISHED" {
@@ -181,7 +181,7 @@ func (b *Bind) doEvents() {
 
 				if t.Media != nil {
 					if ok := b.mediaContentID.Set(t.Media.ContentId); ok {
-						_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateContent.Format(sn), 0, true, t.Media.ContentId)
+						_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateContent.Format(sn), t.Media.ContentId)
 					}
 				}
 

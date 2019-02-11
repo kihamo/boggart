@@ -97,7 +97,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 						}
 
 						// стартуем новую запись
-						if err := b.MQTTPublish(ctx, MQTTPublishTopicCaptureState.Format(sn), 2, true, true); err != nil {
+						if err := b.MQTTPublish(ctx, MQTTPublishTopicCaptureState.Format(sn), true); err != nil {
 							return err
 						}
 
@@ -109,7 +109,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 							return nil
 						}
 
-						if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicCaptureState.Format(sn), 2, true, false); err != nil {
+						if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicCaptureState.Format(sn), false); err != nil {
 							return err
 						}
 
@@ -134,7 +134,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 						}
 
 						if topicCaptureCode != "" {
-							if err = b.MQTTPublish(ctx, topicCaptureCode, 0, false, code); err != nil {
+							if err = b.MQTTPublish(ctx, topicCaptureCode, code); err != nil {
 								return err
 							}
 						}

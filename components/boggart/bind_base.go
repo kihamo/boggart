@@ -65,7 +65,11 @@ func (d *BindMQTT) SetMQTTClient(client mqtt.Component) {
 	d.mutex.Unlock()
 }
 
-func (d *BindMQTT) MQTTPublish(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
+func (d *BindMQTT) MQTTPublish(ctx context.Context, topic string, payload interface{}) error {
+	return d.MQTTPublishRaw(ctx, topic, 1, true, payload)
+}
+
+func (d *BindMQTT) MQTTPublishRaw(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 
@@ -76,7 +80,11 @@ func (d *BindMQTT) MQTTPublish(ctx context.Context, topic string, qos byte, reta
 	return d.client.Publish(ctx, topic, qos, retained, payload)
 }
 
-func (d *BindMQTT) MQTTPublishAsync(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
+func (d *BindMQTT) MQTTPublishAsync(ctx context.Context, topic string, payload interface{}) error {
+	return d.MQTTPublishAsyncRaw(ctx, topic, 1, true, payload)
+}
+
+func (d *BindMQTT) MQTTPublishAsyncRaw(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 

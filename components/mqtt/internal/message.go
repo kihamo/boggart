@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	PayloadTrue  = []byte(`1`)
-	PayloadFalse = []byte(`0`)
+	PayloadTrue  = []byte(`true`)
+	PayloadFalse = []byte(`false`)
 )
 
 type message struct {

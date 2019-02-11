@@ -172,7 +172,7 @@ func (b *Bind) SetVolume(percent int64) error {
 
 	sn := mqtt.NameReplace(b.SerialNumber())
 	ctx := context.Background()
-	return b.MQTTPublishAsync(ctx, MQTTPublishTopicStateVolume.Format(sn), 0, true, percent)
+	return b.MQTTPublishAsync(ctx, MQTTPublishTopicStateVolume.Format(sn), percent)
 }
 
 func (b *Bind) Mute() bool {
@@ -188,5 +188,5 @@ func (b *Bind) SetMute(mute bool) error {
 
 	sn := mqtt.NameReplace(b.SerialNumber())
 	ctx := context.Background()
-	return b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMute.Format(sn), 0, true, mute)
+	return b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMute.Format(sn), mute)
 }

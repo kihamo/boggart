@@ -37,7 +37,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 
 	online := stats.PacketsRecv != 0
 	if ok := b.online.Set(online); ok {
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicOnline.Format(h), 0, true, online); e != nil {
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicOnline.Format(h), online); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
@@ -47,7 +47,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		if ok := b.latency.Set(latency); ok {
 			metricLatency.With("host", b.hostname).Set(float64(latency))
 
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicLatency.Format(h), 0, true, latency); e != nil {
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicLatency.Format(h), latency); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}

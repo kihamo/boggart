@@ -33,7 +33,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	if ok := b.balance.Set(current); ok {
 		sn := b.SerialNumber()
 		metricBalance.With("account", sn).Set(value)
-		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicBalance.Format(mqtt.NameReplace(sn)), 0, true, value); err != nil {
+		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicBalance.Format(mqtt.NameReplace(sn)), value); err != nil {
 			return nil, err
 		}
 	}

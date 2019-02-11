@@ -93,19 +93,19 @@ func (b *Bind) updateStatusByChannelId(ctx context.Context, channelId uint64) er
 	var result error
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.Elevation != status.AbsoluteHigh.Elevation {
-		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusElevation.Format(sn, channelId), 1, false, status.AbsoluteHigh.Elevation); err != nil {
+		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusElevation.Format(sn, channelId), status.AbsoluteHigh.Elevation); err != nil {
 			result = multierr.Append(result, err)
 		}
 	}
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.Azimuth != status.AbsoluteHigh.Azimuth {
-		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusAzimuth.Format(sn, channelId), 1, false, status.AbsoluteHigh.Azimuth); err != nil {
+		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusAzimuth.Format(sn, channelId), status.AbsoluteHigh.Azimuth); err != nil {
 			result = multierr.Append(result, err)
 		}
 	}
 
 	if channel.Status == nil || channel.Status.AbsoluteHigh.AbsoluteZoom != status.AbsoluteHigh.AbsoluteZoom {
-		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusZoom.Format(sn, channelId), 1, false, status.AbsoluteHigh.AbsoluteZoom); err != nil {
+		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusZoom.Format(sn, channelId), status.AbsoluteHigh.AbsoluteZoom); err != nil {
 			result = multierr.Append(result, err)
 		}
 	}

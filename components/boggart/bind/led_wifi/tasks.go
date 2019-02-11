@@ -41,32 +41,32 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	host := mqtt.NameReplace(b.bulb.Host())
 
 	if ok := b.power.Set(state.Power); ok {
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStatePower.Format(host), 0, true, state.Power); e != nil {
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStatePower.Format(host), state.Power); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
 
 	if ok := b.mode.Set(uint32(state.Mode)); ok {
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMode.Format(host), 0, true, state.Mode); e != nil {
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMode.Format(host), state.Mode); e != nil {
 			err = multierr.Append(err, err)
 		}
 	}
 
 	if ok := b.speed.Set(uint32(state.Speed)); ok {
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateSpeed.Format(host), 0, true, state.Speed); e != nil {
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateSpeed.Format(host), state.Speed); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
 
 	if ok := b.color.Set(uint32(state.Color.Uint64())); ok {
 		// in HEX
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateColor.Format(host), 0, true, state.Color.String()); e != nil {
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateColor.Format(host), state.Color.String()); e != nil {
 			err = multierr.Append(err, e)
 		}
 
 		// in HSV
 		h, s, v := state.Color.HSV()
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateColorHSV.Format(host), 0, true, fmt.Sprintf("%d,%.2f,%.2f", h, s, v)); e != nil {
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateColorHSV.Format(host), fmt.Sprintf("%d,%.2f,%.2f", h, s, v)); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}

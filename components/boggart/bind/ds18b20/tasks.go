@@ -65,7 +65,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	if ok := b.temperature.Set(float32(value)); ok {
 		metricValue.With("serial_number", sn).Set(value)
 
-		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicValue.Format(mqtt.NameReplace(sn)), 0, true, value); err != nil {
+		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicValue.Format(mqtt.NameReplace(sn)), value); err != nil {
 			return nil, err
 		}
 	}

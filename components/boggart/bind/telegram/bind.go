@@ -134,7 +134,7 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 				ctx := context.Background()
 
 				if u.Message.Text != "" {
-					b.MQTTPublishAsync(ctx, MQTTPublishTopicReceiveMessage.Format(sn, u.Message.Chat.ID), 1, false, u.Message.Text)
+					b.MQTTPublishAsync(ctx, MQTTPublishTopicReceiveMessage.Format(sn, u.Message.Chat.ID), u.Message.Text)
 				}
 
 				var (
@@ -160,7 +160,7 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 					continue
 				}
 
-				b.MQTTPublishAsync(ctx, mqttTopic, 1, false, link)
+				b.MQTTPublishAsync(ctx, mqttTopic, link)
 
 			case <-b.done:
 				return

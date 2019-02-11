@@ -34,7 +34,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	serialNumberMQTT := mqtt.NameReplace(serialNumber)
 
 	if ok := b.state.Set(state); ok {
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicState.Format(serialNumberMQTT), 0, true, state); e != nil {
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicState.Format(serialNumberMQTT), state); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
@@ -43,7 +43,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		if ok := b.power.Set(float32(power)); ok {
 			metricPower.With("serial_number", serialNumber).Set(power)
 
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicPower.Format(serialNumberMQTT), 0, true, power); e != nil {
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicPower.Format(serialNumberMQTT), power); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}

@@ -53,7 +53,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			name := mqtt.NameReplace(v.Name)
 
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicVariable.Format(snMQTT, name), 2, true, v.Value)
+			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicVariable.Format(snMQTT, name), v.Value)
 		}
 	}
 

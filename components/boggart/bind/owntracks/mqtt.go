@@ -102,7 +102,7 @@ func (b *Bind) notifyRegionEvent(ctx context.Context, payload *LocationPayload, 
 
 			if checker != nil {
 				if ok := checker.Set(true); ok {
-					if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, mqtt.NameReplace(name)), q, r, true); e != nil {
+					if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, mqtt.NameReplace(name)), q, r, true); e != nil {
 						err = multierr.Append(err, e)
 					}
 				}
@@ -131,7 +131,7 @@ func (b *Bind) notifyRegionEvent(ctx context.Context, payload *LocationPayload, 
 			checkResult := calculateDistance(*payload.Lat, *payload.Lon, point.Lat, point.Lon) < point.Radius
 
 			if ok := checker.Set(checkResult); ok {
-				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, mqtt.NameReplace(name)), q, r, checkResult); e != nil {
+				if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, mqtt.NameReplace(name)), q, r, checkResult); e != nil {
 					err = multierr.Append(err, e)
 				}
 			}
@@ -144,7 +144,7 @@ func (b *Bind) notifyRegionEvent(ctx context.Context, payload *LocationPayload, 
 		}
 
 		if ok := checker.Set(false); ok {
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, mqtt.NameReplace(name)), q, r, false); e != nil {
+			if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, mqtt.NameReplace(name)), q, r, false); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}
@@ -178,7 +178,7 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 	if ok := b.lat.Set(float32(*payload.Lat)); ok {
 		changeLocation = true
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateLat.Format(b.config.User, b.config.Device), q, r, *payload.Lat); e != nil {
+		if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicUserStateLat.Format(b.config.User, b.config.Device), q, r, *payload.Lat); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
@@ -186,21 +186,21 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 	if ok := b.lon.Set(float32(*payload.Lon)); ok {
 		changeLocation = true
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateLon.Format(b.config.User, b.config.Device), q, r, *payload.Lon); e != nil {
+		if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicUserStateLon.Format(b.config.User, b.config.Device), q, r, *payload.Lon); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
 
 	hash := geohash.Encode(*payload.Lat, *payload.Lon)
 	if ok := b.geoHash.Set(hash); ok {
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateGeoHash.Format(b.config.User, b.config.Device), q, r, hash); e != nil {
+		if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicUserStateGeoHash.Format(b.config.User, b.config.Device), q, r, hash); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
 
 	if changeLocation {
 		location := strconv.FormatFloat(*payload.Lat, 'f', -1, 64) + "," + strconv.FormatFloat(*payload.Lon, 'f', -1, 64)
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateLocation.Format(b.config.User, b.config.Device), q, r, location); e != nil {
+		if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicUserStateLocation.Format(b.config.User, b.config.Device), q, r, location); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
@@ -212,7 +212,7 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 
 	if payload.Acc != nil {
 		if ok := b.acc.Set(int32(*payload.Acc)); ok {
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateAccuracy.Format(b.config.User, b.config.Device), q, r, *payload.Acc); e != nil {
+			if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicUserStateAccuracy.Format(b.config.User, b.config.Device), q, r, *payload.Acc); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}
@@ -220,7 +220,7 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 
 	if payload.Alt != nil {
 		if ok := b.alt.Set(int32(*payload.Alt)); ok {
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateAltitude.Format(b.config.User, b.config.Device), q, r, *payload.Alt); e != nil {
+			if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicUserStateAltitude.Format(b.config.User, b.config.Device), q, r, *payload.Alt); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}
@@ -230,7 +230,7 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 		metricBatteryLevel.With("user", b.config.User, "device", b.config.Device).Set(*payload.Batt)
 
 		if ok := b.batt.Set(float32(*payload.Batt)); ok {
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateBatteryLevel.Format(b.config.User, b.config.Device), q, r, *payload.Batt); e != nil {
+			if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicUserStateBatteryLevel.Format(b.config.User, b.config.Device), q, r, *payload.Batt); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}
@@ -240,7 +240,7 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 		metricVelocity.With("user", b.config.User, "device", b.config.Device).Set(float64(*payload.Vel))
 
 		if ok := b.vel.Set(int32(*payload.Vel)); ok {
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateVelocity.Format(b.config.User, b.config.Device), q, r, *payload.Vel); e != nil {
+			if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicUserStateVelocity.Format(b.config.User, b.config.Device), q, r, *payload.Vel); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}
@@ -260,7 +260,7 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 		}
 
 		if ok := b.conn.Set(v); ok {
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicUserStateConnection.Format(b.config.User, b.config.Device), q, r, v); e != nil {
+			if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicUserStateConnection.Format(b.config.User, b.config.Device), q, r, v); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}
@@ -294,7 +294,7 @@ func (b *Bind) subscribeTransition(ctx context.Context, _ mqtt.Component, messag
 		if ok := check.Set(checkResult); ok {
 			name := mqtt.NameReplace(payload.Desc)
 
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, name), message.Qos(), message.Retained(), checkResult); e != nil {
+			if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, name), message.Qos(), message.Retained(), checkResult); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}
