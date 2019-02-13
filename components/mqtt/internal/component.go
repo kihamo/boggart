@@ -253,7 +253,7 @@ func (c *Component) clientSubscribe(topic string, qos byte, subscription *mqtt.S
 		)
 
 		if err := subscription.Callback(ctx, c, newMessage(message)); err != nil {
-			metricSubscribe.With("status", "failure").Inc()
+			metricSubscriberCalls.With("status", "failure", "topic", topic).Inc()
 
 			tracing.SpanError(span, err)
 
@@ -272,14 +272,21 @@ func (c *Component) clientSubscribe(topic string, qos byte, subscription *mqtt.S
 				"payload", string(message.Payload()),
 			)
 		} else {
-			metricSubscribe.With("status", "success").Inc()
+			metricSubscriberCalls.With("status", "success", "topic", topic).Inc()
 		}
 	}
 
 	token := client.Subscribe(topic, qos, callback)
 	token.Wait()
 
-	return token.Error()
+	err := token.Error()
+	if err == nil {
+		metricSubscribe.With("status", "success", "topic", topic).Inc()
+	} else {
+		metricSubscribe.With("status", "failure", "topic", topic).Inc()
+	}
+
+	return err
 }
 
 func (c *Component) Publish(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) (err error) {
