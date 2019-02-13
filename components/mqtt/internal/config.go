@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"strings"
+	"strconv"
 
 	m "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kihamo/boggart/components/boggart"
@@ -16,6 +16,17 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithGroup("Connect").
 			WithDefault("tcp://localhost:1883").
 			WithEditable(true),
+		config.NewVariable(mqtt.ConfigClientID, config.ValueTypeString).
+			WithUsage("Topic").
+			WithGroup("Client ID").
+			WithDefaultFunc(func() interface{} {
+				name := mqtt.NameReplace(c.application.Name())
+				if len(name) > 10 {
+					name = name[0:9]
+				}
+
+				return name + "_v" + strconv.FormatInt(c.application.BuildDate().Unix(), 10)
+			}),
 		config.NewVariable(mqtt.ConfigUsername, config.ValueTypeString).
 			WithUsage("Username").
 			WithGroup("Connect").
@@ -45,12 +56,7 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithUsage("Topic").
 			WithGroup("Last Will and Testament").
 			WithDefaultFunc(func() interface{} {
-				name := strings.TrimSpace(c.application.Name())
-				name = strings.ToLower(name)
-				name = strings.Join(strings.Fields(name), " ")
-				name = strings.Replace(name, " ", "-", -1)
-
-				return boggart.ComponentName + "/" + name + "/status"
+				return boggart.ComponentName + "/" + mqtt.NameReplace(c.application.Name()) + "/status"
 			}),
 		config.NewVariable(mqtt.ConfigLWTPayload, config.ValueTypeString).
 			WithUsage("Payload").

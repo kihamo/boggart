@@ -99,6 +99,7 @@ func (c *Component) initClient() error {
 	defer ticker.Stop()
 
 	opts := m.NewClientOptions()
+	opts.ClientID = c.config.String(mqtt.ConfigClientID)
 	opts.Username = c.config.String(mqtt.ConfigUsername)
 	opts.Password = c.config.String(mqtt.ConfigPassword)
 	opts.ConnectTimeout = c.config.Duration(mqtt.ConfigConnectionTimeout)
@@ -141,12 +142,6 @@ func (c *Component) initClient() error {
 			opts.Servers = append(opts.Servers, p)
 		}
 	}
-
-	name := c.application.Name()
-	if len(name) > 10 {
-		name = name[0:9]
-	}
-	opts.ClientID = fmt.Sprintf("%s_v%d", name, c.application.BuildDate().Unix())
 
 	for ; true; <-ticker.C {
 		client := m.NewClient(opts)
