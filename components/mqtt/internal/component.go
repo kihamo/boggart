@@ -99,6 +99,8 @@ func (c *Component) initClient() error {
 	defer ticker.Stop()
 
 	opts := m.NewClientOptions()
+	opts.Store = NewStore(c.logger)
+
 	opts.ClientID = c.config.String(mqtt.ConfigClientID)
 	opts.Username = c.config.String(mqtt.ConfigUsername)
 	opts.Password = c.config.String(mqtt.ConfigPassword)
@@ -112,7 +114,7 @@ func (c *Component) initClient() error {
 	opts.WillRetained = c.config.Bool(mqtt.ConfigLWTRetained)
 
 	opts.OnConnect = func(client m.Client) {
-		c.logger.Debug("Connect to MQTT broker")
+		c.logger.Debug("Connect to MQTT broker", "clientId", opts.ClientID)
 		metricConnect.Inc()
 
 		if atomic.LoadUint64(&c.lostConnections) == 0 {
@@ -126,7 +128,7 @@ func (c *Component) initClient() error {
 			if err := c.clientSubscribe(topic, qos, sub); err != nil {
 				c.logger.Error("Resubscribe failed", "topic", topic, "qos", qos, "error", err.Error())
 			} else {
-				c.logger.Debug("Resubscribe", "topic", topic, "qos", qos)
+				c.logger.Debug("Resubscribe success", "topic", topic, "qos", qos)
 			}
 		}
 	}
@@ -134,6 +136,14 @@ func (c *Component) initClient() error {
 		atomic.AddUint64(&c.lostConnections, 1)
 		c.logger.Error("Connection lost", "error", reason.Error(), "count", atomic.LoadUint64(&c.lostConnections))
 		metricConnectionLost.Inc()
+	}
+
+	opts.DefaultPublishHandler = func(_ m.Client, message m.Message) {
+		c.logger.Warn("Received that does not match any known subscriptions",
+			"topic", message.Topic(),
+			"qos", message.Qos(),
+			"retained", message.Retained(),
+		)
 	}
 
 	opts.Servers = make([]*url.URL, 0)
@@ -242,19 +252,16 @@ func (c *Component) clientSubscribe(topic string, qos byte, subscription *mqtt.S
 			log.String("topic.subscribe", topic),
 		)
 
-		r := "0"
-		if message.Retained() {
-			r = "1"
-		}
-
-		metricSubscribe.With(
-			"topic", topic,
-			"qos", strconv.Itoa(int(qos)),
-			"retained", r,
-		).Inc()
-
 		if err := subscription.Callback(ctx, c, newMessage(message)); err != nil {
+			metricSubscribe.With("status", "failure").Inc()
+
 			tracing.SpanError(span, err)
+
+			r := "0"
+			if message.Retained() {
+				r = "1"
+			}
+
 			c.logger.Error(
 				"Call MQTT subscriber failed",
 				"error", err.Error(),
@@ -264,6 +271,8 @@ func (c *Component) clientSubscribe(topic string, qos byte, subscription *mqtt.S
 				"retained", r,
 				"payload", string(message.Payload()),
 			)
+		} else {
+			metricSubscribe.With("status", "success").Inc()
 		}
 	}
 
@@ -287,17 +296,6 @@ func (c *Component) Publish(ctx context.Context, topic string, qos byte, retaine
 		log.Bool("retained", retained),
 	)
 
-	r := "0"
-	if retained {
-		r = "1"
-	}
-
-	metricPublish.With(
-		"topic", topic,
-		"qos", strconv.Itoa(int(qos)),
-		"retained", r,
-	).Inc()
-
 	client := c.Client()
 	if client != nil {
 		token := client.Publish(topic, qos, retained, payload)
@@ -309,7 +307,15 @@ func (c *Component) Publish(ctx context.Context, topic string, qos byte, retaine
 	}
 
 	if err != nil {
+		metricPublish.With("status", "failure").Inc()
+
 		tracing.SpanError(span, err)
+
+		r := "0"
+		if retained {
+			r = "1"
+		}
+
 		c.logger.Error(
 			"Publish MQTT topic failed",
 			"error", err.Error(),
@@ -318,6 +324,8 @@ func (c *Component) Publish(ctx context.Context, topic string, qos byte, retaine
 			"retained", r,
 			"payload", fmt.Sprintf("%v", payload),
 		)
+	} else {
+		metricPublish.With("status", "success").Inc()
 	}
 
 	return err
@@ -470,7 +478,7 @@ func (c *Component) SubscribeSubscriber(subscriber mqtt.Subscriber) error {
 	}
 	c.mutex.Unlock()
 
-	c.logger.Debug("Subscribe", "topic", topic, "qos", qos)
+	c.logger.Debug("Subscribe success", "topic", topic, "qos", qos)
 
 	return nil
 }

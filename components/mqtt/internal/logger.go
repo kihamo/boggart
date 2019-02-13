@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"strings"
 
 	m "github.com/eclipse/paho.mqtt.golang"
 )
@@ -23,39 +24,47 @@ func NewMQTTLogger(ln func(string, ...interface{}), f func(string, ...interface{
 }
 
 func (l MQTTLogger) Println(v ...interface{}) {
-	fields := make([]interface{}, 0, len(v)+1)
+	if len(v) == 0 {
+		return
+	}
+
+	fields := make([]interface{}, 0, 4)
 	var msg string
 
-	for _, value := range v {
-		switch value {
-		case m.NET:
-			fields = append(fields, fieldMQTTComponent, "net")
-		case m.PNG:
-			fields = append(fields, fieldMQTTComponent, "pinger")
-		case m.CLI:
-			fields = append(fields, fieldMQTTComponent, "client")
-		case m.DEC:
-			fields = append(fields, fieldMQTTComponent, "decode")
-		case m.MES:
-			fields = append(fields, fieldMQTTComponent, "message")
-		case m.STR:
-			fields = append(fields, fieldMQTTComponent, "store")
-		case m.MID:
-			fields = append(fields, fieldMQTTComponent, "msgids")
-		case m.TST:
-			fields = append(fields, fieldMQTTComponent, "test")
-		case m.STA:
-			fields = append(fields, fieldMQTTComponent, "state")
-		case m.ERR:
-			fields = append(fields, fieldMQTTComponent, "error")
+	switch v[0] {
+	case m.NET:
+		fields = append(fields, fieldMQTTComponent, "net")
+	case m.PNG:
+		fields = append(fields, fieldMQTTComponent, "pinger")
+	case m.CLI:
+		fields = append(fields, fieldMQTTComponent, "client")
+	case m.DEC:
+		fields = append(fields, fieldMQTTComponent, "decode")
+	case m.MES:
+		fields = append(fields, fieldMQTTComponent, "message")
+	case m.STR:
+		fields = append(fields, fieldMQTTComponent, "store")
+	case m.MID:
+		fields = append(fields, fieldMQTTComponent, "msgids")
+	case m.TST:
+		fields = append(fields, fieldMQTTComponent, "test")
+	case m.STA:
+		fields = append(fields, fieldMQTTComponent, "state")
+	case m.ERR:
+		fields = append(fields, fieldMQTTComponent, "error")
+	}
 
-		default:
-			if len(fields) == 2 {
-				msg = fmt.Sprintf("%v", value)
-			} else {
-				fields = append(fields, value)
-			}
+	if len(fields) == 2 {
+		v = v[1:]
+	}
+
+	if len(v) > 0 {
+		parts := make([]string, len(v), len(v))
+		for i, value := range v {
+			parts[i] = fmt.Sprintf("%v", value)
 		}
+
+		msg = strings.Join(parts, " ")
 	}
 
 	l.ln(msg, fields...)
