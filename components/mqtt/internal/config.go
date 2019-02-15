@@ -17,7 +17,7 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithDefault("tcp://localhost:1883").
 			WithEditable(true),
 		config.NewVariable(mqtt.ConfigClientID, config.ValueTypeString).
-			WithUsage("Topic").
+			WithUsage("Client ID to be used by this client when connecting to the MQTT broker. According to the MQTT v3.1 specification, a client id mus be no longer than 23 characters.").
 			WithGroup("Client ID").
 			WithDefaultFunc(func() interface{} {
 				name := mqtt.NameReplace(c.application.Name())
@@ -45,9 +45,13 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithGroup("Connect").
 			WithDefault(m.NewClientOptions().ConnectTimeout),
 		config.NewVariable(mqtt.ConfigClearSession, config.ValueTypeBool).
-			WithUsage("Clear session").
+			WithUsage("Flag in the connect message when this client connects to an MQTT broker. By setting this flag, you are indicating that no messages saved by the broker for this client should be delivered. Any messages that were going to be sent by this client before diconnecting previously but didn't will not be sent upon connecting to the broker.").
 			WithGroup("Connect").
 			WithDefault(true),
+		config.NewVariable(mqtt.ConfigResumeSubs, config.ValueTypeBool).
+			WithUsage("Will enable resuming of stored (un)subscribe messages when connecting but not reconnecting if CleanSession is false. Otherwise these messages are discarded.").
+			WithGroup("Connect").
+			WithDefault(false),
 		config.NewVariable(mqtt.ConfigLWTEnabled, config.ValueTypeBool).
 			WithUsage("Enabled").
 			WithGroup("Last Will and Testament").
@@ -85,6 +89,7 @@ func (c *Component) ConfigWatchers() []config.Watcher {
 	return []config.Watcher{
 		config.NewWatcher([]string{
 			mqtt.ConfigServers,
+			mqtt.ConfigClientID,
 			mqtt.ConfigUsername,
 			mqtt.ConfigPassword,
 		}, c.watchConnect),

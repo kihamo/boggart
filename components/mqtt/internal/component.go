@@ -106,6 +106,7 @@ func (c *Component) initClient() error {
 	opts.Password = c.config.String(mqtt.ConfigPassword)
 	opts.ConnectTimeout = c.config.Duration(mqtt.ConfigConnectionTimeout)
 	opts.CleanSession = c.config.Bool(mqtt.ConfigClearSession)
+	opts.ResumeSubs = c.config.Bool(mqtt.ConfigResumeSubs)
 
 	opts.WillEnabled = c.config.Bool(mqtt.ConfigLWTEnabled)
 	opts.WillTopic = c.config.String(mqtt.ConfigLWTTopic)
@@ -114,7 +115,17 @@ func (c *Component) initClient() error {
 	opts.WillRetained = c.config.Bool(mqtt.ConfigLWTRetained)
 
 	opts.OnConnect = func(client m.Client) {
-		c.logger.Debug("Connect to MQTT broker", "clientId", opts.ClientID)
+		cfg := client.OptionsReader()
+		var mqttVersion string
+
+		switch cfg.ProtocolVersion() {
+		case 3:
+			mqttVersion = "3.1"
+		case 4:
+			mqttVersion = "3.1.1"
+		}
+
+		c.logger.Debug("Connect to MQTT broker", "clientId", cfg.ClientID(), "protocol.version", mqttVersion)
 		metricConnect.Inc()
 
 		if atomic.LoadUint64(&c.lostConnections) == 0 {

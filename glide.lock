@@ -1,5 +1,5 @@
-hash: 029ceb168491d4a4e4dd2daac05c827cba33f5f37a466ac4982d7d3994d83f35
-updated: 2019-02-07T22:23:30.305499+03:00
+hash: 177ecf3dd556c98e840d56eb187ee89dadf41dc81011641a84d5ce34787a5cbc
+updated: 2019-02-15T15:40:29.001057+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -217,7 +217,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 53ab1458a551b0155bb43a1d5a30b9a270d4465b
+  version: 7392d84cb9603954ea7530afa4bcc056e6c233f1
   subpackages:
   - components/annotations
   - components/config
@@ -331,7 +331,7 @@ imports:
 - name: github.com/mmcloughlin/geohash
   version: f7f2bcae3294530249c63fcb6fb6d5e83eee4e73
 - name: github.com/OneOfOne/xxhash
-  version: 6def279d2ce6c81a79dd1c1be580f03bb216fb8a
+  version: 456a93f5dffea9f90d34d67b03b144f12a8125cc
 - name: github.com/opentracing-contrib/go-stdlib
   version: c9628a4f0148d7e441a4af66dc0b1653cd941c20
   subpackages:

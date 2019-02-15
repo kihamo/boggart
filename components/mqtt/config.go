@@ -10,6 +10,7 @@ const (
 	ConfigConnectionAttempts = ComponentName + ".connection.attempts"
 	ConfigConnectionTimeout  = ComponentName + ".connection.timeout"
 	ConfigClearSession       = ComponentName + ".clear-session"
+	ConfigResumeSubs         = ComponentName + ".resume-subs"
 	ConfigLWTEnabled         = ComponentName + ".lwt.enabled"
 	ConfigLWTTopic           = ComponentName + ".lwt.topic"
 	ConfigLWTPayload         = ComponentName + ".lwt.payload"
