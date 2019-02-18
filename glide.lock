@@ -1,5 +1,5 @@
-hash: 177ecf3dd556c98e840d56eb187ee89dadf41dc81011641a84d5ce34787a5cbc
-updated: 2019-02-15T15:40:29.001057+03:00
+hash: abce9579e719b546d38077b753ef66708896253c56f4523a4cd6e9e805347f31
+updated: 2019-02-18T04:04:41.843116+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -217,7 +217,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 7392d84cb9603954ea7530afa4bcc056e6c233f1
+  version: bf18c23d78cd0bb18a9fe159dda0b44bb5043652
   subpackages:
   - components/annotations
   - components/config
@@ -244,6 +244,8 @@ imports:
   - components/logging/http
   - components/logging/instance
   - components/logging/internal
+  - components/logging/internal/handlers
+  - components/logging/internal/wrapper
   - components/messengers
   - components/messengers/instance
   - components/messengers/internal
