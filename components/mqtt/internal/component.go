@@ -108,6 +108,7 @@ func (c *Component) initClient() error {
 	opts.ConnectTimeout = c.config.Duration(mqtt.ConfigConnectionTimeout)
 	opts.CleanSession = c.config.Bool(mqtt.ConfigClearSession)
 	opts.ResumeSubs = c.config.Bool(mqtt.ConfigResumeSubs)
+	opts.WriteTimeout = c.config.Duration(mqtt.ConfigWriteTimeout)
 
 	opts.WillEnabled = c.config.Bool(mqtt.ConfigLWTEnabled)
 	opts.WillTopic = c.config.String(mqtt.ConfigLWTTopic)
@@ -264,28 +265,33 @@ func (c *Component) clientSubscribe(topic string, qos byte, subscription *mqtt.S
 			log.String("topic.subscribe", topic),
 		)
 
-		if err := subscription.Callback(ctx, c, newMessage(message)); err != nil {
-			metricSubscriberCalls.With("status", "failure", "topic", topic).Inc()
+		msg := newMessage(message)
 
-			tracing.SpanError(span, err)
+		// в отдельной рутине, так как если зависнет хендлер клиент MQTT не сделает ack на сообщение
+		go func() {
+			if err := subscription.Callback(ctx, c, msg); err != nil {
+				metricSubscriberCalls.With("status", "failure", "topic", topic).Inc()
 
-			r := "0"
-			if message.Retained() {
-				r = "1"
+				tracing.SpanError(span, err)
+
+				r := "0"
+				if message.Retained() {
+					r = "1"
+				}
+
+				c.logger.Error(
+					"Call MQTT subscriber failed",
+					"error", err.Error(),
+					"topic.subscribe", topic,
+					"topic.call", message.Topic(),
+					"qos", strconv.Itoa(int(qos)),
+					"retained", r,
+					"payload", msg.String(),
+				)
+			} else {
+				metricSubscriberCalls.With("status", "success", "topic", topic).Inc()
 			}
-
-			c.logger.Error(
-				"Call MQTT subscriber failed",
-				"error", err.Error(),
-				"topic.subscribe", topic,
-				"topic.call", message.Topic(),
-				"qos", strconv.Itoa(int(qos)),
-				"retained", r,
-				"payload", string(message.Payload()),
-			)
-		} else {
-			metricSubscriberCalls.With("status", "success", "topic", topic).Inc()
-		}
+		}()
 	}
 
 	token := client.Subscribe(topic, qos, callback)

@@ -129,7 +129,7 @@ func (c *Subscription) Callback(ctx context.Context, client Component, message M
 	}
 
 	wg.Wait()
-	doneCh <- struct{}{}
+	// doneCh <- struct{}{}
 
 	close(doneCh)
 	close(errCh)

@@ -2,6 +2,7 @@ package internal
 
 import (
 	"strconv"
+	"time"
 
 	m "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kihamo/boggart/components/boggart"
@@ -48,6 +49,10 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithUsage("Flag in the connect message when this client connects to an MQTT broker. By setting this flag, you are indicating that no messages saved by the broker for this client should be delivered. Any messages that were going to be sent by this client before diconnecting previously but didn't will not be sent upon connecting to the broker.").
 			WithGroup("Connect").
 			WithDefault(true),
+		config.NewVariable(mqtt.ConfigWriteTimeout, config.ValueTypeDuration).
+			WithUsage("Limit on how long a mqtt publish should block until it unblocks with a timeout error. A duration of 0 never times out.").
+			WithGroup("Connect").
+			WithDefault(time.Second * 30),
 		config.NewVariable(mqtt.ConfigResumeSubs, config.ValueTypeBool).
 			WithUsage("Will enable resuming of stored (un)subscribe messages when connecting but not reconnecting if CleanSession is false. Otherwise these messages are discarded.").
 			WithGroup("Connect").
