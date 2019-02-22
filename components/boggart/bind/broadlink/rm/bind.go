@@ -1,11 +1,13 @@
 package rm
 
 import (
+	"context"
 	"net"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/broadlink"
+	"github.com/kihamo/boggart/components/mqtt"
 )
 
 type Bind struct {
@@ -36,4 +38,10 @@ type SupportRF315Mhz interface {
 
 type SupportRF433Mhz interface {
 	SendRF433MhzRemoteControlCodeAsString(code string, count int) error
+}
+
+func (b *Bind) Run() error {
+	b.MQTTPublishAsync(context.Background(), MQTTPublishTopicCaptureState.Format(mqtt.NameReplace(b.SerialNumber())), false)
+
+	return nil
 }

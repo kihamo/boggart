@@ -25,14 +25,6 @@ const (
 	MQTTPublishTopicRF433mhzCapture = MQTTPrefix + "capture/rf433mhz"
 )
 
-func (b *Bind) SetMQTTClient(client mqtt.Component) {
-	b.BindMQTT.SetMQTTClient(client)
-
-	if client != nil {
-		client.Publish(context.Background(), MQTTPublishTopicCaptureState.Format(mqtt.NameReplace(b.SerialNumber())), 2, true, false)
-	}
-}
-
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	sn := mqtt.NameReplace(b.SerialNumber())
 

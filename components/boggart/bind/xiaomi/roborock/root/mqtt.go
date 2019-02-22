@@ -16,13 +16,3 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 		mqtt.Topic(MQTTPublishTopicRuntimeConfig.Format(sn)),
 	}
 }
-
-func (b *Bind) SetMQTTClient(client mqtt.Component) {
-	b.BindMQTT.SetMQTTClient(client)
-
-	if client != nil {
-		for fileName, callback := range b.watchFiles {
-			go callback(fileName)
-		}
-	}
-}
