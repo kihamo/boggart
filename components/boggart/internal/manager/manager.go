@@ -300,8 +300,7 @@ func (m *Manager) bindStatusUpdate(item *BindItem) boggart.BindStatusSetter {
 				strings.ToLower(status.String()))
 
 		default:
-			// TODO: deny log
-			// fmt.Println("Deny change status " + status.String() + " ID " + item.id)
+			m.logger.Error("Deny change status", "status", status.String(), "item-id", item.id)
 		}
 	}
 }
