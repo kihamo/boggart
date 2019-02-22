@@ -13,10 +13,9 @@ type Bind struct {
 	boggart.BindMQTT
 }
 
-func (b *Bind) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.BindStatusSetter) {
-	b.BindBase.SetStatusManager(getter, setter)
-
+func (b *Bind) Run() error {
 	b.UpdateStatus(boggart.BindStatusOnline)
+	return nil
 }
 
 func (b *Bind) WOL(mac net.HardwareAddr, ip net.IP, subnet net.IP) error {

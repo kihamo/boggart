@@ -24,10 +24,15 @@ type Bind struct {
 	mode Mode
 }
 
-func (b *Bind) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.BindStatusSetter) {
-	b.BindBase.SetStatusManager(getter, setter)
+func (b *Bind) Run() error {
+	if _, ok := b.pin.(gpio.PinIn); ok {
+		go func() {
+			b.waitForEdge()
+		}()
+	}
 
 	b.UpdateStatus(boggart.BindStatusOnline)
+	return nil
 }
 
 func (b *Bind) Mode() Mode {

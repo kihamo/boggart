@@ -44,7 +44,7 @@ type Bind struct {
 	livenessTimeout  time.Duration
 }
 
-func (b *Bind) initCast() error {
+func (b *Bind) Run() error {
 	b.events = make(chan events.Event, 16)
 	b.conn = castnet.NewConnection()
 
@@ -92,8 +92,13 @@ func (b *Bind) Connect(_ context.Context) error {
 func (b *Bind) Close() (err error) {
 	b.UpdateStatus(boggart.BindStatusOffline)
 
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
 	// close running aps
-	b.receiver.QuitApp(context.Background())
+	if _, e := b.receiver.QuitApp(ctx); e != nil {
+		err = multierr.Append(err, e)
+	}
 
 	// close main connection controller
 	if e := b.connection.Close(); e != nil {
@@ -107,7 +112,10 @@ func (b *Bind) Close() (err error) {
 
 	b.mutex.Lock()
 	if b.media != nil {
-		b.media.Close()
+		if e := b.media.Close(); e != nil {
+			err = multierr.Append(err, e)
+		}
+
 		b.media = nil
 	}
 	b.mutex.Unlock()
@@ -116,6 +124,8 @@ func (b *Bind) Close() (err error) {
 }
 
 func (b *Bind) doEvents() {
+	ctx := context.Background()
+
 	for {
 		select {
 		case event := <-b.events:
@@ -154,7 +164,6 @@ func (b *Bind) doEvents() {
 			case events.StatusUpdated: // from ReceiverController
 				// fmt.Println("events.StatusUpdated", t)
 
-				ctx := context.Background()
 				sn := mqtt.NameReplace(b.SerialNumber())
 
 				volume := uint32(math.Round(t.Level * 100))
@@ -167,7 +176,6 @@ func (b *Bind) doEvents() {
 				}
 
 			case controllers.MediaStatus:
-				ctx := context.Background()
 				sn := mqtt.NameReplace(b.SerialNumber())
 
 				if ok := b.status.Set(t.PlayerState); ok {

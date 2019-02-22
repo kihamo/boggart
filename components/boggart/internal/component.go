@@ -108,16 +108,17 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 		i18nCmp = a.GetComponent(i18n.ComponentName).(i18n.Component)
 	}
 
+	c.logger = logging.DefaultLogger().Named(c.Name())
+
 	c.mutex.Lock()
 	c.manager = manager.NewManager(
 		a.GetComponent(dashboard.ComponentName).(dashboard.Component),
 		i18nCmp,
 		a.GetComponent(mqtt.ComponentName).(mqtt.Component),
 		a.GetComponent(workers.ComponentName).(workers.Component),
+		c.logger.Named(c.logger.Name()+".bind"),
 		c.listenersManager)
 	c.mutex.Unlock()
-
-	c.logger = logging.DefaultLogger().Named(c.Name())
 
 	if _, err := host.Init(); err != nil {
 		return err
@@ -134,10 +135,10 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 	return nil
 }
 
-func (c *Component) registerDefaultBinds() error {
+func (c *Component) registerDefaultBinds() (int, error) {
 	kind, err := boggart.GetBindType(c.Name())
 	if err != nil {
-		return err
+		return -1, err
 	}
 
 	cfg, err := boggart.ValidateBindConfig(kind, map[string]interface{}{
@@ -146,17 +147,20 @@ func (c *Component) registerDefaultBinds() error {
 		"application_build":   c.application.Build(),
 	})
 	if err != nil {
-		return err
+		return -1, err
 	}
 
 	bind, err := kind.CreateBind(cfg)
 	if err != nil {
-		return err
+		return -1, err
 	}
 
-	id := mqtt.NameReplace(c.application.Name())
-	_, err = c.manager.RegisterWithID(id, bind, c.Name(), c.application.Name(), []string{c.Name()}, cfg)
-	return err
+	err = c.register(mqtt.NameReplace(c.application.Name()), bind, c.Name(), c.application.Name(), []string{c.Name()}, cfg)
+	if err != nil {
+		return -1, err
+	}
+
+	return 1, nil
 }
 
 func (c *Component) ReloadConfig() (int, error) {
@@ -164,16 +168,17 @@ func (c *Component) ReloadConfig() (int, error) {
 		return -1, err
 	}
 
-	if err := c.registerDefaultBinds(); err != nil {
-		return -1, err
-	}
-
-	loaded, err := c.initConfigFromYaml("")
+	loadedDefault, err := c.registerDefaultBinds()
 	if err != nil {
 		return -1, err
 	}
 
-	return loaded, nil
+	loadedFromConfig, err := c.initConfigFromYaml("")
+	if err != nil {
+		return -1, err
+	}
+
+	return loadedDefault + loadedFromConfig, nil
 }
 
 func (c *Component) ReloadConfigByID(id string) error {
@@ -242,13 +247,12 @@ func (c *Component) initConfigFromYaml(id string) (int, error) {
 			return -1, err
 		}
 
+		var id string
 		if d.ID != nil && *d.ID != "" {
-			_, err = c.manager.RegisterWithID(*d.ID, bind, d.Type, d.Description, d.Tags, cfg)
-		} else {
-			_, err = c.manager.Register(bind, d.Type, d.Description, d.Tags, cfg)
+			id = *d.ID
 		}
 
-		if err != nil {
+		if err := c.register(id, bind, d.Type, d.Description, d.Tags, cfg); err != nil {
 			return -1, err
 		}
 
@@ -256,6 +260,18 @@ func (c *Component) initConfigFromYaml(id string) (int, error) {
 	}
 
 	return loaded, nil
+}
+
+func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, description string, tags []string, cfg interface{}) error {
+	<-c.application.ReadyComponent(boggart.ComponentName)
+
+	return c.register(id, bind, t, description, tags, cfg)
+}
+
+func (c *Component) register(id string, bind boggart.Bind, t string, description string, tags []string, cfg interface{}) error {
+	_, err := c.manager.Register(id, bind, t, description, tags, cfg)
+
+	return err
 }
 
 func (c *Component) Shutdown() error {

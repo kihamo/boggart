@@ -11,4 +11,5 @@ type Component interface {
 
 	ReloadConfig() (int, error)
 	ReloadConfigByID(id string) error
+	RegisterBind(id string, bind Bind, t string, description string, tags []string, cfg interface{}) error
 }

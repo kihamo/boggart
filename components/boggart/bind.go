@@ -4,6 +4,7 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/event"
+	"github.com/kihamo/shadow/components/logging"
 )
 
 var (
@@ -42,8 +43,13 @@ type BindStatusGetter func() BindStatus
 type BindStatusSetter func(BindStatus)
 
 type Bind interface {
+	Run() error
 	SetStatusManager(BindStatusGetter, BindStatusSetter)
 	SerialNumber() string
+}
+
+type BindLogger interface {
+	SetLogger(logging.Logger)
 }
 
 type BindCloser interface {

@@ -17,10 +17,9 @@ type Bind struct {
 	tokens    []string
 }
 
-func (b *Bind) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.BindStatusSetter) {
-	b.BindBase.SetStatusManager(getter, setter)
-
+func (b *Bind) Run() error {
 	b.UpdateStatus(boggart.BindStatusOnline)
+	return nil
 }
 
 func (b *Bind) Send(ctx context.Context, text string) (err error) {

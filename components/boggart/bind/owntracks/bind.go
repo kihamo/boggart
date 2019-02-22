@@ -27,10 +27,9 @@ type Bind struct {
 	checkers map[string]*atomic.BoolNull
 }
 
-func (b *Bind) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.BindStatusSetter) {
-	b.BindBase.SetStatusManager(getter, setter)
-
+func (b *Bind) Run() error {
 	b.UpdateStatus(boggart.BindStatusOnline)
+	return nil
 }
 
 func (b *Bind) validAccuracy(acc *int64, maxAccuracy int64) bool {

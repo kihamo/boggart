@@ -16,14 +16,36 @@ type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
 
+	config *Config
 	client *tgbotapi.BotAPI
 	done   chan struct{}
 }
 
-func (b *Bind) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.BindStatusSetter) {
-	b.BindBase.SetStatusManager(getter, setter)
+func (b *Bind) Run() (err error) {
+	b.client, err = tgbotapi.NewBotAPI(b.config.Token)
+	if err != nil {
+		return err
+	}
+
+	b.SetSerialNumber(strconv.Itoa(b.client.Self.ID))
+	b.client.Debug = b.config.Debug
+
+	if b.config.UpdatesEnabled {
+		b.client.Buffer = b.config.UpdatesBuffer
+
+		u := tgbotapi.NewUpdate(0)
+		u.Timeout = b.config.UpdatesTimeout
+
+		updates, err := b.client.GetUpdatesChan(u)
+		if err != nil {
+			return err
+		}
+
+		b.listenUpdates(updates)
+	}
 
 	b.UpdateStatus(boggart.BindStatusOnline)
+	return nil
 }
 
 func (b *Bind) SendMessage(to, message string) error {

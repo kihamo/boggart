@@ -13,6 +13,7 @@ import (
 	"github.com/kihamo/go-workers/manager"
 	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/i18n"
+	"github.com/kihamo/shadow/components/logging"
 	"github.com/kihamo/shadow/components/workers"
 	"github.com/kihamo/snitch"
 	"github.com/pborman/uuid"
@@ -34,10 +35,11 @@ type Manager struct {
 	i18n      i18n.Component
 	mqtt      mqtt.Component
 	workers   workers.Component
+	logger    logging.Logger
 	listeners *manager.ListenersManager
 }
 
-func NewManager(dashboard dashboard.Component, i18n i18n.Component, mqtt mqtt.Component, workers workers.Component, listeners *manager.ListenersManager) *Manager {
+func NewManager(dashboard dashboard.Component, i18n i18n.Component, mqtt mqtt.Component, workers workers.Component, logger logging.Logger, listeners *manager.ListenersManager) *Manager {
 	return &Manager{
 		ready:     managerNotReady,
 		storage:   new(sync.Map),
@@ -45,16 +47,12 @@ func NewManager(dashboard dashboard.Component, i18n i18n.Component, mqtt mqtt.Co
 		i18n:      i18n,
 		mqtt:      mqtt,
 		workers:   workers,
+		logger:    logger,
 		listeners: listeners,
 	}
 }
 
-func (m *Manager) Register(bind boggart.Bind, t string, description string, tags []string, config interface{}) (boggart.BindItem, error) {
-	id := uuid.New()
-	return m.RegisterWithID(id, bind, t, description, tags, config)
-}
-
-func (m *Manager) RegisterWithID(id string, bind boggart.Bind, t string, description string, tags []string, config interface{}) (boggart.BindItem, error) {
+func (m *Manager) Register(id string, bind boggart.Bind, t string, description string, tags []string, config interface{}) (boggart.BindItem, error) {
 	if id == "" {
 		id = uuid.New()
 	} else {
@@ -105,11 +103,20 @@ func (m *Manager) RegisterWithID(id string, bind boggart.Bind, t string, descrip
 	statusUpdate := m.itemStatusUpdate(bindItem)
 	statusUpdate(boggart.BindStatusInitializing)
 
+	// init logger
+	if bindLogger, ok := bind.(boggart.BindLogger); ok {
+		bindLogger.SetLogger(m.logger.Named(m.logger.Name() + "." + id))
+	}
+
 	bind.SetStatusManager(bindItem.Status, m.bindStatusUpdate(bindItem))
 
 	// register mqtt
 	if mqttClient, ok := bind.(boggart.BindHasMQTTClient); ok {
 		mqttClient.SetMQTTClient(m.mqtt)
+	}
+
+	if err := bind.Run(); err != nil {
+		return nil, err
 	}
 
 	// TODO: обвешать подписки враппером, что бы только в online можно было посылать
@@ -131,6 +138,11 @@ func (m *Manager) RegisterWithID(id string, bind boggart.Bind, t string, descrip
 	}
 
 	m.storage.Store(id, bindItem)
+
+	m.logger.Debug("Register bind",
+		"type", bindItem.Type(),
+		"id", bindItem.ID(),
+	)
 
 	return bindItem, nil
 }
@@ -167,6 +179,11 @@ func (m *Manager) Unregister(id string) error {
 	}
 
 	m.storage.Delete(id)
+
+	m.logger.Debug("Unregister bind",
+		"type", bindItem.Type(),
+		"id", bindItem.ID(),
+	)
 
 	if closer, ok := bindItem.Bind().(boggart.BindCloser); ok {
 		if err := closer.Close(); err != nil {

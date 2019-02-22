@@ -17,16 +17,32 @@ type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
 
+	config                 *Config
 	cacheRuntimeConfig     map[string]string
 	cacheRuntimeConfigLock sync.Mutex
 
 	watchFiles map[string]func(string) error
 }
 
-func (b *Bind) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.BindStatusSetter) {
-	b.BindBase.SetStatusManager(getter, setter)
+func (b *Bind) Run() error {
+	if b.config.DeviceIDFile != "" {
+		if err := b.InitDeviceID(b.config.DeviceIDFile); err != nil {
+			return err
+		}
+	}
+
+	if b.config.RuntimeConfigFile != "" {
+		if err := b.AddWatchRuntimeConfig(b.config.RuntimeConfigFile); err != nil {
+			return err
+		}
+	}
+
+	if err := b.StartWatch(); err != nil {
+		return err
+	}
 
 	b.UpdateStatus(boggart.BindStatusOnline)
+	return nil
 }
 
 func (b *Bind) InitDeviceID(fileName string) error {
@@ -73,15 +89,13 @@ func (b *Bind) StartWatch() error {
 				if event.Op&fsnotify.Write == fsnotify.Write || event.Op&fsnotify.Rename == fsnotify.Rename {
 					if w, ok := b.watchFiles[event.Name]; ok {
 						if err := w(event.Name); err != nil {
-							// TODO:
-							// c.logger.Error("Watcher callback return error", "error", err.Error(), "file", event.Name, )
+							b.Logger().Error("Watcher callback return error", "error", err.Error(), "file", event.Name)
 						}
 					}
 				}
 
 			case _ = <-watcher.Errors:
-				// TODO:
-				// c.logger.Error("File watcher return error", "error", err.Error())
+				b.Logger().Error("File watcher return error", "error", err.Error())
 			}
 
 			// TODO: shutdown

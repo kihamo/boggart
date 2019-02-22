@@ -19,10 +19,9 @@ type Bind struct {
 	dashboards []int64
 }
 
-func (b *Bind) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.BindStatusSetter) {
-	b.BindBase.SetStatusManager(getter, setter)
-
+func (b *Bind) Run() error {
 	b.UpdateStatus(boggart.BindStatusOnline)
+	return nil
 }
 
 func (b *Bind) CreateAnnotation(title, text string, tags []string, timeStart *time.Time, timeEnd *time.Time) (err error) {

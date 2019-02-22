@@ -60,7 +60,7 @@ func (h *BindHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	}
 }
 
-func (h *BindHandler) registerByYAML(code []byte) (bindItem boggart.BindItem, upgraded bool, err error) {
+func (h *BindHandler) registerByYAML(oldID string, code []byte) (bindItem boggart.BindItem, upgraded bool, err error) {
 	bindParsed := &BindYAML{}
 
 	err = yaml.Unmarshal(code, bindParsed)
@@ -87,19 +87,29 @@ func (h *BindHandler) registerByYAML(code []byte) (bindItem boggart.BindItem, up
 		return nil, false, err
 	}
 
+	removeIDs := make([]string, 0, 2)
+
+	// check new ID
 	if bindParsed.ID != "" {
-		if bindExists := h.manager.Bind(bindParsed.ID); bindExists != nil {
+		removeIDs = append(removeIDs, bindParsed.ID)
+	}
+
+	// check old ID
+	if oldID != "" && oldID != bindParsed.ID {
+		removeIDs = append(removeIDs, oldID)
+	}
+
+	for _, id := range removeIDs {
+		if bindExists := h.manager.Bind(id); bindExists != nil {
 			upgraded = true
 
-			if err := h.manager.Unregister(bindParsed.ID); err != nil {
+			if err := h.manager.Unregister(id); err != nil {
 				return nil, false, err
 			}
 		}
-
-		bindItem, err = h.manager.RegisterWithID(bindParsed.ID, bind, bindParsed.Type, bindParsed.Description, bindParsed.Tags, cfg)
-	} else {
-		bindItem, err = h.manager.Register(bind, bindParsed.Type, bindParsed.Description, bindParsed.Tags, cfg)
 	}
+
+	bindItem, err = h.manager.Register(bindParsed.ID, bind, bindParsed.Type, bindParsed.Description, bindParsed.Tags, cfg)
 
 	return bindItem, upgraded, err
 }
@@ -122,11 +132,16 @@ func (h *BindHandler) actionCreateOrUpdate(w *dashboard.Response, r *dashboard.R
 		buf.WriteString(code)
 
 		var (
+			id       string
 			bind     boggart.BindItem
 			upgraded bool
 		)
 
-		if bind, upgraded, err = h.registerByYAML(buf.Bytes()); err == nil {
+		if b != nil {
+			id = b.ID()
+		}
+
+		if bind, upgraded, err = h.registerByYAML(id, buf.Bytes()); err == nil {
 			if upgraded {
 				message = "Bind " + bind.ID() + " upgraded"
 			} else {

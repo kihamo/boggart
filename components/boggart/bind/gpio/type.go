@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"periph.io/x/periph/conn/gpio"
 	"periph.io/x/periph/conn/gpio/gpioreg"
 )
 
@@ -35,12 +34,6 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	}
 
 	bind.SetSerialNumber(g.Name())
-
-	if _, ok := g.(gpio.PinIn); ok {
-		go func() {
-			bind.waitForEdge()
-		}()
-	}
 
 	return bind, nil
 }

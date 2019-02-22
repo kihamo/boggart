@@ -45,10 +45,9 @@ type Bind struct {
 	stream  *streamWrapper
 }
 
-func (b *Bind) SetStatusManager(getter boggart.BindStatusGetter, setter boggart.BindStatusSetter) {
-	b.BindBase.SetStatusManager(getter, setter)
-
+func (b *Bind) Run() error {
 	b.UpdateStatus(boggart.BindStatusOnline)
+	return nil
 }
 
 func (b *Bind) Close() error {

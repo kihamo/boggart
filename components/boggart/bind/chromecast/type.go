@@ -32,9 +32,5 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	}
 	bind.SetSerialNumber(config.Host.String() + ":" + strconv.Itoa(config.Port))
 
-	if err := bind.initCast(); err != nil {
-		return nil, err
-	}
-
 	return bind, nil
 }

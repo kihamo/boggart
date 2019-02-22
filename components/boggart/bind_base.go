@@ -6,52 +6,75 @@ import (
 	"sync"
 
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/shadow/components/logging"
 )
 
 type BindBase struct {
 	statusGetter BindStatusGetter
 	statusSetter BindStatusSetter
 	mutex        sync.RWMutex
+	logger       logging.Logger
 	serialNumber string
 }
 
-func (d *BindBase) SetStatusManager(getter BindStatusGetter, setter BindStatusSetter) {
-	d.mutex.Lock()
-	d.statusGetter = getter
-	d.statusSetter = setter
-	d.mutex.Unlock()
+func (b *BindBase) Run() error {
+	return nil
 }
 
-func (d *BindBase) Status() BindStatus {
-	d.mutex.RLock()
-	defer d.mutex.RUnlock()
+func (b *BindBase) SetStatusManager(getter BindStatusGetter, setter BindStatusSetter) {
+	b.mutex.Lock()
+	b.statusGetter = getter
+	b.statusSetter = setter
+	b.mutex.Unlock()
+}
 
-	if d.statusGetter != nil {
-		return d.statusGetter()
+func (b *BindBase) Logger() logging.Logger {
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
+
+	if b.logger == nil {
+		b.logger = logging.DefaultLogger()
+	}
+
+	return b.logger
+}
+
+func (b *BindBase) SetLogger(logger logging.Logger) {
+	b.mutex.Lock()
+	b.logger = logger
+	b.mutex.Unlock()
+}
+
+func (b *BindBase) Status() BindStatus {
+	b.mutex.RLock()
+	defer b.mutex.RUnlock()
+
+	if b.statusGetter != nil {
+		return b.statusGetter()
 	}
 
 	return BindStatusUnknown
 }
 
-func (d *BindBase) UpdateStatus(status BindStatus) {
-	d.mutex.RLock()
-	if d.statusSetter != nil {
-		d.statusSetter(status)
+func (b *BindBase) UpdateStatus(status BindStatus) {
+	b.mutex.RLock()
+	if b.statusSetter != nil {
+		b.statusSetter(status)
 	}
-	d.mutex.RUnlock()
+	b.mutex.RUnlock()
 }
 
-func (d *BindBase) SerialNumber() string {
-	d.mutex.RLock()
-	defer d.mutex.RUnlock()
+func (b *BindBase) SerialNumber() string {
+	b.mutex.RLock()
+	defer b.mutex.RUnlock()
 
-	return d.serialNumber
+	return b.serialNumber
 }
 
-func (d *BindBase) SetSerialNumber(serialNumber string) {
-	d.mutex.Lock()
-	d.serialNumber = serialNumber
-	d.mutex.Unlock()
+func (b *BindBase) SetSerialNumber(serialNumber string) {
+	b.mutex.Lock()
+	b.serialNumber = serialNumber
+	b.mutex.Unlock()
 }
 
 type BindMQTT struct {
@@ -59,40 +82,40 @@ type BindMQTT struct {
 	client mqtt.Component
 }
 
-func (d *BindMQTT) SetMQTTClient(client mqtt.Component) {
-	d.mutex.Lock()
-	d.client = client
-	d.mutex.Unlock()
+func (b *BindMQTT) SetMQTTClient(client mqtt.Component) {
+	b.mutex.Lock()
+	b.client = client
+	b.mutex.Unlock()
 }
 
-func (d *BindMQTT) MQTTPublish(ctx context.Context, topic string, payload interface{}) error {
-	return d.MQTTPublishRaw(ctx, topic, 1, true, payload)
+func (b *BindMQTT) MQTTPublish(ctx context.Context, topic string, payload interface{}) error {
+	return b.MQTTPublishRaw(ctx, topic, 1, true, payload)
 }
 
-func (d *BindMQTT) MQTTPublishRaw(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
-	d.mutex.RLock()
-	defer d.mutex.RUnlock()
+func (b *BindMQTT) MQTTPublishRaw(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
+	b.mutex.RLock()
+	defer b.mutex.RUnlock()
 
-	if d.client == nil {
+	if b.client == nil {
 		return errors.New("MQTT client isn't init")
 	}
 
-	return d.client.Publish(ctx, topic, qos, retained, payload)
+	return b.client.Publish(ctx, topic, qos, retained, payload)
 }
 
-func (d *BindMQTT) MQTTPublishAsync(ctx context.Context, topic string, payload interface{}) error {
-	return d.MQTTPublishAsyncRaw(ctx, topic, 1, true, payload)
+func (b *BindMQTT) MQTTPublishAsync(ctx context.Context, topic string, payload interface{}) error {
+	return b.MQTTPublishAsyncRaw(ctx, topic, 1, true, payload)
 }
 
-func (d *BindMQTT) MQTTPublishAsyncRaw(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
-	d.mutex.RLock()
-	defer d.mutex.RUnlock()
+func (b *BindMQTT) MQTTPublishAsyncRaw(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
+	b.mutex.RLock()
+	defer b.mutex.RUnlock()
 
-	if d.client == nil {
+	if b.client == nil {
 		return errors.New("MQTT client isn't init")
 	}
 
-	d.client.PublishAsync(ctx, topic, qos, retained, payload)
+	b.client.PublishAsync(ctx, topic, qos, retained, payload)
 	return nil
 }
 
