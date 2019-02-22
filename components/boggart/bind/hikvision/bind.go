@@ -78,8 +78,8 @@ func (b *Bind) startAlertStreaming() error {
 					_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicEvent.Format(sn, event.DynChannelID, event.EventType), event.EventDescription)
 				}
 
-			case _ = <-stream.NextError():
-				// TODO: log errors
+			case err := <-stream.NextError():
+				b.Logger().Error("Stream error", "error", err.Error())
 
 			case <-ctx.Done():
 				b.alertStreamingCancel = nil

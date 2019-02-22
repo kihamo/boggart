@@ -148,7 +148,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMemoryAvailable.Format(snMQTT), memoryAvailable)
 		metricMemoryAvailable.With("serial_number", sn).Set(float64(memoryAvailable))
 	} else {
-		// TODO: log
+		b.Logger().Error("Request SystemStatus failed", "error", err.Error())
 	}
 
 	storage, err := b.isapi.ContentManagementStorage(ctx)
@@ -166,7 +166,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			metricStorageAvailable.With("serial_number", sn).With("name", hdd.Name).Set(float64(hdd.FreeSpace * MB))
 		}
 	} else {
-		// TODO: log
+		b.Logger().Error("Request ContentManagementStorage failed", "error", err.Error())
 	}
 
 	return nil, nil

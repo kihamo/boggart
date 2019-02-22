@@ -178,11 +178,15 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 
 				link, err := b.client.GetFileDirectURL(fileID)
 				if err != nil {
-					// TODO: log
+					b.Logger().Error("Get file by direct url failed",
+						"error", err.Error(),
+						"file", fileID,
+					)
 					continue
 				}
 
-				b.MQTTPublishAsync(ctx, mqttTopic, link)
+				// TODO: log
+				_ = b.MQTTPublishAsync(ctx, mqttTopic, link)
 
 			case <-b.done:
 				return

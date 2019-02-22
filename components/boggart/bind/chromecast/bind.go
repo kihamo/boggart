@@ -3,6 +3,7 @@ package chromecast
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 	"net"
 	"strings"
@@ -138,7 +139,7 @@ func (b *Bind) doEvents() {
 				//fmt.Println("events.Disconnected", t)
 
 				if err := b.Close(); err != nil {
-					// TODO: log
+					b.Logger().Error("Close failed", "error", err.Error())
 				}
 
 			case events.AppStarted: // from ReceiverController
@@ -152,7 +153,7 @@ func (b *Bind) doEvents() {
 
 					if b.media != nil {
 						if err := b.media.Close(); err != nil {
-							// TODO: log
+							b.Logger().Error("Media close failed", "error", err.Error())
 						}
 
 						b.media = nil
@@ -183,8 +184,9 @@ func (b *Bind) doEvents() {
 				}
 
 				if t.PlayerState == "IDLE" && t.IdleReason == "FINISHED" {
-					// TODO: error log
-					_, _ = b.receiver.QuitApp(ctx)
+					if _, err := b.receiver.QuitApp(ctx); err != nil {
+						b.Logger().Error("Quit app failed", "error", err.Error())
+					}
 				}
 
 				if t.Media != nil {
@@ -194,8 +196,7 @@ func (b *Bind) doEvents() {
 				}
 
 			default:
-				// TODO: log
-				// fmt.Printf("Unknown event: %#v\n", t)
+				b.Logger().Error("Unknown event", "event", fmt.Sprintf("%#v", t))
 			}
 		}
 	}
