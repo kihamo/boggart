@@ -10,6 +10,8 @@ import (
 )
 
 func (b *Bind) setVolume(ctx context.Context, level *float64, muted *bool) error {
+	b.Logger().Debug("Set volume", "level", level, "muted", muted)
+
 	volume := controllers.Volume{
 		Level: level,
 		Muted: muted,
@@ -48,6 +50,8 @@ func (b *Bind) SetMute(ctx context.Context, mute bool) error {
 }
 
 func (b *Bind) PlayFromURL(ctx context.Context, url string) error {
+	b.Logger().Debug("Play from URL", "url", url)
+
 	mimeType, err := storage.MimeTypeFromURL(url)
 	if err != nil {
 		return err
@@ -74,15 +78,9 @@ func (b *Bind) PlayFromURL(ctx context.Context, url string) error {
 	return err
 }
 
-func (b *Bind) Seek(ctx context.Context, second uint64) error {
-	return nil
-}
-
-func (b *Bind) Resume(ctx context.Context) error {
-	return nil
-}
-
 func (b *Bind) Stop(ctx context.Context) error {
+	b.Logger().Debug("Stop")
+
 	ctrl, err := b.Media(ctx)
 	if err != nil {
 		return err
@@ -97,6 +95,38 @@ func (b *Bind) Stop(ctx context.Context) error {
 	return err
 }
 
-func (b *Bind) Pause(ctx context.Context) error {
+func (b *Bind) Seek(ctx context.Context, second uint64) error {
 	return nil
+}
+
+func (b *Bind) Resume(ctx context.Context) error {
+	b.Logger().Debug("Resume")
+
+	if b.status.Load() != PlayerStatePaused {
+		return nil
+	}
+
+	ctrl, err := b.Media(ctx)
+	if err != nil {
+		return err
+	}
+
+	_, err = ctrl.Play(ctx)
+	return err
+}
+
+func (b *Bind) Pause(ctx context.Context) error {
+	b.Logger().Debug("Pause")
+
+	if b.status.Load() != PlayerStatePlaying {
+		return nil
+	}
+
+	ctrl, err := b.Media(ctx)
+	if err != nil {
+		return err
+	}
+
+	_, err = ctrl.Pause(ctx)
+	return err
 }

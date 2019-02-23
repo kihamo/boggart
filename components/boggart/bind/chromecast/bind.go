@@ -20,6 +20,18 @@ import (
 	"go.uber.org/multierr"
 )
 
+const (
+	PlayerStateIdle      = "IDLE"
+	PlayerStatePlaying   = "PLAYING"
+	PlayerStateBuffering = "BUFFERING"
+	PlayerStatePaused    = "PAUSED"
+
+	IdleReasonCancelled   = "CANCELLED"
+	IdleReasonInterrupted = "INTERRUPTED"
+	IdleReasonFinished    = "FINISHED"
+	IdleReasonError       = "ERROR"
+)
+
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
@@ -132,21 +144,22 @@ func (b *Bind) doEvents() {
 		case event := <-b.events:
 			switch t := event.(type) {
 			case events.Connected:
-				//fmt.Println("events.Connected", t)
+				b.Logger().Debug("Event Connected")
+
 				b.UpdateStatus(boggart.BindStatusOnline)
 
 			case events.Disconnected: // from ReceiverController
-				//fmt.Println("events.Disconnected", t)
+				b.Logger().Debug("Event Disconnected")
 
 				if err := b.Close(); err != nil {
 					b.Logger().Error("Close failed", "error", err.Error())
 				}
 
 			case events.AppStarted: // from ReceiverController
-				//fmt.Println("events.AppStarted", t)
+				b.Logger().Debug("Event AppStarted")
 
 			case events.AppStopped: // from ReceiverController
-				//fmt.Println("events.AppStopped", t)
+				b.Logger().Debug("Event AppStopped")
 
 				if t.AppID == cast.AppMedia {
 					b.mutex.Lock()
@@ -163,7 +176,10 @@ func (b *Bind) doEvents() {
 				}
 
 			case events.StatusUpdated: // from ReceiverController
-				// fmt.Println("events.StatusUpdated", t)
+				b.Logger().Debug("Event StatusUpdated",
+					"level", t.Level,
+					"muted", t.Muted,
+				)
 
 				sn := mqtt.NameReplace(b.SerialNumber())
 
@@ -177,13 +193,18 @@ func (b *Bind) doEvents() {
 				}
 
 			case controllers.MediaStatus:
+				b.Logger().Debug("Event MediaStatus",
+					"state", t.PlayerState,
+					"reason", t.IdleReason,
+				)
+
 				sn := mqtt.NameReplace(b.SerialNumber())
 
 				if ok := b.status.Set(t.PlayerState); ok {
 					_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateStatus.Format(sn), strings.ToLower(t.PlayerState))
 				}
 
-				if t.PlayerState == "IDLE" && t.IdleReason == "FINISHED" {
+				if t.PlayerState == PlayerStateIdle && t.IdleReason == IdleReasonFinished {
 					if _, err := b.receiver.QuitApp(ctx); err != nil {
 						b.Logger().Error("Quit app failed", "error", err.Error())
 					}
