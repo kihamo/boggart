@@ -1,5 +1,5 @@
-hash: 2ab1237fe24af8f0317ce263313f2ed0c5bd09f50f5ddeaf1344ff58fddea73b
-updated: 2019-02-23T13:16:04.535709+03:00
+hash: 803ee18ad0a962ed5dce4ad76a97dc8af07b75ad59e77d87750cb395db23e0e8
+updated: 2019-02-23T20:30:59.885409+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -217,7 +217,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 78565ada3db0e96dda41e02c11d4c542162c9141
+  version: 96ce8cf4335bb916555842ef640d6a04c633b334
   subpackages:
   - components/annotations
   - components/config
