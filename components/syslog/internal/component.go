@@ -56,7 +56,7 @@ func (c *Component) Run(a shadow.Application, ready chan<- struct{}) error {
 	server.SetFormat(rsyslog.Automatic)
 	server.SetHandler(c)
 
-	c.logger = logging.DefaultLogger().Named(c.Name())
+	c.logger = logging.DefaultLazyLogger(c.Name())
 
 	c.handlers = make([]syslog.HasHandler, 0, 0)
 	for _, component := range components {

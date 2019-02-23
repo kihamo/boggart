@@ -70,9 +70,9 @@ func (c *Component) Run(a shadow.Application, ready chan<- struct{}) (err error)
 	}
 
 	c.subscriptions = list.New()
-	c.logger = logging.DefaultLogger().Named(c.Name())
+	c.logger = logging.DefaultLazyLogger(c.Name())
 
-	clientLogger := c.logger.Named(c.Name() + ".client")
+	clientLogger := logging.NewLazyLogger(c.logger, c.Name()+".client")
 	m.ERROR = NewMQTTLogger(clientLogger.Error, clientLogger.Errorf)
 	m.CRITICAL = NewMQTTLogger(clientLogger.Error, clientLogger.Errorf)
 	m.WARN = NewMQTTLogger(clientLogger.Warn, clientLogger.Warnf)
@@ -520,9 +520,6 @@ func (c *Component) Subscriptions() []*mqtt.Subscription {
 }
 
 func (c *Component) convertPayload(payload interface{}) interface{} {
-	// TODO: rgb
-	// TODO: hsv
-
 	switch value := payload.(type) {
 	case string, []byte:
 		// skip

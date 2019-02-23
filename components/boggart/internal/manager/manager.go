@@ -105,7 +105,7 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 
 	// init logger
 	if bindLogger, ok := bind.(boggart.BindLogger); ok {
-		bindLogger.SetLogger(m.logger.Named(m.logger.Name() + "." + id))
+		bindLogger.SetLogger(logging.NewLazyLogger(m.logger, m.logger.Name()+"."+id))
 	}
 
 	bind.SetStatusManager(bindItem.Status, m.bindStatusUpdate(bindItem))

@@ -3,7 +3,7 @@ import:
 - package: github.com/go-sql-driver/mysql
   version: 9181e3a86a19bacd63e68d43ae8b7b36320d8092
 - package: github.com/kihamo/shadow
-  version: c8c16e0ea866353297d36b0e968dfb8b1fb15367
+  version: 96ce8cf4335bb916555842ef640d6a04c633b334
 - package: github.com/kihamo/go-workers
   version: 5fbca9be0fd9cd11bb6aa398d071d0f6f7fd287c
 - package: github.com/goburrow/serial

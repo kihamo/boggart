@@ -108,7 +108,7 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 		i18nCmp = a.GetComponent(i18n.ComponentName).(i18n.Component)
 	}
 
-	c.logger = logging.DefaultLogger().Named(c.Name())
+	c.logger = logging.DefaultLazyLogger(c.Name())
 
 	c.mutex.Lock()
 	c.manager = manager.NewManager(
@@ -116,7 +116,7 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 		i18nCmp,
 		a.GetComponent(mqtt.ComponentName).(mqtt.Component),
 		a.GetComponent(workers.ComponentName).(workers.Component),
-		c.logger.Named(c.logger.Name()+".bind"),
+		logging.NewLazyLogger(c.logger, c.logger.Name()+".bind"),
 		c.listenersManager)
 	c.mutex.Unlock()
 
