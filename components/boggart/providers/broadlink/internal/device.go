@@ -38,26 +38,29 @@ type Device struct {
 
 	id             uint32
 	kind           int
-	timeout        time.Duration
+	timeout        int64
 	packetsCounter uint64
 	auth           sync.Once
 }
 
 func NewDevice(kind int, mac net.HardwareAddr, addr, iface net.UDPAddr) *Device {
-	return &Device{
+	d := &Device{
 		kind:          kind,
 		addrMAC:       mac,
 		addrDevice:    addr,
 		addrInterface: iface,
 	}
+	d.SetTimeout(DefaultTimeout)
+
+	return d
 }
 
-func (d *Device) getTimeout() time.Duration {
-	if d.timeout > 0 {
-		return d.timeout
-	}
+func (d *Device) SetTimeout(duration time.Duration) {
+	atomic.StoreInt64(&d.timeout, int64(duration))
+}
 
-	return DefaultTimeout
+func (d *Device) Timeout() time.Duration {
+	return time.Duration(atomic.LoadInt64(&d.timeout))
 }
 
 func (d *Device) getPacketsCounter() uint16 {
@@ -106,7 +109,7 @@ func (d *Device) request(cmd byte, payload []byte, waitResult bool) ([]byte, err
 	}
 	defer conn.Close()
 
-	err = conn.SetDeadline(time.Now().Add(d.getTimeout())) // set timeout to connection
+	err = conn.SetDeadline(time.Now().Add(d.Timeout()))
 	if err != nil {
 		return nil, err
 	}

@@ -23,7 +23,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		Port: broadlink.DevicePort,
 	}
 
-	var provider interface{}
+	var provider broadlink.Device
 
 	switch config.Model {
 	case "rm3mini":
@@ -35,6 +35,8 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	default:
 		return nil, errors.New("unknown model " + config.Model)
 	}
+
+	provider.SetTimeout(config.ConnectionTimeout)
 
 	bind := &Bind{
 		provider:        provider,

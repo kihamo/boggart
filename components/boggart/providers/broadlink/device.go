@@ -2,6 +2,7 @@ package broadlink
 
 import (
 	"net"
+	"time"
 
 	"github.com/kihamo/boggart/components/boggart/providers/broadlink/internal"
 )
@@ -90,6 +91,7 @@ type Device interface {
 	MAC() net.HardwareAddr
 	Addr() *net.UDPAddr
 	Interface() *net.UDPAddr
+	SetTimeout(duration time.Duration)
 }
 
 func NewDevice(kind int, mac net.HardwareAddr, addr, iface net.UDPAddr) Device {

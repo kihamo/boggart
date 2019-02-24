@@ -37,6 +37,8 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		return nil, errors.New("unknown model " + config.Model)
 	}
 
+	provider.SetTimeout(config.ConnectionTimeout)
+
 	bind := &Bind{
 		provider:        provider,
 		updaterInterval: config.UpdaterInterval,

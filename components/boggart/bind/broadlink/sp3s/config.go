@@ -7,18 +7,21 @@ import (
 )
 
 const (
-	DefaultUpdateInterval = time.Second * 3 // as e-control app, refresh every 3 sec
+	DefaultUpdateInterval    = time.Second * 3 // as e-control app, refresh every 3 sec
+	DefaultConnectionTimeout = time.Second
 )
 
 type Config struct {
-	IP              boggart.IP           `valid:",required"`
-	MAC             boggart.HardwareAddr `valid:",required"`
-	Model           string               `valid:"in(sp3seu|sp3sus),required"`
-	UpdaterInterval time.Duration        `mapstructure:"updater_interval" yaml:"updater_interval"`
+	IP                boggart.IP           `valid:",required"`
+	MAC               boggart.HardwareAddr `valid:",required"`
+	Model             string               `valid:"in(sp3seu|sp3sus),required"`
+	UpdaterInterval   time.Duration        `mapstructure:"updater_interval" yaml:"updater_interval"`
+	ConnectionTimeout time.Duration        `mapstructure:"connection_timeout" yaml:"connection_timeout"`
 }
 
 func (t Type) Config() interface{} {
 	return &Config{
-		UpdaterInterval: DefaultUpdateInterval,
+		UpdaterInterval:   DefaultUpdateInterval,
+		ConnectionTimeout: DefaultConnectionTimeout,
 	}
 }

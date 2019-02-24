@@ -81,6 +81,7 @@ func (b *Bind) Connect(_ context.Context) error {
 	// open TCP connection
 	err := b.conn.Connect(ctx, b.host, b.port)
 	if err != nil {
+		b.Logger().Debug("Connect failed", "error", err.Error())
 		return err
 	}
 

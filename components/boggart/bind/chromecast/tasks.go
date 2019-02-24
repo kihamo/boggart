@@ -25,6 +25,8 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	if err == nil {
 		b.UpdateStatus(boggart.BindStatusOnline)
 	} else {
+		b.Logger().Error("Liveness checker failed", "error", err.Error())
+
 		b.UpdateStatus(boggart.BindStatusOffline)
 	}
 
