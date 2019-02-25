@@ -104,6 +104,10 @@ func (b *Bind) Connect(_ context.Context) error {
 }
 
 func (b *Bind) Close() (err error) {
+	if b.Status() == boggart.BindStatusOffline {
+		return nil
+	}
+
 	b.UpdateStatus(boggart.BindStatusOffline)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
