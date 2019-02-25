@@ -280,7 +280,7 @@ func (c *Component) Shutdown() error {
 	c.mutex.Unlock()
 
 	if m != nil {
-		return m.UnregisterAll()
+		return m.Close()
 	}
 
 	return nil

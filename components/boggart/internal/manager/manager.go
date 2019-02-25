@@ -20,8 +20,9 @@ import (
 )
 
 const (
-	managerNotReady = int64(iota)
-	managerReady
+	managerStatusNotReady = int64(iota)
+	managerStatusReady
+	managerStatusClose
 
 	MQTTPublishTopicBindStatus mqtt.Topic = boggart.ComponentName + "/bind/+/status"
 )
@@ -29,7 +30,7 @@ const (
 type Manager struct {
 	mutex sync.RWMutex
 
-	ready     int64
+	status    int64
 	storage   *sync.Map
 	dashboard dashboard.Component
 	i18n      i18n.Component
@@ -41,7 +42,7 @@ type Manager struct {
 
 func NewManager(dashboard dashboard.Component, i18n i18n.Component, mqtt mqtt.Component, workers workers.Component, logger logging.Logger, listeners *manager.ListenersManager) *Manager {
 	return &Manager{
-		ready:     managerNotReady,
+		status:    managerStatusNotReady,
 		storage:   new(sync.Map),
 		dashboard: dashboard,
 		i18n:      i18n,
@@ -254,14 +255,28 @@ func (m *Manager) Collect(ch chan<- snitch.Metric) {
 }
 
 func (m *Manager) Ready() {
-	if !m.IsReady() {
-		atomic.StoreInt64(&m.ready, managerReady)
+	old := atomic.SwapInt64(&m.status, managerStatusReady)
+	if old != managerStatusReady {
 		m.listeners.AsyncTrigger(context.TODO(), boggart.BindEventManagerReady)
 	}
 }
 
-func (m *Manager) IsReady() bool {
-	return atomic.LoadInt64(&m.ready) == managerReady
+func (m *Manager) Close() error {
+	old := atomic.SwapInt64(&m.status, managerStatusClose)
+	if old != managerStatusClose {
+		return m.UnregisterAll()
+	}
+
+	return nil
+}
+
+func (m *Manager) mqttPublish(topic string, payload interface{}) {
+	// при закрытии шлем синхронно, что бы блочить операцию Close компонента
+	if atomic.LoadInt64(&m.status) == managerStatusClose {
+		m.mqtt.Publish(context.Background(), topic, 1, true, payload)
+	} else {
+		m.mqtt.PublishAsync(context.Background(), topic, 1, true, payload)
+	}
 }
 
 func (m *Manager) itemStatusUpdate(item *BindItem) boggart.BindStatusSetter {
@@ -272,12 +287,7 @@ func (m *Manager) itemStatusUpdate(item *BindItem) boggart.BindStatusSetter {
 
 		item.updateStatus(status)
 
-		m.mqtt.PublishAsync(
-			context.Background(),
-			MQTTPublishTopicBindStatus.Format(mqtt.NameReplace(item.id)),
-			1,
-			true,
-			strings.ToLower(status.String()))
+		m.mqttPublish(MQTTPublishTopicBindStatus.Format(mqtt.NameReplace(item.id)), strings.ToLower(status.String()))
 	}
 }
 
@@ -292,12 +302,7 @@ func (m *Manager) bindStatusUpdate(item *BindItem) boggart.BindStatusSetter {
 
 			item.updateStatus(status)
 
-			m.mqtt.PublishAsync(
-				context.Background(),
-				MQTTPublishTopicBindStatus.Format(mqtt.NameReplace(item.id)),
-				1,
-				true,
-				strings.ToLower(status.String()))
+			m.mqttPublish(MQTTPublishTopicBindStatus.Format(mqtt.NameReplace(item.id)), strings.ToLower(status.String()))
 
 		default:
 			m.logger.Error("Deny change status", "status", status.String(), "item-id", item.id)
