@@ -154,7 +154,12 @@ func (b *Bind) doEvents() {
 				b.UpdateStatus(boggart.BindStatusOnline)
 
 			case events.Disconnected: // from ReceiverController
-				b.Logger().Debug("Event Disconnected")
+				var reason string
+				if t.Reason != nil {
+					reason = t.Reason.Error()
+				}
+
+				b.Logger().Debug("Event Disconnected", "reason", reason)
 
 				if err := b.Close(); err != nil {
 					b.Logger().Error("Close failed", "error", err.Error())
@@ -164,7 +169,11 @@ func (b *Bind) doEvents() {
 				b.Logger().Debug("Event AppStarted")
 
 			case events.AppStopped: // from ReceiverController
-				b.Logger().Debug("Event AppStopped")
+				b.Logger().Debug("Event AppStopped",
+					"app-id", t.AppID,
+					"display-name", t.DisplayName,
+					"status-text", t.StatusText,
+				)
 
 				if t.AppID == cast.AppMedia {
 					b.mutex.Lock()
