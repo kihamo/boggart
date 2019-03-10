@@ -1,5 +1,5 @@
-hash: f582bf0fe522a69ba1a71d09e22f339b7e6737288aff38304810eee9ac25f448
-updated: 2019-02-25T04:39:07.605161+03:00
+hash: cff3b2797da907a3eede9e3b3d44d6d7f20d4a760d0812684fe50bc0d5dc3401
+updated: 2019-03-02T13:45:04.789811+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -62,7 +62,7 @@ imports:
 - name: github.com/deckarep/golang-set
   version: cbaa98ba5575e67703b32b4b19f73c91f3c4159e
 - name: github.com/denisbrodbeck/machineid
-  version: e2e48f90c87f1f77286682531a46ff99e95d8089
+  version: f07179bb15a0bec252453468aa607c670f5c12b5
 - name: github.com/eclipse/paho.mqtt.golang
   version: cb7eb9363b4469c601b1a714447653b720e4e43a
   subpackages:
@@ -217,7 +217,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 53bd9af09e127a820c41058ecbfdb7c36a701a25
+  version: 119e15455a1fc616a3c17d4cd60012f1a61e4f8e
   subpackages:
   - components/annotations
   - components/config
@@ -378,7 +378,7 @@ imports:
 - name: github.com/robbiet480/go.nut
   version: 246697bfaea771ddfe4ce0d754e6e2a7b8214f0f
 - name: github.com/rubenv/sql-migrate
-  version: 6edbfbd6a369ee82463312ec67b2c92f97a1d4dc
+  version: 1007f53448d75fe14190968f5de4d95ed63ebb83
   subpackages:
   - sqlparse
 - name: github.com/snabb/webostv
