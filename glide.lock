@@ -1,5 +1,5 @@
-hash: cff3b2797da907a3eede9e3b3d44d6d7f20d4a760d0812684fe50bc0d5dc3401
-updated: 2019-03-02T13:45:04.789811+03:00
+hash: 80380890813873aed8b4dfdc97e2fa282b48386a93b42615c11eafedac141f61
+updated: 2019-03-16T01:01:10.898045+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -180,7 +180,7 @@ imports:
 - name: github.com/hajimehoshi/oto
   version: 69b46d84898282d901717ca51635af708da6c086
 - name: github.com/hashicorp/golang-lru
-  version: 20f1fb78b0740ba8c3cb143a61e86ba5c8669768
+  version: 7087cb70de9f7a8bc0a10c375cb0d2280a8edf9c
   subpackages:
   - simplelru
 - name: github.com/heptiolabs/healthcheck
@@ -203,6 +203,8 @@ imports:
   version: 03f45bd4b7dad4734bc4620e46a35789349abb20
 - name: github.com/kardianos/osext
   version: ae77be60afb1dcacde03767a8c37337fad28ac14
+- name: github.com/kelvins/sunrisesunset
+  version: 14f1915ad4b4fc68cdf3c144e39293993e21c67c
 - name: github.com/kihamo/go-grafana-api
   version: b9af836f6e9ddb24b1bb5d3d498459d93816ed64
 - name: github.com/kihamo/go-workers

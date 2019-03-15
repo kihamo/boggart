@@ -557,6 +557,10 @@ func (c *Component) convertPayload(payload interface{}) interface{} {
 		return value.Format(time.RFC3339)
 	case *time.Time:
 		return value.Format(time.RFC3339)
+	case time.Duration:
+		return strconv.FormatFloat(value.Seconds(), 'f', -1, 64)
+	case *time.Duration:
+		return strconv.FormatFloat(value.Seconds(), 'f', -1, 64)
 	default:
 		return fmt.Sprintf("%s", payload)
 	}
