@@ -60,5 +60,5 @@ import:
   version: ~v3.5
 - package: gopkg.in/telegram-bot-api.v4
   version: ~v4.6
-- package: github.com/kelvins/sunrisesunset
-  version: 14f1915ad4b4fc68cdf3c144e39293993e21c67c
+- package: github.com/mourner/suncalc-go
+  version: 77cea98fd55e16d1ff6e131b220012679265096b

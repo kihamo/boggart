@@ -11,10 +11,18 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
 	bind := &Bind{
-		config:   config,
-		sunrise:  atomic.NewTimeNull(),
-		sunset:   atomic.NewTimeNull(),
-		dayLight: atomic.NewDuration(),
+		config:        config,
+		riseStart:     atomic.NewTimeNull(),
+		riseEnd:       atomic.NewTimeNull(),
+		riseDuration:  atomic.NewDuration(),
+		setStart:      atomic.NewTimeNull(),
+		setEnd:        atomic.NewTimeNull(),
+		setDuration:   atomic.NewDuration(),
+		nightStart:    atomic.NewTimeNull(),
+		nightEnd:      atomic.NewTimeNull(),
+		nightDuration: atomic.NewDuration(),
+		nadir:         atomic.NewTimeNull(),
+		solarNoon:     atomic.NewTimeNull(),
 	}
 	bind.SetSerialNumber(config.Name)
 

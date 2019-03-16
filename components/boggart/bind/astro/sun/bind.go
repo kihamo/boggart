@@ -12,9 +12,17 @@ type Bind struct {
 
 	config *Config
 
-	sunrise  *atomic.TimeNull
-	sunset   *atomic.TimeNull
-	dayLight *atomic.Duration
+	riseStart     *atomic.TimeNull
+	riseEnd       *atomic.TimeNull
+	riseDuration  *atomic.Duration
+	setStart      *atomic.TimeNull
+	setEnd        *atomic.TimeNull
+	setDuration   *atomic.Duration
+	nightStart    *atomic.TimeNull
+	nightEnd      *atomic.TimeNull
+	nightDuration *atomic.Duration
+	nadir         *atomic.TimeNull
+	solarNoon     *atomic.TimeNull
 
 	taskStateUpdater *task.FunctionTask
 }

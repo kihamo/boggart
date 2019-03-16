@@ -1,5 +1,5 @@
-hash: 80380890813873aed8b4dfdc97e2fa282b48386a93b42615c11eafedac141f61
-updated: 2019-03-16T01:01:10.898045+03:00
+hash: 1b4a06f4c38dc98c21bdb8e28d90fffad9c159b6b74aa1daf01734843df7609c
+updated: 2019-03-16T03:26:42.880467+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -203,8 +203,6 @@ imports:
   version: 03f45bd4b7dad4734bc4620e46a35789349abb20
 - name: github.com/kardianos/osext
   version: ae77be60afb1dcacde03767a8c37337fad28ac14
-- name: github.com/kelvins/sunrisesunset
-  version: 14f1915ad4b4fc68cdf3c144e39293993e21c67c
 - name: github.com/kihamo/go-grafana-api
   version: b9af836f6e9ddb24b1bb5d3d498459d93816ed64
 - name: github.com/kihamo/go-workers
@@ -334,6 +332,8 @@ imports:
   version: 3536a929edddb9a5b34bd6861dc4a9647cb459fe
 - name: github.com/mmcloughlin/geohash
   version: f7f2bcae3294530249c63fcb6fb6d5e83eee4e73
+- name: github.com/mourner/suncalc-go
+  version: 77cea98fd55e16d1ff6e131b220012679265096b
 - name: github.com/OneOfOne/xxhash
   version: 456a93f5dffea9f90d34d67b03b144f12a8125cc
 - name: github.com/opentracing-contrib/go-stdlib
