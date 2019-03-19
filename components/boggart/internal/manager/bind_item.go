@@ -71,8 +71,11 @@ func (i *BindItem) Status() boggart.BindStatus {
 	return boggart.BindStatus(atomic.LoadUint64(&i.status))
 }
 
-func (i *BindItem) updateStatus(status boggart.BindStatus) {
-	atomic.StoreUint64(&i.status, uint64(status))
+func (i *BindItem) updateStatus(status boggart.BindStatus) bool {
+	value := uint64(status)
+	old := atomic.SwapUint64(&i.status, value)
+
+	return old != value
 }
 
 func (i *BindItem) Tasks() []workers.Task {

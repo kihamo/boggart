@@ -281,13 +281,9 @@ func (m *Manager) mqttPublish(topic string, payload interface{}) {
 
 func (m *Manager) itemStatusUpdate(item *BindItem) boggart.BindStatusSetter {
 	return func(status boggart.BindStatus) {
-		if status == item.Status() {
-			return
+		if ok := item.updateStatus(status); ok {
+			m.mqttPublish(MQTTPublishTopicBindStatus.Format(mqtt.NameReplace(item.id)), strings.ToLower(status.String()))
 		}
-
-		item.updateStatus(status)
-
-		m.mqttPublish(MQTTPublishTopicBindStatus.Format(mqtt.NameReplace(item.id)), strings.ToLower(status.String()))
 	}
 }
 
@@ -296,13 +292,9 @@ func (m *Manager) bindStatusUpdate(item *BindItem) boggart.BindStatusSetter {
 		switch status {
 		// allow statuses
 		case boggart.BindStatusOnline, boggart.BindStatusOffline, boggart.BindStatusUnknown, boggart.BindStatusRemoved:
-			if status == item.Status() {
-				return
+			if ok := item.updateStatus(status); ok {
+				m.mqttPublish(MQTTPublishTopicBindStatus.Format(mqtt.NameReplace(item.id)), strings.ToLower(status.String()))
 			}
-
-			item.updateStatus(status)
-
-			m.mqttPublish(MQTTPublishTopicBindStatus.Format(mqtt.NameReplace(item.id)), strings.ToLower(status.String()))
 
 		default:
 			m.logger.Error("Deny change status", "status", status.String(), "item-id", item.id)
