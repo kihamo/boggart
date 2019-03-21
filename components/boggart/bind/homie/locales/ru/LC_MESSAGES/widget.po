@@ -13,14 +13,23 @@ msgstr ""
 msgid "Device %s"
 msgstr "Устройство %s"
 
+msgid "Wipe"
+msgstr "Сбросить"
+
 msgid "Confirm reset device"
 msgstr "Подтверждение сброса устройства"
 
-msgid "Will be reset config device. Are you sure?"
+msgid "Will be wipe config device. Are you sure?"
 msgstr "Будет сброшена конфигурация устройства. Вы уверены?"
 
-msgid "Reset device"
-msgstr "Сбросить утройство"
+msgid "Restart"
+msgstr "Перезагрузить"
+
+msgid "Confirm restart device"
+msgstr "Подтверждение перезагрузки устройства"
+
+msgid "Will be restart device. Are you sure?"
+msgstr "Устройство будет перезагружено. Вы уверены?"
 
 msgid "Config"
 msgstr "Конфигурация"
@@ -36,3 +45,15 @@ msgstr "Аттрибут"
 
 msgid "Value"
 msgstr "Значение"
+
+msgid "Broadcast message"
+msgstr "Широковещательное сообщение"
+
+msgid "Level"
+msgstr "Уровень"
+
+msgid "Message"
+msgstr "Сообщение"
+
+msgid "Send"
+msgstr "Отправить"

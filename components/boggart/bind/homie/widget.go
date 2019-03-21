@@ -16,22 +16,9 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	var err error
 
 	if r.IsPost() {
+		var successMsg string
+
 		switch r.URL().Query().Get("action") {
-		case "reset":
-			err = bind.Reset(r.Context())
-			if err != nil {
-				w.SendJSON(response{
-					Result:  "failed",
-					Message: err.Error(),
-				})
-
-			} else {
-				w.SendJSON(response{
-					Result:  "success",
-					Message: "Send reset signal success",
-				})
-			}
-
 		case "config":
 			err = r.Original().ParseForm()
 			if err == nil {
@@ -45,23 +32,55 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 						break
 					}
 				}
+
+				if err == nil {
+					successMsg = "Send signal of set config success"
+				}
 			}
 
-			if err != nil {
-				w.SendJSON(response{
-					Result:  "failed",
-					Message: err.Error(),
-				})
+		case "restart":
+			err = bind.Restart(r.Context())
+			if err == nil {
+				successMsg = "Send restart signal success"
+			}
 
-			} else {
-				w.SendJSON(response{
-					Result:  "success",
-					Message: "Send signal of set config success",
-				})
+		case "reset":
+			err = bind.Reset(r.Context())
+			if err == nil {
+				successMsg = "Send reset signal success"
+			}
+
+		case "broadcast":
+			err = r.Original().ParseForm()
+			if err == nil {
+				level := r.Original().PostFormValue("level")
+				if level == "" {
+					t.NotFound(w, r)
+					return
+				}
+
+				err = bind.Broadcast(r.Context(), level, r.Original().PostFormValue("message"))
+				if err == nil {
+					successMsg = "Send broadcast message success"
+				}
 			}
 
 		default:
 			t.NotFound(w, r)
+			return
+		}
+
+		if err != nil {
+			w.SendJSON(response{
+				Result:  "failed",
+				Message: err.Error(),
+			})
+
+		} else {
+			w.SendJSON(response{
+				Result:  "success",
+				Message: successMsg,
+			})
 		}
 
 		return

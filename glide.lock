@@ -1,5 +1,5 @@
-hash: 1b4a06f4c38dc98c21bdb8e28d90fffad9c159b6b74aa1daf01734843df7609c
-updated: 2019-03-16T03:26:42.880467+03:00
+hash: e27627b113c2b2355233f0e478dd9883554725d7194a0fbaaa197e05c5bfd368
+updated: 2019-03-22T01:34:05.439189+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -217,7 +217,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 119e15455a1fc616a3c17d4cd60012f1a61e4f8e
+  version: 29c8d28e66f72ce453e142315bd62cbeaa957334
   subpackages:
   - components/annotations
   - components/config
@@ -335,7 +335,7 @@ imports:
 - name: github.com/mourner/suncalc-go
   version: 77cea98fd55e16d1ff6e131b220012679265096b
 - name: github.com/OneOfOne/xxhash
-  version: 456a93f5dffea9f90d34d67b03b144f12a8125cc
+  version: c1e3185f167680b62832a0a11938a04b1ab265fc
 - name: github.com/opentracing-contrib/go-stdlib
   version: c9628a4f0148d7e441a4af66dc0b1653cd941c20
   subpackages:
@@ -570,7 +570,7 @@ imports:
   - googleapis/rpc/status
   - googleapis/type/latlng
 - name: google.golang.org/grpc
-  version: a02b0774206b209466313a0b525d2c738fe407eb
+  version: ce08908258b7dc7d5c25259760589acdf3bf3789
   subpackages:
   - balancer
   - balancer/base

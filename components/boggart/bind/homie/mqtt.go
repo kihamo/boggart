@@ -14,8 +14,10 @@ import (
 const (
 	MQTTPrefix mqtt.Topic = "+/+/"
 
-	MQTTPublishTopicConfigSet = MQTTPrefix + "$implementation/config/set"
-	MQTTPublishTopicReset     = MQTTPrefix + "$implementation/reset"
+	MQTTPublishTopicBroadcast mqtt.Topic = "+/$broadcast/+"
+	MQTTPublishTopicConfigSet            = MQTTPrefix + "$implementation/config/set"
+	MQTTPublishTopicReset                = MQTTPrefix + "$implementation/reset"
+	MQTTPublishTopicRestart              = MQTTPrefix + "$implementation/restart"
 
 	MQTTSubscribeTopicDeviceAttribute               = MQTTPrefix + "+"
 	MQTTSubscribeTopicDeviceAttributeFirmware       = MQTTPrefix + "$fw/+"
@@ -28,8 +30,10 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	sn := b.SerialNumber()
 
 	return []mqtt.Topic{
+		mqtt.Topic(MQTTPublishTopicBroadcast.Format(base)),
 		mqtt.Topic(MQTTPublishTopicConfigSet.Format(base, sn)),
 		mqtt.Topic(MQTTPublishTopicReset.Format(base, sn)),
+		mqtt.Topic(MQTTPublishTopicRestart.Format(base, sn)),
 	}
 }
 

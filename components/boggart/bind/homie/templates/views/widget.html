@@ -8,12 +8,18 @@
         <div class="form-group pull-right">
             <div class="input-group">
                 <label>
-                    <button type="submit" class="btn btn-danger btn-sm"
+                    <button type="button" class="btn btn-warning btn-sm"
+                            data-toggle="modal" data-target="#modal"
+                            data-modal-title="{{ i18n "Confirm restart device" . }}"
+                            data-modal-body="{{ i18n "Will be restart device. Are you sure?" . }}"
+                            data-modal-callback="action('restart');"
+                    >{{ i18n "Restart" . }}</button>
+                    <button type="button" class="btn btn-danger btn-sm"
                             data-toggle="modal" data-target="#modal"
                             data-modal-title="{{ i18n "Confirm reset device" . }}"
-                            data-modal-body="{{ i18n "Will be reset config device. Are you sure?" . }}"
-                            data-modal-callback="reset();"
-                    >{{ i18n "Reset device" . }}</button>
+                            data-modal-body="{{ i18n "Will be wipe config device. Are you sure?" . }}"
+                            data-modal-callback="action('reset');"
+                    >{{ i18n "Wipe" . }}</button>
                 </label>
             </div>
         </div>
@@ -60,10 +66,50 @@
     </div>
 </div>
 
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel collapsed">
+            <div class="x_title">
+                <h2>{{ i18n "Broadcast message" . }}</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <form class="form-horizontal form-label-left" role="form" method="post" id="broadcast" action="?action=broadcast" novalidate>
+                    <div class="item form-group">
+                        <label for="level" class="control-label col-md-3 col-sm-3 col-xs-12">
+                        {{ i18n "Level" . }} <span class="required">*</span>
+                        </label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <input type="text" class="form-control" id="level" name="level" placeholder="alert" value="" required="required">
+                        </div>
+                    </div>
+                    <div class="item form-group">
+                        <label for="message" class="control-label col-md-3 col-sm-3 col-xs-12">
+                        {{ i18n "Message" . }}
+                        </label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <textarea class="form-control resizable_textarea" rows="4" name="message" id="message"></textarea>
+                        </div>
+                    </div>
+                    <div class="ln_solid"></div>
+                    <div class="form-group">
+                        <div class="col-md-6 col-md-offset-3">
+                            <button type="submit" class="btn btn-success">{{ i18n "Send" . }}</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{ if .config }}
 <div class="row">
     <div class="col-md-12 col-sm-12 col-xs-12">
-        <div class="x_panel">
+        <div class="x_panel collapsed">
             <div class="x_title">
                 <h2>{{ i18n "Config" . }}</h2>
                 <ul class="nav navbar-right panel_toolbox">
@@ -72,14 +118,7 @@
                 <div class="clearfix"></div>
             </div>
             <div class="x_content">
-                {{ if .error }}
-                    <div class="alert alert-danger alert-dismissable">
-                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                    {{ .error.Error }}
-                    </div>
-                {{ end }}
-
-                <form role="form" action="#?action=config" method="post" id="configs" data-toggle="validator">
+                <form role="form" action="?action=config" method="post" id="configs" data-toggle="validator">
                     <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
                         <thead>
                         <tr>
@@ -137,90 +176,83 @@
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive/js/dataTables.responsive.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/highlightjs/js/highlight.pack.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/validator/js/validator.min.js" false) }}
     <script type="application/javascript">
         $(document).ready(function () {
             hljs.initHighlightingOnLoad();
-        });
 
-        function reset() {
-            $.ajax({
-                type: 'POST',
-                url: '?action=reset',
-                success: function (r) {
-                    if (r.result === 'failed') {
-                        new PNotify({
-                            title: 'Error',
-                            text: r.message,
-                            type: 'error',
-                            hide: false,
-                            styling: 'bootstrap3'
-                        });
-                    } else if (r.message !== 'undefined') {
-                        new PNotify({
-                            title: 'Success',
-                            text: r.message,
-                            type: 'success',
-                            hide: false,
-                            styling: 'bootstrap3'
-                        });
-                    }
-
-                    refreshTables();
+            function successHandler(r) {
+                if (r.result === 'failed') {
+                    new PNotify({
+                        title: 'Error',
+                        text: r.message,
+                        type: 'error',
+                        hide: false,
+                        styling: 'bootstrap3'
+                    });
+                } else if (r.message !== 'undefined') {
+                    new PNotify({
+                        title: 'Success',
+                        text: r.message,
+                        type: 'success',
+                        hide: false,
+                        styling: 'bootstrap3'
+                    });
                 }
-            });
-        }
-
-        {{ if .config }}
-        $('#configs input[id], #configs textarea[id]').change(function() {
-            var
-                e = $(this),
-                data = {},
-                k = e.prop('id')
-            ;
-
-            if (e.prop('type') === 'checkbox') {
-                data[k] = e.prop('checked') !== '';
-            } else {
-                data[k] = e.val()
             }
 
-            $.ajax({
-                type: 'POST',
-                url: '?action=config',
-                data: data,
-                success: function (r) {
-                    if (r.result === 'failed') {
-                        new PNotify({
-                            title: 'Error',
-                            text: r.message,
-                            type: 'error',
-                            hide: false,
-                            styling: 'bootstrap3'
-                        });
-                    } else if (r.message !== 'undefined') {
-                        new PNotify({
-                            title: 'Success',
-                            text: r.message,
-                            type: 'success',
-                            hide: false,
-                            styling: 'bootstrap3'
-                        });
-                    }
+            window.action = function(cmd) {
+                $.ajax({
+                    type: 'POST',
+                    url: '?action=' + cmd,
+                    success: successHandler
+                });
+            };
 
-                    refreshTables();
+            $('#broadcast').submit(function(event){
+                event.preventDefault();
+                var e = $(this);
+
+                $.ajax({
+                    type: 'POST',
+                    url: e.prop('action'),
+                    data: e.serialize(),
+                    success: successHandler
+                });
+            });
+
+            {{ if .config }}
+            $('#configs input[id], #configs textarea[id]').change(function() {
+                var
+                    e = $(this),
+                    data = {},
+                    k = e.prop('id')
+                ;
+
+                if (e.prop('type') === 'checkbox') {
+                    data[k] = e.prop('checked') !== '';
+                } else {
+                    data[k] = e.val()
                 }
-            });
-        });
-        {{ end }}
 
-        {{ if .error }}
-            new PNotify({
-                title: 'Error',
-                text: '{{ .error }}',
-                type: 'error',
-                hide: false,
-                styling: 'bootstrap3'
+                $.ajax({
+                    type: 'POST',
+                    url: $('#configs').prop('action'),
+                    data: data,
+                    success: successHandler
+                });
             });
-        {{ end }}
+            {{ end }}
+
+            {{ if .error }}
+                new PNotify({
+                    title: 'Error',
+                    text: '{{ .error }}',
+                    type: 'error',
+                    hide: false,
+                    styling: 'bootstrap3'
+                });
+            {{ end }}
+        });
     </script>
 {{ end }}
