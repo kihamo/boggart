@@ -15,6 +15,7 @@ const (
 	MQTTPrefix mqtt.Topic = "+/+/"
 
 	MQTTPublishTopicConfigSet = MQTTPrefix + "$implementation/config/set"
+	MQTTPublishTopicReset     = MQTTPrefix + "$implementation/reset"
 
 	MQTTSubscribeTopicDeviceAttribute               = MQTTPrefix + "+"
 	MQTTSubscribeTopicDeviceAttributeFirmware       = MQTTPrefix + "$fw/+"
@@ -28,6 +29,7 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 
 	return []mqtt.Topic{
 		mqtt.Topic(MQTTPublishTopicConfigSet.Format(base, sn)),
+		mqtt.Topic(MQTTPublishTopicReset.Format(base, sn)),
 	}
 }
 

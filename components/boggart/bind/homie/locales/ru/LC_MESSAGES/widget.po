@@ -10,6 +10,24 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;"
 
+msgid "Device %s"
+msgstr "Устройство %s"
+
+msgid "Confirm reset device"
+msgstr "Подтверждение сброса устройства"
+
+msgid "Will be reset config device. Are you sure?"
+msgstr "Будет сброшена конфигурация устройства. Вы уверены?"
+
+msgid "Reset device"
+msgstr "Сбросить утройство"
+
+msgid "Config"
+msgstr "Конфигурация"
+
+msgid "Option"
+msgstr "Опция"
+
 msgid "Device attributes"
 msgstr "Аттрибуты устройства"
 
