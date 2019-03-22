@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/kihamo/boggart/components/boggart"
+	a "github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
@@ -16,6 +17,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	bind := &Bind{
 		config:               config,
+		lastUpdate:           a.NewTimeNull(),
 		deviceAttributes:     &sync.Map{},
 		implementationConfig: &sync.Map{},
 	}

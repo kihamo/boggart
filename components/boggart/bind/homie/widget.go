@@ -89,6 +89,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	vars := map[string]interface{}{
 		"error":              err,
 		"name":               "",
+		"last_update":        bind.LastUpdate(),
 		"devices_attributes": bind.DeviceAttributes(),
 		"config":             bind.ImplementationConfigAll(),
 	}

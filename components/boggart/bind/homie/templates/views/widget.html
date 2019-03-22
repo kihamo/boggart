@@ -1,25 +1,33 @@
 {{ define "content" }}
 <div class="page-title">
     <div class="title_left">
-        <h3>{{ i18n "Device %s" $ nil nil nil .name }}</h3>
+        <h3>
+            {{ i18n "Device %s" $ nil nil nil .name }}<br />
+
+            {{ if .last_update }}
+                <small><script type="application/javascript">document.write(dateToString('{{ .last_update.Format "2006-01-02T15:04:05Z07:00" }}'))</script></small>
+            {{ end }}
+        </h3>
     </div>
 
     <div class="title_right">
         <div class="form-group pull-right">
             <div class="input-group">
-                <label>
-                    <button type="button" class="btn btn-warning btn-sm"
+                <label class="btn-group">
+                    <button type="button" class="btn btn-icon btn-warning btn-sm"
                             data-toggle="modal" data-target="#modal"
                             data-modal-title="{{ i18n "Confirm restart device" . }}"
                             data-modal-body="{{ i18n "Will be restart device. Are you sure?" . }}"
-                            data-modal-callback="action('restart');"
-                    >{{ i18n "Restart" . }}</button>
-                    <button type="button" class="btn btn-danger btn-sm"
+                            data-modal-callback="action('restart');">
+                        <i class="fas fa-power-off" title="{{ i18n "Restart" . }}"></i>
+                    </button>
+                    <button type="button" class="btn btn-icon btn-danger btn-sm"
                             data-toggle="modal" data-target="#modal"
                             data-modal-title="{{ i18n "Confirm reset device" . }}"
                             data-modal-body="{{ i18n "Will be wipe config device. Are you sure?" . }}"
-                            data-modal-callback="action('reset');"
-                    >{{ i18n "Wipe" . }}</button>
+                            data-modal-callback="action('reset');">
+                        <i class="fas fa-eraser" title="{{ i18n "Wipe" . }}"></i>
+                    </button>
                 </label>
             </div>
         </div>

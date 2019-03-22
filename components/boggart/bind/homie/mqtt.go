@@ -79,6 +79,8 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			return nil
 		}),
 		mqtt.NewSubscriber(MQTTSubscribeTopicDeviceAttributeStats.Format(base, sn), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+			b.bump()
+
 			route := mqtt.RouteSplit(message.Topic())
 			attributeName := strings.Join(route[3:], ".")
 			var value interface{}
