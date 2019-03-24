@@ -81,7 +81,7 @@ func (c *Component) NamespacePath(namespace string) (path string, err error) {
 		err = errors.New("namespace not found")
 	}
 
-	return path, nil
+	return path, err
 }
 
 func (c *Component) SaveURLToFile(namespace, url string, force bool) (string, error) {

@@ -59,7 +59,7 @@ func (l MQTTLogger) Println(v ...interface{}) {
 	}
 
 	if len(v) > 0 {
-		parts := make([]string, len(v), len(v))
+		parts := make([]string, len(v))
 		for i, value := range v {
 			parts[i] = fmt.Sprintf("%v", value)
 		}

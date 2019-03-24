@@ -139,7 +139,9 @@ func (c *YandexSpeechKitCloud) Generate(ctx context.Context, text, lang, speaker
 
 	u, err := c.GenerateURL(ctx, text, lang, speaker, emotion, format, quality, speed)
 	if err == nil {
-		response, err := c.client.Get(ctx, u)
+		var response *h.Response
+
+		response, err = c.client.Get(ctx, u)
 		if err == nil {
 			defer response.Body.Close()
 

@@ -38,7 +38,7 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		return nil, nil
 	}
 
-	pinger.Timeout = deadline.Sub(time.Now())
+	pinger.Timeout = time.Until(deadline)
 	if pinger.Timeout > overhead {
 		pinger.Timeout -= overhead
 	}

@@ -55,7 +55,7 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	}
 
 	if b.SerialNumber() == "" {
-		ptzChannels := make(map[uint64]PTZChannel, 0)
+		ptzChannels := make(map[uint64]PTZChannel)
 		if list, err := b.isapi.PTZChannels(ctx); err == nil {
 			for _, channel := range list.Channels {
 				ptzChannels[channel.ID] = PTZChannel{

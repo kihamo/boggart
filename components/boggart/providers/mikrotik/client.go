@@ -62,7 +62,9 @@ func (c *Client) connect() (err error) {
 	}
 
 	if c.dialer.Timeout > 0 {
-		c.conn.SetDeadline(time.Now().Add(c.dialer.Timeout))
+		if err := c.conn.SetDeadline(time.Now().Add(c.dialer.Timeout)); err != nil {
+			return err
+		}
 	}
 
 	c.client, err = routeros.NewClient(c.conn)
@@ -105,10 +107,12 @@ func (c *Client) doConvert(ctx context.Context, sentence []string, result interf
 	}
 
 	if c.dialer.Timeout > 0 {
-		c.conn.SetDeadline(time.Now().Add(c.dialer.Timeout))
+		if err := c.conn.SetDeadline(time.Now().Add(c.dialer.Timeout)); err != nil {
+			return err
+		}
 	}
 
-	span, ctx := tracing.StartSpanFromContext(ctx, ComponentName, "call")
+	span, _ := tracing.StartSpanFromContext(ctx, ComponentName, "call")
 	defer span.Finish()
 
 	span.SetTag("sentence", strings.Join(sentence, " "))

@@ -28,8 +28,6 @@ const (
 )
 
 type Manager struct {
-	mutex sync.RWMutex
-
 	status    int64
 	storage   *sync.Map
 	dashboard dashboard.Component
@@ -273,7 +271,9 @@ func (m *Manager) Close() error {
 func (m *Manager) mqttPublish(topic string, payload interface{}) {
 	// при закрытии шлем синхронно, что бы блочить операцию Close компонента
 	if atomic.LoadInt64(&m.status) == managerStatusClose {
-		m.mqtt.Publish(context.Background(), topic, 1, true, payload)
+		if err := m.mqtt.Publish(context.Background(), topic, 1, true, payload); err != nil {
+			m.logger.Error("Publish to MQTT failed", "topic", topic, "error", err.Error())
+		}
 	} else {
 		m.mqtt.PublishAsync(context.Background(), topic, 1, true, payload)
 	}

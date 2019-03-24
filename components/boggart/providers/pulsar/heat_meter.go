@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"math"
 	"math/big"
 	"time"
 
@@ -101,12 +100,12 @@ func (d *HeatMeter) Request(function byte, data []byte) ([]byte, error) {
 
 	// check crc16
 	crc16 := rs485.GenerateCRC16(response[:l-2])
-	if bytes.Compare(response[l-2:], crc16) != 0 {
+	if !bytes.Equal(response[l-2:], crc16) {
 		return nil, errors.New("error CRC16 of response packet")
 	}
 
 	// check id
-	if bytes.Compare(response[l-(2+len(requestId)):l-2], requestId) != 0 {
+	if !bytes.Equal(response[l-(2+len(requestId)):l-2], requestId) {
 		return nil, errors.New("error ID of response packet")
 	}
 
@@ -125,8 +124,7 @@ func (d *HeatMeter) ReadMetrics(channel int64) ([][]byte, error) {
 		return nil, err
 	}
 
-	metrics := math.Ceil(float64(len(response) / 4))
-	result := make([][]byte, 0, int64(metrics))
+	result := make([][]byte, 0, len(response)/4)
 	value := rs485.Reverse(response)
 	for i := 0; i < len(value); i += 4 {
 		result = append(result, value[i:i+4])

@@ -41,12 +41,9 @@ func MimeTypeFromHTTPHeader(header http.Header) (MIMEType, error) {
 	}
 
 	for _, v := range strings.Split(contentType, ",") {
-		t, _, err := mime.ParseMediaType(v)
-		if err != nil {
-			return MIMETypeUnknown, err
+		if t, _, err := mime.ParseMediaType(v); err == nil {
+			return MIMEType(t), nil
 		}
-
-		return MIMEType(t), nil
 	}
 
 	return MIMETypeUnknown, nil

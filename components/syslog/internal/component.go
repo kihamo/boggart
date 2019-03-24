@@ -58,7 +58,7 @@ func (c *Component) Run(a shadow.Application, ready chan<- struct{}) error {
 
 	c.logger = logging.DefaultLazyLogger(c.Name())
 
-	c.handlers = make([]syslog.HasHandler, 0, 0)
+	c.handlers = make([]syslog.HasHandler, 0)
 	for _, component := range components {
 		if handler, ok := component.(syslog.HasHandler); ok {
 			c.handlers = append(c.handlers, handler)

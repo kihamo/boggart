@@ -56,7 +56,11 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	go func() {
 		state, err := client.ApplicationManagerGetForegroundAppInfo()
 		if err == nil {
-			b.monitorForegroundAppInfo(state)
+			err = b.monitorForegroundAppInfo(state)
+		}
+
+		if err != nil {
+			b.Logger().Warn("Failed get current app info", "error", err.Error())
 		}
 
 		err = client.ApplicationManagerMonitorForegroundAppInfo(b.monitorForegroundAppInfo, quit)
@@ -70,7 +74,11 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	go func() {
 		state, err := client.AudioGetStatus()
 		if err == nil {
-			b.monitorAudio(state)
+			err = b.monitorAudio(state)
+		}
+
+		if err != nil {
+			b.Logger().Warn("Failed get current audio status", "error", err.Error())
 		}
 
 		err = client.AudioMonitorStatus(b.monitorAudio, quit)
@@ -82,7 +90,11 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	go func() {
 		state, err := client.TvGetCurrentChannel()
 		if err == nil {
-			b.monitorTvCurrentChannel(state)
+			err = b.monitorTvCurrentChannel(state)
+		}
+
+		if err != nil {
+			b.Logger().Warn("Failed get current tv channel", "error", err.Error())
 		}
 
 		err = client.TvMonitorCurrentChannel(b.monitorTvCurrentChannel, quit)

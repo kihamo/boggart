@@ -41,7 +41,5 @@ type SupportRF433Mhz interface {
 }
 
 func (b *Bind) Run() error {
-	b.MQTTPublishAsync(context.Background(), MQTTPublishTopicCaptureState.Format(mqtt.NameReplace(b.SerialNumber())), false)
-
-	return nil
+	return b.MQTTPublishAsync(context.Background(), MQTTPublishTopicCaptureState.Format(mqtt.NameReplace(b.SerialNumber())), false)
 }

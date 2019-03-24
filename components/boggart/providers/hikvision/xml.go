@@ -21,7 +21,9 @@ func (f *overrideFloat64) Float64() float64 {
 
 func (f *overrideFloat64) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var raw string
-	d.DecodeElement(&raw, &start)
+	if err := d.DecodeElement(&raw, &start); err != nil {
+		return err
+	}
 
 	value, err := strconv.ParseFloat(strings.TrimSpace(raw), 64)
 	if err != nil {

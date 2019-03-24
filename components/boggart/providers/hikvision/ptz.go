@@ -189,15 +189,11 @@ func (a *ISAPI) PTZAbsolute(ctx context.Context, channel uint64, elevation int64
 		elevation = 2700
 	}
 
-	if azimuth < 0 {
-		azimuth = 0
-	} else if azimuth > 3600 {
+	if azimuth > 3600 {
 		azimuth = 3600
 	}
 
-	if absoluteZoom < 0 {
-		absoluteZoom = 0
-	} else if absoluteZoom > 1000 {
+	if absoluteZoom > 1000 {
 		absoluteZoom = 1000
 	}
 

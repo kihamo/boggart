@@ -12,8 +12,7 @@ type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
 
-	mutex    sync.RWMutex
-	initOnce sync.Once
+	mutex sync.RWMutex
 
 	client           *tv.ApiV2
 	mac              string

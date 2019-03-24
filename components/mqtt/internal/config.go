@@ -103,6 +103,10 @@ func (c *Component) ConfigWatchers() []config.Watcher {
 
 func (c *Component) watchConnect(_ string, _ interface{}, _ interface{}) {
 	if err := c.initClient(); err == nil {
-		c.initSubscribers()
+		if err := c.initSubscribers(); err != nil {
+			c.logger.Warn("Failed init MQTT subscribers", "error", err.Error())
+		}
+	} else {
+		c.logger.Warn("Failed init MQTT client", "error", err.Error())
 	}
 }

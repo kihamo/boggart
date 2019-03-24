@@ -300,7 +300,7 @@ func (b *Bind) subscribeTransition(ctx context.Context, _ mqtt.Component, messag
 		}
 	}
 
-	return nil
+	return err
 }
 
 func (b *Bind) subscribeSyncRegions(ctx context.Context, _ mqtt.Component, message mqtt.Message) (err error) {

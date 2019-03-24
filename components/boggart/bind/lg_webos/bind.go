@@ -26,8 +26,7 @@ type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
 
-	mutex    sync.RWMutex
-	initOnce sync.Once
+	mutex sync.RWMutex
 
 	client           *webostv.Tv
 	host             string
@@ -50,7 +49,9 @@ func (b *Bind) Client() (*webostv.Tv, error) {
 		return nil, err
 	}
 
-	go client.MessageHandler()
+	go func() {
+		_ = client.MessageHandler()
+	}()
 
 	b.mutex.Lock()
 	b.client = client

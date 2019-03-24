@@ -105,7 +105,6 @@ func (c *Component) DashboardMiddleware() []func(http.Handler) http.Handler {
 				}
 
 				http.Error(w, http.StatusText(http.StatusUnauthorized), 401)
-				return
 			})
 		},
 	}

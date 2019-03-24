@@ -42,6 +42,8 @@ func (b *Bind) registerDeviceAttributes(name string, value interface{}) {
 		err := json.Unmarshal([]byte(fmt.Sprintf("%v", value)), &md)
 		if err == nil {
 			b.configMetadataParse(reflect.ValueOf(md), "")
+
+			// TODO: динамически добавлять пароли, так как само устройство их не передает
 		}
 	}
 }

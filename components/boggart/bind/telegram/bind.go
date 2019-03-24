@@ -154,15 +154,20 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 				}
 
 				ctx := context.Background()
+				var mqttTopic string
 
 				if u.Message.Text != "" {
-					b.MQTTPublishAsync(ctx, MQTTPublishTopicReceiveMessage.Format(sn, u.Message.Chat.ID), u.Message.Text)
+					mqttTopic = MQTTPublishTopicReceiveMessage.Format(sn, u.Message.Chat.ID)
+
+					if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicReceiveMessage.Format(sn, u.Message.Chat.ID), u.Message.Text); err != nil {
+						b.Logger().Error("Publish message to MQTT failed",
+							"topic", mqttTopic,
+							"message", u.Message.Text,
+						)
+					}
 				}
 
-				var (
-					fileID    string
-					mqttTopic string
-				)
+				var fileID string
 
 				if u.Message.Voice != nil {
 					fileID = u.Message.Voice.FileID
@@ -185,8 +190,12 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 					continue
 				}
 
-				// TODO: log
-				_ = b.MQTTPublishAsync(ctx, mqttTopic, link)
+				if err := b.MQTTPublishAsync(ctx, mqttTopic, link); err != nil {
+					b.Logger().Error("Publish link to MQTT failed",
+						"topic", mqttTopic,
+						"link", link,
+					)
+				}
 
 			case <-b.done:
 				return

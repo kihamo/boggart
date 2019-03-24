@@ -358,7 +358,7 @@ func (c *Component) Publish(ctx context.Context, topic string, qos byte, retaine
 
 func (c *Component) PublishAsync(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) {
 	go func() {
-		c.Publish(ctx, topic, qos, retained, payload)
+		_ = c.Publish(ctx, topic, qos, retained, payload)
 	}()
 }
 

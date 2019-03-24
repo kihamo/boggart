@@ -81,7 +81,7 @@ func (d *ElectricityMeter200) Request(function byte, data []byte) ([]byte, error
 
 	// check crc16
 	crc16 := rs485.GenerateCRC16(response[:l-2])
-	if bytes.Compare(response[l-2:], crc16) != 0 {
+	if !bytes.Equal(response[l-2:], crc16) {
 		return nil, errors.New("error CRC16 of response packet")
 	}
 
@@ -322,7 +322,7 @@ func (d *ElectricityMeter200) DaylightSavingTime() (bool, error) {
 		return false, err
 	}
 
-	return bytes.Compare(response, []byte{0}) != 0, nil
+	return !bytes.Equal(response, []byte{0}), nil
 }
 
 // ParamsCurrent returns current value of voltage in V, amperage in A, power in W

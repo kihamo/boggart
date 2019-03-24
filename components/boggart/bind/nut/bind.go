@@ -32,7 +32,7 @@ func (b *Bind) connect() (client nut.Client, err error) {
 
 	defer func() {
 		if err != nil {
-			client.Disconnect()
+			_, _ = client.Disconnect()
 		}
 	}()
 
@@ -55,7 +55,9 @@ func (b *Bind) GetUPS() (ups nut.UPS, err error) {
 	if err != nil {
 		return ups, err
 	}
-	defer client.Disconnect()
+	defer func() {
+		_, _ = client.Disconnect()
+	}()
 
 	devices, err := client.GetUPSList()
 	if err != nil {
@@ -83,7 +85,9 @@ func (b *Bind) SendCommand(command string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	defer client.Disconnect()
+	defer func() {
+		_, _ = client.Disconnect()
+	}()
 
 	devices, err := client.GetUPSList()
 	if err != nil {

@@ -1,5 +1,5 @@
-hash: e27627b113c2b2355233f0e478dd9883554725d7194a0fbaaa197e05c5bfd368
-updated: 2019-03-22T01:34:05.439189+03:00
+hash: 0734ee1711798980ff8d38e7eb7ee41e969f69219df863d3513604169a1c47be
+updated: 2019-03-24T13:42:31.442621+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -206,7 +206,7 @@ imports:
 - name: github.com/kihamo/go-grafana-api
   version: b9af836f6e9ddb24b1bb5d3d498459d93816ed64
 - name: github.com/kihamo/go-workers
-  version: 5fbca9be0fd9cd11bb6aa398d071d0f6f7fd287c
+  version: 3700bb882786775132e86576af393232e81d5586
   subpackages:
   - dispatcher
   - event
@@ -217,7 +217,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 29c8d28e66f72ce453e142315bd62cbeaa957334
+  version: 04146a59438f56d80ef2b8fc674aab491d143b7c
   subpackages:
   - components/annotations
   - components/config

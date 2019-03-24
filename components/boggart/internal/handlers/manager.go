@@ -72,7 +72,7 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 
 	switch r.URL().Query().Get("entity") {
 	case "devices":
-		list := make([]managerHandlerDevice, 0, 0)
+		list := make([]managerHandlerDevice, 0)
 		buf := bytes.NewBuffer(nil)
 		enc := yaml.NewEncoder(buf)
 		defer enc.Close()
@@ -119,13 +119,13 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 		entities.Total = len(list)
 
 	case "listeners":
-		list := make([]managerListener, 0, 0)
+		list := make([]managerListener, 0)
 
 		for _, l := range h.listenersManager.Listeners() {
 			item := managerListener{
 				Id:     l.Id(),
 				Name:   l.Name(),
-				Events: make(map[string]string, 0),
+				Events: make(map[string]string),
 			}
 
 			listener := h.listenersManager.GetById(l.Id())
@@ -155,5 +155,5 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 	}
 
 	entities.Filtered = entities.Total
-	w.SendJSON(entities)
+	_ = w.SendJSON(entities)
 }

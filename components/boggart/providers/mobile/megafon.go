@@ -184,19 +184,15 @@ func (m *Megafon) Remainders(ctx context.Context) (*MegafonRemainders, error) {
 			switch remainder.Name {
 			case "Минуты по тарифному плану":
 				ret.Voice = remainder.Total.Value - remainder.Available.Value
-				break
 
 			case "SMS по тарифному плану":
 				ret.Sms = remainder.Total.Value - remainder.Available.Value
-				break
 
 			case "Интернет по тарифному плану":
 				ret.Internet = remainder.Total.Value - remainder.Available.Value
-				break
 
 			case "Автопродление":
 				ret.InternetProlongation = remainder.Total.Value - remainder.Available.Value
-				break
 			}
 		}
 	}

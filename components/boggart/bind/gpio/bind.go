@@ -89,7 +89,7 @@ func (b *Bind) Read() bool {
 
 func (b *Bind) waitForEdge() {
 	p := b.pin.(gpio.PinIn)
-	p.In(gpio.PullNoChange, gpio.BothEdges)
+	_ = p.In(gpio.PullNoChange, gpio.BothEdges)
 	ctx := context.Background()
 
 	for p.WaitForEdge(-1) {

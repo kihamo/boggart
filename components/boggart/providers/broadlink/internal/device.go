@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -40,7 +39,6 @@ type Device struct {
 	kind           int
 	timeout        int64
 	packetsCounter uint64
-	auth           sync.Once
 }
 
 func NewDevice(kind int, mac net.HardwareAddr, addr, iface net.UDPAddr) *Device {
@@ -287,7 +285,7 @@ func (d *Device) decrypt(data []byte) []byte {
 }
 
 func (d *Device) setAESKey(key []byte) {
-	if len(key) != aes.BlockSize || bytes.Compare(key, aesKey) == 0 {
+	if len(key) != aes.BlockSize || bytes.Equal(key, aesKey) {
 		key = nil
 	}
 
@@ -301,6 +299,7 @@ func (d *Device) setAESKey(key []byte) {
 	d.aesBlock, _ = aes.NewCipher(d.aesKey)
 }
 
+/*
 func (d *Device) getAESKey() []byte {
 	if d.aesKey == nil {
 		k := make([]byte, len(aesKey))
@@ -310,7 +309,7 @@ func (d *Device) getAESKey() []byte {
 
 	return d.aesKey
 }
-
+*/
 func (d *Device) cipherParam() (block cipher.Block, iv []byte) {
 	if d.aesIV != nil {
 		iv = d.aesIV

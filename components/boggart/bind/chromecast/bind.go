@@ -145,94 +145,92 @@ func (b *Bind) doEvents() {
 	ctx := context.Background()
 
 	for {
-		select {
-		case event := <-b.events:
-			switch t := event.(type) {
-			case events.Connected:
-				b.Logger().Debug("Event Connected")
+		event := <-b.events
+		switch t := event.(type) {
+		case events.Connected:
+			b.Logger().Debug("Event Connected")
 
-				b.UpdateStatus(boggart.BindStatusOnline)
+			b.UpdateStatus(boggart.BindStatusOnline)
 
-			case events.Disconnected: // from ReceiverController
-				var reason string
-				if t.Reason != nil {
-					reason = t.Reason.Error()
-				}
-
-				b.Logger().Debug("Event Disconnected", "reason", reason)
-
-				if err := b.Close(); err != nil {
-					b.Logger().Error("Close failed", "error", err.Error())
-				}
-
-			case events.AppStarted: // from ReceiverController
-				b.Logger().Debug("Event AppStarted")
-
-			case events.AppStopped: // from ReceiverController
-				b.Logger().Debug("Event AppStopped",
-					"app-id", t.AppID,
-					"display-name", t.DisplayName,
-					"status-text", t.StatusText,
-				)
-
-				if t.AppID == cast.AppMedia {
-					b.mutex.Lock()
-
-					if b.media != nil {
-						if err := b.media.Close(); err != nil {
-							b.Logger().Error("Media close failed", "error", err.Error())
-						}
-
-						b.media = nil
-					}
-
-					b.mutex.Unlock()
-				}
-
-			case events.StatusUpdated: // from ReceiverController
-				b.Logger().Debug("Event StatusUpdated",
-					"level", t.Level,
-					"muted", t.Muted,
-				)
-
-				sn := mqtt.NameReplace(b.SerialNumber())
-
-				volume := uint32(math.Round(t.Level * 100))
-				if ok := b.volume.Set(volume); ok {
-					_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateVolume.Format(sn), volume)
-				}
-
-				if ok := b.mute.Set(t.Muted); ok {
-					_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMute.Format(sn), t.Muted)
-				}
-
-			case controllers.MediaStatus:
-				b.Logger().Debug("Event MediaStatus",
-					"state", t.PlayerState,
-					"reason", t.IdleReason,
-				)
-
-				sn := mqtt.NameReplace(b.SerialNumber())
-
-				if ok := b.status.Set(t.PlayerState); ok {
-					_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateStatus.Format(sn), strings.ToLower(t.PlayerState))
-				}
-
-				if t.PlayerState == PlayerStateIdle && t.IdleReason == IdleReasonFinished {
-					if _, err := b.receiver.QuitApp(ctx); err != nil {
-						b.Logger().Error("Quit app failed", "error", err.Error())
-					}
-				}
-
-				if t.Media != nil {
-					if ok := b.mediaContentID.Set(t.Media.ContentId); ok {
-						_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateContent.Format(sn), t.Media.ContentId)
-					}
-				}
-
-			default:
-				b.Logger().Error("Unknown event", "event", fmt.Sprintf("%#v", t))
+		case events.Disconnected: // from ReceiverController
+			var reason string
+			if t.Reason != nil {
+				reason = t.Reason.Error()
 			}
+
+			b.Logger().Debug("Event Disconnected", "reason", reason)
+
+			if err := b.Close(); err != nil {
+				b.Logger().Error("Close failed", "error", err.Error())
+			}
+
+		case events.AppStarted: // from ReceiverController
+			b.Logger().Debug("Event AppStarted")
+
+		case events.AppStopped: // from ReceiverController
+			b.Logger().Debug("Event AppStopped",
+				"app-id", t.AppID,
+				"display-name", t.DisplayName,
+				"status-text", t.StatusText,
+			)
+
+			if t.AppID == cast.AppMedia {
+				b.mutex.Lock()
+
+				if b.media != nil {
+					if err := b.media.Close(); err != nil {
+						b.Logger().Error("Media close failed", "error", err.Error())
+					}
+
+					b.media = nil
+				}
+
+				b.mutex.Unlock()
+			}
+
+		case events.StatusUpdated: // from ReceiverController
+			b.Logger().Debug("Event StatusUpdated",
+				"level", t.Level,
+				"muted", t.Muted,
+			)
+
+			sn := mqtt.NameReplace(b.SerialNumber())
+
+			volume := uint32(math.Round(t.Level * 100))
+			if ok := b.volume.Set(volume); ok {
+				_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateVolume.Format(sn), volume)
+			}
+
+			if ok := b.mute.Set(t.Muted); ok {
+				_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMute.Format(sn), t.Muted)
+			}
+
+		case controllers.MediaStatus:
+			b.Logger().Debug("Event MediaStatus",
+				"state", t.PlayerState,
+				"reason", t.IdleReason,
+			)
+
+			sn := mqtt.NameReplace(b.SerialNumber())
+
+			if ok := b.status.Set(t.PlayerState); ok {
+				_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateStatus.Format(sn), strings.ToLower(t.PlayerState))
+			}
+
+			if t.PlayerState == PlayerStateIdle && t.IdleReason == IdleReasonFinished {
+				if _, err := b.receiver.QuitApp(ctx); err != nil {
+					b.Logger().Error("Quit app failed", "error", err.Error())
+				}
+			}
+
+			if t.Media != nil {
+				if ok := b.mediaContentID.Set(t.Media.ContentId); ok {
+					_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateContent.Format(sn), t.Media.ContentId)
+				}
+			}
+
+		default:
+			b.Logger().Error("Unknown event", "event", fmt.Sprintf("%#v", t))
 		}
 	}
 }

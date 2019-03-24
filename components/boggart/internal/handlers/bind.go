@@ -192,14 +192,14 @@ func (h *BindHandler) actionDelete(w *dashboard.Response, r *dashboard.Request, 
 	}
 
 	if err != nil {
-		w.SendJSON(response{
+		_ = w.SendJSON(response{
 			Result:  "failed",
 			Message: err.Error(),
 		})
 		return
 	}
 
-	w.SendJSON(response{
+	_ = w.SendJSON(response{
 		Result: "success",
 	})
 }

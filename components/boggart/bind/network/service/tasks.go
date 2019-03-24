@@ -35,7 +35,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 
 		startTime := time.Now()
 		conn, err = net.DialTimeout("tcp", b.address, b.timeout)
-		latency = uint32(time.Now().Sub(startTime).Nanoseconds() / 1e+6)
+		latency = uint32(time.Since(startTime).Nanoseconds() / 1e+6)
 
 		if err == nil {
 			conn.Close()

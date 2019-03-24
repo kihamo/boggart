@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"net"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart/providers/broadlink/internal"
 )
@@ -93,27 +92,26 @@ func SetupWiFi(SSID, password string, securityMode int) (err error) {
 	return nil
 }
 
+/*
 func DiscoverDevices() (devices []Device, err error) {
-	/*
-		Offset       Contents
-		0x00-0x07    00
-		0x08-0x0b    Current offset from GMT as a little-endian 32 bit integer
-		0x0c-0x0d    Current year as a little-endian 16 bit integer
-		0x0e         Current number of seconds past the minute
-		0x0f         Current number of minutes past the hour
-		0x10         Current number of hours past midnight
-		0x11         Current day of the week (Monday = 1, Tuesday = 2, etc)
-		0x12         Current day in month
-		0x13         Current month
-		0x14-0x17    00
-		0x18-0x1b    Local IP address
-		0x1c-0x1d    Source port as a little-endian 16 bit integer
-		0x1e-0x1f    00
-		0x20-0x21    Checksum as a little-endian 16 bit integer
-		0x22-0x25    00
-		0x26         06
-		0x27-0x2f    00
-	*/
+		//Offset       Contents
+		//0x00-0x07    00
+		//0x08-0x0b    Current offset from GMT as a little-endian 32 bit integer
+		//0x0c-0x0d    Current year as a little-endian 16 bit integer
+		//0x0e         Current number of seconds past the minute
+		//0x0f         Current number of minutes past the hour
+		//0x10         Current number of hours past midnight
+		//0x11         Current day of the week (Monday = 1, Tuesday = 2, etc)
+		//0x12         Current day in month
+		//0x13         Current month
+		//0x14-0x17    00
+		//0x18-0x1b    Local IP address
+		//0x1c-0x1d    Source port as a little-endian 16 bit integer
+		//0x1e-0x1f    00
+		//0x20-0x21    Checksum as a little-endian 16 bit integer
+		//0x22-0x25    00
+		//0x26         06
+		//0x27-0x2f    00
 
 	addrInterface, err := LocalAddr()
 	if err != nil {
@@ -224,3 +222,4 @@ func DiscoverDevices() (devices []Device, err error) {
 
 	return devices, nil
 }
+*/

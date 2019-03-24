@@ -15,7 +15,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		username:        config.Username,
 		password:        config.Password,
 		updaterInterval: config.UpdaterInterval,
-		variables:       make(map[string]interface{}, 0),
+		variables:       make(map[string]interface{}),
 	}
 
 	return bind, nil

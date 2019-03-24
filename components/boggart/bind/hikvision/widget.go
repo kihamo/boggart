@@ -38,5 +38,5 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	}
 
 	w.Header().Set("Content-Length", strconv.FormatInt(int64(buf.Len()), 10))
-	io.Copy(w, buf)
+	_, _ = io.Copy(w, buf)
 }

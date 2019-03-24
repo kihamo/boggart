@@ -32,11 +32,12 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 			volume, err = strconv.ParseInt(r.Original().FormValue("volume"), 10, 64)
 			if err == nil {
-				bind.SetVolume(volume)
-
-				url := r.Original().FormValue("url")
-				err = bind.PlayFromURL(url)
-				data["url"] = url
+				err = bind.SetVolume(volume)
+				if err == nil {
+					url := r.Original().FormValue("url")
+					err = bind.PlayFromURL(url)
+					data["url"] = url
+				}
 			}
 
 			if err != nil {

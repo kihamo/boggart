@@ -39,12 +39,12 @@ func (h *ConfigHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		// reload by ID
 		if id := q.Get("id"); id != "" {
 			if err := h.component.ReloadConfigByID(id); err != nil {
-				w.SendJSON(response{
+				_ = w.SendJSON(response{
 					Result:  "failed",
 					Message: err.Error(),
 				})
 			} else {
-				w.SendJSON(response{
+				_ = w.SendJSON(response{
 					Result:  "success",
 					Message: "Bind " + id + " reloaded from file",
 				})
@@ -55,12 +55,12 @@ func (h *ConfigHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 		// reload all
 		if loaded, err := h.component.ReloadConfig(); err != nil {
-			w.SendJSON(response{
+			_ = w.SendJSON(response{
 				Result:  "failed",
 				Message: err.Error(),
 			})
 		} else {
-			w.SendJSON(response{
+			_ = w.SendJSON(response{
 				Result:  "success",
 				Message: "Loaded " + strconv.FormatInt(int64(loaded), 10) + " binds",
 			})

@@ -44,7 +44,14 @@ func (b *Bind) Run() error {
 	b.UpdateStatus(boggart.BindStatusOnline)
 
 	for fileName, callback := range b.watchFiles {
-		go callback(fileName)
+		go func(file string, cb func(string) error) {
+			if err := cb(file); err != nil {
+				b.Logger().Error("Callback returns error",
+					"file", file,
+					"error", err.Error(),
+				)
+			}
+		}(fileName, callback)
 	}
 
 	return nil
@@ -99,7 +106,7 @@ func (b *Bind) StartWatch() error {
 					}
 				}
 
-			case _ = <-watcher.Errors:
+			case <-watcher.Errors:
 				b.Logger().Error("File watcher return error", "error", err.Error())
 			}
 

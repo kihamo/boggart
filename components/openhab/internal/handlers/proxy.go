@@ -106,7 +106,7 @@ func (h *ProxyHandler) proxy(u string, w *dashboard.Response, r *dashboard.Reque
 	}
 
 	w.WriteHeader(response.StatusCode)
-	w.Write(body)
+	_, _ = w.Write(body)
 }
 
 func (h *ProxyHandler) sendFileToMessenger(messenger string, body []byte, w *dashboard.Response, r *dashboard.Request) {
@@ -121,9 +121,7 @@ func (h *ProxyHandler) sendFileToMessenger(messenger string, body []byte, w *das
 		return c == ','
 	})
 
-	for _, id := range chatsFromConfig {
-		chats = append(chats, id)
-	}
+	chats = append(chats, chatsFromConfig...)
 
 	if len(chats) == 0 {
 		h.NotFound(w, r)
