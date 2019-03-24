@@ -253,10 +253,7 @@ func (m *Manager) Collect(ch chan<- snitch.Metric) {
 }
 
 func (m *Manager) Ready() {
-	old := atomic.SwapInt64(&m.status, managerStatusReady)
-	if old != managerStatusReady {
-		m.listeners.AsyncTrigger(context.TODO(), boggart.BindEventManagerReady)
-	}
+	atomic.SwapInt64(&m.status, managerStatusReady)
 }
 
 func (m *Manager) Close() error {

@@ -9,7 +9,6 @@ import (
 
 var (
 	BindEventSyslogReceive = event.NewBaseEvent("SyslogReceive")
-	BindEventManagerReady  = event.NewBaseEvent("ManagerReady")
 )
 
 type BindStatus uint64
