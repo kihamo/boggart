@@ -9,8 +9,10 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	a "github.com/kihamo/boggart/components/boggart/atomic"
 )
 
 const (
@@ -22,7 +24,8 @@ type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
 
-	config *Config
+	config     *Config
+	lastUpdate *a.TimeNull
 
 	deviceAttributes     *sync.Map
 	implementationConfig *sync.Map
@@ -163,4 +166,17 @@ func (b *Bind) Restart(ctx context.Context) error {
 
 func (b *Bind) Reset(ctx context.Context) error {
 	return b.MQTTPublish(ctx, MQTTPublishTopicReset.Format(b.config.BaseTopic, b.SerialNumber()), true)
+}
+
+func (b *Bind) bump() {
+	b.lastUpdate.Set(time.Now())
+}
+
+func (b *Bind) LastUpdate() *time.Time {
+	if b.lastUpdate.IsNil() {
+		return nil
+	}
+
+	t := b.lastUpdate.Load()
+	return &t
 }
