@@ -87,7 +87,7 @@ func (c *Subscription) Callback(ctx context.Context, client Component, message M
 	atomic.AddUint64(&c.calls, 1)
 
 	c.mutex.RLock()
-	subscribers := c.subscribers
+	subscribers := append([]Subscriber(nil), c.subscribers...)
 	c.mutex.RUnlock()
 
 	if len(subscribers) == 0 {
