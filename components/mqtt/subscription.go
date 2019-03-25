@@ -94,23 +94,23 @@ func (c *Subscription) Callback(ctx context.Context, client Component, message M
 		return nil
 	}
 
-	errCh := make(chan error)
-	doneCh := make(chan struct{})
+	errIn := make(chan error)
+	errOut := make(chan error, 1)
 
 	go func() {
-		for {
-			select {
-			case result := <-errCh:
-				if result != nil {
-					if err == nil {
-						err = errors.Wrap(result, "Call returned error")
-					} else {
-						err = errors.Wrap(result, err.Error())
-					}
-				}
+		var err error
 
-			case <-doneCh:
+		for {
+			result := <-errIn
+			if result == nil {
+				errOut <- err
 				return
+			}
+
+			if err == nil {
+				err = errors.Wrap(result, "Call returned error")
+			} else {
+				err = errors.Wrap(result, err.Error())
 			}
 		}
 	}()
@@ -123,16 +123,17 @@ func (c *Subscription) Callback(ctx context.Context, client Component, message M
 			defer wg.Done()
 
 			if errCall := s.Call(ctx, client, message); errCall != nil {
-				errCh <- errCall
+				errIn <- errCall
 			}
 		}(sub)
 	}
 
 	wg.Wait()
-	// doneCh <- struct{}{}
 
-	close(doneCh)
-	close(errCh)
+	err = <-errOut
+
+	close(errIn)
+	close(errOut)
 
 	return err
 }

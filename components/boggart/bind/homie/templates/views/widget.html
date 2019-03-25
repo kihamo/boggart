@@ -164,12 +164,51 @@
 </div>
 {{ end }}
 
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel collapsed">
+            <div class="x_title">
+                <h2>{{ i18n "OTA" . }}</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <table class="table table-striped nowrap" style="width:100%">
+                    <tbody>
+                        <tr>
+                            <th>Status</th>
+                            <td>{{ if .ota_running }}running{{ else }}ready{{ end }}</td>
+                        </tr>
+                        <tr>
+                            <th>Progress</th>
+                            <td>
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-striped {{ if .ota_running }}progress-bar-info active{{ else }}progress-bar-danger{{ end}}" role="progressbar" aria-valuenow="{{ .ota_written }}" aria-valuemin="0" aria-valuemax="{{ .ota_total }}" style="width:{{ .ota_progress }}%">
+                                        <span class="sr-only">{{ .ota_written }} bytes of {{ .ota_total }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Checksum</th>
+                            <td>{{ .ota_checksum }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <form role="form" action="?action=ota" method="post" id="ota" class="dropzone"></form>
+            </div>
+        </div>
+    </div>
+</div>
 {{ end }}
 
 {{ define "head" }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/highlightjs/css/tomorrow.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/dropzonejs/css/dropzone.min.css" false) }}
 
     <style type="text/css">
         #configs tbody input, #configs tbody textarea {
@@ -185,8 +224,16 @@
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/highlightjs/js/highlight.pack.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/validator/js/validator.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/dropzonejs/js/dropzone.min.js" false) }}
     <script type="application/javascript">
         $(document).ready(function () {
+            Dropzone.options.ota = {
+                parallelUploads: 1,
+                paramName: "firmware",
+                createImageThumbnails: false,
+                acceptedFiles: "application/macbinary,.bin"
+            };
+
             hljs.initHighlightingOnLoad();
 
             function successHandler(r) {
@@ -238,7 +285,7 @@
                 ;
 
                 if (e.prop('type') === 'checkbox') {
-                    data[k] = e.prop('checked') !== '';
+                    data[k] = e.prop('checked') != '';
                 } else {
                     data[k] = e.val()
                 }

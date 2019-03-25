@@ -1,6 +1,10 @@
 package homie
 
 import (
+	"errors"
+	"net/http"
+	"time"
+
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/shadow/components/dashboard"
@@ -65,6 +69,30 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 				}
 			}
 
+		case "ota":
+			file, header, err := r.Original().FormFile("firmware")
+			if err == nil {
+				defer file.Close()
+				t := header.Header.Get("Content-Type")
+
+				switch t {
+				case "application/macbinary":
+					err = bind.OTA(r.Context(), file, time.Minute)
+
+				default:
+					err = errors.New("unknown content type " + t)
+				}
+			}
+
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(err.Error()))
+			} else {
+				w.Write([]byte("success"))
+			}
+
+			return
+
 		default:
 			t.NotFound(w, r)
 			return
@@ -86,12 +114,18 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		return
 	}
 
+	otaWritten, otaTotal := bind.OTAProgress()
 	vars := map[string]interface{}{
 		"error":              err,
 		"name":               "",
 		"last_update":        bind.LastUpdate(),
 		"devices_attributes": bind.DeviceAttributes(),
 		"config":             bind.ImplementationConfigAll(),
+		"ota_running":        bind.OTAIsRunning(),
+		"ota_written":        otaWritten,
+		"ota_total":          otaTotal,
+		"ota_checksum":       bind.OTAChecksum(),
+		"ota_progress":       (float64(otaWritten) * float64(100)) / float64(otaTotal),
 	}
 
 	if attribute, ok := bind.DeviceAttribute("name"); ok {

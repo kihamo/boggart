@@ -47,8 +47,24 @@ func (v *BoolNull) Set(value bool) bool {
 	return old != current
 }
 
+func (v *BoolNull) True() bool {
+	return v.Set(true)
+}
+
+func (v *BoolNull) False() bool {
+	return v.Set(false)
+}
+
 func (v *BoolNull) Load() bool {
 	return a.LoadUint32(&v.v) == boolTrue
+}
+
+func (v *BoolNull) IsTrue() bool {
+	return v.Load()
+}
+
+func (v *BoolNull) IsFalse() bool {
+	return !v.Load()
 }
 
 func (v *BoolNull) IsNil() bool {

@@ -279,6 +279,11 @@ func (c *Component) clientSubscribe(topic string, qos byte, subscription *mqtt.S
 					r = "1"
 				}
 
+				logPayload := msg.String()
+				if len(logPayload) > 100 {
+					logPayload = logPayload[:100]
+				}
+
 				c.logger.Error(
 					"Call MQTT subscriber failed",
 					"error", err.Error(),
@@ -286,7 +291,7 @@ func (c *Component) clientSubscribe(topic string, qos byte, subscription *mqtt.S
 					"topic.call", message.Topic(),
 					"qos", strconv.Itoa(int(qos)),
 					"retained", r,
-					"payload", msg.String(),
+					"payload", logPayload,
 				)
 			} else {
 				metricSubscriberCalls.With("status", "success", "topic", topic).Inc()
@@ -341,13 +346,18 @@ func (c *Component) Publish(ctx context.Context, topic string, qos byte, retaine
 			r = "1"
 		}
 
+		logPayload := fmt.Sprintf("%v", payload)
+		if len(logPayload) > 100 {
+			logPayload = logPayload[:100]
+		}
+
 		c.logger.Error(
 			"Publish MQTT topic failed",
 			"error", err.Error(),
 			"topic", topic,
 			"qos", strconv.Itoa(int(qos)),
 			"retained", r,
-			"payload", fmt.Sprintf("%v", payload),
+			"payload", logPayload,
 		)
 	} else {
 		metricPublish.With("status", "success").Inc()

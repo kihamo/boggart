@@ -54,6 +54,14 @@ func (m *message) UnmarshalJSON(v interface{}) error {
 	return json.Unmarshal(m.m.Payload(), v)
 }
 
+func (m *message) Bool() bool {
+	if m.IsTrue() {
+		return true
+	}
+
+	return false
+}
+
 func (m *message) IsTrue() bool {
 	return bytes.Equal(m.m.Payload(), PayloadTrue)
 }

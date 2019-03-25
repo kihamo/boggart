@@ -32,6 +32,22 @@ func (v *Bool) Set(value bool) bool {
 	return old != current
 }
 
+func (v *Bool) True() bool {
+	return v.Set(true)
+}
+
+func (v *Bool) False() bool {
+	return v.Set(false)
+}
+
 func (v *Bool) Load() bool {
 	return a.LoadUint32(&v.v) == 1
+}
+
+func (v *Bool) IsTrue() bool {
+	return v.Load()
+}
+
+func (v *Bool) IsFalse() bool {
+	return !v.Load()
 }

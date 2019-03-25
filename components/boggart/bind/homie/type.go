@@ -20,6 +20,10 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		lastUpdate:           a.NewTimeNull(),
 		deviceAttributes:     &sync.Map{},
 		implementationConfig: &sync.Map{},
+		otaRun:               a.NewBool(),
+		otaWritten:           a.NewUint32(),
+		otaTotal:             a.NewUint32(),
+		otaChecksum:          a.NewString(),
 	}
 	bind.SetSerialNumber(config.DeviceID)
 

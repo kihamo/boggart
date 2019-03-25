@@ -24,17 +24,30 @@ type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
 
-	config     *Config
-	lastUpdate *a.TimeNull
-
+	config               *Config
+	lastUpdate           *a.TimeNull
 	deviceAttributes     *sync.Map
 	implementationConfig *sync.Map
+
+	otaRun      *a.Bool
+	otaWritten  *a.Uint32
+	otaTotal    *a.Uint32
+	otaChecksum *a.String
+	otaFlash    chan struct{}
 }
 
 type ImplementationConfig struct {
 	Name  string
 	Type  string
 	Value interface{}
+}
+
+func (b *Bind) UpdateStatus(status boggart.BindStatus) {
+	b.BindBase.UpdateStatus(status)
+
+	if status == boggart.BindStatusOnline && b.OTAIsRunning() {
+		b.otaFlash <- struct{}{}
+	}
 }
 
 func (b *Bind) registerDeviceAttributes(name string, value interface{}) {

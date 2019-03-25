@@ -30,6 +30,7 @@ type Message interface {
 	UnmarshalJSON(interface{}) error
 	IsTrue() bool
 	IsFalse() bool
+	Bool() bool
 	String() string
 }
 

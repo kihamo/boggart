@@ -12,16 +12,17 @@ import (
 )
 
 const (
-	MQTTPrefix mqtt.Topic = "+/+/"
+	MQTTPrefix     mqtt.Topic = "+/+/"
+	MQTTPrefixImpl            = MQTTPrefix + "$implementation/"
 
 	MQTTPublishTopicBroadcast mqtt.Topic = "+/$broadcast/+"
-	MQTTPublishTopicConfigSet            = MQTTPrefix + "$implementation/config/set"
-	MQTTPublishTopicReset                = MQTTPrefix + "$implementation/reset"
-	MQTTPublishTopicRestart              = MQTTPrefix + "$implementation/restart"
+	MQTTPublishTopicConfigSet            = MQTTPrefixImpl + "config/set"
+	MQTTPublishTopicReset                = MQTTPrefixImpl + "reset"
+	MQTTPublishTopicRestart              = MQTTPrefixImpl + "restart"
 
 	MQTTSubscribeTopicDeviceAttribute               = MQTTPrefix + "+"
 	MQTTSubscribeTopicDeviceAttributeFirmware       = MQTTPrefix + "$fw/+"
-	MQTTSubscribeTopicDeviceAttributeImplementation = MQTTPrefix + "$implementation/+/#"
+	MQTTSubscribeTopicDeviceAttributeImplementation = MQTTPrefixImpl + "+"
 	MQTTSubscribeTopicDeviceAttributeStats          = MQTTPrefix + "$stats/+"
 )
 
@@ -75,6 +76,11 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			}
 
 			route := mqtt.RouteSplit(message.Topic())
+			name := strings.Join(route[3:], ".")
+			if strings.HasPrefix(name, "ota.") {
+				return nil
+			}
+
 			b.registerDeviceAttributes("implementation."+strings.Join(route[3:], "."), message.String())
 			return nil
 		}),
@@ -97,5 +103,8 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			b.registerDeviceAttributes("stats."+attributeName, value)
 			return nil
 		}),
+
+		// ota
+		mqtt.NewSubscriber(otaMQTTPublishTopicStatus.Format(base, sn), 0, b.otaStatusSubscriber),
 	}
 }
