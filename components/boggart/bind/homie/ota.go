@@ -19,6 +19,7 @@ import (
 const (
 	otaTopicFirmware = MQTTPrefixImpl + "ota/firmware/+"
 	otaTopicStatus   = MQTTPrefixImpl + "ota/status"
+	otaTopicEnabled  = MQTTPrefixImpl + "ota/enabled"
 
 	// https://github.com/homieiot/homie-esp8266/blob/develop/docs/others/homie-implementation-specifics.md
 	otaStatusSuccessfully = 200 // OTA successfully flashed
@@ -79,6 +80,10 @@ func (b *Bind) OTA(ctx context.Context, file io.Reader, timeout time.Duration) e
 	go b.otaDo(firmware, timeout)
 
 	return nil
+}
+
+func (b *Bind) OTAIsEnabled() bool {
+	return b.otaEnabled.IsTrue()
 }
 
 func (b *Bind) OTAIsRunning() bool {
@@ -235,6 +240,14 @@ func (b *Bind) otaStatusSubscriber(_ context.Context, _ mqtt.Component, message 
 
 	default:
 		b.Logger().Warn("OTA unknown status", "status", info[0])
+	}
+
+	return nil
+}
+
+func (b *Bind) otaEnabledSubscriber(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+	if message.Topic() == otaTopicEnabled.Format(b.config.BaseTopic, b.SerialNumber()) {
+		b.otaEnabled.Set(message.Bool())
 	}
 
 	return nil

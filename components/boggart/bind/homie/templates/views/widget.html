@@ -14,6 +14,7 @@
         <div class="form-group pull-right">
             <div class="input-group">
                 <label class="btn-group">
+                    {{ if .online }}
                     <button type="button" class="btn btn-icon btn-warning btn-sm"
                             data-toggle="modal" data-target="#modal"
                             data-modal-title="{{ i18n "Confirm restart device" . }}"
@@ -21,6 +22,7 @@
                             data-modal-callback="action('restart');">
                         <i class="fas fa-power-off" title="{{ i18n "Restart" . }}"></i>
                     </button>
+                    {{ end }}
                     <button type="button" class="btn btn-icon btn-danger btn-sm"
                             data-toggle="modal" data-target="#modal"
                             data-modal-title="{{ i18n "Confirm reset device" . }}"
@@ -74,6 +76,7 @@
     </div>
 </div>
 
+{{ if .nodes }}
 <div class="row">
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
@@ -103,6 +106,8 @@
                             <td>{{ $node.Type.String }}</td>
                             <td>{{ $node.Array.String }}</td>
                             <td>
+                                {{ $properties := $node.Properties }}
+                                {{ if $properties }}
                                 <table class="table table-striped nowrap">
                                     <thead>
                                         <tr>
@@ -111,7 +116,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {{ range $p, $property := $node.Properties }}
+                                        {{ range $p, $property := $properties }}
                                         <tr>
                                             <td>{{ $property.Name.String }}</td>
                                             <td>{{ $property.Value.String }} {{ $property.Unit.String }}</td>
@@ -119,6 +124,7 @@
                                         {{ end }}
                                     </tbody>
                                 </table>
+                                {{ end }}
                             </td>
                         </tr>
                     {{ end }}
@@ -128,46 +134,7 @@
         </div>
     </div>
 </div>
-
-<div class="row">
-    <div class="col-md-12 col-sm-12 col-xs-12">
-        <div class="x_panel collapsed">
-            <div class="x_title">
-                <h2>{{ i18n "Broadcast message" . }}</h2>
-                <ul class="nav navbar-right panel_toolbox">
-                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
-                </ul>
-                <div class="clearfix"></div>
-            </div>
-            <div class="x_content">
-                <form class="form-horizontal form-label-left" role="form" method="post" id="broadcast" action="?action=broadcast" novalidate>
-                    <div class="item form-group">
-                        <label for="level" class="control-label col-md-3 col-sm-3 col-xs-12">
-                        {{ i18n "Level" . }} <span class="required">*</span>
-                        </label>
-                        <div class="col-md-6 col-sm-6 col-xs-12">
-                            <input type="text" class="form-control" id="level" name="level" placeholder="alert" value="" required="required">
-                        </div>
-                    </div>
-                    <div class="item form-group">
-                        <label for="message" class="control-label col-md-3 col-sm-3 col-xs-12">
-                        {{ i18n "Message" . }}
-                        </label>
-                        <div class="col-md-6 col-sm-6 col-xs-12">
-                            <textarea class="form-control resizable_textarea" rows="4" name="message" id="message"></textarea>
-                        </div>
-                    </div>
-                    <div class="ln_solid"></div>
-                    <div class="form-group">
-                        <div class="col-md-6 col-md-offset-3">
-                            <button type="submit" class="btn btn-success">{{ i18n "Send" . }}</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+{{ end }}
 
 {{ if .settings }}
 <div class="row">
@@ -219,6 +186,7 @@
 </div>
 {{ end }}
 
+{{ if .ota_enabled }}
 <div class="row">
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel collapsed">
@@ -260,6 +228,47 @@
                         </label>
                         <div class="col-md-6 col-sm-6 col-xs-12">
                             <input type="text" class="form-control" id="timeout" name="timeout" value="{{ .ota_timeout }}" required="required">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel collapsed">
+            <div class="x_title">
+                <h2>{{ i18n "Broadcast message" . }}</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <form class="form-horizontal form-label-left" role="form" method="post" id="broadcast" action="?action=broadcast" novalidate>
+                    <div class="item form-group">
+                        <label for="level" class="control-label col-md-3 col-sm-3 col-xs-12">
+                        {{ i18n "Level" . }} <span class="required">*</span>
+                        </label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <input type="text" class="form-control" id="level" name="level" placeholder="alert" value="" required="required">
+                        </div>
+                    </div>
+                    <div class="item form-group">
+                        <label for="message" class="control-label col-md-3 col-sm-3 col-xs-12">
+                        {{ i18n "Message" . }}
+                        </label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <textarea class="form-control resizable_textarea" rows="4" name="message" id="message"></textarea>
+                        </div>
+                    </div>
+                    <div class="ln_solid"></div>
+                    <div class="form-group">
+                        <div class="col-md-6 col-md-offset-3">
+                            <button type="submit" class="btn btn-success">{{ i18n "Send" . }}</button>
                         </div>
                     </div>
                 </form>

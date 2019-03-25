@@ -23,6 +23,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 		nodes: &sync.Map{},
 
+		otaEnabled:  a.NewBool(),
 		otaRun:      a.NewBool(),
 		otaWritten:  a.NewUint32(),
 		otaTotal:    a.NewUint32(),

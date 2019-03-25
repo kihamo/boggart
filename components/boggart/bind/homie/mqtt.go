@@ -36,11 +36,13 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 		mqtt.NewSubscriber(deviceTopicAttributeStats.Format(base, sn), 0, b.deviceStatsSubscriber),
 
 		// nodes
+		mqtt.NewSubscriber(nodesTopicNodesAttribute.Format(base, sn), 0, b.nodesAttributesSubscriber),
 		mqtt.NewSubscriber(nodesTopicNodes.Format(base, sn), 0, b.nodesSubscriber),
 		mqtt.NewSubscriber(nodesTopicProperty.Format(base, sn), 0, b.nodesPropertySubscriber),
 
 		// ota
 		mqtt.NewSubscriber(otaTopicStatus.Format(base, sn), 0, b.otaStatusSubscriber),
+		mqtt.NewSubscriber(otaTopicEnabled.Format(base, sn), 0, b.otaEnabledSubscriber),
 
 		// settings
 		mqtt.NewSubscriber(settingsTopicGet.Format(base, sn), 0, b.settingsSubscriber),

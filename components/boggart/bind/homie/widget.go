@@ -135,9 +135,11 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	vars := map[string]interface{}{
 		"error":              err,
 		"name":               "",
+		"online":             bind.Status() == boggart.BindStatusOnline,
 		"last_update":        bind.LastUpdate(),
 		"devices_attributes": bind.DeviceAttributes(),
 		"nodes":              bind.Nodes(),
+		"ota_enabled":        bind.OTAIsEnabled(),
 		"ota_running":        bind.OTAIsRunning(),
 		"ota_written":        otaWritten,
 		"ota_total":          otaTotal,

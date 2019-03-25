@@ -24,6 +24,7 @@ type Bind struct {
 
 	nodes *sync.Map
 
+	otaEnabled  *a.Bool
 	otaRun      *a.Bool
 	otaWritten  *a.Uint32
 	otaTotal    *a.Uint32

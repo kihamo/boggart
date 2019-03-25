@@ -7,13 +7,13 @@ import (
 	"sync"
 
 	"github.com/kihamo/boggart/components/boggart/atomic"
-
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
 const (
-	nodesTopicNodes    = MQTTPrefix + "+/+"
-	nodesTopicProperty = MQTTPrefix + "+/+/+"
+	nodesTopicNodesAttribute = MQTTPrefix + "$nodes"
+	nodesTopicNodes          = MQTTPrefix + "+/+"
+	nodesTopicProperty       = MQTTPrefix + "+/+/+"
 
 	dataTypeInteger = "integer"
 	dataTypeFloat   = "float"
@@ -82,21 +82,24 @@ func (b *Bind) Nodes() []*node {
 	return result
 }
 
-func (b *Bind) nodesLoadOrStore(name string) *node {
-	if value, ok := b.nodes.Load(name); ok {
-		return value.(*node)
+func (b *Bind) nodesAttributesSubscriber(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+	if message.Topic() != nodesTopicNodesAttribute.Format(b.config.BaseTopic, b.SerialNumber()) {
+		return nil
 	}
 
-	n := &node{
-		ID:         atomic.NewStringDefault(name),
-		Name:       atomic.NewString(),
-		Type:       atomic.NewString(),
-		Array:      atomic.NewString(),
-		properties: &sync.Map{},
+	for _, name := range strings.Split(message.String(), ",") {
+		b.nodes.Store(name, &node{
+			ID:         atomic.NewStringDefault(name),
+			Name:       atomic.NewString(),
+			Type:       atomic.NewString(),
+			Array:      atomic.NewString(),
+			properties: &sync.Map{},
+		})
+
+		b.Logger().Debug("Register node", "node", name)
 	}
 
-	b.nodes.Store(name, n)
-	return n
+	return nil
 }
 
 /*
@@ -111,7 +114,12 @@ func (b *Bind) nodesSubscriber(_ context.Context, _ mqtt.Component, message mqtt
 		return nil
 	}
 
-	n := b.nodesLoadOrStore(route[2])
+	value, ok := b.nodes.Load(route[2])
+	if !ok {
+		return errors.New("unknown node " + route[2])
+	}
+
+	n := value.(*node)
 
 	if strings.HasPrefix(route[3], "$") { // node attribute
 		switch route[3] {
@@ -143,7 +151,12 @@ func (b *Bind) nodesPropertySubscriber(_ context.Context, _ mqtt.Component, mess
 		return nil
 	}
 
-	n := b.nodesLoadOrStore(route[2])
+	value, ok := b.nodes.Load(route[2])
+	if !ok {
+		return errors.New("unknown node " + route[2])
+	}
+
+	n := value.(*node)
 	property := n.propertyLoadOrStore(route[3])
 
 	switch route[4] {
