@@ -1,6 +1,7 @@
 package atomic
 
 import (
+	"strconv"
 	a "sync/atomic"
 )
 
@@ -73,4 +74,14 @@ func (v *BoolNull) IsNil() bool {
 
 func (v *BoolNull) Nil() bool {
 	return v.Uint32.Set(boolNull)
+}
+
+func (v *BoolNull) String() string {
+	value := v.Uint32.Load()
+
+	if value == boolNull {
+		return nilString
+	}
+
+	return strconv.FormatBool(value == boolTrue)
 }

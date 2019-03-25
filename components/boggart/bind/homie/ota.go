@@ -17,8 +17,8 @@ import (
 )
 
 const (
-	otaMQTTPublishTopicFirmware = MQTTPrefixImpl + "ota/firmware/+"
-	otaMQTTPublishTopicStatus   = MQTTPrefixImpl + "ota/status"
+	otaTopicFirmware = MQTTPrefixImpl + "ota/firmware/+"
+	otaTopicStatus   = MQTTPrefixImpl + "ota/status"
 
 	// https://github.com/homieiot/homie-esp8266/blob/develop/docs/others/homie-implementation-specifics.md
 	otaStatusSuccessfully = 200 // OTA successfully flashed
@@ -139,7 +139,7 @@ func (b *Bind) otaDo(firmware *bytes.Buffer, timeout time.Duration) {
 		   $implementation/ota/firmware/<md5 checksum>, either as binary or
 		   as a Base64 encoded string
 	*/
-	topic := otaMQTTPublishTopicFirmware.Format(b.config.BaseTopic, b.SerialNumber(), checkSum)
+	topic := otaTopicFirmware.Format(b.config.BaseTopic, b.SerialNumber(), checkSum)
 	if err := b.MQTTPublishRaw(context.Background(), topic, 1, false, firmware.Bytes()); err != nil {
 		b.otaAbort()
 	}

@@ -120,14 +120,13 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		"name":               "",
 		"last_update":        bind.LastUpdate(),
 		"devices_attributes": bind.DeviceAttributes(),
-
-		"ota_running":  bind.OTAIsRunning(),
-		"ota_written":  otaWritten,
-		"ota_total":    otaTotal,
-		"ota_checksum": bind.OTAChecksum(),
-		"ota_progress": (float64(otaWritten) * float64(100)) / float64(otaTotal),
-
-		"settings": bind.SettingsAll(),
+		"nodes":              bind.Nodes(),
+		"ota_running":        bind.OTAIsRunning(),
+		"ota_written":        otaWritten,
+		"ota_total":          otaTotal,
+		"ota_checksum":       bind.OTAChecksum(),
+		"ota_progress":       (float64(otaWritten) * float64(100)) / float64(otaTotal),
+		"settings":           bind.SettingsAll(),
 	}
 
 	if attribute, ok := bind.DeviceAttribute("name"); ok {

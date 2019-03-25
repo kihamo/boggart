@@ -2,6 +2,7 @@ package atomic
 
 import (
 	"math"
+	"strconv"
 )
 
 type Float64 struct {
@@ -25,4 +26,8 @@ func (v *Float64) Set(value float64) bool {
 
 func (v *Float64) Load() float64 {
 	return math.Float64frombits(v.Uint64.Load())
+}
+
+func (v *Float64) String() string {
+	return strconv.FormatFloat(float64(v.Load()), 'f', -1, 64)
 }

@@ -30,15 +30,19 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 	return []mqtt.Subscriber{
 		// device
-		mqtt.NewSubscriber(deviceMQTTSubscribeTopicAttribute.Format(base, sn), 0, b.deviceAttributesSubscriber),
-		mqtt.NewSubscriber(deviceMQTTSubscribeTopicAttributeFirmware.Format(base, sn), 0, b.deviceFirmwareSubscriber),
-		mqtt.NewSubscriber(deviceMQTTSubscribeTopicAttributeImplementation.Format(base, sn), 0, b.deviceImplementationSubscriber),
-		mqtt.NewSubscriber(deviceMQTTSubscribeTopicAttributeStats.Format(base, sn), 0, b.deviceStatsSubscriber),
+		mqtt.NewSubscriber(deviceTopicAttribute.Format(base, sn), 0, b.deviceAttributesSubscriber),
+		mqtt.NewSubscriber(deviceTopicAttributeFirmware.Format(base, sn), 0, b.deviceFirmwareSubscriber),
+		mqtt.NewSubscriber(deviceTopicAttributeImplementation.Format(base, sn), 0, b.deviceImplementationSubscriber),
+		mqtt.NewSubscriber(deviceTopicAttributeStats.Format(base, sn), 0, b.deviceStatsSubscriber),
+
+		// nodes
+		mqtt.NewSubscriber(nodesTopicNodes.Format(base, sn), 0, b.nodesSubscriber),
+		mqtt.NewSubscriber(nodesTopicProperty.Format(base, sn), 0, b.nodesPropertySubscriber),
 
 		// ota
-		mqtt.NewSubscriber(otaMQTTPublishTopicStatus.Format(base, sn), 0, b.otaStatusSubscriber),
+		mqtt.NewSubscriber(otaTopicStatus.Format(base, sn), 0, b.otaStatusSubscriber),
 
 		// settings
-		mqtt.NewSubscriber(settingsMQTTPublishTopicGet.Format(base, sn), 0, b.settingsSubscriber),
+		mqtt.NewSubscriber(settingsTopicGet.Format(base, sn), 0, b.settingsSubscriber),
 	}
 }

@@ -1,6 +1,7 @@
 package atomic
 
 import (
+	"strconv"
 	a "sync/atomic"
 )
 
@@ -50,4 +51,8 @@ func (v *Bool) IsTrue() bool {
 
 func (v *Bool) IsFalse() bool {
 	return !v.Load()
+}
+
+func (v *Bool) String() string {
+	return strconv.FormatBool(v.Load())
 }

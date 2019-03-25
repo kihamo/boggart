@@ -26,3 +26,7 @@ func (v *Duration) Set(value time.Duration) bool {
 func (v *Duration) Load() time.Duration {
 	return time.Duration(v.Int64.Load())
 }
+
+func (v *Duration) String() string {
+	return v.Load().String()
+}

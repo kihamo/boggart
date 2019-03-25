@@ -27,3 +27,7 @@ func (v *Time) Load() time.Time {
 	ns := v.Int64.Load()
 	return time.Unix(0, ns)
 }
+
+func (v *Time) String() string {
+	return v.Load().String()
+}

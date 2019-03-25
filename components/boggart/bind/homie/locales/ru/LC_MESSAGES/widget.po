@@ -57,3 +57,21 @@ msgstr "Сообщение"
 
 msgid "Send"
 msgstr "Отправить"
+
+msgid "Nodes"
+msgstr "Ноды"
+
+msgid "ID"
+msgstr "ID"
+
+msgid "Name"
+msgstr "Имя"
+
+msgid "Type"
+msgstr "Тип"
+
+msgid "Array"
+msgstr "Массив"
+
+msgid "Property"
+msgstr "Свойство"

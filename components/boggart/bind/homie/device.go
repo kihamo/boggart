@@ -12,10 +12,10 @@ import (
 )
 
 const (
-	deviceMQTTSubscribeTopicAttribute               = MQTTPrefix + "+"
-	deviceMQTTSubscribeTopicAttributeFirmware       = MQTTPrefix + "$fw/+"
-	deviceMQTTSubscribeTopicAttributeImplementation = MQTTPrefixImpl + "+"
-	deviceMQTTSubscribeTopicAttributeStats          = MQTTPrefix + "$stats/+"
+	deviceTopicAttribute               = MQTTPrefix + "+"
+	deviceTopicAttributeFirmware       = MQTTPrefix + "$fw/+"
+	deviceTopicAttributeImplementation = MQTTPrefixImpl + "+"
+	deviceTopicAttributeStats          = MQTTPrefix + "$stats/+"
 )
 
 func (b *Bind) registerDeviceAttributes(name string, value interface{}) {

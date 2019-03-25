@@ -31,3 +31,12 @@ func (v *TimeNull) IsNil() bool {
 func (v *TimeNull) Nil() bool {
 	return v.Time.Set(timeNull)
 }
+
+func (v *TimeNull) String() string {
+	value := v.Time.Load()
+	if value == timeNull {
+		return nilString
+	}
+
+	return value.String()
+}

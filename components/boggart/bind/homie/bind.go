@@ -22,6 +22,8 @@ type Bind struct {
 
 	deviceAttributes *sync.Map
 
+	nodes *sync.Map
+
 	otaRun      *a.Bool
 	otaWritten  *a.Uint32
 	otaTotal    *a.Uint32

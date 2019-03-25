@@ -12,11 +12,11 @@ import (
 )
 
 const (
-	settingsMQTTPublishTopicGet = MQTTPrefixImpl + "config"
-	settingsMQTTPublishTopicSet = MQTTPrefixImpl + "config/set"
+	settingsTopicGet = MQTTPrefixImpl + "config"
+	settingsTopicSet = MQTTPrefixImpl + "config/set"
 )
 
-type SettingsOption struct {
+type settingsOption struct {
 	Name  string
 	Type  string
 	Value interface{}
@@ -36,7 +36,7 @@ func (b *Bind) settingsParse(e reflect.Value, prefix string) {
 			b.settingsParse(value, key+configNameSeparator)
 
 		default:
-			b.settings.Store(key, SettingsOption{
+			b.settings.Store(key, settingsOption{
 				Name:  prefix + field.String(),
 				Type:  value.Kind().String(),
 				Value: value.Interface(),
@@ -45,20 +45,20 @@ func (b *Bind) settingsParse(e reflect.Value, prefix string) {
 	}
 }
 
-func (b *Bind) SettingsAll() map[string]SettingsOption {
-	result := make(map[string]SettingsOption)
+func (b *Bind) SettingsAll() map[string]settingsOption {
+	result := make(map[string]settingsOption)
 
 	b.settings.Range(func(key, value interface{}) bool {
-		result[key.(string)] = value.(SettingsOption)
+		result[key.(string)] = value.(settingsOption)
 		return true
 	})
 
 	return result
 }
 
-func (b *Bind) SettingsGet(key string) (value SettingsOption, ok bool) {
+func (b *Bind) SettingsGet(key string) (value settingsOption, ok bool) {
 	if v, o := b.settings.Load(key); o {
-		return v.(SettingsOption), o
+		return v.(settingsOption), o
 	}
 
 	return value, ok
@@ -109,7 +109,7 @@ func (b *Bind) SettingsSet(ctx context.Context, key string, value interface{}) (
 		return err
 	}
 
-	return b.MQTTPublish(ctx, settingsMQTTPublishTopicSet.Format(b.config.BaseTopic, b.SerialNumber()), pl)
+	return b.MQTTPublish(ctx, settingsTopicSet.Format(b.config.BaseTopic, b.SerialNumber()), pl)
 }
 
 func (b *Bind) settingsSubscriber(_ context.Context, _ mqtt.Component, message mqtt.Message) error {

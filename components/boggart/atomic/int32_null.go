@@ -2,6 +2,7 @@ package atomic
 
 import (
 	"math"
+	"strconv"
 )
 
 const (
@@ -43,4 +44,13 @@ func (v *Int32Null) IsNil() bool {
 
 func (v *Int32Null) Nil() bool {
 	return v.Int64.Set(int32Null)
+}
+
+func (v *Int32Null) String() string {
+	value := v.Int64.Load()
+	if value == int32Null {
+		return nilString
+	}
+
+	return strconv.FormatInt(value, 10)
 }

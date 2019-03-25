@@ -1,6 +1,7 @@
 package atomic
 
 import (
+	"strconv"
 	a "sync/atomic"
 )
 
@@ -25,4 +26,8 @@ func (v *Uint64) Set(value uint64) bool {
 
 func (v *Uint64) Load() uint64 {
 	return a.LoadUint64(&v.v)
+}
+
+func (v *Uint64) String() string {
+	return strconv.FormatUint(v.Load(), 10)
 }

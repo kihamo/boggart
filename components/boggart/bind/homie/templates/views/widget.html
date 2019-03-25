@@ -76,6 +76,61 @@
 
 <div class="row">
     <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>{{ i18n "Nodes" . }}</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>{{ i18n "ID" . }}</th>
+                            <th>{{ i18n "Name" . }}</th>
+                            <th>{{ i18n "Type" . }}</th>
+                            <th>{{ i18n "Array" . }}</th>
+                            <th style="display: none"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {{ range $n, $node := .nodes }}
+                        <tr>
+                            <td>{{ $node.ID.String }}</td>
+                            <td>{{ $node.Name.String }}</td>
+                            <td>{{ $node.Type.String }}</td>
+                            <td>{{ $node.Array.String }}</td>
+                            <td>
+                                <table class="table table-striped nowrap">
+                                    <thead>
+                                        <tr>
+                                            <th>{{ i18n "Property" $ }}</th>
+                                            <th>{{ i18n "Value" $ }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {{ range $p, $property := $node.Properties }}
+                                        <tr>
+                                            <td>{{ $property.Name.String }}</td>
+                                            <td>{{ $property.Value.String }} {{ $property.Unit.String }}</td>
+                                        </tr>
+                                        {{ end }}
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    {{ end }}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel collapsed">
             <div class="x_title">
                 <h2>{{ i18n "Broadcast message" . }}</h2>

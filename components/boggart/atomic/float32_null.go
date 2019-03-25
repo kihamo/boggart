@@ -2,6 +2,7 @@ package atomic
 
 import (
 	"math"
+	"strconv"
 )
 
 const (
@@ -43,4 +44,13 @@ func (v *Float32Null) IsNil() bool {
 
 func (v *Float32Null) Nil() bool {
 	return v.Float64.Set(float32Null)
+}
+
+func (v *Float32Null) String() string {
+	value := v.Float64.Load()
+	if value == float32Null {
+		return nilString
+	}
+
+	return strconv.FormatFloat(value, 'f', -1, 32)
 }

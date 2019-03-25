@@ -16,9 +16,12 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
 	bind := &Bind{
-		config:           config,
-		lastUpdate:       a.NewTimeNull(),
+		config:     config,
+		lastUpdate: a.NewTimeNull(),
+
 		deviceAttributes: &sync.Map{},
+
+		nodes: &sync.Map{},
 
 		otaRun:      a.NewBool(),
 		otaWritten:  a.NewUint32(),
