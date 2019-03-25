@@ -10,6 +10,10 @@ import (
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
+const (
+	defaultOTATimeout = time.Minute
+)
+
 type response struct {
 	Result  string `json:"result"`
 	Message string `json:"message,omitempty"`
@@ -17,6 +21,7 @@ type response struct {
 
 func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
 	bind := b.Bind().(*Bind)
+	otaTimeout := defaultOTATimeout
 	var err error
 
 	if r.IsPost() {
@@ -70,17 +75,29 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			}
 
 		case "ota":
-			file, header, err := r.Original().FormFile("firmware")
+			if v := r.Original().PostFormValue("timeout"); v != "" {
+				var t time.Duration
+
+				t, err = time.ParseDuration(v)
+				if err == nil {
+					otaTimeout = t
+				}
+			}
+
 			if err == nil {
-				defer file.Close()
-				t := header.Header.Get("Content-Type")
+				file, header, err := r.Original().FormFile("firmware")
 
-				switch t {
-				case "application/macbinary":
-					err = bind.OTA(r.Context(), file, time.Minute)
+				if err == nil {
+					defer file.Close()
+					t := header.Header.Get("Content-Type")
 
-				default:
-					err = errors.New("unknown content type " + t)
+					switch t {
+					case "application/macbinary":
+						err = bind.OTA(r.Context(), file, otaTimeout)
+
+					default:
+						err = errors.New("unknown content type " + t)
+					}
 				}
 			}
 
@@ -126,6 +143,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		"ota_total":          otaTotal,
 		"ota_checksum":       bind.OTAChecksum(),
 		"ota_progress":       (float64(otaWritten) * float64(100)) / float64(otaTotal),
+		"ota_timeout":        otaTimeout,
 		"settings":           bind.SettingsAll(),
 	}
 

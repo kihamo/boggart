@@ -42,7 +42,7 @@ var (
 // \x6A\x3F\x3E\x0E\xE1(.+?)\xB0\x30\x48\xD4\x1A
 // \xFB\x2A\xF5\x68\xC0(.+?)\x6E\x2F\x0F\xEB\x2D
 func (b *Bind) OTA(ctx context.Context, file io.Reader, timeout time.Duration) error {
-	if b.otaRun.IsTrue() {
+	if b.OTAIsRunning() {
 		return errors.New("OTA proccess aleady running")
 	}
 
@@ -82,7 +82,7 @@ func (b *Bind) OTA(ctx context.Context, file io.Reader, timeout time.Duration) e
 }
 
 func (b *Bind) OTAIsRunning() bool {
-	return b.otaRun.Load()
+	return b.otaRun.IsTrue()
 }
 
 func (b *Bind) OTAChecksum() string {
@@ -94,22 +94,21 @@ func (b *Bind) OTAProgress() (uint32, uint32) {
 }
 
 func (b *Bind) otaStart() {
-	if b.otaRun.IsFalse() {
-		b.otaFlash = make(chan struct{}, 1)
-		b.otaRun.True()
-	}
+	b.otaRun.True()
 }
 
 func (b *Bind) otaAbort() {
-	if b.otaRun.False() {
-		close(b.otaFlash)
-	}
+	b.otaRun.False()
 }
 
 func (b *Bind) otaDo(firmware *bytes.Buffer, timeout time.Duration) {
+	// running flash
+	b.otaStart()
+
 	if b.Status() != boggart.BindStatusOnline && timeout > 0 {
 		if ok := b.otaDelayOnline(timeout); !ok {
 			b.Logger().Warn("OTA timeout", "timeout", timeout)
+			b.otaAbort()
 			return
 		}
 
@@ -118,11 +117,9 @@ func (b *Bind) otaDo(firmware *bytes.Buffer, timeout time.Duration) {
 
 	if b.Status() != boggart.BindStatusOnline {
 		b.Logger().Info("Device is offline")
+		b.otaAbort()
 		return
 	}
-
-	// running flash
-	b.otaStart()
 
 	/*
 		1. During startup of the Homie for ESP8266 device, it reports the current firmware's MD5 to $fw/checksum
@@ -189,7 +186,7 @@ func (b *Bind) otaStatusSubscriber(_ context.Context, _ mqtt.Component, message 
 		   Homie for ESP8266 reports 304 and aborts the OTA
 	*/
 	case otaStatusNotModified:
-		b.Logger().Info("OTA device firmware already up to date")
+		b.Logger().Warn("OTA device firmware already up to date")
 		b.otaAbort()
 
 	/*

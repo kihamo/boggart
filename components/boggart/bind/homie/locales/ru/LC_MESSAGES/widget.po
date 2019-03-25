@@ -75,3 +75,21 @@ msgstr "Массив"
 
 msgid "Property"
 msgstr "Свойство"
+
+msgid "Status"
+msgstr "Статус"
+
+msgid "running"
+msgstr "запущено"
+
+msgid "ready"
+msgstr "готово"
+
+msgid "Timeout"
+msgstr "Таймаут"
+
+msgid "Progress"
+msgstr "Прогресс"
+
+msgid "Checksum"
+msgstr "Чексумма"

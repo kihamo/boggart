@@ -27,6 +27,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		otaWritten:  a.NewUint32(),
 		otaTotal:    a.NewUint32(),
 		otaChecksum: a.NewString(),
+		otaFlash:    make(chan struct{}, 1),
 
 		settings: &sync.Map{},
 	}
