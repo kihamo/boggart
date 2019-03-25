@@ -17,8 +17,9 @@ type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
 
-	config           *Config
-	lastUpdate       *a.TimeNull
+	config     *Config
+	lastUpdate *a.TimeNull
+
 	deviceAttributes *sync.Map
 
 	otaRun      *a.Bool
@@ -36,25 +37,6 @@ func (b *Bind) UpdateStatus(status boggart.BindStatus) {
 	if status == boggart.BindStatusOnline && b.OTAIsRunning() {
 		b.otaFlash <- struct{}{}
 	}
-}
-
-func (b *Bind) registerDeviceAttributes(name string, value interface{}) {
-	b.deviceAttributes.Store(name, value)
-}
-
-func (b *Bind) DeviceAttribute(key string) (interface{}, bool) {
-	return b.deviceAttributes.Load(key)
-}
-
-func (b *Bind) DeviceAttributes() map[string]interface{} {
-	result := make(map[string]interface{})
-
-	b.deviceAttributes.Range(func(key, value interface{}) bool {
-		result[key.(string)] = value
-		return true
-	})
-
-	return result
 }
 
 func (b *Bind) Broadcast(ctx context.Context, level string, payload interface{}) error {
