@@ -23,7 +23,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		var successMsg string
 
 		switch r.URL().Query().Get("action") {
-		case "config":
+		case "settings":
 			err = r.Original().ParseForm()
 			if err == nil {
 				for key, value := range r.Original().PostForm {
@@ -31,7 +31,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 						continue
 					}
 
-					err = bind.ImplementationConfigSet(r.Context(), key, value[0])
+					err = bind.SettingsSet(r.Context(), key, value[0])
 					if err != nil {
 						break
 					}
@@ -120,12 +120,14 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		"name":               "",
 		"last_update":        bind.LastUpdate(),
 		"devices_attributes": bind.DeviceAttributes(),
-		"config":             bind.ImplementationConfigAll(),
-		"ota_running":        bind.OTAIsRunning(),
-		"ota_written":        otaWritten,
-		"ota_total":          otaTotal,
-		"ota_checksum":       bind.OTAChecksum(),
-		"ota_progress":       (float64(otaWritten) * float64(100)) / float64(otaTotal),
+
+		"ota_running":  bind.OTAIsRunning(),
+		"ota_written":  otaWritten,
+		"ota_total":    otaTotal,
+		"ota_checksum": bind.OTAChecksum(),
+		"ota_progress": (float64(otaWritten) * float64(100)) / float64(otaTotal),
+
+		"settings": bind.SettingsAll(),
 	}
 
 	if attribute, ok := bind.DeviceAttribute("name"); ok {

@@ -16,7 +16,6 @@ const (
 	MQTTPrefixImpl            = MQTTPrefix + "$implementation/"
 
 	MQTTPublishTopicBroadcast mqtt.Topic = "+/$broadcast/+"
-	MQTTPublishTopicConfigSet            = MQTTPrefixImpl + "config/set"
 	MQTTPublishTopicReset                = MQTTPrefixImpl + "reset"
 	MQTTPublishTopicRestart              = MQTTPrefixImpl + "restart"
 
@@ -32,7 +31,6 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 
 	return []mqtt.Topic{
 		mqtt.Topic(MQTTPublishTopicBroadcast.Format(base)),
-		mqtt.Topic(MQTTPublishTopicConfigSet.Format(base, sn)),
 		mqtt.Topic(MQTTPublishTopicReset.Format(base, sn)),
 		mqtt.Topic(MQTTPublishTopicRestart.Format(base, sn)),
 	}
@@ -70,11 +68,6 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			return nil
 		}),
 		mqtt.NewSubscriber(MQTTSubscribeTopicDeviceAttributeImplementation.Format(base, sn), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-			// skip special topics
-			if message.Topic() == MQTTPublishTopicConfigSet.Format(base, sn) {
-				return nil
-			}
-
 			route := mqtt.RouteSplit(message.Topic())
 			name := strings.Join(route[3:], ".")
 			if strings.HasPrefix(name, "ota.") {
@@ -106,5 +99,8 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 		// ota
 		mqtt.NewSubscriber(otaMQTTPublishTopicStatus.Format(base, sn), 0, b.otaStatusSubscriber),
+
+		// settings
+		mqtt.NewSubscriber(settingsMQTTPublishTopicGet.Format(base, sn), 0, b.settingsSubscriber),
 	}
 }

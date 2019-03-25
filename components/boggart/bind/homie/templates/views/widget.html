@@ -114,7 +114,7 @@
     </div>
 </div>
 
-{{ if .config }}
+{{ if .settings }}
 <div class="row">
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel collapsed">
@@ -126,7 +126,7 @@
                 <div class="clearfix"></div>
             </div>
             <div class="x_content">
-                <form role="form" action="?action=config" method="post" id="configs" data-toggle="validator">
+                <form role="form" action="?action=settings" method="post" id="settings" data-toggle="validator">
                     <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
                         <thead>
                         <tr>
@@ -135,7 +135,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {{ range $i, $option := .config }}
+                        {{ range $i, $option := .settings }}
                         <tr>
                             <td>{{ $option.Name }}</td>
                             <td>
@@ -211,7 +211,7 @@
     {{ staticHTML (staticURL "/dashboard/assets/vendors/dropzonejs/css/dropzone.min.css" false) }}
 
     <style type="text/css">
-        #configs tbody input, #configs tbody textarea {
+        #settings tbody input, #settings tbody textarea {
             width: 100%;
         }
     </style>
@@ -276,8 +276,8 @@
                 });
             });
 
-            {{ if .config }}
-            $('#configs input[id], #configs textarea[id]').change(function() {
+            {{ if .settings }}
+            $('#settings input[id], #settings textarea[id]').change(function() {
                 var
                     e = $(this),
                     data = {},
@@ -292,7 +292,7 @@
 
                 $.ajax({
                     type: 'POST',
-                    url: $('#configs').prop('action'),
+                    url: $('#settings').prop('action'),
                     data: data,
                     success: successHandler
                 });

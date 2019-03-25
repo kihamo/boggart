@@ -2,12 +2,6 @@ package homie
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"reflect"
-	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -16,30 +10,24 @@ import (
 )
 
 const (
-	configNameSeparator       = "."
-	configDeviceAttributeName = "implementation.config"
+	configNameSeparator = "."
 )
 
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
 
-	config               *Config
-	lastUpdate           *a.TimeNull
-	deviceAttributes     *sync.Map
-	implementationConfig *sync.Map
+	config           *Config
+	lastUpdate       *a.TimeNull
+	deviceAttributes *sync.Map
 
 	otaRun      *a.Bool
 	otaWritten  *a.Uint32
 	otaTotal    *a.Uint32
 	otaChecksum *a.String
 	otaFlash    chan struct{}
-}
 
-type ImplementationConfig struct {
-	Name  string
-	Type  string
-	Value interface{}
+	settings *sync.Map
 }
 
 func (b *Bind) UpdateStatus(status boggart.BindStatus) {
@@ -52,16 +40,6 @@ func (b *Bind) UpdateStatus(status boggart.BindStatus) {
 
 func (b *Bind) registerDeviceAttributes(name string, value interface{}) {
 	b.deviceAttributes.Store(name, value)
-
-	if name == configDeviceAttributeName {
-		md := make(map[string]interface{})
-		err := json.Unmarshal([]byte(fmt.Sprintf("%v", value)), &md)
-		if err == nil {
-			b.configMetadataParse(reflect.ValueOf(md), "")
-
-			// TODO: динамически добавлять пароли, так как само устройство их не передает
-		}
-	}
 }
 
 func (b *Bind) DeviceAttribute(key string) (interface{}, bool) {
@@ -77,96 +55,6 @@ func (b *Bind) DeviceAttributes() map[string]interface{} {
 	})
 
 	return result
-}
-
-func (b *Bind) configMetadataParse(e reflect.Value, prefix string) {
-	if !e.IsValid() || e.Kind() != reflect.Map || e.Len() == 0 {
-		return
-	}
-
-	for _, field := range e.MapKeys() {
-		value := reflect.ValueOf(e.MapIndex(field).Interface())
-		key := prefix + field.String()
-
-		switch value.Kind() {
-		case reflect.Map:
-			b.configMetadataParse(value, key+configNameSeparator)
-
-		default:
-			b.implementationConfig.Store(key, ImplementationConfig{
-				Name:  prefix + field.String(),
-				Type:  value.Kind().String(),
-				Value: value.Interface(),
-			})
-		}
-	}
-}
-
-func (b *Bind) ImplementationConfigAll() map[string]ImplementationConfig {
-	result := make(map[string]ImplementationConfig)
-
-	b.implementationConfig.Range(func(key, value interface{}) bool {
-		result[key.(string)] = value.(ImplementationConfig)
-		return true
-	})
-
-	return result
-}
-
-func (b *Bind) ImplementationConfig(key string) (value ImplementationConfig, ok bool) {
-	if v, o := b.implementationConfig.Load(key); o {
-		return v.(ImplementationConfig), o
-	}
-
-	return value, ok
-}
-
-func (b *Bind) ImplementationConfigSet(ctx context.Context, key string, value interface{}) (err error) {
-	md, ok := b.ImplementationConfig(key)
-	if !ok {
-		return errors.New("config option " + key + " not found")
-	}
-
-	switch md.Type {
-	case reflect.Bool.String():
-		value, err = strconv.ParseBool(value.(string))
-
-	case reflect.Int.String(), reflect.Int32.String(), reflect.Int64.String():
-		value, err = strconv.ParseInt(value.(string), 10, 64)
-
-	case reflect.Uint.String(), reflect.Uint32.String(), reflect.Uint64.String():
-		value, err = strconv.ParseUint(value.(string), 10, 64)
-
-	case reflect.Float32.String(), reflect.Float64.String():
-		value, err = strconv.ParseFloat(value.(string), 64)
-
-	default:
-		value = value.(string)
-	}
-
-	if err != nil {
-		return err
-	}
-
-	payload := make(map[string]interface{}, 1)
-	levels := strings.Split(key, configNameSeparator)
-
-	for i := len(levels) - 1; i >= 0; i-- {
-		if i == len(levels)-1 {
-			payload[levels[i]] = value
-		} else {
-			payload = map[string]interface{}{
-				levels[i]: payload,
-			}
-		}
-	}
-
-	pl, err := json.Marshal(&payload)
-	if err != nil {
-		return err
-	}
-
-	return b.MQTTPublish(ctx, MQTTPublishTopicConfigSet.Format(b.config.BaseTopic, b.SerialNumber()), pl)
 }
 
 func (b *Bind) Broadcast(ctx context.Context, level string, payload interface{}) error {

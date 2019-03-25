@@ -16,14 +16,16 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
 	bind := &Bind{
-		config:               config,
-		lastUpdate:           a.NewTimeNull(),
-		deviceAttributes:     &sync.Map{},
-		implementationConfig: &sync.Map{},
-		otaRun:               a.NewBool(),
-		otaWritten:           a.NewUint32(),
-		otaTotal:             a.NewUint32(),
-		otaChecksum:          a.NewString(),
+		config:           config,
+		lastUpdate:       a.NewTimeNull(),
+		deviceAttributes: &sync.Map{},
+
+		otaRun:      a.NewBool(),
+		otaWritten:  a.NewUint32(),
+		otaTotal:    a.NewUint32(),
+		otaChecksum: a.NewString(),
+
+		settings: &sync.Map{},
 	}
 	bind.SetSerialNumber(config.DeviceID)
 
