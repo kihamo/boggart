@@ -1,4 +1,4 @@
-package homie
+package esp
 
 import (
 	"github.com/kihamo/boggart/components/mqtt"

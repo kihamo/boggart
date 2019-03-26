@@ -1,4 +1,4 @@
-package homie
+package esp
 
 const (
 	DefaultBaseTopic = "homie"
