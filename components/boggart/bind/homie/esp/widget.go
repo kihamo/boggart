@@ -132,9 +132,18 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	}
 
 	otaWritten, otaTotal := bind.OTAProgress()
+
+	name, ok := bind.DeviceAttribute("name")
+
+	protocol, ok := bind.DeviceAttribute("homie")
+	if ok && len(protocol.(string)) > 0 {
+		protocol = protocol.(string)[:1]
+	}
+
 	vars := map[string]interface{}{
 		"error":              err,
-		"name":               "",
+		"name":               name,
+		"protocol_major":     protocol,
 		"online":             bind.Status() == boggart.BindStatusOnline,
 		"last_update":        bind.LastUpdate(),
 		"devices_attributes": bind.DeviceAttributes(),
@@ -147,10 +156,6 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		"ota_progress":       (float64(otaWritten) * float64(100)) / float64(otaTotal),
 		"ota_timeout":        otaTimeout,
 		"settings":           bind.SettingsAll(),
-	}
-
-	if attribute, ok := bind.DeviceAttribute("name"); ok {
-		vars["name"] = attribute
 	}
 
 	t.Render(r.Context(), "widget", vars)
