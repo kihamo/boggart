@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hashicorp/go-version"
 	"github.com/kihamo/boggart/components/boggart"
 	a "github.com/kihamo/boggart/components/boggart/atomic"
 )
@@ -52,6 +53,25 @@ func (b *Bind) Restart(ctx context.Context) error {
 
 func (b *Bind) Reset(ctx context.Context) error {
 	return b.MQTTPublish(ctx, MQTTPublishTopicReset.Format(b.config.BaseTopic, b.SerialNumber()), true)
+}
+
+func (b *Bind) ProtocolVersion() string {
+	v, ok := b.DeviceAttribute("homie")
+	if ok {
+		return v.(string)
+	}
+
+	return ""
+}
+
+func (b *Bind) ProtocolVersionConstraint(constraint string) bool {
+	current, err := version.NewVersion(b.ProtocolVersion())
+	if err != nil {
+		return false
+	}
+
+	constraints, err := version.NewConstraint(constraint)
+	return constraints.Check(current)
 }
 
 func (b *Bind) bump() {

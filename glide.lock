@@ -1,5 +1,5 @@
-hash: 715cf907477ef074a46fb10834c7c45330495a07de4b8e3353e9990f8eca64dd
-updated: 2019-03-24T19:50:26.740863+03:00
+hash: 4d2bcfa3b2b18fe5c93f579dd7f5bfcbea3fbe6ba683973ed05e8ae3aaf15cdf
+updated: 2019-03-26T03:57:04.992832+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -179,6 +179,8 @@ imports:
   - internal/sideinfo
 - name: github.com/hajimehoshi/oto
   version: 69b46d84898282d901717ca51635af708da6c086
+- name: github.com/hashicorp/go-version
+  version: d40cf49b3a77bba84a7afdbd7f1dc295d114efb1
 - name: github.com/hashicorp/golang-lru
   version: 7087cb70de9f7a8bc0a10c375cb0d2280a8edf9c
   subpackages:

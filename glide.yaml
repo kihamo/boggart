@@ -60,3 +60,7 @@ import:
   version: ~v4.6
 - package: github.com/mourner/suncalc-go
   version: 77cea98fd55e16d1ff6e131b220012679265096b
+- package: github.com/hashicorp/go-version
+  version: ~v1.1
+- package: github.com/uber/jaeger-client-go
+  version: ~v2.15
