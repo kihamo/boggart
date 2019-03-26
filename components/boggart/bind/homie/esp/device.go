@@ -16,6 +16,13 @@ const (
 	deviceTopicAttributeFirmware       = MQTTPrefix + "$fw/+"
 	deviceTopicAttributeImplementation = MQTTPrefixImpl + "+"
 	deviceTopicAttributeStats          = MQTTPrefix + "$stats/+"
+
+	deviceStateInit         = "init"
+	deviceStateReady        = "ready"
+	deviceStateDisconnected = "disconnected"
+	deviceStateSleeping     = "sleeping"
+	deviceStateLost         = "lost"
+	deviceStateAlert        = "alert"
 )
 
 func (b *Bind) registerDeviceAttributes(name string, value interface{}) {
@@ -47,6 +54,23 @@ func (b *Bind) deviceAttributesSubscriber(_ context.Context, _ mqtt.Component, m
 
 	attributeName = attributeName[1:]
 	b.registerDeviceAttributes(attributeName, message.String())
+
+	switch attributeName {
+	case "online": // 2.x
+		if message.IsTrue() {
+			b.UpdateStatus(boggart.BindStatusOnline)
+		} else {
+			b.UpdateStatus(boggart.BindStatusOffline)
+		}
+
+	case "state": // 3.x
+		switch message.String() {
+		case deviceStateReady:
+			b.UpdateStatus(boggart.BindStatusOnline)
+		default:
+			b.UpdateStatus(boggart.BindStatusOffline)
+		}
+	}
 
 	if attributeName == "online" {
 		if message.IsTrue() {
