@@ -55,11 +55,7 @@ func (m *message) UnmarshalJSON(v interface{}) error {
 }
 
 func (m *message) Bool() bool {
-	if m.IsTrue() {
-		return true
-	}
-
-	return false
+	return m.IsTrue()
 }
 
 func (m *message) IsTrue() bool {

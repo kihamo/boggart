@@ -2,6 +2,7 @@ package esp
 
 import (
 	"errors"
+	"mime/multipart"
 	"net/http"
 	"time"
 
@@ -85,7 +86,12 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			}
 
 			if err == nil {
-				file, header, err := r.Original().FormFile("firmware")
+				var (
+					file   multipart.File
+					header *multipart.FileHeader
+				)
+
+				file, header, err = r.Original().FormFile("firmware")
 
 				if err == nil {
 					defer file.Close()
@@ -103,9 +109,9 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(err.Error()))
+				_, _ = w.Write([]byte(err.Error()))
 			} else {
-				w.Write([]byte("success"))
+				_, _ = w.Write([]byte("success"))
 			}
 
 			return
@@ -133,7 +139,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 	otaWritten, otaTotal := bind.OTAProgress()
 
-	name, ok := bind.DeviceAttribute("name")
+	name, _ := bind.DeviceAttribute("name")
 
 	protocol, ok := bind.DeviceAttribute("homie")
 	if ok && len(protocol.(string)) > 0 {
