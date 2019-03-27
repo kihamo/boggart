@@ -1,5 +1,5 @@
 hash: 4d2bcfa3b2b18fe5c93f579dd7f5bfcbea3fbe6ba683973ed05e8ae3aaf15cdf
-updated: 2019-03-26T03:57:04.992832+03:00
+updated: 2019-03-27T16:47:58.258954+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -45,6 +45,8 @@ imports:
   - events
   - log
   - net
+- name: github.com/benbjohnson/clock
+  version: 7dc76406b6d3c05b5f71a86293cbcf3c4ea03b19
 - name: github.com/beorn7/perks
   version: 3a771d992973f24aa725d07868b467d1ddfceafb
   subpackages:
@@ -222,6 +224,9 @@ imports:
   version: 8f963e8862ff2fdd4ce39bb8048ec6e669b1b150
   subpackages:
   - components/annotations
+  - components/annotations/instance
+  - components/annotations/internal
+  - components/annotations/storage
   - components/config
   - components/config/instance
   - components/config/internal
@@ -284,10 +289,14 @@ imports:
   - collector/runtime
   - internal
   - storage
+- name: github.com/konsorten/go-windows-terminal-sequences
+  version: f55edac94c9bbba5d6182a4be46d86a2c9b5b50e
 - name: github.com/lann/builder
   version: 47ae307949d02aa1f1069fdafc00ca08e1dbabac
 - name: github.com/lann/ps
   version: 62de8c46ede02a7675c4c79c84883eb164cb71e3
+- name: github.com/lunixbochs/struc
+  version: a9e4041416c2cd121670f6c3be4b0d523ee49b8a
 - name: github.com/mailru/easyjson
   version: 3fdea8d05856a0c8df22ed4bc71b3219245e4485
   subpackages:
@@ -336,6 +345,22 @@ imports:
   version: f7f2bcae3294530249c63fcb6fb6d5e83eee4e73
 - name: github.com/mourner/suncalc-go
   version: 77cea98fd55e16d1ff6e131b220012679265096b
+- name: github.com/nickw444/miio-go
+  version: ce79bf638b2e833f84f2cc61be940b5bac6cc5ea
+  subpackages:
+  - capability
+  - common
+  - device
+  - device/product
+  - device/rthrottle
+  - protocol
+  - protocol/packet
+  - protocol/tokens
+  - protocol/transport
+  - subscription
+  - subscription/common
+  - subscription/subscription
+  - subscription/target
 - name: github.com/OneOfOne/xxhash
   version: c1e3185f167680b62832a0a11938a04b1ab265fc
 - name: github.com/opentracing-contrib/go-stdlib
@@ -385,6 +410,10 @@ imports:
   version: 1007f53448d75fe14190968f5de4d95ed63ebb83
   subpackages:
   - sqlparse
+- name: github.com/satori/go.uuid
+  version: b2ce2384e17bbe0c6d34077efa39dbab3e09123b
+- name: github.com/sirupsen/logrus
+  version: 1115b87d621f90f39ac3d2bd230797e35c1d478d
 - name: github.com/snabb/webostv
   version: bae6b85a37a6ea235af0571b9f3ff944651a6581
 - name: github.com/sparrc/go-ping
@@ -453,6 +482,7 @@ imports:
   - nacl/secretbox
   - poly1305
   - salsa20/salsa
+  - ssh/terminal
 - name: golang.org/x/exp
   version: d9c527d6d0b47a696ffac0deae40c20e56c9e1c5
   subpackages:

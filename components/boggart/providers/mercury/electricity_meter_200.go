@@ -32,12 +32,18 @@ const (
 
 type ElectricityMeter200 struct {
 	address    []byte
+	location   *time.Location
 	connection *rs485.Connection
 }
 
-func NewElectricityMeter200(address []byte, connection *rs485.Connection) *ElectricityMeter200 {
+func NewElectricityMeter200(address []byte, location *time.Location, connection *rs485.Connection) *ElectricityMeter200 {
+	if location == nil {
+		location = time.Now().Location()
+	}
+
 	return &ElectricityMeter200{
 		address:    address,
+		location:   location,
 		connection: connection,
 	}
 }
@@ -126,15 +132,7 @@ func (d *ElectricityMeter200) responseDatetime(function byte, data []byte) (time
 		return time.Time{}, err
 	}
 
-	return time.Date(
-		2000+int(year),
-		time.Month(month),
-		int(day),
-		int(hour),
-		int(minute),
-		int(second),
-		0,
-		time.Now().UTC().Location()), nil
+	return time.Date(2000+int(year), time.Month(month), int(day), int(hour), int(minute), int(second), 0, d.location), nil
 }
 
 func (d *ElectricityMeter200) Datetime() (time.Time, error) {
@@ -171,15 +169,7 @@ func (d *ElectricityMeter200) MakeDate() (time.Time, error) {
 		return time.Time{}, err
 	}
 
-	return time.Date(
-		2000+int(year),
-		time.Month(month),
-		int(day),
-		0,
-		0,
-		0,
-		0,
-		time.Now().UTC().Location()), nil
+	return time.Date(2000+int(year), time.Month(month), int(day), 0, 0, 0, 0, d.location), nil
 }
 
 func (d *ElectricityMeter200) Version() (string, time.Time, error) {
@@ -219,15 +209,7 @@ func (d *ElectricityMeter200) Version() (string, time.Time, error) {
 	}
 
 	return fmt.Sprintf("%d.%d.%d", version1, version2, version3),
-		time.Date(
-			2000+int(year),
-			time.Month(month),
-			int(day),
-			0,
-			0,
-			0,
-			0,
-			time.Now().UTC().Location()),
+		time.Date(2000+int(year), time.Month(month), int(day), 0, 0, 0, 0, d.location),
 		nil
 }
 

@@ -1,19 +1,30 @@
 package mercury
 
 import (
+	"time"
+
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
 	"github.com/kihamo/boggart/components/boggart/providers/mercury"
+	"github.com/kihamo/shadow/components/dashboard"
 )
 
-type Type struct{}
+type Type struct {
+	dashboard.Handler
+}
 
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
+	loc, err := time.LoadLocation(config.Location)
+	if err != nil {
+		return nil, err
+	}
+
 	provider := mercury.NewElectricityMeter200(
 		mercury.ConvertSerialNumber(config.Address),
+		loc,
 		rs485.GetConnection(config.RS485Address, config.RS485Timeout))
 
 	bind := &Bind{
