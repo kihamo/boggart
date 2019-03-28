@@ -39,5 +39,7 @@ func (h *WidgetHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	}
 
 	r = r.WithContext(dashboard.ContextWithTemplateNamespace(r.Context(), boggart.ComponentName+"-bind-"+bind.Type()))
+	r = r.WithContext(boggart.ContextWithI18nDomain(r.Context(), boggart.ComponentName+"-bind-"+bind.Type()))
+
 	widget.Widget(w, r, bind)
 }

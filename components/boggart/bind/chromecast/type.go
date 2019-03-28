@@ -6,11 +6,10 @@ import (
 	"github.com/barnybug/go-cast/log"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/atomic"
-	"github.com/kihamo/shadow/components/dashboard"
 )
 
 type Type struct {
-	dashboard.Handler
+	boggart.BindTypeWidget
 }
 
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {

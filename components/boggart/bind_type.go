@@ -1,6 +1,7 @@
 package boggart
 
 import (
+	"context"
 	"errors"
 	"sync"
 	"time"
@@ -8,6 +9,7 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/shadow/components/dashboard"
+	"github.com/kihamo/shadow/components/i18n"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -98,4 +100,16 @@ func ValidateBindConfig(t BindType, config map[string]interface{}) (cfg interfac
 	}
 
 	return cfg, err
+}
+
+type BindTypeWidget struct {
+	dashboard.Handler
+}
+
+func (b *BindTypeWidget) Translate(ctx context.Context, ID string, context string, format ...interface{}) string {
+	return i18n.Locale(ctx).Translate(I18nDomainFromContext(ctx), ID, context, format...)
+}
+
+func (b *BindTypeWidget) TranslatePlural(ctx context.Context, singleID, pluralID string, number int, context string, format ...interface{}) string {
+	return i18n.Locale(ctx).TranslatePlural(I18nDomainFromContext(ctx), singleID, pluralID, number, context, format...)
 }

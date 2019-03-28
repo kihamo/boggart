@@ -6,7 +6,6 @@ import (
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/shadow/components/dashboard"
-	"github.com/kihamo/shadow/components/i18n"
 )
 
 func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
@@ -17,12 +16,11 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		"url":    b.Config().(*Config).WidgetFileURL,
 		"volume": bind.Volume(),
 	}
-	domain := dashboard.TemplateNamespaceFromContext(r.Context())
 
 	status := bind.status.Load()
 	isPlaying := status == "PLAYING" || status == "BUFFERING"
 	if isPlaying {
-		data["error"] = i18n.Locale(r.Context()).Translate(domain, "Already playing", "")
+		data["error"] = t.Translate(r.Context(), "Already playing", "")
 	}
 
 	if r.IsPost() {
@@ -45,7 +43,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			if err != nil {
 				data["error"] = err.Error()
 			} else {
-				data["message"] = i18n.Locale(r.Context()).Translate(domain, "File playing", "")
+				data["message"] = t.Translate(r.Context(), "File playing", "")
 			}
 		}
 	}

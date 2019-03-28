@@ -4,7 +4,6 @@ import (
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/shadow/components/dashboard"
-	"github.com/kihamo/shadow/components/i18n"
 )
 
 func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
@@ -12,7 +11,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	data := make(map[string]interface{})
 
 	if bind.Status() != boggart.BindStatusOnline {
-		data["error"] = i18n.Locale(r.Context()).Translate(boggart.ComponentName+"-bind-"+b.Type(), "Device is offline", "")
+		data["error"] = t.Translate(r.Context(), "Device is offline", "")
 	}
 
 	if r.IsPost() {
@@ -23,10 +22,10 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			if err := bind.Toast(toast); err != nil {
 				data["error"] = err.Error()
 			} else {
-				data["message"] = i18n.Locale(r.Context()).Translate(boggart.ComponentName+"-bind-"+b.Type(), "Message send success", "")
+				data["message"] = t.Translate(r.Context(), "Message send success", "")
 			}
 		} else {
-			data["error"] = i18n.Locale(r.Context()).Translate(boggart.ComponentName+"-bind-"+b.Type(), "Message is empty", "")
+			data["error"] = t.Translate(r.Context(), "Message is empty", "")
 		}
 	}
 

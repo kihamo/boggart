@@ -15,3 +15,12 @@ msgstr "Сообщение"
 
 msgid "Send"
 msgstr "Отправить"
+
+msgid "Device is offline"
+msgstr "Устройство оффлайн"
+
+msgid "Message send success"
+msgstr "Сообщение успешно отправлено"
+
+msgid "Message is empty"
+msgstr "Сообщение пустое"
