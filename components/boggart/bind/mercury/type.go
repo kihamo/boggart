@@ -22,7 +22,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		return nil, err
 	}
 
-	provider := mercury.NewElectricityMeter200(
+	provider := mercury.NewMercury(
 		mercury.ConvertSerialNumber(config.Address),
 		loc,
 		rs485.GetConnection(config.RS485Address, config.RS485Timeout))

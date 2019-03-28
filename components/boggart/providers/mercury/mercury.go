@@ -15,19 +15,42 @@ import (
 // http://incotex-support.blogspot.ru/2016/05/blog-post.html
 
 const (
+	// группа сетевых команд чтения
+	FunctionReadAddressGroup         = 0x20 // чтение группового адреса счетчика
 	FunctionReadDatetime             = 0x21 // чтение установленных даты и времени
 	FunctionReadPowerMaximum         = 0x22 // чтение лимита мощности
 	FunctionReadEnergyMaximum        = 0x23 // чтение лимита энергии
 	FunctionReadDaylightSavingTime   = 0x24 // чтение значения флага сезонного времени
+	FunctionReadTimeCorrection       = 0x25 // чтение величины коррекции времени
 	FunctionReadPowerCurrent         = 0x26 // чтение текущей мощности в нагрузке
 	FunctionReadPowerCounters        = 0x27 // чтение содержимого тарифных аккумуляторов
 	FunctionReadVersion              = 0x28 // чтение версии ПО
 	FunctionReadBatteryVoltage       = 0x29 // чтение напряжения встроенной батарейки
+	FunctionReadDisplayMode          = 0x2A // чтение режима индикации
 	FunctionReadLastPowerOffDatetime = 0x2B // чтение времени последнего отключения напряжения
 	FunctionReadLastPowerOnDatetime  = 0x2C // чтение времени последнего включения напряжения
 	FunctionReadSerialNumber         = 0x2F // чтение серийного номера
-	FunctionReadParamsCurrent        = 0x63 // чтение текущих параметров сети U, I, P
-	FunctionReadMakeDate             = 0x66 // чтение даты изготовления
+	FunctionReadTariffCount          = 0x2E // чтение количества действующих тарифов
+
+	// группа дополнительных сетевых команд чтения
+	FunctionReadCurrentTariff = 0x60 // чтение тарифа
+	FunctionReadLastCloseCap  = 0x62 // чтение времение последнего закрытия крышки счетчика
+	FunctionReadParamsCurrent = 0x63 // чтение текущих параметров сети U, I, P
+	FunctionReadWordType      = 0x65 // чтение слова исполнения
+	FunctionReadMakeDate      = 0x66 // чтение даты изготовления
+	FunctionReadDisplayTime   = 0x67 // чтение времени индекации
+	FunctionReadWorkingTime   = 0x69 // чтение времени наработки
+)
+
+const (
+	displayModeTariff1 = 1 << iota
+	displayModeTariff2
+	displayModeTariff3
+	displayModeTariff4
+	displayModeAmount
+	displayModePower
+	displayModeTime
+	displayModeDate
 )
 
 type ElectricityMeter200 struct {
@@ -36,7 +59,7 @@ type ElectricityMeter200 struct {
 	connection *rs485.Connection
 }
 
-func NewElectricityMeter200(address []byte, location *time.Location, connection *rs485.Connection) *ElectricityMeter200 {
+func NewMercury(address []byte, location *time.Location, connection *rs485.Connection) *ElectricityMeter200 {
 	if location == nil {
 		location = time.Now().Location()
 	}
@@ -50,6 +73,10 @@ func NewElectricityMeter200(address []byte, location *time.Location, connection 
 
 func (d *ElectricityMeter200) Address() []byte {
 	return d.address
+}
+
+func (d *ElectricityMeter200) AddressGroup() ([]byte, error) {
+	return d.Request(FunctionReadAddressGroup, nil)
 }
 
 func (d *ElectricityMeter200) Connection() *rs485.Connection {
@@ -71,24 +98,35 @@ func (d *ElectricityMeter200) Request(function byte, data []byte) ([]byte, error
 	// check sum CRC16
 	request = append(request, rs485.GenerateCRC16(request)...)
 
-	//fmt.Println("Request: ", request, hex.EncodeToString(request))
+	// fmt.Println("Request: ", request, hex.EncodeToString(request), " with function", strings.ToUpper(hex.EncodeToString([]byte{function})))
 
 	response, err := d.connection.Request(request)
 	if err != nil {
 		return nil, err
 	}
 
-	//fmt.Println("Response: ", response, hex.EncodeToString(response))
+	// fmt.Println("Response: ", response, hex.EncodeToString(response))
 
 	l := len(response)
 	if l < 7 {
-		return nil, errors.New("error length of response packet")
+		return nil, fmt.Errorf("error length of response packet %d", l)
 	}
 
 	// check crc16
 	crc16 := rs485.GenerateCRC16(response[:l-2])
 	if !bytes.Equal(response[l-2:], crc16) {
-		return nil, errors.New("error CRC16 of response packet")
+		return nil, errors.New(
+			"error CRC16 of response packet have" +
+				hex.EncodeToString(crc16) + " want " +
+				hex.EncodeToString(response[l-2:]))
+	}
+
+	// check ADDR
+	if !bytes.Equal(response[:4], request[:4]) {
+		return nil, errors.New(
+			"error ADDR of response packet have " +
+				hex.EncodeToString(response[:4]) + " want " +
+				hex.EncodeToString(request[:4]))
 	}
 
 	return response[5 : l-2], nil
@@ -146,6 +184,18 @@ func (d *ElectricityMeter200) SerialNumber() (int64, error) {
 	}
 
 	return strconv.ParseInt(hex.EncodeToString(response), 16, 0)
+}
+
+func (d *ElectricityMeter200) WordType() error {
+	response, err := d.Request(FunctionReadWordType, nil)
+	if err != nil {
+		return err
+	}
+
+	// TODO:
+	_ = response
+
+	return nil
 }
 
 func (d *ElectricityMeter200) MakeDate() (time.Time, error) {
@@ -258,6 +308,25 @@ func (d *ElectricityMeter200) BatteryVoltage() (float64, error) {
 	return float64(v) / 100, nil
 }
 
+func (d *ElectricityMeter200) DisplayMode() (bool, bool, bool, bool, bool, bool, bool, bool, error) {
+	response, err := d.Request(FunctionReadDisplayMode, nil)
+	if err != nil {
+		return false, false, false, false, false, false, false, false, err
+	}
+
+	bit := int(response[0])
+
+	return bit&displayModeTariff1 != 0,
+		bit&displayModeTariff2 != 0,
+		bit&displayModeTariff3 != 0,
+		bit&displayModeTariff4 != 0,
+		bit&displayModeAmount != 0,
+		bit&displayModePower != 0,
+		bit&displayModeTime != 0,
+		bit&displayModeDate != 0,
+		nil
+}
+
 // PowerCounters returns value of T1, T2, T3 and T4 in W/h
 func (d *ElectricityMeter200) PowerCounters() (uint64, uint64, uint64, uint64, error) {
 	response, err := d.Request(FunctionReadPowerCounters, nil)
@@ -307,6 +376,18 @@ func (d *ElectricityMeter200) DaylightSavingTime() (bool, error) {
 	return !bytes.Equal(response, []byte{0}), nil
 }
 
+func (d *ElectricityMeter200) TimeCorrection() (uint64, error) {
+	response, err := d.Request(FunctionReadTimeCorrection, nil)
+	if err != nil {
+		return 0, err
+	}
+
+	// Коррекция времени в счетчике Меркурий 200 возможна в диапазоне ±30 минут в течение года.
+	// Коррекция времени в счетчике Меркурий 230 возможна в диапазоне ±30 секунд в течении суток.
+
+	return uint64(response[0]), nil
+}
+
 // ParamsCurrent returns current value of voltage in V, amperage in A, power in W
 func (d *ElectricityMeter200) ParamsCurrent() (uint64, float64, uint64, error) {
 	response, err := d.Request(FunctionReadParamsCurrent, nil)
@@ -338,4 +419,54 @@ func (d *ElectricityMeter200) LastPowerOffDatetime() (time.Time, error) {
 
 func (d *ElectricityMeter200) LastPowerOnDatetime() (time.Time, error) {
 	return d.responseDatetime(FunctionReadLastPowerOnDatetime, nil)
+}
+
+func (d *ElectricityMeter200) LastCloseCap() (time.Time, error) {
+	return d.responseDatetime(FunctionReadLastCloseCap, nil)
+}
+
+func (d *ElectricityMeter200) TariffCount() (uint64, error) {
+	response, err := d.Request(FunctionReadTariffCount, nil)
+	if err != nil {
+		return 0, err
+	}
+
+	return uint64(response[0]), nil
+}
+
+func (d *ElectricityMeter200) CurrentTariff() (uint64, error) {
+	response, err := d.Request(FunctionReadCurrentTariff, nil)
+	if err != nil {
+		return 0, err
+	}
+
+	return uint64(response[0]), nil
+}
+
+func (d *ElectricityMeter200) DisplayTime() (uint64, uint64, uint64, uint64, error) {
+	response, err := d.Request(FunctionReadDisplayTime, nil)
+	if err != nil {
+		return 0, 0, 0, 0, err
+	}
+
+	return uint64(response[0]), uint64(response[1]), uint64(response[2]), uint64(response[3]), nil
+}
+
+func (d *ElectricityMeter200) WorkingTime() (uint64, uint64, error) {
+	response, err := d.Request(FunctionReadWorkingTime, nil)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	under, err := strconv.ParseUint(hex.EncodeToString(response[0:3]), 10, 0)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	without, err := strconv.ParseUint(hex.EncodeToString(response[3:6]), 10, 0)
+	if err != nil {
+		return under, 0, err
+	}
+
+	return under, without, nil
 }
