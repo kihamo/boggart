@@ -69,3 +69,13 @@ func (b *Bind) UpdateStatus(status boggart.BindStatus) {
 
 	b.BindBase.UpdateStatus(status)
 }
+
+func (b *Bind) Toast(message string) error {
+	client, err := b.Client()
+	if err != nil {
+		return err
+	}
+
+	_, err = client.SystemNotificationsCreateToast(message)
+	return err
+}

@@ -207,9 +207,9 @@
                         <tr>
                             <th>{{ i18n "Progress" . }}</th>
                             <td>
-                                <div class="progress">
+                                <div class="progress" style="margin-bottom:0">
                                     <div class="progress-bar progress-bar-striped {{ if .ota_running }}progress-bar-info active{{ else }}progress-bar-danger{{ end}}" role="progressbar" aria-valuenow="{{ .ota_written }}" aria-valuemin="0" aria-valuemax="{{ .ota_total }}" style="width:{{ .ota_progress }}%">
-                                        <span class="sr-only">{{ .ota_written }} bytes of {{ .ota_total }}</span>
+                                        <span style="line-height:20px">{{ .ota_written }} bytes of {{ .ota_total }}</span>
                                     </div>
                                 </div>
                             </td>

@@ -108,13 +108,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return nil
 			}
 
-			client, err := b.Client()
-			if err != nil {
-				return err
-			}
-
-			_, err = client.SystemNotificationsCreateToast(message.String())
-			return err
+			return b.Toast(message.String())
 		})),
 		mqtt.NewSubscriber(MQTTSubscribeTopicPower.String(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
