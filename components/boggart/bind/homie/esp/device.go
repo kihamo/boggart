@@ -17,12 +17,12 @@ const (
 	deviceTopicAttributeImplementation = MQTTPrefixImpl + "+"
 	deviceTopicAttributeStats          = MQTTPrefix + "$stats/+"
 
-	deviceStateInit         = "init"
-	deviceStateReady        = "ready"
-	deviceStateDisconnected = "disconnected"
-	deviceStateSleeping     = "sleeping"
-	deviceStateLost         = "lost"
-	deviceStateAlert        = "alert"
+	// deviceStateInit         = "init"
+	deviceStateReady = "ready"
+	// deviceStateDisconnected = "disconnected"
+	// deviceStateSleeping     = "sleeping"
+	// deviceStateLost         = "lost"
+	// deviceStateAlert        = "alert"
 )
 
 func (b *Bind) registerDeviceAttributes(name string, value interface{}) {

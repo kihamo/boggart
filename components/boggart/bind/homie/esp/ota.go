@@ -48,7 +48,9 @@ func (b *Bind) OTA(ctx context.Context, file io.Reader, timeout time.Duration) e
 	}
 
 	firmware := bytes.NewBuffer(nil)
-	firmware.ReadFrom(file)
+	if _, err := firmware.ReadFrom(file); err != nil {
+		return err
+	}
 
 	// check firmware signature
 	if !regexpMagic.Match(firmware.Bytes()) {
@@ -132,7 +134,10 @@ func (b *Bind) otaDo(firmware *bytes.Buffer, timeout time.Duration) {
 		   automatically schedule OTA updates
 	*/
 	checkSumHash := md5.New()
-	checkSumHash.Write(firmware.Bytes())
+	if _, err := checkSumHash.Write(firmware.Bytes()); err != nil {
+		b.otaAbort()
+		return
+	}
 	checkSum := hex.EncodeToString(checkSumHash.Sum(nil)[:16])
 	b.otaChecksum.Set(checkSum)
 

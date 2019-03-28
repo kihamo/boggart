@@ -71,6 +71,10 @@ func (b *Bind) ProtocolVersionConstraint(constraint string) bool {
 	}
 
 	constraints, err := version.NewConstraint(constraint)
+	if err != nil {
+		return false
+	}
+
 	return constraints.Check(current)
 }
 
