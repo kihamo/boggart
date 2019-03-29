@@ -1,6 +1,7 @@
 package alsa
 
 import (
+	"net/http"
 	"strconv"
 
 	"github.com/elazarl/go-bindata-assetfs"
@@ -19,7 +20,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 	isPlaying := bind.PlayerStatus() == StatusPlaying
 	if isPlaying {
-		data["error"] = t.Translate(r.Context(), "Already playing", "")
+		r.Session().FlashBag().Error(t.Translate(r.Context(), "Already playing", ""))
 	}
 
 	if r.IsPost() {
@@ -40,9 +41,11 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			}
 
 			if err != nil {
-				data["error"] = err.Error()
+				r.Session().FlashBag().Error(err.Error())
 			} else {
-				data["message"] = t.Translate(r.Context(), "File playing", "")
+				r.Session().FlashBag().Info(t.Translate(r.Context(), "File playing", ""))
+				t.Redirect(r.URL().Path, http.StatusFound, w, r)
+				return
 			}
 		}
 	}

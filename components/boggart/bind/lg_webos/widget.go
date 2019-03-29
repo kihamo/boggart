@@ -1,6 +1,8 @@
 package lg_webos
 
 import (
+	"net/http"
+
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/shadow/components/dashboard"
@@ -11,7 +13,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	data := make(map[string]interface{})
 
 	if bind.Status() != boggart.BindStatusOnline {
-		data["error"] = t.Translate(r.Context(), "Device is offline", "")
+		r.Session().FlashBag().Error(t.Translate(r.Context(), "Device is offline", ""))
 	}
 
 	if r.IsPost() {
@@ -20,9 +22,11 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 		if toast != "" {
 			if err := bind.Toast(toast); err != nil {
-				data["error"] = err.Error()
+				r.Session().FlashBag().Error(err.Error())
 			} else {
-				data["message"] = t.Translate(r.Context(), "Message send success", "")
+				r.Session().FlashBag().Success(t.Translate(r.Context(), "Message send success", ""))
+				t.Redirect(r.URL().Path, http.StatusFound, w, r)
+				return
 			}
 		} else {
 			data["error"] = t.Translate(r.Context(), "Message is empty", "")

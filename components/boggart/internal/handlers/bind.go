@@ -117,10 +117,7 @@ func (h *BindHandler) registerByYAML(oldID string, code []byte) (bindItem boggar
 func (h *BindHandler) actionCreateOrUpdate(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
 	buf := bytes.NewBuffer(nil)
 
-	var (
-		err     error
-		message string
-	)
+	var err error
 
 	if r.IsPost() {
 		code := r.Original().FormValue("yaml")
@@ -143,10 +140,13 @@ func (h *BindHandler) actionCreateOrUpdate(w *dashboard.Response, r *dashboard.R
 
 		if bind, upgraded, err = h.registerByYAML(id, buf.Bytes()); err == nil {
 			if upgraded {
-				message = "Bind " + bind.ID() + " upgraded"
+				r.Session().FlashBag().Info("Bind " + bind.ID() + " upgraded")
 			} else {
-				message = "Bind register success with id " + bind.ID()
+				r.Session().FlashBag().Success("Bind register success with id " + bind.ID())
 			}
+
+			h.Redirect(r.URL().Path, http.StatusFound, w, r)
+			return
 		}
 	} else {
 		enc := yaml.NewEncoder(buf)
@@ -166,9 +166,11 @@ func (h *BindHandler) actionCreateOrUpdate(w *dashboard.Response, r *dashboard.R
 	}
 
 	vars := map[string]interface{}{
-		"yaml":    buf.String(),
-		"error":   err,
-		"message": message,
+		"yaml": buf.String(),
+	}
+
+	if err != nil {
+		r.Session().FlashBag().Error(err.Error())
 	}
 
 	if b != nil {
