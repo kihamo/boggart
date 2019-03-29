@@ -15,6 +15,10 @@ import (
 // http://incotex-support.blogspot.ru/2016/05/blog-post.html
 
 const (
+	// группа сетевых команд установки
+	FunctionWriteDisplayMode = 0x09 // установка режима индикации
+	FunctionWriteDisplayTime = 0x0D // установка времени индикации
+
 	// группа сетевых команд чтения
 	FunctionReadAddressGroup         = 0x20 // чтение группового адреса счетчика
 	FunctionReadDatetime             = 0x21 // чтение установленных даты и времени
@@ -327,6 +331,53 @@ func (d *ElectricityMeter200) DisplayMode() (bool, bool, bool, bool, bool, bool,
 		nil
 }
 
+// true  / разрешает индикацию 1 тарифа
+// true  / разрешает индикацию 2 тарифа
+// false / разрешает индикацию 3 тарифа
+// false / разрешает индикацию 4 тарифа
+// true  / разрешает индикацию суммы
+// false / разрешает индикацию мощности
+// false / разрешает индикацию времени
+// false / разрешает индикацию даты
+func (d *ElectricityMeter200) SetDisplayMode(t1, t2, t3, t4, amount, power, time, date bool) error {
+	bit := 0
+
+	if t1 {
+		bit |= displayModeTariff1
+	}
+
+	if t2 {
+		bit |= displayModeTariff2
+	}
+
+	if t3 {
+		bit |= displayModeTariff3
+	}
+
+	if t4 {
+		bit |= displayModeTariff4
+	}
+
+	if amount {
+		bit |= displayModeAmount
+	}
+
+	if power {
+		bit |= displayModePower
+	}
+
+	if time {
+		bit |= displayModeTime
+	}
+
+	if date {
+		bit |= displayModeDate
+	}
+
+	_, err := d.Request(FunctionWriteDisplayMode, []byte{byte(bit)})
+	return err
+}
+
 // PowerCounters returns value of T1, T2, T3 and T4 in W/h
 func (d *ElectricityMeter200) PowerCounters() (uint64, uint64, uint64, uint64, error) {
 	response, err := d.Request(FunctionReadPowerCounters, nil)
@@ -450,6 +501,21 @@ func (d *ElectricityMeter200) DisplayTime() (uint64, uint64, uint64, uint64, err
 	}
 
 	return uint64(response[0]), uint64(response[1]), uint64(response[2]), uint64(response[3]), nil
+}
+
+// default 10 10 5 30
+// t1 / 10 / время индикации энергии не текущих тарифов и суммы
+// t2 / 10 / время индикации энергии текущего тарифа
+// t3 /  5 / время индикации мощности, времени и даты
+// t4 / 30 / время индикации после нажатия кнопки
+func (d *ElectricityMeter200) SetDisplayTime(t1, t2, t3, t4 uint64) error {
+	_, err := d.Request(FunctionWriteDisplayTime, []byte{
+		byte(t1),
+		byte(t2),
+		byte(t3),
+		byte(t4),
+	})
+	return err
 }
 
 func (d *ElectricityMeter200) WorkingTime() (uint64, uint64, error) {

@@ -48,3 +48,66 @@ msgstr "Последнее отключение"
 
 msgid "Last power on"
 msgstr "Последнее включение"
+
+msgid "Display mode"
+msgstr "Режим индикации"
+
+msgid "Show T1"
+msgstr "Показывать T1"
+
+msgid "Show T2"
+msgstr "Показывать T2"
+
+msgid "Show T3"
+msgstr "Показывать T3"
+
+msgid "Show T4"
+msgstr "Показывать T4"
+
+msgid "Show amount"
+msgstr "Показывать сумму"
+
+msgid "Show power"
+msgstr "Показывать мощность"
+
+msgid "Show time"
+msgstr "Показывать время"
+
+msgid "Show date"
+msgstr "Показывать дату"
+
+msgid "Interval for not current tariff"
+msgstr "Интервал индикации не текущих тарифов и суммы"
+
+msgid "Interval for current tariff"
+msgstr "Интервал индикации энергии текущего тарифа"
+
+msgid "Interval for power, time and date"
+msgstr "Интервал индикации мощности, времени и даты"
+
+msgid "Interval for after press back button"
+msgstr "Интервал индикации после нажатия кнопки"
+
+msgid "Reset"
+msgstr "Сбросить"
+
+msgid "Save"
+msgstr "Сохранить"
+
+msgid "Change display mode failed with error %s"
+msgstr "Изменение режимов индикации завершилось с ошибкой %s"
+
+msgid "Change display mode success"
+msgstr "Успешно изменены режимы индикации"
+
+msgid "Change display time failed with error %s"
+msgstr "Изменение интервалов индикации завершилось с ошибкой %s"
+
+msgid "Change display time success"
+msgstr "Успешно изменены интервалы индикации"
+
+msgid "Get display mode failed with error %s"
+msgstr "Получение режимов индикации завершилось с ошибкой %s"
+
+msgid "Get display time failed with error %s"
+msgstr "Получение интервалов индикации завершилось с ошибкой %s"

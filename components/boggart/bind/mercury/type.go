@@ -7,11 +7,10 @@ import (
 	"github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
 	"github.com/kihamo/boggart/components/boggart/providers/mercury"
-	"github.com/kihamo/shadow/components/dashboard"
 )
 
 type Type struct {
-	dashboard.Handler
+	boggart.BindTypeWidget
 }
 
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
