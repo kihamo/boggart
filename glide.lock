@@ -1,5 +1,5 @@
 hash: ece411358fb302856e7713bbce22b41d99abbc30f49e596ed80440f87ad2d5cf
-updated: 2019-03-29T23:32:20.128968+03:00
+updated: 2019-03-30T00:15:11.374055+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -208,7 +208,7 @@ imports:
 - name: github.com/kihamo/go-grafana-api
   version: b9af836f6e9ddb24b1bb5d3d498459d93816ed64
 - name: github.com/kihamo/go-workers
-  version: 3700bb882786775132e86576af393232e81d5586
+  version: 5586be04a7c882d9904227826aa39b135e5d170f
   subpackages:
   - dispatcher
   - event
