@@ -2,6 +2,7 @@ package mercury
 
 import (
 	"net/http"
+	"sort"
 	"strconv"
 	"time"
 
@@ -18,6 +19,125 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	vars["action"] = action
 
 	switch action {
+	case "monthly":
+		type monthly struct {
+			Month                              time.Month
+			Year                               int
+			T1, T2, T3, T4                     uint64
+			T1Delta, T2Delta, T3Delta, T4Delta uint64
+			T1Trend, T2Trend, T3Trend, T4Trend int64
+		}
+
+		date, err := bind.provider.Datetime()
+		if err != nil {
+			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get datetime failed with error", "", err.Error()))
+
+			vars["stats"] = make([]*monthly, 0)
+
+		} else {
+			vars["date"] = date
+
+			var (
+				t1, t2, t3, t4 uint64
+				last           time.Month
+				err            error
+				monthRequest   time.Month
+			)
+
+			if r.URL().Query().Get("all") != "" {
+				last = time.December
+			} else {
+				last = date.Month()
+			}
+
+			stats := make([]*monthly, 0, int(last))
+
+			for i := 1; i <= int(last); i++ {
+				monthRequest = time.Month(i)
+
+				t1, t2, t3, t4, err = bind.provider.MonthlyStatByMonth(monthRequest)
+				if err != nil {
+					mAsString := t.Translate(r.Context(), monthRequest.String(), "")
+					r.Session().FlashBag().Error(t.Translate(r.Context(), "Get statistics for %s failed with error", "", mAsString, err.Error()))
+					continue
+				}
+
+				stat := &monthly{
+					T1: t1,
+					T2: t2,
+					T3: t3,
+					T4: t4,
+				}
+
+				// счетчик отдает статистику на 1 число следующего месяца, поэтому разделяем месяца
+				if monthRequest == time.January {
+					stat.Month = time.December
+				} else {
+					stat.Month = time.Month(int(monthRequest) - 1)
+				}
+
+				if stat.Month >= date.Month() {
+					stat.Year = date.Year() - 1
+				} else {
+					stat.Year = date.Year()
+				}
+
+				stats = append(stats, stat)
+			}
+
+			sort.SliceStable(stats, func(i, j int) bool {
+				if stats[i].Year == stats[j].Year {
+					return int(stats[i].Month) < int(stats[j].Month)
+				}
+
+				return stats[i].Year < stats[j].Year
+			})
+
+			// отдельно запрашиваем текущий месяц
+			t1, t2, t3, t4, err = bind.provider.PowerCounters()
+			if err != nil {
+				mAsString := t.Translate(r.Context(), date.Month().String(), "")
+				r.Session().FlashBag().Error(t.Translate(r.Context(), "Get statistics for %s failed with error", "", mAsString, err.Error()))
+			} else {
+				stat := &monthly{
+					Month: date.Month(),
+					Year:  date.Year(),
+					T1:    t1,
+					T2:    t2,
+					T3:    t3,
+					T4:    t4,
+				}
+
+				stats = append(stats, stat)
+			}
+
+			// deltas
+			for i, current := range stats {
+				if i == 0 {
+					continue
+				}
+
+				current.T1Delta = current.T1 - stats[i-1].T1
+				current.T2Delta = current.T2 - stats[i-1].T2
+				current.T3Delta = current.T3 - stats[i-1].T3
+				current.T4Delta = current.T4 - stats[i-1].T4
+			}
+
+			// trends
+			for i, current := range stats {
+				if i < 2 {
+					continue
+				}
+
+				current.T1Trend = int64(current.T1Delta) - int64(stats[i-1].T1Delta)
+				current.T2Trend = int64(current.T2Delta) - int64(stats[i-1].T2Delta)
+				current.T3Trend = int64(current.T3Delta) - int64(stats[i-1].T3Delta)
+				current.T4Trend = int64(current.T4Delta) - int64(stats[i-1].T4Delta)
+			}
+
+			vars["stats"] = stats
+		}
+
 	case "display":
 		var (
 			modeT1, modeT2, modeT3, modeT4, modeAmount, modePower, modeTime, modeDate bool

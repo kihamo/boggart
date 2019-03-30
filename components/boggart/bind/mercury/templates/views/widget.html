@@ -1,10 +1,93 @@
 {{ define "content" }}
-    {{ if eq .action "display" }}
+    {{ if eq .action "monthly" }}
     <div class="row">
         <div class="col-md-12 col-sm-12 col-xs-12">
             <div class="x_panel">
                 <div class="x_title">
-                    <h2>{{ i18n "Display mode" . }}</h2>
+                    <h2>{{ i18n "Monthly statistics" . }}</h2>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <p class="text-muted font-13 m-b-30">
+                        {{ raw (i18n "Current date time on device %s" . nil nil nil (print "<script type=\"application/javascript\">document.write(dateToString('" (.date.Format "2006-01-02T15:04:05Z07:00") "'))</script>")) }}
+                    </p>
+
+                    <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                        <thead>
+                        <tr>
+                            <th>{{ i18n "Month" . }}</th>
+                            <th>{{ i18n "T1 / Wh" . }}</th>
+                            <th>{{ i18n "T2 / Wh" . }}</th>
+                            <th>{{ i18n "T3 / Wh" . }}</th>
+                            <th>{{ i18n "T4 / Wh" . }}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{ range $i, $stats := .stats }}
+                        <tr{{ if and (eq $stats.Month $.date.Month) (eq $stats.Year $.date.Year) }} class="success"{{ end }}>
+                            <td>{{ i18n $stats.Month.String $ }} {{ $stats.Year }}</td>
+                            <td>
+                                {{ $stats.T1 }}
+                                {{ if gt $stats.T1Trend 0 }}
+                                    <span class="label label-danger">{{ $stats.T1Delta }} / +{{ $stats.T1Trend }}</span>
+                                {{ else if lt $stats.T1Trend 0 }}
+                                    <span class="label label-success">{{ $stats.T1Delta }} / {{ $stats.T1Trend }}</span>
+                                {{ else if eq $stats.T1Trend 0 }}
+                                    <span class="label label-info">{{ $stats.T1Delta }} / {{ $stats.T1Trend }}</span>
+                                {{ else if gt $stats.T1Delta 0 }}
+                                    <span class="label label-default">{{ $stats.T1Delta }}</span>
+                                {{ end }}
+                            </td>
+                            <td>
+                                {{ $stats.T2 }}
+                                {{ if gt $stats.T2Trend 0 }}
+                                    <span class="label label-danger">{{ $stats.T2Delta }} / +{{ $stats.T2Trend }}</span>
+                                {{ else if lt $stats.T2Trend 0 }}
+                                    <span class="label label-success">{{ $stats.T2Delta }} / {{ $stats.T2Trend }}</span>
+                                {{ else if eq $stats.T2Trend 0 }}
+                                    <span class="label label-info">{{ $stats.T2Delta }} / {{ $stats.T2Trend }}</span>
+                                {{ else if gt $stats.T2Delta 0 }}
+                                    <span class="label label-default">{{ $stats.T2Delta }}</span>
+                                {{ end }}
+                            </td>
+                            <td>
+                                {{ $stats.T3 }}
+                                {{ if gt $stats.T3Trend 0 }}
+                                    <span class="label label-danger">{{ $stats.T3Delta }} / +{{ $stats.T3Trend }}</span>
+                                {{ else if lt $stats.T3Trend 0 }}
+                                    <span class="label label-success">{{ $stats.T3Delta }} / {{ $stats.T3Trend }}</span>
+                                {{ else if eq $stats.T3Trend 0 }}
+                                    <span class="label label-info">{{ $stats.T3Delta }} / {{ $stats.T3Trend }}</span>
+                                {{ else if gt $stats.T3Delta 0 }}
+                                    <span class="label label-default">{{ $stats.T3Delta }}</span>
+                                {{ end }}
+                            </td>
+                            <td>
+                                {{ $stats.T4 }}
+                                {{ if gt $stats.T4Trend 0 }}
+                                    <span class="label label-danger">{{ $stats.T4Delta }} / +{{ $stats.T4Trend }}</span>
+                                {{ else if lt $stats.T4Trend 0 }}
+                                    <span class="label label-success">{{ $stats.T4Delta }} / {{ $stats.T4Trend }}</span>
+                                {{ else if eq $stats.T4Trend 0 }}
+                                    <span class="label label-info">{{ $stats.T4Delta }} / {{ $stats.T4Trend }}</span>
+                                {{ else if gt $stats.T4Delta 0 }}
+                                    <span class="label label-default">{{ $stats.T4Delta }}</span>
+                                {{ end }}
+                            </td>
+                        </tr>
+                        {{ end }}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{ else if eq .action "display" }}
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>{{ i18n "Display" . }}</h2>
                     <div class="clearfix"></div>
                 </div>
                 <div class="x_content">

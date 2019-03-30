@@ -49,8 +49,8 @@ msgstr "Последнее отключение"
 msgid "Last power on"
 msgstr "Последнее включение"
 
-msgid "Display mode"
-msgstr "Режим индикации"
+msgid "Display"
+msgstr "Индикация"
 
 msgid "Show T1"
 msgstr "Показывать T1"
@@ -111,3 +111,60 @@ msgstr "Получение режимов индикации завершило�
 
 msgid "Get display time failed with error %s"
 msgstr "Получение интервалов индикации завершилось с ошибкой %s"
+
+msgid "Monthly statistics"
+msgstr "Месячная статистика"
+
+msgid "Current date time on device %s"
+msgstr "Текущая дата на устройстве %s"
+
+msgid "Month"
+msgstr "Месяц"
+
+msgid "T1 / Wh"
+msgstr "T1 / Втч"
+
+msgid "T2 / Wh"
+msgstr "T2 / Втч"
+
+msgid "T3 / Wh"
+msgstr "T3 / Втч"
+
+msgid "T4 / Wh"
+msgstr "T4 / Втч"
+
+msgid "January"
+msgstr "Январь"
+
+msgid "February"
+msgstr "Февраль"
+
+msgid "March"
+msgstr "Март"
+
+msgid "April"
+msgstr "Апрель"
+
+msgid "May"
+msgstr "Май"
+
+msgid "June"
+msgstr "Июнь"
+
+msgid "July"
+msgstr "Июль"
+
+msgid "August"
+msgstr "Август"
+
+msgid "September"
+msgstr "Сентябрь"
+
+msgid "October"
+msgstr "Октябрь"
+
+msgid "November"
+msgstr "Ноябрь"
+
+msgid "December"
+msgstr "Декабрь"

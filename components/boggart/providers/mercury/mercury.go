@@ -37,6 +37,7 @@ const (
 	FunctionReadTariffCount          = 0x2E // чтение количества действующих тарифов
 
 	// группа дополнительных сетевых команд чтения
+	FunctionReadMonthlyStat   = 0x32 // чтение месячных срезов
 	FunctionReadCurrentTariff = 0x60 // чтение тарифа
 	FunctionReadLastCloseCap  = 0x62 // чтение времение последнего закрытия крышки счетчика
 	FunctionReadParamsCurrent = 0x63 // чтение текущих параметров сети U, I, P
@@ -385,27 +386,17 @@ func (d *ElectricityMeter200) PowerCounters() (uint64, uint64, uint64, uint64, e
 		return 0, 0, 0, 0, err
 	}
 
-	t1, err := strconv.ParseUint(hex.EncodeToString(response[0:4]), 10, 0)
-	if err != nil {
-		return 0, 0, 0, 0, err
+	values := make([]uint64, 4)
+	for i := 0; i < len(response); i += 4 {
+		value, err := strconv.ParseUint(hex.EncodeToString(response[i:i+4]), 10, 0)
+		if err != nil {
+			return 0, 0, 0, 0, err
+		}
+
+		values[i/4] = value
 	}
 
-	t2, err := strconv.ParseUint(hex.EncodeToString(response[4:8]), 10, 0)
-	if err != nil {
-		return 0, 0, 0, 0, err
-	}
-
-	t3, err := strconv.ParseUint(hex.EncodeToString(response[8:12]), 10, 0)
-	if err != nil {
-		return 0, 0, 0, 0, err
-	}
-
-	t4, err := strconv.ParseUint(hex.EncodeToString(response[12:16]), 10, 0)
-	if err != nil {
-		return 0, 0, 0, 0, err
-	}
-
-	return t1 * 10, t2 * 10, t3 * 10, t4 * 10, err
+	return values[0] * 10, values[1] * 10, values[2] * 10, values[3] * 10, nil
 }
 
 // PowerUser return power in W
@@ -483,6 +474,37 @@ func (d *ElectricityMeter200) TariffCount() (uint64, error) {
 	}
 
 	return uint64(response[0]), nil
+}
+
+func (d *ElectricityMeter200) monthlyStat(month byte) (uint64, uint64, uint64, uint64, error) {
+	response, err := d.Request(FunctionReadMonthlyStat, []byte{month})
+	if err != nil {
+		return 0, 0, 0, 0, err
+	}
+
+	values := make([]uint64, 4)
+	for i := 0; i < len(response); i += 4 {
+		value, err := strconv.ParseUint(hex.EncodeToString(response[i:i+4]), 10, 0)
+		if err != nil {
+			return 0, 0, 0, 0, err
+		}
+
+		values[i/4] = value
+	}
+
+	return values[0] * 10, values[1] * 10, values[2] * 10, values[3] * 10, nil
+}
+
+func (d *ElectricityMeter200) MonthlyStat() (uint64, uint64, uint64, uint64, error) {
+	// 0x0F текущий месяц, но модель 200 возвращает не корректные значения
+	// поэтому лучше указывать месяц явно
+
+	return d.monthlyStat(0x0F)
+}
+
+// значения счетчика на 1 число месяца
+func (d *ElectricityMeter200) MonthlyStatByMonth(month time.Month) (uint64, uint64, uint64, uint64, error) {
+	return d.monthlyStat(byte(int(month) - 1))
 }
 
 func (d *ElectricityMeter200) CurrentTariff() (uint64, error) {
