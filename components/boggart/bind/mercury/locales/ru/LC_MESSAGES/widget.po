@@ -168,3 +168,12 @@ msgstr "Ноябрь"
 
 msgid "December"
 msgstr "Декабрь"
+
+msgid "Day"
+msgstr "День"
+
+msgid "Holidays"
+msgstr "Праздничные дни"
+
+msgid "Get holidays failed with error %s"
+msgstr "Получение праздничных дней завершилось с ошибкой %s"

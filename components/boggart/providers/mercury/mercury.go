@@ -37,6 +37,7 @@ const (
 	FunctionReadTariffCount          = 0x2E // чтение количества действующих тарифов
 
 	// группа дополнительных сетевых команд чтения
+	FunctionReadHolidays      = 0x30 // чтение таблицы праздничных дней
 	FunctionReadMonthlyStat   = 0x32 // чтение месячных срезов
 	FunctionReadCurrentTariff = 0x60 // чтение тарифа
 	FunctionReadLastCloseCap  = 0x62 // чтение времение последнего закрытия крышки счетчика
@@ -474,6 +475,32 @@ func (d *ElectricityMeter200) TariffCount() (uint64, error) {
 	}
 
 	return uint64(response[0]), nil
+}
+
+func (d *ElectricityMeter200) Holidays() ([]time.Time, error) {
+	response1, err := d.Request(FunctionReadHolidays, []byte{0})
+	if err != nil {
+		return nil, err
+	}
+
+	response2, err := d.Request(FunctionReadHolidays, []byte{1})
+	if err != nil {
+		return nil, err
+	}
+
+	response := append(response1, response2...)
+	days := make([]time.Time, 0)
+	year := time.Now().Year()
+
+	for i := 0; i < len(response); i += 2 {
+		if response[i] < 1 || response[i] > 31 || response[i+1] > 12 || response[i+1] < 1 {
+			continue
+		}
+
+		days = append(days, time.Date(year, time.Month(response[i+1]), int(response[i]), 0, 0, 0, 0, time.UTC))
+	}
+
+	return days, nil
 }
 
 func (d *ElectricityMeter200) monthlyStat(month byte) (uint64, uint64, uint64, uint64, error) {

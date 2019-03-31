@@ -213,6 +213,14 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		vars["time_t3"] = timeT3
 		vars["time_t4"] = timeT4
 
+	case "holidays":
+		days, err := bind.provider.Holidays()
+		if err != nil {
+			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get holidays failed with error %s", "", err.Error()))
+		}
+
+		vars["holidays"] = days
+
 	default:
 		// date time
 		now := time.Now()
