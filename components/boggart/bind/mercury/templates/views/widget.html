@@ -1,264 +1,252 @@
 {{ define "content" }}
-    {{ if eq .action "monthly" }}
-    <div class="row">
-        <div class="col-md-12 col-sm-12 col-xs-12">
-            <div class="x_panel">
-                <div class="x_title">
-                    <h2>{{ i18n "Monthly statistics" . }}</h2>
-                    <div class="clearfix"></div>
-                </div>
-                <div class="x_content">
-                    <p class="text-muted font-13 m-b-30">
-                        {{ raw (i18n "Current date time on device %s" . nil nil nil (print "<script type=\"application/javascript\">document.write(dateToString('" (.date.Format "2006-01-02T15:04:05Z07:00") "'))</script>")) }}
-                    </p>
+<script type="application/javascript">
+    function valueFormat(n) {
+        return new Intl.NumberFormat().format(n);
+    }
+</script>
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_content">
+                <div role="tabpanel">
+                    <ul class="nav nav-tabs bar_tabs" role="tablist">
+                        <li role="presentation"{{ if eq .action "" }} class="active"{{ end }}><a href="{{ if eq .action "" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}{{ end }}">{{ i18n "Current measurements" . }}</a></li>
+                        <li role="presentation"{{ if eq .action "monthly" }} class="active"{{ end }}><a href="{{ if eq .action "monthly" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=monthly&all=1{{ end }}">{{ i18n "Monthly statistics" . }}</a></li>
+                        <li role="presentation"{{ if eq .action "display" }} class="active"{{ end }}><a href="{{ if eq .action "display" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=display{{ end }}">{{ i18n "Display" . }}</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane fade active in">
+                            {{ if eq .action "monthly" }}
+                                <p class="text-muted font-13 m-b-30">
+                                    {{ raw (i18n "Current date time on device %s" . nil nil nil (print "<script type=\"application/javascript\">document.write(dateToString('" (.date.Format "2006-01-02T15:04:05Z07:00") "'))</script>")) }}
+                                </p>
 
-                    <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
-                        <thead>
-                        <tr>
-                            <th>{{ i18n "Month" . }}</th>
-                            <th>{{ i18n "T1 / Wh" . }}</th>
-                            <th>{{ i18n "T2 / Wh" . }}</th>
-                            <th>{{ i18n "T3 / Wh" . }}</th>
-                            <th>{{ i18n "T4 / Wh" . }}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {{ range $i, $stats := .stats }}
-                        <tr{{ if and (eq $stats.Month $.date.Month) (eq $stats.Year $.date.Year) }} class="success"{{ end }}>
-                            <td>{{ i18n $stats.Month.String $ }} {{ $stats.Year }}</td>
-                            <td>
-                                {{ $stats.T1 }}
-                                {{ if gt $stats.T1Trend 0 }}
-                                    <span class="label label-danger">{{ $stats.T1Delta }} / +{{ $stats.T1Trend }}</span>
-                                {{ else if lt $stats.T1Trend 0 }}
-                                    <span class="label label-success">{{ $stats.T1Delta }} / {{ $stats.T1Trend }}</span>
-                                {{ else if eq $stats.T1Trend 0 }}
-                                    <span class="label label-info">{{ $stats.T1Delta }} / {{ $stats.T1Trend }}</span>
-                                {{ else if gt $stats.T1Delta 0 }}
-                                    <span class="label label-default">{{ $stats.T1Delta }}</span>
-                                {{ end }}
-                            </td>
-                            <td>
-                                {{ $stats.T2 }}
-                                {{ if gt $stats.T2Trend 0 }}
-                                    <span class="label label-danger">{{ $stats.T2Delta }} / +{{ $stats.T2Trend }}</span>
-                                {{ else if lt $stats.T2Trend 0 }}
-                                    <span class="label label-success">{{ $stats.T2Delta }} / {{ $stats.T2Trend }}</span>
-                                {{ else if eq $stats.T2Trend 0 }}
-                                    <span class="label label-info">{{ $stats.T2Delta }} / {{ $stats.T2Trend }}</span>
-                                {{ else if gt $stats.T2Delta 0 }}
-                                    <span class="label label-default">{{ $stats.T2Delta }}</span>
-                                {{ end }}
-                            </td>
-                            <td>
-                                {{ $stats.T3 }}
-                                {{ if gt $stats.T3Trend 0 }}
-                                    <span class="label label-danger">{{ $stats.T3Delta }} / +{{ $stats.T3Trend }}</span>
-                                {{ else if lt $stats.T3Trend 0 }}
-                                    <span class="label label-success">{{ $stats.T3Delta }} / {{ $stats.T3Trend }}</span>
-                                {{ else if eq $stats.T3Trend 0 }}
-                                    <span class="label label-info">{{ $stats.T3Delta }} / {{ $stats.T3Trend }}</span>
-                                {{ else if gt $stats.T3Delta 0 }}
-                                    <span class="label label-default">{{ $stats.T3Delta }}</span>
-                                {{ end }}
-                            </td>
-                            <td>
-                                {{ $stats.T4 }}
-                                {{ if gt $stats.T4Trend 0 }}
-                                    <span class="label label-danger">{{ $stats.T4Delta }} / +{{ $stats.T4Trend }}</span>
-                                {{ else if lt $stats.T4Trend 0 }}
-                                    <span class="label label-success">{{ $stats.T4Delta }} / {{ $stats.T4Trend }}</span>
-                                {{ else if eq $stats.T4Trend 0 }}
-                                    <span class="label label-info">{{ $stats.T4Delta }} / {{ $stats.T4Trend }}</span>
-                                {{ else if gt $stats.T4Delta 0 }}
-                                    <span class="label label-default">{{ $stats.T4Delta }}</span>
-                                {{ end }}
-                            </td>
-                        </tr>
-                        {{ end }}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    {{ else if eq .action "display" }}
-    <div class="row">
-        <div class="col-md-12 col-sm-12 col-xs-12">
-            <div class="x_panel">
-                <div class="x_title">
-                    <h2>{{ i18n "Display" . }}</h2>
-                    <div class="clearfix"></div>
-                </div>
-                <div class="x_content">
-                    <form id="display" class="form-horizontal form-label-left" data-toggle="validator" method="post">
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_t1">{{ i18n "Show T1" . }} <span class="required">*</span>
-                            </label>
-                            <div class="col-md-6 col-sm-6 col-xs-12">
-                                <input type="checkbox" class="js-switch" name="mode_t1" id="mode_t1" {{ if eq (print .mode_t1) "true" }} checked{{ end }} />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_t2">{{ i18n "Show T2" . }} <span class="required">*</span>
-                            </label>
-                            <div class="col-md-6 col-sm-6 col-xs-12">
-                                <input type="checkbox" class="js-switch" name="mode_t2" id="mode_t2" {{ if eq (print .mode_t2) "true" }} checked{{ end }} />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_t3">{{ i18n "Show T3" . }} <span class="required">*</span>
-                            </label>
-                            <div class="col-md-6 col-sm-6 col-xs-12">
-                                <input type="checkbox" class="js-switch" name="mode_t3" id="mode_t3" {{ if eq (print .mode_t3) "true" }} checked{{ end }} />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_t4">{{ i18n "Show T4" . }} <span class="required">*</span>
-                            </label>
-                            <div class="col-md-6 col-sm-6 col-xs-12">
-                                <input type="checkbox" class="js-switch" name="mode_t4" id="mode_t4" {{ if eq (print .mode_t4) "true" }} checked{{ end }} />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_amount">{{ i18n "Show amount" . }} <span class="required">*</span>
-                            </label>
-                            <div class="col-md-6 col-sm-6 col-xs-12">
-                                <input type="checkbox" class="js-switch" name="mode_amount" id="mode_amount" {{ if eq (print .mode_amount) "true" }} checked{{ end }} />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_power">{{ i18n "Show power" . }} <span class="required">*</span>
-                            </label>
-                            <div class="col-md-6 col-sm-6 col-xs-12">
-                                <input type="checkbox" class="js-switch" name="mode_power" id="mode_power" {{ if eq (print .mode_power) "true" }} checked{{ end }} />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_time">{{ i18n "Show time" . }} <span class="required">*</span>
-                            </label>
-                            <div class="col-md-6 col-sm-6 col-xs-12">
-                                <input type="checkbox" class="js-switch" name="mode_time" id="mode_time" {{ if eq (print .mode_time) "true" }} checked{{ end }} />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_date">{{ i18n "Show date" . }} <span class="required">*</span>
-                            </label>
-                            <div class="col-md-6 col-sm-6 col-xs-12">
-                                <input type="checkbox" class="js-switch" name="mode_date" id="mode_date" {{ if eq (print .date) "true" }} checked{{ end }} />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-4 col-xs-12" for="time_t1">{{ i18n "Interval for not current tariff" . }} <span class="required">*</span>
-                            </label>
-                            <div class="col-md-6 col-sm-6 col-xs-12">
-                                <input type="number" name="time_t1" id="time_t1" value="{{ .time_t1 }}" pattern="^[-+]?[0-9]*$"/>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-4 col-xs-12" for="time_t2">{{ i18n "Interval for current tariff" . }} <span class="required">*</span>
-                            </label>
-                            <div class="col-md-6 col-sm-6 col-xs-12">
-                                <input type="number" name="time_t2" id="time_t2" value="{{ .time_t2 }}" pattern="^[-+]?[0-9]*$"/>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-4 col-xs-12" for="time_t3">{{ i18n "Interval for power, time and date" . }} <span class="required">*</span>
-                            </label>
-                            <div class="col-md-6 col-sm-6 col-xs-12">
-                                <input type="number" name="time_t3" id="time_t3" value="{{ .time_t3 }}" pattern="^[-+]?[0-9]*$"/>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-4 col-xs-12" for="time_t4">{{ i18n "Interval for after press back button" . }} <span class="required">*</span>
-                            </label>
-                            <div class="col-md-6 col-sm-6 col-xs-12">
-                                <input type="number" name="time_t4" id="time_t4" value="{{ .time_t4 }}" pattern="^[-+]?[0-9]*$"/>
-                            </div>
-                        </div>
-
-                        <div class="ln_solid"></div>
-                        <div class="form-group">
-                            <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
-                                <button type="reset" class="btn btn-info" value="reset">{{ i18n "Reset" . }}</button>
-                                <button type="submit" class="btn btn-success" value="save">{{ i18n "Save" . }}</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    {{ else }}
-    <div class="row">
-        <div class="col-md-12 col-sm-12 col-xs-12">
-            <div class="x_panel">
-                <div class="x_title">
-                    <h2>{{ i18n "Current measurements" . }}</h2>
-                    <div class="clearfix"></div>
-                </div>
-                <div class="x_content">
-                    <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
-                        <thead>
-                        <tr>
-                            <th class="md-col-2">{{ i18n "Measurement" . }}</th>
-                            <th class="md-col-2">{{ i18n "Value" . }}</th>
-                            <th>{{ i18n "Description" . }}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>{{ i18n "Date and time" . }}</td>
-                                {{ if .datetime.error }}
-                                    <td class="text-danger">{{ .datetime.error.Error }}</td>
-                                {{ else }}
-                                    <td>
-                                        <script type="application/javascript">document.write(dateToString('{{ .datetime.value.Format "2006-01-02T15:04:05Z07:00" }}'))</script>
-                                        {{ if ne .datetime.delta 0 }}
-                                            <strong class="text-danger">
-                                            {{ if gt .datetime.delta 0 }}
-                                                {{ i18nPlural "+%d second" "+%d seconds" .datetime.delta $ nil nil nil .datetime.delta }}
-                                            {{ else }}
-                                                {{ i18nPlural "%d second" "%d seconds" .datetime.delta $ nil nil nil .datetime.delta }}
+                                <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                                    <thead>
+                                    <tr>
+                                        <th>{{ i18n "Month" . }}</th>
+                                        <th>{{ i18n "T1 / Wh" . }}</th>
+                                        <th>{{ i18n "T2 / Wh" . }}</th>
+                                        <th>{{ i18n "T3 / Wh" . }}</th>
+                                        <th>{{ i18n "T4 / Wh" . }}</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {{ range $i, $stats := .stats }}
+                                    <tr{{ if and (eq $stats.Month $.date.Month) (eq $stats.Year $.date.Year) }} class="success"{{ end }}>
+                                        <td>{{ i18n $stats.Month.String $ }} {{ $stats.Year }}</td>
+                                        <td>
+                                            <script type="application/javascript">document.write(valueFormat({{ $stats.T1 }}))</script>
+                                            {{ if gt $stats.T1Trend 0 }}
+                                                <span class="label label-danger"><script type="application/javascript">document.write(valueFormat({{ $stats.T1Delta }}))</script> / <script type="application/javascript">document.write(valueFormat({{ $stats.T1Trend }}))</script></span>
+                                            {{ else if lt $stats.T1Trend 0 }}
+                                                <span class="label label-success"><script type="application/javascript">document.write(valueFormat({{ $stats.T1Delta }}))</script> / <script type="application/javascript">document.write(valueFormat({{ $stats.T1Trend }}))</script></span>
+                                            {{ else if eq $stats.T1Trend 0 }}
+                                                <span class="label label-info"><script type="application/javascript">document.write(valueFormat({{ $stats.T1Delta }}))</script> / <script type="application/javascript">document.write(valueFormat({{ $stats.T1Trend }}))</script></span>
+                                            {{ else if gt $stats.T1Delta 0 }}
+                                                <span class="label label-default"><script type="application/javascript">document.write(valueFormat({{ $stats.T1Delta }}))</script></span>
                                             {{ end }}
-                                            </strong>
-                                        {{ end }}
-                                    </td>
-                                {{ end }}
-                                <td>{{ i18n "Current date and time on meter" . }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Make date" . }}</td>
-                                {{ if .make_date.error }}
-                                    <td class="text-danger">{{ .make_date.error.Error }}</td>
-                                {{ else }}
-                                    <td>{{ .make_date.value.Format "2006-01-02" }}</td>
-                                {{ end }}
-                                <td>{{ i18n "Make date" . }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Last power off" . }}</td>
-                                {{ if .last_power_off_datetime.error }}
-                                    <td class="text-danger">{{ .last_power_off_datetime.error.Error }}</td>
-                                {{ else }}
-                                    <td><script type="application/javascript">document.write(dateToString('{{ .last_power_off_datetime.value.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
-                                {{ end }}
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Last power on" . }}</td>
-                                {{ if .last_power_on_datetime.error }}
-                                    <td class="text-danger">{{ .last_power_on_datetime.error.Error }}</td>
-                                {{ else }}
-                                    <td><script type="application/javascript">document.write(dateToString('{{ .last_power_on_datetime.value.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
-                                {{ end }}
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                        </td>
+                                        <td>
+                                            <script type="application/javascript">document.write(valueFormat({{ $stats.T2 }}))</script>
+                                            {{ if gt $stats.T2Trend 0 }}
+                                                <span class="label label-danger"><script type="application/javascript">document.write(valueFormat({{ $stats.T2Delta }}))</script> / <script type="application/javascript">document.write(valueFormat({{ $stats.T2Trend }}))</script></span>
+                                            {{ else if lt $stats.T2Trend 0 }}
+                                                <span class="label label-success"><script type="application/javascript">document.write(valueFormat({{ $stats.T2Delta }}))</script> / <script type="application/javascript">document.write(valueFormat({{ $stats.T2Trend }}))</script></span>
+                                            {{ else if eq $stats.T2Trend 0 }}
+                                                <span class="label label-info"><script type="application/javascript">document.write(valueFormat({{ $stats.T2Delta }}))</script> / <script type="application/javascript">document.write(valueFormat({{ $stats.T2Trend }}))</script></span>
+                                            {{ else if gt $stats.T2Delta 0 }}
+                                                <span class="label label-default"><script type="application/javascript">document.write(valueFormat({{ $stats.T2Delta }}))</script></span>
+                                            {{ end }}
+                                        </td>
+                                        <td>
+                                            <script type="application/javascript">document.write(valueFormat({{ $stats.T3 }}))</script>
+                                            {{ if gt $stats.T3Trend 0 }}
+                                                <span class="label label-danger"><script type="application/javascript">document.write(valueFormat({{ $stats.T3Delta }}))</script> / <script type="application/javascript">document.write(valueFormat({{ $stats.T3Trend }}))</script></span>
+                                            {{ else if lt $stats.T3Trend 0 }}
+                                                <span class="label label-success"><script type="application/javascript">document.write(valueFormat({{ $stats.T3Delta }}))</script> / <script type="application/javascript">document.write(valueFormat({{ $stats.T3Trend }}))</script></span>
+                                            {{ else if eq $stats.T3Trend 0 }}
+                                                <span class="label label-info"><script type="application/javascript">document.write(valueFormat({{ $stats.T3Delta }}))</script> / <script type="application/javascript">document.write(valueFormat({{ $stats.T3Trend }}))</script></span>
+                                            {{ else if gt $stats.T3Delta 0 }}
+                                                <span class="label label-default"><script type="application/javascript">document.write(valueFormat({{ $stats.T3Delta }}))</script></span>
+                                            {{ end }}
+                                        </td>
+                                        <td>
+                                            <script type="application/javascript">document.write(valueFormat({{ $stats.T4 }}))</script>
+                                            {{ if gt $stats.T4Trend 0 }}
+                                                <span class="label label-danger"><script type="application/javascript">document.write(valueFormat({{ $stats.T4Delta }}))</script> / <script type="application/javascript">document.write(valueFormat({{ $stats.T4Trend }}))</script></span>
+                                            {{ else if lt $stats.T4Trend 0 }}
+                                                <span class="label label-success"><script type="application/javascript">document.write(valueFormat({{ $stats.T4Delta }}))</script> / <script type="application/javascript">document.write(valueFormat({{ $stats.T4Trend }}))</script></span>
+                                            {{ else if eq $stats.T4Trend 0 }}
+                                                <span class="label label-info"><script type="application/javascript">document.write(valueFormat({{ $stats.T4Delta }}))</script> / <script type="application/javascript">document.write(valueFormat({{ $stats.T4Trend }}))</script></span>
+                                            {{ else if gt $stats.T4Delta 0 }}
+                                                <span class="label label-default"><script type="application/javascript">document.write(valueFormat({{ $stats.T4Delta }}))</script></span>
+                                            {{ end }}
+                                        </td>
+                                    </tr>
+                                    {{ end }}
+                                    </tbody>
+                                </table>
+                            {{ else if eq .action "display" }}
+                                <form id="display" class="form-horizontal form-label-left" data-toggle="validator" method="post">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_t1">{{ i18n "Show T1" . }} <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="checkbox" class="js-switch" name="mode_t1" id="mode_t1" {{ if eq (print .mode_t1) "true" }} checked{{ end }} />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_t2">{{ i18n "Show T2" . }} <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="checkbox" class="js-switch" name="mode_t2" id="mode_t2" {{ if eq (print .mode_t2) "true" }} checked{{ end }} />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_t3">{{ i18n "Show T3" . }} <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="checkbox" class="js-switch" name="mode_t3" id="mode_t3" {{ if eq (print .mode_t3) "true" }} checked{{ end }} />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_t4">{{ i18n "Show T4" . }} <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="checkbox" class="js-switch" name="mode_t4" id="mode_t4" {{ if eq (print .mode_t4) "true" }} checked{{ end }} />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_amount">{{ i18n "Show amount" . }} <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="checkbox" class="js-switch" name="mode_amount" id="mode_amount" {{ if eq (print .mode_amount) "true" }} checked{{ end }} />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_power">{{ i18n "Show power" . }} <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="checkbox" class="js-switch" name="mode_power" id="mode_power" {{ if eq (print .mode_power) "true" }} checked{{ end }} />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_time">{{ i18n "Show time" . }} <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="checkbox" class="js-switch" name="mode_time" id="mode_time" {{ if eq (print .mode_time) "true" }} checked{{ end }} />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_date">{{ i18n "Show date" . }} <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="checkbox" class="js-switch" name="mode_date" id="mode_date" {{ if eq (print .date) "true" }} checked{{ end }} />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="time_t1">{{ i18n "Interval for not current tariff" . }} <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="number" name="time_t1" id="time_t1" value="{{ .time_t1 }}" pattern="^[-+]?[0-9]*$"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="time_t2">{{ i18n "Interval for current tariff" . }} <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="number" name="time_t2" id="time_t2" value="{{ .time_t2 }}" pattern="^[-+]?[0-9]*$"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="time_t3">{{ i18n "Interval for power, time and date" . }} <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="number" name="time_t3" id="time_t3" value="{{ .time_t3 }}" pattern="^[-+]?[0-9]*$"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="time_t4">{{ i18n "Interval for after press back button" . }} <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="number" name="time_t4" id="time_t4" value="{{ .time_t4 }}" pattern="^[-+]?[0-9]*$"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="ln_solid"></div>
+                                    <div class="form-group">
+                                        <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+                                            <button type="reset" class="btn btn-info" value="reset">{{ i18n "Reset" . }}</button>
+                                            <button type="submit" class="btn btn-success" value="save">{{ i18n "Save" . }}</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            {{ else }}
+                                <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                                    <thead>
+                                    <tr>
+                                        <th class="md-col-2">{{ i18n "Measurement" . }}</th>
+                                        <th class="md-col-2">{{ i18n "Value" . }}</th>
+                                        <th>{{ i18n "Description" . }}</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>{{ i18n "Date and time" . }}</td>
+                                            {{ if .datetime.error }}
+                                                <td class="text-danger">{{ .datetime.error.Error }}</td>
+                                            {{ else }}
+                                                <td>
+                                                    <script type="application/javascript">document.write(dateToString('{{ .datetime.value.Format "2006-01-02T15:04:05Z07:00" }}'))</script>
+                                                    {{ if ne .datetime.delta 0 }}
+                                                        <strong class="text-danger">
+                                                        {{ if gt .datetime.delta 0 }}
+                                                            {{ i18nPlural "+%d second" "+%d seconds" .datetime.delta $ nil nil nil .datetime.delta }}
+                                                        {{ else }}
+                                                            {{ i18nPlural "%d second" "%d seconds" .datetime.delta $ nil nil nil .datetime.delta }}
+                                                        {{ end }}
+                                                        </strong>
+                                                    {{ end }}
+                                                </td>
+                                            {{ end }}
+                                            <td>{{ i18n "Current date and time on meter" . }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ i18n "Make date" . }}</td>
+                                            {{ if .make_date.error }}
+                                                <td class="text-danger">{{ .make_date.error.Error }}</td>
+                                            {{ else }}
+                                                <td>{{ .make_date.value.Format "2006-01-02" }}</td>
+                                            {{ end }}
+                                            <td>{{ i18n "Make date" . }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ i18n "Last power off" . }}</td>
+                                            {{ if .last_power_off_datetime.error }}
+                                                <td class="text-danger">{{ .last_power_off_datetime.error.Error }}</td>
+                                            {{ else }}
+                                                <td><script type="application/javascript">document.write(dateToString('{{ .last_power_off_datetime.value.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                            {{ end }}
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ i18n "Last power on" . }}</td>
+                                            {{ if .last_power_on_datetime.error }}
+                                                <td class="text-danger">{{ .last_power_on_datetime.error.Error }}</td>
+                                            {{ else }}
+                                                <td><script type="application/javascript">document.write(dateToString('{{ .last_power_on_datetime.value.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                            {{ end }}
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            {{ end }}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    {{ end }}
+</div>
 {{ end }}
