@@ -1,0 +1,141 @@
+{{ define "content" }}
+<script type="application/javascript">
+    function valueFormat(n) {
+        return new Intl.NumberFormat().format(n);
+    }
+</script>
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_content">
+                <div role="tabpanel">
+                    <ul class="nav nav-tabs bar_tabs" role="tablist">
+                        <li role="presentation"{{ if eq .action "" }} class="active"{{ end }}><a href="{{ if eq .action "" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}{{ end }}">{{ i18n "Current measurements" . }}</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane fade active in">
+                            <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>{{ i18n "Measurement" . }}</th>
+                                        <th>{{ i18n "Value" . }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{{ i18n "Date and time" . }}</td>
+                                        {{ if .datetime.Error }}
+                                            <td class="text-danger">{{ .datetime.Error.Error }}</td>
+                                        {{ else }}
+                                            <td>
+                                                <script type="application/javascript">document.write(dateToString('{{ .datetime.Value.Format "2006-01-02T15:04:05Z07:00" }}'))</script>
+                                                {{ if ne .datetime.Delta 0 }}
+                                                <strong class="text-danger">
+                                                    {{ if gt .datetime.Delta 0 }}
+                                                        {{ i18nPlural "+%d second" "+%d seconds" .datetime.Delta $ nil nil nil .datetime.Delta }}
+                                                    {{ else }}
+                                                        {{ i18nPlural "%d second" "%d seconds" .datetime.Delta $ nil nil nil .datetime.Delta }}
+                                                    {{ end }}
+                                                </strong>
+                                                {{ end }}
+                                            </td>
+                                        {{ end }}
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Temperature in" . }}</td>
+                                        {{ if .temperature_in.Error }}
+                                            <td class="text-danger">{{ .temperature_in.Error.Error }}</td>
+                                        {{ else }}
+                                            <td><script type="application/javascript">document.write(valueFormat({{ .temperature_in.Value }}))</script> {{ i18n "°C" }}</td>
+                                        {{ end }}
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Temperature out" . }}</td>
+                                        {{ if .temperature_out.Error }}
+                                            <td class="text-danger">{{ .temperature_out.Error.Error }}</td>
+                                        {{ else }}
+                                            <td><script type="application/javascript">document.write(valueFormat({{ .temperature_out.Value }}))</script> {{ i18n "°C" }}</td>
+                                        {{ end }}
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Temperature delta" . }}</td>
+                                        {{ if .temperature_delta.Error }}
+                                            <td class="text-danger">{{ .temperature_delta.Error.Error }}</td>
+                                        {{ else }}
+                                            <td><script type="application/javascript">document.write(valueFormat({{ .temperature_delta.Value }}))</script> {{ i18n "°C" }}</td>
+                                        {{ end }}
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Power" . }}</td>
+                                        {{ if .power.Error }}
+                                            <td class="text-danger">{{ .power.Error.Error }}</td>
+                                        {{ else }}
+                                            <td><script type="application/javascript">document.write(valueFormat({{ .power.Value }}))</script> {{ i18n "Gcal/h" }}</td>
+                                        {{ end }}
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Energy" . }}</td>
+                                        {{ if .energy.Error }}
+                                            <td class="text-danger">{{ .energy.Error.Error }}</td>
+                                        {{ else }}
+                                            <td><script type="application/javascript">document.write(valueFormat({{ .energy.Value }}))</script> {{ i18n "Gcal" }}</td>
+                                        {{ end }}
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Capacity" . }}</td>
+                                        {{ if .capacity.Error }}
+                                            <td class="text-danger">{{ .capacity.Error.Error }}</td>
+                                        {{ else }}
+                                            <td><script type="application/javascript">document.write(valueFormat({{ .capacity.Value }}))</script> {{ raw (i18n "m<sup>3</sup>") }}</td>
+                                        {{ end }}
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Consumption" . }}</td>
+                                        {{ if .consumption.Error }}
+                                            <td class="text-danger">{{ .consumption.Error.Error }}</td>
+                                        {{ else }}
+                                            <td><script type="application/javascript">document.write(valueFormat({{ .consumption.Value }}))</script> {{ raw (i18n "m<sup>3</sup>/h") }}</td>
+                                        {{ end }}
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Pulse input 1" . }}</td>
+                                        {{ if .pusle_input_1.Error }}
+                                            <td class="text-danger">{{ .pusle_input_1.Error.Error }}</td>
+                                        {{ else }}
+                                            <td><script type="application/javascript">document.write(valueFormat({{ .pusle_input_1.Value }}))</script> {{ i18n "pulses" }}</td>
+                                        {{ end }}
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Pulse input 2" . }}</td>
+                                        {{ if .pusle_input_2.Error }}
+                                            <td class="text-danger">{{ .pusle_input_2.Error.Error }}</td>
+                                        {{ else }}
+                                            <td><script type="application/javascript">document.write(valueFormat({{ .pusle_input_2.Value }}))</script> {{ i18n "pulses" }}</td>
+                                        {{ end }}
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Pulse input 3" . }}</td>
+                                        {{ if .pusle_input_3.Error }}
+                                            <td class="text-danger">{{ .pusle_input_3.Error.Error }}</td>
+                                        {{ else }}
+                                            <td><script type="application/javascript">document.write(valueFormat({{ .pusle_input_3.Value }}))</script> {{ i18n "pulses" }}</td>
+                                        {{ end }}
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Pulse input 4" . }}</td>
+                                        {{ if .pusle_input_4.Error }}
+                                            <td class="text-danger">{{ .pusle_input_4.Error.Error }}</td>
+                                        {{ else }}
+                                            <td><script type="application/javascript">document.write(valueFormat({{ .pusle_input_4.Value }}))</script> {{ i18n "pulses" }}</td>
+                                        {{ end }}
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}

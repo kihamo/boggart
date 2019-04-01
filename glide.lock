@@ -1,5 +1,5 @@
 hash: ece411358fb302856e7713bbce22b41d99abbc30f49e596ed80440f87ad2d5cf
-updated: 2019-03-30T00:15:11.374055+03:00
+updated: 2019-04-01T14:01:58.104863+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -222,6 +222,9 @@ imports:
   version: e2254faa61b8dadc7099c7cfe1bf6de61ce47798
   subpackages:
   - components/annotations
+  - components/annotations/instance
+  - components/annotations/internal
+  - components/annotations/storage
   - components/config
   - components/config/instance
   - components/config/internal

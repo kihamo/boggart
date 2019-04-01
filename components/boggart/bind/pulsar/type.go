@@ -2,6 +2,7 @@ package pulsar
 
 import (
 	"encoding/hex"
+	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/atomic"
@@ -9,7 +10,9 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
 )
 
-type Type struct{}
+type Type struct {
+	boggart.BindTypeWidget
+}
 
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
@@ -28,9 +31,14 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		return nil, err
 	}
 
+	loc, err := time.LoadLocation(config.Location)
+	if err != nil {
+		return nil, err
+	}
+
 	bind := &Bind{
 		config:   config,
-		provider: pulsar.NewHeatMeter(deviceAddress, conn),
+		provider: pulsar.NewHeatMeter(deviceAddress, loc, conn),
 
 		temperatureIn:    atomic.NewFloat32Null(),
 		temperatureOut:   atomic.NewFloat32Null(),
