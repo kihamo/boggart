@@ -9,6 +9,7 @@ import (
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/shadow/components/dashboard"
+	tm "github.com/kihamo/shadow/misc/time"
 )
 
 const (
@@ -146,12 +147,13 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		protocol = protocol.(string)[:1]
 	}
 
+	lastUpdate := bind.LastUpdate()
 	vars := map[string]interface{}{
 		"error":              err,
 		"name":               name,
 		"protocol_major":     protocol,
 		"online":             bind.Status() == boggart.BindStatusOnline,
-		"last_update":        bind.LastUpdate(),
+		"last_update":        lastUpdate,
 		"devices_attributes": bind.DeviceAttributes(),
 		"nodes":              bind.Nodes(),
 		"ota_enabled":        bind.OTAIsEnabled(),
@@ -162,6 +164,10 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		"ota_progress":       (float64(otaWritten) * float64(100)) / float64(otaTotal),
 		"ota_timeout":        otaTimeout,
 		"settings":           bind.SettingsAll(),
+	}
+
+	if lastUpdate != nil {
+		vars["last_update_delta"] = tm.DateSinceAsMessage(*lastUpdate)
 	}
 
 	t.Render(r.Context(), "widget", vars)

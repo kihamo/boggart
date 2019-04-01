@@ -46,6 +46,12 @@ msgstr "Аттрибут"
 msgid "Value"
 msgstr "Значение"
 
+msgid "Last online time %s"
+msgstr "Время последнего online %s"
+
+msgid "Last online time %s (%s)"
+msgstr "Время последнего online %s (%s)"
+
 msgid "Broadcast message"
 msgstr "Широковещательное сообщение"
 

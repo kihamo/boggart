@@ -1,13 +1,7 @@
 {{ define "content" }}
 <div class="page-title">
     <div class="title_left">
-        <h3>
-            {{ i18n "Device %s" $ nil nil nil .name }}<br />
-
-            {{ if .last_update }}
-                <small><script type="application/javascript">document.write(dateToString('{{ .last_update.Format "2006-01-02T15:04:05Z07:00" }}'))</script></small>
-            {{ end }}
-        </h3>
+        <h3>{{ i18n "Device %s" $ nil nil nil .name }}</h3>
     </div>
 
     <div class="title_right">
@@ -49,6 +43,14 @@
                 <div class="clearfix"></div>
             </div>
             <div class="x_content">
+                <p class="text-muted font-13 m-b-30">
+                    {{ if .last_update_delta }}
+                        {{ raw (i18n "Last online time %s (%s)" . nil nil nil (print "<script type=\"application/javascript\">document.write(dateToString('" (.last_update.Format "2006-01-02T15:04:05Z07:00") "'))</script>") .last_update_delta ) }}
+                    {{ else }}
+                        {{ raw ( i18n "Last online time %s" . nil nil nil (print "<script type=\"application/javascript\">document.write(dateToString('" (.last_update.Format "2006-01-02T15:04:05Z07:00") "'))</script>") ) }}
+                    {{ end }}
+                </p>
+
                 <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
                     <thead>
                     <tr>
