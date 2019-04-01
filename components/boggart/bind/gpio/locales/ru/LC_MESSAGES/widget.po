@@ -10,17 +10,23 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;"
 
-msgid "State"
-msgstr "Состояние"
+msgid "Level"
+msgstr "Уровень"
 
-msgid "Set high failed with error %s"
-msgstr "Установка high завершилась с ошибкой %s"
+msgid "Set high level failed with error %s"
+msgstr "Установка высокого уровня завершилась с ошибкой %s"
 
-msgid "Set high success"
-msgstr "Успешно установлен high"
+msgid "Set high level success"
+msgstr "Успешно установлен высокий уровень"
 
-msgid "Set low failed with error %s"
-msgstr "Установка low завершилась с ошибкой %s"
+msgid "Set low level failed with error %s"
+msgstr "Установка низкого уровня завершилась с ошибкой %s"
 
-msgid "Set low success"
-msgstr "Успешно установлен low"
+msgid "Set low level success"
+msgstr "Успешно установлен низкий уровень"
+
+msgid "High"
+msgstr "Высокий"
+
+msgid "Low"
+msgstr "Низкий"

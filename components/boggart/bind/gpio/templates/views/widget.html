@@ -1,11 +1,13 @@
 {{ define "content" }}
+{{ if ne .mode 1 }}
 <script type="application/javascript">
     $(document).ready(function () {
-        $('#state').change(function() {
+        $('#level').change(function() {
             $('#set').submit();
         });
     });
 </script>
+{{ end }}
 <div class="row">
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
@@ -17,14 +19,20 @@
                 <form class="form-horizontal form-label-left" role="form" method="post" id="set">
                     <div class="form-group">
                         <label for="volume" class="control-label col-md-3 col-sm-3 col-xs-12">
-                            {{ i18n "State" . }}
+                            {{ i18n "Level" . }}
                         </label>
                         <div class="col-md-6 col-sm-6 col-xs-12">
+                            {{ if ne .mode 1 }}
                             <div class="">
                                 <label>
-                                    <input type="checkbox" class="js-switch" name="state" id="state" {{ if eq (print .state) "true" }} checked{{ end }} />
+                                    <input type="checkbox" class="js-switch" name="level" id="level" {{ if eq (print .level) "true" }} checked{{ end }} />
                                 </label>
                             </div>
+                            {{ else }}
+                                <p class="form-control-static">
+                                    {{ if eq (print .level) "true" }}{{ i18n "High" . }}{{ else }}{{ i18n "Low" . }}{{ end }}
+                                </p>
+                            {{ end }}
                         </div>
                     </div>
                 </form>

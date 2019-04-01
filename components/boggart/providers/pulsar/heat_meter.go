@@ -2,11 +2,9 @@ package pulsar
 
 import (
 	"bytes"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
-	"strings"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
@@ -103,14 +101,14 @@ func (d *HeatMeter) Request(function byte, data []byte) ([]byte, error) {
 	// check sum CRC16
 	request = append(request, rs485.GenerateCRC16(request)...)
 
-	fmt.Println("Request: ", request, hex.EncodeToString(request), " with function", strings.ToUpper(hex.EncodeToString([]byte{function})))
+	// fmt.Println("Request: ", request, hex.EncodeToString(request), " with function", strings.ToUpper(hex.EncodeToString([]byte{function})))
 
 	response, err := d.connection.Request(request)
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Println("Response: ", response, hex.EncodeToString(response))
+	// fmt.Println("Response: ", response, hex.EncodeToString(response))
 
 	l = len(response)
 	if l < 10 {

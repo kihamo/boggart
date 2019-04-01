@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/atomic"
 	"periph.io/x/periph/conn/gpio"
 	"periph.io/x/periph/conn/pin"
 )
@@ -23,6 +24,7 @@ type Bind struct {
 
 	pin  pin.Pin
 	mode Mode
+	out  *atomic.Bool
 }
 
 func (b *Bind) Run() error {
@@ -50,6 +52,8 @@ func (b *Bind) High(ctx context.Context) error {
 			return err
 		}
 
+		b.out.True()
+
 		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPinState.Format(b.pin.Number()), true); err != nil {
 			return err
 		}
@@ -68,6 +72,8 @@ func (b *Bind) Low(ctx context.Context) error {
 			return err
 		}
 
+		b.out.False()
+
 		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPinState.Format(b.pin.Number()), false); err != nil {
 			return err
 		}
@@ -78,7 +84,7 @@ func (b *Bind) Low(ctx context.Context) error {
 
 func (b *Bind) Read() bool {
 	if b.Mode() == ModeOut {
-		return false
+		return b.out.IsTrue()
 	}
 
 	if g, ok := b.pin.(gpio.PinIn); ok {

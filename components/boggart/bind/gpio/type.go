@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/atomic"
 	"periph.io/x/periph/conn/gpio/gpioreg"
 )
 
@@ -33,6 +34,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	bind := &Bind{
 		pin:  g,
 		mode: mode,
+		out:  atomic.NewBool(),
 	}
 
 	bind.SetSerialNumber(g.Name())
