@@ -1,0 +1,49 @@
+{{ define "content" }}
+<script type="application/javascript">
+    function valueFormat(n) {
+        return new Intl.NumberFormat().format(n);
+    }
+
+    $(document).ready(function () {
+        $('#state').change(function() {
+            $('#sp3s').submit();
+        });
+    });
+</script>
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>{{ i18n "Broadlink SP3S" . }}</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <form class="form-horizontal form-label-left" role="form" method="post" id="sp3s">
+                    <div class="form-group">
+                        <label for="volume" class="control-label col-md-3 col-sm-3 col-xs-12">
+                            {{ i18n "State" . }}
+                        </label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <div class="">
+                                <label>
+                                    <input type="checkbox" class="js-switch" name="state" id="state" {{ if eq (print .state) "true" }} checked{{ end }} />
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="power" class="control-label col-md-3 col-sm-3 col-xs-12">
+                            {{ i18n "Power" . }}
+                        </label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <p class="form-control-static">
+                                <script type="application/javascript">document.write(valueFormat({{ .power }}))</script> {{ i18n "watts" . }}
+                            </p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}

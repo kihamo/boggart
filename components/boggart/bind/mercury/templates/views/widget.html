@@ -91,84 +91,96 @@
                             {{ else if eq .action "display" }}
                                 <form id="display" class="form-horizontal form-label-left" data-toggle="validator" method="post">
                                     <div class="form-group">
-                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_t1">{{ i18n "Show T1" . }} <span class="required">*</span>
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_t1">
+                                            {{ i18n "Show T1" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
                                             <input type="checkbox" class="js-switch" name="mode_t1" id="mode_t1" {{ if eq (print .mode_t1) "true" }} checked{{ end }} />
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_t2">{{ i18n "Show T2" . }} <span class="required">*</span>
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_t2">
+                                            {{ i18n "Show T2" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
                                             <input type="checkbox" class="js-switch" name="mode_t2" id="mode_t2" {{ if eq (print .mode_t2) "true" }} checked{{ end }} />
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_t3">{{ i18n "Show T3" . }} <span class="required">*</span>
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_t3">
+                                            {{ i18n "Show T3" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
                                             <input type="checkbox" class="js-switch" name="mode_t3" id="mode_t3" {{ if eq (print .mode_t3) "true" }} checked{{ end }} />
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_t4">{{ i18n "Show T4" . }} <span class="required">*</span>
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_t4">
+                                            {{ i18n "Show T4" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
                                             <input type="checkbox" class="js-switch" name="mode_t4" id="mode_t4" {{ if eq (print .mode_t4) "true" }} checked{{ end }} />
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_amount">{{ i18n "Show amount" . }} <span class="required">*</span>
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_amount">
+                                            {{ i18n "Show amount" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
                                             <input type="checkbox" class="js-switch" name="mode_amount" id="mode_amount" {{ if eq (print .mode_amount) "true" }} checked{{ end }} />
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_power">{{ i18n "Show power" . }} <span class="required">*</span>
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_power">
+                                            {{ i18n "Show power" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
                                             <input type="checkbox" class="js-switch" name="mode_power" id="mode_power" {{ if eq (print .mode_power) "true" }} checked{{ end }} />
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_time">{{ i18n "Show time" . }} <span class="required">*</span>
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_time">
+                                            {{ i18n "Show time" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
                                             <input type="checkbox" class="js-switch" name="mode_time" id="mode_time" {{ if eq (print .mode_time) "true" }} checked{{ end }} />
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_date">{{ i18n "Show date" . }} <span class="required">*</span>
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="mode_date">
+                                            {{ i18n "Show date" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
                                             <input type="checkbox" class="js-switch" name="mode_date" id="mode_date" {{ if eq (print .date) "true" }} checked{{ end }} />
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="time_t1">{{ i18n "Interval for not current tariff" . }} <span class="required">*</span>
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="time_t1">
+                                            {{ i18n "Interval for not current tariff" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
                                             <input type="number" name="time_t1" id="time_t1" value="{{ .time_t1 }}" pattern="^[-+]?[0-9]*$"/>
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="time_t2">{{ i18n "Interval for current tariff" . }} <span class="required">*</span>
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="time_t2">
+                                            {{ i18n "Interval for current tariff" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
                                             <input type="number" name="time_t2" id="time_t2" value="{{ .time_t2 }}" pattern="^[-+]?[0-9]*$"/>
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="time_t3">{{ i18n "Interval for power, time and date" . }} <span class="required">*</span>
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="time_t3">
+                                            {{ i18n "Interval for power, time and date" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
                                             <input type="number" name="time_t3" id="time_t3" value="{{ .time_t3 }}" pattern="^[-+]?[0-9]*$"/>
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="time_t4">{{ i18n "Interval for after press back button" . }} <span class="required">*</span>
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="time_t4">
+                                            {{ i18n "Interval for after press back button" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
                                             <input type="number" name="time_t4" id="time_t4" value="{{ .time_t4 }}" pattern="^[-+]?[0-9]*$"/>
