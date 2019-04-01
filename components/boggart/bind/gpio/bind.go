@@ -2,6 +2,7 @@ package gpio
 
 import (
 	"context"
+	"errors"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"periph.io/x/periph/conn/gpio"
@@ -41,7 +42,7 @@ func (b *Bind) Mode() Mode {
 
 func (b *Bind) High(ctx context.Context) error {
 	if b.Mode() == ModeIn {
-		return nil
+		return errors.New("is read only")
 	}
 
 	if g, ok := b.pin.(gpio.PinOut); ok {
@@ -59,7 +60,7 @@ func (b *Bind) High(ctx context.Context) error {
 
 func (b *Bind) Low(ctx context.Context) error {
 	if b.Mode() == ModeIn {
-		return nil
+		return errors.New("is read only")
 	}
 
 	if g, ok := b.pin.(gpio.PinOut); ok {
