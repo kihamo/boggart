@@ -76,14 +76,6 @@ func (b *Bind) deviceAttributesSubscriber(_ context.Context, _ mqtt.Component, m
 		}
 	}
 
-	if attributeName == "online" {
-		if message.IsTrue() {
-			b.UpdateStatus(boggart.BindStatusOnline)
-		} else {
-			b.UpdateStatus(boggart.BindStatusOffline)
-		}
-	}
-
 	return nil
 }
 
