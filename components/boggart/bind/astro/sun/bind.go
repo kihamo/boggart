@@ -49,9 +49,12 @@ func (b *Bind) Times() Times {
 	t := Times{}
 
 	now := time.Now()
+
+	// для 00:00:00 почему-то считает предыдущий день, поэтому берем полдень
+	todaySolarNoon := time.Date(now.Year(), now.Month(), now.Day(), 12, 0, 0, 0, now.Location())
 	todayEnd := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
 
-	timesToday := suncalc.SunTimes(now, b.config.Lat, b.config.Lon)
+	timesToday := suncalc.SunTimes(todaySolarNoon, b.config.Lat, b.config.Lon)
 	timesTomorrow := suncalc.SunTimes(now.Add(dayDuration), b.config.Lat, b.config.Lon)
 
 	t.Night.Start = timesToday["night"]
