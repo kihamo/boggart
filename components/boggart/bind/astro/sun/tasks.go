@@ -28,7 +28,15 @@ func (b *Bind) taskUpdater(ctx context.Context) (_ interface{}, err error) {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicNightEnd.Format(serialNumberMQTT), times.Night.End); e != nil {
+	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicNightBeforeStart.Format(serialNumberMQTT), times.NightBefore.Start); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicNightBeforeEnd.Format(serialNumberMQTT), times.NightBefore.End); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicNightBeforeDuration.Format(serialNumberMQTT), times.NightBefore.Duration); e != nil {
 		err = multierr.Append(err, e)
 	}
 
@@ -132,11 +140,15 @@ func (b *Bind) taskUpdater(ctx context.Context) (_ interface{}, err error) {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicNightStart.Format(serialNumberMQTT), times.Night.Start); e != nil {
+	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicNightAfterStart.Format(serialNumberMQTT), times.NightAfter.Start); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicNightDuration.Format(serialNumberMQTT), times.Night.Duration); e != nil {
+	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicNightAfterEnd.Format(serialNumberMQTT), times.NightAfter.End); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicNightAfterDuration.Format(serialNumberMQTT), times.NightAfter.Duration); e != nil {
 		err = multierr.Append(err, e)
 	}
 

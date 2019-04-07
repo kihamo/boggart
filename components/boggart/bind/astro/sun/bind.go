@@ -27,7 +27,8 @@ type Time struct {
 }
 
 type Times struct {
-	Night            Time
+	NightBefore      Time
+	NightAfter       Time
 	Nadir            time.Time
 	AstronomicalDawn Time
 	NauticalDawn     Time
@@ -52,14 +53,18 @@ func (b *Bind) Times() Times {
 
 	// для 00:00:00 почему-то считает предыдущий день, поэтому берем полдень
 	todaySolarNoon := time.Date(now.Year(), now.Month(), now.Day(), 12, 0, 0, 0, now.Location())
-	todayEnd := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
 
+	timesYesterday := suncalc.SunTimes(todaySolarNoon.Add(-dayDuration), b.config.Lat, b.config.Lon)
 	timesToday := suncalc.SunTimes(todaySolarNoon, b.config.Lat, b.config.Lon)
-	timesTomorrow := suncalc.SunTimes(now.Add(dayDuration), b.config.Lat, b.config.Lon)
+	timesTomorrow := suncalc.SunTimes(todaySolarNoon.Add(dayDuration), b.config.Lat, b.config.Lon)
 
-	t.Night.Start = timesToday["night"]
-	t.Night.End = timesToday["nightEnd"]
-	t.Night.Duration = todayEnd.Sub(t.Night.Start) + timesTomorrow["nightEnd"].Sub(todayEnd)
+	t.NightBefore.Start = timesYesterday["night"]
+	t.NightBefore.End = timesToday["nightEnd"]
+	t.NightBefore.Duration = t.NightBefore.End.Sub(t.NightBefore.Start)
+
+	t.NightAfter.Start = timesToday["night"]
+	t.NightAfter.End = timesTomorrow["nightEnd"]
+	t.NightAfter.Duration = t.NightAfter.End.Sub(t.NightAfter.Start)
 
 	t.Nadir = timesToday["nadir"]
 

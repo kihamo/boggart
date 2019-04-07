@@ -9,7 +9,9 @@ const (
 	MQTTPrefix mqtt.Topic = boggart.ComponentName + "/astro/sun/+/"
 
 	MQTTPublishTopicNadir                    = MQTTPrefix + "nadir"
-	MQTTPublishTopicNightEnd                 = MQTTPrefix + "night/end"
+	MQTTPublishTopicNightBeforeStart         = MQTTPrefix + "night/before/start"
+	MQTTPublishTopicNightBeforeEnd           = MQTTPrefix + "night/before/end"
+	MQTTPublishTopicNightBeforeDuration      = MQTTPrefix + "night/before/duration"
 	MQTTPublishTopicAstronomicalDawnStart    = MQTTPrefix + "dawn/astronomical/start"
 	MQTTPublishTopicAstronomicalDawnEnd      = MQTTPrefix + "dawn/astronomical/end"
 	MQTTPublishTopicAstronomicalDawnDuration = MQTTPrefix + "dawn/astronomical/duration"
@@ -35,8 +37,9 @@ const (
 	MQTTPublishTopicAstronomicalDuskStart    = MQTTPrefix + "dusk/astronomical/start"
 	MQTTPublishTopicAstronomicalDuskEnd      = MQTTPrefix + "dusk/astronomical/end"
 	MQTTPublishTopicAstronomicalDuskDuration = MQTTPrefix + "dusk/astronomical/duration"
-	MQTTPublishTopicNightStart               = MQTTPrefix + "night/start"
-	MQTTPublishTopicNightDuration            = MQTTPrefix + "night/duration"
+	MQTTPublishTopicNightAfterStart          = MQTTPrefix + "night/after/start"
+	MQTTPublishTopicNightAfterEnd            = MQTTPrefix + "night/after/end"
+	MQTTPublishTopicNightAfterDuration       = MQTTPrefix + "night/after/duration"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
@@ -44,7 +47,9 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 
 	return []mqtt.Topic{
 		mqtt.Topic(MQTTPublishTopicNadir.Format(sn)),
-		mqtt.Topic(MQTTPublishTopicNightEnd.Format(sn)),
+		mqtt.Topic(MQTTPublishTopicNightBeforeStart.Format(sn)),
+		mqtt.Topic(MQTTPublishTopicNightBeforeEnd.Format(sn)),
+		mqtt.Topic(MQTTPublishTopicNightBeforeDuration.Format(sn)),
 		mqtt.Topic(MQTTPublishTopicAstronomicalDawnStart.Format(sn)),
 		mqtt.Topic(MQTTPublishTopicAstronomicalDawnEnd.Format(sn)),
 		mqtt.Topic(MQTTPublishTopicAstronomicalDawnDuration.Format(sn)),
@@ -70,7 +75,8 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 		mqtt.Topic(MQTTPublishTopicAstronomicalDuskStart.Format(sn)),
 		mqtt.Topic(MQTTPublishTopicAstronomicalDuskEnd.Format(sn)),
 		mqtt.Topic(MQTTPublishTopicAstronomicalDuskDuration.Format(sn)),
-		mqtt.Topic(MQTTPublishTopicNightStart.Format(sn)),
-		mqtt.Topic(MQTTPublishTopicNightDuration.Format(sn)),
+		mqtt.Topic(MQTTPublishTopicNightAfterStart.Format(sn)),
+		mqtt.Topic(MQTTPublishTopicNightAfterEnd.Format(sn)),
+		mqtt.Topic(MQTTPublishTopicNightAfterDuration.Format(sn)),
 	}
 }

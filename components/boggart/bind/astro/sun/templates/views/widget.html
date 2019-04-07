@@ -19,9 +19,9 @@
                     <tbody>
                         <tr>
                             <td>{{ i18n "Night" . }}</td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.Night.Start.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.Night.End.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
-                            <td>{{ .times.Night.Duration.String }}</td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.NightBefore.Start.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.NightBefore.End.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                            <td>{{ .times.NightBefore.Duration.String }}</td>
                         </tr>
                         <tr>
                             <td>{{ i18n "Nadir" . }}</td>
@@ -82,6 +82,12 @@
                             <td><script type="application/javascript">document.write(dateToString('{{ .times.AstronomicalDusk.Start.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
                             <td><script type="application/javascript">document.write(dateToString('{{ .times.AstronomicalDusk.End.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
                             <td>{{ .times.AstronomicalDusk.Duration.String }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ i18n "Night" . }}</td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.NightAfter.Start.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.NightAfter.End.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                            <td>{{ .times.NightAfter.Duration.String }}</td>
                         </tr>
                     </tbody>
                 </table>
