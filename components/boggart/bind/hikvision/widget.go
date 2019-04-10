@@ -5,38 +5,119 @@ import (
 	"io"
 	"strconv"
 
+	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
-func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
-	var (
-		ch  uint64
-		err error
-	)
+type response struct {
+	Result  string `json:"result"`
+	Message string `json:"message,omitempty"`
+}
 
-	if channel := r.URL().Query().Get("channel"); channel == "" {
-		ch = b.Config().(*Config).WidgetChannel
-	} else {
-		ch, err = strconv.ParseUint(channel, 10, 64)
+func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
+	bind := b.Bind().(*Bind)
+
+	query := r.URL().Query()
+	action := query.Get("action")
+
+	vars := map[string]interface{}{
+		"action":                   action,
+		"preview_refresh_interval": b.Config().(*Config).PreviewRefreshInterval.Seconds(),
+	}
+
+	switch action {
+	case "image":
+		if r.IsPost() {
+			var (
+				ch  uint64
+				err error
+			)
+
+			if channel := query.Get("channel"); channel == "" {
+				ch = b.Config().(*Config).WidgetChannel
+			} else {
+				ch, err = strconv.ParseUint(channel, 10, 64)
+				if err != nil {
+					t.NotFound(w, r)
+					return
+				}
+			}
+
+			err = r.Original().ParseForm()
+			if err == nil {
+				for key, value := range r.Original().PostForm {
+					if len(value) == 0 {
+						continue
+					}
+
+					switch key {
+					case "ir-cut-filter-type":
+						err = bind.isapi.ImageIrCutFilter(r.Context(), ch, hikvision.ImageIrCutFilter{
+							Type: hikvision.ImageIrCutFilterType(value[0]),
+						})
+					}
+
+					break
+				}
+			}
+
+			if err != nil {
+				_ = w.SendJSON(response{
+					Result:  "failed",
+					Message: err.Error(),
+				})
+
+			} else {
+				_ = w.SendJSON(response{
+					Result:  "success",
+					Message: "Save success",
+				})
+			}
+
+			return
+		}
+
+		response, err := bind.isapi.ImageChannels(r.Context())
 		if err != nil {
 			t.NotFound(w, r)
 			return
 		}
-	}
 
-	bind, ok := b.Bind().(*Bind)
-	if !ok {
-		t.NotFound(w, r)
+		vars["channels"] = response.Channels
+
+	case "preview":
+		var (
+			ch  uint64
+			err error
+		)
+
+		if channel := query.Get("channel"); channel == "" {
+			ch = b.Config().(*Config).WidgetChannel
+		} else {
+			ch, err = strconv.ParseUint(channel, 10, 64)
+			if err != nil {
+				t.NotFound(w, r)
+				return
+			}
+		}
+
+		buf := bytes.NewBuffer(nil)
+		if err = bind.Snapshot(r.Context(), ch, buf); err != nil {
+			t.NotFound(w, r)
+			return
+		}
+
+		w.Header().Set("Content-Length", strconv.FormatInt(int64(buf.Len()), 10))
+		_, _ = io.Copy(w, buf)
+
 		return
 	}
 
-	buf := bytes.NewBuffer(nil)
-	if err = bind.Snapshot(r.Context(), ch, buf); err != nil {
-		t.NotFound(w, r)
-		return
-	}
+	t.Render(r.Context(), "widget", vars)
+}
 
-	w.Header().Set("Content-Length", strconv.FormatInt(int64(buf.Len()), 10))
-	_, _ = io.Copy(w, buf)
+func (t Type) WidgetAssetFS() *assetfs.AssetFS {
+	return assetFS()
 }

@@ -1,0 +1,122 @@
+{{ define "content" }}
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_content">
+                <div role="tabpanel">
+                    <ul class="nav nav-tabs bar_tabs" role="tablist">
+                        <li role="presentation"{{ if eq .action "" }} class="active"{{ end }}><a href="{{ if eq .action "" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}{{ end }}">{{ i18n "Preview" . }}</a></li>
+                        <li role="presentation"{{ if eq .action "image" }} class="active"{{ end }}><a href="{{ if eq .action "image" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=image{{ end }}">{{ i18n "Image" . }}</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane fade active in">
+                        {{ if eq .action "image" }}
+                            {{ range $i, $channel := .channels }}
+                                <div class="col-md-5 col-sm-5 col-xs-12">
+                                    <img src="{{ $.Request.URL.Path }}?action=preview&channel=10{{ $channel.ID }}" width="100%" height="100%" id="preview" />
+                                </div>
+                                <div class="col-md-7 col-sm-7 col-xs-12">
+                                    <form role="form" data-toggle="validator" id="image-settings" action="{{ $.Request.URL.Path }}?action=image" method="post">
+                                        {{ if $channel.IrCutFilter }}
+                                        <div class="accordion" id="image-accordion" role="tablist" aria-multiselectable="true">
+                                            <div class="panel">
+                                                <a class="panel-heading" role="tab" id="image-accordion-switch" data-toggle="collapse" data-parent="#image-accordion" href="#image-collapse-switch" aria-expanded="true" aria-controls="image-collapse-switch">
+                                                    <h4 class="panel-title">{{ i18n "Day/Night switch" $ }}</h4>
+                                                </a>
+                                                <div id="image-collapse-switch" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="image-accordion-switch">
+                                                    <div class="panel-body">
+                                                        <label for="ir-cut-filter-type">
+                                                            {{ i18n "Day/Night switch" $ }} <span class="required">*</span>
+                                                        </label>
+                                                        <select id="ir-cut-filter-type" class="form-control select2" required="required">
+                                                            <option value="day"{{ if eq $channel.IrCutFilter.Type "day" }} selected="selected"{{ end }}>{{ i18n "Day" $ }}</option>
+                                                            <option value="night"{{ if eq $channel.IrCutFilter.Type "night" }} selected="selected"{{ end }}>{{ i18n "Night" $ }}</option>
+                                                            <option value="auto"{{ if eq $channel.IrCutFilter.Type "auto" }} selected="selected"{{ end }}>{{ i18n "Auto" $ }}</option>
+                                                            <option value="schedule"{{ if eq $channel.IrCutFilter.Type "schedule" }} selected="selected"{{ end }}>{{ i18n "Schedule" $ }}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!--
+                                            <div class="panel">
+                                                <a class="panel-heading collapsed" role="tab" id="image-accordion-other" data-toggle="collapse" data-parent="#image-accordion" href="#image-collapse-other" aria-expanded="false" aria-controls="image-collapse-other">
+                                                    <h4 class="panel-title">Collapsible Group Items #2</h4>
+                                                </a>
+                                                <div id="image-collapse-other" class="panel-collapse collapse" role="tabpanel" aria-labelledby="image-accordion-other">
+                                                    <div class="panel-body">
+                                                        <p><strong>Collapsible Item 2 data</strong>
+                                                        </p>
+                                                        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor,
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            -->
+                                        </div>
+                                        {{ end }}
+                                    </form>
+                                </div>
+                            {{ end }}
+                        {{ else }}
+                            <img src="{{ .Request.URL.Path }}?action=preview" width="100%" height="100%" id="preview" />
+                        {{ end }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
+
+{{ define "js" }}
+    {{ if eq .action "image" }}
+        {{ staticHTML (staticURL "/dashboard/assets/vendors/validator/js/validator.min.js" false) }}
+    {{ end }}
+
+    <script type="application/javascript">
+        $('#preview').ready(function () {
+            window.setInterval(function() {
+                $('#preview').attr('src', '{{ .Request.URL.Path }}?action=preview&_t='+(new Date()).getTime());
+            }, {{ .preview_refresh_interval }} * 1000);
+        });
+
+        $(document).ready(function () {
+            $('#image-settings input[id], #image-settings select, #image-settings textarea[id]').change(function() {
+                var
+                        e = $(this),
+                        data = {},
+                        k = e.prop('id')
+                ;
+
+                if (e.prop('type') === 'checkbox') {
+                    data[k] = e.prop('checked') != '';
+                } else {
+                    data[k] = e.val()
+                }
+
+                $.ajax({
+                    type: $('#image-settings').prop('method'),
+                    url: $('#image-settings').prop('action'),
+                    data: data,
+                    success: function (r) {
+                        if (r.result === 'failed') {
+                            new PNotify({
+                                title: 'Error',
+                                text: r.message,
+                                type: 'error',
+                                styling: 'bootstrap3'
+                            });
+                        } else if (r.message !== 'undefined') {
+                            new PNotify({
+                                title: 'Success',
+                                text: r.message,
+                                type: 'success',
+                                styling: 'bootstrap3'
+                            });
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+{{ end }}

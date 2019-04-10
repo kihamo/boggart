@@ -8,6 +8,10 @@ import (
 	"github.com/kihamo/shadow/components/tracing"
 )
 
+const (
+	systemPrefixURL = "/System"
+)
+
 type SystemDeviceInfoResponse struct {
 	DeviceName           string `xml:"deviceName"`
 	DeviceID             string `xml:"deviceID"`
@@ -47,7 +51,7 @@ func (a *ISAPI) SystemDeviceInfo(ctx context.Context) (result SystemDeviceInfoRe
 	span, ctx := tracing.StartSpanFromContext(ctx, ComponentName, "system.device_info")
 	defer span.Finish()
 
-	err = a.DoXML(ctx, http.MethodGet, a.address+"/System/deviceInfo", nil, &result)
+	err = a.DoXML(ctx, http.MethodGet, a.address+systemPrefixURL+"/deviceInfo", nil, &result)
 	if err != nil {
 		tracing.SpanError(span, err)
 	}
@@ -59,7 +63,7 @@ func (a *ISAPI) SystemStatus(ctx context.Context) (result SystemStatusResponse, 
 	span, ctx := tracing.StartSpanFromContext(ctx, ComponentName, "system.status")
 	defer span.Finish()
 
-	err = a.DoXML(ctx, http.MethodGet, a.address+"/System/status", nil, &result)
+	err = a.DoXML(ctx, http.MethodGet, a.address+systemPrefixURL+"/status", nil, &result)
 	if err != nil {
 		tracing.SpanError(span, err)
 	}
