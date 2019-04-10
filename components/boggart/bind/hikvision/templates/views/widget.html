@@ -57,6 +57,18 @@
                                 </div>
                             {{ end }}
                         {{ else }}
+                            <div class="form-group pull-right">
+                                <div class="input-group">
+                                    <label class="btn-group">
+                                        <button type="button" class="btn btn-icon btn-info btn-sm" onclick="previewRefresh()">
+                                            <i class="fas fa-sync" title="{{ i18n "Refresh" . }}"></i>
+                                        </button>
+                                        <a href="{{ .Request.URL.Path }}?action=preview&download=1" class="btn btn-icon btn-info btn-sm">
+                                            <i class="fas fa-download" title="{{ i18n "Download" . }}"></i>
+                                        </a>
+                                    </label>
+                                </div>
+                            </div>
                             <img src="{{ .Request.URL.Path }}?action=preview" width="100%" height="100%" id="preview" />
                         {{ end }}
                         </div>
@@ -74,10 +86,12 @@
     {{ end }}
 
     <script type="application/javascript">
+        window.previewRefresh = function() {
+            $('#preview').attr('src', '{{ .Request.URL.Path }}?action=preview&_t='+(new Date()).getTime());
+        };
+
         $('#preview').ready(function () {
-            window.setInterval(function() {
-                $('#preview').attr('src', '{{ .Request.URL.Path }}?action=preview&_t='+(new Date()).getTime());
-            }, {{ .preview_refresh_interval }} * 1000);
+            window.setInterval(window.previewRefresh, {{ .preview_refresh_interval }} * 1000);
         });
 
         $(document).ready(function () {

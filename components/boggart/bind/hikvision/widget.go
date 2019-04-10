@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"strconv"
+	"time"
 
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
@@ -110,6 +111,14 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		w.Header().Set("Content-Length", strconv.FormatInt(int64(buf.Len()), 10))
+
+		if download := query.Get("download"); download != "" {
+			filename := b.ID() + time.Now().Format("_20060102150405.jpg")
+
+			w.Header().Set("Content-Disposition", "attachment; filename=\""+filename+"\"")
+			w.Header().Set("Content-Type", "text/x-yaml")
+		}
+
 		_, _ = io.Copy(w, buf)
 
 		return
