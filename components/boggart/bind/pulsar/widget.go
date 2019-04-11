@@ -35,12 +35,15 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		case "daily":
 			period = pulsar.ArchiveTypeDaily
 			start = end.AddDate(0, -1, 0)
+			vars["period"] = "daily"
 		case "hourly":
 			period = pulsar.ArchiveTypeHourly
 			start = end.AddDate(0, 0, -1)
+			vars["period"] = "hourly"
 		default:
 			period = pulsar.ArchiveTypeMonthly
 			start = end.AddDate(-1, 0, 0)
+			vars["period"] = "monthly"
 		}
 
 		// energy

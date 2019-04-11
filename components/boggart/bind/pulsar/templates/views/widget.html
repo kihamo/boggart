@@ -15,7 +15,7 @@
                     </ul>
                     <div class="tab-content">
                         <div role="tabpanel" class="tab-pane fade active in">
-                            {{ if eq .action "archive"}}
+                            {{ if eq .action "archive" }}
                             <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
                                 <thead>
                                 <tr>
@@ -26,7 +26,15 @@
                                 <tbody>
                                 {{ range $i, $stat := .stats }}
                                 <tr>
-                                    <td><script type="application/javascript">document.write(dateToString('{{ $stat.Date.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                    <td>
+                                        {{ if eq $.period "monthly" }}
+                                            {{ i18n $stat.Date.Month.String $ }} {{ $stat.Date.Year }}
+                                        {{ else if eq $.period "daily" }}
+                                            {{ $stat.Date.Day }} {{ i18n $stat.Date.Month.String $ }} {{ $stat.Date.Year }}
+                                        {{ else }}
+                                            <script type="application/javascript">document.write(dateToString('{{ $stat.Date.Format "2006-01-02T15:04:05Z07:00" }}'))</script>
+                                        {{ end }}
+                                    </td>
                                     <td><script type="application/javascript">document.write(valueFormat({{ $stat.Energy }}))</script></td>
                                 </tr>
                                 {{ end }}
