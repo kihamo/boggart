@@ -11,9 +11,28 @@
                 <div role="tabpanel">
                     <ul class="nav nav-tabs bar_tabs" role="tablist">
                         <li role="presentation"{{ if eq .action "" }} class="active"{{ end }}><a href="{{ if eq .action "" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}{{ end }}">{{ i18n "Current measurements" . }}</a></li>
+                        <li role="presentation"{{ if eq .action "archive" }} class="active"{{ end }}><a href="{{ if eq .action "archive" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=archive{{ end }}">{{ i18n "Archive" . }}</a></li>
                     </ul>
                     <div class="tab-content">
                         <div role="tabpanel" class="tab-pane fade active in">
+                            {{ if eq .action "archive"}}
+                            <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                                <thead>
+                                <tr>
+                                    <th>{{ i18n "Date" . }}</th>
+                                    <th>{{ i18n "Energy in Gcal" . }}</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {{ range $i, $stat := .stats }}
+                                <tr>
+                                    <td><script type="application/javascript">document.write(dateToString('{{ $stat.Date.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                    <td><script type="application/javascript">document.write(valueFormat({{ $stat.Energy }}))</script></td>
+                                </tr>
+                                {{ end }}
+                                </tbody>
+                            </table>
+                            {{ else }}
                             <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
                                 <thead>
                                     <tr>
@@ -131,6 +150,7 @@
                                     </tr>
                                 </tbody>
                             </table>
+                            {{ end }}
                         </div>
                     </div>
                 </div>

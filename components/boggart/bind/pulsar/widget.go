@@ -3,6 +3,8 @@ package pulsar
 import (
 	"time"
 
+	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
+
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/shadow/components/dashboard"
@@ -10,12 +12,70 @@ import (
 
 func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
 	bind := b.Bind().(*Bind)
-	vars := map[string]interface{}{}
+	vars := map[string]interface{}{
+		"action": r.URL().Query().Get("action"),
+	}
 
-	action := r.URL().Query().Get("action")
-	vars["action"] = action
+	switch vars["action"] {
+	case "archive":
+		type stat struct {
+			Date   time.Time
+			Energy float32
+		}
 
-	switch action {
+		stats := make([]stat, 0)
+		end := time.Now()
+
+		var (
+			period pulsar.ArchiveType
+			start  time.Time
+		)
+
+		switch r.URL().Query().Get("period") {
+		case "daily":
+			period = pulsar.ArchiveTypeDaily
+			start = end.AddDate(0, -1, 0)
+		case "hourly":
+			period = pulsar.ArchiveTypeHourly
+			start = end.AddDate(0, 0, -1)
+		default:
+			period = pulsar.ArchiveTypeMonthly
+			start = end.AddDate(-1, 0, 0)
+		}
+
+		// energy
+		date, values, err := bind.provider.EnergyArchive(start, end, period)
+		if err != nil {
+			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get archive failed with error %s", "", err.Error()))
+		} else {
+			for _, value := range values {
+				stats = append(stats, stat{
+					Date:   date,
+					Energy: value,
+				})
+
+				switch period {
+				case pulsar.ArchiveTypeMonthly:
+					date = date.AddDate(0, 1, 0)
+
+				case pulsar.ArchiveTypeDaily:
+					date = date.AddDate(0, 0, 1)
+
+				case pulsar.ArchiveTypeHourly:
+					date = date.Add(time.Hour)
+				}
+			}
+		}
+
+		// pulse input 1
+
+		// pulse input 2
+
+		// pulse input 3
+
+		// pulse input 4
+
+		vars["stats"] = stats
 
 	default:
 		type metricView struct {

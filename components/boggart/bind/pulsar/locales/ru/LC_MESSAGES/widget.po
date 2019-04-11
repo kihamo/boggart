@@ -81,3 +81,12 @@ msgstr "Импульсный вход 4"
 
 msgid "pulses"
 msgstr "импульсов"
+
+msgid "Archive"
+msgstr "Архив"
+
+msgid "Date"
+msgstr "Дата"
+
+msgid "Energy in Gcal"
+msgstr "Энергия в Гкал"
