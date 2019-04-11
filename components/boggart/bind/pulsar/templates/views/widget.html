@@ -16,6 +16,9 @@
                     <div class="tab-content">
                         <div role="tabpanel" class="tab-pane fade active in">
                             {{ if eq .action "archive" }}
+                            <p class="text-muted font-13 m-b-30">
+                                {{ raw (i18n "Show from %s to %s" . nil nil nil (print "<script type=\"application/javascript\">document.write(dateToString('" (.date_from.Format "2006-01-02T15:04:05Z07:00") "'))</script>") (print "<script type=\"application/javascript\">document.write(dateToString('" (.date_to.Format "2006-01-02T15:04:05Z07:00") "'))</script>")) }}
+                            </p>
                             <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
                                 <thead>
                                 <tr>

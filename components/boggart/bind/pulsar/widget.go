@@ -14,8 +14,9 @@ import (
 func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
 	bind := b.Bind().(*Bind)
 	config := b.Config().(*Config)
+	q := r.URL().Query()
 	vars := map[string]interface{}{
-		"action": r.URL().Query().Get("action"),
+		"action": q.Get("action"),
 	}
 
 	switch vars["action"] {
@@ -43,7 +44,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			err    error
 		)
 
-		switch r.URL().Query().Get("period") {
+		switch q.Get("period") {
 		case "daily":
 			period = pulsar.ArchiveTypeDaily
 			start = end.AddDate(0, -1, 0)
@@ -57,6 +58,21 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			start = end.AddDate(-1, 0, 0)
 			vars["period"] = "monthly"
 		}
+
+		if queryTime := q.Get("from"); queryTime != "" {
+			if t, err := time.Parse(time.RFC3339, queryTime); err == nil {
+				start = t
+			}
+		}
+
+		if queryTime := q.Get("to"); queryTime != "" {
+			if t, err := time.Parse(time.RFC3339, queryTime); err == nil {
+				end = t
+			}
+		}
+
+		vars["date_from"] = start
+		vars["date_to"] = end
 
 		// energy
 		date, values, err = bind.provider.EnergyArchive(start, end, period)
