@@ -5,11 +5,10 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	a "github.com/kihamo/boggart/components/boggart/atomic"
-	"github.com/kihamo/shadow/components/dashboard"
 )
 
 type Type struct {
-	dashboard.Handler
+	boggart.BindTypeWidget
 }
 
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {

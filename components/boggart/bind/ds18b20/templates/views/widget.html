@@ -1,0 +1,35 @@
+{{ define "content" }}
+<script type="application/javascript">
+    function valueFormat(n) {
+        return new Intl.NumberFormat().format(n);
+    }
+</script>
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_content">
+                <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>{{ i18n "Measurement" . }}</th>
+                            <th>{{ i18n "Value" . }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ i18n "Temperature" . }}</td>
+                            {{ if .error }}
+                                <td class="text-danger">{{ .error.Error }}</td>
+                            {{ else }}
+                                <td>
+                                    <script type="application/javascript">document.write(valueFormat({{ .value }}))</script> {{ i18n "°C" }}
+                                </td>
+                            {{ end }}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
