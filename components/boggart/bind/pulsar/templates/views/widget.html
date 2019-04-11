@@ -20,7 +20,11 @@
                                 <thead>
                                 <tr>
                                     <th>{{ i18n "Date" . }}</th>
-                                    <th>{{ i18n "Energy in Gcal" . }}</th>
+                                    <th>{{ i18n "Energy" . }}<br />{{ i18n "Gcal" . }}</th>
+                                    <th>{{ i18n "Pulse input %d" . nil nil nil 1 }}<br />{{ raw (i18n "m<sup>3</sup> / pulses" .) }}</th>
+                                    <th>{{ i18n "Pulse input %d" . nil nil nil 2 }}<br />{{ raw (i18n "m<sup>3</sup> / pulses" .) }}</th>
+                                    <th>{{ i18n "Pulse input %d" . nil nil nil 3 }}<br />{{ raw (i18n "m<sup>3</sup> / pulses" .) }}</th>
+                                    <th>{{ i18n "Pulse input %d" . nil nil nil 4 }}<br />{{ raw (i18n "m<sup>3</sup> / pulses" .) }}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -35,7 +39,121 @@
                                             <script type="application/javascript">document.write(dateToString('{{ $stat.Date.Format "2006-01-02T15:04:05Z07:00" }}'))</script>
                                         {{ end }}
                                     </td>
-                                    <td><script type="application/javascript">document.write(valueFormat({{ $stat.Energy }}))</script></td>
+                                    <td>
+                                        <script type="application/javascript">document.write(valueFormat({{ $stat.Energy }}))</script>
+                                        {{ if gt $stat.EnergyTrend 0.0 }}
+                                            <span class="label label-danger">
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.EnergyDelta }}))</script> /
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.EnergyTrend }}))</script>
+                                            </span>
+                                        {{ else if lt $stat.EnergyTrend 0.0 }}
+                                            <span class="label label-success">
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.EnergyDelta }}))</script> /
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.EnergyTrend }}))</script>
+                                            </span>
+                                        {{ else if eq $stat.EnergyTrend 0.0 }}
+                                            <span class="label label-info">
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.EnergyDelta }}))</script> /
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.EnergyTrend }}))</script>
+                                            </span>
+                                        {{ else if gt $stat.EnergyDelta 0.0 }}
+                                            <span class="label label-default">
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.EnergyDelta }}))</script>
+                                            </span>
+                                        {{ end }}
+                                    </td>
+                                    <td>
+                                        <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse1Volume }}))</script> / {{ $stat.Pulse1 }}
+                                        {{ if gt $stat.Pulse1Trend 0.0 }}
+                                            <span class="label label-danger">
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse1Delta }}))</script> /
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse1Trend }}))</script>
+                                            </span>
+                                        {{ else if lt $stat.Pulse1Trend 0.0 }}
+                                            <span class="label label-success">
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse1Delta }}))</script> /
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse1Trend }}))</script>
+                                            </span>
+                                        {{ else if eq $stat.Pulse1Trend 0.0 }}
+                                            <span class="label label-info">
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse1Delta }}))</script> /
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse1Trend }}))</script>
+                                            </span>
+                                        {{ else if gt $stat.Pulse1Delta 0.0 }}
+                                            <span class="label label-default">
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse1Delta }}))</script>
+                                            </span>
+                                        {{ end }}
+                                    </td>
+                                    <td>
+                                        <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse2Volume }}))</script> / {{ $stat.Pulse2 }}
+                                        {{ if gt $stat.Pulse2Trend 0.0 }}
+                                            <span class="label label-danger">
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse2Delta }}))</script> /
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse2Trend }}))</script>
+                                            </span>
+                                        {{ else if lt $stat.Pulse2Trend 0.0 }}
+                                            <span class="label label-success">
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse2Delta }}))</script> /
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse2Trend }}))</script>
+                                            </span>
+                                        {{ else if eq $stat.Pulse2Trend 0.0 }}
+                                            <span class="label label-info">
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse2Delta }}))</script> /
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse2Trend }}))</script>
+                                            </span>
+                                        {{ else if gt $stat.Pulse2Delta 0.0 }}
+                                            <span class="label label-default">
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse2Delta }}))</script>
+                                            </span>
+                                        {{ end }}
+                                    </td>
+                                    <td>
+                                        <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse3Volume }}))</script> / {{ $stat.Pulse3 }}
+                                        {{ if gt $stat.Pulse3Trend 0.0 }}
+                                            <span class="label label-danger">
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse3Delta }}))</script> /
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse3Trend }}))</script>
+                                            </span>
+                                        {{ else if lt $stat.Pulse3Trend 0.0 }}
+                                            <span class="label label-success">
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse3Delta }}))</script> /
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse3Trend }}))</script>
+                                            </span>
+                                        {{ else if eq $stat.Pulse3Trend 0.0 }}
+                                            <span class="label label-info">
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse3Delta }}))</script> /
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse3Trend }}))</script>
+                                            </span>
+                                        {{ else if gt $stat.Pulse3Delta 0.0 }}
+                                            <span class="label label-default">
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse3Delta }}))</script>
+                                            </span>
+                                        {{ end }}
+                                    </td>
+                                    <td>
+                                        <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse4Volume }}))</script> / {{ $stat.Pulse4 }}
+                                        {{ if gt $stat.Pulse4Trend 0.0 }}
+                                            <span class="label label-danger">
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse4Delta }}))</script> /
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse4Trend }}))</script>
+                                            </span>
+                                        {{ else if lt $stat.Pulse4Trend 0.0 }}
+                                            <span class="label label-success">
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse4Delta }}))</script> /
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse4Trend }}))</script>
+                                            </span>
+                                        {{ else if eq $stat.Pulse4Trend 0.0 }}
+                                            <span class="label label-info">
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse4Delta }}))</script> /
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse4Trend }}))</script>
+                                            </span>
+                                        {{ else if gt $stat.Pulse4Delta 0.0 }}
+                                            <span class="label label-default">
+                                                <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse4Delta }}))</script>
+                                            </span>
+                                        {{ end }}
+                                    </td>
                                 </tr>
                                 {{ end }}
                                 </tbody>
@@ -125,7 +243,7 @@
                                         {{ end }}
                                     </tr>
                                     <tr>
-                                        <td>{{ i18n "Pulse input 1" . }}</td>
+                                        <td>{{ i18n "Pulse input %d" . nil nil nil 1 }}</td>
                                         {{ if .pusle_input_1.Error }}
                                             <td class="text-danger">{{ .pusle_input_1.Error.Error }}</td>
                                         {{ else }}
@@ -133,7 +251,7 @@
                                         {{ end }}
                                     </tr>
                                     <tr>
-                                        <td>{{ i18n "Pulse input 2" . }}</td>
+                                        <td>{{ i18n "Pulse input %d" . nil nil nil 2 }}</td>
                                         {{ if .pusle_input_2.Error }}
                                             <td class="text-danger">{{ .pusle_input_2.Error.Error }}</td>
                                         {{ else }}
@@ -141,7 +259,7 @@
                                         {{ end }}
                                     </tr>
                                     <tr>
-                                        <td>{{ i18n "Pulse input 3" . }}</td>
+                                        <td>{{ i18n "Pulse input %d" . nil nil nil 3 }}</td>
                                         {{ if .pusle_input_3.Error }}
                                             <td class="text-danger">{{ .pusle_input_3.Error.Error }}</td>
                                         {{ else }}
@@ -149,7 +267,7 @@
                                         {{ end }}
                                     </tr>
                                     <tr>
-                                        <td>{{ i18n "Pulse input 4" . }}</td>
+                                        <td>{{ i18n "Pulse input %d" . nil nil nil 4 }}</td>
                                         {{ if .pusle_input_4.Error }}
                                             <td class="text-danger">{{ .pusle_input_4.Error.Error }}</td>
                                         {{ else }}

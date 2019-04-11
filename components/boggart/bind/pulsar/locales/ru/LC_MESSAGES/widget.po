@@ -67,20 +67,14 @@ msgstr "Расход"
 msgid "m<sup>3</sup>/h"
 msgstr "м<sup>3</sup>/ч"
 
-msgid "Pulse input 1"
-msgstr "Импульсный вход 1"
-
-msgid "Pulse input 2"
-msgstr "Импульсный вход 2"
-
-msgid "Pulse input 3"
-msgstr "Импульсный вход 3"
-
-msgid "Pulse input 4"
-msgstr "Импульсный вход 4"
+msgid "Pulse input %d"
+msgstr "Импульсный вход %d"
 
 msgid "pulses"
 msgstr "импульсов"
+
+msgid "m<sup>3</sup> / pulses"
+msgstr "m<sup>3</sup> / импульсов"
 
 msgid "Archive"
 msgstr "Архив"
@@ -88,5 +82,38 @@ msgstr "Архив"
 msgid "Date"
 msgstr "Дата"
 
-msgid "Energy in Gcal"
-msgstr "Энергия в Гкал"
+msgid "January"
+msgstr "Январь"
+
+msgid "February"
+msgstr "Февраль"
+
+msgid "March"
+msgstr "Март"
+
+msgid "April"
+msgstr "Апрель"
+
+msgid "May"
+msgstr "Май"
+
+msgid "June"
+msgstr "Июнь"
+
+msgid "July"
+msgstr "Июль"
+
+msgid "August"
+msgstr "Август"
+
+msgid "September"
+msgstr "Сентябрь"
+
+msgid "October"
+msgstr "Октябрь"
+
+msgid "November"
+msgstr "Ноябрь"
+
+msgid "December"
+msgstr "Декабрь"

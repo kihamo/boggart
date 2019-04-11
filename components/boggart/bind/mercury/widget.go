@@ -30,7 +30,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 		date, err := bind.provider.Datetime()
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get datetime failed with error", "", err.Error()))
+			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get datetime failed with error %s", "", err.Error()))
 
 			vars["stats"] = make([]*monthly, 0)
 
