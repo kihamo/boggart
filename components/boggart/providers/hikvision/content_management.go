@@ -7,6 +7,10 @@ import (
 	"github.com/kihamo/shadow/components/tracing"
 )
 
+const (
+	contentManagerPrefixURL = "/ContentMgmt"
+)
+
 type ContentManagementStorageResponse struct {
 	HDD []struct {
 		ID        uint64 `xml:"id"`
@@ -28,7 +32,7 @@ func (a *ISAPI) ContentManagementStorage(ctx context.Context) (result ContentMan
 	span, ctx := tracing.StartSpanFromContext(ctx, ComponentName, "content_management.storage")
 	defer span.Finish()
 
-	err = a.DoXML(ctx, http.MethodGet, a.address+"/ContentMgmt/Storage", nil, &result)
+	err = a.DoXML(ctx, http.MethodGet, a.address+contentManagerPrefixURL+"/Storage", nil, &result)
 	if err != nil {
 		tracing.SpanError(span, err)
 	}
