@@ -15,10 +15,40 @@
                     </ul>
                     <div class="tab-content">
                         <div role="tabpanel" class="tab-pane fade active in">
-                            {{ if eq .action "archive" }}
-                            <p class="text-muted font-13 m-b-30">
-                                {{ raw (i18n "Show from %s to %s" . nil nil nil (print "<script type=\"application/javascript\">document.write(dateToString('" (.date_from.Format "2006-01-02T15:04:05Z07:00") "'))</script>") (print "<script type=\"application/javascript\">document.write(dateToString('" (.date_to.Format "2006-01-02T15:04:05Z07:00") "'))</script>")) }}
-                            </p>
+                            {{ if eq .action "archive" }}<form class="form-horizontal">
+                            <div class="well" style="overflow: auto">
+                                <form class="form-horizontal">
+                                    <div class="col-md-5">
+                                        {{ i18n "Date Range" . }}
+                                        <fieldset>
+                                            <div class="control-group">
+                                                <div class="controls">
+                                                    <div class="input-prepend input-group">
+                                                        <span class="add-on input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                        <input type="text" name="date" id="date" class="form-control" value="{{ .date_from.Format "2006.01.02 15:04:05" }} - {{ .date_to.Format "2006.01.02 15:04:05" }}" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ i18n "Period" . }}
+                                        <fieldset>
+                                            <div class="control-group">
+                                                <div class="controls">
+                                                    <div class="input-prepend input-group">
+                                                        <select id="period" class="form-control select2" required="required">
+                                                            <option value="monthly"{{ if eq .period "monthly" }} selected="selected"{{ end }}>{{ i18n "Monthly" . }}</option>
+                                                            <option value="daily"{{ if eq .period "daily" }} selected="selected"{{ end }}>{{ i18n "Daily" . }}</option>
+                                                            <option value="hourly"{{ if eq .period "hourly" }} selected="selected"{{ end }}>{{ i18n "Hourly" . }}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                            </form>
                             <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
                                 <thead>
                                 <tr>
@@ -287,4 +317,176 @@
         </div>
     </div>
 </div>
+{{ end }}
+
+{{ define "head" }}
+    <link href="https://colorlib.com/polygon/vendors/bootstrap-daterangepicker/daterangepicker.css" rel="stylesheet">
+
+    <style type="text/css">
+        .daterangepicker .ranges li {
+            color: #73879C
+        }
+        .daterangepicker .ranges li.active,
+        .daterangepicker .ranges li:hover {
+            background: #536A7F;
+            border: 1px solid #536A7F;
+            color: #fff
+        }
+        .daterangepicker .input-mini {
+            background-color: #eee;
+            border: 1px solid #ccc;
+            box-shadow: none !important
+        }
+        .daterangepicker .input-mini.active {
+            border: 1px solid #ccc
+        }
+        .daterangepicker select.monthselect,
+        .daterangepicker select.yearselect,
+        .daterangepicker select.hourselect,
+        .daterangepicker select.minuteselect,
+        .daterangepicker select.secondselect,
+        .daterangepicker select.ampmselect {
+            font-size: 12px;
+            padding: 1px;
+            height: auto;
+            margin: 0;
+            cursor: default;
+            height: 30px;
+            border: 1px solid #ADB2B5;
+            line-height: 30px;
+            border-radius: 0px !important
+        }
+        .daterangepicker select.monthselect {
+            margin-right: 2%
+        }
+        .daterangepicker td.in-range {
+            background: #E4E7EA;
+            color: #73879C
+        }
+        .daterangepicker td.active,
+        .daterangepicker td.active:hover {
+            background-color: #536A7F;
+            color: #fff
+        }
+        .daterangepicker th.available:hover {
+            background: #eee;
+            color: #34495E
+        }
+        .daterangepicker:before,
+        .daterangepicker:after {
+            content: none
+        }
+        .daterangepicker .calendar.single {
+            margin: 0 0 4px 0
+        }
+        .daterangepicker .calendar.single .calendar-table {
+            width: 224px;
+            padding: 0 0 4px 0 !important
+        }
+        .daterangepicker .calendar.single .calendar-table thead tr:first-child th {
+            padding: 8px 5px
+        }
+        .daterangepicker .calendar.single .calendar-table thead th {
+            border-radius: 0
+        }
+        .daterangepicker.picker_1 {
+            color: #fff;
+            background: #34495E
+        }
+        .daterangepicker.picker_1 .calendar-table {
+            background: #34495E
+        }
+        .daterangepicker.picker_1 .calendar-table thead tr {
+            background: #213345
+        }
+        .daterangepicker.picker_1 .calendar-table thead tr:first-child {
+            background: #1ABB9C
+        }
+        .daterangepicker.picker_1 .calendar-table td.off {
+            background: #34495E;
+            color: #999
+        }
+        .daterangepicker.picker_1 .calendar-table td.available:hover {
+            color: #34495E
+        }
+        .daterangepicker.picker_2 .calendar-table thead tr {
+            color: #1ABB9C
+        }
+        .daterangepicker.picker_2 .calendar-table thead tr:first-child {
+            color: #73879C
+        }
+        .daterangepicker.picker_3 .calendar-table thead tr:first-child {
+            color: #fff;
+            background: #1ABB9C
+        }
+        .daterangepicker.picker_4 .calendar-table thead tr:first-child {
+            color: #fff;
+            background: #34495E
+        }
+        .daterangepicker.picker_4 .calendar-table td,
+        .daterangepicker.picker_4 .calendar-table td.off {
+            background: #ECF0F1;
+            border: 1px solid #fff;
+            border-radius: 0
+        }
+        .daterangepicker.picker_4 .calendar-table td.active {
+            background: #34495E
+        }
+
+        .daterangepicker .calendar.left {
+            float: left !important
+        }
+    </style>
+{{ end }}
+
+{{ define "js" }}
+    {{ if eq .action "archive" }}
+        <script src="https://colorlib.com/polygon/vendors/moment/min/moment.min.js" type="application/javascript"></script>
+        <script src="https://colorlib.com/polygon/vendors/bootstrap-daterangepicker/daterangepicker.js" type="application/javascript"></script>
+
+        <script type="application/javascript">
+            $(document).ready(function () {
+                $('#date').daterangepicker({
+                    timePicker: true,
+                    timePicker24Hour: true,
+                    timePickerIncrement: 60,
+                    maxDate: moment(),
+                    locale: {
+                        format: 'YYYY.MM.DD HH:mm:ss',
+
+                        "applyLabel": "Apply",
+                        "cancelLabel": "Cancel",
+                        "fromLabel": "From",
+                        "toLabel": "To",
+                        "customRangeLabel": "Custom",
+                        "weekLabel": "W",
+                        "daysOfWeek": [
+                            "Su",
+                            "Mo",
+                            "Tu",
+                            "We",
+                            "Th",
+                            "Fr",
+                            "Sa"
+                        ],
+                        "monthNames": [
+                            "{{ i18n "January" . }}",
+                            "{{ i18n "February" . }}",
+                            "{{ i18n "March" . }}",
+                            "{{ i18n "April" . }}",
+                            "{{ i18n "May" . }}",
+                            "{{ i18n "June" . }}",
+                            "{{ i18n "July" . }}",
+                            "{{ i18n "August" . }}",
+                            "{{ i18n "September" . }}",
+                            "{{ i18n "October" . }}",
+                            "{{ i18n "November" . }}",
+                            "{{ i18n "December" . }}"
+                        ],
+                        "firstDay": 1
+                    }
+                });
+            });
+        </script>
+    {{ end }}
 {{ end }}
