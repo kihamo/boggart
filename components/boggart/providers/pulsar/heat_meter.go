@@ -19,6 +19,10 @@ const (
 	FunctionReadSettings  = 0x0A
 	FunctionWriteSettings = 0x0B
 
+	ArchiveTypeHourly  ArchiveType = 0x0001
+	ArchiveTypeDaily   ArchiveType = 0x0002
+	ArchiveTypeMonthly ArchiveType = 0x0003
+
 	SettingsParamDaylightSavingTime SettingsParam = 0x0001 // uint16  | RW |    | признак автоперехода на летнее время 0 - выкл, 1 - вкл
 	SettingsParamPulseDuration      SettingsParam = 0x0003 // float32 | RW | мс | длительность импульса
 	SettingsParamPauseDuration      SettingsParam = 0x0004 // float32 | RW | мс | длительность паузы
@@ -43,6 +47,7 @@ const (
 
 type MetricsChannel int
 type SettingsParam int
+type ArchiveType int
 
 type HeatMeter struct {
 	address    []byte
@@ -50,12 +55,28 @@ type HeatMeter struct {
 	connection *rs485.Connection
 }
 
-func (c MetricsChannel) toInt64() int64 {
-	return int64(c)
+func (i MetricsChannel) toInt64() int64 {
+	return int64(i)
 }
 
-func (p SettingsParam) toInt64() int64 {
-	return int64(p)
+func (i MetricsChannel) toBytes() []byte {
+	return big.NewInt(i.toInt64()).Bytes()
+}
+
+func (i SettingsParam) toInt64() int64 {
+	return int64(i)
+}
+
+func (i SettingsParam) toBytes() []byte {
+	return big.NewInt(i.toInt64()).Bytes()
+}
+
+func (i ArchiveType) toInt64() int64 {
+	return int64(i)
+}
+
+func (i ArchiveType) toBytes() []byte {
+	return big.NewInt(i.toInt64()).Bytes()
 }
 
 func NewHeatMeter(address []byte, location *time.Location, connection *rs485.Connection) *HeatMeter {
@@ -134,20 +155,14 @@ func (d *HeatMeter) Request(function byte, data []byte) ([]byte, error) {
 	return response[6 : l-4], nil
 }
 
-func (d *HeatMeter) Metrics(channel MetricsChannel) ([][]byte, error) {
-	bs := rs485.Pad(rs485.Reverse(big.NewInt(channel.toInt64()).Bytes()), 4)
+func (d *HeatMeter) readMetrics(channel MetricsChannel) (float32, error) {
+	bs := rs485.Pad(rs485.Reverse(channel.toBytes()), 4)
 	response, err := d.Request(FunctionReadMetrics, bs)
 	if err != nil {
-		return nil, err
+		return -1, err
 	}
 
-	result := make([][]byte, 0, len(response)/4)
-	value := rs485.Reverse(response)
-	for i := 0; i < len(value); i += 4 {
-		result = append(result, value[i:i+4])
-	}
-
-	return result, nil
+	return rs485.ToFloat32(rs485.Reverse(response)), nil
 }
 
 func (d *HeatMeter) Datetime() (time.Time, error) {
@@ -156,19 +171,53 @@ func (d *HeatMeter) Datetime() (time.Time, error) {
 		return time.Time{}, err
 	}
 
-	return time.Date(
-		2000+int(response[0]),
-		time.Month(response[1]),
-		int(response[2]),
-		int(response[3]),
-		int(response[4]),
-		int(response[5]),
-		0,
-		d.location), nil
+	return BytesToTime(response, d.location), nil
+}
+
+/*
+	Максимальная глубина архивов
+	- Часовые 62 суток (1488 значений)
+	- Суточные 6 месцев (184 суток)
+	- Месячные 5 лет (60 значений)
+*/
+func (d *HeatMeter) readArchive(channel MetricsChannel, start, end time.Time, t ArchiveType) (time.Time, []float32, error) {
+	/*
+		DATE_START
+		дата округляется прибором до ближайшей архивной записи слева, в некоторых ранних прошивках приборов
+		нормировка архивов не производилась, поэтому желательно нормировку даты осуществлять софтом верхнего уровня
+	*/
+	switch t {
+	case ArchiveTypeMonthly:
+		start = time.Date(start.Year(), start.Month(), 1, 0, 0, 0, 0, end.Location())
+	case ArchiveTypeDaily:
+		start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, end.Location())
+	case ArchiveTypeHourly:
+		start = time.Date(start.Year(), start.Month(), start.Day(), start.Hour(), 0, 0, 0, end.Location())
+	}
+
+	bs := rs485.Pad(rs485.Reverse(channel.toBytes()), 4)
+	bs = append(bs, rs485.Pad(t.toBytes(), 2)...)
+	bs = append(bs, TimeToBytes(start)...)
+	bs = append(bs, TimeToBytes(end)...)
+
+	response, err := d.Request(FunctionReadArchive, bs)
+	if err != nil {
+		return time.Time{}, nil, err
+	}
+
+	begin := BytesToTime(response[4:10], d.location)
+	raw := rs485.Reverse(response[10:])
+	values := make([]float32, 0)
+
+	for i := 0; i < len(raw); i += 4 {
+		values = append([]float32{rs485.ToFloat32(raw[i : i+4])}, values...)
+	}
+
+	return begin, values, nil
 }
 
 func (d *HeatMeter) Settings(param SettingsParam) ([]byte, error) {
-	bs := rs485.Pad(big.NewInt(param.toInt64()).Bytes(), 2)
+	bs := rs485.Pad(param.toBytes(), 2)
 	response, err := d.Request(FunctionReadSettings, bs)
 	if err != nil {
 		return nil, err
@@ -177,61 +226,100 @@ func (d *HeatMeter) Settings(param SettingsParam) ([]byte, error) {
 	return rs485.Reverse(response), nil
 }
 
-func (d *HeatMeter) readMetricFloat32(channel MetricsChannel) (float32, error) {
-	value, err := d.Metrics(channel)
-	if err != nil {
-		return -1, err
-	}
-
-	return rs485.ToFloat32(value[0]), nil
+func (d *HeatMeter) TemperatureIn() (float32, error) {
+	return d.readMetrics(Channel3)
 }
 
-func (d *HeatMeter) TemperatureIn() (float32, error) {
-	return d.readMetricFloat32(Channel3)
+func (d *HeatMeter) TemperatureInArchive(start, end time.Time, t ArchiveType) (time.Time, []float32, error) {
+	return d.readArchive(Channel3, start, end, t)
 }
 
 func (d *HeatMeter) TemperatureOut() (float32, error) {
-	return d.readMetricFloat32(Channel4)
+	return d.readMetrics(Channel4)
+}
+
+func (d *HeatMeter) TemperatureOutArchive(start, end time.Time, t ArchiveType) (time.Time, []float32, error) {
+	return d.readArchive(Channel4, start, end, t)
 }
 
 func (d *HeatMeter) TemperatureDelta() (float32, error) {
-	return d.readMetricFloat32(Channel5)
+	return d.readMetrics(Channel5)
+}
+
+func (d *HeatMeter) TemperatureDeltaArchive(start, end time.Time, t ArchiveType) (time.Time, []float32, error) {
+	return d.readArchive(Channel5, start, end, t)
 }
 
 func (d *HeatMeter) Power() (float32, error) {
-	return d.readMetricFloat32(Channel6)
+	return d.readMetrics(Channel6)
+}
+
+func (d *HeatMeter) PowerArchive(start, end time.Time, t ArchiveType) (time.Time, []float32, error) {
+	return d.readArchive(Channel6, start, end, t)
 }
 
 func (d *HeatMeter) PowerByEnergy() (float32, error) {
-	return d.readMetricFloat32(Channel14)
+	return d.readMetrics(Channel14)
+}
+
+func (d *HeatMeter) PowerByEnergyArchive(start, end time.Time, t ArchiveType) (time.Time, []float32, error) {
+	return d.readArchive(Channel14, start, end, t)
 }
 
 func (d *HeatMeter) Energy() (float32, error) {
-	return d.readMetricFloat32(Channel7)
+	return d.readMetrics(Channel7)
+}
+
+func (d *HeatMeter) EnergyArchive(start, end time.Time, t ArchiveType) (time.Time, []float32, error) {
+	return d.readArchive(Channel7, start, end, t)
 }
 
 func (d *HeatMeter) Capacity() (float32, error) {
-	return d.readMetricFloat32(Channel8)
+	return d.readMetrics(Channel8)
+}
+
+func (d *HeatMeter) CapacityArchive(start, end time.Time, t ArchiveType) (time.Time, []float32, error) {
+	return d.readArchive(Channel8, start, end, t)
 }
 
 func (d *HeatMeter) Consumption() (float32, error) {
-	return d.readMetricFloat32(Channel9)
+	return d.readMetrics(Channel9)
+}
+
+func (d *HeatMeter) ConsumptionArchive(start, end time.Time, t ArchiveType) (time.Time, []float32, error) {
+	return d.readArchive(Channel9, start, end, t)
 }
 
 func (d *HeatMeter) PulseInput1() (float32, error) {
-	return d.readMetricFloat32(Channel10)
+	return d.readMetrics(Channel10)
+}
+
+func (d *HeatMeter) PulseInput1Archive(start, end time.Time, t ArchiveType) (time.Time, []float32, error) {
+	return d.readArchive(Channel10, start, end, t)
 }
 
 func (d *HeatMeter) PulseInput2() (float32, error) {
-	return d.readMetricFloat32(Channel11)
+	return d.readMetrics(Channel11)
+}
+
+func (d *HeatMeter) PulseInput2Archive(start, end time.Time, t ArchiveType) (time.Time, []float32, error) {
+	return d.readArchive(Channel11, start, end, t)
 }
 
 func (d *HeatMeter) PulseInput3() (float32, error) {
-	return d.readMetricFloat32(Channel12)
+	return d.readMetrics(Channel12)
+}
+
+func (d *HeatMeter) PulseInput3Archive(start, end time.Time, t ArchiveType) (time.Time, []float32, error) {
+	return d.readArchive(Channel12, start, end, t)
 }
 
 func (d *HeatMeter) PulseInput4() (float32, error) {
-	return d.readMetricFloat32(Channel13)
+	return d.readMetrics(Channel13)
+}
+
+func (d *HeatMeter) PulseInput4Archive(start, end time.Time, t ArchiveType) (time.Time, []float32, error) {
+	return d.readArchive(Channel14, start, end, t)
 }
 
 func (d *HeatMeter) DaylightSavingTime() (bool, error) {
