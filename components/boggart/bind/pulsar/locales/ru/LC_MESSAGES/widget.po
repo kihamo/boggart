@@ -92,7 +92,7 @@ msgid "Monthly"
 msgstr "Месячная"
 
 msgid "Daily"
-msgstr "Дневная"
+msgstr "Суточная"
 
 msgid "Hourly"
 msgstr "Часовая"

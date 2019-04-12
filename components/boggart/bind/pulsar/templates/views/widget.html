@@ -80,9 +80,9 @@
                                 <tr>
                                     <td>
                                         {{ if eq $.period "monthly" }}
-                                            {{ i18n $stat.Date.Month.String . nil "dashboard" $ }} {{ $stat.Date.Year }}
+                                            {{ i18n $stat.Date.Month.String $ nil "dashboard" }} {{ $stat.Date.Year }}
                                         {{ else if eq $.period "daily" }}
-                                            {{ $stat.Date.Day }} {{ i18n $stat.Date.Month.String . nil "dashboard" $ }} {{ $stat.Date.Year }}
+                                            {{ $stat.Date.Day }} {{ i18n $stat.Date.Month.String $ nil "dashboard" }} {{ $stat.Date.Year }}
                                         {{ else }}
                                             <script type="application/javascript">document.write(dateToString('{{ $stat.Date.Format "2006-01-02T15:04:05Z07:00" }}'))</script>
                                         {{ end }}
