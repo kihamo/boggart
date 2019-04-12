@@ -23,12 +23,30 @@ const (
 	ArchiveTypeDaily   ArchiveType = 0x0002
 	ArchiveTypeMonthly ArchiveType = 0x0003
 
-	SettingsParamDaylightSavingTime SettingsParam = 0x0001 // uint16  | RW |    | признак автоперехода на летнее время 0 - выкл, 1 - вкл
-	SettingsParamPulseDuration      SettingsParam = 0x0003 // float32 | RW | мс | длительность импульса
-	SettingsParamPauseDuration      SettingsParam = 0x0004 // float32 | RW | мс | длительность паузы
-	SettingsParamVersion            SettingsParam = 0x0005 // uint16  | R  |    | версия прошивки
-	SettingsParamDiagnostics        SettingsParam = 0x0006
-	SettingsParamOperatingTime      SettingsParam = 0x000C // uint32  | RW | ч  | время наработки
+	SettingsParamDaylightSavingTime  SettingsParam = 0x0001 // uint16  | RW |          | признак автоперехода на летнее время 0 - выкл, 1 - вкл
+	SettingsParamPulseDuration       SettingsParam = 0x0003 // float32 | RW | мс       | длительность импульса
+	SettingsParamPauseDuration       SettingsParam = 0x0004 // float32 | RW | мс       | длительность паузы
+	SettingsParamVersion             SettingsParam = 0x0005 // uint16  | R  |          | версия прошивки
+	SettingsParamDiagnostics         SettingsParam = 0x0006 // uint16  | R  |          | диагностика
+	SettingsParamResetMCU            SettingsParam = 0x0007 // uint16  | R  |          | количество сбросов MCU
+	SettingsParamBatteryVoltage      SettingsParam = 0x000A // float32 | R  | v        | напряжение батареи
+	SettingsParamDeviceTemperature   SettingsParam = 0x000B // float32 | R  | c        | температура прибота
+	SettingsParamOperatingTime       SettingsParam = 0x000C // uint32  | RW | ч        | время наработки
+	SettingsParamErrorOperatingTime  SettingsParam = 0x000D // uint32  | RW | ч        | время наработки с ошибками
+	SettingsParamPulse1Volume        SettingsParam = 0x0020 // float32 | RW | м3       | вес импульсного входа 1
+	SettingsParamPulse1Duration      SettingsParam = 0x0021 // float32 | RW | мс       | длительность импульса импульсного входа 1
+	SettingsParamPulse1PauseDuration SettingsParam = 0x0022 // float32 | RW | мс       | длительность паузы импульсного входа 1
+	SettingsParamPulse2Volume        SettingsParam = 0x0023 // float32 | RW | м3       | вес импульсного входа 2
+	SettingsParamPulse2Duration      SettingsParam = 0x0024 // float32 | RW | мс       | длительность импульса импульсного входа 2
+	SettingsParamPulse2PauseDuration SettingsParam = 0x0025 // float32 | RW | мс       | длительность паузы импульсного входа 2
+	SettingsParamPulse3Volume        SettingsParam = 0x0026 // float32 | RW | м3       | вес импульсного входа 3
+	SettingsParamPulse3Duration      SettingsParam = 0x0027 // float32 | RW | мс       | длительность импульса импульсного входа 3
+	SettingsParamPulse3PauseDuration SettingsParam = 0x0028 // float32 | RW | мс       | длительность паузы импульсного входа 3
+	SettingsParamPulse4Volume        SettingsParam = 0x0029 // float32 | RW | м3       | вес импульсного входа 4
+	SettingsParamPulse4Duration      SettingsParam = 0x002A // float32 | RW | мс       | длительность импульса импульсного входа 4
+	SettingsParamPulse4PauseDuration SettingsParam = 0x002B // float32 | RW | мс       | длительность импульса импульсного входа 4
+	SettingsParamOutputVolume        SettingsParam = 0x002C // float32 | RW | гкал/имп | вес импульса выхода
+	SettingsParamOutputDuration      SettingsParam = 0x002D // float32 | RW | мс       | длительность импульса выхода
 
 	Channel3  MetricsChannel = 0x00000004 // float32 | °C     | температура подачи
 	Channel4  MetricsChannel = 0x00000008 // float32 | °C     | температура обратки
@@ -216,7 +234,7 @@ func (d *HeatMeter) readArchive(channel MetricsChannel, start, end time.Time, t 
 	return begin, values, nil
 }
 
-func (d *HeatMeter) Settings(param SettingsParam) ([]byte, error) {
+func (d *HeatMeter) readSettings(param SettingsParam) ([]byte, error) {
 	bs := rs485.Pad(param.toBytes(), 2)
 	response, err := d.Request(FunctionReadSettings, bs)
 	if err != nil {
@@ -323,7 +341,7 @@ func (d *HeatMeter) PulseInput4Archive(start, end time.Time, t ArchiveType) (tim
 }
 
 func (d *HeatMeter) DaylightSavingTime() (bool, error) {
-	value, err := d.Settings(SettingsParamDaylightSavingTime)
+	value, err := d.readSettings(SettingsParamDaylightSavingTime)
 	if err != nil {
 		return false, err
 	}
@@ -332,7 +350,7 @@ func (d *HeatMeter) DaylightSavingTime() (bool, error) {
 }
 
 func (d *HeatMeter) Diagnostics() ([]byte, error) {
-	value, err := d.Settings(SettingsParamDiagnostics)
+	value, err := d.readSettings(SettingsParamDiagnostics)
 	if err != nil {
 		return nil, err
 	}
@@ -342,7 +360,7 @@ func (d *HeatMeter) Diagnostics() ([]byte, error) {
 }
 
 func (d *HeatMeter) Version() (uint16, error) {
-	value, err := d.Settings(SettingsParamVersion)
+	value, err := d.readSettings(SettingsParamVersion)
 	if err != nil {
 		return 0, err
 	}
@@ -351,7 +369,7 @@ func (d *HeatMeter) Version() (uint16, error) {
 }
 
 func (d *HeatMeter) OperatingTime() (time.Duration, error) {
-	value, err := d.Settings(SettingsParamOperatingTime)
+	value, err := d.readSettings(SettingsParamOperatingTime)
 	if err != nil {
 		return -1, err
 	}
