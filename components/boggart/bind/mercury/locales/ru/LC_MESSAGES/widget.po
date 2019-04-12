@@ -133,42 +133,6 @@ msgstr "T3 / Втч"
 msgid "T4 / Wh"
 msgstr "T4 / Втч"
 
-msgid "January"
-msgstr "Январь"
-
-msgid "February"
-msgstr "Февраль"
-
-msgid "March"
-msgstr "Март"
-
-msgid "April"
-msgstr "Апрель"
-
-msgid "May"
-msgstr "Май"
-
-msgid "June"
-msgstr "Июнь"
-
-msgid "July"
-msgstr "Июль"
-
-msgid "August"
-msgstr "Август"
-
-msgid "September"
-msgstr "Сентябрь"
-
-msgid "October"
-msgstr "Октябрь"
-
-msgid "November"
-msgstr "Ноябрь"
-
-msgid "December"
-msgstr "Декабрь"
-
 msgid "Day"
 msgstr "День"
 

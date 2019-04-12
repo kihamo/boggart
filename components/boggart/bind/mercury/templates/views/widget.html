@@ -35,7 +35,7 @@
                                     <tbody>
                                     {{ range $i, $stats := .stats }}
                                     <tr{{ if and (eq $stats.Month $.date.Month) (eq $stats.Year $.date.Year) }} class="success"{{ end }}>
-                                        <td>{{ i18n $stats.Month.String $ }} {{ $stats.Year }}</td>
+                                        <td>{{ i18n $stats.Month.String $ nil "dashboard" }} {{ $stats.Year }}</td>
                                         <td>
                                             <script type="application/javascript">document.write(valueFormat({{ $stats.T1 }}))</script>
                                             {{ if gt $stats.T1Trend 0 }}
@@ -207,7 +207,7 @@
                                         {{ range $i, $day := .holidays }}
                                         <tr>
                                             <td>{{ $day.Format "2" }}</td>
-                                            <td>{{ i18n $day.Month.String $ }}</td>
+                                            <td>{{ i18n $day.Month.String $ nil "dashboard" }}</td>
                                         </tr>
                                         {{ end }}
                                     </tbody>

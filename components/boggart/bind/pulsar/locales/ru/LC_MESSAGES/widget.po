@@ -82,38 +82,38 @@ msgstr "Архив"
 msgid "Date"
 msgstr "Дата"
 
-msgid "January"
-msgstr "Январь"
+msgid "Date range"
+msgstr "Диапазон дат"
 
-msgid "February"
-msgstr "Февраль"
+msgid "Period"
+msgstr "Период"
 
-msgid "March"
-msgstr "Март"
+msgid "Monthly"
+msgstr "Месячная"
 
-msgid "April"
-msgstr "Апрель"
+msgid "Daily"
+msgstr "Суточная"
 
-msgid "May"
-msgstr "Май"
+msgid "Hourly"
+msgstr "Часовая"
 
-msgid "June"
-msgstr "Июнь"
+msgid "Today"
+msgstr "Сегодня"
 
-msgid "July"
-msgstr "Июль"
+msgid "Yesterday"
+msgstr "Вчера"
 
-msgid "August"
-msgstr "Август"
+msgid "This month"
+msgstr "Этот месяц"
 
-msgid "September"
-msgstr "Сентябрь"
+msgid "Last month"
+msgstr "Предыдущий месяц"
 
-msgid "October"
-msgstr "Октябрь"
+msgid "This year"
+msgstr "Этот год"
 
-msgid "November"
-msgstr "Ноябрь"
+msgid "Last year"
+msgstr "Предыдущий год"
 
-msgid "December"
-msgstr "Декабрь"
+msgid "Show"
+msgstr "Показать"

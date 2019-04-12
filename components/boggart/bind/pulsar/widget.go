@@ -1,6 +1,7 @@
 package pulsar
 
 import (
+	"fmt"
 	"sort"
 	"time"
 
@@ -62,6 +63,8 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		if queryTime := q.Get("from"); queryTime != "" {
 			if t, err := time.Parse(time.RFC3339, queryTime); err == nil {
 				start = t
+			} else {
+				fmt.Println(err.Error(), queryTime)
 			}
 		}
 
