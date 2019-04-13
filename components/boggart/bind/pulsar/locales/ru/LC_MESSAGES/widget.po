@@ -70,6 +70,9 @@ msgstr "м<sup>3</sup>/ч"
 msgid "Pulse input %d"
 msgstr "Импульсный вход %d"
 
+msgid "Operating time"
+msgstr "Время наработки"
+
 msgid "pulses"
 msgstr "импульсов"
 

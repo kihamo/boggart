@@ -234,7 +234,7 @@ func (d *HeatMeter) readArchive(channel MetricsChannel, start, end time.Time, t 
 	return begin, values, nil
 }
 
-func (d *HeatMeter) readSettings(param SettingsParam) ([]byte, error) {
+func (d *HeatMeter) ReadSettings(param SettingsParam) ([]byte, error) {
 	bs := rs485.Pad(param.toBytes(), 2)
 	response, err := d.Request(FunctionReadSettings, bs)
 	if err != nil {
@@ -341,7 +341,7 @@ func (d *HeatMeter) PulseInput4Archive(start, end time.Time, t ArchiveType) (tim
 }
 
 func (d *HeatMeter) DaylightSavingTime() (bool, error) {
-	value, err := d.readSettings(SettingsParamDaylightSavingTime)
+	value, err := d.ReadSettings(SettingsParamDaylightSavingTime)
 	if err != nil {
 		return false, err
 	}
@@ -350,7 +350,7 @@ func (d *HeatMeter) DaylightSavingTime() (bool, error) {
 }
 
 func (d *HeatMeter) Diagnostics() ([]byte, error) {
-	value, err := d.readSettings(SettingsParamDiagnostics)
+	value, err := d.ReadSettings(SettingsParamDiagnostics)
 	if err != nil {
 		return nil, err
 	}
@@ -360,7 +360,7 @@ func (d *HeatMeter) Diagnostics() ([]byte, error) {
 }
 
 func (d *HeatMeter) Version() (uint16, error) {
-	value, err := d.readSettings(SettingsParamVersion)
+	value, err := d.ReadSettings(SettingsParamVersion)
 	if err != nil {
 		return 0, err
 	}
@@ -368,8 +368,17 @@ func (d *HeatMeter) Version() (uint16, error) {
 	return uint16(rs485.ToUint64(value)), nil
 }
 
+func (d *HeatMeter) BatteryVoltage() (float32, error) {
+	value, err := d.ReadSettings(SettingsParamBatteryVoltage)
+	if err != nil {
+		return -1, err
+	}
+
+	return rs485.ToFloat32(rs485.Reverse(value)), nil
+}
+
 func (d *HeatMeter) OperatingTime() (time.Duration, error) {
-	value, err := d.readSettings(SettingsParamOperatingTime)
+	value, err := d.ReadSettings(SettingsParamOperatingTime)
 	if err != nil {
 		return -1, err
 	}

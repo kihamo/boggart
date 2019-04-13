@@ -322,6 +322,14 @@
                                             <td><script type="application/javascript">document.write(valueFormat({{ .pusle_input_4.Value }}))</script> {{ i18n "pulses" }}</td>
                                         {{ end }}
                                     </tr>
+                                    <tr>
+                                        <td>{{ i18n "Operating time" . }}</td>
+                                        {{ if .operating_time.Error }}
+                                            <td class="text-danger">{{ .operating_time.Error.Error }}</td>
+                                        {{ else }}
+                                            <td>{{ .operating_time.Value.String }}</td>
+                                        {{ end }}
+                                    </tr>
                                 </tbody>
                             </table>
                             {{ end }}
