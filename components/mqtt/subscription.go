@@ -116,9 +116,9 @@ func (c *Subscription) Callback(ctx context.Context, client Component, message M
 	}()
 
 	var wg sync.WaitGroup
-	for _, sub := range subscribers {
-		wg.Add(1)
+	wg.Add(len(subscribers))
 
+	for _, sub := range subscribers {
 		go func(s Subscriber) {
 			defer wg.Done()
 
@@ -129,10 +129,9 @@ func (c *Subscription) Callback(ctx context.Context, client Component, message M
 	}
 
 	wg.Wait()
+	close(errIn)
 
 	err = <-errOut
-
-	close(errIn)
 	close(errOut)
 
 	return err
