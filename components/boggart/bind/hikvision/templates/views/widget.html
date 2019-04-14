@@ -107,34 +107,44 @@
                                         <td>{{ .info.DecoderVersion }} {{ .info.DecoderReleasedDate }}</td>
                                     </tr>
                                     {{ end }}
+                                    {{ if ne .info.BootVersion "" }}
                                     <tr>
                                         <td>{{ i18n "Boot version" . }}</td>
                                         <td>{{ .info.BootVersion }} {{ .info.BootReleasedDate }}</td>
                                     </tr>
+                                    {{ end }}
                                     <tr>
                                         <td>{{ i18n "Device ID" . }}</td>
                                         <td>{{ .info.DeviceID }}</td>
                                     </tr>
+                                    {{ if ne .info.DeviceDescription "" }}
                                     <tr>
                                         <td>{{ i18n "Device description" . }}</td>
                                         <td>{{ .info.DeviceDescription }}</td>
                                     </tr>
+                                    {{ end }}
+                                    {{ if ne .info.DeviceLocation "" }}
                                     <tr>
                                         <td>{{ i18n "Device location" . }}</td>
                                         <td>{{ .info.DeviceLocation }}</td>
                                     </tr>
+                                    {{ end }}
+                                    {{ if ne .info.SystemContact "" }}
                                     <tr>
                                         <td>{{ i18n "System contact" . }}</td>
-                                        <td>{{ .info.DeviceLocation }}</td>
+                                        <td>{{ .info.SystemContact }}</td>
                                     </tr>
+                                    {{ end }}
                                     <tr>
                                         <td>{{ i18n "Mac address" . }}</td>
                                         <td>{{ .info.MacAddress }}</td>
                                     </tr>
+                                    {{ if ne .info.HardwareVersion "" }}
                                     <tr>
                                         <td>{{ i18n "Hardware version" . }}</td>
                                         <td>{{ .info.HardwareVersion }}</td>
                                     </tr>
+                                    {{ end }}
                                     <tr>
                                         <td>{{ i18n "Device type" . }}</td>
                                         <td>{{ .info.DeviceType }}</td>
