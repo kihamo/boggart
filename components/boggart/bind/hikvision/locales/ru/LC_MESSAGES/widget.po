@@ -36,3 +36,9 @@ msgstr "Авто"
 
 msgid "Schedule"
 msgstr "По расписанию"
+
+msgid "System"
+msgstr "Система"
+
+msgid "Get device info failed with error %s"
+msgstr "Получение информации об устройстве завершилось ошибкой %s"

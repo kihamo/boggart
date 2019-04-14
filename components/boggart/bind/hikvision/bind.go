@@ -94,6 +94,19 @@ func (b *Bind) Snapshot(ctx context.Context, channel uint64, writer io.Writer) e
 	return b.isapi.StreamingPictureToWriter(ctx, channel, writer)
 }
 
+func (b *Bind) FirmwareUpdate(firmware io.Reader) {
+	go func() {
+		ctx := context.Background()
+
+		code, _ := b.isapi.SystemUpdateFirmware(ctx, firmware)
+		if code.SubStatusCode == hikvision.SubStatusCodeRebootRequired {
+			if err := b.isapi.SystemReboot(ctx); err != nil {
+				b.Logger().Error("Reboot after firmware update failed", "error", err.Error())
+			}
+		}
+	}()
+}
+
 func (b *Bind) Close() error {
 	if b.alertStreamingCancel != nil {
 		b.alertStreamingCancel()

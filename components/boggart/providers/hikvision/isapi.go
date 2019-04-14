@@ -16,6 +16,8 @@ import (
 
 const (
 	ComponentName = "hikvision"
+
+	SubStatusCodeRebootRequired = "rebootRequired"
 )
 
 type ResponseStatus struct {

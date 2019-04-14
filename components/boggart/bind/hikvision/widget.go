@@ -2,7 +2,9 @@ package hikvision
 
 import (
 	"bytes"
+	"errors"
 	"io"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -122,6 +124,47 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		_, _ = io.Copy(w, buf)
 
 		return
+
+	case "system":
+		if r.IsPost() {
+			file, header, err := r.Original().FormFile("firmware")
+
+			if err == nil {
+				defer file.Close()
+				t := header.Header.Get("Content-Type")
+
+				switch t {
+				case "application/octet-stream":
+					bind.FirmwareUpdate(file)
+
+				default:
+					err = errors.New("unknown content type " + t)
+				}
+			}
+
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				_, _ = w.Write([]byte(err.Error()))
+			} else {
+				_, _ = w.Write([]byte("success"))
+			}
+
+			return
+		}
+
+		info, err := bind.isapi.SystemDeviceInfo(r.Context())
+		if err != nil {
+			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get device info failed with error %s", "", err.Error()))
+		}
+
+		vars["info"] = info
+
+		upgrade, err := bind.isapi.SystemUpgradeStatus(r.Context())
+		if err != nil {
+			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get upgrade status failed with error %s", "", err.Error()))
+		}
+
+		vars["upgrade"] = upgrade
 	}
 
 	t.Render(r.Context(), "widget", vars)
