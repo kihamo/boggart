@@ -13,6 +13,7 @@ const (
 	DefaultUpdaterTimeout         = time.Second * 30
 	DefaultPTZInterval            = time.Minute
 	DefaultPTZTimeout             = time.Second * 5
+	DefaultEventsIgnoreInterval   = time.Second * 5
 	DefaultWidgetChannel          = 101
 	DefaultPreviewRefreshInterval = time.Second * 5
 )
@@ -40,6 +41,7 @@ func (t Type) Config() interface{} {
 		UpdaterTimeout:         DefaultUpdaterTimeout,
 		PTZInterval:            DefaultPTZInterval,
 		PTZTimeout:             DefaultPTZTimeout,
+		EventsIgnoreInterval:   DefaultEventsIgnoreInterval,
 		WidgetChannel:          DefaultWidgetChannel,
 		PreviewRefreshInterval: DefaultPreviewRefreshInterval,
 	}

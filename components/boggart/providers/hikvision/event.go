@@ -39,6 +39,11 @@ const (
 	EventEventStateInctive = "inactive"
 )
 
+var (
+	eventTagAlertStart = []byte("<EventNotificationAlert")
+	eventTagAlertEnd   = []byte("</EventNotificationAlert>")
+)
+
 type EventNotificationAlertStreamResponse struct {
 	IpAddress           string    `xml:"ipAddress"`
 	Ipv6Address         string    `xml:"ipv6Address"`
@@ -70,6 +75,7 @@ func (s *AlertStreaming) Start() {
 	s.alerts = make(chan *EventNotificationAlertStreamResponse)
 	s.errors = make(chan error)
 
+	// starter
 	go func() {
 		ticker := time.NewTicker(connectionAttemptDuration)
 		for ; true; <-ticker.C {
@@ -116,7 +122,7 @@ func (s *AlertStreaming) read(response *http.Response) {
 				continue
 			}
 
-			if bytes.HasPrefix(line, []byte("<EventNotificationAlert")) {
+			if bytes.HasPrefix(line, eventTagAlertStart) {
 				buf.Write(line)
 				continue
 			} else if buf.Len() == 0 { // если сообщение не началось игнорируем весь контент
@@ -126,7 +132,7 @@ func (s *AlertStreaming) read(response *http.Response) {
 			buf.Write(line)
 
 			// если сообщение заканчивается запускаем алгоритм
-			if !bytes.HasPrefix(line, []byte("</EventNotificationAlert>")) {
+			if !bytes.HasPrefix(line, eventTagAlertEnd) {
 				continue
 			}
 

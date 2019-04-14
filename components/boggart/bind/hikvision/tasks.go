@@ -9,19 +9,20 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
+	"go.uber.org/multierr"
 )
 
 func (b *Bind) Tasks() []workers.Task {
 	taskLiveness := task.NewFunctionTask(b.taskLiveness)
-	taskLiveness.SetTimeout(b.livenessTimeout)
+	taskLiveness.SetTimeout(b.config.LivenessTimeout)
 	taskLiveness.SetRepeats(-1)
-	taskLiveness.SetRepeatInterval(b.livenessInterval)
+	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
 	taskLiveness.SetName("bind-hikvision-liveness-" + b.address.Host)
 
 	taskState := task.NewFunctionTask(b.taskUpdater)
-	taskState.SetTimeout(b.updaterTimeout)
+	taskState.SetTimeout(b.config.UpdaterTimeout)
 	taskState.SetRepeats(-1)
-	taskState.SetRepeatInterval(b.updaterInterval)
+	taskState.SetRepeatInterval(b.config.UpdaterInterval)
 	taskState.SetName("bind-hikvision-updater-" + b.address.Host)
 
 	tasks := []workers.Task{
@@ -29,11 +30,11 @@ func (b *Bind) Tasks() []workers.Task {
 		taskState,
 	}
 
-	if b.ptzEnabled {
+	if b.config.PTZEnabled {
 		taskPTZStatus := task.NewFunctionTillStopTask(b.taskPTZ)
-		taskPTZStatus.SetTimeout(b.ptzTimeout)
+		taskPTZStatus.SetTimeout(b.config.PTZTimeout)
 		taskPTZStatus.SetRepeats(-1)
-		taskPTZStatus.SetRepeatInterval(b.ptzInterval)
+		taskPTZStatus.SetRepeatInterval(b.config.PTZInterval)
 		taskPTZStatus.SetName("bind-hikvision-ptz-" + b.address.Host)
 
 		tasks = append(tasks, taskPTZStatus)
@@ -68,7 +69,7 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		b.ptzChannels = ptzChannels
 		b.mutex.Unlock()
 
-		if b.eventsEnabled {
+		if b.config.EventsEnabled {
 			if err := b.startAlertStreaming(); err != nil {
 				return nil, err
 			}
@@ -76,15 +77,22 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 
 		b.SetSerialNumber(deviceInfo.SerialNumber)
 
-		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateModel.Format(deviceInfo.SerialNumber), deviceInfo.Model)
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateFirmwareVersion.Format(deviceInfo.SerialNumber), deviceInfo.FirmwareVersion)
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateFirmwareReleasedDate.Format(deviceInfo.SerialNumber), deviceInfo.FirmwareReleasedDate)
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateModel.Format(deviceInfo.SerialNumber), deviceInfo.Model); e != nil {
+			err = multierr.Append(err, e)
+		}
+
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateFirmwareVersion.Format(deviceInfo.SerialNumber), deviceInfo.FirmwareVersion); e != nil {
+			err = multierr.Append(err, e)
+		}
+
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateFirmwareReleasedDate.Format(deviceInfo.SerialNumber), deviceInfo.FirmwareReleasedDate); e != nil {
+			err = multierr.Append(err, e)
+		}
 	}
 
 	b.UpdateStatus(boggart.BindStatusOnline)
 
-	return nil, nil
+	return nil, err
 }
 
 func (b *Bind) taskPTZ(ctx context.Context) (interface{}, error, bool) {

@@ -19,18 +19,10 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	password, _ := config.Address.User.Password()
 
 	bind := &Bind{
-		isapi: hikvision.NewISAPI(config.Address.Hostname(), port, config.Address.User.Username(), password),
+		isapi:                 hikvision.NewISAPI(config.Address.Hostname(), port, config.Address.User.Username(), password),
 		alertStreamingHistory: make(map[string]time.Time),
 		address:               config.Address.URL,
-		livenessInterval:      config.LivenessInterval,
-		livenessTimeout:       config.LivenessTimeout,
-		updaterInterval:       config.UpdaterInterval,
-		updaterTimeout:        config.UpdaterTimeout,
-		ptzInterval:           config.PTZInterval,
-		ptzTimeout:            config.PTZTimeout,
-		ptzEnabled:            config.PTZEnabled,
-		eventsEnabled:         config.EventsEnabled,
-		eventsIgnoreInterval:  config.EventsIgnoreInterval,
+		config:                config,
 	}
 
 	return bind, nil

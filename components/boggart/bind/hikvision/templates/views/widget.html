@@ -212,13 +212,13 @@
 
         <script type="application/javascript">
             $(document).ready(function () {
-                    Dropzone.options.firmware = {
-                        parallelUploads: 1,
-                        paramName: "firmware",
-                        createImageThumbnails: false,
-                        acceptedFiles: "application/octet-stream,.dav"
-                    };
-                });
+                Dropzone.options.firmware = {
+                    parallelUploads: 1,
+                    paramName: "firmware",
+                    createImageThumbnails: false,
+                    acceptedFiles: "application/octet-stream,.dav"
+                };
+            });
         </script>
     {{ end }}
 

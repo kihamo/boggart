@@ -20,10 +20,10 @@ const (
 	MQTTSubscribeTopicPTZRelative             mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/relative"
 	MQTTSubscribeTopicPTZPreset               mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/preset"
 	MQTTSubscribeTopicPTZMomentary            mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/momentary"
-	MQTTPublishTopicEvent                     mqtt.Topic = boggart.ComponentName + "/cctv/+/+/+"
 	MQTTPublishTopicPTZStatusElevation        mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/elevation"
 	MQTTPublishTopicPTZStatusAzimuth          mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/azimuth"
 	MQTTPublishTopicPTZStatusZoom             mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/zoom"
+	MQTTPublishTopicEvent                     mqtt.Topic = boggart.ComponentName + "/cctv/+/event/+/+"
 	MQTTPublishTopicStateModel                mqtt.Topic = boggart.ComponentName + "/cctv/+/state/model"
 	MQTTPublishTopicStateFirmwareVersion      mqtt.Topic = boggart.ComponentName + "/cctv/+/state/firmware/version"
 	MQTTPublishTopicStateFirmwareReleasedDate mqtt.Topic = boggart.ComponentName + "/cctv/+/state/firmware/release-date"
@@ -48,11 +48,11 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 		MQTTPublishTopicStateHDDUsage,
 	}
 
-	if b.eventsEnabled {
+	if b.config.EventsEnabled {
 		topics = append(topics, MQTTPublishTopicEvent)
 	}
 
-	if b.ptzEnabled {
+	if b.config.PTZEnabled {
 		topics = append(topics,
 			MQTTPublishTopicPTZStatusElevation,
 			MQTTPublishTopicPTZStatusAzimuth,
@@ -64,18 +64,20 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 }
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
-	if !b.ptzEnabled {
-		return nil
+	subscribers := make([]mqtt.Subscriber, 0)
+
+	if b.config.PTZEnabled {
+		subscribers = append(subscribers,
+			mqtt.NewSubscriber(MQTTSubscribeTopicPTZMove.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTAbsolute)),
+			mqtt.NewSubscriber(MQTTSubscribeTopicPTZAbsolute.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTAbsolute)),
+			mqtt.NewSubscriber(MQTTSubscribeTopicPTZContinuous.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTContinuous)),
+			mqtt.NewSubscriber(MQTTSubscribeTopicPTZRelative.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTRelative)),
+			mqtt.NewSubscriber(MQTTSubscribeTopicPTZPreset.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTPreset)),
+			mqtt.NewSubscriber(MQTTSubscribeTopicPTZMomentary.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTMomentary)),
+		)
 	}
 
-	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTSubscribeTopicPTZMove.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTAbsolute)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicPTZAbsolute.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTAbsolute)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicPTZContinuous.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTContinuous)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicPTZRelative.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTRelative)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicPTZPreset.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTPreset)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicPTZMomentary.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTMomentary)),
-	}
+	return subscribers
 }
 
 func (b *Bind) updateStatusByChannelId(ctx context.Context, channelId uint64) error {

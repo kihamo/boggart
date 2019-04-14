@@ -2,9 +2,9 @@ package hikvision
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"net/url"
+	"strconv"
 	"sync"
 	"time"
 
@@ -35,15 +35,7 @@ type Bind struct {
 
 	ptzChannels map[uint64]PTZChannel
 
-	livenessInterval     time.Duration
-	livenessTimeout      time.Duration
-	updaterInterval      time.Duration
-	updaterTimeout       time.Duration
-	ptzInterval          time.Duration
-	ptzTimeout           time.Duration
-	ptzEnabled           bool
-	eventsEnabled        bool
-	eventsIgnoreInterval time.Duration
+	config *Config
 }
 
 func (b *Bind) startAlertStreaming() error {
@@ -65,16 +57,17 @@ func (b *Bind) startAlertStreaming() error {
 					continue
 				}
 
-				cacheKey := fmt.Sprintf("%d-%s", event.DynChannelID, event.EventType)
+				cacheKey := strconv.FormatUint(event.DynChannelID, 10) + "-" + event.EventType
 
 				b.mutex.Lock()
 				lastFire, ok := b.alertStreamingHistory[cacheKey]
 				b.alertStreamingHistory[cacheKey] = event.DateTime
 				b.mutex.Unlock()
 
-				if !ok || event.DateTime.Sub(lastFire) > b.eventsIgnoreInterval {
-					// TODO: log
-					_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicEvent.Format(sn, event.DynChannelID, event.EventType), event.EventDescription)
+				if !ok || event.DateTime.Sub(lastFire) > b.config.EventsIgnoreInterval {
+					if err = b.MQTTPublishAsync(ctx, MQTTPublishTopicEvent.Format(sn, event.DynChannelID, event.EventType), event.EventDescription); err != nil {
+						b.Logger().Error("Send event to MQTT failed", "error", err.Error())
+					}
 				}
 
 			case err := <-stream.NextError():
