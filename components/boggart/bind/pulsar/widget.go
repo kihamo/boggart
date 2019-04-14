@@ -276,6 +276,12 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			Value: floatValue,
 			Error: err,
 		}
+
+		durationValue, err := bind.provider.OperatingTime()
+		vars["operating_time"] = metricView{
+			Value: durationValue,
+			Error: err,
+		}
 	}
 
 	t.Render(r.Context(), "widget", vars)
