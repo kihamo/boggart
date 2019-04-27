@@ -2,14 +2,19 @@ package serial
 
 import (
 	"bytes"
+	"io"
 	"sync"
 
-	"github.com/goburrow/serial"
+	s "github.com/goburrow/serial"
+)
+
+const (
+	bufferSize = 512
 )
 
 var (
 	multiRequestsMutex       sync.RWMutex
-	multiRequestsConnections = make(map[string]sync.RWMutex)
+	multiRequestsConnections = make(map[string]*sync.Mutex)
 )
 
 type Connection struct {
@@ -33,14 +38,14 @@ func Dial(target string, opts ...DialOption) *Connection {
 
 	if !conn.options.allowMultiRequest {
 		multiRequestsMutex.Lock()
-		multiRequestsConnections[target] = sync.RWMutex{}
+		multiRequestsConnections[target] = &sync.Mutex{}
 		multiRequestsMutex.Unlock()
 	}
 
 	return conn
 }
 
-func (c *Connection) Request(request []byte) ([]byte, error) {
+func (c *Connection) lockWrapper(f func(s.Port) error) error {
 	multiRequestsMutex.Lock()
 	lock, ok := multiRequestsConnections[c.target]
 	multiRequestsMutex.Unlock()
@@ -50,7 +55,7 @@ func (c *Connection) Request(request []byte) ([]byte, error) {
 		defer lock.Unlock()
 	}
 
-	port, err := serial.Open(&serial.Config{
+	port, err := s.Open(&s.Config{
 		BaudRate: 9600,
 		Parity:   "N",
 		Address:  c.target,
@@ -58,27 +63,125 @@ func (c *Connection) Request(request []byte) ([]byte, error) {
 	})
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer port.Close()
 
-	if _, err := port.Write(request); err != nil {
-		return nil, err
-	}
+	return f(port)
+}
 
-	buffer := bytes.NewBuffer(nil)
+func (c *Connection) Read(p []byte) (n int, err error) {
+	err = c.lockWrapper(func(port s.Port) (e error) {
+		n, e = port.Read(p)
+		return e
+	})
 
-	for {
-		b := make([]byte, 512)
-		n, err := port.Read(b)
-		if err != nil {
-			break
+	return n, err
+}
+
+func (c *Connection) Write(p []byte) (n int, err error) {
+	err = c.lockWrapper(func(port s.Port) (e error) {
+		n, e = port.Write(p)
+		return e
+	})
+
+	return n, err
+}
+
+func (c *Connection) ReadWrite(reader io.Reader, writer io.Writer) error {
+	return c.lockWrapper(func(port s.Port) (e error) {
+		readSerialDone := make(chan struct{}, 1)
+		readSerial := make(chan struct{}, 1)
+		errors := make(chan error, 1)
+
+		// from SERIAL to WRITER
+		go func() {
+			for {
+				select {
+				case <-readSerial:
+					for {
+						serialBuffer := make([]byte, bufferSize)
+
+						n, err := port.Read(serialBuffer)
+						if err != nil {
+							// любая ошибка при чтении из порта делает не возможную работу с ним в рамках этой сессии
+							errors <- err
+							return
+						}
+
+						if n > 0 {
+							_, err = writer.Write(serialBuffer[:n])
+							if err != nil {
+								return
+							}
+						}
+					}
+
+				case <-readSerialDone:
+					return
+				}
+			}
+		}()
+
+		// from READER to SERIAL
+		go func() {
+			for {
+				readerBuffer := make([]byte, bufferSize)
+
+				n, err := reader.Read(readerBuffer)
+				if err != nil {
+					if err != io.EOF {
+						errors <- err
+					} else {
+						errors <- nil
+					}
+
+					return
+				}
+
+				if n < 1 {
+					continue
+				}
+
+				_, err = port.Write(readerBuffer[:n])
+				if err != nil {
+					errors <- err
+					return
+				}
+
+				readSerial <- struct{}{}
+			}
+		}()
+
+		defer close(readSerialDone)
+
+		return <-errors
+	})
+}
+
+func (c *Connection) Invoke(request []byte) (response []byte, err error) {
+	err = c.lockWrapper(func(port s.Port) (e error) {
+		if _, e = port.Write(request); e != nil {
+			return e
 		}
 
-		if n != 0 {
-			buffer.Write(b[:n])
-		}
-	}
+		buffer := bytes.NewBuffer(nil)
 
-	return buffer.Bytes(), err
+		for {
+			b := make([]byte, bufferSize)
+			n, e := port.Read(b)
+			if e != nil {
+				break
+			}
+
+			if n != 0 {
+				buffer.Write(b[:n])
+			}
+		}
+
+		response = buffer.Bytes()
+		return e
+	})
+
+	return response, err
 }

@@ -67,10 +67,14 @@ type MetricsChannel int
 type SettingsParam int
 type ArchiveType int
 
+type Connection interface {
+	Invoke(request []byte) (response []byte, err error)
+}
+
 type HeatMeter struct {
 	address    []byte
 	location   *time.Location
-	connection *serial.Connection
+	connection Connection
 }
 
 func (i MetricsChannel) toInt64() int64 {
@@ -97,7 +101,7 @@ func (i ArchiveType) toBytes() []byte {
 	return big.NewInt(i.toInt64()).Bytes()
 }
 
-func NewHeatMeter(address []byte, location *time.Location, connection *serial.Connection) *HeatMeter {
+func NewHeatMeter(address []byte, location *time.Location, connection Connection) *HeatMeter {
 	if location == nil {
 		location = time.Now().Location()
 	}
@@ -111,10 +115,6 @@ func NewHeatMeter(address []byte, location *time.Location, connection *serial.Co
 
 func (d *HeatMeter) Address() []byte {
 	return d.address
-}
-
-func (d *HeatMeter) Connection() *serial.Connection {
-	return d.connection
 }
 
 func (d *HeatMeter) Request(function byte, data []byte) ([]byte, error) {
@@ -142,7 +142,7 @@ func (d *HeatMeter) Request(function byte, data []byte) ([]byte, error) {
 
 	// fmt.Println("Request: ", request, hex.EncodeToString(request), " with function", strings.ToUpper(hex.EncodeToString([]byte{function})))
 
-	response, err := d.connection.Request(request)
+	response, err := d.connection.Invoke(request)
 	if err != nil {
 		return nil, err
 	}

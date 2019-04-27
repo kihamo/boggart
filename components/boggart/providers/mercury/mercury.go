@@ -59,13 +59,17 @@ const (
 	displayModeDate
 )
 
+type Connection interface {
+	Invoke(request []byte) (response []byte, err error)
+}
+
 type ElectricityMeter200 struct {
 	address    []byte
 	location   *time.Location
-	connection *serial.Connection
+	connection Connection
 }
 
-func NewMercury(address []byte, location *time.Location, connection *serial.Connection) *ElectricityMeter200 {
+func NewMercury(address []byte, location *time.Location, connection Connection) *ElectricityMeter200 {
 	if location == nil {
 		location = time.Now().Location()
 	}
@@ -85,10 +89,6 @@ func (d *ElectricityMeter200) AddressGroup() ([]byte, error) {
 	return d.Request(FunctionReadAddressGroup, nil)
 }
 
-func (d *ElectricityMeter200) Connection() *serial.Connection {
-	return d.connection
-}
-
 func (d *ElectricityMeter200) Request(function byte, data []byte) ([]byte, error) {
 	request := []byte{0x00}
 
@@ -106,7 +106,7 @@ func (d *ElectricityMeter200) Request(function byte, data []byte) ([]byte, error
 
 	// fmt.Println("Request: ", request, hex.EncodeToString(request), " with function", strings.ToUpper(hex.EncodeToString([]byte{function})))
 
-	response, err := d.connection.Request(request)
+	response, err := d.connection.Invoke(request)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +122,7 @@ func (d *ElectricityMeter200) Request(function byte, data []byte) ([]byte, error
 	crc16 := serial.GenerateCRC16(response[:l-2])
 	if !bytes.Equal(response[l-2:], crc16) {
 		return nil, errors.New(
-			"error CRC16 of response packet have" +
+			"error CRC16 of response packet have " +
 				hex.EncodeToString(crc16) + " want " +
 				hex.EncodeToString(response[l-2:]))
 	}
