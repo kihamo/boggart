@@ -20,6 +20,7 @@ var (
 type Connection struct {
 	target  string
 	options dialOptions
+	config  *s.Config
 }
 
 func Dial(target string, opts ...DialOption) *Connection {
@@ -34,6 +35,13 @@ func Dial(target string, opts ...DialOption) *Connection {
 
 	for _, opt := range opts {
 		opt.apply(&conn.options)
+	}
+
+	conn.config = &s.Config{
+		BaudRate: 9600,
+		Parity:   "N",
+		Address:  conn.target,
+		Timeout:  conn.options.timeout,
 	}
 
 	if !conn.options.allowMultiRequest {
@@ -55,12 +63,7 @@ func (c *Connection) lockWrapper(f func(s.Port) error) error {
 		defer lock.Unlock()
 	}
 
-	port, err := s.Open(&s.Config{
-		BaudRate: 9600,
-		Parity:   "N",
-		Address:  c.target,
-		Timeout:  c.options.timeout,
-	})
+	port, err := s.Open(c.config)
 
 	if err != nil {
 		return err
@@ -130,12 +133,6 @@ func (c *Connection) ReadWrite(reader io.Reader, writer io.Writer) error {
 
 				n, err := reader.Read(readerBuffer)
 				if err != nil {
-					if err != io.EOF {
-						errors <- err
-					} else {
-						errors <- nil
-					}
-
 					return
 				}
 
@@ -155,7 +152,12 @@ func (c *Connection) ReadWrite(reader io.Reader, writer io.Writer) error {
 
 		defer close(readSerialDone)
 
-		return <-errors
+		err := <-errors
+		if err != nil && err.Error() == "serial: timeout" {
+			return nil
+		}
+
+		return err
 	})
 }
 

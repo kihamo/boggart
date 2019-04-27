@@ -2,13 +2,13 @@ package serial
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/protocols/serial_tcp"
+	"github.com/kihamo/boggart/components/boggart/protocols/serial_network"
 )
 
 type Bind struct {
 	boggart.BindBase
 
-	server *serial_tcp.Server
+	server serial_network.Server
 }
 
 func (b *Bind) Run() error {
