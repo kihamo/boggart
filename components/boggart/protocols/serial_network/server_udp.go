@@ -2,7 +2,6 @@ package serial_network
 
 import (
 	"bytes"
-	"fmt"
 	"net"
 	"sync"
 )
@@ -25,8 +24,6 @@ func NewUDPServer(network, address string, serial ReadWriter) *UDPServer {
 }
 
 func (s *UDPServer) ListenAndServe() error {
-	fmt.Println(s.address)
-
 	listen, err := net.ListenPacket(s.network, s.address)
 	if err != nil {
 		return err

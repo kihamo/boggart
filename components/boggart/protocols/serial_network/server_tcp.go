@@ -1,7 +1,6 @@
 package serial_network
 
 import (
-	"fmt"
 	"net"
 	"sync"
 )
@@ -41,7 +40,6 @@ func (s *TCPServer) ListenAndServe() error {
 			}
 
 			// TODO: log
-			fmt.Println("Error ", err.Error())
 			continue
 		}
 
