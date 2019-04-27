@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
+	"github.com/kihamo/boggart/components/boggart/protocols/serial"
 )
 
 // https://github.com/mrkrasser/MercuryStats
@@ -62,10 +62,10 @@ const (
 type ElectricityMeter200 struct {
 	address    []byte
 	location   *time.Location
-	connection *rs485.Connection
+	connection *serial.Connection
 }
 
-func NewMercury(address []byte, location *time.Location, connection *rs485.Connection) *ElectricityMeter200 {
+func NewMercury(address []byte, location *time.Location, connection *serial.Connection) *ElectricityMeter200 {
 	if location == nil {
 		location = time.Now().Location()
 	}
@@ -85,7 +85,7 @@ func (d *ElectricityMeter200) AddressGroup() ([]byte, error) {
 	return d.Request(FunctionReadAddressGroup, nil)
 }
 
-func (d *ElectricityMeter200) Connection() *rs485.Connection {
+func (d *ElectricityMeter200) Connection() *serial.Connection {
 	return d.connection
 }
 
@@ -102,7 +102,7 @@ func (d *ElectricityMeter200) Request(function byte, data []byte) ([]byte, error
 	request = append(request, data...)
 
 	// check sum CRC16
-	request = append(request, rs485.GenerateCRC16(request)...)
+	request = append(request, serial.GenerateCRC16(request)...)
 
 	// fmt.Println("Request: ", request, hex.EncodeToString(request), " with function", strings.ToUpper(hex.EncodeToString([]byte{function})))
 
@@ -119,7 +119,7 @@ func (d *ElectricityMeter200) Request(function byte, data []byte) ([]byte, error
 	}
 
 	// check crc16
-	crc16 := rs485.GenerateCRC16(response[:l-2])
+	crc16 := serial.GenerateCRC16(response[:l-2])
 	if !bytes.Equal(response[l-2:], crc16) {
 		return nil, errors.New(
 			"error CRC16 of response packet have" +

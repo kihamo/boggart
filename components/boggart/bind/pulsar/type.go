@@ -6,7 +6,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/atomic"
-	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
+	"github.com/kihamo/boggart/components/boggart/protocols/serial"
 	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
 )
 
@@ -18,7 +18,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
 	var err error
-	conn := rs485.GetConnection(config.RS485Address, config.RS485Timeout)
+	conn := serial.Dial(config.RS485Address, serial.WithTimeout(config.RS485Timeout))
 
 	var deviceAddress []byte
 	if config.Address == "" {

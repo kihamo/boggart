@@ -7,7 +7,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
+	"github.com/kihamo/boggart/components/boggart/protocols/serial"
 )
 
 const (
@@ -70,7 +70,7 @@ type ArchiveType int
 type HeatMeter struct {
 	address    []byte
 	location   *time.Location
-	connection *rs485.Connection
+	connection *serial.Connection
 }
 
 func (i MetricsChannel) toInt64() int64 {
@@ -97,7 +97,7 @@ func (i ArchiveType) toBytes() []byte {
 	return big.NewInt(i.toInt64()).Bytes()
 }
 
-func NewHeatMeter(address []byte, location *time.Location, connection *rs485.Connection) *HeatMeter {
+func NewHeatMeter(address []byte, location *time.Location, connection *serial.Connection) *HeatMeter {
 	if location == nil {
 		location = time.Now().Location()
 	}
@@ -113,7 +113,7 @@ func (d *HeatMeter) Address() []byte {
 	return d.address
 }
 
-func (d *HeatMeter) Connection() *rs485.Connection {
+func (d *HeatMeter) Connection() *serial.Connection {
 	return d.connection
 }
 
@@ -134,11 +134,11 @@ func (d *HeatMeter) Request(function byte, data []byte) ([]byte, error) {
 	request = append(request, data...)
 
 	// request id
-	requestId := rs485.GenerateRequestId()
+	requestId := serial.GenerateRequestId()
 	request = append(request, requestId...)
 
 	// check sum CRC16
-	request = append(request, rs485.GenerateCRC16(request)...)
+	request = append(request, serial.GenerateCRC16(request)...)
 
 	// fmt.Println("Request: ", request, hex.EncodeToString(request), " with function", strings.ToUpper(hex.EncodeToString([]byte{function})))
 
@@ -155,7 +155,7 @@ func (d *HeatMeter) Request(function byte, data []byte) ([]byte, error) {
 	}
 
 	// check crc16
-	crc16 := rs485.GenerateCRC16(response[:l-2])
+	crc16 := serial.GenerateCRC16(response[:l-2])
 	if !bytes.Equal(response[l-2:], crc16) {
 		return nil, errors.New("error CRC16 of response packet")
 	}
@@ -174,13 +174,13 @@ func (d *HeatMeter) Request(function byte, data []byte) ([]byte, error) {
 }
 
 func (d *HeatMeter) readMetrics(channel MetricsChannel) (float32, error) {
-	bs := rs485.Pad(rs485.Reverse(channel.toBytes()), 4)
+	bs := serial.Pad(serial.Reverse(channel.toBytes()), 4)
 	response, err := d.Request(FunctionReadMetrics, bs)
 	if err != nil {
 		return -1, err
 	}
 
-	return rs485.ToFloat32(rs485.Reverse(response)), nil
+	return serial.ToFloat32(serial.Reverse(response)), nil
 }
 
 func (d *HeatMeter) Datetime() (time.Time, error) {
@@ -213,8 +213,8 @@ func (d *HeatMeter) readArchive(channel MetricsChannel, start, end time.Time, t 
 		start = time.Date(start.Year(), start.Month(), start.Day(), start.Hour(), 0, 0, 0, end.Location())
 	}
 
-	bs := rs485.Pad(rs485.Reverse(channel.toBytes()), 4)
-	bs = append(bs, rs485.Pad(t.toBytes(), 2)...)
+	bs := serial.Pad(serial.Reverse(channel.toBytes()), 4)
+	bs = append(bs, serial.Pad(t.toBytes(), 2)...)
 	bs = append(bs, TimeToBytes(start)...)
 	bs = append(bs, TimeToBytes(end)...)
 
@@ -224,24 +224,24 @@ func (d *HeatMeter) readArchive(channel MetricsChannel, start, end time.Time, t 
 	}
 
 	begin := BytesToTime(response[4:10], d.location)
-	raw := rs485.Reverse(response[10:])
+	raw := serial.Reverse(response[10:])
 	values := make([]float32, 0)
 
 	for i := 0; i < len(raw); i += 4 {
-		values = append([]float32{rs485.ToFloat32(raw[i : i+4])}, values...)
+		values = append([]float32{serial.ToFloat32(raw[i : i+4])}, values...)
 	}
 
 	return begin, values, nil
 }
 
 func (d *HeatMeter) ReadSettings(param SettingsParam) ([]byte, error) {
-	bs := rs485.Pad(param.toBytes(), 2)
+	bs := serial.Pad(param.toBytes(), 2)
 	response, err := d.Request(FunctionReadSettings, bs)
 	if err != nil {
 		return nil, err
 	}
 
-	return rs485.Reverse(response), nil
+	return serial.Reverse(response), nil
 }
 
 func (d *HeatMeter) TemperatureIn() (float32, error) {
@@ -346,7 +346,7 @@ func (d *HeatMeter) DaylightSavingTime() (bool, error) {
 		return false, err
 	}
 
-	return rs485.ToUint64(value) == 1, nil
+	return serial.ToUint64(value) == 1, nil
 }
 
 func (d *HeatMeter) Diagnostics() ([]byte, error) {
@@ -365,7 +365,7 @@ func (d *HeatMeter) Version() (uint16, error) {
 		return 0, err
 	}
 
-	return uint16(rs485.ToUint64(value)), nil
+	return uint16(serial.ToUint64(value)), nil
 }
 
 func (d *HeatMeter) BatteryVoltage() (float32, error) {
@@ -374,7 +374,7 @@ func (d *HeatMeter) BatteryVoltage() (float32, error) {
 		return -1, err
 	}
 
-	return rs485.ToFloat32(rs485.Reverse(value)), nil
+	return serial.ToFloat32(serial.Reverse(value)), nil
 }
 
 func (d *HeatMeter) OperatingTime() (time.Duration, error) {
@@ -383,5 +383,5 @@ func (d *HeatMeter) OperatingTime() (time.Duration, error) {
 		return -1, err
 	}
 
-	return time.Hour * time.Duration(rs485.ToUint64(value)), nil
+	return time.Hour * time.Duration(serial.ToUint64(value)), nil
 }

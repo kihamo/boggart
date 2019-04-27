@@ -5,7 +5,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/atomic"
-	"github.com/kihamo/boggart/components/boggart/protocols/rs485"
+	"github.com/kihamo/boggart/components/boggart/protocols/serial"
 	"github.com/kihamo/boggart/components/boggart/providers/mercury"
 )
 
@@ -24,7 +24,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	provider := mercury.NewMercury(
 		mercury.ConvertSerialNumber(config.Address),
 		loc,
-		rs485.GetConnection(config.RS485Address, config.RS485Timeout))
+		serial.Dial(config.RS485Address, serial.WithTimeout(config.RS485Timeout)))
 
 	bind := &Bind{
 		provider: provider,

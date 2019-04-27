@@ -1,4 +1,4 @@
-package rs485
+package serial
 
 import (
 	"crypto/rand"
