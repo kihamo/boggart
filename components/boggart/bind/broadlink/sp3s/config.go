@@ -12,7 +12,7 @@ const (
 )
 
 type Config struct {
-	IP                boggart.IP           `valid:",required"`
+	Host              string               `valid:",required"`
 	MAC               boggart.HardwareAddr `valid:",required"`
 	Model             string               `valid:"in(sp3seu|sp3sus),required"`
 	UpdaterInterval   time.Duration        `mapstructure:"updater_interval" yaml:"updater_interval"`

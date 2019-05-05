@@ -11,10 +11,10 @@ type RM2ProPlus3 struct {
 	*RMMini
 }
 
-func NewRM2ProPlus3(mac net.HardwareAddr, addr, iface net.UDPAddr) *RM2ProPlus3 {
+func NewRM2ProPlus3(mac net.HardwareAddr, addr string) *RM2ProPlus3 {
 	return &RM2ProPlus3{
 		RMMini: &RMMini{
-			Device: internal.NewDevice(KindRM2ProPlus3, mac, addr, iface),
+			Device: internal.NewDevice(KindRM2ProPlus3, mac, addr),
 		},
 	}
 }

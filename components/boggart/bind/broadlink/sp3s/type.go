@@ -2,7 +2,6 @@ package sp3s
 
 import (
 	"errors"
-	"net"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/atomic"
@@ -16,24 +15,14 @@ type Type struct {
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
-	localAddr, err := broadlink.LocalAddr()
-	if err != nil {
-		return nil, err
-	}
-
-	ip := net.UDPAddr{
-		IP:   config.IP.IP,
-		Port: broadlink.DevicePort,
-	}
-
 	var provider *broadlink.SP3S
 
 	switch config.Model {
 	case "sp3seu":
-		provider = broadlink.NewSP3SEU(config.MAC.HardwareAddr, ip, *localAddr)
+		provider = broadlink.NewSP3SEU(config.MAC.HardwareAddr, config.Host)
 
 	case "sp3sus":
-		provider = broadlink.NewSP3SUS(config.MAC.HardwareAddr, ip, *localAddr)
+		provider = broadlink.NewSP3SUS(config.MAC.HardwareAddr, config.Host)
 
 	default:
 		return nil, errors.New("unknown model " + config.Model)

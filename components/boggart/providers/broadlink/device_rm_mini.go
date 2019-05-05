@@ -18,9 +18,9 @@ type RMMini struct {
 	*internal.Device
 }
 
-func NewRMMini(mac net.HardwareAddr, addr, iface net.UDPAddr) *RMMini {
+func NewRMMini(mac net.HardwareAddr, addr string) *RMMini {
 	return &RMMini{
-		Device: internal.NewDevice(KindRMMini, mac, addr, iface),
+		Device: internal.NewDevice(KindRMMini, mac, addr),
 	}
 }
 

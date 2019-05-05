@@ -14,7 +14,7 @@ const (
 )
 
 type ConfigRM struct {
-	IP                boggart.IP           `valid:",required"`
+	Host              string               `valid:",required"`
 	MAC               boggart.HardwareAddr `valid:",required"`
 	Model             string               `valid:"in(rm3mini|rm2proplus),required"`
 	CaptureDuration   time.Duration        `mapstructure:"capture_interval" yaml:"capture_interval"`

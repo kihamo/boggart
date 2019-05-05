@@ -2,7 +2,6 @@ package rm
 
 import (
 	"errors"
-	"net"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/broadlink"
@@ -13,24 +12,14 @@ type Type struct{}
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*ConfigRM)
 
-	localAddr, err := broadlink.LocalAddr()
-	if err != nil {
-		return nil, err
-	}
-
-	ip := net.UDPAddr{
-		IP:   config.IP.IP,
-		Port: broadlink.DevicePort,
-	}
-
 	var provider broadlink.Device
 
 	switch config.Model {
 	case "rm3mini":
-		provider = broadlink.NewRMMini(config.MAC.HardwareAddr, ip, *localAddr)
+		provider = broadlink.NewRMMini(config.MAC.HardwareAddr, config.Host)
 
 	case "rm2proplus":
-		provider = broadlink.NewRM2ProPlus3(config.MAC.HardwareAddr, ip, *localAddr)
+		provider = broadlink.NewRM2ProPlus3(config.MAC.HardwareAddr, config.Host)
 
 	default:
 		return nil, errors.New("unknown model " + config.Model)
@@ -41,7 +30,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	bind := &Bind{
 		provider:        provider,
 		mac:             config.MAC.HardwareAddr,
-		ip:              ip,
+		host:            config.Host,
 		captureDuration: config.CaptureDuration,
 
 		livenessInterval: config.LivenessInterval,

@@ -27,7 +27,7 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
-	pinger, err := ping.NewPinger(b.ip.IP.String())
+	pinger, err := ping.NewPinger(b.host)
 	if err != nil {
 		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, err

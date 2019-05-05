@@ -89,25 +89,24 @@ const (
 type Device interface {
 	Kind() int
 	MAC() net.HardwareAddr
-	Addr() *net.UDPAddr
-	Interface() *net.UDPAddr
+	Host() string
 	SetTimeout(duration time.Duration)
 }
 
-func NewDevice(kind int, mac net.HardwareAddr, addr, iface net.UDPAddr) Device {
+func NewDevice(kind int, mac net.HardwareAddr, addr string) Device {
 	switch kind {
 	case KindSP3SEU:
-		return NewSP3SEU(mac, addr, iface)
+		return NewSP3SEU(mac, addr)
 
 	case KindSP3SUS:
-		return NewSP3SUS(mac, addr, iface)
+		return NewSP3SUS(mac, addr)
 
 	case KindRM2ProPlus3:
-		return NewRM2ProPlus3(mac, addr, iface)
+		return NewRM2ProPlus3(mac, addr)
 
 	case KindRMMini:
-		return NewRMMini(mac, addr, iface)
+		return NewRMMini(mac, addr)
 	}
 
-	return internal.NewDevice(kind, mac, addr, iface)
+	return internal.NewDevice(kind, mac, addr)
 }

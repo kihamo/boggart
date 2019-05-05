@@ -16,7 +16,7 @@ type Bind struct {
 
 	provider        interface{}
 	mac             net.HardwareAddr
-	ip              net.UDPAddr
+	host            string
 	captureDuration time.Duration
 
 	livenessInterval time.Duration

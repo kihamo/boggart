@@ -8,12 +8,14 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"strconv"
 	"sync/atomic"
 	"time"
 )
 
 const (
 	DefaultTimeout = time.Second
+	DefaultPort    = 80
 
 	CommandAuth = 0x0065
 )
@@ -27,9 +29,8 @@ var (
 )
 
 type Device struct {
-	addrMAC       net.HardwareAddr
-	addrDevice    net.UDPAddr
-	addrInterface net.UDPAddr
+	mac  net.HardwareAddr
+	host string
 
 	aesKey   []byte
 	aesIV    []byte
@@ -41,12 +42,15 @@ type Device struct {
 	packetsCounter uint64
 }
 
-func NewDevice(kind int, mac net.HardwareAddr, addr, iface net.UDPAddr) *Device {
+func NewDevice(kind int, mac net.HardwareAddr, host string) *Device {
+	if _, _, err := net.SplitHostPort(host); err != nil {
+		host = host + ":" + strconv.Itoa(DefaultPort)
+	}
+
 	d := &Device{
-		kind:          kind,
-		addrMAC:       mac,
-		addrDevice:    addr,
-		addrInterface: iface,
+		kind: kind,
+		mac:  mac,
+		host: host,
 	}
 	d.SetTimeout(DefaultTimeout)
 
@@ -82,15 +86,11 @@ func (d *Device) Kind() int {
 }
 
 func (d *Device) MAC() net.HardwareAddr {
-	return d.addrMAC
+	return d.mac
 }
 
-func (d *Device) Addr() *net.UDPAddr {
-	return &d.addrDevice
-}
-
-func (d *Device) Interface() *net.UDPAddr {
-	return &d.addrInterface
+func (d *Device) Host() string {
+	return d.host
 }
 
 func (d *Device) request(cmd byte, payload []byte, waitResult bool) ([]byte, error) {
@@ -101,18 +101,23 @@ func (d *Device) request(cmd byte, payload []byte, waitResult bool) ([]byte, err
 		}
 	}
 
-	conn, err := net.ListenUDP("udp4", &d.addrInterface)
+	conn, err := net.Dial("udp", d.host)
 	if err != nil {
 		return nil, err
 	}
 	defer conn.Close()
 
-	err = conn.SetDeadline(time.Now().Add(d.Timeout()))
+	connUDP, ok := conn.(*net.UDPConn)
+	if !ok {
+		return nil, errors.New("failed cast connect to *net.UDPConn")
+	}
+
+	err = connUDP.SetDeadline(time.Now().Add(d.Timeout()))
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = conn.WriteTo(d.buildCmdPacket(cmd, payload), &d.addrDevice)
+	_, err = connUDP.Write(d.buildCmdPacket(cmd, payload))
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +127,7 @@ func (d *Device) request(cmd byte, payload []byte, waitResult bool) ([]byte, err
 	}
 
 	response := make([]byte, DefaultBufferSize)
-	size, _, err := conn.ReadFromUDP(response)
+	size, _, err := connUDP.ReadFromUDP(response)
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +156,7 @@ func (d *Device) Call(cmd byte, payload []byte) ([]byte, error) {
 	}
 
 	// verify MAC address
-	for i, part := range d.addrMAC {
+	for i, part := range d.mac {
 		if result[0x2a+i] != part {
 			return nil, errors.New("invalid MAC address")
 		}
@@ -175,7 +180,7 @@ func (d *Device) Auth(id []byte, name string) error {
 	}
 
 	if name == "" {
-		name = d.addrMAC.String()
+		name = d.mac.String()
 	}
 
 	if len(id) != 15 {
@@ -262,7 +267,7 @@ func (d *Device) buildCmdPacket(cmd byte, payload []byte) (packet []byte) {
 	d.incPacketsCounter()
 	binary.LittleEndian.PutUint16(packet[0x28:], d.getPacketsCounter())
 
-	for i, part := range d.addrMAC {
+	for i, part := range d.mac {
 		packet[0x2a+i] = part
 	}
 

@@ -13,15 +13,15 @@ type SP3S struct {
 	*internal.Device
 }
 
-func NewSP3SEU(mac net.HardwareAddr, addr, iface net.UDPAddr) *SP3S {
+func NewSP3SEU(mac net.HardwareAddr, addr string) *SP3S {
 	return &SP3S{
-		Device: internal.NewDevice(KindSP3SEU, mac, addr, iface),
+		Device: internal.NewDevice(KindSP3SEU, mac, addr),
 	}
 }
 
-func NewSP3SUS(mac net.HardwareAddr, addr, iface net.UDPAddr) *SP3S {
+func NewSP3SUS(mac net.HardwareAddr, addr string) *SP3S {
 	return &SP3S{
-		Device: internal.NewDevice(KindSP3SUS, mac, addr, iface),
+		Device: internal.NewDevice(KindSP3SUS, mac, addr),
 	}
 }
 
