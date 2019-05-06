@@ -1,7 +1,6 @@
 package serial_network
 
 import (
-	"bytes"
 	"errors"
 	"net"
 	"time"
@@ -19,13 +18,13 @@ func NewUDPClient(network, address string) *UDPClient {
 	}
 }
 
-func (c *UDPClient) connect() (net.Conn, error) {
+func (c *UDPClient) connect() (*net.UDPConn, error) {
 	conn, err := net.Dial(c.network, c.address)
 	if err != nil {
 		return nil, err
 	}
 
-	_, ok := conn.(*net.UDPConn)
+	udp, ok := conn.(*net.UDPConn)
 	if !ok {
 		return nil, errors.New("failed cast connect to *net.UDPConn")
 	}
@@ -39,7 +38,7 @@ func (c *UDPClient) connect() (net.Conn, error) {
 
 	//udp.SetReadDeadline(time.Now().Add(time.Second * 2))
 
-	return conn, err
+	return udp, err
 }
 
 func (c *UDPClient) Read(b []byte) (n int, err error) {
@@ -75,19 +74,12 @@ func (c *UDPClient) Invoke(request []byte) (response []byte, err error) {
 		return nil, err
 	}
 
-	buffer := bytes.NewBuffer(nil)
+	b := make([]byte, maxBufferSize)
 
-	for {
-		b := make([]byte, maxBufferSize)
-		n, e := conn.Read(b)
-		if e != nil {
-			break
-		}
-
-		if n > 0 {
-			buffer.Write(b[:n])
-		}
+	n, _, err := conn.ReadFromUDP(b)
+	if n > 0 {
+		return b[:n], nil
 	}
 
-	return buffer.Bytes(), nil
+	return nil, nil
 }
