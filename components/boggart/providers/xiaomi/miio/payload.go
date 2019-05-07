@@ -10,9 +10,21 @@ type Response struct {
 }
 
 type ResponseOK struct {
-	Response
-
+	ID     uint32   `json:"id"`
 	Result []string `json:"result"`
+}
+
+type ResponseUnknownMethod struct {
+	ID     uint32 `json:"id"`
+	Result string `json:"result"`
+}
+
+type ResponseError struct {
+	ID    uint32 `json:"id"`
+	Error struct {
+		Code    int64  `json:"code"`
+		Message string `json:"message"`
+	} `json:"error"`
 }
 
 type Request struct {

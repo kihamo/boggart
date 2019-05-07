@@ -2,6 +2,7 @@ package miio
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"sync"
@@ -137,6 +138,19 @@ func (p *Client) Send(method string, params interface{}, result interface{}) err
 	}
 
 	fmt.Println(string(response.Body()))
+
+	var responseError ResponseError
+	if err = json.Unmarshal(response.Body(), &responseError); err == nil && len(responseError.Error.Message) > 0 {
+		return errors.New(responseError.Error.Message)
+	} else {
+		var responseUnknown ResponseUnknownMethod
+		if err = json.Unmarshal(response.Body(), &responseUnknown); err == nil {
+			switch responseUnknown.Result {
+			case "unknown_method":
+				return errors.New("unknown method")
+			}
+		}
+	}
 
 	err = json.Unmarshal(response.Body(), &result)
 	return err

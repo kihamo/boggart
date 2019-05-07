@@ -15,7 +15,7 @@ STOP_VACUUM	app_stop	Stop vacuuming
 START_SPOT	app_spot	Start spot cleaning
 PAUSE	app_pause	Pause cleaning
 CHARGE	app_charge	Start charging
-FIND_ME	find_me	Send findme
+// FIND_ME	find_me	Send findme
 // CONSUMABLES_GET	get_consumable	Get consumables status
 // CONSUMABLES_RESET	reset_consumable	Reset consumables
 // CLEAN_SUMMARY_GET	get_clean_summary	Cleaning details
@@ -36,14 +36,14 @@ TIMER_DEL	del_timer	Remove a timer
 // SOUND_INSTALL	dnld_install_sound	Voice pack installation
 // SOUND_GET_CURRENT	get_current_sound	Current voice
 // SOUND_GET_VOLUME	get_sound_volume	-
-LOG_UPLOAD_GET	get_log_upload_status	-
+// LOG_UPLOAD_GET	get_log_upload_status	-
 LOG_UPLOAD_ENABLE	enable_log_upload	-
-SET_MODE	set_custom_mode	Set the vacuum level
-GET_MODE	get_custom_mode	Get the vacuum level
+// SET_MODE	set_custom_mode	Set the vacuum level
+// GET_MODE	get_custom_mode	Get the vacuum level
 REMOTE_START	app_rc_start	Start remote control
 REMOTE_END	app_rc_end	End remote control
 REMOTE_MOVE	app_rc_move	Remote control move command
-GET_GATEWAY	get_gateway	Get current gatway
+// GET_GATEWAY	get_gateway	Get current gatway
 
 Robo Vacuum v2 and v1 with firmware versions 3.3.9_003194 or newer
 Type	Command	Description
@@ -126,6 +126,17 @@ type VacuumSoundInstallStatus struct {
 	SIDInProgress uint64 `json:"sid_in_progress"`
 }
 
+type VacuumGateway struct {
+	IP  boggart.IP           `json:"gateway_ip"`
+	MAC boggart.HardwareAddr `json:"gateway_mac"`
+}
+
+type VacuumLogUploadStatus struct {
+	Status     uint64 `json:"log_upload_status"`
+	Location   string `json:"location"`
+	PolicyName uint64 `json:"policy_name"`
+}
+
 type vacuumConsumable string
 
 type Vacuum struct {
@@ -157,6 +168,38 @@ func (d *Vacuum) SerialNumber() (string, error) {
 	}
 
 	return reply.Result[0].SerialNumber, nil
+}
+
+func (d *Vacuum) FanSpeed() (uint64, error) {
+	type response struct {
+		miio.Response
+
+		Result []uint64 `json:"result"`
+	}
+
+	var reply response
+
+	err := d.Client().Send("get_custom_mode", nil, &reply)
+	if err != nil {
+		return 0, err
+	}
+
+	return reply.Result[0], nil
+}
+
+func (d *Vacuum) SetFanSpeed(speed uint64) error {
+	if speed > 100 {
+		speed = 100
+	}
+
+	var reply miio.ResponseOK
+
+	err := d.Client().Send("set_custom_mode", []uint64{speed}, &reply)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (d *Vacuum) Consumables() (map[vacuumConsumable]time.Duration, error) {
@@ -390,6 +433,10 @@ func (d *Vacuum) SoundInstallProgress() (VacuumSoundInstallStatus, error) {
 	return reply.Result[0], nil
 }
 
+func (d *Vacuum) Find() error {
+	return d.Client().Send("find_me", nil, nil)
+}
+
 func (d *Vacuum) Timezone() (*time.Location, error) {
 	type response struct {
 		miio.Response
@@ -437,4 +484,60 @@ func (d *Vacuum) Locale() (VacuumLocale, error) {
 	}
 
 	return reply.Result[0], nil
+}
+
+func (d *Vacuum) Gateway() (VacuumGateway, error) {
+	type response struct {
+		miio.Response
+
+		Result []VacuumGateway `json:"result"`
+	}
+
+	var reply response
+
+	err := d.Client().Send("get_gateway", nil, &reply)
+	if err != nil {
+		return VacuumGateway{}, err
+	}
+
+	return reply.Result[0], nil
+}
+
+func (d *Vacuum) LogUploadStatus() (VacuumLogUploadStatus, error) {
+	type response struct {
+		miio.Response
+
+		Result []VacuumLogUploadStatus `json:"result"`
+	}
+
+	var reply response
+
+	err := d.Client().Send("get_log_upload_status", nil, &reply)
+	if err != nil {
+		return VacuumLogUploadStatus{}, err
+	}
+
+	return reply.Result[0], nil
+}
+
+func (d *Vacuum) SetLabStatus(enabled bool) error {
+	var (
+		reply  miio.ResponseOK
+		status int64
+	)
+
+	if enabled {
+		status = 1
+	}
+
+	err := d.Client().Send("set_lab_status", []int64{status}, &reply)
+	if err != nil {
+		return err
+	}
+
+	if !miio.ResponseIsOK(reply) {
+		return errors.New("device return not OK response")
+	}
+
+	return nil
 }
