@@ -3,6 +3,7 @@ package miio
 import (
 	"encoding/json"
 	"io"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -14,36 +15,53 @@ type Client struct {
 	io.Closer
 
 	conn           *internal.Connection
+	connOnce       sync.Once
 	packetsCounter uint32
 
+	address  string
 	deviceId []byte
 	token    string
 
 	stampDiff time.Duration
 }
 
-func NewClient(address, token string) (*Client, error) {
-	conn, err := internal.NewConnection(address)
+func NewClient(address, token string) *Client {
+	return &Client{
+		packetsCounter: uint32(time.Now().Unix()),
+		address:        address,
+		token:          token,
+	}
+}
+
+func (p *Client) lazyConnect() (conn *internal.Connection, err error) {
+	p.connOnce.Do(func() {
+		conn, err = internal.NewConnection(p.address)
+		if err == nil {
+			p.conn = conn
+		}
+	})
+
+	return p.conn, nil
+}
+
+func (p *Client) Close() error {
+	if p.conn != nil {
+		return p.conn.Close()
+	}
+
+	return nil
+}
+
+func (p *Client) Hello() (packet.Packet, error) {
+	conn, err := p.lazyConnect()
 	if err != nil {
 		return nil, err
 	}
 
-	return &Client{
-		packetsCounter: 6,
-		token:          token,
-		conn:           conn,
-	}, nil
-}
-
-func (p *Client) Close() error {
-	return p.conn.Close()
-}
-
-func (p *Client) Hello() (packet.Packet, error) {
 	request := packet.NewHello()
 	response := packet.NewBase()
 
-	err := p.conn.Invoke(request, response)
+	err = conn.Invoke(request, response)
 	if err != nil {
 		return nil, err
 	}
@@ -85,6 +103,11 @@ func (p *Client) Send(method string, params interface{}, result interface{}) err
 		return err
 	}
 
+	conn, err := p.lazyConnect()
+	if err != nil {
+		return err
+	}
+
 	var response packet.Packet
 
 	if result != nil {
@@ -101,7 +124,7 @@ func (p *Client) Send(method string, params interface{}, result interface{}) err
 	request.SetBody(body)
 	request.SetStamp(time.Now().Add(p.stampDiff))
 
-	err = p.conn.Invoke(request, response)
+	err = conn.Invoke(request, response)
 	if err != nil {
 		return err
 	}
