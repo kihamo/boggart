@@ -10,11 +10,11 @@ import (
 
 /*
 Type	Command	Description
-START_VACUUM	app_start	Start vacuuming
-STOP_VACUUM	app_stop	Stop vacuuming
-START_SPOT	app_spot	Start spot cleaning
-PAUSE	app_pause	Pause cleaning
-CHARGE	app_charge	Start charging
+// START_VACUUM	app_start	Start vacuuming
+// STOP_VACUUM	app_stop	Stop vacuuming
+// START_SPOT	app_spot	Start spot cleaning
+// PAUSE	app_pause	Pause cleaning
+// CHARGE	app_charge	Start charging
 // FIND_ME	find_me	Send findme
 // CONSUMABLES_GET	get_consumable	Get consumables status
 // CONSUMABLES_RESET	reset_consumable	Reset consumables
@@ -22,7 +22,7 @@ CHARGE	app_charge	Start charging
 // CLEAN_RECORD_GET	get_clean_record	Cleaning details
 CLEAN_RECORD_MAP_GET	get_clean_record_map	Get the map reference of a historical cleaning
 GET_MAP	get_map_v1	Get Map
-GET_STATUS	get_status	Get Status information
+// GET_STATUS	get_status	Get Status information
 // GET_SERIAL_NUMBER	get_serial_number	Get Serial #
 DND_GET	get_dnd_timer	Do Not Disturb Settings
 DND_SET	set_dnd_timer	Set the do not disturb timings
@@ -60,31 +60,68 @@ OTA_STATE	miIO.get_ota_state	Update firmware over air Status
 */
 
 const (
-	ConsumableFilter    vacuumConsumable = "filter_work_time"
-	ConsumableBrushMain vacuumConsumable = "main_brush_work_time"
-	ConsumableBrushSide vacuumConsumable = "side_brush_work_time"
-	ConsumableSensor    vacuumConsumable = "sensor_dirty_time"
+	VacuumStatusUnknown uint64 = iota
+	VacuumStatusInitiating
+	VacuumStatusSleeping
+	VacuumStatusWaiting
+	VacuumStatusUnknown4
+	VacuumStatusCleaning
+	VacuumStatusReturningHome
+	VacuumStatusRemoteControl
+	VacuumStatusCharging
+	VacuumStatusChargingError
+	VacuumStatusPause
+	VacuumStatusSpotCleaning
+	VacuumStatusInError
+	VacuumStatusShuttingDown
+	VacuumStatusUpdating
+	VacuumStatusDocking
+	VacuumStatusGoTo
+	VacuumStatusZoneCleaning
+	VacuumStatusFull uint64 = 100
 
-	ConsumableLifetimeFilter    time.Duration = 150
-	ConsumableLifetimeBrushMain time.Duration = 300
-	ConsumableLifetimeBrushSide time.Duration = 200
-	ConsumableLifetimeSensor    time.Duration = 30
+	VacuumConsumableFilter    vacuumConsumable = "filter_work_time"
+	VacuumConsumableBrushMain vacuumConsumable = "main_brush_work_time"
+	VacuumConsumableBrushSide vacuumConsumable = "side_brush_work_time"
+	VacuumConsumableSensor    vacuumConsumable = "sensor_dirty_time"
 
-	SoundInstallStateUnknown uint64 = iota
-	SoundInstallStateDownloading
-	SoundInstallStateInstalling
-	SoundInstallStateInstalled
-	SoundInstallStateError
+	VacuumConsumableLifetimeFilter    time.Duration = 150
+	VacuumConsumableLifetimeBrushMain time.Duration = 300
+	VacuumConsumableLifetimeBrushSide time.Duration = 200
+	VacuumConsumableLifetimeSensor    time.Duration = 30
 
-	SoundInstallErrorNo uint64 = iota
-	SoundInstallErrorUnknown1
-	SoundInstallErrorFailedDownload
-	SoundInstallErrorWrongChecksum
-	SoundInstallErrorUnknown4
-	SoundInstallErrorUnknown5
+	VacuumSoundInstallStateUnknown uint64 = iota
+	VacuumSoundInstallStateDownloading
+	VacuumSoundInstallStateInstalling
+	VacuumSoundInstallStateInstalled
+	VacuumSoundInstallStateError
+
+	VacuumSoundInstallErrorNo uint64 = iota
+	VacuumSoundInstallErrorUnknown1
+	VacuumSoundInstallErrorFailedDownload
+	VacuumSoundInstallErrorWrongChecksum
+	VacuumSoundInstallErrorUnknown4
+	VacuumSoundInstallErrorUnknown5
 )
 
 // https://github.com/marcelrv/XiaomiRobotVacuumProtocol
+type VacuumStatus struct {
+	MessageVersion  uint64
+	MessageSequence uint64
+	State           uint64
+	Battery         uint64
+	CleanTime       time.Duration
+	CleanArea       uint64 // mm2
+	ErrorCode       uint64
+	MapPresent      bool
+	InCleaning      bool
+	InReturning     bool
+	InFreshState    bool
+	LabStatus       bool
+	FanPower        uint64
+	DNDEnabled      bool
+}
+
 type VacuumCleanSummary struct {
 	TotalTime     time.Duration
 	TotalArea     uint64 // mm2
@@ -170,7 +207,130 @@ func (d *Vacuum) SerialNumber() (string, error) {
 	return reply.Result[0].SerialNumber, nil
 }
 
-func (d *Vacuum) FanSpeed() (uint64, error) {
+func (d *Vacuum) Status() (result VacuumStatus, err error) {
+	type response struct {
+		miio.Response
+
+		Result []struct {
+			MessageVersion  uint64        `json:"msg_ver"`
+			MessageSequence uint64        `json:"msg_seq"`
+			State           uint64        `json:"state"`
+			Battery         uint64        `json:"battery"`
+			CleanTime       time.Duration `json:"clean_time"`
+			CleanArea       uint64        `json:"clean_area"` // mm2
+			ErrorCode       uint64        `json:"error_code"`
+			MapPresent      uint64        `json:"map_present"`
+			InCleaning      uint64        `json:"in_cleaning"`
+			InReturning     uint64        `json:"in_returning"`
+			InFreshState    uint64        `json:"in_fresh_state"`
+			LabStatus       uint64        `json:"lab_status"`
+			FanPower        uint64        `json:"fan_power"`
+			DNDEnabled      uint64        `json:"dnd_enabled"`
+		} `json:"result"`
+	}
+
+	var reply response
+
+	err = d.Client().Send("get_status", nil, &reply)
+	if err != nil {
+		return result, err
+	}
+
+	r := &reply.Result[0]
+	result.MessageVersion = r.MessageVersion
+	result.MessageSequence = r.MessageSequence
+	result.State = r.State
+	result.Battery = r.Battery
+	result.CleanTime = r.CleanTime * time.Second
+	result.CleanArea = r.CleanArea
+	result.ErrorCode = r.ErrorCode
+	result.MapPresent = r.MapPresent == 1
+	result.InCleaning = r.InCleaning == 1
+	result.InReturning = r.InReturning == 1
+	result.InFreshState = r.InFreshState == 1
+	result.LabStatus = r.LabStatus == 1
+	result.FanPower = r.FanPower
+	result.DNDEnabled = r.DNDEnabled == 1
+
+	return result, nil
+}
+
+func (d *Vacuum) Start() error {
+	var reply miio.ResponseOK
+
+	err := d.Client().Send("app_start", nil, &reply)
+	if err != nil {
+		return err
+	}
+
+	if !miio.ResponseIsOK(reply) {
+		return errors.New("device return not OK response")
+	}
+
+	return nil
+}
+
+func (d *Vacuum) Spot() error {
+	var reply miio.ResponseOK
+
+	err := d.Client().Send("app_spot", nil, &reply)
+	if err != nil {
+		return err
+	}
+
+	if !miio.ResponseIsOK(reply) {
+		return errors.New("device return not OK response")
+	}
+
+	return nil
+}
+
+func (d *Vacuum) Stop() error {
+	var reply miio.ResponseOK
+
+	err := d.Client().Send("app_stop", nil, &reply)
+	if err != nil {
+		return err
+	}
+
+	if !miio.ResponseIsOK(reply) {
+		return errors.New("device return not OK response")
+	}
+
+	return nil
+}
+
+func (d *Vacuum) Pause() error {
+	var reply miio.ResponseOK
+
+	err := d.Client().Send("app_pause", nil, &reply)
+	if err != nil {
+		return err
+	}
+
+	if !miio.ResponseIsOK(reply) {
+		return errors.New("device return not OK response")
+	}
+
+	return nil
+}
+
+func (d *Vacuum) Home() error {
+	var reply miio.ResponseOK
+
+	err := d.Client().Send("app_charge", nil, &reply)
+	if err != nil {
+		return err
+	}
+
+	if !miio.ResponseIsOK(reply) {
+		return errors.New("device return not OK response")
+	}
+
+	return nil
+}
+
+func (d *Vacuum) FanPower() (uint64, error) {
 	type response struct {
 		miio.Response
 
@@ -187,14 +347,14 @@ func (d *Vacuum) FanSpeed() (uint64, error) {
 	return reply.Result[0], nil
 }
 
-func (d *Vacuum) SetFanSpeed(speed uint64) error {
-	if speed > 100 {
-		speed = 100
+func (d *Vacuum) SetFanPower(power uint64) error {
+	if power > 100 {
+		power = 100
 	}
 
 	var reply miio.ResponseOK
 
-	err := d.Client().Send("set_custom_mode", []uint64{speed}, &reply)
+	err := d.Client().Send("set_custom_mode", []uint64{power}, &reply)
 	if err != nil {
 		return err
 	}
