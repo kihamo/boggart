@@ -30,10 +30,10 @@ TIMER_SET	set_timer	Add a timer
 TIMER_UPDATE	upd_timer	Activate/deactivate a timer
 TIMER_GET	get_timer	Get Timers
 TIMER_DEL	del_timer	Remove a timer
-TIMERZONE_GET	get_timezone	Get timezone
-TIMERZONE_SET	set_timezone	Set timezone
-SOUND_INSTALL	dnld_install_sound	Voice pack installation
-SOUND_GET_CURRENT	get_current_sound	Current voice
+// TIMERZONE_GET	get_timezone	Get timezone
+// TIMERZONE_SET	set_timezone	Set timezone
+// SOUND_INSTALL	dnld_install_sound	Voice pack installation
+// SOUND_GET_CURRENT	get_current_sound	Current voice
 // SOUND_GET_VOLUME	get_sound_volume	-
 LOG_UPLOAD_GET	get_log_upload_status	-
 LOG_UPLOAD_ENABLE	enable_log_upload	-
@@ -68,25 +68,55 @@ const (
 	ConsumableLifetimeBrushMain time.Duration = 300
 	ConsumableLifetimeBrushSide time.Duration = 200
 	ConsumableLifetimeSensor    time.Duration = 30
+
+	SoundInstallStateUnknown uint64 = iota
+	SoundInstallStateDownloading
+	SoundInstallStateInstalling
+	SoundInstallStateInstalled
+	SoundInstallStateError
+
+	SoundInstallErrorNo uint64 = iota
+	SoundInstallErrorUnknown1
+	SoundInstallErrorFailedDownload
+	SoundInstallErrorWrongChecksum
+	SoundInstallErrorUnknown4
+	SoundInstallErrorUnknown5
 )
 
 // https://github.com/marcelrv/XiaomiRobotVacuumProtocol
-type vacuumConsumable string
-
-type CleanSummary struct {
+type VacuumCleanSummary struct {
 	TotalTime     time.Duration
 	TotalArea     uint64 // mm2
 	TotalCleanups uint64
 	CleanupIDs    []uint64
 }
 
-type CleanDetail struct {
+type VacuumCleanDetail struct {
 	StartTime        time.Time
 	EndTime          time.Time
 	CleaningDuration time.Duration
 	Area             uint64 // mm2
 	Completed        bool
 }
+
+type VacuumSound struct {
+	SIDInUse       uint64 `json:"sid_in_use"`
+	SIDVersion     uint64 `json:"sid_version"`
+	SIDInProgress  uint64 `json:"sid_in_progress"`
+	Location       string `json:"location"`
+	Bom            string `json:"bom"`
+	Language       string `json:"language"`
+	MessageVersion uint64 `json:"msg_ver"`
+}
+
+type VacuumSoundInstallStatus struct {
+	Progress      uint64 `json:"progress"`
+	State         uint64 `json:"state"`
+	Error         uint64 `json:"error"`
+	SIDInProgress uint64 `json:"sid_in_progress"`
+}
+
+type vacuumConsumable string
 
 type Vacuum struct {
 	miio.Device
@@ -156,7 +186,7 @@ func (d *Vacuum) ResetConsumable(consumable vacuumConsumable) error {
 	return nil
 }
 
-func (d *Vacuum) CleanSummary() (CleanSummary, error) {
+func (d *Vacuum) CleanSummary() (VacuumCleanSummary, error) {
 	type response struct {
 		miio.Response
 
@@ -167,10 +197,10 @@ func (d *Vacuum) CleanSummary() (CleanSummary, error) {
 
 	err := d.Client().Send("get_clean_summary", nil, &reply)
 	if err != nil {
-		return CleanSummary{}, err
+		return VacuumCleanSummary{}, err
 	}
 
-	result := CleanSummary{}
+	result := VacuumCleanSummary{}
 
 	for i, v := range reply.Result {
 		switch i {
@@ -196,7 +226,7 @@ func (d *Vacuum) CleanSummary() (CleanSummary, error) {
 	return result, nil
 }
 
-func (d *Vacuum) CleanDetails(id uint64) (CleanDetail, error) {
+func (d *Vacuum) CleanDetails(id uint64) (VacuumCleanDetail, error) {
 	type response struct {
 		miio.Response
 
@@ -207,10 +237,10 @@ func (d *Vacuum) CleanDetails(id uint64) (CleanDetail, error) {
 
 	err := d.Client().Send("get_clean_record", []uint64{id}, &reply)
 	if err != nil {
-		return CleanDetail{}, err
+		return VacuumCleanDetail{}, err
 	}
 
-	result := CleanDetail{}
+	result := VacuumCleanDetail{}
 
 	for i, v := range reply.Result[0] {
 		switch i {
@@ -268,6 +298,71 @@ func (d *Vacuum) SetSoundVolume(volume uint64) error {
 	}
 
 	return nil
+}
+
+// Мой кастомный {"result":[{"sid_in_use":10000,"sid_version":1,"sid_in_progress":0,"location":"prc","bom":"A.03.0002","language":"prc","msg_ver":2}],"id":1557236719}
+// English       {"result":[{"sid_in_use":3,"sid_version":2,"sid_in_progress":0,"location":"prc","bom":"A.03.0002","language":"prc","msg_ver":2}],"id":1557236769}
+// По-умолчанию  {"result":[{"sid_in_use":1,"sid_version":2,"sid_in_progress":0,"location":"prc","bom":"A.03.0002","language":"prc","msg_ver":2}],"id":1557236821}
+
+func (d *Vacuum) SoundCurrent() (VacuumSound, error) {
+	type response struct {
+		miio.Response
+
+		Result []VacuumSound `json:"result"`
+	}
+
+	var reply response
+
+	err := d.Client().Send("get_current_sound", nil, &reply)
+	if err != nil {
+		return VacuumSound{}, err
+	}
+
+	return reply.Result[0], nil
+}
+
+func (d *Vacuum) SoundInstall(url, md5sum string, sid uint64) (VacuumSoundInstallStatus, error) {
+	request := struct {
+		MD5 string `json:"md5"`
+		URL string `json:"url"`
+		SID uint64 `json:"sid"`
+	}{
+		MD5: md5sum,
+		URL: url,
+		SID: sid,
+	}
+
+	type response struct {
+		miio.Response
+
+		Result []VacuumSoundInstallStatus `json:"result"`
+	}
+
+	var reply response
+
+	err := d.Client().Send("dnld_install_sound", request, &reply)
+	if err != nil {
+		return VacuumSoundInstallStatus{}, err
+	}
+
+	return reply.Result[0], nil
+}
+
+func (d *Vacuum) SoundInstallProgress() (VacuumSoundInstallStatus, error) {
+	type response struct {
+		miio.Response
+
+		Result []VacuumSoundInstallStatus `json:"result"`
+	}
+
+	var reply response
+
+	err := d.Client().Send("get_sound_progress", nil, &reply)
+	if err != nil {
+		return VacuumSoundInstallStatus{}, err
+	}
+
+	return reply.Result[0], nil
 }
 
 func (d *Vacuum) Timezone() (*time.Location, error) {

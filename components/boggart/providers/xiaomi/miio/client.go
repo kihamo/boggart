@@ -2,6 +2,7 @@ package miio
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"sync"
 	"sync/atomic"
@@ -117,6 +118,8 @@ func (p *Client) Send(method string, params interface{}, result interface{}) err
 		}
 	}
 
+	fmt.Println(string(body))
+
 	request, err := packet.NewCrypto(deviceID, p.token)
 	if err != nil {
 		return err
@@ -132,6 +135,8 @@ func (p *Client) Send(method string, params interface{}, result interface{}) err
 	if result == nil {
 		return nil
 	}
+
+	fmt.Println(string(response.Body()))
 
 	err = json.Unmarshal(response.Body(), &result)
 	return err
