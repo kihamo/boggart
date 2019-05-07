@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/xiaomi/miio"
 )
 
@@ -99,6 +100,15 @@ type VacuumCleanDetail struct {
 	Completed        bool
 }
 
+type VacuumLocale struct {
+	Name     string           `json:"name"`
+	Bom      string           `json:"bom"`
+	Location string           `json:"location"`
+	Language string           `json:"language"`
+	WiFiPlan string           `json:"wifiplan"`
+	Timezone boggart.Location `json:"timezone"`
+}
+
 type VacuumSound struct {
 	SIDInUse       uint64 `json:"sid_in_use"`
 	SIDVersion     uint64 `json:"sid_version"`
@@ -165,7 +175,7 @@ func (d *Vacuum) Consumables() (map[vacuumConsumable]time.Duration, error) {
 
 	consumables := make(map[vacuumConsumable]time.Duration, len(reply.Result[0]))
 	for n, v := range reply.Result[0] {
-		consumables[vacuumConsumable(n)] = time.Duration(v/60/60) * time.Hour
+		consumables[vacuumConsumable(n)] = time.Duration(v) * time.Second
 	}
 
 	return consumables, nil
@@ -262,6 +272,21 @@ func (d *Vacuum) CleanDetails(id uint64) (VacuumCleanDetail, error) {
 	}
 
 	return result, nil
+}
+
+func (d *Vacuum) SoundVolumeTest() error {
+	var reply miio.ResponseOK
+
+	err := d.Client().Send("test_sound_volume", nil, &reply)
+	if err != nil {
+		return err
+	}
+
+	if !miio.ResponseIsOK(reply) {
+		return errors.New("device return not OK response")
+	}
+
+	return nil
 }
 
 func (d *Vacuum) SoundVolume() (uint64, error) {
@@ -395,4 +420,21 @@ func (d *Vacuum) SetTimezone(zone time.Location) error {
 	}
 
 	return nil
+}
+
+func (d *Vacuum) Locale() (VacuumLocale, error) {
+	type response struct {
+		miio.Response
+
+		Result []VacuumLocale `json:"result"`
+	}
+
+	var reply response
+
+	err := d.Client().Send("app_get_locale", nil, &reply)
+	if err != nil {
+		return VacuumLocale{}, err
+	}
+
+	return reply.Result[0], nil
 }

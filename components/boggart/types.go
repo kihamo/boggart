@@ -3,26 +3,27 @@ package boggart
 import (
 	"net"
 	"net/url"
+	"time"
 )
 
 type IP struct {
 	net.IP
 }
 
-func (ip IP) MarshalText() ([]byte, error) {
-	return []byte(ip.String()), nil
+func (i IP) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
 }
 
 type IPMask struct {
 	net.IPMask
 }
 
-func (mask *IPMask) UnmarshalText(text []byte) error {
+func (m *IPMask) UnmarshalText(text []byte) error {
 	ip := &net.IP{}
 
 	err := ip.UnmarshalText(text)
 	if err == nil {
-		*mask = IPMask{
+		*m = IPMask{
 			IPMask: net.IPMask(ip.To4()),
 		}
 	}
@@ -34,15 +35,15 @@ type HardwareAddr struct {
 	net.HardwareAddr
 }
 
-func (addr HardwareAddr) MarshalText() ([]byte, error) {
-	return []byte(addr.String()), nil
+func (a HardwareAddr) MarshalText() ([]byte, error) {
+	return []byte(a.String()), nil
 }
 
-func (addr *HardwareAddr) UnmarshalText(text []byte) error {
+func (a *HardwareAddr) UnmarshalText(text []byte) error {
 	mac, err := net.ParseMAC(string(text))
 
 	if err == nil {
-		*addr = HardwareAddr{
+		*a = HardwareAddr{
 			HardwareAddr: mac,
 		}
 	}
@@ -56,4 +57,24 @@ type URL struct {
 
 func (u URL) MarshalText() ([]byte, error) {
 	return []byte(u.String()), nil
+}
+
+type Location struct {
+	time.Location
+}
+
+func (l Location) MarshalText() ([]byte, error) {
+	return []byte(l.String()), nil
+}
+
+func (l *Location) UnmarshalText(text []byte) error {
+	location, err := time.LoadLocation(string(text))
+
+	if err == nil {
+		*l = Location{
+			Location: *location,
+		}
+	}
+
+	return err
 }
