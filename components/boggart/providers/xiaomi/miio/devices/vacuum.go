@@ -80,6 +80,12 @@ const (
 	VacuumStatusZoneCleaning
 	VacuumStatusFull uint64 = 100
 
+	VacuumFanPowerQuiet    uint64 = 38
+	VacuumFanPowerBalanced uint64 = 60
+	VacuumFanPowerTurbo    uint64 = 75
+	VacuumFanPowerMax      uint64 = 100
+	VacuumFanPowerMob      uint64 = 105
+
 	VacuumConsumableFilter    vacuumConsumable = "filter_work_time"
 	VacuumConsumableBrushMain vacuumConsumable = "main_brush_work_time"
 	VacuumConsumableBrushSide vacuumConsumable = "side_brush_work_time"
@@ -102,6 +108,30 @@ const (
 	VacuumSoundInstallErrorWrongChecksum
 	VacuumSoundInstallErrorUnknown4
 	VacuumSoundInstallErrorUnknown5
+
+/*
+   0 => 'None',
+       1 => 'Laser sensor fault',
+       2 => 'Collision sensor error',
+       3 => 'Wheel floating',
+       4 => 'Cliff sensor fault',
+       5 => 'Main brush blocked',
+       6 => 'Side brush blocked',
+       7 => 'Wheel blocked',
+       8 => 'Device stuck',
+       9 => 'Dust bin missing',
+       10 => 'Filter blocked',
+       11 => 'Magnetic field detected',
+       12 => 'Low battery',
+       13 => 'Charging problem',
+       14 => 'Battery failure',
+       15 => 'Wall sensor fault',
+       16 => 'Uneven surface',
+       17 => 'Side brush failure',
+       18 => 'Suction fan failure',
+       19 => 'Unpowered charging station',
+       20 => 'Unknown'
+*/
 )
 
 // https://github.com/marcelrv/XiaomiRobotVacuumProtocol
@@ -120,6 +150,14 @@ type VacuumStatus struct {
 	LabStatus       bool
 	FanPower        uint64
 	DNDEnabled      bool
+}
+
+type VacuumCarpetMode struct {
+	Enabled         bool
+	CurrentIntegral uint64
+	CurrentHigh     uint64
+	CurrentLow      uint64
+	StallTime       uint64
 }
 
 type VacuumCleanSummary struct {
@@ -232,27 +270,25 @@ func (d *Vacuum) Status() (result VacuumStatus, err error) {
 	var reply response
 
 	err = d.Client().Send("get_status", nil, &reply)
-	if err != nil {
-		return result, err
+	if err == nil {
+		r := &reply.Result[0]
+		result.MessageVersion = r.MessageVersion
+		result.MessageSequence = r.MessageSequence
+		result.State = r.State
+		result.Battery = r.Battery
+		result.CleanTime = r.CleanTime * time.Second
+		result.CleanArea = r.CleanArea
+		result.ErrorCode = r.ErrorCode
+		result.MapPresent = r.MapPresent == 1
+		result.InCleaning = r.InCleaning == 1
+		result.InReturning = r.InReturning == 1
+		result.InFreshState = r.InFreshState == 1
+		result.LabStatus = r.LabStatus == 1
+		result.FanPower = r.FanPower
+		result.DNDEnabled = r.DNDEnabled == 1
 	}
 
-	r := &reply.Result[0]
-	result.MessageVersion = r.MessageVersion
-	result.MessageSequence = r.MessageSequence
-	result.State = r.State
-	result.Battery = r.Battery
-	result.CleanTime = r.CleanTime * time.Second
-	result.CleanArea = r.CleanArea
-	result.ErrorCode = r.ErrorCode
-	result.MapPresent = r.MapPresent == 1
-	result.InCleaning = r.InCleaning == 1
-	result.InReturning = r.InReturning == 1
-	result.InFreshState = r.InFreshState == 1
-	result.LabStatus = r.LabStatus == 1
-	result.FanPower = r.FanPower
-	result.DNDEnabled = r.DNDEnabled == 1
-
-	return result, nil
+	return result, err
 }
 
 func (d *Vacuum) Start() error {
@@ -348,13 +384,66 @@ func (d *Vacuum) FanPower() (uint64, error) {
 }
 
 func (d *Vacuum) SetFanPower(power uint64) error {
-	if power > 100 {
-		power = 100
+	if power > 105 {
+		power = 105
+	} else if power < 1 {
+		power = 1
 	}
 
 	var reply miio.ResponseOK
 
 	err := d.Client().Send("set_custom_mode", []uint64{power}, &reply)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *Vacuum) CarpetMode() (result VacuumCarpetMode, err error) {
+	type response struct {
+		miio.Response
+
+		Result []struct {
+			Enabled         uint64 `json:"enabled"`
+			CurrentIntegral uint64 `json:"current_integral"`
+			CurrentHigh     uint64 `json:"current_high"`
+			CurrentLow      uint64 `json:"current_low"`
+			StallTime       uint64 `json:"stall_time"`
+		} `json:"result"`
+	}
+
+	var reply response
+
+	err = d.Client().Send("get_carpet_mode", nil, &reply)
+	if err == nil {
+		r := &reply.Result[0]
+		result.Enabled = r.Enabled == 1
+		result.CurrentIntegral = r.CurrentIntegral
+		result.CurrentHigh = r.CurrentHigh
+		result.CurrentLow = r.CurrentLow
+		result.StallTime = r.StallTime
+	}
+
+	return result, nil
+}
+
+func (d *Vacuum) SetCarpetMode(enabled bool, integral, high, low, stallTime uint64) error {
+	var reply miio.ResponseOK
+
+	request := map[string]uint64{
+		"enable":           0,
+		"current_integral": integral,
+		"current_high":     high,
+		"current_low":      low,
+		"stall_time":       stallTime,
+	}
+
+	if enabled {
+		request["enable"] = 1
+	}
+
+	err := d.Client().Send("set_carpet_mode", []interface{}{request}, &reply)
 	if err != nil {
 		return err
 	}
@@ -550,16 +639,6 @@ func (d *Vacuum) SoundCurrent() (VacuumSound, error) {
 }
 
 func (d *Vacuum) SoundInstall(url, md5sum string, sid uint64) (VacuumSoundInstallStatus, error) {
-	request := struct {
-		MD5 string `json:"md5"`
-		URL string `json:"url"`
-		SID uint64 `json:"sid"`
-	}{
-		MD5: md5sum,
-		URL: url,
-		SID: sid,
-	}
-
 	type response struct {
 		miio.Response
 
@@ -568,7 +647,11 @@ func (d *Vacuum) SoundInstall(url, md5sum string, sid uint64) (VacuumSoundInstal
 
 	var reply response
 
-	err := d.Client().Send("dnld_install_sound", request, &reply)
+	err := d.Client().Send("dnld_install_sound", []map[string]interface{}{{
+		"md5": md5sum,
+		"url": url,
+		"sid": sid,
+	}}, &reply)
 	if err != nil {
 		return VacuumSoundInstallStatus{}, err
 	}

@@ -32,6 +32,14 @@ type InfoPayload struct {
 	} `json:"netif"`
 }
 
+type WiFiStatusPayload struct {
+	State               string `json:"state"`
+	AuthFailCount       uint64 `json:"auth_fail_count"`
+	ConnectSuccessCount uint64 `json:"conn_success_count"`
+	ConnectFailCount    uint64 `json:"conn_fail_count"`
+	DHCPFailCount       uint64 `json:"dhcp_fail_count"`
+}
+
 func NewDevice(address, token string) *Device {
 	return &Device{
 		client: NewClient(address, token),
@@ -59,6 +67,23 @@ func (d *Device) Info() (InfoPayload, error) {
 	err := d.Client().Send("miIO.info", nil, &reply)
 	if err != nil {
 		return InfoPayload{}, err
+	}
+
+	return reply.Result, nil
+}
+
+func (d *Device) WiFiStatus() (WiFiStatusPayload, error) {
+	type response struct {
+		Response
+
+		Result WiFiStatusPayload `json:"result"`
+	}
+
+	var reply response
+
+	err := d.Client().Send("miIO.wifi_assoc_state", nil, &reply)
+	if err != nil {
+		return WiFiStatusPayload{}, err
 	}
 
 	return reply.Result, nil

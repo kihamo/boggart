@@ -3,7 +3,6 @@ package miio
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"sync"
 	"sync/atomic"
@@ -119,7 +118,7 @@ func (p *Client) Send(method string, params interface{}, result interface{}) err
 		}
 	}
 
-	fmt.Println(string(body))
+	// fmt.Println(string(body))
 
 	request, err := packet.NewCrypto(deviceID, p.token)
 	if err != nil {
@@ -137,7 +136,7 @@ func (p *Client) Send(method string, params interface{}, result interface{}) err
 		return nil
 	}
 
-	fmt.Println(string(response.Body()))
+	// fmt.Println(string(response.Body()))
 
 	var responseError ResponseError
 	if err = json.Unmarshal(response.Body(), &responseError); err == nil && len(responseError.Error.Message) > 0 {
