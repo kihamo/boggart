@@ -24,9 +24,9 @@ CLEAN_RECORD_MAP_GET	get_clean_record_map	Get the map reference of a historical 
 GET_MAP	get_map_v1	Get Map
 // GET_STATUS	get_status	Get Status information
 // GET_SERIAL_NUMBER	get_serial_number	Get Serial #
-DND_GET	get_dnd_timer	Do Not Disturb Settings
-DND_SET	set_dnd_timer	Set the do not disturb timings
-DND_CLOSE	close_dnd_timer	Disable the do not disturb function
+// DND_GET	get_dnd_timer	Do Not Disturb Settings
+// DND_SET	set_dnd_timer	Set the do not disturb timings
+// DND_CLOSE	close_dnd_timer	Disable the do not disturb function
 TIMER_SET	set_timer	Add a timer
 TIMER_UPDATE	upd_timer	Activate/deactivate a timer
 TIMER_GET	get_timer	Get Timers
@@ -173,6 +173,14 @@ type VacuumCleanDetail struct {
 	CleaningDuration time.Duration
 	Area             uint64 // mm2
 	Completed        bool
+}
+
+type VacuumDoNotDisturb struct {
+	Enabled     bool
+	StartHour   uint64
+	StartMinute uint64
+	EndHour     uint64
+	EndMinute   uint64
 }
 
 type VacuumLocale struct {
@@ -473,7 +481,7 @@ func (d *Vacuum) Consumables() (map[vacuumConsumable]time.Duration, error) {
 	return consumables, nil
 }
 
-func (d *Vacuum) ResetConsumable(consumable vacuumConsumable) error {
+func (d *Vacuum) ConsumableReset(consumable vacuumConsumable) error {
 	var reply miio.ResponseOK
 
 	err := d.Client().Send("reset_consumable", []string{string(consumable)}, &reply)
@@ -677,7 +685,76 @@ func (d *Vacuum) SoundInstallProgress() (VacuumSoundInstallStatus, error) {
 }
 
 func (d *Vacuum) Find() error {
-	return d.Client().Send("find_me", nil, nil)
+	var reply miio.ResponseOK
+
+	err := d.Client().Send("find_me", nil, &reply)
+	if err != nil {
+		return err
+	}
+
+	if !miio.ResponseIsOK(reply) {
+		return errors.New("device return not OK response")
+	}
+
+	return nil
+}
+
+func (d *Vacuum) DoNotDisturb() (result VacuumDoNotDisturb, err error) {
+	type response struct {
+		miio.Response
+
+		Result []struct {
+			Enabled     uint64 `json:"enabled"`
+			StartHour   uint64 `json:"start_hour"`
+			StartMinute uint64 `json:"start_minute"`
+			EndHour     uint64 `json:"end_hour"`
+			EndMinute   uint64 `json:"end_minute"`
+		} `json:"result"`
+	}
+
+	var reply response
+
+	err = d.Client().Send("get_dnd_timer", nil, &reply)
+	if err == nil {
+		r := &reply.Result[0]
+		result.Enabled = r.Enabled == 1
+		result.StartHour = r.StartHour
+		result.StartMinute = r.StartMinute
+		result.EndHour = r.EndHour
+		result.EndMinute = r.EndMinute
+	}
+
+	return result, err
+}
+
+func (d *Vacuum) DoNotDisturbDisable() error {
+	var reply miio.ResponseOK
+
+	err := d.Client().Send("close_dnd_timer", nil, &reply)
+	if err != nil {
+		return err
+	}
+
+	if !miio.ResponseIsOK(reply) {
+		return errors.New("device return not OK response")
+	}
+
+	return nil
+}
+
+func (d *Vacuum) SetDoNotDisturb(startHour, startMinute, endHour, endMinute uint64) error {
+	var reply miio.ResponseOK
+
+	err := d.Client().Send("set_dnd_timer", []uint64{startHour, startMinute, endHour, endMinute}, &reply)
+	if err != nil {
+		return err
+	}
+
+	if !miio.ResponseIsOK(reply) {
+		return errors.New("device return not OK response")
+	}
+
+	return nil
 }
 
 func (d *Vacuum) Timezone() (*time.Location, error) {
