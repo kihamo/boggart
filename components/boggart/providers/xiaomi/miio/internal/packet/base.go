@@ -26,6 +26,7 @@ type Packet interface {
 	DeviceID() []byte
 	Stamp() time.Time
 	Body() []byte
+	Dump() string
 }
 
 type Base struct {
@@ -63,6 +64,13 @@ func (p *Base) Stamp() time.Time {
 
 func (p *Base) Body() []byte {
 	return p.body
+}
+
+func (p *Base) Dump() string {
+	buf := bytes.NewBuffer(nil)
+	p.WriteTo(buf)
+
+	return hex.EncodeToString(buf.Bytes())
 }
 
 func (p *Base) build(checksum []byte) []byte {

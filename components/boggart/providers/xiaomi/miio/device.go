@@ -1,6 +1,7 @@
 package miio
 
 import (
+	"context"
 	"io"
 	"net"
 
@@ -58,13 +59,13 @@ func (d *Device) Close() error {
 	return d.client.Close()
 }
 
-func (d *Device) Info() (InfoPayload, error) {
+func (d *Device) Info(ctx context.Context) (InfoPayload, error) {
 	var reply struct {
 		Response
 		Result InfoPayload `json:"result"`
 	}
 
-	err := d.Client().Send("miIO.info", nil, &reply)
+	err := d.Client().Send(ctx, "miIO.info", nil, &reply)
 	if err != nil {
 		return InfoPayload{}, err
 	}
@@ -72,7 +73,7 @@ func (d *Device) Info() (InfoPayload, error) {
 	return reply.Result, nil
 }
 
-func (d *Device) WiFiStatus() (WiFiStatusPayload, error) {
+func (d *Device) WiFiStatus(ctx context.Context) (WiFiStatusPayload, error) {
 	type response struct {
 		Response
 
@@ -81,7 +82,7 @@ func (d *Device) WiFiStatus() (WiFiStatusPayload, error) {
 
 	var reply response
 
-	err := d.Client().Send("miIO.wifi_assoc_state", nil, &reply)
+	err := d.Client().Send(ctx, "miIO.wifi_assoc_state", nil, &reply)
 	if err != nil {
 		return WiFiStatusPayload{}, err
 	}
@@ -90,13 +91,13 @@ func (d *Device) WiFiStatus() (WiFiStatusPayload, error) {
 }
 
 /*
-func (d *Device) OTAStatus() (error) {
+func (d *Device) OTAStatus(ctx context.Context) (error) {
 	var reply struct {
 		Response
 		// Result []uint64 `json:"result"`
 	}
 
-	err := d.Client().Send("miIO.get_ota_state", nil, &reply)
+	err := d.Client().Send(ctx, "miIO.get_ota_state", nil, &reply)
 	if err != nil {
 		return err
 	}
@@ -107,13 +108,13 @@ func (d *Device) OTAStatus() (error) {
 }
 */
 
-func (d *Device) OTAProgress() (uint64, error) {
+func (d *Device) OTAProgress(ctx context.Context) (uint64, error) {
 	var reply struct {
 		Response
 		Result []uint64 `json:"result"`
 	}
 
-	err := d.Client().Send("miIO.get_ota_progress", nil, &reply)
+	err := d.Client().Send(ctx, "miIO.get_ota_progress", nil, &reply)
 	if err != nil {
 		return 0, err
 	}

@@ -1,9 +1,12 @@
 package miio
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
+	"log"
+	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -12,37 +15,52 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/xiaomi/miio/internal/packet"
 )
 
+const (
+	DefaultTimeout = time.Second * 5
+)
+
 type Client struct {
 	io.Closer
 
-	conn           *internal.Connection
-	connOnce       sync.Once
 	packetsCounter uint32
+	dump           uint32
+	stampDiff      int64
+
+	conn     *internal.Connection
+	connOnce sync.Once
 
 	address  string
 	deviceId []byte
 	token    string
-
-	stampDiff time.Duration
 }
 
 func NewClient(address, token string) *Client {
 	return &Client{
-		packetsCounter: uint32(time.Now().Unix()),
+		packetsCounter: 400,
 		address:        address,
 		token:          token,
 	}
 }
 
-func (p *Client) lazyConnect() (conn *internal.Connection, err error) {
+func (p *Client) lazyConnect(ctx context.Context) (conn *internal.Connection, err error) {
+	var start bool
+
 	p.connOnce.Do(func() {
+		start = true
+		p.SetDump(true)
+
 		conn, err = internal.NewConnection(p.address)
 		if err == nil {
 			p.conn = conn
 		}
 	})
 
-	return p.conn, nil
+	// начинаем сессию hello пакетом
+	if start {
+		_, err = p.Hello(ctx)
+	}
+
+	return p.conn, err
 }
 
 func (p *Client) Close() error {
@@ -53,8 +71,21 @@ func (p *Client) Close() error {
 	return nil
 }
 
-func (p *Client) Hello() (packet.Packet, error) {
-	conn, err := p.lazyConnect()
+func (p *Client) SetDump(enabled bool) {
+	if enabled {
+		atomic.StoreUint32(&p.dump, 1)
+	} else {
+
+		atomic.StoreUint32(&p.dump, 0)
+	}
+}
+
+func (p *Client) SetPacketsCounter(count uint32) {
+	atomic.StoreUint32(&p.packetsCounter, count)
+}
+
+func (p *Client) Hello(ctx context.Context) (packet.Packet, error) {
+	conn, err := p.lazyConnect(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -62,18 +93,17 @@ func (p *Client) Hello() (packet.Packet, error) {
 	request := packet.NewHello()
 	response := packet.NewBase()
 
-	err = conn.Invoke(request, response)
+	err = conn.Invoke(ctx, request, response)
 	if err != nil {
 		return nil, err
 	}
 
-	p.stampDiff = time.Now().Sub(response.Stamp())
 	return response, nil
 }
 
 func (p *Client) DeviceID() ([]byte, error) {
 	if p.deviceId == nil {
-		response, err := p.Hello()
+		response, err := p.Hello(context.Background())
 		if err != nil {
 			return nil, err
 		}
@@ -84,13 +114,18 @@ func (p *Client) DeviceID() ([]byte, error) {
 	return p.deviceId, nil
 }
 
-func (p *Client) Send(method string, params interface{}, result interface{}) error {
+func (p *Client) Send(ctx context.Context, method string, params interface{}, result interface{}) error {
 	if params == nil {
 		params = []interface{}{}
 	}
 
+	if _, ok := ctx.Deadline(); !ok {
+		ctx, _ = context.WithTimeout(ctx, DefaultTimeout)
+	}
+
+	requestID := atomic.AddUint32(&p.packetsCounter, 1)
 	body, err := json.Marshal(Request{
-		ID:     atomic.AddUint32(&p.packetsCounter, 1),
+		ID:     requestID,
 		Method: method,
 		Params: params,
 	})
@@ -104,7 +139,7 @@ func (p *Client) Send(method string, params interface{}, result interface{}) err
 		return err
 	}
 
-	conn, err := p.lazyConnect()
+	conn, err := p.lazyConnect(ctx)
 	if err != nil {
 		return err
 	}
@@ -118,25 +153,40 @@ func (p *Client) Send(method string, params interface{}, result interface{}) err
 		}
 	}
 
-	// fmt.Println(string(body))
-
 	request, err := packet.NewCrypto(deviceID, p.token)
 	if err != nil {
 		return err
 	}
 	request.SetBody(body)
-	request.SetStamp(time.Now().Add(p.stampDiff))
 
-	err = conn.Invoke(request, response)
+	var diff time.Duration
+
+	diff = time.Duration(atomic.LoadInt64(&p.stampDiff))
+	request.SetStamp(time.Now().Add(diff))
+
+	dump := atomic.LoadUint32(&p.dump) == 1
+	if dump {
+		log.Printf("Request #%d raw: " + request.Dump())
+		log.Printf("Request #%d body: " + string(body))
+	}
+
+	err = conn.Invoke(ctx, request, response)
+
 	if err != nil {
 		return err
+	}
+
+	if dump {
+		log.Println("Response raw: " + response.Dump())
+		log.Println("Response body: " + string(response.Body()))
 	}
 
 	if result == nil {
 		return nil
 	}
 
-	// fmt.Println(string(response.Body()))
+	diff = time.Now().Sub(response.Stamp())
+	atomic.StoreInt64(&p.stampDiff, int64(diff))
 
 	var responseError ResponseError
 	if err = json.Unmarshal(response.Body(), &responseError); err == nil && len(responseError.Error.Message) > 0 {
@@ -149,6 +199,14 @@ func (p *Client) Send(method string, params interface{}, result interface{}) err
 				return errors.New("unknown method")
 			}
 		}
+	}
+
+	var responseDefault Response
+	if err = json.Unmarshal(response.Body(), &responseDefault); err == nil && responseDefault.ID != requestID {
+		return errors.New("response ID could not be verified. Expected " +
+			strconv.FormatUint(uint64(requestID), 10) +
+			", got 0x" +
+			strconv.FormatUint(uint64(responseDefault.ID), 10))
 	}
 
 	err = json.Unmarshal(response.Body(), &result)

@@ -1,0 +1,105 @@
+{{ define "content" }}
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_content">
+                <div role="tabpanel">
+                    <ul class="nav nav-tabs bar_tabs" role="tablist">
+                        <li role="presentation"{{ if eq .action "" }} class="active"{{ end }}><a href="{{ if eq .action "" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}{{ end }}">{{ i18n "Status" . }}</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane fade active in">
+                            {{ if .info }}
+                            <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                                <thead>
+                                <tr>
+                                    <th class="md-col-2">{{ i18n "Variable" . }}</th>
+                                    <th class="md-col-2">{{ i18n "Value" . }}</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>{{ i18n "Model" . }}</td>
+                                    <td>{{ .info.Model }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            {{ end }}
+
+                            {{ if .wifi }}
+                            <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th class="md-col-2">{{ i18n "Variable" . }}</th>
+                                        <th class="md-col-2">{{ i18n "Value" . }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{{ i18n "State" . }}</td>
+                                        <td>{{ .wifi.State }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Auth fail count" . }}</td>
+                                        <td>{{ .wifi.AuthFailCount }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Connect success count" . }}</td>
+                                        <td>{{ .wifi.ConnectSuccessCount }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Connect fail count" . }}</td>
+                                        <td>{{ .wifi.ConnectFailCount }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "DHCP fail count" . }}</td>
+                                        <td>{{ .wifi.DHCPFailCount }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            {{ end }}
+
+                            {{ if .status }}
+                            <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                                <thead>
+                                <tr>
+                                    <th class="md-col-2">{{ i18n "Variable" . }}</th>
+                                    <th class="md-col-2">{{ i18n "Value" . }}</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>{{ i18n "Message version" . }}</td>
+                                    <td>{{ .status.MessageVersion }}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{ i18n "Message sequence" . }}</td>
+                                    <td>{{ .status.MessageSequence }}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{ i18n "State" . }}</td>
+                                    <td>{{ .status.State }}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{ i18n "Battery" . }}</td>
+                                    <td>{{ .status.Battery }} %</td>
+                                </tr>
+                                <tr>
+                                    <td>{{ i18n "Clean time" . }}</td>
+                                    <td>{{ .status.CleanTime }}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{ i18n "Clean area" . }}</td>
+                                    <td>{{ .status.CleanArea }} mm<sup>2</sup></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            {{ end }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}

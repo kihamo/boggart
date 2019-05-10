@@ -2,6 +2,7 @@ package internal
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"net"
 	"strconv"
@@ -11,10 +12,8 @@ import (
 )
 
 const (
-	DefaultPort     = 54321
-	DefaultDeadline = time.Second * 5
-
-	network = "udp"
+	DefaultPort = 54321
+	network     = "udp"
 )
 
 type Connection struct {
@@ -43,28 +42,50 @@ func NewConnection(address string) (*Connection, error) {
 	}, nil
 }
 
-func (c *Connection) Invoke(request packet.Packet, response packet.Packet) error {
-	if _, err := request.WriteTo(c.conn); err != nil {
-		return err
-	}
+func (c *Connection) Invoke(ctx context.Context, request packet.Packet, response packet.Packet) (err error) {
+	done := make(chan error, 1)
 
-	if response == nil {
-		return nil
-	}
+	go func() {
+		var deadline time.Time
 
-	err := c.conn.SetDeadline(time.Now().Add(DefaultDeadline))
-	if err != nil {
-		return err
-	}
-
-	b := make([]byte, packet.MaxBufferSize)
-	n, _, err := c.conn.ReadFromUDP(b)
-
-	if n > 0 {
-		_, err = response.ReadFrom(bytes.NewBuffer(b[:n]))
-		if err != nil {
-			return err
+		if d, ok := ctx.Deadline(); ok {
+			deadline = d
+		} else {
+			// disable deadline
+			deadline = time.Time{}
 		}
+
+		if err := c.conn.SetDeadline(deadline); err != nil {
+			done <- err
+			return
+		}
+
+		if _, err := request.WriteTo(c.conn); err != nil {
+			done <- err
+			return
+		}
+
+		if response != nil {
+			b := make([]byte, packet.MaxBufferSize)
+			n, _, err := c.conn.ReadFromUDP(b)
+
+			if n > 0 {
+				_, err = response.ReadFrom(bytes.NewBuffer(b[:n]))
+				if err != nil {
+					done <- err
+					return
+				}
+			}
+		}
+
+		done <- nil
+	}()
+
+	select {
+	case <-ctx.Done():
+		err = ctx.Err()
+
+	case err = <-done:
 	}
 
 	return err
