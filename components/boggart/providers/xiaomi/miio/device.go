@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"net"
+	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 )
@@ -18,7 +19,7 @@ type InfoPayload struct {
 	HardwareVersion string               `json:"hw_ver"`
 	FirmwareVersion string               `json:"fw_ver"`
 	Token           string               `json:"token"`
-	LifeTime        uint64               `json:"life"`
+	LifeTime        time.Duration        `json:"life"`
 	MAC             boggart.HardwareAddr `json:"mac"`
 	Model           string               `json:"model"`
 	AccessPoint     struct {
@@ -69,6 +70,8 @@ func (d *Device) Info(ctx context.Context) (InfoPayload, error) {
 	if err != nil {
 		return InfoPayload{}, err
 	}
+
+	reply.Result.LifeTime *= time.Second
 
 	return reply.Result, nil
 }

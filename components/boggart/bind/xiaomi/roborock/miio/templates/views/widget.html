@@ -6,22 +6,205 @@
                 <div role="tabpanel">
                     <ul class="nav nav-tabs bar_tabs" role="tablist">
                         <li role="presentation"{{ if eq .action "" }} class="active"{{ end }}><a href="{{ if eq .action "" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}{{ end }}">{{ i18n "Status" . }}</a></li>
+                        <li role="presentation"{{ if eq .action "settings" }} class="active"{{ end }}><a href="{{ if eq .action "settings" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=settings{{ end }}">{{ i18n "Settings" . }}</a></li>
                     </ul>
                     <div class="tab-content">
                         <div role="tabpanel" class="tab-pane fade active in">
+                        {{ if eq .action "settings" }}
+                            <form class="form-horizontal form-label-left" role="form" data-toggle="validator" id="settings" action="{{ $.Request.URL.Path }}?action=settings" method="post">
+                                <div class="accordion" id="settings-accordion" role="tablist" aria-multiselectable="true">
+                                    <div class="panel">
+                                        <a class="panel-heading" role="tab" id="settings-accordion-cleaning" data-toggle="collapse" data-parent="#settings-accordion" href="#settings-collapse-cleaning" aria-expanded="true" aria-controls="settings-collapse-cleaning">
+                                            <h4 class="panel-title">{{ i18n "Cleaning" . }}</h4>
+                                        </a>
+                                        <div id="settings-collapse-cleaning" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="settings-accordion-cleaning">
+                                            <div class="panel-body">
+                                                {{ if .carpetMode }}
+                                                <div class="item form-group">
+                                                    <label for="carpet-mode-enabled" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                                    {{ i18n "Carpet mode enabled" . }}
+                                                    </label>
+                                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                                        <input type="checkbox" class="js-switch" name="carpet-mode-enabled" id="carpet-mode-enabled" {{ if eq (print .carpetMode.Enabled) "true" }} checked{{ end }} />
+                                                    </div>
+                                                </div>
+                                                <div class="item form-group">
+                                                    <label for="carpet-mode-integral" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                                        {{ i18n "Carpet mode integral" . }} <span class="required">*</span>
+                                                    </label>
+                                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                                        <input type="text" class="form-control" name="carpet-mode-integral" id="carpet-mode-integral" value="{{ .carpetMode.CurrentIntegral }}" required="required" />
+                                                    </div>
+                                                </div>
+                                                <div class="item form-group">
+                                                    <label for="carpet-mode-high" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                                    {{ i18n "Carpet mode high" . }} <span class="required">*</span>
+                                                    </label>
+                                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                                        <input type="text" class="form-control" name="carpet-mode-high" id="carpet-mode-high" value="{{ .carpetMode.CurrentHigh }}" required="required" />
+                                                    </div>
+                                                </div>
+                                                <div class="item form-group">
+                                                    <label for="carpet-mode-low" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                                    {{ i18n "Carpet mode low" . }} <span class="required">*</span>
+                                                    </label>
+                                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                                        <input type="text" class="form-control" name="carpet-mode-low" id="carpet-mode-low" value="{{ .carpetMode.CurrentLow }}" required="required" />
+                                                    </div>
+                                                </div>
+                                                <div class="item form-group">
+                                                    <label for="carpet-mode-stall-time" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                                    {{ i18n "Carpet mode stall time" . }} <span class="required">*</span>
+                                                    </label>
+                                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                                        <input type="text" class="form-control" name="carpet-mode-stall-time" id="carpet-mode-stall-time" value="{{ .carpetMode.StallTime }}" required="required" />
+                                                    </div>
+                                                </div>
+                                                {{ end }}
+                                                {{ if .fanPower }}
+                                                <div class="item form-group">
+                                                    <label for="fan-power" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                                    {{ i18n "Fan power" . }} <span class="required">*</span>
+                                                    </label>
+                                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                                        <input type="range" min="0" max="100" class="form-control" name="fan-power" id="fan-power" value="{{ .fanPower }}" required="required" />
+                                                    </div>
+                                                </div>
+                                                <div class="item form-group">
+                                                    <label for="fan-power" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                                    {{ i18n "Fan power preset" . }} <span class="required">*</span>
+                                                    </label>
+                                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                                        <select id="fan-power" class="form-control select2" required="required">
+                                                            <option value="">{{ i18n "Custom" . }}</option>
+                                                            <option value="38"{{ if eq .fanPower 38 }} selected="selected"{{ end }}>{{ i18n "Quiet" . }}</option>
+                                                            <option value="60"{{ if eq .fanPower 60 }} selected="selected"{{ end }}>{{ i18n "Balanced" . }}</option>
+                                                            <option value="75"{{ if eq .fanPower 75 }} selected="selected"{{ end }}>{{ i18n "Turbo" . }}</option>
+                                                            <option value="100"{{ if eq .fanPower 100 }} selected="selected"{{ end }}>{{ i18n "Max" . }}</option>
+                                                            <option value="105"{{ if eq .fanPower 105 }} selected="selected"{{ end }}>{{ i18n "Mob" . }}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                {{ end }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {{ if .dnd }}
+                                    <div class="panel">
+                                        <a class="panel-heading" role="tab" id="settings-accordion-dnd" data-toggle="collapse" data-parent="#settings-accordion" href="#settings-collapse-dnd" aria-expanded="true" aria-controls="settings-collapse-dnd">
+                                            <h4 class="panel-title">{{ i18n "Do not disturb" . }}</h4>
+                                        </a>
+                                        <div id="settings-collapse-dnd" class="panel-collapse collapse" role="tabpanel" aria-labelledby="settings-accordion-dnd">
+                                            <div class="panel-body">
+                                                <div class="item form-group">
+                                                    <label for="dnd-enabled" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                                    {{ i18n "Enabled" . }}
+                                                    </label>
+                                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                                        <input type="checkbox" class="js-switch" name="dnd-enabled" id="dnd-enabled" {{ if eq (print .dnd.Enabled) "true" }} checked{{ end }} />
+                                                    </div>
+                                                </div>
+                                                <div class="item form-group">
+                                                    <label for="dnd-time" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                                    {{ i18n "Time" . }}
+                                                    </label>
+                                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                                        <input type="text" id="dnd-time" class="form-control" value="{{ .dnd_start.Format "2006.01.02 15:04" }} - {{ .dnd_end.Format "2006.01.02 15:04" }}" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {{ end }}
+                                    <div class="panel">
+                                        <a class="panel-heading" role="tab" id="settings-accordion-other" data-toggle="collapse" data-parent="#settings-accordion" href="#settings-collapse-other" aria-expanded="true" aria-controls="settings-collapse-other">
+                                            <h4 class="panel-title">{{ i18n "Other" . }}</h4>
+                                        </a>
+                                        <div id="settings-collapse-other" class="panel-collapse collapse" role="tabpanel" aria-labelledby="settings-accordion-other">
+                                            <div class="panel-body">
+                                                {{ if .volume }}
+                                                <div class="item form-group">
+                                                    <label for="volume" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                                    {{ i18n "Volume" . }}
+                                                    </label>
+                                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                                        <input type="range" min="0" max="100" class="form-control" name="volume" id="volume" value="{{ .volume }}" required="required" />
+                                                    </div>
+                                                </div>
+                                                {{ end }}
+                                                {{ if .timezone }}
+                                                <div class="item form-group">
+                                                    <label for="timezone" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                                    {{ i18n "Timezone" . }}
+                                                    </label>
+                                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                                        <input type="text" class="form-control" name="timezone" id="timezone" value="{{ .timezone }}" required="required" />
+                                                    </div>
+                                                </div>
+                                                {{ end }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        {{ else }}
                             {{ if .info }}
                             <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
                                 <thead>
-                                <tr>
-                                    <th class="md-col-2">{{ i18n "Variable" . }}</th>
-                                    <th class="md-col-2">{{ i18n "Value" . }}</th>
-                                </tr>
+                                    <tr>
+                                        <th class="md-col-2">{{ i18n "Variable" . }}</th>
+                                        <th class="md-col-2">{{ i18n "Value" . }}</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
-                                <tr>
-                                    <td>{{ i18n "Model" . }}</td>
-                                    <td>{{ .info.Model }}</td>
-                                </tr>
+                                    <tr>
+                                        <td>{{ i18n "MAC" . }}</td>
+                                        <td>{{ .info.MAC }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Model" . }}</td>
+                                        <td>{{ .info.Model }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Hardware version" . }}</td>
+                                        <td>{{ .info.HardwareVersion }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Firmware version" . }}</td>
+                                        <td>{{ .info.FirmwareVersion }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Token" . }}</td>
+                                        <td>{{ .info.Token }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Life time" . }}</td>
+                                        <td>{{ .info.LifeTime }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Access point BSSID" . }}</td>
+                                        <td>{{ .info.AccessPoint.BSSID }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Access point RSSI" . }}</td>
+                                        <td>{{ .info.AccessPoint.RSSI }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Access point SSID" . }}</td>
+                                        <td>{{ .info.AccessPoint.SSID }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Network local IP" . }}</td>
+                                        <td>{{ .info.Network.LocalIP }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Network gateway" . }}</td>
+                                        <td>{{ .info.Network.Gateway }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Network mask" . }}</td>
+                                        <td>{{ .info.Network.Mask }}</td>
+                                    </tr>
                                 </tbody>
                             </table>
                             {{ end }}
@@ -62,39 +245,72 @@
                             {{ if .status }}
                             <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
                                 <thead>
-                                <tr>
-                                    <th class="md-col-2">{{ i18n "Variable" . }}</th>
-                                    <th class="md-col-2">{{ i18n "Value" . }}</th>
-                                </tr>
+                                    <tr>
+                                        <th class="md-col-2">{{ i18n "Variable" . }}</th>
+                                        <th class="md-col-2">{{ i18n "Value" . }}</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
-                                <tr>
-                                    <td>{{ i18n "Message version" . }}</td>
-                                    <td>{{ .status.MessageVersion }}</td>
-                                </tr>
-                                <tr>
-                                    <td>{{ i18n "Message sequence" . }}</td>
-                                    <td>{{ .status.MessageSequence }}</td>
-                                </tr>
-                                <tr>
-                                    <td>{{ i18n "State" . }}</td>
-                                    <td>{{ .status.State }}</td>
-                                </tr>
-                                <tr>
-                                    <td>{{ i18n "Battery" . }}</td>
-                                    <td>{{ .status.Battery }} %</td>
-                                </tr>
-                                <tr>
-                                    <td>{{ i18n "Clean time" . }}</td>
-                                    <td>{{ .status.CleanTime }}</td>
-                                </tr>
-                                <tr>
-                                    <td>{{ i18n "Clean area" . }}</td>
-                                    <td>{{ .status.CleanArea }} mm<sup>2</sup></td>
-                                </tr>
+                                    <tr>
+                                        <td>{{ i18n "Message version" . }}</td>
+                                        <td>{{ .status.MessageVersion }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Message sequence" . }}</td>
+                                        <td>{{ .status.MessageSequence }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "State" . }}</td>
+                                        <td>{{ .status.State }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Battery" . }}</td>
+                                        <td>{{ .status.Battery }} %</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Clean time" . }}</td>
+                                        <td>{{ .status.CleanTime }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Clean area" . }}</td>
+                                        <td>{{ .status.CleanArea }} mm<sup>2</sup></td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Error code" . }}</td>
+                                        <td>{{ .status.ErrorCode }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Map present" . }}</td>
+                                        <td>{{ .status.MapPresent }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "In cleaning" . }}</td>
+                                        <td>{{ .status.InCleaning }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "In returning" . }}</td>
+                                        <td>{{ .status.InReturning }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "In fresh state" . }}</td>
+                                        <td>{{ .status.InFreshState }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Lab status" . }}</td>
+                                        <td>{{ .status.LabStatus }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Fan power" . }}</td>
+                                        <td>{{ .status.FanPower }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "DND enabled" . }}</td>
+                                        <td>{{ .status.DNDEnabled }}</td>
+                                    </tr>
                                 </tbody>
                             </table>
                             {{ end }}
+                        {{ end }}
                         </div>
                     </div>
                 </div>
@@ -102,4 +318,85 @@
         </div>
     </div>
 </div>
+{{ end }}
+
+{{ define "head" }}
+    {{ if eq .action "settings" }}
+        {{ staticHTML (staticURL "/dashboard/assets/vendors/bootstrap-daterangepicker/css/daterangepicker.min.css" false) }}
+    {{ end }}
+{{ end }}
+
+{{ define "js" }}
+    {{ if eq .action "settings" }}
+        {{ staticHTML (staticURL "/dashboard/assets/vendors/validator/js/validator.min.js" false) }}
+        {{ staticHTML (staticURL "/dashboard/assets/vendors/moment/js/moment.min.js" false) }}
+        {{ staticHTML (staticURL "/dashboard/assets/vendors/bootstrap-daterangepicker/js/daterangepicker.min.js" false) }}
+
+        <script type="application/javascript">
+            $(document).ready(function () {
+                var
+                        fmtIn = 'YYYY.MM.DD HH:mm',
+                        fmtOut = 'HH:mm'
+                ;
+
+                $('#dnd-time').daterangepicker({
+                    timePicker : true,
+                    timePicker24Hour : true,
+                    timePickerIncrement : 1,
+                    timePickerSeconds : false,
+                    applyButtonClasses: 'btn-success',
+                    locale : {
+                        format : fmtIn
+                    },
+                    autoUpdateInput: false
+                }).on('show.daterangepicker', function(ev, picker) {
+                    picker.container.find('.calendar-table').hide();
+                }).on('apply.daterangepicker', function(ev, picker) {
+                    $(this).val(picker.startDate.format(fmtOut) +' - '+picker.endDate.format(fmtOut)).change();
+                });
+
+                $('#dnd-time').val(
+                    moment('{{ .dnd_start.Format "2006.01.02 15:04" }}', fmtIn).format(fmtOut) +
+                    ' - ' +
+                    moment('{{ .dnd_end.Format "2006.01.02 15:04" }}', fmtIn).format(fmtOut));
+
+                $('#settings input[id], #settings select, #settings textarea[id]').change(function() {
+                    var
+                            e = $(this),
+                            data = {},
+                            k = e.prop('id')
+                    ;
+
+                    if (e.prop('type') === 'checkbox') {
+                        data[k] = e.prop('checked') != '';
+                    } else {
+                        data[k] = e.val()
+                    }
+
+                    $.ajax({
+                        type: $('#settings').prop('method'),
+                        url: $('#settings').prop('action'),
+                        data: data,
+                        success: function (r) {
+                            if (r.result === 'failed') {
+                                new PNotify({
+                                    title: 'Error',
+                                    text: r.message,
+                                    type: 'error',
+                                    styling: 'bootstrap3'
+                                });
+                            } else if (r.message !== 'undefined') {
+                                new PNotify({
+                                    title: 'Success',
+                                    text: r.message,
+                                    type: 'success',
+                                    styling: 'bootstrap3'
+                                });
+                            }
+                        }
+                    });
+                });
+            });
+        </script>
+    {{ end }}
 {{ end }}

@@ -137,28 +137,28 @@ const (
 
 // https://github.com/marcelrv/XiaomiRobotVacuumProtocol
 type VacuumStatus struct {
-	MessageVersion  uint32
-	MessageSequence uint32
-	State           uint64
-	Battery         uint64
-	CleanTime       time.Duration
-	CleanArea       uint64 // mm2
-	ErrorCode       uint64
-	MapPresent      bool
-	InCleaning      bool
-	InReturning     bool
-	InFreshState    bool
-	LabStatus       bool
-	FanPower        uint64
-	DNDEnabled      bool
+	MessageVersion  uint32        `json:"msg_ver"`
+	MessageSequence uint32        `json:"msg_seq"`
+	State           uint32        `json:"state"`
+	Battery         uint32        `json:"battery"`
+	CleanTime       time.Duration `json:"clean_time"`
+	CleanArea       uint64        `json:"clean_area"` // mm2
+	ErrorCode       uint64        `json:"error_code"`
+	MapPresent      bool          `json:"map_present"`
+	InCleaning      bool          `json:"in_cleaning"`
+	InReturning     bool          `json:"in_returning"`
+	InFreshState    bool          `json:"in_fresh_state"`
+	LabStatus       bool          `json:"lab_status"`
+	FanPower        uint64        `json:"fan_power"`
+	DNDEnabled      bool          `json:"dnd_enabled"`
 }
 
 type VacuumCarpetMode struct {
-	Enabled         bool
-	CurrentIntegral uint64
-	CurrentHigh     uint64
-	CurrentLow      uint64
-	StallTime       uint64
+	Enabled         bool   `json:"enabled"`
+	CurrentIntegral uint64 `json:"current_integral"`
+	CurrentHigh     uint64 `json:"current_high"`
+	CurrentLow      uint64 `json:"current_low"`
+	StallTime       uint64 `json:"stall_time"`
 }
 
 type VacuumCleanSummary struct {
@@ -177,11 +177,11 @@ type VacuumCleanDetail struct {
 }
 
 type VacuumDoNotDisturb struct {
-	Enabled     bool
-	StartHour   uint64
-	StartMinute uint64
-	EndHour     uint64
-	EndMinute   uint64
+	Enabled     bool   `json:"enabled"`
+	StartHour   uint64 `json:"start_hour"`
+	StartMinute uint64 `json:"start_minute"`
+	EndHour     uint64 `json:"end_hour"`
+	EndMinute   uint64 `json:"end_minute"`
 }
 
 type VacuumLocale struct {
@@ -259,20 +259,14 @@ func (d *Vacuum) Status(ctx context.Context) (result VacuumStatus, err error) {
 		miio.Response
 
 		Result []struct {
-			MessageVersion  uint32        `json:"msg_ver"`
-			MessageSequence uint32        `json:"msg_seq"`
-			State           uint64        `json:"state"`
-			Battery         uint64        `json:"battery"`
-			CleanTime       time.Duration `json:"clean_time"`
-			CleanArea       uint64        `json:"clean_area"` // mm2
-			ErrorCode       uint64        `json:"error_code"`
-			MapPresent      uint64        `json:"map_present"`
-			InCleaning      uint64        `json:"in_cleaning"`
-			InReturning     uint64        `json:"in_returning"`
-			InFreshState    uint64        `json:"in_fresh_state"`
-			LabStatus       uint64        `json:"lab_status"`
-			FanPower        uint64        `json:"fan_power"`
-			DNDEnabled      uint64        `json:"dnd_enabled"`
+			VacuumStatus
+
+			MapPresent   uint64 `json:"map_present"`
+			InCleaning   uint64 `json:"in_cleaning"`
+			InReturning  uint64 `json:"in_returning"`
+			InFreshState uint64 `json:"in_fresh_state"`
+			LabStatus    uint64 `json:"lab_status"`
+			DNDEnabled   uint64 `json:"dnd_enabled"`
 		} `json:"result"`
 	}
 
@@ -414,11 +408,9 @@ func (d *Vacuum) CarpetMode(ctx context.Context) (result VacuumCarpetMode, err e
 		miio.Response
 
 		Result []struct {
-			Enabled         uint64 `json:"enabled"`
-			CurrentIntegral uint64 `json:"current_integral"`
-			CurrentHigh     uint64 `json:"current_high"`
-			CurrentLow      uint64 `json:"current_low"`
-			StallTime       uint64 `json:"stall_time"`
+			VacuumCarpetMode
+
+			Enabled uint64 `json:"enable"`
 		} `json:"result"`
 	}
 
@@ -705,11 +697,9 @@ func (d *Vacuum) DoNotDisturb(ctx context.Context) (result VacuumDoNotDisturb, e
 		miio.Response
 
 		Result []struct {
-			Enabled     uint64 `json:"enabled"`
-			StartHour   uint64 `json:"start_hour"`
-			StartMinute uint64 `json:"start_minute"`
-			EndHour     uint64 `json:"end_hour"`
-			EndMinute   uint64 `json:"end_minute"`
+			VacuumDoNotDisturb
+
+			Enabled uint64 `json:"enabled"`
 		} `json:"result"`
 	}
 

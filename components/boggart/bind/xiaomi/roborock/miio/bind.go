@@ -11,3 +11,7 @@ type Bind struct {
 	config *Config
 	device *devices.Vacuum
 }
+
+func (b *Bind) Close() error {
+	return b.device.Close()
+}

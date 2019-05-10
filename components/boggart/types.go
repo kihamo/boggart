@@ -31,6 +31,11 @@ func (m *IPMask) UnmarshalText(text []byte) error {
 	return err
 }
 
+func (m IPMask) String() string {
+	mask := net.CIDRMask(m.Size())
+	return net.IP(mask).String()
+}
+
 type HardwareAddr struct {
 	net.HardwareAddr
 }

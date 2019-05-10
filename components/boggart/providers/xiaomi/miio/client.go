@@ -36,9 +36,10 @@ type Client struct {
 
 func NewClient(address, token string) *Client {
 	return &Client{
-		packetsCounter: 400,
-		address:        address,
-		token:          token,
+		// packetsCounter: 680,
+
+		address: address,
+		token:   token,
 	}
 }
 
@@ -166,8 +167,8 @@ func (p *Client) Send(ctx context.Context, method string, params interface{}, re
 
 	dump := atomic.LoadUint32(&p.dump) == 1
 	if dump {
-		log.Printf("Request #%d raw: " + request.Dump())
-		log.Printf("Request #%d body: " + string(body))
+		log.Printf("Request #%d raw: "+request.Dump(), requestID)
+		log.Printf("Request #%d body: "+string(body), requestID)
 	}
 
 	err = conn.Invoke(ctx, request, response)
@@ -205,7 +206,7 @@ func (p *Client) Send(ctx context.Context, method string, params interface{}, re
 	if err = json.Unmarshal(response.Body(), &responseDefault); err == nil && responseDefault.ID != requestID {
 		return errors.New("response ID could not be verified. Expected " +
 			strconv.FormatUint(uint64(requestID), 10) +
-			", got 0x" +
+			", got " +
 			strconv.FormatUint(uint64(responseDefault.ID), 10))
 	}
 
