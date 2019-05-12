@@ -1,8 +1,9 @@
-package miio
+package internal
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"errors"
-	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -22,10 +23,32 @@ type ServerFile struct {
 type Server struct {
 	listener net.Listener
 	file     io.Reader
-	size     int64
+	size     int
+	md5sum   string
 }
 
-func NewServer(file io.Reader, size int64, hostname string) (*Server, error) {
+func NewServer(file io.ReadSeeker, hostname string) (*Server, error) {
+	size := 0
+
+	// md5
+	h := md5.New()
+
+	buf := make([]byte, 1024)
+	for {
+		n, err := file.Read(buf)
+		if err != nil {
+			break
+		}
+
+		if n > 0 {
+			size += n
+			h.Write(buf[:n])
+		}
+	}
+
+	md5sum := hex.EncodeToString(h.Sum(nil))
+	file.Seek(0, 0)
+
 	if hostname == "" {
 		ip, err := localIP()
 		if err != nil {
@@ -44,12 +67,11 @@ func NewServer(file io.Reader, size int64, hostname string) (*Server, error) {
 		listener: listener,
 		file:     file,
 		size:     size,
+		md5sum:   md5sum,
 	}
 
 	go func() {
 		http.Serve(listener, server)
-
-		fmt.Println("Close SERVER")
 	}()
 
 	return server, nil
@@ -63,7 +85,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// хуже того, если SoundInstall установит и без этого, то OTA вернет ошибку.
 		// Скорее всего OTA использует это как дополнительную проверку
 		if s.size > 0 {
-			w.Header().Set("Content-Length", strconv.FormatInt(s.size, 10))
+			w.Header().Set("Content-Length", strconv.Itoa(s.size))
 		}
 
 		io.Copy(w, s.file)
@@ -79,6 +101,10 @@ func (s *Server) URL() *url.URL {
 		Host:   s.listener.Addr().String(),
 		Path:   "/" + fileName,
 	}
+}
+
+func (s *Server) MD5() string {
+	return s.md5sum
 }
 
 func (s *Server) Close() error {

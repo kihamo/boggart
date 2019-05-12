@@ -36,8 +36,6 @@ type Client struct {
 
 func NewClient(address, token string) *Client {
 	return &Client{
-		// packetsCounter: 680,
-
 		address: address,
 		token:   token,
 	}
@@ -48,7 +46,7 @@ func (p *Client) lazyConnect(ctx context.Context) (conn *internal.Connection, er
 
 	p.connOnce.Do(func() {
 		start = true
-		p.SetDump(true)
+		// p.SetDump(true)
 
 		conn, err = internal.NewConnection(p.address)
 		if err == nil {
@@ -204,6 +202,9 @@ func (p *Client) Send(ctx context.Context, method string, params interface{}, re
 
 	var responseDefault Response
 	if err = json.Unmarshal(response.Body(), &responseDefault); err == nil && responseDefault.ID != requestID {
+		// TODO: если requestID > responseDefault.ID то можно еще делать попытки вычитывания, обычно такое бывает
+		// из-за того что контекст прерывается быстрее чем девай отвечает и следующий реквест получает предыдущий респонс
+
 		return errors.New("response ID could not be verified. Expected " +
 			strconv.FormatUint(uint64(requestID), 10) +
 			", got " +

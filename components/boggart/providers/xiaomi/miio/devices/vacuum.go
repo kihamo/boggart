@@ -2,16 +2,14 @@ package devices
 
 import (
 	"context"
-	"crypto/md5"
-	"encoding/hex"
 	"errors"
-	"fmt"
 	"io"
 	"strconv"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/xiaomi/miio"
+	"github.com/kihamo/boggart/components/boggart/providers/xiaomi/miio/internal"
 )
 
 /*
@@ -688,30 +686,20 @@ func (d *Vacuum) SoundInstallProgress(ctx context.Context) (VacuumSoundInstallSt
 }
 
 func (d *Vacuum) SoundInstallLocalServer(ctx context.Context, file io.ReadSeeker, hostname string, sid uint64) error {
-	h := md5.New()
-	if _, err := io.Copy(h, io.TeeReader(file, h)); err != nil {
-		return err
-	}
-
-	md5sum := hex.EncodeToString(h.Sum(nil))
-	//file.Seek(0, 0)
-
-	fmt.Println(md5sum)
-
-	server, err := miio.NewServer(file, 0, hostname) // тут 0 в content-length прокатит
+	server, err := internal.NewServer(file, hostname) // тут 0 в content-length прокатит
 	if err != nil {
 		return err
 	}
 	defer server.Close()
 
 	var status VacuumSoundInstallStatus
-	status, err = d.SoundInstall(ctx, server.URL().String(), md5sum, sid)
+	status, err = d.SoundInstall(ctx, server.URL().String(), server.MD5(), sid)
 	if err == nil {
 		if status.Error != VacuumSoundInstallErrorNo {
 			return errors.New("return error code " + strconv.FormatUint(status.Error, 10))
 		}
 
-		ticker := time.NewTicker(time.Minute * 60)
+		ticker := time.NewTicker(time.Second)
 
 		for range ticker.C {
 			if status, err := d.SoundInstallProgress(ctx); err == nil {
