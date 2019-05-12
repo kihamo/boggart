@@ -23,6 +23,7 @@ const (
 
 	MQTTSubscribeTopicSetFanPower = MQTTPrefix + "fan-power/set"
 	MQTTSubscribeTopicSetVolume   = MQTTPrefix + "volume/set"
+	MQTTSubscribeTopicTestVolume  = MQTTPrefix + "volume/test"
 	MQTTSubscribeTopicFind        = MQTTPrefix + "find"
 )
 
@@ -43,6 +44,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(MQTTSubscribeTopicSetFanPower.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSetFanPower)),
 		mqtt.NewSubscriber(MQTTSubscribeTopicSetVolume.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSetVolume)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicTestVolume.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTTestVolume)),
 		mqtt.NewSubscriber(MQTTSubscribeTopicFind.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTFind)),
 	}
 }
@@ -81,6 +83,14 @@ func (b *Bind) callbackMQTTSetVolume(ctx context.Context, client mqtt.Component,
 	}
 
 	return err
+}
+
+func (b *Bind) callbackMQTTTestVolume(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
+	if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 3) {
+		return nil
+	}
+
+	return b.device.SoundVolumeTest(ctx)
 }
 
 func (b *Bind) callbackMQTTFind(ctx context.Context, client mqtt.Component, message mqtt.Message) error {

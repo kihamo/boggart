@@ -29,5 +29,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		consumableSensor:    atomic.NewDurationNull(),
 	}
 
+	bind.device.Client().SetPacketsCounter(config.PacketsCounter)
+
 	return bind, nil
 }
