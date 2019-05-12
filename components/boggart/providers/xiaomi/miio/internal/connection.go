@@ -91,6 +91,10 @@ func (c *Connection) Invoke(ctx context.Context, request packet.Packet, response
 	return err
 }
 
+func (c *Connection) LocalAddr() *net.UDPAddr {
+	return c.conn.LocalAddr().(*net.UDPAddr)
+}
+
 func (c *Connection) Close() error {
 	return c.conn.Close()
 }

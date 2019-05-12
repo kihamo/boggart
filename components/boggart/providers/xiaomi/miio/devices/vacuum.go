@@ -685,8 +685,8 @@ func (d *Vacuum) SoundInstallProgress(ctx context.Context) (VacuumSoundInstallSt
 	return reply.Result[0], nil
 }
 
-func (d *Vacuum) SoundInstallLocalServer(ctx context.Context, file io.ReadSeeker, hostname string, sid uint64) error {
-	server, err := internal.NewServer(file, hostname) // тут 0 в content-length прокатит
+func (d *Vacuum) SoundInstallLocalServer(ctx context.Context, file io.ReadSeeker, sid uint64) error {
+	server, err := internal.NewServer(file, d.HostnameForLocalServer())
 	if err != nil {
 		return err
 	}

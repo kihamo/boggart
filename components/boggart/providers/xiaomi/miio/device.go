@@ -105,8 +105,8 @@ func (d *Device) WiFiStatus(ctx context.Context) (WiFiStatusPayload, error) {
 }
 
 // проверить загрузку на устройстве можно в /mnt/data/.temp
-func (d *Device) OTALocalServer(ctx context.Context, file io.ReadSeeker, hostname string) error {
-	server, err := internal.NewServer(file, hostname)
+func (d *Device) OTALocalServer(ctx context.Context, file io.ReadSeeker) error {
+	server, err := internal.NewServer(file, d.HostnameForLocalServer())
 	if err != nil {
 		return err
 	}
@@ -179,4 +179,12 @@ func (d *Device) OTAProgress(ctx context.Context) (uint64, error) {
 	}
 
 	return reply.Result[0], nil
+}
+
+func (d *Device) HostnameForLocalServer() string {
+	if addr, err := d.client.LocalAddr(); err == nil {
+		return addr.IP.String()
+	}
+
+	return ""
 }

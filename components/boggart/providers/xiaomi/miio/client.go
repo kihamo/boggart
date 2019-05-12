@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"log"
+	"net"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -68,6 +69,15 @@ func (p *Client) Close() error {
 	}
 
 	return nil
+}
+
+func (p *Client) LocalAddr() (*net.UDPAddr, error) {
+	connect, err := p.lazyConnect(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	return connect.LocalAddr(), nil
 }
 
 func (p *Client) SetDump(enabled bool) {
