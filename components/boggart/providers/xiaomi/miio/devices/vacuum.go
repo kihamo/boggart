@@ -53,11 +53,11 @@ GOTO_TARGET	app_goto_target	Send vacuum to coordinates
 
 Generic MiIO Commands
 Type	Command	Description
-INFO	miIO.info	Get device info
+// INFO	miIO.info	Get device info
 ROUTER	miIO.config_router	Set Wifi settings of the device
 OTA	miIO.ota	Update firmware over air
 OTA_PROG	miIO.get_ota_progress	Update firmware over air Progress
-OTA_STATE	miIO.get_ota_state	Update firmware over air Status
+// OTA_STATE	miIO.get_ota_state	Update firmware over air Status
 */
 
 const (
@@ -142,7 +142,7 @@ type VacuumStatus struct {
 	State           uint32        `json:"state"`
 	Battery         uint32        `json:"battery"`
 	CleanTime       time.Duration `json:"clean_time"`
-	CleanArea       uint64        `json:"clean_area"` // mm2
+	CleanArea       uint32        `json:"clean_area"` // mm2
 	ErrorCode       uint64        `json:"error_code"`
 	MapPresent      bool          `json:"map_present"`
 	InCleaning      bool          `json:"in_cleaning"`
