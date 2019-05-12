@@ -2,12 +2,25 @@ package miio
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/hex"
+	"errors"
+	"fmt"
 	"io"
 	"net"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 )
+
+const (
+	OTAStatusDownloading otaStatus = "downloading"
+	OTAStatusInstalling            = "installing"
+	OTAStatusFailed                = "failed"
+	OTAStatusIdle                  = "idle"
+)
+
+type otaStatus string
 
 type Device struct {
 	io.Closer
@@ -93,23 +106,85 @@ func (d *Device) WiFiStatus(ctx context.Context) (WiFiStatusPayload, error) {
 	return reply.Result, nil
 }
 
-/*
-func (d *Device) OTAStatus(ctx context.Context) (error) {
-	var reply struct {
-		Response
-		// Result []uint64 `json:"result"`
+// проверить загрузку на устройстве можно в /mnt/data/.temp
+func (d *Device) OTALocalServer(ctx context.Context, file io.ReadSeeker, hostname string) error {
+	h := md5.New()
+
+	if _, err := io.Copy(h, io.TeeReader(file, h)); err != nil {
+		return err
 	}
 
-	err := d.Client().Send(ctx, "miIO.get_ota_state", nil, &reply)
+	md5sum := hex.EncodeToString(h.Sum(nil))
+	file.Seek(0, 0)
+
+	server, err := NewServer(file, 0, hostname)
+	if err != nil {
+		return err
+	}
+	defer server.Close()
+
+	err = d.OTA(ctx, server.URL().String(), md5sum)
+	if err == nil {
+		ticker := time.NewTicker(time.Second)
+
+		for range ticker.C {
+			fmt.Println("TICK")
+
+			if status, err := d.OTAStatus(ctx); err == nil {
+				fmt.Println("STATUS", status)
+
+				switch status {
+				case OTAStatusFailed:
+					return errors.New("OTA install failed")
+
+				case OTAStatusInstalling:
+					fmt.Println("RETURN")
+					return nil
+
+				default:
+					fmt.Println(d.OTAProgress(ctx))
+				}
+			}
+		}
+	}
+
+	return err
+}
+
+func (d *Device) OTA(ctx context.Context, url, md5sum string) error {
+	var reply ResponseOK
+
+	err := d.Client().Send(ctx, "miIO.ota", map[string]interface{}{
+		"mode":     "normal",
+		"install":  "1",
+		"app_url":  url,
+		"file_md5": md5sum,
+		"proc":     "dnld install",
+	}, &reply)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(reply.Result)
+	if !ResponseIsOK(reply) {
+		return errors.New("device return not OK response")
+	}
 
 	return nil
 }
-*/
+
+func (d *Device) OTAStatus(ctx context.Context) (otaStatus, error) {
+	var reply struct {
+		Response
+		Result []string `json:"result"`
+	}
+
+	err := d.Client().Send(ctx, "miIO.get_ota_state", nil, &reply)
+	if err != nil {
+		return "", err
+	}
+
+	return otaStatus(reply.Result[0]), nil
+}
 
 func (d *Device) OTAProgress(ctx context.Context) (uint64, error) {
 	var reply struct {

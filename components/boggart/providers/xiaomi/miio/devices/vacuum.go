@@ -2,7 +2,12 @@ package devices
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/hex"
 	"errors"
+	"fmt"
+	"io"
+	"strconv"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -96,13 +101,17 @@ const (
 	VacuumConsumableLifetimeBrushMain time.Duration = 300
 	VacuumConsumableLifetimeBrushSide time.Duration = 200
 	VacuumConsumableLifetimeSensor    time.Duration = 30
+)
 
+const (
 	VacuumSoundInstallStateUnknown uint64 = iota
 	VacuumSoundInstallStateDownloading
 	VacuumSoundInstallStateInstalling
 	VacuumSoundInstallStateInstalled
 	VacuumSoundInstallStateError
+)
 
+const (
 	VacuumSoundInstallErrorNo uint64 = iota
 	VacuumSoundInstallErrorUnknown1
 	VacuumSoundInstallErrorFailedDownload
@@ -648,11 +657,12 @@ func (d *Vacuum) SoundInstall(ctx context.Context, url, md5sum string, sid uint6
 
 	var reply response
 
-	err := d.Client().Send(ctx, "dnld_install_sound", []map[string]interface{}{{
+	err := d.Client().Send(ctx, "dnld_install_sound", map[string]interface{}{
 		"md5": md5sum,
 		"url": url,
 		"sid": sid,
-	}}, &reply)
+		//"sver": 2,
+	}, &reply)
 	if err != nil {
 		return VacuumSoundInstallStatus{}, err
 	}
@@ -675,6 +685,50 @@ func (d *Vacuum) SoundInstallProgress(ctx context.Context) (VacuumSoundInstallSt
 	}
 
 	return reply.Result[0], nil
+}
+
+func (d *Vacuum) SoundInstallLocalServer(ctx context.Context, file io.ReadSeeker, hostname string, sid uint64) error {
+	h := md5.New()
+	if _, err := io.Copy(h, io.TeeReader(file, h)); err != nil {
+		return err
+	}
+
+	md5sum := hex.EncodeToString(h.Sum(nil))
+	//file.Seek(0, 0)
+
+	fmt.Println(md5sum)
+
+	server, err := miio.NewServer(file, 0, hostname) // тут 0 в content-length прокатит
+	if err != nil {
+		return err
+	}
+	defer server.Close()
+
+	var status VacuumSoundInstallStatus
+	status, err = d.SoundInstall(ctx, server.URL().String(), md5sum, sid)
+	if err == nil {
+		if status.Error != VacuumSoundInstallErrorNo {
+			return errors.New("return error code " + strconv.FormatUint(status.Error, 10))
+		}
+
+		ticker := time.NewTicker(time.Minute * 60)
+
+		for range ticker.C {
+			if status, err := d.SoundInstallProgress(ctx); err == nil {
+				if status.State == VacuumSoundInstallStateDownloading || status.State == VacuumSoundInstallStateInstalling {
+					continue
+				}
+
+				if status.Error != VacuumSoundInstallErrorNo {
+					return errors.New("return error code " + strconv.FormatUint(status.Error, 10))
+				}
+
+				return nil
+			}
+		}
+	}
+
+	return err
 }
 
 func (d *Vacuum) Find(ctx context.Context) error {
