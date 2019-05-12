@@ -15,7 +15,14 @@ type Bind struct {
 
 	battery   *atomic.Uint32Null
 	cleanArea *atomic.Uint32Null
-	cleanTime *atomic.Uint32Null
+	cleanTime *atomic.DurationNull
+	fanPower  *atomic.Uint32Null
+	volume    *atomic.Uint32Null
+
+	consumableFilter    *atomic.DurationNull
+	consumableBrushMain *atomic.DurationNull
+	consumableBrushSide *atomic.DurationNull
+	consumableSensor    *atomic.DurationNull
 }
 
 func (b *Bind) Close() error {

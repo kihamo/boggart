@@ -19,7 +19,14 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 		battery:   atomic.NewUint32Null(),
 		cleanArea: atomic.NewUint32Null(),
-		cleanTime: atomic.NewUint32Null(),
+		cleanTime: atomic.NewDurationNull(),
+		fanPower:  atomic.NewUint32Null(),
+		volume:    atomic.NewUint32Null(),
+
+		consumableFilter:    atomic.NewDurationNull(),
+		consumableBrushMain: atomic.NewDurationNull(),
+		consumableBrushSide: atomic.NewDurationNull(),
+		consumableSensor:    atomic.NewDurationNull(),
 	}
 
 	return bind, nil

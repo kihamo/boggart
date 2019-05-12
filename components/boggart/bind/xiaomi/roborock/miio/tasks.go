@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/providers/xiaomi/miio/devices"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
@@ -21,7 +22,7 @@ func (b *Bind) Tasks() []workers.Task {
 	taskState.SetTimeout(b.config.UpdaterTimeout)
 	taskState.SetRepeats(-1)
 	taskState.SetRepeatInterval(b.config.UpdaterInterval)
-	taskState.SetName("bind-hikvision-updater-" + b.config.Host)
+	taskState.SetName("bind-xiaomi-roborock-updater-" + b.config.Host)
 
 	return []workers.Task{
 		taskLiveness,
@@ -59,9 +60,10 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	}
 
 	snMQTT := mqtt.NameReplace(sn)
+	var err error
 
-	status, err := b.device.Status(ctx)
-	if err == nil {
+	status, e := b.device.Status(ctx)
+	if e == nil {
 		if ok := b.battery.Set(status.Battery); ok {
 			metricBattery.With("serial_number", sn).Set(float64(status.Battery))
 
@@ -71,22 +73,65 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		}
 
 		if ok := b.cleanArea.Set(status.CleanArea); ok {
-			metricCleanArea.With("serial_number", sn).Set(float64(status.CleanArea))
-
 			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicCleanArea.Format(snMQTT), status.CleanArea); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}
 
 		if status.CleanTime > 0 {
-			if ok := b.cleanTime.Set(uint32(status.CleanTime)); ok {
-				metricCleanTime.With("serial_number", sn).Set(float64(status.CleanTime))
-
+			if ok := b.cleanTime.Set(status.CleanTime); ok {
 				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicCleanTime.Format(snMQTT), status.CleanTime); e != nil {
 					err = multierr.Append(err, e)
 				}
 			}
 		}
+	} else {
+		err = multierr.Append(err, e)
+	}
+
+	consumables, e := b.device.Consumables(ctx)
+	if e == nil {
+		if consumable, ok := consumables[devices.VacuumConsumableFilter]; ok {
+			if ok := b.consumableFilter.Set(consumable); ok {
+				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicConsumableFilter.Format(snMQTT), consumable); e != nil {
+					err = multierr.Append(err, e)
+				}
+			}
+		}
+
+		if consumable, ok := consumables[devices.VacuumConsumableBrushMain]; ok {
+			if ok := b.consumableBrushMain.Set(consumable); ok {
+				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicConsumableBrushMain.Format(snMQTT), consumable); e != nil {
+					err = multierr.Append(err, e)
+				}
+			}
+		}
+
+		if consumable, ok := consumables[devices.VacuumConsumableBrushSide]; ok {
+			if ok := b.consumableBrushSide.Set(consumable); ok {
+				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicConsumableBrushSide.Format(snMQTT), consumable); e != nil {
+					err = multierr.Append(err, e)
+				}
+			}
+		}
+
+		if consumable, ok := consumables[devices.VacuumConsumableSensor]; ok {
+			if ok := b.consumableSensor.Set(consumable); ok {
+				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicConsumableSensor.Format(snMQTT), consumable); e != nil {
+					err = multierr.Append(err, e)
+				}
+			}
+		}
+	} else {
+		err = multierr.Append(err, e)
+	}
+
+	if e := b.updateFanPower(ctx); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	if e := b.updateVolume(ctx); e != nil {
+		err = multierr.Append(err, e)
 	}
 
 	return nil, err

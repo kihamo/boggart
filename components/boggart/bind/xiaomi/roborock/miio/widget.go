@@ -154,7 +154,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 						v, err = strconv.ParseUint(value[0], 10, 64)
 						if err == nil {
-							err = bind.device.SetSoundVolume(ctx, v)
+							err = bind.device.SetSoundVolume(ctx, uint32(v))
 						}
 
 					case "timezone":

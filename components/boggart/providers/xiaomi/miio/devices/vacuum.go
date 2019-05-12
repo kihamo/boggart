@@ -149,7 +149,7 @@ type VacuumStatus struct {
 	InReturning     bool          `json:"in_returning"`
 	InFreshState    bool          `json:"in_fresh_state"`
 	LabStatus       bool          `json:"lab_status"`
-	FanPower        uint64        `json:"fan_power"`
+	FanPower        uint32        `json:"fan_power"`
 	DNDEnabled      bool          `json:"dnd_enabled"`
 }
 
@@ -369,11 +369,11 @@ func (d *Vacuum) Home(ctx context.Context) error {
 	return nil
 }
 
-func (d *Vacuum) FanPower(ctx context.Context) (uint64, error) {
+func (d *Vacuum) FanPower(ctx context.Context) (uint32, error) {
 	type response struct {
 		miio.Response
 
-		Result []uint64 `json:"result"`
+		Result []uint32 `json:"result"`
 	}
 
 	var reply response
@@ -582,11 +582,11 @@ func (d *Vacuum) SoundVolumeTest(ctx context.Context) error {
 	return nil
 }
 
-func (d *Vacuum) SoundVolume(ctx context.Context) (uint64, error) {
+func (d *Vacuum) SoundVolume(ctx context.Context) (uint32, error) {
 	type response struct {
 		miio.Response
 
-		Result []uint64 `json:"result"`
+		Result []uint32 `json:"result"`
 	}
 
 	var reply response
@@ -599,14 +599,14 @@ func (d *Vacuum) SoundVolume(ctx context.Context) (uint64, error) {
 	return reply.Result[0], nil
 }
 
-func (d *Vacuum) SetSoundVolume(ctx context.Context, volume uint64) error {
+func (d *Vacuum) SetSoundVolume(ctx context.Context, volume uint32) error {
 	if volume > 100 {
 		volume = 100
 	}
 
 	var reply miio.ResponseOK
 
-	err := d.Client().Send(ctx, "change_sound_volume", []uint64{volume}, &reply)
+	err := d.Client().Send(ctx, "change_sound_volume", []uint32{volume}, &reply)
 	if err != nil {
 		return err
 	}
