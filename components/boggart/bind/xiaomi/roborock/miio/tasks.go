@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/xiaomi/miio/devices"
+	"github.com/kihamo/boggart/components/boggart/providers/xiaomi/miio/devices/vacuum"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
@@ -91,7 +91,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 
 	consumables, e := b.device.Consumables(ctx)
 	if e == nil {
-		if consumable, ok := consumables[devices.VacuumConsumableFilter]; ok {
+		if consumable, ok := consumables[vacuum.ConsumableFilter]; ok {
 			if ok := b.consumableFilter.Set(consumable); ok {
 				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicConsumableFilter.Format(snMQTT), consumable); e != nil {
 					err = multierr.Append(err, e)
@@ -99,7 +99,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			}
 		}
 
-		if consumable, ok := consumables[devices.VacuumConsumableBrushMain]; ok {
+		if consumable, ok := consumables[vacuum.ConsumableBrushMain]; ok {
 			if ok := b.consumableBrushMain.Set(consumable); ok {
 				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicConsumableBrushMain.Format(snMQTT), consumable); e != nil {
 					err = multierr.Append(err, e)
@@ -107,7 +107,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			}
 		}
 
-		if consumable, ok := consumables[devices.VacuumConsumableBrushSide]; ok {
+		if consumable, ok := consumables[vacuum.ConsumableBrushSide]; ok {
 			if ok := b.consumableBrushSide.Set(consumable); ok {
 				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicConsumableBrushSide.Format(snMQTT), consumable); e != nil {
 					err = multierr.Append(err, e)
@@ -115,7 +115,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			}
 		}
 
-		if consumable, ok := consumables[devices.VacuumConsumableSensor]; ok {
+		if consumable, ok := consumables[vacuum.ConsumableSensor]; ok {
 			if ok := b.consumableSensor.Set(consumable); ok {
 				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicConsumableSensor.Format(snMQTT), consumable); e != nil {
 					err = multierr.Append(err, e)

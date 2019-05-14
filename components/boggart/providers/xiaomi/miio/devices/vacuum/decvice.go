@@ -1,4 +1,4 @@
-package devices
+package vacuum
 
 import (
 	"context"
@@ -64,58 +64,58 @@ OTA_PROG	miIO.get_ota_progress	Update firmware over air Progress
 */
 
 const (
-	VacuumStatusUnknown uint64 = iota
-	VacuumStatusInitiating
-	VacuumStatusSleeping
-	VacuumStatusWaiting
-	VacuumStatusUnknown4
-	VacuumStatusCleaning
-	VacuumStatusReturningHome
-	VacuumStatusRemoteControl
-	VacuumStatusCharging
-	VacuumStatusChargingError
-	VacuumStatusPause
-	VacuumStatusSpotCleaning
-	VacuumStatusInError
-	VacuumStatusShuttingDown
-	VacuumStatusUpdating
-	VacuumStatusDocking
-	VacuumStatusGoTo
-	VacuumStatusZoneCleaning
-	VacuumStatusFull uint64 = 100
+	StatusUnknown uint64 = iota
+	StatusInitiating
+	StatusSleeping
+	StatusWaiting
+	StatusUnknown4
+	StatusCleaning
+	StatusReturningHome
+	StatusRemoteControl
+	StatusCharging
+	StatusChargingError
+	StatusPause
+	StatusSpotCleaning
+	StatusInError
+	StatusShuttingDown
+	StatusUpdating
+	StatusDocking
+	StatusGoTo
+	StatusZoneCleaning
+	StatusFull uint64 = 100
 
-	VacuumFanPowerQuiet    uint64 = 38
-	VacuumFanPowerBalanced uint64 = 60
-	VacuumFanPowerTurbo    uint64 = 75
-	VacuumFanPowerMax      uint64 = 100
-	VacuumFanPowerMob      uint64 = 105
+	FanPowerQuiet    uint64 = 38
+	FanPowerBalanced uint64 = 60
+	FanPowerTurbo    uint64 = 75
+	FanPowerMax      uint64 = 100
+	FanPowerMob      uint64 = 105
 
-	VacuumConsumableFilter    vacuumConsumable = "filter_work_time"
-	VacuumConsumableBrushMain vacuumConsumable = "main_brush_work_time"
-	VacuumConsumableBrushSide vacuumConsumable = "side_brush_work_time"
-	VacuumConsumableSensor    vacuumConsumable = "sensor_dirty_time"
+	ConsumableFilter    consumable = "filter_work_time"
+	ConsumableBrushMain consumable = "main_brush_work_time"
+	ConsumableBrushSide consumable = "side_brush_work_time"
+	ConsumableSensor    consumable = "sensor_dirty_time"
 
-	VacuumConsumableLifetimeFilter    time.Duration = 150
-	VacuumConsumableLifetimeBrushMain time.Duration = 300
-	VacuumConsumableLifetimeBrushSide time.Duration = 200
-	VacuumConsumableLifetimeSensor    time.Duration = 30
+	ConsumableLifetimeFilter    time.Duration = 150
+	ConsumableLifetimeBrushMain time.Duration = 300
+	ConsumableLifetimeBrushSide time.Duration = 200
+	ConsumableLifetimeSensor    time.Duration = 30
 )
 
 const (
-	VacuumSoundInstallStateUnknown uint64 = iota
-	VacuumSoundInstallStateDownloading
-	VacuumSoundInstallStateInstalling
-	VacuumSoundInstallStateInstalled
-	VacuumSoundInstallStateError
+	SoundInstallStateUnknown uint64 = iota
+	SoundInstallStateDownloading
+	SoundInstallStateInstalling
+	SoundInstallStateInstalled
+	SoundInstallStateError
 )
 
 const (
-	VacuumSoundInstallErrorNo uint64 = iota
-	VacuumSoundInstallErrorUnknown1
-	VacuumSoundInstallErrorFailedDownload
-	VacuumSoundInstallErrorWrongChecksum
-	VacuumSoundInstallErrorUnknown4
-	VacuumSoundInstallErrorUnknown5
+	SoundInstallErrorNo uint64 = iota
+	SoundInstallErrorUnknown1
+	SoundInstallErrorFailedDownload
+	SoundInstallErrorWrongChecksum
+	SoundInstallErrorUnknown4
+	SoundInstallErrorUnknown5
 
 /*
    0 => 'None',
@@ -143,7 +143,7 @@ const (
 )
 
 // https://github.com/marcelrv/XiaomiRobotVacuumProtocol
-type VacuumStatus struct {
+type Status struct {
 	MessageVersion  uint32        `json:"msg_ver"`
 	MessageSequence uint32        `json:"msg_seq"`
 	State           uint32        `json:"state"`
@@ -160,7 +160,7 @@ type VacuumStatus struct {
 	DNDEnabled      bool          `json:"dnd_enabled"`
 }
 
-type VacuumCarpetMode struct {
+type CarpetMode struct {
 	Enabled         bool   `json:"enabled"`
 	CurrentIntegral uint64 `json:"current_integral"`
 	CurrentHigh     uint64 `json:"current_high"`
@@ -168,14 +168,14 @@ type VacuumCarpetMode struct {
 	StallTime       uint64 `json:"stall_time"`
 }
 
-type VacuumCleanSummary struct {
+type CleanSummary struct {
 	TotalTime     time.Duration
 	TotalArea     uint64 // mm2
 	TotalCleanups uint64
 	CleanupIDs    []uint64
 }
 
-type VacuumCleanDetail struct {
+type CleanDetail struct {
 	StartTime        time.Time
 	EndTime          time.Time
 	CleaningDuration time.Duration
@@ -183,7 +183,7 @@ type VacuumCleanDetail struct {
 	Completed        bool
 }
 
-type VacuumDoNotDisturb struct {
+type DoNotDisturb struct {
 	Enabled     bool   `json:"enabled"`
 	StartHour   uint64 `json:"start_hour"`
 	StartMinute uint64 `json:"start_minute"`
@@ -191,7 +191,7 @@ type VacuumDoNotDisturb struct {
 	EndMinute   uint64 `json:"end_minute"`
 }
 
-type VacuumLocale struct {
+type Locale struct {
 	Name     string           `json:"name"`
 	Bom      string           `json:"bom"`
 	Location string           `json:"location"`
@@ -200,7 +200,7 @@ type VacuumLocale struct {
 	Timezone boggart.Location `json:"timezone"`
 }
 
-type VacuumSound struct {
+type Sound struct {
 	SIDInUse       uint64 `json:"sid_in_use"`
 	SIDVersion     uint64 `json:"sid_version"`
 	SIDInProgress  uint64 `json:"sid_in_progress"`
@@ -210,39 +210,39 @@ type VacuumSound struct {
 	MessageVersion uint64 `json:"msg_ver"`
 }
 
-type VacuumSoundInstallStatus struct {
+type SoundInstallStatus struct {
 	Progress      uint64 `json:"progress"`
 	State         uint64 `json:"state"`
 	Error         uint64 `json:"error"`
 	SIDInProgress uint64 `json:"sid_in_progress"`
 }
 
-type VacuumGateway struct {
+type Gateway struct {
 	IP  boggart.IP           `json:"gateway_ip"`
 	MAC boggart.HardwareAddr `json:"gateway_mac"`
 }
 
-type VacuumLogUploadStatus struct {
+type LogUploadStatus struct {
 	Status     uint64 `json:"log_upload_status"`
 	Location   string `json:"location"`
 	PolicyName uint64 `json:"policy_name"`
 }
 
-type vacuumConsumable string
+type consumable string
 
-type Vacuum struct {
+type Device struct {
 	miio.Device
 }
 
-func NewVacuum(address, token string) *Vacuum {
-	d := &Vacuum{
+func New(address, token string) *Device {
+	d := &Device{
 		Device: *miio.NewDevice(address, token),
 	}
 
 	return d
 }
 
-func (d *Vacuum) SerialNumber(ctx context.Context) (string, error) {
+func (d *Device) SerialNumber(ctx context.Context) (string, error) {
 	type response struct {
 		miio.Response
 
@@ -261,12 +261,12 @@ func (d *Vacuum) SerialNumber(ctx context.Context) (string, error) {
 	return reply.Result[0].SerialNumber, nil
 }
 
-func (d *Vacuum) Status(ctx context.Context) (result VacuumStatus, err error) {
+func (d *Device) Status(ctx context.Context) (result Status, err error) {
 	type response struct {
 		miio.Response
 
 		Result []struct {
-			VacuumStatus
+			Status
 
 			MapPresent   uint64 `json:"map_present"`
 			InCleaning   uint64 `json:"in_cleaning"`
@@ -301,7 +301,7 @@ func (d *Vacuum) Status(ctx context.Context) (result VacuumStatus, err error) {
 	return result, err
 }
 
-func (d *Vacuum) Start(ctx context.Context) error {
+func (d *Device) Start(ctx context.Context) error {
 	var reply miio.ResponseOK
 
 	err := d.Client().Send(ctx, "app_start", nil, &reply)
@@ -316,7 +316,7 @@ func (d *Vacuum) Start(ctx context.Context) error {
 	return nil
 }
 
-func (d *Vacuum) Spot(ctx context.Context) error {
+func (d *Device) Spot(ctx context.Context) error {
 	var reply miio.ResponseOK
 
 	err := d.Client().Send(ctx, "app_spot", nil, &reply)
@@ -331,7 +331,7 @@ func (d *Vacuum) Spot(ctx context.Context) error {
 	return nil
 }
 
-func (d *Vacuum) Stop(ctx context.Context) error {
+func (d *Device) Stop(ctx context.Context) error {
 	var reply miio.ResponseOK
 
 	err := d.Client().Send(ctx, "app_stop", nil, &reply)
@@ -346,7 +346,7 @@ func (d *Vacuum) Stop(ctx context.Context) error {
 	return nil
 }
 
-func (d *Vacuum) Pause(ctx context.Context) error {
+func (d *Device) Pause(ctx context.Context) error {
 	var reply miio.ResponseOK
 
 	err := d.Client().Send(ctx, "app_pause", nil, &reply)
@@ -361,7 +361,7 @@ func (d *Vacuum) Pause(ctx context.Context) error {
 	return nil
 }
 
-func (d *Vacuum) Home(ctx context.Context) error {
+func (d *Device) Home(ctx context.Context) error {
 	var reply miio.ResponseOK
 
 	err := d.Client().Send(ctx, "app_charge", nil, &reply)
@@ -376,7 +376,7 @@ func (d *Vacuum) Home(ctx context.Context) error {
 	return nil
 }
 
-func (d *Vacuum) FanPower(ctx context.Context) (uint32, error) {
+func (d *Device) FanPower(ctx context.Context) (uint32, error) {
 	type response struct {
 		miio.Response
 
@@ -393,7 +393,7 @@ func (d *Vacuum) FanPower(ctx context.Context) (uint32, error) {
 	return reply.Result[0], nil
 }
 
-func (d *Vacuum) SetFanPower(ctx context.Context, power uint64) error {
+func (d *Device) SetFanPower(ctx context.Context, power uint64) error {
 	if power > 105 {
 		power = 105
 	} else if power < 1 {
@@ -410,12 +410,12 @@ func (d *Vacuum) SetFanPower(ctx context.Context, power uint64) error {
 	return nil
 }
 
-func (d *Vacuum) CarpetMode(ctx context.Context) (result VacuumCarpetMode, err error) {
+func (d *Device) CarpetMode(ctx context.Context) (result CarpetMode, err error) {
 	type response struct {
 		miio.Response
 
 		Result []struct {
-			VacuumCarpetMode
+			CarpetMode
 
 			Enabled uint64 `json:"enable"`
 		} `json:"result"`
@@ -436,7 +436,7 @@ func (d *Vacuum) CarpetMode(ctx context.Context) (result VacuumCarpetMode, err e
 	return result, nil
 }
 
-func (d *Vacuum) SetCarpetMode(ctx context.Context, enabled bool, integral, high, low, stallTime uint64) error {
+func (d *Device) SetCarpetMode(ctx context.Context, enabled bool, integral, high, low, stallTime uint64) error {
 	var reply miio.ResponseOK
 
 	request := map[string]uint64{
@@ -459,7 +459,7 @@ func (d *Vacuum) SetCarpetMode(ctx context.Context, enabled bool, integral, high
 	return nil
 }
 
-func (d *Vacuum) Consumables(ctx context.Context) (map[vacuumConsumable]time.Duration, error) {
+func (d *Device) Consumables(ctx context.Context) (map[consumable]time.Duration, error) {
 	type response struct {
 		miio.Response
 
@@ -473,15 +473,15 @@ func (d *Vacuum) Consumables(ctx context.Context) (map[vacuumConsumable]time.Dur
 		return nil, err
 	}
 
-	consumables := make(map[vacuumConsumable]time.Duration, len(reply.Result[0]))
+	consumables := make(map[consumable]time.Duration, len(reply.Result[0]))
 	for n, v := range reply.Result[0] {
-		consumables[vacuumConsumable(n)] = time.Duration(v) * time.Second
+		consumables[consumable(n)] = time.Duration(v) * time.Second
 	}
 
 	return consumables, nil
 }
 
-func (d *Vacuum) ConsumableReset(ctx context.Context, consumable vacuumConsumable) error {
+func (d *Device) ConsumableReset(ctx context.Context, consumable consumable) error {
 	var reply miio.ResponseOK
 
 	err := d.Client().Send(ctx, "reset_consumable", []string{string(consumable)}, &reply)
@@ -496,7 +496,7 @@ func (d *Vacuum) ConsumableReset(ctx context.Context, consumable vacuumConsumabl
 	return nil
 }
 
-func (d *Vacuum) CleanSummary(ctx context.Context) (VacuumCleanSummary, error) {
+func (d *Device) CleanSummary(ctx context.Context) (CleanSummary, error) {
 	type response struct {
 		miio.Response
 
@@ -507,10 +507,10 @@ func (d *Vacuum) CleanSummary(ctx context.Context) (VacuumCleanSummary, error) {
 
 	err := d.Client().Send(ctx, "get_clean_summary", nil, &reply)
 	if err != nil {
-		return VacuumCleanSummary{}, err
+		return CleanSummary{}, err
 	}
 
-	result := VacuumCleanSummary{}
+	result := CleanSummary{}
 
 	for i, v := range reply.Result {
 		switch i {
@@ -536,7 +536,7 @@ func (d *Vacuum) CleanSummary(ctx context.Context) (VacuumCleanSummary, error) {
 	return result, nil
 }
 
-func (d *Vacuum) CleanDetails(ctx context.Context, id uint64) (VacuumCleanDetail, error) {
+func (d *Device) CleanDetails(ctx context.Context, id uint64) (CleanDetail, error) {
 	type response struct {
 		miio.Response
 
@@ -547,10 +547,10 @@ func (d *Vacuum) CleanDetails(ctx context.Context, id uint64) (VacuumCleanDetail
 
 	err := d.Client().Send(ctx, "get_clean_record", []uint64{id}, &reply)
 	if err != nil {
-		return VacuumCleanDetail{}, err
+		return CleanDetail{}, err
 	}
 
-	result := VacuumCleanDetail{}
+	result := CleanDetail{}
 
 	for i, v := range reply.Result[0] {
 		switch i {
@@ -574,7 +574,7 @@ func (d *Vacuum) CleanDetails(ctx context.Context, id uint64) (VacuumCleanDetail
 	return result, nil
 }
 
-func (d *Vacuum) SoundVolumeTest(ctx context.Context) error {
+func (d *Device) SoundVolumeTest(ctx context.Context) error {
 	var reply miio.ResponseOK
 
 	err := d.Client().Send(ctx, "test_sound_volume", nil, &reply)
@@ -589,7 +589,7 @@ func (d *Vacuum) SoundVolumeTest(ctx context.Context) error {
 	return nil
 }
 
-func (d *Vacuum) SoundVolume(ctx context.Context) (uint32, error) {
+func (d *Device) SoundVolume(ctx context.Context) (uint32, error) {
 	type response struct {
 		miio.Response
 
@@ -606,7 +606,7 @@ func (d *Vacuum) SoundVolume(ctx context.Context) (uint32, error) {
 	return reply.Result[0], nil
 }
 
-func (d *Vacuum) SetSoundVolume(ctx context.Context, volume uint32) error {
+func (d *Device) SetSoundVolume(ctx context.Context, volume uint32) error {
 	if volume > 100 {
 		volume = 100
 	}
@@ -629,28 +629,28 @@ func (d *Vacuum) SetSoundVolume(ctx context.Context, volume uint32) error {
 // English       {"result":[{"sid_in_use":3,"sid_version":2,"sid_in_progress":0,"location":"prc","bom":"A.03.0002","language":"prc","msg_ver":2}],"id":1557236769}
 // По-умолчанию  {"result":[{"sid_in_use":1,"sid_version":2,"sid_in_progress":0,"location":"prc","bom":"A.03.0002","language":"prc","msg_ver":2}],"id":1557236821}
 
-func (d *Vacuum) SoundCurrent(ctx context.Context) (VacuumSound, error) {
+func (d *Device) SoundCurrent(ctx context.Context) (Sound, error) {
 	type response struct {
 		miio.Response
 
-		Result []VacuumSound `json:"result"`
+		Result []Sound `json:"result"`
 	}
 
 	var reply response
 
 	err := d.Client().Send(ctx, "get_current_sound", nil, &reply)
 	if err != nil {
-		return VacuumSound{}, err
+		return Sound{}, err
 	}
 
 	return reply.Result[0], nil
 }
 
-func (d *Vacuum) SoundInstall(ctx context.Context, url, md5sum string, sid uint64) (VacuumSoundInstallStatus, error) {
+func (d *Device) SoundInstall(ctx context.Context, url, md5sum string, sid uint64) (SoundInstallStatus, error) {
 	type response struct {
 		miio.Response
 
-		Result []VacuumSoundInstallStatus `json:"result"`
+		Result []SoundInstallStatus `json:"result"`
 	}
 
 	var reply response
@@ -662,40 +662,40 @@ func (d *Vacuum) SoundInstall(ctx context.Context, url, md5sum string, sid uint6
 		//"sver": 2,
 	}, &reply)
 	if err != nil {
-		return VacuumSoundInstallStatus{}, err
+		return SoundInstallStatus{}, err
 	}
 
 	return reply.Result[0], nil
 }
 
-func (d *Vacuum) SoundInstallProgress(ctx context.Context) (VacuumSoundInstallStatus, error) {
+func (d *Device) SoundInstallProgress(ctx context.Context) (SoundInstallStatus, error) {
 	type response struct {
 		miio.Response
 
-		Result []VacuumSoundInstallStatus `json:"result"`
+		Result []SoundInstallStatus `json:"result"`
 	}
 
 	var reply response
 
 	err := d.Client().Send(ctx, "get_sound_progress", nil, &reply)
 	if err != nil {
-		return VacuumSoundInstallStatus{}, err
+		return SoundInstallStatus{}, err
 	}
 
 	return reply.Result[0], nil
 }
 
-func (d *Vacuum) SoundInstallLocalServer(ctx context.Context, file io.ReadSeeker, sid uint64) error {
+func (d *Device) SoundInstallLocalServer(ctx context.Context, file io.ReadSeeker, sid uint64) error {
 	server, err := internal.NewServer(file, d.HostnameForLocalServer())
 	if err != nil {
 		return err
 	}
 	defer server.Close()
 
-	var status VacuumSoundInstallStatus
+	var status SoundInstallStatus
 	status, err = d.SoundInstall(ctx, server.URL().String(), server.MD5(), sid)
 	if err == nil {
-		if status.Error != VacuumSoundInstallErrorNo {
+		if status.Error != SoundInstallErrorNo {
 			return errors.New("return error code " + strconv.FormatUint(status.Error, 10))
 		}
 
@@ -703,11 +703,11 @@ func (d *Vacuum) SoundInstallLocalServer(ctx context.Context, file io.ReadSeeker
 
 		for range ticker.C {
 			if status, err := d.SoundInstallProgress(ctx); err == nil {
-				if status.State == VacuumSoundInstallStateDownloading || status.State == VacuumSoundInstallStateInstalling {
+				if status.State == SoundInstallStateDownloading || status.State == SoundInstallStateInstalling {
 					continue
 				}
 
-				if status.Error != VacuumSoundInstallErrorNo {
+				if status.Error != SoundInstallErrorNo {
 					return errors.New("return error code " + strconv.FormatUint(status.Error, 10))
 				}
 
@@ -719,7 +719,7 @@ func (d *Vacuum) SoundInstallLocalServer(ctx context.Context, file io.ReadSeeker
 	return err
 }
 
-func (d *Vacuum) Find(ctx context.Context) error {
+func (d *Device) Find(ctx context.Context) error {
 	var reply miio.ResponseOK
 
 	err := d.Client().Send(ctx, "find_me", nil, &reply)
@@ -734,12 +734,12 @@ func (d *Vacuum) Find(ctx context.Context) error {
 	return nil
 }
 
-func (d *Vacuum) DoNotDisturb(ctx context.Context) (result VacuumDoNotDisturb, err error) {
+func (d *Device) DoNotDisturb(ctx context.Context) (result DoNotDisturb, err error) {
 	type response struct {
 		miio.Response
 
 		Result []struct {
-			VacuumDoNotDisturb
+			DoNotDisturb
 
 			Enabled uint64 `json:"enabled"`
 		} `json:"result"`
@@ -760,7 +760,7 @@ func (d *Vacuum) DoNotDisturb(ctx context.Context) (result VacuumDoNotDisturb, e
 	return result, err
 }
 
-func (d *Vacuum) DoNotDisturbDisable(ctx context.Context) error {
+func (d *Device) DoNotDisturbDisable(ctx context.Context) error {
 	var reply miio.ResponseOK
 
 	err := d.Client().Send(ctx, "close_dnd_timer", nil, &reply)
@@ -775,7 +775,7 @@ func (d *Vacuum) DoNotDisturbDisable(ctx context.Context) error {
 	return nil
 }
 
-func (d *Vacuum) SetDoNotDisturb(ctx context.Context, startHour, startMinute, endHour, endMinute uint64) error {
+func (d *Device) SetDoNotDisturb(ctx context.Context, startHour, startMinute, endHour, endMinute uint64) error {
 	var reply miio.ResponseOK
 
 	err := d.Client().Send(ctx, "set_dnd_timer", []uint64{startHour, startMinute, endHour, endMinute}, &reply)
@@ -790,7 +790,7 @@ func (d *Vacuum) SetDoNotDisturb(ctx context.Context, startHour, startMinute, en
 	return nil
 }
 
-func (d *Vacuum) Timezone(ctx context.Context) (*time.Location, error) {
+func (d *Device) Timezone(ctx context.Context) (*time.Location, error) {
 	type response struct {
 		miio.Response
 
@@ -807,7 +807,7 @@ func (d *Vacuum) Timezone(ctx context.Context) (*time.Location, error) {
 	return time.LoadLocation(reply.Result[0])
 }
 
-func (d *Vacuum) SetTimezone(ctx context.Context, zone time.Location) error {
+func (d *Device) SetTimezone(ctx context.Context, zone time.Location) error {
 	var reply miio.ResponseOK
 
 	err := d.Client().Send(ctx, "set_timezone", []string{zone.String()}, &reply)
@@ -822,58 +822,58 @@ func (d *Vacuum) SetTimezone(ctx context.Context, zone time.Location) error {
 	return nil
 }
 
-func (d *Vacuum) Locale(ctx context.Context) (VacuumLocale, error) {
+func (d *Device) Locale(ctx context.Context) (Locale, error) {
 	type response struct {
 		miio.Response
 
-		Result []VacuumLocale `json:"result"`
+		Result []Locale `json:"result"`
 	}
 
 	var reply response
 
 	err := d.Client().Send(ctx, "app_get_locale", nil, &reply)
 	if err != nil {
-		return VacuumLocale{}, err
+		return Locale{}, err
 	}
 
 	return reply.Result[0], nil
 }
 
-func (d *Vacuum) Gateway(ctx context.Context) (VacuumGateway, error) {
+func (d *Device) Gateway(ctx context.Context) (Gateway, error) {
 	type response struct {
 		miio.Response
 
-		Result []VacuumGateway `json:"result"`
+		Result []Gateway `json:"result"`
 	}
 
 	var reply response
 
 	err := d.Client().Send(ctx, "get_gateway", nil, &reply)
 	if err != nil {
-		return VacuumGateway{}, err
+		return Gateway{}, err
 	}
 
 	return reply.Result[0], nil
 }
 
-func (d *Vacuum) LogUploadStatus(ctx context.Context) (VacuumLogUploadStatus, error) {
+func (d *Device) LogUploadStatus(ctx context.Context) (LogUploadStatus, error) {
 	type response struct {
 		miio.Response
 
-		Result []VacuumLogUploadStatus `json:"result"`
+		Result []LogUploadStatus `json:"result"`
 	}
 
 	var reply response
 
 	err := d.Client().Send(ctx, "get_log_upload_status", nil, &reply)
 	if err != nil {
-		return VacuumLogUploadStatus{}, err
+		return LogUploadStatus{}, err
 	}
 
 	return reply.Result[0], nil
 }
 
-func (d *Vacuum) SetLabStatus(ctx context.Context, enabled bool) error {
+func (d *Device) SetLabStatus(ctx context.Context, enabled bool) error {
 	var (
 		reply  miio.ResponseOK
 		status int64

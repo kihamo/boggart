@@ -3,7 +3,7 @@ package miio
 import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/atomic"
-	"github.com/kihamo/boggart/components/boggart/providers/xiaomi/miio/devices"
+	"github.com/kihamo/boggart/components/boggart/providers/xiaomi/miio/devices/vacuum"
 )
 
 type Bind struct {
@@ -11,7 +11,7 @@ type Bind struct {
 	boggart.BindMQTT
 
 	config *Config
-	device *devices.Vacuum
+	device *vacuum.Device
 
 	battery   *atomic.Uint32Null
 	cleanArea *atomic.Uint32Null
