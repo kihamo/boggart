@@ -3,13 +3,10 @@ package vacuum
 import (
 	"context"
 	"errors"
-	"io"
-	"strconv"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/xiaomi/miio"
-	"github.com/kihamo/boggart/components/boggart/providers/xiaomi/miio/internal"
 )
 
 /*
@@ -83,39 +80,7 @@ const (
 	StatusGoTo
 	StatusZoneCleaning
 	StatusFull uint64 = 100
-
-	FanPowerQuiet    uint64 = 38
-	FanPowerBalanced uint64 = 60
-	FanPowerTurbo    uint64 = 75
-	FanPowerMax      uint64 = 100
-	FanPowerMob      uint64 = 105
-
-	ConsumableFilter    consumable = "filter_work_time"
-	ConsumableBrushMain consumable = "main_brush_work_time"
-	ConsumableBrushSide consumable = "side_brush_work_time"
-	ConsumableSensor    consumable = "sensor_dirty_time"
-
-	ConsumableLifetimeFilter    time.Duration = 150
-	ConsumableLifetimeBrushMain time.Duration = 300
-	ConsumableLifetimeBrushSide time.Duration = 200
-	ConsumableLifetimeSensor    time.Duration = 30
 )
-
-const (
-	SoundInstallStateUnknown uint64 = iota
-	SoundInstallStateDownloading
-	SoundInstallStateInstalling
-	SoundInstallStateInstalled
-	SoundInstallStateError
-)
-
-const (
-	SoundInstallErrorNo uint64 = iota
-	SoundInstallErrorUnknown1
-	SoundInstallErrorFailedDownload
-	SoundInstallErrorWrongChecksum
-	SoundInstallErrorUnknown4
-	SoundInstallErrorUnknown5
 
 /*
    0 => 'None',
@@ -140,7 +105,6 @@ const (
        19 => 'Unpowered charging station',
        20 => 'Unknown'
 */
-)
 
 // https://github.com/marcelrv/XiaomiRobotVacuumProtocol
 type Status struct {
@@ -160,37 +124,6 @@ type Status struct {
 	DNDEnabled      bool          `json:"dnd_enabled"`
 }
 
-type CarpetMode struct {
-	Enabled         bool   `json:"enabled"`
-	CurrentIntegral uint64 `json:"current_integral"`
-	CurrentHigh     uint64 `json:"current_high"`
-	CurrentLow      uint64 `json:"current_low"`
-	StallTime       uint64 `json:"stall_time"`
-}
-
-type CleanSummary struct {
-	TotalTime     time.Duration
-	TotalArea     uint64 // mm2
-	TotalCleanups uint64
-	CleanupIDs    []uint64
-}
-
-type CleanDetail struct {
-	StartTime        time.Time
-	EndTime          time.Time
-	CleaningDuration time.Duration
-	Area             uint64 // mm2
-	Completed        bool
-}
-
-type DoNotDisturb struct {
-	Enabled     bool   `json:"enabled"`
-	StartHour   uint64 `json:"start_hour"`
-	StartMinute uint64 `json:"start_minute"`
-	EndHour     uint64 `json:"end_hour"`
-	EndMinute   uint64 `json:"end_minute"`
-}
-
 type Locale struct {
 	Name     string           `json:"name"`
 	Bom      string           `json:"bom"`
@@ -198,23 +131,6 @@ type Locale struct {
 	Language string           `json:"language"`
 	WiFiPlan string           `json:"wifiplan"`
 	Timezone boggart.Location `json:"timezone"`
-}
-
-type Sound struct {
-	SIDInUse       uint64 `json:"sid_in_use"`
-	SIDVersion     uint64 `json:"sid_version"`
-	SIDInProgress  uint64 `json:"sid_in_progress"`
-	Location       string `json:"location"`
-	Bom            string `json:"bom"`
-	Language       string `json:"language"`
-	MessageVersion uint64 `json:"msg_ver"`
-}
-
-type SoundInstallStatus struct {
-	Progress      uint64 `json:"progress"`
-	State         uint64 `json:"state"`
-	Error         uint64 `json:"error"`
-	SIDInProgress uint64 `json:"sid_in_progress"`
 }
 
 type Gateway struct {
@@ -227,8 +143,6 @@ type LogUploadStatus struct {
 	Location   string `json:"location"`
 	PolicyName uint64 `json:"policy_name"`
 }
-
-type consumable string
 
 type Device struct {
 	miio.Device
@@ -376,441 +290,10 @@ func (d *Device) Home(ctx context.Context) error {
 	return nil
 }
 
-func (d *Device) FanPower(ctx context.Context) (uint32, error) {
-	type response struct {
-		miio.Response
-
-		Result []uint32 `json:"result"`
-	}
-
-	var reply response
-
-	err := d.Client().Send(ctx, "get_custom_mode", nil, &reply)
-	if err != nil {
-		return 0, err
-	}
-
-	return reply.Result[0], nil
-}
-
-func (d *Device) SetFanPower(ctx context.Context, power uint64) error {
-	if power > 105 {
-		power = 105
-	} else if power < 1 {
-		power = 1
-	}
-
-	var reply miio.ResponseOK
-
-	err := d.Client().Send(ctx, "set_custom_mode", []uint64{power}, &reply)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (d *Device) CarpetMode(ctx context.Context) (result CarpetMode, err error) {
-	type response struct {
-		miio.Response
-
-		Result []struct {
-			CarpetMode
-
-			Enabled uint64 `json:"enable"`
-		} `json:"result"`
-	}
-
-	var reply response
-
-	err = d.Client().Send(ctx, "get_carpet_mode", nil, &reply)
-	if err == nil {
-		r := &reply.Result[0]
-		result.Enabled = r.Enabled == 1
-		result.CurrentIntegral = r.CurrentIntegral
-		result.CurrentHigh = r.CurrentHigh
-		result.CurrentLow = r.CurrentLow
-		result.StallTime = r.StallTime
-	}
-
-	return result, nil
-}
-
-func (d *Device) SetCarpetMode(ctx context.Context, enabled bool, integral, high, low, stallTime uint64) error {
-	var reply miio.ResponseOK
-
-	request := map[string]uint64{
-		"enable":           0,
-		"current_integral": integral,
-		"current_high":     high,
-		"current_low":      low,
-		"stall_time":       stallTime,
-	}
-
-	if enabled {
-		request["enable"] = 1
-	}
-
-	err := d.Client().Send(ctx, "set_carpet_mode", []interface{}{request}, &reply)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (d *Device) Consumables(ctx context.Context) (map[consumable]time.Duration, error) {
-	type response struct {
-		miio.Response
-
-		Result []map[string]uint64 `json:"result"`
-	}
-
-	var reply response
-
-	err := d.Client().Send(ctx, "get_consumable", nil, &reply)
-	if err != nil {
-		return nil, err
-	}
-
-	consumables := make(map[consumable]time.Duration, len(reply.Result[0]))
-	for n, v := range reply.Result[0] {
-		consumables[consumable(n)] = time.Duration(v) * time.Second
-	}
-
-	return consumables, nil
-}
-
-func (d *Device) ConsumableReset(ctx context.Context, consumable consumable) error {
-	var reply miio.ResponseOK
-
-	err := d.Client().Send(ctx, "reset_consumable", []string{string(consumable)}, &reply)
-	if err != nil {
-		return err
-	}
-
-	if !miio.ResponseIsOK(reply) {
-		return errors.New("device return not OK response")
-	}
-
-	return nil
-}
-
-func (d *Device) CleanSummary(ctx context.Context) (CleanSummary, error) {
-	type response struct {
-		miio.Response
-
-		Result []interface{} `json:"result"`
-	}
-
-	var reply response
-
-	err := d.Client().Send(ctx, "get_clean_summary", nil, &reply)
-	if err != nil {
-		return CleanSummary{}, err
-	}
-
-	result := CleanSummary{}
-
-	for i, v := range reply.Result {
-		switch i {
-		case 0:
-			result.TotalTime = time.Duration(v.(float64)) * time.Second
-
-		case 1:
-			result.TotalArea = uint64(v.(float64))
-
-		case 2:
-			result.TotalCleanups = uint64(v.(float64))
-
-		case 3:
-			values := v.([]interface{})
-			result.CleanupIDs = make([]uint64, len(values), len(values))
-
-			for i2, v2 := range values {
-				result.CleanupIDs[i2] = uint64(v2.(float64))
-			}
-		}
-	}
-
-	return result, nil
-}
-
-func (d *Device) CleanDetails(ctx context.Context, id uint64) (CleanDetail, error) {
-	type response struct {
-		miio.Response
-
-		Result [][]int64 `json:"result"`
-	}
-
-	var reply response
-
-	err := d.Client().Send(ctx, "get_clean_record", []uint64{id}, &reply)
-	if err != nil {
-		return CleanDetail{}, err
-	}
-
-	result := CleanDetail{}
-
-	for i, v := range reply.Result[0] {
-		switch i {
-		case 0:
-			result.StartTime = time.Unix(v, 0)
-
-		case 1:
-			result.EndTime = time.Unix(v, 0)
-
-		case 2:
-			result.CleaningDuration = time.Duration(v) * time.Second
-
-		case 3:
-			result.Area = uint64(v)
-
-		case 5:
-			result.Completed = v == 1
-		}
-	}
-
-	return result, nil
-}
-
-func (d *Device) SoundVolumeTest(ctx context.Context) error {
-	var reply miio.ResponseOK
-
-	err := d.Client().Send(ctx, "test_sound_volume", nil, &reply)
-	if err != nil {
-		return err
-	}
-
-	if !miio.ResponseIsOK(reply) {
-		return errors.New("device return not OK response")
-	}
-
-	return nil
-}
-
-func (d *Device) SoundVolume(ctx context.Context) (uint32, error) {
-	type response struct {
-		miio.Response
-
-		Result []uint32 `json:"result"`
-	}
-
-	var reply response
-
-	err := d.Client().Send(ctx, "get_sound_volume", nil, &reply)
-	if err != nil {
-		return 0, err
-	}
-
-	return reply.Result[0], nil
-}
-
-func (d *Device) SetSoundVolume(ctx context.Context, volume uint32) error {
-	if volume > 100 {
-		volume = 100
-	}
-
-	var reply miio.ResponseOK
-
-	err := d.Client().Send(ctx, "change_sound_volume", []uint32{volume}, &reply)
-	if err != nil {
-		return err
-	}
-
-	if !miio.ResponseIsOK(reply) {
-		return errors.New("device return not OK response")
-	}
-
-	return nil
-}
-
-// Мой кастомный {"result":[{"sid_in_use":10000,"sid_version":1,"sid_in_progress":0,"location":"prc","bom":"A.03.0002","language":"prc","msg_ver":2}],"id":1557236719}
-// English       {"result":[{"sid_in_use":3,"sid_version":2,"sid_in_progress":0,"location":"prc","bom":"A.03.0002","language":"prc","msg_ver":2}],"id":1557236769}
-// По-умолчанию  {"result":[{"sid_in_use":1,"sid_version":2,"sid_in_progress":0,"location":"prc","bom":"A.03.0002","language":"prc","msg_ver":2}],"id":1557236821}
-
-func (d *Device) SoundCurrent(ctx context.Context) (Sound, error) {
-	type response struct {
-		miio.Response
-
-		Result []Sound `json:"result"`
-	}
-
-	var reply response
-
-	err := d.Client().Send(ctx, "get_current_sound", nil, &reply)
-	if err != nil {
-		return Sound{}, err
-	}
-
-	return reply.Result[0], nil
-}
-
-func (d *Device) SoundInstall(ctx context.Context, url, md5sum string, sid uint64) (SoundInstallStatus, error) {
-	type response struct {
-		miio.Response
-
-		Result []SoundInstallStatus `json:"result"`
-	}
-
-	var reply response
-
-	err := d.Client().Send(ctx, "dnld_install_sound", map[string]interface{}{
-		"md5": md5sum,
-		"url": url,
-		"sid": sid,
-		//"sver": 2,
-	}, &reply)
-	if err != nil {
-		return SoundInstallStatus{}, err
-	}
-
-	return reply.Result[0], nil
-}
-
-func (d *Device) SoundInstallProgress(ctx context.Context) (SoundInstallStatus, error) {
-	type response struct {
-		miio.Response
-
-		Result []SoundInstallStatus `json:"result"`
-	}
-
-	var reply response
-
-	err := d.Client().Send(ctx, "get_sound_progress", nil, &reply)
-	if err != nil {
-		return SoundInstallStatus{}, err
-	}
-
-	return reply.Result[0], nil
-}
-
-func (d *Device) SoundInstallLocalServer(ctx context.Context, file io.ReadSeeker, sid uint64) error {
-	server, err := internal.NewServer(file, d.HostnameForLocalServer())
-	if err != nil {
-		return err
-	}
-	defer server.Close()
-
-	var status SoundInstallStatus
-	status, err = d.SoundInstall(ctx, server.URL().String(), server.MD5(), sid)
-	if err == nil {
-		if status.Error != SoundInstallErrorNo {
-			return errors.New("return error code " + strconv.FormatUint(status.Error, 10))
-		}
-
-		ticker := time.NewTicker(time.Second)
-
-		for range ticker.C {
-			if status, err := d.SoundInstallProgress(ctx); err == nil {
-				if status.State == SoundInstallStateDownloading || status.State == SoundInstallStateInstalling {
-					continue
-				}
-
-				if status.Error != SoundInstallErrorNo {
-					return errors.New("return error code " + strconv.FormatUint(status.Error, 10))
-				}
-
-				return nil
-			}
-		}
-	}
-
-	return err
-}
-
 func (d *Device) Find(ctx context.Context) error {
 	var reply miio.ResponseOK
 
 	err := d.Client().Send(ctx, "find_me", nil, &reply)
-	if err != nil {
-		return err
-	}
-
-	if !miio.ResponseIsOK(reply) {
-		return errors.New("device return not OK response")
-	}
-
-	return nil
-}
-
-func (d *Device) DoNotDisturb(ctx context.Context) (result DoNotDisturb, err error) {
-	type response struct {
-		miio.Response
-
-		Result []struct {
-			DoNotDisturb
-
-			Enabled uint64 `json:"enabled"`
-		} `json:"result"`
-	}
-
-	var reply response
-
-	err = d.Client().Send(ctx, "get_dnd_timer", nil, &reply)
-	if err == nil {
-		r := &reply.Result[0]
-		result.Enabled = r.Enabled == 1
-		result.StartHour = r.StartHour
-		result.StartMinute = r.StartMinute
-		result.EndHour = r.EndHour
-		result.EndMinute = r.EndMinute
-	}
-
-	return result, err
-}
-
-func (d *Device) DoNotDisturbDisable(ctx context.Context) error {
-	var reply miio.ResponseOK
-
-	err := d.Client().Send(ctx, "close_dnd_timer", nil, &reply)
-	if err != nil {
-		return err
-	}
-
-	if !miio.ResponseIsOK(reply) {
-		return errors.New("device return not OK response")
-	}
-
-	return nil
-}
-
-func (d *Device) SetDoNotDisturb(ctx context.Context, startHour, startMinute, endHour, endMinute uint64) error {
-	var reply miio.ResponseOK
-
-	err := d.Client().Send(ctx, "set_dnd_timer", []uint64{startHour, startMinute, endHour, endMinute}, &reply)
-	if err != nil {
-		return err
-	}
-
-	if !miio.ResponseIsOK(reply) {
-		return errors.New("device return not OK response")
-	}
-
-	return nil
-}
-
-func (d *Device) Timezone(ctx context.Context) (*time.Location, error) {
-	type response struct {
-		miio.Response
-
-		Result []string `json:"result"`
-	}
-
-	var reply response
-
-	err := d.Client().Send(ctx, "get_timezone", nil, &reply)
-	if err != nil {
-		return nil, err
-	}
-
-	return time.LoadLocation(reply.Result[0])
-}
-
-func (d *Device) SetTimezone(ctx context.Context, zone time.Location) error {
-	var reply miio.ResponseOK
-
-	err := d.Client().Send(ctx, "set_timezone", []string{zone.String()}, &reply)
 	if err != nil {
 		return err
 	}
