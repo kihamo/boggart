@@ -41,7 +41,7 @@ func (d *Device) DoNotDisturb(ctx context.Context) (result DoNotDisturb, err err
 	return result, err
 }
 
-func (d *Device) DoNotDisturbDisable(ctx context.Context) error {
+func (d *Device) DisableDoNotDisturb(ctx context.Context) error {
 	var reply miio.ResponseOK
 
 	err := d.Client().Send(ctx, "close_dnd_timer", nil, &reply)

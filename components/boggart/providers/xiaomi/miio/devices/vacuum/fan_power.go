@@ -2,6 +2,7 @@ package vacuum
 
 import (
 	"context"
+	"errors"
 
 	"github.com/kihamo/boggart/components/boggart/providers/xiaomi/miio"
 )
@@ -43,6 +44,10 @@ func (d *Device) SetFanPower(ctx context.Context, power uint64) error {
 	err := d.Client().Send(ctx, "set_custom_mode", []uint64{power}, &reply)
 	if err != nil {
 		return err
+	}
+
+	if !miio.ResponseIsOK(reply) {
+		return errors.New("device return not OK response")
 	}
 
 	return nil
