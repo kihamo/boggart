@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"strconv"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart/providers/xiaomi/miio"
@@ -61,25 +62,14 @@ func (s SoundInstallStatus) IsError() bool {
 func (e SoundInstallStatusError) String() string {
 	switch e {
 	case SoundInstallErrorNo:
-		return ""
-
-	case SoundInstallErrorUnknown1:
-		return "error unknown #1"
-
+		return "no"
 	case SoundInstallErrorFailedDownload:
 		return "download failed"
-
 	case SoundInstallErrorWrongChecksum:
 		return "wrong checksum"
-
-	case SoundInstallErrorUnknown4:
-		return "error unknown #4"
-
-	case SoundInstallErrorUnknown5:
-		return "error unknown #5"
 	}
 
-	return "error unknown"
+	return "unknown #" + strconv.FormatUint(uint64(e), 10)
 }
 
 func (d *Device) SoundVolumeTest(ctx context.Context) error {

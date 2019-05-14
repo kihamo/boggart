@@ -13,6 +13,8 @@ type Bind struct {
 	config *Config
 	device *vacuum.Device
 
+	state *atomic.Uint32Null
+
 	battery   *atomic.Uint32Null
 	cleanArea *atomic.Uint32Null
 	cleanTime *atomic.DurationNull

@@ -20,11 +20,14 @@ const (
 	MQTTPublishTopicConsumableBrushMain = MQTTPrefix + "consumable/brush-main"
 	MQTTPublishTopicConsumableBrushSide = MQTTPrefix + "consumable/brush-side"
 	MQTTPublishTopicConsumableSensor    = MQTTPrefix + "consumable/sensor"
+	MQTTPublishTopicState               = MQTTPrefix + "state"
+	MQTTPublishTopicError               = MQTTPrefix + "error"
 
 	MQTTSubscribeTopicSetFanPower = MQTTPrefix + "fan-power/set"
 	MQTTSubscribeTopicSetVolume   = MQTTPrefix + "volume/set"
 	MQTTSubscribeTopicTestVolume  = MQTTPrefix + "volume/test"
 	MQTTSubscribeTopicFind        = MQTTPrefix + "find"
+	MQTTSubscribeTopicAction      = MQTTPrefix + "action"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
@@ -37,6 +40,8 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 		MQTTPublishTopicConsumableBrushMain,
 		MQTTPublishTopicConsumableBrushSide,
 		MQTTPublishTopicConsumableSensor,
+		MQTTPublishTopicState,
+		MQTTPublishTopicError,
 	}
 }
 
@@ -46,6 +51,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 		mqtt.NewSubscriber(MQTTSubscribeTopicSetVolume.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSetVolume)),
 		mqtt.NewSubscriber(MQTTSubscribeTopicTestVolume.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTTestVolume)),
 		mqtt.NewSubscriber(MQTTSubscribeTopicFind.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTFind)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicAction.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTAction)),
 	}
 }
 
@@ -99,6 +105,57 @@ func (b *Bind) callbackMQTTFind(ctx context.Context, client mqtt.Component, mess
 	}
 
 	return b.device.Find(ctx)
+}
+
+func (b *Bind) callbackMQTTAction(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
+	if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
+		return nil
+	}
+
+	var err error
+
+	switch message.String() {
+	case "start":
+		err = b.device.Start(ctx)
+	case "spot":
+		err = b.device.Spot(ctx)
+	case "stop":
+		err = b.device.Stop(ctx)
+	case "pause":
+		err = b.device.Pause(ctx)
+	case "home":
+		err = b.device.Home(ctx)
+	}
+
+	if err == nil {
+		err = b.updateStatus(ctx)
+	}
+
+	return err
+}
+
+func (b *Bind) updateStatus(ctx context.Context) error {
+	sn := b.SerialNumber()
+	if sn == "" {
+		return nil
+	}
+
+	status, err := b.device.Status(ctx)
+	if err == nil {
+		snMQTT := mqtt.NameReplace(sn)
+
+		state := uint32(status.State)
+		if ok := b.state.Set(state); ok {
+			err = b.MQTTPublishAsync(ctx, MQTTPublishTopicState.Format(snMQTT), state)
+		}
+
+		e := uint32(status.Error)
+		if ok := b.state.Set(e); ok {
+			err = b.MQTTPublishAsync(ctx, MQTTPublishTopicError.Format(snMQTT), e)
+		}
+	}
+
+	return err
 }
 
 func (b *Bind) updateFanPower(ctx context.Context) error {

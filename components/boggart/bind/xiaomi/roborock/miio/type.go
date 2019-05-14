@@ -17,6 +17,8 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		config: config,
 		device: vacuum.New(config.Host, config.Token),
 
+		state: atomic.NewUint32Null(),
+
 		battery:   atomic.NewUint32Null(),
 		cleanArea: atomic.NewUint32Null(),
 		cleanTime: atomic.NewDurationNull(),

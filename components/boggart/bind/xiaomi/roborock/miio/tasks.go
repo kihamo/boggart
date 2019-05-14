@@ -41,10 +41,13 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		return nil, nil
 	}
 
+	b.UpdateStatus(boggart.BindStatusOnline)
+
 	if b.SerialNumber() == "" {
 		b.SetSerialNumber(sn)
+
+		b.taskUpdater(ctx)
 	}
-	b.UpdateStatus(boggart.BindStatusOnline)
 
 	return nil, nil
 }
@@ -62,6 +65,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	snMQTT := mqtt.NameReplace(sn)
 	var err error
 
+	// only statistics
 	status, e := b.device.Status(ctx)
 	if e == nil {
 		if ok := b.battery.Set(status.Battery); ok {
@@ -123,6 +127,10 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			}
 		}
 	} else {
+		err = multierr.Append(err, e)
+	}
+
+	if e := b.updateStatus(ctx); e != nil {
 		err = multierr.Append(err, e)
 	}
 
