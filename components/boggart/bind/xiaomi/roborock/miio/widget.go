@@ -126,7 +126,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 						if strings.EqualFold(value[0], "true") {
 							err = bind.device.SetDoNotDisturb(ctx, dnd.StartHour, dnd.StartMinute, dnd.EndHour, dnd.EndMinute)
 						} else {
-							err = bind.device.DoNotDisturbDisable(ctx)
+							err = bind.device.DisableDoNotDisturb(ctx)
 						}
 
 					case "dnd-time":
