@@ -8,8 +8,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/operations"
+
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
+	apiclient "github.com/kihamo/boggart/components/boggart/providers/hikvision2/client"
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
@@ -27,6 +30,8 @@ type Bind struct {
 	boggart.BindMQTT
 
 	mutex sync.RWMutex
+
+	client *apiclient.HikVision
 
 	isapi                 *hikvision.ISAPI
 	address               url.URL
@@ -83,17 +88,13 @@ func (b *Bind) startAlertStreaming() error {
 	return nil
 }
 
-func (b *Bind) Snapshot(ctx context.Context, channel uint64, writer io.Writer) error {
-	return b.isapi.StreamingPictureToWriter(ctx, channel, writer)
-}
-
 func (b *Bind) FirmwareUpdate(firmware io.Reader) {
 	go func() {
 		ctx := context.Background()
 
 		code, _ := b.isapi.SystemUpdateFirmware(ctx, firmware)
 		if code.SubStatusCode == hikvision.SubStatusCodeRebootRequired {
-			if err := b.isapi.SystemReboot(ctx); err != nil {
+			if _, err := b.client.Operations.PutSystemReboot(operations.NewPutSystemRebootParamsWithContext(ctx), nil); err != nil {
 				b.Logger().Error("Reboot after firmware update failed", "error", err.Error())
 			}
 		}

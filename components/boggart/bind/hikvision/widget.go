@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/operations"
+
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
@@ -24,6 +26,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 	query := r.URL().Query()
 	action := query.Get("action")
+	ctx := r.Context()
 
 	vars := map[string]interface{}{
 		"action":                   action,
@@ -57,7 +60,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 					switch key {
 					case "ir-cut-filter-type":
-						err = bind.isapi.ImageIrCutFilter(r.Context(), ch, hikvision.ImageIrCutFilter{
+						err = bind.isapi.ImageIrCutFilter(ctx, uint64(ch), hikvision.ImageIrCutFilter{
 							Type: hikvision.ImageIrCutFilterType(value[0]),
 						})
 					}
@@ -82,7 +85,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			return
 		}
 
-		response, err := bind.isapi.ImageChannels(r.Context())
+		response, err := bind.isapi.ImageChannels(ctx)
 		if err != nil {
 			t.NotFound(w, r)
 			return
@@ -107,7 +110,8 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		buf := bytes.NewBuffer(nil)
-		if err = bind.Snapshot(r.Context(), ch, buf); err != nil {
+		params := operations.NewGetStreamingChannelsChannelPictureParamsWithContext(ctx).WithChannel(ch)
+		if _, err := bind.client.Operations.GetStreamingChannelsChannelPicture(params, nil, buf); err != nil {
 			t.NotFound(w, r)
 			return
 		}
@@ -118,7 +122,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			filename := b.ID() + time.Now().Format("_20060102150405.jpg")
 
 			w.Header().Set("Content-Disposition", "attachment; filename=\""+filename+"\"")
-			w.Header().Set("Content-Type", "text/x-yaml")
+			// w.Header().Set("Content-Type", "image/jpeg")
 		}
 
 		_, _ = io.Copy(w, buf)
@@ -152,22 +156,22 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			return
 		}
 
-		info, err := bind.isapi.SystemDeviceInfo(r.Context())
+		info, err := bind.client.Operations.GetSystemDeviceInfo(operations.NewGetSystemDeviceInfoParamsWithContext(ctx), nil)
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get device info failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(t.Translate(ctx, "Get device info failed with error %s", "", err.Error()))
 		}
 
-		vars["info"] = info
+		vars["info"] = info.Payload
 
-		upgrade, err := bind.isapi.SystemUpgradeStatus(r.Context())
+		upgrade, err := bind.client.Operations.GetSystemUpgradeStatus(operations.NewGetSystemUpgradeStatusParamsWithContext(ctx), nil)
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get upgrade status failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(t.Translate(ctx, "Get upgrade status failed with error %s", "", err.Error()))
 		}
 
-		vars["upgrade"] = upgrade
+		vars["upgrade"] = upgrade.Payload
 	}
 
-	t.Render(r.Context(), "widget", vars)
+	t.Render(ctx, "widget", vars)
 }
 
 func (t Type) WidgetAssetFS() *assetfs.AssetFS {

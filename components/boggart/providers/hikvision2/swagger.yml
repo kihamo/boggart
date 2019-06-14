@@ -1,0 +1,300 @@
+---
+
+swagger: "2.0"
+info:
+  title: "HikVision"
+  version: "0.1.0"
+consumes:
+  - "application/xml"
+produces:
+  - "application/xml"
+schemes:
+  - "http"
+basePath: "/ISAPI"
+securityDefinitions:
+  basicAuth:
+    type: "basic"
+security:
+  - basicAuth: []
+paths:
+  /Streaming/channels/{channel}/picture:
+    get:
+      parameters:
+        - name: "channel"
+          in: "path"
+          description: "Channel ID"
+          required: true
+          type: "integer"
+          format: "uint64"
+      produces:
+        - 'image/jpeg; charset="UTF-8"'
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "file"
+  /System/deviceInfo:
+    get:
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/SystemDeviceInfo"
+  /System/status:
+    get:
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/SystemStatus"
+  /System/upgradeStatus:
+    get:
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/SystemUpgradeStatus"
+  /System/reboot:
+    put:
+      responses:
+        200:
+
+definitions:
+  SystemDeviceInfo:
+    type: "object"
+    properties:
+      deviceName:
+        type: "string"
+        xml:
+          name: "deviceName"
+      deviceID:
+        type: "string"
+        xml:
+          name: "deviceID"
+      deviceDescription:
+        type: "string"
+        xml:
+          name: "deviceDescription"
+      deviceLocation:
+        type: "string"
+        xml:
+          name: "deviceLocation"
+      systemContact:
+        type: "string"
+        xml:
+          name: "systemContact"
+      model:
+        type: "string"
+        xml:
+          name: "model"
+      serialNumber:
+        type: "string"
+        xml:
+          name: "serialNumber"
+      macAddress:
+        type: "string"
+        xml:
+          name: "macAddress"
+      firmwareVersion:
+        type: "string"
+        xml:
+          name: "firmwareVersion"
+      firmwareVersionInfo:
+        type: "string"
+        xml:
+          name: "firmwareVersionInfo"
+      firmwareReleasedDate:
+        type: "string"
+        xml:
+          name: "firmwareReleasedDate"
+      encoderVersion:
+        type: "string"
+        xml:
+          name: "encoderVersion"
+      encoderReleasedDate:
+        type: "string"
+        xml:
+          name: "encoderReleasedDate"
+      decoderVersion:
+        type: "string"
+        xml:
+          name: "decoderVersion"
+      decoderReleasedDate:
+        type: "string"
+        xml:
+          name: "decoderReleasedDate"
+      bootVersion:
+        type: "string"
+        xml:
+          name: "bootVersion"
+      bootReleasedDate:
+        type: "string"
+        xml:
+          name: "bootReleasedDate"
+      hardwareVersion:
+        type: "string"
+        xml:
+          name: "hardwareVersion"
+      deviceType:
+        type: "string"
+        xml:
+          name: "deviceType"
+      telecontrolID:
+        type: "integer"
+        xml:
+          name: "telecontrolID"
+      supportBeep:
+        type: "boolean"
+        xml:
+          name: "supportBeep"
+      supportVideoLoss:
+        type: "boolean"
+        xml:
+          name: "supportVideoLoss"
+  SystemStatus:
+    type: "object"
+    properties:
+      currentDeviceTime:
+        type: "string"
+        format: "date-time"
+        xml:
+          name: "currentDeviceTime"
+      deviceUpTime:
+        type: "integer"
+        xml:
+          name: "deviceUpTime"
+      totalRebootCount:
+        type: "integer"
+        xml:
+          name: "totalRebootCount"
+      CPUList:
+        type: "array"
+        xml:
+          name: "CPUList"
+        items:
+          type: "object"
+          properties:
+            cpuDescription:
+              type: "string"
+              xml:
+                name: "CPU>cpuDescription"
+            cpuUtilization:
+              type: "integer"
+              xml:
+                name: "CPU>cpuUtilization"
+      MemoryList:
+        type: "array"
+        xml:
+          name: "MemoryList"
+        items:
+          type: "object"
+          properties:
+            memoryDescription:
+              type: "string"
+              xml:
+                name: "Memory>memoryDescription"
+            memoryUsage:
+              type: "number"
+              xml:
+                name: "Memory>memoryUsage"
+            memoryAvailable:
+              type: "number"
+              xml:
+                name: "Memory>memoryAvailable"
+      CameraList:
+        type: "array"
+        xml:
+          name: "CameraList"
+        items:
+          type: "object"
+          properties:
+            zoomReverseTimes:
+              type: "integer"
+              xml:
+                name: "Camera>zoomReverseTimes"
+            zoomTotalSteps:
+              type: "integer"
+              xml:
+                name: "Camera>zoomTotalSteps"
+            focusReverseTimes:
+              type: "integer"
+              xml:
+                name: "Camera>focusReverseTimes"
+            focusTotalSteps:
+              type: "integer"
+              xml:
+                name: "Camera>focusTotalSteps"
+            irisShiftTimes:
+              type: "integer"
+              xml:
+                name: "Camera>irisShiftTimes"
+            irisTotalSteps:
+              type: "integer"
+              xml:
+                name: "Camera>irisTotalSteps"
+            icrShiftTimes:
+              type: "integer"
+              xml:
+                name: "Camera>icrShiftTimes"
+            icrTotalSteps:
+              type: "integer"
+              xml:
+                name: "Camera>icrTotalSteps"
+            lensIntirTimes:
+              type: "integer"
+              xml:
+                name: "Camera>lensIntirTimes"
+            cameraRunTotalTime:
+              type: "integer"
+              xml:
+                name: "Camera>cameraRunTotalTime"
+      DomeInfoList:
+        type: "array"
+        xml:
+          name: "DomeInfoList"
+        items:
+          type: "object"
+          properties:
+            domeRunTotalTime:
+              type: "integer"
+              xml:
+                name: "DomeInfo>domeRunTotalTime"
+            runTimeUnderNegativetwenty:
+              type: "integer"
+              xml:
+                name: "DomeInfo>runTimeUnderNegativetwenty"
+            runTimeBetweenNtwentyPforty:
+              type: "integer"
+              xml:
+                name: "DomeInfo>runTimeBetweenNtwentyPforty"
+            runtimeOverPositiveforty:
+              type: "integer"
+              xml:
+                name: "DomeInfo>runtimeOverPositiveforty"
+            panTotalRounds:
+              type: "integer"
+              xml:
+                name: "DomeInfo>panTotalRounds"
+            tiltTotalRounds:
+              type: "integer"
+              xml:
+                name: "DomeInfo>tiltTotalRounds"
+            heatState:
+              type: "integer"
+              xml:
+                name: "DomeInfo>heatState"
+            fanState:
+              type: "integer"
+              xml:
+                name: "DomeInfo>fanState"
+  SystemUpgradeStatus:
+    type: "object"
+    properties:
+      upgrading:
+        type: "boolean"
+        xml:
+          name: "upgrading"
+      percent:
+        type: "integer"
+        xml:
+          name: "percent"

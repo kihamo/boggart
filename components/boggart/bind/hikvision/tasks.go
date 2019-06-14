@@ -5,6 +5,8 @@ import (
 	"errors"
 	"log"
 
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/operations"
+
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
@@ -44,13 +46,15 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
-	deviceInfo, err := b.isapi.SystemDeviceInfo(ctx)
+	params := operations.NewGetSystemDeviceInfoParamsWithContext(ctx)
+	deviceInfo, err := b.client.Operations.GetSystemDeviceInfo(params, nil)
+
 	if err != nil {
 		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, nil
 	}
 
-	if deviceInfo.SerialNumber == "" {
+	if deviceInfo.Payload.SerialNumber == "" {
 		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, errors.New("device returns empty serial number")
 	}
@@ -75,17 +79,17 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 			}
 		}
 
-		b.SetSerialNumber(deviceInfo.SerialNumber)
+		b.SetSerialNumber(deviceInfo.Payload.SerialNumber)
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateModel.Format(deviceInfo.SerialNumber), deviceInfo.Model); e != nil {
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateModel.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.Model); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateFirmwareVersion.Format(deviceInfo.SerialNumber), deviceInfo.FirmwareVersion); e != nil {
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateFirmwareVersion.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.FirmwareVersion); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateFirmwareReleasedDate.Format(deviceInfo.SerialNumber), deviceInfo.FirmwareReleasedDate); e != nil {
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateFirmwareReleasedDate.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.FirmwareReleasedDate); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
@@ -140,18 +144,19 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	sn := b.SerialNumber()
 	snMQTT := mqtt.NameReplace(sn)
 
-	status, err := b.isapi.SystemStatus(ctx)
+	params := operations.NewGetSystemStatusParamsWithContext(ctx)
+	status, err := b.client.Operations.GetSystemStatus(params, nil)
 	if err == nil {
 		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateUpTime.Format(snMQTT), status.DeviceUpTime)
-		metricUpTime.With("serial_number", sn).Set(float64(status.DeviceUpTime))
+		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateUpTime.Format(snMQTT), status.Payload.DeviceUpTime)
+		metricUpTime.With("serial_number", sn).Set(float64(status.Payload.DeviceUpTime))
 
-		memoryUsage := uint64(status.Memory[0].MemoryUsage.Float64()) * MB
+		memoryUsage := uint64(status.Payload.MemoryList[0].MemoryUsage) * MB
 		// TODO:
 		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMemoryUsage.Format(snMQTT), memoryUsage)
 		metricMemoryUsage.With("serial_number", sn).Set(float64(memoryUsage))
 
-		memoryAvailable := uint64(status.Memory[0].MemoryAvailable.Float64()) * MB
+		memoryAvailable := uint64(status.Payload.MemoryList[0].MemoryAvailable) * MB
 		// TODO:
 		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMemoryAvailable.Format(snMQTT), memoryAvailable)
 		metricMemoryAvailable.With("serial_number", sn).Set(float64(memoryAvailable))
