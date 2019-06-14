@@ -17,6 +17,31 @@ securityDefinitions:
 security:
   - basicAuth: []
 paths:
+  /Image/channels:
+    get:
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/ImageChannels"
+  /Image/channels/{channel}/IrcutFilter:
+    put:
+      parameters:
+        - name: "channel"
+          in: "path"
+          description: "Channel ID"
+          required: true
+          type: "integer"
+          format: "uint64"
+        - name: "IrcutFilter"
+          in: "body"
+          schema:
+            $ref: '#/definitions/IrcutFilter'
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Status"
   /Streaming/channels/{channel}/picture:
     get:
       parameters:
@@ -60,6 +85,122 @@ paths:
         200:
 
 definitions:
+  Status:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        xml:
+          name: "statusCode"
+      string:
+        type: "string"
+        xml:
+          name: "statusString"
+      subCode:
+        type: "string"
+        xml:
+          name: "subStatusCode"
+  IrcutFilter:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+        enum:
+          - "auto"
+          - "day"
+          - "night"
+          - "shedule"
+          - "eventTrigger"
+        xml:
+          name: "IrcutFilterType"
+  ImageChannels:
+    type: "array"
+    xml:
+      name: "ImageChannellist"
+    items:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          xml:
+            name: "ImageChannel>id"
+        enabled:
+          type: "boolean"
+          xml:
+            name: "ImageChannel>enabled"
+        videoInputID:
+          type: "integer"
+          xml:
+            name: "ImageChannel>videoInputID"
+        ImageFlipEnabled:
+          type: "boolean"
+          xml:
+            name: "ImageChannel>ImageFlip>enabled"
+        ImageFlipStyle:
+          type: "string"
+          enum:
+            - "LEFTRIGHT"
+            - "UPDOWN"
+            - "CENTER"
+            - "AUTO"
+          xml:
+            name: "ImageChannel>ImageFlip>ImageFlipStyle"
+        IrcutFilterType:
+          type: "string"
+          enum:
+            - "auto"
+            - "day"
+            - "night"
+            - "shedule"
+            - "eventTrigger"
+          xml:
+            name: "ImageChannel>IrcutFilter>IrcutFilterType"
+        IrcutFilterLevel:
+          type: "string"
+          enum:
+            - "low"
+            - "normal"
+            - "high"
+          xml:
+            name: "ImageChannel>IrcutFilter>IrcutFilterLevel"
+        IrcutFilterTime:
+          type: "integer"
+          xml:
+            name: "ImageChannel>IrcutFilter>IrcutFilterTime"
+        IrCutFilterExtType:
+          type: "string"
+          enum:
+            - "auto"
+            - "day"
+            - "night"
+            - "shedule"
+            - "eventTrigger"
+          xml:
+            name: "ImageChannel>IrcutFilterExt>IrcutFilterType"
+        IrCutFilterExtNightToDayFilterLevel:
+          type: "string"
+          enum:
+            - "low"
+            - "normal"
+            - "high"
+          xml:
+            name: "ImageChannel>IrcutFilterExt>nightToDayFilterLevel"
+        IrCutFilterExtNightToDayFilterTime:
+          type: "integer"
+          xml:
+            name: "ImageChannel>IrcutFilterExt>nightToDayFilterTime"
+        IrCutFilterExtScheduleType:
+          type: "string"
+          xml:
+            name: "ImageChannel>IrcutFilterExt>scheduleType"
+        IrCutFilterExtScheduleTimeRangeBegin:
+          type: "string"
+          xml:
+            name: "ImageChannel>IrcutFilterExt>TimeRange>beginTime"
+        IrCutFilterExtScheduleTimeRangeEnd:
+          type: "string"
+          xml:
+            name: "ImageChannel>IrcutFilterExt>TimeRange>endTime"
   SystemDeviceInfo:
     type: "object"
     properties:

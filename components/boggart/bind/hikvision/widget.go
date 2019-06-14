@@ -8,11 +8,12 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/models"
+
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/operations"
 
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
@@ -60,9 +61,13 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 					switch key {
 					case "ir-cut-filter-type":
-						err = bind.isapi.ImageIrCutFilter(ctx, uint64(ch), hikvision.ImageIrCutFilter{
-							Type: hikvision.ImageIrCutFilterType(value[0]),
-						})
+						params := operations.NewPutImageChannelsChannelIrcutFilterParamsWithContext(ctx).
+							WithChannel(ch).
+							WithIrcutFilter(&models.IrcutFilter{
+								Type: value[0],
+							})
+
+						_, err = bind.client.Operations.PutImageChannelsChannelIrcutFilter(params, nil)
 					}
 
 					break
@@ -85,13 +90,13 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			return
 		}
 
-		response, err := bind.isapi.ImageChannels(ctx)
+		response, err := bind.client.Operations.GetImageChannels(operations.NewGetImageChannelsParamsWithContext(ctx), nil)
 		if err != nil {
 			t.NotFound(w, r)
 			return
 		}
 
-		vars["channels"] = response.Channels
+		vars["channels"] = response.Payload
 
 	case "preview":
 		var (

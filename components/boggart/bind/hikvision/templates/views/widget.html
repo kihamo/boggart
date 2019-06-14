@@ -18,7 +18,7 @@
                                 </div>
                                 <div class="col-md-7 col-sm-7 col-xs-12">
                                     <form role="form" data-toggle="validator" id="image-settings" action="{{ $.Request.URL.Path }}?action=image" method="post">
-                                        {{ if $channel.IrCutFilter }}
+                                        {{ if $channel.IrcutFilterType }}
                                         <div class="accordion" id="image-accordion" role="tablist" aria-multiselectable="true">
                                             <div class="panel">
                                                 <a class="panel-heading" role="tab" id="image-accordion-switch" data-toggle="collapse" data-parent="#image-accordion" href="#image-collapse-switch" aria-expanded="true" aria-controls="image-collapse-switch">
@@ -30,10 +30,10 @@
                                                             {{ i18n "Day/Night switch" $ }} <span class="required">*</span>
                                                         </label>
                                                         <select id="ir-cut-filter-type" class="form-control select2" required="required">
-                                                            <option value="day"{{ if eq $channel.IrCutFilter.Type "day" }} selected="selected"{{ end }}>{{ i18n "Day" $ }}</option>
-                                                            <option value="night"{{ if eq $channel.IrCutFilter.Type "night" }} selected="selected"{{ end }}>{{ i18n "Night" $ }}</option>
-                                                            <option value="auto"{{ if eq $channel.IrCutFilter.Type "auto" }} selected="selected"{{ end }}>{{ i18n "Auto" $ }}</option>
-                                                            <option value="schedule"{{ if eq $channel.IrCutFilter.Type "schedule" }} selected="selected"{{ end }}>{{ i18n "Schedule" $ }}</option>
+                                                            <option value="day"{{ if eq $channel.IrcutFilterType "day" }} selected="selected"{{ end }}>{{ i18n "Day" $ }}</option>
+                                                            <option value="night"{{ if eq $channel.IrcutFilterType "night" }} selected="selected"{{ end }}>{{ i18n "Night" $ }}</option>
+                                                            <option value="auto"{{ if eq $channel.IrcutFilterType "auto" }} selected="selected"{{ end }}>{{ i18n "Auto" $ }}</option>
+                                                            <option value="schedule"{{ if eq $channel.IrcutFilterType "schedule" }} selected="selected"{{ end }}>{{ i18n "Schedule" $ }}</option>
                                                         </select>
                                                     </div>
                                                 </div>

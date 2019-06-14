@@ -27,6 +27,35 @@ type Client struct {
 }
 
 /*
+GetImageChannels get image channels API
+*/
+func (a *Client) GetImageChannels(params *GetImageChannelsParams, authInfo runtime.ClientAuthInfoWriter) (*GetImageChannelsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetImageChannelsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "GetImageChannels",
+		Method:             "GET",
+		PathPattern:        "/Image/channels",
+		ProducesMediaTypes: []string{"application/xml"},
+		ConsumesMediaTypes: []string{"application/xml"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GetImageChannelsReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetImageChannelsOK), nil
+
+}
+
+/*
 GetStreamingChannelsChannelPicture get streaming channels channel picture API
 */
 func (a *Client) GetStreamingChannelsChannelPicture(params *GetStreamingChannelsChannelPictureParams, authInfo runtime.ClientAuthInfoWriter, writer io.Writer) (*GetStreamingChannelsChannelPictureOK, error) {
@@ -139,6 +168,35 @@ func (a *Client) GetSystemUpgradeStatus(params *GetSystemUpgradeStatusParams, au
 		return nil, err
 	}
 	return result.(*GetSystemUpgradeStatusOK), nil
+
+}
+
+/*
+PutImageChannelsChannelIrcutFilter put image channels channel ircut filter API
+*/
+func (a *Client) PutImageChannelsChannelIrcutFilter(params *PutImageChannelsChannelIrcutFilterParams, authInfo runtime.ClientAuthInfoWriter) (*PutImageChannelsChannelIrcutFilterOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPutImageChannelsChannelIrcutFilterParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "PutImageChannelsChannelIrcutFilter",
+		Method:             "PUT",
+		PathPattern:        "/Image/channels/{channel}/IrcutFilter",
+		ProducesMediaTypes: []string{"application/xml"},
+		ConsumesMediaTypes: []string{"application/xml"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &PutImageChannelsChannelIrcutFilterReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PutImageChannelsChannelIrcutFilterOK), nil
 
 }
 
