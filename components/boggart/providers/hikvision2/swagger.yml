@@ -27,6 +27,18 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/Storage"
+  /Event/notification/alertStream:
+    get:
+      operationId: "getNotificationAlertStream"
+      tags:
+      - "event"
+      summary: "It is used to get the event notification data stream through HTTP server push."
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "string"
+            format: "binary"
   /Image/channels:
     get:
       operationId: "getImageChannels"
@@ -293,6 +305,99 @@ definitions:
         type: "string"
         xml:
           name: "subStatusCode"
+  EventNotificationAlert:
+    type: "object"
+    properties:
+      ipAddress:
+        type: "string"
+        xml:
+          name: "ipAddress"
+      ipv6Address:
+        type: "string"
+        xml:
+          name: "ipv6Address"
+      port:
+        type: "integer"
+        format: "uint64"
+        xml:
+          name: "portNo"
+      protocol:
+        type: "string"
+        xml:
+          name: "protocol"
+      macAddress:
+        type: "string"
+        xml:
+          name: "macAddress"
+      dynChannelID:
+        type: "integer"
+        format: "uint64"
+        xml:
+          name: "dynChannelID"
+      dateTime:
+        type: "string"
+        format: "date-time"
+        xml:
+          name: "dateTime"
+      activePostCount:
+        type: "integer"
+        format: "uint64"
+        xml:
+          name: "activePostCount"
+      eventType:
+        type: "string"
+        xml:
+          name: "eventType"
+        enum:
+          - "IO"
+          - "VMD"
+          - "videoloss"
+          - "shelteralarm"
+          - "facedetection"
+          - "defocus"
+          - "audioexception"
+          - "scenechangedetection"
+          - "fielddetection"
+          - "linedetection"
+          - "regionEntrance"
+          - "regionExiting"
+          - "loitering"
+          - "group"
+          - "rapidMove"
+          - "parking"
+          - "unattendedBaggage"
+          - "attendedBaggage"
+          - "PIR"
+          - "peopleDetection"
+      eventState:
+        type: "string"
+        xml:
+          name: "eventState"
+        enum:
+          - "active"
+          - "inactive"
+      eventDescription:
+        type: "string"
+        xml:
+          name: "eventDescription"
+      inputIOPortID:
+        type: "integer"
+        format: "uint64"
+        xml:
+          name: "inputIOPortID"
+      dynInputIOPortID:
+        type: "string"
+        xml:
+          name: "dynInputIOPortID"
+      regionID:
+        type: "string"
+        xml:
+          name: "DetectionRegionList>DetectionRegionEntry>regionID"
+      sensitivityLevel:
+        type: "integer"
+        format: "uint64"
+        xml:
+          name: "DetectionRegionList>DetectionRegionEntry>sensitivityLevel"
   Storage:
     type: "object"
     properties:

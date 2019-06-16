@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision2"
 )
 
@@ -20,7 +19,6 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	password, _ := config.Address.User.Password()
 
 	bind := &Bind{
-		isapi:                 hikvision.NewISAPI(config.Address.Hostname(), port, config.Address.User.Username(), password),
 		alertStreamingHistory: make(map[string]time.Time),
 		address:               config.Address.URL,
 		config:                config,

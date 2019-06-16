@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
-	apiclient "github.com/kihamo/boggart/components/boggart/providers/hikvision2/client"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision2"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/system"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/models"
 	"github.com/kihamo/boggart/components/mqtt"
@@ -32,9 +32,8 @@ type Bind struct {
 
 	mutex sync.RWMutex
 
-	client *apiclient.HikVision
+	client *hikvision2.Client
 
-	isapi                 *hikvision.ISAPI
 	address               url.URL
 	alertStreamingHistory map[string]time.Time
 	alertStreamingCancel  context.CancelFunc
@@ -44,14 +43,11 @@ type Bind struct {
 	config *Config
 }
 
-func (b *Bind) startAlertStreaming() error {
+func (b *Bind) startAlertStreaming() {
 	ctx, cancel := context.WithCancel(context.Background())
 	b.alertStreamingCancel = cancel
 
-	stream, err := b.isapi.EventNotificationAlertStream(ctx)
-	if err != nil {
-		return err
-	}
+	stream := b.client.EventNotificationAlertStream(ctx)
 
 	go func() {
 		sn := mqtt.NameReplace(b.SerialNumber())
@@ -59,19 +55,20 @@ func (b *Bind) startAlertStreaming() error {
 		for {
 			select {
 			case event := <-stream.NextAlert():
-				if event.EventState != hikvision.EventEventStateActive {
+				if event.EventState != models.EventNotificationAlertEventStateActive {
 					continue
 				}
 
 				cacheKey := strconv.FormatUint(event.DynChannelID, 10) + "-" + event.EventType
+				dt := time.Time(event.DateTime)
 
 				b.mutex.Lock()
 				lastFire, ok := b.alertStreamingHistory[cacheKey]
-				b.alertStreamingHistory[cacheKey] = event.DateTime
+				b.alertStreamingHistory[cacheKey] = dt
 				b.mutex.Unlock()
 
-				if !ok || event.DateTime.Sub(lastFire) > b.config.EventsIgnoreInterval {
-					if err = b.MQTTPublishAsync(ctx, MQTTPublishTopicEvent.Format(sn, event.DynChannelID, event.EventType), event.EventDescription); err != nil {
+				if !ok || dt.Sub(lastFire) > b.config.EventsIgnoreInterval {
+					if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicEvent.Format(sn, event.DynChannelID, event.EventType), event.EventDescription); err != nil {
 						b.Logger().Error("Send event to MQTT failed", "error", err.Error())
 					}
 				}
@@ -85,8 +82,6 @@ func (b *Bind) startAlertStreaming() error {
 			}
 		}
 	}()
-
-	return nil
 }
 
 func (b *Bind) FirmwareUpdate(firmware io.Reader) {

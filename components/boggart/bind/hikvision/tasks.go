@@ -74,9 +74,7 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		b.mutex.Unlock()
 
 		if b.config.EventsEnabled {
-			if err := b.startAlertStreaming(); err != nil {
-				return nil, err
-			}
+			b.startAlertStreaming()
 		}
 
 		b.SetSerialNumber(deviceInfo.Payload.SerialNumber)

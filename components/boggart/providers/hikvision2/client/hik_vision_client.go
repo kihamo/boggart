@@ -12,6 +12,7 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/content_manager"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/event"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/image"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/ptz"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/streaming"
@@ -62,6 +63,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *HikVision 
 	cli.Transport = transport
 
 	cli.ContentManager = content_manager.New(transport, formats)
+
+	cli.Event = event.New(transport, formats)
 
 	cli.Image = image.New(transport, formats)
 
@@ -117,6 +120,8 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 type HikVision struct {
 	ContentManager *content_manager.Client
 
+	Event *event.Client
+
 	Image *image.Client
 
 	Ptz *ptz.Client
@@ -133,6 +138,8 @@ func (c *HikVision) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 
 	c.ContentManager.SetTransport(transport)
+
+	c.Event.SetTransport(transport)
 
 	c.Image.SetTransport(transport)
 
