@@ -47,7 +47,7 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
-	deviceInfo, err := b.client.System.GetDeviceInfo(system.NewGetDeviceInfoParamsWithContext(ctx), nil)
+	deviceInfo, err := b.client.System.GetSystemDeviceInfo(system.NewGetSystemDeviceInfoParamsWithContext(ctx), nil)
 
 	if err != nil {
 		b.UpdateStatus(boggart.BindStatusOffline)

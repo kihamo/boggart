@@ -61,13 +61,13 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 					switch key {
 					case "ir-cut-filter-type":
-						params := image.NewSetChannelIrCutFilterParamsWithContext(ctx).
+						params := image.NewSetImageIrCutFilterParamsWithContext(ctx).
 							WithChannel(ch).
 							WithIrcutFilter(&models.IrcutFilter{
 								Type: value[0],
 							})
 
-						_, err = bind.client.Image.SetChannelIrCutFilter(params, nil)
+						_, err = bind.client.Image.SetImageIrCutFilter(params, nil)
 					}
 
 					break
@@ -115,8 +115,8 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		buf := bytes.NewBuffer(nil)
-		params := streaming.NewGetChannelPictureParamsWithContext(ctx).WithChannel(ch)
-		if _, err := bind.client.Streaming.GetChannelPicture(params, nil, buf); err != nil {
+		params := streaming.NewGetStreamingPictureParamsWithContext(ctx).WithChannel(ch)
+		if _, err := bind.client.Streaming.GetStreamingPicture(params, nil, buf); err != nil {
 			t.NotFound(w, r)
 			return
 		}
@@ -161,14 +161,14 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			return
 		}
 
-		info, err := bind.client.System.GetDeviceInfo(system.NewGetDeviceInfoParamsWithContext(ctx), nil)
+		info, err := bind.client.System.GetSystemDeviceInfo(system.NewGetSystemDeviceInfoParamsWithContext(ctx), nil)
 		if err != nil {
 			r.Session().FlashBag().Error(t.Translate(ctx, "Get device info failed with error %s", "", err.Error()))
 		}
 
 		vars["info"] = info.Payload
 
-		upgrade, err := bind.client.System.GetUpgradeStatus(system.NewGetUpgradeStatusParamsWithContext(ctx), nil)
+		upgrade, err := bind.client.System.GetSystemUpgradeStatus(system.NewGetSystemUpgradeStatusParamsWithContext(ctx), nil)
 		if err != nil {
 			r.Session().FlashBag().Error(t.Translate(ctx, "Get upgrade status failed with error %s", "", err.Error()))
 		}

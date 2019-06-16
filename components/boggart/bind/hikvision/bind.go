@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/go-openapi/runtime"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 	apiclient "github.com/kihamo/boggart/components/boggart/providers/hikvision2/client"
@@ -91,9 +92,13 @@ func (b *Bind) startAlertStreaming() error {
 func (b *Bind) FirmwareUpdate(firmware io.Reader) {
 	go func() {
 		ctx := context.Background()
+		params := system.NewUpdateSystemFirmwareParamsWithContext(ctx).
+			WithFile(runtime.NamedReader("digicap.dav", firmware))
 
-		code, _ := b.isapi.SystemUpdateFirmware(ctx, firmware)
-		if code.SubStatusCode == hikvision.SubStatusCodeRebootRequired {
+		response, err := b.client.System.UpdateSystemFirmware(params, nil)
+		if err != nil {
+			b.Logger().Error("Firmware update failed", "error", err.Error())
+		} else if response.Payload.SubCode == hikvision.SubStatusCodeRebootRequired {
 			if _, err := b.client.System.Reboot(system.NewRebootParamsWithContext(ctx), nil); err != nil {
 				b.Logger().Error("Reboot after firmware update failed", "error", err.Error())
 			}

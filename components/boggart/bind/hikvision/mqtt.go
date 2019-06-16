@@ -89,9 +89,9 @@ func (b *Bind) updateStatusByChannelId(ctx context.Context, channelId uint64) er
 		return fmt.Errorf("channel %d not found", channelId)
 	}
 
-	params := ptz.NewGetPtzChannelStatusParamsWithContext(ctx).
+	params := ptz.NewGetPtzStatusParamsWithContext(ctx).
 		WithChannel(channelId)
-	status, err := b.client.Ptz.GetPtzChannelStatus(params, nil)
+	status, err := b.client.Ptz.GetPtzStatus(params, nil)
 	if err != nil {
 		return err
 	}
@@ -163,13 +163,13 @@ func (b *Bind) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, 
 		return err
 	}
 
-	params := ptz.NewSetPtzChannelPositionAbsoluteParamsWithContext(ctx).
+	params := ptz.NewSetPtzPositionAbsoluteParamsWithContext(ctx).
 		WithChannel(channelId).
 		WithPTZData(&models.PTZData{
 			AbsoluteHigh: &request,
 		})
 
-	if _, err := b.client.Ptz.SetPtzChannelPositionAbsolute(params, nil); err != nil {
+	if _, err := b.client.Ptz.SetPtzPositionAbsolute(params, nil); err != nil {
 		return err
 	}
 
@@ -192,11 +192,11 @@ func (b *Bind) callbackMQTTContinuous(ctx context.Context, client mqtt.Component
 		return err
 	}
 
-	params := ptz.NewSetPtzChannelContinuousParamsWithContext(ctx).
+	params := ptz.NewSetPtzContinuousParamsWithContext(ctx).
 		WithChannel(channelId).
 		WithPTZData(&request)
 
-	if _, err = b.client.Ptz.SetPtzChannelContinuous(params, nil); err != nil {
+	if _, err = b.client.Ptz.SetPtzContinuous(params, nil); err != nil {
 		return err
 	}
 
@@ -219,13 +219,13 @@ func (b *Bind) callbackMQTTRelative(ctx context.Context, client mqtt.Component, 
 		return err
 	}
 
-	params := ptz.NewSetPtzChannelPositionRelativeParamsWithContext(ctx).
+	params := ptz.NewSetPtzPositionRelativeParamsWithContext(ctx).
 		WithChannel(channelId).
 		WithPTZData(&models.PTZData{
 			Relative: &request,
 		})
 
-	if _, err := b.client.Ptz.SetPtzChannelPositionRelative(params, nil); err != nil {
+	if _, err := b.client.Ptz.SetPtzPositionRelative(params, nil); err != nil {
 		return err
 	}
 
@@ -247,10 +247,10 @@ func (b *Bind) callbackMQTTPreset(ctx context.Context, client mqtt.Component, me
 		return err
 	}
 
-	params := ptz.NewGotoPtzChannelPresetParamsWithContext(ctx).
+	params := ptz.NewGotoPtzPresetParamsWithContext(ctx).
 		WithChannel(channelId).
 		WithPreset(presetId)
-	if _, err := b.client.Ptz.GotoPtzChannelPreset(params, nil); err != nil {
+	if _, err := b.client.Ptz.GotoPtzPreset(params, nil); err != nil {
 		return err
 	}
 
@@ -275,11 +275,11 @@ func (b *Bind) callbackMQTTMomentary(ctx context.Context, client mqtt.Component,
 
 	request.Duration = strfmt.Duration(time.Duration(request.Duration) * time.Millisecond)
 
-	params := ptz.NewSetPtzChannelMomentaryParamsWithContext(ctx).
+	params := ptz.NewSetPtzMomentaryParamsWithContext(ctx).
 		WithChannel(channelId).
 		WithPTZData(&request)
 
-	if _, err := b.client.Ptz.SetPtzChannelMomentary(params, nil); err != nil {
+	if _, err := b.client.Ptz.SetPtzMomentary(params, nil); err != nil {
 		return err
 	}
 

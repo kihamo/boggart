@@ -16,17 +16,17 @@ import (
 	models "github.com/kihamo/boggart/components/boggart/providers/hikvision2/models"
 )
 
-// SetPtzChannelMomentaryReader is a Reader for the SetPtzChannelMomentary structure.
-type SetPtzChannelMomentaryReader struct {
+// GotoPtzPresetReader is a Reader for the GotoPtzPreset structure.
+type GotoPtzPresetReader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *SetPtzChannelMomentaryReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *GotoPtzPresetReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
 	case 200:
-		result := NewSetPtzChannelMomentaryOK()
+		result := NewGotoPtzPresetOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -37,24 +37,24 @@ func (o *SetPtzChannelMomentaryReader) ReadResponse(response runtime.ClientRespo
 	}
 }
 
-// NewSetPtzChannelMomentaryOK creates a SetPtzChannelMomentaryOK with default headers values
-func NewSetPtzChannelMomentaryOK() *SetPtzChannelMomentaryOK {
-	return &SetPtzChannelMomentaryOK{}
+// NewGotoPtzPresetOK creates a GotoPtzPresetOK with default headers values
+func NewGotoPtzPresetOK() *GotoPtzPresetOK {
+	return &GotoPtzPresetOK{}
 }
 
-/*SetPtzChannelMomentaryOK handles this case with default header values.
+/*GotoPtzPresetOK handles this case with default header values.
 
 Successful operation
 */
-type SetPtzChannelMomentaryOK struct {
+type GotoPtzPresetOK struct {
 	Payload *models.Status
 }
 
-func (o *SetPtzChannelMomentaryOK) Error() string {
-	return fmt.Sprintf("[PUT /PTZCtrl/channels/{channel}/momentary][%d] setPtzChannelMomentaryOK  %+v", 200, o.Payload)
+func (o *GotoPtzPresetOK) Error() string {
+	return fmt.Sprintf("[PUT /PTZCtrl/channels/{channel}/presets/{preset}/goto][%d] gotoPtzPresetOK  %+v", 200, o.Payload)
 }
 
-func (o *SetPtzChannelMomentaryOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *GotoPtzPresetOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Status)
 

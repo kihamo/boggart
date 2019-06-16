@@ -16,17 +16,17 @@ import (
 	models "github.com/kihamo/boggart/components/boggart/providers/hikvision2/models"
 )
 
-// SetPtzChannelContinuousReader is a Reader for the SetPtzChannelContinuous structure.
-type SetPtzChannelContinuousReader struct {
+// SetPtzPositionAbsoluteReader is a Reader for the SetPtzPositionAbsolute structure.
+type SetPtzPositionAbsoluteReader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *SetPtzChannelContinuousReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *SetPtzPositionAbsoluteReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
 	case 200:
-		result := NewSetPtzChannelContinuousOK()
+		result := NewSetPtzPositionAbsoluteOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -37,24 +37,24 @@ func (o *SetPtzChannelContinuousReader) ReadResponse(response runtime.ClientResp
 	}
 }
 
-// NewSetPtzChannelContinuousOK creates a SetPtzChannelContinuousOK with default headers values
-func NewSetPtzChannelContinuousOK() *SetPtzChannelContinuousOK {
-	return &SetPtzChannelContinuousOK{}
+// NewSetPtzPositionAbsoluteOK creates a SetPtzPositionAbsoluteOK with default headers values
+func NewSetPtzPositionAbsoluteOK() *SetPtzPositionAbsoluteOK {
+	return &SetPtzPositionAbsoluteOK{}
 }
 
-/*SetPtzChannelContinuousOK handles this case with default header values.
+/*SetPtzPositionAbsoluteOK handles this case with default header values.
 
 Successful operation
 */
-type SetPtzChannelContinuousOK struct {
+type SetPtzPositionAbsoluteOK struct {
 	Payload *models.Status
 }
 
-func (o *SetPtzChannelContinuousOK) Error() string {
-	return fmt.Sprintf("[PUT /PTZCtrl/channels/{channel}/continuous][%d] setPtzChannelContinuousOK  %+v", 200, o.Payload)
+func (o *SetPtzPositionAbsoluteOK) Error() string {
+	return fmt.Sprintf("[PUT /PTZCtrl/channels/{channel}/absolute][%d] setPtzPositionAbsoluteOK  %+v", 200, o.Payload)
 }
 
-func (o *SetPtzChannelContinuousOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *SetPtzPositionAbsoluteOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Status)
 

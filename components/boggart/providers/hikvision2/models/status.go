@@ -8,7 +8,9 @@ package models
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // Status status
@@ -16,7 +18,8 @@ import (
 type Status struct {
 
 	// code
-	Code int64 `json:"code,omitempty" xml:"statusCode"`
+	// Maximum: 7
+	Code uint64 `json:"code,omitempty" xml:"statusCode"`
 
 	// string
 	String string `json:"string,omitempty" xml:"statusString"`
@@ -27,6 +30,28 @@ type Status struct {
 
 // Validate validates this status
 func (m *Status) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateCode(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *Status) validateCode(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Code) { // not required
+		return nil
+	}
+
+	if err := validate.MaximumInt("code", "body", int64(m.Code), 7, false); err != nil {
+		return err
+	}
+
 	return nil
 }
 

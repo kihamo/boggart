@@ -16,17 +16,17 @@ import (
 	models "github.com/kihamo/boggart/components/boggart/providers/hikvision2/models"
 )
 
-// GetDeviceInfoReader is a Reader for the GetDeviceInfo structure.
-type GetDeviceInfoReader struct {
+// GetSystemDeviceInfoReader is a Reader for the GetSystemDeviceInfo structure.
+type GetSystemDeviceInfoReader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *GetDeviceInfoReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *GetSystemDeviceInfoReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
 	case 200:
-		result := NewGetDeviceInfoOK()
+		result := NewGetSystemDeviceInfoOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -37,24 +37,24 @@ func (o *GetDeviceInfoReader) ReadResponse(response runtime.ClientResponse, cons
 	}
 }
 
-// NewGetDeviceInfoOK creates a GetDeviceInfoOK with default headers values
-func NewGetDeviceInfoOK() *GetDeviceInfoOK {
-	return &GetDeviceInfoOK{}
+// NewGetSystemDeviceInfoOK creates a GetSystemDeviceInfoOK with default headers values
+func NewGetSystemDeviceInfoOK() *GetSystemDeviceInfoOK {
+	return &GetSystemDeviceInfoOK{}
 }
 
-/*GetDeviceInfoOK handles this case with default header values.
+/*GetSystemDeviceInfoOK handles this case with default header values.
 
 Successful operation
 */
-type GetDeviceInfoOK struct {
+type GetSystemDeviceInfoOK struct {
 	Payload *models.SystemDeviceInfo
 }
 
-func (o *GetDeviceInfoOK) Error() string {
-	return fmt.Sprintf("[GET /System/deviceInfo][%d] getDeviceInfoOK  %+v", 200, o.Payload)
+func (o *GetSystemDeviceInfoOK) Error() string {
+	return fmt.Sprintf("[GET /System/deviceInfo][%d] getSystemDeviceInfoOK  %+v", 200, o.Payload)
 }
 
-func (o *GetDeviceInfoOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *GetSystemDeviceInfoOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.SystemDeviceInfo)
 

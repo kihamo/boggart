@@ -39,7 +39,7 @@ paths:
             $ref: "#/definitions/ImageChannels"
   /Image/channels/{channel}/IrcutFilter:
     put:
-      operationId: "setChannelIrCutFilter"
+      operationId: "setImageIrCutFilter"
       tags:
       - "image"
       parameters:
@@ -71,7 +71,7 @@ paths:
             $ref: "#/definitions/PtzChannels"
   /PTZCtrl/channels/{channel}/status:
     get:
-      operationId: "getPtzChannelStatus"
+      operationId: "getPtzStatus"
       tags:
       - "ptz"
       summary: "It is used to get currently PTZ coordinate position for the device."
@@ -89,7 +89,7 @@ paths:
             $ref: "#/definitions/PtzAbsoluteHigh"
   /PTZCtrl/channels/{channel}/presets/{preset}/goto:
     put:
-      operationId: "gotoPtzChannelPreset"
+      operationId: "gotoPtzPreset"
       tags:
       - "ptz"
       summary: "It is used to move a particular PTZ channel to a ID preset position for the device."
@@ -113,7 +113,7 @@ paths:
             $ref: "#/definitions/Status"
   /PTZCtrl/channels/{channel}/relative:
     put:
-      operationId: "setPtzChannelPositionRelative"
+      operationId: "setPtzPositionRelative"
       tags:
       - "ptz"
       summary: "It is used to move the position which is defined by positionX, positionY to the screen center and relative zoom for the device."
@@ -135,7 +135,7 @@ paths:
             $ref: "#/definitions/Status"
   /PTZCtrl/channels/{channel}/absolute:
     put:
-      operationId: "setPtzChannelPositionAbsolute"
+      operationId: "setPtzPositionAbsolute"
       tags:
       - "ptz"
       summary: "It is used to move a particular PTZ channel to a absolute position which is defined by Absolute for the device."
@@ -157,7 +157,7 @@ paths:
             $ref: "#/definitions/Status"
   /PTZCtrl/channels/{channel}/continuous:
     put:
-      operationId: "setPtzChannelContinuous"
+      operationId: "setPtzContinuous"
       tags:
       - "ptz"
       summary: "It is used to control PTZ move around and zoom for the device."
@@ -179,7 +179,7 @@ paths:
             $ref: "#/definitions/Status"
   /PTZCtrl/channels/{channel}/momentary:
     put:
-      operationId: "setPtzChannelMomentary"
+      operationId: "setPtzMomentary"
       tags:
       - "ptz"
       summary: "It is used to control PTZ move around and zoom in a period of time for the device."
@@ -201,7 +201,7 @@ paths:
             $ref: "#/definitions/Status"
   /Streaming/channels/{channel}/picture:
     get:
-      operationId: "getChannelPicture"
+      operationId: "getStreamingPicture"
       tags:
       - "streaming"
       parameters:
@@ -220,7 +220,7 @@ paths:
             type: "file"
   /System/deviceInfo:
     get:
-      operationId: "getDeviceInfo"
+      operationId: "getSystemDeviceInfo"
       tags:
       - "system"
       responses:
@@ -238,9 +238,28 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/SystemStatus"
+  /System/updateFirmware:
+    put:
+      operationId: "updateSystemFirmware"
+      tags:
+      - "system"
+      summary: "Update the firmware of the device."
+      consumes:
+      - "application/x-www-form-urlencoded"
+      parameters:
+      - name: "file"
+        in: "formData"
+        description: "Firmware in dav format"
+        required: true
+        type: "file"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Status"
   /System/upgradeStatus:
     get:
-      operationId: "getUpgradeStatus"
+      operationId: "getSystemUpgradeStatus"
       tags:
       - "system"
       responses:
@@ -262,8 +281,10 @@ definitions:
     properties:
       code:
         type: "integer"
+        format: "uint64"
         xml:
           name: "statusCode"
+        maximum: 7
       string:
         type: "string"
         xml:

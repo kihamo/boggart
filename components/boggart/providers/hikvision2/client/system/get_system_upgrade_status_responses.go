@@ -16,17 +16,17 @@ import (
 	models "github.com/kihamo/boggart/components/boggart/providers/hikvision2/models"
 )
 
-// GetUpgradeStatusReader is a Reader for the GetUpgradeStatus structure.
-type GetUpgradeStatusReader struct {
+// GetSystemUpgradeStatusReader is a Reader for the GetSystemUpgradeStatus structure.
+type GetSystemUpgradeStatusReader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *GetUpgradeStatusReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *GetSystemUpgradeStatusReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
 	case 200:
-		result := NewGetUpgradeStatusOK()
+		result := NewGetSystemUpgradeStatusOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -37,24 +37,24 @@ func (o *GetUpgradeStatusReader) ReadResponse(response runtime.ClientResponse, c
 	}
 }
 
-// NewGetUpgradeStatusOK creates a GetUpgradeStatusOK with default headers values
-func NewGetUpgradeStatusOK() *GetUpgradeStatusOK {
-	return &GetUpgradeStatusOK{}
+// NewGetSystemUpgradeStatusOK creates a GetSystemUpgradeStatusOK with default headers values
+func NewGetSystemUpgradeStatusOK() *GetSystemUpgradeStatusOK {
+	return &GetSystemUpgradeStatusOK{}
 }
 
-/*GetUpgradeStatusOK handles this case with default header values.
+/*GetSystemUpgradeStatusOK handles this case with default header values.
 
 Successful operation
 */
-type GetUpgradeStatusOK struct {
+type GetSystemUpgradeStatusOK struct {
 	Payload *models.SystemUpgradeStatus
 }
 
-func (o *GetUpgradeStatusOK) Error() string {
-	return fmt.Sprintf("[GET /System/upgradeStatus][%d] getUpgradeStatusOK  %+v", 200, o.Payload)
+func (o *GetSystemUpgradeStatusOK) Error() string {
+	return fmt.Sprintf("[GET /System/upgradeStatus][%d] getSystemUpgradeStatusOK  %+v", 200, o.Payload)
 }
 
-func (o *GetUpgradeStatusOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *GetSystemUpgradeStatusOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.SystemUpgradeStatus)
 

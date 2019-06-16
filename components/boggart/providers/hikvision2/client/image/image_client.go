@@ -54,23 +54,23 @@ func (a *Client) GetImageChannels(params *GetImageChannelsParams, authInfo runti
 }
 
 /*
-SetChannelIrCutFilter set channel ir cut filter API
+SetImageIrCutFilter set image ir cut filter API
 */
-func (a *Client) SetChannelIrCutFilter(params *SetChannelIrCutFilterParams, authInfo runtime.ClientAuthInfoWriter) (*SetChannelIrCutFilterOK, error) {
+func (a *Client) SetImageIrCutFilter(params *SetImageIrCutFilterParams, authInfo runtime.ClientAuthInfoWriter) (*SetImageIrCutFilterOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewSetChannelIrCutFilterParams()
+		params = NewSetImageIrCutFilterParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "setChannelIrCutFilter",
+		ID:                 "setImageIrCutFilter",
 		Method:             "PUT",
 		PathPattern:        "/Image/channels/{channel}/IrcutFilter",
 		ProducesMediaTypes: []string{"application/xml"},
 		ConsumesMediaTypes: []string{"application/xml"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &SetChannelIrCutFilterReader{formats: a.formats},
+		Reader:             &SetImageIrCutFilterReader{formats: a.formats},
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
@@ -78,7 +78,7 @@ func (a *Client) SetChannelIrCutFilter(params *SetChannelIrCutFilterParams, auth
 	if err != nil {
 		return nil, err
 	}
-	return result.(*SetChannelIrCutFilterOK), nil
+	return result.(*SetImageIrCutFilterOK), nil
 
 }
 

@@ -16,17 +16,17 @@ import (
 	models "github.com/kihamo/boggart/components/boggart/providers/hikvision2/models"
 )
 
-// GetPtzChannelStatusReader is a Reader for the GetPtzChannelStatus structure.
-type GetPtzChannelStatusReader struct {
+// GetPtzStatusReader is a Reader for the GetPtzStatus structure.
+type GetPtzStatusReader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *GetPtzChannelStatusReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *GetPtzStatusReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
 	case 200:
-		result := NewGetPtzChannelStatusOK()
+		result := NewGetPtzStatusOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -37,24 +37,24 @@ func (o *GetPtzChannelStatusReader) ReadResponse(response runtime.ClientResponse
 	}
 }
 
-// NewGetPtzChannelStatusOK creates a GetPtzChannelStatusOK with default headers values
-func NewGetPtzChannelStatusOK() *GetPtzChannelStatusOK {
-	return &GetPtzChannelStatusOK{}
+// NewGetPtzStatusOK creates a GetPtzStatusOK with default headers values
+func NewGetPtzStatusOK() *GetPtzStatusOK {
+	return &GetPtzStatusOK{}
 }
 
-/*GetPtzChannelStatusOK handles this case with default header values.
+/*GetPtzStatusOK handles this case with default header values.
 
 Successful operation
 */
-type GetPtzChannelStatusOK struct {
+type GetPtzStatusOK struct {
 	Payload *models.PtzAbsoluteHigh
 }
 
-func (o *GetPtzChannelStatusOK) Error() string {
-	return fmt.Sprintf("[GET /PTZCtrl/channels/{channel}/status][%d] getPtzChannelStatusOK  %+v", 200, o.Payload)
+func (o *GetPtzStatusOK) Error() string {
+	return fmt.Sprintf("[GET /PTZCtrl/channels/{channel}/status][%d] getPtzStatusOK  %+v", 200, o.Payload)
 }
 
-func (o *GetPtzChannelStatusOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *GetPtzStatusOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.PtzAbsoluteHigh)
 

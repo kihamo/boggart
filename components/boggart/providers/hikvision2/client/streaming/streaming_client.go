@@ -27,23 +27,23 @@ type Client struct {
 }
 
 /*
-GetChannelPicture get channel picture API
+GetStreamingPicture get streaming picture API
 */
-func (a *Client) GetChannelPicture(params *GetChannelPictureParams, authInfo runtime.ClientAuthInfoWriter, writer io.Writer) (*GetChannelPictureOK, error) {
+func (a *Client) GetStreamingPicture(params *GetStreamingPictureParams, authInfo runtime.ClientAuthInfoWriter, writer io.Writer) (*GetStreamingPictureOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetChannelPictureParams()
+		params = NewGetStreamingPictureParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getChannelPicture",
+		ID:                 "getStreamingPicture",
 		Method:             "GET",
 		PathPattern:        "/Streaming/channels/{channel}/picture",
 		ProducesMediaTypes: []string{"image/jpeg; charset=\"UTF-8\""},
 		ConsumesMediaTypes: []string{"application/xml"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &GetChannelPictureReader{formats: a.formats, writer: writer},
+		Reader:             &GetStreamingPictureReader{formats: a.formats, writer: writer},
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
@@ -51,7 +51,7 @@ func (a *Client) GetChannelPicture(params *GetChannelPictureParams, authInfo run
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetChannelPictureOK), nil
+	return result.(*GetStreamingPictureOK), nil
 
 }
 
