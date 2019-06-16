@@ -77,7 +77,6 @@ func (c *Client) EventNotificationAlertStream(ctx context.Context) *AlertStreami
 	s := &AlertStreaming{
 		ctx:    ctx,
 		client: c,
-		buffer: bytes.NewBuffer(nil),
 	}
 	s.start()
 
@@ -136,12 +135,14 @@ func (rt UploadRoundTripper) RoundTrip(req *http.Request) (*http.Response, error
 }
 
 func (s *AlertStreaming) start() {
+	s.buffer = bytes.NewBuffer(nil)
 	s.done = make(chan struct{}, 1)
 	s.alerts = make(chan *models.EventNotificationAlert)
 	s.errors = make(chan error)
 
-	params := event.NewGetNotificationAlertStreamParamsWithContext(s.ctx)
-	params.SetTimeout(0)
+	params := event.NewGetNotificationAlertStreamParams().
+		WithContext(s.ctx).
+		WithTimeout(0)
 
 	go func() {
 		_, err := s.client.Event.GetNotificationAlertStream(params, nil, s.buffer)
@@ -222,4 +223,9 @@ func (s *AlertStreaming) NextAlert() <-chan *models.EventNotificationAlert {
 
 func (s *AlertStreaming) NextError() <-chan error {
 	return s.errors
+}
+
+func (s *AlertStreaming) Close() error {
+	s.done <- struct{}{}
+	return nil
 }

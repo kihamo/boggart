@@ -35,7 +35,7 @@ type Bind struct {
 
 	address               url.URL
 	alertStreamingHistory map[string]time.Time
-	alertStreamingCancel  context.CancelFunc
+	alertStreaming        *hikvision.AlertStreaming
 
 	ptzChannels map[uint64]PTZChannel
 
@@ -43,17 +43,15 @@ type Bind struct {
 }
 
 func (b *Bind) startAlertStreaming() {
-	ctx, cancel := context.WithCancel(context.Background())
-	b.alertStreamingCancel = cancel
-
-	stream := b.client.EventNotificationAlertStream(ctx)
+	ctx := context.Background()
+	b.alertStreaming = b.client.EventNotificationAlertStream(ctx)
 
 	go func() {
 		sn := mqtt.NameReplace(b.SerialNumber())
 
 		for {
 			select {
-			case event := <-stream.NextAlert():
+			case event := <-b.alertStreaming.NextAlert():
 				if event.EventState != models.EventNotificationAlertEventStateActive {
 					continue
 				}
@@ -72,12 +70,8 @@ func (b *Bind) startAlertStreaming() {
 					}
 				}
 
-			case err := <-stream.NextError():
+			case err := <-b.alertStreaming.NextError():
 				b.Logger().Error("Stream error", "error", err.Error())
-
-			case <-ctx.Done():
-				b.alertStreamingCancel = nil
-				return
 			}
 		}
 	}()
@@ -101,8 +95,8 @@ func (b *Bind) FirmwareUpdate(firmware io.Reader) {
 }
 
 func (b *Bind) Close() error {
-	if b.alertStreamingCancel != nil {
-		b.alertStreamingCancel()
+	if b.alertStreaming != nil {
+		b.alertStreaming.Close()
 	}
 
 	return nil
