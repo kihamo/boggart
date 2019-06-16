@@ -7,7 +7,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/go-openapi/strfmt"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/ptz"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/models"
 	"github.com/kihamo/boggart/components/mqtt"
 	er "github.com/pkg/errors"
 	"go.uber.org/multierr"
@@ -86,7 +89,9 @@ func (b *Bind) updateStatusByChannelId(ctx context.Context, channelId uint64) er
 		return fmt.Errorf("channel %d not found", channelId)
 	}
 
-	status, err := b.isapi.PTZStatus(ctx, channelId)
+	params := ptz.NewGetPtzChannelStatusParamsWithContext(ctx).
+		WithChannel(channelId)
+	status, err := b.client.Ptz.GetPtzChannelStatus(params, nil)
 	if err != nil {
 		return err
 	}
@@ -94,25 +99,25 @@ func (b *Bind) updateStatusByChannelId(ctx context.Context, channelId uint64) er
 	sn := mqtt.NameReplace(b.SerialNumber())
 	var result error
 
-	if channel.Status == nil || channel.Status.AbsoluteHigh.Elevation != status.AbsoluteHigh.Elevation {
-		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusElevation.Format(sn, channelId), status.AbsoluteHigh.Elevation); err != nil {
+	if channel.Status == nil || channel.Status.Elevation != status.Payload.Elevation {
+		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusElevation.Format(sn, channelId), status.Payload.Elevation); err != nil {
 			result = multierr.Append(result, err)
 		}
 	}
 
-	if channel.Status == nil || channel.Status.AbsoluteHigh.Azimuth != status.AbsoluteHigh.Azimuth {
-		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusAzimuth.Format(sn, channelId), status.AbsoluteHigh.Azimuth); err != nil {
+	if channel.Status == nil || channel.Status.Azimuth != status.Payload.Azimuth {
+		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusAzimuth.Format(sn, channelId), status.Payload.Azimuth); err != nil {
 			result = multierr.Append(result, err)
 		}
 	}
 
-	if channel.Status == nil || channel.Status.AbsoluteHigh.AbsoluteZoom != status.AbsoluteHigh.AbsoluteZoom {
-		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusZoom.Format(sn, channelId), status.AbsoluteHigh.AbsoluteZoom); err != nil {
+	if channel.Status == nil || channel.Status.Zoom != status.Payload.Zoom {
+		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusZoom.Format(sn, channelId), status.Payload.Zoom); err != nil {
 			result = multierr.Append(result, err)
 		}
 	}
 
-	channel.Status = &status
+	channel.Status = status.Payload
 	b.ptzChannels[channelId] = channel
 
 	if result != nil {
@@ -152,17 +157,19 @@ func (b *Bind) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, 
 		return err
 	}
 
-	var request struct {
-		Elevation int64  `json:"elevation,omitempty"`
-		Azimuth   uint64 `json:"azimuth,omitempty"`
-		Zoom      uint64 `json:"zoom,omitempty"`
-	}
+	var request models.PtzAbsoluteHigh
 
 	if err := message.UnmarshalJSON(&request); err != nil {
 		return err
 	}
 
-	if err := b.isapi.PTZAbsolute(ctx, channelId, request.Elevation, request.Azimuth, request.Zoom); err != nil {
+	params := ptz.NewSetPtzChannelPositionAbsoluteParamsWithContext(ctx).
+		WithChannel(channelId).
+		WithPTZData(&models.PTZData{
+			AbsoluteHigh: &request,
+		})
+
+	if _, err := b.client.Ptz.SetPtzChannelPositionAbsolute(params, nil); err != nil {
 		return err
 	}
 
@@ -179,17 +186,17 @@ func (b *Bind) callbackMQTTContinuous(ctx context.Context, client mqtt.Component
 		return err
 	}
 
-	var request struct {
-		Pan  int64 `json:"pan,omitempty"`
-		Tilt int64 `json:"tilt,omitempty"`
-		Zoom int64 `json:"zoom,omitempty"`
-	}
+	var request models.PTZData
 
 	if err := message.UnmarshalJSON(&request); err != nil {
 		return err
 	}
 
-	if err = b.isapi.PTZContinuous(ctx, channelId, request.Pan, request.Tilt, request.Zoom); err != nil {
+	params := ptz.NewSetPtzChannelContinuousParamsWithContext(ctx).
+		WithChannel(channelId).
+		WithPTZData(&request)
+
+	if _, err = b.client.Ptz.SetPtzChannelContinuous(params, nil); err != nil {
 		return err
 	}
 
@@ -206,17 +213,19 @@ func (b *Bind) callbackMQTTRelative(ctx context.Context, client mqtt.Component, 
 		return err
 	}
 
-	var request struct {
-		X    int64 `xml:"x,omitempty"`
-		Y    int64 `xml:"y,omitempty"`
-		Zoom int64 `xml:"zoom,omitempty"`
-	}
+	var request models.PtzRelative
 
 	if err := message.UnmarshalJSON(&request); err != nil {
 		return err
 	}
 
-	if err := b.isapi.PTZRelative(ctx, channelId, request.X, request.Y, request.Zoom); err != nil {
+	params := ptz.NewSetPtzChannelPositionRelativeParamsWithContext(ctx).
+		WithChannel(channelId).
+		WithPTZData(&models.PTZData{
+			Relative: &request,
+		})
+
+	if _, err := b.client.Ptz.SetPtzChannelPositionRelative(params, nil); err != nil {
 		return err
 	}
 
@@ -238,7 +247,10 @@ func (b *Bind) callbackMQTTPreset(ctx context.Context, client mqtt.Component, me
 		return err
 	}
 
-	if err := b.isapi.PTZPresetGoTo(ctx, channelId, presetId); err != nil {
+	params := ptz.NewGotoPtzChannelPresetParamsWithContext(ctx).
+		WithChannel(channelId).
+		WithPreset(presetId)
+	if _, err := b.client.Ptz.GotoPtzChannelPreset(params, nil); err != nil {
 		return err
 	}
 
@@ -255,19 +267,19 @@ func (b *Bind) callbackMQTTMomentary(ctx context.Context, client mqtt.Component,
 		return err
 	}
 
-	var request struct {
-		Pan      int64         `json:"pan,omitempty"`
-		Tilt     int64         `json:"tilt,omitempty"`
-		Zoom     int64         `json:"zoom,omitempty"`
-		Duration time.Duration `json:"duration,omitempty"`
-	}
+	var request models.PTZData
 
 	if err := message.UnmarshalJSON(&request); err != nil {
 		return err
 	}
 
-	duration := time.Duration(request.Duration) * time.Millisecond
-	if err := b.isapi.PTZMomentary(ctx, channelId, request.Pan, request.Tilt, request.Zoom, duration); err != nil {
+	request.Duration = strfmt.Duration(time.Duration(request.Duration) * time.Millisecond)
+
+	params := ptz.NewSetPtzChannelMomentaryParamsWithContext(ctx).
+		WithChannel(channelId).
+		WithPTZData(&request)
+
+	if _, err := b.client.Ptz.SetPtzChannelMomentary(params, nil); err != nil {
 		return err
 	}
 

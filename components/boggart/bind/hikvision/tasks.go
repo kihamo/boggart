@@ -7,6 +7,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/content_manager"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/ptz"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/system"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
@@ -60,8 +61,8 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 
 	if b.SerialNumber() == "" {
 		ptzChannels := make(map[uint64]PTZChannel)
-		if list, err := b.isapi.PTZChannels(ctx); err == nil {
-			for _, channel := range list.Channels {
+		if list, err := b.client.Ptz.GetPtzChannels(ptz.NewGetPtzChannelsParamsWithContext(ctx), nil); err == nil {
+			for _, channel := range list.Payload {
 				ptzChannels[channel.ID] = PTZChannel{
 					Channel: channel,
 				}
@@ -165,6 +166,10 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	storage, err := b.client.ContentManager.GetStorage(content_manager.NewGetStorageParamsWithContext(ctx), nil)
 	if err == nil {
 		for _, hdd := range storage.Payload.HddList {
+			if hdd.Name == "" {
+				continue
+			}
+
 			// TODO:
 			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateHDDCapacity.Format(snMQTT, hdd.ID), hdd.Capacity*MB)
 

@@ -16,17 +16,17 @@ import (
 	models "github.com/kihamo/boggart/components/boggart/providers/hikvision2/models"
 )
 
-// GetChannelsReader is a Reader for the GetChannels structure.
-type GetChannelsReader struct {
+// GetImageChannelsReader is a Reader for the GetImageChannels structure.
+type GetImageChannelsReader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *GetChannelsReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *GetImageChannelsReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
 	case 200:
-		result := NewGetChannelsOK()
+		result := NewGetImageChannelsOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -37,24 +37,24 @@ func (o *GetChannelsReader) ReadResponse(response runtime.ClientResponse, consum
 	}
 }
 
-// NewGetChannelsOK creates a GetChannelsOK with default headers values
-func NewGetChannelsOK() *GetChannelsOK {
-	return &GetChannelsOK{}
+// NewGetImageChannelsOK creates a GetImageChannelsOK with default headers values
+func NewGetImageChannelsOK() *GetImageChannelsOK {
+	return &GetImageChannelsOK{}
 }
 
-/*GetChannelsOK handles this case with default header values.
+/*GetImageChannelsOK handles this case with default header values.
 
 Successful operation
 */
-type GetChannelsOK struct {
+type GetImageChannelsOK struct {
 	Payload models.ImageChannels
 }
 
-func (o *GetChannelsOK) Error() string {
-	return fmt.Sprintf("[GET /Image/channels][%d] getChannelsOK  %+v", 200, o.Payload)
+func (o *GetImageChannelsOK) Error() string {
+	return fmt.Sprintf("[GET /Image/channels][%d] getImageChannelsOK  %+v", 200, o.Payload)
 }
 
-func (o *GetChannelsOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *GetImageChannelsOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	// response payload
 	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {

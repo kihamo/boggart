@@ -5,23 +5,23 @@ info:
   title: "HikVision"
   version: "0.1.0"
 consumes:
-  - "application/xml"
+- "application/xml"
 produces:
-  - "application/xml"
+- "application/xml"
 schemes:
-  - "http"
+- "http"
 basePath: "/ISAPI"
 securityDefinitions:
   basicAuth:
     type: "basic"
 security:
-  - basicAuth: []
+- basicAuth: []
 paths:
   /ContentMgmt/Storage:
     get:
       operationId: "getStorage"
       tags:
-        - "content-manager"
+      - "content-manager"
       responses:
         200:
           description: "Successful operation"
@@ -29,9 +29,9 @@ paths:
             $ref: "#/definitions/Storage"
   /Image/channels:
     get:
-      operationId: "getChannels"
+      operationId: "getImageChannels"
       tags:
-        - "image"
+      - "image"
       responses:
         200:
           description: "Successful operation"
@@ -41,7 +41,104 @@ paths:
     put:
       operationId: "setChannelIrCutFilter"
       tags:
-        - "image"
+      - "image"
+      parameters:
+      - name: "channel"
+        in: "path"
+        description: "Channel ID"
+        required: true
+        type: "integer"
+        format: "uint64"
+      - name: "IrcutFilter"
+        in: "body"
+        schema:
+          $ref: "#/definitions/IrcutFilter"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Status"
+  /PTZCtrl/channels:
+    get:
+      operationId: "getPtzChannels"
+      tags:
+      - "ptz"
+      summary: "It is used to get the list of PTZ channels for the device"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/PtzChannels"
+  /PTZCtrl/channels/{channel}/status:
+    get:
+      operationId: "getPtzChannelStatus"
+      tags:
+      - "ptz"
+      summary: "It is used to get currently PTZ coordinate position for the device."
+      parameters:
+      - name: "channel"
+        in: "path"
+        description: "Channel ID"
+        required: true
+        type: "integer"
+        format: "uint64"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/PtzAbsoluteHigh"
+  /PTZCtrl/channels/{channel}/presets/{preset}/goto:
+    put:
+      operationId: "gotoPtzChannelPreset"
+      tags:
+      - "ptz"
+      summary: "It is used to move a particular PTZ channel to a ID preset position for the device."
+      parameters:
+      - name: "channel"
+        in: "path"
+        description: "Channel ID"
+        required: true
+        type: "integer"
+        format: "uint64"
+      - name: "preset"
+        in: "path"
+        description: "Preset ID"
+        required: true
+        type: "integer"
+        format: "uint64"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Status"
+  /PTZCtrl/channels/{channel}/relative:
+    put:
+      operationId: "setPtzChannelPositionRelative"
+      tags:
+      - "ptz"
+      summary: "It is used to move the position which is defined by positionX, positionY to the screen center and relative zoom for the device."
+      parameters:
+      - name: "channel"
+        in: "path"
+        description: "Channel ID"
+        required: true
+        type: "integer"
+        format: "uint64"
+      - name: "PTZData"
+        in: "body"
+        schema:
+          $ref: "#/definitions/PTZData"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Status"
+  /PTZCtrl/channels/{channel}/absolute:
+    put:
+      operationId: "setPtzChannelPositionAbsolute"
+      tags:
+      - "ptz"
+      summary: "It is used to move a particular PTZ channel to a absolute position which is defined by Absolute for the device."
       parameters:
         - name: "channel"
           in: "path"
@@ -49,10 +146,54 @@ paths:
           required: true
           type: "integer"
           format: "uint64"
-        - name: "IrcutFilter"
+        - name: "PTZData"
           in: "body"
           schema:
-            $ref: '#/definitions/IrcutFilter'
+            $ref: "#/definitions/PTZData"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Status"
+  /PTZCtrl/channels/{channel}/continuous:
+    put:
+      operationId: "setPtzChannelContinuous"
+      tags:
+      - "ptz"
+      summary: "It is used to control PTZ move around and zoom for the device."
+      parameters:
+      - name: "channel"
+        in: "path"
+        description: "Channel ID"
+        required: true
+        type: "integer"
+        format: "uint64"
+      - name: "PTZData"
+        in: "body"
+        schema:
+          $ref: "#/definitions/PTZData"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Status"
+  /PTZCtrl/channels/{channel}/momentary:
+    put:
+      operationId: "setPtzChannelMomentary"
+      tags:
+      - "ptz"
+      summary: "It is used to control PTZ move around and zoom in a period of time for the device."
+      parameters:
+      - name: "channel"
+        in: "path"
+        description: "Channel ID"
+        required: true
+        type: "integer"
+        format: "uint64"
+      - name: "PTZData"
+        in: "body"
+        schema:
+          $ref: "#/definitions/PTZData"
       responses:
         200:
           description: "Successful operation"
@@ -62,16 +203,16 @@ paths:
     get:
       operationId: "getChannelPicture"
       tags:
-        - "streaming"
+      - "streaming"
       parameters:
-        - name: "channel"
-          in: "path"
-          description: "Channel ID"
-          required: true
-          type: "integer"
-          format: "uint64"
+      - name: "channel"
+        in: "path"
+        description: "Channel ID"
+        required: true
+        type: "integer"
+        format: "uint64"
       produces:
-        - 'image/jpeg; charset="UTF-8"'
+      - 'image/jpeg; charset="UTF-8"'
       responses:
         200:
           description: "Successful operation"
@@ -81,7 +222,7 @@ paths:
     get:
       operationId: "getDeviceInfo"
       tags:
-        - "system"
+      - "system"
       responses:
         200:
           description: "Successful operation"
@@ -91,7 +232,7 @@ paths:
     get:
       operationId: "getStatus"
       tags:
-        - "system"
+      - "system"
       responses:
         200:
           description: "Successful operation"
@@ -101,7 +242,7 @@ paths:
     get:
       operationId: "getUpgradeStatus"
       tags:
-        - "system"
+      - "system"
       responses:
         200:
           description: "Successful operation"
@@ -111,7 +252,7 @@ paths:
     put:
       operationId: "reboot"
       tags:
-        - "system"
+      - "system"
       responses:
         200:
 
@@ -139,9 +280,9 @@ definitions:
         xml:
           name: "workMode"
         enum:
-          - "group"
-          - "quota"
-          - "extract"
+        - "group"
+        - "quota"
+        - "extract"
       hddList:
         type: "array"
         xml:
@@ -182,9 +323,9 @@ definitions:
               xml:
                 name: "hdd>property"
               enum:
-                - "RW"
-                - "RO"
-                - "Redund"
+              - "RW"
+              - "RO"
+              - "Redund"
             group:
               type: "string"
               xml:
@@ -205,8 +346,8 @@ definitions:
               xml:
                 name: "nas>addressingFormatType"
               enum:
-                - "ipaddress"
-                - "hostname"
+              - "ipaddress"
+              - "hostname"
             hostName:
               type: "string"
               xml:
@@ -256,9 +397,9 @@ definitions:
               xml:
                 name: "nas>property"
               enum:
-                - "RW"
-                - "RO"
-                - "RDD"
+              - "RW"
+              - "RO"
+              - "RDD"
             group:
               type: "string"
               xml:
@@ -269,11 +410,11 @@ definitions:
       type:
         type: "string"
         enum:
-          - "auto"
-          - "day"
-          - "night"
-          - "shedule"
-          - "eventTrigger"
+        - "auto"
+        - "day"
+        - "night"
+        - "shedule"
+        - "eventTrigger"
         xml:
           name: "IrcutFilterType"
   ImageChannels:
@@ -302,28 +443,28 @@ definitions:
         ImageFlipStyle:
           type: "string"
           enum:
-            - "LEFTRIGHT"
-            - "UPDOWN"
-            - "CENTER"
-            - "AUTO"
+          - "LEFTRIGHT"
+          - "UPDOWN"
+          - "CENTER"
+          - "AUTO"
           xml:
             name: "ImageChannel>ImageFlip>ImageFlipStyle"
         IrcutFilterType:
           type: "string"
           enum:
-            - "auto"
-            - "day"
-            - "night"
-            - "shedule"
-            - "eventTrigger"
+          - "auto"
+          - "day"
+          - "night"
+          - "shedule"
+          - "eventTrigger"
           xml:
             name: "ImageChannel>IrcutFilter>IrcutFilterType"
         IrcutFilterLevel:
           type: "string"
           enum:
-            - "low"
-            - "normal"
-            - "high"
+          - "low"
+          - "normal"
+          - "high"
           xml:
             name: "ImageChannel>IrcutFilter>IrcutFilterLevel"
         IrcutFilterTime:
@@ -333,19 +474,19 @@ definitions:
         IrCutFilterExtType:
           type: "string"
           enum:
-            - "auto"
-            - "day"
-            - "night"
-            - "shedule"
-            - "eventTrigger"
+          - "auto"
+          - "day"
+          - "night"
+          - "shedule"
+          - "eventTrigger"
           xml:
             name: "ImageChannel>IrcutFilterExt>IrcutFilterType"
         IrCutFilterExtNightToDayFilterLevel:
           type: "string"
           enum:
-            - "low"
-            - "normal"
-            - "high"
+          - "low"
+          - "normal"
+          - "high"
           xml:
             name: "ImageChannel>IrcutFilterExt>nightToDayFilterLevel"
         IrCutFilterExtNightToDayFilterTime:
@@ -364,6 +505,193 @@ definitions:
           type: "string"
           xml:
             name: "ImageChannel>IrcutFilterExt>TimeRange>endTime"
+  PtzChannels:
+    type: "array"
+    xml:
+      name: "PtzChannelList"
+    items:
+      $ref: "#/definitions/PtzChannel"
+  PtzChannel:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "uint64"
+        xml:
+          name: "PTZChannel>id"
+      enabled:
+        type: "boolean"
+        xml:
+          name: "PTZChannel>enabled"
+      videoInputID:
+        type: "integer"
+        format: "uint64"
+        xml:
+          name: "PTZChannel>videoInputID"
+      panMaxSpeed:
+        type: "integer"
+        xml:
+          name: "PTZChannel>panMaxSpeed"
+      tiltMaxSpeed:
+        type: "integer"
+        xml:
+          name: "PTZChannel>tiltMaxSpeed"
+      presetSpeed:
+        type: "integer"
+        xml:
+          name: "PTZChannel>presetSpeed"
+      autoPatrolSpeed:
+        type: "integer"
+        xml:
+          name: "PTZChannel>autoPatrolSpeed"
+      keyBoardControlSpeed:
+        type: "string" # normal - value of real device
+        xml:
+          name: "PTZChannel>keyBoardControlSpeed"
+      controlProtocol:
+        type: "string"
+        xml:
+          name: "PTZChannel>controlProtocol"
+      controlEnabled:
+        type: "boolean"
+        xml:
+          name: "PTZChannel>controlAddress>enabled"
+      controlAddress:
+        type: "string"
+        xml:
+          name: "PTZChannel>controlAddress>Address"
+      defaultPresetID:
+        type: "string"
+        xml:
+          name: "PTZChannel>defaultPresetID"
+      RS485BaudRate:
+        type: "integer"
+        xml:
+          name: "PTZChannel>PTZRs485Para>baudRate"
+      RS485DataBits:
+        type: "integer"
+        xml:
+          name: "PTZChannel>PTZRs485Para>dataBits"
+      RS485ParityType:
+        type: "string"
+        xml:
+          name: "PTZChannel>PTZRs485Para>parityType"
+        enum:
+        - "none"
+        - "even"
+        - "odd"
+        - "mark"
+        - "space"
+      RS485StopBits:
+        type: "number"
+        xml:
+          name: "PTZChannel>PTZRs485Para>stopBits"
+      RS485FlowControl:
+        type: "string"
+        xml:
+          name: "PTZChannel>PTZRs485Para>flowCtrl"
+        enum:
+        - "none"
+        - "software"
+        - "hardware"
+      manualControlSpeed:
+        type: "string"
+        xml:
+          name: "PTZChannel>manualControlSpeed"
+        enum:
+        - "pedestrian"
+        - "nonMotorVehicle"
+        - "motorVehicle"
+        - "selfadaptive"
+        - "compatible"
+      panSupport:
+        type: "boolean"
+        xml:
+          name: "PTZChannel>panSupport"
+      tiltSupport:
+        type: "boolean"
+        xml:
+          name: "PTZChannel>tiltSupport"
+      zoomSupport:
+        type: "boolean"
+        xml:
+          name: "PTZChannel>zoomSupport"
+  PtzAbsoluteHigh:
+    type: "object"
+    properties:
+      elevation:
+        type: "integer"
+        xml:
+          name: "elevation"
+        minimum: -900
+        maximum: 2700
+      azimuth:
+        type: "integer"
+        format: "uint64"
+        xml:
+          name: "azimuth"
+        minimum: 0
+        maximum: 3600
+      zoom:
+        type: "integer"
+        format: "uint64"
+        xml:
+          name: "absoluteZoom"
+        minimum: 0
+        maximum: 1000
+  PtzRelative:
+    type: "object"
+    properties:
+      X:
+        type: "integer"
+        xml:
+          name: "Relative>positionX"
+      "Y":
+        type: "integer"
+        xml:
+          name: "Relative>positionY"
+      zoom:
+        type: "integer"
+        xml:
+          name: "Relative>relativeZoom"
+        minimum: -100
+        maximum: 100
+  PTZData:
+    type: "object"
+    xml:
+      name: "PTZData"
+    properties:
+      relative:
+        xml:
+          name: "Relative"
+        $ref: "#/definitions/PtzRelative"
+      absoluteHigh:
+        xml:
+          name: "AbsoluteHigh"
+        $ref: "#/definitions/PtzAbsoluteHigh"
+      pan:
+        type: "integer"
+        xml:
+          name: "pan"
+        minimum: -100
+        maximum: 100
+      tilt:
+        type: "integer"
+        xml:
+          name: "tilt"
+        minimum: -100
+        maximum: 100
+      zoom:
+        type: "integer"
+        xml:
+          name: "zoom"
+        minimum: -100
+        maximum: 100
+      duration:
+        type: "string"
+        format: "duration"
+        xml:
+          name: "Momentary>duration"
   SystemDeviceInfo:
     type: "object"
     properties:

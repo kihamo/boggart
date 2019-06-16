@@ -13,6 +13,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/content_manager"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/image"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/ptz"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/streaming"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/system"
 )
@@ -63,6 +64,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *HikVision 
 	cli.ContentManager = content_manager.New(transport, formats)
 
 	cli.Image = image.New(transport, formats)
+
+	cli.Ptz = ptz.New(transport, formats)
 
 	cli.Streaming = streaming.New(transport, formats)
 
@@ -116,6 +119,8 @@ type HikVision struct {
 
 	Image *image.Client
 
+	Ptz *ptz.Client
+
 	Streaming *streaming.Client
 
 	System *system.Client
@@ -130,6 +135,8 @@ func (c *HikVision) SetTransport(transport runtime.ClientTransport) {
 	c.ContentManager.SetTransport(transport)
 
 	c.Image.SetTransport(transport)
+
+	c.Ptz.SetTransport(transport)
 
 	c.Streaming.SetTransport(transport)
 

@@ -2,7 +2,6 @@ package hikvision
 
 import (
 	"context"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/system"
 	"io"
 	"net/url"
 	"strconv"
@@ -12,6 +11,8 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 	apiclient "github.com/kihamo/boggart/components/boggart/providers/hikvision2/client"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/system"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/models"
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
@@ -20,8 +21,8 @@ const (
 )
 
 type PTZChannel struct {
-	Channel hikvision.PTZChannel
-	Status  *hikvision.PTZStatus
+	Channel *models.PtzChannel
+	Status  *models.PtzAbsoluteHigh
 }
 
 type Bind struct {

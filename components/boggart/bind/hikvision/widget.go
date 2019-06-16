@@ -90,7 +90,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			return
 		}
 
-		response, err := bind.client.Image.GetChannels(image.NewGetChannelsParamsWithContext(ctx), nil)
+		response, err := bind.client.Image.GetImageChannels(image.NewGetImageChannelsParamsWithContext(ctx), nil)
 		if err != nil {
 			t.NotFound(w, r)
 			return

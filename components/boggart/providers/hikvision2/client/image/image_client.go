@@ -25,23 +25,23 @@ type Client struct {
 }
 
 /*
-GetChannels get channels API
+GetImageChannels get image channels API
 */
-func (a *Client) GetChannels(params *GetChannelsParams, authInfo runtime.ClientAuthInfoWriter) (*GetChannelsOK, error) {
+func (a *Client) GetImageChannels(params *GetImageChannelsParams, authInfo runtime.ClientAuthInfoWriter) (*GetImageChannelsOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetChannelsParams()
+		params = NewGetImageChannelsParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getChannels",
+		ID:                 "getImageChannels",
 		Method:             "GET",
 		PathPattern:        "/Image/channels",
 		ProducesMediaTypes: []string{"application/xml"},
 		ConsumesMediaTypes: []string{"application/xml"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &GetChannelsReader{formats: a.formats},
+		Reader:             &GetImageChannelsReader{formats: a.formats},
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
@@ -49,7 +49,7 @@ func (a *Client) GetChannels(params *GetChannelsParams, authInfo runtime.ClientA
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetChannelsOK), nil
+	return result.(*GetImageChannelsOK), nil
 
 }
 
