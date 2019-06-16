@@ -11,7 +11,10 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/operations"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/content_manager"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/image"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/streaming"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/system"
 )
 
 // Default hik vision HTTP client.
@@ -57,7 +60,13 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *HikVision 
 	cli := new(HikVision)
 	cli.Transport = transport
 
-	cli.Operations = operations.New(transport, formats)
+	cli.ContentManager = content_manager.New(transport, formats)
+
+	cli.Image = image.New(transport, formats)
+
+	cli.Streaming = streaming.New(transport, formats)
+
+	cli.System = system.New(transport, formats)
 
 	return cli
 }
@@ -103,7 +112,13 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // HikVision is a client for hik vision
 type HikVision struct {
-	Operations *operations.Client
+	ContentManager *content_manager.Client
+
+	Image *image.Client
+
+	Streaming *streaming.Client
+
+	System *system.Client
 
 	Transport runtime.ClientTransport
 }
@@ -112,6 +127,12 @@ type HikVision struct {
 func (c *HikVision) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 
-	c.Operations.SetTransport(transport)
+	c.ContentManager.SetTransport(transport)
+
+	c.Image.SetTransport(transport)
+
+	c.Streaming.SetTransport(transport)
+
+	c.System.SetTransport(transport)
 
 }

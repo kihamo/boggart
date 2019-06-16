@@ -5,9 +5,9 @@ import (
 	"errors"
 	"log"
 
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/operations"
-
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/content_manager"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/system"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
@@ -46,8 +46,7 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
-	params := operations.NewGetSystemDeviceInfoParamsWithContext(ctx)
-	deviceInfo, err := b.client.Operations.GetSystemDeviceInfo(params, nil)
+	deviceInfo, err := b.client.System.GetDeviceInfo(system.NewGetDeviceInfoParamsWithContext(ctx), nil)
 
 	if err != nil {
 		b.UpdateStatus(boggart.BindStatusOffline)
@@ -144,19 +143,18 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	sn := b.SerialNumber()
 	snMQTT := mqtt.NameReplace(sn)
 
-	params := operations.NewGetSystemStatusParamsWithContext(ctx)
-	status, err := b.client.Operations.GetSystemStatus(params, nil)
+	status, err := b.client.System.GetStatus(system.NewGetStatusParamsWithContext(ctx), nil)
 	if err == nil {
 		// TODO:
 		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateUpTime.Format(snMQTT), status.Payload.DeviceUpTime)
 		metricUpTime.With("serial_number", sn).Set(float64(status.Payload.DeviceUpTime))
 
-		memoryUsage := uint64(status.Payload.MemoryList[0].MemoryUsage) * MB
+		memoryUsage := int64(status.Payload.MemoryList[0].MemoryUsage) * MB
 		// TODO:
 		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMemoryUsage.Format(snMQTT), memoryUsage)
 		metricMemoryUsage.With("serial_number", sn).Set(float64(memoryUsage))
 
-		memoryAvailable := uint64(status.Payload.MemoryList[0].MemoryAvailable) * MB
+		memoryAvailable := int64(status.Payload.MemoryList[0].MemoryAvailable) * MB
 		// TODO:
 		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMemoryAvailable.Format(snMQTT), memoryAvailable)
 		metricMemoryAvailable.With("serial_number", sn).Set(float64(memoryAvailable))
@@ -164,9 +162,9 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		b.Logger().Error("Request SystemStatus failed", "error", err.Error())
 	}
 
-	storage, err := b.isapi.ContentManagementStorage(ctx)
+	storage, err := b.client.ContentManager.GetStorage(content_manager.NewGetStorageParamsWithContext(ctx), nil)
 	if err == nil {
-		for _, hdd := range storage.HDD {
+		for _, hdd := range storage.Payload.HddList {
 			// TODO:
 			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateHDDCapacity.Format(snMQTT, hdd.ID), hdd.Capacity*MB)
 

@@ -8,12 +8,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/models"
-
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/operations"
-
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/image"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/streaming"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/system"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/models"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
@@ -61,13 +61,13 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 					switch key {
 					case "ir-cut-filter-type":
-						params := operations.NewPutImageChannelsChannelIrcutFilterParamsWithContext(ctx).
+						params := image.NewSetChannelIrCutFilterParamsWithContext(ctx).
 							WithChannel(ch).
 							WithIrcutFilter(&models.IrcutFilter{
 								Type: value[0],
 							})
 
-						_, err = bind.client.Operations.PutImageChannelsChannelIrcutFilter(params, nil)
+						_, err = bind.client.Image.SetChannelIrCutFilter(params, nil)
 					}
 
 					break
@@ -90,7 +90,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			return
 		}
 
-		response, err := bind.client.Operations.GetImageChannels(operations.NewGetImageChannelsParamsWithContext(ctx), nil)
+		response, err := bind.client.Image.GetChannels(image.NewGetChannelsParamsWithContext(ctx), nil)
 		if err != nil {
 			t.NotFound(w, r)
 			return
@@ -115,8 +115,8 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		buf := bytes.NewBuffer(nil)
-		params := operations.NewGetStreamingChannelsChannelPictureParamsWithContext(ctx).WithChannel(ch)
-		if _, err := bind.client.Operations.GetStreamingChannelsChannelPicture(params, nil, buf); err != nil {
+		params := streaming.NewGetChannelPictureParamsWithContext(ctx).WithChannel(ch)
+		if _, err := bind.client.Streaming.GetChannelPicture(params, nil, buf); err != nil {
 			t.NotFound(w, r)
 			return
 		}
@@ -161,14 +161,14 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			return
 		}
 
-		info, err := bind.client.Operations.GetSystemDeviceInfo(operations.NewGetSystemDeviceInfoParamsWithContext(ctx), nil)
+		info, err := bind.client.System.GetDeviceInfo(system.NewGetDeviceInfoParamsWithContext(ctx), nil)
 		if err != nil {
 			r.Session().FlashBag().Error(t.Translate(ctx, "Get device info failed with error %s", "", err.Error()))
 		}
 
 		vars["info"] = info.Payload
 
-		upgrade, err := bind.client.Operations.GetSystemUpgradeStatus(operations.NewGetSystemUpgradeStatusParamsWithContext(ctx), nil)
+		upgrade, err := bind.client.System.GetUpgradeStatus(system.NewGetUpgradeStatusParamsWithContext(ctx), nil)
 		if err != nil {
 			r.Session().FlashBag().Error(t.Translate(ctx, "Get upgrade status failed with error %s", "", err.Error()))
 		}

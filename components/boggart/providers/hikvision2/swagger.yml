@@ -17,8 +17,21 @@ securityDefinitions:
 security:
   - basicAuth: []
 paths:
+  /ContentMgmt/Storage:
+    get:
+      operationId: "getStorage"
+      tags:
+        - "content-manager"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Storage"
   /Image/channels:
     get:
+      operationId: "getChannels"
+      tags:
+        - "image"
       responses:
         200:
           description: "Successful operation"
@@ -26,6 +39,9 @@ paths:
             $ref: "#/definitions/ImageChannels"
   /Image/channels/{channel}/IrcutFilter:
     put:
+      operationId: "setChannelIrCutFilter"
+      tags:
+        - "image"
       parameters:
         - name: "channel"
           in: "path"
@@ -44,6 +60,9 @@ paths:
             $ref: "#/definitions/Status"
   /Streaming/channels/{channel}/picture:
     get:
+      operationId: "getChannelPicture"
+      tags:
+        - "streaming"
       parameters:
         - name: "channel"
           in: "path"
@@ -60,6 +79,9 @@ paths:
             type: "file"
   /System/deviceInfo:
     get:
+      operationId: "getDeviceInfo"
+      tags:
+        - "system"
       responses:
         200:
           description: "Successful operation"
@@ -67,6 +89,9 @@ paths:
             $ref: "#/definitions/SystemDeviceInfo"
   /System/status:
     get:
+      operationId: "getStatus"
+      tags:
+        - "system"
       responses:
         200:
           description: "Successful operation"
@@ -74,6 +99,9 @@ paths:
             $ref: "#/definitions/SystemStatus"
   /System/upgradeStatus:
     get:
+      operationId: "getUpgradeStatus"
+      tags:
+        - "system"
       responses:
         200:
           description: "Successful operation"
@@ -81,6 +109,9 @@ paths:
             $ref: "#/definitions/SystemUpgradeStatus"
   /System/reboot:
     put:
+      operationId: "reboot"
+      tags:
+        - "system"
       responses:
         200:
 
@@ -100,6 +131,138 @@ definitions:
         type: "string"
         xml:
           name: "subStatusCode"
+  Storage:
+    type: "object"
+    properties:
+      workMode:
+        type: "string"
+        xml:
+          name: "workMode"
+        enum:
+          - "group"
+          - "quota"
+          - "extract"
+      hddList:
+        type: "array"
+        xml:
+          name: "hddList"
+        items:
+          type: "object"
+          properties:
+            id:
+              type: "string"
+              xml:
+                name: "hdd>id"
+            name:
+              type: "string"
+              xml:
+                name: "hdd>hddName"
+            path:
+              type: "string"
+              xml:
+                name: "hdd>hddPath"
+            type:
+              type: "string"
+              xml:
+                name: "hdd>hddType"
+            status:
+              type: "string"
+              xml:
+                name: "hdd>status"
+            capacity:
+              type: "integer"
+              xml:
+                name: "hdd>capacity"
+            freeSpace:
+              type: "integer"
+              xml:
+                name: "hdd>freeSpace"
+            property:
+              type: "string"
+              xml:
+                name: "hdd>property"
+              enum:
+                - "RW"
+                - "RO"
+                - "Redund"
+            group:
+              type: "string"
+              xml:
+                name: "hdd>group"
+      nasList:
+        type: "array"
+        xml:
+          name: "nasList"
+        items:
+          type: "object"
+          properties:
+            id:
+              type: "string"
+              xml:
+                name: "nas>id"
+            addressingFormatType:
+              type: "string"
+              xml:
+                name: "nas>addressingFormatType"
+              enum:
+                - "ipaddress"
+                - "hostname"
+            hostName:
+              type: "string"
+              xml:
+                name: "nas>hostName"
+            ipAddress:
+              type: "string"
+              xml:
+                name: "nas>ipAddress"
+            ipv6Address:
+              type: "string"
+              xml:
+                name: "nas>ipv6Address"
+            portNo:
+              type: "integer"
+              xml:
+                name: "nas>portNo"
+            userName:
+              type: "string"
+              xml:
+                name: "nas>userName"
+            password:
+              type: "string"
+              xml:
+                name: "nas>password"
+            type:
+              type: "string"
+              xml:
+                name: "nas>nasType"
+            path:
+              type: "string"
+              xml:
+                name: "nas>path"
+            status:
+              type: "string"
+              xml:
+                name: "nas>status"
+            capacity:
+              type: "integer"
+              xml:
+                name: "nas>capacity"
+            freeSpace:
+              type: "integer"
+              xml:
+                name: "nas>freeSpace"
+            property:
+              type: "string"
+              xml:
+                name: "nas>property"
+              enum:
+                - "RW"
+                - "RO"
+                - "RDD"
+            group:
+              type: "string"
+              xml:
+                name: "nas>group"
   IrcutFilter:
     type: "object"
     properties:

@@ -2,13 +2,12 @@ package hikvision
 
 import (
 	"context"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/system"
 	"io"
 	"net/url"
 	"strconv"
 	"sync"
 	"time"
-
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/operations"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
@@ -17,7 +16,7 @@ import (
 )
 
 const (
-	MB uint64 = 1024 * 1024
+	MB int64 = 1024 * 1024
 )
 
 type PTZChannel struct {
@@ -94,7 +93,7 @@ func (b *Bind) FirmwareUpdate(firmware io.Reader) {
 
 		code, _ := b.isapi.SystemUpdateFirmware(ctx, firmware)
 		if code.SubStatusCode == hikvision.SubStatusCodeRebootRequired {
-			if _, err := b.client.Operations.PutSystemReboot(operations.NewPutSystemRebootParamsWithContext(ctx), nil); err != nil {
+			if _, err := b.client.System.Reboot(system.NewRebootParamsWithContext(ctx), nil); err != nil {
 				b.Logger().Error("Reboot after firmware update failed", "error", err.Error())
 			}
 		}
