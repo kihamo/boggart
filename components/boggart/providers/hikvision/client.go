@@ -33,7 +33,6 @@ type AlertStreaming struct {
 	ctx context.Context
 
 	client *Client
-	buffer *bytes.Buffer
 
 	alerts chan *models.EventNotificationAlert
 	errors chan error
@@ -135,7 +134,6 @@ func (rt UploadRoundTripper) RoundTrip(req *http.Request) (*http.Response, error
 }
 
 func (s *AlertStreaming) start() {
-	s.buffer = bytes.NewBuffer(nil)
 	s.done = make(chan struct{}, 1)
 	s.alerts = make(chan *models.EventNotificationAlert)
 	s.errors = make(chan error)
@@ -152,24 +150,28 @@ func (s *AlertStreaming) start() {
 		WithContext(s.ctx).
 		WithTimeout(0)
 
+	pr, pw := io.Pipe()
+
 	go func() {
-		_, err := s.client.Event.GetNotificationAlertStream(params, nil, s.buffer)
+		defer pw.Close()
+
+		_, err := s.client.Event.GetNotificationAlertStream(params, nil, pw)
 		if err != nil {
 			s.errors <- err
 			s.done <- struct{}{}
 		}
 	}()
 
-	go s.loop()
+	go s.loop(pr)
 }
 
-func (s *AlertStreaming) loop() {
-	reader := bufio.NewReader(s.buffer)
+func (s *AlertStreaming) loop(pr *io.PipeReader) {
+	reader := bufio.NewReader(pr)
 	parseBuffer := bytes.NewBuffer(nil)
 
 	defer func() {
-		s.buffer.Reset()
 		parseBuffer.Reset()
+		pr.Close()
 
 		//close(s.alerts)
 		//close(s.errors)
