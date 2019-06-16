@@ -11,9 +11,8 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/system"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/models"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/system"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision/models"
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
@@ -32,7 +31,7 @@ type Bind struct {
 
 	mutex sync.RWMutex
 
-	client *hikvision2.Client
+	client *hikvision.Client
 
 	address               url.URL
 	alertStreamingHistory map[string]time.Time
@@ -93,7 +92,7 @@ func (b *Bind) FirmwareUpdate(firmware io.Reader) {
 		response, err := b.client.System.UpdateSystemFirmware(params, nil)
 		if err != nil {
 			b.Logger().Error("Firmware update failed", "error", err.Error())
-		} else if response.Payload.SubCode == hikvision.SubStatusCodeRebootRequired {
+		} else if response.Payload.SubCode == models.StatusSubCodeRebootRequired {
 			if _, err := b.client.System.Reboot(system.NewRebootParamsWithContext(ctx), nil); err != nil {
 				b.Logger().Error("Reboot after firmware update failed", "error", err.Error())
 			}

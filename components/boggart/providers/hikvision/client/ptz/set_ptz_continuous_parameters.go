@@ -17,7 +17,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/kihamo/boggart/components/boggart/providers/hikvision2/models"
+	models "github.com/kihamo/boggart/components/boggart/providers/hikvision/models"
 )
 
 // NewSetPtzContinuousParams creates a new SetPtzContinuousParams object

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 )
 
 type Type struct {
@@ -32,7 +32,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 			bind.Logger().Debug(message)
 		})
 
-	bind.client = hikvision2.New(config.Address.Hostname(), port, config.Address.User.Username(), password, true, l)
+	bind.client = hikvision.New(config.Address.Hostname(), port, config.Address.User.Username(), password, true, l)
 
 	return bind, nil
 }

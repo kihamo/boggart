@@ -11,12 +11,12 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/content_manager"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/event"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/image"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/ptz"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/streaming"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/system"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/content_manager"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/event"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/image"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/ptz"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/streaming"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/system"
 )
 
 // Default hik vision HTTP client.

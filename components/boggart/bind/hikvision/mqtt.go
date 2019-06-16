@@ -9,8 +9,8 @@ import (
 
 	"github.com/go-openapi/strfmt"
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/ptz"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/models"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/ptz"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision/models"
 	"github.com/kihamo/boggart/components/mqtt"
 	er "github.com/pkg/errors"
 	"go.uber.org/multierr"

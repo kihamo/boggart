@@ -6,9 +6,9 @@ import (
 	"log"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/content_manager"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/ptz"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/system"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/content_manager"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/ptz"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/system"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"

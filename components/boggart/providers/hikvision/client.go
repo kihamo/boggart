@@ -1,4 +1,4 @@
-package hikvision2
+package hikvision
 
 import (
 	"bufio"
@@ -16,9 +16,9 @@ import (
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/runtime/logger"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/client/event"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision2/models"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/event"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision/models"
 )
 
 type Client struct {
