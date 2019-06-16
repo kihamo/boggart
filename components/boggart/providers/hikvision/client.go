@@ -140,6 +140,14 @@ func (s *AlertStreaming) start() {
 	s.alerts = make(chan *models.EventNotificationAlert)
 	s.errors = make(chan error)
 
+	// принудительно отключаем дебаг, иначе его вывод заблочит чтение стрима
+	// хотя это не потокобезопасно
+	if t, ok := s.client.Transport.(*httptransport.Runtime); ok {
+		if t.Debug {
+			t.SetDebug(false)
+		}
+	}
+
 	params := event.NewGetNotificationAlertStreamParams().
 		WithContext(s.ctx).
 		WithTimeout(0)

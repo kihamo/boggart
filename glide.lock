@@ -1,5 +1,5 @@
-hash: ed89f3b738c14cbc0e0307417f33001cf9f117f19a852fab0fb8b17eae0eb349
-updated: 2019-04-12T17:55:33.663301+03:00
+hash: 33597a007b687d2370602873dba9ddccfd6fa65f24e575d35c330a16b73826c6
+updated: 2019-06-16T19:27:52.168469+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -27,7 +27,7 @@ imports:
   - messaging
   - storage
 - name: github.com/alexedwards/scs
-  version: cac921d76a577e6c80f3f6bc0857b8eeb650669e
+  version: cfcbf41460ffe695c7d52159fbff3393c646c8f0
   subpackages:
   - stores/cookiestore
   - stores/memstore
@@ -99,7 +99,7 @@ imports:
 - name: github.com/go-openapi/loads
   version: 74628589c3b94e3526a842d24f46589980f5ab22
 - name: github.com/go-openapi/runtime
-  version: aadb2cc7b8862fdab251bf60a8b9d2a951c9746c
+  version: 109737172424d8a656fd1199e28c9f5cc89b0cca
   subpackages:
   - client
   - logger
@@ -119,7 +119,7 @@ imports:
 - name: github.com/go-sql-driver/mysql
   version: 9181e3a86a19bacd63e68d43ae8b7b36320d8092
 - name: github.com/go-swagger/go-swagger
-  version: 84da4f998602ef20ebd60a576756996162a1ca66
+  version: 51061fa3be377b2ef34c70d14d2058b467009eb4
 - name: github.com/goburrow/serial
   version: 5efbe925ecf714f8ba147bf2226f2e7afc7111bc
 - name: github.com/gogo/protobuf
@@ -222,9 +222,6 @@ imports:
   version: 2a89102c691a4ada3c6541c0fc554a6b126b6715
   subpackages:
   - components/annotations
-  - components/annotations/instance
-  - components/annotations/internal
-  - components/annotations/storage
   - components/config
   - components/config/instance
   - components/config/internal
@@ -333,11 +330,11 @@ imports:
   - errutil
   - term
 - name: github.com/mitchellh/gox
-  version: 9cc487598128d0963ff9dcc51176e722788ec645
+  version: d8caaff5a9dc98f4cfa1fcce6e7265a04689f641
 - name: github.com/mitchellh/mapstructure
   version: 3536a929edddb9a5b34bd6861dc4a9647cb459fe
 - name: github.com/mmcloughlin/geohash
-  version: f7f2bcae3294530249c63fcb6fb6d5e83eee4e73
+  version: a84196f7a15d0ea8c5919f1ec0f15172fb518fba
 - name: github.com/mourner/suncalc-go
   version: 77cea98fd55e16d1ff6e131b220012679265096b
 - name: github.com/OneOfOne/xxhash
@@ -438,11 +435,11 @@ imports:
   - trace/propagation
   - trace/tracestate
 - name: go.uber.org/atomic
-  version: 1ea20fb1cbb1cc08cbd0d913a96dead89aa18289
+  version: df976f2515e274675050de7b3f42545de80594fd
 - name: go.uber.org/multierr
   version: 3c4937480c32f4c13a875a1829af76c98ca3d40a
 - name: go.uber.org/zap
-  version: ff33455a0e382e8a81d14dd7c922020b6b5e7982
+  version: 27376062155ad36be76b0f12cf1572a221d3a48c
   subpackages:
   - buffer
   - internal/bufferpool

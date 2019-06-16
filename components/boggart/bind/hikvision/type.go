@@ -32,7 +32,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 			bind.Logger().Debug(message)
 		})
 
-	bind.client = hikvision.New(config.Address.Hostname(), port, config.Address.User.Username(), password, true, l)
+	bind.client = hikvision.New(config.Address.Hostname(), port, config.Address.User.Username(), password, false, l)
 
 	return bind, nil
 }
