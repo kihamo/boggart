@@ -73,7 +73,7 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		b.ptzChannels = ptzChannels
 		b.mutex.Unlock()
 
-		if b.config.EventsEnabled {
+		if b.config.EventsEnabled && b.config.EventsStreamingEnabled {
 			b.startAlertStreaming()
 		}
 

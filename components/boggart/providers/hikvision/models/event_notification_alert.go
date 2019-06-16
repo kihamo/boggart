@@ -22,6 +22,9 @@ type EventNotificationAlert struct {
 	// active post count
 	ActivePostCount uint64 `json:"activePostCount,omitempty" xml:"activePostCount"`
 
+	// channel ID
+	ChannelID uint64 `json:"channelID,omitempty" xml:"channelID"`
+
 	// date time
 	// Format: date-time
 	DateTime strfmt.DateTime `json:"dateTime,omitempty" xml:"dateTime"`
@@ -34,6 +37,9 @@ type EventNotificationAlert struct {
 
 	// event description
 	EventDescription string `json:"eventDescription,omitempty" xml:"eventDescription"`
+
+	// event push
+	EventPush string `json:"eventPush,omitempty" xml:"Extensions>eventPush"`
 
 	// event state
 	// Enum: [active inactive]
@@ -66,6 +72,9 @@ type EventNotificationAlert struct {
 
 	// sensitivity level
 	SensitivityLevel uint64 `json:"sensitivityLevel,omitempty" xml:"DetectionRegionList>DetectionRegionEntry>sensitivityLevel"`
+
+	// serial number
+	SerialNumber string `json:"serialNumber,omitempty" xml:"Extensions>serialNumber"`
 }
 
 // Validate validates this event notification alert

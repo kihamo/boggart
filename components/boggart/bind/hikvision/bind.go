@@ -42,33 +42,42 @@ type Bind struct {
 	config *Config
 }
 
+func (b *Bind) registerEvent(event *models.EventNotificationAlert) {
+	if event.EventState != models.EventNotificationAlertEventStateActive {
+		return
+	}
+
+	ch := event.ChannelID
+	if ch == 0 && event.DynChannelID > 0 {
+		ch = event.DynChannelID
+	}
+
+	cacheKey := strconv.FormatUint(ch, 10) + "-" + event.EventType
+	dt := time.Time(event.DateTime)
+
+	b.mutex.Lock()
+	lastFire, ok := b.alertStreamingHistory[cacheKey]
+	b.alertStreamingHistory[cacheKey] = dt
+	b.mutex.Unlock()
+
+	if !ok || dt.Sub(lastFire) > b.config.EventsIgnoreInterval {
+		sn := mqtt.NameReplace(b.SerialNumber())
+
+		if err := b.MQTTPublishAsync(context.Background(), MQTTPublishTopicEvent.Format(sn, ch, event.EventType), event.ActivePostCount); err != nil {
+			b.Logger().Error("Send event to MQTT failed", "error", err.Error())
+		}
+	}
+}
+
 func (b *Bind) startAlertStreaming() {
 	ctx := context.Background()
 	b.alertStreaming = b.client.EventNotificationAlertStream(ctx)
 
 	go func() {
-		sn := mqtt.NameReplace(b.SerialNumber())
-
 		for {
 			select {
 			case event := <-b.alertStreaming.NextAlert():
-				if event.EventState != models.EventNotificationAlertEventStateActive {
-					continue
-				}
-
-				cacheKey := strconv.FormatUint(event.DynChannelID, 10) + "-" + event.EventType
-				dt := time.Time(event.DateTime)
-
-				b.mutex.Lock()
-				lastFire, ok := b.alertStreamingHistory[cacheKey]
-				b.alertStreamingHistory[cacheKey] = dt
-				b.mutex.Unlock()
-
-				if !ok || dt.Sub(lastFire) > b.config.EventsIgnoreInterval {
-					if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicEvent.Format(sn, event.DynChannelID, event.EventType), event.EventDescription); err != nil {
-						b.Logger().Error("Send event to MQTT failed", "error", err.Error())
-					}
-				}
+				b.registerEvent(event)
 
 			case err := <-b.alertStreaming.NextError():
 				b.Logger().Error("Stream error", "error", err.Error())

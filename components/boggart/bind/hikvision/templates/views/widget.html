@@ -8,6 +8,7 @@
                         <li role="presentation"{{ if eq .action "" }} class="active"{{ end }}><a href="{{ if eq .action "" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}{{ end }}">{{ i18n "Preview" . }}</a></li>
                         <li role="presentation"{{ if eq .action "image" }} class="active"{{ end }}><a href="{{ if eq .action "image" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=image{{ end }}">{{ i18n "Image" . }}</a></li>
                         <li role="presentation"{{ if eq .action "system" }} class="active"{{ end }}><a href="{{ if eq .action "system" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=system{{ end }}">{{ i18n "System" . }}</a></li>
+                        {{ if .events_enabled }}<li role="presentation"{{ if eq .action "notification" }} class="active"{{ end }}><a href="{{ if eq .action "notification" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=notification{{ end }}">{{ i18n "Notification" . }}</a></li>{{ end }}
                     </ul>
                     <div class="tab-content">
                         <div role="tabpanel" class="tab-pane fade active in">
@@ -174,6 +175,66 @@
                             {{ else }}
                                 <form class="form-horizontal form-label-left dropzone" role="form" method="post" id="firmware" action="?action=system" novalidate></form>
                             {{ end }}
+                        {{ else if and .events_enabled (eq .action "notification") }}
+                            <form role="form" data-toggle="validator" id="notification-settings" action="{{ $.Request.URL.Path }}?action=notification" method="post" class="form-horizontal form-label-left">
+                                <div class="form-group">
+                                    <label for="url" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                        {{ i18n "URL" . }}
+                                    </label>
+                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                        <input type="text" class="form-control" name="url" id="url" required
+                                            placeholder="{{ .Request.URL.Path }}?action=event{{ if ge (len .access_key) 0 }}&key={{ .access_key }}{{ end }}"
+                                            value="{{ .notification.url }}" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="address-format" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                        {{ i18n "Address format" . }}
+                                    </label>
+                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                        <select id="address-format" name="address-format" class="form-control select2" required="required">
+                                            <option value="ipaddress" {{ if eq .notification.address_format "ipaddress" }} selected="selected"{{ end }}>{{ i18n "By IP address" $ }}</option>
+                                            <option value="hostname" {{ if eq .notification.address_format "hostname" }} selected="selected"{{ end }}>{{ i18n "By hostname" $ }}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="hostname" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                        {{ i18n "Hostname" . }}
+                                    </label>
+                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                        <input type="text" class="form-control" name="hostname" id="hostname"
+                                            placeholder="{{ config "dashboard.host" }}"
+                                            value="{{ .notification.hostname }}" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="ip" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                        {{ i18n "IP address" . }}
+                                    </label>
+                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                        <input type="text" class="form-control" name="ip" id="ip"
+                                            placeholder="0.0.0.0"
+                                            value="{{ .notification.ip_address }}" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="port" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                        {{ i18n "Port" . }}
+                                    </label>
+                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                        <input type="text" class="form-control" name="port" id="port" required
+                                            placeholder="{{ config "dashboard.port" }}"
+                                            value="{{ .notification.port }}" />
+                                    </div>
+                                </div>
+                                <div class="ln_solid"></div>
+                                <div class="form-group">
+                                    <div class="col-md-6 col-md-offset-3">
+                                        <button type="submit" class="btn btn-success">{{ i18n "Apply" . }}</button>
+                                    </div>
+                                </div>
+                            </form>
                         {{ else }}
                             <div class="form-group pull-right">
                                 <div class="input-group">

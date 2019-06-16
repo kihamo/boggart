@@ -39,6 +39,45 @@ paths:
           schema:
             type: "string"
             format: "binary"
+  /Event/notification/httpHosts/{httpHost}:
+    get:
+      operationId: "getNotificationHttpHost"
+      tags:
+      - "event"
+      summary: "It is used to get the configuration of a particular e-mail."
+      parameters:
+      - name: "httpHost"
+        in: "path"
+        description: "HTTP host ID"
+        required: true
+        type: "integer"
+        format: "uint64"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/HttpHostNotification"
+    put:
+      operationId: "setNotificationHttpHost"
+      tags:
+      - "event"
+      summary: "It is used to get the configuration of a particular e-mail."
+      parameters:
+      - name: "httpHost"
+        in: "path"
+        description: "HTTP host ID"
+        required: true
+        type: "integer"
+        format: "uint64"
+      - name: "/HttpHostNotification"
+        in: "body"
+        schema:
+          $ref: "#/definitions/HttpHostNotification"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Status"
   /Image/channels:
     get:
       operationId: "getImageChannels"
@@ -152,16 +191,16 @@ paths:
       - "ptz"
       summary: "It is used to move a particular PTZ channel to a absolute position which is defined by Absolute for the device."
       parameters:
-        - name: "channel"
-          in: "path"
-          description: "Channel ID"
-          required: true
-          type: "integer"
-          format: "uint64"
-        - name: "PTZData"
-          in: "body"
-          schema:
-            $ref: "#/definitions/PTZData"
+      - name: "channel"
+        in: "path"
+        description: "Channel ID"
+        required: true
+        type: "integer"
+        format: "uint64"
+      - name: "PTZData"
+        in: "body"
+        schema:
+          $ref: "#/definitions/PTZData"
       responses:
         200:
           description: "Successful operation"
@@ -306,60 +345,65 @@ definitions:
         xml:
           name: "subStatusCode"
         enum:
-          - "ok"
-          - "riskPassword"
-          - "noMemory"
-          - "serviceUnavailable"
-          - "upgrading"
-          - "deviceBusy"
-          - "reConnectIpc"
-          - "deviceError"
-          - "badFlash"
-          - "28181Uninitialized"
-          - "notSupport"
-          - "lowPrivilege"
-          - "badAuthorization"
-          - "methodNotAllowed"
-          - "notSetHdiskRedund"
-          - "invalidOperation"
-          - "notActivated"
-          - "hasActivated"
-          - "badXmlFormat"
-          - "badParameters"
-          - "badHostAddress"
-          - "badXmlContent"
-          - "badIPv4Address"
-          - "badIPv6Address"
-          - "conflictIPv4Address"
-          - "conflictIPv6Address"
-          - "badDomainName"
-          - "connectSreverFail"
-          - "conflictDomainName"
-          - "badPort"
-          - "portError"
-          - "importErrorData"
-          - "badNetMask"
-          - "badVersion"
-          - "badDevType"
-          - "badLanguage"
-          - "incorrentUserNameOrPassword"
-          - "invalidStoragePoolOfCloudServer"
-          - "noFreeSpaceOfStoragePool"
-          - "fileFormatError"
-          - "fileContentError"
-          - "UnSupportCapture"
-          - "unableCalibrate"
-          - "pleaseCalibrate"
-          - "SNMPv3PasswordNone"
-          - "SNMPv3NameDifferent"
-          - "notSupportDeicing"
-          - "notMeetDeicing"
-          - "alarmInputOccupied"
-          - "notSupportWithAPMode"
-          - "rebootRequired"
+        - "ok"
+        - "riskPassword"
+        - "noMemory"
+        - "serviceUnavailable"
+        - "upgrading"
+        - "deviceBusy"
+        - "reConnectIpc"
+        - "deviceError"
+        - "badFlash"
+        - "28181Uninitialized"
+        - "notSupport"
+        - "lowPrivilege"
+        - "badAuthorization"
+        - "methodNotAllowed"
+        - "notSetHdiskRedund"
+        - "invalidOperation"
+        - "notActivated"
+        - "hasActivated"
+        - "badXmlFormat"
+        - "badParameters"
+        - "badHostAddress"
+        - "badXmlContent"
+        - "badIPv4Address"
+        - "badIPv6Address"
+        - "conflictIPv4Address"
+        - "conflictIPv6Address"
+        - "badDomainName"
+        - "connectSreverFail"
+        - "conflictDomainName"
+        - "badPort"
+        - "portError"
+        - "importErrorData"
+        - "badNetMask"
+        - "badVersion"
+        - "badDevType"
+        - "badLanguage"
+        - "incorrentUserNameOrPassword"
+        - "invalidStoragePoolOfCloudServer"
+        - "noFreeSpaceOfStoragePool"
+        - "fileFormatError"
+        - "fileContentError"
+        - "UnSupportCapture"
+        - "unableCalibrate"
+        - "pleaseCalibrate"
+        - "SNMPv3PasswordNone"
+        - "SNMPv3NameDifferent"
+        - "notSupportDeicing"
+        - "notMeetDeicing"
+        - "alarmInputOccupied"
+        - "notSupportWithAPMode"
+        - "rebootRequired"
   EventNotificationAlert:
     type: "object"
     properties:
+      channelID:
+        type: "integer"
+        format: "uint64"
+        xml:
+          name: "channelID"
       ipAddress:
         type: "string"
         xml:
@@ -401,33 +445,33 @@ definitions:
         xml:
           name: "eventType"
         enum:
-          - "IO"
-          - "VMD"
-          - "videoloss"
-          - "shelteralarm"
-          - "facedetection"
-          - "defocus"
-          - "audioexception"
-          - "scenechangedetection"
-          - "fielddetection"
-          - "linedetection"
-          - "regionEntrance"
-          - "regionExiting"
-          - "loitering"
-          - "group"
-          - "rapidMove"
-          - "parking"
-          - "unattendedBaggage"
-          - "attendedBaggage"
-          - "PIR"
-          - "peopleDetection"
+        - "IO"
+        - "VMD"
+        - "videoloss"
+        - "shelteralarm"
+        - "facedetection"
+        - "defocus"
+        - "audioexception"
+        - "scenechangedetection"
+        - "fielddetection"
+        - "linedetection"
+        - "regionEntrance"
+        - "regionExiting"
+        - "loitering"
+        - "group"
+        - "rapidMove"
+        - "parking"
+        - "unattendedBaggage"
+        - "attendedBaggage"
+        - "PIR"
+        - "peopleDetection"
       eventState:
         type: "string"
         xml:
           name: "eventState"
         enum:
-          - "active"
-          - "inactive"
+        - "active"
+        - "inactive"
       eventDescription:
         type: "string"
         xml:
@@ -450,6 +494,90 @@ definitions:
         format: "uint64"
         xml:
           name: "DetectionRegionList>DetectionRegionEntry>sensitivityLevel"
+      serialNumber:
+        type: "string"
+        xml:
+          name: "Extensions>serialNumber"
+      eventPush:
+        type: "string"
+        xml:
+          name: "Extensions>eventPush"
+  HttpHostNotification:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "uint64"
+        xml:
+          name: "id"
+      url:
+        type: "string"
+        x-nullable: true
+        xml:
+          name: "url"
+      protocolType:
+        type: "string"
+        xml:
+          name: "protocolType"
+        enum:
+        - "HTTP"
+        - "HTTPS"
+      parameterFormatType:
+        type: "string"
+        xml:
+          name: "parameterFormatType"
+        enum:
+        - "XML"
+        - "querystring"
+      addressingFormatType:
+        type: "string"
+        xml:
+          name: "addressingFormatType"
+        enum:
+        - "ipaddress"
+        - "hostname"
+      hostName:
+        type: "string"
+        x-nullable: true
+        xml:
+          name: "hostName"
+      ipAddress:
+        type: "string"
+        x-nullable: true
+        xml:
+          name: "ipAddress"
+      ipv6Address:
+        type: "string"
+        x-nullable: true
+        xml:
+          name: "ipv6Address"
+      portNo:
+        type: "integer"
+        format: "uint64"
+        xml:
+          name: "portNo"
+      userName:
+        type: "string"
+        x-nullable: true
+        xml:
+          name: "userName"
+      password:
+        type: "string"
+        x-nullable: true
+        xml:
+          name: "password"
+      httpAuthenticationMethod:
+        type: "string"
+        xml:
+          name: "httpAuthenticationMethod"
+        enum:
+        - "MD5digest"
+        - "none"
+      intervalBetweenEvents:
+        type: "integer"
+        x-nullable: true
+        xml:
+          name: "Extensions>intervalBetweenEvents"
   Storage:
     type: "object"
     properties:

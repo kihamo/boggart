@@ -2,11 +2,16 @@ package hikvision
 
 import (
 	"bytes"
+	"encoding/xml"
 	"errors"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
+
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/event"
 
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
@@ -28,10 +33,12 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	query := r.URL().Query()
 	action := query.Get("action")
 	ctx := r.Context()
+	cfg := b.Config().(*Config)
 
 	vars := map[string]interface{}{
 		"action":                   action,
-		"preview_refresh_interval": b.Config().(*Config).PreviewRefreshInterval.Seconds(),
+		"events_enabled":           cfg.EventsEnabled,
+		"preview_refresh_interval": cfg.PreviewRefreshInterval.Seconds(),
 	}
 
 	switch action {
@@ -174,6 +181,117 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		vars["upgrade"] = upgrade.Payload
+
+	case "notification":
+		if !bind.config.EventsEnabled {
+			t.NotFound(w, r)
+			return
+		}
+
+		params := event.NewGetNotificationHttpHostParamsWithContext(ctx).
+			WithHttpHost(1)
+
+		notification, err := bind.client.Event.GetNotificationHttpHost(params, nil)
+		if err != nil {
+			r.Session().FlashBag().Error(t.Translate(ctx, "Get notification http host failed with error %s", "", err.Error()))
+		}
+
+		if r.IsPost() {
+			if err == nil {
+				port, err := strconv.ParseUint(r.Original().FormValue("port"), 10, 64)
+
+				u := bytes.NewBuffer(nil)
+				err = xml.EscapeText(u, []byte(r.Original().FormValue("url")))
+
+				if err == nil {
+					params := event.NewSetNotificationHttpHostParamsWithContext(ctx).
+						WithHttpHost(notification.Payload.ID).
+						WithHttpHostNotification(&models.HttpHostNotification{
+							ID:                       notification.Payload.ID,
+							ProtocolType:             notification.Payload.ProtocolType,
+							ParameterFormatType:      notification.Payload.ParameterFormatType,
+							HttpAuthenticationMethod: notification.Payload.HttpAuthenticationMethod,
+
+							AddressingFormatType: r.Original().FormValue("address-format"),
+							URL:                  &[]string{u.String()}[0],
+							PortNo:               port,
+						})
+
+					if hostname := r.Original().FormValue("hostname"); len(hostname) > 0 {
+						params.HttpHostNotification.HostName = &hostname
+					}
+
+					if ip := r.Original().FormValue("ip"); len(ip) > 0 {
+						params.HttpHostNotification.IPAddress = &ip
+					}
+
+					_, err = bind.client.Event.SetNotificationHttpHost(params, nil)
+				}
+
+				if err != nil {
+					r.Session().FlashBag().Error(err.Error())
+				} else {
+					r.Session().FlashBag().Success(t.Translate(ctx, "Success", ""))
+				}
+
+				t.Redirect(r.URL().Path+"?action="+action, http.StatusFound, w, r)
+			}
+
+			return
+		}
+
+		info := map[string]interface{}{
+			"address_format": "",
+			"port":           "",
+			"url":            "",
+			"hostname":       "",
+			"ip_address":     "",
+		}
+
+		if err == nil {
+			info["address_format"] = notification.Payload.AddressingFormatType
+			info["port"] = notification.Payload.PortNo
+
+			if notification.Payload.URL != nil {
+				info["url"] = *notification.Payload.URL
+			}
+
+			if notification.Payload.HostName != nil {
+				info["hostname"] = *notification.Payload.HostName
+			}
+
+			if notification.Payload.IPAddress != nil {
+				info["ip_address"] = *notification.Payload.IPAddress
+			}
+		}
+
+		vars["notification"] = info
+		vars["access_key"] = ""
+
+		if keysConfig := r.Config().String(boggart.ConfigAccessKeys); keysConfig != "" {
+			if keys := strings.Split(keysConfig, ","); len(keys) > 0 {
+				vars["access_key"] = keys[0]
+			}
+		}
+
+	case "event":
+		if !bind.config.EventsEnabled || !r.IsPost() {
+			t.NotFound(w, r)
+			return
+		}
+
+		if content, err := ioutil.ReadAll(r.Original().Body); err == nil {
+			e := &models.EventNotificationAlert{}
+			err = xml.Unmarshal(content, e)
+
+			if err != nil {
+				t.InternalError(w, r, err)
+			} else {
+				bind.registerEvent(e)
+			}
+		}
+
+		return
 	}
 
 	t.Render(ctx, "widget", vars)

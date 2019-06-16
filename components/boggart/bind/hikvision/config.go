@@ -28,6 +28,7 @@ type Config struct {
 	PTZTimeout             time.Duration `mapstructure:"ptz_timeout" yaml:"ptz_timeout"`
 	PTZEnabled             bool          `mapstructure:"ptz_enabled" yaml:"ptz_enabled,omitempty"`
 	EventsEnabled          bool          `mapstructure:"events_enabled" yaml:"events_enabled,omitempty"`
+	EventsStreamingEnabled bool          `mapstructure:"events_streaming_enabled" yaml:"events_streaming_enabled,omitempty"`
 	EventsIgnoreInterval   time.Duration `mapstructure:"events_ignore_interval" yaml:"events_ignore_interval,omitempty"`
 	WidgetChannel          uint64        `mapstructure:"widget_channel" yaml:"widget_channel,omitempty"`
 	PreviewRefreshInterval time.Duration `mapstructure:"preview_refresh_interval" yaml:"preview_refresh_interval,omitempty"`

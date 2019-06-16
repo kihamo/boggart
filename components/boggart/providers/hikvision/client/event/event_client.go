@@ -27,7 +27,7 @@ type Client struct {
 }
 
 /*
-GetNotificationAlertStream its is used to get the event notification data stream through HTTP server push
+GetNotificationAlertStream its is used to get the event notification data stream through h t t p server push
 */
 func (a *Client) GetNotificationAlertStream(params *GetNotificationAlertStreamParams, authInfo runtime.ClientAuthInfoWriter, writer io.Writer) (*GetNotificationAlertStreamOK, error) {
 	// TODO: Validate the params before sending
@@ -52,6 +52,64 @@ func (a *Client) GetNotificationAlertStream(params *GetNotificationAlertStreamPa
 		return nil, err
 	}
 	return result.(*GetNotificationAlertStreamOK), nil
+
+}
+
+/*
+GetNotificationHttpHost its is used to get the configuration of a particular e mail
+*/
+func (a *Client) GetNotificationHttpHost(params *GetNotificationHttpHostParams, authInfo runtime.ClientAuthInfoWriter) (*GetNotificationHttpHostOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetNotificationHttpHostParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getNotificationHttpHost",
+		Method:             "GET",
+		PathPattern:        "/Event/notification/httpHosts/{httpHost}",
+		ProducesMediaTypes: []string{"application/xml"},
+		ConsumesMediaTypes: []string{"application/xml"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GetNotificationHttpHostReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetNotificationHttpHostOK), nil
+
+}
+
+/*
+SetNotificationHttpHost its is used to get the configuration of a particular e mail
+*/
+func (a *Client) SetNotificationHttpHost(params *SetNotificationHttpHostParams, authInfo runtime.ClientAuthInfoWriter) (*SetNotificationHttpHostOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewSetNotificationHttpHostParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "setNotificationHttpHost",
+		Method:             "PUT",
+		PathPattern:        "/Event/notification/httpHosts/{httpHost}",
+		ProducesMediaTypes: []string{"application/xml"},
+		ConsumesMediaTypes: []string{"application/xml"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &SetNotificationHttpHostReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*SetNotificationHttpHostOK), nil
 
 }
 
