@@ -29,6 +29,9 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	sn := b.SerialNumber()
 
 	return []mqtt.Subscriber{
+		// settings
+		mqtt.NewSubscriber(settingsTopicGet.Format(base, sn), 0, b.settingsSubscriber),
+
 		// device
 		mqtt.NewSubscriber(deviceTopicAttribute.Format(base, sn), 0, b.deviceAttributesSubscriber),
 		mqtt.NewSubscriber(deviceTopicAttributeFirmware.Format(base, sn), 0, b.deviceFirmwareSubscriber),
@@ -43,8 +46,5 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 		// ota
 		mqtt.NewSubscriber(otaTopicStatus.Format(base, sn), 0, b.otaStatusSubscriber),
 		mqtt.NewSubscriber(otaTopicEnabled.Format(base, sn), 0, b.otaEnabledSubscriber),
-
-		// settings
-		mqtt.NewSubscriber(settingsTopicGet.Format(base, sn), 0, b.settingsSubscriber),
 	}
 }

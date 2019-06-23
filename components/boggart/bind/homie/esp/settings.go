@@ -116,6 +116,11 @@ func (b *Bind) settingsSubscriber(_ context.Context, _ mqtt.Component, message m
 	md := make(map[string]interface{})
 	err := message.UnmarshalJSON(&md)
 	if err == nil {
+		b.settings.Range(func(key, value interface{}) bool {
+			b.settings.Delete(key)
+			return true
+		})
+
 		b.settingsParse(reflect.ValueOf(md), "")
 	}
 
