@@ -26,22 +26,18 @@ const (
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	sn := mqtt.NameReplace(b.SerialNumber())
-
 	return []mqtt.Topic{
-		mqtt.Topic(MQTTPublishTopicReceiveMessage.Format(sn)),
-		mqtt.Topic(MQTTPublishTopicReceiveAudio.Format(sn)),
-		mqtt.Topic(MQTTPublishTopicReceiveVoice.Format(sn)),
+		MQTTPublishTopicReceiveMessage,
+		MQTTPublishTopicReceiveAudio,
+		MQTTPublishTopicReceiveVoice,
 	}
 }
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
-	sn := mqtt.NameReplace(b.SerialNumber())
-
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTSubscribeTopicSendMessage.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSendMessage)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicSendFile.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSendFileURL)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicSendFileURL.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSendFileURL)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicSendMessage.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSendMessage)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicSendFile.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSendFileURL)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicSendFileURL.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSendFileURL)),
 	}
 }
 
