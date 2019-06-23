@@ -33,6 +33,8 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
+	pinger.SetPrivileged(true)
+
 	deadline, ok := ctx.Deadline()
 	if !ok {
 		return nil, nil

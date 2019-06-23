@@ -11,15 +11,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/event"
-
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/event"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/image"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/streaming"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/system"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision/models"
 	"github.com/kihamo/shadow/components/dashboard"
+	"github.com/kihamo/shadow/components/logging"
 )
 
 type response struct {
@@ -281,10 +281,21 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		if content, err := ioutil.ReadAll(r.Original().Body); err == nil {
+			logging.Log(ctx).Debug("Call hikvision event " + string(content))
+
 			e := &models.EventNotificationAlert{}
-			err = xml.Unmarshal(content, e)
+
+			d := xml.NewDecoder(bytes.NewReader(content))
+			d.Strict = false // иногда приходит треш, например кривый амперсанты
+
+			err = d.Decode(e)
 
 			if err != nil {
+				logging.Log(ctx).Error("Parse event failed",
+					"error", err.Error(),
+					"body", string(content),
+				)
+
 				t.InternalError(w, r, err)
 			} else {
 				bind.registerEvent(e)

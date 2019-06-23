@@ -27,6 +27,8 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
+	pinger.SetPrivileged(true)
+
 	pinger.Count = b.retry
 	pinger.Timeout = b.timeout
 
