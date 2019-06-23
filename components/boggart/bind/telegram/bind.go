@@ -2,10 +2,12 @@ package telegram
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/url"
 	"strconv"
+	"sync"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
@@ -16,51 +18,35 @@ type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
 
+	mutex  sync.RWMutex
 	config *Config
 	client *tgbotapi.BotAPI
 	done   chan struct{}
 }
 
-func (b *Bind) Run() (err error) {
-	b.client, err = tgbotapi.NewBotAPI(b.config.Token)
-	if err != nil {
-		return err
-	}
-
-	b.SetSerialNumber(strconv.Itoa(b.client.Self.ID))
-	b.client.Debug = b.config.Debug
-
-	if b.config.UpdatesEnabled {
-		b.client.Buffer = b.config.UpdatesBuffer
-
-		u := tgbotapi.NewUpdate(0)
-		u.Timeout = b.config.UpdatesTimeout
-
-		updates, err := b.client.GetUpdatesChan(u)
-		if err != nil {
-			return err
-		}
-
-		b.listenUpdates(updates)
-	}
-
-	b.UpdateStatus(boggart.BindStatusOnline)
-	return nil
-}
-
 func (b *Bind) SendMessage(to, message string) error {
+	bot := b.bot()
+	if bot == nil {
+		return errors.New("bot is offline")
+	}
+
 	chatId, err := b.chatId(to)
 	if err != nil {
 		return err
 	}
 
 	msg := tgbotapi.NewMessage(chatId, message)
-	_, err = b.client.Send(msg)
+	_, err = bot.Send(msg)
 
 	return err
 }
 
 func (b *Bind) SendPhoto(to, name string, file io.Reader, size int64) error {
+	bot := b.bot()
+	if bot == nil {
+		return errors.New("bot is offline")
+	}
+
 	chatId, err := b.chatId(to)
 	if err != nil {
 		return err
@@ -73,11 +59,16 @@ func (b *Bind) SendPhoto(to, name string, file io.Reader, size int64) error {
 	})
 	msg.Caption = name
 
-	_, err = b.client.Send(msg)
+	_, err = bot.Send(msg)
 	return err
 }
 
 func (b *Bind) SendAudio(to, name string, file io.Reader, size int64) error {
+	bot := b.bot()
+	if bot == nil {
+		return errors.New("bot is offline")
+	}
+
 	chatId, err := b.chatId(to)
 	if err != nil {
 		return err
@@ -90,11 +81,16 @@ func (b *Bind) SendAudio(to, name string, file io.Reader, size int64) error {
 	})
 	msg.Caption = name
 
-	_, err = b.client.Send(msg)
+	_, err = bot.Send(msg)
 	return err
 }
 
 func (b *Bind) SendDocument(to, name string, file io.Reader, size int64) error {
+	bot := b.bot()
+	if bot == nil {
+		return errors.New("bot is offline")
+	}
+
 	chatId, err := b.chatId(to)
 	if err != nil {
 		return err
@@ -107,11 +103,16 @@ func (b *Bind) SendDocument(to, name string, file io.Reader, size int64) error {
 	})
 	msg.Caption = name
 
-	_, err = b.client.Send(msg)
+	_, err = bot.Send(msg)
 	return err
 }
 
 func (b *Bind) SendFileAsURL(to, name, u string) error {
+	bot := b.bot()
+	if bot == nil {
+		return errors.New("bot is offline")
+	}
+
 	chatId, err := b.chatId(to)
 	if err != nil {
 		return err
@@ -124,9 +125,16 @@ func (b *Bind) SendFileAsURL(to, name, u string) error {
 	msg := tgbotapi.NewMessage(chatId, fmt.Sprintf("%s [view](%s)", name, u))
 	msg.ParseMode = "Markdown"
 
-	_, err = b.client.Send(msg)
+	_, err = bot.Send(msg)
 
 	return err
+}
+
+func (b *Bind) bot() *tgbotapi.BotAPI {
+	b.mutex.RLock()
+	defer b.mutex.RUnlock()
+
+	return b.client
 }
 
 func (b *Bind) chatId(to string) (int64, error) {
@@ -164,6 +172,11 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 							"topic", mqttTopic,
 							"message", u.Message.Text,
 						)
+					} else {
+						b.Logger().Debug("Receive message",
+							"chat", u.Message.Chat.ID,
+							"message", u.Message.Text,
+						)
 					}
 				}
 
@@ -178,6 +191,14 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 				}
 
 				if fileID == "" {
+					continue
+				}
+
+				bot := b.bot()
+				if bot == nil {
+					b.Logger().Error("Bot if offline",
+						"file", fileID,
+					)
 					continue
 				}
 
@@ -205,7 +226,12 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 }
 
 func (b *Bind) Close() (err error) {
+	bot := b.bot()
+	if bot != nil {
+		bot.StopReceivingUpdates()
+	}
+
 	close(b.done)
-	b.client.StopReceivingUpdates()
+
 	return nil
 }
