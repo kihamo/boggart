@@ -107,6 +107,11 @@ func (c *Component) Handle(message format.LogParts, length int64, err error) {
 			"length", length,
 			"message", message,
 		)
+	} else {
+		c.logger.Debug("Receive message",
+			"length", length,
+			"message", message,
+		)
 	}
 
 	fields := make([]string, 0, len(tags)*2)
