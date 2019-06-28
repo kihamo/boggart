@@ -1,0 +1,58 @@
+{{ define "content" }}
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>{{ i18n "Network UPS Tools" . }}</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                {{ if ge (len .variables_by_name) 0 }}
+                <div class="row">
+                    <div class="col-md-6 col-sm-6 col-xs-6">
+                        <p>{{ i18n "Charged" . }}</p>
+                        <div class="progress" style="margin-bottom:0">
+                            <div class="progress-bar progress-bar-success{{ if .charged }} progress-bar-striped active{{ end }}"
+                                 role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                                 aria-valuenow="{{ (index .variables_by_name "battery.charge").Value }}"
+                                 style="width:{{ (index .variables_by_name "battery.charge").Value }}%">
+                                <span style="line-height:20px">{{ (index .variables_by_name "battery.charge").Value }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-sm-6 col-xs-6">
+                        <p>{{ i18n "Load" . }}</p>
+                        <div class="progress" style="margin-bottom:0">
+                            <div class="progress-bar progress-bar-warning progress-bar-striped active"
+                                 role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                                 aria-valuenow="{{ (index .variables_by_name "ups.load").Value }}"
+                                 style="width:{{ (index .variables_by_name "ups.load").Value }}%">
+                                <span style="line-height:20px">{{ (index .variables_by_name "ups.load").Value }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <table class="table table-striped dt-responsive nowrap" style="width:100%">
+                        <thead>
+                        <tr>
+                            <th>{{ i18n "Variable" . }}</th>
+                            <th>{{ i18n "Value" . }}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{ range $i, $variable := .variables }}
+                        <tr>
+                            <td>{{ $variable.Name }}</td>
+                            <td>{{ $variable.Value }}</td>
+                        </tr>
+                        {{ end }}
+                        </tbody>
+                    </table>
+                </div>
+                {{ end }}
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}

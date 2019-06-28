@@ -4,7 +4,6 @@ import (
 	"errors"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/robbiet480/go.nut"
@@ -14,18 +13,14 @@ type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
 
-	host            string
-	username        string
-	password        string
-	ups             string
-	updaterInterval time.Duration
+	config *Config
 
 	mutex     sync.Mutex
 	variables map[string]interface{}
 }
 
 func (b *Bind) connect() (client nut.Client, err error) {
-	client, err = nut.Connect(b.host)
+	client, err = nut.Connect(b.config.Host)
 	if err != nil {
 		return client, err
 	}
@@ -36,8 +31,8 @@ func (b *Bind) connect() (client nut.Client, err error) {
 		}
 	}()
 
-	if b.username != "" && b.password != "" {
-		result, err := client.Authenticate(b.username, b.password)
+	if b.config.Username != "" && b.config.Password != "" {
+		result, err := client.Authenticate(b.config.Username, b.config.Password)
 		if err != nil {
 			return client, err
 		}
@@ -50,7 +45,7 @@ func (b *Bind) connect() (client nut.Client, err error) {
 	return client, err
 }
 
-func (b *Bind) GetUPS() (ups nut.UPS, err error) {
+func (b *Bind) ups() (ups nut.UPS, err error) {
 	client, err := b.connect()
 	if err != nil {
 		return ups, err
@@ -65,7 +60,7 @@ func (b *Bind) GetUPS() (ups nut.UPS, err error) {
 	}
 
 	for _, device := range devices {
-		if device.Name == b.ups {
+		if device.Name == b.config.UPS {
 			for _, v := range device.Variables {
 				if v.Name == "device.serial" {
 					b.SetSerialNumber(strings.TrimSpace(v.Value.(string)))
@@ -77,7 +72,16 @@ func (b *Bind) GetUPS() (ups nut.UPS, err error) {
 		}
 	}
 
-	return ups, errors.New("device " + b.ups + " not found")
+	return ups, errors.New("device " + b.config.UPS + " not found")
+}
+
+func (b *Bind) Variables() ([]nut.Variable, error) {
+	ups, err := b.ups()
+	if err != nil {
+		return nil, err
+	}
+
+	return ups.Variables, nil
 }
 
 func (b *Bind) SendCommand(command string) (bool, error) {
@@ -95,7 +99,7 @@ func (b *Bind) SendCommand(command string) (bool, error) {
 	}
 
 	for _, device := range devices {
-		if device.Name == b.ups {
+		if device.Name == b.config.UPS {
 			command = strings.ToLower(command)
 
 			for _, cmd := range device.Commands {
@@ -108,5 +112,5 @@ func (b *Bind) SendCommand(command string) (bool, error) {
 		}
 	}
 
-	return false, errors.New("device " + b.ups + " not found")
+	return false, errors.New("device " + b.config.UPS + " not found")
 }

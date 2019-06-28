@@ -12,8 +12,8 @@ import (
 func (b *Bind) Tasks() []workers.Task {
 	taskStateUpdater := task.NewFunctionTask(b.taskUpdater)
 	taskStateUpdater.SetRepeats(-1)
-	taskStateUpdater.SetRepeatInterval(b.updaterInterval)
-	taskStateUpdater.SetName("bind-nut-updater-" + b.ups)
+	taskStateUpdater.SetRepeatInterval(b.config.UpdaterInterval)
+	taskStateUpdater.SetName("bind-nut-updater-" + b.config.UPS)
 
 	return []workers.Task{
 		taskStateUpdater,
@@ -21,7 +21,7 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
-	ups, err := b.GetUPS()
+	variables, err := b.Variables()
 	if err != nil {
 		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, err
@@ -33,7 +33,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	sn := b.SerialNumber()
 	snMQTT := mqtt.NameReplace(sn)
 
-	for _, v := range ups.Variables {
+	for _, v := range variables {
 		prev, ok := b.variables[v.Name]
 		if !ok || prev != v.Value {
 			switch v.Name {
