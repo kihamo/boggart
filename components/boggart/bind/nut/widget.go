@@ -3,6 +3,7 @@ package nut
 import (
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
@@ -95,14 +96,21 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	}
 
 	variables := make(map[string]interface{}, len(ups.Variables))
-	charged := false
+
+	var (
+		charged bool
+		runtime time.Duration
+	)
 
 	for _, v := range ups.Variables {
 		variables[v.Name] = v
 
 		switch v.Name {
 		case "ups.status":
-			charged = strings.HasSuffix(v.Value.(string), "CHRG")
+			charged = strings.HasSuffix(v.Value.(string), " CHRG")
+
+		case "battery.runtime":
+			runtime = time.Second * time.Duration(v.Value.(int64))
 		}
 	}
 
@@ -110,6 +118,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		"ups":       ups,
 		"variables": variables,
 		"charged":   charged,
+		"runtime":   runtime,
 		"error":     err,
 	}
 

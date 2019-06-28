@@ -22,9 +22,6 @@ msgstr "Статус"
 msgid "Runtime"
 msgstr "Время работы"
 
-msgid "seconds"
-msgstr "секунд"
-
 msgid "Variables"
 msgstr "Переменные"
 
