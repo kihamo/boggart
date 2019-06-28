@@ -1,6 +1,7 @@
 package nut
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/elazarl/go-bindata-assetfs"
@@ -8,13 +9,96 @@ import (
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
+type response struct {
+	Result  string `json:"result"`
+	Message string `json:"message,omitempty"`
+}
+
 func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
-	variables, err := b.Bind().(*Bind).Variables()
-	variablesByName := make(map[string]interface{}, len(variables))
+	bind := b.Bind().(*Bind)
+
+	if r.IsPost() {
+		var (
+			err        error
+			successMsg string
+		)
+
+		q := r.URL().Query()
+
+		switch q.Get("action") {
+		case "cmd":
+			cmd := strings.TrimSpace(q.Get("cmd"))
+			if cmd == "" {
+				t.NotFound(w, r)
+				return
+			}
+
+			ok, err := bind.SendCommand(cmd)
+			if err != nil {
+				// skip
+			} else if !ok {
+				err = errors.New("Execute command " + cmd + " return false")
+			} else {
+				successMsg = "Execute command " + cmd + " success"
+			}
+
+		case "variable":
+			err = r.Original().ParseForm()
+			if err == nil {
+				keys := make([]string, 0)
+
+				for key, value := range r.Original().PostForm {
+					if len(value) == 0 {
+						continue
+					}
+
+					ok, err := bind.SetVariable(key, value[0])
+					if err != nil {
+						break
+					} else if !ok {
+						err = errors.New("Set variable " + key + " return false")
+						break
+					}
+
+					keys = append(keys, key)
+				}
+
+				if err == nil {
+					successMsg = "Change variables (" + strings.Join(keys, ",") + ") value success"
+				}
+			}
+
+		default:
+			t.NotFound(w, r)
+			return
+		}
+
+		if err != nil {
+			_ = w.SendJSON(response{
+				Result:  "failed",
+				Message: err.Error(),
+			})
+
+		} else {
+			_ = w.SendJSON(response{
+				Result:  "success",
+				Message: successMsg,
+			})
+		}
+
+		return
+	}
+
+	ups, err := bind.ups()
+	if err != nil {
+		r.Session().FlashBag().Error(t.Translate(r.Context(), "Get UPS failed with error %s", "", err.Error()))
+	}
+
+	variables := make(map[string]interface{}, len(ups.Variables))
 	charged := false
 
-	for _, v := range variables {
-		variablesByName[v.Name] = v
+	for _, v := range ups.Variables {
+		variables[v.Name] = v
 
 		switch v.Name {
 		case "ups.status":
@@ -23,14 +107,10 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	}
 
 	vars := map[string]interface{}{
-		"variables":         variables,
-		"variables_by_name": variablesByName,
-		"charged":           charged,
-		"error":             err,
-	}
-
-	if err != nil {
-		r.Session().FlashBag().Error(t.Translate(r.Context(), "Get variables failed with error %s", "", err.Error()))
+		"ups":       ups,
+		"variables": variables,
+		"charged":   charged,
+		"error":     err,
 	}
 
 	t.Render(r.Context(), "widget", vars)

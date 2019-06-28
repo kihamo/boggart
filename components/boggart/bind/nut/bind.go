@@ -84,6 +84,37 @@ func (b *Bind) Variables() ([]nut.Variable, error) {
 	return ups.Variables, nil
 }
 
+func (b *Bind) SetVariable(variable, value string) (bool, error) {
+	client, err := b.connect()
+	if err != nil {
+		return false, err
+	}
+	defer func() {
+		_, _ = client.Disconnect()
+	}()
+
+	devices, err := client.GetUPSList()
+	if err != nil {
+		return false, err
+	}
+
+	for _, device := range devices {
+		if device.Name == b.config.UPS {
+			variable = strings.ToLower(variable)
+
+			for _, v := range device.Variables {
+				if strings.ToLower(v.Name) == variable {
+					return device.SetVariable(variable, value)
+				}
+			}
+
+			return false, errors.New("variable " + variable + " not found")
+		}
+	}
+
+	return false, errors.New("device " + b.config.UPS + " not found")
+}
+
 func (b *Bind) SendCommand(command string) (bool, error) {
 	client, err := b.connect()
 	if err != nil {

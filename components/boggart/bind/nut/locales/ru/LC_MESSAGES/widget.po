@@ -10,14 +10,41 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;"
 
+msgid "Charged"
+msgstr "Заряжено"
+
+msgid "Load"
+msgstr "Нагрузка"
+
+msgid "Status"
+msgstr "Статус"
+
+msgid "Runtime"
+msgstr "Время работы"
+
+msgid "seconds"
+msgstr "секунд"
+
+msgid "Variables"
+msgstr "Переменные"
+
 msgid "Variable"
 msgstr "Переменная"
 
 msgid "Value"
 msgstr "Значение"
 
-msgid "Charged"
-msgstr "Заряжено"
+msgid "Description"
+msgstr "Описание"
 
-msgid "Load"
-msgstr "Нагрузка"
+msgid "Description unavailable"
+msgstr "Описание не доступно"
+
+msgid "Commands"
+msgstr "Команды"
+
+msgid "Command"
+msgstr "Команда"
+
+msgid "Execute"
+msgstr "Выполнить"

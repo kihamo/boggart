@@ -1,4 +1,5 @@
 {{ define "content" }}
+{{ if ge (len .variables) 0 }}
 <div class="row">
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
@@ -7,16 +8,15 @@
                 <div class="clearfix"></div>
             </div>
             <div class="x_content">
-                {{ if ge (len .variables_by_name) 0 }}
                 <div class="row">
                     <div class="col-md-6 col-sm-6 col-xs-6">
                         <p>{{ i18n "Charged" . }}</p>
                         <div class="progress" style="margin-bottom:0">
                             <div class="progress-bar progress-bar-success{{ if .charged }} progress-bar-striped active{{ end }}"
                                  role="progressbar" aria-valuemin="0" aria-valuemax="100"
-                                 aria-valuenow="{{ (index .variables_by_name "battery.charge").Value }}"
-                                 style="width:{{ (index .variables_by_name "battery.charge").Value }}%">
-                                <span style="line-height:20px">{{ (index .variables_by_name "battery.charge").Value }}%</span>
+                                 aria-valuenow="{{ (index .variables "battery.charge").Value }}"
+                                 style="width:{{ (index .variables "battery.charge").Value }}%">
+                                <span style="line-height:20px">{{ (index .variables "battery.charge").Value }}%</span>
                             </div>
                         </div>
                     </div>
@@ -25,34 +25,165 @@
                         <div class="progress" style="margin-bottom:0">
                             <div class="progress-bar progress-bar-warning progress-bar-striped active"
                                  role="progressbar" aria-valuemin="0" aria-valuemax="100"
-                                 aria-valuenow="{{ (index .variables_by_name "ups.load").Value }}"
-                                 style="width:{{ (index .variables_by_name "ups.load").Value }}%">
-                                <span style="line-height:20px">{{ (index .variables_by_name "ups.load").Value }}%</span>
+                                 aria-valuenow="{{ (index .variables "ups.load").Value }}"
+                                 style="width:{{ (index .variables "ups.load").Value }}%">
+                                <span style="line-height:20px">{{ (index .variables "ups.load").Value }}%</span>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="row">
+                <div class="row" style="margin-top: 1.0em;">
+                    <div class="col-md-6 col-sm-6 col-xs-6">
+                        <p>{{ i18n "Status" . }}</p>
+                        <p><strong>{{ (index .variables "ups.status").Value }}</strong></p>
+                    </div>
+                    <div class="col-md-6 col-sm-6 col-xs-6">
+                        <p>{{ i18n "Runtime" . }}</p>
+                        <p><strong>{{ (index .variables "battery.runtime").Value }} {{ i18n "seconds" . }}</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
+
+{{ if ge (len .ups.Variables) 0 }}
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel collapsed">
+            <div class="x_title">
+                <h2>{{ i18n "Variables" . }}</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <form role="form" action="?action=variable" method="post" id="variables" data-toggle="validator">
                     <table class="table table-striped dt-responsive nowrap" style="width:100%">
                         <thead>
                         <tr>
                             <th>{{ i18n "Variable" . }}</th>
                             <th>{{ i18n "Value" . }}</th>
+                            <th>{{ i18n "Description" . }}</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {{ range $i, $variable := .variables }}
+                        {{ range $i, $variable := .ups.Variables }}
                         <tr>
                             <td>{{ $variable.Name }}</td>
-                            <td>{{ $variable.Value }}</td>
+                            <td>
+                                {{ if $variable.Writeable }}
+                                    <input type="text" class="form-control" name="{{ $variable.Name }}" value="{{ $variable.Value }}" id="{{ $variable.Name }}"/>
+                                {{ else }}
+                                    {{ $variable.Value }}
+                                {{ end }}
+                            </td>
+                            <td>{{ i18n $variable.Description $ }}</td>
                         </tr>
                         {{ end }}
                         </tbody>
                     </table>
-                </div>
-                {{ end }}
+                </form>
             </div>
         </div>
     </div>
 </div>
+{{ end }}
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel collapsed">
+            <div class="x_title">
+                <h2>{{ i18n "Commands" . }}</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <table class="table table-striped dt-responsive nowrap" style="width:100%">
+                    <thead>
+                    <tr>
+                        <th>{{ i18n "Command" . }}</th>
+                        <th>{{ i18n "Execute" . }}</th>
+                        <th>{{ i18n "Description" . }}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{ range $i, $cmd := .ups.Commands }}
+                    <tr>
+                        <td>{{ $cmd.Name }}</td>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="executeCmd('{{ $cmd.Name }}')">
+                                {{ i18n "Execute" . }}
+                            </button>
+                        </td>
+                        <td>{{ i18n $cmd.Description $ }}</td>
+                    </tr>
+                    {{ end }}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
+
+{{ define "js" }}
+<script type="application/javascript">
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net/js/jquery.dataTables.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive/js/dataTables.responsive.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/validator/js/validator.min.js" false) }}
+
+    $(document).ready(function () {
+        function successHandler(r) {
+            if (r.result === 'failed') {
+                new PNotify({
+                    title: 'Error',
+                    text: r.message,
+                    type: 'error',
+                    hide: false,
+                    styling: 'bootstrap3'
+                });
+            } else if (r.message !== 'undefined') {
+                new PNotify({
+                    title: 'Success',
+                    text: r.message,
+                    type: 'success',
+                    hide: false,
+                    styling: 'bootstrap3'
+                });
+            }
+        }
+
+        window.executeCmd = function(cmd) {
+            $.ajax({
+                type: 'POST',
+                url: '?action=cmd&cmd=' + cmd,
+                success: successHandler
+            });
+        };
+
+        $('#variables input[id]').change(function() {
+            var
+                f = $('#variables'),
+                e = $(this),
+                data = {}
+            ;
+
+            data[e.prop('id')] = e.val();
+
+            $.ajax({
+                type: f.prop('method'),
+                url: f.prop('action'),
+                data: data,
+                success: successHandler
+            });
+        });
+    });
+</script>
 {{ end }}
