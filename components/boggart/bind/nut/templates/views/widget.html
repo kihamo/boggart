@@ -117,7 +117,7 @@
                         <td>{{ $cmd.Name }}</td>
                         <td>
                             <button type="button" class="btn btn-danger btn-sm" onclick="executeCmd('{{ $cmd.Name }}')">
-                                {{ i18n "Execute" . }}
+                                {{ i18n "Execute" $ }}
                             </button>
                         </td>
                         <td>{{ i18n $cmd.Description $ }}</td>

@@ -9,8 +9,9 @@ import (
 )
 
 const (
-	MQTTPublishTopicVariable  mqtt.Topic = boggart.ComponentName + "/ups/+/variable/+"
-	MQTTSubscribeTopicCommand mqtt.Topic = boggart.ComponentName + "/ups/+/command"
+	MQTTPublishTopicVariable   mqtt.Topic = boggart.ComponentName + "/ups/+/variable/+"
+	MQTTSubscribeTopicVariable mqtt.Topic = boggart.ComponentName + "/ups/+/variable/+/set"
+	MQTTSubscribeTopicCommand  mqtt.Topic = boggart.ComponentName + "/ups/+/command"
 )
 
 /*
@@ -41,6 +42,36 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
+		mqtt.NewSubscriber(MQTTSubscribeTopicVariable.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 4) {
+				return nil
+			}
+
+			route := mqtt.RouteSplit(message.Topic())
+			if len(route) < 2 {
+				return errors.New("bad topic name")
+			}
+
+			variable := route[len(route)-2]
+
+			variables, err := b.Variables()
+			if err != nil {
+				return err
+			}
+
+			for _, v := range variables {
+				if mqtt.NameReplace(v.Name) == variable {
+					result, err := b.SetVariable(v.Name, message.String())
+					if !result {
+						return errors.New("nut returned not OK result")
+					}
+
+					return err
+				}
+			}
+
+			return errors.New("variable name " + variable + " not found")
+		})),
 		mqtt.NewSubscriber(MQTTSubscribeTopicCommand.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
 				return nil
