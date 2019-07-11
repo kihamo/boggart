@@ -84,7 +84,10 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 }
 
 func (b *Bind) updateStatusByChannelId(ctx context.Context, channelId uint64) error {
+	b.mutex.RLock()
 	channel, ok := b.ptzChannels[channelId]
+	b.mutex.RUnlock()
+
 	if !ok {
 		return fmt.Errorf("channel %d not found", channelId)
 	}
@@ -99,26 +102,29 @@ func (b *Bind) updateStatusByChannelId(ctx context.Context, channelId uint64) er
 	sn := mqtt.NameReplace(b.SerialNumber())
 	var result error
 
-	if channel.Status == nil || channel.Status.Elevation != status.Payload.Elevation {
-		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusElevation.Format(sn, channelId), status.Payload.Elevation); err != nil {
+	if channel.Status == nil || channel.Status.Elevation != status.Payload.AbsoluteHigh.Elevation {
+		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusElevation.Format(sn, channelId), status.Payload.AbsoluteHigh.Elevation); err != nil {
 			result = multierr.Append(result, err)
 		}
 	}
 
-	if channel.Status == nil || channel.Status.Azimuth != status.Payload.Azimuth {
-		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusAzimuth.Format(sn, channelId), status.Payload.Azimuth); err != nil {
+	if channel.Status == nil || channel.Status.Azimuth != status.Payload.AbsoluteHigh.Azimuth {
+		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusAzimuth.Format(sn, channelId), status.Payload.AbsoluteHigh.Azimuth); err != nil {
 			result = multierr.Append(result, err)
 		}
 	}
 
-	if channel.Status == nil || channel.Status.Zoom != status.Payload.Zoom {
-		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusZoom.Format(sn, channelId), status.Payload.Zoom); err != nil {
+	if channel.Status == nil || channel.Status.Zoom != status.Payload.AbsoluteHigh.Zoom {
+		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusZoom.Format(sn, channelId), status.Payload.AbsoluteHigh.Zoom); err != nil {
 			result = multierr.Append(result, err)
 		}
 	}
 
-	channel.Status = status.Payload
+	channel.Status = status.Payload.AbsoluteHigh
+
+	b.mutex.Lock()
 	b.ptzChannels[channelId] = channel
+	b.mutex.Unlock()
 
 	if result != nil {
 		result = er.Wrap(result, "Failed send to MQTT")
@@ -128,7 +134,11 @@ func (b *Bind) updateStatusByChannelId(ctx context.Context, channelId uint64) er
 }
 
 func (b *Bind) checkTopic(topic string) (uint64, error) {
-	if b.ptzChannels == nil || len(b.ptzChannels) == 0 {
+	b.mutex.RLock()
+	channels := b.ptzChannels
+	b.mutex.RUnlock()
+
+	if channels == nil || len(channels) == 0 {
 		return 0, errors.New("channels is empty")
 	}
 
@@ -139,7 +149,7 @@ func (b *Bind) checkTopic(topic string) (uint64, error) {
 		return 0, err
 	}
 
-	_, ok := b.ptzChannels[channelId]
+	_, ok := channels[channelId]
 	if !ok {
 		return 0, fmt.Errorf("channel %d not found", channelId)
 	}

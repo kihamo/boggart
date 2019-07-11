@@ -47,7 +47,7 @@ func NewGetPtzStatusOK() *GetPtzStatusOK {
 Successful operation
 */
 type GetPtzStatusOK struct {
-	Payload *models.PtzAbsoluteHigh
+	Payload *models.PTZStatus
 }
 
 func (o *GetPtzStatusOK) Error() string {
@@ -56,7 +56,7 @@ func (o *GetPtzStatusOK) Error() string {
 
 func (o *GetPtzStatusOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.PtzAbsoluteHigh)
+	o.Payload = new(models.PTZStatus)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

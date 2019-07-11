@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"reflect"
 	"strconv"
 	"strings"
 	"sync"
@@ -531,6 +532,8 @@ func (c *Component) Subscriptions() []*mqtt.Subscription {
 
 func (c *Component) convertPayload(payload interface{}) interface{} {
 	switch value := payload.(type) {
+	case nil:
+		return ""
 	case string, []byte:
 		// skip
 	case float64:
@@ -572,6 +575,14 @@ func (c *Component) convertPayload(payload interface{}) interface{} {
 	case *time.Duration:
 		return strconv.FormatFloat(value.Seconds(), 'f', -1, 64)
 	default:
+		if ref := reflect.ValueOf(value); ref.Kind() == reflect.Ptr {
+			if !ref.Elem().IsValid() {
+				return c.convertPayload(nil)
+			}
+
+			return c.convertPayload(ref.Elem().Interface())
+		}
+
 		return fmt.Sprintf("%s", payload)
 	}
 
