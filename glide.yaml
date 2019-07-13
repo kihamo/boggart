@@ -19,7 +19,7 @@ import:
 - package: periph.io/x/periph
   version: ~v3.1.0
 - package: github.com/eclipse/paho.mqtt.golang
-  version: cb7eb9363b4469c601b1a714447653b720e4e43a
+  version: 696319167975029c23b2356d034b973d8e454c00
 - package: github.com/go-swagger/go-swagger
   version: ~v0.19.0
 - package: github.com/go-openapi/runtime
@@ -30,7 +30,7 @@ import:
   version: v0.9.0
 - package: github.com/yryz/ds18b20
 - package: github.com/fsnotify/fsnotify
-  version: ~v1.4.7
+  version: 1485a34d5d5723fea214f5710708e19a831720e4
 - package: github.com/faiface/beep
   version: 082eb9168dd13b6829788ac8246f152d63665753
 - package: github.com/hajimehoshi/oto

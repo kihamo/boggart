@@ -2,6 +2,7 @@ package fcm
 
 import (
 	"context"
+	"errors"
 
 	"firebase.google.com/go/messaging"
 	"github.com/kihamo/boggart/components/boggart"
@@ -23,6 +24,10 @@ func (b *Bind) Run() error {
 }
 
 func (b *Bind) Send(ctx context.Context, text string) (err error) {
+	if len(text) == 0 {
+		return errors.New("text is empty")
+	}
+
 	for _, token := range b.tokens {
 		if e := b.sendByToken(ctx, token, text); e != nil {
 			err = multierr.Append(err, e)

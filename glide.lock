@@ -1,5 +1,5 @@
-hash: 33597a007b687d2370602873dba9ddccfd6fa65f24e575d35c330a16b73826c6
-updated: 2019-06-16T19:27:52.168469+03:00
+hash: c02603eda9ff6d0c18edad7d4c36b6770611e839e78544e03268c4bf438e71a9
+updated: 2019-07-13T12:12:21.167445+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -64,7 +64,7 @@ imports:
 - name: github.com/denisbrodbeck/machineid
   version: f07179bb15a0bec252453468aa607c670f5c12b5
 - name: github.com/eclipse/paho.mqtt.golang
-  version: cb7eb9363b4469c601b1a714447653b720e4e43a
+  version: 696319167975029c23b2356d034b973d8e454c00
   subpackages:
   - packets
 - name: github.com/elazarl/go-bindata-assetfs
@@ -78,7 +78,7 @@ imports:
   - vorbis
   - wav
 - name: github.com/fsnotify/fsnotify
-  version: c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9
+  version: 1485a34d5d5723fea214f5710708e19a831720e4
 - name: github.com/ghthor/gowol
   version: eb42ead1b24e9226bddb05004815f6e72280f879
 - name: github.com/globalsign/mgo
@@ -99,7 +99,7 @@ imports:
 - name: github.com/go-openapi/loads
   version: 74628589c3b94e3526a842d24f46589980f5ab22
 - name: github.com/go-openapi/runtime
-  version: 109737172424d8a656fd1199e28c9f5cc89b0cca
+  version: 58872d9a7ca5f28beff9effa19ac4c17d3e42cd3
   subpackages:
   - client
   - logger
@@ -503,7 +503,6 @@ imports:
   - lex/httplex
   - proxy
   - trace
-  - websocket
 - name: golang.org/x/oauth2
   version: 8f65e3013ebad444f13bc19536f7865efc793816
   subpackages:
