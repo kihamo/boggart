@@ -34,11 +34,11 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	}
 
 	if b.SerialNumber() == "" {
-		if response.Payload == nil || response.Payload.DeviceInfo == nil || response.Payload.DeviceInfo.MacAddress == "" {
+		if response.Payload == nil || response.Payload.MacAddress == "" {
 			return nil, errors.New("MAC address not found")
 		}
 
-		b.SetSerialNumber(response.Payload.DeviceInfo.MacAddress)
+		b.SetSerialNumber(response.Payload.MacAddress)
 	}
 
 	b.UpdateStatus(boggart.BindStatusOnline)
