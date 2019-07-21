@@ -22,7 +22,7 @@
                                         {{ range $option, $value := .configuration }}
                                         <tr>
                                             <td>{{ $option }}</td>
-                                            <td>{{ $value }}</td>
+                                            <td>{{ raw (replace $value ";" ";<br />") }}</td>
                                         </tr>
                                         {{ end }}
                                     </tbody>
