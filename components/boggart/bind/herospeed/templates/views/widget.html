@@ -1,0 +1,69 @@
+{{ define "content" }}
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_content">
+                <div role="tabpanel">
+                    <ul class="nav nav-tabs bar_tabs" role="tablist">
+                        <li role="presentation"{{ if eq .action "" }} class="active"{{ end }}><a href="{{ if eq .action "" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}{{ end }}">{{ i18n "Preview" . }}</a></li>
+                        <li role="presentation"{{ if eq .action "configuration" }} class="active"{{ end }}><a href="{{ if eq .action "configuration" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=configuration{{ end }}">{{ i18n "Configuration" . }}</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane fade active in">
+                            {{ if eq .action "configuration" }}
+                                <div class="x_title">
+                                    <h2>{{ i18n "Basic information" . }}</h2>
+                                    <div class="clearfix"></div>
+                                </div>
+
+                                <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                                    <thead>
+                                    <tr>
+                                        <th class="col-md-4">{{ i18n "Parameter" . }}</th>
+                                        <th>{{ i18n "Value" . }}</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                        {{ range $option, $value := .configuration }}
+                                        <tr>
+                                            <td>{{ $option }}</td>
+                                            <td>{{ $value }}</td>
+                                        </tr>
+                                        {{ end }}
+                                    </tbody>
+                                </table>
+                            {{ else }}
+                                <div class="form-group pull-right">
+                                    <div class="input-group">
+                                        <label class="btn-group">
+                                            <button type="button" class="btn btn-icon btn-info btn-sm" onclick="previewRefresh()">
+                                                <i class="fas fa-sync" title="{{ i18n "Refresh" . }}"></i>
+                                            </button>
+                                            <a href="{{ .Request.URL.Path }}?action=preview&download=1" class="btn btn-icon btn-info btn-sm">
+                                                <i class="fas fa-download" title="{{ i18n "Download" . }}"></i>
+                                            </a>
+                                        </label>
+                                    </div>
+                                </div>
+                                <img src="{{ .Request.URL.Path }}?action=preview" width="100%" height="100%" id="preview" />
+                            {{ end }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
+
+{{ define "js" }}
+    <script type="application/javascript">
+        window.previewRefresh = function() {
+            $('#preview').attr('src', '{{ .Request.URL.Path }}?action=preview&_t='+(new Date()).getTime());
+        };
+
+        $('#preview').ready(function () {
+            window.setInterval(window.previewRefresh, {{ .preview_refresh_interval }} * 1000);
+        });
+    </script>
+{{ end }}

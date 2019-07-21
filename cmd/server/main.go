@@ -11,6 +11,7 @@ import (
 	_ "github.com/kihamo/boggart/components/boggart/bind/google_home"
 	_ "github.com/kihamo/boggart/components/boggart/bind/gpio"
 	_ "github.com/kihamo/boggart/components/boggart/bind/grafana"
+	_ "github.com/kihamo/boggart/components/boggart/bind/herospeed"
 	_ "github.com/kihamo/boggart/components/boggart/bind/hikvision"
 	_ "github.com/kihamo/boggart/components/boggart/bind/homie"
 	_ "github.com/kihamo/boggart/components/boggart/bind/led_wifi"
