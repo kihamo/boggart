@@ -11,12 +11,7 @@
                     <div class="tab-content">
                         <div role="tabpanel" class="tab-pane fade active in">
                             {{ if eq .action "configuration" }}
-                                <div class="x_title">
-                                    <h2>{{ i18n "Basic information" . }}</h2>
-                                    <div class="clearfix"></div>
-                                </div>
-
-                                <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                                <table class="table table-striped datatable" style="width:100%">
                                     <thead>
                                     <tr>
                                         <th class="col-md-4">{{ i18n "Parameter" . }}</th>
@@ -56,7 +51,16 @@
 </div>
 {{ end }}
 
+{{ define "head" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" false) }}
+{{ end }}
+
 {{ define "js" }}
+    {{ if eq .action "configuration" }}
+        {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net/js/jquery.dataTables.min.js" false) }}
+        {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
+    {{ else }}
     <script type="application/javascript">
         window.previewRefresh = function() {
             $('#preview').attr('src', '{{ .Request.URL.Path }}?action=preview&_t='+(new Date()).getTime());
@@ -66,4 +70,5 @@
             window.setInterval(window.previewRefresh, {{ .preview_refresh_interval }} * 1000);
         });
     </script>
+    {{ end }}
 {{ end }}

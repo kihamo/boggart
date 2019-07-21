@@ -29,7 +29,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		buf := bytes.NewBuffer(nil)
 
 		if err := bind.client.Snapshot(ctx, buf); err != nil {
-			t.NotFound(w, r)
+			t.InternalError(w, r, err)
 			return
 		}
 

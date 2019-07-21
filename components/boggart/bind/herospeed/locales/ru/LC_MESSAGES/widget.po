@@ -21,3 +21,9 @@ msgstr "Скачать"
 
 msgid "Configuration"
 msgstr "Конфигурация"
+
+msgid "Parameter"
+msgstr "Параметр"
+
+msgid "Value"
+msgstr "Значение"
