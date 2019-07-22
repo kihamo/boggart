@@ -2,13 +2,15 @@ package herospeed
 
 import (
 	"bufio"
-	"bytes"
 	"context"
+	"errors"
 	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 
 	connection "github.com/kihamo/boggart/components/boggart/protocols/http"
 )
@@ -18,6 +20,9 @@ type Client struct {
 	username   string
 	password   string
 	address    string
+
+	snapshotLock sync.Mutex
+	snapshotURL  string
 }
 
 func New(host string, port int64, username, password string) *Client {
@@ -52,7 +57,7 @@ func (c *Client) Configuration(ctx context.Context) (map[string]string, error) {
 		return nil, err
 	}
 
-	separator := []byte("<br>")
+	separator := "<br>"
 	separatorLen := len(separator)
 
 	split := func(data []byte, atEOF bool) (advance int, token []byte, err error) {
@@ -60,18 +65,15 @@ func (c *Client) Configuration(ctx context.Context) (map[string]string, error) {
 			return 0, nil, nil
 		}
 
-		i := bytes.IndexByte(data, separator[0])
-		if i < 0 {
+		if i := strings.Index(string(data), separator); i >= 0 {
+			return i + separatorLen, data[0:i], nil
+		}
+
+		if atEOF {
 			return len(data), data, nil
 		}
 
-		if len(data[i:]) >= separatorLen {
-			if bytes.Equal(data[i:i+separatorLen], separator) {
-				return i + separatorLen, data[:i], nil
-			}
-		}
-
-		return len(data), data, nil
+		return
 	}
 
 	scanner := bufio.NewScanner(response.Body)
@@ -92,9 +94,17 @@ func (c *Client) Configuration(ctx context.Context) (map[string]string, error) {
 	return options, scanner.Err()
 }
 
-// FIXME: скорее всего однопоточная реализация, нужен мьютекс
 func (c *Client) Snapshot(ctx context.Context, writer io.Writer) error {
-	response, err := c.Do(ctx, http.MethodGet, c.address+"snap.jpg", nil)
+	// камера криво поддерживает множество потоков, поэтому организуем мьютекс
+	c.snapshotLock.Lock()
+	defer c.snapshotLock.Unlock()
+
+	u, err := c.lazyLoadClickSnapStorage(ctx)
+	if err != nil {
+		return err
+	}
+
+	response, err := c.Do(ctx, http.MethodGet, u, nil)
 	if err != nil {
 		return err
 	}
@@ -103,4 +113,34 @@ func (c *Client) Snapshot(ctx context.Context, writer io.Writer) error {
 	response.Body.Close()
 
 	return err
+}
+
+func (c *Client) lazyLoadClickSnapStorage(ctx context.Context) (string, error) {
+	if c.snapshotURL == "" {
+		cfg, err := c.Configuration(ctx)
+		if err != nil {
+			return "", err
+		}
+
+		clickSnapStorage, ok := cfg["clicksnapstorage"]
+		if !ok {
+			return "", errors.New("clicksnapstorage option isn't exists")
+		}
+
+		result, err := url.Parse(clickSnapStorage)
+		if err != nil {
+			return "", err
+		}
+
+		api, err := url.Parse(c.address)
+		if err != nil {
+			return "", err
+		}
+
+		result.Host = api.Host
+
+		c.snapshotURL = result.String()
+	}
+
+	return c.snapshotURL, nil
 }
