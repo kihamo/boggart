@@ -270,20 +270,29 @@ func (c *Component) clientSubscribe(topic string, qos byte, subscription *mqtt.S
 
 		// в отдельной рутине, так как если зависнет хендлер клиент MQTT не сделает ack на сообщение
 		go func() {
+			r := "0"
+			if message.Retained() {
+				r = "1"
+			}
+
+			logPayload := msg.String()
+			if len(logPayload) > 100 {
+				logPayload = logPayload[:100]
+			}
+
+			c.logger.Debug(
+				"Call MQTT subscriber",
+				"topic.subscribe", topic,
+				"topic.call", message.Topic(),
+				"qos", strconv.Itoa(int(qos)),
+				"retained", r,
+				"payload", logPayload,
+			)
+
 			if err := subscription.Callback(ctx, c, msg); err != nil {
 				metricSubscriberCalls.With("status", "failure", "topic", topic).Inc()
 
 				tracing.SpanError(span, err)
-
-				r := "0"
-				if message.Retained() {
-					r = "1"
-				}
-
-				logPayload := msg.String()
-				if len(logPayload) > 100 {
-					logPayload = logPayload[:100]
-				}
 
 				c.logger.Error(
 					"Call MQTT subscriber failed",
@@ -296,6 +305,15 @@ func (c *Component) clientSubscribe(topic string, qos byte, subscription *mqtt.S
 				)
 			} else {
 				metricSubscriberCalls.With("status", "success", "topic", topic).Inc()
+
+				c.logger.Debug(
+					"Call MQTT subscriber success",
+					"topic.subscribe", topic,
+					"topic.call", message.Topic(),
+					"qos", strconv.Itoa(int(qos)),
+					"retained", r,
+					"payload", logPayload,
+				)
 			}
 		}()
 	}

@@ -103,19 +103,20 @@ func (b *Bind) taskPTZ(ctx context.Context) (interface{}, error, bool) {
 	}
 
 	b.mutex.RLock()
-	defer b.mutex.RUnlock()
+	channels := b.ptzChannels
+	b.mutex.RUnlock()
 
-	if b.ptzChannels == nil {
+	if channels == nil {
 		return nil, nil, false
 	}
 
-	if len(b.ptzChannels) == 0 {
+	if len(channels) == 0 {
 		return nil, nil, true
 	}
 
 	stop := true
 
-	for id, channel := range b.ptzChannels {
+	for id, channel := range channels {
 		if !channel.Channel.Enabled {
 			continue
 		}
