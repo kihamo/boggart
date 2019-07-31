@@ -1,4 +1,4 @@
-package hikvision
+package swagger
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ type logger struct {
 	f2 func(string)
 }
 
-func newLogger(printf func(string), debug func(string)) *logger {
+func NewLogger(printf func(string), debug func(string)) o.Logger {
 	return &logger{
 		f1: printf,
 		f2: debug,

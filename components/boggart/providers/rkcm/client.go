@@ -10,6 +10,8 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/rkcm/client"
 )
 
+// https://github.com/RomanXX1/LibraryJkh-master/blob/e3ef167c387456507057862e25868ca27691bbb8/patternjkh/src/main/java/com/patternjkh/Server.java#L48
+
 // http://uk-gkh.org/muprcmytishi/GetMobileMenu.ashx?appVersion=2.112
 // http://uk-gkh.org/muprcmytishi/MobileAPI/AuthenticateAccount.ashx?phone={phone}&pwd={password}
 // http://uk-gkh.org/muprcmytishi/RegisterClientDevice.ashx?cid=13076&did={token}&os=Android&version=28&model={model}&isMobAcc=1
@@ -27,12 +29,9 @@ const (
 
 type Client struct {
 	*client.RKCM
-
-	phone    string
-	password string
 }
 
-func New(phone, password string, debug bool, logger logger.Logger) *Client {
+func New(debug bool, logger logger.Logger) *Client {
 	cfg := client.DefaultTransportConfig().WithHost(net.JoinHostPort(defaultHost, strconv.FormatInt(defaultPort, 10)))
 	cl := client.NewHTTPClientWithConfig(nil, cfg)
 
@@ -53,8 +52,5 @@ func New(phone, password string, debug bool, logger logger.Logger) *Client {
 
 	return &Client{
 		RKCM: cl,
-
-		phone:    phone,
-		password: password,
 	}
 }

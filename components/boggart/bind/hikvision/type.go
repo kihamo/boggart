@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/protocols/swagger"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
 )
 
@@ -24,7 +25,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		config:                config,
 	}
 
-	l := newLogger(
+	l := swagger.NewLogger(
 		func(message string) {
 			bind.Logger().Info(message)
 		},
