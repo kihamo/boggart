@@ -1,0 +1,304 @@
+---
+
+swagger: "2.0"
+info:
+  title: "RKCM"
+  version: "0.1.0"
+schemes:
+- "http"
+basePath: "/muprcmytishi/"
+paths:
+  /GetDebtByAccount.ashx:
+    get:
+      operationId: "getDebtByAccount"
+      tags:
+      - "general"
+      summary: "Get account debt"
+      parameters:
+      - name: "ident"
+        in: "query"
+        description: "ID"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "object"
+            properties:
+              data:
+                $ref: "#/definitions/DebtForIdent"
+  /GetBills.ashx:
+    get:
+      operationId: "getBills"
+      tags:
+      - "general"
+      summary: "Get bill full for services"
+      parameters:
+      - name: "login"
+        in: "query"
+        description: "Login"
+        required: true
+        type: "string"
+      - name: "pwd"
+        in: "query"
+        description: "Password"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "object"
+            properties:
+              data:
+                type: "array"
+                items:
+                  $ref: "#/definitions/Bill"
+  /GetBillServicesFull.ashx:
+    get:
+      operationId: "getBillServicesFull"
+      tags:
+      - "general"
+      summary: "Get bill full for services"
+      parameters:
+      - name: "login"
+        in: "query"
+        description: "Login"
+        required: true
+        type: "string"
+      - name: "pwd"
+        in: "query"
+        description: "Password"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "object"
+            properties:
+              data:
+                type: "array"
+                items:
+                  $ref: "#/definitions/BillFull"
+  /GetMeterValuesEverydayMode.ashx:
+    get:
+      operationId: "getMeterValuesEverydayMode"
+      tags:
+      - "general"
+      parameters:
+      - name: "login"
+        in: "query"
+        description: "Login"
+        required: true
+        type: "string"
+      - name: "pwd"
+        in: "query"
+        description: "Password"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/MetersValues"
+  /MobileAPI/GetAccountIdents.ashx:
+    get:
+      operationId: "getAccountIdents"
+      tags:
+      - "mobile"
+      summary: "Get account idents"
+      parameters:
+      - name: "phone"
+        in: "query"
+        description: "Phone number"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "object"
+            properties:
+              data:
+                type: "array"
+                items:
+                  type: "string"
+  /MobileAPI/GetDebt.ashx:
+    get:
+      operationId: "getDebt"
+      tags:
+      - "mobile"
+      summary: "Get debt"
+      parameters:
+      - name: "phone"
+        in: "query"
+        description: "Phone number"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "object"
+            properties:
+              data:
+                type: "array"
+                items:
+                  $ref: "#/definitions/Debt"
+definitions:
+  Bill:
+    type: "object"
+    properties:
+      Month:
+        type: "integer"
+      Year:
+        type: "integer"
+      Ident:
+        type: "string"
+      Link:
+        type: "string"
+      Sum:
+        type: "number"
+  BillFull:
+    type: "object"
+    properties:
+      ID:
+        type: "integer"
+      Month:
+        type: "integer"
+      Year:
+        type: "integer"
+      Service:
+        type: "string"
+      Ident:
+        type: "string"
+      Accured:
+        type: "number"
+      Debt:
+        type: "number"
+      Payed:
+        type: "number"
+      Total:
+        type: "number"
+      ServiceTypeId:
+        type: "number"
+  DebtForIdent:
+    type: "object"
+    properties:
+      Date:
+        type: "string"
+      Sum:
+        type: "number"
+      SumFine:
+        type: "number"
+      SumOverhaul:
+        type: "number"
+      SumFineOverhaul:
+        type: "number"
+      SumAll:
+        type: "number"
+  Debt:
+    type: "object"
+    properties:
+      Ident:
+        type: "string"
+      Sum:
+        type: "number"
+      SumFine:
+        type: "number"
+      Address:
+        type: "string"
+      MetersStartDay:
+        type: "integer"
+      MetersEndDay:
+        type: "integer"
+      MetersAccessFlag:
+        type: "boolean"
+      DebtActualDate:
+        type: "string"
+  MetersValues:
+    type: "object"
+    properties:
+      Meter:
+        type: "array"
+        xml:
+          name: "Meter"
+        items:
+          type: "object"
+          properties:
+            Ident:
+              type: "string"
+              xml:
+                name: "Ident,attr"
+            Units:
+              type: "string"
+              xml:
+                name: "Units,attr"
+            Name:
+              type: "string"
+              xml:
+                name: "Name,attr"
+            MeterUniqueNum:
+              type: "integer"
+              xml:
+                name: "MeterUniqueNum,attr"
+            MeterTypeID:
+              type: "integer"
+              xml:
+                name: "MeterTypeID,attr"
+            FactoryNumber:
+              type: "integer"
+              xml:
+                name: "FactoryNumber,attr"
+            TariffNumber:
+              type: "integer"
+              xml:
+                name: "TariffNumber,attr"
+            AutoValueGettingOnly:
+              type: "integer"
+              xml:
+                name: "AutoValueGettingOnly,attr"
+            LastCheckupDate:
+              type: "string"
+              xml:
+                name: "LastCheckupDate,attr"
+            Value:
+              type: "array"
+              xml:
+                name: "MeterValue"
+              items:
+                type: "object"
+                properties:
+                  PeriodDate:
+                    type: "string"
+                    xml:
+                      name: "PeriodDate,attr"
+                  Value:
+                    type: "string"
+                    xml:
+                      name: "Value,attr"
+                  ValueT2:
+                    type: "string"
+                    xml:
+                      name: "ValueT2,attr"
+                  ValueT3:
+                    type: "string"
+                    xml:
+                      name: "ValueT3,attr"
+                  IsSended:
+                    type: "string"
+                    xml:
+                      name: "IsSended,attr"
+                  SendError:
+                    type: "string"
+                    xml:
+                      name: "SendError,attr"
+                  SendErrorText:
+                    type: "string"
+                    xml:
+                      name: "SendErrorText,attr"
+
+
+
