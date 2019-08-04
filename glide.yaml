@@ -7,7 +7,7 @@ import:
 - package: github.com/goburrow/serial
   version: 5efbe925ecf714f8ba147bf2226f2e7afc7111bc
 - package: gopkg.in/routeros.v2
-  version: 2dc19c12445caefdc2d128f7331dcc83284211ef
+  version: f3fbcaa56d697bbe148e0c0424c516b65eba56cf
 - package: github.com/PuerkitoBio/goquery
   version: v1.3.0
 - package: github.com/mcuadros/go-syslog

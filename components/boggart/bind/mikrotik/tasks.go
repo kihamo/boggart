@@ -8,7 +8,6 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/mikrotik"
-	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 )
@@ -44,45 +43,15 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	}
 
 	b.UpdateStatus(boggart.BindStatusOnline)
-	if b.SerialNumber() != "" {
-		return nil, nil
+	if b.SerialNumber() == "" {
+		b.SetSerialNumber(system.SerialNumber)
 	}
 
-	b.SetSerialNumber(system.SerialNumber)
-	sn := system.SerialNumber
+	b.updateWiFiClient(ctx)
+	b.clientWiFi.Ready()
 
-	// wifi clients
-	clients, err := b.provider.InterfaceWirelessRegistrationTable(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, connection := range clients {
-		mac, err := b.Mac(ctx, connection.MacAddress)
-		if err != nil {
-			return nil, err
-		}
-
-		login := mqtt.NameReplace(mac.Address)
-
-		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicWiFiConnectedMAC.Format(sn), login)
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicWiFiMACState.Format(sn, login), true)
-	}
-
-	// vpn clients
-	connections, err := b.provider.PPPActive(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, connection := range connections {
-		login := mqtt.NameReplace(connection.Name)
-
-		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicVPNConnectedLogin.Format(sn), login)
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicVPNLoginState.Format(sn, login), true)
-	}
+	b.updateVPNClient(ctx)
+	b.clientVPN.Ready()
 
 	return nil, nil
 }

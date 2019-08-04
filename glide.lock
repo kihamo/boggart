@@ -1,5 +1,5 @@
-hash: c02603eda9ff6d0c18edad7d4c36b6770611e839e78544e03268c4bf438e71a9
-updated: 2019-07-13T12:12:21.167445+03:00
+hash: d61ba8cd01483bde85253b9c944d040c1f8b35d11ba0731a67c4accff86f5ffa
+updated: 2019-08-04T00:40:17.969561+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -618,7 +618,7 @@ imports:
   - internal/syslogparser/rfc3164
   - internal/syslogparser/rfc5424
 - name: gopkg.in/routeros.v2
-  version: 2dc19c12445caefdc2d128f7331dcc83284211ef
+  version: f3fbcaa56d697bbe148e0c0424c516b65eba56cf
   subpackages:
   - proto
 - name: gopkg.in/telegram-bot-api.v4

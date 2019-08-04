@@ -3,11 +3,13 @@ package mikrotik
 import (
 	"context"
 	"errors"
+	"fmt"
 	"regexp"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/mikrotik"
+	"github.com/kihamo/boggart/components/mqtt"
 )
 
 var (
@@ -26,6 +28,10 @@ type Bind struct {
 	livenessInterval time.Duration
 	livenessTimeout  time.Duration
 	updaterInterval  time.Duration
+
+	serialNumberLock chan struct{}
+	clientWiFi       *PreloadMap
+	clientVPN        *PreloadMap
 }
 
 type Mac struct {
@@ -37,6 +43,17 @@ type Mac struct {
 	DHCP struct {
 		Hostname string
 	}
+}
+
+func (b *Bind) SerialNumberWait() string {
+	<-b.serialNumberLock
+
+	return b.SerialNumber()
+}
+
+func (b *Bind) SetSerialNumber(serialNumber string) {
+	b.BindBase.SetSerialNumber(serialNumber)
+	close(b.serialNumberLock)
 }
 
 func (b *Bind) Mac(ctx context.Context, mac string) (*Mac, error) {
@@ -72,4 +89,74 @@ func (b *Bind) Mac(ctx context.Context, mac string) (*Mac, error) {
 	}
 
 	return info, nil
+}
+
+func (b *Bind) updateWiFiClient(ctx context.Context) {
+	connections, err := b.provider.InterfaceWirelessRegistrationTable(ctx)
+	if err != nil {
+		// TODO: log
+		return
+	}
+
+	sn := b.SerialNumber()
+	active := make(map[interface{}]struct{}, len(connections))
+
+	for _, connection := range connections {
+		mac, err := b.Mac(ctx, connection.MacAddress)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+
+		key := mqtt.NameReplace(mac.Address)
+		active[key] = struct{}{}
+
+		if _, ok := b.clientWiFi.Load(key); !ok {
+			b.clientWiFi.Store(key, true)
+			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicWiFiMACState.Format(sn, key), true)
+		}
+	}
+
+	if b.clientWiFi.IsReady() {
+		b.clientWiFi.Range(func(key, value interface{}) bool {
+			if _, ok := active[key]; !ok {
+				b.clientWiFi.Delete(key)
+				_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicWiFiMACState.Format(sn, key), false)
+			}
+
+			return true
+		})
+	}
+}
+
+func (b *Bind) updateVPNClient(ctx context.Context) {
+	connections, err := b.provider.PPPActive(ctx)
+	if err != nil {
+		// TODO: log
+		return
+	}
+
+	sn := b.SerialNumber()
+	active := make(map[interface{}]struct{}, len(connections))
+
+	for _, connection := range connections {
+		key := mqtt.NameReplace(connection.Name)
+		active[key] = struct{}{}
+
+		if _, ok := b.clientVPN.Load(key); !ok {
+			b.clientVPN.Store(key, true)
+			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicVPNLoginState.Format(sn, key), true)
+		}
+	}
+
+	if b.clientVPN.IsReady() {
+		b.clientVPN.Range(func(key, value interface{}) bool {
+			if _, ok := active[key]; !ok {
+				b.clientVPN.Delete(key)
+				_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicVPNLoginState.Format(sn, key), false)
+			}
+
+			return true
+		})
+	}
 }

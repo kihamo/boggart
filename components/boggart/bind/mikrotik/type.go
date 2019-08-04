@@ -24,7 +24,11 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		livenessInterval: config.LivenessInterval,
 		livenessTimeout:  config.LivenessTimeout,
 		updaterInterval:  config.UpdaterInterval,
+		serialNumberLock: make(chan struct{}),
 	}
+
+	bind.clientWiFi = NewPreloadMap()
+	bind.clientVPN = NewPreloadMap()
 
 	return bind, nil
 }
