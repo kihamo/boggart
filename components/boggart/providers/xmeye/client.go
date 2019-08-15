@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
+	"io"
 	"net"
 	"strconv"
 	"sync"
@@ -16,11 +16,14 @@ const (
 	DefaultTimeout = time.Second
 	DefaultPort    = 34567
 
-	CmdLoginResponse     uint16 = 1000
-	CmdKeepAliveRequest  uint16 = 1006
-	CmdTimeRequest       uint16 = 1452
-	CmdSystemInfoRequest uint16 = 1020
-	CmdPhotoGetRequest   uint16 = 1600
+	CmdLoginResponse      uint16 = 1000
+	CmdLogoutResponse     uint16 = 1002
+	CmdKeepAliveResponse  uint16 = 1006
+	CmdTimeRequest        uint16 = 1452
+	CmdSystemInfoRequest  uint16 = 1020
+	CmdLogSearchRequest   uint16 = 1442
+	CmdSysManagerRequest  uint16 = 1450
+	CmdSysManagerResponse uint16 = 1451
 
 	CodeOK = 100
 )
@@ -55,8 +58,8 @@ func New(host, username, password string) *Client {
 		username: username,
 		password: []byte(password),
 
-		sessionID:      1,
-		sequenceNumber: 2,
+		sessionID:      0,
+		sequenceNumber: 0,
 
 		keepAliveTicker: time.NewTicker(time.Second * 20),
 		keepAliceDone:   make(chan struct{}),
@@ -83,108 +86,108 @@ func (c *Client) connect() (*net.TCPConn, error) {
 	return conn, nil
 }
 
-func (c *Client) Login() error {
-	response := &LoginResponse{}
-
-	err := c.CallWithResult(CmdLoginResponse, map[string]string{
-		"EncryptType": "MD5",
-		"LoginType":   "DVRIP-Web",
-		"PassWord":    HashPassword(c.password),
-		"UserName":    c.username,
-	}, response)
-
-	if err != nil {
-		return err
-	}
-
-	if response.Ret != CodeOK {
-		return fmt.Errorf("response %d isn't ok", response.Ret)
-	}
-
-	if response.AliveInterval > 0 {
-		go c.keepAlive(response.AliveInterval)
-	}
-
-	return err
-}
-
 func (c *Client) request(code uint16, payload interface{}) ([]byte, error) {
-	requestPacket := make([]byte, 0x14)
-
-	// Head Flag, VERSION, RESERVED01, RESERVED02
-	copy(requestPacket, regularPacketHeader)
-
-	// SESSION ID
-	binary.LittleEndian.PutUint32(requestPacket[0x04:], atomic.LoadUint32(&c.sessionID))
-
-	// SEQUENCE NUMBER
-	binary.LittleEndian.PutUint32(requestPacket[0x08:], atomic.LoadUint32(&c.sequenceNumber))
-
-	// Total Packet
-	requestPacket[0x0c] = 0
-
-	// CurPacket
-	requestPacket[0x0d] = 0
-
-	// Message Id
-	binary.LittleEndian.PutUint16(requestPacket[0x0e:], code)
-
-	// Data Length
-	var (
-		requestPayload []byte
-		err            error
-	)
-
-	if payload != nil {
-		requestPayload, err = json.Marshal(payload)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	requestPayloadLen := len(requestPayload)
-	binary.LittleEndian.PutUint32(requestPacket[0x10:], uint32(requestPayloadLen))
-
-	if requestPayloadLen > 0 {
-		// DATA
-		requestPacket = append(requestPacket, requestPayload...)
-		requestPacket = append(requestPacket, payloadEOF...)
-	}
-
 	conn, err := c.connect()
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Println(">>>")
-	fmt.Println(hex.Dump(requestPacket))
+	requestPacket, err := c.buildRequestPacket(code, payload)
+	if err != nil {
+		return nil, err
+	}
 
 	if _, err = conn.Write(requestPacket); err != nil {
 		return nil, err
 	}
 
-	responsePacket := make([]byte, 20)
-	if _, err = conn.Read(responsePacket); err != nil {
-		return nil, err
-	}
+	//fmt.Println(">>>")
+	//fmt.Println(hex.Dump(requestPacket))
 
 	atomic.AddUint32(&c.sequenceNumber, 1)
 
-	// save session id
-	sessionID := binary.LittleEndian.Uint32(responsePacket[0x08:0x0c])
-	atomic.StoreUint32(&c.sessionID, sessionID)
-
-	payloadLen := binary.LittleEndian.Uint16(responsePacket[0x10:0x12])
-
-	responsePacket = make([]byte, payloadLen)
-	if _, err = conn.Read(responsePacket); err != nil {
+	// TODO: check read response needed?
+	sessionID, responsePayload, err := c.parseResponsePacker(conn)
+	if err != nil {
 		return nil, err
 	}
 
-	fmt.Println("<<<")
-	fmt.Println(hex.Dump(responsePacket))
+	atomic.StoreUint32(&c.sessionID, sessionID)
 
-	return responsePacket, nil
+	return responsePayload, nil
+}
+
+func (c *Client) buildRequestPacket(code uint16, payload interface{}) ([]byte, error) {
+	packet := make([]byte, 0x14) // build head
+
+	// Head Flag, VERSION, RESERVED01, RESERVED02
+	copy(packet, regularPacketHeader)
+
+	// SESSION ID
+	binary.LittleEndian.PutUint32(packet[0x04:], atomic.LoadUint32(&c.sessionID))
+
+	// SEQUENCE NUMBER
+	binary.LittleEndian.PutUint32(packet[0x08:], atomic.LoadUint32(&c.sequenceNumber))
+
+	// Total Packet
+	packet[0x0c] = 0
+
+	// CurPacket
+	packet[0x0d] = 0
+
+	// Message Id
+	binary.LittleEndian.PutUint16(packet[0x0e:], code)
+
+	// Data Length
+	var (
+		payloadEncode []byte
+		err           error
+	)
+
+	if payload != nil {
+		payloadEncode, err = json.Marshal(payload)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	payloadLen := len(payloadEncode)
+	binary.LittleEndian.PutUint32(packet[0x10:], uint32(payloadLen))
+
+	if payloadLen > 0 {
+		// DATA
+		packet = append(packet, payloadEncode...)
+		packet = append(packet, payloadEOF...)
+	}
+
+	return packet, nil
+}
+
+func (c *Client) parseResponsePacker(conn io.Reader) (sessionID uint32, payload []byte, err error) {
+	// FIXME: после reboot через ручку странное поведение, девайс не перезагружается
+	// команды принимает, но не отвечает на них
+
+	packet := make([]byte, 0x14) // read head
+	if _, err = conn.Read(packet); err != nil {
+		return 0, nil, err
+	}
+
+	//fmt.Println("<<<")
+	//fmt.Println("total", packet[0x0c], "current", packet[0x0d])
+	//fmt.Println(hex.Dump(packet))
+
+	// save session id
+	sessionID = binary.LittleEndian.Uint32(packet[0x04:0x08])
+	payloadLen := binary.LittleEndian.Uint16(packet[0x10:0x12])
+
+	packet = make([]byte, payloadLen)
+	if _, err = conn.Read(packet); err != nil {
+		return 0, nil, err
+	}
+
+	// fmt.Println(hex.Dump(packet))
+
+	return sessionID, packet, err
 }
 
 func (c *Client) Cmd(code uint16, cmd string) ([]byte, error) {
@@ -221,7 +224,7 @@ func (c *Client) keepAlive(interval uint64) {
 	for {
 		select {
 		case <-c.keepAliveTicker.C:
-			c.Cmd(CmdKeepAliveRequest, "KeepAlive")
+			c.Cmd(CmdKeepAliveResponse, "KeepAlive")
 
 		case <-c.keepAliceDone:
 			return
@@ -238,7 +241,7 @@ func (c *Client) Close() error {
 
 func (c *Client) sessionIDAsString() string {
 	sessionIDBytes := make([]byte, 4)
-	binary.LittleEndian.PutUint32(sessionIDBytes, atomic.LoadUint32(&c.sequenceNumber))
+	binary.LittleEndian.PutUint32(sessionIDBytes, atomic.LoadUint32(&c.sessionID))
 
 	return "0x" + hex.EncodeToString(sessionIDBytes)
 }
