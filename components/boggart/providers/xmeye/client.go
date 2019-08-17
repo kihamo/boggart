@@ -18,6 +18,8 @@ const (
 	DefaultPort          = 34567
 	defaultPayloadBuffer = 2048
 
+	timeLayout = "2006-01-02 15:04:05"
+
 	CmdLoginResponse      uint16 = 1000
 	CmdLogoutResponse     uint16 = 1002
 	CmdKeepAliveResponse  uint16 = 1006

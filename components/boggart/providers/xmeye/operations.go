@@ -43,7 +43,7 @@ func (c *Client) OPTime() (*time.Time, error) {
 		return nil, err
 	}
 
-	t, err := time.Parse("2006-01-02 15:04:05", response.OPTimeQuery)
+	t, err := time.Parse(timeLayout, response.OPTimeQuery)
 	if err != nil {
 		return nil, err
 	}
@@ -106,15 +106,15 @@ func (c *Client) WorkState() (*WorkState, error) {
 	return result, err
 }
 
-func (c *Client) LogSearch() (interface{}, error) {
+func (c *Client) LogSearch(begin time.Time, end time.Time) (interface{}, error) {
 	var result interface{}
 
 	err := c.CallWithResult(CmdLogSearchRequest, map[string]interface{}{
 		"Name":      "OPLogQuery",
 		"SessionID": c.sessionIDAsString(),
 		"OPLogQuery": map[string]interface{}{
-			"BeginTime":   "2019-01-01 00:00:00",
-			"EndTime":     "2019-09-01 00:00:00",
+			"BeginTime":   begin.Format(timeLayout),
+			"EndTime":     end.Format(timeLayout),
 			"LogPosition": 0,
 			"Type":        "LogAll",
 		},
@@ -122,8 +122,6 @@ func (c *Client) LogSearch() (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	//fmt.Println(c.Call(CmdLogSearchResponse, nil))
 
 	return result, err
 }
