@@ -1,4 +1,4 @@
-package xmeye
+package internal
 
 type Response struct {
 	Name      string

@@ -2,10 +2,12 @@ package xmeye
 
 import (
 	"time"
+
+	"github.com/kihamo/boggart/components/boggart/providers/xmeye/internal"
 )
 
 func (c *Client) OPTime() (*time.Time, error) {
-	response := &OPTimeQuery{}
+	response := &internal.OPTimeQuery{}
 
 	err := c.CmdWithResult(CmdTimeRequest, "OPTimeQuery", response)
 	if err != nil {

@@ -1,7 +1,13 @@
 package xmeye
 
+import (
+	"time"
+
+	"github.com/kihamo/boggart/components/boggart/providers/xmeye/internal"
+)
+
 func (c *Client) Login() error {
-	response := &LoginResponse{}
+	response := &internal.LoginResponse{}
 
 	err := c.CallWithResult(CmdLoginResponse, map[string]string{
 		"EncryptType": "MD5",
@@ -14,6 +20,14 @@ func (c *Client) Login() error {
 		return err
 	}
 
+	c.mutex.Lock()
+	if c.done != nil {
+		close(c.done)
+	}
+
+	c.done = make(chan struct{}, 1)
+	c.mutex.Unlock()
+
 	if response.AliveInterval > 0 {
 		go c.keepAlive(response.AliveInterval)
 	}
@@ -23,16 +37,24 @@ func (c *Client) Login() error {
 
 func (c *Client) Logout() error {
 	_, err := c.Call(CmdLogoutResponse, nil)
+
+	if err != nil {
+		return c.Close()
+	}
+
 	return err
 }
 
 func (c *Client) keepAlive(interval uint64) {
+	ticker := time.NewTicker(time.Second * time.Duration(interval))
+
 	for {
 		select {
-		case <-c.keepAliveTicker.C:
+		case <-ticker.C:
 			c.Cmd(CmdKeepAliveResponse, "KeepAlive")
 
-		case <-c.keepAliceDone:
+		case <-c.done:
+			ticker.Stop()
 			return
 		}
 	}

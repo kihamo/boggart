@@ -1,7 +1,11 @@
 package xmeye
 
-func (c *Client) SystemFunctions() (*SystemFunctions, error) {
-	result := &SystemFunctions{}
+import (
+	"github.com/kihamo/boggart/components/boggart/providers/xmeye/internal"
+)
+
+func (c *Client) SystemFunctions() (*internal.SystemFunctions, error) {
+	result := &internal.SystemFunctions{}
 
 	err := c.CmdWithResult(CmdAbilityGetRequest, "SystemFunction", result)
 	if err != nil {
@@ -11,8 +15,8 @@ func (c *Client) SystemFunctions() (*SystemFunctions, error) {
 	return result, err
 }
 
-func (c *Client) SystemInfo() (*SystemInfo, error) {
-	result := &SystemInfo{}
+func (c *Client) SystemInfo() (*internal.SystemInfo, error) {
+	result := &internal.SystemInfo{}
 
 	err := c.CmdWithResult(CmdSystemInfoRequest, "SystemInfo", result)
 	if err != nil {
@@ -22,8 +26,8 @@ func (c *Client) SystemInfo() (*SystemInfo, error) {
 	return result, err
 }
 
-func (c *Client) OEMInfo() (*OEMInfo, error) {
-	result := &OEMInfo{}
+func (c *Client) OEMInfo() (*internal.OEMInfo, error) {
+	result := &internal.OEMInfo{}
 
 	err := c.CmdWithResult(CmdSystemInfoRequest, "OEMInfo", result)
 	if err != nil {
@@ -33,8 +37,8 @@ func (c *Client) OEMInfo() (*OEMInfo, error) {
 	return result, err
 }
 
-func (c *Client) StorageInfo() (*StorageInfo, error) {
-	result := &StorageInfo{}
+func (c *Client) StorageInfo() (*internal.StorageInfo, error) {
+	result := &internal.StorageInfo{}
 
 	err := c.CmdWithResult(CmdSystemInfoRequest, "StorageInfo", result)
 	if err != nil {
@@ -44,8 +48,8 @@ func (c *Client) StorageInfo() (*StorageInfo, error) {
 	return result, err
 }
 
-func (c *Client) WorkState() (*WorkState, error) {
-	result := &WorkState{}
+func (c *Client) WorkState() (*internal.WorkState, error) {
+	result := &internal.WorkState{}
 
 	err := c.CmdWithResult(CmdSystemInfoRequest, "WorkState", result)
 	if err != nil {
