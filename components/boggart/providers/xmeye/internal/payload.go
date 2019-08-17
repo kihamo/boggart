@@ -18,7 +18,10 @@ func NewPayload() *Payload {
 func (p *Payload) UnmarshalJSON(v interface{}) error {
 	// обрезаем признак конца строки
 	payload := p.Bytes()
-	payload = payload[:len(payload)-len(payloadEOF)]
+
+	if len(payload) > 2 {
+		payload = payload[:len(payload)-len(payloadEOF)]
+	}
 
 	return json.Unmarshal(payload, v)
 }

@@ -306,9 +306,9 @@ func (c *Client) CmdWithResult(code uint16, cmd string, result interface{}) erro
 }
 
 func (c *Client) PayloadError(payload *internal.Payload) error {
-	result := &internal.Response{}
+	var result internal.Response
 
-	if err := payload.UnmarshalJSON(result); err == nil {
+	if err := payload.UnmarshalJSON(&result); err == nil {
 		switch result.Ret {
 		case CodeOK, CodeUpgradeSuccessful, 0:
 			return nil
