@@ -15,9 +15,12 @@ import (
 )
 
 const (
-	DefaultTimeout       = time.Second
-	DefaultPort          = 34567
+	DefaultTimeout = time.Second
+	DefaultPort    = 34567
+
 	defaultPayloadBuffer = 2048
+	defaultReadTimeout   = time.Second * 5
+	defaultWriteTimeout  = time.Second * 5
 
 	timeLayout = "2006-01-02 15:04:05"
 
@@ -51,13 +54,17 @@ type Client struct {
 	password []byte
 	debug    uint32
 
-	connection   *net.TCPConn
+	connection net.Conn
+
 	mutex        sync.RWMutex
 	mutexRequest sync.Mutex
 	done         chan struct{}
 
 	sessionID      uint32
 	sequenceNumber uint32
+
+	resetConnection uint32
+	alarmStarted    uint32
 }
 
 func New(host, username, password string) *Client {
@@ -93,24 +100,69 @@ func (c *Client) sessionIDAsString() string {
 	return "0x" + hex.EncodeToString(sessionIDBytes)
 }
 
-func (c *Client) connect() (*net.TCPConn, error) {
+func (c *Client) connect() (conn net.Conn, err error) {
 	c.mutex.RLock()
-	conn := c.connection
+	conn = c.connection
 	c.mutex.RUnlock()
 
 	if conn == nil {
-		dial, err := net.Dial("tcp", c.host)
+		conn, err = net.Dial("tcp", c.host)
 		if err != nil {
+			if e := ConnectionCheck(conn); e != nil {
+				c.reset()
+			}
+
+			return nil, err
+		}
+
+		tcpConn := conn.(*net.TCPConn)
+		err = tcpConn.SetKeepAlive(true)
+
+		if err == nil {
+			err = tcpConn.SetReadBuffer(defaultPayloadBuffer * 2)
+		}
+
+		if err == nil {
+			err = tcpConn.SetWriteBuffer(defaultPayloadBuffer * 2)
+		}
+
+		if err != nil {
+			conn.Close()
 			return nil, err
 		}
 
 		c.mutex.Lock()
-		c.connection = dial.(*net.TCPConn)
-		conn = c.connection
+		c.connection = conn
 		c.mutex.Unlock()
+
+		atomic.StoreUint32(&c.sequenceNumber, 0)
+
+		// обрыв соединения обрывает так же сессию
+		if atomic.LoadUint32(&c.resetConnection) > 0 {
+			atomic.StoreUint32(&c.resetConnection, 0)
+
+			if atomic.LoadUint32(&c.sessionID) > 0 {
+				err = c.Login()
+			}
+
+			if err == nil && atomic.LoadUint32(&c.alarmStarted) > 0 {
+				err = c.AlarmStart()
+			}
+		}
 	}
 
-	return conn, nil
+	return conn, err
+}
+
+func (c *Client) reset() {
+	c.mutex.Lock()
+	if c.connection != nil {
+		c.connection.Close()
+		c.connection = nil
+	}
+	c.mutex.Unlock()
+
+	atomic.StoreUint32(&c.resetConnection, 1)
 }
 
 func (c *Client) request(code uint16, payload interface{}) (*internal.Packet, error) {
@@ -136,7 +188,16 @@ func (c *Client) request(code uint16, payload interface{}) (*internal.Packet, er
 
 	requestPacketBytes := requestPacket.Marshal()
 
-	if _, err = conn.Write(requestPacketBytes); err != nil {
+	err = conn.SetWriteDeadline(time.Now().Add(defaultWriteTimeout))
+	if err == nil {
+		_, err = conn.Write(requestPacketBytes)
+	}
+
+	if err != nil {
+		if e := ConnectionCheck(conn); e != nil {
+			c.reset()
+		}
+
 		return nil, err
 	}
 
@@ -151,8 +212,19 @@ func (c *Client) request(code uint16, payload interface{}) (*internal.Packet, er
 	//
 	// --- RESPONSE ---
 	//
-	responsePacketHead := make([]byte, 0x14) // read head
-	if _, err = conn.Read(responsePacketHead); err != nil {
+	var responsePacketHead []byte
+
+	err = conn.SetReadDeadline(time.Now().Add(defaultReadTimeout))
+	if err == nil {
+		responsePacketHead = make([]byte, 0x14) // read head
+		_, err = conn.Read(responsePacketHead)
+	}
+
+	if err != nil {
+		if e := ConnectionCheck(conn); e != nil {
+			c.reset()
+		}
+
 		return nil, err
 	}
 
@@ -167,9 +239,10 @@ func (c *Client) request(code uint16, payload interface{}) (*internal.Packet, er
 		bufSize = responsePacket.PayloadLen
 	}
 	buf := make([]byte, bufSize)
+	var n int
 
 	for {
-		n, err := conn.Read(buf)
+		n, err = conn.Read(buf)
 
 		if err != nil {
 			return &responsePacket, err

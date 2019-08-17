@@ -1,6 +1,7 @@
 package xmeye
 
 import (
+	"sync/atomic"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart/providers/xmeye/internal"
@@ -15,11 +16,21 @@ type AlertStreaming struct {
 
 func (c *Client) AlarmStart() error {
 	_, err := c.Call(CmdGuardRequest, nil)
+
+	if err == nil {
+		atomic.StoreUint32(&c.alarmStarted, 1)
+	}
+
 	return err
 }
 
 func (c *Client) AlarmStop() error {
 	_, err := c.Call(CmdUnGuardRequest, nil)
+
+	if err == nil {
+		atomic.StoreUint32(&c.alarmStarted, 0)
+	}
+
 	return err
 }
 

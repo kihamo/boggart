@@ -1,6 +1,9 @@
 package xmeye
 
 import (
+	"encoding/binary"
+	"encoding/hex"
+	"sync/atomic"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart/providers/xmeye/internal"
@@ -19,6 +22,14 @@ func (c *Client) Login() error {
 	if err != nil {
 		return err
 	}
+
+	session, err := hex.DecodeString(response.SessionID[2:])
+	if err != nil {
+		return err
+	}
+
+	sessionID := binary.LittleEndian.Uint32([]byte{session[3], session[2], session[1], session[0]})
+	atomic.StoreUint32(&c.sessionID, sessionID)
 
 	c.mutex.Lock()
 	if c.done != nil {
@@ -42,6 +53,7 @@ func (c *Client) Logout() error {
 		return c.Close()
 	}
 
+	atomic.StoreUint32(&c.sessionID, 0)
 	return err
 }
 
