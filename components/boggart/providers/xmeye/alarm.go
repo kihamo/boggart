@@ -35,19 +35,22 @@ func (c *Client) AlarmStop() error {
 }
 
 func (c *Client) AlarmInfo() (*internal.AlarmInfo, error) {
-	response := &internal.AlarmInfo{}
+	var result struct {
+		internal.Response
+		AlarmInfo internal.AlarmInfo
+	}
 
-	err := c.CallWithResult(CmdAlarmRequest, nil, response)
+	err := c.CallWithResult(CmdAlarmRequest, nil, &result)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if response.AlarmInfo.Event == "" {
+	if result.AlarmInfo.Event == "" {
 		return nil, nil
 	}
 
-	return response, nil
+	return &result.AlarmInfo, nil
 }
 
 func (c *Client) AlarmStreaming() *AlertStreaming {

@@ -7,14 +7,17 @@ import (
 )
 
 func (c *Client) OPTime() (*time.Time, error) {
-	response := &internal.OPTimeQuery{}
+	var result struct {
+		internal.Response
+		OPTimeQuery string
+	}
 
-	err := c.CmdWithResult(CmdTimeRequest, "OPTimeQuery", response)
+	err := c.CmdWithResult(CmdTimeRequest, "OPTimeQuery", &result)
 	if err != nil {
 		return nil, err
 	}
 
-	t, err := time.Parse(timeLayout, response.OPTimeQuery)
+	t, err := time.Parse(timeLayout, result.OPTimeQuery)
 	if err != nil {
 		return nil, err
 	}
@@ -22,8 +25,11 @@ func (c *Client) OPTime() (*time.Time, error) {
 	return &t, nil
 }
 
-func (c *Client) LogSearch(begin time.Time, end time.Time) (interface{}, error) {
-	var result interface{}
+func (c *Client) LogSearch(begin time.Time, end time.Time) ([]internal.LogSearch, error) {
+	var result struct {
+		internal.Response
+		OPLogQuery []internal.LogSearch
+	}
 
 	err := c.CallWithResult(CmdLogSearchRequest, map[string]interface{}{
 		"Name":      "OPLogQuery",
@@ -39,7 +45,7 @@ func (c *Client) LogSearch(begin time.Time, end time.Time) (interface{}, error) 
 		return nil, err
 	}
 
-	return result, err
+	return result.OPLogQuery, err
 }
 
 // FIXME: после reboot через ручку странное поведение, девайс не перезагружается

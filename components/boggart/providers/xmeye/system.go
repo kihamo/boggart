@@ -5,56 +5,71 @@ import (
 )
 
 func (c *Client) SystemFunctions() (*internal.SystemFunctions, error) {
-	result := &internal.SystemFunctions{}
+	var result struct {
+		internal.Response
+		SystemFunction internal.SystemFunctions
+	}
 
-	err := c.CmdWithResult(CmdAbilityGetRequest, "SystemFunction", result)
+	err := c.CmdWithResult(CmdAbilityGetRequest, "SystemFunction", &result)
 	if err != nil {
 		return nil, err
 	}
 
-	return result, err
+	return &result.SystemFunction, err
 }
 
 func (c *Client) SystemInfo() (*internal.SystemInfo, error) {
-	result := &internal.SystemInfo{}
+	var result struct {
+		internal.Response
+		SystemInfo internal.SystemInfo
+	}
 
-	err := c.CmdWithResult(CmdSystemInfoRequest, "SystemInfo", result)
+	err := c.CmdWithResult(CmdSystemInfoRequest, "SystemInfo", &result)
 	if err != nil {
 		return nil, err
 	}
 
-	return result, err
+	return &result.SystemInfo, err
 }
 
 func (c *Client) OEMInfo() (*internal.OEMInfo, error) {
-	result := &internal.OEMInfo{}
+	var result struct {
+		internal.Response
+		OEMInfo internal.OEMInfo
+	}
 
-	err := c.CmdWithResult(CmdSystemInfoRequest, "OEMInfo", result)
+	err := c.CmdWithResult(CmdSystemInfoRequest, "OEMInfo", &result)
 	if err != nil {
 		return nil, err
 	}
 
-	return result, err
+	return &result.OEMInfo, err
 }
 
 func (c *Client) StorageInfo() (*internal.StorageInfo, error) {
-	result := &internal.StorageInfo{}
+	var result struct {
+		internal.Response
+		StorageInfo internal.StorageInfo
+	}
 
-	err := c.CmdWithResult(CmdSystemInfoRequest, "StorageInfo", result)
+	err := c.CmdWithResult(CmdSystemInfoRequest, "StorageInfo", &result)
 	if err != nil {
 		return nil, err
 	}
 
-	return result, err
+	return &result.StorageInfo, err
 }
 
 func (c *Client) WorkState() (*internal.WorkState, error) {
-	result := &internal.WorkState{}
+	var result struct {
+		internal.Response
+		WorkState internal.WorkState
+	}
 
-	err := c.CmdWithResult(CmdSystemInfoRequest, "WorkState", result)
+	err := c.CmdWithResult(CmdSystemInfoRequest, "WorkState", &result)
 	if err != nil {
 		return nil, err
 	}
 
-	return result, err
+	return &result.WorkState, err
 }

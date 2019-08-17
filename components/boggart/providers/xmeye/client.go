@@ -24,17 +24,21 @@ const (
 
 	timeLayout = "2006-01-02 15:04:05"
 
-	CmdLoginResponse      uint16 = 1000
-	CmdLogoutResponse     uint16 = 1002
-	CmdKeepAliveResponse  uint16 = 1006
-	CmdTimeRequest        uint16 = 1452
-	CmdSystemInfoRequest  uint16 = 1020
-	CmdAbilityGetRequest  uint16 = 1360
-	CmdLogSearchRequest   uint16 = 1442
-	CmdGuardRequest       uint16 = 1500
-	CmdUnGuardRequest     uint16 = 1502
-	CmdAlarmRequest       uint16 = 1504
-	CmdSysManagerResponse uint16 = 1451
+	CmdLoginResponse                uint16 = 1000
+	CmdLogoutResponse               uint16 = 1002
+	CmdKeepAliveResponse            uint16 = 1006
+	CmdSystemInfoRequest            uint16 = 1020
+	CmdConfigGetRequest             uint16 = 1042
+	CmdDefaultConfigGetRequest      uint16 = 1044
+	CmdConfigChannelTitleSetRequest uint16 = 1046
+	CmdConfigChannelTitleGetRequest uint16 = 1048
+	CmdAbilityGetRequest            uint16 = 1360
+	CmdLogSearchRequest             uint16 = 1442
+	CmdSysManagerResponse           uint16 = 1451
+	CmdTimeRequest                  uint16 = 1452
+	CmdGuardRequest                 uint16 = 1500
+	CmdUnGuardRequest               uint16 = 1502
+	CmdAlarmRequest                 uint16 = 1504
 
 	CodeOK                                  = 100
 	CodeUnknownError                        = 101
@@ -44,8 +48,10 @@ const (
 	CodeUserUserIsNotLoggedIn               = 105
 	CodeUsernameOrPasswordIsIncorrect       = 106
 	CodeUserDoesNotHaveNecessaryPermissions = 107
+	CodeRequestWrongFormat                  = 117
 	CodePasswordIsIncorrect                 = 203
 	CodeUpgradeSuccessful                   = 515
+	CodeConfigurationIsNotExists            = 607
 )
 
 type Client struct {
@@ -94,10 +100,10 @@ func (c *Client) WithDebug(flag bool) *Client {
 }
 
 func (c *Client) sessionIDAsString() string {
-	sessionIDBytes := make([]byte, 4)
-	binary.LittleEndian.PutUint32(sessionIDBytes, atomic.LoadUint32(&c.sessionID))
+	session := make([]byte, 4)
+	binary.LittleEndian.PutUint32(session, atomic.LoadUint32(&c.sessionID))
 
-	return "0x" + hex.EncodeToString(sessionIDBytes)
+	return "0x" + hex.EncodeToString([]byte{session[3], session[2], session[1], session[0]})
 }
 
 func (c *Client) connect() (conn net.Conn, err error) {
@@ -258,6 +264,7 @@ func (c *Client) request(code uint16, payload interface{}) (*internal.Packet, er
 	if debug > 0 {
 		fmt.Println("<<< response")
 		fmt.Println(hex.Dump(responsePacket.Marshal()))
+		fmt.Println(responsePacket.Payload.String())
 	}
 
 	return &responsePacket, nil
@@ -319,6 +326,9 @@ func (c *Client) PayloadError(payload *internal.Payload) error {
 		case CodeUserUserIsNotLoggedIn:
 			return errors.New("user is not logged in")
 
+		case CodeRequestWrongFormat:
+			return errors.New("request wrong format")
+
 		case CodeUsernameOrPasswordIsIncorrect:
 			return errors.New("username or password is incorrect")
 
@@ -327,6 +337,9 @@ func (c *Client) PayloadError(payload *internal.Payload) error {
 
 		case CodePasswordIsIncorrect:
 			return errors.New("password is incorrect")
+
+		case CodeConfigurationIsNotExists:
+			return errors.New("configuration is not exists")
 
 		default:
 			return errors.New("unsupported unknown error")
