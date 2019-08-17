@@ -4,20 +4,6 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/xmeye/internal"
 )
 
-func (c *Client) SystemFunctions() (*internal.SystemFunctions, error) {
-	var result struct {
-		internal.Response
-		SystemFunction internal.SystemFunctions
-	}
-
-	err := c.CmdWithResult(CmdAbilityGetRequest, "SystemFunction", &result)
-	if err != nil {
-		return nil, err
-	}
-
-	return &result.SystemFunction, err
-}
-
 func (c *Client) SystemInfo() (*internal.SystemInfo, error) {
 	var result struct {
 		internal.Response

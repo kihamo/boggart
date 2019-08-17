@@ -1,6 +1,7 @@
 package xmeye
 
 import (
+	"io"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart/providers/xmeye/internal"
@@ -46,6 +47,12 @@ func (c *Client) LogSearch(begin time.Time, end time.Time) ([]internal.LogSearch
 	}
 
 	return result.OPLogQuery, err
+}
+
+func (c *Client) LogExport() (io.Reader, error) {
+	packet, err := c.Call(CmdLogExportRequest, nil)
+
+	return packet.Payload, err
 }
 
 // FIXME: после reboot через ручку странное поведение, девайс не перезагружается

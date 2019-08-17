@@ -39,6 +39,8 @@ const (
 	CmdGuardRequest                 uint16 = 1500
 	CmdUnGuardRequest               uint16 = 1502
 	CmdAlarmRequest                 uint16 = 1504
+	CmdConfigExportRequest          uint16 = 1542
+	CmdLogExportRequest             uint16 = 1544
 
 	CodeOK                                  = 100
 	CodeUnknownError                        = 101

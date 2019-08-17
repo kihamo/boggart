@@ -1,6 +1,8 @@
 package xmeye
 
 import (
+	"io"
+
 	"github.com/kihamo/boggart/components/boggart/providers/xmeye/internal"
 )
 
@@ -92,4 +94,10 @@ func (c *Client) ConfigChannelTitleSet(names ...string) error {
 		"ChannelTitle": names,
 	})
 	return err
+}
+
+func (c *Client) ConfigExport() (io.Reader, error) {
+	packet, err := c.Call(CmdConfigExportRequest, nil)
+
+	return packet.Payload, err
 }
