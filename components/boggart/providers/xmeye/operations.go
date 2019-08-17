@@ -51,6 +51,17 @@ func (c *Client) OPTime() (*time.Time, error) {
 	return &t, nil
 }
 
+func (c *Client) SystemFunctions() (*SystemFunctions, error) {
+	result := &SystemFunctions{}
+
+	err := c.CmdWithResult(CmdAbilityGetRequest, "SystemFunction", result)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, err
+}
+
 func (c *Client) SystemInfo() (*SystemInfo, error) {
 	result := &SystemInfo{}
 

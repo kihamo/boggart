@@ -1,6 +1,7 @@
 package xmeye
 
 import (
+	"bytes"
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
@@ -13,14 +14,16 @@ import (
 )
 
 const (
-	DefaultTimeout = time.Second
-	DefaultPort    = 34567
+	DefaultTimeout       = time.Second
+	DefaultPort          = 34567
+	defaultPayloadBuffer = 2048
 
 	CmdLoginResponse      uint16 = 1000
 	CmdLogoutResponse     uint16 = 1002
 	CmdKeepAliveResponse  uint16 = 1006
 	CmdTimeRequest        uint16 = 1452
 	CmdSystemInfoRequest  uint16 = 1020
+	CmdAbilityGetRequest  uint16 = 1360
 	CmdLogSearchRequest   uint16 = 1442
 	CmdSysManagerRequest  uint16 = 1450
 	CmdSysManagerResponse uint16 = 1451
@@ -167,8 +170,8 @@ func (c *Client) parseResponsePacker(conn io.Reader) (sessionID uint32, payload 
 	// FIXME: после reboot через ручку странное поведение, девайс не перезагружается
 	// команды принимает, но не отвечает на них
 
-	packet := make([]byte, 0x14) // read head
-	if _, err = conn.Read(packet); err != nil {
+	packetHead := make([]byte, 0x14) // read head
+	if _, err = conn.Read(packetHead); err != nil {
 		return 0, nil, err
 	}
 
@@ -177,17 +180,36 @@ func (c *Client) parseResponsePacker(conn io.Reader) (sessionID uint32, payload 
 	//fmt.Println(hex.Dump(packet))
 
 	// save session id
-	sessionID = binary.LittleEndian.Uint32(packet[0x04:0x08])
-	payloadLen := binary.LittleEndian.Uint16(packet[0x10:0x12])
+	sessionID = binary.LittleEndian.Uint32(packetHead[0x04:0x08])
+	payloadLen := int(binary.LittleEndian.Uint16(packetHead[0x10:0x12]))
 
-	packet = make([]byte, payloadLen)
-	if _, err = conn.Read(packet); err != nil {
-		return 0, nil, err
+	packetPayload := bytes.NewBuffer(nil)
+
+	bufSize := defaultPayloadBuffer
+	if bufSize > payloadLen {
+		bufSize = payloadLen
+	}
+	buf := make([]byte, bufSize)
+
+	for {
+		n, err := conn.Read(buf)
+
+		if err != nil {
+			return 0, nil, err
+		}
+
+		packetPayload.Write(buf[:n])
+
+		if packetPayload.Len() >= payloadLen {
+			break
+		}
 	}
 
-	// fmt.Println(hex.Dump(packet))
+	// fmt.Println(hex.Dump(packetPayload.Bytes()))
+	// fmt.Println(packetPayload.String())
+	// fmt.Println(packetPayload.Len(), payloadLen)
 
-	return sessionID, packet, err
+	return sessionID, packetPayload.Bytes(), err
 }
 
 func (c *Client) Cmd(code uint16, cmd string) ([]byte, error) {
