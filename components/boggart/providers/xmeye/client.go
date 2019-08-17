@@ -5,6 +5,8 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"net"
 	"strconv"
@@ -27,10 +29,21 @@ const (
 	CmdSystemInfoRequest  uint16 = 1020
 	CmdAbilityGetRequest  uint16 = 1360
 	CmdLogSearchRequest   uint16 = 1442
-	CmdSysManagerRequest  uint16 = 1450
+	CmdGuardRequest       uint16 = 1500
+	CmdUnGuardRequest     uint16 = 1502
+	CmdAlarmRequest       uint16 = 1504
 	CmdSysManagerResponse uint16 = 1451
 
-	CodeOK = 100
+	CodeOK                                  = 100
+	CodeUnknownError                        = 101
+	CodeUnsupportedVersion                  = 102
+	CodeRequestNotPermitted                 = 103
+	CodeUserAlreadyLoggedIn                 = 104
+	CodeUserUserIsNotLoggedIn               = 105
+	CodeUsernameOrPasswordIsIncorrect       = 106
+	CodeUserDoesNotHaveNecessaryPermissions = 107
+	CodePasswordIsIncorrect                 = 203
+	CodeUpgradeSuccessful                   = 515
 )
 
 var (
@@ -42,6 +55,7 @@ type Client struct {
 	host     string
 	username string
 	password []byte
+	debug    uint32
 
 	connection *net.TCPConn
 	mutex      sync.RWMutex
@@ -69,6 +83,24 @@ func New(host, username, password string) *Client {
 		keepAliveTicker: time.NewTicker(time.Second * 20),
 		keepAliceDone:   make(chan struct{}),
 	}
+}
+
+func (c *Client) WithDebug(flag bool) *Client {
+	var debug uint32
+	if flag {
+		debug = 1
+	}
+
+	atomic.StoreUint32(&c.debug, debug)
+
+	return c
+}
+
+func (c *Client) sessionIDAsString() string {
+	sessionIDBytes := make([]byte, 4)
+	binary.LittleEndian.PutUint32(sessionIDBytes, atomic.LoadUint32(&c.sessionID))
+
+	return "0x" + hex.EncodeToString(sessionIDBytes)
 }
 
 func (c *Client) connect() (*net.TCPConn, error) {
@@ -106,8 +138,10 @@ func (c *Client) request(code uint16, payload interface{}) ([]byte, error) {
 		return nil, err
 	}
 
-	//fmt.Println(">>>")
-	//fmt.Println(hex.Dump(requestPacket))
+	if atomic.LoadUint32(&c.debug) > 0 {
+		fmt.Println(">>> request")
+		fmt.Println(hex.Dump(requestPacket))
+	}
 
 	atomic.AddUint32(&c.sequenceNumber, 1)
 
@@ -174,9 +208,12 @@ func (c *Client) parseResponsePacker(conn io.Reader) (sessionID uint32, payload 
 		return 0, nil, err
 	}
 
-	//fmt.Println("<<<")
-	//fmt.Println("total", packet[0x0c], "current", packet[0x0d])
-	//fmt.Println(hex.Dump(packet))
+	debug := atomic.LoadUint32(&c.debug)
+
+	if debug > 0 {
+		fmt.Println("<<< response")
+		fmt.Println(hex.Dump(packetHead))
+	}
 
 	// save session id
 	sessionID = binary.LittleEndian.Uint32(packetHead[0x04:0x08])
@@ -204,15 +241,16 @@ func (c *Client) parseResponsePacker(conn io.Reader) (sessionID uint32, payload 
 		}
 	}
 
-	// fmt.Println(hex.Dump(packetPayload.Bytes()))
-	// fmt.Println(packetPayload.String())
-	// fmt.Println(packetPayload.Len(), payloadLen)
+	if debug > 0 {
+		fmt.Println(hex.Dump(packetPayload.Bytes()))
+		fmt.Println(packetPayload.String())
+	}
 
 	return sessionID, packetPayload.Bytes(), err
 }
 
 func (c *Client) Cmd(code uint16, cmd string) ([]byte, error) {
-	return c.request(code, map[string]string{
+	return c.Call(code, map[string]string{
 		"Name":      cmd,
 		"SessionID": c.sessionIDAsString(),
 	})
@@ -226,11 +264,19 @@ func (c *Client) CmdWithResult(code uint16, cmd string, result interface{}) erro
 }
 
 func (c *Client) Call(code uint16, payload interface{}) ([]byte, error) {
-	return c.request(code, payload)
+	response, err := c.request(code, payload)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.PayloadError(response)
+
+	return response, err
 }
 
 func (c *Client) CallWithResult(code uint16, payload, result interface{}) error {
-	response, err := c.request(code, payload)
+	response, err := c.Call(code, payload)
 	if err != nil {
 		return err
 	}
@@ -241,16 +287,49 @@ func (c *Client) CallWithResult(code uint16, payload, result interface{}) error 
 	return json.Unmarshal(response, &result)
 }
 
-func (c *Client) keepAlive(interval uint64) {
-	for {
-		select {
-		case <-c.keepAliveTicker.C:
-			c.Cmd(CmdKeepAliveResponse, "KeepAlive")
+func (c *Client) PayloadError(payload []byte) error {
+	// обрезаем признак конца строки
+	payload = payload[:len(payload)-len(payloadEOF)]
 
-		case <-c.keepAliceDone:
-			return
+	result := &Response{}
+	if err := json.Unmarshal(payload, &result); err == nil {
+		switch result.Ret {
+		case CodeOK:
+			return nil
+
+		case CodeUnknownError:
+			return errors.New("unknown error")
+
+		case CodeUnsupportedVersion:
+			return errors.New("unsupported version")
+
+		case CodeRequestNotPermitted:
+			return errors.New("request not permitted")
+
+		case CodeUserAlreadyLoggedIn:
+			return errors.New("user already logged in")
+
+		case CodeUserUserIsNotLoggedIn:
+			return errors.New("user is not logged in")
+
+		case CodeUsernameOrPasswordIsIncorrect:
+			return errors.New("username or password is incorrect")
+
+		case CodeUserDoesNotHaveNecessaryPermissions:
+			return errors.New("user does not have necessary permissions")
+
+		case CodePasswordIsIncorrect:
+			return errors.New("password is incorrect")
+
+		case CodeUpgradeSuccessful:
+			return nil
+
+		default:
+			return errors.New("unsupported unknown error")
 		}
 	}
+
+	return nil
 }
 
 func (c *Client) Close() error {
@@ -258,11 +337,4 @@ func (c *Client) Close() error {
 	close(c.keepAliceDone)
 
 	return nil
-}
-
-func (c *Client) sessionIDAsString() string {
-	sessionIDBytes := make([]byte, 4)
-	binary.LittleEndian.PutUint32(sessionIDBytes, atomic.LoadUint32(&c.sessionID))
-
-	return "0x" + hex.EncodeToString(sessionIDBytes)
 }

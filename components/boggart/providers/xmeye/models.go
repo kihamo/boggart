@@ -1,6 +1,6 @@
 package xmeye
 
-type CmdResponse struct {
+type Response struct {
 	Name      string
 	Ret       uint64
 	SessionID string
@@ -17,12 +17,12 @@ type LoginResponse struct {
 }
 
 type OPTimeQuery struct {
-	CmdResponse
+	Response
 	OPTimeQuery string
 }
 
 type SystemFunctions struct {
-	CmdResponse
+	Response
 	SystemFunction struct {
 		AlarmFunction struct {
 			AlarmConfig           bool
@@ -240,7 +240,7 @@ type SystemFunctions struct {
 }
 
 type SystemInfo struct {
-	CmdResponse
+	Response
 	SystemInfo struct {
 		AlarmInChannel  uint64
 		AlarmOutChannel uint64
@@ -265,7 +265,7 @@ type SystemInfo struct {
 }
 
 type OEMInfo struct {
-	CmdResponse
+	Response
 	OEMInfo struct {
 		Address   string
 		Name      string
@@ -275,7 +275,7 @@ type OEMInfo struct {
 }
 
 type StorageInfo struct {
-	CmdResponse
+	Response
 	StorageInfo []struct {
 		PartNumber uint64
 		PlysicalNo uint64
@@ -295,7 +295,7 @@ type StorageInfo struct {
 }
 
 type WorkState struct {
-	CmdResponse
+	Response
 	WorkState struct {
 		AlarmState struct {
 			AlarmIn     uint64
@@ -308,5 +308,15 @@ type WorkState struct {
 			Bitrate uint64
 			Record  bool
 		}
+	}
+}
+
+type AlarmInfo struct {
+	Response
+	AlarmInfo struct {
+		Channel   uint8
+		Event     string
+		StartTime string
+		Status    string
 	}
 }
