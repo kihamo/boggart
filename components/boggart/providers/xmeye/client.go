@@ -169,9 +169,6 @@ func (c *Client) buildRequestPacket(code uint16, payload interface{}) ([]byte, e
 }
 
 func (c *Client) parseResponsePacker(conn io.Reader) (sessionID uint32, payload []byte, err error) {
-	// FIXME: после reboot через ручку странное поведение, девайс не перезагружается
-	// команды принимает, но не отвечает на них
-
 	packetHead := make([]byte, 0x14) // read head
 	if _, err = conn.Read(packetHead); err != nil {
 		return 0, nil, err
