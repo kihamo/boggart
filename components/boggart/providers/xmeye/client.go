@@ -1,12 +1,14 @@
 package xmeye
 
 import (
+	"context"
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
 	"fmt"
 	"net"
 	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -19,8 +21,6 @@ const (
 	DefaultPort    = 34567
 
 	defaultPayloadBuffer = 2048
-	defaultReadTimeout   = time.Second * 5
-	defaultWriteTimeout  = time.Second * 5
 
 	timeLayout = "2006-01-02 15:04:05"
 
@@ -107,7 +107,11 @@ func (c *Client) sessionIDAsString() string {
 	session := make([]byte, 4)
 	binary.LittleEndian.PutUint32(session, atomic.LoadUint32(&c.sessionID))
 
-	return "0x" + hex.EncodeToString([]byte{session[3], session[2], session[1], session[0]})
+	return "0x" + strings.ToUpper(hex.EncodeToString([]byte{session[3], session[2], session[1], session[0]}))
+}
+
+func (c *Client) IsAuth() bool {
+	return atomic.LoadUint32(&c.sessionID) > 0
 }
 
 func (c *Client) connect() (conn net.Conn, err error) {
@@ -150,13 +154,14 @@ func (c *Client) connect() (conn net.Conn, err error) {
 		// обрыв соединения обрывает так же сессию
 		if atomic.LoadUint32(&c.resetConnection) > 0 {
 			atomic.StoreUint32(&c.resetConnection, 0)
+			ctx := context.Background()
 
-			if atomic.LoadUint32(&c.sessionID) > 0 {
-				err = c.Login()
+			if c.IsAuth() {
+				err = c.Login(ctx)
 			}
 
 			if err == nil && atomic.LoadUint32(&c.alarmStarted) > 0 {
-				err = c.AlarmStart()
+				err = c.AlarmStart(ctx)
 			}
 		}
 	}
@@ -175,10 +180,16 @@ func (c *Client) reset() {
 	atomic.StoreUint32(&c.resetConnection, 1)
 }
 
-func (c *Client) request(code uint16, payload interface{}) (*internal.Packet, error) {
+func (c *Client) request(ctx context.Context, code uint16, payload interface{}) (*internal.Packet, error) {
 	conn, err := c.connect()
 	if err != nil {
 		return nil, err
+	}
+
+	if !c.IsAuth() && code != CmdLoginResponse && code != CmdLogoutResponse {
+		if err := c.Login(ctx); err != nil {
+			return nil, err
+		}
 	}
 
 	c.mutexRequest.Lock()
@@ -198,7 +209,10 @@ func (c *Client) request(code uint16, payload interface{}) (*internal.Packet, er
 
 	requestPacketBytes := requestPacket.Marshal()
 
-	err = conn.SetWriteDeadline(time.Now().Add(defaultWriteTimeout))
+	if deadline, ok := ctx.Deadline(); ok {
+		err = conn.SetWriteDeadline(deadline)
+	}
+
 	if err == nil {
 		_, err = conn.Write(requestPacketBytes)
 	}
@@ -224,7 +238,10 @@ func (c *Client) request(code uint16, payload interface{}) (*internal.Packet, er
 	//
 	var responsePacketHead []byte
 
-	err = conn.SetReadDeadline(time.Now().Add(defaultReadTimeout))
+	if deadline, ok := ctx.Deadline(); ok {
+		err = conn.SetReadDeadline(deadline)
+	}
+
 	if err == nil {
 		responsePacketHead = make([]byte, 0x14) // read head
 		_, err = conn.Read(responsePacketHead)
@@ -274,8 +291,8 @@ func (c *Client) request(code uint16, payload interface{}) (*internal.Packet, er
 	return &responsePacket, nil
 }
 
-func (c *Client) Call(code uint16, payload interface{}) (*internal.Packet, error) {
-	p, err := c.request(code, payload)
+func (c *Client) Call(ctx context.Context, code uint16, payload interface{}) (*internal.Packet, error) {
+	p, err := c.request(ctx, code, payload)
 	if err != nil {
 		return nil, err
 	}
@@ -284,8 +301,8 @@ func (c *Client) Call(code uint16, payload interface{}) (*internal.Packet, error
 	return p, err
 }
 
-func (c *Client) CallWithResult(code uint16, payload, result interface{}) error {
-	packet, err := c.Call(code, payload)
+func (c *Client) CallWithResult(ctx context.Context, code uint16, payload, result interface{}) error {
+	packet, err := c.Call(ctx, code, payload)
 	if err != nil {
 		return err
 	}
@@ -293,15 +310,15 @@ func (c *Client) CallWithResult(code uint16, payload, result interface{}) error 
 	return packet.Payload.UnmarshalJSON(result)
 }
 
-func (c *Client) Cmd(code uint16, cmd string) (*internal.Packet, error) {
-	return c.Call(code, map[string]string{
+func (c *Client) Cmd(ctx context.Context, code uint16, cmd string) (*internal.Packet, error) {
+	return c.Call(ctx, code, map[string]string{
 		"Name":      cmd,
 		"SessionID": c.sessionIDAsString(),
 	})
 }
 
-func (c *Client) CmdWithResult(code uint16, cmd string, result interface{}) error {
-	return c.CallWithResult(code, map[string]string{
+func (c *Client) CmdWithResult(ctx context.Context, code uint16, cmd string, result interface{}) error {
+	return c.CallWithResult(ctx, code, map[string]string{
 		"Name":      cmd,
 		"SessionID": c.sessionIDAsString(),
 	}, &result)

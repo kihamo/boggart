@@ -1,6 +1,7 @@
 package xmeye
 
 import (
+	"context"
 	"encoding/binary"
 	"encoding/hex"
 	"sync/atomic"
@@ -9,10 +10,10 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/xmeye/internal"
 )
 
-func (c *Client) Login() error {
+func (c *Client) Login(ctx context.Context) error {
 	response := &internal.LoginResponse{}
 
-	err := c.CallWithResult(CmdLoginResponse, map[string]string{
+	err := c.CallWithResult(ctx, CmdLoginResponse, map[string]string{
 		"EncryptType": "MD5",
 		"LoginType":   "DVRIP-Web",
 		"PassWord":    HashPassword(c.password),
@@ -46,8 +47,8 @@ func (c *Client) Login() error {
 	return err
 }
 
-func (c *Client) Logout() error {
-	_, err := c.Call(CmdLogoutResponse, nil)
+func (c *Client) Logout(ctx context.Context) error {
+	_, err := c.Call(ctx, CmdLogoutResponse, nil)
 
 	if err != nil {
 		return c.Close()
@@ -60,12 +61,16 @@ func (c *Client) Logout() error {
 func (c *Client) keepAlive(interval uint64) {
 	ticker := time.NewTicker(time.Second * time.Duration(interval))
 
+	c.mutex.RLock()
+	done := c.done
+	c.mutex.RUnlock()
+
 	for {
 		select {
 		case <-ticker.C:
-			c.Cmd(CmdKeepAliveResponse, "KeepAlive")
+			c.Cmd(context.Background(), CmdKeepAliveResponse, "KeepAlive")
 
-		case <-c.done:
+		case <-done:
 			ticker.Stop()
 			return
 		}

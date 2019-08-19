@@ -1,11 +1,13 @@
 package xmeye
 
 import (
+	"context"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart/providers/xmeye/internal"
 )
 
+type logSearchType string
 type fileSearchEvent string
 type fileSearchType string
 
@@ -20,19 +22,19 @@ const (
 	FileSearchJPEG fileSearchType = "jpg"
 )
 
-func (c *Client) LogSearch(begin, end time.Time) ([]internal.LogSearch, error) {
+func (c *Client) LogSearch(ctx context.Context, begin, end time.Time, position uint64) ([]internal.LogSearch, error) {
 	var result struct {
 		internal.Response
 		OPLogQuery []internal.LogSearch
 	}
 
-	err := c.CallWithResult(CmdLogSearchRequest, map[string]interface{}{
+	err := c.CallWithResult(ctx, CmdLogSearchRequest, map[string]interface{}{
 		"Name":      "OPLogQuery",
 		"SessionID": c.sessionIDAsString(),
 		"OPLogQuery": map[string]interface{}{
 			"BeginTime":   begin.Format(timeLayout),
 			"EndTime":     end.Format(timeLayout),
-			"LogPosition": 0,
+			"LogPosition": position,
 			"Type":        "LogAll",
 		},
 	}, &result)
@@ -43,13 +45,13 @@ func (c *Client) LogSearch(begin, end time.Time) ([]internal.LogSearch, error) {
 	return result.OPLogQuery, err
 }
 
-func (c *Client) FileSearch(begin, end time.Time, channel uint32, event fileSearchEvent, typ fileSearchType) ([]internal.FileSearch, error) {
+func (c *Client) FileSearch(ctx context.Context, begin, end time.Time, channel uint32, event fileSearchEvent, typ fileSearchType) ([]internal.FileSearch, error) {
 	var result struct {
 		internal.Response
 		OPFileQuery []internal.FileSearch
 	}
 
-	err := c.CallWithResult(CmdFileSearchRequest, map[string]interface{}{
+	err := c.CallWithResult(ctx, CmdFileSearchRequest, map[string]interface{}{
 		"Name":      "OPFileQuery",
 		"SessionID": c.sessionIDAsString(),
 		"OPFileQuery": map[string]interface{}{

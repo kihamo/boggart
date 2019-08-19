@@ -1,5 +1,9 @@
 package xmeye
 
+import (
+	"context"
+)
+
 type diskManagerAction string
 type diskManagerType string
 
@@ -13,8 +17,8 @@ const (
 	DiskManagerTypeReadWrite diskManagerType = "ReadWrite"
 )
 
-func (c *Client) DiskManager(partNumber uint64, action diskManagerAction) error {
-	_, err := c.Call(CmdDiskManagerRequest, map[string]interface{}{
+func (c *Client) DiskManager(ctx context.Context, partNumber uint64, action diskManagerAction) error {
+	_, err := c.Call(ctx, CmdDiskManagerRequest, map[string]interface{}{
 		"Name":      "OPStorageManager",
 		"SessionID": c.sessionIDAsString(),
 		"OPStorageManager": map[string]interface{}{
@@ -27,8 +31,8 @@ func (c *Client) DiskManager(partNumber uint64, action diskManagerAction) error 
 	return err
 }
 
-func (c *Client) DiskManagerPartition(partNumber, record, snapshot uint64) error {
-	_, err := c.Call(CmdDiskManagerRequest, map[string]interface{}{
+func (c *Client) DiskManagerPartition(ctx context.Context, partNumber, record, snapshot uint64) error {
+	_, err := c.Call(ctx, CmdDiskManagerRequest, map[string]interface{}{
 		"Name":      "OPStorageManager",
 		"SessionID": c.sessionIDAsString(),
 		"OPStorageManager": map[string]interface{}{
@@ -45,8 +49,8 @@ func (c *Client) DiskManagerPartition(partNumber, record, snapshot uint64) error
 	return err
 }
 
-func (c *Client) DiskManagerSetType(partNumber uint64, typ diskManagerType) error {
-	_, err := c.Call(CmdDiskManagerRequest, map[string]interface{}{
+func (c *Client) DiskManagerSetType(ctx context.Context, partNumber uint64, typ diskManagerType) error {
+	_, err := c.Call(ctx, CmdDiskManagerRequest, map[string]interface{}{
 		"Name":      "OPStorageManager",
 		"SessionID": c.sessionIDAsString(),
 		"OPStorageManager": map[string]interface{}{

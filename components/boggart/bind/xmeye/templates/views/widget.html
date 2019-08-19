@@ -1,0 +1,42 @@
+{{ define "content" }}
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_content">
+                <div role="tabpanel">
+                    <ul class="nav nav-tabs bar_tabs" role="tablist">
+                        <li role="presentation"{{ if eq .action "" }} class="active"{{ end }}><a href="{{ if eq .action "" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}{{ end }}">{{ i18n "Preview" . }}</a></li>
+                        <li role="presentation"{{ if eq .action "logs" }} class="active"{{ end }}><a href="{{ if eq .action "logs" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=logs{{ end }}">{{ i18n "Logs" . }}</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane fade active in">
+                        {{ if eq .action "logs" }}
+                        <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>{{ i18n "Time" . }}</th>
+                                    <th>{{ i18n "Message" . }}</th>
+                                    <th>{{ i18n "Type" . }}</th>
+                                    <th>{{ i18n "User" . }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ range $i, $log := .logs }}
+                                <tr>
+                                    <td>{{ $log.Time }}</td>
+                                    <td>{{ $log.Data }}</td>
+                                    <td>{{ $log.Type }}</td>
+                                    <td>{{ $log.User }}</td>
+                                </tr>
+                                {{ end }}
+                            </tbody>
+                        </table>
+                        {{ end }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}

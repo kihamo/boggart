@@ -1,6 +1,7 @@
 package xmeye
 
 import (
+	"context"
 	"io"
 
 	"github.com/kihamo/boggart/components/boggart/providers/xmeye/internal"
@@ -54,7 +55,7 @@ const (
 	ConfigNameRecord                 configName = "Record"
 )
 
-func (c *Client) ConfigGet(name configName, def bool) (map[string]interface{}, error) {
+func (c *Client) ConfigGet(ctx context.Context, name configName, def bool) (map[string]interface{}, error) {
 	var result map[string]interface{}
 
 	code := CmdConfigGetRequest
@@ -62,7 +63,7 @@ func (c *Client) ConfigGet(name configName, def bool) (map[string]interface{}, e
 		code = CmdDefaultConfigGetRequest
 	}
 
-	err := c.CmdWithResult(code, string(name), &result)
+	err := c.CmdWithResult(ctx, code, string(name), &result)
 	if err != nil {
 		return nil, err
 	}
@@ -76,13 +77,13 @@ func (c *Client) ConfigGet(name configName, def bool) (map[string]interface{}, e
 	return nil, err
 }
 
-func (c *Client) ConfigChannelTitleGet() ([]string, error) {
+func (c *Client) ConfigChannelTitleGet(ctx context.Context) ([]string, error) {
 	var result struct {
 		internal.Response
 		ChannelTitleGet []string
 	}
 
-	err := c.CmdWithResult(CmdConfigChannelTitleGetRequest, "ChannelTitleGet", &result)
+	err := c.CmdWithResult(ctx, CmdConfigChannelTitleGetRequest, "ChannelTitleGet", &result)
 	if err != nil {
 		return nil, err
 	}
@@ -90,16 +91,16 @@ func (c *Client) ConfigChannelTitleGet() ([]string, error) {
 	return result.ChannelTitleGet, err
 }
 
-func (c *Client) ConfigChannelTitleSet(names ...string) error {
-	_, err := c.Call(CmdConfigChannelTitleSetRequest, map[string]interface{}{
+func (c *Client) ConfigChannelTitleSet(ctx context.Context, names ...string) error {
+	_, err := c.Call(ctx, CmdConfigChannelTitleSetRequest, map[string]interface{}{
 		"Name":         "ChannelTitle",
 		"ChannelTitle": names,
 	})
 	return err
 }
 
-func (c *Client) ConfigExport() (io.Reader, error) {
-	packet, err := c.Call(CmdConfigExportRequest, nil)
+func (c *Client) ConfigExport(ctx context.Context) (io.Reader, error) {
+	packet, err := c.Call(ctx, CmdConfigExportRequest, nil)
 
 	return packet.Payload, err
 }

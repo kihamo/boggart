@@ -1,6 +1,7 @@
 package xmeye
 
 import (
+	"context"
 	"sync/atomic"
 	"time"
 
@@ -8,14 +9,15 @@ import (
 )
 
 type AlertStreaming struct {
-	client *Client
-	alerts chan *internal.AlarmInfo
-	errors chan error
-	done   chan struct{}
+	client         *Client
+	ctx            context.Context
+	tickerInterval time.Duration
+	alerts         chan *internal.AlarmInfo
+	errors         chan error
 }
 
-func (c *Client) AlarmStart() error {
-	_, err := c.Call(CmdGuardRequest, nil)
+func (c *Client) AlarmStart(ctx context.Context) error {
+	_, err := c.Call(ctx, CmdGuardRequest, nil)
 
 	if err == nil {
 		atomic.StoreUint32(&c.alarmStarted, 1)
@@ -24,8 +26,8 @@ func (c *Client) AlarmStart() error {
 	return err
 }
 
-func (c *Client) AlarmStop() error {
-	_, err := c.Call(CmdUnGuardRequest, nil)
+func (c *Client) AlarmStop(ctx context.Context) error {
+	_, err := c.Call(ctx, CmdUnGuardRequest, nil)
 
 	if err == nil {
 		atomic.StoreUint32(&c.alarmStarted, 0)
@@ -34,13 +36,13 @@ func (c *Client) AlarmStop() error {
 	return err
 }
 
-func (c *Client) AlarmInfo() (*internal.AlarmInfo, error) {
+func (c *Client) AlarmInfo(ctx context.Context) (*internal.AlarmInfo, error) {
 	var result struct {
 		internal.Response
 		AlarmInfo internal.AlarmInfo
 	}
 
-	err := c.CallWithResult(CmdAlarmRequest, nil, &result)
+	err := c.CallWithResult(ctx, CmdAlarmRequest, nil, &result)
 
 	if err != nil {
 		return nil, err
@@ -53,21 +55,17 @@ func (c *Client) AlarmInfo() (*internal.AlarmInfo, error) {
 	return &result.AlarmInfo, nil
 }
 
-func (c *Client) AlarmStreaming() *AlertStreaming {
+func (c *Client) AlarmStreaming(ctx context.Context, interval time.Duration) *AlertStreaming {
 	s := &AlertStreaming{
-		client: c,
-		done:   make(chan struct{}),
-		alerts: make(chan *internal.AlarmInfo),
-		errors: make(chan error),
+		client:         c,
+		ctx:            ctx,
+		tickerInterval: interval,
+		alerts:         make(chan *internal.AlarmInfo),
+		errors:         make(chan error),
 	}
 	go s.start()
 
 	return s
-}
-
-func (s *AlertStreaming) Close() error {
-	close(s.done)
-	return nil
 }
 
 func (s *AlertStreaming) NextAlarm() <-chan *internal.AlarmInfo {
@@ -79,7 +77,7 @@ func (s *AlertStreaming) NextError() <-chan error {
 }
 
 func (s *AlertStreaming) start() {
-	ticker := time.NewTicker(time.Second)
+	ticker := time.NewTicker(s.tickerInterval)
 
 	defer func() {
 		ticker.Stop()
@@ -94,15 +92,12 @@ func (s *AlertStreaming) start() {
 
 	for {
 		select {
-		case <-s.done:
-			return
-
-		case <-s.client.done:
+		case <-s.ctx.Done():
 			return
 
 		case <-ticker.C:
 			if !alarmEnable {
-				if err = s.client.AlarmStart(); err != nil {
+				if err = s.client.AlarmStart(s.ctx); err != nil {
 					s.errors <- err
 					continue
 				}
@@ -110,7 +105,7 @@ func (s *AlertStreaming) start() {
 				alarmEnable = true
 			}
 
-			alert, err := s.client.AlarmInfo()
+			alert, err := s.client.AlarmInfo(s.ctx)
 			if err != nil {
 				s.errors <- err
 			} else if alert != nil {

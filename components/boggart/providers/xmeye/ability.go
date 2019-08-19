@@ -1,5 +1,9 @@
 package xmeye
 
+import (
+	"context"
+)
+
 type ability string
 
 const (
@@ -14,10 +18,10 @@ const (
 	AbilitySystemFunction   ability = "SystemFunction"
 )
 
-func (c *Client) Ability(name ability) (interface{}, error) {
+func (c *Client) Ability(ctx context.Context, name ability) (interface{}, error) {
 	var result map[string]interface{}
 
-	err := c.CmdWithResult(CmdAbilityGetRequest, string(name), &result)
+	err := c.CmdWithResult(ctx, CmdAbilityGetRequest, string(name), &result)
 	if err != nil {
 		return nil, err
 	}
