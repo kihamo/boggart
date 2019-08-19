@@ -33,9 +33,11 @@ const (
 	CmdConfigChannelTitleSetRequest uint16 = 1046
 	CmdConfigChannelTitleGetRequest uint16 = 1048
 	CmdAbilityGetRequest            uint16 = 1360
+	CmdFileSearchRequest            uint16 = 1440
 	CmdLogSearchRequest             uint16 = 1442
 	CmdSysManagerResponse           uint16 = 1451
 	CmdTimeRequest                  uint16 = 1452
+	CmdDiskManagerRequest           uint16 = 1460
 	CmdGuardRequest                 uint16 = 1500
 	CmdUnGuardRequest               uint16 = 1502
 	CmdAlarmRequest                 uint16 = 1504

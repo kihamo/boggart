@@ -24,6 +24,15 @@ type LogSearch struct {
 	User     string
 }
 
+type FileSearch struct {
+	BeginTime  string
+	DiskNo     uint32
+	EndTime    string
+	FileLength string
+	FileName   string
+	SerialNo   uint32
+}
+
 type SystemFunctions struct {
 	AlarmFunction struct {
 		AlarmConfig           bool

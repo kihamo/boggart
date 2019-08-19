@@ -1,26 +1,28 @@
 package xmeye
 
+type ability string
+
 const (
-	AbilityEncodeCapability = "EncodeCapability"
-	AbilityBlindCapability  = "BlindCapability"
-	AbilityMotionArea       = "MotionArea"
-	AbilityDDNSService      = "DDNSService"
-	AbilityComProtocol      = "ComProtocol"
-	AbilityPTZProtocol      = "PTZProtocol"
-	AbilityTalkAudioFormat  = "TalkAudioFormat"
-	AbilityMultiLanguage    = "MultiLanguage"
-	AbilitySystemFunction   = "SystemFunction"
+	AbilityEncodeCapability ability = "EncodeCapability"
+	AbilityBlindCapability  ability = "BlindCapability"
+	AbilityMotionArea       ability = "MotionArea"
+	AbilityDDNSService      ability = "DDNSService"
+	AbilityComProtocol      ability = "ComProtocol"
+	AbilityPTZProtocol      ability = "PTZProtocol"
+	AbilityTalkAudioFormat  ability = "TalkAudioFormat"
+	AbilityMultiLanguage    ability = "MultiLanguage"
+	AbilitySystemFunction   ability = "SystemFunction"
 )
 
-func (c *Client) Ability(name string) (interface{}, error) {
+func (c *Client) Ability(name ability) (interface{}, error) {
 	var result map[string]interface{}
 
-	err := c.CmdWithResult(CmdAbilityGetRequest, name, &result)
+	err := c.CmdWithResult(CmdAbilityGetRequest, string(name), &result)
 	if err != nil {
 		return nil, err
 	}
 
-	if ability, ok := result[name]; ok {
+	if ability, ok := result[string(name)]; ok {
 		return ability, nil
 	}
 

@@ -26,29 +26,6 @@ func (c *Client) OPTime() (*time.Time, error) {
 	return &t, nil
 }
 
-func (c *Client) LogSearch(begin time.Time, end time.Time) ([]internal.LogSearch, error) {
-	var result struct {
-		internal.Response
-		OPLogQuery []internal.LogSearch
-	}
-
-	err := c.CallWithResult(CmdLogSearchRequest, map[string]interface{}{
-		"Name":      "OPLogQuery",
-		"SessionID": c.sessionIDAsString(),
-		"OPLogQuery": map[string]interface{}{
-			"BeginTime":   begin.Format(timeLayout),
-			"EndTime":     end.Format(timeLayout),
-			"LogPosition": 0,
-			"Type":        "LogAll",
-		},
-	}, &result)
-	if err != nil {
-		return nil, err
-	}
-
-	return result.OPLogQuery, err
-}
-
 func (c *Client) LogExport() (io.Reader, error) {
 	packet, err := c.Call(CmdLogExportRequest, nil)
 
