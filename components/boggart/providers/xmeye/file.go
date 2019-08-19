@@ -3,11 +3,8 @@ package xmeye
 import (
 	"context"
 	"time"
-
-	"github.com/kihamo/boggart/components/boggart/providers/xmeye/internal"
 )
 
-type logSearchType string
 type fileSearchEvent string
 type fileSearchType string
 
@@ -20,12 +17,14 @@ const (
 
 	FileSearchH264 fileSearchType = "h264"
 	FileSearchJPEG fileSearchType = "jpg"
+
+	MaxLogRecordsPerPage = 128
 )
 
-func (c *Client) LogSearch(ctx context.Context, begin, end time.Time, position uint64) ([]internal.LogSearch, error) {
+func (c *Client) LogSearch(ctx context.Context, begin, end time.Time, position uint64) ([]LogSearch, error) {
 	var result struct {
-		internal.Response
-		OPLogQuery []internal.LogSearch
+		Response
+		OPLogQuery []LogSearch
 	}
 
 	err := c.CallWithResult(ctx, CmdLogSearchRequest, map[string]interface{}{
@@ -45,10 +44,10 @@ func (c *Client) LogSearch(ctx context.Context, begin, end time.Time, position u
 	return result.OPLogQuery, err
 }
 
-func (c *Client) FileSearch(ctx context.Context, begin, end time.Time, channel uint32, event fileSearchEvent, typ fileSearchType) ([]internal.FileSearch, error) {
+func (c *Client) FileSearch(ctx context.Context, begin, end time.Time, channel uint32, event fileSearchEvent, typ fileSearchType) ([]FileSearch, error) {
 	var result struct {
-		internal.Response
-		OPFileQuery []internal.FileSearch
+		Response
+		OPFileQuery []FileSearch
 	}
 
 	err := c.CallWithResult(ctx, CmdFileSearchRequest, map[string]interface{}{

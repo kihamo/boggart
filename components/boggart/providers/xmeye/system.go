@@ -2,14 +2,12 @@ package xmeye
 
 import (
 	"context"
-
-	"github.com/kihamo/boggart/components/boggart/providers/xmeye/internal"
 )
 
-func (c *Client) SystemInfo(ctx context.Context) (*internal.SystemInfo, error) {
+func (c *Client) SystemInfo(ctx context.Context) (*SystemInfo, error) {
 	var result struct {
-		internal.Response
-		SystemInfo internal.SystemInfo
+		Response
+		SystemInfo SystemInfo
 	}
 
 	err := c.CmdWithResult(ctx, CmdSystemInfoRequest, "SystemInfo", &result)
@@ -20,10 +18,10 @@ func (c *Client) SystemInfo(ctx context.Context) (*internal.SystemInfo, error) {
 	return &result.SystemInfo, err
 }
 
-func (c *Client) OEMInfo(ctx context.Context) (*internal.OEMInfo, error) {
+func (c *Client) OEMInfo(ctx context.Context) (*OEMInfo, error) {
 	var result struct {
-		internal.Response
-		OEMInfo internal.OEMInfo
+		Response
+		OEMInfo OEMInfo
 	}
 
 	err := c.CmdWithResult(ctx, CmdSystemInfoRequest, "OEMInfo", &result)
@@ -34,10 +32,10 @@ func (c *Client) OEMInfo(ctx context.Context) (*internal.OEMInfo, error) {
 	return &result.OEMInfo, err
 }
 
-func (c *Client) StorageInfo(ctx context.Context) (*internal.StorageInfo, error) {
+func (c *Client) StorageInfo(ctx context.Context) (*StorageInfo, error) {
 	var result struct {
-		internal.Response
-		StorageInfo internal.StorageInfo
+		Response
+		StorageInfo StorageInfo
 	}
 
 	err := c.CmdWithResult(ctx, CmdSystemInfoRequest, "StorageInfo", &result)
@@ -48,10 +46,10 @@ func (c *Client) StorageInfo(ctx context.Context) (*internal.StorageInfo, error)
 	return &result.StorageInfo, err
 }
 
-func (c *Client) WorkState(ctx context.Context) (*internal.WorkState, error) {
+func (c *Client) WorkState(ctx context.Context) (*WorkState, error) {
 	var result struct {
-		internal.Response
-		WorkState internal.WorkState
+		Response
+		WorkState WorkState
 	}
 
 	err := c.CmdWithResult(ctx, CmdSystemInfoRequest, "WorkState", &result)

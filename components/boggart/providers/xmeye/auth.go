@@ -6,25 +6,23 @@ import (
 	"encoding/hex"
 	"sync/atomic"
 	"time"
-
-	"github.com/kihamo/boggart/components/boggart/providers/xmeye/internal"
 )
 
 func (c *Client) Login(ctx context.Context) error {
-	response := &internal.LoginResponse{}
+	var result LoginResponse
 
 	err := c.CallWithResult(ctx, CmdLoginResponse, map[string]string{
 		"EncryptType": "MD5",
 		"LoginType":   "DVRIP-Web",
 		"PassWord":    HashPassword(c.password),
 		"UserName":    c.username,
-	}, response)
+	}, &result)
 
 	if err != nil {
 		return err
 	}
 
-	session, err := hex.DecodeString(response.SessionID[2:])
+	session, err := hex.DecodeString(result.SessionID[2:])
 	if err != nil {
 		return err
 	}
@@ -40,8 +38,8 @@ func (c *Client) Login(ctx context.Context) error {
 	c.done = make(chan struct{}, 1)
 	c.mutex.Unlock()
 
-	if response.AliveInterval > 0 {
-		go c.keepAlive(response.AliveInterval)
+	if result.AliveInterval > 0 {
+		go c.keepAlive(result.AliveInterval)
 	}
 
 	return err

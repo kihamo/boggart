@@ -3,8 +3,6 @@ package xmeye
 import (
 	"context"
 	"io"
-
-	"github.com/kihamo/boggart/components/boggart/providers/xmeye/internal"
 )
 
 type configName string
@@ -79,7 +77,7 @@ func (c *Client) ConfigGet(ctx context.Context, name configName, def bool) (map[
 
 func (c *Client) ConfigChannelTitleGet(ctx context.Context) ([]string, error) {
 	var result struct {
-		internal.Response
+		Response
 		ChannelTitleGet []string
 	}
 

@@ -325,7 +325,7 @@ func (c *Client) CmdWithResult(ctx context.Context, code uint16, cmd string, res
 }
 
 func (c *Client) PayloadError(payload *internal.Payload) error {
-	var result internal.Response
+	var result Response
 
 	if err := payload.UnmarshalJSON(&result); err == nil {
 		switch result.Ret {
@@ -386,4 +386,8 @@ func (c *Client) Close() (err error) {
 	c.mutex.Unlock()
 
 	return err
+}
+
+func (c *Client) TimeOffset() time.Duration {
+	return 0
 }

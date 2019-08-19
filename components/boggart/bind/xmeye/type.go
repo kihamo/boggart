@@ -16,7 +16,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	bind := &Bind{
 		config: config,
-		client: xmeye.New(config.Address.Host, config.Address.User.Username(), password).WithDebug(true),
+		client: xmeye.New(config.Address.Host, config.Address.User.Username(), password),
 	}
 
 	return bind, nil

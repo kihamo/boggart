@@ -4,13 +4,11 @@ import (
 	"context"
 	"io"
 	"time"
-
-	"github.com/kihamo/boggart/components/boggart/providers/xmeye/internal"
 )
 
 func (c *Client) OPTime(ctx context.Context) (*time.Time, error) {
 	var result struct {
-		internal.Response
+		Response
 		OPTimeQuery string
 	}
 

@@ -21,14 +21,9 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 	switch action {
 	case "logs":
-		logs, err := bind.client.LogSearch(ctx, time.Now().Add(-time.Hour*24), time.Now(), 0)
+		logs, err := bind.client.LogSearch(ctx, time.Now().Add(-time.Hour), time.Now(), 0)
 		if err != nil {
 			r.Session().FlashBag().Error(t.Translate(ctx, "Get logs failed with error %s", "", err.Error()))
-		}
-
-		// change reverse
-		for i, j := 0, len(logs)-1; i < j; i, j = i+1, j-1 {
-			logs[i], logs[j] = logs[j], logs[i]
 		}
 
 		vars["logs"] = logs

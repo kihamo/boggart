@@ -4,15 +4,13 @@ import (
 	"context"
 	"sync/atomic"
 	"time"
-
-	"github.com/kihamo/boggart/components/boggart/providers/xmeye/internal"
 )
 
 type AlertStreaming struct {
 	client         *Client
 	ctx            context.Context
 	tickerInterval time.Duration
-	alerts         chan *internal.AlarmInfo
+	alerts         chan *AlarmInfo
 	errors         chan error
 }
 
@@ -36,10 +34,10 @@ func (c *Client) AlarmStop(ctx context.Context) error {
 	return err
 }
 
-func (c *Client) AlarmInfo(ctx context.Context) (*internal.AlarmInfo, error) {
+func (c *Client) AlarmInfo(ctx context.Context) (*AlarmInfo, error) {
 	var result struct {
-		internal.Response
-		AlarmInfo internal.AlarmInfo
+		Response
+		AlarmInfo AlarmInfo
 	}
 
 	err := c.CallWithResult(ctx, CmdAlarmRequest, nil, &result)
@@ -60,7 +58,7 @@ func (c *Client) AlarmStreaming(ctx context.Context, interval time.Duration) *Al
 		client:         c,
 		ctx:            ctx,
 		tickerInterval: interval,
-		alerts:         make(chan *internal.AlarmInfo),
+		alerts:         make(chan *AlarmInfo),
 		errors:         make(chan error),
 	}
 	go s.start()
@@ -68,7 +66,7 @@ func (c *Client) AlarmStreaming(ctx context.Context, interval time.Duration) *Al
 	return s
 }
 
-func (s *AlertStreaming) NextAlarm() <-chan *internal.AlarmInfo {
+func (s *AlertStreaming) NextAlarm() <-chan *AlarmInfo {
 	return s.alerts
 }
 
