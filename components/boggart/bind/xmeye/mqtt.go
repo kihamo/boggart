@@ -6,14 +6,20 @@ import (
 )
 
 const (
-	MQTTPublishTopicEvent            mqtt.Topic = boggart.ComponentName + "/cctv/+/event/+/+"
-	MQTTPublishTopicStateHDDCapacity mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/capacity"
-	MQTTPublishTopicStateHDDFree     mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/free"
-	MQTTPublishTopicStateHDDUsage    mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/usage"
+	MQTTPublishTopicEvent                     mqtt.Topic = boggart.ComponentName + "/cctv/+/event/+/+"
+	MQTTPublishTopicStateModel                mqtt.Topic = boggart.ComponentName + "/cctv/+/state/model"
+	MQTTPublishTopicStateFirmwareVersion      mqtt.Topic = boggart.ComponentName + "/cctv/+/state/firmware/version"
+	MQTTPublishTopicStateFirmwareReleasedDate mqtt.Topic = boggart.ComponentName + "/cctv/+/state/firmware/release-date"
+	MQTTPublishTopicStateHDDCapacity          mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/capacity"
+	MQTTPublishTopicStateHDDFree              mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/free"
+	MQTTPublishTopicStateHDDUsage             mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/usage"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	topics := []mqtt.Topic{
+		MQTTPublishTopicStateModel,
+		MQTTPublishTopicStateFirmwareVersion,
+		MQTTPublishTopicStateFirmwareReleasedDate,
 		MQTTPublishTopicStateHDDCapacity,
 		MQTTPublishTopicStateHDDFree,
 		MQTTPublishTopicStateHDDUsage,

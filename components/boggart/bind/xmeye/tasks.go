@@ -51,6 +51,18 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		if b.config.AlarmStreamingEnabled {
 			b.startAlarmStreaming()
 		}
+
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateModel.Format(info.SerialNo), info.HardWare); e != nil {
+			err = multierr.Append(err, e)
+		}
+
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateFirmwareVersion.Format(info.SerialNo), info.SoftWareVersion); e != nil {
+			err = multierr.Append(err, e)
+		}
+
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateFirmwareReleasedDate.Format(info.SerialNo), info.BuildTime); e != nil {
+			err = multierr.Append(err, e)
+		}
 	}
 
 	b.UpdateStatus(boggart.BindStatusOnline)
