@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"strconv"
 	"sync"
@@ -305,6 +306,11 @@ func (c *Client) Call(ctx context.Context, code uint16, payload interface{}) (*i
 func (c *Client) CallWithResult(ctx context.Context, code uint16, payload, result interface{}) error {
 	packet, err := c.Call(ctx, code, payload)
 	if err != nil {
+		return err
+	}
+
+	if writer, ok := result.(io.Writer); ok {
+		_, err = packet.Payload.WriteTo(writer)
 		return err
 	}
 
