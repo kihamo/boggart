@@ -1,4 +1,21 @@
 {{ define "content" }}
+<div class="page-title">
+    <div class="form-group pull-right">
+        <div class="input-group">
+            <label class="btn-group">
+                <a href="?action=configs-export" class="btn btn-icon btn-success btn-sm">
+                    <i class="fas fa-cog" title="{{ i18n "Export configuration" . }}"></i>
+                </a>
+                <a href="?action=logs-export" class="btn btn-icon btn-success btn-sm">
+                    <i class="fas fa-headset" title="{{ i18n "Export logs" . }}"></i>
+                </a>
+            </label>
+        </div>
+    </div>
+</div>
+
+<div class="clearfix"></div>
+
 <div class="row">
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
