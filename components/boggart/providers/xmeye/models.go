@@ -39,7 +39,7 @@ type SystemInfo struct {
 	AudioInChannel  uint64
 	BuildTime       Time
 	CombineSwitch   uint64
-	DeviceRunTime   Time
+	DeviceRunTime   string
 	DigChannel      uint64
 	EncryptVersion  string
 	ExtraChannel    uint64

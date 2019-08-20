@@ -20,7 +20,7 @@ const (
 	DefaultTimeout = time.Second
 	DefaultPort    = 34567
 
-	defaultPayloadBuffer = 2048
+	defaultPayloadBuffer = 1024
 
 	timeLayout = "2006-01-02 15:04:05"
 
@@ -275,7 +275,10 @@ func (c *Client) request(ctx context.Context, code uint16, payload interface{}) 
 			return &responsePacket, err
 		}
 
-		responsePacket.Payload.Write(buf[:n])
+		n, err = responsePacket.Payload.Write(buf[:n])
+		if err != nil {
+			return &responsePacket, err
+		}
 
 		if responsePacket.Payload.Len() >= responsePacket.PayloadLen {
 			break

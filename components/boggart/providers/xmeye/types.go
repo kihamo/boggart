@@ -15,7 +15,7 @@ type Time struct {
 
 func (t *Time) UnmarshalJSON(b []byte) (err error) {
 	s := strings.Trim(string(b), "\"")
-	if s == "null" {
+	if s == "null" || s == "" {
 		t.Time = time.Time{}
 	} else {
 		// FIXME: так как регистратор не отдает признак часового пояса

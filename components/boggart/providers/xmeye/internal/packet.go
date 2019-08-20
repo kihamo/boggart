@@ -39,9 +39,17 @@ func (p Packet) Marshal() []byte {
 	binary.LittleEndian.PutUint32(message[0x08:], p.SequenceNumber)
 
 	// Total Packet
+	if p.TotalPacket == 0 {
+		p.TotalPacket = 1
+	}
+
 	message[0x0c] = byte(p.TotalPacket)
 
 	// CurPacket
+	if p.CurrentPacket == 0 {
+		p.CurrentPacket = 1
+	}
+
 	message[0x0d] = byte(p.CurrentPacket)
 
 	// Message Id
@@ -92,7 +100,7 @@ func PacketUnmarshal(message []byte) Packet {
 	p.SessionID = binary.LittleEndian.Uint32(message[0x04:0x08])
 	p.SequenceNumber = binary.LittleEndian.Uint32(message[0x08:0x0c])
 	p.TotalPacket = uint16(message[0x0c])
-	p.CurrentPacket = uint16(message[0x0e])
+	p.CurrentPacket = uint16(message[0x0d])
 	p.MessageID = binary.LittleEndian.Uint16(message[0x0e:0x10])
 	p.PayloadLen = int(binary.LittleEndian.Uint32(message[0x10:0x14]))
 	p.Payload.Write(message[0x14:])

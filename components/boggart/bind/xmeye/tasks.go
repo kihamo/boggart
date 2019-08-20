@@ -27,7 +27,7 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	info, err := b.client.SystemInfo(ctx)
 	if err != nil {
 		b.UpdateStatus(boggart.BindStatusOffline)
-		return nil, nil
+		return nil, err
 	}
 
 	if info.SerialNo == "" {
