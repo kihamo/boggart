@@ -2,8 +2,6 @@ package xmeye
 
 import (
 	"context"
-	"encoding/binary"
-	"encoding/hex"
 	"sync/atomic"
 	"time"
 )
@@ -22,13 +20,7 @@ func (c *Client) Login(ctx context.Context) error {
 		return err
 	}
 
-	session, err := hex.DecodeString(result.SessionID[2:])
-	if err != nil {
-		return err
-	}
-
-	sessionID := binary.LittleEndian.Uint32([]byte{session[3], session[2], session[1], session[0]})
-	atomic.StoreUint32(&c.sessionID, sessionID)
+	atomic.StoreUint32(&c.sessionID, uint32(result.SessionID))
 
 	c.mutex.Lock()
 	if c.done != nil {

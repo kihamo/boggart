@@ -13,7 +13,7 @@ type LoginResponse struct {
 	DeviceType    string `json:DeviceType `
 	ExtraChannel  uint64
 	Ret           uint64
-	SessionID     string
+	SessionID     Uint32
 }
 
 type LogSearch struct {
@@ -62,7 +62,7 @@ type OEMInfo struct {
 	Telephone string
 }
 
-type StorageInfo []struct {
+type StorageInfo struct {
 	PartNumber uint64
 	PlysicalNo uint64
 	Partition  []struct {
@@ -73,9 +73,9 @@ type StorageInfo []struct {
 		NewStartTime  Time
 		OldEndTime    Time
 		OldStartTime  Time
-		RemainSpace   string
 		Status        uint64
-		TotalSpace    string
+		RemainSpace   Uint32
+		TotalSpace    Uint32
 	}
 }
 

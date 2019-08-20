@@ -2,13 +2,11 @@ package xmeye
 
 import (
 	"context"
-	"encoding/binary"
 	"encoding/hex"
 	"errors"
 	"fmt"
 	"net"
 	"strconv"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -104,10 +102,10 @@ func (c *Client) WithDebug(flag bool) *Client {
 }
 
 func (c *Client) sessionIDAsString() string {
-	session := make([]byte, 4)
-	binary.LittleEndian.PutUint32(session, atomic.LoadUint32(&c.sessionID))
+	session := Uint32(atomic.LoadUint32(&c.sessionID))
+	b, _ := session.MarshalJSON()
 
-	return "0x" + strings.ToUpper(hex.EncodeToString([]byte{session[3], session[2], session[1], session[0]}))
+	return string(b)
 }
 
 func (c *Client) IsAuth() bool {
@@ -288,7 +286,7 @@ func (c *Client) request(ctx context.Context, code uint16, payload interface{}) 
 	if debug > 0 {
 		fmt.Println("<<< response")
 		fmt.Println(hex.Dump(responsePacket.Marshal()))
-		fmt.Println(responsePacket.Payload.String())
+		//fmt.Println(responsePacket.Payload.String())
 	}
 
 	return &responsePacket, nil

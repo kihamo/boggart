@@ -6,11 +6,18 @@ import (
 )
 
 const (
-	MQTTPublishTopicEvent mqtt.Topic = boggart.ComponentName + "/cctv/+/event/+/+"
+	MQTTPublishTopicEvent            mqtt.Topic = boggart.ComponentName + "/cctv/+/event/+/+"
+	MQTTPublishTopicStateHDDCapacity mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/capacity"
+	MQTTPublishTopicStateHDDFree     mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/free"
+	MQTTPublishTopicStateHDDUsage    mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/usage"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	topics := make([]mqtt.Topic, 0, 1)
+	topics := []mqtt.Topic{
+		MQTTPublishTopicStateHDDCapacity,
+		MQTTPublishTopicStateHDDFree,
+		MQTTPublishTopicStateHDDUsage,
+	}
 
 	if b.config.AlarmStreamingEnabled {
 		topics = append(topics, MQTTPublishTopicEvent)

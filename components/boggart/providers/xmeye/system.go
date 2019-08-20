@@ -32,10 +32,10 @@ func (c *Client) OEMInfo(ctx context.Context) (*OEMInfo, error) {
 	return &result.OEMInfo, err
 }
 
-func (c *Client) StorageInfo(ctx context.Context) (*StorageInfo, error) {
+func (c *Client) StorageInfo(ctx context.Context) ([]StorageInfo, error) {
 	var result struct {
 		Response
-		StorageInfo StorageInfo
+		StorageInfo []StorageInfo
 	}
 
 	err := c.CmdWithResult(ctx, CmdSystemInfoRequest, "StorageInfo", &result)
@@ -43,7 +43,7 @@ func (c *Client) StorageInfo(ctx context.Context) (*StorageInfo, error) {
 		return nil, err
 	}
 
-	return &result.StorageInfo, err
+	return result.StorageInfo, err
 }
 
 func (c *Client) WorkState(ctx context.Context) (*WorkState, error) {

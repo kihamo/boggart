@@ -8,6 +8,10 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
+const (
+	MB uint64 = 1024 * 1024
+)
+
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
