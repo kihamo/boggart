@@ -267,15 +267,15 @@ definitions:
         xml:
           name: "SerialNumber"
       IMEI:
-        type: "integer"
+        type: "string"
         xml:
           name: "Imei"
       IMSI:
-        type: "integer"
+        type: "string"
         xml:
           name: "Imsi"
       ICCID:
-        type: "integer"
+        type: "string"
         xml:
           name: "Iccid"
       MSISDN:

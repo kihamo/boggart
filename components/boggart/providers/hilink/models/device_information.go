@@ -25,13 +25,13 @@ type DeviceInformation struct {
 	HardwareVersion string `json:"HardwareVersion,omitempty" xml:"HardwareVersion"`
 
 	// i c c ID
-	ICCID int64 `json:"ICCID,omitempty" xml:"Iccid"`
+	ICCID string `json:"ICCID,omitempty" xml:"Iccid"`
 
 	// i m e i
-	IMEI int64 `json:"IMEI,omitempty" xml:"Imei"`
+	IMEI string `json:"IMEI,omitempty" xml:"Imei"`
 
 	// i m s i
-	IMSI int64 `json:"IMSI,omitempty" xml:"Imsi"`
+	IMSI string `json:"IMSI,omitempty" xml:"Imsi"`
 
 	// m s i s d n
 	MSISDN string `json:"MSISDN,omitempty" xml:"Msisdn"`

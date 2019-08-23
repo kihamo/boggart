@@ -35,10 +35,26 @@ func New(address string, debug bool, logger logger.Logger) *Client {
 		address = host
 	}
 
-	cfg := client.DefaultTransportConfig().WithHost(address)
-	cl := client.NewHTTPClientWithConfig(nil, cfg)
+	cl := &Client{
+		HiLink: client.NewHTTPClientWithConfig(nil, client.DefaultTransportConfig().WithHost(address)),
+	}
 
-	if rt, ok := cl.Transport.(*httptransport.Runtime); ok {
+	if rt, ok := cl.HiLink.Transport.(*httptransport.Runtime); ok {
+		// автоматическая авторизация при первом запросе
+		rt.DefaultAuthentication = runtime.ClientAuthInfoWriterFunc(func(r runtime.ClientRequest, rg strfmt.Registry) error {
+			if r.GetPath() == "/webserver/SesTokInfo" {
+				return nil
+			}
+
+			if err := cl.Auth(context.Background()); err != nil {
+				return err
+			}
+
+			return cl.HiLink.Transport.(*httptransport.Runtime).
+				DefaultAuthentication.
+				AuthenticateRequest(r, rg)
+		})
+
 		rt.Transport = XMLRoundTripper{
 			original: rt.Transport,
 			runtime:  rt,
@@ -61,9 +77,7 @@ func New(address string, debug bool, logger logger.Logger) *Client {
 		rt.SetDebug(debug)
 	}
 
-	return &Client{
-		HiLink: cl,
-	}
+	return cl
 }
 
 func (c *Client) Auth(ctx context.Context) error {
