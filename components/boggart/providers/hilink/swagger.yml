@@ -1,0 +1,326 @@
+---
+
+swagger: "2.0"
+info:
+  title: "HiLink"
+  version: "0.1.0"
+consumes:
+- "application/xml"
+produces:
+- "application/xml"
+schemes:
+- "http"
+basePath: "/api"
+paths:
+  /device/autorun-version:
+    get:
+      operationId: "getDeviceAutoRunVersion"
+      tags:
+        - "device"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/AutoRunVersion"
+  /device/basic_information:
+    get:
+      operationId: "getDeviceBasicInformation"
+      tags:
+        - "device"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/DeviceBasicInformation"
+  /device/information:
+    get:
+      operationId: "getDeviceInformation"
+      tags:
+        - "device"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/DeviceInformation"
+  /device/signal:
+    get:
+      operationId: "getDeviceSignal"
+      tags:
+        - "device"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/DeviceSignal"
+  /ussd/get:
+    get:
+      operationId: "getUSSD"
+      tags:
+        - "ussd"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/USSD"
+  /ussd/release:
+    get:
+      operationId: "releaseUSSD"
+      tags:
+        - "ussd"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "string"
+  /ussd/send:
+    post:
+      operationId: "sendUSSD"
+      tags:
+        - "ussd"
+      parameters:
+        - name: "request"
+          in: "body"
+          schema:
+            $ref: "#/definitions/USSD"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/USSD"
+  /ussd/status:
+    get:
+      operationId: "getUSSDStatus"
+      tags:
+        - "ussd"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/USSDStatus"
+  /webserver/SesTokInfo:
+    get:
+      operationId: "getWebServerSession"
+      tags:
+        - "web server"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/SessionToken"
+definitions:
+  Error:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        xml:
+          name: "code"
+      message:
+        type: "string"
+        xml:
+          name: "message"
+  AutoRunVersion:
+    type: "object"
+    properties:
+      version:
+        type: "string"
+        xml:
+          name: "Version"
+  DeviceBasicInformation:
+    type: "object"
+    properties:
+      ProductFamily:
+        type: "string"
+        xml:
+          name: "productfamily"
+      Classify:
+        type: "string"
+        xml:
+          name: "classify"
+      MultiMode:
+        type: "boolean"
+        xml:
+          name: "multimode"
+      RestoreDefaultStatus:
+        type: "boolean"
+        xml:
+          name: "restore_default_status"
+      AutoupdateGuideStatus:
+        type: "boolean"
+        xml:
+          name: "autoupdate_guide_status"
+      SimSavePinEnable:
+        type: "boolean"
+        xml:
+          name: "sim_save_pin_enable"
+      DeviceName:
+        type: "string"
+        xml:
+          name: "devicename"
+      SoftwareVersion:
+        type: "string"
+        xml:
+          name: "SoftwareVersion"
+      WebUIVersion:
+        type: "string"
+        xml:
+          name: "WebUIVersion"
+  DeviceInformation:
+    type: "object"
+    properties:
+      DeviceName:
+        type: "string"
+        xml:
+          name: "DeviceName"
+      SerialNumber:
+        type: "string"
+        xml:
+          name: "SerialNumber"
+      IMEI:
+        type: "integer"
+        xml:
+          name: "Imei"
+      IMSI:
+        type: "integer"
+        xml:
+          name: "Imsi"
+      ICCID:
+        type: "integer"
+        xml:
+          name: "Iccid"
+      MSISDN:
+        type: "string"
+        xml:
+          name: "Msisdn"
+      HardwareVersion:
+        type: "string"
+        xml:
+          name: "HardwareVersion"
+      SoftwareVersion:
+        type: "string"
+        xml:
+          name: "SoftwareVersion"
+      WebUIVersion:
+        type: "string"
+        xml:
+          name: "WebUIVersion"
+      MacAddress1:
+        type: "string"
+        xml:
+          name: "MacAddress1"
+      MacAddress2:
+        type: "string"
+        xml:
+          name: "MacAddress2"
+      ProductFamily:
+        type: "string"
+        xml:
+          name: "ProductFamily"
+      Classify:
+        type: "string"
+        xml:
+          name: "Classify"
+      SupportMode:
+        type: "string"
+        xml:
+          name: "supportmode"
+      WorkMode:
+        type: "string"
+        xml:
+          name: "workmode"
+      WanIPAddress:
+        type: "string"
+        xml:
+          name: "WanIPAddress"
+      WanIPv6Address:
+        type: "string"
+        xml:
+          name: "WanIPv6Address"
+  DeviceSignal:
+    type: "object"
+    properties:
+      PCI:
+        type: "integer"
+        xml:
+          name: "pci"
+      SC:
+        type: "integer"
+        xml:
+          name: "sc"
+      CellID:
+        type: "integer"
+        xml:
+          name: "cell_id"
+      RSRQ:
+        type: "string"
+        xml:
+          name: "rsrq"
+      RSRP:
+        type: "string"
+        xml:
+          name: "rsrp"
+      RSSI:
+        type: "string"
+        xml:
+          name: "rssi"
+      SINR:
+        type: "string"
+        xml:
+          name: "sinr"
+      RSCP:
+        type: "string"
+        xml:
+          name: "rscp"
+      ECIO:
+        type: "string"
+        xml:
+          name: "ecio"
+      PSATT:
+        type: "integer"
+        xml:
+          name: "psatt"
+      Mode:
+        type: "integer"
+        xml:
+          name: "mode"
+      LTEBandWidth:
+        type: "string"
+        xml:
+          name: "lte_bandwidth"
+      LTEBandInfo:
+        type: "string"
+        xml:
+          name: "lte_bandinfo"
+  USSD:
+    type: "object"
+    properties:
+      Content:
+        type: "string"
+        xml:
+          name: "content"
+      CodeType:
+        type: "string"
+        xml:
+          name: "codeType"
+      Timeout:
+        type: "string"
+        xml:
+          name: "timeout"
+  USSDStatus:
+    type: "object"
+    properties:
+      Result:
+        type: "integer"
+        xml:
+          name: "result"
+  SessionToken:
+    type: "object"
+    properties:
+      Session:
+        type: "string"
+        xml:
+          name: "SesInfo"
+      Token:
+        type: "string"
+        xml:
+          name: "TokInfo"
