@@ -2,6 +2,7 @@ package hilink
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -78,7 +79,13 @@ func (b *Bind) taskSMSChecker(ctx context.Context) (interface{}, error) {
 
 	for _, s := range response.Payload.Messages {
 		if s.Status != 1 {
-			e := b.MQTTPublishAsync(ctx, MQTTPublishTopicSMS.Format(sn), s.Content)
+			payload, e := json.Marshal(s)
+			if err != nil {
+				err = multierr.Append(err, e)
+				continue
+			}
+
+			e = b.MQTTPublishAsync(ctx, MQTTPublishTopicSMS.Format(sn), payload)
 			if e != nil {
 				err = multierr.Append(err, e)
 				continue

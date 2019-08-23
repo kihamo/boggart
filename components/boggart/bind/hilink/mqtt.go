@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/device"
 	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/ussd"
 	"github.com/kihamo/boggart/components/boggart/providers/hilink/models"
 	"github.com/kihamo/boggart/components/mqtt"
@@ -13,6 +14,7 @@ import (
 const (
 	MQTTSubscribeTopicUSSDSend   mqtt.Topic = boggart.ComponentName + "/hilink/+/ussd/send"
 	MQTTSubscribeTopicUSSDResult mqtt.Topic = boggart.ComponentName + "/hilink/+/ussd"
+	MQTTSubscribeTopicReboot     mqtt.Topic = boggart.ComponentName + "/hilink/+/reboot"
 	MQTTPublishTopicSMS          mqtt.Topic = boggart.ComponentName + "/hilink/+/sms"
 )
 
@@ -25,6 +27,7 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(MQTTSubscribeTopicUSSDSend.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTUSSDSend)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicReboot.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTReboot)),
 	}
 }
 
@@ -66,4 +69,16 @@ func (b *Bind) callbackMQTTUSSDSend(ctx context.Context, _ mqtt.Component, messa
 	}
 
 	return nil
+}
+
+func (b *Bind) callbackMQTTReboot(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+	if message.IsFalse() || !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
+		return nil
+	}
+
+	params := device.NewDeviceControlParamsWithContext(ctx)
+	params.Request.Control = 1
+
+	_, err := b.client.Device.DeviceControl(params)
+	return err
 }
