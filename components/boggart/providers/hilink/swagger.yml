@@ -77,6 +77,71 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/DeviceSignal"
+  /sms/sms-count:
+    get:
+      operationId: "getSMSCount"
+      tags:
+        - "sms"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/SMSCount"
+  /sms/delete-sms:
+    post:
+      operationId: "removeSMS"
+      tags:
+        - "sms"
+      parameters:
+        - name: "request"
+          in: "body"
+          schema:
+            type: "object"
+            properties:
+              Index:
+                type: "integer"
+                xml:
+                  name: "Index"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "string"
+  /sms/set-read:
+    post:
+      operationId: "readSMS"
+      tags:
+        - "sms"
+      parameters:
+        - name: "request"
+          in: "body"
+          schema:
+            type: "object"
+            properties:
+              Index:
+                type: "integer"
+                xml:
+                  name: "Index"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "string"
+  /sms/sms-list:
+    post:
+      operationId: "getSMSList"
+      tags:
+        - "sms"
+      parameters:
+        - name: "request"
+          in: "body"
+          schema:
+            $ref: "#/definitions/SMSListRequest"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/SMSList"
   /ussd/get:
     get:
       operationId: "getUSSD"
@@ -316,6 +381,143 @@ definitions:
         type: "string"
         xml:
           name: "lte_bandinfo"
+  SMSCount:
+    type: "object"
+    properties:
+      LocalUnread:
+        type: "integer"
+        xml:
+          name: "LocalUnread"
+      LocalInbox:
+        type: "integer"
+        xml:
+          name: "LocalInbox"
+      LocalOutbox:
+        type: "integer"
+        xml:
+          name: "LocalOutbox"
+      LocalDraft:
+        type: "integer"
+        xml:
+          name: "LocalDraft"
+      LocalDeleted:
+        type: "integer"
+        xml:
+          name: "LocalDeleted"
+      SimUnread:
+        type: "integer"
+        xml:
+          name: "SimUnread"
+      SimInbox:
+        type: "integer"
+        xml:
+          name: "SimInbox"
+      SimOutbox:
+        type: "integer"
+        xml:
+          name: "SimOutbox"
+      SimDraft:
+        type: "integer"
+        xml:
+          name: "SimDraft"
+      LocalMax:
+        type: "integer"
+        xml:
+          name: "LocalMax"
+      SimMax:
+        type: "integer"
+        xml:
+          name: "SimMax"
+      SimUsed:
+        type: "integer"
+        xml:
+          name: "SimUsed"
+      NewMsg:
+        type: "integer"
+        xml:
+          name: "NewMsg"
+  SMSListRequest:
+    x-go-type:
+      import:
+        package: "github.com/kihamo/boggart/components/boggart/providers/hilink/static/models"
+        alias: "static"
+      type: "SMSListRequest"
+    type: "object"
+    properties:
+      PageIndex:
+        type: "integer"
+        xml:
+          name: "PageIndex"
+      ReadCount:
+        type: "integer"
+        xml:
+          name: "ReadCount"
+      BoxType:
+        type: "integer"
+        xml:
+          name: "BoxType"
+      SortType:
+        type: "integer"
+        xml:
+          name: "SortType"
+      Ascending:
+        type: "integer"
+        xml:
+          name: "Ascending"
+      UnreadPreferred:
+        type: "integer"
+        xml:
+          name: "UnreadPreferred"
+  SMSList:
+    type: "object"
+    properties:
+      Count:
+        type: "integer"
+        xml:
+          name: "Count"
+      Messages:
+        type: "array"
+        xml:
+          name: "Messages>Message"
+        items:
+          type: "object"
+          properties:
+            Status:
+              type: "integer"
+              xml:
+                name: "Smstat"
+            Index:
+              type: "integer"
+              xml:
+                name: "Index"
+            Phone:
+              type: "string"
+              xml:
+                name: "Phone"
+            Content:
+              type: "string"
+              xml:
+                name: "Content"
+            Date:
+              type: "string"
+              xml:
+                name: "Date"
+            Sca:
+              type: "string"
+              xml:
+                name: "Sca"
+            SaveType:
+              type: "integer"
+              xml:
+                name: "SaveType"
+            Priority:
+              type: "integer"
+              xml:
+                name: "Priority"
+            SmsType:
+              type: "integer"
+              xml:
+                name: "SmsType"
   USSD:
     type: "object"
     properties:

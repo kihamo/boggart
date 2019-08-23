@@ -3,6 +3,8 @@ package hilink
 import (
 	"context"
 	"net"
+	"net/http"
+	"sync"
 
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
@@ -13,11 +15,19 @@ import (
 )
 
 const (
-	TokenHeader = "__RequestVerificationToken"
+	headerToken   = "__RequestVerificationToken"
+	headerSession = "Cookie"
 )
 
 type Client struct {
 	*client.HiLink
+}
+
+type XMLRoundTripper struct {
+	original http.RoundTripper
+	runtime  *httptransport.Runtime
+
+	mutex sync.Mutex
 }
 
 func New(address string, debug bool, logger logger.Logger) *Client {
@@ -29,6 +39,11 @@ func New(address string, debug bool, logger logger.Logger) *Client {
 	cl := client.NewHTTPClientWithConfig(nil, cfg)
 
 	if rt, ok := cl.Transport.(*httptransport.Runtime); ok {
+		rt.Transport = XMLRoundTripper{
+			original: rt.Transport,
+			runtime:  rt,
+		}
+
 		rt.Consumers["text/html"] = runtime.XMLConsumer()
 
 		// что бы скачивались файлы с изображениями
@@ -62,13 +77,59 @@ func (c *Client) Auth(ctx context.Context) error {
 
 	if rt, ok := c.Transport.(*httptransport.Runtime); ok {
 		rt.DefaultAuthentication = runtime.ClientAuthInfoWriterFunc(func(r runtime.ClientRequest, _ strfmt.Registry) error {
-			if err = r.SetHeaderParam(TokenHeader, response.Payload.Token); err != nil {
+			if err = r.SetHeaderParam(headerToken, response.Payload.Token); err != nil {
 				return err
 			}
 
-			return r.SetHeaderParam("Cookie", response.Payload.Session)
+			return r.SetHeaderParam(headerSession, response.Payload.Session)
 		})
 	}
 
 	return nil
+}
+
+func (rt XMLRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	/*
+		if req.Method == http.MethodPost && req.ContentLength > 0 && req.Header.Get("Content-Type") == "application/xml" {
+			//req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+
+			body, err := ioutil.ReadAll(req.Body)
+			if err != nil {
+				return nil, err
+			}
+
+			bytes.Index(body, []byte(">"))
+
+			start := bytes.Index(body, []byte(">"))
+			stop := bytes.LastIndex(body, []byte("/"))
+
+			if start > -1 && stop > -1 {
+				body = append([]byte(`<?xml version: "1.0" encoding="UTF-8"?><request`), body[start:stop+1]...)
+				body = append(body, []byte("request>")...)
+			}
+
+			req.Body = ioutil.NopCloser(bytes.NewReader(body))
+			req.ContentLength = int64(len(body))
+		}
+	*/
+
+	response, err := rt.original.RoundTrip(req)
+	if err == nil {
+		token := response.Header.Get(headerToken)
+		if token != "" {
+			rt.mutex.Lock()
+
+			rt.runtime.DefaultAuthentication = runtime.ClientAuthInfoWriterFunc(func(r runtime.ClientRequest, _ strfmt.Registry) error {
+				if err = r.SetHeaderParam(headerToken, token); err != nil {
+					return err
+				}
+
+				return r.SetHeaderParam(headerSession, req.Header.Get(headerSession))
+			})
+
+			rt.mutex.Unlock()
+		}
+	}
+
+	return response, err
 }
