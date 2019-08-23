@@ -3,16 +3,15 @@ package hilink
 import (
 	"context"
 	"errors"
-	"github.com/kihamo/boggart/components/mqtt"
-	"go.uber.org/multierr"
-
-	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/sms"
-	"github.com/kihamo/boggart/components/boggart/providers/hilink/static/models"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/device"
+	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/sms"
+	"github.com/kihamo/boggart/components/boggart/providers/hilink/static/models"
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
+	"go.uber.org/multierr"
 )
 
 func (b *Bind) Tasks() []workers.Task {
