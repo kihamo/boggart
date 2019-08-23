@@ -25,6 +25,34 @@ type Client struct {
 }
 
 /*
+DeviceControl device control API
+*/
+func (a *Client) DeviceControl(params *DeviceControlParams) (*DeviceControlOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeviceControlParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "DeviceControl",
+		Method:             "POST",
+		PathPattern:        "/device/control",
+		ProducesMediaTypes: []string{"application/xml"},
+		ConsumesMediaTypes: []string{"application/xml"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &DeviceControlReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DeviceControlOK), nil
+
+}
+
+/*
 GetDeviceAutoRunVersion get device auto run version API
 */
 func (a *Client) GetDeviceAutoRunVersion(params *GetDeviceAutoRunVersionParams) (*GetDeviceAutoRunVersionOK, error) {

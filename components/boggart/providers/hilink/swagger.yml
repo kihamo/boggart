@@ -42,6 +42,31 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/DeviceInformation"
+  /device/control:
+    post:
+      operationId: "DeviceControl"
+      tags:
+        - "device"
+      parameters:
+        - name: "request"
+          in: "body"
+          schema:
+            type: "object"
+            properties:
+              Control:
+                type: "integer"
+                xml:
+                  name: "Control"
+                enum:
+                  - 1 # перезагрузка устройства
+                  - 2 # восстановление конфигурации (нет информации о том, как предоставить файлу сохраненную конфигурацию. Возможно, он использует файл http://192.168.8.1/nvram.bak )
+                  - 3 # резервное копирование конфигурации (конфигурация доступна по адресу http://192.168.8.1/nvram.bak . Файл с кодировкой base64)
+                  - 4 # выключение устройства
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "string"
   /device/signal:
     get:
       operationId: "getDeviceSignal"
