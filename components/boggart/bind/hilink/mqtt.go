@@ -2,12 +2,9 @@ package hilink
 
 import (
 	"context"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/device"
-	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/ussd"
-	"github.com/kihamo/boggart/components/boggart/providers/hilink/models"
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
@@ -16,11 +13,13 @@ const (
 	MQTTSubscribeTopicUSSDResult mqtt.Topic = boggart.ComponentName + "/hilink/+/ussd"
 	MQTTSubscribeTopicReboot     mqtt.Topic = boggart.ComponentName + "/hilink/+/reboot"
 	MQTTPublishTopicSMS          mqtt.Topic = boggart.ComponentName + "/hilink/+/sms"
+	MQTTPublishTopicBalance      mqtt.Topic = boggart.ComponentName + "/hilink/+/balance"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
 		MQTTPublishTopicSMS,
+		MQTTPublishTopicBalance,
 	}
 }
 
@@ -36,39 +35,12 @@ func (b *Bind) callbackMQTTUSSDSend(ctx context.Context, _ mqtt.Component, messa
 		return nil
 	}
 
-	if message.String() == "" {
-		return nil
-	}
-
-	params := ussd.NewSendUSSDParamsWithContext(ctx).
-		WithRequest(&models.USSD{
-			Content: message.String(),
-		})
-
-	_, err := b.client.Ussd.SendUSSD(params)
+	content, err := b.USSD(ctx, message.String())
 	if err != nil {
 		return err
 	}
 
-	for {
-		select {
-		case <-ctx.Done():
-			return nil
-
-		default:
-			response, err := b.client.Ussd.GetUSSD(ussd.NewGetUSSDParamsWithContext(ctx))
-			if err == nil && response.Payload.Content != "" {
-				return b.MQTTPublishAsync(
-					ctx,
-					MQTTSubscribeTopicUSSDResult.Format(mqtt.NameReplace(b.SerialNumber())),
-					response.Payload.Content)
-			}
-
-			time.Sleep(time.Second)
-		}
-	}
-
-	return nil
+	return b.MQTTPublishAsync(ctx, MQTTSubscribeTopicUSSDResult.Format(mqtt.NameReplace(b.SerialNumber())), content)
 }
 
 func (b *Bind) callbackMQTTReboot(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {

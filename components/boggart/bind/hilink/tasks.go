@@ -22,14 +22,21 @@ func (b *Bind) Tasks() []workers.Task {
 	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
 	taskLiveness.SetName("bind-hilink-liveness-" + b.config.Address.Host)
 
+	taskUpdater := task.NewFunctionTask(b.taskUpdater)
+	taskUpdater.SetTimeout(b.config.UpdaterTimeout)
+	taskUpdater.SetRepeats(-1)
+	taskUpdater.SetRepeatInterval(b.config.UpdaterInterval)
+	taskUpdater.SetName("bind-hilink-updater-" + b.config.Address.Host)
+
 	taskSMSChecker := task.NewFunctionTask(b.taskSMSChecker)
-	taskSMSChecker.SetTimeout(b.config.LivenessTimeout)
+	taskSMSChecker.SetTimeout(b.config.SMSCheckerTimeout)
 	taskSMSChecker.SetRepeats(-1)
-	taskSMSChecker.SetRepeatInterval(b.config.LivenessInterval)
+	taskSMSChecker.SetRepeatInterval(b.config.SMSCheckerInterval)
 	taskSMSChecker.SetName("bind-hilink-sms-checker-" + b.config.Address.Host)
 
 	tasks := []workers.Task{
 		taskLiveness,
+		taskUpdater,
 		taskSMSChecker,
 	}
 
@@ -53,6 +60,26 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	}
 
 	b.UpdateStatus(boggart.BindStatusOnline)
+
+	return nil, err
+}
+
+func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
+	if b.Status() != boggart.BindStatusOnline {
+		return nil, nil
+	}
+
+	sn := b.SerialNumber()
+	snMQTT := mqtt.NameReplace(sn)
+
+	balance, err := b.Balance(ctx)
+	if err == nil {
+		metricBalance.With("serial_number", sn).Set(balance)
+
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicBalance.Format(snMQTT), balance); e != nil {
+			err = multierr.Append(err, e)
+		}
+	}
 
 	return nil, err
 }

@@ -1,6 +1,8 @@
 package hilink
 
 import (
+	"regexp"
+
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/protocols/swagger"
 	"github.com/kihamo/boggart/components/boggart/providers/hilink"
@@ -10,11 +12,16 @@ type Type struct {
 	boggart.BindTypeWidget
 }
 
-func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
+func (t Type) CreateBind(c interface{}) (_ boggart.Bind, err error) {
 	config := c.(*Config)
 
 	bind := &Bind{
 		config: config,
+	}
+
+	bind.balanceRegexp, err = regexp.Compile(config.BalanceRegexp)
+	if err != nil {
+		return nil, err
 	}
 
 	l := swagger.NewLogger(
