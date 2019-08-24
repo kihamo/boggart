@@ -1,7 +1,6 @@
 package hikvision
 
 import (
-	"strconv"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -16,7 +15,6 @@ type Type struct {
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
-	port, _ := strconv.ParseInt(config.Address.Port(), 10, 64)
 	password, _ := config.Address.User.Password()
 
 	bind := &Bind{
@@ -33,7 +31,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 			bind.Logger().Debug(message)
 		})
 
-	bind.client = hikvision.New(config.Address.Hostname(), port, config.Address.User.Username(), password, false, l)
+	bind.client = hikvision.New(config.Address.Host, config.Address.User.Username(), password, false, l)
 
 	return bind, nil
 }

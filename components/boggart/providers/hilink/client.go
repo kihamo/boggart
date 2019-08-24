@@ -1,5 +1,8 @@
 package hilink
 
+// http://forum.jdtech.pl/Watek-hilink-api-dla-urzadzen-huawei
+// https://github.com/knq/hilink
+
 import (
 	"context"
 	"net"

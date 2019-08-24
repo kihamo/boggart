@@ -5,20 +5,18 @@ import (
 	"bytes"
 	"context"
 	"encoding/xml"
-	"io"
-	"io/ioutil"
-	"mime"
-	"mime/multipart"
-	"net"
-	"net/http"
-	"strconv"
-
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/runtime/logger"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/event"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision/models"
+	"io"
+	"io/ioutil"
+	"mime"
+	"mime/multipart"
+	"net"
+	"net/http"
 )
 
 type Client struct {
@@ -44,8 +42,12 @@ var (
 	eventTagAlertEnd   = []byte("</EventNotificationAlert>")
 )
 
-func New(host string, port int64, user, password string, debug bool, logger logger.Logger) *Client {
-	cfg := client.DefaultTransportConfig().WithHost(net.JoinHostPort(host, strconv.FormatInt(port, 10)))
+func New(address string, user, password string, debug bool, logger logger.Logger) *Client {
+	if host, port, err := net.SplitHostPort(address); err == nil && port == "80" {
+		address = host
+	}
+
+	cfg := client.DefaultTransportConfig().WithHost(address)
 	cl := client.NewHTTPClientWithConfig(nil, cfg)
 
 	if rt, ok := cl.Transport.(*httptransport.Runtime); ok {
