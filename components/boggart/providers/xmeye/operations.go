@@ -25,6 +25,16 @@ func (c *Client) OPTime(ctx context.Context) (*time.Time, error) {
 	return &t, nil
 }
 
+func (c *Client) OPTimeSetting(ctx context.Context, t time.Time) error {
+	_, err := c.Call(ctx, CmdSysManagerRequest, map[string]interface{}{
+		"Name":          "OPTimeSetting",
+		"SessionID":     c.sessionIDAsString(),
+		"OPTimeSetting": t.Format(timeLayout),
+	})
+
+	return err
+}
+
 func (c *Client) LogExport(ctx context.Context) (io.Reader, error) {
 	packet, err := c.Call(ctx, CmdLogExportRequest, nil)
 
