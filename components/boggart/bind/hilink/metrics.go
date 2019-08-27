@@ -6,7 +6,8 @@ import (
 )
 
 var (
-	metricBalance = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_balance_rubles", "HiLink balance in rubles")
+	metricBalance              = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_balance_rubles", "HiLink balance in rubles")
+	metricLimitInternetTraffic = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_limit_internet_traffic_bytes", "HiLink limit internet traffic in bytes")
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {
@@ -16,6 +17,7 @@ func (b *Bind) Describe(ch chan<- *snitch.Description) {
 	}
 
 	metricBalance.With("serial_number", sn).Describe(ch)
+	metricLimitInternetTraffic.With("serial_number", sn).Describe(ch)
 }
 
 func (b *Bind) Collect(ch chan<- snitch.Metric) {
@@ -25,4 +27,5 @@ func (b *Bind) Collect(ch chan<- snitch.Metric) {
 	}
 
 	metricBalance.With("serial_number", sn).Collect(ch)
+	metricLimitInternetTraffic.With("serial_number", sn).Collect(ch)
 }

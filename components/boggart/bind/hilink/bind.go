@@ -94,7 +94,8 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, sms *models.SMSListMessagesI
 		return result
 	}
 
-	sn := mqtt.NameReplace(b.SerialNumber())
+	sn := b.SerialNumber()
+	snMQTT := mqtt.NameReplace(sn)
 
 	if sms.Index > b.limitInternetTrafficIndex.Load() {
 		match := op.SMSLimitTrafficRegexp.FindStringSubmatch(sms.Content)
@@ -102,8 +103,10 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, sms *models.SMSListMessagesI
 			if name == "value" {
 				result = true
 
-				if value, err := strconv.ParseInt(match[i], 10, 64); err == nil {
-					b.MQTTPublishAsync(ctx, MQTTPublishTopicLimitInternetTraffic.Format(sn), value)
+				if value, err := strconv.ParseFloat(match[i], 64); err == nil {
+					metricLimitInternetTraffic.With("serial_number", sn).Set(value)
+
+					b.MQTTPublishAsync(ctx, MQTTPublishTopicLimitInternetTraffic.Format(snMQTT), value)
 
 					b.limitInternetTrafficIndex.Set(sms.Index)
 				}
