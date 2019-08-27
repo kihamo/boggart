@@ -2,12 +2,18 @@ package xmeye
 
 import (
 	"io"
+	"strings"
 	"time"
 
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/shadow/components/dashboard"
 )
+
+type response struct {
+	Result  string `json:"result"`
+	Message string `json:"message,omitempty"`
+}
 
 func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
 	bind := b.Bind().(*Bind)
@@ -60,6 +66,53 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		_, _ = io.Copy(w, reader)
 
 		return
+
+	default:
+		if r.IsPost() {
+			err := r.Original().ParseForm()
+			if err == nil {
+				for key, value := range r.Original().PostForm {
+					switch key {
+					case "time":
+						var t time.Time
+
+						if strings.Compare(value[0], "now") == 0 {
+							t = time.Now()
+						} else {
+							t, err = time.Parse("2006.01.02 15:04:05", value[0])
+						}
+
+						if err == nil {
+							err = bind.client.OPTimeSetting(ctx, t)
+						}
+					}
+				}
+			}
+
+			if err != nil {
+				_ = w.SendJSON(response{
+					Result:  "failed",
+					Message: err.Error(),
+				})
+
+			} else {
+				_ = w.SendJSON(response{
+					Result:  "success",
+					Message: t.Translate(ctx, "Config set success", ""),
+				})
+			}
+
+			return
+		}
+
+		tm, err := bind.client.OPTime(ctx)
+		if err != nil {
+			r.Session().FlashBag().Error(t.Translate(ctx, "Get current time failed with error %s", "", err.Error()))
+		} else {
+			vars["time_current"] = tm
+		}
+
+		vars["time_system"] = time.Now()
 	}
 
 	t.Render(ctx, "widget", vars)

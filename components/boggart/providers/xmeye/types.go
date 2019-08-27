@@ -26,7 +26,7 @@ func (t *Time) UnmarshalJSON(b []byte) (err error) {
 		// то все даты приводим к текущей часовой зоне процесса
 		// что бы даты отображались корректно. В случае если на регистраторе
 		// другой часовой пояс это может стать проблемой
-		t.Time, err = time.ParseInLocation(timeLayout, s, timeLocation)
+		t.Time, err = time.ParseInLocation(TimeLayout, s, timeLocation)
 	}
 
 	return err

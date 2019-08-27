@@ -17,7 +17,7 @@ func (c *Client) OPTime(ctx context.Context) (*time.Time, error) {
 		return nil, err
 	}
 
-	t, err := time.Parse(timeLayout, result.OPTimeQuery)
+	t, err := time.Parse(TimeLayout, result.OPTimeQuery)
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +29,7 @@ func (c *Client) OPTimeSetting(ctx context.Context, t time.Time) error {
 	_, err := c.Call(ctx, CmdSysManagerRequest, map[string]interface{}{
 		"Name":          "OPTimeSetting",
 		"SessionID":     c.sessionIDAsString(),
-		"OPTimeSetting": t.Format(timeLayout),
+		"OPTimeSetting": t.Format(TimeLayout),
 	})
 
 	return err

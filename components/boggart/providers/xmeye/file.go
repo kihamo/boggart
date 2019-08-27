@@ -31,8 +31,8 @@ func (c *Client) LogSearch(ctx context.Context, begin, end time.Time, position u
 		"Name":      "OPLogQuery",
 		"SessionID": c.sessionIDAsString(),
 		"OPLogQuery": map[string]interface{}{
-			"BeginTime":   begin.Format(timeLayout),
-			"EndTime":     end.Format(timeLayout),
+			"BeginTime":   begin.Format(TimeLayout),
+			"EndTime":     end.Format(TimeLayout),
 			"LogPosition": position,
 			"Type":        "LogAll",
 		},
@@ -54,8 +54,8 @@ func (c *Client) FileSearch(ctx context.Context, begin, end time.Time, channel u
 		"Name":      "OPFileQuery",
 		"SessionID": c.sessionIDAsString(),
 		"OPFileQuery": map[string]interface{}{
-			"BeginTime":      begin.Format(timeLayout),
-			"EndTime":        end.Format(timeLayout),
+			"BeginTime":      begin.Format(TimeLayout),
+			"EndTime":        end.Format(TimeLayout),
 			"Channel":        channel,
 			"DriverTypeMask": "0x0000FFFF",
 			"Event":          event,

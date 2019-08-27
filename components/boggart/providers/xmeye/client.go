@@ -21,7 +21,7 @@ const (
 
 	defaultPayloadBuffer = 1024
 
-	timeLayout = "2006-01-02 15:04:05"
+	TimeLayout = "2006-01-02 15:04:05"
 
 	CmdLoginResponse                uint16 = 1000
 	CmdLogoutResponse               uint16 = 1002

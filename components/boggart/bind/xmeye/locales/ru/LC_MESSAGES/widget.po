@@ -16,8 +16,20 @@ msgstr "Экспортировать конфигурацию"
 msgid "Export logs"
 msgstr "Экспортировать логи"
 
-msgid "Preview"
-msgstr "Просмотр"
+msgid "Система"
+msgstr "System"
+
+msgid "Option"
+msgstr "Опция"
+
+msgid "Value"
+msgstr "Значение"
+
+msgid "Now"
+msgstr "Текущее"
+
+msgid "Config set success"
+msgstr "Конфигурация успешно изменена"
 
 msgid "Logs"
 msgstr "Логи"
