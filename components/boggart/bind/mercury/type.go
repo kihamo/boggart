@@ -6,7 +6,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/protocols/serial"
-	"github.com/kihamo/boggart/components/boggart/providers/mercury"
+	mercury "github.com/kihamo/boggart/components/boggart/providers/mercury/v1"
 )
 
 type Type struct {
@@ -21,7 +21,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		return nil, err
 	}
 
-	provider := mercury.NewMercury(
+	provider := mercury.New(
 		mercury.ConvertSerialNumber(config.Address),
 		loc,
 		serial.Dial(config.RS485Address, serial.WithTimeout(config.RS485Timeout)))

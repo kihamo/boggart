@@ -1,4 +1,4 @@
-package mercury
+package v1
 
 import (
 	"bytes"
@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart/protocols/serial"
+	"github.com/kihamo/boggart/components/boggart/providers/mercury"
 )
 
 // https://github.com/mrkrasser/MercuryStats
@@ -59,37 +60,33 @@ const (
 	displayModeDate
 )
 
-type Connection interface {
-	Invoke(request []byte) (response []byte, err error)
-}
-
-type ElectricityMeter200 struct {
+type MercuryV1 struct {
 	address    []byte
 	location   *time.Location
-	connection Connection
+	connection mercury.Connection
 }
 
-func NewMercury(address []byte, location *time.Location, connection Connection) *ElectricityMeter200 {
+func New(address []byte, location *time.Location, connection mercury.Connection) *MercuryV1 {
 	if location == nil {
 		location = time.Now().Location()
 	}
 
-	return &ElectricityMeter200{
+	return &MercuryV1{
 		address:    address,
 		location:   location,
 		connection: connection,
 	}
 }
 
-func (d *ElectricityMeter200) Address() []byte {
+func (d *MercuryV1) Address() []byte {
 	return d.address
 }
 
-func (d *ElectricityMeter200) AddressGroup() ([]byte, error) {
+func (d *MercuryV1) AddressGroup() ([]byte, error) {
 	return d.Request(FunctionReadAddressGroup, nil)
 }
 
-func (d *ElectricityMeter200) Request(function byte, data []byte) ([]byte, error) {
+func (d *MercuryV1) Request(function byte, data []byte) ([]byte, error) {
 	request := []byte{0x00}
 
 	// device address
@@ -138,7 +135,7 @@ func (d *ElectricityMeter200) Request(function byte, data []byte) ([]byte, error
 	return response[5 : l-2], nil
 }
 
-func (d *ElectricityMeter200) responseDatetime(function byte, data []byte) (time.Time, error) {
+func (d *MercuryV1) responseDatetime(function byte, data []byte) (time.Time, error) {
 	response, err := d.Request(function, data)
 	if err != nil {
 		return time.Time{}, err
@@ -179,11 +176,11 @@ func (d *ElectricityMeter200) responseDatetime(function byte, data []byte) (time
 	return time.Date(2000+int(year), time.Month(month), int(day), int(hour), int(minute), int(second), 0, d.location), nil
 }
 
-func (d *ElectricityMeter200) Datetime() (time.Time, error) {
+func (d *MercuryV1) Datetime() (time.Time, error) {
 	return d.responseDatetime(FunctionReadDatetime, nil)
 }
 
-func (d *ElectricityMeter200) SerialNumber() (int64, error) {
+func (d *MercuryV1) SerialNumber() (int64, error) {
 	response, err := d.Request(FunctionReadSerialNumber, nil)
 	if err != nil {
 		return 0, err
@@ -192,7 +189,7 @@ func (d *ElectricityMeter200) SerialNumber() (int64, error) {
 	return strconv.ParseInt(hex.EncodeToString(response), 16, 0)
 }
 
-func (d *ElectricityMeter200) WordType() error {
+func (d *MercuryV1) WordType() error {
 	response, err := d.Request(FunctionReadWordType, nil)
 	if err != nil {
 		return err
@@ -204,7 +201,7 @@ func (d *ElectricityMeter200) WordType() error {
 	return nil
 }
 
-func (d *ElectricityMeter200) MakeDate() (time.Time, error) {
+func (d *MercuryV1) MakeDate() (time.Time, error) {
 	response, err := d.Request(FunctionReadMakeDate, nil)
 	if err != nil {
 		return time.Time{}, err
@@ -228,7 +225,7 @@ func (d *ElectricityMeter200) MakeDate() (time.Time, error) {
 	return time.Date(2000+int(year), time.Month(month), int(day), 0, 0, 0, 0, d.location), nil
 }
 
-func (d *ElectricityMeter200) Version() (string, time.Time, error) {
+func (d *MercuryV1) Version() (string, time.Time, error) {
 	response, err := d.Request(FunctionReadVersion, nil)
 	if err != nil {
 		return "", time.Time{}, err
@@ -270,7 +267,7 @@ func (d *ElectricityMeter200) Version() (string, time.Time, error) {
 }
 
 // PowerMaximum return maximum of power in W
-func (d *ElectricityMeter200) PowerMaximum() (int64, error) {
+func (d *MercuryV1) PowerMaximum() (int64, error) {
 	response, err := d.Request(FunctionReadPowerMaximum, nil)
 	if err != nil {
 		return -1, err
@@ -285,7 +282,7 @@ func (d *ElectricityMeter200) PowerMaximum() (int64, error) {
 }
 
 // EnergyMaximum return maximum of energy in W/h
-func (d *ElectricityMeter200) EnergyMaximum() (int64, error) {
+func (d *MercuryV1) EnergyMaximum() (int64, error) {
 	response, err := d.Request(FunctionReadEnergyMaximum, nil)
 	if err != nil {
 		return -1, err
@@ -300,7 +297,7 @@ func (d *ElectricityMeter200) EnergyMaximum() (int64, error) {
 }
 
 // BatteryVoltage return voltage of battery in V
-func (d *ElectricityMeter200) BatteryVoltage() (float64, error) {
+func (d *MercuryV1) BatteryVoltage() (float64, error) {
 	response, err := d.Request(FunctionReadBatteryVoltage, nil)
 	if err != nil {
 		return -1, err
@@ -314,7 +311,7 @@ func (d *ElectricityMeter200) BatteryVoltage() (float64, error) {
 	return float64(v) / 100, nil
 }
 
-func (d *ElectricityMeter200) DisplayMode() (bool, bool, bool, bool, bool, bool, bool, bool, error) {
+func (d *MercuryV1) DisplayMode() (bool, bool, bool, bool, bool, bool, bool, bool, error) {
 	response, err := d.Request(FunctionReadDisplayMode, nil)
 	if err != nil {
 		return false, false, false, false, false, false, false, false, err
@@ -341,7 +338,7 @@ func (d *ElectricityMeter200) DisplayMode() (bool, bool, bool, bool, bool, bool,
 // false / разрешает индикацию мощности
 // false / разрешает индикацию времени
 // false / разрешает индикацию даты
-func (d *ElectricityMeter200) SetDisplayMode(t1, t2, t3, t4, amount, power, time, date bool) error {
+func (d *MercuryV1) SetDisplayMode(t1, t2, t3, t4, amount, power, time, date bool) error {
 	bit := 0
 
 	if t1 {
@@ -381,7 +378,7 @@ func (d *ElectricityMeter200) SetDisplayMode(t1, t2, t3, t4, amount, power, time
 }
 
 // PowerCounters returns value of T1, T2, T3 and T4 in W/h
-func (d *ElectricityMeter200) PowerCounters() (uint64, uint64, uint64, uint64, error) {
+func (d *MercuryV1) PowerCounters() (uint64, uint64, uint64, uint64, error) {
 	response, err := d.Request(FunctionReadPowerCounters, nil)
 	if err != nil {
 		return 0, 0, 0, 0, err
@@ -401,7 +398,7 @@ func (d *ElectricityMeter200) PowerCounters() (uint64, uint64, uint64, uint64, e
 }
 
 // PowerUser return power in W
-func (d *ElectricityMeter200) PowerCurrent() (uint64, error) {
+func (d *MercuryV1) PowerCurrent() (uint64, error) {
 	response, err := d.Request(FunctionReadPowerCurrent, nil)
 	if err != nil {
 		return 0, err
@@ -410,7 +407,7 @@ func (d *ElectricityMeter200) PowerCurrent() (uint64, error) {
 	return strconv.ParseUint(hex.EncodeToString(response), 10, 0)
 }
 
-func (d *ElectricityMeter200) DaylightSavingTime() (bool, error) {
+func (d *MercuryV1) DaylightSavingTime() (bool, error) {
 	response, err := d.Request(FunctionReadDaylightSavingTime, nil)
 	if err != nil {
 		return false, err
@@ -419,7 +416,7 @@ func (d *ElectricityMeter200) DaylightSavingTime() (bool, error) {
 	return !bytes.Equal(response, []byte{0}), nil
 }
 
-func (d *ElectricityMeter200) TimeCorrection() (uint64, error) {
+func (d *MercuryV1) TimeCorrection() (uint64, error) {
 	response, err := d.Request(FunctionReadTimeCorrection, nil)
 	if err != nil {
 		return 0, err
@@ -432,7 +429,7 @@ func (d *ElectricityMeter200) TimeCorrection() (uint64, error) {
 }
 
 // ParamsCurrent returns current value of voltage in V, amperage in A, power in W
-func (d *ElectricityMeter200) ParamsCurrent() (uint64, float64, uint64, error) {
+func (d *MercuryV1) ParamsCurrent() (uint64, float64, uint64, error) {
 	response, err := d.Request(FunctionReadParamsCurrent, nil)
 	if err != nil {
 		return 0, 0, 0, err
@@ -456,19 +453,19 @@ func (d *ElectricityMeter200) ParamsCurrent() (uint64, float64, uint64, error) {
 	return voltage / 10, amperage / 100, power, nil
 }
 
-func (d *ElectricityMeter200) LastPowerOffDatetime() (time.Time, error) {
+func (d *MercuryV1) LastPowerOffDatetime() (time.Time, error) {
 	return d.responseDatetime(FunctionReadLastPowerOffDatetime, nil)
 }
 
-func (d *ElectricityMeter200) LastPowerOnDatetime() (time.Time, error) {
+func (d *MercuryV1) LastPowerOnDatetime() (time.Time, error) {
 	return d.responseDatetime(FunctionReadLastPowerOnDatetime, nil)
 }
 
-func (d *ElectricityMeter200) LastCloseCap() (time.Time, error) {
+func (d *MercuryV1) LastCloseCap() (time.Time, error) {
 	return d.responseDatetime(FunctionReadLastCloseCap, nil)
 }
 
-func (d *ElectricityMeter200) TariffCount() (uint64, error) {
+func (d *MercuryV1) TariffCount() (uint64, error) {
 	response, err := d.Request(FunctionReadTariffCount, nil)
 	if err != nil {
 		return 0, err
@@ -477,7 +474,7 @@ func (d *ElectricityMeter200) TariffCount() (uint64, error) {
 	return uint64(response[0]), nil
 }
 
-func (d *ElectricityMeter200) Holidays() ([]time.Time, error) {
+func (d *MercuryV1) Holidays() ([]time.Time, error) {
 	response1, err := d.Request(FunctionReadHolidays, []byte{0})
 	if err != nil {
 		return nil, err
@@ -503,7 +500,7 @@ func (d *ElectricityMeter200) Holidays() ([]time.Time, error) {
 	return days, nil
 }
 
-func (d *ElectricityMeter200) monthlyStat(month byte) (uint64, uint64, uint64, uint64, error) {
+func (d *MercuryV1) monthlyStat(month byte) (uint64, uint64, uint64, uint64, error) {
 	response, err := d.Request(FunctionReadMonthlyStat, []byte{month})
 	if err != nil {
 		return 0, 0, 0, 0, err
@@ -522,7 +519,7 @@ func (d *ElectricityMeter200) monthlyStat(month byte) (uint64, uint64, uint64, u
 	return values[0] * 10, values[1] * 10, values[2] * 10, values[3] * 10, nil
 }
 
-func (d *ElectricityMeter200) MonthlyStat() (uint64, uint64, uint64, uint64, error) {
+func (d *MercuryV1) MonthlyStat() (uint64, uint64, uint64, uint64, error) {
 	// 0x0F текущий месяц, но модель 200 возвращает не корректные значения
 	// поэтому лучше указывать месяц явно
 
@@ -530,11 +527,11 @@ func (d *ElectricityMeter200) MonthlyStat() (uint64, uint64, uint64, uint64, err
 }
 
 // значения счетчика на 1 число месяца
-func (d *ElectricityMeter200) MonthlyStatByMonth(month time.Month) (uint64, uint64, uint64, uint64, error) {
+func (d *MercuryV1) MonthlyStatByMonth(month time.Month) (uint64, uint64, uint64, uint64, error) {
 	return d.monthlyStat(byte(int(month) - 1))
 }
 
-func (d *ElectricityMeter200) CurrentTariff() (uint64, error) {
+func (d *MercuryV1) CurrentTariff() (uint64, error) {
 	response, err := d.Request(FunctionReadCurrentTariff, nil)
 	if err != nil {
 		return 0, err
@@ -543,7 +540,7 @@ func (d *ElectricityMeter200) CurrentTariff() (uint64, error) {
 	return uint64(response[0]), nil
 }
 
-func (d *ElectricityMeter200) DisplayTime() (uint64, uint64, uint64, uint64, error) {
+func (d *MercuryV1) DisplayTime() (uint64, uint64, uint64, uint64, error) {
 	response, err := d.Request(FunctionReadDisplayTime, nil)
 	if err != nil {
 		return 0, 0, 0, 0, err
@@ -557,7 +554,7 @@ func (d *ElectricityMeter200) DisplayTime() (uint64, uint64, uint64, uint64, err
 // t2 / 10 / время индикации энергии текущего тарифа
 // t3 /  5 / время индикации мощности, времени и даты
 // t4 / 30 / время индикации после нажатия кнопки
-func (d *ElectricityMeter200) SetDisplayTime(t1, t2, t3, t4 uint64) error {
+func (d *MercuryV1) SetDisplayTime(t1, t2, t3, t4 uint64) error {
 	_, err := d.Request(FunctionWriteDisplayTime, []byte{
 		byte(t1),
 		byte(t2),
@@ -567,7 +564,7 @@ func (d *ElectricityMeter200) SetDisplayTime(t1, t2, t3, t4 uint64) error {
 	return err
 }
 
-func (d *ElectricityMeter200) WorkingTime() (uint64, uint64, error) {
+func (d *MercuryV1) WorkingTime() (uint64, uint64, error) {
 	response, err := d.Request(FunctionReadWorkingTime, nil)
 	if err != nil {
 		return 0, 0, err

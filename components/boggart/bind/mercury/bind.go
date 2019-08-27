@@ -5,14 +5,14 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/atomic"
-	"github.com/kihamo/boggart/components/boggart/providers/mercury"
+	mercury "github.com/kihamo/boggart/components/boggart/providers/mercury/v1"
 )
 
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
 
-	provider *mercury.ElectricityMeter200
+	provider *mercury.MercuryV1
 
 	tariff1          *atomic.Uint32Null
 	tariff2          *atomic.Uint32Null

@@ -5,18 +5,19 @@ import (
 	"bytes"
 	"context"
 	"encoding/xml"
-	"github.com/go-openapi/runtime"
-	httptransport "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/runtime/logger"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/event"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision/models"
 	"io"
 	"io/ioutil"
 	"mime"
 	"mime/multipart"
 	"net"
 	"net/http"
+
+	"github.com/go-openapi/runtime"
+	httptransport "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/runtime/logger"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/event"
+	"github.com/kihamo/boggart/components/boggart/providers/hikvision/models"
 )
 
 type Client struct {
