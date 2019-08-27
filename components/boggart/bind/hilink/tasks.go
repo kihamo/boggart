@@ -7,6 +7,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/device"
+	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/net"
 	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/sms"
 	"github.com/kihamo/boggart/components/boggart/providers/hilink/static/models"
 	"github.com/kihamo/boggart/components/mqtt"
@@ -57,6 +58,17 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 
 	if b.SerialNumber() == "" {
 		b.SetSerialNumber(deviceInfo.Payload.SerialNumber)
+	}
+
+	if b.operator.IsEmpty() {
+		plmn, err := b.client.Net.GetCurrentPLMN(net.NewGetCurrentPLMNParamsWithContext(ctx))
+		if err == nil {
+			b.operator.Set(plmn.Payload.FullName)
+			b.MQTTPublishAsync(
+				ctx,
+				MQTTPublishTopicOperator.Format(mqtt.NameReplace(deviceInfo.Payload.SerialNumber)),
+				plmn.Payload.FullName)
+		}
 	}
 
 	b.UpdateStatus(boggart.BindStatusOnline)
@@ -112,10 +124,13 @@ func (b *Bind) taskSMSChecker(ctx context.Context) (interface{}, error) {
 				continue
 			}
 
-			e = b.MQTTPublishAsync(ctx, MQTTPublishTopicSMS.Format(sn), payload)
-			if e != nil {
-				err = multierr.Append(err, e)
-				continue
+			isSpecial := b.checkSpecialSMS(ctx, s)
+			if !isSpecial {
+				e = b.MQTTPublishAsync(ctx, MQTTPublishTopicSMS.Format(sn), payload)
+				if e != nil {
+					err = multierr.Append(err, e)
+					continue
+				}
 			}
 
 			params := sms.NewReadSMSParamsWithContext(ctx)

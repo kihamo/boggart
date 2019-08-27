@@ -8,8 +8,6 @@ import (
 
 const (
 	DefaultDebug              = false
-	DefaultBalanceRegexp      = `OCTATOK (?P<balance>\d+\.\d{2})\sp\..*?`
-	DefaultBalanceUSSD        = "*105#"
 	DefaultLivenessInterval   = time.Minute
 	DefaultLivenessTimeout    = time.Second * 5
 	DefaultUpdaterInterval    = time.Hour
@@ -20,8 +18,6 @@ const (
 
 type Config struct {
 	Address            boggart.URL `valid:",required"`
-	BalanceRegexp      string      `mapstructure:"balance_regexp" yaml:"balance_regexp"`
-	BalanceUSSD        string      `mapstructure:"balance_ussd" yaml:"balance_ussd"`
 	Debug              bool
 	LivenessInterval   time.Duration `mapstructure:"liveness_interval" yaml:"liveness_interval"`
 	LivenessTimeout    time.Duration `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
@@ -33,8 +29,6 @@ type Config struct {
 
 func (t Type) Config() interface{} {
 	return &Config{
-		BalanceRegexp:      DefaultBalanceRegexp,
-		BalanceUSSD:        DefaultBalanceUSSD,
 		Debug:              DefaultDebug,
 		LivenessInterval:   DefaultLivenessInterval,
 		LivenessTimeout:    DefaultLivenessTimeout,

@@ -3,23 +3,26 @@ package hilink
 import (
 	"context"
 	"errors"
-	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/providers/hilink"
 	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/ussd"
 	"github.com/kihamo/boggart/components/boggart/providers/hilink/models"
+	"github.com/kihamo/boggart/components/mqtt"
 )
 
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
 
-	config        *Config
-	client        *hilink.Client
-	balanceRegexp *regexp.Regexp
+	config                    *Config
+	client                    *hilink.Client
+	operator                  *atomic.String
+	limitInternetTrafficIndex *atomic.Int64
 }
 
 func (b *Bind) USSD(ctx context.Context, content string) (string, error) {
@@ -56,17 +59,59 @@ func (b *Bind) USSD(ctx context.Context, content string) (string, error) {
 }
 
 func (b *Bind) Balance(ctx context.Context) (float64, error) {
-	content, err := b.USSD(ctx, b.config.BalanceUSSD)
+	op := b.operatorSettings()
+	if op == nil {
+		return -1, errors.New("operator settings isn't found")
+	}
+
+	content, err := b.USSD(ctx, op.BalanceUSSD)
 	if err != nil {
 		return -1, err
 	}
 
-	match := b.balanceRegexp.FindStringSubmatch(content)
-	for i, name := range b.balanceRegexp.SubexpNames() {
-		if name == "balance" {
+	match := op.BalanceRegexp.FindStringSubmatch(content)
+	for i, name := range op.BalanceRegexp.SubexpNames() {
+		if name == "value" {
 			return strconv.ParseFloat(match[i], 64)
 		}
 	}
 
 	return 0, errors.New("balance not found")
+}
+
+func (b *Bind) operatorSettings() *operator {
+	switch strings.ToLower(b.operator.Load()) {
+	case "tele2", "tele2 ru":
+		return operatorTele2
+	}
+
+	return nil
+}
+
+func (b *Bind) checkSpecialSMS(ctx context.Context, sms *models.SMSListMessagesItems0) (result bool) {
+	op := b.operatorSettings()
+	if op == nil {
+		return result
+	}
+
+	sn := mqtt.NameReplace(b.SerialNumber())
+
+	if sms.Index > b.limitInternetTrafficIndex.Load() {
+		match := op.SMSLimitTrafficRegexp.FindStringSubmatch(sms.Content)
+		for i, name := range op.SMSLimitTrafficRegexp.SubexpNames() {
+			if name == "value" {
+				result = true
+
+				if value, err := strconv.ParseInt(match[i], 10, 64); err == nil {
+					b.MQTTPublishAsync(ctx, MQTTPublishTopicLimitInternetTraffic.Format(sn), value)
+
+					b.limitInternetTrafficIndex.Set(sms.Index)
+				}
+
+				break
+			}
+		}
+	}
+
+	return result
 }

@@ -12,6 +12,7 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/device"
+	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/net"
 	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/sms"
 	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/ussd"
 	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/web_server"
@@ -61,6 +62,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *HiLink {
 	cli.Transport = transport
 
 	cli.Device = device.New(transport, formats)
+
+	cli.Net = net.New(transport, formats)
 
 	cli.Sms = sms.New(transport, formats)
 
@@ -114,6 +117,8 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 type HiLink struct {
 	Device *device.Client
 
+	Net *net.Client
+
 	Sms *sms.Client
 
 	Ussd *ussd.Client
@@ -128,6 +133,8 @@ func (c *HiLink) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 
 	c.Device.SetTransport(transport)
+
+	c.Net.SetTransport(transport)
 
 	c.Sms.SetTransport(transport)
 

@@ -9,17 +9,21 @@ import (
 )
 
 const (
-	MQTTSubscribeTopicUSSDSend   mqtt.Topic = boggart.ComponentName + "/hilink/+/ussd/send"
-	MQTTSubscribeTopicUSSDResult mqtt.Topic = boggart.ComponentName + "/hilink/+/ussd"
-	MQTTSubscribeTopicReboot     mqtt.Topic = boggart.ComponentName + "/hilink/+/reboot"
-	MQTTPublishTopicSMS          mqtt.Topic = boggart.ComponentName + "/hilink/+/sms"
-	MQTTPublishTopicBalance      mqtt.Topic = boggart.ComponentName + "/hilink/+/balance"
+	MQTTSubscribeTopicUSSDSend           mqtt.Topic = boggart.ComponentName + "/hilink/+/ussd/send"
+	MQTTSubscribeTopicUSSDResult         mqtt.Topic = boggart.ComponentName + "/hilink/+/ussd"
+	MQTTSubscribeTopicReboot             mqtt.Topic = boggart.ComponentName + "/hilink/+/reboot"
+	MQTTPublishTopicSMS                  mqtt.Topic = boggart.ComponentName + "/hilink/+/sms"
+	MQTTPublishTopicBalance              mqtt.Topic = boggart.ComponentName + "/hilink/+/balance"
+	MQTTPublishTopicOperator             mqtt.Topic = boggart.ComponentName + "/hilink/+/operator"
+	MQTTPublishTopicLimitInternetTraffic mqtt.Topic = boggart.ComponentName + "/hilink/+/limits/internet-traffic"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
 		MQTTPublishTopicSMS,
 		MQTTPublishTopicBalance,
+		MQTTPublishTopicOperator,
+		MQTTPublishTopicLimitInternetTraffic,
 	}
 }
 

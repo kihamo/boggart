@@ -1,9 +1,8 @@
 package hilink
 
 import (
-	"regexp"
-
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/protocols/swagger"
 	"github.com/kihamo/boggart/components/boggart/providers/hilink"
 )
@@ -16,12 +15,9 @@ func (t Type) CreateBind(c interface{}) (_ boggart.Bind, err error) {
 	config := c.(*Config)
 
 	bind := &Bind{
-		config: config,
-	}
-
-	bind.balanceRegexp, err = regexp.Compile(config.BalanceRegexp)
-	if err != nil {
-		return nil, err
+		config:                    config,
+		operator:                  atomic.NewString(),
+		limitInternetTrafficIndex: atomic.NewInt64(),
 	}
 
 	l := swagger.NewLogger(

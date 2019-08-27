@@ -77,6 +77,16 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/DeviceSignal"
+  /net/current-plmn:
+    get:
+      operationId: "getCurrentPLMN"
+      tags:
+        - "net"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/CurrentPLMN"
   /sms/sms-count:
     get:
       operationId: "getSMSCount"
@@ -381,6 +391,29 @@ definitions:
         type: "string"
         xml:
           name: "lte_bandinfo"
+  CurrentPLMN:
+    type: "object"
+    properties:
+      State:
+        type: "integer"
+        xml:
+          name: "State"
+      FullName:
+        type: "string"
+        xml:
+          name: "FullName"
+      ShortName:
+        type: "string"
+        xml:
+          name: "ShortName"
+      Numeric:
+        type: "integer"
+        xml:
+          name: "Numeric"
+      Rat:
+        type: "integer"
+        xml:
+          name: "Rat"
   SMSCount:
     type: "object"
     properties:
