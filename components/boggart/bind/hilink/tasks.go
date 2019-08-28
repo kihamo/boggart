@@ -48,7 +48,7 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	deviceInfo, err := b.client.Device.GetDeviceInformation(device.NewGetDeviceInformationParamsWithContext(ctx))
 	if err != nil {
 		b.UpdateStatus(boggart.BindStatusOffline)
-		return nil, nil
+		return nil, err
 	}
 
 	if deviceInfo.Payload.SerialNumber == "" {
@@ -60,18 +60,20 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		b.SetSerialNumber(deviceInfo.Payload.SerialNumber)
 	}
 
+	b.UpdateStatus(boggart.BindStatusOnline)
+
 	if b.operator.IsEmpty() {
 		plmn, err := b.client.Net.GetCurrentPLMN(net.NewGetCurrentPLMNParamsWithContext(ctx))
 		if err == nil {
 			b.operator.Set(plmn.Payload.FullName)
-			b.MQTTPublishAsync(
+			return nil, b.MQTTPublishAsync(
 				ctx,
 				MQTTPublishTopicOperator.Format(mqtt.NameReplace(deviceInfo.Payload.SerialNumber)),
 				plmn.Payload.FullName)
+		} else {
+			return nil, err
 		}
 	}
-
-	b.UpdateStatus(boggart.BindStatusOnline)
 
 	return nil, err
 }
@@ -126,8 +128,7 @@ func (b *Bind) taskSMSChecker(ctx context.Context) (interface{}, error) {
 
 			isSpecial := b.checkSpecialSMS(ctx, s)
 			if !isSpecial {
-				e = b.MQTTPublishAsync(ctx, MQTTPublishTopicSMS.Format(sn), payload)
-				if e != nil {
+				if e = b.MQTTPublishAsync(ctx, MQTTPublishTopicSMS.Format(sn), payload); e != nil {
 					err = multierr.Append(err, e)
 					continue
 				}
