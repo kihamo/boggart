@@ -31,6 +31,7 @@ const (
 	ParamCodeTransformationCoefficient      byte = 0x02
 	ParamCodeVersion                        byte = 0x03
 	ParamCodeAddress                        byte = 0x05
+	ParamCodeAuxiliaryParameters            byte = 0x11
 	ParamCodeType                           byte = 0x12
 	ParamCodeSelfDiagnostics                byte = 0x0A
 	ParamCodeLocation                       byte = 0x0B
