@@ -1,6 +1,8 @@
 package v3
 
 import (
+	"bytes"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"strconv"
@@ -62,4 +64,15 @@ func ParseBuildDate(data []byte) time.Time {
 // TODO:
 func ParseType(data []byte) *Type {
 	return nil
+}
+
+func ParseArrayValue(data []byte) uint64 {
+	if bytes.Compare(data, []byte{255, 255, 255, 255}) == 0 {
+		return 0
+	}
+
+	value := hex.EncodeToString([]byte{data[1], data[0], data[3], data[2]})
+	result, _ := strconv.ParseUint(value, 16, 64)
+
+	return result
 }

@@ -181,22 +181,53 @@ func (d *MercuryV3) Type() (*Type, error) {
 	return ParseType(resp), nil
 }
 
-func (d *MercuryV3) Raw() error {
-	resp, err := d.Request(&Request{
-		Address:       d.address,
-		Code:          RequestCodeReadParameter,
-		ParameterCode: &[]byte{0x0C}[0],
+func (d *MercuryV3) ReadArray(a array, m *month, t tariff) (a1, a2, r3, r4 uint64, err error) {
+	code := int(ArrayReset)
+
+	if m != nil {
+		code |= int(*m)
+	}
+
+	var resp *Response
+
+	resp, err = d.Request(&Request{
+		Address:            d.address,
+		Code:               RequestCodeReadArray,
+		ParameterCode:      &[]byte{byte(code)}[0],
+		ParameterExtension: &[]byte{byte(t)}[0],
 	})
 
 	if err != nil {
-		return err
+		return
 	}
 
-	if err := ResponseError(resp); err != nil {
-		return err
+	if err = ResponseError(resp); err != nil {
+		return
 	}
 
-	fmt.Println(resp.Payload)
+	// Если поле данных ответа содержит 12 байт, то отводится по четыре двоичных байта на каждую фазу энергии А+ в последовательности:
+	// - активная прямая по 1 фазе
+	// - активная прямая по 2 фазе
+	// - активная прямая по 3 фазе.
+	//
+	// Если поле данных ответа содержит 16 байт, то отводится по четыре двоичных байта на каждый вид энергии в последовательности:
+	// - для кода запроса 5h:
+	//   > активная прямая (А+)
+	//   > активная обратная (А-)
+	//   > реактивная прямая (R+)
+	//   > реактивная обратная (R-)
+	// - для кода запроса 15h:
+	//   > реактивная R1
+	//   > R2
+	//   > R3
+	//   > R4
+	a1 = ParseArrayValue(resp.Payload[0:4])
+	a2 = ParseArrayValue(resp.Payload[4:8])
+	r3 = ParseArrayValue(resp.Payload[8:12])
 
-	return nil
+	if len(resp.Payload) > 12 {
+		r4 = ParseArrayValue(resp.Payload[12:16])
+	}
+
+	return
 }
