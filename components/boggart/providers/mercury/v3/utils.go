@@ -2,7 +2,9 @@ package v3
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
+	"time"
 )
 
 // Меркурий 230, 231, 233, 234, 236
@@ -25,7 +27,11 @@ func ConvertSerialNumber(serial string) byte {
 }
 
 func ResponseError(response *Response) error {
-	switch response.Payload[0] {
+	return PayloadError(response.Payload)
+}
+
+func PayloadError(payload []byte) error {
+	switch payload[0] {
 	case ResponseCodeBadRequest:
 		return errors.New("bad request")
 	case ResponseCodeInternalError:
@@ -38,5 +44,22 @@ func ResponseError(response *Response) error {
 		return errors.New("channel is closed")
 	}
 
+	return nil
+}
+
+func ParseFirmwareVersion(data []byte) string {
+	return fmt.Sprintf("%d.%d.%d", data[0], data[1], data[2])
+}
+
+func ParseSerialNumber(data []byte) string {
+	return fmt.Sprintf("%d%d%d%d", data[0], data[1], data[2], data[3])
+}
+
+func ParseBuildDate(data []byte) time.Time {
+	return time.Date(2000+int(data[2]), time.Month(int(data[1])), int(data[0]), 0, 0, 0, 0, time.UTC)
+}
+
+// TODO:
+func ParseType(data []byte) *Type {
 	return nil
 }
