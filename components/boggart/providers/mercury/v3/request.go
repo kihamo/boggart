@@ -23,14 +23,19 @@ const (
 	AccessLevel1 accessLevel = 0x1
 	AccessLevel2 accessLevel = 0x2
 
-	ParamCodeSerialNumberAndBuildDate  byte = 0x0
-	ParamCodeForceReadParameters       byte = 0x01
-	ParamCodeTransformationCoefficient byte = 0x02
-	ParamCodeVersion                   byte = 0x03
-	ParamCodeAddress                   byte = 0x05
-	ParamCodeType                      byte = 0x12
-	ParamCodeSelfDiagnostics           byte = 0x0A
-	ParamCodeLocation                  byte = 0x0B
+	ParamCodeSerialNumberAndBuildDate       byte = 0x0
+	ParamCodeForceReadParameters            byte = 0x01
+	ParamCodeTransformationCoefficient      byte = 0x02
+	ParamCodeVersion                        byte = 0x03
+	ParamCodeAddress                        byte = 0x05
+	ParamCodeType                           byte = 0x12
+	ParamCodeSelfDiagnostics                byte = 0x0A
+	ParamCodeLocation                       byte = 0x0B
+	ParamCodeTarifficatorStatus             byte = 0x17
+	ParamCodeLoadManager                    byte = 0x18
+	ParamCodeLimitPower                     byte = 0x19
+	ParamCodeMultiplierTimeoutMainInterface byte = 0x1D
+	ParamCodeCRC16                          byte = 0x26
 )
 
 type Request struct {
