@@ -166,6 +166,26 @@ func (d *MercuryV3) Address() (byte, error) {
 	return resp[1], nil
 }
 
+// 2.5.32. ЧТЕНИЕ ВСПОМОГАТЕЛЬНЫХ ПАРАМЕТРОВ.
+func (d *MercuryV3) AuxiliaryParameters(bwri byte) ([]byte, error) {
+	resp, err := d.Request(&Request{
+		Address:            d.address,
+		Code:               RequestCodeReadParameter,
+		ParameterCode:      &[]byte{ParamCodeAuxiliaryParameters}[0],
+		ParameterExtension: &[]byte{bwri}[0],
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err := ResponseError(resp); err != nil {
+		return nil, err
+	}
+
+	return resp.Payload, nil
+}
+
 // 2.5.33. ЧТЕНИЕ ВАРИАНТА ИСПОЛНЕНИЯ.
 func (d *MercuryV3) Type() (*Type, error) {
 	resp, err := d.ReadParameter(ParamCodeType)
@@ -230,4 +250,21 @@ func (d *MercuryV3) ReadArray(a array, m *month, t tariff) (a1, a2, r3, r4 uint6
 	}
 
 	return
+}
+
+func (d *MercuryV3) Raw() error {
+	resp, err := d.Request(&Request{
+		Address:            d.address,
+		Code:               RequestCodeReadParameter,
+		ParameterCode:      &[]byte{ParamCodeAuxiliaryParameters}[0],
+		ParameterExtension: &[]byte{0x12}[0],
+	})
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(resp.Payload)
+
+	return nil
 }
