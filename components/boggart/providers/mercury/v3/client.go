@@ -182,7 +182,7 @@ func (d *MercuryV3) Type() (*Type, error) {
 }
 
 func (d *MercuryV3) ReadArray(a array, m *month, t tariff) (a1, a2, r3, r4 uint64, err error) {
-	code := int(ArrayReset)
+	code := int(a)
 
 	if m != nil {
 		code |= int(*m)
