@@ -7,6 +7,16 @@ import (
 )
 
 func init() {
-	boggart.RegisterBindType("mercury:200", v1.Type{})
-	boggart.RegisterBindType("mercury:230", v3.Type{})
+	version1 := v1.Type{}
+	boggart.RegisterBindType("mercury:200", version1)
+	boggart.RegisterBindType("mercury:201", version1)
+	boggart.RegisterBindType("mercury:203", version1)
+	boggart.RegisterBindType("mercury:206", version1)
+
+	version3 := v3.Type{}
+	boggart.RegisterBindType("mercury:203.2TD", version3)
+	boggart.RegisterBindType("mercury:230", version3)
+	boggart.RegisterBindType("mercury:231", version3)
+	boggart.RegisterBindType("mercury:233", version3)
+	boggart.RegisterBindType("mercury:234", version3)
 }
