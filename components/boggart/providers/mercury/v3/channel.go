@@ -2,8 +2,8 @@ package v3
 
 // 2.1. ЗАПРОС НА ТЕСТИРОВАНИЕ КАНАЛА СВЯЗИ
 func (m *MercuryV3) ChannelTest() error {
-	resp, err := m.Request(&Request{
-		Address: m.address,
+	resp, err := m.RequestRaw(&Request{
+		Address: m.options.address,
 		Code:    RequestCodeChannelTest,
 	})
 
@@ -18,8 +18,8 @@ func (m *MercuryV3) ChannelTest() error {
 func (m *MercuryV3) ChannelOpen(level accessLevel, password LevelPassword) error {
 	l := byte(level)
 
-	resp, err := m.Request(&Request{
-		Address:       m.address,
+	resp, err := m.RequestRaw(&Request{
+		Address:       m.options.address,
 		Code:          RequestCodeChannelOpen,
 		ParameterCode: &l,
 		Parameters:    password.Bytes(),
@@ -34,8 +34,8 @@ func (m *MercuryV3) ChannelOpen(level accessLevel, password LevelPassword) error
 
 // 2.2. ЗАПРОСЫ НА ОТКРЫТИЕ/ЗАКРЫТИЕ КАНАЛА СВЯЗИ
 func (m *MercuryV3) ChannelClose() error {
-	resp, err := m.Request(&Request{
-		Address: m.address,
+	resp, err := m.RequestRaw(&Request{
+		Address: m.options.address,
 		Code:    RequestCodeChannelClose,
 	})
 

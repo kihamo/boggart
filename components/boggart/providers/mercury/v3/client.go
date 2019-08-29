@@ -1,45 +1,63 @@
 package v3
 
 import (
-	"encoding/hex"
 	"fmt"
 
 	"github.com/kihamo/boggart/components/boggart/providers/mercury"
 )
 
 type MercuryV3 struct {
-	address    byte
 	connection mercury.Connection
+	options    options
 }
 
-func New(connection mercury.Connection) *MercuryV3 {
-	return &MercuryV3{
-		address:    0x0,
+func New(connection mercury.Connection, opts ...Option) *MercuryV3 {
+	m := &MercuryV3{
 		connection: connection,
+		options:    defaultOptions(),
 	}
-}
 
-func (m *MercuryV3) WithAddress(address byte) *MercuryV3 {
-	m.address = address
+	for _, opt := range opts {
+		opt.apply(&m.options)
+	}
+
 	return m
 }
 
-func (m *MercuryV3) Request(request *Request) (*Response, error) {
-	fmt.Println("Request: >>>>>")
-	fmt.Println(hex.Dump(request.Bytes()))
+func (m *MercuryV3) Request(request *Request) (response *Response, err error) {
+	err = m.ChannelOpen(m.options.accessLevel, m.options.password)
+	if err != nil {
+		return response, err
+	}
+
+	response, err = m.RequestRaw(request)
+	if err == nil {
+		err = m.ChannelClose()
+	}
+
+	return response, err
+}
+
+func (m *MercuryV3) RequestRaw(request *Request) (*Response, error) {
+	// fmt.Println("Request: >>>>>")
+	// fmt.Println(hex.Dump(request.Bytes()))
 
 	data, err := m.connection.Invoke(request.Bytes())
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := ParseResponse(data)
-	if err == nil {
-		fmt.Println("Response: <<<<<")
-		fmt.Println(hex.Dump(response.Bytes()))
-	}
+	return ParseResponse(data)
 
-	return response, err
+	/*
+		response, err := ParseResponse(data)
+		if err == nil {
+			fmt.Println("Response: <<<<<")
+			fmt.Println(hex.Dump(response.Bytes()))
+		}
+
+		return response, err
+	*/
 }
 
 func (m *MercuryV3) Raw() error {

@@ -62,7 +62,7 @@ const (
 
 func (m *MercuryV3) ReadParameter(param byte) ([]byte, error) {
 	resp, err := m.Request(&Request{
-		Address:       m.address,
+		Address:       m.options.address,
 		Code:          RequestCodeReadParameter,
 		ParameterCode: &[]byte{param}[0],
 	})
@@ -140,7 +140,7 @@ func (m *MercuryV3) Address() (int64, error) {
 // 2.5.32. ЧТЕНИЕ ВСПОМОГАТЕЛЬНЫХ ПАРАМЕТРОВ.
 func (m *MercuryV3) AuxiliaryParameters(bwri int64) ([]byte, error) {
 	resp, err := m.Request(&Request{
-		Address:            m.address,
+		Address:            m.options.address,
 		Code:               RequestCodeReadParameter,
 		ParameterCode:      &[]byte{ParamCodeAuxiliaryParameters12}[0],
 		ParameterExtension: &[]byte{byte(bwri)}[0],
@@ -264,17 +264,17 @@ func (m *MercuryV3) Type() (*Type, error) {
 	return ParseType(resp), nil
 }
 
-func (m *MercuryV3) ReadArray(a array, mo *month, t tariff) (a1, a2, r3, r4 uint64, err error) {
-	code := int(a)
+func (m *MercuryV3) ReadArray(arr array, mo *month, t tariff) (a1, a2, r3, r4 uint64, err error) {
+	code := int(arr)
 
-	if m != nil {
+	if mo != nil {
 		code |= int(*mo)
 	}
 
 	var resp *Response
 
 	resp, err = m.Request(&Request{
-		Address:            m.address,
+		Address:            m.options.address,
 		Code:               RequestCodeReadArray,
 		ParameterCode:      &[]byte{byte(code)}[0],
 		ParameterExtension: &[]byte{byte(t)}[0],
