@@ -8,9 +8,6 @@ import (
 
 type requestCode int
 type accessLevel int
-type array int
-type month int
-type tariff int
 
 const (
 	RequestCodeChannelTest     requestCode = 0x0
@@ -31,47 +28,16 @@ const (
 	ParamCodeTransformationCoefficient      byte = 0x02
 	ParamCodeVersion                        byte = 0x03
 	ParamCodeAddress                        byte = 0x05
-	ParamCodeAuxiliaryParameters            byte = 0x11
+	ParamCodeAuxiliaryParameters3           byte = 0x11
 	ParamCodeType                           byte = 0x12
 	ParamCodeSelfDiagnostics                byte = 0x0A
 	ParamCodeLocation                       byte = 0x0B
+	ParamCodeAuxiliaryParameters12          byte = 0x16
 	ParamCodeTarifficatorStatus             byte = 0x17
 	ParamCodeLoadManager                    byte = 0x18
 	ParamCodeLimitPower                     byte = 0x19
 	ParamCodeMultiplierTimeoutMainInterface byte = 0x1D
 	ParamCodeCRC16                          byte = 0x26
-
-	ArrayReset                 array = 0x00
-	ArrayCurrentYear           array = 0x10
-	ArrayPreviousYear          array = 0x20
-	ArrayMonth                 array = 0x30
-	ArrayCurrentDay            array = 0x40
-	ArrayPreviousDay           array = 0x50
-	ArrayActiveEnergy          array = 0x60
-	ArrayBeginningCurrentYear  array = 0x90
-	ArrayBeginningPreviousYear array = 0xA0
-	ArrayBeginningMonth        array = 0xB0
-	ArrayBeginningCurrentDay   array = 0xC0
-	ArrayBeginningPreviousDay  array = 0xD0
-
-	MonthJanuary   month = 0x01
-	MonthFebruary  month = 0x02
-	MonthMarch     month = 0x03
-	MonthApril     month = 0x04
-	MonthMay       month = 0x05
-	MonthJune      month = 0x06
-	MonthJuly      month = 0x07
-	MonthAugust    month = 0x08
-	MonthSeptember month = 0x09
-	MonthOctober   month = 0x0A
-	MonthNovember  month = 0x0B
-	MonthDecember  month = 0x0C
-
-	TariffAll tariff = 0x0
-	Tariff1   tariff = 0x1
-	Tariff2   tariff = 0x2
-	Tariff3   tariff = 0x3
-	Tariff4   tariff = 0x4
 )
 
 type Request struct {

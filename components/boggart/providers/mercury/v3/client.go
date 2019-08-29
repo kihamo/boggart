@@ -19,16 +19,16 @@ func New(connection mercury.Connection) *MercuryV3 {
 	}
 }
 
-func (d *MercuryV3) WithAddress(address byte) *MercuryV3 {
-	d.address = address
-	return d
+func (m *MercuryV3) WithAddress(address byte) *MercuryV3 {
+	m.address = address
+	return m
 }
 
-func (d *MercuryV3) Request(request *Request) (*Response, error) {
+func (m *MercuryV3) Request(request *Request) (*Response, error) {
 	fmt.Println("Request: >>>>>")
 	fmt.Println(hex.Dump(request.Bytes()))
 
-	data, err := d.connection.Invoke(request.Bytes())
+	data, err := m.connection.Invoke(request.Bytes())
 	if err != nil {
 		return nil, err
 	}
@@ -42,11 +42,11 @@ func (d *MercuryV3) Request(request *Request) (*Response, error) {
 	return response, err
 }
 
-func (d *MercuryV3) Raw() error {
-	resp, err := d.Request(&Request{
-		Address:            d.address,
+func (m *MercuryV3) Raw() error {
+	resp, err := m.Request(&Request{
+		Address:            m.address,
 		Code:               RequestCodeReadParameter,
-		ParameterCode:      &[]byte{ParamCodeAuxiliaryParameters}[0],
+		ParameterCode:      &[]byte{ParamCodeAuxiliaryParameters3}[0],
 		ParameterExtension: &[]byte{0x12}[0],
 	})
 
