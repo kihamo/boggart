@@ -43,18 +43,14 @@ func (m *MercuryV3) Request(request *Request) (*Response, error) {
 }
 
 func (m *MercuryV3) Raw() error {
-	resp, err := m.Request(&Request{
-		Address:            m.address,
-		Code:               RequestCodeReadParameter,
-		ParameterCode:      &[]byte{ParamCodeAuxiliaryParameters3}[0],
-		ParameterExtension: &[]byte{0x12}[0],
-	})
+	bwri := int64(0x8<<4) | int64(PhaseNumber1)
+	resp, err := m.AuxiliaryParameters(bwri)
 
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(resp.Payload)
+	fmt.Println(resp)
 
 	return nil
 }

@@ -48,6 +48,7 @@ const (
 	AuxiliaryAmperage     int64 = 0x2
 	AuxiliaryPowerFactors int64 = 0x3
 	AuxiliaryFrequency    int64 = 0x4
+	AuxiliaryPhasesAngle  int64 = 0x5
 
 	PowerNumberP powerNumber = 0x0
 	PowerNumberQ powerNumber = 0x1
@@ -193,6 +194,21 @@ func (m *MercuryV3) Amperage() (phase1, phase2, phase3 float64, err error) {
 	var resp []byte
 
 	bwri := AuxiliaryAmperage<<4 | 0x1
+	resp, err = m.AuxiliaryParameters(bwri)
+
+	if err == nil {
+		phase1 = float64(ParseValue3Bytes(resp[:3])) / 1000
+		phase2 = float64(ParseValue3Bytes(resp[3:6])) / 1000
+		phase3 = float64(ParseValue3Bytes(resp[6:9])) / 1000
+	}
+
+	return
+}
+
+func (m *MercuryV3) PhasesAngle() (phase1, phase2, phase3 float64, err error) {
+	var resp []byte
+
+	bwri := AuxiliaryPhasesAngle<<4 | 0x1
 	resp, err = m.AuxiliaryParameters(bwri)
 
 	if err == nil {
