@@ -8,6 +8,7 @@ type operator struct {
 	BalanceUSSD           string
 	BalanceRegexp         *regexp.Regexp
 	SMSLimitTrafficRegexp *regexp.Regexp
+	SMSLimitTrafficFactor float64
 }
 
 var (
@@ -15,5 +16,6 @@ var (
 		BalanceUSSD:           "*105#",
 		BalanceRegexp:         regexp.MustCompile(`OCTATOK (?P<value>\d+\.\d{2})\sp\..*?`),
 		SMSLimitTrafficRegexp: regexp.MustCompile(`остатки пакетов:.*?(?P<value>\d+) МБ Интернет.*?`),
+		SMSLimitTrafficFactor: 1024 * 1024,
 	}
 )

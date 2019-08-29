@@ -104,9 +104,11 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, sms *models.SMSListMessagesI
 				result = true
 
 				if value, err := strconv.ParseFloat(match[i], 64); err == nil {
+					value *= op.SMSLimitTrafficFactor
+
 					metricLimitInternetTraffic.With("serial_number", sn).Set(value)
 
-					b.MQTTPublishAsync(ctx, MQTTPublishTopicLimitInternetTraffic.Format(snMQTT), value)
+					b.MQTTPublishAsync(ctx, MQTTPublishTopicLimitInternetTraffic.Format(snMQTT), uint64(value))
 
 					b.limitInternetTrafficIndex.Set(sms.Index)
 				}
