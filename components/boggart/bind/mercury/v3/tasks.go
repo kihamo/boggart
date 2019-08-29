@@ -4,12 +4,12 @@ import (
 	"context"
 	"time"
 
+	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/mercury/v3"
 	"github.com/kihamo/boggart/components/mqtt"
-	"go.uber.org/multierr"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
+	"go.uber.org/multierr"
 )
 
 func (b *Bind) Tasks() []workers.Task {
@@ -115,7 +115,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (_ interface{}, err error) {
 		}
 
 		if ok := b.amperage3.Set(float32(p3)); ok {
-			metricAmperage.With("serial_number", sn).With("phase", "3").Set(p1)
+			metricAmperage.With("serial_number", sn).With("phase", "3").Set(p3)
 
 			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicAmperage.Format(snMQTT, 3), p3); e != nil {
 				err = multierr.Append(err, e)

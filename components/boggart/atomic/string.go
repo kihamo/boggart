@@ -35,6 +35,10 @@ func (v *String) Load() string {
 	return v.v
 }
 
+func (v *String) IsEmpty() bool {
+	return v.Load() == ""
+}
+
 func (v *String) String() string {
 	return v.Load()
 }
