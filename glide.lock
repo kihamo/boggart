@@ -1,5 +1,5 @@
 hash: d61ba8cd01483bde85253b9c944d040c1f8b35d11ba0731a67c4accff86f5ffa
-updated: 2019-08-04T00:40:17.969561+03:00
+updated: 2019-08-29T23:56:33.664981+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -99,7 +99,7 @@ imports:
 - name: github.com/go-openapi/loads
   version: 74628589c3b94e3526a842d24f46589980f5ab22
 - name: github.com/go-openapi/runtime
-  version: 58872d9a7ca5f28beff9effa19ac4c17d3e42cd3
+  version: 882fa18ad52bee24eb77d2312d1929580e894013
   subpackages:
   - client
   - logger
@@ -157,7 +157,7 @@ imports:
   subpackages:
   - js
 - name: github.com/gorilla/websocket
-  version: 66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d
+  version: c3e18be99d19e6b3e8f1559eea2c161a665c4b6b
 - name: github.com/grpc-ecosystem/go-grpc-middleware
   version: c250d6563d4d4c20252cd865923440e829844f4e
   subpackages:
