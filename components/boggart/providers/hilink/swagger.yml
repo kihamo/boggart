@@ -77,6 +77,16 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/DeviceSignal"
+  /monitoring/status:
+    get:
+      operationId: "getMonitoringStatus"
+      tags:
+      - "monitoring"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/MonitoringStatus"
   /net/current-plmn:
     get:
       operationId: "getCurrentPLMN"
@@ -391,6 +401,125 @@ definitions:
         type: "string"
         xml:
           name: "lte_bandinfo"
+  MonitoringStatus:
+    type: "object"
+    properties:
+      ConnectionStatus:
+        type: "integer"
+        xml:
+          name: "ConnectionStatus"
+      WifiConnectionStatus:
+        type: "integer"
+        xml:
+          name: "WifiConnectionStatus"
+      SignalStrength:
+        type: "integer"
+        xml:
+          name: "SignalStrength"
+      SignalIcon:
+        type: "integer"
+        xml:
+          name: "SignalIcon"
+      CurrentNetworkType:
+        type: "integer"
+        xml:
+          name: "CurrentNetworkType"
+      CurrentServiceDomain:
+        type: "integer"
+        xml:
+          name: "CurrentServiceDomain"
+      RoamingStatus:
+        type: "integer"
+        xml:
+          name: "RoamingStatus"
+      BatteryStatus:
+        type: "integer"
+        xml:
+          name: "BatteryStatus"
+      BatteryLevel:
+        type: "integer"
+        xml:
+          name: "BatteryLevel"
+      BatteryPercent:
+        type: "integer"
+        xml:
+          name: "BatteryPercent"
+      SimlockStatus:
+        type: "integer"
+        xml:
+          name: "simlockStatus"
+      PrimaryDNS:
+        type: "string"
+        xml:
+          name: "PrimaryDns"
+      SecondaryDNS:
+        type: "string"
+        xml:
+          name: "SecondaryDns"
+      PrimaryIPv6DNS:
+        type: "string"
+        xml:
+          name: "PrimaryIPv6Dns"
+      SecondaryIPv6DNS:
+        type: "string"
+        xml:
+          name: "SecondaryIPv6Dns"
+      CurrentWiFiUser:
+        type: "integer"
+        xml:
+          name: "CurrentWifiUser"
+      TotalWiFiUser:
+        type: "integer"
+        xml:
+          name: "TotalWifiUser"
+      CurrentTotalWiFiuser:
+        type: "integer"
+        xml:
+          name: "currenttotalwifiuser"
+      ServiceStatus:
+        type: "integer"
+        xml:
+          name: "ServiceStatus"
+      SimStatus:
+        type: "integer"
+        xml:
+          name: "SimStatus"
+      WifiStatus:
+        type: "integer"
+        xml:
+          name: "WifiStatus"
+      CurrentNetworkTypeEx:
+        type: "integer"
+        xml:
+          name: "CurrentNetworkTypeEx"
+      MaxSignal:
+        type: "integer"
+        xml:
+          name: "maxsignal"
+      WiFiIndoorOnly:
+        type: "integer"
+        xml:
+          name: "wifiindooronly"
+      WiFiFrequence:
+        type: "integer"
+        xml:
+          name: "wififrequence"
+      Classify:
+        type: "string"
+        xml:
+          name: "classify"
+      FlyMode:
+        type: "integer"
+        xml:
+          name: "flymode"
+      CellRoam:
+        type: "integer"
+        xml:
+          name: "cellroam"
+      LTECAStatus:
+        type: "integer"
+        xml:
+          name: "ltecastatus"
   CurrentPLMN:
     type: "object"
     properties:

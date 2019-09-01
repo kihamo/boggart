@@ -22,6 +22,7 @@ const (
 	MQTTPublishSignalRSRP                = MQTTPrefix + "signal/rsrp"
 	MQTTPublishSignalRSRQ                = MQTTPrefix + "signal/rsrq"
 	MQTTPublishSignalSINR                = MQTTPrefix + "signal/sinr"
+	MQTTPublishSignalLevel               = MQTTPrefix + "signal/level"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
@@ -34,6 +35,7 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 		MQTTPublishSignalRSRP,
 		MQTTPublishSignalRSRQ,
 		MQTTPublishSignalSINR,
+		MQTTPublishSignalLevel,
 	}
 }
 

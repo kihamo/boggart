@@ -9,6 +9,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/device"
+	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/monitoring"
 	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/net"
 	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/sms"
 	"github.com/kihamo/boggart/components/boggart/providers/hilink/static/models"
@@ -163,9 +164,8 @@ func (b *Bind) taskSignalUpdater(ctx context.Context) (interface{}, error) {
 		return nil, nil
 	}
 
-	params := device.NewGetDeviceSignalParamsWithContext(ctx)
-
-	response, err := b.client.Device.GetDeviceSignal(params)
+	paramsSignal := device.NewGetDeviceSignalParamsWithContext(ctx)
+	responseSignal, err := b.client.Device.GetDeviceSignal(paramsSignal)
 	if err != nil {
 		return nil, err
 	}
@@ -173,7 +173,7 @@ func (b *Bind) taskSignalUpdater(ctx context.Context) (interface{}, error) {
 	sn := b.SerialNumber()
 	snMQTT := mqtt.NameReplace(sn)
 
-	if val, e := strconv.ParseInt(strings.TrimRight(response.Payload.RSSI, "dBm"), 10, 64); e == nil {
+	if val, e := strconv.ParseInt(strings.TrimRight(responseSignal.Payload.RSSI, "dBm"), 10, 64); e == nil {
 		if ok := b.signalRSSI.Set(val); ok {
 			metricSignalRSSI.With("serial_number", sn).Set(float64(val))
 
@@ -185,7 +185,7 @@ func (b *Bind) taskSignalUpdater(ctx context.Context) (interface{}, error) {
 		err = multierr.Append(err, e)
 	}
 
-	if val, e := strconv.ParseInt(strings.TrimRight(response.Payload.RSRP, "dBm"), 10, 64); e == nil {
+	if val, e := strconv.ParseInt(strings.TrimRight(responseSignal.Payload.RSRP, "dBm"), 10, 64); e == nil {
 		if ok := b.signalRSRP.Set(val); ok {
 			metricSignalRSRP.With("serial_number", sn).Set(float64(val))
 
@@ -197,7 +197,7 @@ func (b *Bind) taskSignalUpdater(ctx context.Context) (interface{}, error) {
 		err = multierr.Append(err, e)
 	}
 
-	if val, e := strconv.ParseInt(strings.TrimRight(response.Payload.RSRQ, "dBm"), 10, 64); e == nil {
+	if val, e := strconv.ParseInt(strings.TrimRight(responseSignal.Payload.RSRQ, "dBm"), 10, 64); e == nil {
 		if ok := b.signalRSRQ.Set(val); ok {
 			metricSignalRSRQ.With("serial_number", sn).Set(float64(val))
 
@@ -209,7 +209,7 @@ func (b *Bind) taskSignalUpdater(ctx context.Context) (interface{}, error) {
 		err = multierr.Append(err, e)
 	}
 
-	if val, e := strconv.ParseInt(strings.TrimRight(response.Payload.SINR, "dBm"), 10, 64); e == nil {
+	if val, e := strconv.ParseInt(strings.TrimRight(responseSignal.Payload.SINR, "dBm"), 10, 64); e == nil {
 		if ok := b.signalSINR.Set(val); ok {
 			metricSignalSINR.With("serial_number", sn).Set(float64(val))
 
@@ -219,6 +219,21 @@ func (b *Bind) taskSignalUpdater(ctx context.Context) (interface{}, error) {
 		}
 	} else {
 		err = multierr.Append(err, e)
+	}
+
+	paramsStatus := monitoring.NewGetMonitoringStatusParamsWithContext(ctx)
+	responseStatus, err := b.client.Monitoring.GetMonitoringStatus(paramsStatus)
+	if err != nil {
+		return nil, err
+	}
+
+	val := responseStatus.Payload.SignalIcon
+	if ok := b.signalLevel.Set(val); ok {
+		metricSignalLevel.With("serial_number", sn).Set(float64(val))
+
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishSignalLevel.Format(snMQTT), val); e != nil {
+			err = multierr.Append(err, e)
+		}
 	}
 
 	return nil, err

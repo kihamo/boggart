@@ -22,6 +22,7 @@ func (t Type) CreateBind(c interface{}) (_ boggart.Bind, err error) {
 		signalRSRP:                atomic.NewInt64Null(),
 		signalRSRQ:                atomic.NewInt64Null(),
 		signalSINR:                atomic.NewInt64Null(),
+		signalLevel:               atomic.NewInt64Null(),
 	}
 
 	l := swagger.NewLogger(
