@@ -23,6 +23,10 @@ type Bind struct {
 	client                    *hilink.Client
 	operator                  *atomic.String
 	limitInternetTrafficIndex *atomic.Int64
+	signalRSSI                *atomic.Int64Null
+	signalRSRP                *atomic.Int64Null
+	signalRSRQ                *atomic.Int64Null
+	signalSINR                *atomic.Int64Null
 }
 
 func (b *Bind) USSD(ctx context.Context, content string) (string, error) {

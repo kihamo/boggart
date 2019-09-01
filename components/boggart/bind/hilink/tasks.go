@@ -174,40 +174,48 @@ func (b *Bind) taskSignalUpdater(ctx context.Context) (interface{}, error) {
 	snMQTT := mqtt.NameReplace(sn)
 
 	if val, e := strconv.ParseInt(strings.TrimRight(response.Payload.RSSI, "dBm"), 10, 64); e == nil {
-		metricSignalRSSI.With("serial_number", sn).Set(float64(val))
+		if ok := b.signalRSSI.Set(val); ok {
+			metricSignalRSSI.With("serial_number", sn).Set(float64(val))
 
-		if e = b.MQTTPublishAsync(ctx, MQTTPublishSignalRSSI.Format(snMQTT), val); e != nil {
-			err = multierr.Append(err, e)
+			if e = b.MQTTPublishAsync(ctx, MQTTPublishSignalRSSI.Format(snMQTT), val); e != nil {
+				err = multierr.Append(err, e)
+			}
 		}
 	} else {
 		err = multierr.Append(err, e)
 	}
 
 	if val, e := strconv.ParseInt(strings.TrimRight(response.Payload.RSRP, "dBm"), 10, 64); e == nil {
-		metricSignalRSRP.With("serial_number", sn).Set(float64(val))
+		if ok := b.signalRSRP.Set(val); ok {
+			metricSignalRSRP.With("serial_number", sn).Set(float64(val))
 
-		if e = b.MQTTPublishAsync(ctx, MQTTPublishSignalRSRP.Format(snMQTT), val); e != nil {
-			err = multierr.Append(err, e)
+			if e = b.MQTTPublishAsync(ctx, MQTTPublishSignalRSRP.Format(snMQTT), val); e != nil {
+				err = multierr.Append(err, e)
+			}
 		}
 	} else {
 		err = multierr.Append(err, e)
 	}
 
 	if val, e := strconv.ParseInt(strings.TrimRight(response.Payload.RSRQ, "dBm"), 10, 64); e == nil {
-		metricSignalRSRQ.With("serial_number", sn).Set(float64(val))
+		if ok := b.signalRSRQ.Set(val); ok {
+			metricSignalRSRQ.With("serial_number", sn).Set(float64(val))
 
-		if e = b.MQTTPublishAsync(ctx, MQTTPublishSignalRSRQ.Format(snMQTT), val); e != nil {
-			err = multierr.Append(err, e)
+			if e = b.MQTTPublishAsync(ctx, MQTTPublishSignalRSRQ.Format(snMQTT), val); e != nil {
+				err = multierr.Append(err, e)
+			}
 		}
 	} else {
 		err = multierr.Append(err, e)
 	}
 
 	if val, e := strconv.ParseInt(strings.TrimRight(response.Payload.SINR, "dBm"), 10, 64); e == nil {
-		metricSignalSINR.With("serial_number", sn).Set(float64(val))
+		if ok := b.signalSINR.Set(val); ok {
+			metricSignalSINR.With("serial_number", sn).Set(float64(val))
 
-		if e = b.MQTTPublishAsync(ctx, MQTTPublishSignalSINR.Format(snMQTT), val); e != nil {
-			err = multierr.Append(err, e)
+			if e = b.MQTTPublishAsync(ctx, MQTTPublishSignalSINR.Format(snMQTT), val); e != nil {
+				err = multierr.Append(err, e)
+			}
 		}
 	} else {
 		err = multierr.Append(err, e)
