@@ -7,34 +7,40 @@ import (
 )
 
 const (
-	DefaultDebug              = false
-	DefaultLivenessInterval   = time.Minute
-	DefaultLivenessTimeout    = time.Second * 5
-	DefaultUpdaterInterval    = time.Hour
-	DefaultUpdaterTimeout     = time.Second * 30
-	DefaultSMSCheckerInterval = time.Minute
-	DefaultSMSCheckerTimeout  = time.Second * 30
+	DefaultDebug                  = false
+	DefaultLivenessInterval       = time.Minute
+	DefaultLivenessTimeout        = time.Second * 5
+	DefaultBalanceUpdaterInterval = time.Hour
+	DefaultBalanceUpdaterTimeout  = time.Second * 30
+	DefaultSMSCheckerInterval     = time.Minute
+	DefaultSMSCheckerTimeout      = time.Second * 30
+	DefaultSignalUpdaterInterval  = time.Minute
+	DefaultSignalUpdaterTimeout   = time.Second * 5
 )
 
 type Config struct {
-	Address            boggart.URL `valid:",required"`
-	Debug              bool
-	LivenessInterval   time.Duration `mapstructure:"liveness_interval" yaml:"liveness_interval"`
-	LivenessTimeout    time.Duration `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
-	UpdaterInterval    time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
-	UpdaterTimeout     time.Duration `mapstructure:"updater_timeout" yaml:"updater_timeout"`
-	SMSCheckerInterval time.Duration `mapstructure:"sms_checker_interval" yaml:"sms_checker_interval"`
-	SMSCheckerTimeout  time.Duration `mapstructure:"sms_checker_timeout" yaml:"sms_checker_timeout"`
+	Address                boggart.URL `valid:",required"`
+	Debug                  bool
+	LivenessInterval       time.Duration `mapstructure:"liveness_interval" yaml:"liveness_interval"`
+	LivenessTimeout        time.Duration `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
+	BalanceUpdaterInterval time.Duration `mapstructure:"balance_interval" yaml:"balance_interval"`
+	BalanceUpdaterTimeout  time.Duration `mapstructure:"balance_timeout" yaml:"balance_timeout"`
+	SMSCheckerInterval     time.Duration `mapstructure:"sms_checker_interval" yaml:"sms_checker_interval"`
+	SMSCheckerTimeout      time.Duration `mapstructure:"sms_checker_timeout" yaml:"sms_checker_timeout"`
+	SignalUpdaterInterval  time.Duration `mapstructure:"signal_interval" yaml:"signal_interval"`
+	SignalUpdaterTimeout   time.Duration `mapstructure:"signal_timeout" yaml:"signal_timeout"`
 }
 
 func (t Type) Config() interface{} {
 	return &Config{
-		Debug:              DefaultDebug,
-		LivenessInterval:   DefaultLivenessInterval,
-		LivenessTimeout:    DefaultLivenessTimeout,
-		UpdaterInterval:    DefaultUpdaterInterval,
-		UpdaterTimeout:     DefaultUpdaterTimeout,
-		SMSCheckerInterval: DefaultSMSCheckerInterval,
-		SMSCheckerTimeout:  DefaultSMSCheckerTimeout,
+		Debug:                  DefaultDebug,
+		LivenessInterval:       DefaultLivenessInterval,
+		LivenessTimeout:        DefaultLivenessTimeout,
+		BalanceUpdaterInterval: DefaultBalanceUpdaterInterval,
+		BalanceUpdaterTimeout:  DefaultBalanceUpdaterTimeout,
+		SMSCheckerInterval:     DefaultSMSCheckerInterval,
+		SMSCheckerTimeout:      DefaultSMSCheckerTimeout,
+		SignalUpdaterInterval:  DefaultSignalUpdaterInterval,
+		SignalUpdaterTimeout:   DefaultSignalUpdaterTimeout,
 	}
 }

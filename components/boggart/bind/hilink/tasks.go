@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strconv"
+	"strings"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/device"
@@ -23,11 +25,11 @@ func (b *Bind) Tasks() []workers.Task {
 	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
 	taskLiveness.SetName("bind-hilink-liveness-" + b.config.Address.Host)
 
-	taskUpdater := task.NewFunctionTask(b.taskUpdater)
-	taskUpdater.SetTimeout(b.config.UpdaterTimeout)
-	taskUpdater.SetRepeats(-1)
-	taskUpdater.SetRepeatInterval(b.config.UpdaterInterval)
-	taskUpdater.SetName("bind-hilink-updater-" + b.config.Address.Host)
+	taskBalanceUpdater := task.NewFunctionTask(b.taskBalanceUpdater)
+	taskBalanceUpdater.SetTimeout(b.config.BalanceUpdaterTimeout)
+	taskBalanceUpdater.SetRepeats(-1)
+	taskBalanceUpdater.SetRepeatInterval(b.config.BalanceUpdaterInterval)
+	taskBalanceUpdater.SetName("bind-hilink-balance-updater-" + b.config.Address.Host)
 
 	taskSMSChecker := task.NewFunctionTask(b.taskSMSChecker)
 	taskSMSChecker.SetTimeout(b.config.SMSCheckerTimeout)
@@ -35,10 +37,17 @@ func (b *Bind) Tasks() []workers.Task {
 	taskSMSChecker.SetRepeatInterval(b.config.SMSCheckerInterval)
 	taskSMSChecker.SetName("bind-hilink-sms-checker-" + b.config.Address.Host)
 
+	taskSignalUpdater := task.NewFunctionTask(b.taskSignalUpdater)
+	taskSignalUpdater.SetTimeout(b.config.SignalUpdaterTimeout)
+	taskSignalUpdater.SetRepeats(-1)
+	taskSignalUpdater.SetRepeatInterval(b.config.SignalUpdaterInterval)
+	taskSignalUpdater.SetName("bind-hilink-signal-updater-" + b.config.Address.Host)
+
 	tasks := []workers.Task{
 		taskLiveness,
-		taskUpdater,
+		taskBalanceUpdater,
 		taskSMSChecker,
+		taskSignalUpdater,
 	}
 
 	return tasks
@@ -78,7 +87,7 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	return nil, err
 }
 
-func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
+func (b *Bind) taskBalanceUpdater(ctx context.Context) (interface{}, error) {
 	if b.Status() != boggart.BindStatusOnline {
 		return nil, nil
 	}
@@ -145,6 +154,64 @@ func (b *Bind) taskSMSChecker(ctx context.Context) (interface{}, error) {
 	}
 
 	// ----- delete old sms -----
+
+	return nil, err
+}
+
+func (b *Bind) taskSignalUpdater(ctx context.Context) (interface{}, error) {
+	if b.Status() != boggart.BindStatusOnline {
+		return nil, nil
+	}
+
+	params := device.NewGetDeviceSignalParamsWithContext(ctx)
+
+	response, err := b.client.Device.GetDeviceSignal(params)
+	if err != nil {
+		return nil, err
+	}
+
+	sn := b.SerialNumber()
+	snMQTT := mqtt.NameReplace(sn)
+
+	if val, e := strconv.ParseInt(strings.TrimRight(response.Payload.RSSI, "dBm"), 10, 64); e == nil {
+		metricSignalRSSI.With("serial_number", sn).Set(float64(val))
+
+		if e = b.MQTTPublishAsync(ctx, MQTTPublishSignalRSSI.Format(snMQTT), val); e != nil {
+			err = multierr.Append(err, e)
+		}
+	} else {
+		err = multierr.Append(err, e)
+	}
+
+	if val, e := strconv.ParseInt(strings.TrimRight(response.Payload.RSRP, "dBm"), 10, 64); e == nil {
+		metricSignalRSRP.With("serial_number", sn).Set(float64(val))
+
+		if e = b.MQTTPublishAsync(ctx, MQTTPublishSignalRSRP.Format(snMQTT), val); e != nil {
+			err = multierr.Append(err, e)
+		}
+	} else {
+		err = multierr.Append(err, e)
+	}
+
+	if val, e := strconv.ParseInt(strings.TrimRight(response.Payload.RSRQ, "dBm"), 10, 64); e == nil {
+		metricSignalRSRQ.With("serial_number", sn).Set(float64(val))
+
+		if e = b.MQTTPublishAsync(ctx, MQTTPublishSignalRSRQ.Format(snMQTT), val); e != nil {
+			err = multierr.Append(err, e)
+		}
+	} else {
+		err = multierr.Append(err, e)
+	}
+
+	if val, e := strconv.ParseInt(strings.TrimRight(response.Payload.SINR, "dBm"), 10, 64); e == nil {
+		metricSignalSINR.With("serial_number", sn).Set(float64(val))
+
+		if e = b.MQTTPublishAsync(ctx, MQTTPublishSignalSINR.Format(snMQTT), val); e != nil {
+			err = multierr.Append(err, e)
+		}
+	} else {
+		err = multierr.Append(err, e)
+	}
 
 	return nil, err
 }

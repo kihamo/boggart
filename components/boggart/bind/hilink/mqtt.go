@@ -9,13 +9,19 @@ import (
 )
 
 const (
-	MQTTSubscribeTopicUSSDSend           mqtt.Topic = boggart.ComponentName + "/hilink/+/ussd/send"
-	MQTTSubscribeTopicUSSDResult         mqtt.Topic = boggart.ComponentName + "/hilink/+/ussd"
-	MQTTSubscribeTopicReboot             mqtt.Topic = boggart.ComponentName + "/hilink/+/reboot"
-	MQTTPublishTopicSMS                  mqtt.Topic = boggart.ComponentName + "/hilink/+/sms"
-	MQTTPublishTopicBalance              mqtt.Topic = boggart.ComponentName + "/hilink/+/balance"
-	MQTTPublishTopicOperator             mqtt.Topic = boggart.ComponentName + "/hilink/+/operator"
-	MQTTPublishTopicLimitInternetTraffic mqtt.Topic = boggart.ComponentName + "/hilink/+/limits/internet-traffic"
+	MQTTPrefix mqtt.Topic = boggart.ComponentName + "/hilink/+/"
+
+	MQTTSubscribeTopicUSSDSend           = MQTTPrefix + "ussd/send"
+	MQTTSubscribeTopicUSSDResult         = MQTTPrefix + "ussd"
+	MQTTSubscribeTopicReboot             = MQTTPrefix + "reboot"
+	MQTTPublishTopicSMS                  = MQTTPrefix + "sms"
+	MQTTPublishTopicBalance              = MQTTPrefix + "balance"
+	MQTTPublishTopicOperator             = MQTTPrefix + "operator"
+	MQTTPublishTopicLimitInternetTraffic = MQTTPrefix + "limits/internet-traffic"
+	MQTTPublishSignalRSSI                = MQTTPrefix + "signal/rssi"
+	MQTTPublishSignalRSRP                = MQTTPrefix + "signal/rsrp"
+	MQTTPublishSignalRSRQ                = MQTTPrefix + "signal/rsrq"
+	MQTTPublishSignalSINR                = MQTTPrefix + "signal/sinr"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
@@ -24,6 +30,10 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 		MQTTPublishTopicBalance,
 		MQTTPublishTopicOperator,
 		MQTTPublishTopicLimitInternetTraffic,
+		MQTTPublishSignalRSSI,
+		MQTTPublishSignalRSRP,
+		MQTTPublishSignalRSRQ,
+		MQTTPublishSignalSINR,
 	}
 }
 
