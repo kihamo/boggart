@@ -61,7 +61,7 @@ func (b *Bind) Client() (*webostv.Tv, error) {
 }
 
 func (b *Bind) UpdateStatus(status boggart.BindStatus) {
-	if status == boggart.BindStatusOffline && status != b.Status() {
+	if status == boggart.BindStatusOffline && !b.IsStatus(status) {
 		b.mutex.Lock()
 		b.client = nil
 		b.mutex.Unlock()

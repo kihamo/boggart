@@ -33,7 +33,7 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		return nil, nil
 	}
 
-	if b.Status() == boggart.BindStatusOnline {
+	if b.IsStatusOnline() {
 		return nil, nil
 	}
 

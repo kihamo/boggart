@@ -43,7 +43,7 @@ func (b *Bind) ClientGoogleHome() *client.GoogleHome {
 }
 
 func (b *Bind) UpdateStatus(status boggart.BindStatus) {
-	if status == boggart.BindStatusOffline && status != b.Status() {
+	if status == boggart.BindStatusOffline && !b.IsStatus(status) {
 		b.mutex.Lock()
 		b.client = nil
 		b.mutex.Unlock()

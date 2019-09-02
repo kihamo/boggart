@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/providers/mikrotik"
 )
 
@@ -24,7 +25,9 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		livenessInterval: config.LivenessInterval,
 		livenessTimeout:  config.LivenessTimeout,
 		updaterInterval:  config.UpdaterInterval,
-		serialNumberLock: make(chan struct{}),
+
+		serialNumberLock:  make(chan struct{}),
+		serialNumberReady: atomic.NewBool(),
 	}
 
 	bind.clientWiFi = NewPreloadMap()

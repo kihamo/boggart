@@ -35,8 +35,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 func (b *Bind) callbackMQTTWiFiSync(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
 	sn := b.SerialNumberWait()
-
-	if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 5) {
+	if sn == "" || !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 5) {
 		return nil
 	}
 

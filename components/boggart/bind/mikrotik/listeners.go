@@ -68,6 +68,11 @@ func (l *Listener) Run(ctx context.Context, event workers.Event, t time.Time, ar
 
 		switch tag {
 		case "wifi":
+			sn := l.bind.SerialNumberWait()
+			if sn == "" {
+				return
+			}
+
 			check := wifiClientRegexp.FindStringSubmatch(content.(string))
 			if len(check) < 4 {
 				return
@@ -82,7 +87,6 @@ func (l *Listener) Run(ctx context.Context, event workers.Event, t time.Time, ar
 				return
 			}
 
-			sn := l.bind.SerialNumberWait()
 			login := mqtt.NameReplace(mac.Address)
 
 			switch check[3] {
@@ -97,12 +101,16 @@ func (l *Listener) Run(ctx context.Context, event workers.Event, t time.Time, ar
 			}
 
 		case "vpn":
+			sn := l.bind.SerialNumberWait()
+			if sn == "" {
+				return
+			}
+
 			check := vpnClientRegexp.FindStringSubmatch(content.(string))
 			if len(check) < 2 {
 				return
 			}
 
-			sn := l.bind.SerialNumberWait()
 			login := mqtt.NameReplace(check[1])
 
 			switch check[2] {

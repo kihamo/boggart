@@ -38,7 +38,7 @@ type Bind struct {
 func (b *Bind) UpdateStatus(status boggart.BindStatus) {
 	b.BindBase.UpdateStatus(status)
 
-	if status == boggart.BindStatusOnline && b.OTAIsRunning() {
+	if b.IsStatusOnline() && b.OTAIsRunning() {
 		b.otaFlash <- struct{}{}
 	}
 }

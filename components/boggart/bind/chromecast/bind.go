@@ -104,7 +104,7 @@ func (b *Bind) Connect(_ context.Context) error {
 }
 
 func (b *Bind) Close() (err error) {
-	if b.Status() == boggart.BindStatusOffline {
+	if b.IsStatusOffline() {
 		return nil
 	}
 

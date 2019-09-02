@@ -56,6 +56,38 @@ func (b *BindBase) Status() BindStatus {
 	return BindStatusUnknown
 }
 
+func (b *BindBase) IsStatus(status BindStatus) bool {
+	return b.Status() == status
+}
+
+func (b *BindBase) IsStatusUnknown() bool {
+	return b.IsStatus(BindStatusUnknown)
+}
+
+func (b *BindBase) IsStatusUninitialized() bool {
+	return b.IsStatus(BindStatusUninitialized)
+}
+
+func (b *BindBase) IsStatusInitializing() bool {
+	return b.IsStatus(BindStatusInitializing)
+}
+
+func (b *BindBase) IsStatusOnline() bool {
+	return b.IsStatus(BindStatusOnline)
+}
+
+func (b *BindBase) IsStatusOffline() bool {
+	return b.IsStatus(BindStatusOffline)
+}
+
+func (b *BindBase) IsStatusRemoving() bool {
+	return b.IsStatus(BindStatusRemoving)
+}
+
+func (b *BindBase) IsStatusRemoved() bool {
+	return b.IsStatus(BindStatusRemoved)
+}
+
 func (b *BindBase) UpdateStatus(status BindStatus) {
 	b.mutex.RLock()
 	if b.statusSetter != nil {

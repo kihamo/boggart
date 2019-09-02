@@ -95,7 +95,7 @@ func (c *Component) ConfigVariables() []config.Variable {
 		config.NewVariable(mqtt.ConfigPayloadCacheSize, config.ValueTypeInt64).
 			WithUsage("Payload cache size").
 			WithGroup("Cache").
-			// TODO: editable
+			WithEditable(true).
 			WithDefault(1000),
 	}
 }

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/providers/mikrotik"
 	"github.com/kihamo/boggart/components/mqtt"
 )
@@ -29,9 +30,11 @@ type Bind struct {
 	livenessTimeout  time.Duration
 	updaterInterval  time.Duration
 
-	serialNumberLock chan struct{}
-	clientWiFi       *PreloadMap
-	clientVPN        *PreloadMap
+	serialNumberLock  chan struct{}
+	serialNumberReady *atomic.Bool
+
+	clientWiFi *PreloadMap
+	clientVPN  *PreloadMap
 }
 
 type Mac struct {
@@ -45,6 +48,14 @@ type Mac struct {
 	}
 }
 
+func (b *Bind) UpdateStatus(status boggart.BindStatus) {
+	b.BindBase.UpdateStatus(status)
+
+	if !b.IsStatusInitializing() && !b.IsStatusOnline() && b.serialNumberReady.IsFalse() {
+		close(b.serialNumberLock)
+	}
+}
+
 func (b *Bind) SerialNumberWait() string {
 	<-b.serialNumberLock
 
@@ -53,6 +64,8 @@ func (b *Bind) SerialNumberWait() string {
 
 func (b *Bind) SetSerialNumber(serialNumber string) {
 	b.BindBase.SetSerialNumber(serialNumber)
+
+	b.serialNumberReady.True()
 	close(b.serialNumberLock)
 }
 
