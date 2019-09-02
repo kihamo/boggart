@@ -67,3 +67,5 @@ import:
   version: ~v1.1
 - package: github.com/uber/jaeger-client-go
   version: ~v2.15
+- package: github.com/hashicorp/golang-lru
+  version: ~v0.5

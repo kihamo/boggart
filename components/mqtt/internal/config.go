@@ -87,6 +87,16 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithUsage("Retained").
 			WithGroup("Last Will and Testament").
 			WithDefault(false),
+		config.NewVariable(mqtt.ConfigPayloadCacheEnabled, config.ValueTypeBool).
+			WithUsage("Payload cache enabled").
+			WithGroup("Cache").
+			WithEditable(true).
+			WithDefault(true),
+		config.NewVariable(mqtt.ConfigPayloadCacheSize, config.ValueTypeInt64).
+			WithUsage("Payload cache size").
+			WithGroup("Cache").
+			// TODO: editable
+			WithDefault(1000),
 	}
 }
 
@@ -98,6 +108,12 @@ func (c *Component) ConfigWatchers() []config.Watcher {
 			mqtt.ConfigUsername,
 			mqtt.ConfigPassword,
 		}, c.watchConnect),
+		config.NewWatcher([]string{
+			mqtt.ConfigPayloadCacheEnabled,
+		}, c.watchPayloadCacheEnabled),
+		config.NewWatcher([]string{
+			mqtt.ConfigPayloadCacheSize,
+		}, c.watchConnect),
 	}
 }
 
@@ -108,5 +124,19 @@ func (c *Component) watchConnect(_ string, _ interface{}, _ interface{}) {
 		}
 	} else {
 		c.logger.Warn("Failed init MQTT client", "error", err.Error())
+	}
+}
+
+func (c *Component) watchPayloadCacheEnabled(_ string, newValue interface{}, _ interface{}) {
+	if !newValue.(bool) {
+		c.payloadCache.Purge()
+	}
+}
+
+func (c *Component) watchPayloadCacheSize(_ string, newValue interface{}, _ interface{}) {
+	err := c.payloadCache.Resize(newValue.(int))
+
+	if err != nil {
+		c.logger.Error("Failed resize payload cache", "error", err.Error())
 	}
 }

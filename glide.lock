@@ -1,5 +1,5 @@
-hash: 4517c5c322ba39314cbedd4c3af0eea00926f60e840453fc9fc5771274292365
-updated: 2019-09-01T17:37:34.326967+03:00
+hash: 8634e17ac57a2fe383abfab5caffaecd4ba8ccb6b21e14ff8bcd5c1879c6ef69
+updated: 2019-09-02T23:46:38.283174+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -182,7 +182,7 @@ imports:
 - name: github.com/hashicorp/go-version
   version: d40cf49b3a77bba84a7afdbd7f1dc295d114efb1
 - name: github.com/hashicorp/golang-lru
-  version: 7087cb70de9f7a8bc0a10c375cb0d2280a8edf9c
+  version: 7f827b33c0f158ec5dfbba01bb0b14a4541fd81d
   subpackages:
   - simplelru
 - name: github.com/heptiolabs/healthcheck

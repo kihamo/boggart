@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"bytes"
 	"container/list"
 	"context"
 	"errors"
@@ -35,6 +36,7 @@ type Component struct {
 	routes        []dashboard.Route
 	client        m.Client
 	subscriptions *list.List
+	payloadCache  mqtt.Cache
 }
 
 func (c *Component) Name() string {
@@ -60,9 +62,11 @@ func (c *Component) Dependencies() []shadow.Dependency {
 	}
 }
 
-func (c *Component) Init(a shadow.Application) error {
+func (c *Component) Init(a shadow.Application) (err error) {
 	c.application = a
-	return nil
+	c.payloadCache, err = newCache(1)
+
+	return err
 }
 
 func (c *Component) Run(a shadow.Application, ready chan<- struct{}) (err error) {
@@ -81,6 +85,10 @@ func (c *Component) Run(a shadow.Application, ready chan<- struct{}) (err error)
 
 	<-a.ReadyComponent(config.ComponentName)
 	c.config = a.GetComponent(config.ComponentName).(config.Component)
+
+	if err = c.payloadCache.Resize(c.config.Int(mqtt.ConfigPayloadCacheSize)); err != nil {
+		return err
+	}
 
 	if err := c.initClient(); err != nil {
 		return err
@@ -331,9 +339,21 @@ func (c *Component) clientSubscribe(topic string, qos byte, subscription *mqtt.S
 	return err
 }
 
-func (c *Component) Publish(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) (err error) {
-	// TODO: cache topics
-	payload = c.convertPayload(payload)
+func (c *Component) doPublish(ctx context.Context, topic string, qos byte, retained bool, payload interface{}, cache bool) (err error) {
+	payloadConverted := c.convertPayload(payload)
+
+	if cache && !c.config.Bool(mqtt.ConfigPayloadCacheEnabled) {
+		cache = false
+	}
+
+	if cache {
+		if val, ok := c.payloadCache.Get(topic); ok && bytes.Compare(val, payloadConverted) == 0 {
+			metricPayloadCacheHit.Inc()
+			return nil
+		} else {
+			metricPayloadCacheMiss.Inc()
+		}
+	}
 
 	span, _ := tracing.StartSpanFromContext(ctx, c.Name(), "mqtt_publish")
 	span = span.SetTag("topic", topic)
@@ -341,13 +361,13 @@ func (c *Component) Publish(ctx context.Context, topic string, qos byte, retaine
 
 	span.LogFields(
 		log.Int("qos", int(qos)),
-		log.String("payload", fmt.Sprintf("%v", payload)),
+		log.String("payload", string(payloadConverted)),
 		log.Bool("retained", retained),
 	)
 
 	client := c.Client()
 	if client != nil {
-		token := client.Publish(topic, qos, retained, payload)
+		token := client.Publish(topic, qos, retained, payloadConverted)
 		token.Wait()
 
 		err = token.Error()
@@ -365,7 +385,7 @@ func (c *Component) Publish(ctx context.Context, topic string, qos byte, retaine
 			r = "1"
 		}
 
-		logPayload := fmt.Sprintf("%v", payload)
+		logPayload := payloadConverted
 		if len(logPayload) > 100 {
 			logPayload = logPayload[:100]
 		}
@@ -376,18 +396,46 @@ func (c *Component) Publish(ctx context.Context, topic string, qos byte, retaine
 			"topic", topic,
 			"qos", strconv.Itoa(int(qos)),
 			"retained", r,
-			"payload", logPayload,
+			"payload", string(logPayload),
 		)
 	} else {
 		metricPublish.With("status", "success").Inc()
+
+		if cache {
+			c.payloadCache.Add(topic, payloadConverted)
+		}
 	}
 
 	return err
 }
 
+func (c *Component) Publish(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
+	return c.doPublish(ctx, topic, qos, retained, payload, retained)
+}
+
+func (c *Component) PublishWithCache(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
+	return c.doPublish(ctx, topic, qos, retained, payload, true)
+}
+
+func (c *Component) PublishWithoutCache(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
+	return c.doPublish(ctx, topic, qos, retained, payload, false)
+}
+
 func (c *Component) PublishAsync(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) {
 	go func() {
-		_ = c.Publish(ctx, topic, qos, retained, payload)
+		_ = c.doPublish(ctx, topic, qos, retained, payload, retained)
+	}()
+}
+
+func (c *Component) PublishAsyncWithCache(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) {
+	go func() {
+		_ = c.doPublish(ctx, topic, qos, retained, payload, true)
+	}()
+}
+
+func (c *Component) PublishAsyncWithoutCache(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) {
+	go func() {
+		_ = c.doPublish(ctx, topic, qos, retained, payload, false)
 	}()
 }
 
@@ -548,36 +596,38 @@ func (c *Component) Subscriptions() []*mqtt.Subscription {
 	return subscriptions
 }
 
-func (c *Component) convertPayload(payload interface{}) interface{} {
+func (c *Component) convertPayload(payload interface{}) []byte {
 	switch value := payload.(type) {
 	case nil:
-		return ""
-	case string, []byte:
+		return nil
+	case []byte:
 		// skip
+	case string:
+		return []byte(value)
 	case float64:
-		return strconv.FormatFloat(value, 'f', -1, 64)
+		return []byte(strconv.FormatFloat(value, 'f', -1, 64))
 	case float32:
-		return strconv.FormatFloat(float64(value), 'f', -1, 64)
+		return []byte(strconv.FormatFloat(float64(value), 'f', -1, 64))
 	case int64:
-		return strconv.FormatInt(value, 10)
+		return []byte(strconv.FormatInt(value, 10))
 	case int32:
-		return strconv.FormatInt(int64(value), 10)
+		return []byte(strconv.FormatInt(int64(value), 10))
 	case int16:
-		return strconv.FormatInt(int64(value), 10)
+		return []byte(strconv.FormatInt(int64(value), 10))
 	case int8:
-		return strconv.FormatInt(int64(value), 10)
+		return []byte(strconv.FormatInt(int64(value), 10))
 	case int:
-		return strconv.FormatInt(int64(value), 10)
+		return []byte(strconv.FormatInt(int64(value), 10))
 	case uint64:
-		return strconv.FormatUint(value, 10)
+		return []byte(strconv.FormatUint(value, 10))
 	case uint32:
-		return strconv.FormatUint(uint64(value), 10)
+		return []byte(strconv.FormatUint(uint64(value), 10))
 	case uint16:
-		return strconv.FormatUint(uint64(value), 10)
+		return []byte(strconv.FormatUint(uint64(value), 10))
 	case uint8:
-		return strconv.FormatUint(uint64(value), 10)
+		return []byte(strconv.FormatUint(uint64(value), 10))
 	case uint:
-		return strconv.FormatUint(uint64(value), 10)
+		return []byte(strconv.FormatUint(uint64(value), 10))
 	case bool:
 		if value {
 			return PayloadTrue
@@ -585,13 +635,15 @@ func (c *Component) convertPayload(payload interface{}) interface{} {
 
 		return PayloadFalse
 	case time.Time:
-		return value.Format(time.RFC3339)
+		return []byte(value.Format(time.RFC3339))
 	case *time.Time:
-		return value.Format(time.RFC3339)
+		return []byte(value.Format(time.RFC3339))
 	case time.Duration:
-		return strconv.FormatFloat(value.Seconds(), 'f', -1, 64)
+		return []byte(strconv.FormatFloat(value.Seconds(), 'f', -1, 64))
 	case *time.Duration:
-		return strconv.FormatFloat(value.Seconds(), 'f', -1, 64)
+		return []byte(strconv.FormatFloat(value.Seconds(), 'f', -1, 64))
+	case bytes.Buffer:
+		return value.Bytes()
 	default:
 		if ref := reflect.ValueOf(value); ref.Kind() == reflect.Ptr {
 			if !ref.Elem().IsValid() {
@@ -601,8 +653,8 @@ func (c *Component) convertPayload(payload interface{}) interface{} {
 			return c.convertPayload(ref.Elem().Interface())
 		}
 
-		return fmt.Sprintf("%s", payload)
+		return []byte(fmt.Sprintf("%s", payload))
 	}
 
-	return payload
+	return nil
 }
