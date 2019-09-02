@@ -68,25 +68,19 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	// only statistics
 	status, e := b.device.Status(ctx)
 	if e == nil {
-		if ok := b.battery.Set(status.Battery); ok {
-			metricBattery.With("serial_number", sn).Set(float64(status.Battery))
+		metricBattery.With("serial_number", sn).Set(float64(status.Battery))
 
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicBattery.Format(snMQTT), status.Battery); e != nil {
-				err = multierr.Append(err, e)
-			}
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicBattery.Format(snMQTT), status.Battery); e != nil {
+			err = multierr.Append(err, e)
 		}
 
-		if ok := b.cleanArea.Set(status.CleanArea); ok {
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicCleanArea.Format(snMQTT), status.CleanArea); e != nil {
-				err = multierr.Append(err, e)
-			}
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicCleanArea.Format(snMQTT), status.CleanArea); e != nil {
+			err = multierr.Append(err, e)
 		}
 
 		if status.CleanTime > 0 {
-			if ok := b.cleanTime.Set(status.CleanTime); ok {
-				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicCleanTime.Format(snMQTT), status.CleanTime); e != nil {
-					err = multierr.Append(err, e)
-				}
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicCleanTime.Format(snMQTT), status.CleanTime); e != nil {
+				err = multierr.Append(err, e)
 			}
 		}
 	} else {
@@ -96,34 +90,26 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	consumables, e := b.device.Consumables(ctx)
 	if e == nil {
 		if consumable, ok := consumables[vacuum.ConsumableFilter]; ok {
-			if ok := b.consumableFilter.Set(consumable); ok {
-				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicConsumableFilter.Format(snMQTT), consumable); e != nil {
-					err = multierr.Append(err, e)
-				}
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicConsumableFilter.Format(snMQTT), consumable); e != nil {
+				err = multierr.Append(err, e)
 			}
 		}
 
 		if consumable, ok := consumables[vacuum.ConsumableBrushMain]; ok {
-			if ok := b.consumableBrushMain.Set(consumable); ok {
-				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicConsumableBrushMain.Format(snMQTT), consumable); e != nil {
-					err = multierr.Append(err, e)
-				}
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicConsumableBrushMain.Format(snMQTT), consumable); e != nil {
+				err = multierr.Append(err, e)
 			}
 		}
 
 		if consumable, ok := consumables[vacuum.ConsumableBrushSide]; ok {
-			if ok := b.consumableBrushSide.Set(consumable); ok {
-				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicConsumableBrushSide.Format(snMQTT), consumable); e != nil {
-					err = multierr.Append(err, e)
-				}
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicConsumableBrushSide.Format(snMQTT), consumable); e != nil {
+				err = multierr.Append(err, e)
 			}
 		}
 
 		if consumable, ok := consumables[vacuum.ConsumableSensor]; ok {
-			if ok := b.consumableSensor.Set(consumable); ok {
-				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicConsumableSensor.Format(snMQTT), consumable); e != nil {
-					err = multierr.Append(err, e)
-				}
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicConsumableSensor.Format(snMQTT), consumable); e != nil {
+				err = multierr.Append(err, e)
 			}
 		}
 	} else {

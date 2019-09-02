@@ -3,8 +3,6 @@ package v3
 import (
 	"net/url"
 
-	"github.com/kihamo/boggart/components/boggart/atomic"
-
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/protocols/serial"
 	"github.com/kihamo/boggart/components/boggart/protocols/serial_network"
@@ -43,16 +41,5 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	return &Bind{
 		provider: mercury.New(conn, opts...),
 		config:   config,
-
-		tariff1:   atomic.NewUint32Null(),
-		voltage1:  atomic.NewFloat32Null(),
-		voltage2:  atomic.NewFloat32Null(),
-		voltage3:  atomic.NewFloat32Null(),
-		amperage1: atomic.NewFloat32Null(),
-		amperage2: atomic.NewFloat32Null(),
-		amperage3: atomic.NewFloat32Null(),
-		power1:    atomic.NewFloat32Null(),
-		power2:    atomic.NewFloat32Null(),
-		power3:    atomic.NewFloat32Null(),
 	}, nil
 }

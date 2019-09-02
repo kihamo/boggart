@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/protocols/serial"
 	mercury "github.com/kihamo/boggart/components/boggart/providers/mercury/v1"
 )
@@ -27,22 +26,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		serial.Dial(config.RS485Address, serial.WithTimeout(config.RS485Timeout)))
 
 	bind := &Bind{
-		provider: provider,
-
-		tariff1:          atomic.NewUint32Null(),
-		tariff2:          atomic.NewUint32Null(),
-		tariff3:          atomic.NewUint32Null(),
-		tariff4:          atomic.NewUint32Null(),
-		voltage:          atomic.NewUint32Null(),
-		amperage:         atomic.NewFloat32Null(),
-		power:            atomic.NewUint32Null(),
-		batteryVoltage:   atomic.NewFloat32Null(),
-		makeDate:         atomic.NewUint32Null(),
-		lastPowerOffDate: atomic.NewUint32Null(),
-		lastPowerOnDate:  atomic.NewUint32Null(),
-		firmwareDate:     atomic.NewUint32Null(),
-		firmwareVersion:  atomic.NewString(),
-
+		provider:        provider,
 		updaterInterval: config.UpdaterInterval,
 	}
 

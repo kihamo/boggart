@@ -50,19 +50,15 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	h := mqtt.NameReplace(b.address)
 
 	online := err == nil
-	if ok := b.online.Set(online); ok {
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicOnline.Format(h), online); e != nil {
-			err = multierr.Append(err, e)
-		}
+	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicOnline.Format(h), online); e != nil {
+		err = multierr.Append(err, e)
 	}
 
 	if online {
-		if ok := b.latency.Set(latency); ok {
-			metricLatency.With("address", b.address).Set(float64(latency))
+		metricLatency.With("address", b.address).Set(float64(latency))
 
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicLatency.Format(h), latency); e != nil {
-				err = multierr.Append(err, e)
-			}
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicLatency.Format(h), latency); e != nil {
+			err = multierr.Append(err, e)
 		}
 	}
 

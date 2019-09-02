@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/atomic"
 )
 
 type Bind struct {
@@ -15,9 +14,6 @@ type Bind struct {
 	retry           int
 	timeout         time.Duration
 	updaterInterval time.Duration
-
-	online  *atomic.BoolNull
-	latency *atomic.Uint32Null
 }
 
 func (b *Bind) Run() error {

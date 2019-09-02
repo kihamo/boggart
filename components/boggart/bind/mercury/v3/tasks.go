@@ -58,96 +58,76 @@ func (b *Bind) taskUpdater(ctx context.Context) (_ interface{}, err error) {
 	snMQTT := mqtt.NameReplace(sn)
 
 	if val, _, _, _, e := b.provider.ReadArray(v3.ArrayReset, nil, v3.Tariff1); e == nil {
-		if ok := b.tariff1.Set(uint32(val)); ok {
-			metricTariff.With("serial_number", sn).With("tariff", "1").Set(float64(val))
+		metricTariff.With("serial_number", sn).With("tariff", "1").Set(float64(val))
 
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicTariff.Format(snMQTT, 1), val); e != nil {
-				err = multierr.Append(err, e)
-			}
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicTariff.Format(snMQTT, 1), val); e != nil {
+			err = multierr.Append(err, e)
 		}
 	} else {
 		err = multierr.Append(err, e)
 	}
 
 	if p1, p2, p3, e := b.provider.Voltage(); e == nil {
-		if ok := b.voltage1.Set(float32(p1)); ok {
-			metricVoltage.With("serial_number", sn).With("phase", "1").Set(p1)
+		metricVoltage.With("serial_number", sn).With("phase", "1").Set(p1)
 
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicVoltage.Format(snMQTT, 1), p1); e != nil {
-				err = multierr.Append(err, e)
-			}
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicVoltage.Format(snMQTT, 1), p1); e != nil {
+			err = multierr.Append(err, e)
 		}
 
-		if ok := b.voltage2.Set(float32(p2)); ok {
-			metricVoltage.With("serial_number", sn).With("phase", "2").Set(p2)
+		metricVoltage.With("serial_number", sn).With("phase", "2").Set(p2)
 
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicVoltage.Format(snMQTT, 2), p2); e != nil {
-				err = multierr.Append(err, e)
-			}
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicVoltage.Format(snMQTT, 2), p2); e != nil {
+			err = multierr.Append(err, e)
 		}
 
-		if ok := b.voltage3.Set(float32(p3)); ok {
-			metricVoltage.With("serial_number", sn).With("phase", "3").Set(p3)
+		metricVoltage.With("serial_number", sn).With("phase", "3").Set(p3)
 
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicVoltage.Format(snMQTT, 3), p3); e != nil {
-				err = multierr.Append(err, e)
-			}
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicVoltage.Format(snMQTT, 3), p3); e != nil {
+			err = multierr.Append(err, e)
 		}
 	} else {
 		err = multierr.Append(err, e)
 	}
 
 	if p1, p2, p3, e := b.provider.Amperage(); e == nil {
-		if ok := b.amperage1.Set(float32(p1)); ok {
-			metricAmperage.With("serial_number", sn).With("phase", "1").Set(p1)
+		metricAmperage.With("serial_number", sn).With("phase", "1").Set(p1)
 
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicAmperage.Format(snMQTT, 1), p1); e != nil {
-				err = multierr.Append(err, e)
-			}
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicAmperage.Format(snMQTT, 1), p1); e != nil {
+			err = multierr.Append(err, e)
 		}
 
-		if ok := b.amperage2.Set(float32(p2)); ok {
-			metricAmperage.With("serial_number", sn).With("phase", "2").Set(p2)
+		metricAmperage.With("serial_number", sn).With("phase", "2").Set(p2)
 
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicAmperage.Format(snMQTT, 2), p2); e != nil {
-				err = multierr.Append(err, e)
-			}
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicAmperage.Format(snMQTT, 2), p2); e != nil {
+			err = multierr.Append(err, e)
 		}
 
-		if ok := b.amperage3.Set(float32(p3)); ok {
-			metricAmperage.With("serial_number", sn).With("phase", "3").Set(p3)
+		metricAmperage.With("serial_number", sn).With("phase", "3").Set(p3)
 
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicAmperage.Format(snMQTT, 3), p3); e != nil {
-				err = multierr.Append(err, e)
-			}
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicAmperage.Format(snMQTT, 3), p3); e != nil {
+			err = multierr.Append(err, e)
 		}
 	} else {
 		err = multierr.Append(err, e)
 	}
 
 	if _, p1, p2, p3, e := b.provider.Power(v3.PowerNumberP); e == nil {
-		if ok := b.power1.Set(float32(p1)); ok {
-			metricPower.With("serial_number", sn).With("phase", "1").Set(p1)
+		metricPower.With("serial_number", sn).With("phase", "1").Set(p1)
 
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicPower.Format(snMQTT, 1), p1); e != nil {
-				err = multierr.Append(err, e)
-			}
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicPower.Format(snMQTT, 1), p1); e != nil {
+			err = multierr.Append(err, e)
 		}
 
-		if ok := b.power2.Set(float32(p2)); ok {
-			metricPower.With("serial_number", sn).With("phase", "2").Set(p2)
+		metricPower.With("serial_number", sn).With("phase", "2").Set(p2)
 
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicPower.Format(snMQTT, 2), p2); e != nil {
-				err = multierr.Append(err, e)
-			}
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicPower.Format(snMQTT, 2), p2); e != nil {
+			err = multierr.Append(err, e)
 		}
 
-		if ok := b.power3.Set(float32(p3)); ok {
-			metricPower.With("serial_number", sn).With("phase", "3").Set(p3)
+		metricPower.With("serial_number", sn).With("phase", "3").Set(p3)
 
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicPower.Format(snMQTT, 3), p3); e != nil {
-				err = multierr.Append(err, e)
-			}
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicPower.Format(snMQTT, 3), p3); e != nil {
+			err = multierr.Append(err, e)
 		}
 	} else {
 		err = multierr.Append(err, e)

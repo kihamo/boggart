@@ -28,15 +28,11 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	}
 
 	b.UpdateStatus(boggart.BindStatusOnline)
-	current := float32(value)
 
-	if ok := b.balance.Set(current); ok {
-		sn := b.SerialNumber()
-		metricBalance.With("account", sn).Set(value)
-		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicBalance.Format(mqtt.NameReplace(sn)), value); err != nil {
-			return nil, err
-		}
-	}
+	sn := b.SerialNumber()
+	metricBalance.With("account", sn).Set(value)
 
-	return nil, nil
+	err = b.MQTTPublishAsync(ctx, MQTTPublishTopicBalance.Format(mqtt.NameReplace(sn)), value)
+
+	return nil, err
 }

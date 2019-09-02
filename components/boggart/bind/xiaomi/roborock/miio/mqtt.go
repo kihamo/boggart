@@ -4,6 +4,8 @@ import (
 	"context"
 	"strconv"
 
+	"go.uber.org/multierr"
+
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 )
@@ -144,14 +146,12 @@ func (b *Bind) updateStatus(ctx context.Context) error {
 	if err == nil {
 		snMQTT := mqtt.NameReplace(sn)
 
-		state := uint32(status.State)
-		if ok := b.state.Set(state); ok {
-			err = b.MQTTPublishAsync(ctx, MQTTPublishTopicState.Format(snMQTT), state)
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicState.Format(snMQTT), status.State); e != nil {
+			err = multierr.Append(err, e)
 		}
 
-		e := uint32(status.Error)
-		if ok := b.state.Set(e); ok {
-			err = b.MQTTPublishAsync(ctx, MQTTPublishTopicError.Format(snMQTT), e)
+		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicError.Format(snMQTT), status.Error); e != nil {
+			err = multierr.Append(err, e)
 		}
 	}
 
@@ -166,9 +166,7 @@ func (b *Bind) updateFanPower(ctx context.Context) error {
 
 	fan, err := b.device.FanPower(ctx)
 	if err == nil {
-		if ok := b.fanPower.Set(fan); ok {
-			err = b.MQTTPublishAsync(ctx, MQTTPublishTopicFanPower.Format(mqtt.NameReplace(sn)), fan)
-		}
+		err = b.MQTTPublishAsync(ctx, MQTTPublishTopicFanPower.Format(mqtt.NameReplace(sn)), fan)
 	}
 
 	return err
@@ -182,9 +180,7 @@ func (b *Bind) updateVolume(ctx context.Context) error {
 
 	volume, err := b.device.SoundVolume(ctx)
 	if err == nil {
-		if ok := b.volume.Set(volume); ok {
-			err = b.MQTTPublishAsync(ctx, MQTTPublishTopicVolume.Format(mqtt.NameReplace(sn)), volume)
-		}
+		err = b.MQTTPublishAsync(ctx, MQTTPublishTopicVolume.Format(mqtt.NameReplace(sn)), volume)
 	}
 
 	return err
