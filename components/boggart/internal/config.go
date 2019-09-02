@@ -2,6 +2,7 @@ package internal
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/shadow/components/config"
 )
 
@@ -15,5 +16,10 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithEditable(true).
 			WithView([]string{config.ViewTags}).
 			WithViewOptions(map[string]interface{}{config.ViewOptionTagsDefaultText: "add a key"}),
+		config.NewVariable(boggart.ConfigBoggartBindID, config.ValueTypeString).
+			WithUsage("Boggart bind ID").
+			WithDefaultFunc(func() interface{} {
+				return mqtt.NameReplace(c.application.Name())
+			}),
 	}
 }

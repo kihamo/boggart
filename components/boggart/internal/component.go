@@ -155,7 +155,9 @@ func (c *Component) registerDefaultBinds() (int, error) {
 		return -1, err
 	}
 
-	err = c.register(mqtt.NameReplace(c.application.Name()), bind, c.Name(), c.application.Name(), []string{c.Name()}, cfg)
+	bindID := c.config.String(boggart.ConfigBoggartBindID)
+
+	err = c.register(bindID, bind, c.Name(), c.application.Name(), []string{c.Name()}, cfg)
 	if err != nil {
 		return -1, err
 	}
