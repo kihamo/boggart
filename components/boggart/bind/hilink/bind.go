@@ -21,6 +21,7 @@ type Bind struct {
 
 	config                    *Config
 	client                    *hilink.Client
+	balance                   *atomic.Float32Null
 	operator                  *atomic.String
 	limitInternetTrafficIndex *atomic.Int64
 	signalRSSI                *atomic.Int64Null

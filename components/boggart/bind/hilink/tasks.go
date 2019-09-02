@@ -98,10 +98,12 @@ func (b *Bind) taskBalanceUpdater(ctx context.Context) (interface{}, error) {
 
 	balance, err := b.Balance(ctx)
 	if err == nil {
-		metricBalance.With("serial_number", sn).Set(balance)
+		if ok := b.balance.Set(float32(balance)); ok {
+			metricBalance.With("serial_number", sn).Set(balance)
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicBalance.Format(snMQTT), balance); e != nil {
-			err = multierr.Append(err, e)
+			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicBalance.Format(snMQTT), balance); e != nil {
+				err = multierr.Append(err, e)
+			}
 		}
 	}
 

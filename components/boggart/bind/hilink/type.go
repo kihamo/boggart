@@ -16,6 +16,7 @@ func (t Type) CreateBind(c interface{}) (_ boggart.Bind, err error) {
 
 	bind := &Bind{
 		config:                    config,
+		balance:                   atomic.NewFloat32Null(),
 		operator:                  atomic.NewString(),
 		limitInternetTrafficIndex: atomic.NewInt64(),
 		signalRSSI:                atomic.NewInt64Null(),
