@@ -19,7 +19,6 @@ import (
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/system"
 	"github.com/kihamo/boggart/components/boggart/providers/hikvision/models"
 	"github.com/kihamo/shadow/components/dashboard"
-	"github.com/kihamo/shadow/components/logging"
 )
 
 type response struct {
@@ -281,7 +280,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		if content, err := ioutil.ReadAll(r.Original().Body); err == nil {
-			logging.Log(ctx).Debug("Call hikvision event " + string(content))
+			bind.Logger().Debug("Call hikvision event " + string(content))
 
 			e := &models.EventNotificationAlert{}
 
@@ -291,7 +290,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			err = d.Decode(e)
 
 			if err != nil {
-				logging.Log(ctx).Error("Parse event failed",
+				bind.Logger().Error("Parse event failed",
 					"error", err.Error(),
 					"body", string(content),
 				)
