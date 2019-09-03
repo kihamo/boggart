@@ -601,7 +601,7 @@ func (c *Component) convertPayload(payload interface{}) []byte {
 	case nil:
 		return nil
 	case []byte:
-		// skip
+		return value
 	case string:
 		return []byte(value)
 	case float64:
