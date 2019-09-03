@@ -98,6 +98,10 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, sms *models.SMSListMessagesI
 	snMQTT := mqtt.NameReplace(sn)
 
 	match := op.SMSLimitTrafficRegexp.FindStringSubmatch(sms.Content)
+	if len(match) == 0 {
+		return result
+	}
+
 	for i, name := range op.SMSLimitTrafficRegexp.SubexpNames() {
 		if name == "value" {
 			result = true
