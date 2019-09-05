@@ -4,85 +4,21 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
-	"net/url"
 	"strconv"
-	"sync"
 	"time"
 
-	connection "github.com/kihamo/boggart/components/boggart/protocols/http"
-)
-
-const (
-	BaseURL = "https://my.mosenergosbyt.ru/gate_mlkcomu"
+	"github.com/kihamo/boggart/components/boggart/providers/integratorit/internal"
 )
 
 type Client struct {
-	connection *connection.Client
-
-	login       string
-	password    string
-	session     string
-	sessionLock sync.RWMutex
+	base *internal.Client
 }
 
 func New(login, password string) *Client {
-	return &Client{
-		connection: connection.NewClient(), //.WithDebug(true),
-		login:      login,
-		password:   password,
-	}
-}
+	c := &Client{}
+	c.base = internal.New("https://my.mosenergosbyt.ru/gate_mlkcomu", login, password, c.Auth)
 
-func (c *Client) doRequest(ctx context.Context, action, query string, body map[string]string, data interface{}) error {
-	values := url.Values{}
-	values.Add("action", action)
-
-	if query != "" {
-		values.Add("query", query)
-	}
-
-	// auto login
-	if action != "auth" {
-		c.sessionLock.RLock()
-		session := c.session
-		c.sessionLock.RUnlock()
-
-		if session == "" {
-			if err := c.Auth(ctx); err != nil {
-				return err
-			}
-
-			c.sessionLock.RLock()
-			session = c.session
-			c.sessionLock.RUnlock()
-		}
-
-		values.Add("session", session)
-	}
-
-	resp, err := c.connection.Post(ctx, BaseURL+"?"+values.Encode(), body)
-	if err != nil {
-		return err
-	}
-
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-
-	r := &response{}
-	if data != nil {
-		r.Data = data
-	}
-
-	err = json.Unmarshal(b, r)
-
-	if err == nil && r.ErrorMessage != "" {
-		err = errors.New(r.ErrorMessage)
-	}
-
-	return err
+	return c
 }
 
 func (c *Client) Auth(ctx context.Context) error {
@@ -95,20 +31,22 @@ func (c *Client) Auth(ctx context.Context) error {
 		Session   string `json:"session"`
 	}, 0)
 
-	err := c.doRequest(ctx, "auth", "", map[string]string{
-		"login":          c.login,
-		"psw":            c.password,
+	err := c.base.DoRequest(ctx, "auth", "", map[string]string{
+		"login":          c.base.Login(),
+		"psw":            c.base.Password(),
 		"remember":       "true",
 		"vl_device_info": "",
 	}, &data)
+
+	if err != nil {
+		return err
+	}
 
 	if data[0].Session == "" {
 		return errors.New(data[0].NMResult)
 	}
 
-	c.sessionLock.Lock()
-	c.session = data[0].Session
-	c.sessionLock.Unlock()
+	c.base.SetSession(data[0].Session)
 
 	return err
 }
@@ -116,17 +54,17 @@ func (c *Client) Auth(ctx context.Context) error {
 func (c *Client) Accounts(ctx context.Context) ([]Account, error) {
 	data := make([]Account, 0)
 
-	if err := c.doRequest(ctx, "sql", "LSList", nil, &data); err != nil {
+	if err := c.base.DoRequest(ctx, "sql", "LSList", nil, &data); err != nil {
 		return nil, err
 	}
 
 	for i, account := range data {
-		if account.VLProviderRAW != "" {
-			if err := json.Unmarshal([]byte(account.VLProviderRAW), &account.VLProvider); err != nil {
+		if account.ProviderRAW != "" {
+			if err := json.Unmarshal([]byte(account.ProviderRAW), &account.Provider); err != nil {
 				return nil, err
 			}
 
-			data[i].VLProvider = account.VLProvider
+			data[i].Provider = account.Provider
 		}
 	}
 
@@ -136,7 +74,7 @@ func (c *Client) Accounts(ctx context.Context) ([]Account, error) {
 func (c *Client) CurrentBalance(ctx context.Context, IDAbonent uint64) (*Balance, error) {
 	var data []Balance
 
-	err := c.doRequest(ctx, "sql", "smorodinaTransProxy", map[string]string{
+	err := c.base.DoRequest(ctx, "sql", "smorodinaTransProxy", map[string]string{
 		"plugin":      "smorodinaTransProxy",
 		"proxyquery":  "AbonentCurrentBalance",
 		"vl_provider": `{"id_abonent": ` + strconv.FormatUint(IDAbonent, 10) + `}`,
@@ -152,7 +90,7 @@ func (c *Client) CurrentBalance(ctx context.Context, IDAbonent uint64) (*Balance
 func (c *Client) Payments(ctx context.Context, IDAbonent uint64, dateStart, dateEnd time.Time) ([]Payment, error) {
 	var data []Payment
 
-	err := c.doRequest(ctx, "sql", "smorodinaTransProxy", map[string]string{
+	err := c.base.DoRequest(ctx, "sql", "smorodinaTransProxy", map[string]string{
 		"plugin":      "smorodinaTransProxy",
 		"proxyquery":  "AbonentPays",
 		"vl_provider": `{"id_abonent": ` + strconv.FormatUint(IDAbonent, 10) + `}`,
@@ -166,7 +104,7 @@ func (c *Client) Payments(ctx context.Context, IDAbonent uint64, dateStart, date
 func (c *Client) ChargeDetail(ctx context.Context, IDAbonent uint64, dateStart, dateEnd time.Time) ([]Charge, error) {
 	var data []Charge
 
-	err := c.doRequest(ctx, "sql", "smorodinaTransProxy", map[string]string{
+	err := c.base.DoRequest(ctx, "sql", "smorodinaTransProxy", map[string]string{
 		"plugin":          "smorodinaTransProxy",
 		"proxyquery":      "AbonentChargeDetail",
 		"vl_provider":     `{"id_abonent": ` + strconv.FormatUint(IDAbonent, 10) + `}`,

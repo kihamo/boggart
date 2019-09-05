@@ -1,18 +1,8 @@
 package mosenergosbyt
 
-type response struct {
-	Data     interface{} `json:"data"`
-	MetaData struct {
-		ResponseTime     float64 `json:"responseTime"`
-		SmorodinaCode    uint64  `json:"smorodinaCode"`
-		SmorodinaMessage string  `json:"smorodinaMsg"`
-	} `json:"metaData"`
-	Success      bool   `json:"success"`
-	Total        uint64 `json:"total"`
-	ErrorCode    uint64 `json:"err_code"`
-	ErrorMessage string `json:"err_text"`
-	ErrorID      string `json:"err_id"`
-}
+import (
+	"github.com/kihamo/boggart/components/boggart/providers/integratorit/internal"
+)
 
 type Account struct {
 	Data struct {
@@ -32,8 +22,8 @@ type Account struct {
 	NMType             string `json:"nm_type"`
 	NNAccount          string `json:"nn_ls"`
 	PRAccountGroupEdit bool   `json:"pr_ls_group_edit"`
-	VLProviderRAW      string `json:"vl_provider"`
-	VLProvider         struct {
+	ProviderRAW        string `json:"vl_provider"`
+	Provider           struct {
 		IDAbonent uint64 `json:"id_abonent"`
 	}
 }
@@ -62,15 +52,15 @@ type Balance struct {
 }
 
 type Payment struct {
-	Date   Time    `json:"dt_pay"`
-	Agent  string  `json:"nm_agnt"`
-	State  string  `json:"nm_pay_state"`
-	Amount float64 `json:"sm_pay"`
+	Date   internal.Time `json:"dt_pay"`
+	Agent  string        `json:"nm_agnt"`
+	State  string        `json:"nm_pay_state"`
+	Amount float64       `json:"sm_pay"`
 }
 
 type Charge struct {
-	Create   Time `json:"dt_create"`
-	Period   Date `json:"dt_period"`
+	Create   internal.Time `json:"dt_create"`
+	Period   internal.Date `json:"dt_period"`
 	Services []struct {
 		KDType         uint64  `json:"kd_child_type"`
 		Benefits       float64 `json:"sm_benefits"`

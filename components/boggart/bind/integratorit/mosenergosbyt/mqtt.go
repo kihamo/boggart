@@ -6,11 +6,15 @@ import (
 )
 
 const (
-	MQTTPublishTopicBalance mqtt.Topic = boggart.ComponentName + "/service/mosenergosbyt/+/balance"
+	MQTTPrefix mqtt.Topic = boggart.ComponentName + "/service/mosenergosbyt/+/"
+
+	MQTTPublishTopicBalance        = MQTTPrefix + "balance"
+	MQTTPublishTopicServiceBalance = MQTTPrefix + "+/balance"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
 		MQTTPublishTopicBalance,
+		MQTTPublishTopicServiceBalance,
 	}
 }

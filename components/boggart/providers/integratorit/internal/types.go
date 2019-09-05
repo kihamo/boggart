@@ -1,4 +1,4 @@
-package mosenergosbyt
+package internal
 
 import (
 	"strings"
