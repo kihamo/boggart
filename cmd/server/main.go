@@ -19,6 +19,7 @@ import (
 	_ "github.com/kihamo/boggart/components/boggart/bind/lg_webos"
 	_ "github.com/kihamo/boggart/components/boggart/bind/mercury"
 	_ "github.com/kihamo/boggart/components/boggart/bind/mikrotik"
+	_ "github.com/kihamo/boggart/components/boggart/bind/mosenergosbyt"
 	_ "github.com/kihamo/boggart/components/boggart/bind/network"
 	_ "github.com/kihamo/boggart/components/boggart/bind/nut"
 	_ "github.com/kihamo/boggart/components/boggart/bind/owntracks"
