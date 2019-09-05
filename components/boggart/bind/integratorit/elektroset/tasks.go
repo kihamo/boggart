@@ -44,7 +44,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			}
 		}
 
-		metricServiceBalance.With("account", account.Number).Set(totalBalance)
+		metricBalance.With("account", account.Number).Set(totalBalance)
 
 		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicBalance.Format(account.Number), totalBalance); e != nil {
 			err = multierr.Append(e, err)
