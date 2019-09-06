@@ -10,6 +10,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
+	w "github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/manager"
 	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/i18n"
@@ -26,6 +27,11 @@ const (
 
 	MQTTPublishTopicBindStatus mqtt.Topic = boggart.ComponentName + "/bind/+/status"
 )
+
+type bindTask interface {
+	w.Task
+	SetName(string)
+}
 
 type Manager struct {
 	status    int64
@@ -128,6 +134,10 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 
 	// register tasks
 	for _, task := range bindItem.Tasks() {
+		if tsk, ok := task.(bindTask); ok {
+			tsk.SetName("bind-" + t + "-" + tsk.Name())
+		}
+
 		m.workers.AddTask(task)
 	}
 

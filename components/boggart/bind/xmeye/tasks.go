@@ -17,13 +17,13 @@ func (b *Bind) Tasks() []workers.Task {
 	taskLiveness.SetTimeout(b.config.LivenessTimeout)
 	taskLiveness.SetRepeats(-1)
 	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
-	taskLiveness.SetName("bind-xmeye-liveness-" + b.config.Address.Host)
+	taskLiveness.SetName("liveness-" + b.config.Address.Host)
 
 	taskState := task.NewFunctionTask(b.taskUpdater)
 	taskState.SetTimeout(b.config.UpdaterTimeout)
 	taskState.SetRepeats(-1)
 	taskState.SetRepeatInterval(b.config.UpdaterInterval)
-	taskState.SetName("bind-xmeye-updater-" + b.config.Address.Host)
+	taskState.SetName("updater-" + b.config.Address.Host)
 
 	tasks := []workers.Task{
 		taskLiveness,

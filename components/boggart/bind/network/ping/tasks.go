@@ -14,7 +14,7 @@ func (b *Bind) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(b.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(b.updaterInterval)
-	taskUpdater.SetName("bind-network:ping-updater-" + b.hostname)
+	taskUpdater.SetName("updater-" + b.hostname)
 
 	return []workers.Task{
 		taskUpdater,

@@ -16,7 +16,7 @@ func (b *Bind) Tasks() []workers.Task {
 	taskLiveness.SetTimeout(b.livenessTimeout)
 	taskLiveness.SetRepeats(-1)
 	taskLiveness.SetRepeatInterval(b.livenessInterval)
-	taskLiveness.SetName("bind-google-home:mini-liveness-" + b.host.String())
+	taskLiveness.SetName("liveness-" + b.host.String())
 
 	return []workers.Task{
 		taskLiveness,

@@ -17,12 +17,12 @@ func (b *Bind) Tasks() []workers.Task {
 	taskLiveness.SetTimeout(b.livenessTimeout)
 	taskLiveness.SetRepeats(-1)
 	taskLiveness.SetRepeatInterval(b.livenessInterval)
-	taskLiveness.SetName("bind-mikrotik-liveness-" + b.host)
+	taskLiveness.SetName("liveness-" + b.host)
 
 	taskStateUpdater := task.NewFunctionTask(b.taskUpdater)
 	taskStateUpdater.SetRepeats(-1)
 	taskStateUpdater.SetRepeatInterval(b.updaterInterval)
-	taskStateUpdater.SetName("bind-mikrotik-updater-" + b.host)
+	taskStateUpdater.SetName("updater-" + b.host)
 
 	return []workers.Task{
 		taskLiveness,

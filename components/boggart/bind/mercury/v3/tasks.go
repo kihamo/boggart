@@ -16,7 +16,7 @@ func (b *Bind) Tasks() []workers.Task {
 	taskStateUpdater := task.NewFunctionTask(b.taskUpdater)
 	taskStateUpdater.SetRepeats(-1)
 	taskStateUpdater.SetRepeatInterval(b.config.UpdaterInterval)
-	taskStateUpdater.SetName("bind-mercury:v3-updater-" + b.SerialNumber())
+	taskStateUpdater.SetName("updater-" + b.SerialNumber())
 
 	return []workers.Task{
 		taskStateUpdater,

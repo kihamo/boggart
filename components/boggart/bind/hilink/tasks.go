@@ -24,25 +24,25 @@ func (b *Bind) Tasks() []workers.Task {
 	taskLiveness.SetTimeout(b.config.LivenessTimeout)
 	taskLiveness.SetRepeats(-1)
 	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
-	taskLiveness.SetName("bind-hilink-liveness-" + b.config.Address.Host)
+	taskLiveness.SetName("liveness-" + b.config.Address.Host)
 
 	taskBalanceUpdater := task.NewFunctionTask(b.taskBalanceUpdater)
 	taskBalanceUpdater.SetTimeout(b.config.BalanceUpdaterTimeout)
 	taskBalanceUpdater.SetRepeats(-1)
 	taskBalanceUpdater.SetRepeatInterval(b.config.BalanceUpdaterInterval)
-	taskBalanceUpdater.SetName("bind-hilink-balance-updater-" + b.config.Address.Host)
+	taskBalanceUpdater.SetName("balance-updater-" + b.config.Address.Host)
 
 	taskSMSChecker := task.NewFunctionTask(b.taskSMSChecker)
 	taskSMSChecker.SetTimeout(b.config.SMSCheckerTimeout)
 	taskSMSChecker.SetRepeats(-1)
 	taskSMSChecker.SetRepeatInterval(b.config.SMSCheckerInterval)
-	taskSMSChecker.SetName("bind-hilink-sms-checker-" + b.config.Address.Host)
+	taskSMSChecker.SetName("sms-checker-" + b.config.Address.Host)
 
 	taskSignalUpdater := task.NewFunctionTask(b.taskSignalUpdater)
 	taskSignalUpdater.SetTimeout(b.config.SignalUpdaterTimeout)
 	taskSignalUpdater.SetRepeats(-1)
 	taskSignalUpdater.SetRepeatInterval(b.config.SignalUpdaterInterval)
-	taskSignalUpdater.SetName("bind-hilink-signal-updater-" + b.config.Address.Host)
+	taskSignalUpdater.SetName("signal-updater-" + b.config.Address.Host)
 
 	tasks := []workers.Task{
 		taskLiveness,

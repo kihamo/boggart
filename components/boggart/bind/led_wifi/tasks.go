@@ -21,7 +21,7 @@ func (b *Bind) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(b.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(TaskUpdaterInterval)
-	taskUpdater.SetName("bind-led-wifi-updater-" + b.bulb.Host())
+	taskUpdater.SetName("updater-" + b.bulb.Host())
 
 	return []workers.Task{
 		taskUpdater,

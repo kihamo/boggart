@@ -16,13 +16,13 @@ func (b *Bind) Tasks() []workers.Task {
 	taskLiveness.SetTimeout(b.config.LivenessTimeout)
 	taskLiveness.SetRepeats(-1)
 	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
-	taskLiveness.SetName("bind-xiaomi-roborock-liveness-" + b.config.Host)
+	taskLiveness.SetName("liveness-" + b.config.Host)
 
 	taskState := task.NewFunctionTask(b.taskUpdater)
 	taskState.SetTimeout(b.config.UpdaterTimeout)
 	taskState.SetRepeats(-1)
 	taskState.SetRepeatInterval(b.config.UpdaterInterval)
-	taskState.SetName("bind-xiaomi-roborock-updater-" + b.config.Host)
+	taskState.SetName("updater-" + b.config.Host)
 
 	return []workers.Task{
 		taskLiveness,

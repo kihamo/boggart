@@ -13,7 +13,7 @@ func (b *Bind) Tasks() []workers.Task {
 	taskStateUpdater := task.NewFunctionTask(b.taskUpdater)
 	taskStateUpdater.SetRepeats(-1)
 	taskStateUpdater.SetRepeatInterval(b.config.UpdaterInterval)
-	taskStateUpdater.SetName("bind-nut-updater-" + b.config.UPS)
+	taskStateUpdater.SetName("updater-" + b.config.UPS)
 
 	return []workers.Task{
 		taskStateUpdater,

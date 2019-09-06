@@ -20,13 +20,13 @@ func (b *Bind) Tasks() []workers.Task {
 	taskLiveness.SetTimeout(b.config.LivenessTimeout)
 	taskLiveness.SetRepeats(-1)
 	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
-	taskLiveness.SetName("bind-hikvision-liveness-" + b.address.Host)
+	taskLiveness.SetName("liveness-" + b.address.Host)
 
 	taskState := task.NewFunctionTask(b.taskUpdater)
 	taskState.SetTimeout(b.config.UpdaterTimeout)
 	taskState.SetRepeats(-1)
 	taskState.SetRepeatInterval(b.config.UpdaterInterval)
-	taskState.SetName("bind-hikvision-updater-" + b.address.Host)
+	taskState.SetName("updater-" + b.address.Host)
 
 	tasks := []workers.Task{
 		taskLiveness,
@@ -38,7 +38,7 @@ func (b *Bind) Tasks() []workers.Task {
 		taskPTZStatus.SetTimeout(b.config.PTZTimeout)
 		taskPTZStatus.SetRepeats(-1)
 		taskPTZStatus.SetRepeatInterval(b.config.PTZInterval)
-		taskPTZStatus.SetName("bind-hikvision-ptz-" + b.address.Host)
+		taskPTZStatus.SetName("ptz-" + b.address.Host)
 
 		tasks = append(tasks, taskPTZStatus)
 	}

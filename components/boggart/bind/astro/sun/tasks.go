@@ -13,7 +13,7 @@ import (
 func (b *Bind) Tasks() []workers.Task {
 	b.taskStateUpdater = task.NewFunctionTask(b.taskUpdater)
 	b.taskStateUpdater.SetRepeats(-1)
-	b.taskStateUpdater.SetName("bind-astro-sun-updater-" + b.SerialNumber())
+	b.taskStateUpdater.SetName("updater-" + b.SerialNumber())
 
 	return []workers.Task{
 		b.taskStateUpdater,

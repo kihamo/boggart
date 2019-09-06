@@ -16,7 +16,7 @@ func (b *Bind) Tasks() []workers.Task {
 	taskWayPoints := task.NewFunctionTillSuccessTask(b.taskWayPoints)
 	taskWayPoints.SetRepeats(-1)
 	taskWayPoints.SetRepeatInterval(time.Second * 10)
-	taskWayPoints.SetName("bind-owntracks-waypoints-" + b.config.User + "-" + b.config.Device)
+	taskWayPoints.SetName("waypoints-" + b.config.User + "-" + b.config.Device)
 
 	return []workers.Task{
 		taskWayPoints,

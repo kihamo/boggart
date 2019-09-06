@@ -19,7 +19,7 @@ func (b *Bind) Tasks() []workers.Task {
 	taskLiveness.SetTimeout(b.livenessTimeout)
 	taskLiveness.SetRepeats(-1)
 	taskLiveness.SetRepeatInterval(b.livenessInterval)
-	taskLiveness.SetName("bind-broadlink:rm-liveness-" + b.SerialNumber())
+	taskLiveness.SetName("liveness-" + b.SerialNumber())
 
 	return []workers.Task{
 		taskLiveness,
