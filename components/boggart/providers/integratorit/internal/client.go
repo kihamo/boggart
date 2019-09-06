@@ -6,7 +6,9 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/url"
+	"strings"
 	"sync"
+	"time"
 
 	connection "github.com/kihamo/boggart/components/boggart/protocols/http"
 )
@@ -22,8 +24,9 @@ type Client struct {
 	login    string
 	password string
 
-	session     string
-	sessionLock sync.RWMutex
+	session         string
+	sessionLifeTime time.Time
+	sessionLock     sync.RWMutex
 }
 
 func New(baseURL, login, password string, auth Auth) *Client {
@@ -47,10 +50,19 @@ func (c *Client) Password() string {
 func (c *Client) SetSession(session string) {
 	c.sessionLock.Lock()
 	c.session = session
+	c.sessionLifeTime = time.Now().Add(time.Minute * 5)
 	c.sessionLock.Unlock()
 }
 
 func (c *Client) Session() string {
+	c.sessionLock.RLock()
+	lt := c.sessionLifeTime
+	c.sessionLock.RUnlock()
+
+	if time.Now().After(lt) {
+		c.SetSession("")
+	}
+
 	c.sessionLock.RLock()
 	defer c.sessionLock.RUnlock()
 
@@ -98,6 +110,10 @@ func (c *Client) DoRequest(ctx context.Context, action, query string, body map[s
 	err = json.Unmarshal(b, r)
 
 	if err == nil && r.ErrorMessage != "" {
+		if strings.Compare(r.ErrorMessage, "Session not found, specified query requires authentication") == 0 {
+			c.SetSession("")
+		}
+
 		err = errors.New(r.ErrorMessage)
 	}
 
