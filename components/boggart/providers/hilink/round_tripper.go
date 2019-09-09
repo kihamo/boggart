@@ -1,10 +1,13 @@
 package hilink
 
 import (
-	"net/http"
-
+	"bytes"
+	"encoding/xml"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
+	"github.com/kihamo/boggart/components/boggart/providers/hilink/models"
+	"io/ioutil"
+	"net/http"
 )
 
 type RoundTripper struct {
@@ -49,6 +52,36 @@ func (rt RoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 
 				return err
 			}))
+		}
+
+		// эмулируем http ошибку, так как у hilink всегда 200 OK
+		body, err := ioutil.ReadAll(response.Body)
+		if err == nil {
+			var (
+				errorResponse models.Error
+				newBody       []byte
+			)
+
+			if err := xml.Unmarshal(body, &errorResponse); err == nil {
+				if errorResponse.Code > 0 {
+					if len(errorResponse.Message) == 0 {
+						errorResponse.Message = ErrorMessage(errorResponse.Code)
+					}
+
+					if b, err := xml.Marshal(errorResponse); err == nil {
+						newBody = b
+					}
+				}
+			}
+
+			if len(newBody) > 0 {
+				response.StatusCode = http.StatusBadRequest
+				response.Status = http.StatusText(http.StatusBadRequest)
+				response.Body = ioutil.NopCloser(bytes.NewReader(newBody))
+				response.ContentLength = int64(len(newBody))
+			} else {
+				response.Body = ioutil.NopCloser(bytes.NewReader(body))
+			}
 		}
 	}
 

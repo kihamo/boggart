@@ -1,5 +1,5 @@
-hash: 23a19a72cb33f988ebca93a4553475acd023278bff226b15f25247995bfdb9b1
-updated: 2019-09-09T13:07:07.668595+03:00
+hash: 160bfcf987c3cd380538fdf18dd9d379fce505703a1ecf5f24056598861ca28a
+updated: 2019-09-10T01:55:22.199979+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -87,6 +87,8 @@ imports:
   - internal
 - name: github.com/go-openapi/errors
   version: 7a7ff1b7b8020f22574411a32f28b4d168d69237
+- name: github.com/go-openapi/inflect
+  version: 16a898ed1f4943794fb9b0e7afb7376a7619cf21
 - name: github.com/go-openapi/jsonpointer
   version: ef5f0afec364d3b9396b7b77b43dbe26bf1f8004
 - name: github.com/go-openapi/jsonreference
@@ -192,6 +194,8 @@ imports:
   - client/v2
   - models
   - pkg/escape
+- name: github.com/jessevdk/go-flags
+  version: c6ca198ec95c841fdb89fc0de7496fed11ab854e
 - name: github.com/jfreymuth/oggvorbis
   version: ae597dfe1dbbe0024c3ef962f9f8a8f7de3f158b
 - name: github.com/jfreymuth/vorbis
@@ -282,6 +286,10 @@ imports:
   - collector/runtime
   - internal
   - storage
+- name: github.com/kr/pretty
+  version: 73f6ac0b30a98e433b289500d779f50c1a6f0712
+- name: github.com/kr/text
+  version: e2ffdb16a802fe2bb95e2e35ff34f0e53aeef34f
 - name: github.com/lann/builder
   version: 47ae307949d02aa1f1069fdafc00ca08e1dbabac
 - name: github.com/lann/ps
@@ -389,6 +397,8 @@ imports:
   version: ef3ab45e41b017889941ea5bb796dd502d2b5a1b
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
+- name: github.com/toqueteos/webbrowser
+  version: 21fc9f95c83442fd164094666f7cb4f9fdd56cd6
 - name: github.com/uber/jaeger-client-go
   version: 1a782e2da844727691fef1757c72eb190c2909f0
   subpackages:
@@ -538,6 +548,10 @@ imports:
   - unicode/bidi
   - unicode/norm
   - width
+- name: golang.org/x/tools
+  version: 554846603d9bd6cd876d3c3f3ba31aa16384c78d
+  subpackages:
+  - go/packages
 - name: google.golang.org/api
   version: 2332327d474b8b265f7d524cac166fe335d821a9
   subpackages:

@@ -61,6 +61,39 @@ func (a *Client) DeviceControl(params *DeviceControlParams) (*DeviceControlOK, e
 }
 
 /*
+GetCompressLogFile get compress log file API
+*/
+func (a *Client) GetCompressLogFile(params *GetCompressLogFileParams) (*GetCompressLogFileOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetCompressLogFileParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getCompressLogFile",
+		Method:             "GET",
+		PathPattern:        "/device/compresslogfile",
+		ProducesMediaTypes: []string{"application/xml"},
+		ConsumesMediaTypes: []string{"application/xml"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GetCompressLogFileReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetCompressLogFileOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*GetCompressLogFileDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
 GetDeviceAutoRunVersion get device auto run version API
 */
 func (a *Client) GetDeviceAutoRunVersion(params *GetDeviceAutoRunVersionParams) (*GetDeviceAutoRunVersionOK, error) {
@@ -89,9 +122,8 @@ func (a *Client) GetDeviceAutoRunVersion(params *GetDeviceAutoRunVersionParams) 
 		return success, nil
 	}
 	// unexpected success response
-	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
-	msg := fmt.Sprintf("unexpected success response for getDeviceAutoRunVersion: API contract not enforced by server. Client expected to get an error, but got: %T", result)
-	panic(msg)
+	unexpectedSuccess := result.(*GetDeviceAutoRunVersionDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
 /*

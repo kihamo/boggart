@@ -22,6 +22,10 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/AutoRunVersion"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /device/basic_information:
     get:
       operationId: "getDeviceBasicInformation"
@@ -77,6 +81,20 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/DeviceSignal"
+  /device/compresslogfile:
+    get:
+      operationId: "getCompressLogFile"
+      tags:
+        - "device"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/DeviceCompressLogFile"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /monitoring/status:
     get:
       operationId: "getMonitoringStatus"
@@ -411,6 +429,13 @@ definitions:
         type: "string"
         xml:
           name: "lte_bandinfo"
+  DeviceCompressLogFile:
+    type: "object"
+    properties:
+      LogPath:
+        type: "string"
+        xml:
+          name: "LogPath"
   MonitoringStatus:
     type: "object"
     properties:

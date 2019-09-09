@@ -30,9 +30,15 @@ func (o *GetDeviceAutoRunVersionReader) ReadResponse(response runtime.ClientResp
 			return nil, err
 		}
 		return result, nil
-
 	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
+		result := NewGetDeviceAutoRunVersionDefault(response.Code())
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
+		return nil, result
 	}
 }
 
@@ -60,6 +66,48 @@ func (o *GetDeviceAutoRunVersionOK) GetPayload() *models.AutoRunVersion {
 func (o *GetDeviceAutoRunVersionOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.AutoRunVersion)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetDeviceAutoRunVersionDefault creates a GetDeviceAutoRunVersionDefault with default headers values
+func NewGetDeviceAutoRunVersionDefault(code int) *GetDeviceAutoRunVersionDefault {
+	return &GetDeviceAutoRunVersionDefault{
+		_statusCode: code,
+	}
+}
+
+/*GetDeviceAutoRunVersionDefault handles this case with default header values.
+
+Unexpected error
+*/
+type GetDeviceAutoRunVersionDefault struct {
+	_statusCode int
+
+	Payload *models.Error
+}
+
+// Code gets the status code for the get device auto run version default response
+func (o *GetDeviceAutoRunVersionDefault) Code() int {
+	return o._statusCode
+}
+
+func (o *GetDeviceAutoRunVersionDefault) Error() string {
+	return fmt.Sprintf("[GET /device/autorun-version][%d] getDeviceAutoRunVersion default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *GetDeviceAutoRunVersionDefault) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *GetDeviceAutoRunVersionDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
