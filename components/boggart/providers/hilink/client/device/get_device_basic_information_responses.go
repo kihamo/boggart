@@ -24,7 +24,6 @@ type GetDeviceBasicInformationReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *GetDeviceBasicInformationReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewGetDeviceBasicInformationOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +51,10 @@ type GetDeviceBasicInformationOK struct {
 
 func (o *GetDeviceBasicInformationOK) Error() string {
 	return fmt.Sprintf("[GET /device/basic_information][%d] getDeviceBasicInformationOK  %+v", 200, o.Payload)
+}
+
+func (o *GetDeviceBasicInformationOK) GetPayload() *models.DeviceBasicInformation {
+	return o.Payload
 }
 
 func (o *GetDeviceBasicInformationOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

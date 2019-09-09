@@ -57,7 +57,7 @@ type DeviceInformation struct {
 	// wan IP address
 	WanIPAddress string `json:"WanIPAddress,omitempty" xml:"WanIPAddress"`
 
-	// wan ipv6 address
+	// wan IPv6 address
 	WanIPV6Address string `json:"WanIPv6Address,omitempty" xml:"WanIPv6Address"`
 
 	// web UI version

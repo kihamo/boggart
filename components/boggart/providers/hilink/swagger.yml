@@ -87,6 +87,16 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/MonitoringStatus"
+  /monitoring/traffic-statistics:
+    get:
+      operationId: "getMonitoringTrafficStatistics"
+      tags:
+      - "monitoring"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/MonitoringTrafficStatistics"
   /net/current-plmn:
     get:
       operationId: "getCurrentPLMN"
@@ -520,6 +530,45 @@ definitions:
         type: "integer"
         xml:
           name: "ltecastatus"
+  MonitoringTrafficStatistics:
+    type: "object"
+    properties:
+      CurrentConnectTime:
+        type: "integer"
+        xml:
+          name: "CurrentConnectTime"
+      CurrentUpload:
+        type: "integer"
+        xml:
+          name: "CurrentUpload"
+      CurrentDownload:
+        type: "integer"
+        xml:
+          name: "CurrentDownload"
+      CurrentDownloadRate:
+        type: "integer"
+        xml:
+          name: "CurrentDownloadRate"
+      CurrentUploadRate:
+        type: "integer"
+        xml:
+          name: "CurrentUploadRate"
+      TotalUpload:
+        type: "integer"
+        xml:
+          name: "TotalUpload"
+      TotalDownload:
+        type: "integer"
+        xml:
+          name: "TotalDownload"
+      TotalConnectTime:
+        type: "integer"
+        xml:
+          name: "TotalConnectTime"
+      ShowTraffic:
+        type: "integer"
+        xml:
+          name: "showtraffic"
   CurrentPLMN:
     type: "object"
     properties:

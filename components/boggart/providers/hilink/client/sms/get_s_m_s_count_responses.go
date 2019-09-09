@@ -24,7 +24,6 @@ type GetSMSCountReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *GetSMSCountReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewGetSMSCountOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +51,10 @@ type GetSMSCountOK struct {
 
 func (o *GetSMSCountOK) Error() string {
 	return fmt.Sprintf("[GET /sms/sms-count][%d] getSMSCountOK  %+v", 200, o.Payload)
+}
+
+func (o *GetSMSCountOK) GetPayload() *models.SMSCount {
+	return o.Payload
 }
 
 func (o *GetSMSCountOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

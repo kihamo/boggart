@@ -24,7 +24,6 @@ type GetCurrentPLMNReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *GetCurrentPLMNReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewGetCurrentPLMNOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +51,10 @@ type GetCurrentPLMNOK struct {
 
 func (o *GetCurrentPLMNOK) Error() string {
 	return fmt.Sprintf("[GET /net/current-plmn][%d] getCurrentPLMNOK  %+v", 200, o.Payload)
+}
+
+func (o *GetCurrentPLMNOK) GetPayload() *models.CurrentPLMN {
+	return o.Payload
 }
 
 func (o *GetCurrentPLMNOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

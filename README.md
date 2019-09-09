@@ -42,6 +42,15 @@ sudo chmod +x /usr/local/bin/boggart-agent
 sudo systemctl restart boggart.service && sudo journalctl -f -u boggart.service
 ```
 
+#### Self
+```
+cd $GOPATH/src/github.com/kihamo/boggart/cmd/agent/
+go build -ldflags "-s -w -X 'main.Version=`date +"%y%m%d"`' -X 'main.Build=`date +"%H%M%S"`'" -o boggart ./
+sudo cp -f $GOPATH/src/github.com/kihamo/boggart/cmd/agent/boggart /usr/local/bin/boggart-agent
+sudo chmod +x /usr/local/bin/boggart-agent
+sudo systemctl restart boggart.service && sudo journalctl -f -u boggart.service
+```
+
 ## Agent Roborock
 Кросс компиляция не возможна из-за ошибок, поэтому собирать надо на реальном устройстве. Подойдет Raspberry PI, так как платформа на нем аналогичная
 

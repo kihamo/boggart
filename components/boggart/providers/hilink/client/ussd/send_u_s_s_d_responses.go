@@ -24,7 +24,6 @@ type SendUSSDReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *SendUSSDReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewSendUSSDOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +51,10 @@ type SendUSSDOK struct {
 
 func (o *SendUSSDOK) Error() string {
 	return fmt.Sprintf("[POST /ussd/send][%d] sendUSSDOK  %+v", 200, o.Payload)
+}
+
+func (o *SendUSSDOK) GetPayload() *models.USSD {
+	return o.Payload
 }
 
 func (o *SendUSSDOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

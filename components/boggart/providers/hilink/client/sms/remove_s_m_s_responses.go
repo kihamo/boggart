@@ -23,7 +23,6 @@ type RemoveSMSReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *RemoveSMSReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewRemoveSMSOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -51,6 +50,10 @@ type RemoveSMSOK struct {
 
 func (o *RemoveSMSOK) Error() string {
 	return fmt.Sprintf("[POST /sms/delete-sms][%d] removeSMSOK  %+v", 200, o.Payload)
+}
+
+func (o *RemoveSMSOK) GetPayload() string {
+	return o.Payload
 }
 
 func (o *RemoveSMSOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

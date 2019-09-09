@@ -24,7 +24,6 @@ type GetMonitoringStatusReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *GetMonitoringStatusReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewGetMonitoringStatusOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +51,10 @@ type GetMonitoringStatusOK struct {
 
 func (o *GetMonitoringStatusOK) Error() string {
 	return fmt.Sprintf("[GET /monitoring/status][%d] getMonitoringStatusOK  %+v", 200, o.Payload)
+}
+
+func (o *GetMonitoringStatusOK) GetPayload() *models.MonitoringStatus {
+	return o.Payload
 }
 
 func (o *GetMonitoringStatusOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

@@ -1,5 +1,5 @@
-hash: 8634e17ac57a2fe383abfab5caffaecd4ba8ccb6b21e14ff8bcd5c1879c6ef69
-updated: 2019-09-02T23:46:38.283174+03:00
+hash: 23a19a72cb33f988ebca93a4553475acd023278bff226b15f25247995bfdb9b1
+updated: 2019-09-09T13:07:07.668595+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -81,11 +81,6 @@ imports:
   version: 1485a34d5d5723fea214f5710708e19a831720e4
 - name: github.com/ghthor/gowol
   version: eb42ead1b24e9226bddb05004815f6e72280f879
-- name: github.com/globalsign/mgo
-  version: eeefdecb41b842af6dc652aaea4026e8403e62df
-  subpackages:
-  - bson
-  - internal/json
 - name: github.com/go-openapi/analysis
   version: e2f3fdbb7ed0e56e070ccbfb6fc75b288a33c014
   subpackages:
@@ -99,7 +94,7 @@ imports:
 - name: github.com/go-openapi/loads
   version: 74628589c3b94e3526a842d24f46589980f5ab22
 - name: github.com/go-openapi/runtime
-  version: 882fa18ad52bee24eb77d2312d1929580e894013
+  version: 9a7d4745a6664423446ba63492cba3e0fdec6623
   subpackages:
   - client
   - logger
@@ -109,17 +104,19 @@ imports:
   - middleware/untyped
   - security
 - name: github.com/go-openapi/spec
-  version: 5b6cdde3200976e3ecceb2868706ee39b6aff3e4
+  version: 2223ab324566e4ace63ab69b9c8fff1b81a40eeb
 - name: github.com/go-openapi/strfmt
-  version: e471370ae57ac74eaf0afe816a66e4ddd7f1b027
+  version: 6faa644e1cdafc07f7b38eb06c1af5f92128f289
 - name: github.com/go-openapi/swag
-  version: 1d29f06aebd59ccdf11ae04aa0334ded96e2d909
+  version: c3d0f7896d589f3babb99eea24bbc7de98108e72
 - name: github.com/go-openapi/validate
-  version: d2eab7d93009e9215fc85b2faa2c2f2a98c2af48
+  version: d8e712d21b877546d81182812b4a1ae10e42b03f
 - name: github.com/go-sql-driver/mysql
   version: 9181e3a86a19bacd63e68d43ae8b7b36320d8092
+- name: github.com/go-stack/stack
+  version: 2fee6af1a9795aafbe0253a0cfbdf668e1fb8a9a
 - name: github.com/go-swagger/go-swagger
-  version: 51061fa3be377b2ef34c70d14d2058b467009eb4
+  version: cf3fb25e7a4f340882908c5386ba4f22647e93da
 - name: github.com/goburrow/serial
   version: 5efbe925ecf714f8ba147bf2226f2e7afc7111bc
 - name: github.com/gogo/protobuf
@@ -417,6 +414,15 @@ imports:
   - metrics
 - name: github.com/yryz/ds18b20
   version: 3cf383a406247c49e48a80014f3e17ddee418742
+- name: go.mongodb.org/mongo-driver
+  version: e90c6d5c780536651929ff0e242dcda2066d9f8a
+  subpackages:
+  - bson
+  - bson/bsoncodec
+  - bson/bsonrw
+  - bson/bsontype
+  - bson/primitive
+  - x/bsonx/bsoncore
 - name: go.opencensus.io
   version: 7a32882185281dc6ea972e9b80d6a58448359977
   subpackages:

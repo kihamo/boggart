@@ -24,7 +24,6 @@ type GetSMSListReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *GetSMSListReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewGetSMSListOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +51,10 @@ type GetSMSListOK struct {
 
 func (o *GetSMSListOK) Error() string {
 	return fmt.Sprintf("[POST /sms/sms-list][%d] getSMSListOK  %+v", 200, o.Payload)
+}
+
+func (o *GetSMSListOK) GetPayload() *models.SMSList {
+	return o.Payload
 }
 
 func (o *GetSMSListOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

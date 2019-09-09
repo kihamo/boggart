@@ -60,7 +60,7 @@ type MonitoringStatus struct {
 	// primary DNS
 	PrimaryDNS string `json:"PrimaryDNS,omitempty" xml:"PrimaryDns"`
 
-	// primary ipv6 DNS
+	// primary IPv6 DNS
 	PrimaryIPV6DNS string `json:"PrimaryIPv6DNS,omitempty" xml:"PrimaryIPv6Dns"`
 
 	// roaming status
@@ -69,7 +69,7 @@ type MonitoringStatus struct {
 	// secondary DNS
 	SecondaryDNS string `json:"SecondaryDNS,omitempty" xml:"SecondaryDns"`
 
-	// secondary ipv6 DNS
+	// secondary IPv6 DNS
 	SecondaryIPV6DNS string `json:"SecondaryIPv6DNS,omitempty" xml:"SecondaryIPv6Dns"`
 
 	// service status

@@ -23,7 +23,6 @@ type ReadSMSReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *ReadSMSReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewReadSMSOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -51,6 +50,10 @@ type ReadSMSOK struct {
 
 func (o *ReadSMSOK) Error() string {
 	return fmt.Sprintf("[POST /sms/set-read][%d] readSMSOK  %+v", 200, o.Payload)
+}
+
+func (o *ReadSMSOK) GetPayload() string {
+	return o.Payload
 }
 
 func (o *ReadSMSOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

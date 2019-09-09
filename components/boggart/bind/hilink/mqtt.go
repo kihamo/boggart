@@ -23,6 +23,9 @@ const (
 	MQTTPublishSignalRSRQ                = MQTTPrefix + "signal/rsrq"
 	MQTTPublishSignalSINR                = MQTTPrefix + "signal/sinr"
 	MQTTPublishSignalLevel               = MQTTPrefix + "signal/level"
+	MQTTPublishConnectionTime            = MQTTPrefix + "connection/time"
+	MQTTPublishConnectionDownload        = MQTTPrefix + "connection/download"
+	MQTTPublishConnectionUpload          = MQTTPrefix + "connection/upload"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
@@ -36,6 +39,9 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 		MQTTPublishSignalRSRQ,
 		MQTTPublishSignalSINR,
 		MQTTPublishSignalLevel,
+		MQTTPublishConnectionTime,
+		MQTTPublishConnectionDownload,
+		MQTTPublishConnectionUpload,
 	}
 }
 

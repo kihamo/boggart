@@ -13,6 +13,9 @@ var (
 	metricSignalRSRQ           = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_signal_rsrq_decibel", "HiLink signal RSRQ in decibel")
 	metricSignalSINR           = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_signal_sinr_decibel", "HiLink signal SINR in decibel")
 	metricSignalLevel          = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_signal_level", "HiLink signal level")
+	metricTotalConnectTime     = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_total_connection_time_seconds", "HiLink total connection time in seconds")
+	metricTotalDownload        = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_total_download_bytes", "HiLink total download in bytes")
+	metricTotalUpload          = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_total_upload_bytes", "HiLink total upload in bytes")
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {
@@ -28,6 +31,9 @@ func (b *Bind) Describe(ch chan<- *snitch.Description) {
 	metricSignalRSRQ.With("serial_number", sn).Describe(ch)
 	metricSignalSINR.With("serial_number", sn).Describe(ch)
 	metricSignalLevel.With("serial_number", sn).Describe(ch)
+	metricTotalConnectTime.With("serial_number", sn).Describe(ch)
+	metricTotalDownload.With("serial_number", sn).Describe(ch)
+	metricTotalUpload.With("serial_number", sn).Describe(ch)
 }
 
 func (b *Bind) Collect(ch chan<- snitch.Metric) {
@@ -43,4 +49,7 @@ func (b *Bind) Collect(ch chan<- snitch.Metric) {
 	metricSignalRSRQ.With("serial_number", sn).Collect(ch)
 	metricSignalSINR.With("serial_number", sn).Collect(ch)
 	metricSignalLevel.With("serial_number", sn).Collect(ch)
+	metricTotalConnectTime.With("serial_number", sn).Collect(ch)
+	metricTotalDownload.With("serial_number", sn).Collect(ch)
+	metricTotalUpload.With("serial_number", sn).Collect(ch)
 }

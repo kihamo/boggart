@@ -26,7 +26,6 @@ type DeviceControlReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *DeviceControlReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewDeviceControlOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -54,6 +53,10 @@ type DeviceControlOK struct {
 
 func (o *DeviceControlOK) Error() string {
 	return fmt.Sprintf("[POST /device/control][%d] deviceControlOK  %+v", 200, o.Payload)
+}
+
+func (o *DeviceControlOK) GetPayload() string {
+	return o.Payload
 }
 
 func (o *DeviceControlOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

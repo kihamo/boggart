@@ -6,6 +6,8 @@ package monitoring
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"fmt"
+
 	"github.com/go-openapi/runtime"
 
 	strfmt "github.com/go-openapi/strfmt"
@@ -48,8 +50,48 @@ func (a *Client) GetMonitoringStatus(params *GetMonitoringStatusParams) (*GetMon
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetMonitoringStatusOK), nil
+	success, ok := result.(*GetMonitoringStatusOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getMonitoringStatus: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
 
+/*
+GetMonitoringTrafficStatistics get monitoring traffic statistics API
+*/
+func (a *Client) GetMonitoringTrafficStatistics(params *GetMonitoringTrafficStatisticsParams) (*GetMonitoringTrafficStatisticsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetMonitoringTrafficStatisticsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getMonitoringTrafficStatistics",
+		Method:             "GET",
+		PathPattern:        "/monitoring/traffic-statistics",
+		ProducesMediaTypes: []string{"application/xml"},
+		ConsumesMediaTypes: []string{"application/xml"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GetMonitoringTrafficStatisticsReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetMonitoringTrafficStatisticsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getMonitoringTrafficStatistics: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 // SetTransport changes the transport on the client

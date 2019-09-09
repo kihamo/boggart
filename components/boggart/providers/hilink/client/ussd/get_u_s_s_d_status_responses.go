@@ -24,7 +24,6 @@ type GetUSSDStatusReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *GetUSSDStatusReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewGetUSSDStatusOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +51,10 @@ type GetUSSDStatusOK struct {
 
 func (o *GetUSSDStatusOK) Error() string {
 	return fmt.Sprintf("[GET /ussd/status][%d] getUSSDStatusOK  %+v", 200, o.Payload)
+}
+
+func (o *GetUSSDStatusOK) GetPayload() *models.USSDStatus {
+	return o.Payload
 }
 
 func (o *GetUSSDStatusOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

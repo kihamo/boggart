@@ -24,7 +24,6 @@ type GetDeviceAutoRunVersionReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *GetDeviceAutoRunVersionReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewGetDeviceAutoRunVersionOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +51,10 @@ type GetDeviceAutoRunVersionOK struct {
 
 func (o *GetDeviceAutoRunVersionOK) Error() string {
 	return fmt.Sprintf("[GET /device/autorun-version][%d] getDeviceAutoRunVersionOK  %+v", 200, o.Payload)
+}
+
+func (o *GetDeviceAutoRunVersionOK) GetPayload() *models.AutoRunVersion {
+	return o.Payload
 }
 
 func (o *GetDeviceAutoRunVersionOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

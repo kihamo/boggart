@@ -6,6 +6,8 @@ package device
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"fmt"
+
 	"github.com/go-openapi/runtime"
 
 	strfmt "github.com/go-openapi/strfmt"
@@ -48,8 +50,14 @@ func (a *Client) DeviceControl(params *DeviceControlParams) (*DeviceControlOK, e
 	if err != nil {
 		return nil, err
 	}
-	return result.(*DeviceControlOK), nil
-
+	success, ok := result.(*DeviceControlOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for DeviceControl: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -76,8 +84,14 @@ func (a *Client) GetDeviceAutoRunVersion(params *GetDeviceAutoRunVersionParams) 
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetDeviceAutoRunVersionOK), nil
-
+	success, ok := result.(*GetDeviceAutoRunVersionOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getDeviceAutoRunVersion: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -104,8 +118,14 @@ func (a *Client) GetDeviceBasicInformation(params *GetDeviceBasicInformationPara
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetDeviceBasicInformationOK), nil
-
+	success, ok := result.(*GetDeviceBasicInformationOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getDeviceBasicInformation: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -132,8 +152,14 @@ func (a *Client) GetDeviceInformation(params *GetDeviceInformationParams) (*GetD
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetDeviceInformationOK), nil
-
+	success, ok := result.(*GetDeviceInformationOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getDeviceInformation: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -160,8 +186,14 @@ func (a *Client) GetDeviceSignal(params *GetDeviceSignalParams) (*GetDeviceSigna
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetDeviceSignalOK), nil
-
+	success, ok := result.(*GetDeviceSignalOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getDeviceSignal: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 // SetTransport changes the transport on the client
