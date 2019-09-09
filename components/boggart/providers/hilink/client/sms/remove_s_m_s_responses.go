@@ -13,6 +13,8 @@ import (
 	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
+
+	models "github.com/kihamo/boggart/components/boggart/providers/hilink/models"
 )
 
 // RemoveSMSReader is a Reader for the RemoveSMS structure.
@@ -29,9 +31,15 @@ func (o *RemoveSMSReader) ReadResponse(response runtime.ClientResponse, consumer
 			return nil, err
 		}
 		return result, nil
-
 	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
+		result := NewRemoveSMSDefault(response.Code())
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
+		return nil, result
 	}
 }
 
@@ -60,6 +68,48 @@ func (o *RemoveSMSOK) readResponse(response runtime.ClientResponse, consumer run
 
 	// response payload
 	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewRemoveSMSDefault creates a RemoveSMSDefault with default headers values
+func NewRemoveSMSDefault(code int) *RemoveSMSDefault {
+	return &RemoveSMSDefault{
+		_statusCode: code,
+	}
+}
+
+/*RemoveSMSDefault handles this case with default header values.
+
+Unexpected error
+*/
+type RemoveSMSDefault struct {
+	_statusCode int
+
+	Payload *models.Error
+}
+
+// Code gets the status code for the remove s m s default response
+func (o *RemoveSMSDefault) Code() int {
+	return o._statusCode
+}
+
+func (o *RemoveSMSDefault) Error() string {
+	return fmt.Sprintf("[POST /sms/delete-sms][%d] removeSMS default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *RemoveSMSDefault) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *RemoveSMSDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 

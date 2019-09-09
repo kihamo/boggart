@@ -30,9 +30,15 @@ func (o *GetMonitoringTrafficStatisticsReader) ReadResponse(response runtime.Cli
 			return nil, err
 		}
 		return result, nil
-
 	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
+		result := NewGetMonitoringTrafficStatisticsDefault(response.Code())
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
+		return nil, result
 	}
 }
 
@@ -60,6 +66,48 @@ func (o *GetMonitoringTrafficStatisticsOK) GetPayload() *models.MonitoringTraffi
 func (o *GetMonitoringTrafficStatisticsOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.MonitoringTrafficStatistics)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetMonitoringTrafficStatisticsDefault creates a GetMonitoringTrafficStatisticsDefault with default headers values
+func NewGetMonitoringTrafficStatisticsDefault(code int) *GetMonitoringTrafficStatisticsDefault {
+	return &GetMonitoringTrafficStatisticsDefault{
+		_statusCode: code,
+	}
+}
+
+/*GetMonitoringTrafficStatisticsDefault handles this case with default header values.
+
+Unexpected error
+*/
+type GetMonitoringTrafficStatisticsDefault struct {
+	_statusCode int
+
+	Payload *models.Error
+}
+
+// Code gets the status code for the get monitoring traffic statistics default response
+func (o *GetMonitoringTrafficStatisticsDefault) Code() int {
+	return o._statusCode
+}
+
+func (o *GetMonitoringTrafficStatisticsDefault) Error() string {
+	return fmt.Sprintf("[GET /monitoring/traffic-statistics][%d] getMonitoringTrafficStatistics default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *GetMonitoringTrafficStatisticsDefault) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *GetMonitoringTrafficStatisticsDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

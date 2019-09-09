@@ -30,9 +30,15 @@ func (o *GetCurrentPLMNReader) ReadResponse(response runtime.ClientResponse, con
 			return nil, err
 		}
 		return result, nil
-
 	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
+		result := NewGetCurrentPLMNDefault(response.Code())
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
+		return nil, result
 	}
 }
 
@@ -60,6 +66,48 @@ func (o *GetCurrentPLMNOK) GetPayload() *models.CurrentPLMN {
 func (o *GetCurrentPLMNOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.CurrentPLMN)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetCurrentPLMNDefault creates a GetCurrentPLMNDefault with default headers values
+func NewGetCurrentPLMNDefault(code int) *GetCurrentPLMNDefault {
+	return &GetCurrentPLMNDefault{
+		_statusCode: code,
+	}
+}
+
+/*GetCurrentPLMNDefault handles this case with default header values.
+
+Unexpected error
+*/
+type GetCurrentPLMNDefault struct {
+	_statusCode int
+
+	Payload *models.Error
+}
+
+// Code gets the status code for the get current p l m n default response
+func (o *GetCurrentPLMNDefault) Code() int {
+	return o._statusCode
+}
+
+func (o *GetCurrentPLMNDefault) Error() string {
+	return fmt.Sprintf("[GET /net/current-plmn][%d] getCurrentPLMN default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *GetCurrentPLMNDefault) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *GetCurrentPLMNDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

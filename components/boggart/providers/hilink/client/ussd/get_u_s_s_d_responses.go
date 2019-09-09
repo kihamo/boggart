@@ -30,9 +30,15 @@ func (o *GetUSSDReader) ReadResponse(response runtime.ClientResponse, consumer r
 			return nil, err
 		}
 		return result, nil
-
 	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
+		result := NewGetUSSDDefault(response.Code())
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
+		return nil, result
 	}
 }
 
@@ -60,6 +66,48 @@ func (o *GetUSSDOK) GetPayload() *models.USSD {
 func (o *GetUSSDOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.USSD)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetUSSDDefault creates a GetUSSDDefault with default headers values
+func NewGetUSSDDefault(code int) *GetUSSDDefault {
+	return &GetUSSDDefault{
+		_statusCode: code,
+	}
+}
+
+/*GetUSSDDefault handles this case with default header values.
+
+Unexpected error
+*/
+type GetUSSDDefault struct {
+	_statusCode int
+
+	Payload *models.Error
+}
+
+// Code gets the status code for the get u s s d default response
+func (o *GetUSSDDefault) Code() int {
+	return o._statusCode
+}
+
+func (o *GetUSSDDefault) Error() string {
+	return fmt.Sprintf("[GET /ussd/get][%d] getUSSD default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *GetUSSDDefault) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *GetUSSDDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

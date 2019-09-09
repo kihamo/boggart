@@ -12,6 +12,8 @@ import (
 	"github.com/go-openapi/runtime"
 
 	strfmt "github.com/go-openapi/strfmt"
+
+	models "github.com/kihamo/boggart/components/boggart/providers/hilink/models"
 )
 
 // ReleaseUSSDReader is a Reader for the ReleaseUSSD structure.
@@ -28,9 +30,15 @@ func (o *ReleaseUSSDReader) ReadResponse(response runtime.ClientResponse, consum
 			return nil, err
 		}
 		return result, nil
-
 	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
+		result := NewReleaseUSSDDefault(response.Code())
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
+		return nil, result
 	}
 }
 
@@ -59,6 +67,48 @@ func (o *ReleaseUSSDOK) readResponse(response runtime.ClientResponse, consumer r
 
 	// response payload
 	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewReleaseUSSDDefault creates a ReleaseUSSDDefault with default headers values
+func NewReleaseUSSDDefault(code int) *ReleaseUSSDDefault {
+	return &ReleaseUSSDDefault{
+		_statusCode: code,
+	}
+}
+
+/*ReleaseUSSDDefault handles this case with default header values.
+
+Unexpected error
+*/
+type ReleaseUSSDDefault struct {
+	_statusCode int
+
+	Payload *models.Error
+}
+
+// Code gets the status code for the release u s s d default response
+func (o *ReleaseUSSDDefault) Code() int {
+	return o._statusCode
+}
+
+func (o *ReleaseUSSDDefault) Error() string {
+	return fmt.Sprintf("[GET /ussd/release][%d] releaseUSSD default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *ReleaseUSSDDefault) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ReleaseUSSDDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 

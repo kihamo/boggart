@@ -13,6 +13,8 @@ import (
 	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
+
+	models "github.com/kihamo/boggart/components/boggart/providers/hilink/models"
 )
 
 // ReadSMSReader is a Reader for the ReadSMS structure.
@@ -29,9 +31,15 @@ func (o *ReadSMSReader) ReadResponse(response runtime.ClientResponse, consumer r
 			return nil, err
 		}
 		return result, nil
-
 	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
+		result := NewReadSMSDefault(response.Code())
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
+		return nil, result
 	}
 }
 
@@ -60,6 +68,48 @@ func (o *ReadSMSOK) readResponse(response runtime.ClientResponse, consumer runti
 
 	// response payload
 	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewReadSMSDefault creates a ReadSMSDefault with default headers values
+func NewReadSMSDefault(code int) *ReadSMSDefault {
+	return &ReadSMSDefault{
+		_statusCode: code,
+	}
+}
+
+/*ReadSMSDefault handles this case with default header values.
+
+Unexpected error
+*/
+type ReadSMSDefault struct {
+	_statusCode int
+
+	Payload *models.Error
+}
+
+// Code gets the status code for the read s m s default response
+func (o *ReadSMSDefault) Code() int {
+	return o._statusCode
+}
+
+func (o *ReadSMSDefault) Error() string {
+	return fmt.Sprintf("[POST /sms/set-read][%d] readSMS default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *ReadSMSDefault) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ReadSMSDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 

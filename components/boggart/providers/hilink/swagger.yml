@@ -36,6 +36,10 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/DeviceBasicInformation"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /device/information:
     get:
       operationId: "getDeviceInformation"
@@ -46,6 +50,10 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/DeviceInformation"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /device/control:
     post:
       operationId: "DeviceControl"
@@ -71,6 +79,10 @@ paths:
           description: "Successful operation"
           schema:
             type: "string"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /device/signal:
     get:
       operationId: "getDeviceSignal"
@@ -81,6 +93,10 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/DeviceSignal"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /device/compresslogfile:
     get:
       operationId: "getCompressLogFile"
@@ -105,6 +121,10 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/MonitoringStatus"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /monitoring/traffic-statistics:
     get:
       operationId: "getMonitoringTrafficStatistics"
@@ -115,6 +135,10 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/MonitoringTrafficStatistics"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /net/current-plmn:
     get:
       operationId: "getCurrentPLMN"
@@ -125,6 +149,10 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/CurrentPLMN"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /sms/sms-count:
     get:
       operationId: "getSMSCount"
@@ -135,6 +163,10 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/SMSCount"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /sms/delete-sms:
     post:
       operationId: "removeSMS"
@@ -155,6 +187,10 @@ paths:
           description: "Successful operation"
           schema:
             type: "string"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /sms/set-read:
     post:
       operationId: "readSMS"
@@ -175,6 +211,10 @@ paths:
           description: "Successful operation"
           schema:
             type: "string"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /sms/sms-list:
     post:
       operationId: "getSMSList"
@@ -190,6 +230,10 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/SMSList"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /ussd/get:
     get:
       operationId: "getUSSD"
@@ -200,6 +244,10 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/USSD"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /ussd/release:
     get:
       operationId: "releaseUSSD"
@@ -210,6 +258,10 @@ paths:
           description: "Successful operation"
           schema:
             type: "string"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /ussd/send:
     post:
       operationId: "sendUSSD"
@@ -225,6 +277,10 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/USSD"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /ussd/status:
     get:
       operationId: "getUSSDStatus"
@@ -235,6 +291,10 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/USSDStatus"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /webserver/SesTokInfo:
     get:
       operationId: "getWebServerSession"
@@ -245,6 +305,10 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/SessionToken"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
 definitions:
   Error:
     type: "object"

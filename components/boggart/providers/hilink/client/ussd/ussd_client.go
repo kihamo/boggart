@@ -6,8 +6,6 @@ package ussd
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"fmt"
-
 	"github.com/go-openapi/runtime"
 
 	strfmt "github.com/go-openapi/strfmt"
@@ -55,9 +53,8 @@ func (a *Client) GetUSSD(params *GetUSSDParams) (*GetUSSDOK, error) {
 		return success, nil
 	}
 	// unexpected success response
-	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
-	msg := fmt.Sprintf("unexpected success response for getUSSD: API contract not enforced by server. Client expected to get an error, but got: %T", result)
-	panic(msg)
+	unexpectedSuccess := result.(*GetUSSDDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
 /*
@@ -89,9 +86,8 @@ func (a *Client) GetUSSDStatus(params *GetUSSDStatusParams) (*GetUSSDStatusOK, e
 		return success, nil
 	}
 	// unexpected success response
-	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
-	msg := fmt.Sprintf("unexpected success response for getUSSDStatus: API contract not enforced by server. Client expected to get an error, but got: %T", result)
-	panic(msg)
+	unexpectedSuccess := result.(*GetUSSDStatusDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
 /*
@@ -123,9 +119,8 @@ func (a *Client) ReleaseUSSD(params *ReleaseUSSDParams) (*ReleaseUSSDOK, error) 
 		return success, nil
 	}
 	// unexpected success response
-	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
-	msg := fmt.Sprintf("unexpected success response for releaseUSSD: API contract not enforced by server. Client expected to get an error, but got: %T", result)
-	panic(msg)
+	unexpectedSuccess := result.(*ReleaseUSSDDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
 /*
@@ -157,9 +152,8 @@ func (a *Client) SendUSSD(params *SendUSSDParams) (*SendUSSDOK, error) {
 		return success, nil
 	}
 	// unexpected success response
-	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
-	msg := fmt.Sprintf("unexpected success response for sendUSSD: API contract not enforced by server. Client expected to get an error, but got: %T", result)
-	panic(msg)
+	unexpectedSuccess := result.(*SendUSSDDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
 // SetTransport changes the transport on the client

@@ -30,9 +30,15 @@ func (o *GetDeviceSignalReader) ReadResponse(response runtime.ClientResponse, co
 			return nil, err
 		}
 		return result, nil
-
 	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
+		result := NewGetDeviceSignalDefault(response.Code())
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
+		return nil, result
 	}
 }
 
@@ -60,6 +66,48 @@ func (o *GetDeviceSignalOK) GetPayload() *models.DeviceSignal {
 func (o *GetDeviceSignalOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.DeviceSignal)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetDeviceSignalDefault creates a GetDeviceSignalDefault with default headers values
+func NewGetDeviceSignalDefault(code int) *GetDeviceSignalDefault {
+	return &GetDeviceSignalDefault{
+		_statusCode: code,
+	}
+}
+
+/*GetDeviceSignalDefault handles this case with default header values.
+
+Unexpected error
+*/
+type GetDeviceSignalDefault struct {
+	_statusCode int
+
+	Payload *models.Error
+}
+
+// Code gets the status code for the get device signal default response
+func (o *GetDeviceSignalDefault) Code() int {
+	return o._statusCode
+}
+
+func (o *GetDeviceSignalDefault) Error() string {
+	return fmt.Sprintf("[GET /device/signal][%d] getDeviceSignal default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *GetDeviceSignalDefault) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *GetDeviceSignalDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

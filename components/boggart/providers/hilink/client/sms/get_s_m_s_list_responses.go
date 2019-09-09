@@ -30,9 +30,15 @@ func (o *GetSMSListReader) ReadResponse(response runtime.ClientResponse, consume
 			return nil, err
 		}
 		return result, nil
-
 	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
+		result := NewGetSMSListDefault(response.Code())
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
+		return nil, result
 	}
 }
 
@@ -60,6 +66,48 @@ func (o *GetSMSListOK) GetPayload() *models.SMSList {
 func (o *GetSMSListOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.SMSList)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetSMSListDefault creates a GetSMSListDefault with default headers values
+func NewGetSMSListDefault(code int) *GetSMSListDefault {
+	return &GetSMSListDefault{
+		_statusCode: code,
+	}
+}
+
+/*GetSMSListDefault handles this case with default header values.
+
+Unexpected error
+*/
+type GetSMSListDefault struct {
+	_statusCode int
+
+	Payload *models.Error
+}
+
+// Code gets the status code for the get s m s list default response
+func (o *GetSMSListDefault) Code() int {
+	return o._statusCode
+}
+
+func (o *GetSMSListDefault) Error() string {
+	return fmt.Sprintf("[POST /sms/sms-list][%d] getSMSList default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *GetSMSListDefault) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *GetSMSListDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

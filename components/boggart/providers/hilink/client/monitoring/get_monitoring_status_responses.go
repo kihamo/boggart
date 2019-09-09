@@ -30,9 +30,15 @@ func (o *GetMonitoringStatusReader) ReadResponse(response runtime.ClientResponse
 			return nil, err
 		}
 		return result, nil
-
 	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
+		result := NewGetMonitoringStatusDefault(response.Code())
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
+		return nil, result
 	}
 }
 
@@ -60,6 +66,48 @@ func (o *GetMonitoringStatusOK) GetPayload() *models.MonitoringStatus {
 func (o *GetMonitoringStatusOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.MonitoringStatus)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetMonitoringStatusDefault creates a GetMonitoringStatusDefault with default headers values
+func NewGetMonitoringStatusDefault(code int) *GetMonitoringStatusDefault {
+	return &GetMonitoringStatusDefault{
+		_statusCode: code,
+	}
+}
+
+/*GetMonitoringStatusDefault handles this case with default header values.
+
+Unexpected error
+*/
+type GetMonitoringStatusDefault struct {
+	_statusCode int
+
+	Payload *models.Error
+}
+
+// Code gets the status code for the get monitoring status default response
+func (o *GetMonitoringStatusDefault) Code() int {
+	return o._statusCode
+}
+
+func (o *GetMonitoringStatusDefault) Error() string {
+	return fmt.Sprintf("[GET /monitoring/status][%d] getMonitoringStatus default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *GetMonitoringStatusDefault) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *GetMonitoringStatusDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

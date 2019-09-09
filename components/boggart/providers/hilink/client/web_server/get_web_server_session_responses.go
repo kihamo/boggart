@@ -30,9 +30,15 @@ func (o *GetWebServerSessionReader) ReadResponse(response runtime.ClientResponse
 			return nil, err
 		}
 		return result, nil
-
 	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
+		result := NewGetWebServerSessionDefault(response.Code())
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
+		return nil, result
 	}
 }
 
@@ -60,6 +66,48 @@ func (o *GetWebServerSessionOK) GetPayload() *models.SessionToken {
 func (o *GetWebServerSessionOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.SessionToken)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetWebServerSessionDefault creates a GetWebServerSessionDefault with default headers values
+func NewGetWebServerSessionDefault(code int) *GetWebServerSessionDefault {
+	return &GetWebServerSessionDefault{
+		_statusCode: code,
+	}
+}
+
+/*GetWebServerSessionDefault handles this case with default header values.
+
+Unexpected error
+*/
+type GetWebServerSessionDefault struct {
+	_statusCode int
+
+	Payload *models.Error
+}
+
+// Code gets the status code for the get web server session default response
+func (o *GetWebServerSessionDefault) Code() int {
+	return o._statusCode
+}
+
+func (o *GetWebServerSessionDefault) Error() string {
+	return fmt.Sprintf("[GET /webserver/SesTokInfo][%d] getWebServerSession default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *GetWebServerSessionDefault) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *GetWebServerSessionDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

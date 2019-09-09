@@ -30,9 +30,15 @@ func (o *GetDeviceInformationReader) ReadResponse(response runtime.ClientRespons
 			return nil, err
 		}
 		return result, nil
-
 	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
+		result := NewGetDeviceInformationDefault(response.Code())
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
+		return nil, result
 	}
 }
 
@@ -60,6 +66,48 @@ func (o *GetDeviceInformationOK) GetPayload() *models.DeviceInformation {
 func (o *GetDeviceInformationOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.DeviceInformation)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetDeviceInformationDefault creates a GetDeviceInformationDefault with default headers values
+func NewGetDeviceInformationDefault(code int) *GetDeviceInformationDefault {
+	return &GetDeviceInformationDefault{
+		_statusCode: code,
+	}
+}
+
+/*GetDeviceInformationDefault handles this case with default header values.
+
+Unexpected error
+*/
+type GetDeviceInformationDefault struct {
+	_statusCode int
+
+	Payload *models.Error
+}
+
+// Code gets the status code for the get device information default response
+func (o *GetDeviceInformationDefault) Code() int {
+	return o._statusCode
+}
+
+func (o *GetDeviceInformationDefault) Error() string {
+	return fmt.Sprintf("[GET /device/information][%d] getDeviceInformation default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *GetDeviceInformationDefault) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *GetDeviceInformationDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
