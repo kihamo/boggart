@@ -1,0 +1,196 @@
+---
+
+swagger: "2.0"
+info:
+  title: "Nalog.RU"
+  version: "0.1.0"
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+schemes:
+  - "https"
+basePath: "/v1"
+securityDefinitions:
+  basicAuth:
+    type: "basic"
+security:
+  - basicAuth: []
+paths:
+  /mobile/users/login:
+    get:
+      operationId: "login"
+      tags:
+        - "auth"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Login"
+  /ofds/*/inns/*/fss/{fiscalDriveNumber}/operations/1/tickets/{fiscalDocumentNumber}:
+    get:
+      operationId: "check"
+      tags:
+        - "api"
+      parameters:
+        - name: "fiscalDriveNumber"
+          in: "path"
+          description: "Номер фискальное накопителя"
+          required: true
+          type: "integer"
+          format: "uint64"
+        - name: "fiscalDocumentNumber"
+          in: "path"
+          description: "Номер фискальных данных"
+          required: true
+          type: "integer"
+          format: "uint64"
+        - name: "fiscalSign"
+          in: "query"
+          description: "Фискальный признак"
+          required: true
+          type: "integer"
+          format: "uint64"
+        - name: "date"
+          in: "query"
+          description: "Дата в формате DD-MM-YYYY HH:II"
+          required: true
+          type: "string"
+        - name: "sum"
+          in: "query"
+          description: "Сумма в копейках"
+          required: true
+          type: "integer"
+          format: "uint64"
+      responses:
+        204:
+          description: "Successful operation"
+  /inns/*/kkts/*/fss/{fiscalDriveNumber}/tickets/{fiscalDocumentNumber}:
+    get:
+      operationId: "get"
+      tags:
+        - "api"
+      parameters:
+        - in: "header"
+          name: "Device-Id"
+          type: "string"
+          required: true
+        - in: "header"
+          name: "Device-OS"
+          type: "string"
+          required: false
+          default: "Android 9"
+        - name: "fiscalDriveNumber"
+          in: "path"
+          description: "Номер фискальное накопителя"
+          required: true
+          type: "integer"
+          format: "uint64"
+        - name: "fiscalDocumentNumber"
+          in: "path"
+          description: "Номер фискальных данных"
+          required: true
+          type: "integer"
+          format: "uint64"
+        - name: "fiscalSign"
+          in: "query"
+          description: "Фискальный признак"
+          required: true
+          type: "integer"
+          format: "uint64"
+        - name: "sendToEmail"
+          in: "query"
+          description: "Отсылка на email"
+          required: false
+          type: "string"
+          default: "no"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "object"
+            properties:
+              document:
+                $ref: '#/definitions/Document'
+definitions:
+  Login:
+    type: "object"
+    properties:
+      email:
+        type: "string"
+      name:
+        type: "string"
+  Document:
+    type: "object"
+    properties:
+      receipt:
+        type: "object"
+        properties:
+          rawData:
+            type: "string"
+            format: "byte"
+          fiscalDocumentNumber:
+            type: "integer"
+            format: "uint64"
+          fiscalDriveNumber:
+            type: "string"
+          fiscalSign:
+            type: "integer"
+            format: "uint64"
+          nds18:
+            type: "integer"
+            format: "uint64"
+          userInn:
+            type: "string"
+          shiftNumber:
+            type: "integer"
+            format: "uint64"
+          requestNumber:
+            type: "integer"
+            format: "uint64"
+          receiptCode:
+            type: "integer"
+            format: "uint64"
+          taxationType:
+            type: "integer"
+            format: "uint64"
+          kktRegId:
+            type: "string"
+          cashTotalSum:
+            type: "integer"
+            format: "uint64"
+          operationType:
+            type: "integer"
+            format: "uint64"
+          totalSum:
+            type: "integer"
+            format: "uint64"
+          ecashTotalSum:
+            type: "integer"
+            format: "uint64"
+          operator:
+            type: "string"
+          dateTime:
+            type: "string"
+            format: "datetime"
+          items:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                nds18:
+                  type: "integer"
+                  format: "uint64"
+                sum:
+                  type: "integer"
+                  format: "uint64"
+                quantity:
+                  type: "integer"
+                  format: "uint64"
+                price:
+                  type: "integer"
+                  format: "uint64"
+                name:
+                  type: "string"
+
+
