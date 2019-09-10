@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
-	mercury "github.com/kihamo/boggart/components/boggart/providers/mercury/v1"
+	mercury "github.com/kihamo/boggart/providers/mercury/v1"
 )
 
 type Bind struct {

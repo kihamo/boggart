@@ -6,7 +6,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/protocols/serial"
-	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
+	"github.com/kihamo/boggart/providers/pulsar"
 )
 
 type Type struct {

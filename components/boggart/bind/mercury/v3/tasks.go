@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/mercury/v3"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/providers/mercury/v3"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 	"go.uber.org/multierr"

@@ -5,7 +5,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/kihamo/boggart/components/boggart/providers/pulsar"
+	"github.com/kihamo/boggart/providers/pulsar"
 
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"

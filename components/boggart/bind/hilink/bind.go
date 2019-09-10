@@ -10,11 +10,11 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/atomic"
-	"github.com/kihamo/boggart/components/boggart/providers/hilink"
-	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/device"
-	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/ussd"
-	"github.com/kihamo/boggart/components/boggart/providers/hilink/models"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/providers/hilink"
+	"github.com/kihamo/boggart/providers/hilink/client/device"
+	"github.com/kihamo/boggart/providers/hilink/client/ussd"
+	"github.com/kihamo/boggart/providers/hilink/models"
 )
 
 var (

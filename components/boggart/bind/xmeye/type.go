@@ -2,7 +2,7 @@ package xmeye
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/xmeye"
+	"github.com/kihamo/boggart/providers/xmeye"
 )
 
 type Type struct {

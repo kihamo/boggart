@@ -10,10 +10,10 @@ import (
 
 	"github.com/go-openapi/runtime"
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/system"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision/models"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/providers/hikvision"
+	"github.com/kihamo/boggart/providers/hikvision/client/system"
+	"github.com/kihamo/boggart/providers/hikvision/models"
 )
 
 const (

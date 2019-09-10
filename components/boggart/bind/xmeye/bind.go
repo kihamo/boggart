@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/xmeye"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/providers/xmeye"
 )
 
 const (

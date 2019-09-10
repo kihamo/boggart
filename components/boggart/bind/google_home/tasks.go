@@ -5,8 +5,8 @@ import (
 	"errors"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/google/home"
-	"github.com/kihamo/boggart/components/boggart/providers/google/home/client/info"
+	"github.com/kihamo/boggart/providers/google/home"
+	"github.com/kihamo/boggart/providers/google/home/client/info"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 )

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/wifiled"
+	"github.com/kihamo/boggart/providers/wifiled"
 )
 
 type Bind struct {

@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/wifiled"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/providers/wifiled"
 )
 
 const (

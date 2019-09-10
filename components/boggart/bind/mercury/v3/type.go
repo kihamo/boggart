@@ -6,8 +6,8 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/protocols/serial"
 	"github.com/kihamo/boggart/components/boggart/protocols/serial_network"
-	m "github.com/kihamo/boggart/components/boggart/providers/mercury"
-	mercury "github.com/kihamo/boggart/components/boggart/providers/mercury/v3"
+	m "github.com/kihamo/boggart/providers/mercury"
+	mercury "github.com/kihamo/boggart/providers/mercury/v3"
 )
 
 type Type struct{}

@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/mikrotik"
+	"github.com/kihamo/boggart/providers/mikrotik"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 )

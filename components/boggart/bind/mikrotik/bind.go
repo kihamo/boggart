@@ -9,8 +9,8 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/atomic"
-	"github.com/kihamo/boggart/components/boggart/providers/mikrotik"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/providers/mikrotik"
 )
 
 var (

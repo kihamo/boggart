@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/samsung/tv"
+	"github.com/kihamo/boggart/providers/samsung/tv"
 )
 
 type Bind struct {

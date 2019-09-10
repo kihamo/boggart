@@ -5,7 +5,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/protocols/swagger"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision"
+	"github.com/kihamo/boggart/providers/hikvision"
 )
 
 type Type struct {

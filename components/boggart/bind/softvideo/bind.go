@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/softvideo"
+	"github.com/kihamo/boggart/providers/softvideo"
 )
 
 type Bind struct {

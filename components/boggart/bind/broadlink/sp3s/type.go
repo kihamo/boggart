@@ -5,7 +5,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/atomic"
-	"github.com/kihamo/boggart/components/boggart/providers/broadlink"
+	"github.com/kihamo/boggart/providers/broadlink"
 )
 
 type Type struct {

@@ -6,8 +6,8 @@ import (
 
 	"github.com/ghthor/gowol"
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/samsung/tv"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/providers/samsung/tv"
 )
 
 const (

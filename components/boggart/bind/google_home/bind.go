@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/google/home"
-	"github.com/kihamo/boggart/components/boggart/providers/google/home/client"
+	"github.com/kihamo/boggart/providers/google/home"
+	"github.com/kihamo/boggart/providers/google/home/client"
 )
 
 type Bind struct {

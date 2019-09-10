@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/hilink/client/device"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/providers/hilink/client/device"
 )
 
 const (

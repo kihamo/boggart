@@ -2,7 +2,7 @@ package mosenergosbyt
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/integratorit/mosenergosbyt"
+	"github.com/kihamo/boggart/providers/integratorit/mosenergosbyt"
 )
 
 type Type struct{}

@@ -5,7 +5,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/protocols/serial"
-	mercury "github.com/kihamo/boggart/components/boggart/providers/mercury/v1"
+	mercury "github.com/kihamo/boggart/providers/mercury/v1"
 )
 
 type Type struct {

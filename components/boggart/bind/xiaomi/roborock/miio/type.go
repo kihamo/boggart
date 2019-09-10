@@ -2,7 +2,7 @@ package miio
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/xiaomi/miio/devices/vacuum"
+	"github.com/kihamo/boggart/providers/xiaomi/miio/devices/vacuum"
 )
 
 type Type struct {

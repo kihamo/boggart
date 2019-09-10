@@ -2,7 +2,7 @@ package rkcm
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/rkcm"
+	"github.com/kihamo/boggart/providers/rkcm"
 )
 
 type Bind struct {

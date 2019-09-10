@@ -13,11 +13,11 @@ import (
 
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/event"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/image"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/streaming"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision/client/system"
-	"github.com/kihamo/boggart/components/boggart/providers/hikvision/models"
+	"github.com/kihamo/boggart/providers/hikvision/client/event"
+	"github.com/kihamo/boggart/providers/hikvision/client/image"
+	"github.com/kihamo/boggart/providers/hikvision/client/streaming"
+	"github.com/kihamo/boggart/providers/hikvision/client/system"
+	"github.com/kihamo/boggart/providers/hikvision/models"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 

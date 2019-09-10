@@ -4,7 +4,7 @@ import (
 	"strconv"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/herospeed"
+	"github.com/kihamo/boggart/providers/herospeed"
 )
 
 type Type struct {

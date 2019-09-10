@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/providers/xiaomi/miio/devices/vacuum"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/providers/xiaomi/miio/devices/vacuum"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 	"go.uber.org/multierr"

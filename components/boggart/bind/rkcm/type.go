@@ -3,7 +3,7 @@ package rkcm
 import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/protocols/swagger"
-	"github.com/kihamo/boggart/components/boggart/providers/rkcm"
+	"github.com/kihamo/boggart/providers/rkcm"
 )
 
 type Type struct{}
