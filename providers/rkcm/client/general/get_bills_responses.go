@@ -27,7 +27,6 @@ type GetBillsReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *GetBillsReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewGetBillsOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -55,6 +54,10 @@ type GetBillsOK struct {
 
 func (o *GetBillsOK) Error() string {
 	return fmt.Sprintf("[GET /GetBills.ashx][%d] getBillsOK  %+v", 200, o.Payload)
+}
+
+func (o *GetBillsOK) GetPayload() *GetBillsOKBody {
+	return o.Payload
 }
 
 func (o *GetBillsOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

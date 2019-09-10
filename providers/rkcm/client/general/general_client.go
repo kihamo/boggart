@@ -6,6 +6,8 @@ package general
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"fmt"
+
 	"github.com/go-openapi/runtime"
 
 	strfmt "github.com/go-openapi/strfmt"
@@ -48,8 +50,14 @@ func (a *Client) GetBillServicesFull(params *GetBillServicesFullParams) (*GetBil
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetBillServicesFullOK), nil
-
+	success, ok := result.(*GetBillServicesFullOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getBillServicesFull: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -76,8 +84,14 @@ func (a *Client) GetBills(params *GetBillsParams) (*GetBillsOK, error) {
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetBillsOK), nil
-
+	success, ok := result.(*GetBillsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getBills: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -104,8 +118,14 @@ func (a *Client) GetDebtByAccount(params *GetDebtByAccountParams) (*GetDebtByAcc
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetDebtByAccountOK), nil
-
+	success, ok := result.(*GetDebtByAccountOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getDebtByAccount: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -132,8 +152,14 @@ func (a *Client) GetMeterValuesEverydayMode(params *GetMeterValuesEverydayModePa
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetMeterValuesEverydayModeOK), nil
-
+	success, ok := result.(*GetMeterValuesEverydayModeOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getMeterValuesEverydayMode: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 // SetTransport changes the transport on the client

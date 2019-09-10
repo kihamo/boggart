@@ -24,7 +24,6 @@ type GetImageChannelsReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *GetImageChannelsReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewGetImageChannelsOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +51,10 @@ type GetImageChannelsOK struct {
 
 func (o *GetImageChannelsOK) Error() string {
 	return fmt.Sprintf("[GET /Image/channels][%d] getImageChannelsOK  %+v", 200, o.Payload)
+}
+
+func (o *GetImageChannelsOK) GetPayload() models.ImageChannels {
+	return o.Payload
 }
 
 func (o *GetImageChannelsOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

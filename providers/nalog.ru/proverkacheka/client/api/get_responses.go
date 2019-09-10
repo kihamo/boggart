@@ -15,7 +15,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/kihamo/boggart/providers/nalog.ruls"
+	models "github.com/kihamo/boggart/providers/nalog.ru/proverkacheka/models"
 )
 
 // GetReader is a Reader for the Get structure.

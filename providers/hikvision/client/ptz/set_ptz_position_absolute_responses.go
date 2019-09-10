@@ -24,7 +24,6 @@ type SetPtzPositionAbsoluteReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *SetPtzPositionAbsoluteReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewSetPtzPositionAbsoluteOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +51,10 @@ type SetPtzPositionAbsoluteOK struct {
 
 func (o *SetPtzPositionAbsoluteOK) Error() string {
 	return fmt.Sprintf("[PUT /PTZCtrl/channels/{channel}/absolute][%d] setPtzPositionAbsoluteOK  %+v", 200, o.Payload)
+}
+
+func (o *SetPtzPositionAbsoluteOK) GetPayload() *models.Status {
+	return o.Payload
 }
 
 func (o *SetPtzPositionAbsoluteOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

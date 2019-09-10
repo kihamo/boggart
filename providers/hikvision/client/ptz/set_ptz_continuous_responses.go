@@ -24,7 +24,6 @@ type SetPtzContinuousReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *SetPtzContinuousReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewSetPtzContinuousOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +51,10 @@ type SetPtzContinuousOK struct {
 
 func (o *SetPtzContinuousOK) Error() string {
 	return fmt.Sprintf("[PUT /PTZCtrl/channels/{channel}/continuous][%d] setPtzContinuousOK  %+v", 200, o.Payload)
+}
+
+func (o *SetPtzContinuousOK) GetPayload() *models.Status {
+	return o.Payload
 }
 
 func (o *SetPtzContinuousOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

@@ -24,7 +24,6 @@ type SetImageIrCutFilterReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *SetImageIrCutFilterReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewSetImageIrCutFilterOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +51,10 @@ type SetImageIrCutFilterOK struct {
 
 func (o *SetImageIrCutFilterOK) Error() string {
 	return fmt.Sprintf("[PUT /Image/channels/{channel}/IrcutFilter][%d] setImageIrCutFilterOK  %+v", 200, o.Payload)
+}
+
+func (o *SetImageIrCutFilterOK) GetPayload() *models.Status {
+	return o.Payload
 }
 
 func (o *SetImageIrCutFilterOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

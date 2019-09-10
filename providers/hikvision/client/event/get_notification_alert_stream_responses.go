@@ -23,7 +23,6 @@ type GetNotificationAlertStreamReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *GetNotificationAlertStreamReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewGetNotificationAlertStreamOK(o.writer)
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -53,6 +52,10 @@ type GetNotificationAlertStreamOK struct {
 
 func (o *GetNotificationAlertStreamOK) Error() string {
 	return fmt.Sprintf("[GET /Event/notification/alertStream][%d] getNotificationAlertStreamOK  %+v", 200, o.Payload)
+}
+
+func (o *GetNotificationAlertStreamOK) GetPayload() io.Writer {
+	return o.Payload
 }
 
 func (o *GetNotificationAlertStreamOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

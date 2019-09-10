@@ -23,7 +23,6 @@ type GetAccountIdentsReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *GetAccountIdentsReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewGetAccountIdentsOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -51,6 +50,10 @@ type GetAccountIdentsOK struct {
 
 func (o *GetAccountIdentsOK) Error() string {
 	return fmt.Sprintf("[GET /MobileAPI/GetAccountIdents.ashx][%d] getAccountIdentsOK  %+v", 200, o.Payload)
+}
+
+func (o *GetAccountIdentsOK) GetPayload() *GetAccountIdentsOKBody {
+	return o.Payload
 }
 
 func (o *GetAccountIdentsOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

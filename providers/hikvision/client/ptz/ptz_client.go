@@ -6,6 +6,8 @@ package ptz
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"fmt"
+
 	"github.com/go-openapi/runtime"
 
 	strfmt "github.com/go-openapi/strfmt"
@@ -49,8 +51,14 @@ func (a *Client) GetPtzChannels(params *GetPtzChannelsParams, authInfo runtime.C
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetPtzChannelsOK), nil
-
+	success, ok := result.(*GetPtzChannelsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getPtzChannels: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -78,8 +86,14 @@ func (a *Client) GetPtzStatus(params *GetPtzStatusParams, authInfo runtime.Clien
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetPtzStatusOK), nil
-
+	success, ok := result.(*GetPtzStatusOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getPtzStatus: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -107,8 +121,14 @@ func (a *Client) GotoPtzPreset(params *GotoPtzPresetParams, authInfo runtime.Cli
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GotoPtzPresetOK), nil
-
+	success, ok := result.(*GotoPtzPresetOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for gotoPtzPreset: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -136,8 +156,14 @@ func (a *Client) SetPtzContinuous(params *SetPtzContinuousParams, authInfo runti
 	if err != nil {
 		return nil, err
 	}
-	return result.(*SetPtzContinuousOK), nil
-
+	success, ok := result.(*SetPtzContinuousOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for setPtzContinuous: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -165,8 +191,14 @@ func (a *Client) SetPtzMomentary(params *SetPtzMomentaryParams, authInfo runtime
 	if err != nil {
 		return nil, err
 	}
-	return result.(*SetPtzMomentaryOK), nil
-
+	success, ok := result.(*SetPtzMomentaryOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for setPtzMomentary: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -194,8 +226,14 @@ func (a *Client) SetPtzPositionAbsolute(params *SetPtzPositionAbsoluteParams, au
 	if err != nil {
 		return nil, err
 	}
-	return result.(*SetPtzPositionAbsoluteOK), nil
-
+	success, ok := result.(*SetPtzPositionAbsoluteOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for setPtzPositionAbsolute: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -223,8 +261,14 @@ func (a *Client) SetPtzPositionRelative(params *SetPtzPositionRelativeParams, au
 	if err != nil {
 		return nil, err
 	}
-	return result.(*SetPtzPositionRelativeOK), nil
-
+	success, ok := result.(*SetPtzPositionRelativeOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for setPtzPositionRelative: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 // SetTransport changes the transport on the client

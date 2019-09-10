@@ -24,7 +24,6 @@ type SetPtzMomentaryReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *SetPtzMomentaryReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewSetPtzMomentaryOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +51,10 @@ type SetPtzMomentaryOK struct {
 
 func (o *SetPtzMomentaryOK) Error() string {
 	return fmt.Sprintf("[PUT /PTZCtrl/channels/{channel}/momentary][%d] setPtzMomentaryOK  %+v", 200, o.Payload)
+}
+
+func (o *SetPtzMomentaryOK) GetPayload() *models.Status {
+	return o.Payload
 }
 
 func (o *SetPtzMomentaryOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

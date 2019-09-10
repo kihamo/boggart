@@ -24,7 +24,6 @@ type UpdateSystemFirmwareReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *UpdateSystemFirmwareReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewUpdateSystemFirmwareOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +51,10 @@ type UpdateSystemFirmwareOK struct {
 
 func (o *UpdateSystemFirmwareOK) Error() string {
 	return fmt.Sprintf("[PUT /System/updateFirmware][%d] updateSystemFirmwareOK  %+v", 200, o.Payload)
+}
+
+func (o *UpdateSystemFirmwareOK) GetPayload() *models.Status {
+	return o.Payload
 }
 
 func (o *UpdateSystemFirmwareOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

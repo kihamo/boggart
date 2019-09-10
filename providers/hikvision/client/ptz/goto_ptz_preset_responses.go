@@ -24,7 +24,6 @@ type GotoPtzPresetReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *GotoPtzPresetReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewGotoPtzPresetOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +51,10 @@ type GotoPtzPresetOK struct {
 
 func (o *GotoPtzPresetOK) Error() string {
 	return fmt.Sprintf("[PUT /PTZCtrl/channels/{channel}/presets/{preset}/goto][%d] gotoPtzPresetOK  %+v", 200, o.Payload)
+}
+
+func (o *GotoPtzPresetOK) GetPayload() *models.Status {
+	return o.Payload
 }
 
 func (o *GotoPtzPresetOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

@@ -23,7 +23,6 @@ type GetStreamingPictureReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *GetStreamingPictureReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewGetStreamingPictureOK(o.writer)
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -53,6 +52,10 @@ type GetStreamingPictureOK struct {
 
 func (o *GetStreamingPictureOK) Error() string {
 	return fmt.Sprintf("[GET /Streaming/channels/{channel}/picture][%d] getStreamingPictureOK  %+v", 200, o.Payload)
+}
+
+func (o *GetStreamingPictureOK) GetPayload() io.Writer {
+	return o.Payload
 }
 
 func (o *GetStreamingPictureOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

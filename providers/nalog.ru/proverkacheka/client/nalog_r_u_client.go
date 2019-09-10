@@ -11,8 +11,8 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/kihamo/boggart/providers/nalog.runt/api"
-	"github.com/kihamo/boggart/providers/nalog.runt/auth"
+	"github.com/kihamo/boggart/providers/nalog.ru/proverkacheka/client/api"
+	"github.com/kihamo/boggart/providers/nalog.ru/proverkacheka/client/auth"
 )
 
 // Default nalog r u HTTP client.

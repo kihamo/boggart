@@ -6,6 +6,8 @@ package system
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"fmt"
+
 	"github.com/go-openapi/runtime"
 
 	strfmt "github.com/go-openapi/strfmt"
@@ -49,8 +51,14 @@ func (a *Client) GetStatus(params *GetStatusParams, authInfo runtime.ClientAuthI
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetStatusOK), nil
-
+	success, ok := result.(*GetStatusOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getStatus: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -78,8 +86,14 @@ func (a *Client) GetSystemDeviceInfo(params *GetSystemDeviceInfoParams, authInfo
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetSystemDeviceInfoOK), nil
-
+	success, ok := result.(*GetSystemDeviceInfoOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getSystemDeviceInfo: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -107,8 +121,14 @@ func (a *Client) GetSystemUpgradeStatus(params *GetSystemUpgradeStatusParams, au
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetSystemUpgradeStatusOK), nil
-
+	success, ok := result.(*GetSystemUpgradeStatusOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getSystemUpgradeStatus: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -136,8 +156,14 @@ func (a *Client) Reboot(params *RebootParams, authInfo runtime.ClientAuthInfoWri
 	if err != nil {
 		return nil, err
 	}
-	return result.(*RebootOK), nil
-
+	success, ok := result.(*RebootOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for reboot: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -165,8 +191,14 @@ func (a *Client) UpdateSystemFirmware(params *UpdateSystemFirmwareParams, authIn
 	if err != nil {
 		return nil, err
 	}
-	return result.(*UpdateSystemFirmwareOK), nil
-
+	success, ok := result.(*UpdateSystemFirmwareOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for updateSystemFirmware: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 // SetTransport changes the transport on the client

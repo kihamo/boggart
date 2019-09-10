@@ -26,7 +26,6 @@ type GetDebtByAccountReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *GetDebtByAccountReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewGetDebtByAccountOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -54,6 +53,10 @@ type GetDebtByAccountOK struct {
 
 func (o *GetDebtByAccountOK) Error() string {
 	return fmt.Sprintf("[GET /GetDebtByAccount.ashx][%d] getDebtByAccountOK  %+v", 200, o.Payload)
+}
+
+func (o *GetDebtByAccountOK) GetPayload() *GetDebtByAccountOKBody {
+	return o.Payload
 }
 
 func (o *GetDebtByAccountOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

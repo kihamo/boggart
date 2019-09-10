@@ -64,7 +64,7 @@ for the set notification http host operation typically these are written to a ht
 */
 type SetNotificationHttpHostParams struct {
 
-	/*NrHttpHostNotification*/
+	/*HttpHostNotification*/
 	HttpHostNotification *models.HttpHostNotification
 	/*HttpHost
 	  HTTP host ID

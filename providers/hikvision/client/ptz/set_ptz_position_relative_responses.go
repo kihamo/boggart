@@ -24,7 +24,6 @@ type SetPtzPositionRelativeReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *SetPtzPositionRelativeReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewSetPtzPositionRelativeOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +51,10 @@ type SetPtzPositionRelativeOK struct {
 
 func (o *SetPtzPositionRelativeOK) Error() string {
 	return fmt.Sprintf("[PUT /PTZCtrl/channels/{channel}/relative][%d] setPtzPositionRelativeOK  %+v", 200, o.Payload)
+}
+
+func (o *SetPtzPositionRelativeOK) GetPayload() *models.Status {
+	return o.Payload
 }
 
 func (o *SetPtzPositionRelativeOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

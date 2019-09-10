@@ -24,7 +24,6 @@ type SetNotificationHttpHostReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *SetNotificationHttpHostReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewSetNotificationHttpHostOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +51,10 @@ type SetNotificationHttpHostOK struct {
 
 func (o *SetNotificationHttpHostOK) Error() string {
 	return fmt.Sprintf("[PUT /Event/notification/httpHosts/{httpHost}][%d] setNotificationHttpHostOK  %+v", 200, o.Payload)
+}
+
+func (o *SetNotificationHttpHostOK) GetPayload() *models.Status {
+	return o.Payload
 }
 
 func (o *SetNotificationHttpHostOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

@@ -24,7 +24,6 @@ type GetSystemUpgradeStatusReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *GetSystemUpgradeStatusReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewGetSystemUpgradeStatusOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +51,10 @@ type GetSystemUpgradeStatusOK struct {
 
 func (o *GetSystemUpgradeStatusOK) Error() string {
 	return fmt.Sprintf("[GET /System/upgradeStatus][%d] getSystemUpgradeStatusOK  %+v", 200, o.Payload)
+}
+
+func (o *GetSystemUpgradeStatusOK) GetPayload() *models.SystemUpgradeStatus {
+	return o.Payload
 }
 
 func (o *GetSystemUpgradeStatusOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

@@ -6,6 +6,7 @@ package event
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/go-openapi/runtime"
@@ -51,8 +52,14 @@ func (a *Client) GetNotificationAlertStream(params *GetNotificationAlertStreamPa
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetNotificationAlertStreamOK), nil
-
+	success, ok := result.(*GetNotificationAlertStreamOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getNotificationAlertStream: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -80,8 +87,14 @@ func (a *Client) GetNotificationHttpHost(params *GetNotificationHttpHostParams, 
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetNotificationHttpHostOK), nil
-
+	success, ok := result.(*GetNotificationHttpHostOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getNotificationHttpHost: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -109,8 +122,14 @@ func (a *Client) SetNotificationHttpHost(params *SetNotificationHttpHostParams, 
 	if err != nil {
 		return nil, err
 	}
-	return result.(*SetNotificationHttpHostOK), nil
-
+	success, ok := result.(*SetNotificationHttpHostOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for setNotificationHttpHost: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 // SetTransport changes the transport on the client

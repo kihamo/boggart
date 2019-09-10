@@ -24,7 +24,6 @@ type GetPtzChannelsReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *GetPtzChannelsReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewGetPtzChannelsOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +51,10 @@ type GetPtzChannelsOK struct {
 
 func (o *GetPtzChannelsOK) Error() string {
 	return fmt.Sprintf("[GET /PTZCtrl/channels][%d] getPtzChannelsOK  %+v", 200, o.Payload)
+}
+
+func (o *GetPtzChannelsOK) GetPayload() models.PtzChannels {
+	return o.Payload
 }
 
 func (o *GetPtzChannelsOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

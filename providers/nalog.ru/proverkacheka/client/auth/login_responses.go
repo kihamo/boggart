@@ -13,7 +13,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/kihamo/boggart/providers/nalog.ruls"
+	models "github.com/kihamo/boggart/providers/nalog.ru/proverkacheka/models"
 )
 
 // LoginReader is a Reader for the Login structure.

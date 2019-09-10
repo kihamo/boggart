@@ -24,7 +24,6 @@ type GetMeterValuesEverydayModeReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *GetMeterValuesEverydayModeReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewGetMeterValuesEverydayModeOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +51,10 @@ type GetMeterValuesEverydayModeOK struct {
 
 func (o *GetMeterValuesEverydayModeOK) Error() string {
 	return fmt.Sprintf("[GET /GetMeterValuesEverydayMode.ashx][%d] getMeterValuesEverydayModeOK  %+v", 200, o.Payload)
+}
+
+func (o *GetMeterValuesEverydayModeOK) GetPayload() *models.MetersValues {
+	return o.Payload
 }
 
 func (o *GetMeterValuesEverydayModeOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
