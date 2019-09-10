@@ -16,7 +16,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	static "github.com/kihamo/boggart/components/boggart/providers/hilink/static/models"
+	static "github.com/kihamo/boggart/providers/hilink/static/models"
 )
 
 // NewGetSMSListParams creates a new GetSMSListParams object

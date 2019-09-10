@@ -739,7 +739,7 @@ definitions:
   SMSListRequest:
     x-go-type:
       import:
-        package: "github.com/kihamo/boggart/components/boggart/providers/hilink/static/models"
+        package: "github.com/kihamo/boggart/providers/hilink/static/models"
         alias: "static"
       type: "SMSListRequest"
     type: "object"
