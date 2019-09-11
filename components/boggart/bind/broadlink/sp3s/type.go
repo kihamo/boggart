@@ -3,8 +3,8 @@ package sp3s
 import (
 	"errors"
 
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/boggart/providers/broadlink"
 )
 

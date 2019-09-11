@@ -3,7 +3,7 @@ package mikrotik
 import (
 	"sync"
 
-	"github.com/kihamo/boggart/components/boggart/atomic"
+	"github.com/kihamo/boggart/atomic"
 )
 
 type PreloadMap struct {

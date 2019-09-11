@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-version"
+	a "github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
-	a "github.com/kihamo/boggart/components/boggart/atomic"
 )
 
 const (

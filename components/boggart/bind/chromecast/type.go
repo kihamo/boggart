@@ -4,8 +4,8 @@ import (
 	"strconv"
 
 	"github.com/barnybug/go-cast/log"
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/atomic"
 )
 
 type Type struct {

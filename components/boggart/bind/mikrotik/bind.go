@@ -7,8 +7,8 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/providers/mikrotik"
 )
