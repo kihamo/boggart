@@ -1,5 +1,5 @@
-hash: 160bfcf987c3cd380538fdf18dd9d379fce505703a1ecf5f24056598861ca28a
-updated: 2019-09-10T01:55:22.199979+03:00
+hash: 0907b91d2d606655cb1d0de2d41a90f8ca02f8596ecea20774dbf2e3c7448fc4
+updated: 2019-09-11T13:35:46.877382+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -49,6 +49,8 @@ imports:
   version: 3a771d992973f24aa725d07868b467d1ddfceafb
   subpackages:
   - quantile
+- name: github.com/bieber/barcode
+  version: ea9099fd9d910a2ac3f906c03d5fbf9574cfee65
 - name: github.com/bsm/histogram
   version: e219932777c945c7a221ce0e7ace7712c59c8bac
 - name: github.com/bugsnag/osext
@@ -125,6 +127,11 @@ imports:
   version: 30433562cfbf487fe1df7cd26c7bab168d2f14d0
   subpackages:
   - proto
+- name: github.com/golang/freetype
+  version: e2365dfdc4a05e4b8299a783240d4a7d5a65d4e4
+  subpackages:
+  - raster
+  - truetype
 - name: github.com/golang/protobuf
   version: aa810b61a9c79d51363740d207bb46cf8e620ed5
   subpackages:
@@ -294,6 +301,11 @@ imports:
   version: 47ae307949d02aa1f1069fdafc00ca08e1dbabac
 - name: github.com/lann/ps
   version: 62de8c46ede02a7675c4c79c84883eb164cb71e3
+- name: github.com/llgcode/draw2d
+  version: 79e59b6b8fbc28e34dc8c7bc53c8a2668989f425
+  subpackages:
+  - draw2dbase
+  - draw2dimg
 - name: github.com/mailru/easyjson
   version: 3fdea8d05856a0c8df22ed4bc71b3219245e4485
   subpackages:
@@ -464,6 +476,8 @@ imports:
   - zapcore
 - name: gobot.io/x/gobot
   version: c1d0e3ce485df0b45076d1d93b7d9240b770d5fc
+- name: gocv.io/x/gocv
+  version: 0f87fa5ef3fd497562e89a821fd87a77c28cb8ea
 - name: golang.org/x/crypto
   version: 9477e0b78b9ac3d0b03822fd95422e2fe07627cd
   subpackages:
@@ -484,7 +498,10 @@ imports:
 - name: golang.org/x/image
   version: cd38e8056d9b27bb2f265effa37fb0ea6b8a7f0f
   subpackages:
+  - draw
+  - font
   - math/f64
+  - math/fixed
 - name: golang.org/x/mobile
   version: ca3c58166ed802c9810ffc499b01bc1cd2e0153a
   subpackages:

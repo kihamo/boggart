@@ -91,3 +91,9 @@ import:
   version: ~v2.15
 - package: github.com/hashicorp/golang-lru
   version: ~v0.5
+- package: github.com/bieber/barcode
+  version: ~v0.1
+- package: gocv.io/x/gocv
+  version: ~v0.20
+- package: github.com/llgcode/draw2d
+  version: 79e59b6b8fbc28e34dc8c7bc53c8a2668989f425
