@@ -1,4 +1,4 @@
-package barcode
+package codes
 
 import (
 	"image"
@@ -37,12 +37,12 @@ func parseQRCode(reader io.Reader, debug bool) (code string, result io.Reader, e
 	return code, result, err
 }
 
-func QRCode(reader io.Reader) (code string, err error) {
+func DecodeQRCode(reader io.Reader) (code string, err error) {
 	code, _, err = parseQRCode(reader, false)
 
 	return code, err
 }
 
-func QRCodeDebug(reader io.Reader) (string, io.Reader, error) {
+func DecodeQRCodeDebug(reader io.Reader) (string, io.Reader, error) {
 	return parseQRCode(reader, true)
 }

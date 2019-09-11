@@ -3,6 +3,7 @@ package main // import "github.com/kihamo/boggart/cmd/server"
 import (
 	"log"
 
+	_ "github.com/kihamo/boggart/components/barcode/instance"
 	_ "github.com/kihamo/boggart/components/boggart/bind/astro"
 	_ "github.com/kihamo/boggart/components/boggart/bind/broadlink"
 	_ "github.com/kihamo/boggart/components/boggart/bind/chromecast"

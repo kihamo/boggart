@@ -1,7 +1,8 @@
-package barcode
+package codes
 
 import (
 	"bytes"
+	"encoding/base64"
 	"image"
 	"image/color"
 	"image/gif"
@@ -17,12 +18,6 @@ var (
 	debugBorderWidth float64 = 2
 )
 
-func init() {
-	image.RegisterFormat("gif", "gif", gif.Decode, gif.DecodeConfig)
-	image.RegisterFormat("jpeg", "jpeg", jpeg.Decode, jpeg.DecodeConfig)
-	image.RegisterFormat("png", "png", png.Decode, png.DecodeConfig)
-}
-
 func encode(format string, img image.Image) (_ io.Reader, err error) {
 	result := bytes.NewBuffer(nil)
 
@@ -36,6 +31,12 @@ func encode(format string, img image.Image) (_ io.Reader, err error) {
 	}
 
 	return result, err
+}
+
+func FromBase64(code []byte) (io.Reader, error) {
+	result := make([]byte, 0)
+	_, err := base64.StdEncoding.Decode(code, result)
+	return bytes.NewReader(result), err
 }
 
 func drawDebugBorder(img image.Image, points []image.Point) image.Image {
