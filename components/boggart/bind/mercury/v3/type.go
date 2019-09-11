@@ -4,8 +4,8 @@ import (
 	"net/url"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/protocols/serial"
-	"github.com/kihamo/boggart/components/boggart/protocols/serial_network"
+	"github.com/kihamo/boggart/protocols/serial"
+	"github.com/kihamo/boggart/protocols/serial_network"
 	m "github.com/kihamo/boggart/providers/mercury"
 	mercury "github.com/kihamo/boggart/providers/mercury/v3"
 )

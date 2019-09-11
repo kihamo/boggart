@@ -10,7 +10,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/kihamo/boggart/components/boggart/protocols/http"
+	"github.com/kihamo/boggart/protocols/http"
 	"github.com/kihamo/shadow/components/tracing"
 )
 

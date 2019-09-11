@@ -12,7 +12,7 @@ import (
 	"strings"
 	"sync"
 
-	connection "github.com/kihamo/boggart/components/boggart/protocols/http"
+	connection "github.com/kihamo/boggart/protocols/http"
 )
 
 type Client struct {

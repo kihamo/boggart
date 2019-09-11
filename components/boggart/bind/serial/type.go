@@ -5,10 +5,9 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/kihamo/boggart/components/boggart/protocols/serial_network"
-
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/protocols/serial"
+	"github.com/kihamo/boggart/protocols/serial"
+	"github.com/kihamo/boggart/protocols/serial_network"
 )
 
 type Type struct{}

@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	httpClient "github.com/kihamo/boggart/components/boggart/protocols/http"
 	"github.com/kihamo/boggart/components/openhab"
 	"github.com/kihamo/boggart/components/openhab/client/things"
+	httpClient "github.com/kihamo/boggart/protocols/http"
 	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/logging"
 	"github.com/kihamo/shadow/components/messengers"

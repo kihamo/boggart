@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/kihamo/boggart/components/boggart/protocols/http"
+	"github.com/kihamo/boggart/protocols/http"
 	"github.com/kihamo/shadow/components/tracing"
 	tracingHttp "github.com/kihamo/shadow/components/tracing/http"
 	"github.com/opentracing/opentracing-go/log"

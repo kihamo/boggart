@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/kihamo/boggart/components/boggart/protocols/http"
+	"github.com/kihamo/boggart/protocols/http"
 	"github.com/kihamo/shadow/components/tracing"
 	"github.com/opentracing/opentracing-go/log"
 )
