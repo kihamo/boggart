@@ -43,23 +43,23 @@ const (
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	topics := []mqtt.Topic{
-		mqtt.Topic(MQTTPublishTopicUserStateLat.Format(b.config.User, b.config.Device)),
-		mqtt.Topic(MQTTPublishTopicUserStateLon.Format(b.config.User, b.config.Device)),
-		mqtt.Topic(MQTTPublishTopicUserStateGeoHash.Format(b.config.User, b.config.Device)),
-		mqtt.Topic(MQTTPublishTopicUserStateAccuracy.Format(b.config.User, b.config.Device)),
-		mqtt.Topic(MQTTPublishTopicUserStateAltitude.Format(b.config.User, b.config.Device)),
-		mqtt.Topic(MQTTPublishTopicUserStateBatteryLevel.Format(b.config.User, b.config.Device)),
-		mqtt.Topic(MQTTPublishTopicUserStateVelocity.Format(b.config.User, b.config.Device)),
-		mqtt.Topic(MQTTPublishTopicUserStateConnection.Format(b.config.User, b.config.Device)),
-		mqtt.Topic(MQTTPublishTopicUserStateLocation.Format(b.config.User, b.config.Device)),
+		MQTTPublishTopicUserStateLat.Format(b.config.User, b.config.Device),
+		MQTTPublishTopicUserStateLon.Format(b.config.User, b.config.Device),
+		MQTTPublishTopicUserStateGeoHash.Format(b.config.User, b.config.Device),
+		MQTTPublishTopicUserStateAccuracy.Format(b.config.User, b.config.Device),
+		MQTTPublishTopicUserStateAltitude.Format(b.config.User, b.config.Device),
+		MQTTPublishTopicUserStateBatteryLevel.Format(b.config.User, b.config.Device),
+		MQTTPublishTopicUserStateVelocity.Format(b.config.User, b.config.Device),
+		MQTTPublishTopicUserStateConnection.Format(b.config.User, b.config.Device),
+		MQTTPublishTopicUserStateLocation.Format(b.config.User, b.config.Device),
 	}
 
 	if !b.config.UnregisterPointsAllowed {
 		for name := range b.getAllRegions() {
-			topics = append(topics, mqtt.Topic(MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, name)))
+			topics = append(topics, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, name))
 		}
 	} else {
-		topics = append(topics, mqtt.Topic(MQTTPublishTopicRegion.Format(b.config.User, b.config.Device)))
+		topics = append(topics, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device))
 	}
 
 	return topics

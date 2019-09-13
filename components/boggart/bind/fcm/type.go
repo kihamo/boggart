@@ -5,7 +5,6 @@ import (
 
 	"firebase.google.com/go"
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/mqtt"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 )
@@ -40,7 +39,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		return nil, err
 	}
 
-	config.TopicSend = mqtt.Topic(config.TopicSend.Format(credentials.ProjectID))
+	config.TopicSend = config.TopicSend.Format(credentials.ProjectID)
 
 	bind := &Bind{
 		config:    config,

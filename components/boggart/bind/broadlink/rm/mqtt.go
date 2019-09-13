@@ -26,24 +26,24 @@ const (
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	sn := mqtt.NameReplace(b.SerialNumber())
+	sn := b.SerialNumber()
 
 	topics := make([]mqtt.Topic, 0)
 
 	_, supportCapture := b.provider.(SupportCapture)
 	if supportCapture {
-		topics = append(topics, mqtt.Topic(MQTTPublishTopicCaptureState.Format(sn)))
+		topics = append(topics, MQTTPublishTopicCaptureState.Format(sn))
 
 		if _, ok := b.provider.(SupportIR); ok {
-			topics = append(topics, mqtt.Topic(MQTTPublishTopicIRCapture.Format(sn)))
+			topics = append(topics, MQTTPublishTopicIRCapture.Format(sn))
 		}
 
 		if _, ok := b.provider.(SupportRF315Mhz); ok {
-			topics = append(topics, mqtt.Topic(MQTTPublishTopicRF315mhzCapture.Format(sn)))
+			topics = append(topics, MQTTPublishTopicRF315mhzCapture.Format(sn))
 		}
 
 		if _, ok := b.provider.(SupportRF433Mhz); ok {
-			topics = append(topics, mqtt.Topic(MQTTPublishTopicRF433mhzCapture.Format(sn)))
+			topics = append(topics, MQTTPublishTopicRF433mhzCapture.Format(sn))
 		}
 	}
 

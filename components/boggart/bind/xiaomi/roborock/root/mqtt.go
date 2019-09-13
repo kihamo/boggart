@@ -10,9 +10,7 @@ const (
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	sn := mqtt.NameReplace(b.SerialNumber())
-
 	return []mqtt.Topic{
-		mqtt.Topic(MQTTPublishTopicRuntimeConfig.Format(sn)),
+		MQTTPublishTopicRuntimeConfig.Format(b.SerialNumber()),
 	}
 }

@@ -18,9 +18,9 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	sn := b.SerialNumber()
 
 	return []mqtt.Topic{
-		mqtt.Topic(MQTTPublishTopicBroadcast.Format(base)),
-		mqtt.Topic(MQTTPublishTopicReset.Format(base, sn)),
-		mqtt.Topic(MQTTPublishTopicRestart.Format(base, sn)),
+		MQTTPublishTopicBroadcast.Format(base),
+		MQTTPublishTopicReset.Format(base, sn),
+		MQTTPublishTopicRestart.Format(base, sn),
 	}
 }
 

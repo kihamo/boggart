@@ -36,7 +36,7 @@ test.panel.stop - Stop a UPS panel test
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
-		mqtt.Topic(MQTTPublishTopicVariable),
+		MQTTPublishTopicVariable,
 	}
 }
 

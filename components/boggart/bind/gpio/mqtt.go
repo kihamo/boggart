@@ -16,7 +16,7 @@ const (
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
-		mqtt.Topic(MQTTPublishTopicPinState.Format(b.pin.Number())),
+		MQTTPublishTopicPinState.Format(b.pin.Number()),
 	}
 }
 

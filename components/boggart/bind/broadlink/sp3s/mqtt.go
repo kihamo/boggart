@@ -16,16 +16,16 @@ const (
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	sn := mqtt.NameReplace(b.SerialNumber())
+	sn := b.SerialNumber()
 
 	return []mqtt.Topic{
-		mqtt.Topic(MQTTPublishTopicState.Format(sn)),
-		mqtt.Topic(MQTTPublishTopicPower.Format(sn)),
+		MQTTPublishTopicState.Format(sn),
+		MQTTPublishTopicPower.Format(sn),
 	}
 }
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
-	sn := mqtt.NameReplace(b.SerialNumber())
+	sn := b.SerialNumber()
 
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(MQTTSubscribeTopicSet.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {

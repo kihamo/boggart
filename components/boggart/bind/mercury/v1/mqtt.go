@@ -21,21 +21,21 @@ const (
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	sn := mqtt.NameReplace(b.SerialNumber())
+	sn := b.SerialNumber()
 
 	return []mqtt.Topic{
-		mqtt.Topic(MQTTPublishTopicTariff.Format(sn, 1)),
-		mqtt.Topic(MQTTPublishTopicTariff.Format(sn, 2)),
-		mqtt.Topic(MQTTPublishTopicTariff.Format(sn, 3)),
-		mqtt.Topic(MQTTPublishTopicTariff.Format(sn, 4)),
-		mqtt.Topic(MQTTPublishTopicVoltage.Format(sn)),
-		mqtt.Topic(MQTTPublishTopicAmperage.Format(sn)),
-		mqtt.Topic(MQTTPublishTopicPower.Format(sn)),
-		mqtt.Topic(MQTTPublishTopicBatteryVoltage.Format(sn)),
-		mqtt.Topic(MQTTPublishTopicLastPowerOff.Format(sn)),
-		mqtt.Topic(MQTTPublishTopicLastPowerOn.Format(sn)),
-		mqtt.Topic(MQTTPublishTopicMakeDate.Format(sn)),
-		mqtt.Topic(MQTTPublishTopicFirmwareDate.Format(sn)),
-		mqtt.Topic(MQTTPublishTopicFirmwareVersion.Format(sn)),
+		MQTTPublishTopicTariff.Format(sn, 1),
+		MQTTPublishTopicTariff.Format(sn, 2),
+		MQTTPublishTopicTariff.Format(sn, 3),
+		MQTTPublishTopicTariff.Format(sn, 4),
+		MQTTPublishTopicVoltage.Format(sn),
+		MQTTPublishTopicAmperage.Format(sn),
+		MQTTPublishTopicPower.Format(sn),
+		MQTTPublishTopicBatteryVoltage.Format(sn),
+		MQTTPublishTopicLastPowerOff.Format(sn),
+		MQTTPublishTopicLastPowerOn.Format(sn),
+		MQTTPublishTopicMakeDate.Format(sn),
+		MQTTPublishTopicFirmwareDate.Format(sn),
+		MQTTPublishTopicFirmwareVersion.Format(sn),
 	}
 }

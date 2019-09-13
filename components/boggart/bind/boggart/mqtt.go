@@ -14,11 +14,9 @@ const (
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	sn := mqtt.NameReplace(b.config.ApplicationName)
-
 	return []mqtt.Topic{
-		mqtt.Topic(MQTTPublishTopicApplicationName.Format(sn)),
-		mqtt.Topic(MQTTPublishTopicApplicationVersion.Format(sn)),
-		mqtt.Topic(MQTTPublishTopicApplicationBuild.Format(sn)),
+		MQTTPublishTopicApplicationName.Format(b.config.ApplicationName),
+		MQTTPublishTopicApplicationVersion.Format(b.config.ApplicationName),
+		MQTTPublishTopicApplicationBuild.Format(b.config.ApplicationName),
 	}
 }

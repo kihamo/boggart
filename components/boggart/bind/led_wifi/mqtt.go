@@ -25,14 +25,14 @@ const (
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	host := mqtt.NameReplace(b.bulb.Host())
+	host := b.bulb.Host()
 
 	return []mqtt.Topic{
-		mqtt.Topic(MQTTPublishTopicStatePower.Format(host)),
-		mqtt.Topic(MQTTPublishTopicStateColor.Format(host)),
-		mqtt.Topic(MQTTPublishTopicStateColorHSV.Format(host)),
-		mqtt.Topic(MQTTPublishTopicStateMode.Format(host)),
-		mqtt.Topic(MQTTPublishTopicStateSpeed.Format(host)),
+		MQTTPublishTopicStatePower.Format(host),
+		MQTTPublishTopicStateColor.Format(host),
+		MQTTPublishTopicStateColorHSV.Format(host),
+		MQTTPublishTopicStateMode.Format(host),
+		MQTTPublishTopicStateSpeed.Format(host),
 	}
 }
 

@@ -534,7 +534,7 @@ func (c *Component) UnsubscribeSubscribers(subscribers []mqtt.Subscriber) error 
 }
 
 func (c *Component) Subscribe(topic mqtt.Topic, qos byte, callback mqtt.MessageHandler) (mqtt.Subscriber, error) {
-	subscriber := mqtt.NewSubscriber(mqtt.Topic(topic), qos, callback)
+	subscriber := mqtt.NewSubscriber(topic, qos, callback)
 	if err := c.SubscribeSubscriber(subscriber); err != nil {
 		return nil, err
 	}

@@ -16,18 +16,14 @@ const (
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	h := mqtt.NameReplace(b.hostname)
-
 	return []mqtt.Topic{
-		mqtt.Topic(MQTTPublishTopicLatency.Format(h)),
+		MQTTPublishTopicLatency.Format(b.hostname),
 	}
 }
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
-	h := mqtt.NameReplace(b.hostname)
-
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTSubscribeTopicCheck.Format(h), 0, func(ctx context.Context, _ mqtt.Component, _ mqtt.Message) error {
+		mqtt.NewSubscriber(MQTTSubscribeTopicCheck.Format(b.hostname), 0, func(ctx context.Context, _ mqtt.Component, _ mqtt.Message) error {
 			_, err := b.taskUpdater(ctx)
 			return err
 		}),

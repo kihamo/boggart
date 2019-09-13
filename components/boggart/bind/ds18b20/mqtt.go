@@ -11,6 +11,6 @@ const (
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
-		mqtt.Topic(MQTTPublishTopicValue.Format(mqtt.NameReplace(b.SerialNumber()))),
+		MQTTPublishTopicValue.Format(b.SerialNumber()),
 	}
 }
