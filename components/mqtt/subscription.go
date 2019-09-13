@@ -12,7 +12,7 @@ import (
 type Subscription struct {
 	calls uint64
 	qos   uint64
-	topic string
+	topic Topic
 
 	mutex       sync.RWMutex
 	subscribers []Subscriber
@@ -75,7 +75,7 @@ func (c *Subscription) Subscribers() []Subscriber {
 	return subscribers
 }
 
-func (c *Subscription) Topic() string {
+func (c *Subscription) Topic() Topic {
 	return c.topic
 }
 
@@ -144,13 +144,13 @@ func (c *Subscription) Len() int {
 	return len(c.subscribers)
 }
 
-func (c *Subscription) Match(topic string) bool {
+func (c *Subscription) Match(topic Topic) bool {
 	c.mutex.RLock()
 	subscribers := c.subscribers
 	c.mutex.RUnlock()
 
 	for _, subscriber := range subscribers {
-		if subscriber.Topic() == topic || routeIncludesTopic(subscriber.Topic(), topic) {
+		if subscriber.Topic().String() == topic.String() || routeIncludesTopic(subscriber.Topic().String(), topic.String()) {
 			return true
 		}
 	}

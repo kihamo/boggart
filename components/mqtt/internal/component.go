@@ -255,7 +255,7 @@ func (c *Component) Client() m.Client {
 	return c.client
 }
 
-func (c *Component) clientSubscribe(topic string, qos byte, subscription *mqtt.Subscription) error {
+func (c *Component) clientSubscribe(topic mqtt.Topic, qos byte, subscription *mqtt.Subscription) error {
 	client := c.Client()
 	if client == nil {
 		return errors.New("can't initialize client of MQTT")
@@ -271,7 +271,7 @@ func (c *Component) clientSubscribe(topic string, qos byte, subscription *mqtt.S
 			log.Int("qos", int(message.Qos())),
 			log.String("payload", string(message.Payload())),
 			log.Bool("retained", message.Retained()),
-			log.String("topic.subscribe", topic),
+			log.String("topic.subscribe", topic.String()),
 		)
 
 		msg := newMessage(message)
@@ -298,7 +298,7 @@ func (c *Component) clientSubscribe(topic string, qos byte, subscription *mqtt.S
 			)
 
 			if err := subscription.Callback(ctx, c, msg); err != nil {
-				metricSubscriberCalls.With("status", "failure", "topic", topic).Inc()
+				metricSubscriberCalls.With("status", "failure", "topic", topic.String()).Inc()
 
 				tracing.SpanError(span, err)
 
@@ -312,7 +312,7 @@ func (c *Component) clientSubscribe(topic string, qos byte, subscription *mqtt.S
 					"payload", logPayload,
 				)
 			} else {
-				metricSubscriberCalls.With("status", "success", "topic", topic).Inc()
+				metricSubscriberCalls.With("status", "success", "topic", topic.String()).Inc()
 
 				c.logger.Debug(
 					"Call MQTT subscriber success",
@@ -326,14 +326,14 @@ func (c *Component) clientSubscribe(topic string, qos byte, subscription *mqtt.S
 		}()
 	}
 
-	token := client.Subscribe(topic, qos, callback)
+	token := client.Subscribe(topic.String(), qos, callback)
 	token.Wait()
 
 	err := token.Error()
 	if err == nil {
-		metricSubscribe.With("status", "success", "topic", topic).Inc()
+		metricSubscribe.With("status", "success", "topic", topic.String()).Inc()
 	} else {
-		metricSubscribe.With("status", "failure", "topic", topic).Inc()
+		metricSubscribe.With("status", "failure", "topic", topic.String()).Inc()
 	}
 
 	return err
@@ -347,7 +347,7 @@ func (c *Component) doPublish(ctx context.Context, topic mqtt.Topic, qos byte, r
 	}
 
 	if cache {
-		if val, ok := c.payloadCache.Get(topic.String()); ok && bytes.Compare(val, payloadConverted) == 0 {
+		if val, ok := c.payloadCache.Get(topic); ok && bytes.Compare(val, payloadConverted) == 0 {
 			metricPayloadCacheHit.Inc()
 			return nil
 		} else {
@@ -402,7 +402,7 @@ func (c *Component) doPublish(ctx context.Context, topic mqtt.Topic, qos byte, r
 		metricPublish.With("status", "success").Inc()
 
 		if cache {
-			c.payloadCache.Add(topic.String(), payloadConverted)
+			c.payloadCache.Add(topic, payloadConverted)
 		}
 	}
 
@@ -456,13 +456,13 @@ func (c *Component) Unsubscribe(topic mqtt.Topic) error {
 		subscription := element.Value.(*mqtt.Subscription)
 
 		for _, subscriber := range subscription.Subscribers() {
-			if subscriber.Topic() == topic.String() {
+			if subscriber.Topic().String() == topic.String() {
 				subscription.RemoveSubscriber(subscriber)
 			}
 		}
 
 		if subscription.Len() == 0 {
-			topic := subscription.Topic()
+			topic := subscription.Topic().String()
 
 			token := client.Unsubscribe(topic)
 			token.Wait()
@@ -497,7 +497,7 @@ func (c *Component) UnsubscribeSubscriber(subscriber mqtt.Subscriber) error {
 
 		if result := subscription.RemoveSubscriber(subscriber); result {
 			if subscription.Len() == 0 {
-				topic := subscriber.Topic()
+				topic := subscriber.Topic().String()
 
 				token := client.Unsubscribe(topic)
 				token.Wait()
