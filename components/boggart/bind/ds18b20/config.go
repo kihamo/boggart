@@ -2,12 +2,9 @@ package ds18b20
 
 import (
 	"time"
-)
 
-const (
-	DefaultLivenessInterval = time.Minute
-	DefaultLivenessTimeout  = time.Second * 5
-	DefaultUpdaterInterval  = time.Minute
+	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/mqtt"
 )
 
 type Config struct {
@@ -15,12 +12,14 @@ type Config struct {
 	LivenessInterval time.Duration `mapstructure:"liveness_interval" yaml:"liveness_interval"`
 	LivenessTimeout  time.Duration `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
 	UpdaterInterval  time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
+	TopicValue       mqtt.Topic    `mapstructure:"topic_value" yaml:"topic_value"`
 }
 
 func (t Type) Config() interface{} {
 	return &Config{
-		LivenessInterval: DefaultLivenessInterval,
-		LivenessTimeout:  DefaultLivenessTimeout,
-		UpdaterInterval:  DefaultUpdaterInterval,
+		LivenessInterval: time.Minute,
+		LivenessTimeout:  time.Second * 5,
+		UpdaterInterval:  time.Minute,
+		TopicValue:       boggart.ComponentName + "/meter/ds18b20/+",
 	}
 }
