@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 	"go.uber.org/multierr"
@@ -13,7 +12,7 @@ import (
 func (b *Bind) Tasks() []workers.Task {
 	taskStateUpdater := task.NewFunctionTask(b.taskUpdater)
 	taskStateUpdater.SetRepeats(-1)
-	taskStateUpdater.SetRepeatInterval(b.updaterInterval)
+	taskStateUpdater.SetRepeatInterval(b.config.UpdaterInterval)
 	taskStateUpdater.SetName("updater-" + b.SerialNumber())
 
 	return []workers.Task{
@@ -31,30 +30,29 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	b.UpdateStatus(boggart.BindStatusOnline)
 
 	sn := b.SerialNumber()
-	snMQTT := mqtt.NameReplace(sn)
 	mTariff := metricTariff.With("serial_number", sn)
 
 	mTariff.With("tariff", "1").Set(float64(t1))
 
-	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicTariff.Format(snMQTT, 1), t1); e != nil {
+	if e := b.MQTTPublishAsync(ctx, b.config.TopicTariff1, t1); e != nil {
 		err = multierr.Append(err, e)
 	}
 
 	mTariff.With("tariff", "2").Set(float64(t2))
 
-	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicTariff.Format(snMQTT, 2), t2); e != nil {
+	if e := b.MQTTPublishAsync(ctx, b.config.TopicTariff2, t2); e != nil {
 		err = multierr.Append(err, e)
 	}
 
 	mTariff.With("tariff", "3").Set(float64(t3))
 
-	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicTariff.Format(snMQTT, 3), t3); e != nil {
+	if e := b.MQTTPublishAsync(ctx, b.config.TopicTariff3, t3); e != nil {
 		err = multierr.Append(err, e)
 	}
 
 	mTariff.With("tariff", "4").Set(float64(t4))
 
-	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicTariff.Format(snMQTT, 4), t4); e != nil {
+	if e := b.MQTTPublishAsync(ctx, b.config.TopicTariff4, t4); e != nil {
 		err = multierr.Append(err, e)
 	}
 
@@ -62,19 +60,19 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	if voltage, amperage, power, e := b.provider.ParamsCurrent(); e == nil {
 		metricVoltage.With("serial_number", sn).Set(float64(voltage))
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicVoltage.Format(snMQTT), voltage); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicVoltage, voltage); e != nil {
 			err = multierr.Append(err, e)
 		}
 
 		metricAmperage.With("serial_number", sn).Set(amperage)
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicAmperage.Format(snMQTT), amperage); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicAmperage, amperage); e != nil {
 			err = multierr.Append(err, e)
 		}
 
 		metricPower.With("serial_number", sn).Set(float64(power))
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicPower.Format(snMQTT), power); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicPower, power); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {
@@ -84,7 +82,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	if voltage, e := b.provider.BatteryVoltage(); e == nil {
 		metricBatteryVoltage.With("serial_number", sn).Set(voltage)
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicBatteryVoltage.Format(snMQTT), voltage); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicBatteryVoltage, voltage); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {
@@ -92,7 +90,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	}
 
 	if date, e := b.provider.LastPowerOffDatetime(); e == nil {
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicLastPowerOff.Format(snMQTT), date); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicLastPowerOff, date); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {
@@ -100,7 +98,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	}
 
 	if date, e := b.provider.LastPowerOnDatetime(); e == nil {
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicLastPowerOn.Format(snMQTT), date); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicLastPowerOn, date); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {
@@ -108,7 +106,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	}
 
 	if date, e := b.provider.MakeDate(); e == nil {
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicMakeDate.Format(snMQTT), date); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicMakeDate, date); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {
@@ -116,11 +114,11 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	}
 
 	if version, date, e := b.provider.Version(); e == nil {
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicFirmwareDate.Format(snMQTT), date); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicFirmwareDate, date); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicFirmwareVersion.Format(snMQTT), version); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicFirmwareVersion, version); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {
