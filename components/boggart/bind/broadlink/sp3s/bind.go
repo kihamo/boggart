@@ -2,7 +2,6 @@ package sp3s
 
 import (
 	"context"
-	"time"
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
@@ -12,12 +11,12 @@ import (
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
+	config *Config
 
 	state *atomic.BoolNull
 	power *atomic.Float32Null
 
-	provider        *broadlink.SP3S
-	updaterInterval time.Duration
+	provider *broadlink.SP3S
 }
 
 func (b *Bind) State() (bool, error) {
