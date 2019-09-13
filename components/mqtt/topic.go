@@ -62,6 +62,35 @@ func (t Topic) Split() (result []string) {
 	return result
 }
 
+func (t Topic) match(routes1 []string, routes2 []string) bool {
+	if len(routes1) == 0 {
+		return len(routes2) == 0
+	}
+
+	if len(routes2) == 0 {
+		return routes1[0] == "#"
+	}
+
+	if routes1[0] == "#" {
+		return true
+	}
+
+	if (routes1[0] == "+") || (routes1[0] == routes2[0]) {
+		return t.match(routes1[1:], routes2[1:])
+	}
+
+	return false
+}
+
+func (t Topic) IsInclude(topic Topic) bool {
+	if t.String() == topic.String() {
+		return true
+	}
+
+	topic = Topic(strings.TrimRight(topic.String(), "/"))
+	return t.match(t.Split(), topic.Split())
+}
+
 func NameReplace(name string) string {
 	name = strings.ToLower(name)
 	name = strings.Trim(name, TopicSeparator)

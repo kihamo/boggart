@@ -2,7 +2,6 @@ package mqtt
 
 import (
 	"context"
-	"strings"
 	"sync"
 	"sync/atomic"
 
@@ -150,36 +149,10 @@ func (c *Subscription) Match(topic Topic) bool {
 	c.mutex.RUnlock()
 
 	for _, subscriber := range subscribers {
-		if subscriber.Topic().String() == topic.String() || routeIncludesTopic(subscriber.Topic().String(), topic.String()) {
+		if subscriber.Topic().IsInclude(topic) {
 			return true
 		}
 	}
 
 	return false
-}
-
-func match(route []string, topic []string) bool {
-	if len(route) == 0 {
-		return len(topic) == 0
-	}
-
-	if len(topic) == 0 {
-		return route[0] == "#"
-	}
-
-	if route[0] == "#" {
-		return true
-	}
-
-	if (route[0] == "+") || (route[0] == topic[0]) {
-		return match(route[1:], topic[1:])
-	}
-
-	return false
-}
-
-func routeIncludesTopic(route, topic string) bool {
-	topic = strings.TrimRight(topic, "/")
-
-	return match(Topic(route).Split(), strings.Split(topic, "/"))
 }
