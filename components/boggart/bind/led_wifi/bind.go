@@ -10,8 +10,8 @@ import (
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
-
-	bulb *wifiled.Bulb
+	config *Config
+	bulb   *wifiled.Bulb
 }
 
 func (b *Bind) On(ctx context.Context) error {
