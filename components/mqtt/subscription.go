@@ -181,19 +181,5 @@ func match(route []string, topic []string) bool {
 func routeIncludesTopic(route, topic string) bool {
 	topic = strings.TrimRight(topic, "/")
 
-	return match(RouteSplit(route), strings.Split(topic, "/"))
-}
-
-func RouteSplit(route string) []string {
-	route = strings.TrimRight(route, "/")
-
-	var result []string
-
-	if strings.HasPrefix(route, "$share") {
-		result = strings.Split(route, "/")[2:]
-	} else {
-		result = strings.Split(route, "/")
-	}
-
-	return result
+	return match(Topic(route).Split(), strings.Split(topic, "/"))
 }
