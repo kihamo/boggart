@@ -31,7 +31,6 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	b.mutex.Lock()
 
 	sn := b.SerialNumber()
-	snMQTT := mqtt.NameReplace(sn)
 
 	for _, v := range variables {
 		prev, ok := b.variables[v.Name]
@@ -53,7 +52,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			name := mqtt.NameReplace(v.Name)
 
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicVariable.Format(snMQTT, name), v.Value)
+			_ = b.MQTTPublishAsync(ctx, b.config.TopicVariable.Format(sn, name), v.Value)
 		}
 	}
 

@@ -12,9 +12,7 @@ import (
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
-
-	config *Config
-
+	config    *Config
 	mutex     sync.Mutex
 	variables map[string]interface{}
 }
