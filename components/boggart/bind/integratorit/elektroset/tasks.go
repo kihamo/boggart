@@ -39,14 +39,14 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 
 			metricServiceBalance.With("account", account.Number, "service", serviceID).Set(service.Balance)
 
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicServiceBalance.Format(account.Number, serviceID), service.Balance); e != nil {
+			if e := b.MQTTPublishAsync(ctx, b.config.TopicServiceBalance.Format(account.Number, serviceID), service.Balance); e != nil {
 				err = multierr.Append(e, err)
 			}
 		}
 
 		metricBalance.With("account", account.Number).Set(totalBalance)
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicBalance.Format(account.Number), totalBalance); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicBalance.Format(account.Number), totalBalance); e != nil {
 			err = multierr.Append(e, err)
 		}
 	}

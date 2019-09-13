@@ -8,7 +8,6 @@ import (
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
-
-	client *elektroset.Client
 	config *Config
+	client *elektroset.Client
 }
