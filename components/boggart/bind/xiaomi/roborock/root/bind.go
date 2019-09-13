@@ -16,11 +16,9 @@ var reRuntimeConfigLine = regexp.MustCompile(`(?m)\s*([[:alnum:]_]+)\s*=\s*([^;]
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
-
 	config                 *Config
 	cacheRuntimeConfig     map[string]string
 	cacheRuntimeConfigLock sync.Mutex
-
 	watchFiles map[string]func(string) error
 }
 
