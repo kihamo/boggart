@@ -2,11 +2,9 @@ package softvideo
 
 import (
 	"time"
-)
 
-const (
-	DefaultUpdaterInterval = time.Hour
-	DefaultDebug           = false
+	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/mqtt"
 )
 
 type Config struct {
@@ -14,11 +12,13 @@ type Config struct {
 	Password        string        `valid:"required"`
 	UpdaterInterval time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 	Debug           bool
+	TopicBalance    mqtt.Topic `mapstructure:"topic_balance" yaml:"topic_balance"`
 }
 
 func (Type) Config() interface{} {
 	return &Config{
-		UpdaterInterval: DefaultUpdaterInterval,
-		Debug:           DefaultDebug,
+		UpdaterInterval: time.Hour,
+		Debug:           false,
+		TopicBalance:    boggart.ComponentName + "/service/softvideo/+/balance",
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 )
@@ -12,7 +11,7 @@ import (
 func (b *Bind) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(b.taskUpdater)
 	taskUpdater.SetRepeats(-1)
-	taskUpdater.SetRepeatInterval(b.updaterInterval)
+	taskUpdater.SetRepeatInterval(b.config.UpdaterInterval)
 	taskUpdater.SetName("updater-" + b.provider.AccountID())
 
 	return []workers.Task{
@@ -32,7 +31,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	sn := b.SerialNumber()
 	metricBalance.With("account", sn).Set(value)
 
-	err = b.MQTTPublishAsync(ctx, MQTTPublishTopicBalance.Format(mqtt.NameReplace(sn)), value)
+	err = b.MQTTPublishAsync(ctx, b.config.TopicBalance, value)
 
 	return nil, err
 }
