@@ -12,10 +12,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
 	bind := &Bind{
-		host:             config.Host,
-		key:              config.Key,
-		livenessInterval: config.LivenessInterval,
-		livenessTimeout:  config.LivenessTimeout,
+		config: config,
 	}
 
 	return bind, nil
