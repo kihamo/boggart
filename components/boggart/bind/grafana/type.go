@@ -10,6 +10,8 @@ type Type struct{}
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
+	config.TopicAnnotation = config.TopicAnnotation.Format(config.Name)
+
 	client := g.New(config.Address.String())
 
 	if config.ApiKey != "" {
@@ -19,9 +21,8 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	}
 
 	bind := &Bind{
-		client:     client,
-		name:       config.Name,
-		dashboards: config.Dashboards,
+		config: config,
+		client: client,
 	}
 
 	return bind, nil

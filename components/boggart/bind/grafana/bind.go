@@ -13,10 +13,8 @@ import (
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
-
-	client     *g.Client
-	name       string
-	dashboards []int64
+	config *Config
+	client *g.Client
 }
 
 func (b *Bind) Run() error {
@@ -43,7 +41,7 @@ func (b *Bind) CreateAnnotation(title, text string, tags []string, timeStart *ti
 		input.IsRegion = g.Bool(true)
 	}
 
-	for _, dashboardId := range b.dashboards {
+	for _, dashboardId := range b.config.Dashboards {
 		input.DashboardId = g.Int64(dashboardId)
 
 		if _, e := b.client.CreateAnnotation(context.Background(), input); e != nil {
