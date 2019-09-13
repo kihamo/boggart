@@ -39,7 +39,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 
 			metricBalance.With("account", accountID).Set(balance.Balance)
 
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicBalance.Format(accountID), balance.Balance); e != nil {
+			if e := b.MQTTPublishAsync(ctx, b.config.TopicBalance.Format(accountID), balance.Balance); e != nil {
 				err = multierr.Append(e, err)
 			}
 
@@ -54,7 +54,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 
 				metricServiceBalance.With("account", accountID, "service", serviceID).Set(service.Balance)
 
-				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicServiceBalance.Format(accountID, serviceID), service.Balance); e != nil {
+				if e := b.MQTTPublishAsync(ctx, b.config.TopicServiceBalance.Format(accountID, serviceID), service.Balance); e != nil {
 					err = multierr.Append(e, err)
 				}
 			}
