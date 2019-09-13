@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 	"go.uber.org/multierr"
@@ -52,15 +51,15 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 			b.startAlarmStreaming()
 		}
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateModel.Format(info.SerialNo), info.HardWare); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicStateModel.Format(info.SerialNo), info.HardWare); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateFirmwareVersion.Format(info.SerialNo), info.SoftWareVersion); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicStateFirmwareVersion.Format(info.SerialNo), info.SoftWareVersion); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateFirmwareReleasedDate.Format(info.SerialNo), info.BuildTime); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicStateFirmwareReleasedDate.Format(info.SerialNo), info.BuildTime); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
@@ -76,7 +75,6 @@ func (b *Bind) taskUpdater(ctx context.Context) (_ interface{}, err error) {
 	}
 
 	sn := b.SerialNumber()
-	snMQTT := mqtt.NameReplace(sn)
 
 	storage, _ := b.client.StorageInfo(ctx)
 	for _, s := range storage {
@@ -85,18 +83,18 @@ func (b *Bind) taskUpdater(ctx context.Context) (_ interface{}, err error) {
 				name := strconv.FormatUint(p.LogicSerialNo, 10)
 
 				// TODO:
-				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateHDDCapacity.Format(snMQTT, p.LogicSerialNo), uint64(p.TotalSpace)*MB); e != nil {
+				if e := b.MQTTPublishAsync(ctx, b.config.TopicStateHDDCapacity.Format(sn, p.LogicSerialNo), uint64(p.TotalSpace)*MB); e != nil {
 					err = multierr.Append(err, e)
 				}
 
 				// TODO:
-				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateHDDUsage.Format(snMQTT, p.LogicSerialNo), uint64(p.TotalSpace-p.RemainSpace)*MB); e != nil {
+				if e := b.MQTTPublishAsync(ctx, b.config.TopicStateHDDUsage.Format(sn, p.LogicSerialNo), uint64(p.TotalSpace-p.RemainSpace)*MB); e != nil {
 					err = multierr.Append(err, e)
 				}
 				metricStorageUsage.With("serial_number", sn).With("name", name).Set(float64(uint64(p.TotalSpace-p.RemainSpace) * MB))
 
 				// TODO:
-				if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateHDDFree.Format(snMQTT, p.LogicSerialNo), uint64(p.RemainSpace)*MB); e != nil {
+				if e := b.MQTTPublishAsync(ctx, b.config.TopicStateHDDFree.Format(sn, p.LogicSerialNo), uint64(p.RemainSpace)*MB); e != nil {
 					err = multierr.Append(err, e)
 				}
 				metricStorageAvailable.With("serial_number", sn).With("name", name).Set(float64(uint64(p.RemainSpace) * MB))

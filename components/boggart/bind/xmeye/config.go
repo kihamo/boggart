@@ -4,32 +4,41 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
-)
-
-const (
-	DefaultLivenessInterval       = time.Minute
-	DefaultLivenessTimeout        = time.Second * 5
-	DefaultUpdaterInterval        = time.Minute
-	DefaultUpdaterTimeout         = time.Second * 30
-	DefaultAlarmStreamingInterval = time.Second * 5
+	"github.com/kihamo/boggart/components/mqtt"
 )
 
 type Config struct {
-	Address                boggart.URL   `valid:",required"`
-	LivenessInterval       time.Duration `mapstructure:"liveness_interval" yaml:"liveness_interval"`
-	LivenessTimeout        time.Duration `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
-	UpdaterInterval        time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
-	UpdaterTimeout         time.Duration `mapstructure:"updater_timeout" yaml:"updater_timeout"`
-	AlarmStreamingEnabled  bool          `mapstructure:"alarm_streaming_enabled" yaml:"alarm_streaming_enabled,omitempty"`
-	AlarmStreamingInterval time.Duration `mapstructure:"alarm_streaming_interval" yaml:"alarm_streaming_interval"`
+	Address                        boggart.URL   `valid:",required"`
+	LivenessInterval               time.Duration `mapstructure:"liveness_interval" yaml:"liveness_interval"`
+	LivenessTimeout                time.Duration `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
+	UpdaterInterval                time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
+	UpdaterTimeout                 time.Duration `mapstructure:"updater_timeout" yaml:"updater_timeout"`
+	AlarmStreamingEnabled          bool          `mapstructure:"alarm_streaming_enabled" yaml:"alarm_streaming_enabled,omitempty"`
+	AlarmStreamingInterval         time.Duration `mapstructure:"alarm_streaming_interval" yaml:"alarm_streaming_interval"`
+	TopicEvent                     mqtt.Topic    `mapstructure:"topic_event" yaml:"topic_event"`
+	TopicStateModel                mqtt.Topic    `mapstructure:"topic_state_model" yaml:"topic_state_model"`
+	TopicStateFirmwareVersion      mqtt.Topic    `mapstructure:"topic_state_firmware_release_version" yaml:"topic_state_firmware_release_version"`
+	TopicStateFirmwareReleasedDate mqtt.Topic    `mapstructure:"topic_state_firmware_release_date" yaml:"topic_state_firmware_release_date"`
+	TopicStateHDDCapacity          mqtt.Topic    `mapstructure:"topic_state_hdd_capacity" yaml:"topic_state_hdd_capacity"`
+	TopicStateHDDFree              mqtt.Topic    `mapstructure:"topic_state_hdd_free" yaml:"topic_state_hdd_free"`
+	TopicStateHDDUsage             mqtt.Topic    `mapstructure:"topic_state_hdd_usage" yaml:"topic_state_hdd_usage"`
 }
 
 func (t Type) Config() interface{} {
+	var prefix mqtt.Topic = boggart.ComponentName + "/cctv/+/"
+
 	return &Config{
-		LivenessInterval:       DefaultLivenessInterval,
-		LivenessTimeout:        DefaultLivenessTimeout,
-		UpdaterInterval:        DefaultUpdaterInterval,
-		UpdaterTimeout:         DefaultUpdaterTimeout,
-		AlarmStreamingInterval: DefaultAlarmStreamingInterval,
+		LivenessInterval:               time.Minute,
+		LivenessTimeout:                time.Second * 5,
+		UpdaterInterval:                time.Minute,
+		UpdaterTimeout:                 time.Second * 30,
+		AlarmStreamingInterval:         time.Second * 5,
+		TopicEvent:                     prefix + "+",
+		TopicStateModel:                prefix + "state/model",
+		TopicStateFirmwareVersion:      prefix + "state/firmware/version",
+		TopicStateFirmwareReleasedDate: prefix + "state/firmware/release-date",
+		TopicStateHDDCapacity:          prefix + "state/hdd/+/capacity",
+		TopicStateHDDFree:              prefix + "state/hdd/+/free",
+		TopicStateHDDUsage:             prefix + "state/hdd/+/usage",
 	}
 }
