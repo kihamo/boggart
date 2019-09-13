@@ -11,10 +11,10 @@ import (
 
 func (b *Bind) Tasks() []workers.Task {
 	taskLiveness := task.NewFunctionTask(b.taskLiveness)
-	taskLiveness.SetTimeout(b.livenessTimeout)
+	taskLiveness.SetTimeout(b.config.LivenessTimeout)
 	taskLiveness.SetRepeats(-1)
-	taskLiveness.SetRepeatInterval(b.livenessInterval)
-	taskLiveness.SetName("liveness-" + b.client.Host())
+	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
+	taskLiveness.SetName("liveness-" + b.config.Host)
 
 	return []workers.Task{
 		taskLiveness,
@@ -46,8 +46,8 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 
 		sn := b.SerialNumber()
 		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicDeviceID.Format(sn), info.Device.ID)
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicDeviceModelName.Format(sn), info.Device.Name)
+		_ = b.MQTTPublishAsync(ctx, b.config.TopicDeviceID.Format(sn), info.Device.ID)
+		_ = b.MQTTPublishAsync(ctx, b.config.TopicDeviceModelName.Format(sn), info.Device.Name)
 	}
 	b.UpdateStatus(boggart.BindStatusOnline)
 
