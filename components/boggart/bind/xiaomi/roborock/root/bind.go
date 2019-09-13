@@ -19,7 +19,7 @@ type Bind struct {
 	config                 *Config
 	cacheRuntimeConfig     map[string]string
 	cacheRuntimeConfigLock sync.Mutex
-	watchFiles map[string]func(string) error
+	watchFiles             map[string]func(string) error
 }
 
 func (b *Bind) Run() error {
