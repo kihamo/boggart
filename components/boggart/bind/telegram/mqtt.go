@@ -14,30 +14,19 @@ import (
 	"github.com/kihamo/boggart/components/storage"
 )
 
-const (
-	MQTTPrefix mqtt.Topic = boggart.ComponentName + "/telegram/+/"
-
-	MQTTSubscribeTopicSendMessage  = MQTTPrefix + "send/+/message"
-	MQTTSubscribeTopicSendFile     = MQTTPrefix + "send/+/file"
-	MQTTSubscribeTopicSendFileURL  = MQTTPrefix + "send/+/file/url"
-	MQTTPublishTopicReceiveMessage = MQTTPrefix + "receive/+/message"
-	MQTTPublishTopicReceiveAudio   = MQTTPrefix + "receive/+/audio"
-	MQTTPublishTopicReceiveVoice   = MQTTPrefix + "receive/+/voice"
-)
-
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
-		MQTTPublishTopicReceiveMessage,
-		MQTTPublishTopicReceiveAudio,
-		MQTTPublishTopicReceiveVoice,
+		b.config.TopicReceiveMessage,
+		b.config.TopicReceiveAudio,
+		b.config.TopicReceiveVoice,
 	}
 }
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTSubscribeTopicSendMessage, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSendMessage)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicSendFile, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSendFileURL)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicSendFileURL, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSendFileURL)),
+		mqtt.NewSubscriber(b.config.TopicSendMessage, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSendMessage)),
+		mqtt.NewSubscriber(b.config.TopicSendFile, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSendFileURL)),
+		mqtt.NewSubscriber(b.config.TopicSendFileURL, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSendFileURL)),
 	}
 }
 
