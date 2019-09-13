@@ -9,41 +9,23 @@ import (
 	"github.com/kihamo/boggart/providers/broadlink"
 )
 
-const (
-	MQTTPrefix mqtt.Topic = boggart.ComponentName + "/remote-control/+/"
-
-	MQTTSubscribeTopicCapture       = MQTTPrefix + "capture"
-	MQTTPublishTopicCaptureState    = MQTTPrefix + "capture/state"
-	MQTTSubscribeTopicIR            = MQTTPrefix + "ir"
-	MQTTSubscribeTopicIRCount       = MQTTPrefix + "ir/count"
-	MQTTPublishTopicIRCapture       = MQTTPrefix + "capture/ir"
-	MQTTSubscribeTopicRF315mhz      = MQTTPrefix + "rf315mhz"
-	MQTTSubscribeTopicRF315mhzCount = MQTTPrefix + "rf315mhz/count"
-	MQTTPublishTopicRF315mhzCapture = MQTTPrefix + "capture/rf315mhz"
-	MQTTSubscribeTopicRF433mhz      = MQTTPrefix + "rf433mhz"
-	MQTTSubscribeTopicRF433mhzCount = MQTTPrefix + "rf433mhz/count"
-	MQTTPublishTopicRF433mhzCapture = MQTTPrefix + "capture/rf433mhz"
-)
-
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	sn := b.SerialNumber()
-
 	topics := make([]mqtt.Topic, 0)
 
 	_, supportCapture := b.provider.(SupportCapture)
 	if supportCapture {
-		topics = append(topics, MQTTPublishTopicCaptureState.Format(sn))
+		topics = append(topics, b.config.TopicCaptureState)
 
 		if _, ok := b.provider.(SupportIR); ok {
-			topics = append(topics, MQTTPublishTopicIRCapture.Format(sn))
+			topics = append(topics, b.config.TopicIRCapture)
 		}
 
 		if _, ok := b.provider.(SupportRF315Mhz); ok {
-			topics = append(topics, MQTTPublishTopicRF315mhzCapture.Format(sn))
+			topics = append(topics, b.config.TopicRF315mhzCapture)
 		}
 
 		if _, ok := b.provider.(SupportRF433Mhz); ok {
-			topics = append(topics, MQTTPublishTopicRF433mhzCapture.Format(sn))
+			topics = append(topics, b.config.TopicRF433mhzCapture)
 		}
 	}
 
@@ -51,7 +33,6 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 }
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
-	sn := mqtt.NameReplace(b.SerialNumber())
 	subscribers := make([]mqtt.Subscriber, 0)
 
 	if capture, ok := b.provider.(SupportCapture); ok {
@@ -63,7 +44,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 		<-captureTimer.C
 
 		subscribers = append(subscribers,
-			mqtt.NewSubscriber(MQTTSubscribeTopicCapture.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
+			mqtt.NewSubscriber(b.config.TopicCapture, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
 				func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 					if message.IsTrue() { // start
 						if err := capture.StartCaptureRemoteControlCode(); err != nil {
@@ -71,7 +52,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 						}
 
 						// завершаем предыдущие запуски
-						if captureTimer.Reset(b.captureDuration) {
+						if captureTimer.Reset(b.config.CaptureDuration) {
 							captureDone <- struct{}{}
 						} else {
 							for len(captureDone) > 0 {
@@ -89,7 +70,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 						}
 
 						// стартуем новую запись
-						if err := b.MQTTPublish(ctx, MQTTPublishTopicCaptureState.Format(sn), true); err != nil {
+						if err := b.MQTTPublish(ctx, b.config.TopicCaptureState, true); err != nil {
 							return err
 						}
 
@@ -101,7 +82,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 							return nil
 						}
 
-						if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicCaptureState.Format(sn), false); err != nil {
+						if err := b.MQTTPublishAsync(ctx, b.config.TopicCaptureState, false); err != nil {
 							return err
 						}
 
@@ -118,11 +99,11 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 						switch remoteType {
 						case broadlink.RemoteIR:
-							topicCaptureCode = MQTTPublishTopicIRCapture.Format(sn)
+							topicCaptureCode = b.config.TopicIRCapture
 						case broadlink.RemoteRF315Mhz:
-							topicCaptureCode = MQTTPublishTopicRF315mhzCapture.Format(sn)
+							topicCaptureCode = b.config.TopicRF315mhzCapture
 						case broadlink.RemoteRF433Mhz:
-							topicCaptureCode = MQTTPublishTopicRF433mhzCapture.Format(sn)
+							topicCaptureCode = b.config.TopicRF433mhzCapture
 						}
 
 						if topicCaptureCode != "" {
@@ -149,11 +130,11 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	// IR support
 	if ir, ok := b.provider.(SupportIR); ok {
 		subscribers = append(subscribers,
-			mqtt.NewSubscriber(MQTTSubscribeTopicIR.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
+			mqtt.NewSubscriber(b.config.TopicIR, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
 				func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 					return ir.SendIRRemoteControlCodeAsString(message.String(), 0)
 				})),
-			mqtt.NewSubscriber(MQTTSubscribeTopicIRCount.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
+			mqtt.NewSubscriber(b.config.TopicIRCount, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
 				func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 					var request codeRequest
 
@@ -169,11 +150,11 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	// RF315mhz support
 	if rf315mhz, ok := b.provider.(SupportRF315Mhz); ok {
 		subscribers = append(subscribers,
-			mqtt.NewSubscriber(MQTTSubscribeTopicRF315mhz.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
+			mqtt.NewSubscriber(b.config.TopicRF315mhz, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
 				func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 					return rf315mhz.SendRF315MhzRemoteControlCodeAsString(message.String(), 0)
 				})),
-			mqtt.NewSubscriber(MQTTSubscribeTopicRF315mhzCount.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
+			mqtt.NewSubscriber(b.config.TopicRF315mhzCount, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
 				func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 					var request codeRequest
 
@@ -189,11 +170,11 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	// RF433mhz support
 	if rf433mhz, ok := b.provider.(SupportRF433Mhz); ok {
 		subscribers = append(subscribers,
-			mqtt.NewSubscriber(MQTTSubscribeTopicRF433mhz.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
+			mqtt.NewSubscriber(b.config.TopicRF433mhz, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
 				func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 					return rf433mhz.SendRF433MhzRemoteControlCodeAsString(message.String(), 0)
 				})),
-			mqtt.NewSubscriber(MQTTSubscribeTopicRF433mhzCount.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
+			mqtt.NewSubscriber(b.config.TopicRF433mhzCount, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status,
 				func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 					var request codeRequest
 

@@ -4,30 +4,48 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
-)
-
-const (
-	DefaultCaptureDuration   = time.Second * 15
-	DefaultLivenessInterval  = time.Second * 30
-	DefaultLivenessTimeout   = time.Second * 10
-	DefaultConnectionTimeout = time.Second
+	"github.com/kihamo/boggart/components/mqtt"
 )
 
 type ConfigRM struct {
-	Host              string               `valid:",required"`
-	MAC               boggart.HardwareAddr `valid:",required"`
-	Model             string               `valid:"in(rm3mini|rm2proplus),required"`
-	CaptureDuration   time.Duration        `mapstructure:"capture_interval" yaml:"capture_interval"`
-	LivenessInterval  time.Duration        `mapstructure:"liveness_interval" yaml:"liveness_interval"`
-	LivenessTimeout   time.Duration        `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
-	ConnectionTimeout time.Duration        `mapstructure:"connection_timeout" yaml:"connection_timeout"`
+	Host                 string               `valid:",required"`
+	MAC                  boggart.HardwareAddr `valid:",required"`
+	Model                string               `valid:"in(rm3mini|rm2proplus),required"`
+	CaptureDuration      time.Duration        `mapstructure:"capture_interval" yaml:"capture_interval"`
+	LivenessInterval     time.Duration        `mapstructure:"liveness_interval" yaml:"liveness_interval"`
+	LivenessTimeout      time.Duration        `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
+	ConnectionTimeout    time.Duration        `mapstructure:"connection_timeout" yaml:"connection_timeout"`
+	TopicCapture         mqtt.Topic           `mapstructure:"topic_capture" yaml:"topic_capture"`
+	TopicCaptureState    mqtt.Topic           `mapstructure:"topic_capture_state" yaml:"topic_capture_state"`
+	TopicIR              mqtt.Topic           `mapstructure:"topic_ir" yaml:"topic_ir"`
+	TopicIRCount         mqtt.Topic           `mapstructure:"topic_ir_count" yaml:"topic_ir_count"`
+	TopicIRCapture       mqtt.Topic           `mapstructure:"topic_ir_capture" yaml:"topic_ir_capture"`
+	TopicRF315mhz        mqtt.Topic           `mapstructure:"topic_rf315mhz" yaml:"topic_rf315mhz"`
+	TopicRF315mhzCount   mqtt.Topic           `mapstructure:"topic_rf315mhz_count" yaml:"topic_rf315mhz_count"`
+	TopicRF315mhzCapture mqtt.Topic           `mapstructure:"topic_rf315mhz_capture" yaml:"topic_rf315mhz_capture"`
+	TopicRF433mhz        mqtt.Topic           `mapstructure:"topic_rf433mhz" yaml:"topic_rf433mhz"`
+	TopicRF433mhzCount   mqtt.Topic           `mapstructure:"topic_rf433mhz_count" yaml:"topic_rf433mhz_count"`
+	TopicRF433mhzCapture mqtt.Topic           `mapstructure:"topic_rf433mhz_capture" yaml:"topic_rf433mhz_capture"`
 }
 
 func (t Type) Config() interface{} {
+	var prefix mqtt.Topic = boggart.ComponentName + "/remote-control/+/"
+
 	return &ConfigRM{
-		CaptureDuration:   DefaultCaptureDuration,
-		LivenessInterval:  DefaultLivenessInterval,
-		LivenessTimeout:   DefaultLivenessTimeout,
-		ConnectionTimeout: DefaultConnectionTimeout,
+		CaptureDuration:      time.Second * 15,
+		LivenessInterval:     time.Second * 30,
+		LivenessTimeout:      time.Second * 10,
+		ConnectionTimeout:    time.Second,
+		TopicCapture:         prefix + "capture",
+		TopicCaptureState:    prefix + "capture/state",
+		TopicIR:              prefix + "ir",
+		TopicIRCount:         prefix + "ir/count",
+		TopicIRCapture:       prefix + "capture/ir",
+		TopicRF315mhz:        prefix + "rf315mhz",
+		TopicRF315mhzCount:   prefix + "rf315mhz/count",
+		TopicRF315mhzCapture: prefix + "capture/rf315mhz",
+		TopicRF433mhz:        prefix + "rf433mhz",
+		TopicRF433mhzCount:   prefix + "rf433mhz/count",
+		TopicRF433mhzCapture: prefix + "capture/rf433mhz",
 	}
 }

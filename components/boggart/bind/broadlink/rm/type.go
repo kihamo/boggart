@@ -25,18 +25,27 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		return nil, errors.New("unknown model " + config.Model)
 	}
 
+	sn := config.MAC.String()
+
+	config.TopicCapture = config.TopicCapture.Format(sn)
+	config.TopicCaptureState = config.TopicCaptureState.Format(sn)
+	config.TopicIR = config.TopicIR.Format(sn)
+	config.TopicIRCount = config.TopicIRCount.Format(sn)
+	config.TopicIRCapture = config.TopicIRCapture.Format(sn)
+	config.TopicRF315mhz = config.TopicRF315mhz.Format(sn)
+	config.TopicRF315mhzCount = config.TopicRF315mhzCount.Format(sn)
+	config.TopicRF315mhzCapture = config.TopicRF315mhzCapture.Format(sn)
+	config.TopicRF433mhz = config.TopicRF433mhz.Format(sn)
+	config.TopicRF433mhzCount = config.TopicRF433mhzCount.Format(sn)
+	config.TopicRF433mhzCapture = config.TopicRF433mhzCapture.Format(sn)
+
 	provider.SetTimeout(config.ConnectionTimeout)
 
 	bind := &Bind{
-		provider:        provider,
-		mac:             config.MAC.HardwareAddr,
-		host:            config.Host,
-		captureDuration: config.CaptureDuration,
-
-		livenessInterval: config.LivenessInterval,
-		livenessTimeout:  config.LivenessTimeout,
+		config:   config,
+		provider: provider,
 	}
-	bind.SetSerialNumber(config.MAC.String())
+	bind.SetSerialNumber(sn)
 
 	return bind, nil
 }
