@@ -10,36 +10,17 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
-const (
-	MQTTPrefix mqtt.Topic = boggart.ComponentName + "/alsa/+/"
-
-	MQTTSubscribeTopicVolume    = MQTTPrefix + "volume"
-	MQTTSubscribeTopicMute      = MQTTPrefix + "mute"
-	MQTTSubscribeTopicPause     = MQTTPrefix + "pause"
-	MQTTSubscribeTopicStop      = MQTTPrefix + "stop"
-	MQTTSubscribeTopicPlay      = MQTTPrefix + "play"
-	MQTTSubscribeTopicResume    = MQTTPrefix + "resume"
-	MQTTSubscribeTopicAction    = MQTTPrefix + "action"
-	MQTTPublishTopicStateStatus = MQTTPrefix + "state/status"
-	MQTTPublishTopicStateVolume = MQTTPrefix + "state/volume"
-	MQTTPublishTopicStateMute   = MQTTPrefix + "state/mute"
-)
-
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	sn := b.SerialNumber()
-
 	return []mqtt.Topic{
-		MQTTPublishTopicStateStatus.Format(sn),
-		MQTTPublishTopicStateVolume.Format(sn),
-		MQTTPublishTopicStateMute.Format(sn),
+		b.config.TopicStateStatus,
+		b.config.TopicStateVolume,
+		b.config.TopicStateMute,
 	}
 }
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
-	sn := b.SerialNumber()
-
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTSubscribeTopicVolume.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(b.config.TopicVolume, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			volume, err := strconv.ParseInt(message.String(), 10, 64)
 			if err != nil {
 				return err
@@ -47,30 +28,30 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			return b.SetVolume(volume)
 		})),
-		mqtt.NewSubscriber(MQTTSubscribeTopicMute.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(b.config.TopicMute, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			return b.SetMute(message.IsTrue())
 		})),
-		mqtt.NewSubscriber(MQTTSubscribeTopicPause.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(b.config.TopicPause, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			return b.Pause()
 		})),
-		mqtt.NewSubscriber(MQTTSubscribeTopicStop.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(b.config.TopicStop, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			return b.Stop()
 		})),
-		mqtt.NewSubscriber(MQTTSubscribeTopicPlay.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(b.config.TopicPlay, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if u := message.String(); u != "" {
 				return b.PlayFromURL(u)
 			}
 
 			return b.Play()
 		})),
-		mqtt.NewSubscriber(MQTTSubscribeTopicResume.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(b.config.TopicResume, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if u := message.String(); u != "" {
 				return b.PlayFromURL(u)
 			}
 
 			return b.Play()
 		})),
-		mqtt.NewSubscriber(MQTTSubscribeTopicAction.Format(sn), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(b.config.TopicAction, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			action := message.String()
 
 			switch strings.ToLower(action) {
