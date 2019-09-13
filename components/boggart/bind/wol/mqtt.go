@@ -5,18 +5,12 @@ import (
 	"errors"
 	"net"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
-)
-
-const (
-	MQTTSubscribeTopicWOL                mqtt.Topic = boggart.ComponentName + "/wol/+"
-	MQTTSubscribeTopicWOLWithIPAndSubnet mqtt.Topic = boggart.ComponentName + "/wol/+/+/+"
 )
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTSubscribeTopicWOL, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(b.config.TopicWOL, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			route := message.Topic().Split()
 			if len(route) < 1 {
 				return errors.New("bad topic name")
@@ -29,7 +23,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			return b.WOL(mac, nil, nil)
 		}),
-		mqtt.NewSubscriber(MQTTSubscribeTopicWOLWithIPAndSubnet, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(b.config.TopicWOLWithIPAndSubnet, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			route := message.Topic().Split()
 			if len(route) < 3 {
 				return errors.New("bad topic name")

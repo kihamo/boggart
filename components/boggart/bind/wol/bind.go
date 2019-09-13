@@ -11,6 +11,7 @@ import (
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
+	config *Config
 }
 
 func (b *Bind) Run() error {
