@@ -35,9 +35,9 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTSubscribeTopicSendMessage.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSendMessage)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicSendFile.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSendFileURL)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicSendFileURL.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSendFileURL)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicSendMessage, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSendMessage)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicSendFile, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSendFileURL)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicSendFileURL, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSendFileURL)),
 	}
 }
 

@@ -251,7 +251,7 @@ func (b *Bind) otaStatusSubscriber(_ context.Context, _ mqtt.Component, message 
 }
 
 func (b *Bind) otaEnabledSubscriber(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-	if message.Topic().String() == otaTopicEnabled.Format(b.config.BaseTopic, b.SerialNumber()) {
+	if message.Topic().String() == otaTopicEnabled.Format(b.config.BaseTopic, b.SerialNumber()).String() {
 		b.otaEnabled.Set(message.Bool())
 	}
 

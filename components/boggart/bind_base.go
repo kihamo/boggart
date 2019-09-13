@@ -120,11 +120,11 @@ func (b *BindMQTT) SetMQTTClient(client mqtt.Component) {
 	b.mutex.Unlock()
 }
 
-func (b *BindMQTT) MQTTPublish(ctx context.Context, topic string, payload interface{}) error {
+func (b *BindMQTT) MQTTPublish(ctx context.Context, topic mqtt.Topic, payload interface{}) error {
 	return b.MQTTPublishRaw(ctx, topic, 1, true, payload)
 }
 
-func (b *BindMQTT) MQTTPublishRaw(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
+func (b *BindMQTT) MQTTPublishRaw(ctx context.Context, topic mqtt.Topic, qos byte, retained bool, payload interface{}) error {
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()
 
@@ -135,11 +135,11 @@ func (b *BindMQTT) MQTTPublishRaw(ctx context.Context, topic string, qos byte, r
 	return b.client.Publish(ctx, topic, qos, retained, payload)
 }
 
-func (b *BindMQTT) MQTTPublishAsync(ctx context.Context, topic string, payload interface{}) error {
+func (b *BindMQTT) MQTTPublishAsync(ctx context.Context, topic mqtt.Topic, payload interface{}) error {
 	return b.MQTTPublishAsyncRaw(ctx, topic, 1, true, payload)
 }
 
-func (b *BindMQTT) MQTTPublishAsyncRaw(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
+func (b *BindMQTT) MQTTPublishAsyncRaw(ctx context.Context, topic mqtt.Topic, qos byte, retained bool, payload interface{}) error {
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()
 

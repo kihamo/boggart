@@ -11,18 +11,18 @@ type Component interface {
 	shadow.Component
 
 	Client() m.Client
-	Publish(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error
-	PublishWithCache(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error
-	PublishWithoutCache(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error
-	PublishAsync(ctx context.Context, topic string, qos byte, retained bool, payload interface{})
-	PublishAsyncWithCache(ctx context.Context, topic string, qos byte, retained bool, payload interface{})
-	PublishAsyncWithoutCache(ctx context.Context, topic string, qos byte, retained bool, payload interface{})
+	Publish(ctx context.Context, topic Topic, qos byte, retained bool, payload interface{}) error
+	PublishWithCache(ctx context.Context, topic Topic, qos byte, retained bool, payload interface{}) error
+	PublishWithoutCache(ctx context.Context, topic Topic, qos byte, retained bool, payload interface{}) error
+	PublishAsync(ctx context.Context, topic Topic, qos byte, retained bool, payload interface{})
+	PublishAsyncWithCache(ctx context.Context, topic Topic, qos byte, retained bool, payload interface{})
+	PublishAsyncWithoutCache(ctx context.Context, topic Topic, qos byte, retained bool, payload interface{})
 
-	Unsubscribe(topic string) error
+	Unsubscribe(topic Topic) error
 	UnsubscribeSubscriber(Subscriber) error
 	UnsubscribeSubscribers([]Subscriber) error
 
-	Subscribe(topic string, qos byte, callback MessageHandler) (Subscriber, error)
+	Subscribe(topic Topic, qos byte, callback MessageHandler) (Subscriber, error)
 	SubscribeSubscriber(Subscriber) error
 
 	Subscriptions() []*Subscription

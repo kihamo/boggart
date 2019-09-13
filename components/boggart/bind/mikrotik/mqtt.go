@@ -29,7 +29,7 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTPublishTopicWiFiMACState.String(), 0, b.callbackMQTTWiFiSync),
+		mqtt.NewSubscriber(MQTTPublishTopicWiFiMACState, 0, b.callbackMQTTWiFiSync),
 	}
 }
 

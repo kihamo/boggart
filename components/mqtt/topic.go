@@ -24,7 +24,7 @@ func (t Topic) String() string {
 	return string(t)
 }
 
-func (t Topic) Format(args ...interface{}) string {
+func (t Topic) Format(args ...interface{}) Topic {
 	parts := t.Split()
 
 	for _, arg := range args {
@@ -36,7 +36,8 @@ func (t Topic) Format(args ...interface{}) string {
 		}
 	}
 
-	return strings.Join(parts, "/")
+	topic := strings.Join(parts, "/")
+	return Topic(topic)
 }
 
 func (t Topic) Replace(replaces map[string]string) Topic {

@@ -83,7 +83,7 @@ func (b *Bind) Nodes() []*node {
 }
 
 func (b *Bind) nodesAttributesSubscriber(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-	if message.Topic().String() != nodesTopicNodesAttribute.Format(b.config.BaseTopic, b.SerialNumber()) {
+	if message.Topic().String() != nodesTopicNodesAttribute.Format(b.config.BaseTopic, b.SerialNumber()).String() {
 		return nil
 	}
 

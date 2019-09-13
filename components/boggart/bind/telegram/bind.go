@@ -162,7 +162,7 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 				}
 
 				ctx := context.Background()
-				var mqttTopic string
+				var mqttTopic mqtt.Topic
 
 				if u.Message.Text != "" {
 					mqttTopic = MQTTPublishTopicReceiveMessage.Format(sn, u.Message.Chat.ID)

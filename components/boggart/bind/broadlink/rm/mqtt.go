@@ -114,7 +114,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 							return nil
 						}
 
-						var topicCaptureCode string
+						var topicCaptureCode mqtt.Topic
 
 						switch remoteType {
 						case broadlink.RemoteIR:

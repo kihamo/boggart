@@ -275,7 +275,7 @@ func (m *Manager) Close() error {
 	return nil
 }
 
-func (m *Manager) mqttPublish(topic string, payload interface{}) {
+func (m *Manager) mqttPublish(topic mqtt.Topic, payload interface{}) {
 	// при закрытии шлем синхронно, что бы блочить операцию Close компонента
 	if atomic.LoadInt64(&m.status) == managerStatusClose {
 		if err := m.mqtt.PublishWithoutCache(context.Background(), topic, 1, true, payload); err != nil {

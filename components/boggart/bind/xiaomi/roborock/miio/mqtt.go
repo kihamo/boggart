@@ -49,11 +49,11 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTSubscribeTopicSetFanPower.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSetFanPower)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicSetVolume.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSetVolume)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicTestVolume.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTTestVolume)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicFind.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTFind)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicAction.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTAction)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicSetFanPower, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSetFanPower)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicSetVolume, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSetVolume)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicTestVolume, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTTestVolume)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicFind, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTFind)),
+		mqtt.NewSubscriber(MQTTSubscribeTopicAction, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTAction)),
 	}
 }
 

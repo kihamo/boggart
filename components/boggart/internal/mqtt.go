@@ -15,8 +15,8 @@ const (
 
 func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTSubscribeTopicBindReloadByPayload.String(), 0, c.callbackBindReloadInPayload),
-		mqtt.NewSubscriber(MQTTSubscribeTopicBindReloadByTopic.String(), 0, c.callbackBindReloadInTopic),
+		mqtt.NewSubscriber(MQTTSubscribeTopicBindReloadByPayload, 0, c.callbackBindReloadInPayload),
+		mqtt.NewSubscriber(MQTTSubscribeTopicBindReloadByTopic, 0, c.callbackBindReloadInTopic),
 	}
 }
 

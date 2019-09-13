@@ -20,9 +20,9 @@ type SubscriberSimple struct {
 	callback MessageHandler
 }
 
-func NewSubscriber(topic string, qos byte, callback MessageHandler) *SubscriberSimple {
+func NewSubscriber(topic Topic, qos byte, callback MessageHandler) *SubscriberSimple {
 	return &SubscriberSimple{
-		topic:    topic,
+		topic:    topic.String(),
 		qos:      qos,
 		callback: callback,
 	}
