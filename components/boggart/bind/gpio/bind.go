@@ -21,6 +21,7 @@ const (
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
+	config *Config
 
 	pin  pin.Pin
 	mode Mode
