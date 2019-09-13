@@ -7,11 +7,6 @@ import (
 	"github.com/kihamo/boggart/providers/google/home"
 )
 
-const (
-	DefaultLivenessInterval = time.Second * 30
-	DefaultLivenessTimeout  = time.Second * 10
-)
-
 type Config struct {
 	Host             boggart.IP    `valid:",required"`
 	Port             int           `valid:"port"`
@@ -22,7 +17,7 @@ type Config struct {
 func (t Type) Config() interface{} {
 	return &Config{
 		Port:             home.DefaultPort,
-		LivenessInterval: DefaultLivenessInterval,
-		LivenessTimeout:  DefaultLivenessTimeout,
+		LivenessInterval: time.Second * 30,
+		LivenessTimeout:  time.Second * 10,
 	}
 }
