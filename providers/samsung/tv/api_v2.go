@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/kihamo/boggart/components/boggart/protocols/http"
+	"github.com/kihamo/boggart/protocols/http"
 )
 
 const (

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/kihamo/boggart/components/boggart/atomic"
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/mqtt"
 )
 

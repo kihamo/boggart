@@ -3,8 +3,8 @@ package esp
 import (
 	"sync"
 
+	a "github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
-	a "github.com/kihamo/boggart/components/boggart/atomic"
 )
 
 type Type struct {

@@ -14,8 +14,8 @@ import (
 	"github.com/barnybug/go-cast/controllers"
 	"github.com/barnybug/go-cast/events"
 	castnet "github.com/barnybug/go-cast/net"
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/boggart/components/mqtt"
 	"go.uber.org/multierr"
 )

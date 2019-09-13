@@ -3,7 +3,7 @@ package v3
 import (
 	"encoding/hex"
 
-	"github.com/kihamo/boggart/components/boggart/protocols/serial"
+	"github.com/kihamo/boggart/protocols/serial"
 )
 
 type requestCode int

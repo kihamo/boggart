@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/atomic"
 	"periph.io/x/periph/conn/gpio"
 	"periph.io/x/periph/conn/pin"
 )

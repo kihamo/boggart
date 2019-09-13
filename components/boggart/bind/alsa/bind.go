@@ -13,8 +13,8 @@ import (
 	"github.com/faiface/beep/vorbis"
 	"github.com/faiface/beep/wav"
 	"github.com/hajimehoshi/oto"
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/atomic"
 	"github.com/kihamo/boggart/components/mqtt"
 )
 

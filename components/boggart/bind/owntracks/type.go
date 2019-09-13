@@ -1,8 +1,8 @@
 package owntracks
 
 import (
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/atomic"
 )
 
 type Type struct{}
