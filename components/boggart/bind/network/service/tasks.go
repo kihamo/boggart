@@ -5,7 +5,6 @@ import (
 	"net"
 	"time"
 
-	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 	"go.uber.org/multierr"
@@ -14,7 +13,7 @@ import (
 func (b *Bind) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(b.taskUpdater)
 	taskUpdater.SetRepeats(-1)
-	taskUpdater.SetRepeatInterval(b.updaterInterval)
+	taskUpdater.SetRepeatInterval(b.config.UpdaterInterval)
 	taskUpdater.SetName("updater-" + b.address)
 
 	return []workers.Task{
@@ -34,7 +33,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		attempts++
 
 		startTime := time.Now()
-		conn, err = net.DialTimeout("tcp", b.address, b.timeout)
+		conn, err = net.DialTimeout("tcp", b.address, b.config.Timeout)
 		latency = uint32(time.Since(startTime).Nanoseconds() / 1e+6)
 
 		if err == nil {
@@ -42,22 +41,20 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			break
 		}
 
-		if b.retry > 0 && attempts >= b.retry {
+		if b.config.Retry > 0 && attempts >= b.config.Retry {
 			break
 		}
 	}
 
-	h := mqtt.NameReplace(b.address)
-
 	online := err == nil
-	if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicOnline.Format(h), online); e != nil {
+	if e := b.MQTTPublishAsync(ctx, b.config.TopicOnline, online); e != nil {
 		err = multierr.Append(err, e)
 	}
 
 	if online {
 		metricLatency.With("address", b.address).Set(float64(latency))
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicLatency.Format(h), latency); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicLatency, latency); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}

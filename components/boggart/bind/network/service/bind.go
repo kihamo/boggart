@@ -1,19 +1,14 @@
 package service
 
 import (
-	"time"
-
 	"github.com/kihamo/boggart/components/boggart"
 )
 
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
-
-	address         string
-	retry           int
-	timeout         time.Duration
-	updaterInterval time.Duration
+	config  *Config
+	address string
 }
 
 func (b *Bind) Run() error {
