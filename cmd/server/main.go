@@ -50,12 +50,13 @@ import (
 )
 
 var (
+	Name    = "Boggart Server"
 	Version = "0.0"
 	Build   = "0-0000000"
 )
 
 func main() {
-	shadow.SetName("Boggart Server")
+	shadow.SetName(Name)
 	shadow.SetVersion(Version)
 	shadow.SetBuild(Build)
 

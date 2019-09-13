@@ -13,9 +13,8 @@ type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
 
+	config    *Config
 	messaging *messaging.Client
-	projectID string
-	tokens    []string
 }
 
 func (b *Bind) Run() error {
@@ -28,7 +27,7 @@ func (b *Bind) Send(ctx context.Context, text string) (err error) {
 		return errors.New("text is empty")
 	}
 
-	for _, token := range b.tokens {
+	for _, token := range b.config.Tokens {
 		if e := b.sendByToken(ctx, token, text); e != nil {
 			err = multierr.Append(err, e)
 		}
