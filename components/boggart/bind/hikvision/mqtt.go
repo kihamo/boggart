@@ -133,7 +133,7 @@ func (b *Bind) updateStatusByChannelId(ctx context.Context, channelId uint64) er
 	return result
 }
 
-func (b *Bind) checkTopic(topic string) (uint64, error) {
+func (b *Bind) checkTopic(topic mqtt.Topic) (uint64, error) {
 	b.mutex.RLock()
 	channels := b.ptzChannels
 	b.mutex.RUnlock()
@@ -142,7 +142,7 @@ func (b *Bind) checkTopic(topic string) (uint64, error) {
 		return 0, errors.New("channels is empty")
 	}
 
-	parts := mqtt.RouteSplit(topic)
+	parts := topic.Split()
 
 	channelId, err := strconv.ParseUint(parts[4], 10, 64)
 	if err != nil {

@@ -45,7 +45,7 @@ func (b *Bind) DeviceAttributes() map[string]interface{} {
 }
 
 func (b *Bind) deviceAttributesSubscriber(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-	route := mqtt.RouteSplit(message.Topic())
+	route := message.Topic().Split()
 	attributeName := route[len(route)-1]
 
 	if !strings.HasPrefix(attributeName, "$") {
@@ -80,13 +80,13 @@ func (b *Bind) deviceAttributesSubscriber(_ context.Context, _ mqtt.Component, m
 }
 
 func (b *Bind) deviceFirmwareSubscriber(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-	route := mqtt.RouteSplit(message.Topic())
+	route := message.Topic().Split()
 	b.registerDeviceAttributes("fw."+route[len(route)-1], message.String())
 	return nil
 }
 
 func (b *Bind) deviceImplementationSubscriber(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-	route := mqtt.RouteSplit(message.Topic())
+	route := message.Topic().Split()
 	name := strings.Join(route[3:], ".")
 	if strings.HasPrefix(name, "ota.") {
 		return nil
@@ -99,7 +99,7 @@ func (b *Bind) deviceImplementationSubscriber(_ context.Context, _ mqtt.Componen
 func (b *Bind) deviceStatsSubscriber(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 	b.bump()
 
-	route := mqtt.RouteSplit(message.Topic())
+	route := message.Topic().Split()
 	attributeName := strings.Join(route[3:], ".")
 	var value interface{}
 

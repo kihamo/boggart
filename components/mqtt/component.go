@@ -29,8 +29,13 @@ type Component interface {
 }
 
 type Message interface {
-	m.Message
-
+	Duplicate() bool
+	Qos() byte
+	Retained() bool
+	Topic() Topic
+	MessageID() uint16
+	Payload() []byte
+	Ack()
 	UnmarshalJSON(interface{}) error
 	IsTrue() bool
 	IsFalse() bool

@@ -46,7 +46,7 @@ func (b *Bind) callbackMQTTSendMessage(_ context.Context, _ mqtt.Component, mess
 		return nil
 	}
 
-	routes := mqtt.RouteSplit(message.Topic())
+	routes := message.Topic().Split()
 	if len(routes) < 1 {
 		return errors.New("bad topic name")
 	}
@@ -59,7 +59,7 @@ func (b *Bind) callbackMQTTSendFile(_ context.Context, _ mqtt.Component, message
 		return nil
 	}
 
-	routes := mqtt.RouteSplit(message.Topic())
+	routes := message.Topic().Split()
 	if len(routes) < 1 {
 		return errors.New("bad topic name")
 	}
@@ -144,7 +144,7 @@ func (b *Bind) callbackMQTTSendFileURL(_ context.Context, _ mqtt.Component, mess
 		return nil
 	}
 
-	routes := mqtt.RouteSplit(message.Topic())
+	routes := message.Topic().Split()
 	if len(routes) < 1 {
 		return errors.New("bad topic name")
 	}

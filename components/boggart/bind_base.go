@@ -151,12 +151,12 @@ func (b *BindMQTT) MQTTPublishAsyncRaw(ctx context.Context, topic string, qos by
 	return nil
 }
 
-func CheckValueInMQTTTopic(topic string, value string, offset int) bool {
+func CheckValueInMQTTTopic(topic mqtt.Topic, value string, offset int) bool {
 	if value == "" {
 		return false
 	}
 
-	routes := mqtt.RouteSplit(topic)
+	routes := topic.Split()
 	if len(routes) < offset {
 		return false
 	}
@@ -164,7 +164,7 @@ func CheckValueInMQTTTopic(topic string, value string, offset int) bool {
 	return routes[len(routes)-offset] == value
 }
 
-func CheckSerialNumberInMQTTTopic(bind Bind, topic string, offset int) bool {
+func CheckSerialNumberInMQTTTopic(bind Bind, topic mqtt.Topic, offset int) bool {
 	return CheckValueInMQTTTopic(topic, mqtt.NameReplace(bind.SerialNumber()), offset)
 }
 

@@ -83,7 +83,7 @@ func (b *Bind) Nodes() []*node {
 }
 
 func (b *Bind) nodesAttributesSubscriber(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-	if message.Topic() != nodesTopicNodesAttribute.Format(b.config.BaseTopic, b.SerialNumber()) {
+	if message.Topic().String() != nodesTopicNodesAttribute.Format(b.config.BaseTopic, b.SerialNumber()) {
 		return nil
 	}
 
@@ -107,7 +107,7 @@ func (b *Bind) nodesAttributesSubscriber(_ context.Context, _ mqtt.Component, me
 	homie / device ID / node ID / property ID
 */
 func (b *Bind) nodesSubscriber(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-	route := mqtt.RouteSplit(message.Topic())
+	route := message.Topic().Split()
 
 	// skip $fw $stats $implementation etc.
 	if strings.HasPrefix(route[2], "$") {
@@ -144,7 +144,7 @@ func (b *Bind) nodesSubscriber(_ context.Context, _ mqtt.Component, message mqtt
 	homie / device ID / node ID / property ID / $property-attribute
 */
 func (b *Bind) nodesPropertySubscriber(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-	route := mqtt.RouteSplit(message.Topic())
+	route := message.Topic().Split()
 
 	// skip $fw $stats $implementation etc.
 	if strings.HasPrefix(route[2], "$") {

@@ -25,7 +25,7 @@ func (t Topic) String() string {
 }
 
 func (t Topic) Format(args ...interface{}) string {
-	parts := RouteSplit(t.String())
+	parts := t.Split()
 
 	for _, arg := range args {
 		for i, topic := range parts {

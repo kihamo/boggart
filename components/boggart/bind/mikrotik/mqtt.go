@@ -39,7 +39,7 @@ func (b *Bind) callbackMQTTWiFiSync(ctx context.Context, client mqtt.Component, 
 		return nil
 	}
 
-	parts := mqtt.RouteSplit(message.Topic())
+	parts := message.Topic().Split()
 	key := parts[len(parts)-2]
 
 	// проверяем наличие в списке, дождавшись первоначальной загрузки

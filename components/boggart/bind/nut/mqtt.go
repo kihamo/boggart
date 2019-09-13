@@ -47,7 +47,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return nil
 			}
 
-			route := mqtt.RouteSplit(message.Topic())
+			route := message.Topic().Split()
 			if len(route) < 2 {
 				return errors.New("bad topic name")
 			}
