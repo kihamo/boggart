@@ -1,0 +1,183 @@
+---
+
+swagger: "2.0"
+info:
+  title: "ESP Home"
+  version: "0.1.0"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+schemes:
+- "http"
+basePath: "/"
+paths:
+  /light/{id}:
+    get:
+      operationId: "getLight"
+      tags:
+        - "light"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "Light ID"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Light"
+  /light/{id}/turn_on:
+    post:
+      operationId: "turnOnLight"
+      tags:
+        - "light"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "The id of the light"
+          required: true
+          type: "string"
+        - name: "brightness"
+          in: "query"
+          description: "The brightness of the light, from 0 to 255"
+          type: "integer"
+        - name: "r"
+          in: "query"
+          description: "The red color channel of the light, from 0 to 255"
+          type: "integer"
+        - name: "g"
+          in: "query"
+          description: "The green color channel of the light, from 0 to 255"
+          type: "integer"
+        - name: "b"
+          in: "query"
+          description: "The blue color channel of the light, from 0 to 255"
+          type: "integer"
+        - name: "white_value"
+          in: "query"
+          description: "The white channel of RGBW lights, from 0 to 255"
+          type: "integer"
+        - name: "flash"
+          in: "query"
+          description: "Flash the color provided by the other properties for a duration in seconds"
+          type: "integer"
+        - name: "transition"
+          in: "query"
+          description: "Transition to the specified color values in this duration in seconds"
+          type: "integer"
+        - name: "effect"
+          in: "query"
+          description: "Set an effect for the light"
+          type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+  /light/{id}/turn_off:
+    post:
+      operationId: "turnOffLight"
+      tags:
+        - "light"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "The id of the light"
+          required: true
+          type: "string"
+        - name: "transition"
+          in: "query"
+          description: "Transition to off in this duration in seconds"
+          type: "integer"
+      responses:
+        200:
+          description: "Successful operation"
+  /light/{id}/toggle:
+    post:
+      operationId: "toggleLight"
+      tags:
+        - "light"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "Light ID"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+  /sensor/{id}:
+    get:
+      operationId: "getSensor"
+      tags:
+        - "sensor"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "Sensor ID"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Sensor"
+  /text_sensor/{id}:
+    get:
+      operationId: "getTextSensor"
+      tags:
+        - "textSensor"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "Text sensor ID"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/TextSensor"
+definitions:
+  Light:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      state:
+        type: "string"
+      effect:
+        type: "string"
+      brightness:
+        type: "integer"
+      color:
+        type: "object"
+        properties:
+          r:
+            type: "integer"
+          g:
+            type: "integer"
+          b:
+            type: "integer"
+      white_value:
+        type: "integer"
+      color_temp:
+        type: "integer"
+  Sensor:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      state:
+        type: "string"
+      value:
+        type: "number"
+  TextSensor:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      state:
+        type: "string"
+      value:
+        type: "string"
