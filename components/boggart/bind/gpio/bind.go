@@ -21,6 +21,7 @@ const (
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
+	config *Config
 
 	pin  pin.Pin
 	mode Mode
@@ -54,7 +55,7 @@ func (b *Bind) High(ctx context.Context) error {
 
 		b.out.True()
 
-		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPinState.Format(b.pin.Number()), true); err != nil {
+		if err := b.MQTTPublishAsync(ctx, b.config.TopicPinState, true); err != nil {
 			return err
 		}
 	}
@@ -74,7 +75,7 @@ func (b *Bind) Low(ctx context.Context) error {
 
 		b.out.False()
 
-		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPinState.Format(b.pin.Number()), false); err != nil {
+		if err := b.MQTTPublishAsync(ctx, b.config.TopicPinState, false); err != nil {
 			return err
 		}
 	}
@@ -101,6 +102,6 @@ func (b *Bind) waitForEdge() {
 
 	for p.WaitForEdge(-1) {
 		// TODO: log
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicPinState.Format(b.pin.Number()), b.Read())
+		_ = b.MQTTPublishAsync(ctx, b.config.TopicPinState, b.Read())
 	}
 }

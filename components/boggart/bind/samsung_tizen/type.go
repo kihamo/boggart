@@ -11,9 +11,8 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
 	bind := &Bind{
-		client:           tv.NewApiV2(config.Host),
-		livenessInterval: config.LivenessInterval,
-		livenessTimeout:  config.LivenessTimeout,
+		config: config,
+		client: tv.NewApiV2(config.Host),
 	}
 
 	return bind, nil

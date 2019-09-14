@@ -9,18 +9,18 @@ type HasSubscribers interface {
 }
 
 type Subscriber interface {
-	Topic() string
+	Topic() Topic
 	QOS() byte
 	Call(context.Context, Component, Message) error
 }
 
 type SubscriberSimple struct {
-	topic    string
+	topic    Topic
 	qos      byte
 	callback MessageHandler
 }
 
-func NewSubscriber(topic string, qos byte, callback MessageHandler) *SubscriberSimple {
+func NewSubscriber(topic Topic, qos byte, callback MessageHandler) *SubscriberSimple {
 	return &SubscriberSimple{
 		topic:    topic,
 		qos:      qos,
@@ -28,7 +28,7 @@ func NewSubscriber(topic string, qos byte, callback MessageHandler) *SubscriberS
 	}
 }
 
-func (s *SubscriberSimple) Topic() string {
+func (s *SubscriberSimple) Topic() Topic {
 	return s.topic
 }
 

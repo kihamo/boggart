@@ -8,7 +8,6 @@ import (
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
-
-	client *rkcm.Client
 	config *Config
+	client *rkcm.Client
 }

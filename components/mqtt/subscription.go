@@ -2,7 +2,6 @@ package mqtt
 
 import (
 	"context"
-	"strings"
 	"sync"
 	"sync/atomic"
 
@@ -12,7 +11,7 @@ import (
 type Subscription struct {
 	calls uint64
 	qos   uint64
-	topic string
+	topic Topic
 
 	mutex       sync.RWMutex
 	subscribers []Subscriber
@@ -75,7 +74,7 @@ func (c *Subscription) Subscribers() []Subscriber {
 	return subscribers
 }
 
-func (c *Subscription) Topic() string {
+func (c *Subscription) Topic() Topic {
 	return c.topic
 }
 
@@ -144,56 +143,16 @@ func (c *Subscription) Len() int {
 	return len(c.subscribers)
 }
 
-func (c *Subscription) Match(topic string) bool {
+func (c *Subscription) Match(topic Topic) bool {
 	c.mutex.RLock()
 	subscribers := c.subscribers
 	c.mutex.RUnlock()
 
 	for _, subscriber := range subscribers {
-		if subscriber.Topic() == topic || routeIncludesTopic(subscriber.Topic(), topic) {
+		if subscriber.Topic().IsInclude(topic) {
 			return true
 		}
 	}
 
 	return false
-}
-
-func match(route []string, topic []string) bool {
-	if len(route) == 0 {
-		return len(topic) == 0
-	}
-
-	if len(topic) == 0 {
-		return route[0] == "#"
-	}
-
-	if route[0] == "#" {
-		return true
-	}
-
-	if (route[0] == "+") || (route[0] == topic[0]) {
-		return match(route[1:], topic[1:])
-	}
-
-	return false
-}
-
-func routeIncludesTopic(route, topic string) bool {
-	topic = strings.TrimRight(topic, "/")
-
-	return match(RouteSplit(route), strings.Split(topic, "/"))
-}
-
-func RouteSplit(route string) []string {
-	route = strings.TrimRight(route, "/")
-
-	var result []string
-
-	if strings.HasPrefix(route, "$share") {
-		result = strings.Split(route, "/")[2:]
-	} else {
-		result = strings.Split(route, "/")
-	}
-
-	return result
 }

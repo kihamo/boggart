@@ -8,11 +8,11 @@ import (
 type Type struct{}
 
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
-	cfg := c.(*Config)
+	config := c.(*Config)
 
 	bind := &Bind{
-		config: cfg,
-		client: elektroset.New(cfg.Login, cfg.Password),
+		config: config,
+		client: elektroset.New(config.Login, config.Password),
 	}
 	bind.SetSerialNumber(bind.config.Login)
 

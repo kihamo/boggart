@@ -7,5 +7,7 @@ import (
 type Type struct{}
 
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
-	return &Bind{}, nil
+	return &Bind{
+		config: c.(*Config),
+	}, nil
 }

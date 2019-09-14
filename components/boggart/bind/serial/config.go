@@ -6,14 +6,6 @@ import (
 	"github.com/kihamo/boggart/protocols/serial"
 )
 
-const (
-	DefaultNetwork = "tcp"
-	DefaultHost    = "0.0.0.0"
-	DefaultPort    = 8600
-	DefaultTarget  = serial.DefaultSerialAddress
-	DefaultTimeout = time.Second
-)
-
 type Config struct {
 	Network string
 	Host    string
@@ -24,10 +16,10 @@ type Config struct {
 
 func (t Type) Config() interface{} {
 	return &Config{
-		Network: DefaultNetwork,
-		Host:    DefaultHost,
-		Port:    DefaultPort,
-		Target:  DefaultTarget,
-		Timeout: DefaultTimeout,
+		Network: "tcp",
+		Host:    "0.0.0.0",
+		Port:    8600,
+		Target:  serial.DefaultSerialAddress,
+		Timeout: time.Second,
 	}
 }

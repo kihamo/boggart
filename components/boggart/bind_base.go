@@ -120,11 +120,11 @@ func (b *BindMQTT) SetMQTTClient(client mqtt.Component) {
 	b.mutex.Unlock()
 }
 
-func (b *BindMQTT) MQTTPublish(ctx context.Context, topic string, payload interface{}) error {
+func (b *BindMQTT) MQTTPublish(ctx context.Context, topic mqtt.Topic, payload interface{}) error {
 	return b.MQTTPublishRaw(ctx, topic, 1, true, payload)
 }
 
-func (b *BindMQTT) MQTTPublishRaw(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
+func (b *BindMQTT) MQTTPublishRaw(ctx context.Context, topic mqtt.Topic, qos byte, retained bool, payload interface{}) error {
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()
 
@@ -135,11 +135,11 @@ func (b *BindMQTT) MQTTPublishRaw(ctx context.Context, topic string, qos byte, r
 	return b.client.Publish(ctx, topic, qos, retained, payload)
 }
 
-func (b *BindMQTT) MQTTPublishAsync(ctx context.Context, topic string, payload interface{}) error {
+func (b *BindMQTT) MQTTPublishAsync(ctx context.Context, topic mqtt.Topic, payload interface{}) error {
 	return b.MQTTPublishAsyncRaw(ctx, topic, 1, true, payload)
 }
 
-func (b *BindMQTT) MQTTPublishAsyncRaw(ctx context.Context, topic string, qos byte, retained bool, payload interface{}) error {
+func (b *BindMQTT) MQTTPublishAsyncRaw(ctx context.Context, topic mqtt.Topic, qos byte, retained bool, payload interface{}) error {
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()
 
@@ -151,12 +151,12 @@ func (b *BindMQTT) MQTTPublishAsyncRaw(ctx context.Context, topic string, qos by
 	return nil
 }
 
-func CheckValueInMQTTTopic(topic string, value string, offset int) bool {
+func CheckValueInMQTTTopic(topic mqtt.Topic, value string, offset int) bool {
 	if value == "" {
 		return false
 	}
 
-	routes := mqtt.RouteSplit(topic)
+	routes := topic.Split()
 	if len(routes) < offset {
 		return false
 	}
@@ -164,7 +164,7 @@ func CheckValueInMQTTTopic(topic string, value string, offset int) bool {
 	return routes[len(routes)-offset] == value
 }
 
-func CheckSerialNumberInMQTTTopic(bind Bind, topic string, offset int) bool {
+func CheckSerialNumberInMQTTTopic(bind Bind, topic mqtt.Topic, offset int) bool {
 	return CheckValueInMQTTTopic(topic, mqtt.NameReplace(bind.SerialNumber()), offset)
 }
 

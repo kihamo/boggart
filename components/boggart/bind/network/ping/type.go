@@ -9,12 +9,11 @@ type Type struct{}
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
-	bind := &Bind{
-		hostname:        config.Hostname,
-		retry:           config.Retry,
-		timeout:         config.Timeout,
-		updaterInterval: config.UpdaterInterval,
-	}
+	config.TopicOnline = config.TopicOnline.Format(config.Hostname)
+	config.TopicLatency = config.TopicLatency.Format(config.Hostname)
+	config.TopicCheck = config.TopicCheck.Format(config.Hostname)
 
-	return bind, nil
+	return &Bind{
+		config: config,
+	}, nil
 }

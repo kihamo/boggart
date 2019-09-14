@@ -2,12 +2,9 @@ package ping
 
 import (
 	"time"
-)
 
-const (
-	DefaultRetry           = 1
-	DefaultTimeout         = time.Second * 5
-	DefaultUpdaterInterval = time.Minute
+	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/mqtt"
 )
 
 type Config struct {
@@ -15,12 +12,20 @@ type Config struct {
 	Retry           int
 	Timeout         time.Duration
 	UpdaterInterval time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
+	TopicOnline     mqtt.Topic    `mapstructure:"topic_online" yaml:"topic_online"`
+	TopicLatency    mqtt.Topic    `mapstructure:"topic_latency" yaml:"topic_latency"`
+	TopicCheck      mqtt.Topic    `mapstructure:"topic_check" yaml:"topic_check"`
 }
 
 func (t Type) Config() interface{} {
+	var prefix mqtt.Topic = boggart.ComponentName + "/ping/+/"
+
 	return &Config{
-		Retry:           DefaultRetry,
-		Timeout:         DefaultTimeout,
-		UpdaterInterval: DefaultUpdaterInterval,
+		Retry:           1,
+		Timeout:         time.Second * 5,
+		UpdaterInterval: time.Minute,
+		TopicOnline:     prefix + "online",
+		TopicLatency:    prefix + "latency",
+		TopicCheck:      prefix + "check",
 	}
 }

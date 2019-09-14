@@ -31,10 +31,14 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		mode = ModeDefault
 	}
 
+	config.TopicPinState = config.TopicPinState.Format(g.Name())
+	config.TopicPinSet = config.TopicPinSet.Format(g.Name())
+
 	bind := &Bind{
-		pin:  g,
-		mode: mode,
-		out:  atomic.NewBool(),
+		config: config,
+		pin:    g,
+		mode:   mode,
+		out:    atomic.NewBool(),
 	}
 
 	bind.SetSerialNumber(g.Name())

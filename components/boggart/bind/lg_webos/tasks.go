@@ -10,10 +10,10 @@ import (
 
 func (b *Bind) Tasks() []workers.Task {
 	taskLiveness := task.NewFunctionTask(b.taskLiveness)
-	taskLiveness.SetTimeout(b.livenessTimeout)
+	taskLiveness.SetTimeout(b.config.LivenessTimeout)
 	taskLiveness.SetRepeats(-1)
-	taskLiveness.SetRepeatInterval(b.livenessInterval)
-	taskLiveness.SetName("liveness-" + b.host)
+	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
+	taskLiveness.SetName("liveness-" + b.config.Host)
 
 	return []workers.Task{
 		taskLiveness,
@@ -27,7 +27,7 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		return nil, nil
 	}
 
-	_, err = client.Register(b.key)
+	_, err = client.Register(b.config.Key)
 	if err != nil {
 		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, nil

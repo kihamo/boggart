@@ -29,12 +29,13 @@ import (
 )
 
 var (
+	Name    = "Boggart"
 	Version = "0.0"
 	Build   = "0-0000000"
 )
 
 func main() {
-	shadow.SetName("Boggart Agent")
+	shadow.SetName(Name)
 	shadow.SetVersion(Version)
 	shadow.SetBuild(Build)
 

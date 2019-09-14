@@ -4,7 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/eclipse/paho.mqtt.golang"
+	m "github.com/eclipse/paho.mqtt.golang"
+	"github.com/kihamo/boggart/components/mqtt"
 )
 
 var (
@@ -13,45 +14,45 @@ var (
 )
 
 type message struct {
-	m mqtt.Message
+	msg m.Message
 }
 
-func newMessage(m mqtt.Message) *message {
+func newMessage(msg m.Message) *message {
 	return &message{
-		m: m,
+		msg: msg,
 	}
 }
 
 func (m *message) Duplicate() bool {
-	return m.m.Duplicate()
+	return m.msg.Duplicate()
 }
 
 func (m *message) Qos() byte {
-	return m.m.Qos()
+	return m.msg.Qos()
 }
 
 func (m *message) Retained() bool {
-	return m.m.Retained()
+	return m.msg.Retained()
 }
 
-func (m *message) Topic() string {
-	return m.m.Topic()
+func (m *message) Topic() mqtt.Topic {
+	return mqtt.Topic(m.msg.Topic())
 }
 
 func (m *message) MessageID() uint16 {
-	return m.m.MessageID()
+	return m.msg.MessageID()
 }
 
 func (m *message) Payload() []byte {
-	return m.m.Payload()
+	return m.msg.Payload()
 }
 
 func (m *message) Ack() {
-	m.m.Ack()
+	m.msg.Ack()
 }
 
 func (m *message) UnmarshalJSON(v interface{}) error {
-	return json.Unmarshal(m.m.Payload(), v)
+	return json.Unmarshal(m.msg.Payload(), v)
 }
 
 func (m *message) Bool() bool {
@@ -59,13 +60,13 @@ func (m *message) Bool() bool {
 }
 
 func (m *message) IsTrue() bool {
-	return bytes.Equal(m.m.Payload(), PayloadTrue)
+	return bytes.Equal(m.msg.Payload(), PayloadTrue)
 }
 
 func (m *message) IsFalse() bool {
-	return bytes.Equal(m.m.Payload(), PayloadFalse)
+	return bytes.Equal(m.msg.Payload(), PayloadFalse)
 }
 
 func (m *message) String() string {
-	return string(m.m.Payload())
+	return string(m.msg.Payload())
 }

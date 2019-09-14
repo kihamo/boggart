@@ -109,7 +109,7 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 			}
 
 			for _, topic := range bindItem.MQTTSubscribers() {
-				item.MQTTSubscribers = append(item.MQTTSubscribers, topic.Topic())
+				item.MQTTSubscribers = append(item.MQTTSubscribers, topic.Topic().String())
 			}
 
 			list = append(list, item)

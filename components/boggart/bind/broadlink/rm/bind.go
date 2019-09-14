@@ -2,25 +2,17 @@ package rm
 
 import (
 	"context"
-	"net"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/providers/broadlink"
 )
 
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
+	config *ConfigRM
 
-	provider        interface{}
-	mac             net.HardwareAddr
-	host            string
-	captureDuration time.Duration
-
-	livenessInterval time.Duration
-	livenessTimeout  time.Duration
+	provider interface{}
 }
 
 type SupportCapture interface {
@@ -41,5 +33,5 @@ type SupportRF433Mhz interface {
 }
 
 func (b *Bind) Run() error {
-	return b.MQTTPublishAsync(context.Background(), MQTTPublishTopicCaptureState.Format(mqtt.NameReplace(b.SerialNumber())), false)
+	return b.MQTTPublishAsync(context.Background(), b.config.TopicCaptureState, false)
 }

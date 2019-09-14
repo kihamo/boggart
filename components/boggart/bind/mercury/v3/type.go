@@ -38,6 +38,19 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		opts = append(opts, mercury.WithAddress(mercury.ConvertSerialNumber(config.Address)))
 	}
 
+	config.TopicTariff1 = config.TopicTariff1.Format(config.Address)
+	config.TopicVoltage1 = config.TopicVoltage1.Format(config.Address)
+	config.TopicVoltage2 = config.TopicVoltage2.Format(config.Address)
+	config.TopicVoltage3 = config.TopicVoltage3.Format(config.Address)
+	config.TopicAmperage1 = config.TopicAmperage1.Format(config.Address)
+	config.TopicAmperage2 = config.TopicAmperage2.Format(config.Address)
+	config.TopicAmperage3 = config.TopicAmperage3.Format(config.Address)
+	config.TopicPower1 = config.TopicPower1.Format(config.Address)
+	config.TopicPower2 = config.TopicPower2.Format(config.Address)
+	config.TopicPower3 = config.TopicPower3.Format(config.Address)
+	config.TopicMakeDate = config.TopicMakeDate.Format(config.Address)
+	config.TopicFirmwareVersion = config.TopicFirmwareVersion.Format(config.Address)
+
 	return &Bind{
 		provider: mercury.New(conn, opts...),
 		config:   config,

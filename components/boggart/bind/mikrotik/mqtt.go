@@ -29,7 +29,7 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTPublishTopicWiFiMACState.String(), 0, b.callbackMQTTWiFiSync),
+		mqtt.NewSubscriber(MQTTPublishTopicWiFiMACState, 0, b.callbackMQTTWiFiSync),
 	}
 }
 
@@ -39,7 +39,7 @@ func (b *Bind) callbackMQTTWiFiSync(ctx context.Context, client mqtt.Component, 
 		return nil
 	}
 
-	parts := mqtt.RouteSplit(message.Topic())
+	parts := message.Topic().Split()
 	key := parts[len(parts)-2]
 
 	// проверяем наличие в списке, дождавшись первоначальной загрузки

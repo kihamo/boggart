@@ -10,50 +10,28 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
-const (
-	MQTTPrefix mqtt.Topic = boggart.ComponentName + "/xiaomi/roborock/+/"
-
-	MQTTPublishTopicBattery             = MQTTPrefix + "battery"
-	MQTTPublishTopicCleanArea           = MQTTPrefix + "clean/area"
-	MQTTPublishTopicCleanTime           = MQTTPrefix + "clean/time"
-	MQTTPublishTopicFanPower            = MQTTPrefix + "fan-power"
-	MQTTPublishTopicVolume              = MQTTPrefix + "volume"
-	MQTTPublishTopicConsumableFilter    = MQTTPrefix + "consumable/filter"
-	MQTTPublishTopicConsumableBrushMain = MQTTPrefix + "consumable/brush-main"
-	MQTTPublishTopicConsumableBrushSide = MQTTPrefix + "consumable/brush-side"
-	MQTTPublishTopicConsumableSensor    = MQTTPrefix + "consumable/sensor"
-	MQTTPublishTopicState               = MQTTPrefix + "state"
-	MQTTPublishTopicError               = MQTTPrefix + "error"
-
-	MQTTSubscribeTopicSetFanPower = MQTTPrefix + "fan-power/set"
-	MQTTSubscribeTopicSetVolume   = MQTTPrefix + "volume/set"
-	MQTTSubscribeTopicTestVolume  = MQTTPrefix + "volume/test"
-	MQTTSubscribeTopicFind        = MQTTPrefix + "find"
-	MQTTSubscribeTopicAction      = MQTTPrefix + "action"
-)
-
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
-		MQTTPublishTopicBattery,
-		MQTTPublishTopicCleanArea,
-		MQTTPublishTopicCleanTime,
-		MQTTPublishTopicFanPower,
-		MQTTPublishTopicConsumableFilter,
-		MQTTPublishTopicConsumableBrushMain,
-		MQTTPublishTopicConsumableBrushSide,
-		MQTTPublishTopicConsumableSensor,
-		MQTTPublishTopicState,
-		MQTTPublishTopicError,
+		b.config.TopicBattery,
+		b.config.TopicCleanArea,
+		b.config.TopicCleanTime,
+		b.config.TopicFanPower,
+		b.config.TopicConsumableFilter,
+		b.config.TopicConsumableBrushMain,
+		b.config.TopicConsumableBrushSide,
+		b.config.TopicConsumableSensor,
+		b.config.TopicState,
+		b.config.TopicError,
 	}
 }
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTSubscribeTopicSetFanPower.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSetFanPower)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicSetVolume.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSetVolume)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicTestVolume.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTTestVolume)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicFind.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTFind)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicAction.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTAction)),
+		mqtt.NewSubscriber(b.config.TopicSetFanPower, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSetFanPower)),
+		mqtt.NewSubscriber(b.config.TopicSetVolume, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSetVolume)),
+		mqtt.NewSubscriber(b.config.TopicTestVolume, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTTestVolume)),
+		mqtt.NewSubscriber(b.config.TopicFind, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTFind)),
+		mqtt.NewSubscriber(b.config.TopicAction, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTAction)),
 	}
 }
 
@@ -144,13 +122,11 @@ func (b *Bind) updateStatus(ctx context.Context) error {
 
 	status, err := b.device.Status(ctx)
 	if err == nil {
-		snMQTT := mqtt.NameReplace(sn)
-
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicState.Format(snMQTT), status.State); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicState.Format(sn), status.State); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicError.Format(snMQTT), status.Error); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicError.Format(sn), status.Error); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
@@ -166,7 +142,7 @@ func (b *Bind) updateFanPower(ctx context.Context) error {
 
 	fan, err := b.device.FanPower(ctx)
 	if err == nil {
-		err = b.MQTTPublishAsync(ctx, MQTTPublishTopicFanPower.Format(mqtt.NameReplace(sn)), fan)
+		err = b.MQTTPublishAsync(ctx, b.config.TopicFanPower.Format(sn), fan)
 	}
 
 	return err
@@ -180,7 +156,7 @@ func (b *Bind) updateVolume(ctx context.Context) error {
 
 	volume, err := b.device.SoundVolume(ctx)
 	if err == nil {
-		err = b.MQTTPublishAsync(ctx, MQTTPublishTopicVolume.Format(mqtt.NameReplace(sn)), volume)
+		err = b.MQTTPublishAsync(ctx, b.config.TopicVolume.Format(sn), volume)
 	}
 
 	return err

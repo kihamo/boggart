@@ -2,30 +2,60 @@ package miio
 
 import (
 	"time"
-)
 
-const (
-	DefaultLivenessInterval = time.Minute
-	DefaultLivenessTimeout  = time.Second * 5
-	DefaultUpdaterInterval  = time.Minute
-	DefaultUpdaterTimeout   = time.Second * 30
+	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/mqtt"
 )
 
 type Config struct {
-	Host             string        `valid:"host,required"`
-	Token            string        `valid:"required"`
-	PacketsCounter   uint32        `mapstructure:"packets_counter" yaml:"packets_counter"`
-	LivenessInterval time.Duration `mapstructure:"liveness_interval" yaml:"liveness_interval"`
-	LivenessTimeout  time.Duration `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
-	UpdaterInterval  time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
-	UpdaterTimeout   time.Duration `mapstructure:"updater_timeout" yaml:"updater_timeout"`
+	Host                     string        `valid:"host,required"`
+	Token                    string        `valid:"required"`
+	PacketsCounter           uint32        `mapstructure:"packets_counter" yaml:"packets_counter"`
+	LivenessInterval         time.Duration `mapstructure:"liveness_interval" yaml:"liveness_interval"`
+	LivenessTimeout          time.Duration `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
+	UpdaterInterval          time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
+	UpdaterTimeout           time.Duration `mapstructure:"updater_timeout" yaml:"updater_timeout"`
+	TopicBattery             mqtt.Topic    `mapstructure:"topic_battery" yaml:"topic_battery"`
+	TopicCleanArea           mqtt.Topic    `mapstructure:"topic_clean_area" yaml:"topic_clean_area"`
+	TopicCleanTime           mqtt.Topic    `mapstructure:"topic_clean_time" yaml:"topic_clean_time"`
+	TopicFanPower            mqtt.Topic    `mapstructure:"topic_fan_power" yaml:"topic_fan_power"`
+	TopicVolume              mqtt.Topic    `mapstructure:"topic_volume" yaml:"topic_volume"`
+	TopicConsumableFilter    mqtt.Topic    `mapstructure:"topic_consumable_filter" yaml:"topic_consumable_filter"`
+	TopicConsumableBrushMain mqtt.Topic    `mapstructure:"topic_consumable_brush_main" yaml:"topic_consumable_brush_main"`
+	TopicConsumableBrushSide mqtt.Topic    `mapstructure:"topic_consumable_brush_side" yaml:"topic_consumable_brush_side"`
+	TopicConsumableSensor    mqtt.Topic    `mapstructure:"topic_consumable_sensor" yaml:"topic_consumable_sensor"`
+	TopicState               mqtt.Topic    `mapstructure:"topic_state" yaml:"topic_state"`
+	TopicError               mqtt.Topic    `mapstructure:"topic_error" yaml:"topic_error"`
+	TopicSetFanPower         mqtt.Topic    `mapstructure:"topic_set_fan_power" yaml:"topic_set_fan_power"`
+	TopicSetVolume           mqtt.Topic    `mapstructure:"topic_set_volume" yaml:"topic_set_volume"`
+	TopicTestVolume          mqtt.Topic    `mapstructure:"topic_test_volume" yaml:"topic_test_volume"`
+	TopicFind                mqtt.Topic    `mapstructure:"topic_find" yaml:"topic_find"`
+	TopicAction              mqtt.Topic    `mapstructure:"topic_action" yaml:"topic_action"`
 }
 
 func (t Type) Config() interface{} {
+	var prefix mqtt.Topic = boggart.ComponentName + "/xiaomi/roborock/+/"
+
 	return &Config{
-		LivenessInterval: DefaultLivenessInterval,
-		LivenessTimeout:  DefaultLivenessTimeout,
-		UpdaterInterval:  DefaultUpdaterInterval,
-		UpdaterTimeout:   DefaultUpdaterTimeout,
+		LivenessInterval:         time.Minute,
+		LivenessTimeout:          time.Second * 5,
+		UpdaterInterval:          time.Minute,
+		UpdaterTimeout:           time.Second * 30,
+		TopicBattery:             prefix + "battery",
+		TopicCleanArea:           prefix + "clean/area",
+		TopicCleanTime:           prefix + "clean/time",
+		TopicFanPower:            prefix + "fan-power",
+		TopicVolume:              prefix + "volume",
+		TopicConsumableFilter:    prefix + "consumable/filter",
+		TopicConsumableBrushMain: prefix + "consumable/brush-main",
+		TopicConsumableBrushSide: prefix + "consumable/brush-side",
+		TopicConsumableSensor:    prefix + "consumable/sensor",
+		TopicState:               prefix + "state",
+		TopicError:               prefix + "error",
+		TopicSetFanPower:         prefix + "fan-power/set",
+		TopicSetVolume:           prefix + "volume/set",
+		TopicTestVolume:          prefix + "volume/test",
+		TopicFind:                prefix + "find",
+		TopicAction:              prefix + "action",
 	}
 }

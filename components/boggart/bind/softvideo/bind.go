@@ -2,7 +2,6 @@ package softvideo
 
 import (
 	"context"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/providers/softvideo"
@@ -11,9 +10,9 @@ import (
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
+	config *Config
 
-	provider        *softvideo.Client
-	updaterInterval time.Duration
+	provider *softvideo.Client
 }
 
 func (b *Bind) Balance(ctx context.Context) (float64, error) {

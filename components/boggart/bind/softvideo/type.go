@@ -10,9 +10,11 @@ type Type struct{}
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
+	config.TopicBalance = config.TopicBalance.Format(config.Login)
+
 	bind := &Bind{
-		provider:        softvideo.NewClient(config.Login, config.Password, config.Debug),
-		updaterInterval: config.UpdaterInterval,
+		config:   config,
+		provider: softvideo.NewClient(config.Login, config.Password, config.Debug),
 	}
 	bind.SetSerialNumber(config.Login)
 

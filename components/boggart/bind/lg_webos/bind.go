@@ -25,14 +25,9 @@ var defaultDialerLGWebOS = webostv.Dialer{
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
-
-	mutex sync.RWMutex
-
-	client           *webostv.Tv
-	host             string
-	key              string
-	livenessInterval time.Duration
-	livenessTimeout  time.Duration
+	config *Config
+	mutex  sync.RWMutex
+	client *webostv.Tv
 }
 
 func (b *Bind) Client() (*webostv.Tv, error) {
@@ -44,7 +39,7 @@ func (b *Bind) Client() (*webostv.Tv, error) {
 		return c, nil
 	}
 
-	client, err := defaultDialerLGWebOS.Dial(b.host)
+	client, err := defaultDialerLGWebOS.Dial(b.config.Host)
 	if err != nil {
 		return nil, err
 	}

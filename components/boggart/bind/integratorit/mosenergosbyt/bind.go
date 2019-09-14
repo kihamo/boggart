@@ -13,7 +13,6 @@ var services = map[string]string{
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
-
-	client *mosenergosbyt.Client
 	config *Config
+	client *mosenergosbyt.Client
 }

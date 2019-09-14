@@ -40,13 +40,13 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		b.SetSerialNumber(sn)
 
 		if model, ok := configuration["modelname"]; ok {
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateModel.Format(sn), model); e != nil {
+			if e := b.MQTTPublishAsync(ctx, b.config.TopicStateModel.Format(sn), model); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}
 
 		if fw, ok := configuration["firmwareversion"]; ok {
-			if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateFirmwareVersion.Format(sn), fw); e != nil {
+			if e := b.MQTTPublishAsync(ctx, b.config.TopicStateFirmwareVersion.Format(sn), fw); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}

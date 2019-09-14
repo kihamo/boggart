@@ -3,7 +3,7 @@ package main // import "github.com/kihamo/boggart/cmd/server"
 import (
 	"log"
 
-	_ "github.com/kihamo/boggart/components/barcode/instance"
+	// _ "github.com/kihamo/boggart/components/barcode/instance"
 	_ "github.com/kihamo/boggart/components/boggart/bind/astro"
 	_ "github.com/kihamo/boggart/components/boggart/bind/broadlink"
 	_ "github.com/kihamo/boggart/components/boggart/bind/chromecast"
@@ -50,12 +50,13 @@ import (
 )
 
 var (
+	Name    = "Boggart Server"
 	Version = "0.0"
 	Build   = "0-0000000"
 )
 
 func main() {
-	shadow.SetName("Boggart Server")
+	shadow.SetName(Name)
 	shadow.SetVersion(Version)
 	shadow.SetBuild(Build)
 

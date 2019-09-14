@@ -71,12 +71,12 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 	if b.config.PTZEnabled {
 		subscribers = append(subscribers,
-			mqtt.NewSubscriber(MQTTSubscribeTopicPTZMove.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTAbsolute)),
-			mqtt.NewSubscriber(MQTTSubscribeTopicPTZAbsolute.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTAbsolute)),
-			mqtt.NewSubscriber(MQTTSubscribeTopicPTZContinuous.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTContinuous)),
-			mqtt.NewSubscriber(MQTTSubscribeTopicPTZRelative.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTRelative)),
-			mqtt.NewSubscriber(MQTTSubscribeTopicPTZPreset.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTPreset)),
-			mqtt.NewSubscriber(MQTTSubscribeTopicPTZMomentary.String(), 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTMomentary)),
+			mqtt.NewSubscriber(MQTTSubscribeTopicPTZMove, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTAbsolute)),
+			mqtt.NewSubscriber(MQTTSubscribeTopicPTZAbsolute, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTAbsolute)),
+			mqtt.NewSubscriber(MQTTSubscribeTopicPTZContinuous, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTContinuous)),
+			mqtt.NewSubscriber(MQTTSubscribeTopicPTZRelative, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTRelative)),
+			mqtt.NewSubscriber(MQTTSubscribeTopicPTZPreset, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTPreset)),
+			mqtt.NewSubscriber(MQTTSubscribeTopicPTZMomentary, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTMomentary)),
 		)
 	}
 
@@ -133,7 +133,7 @@ func (b *Bind) updateStatusByChannelId(ctx context.Context, channelId uint64) er
 	return result
 }
 
-func (b *Bind) checkTopic(topic string) (uint64, error) {
+func (b *Bind) checkTopic(topic mqtt.Topic) (uint64, error) {
 	b.mutex.RLock()
 	channels := b.ptzChannels
 	b.mutex.RUnlock()
@@ -142,7 +142,7 @@ func (b *Bind) checkTopic(topic string) (uint64, error) {
 		return 0, errors.New("channels is empty")
 	}
 
-	parts := mqtt.RouteSplit(topic)
+	parts := topic.Split()
 
 	channelId, err := strconv.ParseUint(parts[4], 10, 64)
 	if err != nil {

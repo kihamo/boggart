@@ -1,10 +1,8 @@
 package google_home
 
 import (
-	"net"
 	"strconv"
 	"sync"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/providers/google/home"
@@ -13,15 +11,9 @@ import (
 
 type Bind struct {
 	boggart.BindBase
-
+	config *Config
 	mutex  sync.RWMutex
 	client *client.GoogleHome
-
-	host net.IP
-	port int
-
-	livenessInterval time.Duration
-	livenessTimeout  time.Duration
 }
 
 func (b *Bind) ClientGoogleHome() *client.GoogleHome {
@@ -33,7 +25,7 @@ func (b *Bind) ClientGoogleHome() *client.GoogleHome {
 		return c
 	}
 
-	ctrl := home.NewClient(b.host.String() + ":" + strconv.Itoa(b.port))
+	ctrl := home.NewClient(b.config.Host.String() + ":" + strconv.Itoa(b.config.Port))
 
 	b.mutex.Lock()
 	b.client = ctrl

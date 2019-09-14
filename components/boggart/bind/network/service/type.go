@@ -13,11 +13,13 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 	addr := net.JoinHostPort(config.Hostname, strconv.Itoa(config.Port))
 
+	config.TopicOnline = config.TopicOnline.Format(addr)
+	config.TopicLatency = config.TopicLatency.Format(addr)
+	config.TopicCheck = config.TopicCheck.Format(addr)
+
 	bind := &Bind{
-		address:         addr,
-		retry:           config.Retry,
-		timeout:         config.Timeout,
-		updaterInterval: config.UpdaterInterval,
+		config:  config,
+		address: addr,
 	}
 
 	return bind, nil

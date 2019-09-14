@@ -8,7 +8,6 @@ import (
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
-
-	provider *mercury.MercuryV3
 	config   *Config
+	provider *mercury.MercuryV3
 }

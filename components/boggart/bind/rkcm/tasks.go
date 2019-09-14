@@ -37,7 +37,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	for _, debt := range response.Payload.Data {
 		metricBalance.With("ident", debt.Ident).Set(debt.Sum)
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicBalance.Format(mqtt.NameReplace(debt.Ident)), debt.Sum); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicBalance.Format(mqtt.NameReplace(debt.Ident)), debt.Sum); e != nil {
 			err = multierr.Append(e, err)
 		}
 	}

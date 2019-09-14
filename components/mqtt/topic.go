@@ -24,8 +24,8 @@ func (t Topic) String() string {
 	return string(t)
 }
 
-func (t Topic) Format(args ...interface{}) string {
-	parts := RouteSplit(t.String())
+func (t Topic) Format(args ...interface{}) Topic {
+	parts := t.Split()
 
 	for _, arg := range args {
 		for i, topic := range parts {
@@ -36,7 +36,59 @@ func (t Topic) Format(args ...interface{}) string {
 		}
 	}
 
-	return strings.Join(parts, "/")
+	topic := strings.Join(parts, "/")
+	return Topic(topic)
+}
+
+func (t Topic) Replace(replaces map[string]string) Topic {
+	oldnew := make([]string, 0, len(replaces)*2)
+
+	for k, v := range replaces {
+		oldnew = append(oldnew, k, v)
+	}
+
+	topic := strings.NewReplacer(oldnew...).Replace(t.String())
+	return Topic(topic)
+}
+
+func (t Topic) Split() (result []string) {
+	route := strings.TrimRight(t.String(), "/")
+	if strings.HasPrefix(route, "$share") {
+		result = strings.Split(route, "/")[2:]
+	} else {
+		result = strings.Split(route, "/")
+	}
+
+	return result
+}
+
+func (t Topic) match(routes1 []string, routes2 []string) bool {
+	if len(routes1) == 0 {
+		return len(routes2) == 0
+	}
+
+	if len(routes2) == 0 {
+		return routes1[0] == "#"
+	}
+
+	if routes1[0] == "#" {
+		return true
+	}
+
+	if (routes1[0] == "+") || (routes1[0] == routes2[0]) {
+		return t.match(routes1[1:], routes2[1:])
+	}
+
+	return false
+}
+
+func (t Topic) IsInclude(topic Topic) bool {
+	if t.String() == topic.String() {
+		return true
+	}
+
+	topic = Topic(strings.TrimRight(topic.String(), "/"))
+	return t.match(t.Split(), topic.Split())
 }
 
 func NameReplace(name string) string {

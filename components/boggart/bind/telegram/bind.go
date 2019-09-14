@@ -17,9 +17,8 @@ import (
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
-
-	mutex  sync.RWMutex
 	config *Config
+	mutex  sync.RWMutex
 	client *tgbotapi.BotAPI
 	done   chan struct{}
 }
@@ -148,7 +147,7 @@ func (b *Bind) chatId(to string) (int64, error) {
 
 func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 	go func() {
-		sn := mqtt.NameReplace(b.SerialNumber())
+		sn := b.SerialNumber()
 
 		for {
 			select {
@@ -162,12 +161,12 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 				}
 
 				ctx := context.Background()
-				var mqttTopic string
+				var mqttTopic mqtt.Topic
 
 				if u.Message.Text != "" {
-					mqttTopic = MQTTPublishTopicReceiveMessage.Format(sn, u.Message.Chat.ID)
+					mqttTopic = b.config.TopicReceiveMessage.Format(sn, u.Message.Chat.ID)
 
-					if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicReceiveMessage.Format(sn, u.Message.Chat.ID), u.Message.Text); err != nil {
+					if err := b.MQTTPublishAsync(ctx, b.config.TopicReceiveMessage.Format(sn, u.Message.Chat.ID), u.Message.Text); err != nil {
 						b.Logger().Error("Publish message to MQTT failed",
 							"topic", mqttTopic,
 							"message", u.Message.Text,
@@ -184,10 +183,10 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 
 				if u.Message.Voice != nil {
 					fileID = u.Message.Voice.FileID
-					mqttTopic = MQTTPublishTopicReceiveVoice.Format(sn, u.Message.Chat.ID)
+					mqttTopic = b.config.TopicReceiveVoice.Format(sn, u.Message.Chat.ID)
 				} else if u.Message.Audio != nil {
 					fileID = u.Message.Audio.FileID
-					mqttTopic = MQTTPublishTopicReceiveAudio.Format(sn, u.Message.Chat.ID)
+					mqttTopic = b.config.TopicReceiveAudio.Format(sn, u.Message.Chat.ID)
 				}
 
 				if fileID == "" {

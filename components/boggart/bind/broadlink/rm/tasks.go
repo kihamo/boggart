@@ -16,9 +16,9 @@ const (
 
 func (b *Bind) Tasks() []workers.Task {
 	taskLiveness := task.NewFunctionTask(b.taskLiveness)
-	taskLiveness.SetTimeout(b.livenessTimeout)
+	taskLiveness.SetTimeout(b.config.LivenessTimeout)
 	taskLiveness.SetRepeats(-1)
-	taskLiveness.SetRepeatInterval(b.livenessInterval)
+	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
 	taskLiveness.SetName("liveness-" + b.SerialNumber())
 
 	return []workers.Task{
@@ -27,7 +27,7 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
-	pinger, err := ping.NewPinger(b.host)
+	pinger, err := ping.NewPinger(b.config.Host)
 	if err != nil {
 		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, err

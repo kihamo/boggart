@@ -15,8 +15,8 @@ const (
 
 func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTSubscribeTopicBindReloadByPayload.String(), 0, c.callbackBindReloadInPayload),
-		mqtt.NewSubscriber(MQTTSubscribeTopicBindReloadByTopic.String(), 0, c.callbackBindReloadInTopic),
+		mqtt.NewSubscriber(MQTTSubscribeTopicBindReloadByPayload, 0, c.callbackBindReloadInPayload),
+		mqtt.NewSubscriber(MQTTSubscribeTopicBindReloadByTopic, 0, c.callbackBindReloadInTopic),
 	}
 }
 
@@ -30,7 +30,7 @@ func (c *Component) callbackBindReloadInPayload(ctx context.Context, _ mqtt.Comp
 }
 
 func (c *Component) callbackBindReloadInTopic(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-	route := mqtt.RouteSplit(message.Topic())
+	route := message.Topic().Split()
 	if len(route) < 1 {
 		return errors.New("bad bind id")
 	}

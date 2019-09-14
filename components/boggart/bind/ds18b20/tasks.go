@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 	"github.com/yryz/ds18b20"
@@ -14,14 +13,14 @@ func (b *Bind) Tasks() []workers.Task {
 	sn := b.SerialNumber()
 
 	taskLiveness := task.NewFunctionTask(b.taskLiveness)
-	taskLiveness.SetTimeout(b.livenessTimeout)
+	taskLiveness.SetTimeout(b.config.LivenessTimeout)
 	taskLiveness.SetRepeats(-1)
-	taskLiveness.SetRepeatInterval(b.livenessInterval)
+	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
 	taskLiveness.SetName("liveness-" + sn)
 
 	taskStateUpdater := task.NewFunctionTask(b.taskUpdater)
 	taskStateUpdater.SetRepeats(-1)
-	taskStateUpdater.SetRepeatInterval(b.updaterInterval)
+	taskStateUpdater.SetRepeatInterval(b.config.UpdaterInterval)
 	taskStateUpdater.SetName("updater-" + sn)
 
 	return []workers.Task{
@@ -64,7 +63,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 
 	metricValue.With("serial_number", sn).Set(value)
 
-	if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicValue.Format(mqtt.NameReplace(sn)), value); err != nil {
+	if err := b.MQTTPublishAsync(ctx, b.config.TopicValue, value); err != nil {
 		return nil, err
 	}
 

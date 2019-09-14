@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/components/storage"
 )
 
@@ -170,9 +169,7 @@ func (b *Bind) SetVolume(percent int64) error {
 
 	b.getStream().SetVolume(percent)
 
-	sn := mqtt.NameReplace(b.SerialNumber())
-	ctx := context.Background()
-	return b.MQTTPublishAsync(ctx, MQTTPublishTopicStateVolume.Format(sn), percent)
+	return b.MQTTPublishAsync(context.Background(), b.config.TopicStateVolume, percent)
 }
 
 func (b *Bind) Mute() bool {
@@ -186,7 +183,5 @@ func (b *Bind) SetMute(mute bool) error {
 
 	b.getStream().SetMute(mute)
 
-	sn := mqtt.NameReplace(b.SerialNumber())
-	ctx := context.Background()
-	return b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMute.Format(sn), mute)
+	return b.MQTTPublishAsync(context.Background(), b.config.TopicStateMute, mute)
 }

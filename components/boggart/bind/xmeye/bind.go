@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/providers/xmeye"
 )
 
@@ -38,9 +37,7 @@ func (b *Bind) startAlarmStreaming() {
 					return
 				}
 
-				sn := mqtt.NameReplace(b.SerialNumber())
-
-				if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicEvent.Format(sn, alarm.Channel, alarm.Event), alarm.Status); err != nil {
+				if err := b.MQTTPublishAsync(ctx, b.config.TopicEvent.Format(b.SerialNumber(), alarm.Channel, alarm.Event), alarm.Status); err != nil {
 					b.Logger().Error("Send alarm to MQTT failed", "error", err.Error())
 				}
 

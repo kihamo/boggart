@@ -34,7 +34,7 @@ func (b *Bind) runtimeConfigWatcher(fileName string) error {
 			b.cacheRuntimeConfig[key] = current
 
 			// TODO
-			_ = b.MQTTPublish(context.Background(), MQTTPublishTopicRuntimeConfig.Format(sn, key), current)
+			_ = b.MQTTPublish(context.Background(), b.config.TopicRuntimeConfig.Format(sn, key), current)
 		}
 
 		b.cacheRuntimeConfigLock.Unlock()

@@ -8,7 +8,6 @@ import (
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
-
-	client *herospeed.Client
 	config *Config
+	client *herospeed.Client
 }

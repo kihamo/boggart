@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/providers/mercury/v3"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
@@ -44,23 +43,21 @@ func (b *Bind) taskUpdater(ctx context.Context) (_ interface{}, err error) {
 
 		b.SetSerialNumber(sn)
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicMakeDate.Format(mqtt.NameReplace(sn)), makeDate); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicMakeDate, makeDate); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicFirmwareVersion.Format(mqtt.NameReplace(sn)), version); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicFirmwareVersion, version); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
 
 	b.UpdateStatus(boggart.BindStatusOnline)
 
-	snMQTT := mqtt.NameReplace(sn)
-
 	if val, _, _, _, e := b.provider.ReadArray(v3.ArrayReset, nil, v3.Tariff1); e == nil {
 		metricTariff.With("serial_number", sn).With("tariff", "1").Set(float64(val))
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicTariff.Format(snMQTT, 1), val); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicTariff1, val); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {
@@ -70,19 +67,19 @@ func (b *Bind) taskUpdater(ctx context.Context) (_ interface{}, err error) {
 	if p1, p2, p3, e := b.provider.Voltage(); e == nil {
 		metricVoltage.With("serial_number", sn).With("phase", "1").Set(p1)
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicVoltage.Format(snMQTT, 1), p1); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicVoltage1, p1); e != nil {
 			err = multierr.Append(err, e)
 		}
 
 		metricVoltage.With("serial_number", sn).With("phase", "2").Set(p2)
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicVoltage.Format(snMQTT, 2), p2); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicVoltage2, p2); e != nil {
 			err = multierr.Append(err, e)
 		}
 
 		metricVoltage.With("serial_number", sn).With("phase", "3").Set(p3)
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicVoltage.Format(snMQTT, 3), p3); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicVoltage3, p3); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {
@@ -92,19 +89,19 @@ func (b *Bind) taskUpdater(ctx context.Context) (_ interface{}, err error) {
 	if p1, p2, p3, e := b.provider.Amperage(); e == nil {
 		metricAmperage.With("serial_number", sn).With("phase", "1").Set(p1)
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicAmperage.Format(snMQTT, 1), p1); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicAmperage1, p1); e != nil {
 			err = multierr.Append(err, e)
 		}
 
 		metricAmperage.With("serial_number", sn).With("phase", "2").Set(p2)
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicAmperage.Format(snMQTT, 2), p2); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicAmperage2, p2); e != nil {
 			err = multierr.Append(err, e)
 		}
 
 		metricAmperage.With("serial_number", sn).With("phase", "3").Set(p3)
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicAmperage.Format(snMQTT, 3), p3); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicAmperage3, p3); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {
@@ -114,19 +111,19 @@ func (b *Bind) taskUpdater(ctx context.Context) (_ interface{}, err error) {
 	if _, p1, p2, p3, e := b.provider.Power(v3.PowerNumberP); e == nil {
 		metricPower.With("serial_number", sn).With("phase", "1").Set(p1)
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicPower.Format(snMQTT, 1), p1); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicPower1, p1); e != nil {
 			err = multierr.Append(err, e)
 		}
 
 		metricPower.With("serial_number", sn).With("phase", "2").Set(p2)
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicPower.Format(snMQTT, 2), p2); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicPower2, p2); e != nil {
 			err = multierr.Append(err, e)
 		}
 
 		metricPower.With("serial_number", sn).With("phase", "3").Set(p3)
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicPower.Format(snMQTT, 3), p3); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicPower3, p3); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {

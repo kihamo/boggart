@@ -28,15 +28,21 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		return nil, errors.New("unknown model " + config.Model)
 	}
 
+	sn := config.MAC.String()
+
+	config.TopicState = config.TopicState.Format(sn)
+	config.TopicPower = config.TopicPower.Format(sn)
+	config.TopicSet = config.TopicSet.Format(sn)
+
 	provider.SetTimeout(config.ConnectionTimeout)
 
 	bind := &Bind{
-		provider:        provider,
-		updaterInterval: config.UpdaterInterval,
-		state:           atomic.NewBoolNull(),
-		power:           atomic.NewFloat32Null(),
+		config:   config,
+		provider: provider,
+		state:    atomic.NewBoolNull(),
+		power:    atomic.NewFloat32Null(),
 	}
-	bind.SetSerialNumber(config.MAC.String())
+	bind.SetSerialNumber(sn)
 
 	return bind, nil
 }

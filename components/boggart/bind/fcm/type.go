@@ -39,10 +39,11 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		return nil, err
 	}
 
+	config.TopicSend = config.TopicSend.Format(credentials.ProjectID)
+
 	bind := &Bind{
+		config:    config,
 		messaging: messaging,
-		projectID: credentials.ProjectID,
-		tokens:    config.Tokens,
 	}
 
 	return bind, nil
