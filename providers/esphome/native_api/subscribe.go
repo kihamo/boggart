@@ -2,8 +2,14 @@ package native_api
 
 import (
 	"context"
-	"github.com/golang/protobuf/proto"
+	"fmt"
 	"time"
+
+	"github.com/golang/protobuf/proto"
+)
+
+const (
+	defaultTimeout = time.Second * 5
 )
 
 type Subscribe struct {
@@ -30,22 +36,14 @@ func NewSubscribe(client *Client, ctx context.Context, startMessage proto.Messag
 }
 
 func (s *Subscribe) start() {
-	conn, err := s.client.connect()
-	if err != nil {
-		return
-	}
-
-	conn.Lock()
-	defer conn.Unlock()
-
 	ticker := time.NewTicker(s.tickerInterval)
 	defer func() {
+		fmt.Println("Close")
+
 		ticker.Stop()
 		close(s.messages)
 		close(s.errors)
 	}()
-
-	var init bool
 
 	for {
 		select {
@@ -53,16 +51,9 @@ func (s *Subscribe) start() {
 			return
 
 		case <-ticker.C:
-			if !init {
-				if err = conn.Write(s.ctx, s.startMessage); err != nil {
-					s.errors <- err
-					continue
-				}
+			message, err := s.client.invoke(s.ctx, s.startMessage)
 
-				init = true
-			}
-
-			message, err := conn.Read(s.ctx)
+			fmt.Println("Subscribe read:", message, err)
 
 			if err != nil {
 				s.errors <- err

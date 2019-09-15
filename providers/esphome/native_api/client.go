@@ -3,7 +3,6 @@ package native_api
 import (
 	"context"
 	"errors"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -91,35 +90,51 @@ func init() {
 type Client struct {
 	address       string
 	password      string
-	id            string
-	debug         int32
+	clientID      string
+	debug         uint32
 	mutex         sync.RWMutex
 	done          chan struct{}
-	connection    *connection
 	authenticated int32
+
+	connection     *connection
+	connectionID   uint64
+	connectionPing bool
 }
 
 func New(address, password string) *Client {
 	return &Client{
-		address:  address,
-		password: password,
-		id:       defaultClient,
+		address:        address,
+		password:       password,
+		clientID:       defaultClient,
+		connectionID:   1,
+		connectionPing: true,
 	}
 }
 
-func (c *Client) WithID(id string) *Client {
+func (c *Client) ClientID() string {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	return c.clientID
+}
+
+func (c *Client) WithClientID(id string) *Client {
 	c.mutex.Lock()
-	c.id = id
+	c.clientID = id
 	c.mutex.Unlock()
 
 	return c
 }
 
+func (c *Client) Debug() bool {
+	return atomic.LoadUint32(&c.debug) != 0
+}
+
 func (c *Client) WithDebug(debug bool) *Client {
 	if debug {
-		atomic.StoreInt32(&c.debug, 1)
+		atomic.StoreUint32(&c.debug, 1)
 	} else {
-		atomic.StoreInt32(&c.debug, 0)
+		atomic.StoreUint32(&c.debug, 0)
 	}
 
 	c.mutex.RLock()
@@ -143,16 +158,16 @@ func (c *Client) connect() (conn *connection, err error) {
 			return nil, err
 		}
 
-		conn.WithDebug(atomic.LoadInt32(&c.debug) != 0)
+		conn.WithDebug(c.Debug())
+		conn.WithID(c.connectionID)
 
 		c.mutex.Lock()
 		c.connection = conn
-		clientID := c.id
 		c.mutex.Unlock()
 
 		ctx := context.Background()
 
-		_, err = c.Hello(ctx, &HelloRequest{ClientInfo: clientID})
+		_, err = c.Hello(ctx)
 		if err != nil {
 			c.mutex.Lock()
 			c.connection = nil
@@ -161,10 +176,25 @@ func (c *Client) connect() (conn *connection, err error) {
 			return nil, err
 		}
 
-		go c.keepalive()
+		if c.connectionPing {
+			go c.keepalive()
+		}
 	}
 
 	return conn, err
+}
+
+func (c *Client) Clone() (*Client, error) {
+	c.mutex.RLock()
+	clientId := c.clientID
+	c.mutex.RUnlock()
+
+	client := New(c.address, c.password).
+		WithDebug(c.Debug()).
+		WithClientID(clientId)
+	client.connectionID = c.connectionID + 1
+
+	return client, nil
 }
 
 func (c *Client) Close() error {
@@ -197,6 +227,9 @@ func (c *Client) invoke(ctx context.Context, request proto.Message) (proto.Messa
 	if err != nil {
 		return nil, err
 	}
+
+	conn.Lock()
+	defer conn.Unlock()
 
 	if err := conn.Write(ctx, request); err != nil {
 		return nil, err
@@ -233,7 +266,7 @@ func (c *Client) keepalive() {
 	for {
 		select {
 		case <-ticker.C:
-			_, err := c.Ping(context.Background(), &PingRequest{})
+			_, err := c.Ping(context.Background())
 			if err != nil {
 				c.Close()
 				return
@@ -254,7 +287,7 @@ func (c *Client) checkAuthenticate(ctx context.Context) error {
 		return ErrAuthenticated
 
 	default:
-		response, err := c.Connect(ctx, &ConnectRequest{Password: c.password})
+		response, err := c.Connect(ctx)
 		if err != nil {
 			atomic.StoreInt32(&c.authenticated, authNone)
 			return err
@@ -270,189 +303,4 @@ func (c *Client) checkAuthenticate(ctx context.Context) error {
 	}
 
 	return nil
-}
-
-func (c *Client) Hello(ctx context.Context, in *HelloRequest) (*HelloResponse, error) {
-	out, err := c.invoke(ctx, in)
-	if err != nil {
-		return nil, err
-	}
-
-	return out.(*HelloResponse), nil
-}
-
-func (c *Client) Connect(ctx context.Context, in *ConnectRequest) (*ConnectResponse, error) {
-	out, err := c.invoke(ctx, in)
-	if err != nil {
-		return nil, err
-	}
-
-	return out.(*ConnectResponse), nil
-}
-
-func (c *Client) Disconnect(ctx context.Context, in *DisconnectRequest) (*DisconnectResponse, error) {
-	out, err := c.invoke(ctx, in)
-	if err != nil {
-		return nil, err
-	}
-
-	return out.(*DisconnectResponse), nil
-}
-
-func (c *Client) Ping(ctx context.Context, in *PingRequest) (*PingResponse, error) {
-	out, err := c.invoke(ctx, in)
-	if err != nil {
-		return nil, err
-	}
-	return out.(*PingResponse), nil
-}
-
-func (c *Client) DeviceInfo(ctx context.Context, in *DeviceInfoRequest) (*DeviceInfoResponse, error) {
-	out, err := c.invoke(ctx, in)
-	if err != nil {
-		return nil, err
-	}
-	return out.(*DeviceInfoResponse), nil
-}
-
-func (c *Client) ListEntities(ctx context.Context, in *ListEntitiesRequest) ([]proto.Message, error) {
-	if err := c.checkAuthenticate(ctx); err != nil {
-		return nil, err
-	}
-
-	ctxSub, ctxCancel := context.WithCancel(ctx)
-	defer ctxCancel()
-
-	subscribe := NewSubscribe(c, ctxSub, in, time.Second)
-	messages := make([]proto.Message, 0)
-
-	for {
-		select {
-		case message := <-subscribe.NextMessage():
-			if strings.Compare(proto.MessageName(message), "native_api.ListEntitiesDoneResponse") == 0 {
-				return messages, nil
-			}
-
-			messages = append(messages, message)
-
-		case err := <-subscribe.NextError():
-			return nil, err
-		}
-	}
-
-	return messages, nil
-}
-
-// TODO: требует постоянного соединения, блочит остальные запросы,
-// надо вынести в отдельную обработку с каналом результатов на выходе
-func (c *Client) SubscribeStates(ctx context.Context, in *SubscribeStatesRequest) ([]proto.Message, error) {
-	return nil, nil
-}
-
-func (c *Client) SubscribeLogs(ctx context.Context, in *SubscribeLogsRequest) (*SubscribeLogsResponse, error) {
-	if err := c.checkAuthenticate(ctx); err != nil {
-		return nil, err
-	}
-
-	out, err := c.invoke(ctx, in)
-	if err != nil {
-		return nil, err
-	}
-	return out.(*SubscribeLogsResponse), nil
-}
-
-func (c *Client) SubscribeHomeassistantServices(ctx context.Context, in *SubscribeHomeassistantServicesRequest) (*HomeassistantServiceResponse, error) {
-	if err := c.checkAuthenticate(ctx); err != nil {
-		return nil, err
-	}
-
-	out, err := c.invoke(ctx, in)
-	if err != nil {
-		return nil, err
-	}
-	return out.(*HomeassistantServiceResponse), nil
-}
-
-func (c *Client) SubscribeHomeAssistantStates(ctx context.Context, in *SubscribeHomeAssistantStatesRequest) (*SubscribeHomeAssistantStateResponse, error) {
-	if err := c.checkAuthenticate(ctx); err != nil {
-		return nil, err
-	}
-
-	out, err := c.invoke(ctx, in)
-	if err != nil {
-		return nil, err
-	}
-	return out.(*SubscribeHomeAssistantStateResponse), nil
-}
-
-func (c *Client) GetTime(ctx context.Context, in *GetTimeRequest) (*GetTimeResponse, error) {
-	out, err := c.invoke(ctx, in)
-	if err != nil {
-		return nil, err
-	}
-	return out.(*GetTimeResponse), nil
-}
-
-func (c *Client) ExecuteService(ctx context.Context, in *ExecuteServiceRequest) (*Void, error) {
-	if err := c.checkAuthenticate(ctx); err != nil {
-		return nil, err
-	}
-
-	out, err := c.invoke(ctx, in)
-	if err != nil {
-		return nil, err
-	}
-	return out.(*Void), nil
-}
-
-func (c *Client) CoverCommand(ctx context.Context, in *CoverCommandRequest) error {
-	if err := c.checkAuthenticate(ctx); err != nil {
-		return err
-	}
-
-	return c.invokeNoDelay(ctx, in)
-}
-
-func (c *Client) FanCommand(ctx context.Context, in *FanCommandRequest) error {
-	if err := c.checkAuthenticate(ctx); err != nil {
-		return err
-	}
-
-	return c.invokeNoDelay(ctx, in)
-}
-
-func (c *Client) LightCommand(ctx context.Context, in *LightCommandRequest) error {
-	if err := c.checkAuthenticate(ctx); err != nil {
-		return err
-	}
-
-	return c.invokeNoDelay(ctx, in)
-}
-
-func (c *Client) SwitchCommand(ctx context.Context, in *SwitchCommandRequest) error {
-	if err := c.checkAuthenticate(ctx); err != nil {
-		return err
-	}
-
-	return c.invokeNoDelay(ctx, in)
-}
-
-func (c *Client) CameraImage(ctx context.Context, in *CameraImageRequest) (*CameraImageResponse, error) {
-	if err := c.checkAuthenticate(ctx); err != nil {
-		return nil, err
-	}
-
-	out, err := c.invoke(ctx, in)
-	if err != nil {
-		return nil, err
-	}
-	return out.(*CameraImageResponse), nil
-}
-
-func (c *Client) ClimateCommand(ctx context.Context, in *ClimateCommandRequest) error {
-	if err := c.checkAuthenticate(ctx); err != nil {
-		return err
-	}
-
-	return c.invokeNoDelay(ctx, in)
 }

@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/hex"
 	"errors"
-	"github.com/golang/protobuf/proto"
 	"net"
 	"reflect"
 	"strconv"
 	"sync"
 	"sync/atomic"
+
+	"github.com/golang/protobuf/proto"
 )
 
 const (
@@ -19,8 +20,9 @@ const (
 type connection struct {
 	sync.Mutex
 
+	id         uint64
 	address    string
-	debug      int32
+	debug      uint32
 	connection net.Conn
 }
 
@@ -35,31 +37,72 @@ func newConnection(address string) (*connection, error) {
 	}
 
 	c := &connection{
+		id:         1,
 		address:    address,
 		connection: conn,
 	}
 
-	err = conn.(*net.TCPConn).SetKeepAlive(true)
+	tcpConn := conn.(*net.TCPConn)
+
+	if err = tcpConn.SetKeepAlive(true); err != nil {
+		return nil, err
+	}
+
+	if err = tcpConn.SetKeepAlivePeriod(keepAliveInterval); err != nil {
+		return nil, err
+	}
 
 	return c, nil
 }
 
+func (c *connection) ID() uint64 {
+	return atomic.LoadUint64(&c.id)
+}
+
+func (c *connection) WithID(id uint64) *connection {
+	atomic.StoreUint64(&c.id, id)
+	return c
+}
+
+func (c *connection) Debug() bool {
+	return atomic.LoadUint32(&c.debug) != 0
+}
+
 func (c *connection) WithDebug(debug bool) *connection {
 	if debug {
-		atomic.StoreInt32(&c.debug, 1)
+		atomic.StoreUint32(&c.debug, 1)
 	} else {
-		atomic.StoreInt32(&c.debug, 0)
+		atomic.StoreUint32(&c.debug, 0)
 	}
 
 	return c
 }
+
+/*
+func (c *connection) Lock() {
+	c.Mutex.Lock()
+
+	if c.Debug() {
+		println(">>> [" + strconv.FormatUint(c.ID(), 10) + "] LOCK")
+	}
+}
+
+func (c *connection) Unlock() {
+	c.Mutex.Unlock()
+
+	if c.Debug() {
+		println(">>> [" + strconv.FormatUint(c.ID(), 10) + "] UNLOCK")
+	}
+}
+*/
 
 func (c *connection) Close() error {
 	return c.connection.Close()
 }
 
 func (c *connection) Write(ctx context.Context, request proto.Message) error {
-	requestType, ok := messageTypesByName[proto.MessageName(request)]
+	name := proto.MessageName(request)
+	requestType, ok := messageTypesByName[name]
 	if !ok {
 		return errors.New("unknown request message type")
 	}
@@ -88,9 +131,12 @@ func (c *connection) Write(ctx context.Context, request proto.Message) error {
 		return err
 	}
 
-	if atomic.LoadInt32(&c.debug) != 0 {
-		println(">>> ")
-		println(hex.Dump(requestPacket))
+	if c.Debug() {
+		clientID := strconv.FormatUint(c.ID(), 10)
+
+		println(">>> [" + clientID + "] Model " + name)
+		println(">>> [" + clientID + "] Packet")
+		print(hex.Dump(requestPacket))
 	}
 
 	return nil
@@ -118,10 +164,10 @@ func (c *connection) Read(ctx context.Context) (proto.Message, error) {
 		return nil, err
 	}
 
-	debug := atomic.LoadInt32(&c.debug) != 0
+	debug := c.Debug()
 
 	if debug {
-		println("<<<")
+		println("<<< [" + strconv.FormatUint(c.ID(), 10) + "] Packet header")
 		print(hex.Dump(responsePacketHead))
 	}
 
@@ -137,6 +183,10 @@ func (c *connection) Read(ctx context.Context) (proto.Message, error) {
 	responseType, ok := messageTypesByID[responsePacketHead[2]]
 	if !ok {
 		return nil, errors.New("unknown response message type")
+	}
+
+	if debug {
+		println("<<< [" + strconv.FormatUint(c.ID(), 10) + "] Model " + responseType)
 	}
 
 	responseReflect := proto.MessageType(responseType)
@@ -161,6 +211,7 @@ func (c *connection) Read(ctx context.Context) (proto.Message, error) {
 	}
 
 	if debug {
+		println("<<< [" + strconv.FormatUint(c.ID(), 10) + "] Packet payload")
 		print(hex.Dump(responsePacketPayload))
 	}
 
