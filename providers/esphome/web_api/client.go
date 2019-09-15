@@ -3,9 +3,9 @@ package web_api
 // https://esphome.io/web-api/index.html
 
 import (
-	"github.com/go-openapi/runtime"
 	"net"
 
+	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/runtime/logger"
 	"github.com/kihamo/boggart/providers/esphome/web_api/client"
