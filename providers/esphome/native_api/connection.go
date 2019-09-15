@@ -20,10 +20,12 @@ const (
 type connection struct {
 	sync.Mutex
 
-	id         uint64
-	address    string
-	debug      uint32
-	connection net.Conn
+	id      uint64
+	address string
+	debug   uint32
+
+	connectionMutex sync.RWMutex
+	connection      net.Conn
 }
 
 func newConnection(address string) (*connection, error) {
@@ -31,28 +33,39 @@ func newConnection(address string) (*connection, error) {
 		address = address + ":" + strconv.Itoa(defaultPort)
 	}
 
-	conn, err := net.Dial("tcp", address)
-	if err != nil {
+	c := &connection{
+		id:      1,
+		address: address,
+	}
+
+	if err := c.init(); err != nil {
 		return nil, err
 	}
 
-	c := &connection{
-		id:         1,
-		address:    address,
-		connection: conn,
+	return c, nil
+}
+
+func (c *connection) init() error {
+	conn, err := net.Dial("tcp", c.address)
+	if err != nil {
+		return err
 	}
 
 	tcpConn := conn.(*net.TCPConn)
 
 	if err = tcpConn.SetKeepAlive(true); err != nil {
-		return nil, err
+		return err
 	}
 
 	if err = tcpConn.SetKeepAlivePeriod(keepAliveInterval); err != nil {
-		return nil, err
+		return err
 	}
 
-	return c, nil
+	c.connectionMutex.Lock()
+	c.connection = tcpConn
+	c.connectionMutex.Unlock()
+
+	return nil
 }
 
 func (c *connection) ID() uint64 {
@@ -224,7 +237,6 @@ func (c *connection) Read(ctx context.Context) (proto.Message, error) {
 
 func (c *connection) connectionCheck() {
 	if e := ConnectionCheck(c.connection); e != nil {
-		// TODO:
-		//c.reset()
+		c.init()
 	}
 }
