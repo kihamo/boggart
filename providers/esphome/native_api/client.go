@@ -2,12 +2,7 @@ package native_api
 
 import (
 	"context"
-	"encoding/hex"
 	"errors"
-	"fmt"
-	"net"
-	"reflect"
-	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -17,7 +12,6 @@ import (
 )
 
 const (
-	defaultPort   = 6053
 	defaultClient = "GoLang Native API client"
 
 	packetMagicByte   byte = 0x00
@@ -95,15 +89,13 @@ func init() {
 }
 
 type Client struct {
-	address  string
-	password string
-	id       string
-	debug    int32
-
+	address       string
+	password      string
+	id            string
+	debug         int32
 	mutex         sync.RWMutex
-	mutexInvoke   sync.Mutex
 	done          chan struct{}
-	connection    net.Conn
+	connection    *connection
 	authenticated int32
 }
 
@@ -130,30 +122,28 @@ func (c *Client) WithDebug(debug bool) *Client {
 		atomic.StoreInt32(&c.debug, 0)
 	}
 
+	c.mutex.RLock()
+	if c.connection != nil {
+		c.connection.WithDebug(debug)
+	}
+	c.mutex.RUnlock()
+
 	return c
 }
 
-func (c *Client) connect() (conn net.Conn, err error) {
+func (c *Client) connect() (conn *connection, err error) {
 	c.mutex.RLock()
 	conn = c.connection
+	address := c.address
 	c.mutex.RUnlock()
 
 	if conn == nil {
-		address := c.address
-
-		if _, _, err := net.SplitHostPort(address); err != nil {
-			address = address + ":" + strconv.Itoa(defaultPort)
-		}
-
-		conn, err = net.Dial("tcp", address)
+		conn, err = newConnection(address)
 		if err != nil {
 			return nil, err
 		}
 
-		err = conn.(*net.TCPConn).SetKeepAlive(true)
-		if err != nil {
-			return nil, err
-		}
+		conn.WithDebug(atomic.LoadInt32(&c.debug) != 0)
 
 		c.mutex.Lock()
 		c.connection = conn
@@ -202,6 +192,68 @@ func (c *Client) Close() error {
 	return nil
 }
 
+func (c *Client) invoke(ctx context.Context, request proto.Message) (proto.Message, error) {
+	conn, err := c.connect()
+	if err != nil {
+		return nil, err
+	}
+
+	if err := conn.Write(ctx, request); err != nil {
+		return nil, err
+	}
+
+	return conn.Read(ctx)
+}
+
+func (c *Client) invokeNoDelay(ctx context.Context, request proto.Message) error {
+	conn, err := c.connect()
+	if err != nil {
+		return err
+	}
+
+	conn.Lock()
+	defer conn.Unlock()
+
+	return conn.Write(ctx, request)
+}
+
+func (c *Client) invokeMulti(ctx context.Context, request proto.Message, endType string) ([]proto.Message, error) {
+	conn, err := c.connect()
+	if err != nil {
+		return nil, err
+	}
+
+	conn.Lock()
+	defer conn.Unlock()
+
+	if err := conn.Write(ctx, request); err != nil {
+		return nil, err
+	}
+
+	responses := make([]proto.Message, 0)
+
+	for {
+		select {
+		case <-ctx.Done():
+			return responses, ctx.Err()
+
+		default:
+			response, err := conn.Read(ctx)
+			if err != nil {
+				return responses, err
+			}
+
+			responses = append(responses, response)
+
+			if strings.Compare(proto.MessageName(response), endType) == 0 {
+				return responses, nil
+			}
+		}
+	}
+
+	return responses, nil
+}
+
 func (c *Client) keepalive() {
 	done := make(chan struct{})
 
@@ -228,174 +280,6 @@ func (c *Client) keepalive() {
 			return
 		}
 	}
-}
-
-func (c *Client) invoke(ctx context.Context, request proto.Message) (proto.Message, error) {
-	conn, err := c.connect()
-	if err != nil {
-		return nil, err
-	}
-
-	c.mutexInvoke.Lock()
-	defer c.mutexInvoke.Unlock()
-
-	if err := c.writeRequest(ctx, conn, request); err != nil {
-		return nil, err
-	}
-
-	return c.readResponse(ctx, conn)
-}
-
-func (c *Client) invokeNoDelay(ctx context.Context, request proto.Message) error {
-	conn, err := c.connect()
-	if err != nil {
-		return err
-	}
-
-	c.mutexInvoke.Lock()
-	defer c.mutexInvoke.Unlock()
-
-	return c.writeRequest(ctx, conn, request)
-}
-
-func (c *Client) invokeMulti(ctx context.Context, request proto.Message, endType string) ([]proto.Message, error) {
-	conn, err := c.connect()
-	if err != nil {
-		return nil, err
-	}
-
-	c.mutexInvoke.Lock()
-	defer c.mutexInvoke.Unlock()
-
-	if err := c.writeRequest(ctx, conn, request); err != nil {
-		return nil, err
-	}
-
-	responses := make([]proto.Message, 0)
-
-	for {
-		select {
-		case <-ctx.Done():
-			return responses, ctx.Err()
-
-		default:
-			response, err := c.readResponse(ctx, conn)
-			if err != nil {
-				return responses, err
-			}
-
-			responses = append(responses, response)
-
-			if strings.Compare(proto.MessageName(response), endType) == 0 {
-				return responses, nil
-			}
-		}
-	}
-
-	return responses, nil
-}
-
-func (c *Client) deadline(ctx context.Context) (deadline time.Time) {
-	if d, ok := ctx.Deadline(); ok {
-		deadline = d
-	}
-
-	return deadline
-}
-
-func (c *Client) writeRequest(ctx context.Context, conn net.Conn, request proto.Message) error {
-	requestType, ok := messageTypesByName[proto.MessageName(request)]
-	if !ok {
-		return errors.New("unknown request message type")
-	}
-
-	requestPayload, err := proto.Marshal(request)
-	if err != nil {
-		return err
-	}
-
-	if err := conn.SetWriteDeadline(c.deadline(ctx)); err != nil {
-		return err
-	}
-
-	requestPacket := make([]byte, 3, len(requestPayload)+3)
-	requestPacket[0] = packetMagicByte
-	requestPacket[1] = byte(len(requestPayload))
-	requestPacket[2] = requestType
-	requestPacket = append(requestPacket, requestPayload...)
-
-	if atomic.LoadInt32(&c.debug) != 0 {
-		fmt.Println(">>> ")
-		fmt.Print(hex.Dump(requestPacket))
-	}
-
-	_, err = conn.Write(requestPacket)
-	return err
-}
-
-func (c *Client) readResponse(ctx context.Context, conn net.Conn) (proto.Message, error) {
-	err := conn.SetReadDeadline(c.deadline(ctx))
-	if err != nil {
-		return nil, err
-	}
-
-	var n int
-	responsePacketHead := make([]byte, 3)
-
-	n, err = conn.Read(responsePacketHead)
-	if err != nil {
-		return nil, err
-	}
-
-	debug := atomic.LoadInt32(&c.debug) != 0
-
-	if debug {
-		println("<<<")
-		print(hex.Dump(responsePacketHead))
-	}
-
-	if n < 3 {
-		return nil, errors.New("header of response packet failed")
-	}
-
-	if responsePacketHead[0] != packetMagicByte {
-		return nil, errors.New("magic byte of response packet failed")
-	}
-
-	// type
-	responseType, ok := messageTypesByID[responsePacketHead[2]]
-	if !ok {
-		return nil, errors.New("unknown response message type")
-	}
-
-	responseReflect := proto.MessageType(responseType)
-	if responseReflect == nil {
-		return nil, errors.New("unknown type: " + responseType)
-	}
-
-	response := reflect.New(responseReflect.Elem()).Interface().(proto.Message)
-
-	// empty payload
-	if responsePacketHead[1] == 0 {
-		return response, nil
-	}
-
-	// parse payload
-	responsePacketPayload := make([]byte, responsePacketHead[1])
-	n, err = conn.Read(responsePacketPayload)
-	if err != nil {
-		return nil, err
-	}
-
-	if debug {
-		print(hex.Dump(responsePacketPayload))
-	}
-
-	if err := proto.Unmarshal(responsePacketPayload, response); err != nil {
-		return nil, err
-	}
-
-	return response, nil
 }
 
 func (c *Client) checkAuthenticate(ctx context.Context) error {
@@ -430,6 +314,7 @@ func (c *Client) Hello(ctx context.Context, in *HelloRequest) (*HelloResponse, e
 	if err != nil {
 		return nil, err
 	}
+
 	return out.(*HelloResponse), nil
 }
 
