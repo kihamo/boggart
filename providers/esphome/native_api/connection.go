@@ -6,46 +6,23 @@ import (
 	"errors"
 	"net"
 	"reflect"
-	"strconv"
-	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/golang/protobuf/proto"
 )
 
 const (
-	defaultPort = 6053
+	defaultReadTimeout   = time.Second * 10
+	defaultWriteTimeout  = time.Second * 10
+	defaultCloseDeadline = time.Second
 )
 
-type connection struct {
-	sync.Mutex
+var (
+	ErrConnectionNotInit = errors.New("connection must initialization")
+)
 
-	id      uint64
-	address string
-	debug   uint32
-
-	connectionMutex sync.RWMutex
-	connection      net.Conn
-}
-
-func newConnection(address string) (*connection, error) {
-	if _, _, err := net.SplitHostPort(address); err != nil {
-		address = address + ":" + strconv.Itoa(defaultPort)
-	}
-
-	c := &connection{
-		id:      1,
-		address: address,
-	}
-
-	if err := c.init(); err != nil {
-		return nil, err
-	}
-
-	return c, nil
-}
-
-func (c *connection) init() error {
+func (c *Client) connectionInit() error {
 	conn, err := net.Dial("tcp", c.address)
 	if err != nil {
 		return err
@@ -61,59 +38,72 @@ func (c *connection) init() error {
 		return err
 	}
 
-	c.connectionMutex.Lock()
-	c.connection = tcpConn
-	c.connectionMutex.Unlock()
-
+	c.connectionSet(tcpConn)
 	return nil
 }
 
-func (c *connection) ID() uint64 {
-	return atomic.LoadUint64(&c.id)
-}
-
-func (c *connection) WithID(id uint64) *connection {
-	atomic.StoreUint64(&c.id, id)
-	return c
-}
-
-func (c *connection) Debug() bool {
-	return atomic.LoadUint32(&c.debug) != 0
-}
-
-func (c *connection) WithDebug(debug bool) *connection {
-	if debug {
-		atomic.StoreUint32(&c.debug, 1)
-	} else {
-		atomic.StoreUint32(&c.debug, 0)
-	}
-
-	return c
-}
-
-/*
-func (c *connection) Lock() {
-	c.Mutex.Lock()
-
-	if c.Debug() {
-		println(">>> [" + strconv.FormatUint(c.ID(), 10) + "] LOCK")
+func (c *Client) connectionRun() {
+	if !c.isRestart() {
+		go c.loop()
+		go c.keepalive()
 	}
 }
 
-func (c *connection) Unlock() {
-	c.Mutex.Unlock()
+func (c *Client) connectionClose() (err error) {
+	conn := c.connectionGet()
 
-	if c.Debug() {
-		println(">>> [" + strconv.FormatUint(c.ID(), 10) + "] UNLOCK")
+	if conn != nil {
+		err = conn.Close()
+
+		if err == nil {
+			c.connectionSet(nil)
+
+			if c.isRestart() {
+				atomic.StoreInt64(&c.closeDeadline, time.Now().Add(defaultCloseDeadline).UnixNano())
+			}
+		}
+	}
+
+	return err
+}
+
+func (c *Client) connectionSet(conn net.Conn) {
+	c.mutex.Lock()
+	c.conn = conn
+	c.mutex.Unlock()
+}
+
+func (c *Client) connectionGet() net.Conn {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	return c.conn
+}
+
+func (c *Client) loop() {
+	for {
+		select {
+		case <-c.done:
+			return
+
+		default:
+			ctx, cancel := context.WithTimeout(context.Background(), defaultReadTimeout)
+			message, err := c.read(ctx)
+			cancel()
+
+			c.handle(message, err)
+		}
 	}
 }
-*/
 
-func (c *connection) Close() error {
-	return c.connection.Close()
-}
+func (c *Client) write(ctx context.Context, request proto.Message) (err error) {
+	err = c.connectionCheck()
+	if err != nil {
+		return err
+	}
 
-func (c *connection) Write(ctx context.Context, request proto.Message) error {
+	conn := c.connectionGet()
+
 	name := proto.MessageName(request)
 	requestType, ok := messageTypesByName[name]
 	if !ok {
@@ -132,34 +122,37 @@ func (c *connection) Write(ctx context.Context, request proto.Message) error {
 	requestPacket = append(requestPacket, requestPayload...)
 
 	if deadline, ok := ctx.Deadline(); ok {
-		err = c.connection.SetWriteDeadline(deadline)
+		err = conn.SetWriteDeadline(deadline)
 	}
 
 	if err == nil {
-		_, err = c.connection.Write(requestPacket)
+		_, err = conn.Write(requestPacket)
 	}
 
 	if err != nil {
-		c.connectionCheck()
+		c.connectionCheckBroken()
 		return err
 	}
 
 	if c.Debug() {
-		clientID := strconv.FormatUint(c.ID(), 10)
-
-		println(">>> [" + clientID + "] Model " + name)
-		println(">>> [" + clientID + "] Packet")
+		println(">>> Model " + name)
+		println(">>> Packet")
 		print(hex.Dump(requestPacket))
 	}
 
 	return nil
 }
 
-func (c *connection) Read(ctx context.Context) (proto.Message, error) {
-	var err error
+func (c *Client) read(ctx context.Context) (message proto.Message, err error) {
+	err = c.connectionCheck()
+	if err != nil {
+		return nil, err
+	}
+
+	conn := c.connectionGet()
 
 	if deadline, ok := ctx.Deadline(); ok {
-		err = c.connection.SetReadDeadline(deadline)
+		err = conn.SetReadDeadline(deadline)
 	}
 
 	var (
@@ -169,18 +162,18 @@ func (c *connection) Read(ctx context.Context) (proto.Message, error) {
 
 	if err == nil {
 		responsePacketHead = make([]byte, 3)
-		n, err = c.connection.Read(responsePacketHead)
+		n, err = conn.Read(responsePacketHead)
 	}
 
 	if err != nil {
-		c.connectionCheck()
+		c.connectionCheckBroken()
 		return nil, err
 	}
 
 	debug := c.Debug()
 
 	if debug {
-		println("<<< [" + strconv.FormatUint(c.ID(), 10) + "] Packet header")
+		println("<<<  Packet header")
 		print(hex.Dump(responsePacketHead))
 	}
 
@@ -199,7 +192,7 @@ func (c *connection) Read(ctx context.Context) (proto.Message, error) {
 	}
 
 	if debug {
-		println("<<< [" + strconv.FormatUint(c.ID(), 10) + "] Model " + responseType)
+		println("<<< Model " + responseType)
 	}
 
 	responseReflect := proto.MessageType(responseType)
@@ -207,36 +200,49 @@ func (c *connection) Read(ctx context.Context) (proto.Message, error) {
 		return nil, errors.New("unknown type: " + responseType)
 	}
 
-	response := reflect.New(responseReflect.Elem()).Interface().(proto.Message)
+	message = reflect.New(responseReflect.Elem()).Interface().(proto.Message)
 
 	// empty payload
 	if responsePacketHead[1] == 0 {
-		return response, nil
+		return message, nil
 	}
 
 	// parse payload
 	responsePacketPayload := make([]byte, responsePacketHead[1])
-	n, err = c.connection.Read(responsePacketPayload)
+	n, err = conn.Read(responsePacketPayload)
 
 	if err != nil {
-		c.connectionCheck()
+		c.connectionCheckBroken()
 		return nil, err
 	}
 
 	if debug {
-		println("<<< [" + strconv.FormatUint(c.ID(), 10) + "] Packet payload")
+		println("<<< Packet payload")
 		print(hex.Dump(responsePacketPayload))
 	}
 
-	if err := proto.Unmarshal(responsePacketPayload, response); err != nil {
+	if err := proto.Unmarshal(responsePacketPayload, message); err != nil {
 		return nil, err
 	}
 
-	return response, nil
+	return message, nil
 }
 
-func (c *connection) connectionCheck() {
-	if e := ConnectionCheck(c.connection); e != nil {
-		c.init()
+func (c *Client) connectionCheck() error {
+	if conn := c.connectionGet(); conn == nil {
+		return ErrConnectionNotInit
+	}
+
+	return nil
+}
+
+func (c *Client) connectionCheckBroken() {
+	conn := c.connectionGet()
+	if conn == nil {
+		return
+	}
+
+	if err := ConnectionCheck(conn); err != nil {
+		c.restart()
 	}
 }

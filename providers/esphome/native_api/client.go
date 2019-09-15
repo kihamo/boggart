@@ -2,7 +2,9 @@ package native_api
 
 import (
 	"context"
-	"errors"
+	"net"
+	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -11,19 +13,10 @@ import (
 )
 
 const (
+	defaultPort   = 6053
 	defaultClient = "GoLang Native API client"
 
-	packetMagicByte   byte = 0x00
-	keepAliveInterval      = time.Second * 5
-
-	authNone int32 = iota
-	authSuccess
-	authFailed
-)
-
-var (
-	ErrAuthenticated      = errors.New("must authenticated")
-	ErrAuthenticateFailed = errors.New("authenticated failed")
+	packetMagicByte byte = 0x00
 )
 
 var messageTypesByName = map[string]byte{
@@ -87,27 +80,36 @@ func init() {
 	}
 }
 
-type Client struct {
-	address       string
-	password      string
-	clientID      string
-	debug         uint32
-	mutex         sync.RWMutex
-	done          chan struct{}
-	authenticated int32
+type handler func(proto.Message, error) bool
 
-	connection     *connection
-	connectionID   uint64
-	connectionPing bool
+type Client struct {
+	address  string
+	password string
+	clientID string
+	debug    uint32
+	mutex    sync.RWMutex
+
+	inited        uint32
+	authenticated uint32
+	restarted     uint32
+
+	closeDeadline int64
+	conn          net.Conn
+	handlers      []handler
+	done          chan struct{}
 }
 
 func New(address, password string) *Client {
+	if _, _, err := net.SplitHostPort(address); err != nil {
+		address = address + ":" + strconv.Itoa(defaultPort)
+	}
+
 	return &Client{
-		address:        address,
-		password:       password,
-		clientID:       defaultClient,
-		connectionID:   1,
-		connectionPing: true,
+		address:  address,
+		password: password,
+		clientID: defaultClient,
+		handlers: make([]handler, 0),
+		done:     make(chan struct{}),
 	}
 }
 
@@ -137,170 +139,146 @@ func (c *Client) WithDebug(debug bool) *Client {
 		atomic.StoreUint32(&c.debug, 0)
 	}
 
-	c.mutex.RLock()
-	if c.connection != nil {
-		c.connection.WithDebug(debug)
-	}
-	c.mutex.RUnlock()
-
 	return c
 }
 
-func (c *Client) connect() (conn *connection, err error) {
-	c.mutex.RLock()
-	conn = c.connection
-	address := c.address
-	c.mutex.RUnlock()
-
-	if conn == nil {
-		conn, err = newConnection(address)
-		if err != nil {
-			return nil, err
-		}
-
-		conn.WithDebug(c.Debug())
-		conn.WithID(c.connectionID)
-
-		c.mutex.Lock()
-		c.connection = conn
-		c.mutex.Unlock()
-
-		ctx := context.Background()
-
-		_, err = c.Hello(ctx)
-		if err != nil {
-			c.mutex.Lock()
-			c.connection = nil
-			c.mutex.Unlock()
-
-			return nil, err
-		}
-
-		if c.connectionPing {
-			go c.keepalive()
-		}
+func (c *Client) Close() (err error) {
+	err = c.connectionCheck()
+	if err == nil {
+		err = c.write(context.Background(), &DisconnectRequest{})
 	}
 
-	return conn, err
-}
-
-func (c *Client) Clone() (*Client, error) {
-	c.mutex.RLock()
-	clientId := c.clientID
-	c.mutex.RUnlock()
-
-	client := New(c.address, c.password).
-		WithDebug(c.Debug()).
-		WithClientID(clientId)
-	client.connectionID = c.connectionID + 1
-
-	return client, nil
-}
-
-func (c *Client) Close() error {
-	c.mutex.RLock()
-	conn := c.connection
-	c.mutex.RUnlock()
-
-	if conn != nil {
-		if _, err := c.invoke(context.Background(), &DisconnectRequest{}); err != nil {
-			return err
-		}
-
-		if err := conn.Close(); err != nil {
-			return err
-		}
-
-		c.mutex.Lock()
-		c.connection = nil
-		close(c.done)
-		c.mutex.Unlock()
-	}
-
-	atomic.StoreInt32(&c.authenticated, authNone)
-
-	return nil
-}
-
-func (c *Client) invoke(ctx context.Context, request proto.Message) (proto.Message, error) {
-	conn, err := c.connect()
-	if err != nil {
-		return nil, err
-	}
-
-	conn.Lock()
-	defer conn.Unlock()
-
-	if err := conn.Write(ctx, request); err != nil {
-		return nil, err
-	}
-
-	return conn.Read(ctx)
-}
-
-func (c *Client) invokeNoDelay(ctx context.Context, request proto.Message) error {
-	conn, err := c.connect()
 	if err != nil {
 		return err
 	}
 
-	conn.Lock()
-	defer conn.Unlock()
-
-	return conn.Write(ctx, request)
-}
-
-func (c *Client) keepalive() {
-	done := make(chan struct{})
+	close(c.done)
 
 	c.mutex.Lock()
-	c.done = done
+	c.handlers = c.handlers[:0]
+	c.done = make(chan struct{})
 	c.mutex.Unlock()
 
-	ticker := time.NewTicker(keepAliveInterval)
+	c.connectionClose()
+	c.authenticateClose()
 
-	defer func() {
-		ticker.Stop()
-	}()
+	atomic.StoreUint32(&c.inited, 0)
+	atomic.StoreUint32(&c.restarted, 0)
 
-	for {
-		select {
-		case <-ticker.C:
-			_, err := c.Ping(context.Background())
-			if err != nil {
-				c.Close()
-				return
-			}
-
-		case <-done:
-			return
-		}
-	}
+	return nil
 }
 
-func (c *Client) checkAuthenticate(ctx context.Context) error {
-	switch atomic.LoadInt32(&c.authenticated) {
-	case authSuccess:
-		return nil
+func (c *Client) restart() {
+	atomic.StoreUint32(&c.restarted, 1)
 
-	case authFailed:
-		return ErrAuthenticated
+	c.connectionClose()
+	c.authenticateClose()
 
-	default:
-		response, err := c.Connect(ctx)
+	atomic.StoreUint32(&c.inited, 0)
+}
+
+func (c *Client) isRestart() bool {
+	return atomic.LoadUint32(&c.restarted) == 1
+}
+
+func (c *Client) init() (err error) {
+	inited := atomic.LoadUint32(&c.inited)
+	if inited == 0 {
+		now := time.Now()
+		deadline := time.Unix(0, atomic.LoadInt64(&c.closeDeadline))
+
+		if deadline.After(now) {
+			time.Sleep(deadline.Sub(now))
+		}
+
+		err = c.connectionInit()
 		if err != nil {
-			atomic.StoreInt32(&c.authenticated, authNone)
 			return err
 		}
 
-		if response.GetInvalidPassword() {
-			atomic.StoreInt32(&c.authenticated, authFailed)
-			return ErrAuthenticateFailed
+		c.connectionRun()
+
+		err = c.write(context.Background(), &HelloRequest{ClientInfo: c.ClientID()})
+		if err != nil {
+			c.connectionClose()
 		}
 
-		atomic.StoreInt32(&c.authenticated, authSuccess)
-		return nil
+		err = c.authenticateRun()
+		if err != nil {
+			c.authenticateClose()
+		}
+
+		atomic.StoreUint32(&c.inited, 1)
+		atomic.StoreUint32(&c.restarted, 0)
 	}
 
+	return err
+}
+
+func (c *Client) handlerRegister(h handler) {
+	c.mutex.Lock()
+	c.handlers = append(c.handlers, h)
+	c.mutex.Unlock()
+}
+
+func (c *Client) handle(message proto.Message, err error) {
+	c.mutex.Lock()
+	for i := len(c.handlers) - 1; i >= 0; i-- {
+		if c.handlers[i](message, err) {
+			c.handlers = append(c.handlers[:i], c.handlers[i+1:]...)
+		}
+	}
+	c.mutex.Unlock()
+}
+
+func (c *Client) invoke(ctx context.Context, request proto.Message, messageName string) (message proto.Message, err error) {
+	chMessage := make(chan proto.Message, 1)
+	chErr := make(chan error, 1)
+
+	err = c.invokeHandler(ctx, request, func(message proto.Message, err error) bool {
+		if err != nil {
+			chErr <- err
+			return true
+		}
+
+		if messageName == "" || strings.Compare(proto.MessageName(message), messageName) == 0 {
+			chMessage <- message
+			return true
+		}
+
+		return false
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	select {
+	case message := <-chMessage:
+		return message, nil
+
+	case err := <-chErr:
+		return nil, err
+	}
+}
+
+func (c *Client) invokeHandler(ctx context.Context, request proto.Message, h handler) (err error) {
+	if err = c.init(); err != nil {
+		return err
+	}
+
+	if err = c.write(ctx, request); err != nil {
+		return err
+	}
+
+	c.handlerRegister(h)
 	return nil
+}
+
+func (c *Client) invokeNoDelay(ctx context.Context, request proto.Message) error {
+	if err := c.init(); err != nil {
+		return err
+	}
+
+	return c.write(ctx, request)
 }

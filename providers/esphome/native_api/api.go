@@ -2,14 +2,12 @@ package native_api
 
 import (
 	"context"
-	"strings"
-	"time"
 
 	"github.com/golang/protobuf/proto"
 )
 
 func (c *Client) Hello(ctx context.Context) (*HelloResponse, error) {
-	out, err := c.invoke(ctx, &HelloRequest{ClientInfo: c.ClientID()})
+	out, err := c.invoke(ctx, &HelloRequest{ClientInfo: c.ClientID()}, "native_api.HelloResponse")
 	if err != nil {
 		return nil, err
 	}
@@ -17,8 +15,8 @@ func (c *Client) Hello(ctx context.Context) (*HelloResponse, error) {
 	return out.(*HelloResponse), nil
 }
 
-func (c *Client) Connect(ctx context.Context) (*ConnectResponse, error) {
-	out, err := c.invoke(ctx, &ConnectRequest{Password: c.password})
+func (c *Client) Connect(ctx context.Context, password string) (*ConnectResponse, error) {
+	out, err := c.invoke(ctx, &ConnectRequest{Password: password}, "native_api.ConnectResponse")
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +25,7 @@ func (c *Client) Connect(ctx context.Context) (*ConnectResponse, error) {
 }
 
 func (c *Client) Disconnect(ctx context.Context) (*DisconnectResponse, error) {
-	out, err := c.invoke(ctx, &DisconnectRequest{})
+	out, err := c.invoke(ctx, &DisconnectRequest{}, "native_api.DisconnectResponse")
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +34,7 @@ func (c *Client) Disconnect(ctx context.Context) (*DisconnectResponse, error) {
 }
 
 func (c *Client) Ping(ctx context.Context) (*PingResponse, error) {
-	out, err := c.invoke(ctx, &PingRequest{})
+	out, err := c.invoke(ctx, &PingRequest{}, "native_api.PingResponse")
 	if err != nil {
 		return nil, err
 	}
@@ -44,99 +42,127 @@ func (c *Client) Ping(ctx context.Context) (*PingResponse, error) {
 }
 
 func (c *Client) DeviceInfo(ctx context.Context) (*DeviceInfoResponse, error) {
-	out, err := c.invoke(ctx, &DeviceInfoRequest{})
+	out, err := c.invoke(ctx, &DeviceInfoRequest{}, "native_api.DeviceInfoResponse")
 	if err != nil {
 		return nil, err
 	}
 	return out.(*DeviceInfoResponse), nil
 }
 
-func (c *Client) ListEntities(ctx context.Context) ([]proto.Message, error) {
-	if err := c.checkAuthenticate(ctx); err != nil {
+func (c *Client) ListEntities(ctx context.Context) (_ []proto.Message, err error) {
+	chMessages := make(chan proto.Message, 1)
+	chDone := make(chan error, 1)
+
+	err = c.invokeHandler(ctx, &ListEntitiesRequest{}, func(message proto.Message, err error) bool {
+		if err != nil {
+			chDone <- err
+			return true
+		}
+
+		switch proto.MessageName(message) {
+		case "native_api.ListEntitiesBinarySensorResponse",
+			"native_api.ListEntitiesCoverResponse",
+			"native_api.ListEntitiesFanResponse",
+			"native_api.ListEntitiesLightResponse",
+			"native_api.ListEntitiesSensorResponse",
+			"native_api.ListEntitiesSwitchResponse",
+			"native_api.ListEntitiesTextSensorResponse",
+			"native_api.ListEntitiesServicesResponse",
+			"native_api.ListEntitiesCameraResponse",
+			"native_api.ListEntitiesClimateResponse":
+			chMessages <- message
+
+		case "native_api.ListEntitiesDoneResponse":
+			close(chDone)
+			return true
+		}
+
+		return false
+	})
+
+	if err != nil {
 		return nil, err
 	}
 
 	messages := make([]proto.Message, 0)
 
-	message, err := c.invoke(ctx, &ListEntitiesRequest{})
+	for {
+		select {
+		case err := <-chDone:
+			if err != nil {
+				return nil, err
+			}
+
+			return messages, nil
+
+		case message := <-chMessages:
+			messages = append(messages, message)
+		}
+	}
+}
+
+func (c *Client) SubscribeStates(ctx context.Context) (_ <-chan proto.Message, err error) {
+	chMessages := make(chan proto.Message, 1)
+
+	err = c.invokeHandler(ctx, &SubscribeStatesRequest{}, func(message proto.Message, err error) bool {
+		if err != nil {
+			close(chMessages)
+			return true
+		}
+
+		switch proto.MessageName(message) {
+		case "native_api.BinarySensorStateResponse",
+			"native_api.CoverStateResponse",
+			"native_api.FanStateResponse",
+			"native_api.LightStateResponse",
+			"native_api.SensorStateResponse",
+			"native_api.SwitchStateResponse",
+			"native_api.TextSensorStateResponse",
+			"native_api.SubscribeHomeAssistantStateResponse",
+			"native_api.HomeAssistantStateResponse",
+			"native_api.ClimateStateResponse":
+			chMessages <- message
+		}
+
+		return false
+	})
+
 	if err != nil {
 		return nil, err
 	}
 
-	messages = append(messages, message)
+	return chMessages, err
+}
 
-	for {
-		message, err = c.connection.Read(ctx)
+func (c *Client) SubscribeLogs(ctx context.Context, logLevel LogLevel, dumpConfig bool) (_ <-chan proto.Message, err error) {
+	chMessages := make(chan proto.Message, 1)
+
+	err = c.invokeHandler(ctx, &SubscribeLogsRequest{Level: logLevel, DumpConfig: dumpConfig}, func(message proto.Message, err error) bool {
 		if err != nil {
-			return messages, err
+			close(chMessages)
+			return true
 		}
 
-		if strings.Compare(proto.MessageName(message), "native_api.ListEntitiesDoneResponse") == 0 {
-			return messages, nil
+		if proto.MessageName(message) == "native_api.SubscribeLogsResponse" {
+			chMessages <- message
 		}
-	}
 
-	return messages, nil
-}
-
-func (c *Client) SubscribeStates(ctx context.Context) (<-chan proto.Message, <-chan error) {
-	client, err := c.Clone()
-	if err == nil {
-		client.connectionPing = false
-
-		err = client.checkAuthenticate(ctx)
-	}
+		return false
+	})
 
 	if err != nil {
-		chMessage := make(chan proto.Message)
-		chError := make(chan error)
-
-		go func() {
-			chError <- err
-
-			close(chMessage)
-			close(chError)
-		}()
-
-		return chMessage, chError
+		return nil, err
 	}
 
-	subscribe := NewSubscribe(client, ctx, &SubscribeStatesRequest{}, time.Second)
-	return subscribe.NextMessage(), subscribe.NextError()
-}
-
-func (c *Client) SubscribeLogs(ctx context.Context, logLevel LogLevel, dumpConfig bool) (<-chan proto.Message, <-chan error) {
-	client, err := c.Clone()
-	if err == nil {
-		client.connectionPing = false
-
-		err = client.checkAuthenticate(ctx)
-	}
-
-	if err != nil {
-		chMessage := make(chan proto.Message)
-		chError := make(chan error)
-
-		go func() {
-			chError <- err
-
-			close(chMessage)
-			close(chError)
-		}()
-
-		return chMessage, chError
-	}
-
-	subscribe := NewSubscribe(client, ctx, &SubscribeLogsRequest{Level: logLevel, DumpConfig: dumpConfig}, time.Second)
-	return subscribe.NextMessage(), subscribe.NextError()
+	return chMessages, err
 }
 
 func (c *Client) SubscribeHomeassistantServices(ctx context.Context) (*HomeassistantServiceResponse, error) {
-	if err := c.checkAuthenticate(ctx); err != nil {
+	if err := c.authenticateCheck(ctx); err != nil {
 		return nil, err
 	}
 
-	out, err := c.invoke(ctx, &SubscribeHomeassistantServicesRequest{})
+	out, err := c.invoke(ctx, &SubscribeHomeassistantServicesRequest{}, "native_api.HomeassistantServiceResponse")
 	if err != nil {
 		return nil, err
 	}
@@ -144,11 +170,11 @@ func (c *Client) SubscribeHomeassistantServices(ctx context.Context) (*Homeassis
 }
 
 func (c *Client) SubscribeHomeAssistantStates(ctx context.Context) (*SubscribeHomeAssistantStateResponse, error) {
-	if err := c.checkAuthenticate(ctx); err != nil {
+	if err := c.authenticateCheck(ctx); err != nil {
 		return nil, err
 	}
 
-	out, err := c.invoke(ctx, &SubscribeHomeAssistantStatesRequest{})
+	out, err := c.invoke(ctx, &SubscribeHomeAssistantStatesRequest{}, "native_api.SubscribeHomeAssistantStateResponse")
 	if err != nil {
 		return nil, err
 	}
@@ -156,7 +182,7 @@ func (c *Client) SubscribeHomeAssistantStates(ctx context.Context) (*SubscribeHo
 }
 
 func (c *Client) GetTime(ctx context.Context) (*GetTimeResponse, error) {
-	out, err := c.invoke(ctx, &GetTimeRequest{})
+	out, err := c.invoke(ctx, &GetTimeRequest{}, "native_api.GetTimeResponse")
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +190,7 @@ func (c *Client) GetTime(ctx context.Context) (*GetTimeResponse, error) {
 }
 
 func (c *Client) ExecuteService(ctx context.Context, key uint32, args []*ExecuteServiceArgument) error {
-	if err := c.checkAuthenticate(ctx); err != nil {
+	if err := c.authenticateCheck(ctx); err != nil {
 		return err
 	}
 
@@ -172,7 +198,7 @@ func (c *Client) ExecuteService(ctx context.Context, key uint32, args []*Execute
 }
 
 func (c *Client) CoverCommand(ctx context.Context, in *CoverCommandRequest) error {
-	if err := c.checkAuthenticate(ctx); err != nil {
+	if err := c.authenticateCheck(ctx); err != nil {
 		return err
 	}
 
@@ -180,7 +206,7 @@ func (c *Client) CoverCommand(ctx context.Context, in *CoverCommandRequest) erro
 }
 
 func (c *Client) FanCommand(ctx context.Context, in *FanCommandRequest) error {
-	if err := c.checkAuthenticate(ctx); err != nil {
+	if err := c.authenticateCheck(ctx); err != nil {
 		return err
 	}
 
@@ -188,7 +214,7 @@ func (c *Client) FanCommand(ctx context.Context, in *FanCommandRequest) error {
 }
 
 func (c *Client) LightCommand(ctx context.Context, in *LightCommandRequest) error {
-	if err := c.checkAuthenticate(ctx); err != nil {
+	if err := c.authenticateCheck(ctx); err != nil {
 		return err
 	}
 
@@ -196,7 +222,7 @@ func (c *Client) LightCommand(ctx context.Context, in *LightCommandRequest) erro
 }
 
 func (c *Client) SwitchCommand(ctx context.Context, in *SwitchCommandRequest) error {
-	if err := c.checkAuthenticate(ctx); err != nil {
+	if err := c.authenticateCheck(ctx); err != nil {
 		return err
 	}
 
@@ -204,11 +230,11 @@ func (c *Client) SwitchCommand(ctx context.Context, in *SwitchCommandRequest) er
 }
 
 func (c *Client) CameraImage(ctx context.Context, in *CameraImageRequest) (*CameraImageResponse, error) {
-	if err := c.checkAuthenticate(ctx); err != nil {
+	if err := c.authenticateCheck(ctx); err != nil {
 		return nil, err
 	}
 
-	out, err := c.invoke(ctx, in)
+	out, err := c.invoke(ctx, in, "native_api.CameraImageResponse")
 	if err != nil {
 		return nil, err
 	}
@@ -216,7 +242,7 @@ func (c *Client) CameraImage(ctx context.Context, in *CameraImageRequest) (*Came
 }
 
 func (c *Client) ClimateCommand(ctx context.Context, in *ClimateCommandRequest) error {
-	if err := c.checkAuthenticate(ctx); err != nil {
+	if err := c.authenticateCheck(ctx); err != nil {
 		return err
 	}
 
