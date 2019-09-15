@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"sync"
 	"sync/atomic"
-	"time"
 )
 
 const (
@@ -59,14 +58,6 @@ func (c *connection) Close() error {
 	return c.connection.Close()
 }
 
-func (c *connection) deadline(ctx context.Context) (deadline time.Time) {
-	if d, ok := ctx.Deadline(); ok {
-		deadline = d
-	}
-
-	return deadline
-}
-
 func (c *connection) Write(ctx context.Context, request proto.Message) error {
 	requestType, ok := messageTypesByName[proto.MessageName(request)]
 	if !ok {
@@ -78,36 +69,52 @@ func (c *connection) Write(ctx context.Context, request proto.Message) error {
 		return err
 	}
 
-	if err := c.connection.SetWriteDeadline(c.deadline(ctx)); err != nil {
-		return err
-	}
-
 	requestPacket := make([]byte, 3, len(requestPayload)+3)
 	requestPacket[0] = packetMagicByte
 	requestPacket[1] = byte(len(requestPayload))
 	requestPacket[2] = requestType
 	requestPacket = append(requestPacket, requestPayload...)
 
+	if deadline, ok := ctx.Deadline(); ok {
+		err = c.connection.SetWriteDeadline(deadline)
+	}
+
+	if err == nil {
+		_, err = c.connection.Write(requestPacket)
+	}
+
+	if err != nil {
+		c.connectionCheck()
+		return err
+	}
+
 	if atomic.LoadInt32(&c.debug) != 0 {
 		println(">>> ")
 		println(hex.Dump(requestPacket))
 	}
 
-	_, err = c.connection.Write(requestPacket)
-	return err
+	return nil
 }
 
 func (c *connection) Read(ctx context.Context) (proto.Message, error) {
-	err := c.connection.SetReadDeadline(c.deadline(ctx))
-	if err != nil {
-		return nil, err
+	var err error
+
+	if deadline, ok := ctx.Deadline(); ok {
+		err = c.connection.SetReadDeadline(deadline)
 	}
 
-	var n int
-	responsePacketHead := make([]byte, 3)
+	var (
+		n                  int
+		responsePacketHead []byte
+	)
 
-	n, err = c.connection.Read(responsePacketHead)
+	if err == nil {
+		responsePacketHead = make([]byte, 3)
+		n, err = c.connection.Read(responsePacketHead)
+	}
+
 	if err != nil {
+		c.connectionCheck()
 		return nil, err
 	}
 
@@ -147,7 +154,9 @@ func (c *connection) Read(ctx context.Context) (proto.Message, error) {
 	// parse payload
 	responsePacketPayload := make([]byte, responsePacketHead[1])
 	n, err = c.connection.Read(responsePacketPayload)
+
 	if err != nil {
+		c.connectionCheck()
 		return nil, err
 	}
 
@@ -160,4 +169,11 @@ func (c *connection) Read(ctx context.Context) (proto.Message, error) {
 	}
 
 	return response, nil
+}
+
+func (c *connection) connectionCheck() {
+	if e := ConnectionCheck(c.connection); e != nil {
+		// TODO:
+		//c.reset()
+	}
 }

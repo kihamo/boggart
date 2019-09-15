@@ -217,43 +217,6 @@ func (c *Client) invokeNoDelay(ctx context.Context, request proto.Message) error
 	return conn.Write(ctx, request)
 }
 
-func (c *Client) invokeMulti(ctx context.Context, request proto.Message, endType string) ([]proto.Message, error) {
-	conn, err := c.connect()
-	if err != nil {
-		return nil, err
-	}
-
-	conn.Lock()
-	defer conn.Unlock()
-
-	if err := conn.Write(ctx, request); err != nil {
-		return nil, err
-	}
-
-	responses := make([]proto.Message, 0)
-
-	for {
-		select {
-		case <-ctx.Done():
-			return responses, ctx.Err()
-
-		default:
-			response, err := conn.Read(ctx)
-			if err != nil {
-				return responses, err
-			}
-
-			responses = append(responses, response)
-
-			if strings.Compare(proto.MessageName(response), endType) == 0 {
-				return responses, nil
-			}
-		}
-	}
-
-	return responses, nil
-}
-
 func (c *Client) keepalive() {
 	done := make(chan struct{})
 
@@ -357,26 +320,33 @@ func (c *Client) ListEntities(ctx context.Context, in *ListEntitiesRequest) ([]p
 		return nil, err
 	}
 
-	out, err := c.invokeMulti(ctx, in, "native_api.ListEntitiesDoneResponse")
-	if err != nil {
-		return nil, err
+	ctxSub, ctxCancel := context.WithCancel(ctx)
+	defer ctxCancel()
+
+	subscribe := NewSubscribe(c, ctxSub, in, time.Second)
+	messages := make([]proto.Message, 0)
+
+	for {
+		select {
+		case message := <-subscribe.NextMessage():
+			if strings.Compare(proto.MessageName(message), "native_api.ListEntitiesDoneResponse") == 0 {
+				return messages, nil
+			}
+
+			messages = append(messages, message)
+
+		case err := <-subscribe.NextError():
+			return nil, err
+		}
 	}
 
-	return out[:len(out)-1], nil
+	return messages, nil
 }
 
 // TODO: требует постоянного соединения, блочит остальные запросы,
 // надо вынести в отдельную обработку с каналом результатов на выходе
 func (c *Client) SubscribeStates(ctx context.Context, in *SubscribeStatesRequest) ([]proto.Message, error) {
-	if err := c.checkAuthenticate(ctx); err != nil {
-		return nil, err
-	}
-
-	out, err := c.invokeMulti(ctx, in, "")
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
+	return nil, nil
 }
 
 func (c *Client) SubscribeLogs(ctx context.Context, in *SubscribeLogsRequest) (*SubscribeLogsResponse, error) {
