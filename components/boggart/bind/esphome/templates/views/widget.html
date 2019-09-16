@@ -1,0 +1,28 @@
+{{ define "content" }}
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_content">
+                <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>{{ i18n "Key" . }}</th>
+                            <th>{{ i18n "Name" . }}</th>
+                            <th>{{ i18n "State" . }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{ range $i, $entity := .entities }}
+                        <tr>
+                            <td>{{ $entity.Key }}</td>
+                            <td>{{ $entity.Name }}</td>
+                            <td>{{ $entity.State }}</td>
+                        </tr>
+                        {{ end }}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
