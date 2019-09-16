@@ -81,9 +81,13 @@ func (c *Client) connectionGet() net.Conn {
 }
 
 func (c *Client) loop() {
+	c.mutex.RLock()
+	done := c.done
+	c.mutex.RUnlock()
+
 	for {
 		select {
-		case <-c.done:
+		case <-done:
 			return
 
 		default:

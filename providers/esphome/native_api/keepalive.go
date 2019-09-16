@@ -16,9 +16,13 @@ func (c *Client) keepalive() {
 		ticker.Stop()
 	}()
 
+	c.mutex.RLock()
+	done := c.done
+	c.mutex.RUnlock()
+
 	for {
 		select {
-		case <-c.done:
+		case <-done:
 			return
 
 		case <-ticker.C:
