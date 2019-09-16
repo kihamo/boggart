@@ -78,7 +78,7 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 			b.operator.Set(plmn.Payload.FullName)
 			return nil, b.MQTTPublishAsync(
 				ctx,
-				MQTTPublishTopicOperator.Format(mqtt.NameReplace(deviceInfo.Payload.SerialNumber)),
+				b.config.TopicOperator.Format(deviceInfo.Payload.SerialNumber),
 				plmn.Payload.FullName)
 		} else {
 			return nil, err
@@ -94,13 +94,12 @@ func (b *Bind) taskBalanceUpdater(ctx context.Context) (interface{}, error) {
 	}
 
 	sn := b.SerialNumber()
-	snMQTT := mqtt.NameReplace(sn)
 
 	balance, err := b.Balance(ctx)
 	if err == nil {
 		metricBalance.With("serial_number", sn).Set(balance)
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicBalance.Format(snMQTT), balance); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicBalance.Format(sn), balance); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
@@ -138,7 +137,7 @@ func (b *Bind) taskSMSChecker(ctx context.Context) (interface{}, error) {
 
 			isSpecial := b.checkSpecialSMS(ctx, s)
 			if !isSpecial {
-				if e = b.MQTTPublishAsync(ctx, MQTTPublishTopicSMS.Format(sn), payload); e != nil {
+				if e = b.MQTTPublishAsync(ctx, b.config.TopicSMS.Format(sn), payload); e != nil {
 					err = multierr.Append(err, e)
 					continue
 				}
@@ -165,14 +164,13 @@ func (b *Bind) taskSystemUpdater(ctx context.Context) (_ interface{}, err error)
 	}
 
 	sn := b.SerialNumber()
-	snMQTT := mqtt.NameReplace(sn)
 
 	// signal
 	if response, e := b.client.Device.GetDeviceSignal(device.NewGetDeviceSignalParamsWithContext(ctx)); e == nil {
 		if val, e := strconv.ParseInt(strings.TrimRight(response.Payload.RSSI, "dBm"), 10, 64); e == nil {
 			metricSignalRSSI.With("serial_number", sn).Set(float64(val))
 
-			if e = b.MQTTPublishAsync(ctx, MQTTPublishSignalRSSI.Format(snMQTT), val); e != nil {
+			if e = b.MQTTPublishAsync(ctx, b.config.TopicSignalRSSI.Format(sn), val); e != nil {
 				err = multierr.Append(err, e)
 			}
 		} else {
@@ -182,7 +180,7 @@ func (b *Bind) taskSystemUpdater(ctx context.Context) (_ interface{}, err error)
 		if val, e := strconv.ParseInt(strings.TrimRight(response.Payload.RSRP, "dBm"), 10, 64); e == nil {
 			metricSignalRSRP.With("serial_number", sn).Set(float64(val))
 
-			if e = b.MQTTPublishAsync(ctx, MQTTPublishSignalRSRP.Format(snMQTT), val); e != nil {
+			if e = b.MQTTPublishAsync(ctx, b.config.TopicSignalRSRP.Format(sn), val); e != nil {
 				err = multierr.Append(err, e)
 			}
 		} else {
@@ -192,7 +190,7 @@ func (b *Bind) taskSystemUpdater(ctx context.Context) (_ interface{}, err error)
 		if val, e := strconv.ParseInt(strings.TrimRight(response.Payload.RSRQ, "dBm"), 10, 64); e == nil {
 			metricSignalRSRQ.With("serial_number", sn).Set(float64(val))
 
-			if e = b.MQTTPublishAsync(ctx, MQTTPublishSignalRSRQ.Format(snMQTT), val); e != nil {
+			if e = b.MQTTPublishAsync(ctx, b.config.TopicSignalRSRQ.Format(sn), val); e != nil {
 				err = multierr.Append(err, e)
 			}
 		} else {
@@ -202,7 +200,7 @@ func (b *Bind) taskSystemUpdater(ctx context.Context) (_ interface{}, err error)
 		if val, e := strconv.ParseInt(strings.TrimRight(response.Payload.SINR, "dBm"), 10, 64); e == nil {
 			metricSignalSINR.With("serial_number", sn).Set(float64(val))
 
-			if e = b.MQTTPublishAsync(ctx, MQTTPublishSignalSINR.Format(snMQTT), val); e != nil {
+			if e = b.MQTTPublishAsync(ctx, b.config.TopicSignalSINR.Format(sn), val); e != nil {
 				err = multierr.Append(err, e)
 			}
 		} else {
@@ -215,7 +213,7 @@ func (b *Bind) taskSystemUpdater(ctx context.Context) (_ interface{}, err error)
 	// status
 	if response, e := b.client.Monitoring.GetMonitoringStatus(monitoring.NewGetMonitoringStatusParamsWithContext(ctx)); e == nil {
 		metricSignalLevel.With("serial_number", sn).Set(float64(response.Payload.SignalIcon))
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishSignalLevel.Format(snMQTT), response.Payload.SignalIcon); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicSignalLevel.Format(sn), response.Payload.SignalIcon); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {
@@ -225,17 +223,17 @@ func (b *Bind) taskSystemUpdater(ctx context.Context) (_ interface{}, err error)
 	// traffic
 	if response, e := b.client.Monitoring.GetMonitoringTrafficStatistics(monitoring.NewGetMonitoringTrafficStatisticsParamsWithContext(ctx)); e == nil {
 		metricTotalConnectTime.With("serial_number", sn).Set(float64(response.Payload.TotalConnectTime))
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishConnectionTime.Format(snMQTT), response.Payload.TotalConnectTime); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicConnectionTime.Format(sn), response.Payload.TotalConnectTime); e != nil {
 			err = multierr.Append(err, e)
 		}
 
 		metricTotalDownload.With("serial_number", sn).Set(float64(response.Payload.TotalDownload))
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishConnectionDownload.Format(snMQTT), response.Payload.TotalDownload); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicConnectionDownload.Format(sn), response.Payload.TotalDownload); e != nil {
 			err = multierr.Append(err, e)
 		}
 
 		metricTotalUpload.With("serial_number", sn).Set(float64(response.Payload.TotalUpload))
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishConnectionUpload.Format(snMQTT), response.Payload.TotalUpload); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicConnectionUpload.Format(sn), response.Payload.TotalUpload); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {

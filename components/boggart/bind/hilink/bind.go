@@ -10,7 +10,6 @@ import (
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/providers/hilink"
 	"github.com/kihamo/boggart/providers/hilink/client/device"
 	"github.com/kihamo/boggart/providers/hilink/client/ussd"
@@ -101,7 +100,6 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, sms *models.SMSListMessagesI
 	}
 
 	sn := b.SerialNumber()
-	snMQTT := mqtt.NameReplace(sn)
 
 	// limit traffic
 	match := op.SMSLimitTrafficRegexp.FindStringSubmatch(sms.Content)
@@ -113,7 +111,7 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, sms *models.SMSListMessagesI
 						value *= op.SMSLimitTrafficFactor
 
 						metricLimitInternetTraffic.With("serial_number", sn).Set(value)
-						b.MQTTPublishAsync(ctx, MQTTPublishTopicLimitInternetTraffic.Format(snMQTT), uint64(value))
+						b.MQTTPublishAsync(ctx, b.config.TopicLimitInternetTraffic.Format(sn), uint64(value))
 
 						b.limitInternetTrafficIndex.Set(sms.Index)
 					}
