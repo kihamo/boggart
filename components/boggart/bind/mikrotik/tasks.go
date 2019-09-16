@@ -14,15 +14,15 @@ import (
 
 func (b *Bind) Tasks() []workers.Task {
 	taskLiveness := task.NewFunctionTask(b.taskLiveness)
-	taskLiveness.SetTimeout(b.livenessTimeout)
+	taskLiveness.SetTimeout(b.config.LivenessTimeout)
 	taskLiveness.SetRepeats(-1)
-	taskLiveness.SetRepeatInterval(b.livenessInterval)
-	taskLiveness.SetName("liveness-" + b.host)
+	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
+	taskLiveness.SetName("liveness-" + b.address.Host)
 
 	taskStateUpdater := task.NewFunctionTask(b.taskUpdater)
 	taskStateUpdater.SetRepeats(-1)
-	taskStateUpdater.SetRepeatInterval(b.updaterInterval)
-	taskStateUpdater.SetName("updater-" + b.host)
+	taskStateUpdater.SetRepeatInterval(b.config.UpdaterInterval)
+	taskStateUpdater.SetName("updater-" + b.address.Host)
 
 	return []workers.Task{
 		taskLiveness,

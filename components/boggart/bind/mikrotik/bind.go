@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
 	"regexp"
-	"time"
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
@@ -21,20 +21,13 @@ var (
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
-
-	provider     *mikrotik.Client
-	host         string
-	syslogClient string
-
-	livenessInterval time.Duration
-	livenessTimeout  time.Duration
-	updaterInterval  time.Duration
-
+	config            *Config
+	address           *url.URL
+	provider          *mikrotik.Client
 	serialNumberLock  chan struct{}
 	serialNumberReady *atomic.Bool
-
-	clientWiFi *PreloadMap
-	clientVPN  *PreloadMap
+	clientWiFi        *PreloadMap
+	clientVPN         *PreloadMap
 }
 
 type Mac struct {
@@ -126,7 +119,7 @@ func (b *Bind) updateWiFiClient(ctx context.Context) {
 
 		if _, ok := b.clientWiFi.Load(key); !ok {
 			b.clientWiFi.Store(key, true)
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicWiFiMACState.Format(sn, key), true)
+			_ = b.MQTTPublishAsync(ctx, b.config.TopicWiFiMACState.Format(sn, key), true)
 		}
 	}
 
@@ -134,7 +127,7 @@ func (b *Bind) updateWiFiClient(ctx context.Context) {
 		b.clientWiFi.Range(func(key, value interface{}) bool {
 			if _, ok := active[key]; !ok {
 				b.clientWiFi.Delete(key)
-				_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicWiFiMACState.Format(sn, key), false)
+				_ = b.MQTTPublishAsync(ctx, b.config.TopicWiFiMACState.Format(sn, key), false)
 			}
 
 			return true
@@ -158,7 +151,7 @@ func (b *Bind) updateVPNClient(ctx context.Context) {
 
 		if _, ok := b.clientVPN.Load(key); !ok {
 			b.clientVPN.Store(key, true)
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicVPNLoginState.Format(sn, key), true)
+			_ = b.MQTTPublishAsync(ctx, b.config.TopicVPNLoginState.Format(sn, key), true)
 		}
 	}
 
@@ -166,7 +159,7 @@ func (b *Bind) updateVPNClient(ctx context.Context) {
 		b.clientVPN.Range(func(key, value interface{}) bool {
 			if _, ok := active[key]; !ok {
 				b.clientVPN.Delete(key)
-				_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicVPNLoginState.Format(sn, key), false)
+				_ = b.MQTTPublishAsync(ctx, b.config.TopicVPNLoginState.Format(sn, key), false)
 			}
 
 			return true

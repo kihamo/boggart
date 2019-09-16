@@ -18,7 +18,7 @@ type Listener struct {
 }
 
 func (b *Bind) Listeners() []workers.ListenerWithEvents {
-	if b.syslogClient == "" {
+	if b.config.SyslogClient == "" {
 		return nil
 	}
 
@@ -43,7 +43,7 @@ func (l *Listener) Events() []workers.Event {
 }
 
 func (l *Listener) Name() string {
-	return "bind-mikrotik-" + l.bind.syslogClient
+	return "bind-mikrotik-" + l.bind.config.SyslogClient
 }
 
 func (l *Listener) Run(ctx context.Context, event workers.Event, t time.Time, args ...interface{}) {
@@ -52,7 +52,7 @@ func (l *Listener) Run(ctx context.Context, event workers.Event, t time.Time, ar
 		message := args[0].(map[string]interface{})
 
 		client, ok := message["client"]
-		if !ok || client != l.bind.syslogClient {
+		if !ok || client != l.bind.config.SyslogClient {
 			return
 		}
 
@@ -92,11 +92,11 @@ func (l *Listener) Run(ctx context.Context, event workers.Event, t time.Time, ar
 			switch check[3] {
 			case "connected":
 				// TODO:
-				_ = l.bind.MQTTPublishAsync(ctx, MQTTPublishTopicWiFiConnectedMAC.Format(sn), login)
+				_ = l.bind.MQTTPublishAsync(ctx, l.bind.config.TopicWiFiConnectedMAC.Format(sn), login)
 				l.bind.updateWiFiClient(ctx)
 			case "disconnected":
 				// TODO:
-				_ = l.bind.MQTTPublishAsync(ctx, MQTTPublishTopicWiFiDisconnectedMAC.Format(sn), login)
+				_ = l.bind.MQTTPublishAsync(ctx, l.bind.config.TopicWiFiDisconnectedMAC.Format(sn), login)
 				l.bind.updateWiFiClient(ctx)
 			}
 
@@ -116,11 +116,11 @@ func (l *Listener) Run(ctx context.Context, event workers.Event, t time.Time, ar
 			switch check[2] {
 			case "in":
 				// TODO:
-				_ = l.bind.MQTTPublishAsync(ctx, MQTTPublishTopicVPNConnectedLogin.Format(sn), login)
+				_ = l.bind.MQTTPublishAsync(ctx, l.bind.config.TopicVPNConnectedLogin.Format(sn), login)
 				l.bind.updateVPNClient(ctx)
 			case "out":
 				// TODO:
-				_ = l.bind.MQTTPublishAsync(ctx, MQTTPublishTopicVPNDisconnectedLogin.Format(sn), login)
+				_ = l.bind.MQTTPublishAsync(ctx, l.bind.config.TopicVPNDisconnectedLogin.Format(sn), login)
 				l.bind.updateVPNClient(ctx)
 			}
 		}

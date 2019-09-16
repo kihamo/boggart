@@ -14,18 +14,18 @@ type Type struct{}
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
-	u, _ := url.Parse(config.Address)
+	u, err := url.Parse(config.Address)
+	if err != nil {
+		return nil, err
+	}
+
 	username := u.User.Username()
 	password, _ := u.User.Password()
 
 	bind := &Bind{
-		provider:         mikrotik.NewClient(u.Host, username, password, time.Second*10),
-		host:             u.Host,
-		syslogClient:     config.SyslogClient,
-		livenessInterval: config.LivenessInterval,
-		livenessTimeout:  config.LivenessTimeout,
-		updaterInterval:  config.UpdaterInterval,
-
+		config:            config,
+		address:           u,
+		provider:          mikrotik.NewClient(u.Host, username, password, time.Second*10),
 		serialNumberLock:  make(chan struct{}),
 		serialNumberReady: atomic.NewBool(),
 	}

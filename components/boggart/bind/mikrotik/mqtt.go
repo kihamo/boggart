@@ -7,29 +7,20 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
-const (
-	MQTTPublishTopicWiFiMACState         mqtt.Topic = boggart.ComponentName + "/router/+/wifi/clients/+/state"
-	MQTTPublishTopicWiFiConnectedMAC     mqtt.Topic = boggart.ComponentName + "/router/+/wifi/clients/last/on/mac"
-	MQTTPublishTopicWiFiDisconnectedMAC  mqtt.Topic = boggart.ComponentName + "/router/+/wifi/clients/last/off/mac"
-	MQTTPublishTopicVPNLoginState        mqtt.Topic = boggart.ComponentName + "/router/+/vpn/clients/+/state"
-	MQTTPublishTopicVPNConnectedLogin    mqtt.Topic = boggart.ComponentName + "/router/+/vpn/clients/last/on/login"
-	MQTTPublishTopicVPNDisconnectedLogin mqtt.Topic = boggart.ComponentName + "/router/+/vpn/clients/last/off/login"
-)
-
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
-		MQTTPublishTopicWiFiMACState,
-		MQTTPublishTopicWiFiConnectedMAC,
-		MQTTPublishTopicWiFiDisconnectedMAC,
-		MQTTPublishTopicVPNLoginState,
-		MQTTPublishTopicVPNConnectedLogin,
-		MQTTPublishTopicVPNDisconnectedLogin,
+		b.config.TopicWiFiMACState,
+		b.config.TopicWiFiConnectedMAC,
+		b.config.TopicWiFiDisconnectedMAC,
+		b.config.TopicVPNLoginState,
+		b.config.TopicVPNConnectedLogin,
+		b.config.TopicVPNDisconnectedLogin,
 	}
 }
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTPublishTopicWiFiMACState, 0, b.callbackMQTTWiFiSync),
+		mqtt.NewSubscriber(b.config.TopicWiFiMACState, 0, b.callbackMQTTWiFiSync),
 	}
 }
 
@@ -45,7 +36,7 @@ func (b *Bind) callbackMQTTWiFiSync(ctx context.Context, client mqtt.Component, 
 	// проверяем наличие в списке, дождавшись первоначальной загрузки
 	value, ok := b.clientWiFi.LoadWait(key)
 
-	topic := MQTTPublishTopicWiFiMACState.Format(sn, key)
+	topic := b.config.TopicWiFiMACState.Format(sn, key)
 
 	// если в списке нет, значит удаляем из mqtt (если там не удалено)
 	if !ok {
