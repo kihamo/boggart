@@ -21,25 +21,25 @@ type Config struct {
 	EventsIgnoreInterval           time.Duration `mapstructure:"events_ignore_interval" yaml:"events_ignore_interval,omitempty"`
 	WidgetChannel                  uint64        `mapstructure:"widget_channel" yaml:"widget_channel,omitempty"`
 	PreviewRefreshInterval         time.Duration `mapstructure:"preview_refresh_interval" yaml:"preview_refresh_interval,omitempty"`
-	TopicPTZMove                   mqtt.Topic    `mapstructure:"topic_" yaml:"topic_"`
-	TopicPTZAbsolute               mqtt.Topic    `mapstructure:"topic_" yaml:"topic_"`
-	TopicPTZContinuous             mqtt.Topic    `mapstructure:"topic_" yaml:"topic_"`
-	TopicPTZRelative               mqtt.Topic    `mapstructure:"topic_" yaml:"topic_"`
-	TopicPTZPreset                 mqtt.Topic    `mapstructure:"topic_" yaml:"topic_"`
-	TopicPTZMomentary              mqtt.Topic    `mapstructure:"topic_" yaml:"topic_"`
-	TopicPTZStatusElevation        mqtt.Topic    `mapstructure:"topic_" yaml:"topic_"`
-	TopicPTZStatusAzimuth          mqtt.Topic    `mapstructure:"topic_" yaml:"topic_"`
-	TopicPTZStatusZoom             mqtt.Topic    `mapstructure:"topic_" yaml:"topic_"`
-	TopicEvent                     mqtt.Topic    `mapstructure:"topic_" yaml:"topic_"`
-	TopicStateModel                mqtt.Topic    `mapstructure:"topic_" yaml:"topic_"`
-	TopicStateFirmwareVersion      mqtt.Topic    `mapstructure:"topic_" yaml:"topic_"`
-	TopicStateFirmwareReleasedDate mqtt.Topic    `mapstructure:"topic_" yaml:"topic_"`
-	TopicStateUpTime               mqtt.Topic    `mapstructure:"topic_" yaml:"topic_"`
-	TopicStateMemoryUsage          mqtt.Topic    `mapstructure:"topic_" yaml:"topic_"`
-	TopicStateMemoryAvailable      mqtt.Topic    `mapstructure:"topic_" yaml:"topic_"`
-	TopicStateHDDCapacity          mqtt.Topic    `mapstructure:"topic_" yaml:"topic_"`
-	TopicStateHDDFree              mqtt.Topic    `mapstructure:"topic_" yaml:"topic_"`
-	TopicStateHDDUsage             mqtt.Topic    `mapstructure:"topic_" yaml:"topic_"`
+	TopicPTZMove                   mqtt.Topic    `mapstructure:"topic_ptz_move" yaml:"topic_ptz_move"`
+	TopicPTZAbsolute               mqtt.Topic    `mapstructure:"topic_ptz_absolute" yaml:"topic_ptz_absolute"`
+	TopicPTZContinuous             mqtt.Topic    `mapstructure:"topic_ptz_continuous" yaml:"topic_ptz_continuous"`
+	TopicPTZRelative               mqtt.Topic    `mapstructure:"topic_ptz_relative" yaml:"topic_ptz_relative"`
+	TopicPTZPreset                 mqtt.Topic    `mapstructure:"topic_ptz_preset" yaml:"topic_ptz_preset"`
+	TopicPTZMomentary              mqtt.Topic    `mapstructure:"topic_ptz_momentary" yaml:"topic_ptz_momentary"`
+	TopicPTZStatusElevation        mqtt.Topic    `mapstructure:"topic_ptz_status_elevation" yaml:"topic_ptz_status_elevation"`
+	TopicPTZStatusAzimuth          mqtt.Topic    `mapstructure:"topic_ptz_status_azimuth" yaml:"topic_ptz_status_azimuth"`
+	TopicPTZStatusZoom             mqtt.Topic    `mapstructure:"topic_ptz_status_zoom" yaml:"topic_ptz_status_zoom"`
+	TopicEvent                     mqtt.Topic    `mapstructure:"topic_event" yaml:"topic_event"`
+	TopicStateModel                mqtt.Topic    `mapstructure:"topic_state_model" yaml:"topic_state_model"`
+	TopicStateFirmwareVersion      mqtt.Topic    `mapstructure:"topic_state_firmware_version" yaml:"topic_state_firmware_version"`
+	TopicStateFirmwareReleasedDate mqtt.Topic    `mapstructure:"topic_state_firmware_released_date" yaml:"topic_state_firmware_released_date"`
+	TopicStateUpTime               mqtt.Topic    `mapstructure:"topic_state_up_time" yaml:"topic_state_up_time"`
+	TopicStateMemoryUsage          mqtt.Topic    `mapstructure:"topic_state_memory_usage" yaml:"topic_state_memory_usage"`
+	TopicStateMemoryAvailable      mqtt.Topic    `mapstructure:"topic_state_available" yaml:"topic_state_available"`
+	TopicStateHDDCapacity          mqtt.Topic    `mapstructure:"topic_state_hdd_capacity" yaml:"topic_state_hdd_capacity"`
+	TopicStateHDDFree              mqtt.Topic    `mapstructure:"topic_state_hdd_free" yaml:"topic_state_hdd_free"`
+	TopicStateHDDUsage             mqtt.Topic    `mapstructure:"topic_state_hdd_usage" yaml:"topic_state_hdd_usage"`
 }
 
 func (t Type) Config() interface{} {
