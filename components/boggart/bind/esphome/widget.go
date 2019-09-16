@@ -19,6 +19,7 @@ const (
 
 type entityRow struct {
 	Key         uint32
+	Type        string
 	Name        string
 	State       string
 	stateFormat string
@@ -37,32 +38,33 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		for _, message := range list {
 			var (
 				key         uint32
+				typeName    string
 				name        string
 				stateFormat string
 			)
 
 			switch v := message.(type) {
 			case *native_api.ListEntitiesBinarySensorResponse:
-				key, name = v.GetKey(), v.GetName()
+				typeName, key, name = "binary_sensor", v.GetKey(), v.GetName()
 			case *native_api.ListEntitiesCoverResponse:
-				key, name = v.GetKey(), v.GetName()
+				typeName, key, name = "cover", v.GetKey(), v.GetName()
 			case *native_api.ListEntitiesFanResponse:
-				key, name = v.GetKey(), v.GetName()
+				typeName, key, name = "fan", v.GetKey(), v.GetName()
 			case *native_api.ListEntitiesLightResponse:
-				key, name = v.GetKey(), v.GetName()
+				typeName, key, name = "light", v.GetKey(), v.GetName()
 			case *native_api.ListEntitiesSensorResponse:
-				key, name = v.GetKey(), v.GetName()
+				typeName, key, name = "sensor", v.GetKey(), v.GetName()
 				stateFormat = "%s " + t.Translate(r.Context(), v.GetUnitOfMeasurement(), "")
 			case *native_api.ListEntitiesSwitchResponse:
-				key, name = v.GetKey(), v.GetName()
+				typeName, key, name = "switch", v.GetKey(), v.GetName()
 			case *native_api.ListEntitiesTextSensorResponse:
-				key, name = v.GetKey(), v.GetName()
+				typeName, key, name = "text_sensor", v.GetKey(), v.GetName()
 			case *native_api.ListEntitiesServicesResponse:
-				key, name = v.GetKey(), v.GetName()
+				typeName, key, name = "services", v.GetKey(), v.GetName()
 			case *native_api.ListEntitiesCameraResponse:
-				key, name = v.GetKey(), v.GetName()
+				typeName, key, name = "camera", v.GetKey(), v.GetName()
 			case *native_api.ListEntitiesClimateResponse:
-				key, name = v.GetKey(), v.GetName()
+				typeName, key, name = "climate", v.GetKey(), v.GetName()
 			default:
 				r.Session().FlashBag().Notice(t.Translate(r.Context(), "Unknown entity type %s", "", proto.MessageName(message)))
 			}
@@ -70,6 +72,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			if key > 0 {
 				entities[key] = &entityRow{
 					Key:         key,
+					Type:        typeName,
 					Name:        name,
 					stateFormat: stateFormat,
 				}
@@ -136,14 +139,6 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 					key, state = v.GetKey(), v.GetState()
 				case *native_api.ClimateStateResponse:
 					key, state = v.GetKey(), v.GetMode().String()
-
-					//case *native_api.SubscribeHomeAssistantStateResponse:
-					//	key = v.GetKey()
-					//	state = strconv.FormatBool(v.GetState())
-					//case *native_api.HomeAssistantStateResponse:
-					//	key = v.GetKey()
-					//	state = strconv.FormatBool(v.GetState())
-
 				default:
 					r.Session().FlashBag().Notice(t.Translate(r.Context(), "Unknown entity state type %s", "", proto.MessageName(message)))
 					break loop

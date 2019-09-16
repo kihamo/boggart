@@ -7,6 +7,7 @@
                     <thead>
                         <tr>
                             <th>{{ i18n "Key" . }}</th>
+                            <th>{{ i18n "Type" . }}</th>
                             <th>{{ i18n "Name" . }}</th>
                             <th>{{ i18n "State" . }}</th>
                         </tr>
@@ -15,6 +16,7 @@
                         {{ range $i, $entity := .entities }}
                         <tr>
                             <td>{{ $entity.Key }}</td>
+                            <td>{{ $entity.Type }}</td>
                             <td>{{ $entity.Name }}</td>
                             <td>{{ $entity.State }}</td>
                         </tr>

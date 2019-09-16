@@ -13,6 +13,9 @@ msgstr ""
 msgid "Key"
 msgstr "Ключ"
 
+msgid "Type"
+msgstr "Тип"
+
 msgid "Object ID"
 msgstr "ID объекта"
 
