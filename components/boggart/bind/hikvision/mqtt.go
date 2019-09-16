@@ -16,50 +16,28 @@ import (
 	"go.uber.org/multierr"
 )
 
-const (
-	MQTTSubscribeTopicPTZMove                 mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/move"
-	MQTTSubscribeTopicPTZAbsolute             mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/absolute"
-	MQTTSubscribeTopicPTZContinuous           mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/continuous"
-	MQTTSubscribeTopicPTZRelative             mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/relative"
-	MQTTSubscribeTopicPTZPreset               mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/preset"
-	MQTTSubscribeTopicPTZMomentary            mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/momentary"
-	MQTTPublishTopicPTZStatusElevation        mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/elevation"
-	MQTTPublishTopicPTZStatusAzimuth          mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/azimuth"
-	MQTTPublishTopicPTZStatusZoom             mqtt.Topic = boggart.ComponentName + "/cctv/+/ptz/+/status/zoom"
-	MQTTPublishTopicEvent                     mqtt.Topic = boggart.ComponentName + "/cctv/+/event/+/+"
-	MQTTPublishTopicStateModel                mqtt.Topic = boggart.ComponentName + "/cctv/+/state/model"
-	MQTTPublishTopicStateFirmwareVersion      mqtt.Topic = boggart.ComponentName + "/cctv/+/state/firmware/version"
-	MQTTPublishTopicStateFirmwareReleasedDate mqtt.Topic = boggart.ComponentName + "/cctv/+/state/firmware/release-date"
-	MQTTPublishTopicStateUpTime               mqtt.Topic = boggart.ComponentName + "/cctv/+/state/uptime"
-	MQTTPublishTopicStateMemoryUsage          mqtt.Topic = boggart.ComponentName + "/cctv/+/state/memory/usage"
-	MQTTPublishTopicStateMemoryAvailable      mqtt.Topic = boggart.ComponentName + "/cctv/+/state/memory/available"
-	MQTTPublishTopicStateHDDCapacity          mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/capacity"
-	MQTTPublishTopicStateHDDFree              mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/free"
-	MQTTPublishTopicStateHDDUsage             mqtt.Topic = boggart.ComponentName + "/cctv/+/state/hdd/+/usage"
-)
-
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	topics := []mqtt.Topic{
-		MQTTPublishTopicStateModel,
-		MQTTPublishTopicStateFirmwareVersion,
-		MQTTPublishTopicStateFirmwareReleasedDate,
-		MQTTPublishTopicStateUpTime,
-		MQTTPublishTopicStateMemoryUsage,
-		MQTTPublishTopicStateMemoryAvailable,
-		MQTTPublishTopicStateHDDCapacity,
-		MQTTPublishTopicStateHDDFree,
-		MQTTPublishTopicStateHDDUsage,
+		b.config.TopicStateModel,
+		b.config.TopicStateFirmwareVersion,
+		b.config.TopicStateFirmwareReleasedDate,
+		b.config.TopicStateUpTime,
+		b.config.TopicStateMemoryUsage,
+		b.config.TopicStateMemoryAvailable,
+		b.config.TopicStateHDDCapacity,
+		b.config.TopicStateHDDFree,
+		b.config.TopicStateHDDUsage,
 	}
 
 	if b.config.EventsEnabled {
-		topics = append(topics, MQTTPublishTopicEvent)
+		topics = append(topics, b.config.TopicEvent)
 	}
 
 	if b.config.PTZEnabled {
 		topics = append(topics,
-			MQTTPublishTopicPTZStatusElevation,
-			MQTTPublishTopicPTZStatusAzimuth,
-			MQTTPublishTopicPTZStatusZoom,
+			b.config.TopicPTZStatusElevation,
+			b.config.TopicPTZStatusAzimuth,
+			b.config.TopicPTZStatusZoom,
 		)
 	}
 
@@ -71,12 +49,12 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 	if b.config.PTZEnabled {
 		subscribers = append(subscribers,
-			mqtt.NewSubscriber(MQTTSubscribeTopicPTZMove, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTAbsolute)),
-			mqtt.NewSubscriber(MQTTSubscribeTopicPTZAbsolute, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTAbsolute)),
-			mqtt.NewSubscriber(MQTTSubscribeTopicPTZContinuous, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTContinuous)),
-			mqtt.NewSubscriber(MQTTSubscribeTopicPTZRelative, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTRelative)),
-			mqtt.NewSubscriber(MQTTSubscribeTopicPTZPreset, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTPreset)),
-			mqtt.NewSubscriber(MQTTSubscribeTopicPTZMomentary, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTMomentary)),
+			mqtt.NewSubscriber(b.config.TopicPTZMove, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTAbsolute)),
+			mqtt.NewSubscriber(b.config.TopicPTZAbsolute, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTAbsolute)),
+			mqtt.NewSubscriber(b.config.TopicPTZContinuous, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTContinuous)),
+			mqtt.NewSubscriber(b.config.TopicPTZRelative, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTRelative)),
+			mqtt.NewSubscriber(b.config.TopicPTZPreset, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTPreset)),
+			mqtt.NewSubscriber(b.config.TopicPTZMomentary, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTMomentary)),
 		)
 	}
 
@@ -99,23 +77,23 @@ func (b *Bind) updateStatusByChannelId(ctx context.Context, channelId uint64) er
 		return err
 	}
 
-	sn := mqtt.NameReplace(b.SerialNumber())
+	sn := b.SerialNumber()
 	var result error
 
 	if channel.Status == nil || channel.Status.Elevation != status.Payload.AbsoluteHigh.Elevation {
-		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusElevation.Format(sn, channelId), status.Payload.AbsoluteHigh.Elevation); err != nil {
+		if err := b.MQTTPublishAsync(ctx, b.config.TopicPTZStatusElevation.Format(sn, channelId), status.Payload.AbsoluteHigh.Elevation); err != nil {
 			result = multierr.Append(result, err)
 		}
 	}
 
 	if channel.Status == nil || channel.Status.Azimuth != status.Payload.AbsoluteHigh.Azimuth {
-		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusAzimuth.Format(sn, channelId), status.Payload.AbsoluteHigh.Azimuth); err != nil {
+		if err := b.MQTTPublishAsync(ctx, b.config.TopicPTZStatusAzimuth.Format(sn, channelId), status.Payload.AbsoluteHigh.Azimuth); err != nil {
 			result = multierr.Append(result, err)
 		}
 	}
 
 	if channel.Status == nil || channel.Status.Zoom != status.Payload.AbsoluteHigh.Zoom {
-		if err := b.MQTTPublishAsync(ctx, MQTTPublishTopicPTZStatusZoom.Format(sn, channelId), status.Payload.AbsoluteHigh.Zoom); err != nil {
+		if err := b.MQTTPublishAsync(ctx, b.config.TopicPTZStatusZoom.Format(sn, channelId), status.Payload.AbsoluteHigh.Zoom); err != nil {
 			result = multierr.Append(result, err)
 		}
 	}

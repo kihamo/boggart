@@ -63,7 +63,7 @@ func (b *Bind) registerEvent(event *models.EventNotificationAlert) {
 	if !ok || dt.Sub(lastFire) > b.config.EventsIgnoreInterval {
 		sn := mqtt.NameReplace(b.SerialNumber())
 
-		if err := b.MQTTPublishAsync(context.Background(), MQTTPublishTopicEvent.Format(sn, ch, event.EventType), event.ActivePostCount); err != nil {
+		if err := b.MQTTPublishAsync(context.Background(), b.config.TopicEvent.Format(sn, ch, event.EventType), event.ActivePostCount); err != nil {
 			b.Logger().Error("Send event to MQTT failed", "error", err.Error())
 		}
 	}

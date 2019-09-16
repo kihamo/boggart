@@ -79,15 +79,15 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 
 		b.SetSerialNumber(deviceInfo.Payload.SerialNumber)
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateModel.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.Model); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicStateModel.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.Model); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateFirmwareVersion.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.FirmwareVersion); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicStateFirmwareVersion.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.FirmwareVersion); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTTPublishAsync(ctx, MQTTPublishTopicStateFirmwareReleasedDate.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.FirmwareReleasedDate); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicStateFirmwareReleasedDate.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.FirmwareReleasedDate); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
@@ -146,17 +146,17 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	status, err := b.client.System.GetStatus(system.NewGetStatusParamsWithContext(ctx), nil)
 	if err == nil {
 		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateUpTime.Format(snMQTT), status.Payload.DeviceUpTime)
+		_ = b.MQTTPublishAsync(ctx, b.config.TopicStateUpTime.Format(snMQTT), status.Payload.DeviceUpTime)
 		metricUpTime.With("serial_number", sn).Set(float64(status.Payload.DeviceUpTime))
 
 		memoryUsage := int64(status.Payload.MemoryList[0].MemoryUsage) * MB
 		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMemoryUsage.Format(snMQTT), memoryUsage)
+		_ = b.MQTTPublishAsync(ctx, b.config.TopicStateMemoryUsage.Format(snMQTT), memoryUsage)
 		metricMemoryUsage.With("serial_number", sn).Set(float64(memoryUsage))
 
 		memoryAvailable := int64(status.Payload.MemoryList[0].MemoryAvailable) * MB
 		// TODO:
-		_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMemoryAvailable.Format(snMQTT), memoryAvailable)
+		_ = b.MQTTPublishAsync(ctx, b.config.TopicStateMemoryAvailable.Format(snMQTT), memoryAvailable)
 		metricMemoryAvailable.With("serial_number", sn).Set(float64(memoryAvailable))
 	} else {
 		b.Logger().Error("Request SystemStatus failed", "error", err.Error())
@@ -170,14 +170,14 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			}
 
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateHDDCapacity.Format(snMQTT, hdd.ID), hdd.Capacity*MB)
+			_ = b.MQTTPublishAsync(ctx, b.config.TopicStateHDDCapacity.Format(snMQTT, hdd.ID), hdd.Capacity*MB)
 
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateHDDUsage.Format(snMQTT, hdd.ID), (hdd.Capacity-hdd.FreeSpace)*MB)
+			_ = b.MQTTPublishAsync(ctx, b.config.TopicStateHDDUsage.Format(snMQTT, hdd.ID), (hdd.Capacity-hdd.FreeSpace)*MB)
 			metricStorageUsage.With("serial_number", sn).With("name", hdd.Name).Set(float64((hdd.Capacity - hdd.FreeSpace) * MB))
 
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateHDDFree.Format(snMQTT, hdd.ID), hdd.FreeSpace*MB)
+			_ = b.MQTTPublishAsync(ctx, b.config.TopicStateHDDFree.Format(snMQTT, hdd.ID), hdd.FreeSpace*MB)
 			metricStorageAvailable.With("serial_number", sn).With("name", hdd.Name).Set(float64(hdd.FreeSpace * MB))
 		}
 	} else {
