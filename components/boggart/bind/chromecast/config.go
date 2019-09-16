@@ -5,31 +5,51 @@ import (
 
 	"github.com/barnybug/go-cast/log"
 	"github.com/kihamo/boggart/components/boggart"
-)
-
-const (
-	DefaultPort             = 8009
-	DefaultName             = boggart.ComponentName
-	DefaultLivenessInterval = time.Second * 30
-	DefaultLivenessTimeout  = time.Second * 10
+	"github.com/kihamo/boggart/components/mqtt"
 )
 
 type Config struct {
-	Debug            bool
-	Host             boggart.IP `valid:",required"`
-	Port             int        `valid:"port"`
-	Name             string
-	LivenessInterval time.Duration `mapstructure:"liveness_interval" yaml:"liveness_interval"`
-	LivenessTimeout  time.Duration `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
-	WidgetFileURL    string        `mapstructure:"widget_file_url" yaml:"widget_file_url"`
+	Debug             bool
+	Host              boggart.IP `valid:",required"`
+	Port              int        `valid:"port"`
+	Name              string
+	LivenessInterval  time.Duration `mapstructure:"liveness_interval" yaml:"liveness_interval"`
+	LivenessTimeout   time.Duration `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
+	WidgetFileURL     string        `mapstructure:"widget_file_url" yaml:"widget_file_url"`
+	TopicVolume       mqtt.Topic    `mapstructure:"topic_volume" yaml:"topic_volume"`
+	TopicMute         mqtt.Topic    `mapstructure:"topic_mute" yaml:"topic_mute"`
+	TopicPause        mqtt.Topic    `mapstructure:"topic_pause" yaml:"topic_pause"`
+	TopicStop         mqtt.Topic    `mapstructure:"topic_stop" yaml:"topic_stop"`
+	TopicPlay         mqtt.Topic    `mapstructure:"topic_play" yaml:"topic_play"`
+	TopicResume       mqtt.Topic    `mapstructure:"topic_resume" yaml:"topic_resume"`
+	TopicSeek         mqtt.Topic    `mapstructure:"topic_seek" yaml:"topic_seek"`
+	TopicAction       mqtt.Topic    `mapstructure:"topic_action" yaml:"topic_action"`
+	TopicStateStatus  mqtt.Topic    `mapstructure:"topic_state_status" yaml:"topic_state_status"`
+	TopicStateVolume  mqtt.Topic    `mapstructure:"topic_state_volume" yaml:"topic_state_volume"`
+	TopicStateMute    mqtt.Topic    `mapstructure:"topic_state_mute" yaml:"topic_state_mute"`
+	TopicStateContent mqtt.Topic    `mapstructure:"topic_state_content" yaml:"topic_state_content"`
 }
 
 func (t Type) Config() interface{} {
+	var prefix mqtt.Topic = boggart.ComponentName + "/chromecast/+/"
+
 	return &Config{
-		Debug:            log.Debug,
-		Port:             DefaultPort,
-		Name:             DefaultName,
-		LivenessInterval: DefaultLivenessInterval,
-		LivenessTimeout:  DefaultLivenessTimeout,
+		Debug:             log.Debug,
+		Port:              8009,
+		Name:              boggart.ComponentName,
+		LivenessInterval:  time.Second * 30,
+		LivenessTimeout:   time.Second * 10,
+		TopicVolume:       prefix + "volume",
+		TopicMute:         prefix + "mute",
+		TopicPause:        prefix + "pause",
+		TopicStop:         prefix + "stop",
+		TopicPlay:         prefix + "play",
+		TopicResume:       prefix + "resume",
+		TopicSeek:         prefix + "seek",
+		TopicAction:       prefix + "action",
+		TopicStateStatus:  prefix + "state/status",
+		TopicStateVolume:  prefix + "state/volume",
+		TopicStateMute:    prefix + "state/mute",
+		TopicStateContent: prefix + "state/content",
 	}
 }

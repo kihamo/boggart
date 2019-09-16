@@ -10,10 +10,10 @@ import (
 
 func (b *Bind) Tasks() []workers.Task {
 	taskLiveness := task.NewFunctionTask(b.taskLiveness)
-	taskLiveness.SetTimeout(b.livenessTimeout)
+	taskLiveness.SetTimeout(b.config.LivenessTimeout)
 	taskLiveness.SetRepeats(-1)
-	taskLiveness.SetRepeatInterval(b.livenessInterval)
-	taskLiveness.SetName("liveness-" + b.host.String())
+	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
+	taskLiveness.SetName("liveness-" + b.config.Host.String())
 
 	return []workers.Task{
 		taskLiveness,

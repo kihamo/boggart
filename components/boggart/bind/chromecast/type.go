@@ -1,6 +1,7 @@
 package chromecast
 
 import (
+	"net"
 	"strconv"
 
 	"github.com/barnybug/go-cast/log"
@@ -15,21 +16,31 @@ type Type struct {
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
+	sn := net.JoinHostPort(config.Host.String(), strconv.Itoa(config.Port))
+
+	config.TopicVolume = config.TopicVolume.Format(sn)
+	config.TopicMute = config.TopicMute.Format(sn)
+	config.TopicPause = config.TopicPause.Format(sn)
+	config.TopicStop = config.TopicStop.Format(sn)
+	config.TopicPlay = config.TopicPlay.Format(sn)
+	config.TopicResume = config.TopicResume.Format(sn)
+	config.TopicSeek = config.TopicSeek.Format(sn)
+	config.TopicAction = config.TopicAction.Format(sn)
+	config.TopicStateStatus = config.TopicStateStatus.Format(sn)
+	config.TopicStateVolume = config.TopicStateVolume.Format(sn)
+	config.TopicStateMute = config.TopicStateMute.Format(sn)
+	config.TopicStateContent = config.TopicStateContent.Format(sn)
+
 	log.Debug = config.Debug
 
 	bind := &Bind{
-		host: config.Host.IP,
-		port: config.Port,
-
+		config:         config,
 		volume:         atomic.NewUint32Null(),
 		mute:           atomic.NewBoolNull(),
 		status:         atomic.NewString(),
 		mediaContentID: atomic.NewString(),
-
-		livenessInterval: config.LivenessInterval,
-		livenessTimeout:  config.LivenessTimeout,
 	}
-	bind.SetSerialNumber(config.Host.String() + ":" + strconv.Itoa(config.Port))
+	bind.SetSerialNumber(sn)
 
 	return bind, nil
 }

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"net"
 	"strings"
 	"sync"
 	"time"
@@ -16,7 +15,6 @@ import (
 	castnet "github.com/barnybug/go-cast/net"
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/mqtt"
 	"go.uber.org/multierr"
 )
 
@@ -35,9 +33,7 @@ const (
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
-
-	host net.IP
-	port int
+	config *Config
 
 	volume         *atomic.Uint32Null
 	mute           *atomic.BoolNull
@@ -52,9 +48,6 @@ type Bind struct {
 	heartbeat  *controllers.HeartbeatController
 	receiver   *controllers.ReceiverController
 	media      *controllers.MediaController
-
-	livenessInterval time.Duration
-	livenessTimeout  time.Duration
 }
 
 func (b *Bind) Run() error {
@@ -79,7 +72,7 @@ func (b *Bind) Connect(_ context.Context) error {
 	ctx := context.Background()
 
 	// open TCP connection
-	err := b.conn.Connect(ctx, b.host, b.port)
+	err := b.conn.Connect(ctx, b.config.Host.IP, b.config.Port)
 	if err != nil {
 		b.Logger().Debug("Connect failed", "error", err.Error())
 		return err
@@ -194,12 +187,10 @@ func (b *Bind) doEvents() {
 				"muted", t.Muted,
 			)
 
-			sn := mqtt.NameReplace(b.SerialNumber())
-
 			volume := uint32(math.Round(t.Level * 100))
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateVolume.Format(sn), volume)
+			_ = b.MQTTPublishAsync(ctx, b.config.TopicStateVolume, volume)
 
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateMute.Format(sn), t.Muted)
+			_ = b.MQTTPublishAsync(ctx, b.config.TopicStateMute, t.Muted)
 
 		case controllers.MediaStatus:
 			b.Logger().Debug("Event MediaStatus",
@@ -207,9 +198,7 @@ func (b *Bind) doEvents() {
 				"reason", t.IdleReason,
 			)
 
-			sn := mqtt.NameReplace(b.SerialNumber())
-
-			_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateStatus.Format(sn), strings.ToLower(t.PlayerState))
+			_ = b.MQTTPublishAsync(ctx, b.config.TopicStateStatus, strings.ToLower(t.PlayerState))
 
 			if t.PlayerState == PlayerStateIdle && t.IdleReason == IdleReasonFinished {
 				if _, err := b.receiver.QuitApp(ctx); err != nil {
@@ -218,7 +207,7 @@ func (b *Bind) doEvents() {
 			}
 
 			if t.Media != nil {
-				_ = b.MQTTPublishAsync(ctx, MQTTPublishTopicStateContent.Format(sn), t.Media.ContentId)
+				_ = b.MQTTPublishAsync(ctx, b.config.TopicStateContent, t.Media.ContentId)
 			}
 
 		default:
