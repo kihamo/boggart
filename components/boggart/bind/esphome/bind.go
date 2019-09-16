@@ -13,5 +13,5 @@ type Bind struct {
 }
 
 func (b *Bind) Close() error {
-	return b.Close()
+	return b.provider.Close()
 }

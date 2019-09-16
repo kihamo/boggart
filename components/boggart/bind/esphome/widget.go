@@ -13,11 +13,14 @@ import (
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
-type entityRow struct {
-	Key   uint32
-	Name  string
-	State string
+const (
+	subscribeStateTimeoutByEntity = time.Millisecond * 200
+)
 
+type entityRow struct {
+	Key         uint32
+	Name        string
+	State       string
 	stateFormat string
 }
 
@@ -73,15 +76,17 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			}
 		}
 
-		ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+		i := len(entities)
+
+		timeout := subscribeStateTimeoutByEntity*time.Duration(i) + time.Second
+		ctx, cancel := context.WithTimeout(ctx, timeout)
 		defer cancel()
 
 		chMessage, err := bind.provider.SubscribeStates(ctx)
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get estate of entities failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get state of entities failed with error %s", "", err.Error()))
 		}
 
-		i := len(entities)
 		stateOn := t.Translate(r.Context(), "on", "")
 		stateOff := t.Translate(r.Context(), "off", "")
 
