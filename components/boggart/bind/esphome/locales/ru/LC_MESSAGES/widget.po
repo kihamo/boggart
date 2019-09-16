@@ -25,6 +25,9 @@ msgstr "Имя"
 msgid "State"
 msgstr "Состояние"
 
+msgid "Actions"
+msgstr "Действия"
+
 msgid "on"
 msgstr "включено"
 
