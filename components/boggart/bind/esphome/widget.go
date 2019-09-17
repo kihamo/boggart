@@ -184,9 +184,9 @@ func (t Type) handleLight(w *dashboard.Response, r *dashboard.Request, bind *Bin
 					cmd.Effect = value[0]
 					cmd.HasEffect = true
 				case "flash-length":
-					if val, e := strconv.ParseUint(value[0], 10, 64); e == nil {
+					if val, e := time.ParseDuration(value[0]); e == nil {
 						if val > 0 {
-							cmd.FlashLength = uint32(val)
+							cmd.FlashLength = uint32(val.Seconds())
 							cmd.HasFlashLength = true
 						}
 					} else {
@@ -203,6 +203,7 @@ func (t Type) handleLight(w *dashboard.Response, r *dashboard.Request, bind *Bin
 
 				if err != nil {
 					r.Session().FlashBag().Error(t.Translate(ctx, "Parse param %s failed with error %s", "", key, err.Error()))
+					err = nil
 				}
 			}
 
