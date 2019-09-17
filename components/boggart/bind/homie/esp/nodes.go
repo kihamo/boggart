@@ -11,10 +11,6 @@ import (
 )
 
 const (
-	nodesTopicNodesAttribute = MQTTPrefix + "$nodes"
-	nodesTopicNodes          = MQTTPrefix + "+/+"
-	nodesTopicProperty       = MQTTPrefix + "+/+/+"
-
 	dataTypeInteger = "integer"
 	dataTypeFloat   = "float"
 	dataTypeBoolean = "boolean"
@@ -83,10 +79,6 @@ func (b *Bind) Nodes() []*node {
 }
 
 func (b *Bind) nodesAttributesSubscriber(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-	if message.Topic().String() != nodesTopicNodesAttribute.Format(b.config.BaseTopic, b.SerialNumber()).String() {
-		return nil
-	}
-
 	for _, name := range strings.Split(message.String(), ",") {
 		b.nodes.Store(name, &node{
 			ID:         atomic.NewStringDefault(name),

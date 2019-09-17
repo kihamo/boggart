@@ -44,15 +44,15 @@ func (b *Bind) UpdateStatus(status boggart.BindStatus) {
 }
 
 func (b *Bind) Broadcast(ctx context.Context, level string, payload interface{}) error {
-	return b.MQTTPublishRaw(ctx, MQTTPublishTopicBroadcast.Format(b.config.BaseTopic, level), 1, false, payload)
+	return b.MQTTPublishRaw(ctx, b.config.TopicBroadcast.Format(level), 1, false, payload)
 }
 
 func (b *Bind) Restart(ctx context.Context) error {
-	return b.MQTTPublishRaw(ctx, MQTTPublishTopicRestart.Format(b.config.BaseTopic, b.SerialNumber()), 1, false, true)
+	return b.MQTTPublishRaw(ctx, b.config.TopicRestart, 1, false, true)
 }
 
 func (b *Bind) Reset(ctx context.Context) error {
-	return b.MQTTPublish(ctx, MQTTPublishTopicReset.Format(b.config.BaseTopic, b.SerialNumber()), true)
+	return b.MQTTPublish(ctx, b.config.TopicReset, true)
 }
 
 func (b *Bind) ProtocolVersion() string {

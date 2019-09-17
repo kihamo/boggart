@@ -12,11 +12,6 @@ import (
 )
 
 const (
-	deviceTopicAttribute               = MQTTPrefix + "+"
-	deviceTopicAttributeFirmware       = MQTTPrefix + "$fw/+"
-	deviceTopicAttributeImplementation = MQTTPrefixImpl + "+"
-	deviceTopicAttributeStats          = MQTTPrefix + "$stats/+"
-
 	// deviceStateInit         = "init"
 	deviceStateReady = "ready"
 	// deviceStateDisconnected = "disconnected"

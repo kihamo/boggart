@@ -11,11 +11,6 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
-const (
-	settingsTopicGet = MQTTPrefixImpl + "config"
-	settingsTopicSet = MQTTPrefixImpl + "config/set"
-)
-
 type settingsOption struct {
 	Name  string
 	Type  string
@@ -109,7 +104,7 @@ func (b *Bind) SettingsSet(ctx context.Context, key string, value interface{}) (
 		return err
 	}
 
-	return b.MQTTPublish(ctx, settingsTopicSet.Format(b.config.BaseTopic, b.SerialNumber()), pl)
+	return b.MQTTPublish(ctx, b.config.TopicSettingsSet, pl)
 }
 
 func (b *Bind) settingsSubscriber(_ context.Context, _ mqtt.Component, message mqtt.Message) error {

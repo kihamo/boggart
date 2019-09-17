@@ -17,10 +17,6 @@ import (
 )
 
 const (
-	otaTopicFirmware = MQTTPrefixImpl + "ota/firmware/+"
-	otaTopicStatus   = MQTTPrefixImpl + "ota/status"
-	otaTopicEnabled  = MQTTPrefixImpl + "ota/enabled"
-
 	// https://github.com/homieiot/homie-esp8266/blob/develop/docs/others/homie-implementation-specifics.md
 	otaStatusSuccessfully = 200 // OTA successfully flashed
 	otaStatusAccepted     = 202 // OTA request / checksum accepted
@@ -146,8 +142,7 @@ func (b *Bind) otaDo(firmware *bytes.Buffer, timeout time.Duration) {
 		   $implementation/ota/firmware/<md5 checksum>, either as binary or
 		   as a Base64 encoded string
 	*/
-	topic := otaTopicFirmware.Format(b.config.BaseTopic, b.SerialNumber(), checkSum)
-	if err := b.MQTTPublishRaw(context.Background(), topic, 1, false, firmware.Bytes()); err != nil {
+	if err := b.MQTTPublishRaw(context.Background(), b.config.TopicOTAFirmware.Format(checkSum), 1, false, firmware.Bytes()); err != nil {
 		b.otaAbort()
 	}
 }
@@ -251,9 +246,6 @@ func (b *Bind) otaStatusSubscriber(_ context.Context, _ mqtt.Component, message 
 }
 
 func (b *Bind) otaEnabledSubscriber(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-	if message.Topic().String() == otaTopicEnabled.Format(b.config.BaseTopic, b.SerialNumber()).String() {
-		b.otaEnabled.Set(message.Bool())
-	}
-
+	b.otaEnabled.Set(message.Bool())
 	return nil
 }
