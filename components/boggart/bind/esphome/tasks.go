@@ -79,8 +79,7 @@ func (b *Bind) taskUpdated(ctx context.Context) (interface{}, error) {
 			continue
 		}
 
-		state, _, e := native_api.State(entity.(proto.Message), message)
-		if e == nil {
+		if state, e := native_api.State(entity.(proto.Message), message); e == nil {
 			if e = b.MQTTPublishAsync(ctx, b.config.TopicState.Format(sn, entity.GetObjectId()), state); e != nil {
 				err = multierr.Append(err, e)
 			}

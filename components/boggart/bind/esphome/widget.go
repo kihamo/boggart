@@ -13,12 +13,10 @@ import (
 )
 
 type entityRow struct {
-	Key      uint32
 	ObjectID string
 	Type     string
 	Name     string
 	State    string
-	StateRaw interface{}
 	Entity   proto.Message
 }
 
@@ -28,20 +26,21 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 	switch q.Get("action") {
 	case "entity":
-		id := q.Get("id")
+		objectID := q.Get("object")
 
-		if id == "" {
+		if objectID == "" {
 			t.NotFound(w, r)
 			return
 		}
 
-		entityID, err := strconv.ParseUint(id, 10, 64)
+		entity, err := bind.EntityByObjectID(r.Context(), objectID)
 		if err != nil {
 			t.NotFound(w, r)
-			return
 		}
 
-		t.handleEntity(w, r, bind, uint32(entityID))
+		if native_api.EntityType(entity) == native_api.EntityTypeLight {
+			t.handleLight(w, r, bind, entity.(*native_api.ListEntitiesLightResponse))
+		}
 
 	default:
 		t.handleIndex(w, r, bind)
@@ -80,7 +79,6 @@ func (t Type) handleIndex(w *dashboard.Response, r *dashboard.Request, bind *Bin
 				}
 
 				entities[e.GetKey()] = &entityRow{
-					Key:      e.GetKey(),
 					ObjectID: e.GetObjectId(),
 					Name:     e.GetName(),
 					Type:     native_api.EntityType(message),
@@ -101,7 +99,7 @@ func (t Type) handleIndex(w *dashboard.Response, r *dashboard.Request, bind *Bin
 					continue
 				}
 
-				row.State, row.StateRaw, err = native_api.State(row.Entity, message)
+				row.State, err = native_api.State(row.Entity, message)
 				if err != nil {
 					r.Session().FlashBag().Notice(t.Translate(ctx,
 						"Unknown state type %s for entity with key %d",
@@ -117,27 +115,6 @@ func (t Type) handleIndex(w *dashboard.Response, r *dashboard.Request, bind *Bin
 	t.Render(ctx, "index", map[string]interface{}{
 		"entities": entities,
 	})
-}
-
-func (t Type) handleEntity(w *dashboard.Response, r *dashboard.Request, bind *Bind, entityID uint32) {
-	ctx := r.Context()
-
-	list, err := bind.provider.ListEntities(ctx)
-	if err != nil {
-		t.InternalError(w, r, err)
-	}
-
-	for _, message := range list {
-		switch v := message.(type) {
-		case *native_api.ListEntitiesLightResponse:
-			if entityID == v.GetKey() {
-				t.handleLight(w, r, bind, v)
-				return
-			}
-		}
-	}
-
-	t.NotFound(w, r)
 }
 
 func (t Type) handleLight(w *dashboard.Response, r *dashboard.Request, bind *Bind, entity *native_api.ListEntitiesLightResponse) {
@@ -238,7 +215,7 @@ func (t Type) handleLight(w *dashboard.Response, r *dashboard.Request, bind *Bin
 			if err != nil {
 				r.Session().FlashBag().Error(t.Translate(ctx, "Execute command failed with error %s", "", err.Error()))
 			} else {
-				t.Redirect(r.URL().Path+"?action=entity&id="+strconv.FormatUint(uint64(entity.GetKey()), 10), http.StatusFound, w, r)
+				t.Redirect(r.URL().Path+"?action=entity&object="+entity.GetObjectId(), http.StatusFound, w, r)
 				return
 			}
 		}

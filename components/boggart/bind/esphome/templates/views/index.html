@@ -6,7 +6,6 @@
                 <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
                     <thead>
                         <tr>
-                            <th>{{ i18n "Key" . }}</th>
                             <th>{{ i18n "Object ID" . }}</th>
                             <th>{{ i18n "Type" . }}</th>
                             <th>{{ i18n "Name" . }}</th>
@@ -17,7 +16,6 @@
                     <tbody>
                         {{ range $i, $entity := .entities }}
                         <tr>
-                            <td>{{ $entity.Key }}</td>
                             <td>{{ $entity.ObjectID }}</td>
                             <td>{{ $entity.Type }}</td>
                             <td>{{ $entity.Name }}</td>
@@ -25,15 +23,15 @@
                             <td>
                                 <div class="btn-group" role="group">
                                     {{ if eq $entity.Type "light" }}
-                                    <a href="{{ $.Request.URL.Path }}?action=entity&id={{ $entity.Key }}" class="btn btn-info btn-icon btn-xs">
+                                    <a href="{{ $.Request.URL.Path }}?action=entity&object={{ $entity.ObjectID }}" class="btn btn-info btn-icon btn-xs">
                                         <i class="glyphicon glyphicon-eye-open" title="{{ i18n "Details" $ }}"></i>
                                     </a>
-                                        {{ if $entity.StateRaw }}
-                                            <a href="{{ $.Request.URL.Path }}?action=entity&id={{ $entity.Key }}" class="btn btn-danger btn-icon btn-xs">
+                                        {{ if eq $entity.State "on" }}
+                                            <a href="{{ $.Request.URL.Path }}?action=entity&object={{ $entity.ObjectID }}" class="btn btn-danger btn-icon btn-xs">
                                                 <i class="glyphicon glyphicon-stop" title="{{ i18n "Off" $ }}"></i>
                                             </a>
                                         {{ else }}
-                                            <a href="{{ $.Request.URL.Path }}?action=entity&id={{ $entity.Key }}" class="btn btn-danger btn-icon btn-xs">
+                                            <a href="{{ $.Request.URL.Path }}?action=entity&object={{ $entity.ObjectID }}" class="btn btn-danger btn-icon btn-xs">
                                                 <i class="glyphicon glyphicon-play" title="{{ i18n "On" $ }}"></i>
                                             </a>
                                         {{ end }}

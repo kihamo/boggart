@@ -26,6 +26,21 @@ func (b *Bind) Close() error {
 	return b.provider.Close()
 }
 
+func (b *Bind) EntityByObjectID(ctx context.Context, objectID string) (proto.Message, error) {
+	messages, err := b.provider.ListEntities(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, message := range messages {
+		if e, ok := message.(native_api.MessageEntity); ok && e.GetObjectId() == objectID {
+			return message, nil
+		}
+	}
+
+	return nil, errors.New("entity with object ID " + objectID + " not found")
+}
+
 func (b *Bind) States(ctx context.Context, messages []proto.Message) (map[uint32]proto.Message, error) {
 	length := len(messages)
 
