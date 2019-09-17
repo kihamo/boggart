@@ -3,6 +3,7 @@ package esphome
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/golang/protobuf/proto"
@@ -57,7 +58,7 @@ func (t Type) handleIndex(w *dashboard.Response, r *dashboard.Request, bind *Bin
 	entities := make(map[uint32]*entityRow, len(messages))
 
 	if err != nil {
-		r.Session().FlashBag().Error(t.Translate(r.Context(),
+		r.Session().FlashBag().Error(t.Translate(ctx,
 			"Get list entities failed with error %s",
 			"",
 			err.Error(),
@@ -82,7 +83,7 @@ func (t Type) handleIndex(w *dashboard.Response, r *dashboard.Request, bind *Bin
 				typeName, key, name = "light", v.GetKey(), v.GetName()
 			case *native_api.ListEntitiesSensorResponse:
 				typeName, key, name = "sensor", v.GetKey(), v.GetName()
-				stateFormat = "%s " + t.Translate(r.Context(), v.GetUnitOfMeasurement(), "")
+				stateFormat = "%s " + t.Translate(ctx, v.GetUnitOfMeasurement(), "")
 			case *native_api.ListEntitiesSwitchResponse:
 				typeName, key, name = "switch", v.GetKey(), v.GetName()
 			case *native_api.ListEntitiesTextSensorResponse:
@@ -94,7 +95,7 @@ func (t Type) handleIndex(w *dashboard.Response, r *dashboard.Request, bind *Bin
 			case *native_api.ListEntitiesClimateResponse:
 				typeName, key, name = "climate", v.GetKey(), v.GetName()
 			default:
-				r.Session().FlashBag().Notice(t.Translate(r.Context(),
+				r.Session().FlashBag().Notice(t.Translate(ctx,
 					"Unknown entity type %s",
 					"",
 					proto.MessageName(message),
@@ -113,20 +114,20 @@ func (t Type) handleIndex(w *dashboard.Response, r *dashboard.Request, bind *Bin
 
 		states, err := bind.States(ctx, messages)
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(r.Context(),
+			r.Session().FlashBag().Error(t.Translate(ctx,
 				"Get state of entities failed with error %s",
 				"",
 				err.Error(),
 			))
 		}
 
-		stateOn := t.Translate(r.Context(), "on", "")
-		stateOff := t.Translate(r.Context(), "off", "")
+		stateOn := t.Translate(ctx, "on", "")
+		stateOff := t.Translate(ctx, "off", "")
 
 		for key, entity := range entities {
 			message, ok := states[key]
 			if !ok {
-				r.Session().FlashBag().Notice(t.Translate(r.Context(),
+				r.Session().FlashBag().Notice(t.Translate(ctx,
 					"State for entity with key %d not found",
 					"",
 					key,
@@ -182,7 +183,7 @@ func (t Type) handleIndex(w *dashboard.Response, r *dashboard.Request, bind *Bin
 				key, state = v.GetKey(), v.GetMode().String()
 				stateRaw = state
 			default:
-				r.Session().FlashBag().Notice(t.Translate(r.Context(),
+				r.Session().FlashBag().Notice(t.Translate(ctx,
 					"Unknown state type %s for entity with key %d",
 					"",
 					proto.MessageName(message),
@@ -232,6 +233,104 @@ func (t Type) handleEntity(w *dashboard.Response, r *dashboard.Request, bind *Bi
 
 func (t Type) handleLight(w *dashboard.Response, r *dashboard.Request, bind *Bind, entity *native_api.ListEntitiesLightResponse) {
 	ctx := r.Context()
+
+	if r.IsPost() {
+		err := r.Original().ParseForm()
+		if err != nil {
+			r.Session().FlashBag().Error(t.Translate(ctx, "Parse form failed with error %s", "", err.Error()))
+		} else {
+			cmd := &native_api.LightCommandRequest{
+				Key: entity.Key,
+			}
+
+			for key, value := range r.Original().PostForm {
+				if len(value) == 0 {
+					continue
+				}
+
+				switch key {
+				case "state":
+					cmd.State = value[0] == "on"
+					cmd.HasState = true
+				case "brightness":
+					if val, e := strconv.ParseFloat(value[0], 64); e == nil {
+						cmd.Brightness = float32(val)
+						cmd.HasBrightness = true
+					} else {
+						err = e
+					}
+				case "red":
+					if val, e := strconv.ParseFloat(value[0], 64); e == nil {
+						cmd.Red = float32(val)
+						cmd.HasRgb = true
+					} else {
+						err = e
+					}
+				case "green":
+					if val, e := strconv.ParseFloat(value[0], 64); e == nil {
+						cmd.Green = float32(val)
+						cmd.HasRgb = true
+					} else {
+						err = e
+					}
+				case "blue":
+					if val, e := strconv.ParseFloat(value[0], 64); e == nil {
+						cmd.Blue = float32(val)
+						cmd.HasRgb = true
+					} else {
+						err = e
+					}
+				case "white":
+					if val, e := strconv.ParseFloat(value[0], 64); e == nil {
+						cmd.White = float32(val)
+						cmd.HasWhite = true
+					} else {
+						err = e
+					}
+				case "color-temperature":
+					if val, e := strconv.ParseFloat(value[0], 64); e == nil {
+						cmd.ColorTemperature = float32(val)
+						cmd.HasColorTemperature = true
+					} else {
+						err = e
+					}
+				case "effect":
+					cmd.Effect = value[0]
+					cmd.HasEffect = true
+				case "flash-length":
+					if val, e := strconv.ParseUint(value[0], 10, 64); e == nil {
+						if val > 0 {
+							cmd.FlashLength = uint32(val)
+							cmd.HasFlashLength = true
+						}
+					} else {
+						err = e
+					}
+				case "transition-length":
+					if val, e := time.ParseDuration(value[0]); e == nil {
+						cmd.TransitionLength = uint32(val.Seconds())
+						cmd.HasTransitionLength = true
+					} else {
+						err = e
+					}
+				}
+
+				if err != nil {
+					r.Session().FlashBag().Error(t.Translate(ctx, "Parse param %s failed with error %s", "", key, err.Error()))
+				}
+			}
+
+			if !cmd.HasState {
+				cmd.State = false
+				cmd.HasState = true
+			}
+
+			err = bind.provider.LightCommand(ctx, cmd)
+			if err != nil {
+				r.Session().FlashBag().Error(t.Translate(ctx, "Execute command failed with error %s", "", err.Error()))
+			}
+		}
+	}
 
 	vars := map[string]interface{}{
 		"entity": entity,
