@@ -51,25 +51,31 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			if balances, e := b.client.BalanceDetails(ctx, account.Number, service.Provider, dateStart, dateEnd); e == nil {
 				for _, balance := range balances {
 					if balance.ValueT1 != nil {
-						metricServiceBalance.With("account", account.Number, "service", serviceID, "tariff", "1").Set(*balance.ValueT1)
+						val := *balance.ValueT1 * 1000
 
-						if e := b.MQTTPublishAsync(ctx, b.config.TopicMeterValueT1.Format(account.Number, serviceID), *balance.ValueT1); e != nil {
+						metricServiceBalance.With("account", account.Number, "service", serviceID, "tariff", "1").Set(val)
+
+						if e := b.MQTTPublishAsync(ctx, b.config.TopicMeterValueT1.Format(account.Number, serviceID), val); e != nil {
 							err = multierr.Append(err, e)
 						}
 					}
 
 					if balance.ValueT2 != nil {
-						metricServiceBalance.With("account", account.Number, "service", serviceID, "tariff", "2").Set(*balance.ValueT2)
+						val := *balance.ValueT2 * 1000
 
-						if e := b.MQTTPublishAsync(ctx, b.config.TopicMeterValueT2.Format(account.Number, serviceID), *balance.ValueT2); e != nil {
+						metricServiceBalance.With("account", account.Number, "service", serviceID, "tariff", "2").Set(val)
+
+						if e := b.MQTTPublishAsync(ctx, b.config.TopicMeterValueT2.Format(account.Number, serviceID), val); e != nil {
 							err = multierr.Append(err, e)
 						}
 					}
 
 					if balance.ValueT3 != nil {
-						metricServiceBalance.With("account", account.Number, "service", serviceID, "tariff", "3").Set(*balance.ValueT3)
+						val := *balance.ValueT3 * 1000
 
-						if e := b.MQTTPublishAsync(ctx, b.config.TopicMeterValueT3.Format(account.Number, serviceID), *balance.ValueT3); e != nil {
+						metricServiceBalance.With("account", account.Number, "service", serviceID, "tariff", "3").Set(val)
+
+						if e := b.MQTTPublishAsync(ctx, b.config.TopicMeterValueT3.Format(account.Number, serviceID), val); e != nil {
 							err = multierr.Append(err, e)
 						}
 					}
