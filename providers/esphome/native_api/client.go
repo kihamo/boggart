@@ -90,7 +90,8 @@ type Client struct {
 	debug    uint32
 	mutex    sync.RWMutex
 
-	inited        uint32
+	inited        bool
+	initMutex     sync.Mutex
 	authenticated uint32
 	restarted     uint32
 
@@ -163,7 +164,10 @@ func (c *Client) Close() (err error) {
 	c.connectionClose()
 	c.authenticateClose()
 
-	atomic.StoreUint32(&c.inited, 0)
+	c.initMutex.Lock()
+	c.inited = false
+	c.initMutex.Unlock()
+
 	atomic.StoreUint32(&c.restarted, 0)
 
 	return nil
@@ -175,7 +179,9 @@ func (c *Client) restart() {
 	c.connectionClose()
 	c.authenticateClose()
 
-	atomic.StoreUint32(&c.inited, 0)
+	c.initMutex.Lock()
+	c.inited = false
+	c.initMutex.Unlock()
 }
 
 func (c *Client) isRestart() bool {
@@ -183,8 +189,10 @@ func (c *Client) isRestart() bool {
 }
 
 func (c *Client) init() (err error) {
-	inited := atomic.LoadUint32(&c.inited)
-	if inited == 0 {
+	c.initMutex.Lock()
+	defer c.initMutex.Unlock()
+
+	if !c.inited {
 		now := time.Now()
 		deadline := time.Unix(0, atomic.LoadInt64(&c.closeDeadline))
 
@@ -209,7 +217,7 @@ func (c *Client) init() (err error) {
 			c.authenticateClose()
 		}
 
-		atomic.StoreUint32(&c.inited, 1)
+		c.inited = true
 		atomic.StoreUint32(&c.restarted, 0)
 	}
 
