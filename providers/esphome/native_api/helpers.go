@@ -57,10 +57,9 @@ func EntityType(message proto.Message) string {
 	return EntityTypeUnknown
 }
 
-func State(entityMessage, stateMessage proto.Message) (state string, raw interface{}, err error) {
+func State(entityMessage, stateMessage proto.Message) (state string, err error) {
 	switch v := stateMessage.(type) {
 	case *BinarySensorStateResponse:
-		raw = v.GetKey()
 		if v.GetState() {
 			state = "on"
 		} else {
@@ -69,14 +68,12 @@ func State(entityMessage, stateMessage proto.Message) (state string, raw interfa
 	case *CoverStateResponse:
 		// TODO:
 	case *FanStateResponse:
-		raw = v.GetState()
 		if v.GetState() {
 			state = "on"
 		} else {
 			state = "off"
 		}
 	case *LightStateResponse:
-		raw = v.GetState()
 		if v.GetState() {
 			state = "on"
 		} else {
@@ -84,13 +81,11 @@ func State(entityMessage, stateMessage proto.Message) (state string, raw interfa
 		}
 	case *SensorStateResponse:
 		state = strconv.FormatFloat(float64(v.GetState()), 'f', -1, 64)
-		raw = state
 
 		if e, ok := entityMessage.(*ListEntitiesSensorResponse); ok {
 			state = fmt.Sprintf("%s "+e.GetUnitOfMeasurement(), state)
 		}
 	case *SwitchStateResponse:
-		raw = v.GetState()
 		if v.GetState() {
 			state = "on"
 		} else {
@@ -98,10 +93,8 @@ func State(entityMessage, stateMessage proto.Message) (state string, raw interfa
 		}
 	case *TextSensorStateResponse:
 		state = v.GetState()
-		raw = state
 	case *ClimateStateResponse:
 		state = v.GetMode().String()
-		raw = state
 	default:
 		err = errors.New("unknown state type " + proto.MessageName(stateMessage))
 	}

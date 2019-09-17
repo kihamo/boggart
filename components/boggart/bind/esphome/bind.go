@@ -7,6 +7,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/providers/esphome/native_api"
 )
 
@@ -32,8 +33,10 @@ func (b *Bind) EntityByObjectID(ctx context.Context, objectID string) (proto.Mes
 		return nil, err
 	}
 
+	objectIDReplace := mqtt.NameReplace(objectID)
+
 	for _, message := range messages {
-		if e, ok := message.(native_api.MessageEntity); ok && e.GetObjectId() == objectID {
+		if e, ok := message.(native_api.MessageEntity); ok && mqtt.NameReplace(e.GetObjectId()) == objectIDReplace {
 			return message, nil
 		}
 	}
