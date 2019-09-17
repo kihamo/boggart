@@ -13,8 +13,10 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
 	bind := &Bind{
-		config:   config,
-		provider: native_api.New(config.Address, config.Password).WithClientID("Boggart bind"),
+		config: config,
+		provider: native_api.New(config.Address, config.Password).
+			WithClientID("Boggart bind").
+			WithDebug(config.Debug),
 	}
 
 	return bind, nil

@@ -14,12 +14,9 @@ const (
 	subscribeStateTimeoutByEntity = time.Millisecond * 200
 )
 
-type hasKey interface {
-	GetKey() uint32
-}
-
 type Bind struct {
 	boggart.BindBase
+	boggart.BindMQTT
 
 	config   *Config
 	provider *native_api.Client
@@ -43,9 +40,9 @@ func (b *Bind) States(ctx context.Context, messages []proto.Message) (map[uint32
 
 	entitiesKeys := make(map[uint32]struct{}, length)
 	for _, message := range messages {
-		e, ok := message.(hasKey)
+		e, ok := message.(native_api.MessageState)
 		if !ok {
-			return nil, errors.New("input message " + proto.MessageName(message) + " has not method GetKey() uint32")
+			return nil, errors.New("input message " + proto.MessageName(message) + " not implement MessageState interface")
 		}
 
 		entitiesKeys[e.GetKey()] = struct{}{}
@@ -56,9 +53,9 @@ func (b *Bind) States(ctx context.Context, messages []proto.Message) (map[uint32
 	for {
 		select {
 		case message := <-chMessage:
-			e, ok := message.(hasKey)
+			e, ok := message.(native_api.MessageState)
 			if !ok {
-				return states, errors.New("output message " + proto.MessageName(message) + " has not method GetKey() uint32")
+				return states, errors.New("output message " + proto.MessageName(message) + " not implement MessageState interface")
 			}
 
 			if _, ok = entitiesKeys[e.GetKey()]; ok {

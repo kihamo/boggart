@@ -11,7 +11,7 @@
         <div class="col-md-12 col-sm-12 col-xs-12">
             <div class="x_panel">
                 <div class="x_title">
-                    <h2>{{ i18n "Light" . }} {{ .entity.Name }}</h2>
+                    <h2>{{ .entity.Name }}</h2>
                     <div class="clearfix"></div>
                 </div>
                 <div class="x_content">
@@ -100,14 +100,14 @@
                                 <select id="effect" name="effect" class="form-control select2">
                                 {{ range $f, $effect := .entity.Effects }}
                                     <option value="{{ $effect }}"{{ if eq $effect $.state.Effect }}
-                                            selected="selected"{{ end }}>{{ i18n $effect . }}</option>
+                                            selected="selected"{{ end }}>{{ i18n $effect $ }}</option>
                                 {{ end }}
                                 </select>
                             </div>
                         </div>
                         <div class="item form-group">
                             <label for="flash-length" class="control-label col-md-3 col-sm-3 col-xs-12">
-                            {{ i18n "Flash length" . }}
+                            {{ i18n "Flash duration" . }}
                             </label>
                             <div class="col-md-6 col-sm-6 col-xs-12">
                                 <input type="text" min="0" class="form-control" id="flash-length" name="flash-length" value="0" />
@@ -115,7 +115,7 @@
                         </div>
                         <div class="item form-group">
                             <label for="transition-length" class="control-label col-md-3 col-sm-3 col-xs-12">
-                            {{ i18n "Transition length" . }}
+                            {{ i18n "Transition duration" . }}
                             </label>
                             <div class="col-md-6 col-sm-6 col-xs-12">
                                 <input type="text" class="form-control" id="transition-length" name="transition-length" value="0s" />
@@ -124,7 +124,7 @@
                         <div class="ln_solid"></div>
                         <div class="form-group">
                             <div class="col-md-6 col-md-offset-3">
-                                <button id="send" type="submit" class="btn btn-success">{{ i18n "Send" . }}</button>
+                                <button id="send" type="submit" class="btn btn-success">{{ i18n "Apply" . }}</button>
                             </div>
                         </div>
                     {{ end }}

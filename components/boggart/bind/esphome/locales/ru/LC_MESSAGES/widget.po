@@ -28,8 +28,17 @@ msgstr "Состояние"
 msgid "Actions"
 msgstr "Действия"
 
+msgid "Details"
+msgstr "Детали"
+
 msgid "on"
 msgstr "включено"
 
 msgid "off"
 msgstr "выключено"
+
+msgid "On"
+msgstr "Включить"
+
+msgid "Off"
+msgstr "Выключить"

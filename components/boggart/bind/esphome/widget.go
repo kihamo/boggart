@@ -1,7 +1,6 @@
 package esphome
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 
@@ -13,12 +12,13 @@ import (
 )
 
 type entityRow struct {
-	Key         uint32
-	Type        string
-	Name        string
-	State       string
-	StateRaw    interface{}
-	stateFormat string
+	Key      uint32
+	ObjectID string
+	Type     string
+	Name     string
+	State    string
+	StateRaw interface{}
+	Entity   proto.Message
 }
 
 func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
@@ -64,144 +64,52 @@ func (t Type) handleIndex(w *dashboard.Response, r *dashboard.Request, bind *Bin
 			err.Error(),
 		))
 	} else {
-		for _, message := range messages {
-			var (
-				key         uint32
-				typeName    string
-				name        string
-				stateFormat string
-			)
-
-			switch v := message.(type) {
-			case *native_api.ListEntitiesBinarySensorResponse:
-				typeName, key, name = "binary_sensor", v.GetKey(), v.GetName()
-			case *native_api.ListEntitiesCoverResponse:
-				typeName, key, name = "cover", v.GetKey(), v.GetName()
-			case *native_api.ListEntitiesFanResponse:
-				typeName, key, name = "fan", v.GetKey(), v.GetName()
-			case *native_api.ListEntitiesLightResponse:
-				typeName, key, name = "light", v.GetKey(), v.GetName()
-			case *native_api.ListEntitiesSensorResponse:
-				typeName, key, name = "sensor", v.GetKey(), v.GetName()
-				stateFormat = "%s " + t.Translate(ctx, v.GetUnitOfMeasurement(), "")
-			case *native_api.ListEntitiesSwitchResponse:
-				typeName, key, name = "switch", v.GetKey(), v.GetName()
-			case *native_api.ListEntitiesTextSensorResponse:
-				typeName, key, name = "text_sensor", v.GetKey(), v.GetName()
-			case *native_api.ListEntitiesServicesResponse:
-				typeName, key, name = "services", v.GetKey(), v.GetName()
-			case *native_api.ListEntitiesCameraResponse:
-				typeName, key, name = "camera", v.GetKey(), v.GetName()
-			case *native_api.ListEntitiesClimateResponse:
-				typeName, key, name = "climate", v.GetKey(), v.GetName()
-			default:
-				r.Session().FlashBag().Notice(t.Translate(ctx,
-					"Unknown entity type %s",
-					"",
-					proto.MessageName(message),
-				))
-			}
-
-			if key > 0 {
-				entities[key] = &entityRow{
-					Key:         key,
-					Type:        typeName,
-					Name:        name,
-					stateFormat: stateFormat,
-				}
-			}
-		}
-
 		states, err := bind.States(ctx, messages)
 		if err != nil {
 			r.Session().FlashBag().Error(t.Translate(ctx,
-				"Get state of entities failed with error %s",
+				"Get state of entities failed with error: %s",
 				"",
 				err.Error(),
 			))
-		}
+		} else {
+			for _, message := range messages {
+				e, ok := message.(native_api.MessageEntity)
+				if !ok {
+					continue
+				}
 
-		stateOn := t.Translate(ctx, "on", "")
-		stateOff := t.Translate(ctx, "off", "")
-
-		for key, entity := range entities {
-			message, ok := states[key]
-			if !ok {
-				r.Session().FlashBag().Notice(t.Translate(ctx,
-					"State for entity with key %d not found",
-					"",
-					key,
-				))
-				continue
+				entities[e.GetKey()] = &entityRow{
+					Key:      e.GetKey(),
+					ObjectID: e.GetObjectId(),
+					Name:     e.GetName(),
+					Type:     native_api.EntityType(message),
+					Entity:   message,
+				}
 			}
 
-			var (
-				found    = true
-				key      uint32
-				state    string
-				stateRaw interface{}
-			)
+			for _, message := range states {
+				s, ok := message.(native_api.MessageState)
+				if !ok {
+					continue
+				}
 
-			switch v := message.(type) {
-			case *native_api.BinarySensorStateResponse:
-				key, stateRaw = v.GetKey(), v.GetState()
-				if v.GetState() {
-					state = stateOn
-				} else {
-					state = stateOff
+				var row *entityRow
+
+				row, ok = entities[s.GetKey()]
+				if !ok {
+					continue
 				}
-			case *native_api.CoverStateResponse:
-				key = v.GetKey()
-			case *native_api.FanStateResponse:
-				key, stateRaw = v.GetKey(), v.GetState()
-				if v.GetState() {
-					state = stateOn
-				} else {
-					state = stateOff
+
+				row.State, row.StateRaw, err = native_api.State(row.Entity, message)
+				if err != nil {
+					r.Session().FlashBag().Notice(t.Translate(ctx,
+						"Unknown state type %s for entity with key %d",
+						"",
+						proto.MessageName(message),
+						s.GetKey(),
+					))
 				}
-			case *native_api.LightStateResponse:
-				key, stateRaw = v.GetKey(), v.GetState()
-				if v.GetState() {
-					state = stateOn
-				} else {
-					state = stateOff
-				}
-			case *native_api.SensorStateResponse:
-				key, state = v.GetKey(), strconv.FormatFloat(float64(v.GetState()), 'f', -1, 64)
-				stateRaw = state
-			case *native_api.SwitchStateResponse:
-				key, stateRaw = v.GetKey(), v.GetState()
-				if v.GetState() {
-					state = stateOn
-				} else {
-					state = stateOff
-				}
-			case *native_api.TextSensorStateResponse:
-				key, state = v.GetKey(), v.GetState()
-				stateRaw = state
-			case *native_api.ClimateStateResponse:
-				key, state = v.GetKey(), v.GetMode().String()
-				stateRaw = state
-			default:
-				r.Session().FlashBag().Notice(t.Translate(ctx,
-					"Unknown state type %s for entity with key %d",
-					"",
-					proto.MessageName(message),
-					key,
-				))
-				found = false
 			}
-
-			if !found {
-				continue
-			}
-
-			if entity.stateFormat != "" {
-				state = fmt.Sprintf(entity.stateFormat, state)
-			}
-
-			entity.State = state
-			entity.StateRaw = stateRaw
 		}
 	}
 
