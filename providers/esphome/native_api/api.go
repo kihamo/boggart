@@ -2,6 +2,7 @@ package native_api
 
 import (
 	"context"
+	"sync/atomic"
 
 	"github.com/golang/protobuf/proto"
 )
@@ -52,8 +53,15 @@ func (c *Client) DeviceInfo(ctx context.Context) (*DeviceInfoResponse, error) {
 func (c *Client) ListEntities(ctx context.Context) (_ []proto.Message, err error) {
 	chMessages := make(chan proto.Message, 1)
 	chDone := make(chan error, 1)
+	var canceled uint32
+
+	ctx, cancel := context.WithCancel(ctx)
 
 	err = c.invokeHandler(ctx, &ListEntitiesRequest{}, func(message proto.Message, err error) bool {
+		if atomic.LoadUint32(&canceled) != 0 {
+			return true
+		}
+
 		if err != nil {
 			chDone <- err
 			return true
@@ -88,6 +96,11 @@ func (c *Client) ListEntities(ctx context.Context) (_ []proto.Message, err error
 
 	for {
 		select {
+		case <-ctx.Done():
+			atomic.StoreUint32(&canceled, 1)
+			cancel()
+			return nil, ctx.Err()
+
 		case err := <-chDone:
 			if err != nil {
 				return nil, err
@@ -102,59 +115,33 @@ func (c *Client) ListEntities(ctx context.Context) (_ []proto.Message, err error
 }
 
 func (c *Client) SubscribeStates(ctx context.Context) (_ <-chan proto.Message, err error) {
-	chMessages := make(chan proto.Message, 1)
+	return c.subscribe(ctx,
+		&SubscribeStatesRequest{},
+		func(message proto.Message) bool {
+			switch proto.MessageName(message) {
+			case "native_api.BinarySensorStateResponse",
+				"native_api.CoverStateResponse",
+				"native_api.FanStateResponse",
+				"native_api.LightStateResponse",
+				"native_api.SensorStateResponse",
+				"native_api.SwitchStateResponse",
+				"native_api.TextSensorStateResponse",
+				"native_api.SubscribeHomeAssistantStateResponse",
+				"native_api.HomeAssistantStateResponse",
+				"native_api.ClimateStateResponse":
+				return true
+			}
 
-	err = c.invokeHandler(ctx, &SubscribeStatesRequest{}, func(message proto.Message, err error) bool {
-		if err != nil {
-			close(chMessages)
-			return true
-		}
-
-		switch proto.MessageName(message) {
-		case "native_api.BinarySensorStateResponse",
-			"native_api.CoverStateResponse",
-			"native_api.FanStateResponse",
-			"native_api.LightStateResponse",
-			"native_api.SensorStateResponse",
-			"native_api.SwitchStateResponse",
-			"native_api.TextSensorStateResponse",
-			"native_api.SubscribeHomeAssistantStateResponse",
-			"native_api.HomeAssistantStateResponse",
-			"native_api.ClimateStateResponse":
-			chMessages <- message
-		}
-
-		return false
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return chMessages, err
+			return false
+		})
 }
 
 func (c *Client) SubscribeLogs(ctx context.Context, logLevel LogLevel, dumpConfig bool) (_ <-chan proto.Message, err error) {
-	chMessages := make(chan proto.Message, 1)
-
-	err = c.invokeHandler(ctx, &SubscribeLogsRequest{Level: logLevel, DumpConfig: dumpConfig}, func(message proto.Message, err error) bool {
-		if err != nil {
-			close(chMessages)
-			return true
-		}
-
-		if proto.MessageName(message) == "native_api.SubscribeLogsResponse" {
-			chMessages <- message
-		}
-
-		return false
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return chMessages, err
+	return c.subscribe(ctx,
+		&SubscribeLogsRequest{Level: logLevel, DumpConfig: dumpConfig},
+		func(message proto.Message) bool {
+			return proto.MessageName(message) == "native_api.SubscribeLogsResponse"
+		})
 }
 
 func (c *Client) SubscribeHomeassistantServices(ctx context.Context) (*HomeassistantServiceResponse, error) {

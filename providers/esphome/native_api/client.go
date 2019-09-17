@@ -81,6 +81,7 @@ func init() {
 }
 
 type handler func(proto.Message, error) bool
+type handlerSubscribe func(proto.Message) bool
 
 type Client struct {
 	address  string
@@ -281,4 +282,46 @@ func (c *Client) invokeNoDelay(ctx context.Context, request proto.Message) error
 	}
 
 	return c.write(ctx, request)
+}
+
+func (c *Client) subscribe(ctx context.Context, request proto.Message, h handlerSubscribe) (_ <-chan proto.Message, err error) {
+	chMessages := make(chan proto.Message, 1)
+	var canceled uint32
+
+	ctx, cancel := context.WithCancel(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.invokeHandler(ctx, request, func(message proto.Message, err error) bool {
+		if atomic.LoadUint32(&canceled) != 0 {
+			close(chMessages)
+			return true
+		}
+
+		if err != nil {
+			close(chMessages)
+			return true
+		}
+
+		if h(message) {
+			chMessages <- message
+		}
+
+		return false
+	})
+
+	go func() {
+		select {
+		case <-ctx.Done():
+
+			atomic.StoreUint32(&canceled, 1)
+			cancel()
+
+			return
+		}
+	}()
+
+	return chMessages, err
 }

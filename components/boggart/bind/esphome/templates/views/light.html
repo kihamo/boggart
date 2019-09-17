@@ -1,0 +1,107 @@
+{{ define "content" }}
+     {{ if .error }}
+     <div class="alert alert-danger alert-dismissable">
+         <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+     {{ .error }}
+     </div>
+     {{ end }}
+
+     {{ if and .entity .state }}
+          <div class="row">
+              <div class="col-md-12 col-sm-12 col-xs-12">
+                  <div class="x_panel">
+                      <div class="x_title">
+                          <h2>{{ i18n "Light" . }} {{ .entity.Name }}</h2>
+                          <div class="clearfix"></div>
+                      </div>
+                      <div class="x_content">
+                          <form class="form-horizontal form-label-left" role="form" method="post" id="command" novalidate>
+                              <div class="item form-group">
+                                  <label for="state" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                      {{ i18n "State" . }}
+                                  </label>
+                                  <div class="col-md-6 col-sm-6 col-xs-12">
+                                      <div class="">
+                                          <label>
+                                              <input type="checkbox" class="js-switch" name="state" id="state" {{ if .state.State }} checked{{ end }} />
+                                          </label>
+                                      </div>
+                                  </div>
+                              </div>
+                              {{ if .entity.SupportsBrightness }}
+                              <div class="item form-group">
+                                  <label for="brightness" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                    {{ i18n "Brightness" . }}
+                                  </label>
+                                  <div class="col-md-6 col-sm-6 col-xs-12">
+                                      <input type="range" min="0" max="1" step=".01" class="form-control" id="brightness" name="brightness" value="{{ .state.Brightness }}">
+                                  </div>
+                              </div>
+                              {{ end }}
+                              {{ if .entity.SupportsRgb }}
+                              <div class="item form-group">
+                                  <label for="red" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                    {{ i18n "Red" . }}
+                                  </label>
+                                  <div class="col-md-6 col-sm-6 col-xs-12">
+                                      <input type="range" min="0" max="1" step=".01" class="form-control" id="red" name="red" value="{{ .state.Red }}">
+                                  </div>
+                              </div>
+                              <div class="item form-group">
+                                  <label for="green" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                    {{ i18n "Green" . }}
+                                  </label>
+                                  <div class="col-md-6 col-sm-6 col-xs-12">
+                                      <input type="range" min="0" max="1" step=".01" class="form-control" id="green" name="green" value="{{ .state.Green }}">
+                                  </div>
+                              </div>
+                              <div class="item form-group">
+                                  <label for="red" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                    {{ i18n "Blue" . }}
+                                  </label>
+                                  <div class="col-md-6 col-sm-6 col-xs-12">
+                                      <input type="range" min="0" max="1" step=".01" class="form-control" id="blue" name="blue" value="{{ .state.Blue }}">
+                                  </div>
+                              </div>
+                              {{ end }}
+                              {{ if .entity.SupportsWhiteValue }}
+                              <div class="item form-group">
+                                  <label for="white" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                    {{ i18n "White" . }}
+                                  </label>
+                                  <div class="col-md-6 col-sm-6 col-xs-12">
+                                      <input type="range" min="0" max="1" step=".01" class="form-control" id="white" name="white" value="{{ .state.White }}">
+                                  </div>
+                              </div>
+                              {{ end }}
+                              {{ if .entity.SupportsColorTemperature }}
+                              <div class="item form-group">
+                                  <label for="color-temperature" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                    {{ i18n "Color temperature" . }}
+                                  </label>
+                                  <div class="col-md-6 col-sm-6 col-xs-12">
+                                      <input type="range" min="0" max="1" step=".01" class="form-control" id="color-temperature" name="color-temperature" value="{{ .state.ColorTemperature }}">
+                                  </div>
+                              </div>
+                              {{ end }}
+                              {{ if ne (len .entity.Effects) 0 }}
+                              <div class="item form-group">
+                                  <label for="effect" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                    {{ i18n "Effect" . }}
+                                  </label>
+                                  <div class="col-md-6 col-sm-6 col-xs-12">
+                                      <select id="effect" class="form-control select2">
+                                          {{ range $f, $effect := .entity.Effects }}
+                                          <option value="{{ $effect }}"{{ if eq $effect $.state.Effect }} selected="selected"{{ end }}>{{ i18n $effect . }}</option>
+                                          {{ end }}
+                                      </select>
+                                  </div>
+                              </div>
+                              {{ end }}
+                          </form>
+                      </div>
+                  </div>
+              </div>
+          </div>
+     {{ end }}
+{{ end }}

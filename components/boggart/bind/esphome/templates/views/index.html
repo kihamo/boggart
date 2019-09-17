@@ -1,0 +1,49 @@
+{{ define "content" }}
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_content">
+                <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>{{ i18n "Key" . }}</th>
+                            <th>{{ i18n "Type" . }}</th>
+                            <th>{{ i18n "Name" . }}</th>
+                            <th>{{ i18n "State" . }}</th>
+                            <th>{{ i18n "Actions" . }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{ range $i, $entity := .entities }}
+                        <tr>
+                            <td>{{ $entity.Key }}</td>
+                            <td>{{ $entity.Type }}</td>
+                            <td>{{ $entity.Name }}</td>
+                            <td>{{ $entity.State }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    {{ if eq $entity.Type "light" }}
+                                    <a href="{{ $.Request.URL.Path }}?action=entity&id={{ $entity.Key }}" class="btn btn-info btn-icon btn-xs">
+                                        <i class="glyphicon glyphicon-eye-open" title="{{ i18n "Details" . }}"></i>
+                                    </a>
+                                        {{ if $entity.StateRaw }}
+                                            <a href="{{ $.Request.URL.Path }}?action=entity&id={{ $entity.Key }}" class="btn btn-danger btn-icon btn-xs">
+                                                <i class="glyphicon glyphicon-stop" title="{{ i18n "OFF" . }}"></i>
+                                            </a>
+                                        {{ else }}
+                                            <a href="{{ $.Request.URL.Path }}?action=entity&id={{ $entity.Key }}" class="btn btn-danger btn-icon btn-xs">
+                                                <i class="glyphicon glyphicon-play" title="{{ i18n "ON" . }}"></i>
+                                            </a>
+                                        {{ end }}
+                                    {{ end }}
+                                </div>
+                            </td>
+                        </tr>
+                        {{ end }}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
