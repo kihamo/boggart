@@ -31,7 +31,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 
 	b.UpdateStatus(boggart.BindStatusOnline)
 
-	dateStart := time.Now().Add(-time.Hour * 24 * 31)
+	dateStart := time.Now().Add(-b.config.BalanceDetailsInterval)
 	dateEnd := time.Now()
 
 	for _, account := range accounts {
@@ -49,35 +49,59 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 
 			// balance
 			if balances, e := b.client.BalanceDetails(ctx, account.Number, service.Provider, dateStart, dateEnd); e == nil {
+				var (
+					t1, t2, t3 *float64
+					t1Date, t2Date, t3Date *time.Time
+				)
+
 				for _, balance := range balances {
-					if balance.ValueT1 != nil {
-						val := *balance.ValueT1 * 1000
-
-						metricServiceBalance.With("account", account.Number, "service", serviceID, "tariff", "1").Set(val)
-
-						if e := b.MQTTPublishAsync(ctx, b.config.TopicMeterValueT1.Format(account.Number, serviceID), val); e != nil {
-							err = multierr.Append(err, e)
-						}
+					if balance.DatetimeEntity == nil {
+						continue
 					}
 
-					if balance.ValueT2 != nil {
-						val := *balance.ValueT2 * 1000
-
-						metricServiceBalance.With("account", account.Number, "service", serviceID, "tariff", "2").Set(val)
-
-						if e := b.MQTTPublishAsync(ctx, b.config.TopicMeterValueT2.Format(account.Number, serviceID), val); e != nil {
-							err = multierr.Append(err, e)
-						}
+					if balance.ValueT1 != nil && (t1Date == nil || (*balance.DatetimeEntity).After(*t1Date)) {
+						t1 = balance.ValueT1
+						t1Date = &balance.DatetimeEntity.Time
 					}
 
-					if balance.ValueT3 != nil {
-						val := *balance.ValueT3 * 1000
+					if balance.ValueT2 != nil && (t2Date == nil || (*balance.DatetimeEntity).After(*t2Date)) {
+						t2 = balance.ValueT2
+						t2Date = &balance.DatetimeEntity.Time
+					}
 
-						metricServiceBalance.With("account", account.Number, "service", serviceID, "tariff", "3").Set(val)
+					if balance.ValueT3 != nil && (t3Date == nil || (*balance.DatetimeEntity).After(*t3Date)) {
+						t3 = balance.ValueT3
+						t3Date = &balance.DatetimeEntity.Time
+					}
+				}
 
-						if e := b.MQTTPublishAsync(ctx, b.config.TopicMeterValueT3.Format(account.Number, serviceID), val); e != nil {
-							err = multierr.Append(err, e)
-						}
+				if t1 != nil {
+					val := *t1 * 1000
+
+					metricServiceBalance.With("account", account.Number, "service", serviceID, "tariff", "1").Set(val)
+
+					if e := b.MQTTPublishAsync(ctx, b.config.TopicMeterValueT1.Format(account.Number, serviceID), val); e != nil {
+						err = multierr.Append(err, e)
+					}
+				}
+
+				if t2 != nil {
+					val := *t2 * 1000
+
+					metricServiceBalance.With("account", account.Number, "service", serviceID, "tariff", "2").Set(val)
+
+					if e := b.MQTTPublishAsync(ctx, b.config.TopicMeterValueT2.Format(account.Number, serviceID), val); e != nil {
+						err = multierr.Append(err, e)
+					}
+				}
+
+				if t3 != nil {
+					val := *t3 * 1000
+
+					metricServiceBalance.With("account", account.Number, "service", serviceID, "tariff", "3").Set(val)
+
+					if e := b.MQTTPublishAsync(ctx, b.config.TopicMeterValueT3.Format(account.Number, serviceID), val); e != nil {
+						err = multierr.Append(err, e)
 					}
 				}
 			} else {
