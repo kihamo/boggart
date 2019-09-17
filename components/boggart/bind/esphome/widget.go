@@ -1,6 +1,7 @@
 package esphome
 
 import (
+	"net/http"
 	"strconv"
 	"time"
 
@@ -236,6 +237,9 @@ func (t Type) handleLight(w *dashboard.Response, r *dashboard.Request, bind *Bin
 			err = bind.provider.LightCommand(ctx, cmd)
 			if err != nil {
 				r.Session().FlashBag().Error(t.Translate(ctx, "Execute command failed with error %s", "", err.Error()))
+			} else {
+				t.Redirect(r.URL().Path+"?action=entity&id="+strconv.FormatUint(uint64(entity.GetKey()), 10), http.StatusFound, w, r)
+				return
 			}
 		}
 	}
