@@ -13,6 +13,7 @@ type Config struct {
 	Password        string        `valid:"required"`
 	UpdaterInterval time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 	TopicBalance    mqtt.Topic    `mapstructure:"topic_balance" yaml:"topic_balance"`
+	TopicMeterValue mqtt.Topic    `mapstructure:"topic_meter_value" yaml:"topic_meter_value"`
 }
 
 func (Type) Config() interface{} {
@@ -20,5 +21,6 @@ func (Type) Config() interface{} {
 		Debug:           false,
 		UpdaterInterval: time.Hour,
 		TopicBalance:    boggart.ComponentName + "/service/rkcm/+/balance",
+		TopicMeterValue: boggart.ComponentName + "/service/rkcm/+/meter/+",
 	}
 }
