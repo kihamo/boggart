@@ -78,7 +78,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 				if t1 != nil {
 					val := *t1 * 1000
 
-					metricServiceBalance.With("account", account.Number, "service", serviceID, "tariff", "1").Set(val)
+					metricMeterValue.With("account", account.Number, "service", serviceID, "tariff", "1").Set(val)
 
 					if e := b.MQTTPublishAsync(ctx, b.config.TopicMeterValueT1.Format(account.Number, serviceID), val); e != nil {
 						err = multierr.Append(err, e)
@@ -88,7 +88,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 				if t2 != nil {
 					val := *t2 * 1000
 
-					metricServiceBalance.With("account", account.Number, "service", serviceID, "tariff", "2").Set(val)
+					metricMeterValue.With("account", account.Number, "service", serviceID, "tariff", "2").Set(val)
 
 					if e := b.MQTTPublishAsync(ctx, b.config.TopicMeterValueT2.Format(account.Number, serviceID), val); e != nil {
 						err = multierr.Append(err, e)
@@ -98,7 +98,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 				if t3 != nil {
 					val := *t3 * 1000
 
-					metricServiceBalance.With("account", account.Number, "service", serviceID, "tariff", "3").Set(val)
+					metricMeterValue.With("account", account.Number, "service", serviceID, "tariff", "3").Set(val)
 
 					if e := b.MQTTPublishAsync(ctx, b.config.TopicMeterValueT3.Format(account.Number, serviceID), val); e != nil {
 						err = multierr.Append(err, e)
