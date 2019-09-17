@@ -4,11 +4,17 @@ import (
 	"context"
 	"crypto/md5"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"strconv"
+	"time"
 
 	"github.com/kihamo/boggart/providers/integratorit/internal"
 	"go.uber.org/multierr"
+)
+
+const (
+	dateFormatLayout = "2006-01-02"
 )
 
 type Client struct {
@@ -34,7 +40,7 @@ func (c *Client) Auth(ctx context.Context) error {
 	hash := md5.New()
 	hash.Write([]byte(c.base.Password()))
 
-	err := c.base.DoRequest(ctx, "auth", "", map[string]string{
+	err := c.base.DoRequest(ctx, "auth", nil, map[string]string{
 		"nm_email":         c.base.Login(),
 		"nm_psw":           hex.EncodeToString(hash.Sum(nil)),
 		"plugin":           "captchaChecker",
@@ -59,7 +65,7 @@ func (c *Client) Accounts(ctx context.Context) ([]Account, error) {
 		Accounts []Account `json:"houses"`
 	}, 0)
 
-	err := c.base.DoRequest(ctx, "sql", "lka_get_houses", nil, &data)
+	err := c.base.DoRequest(ctx, "sql", map[string]string{"query": "lka_get_houses"}, nil, &data)
 	if err != nil {
 		return nil, err
 	}
@@ -86,4 +92,29 @@ func (c *Client) Accounts(ctx context.Context) ([]Account, error) {
 	}
 
 	return accounts, err
+}
+
+func (c *Client) BalanceDetails(ctx context.Context, number string, provider Provider, dateStart, dateEnd time.Time) ([]BalanceDetail, error) {
+	vlProvider, err := json.Marshal(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	data := make([]BalanceDetail, 0)
+
+	err = c.base.DoRequest(ctx, "sql", map[string]string{"query": "proxy", "plugin": "bytTmbProxy", "proxyquery": "tmb_balance_detail"}, map[string]string{
+		"dt_start":    dateStart.Format(dateFormatLayout),
+		"dt_end":      dateEnd.Format(dateFormatLayout),
+		"nn_ls":       number,
+		"nm_email":    c.base.Login(),
+		"vl_provider": string(vlProvider),
+		"page":        "1",
+		"start":       "0",
+		"limit":       "25",
+	}, &data)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }

@@ -31,7 +31,7 @@ func (c *Client) Auth(ctx context.Context) error {
 		Session   string `json:"session"`
 	}, 0)
 
-	err := c.base.DoRequest(ctx, "auth", "", map[string]string{
+	err := c.base.DoRequest(ctx, "auth", nil, map[string]string{
 		"login":          c.base.Login(),
 		"psw":            c.base.Password(),
 		"remember":       "true",
@@ -54,7 +54,7 @@ func (c *Client) Auth(ctx context.Context) error {
 func (c *Client) Accounts(ctx context.Context) ([]Account, error) {
 	data := make([]Account, 0)
 
-	if err := c.base.DoRequest(ctx, "sql", "LSList", nil, &data); err != nil {
+	if err := c.base.DoRequest(ctx, "sql", map[string]string{"query": "LSList"}, nil, &data); err != nil {
 		return nil, err
 	}
 
@@ -74,7 +74,7 @@ func (c *Client) Accounts(ctx context.Context) ([]Account, error) {
 func (c *Client) CurrentBalance(ctx context.Context, IDAbonent uint64) (*Balance, error) {
 	var data []Balance
 
-	err := c.base.DoRequest(ctx, "sql", "smorodinaTransProxy", map[string]string{
+	err := c.base.DoRequest(ctx, "sql", map[string]string{"query": "smorodinaTransProxy"}, map[string]string{
 		"plugin":      "smorodinaTransProxy",
 		"proxyquery":  "AbonentCurrentBalance",
 		"vl_provider": `{"id_abonent": ` + strconv.FormatUint(IDAbonent, 10) + `}`,
@@ -90,7 +90,7 @@ func (c *Client) CurrentBalance(ctx context.Context, IDAbonent uint64) (*Balance
 func (c *Client) Payments(ctx context.Context, IDAbonent uint64, dateStart, dateEnd time.Time) ([]Payment, error) {
 	var data []Payment
 
-	err := c.base.DoRequest(ctx, "sql", "smorodinaTransProxy", map[string]string{
+	err := c.base.DoRequest(ctx, "sql", map[string]string{"query": "smorodinaTransProxy"}, map[string]string{
 		"plugin":      "smorodinaTransProxy",
 		"proxyquery":  "AbonentPays",
 		"vl_provider": `{"id_abonent": ` + strconv.FormatUint(IDAbonent, 10) + `}`,
@@ -104,7 +104,7 @@ func (c *Client) Payments(ctx context.Context, IDAbonent uint64, dateStart, date
 func (c *Client) ChargeDetail(ctx context.Context, IDAbonent uint64, dateStart, dateEnd time.Time) ([]Charge, error) {
 	var data []Charge
 
-	err := c.base.DoRequest(ctx, "sql", "smorodinaTransProxy", map[string]string{
+	err := c.base.DoRequest(ctx, "sql", map[string]string{"query": "smorodinaTransProxy"}, map[string]string{
 		"plugin":          "smorodinaTransProxy",
 		"proxyquery":      "AbonentChargeDetail",
 		"vl_provider":     `{"id_abonent": ` + strconv.FormatUint(IDAbonent, 10) + `}`,

@@ -17,10 +17,12 @@ type Config struct {
 }
 
 func (Type) Config() interface{} {
+	var prefix mqtt.Topic = boggart.ComponentName + "/service/rkcm/+/"
+
 	return &Config{
 		Debug:           false,
 		UpdaterInterval: time.Hour,
-		TopicBalance:    boggart.ComponentName + "/service/rkcm/+/balance",
-		TopicMeterValue: boggart.ComponentName + "/service/rkcm/+/meter/+",
+		TopicBalance:    prefix + "balance",
+		TopicMeterValue: prefix + "meter/+",
 	}
 }

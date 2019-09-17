@@ -22,6 +22,6 @@ func (Type) Config() interface{} {
 	return &Config{
 		UpdaterInterval:     time.Hour,
 		TopicBalance:        prefix + "balance",
-		TopicServiceBalance: prefix + "+/balance",
+		TopicServiceBalance: prefix + "balance/+",
 	}
 }

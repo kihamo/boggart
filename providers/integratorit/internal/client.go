@@ -69,12 +69,12 @@ func (c *Client) Session() string {
 	return c.session
 }
 
-func (c *Client) DoRequest(ctx context.Context, action, query string, body map[string]string, data interface{}) error {
+func (c *Client) DoRequest(ctx context.Context, action string, query, body map[string]string, data interface{}) error {
 	values := url.Values{}
 	values.Add("action", action)
 
-	if query != "" {
-		values.Add("query", query)
+	for key, val := range query {
+		values.Add(key, val)
 	}
 
 	// auto login
