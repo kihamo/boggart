@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/providers/hilink/client/device"
 	"github.com/kihamo/boggart/providers/hilink/client/monitoring"
 	"github.com/kihamo/boggart/providers/hilink/client/net"
@@ -125,7 +124,7 @@ func (b *Bind) taskSMSChecker(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	sn := mqtt.NameReplace(b.SerialNumber())
+	sn := b.SerialNumber()
 
 	for _, s := range response.Payload.Messages {
 		if s.Status != 1 {

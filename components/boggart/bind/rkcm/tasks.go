@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/providers/rkcm/client/mobile"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
@@ -37,7 +36,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	for _, debt := range response.Payload.Data {
 		metricBalance.With("ident", debt.Ident).Set(debt.Sum)
 
-		if e := b.MQTTPublishAsync(ctx, b.config.TopicBalance.Format(mqtt.NameReplace(debt.Ident)), debt.Sum); e != nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicBalance.Format(debt.Ident), debt.Sum); e != nil {
 			err = multierr.Append(e, err)
 		}
 	}

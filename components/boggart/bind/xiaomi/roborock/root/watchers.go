@@ -4,8 +4,6 @@ import (
 	"bufio"
 	"context"
 	"os"
-
-	"github.com/kihamo/boggart/components/mqtt"
 )
 
 func (b *Bind) runtimeConfigWatcher(fileName string) error {
@@ -15,7 +13,7 @@ func (b *Bind) runtimeConfigWatcher(fileName string) error {
 	}
 	defer f.Close()
 
-	sn := mqtt.NameReplace(b.SerialNumber())
+	sn := b.SerialNumber()
 
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {

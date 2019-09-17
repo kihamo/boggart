@@ -262,9 +262,7 @@ func (b *Bind) subscribeTransition(ctx context.Context, _ mqtt.Component, messag
 		checkResult := payload.IsEnter()
 
 		if ok := check.Set(checkResult); ok {
-			name := mqtt.NameReplace(payload.Desc)
-
-			if e := b.MQTTPublishAsyncRaw(ctx, b.config.TopicRegion.Format(name), message.Qos(), message.Retained(), checkResult); e != nil {
+			if e := b.MQTTPublishAsyncRaw(ctx, b.config.TopicRegion.Format(payload.Desc), message.Qos(), message.Retained(), checkResult); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}

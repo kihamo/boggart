@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 )
@@ -49,10 +48,9 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			}
 
 			b.variables[v.Name] = v.Value
-			name := mqtt.NameReplace(v.Name)
 
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, b.config.TopicVariable.Format(sn, name), v.Value)
+			_ = b.MQTTPublishAsync(ctx, b.config.TopicVariable.Format(sn, v.Name), v.Value)
 		}
 	}
 

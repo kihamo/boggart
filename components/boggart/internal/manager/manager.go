@@ -289,7 +289,7 @@ func (m *Manager) mqttPublish(topic mqtt.Topic, payload interface{}) {
 func (m *Manager) itemStatusUpdate(item *BindItem) boggart.BindStatusSetter {
 	return func(status boggart.BindStatus) {
 		if ok := item.updateStatus(status); ok {
-			m.mqttPublish(MQTTPublishTopicBindStatus.Format(mqtt.NameReplace(item.id)), strings.ToLower(status.String()))
+			m.mqttPublish(MQTTPublishTopicBindStatus.Format(item.id), strings.ToLower(status.String()))
 		}
 	}
 }
@@ -300,7 +300,7 @@ func (m *Manager) bindStatusUpdate(item *BindItem) boggart.BindStatusSetter {
 		// allow statuses
 		case boggart.BindStatusOnline, boggart.BindStatusOffline, boggart.BindStatusUnknown, boggart.BindStatusRemoved:
 			if ok := item.updateStatus(status); ok {
-				m.mqttPublish(MQTTPublishTopicBindStatus.Format(mqtt.NameReplace(item.id)), strings.ToLower(status.String()))
+				m.mqttPublish(MQTTPublishTopicBindStatus.Format(item.id), strings.ToLower(status.String()))
 			}
 
 		default:

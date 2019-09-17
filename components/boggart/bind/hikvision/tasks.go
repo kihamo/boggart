@@ -6,7 +6,6 @@ import (
 	"log"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/providers/hikvision/client/content_manager"
 	"github.com/kihamo/boggart/providers/hikvision/client/ptz"
 	"github.com/kihamo/boggart/providers/hikvision/client/system"
@@ -141,22 +140,21 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	defer b.mutex.RUnlock()
 
 	sn := b.SerialNumber()
-	snMQTT := mqtt.NameReplace(sn)
 
 	status, err := b.client.System.GetStatus(system.NewGetStatusParamsWithContext(ctx), nil)
 	if err == nil {
 		// TODO:
-		_ = b.MQTTPublishAsync(ctx, b.config.TopicStateUpTime.Format(snMQTT), status.Payload.DeviceUpTime)
+		_ = b.MQTTPublishAsync(ctx, b.config.TopicStateUpTime.Format(sn), status.Payload.DeviceUpTime)
 		metricUpTime.With("serial_number", sn).Set(float64(status.Payload.DeviceUpTime))
 
 		memoryUsage := int64(status.Payload.MemoryList[0].MemoryUsage) * MB
 		// TODO:
-		_ = b.MQTTPublishAsync(ctx, b.config.TopicStateMemoryUsage.Format(snMQTT), memoryUsage)
+		_ = b.MQTTPublishAsync(ctx, b.config.TopicStateMemoryUsage.Format(sn), memoryUsage)
 		metricMemoryUsage.With("serial_number", sn).Set(float64(memoryUsage))
 
 		memoryAvailable := int64(status.Payload.MemoryList[0].MemoryAvailable) * MB
 		// TODO:
-		_ = b.MQTTPublishAsync(ctx, b.config.TopicStateMemoryAvailable.Format(snMQTT), memoryAvailable)
+		_ = b.MQTTPublishAsync(ctx, b.config.TopicStateMemoryAvailable.Format(sn), memoryAvailable)
 		metricMemoryAvailable.With("serial_number", sn).Set(float64(memoryAvailable))
 	} else {
 		b.Logger().Error("Request SystemStatus failed", "error", err.Error())
@@ -170,14 +168,14 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			}
 
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, b.config.TopicStateHDDCapacity.Format(snMQTT, hdd.ID), hdd.Capacity*MB)
+			_ = b.MQTTPublishAsync(ctx, b.config.TopicStateHDDCapacity.Format(sn, hdd.ID), hdd.Capacity*MB)
 
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, b.config.TopicStateHDDUsage.Format(snMQTT, hdd.ID), (hdd.Capacity-hdd.FreeSpace)*MB)
+			_ = b.MQTTPublishAsync(ctx, b.config.TopicStateHDDUsage.Format(sn, hdd.ID), (hdd.Capacity-hdd.FreeSpace)*MB)
 			metricStorageUsage.With("serial_number", sn).With("name", hdd.Name).Set(float64((hdd.Capacity - hdd.FreeSpace) * MB))
 
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, b.config.TopicStateHDDFree.Format(snMQTT, hdd.ID), hdd.FreeSpace*MB)
+			_ = b.MQTTPublishAsync(ctx, b.config.TopicStateHDDFree.Format(sn, hdd.ID), hdd.FreeSpace*MB)
 			metricStorageAvailable.With("serial_number", sn).With("name", hdd.Name).Set(float64(hdd.FreeSpace * MB))
 		}
 	} else {
