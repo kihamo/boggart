@@ -6,60 +6,30 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/atomic"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/mmcloughlin/geohash"
 	"go.uber.org/multierr"
 )
 
-const (
-	// owntracks
-	MQTTOwnTracksPrefix                     mqtt.Topic = "owntracks/+/+"
-	MQTTOwnTracksSubscribeTopicUserLocation            = MQTTOwnTracksPrefix
-	MQTTOwnTracksSubscribeTopicTransition              = MQTTOwnTracksPrefix + "/event"
-	MQTTOwnTracksSubscribeTopicStep                    = MQTTOwnTracksPrefix + "/step"
-	MQTTOwnTracksSubscribeTopicBeacon                  = MQTTOwnTracksPrefix + "/beacon"
-	MQTTOwnTracksSubscribeTopicDump                    = MQTTOwnTracksPrefix + "/dump"
-	MQTTOwnTracksSubscribeTopicWayPoints               = MQTTOwnTracksPrefix + "/waypoint"
-	MQTTOwnTracksPublishTopicCommand                   = MQTTOwnTracksPrefix + "/cmd"
-	MQTTOwnTracksPublishTopicUserLocation              = MQTTOwnTracksPrefix
-	MQTTOwnTracksPublishTopicTransition                = MQTTOwnTracksPrefix + "/event"
-	MQTTOwnTracksPublishTopicCard                      = MQTTOwnTracksPrefix + "/info"
-
-	// custom
-	MQTTPrefix                            mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/"
-	MQTTSubscribeTopicCommand                        = MQTTPrefix + "cmd/+"
-	MQTTPublishTopicRegion                           = MQTTPrefix + "event/+"
-	MQTTPublishTopicUserStateLat                     = MQTTPrefix + "state/lat"
-	MQTTPublishTopicUserStateLon                     = MQTTPrefix + "state/lon"
-	MQTTPublishTopicUserStateGeoHash                 = MQTTPrefix + "state/geohash"
-	MQTTPublishTopicUserStateAccuracy                = MQTTPrefix + "state/accuracy"
-	MQTTPublishTopicUserStateAltitude                = MQTTPrefix + "state/altitude"
-	MQTTPublishTopicUserStateBatteryLevel            = MQTTPrefix + "state/battery-level"
-	MQTTPublishTopicUserStateVelocity                = MQTTPrefix + "state/velocity"
-	MQTTPublishTopicUserStateConnection              = MQTTPrefix + "state/connection"
-	MQTTPublishTopicUserStateLocation                = MQTTPrefix + "state/location"
-)
-
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	topics := []mqtt.Topic{
-		MQTTPublishTopicUserStateLat.Format(b.config.User, b.config.Device),
-		MQTTPublishTopicUserStateLon.Format(b.config.User, b.config.Device),
-		MQTTPublishTopicUserStateGeoHash.Format(b.config.User, b.config.Device),
-		MQTTPublishTopicUserStateAccuracy.Format(b.config.User, b.config.Device),
-		MQTTPublishTopicUserStateAltitude.Format(b.config.User, b.config.Device),
-		MQTTPublishTopicUserStateBatteryLevel.Format(b.config.User, b.config.Device),
-		MQTTPublishTopicUserStateVelocity.Format(b.config.User, b.config.Device),
-		MQTTPublishTopicUserStateConnection.Format(b.config.User, b.config.Device),
-		MQTTPublishTopicUserStateLocation.Format(b.config.User, b.config.Device),
+		b.config.TopicStateLat,
+		b.config.TopicStateLon,
+		b.config.TopicStateGeoHash,
+		b.config.TopicStateAccuracy,
+		b.config.TopicStateAltitude,
+		b.config.TopicStateBatteryLevel,
+		b.config.TopicStateVelocity,
+		b.config.TopicStateConnection,
+		b.config.TopicStateLocation,
 	}
 
 	if !b.config.UnregisterPointsAllowed {
 		for name := range b.getAllRegions() {
-			topics = append(topics, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, name))
+			topics = append(topics, b.config.TopicRegion.Format(name))
 		}
 	} else {
-		topics = append(topics, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device))
+		topics = append(topics, b.config.TopicRegion)
 	}
 
 	return topics
@@ -67,18 +37,18 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	subscribers := []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTSubscribeTopicCommand.Format(b.config.User, b.config.Device, "report-location"), 0, b.subscribeCommand(b.CommandReportLocation)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicCommand.Format(b.config.User, b.config.Device, "restart"), 0, b.subscribeCommand(b.CommandRestart)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicCommand.Format(b.config.User, b.config.Device, "reconnect"), 0, b.subscribeCommand(b.CommandReconnect)),
-		mqtt.NewSubscriber(MQTTSubscribeTopicCommand.Format(b.config.User, b.config.Device, "waypoints"), 0, b.subscribeCommand(b.CommandWayPoints)),
-		mqtt.NewSubscriber(MQTTOwnTracksSubscribeTopicUserLocation.Format(b.config.User, b.config.Device), 0, b.subscribeUserLocation),
-		mqtt.NewSubscriber(MQTTOwnTracksSubscribeTopicTransition.Format(b.config.User, b.config.Device), 0, b.subscribeTransition),
+		mqtt.NewSubscriber(b.config.TopicCommandReportLocation, 0, b.subscribeCommand(b.CommandReportLocation)),
+		mqtt.NewSubscriber(b.config.TopicCommandRestart, 0, b.subscribeCommand(b.CommandRestart)),
+		mqtt.NewSubscriber(b.config.TopicCommandReconnect, 0, b.subscribeCommand(b.CommandReconnect)),
+		mqtt.NewSubscriber(b.config.TopicCommandWayPoints, 0, b.subscribeCommand(b.CommandWayPoints)),
+		mqtt.NewSubscriber(b.config.TopicOwnTracksUserLocation, 0, b.subscribeUserLocation),
+		mqtt.NewSubscriber(b.config.TopicOwnTracksTransition, 0, b.subscribeTransition),
 	}
 
 	if b.config.RegionsSyncEnabled {
 		subscribers = append(
 			subscribers,
-			mqtt.NewSubscriber(MQTTOwnTracksSubscribeTopicWayPoints.Format(b.config.User, b.config.Device), 0, b.subscribeSyncRegions),
+			mqtt.NewSubscriber(b.config.TopicOwnTracksWayPoints, 0, b.subscribeSyncRegions),
 		)
 	}
 
@@ -102,7 +72,7 @@ func (b *Bind) notifyRegionEvent(ctx context.Context, payload *LocationPayload, 
 
 			if checker != nil {
 				if ok := checker.Set(true); ok {
-					if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, mqtt.NameReplace(name)), q, r, true); e != nil {
+					if e := b.MQTTPublishAsyncRaw(ctx, b.config.TopicRegion.Format(name), q, r, true); e != nil {
 						err = multierr.Append(err, e)
 					}
 				}
@@ -131,7 +101,7 @@ func (b *Bind) notifyRegionEvent(ctx context.Context, payload *LocationPayload, 
 			checkResult := calculateDistance(*payload.Lat, *payload.Lon, point.Lat, point.Lon) < point.Radius
 
 			if ok := checker.Set(checkResult); ok {
-				if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, mqtt.NameReplace(name)), q, r, checkResult); e != nil {
+				if e := b.MQTTPublishAsyncRaw(ctx, b.config.TopicRegion.Format(name), q, r, checkResult); e != nil {
 					err = multierr.Append(err, e)
 				}
 			}
@@ -144,7 +114,7 @@ func (b *Bind) notifyRegionEvent(ctx context.Context, payload *LocationPayload, 
 		}
 
 		if ok := checker.Set(false); ok {
-			if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, mqtt.NameReplace(name)), q, r, false); e != nil {
+			if e := b.MQTTPublishAsyncRaw(ctx, b.config.TopicRegion.Format(name), q, r, false); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}
@@ -178,7 +148,7 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 	if ok := b.lat.Set(float32(*payload.Lat)); ok {
 		changeLocation = true
 
-		if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicUserStateLat.Format(b.config.User, b.config.Device), q, r, *payload.Lat); e != nil {
+		if e := b.MQTTPublishAsyncRaw(ctx, b.config.TopicStateLat, q, r, *payload.Lat); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
@@ -186,21 +156,21 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 	if ok := b.lon.Set(float32(*payload.Lon)); ok {
 		changeLocation = true
 
-		if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicUserStateLon.Format(b.config.User, b.config.Device), q, r, *payload.Lon); e != nil {
+		if e := b.MQTTPublishAsyncRaw(ctx, b.config.TopicStateLon, q, r, *payload.Lon); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
 
 	hash := geohash.Encode(*payload.Lat, *payload.Lon)
 	if ok := b.geoHash.Set(hash); ok {
-		if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicUserStateGeoHash.Format(b.config.User, b.config.Device), q, r, hash); e != nil {
+		if e := b.MQTTPublishAsyncRaw(ctx, b.config.TopicStateGeoHash, q, r, hash); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
 
 	if changeLocation {
 		location := strconv.FormatFloat(*payload.Lat, 'f', -1, 64) + "," + strconv.FormatFloat(*payload.Lon, 'f', -1, 64)
-		if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicUserStateLocation.Format(b.config.User, b.config.Device), q, r, location); e != nil {
+		if e := b.MQTTPublishAsyncRaw(ctx, b.config.TopicStateLocation, q, r, location); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
@@ -212,7 +182,7 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 
 	if payload.Acc != nil {
 		if ok := b.acc.Set(int32(*payload.Acc)); ok {
-			if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicUserStateAccuracy.Format(b.config.User, b.config.Device), q, r, *payload.Acc); e != nil {
+			if e := b.MQTTPublishAsyncRaw(ctx, b.config.TopicStateAccuracy, q, r, *payload.Acc); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}
@@ -220,7 +190,7 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 
 	if payload.Alt != nil {
 		if ok := b.alt.Set(int32(*payload.Alt)); ok {
-			if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicUserStateAltitude.Format(b.config.User, b.config.Device), q, r, *payload.Alt); e != nil {
+			if e := b.MQTTPublishAsyncRaw(ctx, b.config.TopicStateAltitude, q, r, *payload.Alt); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}
@@ -230,7 +200,7 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 		metricBatteryLevel.With("user", b.config.User, "device", b.config.Device).Set(*payload.Batt)
 
 		if ok := b.batt.Set(float32(*payload.Batt)); ok {
-			if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicUserStateBatteryLevel.Format(b.config.User, b.config.Device), q, r, *payload.Batt); e != nil {
+			if e := b.MQTTPublishAsyncRaw(ctx, b.config.TopicStateBatteryLevel, q, r, *payload.Batt); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}
@@ -240,7 +210,7 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 		metricVelocity.With("user", b.config.User, "device", b.config.Device).Set(float64(*payload.Vel))
 
 		if ok := b.vel.Set(int32(*payload.Vel)); ok {
-			if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicUserStateVelocity.Format(b.config.User, b.config.Device), q, r, *payload.Vel); e != nil {
+			if e := b.MQTTPublishAsyncRaw(ctx, b.config.TopicStateVelocity, q, r, *payload.Vel); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}
@@ -260,7 +230,7 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 		}
 
 		if ok := b.conn.Set(v); ok {
-			if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicUserStateConnection.Format(b.config.User, b.config.Device), q, r, v); e != nil {
+			if e := b.MQTTPublishAsyncRaw(ctx, b.config.TopicStateConnection, q, r, v); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}
@@ -294,7 +264,7 @@ func (b *Bind) subscribeTransition(ctx context.Context, _ mqtt.Component, messag
 		if ok := check.Set(checkResult); ok {
 			name := mqtt.NameReplace(payload.Desc)
 
-			if e := b.MQTTPublishAsyncRaw(ctx, MQTTPublishTopicRegion.Format(b.config.User, b.config.Device, name), message.Qos(), message.Retained(), checkResult); e != nil {
+			if e := b.MQTTPublishAsyncRaw(ctx, b.config.TopicRegion.Format(name), message.Qos(), message.Retained(), checkResult); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}
