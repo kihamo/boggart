@@ -26,6 +26,8 @@ type Component interface {
 	SubscribeSubscriber(Subscriber) error
 
 	Subscriptions() []*Subscription
+
+	OnConnectHandlerAdd(handler OnConnectHandler)
 }
 
 type Message interface {
@@ -43,4 +45,5 @@ type Message interface {
 	String() string
 }
 
+type OnConnectHandler func(client Component, restore bool)
 type MessageHandler func(ctx context.Context, client Component, message Message) error

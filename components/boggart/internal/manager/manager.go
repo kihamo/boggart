@@ -275,6 +275,17 @@ func (m *Manager) Close() error {
 	return nil
 }
 
+func (m *Manager) MQTTOnConnectHandler(client mqtt.Component, restore bool) {
+	for _, item := range m.BindItems() {
+		topic := MQTTPublishTopicBindStatus.Format(item.ID())
+		err := client.PublishWithoutCache(context.Background(), topic, 1, true, strings.ToLower(item.Status().String()))
+
+		if err != nil {
+			m.logger.Error("Restore publish to MQTT failed", "topic", topic, "error", err.Error())
+		}
+	}
+}
+
 func (m *Manager) mqttPublish(topic mqtt.Topic, payload interface{}) {
 	// при закрытии шлем синхронно, что бы блочить операцию Close компонента
 	if atomic.LoadInt64(&m.status) == managerStatusClose {

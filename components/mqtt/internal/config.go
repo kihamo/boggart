@@ -37,10 +37,6 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithGroup("Connect").
 			WithView([]string{config.ViewPassword}).
 			WithEditable(true),
-		config.NewVariable(mqtt.ConfigConnectionAttempts, config.ValueTypeInt64).
-			WithUsage("Attempts (if 0 unlimited)").
-			WithGroup("Connect").
-			WithDefault(mqtt.DefaultConnectionAttempts),
 		config.NewVariable(mqtt.ConfigConnectionTimeout, config.ValueTypeDuration).
 			WithUsage("Timeout").
 			WithGroup("Connect").

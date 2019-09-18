@@ -110,15 +110,19 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 
 	c.logger = logging.DefaultLazyLogger(c.Name())
 
-	c.mutex.Lock()
-	c.manager = manager.NewManager(
+	mgr := manager.NewManager(
 		a.GetComponent(dashboard.ComponentName).(dashboard.Component),
 		i18nCmp,
 		a.GetComponent(mqtt.ComponentName).(mqtt.Component),
 		a.GetComponent(workers.ComponentName).(workers.Component),
 		logging.NewLazyLogger(c.logger, c.logger.Name()+".bind"),
 		c.listenersManager)
+
+	c.mutex.Lock()
+	c.manager = mgr
 	c.mutex.Unlock()
+
+	c.application.GetComponent(mqtt.ComponentName).(mqtt.Component).OnConnectHandlerAdd(mgr.MQTTOnConnectHandler)
 
 	if _, err := host.Init(); err != nil {
 		return err

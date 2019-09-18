@@ -1,13 +1,10 @@
 package mqtt
 
 const (
-	DefaultConnectionAttempts = 3
-
 	ConfigServers             = ComponentName + ".servers"
 	ConfigClientID            = ComponentName + ".client-id"
 	ConfigUsername            = ComponentName + ".username"
 	ConfigPassword            = ComponentName + ".password"
-	ConfigConnectionAttempts  = ComponentName + ".connection.attempts"
 	ConfigConnectionTimeout   = ComponentName + ".connection.timeout"
 	ConfigClearSession        = ComponentName + ".clear-session"
 	ConfigResumeSubs          = ComponentName + ".resume-subs"

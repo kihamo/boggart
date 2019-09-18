@@ -50,7 +50,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			// balance
 			if balances, e := b.client.BalanceDetails(ctx, account.Number, service.Provider, dateStart, dateEnd); e == nil {
 				var (
-					t1, t2, t3 *float64
+					t1, t2, t3             *float64
 					t1Date, t2Date, t3Date *time.Time
 				)
 

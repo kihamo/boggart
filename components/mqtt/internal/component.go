@@ -32,11 +32,12 @@ type Component struct {
 	config      config.Component
 	logger      logging.Logger
 
-	mutex         sync.RWMutex
-	routes        []dashboard.Route
-	client        m.Client
-	subscriptions *list.List
-	payloadCache  mqtt.Cache
+	mutex             sync.RWMutex
+	routes            []dashboard.Route
+	client            m.Client
+	subscriptions     *list.List
+	handlersOnConnect []mqtt.OnConnectHandler
+	payloadCache      mqtt.Cache
 }
 
 func (c *Component) Name() string {
@@ -64,6 +65,10 @@ func (c *Component) Dependencies() []shadow.Dependency {
 
 func (c *Component) Init(a shadow.Application) (err error) {
 	c.application = a
+
+	c.subscriptions = list.New()
+	c.handlersOnConnect = make([]mqtt.OnConnectHandler, 0)
+
 	c.payloadCache, err = newCache(1)
 
 	return err
@@ -74,7 +79,6 @@ func (c *Component) Run(a shadow.Application, ready chan<- struct{}) (err error)
 		return err
 	}
 
-	c.subscriptions = list.New()
 	c.logger = logging.DefaultLazyLogger(c.Name())
 
 	clientLogger := logging.NewLazyLogger(c.logger, c.Name()+".client")
@@ -99,15 +103,7 @@ func (c *Component) Run(a shadow.Application, ready chan<- struct{}) (err error)
 	return c.initSubscribers()
 }
 
-func (c *Component) initClient() error {
-	attempts := c.config.Int64(mqtt.ConfigConnectionAttempts)
-
-	// auto reconnect
-	//duration := c.config.Duration(mqtt.ConfigConnectionTimeout) + time.Second*30
-	duration := time.Second * 5
-	ticker := time.NewTicker(duration)
-	defer ticker.Stop()
-
+func (c *Component) initClient() (err error) {
 	opts := m.NewClientOptions()
 	opts.Store = NewStore(c.logger)
 
@@ -125,6 +121,9 @@ func (c *Component) initClient() error {
 	opts.WillQos = byte(c.config.Int(mqtt.ConfigLWTQOS))
 	opts.WillRetained = c.config.Bool(mqtt.ConfigLWTRetained)
 
+	opts.ConnectRetry = true
+	opts.ConnectRetryInterval = time.Second * 5
+
 	opts.OnConnect = func(client m.Client) {
 		cfg := client.OptionsReader()
 		var mqttVersion string
@@ -139,20 +138,26 @@ func (c *Component) initClient() error {
 		c.logger.Debug("Connect to MQTT broker", "clientId", cfg.ClientID(), "protocol.version", mqttVersion)
 		metricConnect.Inc()
 
-		if atomic.LoadUint64(&c.lostConnections) == 0 {
-			return
-		}
+		restore := atomic.LoadUint64(&c.lostConnections) == 0
 
-		for _, sub := range c.Subscriptions() {
-			topic := sub.Topic()
-			qos := sub.QOS()
+		if !restore {
+			for _, sub := range c.Subscriptions() {
+				topic := sub.Topic()
+				qos := sub.QOS()
 
-			if err := c.clientSubscribe(topic, qos, sub); err != nil {
-				c.logger.Error("Resubscribe failed", "topic", topic, "qos", qos, "error", err.Error())
-			} else {
-				c.logger.Debug("Resubscribe success", "topic", topic, "qos", qos)
+				if err := c.clientSubscribe(topic, qos, sub); err != nil {
+					c.logger.Error("Resubscribe failed", "topic", topic, "qos", qos, "error", err.Error())
+				} else {
+					c.logger.Debug("Resubscribe success", "topic", topic, "qos", qos)
+				}
 			}
 		}
+
+		c.mutex.RLock()
+		for _, handler := range c.handlersOnConnect {
+			go handler(c, !restore)
+		}
+		c.mutex.RUnlock()
 	}
 	opts.OnConnectionLost = func(client m.Client, reason error) {
 		atomic.AddUint64(&c.lostConnections, 1)
@@ -175,30 +180,17 @@ func (c *Component) initClient() error {
 		}
 	}
 
-	for ; true; <-ticker.C {
-		client := m.NewClient(opts)
-		token := client.Connect()
+	client := m.NewClient(opts)
+	token := client.Connect()
+	token.Wait()
 
-		token.Wait()
-		attempts--
+	err = token.Error()
 
-		if err := token.Error(); err != nil {
-			c.logger.Error("Init MQTT client failed with error " + err.Error())
+	c.mutex.Lock()
+	c.client = client
+	c.mutex.Unlock()
 
-			if attempts == 0 {
-				c.logger.Error("Init MQTT client failed because exhausted number of connection attempts")
-				return errors.New("exhausted number of connection attempts")
-			}
-		} else {
-			c.mutex.Lock()
-			c.client = client
-			c.mutex.Unlock()
-
-			break
-		}
-	}
-
-	return nil
+	return err
 }
 
 func (c *Component) initSubscribers() error {
@@ -278,11 +270,6 @@ func (c *Component) clientSubscribe(topic mqtt.Topic, qos byte, subscription *mq
 
 		// в отдельной рутине, так как если зависнет хендлер клиент MQTT не сделает ack на сообщение
 		go func() {
-			r := "0"
-			if message.Retained() {
-				r = "1"
-			}
-
 			logPayload := msg.String()
 			if len(logPayload) > 100 {
 				logPayload = logPayload[:100]
@@ -293,7 +280,7 @@ func (c *Component) clientSubscribe(topic mqtt.Topic, qos byte, subscription *mq
 				"topic.subscribe", topic,
 				"topic.call", message.Topic(),
 				"qos", strconv.Itoa(int(qos)),
-				"retained", r,
+				"retained", strconv.FormatBool(message.Retained()),
 				"payload", logPayload,
 			)
 
@@ -308,7 +295,7 @@ func (c *Component) clientSubscribe(topic mqtt.Topic, qos byte, subscription *mq
 					"topic.subscribe", topic,
 					"topic.call", message.Topic(),
 					"qos", strconv.Itoa(int(qos)),
-					"retained", r,
+					"retained", strconv.FormatBool(message.Retained()),
 					"payload", logPayload,
 				)
 			} else {
@@ -319,7 +306,7 @@ func (c *Component) clientSubscribe(topic mqtt.Topic, qos byte, subscription *mq
 					"topic.subscribe", topic,
 					"topic.call", message.Topic(),
 					"qos", strconv.Itoa(int(qos)),
-					"retained", r,
+					"retained", strconv.FormatBool(message.Retained()),
 					"payload", logPayload,
 				)
 			}
@@ -342,19 +329,6 @@ func (c *Component) clientSubscribe(topic mqtt.Topic, qos byte, subscription *mq
 func (c *Component) doPublish(ctx context.Context, topic mqtt.Topic, qos byte, retained bool, payload interface{}, cache bool) (err error) {
 	payloadConverted := c.convertPayload(payload)
 
-	if cache && !c.config.Bool(mqtt.ConfigPayloadCacheEnabled) {
-		cache = false
-	}
-
-	if cache {
-		if val, ok := c.payloadCache.Get(topic); ok && bytes.Compare(val, payloadConverted) == 0 {
-			metricPayloadCacheHit.Inc()
-			return nil
-		} else {
-			metricPayloadCacheMiss.Inc()
-		}
-	}
-
 	span, _ := tracing.StartSpanFromContext(ctx, c.Name(), "mqtt_publish")
 	span = span.SetTag("topic", topic)
 	defer span.Finish()
@@ -365,8 +339,21 @@ func (c *Component) doPublish(ctx context.Context, topic mqtt.Topic, qos byte, r
 		log.Bool("retained", retained),
 	)
 
+	if cache && !c.config.Bool(mqtt.ConfigPayloadCacheEnabled) {
+		cache = false
+	}
+
 	client := c.Client()
 	if client != nil {
+		if cache {
+			if val, ok := c.payloadCache.Get(topic); ok && bytes.Compare(val, payloadConverted) == 0 {
+				metricPayloadCacheHit.Inc()
+				return nil
+			} else {
+				metricPayloadCacheMiss.Inc()
+			}
+		}
+
 		token := client.Publish(topic.String(), qos, retained, payloadConverted)
 		token.Wait()
 
@@ -380,11 +367,6 @@ func (c *Component) doPublish(ctx context.Context, topic mqtt.Topic, qos byte, r
 
 		tracing.SpanError(span, err)
 
-		r := "0"
-		if retained {
-			r = "1"
-		}
-
 		logPayload := payloadConverted
 		if len(logPayload) > 100 {
 			logPayload = logPayload[:100]
@@ -395,15 +377,15 @@ func (c *Component) doPublish(ctx context.Context, topic mqtt.Topic, qos byte, r
 			"error", err.Error(),
 			"topic", topic,
 			"qos", strconv.Itoa(int(qos)),
-			"retained", r,
+			"retained", strconv.FormatBool(retained),
 			"payload", string(logPayload),
 		)
 	} else {
 		metricPublish.With("status", "success").Inc()
 
-		if cache {
-			c.payloadCache.Add(topic, payloadConverted)
-		}
+		// if cache {
+		c.payloadCache.Add(topic, payloadConverted)
+		// }
 	}
 
 	return err
@@ -594,6 +576,12 @@ func (c *Component) Subscriptions() []*mqtt.Subscription {
 	c.mutex.RUnlock()
 
 	return subscriptions
+}
+
+func (c *Component) OnConnectHandlerAdd(handler mqtt.OnConnectHandler) {
+	c.mutex.Lock()
+	c.handlersOnConnect = append(c.handlersOnConnect, handler)
+	c.mutex.Unlock()
 }
 
 func (c *Component) convertPayload(payload interface{}) []byte {
