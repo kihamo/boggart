@@ -16,6 +16,8 @@ var (
 	metricTotalConnectTime     = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_total_connection_time_seconds", "HiLink total connection time in seconds")
 	metricTotalDownload        = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_total_download_bytes", "HiLink total download in bytes")
 	metricTotalUpload          = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_total_upload_bytes", "HiLink total upload in bytes")
+	metricSMSUnread            = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_sms_unread", "HiLink SMS unread")
+	metricSMSInbox             = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_sms_inbox", "HiLink SMS inbox")
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {
@@ -34,6 +36,8 @@ func (b *Bind) Describe(ch chan<- *snitch.Description) {
 	metricTotalConnectTime.With("serial_number", sn).Describe(ch)
 	metricTotalDownload.With("serial_number", sn).Describe(ch)
 	metricTotalUpload.With("serial_number", sn).Describe(ch)
+	metricSMSUnread.With("serial_number", sn).Describe(ch)
+	metricSMSInbox.With("serial_number", sn).Describe(ch)
 }
 
 func (b *Bind) Collect(ch chan<- snitch.Metric) {
@@ -52,4 +56,6 @@ func (b *Bind) Collect(ch chan<- snitch.Metric) {
 	metricTotalConnectTime.With("serial_number", sn).Collect(ch)
 	metricTotalDownload.With("serial_number", sn).Collect(ch)
 	metricTotalUpload.With("serial_number", sn).Collect(ch)
+	metricSMSUnread.With("serial_number", sn).Collect(ch)
+	metricSMSInbox.With("serial_number", sn).Collect(ch)
 }

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/providers/hilink/client/device"
@@ -43,11 +44,17 @@ func (b *Bind) Tasks() []workers.Task {
 	taskSystemUpdater.SetRepeatInterval(b.config.SystemUpdaterInterval)
 	taskSystemUpdater.SetName("system-updater-" + b.config.Address.Host)
 
+	taskCleaner := task.NewFunctionTask(b.taskCleaner)
+	taskCleaner.SetRepeats(-1)
+	taskCleaner.SetRepeatInterval(b.config.SystemUpdaterInterval)
+	taskCleaner.SetName("cleaner-" + b.config.Address.Host)
+
 	tasks := []workers.Task{
 		taskLiveness,
 		taskBalanceUpdater,
 		taskSMSChecker,
 		taskSystemUpdater,
+		taskCleaner,
 	}
 
 	return tasks
@@ -111,22 +118,39 @@ func (b *Bind) taskSMSChecker(ctx context.Context) (interface{}, error) {
 		return nil, nil
 	}
 
+	sn := b.SerialNumber()
+
+	// sms counters
+	paramsCount := sms.NewGetSMSCountParamsWithContext(ctx)
+	responseCount, err := b.client.Sms.GetSMSCount(paramsCount)
+	if err != nil {
+		return nil, err
+	}
+
+	metricSMSUnread.With("serial_number", sn).Set(float64(responseCount.Payload.LocalUnread))
+	if e := b.MQTTPublishAsync(ctx, b.config.TopicSMSUnread.Format(sn), responseCount.Payload.LocalUnread); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	metricSMSInbox.With("serial_number", sn).Set(float64(responseCount.Payload.LocalInbox))
+	if e := b.MQTTPublishAsync(ctx, b.config.TopicSMSInbox.Format(sn), responseCount.Payload.LocalInbox); e != nil {
+		err = multierr.Append(err, e)
+	}
+
 	// ----- read new sms -----
-	params := sms.NewGetSMSListParamsWithContext(ctx).
+	paramsList := sms.NewGetSMSListParamsWithContext(ctx).
 		WithRequest(&models.SMSListRequest{
 			PageIndex: 1,
 			ReadCount: 20,
 			BoxType:   1,
 		})
 
-	response, err := b.client.Sms.GetSMSList(params)
+	responseList, err := b.client.Sms.GetSMSList(paramsList)
 	if err != nil {
 		return nil, err
 	}
 
-	sn := b.SerialNumber()
-
-	for _, s := range response.Payload.Messages {
+	for _, s := range responseList.Payload.Messages {
 		if s.Status != 1 {
 			payload, e := json.Marshal(s)
 			if err != nil {
@@ -142,10 +166,18 @@ func (b *Bind) taskSMSChecker(ctx context.Context) (interface{}, error) {
 				}
 			}
 
-			params := sms.NewReadSMSParamsWithContext(ctx)
-			params.Request.Index = s.Index
+			if isSpecial && b.config.CleanerSpecial {
+				params := sms.NewRemoveSMSParamsWithContext(ctx)
+				params.Request.Index = s.Index
 
-			_, e = b.client.Sms.ReadSMS(params)
+				_, e = b.client.Sms.RemoveSMS(params)
+			} else {
+				params := sms.NewReadSMSParamsWithContext(ctx)
+				params.Request.Index = s.Index
+
+				_, e = b.client.Sms.ReadSMS(params)
+			}
+
 			if e != nil {
 				err = multierr.Append(err, e)
 			}
@@ -240,4 +272,63 @@ func (b *Bind) taskSystemUpdater(ctx context.Context) (_ interface{}, err error)
 	}
 
 	return nil, err
+}
+
+func (b *Bind) taskCleaner(ctx context.Context) (_ interface{}, err error) {
+	if b.Status() != boggart.BindStatusOnline {
+		return nil, nil
+	}
+
+	var page int64 = 1
+	for {
+		paramsList := sms.NewGetSMSListParamsWithContext(ctx).
+			WithRequest(&models.SMSListRequest{
+				PageIndex: page,
+				ReadCount: 20,
+				BoxType:   1,
+			})
+
+		response, err := b.client.Sms.GetSMSList(paramsList)
+		if err != nil {
+			return nil, err
+		}
+
+		if len(response.Payload.Messages) == 0 {
+			return nil, nil
+		}
+
+		for _, s := range response.Payload.Messages {
+			remove := b.config.CleanerSpecial && b.checkSpecialSMS(ctx, s)
+			if !remove {
+				d, e := time.Parse("2006-01-02 15:04:05", s.Date)
+
+				if e != nil {
+					continue
+				}
+
+				remove = time.Now().Sub(d) > b.config.CleanerDuration
+			}
+
+			if remove {
+				params := sms.NewRemoveSMSParamsWithContext(ctx)
+				params.Request.Index = s.Index
+
+				if _, err := b.client.Sms.RemoveSMS(params); err != nil {
+					return nil, err
+				}
+
+				b.Logger().Warn("Clean sms",
+					"date", s.Date,
+					"content", s.Content,
+					"phone", s.Phone,
+				)
+
+				time.Sleep(time.Second)
+			}
+		}
+
+		page++
+	}
+
+	return nil, nil
 }

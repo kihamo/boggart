@@ -11,6 +11,8 @@ import (
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
 		b.config.TopicSMS,
+		b.config.TopicSMSUnread,
+		b.config.TopicSMSInbox,
 		b.config.TopicBalance,
 		b.config.TopicOperator,
 		b.config.TopicLimitInternetTraffic,

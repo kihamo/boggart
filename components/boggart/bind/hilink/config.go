@@ -18,12 +18,17 @@ type Config struct {
 	SMSCheckerTimeout         time.Duration `mapstructure:"sms_checker_timeout" yaml:"sms_checker_timeout"`
 	SystemUpdaterInterval     time.Duration `mapstructure:"system_interval" yaml:"system_interval"`
 	SystemUpdaterTimeout      time.Duration `mapstructure:"system_timeout" yaml:"system_timeout"`
+	CleanerInterval           time.Duration `mapstructure:"cleaner_interval" yaml:"cleaner_interval"`
 	SMSCommandsEnabled        bool          `mapstructure:"sms_commands_enabled" yaml:"sms_commands_enabled"`
 	SMSCommandsAllowedPhones  []string      `mapstructure:"sms_commands_allowed_phones" yaml:"sms_commands_allowed_phones"`
+	CleanerSpecial            bool          `mapstructure:"cleaner_special" yaml:"cleaner_special"`
+	CleanerDuration           time.Duration `mapstructure:"cleaner_duration" yaml:"cleaner_duration"`
 	TopicUSSDSend             mqtt.Topic    `mapstructure:"topic_ussd_send" yaml:"topic_ussd_send"`
 	TopicUSSDResult           mqtt.Topic    `mapstructure:"topic_ussd_result" yaml:"topic_ussd_result"`
 	TopicReboot               mqtt.Topic    `mapstructure:"topic_reboot" yaml:"topic_reboot"`
 	TopicSMS                  mqtt.Topic    `mapstructure:"topic_sms" yaml:"topic_sms"`
+	TopicSMSUnread            mqtt.Topic    `mapstructure:"topic_sms_unread" yaml:"topic_sms_unread"`
+	TopicSMSInbox             mqtt.Topic    `mapstructure:"topic_sms_inbox" yaml:"topic_sms_inbox"`
 	TopicBalance              mqtt.Topic    `mapstructure:"topic_balance" yaml:"topic_balance"`
 	TopicOperator             mqtt.Topic    `mapstructure:"topic_operator" yaml:"topic_operator"`
 	TopicLimitInternetTraffic mqtt.Topic    `mapstructure:"topic_limits_internet_traffic" yaml:"topic_limits_internet_traffic"`
@@ -49,10 +54,15 @@ func (t Type) Config() interface{} {
 		SMSCheckerTimeout:         time.Second * 30,
 		SystemUpdaterInterval:     time.Minute,
 		SystemUpdaterTimeout:      time.Second * 30,
+		CleanerInterval:           time.Hour,
+		CleanerSpecial:            true,
+		CleanerDuration:           time.Hour * 24 * 90,
 		TopicUSSDSend:             prefix + "ussd/send",
 		TopicUSSDResult:           prefix + "ussd",
 		TopicReboot:               prefix + "reboot",
 		TopicSMS:                  prefix + "sms",
+		TopicSMSUnread:            prefix + "sms/unread",
+		TopicSMSInbox:             prefix + "sms/inbox",
 		TopicBalance:              prefix + "balance",
 		TopicOperator:             prefix + "operator",
 		TopicLimitInternetTraffic: prefix + "limits/internet-traffic",
