@@ -10,7 +10,6 @@ import (
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/runtime/logger"
-	"github.com/go-openapi/strfmt"
 	"github.com/kihamo/boggart/providers/hilink/client"
 	"github.com/kihamo/boggart/providers/hilink/client/web_server"
 )
@@ -36,22 +35,7 @@ func New(address string, debug bool, logger logger.Logger) *Client {
 	}
 
 	if rt, ok := cl.HiLink.Transport.(*httptransport.Runtime); ok {
-		cl.runtime = newRuntime(rt)
-
-		// автоматическая авторизация при первом запросе
-		cl.runtime.SetDefaultAuthentication(runtime.ClientAuthInfoWriterFunc(func(r runtime.ClientRequest, rg strfmt.Registry) error {
-			if r.GetPath() == "/webserver/SesTokInfo" {
-				return nil
-			}
-
-			if err := cl.Auth(context.Background()); err != nil {
-				return err
-			}
-
-			return cl.HiLink.Transport.(*httptransport.Runtime).
-				DefaultAuthentication.
-				AuthenticateRequest(r, rg)
-		}))
+		cl.runtime = newRuntime(rt, cl.Auth)
 
 		rt.Transport = RoundTripper{
 			original: rt.Transport,
@@ -87,16 +71,7 @@ func (c *Client) Auth(ctx context.Context) error {
 		return err
 	}
 
-	token := response.Payload.Token
-	session := response.Payload.Session
-
-	c.runtime.SetDefaultAuthentication(runtime.ClientAuthInfoWriterFunc(func(request runtime.ClientRequest, _ strfmt.Registry) error {
-		if err := request.SetHeaderParam(headerToken, token); err != nil {
-			return err
-		}
-
-		return request.SetHeaderParam(headerSession, session)
-	}))
+	c.runtime.SetAuthenticationLogged(response.Payload.Token, response.Payload.Session)
 
 	return nil
 }
