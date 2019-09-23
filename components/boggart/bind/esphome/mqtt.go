@@ -13,7 +13,7 @@ import (
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
 		b.config.TopicState,
-		b.config.TopicStateColor,
+		b.config.TopicStateColorRGB,
 		b.config.TopicStateColorHSV,
 		b.config.TopicStateBrightness,
 		b.config.TopicStateRed,

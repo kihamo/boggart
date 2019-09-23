@@ -169,7 +169,7 @@ func (b *Bind) syncState(ctx context.Context, messages ...proto.Message) error {
 				}
 
 				// in HEX
-				if e = b.MQTTPublishAsync(ctx, b.config.TopicStateColor.Format(sn, objectID), color.String()); e != nil {
+				if e = b.MQTTPublishAsync(ctx, b.config.TopicStateColorRGB.Format(sn, objectID), color.String()); e != nil {
 					err = multierr.Append(err, e)
 				}
 

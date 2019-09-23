@@ -18,7 +18,7 @@ type Config struct {
 	TopicColorRGB              mqtt.Topic    `mapstructure:"topic_color_rgb" yaml:"topic_color_rgb"`
 	TopicColorWhite            mqtt.Topic    `mapstructure:"topic_color_white" yaml:"topic_color_white"`
 	TopicState                 mqtt.Topic    `mapstructure:"topic_state" yaml:"topic_state"`
-	TopicStateColor            mqtt.Topic    `mapstructure:"topic_state_color" yaml:"topic_state_color"`
+	TopicStateColorRGB         mqtt.Topic    `mapstructure:"topic_state_color_rgb" yaml:"topic_state_color_rgb"`
 	TopicStateColorHSV         mqtt.Topic    `mapstructure:"topic_state_color_hsv" yaml:"topic_state_color_hsv"`
 	TopicStateBrightness       mqtt.Topic    `mapstructure:"topic_state_brightness" yaml:"topic_state_brightness"`
 	TopicStateRed              mqtt.Topic    `mapstructure:"topic_state_red" yaml:"topic_state_red"`
@@ -42,7 +42,7 @@ func (t Type) Config() interface{} {
 		TopicColorRGB:              prefix + "+/color/rgb",
 		TopicColorWhite:            prefix + "+/color/white",
 		TopicState:                 prefix + "+/state",
-		TopicStateColor:            prefix + "+/state/color",
+		TopicStateColorRGB:         prefix + "+/state/color/rgb",
 		TopicStateColorHSV:         prefix + "+/state/color/hsv",
 		TopicStateBrightness:       prefix + "+/state/brightness",
 		TopicStateRed:              prefix + "+/state/red",
