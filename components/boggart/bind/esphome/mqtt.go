@@ -7,6 +7,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/providers/esphome/native_api"
+	"github.com/kihamo/boggart/providers/wifiled"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
@@ -26,6 +27,91 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
+		mqtt.NewSubscriber(b.config.TopicPower, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 3) {
+				return nil
+			}
+
+			parts := message.Topic().Split()
+
+			entity, err := b.EntityByObjectID(ctx, parts[len(parts)-2])
+			if err != nil {
+				return err
+			}
+
+			switch native_api.EntityType(entity) {
+			case native_api.EntityTypeFan:
+				err = b.provider.FanCommand(ctx, &native_api.FanCommandRequest{
+					Key:      entity.(native_api.MessageEntity).GetKey(),
+					HasState: true,
+					State:    message.Bool(),
+				})
+
+			case native_api.EntityTypeLight:
+				err = b.provider.LightCommand(ctx, &native_api.LightCommandRequest{
+					Key:      entity.(native_api.MessageEntity).GetKey(),
+					HasState: true,
+					State:    message.Bool(),
+				})
+
+			case native_api.EntityTypeSwitch:
+				err = b.provider.SwitchCommand(ctx, &native_api.SwitchCommandRequest{
+					Key:   entity.(native_api.MessageEntity).GetKey(),
+					State: message.Bool(),
+				})
+			}
+
+			if err == nil {
+				err = b.syncState(ctx, entity)
+			}
+
+			return err
+		})),
+		mqtt.NewSubscriber(b.config.TopicColor, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 3) {
+				return nil
+			}
+
+			parts := message.Topic().Split()
+
+			entity, err := b.EntityByObjectID(ctx, parts[len(parts)-2])
+			if err != nil {
+				return err
+			}
+
+			if native_api.EntityType(entity) != native_api.EntityTypeLight {
+				return nil
+			}
+
+			color, err := wifiled.ColorFromString(message.String())
+			if err != nil {
+				return err
+			}
+
+			cmd := &native_api.LightCommandRequest{
+				Key: entity.(native_api.MessageEntity).GetKey(),
+			}
+
+			if color.UseRGB {
+				cmd.HasRgb = true
+				cmd.Red = float32(color.Red) / 255
+				cmd.Green = float32(color.Green) / 255
+				cmd.Blue = float32(color.Blue) / 255
+			}
+
+			if color.UseWarmWhite {
+				cmd.HasWhite = true
+				cmd.White = float32(color.WarmWhite) / 255
+			}
+
+			err = b.provider.LightCommand(ctx, cmd)
+
+			if err == nil {
+				err = b.syncState(ctx, entity)
+			}
+
+			return err
+		})),
 		mqtt.NewSubscriber(b.config.TopicStateSet, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 4) {
 				return nil

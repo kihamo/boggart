@@ -14,6 +14,8 @@ type Config struct {
 	LivenessInterval           time.Duration `mapstructure:"liveness_interval" yaml:"liveness_interval"`
 	LivenessTimeout            time.Duration `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
 	UpdaterInterval            time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
+	TopicPower                 mqtt.Topic    `mapstructure:"topic_power" yaml:"topic_power"`
+	TopicColor                 mqtt.Topic    `mapstructure:"topic_color" yaml:"topic_color"`
 	TopicState                 mqtt.Topic    `mapstructure:"topic_state" yaml:"topic_state"`
 	TopicStateColor            mqtt.Topic    `mapstructure:"topic_state_color" yaml:"topic_state_color"`
 	TopicStateColorHSV         mqtt.Topic    `mapstructure:"topic_state_color_hsv" yaml:"topic_state_color_hsv"`
@@ -35,6 +37,8 @@ func (t Type) Config() interface{} {
 		LivenessInterval:           time.Minute,
 		LivenessTimeout:            time.Second * 5,
 		UpdaterInterval:            time.Minute,
+		TopicPower:                 prefix + "+/power",
+		TopicColor:                 prefix + "+/color",
 		TopicState:                 prefix + "+/state",
 		TopicStateColor:            prefix + "+/state/color",
 		TopicStateColorHSV:         prefix + "+/state/color/hsv",

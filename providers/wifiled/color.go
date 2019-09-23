@@ -96,9 +96,10 @@ func ColorFromHEX(color string) (*Color, error) {
 	}
 
 	return &Color{
-		Red:   rgb[0],
-		Green: rgb[1],
-		Blue:  rgb[2],
+		Red:    rgb[0],
+		Green:  rgb[1],
+		Blue:   rgb[2],
+		UseRGB: true,
 	}, nil
 }
 
