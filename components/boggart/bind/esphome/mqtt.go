@@ -67,62 +67,70 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			return err
 		})),
-		mqtt.NewSubscriber(b.config.TopicColorRGB, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 4) {
+		mqtt.NewSubscriber(b.config.TopicColor, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 3) {
 				return nil
 			}
 
 			parts := message.Topic().Split()
 
-			entity, err := b.EntityByObjectID(ctx, parts[len(parts)-3])
+			entity, err := b.EntityByObjectID(ctx, parts[len(parts)-2])
 			if err != nil {
 				return err
 			}
 
 			if native_api.EntityType(entity) != native_api.EntityTypeLight {
 				return nil
+			}
+
+			states, err := b.States(ctx, entity)
+			if err != nil {
+				return err
+			}
+
+			var (
+				state *native_api.LightStateResponse
+				key   = entity.(native_api.MessageEntity).GetKey()
+			)
+
+			if s, ok := states[key]; !ok {
+				return errors.New("failed get entity state")
+			} else {
+				state = s.(*native_api.LightStateResponse)
+			}
+
+			cmd := &native_api.LightCommandRequest{
+				Key:      key,
+				HasRgb:   true,
+				HasWhite: true,
 			}
 
 			color, err := wifiled.ColorFromString(message.String())
-			if err != nil {
-				return err
-			}
-
-			err = b.provider.LightCommand(ctx, &native_api.LightCommandRequest{
-				Key:    entity.(native_api.MessageEntity).GetKey(),
-				HasRgb: true,
-				Red:    float32(color.Red) / 255,
-				Green:  float32(color.Green) / 255,
-				Blue:   float32(color.Blue) / 255,
-			})
-
 			if err == nil {
-				err = b.syncState(ctx, entity)
+				if color.UseRGB {
+					cmd.Red = float32(color.Red) / 255
+					cmd.Green = float32(color.Green) / 255
+					cmd.Blue = float32(color.Blue) / 255
+					cmd.White = state.GetWhite()
+				} else {
+					cmd.White = float32(color.WarmWhite) / 100
+					cmd.Red = state.GetRed()
+					cmd.Green = state.GetGreen()
+					cmd.Blue = state.GetBlue()
+
+					if cmd.Red == 0 && cmd.Green == 0 && cmd.Blue == 0 {
+						cmd.Red = 1
+						cmd.Green = 1
+						cmd.Blue = 1
+					}
+				}
 			}
 
-			return err
-		})),
-		mqtt.NewSubscriber(b.config.TopicColorWhite, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 4) {
-				return nil
-			}
-
-			parts := message.Topic().Split()
-
-			entity, err := b.EntityByObjectID(ctx, parts[len(parts)-3])
 			if err != nil {
 				return err
 			}
 
-			if native_api.EntityType(entity) != native_api.EntityTypeLight {
-				return nil
-			}
-
-			err = b.provider.LightCommand(ctx, &native_api.LightCommandRequest{
-				Key:      entity.(native_api.MessageEntity).GetKey(),
-				HasWhite: true,
-				White:    float32(message.Float64()),
-			})
+			err = b.provider.LightCommand(ctx, cmd)
 
 			if err == nil {
 				err = b.syncState(ctx, entity)

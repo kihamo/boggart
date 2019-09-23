@@ -173,5 +173,14 @@ func ColorFromString(color string) (*Color, error) {
 		}, nil
 	}
 
+	// white
+	w, err := strconv.ParseFloat(color, 64)
+	if err == nil {
+		return &Color{
+			WarmWhite:    uint8(w * 100),
+			UseWarmWhite: true,
+		}, nil
+	}
+
 	return nil, errors.New("wrong color format")
 }
