@@ -16,7 +16,7 @@ type Config struct {
 	TopicSpeed         mqtt.Topic    `mapstructure:"topic_speed" yaml:"topic_speed"`
 	TopicStatePower    mqtt.Topic    `mapstructure:"topic_state_power" yaml:"topic_state_power"`
 	TopicStateColor    mqtt.Topic    `mapstructure:"topic_state_color" yaml:"topic_state_color"`
-	TopicStateColorHSV mqtt.Topic    `mapstructure:"topic_state_topic_state_color_hsv" yaml:"topic_state_topic_state_color_hsv"`
+	TopicStateColorHSV mqtt.Topic    `mapstructure:"topic_state_color_hsv" yaml:"topic_state_color_hsv"`
 	TopicStateMode     mqtt.Topic    `mapstructure:"topic_state_mode" yaml:"topic_state_mode"`
 	TopicStateSpeed    mqtt.Topic    `mapstructure:"topic_state_speed" yaml:"topic_state_speed"`
 }

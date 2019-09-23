@@ -64,7 +64,7 @@ func (t Type) handleIndex(w *dashboard.Response, r *dashboard.Request, bind *Bin
 			err.Error(),
 		))
 	} else {
-		states, err := bind.States(ctx, messages)
+		states, err := bind.States(ctx, messages...)
 		if err != nil {
 			r.Session().FlashBag().Error(t.Translate(ctx,
 				"Get state of entities failed with error: %s",
@@ -226,7 +226,7 @@ func (t Type) handleLight(w *dashboard.Response, r *dashboard.Request, bind *Bin
 		"entity": entity,
 	}
 
-	states, err := bind.States(ctx, []proto.Message{entity})
+	states, err := bind.States(ctx, entity)
 	if err == nil {
 		vars["state"] = states[entity.GetKey()]
 	}
