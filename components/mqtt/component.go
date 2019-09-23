@@ -43,6 +43,7 @@ type Message interface {
 	IsFalse() bool
 	Bool() bool
 	String() string
+	Float64() float64
 }
 
 type OnConnectHandler func(client Component, restore bool)

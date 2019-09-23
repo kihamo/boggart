@@ -3,6 +3,7 @@ package internal
 import (
 	"bytes"
 	"encoding/json"
+	"strconv"
 
 	m "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kihamo/boggart/components/mqtt"
@@ -69,4 +70,9 @@ func (m *message) IsFalse() bool {
 
 func (m *message) String() string {
 	return string(m.msg.Payload())
+}
+
+func (m *message) Float64() float64 {
+	v, _ := strconv.ParseFloat(m.String(), 64)
+	return v
 }
