@@ -31,8 +31,8 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		mode = ModeDefault
 	}
 
-	config.TopicPinState = config.TopicPinState.Format(g.Name())
-	config.TopicPinSet = config.TopicPinSet.Format(g.Name())
+	config.TopicPinState = config.TopicPinState.Format(g.Number())
+	config.TopicPinSet = config.TopicPinSet.Format(g.Number())
 
 	bind := &Bind{
 		config: config,

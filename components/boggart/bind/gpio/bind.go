@@ -29,6 +29,11 @@ type Bind struct {
 }
 
 func (b *Bind) Run() error {
+	err := b.MQTTPublishAsync(context.Background(), b.config.TopicPinState, b.Read())
+	if err != nil {
+		return err
+	}
+
 	if _, ok := b.pin.(gpio.PinIn); ok {
 		go func() {
 			b.waitForEdge()
