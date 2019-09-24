@@ -164,16 +164,16 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 					light   = entity.(native_api.MessageEntity)
 					cmd     = &native_api.LightCommandRequest{}
 					request struct {
-						State            *bool    `json:"state,omitempty"`
-						Brightness       *float32 `json:"brightness,omitempty"`
-						Red              *float32 `json:"red,omitempty"`
-						Green            *float32 `json:"green,omitempty"`
-						Blue             *float32 `json:"blue,omitempty"`
-						White            *float32 `json:"white,omitempty"`
-						ColorTemperature *float32 `json:"color_temperature,omitempty"`
-						TransitionLength *uint32  `json:"transition_length,omitempty"`
-						FlashLength      *uint32  `json:"flash_length,omitempty"`
-						Effect           *string  `json:"effect,omitempty"`
+						State            *bool   `json:"state,omitempty"`
+						Brightness       *uint8  `json:"brightness,omitempty"`
+						Red              *uint8  `json:"red,omitempty"`
+						Green            *uint8  `json:"green,omitempty"`
+						Blue             *uint8  `json:"blue,omitempty"`
+						White            *uint8  `json:"white,omitempty"`
+						ColorTemperature *uint8  `json:"color_temperature,omitempty"`
+						TransitionLength *uint32 `json:"transition_length,omitempty"`
+						FlashLength      *uint32 `json:"flash_length,omitempty"`
+						Effect           *string `json:"effect,omitempty"`
 					}
 				)
 
@@ -195,7 +195,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 					}
 
 					if request.Brightness != nil {
-						val := *request.Brightness
+						val := float32(*request.Brightness) / 100
 
 						if val > 1 {
 							val = 1
@@ -210,7 +210,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 					}
 
 					if request.Red != nil {
-						val := *request.Red
+						val := float32(*request.Red) / 255
 
 						if val > 1 {
 							val = 1
@@ -225,7 +225,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 					}
 
 					if request.Green != nil {
-						val := *request.Green
+						val := float32(*request.Green) / 255
 
 						if val > 1 {
 							val = 1
@@ -240,7 +240,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 					}
 
 					if request.Blue != nil {
-						val := *request.Blue
+						val := float32(*request.Blue) / 255
 
 						if val > 1 {
 							val = 1
@@ -255,7 +255,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 					}
 
 					if request.White != nil {
-						val := *request.White
+						val := float32(*request.White) / 255
 
 						if val > 1 {
 							val = 1
@@ -278,7 +278,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 					}
 
 					if request.ColorTemperature != nil {
-						val := *request.ColorTemperature
+						val := float32(*request.ColorTemperature) / 100
 
 						if val > 1 {
 							val = 1

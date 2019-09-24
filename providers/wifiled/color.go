@@ -174,10 +174,10 @@ func ColorFromString(color string) (*Color, error) {
 	}
 
 	// white
-	w, err := strconv.ParseFloat(color, 64)
+	w, err := strconv.ParseUint(color, 10, 64)
 	if err == nil {
 		return &Color{
-			WarmWhite:    uint8(w * 100),
+			WarmWhite:    uint8(w),
 			UseWarmWhite: true,
 		}, nil
 	}

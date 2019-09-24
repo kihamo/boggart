@@ -133,39 +133,39 @@ func (b *Bind) syncState(ctx context.Context, messages ...proto.Message) error {
 
 			switch st := state.(type) {
 			case *native_api.LightStateResponse:
+				color := wifiled.Color{
+					Red:       uint8(st.Red * 255),
+					Green:     uint8(st.Green * 255),
+					Blue:      uint8(st.Blue * 255),
+					WarmWhite: uint8(st.White * 100),
+				}
+
 				if e = b.MQTTPublishAsync(ctx, b.config.TopicStateBrightness.Format(sn, objectID), st.Brightness); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				if e = b.MQTTPublishAsync(ctx, b.config.TopicStateRed.Format(sn, objectID), st.Red); e != nil {
+				if e = b.MQTTPublishAsync(ctx, b.config.TopicStateRed.Format(sn, objectID), color.Red); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				if e = b.MQTTPublishAsync(ctx, b.config.TopicStateGreen.Format(sn, objectID), st.Green); e != nil {
+				if e = b.MQTTPublishAsync(ctx, b.config.TopicStateGreen.Format(sn, objectID), color.Green); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				if e = b.MQTTPublishAsync(ctx, b.config.TopicStateBlue.Format(sn, objectID), st.Blue); e != nil {
+				if e = b.MQTTPublishAsync(ctx, b.config.TopicStateBlue.Format(sn, objectID), color.Blue); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				if e = b.MQTTPublishAsync(ctx, b.config.TopicStateWhite.Format(sn, objectID), st.White); e != nil {
+				if e = b.MQTTPublishAsync(ctx, b.config.TopicStateWhite.Format(sn, objectID), color.WarmWhite); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				if e = b.MQTTPublishAsync(ctx, b.config.TopicStateColorTemperature.Format(sn, objectID), st.ColorTemperature); e != nil {
+				if e = b.MQTTPublishAsync(ctx, b.config.TopicStateColorTemperature.Format(sn, objectID), uint8(st.ColorTemperature*100)); e != nil {
 					err = multierr.Append(err, e)
 				}
 
 				if e = b.MQTTPublishAsync(ctx, b.config.TopicStateEffect.Format(sn, objectID), st.Effect); e != nil {
 					err = multierr.Append(err, e)
-				}
-
-				color := wifiled.Color{
-					Red:       uint8(st.Red),
-					Green:     uint8(st.Green),
-					Blue:      uint8(st.Blue),
-					WarmWhite: uint8(st.White),
 				}
 
 				// in HEX
