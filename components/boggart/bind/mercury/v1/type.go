@@ -1,10 +1,13 @@
 package v1
 
 import (
+	"net/url"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/protocols/serial"
+	"github.com/kihamo/boggart/protocols/serial_network"
+	m "github.com/kihamo/boggart/providers/mercury"
 	mercury "github.com/kihamo/boggart/providers/mercury/v1"
 )
 
@@ -15,15 +18,28 @@ type Type struct {
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
-	loc, err := time.LoadLocation(config.Location)
+	u, err := url.Parse(config.RS485Address)
 	if err != nil {
 		return nil, err
 	}
 
-	provider := mercury.New(
-		mercury.ConvertSerialNumber(config.Address),
-		loc,
-		serial.Dial(config.RS485Address, serial.WithTimeout(config.RS485Timeout)))
+	var conn m.Connection
+
+	switch u.Scheme {
+	case "tcp", "tcp4", "tcp6":
+		conn = serial_network.NewTCPClient(u.Scheme, u.Host)
+
+	case "udp", "udp4", "udp6", "unixgram":
+		conn = serial_network.NewUDPClient(u.Scheme, u.Host)
+
+	default:
+		conn = serial.Dial(config.RS485Address, serial.WithTimeout(config.RS485Timeout))
+	}
+
+	loc, err := time.LoadLocation(config.Location)
+	if err != nil {
+		return nil, err
+	}
 
 	config.TopicTariff1 = config.TopicTariff1.Format(config.Address)
 	config.TopicTariff2 = config.TopicTariff2.Format(config.Address)
@@ -39,9 +55,14 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config.TopicFirmwareDate = config.TopicFirmwareDate.Format(config.Address)
 	config.TopicFirmwareVersion = config.TopicFirmwareVersion.Format(config.Address)
 
+	opts := []mercury.Option{
+		mercury.WithAddressAsString(config.Address),
+		mercury.WithLocation(loc),
+	}
+
 	bind := &Bind{
 		config:   config,
-		provider: provider,
+		provider: mercury.New(conn, opts...),
 	}
 
 	// TODO: read real serial number

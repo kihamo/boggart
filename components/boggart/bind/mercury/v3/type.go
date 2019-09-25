@@ -35,7 +35,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	opts := make([]mercury.Option, 0)
 	if config.Address != "" {
-		opts = append(opts, mercury.WithAddress(mercury.ConvertSerialNumber(config.Address)))
+		opts = append(opts, mercury.WithAddressAsString(config.Address))
 	}
 
 	return &Bind{

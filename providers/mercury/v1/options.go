@@ -1,9 +1,12 @@
-package v3
+package v1
+
+import (
+	"time"
+)
 
 type options struct {
-	address     byte
-	accessLevel accessLevel
-	password    LevelPassword
+	address  []byte
+	location *time.Location
 }
 
 type Option interface {
@@ -25,14 +28,10 @@ func newFuncOption(f func(*options)) *funcOption {
 }
 
 func defaultOptions() options {
-	return options{
-		address:     0x0,
-		accessLevel: AccessLevel1,
-		password:    DefaultPasswordLevel1,
-	}
+	return options{}
 }
 
-func WithAddress(address byte) Option {
+func WithAddress(address []byte) Option {
 	return newFuncOption(func(o *options) {
 		o.address = address
 	})
@@ -44,14 +43,8 @@ func WithAddressAsString(address string) Option {
 	})
 }
 
-func WithAccessLevel(accessLevel accessLevel) Option {
+func WithLocation(location *time.Location) Option {
 	return newFuncOption(func(o *options) {
-		o.accessLevel = accessLevel
-	})
-}
-
-func WithPasswordLevel(password LevelPassword) Option {
-	return newFuncOption(func(o *options) {
-		o.password = password
+		o.location = location
 	})
 }
