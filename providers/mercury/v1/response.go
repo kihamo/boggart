@@ -23,7 +23,7 @@ func ParseResponse(data []byte) (*Response, error) {
 	}
 
 	response := &Response{
-		Address: data[1:4],
+		Address: data[:4],
 		Command: requestCommand(data[4]),
 		Payload: data[5 : len(data)-2],
 		CRC:     data[len(data)-2:],
@@ -40,12 +40,11 @@ func ParseResponse(data []byte) (*Response, error) {
 }
 
 func (r *Response) Bytes() []byte {
-	raw := append([]byte{0x0}, r.Address...)
-	raw = append(raw, byte(r.Command))
-	raw = append(raw, r.Payload...)
-	raw = append(raw, r.CRC...)
+	packet := append(r.Address, byte(r.Command))
+	packet = append(packet, r.Payload...)
+	packet = append(packet, r.CRC...)
 
-	return raw
+	return packet
 }
 
 func (r *Response) String() string {

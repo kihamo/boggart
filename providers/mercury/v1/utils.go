@@ -11,7 +11,10 @@ func ConvertSerialNumber(serial string) []byte {
 	number, _ := strconv.ParseInt(serial[len(serial)-6:], 10, 0)
 	h, _ := hex.DecodeString(fmt.Sprintf("%06x", number))
 
-	return h
+	sn := make([]byte, 4)
+	copy(sn[4-len(h):], h)
+
+	return sn
 }
 
 func ParseInt(data ...byte) int64 {

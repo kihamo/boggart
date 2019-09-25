@@ -49,19 +49,12 @@ type Request struct {
 	Address []byte
 	Command requestCommand
 	Payload []byte
-	CRC     []byte
 }
 
 func (r *Request) Bytes() []byte {
-	packet := append([]byte{0x00}, r.Address...)
-	packet = append(packet, byte(r.Command))
+	packet := append(r.Address, byte(r.Command))
 	packet = append(packet, r.Payload...)
-
-	if len(r.CRC) == 0 {
-		r.CRC = serial.GenerateCRC16(packet)
-	}
-
-	packet = append(packet, r.CRC...)
+	packet = append(packet, serial.GenerateCRC16(packet)...)
 
 	return packet
 }

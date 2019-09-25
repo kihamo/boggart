@@ -33,10 +33,10 @@ func ParseResponse(data []byte) (*Response, error) {
 }
 
 func (r *Response) Bytes() []byte {
-	raw := append([]byte{r.Address}, r.Payload...)
-	raw = append(raw, r.CRC...)
+	packet := append([]byte{r.Address}, r.Payload...)
+	packet = append(packet, r.CRC...)
 
-	return raw
+	return packet
 }
 
 func (r *Response) String() string {

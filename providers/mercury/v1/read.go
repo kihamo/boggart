@@ -32,15 +32,16 @@ func (m *MercuryV1) Datetime() (date time.Time, err error) {
 	return
 }
 
-func (m *MercuryV1) SerialNumber() (int64, error) {
+func (m *MercuryV1) SerialNumber() (sn int64, err error) {
 	response, err := m.Request(&Request{
 		Command: RequestCommandReadSerialNumber,
 	})
+
 	if err != nil {
-		return 0, err
+		sn, err = strconv.ParseInt(hex.EncodeToString(response.Payload), 16, 0)
 	}
 
-	return strconv.ParseInt(hex.EncodeToString(response.Payload), 16, 0)
+	return
 }
 
 func (m *MercuryV1) WordType() error {

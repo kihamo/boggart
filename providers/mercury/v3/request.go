@@ -46,7 +46,6 @@ type Request struct {
 	ParameterCode      *byte
 	ParameterExtension *byte
 	Parameters         []byte
-	CRC                []byte
 }
 
 func (r *Request) Bytes() []byte {
@@ -64,11 +63,7 @@ func (r *Request) Bytes() []byte {
 		packet = append(packet, r.Parameters...)
 	}
 
-	if len(r.CRC) == 0 {
-		r.CRC = serial.GenerateCRC16(packet)
-	}
-
-	packet = append(packet, r.CRC...)
+	packet = append(packet, serial.GenerateCRC16(packet)...)
 
 	return packet
 }
