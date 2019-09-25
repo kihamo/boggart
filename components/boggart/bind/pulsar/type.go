@@ -17,7 +17,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
 	var err error
-	conn := serial.Dial(config.RS485Address, serial.WithTimeout(config.RS485Timeout))
+	conn := serial.Dial(serial.WithAddress(config.RS485Address), serial.WithTimeout(config.RS485Timeout))
 
 	var deviceAddress []byte
 	if config.Address == "" {

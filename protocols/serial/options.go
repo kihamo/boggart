@@ -1,17 +1,13 @@
 package serial
 
 import (
+	s "github.com/goburrow/serial"
 	"time"
 )
 
 type options struct {
+	s.Config
 	allowMultiRequest bool
-	target            string
-	baudRate          int
-	dataBits          int
-	stopBits          int
-	parity            string
-	timeout           time.Duration
 }
 
 type Option interface {
@@ -35,47 +31,49 @@ func newFuncOption(f func(*options)) *funcOption {
 func defaultOptions() options {
 	return options{
 		allowMultiRequest: false,
-		target:            "/dev/ttyUSB0",
-		baudRate:          9600,
-		dataBits:          8,
-		stopBits:          1,
-		parity:            "N",
-		timeout:           time.Second,
+		Config: s.Config{
+			Address:  "/dev/ttyUSB0",
+			BaudRate: 9600,
+			DataBits: 8,
+			StopBits: 1,
+			Parity:   "N",
+			Timeout:  time.Second,
+		},
 	}
 }
 
-func WithTarget(address string) Option {
+func WithAddress(address string) Option {
 	return newFuncOption(func(o *options) {
-		o.target = address
+		o.Config.Address = address
 	})
 }
 
 func WithBaudRate(baudRate int) Option {
 	return newFuncOption(func(o *options) {
-		o.baudRate = baudRate
+		o.Config.BaudRate = baudRate
 	})
 }
 
 func WithDataBits(dataBits int) Option {
 	return newFuncOption(func(o *options) {
-		o.dataBits = dataBits
+		o.Config.DataBits = dataBits
 	})
 }
 
 func WithStopBits(stopBits int) Option {
 	return newFuncOption(func(o *options) {
-		o.stopBits = stopBits
+		o.Config.StopBits = stopBits
 	})
 }
 
 func WithParity(parity string) Option {
 	return newFuncOption(func(o *options) {
-		o.parity = parity
+		o.Config.Parity = parity
 	})
 }
 
 func WithTimeout(timeout time.Duration) Option {
 	return newFuncOption(func(o *options) {
-		o.timeout = timeout
+		o.Config.Timeout = timeout
 	})
 }

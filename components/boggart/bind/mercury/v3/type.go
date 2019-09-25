@@ -31,7 +31,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	default:
 		conn = connection.NewIO(
-			serial.Dial(serial.WithTarget(config.RS485Address),
+			serial.Dial(serial.WithAddress(config.RS485Address),
 				serial.WithTimeout(config.RS485Timeout),
 			))
 	}

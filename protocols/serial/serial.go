@@ -33,7 +33,7 @@ func Dial(opts ...Option) *Serial {
 
 	if !conn.options.allowMultiRequest {
 		multiRequestsMutex.Lock()
-		multiRequestsConnections[conn.options.target] = &sync.Mutex{}
+		multiRequestsConnections[conn.options.Config.Address] = &sync.Mutex{}
 		multiRequestsMutex.Unlock()
 	}
 
@@ -42,7 +42,7 @@ func Dial(opts ...Option) *Serial {
 
 func (c *Serial) lockWrapper(f func(s.Port) error) error {
 	multiRequestsMutex.Lock()
-	lock, ok := multiRequestsConnections[c.options.target]
+	lock, ok := multiRequestsConnections[c.options.Config.Address]
 	multiRequestsMutex.Unlock()
 
 	if ok {
@@ -50,14 +50,7 @@ func (c *Serial) lockWrapper(f func(s.Port) error) error {
 		defer lock.Unlock()
 	}
 
-	port, err := s.Open(&s.Config{
-		BaudRate: c.options.baudRate,
-		DataBits: c.options.dataBits,
-		StopBits: c.options.stopBits,
-		Parity:   c.options.parity,
-		Address:  c.options.target,
-		Timeout:  c.options.timeout,
-	})
+	port, err := s.Open(&c.options.Config)
 
 	if err != nil {
 		return err
@@ -80,7 +73,7 @@ func (c *Serial) Read(p []byte) (n int, err error) {
 			}
 
 			if re != nil {
-				if re.Error() == "serial: timeout" {
+				if re == s.ErrTimeout {
 					e = io.EOF
 					break
 				}

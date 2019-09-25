@@ -17,7 +17,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	bind := &Bind{}
 
-	dial := serial.Dial(config.Target, serial.WithTimeout(config.Timeout))
+	dial := serial.Dial(serial.WithAddress(config.Target), serial.WithTimeout(config.Timeout))
 	address := net.JoinHostPort(config.Host, strconv.FormatInt(config.Port, 10))
 
 	switch config.Network {

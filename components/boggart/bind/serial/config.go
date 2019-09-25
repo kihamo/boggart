@@ -2,8 +2,6 @@ package serial
 
 import (
 	"time"
-
-	"github.com/kihamo/boggart/protocols/serial"
 )
 
 type Config struct {
@@ -19,7 +17,7 @@ func (t Type) Config() interface{} {
 		Network: "tcp",
 		Host:    "0.0.0.0",
 		Port:    8600,
-		Target:  serial.DefaultSerialAddress,
+		Target:  "/dev/ttyUSB0",
 		Timeout: time.Second,
 	}
 }
