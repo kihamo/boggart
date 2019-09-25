@@ -3,18 +3,18 @@ package v3
 import (
 	"fmt"
 
-	"github.com/kihamo/boggart/providers/mercury"
+	"github.com/kihamo/boggart/protocols/connection"
 )
 
 type MercuryV3 struct {
-	connection mercury.Connection
-	options    options
+	invoker connection.Invoker
+	options options
 }
 
-func New(connection mercury.Connection, opts ...Option) *MercuryV3 {
+func New(conn connection.Conn, opts ...Option) *MercuryV3 {
 	m := &MercuryV3{
-		connection: connection,
-		options:    defaultOptions(),
+		invoker: connection.NewInvoker(conn),
+		options: defaultOptions(),
 	}
 
 	for _, opt := range opts {
@@ -42,7 +42,7 @@ func (m *MercuryV3) RequestRaw(request *Request) (*Response, error) {
 	// fmt.Println("Request: >>>>>")
 	// fmt.Println(hex.Dump(request.Bytes()))
 
-	data, err := m.connection.Invoke(request.Bytes())
+	data, err := m.invoker.Invoke(request.Bytes())
 	if err != nil {
 		return nil, err
 	}

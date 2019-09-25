@@ -2,6 +2,7 @@ package serial
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"sync"
 
@@ -17,45 +18,31 @@ var (
 	multiRequestsConnections = make(map[string]*sync.Mutex)
 )
 
-type Connection struct {
-	target  string
-	options dialOptions
-	config  *s.Config
+type Serial struct {
+	options options
 }
 
-func Dial(target string, opts ...DialOption) *Connection {
-	if target == "" {
-		target = DefaultSerialAddress
-	}
-
-	conn := &Connection{
-		target:  target,
-		options: defaultDialOptions(),
+func Dial(opts ...Option) *Serial {
+	conn := &Serial{
+		options: defaultOptions(),
 	}
 
 	for _, opt := range opts {
 		opt.apply(&conn.options)
 	}
 
-	conn.config = &s.Config{
-		BaudRate: 9600,
-		Parity:   "N",
-		Address:  conn.target,
-		Timeout:  conn.options.timeout,
-	}
-
 	if !conn.options.allowMultiRequest {
 		multiRequestsMutex.Lock()
-		multiRequestsConnections[target] = &sync.Mutex{}
+		multiRequestsConnections[conn.options.target] = &sync.Mutex{}
 		multiRequestsMutex.Unlock()
 	}
 
 	return conn
 }
 
-func (c *Connection) lockWrapper(f func(s.Port) error) error {
+func (c *Serial) lockWrapper(f func(s.Port) error) error {
 	multiRequestsMutex.Lock()
-	lock, ok := multiRequestsConnections[c.target]
+	lock, ok := multiRequestsConnections[c.options.target]
 	multiRequestsMutex.Unlock()
 
 	if ok {
@@ -63,7 +50,14 @@ func (c *Connection) lockWrapper(f func(s.Port) error) error {
 		defer lock.Unlock()
 	}
 
-	port, err := s.Open(c.config)
+	port, err := s.Open(&s.Config{
+		BaudRate: c.options.baudRate,
+		DataBits: c.options.dataBits,
+		StopBits: c.options.stopBits,
+		Parity:   c.options.parity,
+		Address:  c.options.target,
+		Timeout:  c.options.timeout,
+	})
 
 	if err != nil {
 		return err
@@ -73,16 +67,48 @@ func (c *Connection) lockWrapper(f func(s.Port) error) error {
 	return f(port)
 }
 
-func (c *Connection) Read(p []byte) (n int, err error) {
+func (c *Serial) Read(p []byte) (n int, err error) {
 	err = c.lockWrapper(func(port s.Port) (e error) {
-		n, e = port.Read(p)
+		buffer := bytes.NewBuffer(nil)
+
+		for {
+			b := make([]byte, len(p))
+			rn, re := port.Read(b)
+
+			if rn > 0 {
+				buffer.Write(b[:rn])
+			}
+
+			if re != nil {
+				if re.Error() == "serial: timeout" {
+					e = io.EOF
+					break
+				}
+
+				e = re
+				break
+			}
+
+			if len(p) <= buffer.Len() {
+				break
+			}
+		}
+
+		if buffer.Len() > len(p) {
+			n = len(p)
+		} else {
+			n = buffer.Len()
+		}
+
+		copy(p, buffer.Bytes()[:n])
+
 		return e
 	})
 
 	return n, err
 }
 
-func (c *Connection) Write(p []byte) (n int, err error) {
+func (c *Serial) Write(p []byte) (n int, err error) {
 	err = c.lockWrapper(func(port s.Port) (e error) {
 		n, e = port.Write(p)
 		return e
@@ -91,7 +117,7 @@ func (c *Connection) Write(p []byte) (n int, err error) {
 	return n, err
 }
 
-func (c *Connection) ReadWrite(reader io.Reader, writer io.Writer) error {
+func (c *Serial) ReadWrite(reader io.Reader, writer io.Writer) error {
 	return c.lockWrapper(func(port s.Port) (e error) {
 		readSerialDone := make(chan struct{}, 1)
 		readSerial := make(chan struct{}, 1)
@@ -161,7 +187,9 @@ func (c *Connection) ReadWrite(reader io.Reader, writer io.Writer) error {
 	})
 }
 
-func (c *Connection) Invoke(request []byte) (response []byte, err error) {
+func (c *Serial) Invoke(request []byte) (response []byte, err error) {
+	fmt.Println("Invoke")
+
 	err = c.lockWrapper(func(port s.Port) (e error) {
 		if _, e = port.Write(request); e != nil {
 			return e

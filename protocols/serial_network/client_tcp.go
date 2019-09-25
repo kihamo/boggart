@@ -39,6 +39,10 @@ func (c *TCPClient) Write(b []byte) (n int, err error) {
 	return conn.Write(b)
 }
 
+func (c *TCPClient) Close() error {
+	return nil
+}
+
 func (c *TCPClient) Invoke(request []byte) (response []byte, err error) {
 	conn, err := c.connect()
 	if err != nil {

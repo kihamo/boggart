@@ -28,7 +28,9 @@ func newFuncOption(f func(*options)) *funcOption {
 }
 
 func defaultOptions() options {
-	return options{}
+	return options{
+		location: time.Now().Location(),
+	}
 }
 
 func WithAddress(address []byte) Option {

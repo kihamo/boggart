@@ -59,6 +59,10 @@ func (c *UDPClient) Write(b []byte) (n int, err error) {
 	return conn.Write(b)
 }
 
+func (c *UDPClient) Close() error {
+	return nil
+}
+
 func (c *UDPClient) Invoke(request []byte) (response []byte, err error) {
 	conn, err := c.connect()
 	if err != nil {

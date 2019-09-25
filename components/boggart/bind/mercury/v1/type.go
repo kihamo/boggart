@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/protocols/connection"
 	"github.com/kihamo/boggart/protocols/serial"
 	"github.com/kihamo/boggart/protocols/serial_network"
-	m "github.com/kihamo/boggart/providers/mercury"
 	mercury "github.com/kihamo/boggart/providers/mercury/v1"
 )
 
@@ -23,7 +23,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		return nil, err
 	}
 
-	var conn m.Connection
+	var conn connection.Conn
 
 	switch u.Scheme {
 	case "tcp", "tcp4", "tcp6":
@@ -33,7 +33,10 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		conn = serial_network.NewUDPClient(u.Scheme, u.Host)
 
 	default:
-		conn = serial.Dial(config.RS485Address, serial.WithTimeout(config.RS485Timeout))
+		conn = connection.NewIO(
+			serial.Dial(serial.WithTarget(config.RS485Address),
+				serial.WithTimeout(config.RS485Timeout),
+			))
 	}
 
 	loc, err := time.LoadLocation(config.Location)

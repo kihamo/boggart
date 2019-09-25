@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 
-	"github.com/kihamo/boggart/providers/mercury"
+	"github.com/kihamo/boggart/protocols/connection"
 )
 
 const (
@@ -20,14 +20,14 @@ const (
 )
 
 type MercuryV1 struct {
-	connection mercury.Connection
-	options    options
+	invoker connection.Invoker
+	options options
 }
 
-func New(connection mercury.Connection, opts ...Option) *MercuryV1 {
+func New(conn connection.Conn, opts ...Option) *MercuryV1 {
 	m := &MercuryV1{
-		connection: connection,
-		options:    defaultOptions(),
+		invoker: connection.NewInvoker(conn),
+		options: defaultOptions(),
 	}
 
 	for _, opt := range opts {
@@ -42,7 +42,7 @@ func (m *MercuryV1) Request(request *Request) (*Response, error) {
 		request.Address = m.options.address
 	}
 
-	data, err := m.connection.Invoke(request.Bytes())
+	data, err := m.invoker.Invoke(request.Bytes())
 	if err != nil {
 		return nil, err
 	}
