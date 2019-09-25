@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"time"
 
+	"github.com/kihamo/boggart/protocols/connection"
 	"github.com/kihamo/boggart/protocols/serial"
 )
 
@@ -67,14 +68,10 @@ type MetricsChannel int
 type SettingsParam int
 type ArchiveType int
 
-type Connection interface {
-	Invoke(request []byte) (response []byte, err error)
-}
-
 type HeatMeter struct {
-	address    []byte
-	location   *time.Location
-	connection Connection
+	address  []byte
+	location *time.Location
+	invoker  connection.Invoker
 }
 
 func (i MetricsChannel) toInt64() int64 {
@@ -101,15 +98,15 @@ func (i ArchiveType) toBytes() []byte {
 	return big.NewInt(i.toInt64()).Bytes()
 }
 
-func NewHeatMeter(address []byte, location *time.Location, connection Connection) *HeatMeter {
+func NewHeatMeter(address []byte, location *time.Location, conn connection.Conn) *HeatMeter {
 	if location == nil {
 		location = time.Now().Location()
 	}
 
 	return &HeatMeter{
-		address:    address,
-		location:   location,
-		connection: connection,
+		address:  address,
+		location: location,
+		invoker:  connection.NewInvoker(conn),
 	}
 }
 
@@ -142,7 +139,7 @@ func (d *HeatMeter) Request(function byte, data []byte) ([]byte, error) {
 
 	// fmt.Println("Request: ", request, hex.EncodeToString(request), " with function", strings.ToUpper(hex.EncodeToString([]byte{function})))
 
-	response, err := d.connection.Invoke(request)
+	response, err := d.invoker.Invoke(request)
 	if err != nil {
 		return nil, err
 	}

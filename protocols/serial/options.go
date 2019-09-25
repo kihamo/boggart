@@ -1,8 +1,9 @@
 package serial
 
 import (
-	s "github.com/goburrow/serial"
 	"time"
+
+	s "github.com/goburrow/serial"
 )
 
 type options struct {

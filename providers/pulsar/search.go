@@ -1,11 +1,13 @@
 package pulsar
 
 import (
-	"github.com/kihamo/boggart/protocols/serial"
+	"github.com/kihamo/boggart/protocols/connection"
 )
 
-func DeviceAddress(c *serial.Serial) ([]byte, error) {
-	response, err := c.Invoke([]byte{0xF0, 0x0F, 0x0F, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0xA5, 0x44})
+var commandSearch = []byte{0xF0, 0x0F, 0x0F, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0xA5, 0x44}
+
+func DeviceAddress(conn connection.Conn) ([]byte, error) {
+	response, err := connection.NewInvoker(conn).Invoke(commandSearch)
 	if err != nil {
 		return nil, err
 	}
