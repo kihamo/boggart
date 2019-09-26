@@ -8,8 +8,7 @@ import (
 )
 
 type Config struct {
-	RS485Address         string        `mapstructure:"rs485_address" yaml:"rs485_address" valid:"required"`
-	RS485Timeout         time.Duration `mapstructure:"rs485_timeout" yaml:"rs485_timeout"`
+	ConnectionDSN        string `mapstructure:"connection_dsn" yaml:"connection_dsn" valid:"required"`
 	Address              string
 	UpdaterInterval      time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 	TopicTariff1         mqtt.Topic    `mapstructure:"topic_tariff_1" yaml:"topic_tariff_1"`
@@ -30,7 +29,6 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/meter/mercury/+/"
 
 	return &Config{
-		RS485Timeout:         time.Second,
 		UpdaterInterval:      time.Minute * 5,
 		TopicTariff1:         prefix + "tariff/1",
 		TopicVoltage1:        prefix + "voltage/1",

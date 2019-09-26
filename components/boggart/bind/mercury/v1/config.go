@@ -8,9 +8,8 @@ import (
 )
 
 type Config struct {
-	RS485Address         string        `mapstructure:"rs485_address" yaml:"rs485_address" valid:"required"`
-	RS485Timeout         time.Duration `mapstructure:"rs485_timeout" yaml:"rs485_timeout"`
-	Address              string        `valid:"required"`
+	ConnectionDSN        string `mapstructure:"connection_dsn" yaml:"connection_dsn" valid:"required"`
+	Address              string `valid:"required"`
 	Location             string
 	UpdaterInterval      time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 	TopicTariff1         mqtt.Topic    `mapstructure:"topic_tariff_1" yaml:"topic_tariff_1"`
@@ -32,8 +31,7 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/meter/mercury/+/"
 
 	return &Config{
-		RS485Timeout: time.Second,
-		Location:     time.Now().Location().String(),
+		Location: time.Now().Location().String(),
 		/*
 			При отсутствии тока в последовательной цепи и значении напряжения, равном 1,15Uном, испытательный выход
 			счётчика не создаёт более одного импульса в течение времени, равного 4,4 мин и 3,5 мин для счётчиков класса

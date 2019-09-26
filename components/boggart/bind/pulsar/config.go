@@ -8,8 +8,7 @@ import (
 )
 
 type Config struct {
-	RS485Address          string        `mapstructure:"rs485_address" yaml:"rs485_address" valid:"required"`
-	RS485Timeout          time.Duration `mapstructure:"rs485_timeout" yaml:"rs485_timeout"`
+	ConnectionDSN         string `mapstructure:"connection_dsn" yaml:"connection_dsn" valid:"required"`
 	Address               string
 	Location              string
 	Input1Offset          float32       `mapstructure:"input1_offset" valid:"float"`
@@ -38,7 +37,6 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/"
 
 	return &Config{
-		RS485Timeout:          time.Second,
 		Location:              time.Now().Location().String(),
 		UpdaterInterval:       time.Minute,
 		TopicTemperatureIn:    prefix + "temperature_in",
