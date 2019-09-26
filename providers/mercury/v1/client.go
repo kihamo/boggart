@@ -55,7 +55,8 @@ func (m *MercuryV1) Request(request *Request) (*Response, error) {
 	// check ADDR
 	if !bytes.Equal(response.Address, request.Address) {
 		return nil, errors.New(
-			"error ADDR of response packet have " +
+			"error ADDR of response packet " +
+				hex.EncodeToString(data) + " have " +
 				hex.EncodeToString(response.Address) + " want " +
 				hex.EncodeToString(request.Address))
 	}

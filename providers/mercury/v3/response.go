@@ -22,7 +22,7 @@ type Response struct {
 
 func ParseResponse(data []byte) (*Response, error) {
 	if len(data) < 4 {
-		return nil, errors.New("bad packet length")
+		return nil, errors.New("bad packet " + hex.EncodeToString(data) + " length")
 	}
 
 	return &Response{

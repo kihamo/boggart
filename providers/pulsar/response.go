@@ -19,7 +19,7 @@ func ParseResponse(data []byte) (*Response, error) {
 	l := len(data)
 
 	if l < 10 {
-		return nil, errors.New("bad packet length")
+		return nil, errors.New("bad packet " + hex.EncodeToString(data) + " length")
 	}
 
 	r := &Response{

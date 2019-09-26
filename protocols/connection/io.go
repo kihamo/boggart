@@ -2,6 +2,7 @@ package connection
 
 import (
 	"io"
+	"sync"
 )
 
 type IO struct {
@@ -28,4 +29,16 @@ func (c *IO) Close() error {
 	}
 
 	return nil
+}
+
+func (c *IO) Lock() {
+	if locker, ok := c.conn.(sync.Locker); ok {
+		locker.Lock()
+	}
+}
+
+func (c *IO) Unlock() {
+	if locker, ok := c.conn.(sync.Locker); ok {
+		locker.Unlock()
+	}
 }

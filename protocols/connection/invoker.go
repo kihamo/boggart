@@ -3,6 +3,7 @@ package connection
 import (
 	"bytes"
 	"io"
+	"sync"
 )
 
 const (
@@ -30,6 +31,11 @@ func NewInvoker(conn Conn) Invoker {
 }
 
 func (i *invoker) Invoke(request []byte) ([]byte, error) {
+	if l, ok := i.Conn.(sync.Locker); ok {
+		l.Lock()
+		defer l.Unlock()
+	}
+
 	_, err := i.Write(request)
 	if err != nil {
 		return nil, err

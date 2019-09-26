@@ -145,8 +145,7 @@ func (c *Client) WithDebug(debug bool) *Client {
 }
 
 func (c *Client) Close() (err error) {
-	err = c.connectionCheck()
-	if err == nil {
+	if e := c.connectionCheck(); e == nil {
 		err = c.write(context.Background(), &DisconnectRequest{})
 	}
 

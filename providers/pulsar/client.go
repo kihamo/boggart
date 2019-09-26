@@ -45,7 +45,8 @@ func (d *HeatMeter) Request(request *Request) (*Response, error) {
 	// check ADDR
 	if !bytes.Equal(response.Address, request.Address) {
 		return nil, errors.New(
-			"error ADDR of response packet have " +
+			"error ADDR of response packet " +
+				hex.EncodeToString(data) + " have " +
 				hex.EncodeToString(response.Address) + " want " +
 				hex.EncodeToString(request.Address))
 	}
@@ -53,7 +54,8 @@ func (d *HeatMeter) Request(request *Request) (*Response, error) {
 	// check ID
 	if !bytes.Equal(response.Id, request.Id) {
 		return nil, errors.New(
-			"error ID of response packet have " +
+			"error ID of response packet " +
+				hex.EncodeToString(data) + " have " +
 				hex.EncodeToString(response.Id) + " want " +
 				hex.EncodeToString(request.Id))
 	}
