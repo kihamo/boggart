@@ -21,6 +21,11 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		return nil, err
 	}
 
+	loc, err := time.LoadLocation(config.Location)
+	if err != nil {
+		return nil, err
+	}
+
 	var deviceAddress []byte
 	if config.Address == "" {
 		deviceAddress, err = pulsar.DeviceAddress(conn)
@@ -28,11 +33,6 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		deviceAddress, err = hex.DecodeString(config.Address)
 	}
 
-	if err != nil {
-		return nil, err
-	}
-
-	loc, err := time.LoadLocation(config.Location)
 	if err != nil {
 		return nil, err
 	}
@@ -55,9 +55,14 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config.TopicInputVolume3 = config.TopicInputVolume3.Format(sn)
 	config.TopicInputVolume4 = config.TopicInputVolume4.Format(sn)
 
+	opts := []pulsar.Option{
+		pulsar.WithAddress(deviceAddress),
+		pulsar.WithLocation(loc),
+	}
+
 	bind := &Bind{
 		config:   config,
-		provider: pulsar.NewHeatMeter(deviceAddress, loc, conn),
+		provider: pulsar.New(conn, opts...),
 	}
 	bind.SetSerialNumber(sn)
 
