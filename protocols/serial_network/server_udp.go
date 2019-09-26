@@ -6,6 +6,10 @@ import (
 	"sync"
 )
 
+const (
+	maxBufferSize = 1024
+)
+
 type UDPServer struct {
 	network string
 	address string

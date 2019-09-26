@@ -2,13 +2,13 @@ package connection
 
 import (
 	"errors"
+	"net"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/kihamo/boggart/protocols/serial"
-	"github.com/kihamo/boggart/protocols/serial_network"
 )
 
 func New(dsn string) (conn Conn, err error) {
@@ -23,10 +23,13 @@ func New(dsn string) (conn Conn, err error) {
 
 	switch u.Scheme {
 	case "tcp", "tcp4", "tcp6":
-		conn = serial_network.NewTCPClient(u.Scheme, u.Host)
+		conn, err = net.Dial(u.Scheme, u.Host)
+		if err != nil {
+			return nil, err
+		}
 
 	case "udp", "udp4", "udp6", "unixgram":
-		conn = serial_network.NewUDPClient(u.Scheme, u.Host)
+		conn = NewUDP(u.Scheme, u.Host)
 
 	case "serial":
 		options := []serial.Option{

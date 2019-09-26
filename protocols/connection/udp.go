@@ -1,4 +1,4 @@
-package serial_network
+package connection
 
 import (
 	"errors"
@@ -6,19 +6,19 @@ import (
 	"time"
 )
 
-type UDPClient struct {
+type UDP struct {
 	network string
 	address string
 }
 
-func NewUDPClient(network, address string) *UDPClient {
-	return &UDPClient{
+func NewUDP(network, address string) *UDP {
+	return &UDP{
 		network: network,
 		address: address,
 	}
 }
 
-func (c *UDPClient) connect() (*net.UDPConn, error) {
+func (c *UDP) connect() (*net.UDPConn, error) {
 	conn, err := net.Dial(c.network, c.address)
 	if err != nil {
 		return nil, err
@@ -41,7 +41,7 @@ func (c *UDPClient) connect() (*net.UDPConn, error) {
 	return udp, err
 }
 
-func (c *UDPClient) Read(b []byte) (n int, err error) {
+func (c *UDP) Read(b []byte) (n int, err error) {
 	conn, err := c.connect()
 	if err != nil {
 		return -1, err
@@ -50,7 +50,7 @@ func (c *UDPClient) Read(b []byte) (n int, err error) {
 	return conn.Read(b)
 }
 
-func (c *UDPClient) Write(b []byte) (n int, err error) {
+func (c *UDP) Write(b []byte) (n int, err error) {
 	conn, err := c.connect()
 	if err != nil {
 		return -1, err
@@ -59,11 +59,11 @@ func (c *UDPClient) Write(b []byte) (n int, err error) {
 	return conn.Write(b)
 }
 
-func (c *UDPClient) Close() error {
+func (c *UDP) Close() error {
 	return nil
 }
 
-func (c *UDPClient) Invoke(request []byte) (response []byte, err error) {
+func (c *UDP) Invoke(request []byte) (response []byte, err error) {
 	conn, err := c.connect()
 	if err != nil {
 		return nil, err
@@ -73,12 +73,12 @@ func (c *UDPClient) Invoke(request []byte) (response []byte, err error) {
 		return nil, err
 	}
 
-	err = conn.SetDeadline(time.Now().Add(time.Second * 2))
+	err = conn.SetDeadline(time.Now().Add(time.Second * 5))
 	if err != nil {
 		return nil, err
 	}
 
-	b := make([]byte, maxBufferSize)
+	b := make([]byte, bufferSize)
 
 	n, _, err := conn.ReadFromUDP(b)
 	if n > 0 {
