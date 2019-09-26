@@ -1,5 +1,5 @@
-hash: 0907b91d2d606655cb1d0de2d41a90f8ca02f8596ecea20774dbf2e3c7448fc4
-updated: 2019-09-11T13:35:46.877382+03:00
+hash: f90b6b9d28346434803ae56d11a84f25729b45420c7e316bee2909754d640382
+updated: 2019-09-26T17:34:16.473418+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -81,6 +81,8 @@ imports:
   - wav
 - name: github.com/fsnotify/fsnotify
   version: 1485a34d5d5723fea214f5710708e19a831720e4
+- name: github.com/getsentry/sentry-go
+  version: 6e30a9909361d339adf28d4211947ef408cf7726
 - name: github.com/ghthor/gowol
   version: eb42ead1b24e9226bddb05004815f6e72280f879
 - name: github.com/go-openapi/analysis
@@ -98,7 +100,7 @@ imports:
 - name: github.com/go-openapi/loads
   version: 74628589c3b94e3526a842d24f46589980f5ab22
 - name: github.com/go-openapi/runtime
-  version: 9a7d4745a6664423446ba63492cba3e0fdec6623
+  version: c909caa338861d0afbe126b6706e048e54e40f82
   subpackages:
   - client
   - logger
@@ -227,7 +229,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 2a89102c691a4ada3c6541c0fc554a6b126b6715
+  version: cea43d6ae8dbb04e16850875d5e38cb5353ef3a3
   subpackages:
   - components/annotations
   - components/config
@@ -409,6 +411,8 @@ imports:
   version: ef3ab45e41b017889941ea5bb796dd502d2b5a1b
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
+- name: github.com/TheZeroSlave/zapsentry
+  version: c983a617fa60be67950d9e8c17068b5d9eb32603
 - name: github.com/toqueteos/webbrowser
   version: 21fc9f95c83442fd164094666f7cb4f9fdd56cd6
 - name: github.com/uber/jaeger-client-go
