@@ -333,8 +333,30 @@ func (m *MercuryV1) EventsPowerOnOff(index uint64) (event bool, t time.Time, err
 			Payload: []byte{uint8(index)},
 		})
 
-		event = r.Payload[0] != 1
-		t = ParseDatetime(r.Payload, m.options.location)
+		if err == nil && !bytes.Equal(r.Payload[4:], []byte{255, 255, 255}) {
+			event = r.Payload[0] != 1
+			t = ParseDatetime(r.Payload, m.options.location)
+		}
+	}
+
+	return event, t, err
+}
+
+func (m *MercuryV1) EventsOpenClose(index uint64) (event bool, t time.Time, err error) {
+	if index > 0x3f {
+		err = errors.New("wrong index value #" + strconv.FormatUint(index, 16))
+	} else {
+		var r *Response
+
+		r, err = m.Request(&Request{
+			Command: RequestCommandReadEventsOpenClose,
+			Payload: []byte{uint8(index)},
+		})
+
+		if err == nil && !bytes.Equal(r.Payload[4:], []byte{255, 255, 255}) {
+			event = r.Payload[0] == 0
+			t = ParseDatetime(r.Payload, m.options.location)
+		}
 	}
 
 	return event, t, err

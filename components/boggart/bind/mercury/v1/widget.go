@@ -139,6 +139,8 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 	case "events-on-off":
+		var stopTime time.Time
+
 		type event struct {
 			State bool
 			Time  time.Time
@@ -152,6 +154,40 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			if err != nil {
 				r.Session().FlashBag().Error(t.Translate(r.Context(), "Get event %02x failed with error %s", "", i, err.Error()))
 				continue
+			}
+
+			if date == stopTime {
+				break
+			}
+
+			events = append(events, event{
+				State: state,
+				Time:  date,
+			})
+		}
+
+		vars["events"] = events
+
+	case "events-open-close":
+		var stopTime time.Time
+
+		type event struct {
+			State bool
+			Time  time.Time
+		}
+
+		events := make([]event, 0, 0x3F)
+
+		for i := uint64(0); i <= 0x3F; i++ {
+			state, date, err := bind.provider.EventsOpenClose(i)
+
+			if err != nil {
+				r.Session().FlashBag().Error(t.Translate(r.Context(), "Get event %02x failed with error %s", "", i, err.Error()))
+				continue
+			}
+
+			if date == stopTime {
+				break
 			}
 
 			events = append(events, event{

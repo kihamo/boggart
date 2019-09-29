@@ -37,6 +37,7 @@ const (
 	RequestCommandReadHolidays         = 0x30 // чтение таблицы праздничных дней
 	RequestCommandReadMonthlyStat      = 0x32 // чтение месячных срезов
 	RequestCommandReadEventsPowerOnOff = 0x34 // чтение буфера событий включений/выключения
+	RequestCommandReadEventsOpenClose  = 0x35 // чтение буфера событий включений/выключения
 	RequestCommandReadCurrentTariff    = 0x60 // чтение тарифа
 	RequestCommandReadLastCloseCap     = 0x62 // чтение времение последнего закрытия крышки счетчика
 	RequestCommandReadParamsCurrent    = 0x63 // чтение текущих параметров сети U, I, P

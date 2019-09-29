@@ -14,6 +14,7 @@
                         <li role="presentation"{{ if eq .action "monthly" }} class="active"{{ end }}><a href="{{ if eq .action "monthly" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=monthly&all=1{{ end }}">{{ i18n "Monthly statistics" . }}</a></li>
                         <li role="presentation"{{ if eq .action "display" }} class="active"{{ end }}><a href="{{ if eq .action "display" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=display{{ end }}">{{ i18n "Display" . }}</a></li>
                         <li role="presentation"{{ if eq .action "events-on-off" }} class="active"{{ end }}><a href="{{ if eq .action "events-on-off" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=events-on-off{{ end }}">{{ i18n "Events on/off" . }}</a></li>
+                        <li role="presentation"{{ if eq .action "events-open-close" }} class="active"{{ end }}><a href="{{ if eq .action "events-open-close" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=events-open-close{{ end }}">{{ i18n "Events open/close" . }}</a></li>
                         <li role="presentation"{{ if eq .action "holidays" }} class="active"{{ end }}><a href="{{ if eq .action "holidays" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=holidays{{ end }}">{{ i18n "Holidays" . }}</a></li>
                     </ul>
                     <div class="tab-content">
@@ -102,6 +103,23 @@
                                     <tr>
                                         <td><script type="application/javascript">document.write(dateToString('{{ $event.Time.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
                                         <td>{{ if $event.State }}{{ i18n "on" $ }}{{ else }}{{ i18n "off" $ }}{{ end }}</td>
+                                    </tr>
+                                    {{ end }}
+                                </tbody>
+                            </table>
+                            {{ else if eq .action "events-open-close" }}
+                            <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>{{ i18n "Date" . }}</th>
+                                        <th>{{ i18n "State" . }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{ range $i, $event := .events }}
+                                    <tr>
+                                        <td><script type="application/javascript">document.write(dateToString('{{ $event.Time.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                        <td>{{ if $event.State }}{{ i18n "open" $ }}{{ else }}{{ i18n "close" $ }}{{ end }}</td>
                                     </tr>
                                     {{ end }}
                                 </tbody>

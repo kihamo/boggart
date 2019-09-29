@@ -148,6 +148,15 @@ msgstr "включение"
 msgid "off"
 msgstr "выключение"
 
+msgid "Events open/close"
+msgstr "События открытие/закрытие"
+
+msgid "open"
+msgstr "открытие"
+
+msgid "close"
+msgstr "закрытие"
+
 msgid "Day"
 msgstr "День"
 
