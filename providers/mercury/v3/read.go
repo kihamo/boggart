@@ -67,6 +67,10 @@ func (m *MercuryV3) ReadParameter(param byte) ([]byte, error) {
 		ParameterCode: &[]byte{param}[0],
 	})
 
+	if err != nil {
+		return nil, err
+	}
+
 	return resp.Payload, err
 }
 
