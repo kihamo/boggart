@@ -138,6 +138,30 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			vars["stats"] = stats
 		}
 
+	case "events-on-off":
+		type event struct {
+			State bool
+			Time  time.Time
+		}
+
+		events := make([]event, 0, 0x3F)
+
+		for i := uint64(0); i <= 0x3F; i++ {
+			state, date, err := bind.provider.EventsPowerOnOff(i)
+
+			if err != nil {
+				r.Session().FlashBag().Error(t.Translate(r.Context(), "Get event %02x failed with error %s", "", i, err.Error()))
+				continue
+			}
+
+			events = append(events, event{
+				State: state,
+				Time:  date,
+			})
+		}
+
+		vars["events"] = events
+
 	case "display":
 		var (
 			modeT1, modeT2, modeT3, modeT4, modeAmount, modePower, modeTime, modeDate bool

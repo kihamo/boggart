@@ -133,6 +133,21 @@ msgstr "T3 / Втч"
 msgid "T4 / Wh"
 msgstr "T4 / Втч"
 
+msgid "Events on/off"
+msgstr "События вкл/выкл"
+
+msgid "Date"
+msgstr "Дата"
+
+msgid "State"
+msgstr "Состояние"
+
+msgid "on"
+msgstr "включение"
+
+msgid "off"
+msgstr "выключение"
+
 msgid "Day"
 msgstr "День"
 

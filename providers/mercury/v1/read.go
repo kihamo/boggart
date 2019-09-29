@@ -3,6 +3,7 @@ package v1
 import (
 	"bytes"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -319,6 +320,24 @@ func (m *MercuryV1) MonthlyStat() (uint64, uint64, uint64, uint64, error) {
 // значения счетчика на 1 число месяца
 func (m *MercuryV1) MonthlyStatByMonth(month time.Month) (uint64, uint64, uint64, uint64, error) {
 	return m.monthlyStat(byte(int(month) - 1))
+}
+
+func (m *MercuryV1) EventsPowerOnOff(index uint64) (event bool, t time.Time, err error) {
+	if index > 0x3f {
+		err = errors.New("wrong index value #" + strconv.FormatUint(index, 16))
+	} else {
+		var r *Response
+
+		r, err = m.Request(&Request{
+			Command: RequestCommandReadEventsPowerOnOff,
+			Payload: []byte{uint8(index)},
+		})
+
+		event = r.Payload[0] != 1
+		t = ParseDatetime(r.Payload, m.options.location)
+	}
+
+	return event, t, err
 }
 
 func (m *MercuryV1) CurrentTariff() (tariff uint64, err error) {

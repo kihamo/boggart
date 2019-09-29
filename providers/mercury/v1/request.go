@@ -34,15 +34,16 @@ const (
 	RequestCommandReadTariffCount          = 0x2E // чтение количества действующих тарифов
 
 	// группа дополнительных сетевых команд чтения
-	RequestCommandReadHolidays      = 0x30 // чтение таблицы праздничных дней
-	RequestCommandReadMonthlyStat   = 0x32 // чтение месячных срезов
-	RequestCommandReadCurrentTariff = 0x60 // чтение тарифа
-	RequestCommandReadLastCloseCap  = 0x62 // чтение времение последнего закрытия крышки счетчика
-	RequestCommandReadParamsCurrent = 0x63 // чтение текущих параметров сети U, I, P
-	RequestCommandReadWordType      = 0x65 // чтение слова исполнения
-	RequestCommandReadMakeDate      = 0x66 // чтение даты изготовления
-	RequestCommandReadDisplayTime   = 0x67 // чтение времени индекации
-	RequestCommandReadWorkingTime   = 0x69 // чтение времени наработки
+	RequestCommandReadHolidays         = 0x30 // чтение таблицы праздничных дней
+	RequestCommandReadMonthlyStat      = 0x32 // чтение месячных срезов
+	RequestCommandReadEventsPowerOnOff = 0x34 // чтение буфера событий включений/выключения
+	RequestCommandReadCurrentTariff    = 0x60 // чтение тарифа
+	RequestCommandReadLastCloseCap     = 0x62 // чтение времение последнего закрытия крышки счетчика
+	RequestCommandReadParamsCurrent    = 0x63 // чтение текущих параметров сети U, I, P
+	RequestCommandReadWordType         = 0x65 // чтение слова исполнения
+	RequestCommandReadMakeDate         = 0x66 // чтение даты изготовления
+	RequestCommandReadDisplayTime      = 0x67 // чтение времени индекации
+	RequestCommandReadWorkingTime      = 0x69 // чтение времени наработки
 )
 
 type Request struct {

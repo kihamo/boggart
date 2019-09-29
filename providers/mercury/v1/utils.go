@@ -62,6 +62,20 @@ func ParseDate(data []byte, location *time.Location) time.Time {
 }
 
 func ParseDatetime(data []byte, location *time.Location) time.Time {
+	// без дня недели
+	if len(data) == 6 {
+		return time.Date(
+			2000+int(ParseInt(data[5])),
+			time.Month(ParseInt(data[4])),
+			int(ParseInt(data[3])),
+			int(ParseInt(data[0])),
+			int(ParseInt(data[1])),
+			int(ParseInt(data[2])),
+			0,
+			location)
+	}
+
+	// с ведущем днем недели
 	return time.Date(
 		2000+int(ParseInt(data[6])),
 		time.Month(ParseInt(data[5])),
