@@ -8,8 +8,12 @@ import (
 )
 
 func ConvertSerialNumber(serial string) []byte {
-	number, _ := strconv.ParseInt(serial[len(serial)-6:], 10, 0)
-	h, _ := hex.DecodeString(fmt.Sprintf("%06x", number))
+	if len(serial) < 8 {
+		return nil
+	}
+
+	number, _ := strconv.ParseInt(serial[:8], 10, 0)
+	h, _ := hex.DecodeString(fmt.Sprintf("%08x", number))
 
 	sn := make([]byte, 4)
 	copy(sn[4-len(h):], h)
