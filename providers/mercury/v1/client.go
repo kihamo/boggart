@@ -42,6 +42,10 @@ func (m *MercuryV1) Request(request *Request) (*Response, error) {
 		request.Address = m.options.address
 	}
 
+	if len(request.Address) == 0 {
+		return nil, errors.New("device address is empty")
+	}
+
 	data, err := m.invoker.Invoke(request.Bytes())
 	if err != nil {
 		return nil, err

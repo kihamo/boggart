@@ -42,13 +42,13 @@ func (i *invoker) Invoke(request []byte) ([]byte, error) {
 	}
 
 	buffer := bytes.NewBuffer(nil)
+	bufferTmp := make([]byte, bufferSize)
 
 	for {
-		b := make([]byte, bufferSize)
-		n, err := i.Read(b)
+		n, err := i.Read(bufferTmp)
 
 		if n > 0 {
-			buffer.Write(b[:n])
+			buffer.Write(bufferTmp[:n])
 		}
 
 		if err != nil {

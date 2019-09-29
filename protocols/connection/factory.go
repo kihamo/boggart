@@ -2,13 +2,19 @@ package connection
 
 import (
 	"errors"
-	"net"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/kihamo/boggart/protocols/serial"
+)
+
+type option int64
+
+const (
+	OptionInvoker option = iota
+	OptionDumber
 )
 
 func New(dsn string) (conn Conn, err error) {
@@ -23,13 +29,10 @@ func New(dsn string) (conn Conn, err error) {
 
 	switch u.Scheme {
 	case "tcp", "tcp4", "tcp6":
-		conn, err = net.Dial(u.Scheme, u.Host)
-		if err != nil {
-			return nil, err
-		}
+		conn = DialTCP(u.Host, WithNetwork(u.Scheme))
 
 	case "udp", "udp4", "udp6", "unixgram":
-		conn = NewUDP(u.Scheme, u.Host)
+		conn = DialUDP(u.Host, WithNetwork(u.Scheme))
 
 	case "serial":
 		options := []serial.Option{
@@ -82,4 +85,21 @@ func New(dsn string) (conn Conn, err error) {
 	}
 
 	return
+}
+
+func NewWithOptions(dsn string, options ...option) (conn Conn, err error) {
+	conn, err = New(dsn)
+
+	if err == nil {
+		for _, opt := range options {
+			switch opt {
+			case OptionInvoker:
+				conn = NewInvoker(conn)
+			case OptionDumber:
+				conn = NewDumper(conn)
+			}
+		}
+	}
+
+	return conn, err
 }
