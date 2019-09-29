@@ -7,6 +7,20 @@ import (
 	"time"
 )
 
+func ConvertSerialNumber200(serial string) []byte {
+	if len(serial) < 6 {
+		return nil
+	}
+
+	number, _ := strconv.ParseInt(serial[len(serial)-6:], 10, 0)
+	h, _ := hex.DecodeString(fmt.Sprintf("%06x", number))
+
+	sn := make([]byte, 4)
+	copy(sn[4-len(h):], h)
+
+	return sn
+}
+
 func ConvertSerialNumber(serial string) []byte {
 	if len(serial) < 8 {
 		return nil

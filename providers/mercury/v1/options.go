@@ -39,6 +39,12 @@ func WithAddress(address []byte) Option {
 	})
 }
 
+func WithAddress200AsString(address string) Option {
+	return newFuncOption(func(o *options) {
+		o.address = ConvertSerialNumber200(address)
+	})
+}
+
 func WithAddressAsString(address string) Option {
 	return newFuncOption(func(o *options) {
 		o.address = ConvertSerialNumber(address)

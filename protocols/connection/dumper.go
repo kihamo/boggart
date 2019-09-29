@@ -33,10 +33,16 @@ func (d *dumper) Write(p []byte) (n int, err error) {
 	return d.Conn.Write(p)
 }
 
-func (d *dumper) Invoke(request []byte) ([]byte, error) {
+func (d *dumper) Invoke(request []byte) (response []byte, err error) {
+	log.Println("Write >>>")
+	log.Println(hex.Dump(request))
+
 	if i, ok := d.Conn.(Invoker); ok {
-		return i.Invoke(request)
+		response, err = i.Invoke(request)
 	}
 
-	return nil, nil
+	log.Printf("Read <<< err: %v\n", err)
+	log.Println(hex.Dump(response))
+
+	return response, err
 }

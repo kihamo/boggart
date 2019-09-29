@@ -10,6 +10,8 @@ import (
 
 type Type struct {
 	boggart.BindTypeWidget
+
+	SerialNumberFunc func(address string) mercury.Option
 }
 
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
@@ -40,7 +42,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config.TopicFirmwareVersion = config.TopicFirmwareVersion.Format(config.Address)
 
 	opts := []mercury.Option{
-		mercury.WithAddressAsString(config.Address),
+		t.SerialNumberFunc(config.Address),
 		mercury.WithLocation(loc),
 	}
 

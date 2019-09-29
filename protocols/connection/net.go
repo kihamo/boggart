@@ -48,7 +48,7 @@ func (c *Net) Read(b []byte) (n int, err error) {
 
 	if c.options.readTimeout > 0 {
 		if err = conn.SetReadDeadline(time.Now().Add(c.options.readTimeout)); err != nil {
-			return -1., err
+			return -1, err
 		}
 	}
 
@@ -63,7 +63,7 @@ func (c *Net) Write(b []byte) (n int, err error) {
 
 	if c.options.writeTimeout > 0 {
 		if err = conn.SetWriteDeadline(time.Now().Add(c.options.readTimeout)); err != nil {
-			return -1., err
+			return -1, err
 		}
 	}
 
@@ -80,15 +80,27 @@ func (c *Net) Invoke(request []byte) (response []byte, err error) {
 		return nil, err
 	}
 
+	if c.options.writeTimeout > 0 {
+		if err = conn.SetWriteDeadline(time.Now().Add(c.options.readTimeout)); err != nil {
+			return nil, err
+		}
+	}
+
 	if _, err = conn.Write(request); err != nil {
 		return nil, err
 	}
 
 	b := make([]byte, bufferSize)
 
+	if c.options.readTimeout > 0 {
+		if err = conn.SetReadDeadline(time.Now().Add(c.options.readTimeout)); err != nil {
+			return nil, err
+		}
+	}
+
 	n, err := conn.Read(b)
 	if n > 0 {
-		return b[:n], nil
+		return b[:n], err
 	}
 
 	return nil, err
