@@ -32,3 +32,11 @@ func (d *dumper) Write(p []byte) (n int, err error) {
 
 	return d.Conn.Write(p)
 }
+
+func (d *dumper) Invoke(request []byte) ([]byte, error) {
+	if i, ok := d.Conn.(Invoker); ok {
+		return i.Invoke(request)
+	}
+
+	return nil, nil
+}

@@ -14,7 +14,7 @@ type option int64
 
 const (
 	OptionInvoker option = iota
-	OptionDumber
+	OptionDumper
 )
 
 func New(dsn string) (conn Conn, err error) {
@@ -29,10 +29,58 @@ func New(dsn string) (conn Conn, err error) {
 
 	switch u.Scheme {
 	case "tcp", "tcp4", "tcp6":
-		conn = DialTCP(u.Host, WithNetwork(u.Scheme))
+		options := []Option{
+			WithNetwork(u.Scheme),
+		}
+
+		for key, value := range u.Query() {
+			switch strings.ToLower(key) {
+			case "read-timeout":
+				v, err := time.ParseDuration(value[0])
+				if err != nil {
+					return nil, err
+				}
+
+				options = append(options, WithReadTimeout(v))
+
+			case "write-timeout":
+				v, err := time.ParseDuration(value[0])
+				if err != nil {
+					return nil, err
+				}
+
+				options = append(options, WithWriteTimeout(v))
+			}
+		}
+
+		conn = Dial(u.Host, options...)
 
 	case "udp", "udp4", "udp6", "unixgram":
-		conn = DialUDP(u.Host, WithNetwork(u.Scheme))
+		options := []Option{
+			WithNetwork(u.Scheme),
+		}
+
+		for key, value := range u.Query() {
+			switch strings.ToLower(key) {
+			case "read-timeout":
+				v, err := time.ParseDuration(value[0])
+				if err != nil {
+					return nil, err
+				}
+
+				options = append(options, WithReadTimeout(v))
+
+			case "write-timeout":
+				v, err := time.ParseDuration(value[0])
+				if err != nil {
+					return nil, err
+				}
+
+				options = append(options, WithWriteTimeout(v))
+			}
+		}
+
+		conn = Dial(u.Host, options...)
 
 	case "serial":
 		options := []serial.Option{
@@ -95,7 +143,7 @@ func NewWithOptions(dsn string, options ...option) (conn Conn, err error) {
 			switch opt {
 			case OptionInvoker:
 				conn = NewInvoker(conn)
-			case OptionDumber:
+			case OptionDumper:
 				conn = NewDumper(conn)
 			}
 		}

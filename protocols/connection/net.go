@@ -6,16 +6,16 @@ import (
 	"time"
 )
 
-type UDP struct {
+type Net struct {
 	address string
 	options options
 }
 
-func DialUDP(address string, opts ...Option) *UDP {
-	conn := &UDP{
+func Dial(address string, opts ...Option) *Net {
+	conn := &Net{
 		address: address,
 		options: options{
-			network: "udp",
+			network: "tcp",
 		},
 	}
 
@@ -26,21 +26,21 @@ func DialUDP(address string, opts ...Option) *UDP {
 	return conn
 }
 
-func (c *UDP) connect() (*net.UDPConn, error) {
+func (c *Net) connect() (net.Conn, error) {
 	conn, err := net.Dial(c.options.network, c.address)
 	if err != nil {
 		return nil, err
 	}
 
-	udp, ok := conn.(*net.UDPConn)
+	tcp, ok := conn.(*net.TCPConn)
 	if !ok {
-		return nil, errors.New("failed cast connect to *net.UDPConn")
+		return nil, errors.New("failed cast connect to *net.TCPConn")
 	}
 
-	return udp, err
+	return tcp, err
 }
 
-func (c *UDP) Read(b []byte) (n int, err error) {
+func (c *Net) Read(b []byte) (n int, err error) {
 	conn, err := c.connect()
 	if err != nil {
 		return -1, err
@@ -55,7 +55,7 @@ func (c *UDP) Read(b []byte) (n int, err error) {
 	return conn.Read(b)
 }
 
-func (c *UDP) Write(b []byte) (n int, err error) {
+func (c *Net) Write(b []byte) (n int, err error) {
 	conn, err := c.connect()
 	if err != nil {
 		return -1, err
@@ -70,11 +70,11 @@ func (c *UDP) Write(b []byte) (n int, err error) {
 	return conn.Write(b)
 }
 
-func (c *UDP) Close() error {
+func (c *Net) Close() error {
 	return nil
 }
 
-func (c *UDP) Invoke(request []byte) (response []byte, err error) {
+func (c *Net) Invoke(request []byte) (response []byte, err error) {
 	conn, err := c.connect()
 	if err != nil {
 		return nil, err
@@ -86,10 +86,10 @@ func (c *UDP) Invoke(request []byte) (response []byte, err error) {
 
 	b := make([]byte, bufferSize)
 
-	n, _, err := conn.ReadFromUDP(b)
+	n, err := conn.Read(b)
 	if n > 0 {
 		return b[:n], nil
 	}
 
-	return nil, nil
+	return nil, err
 }
