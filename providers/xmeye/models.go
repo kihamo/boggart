@@ -28,7 +28,7 @@ type FileSearch struct {
 	BeginTime  Time
 	DiskNo     uint32
 	EndTime    Time
-	FileLength string
+	FileLength Uint32
 	FileName   string
 	SerialNo   uint32
 }

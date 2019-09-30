@@ -1,11 +1,11 @@
 // +build windows appengine
 
-package xmeye
+package connection
 
 import (
 	"net"
 )
 
-func ConnectionCheck(c net.Conn) error {
+func Check(c net.Conn) error {
 	return nil
 }

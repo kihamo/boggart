@@ -2,7 +2,6 @@ package xmeye
 
 import (
 	"context"
-	"sync/atomic"
 	"time"
 )
 
@@ -20,7 +19,7 @@ func (c *Client) Login(ctx context.Context) error {
 		return err
 	}
 
-	atomic.StoreUint32(&c.sessionID, uint32(result.SessionID))
+	c.connection.SetSessionID(uint32(result.SessionID))
 
 	c.mutex.Lock()
 	if c.done != nil {
@@ -44,7 +43,8 @@ func (c *Client) Logout(ctx context.Context) error {
 		return c.Close()
 	}
 
-	atomic.StoreUint32(&c.sessionID, 0)
+	c.connection.SetSessionID(0)
+
 	return err
 }
 

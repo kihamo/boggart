@@ -28,7 +28,7 @@ func (c *Client) OPTime(ctx context.Context) (*time.Time, error) {
 func (c *Client) OPTimeSetting(ctx context.Context, t time.Time) error {
 	_, err := c.Call(ctx, CmdSysManagerRequest, map[string]interface{}{
 		"Name":          "OPTimeSetting",
-		"SessionID":     c.sessionIDAsString(),
+		"SessionID":     c.connection.SessionIDAsString(),
 		"OPTimeSetting": t.Format(TimeLayout),
 	})
 
@@ -46,7 +46,7 @@ func (c *Client) LogExport(ctx context.Context) (io.Reader, error) {
 func (c *Client) Reboot(ctx context.Context) error {
 	_, err := c.Call(ctx, CmdSysManagerResponse, map[string]interface{}{
 		"Name":      "OPMachine",
-		"SessionID": c.sessionIDAsString(),
+		"SessionID": c.connection.SessionIDAsString(),
 		"OPMachine": map[string]string{
 			"Action": "Reboot",
 		},

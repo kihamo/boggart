@@ -1,14 +1,16 @@
 package connection
 
 import (
-	"errors"
 	"net"
+	"sync"
 	"time"
 )
 
 type Net struct {
 	address string
 	options options
+	once    sync.Once
+	conn    net.Conn
 }
 
 func Dial(address string, opts ...Option) *Net {
@@ -26,18 +28,18 @@ func Dial(address string, opts ...Option) *Net {
 	return conn
 }
 
-func (c *Net) connect() (net.Conn, error) {
-	conn, err := net.Dial(c.options.network, c.address)
-	if err != nil {
-		return nil, err
+func (c *Net) connect() (conn net.Conn, err error) {
+	if c.options.once {
+		c.once.Do(func() {
+			c.conn, err = net.Dial(c.options.network, c.address)
+		})
+
+		conn = c.conn
+	} else {
+		conn, err = net.Dial(c.options.network, c.address)
 	}
 
-	tcp, ok := conn.(*net.TCPConn)
-	if !ok {
-		return nil, errors.New("failed cast connect to *net.TCPConn")
-	}
-
-	return tcp, err
+	return conn, err
 }
 
 func (c *Net) Read(b []byte) (n int, err error) {

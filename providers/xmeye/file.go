@@ -29,7 +29,7 @@ func (c *Client) LogSearch(ctx context.Context, begin, end time.Time, position u
 
 	err := c.CallWithResult(ctx, CmdLogSearchRequest, map[string]interface{}{
 		"Name":      "OPLogQuery",
-		"SessionID": c.sessionIDAsString(),
+		"SessionID": c.connection.SessionIDAsString(),
 		"OPLogQuery": map[string]interface{}{
 			"BeginTime":   begin.Format(TimeLayout),
 			"EndTime":     end.Format(TimeLayout),
@@ -52,7 +52,7 @@ func (c *Client) FileSearch(ctx context.Context, begin, end time.Time, channel u
 
 	err := c.CallWithResult(ctx, CmdFileSearchRequest, map[string]interface{}{
 		"Name":      "OPFileQuery",
-		"SessionID": c.sessionIDAsString(),
+		"SessionID": c.connection.SessionIDAsString(),
 		"OPFileQuery": map[string]interface{}{
 			"BeginTime":      begin.Format(TimeLayout),
 			"EndTime":        end.Format(TimeLayout),

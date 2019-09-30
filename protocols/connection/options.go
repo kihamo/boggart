@@ -8,6 +8,7 @@ type options struct {
 	network      string
 	readTimeout  time.Duration
 	writeTimeout time.Duration
+	once         bool
 }
 
 type Option interface {
@@ -43,5 +44,11 @@ func WithReadTimeout(timeout time.Duration) Option {
 func WithWriteTimeout(timeout time.Duration) Option {
 	return newFuncOption(func(o *options) {
 		o.writeTimeout = timeout
+	})
+}
+
+func WithOnce(once bool) Option {
+	return newFuncOption(func(o *options) {
+		o.once = once
 	})
 }

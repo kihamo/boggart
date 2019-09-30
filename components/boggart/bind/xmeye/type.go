@@ -14,9 +14,14 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	password, _ := config.Address.User.Password()
 
+	provider, err := xmeye.New(config.Address.Host, config.Address.User.Username(), password)
+	if err != nil {
+		return nil, err
+	}
+
 	bind := &Bind{
 		config: config,
-		client: xmeye.New(config.Address.Host, config.Address.User.Username(), password),
+		client: provider,
 	}
 
 	return bind, nil

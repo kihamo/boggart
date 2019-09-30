@@ -50,6 +50,14 @@ func New(dsn string) (conn Conn, err error) {
 				}
 
 				options = append(options, WithWriteTimeout(v))
+
+			case "once":
+				v, err := strconv.ParseBool(value[0])
+				if err != nil {
+					return nil, err
+				}
+
+				options = append(options, WithOnce(v))
 			}
 		}
 
@@ -77,6 +85,14 @@ func New(dsn string) (conn Conn, err error) {
 				}
 
 				options = append(options, WithWriteTimeout(v))
+
+			case "once":
+				v, err := strconv.ParseBool(value[0])
+				if err != nil {
+					return nil, err
+				}
+
+				options = append(options, WithOnce(v))
 			}
 		}
 

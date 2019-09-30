@@ -2,8 +2,6 @@ package xmeye
 
 import (
 	"bytes"
-	"encoding/binary"
-	"encoding/hex"
 	"strconv"
 	"strings"
 	"time"
@@ -41,23 +39,19 @@ func (t *Uint32) UnmarshalJSON(b []byte) (err error) {
 		return
 	}
 
-	src = src[len(src)-8:]
-	dst := make([]byte, 4)
-
-	if _, err = hex.Decode(dst, src); err != nil {
+	source := strings.Replace(string(src), "0x", "", 1)
+	val, err := strconv.ParseUint(source, 16, 64)
+	if err != nil {
 		return err
 	}
 
-	*t = Uint32(binary.LittleEndian.Uint32([]byte{dst[3], dst[2], dst[1], dst[0]}))
+	*t = Uint32(val)
 
 	return err
 }
 
 func (t *Uint32) MarshalJSON() ([]byte, error) {
-	src := make([]byte, 4)
-	binary.LittleEndian.PutUint32(src, uint32(*t))
-
-	dst := "0x" + strings.ToUpper(hex.EncodeToString([]byte{src[3], src[2], src[1], src[0]}))
+	dst := "0x" + strconv.FormatUint(uint64(*t), 16)
 
 	return []byte(dst), nil
 }

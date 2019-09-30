@@ -1,11 +1,18 @@
-package internal
+package xmeye
 
 import (
+	"bytes"
 	"encoding/binary"
 	"encoding/json"
+	"errors"
 )
 
-type Packet struct {
+var (
+	regularPacketHeader = []byte{0xff, 0x01, 0x00, 0x00}
+	payloadEOF          = []byte{0x0a, 0x00}
+)
+
+type packet struct {
 	SessionID      uint32
 	SequenceNumber uint32
 	MessageID      uint16
@@ -15,18 +22,7 @@ type Packet struct {
 	Payload        *Payload
 }
 
-var (
-	regularPacketHeader = []byte{0xff, 0x01, 0x00, 0x00}
-	payloadEOF          = []byte{0x0a, 0x00}
-)
-
-func NewPacket() Packet {
-	return Packet{
-		Payload: NewPayload(),
-	}
-}
-
-func (p Packet) Marshal() []byte {
+func (p packet) Marshal() []byte {
 	message := make([]byte, 0x14) // build head
 
 	// Head Flag, VERSION, RESERVED01, RESERVED02
@@ -72,7 +68,7 @@ func (p Packet) Marshal() []byte {
 	return message
 }
 
-func (p Packet) LoadPayload(payload interface{}) (err error) {
+func (p packet) LoadPayload(payload interface{}) (err error) {
 	if payload == nil {
 		p.Payload.Reset()
 		p.PayloadLen = 0
@@ -95,15 +91,26 @@ func (p Packet) LoadPayload(payload interface{}) (err error) {
 	return err
 }
 
-func PacketUnmarshal(message []byte) Packet {
-	p := NewPacket()
-	p.SessionID = binary.LittleEndian.Uint32(message[0x04:0x08])
-	p.SequenceNumber = binary.LittleEndian.Uint32(message[0x08:0x0c])
-	p.TotalPacket = uint16(message[0x0c])
-	p.CurrentPacket = uint16(message[0x0d])
-	p.MessageID = binary.LittleEndian.Uint16(message[0x0e:0x10])
-	p.PayloadLen = int(binary.LittleEndian.Uint32(message[0x10:0x14]))
-	p.Payload.Write(message[0x14:])
+func newPacket() *packet {
+	return &packet{
+		Payload: NewPayload(),
+	}
+}
 
-	return p
+func packetUnmarshal(message []byte) (*packet, error) {
+	if !bytes.Equal(regularPacketHeader, message[:0x04]) {
+		return nil, errors.New("invalid regular packet header")
+	}
+
+	packet := newPacket()
+
+	packet.SessionID = binary.LittleEndian.Uint32(message[0x04:0x08])
+	packet.SequenceNumber = binary.LittleEndian.Uint32(message[0x08:0x0c])
+	packet.TotalPacket = uint16(message[0x0c])
+	packet.CurrentPacket = uint16(message[0x0d])
+	packet.MessageID = binary.LittleEndian.Uint16(message[0x0e:0x10])
+	packet.PayloadLen = int(binary.LittleEndian.Uint32(message[0x10:0x14]))
+	packet.Payload.Write(message[0x14:])
+
+	return packet, nil
 }
