@@ -85,5 +85,3 @@ func (c *Client) PlayStream(ctx context.Context, begin, end time.Time, name stri
 		return c.connection.send(request)
 	}), nil
 }
-
-

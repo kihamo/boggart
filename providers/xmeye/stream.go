@@ -13,14 +13,14 @@ type stream struct {
 
 	reader *io.PipeReader
 	writer *io.PipeWriter
-	once sync.Once
+	once   sync.Once
 }
 
 func newStream(conn *connection, claim *packet, request func() error) *stream {
 	s := &stream{
 		connection: conn,
-		claim:   claim,
-		request: request,
+		claim:      claim,
+		request:    request,
 	}
 
 	s.reader, s.writer = io.Pipe()
@@ -82,4 +82,3 @@ func (s *stream) Read(p []byte) (n int, err error) {
 
 	return s.reader.Read(p)
 }
-

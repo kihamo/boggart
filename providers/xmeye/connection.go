@@ -1,9 +1,10 @@
 package xmeye
 
 import (
-	protocol "github.com/kihamo/boggart/protocols/connection"
 	"sync"
 	"sync/atomic"
+
+	protocol "github.com/kihamo/boggart/protocols/connection"
 )
 
 type connection struct {

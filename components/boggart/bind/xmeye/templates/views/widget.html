@@ -88,6 +88,77 @@
                                 </tr>
                                 </thead>
                                 <tbody>
+                                    {{ if .system_info }}
+                                    <tr>
+                                        <td>{{ i18n "Serial number" . }}</td>
+                                        <td>{{ .system_info.SerialNo }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Uptime" . }}</td>
+                                        <td>{{ .system_info.DeviceRunTime }} {{ i18n "minutes" . }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Software version" . }}</td>
+                                        <td>{{ .system_info.SoftWareVersion }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Hardware" . }}</td>
+                                        <td>{{ .system_info.HardWare }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Hardware version" . }}</td>
+                                        <td>{{ .system_info.HardWareVersion }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Encrypt version" . }}</td>
+                                        <td>{{ .system_info.EncryptVersion }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Build time" . }}</td>
+                                        <td><script type="application/javascript">document.write(dateToString('{{ .system_info.BuildTime.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Update time" . }}</td>
+                                        <td><script type="application/javascript">document.write(dateToString('{{ .system_info.UpdataTime.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Alarm in channel" . }}</td>
+                                        <td>{{ .system_info.AlarmInChannel }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Alarm out channel" . }}</td>
+                                        <td>{{ .system_info.AlarmOutChannel }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Talk in channel" . }}</td>
+                                        <td>{{ .system_info.TalkInChannel }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Talk out channel" . }}</td>
+                                        <td>{{ .system_info.TalkOutChannel }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Video in channel" . }}</td>
+                                        <td>{{ .system_info.VideoInChannel }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Video out channel" . }}</td>
+                                        <td>{{ .system_info.VideoOutChannel }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Audio in channel" . }}</td>
+                                        <td>{{ .system_info.AudioInChannel }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Dig channel" . }}</td>
+                                        <td>{{ .system_info.DigChannel }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Extra channel" . }}</td>
+                                        <td>{{ .system_info.ExtraChannel }}</td>
+                                    </tr>
+                                    {{ end }}
+
                                     {{ if .time_current }}
                                     <tr>
                                         <td rowspan="2">{{ i18n "Time" . }}</td>
@@ -124,10 +195,64 @@
                                         </td>
                                     </tr>
                                     {{ end }}
-
                                 </tbody>
                             </table>
                         </form>
+
+                        {{ if .storage_info }}
+                        <div class="x_title">
+                            <h2>{{ i18n "Storage" . }}</h2>
+                            <div class="clearfix"></div>
+                        </div>
+                        <table class="table dt-responsive nowrap" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th class="md-col-1">{{ i18n "Part number" . }}</th>
+                                    <th>{{ i18n "Remain space" . }}</th>
+                                    <th>{{ i18n "Total space" . }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ range $s, $storage := .storage_info }}
+                                    {{ range $p, $partition := $storage.Partition }}
+                                    <tr>
+                                        <td>{{ $storage.PartNumber }}</td>
+                                        <td>{{ human_bytes $partition.RemainSpace.Uint32 }}</td>
+                                        <td>{{ human_bytes $partition.TotalSpace.Uint32 }}</td>
+                                    </tr>
+                                    {{ end }}
+                                {{ end }}
+                            </tbody>
+                        </table>
+                        {{ end }}
+
+                        {{ if .channels }}
+                        <div class="x_title">
+                            <h2>{{ i18n "Channels" . }}</h2>
+                            <div class="clearfix"></div>
+                        </div>
+                        <table class="table dt-responsive nowrap" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th class="md-col-1">{{ i18n "Channel" . }}</th>
+                                    <th>{{ i18n "Title" . }}</th>
+                                    <th>{{ i18n "Bitrate" . }}</th>
+                                    <th>{{ i18n "Record" . }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ range $c, $channel := .channels }}
+                                <tr>
+                                    <td>{{ $channel.Number }}</td>
+                                    <td>{{ $channel.Title }}</td>
+                                    <td>{{ $channel.Bitrate }} {{ i18n "bits/second" $ }}</td>
+                                    <td>{{ if $channel.Record }}{{ i18n "recording" $ }}{{ end }}</td>
+                                </tr>
+                                {{ end }}
+                            </tbody>
+                        </table>
+                        {{ end }}
+
                         {{ end }}
                         </div>
                     </div>

@@ -63,3 +63,7 @@ func (t Uint32) String() string {
 func (t Uint32) GoString() string {
 	return t.String()
 }
+
+func (t Uint32) Uint32() uint32 {
+	return uint32(t)
+}

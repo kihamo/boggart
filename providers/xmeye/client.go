@@ -2,7 +2,6 @@ package xmeye
 
 import (
 	"context"
-	protocol "github.com/kihamo/boggart/protocols/connection"
 	"io"
 	"math"
 	"net"
@@ -10,6 +9,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	protocol "github.com/kihamo/boggart/protocols/connection"
 )
 
 const (

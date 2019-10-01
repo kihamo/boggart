@@ -169,8 +169,65 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		} else {
 			vars["time_current"] = tm
 		}
-
 		vars["time_system"] = time.Now()
+
+		info, err := bind.client.SystemInfo(ctx)
+		if err != nil {
+			r.Session().FlashBag().Error(t.Translate(ctx, "Get system info failed with error %s", "", err.Error()))
+		}
+		vars["system_info"] = info
+
+		storage, err := bind.client.StorageInfo(ctx)
+		if err != nil {
+			r.Session().FlashBag().Error(t.Translate(ctx, "Get storage info failed with error %s", "", err.Error()))
+		} else {
+			for s, st := range storage {
+				for p := range st.Partition {
+					storage[s].Partition[p].RemainSpace *= 1024
+					storage[s].Partition[p].TotalSpace *= 1024
+				}
+			}
+		}
+		vars["storage_info"] = storage
+
+		type chanInfo struct {
+			Number  int
+			Title   string
+			Bitrate uint64
+			Record  bool
+		}
+		channels := make([]chanInfo, bind.client.ChannelsCount())
+
+		state, err := bind.client.WorkState(ctx)
+		if err != nil {
+			r.Session().FlashBag().Error(t.Translate(ctx, "Get work state failed with error %s", "", err.Error()))
+		} else {
+			for i, state := range state.ChannelState {
+				channels[i].Number = i + 1
+				channels[i].Bitrate = state.Bitrate
+				channels[i].Record = state.Record
+
+				if i == len(channels)-1 {
+					break
+				}
+			}
+		}
+
+		titles, err := bind.client.ConfigChannelTitleGet(ctx)
+		if err != nil {
+			r.Session().FlashBag().Error(t.Translate(ctx, "Get channels title failed with error %s", "", err.Error()))
+		} else {
+			for i, title := range titles {
+				channels[i].Number = i + 1
+				channels[i].Title = title
+
+				if i == len(channels)-1 {
+					break
+				}
+			}
+		}
+
+		vars["channels"] = channels
 	}
 
 	t.Render(ctx, "widget", vars)
