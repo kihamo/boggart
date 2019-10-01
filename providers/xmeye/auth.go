@@ -2,6 +2,7 @@ package xmeye
 
 import (
 	"context"
+	"sync/atomic"
 	"time"
 )
 
@@ -20,6 +21,9 @@ func (c *Client) Login(ctx context.Context) error {
 	}
 
 	c.connection.SetSessionID(uint32(result.SessionID))
+
+	atomic.StoreUint64(&c.channelsCount, result.ChannelNum)
+	atomic.StoreUint64(&c.extraChannel, result.ExtraChannel)
 
 	c.mutex.Lock()
 	if c.done != nil {

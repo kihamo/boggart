@@ -4,9 +4,11 @@ import (
 	"context"
 	protocol "github.com/kihamo/boggart/protocols/connection"
 	"io"
+	"math"
 	"net"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -46,11 +48,14 @@ type Client struct {
 	username string
 	password []byte
 
-	dsn string
+	dsn        string
 	connection *connection
 
-	mutex        sync.RWMutex
-	done         chan struct{}
+	mutex sync.RWMutex
+	done  chan struct{}
+
+	channelsCount uint64
+	extraChannel  uint64
 
 	alarmStarted uint32
 }
@@ -61,9 +66,10 @@ func New(host, username, password string) (*Client, error) {
 	}
 
 	client := &Client{
-		username:   username,
-		password:   []byte(password),
-		dsn: "tcp://"+host+"?read-timeout=10s&write-timeout=10s&once=true",
+		username:     username,
+		password:     []byte(password),
+		dsn:          "tcp://" + host + "?read-timeout=10s&write-timeout=10s&once=true",
+		extraChannel: math.MaxUint64,
 	}
 
 	dial, err := client.dial()
@@ -81,7 +87,7 @@ func New(host, username, password string) (*Client, error) {
 }
 
 func (c *Client) dial() (protocol.Conn, error) {
-	return protocol.NewWithOptions(c.dsn/*, protocol.OptionDumper*/)
+	return protocol.NewWithOptions(c.dsn, protocol.OptionDumper)
 }
 
 func (c *Client) IsAuth() bool {
@@ -142,8 +148,6 @@ func (c *Client) CmdWithResult(ctx context.Context, code uint16, cmd string, res
 	}, &result)
 }
 
-
-
 func (c *Client) Close() (err error) {
 	c.mutex.Lock()
 
@@ -160,4 +164,28 @@ func (c *Client) Close() (err error) {
 	c.mutex.Unlock()
 
 	return err
+}
+
+func (c *Client) ChannelsCount() (count uint64) {
+	count = atomic.LoadUint64(&c.channelsCount)
+
+	if count == 0 && !c.IsAuth() {
+		if err := c.Login(context.Background()); err == nil {
+			count = atomic.LoadUint64(&c.channelsCount)
+		}
+	}
+
+	return count
+}
+
+func (c *Client) ExtraChannel() (channel uint64) {
+	channel = atomic.LoadUint64(&c.extraChannel)
+
+	if channel == math.MaxUint64 && !c.IsAuth() {
+		if err := c.Login(context.Background()); err == nil {
+			channel = atomic.LoadUint64(&c.extraChannel)
+		}
+	}
+
+	return channel
 }
