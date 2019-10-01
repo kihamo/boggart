@@ -40,20 +40,6 @@ const (
 	CmdAlarmRequest                 uint16 = 1504
 	CmdConfigExportRequest          uint16 = 1542
 	CmdLogExportRequest             uint16 = 1544
-
-	CodeOK                                  = 100
-	CodeUnknownError                        = 101
-	CodeUnsupportedVersion                  = 102
-	CodeRequestNotPermitted                 = 103
-	CodeUserAlreadyLoggedIn                 = 104
-	CodeUserUserIsNotLoggedIn               = 105
-	CodeUsernameOrPasswordIsIncorrect       = 106
-	CodeUserDoesNotHaveNecessaryPermissions = 107
-	CodeRequestWrongFormat                  = 117
-	CodePasswordIsIncorrect                 = 203
-	CodePasswordLockOut                 = 205
-	CodeUpgradeSuccessful                   = 515
-	CodeConfigurationIsNotExists            = 607
 )
 
 type Client struct {

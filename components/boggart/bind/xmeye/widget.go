@@ -1,7 +1,9 @@
 package xmeye
 
 import (
+	"github.com/kihamo/boggart/providers/xmeye"
 	"io"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -66,6 +68,58 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		_, _ = io.Copy(w, reader)
 
 		return
+
+	case "download":
+		name := strings.TrimSpace(query.Get("name"))
+		if name == "" {
+			t.NotFound(w, r)
+			return
+		}
+
+		begin := time.Now().Add(-time.Hour * 24 * 60)
+		end := time.Now()
+
+		reader, err := bind.client.PlayStream(ctx, begin, end, name)
+		if err != nil {
+			t.NotFound(w, r)
+			return
+		}
+
+		switch strings.ToLower(filepath.Ext(name)) {
+		case ".h264":
+			w.Header().Set("Content-Type", "video/H264")
+		case ".jpeg", ".jpg":
+			w.Header().Set("Content-Type", "image/jpeg")
+		}
+
+		w.Header().Set("Content-Disposition", "attachment; filename=\""+name+"\"")
+		_, _ = io.Copy(w, reader)
+
+		return
+
+	case "files":
+		var channel uint32 = 1
+		begin := time.Now().Add(-time.Hour * 24 * 60)
+		end := time.Now()
+		eventType := xmeye.FileSearchEventAll
+
+		files := make([]xmeye.FileSearch, 0)
+
+		filesH264, err := bind.client.FileSearch(ctx, begin, end, channel, eventType, xmeye.FileSearchH264)
+		if err != nil {
+			r.Session().FlashBag().Error(t.Translate(ctx, "Get files H264 failed with error %s", "", err.Error()))
+		} else {
+			files = append(files, filesH264...)
+		}
+
+		filesJPEG, err := bind.client.FileSearch(ctx, begin, end, channel, eventType, xmeye.FileSearchJPEG)
+		if err != nil {
+			r.Session().FlashBag().Error(t.Translate(ctx, "Get files JPEG failed with error %s", "", err.Error()))
+		} else {
+			files = append(files, filesJPEG...)
+		}
+
+		vars["files"] = files
 
 	default:
 		if r.IsPost() {
