@@ -1,7 +1,10 @@
 package internal
 
 import (
+	"fmt"
+	"html/template"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/elazarl/go-bindata-assetfs"
@@ -108,4 +111,33 @@ func (c *Component) DashboardMiddleware() []func(http.Handler) http.Handler {
 			})
 		},
 	}
+}
+
+func (c *Component) DashboardTemplateFunctions() map[string]interface{} {
+	return template.FuncMap{
+		"human_bytes": templateFunctionHumanBytes,
+	}
+}
+
+func templateFunctionHumanBytes(size interface{}) string {
+	s := fmt.Sprintf("%v", size)
+	b, err := strconv.ParseInt(s, 10, 64)
+
+	if err != nil {
+		return s
+	}
+
+	const unit = 1024
+
+	if b < unit {
+		return fmt.Sprintf("%d B", b)
+	}
+
+	div, exp := int64(unit), 0
+	for n := b / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+
+	return fmt.Sprintf("%.1f %ciB", float64(b)/float64(div), "KMGTPE"[exp])
 }

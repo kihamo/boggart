@@ -1,7 +1,6 @@
 package xmeye
 
 import (
-	"github.com/kihamo/boggart/providers/xmeye"
 	"io"
 	"path/filepath"
 	"strings"
@@ -9,6 +8,7 @@ import (
 
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/providers/xmeye"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
@@ -76,7 +76,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			return
 		}
 
-		begin := time.Now().Add(-time.Hour * 24 * 60)
+		begin := time.Now().Add(-time.Hour * 24 * 30)
 		end := time.Now()
 
 		reader, err := bind.client.PlayStream(ctx, begin, end, name)
@@ -99,7 +99,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 	case "files":
 		var channel uint32 = 1
-		begin := time.Now().Add(-time.Hour * 24 * 60)
+		begin := time.Now().Add(-time.Hour * 24 * 30)
 		end := time.Now()
 		eventType := xmeye.FileSearchEventAll
 
@@ -117,6 +117,10 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			r.Session().FlashBag().Error(t.Translate(ctx, "Get files JPEG failed with error %s", "", err.Error()))
 		} else {
 			files = append(files, filesJPEG...)
+		}
+
+		for i := range files {
+			files[i].FileLength = files[i].FileLength * 1024
 		}
 
 		vars["files"] = files
