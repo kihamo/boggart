@@ -53,7 +53,7 @@ const (
 	ConfigNameRecord                 configName = "Record"
 )
 
-func (c *Client) ConfigGet(ctx context.Context, name configName, def bool) (map[string]interface{}, error) {
+func (c *Client) ConfigGet(ctx context.Context, name configName, def bool) (interface{}, error) {
 	var result map[string]interface{}
 
 	code := CmdConfigGetRequest
@@ -67,9 +67,7 @@ func (c *Client) ConfigGet(ctx context.Context, name configName, def bool) (map[
 	}
 
 	if values, ok := result[string(name)]; ok {
-		if config, ok := values.(map[string]interface{}); ok {
-			return config, nil
-		}
+		return values, nil
 	}
 
 	return nil, err
