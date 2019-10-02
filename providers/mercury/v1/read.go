@@ -323,7 +323,7 @@ func (m *MercuryV1) MonthlyStatByMonth(month time.Month) (uint64, uint64, uint64
 }
 
 func (m *MercuryV1) EventsPowerOnOff(index uint64) (event bool, t time.Time, err error) {
-	if index > 0x3f {
+	if index > MaxEventsIndex {
 		err = errors.New("wrong index value #" + strconv.FormatUint(index, 16))
 	} else {
 		var r *Response
@@ -343,7 +343,7 @@ func (m *MercuryV1) EventsPowerOnOff(index uint64) (event bool, t time.Time, err
 }
 
 func (m *MercuryV1) EventsOpenClose(index uint64) (event bool, t time.Time, err error) {
-	if index > 0x3f {
+	if index > MaxEventsIndex {
 		err = errors.New("wrong index value #" + strconv.FormatUint(index, 16))
 	} else {
 		var r *Response

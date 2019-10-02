@@ -17,6 +17,8 @@ const (
 	displayModePower
 	displayModeTime
 	displayModeDate
+
+	MaxEventsIndex = 0x3F
 )
 
 type MercuryV1 struct {

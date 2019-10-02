@@ -64,7 +64,7 @@ func (c *Net) Write(b []byte) (n int, err error) {
 	}
 
 	if c.options.writeTimeout > 0 {
-		if err = conn.SetWriteDeadline(time.Now().Add(c.options.readTimeout)); err != nil {
+		if err = conn.SetWriteDeadline(time.Now().Add(c.options.writeTimeout)); err != nil {
 			return -1, err
 		}
 	}
@@ -83,7 +83,7 @@ func (c *Net) Invoke(request []byte) (response []byte, err error) {
 	}
 
 	if c.options.writeTimeout > 0 {
-		if err = conn.SetWriteDeadline(time.Now().Add(c.options.readTimeout)); err != nil {
+		if err = conn.SetWriteDeadline(time.Now().Add(c.options.writeTimeout)); err != nil {
 			return nil, err
 		}
 	}

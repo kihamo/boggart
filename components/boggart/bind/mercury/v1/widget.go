@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"github.com/kihamo/boggart/providers/mercury/v1"
 	"net/http"
 	"sort"
 	"strconv"
@@ -146,9 +147,9 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			Time  time.Time
 		}
 
-		events := make([]event, 0, 0x3F)
+		events := make([]event, 0, v1.MaxEventsIndex)
 
-		for i := uint64(0); i <= 0x3F; i++ {
+		for i := uint64(0); i <= v1.MaxEventsIndex; i++ {
 			state, date, err := bind.provider.EventsPowerOnOff(i)
 
 			if err != nil {
@@ -176,9 +177,9 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			Time  time.Time
 		}
 
-		events := make([]event, 0, 0x3F)
+		events := make([]event, 0, v1.MaxEventsIndex)
 
-		for i := uint64(0); i <= 0x3F; i++ {
+		for i := uint64(0); i <= v1.MaxEventsIndex; i++ {
 			state, date, err := bind.provider.EventsOpenClose(i)
 
 			if err != nil {
