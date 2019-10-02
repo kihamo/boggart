@@ -59,7 +59,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 				t1, t2, t3, t4, err = bind.provider.MonthlyStatByMonth(monthRequest)
 				if err != nil {
 					mAsString := t.Translate(r.Context(), monthRequest.String(), "")
-					r.Session().FlashBag().Error(t.Translate(r.Context(), "Get statistics for %s failed with error", "", mAsString, err.Error()))
+					r.Session().FlashBag().Error(t.Translate(r.Context(), "Get statistics for %s failed with error %s", "", mAsString, err.Error()))
 					continue
 				}
 
@@ -98,7 +98,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			t1, t2, t3, t4, err = bind.provider.PowerCounters()
 			if err != nil {
 				mAsString := t.Translate(r.Context(), date.Month().String(), "")
-				r.Session().FlashBag().Error(t.Translate(r.Context(), "Get statistics for %s failed with error", "", mAsString, err.Error()))
+				r.Session().FlashBag().Error(t.Translate(r.Context(), "Get statistics for %s failed with error %s", "", mAsString, err.Error()))
 			} else {
 				stat := &monthly{
 					Month: date.Month(),

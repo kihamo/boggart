@@ -36,7 +36,7 @@ func (i *invoker) Invoke(request []byte) ([]byte, error) {
 		defer locker.Unlock()
 	}
 
-	_, err := i.Write(request)
+	_, err := i.Conn.Write(request)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (i *invoker) Invoke(request []byte) ([]byte, error) {
 	bufferTmp := make([]byte, bufferSize)
 
 	for {
-		n, err := i.Read(bufferTmp)
+		n, err := i.Conn.Read(bufferTmp)
 
 		if n > 0 {
 			buffer.Write(bufferTmp[:n])
