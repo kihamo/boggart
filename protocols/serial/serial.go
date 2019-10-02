@@ -62,6 +62,8 @@ func (c *Serial) Unlock() {
 func (c *Serial) Read(p []byte) (n int, err error) {
 	port, err := s.Open(&c.options.Config)
 	if err == nil {
+		defer port.Close()
+
 		buffer := bytes.NewBuffer(nil)
 
 		for {
@@ -102,6 +104,7 @@ func (c *Serial) Read(p []byte) (n int, err error) {
 func (c *Serial) Write(p []byte) (n int, err error) {
 	port, err := s.Open(&c.options.Config)
 	if err == nil {
+		defer port.Close()
 		n, err = port.Write(p)
 	}
 
@@ -113,6 +116,7 @@ func (c *Serial) ReadWrite(reader io.Reader, writer io.Writer) error {
 	if e != nil {
 		return e
 	}
+	defer port.Close()
 
 	readSerialDone := make(chan struct{}, 1)
 	readSerial := make(chan struct{}, 1)

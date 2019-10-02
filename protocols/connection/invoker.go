@@ -31,9 +31,9 @@ func NewInvoker(conn Conn) Invoker {
 }
 
 func (i *invoker) Invoke(request []byte) ([]byte, error) {
-	if l, ok := i.Conn.(sync.Locker); ok {
-		l.Lock()
-		defer l.Unlock()
+	if locker, ok := i.Conn.(sync.Locker); ok {
+		locker.Lock()
+		defer locker.Unlock()
 	}
 
 	_, err := i.Write(request)
