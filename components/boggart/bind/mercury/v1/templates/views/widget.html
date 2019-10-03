@@ -305,6 +305,42 @@
                                             {{ end }}
                                             <td></td>
                                         </tr>
+                                        <tr>
+                                            <td>{{ i18n "Last close cap" . }}</td>
+                                            {{ if .last_close_cap_datetime.error }}
+                                                <td class="text-danger">{{ .last_close_cap_datetime.error.Error }}</td>
+                                            {{ else }}
+                                                <td><script type="application/javascript">document.write(dateToString('{{ .last_close_cap_datetime.value.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                            {{ end }}
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ i18n "Voltage" . }}</td>
+                                            {{ if .voltage.error }}
+                                                <td class="text-danger">{{ .voltage.error.Error }}</td>
+                                            {{ else }}
+                                                <td>{{ i18n "%d V" . nil nil nil .voltage.value  }}</td>
+                                            {{ end }}
+                                            <td>{{ i18n "Current voltage" . }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ i18n "Amperage" . }}</td>
+                                            {{ if .amperage.error }}
+                                                <td class="text-danger">{{ .amperage.error.Error }}</td>
+                                            {{ else }}
+                                                <td>{{ i18n "%.2f A" . nil nil nil .amperage.value  }}</td>
+                                            {{ end }}
+                                            <td>{{ i18n "Current amperage" . }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ i18n "Power" . }}</td>
+                                            {{ if .power.error }}
+                                                <td class="text-danger">{{ .power.error.Error }}</td>
+                                            {{ else }}
+                                                <td>{{ i18n "%d W" . nil nil nil .power.value  }}</td>
+                                            {{ end }}
+                                            <td>{{ i18n "Current power" . }}</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             {{ end }}

@@ -10,13 +10,6 @@ import (
 	"github.com/kihamo/boggart/protocols/serial"
 )
 
-type option int64
-
-const (
-	OptionInvoker option = iota
-	OptionDumper
-)
-
 func New(dsn string) (conn Conn, err error) {
 	if dsn == "" {
 		return nil, errors.New("DSN is empty")
@@ -139,6 +132,14 @@ func New(dsn string) (conn Conn, err error) {
 				}
 
 				options = append(options, serial.WithTimeout(v))
+
+			case "once":
+				v, err := strconv.ParseBool(value[0])
+				if err != nil {
+					return nil, err
+				}
+
+				options = append(options, serial.WithOnce(v))
 			}
 		}
 
@@ -148,18 +149,15 @@ func New(dsn string) (conn Conn, err error) {
 		err = errors.New("unknown connection type for DSN " + dsn)
 	}
 
-	return
-}
-
-func NewWithOptions(dsn string, options ...option) (conn Conn, err error) {
-	conn, err = New(dsn)
-
-	if err == nil {
-		for _, opt := range options {
-			switch opt {
-			case OptionInvoker:
+	for key, value := range u.Query() {
+		switch strings.ToLower(key) {
+		case "invoke":
+			if v, err := strconv.ParseBool(value[0]); err == nil && v {
 				conn = NewInvoker(conn)
-			case OptionDumper:
+			}
+
+		case "dump":
+			if v, err := strconv.ParseBool(value[0]); err == nil && v {
 				conn = NewDumper(conn)
 			}
 		}

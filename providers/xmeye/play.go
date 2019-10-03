@@ -4,13 +4,8 @@ import (
 	"context"
 	"io"
 	"time"
-)
 
-type playBackAction string
-
-const (
-	PlayBackActionDownloadStart playBackAction = "DownloadStart"
-	PlayBackActionClaim         playBackAction = "Claim"
+	protocol "github.com/kihamo/boggart/protocols/connection"
 )
 
 func (c *Client) PlayStream(ctx context.Context, begin, end time.Time, name string) (io.ReadCloser, error) {
@@ -72,7 +67,7 @@ func (c *Client) PlayStream(ctx context.Context, begin, end time.Time, name stri
 		return nil, err
 	}
 
-	dial, err := c.dial()
+	dial, err := protocol.New(c.dsn)
 	if err != nil {
 		return nil, err
 	}

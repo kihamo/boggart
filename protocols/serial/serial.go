@@ -19,6 +19,8 @@ var (
 
 type Serial struct {
 	options options
+	once    sync.Once
+	port    s.Port
 }
 
 func Dial(opts ...Option) *Serial {
@@ -59,10 +61,26 @@ func (c *Serial) Unlock() {
 	}
 }
 
+func (c *Serial) connect() (port s.Port, err error) {
+	if c.options.once {
+		c.once.Do(func() {
+			c.port, err = s.Open(&c.options.Config)
+		})
+
+		port = c.port
+	} else {
+		port, err = s.Open(&c.options.Config)
+	}
+
+	return port, err
+}
+
 func (c *Serial) Read(p []byte) (n int, err error) {
-	port, err := s.Open(&c.options.Config)
+	port, err := c.connect()
 	if err == nil {
-		defer port.Close()
+		if !c.options.once {
+			defer port.Close()
+		}
 
 		buffer := bytes.NewBuffer(nil)
 
@@ -102,9 +120,12 @@ func (c *Serial) Read(p []byte) (n int, err error) {
 }
 
 func (c *Serial) Write(p []byte) (n int, err error) {
-	port, err := s.Open(&c.options.Config)
+	port, err := c.connect()
 	if err == nil {
-		defer port.Close()
+		if !c.options.once {
+			defer port.Close()
+		}
+
 		n, err = port.Write(p)
 	}
 
@@ -112,18 +133,21 @@ func (c *Serial) Write(p []byte) (n int, err error) {
 }
 
 func (c *Serial) ReadWrite(reader io.Reader, writer io.Writer) error {
+	c.Lock()
+	defer c.Unlock()
+
 	port, e := s.Open(&c.options.Config)
 	if e != nil {
 		return e
 	}
-	defer port.Close()
+
+	if !c.options.once {
+		defer port.Close()
+	}
 
 	readSerialDone := make(chan struct{}, 1)
 	readSerial := make(chan struct{}, 1)
 	errors := make(chan error, 1)
-
-	c.Lock()
-	defer c.Unlock()
 
 	// from SERIAL to WRITER
 	go func() {

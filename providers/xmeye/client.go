@@ -73,7 +73,7 @@ func New(host, username, password string) (*Client, error) {
 		extraChannel: math.MaxUint64,
 	}
 
-	dial, err := client.dial()
+	dial, err := protocol.New(client.dsn)
 	if err != nil {
 		return nil, err
 	}
@@ -85,10 +85,6 @@ func New(host, username, password string) (*Client, error) {
 	}
 
 	return client, nil
-}
-
-func (c *Client) dial() (protocol.Conn, error) {
-	return protocol.NewWithOptions(c.dsn, protocol.OptionDumper)
 }
 
 func (c *Client) IsAuth() bool {

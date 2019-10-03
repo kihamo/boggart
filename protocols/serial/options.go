@@ -9,6 +9,7 @@ import (
 type options struct {
 	s.Config
 	allowMultiRequest bool
+	once              bool
 }
 
 type Option interface {
@@ -32,6 +33,7 @@ func newFuncOption(f func(*options)) *funcOption {
 func defaultOptions() options {
 	return options{
 		allowMultiRequest: false,
+		once:              true,
 		Config: s.Config{
 			Address:  "/dev/ttyUSB0",
 			BaudRate: 9600,
@@ -76,5 +78,10 @@ func WithParity(parity string) Option {
 func WithTimeout(timeout time.Duration) Option {
 	return newFuncOption(func(o *options) {
 		o.Config.Timeout = timeout
+	})
+}
+func WithOnce(once bool) Option {
+	return newFuncOption(func(o *options) {
+		o.once = once
 	})
 }

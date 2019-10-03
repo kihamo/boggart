@@ -49,6 +49,36 @@ msgstr "Последнее отключение"
 msgid "Last power on"
 msgstr "Последнее включение"
 
+msgid "Last close cap"
+msgstr "Последнее закрытие крышки счетчика"
+
+msgid "Voltage"
+msgstr "Напряжение"
+
+msgid "%d V"
+msgstr "%d B"
+
+msgid "Current voltage"
+msgstr "Текущее напряжение"
+
+msgid "Amperage"
+msgstr "Ток"
+
+msgid "%.2f A"
+msgstr "%.2f А"
+
+msgid "Current amperage"
+msgstr "Текущая сила тока"
+
+msgid "Power"
+msgstr "Мощность"
+
+msgid "%d W"
+msgstr "%d Вт"
+
+msgid "Current power"
+msgstr "Текущая мощность"
+
 msgid "Display"
 msgstr "Индикация"
 

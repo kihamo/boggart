@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"github.com/kihamo/boggart/providers/mercury/v1"
 	"net/http"
 	"sort"
 	"strconv"
@@ -9,6 +8,7 @@ import (
 
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/providers/mercury/v1"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
@@ -315,6 +315,28 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		v, err = bind.provider.LastPowerOnDatetime()
 		vars["last_power_on_datetime"] = map[string]interface{}{
 			"value": v,
+			"error": err,
+		}
+
+		// last close cap
+		v, err = bind.provider.LastCloseCap()
+		vars["last_close_cap_datetime"] = map[string]interface{}{
+			"value": v,
+			"error": err,
+		}
+
+		// V, A, Watts
+		voltage, apmerage, power, err := bind.provider.ParamsCurrent()
+		vars["voltage"] = map[string]interface{}{
+			"value": voltage,
+			"error": err,
+		}
+		vars["amperage"] = map[string]interface{}{
+			"value": apmerage,
+			"error": err,
+		}
+		vars["power"] = map[string]interface{}{
+			"value": power,
 			"error": err,
 		}
 	}
