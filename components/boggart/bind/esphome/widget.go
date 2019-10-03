@@ -100,7 +100,7 @@ func (t Type) handleIndex(w *dashboard.Response, r *dashboard.Request, bind *Bin
 					continue
 				}
 
-				row.State, err = native_api.State(row.Entity, message)
+				row.State, err = native_api.State(row.Entity, message, true)
 				if err != nil {
 					r.Session().FlashBag().Notice(t.Translate(ctx,
 						"Unknown state type %s for entity with key %d",

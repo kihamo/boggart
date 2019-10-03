@@ -126,7 +126,7 @@ func (b *Bind) syncState(ctx context.Context, messages ...proto.Message) error {
 
 		objectID := entity.GetObjectId()
 
-		if stateName, e := native_api.State(entity.(proto.Message), state); e == nil {
+		if stateName, e := native_api.State(entity.(proto.Message), state, false); e == nil {
 			if e = b.MQTTPublishAsync(ctx, b.config.TopicState.Format(sn, objectID), stateName); e != nil {
 				err = multierr.Append(err, e)
 			}

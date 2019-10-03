@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/golang/protobuf/proto"
 )
@@ -57,7 +58,7 @@ func EntityType(message proto.Message) string {
 	return EntityTypeUnknown
 }
 
-func State(entityMessage, stateMessage proto.Message) (state string, err error) {
+func State(entityMessage, stateMessage proto.Message, unit bool) (state string, err error) {
 	switch v := stateMessage.(type) {
 	case *BinarySensorStateResponse:
 		if v.GetState() {
@@ -80,10 +81,16 @@ func State(entityMessage, stateMessage proto.Message) (state string, err error) 
 			state = "off"
 		}
 	case *SensorStateResponse:
-		state = strconv.FormatFloat(float64(v.GetState()), 'f', -1, 64)
-
 		if e, ok := entityMessage.(*ListEntitiesSensorResponse); ok {
-			state = fmt.Sprintf("%s "+e.GetUnitOfMeasurement(), state)
+			template := "%." + strconv.FormatInt(int64(e.GetAccuracyDecimals()), 10) + "f"
+
+			if unit {
+				template += " " + strings.Replace(e.GetUnitOfMeasurement(), "%", "%%", -1)
+			}
+
+			state = fmt.Sprintf(template, float64(v.GetState()))
+		} else {
+			state = strconv.FormatFloat(float64(v.GetState()), 'f', -1, 64)
 		}
 	case *SwitchStateResponse:
 		if v.GetState() {
