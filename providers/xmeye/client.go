@@ -46,6 +46,10 @@ const (
 )
 
 type Client struct {
+	channelsCount uint64
+	extraChannel  uint64
+	alarmStarted  uint32
+
 	username string
 	password []byte
 
@@ -54,11 +58,6 @@ type Client struct {
 
 	mutex sync.RWMutex
 	done  chan struct{}
-
-	channelsCount uint64
-	extraChannel  uint64
-
-	alarmStarted uint32
 }
 
 func New(host, username, password string) (*Client, error) {
