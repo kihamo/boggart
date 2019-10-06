@@ -35,8 +35,16 @@ sudo systemctl enable boggart.service
 sudo systemctl start boggart.service && sudo journalctl -f -u boggart.service
 ```
 #### Update
+###### Build for Raspberry 2
 ```
 GOARM=7 gox -output="cmd/agent/boggart" -osarch="linux/arm" -ldflags="-X 'main.Name=Boggart Agent' -X 'main.Version=`date +"%y%m%d"`' -X 'main.Build=`date +"%H%M%S"`'" ./cmd/agent/
+```
+###### Build for Raspberry 1
+```
+GOARM=6 gox -output="cmd/agent/boggart" -osarch="linux/arm" -ldflags="-X 'main.Name=Boggart Zav' -X 'main.Version=`date +"%y%m%d"`' -X 'main.Build=`date +"%H%M%S"`'" ./cmd/agent/
+```
+###### Install
+```
 sudo cp -f /home/pi/go/src/github.com/kihamo/boggart/cmd/agent/boggart /usr/local/bin/boggart-agent
 sudo chmod +x /usr/local/bin/boggart-agent
 sudo systemctl restart boggart.service && sudo journalctl -f -u boggart.service

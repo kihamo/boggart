@@ -4,6 +4,7 @@ import (
 	"log"
 
 	_ "github.com/kihamo/boggart/components/boggart/bind/ds18b20"
+	_ "github.com/kihamo/boggart/components/boggart/bind/esphome"
 	_ "github.com/kihamo/boggart/components/boggart/bind/gpio"
 	_ "github.com/kihamo/boggart/components/boggart/bind/hikvision"
 	_ "github.com/kihamo/boggart/components/boggart/bind/hilink"
