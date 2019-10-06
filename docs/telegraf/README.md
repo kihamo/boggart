@@ -1,5 +1,15 @@
 ## Установка и настройка telegraf
 
+111100000000000001010
+||||             ||||_ under-voltage
+||||             |||_ currently throttled
+||||             ||_ arm frequency capped
+||||             |_ soft temperature reached
+||||_ under-voltage has occurred since last reboot
+|||_ throttling has occurred since last reboot
+||_ arm frequency capped has occurred since last reboot
+|_ soft temperature reached since last reboot
+
 ```
 https://dl.influxdata.com/telegraf/releases/telegraf_1.8.1-1_armhf.deb
 dpkg -i telegraf_1.8.1-1_armhf.deb && rm -rf telegraf_1.8.1-1_armhf.deb
