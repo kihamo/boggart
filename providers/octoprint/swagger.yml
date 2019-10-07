@@ -34,6 +34,16 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/Version"
+  /connection:
+    get:
+      operationId: "getConnection"
+      tags:
+        - "connection"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Connection"
   /languages:
     get:
       operationId: "getLanguages"
@@ -91,6 +101,48 @@ definitions:
         type: "string"
       text:
         type: "string"
+  Connection:
+    type: "object"
+    properties:
+      current:
+        type: "object"
+        properties:
+          state:
+            type: "string"
+          port:
+            type: "string"
+          baudrate:
+            type: "integer"
+          printerProfile:
+            type: "string"
+      options:
+        type: "object"
+        properties:
+          ports:
+            type: "array"
+            items:
+              type: "string"
+          baudrates:
+            type: "array"
+            items:
+              type: "integer"
+          printerProfiles:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                id:
+                  type: "string"
+                name:
+                  type: "string"
+          portPreference:
+            type: "string"
+          baudratePreference:
+            type: "integer"
+          printerProfilePreference:
+            type: "string"
+          autoconnect:
+            type: "boolean"
   Languages:
     type: "object"
     properties:

@@ -11,6 +11,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
+	"github.com/kihamo/boggart/providers/octoprint/client/connection"
 	"github.com/kihamo/boggart/providers/octoprint/client/languages"
 	"github.com/kihamo/boggart/providers/octoprint/client/system"
 	"github.com/kihamo/boggart/providers/octoprint/client/version"
@@ -58,6 +59,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *OctoPrint 
 
 	cli := new(OctoPrint)
 	cli.Transport = transport
+
+	cli.Connection = connection.New(transport, formats)
 
 	cli.Languages = languages.New(transport, formats)
 
@@ -109,6 +112,8 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // OctoPrint is a client for octo print
 type OctoPrint struct {
+	Connection *connection.Client
+
 	Languages *languages.Client
 
 	System *system.Client
@@ -121,6 +126,8 @@ type OctoPrint struct {
 // SetTransport changes the transport on the client and all its subresources
 func (c *OctoPrint) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
+
+	c.Connection.SetTransport(transport)
 
 	c.Languages.SetTransport(transport)
 
