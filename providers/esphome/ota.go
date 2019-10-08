@@ -1,19 +1,21 @@
 package esphome
 
 import (
-	"bufio"
 	"bytes"
 	"crypto/md5"
 	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"hash"
 	"io"
+	"io/ioutil"
 	"net"
 	"os"
 	"strconv"
-
-	"github.com/kihamo/boggart/protocols/connection"
+	"sync"
+	"sync/atomic"
+	"time"
 )
 
 const (
@@ -42,6 +44,10 @@ const (
 	ErrorESP8266NotEnoughSpace   = 136
 	ErrorESP32NotEnoughSpace     = 137
 	ErrorUnknown                 = 255
+
+	connChunkSize   = 1024
+	connWriteBuffer = 8192
+	connTimeout     = time.Second * 20
 )
 
 var (
@@ -66,6 +72,26 @@ var (
 type OTA struct {
 	address  string
 	password string
+
+	running   uint32
+	writen    uint64
+	total     uint64
+	checksum  atomic.Value
+	lastError error
+
+	lock sync.RWMutex
+}
+
+type hasher struct {
+	hash.Hash
+}
+
+func (h hasher) Bytes() []byte {
+	return []byte(hex.EncodeToString(h.Sum(nil)))
+}
+
+func (h hasher) RawBytes() []byte {
+	return h.Sum(nil)
 }
 
 func NewOTA(address, password string) *OTA {
@@ -79,24 +105,116 @@ func NewOTA(address, password string) *OTA {
 	}
 }
 
-func (o *OTA) UploadFromFile(filename string) error {
-	f, err := os.Open(filename)
+func (o *OTA) IsRunning() bool {
+	return atomic.LoadUint32(&o.running) == 1
+}
+
+func (o *OTA) Checksum() []byte {
+	return o.checksum.Load().([]byte)
+}
+
+func (o *OTA) Progress() (uint64, uint64) {
+	return atomic.LoadUint64(&o.writen), atomic.LoadUint64(&o.total)
+}
+
+func (o *OTA) LastError() error {
+	o.lock.RLock()
+	defer o.lock.RUnlock()
+
+	return o.lastError
+}
+
+func (o *OTA) UploadAsync(reader io.Reader) error {
+	body, err := ioutil.ReadAll(reader)
+	if err != nil {
+		return errors.New("error get file data: " + err.Error())
+	}
+
+	return o.doAsync(reader, len(body))
+}
+
+func (o *OTA) UploadAsyncFromFile(filename string) error {
+	reader, size, err := o.readerFromFile(filename)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
 
-	return o.Upload(f)
+	return o.doAsync(reader, size)
 }
 
 func (o *OTA) Upload(reader io.Reader) error {
-	conn, err := connection.New("tcp4://" + o.address + "?dump=true&once=true")
+	body, err := ioutil.ReadAll(reader)
+	if err != nil {
+		return errors.New("error get file data: " + err.Error())
+	}
 
-	//conn, err := net.Dial("tcp4", o.address)
+	return o.doUpload(reader, len(body))
+}
+
+func (o *OTA) UploadFromFile(filename string) error {
+	reader, size, err := o.readerFromFile(filename)
+	if err != nil {
+		return err
+	}
+
+	return o.doUpload(reader, size)
+}
+
+func (o *OTA) readerFromFile(filename string) (io.Reader, int, error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return nil, -1, err
+	}
+
+	stat, err := f.Stat()
+	if err != nil {
+		return nil, -1, err
+	}
+
+	buf := bytes.NewBuffer(nil)
+	_, err = buf.ReadFrom(f)
+	if err != nil {
+		return nil, -1, err
+	}
+
+	f.Close()
+	return buf, int(stat.Size()), nil
+}
+
+func (o *OTA) doAsync(reader io.Reader, size int) error {
+	if o.IsRunning() {
+		return errors.New("OTA proccess aleady running")
+	}
+
+	go func() {
+		atomic.StoreUint32(&o.running, 1)
+		defer func() {
+			atomic.StoreUint32(&o.running, 0)
+		}()
+
+		atomic.StoreUint64(&o.total, uint64(size))
+		atomic.StoreUint64(&o.writen, 0)
+
+		err := o.doUpload(reader, size)
+
+		o.lock.Lock()
+		o.lastError = err
+		o.lock.Unlock()
+	}()
+
+	return nil
+}
+
+func (o *OTA) doUpload(reader io.Reader, size int) error {
+	// check connect
+	conn, err := net.Dial("tcp4", o.address)
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
+
+	tcpConn := conn.(*net.TCPConn)
+	tcpConn.SetNoDelay(true)
 
 	// >>> magic bytes
 	if _, err = conn.Write(magicBytes); err != nil {
@@ -129,7 +247,9 @@ func (o *OTA) Upload(reader io.Reader) error {
 		return err
 	}
 
-	var generator hash.Hash
+	hashMD5 := hasher{
+		Hash: md5.New(),
+	}
 
 	if response[0] != CodeAuthOK {
 		if o.password == "" {
@@ -143,41 +263,34 @@ func (o *OTA) Upload(reader io.Reader) error {
 
 		nonce := response
 
-		fmt.Println("Auth: Nonce is", nonce)
-
 		// >>> auth nonce
 		token := make([]byte, 32)
 		if _, err = rand.Read(token); err != nil {
 			return errors.New("error cnonce calculate: " + err.Error())
 		}
 
-		generator = md5.New()
-		if _, err = generator.Write(token); err != nil {
+		if _, err = hashMD5.Write(token); err != nil {
 			return errors.New("error cnonce calculate: " + err.Error())
 		}
 
-		cnonce := generator.Sum(nil)
-
+		cnonce := hashMD5.Bytes()
 		if _, err = conn.Write(cnonce); err != nil {
 			return errors.New("error sending auth cnonce: " + err.Error())
 		}
 
 		// >>> auth result
-		generator = md5.New()
-		if _, err = generator.Write([]byte(o.password)); err != nil {
+		hashMD5.Reset()
+		if _, err = hashMD5.Write([]byte(o.password)); err != nil {
 			return errors.New("error auth result calculate: " + err.Error())
 		}
-		if _, err = generator.Write(nonce); err != nil {
+		if _, err = hashMD5.Write(nonce); err != nil {
 			return errors.New("error auth result calculate: " + err.Error())
 		}
-		if _, err = generator.Write(cnonce); err != nil {
+		if _, err = hashMD5.Write(cnonce); err != nil {
 			return errors.New("error auth result calculate: " + err.Error())
 		}
 
-		authResult := generator.Sum(nil)
-		fmt.Println("Auth result", authResult)
-
-		if _, err = conn.Write(authResult); err != nil {
+		if _, err = conn.Write(hashMD5.Bytes()); err != nil {
 			return errors.New("error sending auth result: " + err.Error())
 		}
 
@@ -188,10 +301,9 @@ func (o *OTA) Upload(reader io.Reader) error {
 	}
 
 	// >>> binary size
-	size := bufio.NewReader(reader).Size()
 	sizeBytes := []byte{
 		byte((size >> 24) & 0xFF),
-		byte((size >> 16) & 0xFF0),
+		byte((size >> 16) & 0xFF),
 		byte((size >> 8) & 0xFF),
 		byte((size >> 0) & 0xFF),
 	}
@@ -206,12 +318,14 @@ func (o *OTA) Upload(reader io.Reader) error {
 	}
 
 	// >>> file checksum
-	generator = md5.New()
-	if _, err = io.Copy(generator, reader); err != nil {
+	body := bytes.NewBuffer(nil)
+
+	hashMD5.Reset()
+	if _, err = io.Copy(hashMD5, io.TeeReader(reader, body)); err != nil {
 		return errors.New("error file checksum calculate: " + err.Error())
 	}
 
-	if _, err = conn.Write(generator.Sum(nil)); err != nil {
+	if _, err = conn.Write(hashMD5.Bytes()); err != nil {
 		return errors.New("error sending file checksum: " + err.Error())
 	}
 
@@ -221,11 +335,36 @@ func (o *OTA) Upload(reader io.Reader) error {
 	}
 
 	// >>> byte as byte
-	if _, err = io.Copy(conn, reader); err != nil {
-		return errors.New("error sending data: " + err.Error())
+	if err = tcpConn.SetNoDelay(false); err != nil {
+		return errors.New("set connection option failed: " + err.Error())
 	}
 
-	fmt.Println("Waiting results")
+	if err = tcpConn.SetWriteBuffer(connWriteBuffer); err != nil {
+		return errors.New("set connection option failed: " + err.Error())
+	}
+
+	if err = tcpConn.SetDeadline(time.Now().Add(connTimeout)); err != nil {
+		return errors.New("set connection option failed: " + err.Error())
+	}
+
+	var offset, n int
+
+	for {
+		chunk := body.Next(connChunkSize)
+		if len(chunk) == 0 {
+			break
+		}
+
+		if n, err = conn.Write(chunk); err != nil {
+			return errors.New("error sending data: " + err.Error())
+		}
+
+		offset += n
+	}
+
+	if err = tcpConn.SetNoDelay(true); err != nil {
+		return errors.New("set connection option failed: " + err.Error())
+	}
 
 	// <<< receive OK 1
 	if response, err = o.receive(conn, 0, []byte{CodeReceiveOK}); err != nil {
@@ -245,11 +384,11 @@ func (o *OTA) Upload(reader io.Reader) error {
 	return nil
 }
 
-func (o *OTA) receive(conn connection.Conn, amount int, expect []byte) ([]byte, error) {
+func (o *OTA) receive(conn net.Conn, amount int, expect []byte) ([]byte, error) {
 	l := len(expect)
 
 	buf := make([]byte, l+amount)
-	var shift int
+	var offset int
 
 	start := l
 	if start < 1 {
@@ -264,7 +403,7 @@ func (o *OTA) receive(conn connection.Conn, amount int, expect []byte) ([]byte, 
 	if n != start {
 		return nil, fmt.Errorf("unexpected response start bytes %d expected %d", n, start)
 	}
-	shift += n
+	offset += n
 
 	// check first byte
 	if text, ok := errorText[int64(buf[0])]; ok {
@@ -277,17 +416,17 @@ func (o *OTA) receive(conn connection.Conn, amount int, expect []byte) ([]byte, 
 	}
 
 	for {
-		if shift >= l+amount {
+		if offset >= l+amount {
 			break
 		}
 
-		n, err = conn.Read(buf[shift:])
+		n, err = conn.Read(buf[offset:])
 
 		if err != nil {
 			return nil, err
 		}
 
-		shift += n
+		offset += n
 	}
 
 	// skip expect bytes

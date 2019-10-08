@@ -10,7 +10,6 @@ import (
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/golang/protobuf/proto"
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/providers/esphome"
 	"github.com/kihamo/boggart/providers/esphome/native_api"
 	"github.com/kihamo/shadow/components/dashboard"
 )
@@ -54,7 +53,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 			switch t {
 			case "application/macbinary":
-				err = esphome.NewOTA(bind.otaAddress, bind.config.OTAPassword).Upload(file)
+				err = bind.ota.Upload(file)
 
 			default:
 				err = errors.New("unknown content type " + t)
@@ -140,8 +139,16 @@ func (t Type) handleIndex(w *dashboard.Response, r *dashboard.Request, bind *Bin
 		}
 	}
 
+	otaWritten, otaTotal := bind.ota.Progress()
+
 	t.Render(ctx, "index", map[string]interface{}{
-		"entities": entities,
+		"entities":     entities,
+		"ota_running":  bind.ota.IsRunning(),
+		"ota_written":  otaWritten,
+		"ota_total":    otaTotal,
+		"ota_checksum": bind.ota.Checksum(),
+		"ota_progress": (float64(otaWritten) * float64(100)) / float64(otaTotal),
+		"ota_error":    bind.ota.LastError(),
 	})
 }
 

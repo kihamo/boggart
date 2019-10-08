@@ -64,6 +64,12 @@
                         <th>{{ i18n "Status" . }}</th>
                         <td>{{ if .ota_running }}{{ i18n "running" . }}{{ else }}{{ i18n "ready" . }}{{ end }}</td>
                     </tr>
+                    {{ if .ota_error }}
+                    <tr>
+                        <th>{{ i18n "Last error" . }}</th>
+                        <td>{{ .ota_error }}</td>
+                    </tr>
+                    {{ end }}
                     <tr>
                         <th>{{ i18n "Progress" . }}</th>
                         <td>

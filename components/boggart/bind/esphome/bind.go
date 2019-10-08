@@ -9,6 +9,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/providers/esphome"
 	"github.com/kihamo/boggart/providers/esphome/native_api"
 	"github.com/kihamo/boggart/providers/wifiled"
 	"go.uber.org/multierr"
@@ -22,9 +23,9 @@ type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
 
-	config     *Config
-	provider   *native_api.Client
-	otaAddress string
+	config   *Config
+	provider *native_api.Client
+	ota      *esphome.OTA
 }
 
 func (b *Bind) Close() error {
