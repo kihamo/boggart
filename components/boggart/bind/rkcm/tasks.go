@@ -37,9 +37,18 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 
 	if err == nil {
 		for _, debt := range responseDebt.Payload.Data {
-			metricBalance.With("ident", debt.Ident).Set(debt.Sum)
+			// значение в Mobile.GetDebt кэшируется, помогает перевызов General.GetDebtByAccount
 
-			if e := b.MQTTPublishAsync(ctx, b.config.TopicBalance.Format(debt.Ident), debt.Sum); e != nil {
+			paramsAccount := general.NewGetDebtByAccountParamsWithContext(ctx).
+				WithIdent(debt.Ident)
+
+			if responseAccount, e := b.client.General.GetDebtByAccount(paramsAccount); e == nil {
+				metricBalance.With("ident", debt.Ident).Set(debt.Sum)
+
+				if e := b.MQTTPublishAsync(ctx, b.config.TopicBalance.Format(debt.Ident), responseAccount.Payload.Data.Sum); e != nil {
+					err = multierr.Append(e, err)
+				}
+			} else {
 				err = multierr.Append(e, err)
 			}
 		}

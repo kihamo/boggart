@@ -1,0 +1,191 @@
+---
+
+swagger: "2.0"
+info:
+  title: "OctoPrint"
+  version: "0.1.0"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+schemes:
+- "http"
+basePath: "/api"
+securityDefinitions:
+  APIKeyHeader:
+    type: apiKey
+    in: header
+    name: X-API-Key
+  APIKeyQueryParam:
+    type: apiKey
+    in: query
+    name: apikey
+security:
+  - APIKeyHeader: []
+  - APIKeyQueryParam: []
+paths:
+  /version:
+    get:
+      operationId: "getVersion"
+      tags:
+        - "version"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Version"
+  /connection:
+    get:
+      operationId: "getConnection"
+      tags:
+        - "connection"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Connection"
+  /languages:
+    get:
+      operationId: "getLanguages"
+      tags:
+        - "languages"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Languages"
+  /system/commands:
+    get:
+      operationId: "getCommands"
+      tags:
+        - "system"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "object"
+            properties:
+              core:
+                type: "array"
+                items:
+                  $ref: "#/definitions/Command"
+              custom:
+                type: "array"
+                items:
+                  $ref: "#/definitions/Command"
+  /system/commands/{source}:
+    get:
+      operationId: "getCommandsBySource"
+      tags:
+        - "system"
+      parameters:
+        - name: "source"
+          in: "path"
+          description: "Source name"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Command"
+definitions:
+  Version:
+    type: "object"
+    properties:
+      api:
+        type: "string"
+      server:
+        type: "string"
+      text:
+        type: "string"
+  Connection:
+    type: "object"
+    properties:
+      current:
+        type: "object"
+        properties:
+          state:
+            type: "string"
+          port:
+            type: "string"
+          baudrate:
+            type: "integer"
+          printerProfile:
+            type: "string"
+      options:
+        type: "object"
+        properties:
+          ports:
+            type: "array"
+            items:
+              type: "string"
+          baudrates:
+            type: "array"
+            items:
+              type: "integer"
+          printerProfiles:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                id:
+                  type: "string"
+                name:
+                  type: "string"
+          portPreference:
+            type: "string"
+          baudratePreference:
+            type: "integer"
+          printerProfilePreference:
+            type: "string"
+          autoconnect:
+            type: "boolean"
+  Languages:
+    type: "object"
+    properties:
+      language_packs:
+        type: "object"
+        additionalProperties:
+          type: "object"
+          properties:
+            display:
+              type: "string"
+            identifier:
+              type: "string"
+            languages:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  locale:
+                    type: "string"
+                  locale_display:
+                    type: "string"
+                  locale_english:
+                    type: "string"
+                  last_update:
+                    type: "number"
+                  author:
+                    type: "string"
+  Command:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      command:
+        type: "string"
+      action:
+        type: "string"
+      confirm:
+        type: "string"
+      async:
+        type: "boolean"
+      ignore:
+        type: "boolean"
+      source:
+        type: "string"
+      resource:
+        type: "string"
