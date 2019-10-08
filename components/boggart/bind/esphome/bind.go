@@ -22,8 +22,9 @@ type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
 
-	config   *Config
-	provider *native_api.Client
+	config     *Config
+	provider   *native_api.Client
+	otaAddress string
 }
 
 func (b *Bind) Close() error {

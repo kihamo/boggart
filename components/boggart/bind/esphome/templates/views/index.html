@@ -46,4 +46,77 @@
         </div>
     </div>
 </div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel collapsed">
+            <div class="x_title">
+                <h2>{{ i18n "OTA" . }}</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <table class="table table-striped nowrap" style="width:100%">
+                    <tbody>
+                    <tr>
+                        <th>{{ i18n "Status" . }}</th>
+                        <td>{{ if .ota_running }}{{ i18n "running" . }}{{ else }}{{ i18n "ready" . }}{{ end }}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ i18n "Progress" . }}</th>
+                        <td>
+                            <div class="progress" style="margin-bottom:0">
+                                <div class="progress-bar progress-bar-striped {{ if .ota_running }}progress-bar-info active{{ else }}progress-bar-danger{{ end}}" role="progressbar" aria-valuenow="{{ .ota_written }}" aria-valuemin="0" aria-valuemax="{{ .ota_total }}" style="width:{{ .ota_progress }}%">
+                                    <span style="line-height:20px">{{ .ota_written }} bytes of {{ .ota_total }}</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>{{ i18n "Checksum" . }}</th>
+                        <td>{{ .ota_checksum }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <form class="form-horizontal form-label-left dropzone" role="form" method="post" id="ota" action="?action=ota" novalidate>
+                    <div class="item form-group">
+                        <label for="level" class="control-label col-md-3 col-sm-3 col-xs-12">
+                        {{ i18n "Timeout" . }}
+                        </label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <input type="text" class="form-control" id="timeout" name="timeout" value="{{ .ota_timeout }}" required="required">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
+
+{{ define "head" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/dropzonejs/css/dropzone.min.css" false) }}
+{{ end }}
+
+{{ define "js" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net/js/jquery.dataTables.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive/js/dataTables.responsive.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/dropzonejs/js/dropzone.min.js" false) }}
+    <script type="application/javascript">
+        $(document).ready(function () {
+            Dropzone.options.ota = {
+                parallelUploads: 1,
+                paramName: "firmware",
+                createImageThumbnails: false,
+                acceptedFiles: "application/macbinary,.bin"
+            };
+        });
+    </script>
 {{ end }}

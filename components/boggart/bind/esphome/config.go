@@ -11,6 +11,8 @@ type Config struct {
 	Debug                      bool
 	Address                    string `valid:"required"`
 	Password                   string
+	OTAPort                    uint64        `mapstructure:"ota_port" yaml:"ota_port"`
+	OTAPassword                string        `mapstructure:"ota_password" yaml:"ota_password"`
 	LivenessInterval           time.Duration `mapstructure:"liveness_interval" yaml:"liveness_interval"`
 	LivenessTimeout            time.Duration `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
 	UpdaterInterval            time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`

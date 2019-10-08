@@ -2,6 +2,7 @@ package esphome
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/golang/protobuf/proto"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/providers/esphome"
 	"github.com/kihamo/boggart/providers/esphome/native_api"
 	"github.com/kihamo/shadow/components/dashboard"
 )
@@ -42,6 +44,31 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		if native_api.EntityType(entity) == native_api.EntityTypeLight {
 			t.handleLight(w, r, bind, entity.(*native_api.ListEntitiesLightResponse))
 		}
+
+	case "ota":
+		file, header, err := r.Original().FormFile("firmware")
+
+		if err == nil {
+			defer file.Close()
+			t := header.Header.Get("Content-Type")
+
+			switch t {
+			case "application/macbinary":
+				err = esphome.NewOTA(bind.otaAddress, bind.config.OTAPassword).Upload(file)
+
+			default:
+				err = errors.New("unknown content type " + t)
+			}
+		}
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			_, _ = w.Write([]byte(err.Error()))
+		} else {
+			_, _ = w.Write([]byte("success"))
+		}
+
+		return
 
 	default:
 		t.handleIndex(w, r, bind)
