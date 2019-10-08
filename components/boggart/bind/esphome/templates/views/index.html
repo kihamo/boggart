@@ -1,4 +1,6 @@
 {{ define "content" }}
+
+{{ if .entities }}
 <div class="row">
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
@@ -46,10 +48,11 @@
         </div>
     </div>
 </div>
+{{ end }}
 
 <div class="row">
     <div class="col-md-12 col-sm-12 col-xs-12">
-        <div class="x_panel collapsed">
+        <div class="x_panel{{ if eq .ota_running false }} collapsed{{ end }}">
             <div class="x_title">
                 <h2>{{ i18n "OTA" . }}</h2>
                 <ul class="nav navbar-right panel_toolbox">
@@ -60,43 +63,36 @@
             <div class="x_content">
                 <table class="table table-striped nowrap" style="width:100%">
                     <tbody>
-                    <tr>
-                        <th>{{ i18n "Status" . }}</th>
-                        <td>{{ if .ota_running }}{{ i18n "running" . }}{{ else }}{{ i18n "ready" . }}{{ end }}</td>
-                    </tr>
-                    {{ if .ota_error }}
-                    <tr>
-                        <th>{{ i18n "Last error" . }}</th>
-                        <td>{{ .ota_error }}</td>
-                    </tr>
-                    {{ end }}
-                    <tr>
-                        <th>{{ i18n "Progress" . }}</th>
-                        <td>
-                            <div class="progress" style="margin-bottom:0">
-                                <div class="progress-bar progress-bar-striped {{ if .ota_running }}progress-bar-info active{{ else }}progress-bar-danger{{ end}}" role="progressbar" aria-valuenow="{{ .ota_written }}" aria-valuemin="0" aria-valuemax="{{ .ota_total }}" style="width:{{ .ota_progress }}%">
-                                    <span style="line-height:20px">{{ .ota_written }} bytes of {{ .ota_total }}</span>
+                        <tr>
+                            <th>{{ i18n "Status" . }}</th>
+                            <td>{{ if .ota_running }}{{ i18n "running" . }}{{ else }}{{ i18n "ready" . }}{{ end }}</td>
+                        </tr>
+                        {{ if .ota_error }}
+                        <tr>
+                            <th>{{ i18n "Last error" . }}</th>
+                            <td>{{ .ota_error }}</td>
+                        </tr>
+                        {{ end }}
+                        <tr>
+                            <th>{{ i18n "Progress" . }}</th>
+                            <td>
+                                <div class="progress" style="margin-bottom:0">
+                                    <div class="progress-bar progress-bar-striped {{ if .ota_running }}progress-bar-info active{{ else }}progress-bar-danger{{ end}}" role="progressbar" aria-valuenow="{{ .ota_written }}" aria-valuemin="0" aria-valuemax="{{ .ota_total }}" style="width:{{ .ota_progress }}%">
+                                        <span style="line-height:20px">{{ .ota_written }} bytes of {{ .ota_total }}</span>
+                                    </div>
                                 </div>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>{{ i18n "Checksum" . }}</th>
-                        <td>{{ .ota_checksum }}</td>
-                    </tr>
+                            </td>
+                        </tr>
+                        {{ if .ota_checksum }}
+                        <tr>
+                            <th>{{ i18n "Checksum" . }}</th>
+                            <td>{{ .ota_checksum }}</td>
+                        </tr>
+                        {{ end }}
                     </tbody>
                 </table>
 
-                <form class="form-horizontal form-label-left dropzone" role="form" method="post" id="ota" action="?action=ota" novalidate>
-                    <div class="item form-group">
-                        <label for="level" class="control-label col-md-3 col-sm-3 col-xs-12">
-                        {{ i18n "Timeout" . }}
-                        </label>
-                        <div class="col-md-6 col-sm-6 col-xs-12">
-                            <input type="text" class="form-control" id="timeout" name="timeout" value="{{ .ota_timeout }}" required="required">
-                        </div>
-                    </div>
-                </form>
+                <form class="form-horizontal form-label-left dropzone" role="form" method="post" id="ota" action="?action=ota" novalidate></form>
             </div>
         </div>
     </div>

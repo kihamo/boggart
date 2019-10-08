@@ -1,6 +1,7 @@
 package esphome
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"net/http"
@@ -53,7 +54,12 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 			switch t {
 			case "application/macbinary":
-				err = bind.ota.Upload(file)
+				buf := bytes.NewBuffer(nil)
+				_, err = buf.ReadFrom(file)
+
+				if err == nil {
+					err = bind.ota.UploadAsync(buf)
+				}
 
 			default:
 				err = errors.New("unknown content type " + t)
@@ -80,76 +86,80 @@ func (t Type) WidgetAssetFS() *assetfs.AssetFS {
 
 func (t Type) handleIndex(w *dashboard.Response, r *dashboard.Request, bind *Bind) {
 	ctx := r.Context()
-
-	messages, err := bind.provider.ListEntities(ctx)
-	entities := make(map[uint32]*entityRow, len(messages))
-
-	if err != nil {
-		r.Session().FlashBag().Error(t.Translate(ctx,
-			"Get list entities failed with error %s",
-			"",
-			err.Error(),
-		))
-	} else {
-		states, err := bind.States(ctx, messages...)
-		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx,
-				"Get state of entities failed with error: %s",
-				"",
-				err.Error(),
-			))
-		} else {
-			for _, message := range messages {
-				e, ok := message.(native_api.MessageEntity)
-				if !ok {
-					continue
-				}
-
-				entities[e.GetKey()] = &entityRow{
-					ObjectID: e.GetObjectId(),
-					Name:     e.GetName(),
-					Type:     native_api.EntityType(message),
-					Entity:   message,
-				}
-			}
-
-			for _, message := range states {
-				s, ok := message.(native_api.MessageState)
-				if !ok {
-					continue
-				}
-
-				var row *entityRow
-
-				row, ok = entities[s.GetKey()]
-				if !ok {
-					continue
-				}
-
-				row.State, err = native_api.State(row.Entity, message, true)
-				if err != nil {
-					r.Session().FlashBag().Notice(t.Translate(ctx,
-						"Unknown state type %s for entity with key %d",
-						"",
-						proto.MessageName(message),
-						s.GetKey(),
-					))
-				}
-			}
-		}
-	}
-
 	otaWritten, otaTotal := bind.ota.Progress()
 
-	t.Render(ctx, "index", map[string]interface{}{
-		"entities":     entities,
+	vars := map[string]interface{}{
 		"ota_running":  bind.ota.IsRunning(),
 		"ota_written":  otaWritten,
 		"ota_total":    otaTotal,
 		"ota_checksum": bind.ota.Checksum(),
 		"ota_progress": (float64(otaWritten) * float64(100)) / float64(otaTotal),
 		"ota_error":    bind.ota.LastError(),
-	})
+	}
+
+	if !bind.ota.IsRunning() {
+		messages, err := bind.provider.ListEntities(ctx)
+		entities := make(map[uint32]*entityRow, len(messages))
+
+		if err != nil {
+			r.Session().FlashBag().Error(t.Translate(ctx,
+				"Get list entities failed with error %s",
+				"",
+				err.Error(),
+			))
+		} else {
+			states, err := bind.States(ctx, messages...)
+			if err != nil {
+				r.Session().FlashBag().Error(t.Translate(ctx,
+					"Get state of entities failed with error: %s",
+					"",
+					err.Error(),
+				))
+			} else {
+				for _, message := range messages {
+					e, ok := message.(native_api.MessageEntity)
+					if !ok {
+						continue
+					}
+
+					entities[e.GetKey()] = &entityRow{
+						ObjectID: e.GetObjectId(),
+						Name:     e.GetName(),
+						Type:     native_api.EntityType(message),
+						Entity:   message,
+					}
+				}
+
+				for _, message := range states {
+					s, ok := message.(native_api.MessageState)
+					if !ok {
+						continue
+					}
+
+					var row *entityRow
+
+					row, ok = entities[s.GetKey()]
+					if !ok {
+						continue
+					}
+
+					row.State, err = native_api.State(row.Entity, message, true)
+					if err != nil {
+						r.Session().FlashBag().Notice(t.Translate(ctx,
+							"Unknown state type %s for entity with key %d",
+							"",
+							proto.MessageName(message),
+							s.GetKey(),
+						))
+					}
+				}
+			}
+		}
+
+		vars["entities"] = entities
+	}
+
+	t.Render(ctx, "index", vars)
 }
 
 func (t Type) handleLight(w *dashboard.Response, r *dashboard.Request, bind *Bind, entity *native_api.ListEntitiesLightResponse) {

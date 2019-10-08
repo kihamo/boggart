@@ -9,11 +9,9 @@ import (
 	"fmt"
 	"hash"
 	"io"
-	"io/ioutil"
 	"net"
 	"os"
 	"strconv"
-	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -45,9 +43,10 @@ const (
 	ErrorESP32NotEnoughSpace     = 137
 	ErrorUnknown                 = 255
 
-	connChunkSize   = 1024
-	connWriteBuffer = 8192
-	connTimeout     = time.Second * 20
+	connChunkSize     = 1024
+	connWriteBuffer   = 8192
+	connTimeout       = time.Second * 20
+	sleepAfterSuccess = time.Second * 10
 )
 
 var (
@@ -77,9 +76,7 @@ type OTA struct {
 	writen    uint64
 	total     uint64
 	checksum  atomic.Value
-	lastError error
-
-	lock sync.RWMutex
+	lastError atomic.Value
 }
 
 type hasher struct {
@@ -90,8 +87,8 @@ func (h hasher) Bytes() []byte {
 	return []byte(hex.EncodeToString(h.Sum(nil)))
 }
 
-func (h hasher) RawBytes() []byte {
-	return h.Sum(nil)
+func (h hasher) String() string {
+	return hex.EncodeToString(h.Sum(nil))
 }
 
 func NewOTA(address, password string) *OTA {
@@ -109,8 +106,12 @@ func (o *OTA) IsRunning() bool {
 	return atomic.LoadUint32(&o.running) == 1
 }
 
-func (o *OTA) Checksum() []byte {
-	return o.checksum.Load().([]byte)
+func (o *OTA) Checksum() string {
+	if cs := o.checksum.Load(); cs != nil {
+		return cs.(string)
+	}
+
+	return ""
 }
 
 func (o *OTA) Progress() (uint64, uint64) {
@@ -118,19 +119,23 @@ func (o *OTA) Progress() (uint64, uint64) {
 }
 
 func (o *OTA) LastError() error {
-	o.lock.RLock()
-	defer o.lock.RUnlock()
+	if err := o.lastError.Load(); err != nil {
+		if text := err.(string); text != "" {
+			return errors.New(text)
+		}
+	}
 
-	return o.lastError
+	return nil
 }
 
 func (o *OTA) UploadAsync(reader io.Reader) error {
-	body, err := ioutil.ReadAll(reader)
-	if err != nil {
+	buf := bytes.NewBuffer(nil)
+
+	if _, err := io.Copy(buf, reader); err != nil {
 		return errors.New("error get file data: " + err.Error())
 	}
 
-	return o.doAsync(reader, len(body))
+	return o.doAsync(buf, buf.Len())
 }
 
 func (o *OTA) UploadAsyncFromFile(filename string) error {
@@ -143,12 +148,13 @@ func (o *OTA) UploadAsyncFromFile(filename string) error {
 }
 
 func (o *OTA) Upload(reader io.Reader) error {
-	body, err := ioutil.ReadAll(reader)
-	if err != nil {
+	buf := bytes.NewBuffer(nil)
+
+	if _, err := io.Copy(buf, reader); err != nil {
 		return errors.New("error get file data: " + err.Error())
 	}
 
-	return o.doUpload(reader, len(body))
+	return o.doUpload(buf, buf.Len())
 }
 
 func (o *OTA) UploadFromFile(filename string) error {
@@ -188,24 +194,33 @@ func (o *OTA) doAsync(reader io.Reader, size int) error {
 
 	go func() {
 		atomic.StoreUint32(&o.running, 1)
-		defer func() {
-			atomic.StoreUint32(&o.running, 0)
-		}()
-
 		atomic.StoreUint64(&o.total, uint64(size))
 		atomic.StoreUint64(&o.writen, 0)
 
+		defer func() {
+			atomic.StoreUint32(&o.running, 0)
+			atomic.StoreUint64(&o.total, 0)
+			atomic.StoreUint64(&o.writen, 0)
+			o.checksum.Store("")
+		}()
+
 		err := o.doUpload(reader, size)
 
-		o.lock.Lock()
-		o.lastError = err
-		o.lock.Unlock()
+		if err != nil {
+			o.lastError.Store(err.Error())
+		} else {
+			o.lastError.Store("")
+		}
 	}()
 
 	return nil
 }
 
 func (o *OTA) doUpload(reader io.Reader, size int) error {
+	if size == 0 {
+		return errors.New("error sending data: file is empty")
+	}
+
 	// check connect
 	conn, err := net.Dial("tcp4", o.address)
 	if err != nil {
@@ -325,8 +340,14 @@ func (o *OTA) doUpload(reader io.Reader, size int) error {
 		return errors.New("error file checksum calculate: " + err.Error())
 	}
 
+	o.checksum.Store(hashMD5.String())
+
 	if _, err = conn.Write(hashMD5.Bytes()); err != nil {
 		return errors.New("error sending file checksum: " + err.Error())
+	}
+
+	if body.Len() == 0 {
+		return errors.New("error sending data: file is empty")
 	}
 
 	// <<< checksum 1
@@ -360,6 +381,7 @@ func (o *OTA) doUpload(reader io.Reader, size int) error {
 		}
 
 		offset += n
+		atomic.StoreUint64(&o.writen, uint64(offset))
 	}
 
 	if err = tcpConn.SetNoDelay(true); err != nil {
@@ -380,6 +402,9 @@ func (o *OTA) doUpload(reader io.Reader, size int) error {
 	if _, err = conn.Write([]byte{CodeOK}); err != nil {
 		return errors.New("error sending end acknowledgement: " + err.Error())
 	}
+
+	// wait reload
+	time.Sleep(sleepAfterSuccess)
 
 	return nil
 }
