@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -45,35 +46,11 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			t.handleLight(w, r, bind, entity.(*native_api.ListEntitiesLightResponse))
 		}
 
+	case "state":
+		t.handleState(w, r, bind)
+
 	case "ota":
-		file, header, err := r.Original().FormFile("firmware")
-
-		if err == nil {
-			defer file.Close()
-			t := header.Header.Get("Content-Type")
-
-			switch t {
-			case "application/macbinary":
-				buf := bytes.NewBuffer(nil)
-				_, err = buf.ReadFrom(file)
-
-				if err == nil {
-					err = bind.ota.UploadAsync(buf)
-				}
-
-			default:
-				err = errors.New("unknown content type " + t)
-			}
-		}
-
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			_, _ = w.Write([]byte(err.Error()))
-		} else {
-			_, _ = w.Write([]byte("success"))
-		}
-
-		return
+		t.handleOTA(w, r, bind)
 
 	default:
 		t.handleIndex(w, r, bind)
@@ -280,4 +257,139 @@ func (t Type) handleLight(w *dashboard.Response, r *dashboard.Request, bind *Bin
 	vars["error"] = err
 
 	t.Render(ctx, "light", vars)
+}
+
+func (t Type) handleState(w *dashboard.Response, r *dashboard.Request, bind *Bind) {
+	q := r.URL().Query()
+
+	objectID := q.Get("object")
+	state := q.Get("state")
+
+	if objectID == "" || state == "" {
+		t.NotFound(w, r)
+		return
+	}
+
+	entity, err := bind.EntityByObjectID(r.Context(), objectID)
+	if err != nil {
+		t.NotFound(w, r)
+		return
+	}
+
+	ctx := r.Context()
+
+	switch native_api.EntityType(entity) {
+	// TODO: CoverCommand
+
+	case native_api.EntityTypeClimate:
+		v, err := strconv.ParseUint(state, 10, 64)
+		if err != nil {
+			t.NotFound(w, r)
+			return
+		}
+
+		s := native_api.ClimateMode(v)
+
+		switch s {
+		case native_api.ClimateMode_CLIMATE_MODE_OFF:
+		case native_api.ClimateMode_CLIMATE_MODE_AUTO:
+		case native_api.ClimateMode_CLIMATE_MODE_COOL:
+		case native_api.ClimateMode_CLIMATE_MODE_HEAT:
+			// skip
+		default:
+			t.NotFound(w, r)
+			return
+		}
+
+		err = bind.provider.ClimateCommand(ctx, &native_api.ClimateCommandRequest{
+			Key:     entity.(*native_api.ListEntitiesClimateResponse).Key,
+			HasMode: true,
+			Mode:    s,
+		})
+
+	case native_api.EntityTypeFan:
+		s, err := strconv.ParseBool(state)
+		if err != nil {
+			t.NotFound(w, r)
+			return
+		}
+
+		err = bind.provider.FanCommand(ctx, &native_api.FanCommandRequest{
+			Key:      entity.(*native_api.ListEntitiesBinarySensorResponse).Key,
+			HasState: true,
+			State:    s,
+		})
+
+	case native_api.EntityTypeLight:
+		s, err := strconv.ParseBool(state)
+		if err != nil {
+			t.NotFound(w, r)
+			return
+		}
+
+		err = bind.provider.LightCommand(ctx, &native_api.LightCommandRequest{
+			Key:      entity.(*native_api.ListEntitiesLightResponse).Key,
+			HasState: true,
+			State:    s,
+		})
+
+	case native_api.EntityTypeSwitch:
+		s, err := strconv.ParseBool(state)
+		if err != nil {
+			t.NotFound(w, r)
+			return
+		}
+
+		err = bind.provider.SwitchCommand(ctx, &native_api.SwitchCommandRequest{
+			Key:   entity.(*native_api.ListEntitiesSwitchResponse).Key,
+			State: s,
+		})
+
+	default:
+		t.NotFound(w, r)
+		return
+	}
+
+	if err != nil {
+		r.Session().FlashBag().Error(err.Error())
+	} else {
+		r.Session().FlashBag().Success(t.Translate(ctx, "Success toggle", ""))
+	}
+
+	redirectUrl := &url.URL{}
+	*redirectUrl = *r.Original().URL
+	redirectUrl.RawQuery = ""
+
+	t.Redirect(redirectUrl.String(), http.StatusFound, w, r)
+}
+
+func (t Type) handleOTA(w *dashboard.Response, r *dashboard.Request, bind *Bind) {
+	file, header, err := r.Original().FormFile("firmware")
+
+	if err == nil {
+		defer file.Close()
+		t := header.Header.Get("Content-Type")
+
+		switch t {
+		case "application/macbinary":
+			buf := bytes.NewBuffer(nil)
+			_, err = buf.ReadFrom(file)
+
+			if err == nil {
+				err = bind.ota.UploadAsync(buf)
+			}
+
+		default:
+			err = errors.New("unknown content type " + t)
+		}
+	}
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(err.Error()))
+	} else {
+		_, _ = w.Write([]byte("success"))
+	}
+
+	return
 }

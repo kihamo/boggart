@@ -37,8 +37,29 @@ msgstr "включено"
 msgid "off"
 msgstr "выключено"
 
-msgid "On"
+msgid "Turn on"
 msgstr "Включить"
 
-msgid "Off"
+msgid "Switch off"
 msgstr "Выключить"
+
+msgid "Success toggle"
+msgstr "Успешно переключено"
+
+msgid "Status"
+msgstr "Статус"
+
+msgid "running"
+msgstr "запущено"
+
+msgid "ready"
+msgstr "готово"
+
+msgid "Progress"
+msgstr "Прогресс"
+
+msgid "Checksum"
+msgstr "Чексумма"
+
+msgid "%d bytes of %d"
+msgstr "%d байт из %d"

@@ -99,3 +99,6 @@ msgstr "Прогресс"
 
 msgid "Checksum"
 msgstr "Чексумма"
+
+msgid "%d bytes of %d"
+msgstr "%d байт из %d"

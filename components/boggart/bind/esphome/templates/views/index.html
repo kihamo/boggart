@@ -28,13 +28,16 @@
                                     <a href="{{ $.Request.URL.Path }}?action=entity&object={{ $entity.ObjectID }}" class="btn btn-info btn-icon btn-xs">
                                         <i class="glyphicon glyphicon-eye-open" title="{{ i18n "Details" $ }}"></i>
                                     </a>
+                                    {{ end }}
+
+                                    {{ if or (eq $entity.Type "light") (eq $entity.Type "switch") }}
                                         {{ if eq $entity.State "on" }}
-                                            <a href="{{ $.Request.URL.Path }}?action=entity&object={{ $entity.ObjectID }}" class="btn btn-danger btn-icon btn-xs">
-                                                <i class="glyphicon glyphicon-stop" title="{{ i18n "Off" $ }}"></i>
+                                            <a href="{{ $.Request.URL.Path }}?action=state&object={{ $entity.ObjectID }}&state=0" class="btn btn-danger btn-icon btn-xs">
+                                                <i class="glyphicon glyphicon-stop" title="{{ i18n "Switch off" $ }}"></i>
                                             </a>
                                         {{ else }}
-                                            <a href="{{ $.Request.URL.Path }}?action=entity&object={{ $entity.ObjectID }}" class="btn btn-danger btn-icon btn-xs">
-                                                <i class="glyphicon glyphicon-play" title="{{ i18n "On" $ }}"></i>
+                                            <a href="{{ $.Request.URL.Path }}?action=state&object={{ $entity.ObjectID }}&state=1" class="btn btn-danger btn-icon btn-xs">
+                                                <i class="glyphicon glyphicon-play" title="{{ i18n "Turn on" $ }}"></i>
                                             </a>
                                         {{ end }}
                                     {{ end }}
@@ -78,7 +81,9 @@
                             <td>
                                 <div class="progress" style="margin-bottom:0">
                                     <div class="progress-bar progress-bar-striped {{ if .ota_running }}progress-bar-info active{{ else }}progress-bar-danger{{ end}}" role="progressbar" aria-valuenow="{{ .ota_written }}" aria-valuemin="0" aria-valuemax="{{ .ota_total }}" style="width:{{ .ota_progress }}%">
-                                        <span style="line-height:20px">{{ .ota_written }} bytes of {{ .ota_total }}</span>
+                                        <span style="line-height:20px">
+                                            {{ i18n "%d bytes of %d" . nil nil nil .ota_written .ota_total }}
+                                        </span>
                                     </div>
                                 </div>
                             </td>
@@ -92,7 +97,9 @@
                     </tbody>
                 </table>
 
+                {{ if eq .ota_running false }}
                 <form class="form-horizontal form-label-left dropzone" role="form" method="post" id="ota" action="?action=ota" novalidate></form>
+                {{ end }}
             </div>
         </div>
     </div>
