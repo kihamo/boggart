@@ -1,7 +1,6 @@
 package pulsar
 
 import (
-	"fmt"
 	"sort"
 	"time"
 
@@ -61,16 +60,18 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		if queryTime := q.Get("from"); queryTime != "" {
-			if t, err := time.Parse(time.RFC3339, queryTime); err == nil {
-				start = t
+			if tm, err := time.Parse(time.RFC3339, queryTime); err == nil {
+				start = tm
 			} else {
-				fmt.Println(err.Error(), queryTime)
+				r.Session().FlashBag().Error(t.Translate(r.Context(), "Parse date from failed with error %s", "", err.Error()))
 			}
 		}
 
 		if queryTime := q.Get("to"); queryTime != "" {
-			if t, err := time.Parse(time.RFC3339, queryTime); err == nil {
-				end = t
+			if tm, err := time.Parse(time.RFC3339, queryTime); err == nil {
+				end = tm
+			} else {
+				r.Session().FlashBag().Error(t.Translate(r.Context(), "Parse date to failed with error %s", "", err.Error()))
 			}
 		}
 

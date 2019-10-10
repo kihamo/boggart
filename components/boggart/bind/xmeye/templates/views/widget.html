@@ -52,6 +52,72 @@
                             </tbody>
                         </table>
                         {{ else if eq .action "files" }}
+                        <div class="well" style="overflow: auto">
+                            <form class="form-horizontal" role="form" method="get" action="{{ .Request.URL.Path }}" id="files-form" novalidate>
+                                <input type="hidden" value="files" name="action" />
+                                <input type="hidden" value="" name="from" />
+                                <input type="hidden" value="" name="to" />
+                                <div class="col-md-4">
+                                    {{ i18n "Date range" . }}
+                                    <fieldset>
+                                        <div class="control-group">
+                                            <div class="controls">
+                                                <div class="input-prepend input-group">
+                                                    <span class="add-on input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                    <input type="text" id="files-date" class="form-control" value="{{ .date_from.Format "2006.01.02 15:04" }} - {{ .date_to.Format "2006.01.02 15:04" }}" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                                <div class="col-md-2">
+                                    {{ i18n "Channel" . }}
+                                    <fieldset>
+                                        <div class="control-group">
+                                            <div class="controls">
+                                                <div class="input-prepend input-group" style="width: 100%">
+                                                    <select id="channel" name="channel" class="form-control select2" required="required">
+                                                    {{ range $id, $title := .channels }}
+                                                        <option value="{{ $id }}"{{ if eq $.channel $id }} selected="selected"{{ end }}>{{ $title }}</option>
+                                                    {{ end }}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                                <div class="col-md-2">
+                                    {{ i18n "Event type" . }}
+                                    <fieldset>
+                                        <div class="control-group">
+                                            <div class="controls">
+                                                <div class="input-prepend input-group" style="width: 100%">
+                                                    <select id="event-type" name="event-type" class="form-control select2" required="required">
+                                                        <option value="*"{{ if eq .event_type "*" }} selected="selected"{{ end }}>{{ i18n "All" . }}</option>
+                                                        <option value="A"{{ if eq .event_type "A" }} selected="selected"{{ end }}>{{ i18n "Alarm" . }}</option>
+                                                        <option value="M"{{ if eq .event_type "M" }} selected="selected"{{ end }}>{{ i18n "Motion detect" . }}</option>
+                                                        <option value="R"{{ if eq .event_type "R" }} selected="selected"{{ end }}>{{ i18n "General" . }}</option>
+                                                        <option value="H"{{ if eq .event_type "H" }} selected="selected"{{ end }}>{{ i18n "Manual" . }}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                                <div class="col-md-2">
+                                    &nbsp;
+                                    <fieldset>
+                                        <div class="control-group">
+                                            <div class="controls">
+                                                <div class="input-prepend input-group">
+                                                    <button type="submit" class="btn btn-success">{{ i18n "Show" . }}</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            </form>
+                        </div>
                         <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
                             <thead>
                                 <tr>
@@ -264,13 +330,48 @@
 {{ end }}
 
 {{ define "head" }}
-    {{ if eq .action "" }}
+    {{ if or (eq .action "files") (eq .action "") }}
         {{ staticHTML (staticURL "/dashboard/assets/vendors/bootstrap-daterangepicker/css/daterangepicker.min.css" false) }}
     {{ end }}
 {{ end }}
 
 {{ define "js" }}
-    {{ if eq .action "" }}
+    {{ if eq .action "files" }}
+        {{ staticHTML (staticURL "/dashboard/assets/vendors/moment/js/moment.min.js" false) }}
+        {{ staticHTML (staticURL "/dashboard/assets/vendors/bootstrap-daterangepicker/js/daterangepicker.min.js" false) }}
+
+        <script type="application/javascript">
+            $(document).ready(function () {
+                $('#files-date').daterangepicker({
+                    timePickerIncrement: 60,
+                    minDate: moment().subtract(5, 'year'),
+                    maxDate: moment().endOf('day'),
+                    applyButtonClasses: 'btn-success',
+                    locale: {
+                        firstDay: 1,
+                        format: 'YYYY.MM.DD HH:mm'
+                    },
+                    ranges: {
+                        '{{ i18n "Today" . }}': [moment(), moment()],
+                        '{{ i18n "Yesterday" . }}': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                        '{{ i18n "This week" . }}': [moment().startOf('isoWeek'), moment().endOf('isoWeek')],
+                        '{{ i18n "Last week" . }}': [moment().subtract(1, 'isoWeek').startOf('isoWeek'), moment().subtract(1, 'isoWeek').endOf('isoWeek')],
+                        '{{ i18n "This month" . }}': [moment().startOf('month'), moment().endOf('month')],
+                        '{{ i18n "Last month" . }}': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+                        '{{ i18n "This year" . }}': [moment().startOf('year'), moment().endOf('year')],
+                        '{{ i18n "Last year" . }}': [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')]
+                    },
+                });
+
+                $('#files-form').submit(function (e) {
+                    var dp = $('#files-date').data('daterangepicker');
+
+                    $('#files-form input[name="from"]').val(moment(dp.startDate).format('YYYY-MM-DD[T]HH:mm:ssZ'));
+                    $('#files-form input[name="to"]').val(moment(dp.endDate).format('YYYY-MM-DD[T]HH:mm:ssZ'));
+                });
+            });
+        </script>
+    {{ else }}
         {{ staticHTML (staticURL "/dashboard/assets/vendors/moment/js/moment.min.js" false) }}
         {{ staticHTML (staticURL "/dashboard/assets/vendors/bootstrap-daterangepicker/js/daterangepicker.min.js" false) }}
 

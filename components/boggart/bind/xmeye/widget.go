@@ -3,6 +3,7 @@ package xmeye
 import (
 	"io"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -98,21 +99,75 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		return
 
 	case "files":
-		var channel uint32 = 1
-		begin := time.Now().Add(-time.Hour * 24 * 30)
-		end := time.Now()
+		var channel uint32
 		eventType := xmeye.FileSearchEventAll
+		end := time.Now()
+		start := end.Add(-time.Hour * 24 * 30)
+
+		if et := query.Get("event-type"); et != "" {
+			switch strings.ToUpper(et) {
+			case "*":
+				eventType = xmeye.FileSearchEventAll
+			case "A":
+				eventType = xmeye.FileSearchEventAlarm
+			case "M":
+				eventType = xmeye.FileSearchEventMotionDetect
+			case "R":
+				eventType = xmeye.FileSearchEventGeneral
+			case "H":
+				eventType = xmeye.FileSearchEventManual
+			default:
+				r.Session().FlashBag().Error(t.Translate(r.Context(), "Unknown event type %s", "", et))
+			}
+		}
+
+		if channelID := query.Get("channel"); channelID != "" {
+			if cID, err := strconv.ParseUint(channelID, 10, 64); err == nil {
+				channel = uint32(cID)
+			} else {
+				r.Session().FlashBag().Error(t.Translate(r.Context(), "Parse channel ID failed with error %s", "", err.Error()))
+			}
+		}
+
+		if channelID := query.Get("channel"); channelID != "" {
+			if cID, err := strconv.ParseUint(channelID, 10, 64); err == nil {
+				channel = uint32(cID)
+			} else {
+				r.Session().FlashBag().Error(t.Translate(r.Context(), "Parse channel ID failed with error %s", "", err.Error()))
+			}
+		}
+
+		if queryTime := query.Get("from"); queryTime != "" {
+			if tm, err := time.Parse(time.RFC3339, queryTime); err == nil {
+				start = tm
+			} else {
+				r.Session().FlashBag().Error(t.Translate(r.Context(), "Parse date from failed with error %s", "", err.Error()))
+			}
+		}
+
+		if queryTime := query.Get("to"); queryTime != "" {
+			if tm, err := time.Parse(time.RFC3339, queryTime); err == nil {
+				end = tm
+			} else {
+				r.Session().FlashBag().Error(t.Translate(r.Context(), "Parse date to failed with error %s", "", err.Error()))
+			}
+		}
+
+		channels, err := bind.client.ConfigChannelTitleGet(ctx)
+		if err != nil {
+			r.Session().FlashBag().Error(t.Translate(ctx, "Get channels title failed with error %s", "", err.Error()))
+		}
 
 		files := make([]xmeye.FileSearch, 0)
 
-		filesH264, err := bind.client.FileSearch(ctx, begin, end, channel, eventType, xmeye.FileSearchH264)
+		filesH264, err := bind.client.FileSearch(ctx, start, end, channel, eventType, xmeye.FileSearchH264)
 		if err != nil {
 			r.Session().FlashBag().Error(t.Translate(ctx, "Get files H264 failed with error %s", "", err.Error()))
 		} else {
 			files = append(files, filesH264...)
 		}
 
-		filesJPEG, err := bind.client.FileSearch(ctx, begin, end, channel, eventType, xmeye.FileSearchJPEG)
+		filesJPEG, err := bind.client.FileSearch(ctx, start, end, channel, eventType, xmeye.FileSearchJPEG)
 		if err != nil {
 			r.Session().FlashBag().Error(t.Translate(ctx, "Get files JPEG failed with error %s", "", err.Error()))
 		} else {
@@ -123,6 +178,11 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			files[i].FileLength = files[i].FileLength * 1024
 		}
 
+		vars["event_type"] = eventType
+		vars["channels"] = channels
+		vars["channel"] = channel
+		vars["date_from"] = start
+		vars["date_to"] = end
 		vars["files"] = files
 
 	default:
