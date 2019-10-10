@@ -16,17 +16,29 @@ type Bind struct {
 	boggart.BindMQTT
 
 	config         *Config
-	client         *xmeye.Client
 	alarmStreaming *xmeye.AlertStreaming
 }
 
-func (b *Bind) Close() error {
-	return b.client.Close()
+func (b *Bind) client() (*xmeye.Client, error) {
+	password, _ := b.config.Address.User.Password()
+
+	provider, err := xmeye.New(b.config.Address.Host, b.config.Address.User.Username(), password)
+	if err != nil {
+		return nil, err
+	}
+
+	return provider, nil
 }
 
-func (b *Bind) startAlarmStreaming() {
+func (b *Bind) startAlarmStreaming() error {
 	ctx := context.Background()
-	b.alarmStreaming = b.client.AlarmStreaming(ctx, b.config.AlarmStreamingInterval)
+	client, err := b.client()
+	if err != nil {
+		return err
+	}
+
+	b.alarmStreaming = client.AlarmStreaming(ctx, b.config.AlarmStreamingInterval)
+	defer client.Close()
 
 	go func() {
 		for {
@@ -51,4 +63,6 @@ func (b *Bind) startAlarmStreaming() {
 			}
 		}
 	}()
+
+	return nil
 }

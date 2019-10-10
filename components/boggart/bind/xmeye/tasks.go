@@ -33,7 +33,13 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
-	info, err := b.client.SystemInfo(ctx)
+	client, err := b.client()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	info, err := client.SystemInfo(ctx)
 	if err != nil {
 		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, err
@@ -48,7 +54,9 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		b.SetSerialNumber(info.SerialNo)
 
 		if b.config.AlarmStreamingEnabled {
-			b.startAlarmStreaming()
+			if err = b.startAlarmStreaming(); err != nil {
+				return nil, err
+			}
 		}
 
 		if e := b.MQTTPublishAsync(ctx, b.config.TopicStateModel.Format(info.SerialNo), info.HardWare); e != nil {
@@ -74,9 +82,15 @@ func (b *Bind) taskUpdater(ctx context.Context) (_ interface{}, err error) {
 		return nil, nil
 	}
 
+	client, err := b.client()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
 	sn := b.SerialNumber()
 
-	storage, _ := b.client.StorageInfo(ctx)
+	storage, _ := client.StorageInfo(ctx)
 	for _, s := range storage {
 		for _, p := range s.Partition {
 			if p.IsCurrent {

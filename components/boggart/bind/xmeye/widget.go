@@ -25,13 +25,19 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	action := query.Get("action")
 	ctx := r.Context()
 
+	client, err := bind.client()
+	if err != nil {
+		t.InternalError(w, r, err)
+	}
+	defer client.Close()
+
 	vars := map[string]interface{}{
 		"action": action,
 	}
 
 	switch action {
 	case "logs":
-		logs, err := bind.client.LogSearch(ctx, time.Now().Add(-time.Hour), time.Now(), 0)
+		logs, err := client.LogSearch(ctx, time.Now().Add(-time.Hour), time.Now(), 0)
 		if err != nil {
 			r.Session().FlashBag().Error(t.Translate(ctx, "Get logs failed with error %s", "", err.Error()))
 		}
@@ -39,7 +45,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		vars["logs"] = logs
 
 	case "logs-export":
-		reader, err := bind.client.LogExport(ctx)
+		reader, err := client.LogExport(ctx)
 		if err != nil {
 			r.Session().FlashBag().Error(t.Translate(ctx, "Export logs failed with error %s", "", err.Error()))
 			return
@@ -55,7 +61,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		return
 
 	case "configs-export":
-		reader, err := bind.client.ConfigExport(ctx)
+		reader, err := client.ConfigExport(ctx)
 		if err != nil {
 			r.Session().FlashBag().Error(t.Translate(ctx, "Export config failed with error %s", "", err.Error()))
 			return
@@ -80,7 +86,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		begin := time.Now().Add(-time.Hour * 24 * 30)
 		end := time.Now()
 
-		reader, err := bind.client.PlayStream(ctx, begin, end, name)
+		reader, err := client.PlayStream(ctx, begin, end, name)
 		if err != nil {
 			t.NotFound(w, r)
 			return
@@ -153,21 +159,21 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			}
 		}
 
-		channels, err := bind.client.ConfigChannelTitleGet(ctx)
+		channels, err := client.ConfigChannelTitleGet(ctx)
 		if err != nil {
 			r.Session().FlashBag().Error(t.Translate(ctx, "Get channels title failed with error %s", "", err.Error()))
 		}
 
 		files := make([]xmeye.FileSearch, 0)
 
-		filesH264, err := bind.client.FileSearch(ctx, start, end, channel, eventType, xmeye.FileSearchH264)
+		filesH264, err := client.FileSearch(ctx, start, end, channel, eventType, xmeye.FileSearchH264)
 		if err != nil {
 			r.Session().FlashBag().Error(t.Translate(ctx, "Get files H264 failed with error %s", "", err.Error()))
 		} else {
 			files = append(files, filesH264...)
 		}
 
-		filesJPEG, err := bind.client.FileSearch(ctx, start, end, channel, eventType, xmeye.FileSearchJPEG)
+		filesJPEG, err := client.FileSearch(ctx, start, end, channel, eventType, xmeye.FileSearchJPEG)
 		if err != nil {
 			r.Session().FlashBag().Error(t.Translate(ctx, "Get files JPEG failed with error %s", "", err.Error()))
 		} else {
@@ -201,7 +207,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 						}
 
 						if err == nil {
-							err = bind.client.OPTimeSetting(ctx, t)
+							err = client.OPTimeSetting(ctx, t)
 						}
 					}
 				}
@@ -223,7 +229,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			return
 		}
 
-		tm, err := bind.client.OPTime(ctx)
+		tm, err := client.OPTime(ctx)
 		if err != nil {
 			r.Session().FlashBag().Error(t.Translate(ctx, "Get current time failed with error %s", "", err.Error()))
 		} else {
@@ -231,13 +237,13 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 		vars["time_system"] = time.Now()
 
-		info, err := bind.client.SystemInfo(ctx)
+		info, err := client.SystemInfo(ctx)
 		if err != nil {
 			r.Session().FlashBag().Error(t.Translate(ctx, "Get system info failed with error %s", "", err.Error()))
 		}
 		vars["system_info"] = info
 
-		storage, err := bind.client.StorageInfo(ctx)
+		storage, err := client.StorageInfo(ctx)
 		if err != nil {
 			r.Session().FlashBag().Error(t.Translate(ctx, "Get storage info failed with error %s", "", err.Error()))
 		} else {
@@ -256,9 +262,9 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			Bitrate uint64
 			Record  bool
 		}
-		channels := make([]chanInfo, bind.client.ChannelsCount())
+		channels := make([]chanInfo, client.ChannelsCount())
 
-		state, err := bind.client.WorkState(ctx)
+		state, err := client.WorkState(ctx)
 		if err != nil {
 			r.Session().FlashBag().Error(t.Translate(ctx, "Get work state failed with error %s", "", err.Error()))
 		} else {
@@ -273,7 +279,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			}
 		}
 
-		titles, err := bind.client.ConfigChannelTitleGet(ctx)
+		titles, err := client.ConfigChannelTitleGet(ctx)
 		if err != nil {
 			r.Session().FlashBag().Error(t.Translate(ctx, "Get channels title failed with error %s", "", err.Error()))
 		} else {
