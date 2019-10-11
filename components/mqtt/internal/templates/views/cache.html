@@ -1,11 +1,32 @@
 {{ define "content" }}
+<div class="page-title">
+    <div class="title_left">
+        <h3>{{ i18n "Cache" . }}</h3>
+    </div>
+
+    <div class="title_right">
+        <form class="form-horizontal form-label-left" role="form" method="post" id="send">
+            <div class="form-group pull-right">
+                <div class="input-group">
+                    <label class="btn-group">
+                        <button type="submit" id="send" class="btn btn-icon btn-danger btn-sm"
+                                data-toggle="modal" data-target="#modal"
+                                data-modal-title="{{ i18n "Confirm flush cache" . }}"
+                                data-modal-body="{{ i18n "Will be flush cache. Are you sure?" . }}"
+                                data-modal-callback="action('flush');">
+                            <i class="fas fa-eraser" title="{{ i18n "Flush" . }}"></i>
+                        </button>
+                    </label>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="clearfix"></div>
 
 <div class="row" id="devices">
     <div class="x_panel">
-        <div class="x_title">
-            <h2>{{ i18n "Cache" . }}</h2>
-            <div class="clearfix"></div>
-        </div>
         <div class="x_content">
             <div class="table-responsive">
                 <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
