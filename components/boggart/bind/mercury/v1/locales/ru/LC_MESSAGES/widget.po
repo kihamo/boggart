@@ -79,6 +79,27 @@ msgstr "%d Вт"
 msgid "Current power"
 msgstr "Текущая мощность"
 
+msgid "at"
+msgstr "в"
+
+msgid "Voltage maximum can't reset"
+msgstr "Максимум напряжения не сбрасываемый"
+
+msgid "Voltage maximum can reset"
+msgstr "Максимум напряжения сбрасываемый"
+
+msgid "Amperage maximum can't reset"
+msgstr "Максимум тока не сбрасываемый"
+
+msgid "Amperage maximum can reset"
+msgstr "Максимум тока сбрасываемый"
+
+msgid "Power maximum can't reset"
+msgstr "Максимум мощности не сбрасываемый"
+
+msgid "Power maximum can reset"
+msgstr "Максимум мощности сбрасываемый"
+
 msgid "Display"
 msgstr "Индикация"
 

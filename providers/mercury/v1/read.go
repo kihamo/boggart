@@ -292,6 +292,54 @@ func (m *MercuryV1) Holidays() ([]time.Time, error) {
 	return days, nil
 }
 
+func (m *MercuryV1) MaximumPower() (power int64, date time.Time, powerReset int64, dateReset time.Time, err error) {
+	r, err := m.Request(&Request{
+		Command: RequestCommandReadMaximum,
+		Payload: []byte{MaximumPower},
+	})
+
+	if err == nil {
+		power = ParseInt(r.Payload[:2]...)
+		date = ParseDatetime(r.Payload[2:8], m.options.location)
+		powerReset = ParseInt(r.Payload[8:10]...)
+		dateReset = ParseDatetime(r.Payload[10:], m.options.location)
+	}
+
+	return
+}
+
+func (m *MercuryV1) MaximumAmperage() (amperage float64, date time.Time, amperageReset float64, dateReset time.Time, err error) {
+	r, err := m.Request(&Request{
+		Command: RequestCommandReadMaximum,
+		Payload: []byte{MaximumAmperage},
+	})
+
+	if err == nil {
+		amperage = ParseFloat(r.Payload[:2]...) / 100
+		date = ParseDatetime(r.Payload[2:8], m.options.location)
+		amperageReset = ParseFloat(r.Payload[8:10]...) / 100
+		dateReset = ParseDatetime(r.Payload[10:], m.options.location)
+	}
+
+	return
+}
+
+func (m *MercuryV1) MaximumVoltage() (voltage uint64, date time.Time, voltageReset uint64, dateReset time.Time, err error) {
+	r, err := m.Request(&Request{
+		Command: RequestCommandReadMaximum,
+		Payload: []byte{MaximumVoltage},
+	})
+
+	if err == nil {
+		voltage = ParseUint(r.Payload[:2]...) / 10
+		date = ParseDatetime(r.Payload[2:8], m.options.location)
+		voltageReset = ParseUint(r.Payload[8:10]...) / 10
+		dateReset = ParseDatetime(r.Payload[10:], m.options.location)
+	}
+
+	return
+}
+
 func (m *MercuryV1) monthlyStat(month byte) (t1, t2, t3, t4 uint64, err error) {
 	r, err := m.Request(&Request{
 		Command: RequestCommandReadMonthlyStat,

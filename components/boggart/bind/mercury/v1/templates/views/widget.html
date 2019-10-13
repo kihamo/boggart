@@ -319,27 +319,81 @@
                                             {{ if .voltage.error }}
                                                 <td class="text-danger">{{ .voltage.error.Error }}</td>
                                             {{ else }}
-                                                <td>{{ i18n "%d V" . nil nil nil .voltage.value  }}</td>
+                                                <td>{{ i18n "%d V" . nil nil nil .voltage.value }}</td>
                                             {{ end }}
                                             <td>{{ i18n "Current voltage" . }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ i18n "Voltage maximum can't reset" . }}</td>
+                                            {{ if .voltage_max.error }}
+                                                <td class="text-danger">{{ .voltage_max.error.Error }}</td>
+                                            {{ else }}
+                                                <td>{{ i18n "%d V" . nil nil nil .voltage_max.value }} {{ i18n "at" . }} <script type="application/javascript">document.write(dateToString('{{ .voltage_max.date.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                            {{ end }}
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ i18n "Voltage maximum can reset" . }}</td>
+                                            {{ if .voltage_max_reset.error }}
+                                                <td class="text-danger">{{ .voltage_max_reset.error.Error }}</td>
+                                            {{ else }}
+                                                <td>{{ i18n "%d V" . nil nil nil .voltage_max_reset.value }} {{ i18n "at" . }} <script type="application/javascript">document.write(dateToString('{{ .voltage_max_reset.date.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                            {{ end }}
+                                            <td></td>
                                         </tr>
                                         <tr>
                                             <td>{{ i18n "Amperage" . }}</td>
                                             {{ if .amperage.error }}
                                                 <td class="text-danger">{{ .amperage.error.Error }}</td>
                                             {{ else }}
-                                                <td>{{ i18n "%.2f A" . nil nil nil .amperage.value  }}</td>
+                                                <td>{{ i18n "%.2f A" . nil nil nil .amperage.value }}</td>
                                             {{ end }}
                                             <td>{{ i18n "Current amperage" . }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ i18n "Amperage maximum can't reset" . }}</td>
+                                            {{ if .amperage_max.error }}
+                                                <td class="text-danger">{{ .amperage_max.error.Error }}</td>
+                                            {{ else }}
+                                                <td>{{ i18n "%.2f A" . nil nil nil .amperage_max.value  }} {{ i18n "at" . }} <script type="application/javascript">document.write(dateToString('{{ .amperage_max.date.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                            {{ end }}
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ i18n "Amperage maximum can reset" . }}</td>
+                                            {{ if .amperage_max_reset.error }}
+                                                <td class="text-danger">{{ .amperage_max_reset.error.Error }}</td>
+                                            {{ else }}
+                                                <td>{{ i18n "%.2f A" . nil nil nil .amperage_max_reset.value }} {{ i18n "at" . }} <script type="application/javascript">document.write(dateToString('{{ .amperage_max_reset.date.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                            {{ end }}
+                                            <td></td>
                                         </tr>
                                         <tr>
                                             <td>{{ i18n "Power" . }}</td>
                                             {{ if .power.error }}
                                                 <td class="text-danger">{{ .power.error.Error }}</td>
                                             {{ else }}
-                                                <td>{{ i18n "%d W" . nil nil nil .power.value  }}</td>
+                                                <td>{{ i18n "%d W" . nil nil nil .power.value }}</td>
                                             {{ end }}
                                             <td>{{ i18n "Current power" . }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ i18n "Power maximum can't reset" . }}</td>
+                                            {{ if .power_max.error }}
+                                                <td class="text-danger">{{ .power_max.error.Error }}</td>
+                                            {{ else }}
+                                                <td>{{ i18n "%d W" . nil nil nil .power_max.value }} {{ i18n "at" . }} <script type="application/javascript">document.write(dateToString('{{ .power_max.date.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                            {{ end }}
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ i18n "Power maximum can reset" . }}</td>
+                                            {{ if .power_max_reset.error }}
+                                                <td class="text-danger">{{ .power_max_reset.error.Error }}</td>
+                                            {{ else }}
+                                                <td>{{ i18n "%d W" . nil nil nil .power_max_reset.value }} {{ i18n "at" . }} <script type="application/javascript">document.write(dateToString('{{ .power_max_reset.date.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                            {{ end }}
+                                            <td></td>
                                         </tr>
                                     </tbody>
                                 </table>
