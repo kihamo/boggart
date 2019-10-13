@@ -34,7 +34,7 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 			dashboard.NewRoute("/"+c.Name()+"/cache/", &handlers.CacheHandler{
 				PayloadCache: c.payloadCache,
 			}).
-				WithMethods([]string{http.MethodGet}).
+				WithMethods([]string{http.MethodGet, http.MethodPost}).
 				WithAuth(true),
 		}
 	}
