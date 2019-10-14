@@ -11,6 +11,7 @@ type connection struct {
 	protocol.Conn
 	sync.Mutex
 
+	_              [4]byte
 	sessionID      uint32
 	sequenceNumber uint32
 }
