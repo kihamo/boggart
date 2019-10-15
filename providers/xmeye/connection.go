@@ -20,11 +20,14 @@ func (c *connection) SessionID() uint32 {
 	return atomic.LoadUint32(&c.sessionID)
 }
 
-func (c *connection) SessionIDAsString() string {
+func (c *connection) SessionIDAsString() (id string) {
 	session := Uint32(c.SessionID())
-	b, _ := session.MarshalJSON()
 
-	return string(b)
+	if b, err := session.MarshalJSON(); err != nil {
+		id = string(b)
+	}
+
+	return id
 }
 
 func (c *connection) SetSessionID(id uint32) {
