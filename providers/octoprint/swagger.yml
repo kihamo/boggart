@@ -54,6 +54,35 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/Languages"
+  /printer:
+    get:
+      operationId: "getPrinterState"
+      tags:
+        - "printer"
+      parameters:
+        - name: "history"
+          in: "query"
+          description: "The printer’s temperature history by supplying"
+          required: false
+          type: "boolean"
+        - name: "limit"
+          in: "query"
+          description: "The amount of data points limited"
+          required: false
+          type: "integer"
+        - name: "exclude"
+          in: "query"
+          description: "List of attributes to not return in the response"
+          required: false
+          type: "array"
+          collectionFormat: "csv"
+          items:
+            type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/PrinterState"
   /system/commands:
     get:
       operationId: "getCommands"
@@ -189,3 +218,68 @@ definitions:
         type: "string"
       resource:
         type: "string"
+  TemperatureData:
+    type: "object"
+    properties:
+      actual:
+        type: "number"
+      offset:
+        type: "integer"
+      target:
+        type: "number"
+  PrinterState:
+    type: "object"
+    properties:
+      temperature:
+        type: "object"
+        properties:
+          tool0:
+            $ref: "#/definitions/TemperatureData"
+          tool1:
+            $ref: "#/definitions/TemperatureData"
+          bed:
+            $ref: "#/definitions/TemperatureData"
+          history:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                time:
+                  type: "integer"
+                tool0:
+                  $ref: "#/definitions/TemperatureData"
+                tool1:
+                  $ref: "#/definitions/TemperatureData"
+                bed:
+                  $ref: "#/definitions/TemperatureData"
+      sd:
+        type: "object"
+        properties:
+          ready:
+            type: "boolean"
+      state:
+        type: "object"
+        properties:
+          text:
+            type: "string"
+          flags:
+            type: "object"
+            properties:
+              operational:
+                type: "boolean"
+              paused:
+                type: "boolean"
+              printing:
+                type: "boolean"
+              pausing:
+                type: "boolean"
+              cancelling:
+                type: "boolean"
+              sdReady:
+                type: "boolean"
+              error:
+                type: "boolean"
+              ready:
+                type: "boolean"
+              closedOrError:
+                type: "boolean"
