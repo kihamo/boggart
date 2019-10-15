@@ -46,7 +46,7 @@ func (b *Bind) Tasks() []workers.Task {
 
 	taskCleaner := task.NewFunctionTask(b.taskCleaner)
 	taskCleaner.SetRepeats(-1)
-	taskCleaner.SetRepeatInterval(b.config.SystemUpdaterInterval)
+	taskCleaner.SetRepeatInterval(b.config.CleanerInterval)
 	taskCleaner.SetName("cleaner-" + b.config.Address.Host)
 
 	tasks := []workers.Task{
