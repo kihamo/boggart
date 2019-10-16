@@ -21,29 +21,29 @@ securityDefinitions:
     in: query
     name: apikey
 security:
-  - APIKeyHeader: []
-  - APIKeyQueryParam: []
+- APIKeyHeader: []
+- APIKeyQueryParam: []
 paths:
   /login:
     post:
       operationId: "login"
       tags:
-        - "authorization"
+      - "authorization"
       summary: "Login"
       parameters:
-        - in: "body"
-          name: "body"
-          schema:
-            type: "object"
-            properties:
-              passive:
-                type: "boolean"
-              user:
-                type: "string"
-              pass:
-                type: "string"
-              remember:
-                type: "boolean"
+      - in: "body"
+        name: "body"
+        schema:
+          type: "object"
+          properties:
+            passive:
+              type: "boolean"
+            user:
+              type: "string"
+            pass:
+              type: "string"
+            remember:
+              type: "boolean"
       responses:
         200:
           description: "Successful login"
@@ -74,7 +74,7 @@ paths:
     post:
       operationId: "logout"
       tags:
-        - "authorization"
+      - "authorization"
       summary: "Logout"
       responses:
         204:
@@ -83,7 +83,7 @@ paths:
     get:
       operationId: "getVersion"
       tags:
-        - "version"
+      - "version"
       responses:
         200:
           description: "Successful operation"
@@ -93,7 +93,7 @@ paths:
     get:
       operationId: "getConnection"
       tags:
-        - "connection"
+      - "connection"
       responses:
         200:
           description: "Successful operation"
@@ -103,7 +103,7 @@ paths:
     get:
       operationId: "getLanguages"
       tags:
-        - "languages"
+      - "languages"
       responses:
         200:
           description: "Successful operation"
@@ -113,36 +113,119 @@ paths:
     get:
       operationId: "getPrinterState"
       tags:
-        - "printer"
+      - "printer"
       parameters:
-        - name: "history"
-          in: "query"
-          description: "The printer’s temperature history by supplying"
-          required: false
-          type: "boolean"
-        - name: "limit"
-          in: "query"
-          description: "The amount of data points limited"
-          required: false
-          type: "integer"
-        - name: "exclude"
-          in: "query"
-          description: "List of attributes to not return in the response"
-          required: false
-          type: "array"
-          collectionFormat: "csv"
-          items:
-            type: "string"
+      - name: "history"
+        in: "query"
+        description: "The printer’s temperature history by supplying"
+        required: false
+        type: "boolean"
+      - name: "limit"
+        in: "query"
+        description: "The amount of data points limited"
+        required: false
+        type: "integer"
+      - name: "exclude"
+        in: "query"
+        description: "List of attributes to not return in the response"
+        required: false
+        type: "array"
+        collectionFormat: "csv"
+        items:
+          type: "string"
       responses:
         200:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/PrinterState"
+        409:
+          description: "If the printer is not operational"
+  /printer/tool:
+    get:
+      operationId: "getToolState"
+      tags:
+      - "printer"
+      parameters:
+      - name: "history"
+        in: "query"
+        description: "The printer’s temperature history by supplying"
+        required: false
+        type: "boolean"
+      - name: "limit"
+        in: "query"
+        description: "The amount of data points limited"
+        required: false
+        type: "integer"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/ToolState"
+        409:
+          description: "If the printer is not operational"
+  /printer/bed:
+    get:
+      operationId: "getBedState"
+      tags:
+      - "printer"
+      parameters:
+      - name: "history"
+        in: "query"
+        description: "The printer’s temperature history by supplying"
+        required: false
+        type: "boolean"
+      - name: "limit"
+        in: "query"
+        description: "The amount of data points limited"
+        required: false
+        type: "integer"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/BedState"
+        409:
+          description: "If the printer is not operational"
+  /printer/chamber:
+    get:
+      operationId: "getChamberState"
+      tags:
+      - "printer"
+      parameters:
+      - name: "history"
+        in: "query"
+        description: "The printer’s temperature history by supplying"
+        required: false
+        type: "boolean"
+      - name: "limit"
+        in: "query"
+        description: "The amount of data points limited"
+        required: false
+        type: "integer"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/ChamberState"
+        409:
+          description: "If the printer is not operational"
+  /printer/sd:
+    get:
+      operationId: "getSDState"
+      tags:
+      - "printer"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/SDState"
+        404:
+          description: "I SD support has been disabled in OctoPrint's config"
   /system/commands:
     get:
       operationId: "getCommands"
       tags:
-        - "system"
+      - "system"
       responses:
         200:
           description: "Successful operation"
@@ -161,13 +244,13 @@ paths:
     get:
       operationId: "getCommandsBySource"
       tags:
-        - "system"
+      - "system"
       parameters:
-        - name: "source"
-          in: "path"
-          description: "Source name"
-          required: true
-          type: "string"
+      - name: "source"
+        in: "path"
+        description: "Source name"
+        required: true
+        type: "string"
       responses:
         200:
           description: "Successful operation"
@@ -282,6 +365,57 @@ definitions:
         type: "integer"
       target:
         type: "number"
+  ToolState:
+    type: "object"
+    properties:
+      tool0:
+        $ref: "#/definitions/TemperatureData"
+      tool1:
+        $ref: "#/definitions/TemperatureData"
+      history:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            time:
+              type: "integer"
+            tool0:
+              $ref: "#/definitions/TemperatureData"
+            tool1:
+              $ref: "#/definitions/TemperatureData"
+  BedState:
+    type: "object"
+    properties:
+      bed:
+        $ref: "#/definitions/TemperatureData"
+      history:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            time:
+              type: "integer"
+            bed:
+              $ref: "#/definitions/TemperatureData"
+  ChamberState:
+    type: "object"
+    properties:
+      chamber:
+        $ref: "#/definitions/TemperatureData"
+      history:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            time:
+              type: "integer"
+            chamber:
+              $ref: "#/definitions/TemperatureData"
+  SDState:
+    type: "object"
+    properties:
+      ready:
+        type: "boolean"
   PrinterState:
     type: "object"
     properties:
@@ -308,10 +442,7 @@ definitions:
                 bed:
                   $ref: "#/definitions/TemperatureData"
       sd:
-        type: "object"
-        properties:
-          ready:
-            type: "boolean"
+        $ref: "#/definitions/SDState"
       state:
         type: "object"
         properties:

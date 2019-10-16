@@ -30,6 +30,12 @@ func (o *GetPrinterStateReader) ReadResponse(response runtime.ClientResponse, co
 			return nil, err
 		}
 		return result, nil
+	case 409:
+		result := NewGetPrinterStateConflict()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
 
 	default:
 		return nil, runtime.NewAPIError("unknown error", response, response.Code())
@@ -65,6 +71,27 @@ func (o *GetPrinterStateOK) readResponse(response runtime.ClientResponse, consum
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
+
+	return nil
+}
+
+// NewGetPrinterStateConflict creates a GetPrinterStateConflict with default headers values
+func NewGetPrinterStateConflict() *GetPrinterStateConflict {
+	return &GetPrinterStateConflict{}
+}
+
+/*GetPrinterStateConflict handles this case with default header values.
+
+If the printer is not operational
+*/
+type GetPrinterStateConflict struct {
+}
+
+func (o *GetPrinterStateConflict) Error() string {
+	return fmt.Sprintf("[GET /printer][%d] getPrinterStateConflict ", 409)
+}
+
+func (o *GetPrinterStateConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	return nil
 }

@@ -19,7 +19,7 @@ import (
 type PrinterState struct {
 
 	// sd
-	Sd *PrinterStateSd `json:"sd,omitempty"`
+	Sd *SDState `json:"sd,omitempty"`
 
 	// state
 	State *PrinterStateState `json:"state,omitempty"`
@@ -115,37 +115,6 @@ func (m *PrinterState) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (m *PrinterState) UnmarshalBinary(b []byte) error {
 	var res PrinterState
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*m = res
-	return nil
-}
-
-// PrinterStateSd printer state sd
-// swagger:model PrinterStateSd
-type PrinterStateSd struct {
-
-	// ready
-	Ready bool `json:"ready,omitempty"`
-}
-
-// Validate validates this printer state sd
-func (m *PrinterStateSd) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (m *PrinterStateSd) MarshalBinary() ([]byte, error) {
-	if m == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(m)
-}
-
-// UnmarshalBinary interface implementation
-func (m *PrinterStateSd) UnmarshalBinary(b []byte) error {
-	var res PrinterStateSd
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
