@@ -9,11 +9,11 @@ import (
 
 type connection struct {
 	protocol.Conn
-	sync.Mutex
 
-	_              [4]byte
 	sessionID      uint32
 	sequenceNumber uint32
+
+	lock sync.Mutex
 }
 
 func (c *connection) SessionID() uint32 {
@@ -23,7 +23,7 @@ func (c *connection) SessionID() uint32 {
 func (c *connection) SessionIDAsString() (id string) {
 	session := Uint32(c.SessionID())
 
-	if b, err := session.MarshalJSON(); err != nil {
+	if b, err := session.MarshalJSON(); err == nil {
 		id = string(b)
 	}
 
@@ -43,8 +43,8 @@ func (c *connection) InSequenceNumber() {
 }
 
 func (c *connection) send(packet *packet) error {
-	c.Lock()
-	defer c.Unlock()
+	c.lock.Lock()
+	defer c.lock.Unlock()
 
 	packet.SessionID = c.SessionID()
 	packet.SequenceNumber = c.SequenceNumber()
@@ -59,8 +59,8 @@ func (c *connection) send(packet *packet) error {
 }
 
 func (c *connection) receive() (*packet, error) {
-	c.Lock()
-	defer c.Unlock()
+	c.lock.Lock()
+	defer c.lock.Unlock()
 
 	head := make([]byte, 0x14) // read head
 	if _, err := c.Conn.Read(head); err != nil {
