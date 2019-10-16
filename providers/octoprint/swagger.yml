@@ -24,6 +24,61 @@ security:
   - APIKeyHeader: []
   - APIKeyQueryParam: []
 paths:
+  /login:
+    post:
+      operationId: "login"
+      tags:
+        - "authorization"
+      summary: "Login"
+      parameters:
+        - in: "body"
+          name: "body"
+          schema:
+            type: "object"
+            properties:
+              passive:
+                type: "boolean"
+              user:
+                type: "string"
+              pass:
+                type: "string"
+              remember:
+                type: "boolean"
+      responses:
+        200:
+          description: "Successful login"
+          schema:
+            type: "object"
+            properties:
+              name:
+                type: "string"
+              active:
+                type: "boolean"
+              admin:
+                type: "boolean"
+              user:
+                type: "boolean"
+              apikey:
+                type: "string"
+              #settings:
+              #  type: "string"
+              session:
+                type: "string"
+              _is_external_client:
+                type: "boolean"
+        401:
+          description: "Username/password mismatch or unknown user"
+        403:
+          description: "Deactivated account"
+  /logout:
+    post:
+      operationId: "logout"
+      tags:
+        - "authorization"
+      summary: "Logout"
+      responses:
+        204:
+          description: "Successful logout"
   /version:
     get:
       operationId: "getVersion"
