@@ -13,6 +13,7 @@ import (
 
 	"github.com/kihamo/boggart/providers/octoprint/client/authorization"
 	"github.com/kihamo/boggart/providers/octoprint/client/connection"
+	"github.com/kihamo/boggart/providers/octoprint/client/job"
 	"github.com/kihamo/boggart/providers/octoprint/client/languages"
 	"github.com/kihamo/boggart/providers/octoprint/client/printer"
 	"github.com/kihamo/boggart/providers/octoprint/client/system"
@@ -65,6 +66,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *OctoPrint 
 	cli.Authorization = authorization.New(transport, formats)
 
 	cli.Connection = connection.New(transport, formats)
+
+	cli.Job = job.New(transport, formats)
 
 	cli.Languages = languages.New(transport, formats)
 
@@ -122,6 +125,8 @@ type OctoPrint struct {
 
 	Connection *connection.Client
 
+	Job *job.Client
+
 	Languages *languages.Client
 
 	Printer *printer.Client
@@ -140,6 +145,8 @@ func (c *OctoPrint) SetTransport(transport runtime.ClientTransport) {
 	c.Authorization.SetTransport(transport)
 
 	c.Connection.SetTransport(transport)
+
+	c.Job.SetTransport(transport)
 
 	c.Languages.SetTransport(transport)
 

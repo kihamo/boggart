@@ -99,6 +99,16 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/Connection"
+  /job:
+    get:
+      operationId: "getJob"
+      tags:
+      - "job"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Job"
   /languages:
     get:
       operationId: "getLanguages"
@@ -310,6 +320,59 @@ definitions:
             type: "string"
           autoconnect:
             type: "boolean"
+  Job:
+    type: "object"
+    properties:
+      job:
+        type: "object"
+        properties:
+          file:
+            type: "object"
+            properties:
+              date:
+                type: "string"
+              name:
+                type: "string"
+              display:
+                type: "string"
+              path:
+                type: "string"
+              size:
+                type: "integer"
+              type:
+                type: "string"
+              typePath:
+                type: "array"
+                items:
+                  type: "string"
+          averagePrintTime:
+            type: "integer"
+          estimatedPrintTime:
+            type: "integer"
+          lastPrintTime:
+            type: "integer"
+          filament:
+            type: "object"
+            properties:
+              length:
+                type: "integer"
+              volume:
+                type: "number"
+      progress:
+        type: "object"
+        properties:
+          completion:
+            type: "number"
+          filepos:
+            type: "integer"
+          printTime:
+            type: "integer"
+          printTimeLeft:
+            type: "integer"
+          printTimeLeftOrigin:
+            type: "integer"
+      state:
+        type: "string"
   Languages:
     type: "object"
     properties:
