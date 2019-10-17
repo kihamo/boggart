@@ -303,6 +303,18 @@ paths:
             $ref: "#/definitions/SDState"
         404:
           description: "I SD support has been disabled in OctoPrint's config"
+  /settings:
+    get:
+      operationId: "getSettings"
+      tags:
+      - "settings"
+      summary: "Retrieve current settings"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Settings"
+
   /system/commands:
     get:
       operationId: "getCommands"
@@ -512,25 +524,6 @@ definitions:
                     type: "number"
                   author:
                     type: "string"
-  Command:
-    type: "object"
-    properties:
-      name:
-        type: "string"
-      command:
-        type: "string"
-      action:
-        type: "string"
-      confirm:
-        type: "string"
-      async:
-        type: "boolean"
-      ignore:
-        type: "boolean"
-      source:
-        type: "string"
-      resource:
-        type: "string"
   TemperatureData:
     type: "object"
     properties:
@@ -644,3 +637,224 @@ definitions:
                 type: "boolean"
               closedOrError:
                 type: "boolean"
+  Settings:
+    type: "object"
+    properties:
+      api:
+        type: "object"
+        properties:
+          allowCrossOrigin:
+            type: "boolean"
+          key:
+            type: "string"
+      appearance:
+        type: "object"
+        properties:
+          color:
+            type: "string"
+          colorIcon:
+            type: "boolean"
+          colorTransparent:
+            type: "boolean"
+          defaultLanguage:
+            type: "string"
+          fuzzyTimes:
+            type: "boolean"
+          name:
+            type: "string"
+          showFahrenheitAlso:
+            type: "boolean"
+      feature:
+        type: "object"
+        properties:
+          autoUppercaseBlacklist:
+            type: "array"
+            items:
+              type: "string"
+          g90InfluencesExtruder:
+            type: "boolean"
+          gcodeViewer:
+            type: "boolean"
+          keyboardControl:
+            type: "boolean"
+          mobileSizeThreshold:
+            type: "integer"
+          modelSizeDetection:
+            type: "boolean"
+          pollWatched:
+            type: "boolean"
+          printCancelConfirmation:
+            type: "boolean"
+          sdSupport:
+            type: "boolean"
+          sizeThreshold:
+            type: "integer"
+          temperatureGraph:
+            type: "boolean"
+      folder:
+        type: "object"
+        properties:
+          logs:
+            type: "string"
+          timelapse:
+            type: "string"
+          timelapseTmp:
+            type: "string"
+          uploads:
+            type: "string"
+          watched:
+            type: "string"
+      plugins:
+        type: "object"
+        additionalProperties:
+          type: "object"
+      printer:
+        type: "object"
+        properties:
+          defaultExtrusionLength:
+            type: "integer"
+      scripts:
+        type: "object"
+        properties:
+          gcode:
+            type: "object"
+            additionalProperties:
+              type: "object"
+      serial:
+        type: "object"
+        properties:
+          abortHeatupOnCancel:
+            type: "boolean"
+          additionalBaudrates:
+            type: "array"
+            items:
+              type: "integer"
+          additionalPorts:
+            type: "array"
+            items:
+              type: "string"
+          alwaysSendChecksum:
+            type: "boolean"
+          autoconnect:
+            type: "boolean"
+          baudrate:
+            type: "integer"
+          baudrateOptions:
+            type: "array"
+            items:
+              type: "integer"
+          blockWhileDwelling:
+            type: "boolean"
+          blockedCommands:
+            type: "array"
+            items:
+              type: "string"
+          capAutoreportSdStatus:
+            type: "boolean"
+          capAutoreportTemp:
+            type: "boolean"
+          capBusyProtocol:
+            type: "boolean"
+          capEmergencyParser:
+            type: "boolean"
+          checksumRequiringCommands:
+            type: "array"
+            items:
+              type: "string"
+          disconnectOnErrors:
+            type: "boolean"
+          exclusive:
+            type: "boolean"
+          externalHeatupDetection:
+            type: "boolean"
+          firmwareDetection:
+            type: "boolean"
+          helloCommand:
+            type: "string"
+          ignoreErrorsFromFirmware:
+            type: "boolean"
+          ignoreIdenticalResends:
+            type: "boolean"
+          log:
+            type: "boolean"
+          logPositionOnCancel:
+            type: "boolean"
+          logPositionOnPause:
+            type: "boolean"
+          longRunningCommands:
+            type: "array"
+            items:
+              type: "string"
+          maxTimeoutsIdle:
+            type: "integer"
+          maxTimeoutsLong:
+            type: "integer"
+          maxTimeoutsPrinting:
+            type: "integer"
+          neverSendChecksum:
+            type: "boolean"
+          pausingCommands:
+            type: "array"
+            items:
+              type: "string"
+          port:
+            type: "string"
+          portOptions:
+            type: "array"
+            items:
+              type: "string"
+          repetierTargetTemp:
+            type: "boolean"
+          sdAlwaysAvailable:
+            type: "boolean"
+          sdRelativePath:
+            type: "boolean"
+          supportResendsWithoutOk:
+            type: "string"
+          swallowOkAfterResend:
+            type: "boolean"
+          timeoutBaudrateDetectionPause:
+            type: "number"
+          timeoutCommunication:
+            type: "number"
+          timeoutCommunicationBusy:
+            type: "number"
+          timeoutConnection:
+            type: "number"
+          timeoutDetection:
+            type: "number"
+          timeoutPositionLogWait:
+            type: "number"
+          timeoutSdStatus:
+            type: "number"
+          timeoutSdStatusAutoreport:
+            type: "number"
+          timeoutTemperature:
+            type: "number"
+          timeoutTemperatureAutoreport:
+            type: "number"
+          timeoutTemperatureTargetSet:
+            type: "number"
+          triggerOkForM29:
+            type: "boolean"
+          waitForStart:
+            type: "boolean"
+  Command:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      command:
+        type: "string"
+      action:
+        type: "string"
+      confirm:
+        type: "string"
+      async:
+        type: "boolean"
+      ignore:
+        type: "boolean"
+      source:
+        type: "string"
+      resource:
+        type: "string"
