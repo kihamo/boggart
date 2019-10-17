@@ -42,11 +42,11 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		WithExclude([]string{"sd"})
 
 	state, err := b.provider.Printer.GetPrinterState(stateParams, nil)
-	var stateName string
+	sn := b.config.Address.Host
 
 	if err != nil {
 		if _, ok := err.(*printer.GetPrinterStateConflict); ok {
-			err = b.MQTTPublishAsync(ctx, b.config.TopicState.Format("Not operational"), stateName)
+			err = b.MQTTPublishAsync(ctx, b.config.TopicState.Format(sn), "Not operational")
 		} else {
 			b.UpdateStatus(boggart.BindStatusOffline)
 		}
@@ -55,8 +55,6 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	}
 
 	b.UpdateStatus(boggart.BindStatusOnline)
-
-	sn := b.config.Address.Host
 
 	if e := b.MQTTPublishAsync(ctx, b.config.TopicState.Format(sn), state.Payload.State.Text); e != nil {
 		err = multierr.Append(err, e)
