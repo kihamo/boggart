@@ -27,7 +27,7 @@ type Client struct {
 }
 
 /*
-GetBedState get bed state API
+GetBedState retrieves the current bed state
 */
 func (a *Client) GetBedState(params *GetBedStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetBedStateOK, error) {
 	// TODO: Validate the params before sending
@@ -62,7 +62,7 @@ func (a *Client) GetBedState(params *GetBedStateParams, authInfo runtime.ClientA
 }
 
 /*
-GetChamberState get chamber state API
+GetChamberState retrieves the current chamber state
 */
 func (a *Client) GetChamberState(params *GetChamberStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetChamberStateOK, error) {
 	// TODO: Validate the params before sending
@@ -97,7 +97,7 @@ func (a *Client) GetChamberState(params *GetChamberStateParams, authInfo runtime
 }
 
 /*
-GetPrinterState get printer state API
+GetPrinterState retrieves the current printer state
 */
 func (a *Client) GetPrinterState(params *GetPrinterStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetPrinterStateOK, error) {
 	// TODO: Validate the params before sending
@@ -132,7 +132,7 @@ func (a *Client) GetPrinterState(params *GetPrinterStateParams, authInfo runtime
 }
 
 /*
-GetSDState get s d state API
+GetSDState retrieves the current s d state
 */
 func (a *Client) GetSDState(params *GetSDStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetSDStateOK, error) {
 	// TODO: Validate the params before sending
@@ -167,7 +167,7 @@ func (a *Client) GetSDState(params *GetSDStateParams, authInfo runtime.ClientAut
 }
 
 /*
-GetToolState get tool state API
+GetToolState retrieves the current tool state
 */
 func (a *Client) GetToolState(params *GetToolStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetToolStateOK, error) {
 	// TODO: Validate the params before sending

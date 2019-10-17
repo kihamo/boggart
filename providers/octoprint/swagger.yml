@@ -84,6 +84,7 @@ paths:
       operationId: "getVersion"
       tags:
       - "version"
+      summary: "Version information"
       responses:
         200:
           description: "Successful operation"
@@ -94,26 +95,92 @@ paths:
       operationId: "getConnection"
       tags:
       - "connection"
+      summary: "Get connection settings"
       responses:
         200:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/Connection"
+    post:
+      operationId: "sendConnectionCommand"
+      tags:
+      - "connection"
+      summary: "Issue a connection command"
+      parameters:
+      - in: "body"
+        name: "body"
+        schema:
+          type: "object"
+          properties:
+            command:
+              type: "string"
+              enum:
+              - "connect"
+              - "disconnect"
+              - "fake_ack"
+            port:
+              type: "string"
+            baudrate:
+              type: "integer"
+            printerProfile:
+              type: "string"
+            save:
+              type: "boolean"
+            autoconnect:
+              type: "boolean"
+      responses:
+        204:
+          description: "Successful operation"
+        400:
+          description: "Bad request"
   /job:
     get:
       operationId: "getJob"
       tags:
       - "job"
+      summary: "Retrieve information about the current job"
       responses:
         200:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/Job"
+    post:
+      operationId: "sendJobCommand"
+      tags:
+      - "job"
+      summary: "Issue a job command"
+      parameters:
+      - in: "body"
+        name: "body"
+        schema:
+          type: "object"
+          properties:
+            command:
+              type: "string"
+              enum:
+              - "start"
+              - "cancel"
+              - "restart"
+              - "pause"
+              - "resume"
+              - "toggle"
+            action:
+              type: "string"
+              enum:
+              - "pause"
+              - "resume"
+              - "toggle"
+      responses:
+        204:
+          description: "Successful operation"
+        409:
+          description: "If the printer is not operational or the current print job state does not match the preconditions for the command"
   /languages:
     get:
       operationId: "getLanguages"
       tags:
       - "languages"
+      summary: "Retrieve installed language packs"
       responses:
         200:
           description: "Successful operation"
@@ -124,6 +191,7 @@ paths:
       operationId: "getPrinterState"
       tags:
       - "printer"
+      summary: "Retrieve the current printer state"
       parameters:
       - name: "history"
         in: "query"
@@ -155,6 +223,7 @@ paths:
       operationId: "getToolState"
       tags:
       - "printer"
+      summary: "Retrieve the current tool state"
       parameters:
       - name: "history"
         in: "query"
@@ -178,6 +247,7 @@ paths:
       operationId: "getBedState"
       tags:
       - "printer"
+      summary: "Retrieve the current bed state"
       parameters:
       - name: "history"
         in: "query"
@@ -201,6 +271,7 @@ paths:
       operationId: "getChamberState"
       tags:
       - "printer"
+      summary: "Retrieve the current chamber state"
       parameters:
       - name: "history"
         in: "query"
@@ -224,6 +295,7 @@ paths:
       operationId: "getSDState"
       tags:
       - "printer"
+      summary: "Retrieve the current SD state"
       responses:
         200:
           description: "Successful operation"
@@ -236,6 +308,7 @@ paths:
       operationId: "getCommands"
       tags:
       - "system"
+      summary: "List all registered system commands"
       responses:
         200:
           description: "Successful operation"
@@ -255,6 +328,7 @@ paths:
       operationId: "getCommandsBySource"
       tags:
       - "system"
+      summary: "List all registered system commands for a source"
       parameters:
       - name: "source"
         in: "path"

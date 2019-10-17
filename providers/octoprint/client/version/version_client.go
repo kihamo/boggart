@@ -27,7 +27,7 @@ type Client struct {
 }
 
 /*
-GetVersion get version API
+GetVersion versions information
 */
 func (a *Client) GetVersion(params *GetVersionParams, authInfo runtime.ClientAuthInfoWriter) (*GetVersionOK, error) {
 	// TODO: Validate the params before sending

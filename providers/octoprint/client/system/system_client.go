@@ -27,7 +27,7 @@ type Client struct {
 }
 
 /*
-GetCommands get commands API
+GetCommands lists all registered system commands
 */
 func (a *Client) GetCommands(params *GetCommandsParams, authInfo runtime.ClientAuthInfoWriter) (*GetCommandsOK, error) {
 	// TODO: Validate the params before sending
@@ -62,7 +62,7 @@ func (a *Client) GetCommands(params *GetCommandsParams, authInfo runtime.ClientA
 }
 
 /*
-GetCommandsBySource get commands by source API
+GetCommandsBySource lists all registered system commands for a source
 */
 func (a *Client) GetCommandsBySource(params *GetCommandsBySourceParams, authInfo runtime.ClientAuthInfoWriter) (*GetCommandsBySourceOK, error) {
 	// TODO: Validate the params before sending

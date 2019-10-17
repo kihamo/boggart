@@ -27,7 +27,7 @@ type Client struct {
 }
 
 /*
-GetLanguages get languages API
+GetLanguages retrieves installed language packs
 */
 func (a *Client) GetLanguages(params *GetLanguagesParams, authInfo runtime.ClientAuthInfoWriter) (*GetLanguagesOK, error) {
 	// TODO: Validate the params before sending
