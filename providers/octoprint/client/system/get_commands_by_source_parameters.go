@@ -62,7 +62,7 @@ for the get commands by source operation typically these are written to a http.R
 type GetCommandsBySourceParams struct {
 
 	/*Source
-	  Source name
+	  The source for which to list commands
 
 	*/
 	Source string

@@ -332,9 +332,12 @@ paths:
       parameters:
       - name: "source"
         in: "path"
-        description: "Source name"
+        description: "The source for which to list commands"
         required: true
         type: "string"
+        enum:
+        - "core"
+        - "custom"
       responses:
         200:
           description: "Successful operation"
@@ -342,6 +345,41 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/Command"
+        404:
+          description: "Not found"
+  /system/commands/{source}/{action}:
+    post:
+      operationId: "executeCommand"
+      tags:
+      - "system"
+      summary: "Execute a registered system command"
+      parameters:
+      - name: "source"
+        in: "path"
+        description: "The source for which to list commands"
+        required: true
+        type: "string"
+        enum:
+        - "core"
+        - "custom"
+      - name: "action"
+        in: "path"
+        description: "The identifier of the command"
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "Successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Command"
+        400:
+          description: "Bad request"
+        404:
+          description: "Not found"
+        500:
+          description: "Internal server error"
 definitions:
   Version:
     type: "object"
