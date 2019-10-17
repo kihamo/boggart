@@ -1,10 +1,9 @@
-package hilink
+package octoprint
 
 import (
-	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/protocols/swagger"
-	"github.com/kihamo/boggart/providers/hilink"
+	"github.com/kihamo/boggart/providers/octoprint"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
@@ -16,9 +15,7 @@ func (t Type) CreateBind(c interface{}) (_ boggart.Bind, err error) {
 	config := c.(*Config)
 
 	bind := &Bind{
-		config:                    config,
-		operator:                  atomic.NewString(),
-		limitInternetTrafficIndex: atomic.NewInt64(),
+		config: config,
 	}
 
 	l := swagger.NewLogger(
@@ -29,7 +26,7 @@ func (t Type) CreateBind(c interface{}) (_ boggart.Bind, err error) {
 			bind.Logger().Debug(message)
 		})
 
-	bind.client = hilink.New(config.Address.Host, config.Debug, l)
+	bind.provider = octoprint.New(config.Address.Host, config.APIKey, config.Debug, l)
 
 	return bind, nil
 }

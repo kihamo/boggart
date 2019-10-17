@@ -1,0 +1,98 @@
+package octoprint
+
+import (
+	"context"
+
+	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/providers/octoprint/client/printer"
+	"github.com/kihamo/boggart/providers/octoprint/models"
+	"github.com/kihamo/go-workers"
+	"github.com/kihamo/go-workers/task"
+	"go.uber.org/multierr"
+)
+
+func (b *Bind) Tasks() []workers.Task {
+	taskLiveness := task.NewFunctionTask(b.taskLiveness)
+	taskLiveness.SetTimeout(b.config.LivenessTimeout)
+	taskLiveness.SetRepeats(-1)
+	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
+	taskLiveness.SetName("liveness-" + b.config.Address.Host)
+
+	tasks := []workers.Task{
+		taskLiveness,
+	}
+
+	return tasks
+}
+
+func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
+	/*
+		loginParams := authorization.NewLoginParamsWithContext(ctx)
+		loginParams.Body.Passive = true
+
+		_, err := b.provider.Authorization.Login(loginParams, nil)
+		if err != nil {
+			b.UpdateStatus(boggart.BindStatusOffline)
+			return nil, err
+		}
+	*/
+
+	stateParams := printer.NewGetPrinterStateParamsWithContext(ctx).
+		WithHistory(&[]bool{false}[0]).
+		WithExclude([]string{"sd"})
+
+	state, err := b.provider.Printer.GetPrinterState(stateParams, nil)
+	var stateName string
+
+	if err != nil {
+		if _, ok := err.(*printer.GetPrinterStateConflict); ok {
+			err = b.MQTTPublishAsync(ctx, b.config.TopicState.Format("Not operational"), stateName)
+		} else {
+			b.UpdateStatus(boggart.BindStatusOffline)
+		}
+
+		return nil, err
+	}
+
+	b.UpdateStatus(boggart.BindStatusOnline)
+
+	sn := b.config.Address.Host
+
+	if e := b.MQTTPublishAsync(ctx, b.config.TopicState.Format(sn), state.Payload.State.Text); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	var temperature *models.TemperatureData
+
+	// Bed
+	temperature = state.Payload.Temperature.Bed
+
+	if e := b.MQTTPublishAsync(ctx, b.config.TopicStateBedTemperatureActual.Format(sn), temperature.Actual); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	if e := b.MQTTPublishAsync(ctx, b.config.TopicStateBedTemperatureOffset.Format(sn), temperature.Offset); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	if e := b.MQTTPublishAsync(ctx, b.config.TopicStateBedTemperatureTarget.Format(sn), temperature.Target); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	// Hotend (tool 0)
+	temperature = state.Payload.Temperature.Tool0
+
+	if e := b.MQTTPublishAsync(ctx, b.config.TopicStateTool0TemperatureActual.Format(sn), temperature.Actual); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	if e := b.MQTTPublishAsync(ctx, b.config.TopicStateTool0TemperatureOffset.Format(sn), temperature.Offset); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	if e := b.MQTTPublishAsync(ctx, b.config.TopicStateTool0TemperatureTarget.Format(sn), temperature.Target); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	return nil, err
+}
