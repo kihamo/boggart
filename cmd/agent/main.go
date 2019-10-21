@@ -13,6 +13,7 @@ import (
 	_ "github.com/kihamo/boggart/components/boggart/bind/mikrotik"
 	_ "github.com/kihamo/boggart/components/boggart/bind/network"
 	_ "github.com/kihamo/boggart/components/boggart/bind/nut"
+	_ "github.com/kihamo/boggart/components/boggart/bind/octoprint"
 	_ "github.com/kihamo/boggart/components/boggart/bind/serial"
 	_ "github.com/kihamo/boggart/components/boggart/bind/wol"
 	_ "github.com/kihamo/boggart/components/boggart/bind/xmeye"

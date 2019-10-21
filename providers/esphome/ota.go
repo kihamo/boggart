@@ -69,12 +69,11 @@ var (
 )
 
 type OTA struct {
-	address  string
-	password string
-
-	running   uint32
 	writen    uint64
 	total     uint64
+	running   uint32
+	address   string
+	password  string
 	checksum  atomic.Value
 	lastError atomic.Value
 }
