@@ -36,7 +36,7 @@ func (a *Client) GetMonitoringStatus(params *GetMonitoringStatusParams) (*GetMon
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getMonitoringStatus",
 		Method:             "GET",
-		PathPattern:        "/monitoring/status",
+		PathPattern:        "/api/monitoring/status",
 		ProducesMediaTypes: []string{"application/xml"},
 		ConsumesMediaTypes: []string{"application/xml"},
 		Schemes:            []string{"http"},
@@ -69,7 +69,7 @@ func (a *Client) GetMonitoringTrafficStatistics(params *GetMonitoringTrafficStat
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getMonitoringTrafficStatistics",
 		Method:             "GET",
-		PathPattern:        "/monitoring/traffic-statistics",
+		PathPattern:        "/api/monitoring/traffic-statistics",
 		ProducesMediaTypes: []string{"application/xml"},
 		ConsumesMediaTypes: []string{"application/xml"},
 		Schemes:            []string{"http"},

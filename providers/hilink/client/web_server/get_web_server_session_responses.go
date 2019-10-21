@@ -56,7 +56,7 @@ type GetWebServerSessionOK struct {
 }
 
 func (o *GetWebServerSessionOK) Error() string {
-	return fmt.Sprintf("[GET /webserver/SesTokInfo][%d] getWebServerSessionOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/webserver/SesTokInfo][%d] getWebServerSessionOK  %+v", 200, o.Payload)
 }
 
 func (o *GetWebServerSessionOK) GetPayload() *models.SessionToken {
@@ -98,7 +98,7 @@ func (o *GetWebServerSessionDefault) Code() int {
 }
 
 func (o *GetWebServerSessionDefault) Error() string {
-	return fmt.Sprintf("[GET /webserver/SesTokInfo][%d] getWebServerSession default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[GET /api/webserver/SesTokInfo][%d] getWebServerSession default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *GetWebServerSessionDefault) GetPayload() *models.Error {

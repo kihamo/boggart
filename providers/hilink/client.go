@@ -5,12 +5,16 @@ package hilink
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/hex"
 	"net"
 
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/runtime/logger"
 	"github.com/kihamo/boggart/providers/hilink/client"
+	"github.com/kihamo/boggart/providers/hilink/client/user"
 	"github.com/kihamo/boggart/providers/hilink/client/web_server"
 )
 
@@ -43,6 +47,7 @@ func New(address string, debug bool, logger logger.Logger) *Client {
 		}
 
 		rt.Consumers["text/html"] = runtime.XMLConsumer()
+		rt.Consumers["text/xml"] = runtime.XMLConsumer()
 
 		// что бы скачивались файлы с изображениями
 		rt.Consumers["image/jpeg"] = runtime.ByteStreamConsumer()
@@ -63,9 +68,7 @@ func New(address string, debug bool, logger logger.Logger) *Client {
 }
 
 func (c *Client) Auth(ctx context.Context) error {
-	params := web_server.NewGetWebServerSessionParams().
-		WithContext(ctx)
-
+	params := web_server.NewGetWebServerSessionParamsWithContext(ctx)
 	response, err := c.WebServer.GetWebServerSession(params)
 	if err != nil {
 		return err
@@ -74,4 +77,32 @@ func (c *Client) Auth(ctx context.Context) error {
 	c.runtime.SetAuthenticationLogged(response.Payload.Token, response.Payload.Session)
 
 	return nil
+}
+
+func (c *Client) Login(ctx context.Context, username, password string) error {
+	paramsAuth := web_server.NewGetWebServerSessionParamsWithContext(ctx)
+	responseAuth, err := c.WebServer.GetWebServerSession(paramsAuth)
+	if err != nil {
+		return err
+	}
+
+	c.runtime.SetAuthenticationLogged(responseAuth.Payload.Token, responseAuth.Payload.Session)
+
+	h := sha256.New()
+	h.Write([]byte(password))
+
+	passwordHash := base64.StdEncoding.EncodeToString([]byte(hex.EncodeToString(h.Sum(nil))))
+
+	h.Reset()
+	h.Write([]byte(username))
+	h.Write([]byte(passwordHash))
+	h.Write([]byte(responseAuth.Payload.Token))
+
+	paramsLogin := user.NewLoginParamsWithContext(ctx)
+	paramsLogin.Request.Username = username
+	paramsLogin.Request.Password = base64.StdEncoding.EncodeToString([]byte(hex.EncodeToString(h.Sum(nil))))
+	paramsLogin.Request.PasswordType = 4
+
+	_, err = c.User.Login(paramsLogin)
+	return err
 }

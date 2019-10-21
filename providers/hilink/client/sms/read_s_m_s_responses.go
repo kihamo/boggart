@@ -57,7 +57,7 @@ type ReadSMSOK struct {
 }
 
 func (o *ReadSMSOK) Error() string {
-	return fmt.Sprintf("[POST /sms/set-read][%d] readSMSOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /api/sms/set-read][%d] readSMSOK  %+v", 200, o.Payload)
 }
 
 func (o *ReadSMSOK) GetPayload() string {
@@ -97,7 +97,7 @@ func (o *ReadSMSDefault) Code() int {
 }
 
 func (o *ReadSMSDefault) Error() string {
-	return fmt.Sprintf("[POST /sms/set-read][%d] readSMS default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[POST /api/sms/set-read][%d] readSMS default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *ReadSMSDefault) GetPayload() *models.Error {

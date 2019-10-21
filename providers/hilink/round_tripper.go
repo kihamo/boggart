@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 
 	"github.com/kihamo/boggart/providers/hilink/models"
 )
@@ -98,6 +99,15 @@ func (rt RoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 		} else {
 			response.Body = ioutil.NopCloser(bytes.NewReader(body))
 		}
+	}
+
+	// go-swagger на каждый реквест создает нового клиента, поэтому организуем
+	// прокидывание печенек самостоятельно
+	cookies := response.Cookies()
+
+	if len(cookies) > 0 {
+		u, _ := url.Parse(req.URL.Scheme + "://" + req.URL.Host + rt.runtime.BasePath)
+		rt.runtime.Jar.SetCookies(u, response.Cookies())
 	}
 
 	return response, err

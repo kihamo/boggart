@@ -56,7 +56,7 @@ type GetCompressLogFileOK struct {
 }
 
 func (o *GetCompressLogFileOK) Error() string {
-	return fmt.Sprintf("[GET /device/compresslogfile][%d] getCompressLogFileOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/device/compresslogfile][%d] getCompressLogFileOK  %+v", 200, o.Payload)
 }
 
 func (o *GetCompressLogFileOK) GetPayload() *models.DeviceCompressLogFile {
@@ -98,7 +98,7 @@ func (o *GetCompressLogFileDefault) Code() int {
 }
 
 func (o *GetCompressLogFileDefault) Error() string {
-	return fmt.Sprintf("[GET /device/compresslogfile][%d] getCompressLogFile default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[GET /api/device/compresslogfile][%d] getCompressLogFile default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *GetCompressLogFileDefault) GetPayload() *models.Error {

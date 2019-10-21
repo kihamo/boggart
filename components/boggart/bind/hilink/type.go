@@ -19,6 +19,7 @@ func (t Type) CreateBind(c interface{}) (_ boggart.Bind, err error) {
 		config:                    config,
 		operator:                  atomic.NewString(),
 		limitInternetTrafficIndex: atomic.NewInt64(),
+		simStatus:                 atomic.NewUint32(),
 	}
 
 	l := swagger.NewLogger(
@@ -26,7 +27,7 @@ func (t Type) CreateBind(c interface{}) (_ boggart.Bind, err error) {
 			bind.Logger().Info(message)
 		},
 		func(message string) {
-			bind.Logger().Debug(message)
+			bind.Logger().Info(message)
 		})
 
 	bind.client = hilink.New(config.Address.Host, config.Debug, l)

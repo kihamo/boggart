@@ -56,7 +56,7 @@ type GetDeviceInformationOK struct {
 }
 
 func (o *GetDeviceInformationOK) Error() string {
-	return fmt.Sprintf("[GET /device/information][%d] getDeviceInformationOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/device/information][%d] getDeviceInformationOK  %+v", 200, o.Payload)
 }
 
 func (o *GetDeviceInformationOK) GetPayload() *models.DeviceInformation {
@@ -98,7 +98,7 @@ func (o *GetDeviceInformationDefault) Code() int {
 }
 
 func (o *GetDeviceInformationDefault) Error() string {
-	return fmt.Sprintf("[GET /device/information][%d] getDeviceInformation default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[GET /api/device/information][%d] getDeviceInformation default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *GetDeviceInformationDefault) GetPayload() *models.Error {

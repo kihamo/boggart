@@ -60,7 +60,7 @@ type DeviceControlOK struct {
 }
 
 func (o *DeviceControlOK) Error() string {
-	return fmt.Sprintf("[POST /device/control][%d] deviceControlOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /api/device/control][%d] deviceControlOK  %+v", 200, o.Payload)
 }
 
 func (o *DeviceControlOK) GetPayload() string {
@@ -100,7 +100,7 @@ func (o *DeviceControlDefault) Code() int {
 }
 
 func (o *DeviceControlDefault) Error() string {
-	return fmt.Sprintf("[POST /device/control][%d] DeviceControl default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[POST /api/device/control][%d] DeviceControl default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *DeviceControlDefault) GetPayload() *models.Error {

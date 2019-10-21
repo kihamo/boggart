@@ -36,7 +36,7 @@ func (a *Client) DeviceControl(params *DeviceControlParams) (*DeviceControlOK, e
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "DeviceControl",
 		Method:             "POST",
-		PathPattern:        "/device/control",
+		PathPattern:        "/api/device/control",
 		ProducesMediaTypes: []string{"application/xml"},
 		ConsumesMediaTypes: []string{"application/xml"},
 		Schemes:            []string{"http"},
@@ -69,7 +69,7 @@ func (a *Client) GetCompressLogFile(params *GetCompressLogFileParams) (*GetCompr
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getCompressLogFile",
 		Method:             "GET",
-		PathPattern:        "/device/compresslogfile",
+		PathPattern:        "/api/device/compresslogfile",
 		ProducesMediaTypes: []string{"application/xml"},
 		ConsumesMediaTypes: []string{"application/xml"},
 		Schemes:            []string{"http"},
@@ -102,7 +102,7 @@ func (a *Client) GetDeviceAutoRunVersion(params *GetDeviceAutoRunVersionParams) 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getDeviceAutoRunVersion",
 		Method:             "GET",
-		PathPattern:        "/device/autorun-version",
+		PathPattern:        "/api/device/autorun-version",
 		ProducesMediaTypes: []string{"application/xml"},
 		ConsumesMediaTypes: []string{"application/xml"},
 		Schemes:            []string{"http"},
@@ -135,7 +135,7 @@ func (a *Client) GetDeviceBasicInformation(params *GetDeviceBasicInformationPara
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getDeviceBasicInformation",
 		Method:             "GET",
-		PathPattern:        "/device/basic_information",
+		PathPattern:        "/api/device/basic_information",
 		ProducesMediaTypes: []string{"application/xml"},
 		ConsumesMediaTypes: []string{"application/xml"},
 		Schemes:            []string{"http"},
@@ -168,7 +168,7 @@ func (a *Client) GetDeviceInformation(params *GetDeviceInformationParams) (*GetD
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getDeviceInformation",
 		Method:             "GET",
-		PathPattern:        "/device/information",
+		PathPattern:        "/api/device/information",
 		ProducesMediaTypes: []string{"application/xml"},
 		ConsumesMediaTypes: []string{"application/xml"},
 		Schemes:            []string{"http"},
@@ -201,7 +201,7 @@ func (a *Client) GetDeviceSignal(params *GetDeviceSignalParams) (*GetDeviceSigna
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getDeviceSignal",
 		Method:             "GET",
-		PathPattern:        "/device/signal",
+		PathPattern:        "/api/device/signal",
 		ProducesMediaTypes: []string{"application/xml"},
 		ConsumesMediaTypes: []string{"application/xml"},
 		Schemes:            []string{"http"},

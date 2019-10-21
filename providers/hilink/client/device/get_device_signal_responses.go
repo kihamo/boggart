@@ -56,7 +56,7 @@ type GetDeviceSignalOK struct {
 }
 
 func (o *GetDeviceSignalOK) Error() string {
-	return fmt.Sprintf("[GET /device/signal][%d] getDeviceSignalOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/device/signal][%d] getDeviceSignalOK  %+v", 200, o.Payload)
 }
 
 func (o *GetDeviceSignalOK) GetPayload() *models.DeviceSignal {
@@ -98,7 +98,7 @@ func (o *GetDeviceSignalDefault) Code() int {
 }
 
 func (o *GetDeviceSignalDefault) Error() string {
-	return fmt.Sprintf("[GET /device/signal][%d] getDeviceSignal default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[GET /api/device/signal][%d] getDeviceSignal default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *GetDeviceSignalDefault) GetPayload() *models.Error {

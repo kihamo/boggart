@@ -10,6 +10,8 @@ import (
 type Config struct {
 	Address                   boggart.URL `valid:",required"`
 	Debug                     bool
+	Username                  string
+	Password                  string
 	LivenessInterval          time.Duration `mapstructure:"liveness_interval" yaml:"liveness_interval"`
 	LivenessTimeout           time.Duration `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
 	BalanceUpdaterInterval    time.Duration `mapstructure:"balance_interval" yaml:"balance_interval"`

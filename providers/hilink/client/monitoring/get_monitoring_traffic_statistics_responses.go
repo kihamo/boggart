@@ -56,7 +56,7 @@ type GetMonitoringTrafficStatisticsOK struct {
 }
 
 func (o *GetMonitoringTrafficStatisticsOK) Error() string {
-	return fmt.Sprintf("[GET /monitoring/traffic-statistics][%d] getMonitoringTrafficStatisticsOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/monitoring/traffic-statistics][%d] getMonitoringTrafficStatisticsOK  %+v", 200, o.Payload)
 }
 
 func (o *GetMonitoringTrafficStatisticsOK) GetPayload() *models.MonitoringTrafficStatistics {
@@ -98,7 +98,7 @@ func (o *GetMonitoringTrafficStatisticsDefault) Code() int {
 }
 
 func (o *GetMonitoringTrafficStatisticsDefault) Error() string {
-	return fmt.Sprintf("[GET /monitoring/traffic-statistics][%d] getMonitoringTrafficStatistics default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[GET /api/monitoring/traffic-statistics][%d] getMonitoringTrafficStatistics default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *GetMonitoringTrafficStatisticsDefault) GetPayload() *models.Error {

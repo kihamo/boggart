@@ -56,7 +56,7 @@ type GetSMSCountOK struct {
 }
 
 func (o *GetSMSCountOK) Error() string {
-	return fmt.Sprintf("[GET /sms/sms-count][%d] getSMSCountOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/sms/sms-count][%d] getSMSCountOK  %+v", 200, o.Payload)
 }
 
 func (o *GetSMSCountOK) GetPayload() *models.SMSCount {
@@ -98,7 +98,7 @@ func (o *GetSMSCountDefault) Code() int {
 }
 
 func (o *GetSMSCountDefault) Error() string {
-	return fmt.Sprintf("[GET /sms/sms-count][%d] getSMSCount default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[GET /api/sms/sms-count][%d] getSMSCount default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *GetSMSCountDefault) GetPayload() *models.Error {

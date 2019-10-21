@@ -2,6 +2,10 @@ package hilink
 
 import (
 	"context"
+	"net/http"
+	"net/http/cookiejar"
+	"net/url"
+	"strings"
 	"sync"
 
 	"github.com/go-openapi/runtime"
@@ -14,10 +18,7 @@ type Runtime struct {
 
 	mutex          sync.RWMutex
 	authentication runtime.ClientAuthInfoWriter
-
-	token   string
-	session string
-	auth    func(ctx context.Context) error
+	auth           func(ctx context.Context) error
 }
 
 func newRuntime(original *client.Runtime, auth func(ctx context.Context) error) *Runtime {
@@ -26,6 +27,7 @@ func newRuntime(original *client.Runtime, auth func(ctx context.Context) error) 
 		auth:    auth,
 	}
 
+	rt.Jar, _ = cookiejar.New(nil)
 	rt.DefaultAuthentication = runtime.ClientAuthInfoWriterFunc(rt.callDefaultAuthentication)
 	rt.SetAuthenticationAnonymous()
 
@@ -52,7 +54,7 @@ func (r *Runtime) setDefaultAuthentication(auth runtime.ClientAuthInfoWriter) {
 
 func (r *Runtime) SetAuthenticationAnonymous() {
 	r.setDefaultAuthentication(runtime.ClientAuthInfoWriterFunc(func(req runtime.ClientRequest, rg strfmt.Registry) error {
-		if req.GetPath() == "/webserver/SesTokInfo" {
+		if req.GetPath() == "/api/webserver/SesTokInfo" {
 			return nil
 		}
 
@@ -65,20 +67,19 @@ func (r *Runtime) SetAuthenticationAnonymous() {
 }
 
 func (r *Runtime) SetAuthenticationLogged(token, session string) {
-	r.mutex.RLock()
-	t, s := r.token, r.session
-	r.mutex.RUnlock()
+	u, _ := url.Parse("http://" + r.Host + r.BasePath)
+	parts := strings.Split(session, "=")
 
-	if t == token && s == session {
-		return
-	}
+	r.Jar.SetCookies(u, []*http.Cookie{
+		{
+			Name:     parts[0],
+			Value:    parts[1],
+			Path:     "/",
+			HttpOnly: true,
+		},
+	})
 
 	r.setDefaultAuthentication(runtime.ClientAuthInfoWriterFunc(func(req runtime.ClientRequest, _ strfmt.Registry) (err error) {
-		err = req.SetHeaderParam(headerToken, token)
-		if err == nil {
-			err = req.SetHeaderParam(headerSession, session)
-		}
-
-		return err
+		return req.SetHeaderParam(headerToken, token)
 	}))
 }

@@ -36,7 +36,7 @@ func (a *Client) GetUSSD(params *GetUSSDParams) (*GetUSSDOK, error) {
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getUSSD",
 		Method:             "GET",
-		PathPattern:        "/ussd/get",
+		PathPattern:        "/api/ussd/get",
 		ProducesMediaTypes: []string{"application/xml"},
 		ConsumesMediaTypes: []string{"application/xml"},
 		Schemes:            []string{"http"},
@@ -69,7 +69,7 @@ func (a *Client) GetUSSDStatus(params *GetUSSDStatusParams) (*GetUSSDStatusOK, e
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getUSSDStatus",
 		Method:             "GET",
-		PathPattern:        "/ussd/status",
+		PathPattern:        "/api/ussd/status",
 		ProducesMediaTypes: []string{"application/xml"},
 		ConsumesMediaTypes: []string{"application/xml"},
 		Schemes:            []string{"http"},
@@ -102,7 +102,7 @@ func (a *Client) ReleaseUSSD(params *ReleaseUSSDParams) (*ReleaseUSSDOK, error) 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "releaseUSSD",
 		Method:             "GET",
-		PathPattern:        "/ussd/release",
+		PathPattern:        "/api/ussd/release",
 		ProducesMediaTypes: []string{"application/xml"},
 		ConsumesMediaTypes: []string{"application/xml"},
 		Schemes:            []string{"http"},
@@ -135,7 +135,7 @@ func (a *Client) SendUSSD(params *SendUSSDParams) (*SendUSSDOK, error) {
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "sendUSSD",
 		Method:             "POST",
-		PathPattern:        "/ussd/send",
+		PathPattern:        "/api/ussd/send",
 		ProducesMediaTypes: []string{"application/xml"},
 		ConsumesMediaTypes: []string{"application/xml"},
 		Schemes:            []string{"http"},

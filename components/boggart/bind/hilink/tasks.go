@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/providers/hilink/client/config"
 	"github.com/kihamo/boggart/providers/hilink/client/device"
 	"github.com/kihamo/boggart/providers/hilink/client/monitoring"
 	"github.com/kihamo/boggart/providers/hilink/client/net"
@@ -61,6 +62,26 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
+	cfg, err := b.client.Config.GetGlobalConfig(config.NewGetGlobalConfigParamsWithContext(ctx))
+	if err != nil {
+		b.UpdateStatus(boggart.BindStatusOffline)
+		return nil, err
+	}
+
+	if cfg.Payload.Login == 1 {
+		if err := b.client.Login(ctx, b.config.Username, b.config.Password); err != nil {
+			b.UpdateStatus(boggart.BindStatusOffline)
+			return nil, err
+		}
+	}
+
+	monitoringStatus, err := b.client.Monitoring.GetMonitoringStatus(monitoring.NewGetMonitoringStatusParamsWithContext(ctx))
+	if err != nil {
+		b.UpdateStatus(boggart.BindStatusOffline)
+		return nil, err
+	}
+	b.simStatus.Set(uint32(monitoringStatus.Payload.SimStatus))
+
 	deviceInfo, err := b.client.Device.GetDeviceInformation(device.NewGetDeviceInformationParamsWithContext(ctx))
 	if err != nil {
 		b.UpdateStatus(boggart.BindStatusOffline)
@@ -78,7 +99,7 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 
 	b.UpdateStatus(boggart.BindStatusOnline)
 
-	if b.operator.IsEmpty() {
+	if b.operator.IsEmpty() && monitoringStatus.Payload.SimStatus == 1 {
 		plmn, err := b.client.Net.GetCurrentPLMN(net.NewGetCurrentPLMNParamsWithContext(ctx))
 		if err == nil {
 			b.operator.Set(plmn.Payload.FullName)
@@ -114,7 +135,7 @@ func (b *Bind) taskBalanceUpdater(ctx context.Context) (interface{}, error) {
 }
 
 func (b *Bind) taskSMSChecker(ctx context.Context) (interface{}, error) {
-	if b.Status() != boggart.BindStatusOnline {
+	if b.Status() != boggart.BindStatusOnline || b.simStatus.Load() != 1 {
 		return nil, nil
 	}
 
@@ -190,7 +211,7 @@ func (b *Bind) taskSMSChecker(ctx context.Context) (interface{}, error) {
 }
 
 func (b *Bind) taskSystemUpdater(ctx context.Context) (_ interface{}, err error) {
-	if b.Status() != boggart.BindStatusOnline {
+	if b.Status() != boggart.BindStatusOnline || b.simStatus.Load() != 1 {
 		return nil, nil
 	}
 
@@ -275,7 +296,7 @@ func (b *Bind) taskSystemUpdater(ctx context.Context) (_ interface{}, err error)
 }
 
 func (b *Bind) taskCleaner(ctx context.Context) (_ interface{}, err error) {
-	if b.Status() != boggart.BindStatusOnline {
+	if b.Status() != boggart.BindStatusOnline || b.simStatus.Load() != 1 {
 		return nil, nil
 	}
 

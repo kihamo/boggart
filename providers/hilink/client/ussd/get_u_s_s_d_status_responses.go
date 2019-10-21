@@ -56,7 +56,7 @@ type GetUSSDStatusOK struct {
 }
 
 func (o *GetUSSDStatusOK) Error() string {
-	return fmt.Sprintf("[GET /ussd/status][%d] getUSSDStatusOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/ussd/status][%d] getUSSDStatusOK  %+v", 200, o.Payload)
 }
 
 func (o *GetUSSDStatusOK) GetPayload() *models.USSDStatus {
@@ -98,7 +98,7 @@ func (o *GetUSSDStatusDefault) Code() int {
 }
 
 func (o *GetUSSDStatusDefault) Error() string {
-	return fmt.Sprintf("[GET /ussd/status][%d] getUSSDStatus default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[GET /api/ussd/status][%d] getUSSDStatus default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *GetUSSDStatusDefault) GetPayload() *models.Error {

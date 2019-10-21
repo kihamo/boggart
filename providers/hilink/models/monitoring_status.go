@@ -6,9 +6,13 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	strfmt "github.com/go-openapi/strfmt"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // MonitoringStatus monitoring status
@@ -82,6 +86,7 @@ type MonitoringStatus struct {
 	SignalStrength int64 `json:"SignalStrength,omitempty" xml:"SignalStrength"`
 
 	// sim status
+	// Enum: [0 1 2 3 4 240 255]
 	SimStatus int64 `json:"SimStatus,omitempty" xml:"SimStatus"`
 
 	// simlock status
@@ -105,6 +110,49 @@ type MonitoringStatus struct {
 
 // Validate validates this monitoring status
 func (m *MonitoringStatus) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateSimStatus(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+var monitoringStatusTypeSimStatusPropEnum []interface{}
+
+func init() {
+	var res []int64
+	if err := json.Unmarshal([]byte(`[0,1,2,3,4,240,255]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		monitoringStatusTypeSimStatusPropEnum = append(monitoringStatusTypeSimStatusPropEnum, v)
+	}
+}
+
+// prop value enum
+func (m *MonitoringStatus) validateSimStatusEnum(path, location string, value int64) error {
+	if err := validate.Enum(path, location, value, monitoringStatusTypeSimStatusPropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *MonitoringStatus) validateSimStatus(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.SimStatus) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateSimStatusEnum("SimStatus", "body", m.SimStatus); err != nil {
+		return err
+	}
+
 	return nil
 }
 

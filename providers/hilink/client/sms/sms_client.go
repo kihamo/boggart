@@ -36,7 +36,7 @@ func (a *Client) GetSMSCount(params *GetSMSCountParams) (*GetSMSCountOK, error) 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getSMSCount",
 		Method:             "GET",
-		PathPattern:        "/sms/sms-count",
+		PathPattern:        "/api/sms/sms-count",
 		ProducesMediaTypes: []string{"application/xml"},
 		ConsumesMediaTypes: []string{"application/xml"},
 		Schemes:            []string{"http"},
@@ -69,7 +69,7 @@ func (a *Client) GetSMSList(params *GetSMSListParams) (*GetSMSListOK, error) {
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getSMSList",
 		Method:             "POST",
-		PathPattern:        "/sms/sms-list",
+		PathPattern:        "/api/sms/sms-list",
 		ProducesMediaTypes: []string{"application/xml"},
 		ConsumesMediaTypes: []string{"application/xml"},
 		Schemes:            []string{"http"},
@@ -102,7 +102,7 @@ func (a *Client) ReadSMS(params *ReadSMSParams) (*ReadSMSOK, error) {
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "readSMS",
 		Method:             "POST",
-		PathPattern:        "/sms/set-read",
+		PathPattern:        "/api/sms/set-read",
 		ProducesMediaTypes: []string{"application/xml"},
 		ConsumesMediaTypes: []string{"application/xml"},
 		Schemes:            []string{"http"},
@@ -135,7 +135,7 @@ func (a *Client) RemoveSMS(params *RemoveSMSParams) (*RemoveSMSOK, error) {
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "removeSMS",
 		Method:             "POST",
-		PathPattern:        "/sms/delete-sms",
+		PathPattern:        "/api/sms/delete-sms",
 		ProducesMediaTypes: []string{"application/xml"},
 		ConsumesMediaTypes: []string{"application/xml"},
 		Schemes:            []string{"http"},
