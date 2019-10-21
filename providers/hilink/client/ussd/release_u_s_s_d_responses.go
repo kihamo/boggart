@@ -56,7 +56,7 @@ type ReleaseUSSDOK struct {
 }
 
 func (o *ReleaseUSSDOK) Error() string {
-	return fmt.Sprintf("[GET /ussd/release][%d] releaseUSSDOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/ussd/release][%d] releaseUSSDOK  %+v", 200, o.Payload)
 }
 
 func (o *ReleaseUSSDOK) GetPayload() string {
@@ -96,7 +96,7 @@ func (o *ReleaseUSSDDefault) Code() int {
 }
 
 func (o *ReleaseUSSDDefault) Error() string {
-	return fmt.Sprintf("[GET /ussd/release][%d] releaseUSSD default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[GET /api/ussd/release][%d] releaseUSSD default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *ReleaseUSSDDefault) GetPayload() *models.Error {

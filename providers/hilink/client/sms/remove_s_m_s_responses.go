@@ -57,7 +57,7 @@ type RemoveSMSOK struct {
 }
 
 func (o *RemoveSMSOK) Error() string {
-	return fmt.Sprintf("[POST /sms/delete-sms][%d] removeSMSOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /api/sms/delete-sms][%d] removeSMSOK  %+v", 200, o.Payload)
 }
 
 func (o *RemoveSMSOK) GetPayload() string {
@@ -97,7 +97,7 @@ func (o *RemoveSMSDefault) Code() int {
 }
 
 func (o *RemoveSMSDefault) Error() string {
-	return fmt.Sprintf("[POST /sms/delete-sms][%d] removeSMS default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[POST /api/sms/delete-sms][%d] removeSMS default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *RemoveSMSDefault) GetPayload() *models.Error {

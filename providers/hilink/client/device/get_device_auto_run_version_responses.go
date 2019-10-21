@@ -56,7 +56,7 @@ type GetDeviceAutoRunVersionOK struct {
 }
 
 func (o *GetDeviceAutoRunVersionOK) Error() string {
-	return fmt.Sprintf("[GET /device/autorun-version][%d] getDeviceAutoRunVersionOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/device/autorun-version][%d] getDeviceAutoRunVersionOK  %+v", 200, o.Payload)
 }
 
 func (o *GetDeviceAutoRunVersionOK) GetPayload() *models.AutoRunVersion {
@@ -98,7 +98,7 @@ func (o *GetDeviceAutoRunVersionDefault) Code() int {
 }
 
 func (o *GetDeviceAutoRunVersionDefault) Error() string {
-	return fmt.Sprintf("[GET /device/autorun-version][%d] getDeviceAutoRunVersion default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[GET /api/device/autorun-version][%d] getDeviceAutoRunVersion default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *GetDeviceAutoRunVersionDefault) GetPayload() *models.Error {

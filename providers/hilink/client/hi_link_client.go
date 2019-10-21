@@ -11,10 +11,12 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
+	"github.com/kihamo/boggart/providers/hilink/client/config"
 	"github.com/kihamo/boggart/providers/hilink/client/device"
 	"github.com/kihamo/boggart/providers/hilink/client/monitoring"
 	"github.com/kihamo/boggart/providers/hilink/client/net"
 	"github.com/kihamo/boggart/providers/hilink/client/sms"
+	"github.com/kihamo/boggart/providers/hilink/client/user"
 	"github.com/kihamo/boggart/providers/hilink/client/ussd"
 	"github.com/kihamo/boggart/providers/hilink/client/web_server"
 )
@@ -28,7 +30,7 @@ const (
 	DefaultHost string = "localhost"
 	// DefaultBasePath is the default BasePath
 	// found in Meta (info) section of spec file
-	DefaultBasePath string = "/api"
+	DefaultBasePath string = "/"
 )
 
 // DefaultSchemes are the default schemes found in Meta (info) section of spec file
@@ -62,6 +64,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *HiLink {
 	cli := new(HiLink)
 	cli.Transport = transport
 
+	cli.Config = config.New(transport, formats)
+
 	cli.Device = device.New(transport, formats)
 
 	cli.Monitoring = monitoring.New(transport, formats)
@@ -69,6 +73,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *HiLink {
 	cli.Net = net.New(transport, formats)
 
 	cli.Sms = sms.New(transport, formats)
+
+	cli.User = user.New(transport, formats)
 
 	cli.Ussd = ussd.New(transport, formats)
 
@@ -118,6 +124,8 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // HiLink is a client for hi link
 type HiLink struct {
+	Config *config.Client
+
 	Device *device.Client
 
 	Monitoring *monitoring.Client
@@ -125,6 +133,8 @@ type HiLink struct {
 	Net *net.Client
 
 	Sms *sms.Client
+
+	User *user.Client
 
 	Ussd *ussd.Client
 
@@ -137,6 +147,8 @@ type HiLink struct {
 func (c *HiLink) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 
+	c.Config.SetTransport(transport)
+
 	c.Device.SetTransport(transport)
 
 	c.Monitoring.SetTransport(transport)
@@ -144,6 +156,8 @@ func (c *HiLink) SetTransport(transport runtime.ClientTransport) {
 	c.Net.SetTransport(transport)
 
 	c.Sms.SetTransport(transport)
+
+	c.User.SetTransport(transport)
 
 	c.Ussd.SetTransport(transport)
 

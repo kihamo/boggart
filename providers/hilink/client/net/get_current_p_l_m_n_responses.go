@@ -56,7 +56,7 @@ type GetCurrentPLMNOK struct {
 }
 
 func (o *GetCurrentPLMNOK) Error() string {
-	return fmt.Sprintf("[GET /net/current-plmn][%d] getCurrentPLMNOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/net/current-plmn][%d] getCurrentPLMNOK  %+v", 200, o.Payload)
 }
 
 func (o *GetCurrentPLMNOK) GetPayload() *models.CurrentPLMN {
@@ -98,7 +98,7 @@ func (o *GetCurrentPLMNDefault) Code() int {
 }
 
 func (o *GetCurrentPLMNDefault) Error() string {
-	return fmt.Sprintf("[GET /net/current-plmn][%d] getCurrentPLMN default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[GET /api/net/current-plmn][%d] getCurrentPLMN default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *GetCurrentPLMNDefault) GetPayload() *models.Error {

@@ -10,9 +10,23 @@ produces:
 - "application/xml"
 schemes:
 - "http"
-basePath: "/api"
+basePath: "/"
 paths:
-  /device/autorun-version:
+  /config/global/config.xml:
+    get:
+      operationId: "getGlobalConfig"
+      tags:
+        - "config"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/GlobalConfig"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /api/device/autorun-version:
     get:
       operationId: "getDeviceAutoRunVersion"
       tags:
@@ -26,7 +40,7 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
-  /device/basic_information:
+  /api/device/basic_information:
     get:
       operationId: "getDeviceBasicInformation"
       tags:
@@ -40,7 +54,7 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
-  /device/information:
+  /api/device/information:
     get:
       operationId: "getDeviceInformation"
       tags:
@@ -54,7 +68,7 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
-  /device/control:
+  /api/device/control:
     post:
       operationId: "DeviceControl"
       tags:
@@ -83,7 +97,7 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
-  /device/signal:
+  /api/device/signal:
     get:
       operationId: "getDeviceSignal"
       tags:
@@ -97,7 +111,7 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
-  /device/compresslogfile:
+  /api/device/compresslogfile:
     get:
       operationId: "getCompressLogFile"
       tags:
@@ -111,7 +125,7 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
-  /monitoring/status:
+  /api/monitoring/status:
     get:
       operationId: "getMonitoringStatus"
       tags:
@@ -125,7 +139,7 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
-  /monitoring/traffic-statistics:
+  /api/monitoring/traffic-statistics:
     get:
       operationId: "getMonitoringTrafficStatistics"
       tags:
@@ -139,7 +153,7 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
-  /net/current-plmn:
+  /api/net/current-plmn:
     get:
       operationId: "getCurrentPLMN"
       tags:
@@ -153,7 +167,7 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
-  /sms/sms-count:
+  /api/sms/sms-count:
     get:
       operationId: "getSMSCount"
       tags:
@@ -167,7 +181,7 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
-  /sms/delete-sms:
+  /api/sms/delete-sms:
     post:
       operationId: "removeSMS"
       tags:
@@ -191,7 +205,7 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
-  /sms/set-read:
+  /api/sms/set-read:
     post:
       operationId: "readSMS"
       tags:
@@ -215,7 +229,7 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
-  /sms/sms-list:
+  /api/sms/sms-list:
     post:
       operationId: "getSMSList"
       tags:
@@ -234,7 +248,41 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
-  /ussd/get:
+  /api/user/login:
+    post:
+      operationId: "login"
+      tags:
+        - "user"
+      parameters:
+      - name: "request"
+        in: "body"
+        schema:
+          type: "object"
+          xml:
+            name: "request"
+          properties:
+            Username:
+              type: "string"
+              xml:
+                name: "Username"
+            Password:
+              type: "string"
+              xml:
+                name: "Password"
+            PasswordType:
+              type: "integer"
+              xml:
+                name: "password_type"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "string"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /api/ussd/get:
     get:
       operationId: "getUSSD"
       tags:
@@ -248,7 +296,7 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
-  /ussd/release:
+  /api/ussd/release:
     get:
       operationId: "releaseUSSD"
       tags:
@@ -262,7 +310,7 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
-  /ussd/send:
+  /api/ussd/send:
     post:
       operationId: "sendUSSD"
       tags:
@@ -281,7 +329,7 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
-  /ussd/status:
+  /api/ussd/status:
     get:
       operationId: "getUSSDStatus"
       tags:
@@ -295,7 +343,7 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
-  /webserver/SesTokInfo:
+  /api/webserver/SesTokInfo:
     get:
       operationId: "getWebServerSession"
       tags:
@@ -328,6 +376,13 @@ definitions:
         type: "string"
         xml:
           name: "Version"
+  GlobalConfig:
+    type: "object"
+    properties:
+      Login:
+        type: "integer"
+        xml:
+          name: "login"
   DeviceBasicInformation:
     type: "object"
     properties:
@@ -583,6 +638,14 @@ definitions:
         type: "integer"
         xml:
           name: "SimStatus"
+        enum:
+          - 0   # нет SIM-карты или она неверна
+          - 1   # правильная сим-карта
+          - 2   # неверная SIM-карта для коммутационной связи (CS)
+          - 3   # неверная SIM-карта для коммутации пакетов (PS)
+          - 4   # неверная SIM-карта для коммутации каналов и пакетов (PS + CS)
+          - 240 # ROMSIM
+          - 255 # нет SIM-карты
       WifiStatus:
         type: "integer"
         xml:

@@ -56,7 +56,7 @@ type GetSMSListOK struct {
 }
 
 func (o *GetSMSListOK) Error() string {
-	return fmt.Sprintf("[POST /sms/sms-list][%d] getSMSListOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /api/sms/sms-list][%d] getSMSListOK  %+v", 200, o.Payload)
 }
 
 func (o *GetSMSListOK) GetPayload() *models.SMSList {
@@ -98,7 +98,7 @@ func (o *GetSMSListDefault) Code() int {
 }
 
 func (o *GetSMSListDefault) Error() string {
-	return fmt.Sprintf("[POST /sms/sms-list][%d] getSMSList default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[POST /api/sms/sms-list][%d] getSMSList default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *GetSMSListDefault) GetPayload() *models.Error {

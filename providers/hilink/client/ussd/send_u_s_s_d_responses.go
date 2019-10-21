@@ -56,7 +56,7 @@ type SendUSSDOK struct {
 }
 
 func (o *SendUSSDOK) Error() string {
-	return fmt.Sprintf("[POST /ussd/send][%d] sendUSSDOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /api/ussd/send][%d] sendUSSDOK  %+v", 200, o.Payload)
 }
 
 func (o *SendUSSDOK) GetPayload() *models.USSD {
@@ -98,7 +98,7 @@ func (o *SendUSSDDefault) Code() int {
 }
 
 func (o *SendUSSDDefault) Error() string {
-	return fmt.Sprintf("[POST /ussd/send][%d] sendUSSD default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[POST /api/ussd/send][%d] sendUSSD default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *SendUSSDDefault) GetPayload() *models.Error {

@@ -28,6 +28,7 @@ type Bind struct {
 	client                    *hilink.Client
 	operator                  *atomic.String
 	limitInternetTrafficIndex *atomic.Int64
+	simStatus                 *atomic.Uint32
 }
 
 func (b *Bind) USSD(ctx context.Context, content string) (string, error) {

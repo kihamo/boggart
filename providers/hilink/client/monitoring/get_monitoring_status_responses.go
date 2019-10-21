@@ -56,7 +56,7 @@ type GetMonitoringStatusOK struct {
 }
 
 func (o *GetMonitoringStatusOK) Error() string {
-	return fmt.Sprintf("[GET /monitoring/status][%d] getMonitoringStatusOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/monitoring/status][%d] getMonitoringStatusOK  %+v", 200, o.Payload)
 }
 
 func (o *GetMonitoringStatusOK) GetPayload() *models.MonitoringStatus {
@@ -98,7 +98,7 @@ func (o *GetMonitoringStatusDefault) Code() int {
 }
 
 func (o *GetMonitoringStatusDefault) Error() string {
-	return fmt.Sprintf("[GET /monitoring/status][%d] getMonitoringStatus default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[GET /api/monitoring/status][%d] getMonitoringStatus default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *GetMonitoringStatusDefault) GetPayload() *models.Error {

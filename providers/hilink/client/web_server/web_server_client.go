@@ -36,7 +36,7 @@ func (a *Client) GetWebServerSession(params *GetWebServerSessionParams) (*GetWeb
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getWebServerSession",
 		Method:             "GET",
-		PathPattern:        "/webserver/SesTokInfo",
+		PathPattern:        "/api/webserver/SesTokInfo",
 		ProducesMediaTypes: []string{"application/xml"},
 		ConsumesMediaTypes: []string{"application/xml"},
 		Schemes:            []string{"http"},
