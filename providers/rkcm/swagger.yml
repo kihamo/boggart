@@ -8,6 +8,26 @@ schemes:
 - "http"
 basePath: "/muprcmytishi/"
 paths:
+  /GetAdditionalServices.ashx:
+    get:
+      operationId: "getAdditionalServices"
+      tags:
+      - "general"
+      summary: "Get additional services"
+      parameters:
+      - name: "login"
+        in: "query"
+        description: "Login"
+        required: true
+        type: "string"
+      - name: "pwd"
+        in: "query"
+        description: "Password"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful operation"
   /GetDebtByAccount.ashx:
     get:
       operationId: "getDebtByAccount"

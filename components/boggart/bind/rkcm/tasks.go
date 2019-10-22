@@ -25,6 +25,17 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
+	// TODO: предположительно скидывает кэш, но надо проверить
+	paramsServices := general.NewGetAdditionalServicesParamsWithContext(ctx).
+		WithLogin(b.config.Login).
+		WithPwd(b.config.Password)
+	_, err := b.client.General.GetAdditionalServices(paramsServices)
+	if err != nil {
+		b.UpdateStatus(boggart.BindStatusOffline)
+	} else {
+		b.UpdateStatus(boggart.BindStatusOnline)
+	}
+
 	paramsDebt := mobile.NewGetDebtParamsWithContext(ctx).
 		WithPhone(b.config.Login)
 
@@ -37,8 +48,6 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 
 	if err == nil {
 		for _, debt := range responseDebt.Payload.Data {
-			// значение в Mobile.GetDebt кэшируется, помогает перевызов General.GetDebtByAccount
-
 			paramsAccount := general.NewGetDebtByAccountParamsWithContext(ctx).
 				WithIdent(debt.Ident)
 

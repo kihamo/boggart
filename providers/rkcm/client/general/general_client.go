@@ -27,6 +27,40 @@ type Client struct {
 }
 
 /*
+GetAdditionalServices gets additional services
+*/
+func (a *Client) GetAdditionalServices(params *GetAdditionalServicesParams) (*GetAdditionalServicesOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetAdditionalServicesParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getAdditionalServices",
+		Method:             "GET",
+		PathPattern:        "/GetAdditionalServices.ashx",
+		ProducesMediaTypes: []string{""},
+		ConsumesMediaTypes: []string{""},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GetAdditionalServicesReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetAdditionalServicesOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getAdditionalServices: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
 GetBillServicesFull gets bill full for services
 */
 func (a *Client) GetBillServicesFull(params *GetBillServicesFullParams) (*GetBillServicesFullOK, error) {
