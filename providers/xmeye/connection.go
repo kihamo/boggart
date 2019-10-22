@@ -8,10 +8,10 @@ import (
 )
 
 type connection struct {
-	protocol.Conn
-
 	sessionID      uint32
 	sequenceNumber uint32
+
+	protocol.Conn
 
 	lock sync.Mutex
 }
