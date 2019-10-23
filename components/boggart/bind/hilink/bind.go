@@ -105,21 +105,34 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, sms *models.SMSListMessagesI
 	// limit traffic
 	match := op.SMSLimitTrafficRegexp.FindStringSubmatch(sms.Content)
 	if len(match) > 0 {
+		var (
+			value float64
+			found bool
+		)
+
 		for i, name := range op.SMSLimitTrafficRegexp.SubexpNames() {
-			if name == "value" {
-				if sms.Index > b.limitInternetTrafficIndex.Load() {
-					if value, err := strconv.ParseFloat(match[i], 64); err == nil {
-						value *= op.SMSLimitTrafficFactor
-
-						metricLimitInternetTraffic.With("serial_number", sn).Set(value)
-						b.MQTTPublishAsync(ctx, b.config.TopicLimitInternetTraffic.Format(sn), uint64(value))
-
-						b.limitInternetTrafficIndex.Set(sms.Index)
-					}
-				}
-
-				return true
+			if !strings.HasPrefix(name, "value") {
+				continue
 			}
+
+			found = true
+
+			if v, err := strconv.ParseFloat(match[i], 64); err == nil {
+				value += v
+			}
+		}
+
+		if found {
+			if sms.Index > b.limitInternetTrafficIndex.Load() {
+				value *= op.SMSLimitTrafficFactor
+
+				metricLimitInternetTraffic.With("serial_number", sn).Set(value)
+				b.MQTTPublishAsync(ctx, b.config.TopicLimitInternetTraffic.Format(sn), uint64(value))
+
+				b.limitInternetTrafficIndex.Set(sms.Index)
+			}
+
+			return true
 		}
 	}
 
