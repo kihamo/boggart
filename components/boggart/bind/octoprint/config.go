@@ -20,6 +20,11 @@ type Config struct {
 	TopicStateTool0TemperatureActual mqtt.Topic    `mapstructure:"topic_state_tool0_temperature_actual" yaml:"topic_state_tool0_temperature_actual"`
 	TopicStateTool0TemperatureOffset mqtt.Topic    `mapstructure:"topic_state_tool0_temperature_offset" yaml:"topic_state_tool0_temperature_offset"`
 	TopicStateTool0TemperatureTarget mqtt.Topic    `mapstructure:"topic_state_tool0_temperature_target" yaml:"topic_state_tool0_temperature_target"`
+	TopicStateJobFileName            mqtt.Topic    `mapstructure:"topic_state_job_file_name" yaml:"topic_state_job_file_name"`
+	TopicStateJobFileSize            mqtt.Topic    `mapstructure:"topic_state_job_file_size" yaml:"topic_state_job_file_size"`
+	TopicStateJobProgress            mqtt.Topic    `mapstructure:"topic_state_job_progress" yaml:"topic_state_job_progress"`
+	TopicStateJobTime                mqtt.Topic    `mapstructure:"topic_state_job_time" yaml:"topic_state_job_time"`
+	TopicStateJobTimeLeft            mqtt.Topic    `mapstructure:"topic_state_job_time_left" yaml:"topic_state_job_time_left"`
 }
 
 func (t Type) Config() interface{} {
@@ -35,5 +40,10 @@ func (t Type) Config() interface{} {
 		TopicStateTool0TemperatureActual: prefix + "state/tool0/temperature/actual",
 		TopicStateTool0TemperatureOffset: prefix + "state/tool0/temperature/offset",
 		TopicStateTool0TemperatureTarget: prefix + "state/tool0/temperature/target",
+		TopicStateJobFileName:            prefix + "state/job/file/name",
+		TopicStateJobFileSize:            prefix + "state/job/file/size",
+		TopicStateJobProgress:            prefix + "state/job/progress",
+		TopicStateJobTime:                prefix + "state/job/time",
+		TopicStateJobTimeLeft:            prefix + "state/job/time-left",
 	}
 }

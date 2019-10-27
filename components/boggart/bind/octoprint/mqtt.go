@@ -15,5 +15,10 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 		b.config.TopicStateTool0TemperatureActual.Format(sn),
 		b.config.TopicStateTool0TemperatureOffset.Format(sn),
 		b.config.TopicStateTool0TemperatureTarget.Format(sn),
+		b.config.TopicStateJobFileName.Format(sn),
+		b.config.TopicStateJobFileSize.Format(sn),
+		b.config.TopicStateJobProgress.Format(sn),
+		b.config.TopicStateJobTime.Format(sn),
+		b.config.TopicStateJobTimeLeft.Format(sn),
 	}
 }

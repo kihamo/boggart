@@ -103,10 +103,10 @@ func (m *Job) UnmarshalBinary(b []byte) error {
 type JobJob struct {
 
 	// average print time
-	AveragePrintTime int64 `json:"averagePrintTime,omitempty"`
+	AveragePrintTime float64 `json:"averagePrintTime,omitempty"`
 
 	// estimated print time
-	EstimatedPrintTime int64 `json:"estimatedPrintTime,omitempty"`
+	EstimatedPrintTime float64 `json:"estimatedPrintTime,omitempty"`
 
 	// filament
 	Filament *JobJobFilament `json:"filament,omitempty"`
@@ -115,7 +115,7 @@ type JobJob struct {
 	File *JobJobFile `json:"file,omitempty"`
 
 	// last print time
-	LastPrintTime int64 `json:"lastPrintTime,omitempty"`
+	LastPrintTime float64 `json:"lastPrintTime,omitempty"`
 }
 
 // Validate validates this job job
@@ -229,7 +229,7 @@ func (m *JobJobFilament) UnmarshalBinary(b []byte) error {
 type JobJobFile struct {
 
 	// date
-	Date string `json:"date,omitempty"`
+	Date int64 `json:"date,omitempty"`
 
 	// display
 	Display string `json:"display,omitempty"`
@@ -290,7 +290,7 @@ type JobProgress struct {
 	PrintTimeLeft int64 `json:"printTimeLeft,omitempty"`
 
 	// print time left origin
-	PrintTimeLeftOrigin int64 `json:"printTimeLeftOrigin,omitempty"`
+	PrintTimeLeftOrigin string `json:"printTimeLeftOrigin,omitempty"`
 }
 
 // Validate validates this job progress
