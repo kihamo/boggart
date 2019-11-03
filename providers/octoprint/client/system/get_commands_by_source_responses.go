@@ -56,7 +56,7 @@ type GetCommandsBySourceOK struct {
 }
 
 func (o *GetCommandsBySourceOK) Error() string {
-	return fmt.Sprintf("[GET /system/commands/{source}][%d] getCommandsBySourceOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/system/commands/{source}][%d] getCommandsBySourceOK  %+v", 200, o.Payload)
 }
 
 func (o *GetCommandsBySourceOK) GetPayload() []*models.Command {
@@ -86,7 +86,7 @@ type GetCommandsBySourceNotFound struct {
 }
 
 func (o *GetCommandsBySourceNotFound) Error() string {
-	return fmt.Sprintf("[GET /system/commands/{source}][%d] getCommandsBySourceNotFound ", 404)
+	return fmt.Sprintf("[GET /api/system/commands/{source}][%d] getCommandsBySourceNotFound ", 404)
 }
 
 func (o *GetCommandsBySourceNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

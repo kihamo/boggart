@@ -38,7 +38,7 @@ func (a *Client) Login(params *LoginParams, authInfo runtime.ClientAuthInfoWrite
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "login",
 		Method:             "POST",
-		PathPattern:        "/login",
+		PathPattern:        "/api/login",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
@@ -73,7 +73,7 @@ func (a *Client) Logout(params *LogoutParams, authInfo runtime.ClientAuthInfoWri
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "logout",
 		Method:             "POST",
-		PathPattern:        "/logout",
+		PathPattern:        "/api/logout",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},

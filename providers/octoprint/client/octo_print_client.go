@@ -15,6 +15,7 @@ import (
 	"github.com/kihamo/boggart/providers/octoprint/client/connection"
 	"github.com/kihamo/boggart/providers/octoprint/client/job"
 	"github.com/kihamo/boggart/providers/octoprint/client/languages"
+	"github.com/kihamo/boggart/providers/octoprint/client/plugin_display_layer_progress"
 	"github.com/kihamo/boggart/providers/octoprint/client/printer"
 	"github.com/kihamo/boggart/providers/octoprint/client/settings"
 	"github.com/kihamo/boggart/providers/octoprint/client/system"
@@ -30,7 +31,7 @@ const (
 	DefaultHost string = "localhost"
 	// DefaultBasePath is the default BasePath
 	// found in Meta (info) section of spec file
-	DefaultBasePath string = "/api"
+	DefaultBasePath string = "/"
 )
 
 // DefaultSchemes are the default schemes found in Meta (info) section of spec file
@@ -71,6 +72,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *OctoPrint 
 	cli.Job = job.New(transport, formats)
 
 	cli.Languages = languages.New(transport, formats)
+
+	cli.PluginDisplayLayerProgress = plugin_display_layer_progress.New(transport, formats)
 
 	cli.Printer = printer.New(transport, formats)
 
@@ -132,6 +135,8 @@ type OctoPrint struct {
 
 	Languages *languages.Client
 
+	PluginDisplayLayerProgress *plugin_display_layer_progress.Client
+
 	Printer *printer.Client
 
 	Settings *settings.Client
@@ -154,6 +159,8 @@ func (c *OctoPrint) SetTransport(transport runtime.ClientTransport) {
 	c.Job.SetTransport(transport)
 
 	c.Languages.SetTransport(transport)
+
+	c.PluginDisplayLayerProgress.SetTransport(transport)
 
 	c.Printer.SetTransport(transport)
 

@@ -50,7 +50,7 @@ type GetVersionOK struct {
 }
 
 func (o *GetVersionOK) Error() string {
-	return fmt.Sprintf("[GET /version][%d] getVersionOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/version][%d] getVersionOK  %+v", 200, o.Payload)
 }
 
 func (o *GetVersionOK) GetPayload() *models.Version {

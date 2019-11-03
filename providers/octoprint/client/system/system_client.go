@@ -38,7 +38,7 @@ func (a *Client) ExecuteCommand(params *ExecuteCommandParams, authInfo runtime.C
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "executeCommand",
 		Method:             "POST",
-		PathPattern:        "/system/commands/{source}/{action}",
+		PathPattern:        "/api/system/commands/{source}/{action}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
@@ -73,7 +73,7 @@ func (a *Client) GetCommands(params *GetCommandsParams, authInfo runtime.ClientA
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getCommands",
 		Method:             "GET",
-		PathPattern:        "/system/commands",
+		PathPattern:        "/api/system/commands",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
@@ -108,7 +108,7 @@ func (a *Client) GetCommandsBySource(params *GetCommandsBySourceParams, authInfo
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getCommandsBySource",
 		Method:             "GET",
-		PathPattern:        "/system/commands/{source}",
+		PathPattern:        "/api/system/commands/{source}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},

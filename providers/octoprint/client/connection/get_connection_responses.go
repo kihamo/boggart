@@ -50,7 +50,7 @@ type GetConnectionOK struct {
 }
 
 func (o *GetConnectionOK) Error() string {
-	return fmt.Sprintf("[GET /connection][%d] getConnectionOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/connection][%d] getConnectionOK  %+v", 200, o.Payload)
 }
 
 func (o *GetConnectionOK) GetPayload() *models.Connection {

@@ -68,7 +68,7 @@ type ExecuteCommandNoContent struct {
 }
 
 func (o *ExecuteCommandNoContent) Error() string {
-	return fmt.Sprintf("[POST /system/commands/{source}/{action}][%d] executeCommandNoContent  %+v", 204, o.Payload)
+	return fmt.Sprintf("[POST /api/system/commands/{source}/{action}][%d] executeCommandNoContent  %+v", 204, o.Payload)
 }
 
 func (o *ExecuteCommandNoContent) GetPayload() []*models.Command {
@@ -98,7 +98,7 @@ type ExecuteCommandBadRequest struct {
 }
 
 func (o *ExecuteCommandBadRequest) Error() string {
-	return fmt.Sprintf("[POST /system/commands/{source}/{action}][%d] executeCommandBadRequest ", 400)
+	return fmt.Sprintf("[POST /api/system/commands/{source}/{action}][%d] executeCommandBadRequest ", 400)
 }
 
 func (o *ExecuteCommandBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -119,7 +119,7 @@ type ExecuteCommandNotFound struct {
 }
 
 func (o *ExecuteCommandNotFound) Error() string {
-	return fmt.Sprintf("[POST /system/commands/{source}/{action}][%d] executeCommandNotFound ", 404)
+	return fmt.Sprintf("[POST /api/system/commands/{source}/{action}][%d] executeCommandNotFound ", 404)
 }
 
 func (o *ExecuteCommandNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -140,7 +140,7 @@ type ExecuteCommandInternalServerError struct {
 }
 
 func (o *ExecuteCommandInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /system/commands/{source}/{action}][%d] executeCommandInternalServerError ", 500)
+	return fmt.Sprintf("[POST /api/system/commands/{source}/{action}][%d] executeCommandInternalServerError ", 500)
 }
 
 func (o *ExecuteCommandInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

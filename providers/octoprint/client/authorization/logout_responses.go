@@ -46,7 +46,7 @@ type LogoutNoContent struct {
 }
 
 func (o *LogoutNoContent) Error() string {
-	return fmt.Sprintf("[POST /logout][%d] logoutNoContent ", 204)
+	return fmt.Sprintf("[POST /api/logout][%d] logoutNoContent ", 204)
 }
 
 func (o *LogoutNoContent) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

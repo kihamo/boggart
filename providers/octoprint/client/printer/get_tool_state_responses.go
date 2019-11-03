@@ -56,7 +56,7 @@ type GetToolStateOK struct {
 }
 
 func (o *GetToolStateOK) Error() string {
-	return fmt.Sprintf("[GET /printer/tool][%d] getToolStateOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/printer/tool][%d] getToolStateOK  %+v", 200, o.Payload)
 }
 
 func (o *GetToolStateOK) GetPayload() *models.ToolState {
@@ -88,7 +88,7 @@ type GetToolStateConflict struct {
 }
 
 func (o *GetToolStateConflict) Error() string {
-	return fmt.Sprintf("[GET /printer/tool][%d] getToolStateConflict ", 409)
+	return fmt.Sprintf("[GET /api/printer/tool][%d] getToolStateConflict ", 409)
 }
 
 func (o *GetToolStateConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

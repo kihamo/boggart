@@ -50,7 +50,7 @@ type GetJobOK struct {
 }
 
 func (o *GetJobOK) Error() string {
-	return fmt.Sprintf("[GET /job][%d] getJobOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/job][%d] getJobOK  %+v", 200, o.Payload)
 }
 
 func (o *GetJobOK) GetPayload() *models.Job {

@@ -10,7 +10,7 @@ produces:
 - "application/json"
 schemes:
 - "http"
-basePath: "/api"
+#basePath: "/api"
 securityDefinitions:
   APIKeyHeader:
     type: apiKey
@@ -24,7 +24,7 @@ security:
 - APIKeyHeader: []
 - APIKeyQueryParam: []
 paths:
-  /login:
+  /api/login:
     post:
       operationId: "login"
       tags:
@@ -70,7 +70,7 @@ paths:
           description: "Username/password mismatch or unknown user"
         403:
           description: "Deactivated account"
-  /logout:
+  /api/logout:
     post:
       operationId: "logout"
       tags:
@@ -79,7 +79,7 @@ paths:
       responses:
         204:
           description: "Successful logout"
-  /version:
+  /api/version:
     get:
       operationId: "getVersion"
       tags:
@@ -90,7 +90,7 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/Version"
-  /connection:
+  /api/connection:
     get:
       operationId: "getConnection"
       tags:
@@ -133,7 +133,7 @@ paths:
           description: "Successful operation"
         400:
           description: "Bad request"
-  /job:
+  /api/job:
     get:
       operationId: "getJob"
       tags:
@@ -175,7 +175,7 @@ paths:
           description: "Successful operation"
         409:
           description: "If the printer is not operational or the current print job state does not match the preconditions for the command"
-  /languages:
+  /api/languages:
     get:
       operationId: "getLanguages"
       tags:
@@ -186,7 +186,7 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/Languages"
-  /printer:
+  /api/printer:
     get:
       operationId: "getPrinterState"
       tags:
@@ -218,7 +218,7 @@ paths:
             $ref: "#/definitions/PrinterState"
         409:
           description: "If the printer is not operational"
-  /printer/tool:
+  /api/printer/tool:
     get:
       operationId: "getToolState"
       tags:
@@ -242,7 +242,7 @@ paths:
             $ref: "#/definitions/ToolState"
         409:
           description: "If the printer is not operational"
-  /printer/bed:
+  /api/printer/bed:
     get:
       operationId: "getBedState"
       tags:
@@ -266,7 +266,7 @@ paths:
             $ref: "#/definitions/BedState"
         409:
           description: "If the printer is not operational"
-  /printer/chamber:
+  /api/printer/chamber:
     get:
       operationId: "getChamberState"
       tags:
@@ -290,7 +290,7 @@ paths:
             $ref: "#/definitions/ChamberState"
         409:
           description: "If the printer is not operational"
-  /printer/sd:
+  /api/printer/sd:
     get:
       operationId: "getSDState"
       tags:
@@ -303,7 +303,7 @@ paths:
             $ref: "#/definitions/SDState"
         404:
           description: "I SD support has been disabled in OctoPrint's config"
-  /settings:
+  /api/settings:
     get:
       operationId: "getSettings"
       tags:
@@ -315,7 +315,7 @@ paths:
           schema:
             $ref: "#/definitions/Settings"
 
-  /system/commands:
+  /api/system/commands:
     get:
       operationId: "getCommands"
       tags:
@@ -335,7 +335,7 @@ paths:
                 type: "array"
                 items:
                   $ref: "#/definitions/Command"
-  /system/commands/{source}:
+  /api/system/commands/{source}:
     get:
       operationId: "getCommandsBySource"
       tags:
@@ -359,7 +359,7 @@ paths:
               $ref: "#/definitions/Command"
         404:
           description: "Not found"
-  /system/commands/{source}/{action}:
+  /api/system/commands/{source}/{action}:
     post:
       operationId: "executeCommand"
       tags:
@@ -392,6 +392,17 @@ paths:
           description: "Not found"
         500:
           description: "Internal server error"
+  /plugin/DisplayLayerProgress/values:
+    get:
+      operationId: "displayLayerProgress"
+      tags:
+      - "PluginDisplayLayerProgress"
+      summary: "Receive the layer/height and other values"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/PluginDisplayLayerProgress"
 definitions:
   Version:
     type: "object"
@@ -858,3 +869,48 @@ definitions:
         type: "string"
       resource:
         type: "string"
+  PluginDisplayLayerProgress:
+    type: "object"
+    properties:
+      fanSpeed:
+        type: "string"
+      feedrate:
+        type: "string"
+      feedrateG0:
+        type: "string"
+      feedrateG1:
+        type: "string"
+      height:
+        type: "object"
+        properties:
+          current:
+            type: "string"
+          total:
+            type: "string"
+          totalWithExtrusion:
+            type: "string"
+      layer:
+        type: "object"
+        properties:
+          averageLayerDuration:
+            type: "string"
+          averageLayerDurationInSeconds:
+            type: "integer"
+          current:
+            type: "string"
+          lastLayerDuration:
+            type: "string"
+          lastLayerDurationInSeconds:
+            type: "integer"
+          total:
+            type: "string"
+      print:
+        type: "object"
+        properties:
+          progress:
+            type: "string"
+          timeLeft:
+            type: "string"
+          timeLeftInSeconds:
+            type: "integer"
+

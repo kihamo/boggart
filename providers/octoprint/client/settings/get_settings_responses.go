@@ -50,7 +50,7 @@ type GetSettingsOK struct {
 }
 
 func (o *GetSettingsOK) Error() string {
-	return fmt.Sprintf("[GET /settings][%d] getSettingsOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/settings][%d] getSettingsOK  %+v", 200, o.Payload)
 }
 
 func (o *GetSettingsOK) GetPayload() *models.Settings {

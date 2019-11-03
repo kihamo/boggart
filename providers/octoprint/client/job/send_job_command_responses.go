@@ -56,7 +56,7 @@ type SendJobCommandNoContent struct {
 }
 
 func (o *SendJobCommandNoContent) Error() string {
-	return fmt.Sprintf("[POST /job][%d] sendJobCommandNoContent ", 204)
+	return fmt.Sprintf("[POST /api/job][%d] sendJobCommandNoContent ", 204)
 }
 
 func (o *SendJobCommandNoContent) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -77,7 +77,7 @@ type SendJobCommandConflict struct {
 }
 
 func (o *SendJobCommandConflict) Error() string {
-	return fmt.Sprintf("[POST /job][%d] sendJobCommandConflict ", 409)
+	return fmt.Sprintf("[POST /api/job][%d] sendJobCommandConflict ", 409)
 }
 
 func (o *SendJobCommandConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

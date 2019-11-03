@@ -56,7 +56,7 @@ type GetSDStateOK struct {
 }
 
 func (o *GetSDStateOK) Error() string {
-	return fmt.Sprintf("[GET /printer/sd][%d] getSDStateOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/printer/sd][%d] getSDStateOK  %+v", 200, o.Payload)
 }
 
 func (o *GetSDStateOK) GetPayload() *models.SDState {
@@ -88,7 +88,7 @@ type GetSDStateNotFound struct {
 }
 
 func (o *GetSDStateNotFound) Error() string {
-	return fmt.Sprintf("[GET /printer/sd][%d] getSDStateNotFound ", 404)
+	return fmt.Sprintf("[GET /api/printer/sd][%d] getSDStateNotFound ", 404)
 }
 
 func (o *GetSDStateNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

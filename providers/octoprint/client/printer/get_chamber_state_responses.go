@@ -56,7 +56,7 @@ type GetChamberStateOK struct {
 }
 
 func (o *GetChamberStateOK) Error() string {
-	return fmt.Sprintf("[GET /printer/chamber][%d] getChamberStateOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/printer/chamber][%d] getChamberStateOK  %+v", 200, o.Payload)
 }
 
 func (o *GetChamberStateOK) GetPayload() *models.ChamberState {
@@ -88,7 +88,7 @@ type GetChamberStateConflict struct {
 }
 
 func (o *GetChamberStateConflict) Error() string {
-	return fmt.Sprintf("[GET /printer/chamber][%d] getChamberStateConflict ", 409)
+	return fmt.Sprintf("[GET /api/printer/chamber][%d] getChamberStateConflict ", 409)
 }
 
 func (o *GetChamberStateConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

@@ -56,7 +56,7 @@ type SendConnectionCommandNoContent struct {
 }
 
 func (o *SendConnectionCommandNoContent) Error() string {
-	return fmt.Sprintf("[POST /connection][%d] sendConnectionCommandNoContent ", 204)
+	return fmt.Sprintf("[POST /api/connection][%d] sendConnectionCommandNoContent ", 204)
 }
 
 func (o *SendConnectionCommandNoContent) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -77,7 +77,7 @@ type SendConnectionCommandBadRequest struct {
 }
 
 func (o *SendConnectionCommandBadRequest) Error() string {
-	return fmt.Sprintf("[POST /connection][%d] sendConnectionCommandBadRequest ", 400)
+	return fmt.Sprintf("[POST /api/connection][%d] sendConnectionCommandBadRequest ", 400)
 }
 
 func (o *SendConnectionCommandBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

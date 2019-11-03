@@ -38,7 +38,7 @@ func (a *Client) GetBedState(params *GetBedStateParams, authInfo runtime.ClientA
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getBedState",
 		Method:             "GET",
-		PathPattern:        "/printer/bed",
+		PathPattern:        "/api/printer/bed",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
@@ -73,7 +73,7 @@ func (a *Client) GetChamberState(params *GetChamberStateParams, authInfo runtime
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getChamberState",
 		Method:             "GET",
-		PathPattern:        "/printer/chamber",
+		PathPattern:        "/api/printer/chamber",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
@@ -108,7 +108,7 @@ func (a *Client) GetPrinterState(params *GetPrinterStateParams, authInfo runtime
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getPrinterState",
 		Method:             "GET",
-		PathPattern:        "/printer",
+		PathPattern:        "/api/printer",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
@@ -143,7 +143,7 @@ func (a *Client) GetSDState(params *GetSDStateParams, authInfo runtime.ClientAut
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getSDState",
 		Method:             "GET",
-		PathPattern:        "/printer/sd",
+		PathPattern:        "/api/printer/sd",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
@@ -178,7 +178,7 @@ func (a *Client) GetToolState(params *GetToolStateParams, authInfo runtime.Clien
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getToolState",
 		Method:             "GET",
-		PathPattern:        "/printer/tool",
+		PathPattern:        "/api/printer/tool",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},

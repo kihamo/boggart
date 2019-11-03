@@ -56,7 +56,7 @@ type GetPrinterStateOK struct {
 }
 
 func (o *GetPrinterStateOK) Error() string {
-	return fmt.Sprintf("[GET /printer][%d] getPrinterStateOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/printer][%d] getPrinterStateOK  %+v", 200, o.Payload)
 }
 
 func (o *GetPrinterStateOK) GetPayload() *models.PrinterState {
@@ -88,7 +88,7 @@ type GetPrinterStateConflict struct {
 }
 
 func (o *GetPrinterStateConflict) Error() string {
-	return fmt.Sprintf("[GET /printer][%d] getPrinterStateConflict ", 409)
+	return fmt.Sprintf("[GET /api/printer][%d] getPrinterStateConflict ", 409)
 }
 
 func (o *GetPrinterStateConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

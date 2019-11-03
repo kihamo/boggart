@@ -56,7 +56,7 @@ type GetBedStateOK struct {
 }
 
 func (o *GetBedStateOK) Error() string {
-	return fmt.Sprintf("[GET /printer/bed][%d] getBedStateOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/printer/bed][%d] getBedStateOK  %+v", 200, o.Payload)
 }
 
 func (o *GetBedStateOK) GetPayload() *models.BedState {
@@ -88,7 +88,7 @@ type GetBedStateConflict struct {
 }
 
 func (o *GetBedStateConflict) Error() string {
-	return fmt.Sprintf("[GET /printer/bed][%d] getBedStateConflict ", 409)
+	return fmt.Sprintf("[GET /api/printer/bed][%d] getBedStateConflict ", 409)
 }
 
 func (o *GetBedStateConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

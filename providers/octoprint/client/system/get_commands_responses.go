@@ -53,7 +53,7 @@ type GetCommandsOK struct {
 }
 
 func (o *GetCommandsOK) Error() string {
-	return fmt.Sprintf("[GET /system/commands][%d] getCommandsOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/system/commands][%d] getCommandsOK  %+v", 200, o.Payload)
 }
 
 func (o *GetCommandsOK) GetPayload() *GetCommandsOKBody {

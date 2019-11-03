@@ -50,7 +50,7 @@ type GetLanguagesOK struct {
 }
 
 func (o *GetLanguagesOK) Error() string {
-	return fmt.Sprintf("[GET /languages][%d] getLanguagesOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/languages][%d] getLanguagesOK  %+v", 200, o.Payload)
 }
 
 func (o *GetLanguagesOK) GetPayload() *models.Languages {

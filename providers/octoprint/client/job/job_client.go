@@ -38,7 +38,7 @@ func (a *Client) GetJob(params *GetJobParams, authInfo runtime.ClientAuthInfoWri
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getJob",
 		Method:             "GET",
-		PathPattern:        "/job",
+		PathPattern:        "/api/job",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
@@ -73,7 +73,7 @@ func (a *Client) SendJobCommand(params *SendJobCommandParams, authInfo runtime.C
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "sendJobCommand",
 		Method:             "POST",
-		PathPattern:        "/job",
+		PathPattern:        "/api/job",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},

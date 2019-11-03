@@ -61,7 +61,7 @@ type LoginOK struct {
 }
 
 func (o *LoginOK) Error() string {
-	return fmt.Sprintf("[POST /login][%d] loginOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /api/login][%d] loginOK  %+v", 200, o.Payload)
 }
 
 func (o *LoginOK) GetPayload() *LoginOKBody {
@@ -93,7 +93,7 @@ type LoginUnauthorized struct {
 }
 
 func (o *LoginUnauthorized) Error() string {
-	return fmt.Sprintf("[POST /login][%d] loginUnauthorized ", 401)
+	return fmt.Sprintf("[POST /api/login][%d] loginUnauthorized ", 401)
 }
 
 func (o *LoginUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -114,7 +114,7 @@ type LoginForbidden struct {
 }
 
 func (o *LoginForbidden) Error() string {
-	return fmt.Sprintf("[POST /login][%d] loginForbidden ", 403)
+	return fmt.Sprintf("[POST /api/login][%d] loginForbidden ", 403)
 }
 
 func (o *LoginForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

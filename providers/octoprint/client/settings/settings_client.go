@@ -38,7 +38,7 @@ func (a *Client) GetSettings(params *GetSettingsParams, authInfo runtime.ClientA
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getSettings",
 		Method:             "GET",
-		PathPattern:        "/settings",
+		PathPattern:        "/api/settings",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
