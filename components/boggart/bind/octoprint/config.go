@@ -25,6 +25,10 @@ type Config struct {
 	TopicStateJobProgress            mqtt.Topic    `mapstructure:"topic_state_job_progress" yaml:"topic_state_job_progress"`
 	TopicStateJobTime                mqtt.Topic    `mapstructure:"topic_state_job_time" yaml:"topic_state_job_time"`
 	TopicStateJobTimeLeft            mqtt.Topic    `mapstructure:"topic_state_job_time_left" yaml:"topic_state_job_time_left"`
+	TopicLayerTotal                  mqtt.Topic    `mapstructure:"topic_layer_total" yaml:"topic_layer_total"`
+	TopicLayerCurrent                mqtt.Topic    `mapstructure:"topic_layer_current" yaml:"topic_layer_current"`
+	TopicHeightTotal                 mqtt.Topic    `mapstructure:"topic_height_total" yaml:"topic_height_total"`
+	TopicHeightCurrent               mqtt.Topic    `mapstructure:"topic_height_current" yaml:"topic_height_current"`
 }
 
 func (t Type) Config() interface{} {
@@ -45,5 +49,9 @@ func (t Type) Config() interface{} {
 		TopicStateJobProgress:            prefix + "state/job/progress",
 		TopicStateJobTime:                prefix + "state/job/time",
 		TopicStateJobTimeLeft:            prefix + "state/job/time-left",
+		TopicLayerTotal:                  prefix + "layer/total",
+		TopicLayerCurrent:                prefix + "layer/current",
+		TopicHeightTotal:                 prefix + "height/total",
+		TopicHeightCurrent:               prefix + "height/current",
 	}
 }

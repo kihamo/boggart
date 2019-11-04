@@ -892,16 +892,16 @@ definitions:
       layer:
         type: "object"
         properties:
-          averageLayerDuration:
-            type: "string"
-          averageLayerDurationInSeconds:
-            type: "integer"
+          # averageLayerDuration:
+          #   type: "string"
+          # averageLayerDurationInSeconds:
+          #   type: "integer"
           current:
             type: "string"
-          lastLayerDuration:
-            type: "string"
-          lastLayerDurationInSeconds:
-            type: "integer"
+          # lastLayerDuration:
+          #   type: "string"
+          # lastLayerDurationInSeconds:
+          #  type: "integer"
           total:
             type: "string"
       print:

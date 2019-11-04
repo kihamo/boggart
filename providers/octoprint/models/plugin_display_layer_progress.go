@@ -173,20 +173,8 @@ func (m *PluginDisplayLayerProgressHeight) UnmarshalBinary(b []byte) error {
 // swagger:model PluginDisplayLayerProgressLayer
 type PluginDisplayLayerProgressLayer struct {
 
-	// average layer duration
-	AverageLayerDuration string `json:"averageLayerDuration,omitempty"`
-
-	// average layer duration in seconds
-	AverageLayerDurationInSeconds int64 `json:"averageLayerDurationInSeconds,omitempty"`
-
 	// current
 	Current string `json:"current,omitempty"`
-
-	// last layer duration
-	LastLayerDuration string `json:"lastLayerDuration,omitempty"`
-
-	// last layer duration in seconds
-	LastLayerDurationInSeconds int64 `json:"lastLayerDurationInSeconds,omitempty"`
 
 	// total
 	Total string `json:"total,omitempty"`

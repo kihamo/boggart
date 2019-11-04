@@ -2,6 +2,9 @@ package octoprint
 
 import (
 	"context"
+	"strconv"
+
+	"github.com/kihamo/boggart/providers/octoprint/client/plugin_display_layer_progress"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/providers/octoprint/client/job"
@@ -81,7 +84,7 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		err = multierr.Append(err, e)
 	}
 
-	// Hotend (tool 0)
+	// HotEnd (tool 0)
 	temperature = state.Payload.Temperature.Tool0
 
 	metricDeviceTemperatureActual.With("address", address).With("device", "tool0").Set(temperature.Actual)
@@ -119,6 +122,50 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		if e := b.MQTTPublishAsync(ctx, b.config.TopicStateJobTimeLeft.Format(address), j.Payload.Progress.PrintTimeLeft); e != nil {
 			err = multierr.Append(err, e)
 		}
+	}
+
+	// Layer & Height
+	var (
+		layerTotal, layerCurrent   uint64
+		heightTotal, heightCurrent float64
+	)
+
+	if state.Payload.State.Flags.Printing {
+		if progress, e := b.provider.PluginDisplayLayerProgress.DisplayLayerProgress(plugin_display_layer_progress.NewDisplayLayerProgressParamsWithContext(ctx), nil); e == nil {
+			if value, e := strconv.ParseUint(progress.Payload.Layer.Total, 10, 64); e == nil {
+				layerTotal = value
+			}
+
+			if progress.Payload.Layer.Current != "-" {
+				if value, e := strconv.ParseUint(progress.Payload.Layer.Current, 10, 64); e == nil {
+					layerCurrent = value
+				}
+			}
+
+			if value, e := strconv.ParseFloat(progress.Payload.Height.Total, 64); e == nil {
+				heightTotal = value
+			}
+
+			if value, e := strconv.ParseFloat(progress.Payload.Height.Current, 64); e == nil {
+				heightCurrent = value
+			}
+		}
+	}
+
+	if e := b.MQTTPublishAsync(ctx, b.config.TopicLayerTotal.Format(address), layerTotal); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	if e := b.MQTTPublishAsync(ctx, b.config.TopicLayerCurrent.Format(address), layerCurrent); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	if e := b.MQTTPublishAsync(ctx, b.config.TopicHeightTotal.Format(address), heightTotal); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	if e := b.MQTTPublishAsync(ctx, b.config.TopicHeightCurrent.Format(address), heightCurrent); e != nil {
+		err = multierr.Append(err, e)
 	}
 
 	return nil, err

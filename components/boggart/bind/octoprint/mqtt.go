@@ -20,5 +20,9 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 		b.config.TopicStateJobProgress.Format(sn),
 		b.config.TopicStateJobTime.Format(sn),
 		b.config.TopicStateJobTimeLeft.Format(sn),
+		b.config.TopicLayerTotal.Format(sn),
+		b.config.TopicLayerCurrent.Format(sn),
+		b.config.TopicHeightTotal.Format(sn),
+		b.config.TopicHeightCurrent.Format(sn),
 	}
 }
