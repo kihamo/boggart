@@ -7,7 +7,6 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
@@ -153,8 +152,13 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 			return nil, nil
 		})
 
+		probePeriod := boggart.ReadinessProbeDefaultPeriod
+		if probeConfig, ok := config.(boggart.BindConfigReadinessProbePeriod); ok {
+			probePeriod = probeConfig.ReadinessProbePeriod()
+		}
+		probeTask.SetRepeatInterval(probePeriod)
+
 		probeTask.SetRepeats(-1)
-		probeTask.SetRepeatInterval(time.Minute)
 		probeTask.SetName("readiness-probe")
 
 		bindItem.probes = append(bindItem.probes, probeTask)
@@ -203,8 +207,13 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 			return nil, nil
 		})
 
+		probePeriod := boggart.LivenessProbeDefaultPeriod
+		if probeConfig, ok := config.(boggart.BindConfigLivenessProbePeriod); ok {
+			probePeriod = probeConfig.LivenessProbePeriod()
+		}
+		probeTask.SetRepeatInterval(probePeriod)
+
 		probeTask.SetRepeats(-1)
-		probeTask.SetRepeatInterval(time.Minute)
 		probeTask.SetName("liveness-probe")
 
 		bindItem.probes = append(bindItem.probes, probeTask)

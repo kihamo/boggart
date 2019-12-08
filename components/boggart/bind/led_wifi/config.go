@@ -8,6 +8,8 @@ import (
 )
 
 type Config struct {
+	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
+
 	Address            string        `valid:"host,required"`
 	UpdaterInterval    time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 	TopicPower         mqtt.Topic    `mapstructure:"topic_power" yaml:"topic_power"`
@@ -25,6 +27,9 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/led/+/"
 
 	return &Config{
+		BindConfig: boggart.BindConfig{
+			ReadinessPeriod: time.Second * 3,
+		},
 		UpdaterInterval:    time.Second * 3,
 		TopicPower:         prefix + "power",
 		TopicColor:         prefix + "color",
