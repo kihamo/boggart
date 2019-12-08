@@ -1,6 +1,8 @@
 package wifiled
 
-import "strconv"
+import (
+	"strconv"
+)
 
 type Mode uint8
 
@@ -90,6 +92,10 @@ func (m Mode) String() string {
 	default:
 		return "unknown"
 	}
+}
+
+func (m Mode) Uint8() uint8 {
+	return uint8(m)
 }
 
 func ModeFromString(mode string) (*Mode, error) {

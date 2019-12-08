@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 	"go.uber.org/multierr"
@@ -25,13 +24,10 @@ func (b *Bind) Tasks() []workers.Task {
 func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	state, err := b.bulb.State(ctx)
 	if err != nil {
-		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, err
 	}
 
 	b.SetSerialNumber(strconv.FormatUint(uint64(state.DeviceName), 10))
-
-	b.UpdateStatus(boggart.BindStatusOnline)
 
 	if e := b.MQTTPublishAsync(ctx, b.config.TopicStatePower, state.Power); e != nil {
 		err = multierr.Append(err, e)

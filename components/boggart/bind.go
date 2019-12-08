@@ -1,6 +1,8 @@
 package boggart
 
 import (
+	"context"
+
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/event"
@@ -73,4 +75,12 @@ type BindHasMQTTSubscribers interface {
 
 type BindHasMQTTPublishes interface {
 	MQTTPublishes() []mqtt.Topic
+}
+
+type BindHasReadinessProbe interface {
+	ReadinessProbe(context.Context) error
+}
+
+type BindHasLivenessProbe interface {
+	LivenessProbe(context.Context) error
 }

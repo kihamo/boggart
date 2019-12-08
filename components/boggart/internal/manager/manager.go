@@ -7,11 +7,13 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 	w "github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/manager"
+	"github.com/kihamo/go-workers/task"
 	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/i18n"
 	"github.com/kihamo/shadow/components/logging"
@@ -103,6 +105,7 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 		description: description,
 		tags:        tags,
 		config:      config,
+		probes:      make([]w.Task, 0, 3),
 	}
 
 	statusUpdate := m.itemStatusUpdate(bindItem)
@@ -132,13 +135,88 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 		}
 	}
 
+	// probes
+	if probe, ok := bind.(boggart.BindHasReadinessProbe); ok {
+		probeTask := task.NewFunctionTask(func(ctx context.Context) (interface{}, error) {
+			if err := probe.ReadinessProbe(ctx); err != nil {
+				statusUpdate(boggart.BindStatusOffline)
+
+				m.logger.Error("Readiness probe failure",
+					"type", bindItem.Type(),
+					"id", bindItem.ID(),
+					"error", err.Error(),
+				)
+			} else {
+				statusUpdate(boggart.BindStatusOnline)
+			}
+
+			return nil, nil
+		})
+
+		probeTask.SetRepeats(-1)
+		probeTask.SetRepeatInterval(time.Minute)
+		probeTask.SetName("readiness-probe")
+
+		bindItem.probes = append(bindItem.probes, probeTask)
+	}
+
+	if probe, ok := bind.(boggart.BindHasLivenessProbe); ok {
+		probeTask := task.NewFunctionTask(func(ctx context.Context) (_ interface{}, err error) {
+			currentStatus := bindItem.Status()
+			if currentStatus != boggart.BindStatusOnline && currentStatus != boggart.BindStatusOffline {
+				return nil, nil
+			}
+
+			err = probe.LivenessProbe(ctx)
+			if err == nil {
+				return nil, nil
+			}
+
+			m.logger.Error("Liveness probe failure",
+				"type", bindItem.Type(),
+				"id", bindItem.ID(),
+				"error", err.Error(),
+			)
+
+			err = m.Unregister(bindItem.ID())
+			if err != nil {
+				m.logger.Error("Unregister after liveness probe failure",
+					"type", bindItem.Type(),
+					"id", bindItem.ID(),
+					"error", err.Error(),
+				)
+
+				return nil, nil
+			}
+
+			_, err = m.Register(id, bind, t, description, tags, config)
+			if err != nil {
+				m.logger.Error("Register after liveness probe failure",
+					"type", bindItem.Type(),
+					"id", bindItem.ID(),
+					"error", err.Error(),
+				)
+
+				return nil, nil
+			}
+
+			return nil, nil
+		})
+
+		probeTask.SetRepeats(-1)
+		probeTask.SetRepeatInterval(time.Minute)
+		probeTask.SetName("liveness-probe")
+
+		bindItem.probes = append(bindItem.probes, probeTask)
+	}
+
 	// register tasks
-	for _, task := range bindItem.Tasks() {
-		if tsk, ok := task.(bindTask); ok {
+	for _, tsk := range append(bindItem.Tasks(), bindItem.probes...) {
+		if tsk, ok := tsk.(bindTask); ok {
 			tsk.SetName("bind-" + t + "-" + tsk.Name())
 		}
 
-		m.workers.AddTask(task)
+		m.workers.AddTask(tsk)
 	}
 
 	// register listeners
@@ -177,9 +255,14 @@ func (m *Manager) Unregister(id string) error {
 		mqttClient.SetMQTTClient(nil)
 	}
 
+	// remove probes
+	for _, tsk := range bindItem.probes {
+		m.workers.RemoveTask(tsk)
+	}
+
 	// remove tasks
-	for _, task := range bindItem.Tasks() {
-		m.workers.RemoveTask(task)
+	for _, tsk := range bindItem.Tasks() {
+		m.workers.RemoveTask(tsk)
 	}
 
 	// remove listeners

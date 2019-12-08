@@ -19,6 +19,7 @@ type BindItem struct {
 	description string
 	tags        []string
 	config      interface{}
+	probes      []workers.Task
 
 	cacheMutex           sync.Mutex
 	cacheTasks           []workers.Task
