@@ -3,7 +3,6 @@ package sp3s
 import (
 	"context"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 	"go.uber.org/multierr"
@@ -21,13 +20,14 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
-	state, err := b.State()
-	if err != nil {
-		b.UpdateStatus(boggart.BindStatusOffline)
-		return nil, err
+	if !b.IsStatusOnline() {
+		return nil, nil
 	}
 
-	b.UpdateStatus(boggart.BindStatusOnline)
+	state, err := b.State()
+	if err != nil {
+		return nil, err
+	}
 
 	sn := b.SerialNumber()
 

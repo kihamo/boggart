@@ -8,6 +8,8 @@ import (
 )
 
 type Config struct {
+	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
+
 	Host              string               `valid:",required"`
 	MAC               boggart.HardwareAddr `valid:",required"`
 	Model             string               `valid:"in(sp3seu|sp3sus),required"`
@@ -22,6 +24,10 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/socket/+/"
 
 	return &Config{
+		BindConfig: boggart.BindConfig{
+			ReadinessPeriod:  time.Second * 30,
+			ReadinessTimeout: time.Second,
+		},
 		UpdaterInterval:   time.Second * 3, // as e-control app, refresh every 3 sec,
 		ConnectionTimeout: time.Second,
 		TopicState:        prefix + "state",

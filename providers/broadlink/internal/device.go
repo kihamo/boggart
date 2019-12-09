@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -40,6 +41,7 @@ type Device struct {
 	kind           int
 	timeout        int64
 	packetsCounter uint64
+	requestMutex   sync.Mutex
 }
 
 func NewDevice(kind int, mac net.HardwareAddr, host string) *Device {
@@ -65,14 +67,6 @@ func (d *Device) Timeout() time.Duration {
 	return time.Duration(atomic.LoadInt64(&d.timeout))
 }
 
-func (d *Device) getPacketsCounter() uint16 {
-	return uint16(atomic.LoadUint64(&d.packetsCounter))
-}
-
-func (d *Device) incPacketsCounter() {
-	atomic.AddUint64(&d.packetsCounter, 1)
-}
-
 func (d *Device) ID() uint32 {
 	return atomic.LoadUint32(&d.id)
 }
@@ -93,55 +87,60 @@ func (d *Device) Host() string {
 	return d.host
 }
 
-func (d *Device) request(cmd byte, payload []byte, waitResult bool) ([]byte, error) {
+func (d *Device) request(cmd byte, payload []byte, waitResult bool) ([]byte, uint64, error) {
 	// auto auth
 	if cmd != CommandAuth && d.ID() == 0 {
 		if err := d.Auth(nil, ""); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 	}
 
+	d.requestMutex.Lock()
+	defer d.requestMutex.Unlock()
+
 	conn, err := net.Dial("udp", d.host)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer conn.Close()
 
 	connUDP, ok := conn.(*net.UDPConn)
 	if !ok {
-		return nil, errors.New("failed cast connect to *net.UDPConn")
+		return nil, 0, errors.New("failed cast connect to *net.UDPConn")
 	}
 
 	err = connUDP.SetDeadline(time.Now().Add(d.Timeout()))
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	_, err = connUDP.Write(d.buildCmdPacket(cmd, payload))
+	requestPacket, requestId := d.buildCmdPacket(cmd, payload)
+
+	_, err = connUDP.Write(requestPacket)
 	if err != nil {
-		return nil, err
+		return nil, requestId, err
 	}
 
 	if !waitResult {
-		return nil, nil
+		return nil, requestId, nil
 	}
 
 	response := make([]byte, DefaultBufferSize)
 	size, _, err := connUDP.ReadFromUDP(response)
 	if err != nil {
-		return nil, err
+		return nil, requestId, err
 	}
 
-	return response[:size], nil
+	return response[:size], requestId, nil
 }
 
 func (d *Device) Cmd(cmd byte, payload []byte) error {
-	_, err := d.request(cmd, payload, false)
+	_, _, err := d.request(cmd, payload, false)
 	return err
 }
 
 func (d *Device) Call(cmd byte, payload []byte) ([]byte, error) {
-	result, err := d.request(cmd, payload, true)
+	result, pcWant, err := d.request(cmd, payload, true)
 	if err != nil {
 		return nil, err
 	}
@@ -149,9 +148,8 @@ func (d *Device) Call(cmd byte, payload []byte) ([]byte, error) {
 	// TODO: Checksum check
 
 	// verify packet counter
-	pcWant := d.getPacketsCounter()
 	pcHave := binary.LittleEndian.Uint16(result[0x28:])
-	if pcWant != pcHave {
+	if uint16(pcWant) != pcHave {
 		return nil, fmt.Errorf("invalid packet counter want %d have %d", pcWant, pcHave)
 	}
 
@@ -234,7 +232,7 @@ func (d *Device) DecodePacket(packet []byte) ([]byte, error) {
 	return d.decrypt(packet[0x38:]), nil
 }
 
-func (d *Device) buildCmdPacket(cmd byte, payload []byte) (packet []byte) {
+func (d *Device) buildCmdPacket(cmd byte, payload []byte) (packet []byte, packetID uint64) {
 	/*
 		Offset       Contents
 		0x00         0x5a
@@ -264,8 +262,9 @@ func (d *Device) buildCmdPacket(cmd byte, payload []byte) (packet []byte) {
 	packet[0x24], packet[0x25] = 0x2a, 0x27
 	packet[0x26] = cmd
 
-	d.incPacketsCounter()
-	binary.LittleEndian.PutUint16(packet[0x28:], d.getPacketsCounter())
+	d.packetsCounter++
+	packetID = d.packetsCounter
+	binary.LittleEndian.PutUint16(packet[0x28:], uint16(packetID))
 
 	for i, part := range d.mac {
 		packet[0x2a+i] = part
