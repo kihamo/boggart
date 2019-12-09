@@ -153,10 +153,13 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 		})
 
 		probePeriod := boggart.ReadinessProbeDefaultPeriod
-		if probeConfig, ok := config.(boggart.BindConfigReadinessProbePeriod); ok {
+		probeTimeout := boggart.ReadinessProbeDefaultTimeout
+		if probeConfig, ok := config.(boggart.BindConfigReadinessProbe); ok {
 			probePeriod = probeConfig.ReadinessProbePeriod()
+			probeTimeout = probeConfig.ReadinessProbeTimeout()
 		}
 		probeTask.SetRepeatInterval(probePeriod)
+		probeTask.SetTimeout(probeTimeout)
 
 		probeTask.SetRepeats(-1)
 		probeTask.SetName("readiness-probe")
@@ -210,10 +213,13 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 		})
 
 		probePeriod := boggart.LivenessProbeDefaultPeriod
-		if probeConfig, ok := config.(boggart.BindConfigLivenessProbePeriod); ok {
+		probeTimeout := boggart.LivenessProbeDefaultTimeout
+		if probeConfig, ok := config.(boggart.BindConfigLivenessProbe); ok {
 			probePeriod = probeConfig.LivenessProbePeriod()
+			probeTimeout = probeConfig.LivenessProbeTimeout()
 		}
 		probeTask.SetRepeatInterval(probePeriod)
+		probeTask.SetTimeout(probeTimeout)
 
 		probeTask.SetRepeats(-1)
 		probeTask.SetName("liveness-probe")
