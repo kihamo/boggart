@@ -8,16 +8,18 @@ import (
 )
 
 type Config struct {
-	Host             boggart.IP    `valid:",required"`
-	Port             int           `valid:"port"`
-	LivenessInterval time.Duration `mapstructure:"liveness_interval" yaml:"liveness_interval"`
-	LivenessTimeout  time.Duration `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
+	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
+
+	Host boggart.IP `valid:",required"`
+	Port int        `valid:"port"`
 }
 
 func (t Type) Config() interface{} {
 	return &Config{
-		Port:             home.DefaultPort,
-		LivenessInterval: time.Second * 30,
-		LivenessTimeout:  time.Second * 10,
+		BindConfig: boggart.BindConfig{
+			ReadinessPeriod:  time.Second * 30,
+			ReadinessTimeout: time.Second * 10,
+		},
+		Port: home.DefaultPort,
 	}
 }
