@@ -17,11 +17,6 @@ type Bind struct {
 	messaging *messaging.Client
 }
 
-func (b *Bind) Run() error {
-	b.UpdateStatus(boggart.BindStatusOnline)
-	return nil
-}
-
 func (b *Bind) Send(ctx context.Context, text string) (err error) {
 	if len(text) == 0 {
 		return errors.New("text is empty")

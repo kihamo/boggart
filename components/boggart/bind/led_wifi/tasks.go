@@ -22,6 +22,10 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
+	if !b.IsStatusOnline() {
+		return nil, nil
+	}
+
 	state, err := b.bulb.State(ctx)
 	if err != nil {
 		return nil, err

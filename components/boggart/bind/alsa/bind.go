@@ -45,11 +45,6 @@ type Bind struct {
 	stream  *streamWrapper
 }
 
-func (b *Bind) Run() error {
-	b.UpdateStatus(boggart.BindStatusOnline)
-	return nil
-}
-
 func (b *Bind) Close() error {
 	return b.Stop()
 }

@@ -15,8 +15,6 @@ type Bind struct {
 }
 
 func (b *Bind) Run() (err error) {
-	b.UpdateStatus(boggart.BindStatusOnline)
-
 	ctx := context.Background()
 
 	if e := b.MQTTPublishAsync(ctx, b.config.TopicName, b.config.ApplicationName); e != nil {

@@ -17,11 +17,6 @@ type Bind struct {
 	client *g.Client
 }
 
-func (b *Bind) Run() error {
-	b.UpdateStatus(boggart.BindStatusOnline)
-	return nil
-}
-
 func (b *Bind) CreateAnnotation(title, text string, tags []string, timeStart *time.Time, timeEnd *time.Time) (err error) {
 	body := []string{title, text}
 

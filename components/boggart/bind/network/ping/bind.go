@@ -9,8 +9,3 @@ type Bind struct {
 	boggart.BindMQTT
 	config *Config
 }
-
-func (b *Bind) Run() error {
-	b.UpdateStatus(boggart.BindStatusOnline)
-	return nil
-}

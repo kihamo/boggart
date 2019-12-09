@@ -14,11 +14,6 @@ type Bind struct {
 	config *Config
 }
 
-func (b *Bind) Run() error {
-	b.UpdateStatus(boggart.BindStatusOnline)
-	return nil
-}
-
 func (b *Bind) WOL(mac net.HardwareAddr, ip net.IP, subnet net.IP) error {
 	if mac == nil {
 		return errors.New("MAC isn't set")

@@ -41,11 +41,6 @@ type Times struct {
 	AstronomicalDusk Time
 }
 
-func (b *Bind) Run() error {
-	b.UpdateStatus(boggart.BindStatusOnline)
-	return nil
-}
-
 func (b *Bind) Times() Times {
 	t := Times{}
 

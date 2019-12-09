@@ -10,8 +10,3 @@ type Bind struct {
 	config  *Config
 	address string
 }
-
-func (b *Bind) Run() error {
-	b.UpdateStatus(boggart.BindStatusOnline)
-	return nil
-}

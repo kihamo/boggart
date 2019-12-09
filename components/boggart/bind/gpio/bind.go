@@ -40,7 +40,6 @@ func (b *Bind) Run() error {
 		}()
 	}
 
-	b.UpdateStatus(boggart.BindStatusOnline)
 	return nil
 }
 

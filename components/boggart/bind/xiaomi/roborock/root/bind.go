@@ -39,8 +39,6 @@ func (b *Bind) Run() error {
 		return err
 	}
 
-	b.UpdateStatus(boggart.BindStatusOnline)
-
 	for fileName, callback := range b.watchFiles {
 		go func(file string, cb func(string) error) {
 			if err := cb(file); err != nil {

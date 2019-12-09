@@ -162,6 +162,8 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 		probeTask.SetName("readiness-probe")
 
 		bindItem.probes = append(bindItem.probes, probeTask)
+	} else {
+		statusUpdate(boggart.BindStatusOnline)
 	}
 
 	if probe, ok := bind.(boggart.BindHasLivenessProbe); ok {
