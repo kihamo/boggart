@@ -8,12 +8,12 @@ import (
 )
 
 type ConfigRM struct {
+	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
+
 	Host                 string               `valid:",required"`
 	MAC                  boggart.HardwareAddr `valid:",required"`
 	Model                string               `valid:"in(rm3mini|rm2proplus),required"`
 	CaptureDuration      time.Duration        `mapstructure:"capture_interval" yaml:"capture_interval"`
-	LivenessInterval     time.Duration        `mapstructure:"liveness_interval" yaml:"liveness_interval"`
-	LivenessTimeout      time.Duration        `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
 	ConnectionTimeout    time.Duration        `mapstructure:"connection_timeout" yaml:"connection_timeout"`
 	TopicCapture         mqtt.Topic           `mapstructure:"topic_capture" yaml:"topic_capture"`
 	TopicCaptureState    mqtt.Topic           `mapstructure:"topic_capture_state" yaml:"topic_capture_state"`
@@ -32,9 +32,11 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/remote-control/+/"
 
 	return &ConfigRM{
+		BindConfig: boggart.BindConfig{
+			ReadinessPeriod:  time.Second * 30,
+			ReadinessTimeout: time.Second * 10,
+		},
 		CaptureDuration:      time.Second * 15,
-		LivenessInterval:     time.Second * 30,
-		LivenessTimeout:      time.Second * 10,
 		ConnectionTimeout:    time.Second,
 		TopicCapture:         prefix + "capture",
 		TopicCaptureState:    prefix + "capture/state",
