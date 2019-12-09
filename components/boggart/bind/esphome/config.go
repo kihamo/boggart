@@ -8,14 +8,14 @@ import (
 )
 
 type Config struct {
+	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
+
 	Debug                      bool
 	Address                    string `valid:"required"`
 	Password                   string
 	OTAPort                    uint64        `mapstructure:"ota_port" yaml:"ota_port"`
 	OTAPassword                string        `mapstructure:"ota_password" yaml:"ota_password"`
-	LivenessInterval           time.Duration `mapstructure:"liveness_interval" yaml:"liveness_interval"`
-	LivenessTimeout            time.Duration `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
-	UpdaterInterval            time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
+	SyncStateInterval          time.Duration `mapstructure:"sync_state_interval" yaml:"sync_state_interval"`
 	TopicPower                 mqtt.Topic    `mapstructure:"topic_power" yaml:"topic_power"`
 	TopicColor                 mqtt.Topic    `mapstructure:"topic_color" yaml:"topic_color"`
 	TopicState                 mqtt.Topic    `mapstructure:"topic_state" yaml:"topic_state"`
@@ -35,10 +35,12 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/esphome/+/"
 
 	return &Config{
+		BindConfig: boggart.BindConfig{
+			ReadinessPeriod:  time.Minute,
+			ReadinessTimeout: time.Second * 5,
+		},
 		Debug:                      false,
-		LivenessInterval:           time.Minute,
-		LivenessTimeout:            time.Second * 5,
-		UpdaterInterval:            time.Minute,
+		SyncStateInterval:          time.Minute,
 		TopicPower:                 prefix + "+/power",
 		TopicColor:                 prefix + "+/color",
 		TopicState:                 prefix + "+/state",
