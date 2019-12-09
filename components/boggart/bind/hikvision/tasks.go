@@ -2,10 +2,8 @@ package hikvision
 
 import (
 	"context"
-	"errors"
 	"log"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/providers/hikvision/client/content_manager"
 	"github.com/kihamo/boggart/providers/hikvision/client/ptz"
 	"github.com/kihamo/boggart/providers/hikvision/client/system"
@@ -15,12 +13,6 @@ import (
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskLiveness := task.NewFunctionTask(b.taskLiveness)
-	taskLiveness.SetTimeout(b.config.LivenessTimeout)
-	taskLiveness.SetRepeats(-1)
-	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
-	taskLiveness.SetName("liveness-" + b.address.Host)
-
 	taskState := task.NewFunctionTask(b.taskUpdater)
 	taskState.SetTimeout(b.config.UpdaterTimeout)
 	taskState.SetRepeats(-1)
@@ -28,7 +20,6 @@ func (b *Bind) Tasks() []workers.Task {
 	taskState.SetName("updater-" + b.address.Host)
 
 	tasks := []workers.Task{
-		taskLiveness,
 		taskState,
 	}
 
@@ -45,59 +36,8 @@ func (b *Bind) Tasks() []workers.Task {
 	return tasks
 }
 
-func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
-	deviceInfo, err := b.client.System.GetSystemDeviceInfo(system.NewGetSystemDeviceInfoParamsWithContext(ctx), nil)
-
-	if err != nil {
-		b.UpdateStatus(boggart.BindStatusOffline)
-		return nil, nil
-	}
-
-	if deviceInfo.Payload.SerialNumber == "" {
-		b.UpdateStatus(boggart.BindStatusOffline)
-		return nil, errors.New("device returns empty serial number")
-	}
-
-	if b.SerialNumber() == "" {
-		ptzChannels := make(map[uint64]PTZChannel)
-		if list, err := b.client.Ptz.GetPtzChannels(ptz.NewGetPtzChannelsParamsWithContext(ctx), nil); err == nil {
-			for _, channel := range list.Payload {
-				ptzChannels[channel.ID] = PTZChannel{
-					Channel: channel,
-				}
-			}
-		}
-
-		b.mutex.Lock()
-		b.ptzChannels = ptzChannels
-		b.mutex.Unlock()
-
-		if b.config.EventsEnabled && b.config.EventsStreamingEnabled {
-			b.startAlertStreaming()
-		}
-
-		b.SetSerialNumber(deviceInfo.Payload.SerialNumber)
-
-		if e := b.MQTTPublishAsync(ctx, b.config.TopicStateModel.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.Model); e != nil {
-			err = multierr.Append(err, e)
-		}
-
-		if e := b.MQTTPublishAsync(ctx, b.config.TopicStateFirmwareVersion.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.FirmwareVersion); e != nil {
-			err = multierr.Append(err, e)
-		}
-
-		if e := b.MQTTPublishAsync(ctx, b.config.TopicStateFirmwareReleasedDate.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.FirmwareReleasedDate); e != nil {
-			err = multierr.Append(err, e)
-		}
-	}
-
-	b.UpdateStatus(boggart.BindStatusOnline)
-
-	return nil, err
-}
-
 func (b *Bind) taskPTZ(ctx context.Context) (interface{}, error, bool) {
-	if b.Status() != boggart.BindStatusOnline {
+	if !b.IsStatusOnline() {
 		return nil, nil, false
 	}
 
@@ -131,56 +71,104 @@ func (b *Bind) taskPTZ(ctx context.Context) (interface{}, error, bool) {
 	return nil, nil, stop
 }
 
-func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
-	if b.Status() != boggart.BindStatusOnline {
+func (b *Bind) taskUpdater(ctx context.Context) (_ interface{}, err error) {
+	if !b.IsStatusOnline() {
 		return nil, nil
+	}
+
+	sn := b.SerialNumber()
+
+	// first initialization
+	if sn == "" {
+		deviceInfo, err := b.client.System.GetSystemDeviceInfo(system.NewGetSystemDeviceInfoParamsWithContext(ctx), nil)
+
+		if err != nil {
+			return nil, err
+		}
+
+		if b.config.EventsEnabled && b.config.EventsStreamingEnabled {
+			b.startAlertStreaming()
+		}
+
+		if b.config.PTZEnabled {
+			ptzChannels := make(map[uint64]PTZChannel)
+			if list, e := b.client.Ptz.GetPtzChannels(ptz.NewGetPtzChannelsParamsWithContext(ctx), nil); e == nil {
+				for _, channel := range list.Payload {
+					ptzChannels[channel.ID] = PTZChannel{
+						Channel: channel,
+					}
+				}
+			} else {
+				err = multierr.Append(err, e)
+			}
+
+			b.mutex.Lock()
+			b.ptzChannels = ptzChannels
+			b.mutex.Unlock()
+		}
+
+		b.SetSerialNumber(deviceInfo.Payload.SerialNumber)
+
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicStateModel.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.Model); e != nil {
+			err = multierr.Append(err, e)
+		}
+
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicStateFirmwareVersion.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.FirmwareVersion); e != nil {
+			err = multierr.Append(err, e)
+		}
+
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicStateFirmwareReleasedDate.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.FirmwareReleasedDate); e != nil {
+			err = multierr.Append(err, e)
+		}
 	}
 
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()
 
-	sn := b.SerialNumber()
-
-	status, err := b.client.System.GetStatus(system.NewGetStatusParamsWithContext(ctx), nil)
-	if err == nil {
-		// TODO:
-		_ = b.MQTTPublishAsync(ctx, b.config.TopicStateUpTime.Format(sn), status.Payload.DeviceUpTime)
+	if status, e := b.client.System.GetStatus(system.NewGetStatusParamsWithContext(ctx), nil); e == nil {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicStateUpTime.Format(sn), status.Payload.DeviceUpTime); e != nil {
+			err = multierr.Append(err, e)
+		}
 		metricUpTime.With("serial_number", sn).Set(float64(status.Payload.DeviceUpTime))
 
 		memoryUsage := int64(status.Payload.MemoryList[0].MemoryUsage) * MB
-		// TODO:
-		_ = b.MQTTPublishAsync(ctx, b.config.TopicStateMemoryUsage.Format(sn), memoryUsage)
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicStateMemoryUsage.Format(sn), memoryUsage); e != nil {
+			err = multierr.Append(err, e)
+		}
 		metricMemoryUsage.With("serial_number", sn).Set(float64(memoryUsage))
 
 		memoryAvailable := int64(status.Payload.MemoryList[0].MemoryAvailable) * MB
-		// TODO:
-		_ = b.MQTTPublishAsync(ctx, b.config.TopicStateMemoryAvailable.Format(sn), memoryAvailable)
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicStateMemoryAvailable.Format(sn), memoryAvailable); e != nil {
+			err = multierr.Append(err, e)
+		}
 		metricMemoryAvailable.With("serial_number", sn).Set(float64(memoryAvailable))
 	} else {
-		b.Logger().Error("Request SystemStatus failed", "error", err.Error())
+		err = multierr.Append(err, e)
 	}
 
-	storage, err := b.client.ContentManager.GetStorage(content_manager.NewGetStorageParamsWithContext(ctx), nil)
-	if err == nil {
+	if storage, e := b.client.ContentManager.GetStorage(content_manager.NewGetStorageParamsWithContext(ctx), nil); e == nil {
 		for _, hdd := range storage.Payload.HddList {
 			if hdd.Name == "" {
 				continue
 			}
 
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, b.config.TopicStateHDDCapacity.Format(sn, hdd.ID), hdd.Capacity*MB)
+			if e := b.MQTTPublishAsync(ctx, b.config.TopicStateHDDCapacity.Format(sn, hdd.ID), hdd.Capacity*MB); e != nil {
+				err = multierr.Append(err, e)
+			}
 
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, b.config.TopicStateHDDUsage.Format(sn, hdd.ID), (hdd.Capacity-hdd.FreeSpace)*MB)
+			if e := b.MQTTPublishAsync(ctx, b.config.TopicStateHDDUsage.Format(sn, hdd.ID), (hdd.Capacity-hdd.FreeSpace)*MB); e != nil {
+				err = multierr.Append(err, e)
+			}
 			metricStorageUsage.With("serial_number", sn).With("name", hdd.Name).Set(float64((hdd.Capacity - hdd.FreeSpace) * MB))
 
-			// TODO:
-			_ = b.MQTTPublishAsync(ctx, b.config.TopicStateHDDFree.Format(sn, hdd.ID), hdd.FreeSpace*MB)
+			if e := b.MQTTPublishAsync(ctx, b.config.TopicStateHDDFree.Format(sn, hdd.ID), hdd.FreeSpace*MB); e != nil {
+				err = multierr.Append(err, e)
+			}
 			metricStorageAvailable.With("serial_number", sn).With("name", hdd.Name).Set(float64(hdd.FreeSpace * MB))
 		}
 	} else {
-		b.Logger().Error("Request ContentManagementStorage failed", "error", err.Error())
+		err = multierr.Append(err, e)
 	}
 
-	return nil, nil
+	return nil, err
 }
