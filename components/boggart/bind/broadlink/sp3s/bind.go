@@ -26,7 +26,7 @@ func (b *Bind) State() (bool, error) {
 func (b *Bind) On(ctx context.Context) error {
 	err := b.provider.On()
 	if err == nil {
-		_, err = b.taskUpdater(ctx)
+		err = b.taskUpdater(ctx)
 	}
 
 	return err
@@ -35,7 +35,7 @@ func (b *Bind) On(ctx context.Context) error {
 func (b *Bind) Off(ctx context.Context) error {
 	err := b.provider.Off()
 	if err == nil {
-		_, err = b.taskUpdater(ctx)
+		err = b.taskUpdater(ctx)
 	}
 
 	return err

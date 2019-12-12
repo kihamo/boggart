@@ -4,11 +4,10 @@ import (
 	"context"
 
 	"github.com/kihamo/go-workers"
-	"github.com/kihamo/go-workers/task"
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskStateUpdater := task.NewFunctionTask(b.taskUpdater)
+	taskStateUpdater := b.WrapTaskIsOnline(b.taskUpdater)
 	taskStateUpdater.SetRepeats(-1)
 	taskStateUpdater.SetRepeatInterval(b.config.UpdaterInterval)
 	taskStateUpdater.SetName("updater-" + b.SerialNumber())
@@ -18,21 +17,17 @@ func (b *Bind) Tasks() []workers.Task {
 	}
 }
 
-func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
-	if !b.IsStatusOnline() {
-		return nil, nil
-	}
-
+func (b *Bind) taskUpdater(ctx context.Context) error {
 	value, err := b.Temperature()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	metricValue.With("serial_number", b.SerialNumber()).Set(value)
 
 	if err := b.MQTTPublishAsync(ctx, b.config.TopicValue, value); err != nil {
-		return nil, err
+		return err
 	}
 
-	return nil, nil
+	return nil
 }

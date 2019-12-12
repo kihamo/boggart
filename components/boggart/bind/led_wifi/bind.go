@@ -17,7 +17,7 @@ type Bind struct {
 func (b *Bind) On(ctx context.Context) error {
 	err := b.bulb.PowerOn(ctx)
 	if err == nil {
-		_, err = b.taskUpdater(ctx)
+		err = b.taskUpdater(ctx)
 	}
 
 	return err
@@ -26,7 +26,7 @@ func (b *Bind) On(ctx context.Context) error {
 func (b *Bind) Off(ctx context.Context) error {
 	err := b.bulb.PowerOff(ctx)
 	if err == nil {
-		_, err = b.taskUpdater(ctx)
+		err = b.taskUpdater(ctx)
 	}
 
 	return err

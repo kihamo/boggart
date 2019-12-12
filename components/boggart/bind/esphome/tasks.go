@@ -4,11 +4,10 @@ import (
 	"context"
 
 	"github.com/kihamo/go-workers"
-	"github.com/kihamo/go-workers/task"
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskSyncState := task.NewFunctionTask(b.taskSyncState)
+	taskSyncState := b.WrapTaskIsOnline(b.taskSyncState)
 	taskSyncState.SetRepeats(-1)
 	taskSyncState.SetRepeatInterval(b.config.SyncStateInterval)
 	taskSyncState.SetName("sync-state-" + b.config.Address)
@@ -18,15 +17,11 @@ func (b *Bind) Tasks() []workers.Task {
 	}
 }
 
-func (b *Bind) taskSyncState(ctx context.Context) (interface{}, error) {
-	if !b.IsStatusOnline() {
-		return nil, nil
-	}
-
+func (b *Bind) taskSyncState(ctx context.Context) error {
 	if b.SerialNumber() == "" {
 		info, err := b.provider.DeviceInfo(ctx)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		b.SetSerialNumber(info.MacAddress)
@@ -34,8 +29,8 @@ func (b *Bind) taskSyncState(ctx context.Context) (interface{}, error) {
 
 	entities, err := b.provider.ListEntities(ctx)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return nil, b.syncState(ctx, entities...)
+	return b.syncState(ctx, entities...)
 }

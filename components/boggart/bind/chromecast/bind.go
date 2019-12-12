@@ -64,8 +64,7 @@ func (b *Bind) Run() error {
 }
 
 func (b *Bind) Connect(_ context.Context) error {
-	status := b.Status()
-	if status != boggart.BindStatusInitializing && status != boggart.BindStatusOffline {
+	if !b.IsStatusInitializing() && !b.IsStatusOffline() {
 		return nil
 	}
 

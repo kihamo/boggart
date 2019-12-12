@@ -4,12 +4,11 @@ import (
 	"context"
 
 	"github.com/kihamo/go-workers"
-	"github.com/kihamo/go-workers/task"
 	"go.uber.org/multierr"
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskUpdater := task.NewFunctionTask(b.taskUpdater)
+	taskUpdater := b.WrapTaskIsOnline(b.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(b.config.UpdaterInterval)
 	taskUpdater.SetName("updater-" + b.SerialNumber())
@@ -19,14 +18,10 @@ func (b *Bind) Tasks() []workers.Task {
 	}
 }
 
-func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
-	if !b.IsStatusOnline() {
-		return nil, nil
-	}
-
+func (b *Bind) taskUpdater(ctx context.Context) error {
 	state, err := b.State()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	sn := b.SerialNumber()
@@ -45,5 +40,5 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		err = multierr.Append(err, e)
 	}
 
-	return nil, err
+	return err
 }

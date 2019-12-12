@@ -32,7 +32,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return wol.MagicWake(mac, "255.255.255.255")
 			}
 
-			if b.Status() != boggart.BindStatusOnline {
+			if !b.IsStatusOnline() {
 				return errors.New("bind isn't online")
 			}
 

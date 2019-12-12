@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/go-workers/task"
 	"github.com/kihamo/shadow/components/logging"
 )
 
@@ -94,6 +95,16 @@ func (b *BindBase) UpdateStatus(status BindStatus) {
 		b.statusSetter(status)
 	}
 	b.mutex.RUnlock()
+}
+
+func (b *BindBase) WrapTaskIsOnline(fn func(context.Context) error) *task.FunctionTask {
+	return task.NewFunctionTask(func(ctx context.Context) (interface{}, error) {
+		if !b.IsStatusOnline() {
+			return nil, nil
+		}
+
+		return nil, fn(ctx)
+	})
 }
 
 func (b *BindBase) SerialNumber() string {

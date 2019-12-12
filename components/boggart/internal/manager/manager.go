@@ -230,7 +230,7 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 	// register tasks
 	for _, tsk := range append(bindItem.Tasks(), bindItem.probes...) {
 		if tsk, ok := tsk.(bindTask); ok {
-			tsk.SetName("bind-" + t + "-" + tsk.Name())
+			tsk.SetName("bind-" + id + "-" + t + "-" + tsk.Name())
 		}
 
 		m.workers.AddTask(tsk)

@@ -27,25 +27,25 @@ func (b *Bind) Tasks() []workers.Task {
 	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
 	taskLiveness.SetName("liveness-" + b.config.Address.Host)
 
-	taskBalanceUpdater := task.NewFunctionTask(b.taskBalanceUpdater)
+	taskBalanceUpdater := b.WrapTaskIsOnline(b.taskBalanceUpdater)
 	taskBalanceUpdater.SetTimeout(b.config.BalanceUpdaterTimeout)
 	taskBalanceUpdater.SetRepeats(-1)
 	taskBalanceUpdater.SetRepeatInterval(b.config.BalanceUpdaterInterval)
 	taskBalanceUpdater.SetName("balance-updater-" + b.config.Address.Host)
 
-	taskSMSChecker := task.NewFunctionTask(b.taskSMSChecker)
+	taskSMSChecker := b.WrapTaskIsOnline(b.taskSMSChecker)
 	taskSMSChecker.SetTimeout(b.config.SMSCheckerTimeout)
 	taskSMSChecker.SetRepeats(-1)
 	taskSMSChecker.SetRepeatInterval(b.config.SMSCheckerInterval)
 	taskSMSChecker.SetName("sms-checker-" + b.config.Address.Host)
 
-	taskSystemUpdater := task.NewFunctionTask(b.taskSystemUpdater)
+	taskSystemUpdater := b.WrapTaskIsOnline(b.taskSystemUpdater)
 	taskSystemUpdater.SetTimeout(b.config.SystemUpdaterTimeout)
 	taskSystemUpdater.SetRepeats(-1)
 	taskSystemUpdater.SetRepeatInterval(b.config.SystemUpdaterInterval)
 	taskSystemUpdater.SetName("system-updater-" + b.config.Address.Host)
 
-	taskCleaner := task.NewFunctionTask(b.taskCleaner)
+	taskCleaner := b.WrapTaskIsOnline(b.taskCleaner)
 	taskCleaner.SetRepeats(-1)
 	taskCleaner.SetRepeatInterval(b.config.CleanerInterval)
 	taskCleaner.SetName("cleaner-" + b.config.Address.Host)
@@ -115,11 +115,7 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	return nil, err
 }
 
-func (b *Bind) taskBalanceUpdater(ctx context.Context) (interface{}, error) {
-	if b.Status() != boggart.BindStatusOnline {
-		return nil, nil
-	}
-
+func (b *Bind) taskBalanceUpdater(ctx context.Context) error {
 	sn := b.SerialNumber()
 
 	balance, err := b.Balance(ctx)
@@ -131,12 +127,12 @@ func (b *Bind) taskBalanceUpdater(ctx context.Context) (interface{}, error) {
 		}
 	}
 
-	return nil, err
+	return err
 }
 
-func (b *Bind) taskSMSChecker(ctx context.Context) (interface{}, error) {
-	if b.Status() != boggart.BindStatusOnline || b.simStatus.Load() != 1 {
-		return nil, nil
+func (b *Bind) taskSMSChecker(ctx context.Context) error {
+	if b.simStatus.Load() != 1 {
+		return nil
 	}
 
 	sn := b.SerialNumber()
@@ -145,7 +141,7 @@ func (b *Bind) taskSMSChecker(ctx context.Context) (interface{}, error) {
 	paramsCount := sms.NewGetSMSCountParamsWithContext(ctx)
 	responseCount, err := b.client.Sms.GetSMSCount(paramsCount)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	metricSMSUnread.With("serial_number", sn).Set(float64(responseCount.Payload.LocalUnread))
@@ -168,7 +164,7 @@ func (b *Bind) taskSMSChecker(ctx context.Context) (interface{}, error) {
 
 	responseList, err := b.client.Sms.GetSMSList(paramsList)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	for _, s := range responseList.Payload.Messages {
@@ -207,12 +203,12 @@ func (b *Bind) taskSMSChecker(ctx context.Context) (interface{}, error) {
 
 	// ----- delete old sms -----
 
-	return nil, err
+	return err
 }
 
-func (b *Bind) taskSystemUpdater(ctx context.Context) (_ interface{}, err error) {
-	if b.Status() != boggart.BindStatusOnline || b.simStatus.Load() != 1 {
-		return nil, nil
+func (b *Bind) taskSystemUpdater(ctx context.Context) (err error) {
+	if b.simStatus.Load() != 1 {
+		return nil
 	}
 
 	sn := b.SerialNumber()
@@ -292,12 +288,12 @@ func (b *Bind) taskSystemUpdater(ctx context.Context) (_ interface{}, err error)
 		err = multierr.Append(err, e)
 	}
 
-	return nil, err
+	return err
 }
 
-func (b *Bind) taskCleaner(ctx context.Context) (_ interface{}, err error) {
-	if b.Status() != boggart.BindStatusOnline || b.simStatus.Load() != 1 {
-		return nil, nil
+func (b *Bind) taskCleaner(ctx context.Context) (err error) {
+	if b.simStatus.Load() != 1 {
+		return nil
 	}
 
 	var page int64 = 1
@@ -311,11 +307,11 @@ func (b *Bind) taskCleaner(ctx context.Context) (_ interface{}, err error) {
 
 		response, err := b.client.Sms.GetSMSList(paramsList)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		if len(response.Payload.Messages) == 0 {
-			return nil, nil
+			return nil
 		}
 
 		for _, s := range response.Payload.Messages {
@@ -335,7 +331,7 @@ func (b *Bind) taskCleaner(ctx context.Context) (_ interface{}, err error) {
 				params.Request.Index = s.Index
 
 				if _, err := b.client.Sms.RemoveSMS(params); err != nil {
-					return nil, err
+					return err
 				}
 
 				b.Logger().Warn("Clean sms",
@@ -351,5 +347,5 @@ func (b *Bind) taskCleaner(ctx context.Context) (_ interface{}, err error) {
 		page++
 	}
 
-	return nil, nil
+	return nil
 }

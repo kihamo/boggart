@@ -18,7 +18,7 @@ func (b *Bind) Tasks() []workers.Task {
 	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
 	taskLiveness.SetName("liveness-" + b.config.Address.Host)
 
-	taskState := task.NewFunctionTask(b.taskUpdater)
+	taskState := b.WrapTaskIsOnline(b.taskUpdater)
 	taskState.SetTimeout(b.config.UpdaterTimeout)
 	taskState.SetRepeats(-1)
 	taskState.SetRepeatInterval(b.config.UpdaterInterval)
@@ -77,14 +77,14 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	return nil, err
 }
 
-func (b *Bind) taskUpdater(ctx context.Context) (_ interface{}, err error) {
-	if b.Status() != boggart.BindStatusOnline {
-		return nil, nil
+func (b *Bind) taskUpdater(ctx context.Context) (err error) {
+	if !b.IsStatusOnline() {
+		return nil
 	}
 
 	client, err := b.client()
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer client.Close()
 
@@ -116,5 +116,5 @@ func (b *Bind) taskUpdater(ctx context.Context) (_ interface{}, err error) {
 		}
 	}
 
-	return nil, err
+	return err
 }
