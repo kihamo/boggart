@@ -8,6 +8,8 @@ import (
 )
 
 type Config struct {
+	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
+
 	ConnectionDSN        string `mapstructure:"connection_dsn" yaml:"connection_dsn" valid:"required"`
 	Address              string
 	UpdaterInterval      time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
@@ -29,6 +31,10 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/meter/mercury/+/"
 
 	return &Config{
+		BindConfig: boggart.BindConfig{
+			ReadinessPeriod: time.Minute,
+			ReadinessTimeout: time.Second * 30,
+		},
 		UpdaterInterval:      time.Minute * 5,
 		TopicTariff1:         prefix + "tariff/1",
 		TopicVoltage1:        prefix + "voltage/1",

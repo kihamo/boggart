@@ -8,6 +8,8 @@ import (
 )
 
 type Config struct {
+	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
+
 	ConnectionDSN        string `mapstructure:"connection_dsn" yaml:"connection_dsn" valid:"required"`
 	Address              string `valid:"required"`
 	Location             string
@@ -31,6 +33,10 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/meter/mercury/+/"
 
 	return &Config{
+		BindConfig: boggart.BindConfig{
+			ReadinessPeriod: time.Minute,
+			ReadinessTimeout: time.Second * 30,
+		},
 		Location: time.Now().Location().String(),
 		/*
 			При отсутствии тока в последовательной цепи и значении напряжения, равном 1,15Uном, испытательный выход

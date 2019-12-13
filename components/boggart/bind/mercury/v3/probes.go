@@ -4,6 +4,6 @@ import (
 	"context"
 )
 
-func (b *Bind) ReadinessProbe(ctx context.Context) error {
+func (b *Bind) ReadinessProbe(_ context.Context) error {
 	return b.provider.ChannelTest()
 }
