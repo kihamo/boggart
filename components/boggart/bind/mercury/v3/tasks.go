@@ -4,15 +4,13 @@ import (
 	"context"
 	"time"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/providers/mercury/v3"
 	"github.com/kihamo/go-workers"
-	"github.com/kihamo/go-workers/task"
 	"go.uber.org/multierr"
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskStateUpdater := task.NewFunctionTask(b.taskUpdater)
+	taskStateUpdater := b.WrapTaskIsOnline(b.taskUpdater)
 	taskStateUpdater.SetRepeats(-1)
 	taskStateUpdater.SetRepeatInterval(b.config.UpdaterInterval)
 	taskStateUpdater.SetName("updater-" + b.SerialNumber())
@@ -22,12 +20,7 @@ func (b *Bind) Tasks() []workers.Task {
 	}
 }
 
-func (b *Bind) taskUpdater(ctx context.Context) (_ interface{}, err error) {
-	if err = b.provider.ChannelTest(); err != nil {
-		b.UpdateStatus(boggart.BindStatusOffline)
-		return nil, err
-	}
-
+func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 	sn := b.SerialNumber()
 	if sn == "" {
 		var (
@@ -37,8 +30,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (_ interface{}, err error) {
 
 		sn, makeDate, version, _, err = b.provider.ForceReadParameters()
 		if err != nil {
-			b.UpdateStatus(boggart.BindStatusOffline)
-			return nil, err
+			return err
 		}
 
 		b.SetSerialNumber(sn)
@@ -51,8 +43,6 @@ func (b *Bind) taskUpdater(ctx context.Context) (_ interface{}, err error) {
 			err = multierr.Append(err, e)
 		}
 	}
-
-	b.UpdateStatus(boggart.BindStatusOnline)
 
 	if val, _, _, _, e := b.provider.ReadArray(v3.ArrayReset, nil, v3.Tariff1); e == nil {
 		metricTariff.With("serial_number", sn).With("tariff", "1").Set(float64(val))
@@ -130,5 +120,5 @@ func (b *Bind) taskUpdater(ctx context.Context) (_ interface{}, err error) {
 		err = multierr.Append(err, e)
 	}
 
-	return nil, err
+	return err
 }
