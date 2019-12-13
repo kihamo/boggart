@@ -34,7 +34,7 @@ func (t Type) Config() interface{} {
 
 	return &Config{
 		BindConfig: boggart.BindConfig{
-			ReadinessPeriod: time.Minute,
+			ReadinessPeriod:  time.Minute,
 			ReadinessTimeout: time.Second * 30,
 		},
 		Location: time.Now().Location().String(),

@@ -82,6 +82,18 @@ $(document).ready(function () {
                                 '</a>';
                         }
 
+                        if (row.has_readiness_probe) {
+                            content += '<a href="/boggart/bind/' + row.id + '/readiness/" target="_blank" class="btn btn-success btn-icon btn-xs">' +
+                                '<i class="glyphicon glyphicon-volume-down" title="Readiness probe"></i>' +
+                                '</a>';
+                        }
+
+                        if (row.has_liveness_probe) {
+                            content += '<a href="/boggart/bind/' + row.id + '/liveness/" target="_blank" class="btn btn-success btn-icon btn-xs">' +
+                                '<i class="glyphicon glyphicon-glyphicon-volume-up" title="Liveness probe"></i>' +
+                                '</a>';
+                        }
+
                         return content + '<a href="/boggart/bind/' + row.id + '/" class="btn btn-warning btn-icon btn-xs">' +
                             '<i class="glyphicon glyphicon-edit" title="Edit bind"></i>' +
                             '</a>' +

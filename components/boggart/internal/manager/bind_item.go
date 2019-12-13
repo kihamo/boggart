@@ -12,14 +12,15 @@ import (
 type BindItem struct {
 	status uint64
 
-	bind        boggart.Bind
-	bindType    boggart.BindType
-	id          string
-	t           string
-	description string
-	tags        []string
-	config      interface{}
-	probes      []workers.Task
+	bind           boggart.Bind
+	bindType       boggart.BindType
+	id             string
+	t              string
+	description    string
+	tags           []string
+	config         interface{}
+	probeReadiness workers.Task
+	probeLiveness  workers.Task
 
 	cacheMutex           sync.Mutex
 	cacheTasks           []workers.Task

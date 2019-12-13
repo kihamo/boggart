@@ -4,10 +4,11 @@ package handlers
 
 import (
 	json "encoding/json"
+	time "time"
+
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
-	time "time"
 )
 
 // suppress unused package warning
@@ -336,6 +337,10 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.Config = string(in.String())
 		case "has_widget":
 			out.HasWidget = bool(in.Bool())
+		case "has_readiness_probe":
+			out.HasReadinessProbe = bool(in.Bool())
+		case "has_liveness_probe":
+			out.HasLivenessProbe = bool(in.Bool())
 		default:
 			in.SkipRecursive()
 		}
@@ -503,6 +508,26 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.RawString(prefix)
 		}
 		out.Bool(bool(in.HasWidget))
+	}
+	{
+		const prefix string = ",\"has_readiness_probe\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Bool(bool(in.HasReadinessProbe))
+	}
+	{
+		const prefix string = ",\"has_liveness_probe\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Bool(bool(in.HasLivenessProbe))
 	}
 	out.RawByte('}')
 }

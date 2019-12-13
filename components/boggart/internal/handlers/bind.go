@@ -50,6 +50,14 @@ func (h *BindHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		h.actionDelete(w, r, bindItem)
 		return
 
+	case "readiness":
+		h.actionProbe(w, r, bindItem, "readiness")
+		return
+
+	case "liveness":
+		h.actionProbe(w, r, bindItem, "liveness")
+		return
+
 	case "":
 		h.actionCreateOrUpdate(w, r, bindItem)
 		return
@@ -204,4 +212,33 @@ func (h *BindHandler) actionDelete(w *dashboard.Response, r *dashboard.Request, 
 	_ = w.SendJSON(response{
 		Result: "success",
 	})
+}
+
+func (h *BindHandler) actionProbe(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem, t string) {
+	if b == nil {
+		h.NotFound(w, r)
+		return
+	}
+
+	var err error
+
+	switch t {
+	case "readiness":
+		err = h.manager.ReadinessProbeCheck(r.Context(), b.ID())
+	case "liveness":
+		err = h.manager.LivenessProbeCheck(r.Context(), b.ID())
+	}
+
+	response := struct {
+		Result string `json:"result"`
+		Error  string `json:"error,omitempty"`
+	}{
+		Result: "success",
+	}
+
+	if err != nil {
+		response.Error = err.Error()
+	}
+
+	_ = w.SendJSON(response)
 }

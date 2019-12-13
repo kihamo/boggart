@@ -15,17 +15,19 @@ import (
 
 // easyjson:json
 type managerHandlerDevice struct {
-	Id              string   `json:"id"`
-	Type            string   `json:"type"`
-	Description     string   `json:"description"`
-	SerialNumber    string   `json:"serial_number"`
-	Status          string   `json:"status"`
-	Tasks           []string `json:"tasks"`
-	MQTTPublishes   []string `json:"mqtt_publishes"`
-	MQTTSubscribers []string `json:"mqtt_subscribers"`
-	Tags            []string `json:"tags"`
-	Config          string   `json:"config"`
-	HasWidget       bool     `json:"has_widget"`
+	Id                string   `json:"id"`
+	Type              string   `json:"type"`
+	Description       string   `json:"description"`
+	SerialNumber      string   `json:"serial_number"`
+	Status            string   `json:"status"`
+	Tasks             []string `json:"tasks"`
+	MQTTPublishes     []string `json:"mqtt_publishes"`
+	MQTTSubscribers   []string `json:"mqtt_subscribers"`
+	Tags              []string `json:"tags"`
+	Config            string   `json:"config"`
+	HasWidget         bool     `json:"has_widget"`
+	HasReadinessProbe bool     `json:"has_readiness_probe"`
+	HasLivenessProbe  bool     `json:"has_liveness_probe"`
 }
 
 // easyjson:json
@@ -98,6 +100,14 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 
 			if _, ok := bindItem.BindType().(boggart.BindTypeHasWidget); ok {
 				item.HasWidget = ok
+			}
+
+			if _, ok := bindItem.Bind().(boggart.BindHasReadinessProbe); ok {
+				item.HasReadinessProbe = ok
+			}
+
+			if _, ok := bindItem.Bind().(boggart.BindHasLivenessProbe); ok {
+				item.HasLivenessProbe = ok
 			}
 
 			for _, task := range bindItem.Tasks() {

@@ -13,7 +13,7 @@ import (
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskState := task.NewFunctionTask(b.taskUpdater)
+	taskState := b.WrapTaskIsOnline(b.taskUpdater)
 	taskState.SetTimeout(b.config.UpdaterTimeout)
 	taskState.SetRepeats(-1)
 	taskState.SetRepeatInterval(b.config.UpdaterInterval)
@@ -71,11 +71,7 @@ func (b *Bind) taskPTZ(ctx context.Context) (interface{}, error, bool) {
 	return nil, nil, stop
 }
 
-func (b *Bind) taskUpdater(ctx context.Context) (_ interface{}, err error) {
-	if !b.IsStatusOnline() {
-		return nil, nil
-	}
-
+func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 	sn := b.SerialNumber()
 
 	// first initialization
@@ -83,7 +79,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (_ interface{}, err error) {
 		deviceInfo, err := b.client.System.GetSystemDeviceInfo(system.NewGetSystemDeviceInfoParamsWithContext(ctx), nil)
 
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		if b.config.EventsEnabled && b.config.EventsStreamingEnabled {
@@ -170,5 +166,5 @@ func (b *Bind) taskUpdater(ctx context.Context) (_ interface{}, err error) {
 		err = multierr.Append(err, e)
 	}
 
-	return nil, err
+	return err
 }

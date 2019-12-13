@@ -19,6 +19,7 @@ import (
 	"github.com/kihamo/shadow/components/workers"
 	"github.com/kihamo/snitch"
 	"github.com/pborman/uuid"
+	"go.uber.org/multierr"
 )
 
 const (
@@ -104,7 +105,6 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 		description: description,
 		tags:        tags,
 		config:      config,
-		probes:      make([]w.Task, 0, 3),
 	}
 
 	statusUpdate := m.itemStatusUpdate(bindItem)
@@ -134,10 +134,12 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 		}
 	}
 
+	tasks := bindItem.Tasks()
+
 	// probes
 	if probe, ok := bind.(boggart.BindHasReadinessProbe); ok {
-		probeTask := task.NewFunctionTask(func(ctx context.Context) (interface{}, error) {
-			if err := probe.ReadinessProbe(ctx); err != nil {
+		probeTask := task.NewFunctionTask(func(ctx context.Context) (_ interface{}, err error) {
+			if err = probe.ReadinessProbe(ctx); err != nil {
 				statusUpdate(boggart.BindStatusOffline)
 
 				m.logger.Error("Readiness probe failure",
@@ -149,7 +151,7 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 				statusUpdate(boggart.BindStatusOnline)
 			}
 
-			return nil, nil
+			return nil, err
 		})
 
 		probePeriod := boggart.ReadinessProbeDefaultPeriod
@@ -164,7 +166,8 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 		probeTask.SetRepeats(-1)
 		probeTask.SetName("readiness-probe")
 
-		bindItem.probes = append(bindItem.probes, probeTask)
+		bindItem.probeReadiness = probeTask
+		tasks = append(tasks, bindItem.probeReadiness)
 	} else {
 		statusUpdate(boggart.BindStatusOnline)
 	}
@@ -187,29 +190,29 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 				"error", err.Error(),
 			)
 
-			err = m.Unregister(bindItem.ID())
-			if err != nil {
+			if e := m.Unregister(bindItem.ID()); e != nil {
 				m.logger.Error("Unregister after liveness probe failure",
 					"type", bindItem.Type(),
 					"id", bindItem.ID(),
 					"error", err.Error(),
 				)
 
-				return nil, nil
+				err = multierr.Append(err, e)
+				return nil, err
 			}
 
-			_, err = m.Register(id, bind, t, description, tags, config)
-			if err != nil {
+			if _, e := m.Register(id, bind, t, description, tags, config); e != nil {
 				m.logger.Error("Register after liveness probe failure",
 					"type", bindItem.Type(),
 					"id", bindItem.ID(),
 					"error", err.Error(),
 				)
 
-				return nil, nil
+				err = multierr.Append(err, e)
+				return nil, err
 			}
 
-			return nil, nil
+			return nil, err
 		})
 
 		probePeriod := boggart.LivenessProbeDefaultPeriod
@@ -224,11 +227,12 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 		probeTask.SetRepeats(-1)
 		probeTask.SetName("liveness-probe")
 
-		bindItem.probes = append(bindItem.probes, probeTask)
+		bindItem.probeLiveness = probeTask
+		tasks = append(tasks, bindItem.probeLiveness)
 	}
 
 	// register tasks
-	for _, tsk := range append(bindItem.Tasks(), bindItem.probes...) {
+	for _, tsk := range tasks {
 		if tsk, ok := tsk.(bindTask); ok {
 			tsk.SetName("bind-" + id + "-" + t + "-" + tsk.Name())
 		}
@@ -273,8 +277,11 @@ func (m *Manager) Unregister(id string) error {
 	}
 
 	// remove probes
-	for _, tsk := range bindItem.probes {
-		m.workers.RemoveTask(tsk)
+	if bindItem.probeReadiness != nil {
+		m.workers.RemoveTask(bindItem.probeReadiness)
+	}
+	if bindItem.probeLiveness != nil {
+		m.workers.RemoveTask(bindItem.probeLiveness)
 	}
 
 	// remove tasks
@@ -384,6 +391,26 @@ func (m *Manager) MQTTOnConnectHandler(client mqtt.Component, restore bool) {
 			m.logger.Error("Restore publish to MQTT failed", "topic", topic, "error", err.Error())
 		}
 	}
+}
+
+func (m *Manager) ReadinessProbeCheck(ctx context.Context, id string) (err error) {
+	if d, ok := m.storage.Load(id); ok {
+		if probe := d.(*BindItem).probeReadiness; probe != nil {
+			_, err = probe.Run(ctx)
+		}
+	}
+
+	return err
+}
+
+func (m *Manager) LivenessProbeCheck(ctx context.Context, id string) (err error) {
+	if d, ok := m.storage.Load(id); ok {
+		if probe := d.(*BindItem).probeLiveness; probe != nil {
+			_, err = probe.Run(ctx)
+		}
+	}
+
+	return err
 }
 
 func (m *Manager) mqttPublish(topic mqtt.Topic, payload interface{}) {
