@@ -1,0 +1,85 @@
+---
+
+swagger: "2.0"
+info:
+  title: "Grafana"
+  version: "v6.5"
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+schemes:
+  - "https"
+  - "http"
+basePath: "/api"
+securityDefinitions:
+  basicAuth:
+    type: "basic"
+security:
+  - basicAuth: []
+paths:
+  /login/ping:
+    get:
+      operationId: "login"
+      tags:
+        - "other"
+      responses:
+        200:
+          description: "Successful operation"
+  /health:
+    get:
+      operationId: "health"
+      tags:
+        - "other"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Health"
+  /annotations:
+    post:
+      operationId: "createAnnotation"
+      tags:
+        - "annotation"
+      parameters:
+        - name: "request"
+          in: "body"
+          schema:
+            type: "object"
+            properties:
+              dashboardId:
+                type: "integer"
+              panelId:
+                type: "integer"
+              time:
+                type: "integer"
+              timeEnd:
+                type: "integer"
+              tags:
+                type: "array"
+                items:
+                  type: "string"
+              text:
+                type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Message"
+definitions:
+  Health:
+    type: "object"
+    properties:
+      commit:
+        type: "string"
+      database:
+        type: "string"
+      version:
+        type: "string"
+  Message:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+      id:
+        type: "integer"

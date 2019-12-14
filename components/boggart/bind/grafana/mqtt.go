@@ -2,13 +2,17 @@ package grafana
 
 import (
 	"context"
+	"time"
 
+	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/providers/grafana/client/annotation"
+	"go.uber.org/multierr"
 )
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(b.config.TopicAnnotation, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(b.config.TopicAnnotation, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) (err error) {
 			var request struct {
 				Title string   `json:"title,omitempty"`
 				Text  string   `json:"text,omitempty"`
@@ -19,7 +23,22 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return err
 			}
 
-			return b.CreateAnnotation(request.Title, request.Text, request.Tags, nil, nil)
-		}),
+			params := annotation.NewCreateAnnotationParamsWithContext(ctx).
+				WithRequest(annotation.CreateAnnotationBody{
+					Time: time.Now().UnixNano() / int64(time.Millisecond),
+					Text: request.Text,
+					Tags: request.Tags,
+				})
+
+			for _, dashboardId := range b.config.Dashboards {
+				params.Request.DashboardID = dashboardId
+
+				if _, e := b.provider.Annotation.CreateAnnotation(params, nil); e != nil {
+					err = multierr.Append(err, e)
+				}
+			}
+
+			return err
+		})),
 	}
 }

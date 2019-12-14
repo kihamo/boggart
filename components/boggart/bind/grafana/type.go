@@ -2,7 +2,8 @@ package grafana
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
-	g "github.com/kihamo/go-grafana-api"
+	"github.com/kihamo/boggart/protocols/swagger"
+	"github.com/kihamo/boggart/providers/grafana"
 )
 
 type Type struct{}
@@ -12,18 +13,19 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	config.TopicAnnotation = config.TopicAnnotation.Format(config.Name)
 
-	client := g.New(config.Address.String())
-
-	if config.ApiKey != "" {
-		client = client.WithApiKey(config.ApiKey)
-	} else {
-		client = client.WithBasicAuth(config.Username, config.Password)
-	}
-
 	bind := &Bind{
 		config: config,
-		client: client,
 	}
+
+	l := swagger.NewLogger(
+		func(message string) {
+			bind.Logger().Info(message)
+		},
+		func(message string) {
+			bind.Logger().Debug(message)
+		})
+
+	bind.provider = grafana.New(config.Address.String(), config.Debug, l)
 
 	return bind, nil
 }
