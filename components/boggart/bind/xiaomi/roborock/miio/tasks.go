@@ -17,7 +17,7 @@ func (b *Bind) Tasks() []workers.Task {
 	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
 	taskLiveness.SetName("liveness-" + b.config.Host)
 
-	taskState := task.NewFunctionTask(b.taskUpdater)
+	taskState := b.WrapTaskIsOnline(b.taskUpdater)
 	taskState.SetTimeout(b.config.UpdaterTimeout)
 	taskState.SetRepeats(-1)
 	taskState.SetRepeatInterval(b.config.UpdaterInterval)
@@ -51,14 +51,10 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	return nil, nil
 }
 
-func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
-	if !b.IsStatusOnline() {
-		return nil, nil
-	}
-
+func (b *Bind) taskUpdater(ctx context.Context) error {
 	sn := b.SerialNumber()
 	if sn == "" {
-		return nil, nil
+		return nil
 	}
 
 	var err error
@@ -126,5 +122,5 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		err = multierr.Append(err, e)
 	}
 
-	return nil, err
+	return err
 }

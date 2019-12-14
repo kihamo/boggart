@@ -5,7 +5,7 @@ import (
 )
 
 func (b *Bind) ReadinessProbe(ctx context.Context) (err error) {
-	_, err = b.provider.DeviceInfo(ctx)
+	_, err = b.provider.Ping(ctx)
 
 	return err
 }

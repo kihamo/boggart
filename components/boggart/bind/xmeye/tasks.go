@@ -78,10 +78,6 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 }
 
 func (b *Bind) taskUpdater(ctx context.Context) (err error) {
-	if !b.IsStatusOnline() {
-		return nil
-	}
-
 	client, err := b.client()
 	if err != nil {
 		return err

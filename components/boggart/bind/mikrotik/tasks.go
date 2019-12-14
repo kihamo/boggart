@@ -19,7 +19,7 @@ func (b *Bind) Tasks() []workers.Task {
 	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
 	taskLiveness.SetName("liveness-" + b.address.Host)
 
-	taskStateUpdater := task.NewFunctionTask(b.taskUpdater)
+	taskStateUpdater := b.WrapTaskIsOnline(b.taskUpdater)
 	taskStateUpdater.SetRepeats(-1)
 	taskStateUpdater.SetRepeatInterval(b.config.UpdaterInterval)
 	taskStateUpdater.SetName("updater-" + b.address.Host)
@@ -56,29 +56,25 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	return nil, nil
 }
 
-func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
-	if !b.IsStatusOnline() {
-		return nil, nil
-	}
-
+func (b *Bind) taskUpdater(ctx context.Context) error {
 	serialNumber := b.SerialNumber()
 	if serialNumber == "" {
-		return nil, nil
+		return nil
 	}
 
 	arp, err := b.provider.IPARP(ctx)
 	if err != nil && !mikrotik.IsEmptyResponse(err) {
-		return nil, err
+		return err
 	}
 
 	dns, err := b.provider.IPDNSStatic(ctx)
 	if err != nil && !mikrotik.IsEmptyResponse(err) {
-		return nil, err
+		return err
 	}
 
 	leases, err := b.provider.IPDHCPServerLease(ctx)
 	if err != nil && !mikrotik.IsEmptyResponse(err) {
-		return nil, err
+		return err
 	}
 
 	// Wifi clients
@@ -89,14 +85,14 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		for _, client := range clients {
 			bytes := strings.Split(client.Bytes, ",")
 			if len(bytes) != 2 {
-				return nil, err
+				return err
 			}
 
 			name := mikrotik.GetNameByMac(client.MacAddress, arp, dns, leases)
 
 			sent, err := strconv.ParseFloat(bytes[0], 64)
 			if err != nil {
-				return nil, err
+				return err
 			}
 
 			received, err := strconv.ParseFloat(bytes[1], 64)
@@ -110,11 +106,11 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 					"mac", client.MacAddress,
 					"name", name).Set(sent)
 			} else if !mikrotik.IsEmptyResponse(err) {
-				return nil, err
+				return err
 			}
 		}
 	} else if !mikrotik.IsEmptyResponse(err) {
-		return nil, err
+		return err
 	}
 
 	// Ports on mikrotik
@@ -129,7 +125,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 				"mac", stat.MacAddress).Set(float64(stat.TXByte))
 		}
 	} else if !mikrotik.IsEmptyResponse(err) {
-		return nil, err
+		return err
 	}
 
 	resource, err := b.provider.SystemResource(ctx)
@@ -140,7 +136,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		metricStorageAvailable.With("serial_number", serialNumber).Set(float64(resource.FreeHDDSpace))
 		metricStorageUsage.With("serial_number", serialNumber).Set(float64(resource.TotalHDDSpace - resource.FreeHDDSpace))
 	} else if !mikrotik.IsEmptyResponse(err) {
-		return nil, err
+		return err
 	}
 
 	disks, err := b.provider.SystemDisk(ctx)
@@ -156,7 +152,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 			).Set(float64(disk.Free))
 		}
 	} else if !mikrotik.IsEmptyResponse(err) {
-		return nil, err
+		return err
 	}
 
 	health, err := b.provider.SystemHealth(ctx)
@@ -164,8 +160,8 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		metricVoltage.With("serial_number", serialNumber).Set(health.Voltage)
 		metricTemperature.With("serial_number", serialNumber).Set(float64(health.Temperature))
 	} else if !mikrotik.IsEmptyResponse(err) {
-		return nil, err
+		return err
 	}
 
-	return nil, nil
+	return nil
 }
