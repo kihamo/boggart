@@ -8,6 +8,8 @@ import (
 )
 
 type Config struct {
+	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
+
 	Host             string `valid:"host,required"`
 	Username         string
 	Password         string
@@ -22,6 +24,10 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/ups/+/"
 
 	return &Config{
+		BindConfig: boggart.BindConfig{
+			ReadinessPeriod:  time.Minute,
+			ReadinessTimeout: time.Second * 5,
+		},
 		UpdaterInterval:  time.Minute,
 		TopicVariable:    prefix + "variable/+",
 		TopicVariableSet: prefix + "variable/+/set",

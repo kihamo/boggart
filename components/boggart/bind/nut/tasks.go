@@ -3,13 +3,11 @@ package nut
 import (
 	"context"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/go-workers"
-	"github.com/kihamo/go-workers/task"
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskStateUpdater := task.NewFunctionTask(b.taskUpdater)
+	taskStateUpdater := b.WrapTaskIsOnline(b.taskUpdater)
 	taskStateUpdater.SetRepeats(-1)
 	taskStateUpdater.SetRepeatInterval(b.config.UpdaterInterval)
 	taskStateUpdater.SetName("updater")
@@ -19,14 +17,12 @@ func (b *Bind) Tasks() []workers.Task {
 	}
 }
 
-func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
+func (b *Bind) taskUpdater(ctx context.Context) error {
 	variables, err := b.Variables()
 	if err != nil {
-		b.UpdateStatus(boggart.BindStatusOffline)
-		return nil, err
+		return err
 	}
 
-	b.UpdateStatus(boggart.BindStatusOnline)
 	b.mutex.Lock()
 
 	sn := b.SerialNumber()
@@ -55,5 +51,5 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	}
 
 	b.mutex.Unlock()
-	return nil, nil
+	return nil
 }
