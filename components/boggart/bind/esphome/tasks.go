@@ -10,7 +10,7 @@ func (b *Bind) Tasks() []workers.Task {
 	taskSyncState := b.WrapTaskIsOnline(b.taskSyncState)
 	taskSyncState.SetRepeats(-1)
 	taskSyncState.SetRepeatInterval(b.config.SyncStateInterval)
-	taskSyncState.SetName("sync-state-" + b.config.Address)
+	taskSyncState.SetName("sync-state")
 
 	return []workers.Task{
 		taskSyncState,

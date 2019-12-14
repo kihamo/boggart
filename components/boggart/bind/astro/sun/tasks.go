@@ -12,7 +12,7 @@ import (
 func (b *Bind) Tasks() []workers.Task {
 	b.taskStateUpdater = task.NewFunctionTask(b.taskUpdater)
 	b.taskStateUpdater.SetRepeats(-1)
-	b.taskStateUpdater.SetName("updater-" + b.SerialNumber())
+	b.taskStateUpdater.SetName("updater")
 
 	return []workers.Task{
 		b.taskStateUpdater,

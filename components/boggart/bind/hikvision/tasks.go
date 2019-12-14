@@ -17,7 +17,7 @@ func (b *Bind) Tasks() []workers.Task {
 	taskState.SetTimeout(b.config.UpdaterTimeout)
 	taskState.SetRepeats(-1)
 	taskState.SetRepeatInterval(b.config.UpdaterInterval)
-	taskState.SetName("updater-" + b.address.Host)
+	taskState.SetName("updater")
 
 	tasks := []workers.Task{
 		taskState,
@@ -28,7 +28,7 @@ func (b *Bind) Tasks() []workers.Task {
 		taskPTZStatus.SetTimeout(b.config.PTZTimeout)
 		taskPTZStatus.SetRepeats(-1)
 		taskPTZStatus.SetRepeatInterval(b.config.PTZInterval)
-		taskPTZStatus.SetName("ptz-" + b.address.Host)
+		taskPTZStatus.SetName("ptz")
 
 		tasks = append(tasks, taskPTZStatus)
 	}

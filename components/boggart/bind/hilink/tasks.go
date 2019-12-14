@@ -25,30 +25,30 @@ func (b *Bind) Tasks() []workers.Task {
 	taskLiveness.SetTimeout(b.config.LivenessTimeout)
 	taskLiveness.SetRepeats(-1)
 	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
-	taskLiveness.SetName("liveness-" + b.config.Address.Host)
+	taskLiveness.SetName("liveness")
 
 	taskBalanceUpdater := b.WrapTaskIsOnline(b.taskBalanceUpdater)
 	taskBalanceUpdater.SetTimeout(b.config.BalanceUpdaterTimeout)
 	taskBalanceUpdater.SetRepeats(-1)
 	taskBalanceUpdater.SetRepeatInterval(b.config.BalanceUpdaterInterval)
-	taskBalanceUpdater.SetName("balance-updater-" + b.config.Address.Host)
+	taskBalanceUpdater.SetName("balance-updater")
 
 	taskSMSChecker := b.WrapTaskIsOnline(b.taskSMSChecker)
 	taskSMSChecker.SetTimeout(b.config.SMSCheckerTimeout)
 	taskSMSChecker.SetRepeats(-1)
 	taskSMSChecker.SetRepeatInterval(b.config.SMSCheckerInterval)
-	taskSMSChecker.SetName("sms-checker-" + b.config.Address.Host)
+	taskSMSChecker.SetName("sms-checker")
 
 	taskSystemUpdater := b.WrapTaskIsOnline(b.taskSystemUpdater)
 	taskSystemUpdater.SetTimeout(b.config.SystemUpdaterTimeout)
 	taskSystemUpdater.SetRepeats(-1)
 	taskSystemUpdater.SetRepeatInterval(b.config.SystemUpdaterInterval)
-	taskSystemUpdater.SetName("system-updater-" + b.config.Address.Host)
+	taskSystemUpdater.SetName("system-updater")
 
 	taskCleaner := b.WrapTaskIsOnline(b.taskCleaner)
 	taskCleaner.SetRepeats(-1)
 	taskCleaner.SetRepeatInterval(b.config.CleanerInterval)
-	taskCleaner.SetName("cleaner-" + b.config.Address.Host)
+	taskCleaner.SetName("cleaner")
 
 	tasks := []workers.Task{
 		taskLiveness,

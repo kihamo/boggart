@@ -17,12 +17,12 @@ func (b *Bind) Tasks() []workers.Task {
 	taskLiveness.SetTimeout(b.config.LivenessTimeout)
 	taskLiveness.SetRepeats(-1)
 	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
-	taskLiveness.SetName("liveness-" + b.address.Host)
+	taskLiveness.SetName("liveness")
 
 	taskStateUpdater := b.WrapTaskIsOnline(b.taskUpdater)
 	taskStateUpdater.SetRepeats(-1)
 	taskStateUpdater.SetRepeatInterval(b.config.UpdaterInterval)
-	taskStateUpdater.SetName("updater-" + b.address.Host)
+	taskStateUpdater.SetName("updater")
 
 	return []workers.Task{
 		taskLiveness,

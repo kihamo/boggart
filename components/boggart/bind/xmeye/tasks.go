@@ -16,13 +16,13 @@ func (b *Bind) Tasks() []workers.Task {
 	taskLiveness.SetTimeout(b.config.LivenessTimeout)
 	taskLiveness.SetRepeats(-1)
 	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
-	taskLiveness.SetName("liveness-" + b.config.Address.Host)
+	taskLiveness.SetName("liveness")
 
 	taskState := b.WrapTaskIsOnline(b.taskUpdater)
 	taskState.SetTimeout(b.config.UpdaterTimeout)
 	taskState.SetRepeats(-1)
 	taskState.SetRepeatInterval(b.config.UpdaterInterval)
-	taskState.SetName("updater-" + b.config.Address.Host)
+	taskState.SetName("updater")
 
 	tasks := []workers.Task{
 		taskLiveness,

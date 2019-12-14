@@ -14,7 +14,7 @@ func (b *Bind) Tasks() []workers.Task {
 	taskUpdater := task.NewFunctionTask(b.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(b.config.UpdaterInterval)
-	taskUpdater.SetName("updater-" + b.address)
+	taskUpdater.SetName("updater")
 
 	return []workers.Task{
 		taskUpdater,

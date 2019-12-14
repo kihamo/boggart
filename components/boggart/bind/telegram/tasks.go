@@ -15,7 +15,7 @@ func (b *Bind) Tasks() []workers.Task {
 	taskLiveness.SetTimeout(b.config.LivenessTimeout)
 	taskLiveness.SetRepeats(-1)
 	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
-	taskLiveness.SetName("liveness-" + b.config.Token)
+	taskLiveness.SetName("liveness")
 
 	return []workers.Task{
 		taskLiveness,
