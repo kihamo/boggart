@@ -67,7 +67,7 @@ func (b *Bind) Tasks() []workers.Task {
 
 func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
 	if !b.IsStatusOnline() {
-		return nil, nil
+		return nil, errors.New("bind isn't online")
 	}
 
 	deviceInfo, err := b.client.Device.GetDeviceInformation(device.NewGetDeviceInformationParamsWithContext(ctx))
