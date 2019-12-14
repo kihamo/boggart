@@ -3,31 +3,22 @@ package pulsar
 import (
 	"context"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/go-workers"
-	"github.com/kihamo/go-workers/task"
 	"go.uber.org/multierr"
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskStateUpdater := task.NewFunctionTask(b.taskUpdater)
+	taskStateUpdater := b.WrapTaskIsOnline(b.taskUpdater)
 	taskStateUpdater.SetRepeats(-1)
 	taskStateUpdater.SetRepeatInterval(b.config.UpdaterInterval)
-	taskStateUpdater.SetName("updater-" + b.SerialNumber())
+	taskStateUpdater.SetName("updater")
 
 	return []workers.Task{
 		taskStateUpdater,
 	}
 }
 
-func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
-	if _, err := b.provider.Version(); err != nil {
-		b.UpdateStatus(boggart.BindStatusOffline)
-		return nil, err
-	}
-
-	b.UpdateStatus(boggart.BindStatusOnline)
-
+func (b *Bind) taskUpdater(ctx context.Context) error {
 	sn := b.SerialNumber()
 	var result error
 
@@ -162,5 +153,5 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		result = multierr.Append(result, err)
 	}
 
-	return nil, result
+	return result
 }
