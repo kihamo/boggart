@@ -10,6 +10,7 @@ import (
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
+
 	config *Config
 	mutex  sync.RWMutex
 	client *tv.ApiV2
