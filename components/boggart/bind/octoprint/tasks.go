@@ -4,40 +4,36 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/kihamo/boggart/providers/octoprint/client/plugin_display_layer_progress"
-
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/providers/octoprint/client/job"
+	"github.com/kihamo/boggart/providers/octoprint/client/plugin_display_layer_progress"
 	"github.com/kihamo/boggart/providers/octoprint/client/printer"
 	"github.com/kihamo/boggart/providers/octoprint/models"
 	"github.com/kihamo/go-workers"
-	"github.com/kihamo/go-workers/task"
 	"go.uber.org/multierr"
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskLiveness := task.NewFunctionTask(b.taskLiveness)
-	taskLiveness.SetTimeout(b.config.LivenessTimeout)
-	taskLiveness.SetRepeats(-1)
-	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
-	taskLiveness.SetName("liveness")
+	taskUpdater := b.WrapTaskIsOnline(b.taskUpdater)
+	taskUpdater.SetTimeout(b.config.UpdaterTimeout)
+	taskUpdater.SetRepeats(-1)
+	taskUpdater.SetRepeatInterval(b.config.UpdaterInterval)
+	taskUpdater.SetName("updater")
 
 	tasks := []workers.Task{
-		taskLiveness,
+		taskUpdater,
 	}
 
 	return tasks
 }
 
-func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
+func (b *Bind) taskUpdater(ctx context.Context) error {
 	/*
 		loginParams := authorization.NewLoginParamsWithContext(ctx)
 		loginParams.Body.Passive = true
 
 		_, err := b.provider.Authorization.Login(loginParams, nil)
 		if err != nil {
-			b.UpdateStatus(boggart.BindStatusOffline)
-			return nil, err
+			return err
 		}
 	*/
 
@@ -51,15 +47,10 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 	if err != nil {
 		if _, ok := err.(*printer.GetPrinterStateConflict); ok {
 			err = b.MQTTPublishAsync(ctx, b.config.TopicState.Format(address), "Not operational")
-			b.UpdateStatus(boggart.BindStatusOnline)
-		} else {
-			b.UpdateStatus(boggart.BindStatusOffline)
 		}
 
-		return nil, err
+		return err
 	}
-
-	b.UpdateStatus(boggart.BindStatusOnline)
 
 	if e := b.MQTTPublishAsync(ctx, b.config.TopicState.Format(address), state.Payload.State.Text); e != nil {
 		err = multierr.Append(err, e)
@@ -168,5 +159,5 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 		err = multierr.Append(err, e)
 	}
 
-	return nil, err
+	return err
 }

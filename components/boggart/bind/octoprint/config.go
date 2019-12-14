@@ -8,11 +8,13 @@ import (
 )
 
 type Config struct {
+	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
+
 	Address                          boggart.URL `valid:",required"`
 	APIKey                           string      `valid:",required" mapstructure:"api_key" yaml:"api_key"`
 	Debug                            bool
-	LivenessInterval                 time.Duration `mapstructure:"liveness_interval" yaml:"liveness_interval"`
-	LivenessTimeout                  time.Duration `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
+	UpdaterInterval                  time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
+	UpdaterTimeout                   time.Duration `mapstructure:"updater_timeout" yaml:"updater_timeout"`
 	TopicState                       mqtt.Topic    `mapstructure:"topic_state" yaml:"topic_state"`
 	TopicStateBedTemperatureActual   mqtt.Topic    `mapstructure:"topic_state_bed_temperature_actual" yaml:"topic_state_bed_temperature_actual"`
 	TopicStateBedTemperatureOffset   mqtt.Topic    `mapstructure:"topic_state_bed_temperature_offset" yaml:"topic_state_bed_temperature_offset"`
@@ -35,8 +37,12 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/octoprint/+/"
 
 	return &Config{
-		LivenessInterval:                 time.Second * 30,
-		LivenessTimeout:                  time.Second * 5,
+		BindConfig: boggart.BindConfig{
+			ReadinessPeriod:  time.Second * 30,
+			ReadinessTimeout: time.Second * 5,
+		},
+		UpdaterInterval:                  time.Second * 30,
+		UpdaterTimeout:                   time.Second * 5,
 		TopicState:                       prefix + "state",
 		TopicStateBedTemperatureActual:   prefix + "state/bed/temperature/actual",
 		TopicStateBedTemperatureOffset:   prefix + "state/bed/temperature/offset",
