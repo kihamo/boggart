@@ -90,7 +90,7 @@ $(document).ready(function () {
 
                         if (row.has_liveness_probe) {
                             content += '<a href="/boggart/bind/' + row.id + '/liveness/" target="_blank" class="btn btn-success btn-icon btn-xs">' +
-                                '<i class="glyphicon glyphicon-glyphicon-volume-up" title="Liveness probe"></i>' +
+                                '<i class="glyphicon glyphicon-volume-up" title="Liveness probe"></i>' +
                                 '</a>';
                         }
 
