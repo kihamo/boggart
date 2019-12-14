@@ -5,19 +5,24 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"time"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/providers/mikrotik"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskLiveness := task.NewFunctionTask(b.taskLiveness)
-	taskLiveness.SetTimeout(b.config.LivenessTimeout)
-	taskLiveness.SetRepeats(-1)
-	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
-	taskLiveness.SetName("liveness")
+	taskSerialNumber := task.NewFunctionTillSuccessTask(b.taskSerialNumber)
+	taskSerialNumber.SetRepeats(-1)
+	taskSerialNumber.SetRepeatInterval(time.Second * 30)
+	taskSerialNumber.SetName("serial-number")
+
+	taskClientsSync := b.WrapTaskIsOnline(b.taskClientsSync)
+	taskClientsSync.SetTimeout(b.config.LivenessTimeout)
+	taskClientsSync.SetRepeats(-1)
+	taskClientsSync.SetRepeatInterval(b.config.ClientsSyncInterval)
+	taskClientsSync.SetName("clients-sync")
 
 	taskStateUpdater := b.WrapTaskIsOnline(b.taskUpdater)
 	taskStateUpdater.SetRepeats(-1)
@@ -25,40 +30,43 @@ func (b *Bind) Tasks() []workers.Task {
 	taskStateUpdater.SetName("updater")
 
 	return []workers.Task{
-		taskLiveness,
+		taskSerialNumber,
+		taskClientsSync,
 		taskStateUpdater,
 	}
 }
 
-func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
+func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
+	if !b.IsStatusOnline() {
+		return nil, errors.New("bind isn't online")
+	}
+
 	system, err := b.provider.SystemRouterboard(ctx)
 	if err != nil {
-		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, err
 	}
 
 	if system.SerialNumber == "" {
-		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, errors.New("serial number is empty")
 	}
 
-	b.UpdateStatus(boggart.BindStatusOnline)
-	if b.SerialNumber() == "" {
-		b.SetSerialNumber(system.SerialNumber)
-	}
+	b.SetSerialNumber(system.SerialNumber)
+	return nil, nil
+}
 
+func (b *Bind) taskClientsSync(ctx context.Context) error {
 	b.updateWiFiClient(ctx)
 	b.clientWiFi.Ready()
 
 	b.updateVPNClient(ctx)
 	b.clientVPN.Ready()
 
-	return nil, nil
+	return nil
 }
 
 func (b *Bind) taskUpdater(ctx context.Context) error {
-	serialNumber := b.SerialNumber()
-	if serialNumber == "" {
+	sn := b.SerialNumber()
+	if sn == "" {
 		return nil
 	}
 
@@ -80,7 +88,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 	// Wifi clients
 	clients, err := b.provider.InterfaceWirelessRegistrationTable(ctx)
 	if err == nil {
-		metricWifiClients.With("serial_number", serialNumber).Set(float64(len(clients)))
+		metricWifiClients.With("serial_number", sn).Set(float64(len(clients)))
 
 		for _, client := range clients {
 			bytes := strings.Split(client.Bytes, ",")
@@ -97,11 +105,11 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 
 			received, err := strconv.ParseFloat(bytes[1], 64)
 			if err == nil {
-				metricTrafficReceivedBytes.With("serial_number", serialNumber).With(
+				metricTrafficReceivedBytes.With("serial_number", sn).With(
 					"interface", client.Interface,
 					"mac", client.MacAddress,
 					"name", name).Set(received)
-				metricTrafficSentBytes.With("serial_number", serialNumber).With(
+				metricTrafficSentBytes.With("serial_number", sn).With(
 					"interface", client.Interface,
 					"mac", client.MacAddress,
 					"name", name).Set(sent)
@@ -117,10 +125,10 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 	stats, err := b.provider.InterfaceStats(ctx)
 	if err == nil {
 		for _, stat := range stats {
-			metricTrafficReceivedBytes.With("serial_number", serialNumber).With(
+			metricTrafficReceivedBytes.With("serial_number", sn).With(
 				"interface", stat.Name,
 				"mac", stat.MacAddress).Set(float64(stat.RXByte))
-			metricTrafficSentBytes.With("serial_number", serialNumber).With(
+			metricTrafficSentBytes.With("serial_number", sn).With(
 				"interface", stat.Name,
 				"mac", stat.MacAddress).Set(float64(stat.TXByte))
 		}
@@ -130,11 +138,11 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 
 	resource, err := b.provider.SystemResource(ctx)
 	if err == nil {
-		metricCPULoad.With("serial_number", serialNumber).Set(float64(resource.CPULoad))
-		metricMemoryAvailable.With("serial_number", serialNumber).Set(float64(resource.FreeMemory))
-		metricMemoryUsage.With("serial_number", serialNumber).Set(float64(resource.TotalMemory - resource.FreeMemory))
-		metricStorageAvailable.With("serial_number", serialNumber).Set(float64(resource.FreeHDDSpace))
-		metricStorageUsage.With("serial_number", serialNumber).Set(float64(resource.TotalHDDSpace - resource.FreeHDDSpace))
+		metricCPULoad.With("serial_number", sn).Set(float64(resource.CPULoad))
+		metricMemoryAvailable.With("serial_number", sn).Set(float64(resource.FreeMemory))
+		metricMemoryUsage.With("serial_number", sn).Set(float64(resource.TotalMemory - resource.FreeMemory))
+		metricStorageAvailable.With("serial_number", sn).Set(float64(resource.FreeHDDSpace))
+		metricStorageUsage.With("serial_number", sn).Set(float64(resource.TotalHDDSpace - resource.FreeHDDSpace))
 	} else if !mikrotik.IsEmptyResponse(err) {
 		return err
 	}
@@ -142,11 +150,11 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 	disks, err := b.provider.SystemDisk(ctx)
 	if err == nil {
 		for _, disk := range disks {
-			metricDiskUsage.With("serial_number", serialNumber).With(
+			metricDiskUsage.With("serial_number", sn).With(
 				"name", disk.Name,
 				"label", disk.Label,
 			).Set(float64(disk.Size - disk.Free))
-			metricDiskAvailable.With("serial_number", serialNumber).With(
+			metricDiskAvailable.With("serial_number", sn).With(
 				"name", disk.Name,
 				"label", disk.Label,
 			).Set(float64(disk.Free))
@@ -157,8 +165,8 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 
 	health, err := b.provider.SystemHealth(ctx)
 	if err == nil {
-		metricVoltage.With("serial_number", serialNumber).Set(health.Voltage)
-		metricTemperature.With("serial_number", serialNumber).Set(float64(health.Temperature))
+		metricVoltage.With("serial_number", sn).Set(health.Voltage)
+		metricTemperature.With("serial_number", sn).Set(float64(health.Temperature))
 	} else if !mikrotik.IsEmptyResponse(err) {
 		return err
 	}

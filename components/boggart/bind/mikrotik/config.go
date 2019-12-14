@@ -8,10 +8,11 @@ import (
 )
 
 type Config struct {
+	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
+
 	Address                   string        `valid:"url,required"`
 	SyslogClient              string        `valid:"url" mapstructure:"syslog_client" yaml:"syslog_client,omitempty"`
-	LivenessInterval          time.Duration `mapstructure:"liveness_interval" yaml:"liveness_interval"`
-	LivenessTimeout           time.Duration `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
+	ClientsSyncInterval       time.Duration `mapstructure:"clients_sync_interval" yaml:"clients_sync_interval"`
 	UpdaterInterval           time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 	TopicWiFiMACState         mqtt.Topic    `mapstructure:"topic_wifi_mac_state" yaml:"topic_wifi_mac_state"`
 	TopicWiFiConnectedMAC     mqtt.Topic    `mapstructure:"topic_wifi_connected_mac" yaml:"topic_wifi_connected_mac"`
@@ -25,8 +26,11 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/router/+/"
 
 	return &Config{
-		LivenessInterval:          time.Minute,
-		LivenessTimeout:           time.Second * 5,
+		BindConfig: boggart.BindConfig{
+			ReadinessPeriod:  time.Minute,
+			ReadinessTimeout: time.Second * 5,
+		},
+		ClientsSyncInterval:       time.Minute,
 		UpdaterInterval:           time.Minute * 5,
 		TopicWiFiMACState:         prefix + "wifi/clients/+/state",
 		TopicWiFiConnectedMAC:     prefix + "wifi/clients/last/on/mac",
