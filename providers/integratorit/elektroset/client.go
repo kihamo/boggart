@@ -14,6 +14,8 @@ import (
 )
 
 const (
+	BaseURL = "https://lkk.oao-elektroset.ru/gate_lkk_myt"
+
 	dateFormatLayout = "2006-01-02"
 )
 
@@ -23,7 +25,7 @@ type Client struct {
 
 func New(login, password string) *Client {
 	c := &Client{}
-	c.base = internal.New("https://lkk.oao-elektroset.ru/gate_lkk_myt", login, password, c.Auth)
+	c.base = internal.New(BaseURL, login, password, c.Auth)
 
 	return c
 }

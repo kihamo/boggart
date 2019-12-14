@@ -8,6 +8,8 @@ import (
 )
 
 type Config struct {
+	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
+
 	Debug               bool
 	Login               string        `valid:"required"`
 	Password            string        `valid:"required"`

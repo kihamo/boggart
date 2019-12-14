@@ -10,13 +10,17 @@ import (
 	"github.com/kihamo/boggart/providers/integratorit/internal"
 )
 
+const (
+	BaseURL = "https://my.mosenergosbyt.ru/gate_mlkcomu"
+)
+
 type Client struct {
 	base *internal.Client
 }
 
 func New(login, password string) *Client {
 	c := &Client{}
-	c.base = internal.New("https://my.mosenergosbyt.ru/gate_mlkcomu", login, password, c.Auth)
+	c.base = internal.New(BaseURL, login, password, c.Auth)
 
 	return c
 }

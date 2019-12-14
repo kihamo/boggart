@@ -5,31 +5,26 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/go-workers"
-	"github.com/kihamo/go-workers/task"
 	"go.uber.org/multierr"
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskUpdater := task.NewFunctionTask(b.taskUpdater)
+	taskUpdater := b.WrapTaskIsOnline(b.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(b.config.UpdaterInterval)
-	taskUpdater.SetName("updater-" + b.config.Login)
+	taskUpdater.SetName("updater")
 
 	return []workers.Task{
 		taskUpdater,
 	}
 }
 
-func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
+func (b *Bind) taskUpdater(ctx context.Context) error {
 	accounts, err := b.client.Accounts(ctx)
 	if err != nil {
-		b.UpdateStatus(boggart.BindStatusOffline)
-		return nil, err
+		return err
 	}
-
-	b.UpdateStatus(boggart.BindStatusOnline)
 
 	for _, account := range accounts {
 		if balance, e := b.client.CurrentBalance(ctx, account.Provider.IDAbonent); e != nil {
@@ -61,5 +56,5 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		}
 	}
 
-	return nil, err
+	return err
 }
