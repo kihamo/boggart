@@ -1,11 +1,15 @@
 package serial
 
 import (
+	"sync/atomic"
+
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/protocols/serial_network"
 )
 
 type Bind struct {
+	status uint32 // 0 - default, 1 - started, 2 - failed
+
 	boggart.BindBase
 
 	server serial_network.Server
@@ -13,13 +17,11 @@ type Bind struct {
 
 func (b *Bind) Run() error {
 	go func() {
-		b.UpdateStatus(boggart.BindStatusOnline)
+		atomic.StoreUint32(&b.status, 1)
+		defer atomic.StoreUint32(&b.status, 2)
 
-		err := b.server.ListenAndServe()
-		if err != nil {
+		if err := b.server.ListenAndServe(); err != nil {
 			b.Logger().Error("Failed serve with error " + err.Error())
-
-			b.UpdateStatus(boggart.BindStatusOffline)
 		}
 	}()
 
