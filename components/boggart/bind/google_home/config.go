@@ -4,14 +4,13 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/providers/google/home"
 )
 
 type Config struct {
 	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
 
-	Host boggart.IP `valid:",required"`
-	Port int        `valid:"port"`
+	Address boggart.URL `valid:",required"`
+	Debug   bool
 }
 
 func (t Type) Config() interface{} {
@@ -20,6 +19,5 @@ func (t Type) Config() interface{} {
 			ReadinessPeriod:  time.Second * 30,
 			ReadinessTimeout: time.Second * 10,
 		},
-		Port: home.DefaultPort,
 	}
 }

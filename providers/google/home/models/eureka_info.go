@@ -130,9 +130,6 @@ type EurekaInfo struct {
 	// version
 	Version int64 `json:"version,omitempty"`
 
-	// wifi
-	Wifi interface{} `json:"wifi,omitempty"`
-
 	// wpa configured
 	WpaConfigured bool `json:"wpa_configured,omitempty"`
 

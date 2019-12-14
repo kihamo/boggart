@@ -21,19 +21,23 @@ import:
 - package: github.com/eclipse/paho.mqtt.golang
   version: 2e9e43b5d02b38840f73bf795ddc8a266a10bf53
 - package: github.com/go-swagger/go-swagger
-  version: ~v0.20
+  version: ~v0.21
+- package: github.com/go-openapi/analysis
+  version: ~v0.19.4
+- package: github.com/go-openapi/errors
+  version: ~v0.19.2
 - package: github.com/go-openapi/inflect
   version: ~v0.19
 - package: github.com/go-openapi/spec
-  version: ~v0.19
+  version: ~v0.19.3
 - package: github.com/go-openapi/runtime
-  version: ~v0.19
+  version: ~v0.19.4
 - package: github.com/go-openapi/strfmt
-  version: ~v0.19
+  version: ~v0.19.2
 - package: github.com/go-openapi/validate
-  version: ~v0.19
+  version: ~v0.19.5
 - package: github.com/go-openapi/swag
-  version: ~v0.19
+  version: ~v0.19.5
 - package: github.com/jessevdk/go-flags
   version: ~v1.4
 - package: github.com/kr/pretty

@@ -26,7 +26,6 @@ type GetAppDeviceIDReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *GetAppDeviceIDReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewGetAppDeviceIDOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -54,6 +53,10 @@ type GetAppDeviceIDOK struct {
 
 func (o *GetAppDeviceIDOK) Error() string {
 	return fmt.Sprintf("[POST /setup/get_app_device_id][%d] getAppDeviceIdOK  %+v", 200, o.Payload)
+}
+
+func (o *GetAppDeviceIDOK) GetPayload() *GetAppDeviceIDOKBody {
+	return o.Payload
 }
 
 func (o *GetAppDeviceIDOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

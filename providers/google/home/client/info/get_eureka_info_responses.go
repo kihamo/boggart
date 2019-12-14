@@ -24,7 +24,6 @@ type GetEurekaInfoReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *GetEurekaInfoReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewGetEurekaInfoOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +51,10 @@ type GetEurekaInfoOK struct {
 
 func (o *GetEurekaInfoOK) Error() string {
 	return fmt.Sprintf("[GET /setup/eureka_info][%d] getEurekaInfoOK  %+v", 200, o.Payload)
+}
+
+func (o *GetEurekaInfoOK) GetPayload() *models.EurekaInfo {
+	return o.Payload
 }
 
 func (o *GetEurekaInfoOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

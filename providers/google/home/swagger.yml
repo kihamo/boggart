@@ -1,72 +1,72 @@
 # https://ludeeus.github.io/googledevices/
+---
+
 swagger: "2.0"
 info:
-  description: "This is an unofficial documentation of the local API used by the Home app to communicate with the device."
-  version: "0.0.1"
   title: "Google Home"
-  termsOfService: ""
-  contact:
-    email: "dev@kihamo.ru"
-  license:
-    name: "MIT"
-    url: "https://github.com/rithvikvibhu/GHLocalApi/blob/master/LICENSE.md"
+  version: "0.0.1"
+externalDocs:
+  description: "Find out more about Google Home API"
+  url: "https://rithvikvibhu.github.io/GHLocalApi/"
 basePath: "/"
 tags:
-  - name: "info"
-    description: "Device Info"
-  - name: "settings"
-    description: "Device Settings"
-  - name: "assistant"
-    description: "Assistant"
-  - name: "bluetooth"
-    description: "Bluetooth"
-  - name: "wifi"
-    description: "Wifi"
-  - name: "static"
-    description: "Static Files"
+- name: "info"
+  description: "Device Info"
+- name: "settings"
+  description: "Device Settings"
+- name: "assistant"
+  description: "Assistant"
+- name: "bluetooth"
+  description: "Bluetooth"
+- name: "wifi"
+  description: "Wifi"
+- name: "static"
+  description: "Static Files"
+consumes:
+- "application/json"
+produces:
+- "application/json"
 schemes:
-  - "http"
+- "http"
 paths:
   /setup/eureka_info:
     get:
       tags:
-        - "info"
+      - "info"
       summary: "This gives most of the device info"
       description: "This gives most of the device info"
       operationId: "getEurekaInfo"
-      produces:
-        - "application/json"
       parameters:
-        - name: "options"
-          in: "query"
-          description: "Set detail mode"
-          required: false
-          type: "string"
-          enum:
-            - "detail"
-        - name: "params"
-          in: "query"
-          description: "Show only params (comma separated)"
-          required: false
-          type: "string"
-          #enum:
-          #  - "version"
-          #  - "audio"
-          #  - "name"
-          #  - "build_info"
-          #  - "detail"
-          #  - "device_info"
-          #  - "net"
-          #  - "wifi"
-          #  - "setup"
-          #  - "settings"
-          #  - "opt_in"
-          #  - "opencast"
-          #  - "multizone"
-          #  - "proxy"
-          #  - "night_mode_params"
-          #  - "user_eq"
-          #  - "room_equalizer"
+      - name: "options"
+        in: "query"
+        description: "Set detail mode"
+        required: false
+        type: "string"
+        enum:
+        - "detail"
+      - name: "params"
+        in: "query"
+        description: "Show only params (comma separated)"
+        required: false
+        type: "string"
+        #enum:
+        #  - "version"
+        #  - "audio"
+        #  - "name"
+        #  - "build_info"
+        #  - "detail"
+        #  - "device_info"
+        #  - "net"
+        #  - "wifi"
+        #  - "setup"
+        #  - "settings"
+        #  - "opt_in"
+        #  - "opencast"
+        #  - "multizone"
+        #  - "proxy"
+        #  - "night_mode_params"
+        #  - "user_eq"
+        #  - "room_equalizer"
       responses:
         200:
           description: "returned device information"
@@ -75,24 +75,24 @@ paths:
   /setup/get_app_device_id:
     post:
       tags:
-        - "info"
+      - "info"
       summary: "This gives certificate by device ID"
       description: "The app_id in the request is mandatory and refers to Chromecast backdrop/screensaver app. It has to be set to E8C28D3C"
       operationId: "getAppDeviceID"
       parameters:
-        - in: "body"
-          name: "body"
-          description: "Application ID"
-          required: true
-          schema:
-            type: "object"
-            properties:
-              app_id:
-                type: "string"
-                enum:
-                  - "E8C28D3C"
-            required:
-              - app_id
+      - in: "body"
+        name: "body"
+        description: "Application ID"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            app_id:
+              type: "string"
+              enum:
+              - "E8C28D3C"
+          required:
+          - app_id
       responses:
         200:
           description: "successful operation"
@@ -106,18 +106,16 @@ paths:
               signed_data:
                 type: "string"
             required:
-              - app_device_id
-              - certificate
-              - signed_data
+            - app_device_id
+            - certificate
+            - signed_data
   /setup/offer:
     get:
       tags:
-        - "info"
+      - "info"
       summary: "This gives a token which is used by the Home app to get offers"
       description: "This gives a token which is used by the Home app to get offers. The offers themselves are not stored on the device. A new token is generated for every request."
       operationId: "getOffer"
-      produces:
-        - "application/json"
       responses:
         200:
           description: "returned new token"
@@ -127,16 +125,14 @@ paths:
               token:
                 type: "string"
             required:
-              - token
+            - token
   /setup/supported_timezones:
     get:
       tags:
-        - "info"
+      - "info"
       summary: "Simply returns a list of all supported timezones"
       description: "Simply returns a list of all supported timezones"
       operationId: "getSupportedTimezones"
-      produces:
-        - "application/json"
       responses:
         200:
           description: "returned supported timezones list"
@@ -147,12 +143,10 @@ paths:
   /setup/supported_locales:
     get:
       tags:
-        - "info"
+      - "info"
       summary: "Simply returns a list of all supported locales"
       description: "Simply returns a list of all supported locales"
       operationId: "getSupportedLocales"
-      produces:
-        - "application/json"
       responses:
         200:
           description: "returned supported locales list"
@@ -163,23 +157,21 @@ paths:
   /setup/test_internet_download_speed:
     post:
       tags:
-        - "info"
+      - "info"
       summary: "This endpoint tests internet download speed"
       description: "This endpoint tests internet download speed. Any sample file URL can be provided."
       operationId: "postTestInternetDownloadSpeed"
-      produces:
-        - "application/json"
       parameters:
-        - in: "body"
-          name: "body"
-          description: "URL for test"
-          schema:
-            type: "object"
-            properties:
-              url:
-                type: "string"
-            required:
-              - url
+      - in: "body"
+        name: "body"
+        description: "URL for test"
+        schema:
+          type: "object"
+          properties:
+            url:
+              type: "string"
+          required:
+          - url
       responses:
         200:
           description: "returned test result"
@@ -188,19 +180,17 @@ paths:
   /setup/set_eureka_info:
     post:
       tags:
-        - "settings"
+      - "settings"
       summary: "This can set custom values to some options"
       description: "Only fields to be modified need to be sent, not all. Sending non-existant fields will still return a 200 OK, but they are not saved."
       operationId: "setEurekaInfo"
-      produces:
-        - "application/json"
       parameters:
-        - in: "body"
-          name: "body"
-          description: "List fields for set"
-          required: true
-          schema:
-            $ref: "#/definitions/SetEurekaInfo"
+      - in: "body"
+        name: "body"
+        description: "List fields for set"
+        required: true
+        schema:
+          $ref: "#/definitions/SetEurekaInfo"
       responses:
         200:
           description: "successful operation"
@@ -300,7 +290,7 @@ definitions:
       version:
         type: "integer"
         format: "int64"
-      wifi:
+      # wifi:
   Audio:
     type: "object"
     properties:
@@ -561,7 +551,7 @@ definitions:
       locale:
         type: "string"
     required:
-      - display_string
+    - display_string
   Timezone:
     type: "object"
     properties:
@@ -573,8 +563,8 @@ definitions:
       timezone:
         type: "string"
     required:
-      - display_string
-      - offset
+    - display_string
+    - offset
   TestInternetDownloadSpeed:
     type: "object"
     properties:
@@ -591,10 +581,10 @@ definitions:
         type: "integer"
         format: "int64"
     required:
-      - bytes_received
-      - response_code
-      - time_for_data_fetch
-      - time_for_http_response
+    - bytes_received
+    - response_code
+    - time_for_data_fetch
+    - time_for_http_response
   SetEurekaInfo:
     type: "object"
     properties:
@@ -602,6 +592,3 @@ definitions:
         type: "string"
       settings:
         $ref: "#/definitions/Settings"
-externalDocs:
-  description: "Find out more about Google Home API"
-  url: "https://rithvikvibhu.github.io/GHLocalApi/"

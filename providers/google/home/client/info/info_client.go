@@ -6,6 +6,8 @@ package info
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"fmt"
+
 	"github.com/go-openapi/runtime"
 
 	strfmt "github.com/go-openapi/strfmt"
@@ -39,8 +41,8 @@ func (a *Client) GetAppDeviceID(params *GetAppDeviceIDParams) (*GetAppDeviceIDOK
 		ID:                 "getAppDeviceID",
 		Method:             "POST",
 		PathPattern:        "/setup/get_app_device_id",
-		ProducesMediaTypes: []string{""},
-		ConsumesMediaTypes: []string{""},
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,
 		Reader:             &GetAppDeviceIDReader{formats: a.formats},
@@ -50,8 +52,14 @@ func (a *Client) GetAppDeviceID(params *GetAppDeviceIDParams) (*GetAppDeviceIDOK
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetAppDeviceIDOK), nil
-
+	success, ok := result.(*GetAppDeviceIDOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getAppDeviceID: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -70,7 +78,7 @@ func (a *Client) GetEurekaInfo(params *GetEurekaInfoParams) (*GetEurekaInfoOK, e
 		Method:             "GET",
 		PathPattern:        "/setup/eureka_info",
 		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{""},
+		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,
 		Reader:             &GetEurekaInfoReader{formats: a.formats},
@@ -80,8 +88,14 @@ func (a *Client) GetEurekaInfo(params *GetEurekaInfoParams) (*GetEurekaInfoOK, e
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetEurekaInfoOK), nil
-
+	success, ok := result.(*GetEurekaInfoOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getEurekaInfo: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -100,7 +114,7 @@ func (a *Client) GetOffer(params *GetOfferParams) (*GetOfferOK, error) {
 		Method:             "GET",
 		PathPattern:        "/setup/offer",
 		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{""},
+		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,
 		Reader:             &GetOfferReader{formats: a.formats},
@@ -110,8 +124,14 @@ func (a *Client) GetOffer(params *GetOfferParams) (*GetOfferOK, error) {
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetOfferOK), nil
-
+	success, ok := result.(*GetOfferOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getOffer: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -130,7 +150,7 @@ func (a *Client) GetSupportedLocales(params *GetSupportedLocalesParams) (*GetSup
 		Method:             "GET",
 		PathPattern:        "/setup/supported_locales",
 		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{""},
+		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,
 		Reader:             &GetSupportedLocalesReader{formats: a.formats},
@@ -140,8 +160,14 @@ func (a *Client) GetSupportedLocales(params *GetSupportedLocalesParams) (*GetSup
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetSupportedLocalesOK), nil
-
+	success, ok := result.(*GetSupportedLocalesOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getSupportedLocales: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -160,7 +186,7 @@ func (a *Client) GetSupportedTimezones(params *GetSupportedTimezonesParams) (*Ge
 		Method:             "GET",
 		PathPattern:        "/setup/supported_timezones",
 		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{""},
+		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,
 		Reader:             &GetSupportedTimezonesReader{formats: a.formats},
@@ -170,8 +196,14 @@ func (a *Client) GetSupportedTimezones(params *GetSupportedTimezonesParams) (*Ge
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetSupportedTimezonesOK), nil
-
+	success, ok := result.(*GetSupportedTimezonesOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getSupportedTimezones: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -190,7 +222,7 @@ func (a *Client) PostTestInternetDownloadSpeed(params *PostTestInternetDownloadS
 		Method:             "POST",
 		PathPattern:        "/setup/test_internet_download_speed",
 		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{""},
+		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,
 		Reader:             &PostTestInternetDownloadSpeedReader{formats: a.formats},
@@ -200,8 +232,14 @@ func (a *Client) PostTestInternetDownloadSpeed(params *PostTestInternetDownloadS
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostTestInternetDownloadSpeedOK), nil
-
+	success, ok := result.(*PostTestInternetDownloadSpeedOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for postTestInternetDownloadSpeed: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 // SetTransport changes the transport on the client

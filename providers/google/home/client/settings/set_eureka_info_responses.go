@@ -21,7 +21,6 @@ type SetEurekaInfoReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *SetEurekaInfoReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewSetEurekaInfoOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {

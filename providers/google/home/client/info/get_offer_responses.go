@@ -25,7 +25,6 @@ type GetOfferReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *GetOfferReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewGetOfferOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -53,6 +52,10 @@ type GetOfferOK struct {
 
 func (o *GetOfferOK) Error() string {
 	return fmt.Sprintf("[GET /setup/offer][%d] getOfferOK  %+v", 200, o.Payload)
+}
+
+func (o *GetOfferOK) GetPayload() *GetOfferOKBody {
+	return o.Payload
 }
 
 func (o *GetOfferOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

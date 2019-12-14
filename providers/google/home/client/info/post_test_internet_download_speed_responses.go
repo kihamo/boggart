@@ -27,7 +27,6 @@ type PostTestInternetDownloadSpeedReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *PostTestInternetDownloadSpeedReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewPostTestInternetDownloadSpeedOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -55,6 +54,10 @@ type PostTestInternetDownloadSpeedOK struct {
 
 func (o *PostTestInternetDownloadSpeedOK) Error() string {
 	return fmt.Sprintf("[POST /setup/test_internet_download_speed][%d] postTestInternetDownloadSpeedOK  %+v", 200, o.Payload)
+}
+
+func (o *PostTestInternetDownloadSpeedOK) GetPayload() *models.TestInternetDownloadSpeed {
+	return o.Payload
 }
 
 func (o *PostTestInternetDownloadSpeedOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

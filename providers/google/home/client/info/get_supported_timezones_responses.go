@@ -24,7 +24,6 @@ type GetSupportedTimezonesReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *GetSupportedTimezonesReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewGetSupportedTimezonesOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +51,10 @@ type GetSupportedTimezonesOK struct {
 
 func (o *GetSupportedTimezonesOK) Error() string {
 	return fmt.Sprintf("[GET /setup/supported_timezones][%d] getSupportedTimezonesOK  %+v", 200, o.Payload)
+}
+
+func (o *GetSupportedTimezonesOK) GetPayload() []*models.Timezone {
+	return o.Payload
 }
 
 func (o *GetSupportedTimezonesOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
