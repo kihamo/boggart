@@ -4,7 +4,7 @@ import (
 	"context"
 )
 
-func (b *Bind) ReadinessProbe(ctx context.Context) (err error) {
+func (b *Bind) ReadinessProbe(_ context.Context) (err error) {
 	_, err = b.State()
 
 	return err

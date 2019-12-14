@@ -8,6 +8,8 @@ import (
 )
 
 type Config struct {
+	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
+
 	Login           string        `valid:"required"`
 	Password        string        `valid:"required"`
 	UpdaterInterval time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`

@@ -23,8 +23,8 @@ import (
 // http://uk-gkh.org/muprcmytishi/GetAdditionalServices.ashx?login={phone}&pwd={password}
 
 const (
-	defaultHost = "uk-gkh.org"
-	defaultPort = 80
+	DefaultHost = "uk-gkh.org"
+	DefaultPort = 80
 )
 
 type Client struct {
@@ -32,7 +32,7 @@ type Client struct {
 }
 
 func New(debug bool, logger logger.Logger) *Client {
-	cfg := client.DefaultTransportConfig().WithHost(net.JoinHostPort(defaultHost, strconv.FormatInt(defaultPort, 10)))
+	cfg := client.DefaultTransportConfig().WithHost(net.JoinHostPort(DefaultHost, strconv.FormatInt(DefaultPort, 10)))
 	cl := client.NewHTTPClientWithConfig(nil, cfg)
 
 	if rt, ok := cl.Transport.(*httptransport.Runtime); ok {
