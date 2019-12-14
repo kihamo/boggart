@@ -8,8 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/providers/hilink/client/config"
 	"github.com/kihamo/boggart/providers/hilink/client/device"
 	"github.com/kihamo/boggart/providers/hilink/client/monitoring"
 	"github.com/kihamo/boggart/providers/hilink/client/net"
@@ -21,11 +19,16 @@ import (
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskLiveness := task.NewFunctionTask(b.taskLiveness)
-	taskLiveness.SetTimeout(b.config.LivenessTimeout)
-	taskLiveness.SetRepeats(-1)
-	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
-	taskLiveness.SetName("liveness")
+	taskSerialNumber := task.NewFunctionTillSuccessTask(b.taskSerialNumber)
+	taskSerialNumber.SetRepeats(-1)
+	taskSerialNumber.SetRepeatInterval(time.Second * 30)
+	taskSerialNumber.SetName("serial-number")
+
+	taskMonitoring := b.WrapTaskIsOnline(b.taskMonitoring)
+	taskMonitoring.SetTimeout(b.config.MonitoringTimeout)
+	taskMonitoring.SetRepeats(-1)
+	taskMonitoring.SetRepeatInterval(b.config.MonitoringInterval)
+	taskMonitoring.SetName("monitoring")
 
 	taskBalanceUpdater := b.WrapTaskIsOnline(b.taskBalanceUpdater)
 	taskBalanceUpdater.SetTimeout(b.config.BalanceUpdaterTimeout)
@@ -51,7 +54,8 @@ func (b *Bind) Tasks() []workers.Task {
 	taskCleaner.SetName("cleaner")
 
 	tasks := []workers.Task{
-		taskLiveness,
+		taskSerialNumber,
+		taskMonitoring,
 		taskBalanceUpdater,
 		taskSMSChecker,
 		taskSystemUpdater,
@@ -61,62 +65,50 @@ func (b *Bind) Tasks() []workers.Task {
 	return tasks
 }
 
-func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
-	cfg, err := b.client.Config.GetGlobalConfig(config.NewGetGlobalConfigParamsWithContext(ctx))
-	if err != nil {
-		b.UpdateStatus(boggart.BindStatusOffline)
-		return nil, err
-	}
-
-	if cfg.Payload.Login == 1 {
-		if err := b.client.Login(ctx, b.config.Username, b.config.Password); err != nil {
-			b.UpdateStatus(boggart.BindStatusOffline)
-			return nil, err
-		}
-	}
-
-	monitoringStatus, err := b.client.Monitoring.GetMonitoringStatus(monitoring.NewGetMonitoringStatusParamsWithContext(ctx))
-	if err != nil {
-		b.UpdateStatus(boggart.BindStatusOffline)
-		return nil, err
-	}
-	b.simStatus.Set(uint32(monitoringStatus.Payload.SimStatus))
-
+func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
 	deviceInfo, err := b.client.Device.GetDeviceInformation(device.NewGetDeviceInformationParamsWithContext(ctx))
 	if err != nil {
-		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, err
 	}
 
 	if deviceInfo.Payload.SerialNumber == "" {
-		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, errors.New("device returns empty serial number")
 	}
 
-	if b.SerialNumber() == "" {
-		b.SetSerialNumber(deviceInfo.Payload.SerialNumber)
+	b.SetSerialNumber(deviceInfo.Payload.SerialNumber)
+	return nil, nil
+}
+
+func (b *Bind) taskMonitoring(ctx context.Context) error {
+	sn := b.SerialNumber()
+	if sn == "" {
+		return nil
 	}
 
-	b.UpdateStatus(boggart.BindStatusOnline)
+	monitoringStatus, err := b.client.Monitoring.GetMonitoringStatus(monitoring.NewGetMonitoringStatusParamsWithContext(ctx))
+	if err != nil {
+		return err
+	}
+	b.simStatus.Set(uint32(monitoringStatus.Payload.SimStatus))
 
 	if b.operator.IsEmpty() && monitoringStatus.Payload.SimStatus == 1 {
 		plmn, err := b.client.Net.GetCurrentPLMN(net.NewGetCurrentPLMNParamsWithContext(ctx))
 		if err == nil {
 			b.operator.Set(plmn.Payload.FullName)
-			return nil, b.MQTTPublishAsync(
-				ctx,
-				b.config.TopicOperator.Format(deviceInfo.Payload.SerialNumber),
-				plmn.Payload.FullName)
+			return b.MQTTPublishAsync(ctx, b.config.TopicOperator.Format(sn), plmn.Payload.FullName)
 		} else {
-			return nil, err
+			return err
 		}
 	}
 
-	return nil, err
+	return err
 }
 
 func (b *Bind) taskBalanceUpdater(ctx context.Context) error {
 	sn := b.SerialNumber()
+	if sn == "" {
+		return nil
+	}
 
 	balance, err := b.Balance(ctx)
 	if err == nil {
@@ -136,6 +128,9 @@ func (b *Bind) taskSMSChecker(ctx context.Context) error {
 	}
 
 	sn := b.SerialNumber()
+	if sn == "" {
+		return nil
+	}
 
 	// sms counters
 	paramsCount := sms.NewGetSMSCountParamsWithContext(ctx)
@@ -212,6 +207,9 @@ func (b *Bind) taskSystemUpdater(ctx context.Context) (err error) {
 	}
 
 	sn := b.SerialNumber()
+	if sn == "" {
+		return nil
+	}
 
 	// signal
 	if response, e := b.client.Device.GetDeviceSignal(device.NewGetDeviceSignalParamsWithContext(ctx)); e == nil {

@@ -8,12 +8,14 @@ import (
 )
 
 type Config struct {
+	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
+
 	Address                   boggart.URL `valid:",required"`
 	Debug                     bool
 	Username                  string
 	Password                  string
-	LivenessInterval          time.Duration `mapstructure:"liveness_interval" yaml:"liveness_interval"`
-	LivenessTimeout           time.Duration `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
+	MonitoringInterval        time.Duration `mapstructure:"monitoring_interval" yaml:"monitoring_interval"`
+	MonitoringTimeout         time.Duration `mapstructure:"monitoring_timeout" yaml:"monitoring_timeout"`
 	BalanceUpdaterInterval    time.Duration `mapstructure:"balance_interval" yaml:"balance_interval"`
 	BalanceUpdaterTimeout     time.Duration `mapstructure:"balance_timeout" yaml:"balance_timeout"`
 	SMSCheckerInterval        time.Duration `mapstructure:"sms_checker_interval" yaml:"sms_checker_interval"`
@@ -48,8 +50,8 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/hilink/+/"
 
 	return &Config{
-		LivenessInterval:          time.Minute,
-		LivenessTimeout:           time.Second * 5,
+		MonitoringInterval:        time.Minute,
+		MonitoringTimeout:         time.Second * 5,
 		BalanceUpdaterInterval:    time.Hour,
 		BalanceUpdaterTimeout:     time.Second * 30,
 		SMSCheckerInterval:        time.Minute,
