@@ -82,6 +82,9 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 	defer client.Close()
 
 	sn := b.SerialNumber()
+	if sn == "" {
+		return nil
+	}
 
 	storage, _ := client.StorageInfo(ctx)
 	for _, s := range storage {

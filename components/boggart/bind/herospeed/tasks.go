@@ -3,56 +3,48 @@ package herospeed
 import (
 	"context"
 	"errors"
+	"time"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 	"go.uber.org/multierr"
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskLiveness := task.NewFunctionTask(b.taskLiveness)
-	taskLiveness.SetTimeout(b.config.LivenessTimeout)
-	taskLiveness.SetRepeats(-1)
-	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
-	taskLiveness.SetName("liveness")
+	taskSerialNumber := task.NewFunctionTillSuccessTask(b.taskSerialNumber)
+	taskSerialNumber.SetRepeats(-1)
+	taskSerialNumber.SetRepeatInterval(time.Second * 30)
+	taskSerialNumber.SetName("serial-number")
 
 	return []workers.Task{
-		taskLiveness,
+		taskSerialNumber,
 	}
 }
 
-func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
+func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
 	configuration, err := b.client.Configuration(ctx)
-
 	if err != nil {
-		b.UpdateStatus(boggart.BindStatusOffline)
-		return nil, nil
+		return nil, err
 	}
 
 	sn, ok := configuration["serialnumber"]
 	if !ok || len(sn) == 0 {
-		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, errors.New("device returns empty serial number")
 	}
 
-	if b.SerialNumber() == "" {
-		b.SetSerialNumber(sn)
+	b.SetSerialNumber(sn)
 
-		if model, ok := configuration["modelname"]; ok {
-			if e := b.MQTTPublishAsync(ctx, b.config.TopicStateModel.Format(sn), model); e != nil {
-				err = multierr.Append(err, e)
-			}
-		}
-
-		if fw, ok := configuration["firmwareversion"]; ok {
-			if e := b.MQTTPublishAsync(ctx, b.config.TopicStateFirmwareVersion.Format(sn), fw); e != nil {
-				err = multierr.Append(err, e)
-			}
+	if model, ok := configuration["modelname"]; ok {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicStateModel.Format(sn), model); e != nil {
+			err = multierr.Append(err, e)
 		}
 	}
 
-	b.UpdateStatus(boggart.BindStatusOnline)
+	if fw, ok := configuration["firmwareversion"]; ok {
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicStateFirmwareVersion.Format(sn), fw); e != nil {
+			err = multierr.Append(err, e)
+		}
+	}
 
 	return nil, err
 }
