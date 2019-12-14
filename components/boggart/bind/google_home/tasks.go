@@ -23,6 +23,10 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
+	if !b.IsStatusOnline() {
+		return nil, nil
+	}
+
 	response, err := b.provider.Info.GetEurekaInfo(info.NewGetEurekaInfoParams().
 		WithOptions(home.EurekaInfoOptionDetail.Value()).
 		WithParams(home.EurekaInfoParamDeviceInfo.Value()))

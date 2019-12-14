@@ -4,19 +4,18 @@ import (
 	"context"
 	"errors"
 	"strconv"
+	"time"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 	"go.uber.org/multierr"
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskLiveness := task.NewFunctionTask(b.taskLiveness)
-	taskLiveness.SetTimeout(b.config.LivenessTimeout)
-	taskLiveness.SetRepeats(-1)
-	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
-	taskLiveness.SetName("liveness")
+	taskSerialNumber := task.NewFunctionTillSuccessTask(b.taskSerialNumber)
+	taskSerialNumber.SetRepeats(-1)
+	taskSerialNumber.SetRepeatInterval(time.Second * 30)
+	taskSerialNumber.SetName("serial-number")
 
 	taskState := b.WrapTaskIsOnline(b.taskUpdater)
 	taskState.SetTimeout(b.config.UpdaterTimeout)
@@ -25,14 +24,18 @@ func (b *Bind) Tasks() []workers.Task {
 	taskState.SetName("updater")
 
 	tasks := []workers.Task{
-		taskLiveness,
+		taskSerialNumber,
 		taskState,
 	}
 
 	return tasks
 }
 
-func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
+func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
+	if !b.IsStatusOnline() {
+		return nil, nil
+	}
+
 	client, err := b.client()
 	if err != nil {
 		return nil, err
@@ -41,38 +44,32 @@ func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
 
 	info, err := client.SystemInfo(ctx)
 	if err != nil {
-		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, err
 	}
 
 	if info.SerialNo == "" {
-		b.UpdateStatus(boggart.BindStatusOffline)
 		return nil, errors.New("device returns empty serial number")
 	}
 
-	if b.SerialNumber() == "" {
-		b.SetSerialNumber(info.SerialNo)
+	b.SetSerialNumber(info.SerialNo)
 
-		if b.config.AlarmStreamingEnabled {
-			if err = b.startAlarmStreaming(); err != nil {
-				return nil, err
-			}
-		}
-
-		if e := b.MQTTPublishAsync(ctx, b.config.TopicStateModel.Format(info.SerialNo), info.HardWare); e != nil {
-			err = multierr.Append(err, e)
-		}
-
-		if e := b.MQTTPublishAsync(ctx, b.config.TopicStateFirmwareVersion.Format(info.SerialNo), info.SoftWareVersion); e != nil {
-			err = multierr.Append(err, e)
-		}
-
-		if e := b.MQTTPublishAsync(ctx, b.config.TopicStateFirmwareReleasedDate.Format(info.SerialNo), info.BuildTime); e != nil {
-			err = multierr.Append(err, e)
+	if b.config.AlarmStreamingEnabled {
+		if err = b.startAlarmStreaming(); err != nil {
+			return nil, err
 		}
 	}
 
-	b.UpdateStatus(boggart.BindStatusOnline)
+	if e := b.MQTTPublishAsync(ctx, b.config.TopicStateModel.Format(info.SerialNo), info.HardWare); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	if e := b.MQTTPublishAsync(ctx, b.config.TopicStateFirmwareVersion.Format(info.SerialNo), info.SoftWareVersion); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	if e := b.MQTTPublishAsync(ctx, b.config.TopicStateFirmwareReleasedDate.Format(info.SerialNo), info.BuildTime); e != nil {
+		err = multierr.Append(err, e)
+	}
 
 	return nil, err
 }

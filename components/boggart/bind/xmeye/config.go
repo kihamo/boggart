@@ -8,9 +8,9 @@ import (
 )
 
 type Config struct {
+	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
+
 	Address                        boggart.URL   `valid:",required"`
-	LivenessInterval               time.Duration `mapstructure:"liveness_interval" yaml:"liveness_interval"`
-	LivenessTimeout                time.Duration `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
 	UpdaterInterval                time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 	UpdaterTimeout                 time.Duration `mapstructure:"updater_timeout" yaml:"updater_timeout"`
 	AlarmStreamingEnabled          bool          `mapstructure:"alarm_streaming_enabled" yaml:"alarm_streaming_enabled,omitempty"`
@@ -28,8 +28,6 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/cctv/+/"
 
 	return &Config{
-		LivenessInterval:               time.Minute,
-		LivenessTimeout:                time.Second * 5,
 		UpdaterInterval:                time.Minute,
 		UpdaterTimeout:                 time.Second * 30,
 		AlarmStreamingInterval:         time.Second * 5,
