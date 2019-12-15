@@ -129,6 +129,36 @@ func (b *Bind) SendFileAsURL(to, name, u string) error {
 	return err
 }
 
+func (b *Bind) initBot() (*tgbotapi.BotAPI, error) {
+	client, err := tgbotapi.NewBotAPI(b.config.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	b.SetSerialNumber(strconv.Itoa(client.Self.ID))
+	client.Debug = b.config.Debug
+
+	if b.config.UpdatesEnabled {
+		client.Buffer = b.config.UpdatesBuffer
+
+		u := tgbotapi.NewUpdate(0)
+		u.Timeout = b.config.UpdatesTimeout
+
+		updates, err := client.GetUpdatesChan(u)
+		if err != nil {
+			return nil, err
+		}
+
+		b.listenUpdates(updates)
+	}
+
+	b.mutex.Lock()
+	b.client = client
+	b.mutex.Unlock()
+
+	return client, nil
+}
+
 func (b *Bind) bot() *tgbotapi.BotAPI {
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()

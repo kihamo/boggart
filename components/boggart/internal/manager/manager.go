@@ -268,8 +268,11 @@ func (m *Manager) Unregister(id string) error {
 
 	// unregister mqtt
 	if err := m.mqtt.UnsubscribeSubscribers(bindItem.MQTTSubscribers()); err != nil {
-		statusUpdate(boggart.BindStatusUnknown)
-		return err
+		m.logger.Error("Unregister bind failed because unsubscribe MQTT failed",
+			"type", bindItem.Type(),
+			"id", bindItem.ID(),
+			"error", err.Error(),
+		)
 	}
 
 	if mqttClient, ok := bindItem.Bind().(boggart.BindHasMQTTClient); ok {

@@ -108,13 +108,13 @@ func (b *Bind) callbackMQTTAction(ctx context.Context, client mqtt.Component, me
 	}
 
 	if err == nil {
-		err = b.updateStatus(ctx)
+		err = b.updateState(ctx)
 	}
 
 	return err
 }
 
-func (b *Bind) updateStatus(ctx context.Context) error {
+func (b *Bind) updateState(ctx context.Context) error {
 	sn := b.SerialNumber()
 	if sn == "" {
 		return nil

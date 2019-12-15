@@ -471,8 +471,8 @@ func (c *Component) UnsubscribeSubscriber(subscriber mqtt.Subscriber) error {
 
 	var element *list.Element
 
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
 
 	for element = c.subscriptions.Front(); element != nil; element = element.Next() {
 		subscription := element.Value.(*mqtt.Subscription)

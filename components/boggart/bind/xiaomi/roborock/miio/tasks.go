@@ -103,7 +103,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.updateStatus(ctx); e != nil {
+	if e := b.updateState(ctx); e != nil {
 		err = multierr.Append(err, e)
 	}
 
