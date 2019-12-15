@@ -1,5 +1,5 @@
-hash: b11b9fd56ffc4a5fb43fac2e1302d045e8d02ad216aac6aed3358eb155af78c7
-updated: 2019-12-14T16:47:18.289452+03:00
+hash: 5bc9268317fd8b2aba252ba0663e14882017acd524c44f674fa7448a1b5d93cf
+updated: 2019-12-15T20:28:52.943989+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -82,7 +82,7 @@ imports:
 - name: github.com/fsnotify/fsnotify
   version: 1485a34d5d5723fea214f5710708e19a831720e4
 - name: github.com/getsentry/sentry-go
-  version: ea3f6021b89b36b58eaff19c654daf36429fdfa5
+  version: 759fbf8e9221cd2a2c3a26e3d7b41ecae2ed89d9
 - name: github.com/ghthor/gowol
   version: eb42ead1b24e9226bddb05004815f6e72280f879
 - name: github.com/go-openapi/analysis
@@ -146,10 +146,6 @@ imports:
   - ptypes/struct
   - ptypes/timestamp
   - ptypes/wrappers
-- name: github.com/google/go-querystring
-  version: 44c6ddd0a2342c386950e880b658017258da92fc
-  subpackages:
-  - query
 - name: github.com/google/uuid
   version: 9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8
 - name: github.com/googleapis/gax-go
@@ -229,7 +225,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: cea43d6ae8dbb04e16850875d5e38cb5353ef3a3
+  version: 13d7a7cbd73b97fd00757a2f90830ce2bcacdcb3
   subpackages:
   - components/annotations
   - components/config
