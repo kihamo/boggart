@@ -4,7 +4,7 @@ import (
 	"context"
 )
 
-func (b *Bind) ReadinessProbe(ctx context.Context) (err error) {
+func (b *Bind) LivenessProbe(_ context.Context) (err error) {
 	bot := b.bot()
 
 	if bot == nil {
@@ -19,16 +19,10 @@ func (b *Bind) ReadinessProbe(ctx context.Context) (err error) {
 	return err
 }
 
-func (b *Bind) LivenessProbe(ctx context.Context) (err error) {
-	b.mutex.RLock()
-	client := b.client
-	b.mutex.RUnlock()
-
-	if client == nil {
-		return nil
+func (b *Bind) ReadinessProbe(_ context.Context) (err error) {
+	if bot := b.bot(); bot != nil {
+		_, err = bot.GetMe()
 	}
-
-	_, err = client.GetMe()
 
 	return err
 }
