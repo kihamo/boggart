@@ -41,12 +41,12 @@ type Mac struct {
 	}
 }
 
-func (b *Bind) UpdateStatus(status boggart.BindStatus) {
-	b.BindBase.UpdateStatus(status)
-
-	if !b.IsStatusInitializing() && !b.IsStatusOnline() && b.serialNumberReady.IsFalse() {
+func (b *Bind) Close() error {
+	if b.serialNumberReady.IsFalse() {
 		close(b.serialNumberLock)
 	}
+
+	return nil
 }
 
 func (b *Bind) SerialNumberWait() string {
@@ -58,8 +58,10 @@ func (b *Bind) SerialNumberWait() string {
 func (b *Bind) SetSerialNumber(serialNumber string) {
 	b.BindBase.SetSerialNumber(serialNumber)
 
-	b.serialNumberReady.True()
-	close(b.serialNumberLock)
+	if b.serialNumberReady.IsFalse() {
+		b.serialNumberReady.True()
+		close(b.serialNumberLock)
+	}
 }
 
 func (b *Bind) Mac(ctx context.Context, mac string) (*Mac, error) {
