@@ -2,8 +2,9 @@ package miio
 
 import (
 	"context"
+	"errors"
+	"time"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/providers/xiaomi/miio/devices/vacuum"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
@@ -11,11 +12,10 @@ import (
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskLiveness := task.NewFunctionTask(b.taskLiveness)
-	taskLiveness.SetTimeout(b.config.LivenessTimeout)
-	taskLiveness.SetRepeats(-1)
-	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
-	taskLiveness.SetName("liveness")
+	taskSerialNumber := task.NewFunctionTillSuccessTask(b.taskSerialNumber)
+	taskSerialNumber.SetRepeats(-1)
+	taskSerialNumber.SetRepeatInterval(time.Second * 30)
+	taskSerialNumber.SetName("serial-number")
 
 	taskState := b.WrapTaskIsOnline(b.taskUpdater)
 	taskState.SetTimeout(b.config.UpdaterTimeout)
@@ -24,29 +24,22 @@ func (b *Bind) Tasks() []workers.Task {
 	taskState.SetName("updater")
 
 	return []workers.Task{
-		taskLiveness,
+		taskSerialNumber,
 		taskState,
 	}
 }
 
-func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
+func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
+	if !b.IsStatusOnline() {
+		return nil, errors.New("bind isn't online")
+	}
+
 	sn, err := b.device.SerialNumber(ctx)
 	if err != nil {
-		b.UpdateStatus(boggart.BindStatusOffline)
-		return nil, nil
+		return nil, err
 	}
 
-	if b.IsStatusOnline() {
-		return nil, nil
-	}
-
-	b.UpdateStatus(boggart.BindStatusOnline)
-
-	if b.SerialNumber() == "" {
-		b.SetSerialNumber(sn)
-
-		b.taskUpdater(ctx)
-	}
+	b.SetSerialNumber(sn)
 
 	return nil, nil
 }

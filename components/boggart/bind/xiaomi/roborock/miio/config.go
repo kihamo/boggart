@@ -8,11 +8,11 @@ import (
 )
 
 type Config struct {
+	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
+
 	Host                     string        `valid:"host,required"`
 	Token                    string        `valid:"required"`
 	PacketsCounter           uint32        `mapstructure:"packets_counter" yaml:"packets_counter"`
-	LivenessInterval         time.Duration `mapstructure:"liveness_interval" yaml:"liveness_interval"`
-	LivenessTimeout          time.Duration `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
 	UpdaterInterval          time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 	UpdaterTimeout           time.Duration `mapstructure:"updater_timeout" yaml:"updater_timeout"`
 	TopicBattery             mqtt.Topic    `mapstructure:"topic_battery" yaml:"topic_battery"`
@@ -37,8 +37,10 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/xiaomi/roborock/+/"
 
 	return &Config{
-		LivenessInterval:         time.Minute,
-		LivenessTimeout:          time.Second * 5,
+		BindConfig: boggart.BindConfig{
+			ReadinessPeriod:  time.Minute,
+			ReadinessTimeout: time.Second * 5,
+		},
 		UpdaterInterval:          time.Minute,
 		UpdaterTimeout:           time.Second * 30,
 		TopicBattery:             prefix + "battery",
