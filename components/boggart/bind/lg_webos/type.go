@@ -12,7 +12,8 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
 	bind := &Bind{
-		config: config,
+		config:       config,
+		quitMonitors: make(chan struct{}),
 	}
 
 	return bind, nil

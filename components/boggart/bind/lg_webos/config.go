@@ -8,10 +8,11 @@ import (
 )
 
 type Config struct {
+	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
+
 	Host                    string        `valid:"host,required"`
 	Key                     string        `valid:"required"`
-	LivenessInterval        time.Duration `mapstructure:"liveness_interval" yaml:"liveness_interval"`
-	LivenessTimeout         time.Duration `mapstructure:"liveness_timeout" yaml:"liveness_timeout"`
+	UpdaterInterval         time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 	TopicApplication        mqtt.Topic    `mapstructure:"topic_" yaml:"topic_"`
 	TopicMute               mqtt.Topic    `mapstructure:"topic_mute" yaml:"topic_mute"`
 	TopicVolume             mqtt.Topic    `mapstructure:"topic_volume" yaml:"topic_volume"`
@@ -30,8 +31,13 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/tv/+/"
 
 	return &Config{
-		LivenessInterval:        time.Second * 30,
-		LivenessTimeout:         time.Second * 10,
+		BindConfig: boggart.BindConfig{
+			ReadinessPeriod:  time.Second * 30,
+			ReadinessTimeout: time.Second * 10,
+			LivenessPeriod:   time.Second * 30,
+			LivenessTimeout:  time.Second * 10,
+		},
+		UpdaterInterval:         time.Minute,
 		TopicApplication:        prefix + "application",
 		TopicMute:               prefix + "mute",
 		TopicVolume:             prefix + "volume",

@@ -2,104 +2,87 @@ package lg_webos
 
 import (
 	"context"
+	"errors"
+	"time"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskLiveness := task.NewFunctionTask(b.taskLiveness)
-	taskLiveness.SetTimeout(b.config.LivenessTimeout)
-	taskLiveness.SetRepeats(-1)
-	taskLiveness.SetRepeatInterval(b.config.LivenessInterval)
-	taskLiveness.SetName("liveness")
+	taskSerialNumber := task.NewFunctionTillSuccessTask(b.taskSerialNumber)
+	taskSerialNumber.SetRepeats(-1)
+	taskSerialNumber.SetRepeatInterval(time.Second * 30)
+	taskSerialNumber.SetName("serial-number")
 
 	return []workers.Task{
-		taskLiveness,
+		taskSerialNumber,
 	}
 }
 
-func (b *Bind) taskLiveness(ctx context.Context) (interface{}, error) {
-	client, err := b.Client()
+func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
+	if !b.IsStatusOnline() {
+		return nil, errors.New("bind isn't online")
+	}
+
+	client := b.Client()
+	if client == nil {
+		return nil, errors.New("client isn't init")
+	}
+
+	deviceInfo, err := client.GetCurrentSWInformation()
 	if err != nil {
-		b.UpdateStatus(boggart.BindStatusOffline)
-		return nil, nil
+		return nil, err
 	}
 
-	_, err = client.Register(b.config.Key)
-	if err != nil {
-		b.UpdateStatus(boggart.BindStatusOffline)
-		return nil, nil
-	}
-
-	if b.IsStatusOnline() {
-		return nil, nil
-	}
-
-	if b.SerialNumber() == "" {
-		deviceInfo, err := client.GetCurrentSWInformation()
-		if err != nil {
-			b.UpdateStatus(boggart.BindStatusOffline)
-			return nil, err
-		}
-
-		b.SetSerialNumber(deviceInfo.DeviceId)
-	}
-
-	b.UpdateStatus(boggart.BindStatusOnline)
+	b.SetSerialNumber(deviceInfo.DeviceId)
 
 	// set tv subscribers
-	// TODO: close if OFFLINE
-	quit := make(chan struct{})
-
 	go func() {
-		state, err := client.ApplicationManagerGetForegroundAppInfo()
-		if err == nil {
-			err = b.monitorForegroundAppInfo(state)
-		}
+		var err error
 
-		if err != nil {
+		// current state
+		if state, err := client.ApplicationManagerGetForegroundAppInfo(); err == nil {
+			err = b.monitorForegroundAppInfo(state)
+		} else {
 			b.Logger().Warn("Failed get current app info", "error", err.Error())
 		}
 
-		err = client.ApplicationManagerMonitorForegroundAppInfo(b.monitorForegroundAppInfo, quit)
-		if err != nil {
-			b.UpdateStatus(boggart.BindStatusOffline)
+		// subscriber
+		if err = client.ApplicationManagerMonitorForegroundAppInfo(b.monitorForegroundAppInfo, b.quitMonitors); err != nil {
+			b.Logger().Errorf("Init application manager monitor failed %v", err)
 		}
-
-		// TODO: send to quit ???
 	}()
 
 	go func() {
-		state, err := client.AudioGetStatus()
-		if err == nil {
-			err = b.monitorAudio(state)
-		}
+		var err error
 
-		if err != nil {
+		// current state
+		if state, err := client.AudioGetStatus(); err == nil {
+			err = b.monitorAudio(state)
+		} else {
 			b.Logger().Warn("Failed get current audio status", "error", err.Error())
 		}
 
-		err = client.AudioMonitorStatus(b.monitorAudio, quit)
-		if err != nil {
-			b.UpdateStatus(boggart.BindStatusOffline)
+		// subscriber
+		if err = client.AudioMonitorStatus(b.monitorAudio, b.quitMonitors); err != nil {
+			b.Logger().Errorf("Init audio monitor failed %v", err)
 		}
 	}()
 
 	go func() {
-		state, err := client.TvGetCurrentChannel()
-		if err == nil {
-			err = b.monitorTvCurrentChannel(state)
-		}
+		var err error
 
-		if err != nil {
+		// current state
+		if state, err := client.TvGetCurrentChannel(); err == nil {
+			err = b.monitorTvCurrentChannel(state)
+		} else {
 			b.Logger().Warn("Failed get current tv channel", "error", err.Error())
 		}
 
-		err = client.TvMonitorCurrentChannel(b.monitorTvCurrentChannel, quit)
-		if err != nil {
-			b.UpdateStatus(boggart.BindStatusOffline)
+		// subscriber
+		if err = client.TvMonitorCurrentChannel(b.monitorTvCurrentChannel, b.quitMonitors); err != nil {
+			b.Logger().Errorf("Init channel monitor failed %v", err)
 		}
 	}()
 

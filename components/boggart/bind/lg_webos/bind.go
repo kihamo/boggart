@@ -1,6 +1,7 @@
 package lg_webos
 
 import (
+	"errors"
 	"net"
 	"net/http"
 	"sync"
@@ -25,52 +26,71 @@ var defaultDialerLGWebOS = webostv.Dialer{
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
+
 	config *Config
 	mutex  sync.RWMutex
 	client *webostv.Tv
+
+	quitMonitors chan struct{}
 }
 
-func (b *Bind) Client() (*webostv.Tv, error) {
-	b.mutex.RLock()
-	c := b.client
-	b.mutex.RUnlock()
-
-	if c != nil {
-		return c, nil
-	}
-
+func (b *Bind) initClient() error {
 	client, err := defaultDialerLGWebOS.Dial(b.config.Host)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
+	client.SetDebug(func(s string) {
+		b.Logger().Debug(s)
+	})
+
 	go func() {
-		_ = client.MessageHandler()
+		if err := client.MessageHandler(); err != nil {
+			b.mutex.Lock()
+			b.client = nil
+			b.mutex.Unlock()
+		}
 	}()
+
+	newKey, err := client.Register(b.config.Key)
+	if err != nil {
+		return err
+	}
+
+	if b.config.Key != newKey {
+		b.Logger().Warnf("Key changed before %s after %s", b.config.Key, newKey)
+	}
 
 	b.mutex.Lock()
 	b.client = client
 	b.mutex.Unlock()
 
-	return client, nil
+	return nil
 }
 
-func (b *Bind) UpdateStatus(status boggart.BindStatus) {
-	if status == boggart.BindStatusOffline && !b.IsStatus(status) {
-		b.mutex.Lock()
-		b.client = nil
-		b.mutex.Unlock()
-	}
+func (b *Bind) Client() *webostv.Tv {
+	b.mutex.RLock()
+	defer b.mutex.RUnlock()
 
-	b.BindBase.UpdateStatus(status)
+	return b.client
 }
 
 func (b *Bind) Toast(message string) error {
-	client, err := b.Client()
-	if err != nil {
-		return err
+	client := b.Client()
+	if client == nil {
+		return errors.New("client isn't init")
 	}
 
-	_, err = client.SystemNotificationsCreateToast(message)
+	_, err := client.SystemNotificationsCreateToast(message)
 	return err
+}
+
+func (b *Bind) Close() error {
+	close(b.quitMonitors)
+
+	if client := b.Client(); client != nil {
+		return client.Close()
+	}
+
+	return nil
 }

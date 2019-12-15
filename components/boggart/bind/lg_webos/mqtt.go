@@ -27,12 +27,12 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return nil
 			}
 
-			client, err := b.Client()
-			if err != nil {
-				return err
+			client := b.Client()
+			if client == nil {
+				return errors.New("client isn't init")
 			}
 
-			_, err = client.ApplicationManagerLaunch(message.String(), nil)
+			_, err := client.ApplicationManagerLaunch(message.String(), nil)
 			return err
 		})),
 		mqtt.NewSubscriber(b.config.TopicMute, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
@@ -40,9 +40,9 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return nil
 			}
 
-			client, err := b.Client()
-			if err != nil {
-				return err
+			client := b.Client()
+			if client == nil {
+				return errors.New("client isn't init")
 			}
 
 			return client.AudioSetMute(message.IsTrue())
@@ -57,9 +57,9 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return err
 			}
 
-			client, err := b.Client()
-			if err != nil {
-				return err
+			client := b.Client()
+			if client == nil {
+				return errors.New("client isn't init")
 			}
 
 			return client.AudioSetVolume(int(vol))
@@ -69,9 +69,9 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return nil
 			}
 
-			client, err := b.Client()
-			if err != nil {
-				return err
+			client := b.Client()
+			if client == nil {
+				return errors.New("client isn't init")
 			}
 
 			return client.AudioVolumeUp()
@@ -81,9 +81,9 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return nil
 			}
 
-			client, err := b.Client()
-			if err != nil {
-				return err
+			client := b.Client()
+			if client == nil {
+				return errors.New("client isn't init")
 			}
 
 			return client.AudioVolumeDown()
@@ -108,9 +108,9 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return errors.New("bind isn't online")
 			}
 
-			client, err := b.Client()
-			if err != nil {
-				return err
+			client := b.Client()
+			if client == nil {
+				return errors.New("client isn't init")
 			}
 
 			return client.SystemTurnOff()
