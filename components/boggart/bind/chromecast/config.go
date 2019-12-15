@@ -36,7 +36,9 @@ func (t Type) Config() interface{} {
 	return &Config{
 		BindConfig: boggart.BindConfig{
 			ReadinessPeriod:  time.Second * 30,
-			ReadinessTimeout: time.Second * 10,
+			ReadinessTimeout: time.Second * 5,
+			LivenessPeriod:   time.Second * 30,
+			LivenessTimeout:  time.Second * 5,
 		},
 		Debug:             log.Debug,
 		Port:              8009,

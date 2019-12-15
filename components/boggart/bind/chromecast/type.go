@@ -4,6 +4,7 @@ import (
 	"net"
 	"strconv"
 
+	"github.com/barnybug/go-cast/events"
 	"github.com/barnybug/go-cast/log"
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
@@ -35,10 +36,12 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	bind := &Bind{
 		config:         config,
+		disconnected:   atomic.NewBoolNull(),
 		volume:         atomic.NewUint32Null(),
 		mute:           atomic.NewBoolNull(),
 		status:         atomic.NewString(),
 		mediaContentID: atomic.NewString(),
+		events:         make(chan events.Event, 16),
 	}
 	bind.SetSerialNumber(sn)
 

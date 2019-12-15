@@ -7,7 +7,6 @@ import (
 	"math"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/barnybug/go-cast"
 	"github.com/barnybug/go-cast/controllers"
@@ -33,8 +32,10 @@ const (
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
+
 	config *Config
 
+	disconnected   *atomic.BoolNull
 	volume         *atomic.Uint32Null
 	mute           *atomic.BoolNull
 	status         *atomic.String
@@ -43,92 +44,91 @@ type Bind struct {
 	events chan events.Event
 	mutex  sync.RWMutex
 
-	conn       *castnet.Connection
-	connection *controllers.ConnectionController
-	heartbeat  *controllers.HeartbeatController
-	receiver   *controllers.ReceiverController
-	media      *controllers.MediaController
+	conn           *castnet.Connection
+	ctrlConnection *controllers.ConnectionController
+	ctrlHeartbeat  *controllers.HeartbeatController
+	ctrlReceiver   *controllers.ReceiverController
+	ctrlMedia      *controllers.MediaController
 }
 
 func (b *Bind) Run() error {
-	b.events = make(chan events.Event, 16)
-	b.conn = castnet.NewConnection()
-
-	b.connection = controllers.NewConnectionController(b.conn, b.events, cast.DefaultSender, cast.DefaultReceiver)
-	b.heartbeat = controllers.NewHeartbeatController(b.conn, b.events, cast.TransportSender, cast.TransportReceiver)
-	b.receiver = controllers.NewReceiverController(b.conn, b.events, cast.DefaultSender, cast.DefaultReceiver)
-
-	go b.doEvents()
+	b.disconnected.Nil()
 
 	return nil
 }
 
-func (b *Bind) Connect(_ context.Context) error {
-	if !b.IsStatusInitializing() && !b.IsStatusOffline() {
-		return nil
-	}
-
+func (b *Bind) initConnect() error {
 	ctx := context.Background()
 
-	// open TCP connection
-	err := b.conn.Connect(ctx, b.config.Host.IP, b.config.Port)
-	if err != nil {
-		b.Logger().Debug("Connect failed", "error", err.Error())
+	conn := castnet.NewConnection()
+	if err := conn.Connect(ctx, b.config.Host.IP, b.config.Port); err != nil {
 		return err
 	}
 
-	if err := b.heartbeat.Start(ctx); err != nil {
+	ctrlConnection := controllers.NewConnectionController(conn, b.events, cast.DefaultSender, cast.DefaultReceiver)
+	if err := ctrlConnection.Start(ctx); err != nil {
 		return err
 	}
 
-	// start main connection controller
-	if err := b.connection.Start(ctx); err != nil {
+	ctrlHeartbeat := controllers.NewHeartbeatController(conn, b.events, cast.TransportSender, cast.TransportReceiver)
+	if err := ctrlHeartbeat.Start(ctx); err != nil {
 		return err
 	}
 
-	// start receiver
-	if err := b.receiver.Start(ctx); err != nil {
+	ctrlReceiver := controllers.NewReceiverController(conn, b.events, cast.DefaultSender, cast.DefaultReceiver)
+	if err := ctrlReceiver.Start(ctx); err != nil {
 		return err
 	}
 
-	b.events <- events.Connected{}
+	go b.doEvents()
+
+	b.mutex.Lock()
+	b.conn = conn
+	b.ctrlConnection = ctrlConnection
+	b.ctrlHeartbeat = ctrlHeartbeat
+	b.ctrlReceiver = ctrlReceiver
+	b.mutex.Unlock()
+
+	b.disconnected.False()
+
 	return nil
 }
 
 func (b *Bind) Close() (err error) {
-	if b.IsStatusOffline() {
+	ctx, cancel := context.WithTimeout(context.Background(), b.config.LivenessTimeout)
+	defer cancel()
+
+	b.mutex.RLock()
+	conn := b.conn
+	ctrlConnection := b.ctrlConnection
+	ctrlHeartbeat := b.ctrlHeartbeat
+	ctrlReceiver := b.ctrlReceiver
+	ctrlMedia := b.ctrlMedia
+	b.mutex.RUnlock()
+
+	if conn == nil {
 		return nil
 	}
 
-	b.UpdateStatus(boggart.BindStatusOffline)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
-	defer cancel()
-
-	// close running aps
-	if _, e := b.receiver.QuitApp(ctx); e != nil {
+	if _, e := ctrlReceiver.QuitApp(ctx); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	// close main connection controller
-	if e := b.connection.Close(); e != nil {
+	ctrlHeartbeat.Stop()
+
+	if e := ctrlConnection.Close(); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	// close TCP connection
-	if e := b.conn.Close(); e != nil {
+	if e := conn.Close(); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	b.mutex.Lock()
-	if b.media != nil {
-		if e := b.media.Close(); e != nil {
+	if ctrlMedia != nil {
+		if e := ctrlMedia.Close(); e != nil {
 			err = multierr.Append(err, e)
 		}
-
-		b.media = nil
 	}
-	b.mutex.Unlock()
 
 	return err
 }
@@ -139,22 +139,10 @@ func (b *Bind) doEvents() {
 	for {
 		event := <-b.events
 		switch t := event.(type) {
-		case events.Connected:
-			b.Logger().Debug("Event Connected")
+		case events.Disconnected: // from HeartbeatController
+			b.Logger().Debug("Event Disconnected", "reason", t.Reason.Error())
 
-			b.UpdateStatus(boggart.BindStatusOnline)
-
-		case events.Disconnected: // from ReceiverController
-			var reason string
-			if t.Reason != nil {
-				reason = t.Reason.Error()
-			}
-
-			b.Logger().Debug("Event Disconnected", "reason", reason)
-
-			if err := b.Close(); err != nil {
-				b.Logger().Error("Close failed", "error", err.Error())
-			}
+			b.disconnected.True()
 
 		case events.AppStarted: // from ReceiverController
 			b.Logger().Debug("Event AppStarted")
@@ -167,17 +155,19 @@ func (b *Bind) doEvents() {
 			)
 
 			if t.AppID == cast.AppMedia {
-				b.mutex.Lock()
+				b.mutex.RLock()
+				ctrlMedia := b.ctrlMedia
+				b.mutex.RUnlock()
 
-				if b.media != nil {
-					if err := b.media.Close(); err != nil {
+				if ctrlMedia != nil {
+					if err := ctrlMedia.Close(); err != nil {
 						b.Logger().Error("Media close failed", "error", err.Error())
 					}
 
-					b.media = nil
+					b.mutex.Lock()
+					b.ctrlMedia = nil
+					b.mutex.Unlock()
 				}
-
-				b.mutex.Unlock()
 			}
 
 		case events.StatusUpdated: // from ReceiverController
@@ -200,7 +190,11 @@ func (b *Bind) doEvents() {
 			_ = b.MQTTPublishAsync(ctx, b.config.TopicStateStatus, strings.ToLower(t.PlayerState))
 
 			if t.PlayerState == PlayerStateIdle && t.IdleReason == IdleReasonFinished {
-				if _, err := b.receiver.QuitApp(ctx); err != nil {
+				b.mutex.RLock()
+				ctrlReceiver := b.ctrlReceiver
+				b.mutex.RUnlock()
+
+				if _, err := ctrlReceiver.QuitApp(ctx); err != nil {
 					b.Logger().Error("Quit app failed", "error", err.Error())
 				}
 			}
@@ -217,33 +211,40 @@ func (b *Bind) doEvents() {
 
 func (b *Bind) Media(ctx context.Context) (*controllers.MediaController, error) {
 	b.mutex.RLock()
-	controller := b.media
+	ctrlMedia := b.ctrlMedia
+	conn := b.conn
 	b.mutex.RUnlock()
 
-	if controller == nil {
+	if ctrlMedia == nil {
 		transportId, err := b.launchApp(ctx, cast.AppMedia)
 		if err != nil {
 			return nil, err
 		}
 
-		controller = controllers.NewMediaController(b.conn, b.events, cast.DefaultSender, transportId)
-		if err := controller.Start(ctx); err != nil {
-			b.UpdateStatus(boggart.BindStatusOffline)
+		ctrlMedia = controllers.NewMediaController(conn, b.events, cast.DefaultSender, transportId)
+		if err := ctrlMedia.Start(ctx); err != nil {
 			return nil, err
 		}
 
 		b.mutex.Lock()
-		b.media = controller
+		b.ctrlMedia = ctrlMedia
 		b.mutex.Unlock()
 	}
 
-	return controller, nil
+	return ctrlMedia, nil
 }
 
 func (b *Bind) launchApp(ctx context.Context, appID string) (string, error) {
-	result, err := b.receiver.GetAppAvailability(ctx, appID)
+	b.mutex.RLock()
+	ctrlReceiver := b.ctrlReceiver
+	b.mutex.RUnlock()
+
+	if ctrlReceiver == nil {
+		return "", errors.New("receiver controller isn't init")
+	}
+
+	result, err := ctrlReceiver.GetAppAvailability(ctx, appID)
 	if err != nil {
-		b.UpdateStatus(boggart.BindStatusOffline)
 		return "", err
 	}
 
@@ -251,17 +252,15 @@ func (b *Bind) launchApp(ctx context.Context, appID string) (string, error) {
 		return "", errors.New("unsupported app with ID " + appID)
 	}
 
-	status, err := b.receiver.GetStatus(ctx)
+	status, err := ctrlReceiver.GetStatus(ctx)
 	if err != nil {
-		b.UpdateStatus(boggart.BindStatusOffline)
 		return "", err
 	}
 
 	app := status.GetSessionByAppId(appID)
 	if app == nil {
-		status, err = b.receiver.LaunchApp(ctx, appID)
+		status, err = ctrlReceiver.LaunchApp(ctx, appID)
 		if err != nil {
-			b.UpdateStatus(boggart.BindStatusOffline)
 			return "", err
 		}
 

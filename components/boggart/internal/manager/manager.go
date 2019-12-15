@@ -3,6 +3,7 @@ package manager
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sort"
 	"strings"
 	"sync"
@@ -139,7 +140,18 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 	// probes
 	if probe, ok := bind.(boggart.BindHasReadinessProbe); ok {
 		probeTask := task.NewFunctionTask(func(ctx context.Context) (_ interface{}, err error) {
-			if err = probe.ReadinessProbe(ctx); err != nil {
+			c := make(chan error, 1)
+			go func() {
+				c <- probe.ReadinessProbe(ctx)
+			}()
+
+			select {
+			case <-ctx.Done():
+				err = ctx.Err()
+			case err = <-c:
+			}
+
+			if err != nil {
 				statusUpdate(boggart.BindStatusOffline)
 
 				m.logger.Error("Readiness probe failure",
@@ -179,7 +191,17 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 				return nil, nil
 			}
 
-			err = probe.LivenessProbe(ctx)
+			c := make(chan error, 1)
+			go func() {
+				c <- probe.LivenessProbe(ctx)
+			}()
+
+			select {
+			case <-ctx.Done():
+				err = ctx.Err()
+			case err = <-c:
+			}
+
 			if err == nil {
 				return nil, nil
 			}
@@ -194,7 +216,7 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 				m.logger.Error("Unregister after liveness probe failure",
 					"type", bindItem.Type(),
 					"id", bindItem.ID(),
-					"error", err.Error(),
+					"error", e.Error(),
 				)
 
 				err = multierr.Append(err, e)
@@ -205,7 +227,7 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 				m.logger.Error("Register after liveness probe failure",
 					"type", bindItem.Type(),
 					"id", bindItem.ID(),
-					"error", err.Error(),
+					"error", e.Error(),
 				)
 
 				err = multierr.Append(err, e)
@@ -306,8 +328,11 @@ func (m *Manager) Unregister(id string) error {
 
 	if closer, ok := bindItem.Bind().(boggart.BindCloser); ok {
 		if err := closer.Close(); err != nil {
-			statusUpdate(boggart.BindStatusUnknown)
-			return err
+			m.logger.Debug("Unregister bind failed because close failed",
+				"type", bindItem.Type(),
+				"id", bindItem.ID(),
+				"error", err.Error(),
+			)
 		}
 	}
 
@@ -399,6 +424,10 @@ func (m *Manager) MQTTOnConnectHandler(client mqtt.Component, restore bool) {
 func (m *Manager) ReadinessProbeCheck(ctx context.Context, id string) (err error) {
 	if d, ok := m.storage.Load(id); ok {
 		if probe := d.(*BindItem).probeReadiness; probe != nil {
+			if timeout := probe.Timeout(); timeout > 0 {
+				ctx, _ = context.WithTimeout(ctx, timeout)
+			}
+
 			_, err = probe.Run(ctx)
 		}
 	}
@@ -409,6 +438,10 @@ func (m *Manager) ReadinessProbeCheck(ctx context.Context, id string) (err error
 func (m *Manager) LivenessProbeCheck(ctx context.Context, id string) (err error) {
 	if d, ok := m.storage.Load(id); ok {
 		if probe := d.(*BindItem).probeLiveness; probe != nil {
+			if timeout := probe.Timeout(); timeout > 0 {
+				ctx, _ = context.WithTimeout(ctx, timeout)
+			}
+
 			_, err = probe.Run(ctx)
 		}
 	}

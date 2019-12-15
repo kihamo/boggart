@@ -5,23 +5,24 @@ import (
 	"errors"
 
 	"github.com/barnybug/go-cast/controllers"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/storage"
 )
 
 func (b *Bind) setVolume(ctx context.Context, level *float64, muted *bool) error {
-	b.Logger().Debug("Set volume", "level", level, "muted", muted)
+	b.mutex.RLock()
+	ctrlReceiver := b.ctrlReceiver
+	b.mutex.RUnlock()
+
+	if ctrlReceiver == nil {
+		return errors.New("receiver controller isn't init")
+	}
 
 	volume := controllers.Volume{
 		Level: level,
 		Muted: muted,
 	}
 
-	_, err := b.receiver.SetVolume(ctx, &volume)
-	if err != nil {
-		b.UpdateStatus(boggart.BindStatusOffline)
-	}
-
+	_, err := ctrlReceiver.SetVolume(ctx, &volume)
 	return err
 }
 
@@ -50,8 +51,6 @@ func (b *Bind) SetMute(ctx context.Context, mute bool) error {
 }
 
 func (b *Bind) PlayFromURL(ctx context.Context, url string) error {
-	b.Logger().Debug("Play from URL", "url", url)
-
 	mimeType, err := storage.MimeTypeFromURL(url)
 	if err != nil {
 		return err
@@ -63,7 +62,7 @@ func (b *Bind) PlayFromURL(ctx context.Context, url string) error {
 		return errors.New("unknown audio format")
 	}
 
-	ctrl, err := b.Media(ctx)
+	ctrlMedia, err := b.Media(ctx)
 	if err != nil {
 		return err
 	}
@@ -74,24 +73,30 @@ func (b *Bind) PlayFromURL(ctx context.Context, url string) error {
 		ContentType: mimeType.String(),
 	}
 
-	_, err = ctrl.LoadMedia(ctx, item, 0, true, map[string]interface{}{})
+	_, err = ctrlMedia.LoadMedia(ctx, item, 0, true, map[string]interface{}{})
 	return err
 }
 
 func (b *Bind) Stop(ctx context.Context) error {
-	b.Logger().Debug("Stop")
+	b.mutex.RLock()
+	ctrlReceiver := b.ctrlReceiver
+	b.mutex.RUnlock()
 
-	ctrl, err := b.Media(ctx)
+	if ctrlReceiver == nil {
+		return errors.New("receiver controller isn't init")
+	}
+
+	ctrlMedia, err := b.Media(ctx)
 	if err != nil {
 		return err
 	}
 
-	_, err = ctrl.Stop(ctx)
+	_, err = ctrlMedia.Stop(ctx)
 	if err != nil {
 		return err
 	}
 
-	_, err = b.receiver.QuitApp(ctx)
+	_, err = ctrlReceiver.QuitApp(ctx)
 	return err
 }
 
@@ -100,33 +105,29 @@ func (b *Bind) Seek(ctx context.Context, second uint64) error {
 }
 
 func (b *Bind) Resume(ctx context.Context) error {
-	b.Logger().Debug("Resume")
-
 	if b.status.Load() != PlayerStatePaused {
 		return nil
 	}
 
-	ctrl, err := b.Media(ctx)
+	ctrlMedia, err := b.Media(ctx)
 	if err != nil {
 		return err
 	}
 
-	_, err = ctrl.Play(ctx)
+	_, err = ctrlMedia.Play(ctx)
 	return err
 }
 
 func (b *Bind) Pause(ctx context.Context) error {
-	b.Logger().Debug("Pause")
-
 	if b.status.Load() != PlayerStatePlaying {
 		return nil
 	}
 
-	ctrl, err := b.Media(ctx)
+	ctrlMedia, err := b.Media(ctx)
 	if err != nil {
 		return err
 	}
 
-	_, err = ctrl.Pause(ctx)
+	_, err = ctrlMedia.Pause(ctx)
 	return err
 }
