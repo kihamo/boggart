@@ -34,6 +34,13 @@ type Bind struct {
 	quitMonitors chan struct{}
 }
 
+func (b *Bind) Run() error {
+	b.client = nil
+	b.quitMonitors = make(chan struct{})
+
+	return nil
+}
+
 func (b *Bind) initClient() error {
 	client, err := defaultDialerLGWebOS.Dial(b.config.Host)
 	if err != nil {

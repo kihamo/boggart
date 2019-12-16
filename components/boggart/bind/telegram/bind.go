@@ -18,9 +18,17 @@ type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
 	config *Config
+
 	mutex  sync.RWMutex
 	client *tgbotapi.BotAPI
 	done   chan struct{}
+}
+
+func (b *Bind) Run() error {
+	b.client = nil
+	b.done = make(chan struct{})
+
+	return nil
 }
 
 func (b *Bind) SendMessage(to, message string) error {
