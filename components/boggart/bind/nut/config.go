@@ -10,9 +10,7 @@ import (
 type Config struct {
 	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
 
-	Host             string `valid:"host,required"`
-	Username         string
-	Password         string
+	Address          boggart.URL   `valid:",required"`
 	UPS              string        `valid:"required"`
 	UpdaterInterval  time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 	TopicVariable    mqtt.Topic    `mapstructure:"topic_variable" yaml:"topic_variable"`

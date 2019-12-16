@@ -18,7 +18,7 @@ type Bind struct {
 }
 
 func (b *Bind) connect() (client nut.Client, err error) {
-	client, err = nut.Connect(b.config.Host)
+	client, err = nut.Connect(b.config.Address.Host)
 	if err != nil {
 		return client, err
 	}
@@ -29,14 +29,19 @@ func (b *Bind) connect() (client nut.Client, err error) {
 		}
 	}()
 
-	if b.config.Username != "" && b.config.Password != "" {
-		result, err := client.Authenticate(b.config.Username, b.config.Password)
-		if err != nil {
-			return client, err
-		}
+	if user := b.config.Address.User; user != nil {
+		username := user.Username()
+		password, _ := user.Password()
 
-		if !result {
-			return client, errors.New("authenticate failed")
+		if username != "" && password != "" {
+			result, err := client.Authenticate(username, password)
+			if err != nil {
+				return client, err
+			}
+
+			if !result {
+				return client, errors.New("authenticate failed")
+			}
 		}
 	}
 
