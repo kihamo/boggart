@@ -13,8 +13,12 @@ func (b *Bind) ReadinessProbe(ctx context.Context) (err error) {
 	}
 
 	if cfg.Payload.Login == 1 {
-		if err := b.client.Login(ctx, b.config.Username, b.config.Password); err != nil {
-			return err
+		if user := b.config.Address.User; user != nil {
+			password, _ := user.Password()
+
+			if err := b.client.Login(ctx, user.Username(), password); err != nil {
+				return err
+			}
 		}
 	}
 

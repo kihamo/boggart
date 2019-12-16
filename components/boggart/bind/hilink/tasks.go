@@ -24,12 +24,6 @@ func (b *Bind) Tasks() []workers.Task {
 	taskSerialNumber.SetRepeatInterval(time.Second * 30)
 	taskSerialNumber.SetName("serial-number")
 
-	taskMonitoring := b.WrapTaskIsOnline(b.taskMonitoring)
-	taskMonitoring.SetTimeout(b.config.MonitoringTimeout)
-	taskMonitoring.SetRepeats(-1)
-	taskMonitoring.SetRepeatInterval(b.config.MonitoringInterval)
-	taskMonitoring.SetName("monitoring")
-
 	taskBalanceUpdater := b.WrapTaskIsOnline(b.taskBalanceUpdater)
 	taskBalanceUpdater.SetTimeout(b.config.BalanceUpdaterTimeout)
 	taskBalanceUpdater.SetRepeats(-1)
@@ -55,7 +49,6 @@ func (b *Bind) Tasks() []workers.Task {
 
 	tasks := []workers.Task{
 		taskSerialNumber,
-		taskMonitoring,
 		taskBalanceUpdater,
 		taskSMSChecker,
 		taskSystemUpdater,
@@ -81,31 +74,6 @@ func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
 
 	b.SetSerialNumber(deviceInfo.Payload.SerialNumber)
 	return nil, nil
-}
-
-func (b *Bind) taskMonitoring(ctx context.Context) error {
-	sn := b.SerialNumber()
-	if sn == "" {
-		return nil
-	}
-
-	monitoringStatus, err := b.client.Monitoring.GetMonitoringStatus(monitoring.NewGetMonitoringStatusParamsWithContext(ctx))
-	if err != nil {
-		return err
-	}
-	b.simStatus.Set(uint32(monitoringStatus.Payload.SimStatus))
-
-	if b.operator.IsEmpty() && monitoringStatus.Payload.SimStatus == 1 {
-		plmn, err := b.client.Net.GetCurrentPLMN(net.NewGetCurrentPLMNParamsWithContext(ctx))
-		if err == nil {
-			b.operator.Set(plmn.Payload.FullName)
-			return b.MQTTPublishAsync(ctx, b.config.TopicOperator.Format(sn), plmn.Payload.FullName)
-		} else {
-			return err
-		}
-	}
-
-	return err
 }
 
 func (b *Bind) taskBalanceUpdater(ctx context.Context) error {
@@ -206,13 +174,41 @@ func (b *Bind) taskSMSChecker(ctx context.Context) error {
 }
 
 func (b *Bind) taskSystemUpdater(ctx context.Context) (err error) {
-	if b.simStatus.Load() != 1 {
-		return nil
-	}
-
 	sn := b.SerialNumber()
 	if sn == "" {
 		return nil
+	}
+
+	// status
+	if response, e := b.client.Monitoring.GetMonitoringStatus(monitoring.NewGetMonitoringStatusParamsWithContext(ctx)); e == nil {
+		b.simStatus.Set(uint32(response.Payload.SimStatus))
+
+		// только с активной SIM картой
+		if response.Payload.SimStatus == 1 {
+			metricSignalLevel.With("serial_number", sn).Set(float64(response.Payload.SignalIcon))
+			if e := b.MQTTPublishAsync(ctx, b.config.TopicSignalLevel.Format(sn), response.Payload.SignalIcon); e != nil {
+				err = multierr.Append(err, e)
+			}
+
+			if b.operator.IsEmpty() {
+				plmn, err := b.client.Net.GetCurrentPLMN(net.NewGetCurrentPLMNParamsWithContext(ctx))
+				if err == nil {
+					b.operator.Set(plmn.Payload.FullName)
+					if e := b.MQTTPublishAsync(ctx, b.config.TopicOperator.Format(sn), plmn.Payload.FullName); e != nil {
+						err = multierr.Append(err, e)
+					}
+				} else {
+					err = multierr.Append(err, e)
+				}
+			}
+		}
+	} else {
+		err = multierr.Append(err, e)
+	}
+
+	// все проверки ниже только с активной SIM картой
+	if b.simStatus.Load() != 1 {
+		return err
 	}
 
 	// signal
@@ -254,16 +250,6 @@ func (b *Bind) taskSystemUpdater(ctx context.Context) (err error) {
 				err = multierr.Append(err, e)
 			}
 		} else {
-			err = multierr.Append(err, e)
-		}
-	} else {
-		err = multierr.Append(err, e)
-	}
-
-	// status
-	if response, e := b.client.Monitoring.GetMonitoringStatus(monitoring.NewGetMonitoringStatusParamsWithContext(ctx)); e == nil {
-		metricSignalLevel.With("serial_number", sn).Set(float64(response.Payload.SignalIcon))
-		if e := b.MQTTPublishAsync(ctx, b.config.TopicSignalLevel.Format(sn), response.Payload.SignalIcon); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {

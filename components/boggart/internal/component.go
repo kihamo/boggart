@@ -2,6 +2,7 @@ package internal
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"strconv"
 	"sync"
@@ -245,7 +246,7 @@ func (c *Component) initConfigFromYaml(id string) (int, error) {
 
 		cfg, err := boggart.ValidateBindConfig(kind, d.Config)
 		if err != nil {
-			return -1, err
+			return -1, fmt.Errorf("config of device type %s validate failed with error: %v", d.Type, err)
 		}
 
 		bind, err := kind.CreateBind(cfg)
