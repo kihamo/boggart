@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/snabb/webostv"
 )
@@ -31,10 +32,16 @@ type Bind struct {
 	mutex  sync.RWMutex
 	client *webostv.Tv
 
+	power        *atomic.BoolNull
 	quitMonitors chan struct{}
 }
 
 func (b *Bind) Run() error {
+	b.power.Nil()
+
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
+
 	b.client = nil
 	b.quitMonitors = make(chan struct{})
 

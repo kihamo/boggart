@@ -3,24 +3,25 @@ package lg_webos
 import (
 	"context"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/snabb/webostv"
+	"go.uber.org/multierr"
 )
 
-func (b *Bind) monitorForegroundAppInfo(s webostv.ForegroundAppInfo) error {
+func (b *Bind) monitorForegroundAppInfo(s webostv.ForegroundAppInfo) (err error) {
 	ctx := context.Background()
 	sn := b.SerialNumber()
 
-	if err := b.MQTTPublishAsync(ctx, b.config.TopicStateApplication.Format(sn), s.AppId); err != nil {
-		return err
+	b.power.Set(s.AppId != "")
+
+	if e := b.MQTTPublishAsync(ctx, b.config.TopicStateApplication.Format(sn), s.AppId); e != nil {
+		err = multierr.Append(err, e)
 	}
 
-	// TODO: cache
-	if s.AppId == "" {
-		b.UpdateStatus(boggart.BindStatusOffline)
+	if e := b.MQTTPublishAsync(ctx, b.config.TopicStatePower.Format(sn), s.AppId != ""); e != nil {
+		err = multierr.Append(err, e)
 	}
 
-	return b.MQTTPublishAsync(ctx, b.config.TopicStatePower.Format(sn), s.AppId != "")
+	return err
 }
 
 func (b *Bind) monitorAudio(s webostv.AudioStatus) error {

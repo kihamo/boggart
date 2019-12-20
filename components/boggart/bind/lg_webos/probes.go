@@ -2,6 +2,7 @@ package lg_webos
 
 import (
 	"context"
+	"errors"
 )
 
 func (b *Bind) LivenessProbe(ctx context.Context) error {
@@ -18,8 +19,8 @@ func (b *Bind) ReadinessProbe(ctx context.Context) (err error) {
 
 	if client == nil {
 		err = b.initClient()
-	} else {
-		_, _, _, _, _, _, err = client.GetCurrentTime()
+	} else if !b.power.IsNil() && b.power.IsFalse() {
+		err = errors.New("application ID is empty")
 	}
 
 	return err
