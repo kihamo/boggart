@@ -1,0 +1,38 @@
+msgid ""
+msgstr ""
+"Report-Msgid-Bugs-To: dev@kihamo.ru\n"
+"POT-Creation-Date: 2018-03-23 23:55+0300\n"
+"Last-Translator: Kihamo Muramodo <dev@kihamo.ru>\n"
+"Language-Team: \n"
+"Language: Russian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;"
+
+msgid "Version"
+msgstr "Версия"
+
+msgid "Actions"
+msgstr "Действия"
+
+msgid "Size"
+msgstr "Размер"
+
+msgid "Checksum"
+msgstr "Чексумма"
+
+msgid "Architecture"
+msgstr "Архитектура"
+
+msgid "Path"
+msgstr "Путь"
+
+msgid "current"
+msgstr "текущий"
+
+msgid "Download"
+msgstr "Скачать"
+
+msgid "Remove"
+msgstr "Удалить"

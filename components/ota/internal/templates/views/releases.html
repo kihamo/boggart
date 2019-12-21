@@ -1,0 +1,119 @@
+{{ define "content" }}
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>{{ i18n "Releases" . }}</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="table-responsive">
+                    <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                        <thead>
+                        <tr>
+                            <th>{{ i18n "Version" . }}</th>
+                            <th>{{ i18n "Actions" . }}</th>
+                            <th>{{ i18n "Size" . }}</th>
+                            <th>{{ i18n "Checksum" . }}</th>
+                            <th>{{ i18n "Architecture" . }}</th>
+                            <th>{{ i18n "Path" . }}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{ range $i, $release := .releases }}
+                        <tr>
+                            <td>{{ $release.Version }} {{ if $release.IsCurrent }}<span class="label label-success">{{ i18n "current" $ }}</span>{{ end }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="/ota/release/{{ $release.ID }}/download" target="_blank" class="btn btn-success btn-icon btn-xs">
+                                        <i class="fas fa-file-download" title="{{ i18n "Download" $ }}"></i>
+                                    </a>
+
+                                    {{ if ne $release.IsCurrent true }}
+                                        {{ if ne $.currentArch $release.Architecture }}
+                                        <button type="button" class="btn btn-danger btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Confirm upgrade to release {{ $release.Version }}" data-modal-callback="releaseUpgrade('{{ $release.ID }}', false);">
+                                            <i class="fas fa-arrow-circle-up" title="{{ i18n "Upgrade application" $ }}"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-danger btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Confirm upgrade to release {{ $release.Version }} and restart application" data-modal-callback="releaseUpgrade('{{ $release.ID }}', true);">
+                                            <i class="fas fa-cloud-upload-alt" title="{{ i18n "Upgrade application with restart" $ }}"></i>
+                                        </button>
+                                        {{ end }}
+
+                                        <button type="button" class="btn btn-warning btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Confirm remove release {{ $release.Version }}" data-modal-callback="releaseRemove('{{ $release.ID }}');">
+                                            <i class="fas fa-trash" title="{{ i18n "Remove" $ }}"></i>
+                                        </button>
+                                    {{ end }}
+                                </div>
+                            </td>
+                            <td>{{ $release.Size }}</td>
+                            <td>{{ $release.Checksum }}</td>
+                            <td>{{ $release.Architecture }}</td>
+                            <td>{{ $release.Path }}</td>
+                        </tr>
+                        {{ end }}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
+
+{{ define "head" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" false) }}
+{{ end }}
+
+{{ define "js" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net/js/jquery.dataTables.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive/js/dataTables.responsive.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
+
+    <script type="application/javascript">
+        $(document).ready(function () {
+            window.releaseUpgrade = function (id, restart) {
+                var u = '/ota/release/' + id + '/upgrade';
+
+                if (restart) {
+                    u += '?restart=1'
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: u,
+                    success: function (r) {
+                        if (r.result === 'failed') {
+                            new PNotify({
+                                title: 'Error',
+                                text: r.message,
+                                type: 'error',
+                                hide: false,
+                                styling: 'bootstrap3'
+                            });
+                        }
+                    }
+                });
+            };
+
+            window.releaseRemove = function (id) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/ota/release/' + id + '/remove',
+                    success: function (r) {
+                        if (r.result === 'failed') {
+                            new PNotify({
+                                title: 'Error',
+                                text: r.message,
+                                type: 'error',
+                                hide: false,
+                                styling: 'bootstrap3'
+                            });
+                        }
+                    }
+                });
+            };
+        });
+    </script>
+{{ end }}

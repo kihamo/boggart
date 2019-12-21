@@ -1,0 +1,73 @@
+{{ define "content" }}
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>{{ i18n "Upload release" . }}</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div id="wizard" class="form_wizard wizard_horizontal">
+                    <ul class="wizard_steps">
+                        <li>
+                            <a href="#step-1">
+                                <span class="step_no">1</span>
+                                <span class="step_descr">Step 1<br /><small>Upload binary file</small></span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#step-2">
+                                <span class="step_no">2</span>
+                                <span class="step_descr">Step 2<br /><small>Verify uploaded file</small></span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#step-3">
+                                <span class="step_no">3</span>
+                                <span class="step_descr">Step 3<br /><small>Upgrade application</small></span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#step-4">
+                                <span class="step_no">4</span>
+                                <span class="step_descr">Step 4<br /><small>Confirm and restart</small></span>
+                            </a>
+                        </li>
+                    </ul>
+                    <div id="step-1">
+                        1
+                    </div>
+                    <div id="step-2">
+                        2
+                    </div>
+                    <div id="step-3">
+                        3
+                    </div>
+                    <div id="step-4">
+                        4
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
+
+{{ define "head" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/dropzonejs/css/dropzone.min.css" false) }}
+{{ end }}
+
+{{ define "js" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/dropzonejs/js/dropzone.min.js" false) }}
+    {{ staticHTML (staticURL "/ota/assets/vendors/jQuery-Smart-Wizard/js/jquery.smartWizard.js" false) }}
+
+    <script type="application/javascript">
+        $(document).ready(function () {
+            $('#wizard').smartWizard();
+
+            $('.buttonNext').hide();
+            $('.buttonPrevious').hide();
+            $('.buttonFinish').hide();
+        });
+    </script>
+{{ end }}
