@@ -2,11 +2,8 @@ package handlers
 
 import (
 	"encoding/hex"
-	"io"
 	"os"
-	"path/filepath"
 	"runtime"
-	"strconv"
 	"strings"
 	"time"
 
@@ -49,10 +46,6 @@ func (h *ReleasesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request)
 		r.Session().FlashBag().Error(err.Error())
 	} else {
 		switch q.Get(":action") {
-		case "download":
-			h.actionDownload(w, r, releases)
-			return
-
 		case "remove":
 			h.actionRemove(w, r, releases)
 			return
@@ -87,31 +80,6 @@ func (h *ReleasesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request)
 		"releases":    releasesView,
 		"currentArch": runtime.GOARCH,
 	})
-}
-
-func (h *ReleasesHandler) actionDownload(w *dashboard.Response, r *dashboard.Request, releases []ota.Release) {
-	id := strings.TrimSpace(r.URL().Query().Get(":id"))
-	if id != "" {
-		for _, rl := range releases {
-			if rlID := release.GenerateReleaseID(rl); rlID == id {
-				fileName := "release." + rl.Architecture() + ".bin"
-				if releaseFile, ok := rl.(*release.LocalFileRelease); ok {
-					fileName = filepath.Base(releaseFile.Path()) +
-						"." + strings.ReplaceAll(releaseFile.Version(), " ", ".") +
-						"." + rl.Architecture() + ".bin"
-				}
-
-				w.Header().Set("Content-Length", strconv.FormatInt(rl.Size(), 10))
-				w.Header().Set("Content-Type", "application/x-binary")
-				w.Header().Set("Content-Disposition", "attachment; filename="+fileName)
-				io.Copy(w, rl.BinFile())
-				return
-			}
-		}
-	}
-
-	h.NotFound(w, r)
-	return
 }
 
 func (h *ReleasesHandler) actionRemove(w *dashboard.Response, r *dashboard.Request, releases []ota.Release) {

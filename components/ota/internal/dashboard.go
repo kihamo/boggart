@@ -32,6 +32,9 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 			Updater:    c.updater,
 			Repository: c.uploadRepository,
 		}
+		repositoryHandler := &handlers.RepositoryHandler{
+			Repository: c.uploadRepository,
+		}
 
 		c.routes = []dashboard.Route{
 			dashboard.RouteFromAssetFS(c),
@@ -47,6 +50,10 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 			dashboard.NewRoute("/"+c.Name()+"/release/:id/:action", releasesHandler).
 				WithMethods([]string{http.MethodGet, http.MethodPost}).
 				WithAuth(true),
+			dashboard.NewRoute("/"+c.Name()+"/repository/", repositoryHandler).
+				WithMethods([]string{http.MethodGet}),
+			dashboard.NewRoute("/"+c.Name()+"/repository/:id/release.bin", repositoryHandler).
+				WithMethods([]string{http.MethodGet}),
 		}
 	}
 

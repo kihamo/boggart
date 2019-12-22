@@ -26,7 +26,7 @@
                             <td>{{ $release.Version }} {{ if $release.IsCurrent }}<span class="label label-success">{{ i18n "current" $ }}</span>{{ end }}</td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <a href="/ota/release/{{ $release.ID }}/download" target="_blank" class="btn btn-success btn-icon btn-xs">
+                                    <a href="/ota/repository/{{ $release.ID }}/release.bin" target="_blank" class="btn btn-success btn-icon btn-xs">
                                         <i class="fas fa-file-download" title="{{ i18n "Download" $ }}"></i>
                                     </a>
 

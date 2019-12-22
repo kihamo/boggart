@@ -13,5 +13,9 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithUsage("Path to saved releases directory").
 			WithEditable(true).
 			WithDefault(os.TempDir()),
+		config.NewVariable(ota.ConfigRepositoryServerEnabled, config.ValueTypeBool).
+			WithUsage("Enable serve repository").
+			WithEditable(true).
+			WithDefault(true),
 	}
 }
