@@ -1,5 +1,5 @@
-hash: 5bc9268317fd8b2aba252ba0663e14882017acd524c44f674fa7448a1b5d93cf
-updated: 2019-12-15T20:28:52.943989+03:00
+hash: 57441d88be7e12036cb4de2d46e998d046d2472abf2215ae177985872f6e91bd
+updated: 2019-12-23T02:04:26.6259+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -225,7 +225,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 13d7a7cbd73b97fd00757a2f90830ce2bcacdcb3
+  version: 70c4391b21ea167322e8d953ba9499a84a1073ad
   subpackages:
   - components/annotations
   - components/config
@@ -267,6 +267,12 @@ imports:
   - components/metrics/instance
   - components/metrics/internal
   - components/metrics/internal/handlers
+  - components/ota
+  - components/ota/instance
+  - components/ota/internal
+  - components/ota/internal/handlers
+  - components/ota/release
+  - components/ota/repository
   - components/profiling
   - components/profiling/instance
   - components/profiling/internal
