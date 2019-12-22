@@ -10,11 +10,17 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;"
 
+msgid "Releases"
+msgstr "Релизы"
+
 msgid "Version"
 msgstr "Версия"
 
 msgid "Actions"
 msgstr "Действия"
+
+msgid "Uploaded at"
+msgstr "Дата загрузки"
 
 msgid "Size"
 msgstr "Размер"
@@ -36,3 +42,6 @@ msgstr "Скачать"
 
 msgid "Remove"
 msgstr "Удалить"
+
+msgid "Upgrade application with restart"
+msgstr "Обновить приложение с перезапуском"

@@ -9,6 +9,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/kihamo/boggart/components/ota"
 	"github.com/kihamo/boggart/components/ota/release"
@@ -25,6 +26,7 @@ type releaseView struct {
 	IsCurrent    bool
 	Path         string
 	Architecture string
+	UploadedAt   *time.Time
 }
 
 type response struct {
@@ -75,6 +77,7 @@ func (h *ReleasesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request)
 
 		if releaseFile, ok := rl.(*release.LocalFileRelease); ok {
 			rView.Path = releaseFile.Path()
+			rView.UploadedAt = &[]time.Time{releaseFile.FileInfo().ModTime()}[0]
 		}
 
 		releasesView = append(releasesView, rView)

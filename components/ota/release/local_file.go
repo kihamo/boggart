@@ -14,8 +14,8 @@ type LocalFileRelease struct {
 	path         string
 	version      string
 	checksum     []byte
-	size         int64
 	architecture string
+	fileInfo     os.FileInfo
 }
 
 func NewLocalFile(path, version string) (*LocalFileRelease, error) {
@@ -67,8 +67,8 @@ func NewLocalFileFromFD(fd *os.File, version string) (*LocalFileRelease, error) 
 		path:         fd.Name(),
 		version:      version,
 		checksum:     h.Sum(nil),
-		size:         stat.Size(),
 		architecture: ota.GoArch(fd),
+		fileInfo:     stat,
 	}, nil
 }
 
@@ -90,9 +90,13 @@ func (f *LocalFileRelease) Checksum() []byte {
 }
 
 func (f *LocalFileRelease) Size() int64 {
-	return f.size
+	return f.fileInfo.Size()
 }
 
 func (f *LocalFileRelease) Architecture() string {
 	return f.architecture
+}
+
+func (f *LocalFileRelease) FileInfo() os.FileInfo {
+	return f.fileInfo
 }
