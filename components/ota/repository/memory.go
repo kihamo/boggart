@@ -18,13 +18,10 @@ func NewMemoryRepository(releases ...ota.Release) *MemoryRepository {
 	}
 }
 
-func (r *MemoryRepository) Add(release ota.Release) int64 {
+func (r *MemoryRepository) Add(release ota.Release) {
 	r.lock.Lock()
 	r.releases = append(r.releases, release)
-	id := len(r.releases)
 	r.lock.Unlock()
-
-	return int64(id)
 }
 
 func (r *MemoryRepository) Remove(release ota.Release) {

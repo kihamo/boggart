@@ -2,49 +2,54 @@
 <div class="row">
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
-            <div class="x_title">
-                <h2>{{ i18n "Upgrade release" . }}</h2>
-                <div class="clearfix"></div>
-            </div>
             <div class="x_content">
-                <div id="wizard" class="form_wizard wizard_horizontal">
-                    <ul class="wizard_steps">
-                        <li>
-                            <a href="#step-1">
-                                <span class="step_no">1</span>
-                                <span class="step_descr">{{ i18n "Step 1" . }}<br /><small>{{ i18n "Upload binary file" . }}</small></span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#step-2">
-                                <span class="step_no">2</span>
-                                <span class="step_descr">{{ i18n "Step 2" . }}<br /><small>{{ i18n "Verify uploaded file" . }}</small></span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#step-3">
-                                <span class="step_no">3</span>
-                                <span class="step_descr">{{ i18n "Step 3" . }}<br /><small>{{ i18n "Upgrade application" . }}</small></span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#step-4">
-                                <span class="step_no">4</span>
-                                <span class="step_descr">{{ i18n "Step 4" . }}<br /><small>{{ i18n "Confirm and restart" . }}</small></span>
-                            </a>
-                        </li>
+                <h2>{{ i18n "Upgrade release" . }}</h2>
+                <div id="wizard" class="form_wizard wizard_verticle">
+                    <ul class="list-unstyled wizard_steps">
+                        <li><a href="#step-1"><span class="step_no">1</span></a></li>
+                        <li><a href="#step-2"><span class="step_no">2</span></a></li>
                     </ul>
                     <div id="step-1">
-                        <form class="form-horizontal form-label-left dropzone" role="form" method="post" id="ota" action="{{ .Request.URL.Path }}" novalidate></form>
+                        <h4 class="StepTitle">{{ i18n "Step 1 Upload binary file" . }}</h4>
+                        <form class="form-horizontal form-label-left dropzone" role="form" method="post" id="ota"
+                              action="{{ .Request.URL.Path }}" novalidate></form>
                     </div>
                     <div id="step-2">
-                        2
-                    </div>
-                    <div id="step-3">
-                        3
-                    </div>
-                    <div id="step-4">
-                        4
+                        <h4 class="StepTitle">{{ i18n "Step 2 Verify uploaded file" . }}</h4>
+                        <dl class="dl-horizontal">
+                            <dt>{{ i18n "Version" . }}:</dt>
+                            <dd class="version-value"></dd>
+
+                            <dt>{{ i18n "Checksum" . }}:</dt>
+                            <dd class="checksum-value"></dd>
+
+                            <dt>{{ i18n "Architecture" . }}:</dt>
+                            <dd><span class="arch-value"></span> <span
+                                    class="arch-danger label label-danger">{{ i18n "is not current architecture %s" . nil nil nil .goarch }}</span>
+                            </dd>
+
+                            <dt>{{ i18n "Size" . }}:</dt>
+                            <dd><span class="size-value"></span> {{ i18n "bytes" . }}</dd>
+                        </dl>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-success" data-toggle="modal"
+                                    data-target="#modal"
+                                    data-modal-title="Confirm upgrade release"
+                                    data-modal-callback="releaseUpgrade(false);">{{ i18n "Upgrade" $ }}
+                            </button>
+
+                            <button type="button" class="btn btn-warning" data-toggle="modal"
+                                    data-target="#modal"
+                                    data-modal-title="Confirm upgrade release and restart application"
+                                    data-modal-callback="releaseUpgrade(true);">{{ i18n "Upgrade and restart" $ }}
+                            </button>
+
+                            <button type="button" class="btn btn-danger" data-toggle="modal"
+                                    data-target="#modal"
+                                    data-modal-title="Confirm remove release"
+                                    data-modal-callback="releaseRemove();">{{ i18n "Remove" $ }}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -58,29 +63,99 @@
 {{ end }}
 
 {{ define "js" }}
-    {{ staticHTML (staticURL "/dashboard/assets/vendors/dropzonejs/js/dropzone.min.js" false) }}
-    {{ staticHTML (staticURL "/ota/assets/vendors/jQuery-Smart-Wizard/js/jquery.smartWizard.js" false) }}
+{{ staticHTML (staticURL "/dashboard/assets/vendors/dropzonejs/js/dropzone.min.js" false) }}
+{{ staticHTML (staticURL "/ota/assets/vendors/jQuery-Smart-Wizard/js/jquery.smartWizard.js" false) }}
 
-    <script type="application/javascript">
-        $(document).ready(function () {
-            $('#wizard').smartWizard();
+<script type="application/javascript">
+    $(document).ready(function () {
+        $('#wizard').smartWizard();
 
-            $('.buttonNext').hide();
-            $('.buttonPrevious').hide();
-            $('.buttonFinish').hide();
+        $('.buttonNext').hide();
+        $('.buttonPrevious').hide();
+        $('.buttonFinish').hide();
 
-            Dropzone.options.ota = {
-                parallelUploads: 1,
-                paramName: "release",
-                createImageThumbnails: false,
-                acceptedFiles: "application/macbinary,.bin",
-                success: function(file, response) {
-                    $('#wizard').smartWizard('goToStep', 2);
-                    $('#wizard').smartWizard('disableStep', 1);
+        let releaseId = '';
 
-                    // console.log(response.id)
+        Dropzone.options.ota = {
+            parallelUploads: 1,
+            paramName: 'release',
+            createImageThumbnails: false,
+            acceptedFiles: 'application/macbinary,.bin',
+            success: function (f, r) {
+                $('#wizard').smartWizard('goToStep', 2);
+                $('#wizard').smartWizard('disableStep', 1);
+
+                releaseId = r.id;
+
+                $('.version-value').text(r.version);
+                $('.checksum-value').text(r.checksum);
+                $('.arch-value').text(r.architecture);
+                $('.size-value').text(r.size);
+
+                if (r.architecture != '{{ .goarch }}') {
+                    $('#step-2 .btn-success').hide();
+                    $('#step-2 .btn-warning').hide();
+                    $('.arch-danger').show();
+                } else {
+                    $('#step-2 .btn-success').show();
+                    $('#step-2 .btn-warning').show();
+                    $('.arch-danger').hide();
                 }
-            };
-        });
-    </script>
+            }
+        };
+
+        window.releaseUpgrade = function (restart) {
+            var u = '/ota/release/' + releaseId + '/upgrade';
+
+            if (restart) {
+                u += '?restart=1'
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: u,
+                success: function (r) {
+                    if (r.result === 'failed') {
+                        new PNotify({
+                            title: 'Error',
+                            text: r.message,
+                            type: 'error',
+                            hide: false,
+                            styling: 'bootstrap3'
+                        });
+                    } else {
+                        new PNotify({
+                            title: 'Success',
+                            text: 'Success upgrade',
+                            type: 'success',
+                            hide: false,
+                            styling: 'bootstrap3'
+                        });
+                    }
+                }
+            });
+        };
+
+        window.releaseRemove = function () {
+            $.ajax({
+                type: 'POST',
+                url: '/ota/release/' + releaseId + '/remove',
+                success: function (r) {
+                    if (r.result === 'failed') {
+                        new PNotify({
+                            title: 'Error',
+                            text: r.message,
+                            type: 'error',
+                            hide: false,
+                            styling: 'bootstrap3'
+                        });
+                    } else {
+                        $('#wizard').smartWizard('goToStep', 1);
+                        $('#wizard').smartWizard('disableStep', 2);
+                    }
+                }
+            });
+        };
+    });
+</script>
 {{ end }}

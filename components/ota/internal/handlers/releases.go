@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/hex"
-	"errors"
 	"io"
 	"os"
 	"path/filepath"
@@ -19,7 +18,7 @@ import (
 )
 
 type releaseView struct {
-	ID           int
+	ID           string
 	Version      string
 	Size         int64
 	Checksum     string
@@ -65,9 +64,9 @@ func (h *ReleasesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request)
 	}
 
 	releasesView := make([]releaseView, 0, len(releases))
-	for id, rl := range releases {
+	for _, rl := range releases {
 		rView := releaseView{
-			ID:           id,
+			ID:           release.GenerateReleaseID(rl),
 			Version:      rl.Version(),
 			Size:         rl.Size(),
 			Checksum:     hex.EncodeToString(rl.Checksum()),
@@ -91,26 +90,23 @@ func (h *ReleasesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request)
 }
 
 func (h *ReleasesHandler) actionDownload(w *dashboard.Response, r *dashboard.Request, releases []ota.Release) {
-	id, err := strconv.Atoi(r.URL().Query().Get(":id"))
-	if err != nil {
-		h.NotFound(w, r)
-		return
-	}
+	id := strings.TrimSpace(r.URL().Query().Get(":id"))
+	if id != "" {
+		for _, rl := range releases {
+			if rlID := release.GenerateReleaseID(rl); rlID == id {
+				fileName := "release." + rl.Architecture() + ".bin"
+				if releaseFile, ok := rl.(*release.LocalFileRelease); ok {
+					fileName = filepath.Base(releaseFile.Path()) +
+						"." + strings.ReplaceAll(releaseFile.Version(), " ", ".") +
+						"." + rl.Architecture() + ".bin"
+				}
 
-	for i, rl := range releases {
-		if i == id {
-			fileName := "release." + rl.Architecture() + ".bin"
-			if releaseFile, ok := rl.(*release.LocalFileRelease); ok {
-				fileName = filepath.Base(releaseFile.Path()) +
-					"." + strings.ReplaceAll(releaseFile.Version(), " ", ".") +
-					"." + rl.Architecture() + ".bin"
+				w.Header().Set("Content-Length", strconv.FormatInt(rl.Size(), 10))
+				w.Header().Set("Content-Type", "application/x-binary")
+				w.Header().Set("Content-Disposition", "attachment; filename="+fileName)
+				io.Copy(w, rl.BinFile())
+				return
 			}
-
-			w.Header().Set("Content-Length", strconv.FormatInt(rl.Size(), 10))
-			w.Header().Set("Content-Type", "application/x-binary")
-			w.Header().Set("Content-Disposition", "attachment; filename="+fileName)
-			io.Copy(w, rl.BinFile())
-			return
 		}
 	}
 
@@ -124,43 +120,38 @@ func (h *ReleasesHandler) actionRemove(w *dashboard.Response, r *dashboard.Reque
 		return
 	}
 
-	id, err := strconv.Atoi(r.URL().Query().Get(":id"))
-	if err != nil {
-		h.NotFound(w, r)
-		return
-	}
+	id := strings.TrimSpace(r.URL().Query().Get(":id"))
+	if id != "" {
+		for _, rl := range releases {
+			if rlID := release.GenerateReleaseID(rl); rlID == id {
+				if rl == h.CurrentRelease {
+					_ = w.SendJSON(response{
+						Result:  "failed",
+						Message: "can't remove current release",
+					})
+					return
+				}
 
-	for i, rl := range releases {
-		if i == id {
-			if rl == h.CurrentRelease {
-				err = errors.New("can't remove current release")
-				break
+				h.Repository.Remove(rl)
+				info := []interface{}{"version", rl.Version()}
+
+				if releaseFile, ok := rl.(*release.LocalFileRelease); ok {
+					os.Remove(releaseFile.Path())
+					info = append(info, "path", releaseFile.Path())
+				}
+
+				logging.Log(r.Context()).Info("Remove release", info...)
+
+				_ = w.SendJSON(response{
+					Result: "success",
+				})
+
+				return
 			}
-
-			h.Repository.Remove(rl)
-			info := []interface{}{"version", rl.Version()}
-
-			if releaseFile, ok := rl.(*release.LocalFileRelease); ok {
-				os.Remove(releaseFile.Path())
-				info = append(info, "path", releaseFile.Path())
-			}
-
-			logging.Log(r.Context()).Info("Remove release", info...)
-
-			break
 		}
 	}
 
-	if err != nil {
-		_ = w.SendJSON(response{
-			Result:  "failed",
-			Message: err.Error(),
-		})
-	} else {
-		_ = w.SendJSON(response{
-			Result: "success",
-		})
-	}
+	h.NotFound(w, r)
 }
 
 func (h *ReleasesHandler) actionUpgrade(w *dashboard.Response, r *dashboard.Request, releases []ota.Release) {
@@ -169,43 +160,44 @@ func (h *ReleasesHandler) actionUpgrade(w *dashboard.Response, r *dashboard.Requ
 		return
 	}
 
-	id, err := strconv.Atoi(r.URL().Query().Get(":id"))
-	if err != nil {
-		h.NotFound(w, r)
-		return
-	}
+	id := strings.TrimSpace(r.URL().Query().Get(":id"))
+	if id != "" {
+		var err error
 
-	for i, rl := range releases {
-		if i == id {
-			err = h.Updater.Update(rl)
-			if err != nil {
-				r.Session().FlashBag().Error(err.Error())
-			} else {
-				info := []interface{}{"version", rl.Version()}
+		for _, rl := range releases {
+			if rlID := release.GenerateReleaseID(rl); rlID == id {
+				err = h.Updater.Update(rl)
+				if err != nil {
+					r.Session().FlashBag().Error(err.Error())
+				} else {
+					info := []interface{}{"version", rl.Version()}
 
-				if releaseFile, ok := rl.(*release.LocalFileRelease); ok {
-					info = append(info, "path", releaseFile.Path())
+					if releaseFile, ok := rl.(*release.LocalFileRelease); ok {
+						info = append(info, "path", releaseFile.Path())
+					}
+
+					logging.Log(r.Context()).Info("Release upgrade", info...)
 				}
 
-				logging.Log(r.Context()).Warn("Release upgrade", info...)
-			}
+				if r.URL().Query().Get("restart") != "" {
+					err = h.Updater.Restart()
+				}
 
-			if r.URL().Query().Get("restart") != "" {
-				err = h.Updater.Restart()
-			}
+				if err != nil {
+					_ = w.SendJSON(response{
+						Result:  "failed",
+						Message: err.Error(),
+					})
+				} else {
+					_ = w.SendJSON(response{
+						Result: "success",
+					})
+				}
 
-			break
+				return
+			}
 		}
 	}
 
-	if err != nil {
-		_ = w.SendJSON(response{
-			Result:  "failed",
-			Message: err.Error(),
-		})
-	} else {
-		_ = w.SendJSON(response{
-			Result: "success",
-		})
-	}
+	h.NotFound(w, r)
 }

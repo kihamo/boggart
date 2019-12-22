@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"encoding/hex"
 	"errors"
 	"net/http"
+	"runtime"
 
 	"github.com/kihamo/boggart/components/ota"
 	"github.com/kihamo/boggart/components/ota/release"
@@ -18,60 +20,53 @@ type UpgradeHandler struct {
 }
 
 func (h *UpgradeHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
-	q := r.URL().Query()
-	refer := r.Original().Referer()
+	if r.IsPost() {
+		file, header, err := r.Original().FormFile("release")
 
-	switch q.Get(":action") {
-	case "confirm":
-		h.Redirect(refer, http.StatusFound, w, r)
-		return
+		if err == nil {
+			defer file.Close()
+			t := header.Header.Get("Content-Type")
 
-	case "restart":
-		if err := h.Updater.Restart(); err != nil {
-			r.Session().FlashBag().Error(err.Error())
-		}
+			switch t {
+			case "application/macbinary":
+				var rl *release.LocalFileRelease
 
-		h.Redirect(refer, http.StatusFound, w, r)
-		return
+				rl, err = release.NewLocalFileFromStream(file, "", r.Config().String(ota.ConfigReleasesDirectory))
+				if err == nil {
+					h.Repository.Add(rl)
 
-	default:
-		if r.IsPost() {
-			var id int64
-			file, header, err := r.Original().FormFile("release")
+					_ = w.SendJSON(struct {
+						ID           string `json:"id"`
+						Version      string `json:"version"`
+						Checksum     string `json:"checksum"`
+						Architecture string `json:"architecture"`
+						Size         int64  `json:"size"`
+					}{
+						ID:           release.GenerateReleaseID(rl),
+						Version:      rl.Version(),
+						Checksum:     hex.EncodeToString(rl.Checksum()),
+						Architecture: rl.Architecture(),
+						Size:         rl.Size(),
+					})
 
-			if err == nil {
-				defer file.Close()
-				t := header.Header.Get("Content-Type")
-
-				switch t {
-				case "application/macbinary":
-					var rl *release.LocalFileRelease
-
-					rl, err = release.NewLocalFileFromStream(file, "", r.Config().String(ota.ConfigReleasesDirectory))
-					if err == nil {
-						id = h.Repository.Add(rl)
-					}
-
-				default:
-					err = errors.New("unknown content type " + t)
+					return
 				}
-			}
 
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				_, _ = w.Write([]byte(err.Error()))
-			} else {
-				_ = w.SendJSON(struct {
-					ID int64 `json:"id"`
-				}{
-					ID: id,
-				})
+			default:
+				err = errors.New("unknown content type " + t)
 			}
-
-			h.Redirect(refer, http.StatusFound, w, r)
-			return
 		}
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			_, _ = w.Write([]byte(err.Error()))
+		}
+
+		h.Redirect(r.Original().Referer(), http.StatusFound, w, r)
+		return
 	}
 
-	h.Render(r.Context(), "update", map[string]interface{}{})
+	h.Render(r.Context(), "update", map[string]interface{}{
+		"goarch": runtime.GOARCH,
+	})
 }
