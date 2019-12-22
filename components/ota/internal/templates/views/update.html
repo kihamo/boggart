@@ -3,7 +3,7 @@
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
             <div class="x_title">
-                <h2>{{ i18n "Upload release" . }}</h2>
+                <h2>{{ i18n "Upgrade release" . }}</h2>
                 <div class="clearfix"></div>
             </div>
             <div class="x_content">
@@ -12,30 +12,30 @@
                         <li>
                             <a href="#step-1">
                                 <span class="step_no">1</span>
-                                <span class="step_descr">Step 1<br /><small>Upload binary file</small></span>
+                                <span class="step_descr">{{ i18n "Step 1" . }}<br /><small>{{ i18n "Upload binary file" . }}</small></span>
                             </a>
                         </li>
                         <li>
                             <a href="#step-2">
                                 <span class="step_no">2</span>
-                                <span class="step_descr">Step 2<br /><small>Verify uploaded file</small></span>
+                                <span class="step_descr">{{ i18n "Step 2" . }}<br /><small>{{ i18n "Verify uploaded file" . }}</small></span>
                             </a>
                         </li>
                         <li>
                             <a href="#step-3">
                                 <span class="step_no">3</span>
-                                <span class="step_descr">Step 3<br /><small>Upgrade application</small></span>
+                                <span class="step_descr">{{ i18n "Step 3" . }}<br /><small>{{ i18n "Upgrade application" . }}</small></span>
                             </a>
                         </li>
                         <li>
                             <a href="#step-4">
                                 <span class="step_no">4</span>
-                                <span class="step_descr">Step 4<br /><small>Confirm and restart</small></span>
+                                <span class="step_descr">{{ i18n "Step 4" . }}<br /><small>{{ i18n "Confirm and restart" . }}</small></span>
                             </a>
                         </li>
                     </ul>
                     <div id="step-1">
-                        1
+                        <form class="form-horizontal form-label-left dropzone" role="form" method="post" id="ota" action="{{ .Request.URL.Path }}" novalidate></form>
                     </div>
                     <div id="step-2">
                         2
@@ -68,6 +68,19 @@
             $('.buttonNext').hide();
             $('.buttonPrevious').hide();
             $('.buttonFinish').hide();
+
+            Dropzone.options.ota = {
+                parallelUploads: 1,
+                paramName: "release",
+                createImageThumbnails: false,
+                acceptedFiles: "application/macbinary,.bin",
+                success: function(file, response) {
+                    $('#wizard').smartWizard('goToStep', 2);
+                    $('#wizard').smartWizard('disableStep', 1);
+
+                    // console.log(response.id)
+                }
+            };
         });
     </script>
 {{ end }}

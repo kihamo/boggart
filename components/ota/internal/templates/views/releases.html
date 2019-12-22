@@ -30,7 +30,7 @@
                                     </a>
 
                                     {{ if ne $release.IsCurrent true }}
-                                        {{ if ne $.currentArch $release.Architecture }}
+                                        {{ if eq $.currentArch $release.Architecture }}
                                         <button type="button" class="btn btn-danger btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Confirm upgrade to release {{ $release.Version }}" data-modal-callback="releaseUpgrade('{{ $release.ID }}', false);">
                                             <i class="fas fa-arrow-circle-up" title="{{ i18n "Upgrade application" $ }}"></i>
                                         </button>

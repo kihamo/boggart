@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"bytes"
 	"errors"
 	"net/http"
 
@@ -15,7 +14,7 @@ type UpgradeHandler struct {
 	dashboard.Handler
 
 	Updater    *ota.Updater
-	Repository *repository.MemoryRepository
+	Repository *repository.DirectoryRepository
 }
 
 func (h *UpgradeHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
@@ -23,42 +22,6 @@ func (h *UpgradeHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 	refer := r.Original().Referer()
 
 	switch q.Get(":action") {
-	case "upload":
-		file, header, err := r.Original().FormFile("release")
-
-		if err == nil {
-			defer file.Close()
-			t := header.Header.Get("Content-Type")
-
-			switch t {
-			case "application/macbinary":
-				buf := bytes.NewBuffer(nil)
-				_, err = buf.ReadFrom(file)
-
-				if err == nil {
-					var rl *release.LocalFileRelease
-
-					rl, err = release.NewLocalFileFromStream(file, "", r.Config().String(ota.ConfigReleasesDirectory))
-					if err == nil {
-						h.Repository.Add(rl)
-					}
-				}
-
-			default:
-				err = errors.New("unknown content type " + t)
-			}
-		}
-
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			_, _ = w.Write([]byte(err.Error()))
-		} else {
-			_, _ = w.Write([]byte("success"))
-		}
-
-		h.Redirect(refer, http.StatusFound, w, r)
-		return
-
 	case "confirm":
 		h.Redirect(refer, http.StatusFound, w, r)
 		return
@@ -70,6 +33,44 @@ func (h *UpgradeHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 
 		h.Redirect(refer, http.StatusFound, w, r)
 		return
+
+	default:
+		if r.IsPost() {
+			var id int64
+			file, header, err := r.Original().FormFile("release")
+
+			if err == nil {
+				defer file.Close()
+				t := header.Header.Get("Content-Type")
+
+				switch t {
+				case "application/macbinary":
+					var rl *release.LocalFileRelease
+
+					rl, err = release.NewLocalFileFromStream(file, "", r.Config().String(ota.ConfigReleasesDirectory))
+					if err == nil {
+						id = h.Repository.Add(rl)
+					}
+
+				default:
+					err = errors.New("unknown content type " + t)
+				}
+			}
+
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				_, _ = w.Write([]byte(err.Error()))
+			} else {
+				_ = w.SendJSON(struct {
+					ID int64 `json:"id"`
+				}{
+					ID: id,
+				})
+			}
+
+			h.Redirect(refer, http.StatusFound, w, r)
+			return
+		}
 	}
 
 	h.Render(r.Context(), "update", map[string]interface{}{})

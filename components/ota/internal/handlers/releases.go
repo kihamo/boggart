@@ -35,8 +35,9 @@ type response struct {
 type ReleasesHandler struct {
 	dashboard.Handler
 
-	Updater    *ota.Updater
-	Repository *repository.MemoryRepository
+	Updater        *ota.Updater
+	Repository     *repository.DirectoryRepository
+	CurrentRelease ota.Release
 }
 
 func (h *ReleasesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
@@ -68,7 +69,7 @@ func (h *ReleasesHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request)
 			Version:      rl.Version(),
 			Size:         rl.Size(),
 			Checksum:     hex.EncodeToString(rl.Checksum()),
-			IsCurrent:    id == 0,
+			IsCurrent:    rl == h.CurrentRelease,
 			Architecture: rl.Architecture(),
 		}
 
@@ -126,23 +127,24 @@ func (h *ReleasesHandler) actionRemove(w *dashboard.Response, r *dashboard.Reque
 		return
 	}
 
-	if id == 0 {
-		err = errors.New("can't remove current release")
-	} else {
-		for i, rl := range releases {
-			if i == id {
-				h.Repository.Remove(rl)
-				info := []interface{}{"version", rl.Version()}
-
-				if releaseFile, ok := rl.(*release.LocalFileRelease); ok {
-					os.Remove(releaseFile.Path())
-					info = append(info, "path", releaseFile.Path())
-				}
-
-				logging.Log(r.Context()).Info("Remove release", info...)
-
+	for i, rl := range releases {
+		if i == id {
+			if rl == h.CurrentRelease {
+				err = errors.New("can't remove current release")
 				break
 			}
+
+			h.Repository.Remove(rl)
+			info := []interface{}{"version", rl.Version()}
+
+			if releaseFile, ok := rl.(*release.LocalFileRelease); ok {
+				os.Remove(releaseFile.Path())
+				info = append(info, "path", releaseFile.Path())
+			}
+
+			logging.Log(r.Context()).Info("Remove release", info...)
+
+			break
 		}
 	}
 

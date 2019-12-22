@@ -18,8 +18,8 @@ type LocalFileRelease struct {
 	architecture string
 }
 
-func NewLocalFile(name, version string) (*LocalFileRelease, error) {
-	fd, err := os.Open(name)
+func NewLocalFile(path, version string) (*LocalFileRelease, error) {
+	fd, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
