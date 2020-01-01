@@ -1,5 +1,5 @@
-hash: 57441d88be7e12036cb4de2d46e998d046d2472abf2215ae177985872f6e91bd
-updated: 2019-12-23T02:04:26.6259+03:00
+hash: 16c2b0de9194ffe2bbf22aafbd7d1e92a298fca9421bbdf71932cd8bfe357591
+updated: 2020-01-02T01:05:40.475066+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -85,6 +85,19 @@ imports:
   version: 759fbf8e9221cd2a2c3a26e3d7b41ecae2ed89d9
 - name: github.com/ghthor/gowol
   version: eb42ead1b24e9226bddb05004815f6e72280f879
+- name: github.com/go-ble/ble
+  version: 147700f13610085f7387692cd6663a67c495ab87
+  subpackages:
+  - darwin
+  - examples/lib/dev
+  - linux
+  - linux/adv
+  - linux/att
+  - linux/gatt
+  - linux/hci
+  - linux/hci/cmd
+  - linux/hci/evt
+  - linux/hci/socket
 - name: github.com/go-openapi/analysis
   version: 01a3bdad024cd0b80f267b070347538b6edb1c77
   subpackages:
@@ -322,6 +335,10 @@ imports:
   - providers/github
   - providers/gitlab
   - providers/gplus
+- name: github.com/mattn/go-colorable
+  version: 98ec13f34aabf44cc914c65a1cfb7b9bc815aef1
+- name: github.com/mattn/go-isatty
+  version: 31745d66dd679ac0ac4f8d3ecff168fce6170c6a
 - name: github.com/mattn/kinako
   version: 332c0a7e205a29536e672337a4bea6c7a96b04c1
   subpackages:
@@ -350,6 +367,12 @@ imports:
   subpackages:
   - errutil
   - term
+- name: github.com/mgutz/ansi
+  version: 9520e82c474b0a04dd04f8a40959027271bab992
+- name: github.com/mgutz/logxi
+  version: aebf8a7d67ab4625e0fd4a665766fef9a709161b
+  subpackages:
+  - v1
 - name: github.com/mitchellh/gox
   version: d8caaff5a9dc98f4cfa1fcce6e7265a04689f641
 - name: github.com/mitchellh/mapstructure
@@ -401,6 +424,10 @@ imports:
   version: 975f53781597ed779763b7b65566e74c4004d8de
 - name: github.com/PuerkitoBio/urlesc
   version: de5bf2ad457846296e2031421a34e2568e304e35
+- name: github.com/raff/goble
+  version: 72afc67d6a9914be785146adfc74be518bad22d2
+  subpackages:
+  - xpc
 - name: github.com/robbiet480/go.nut
   version: 246697bfaea771ddfe4ce0d754e6e2a7b8214f0f
 - name: github.com/rubenv/sql-migrate

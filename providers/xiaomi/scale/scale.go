@@ -3,6 +3,7 @@ package scale
 import (
 	"context"
 	"net"
+	"sort"
 	"time"
 
 	"github.com/go-ble/ble"
@@ -11,7 +12,7 @@ import (
 
 type Scale struct {
 	addr     net.HardwareAddr
-	device   string
+	device   ble.Device
 	duration time.Duration
 }
 
@@ -21,16 +22,23 @@ const (
 
 var scaleUUID = ble.UUID16(0x181B)
 
-func New(addr net.HardwareAddr, device string, duration time.Duration) *Scale {
+func New(addr net.HardwareAddr, device string, duration time.Duration) (*Scale, error) {
 	if device == "" {
 		device = DefaultDevice
 	}
 
+	d, err := dev.NewDevice(device)
+	if err != nil {
+		return nil, err
+	}
+
+	ble.SetDefaultDevice(d)
+
 	return &Scale{
 		addr:     addr,
-		device:   device,
+		device:   d,
 		duration: duration,
-	}
+	}, nil
 }
 
 func (s *Scale) advFilter(a ble.Advertisement) bool {
@@ -53,15 +61,8 @@ func (s *Scale) advHandler(chResult chan []byte) func(a ble.Advertisement) {
 	}
 }
 
-func (s *Scale) Metrics() ([]*Metrics, error) {
-	d, err := dev.NewDevice(s.device)
-	if err != nil {
-		return nil, err
-	}
-
-	ble.SetDefaultDevice(d)
-
-	ctx, cancel := context.WithTimeout(context.Background(), s.duration)
+func (s *Scale) Metrics(ctx context.Context) ([]*Metrics, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.duration)
 	defer cancel()
 
 	chResult := make(chan []byte)
@@ -74,7 +75,7 @@ func (s *Scale) Metrics() ([]*Metrics, error) {
 	}()
 
 	go func() {
-		err = ble.Scan(ctx, false, s.advHandler(chResult), s.advFilter)
+		err := ble.Scan(ctx, false, s.advHandler(chResult), s.advFilter)
 		if err != nil && err != context.DeadlineExceeded && err != context.Canceled {
 			chError <- err
 		}
@@ -104,11 +105,11 @@ func (s *Scale) Metrics() ([]*Metrics, error) {
 
 			metricsCache[m.datetime] = m
 
-		case err = <-chError:
+		case err := <-chError:
 			return nil, err
 
 		case _ = <-ctx.Done():
-			err = ctx.Err()
+			err := ctx.Err()
 
 			if err == nil || err == context.DeadlineExceeded || err == context.Canceled {
 				metrics := make([]*Metrics, 0, len(metricsCache))
@@ -117,10 +118,18 @@ func (s *Scale) Metrics() ([]*Metrics, error) {
 					metrics = append(metrics, metric)
 				}
 
+				sort.SliceStable(metrics, func(i, j int) bool {
+					return metrics[i].datetime.Before(metrics[j].datetime)
+				})
+
 				return metrics, nil
 			}
 
 			return nil, err
 		}
 	}
+}
+
+func (s *Scale) Close() error {
+	return ble.Stop()
 }
