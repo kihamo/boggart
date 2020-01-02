@@ -10,7 +10,7 @@ type Bind struct {
 	boggart.BindMQTT
 	config *Config
 
-	provider *scale.Scale
+	provider *scale.Client
 }
 
 func (b *Bind) Close() error {

@@ -16,7 +16,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		return nil, err
 	}
 
-	provider, err := scale.New(device, config.MAC.HardwareAddr, config.CaptureDuration)
+	provider, err := scale.NewClient(device, config.MAC.HardwareAddr, config.CaptureDuration)
 	if err != nil {
 		return nil, err
 	}
@@ -24,6 +24,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	sn := config.MAC.String()
 
 	config.TopicWeight = config.TopicWeight.Format(sn)
+	config.TopicImpedance = config.TopicImpedance.Format(sn)
 
 	bind := &Bind{
 		config:   config,

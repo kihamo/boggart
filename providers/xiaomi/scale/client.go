@@ -9,7 +9,7 @@ import (
 	"github.com/go-ble/ble"
 )
 
-type Scale struct {
+type Client struct {
 	addr     net.HardwareAddr
 	device   ble.Device
 	duration time.Duration
@@ -17,15 +17,15 @@ type Scale struct {
 
 var scaleUUID = ble.UUID16(0x181B)
 
-func New(device ble.Device, addr net.HardwareAddr, duration time.Duration) (*Scale, error) {
-	return &Scale{
+func NewClient(device ble.Device, addr net.HardwareAddr, duration time.Duration) (*Client, error) {
+	return &Client{
 		addr:     addr,
 		device:   device,
 		duration: duration,
 	}, nil
 }
 
-func (s *Scale) advHandler(chResult chan []byte) func(a ble.Advertisement) {
+func (s *Client) advHandler(chResult chan []byte) func(a ble.Advertisement) {
 	return func(a ble.Advertisement) {
 		if a.Addr().String() != s.addr.String() || !ble.Contains(a.Services(), scaleUUID) {
 			return
@@ -41,14 +41,14 @@ func (s *Scale) advHandler(chResult chan []byte) func(a ble.Advertisement) {
 	}
 }
 
-func (s *Scale) Metrics(ctx context.Context) ([]*Metrics, error) {
+func (s *Client) Measures(ctx context.Context) ([]*Measure, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.duration)
 	defer cancel()
 
 	chResult := make(chan []byte)
 	chError := make(chan error, 1)
 
-	metricsCache := make(map[time.Time]*Metrics, 0)
+	measuresCache := make(map[time.Time]*Measure, 0)
 
 	defer func() {
 		close(chResult)
@@ -64,26 +64,17 @@ func (s *Scale) Metrics(ctx context.Context) ([]*Metrics, error) {
 	for {
 		select {
 		case data := <-chResult:
-			m := &Metrics{
-				datetime: time.Date(
-					int(data[3])*256+int(data[2]),
-					time.Month(int(data[4])),
-					int(data[5]),
-					int(data[6]),
-					int(data[7]),
-					int(data[8]),
-					0,
-					time.Local),
-				unit:      Unit(data[0]),
-				weight:    ((float64(data[12]) * 256) + float64(data[11])) * 0.01,
-				impedance: int64(data[10])*256 + int64(data[9]),
-			}
+			m := NewMeasure(
+				time.Date(int(data[3])*256+int(data[2]), time.Month(int(data[4])), int(data[5]), int(data[6]), int(data[7]), int(data[8]), 0, time.Local),
+				Unit(data[0]),
+				((float64(data[12])*256)+float64(data[11]))*0.01,
+				uint64(data[10])*256+uint64(data[9]))
 
 			if m.unit == UnitKG || m.unit == UnitKG2 {
 				m.weight = m.weight / 2
 			}
 
-			metricsCache[m.datetime] = m
+			measuresCache[m.datetime] = m
 
 		case err := <-chError:
 			return nil, err
@@ -92,17 +83,17 @@ func (s *Scale) Metrics(ctx context.Context) ([]*Metrics, error) {
 			err := ctx.Err()
 
 			if err == nil || err == context.DeadlineExceeded || err == context.Canceled {
-				metrics := make([]*Metrics, 0, len(metricsCache))
+				measures := make([]*Measure, 0, len(measuresCache))
 
-				for _, metric := range metricsCache {
-					metrics = append(metrics, metric)
+				for _, metric := range measuresCache {
+					measures = append(measures, metric)
 				}
 
-				sort.SliceStable(metrics, func(i, j int) bool {
-					return metrics[i].datetime.Before(metrics[j].datetime)
+				sort.SliceStable(measures, func(i, j int) bool {
+					return measures[i].datetime.Before(measures[j].datetime)
 				})
 
-				return metrics, nil
+				return measures, nil
 			}
 
 			return nil, err
@@ -110,6 +101,6 @@ func (s *Scale) Metrics(ctx context.Context) ([]*Metrics, error) {
 	}
 }
 
-func (s *Scale) Close() error {
+func (s *Client) Close() error {
 	return s.device.Stop()
 }
