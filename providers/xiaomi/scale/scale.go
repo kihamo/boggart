@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/go-ble/ble"
-	"github.com/go-ble/ble/examples/lib/dev"
 )
 
 type Scale struct {
@@ -16,41 +15,22 @@ type Scale struct {
 	duration time.Duration
 }
 
-const (
-	DefaultDevice = "default"
-)
-
 var scaleUUID = ble.UUID16(0x181B)
 
-func New(addr net.HardwareAddr, device string, duration time.Duration) (*Scale, error) {
-	if device == "" {
-		device = DefaultDevice
-	}
-
-	d, err := dev.NewDevice(device)
-	if err != nil {
-		return nil, err
-	}
-
-	ble.SetDefaultDevice(d)
-
+func New(device ble.Device, addr net.HardwareAddr, duration time.Duration) (*Scale, error) {
 	return &Scale{
 		addr:     addr,
-		device:   d,
+		device:   device,
 		duration: duration,
 	}, nil
 }
 
-func (s *Scale) advFilter(a ble.Advertisement) bool {
-	if a.Addr().String() != s.addr.String() {
-		return false
-	}
-
-	return ble.Contains(a.Services(), scaleUUID)
-}
-
 func (s *Scale) advHandler(chResult chan []byte) func(a ble.Advertisement) {
 	return func(a ble.Advertisement) {
+		if a.Addr().String() != s.addr.String() || !ble.Contains(a.Services(), scaleUUID) {
+			return
+		}
+
 		for _, sd := range a.ServiceData() {
 			if !sd.UUID.Equal(scaleUUID) || len(sd.Data) < 13 {
 				continue
@@ -75,7 +55,7 @@ func (s *Scale) Metrics(ctx context.Context) ([]*Metrics, error) {
 	}()
 
 	go func() {
-		err := ble.Scan(ctx, false, s.advHandler(chResult), s.advFilter)
+		err := s.device.Scan(ctx, false, s.advHandler(chResult))
 		if err != nil && err != context.DeadlineExceeded && err != context.Canceled {
 			chError <- err
 		}
@@ -131,5 +111,5 @@ func (s *Scale) Metrics(ctx context.Context) ([]*Metrics, error) {
 }
 
 func (s *Scale) Close() error {
-	return ble.Stop()
+	return s.device.Stop()
 }
