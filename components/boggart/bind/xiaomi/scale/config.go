@@ -11,9 +11,11 @@ type Config struct {
 	MAC                    boggart.HardwareAddr `valid:",required"`
 	UpdaterInterval        time.Duration        `mapstructure:"updater_interval" yaml:"updater_interval"`
 	CaptureDuration        time.Duration        `mapstructure:"capture_interval" yaml:"capture_interval"`
+	TopicDatetime          mqtt.Topic           `mapstructure:"topic_datetime" yaml:"topic_datetime"`
 	TopicWeight            mqtt.Topic           `mapstructure:"topic_weight" yaml:"topic_weight"`
 	TopicImpedance         mqtt.Topic           `mapstructure:"topic_impedance" yaml:"topic_impedance"`
 	TopicProfile           mqtt.Topic           `mapstructure:"topic_profile" yaml:"topic_profile"`
+	TopicProfileSet        mqtt.Topic           `mapstructure:"topic_profile_set" yaml:"topic_profile_set"`
 	TopicBMR               mqtt.Topic           `mapstructure:"topic_bmr" yaml:"topic_bmr"`
 	TopicBMI               mqtt.Topic           `mapstructure:"topic_bmi" yaml:"topic_bmi"`
 	TopicFatPercentage     mqtt.Topic           `mapstructure:"topic_fat_percentage" yaml:"topic_fat_percentage"`
@@ -35,9 +37,11 @@ func (Type) Config() interface{} {
 	return &Config{
 		UpdaterInterval:        time.Minute,
 		CaptureDuration:        time.Second * 10,
+		TopicDatetime:          prefix + "datetime",
 		TopicWeight:            prefix + "weight",
 		TopicImpedance:         prefix + "impedance",
 		TopicProfile:           prefix + "profile",
+		TopicProfileSet:        prefix + "profile/set",
 		TopicBMR:               prefix + "bmr",
 		TopicBMI:               prefix + "bmi",
 		TopicFatPercentage:     prefix + "fat-percentage",

@@ -26,11 +26,15 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 	}
 
 	for _, measure := range measures {
-		if e := b.MQTTPublishAsync(ctx, b.config.TopicWeight, measure.Weight()); e != nil {
+		if e := b.MQTTPublishAsyncWithoutCache(ctx, b.config.TopicDatetime, measure.Datetime()); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTTPublishAsync(ctx, b.config.TopicImpedance, measure.Impedance()); e != nil {
+		if e := b.MQTTPublishAsyncWithoutCache(ctx, b.config.TopicWeight, measure.Weight()); e != nil {
+			err = multierr.Append(err, e)
+		}
+
+		if e := b.MQTTPublishAsyncWithoutCache(ctx, b.config.TopicImpedance, measure.Impedance()); e != nil {
 			err = multierr.Append(err, e)
 		}
 
@@ -50,56 +54,56 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		}
 
 		// ever
-		if e := b.MQTTPublishAsync(ctx, b.config.TopicBMR, metrics.BMR()); e != nil {
+		if e := b.MQTTPublishAsyncWithoutCache(ctx, b.config.TopicBMR, metrics.BMR()); e != nil {
 			err = multierr.Append(err, e)
 		}
-		if e := b.MQTTPublishAsync(ctx, b.config.TopicBMI, metrics.BMI()); e != nil {
-			err = multierr.Append(err, e)
-		}
-
-		if e := b.MQTTPublishAsync(ctx, b.config.TopicFatPercentage, metrics.FatPercentage()); e != nil {
+		if e := b.MQTTPublishAsyncWithoutCache(ctx, b.config.TopicBMI, metrics.BMI()); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTTPublishAsync(ctx, b.config.TopicWaterPercentage, metrics.WaterPercentage()); e != nil {
+		if e := b.MQTTPublishAsyncWithoutCache(ctx, b.config.TopicFatPercentage, metrics.FatPercentage()); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTTPublishAsync(ctx, b.config.TopicIdealWeight, metrics.IdealWeight()); e != nil {
+		if e := b.MQTTPublishAsyncWithoutCache(ctx, b.config.TopicWaterPercentage, metrics.WaterPercentage()); e != nil {
+			err = multierr.Append(err, e)
+		}
+
+		if e := b.MQTTPublishAsyncWithoutCache(ctx, b.config.TopicIdealWeight, metrics.IdealWeight()); e != nil {
 			err = multierr.Append(err, e)
 		}
 
 		// only sets impedance
 		if measure.Impedance() > 0 {
-			if e := b.MQTTPublishAsync(ctx, b.config.TopicLBMCoefficient, metrics.LBMCoefficient()); e != nil {
+			if e := b.MQTTPublishAsyncWithoutCache(ctx, b.config.TopicLBMCoefficient, metrics.LBMCoefficient()); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			if e := b.MQTTPublishAsync(ctx, b.config.TopicBoneMass, metrics.BoneMass()); e != nil {
+			if e := b.MQTTPublishAsyncWithoutCache(ctx, b.config.TopicBoneMass, metrics.BoneMass()); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			if e := b.MQTTPublishAsync(ctx, b.config.TopicMuscleMass, metrics.MuscleMass()); e != nil {
+			if e := b.MQTTPublishAsyncWithoutCache(ctx, b.config.TopicMuscleMass, metrics.MuscleMass()); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			if e := b.MQTTPublishAsync(ctx, b.config.TopicVisceralFat, metrics.VisceralFat()); e != nil {
+			if e := b.MQTTPublishAsyncWithoutCache(ctx, b.config.TopicVisceralFat, metrics.VisceralFat()); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			if e := b.MQTTPublishAsync(ctx, b.config.TopicFatMassToIdeal, metrics.FatMassToIdeal()); e != nil {
+			if e := b.MQTTPublishAsyncWithoutCache(ctx, b.config.TopicFatMassToIdeal, metrics.FatMassToIdeal()); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			if e := b.MQTTPublishAsync(ctx, b.config.TopicProteinPercentage, metrics.ProteinPercentage()); e != nil {
+			if e := b.MQTTPublishAsyncWithoutCache(ctx, b.config.TopicProteinPercentage, metrics.ProteinPercentage()); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			if e := b.MQTTPublishAsync(ctx, b.config.TopicBodyType, metrics.BodyType()); e != nil {
+			if e := b.MQTTPublishAsyncWithoutCache(ctx, b.config.TopicBodyType, metrics.BodyType()); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			if e := b.MQTTPublishAsync(ctx, b.config.TopicMetabolicAge, metrics.MetabolicAge()); e != nil {
+			if e := b.MQTTPublishAsyncWithoutCache(ctx, b.config.TopicMetabolicAge, metrics.MetabolicAge()); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}

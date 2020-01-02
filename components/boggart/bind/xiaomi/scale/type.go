@@ -24,6 +24,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	sn := config.MAC.String()
 
+	config.TopicDatetime = config.TopicDatetime.Format(sn)
 	config.TopicWeight = config.TopicWeight.Format(sn)
 	config.TopicImpedance = config.TopicImpedance.Format(sn)
 	config.TopicProfile = config.TopicProfile.Format(sn)

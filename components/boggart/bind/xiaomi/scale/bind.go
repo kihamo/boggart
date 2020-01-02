@@ -1,6 +1,8 @@
 package scale
 
 import (
+	"context"
+
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/providers/xiaomi/scale"
@@ -16,6 +18,11 @@ type Bind struct {
 	sex    *atomic.BoolNull
 	height *atomic.Uint32Null
 	age    *atomic.Uint32Null
+}
+
+func (b *Bind) Run() error {
+	b.updateProfile(context.Background())
+	return nil
 }
 
 func (b *Bind) Close() error {
