@@ -59,6 +59,25 @@ sudo chmod +x /usr/local/bin/boggart-agent
 sudo systemctl restart boggart.service && sudo journalctl -f -u boggart.service
 ```
 
+#### Bluetooth
+```
+sudo systemctl daemon-reload
+sudo systemctl enable boggart.service
+sudo systemctl enable hciuart.service
+
+sudo systemctl start bluetooth.service
+sudo systemctl start hciuart.service
+
+sudo systemctl status bluetooth.service
+sudo systemctl status hciuart.service
+
+sudo bluetoothctl
+
+agent on
+default-agent
+scan on
+```
+
 ## Agent Roborock
 Кросс компиляция не возможна из-за ошибок, поэтому собирать надо на реальном устройстве. Подойдет Raspberry PI, так как платформа на нем аналогичная
 
