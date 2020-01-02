@@ -28,6 +28,10 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		if e := b.MQTTPublishAsync(ctx, b.config.TopicWeight, metric.Weight()); e != nil {
 			err = multierr.Append(err, e)
 		}
+
+		if e := b.MQTTPublishAsync(ctx, b.config.TopicImpedance, metric.Impedance()); e != nil {
+			err = multierr.Append(err, e)
+		}
 	}
 
 	return err

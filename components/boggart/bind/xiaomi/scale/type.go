@@ -2,6 +2,7 @@ package scale
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/protocols/bluetooth"
 	"github.com/kihamo/boggart/providers/xiaomi/scale"
 )
 
@@ -10,7 +11,12 @@ type Type struct{}
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
-	provider, err := scale.New(config.MAC.HardwareAddr, config.Device, config.CaptureDuration)
+	device, err := bluetooth.NewDevice()
+	if err != nil {
+		return nil, err
+	}
+
+	provider, err := scale.New(device, config.MAC.HardwareAddr, config.CaptureDuration)
 	if err != nil {
 		return nil, err
 	}
