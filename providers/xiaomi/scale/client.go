@@ -64,6 +64,10 @@ func (s *Client) Measures(ctx context.Context) ([]*Measure, error) {
 	for {
 		select {
 		case data := <-chResult:
+			// в v2 impedance равен 0 в промежуточных результах взвешивания,
+			// поэтому такое значение можно игнорироть
+			// TODO: сделать настраиваемо это поведение
+
 			m := NewMeasure(
 				time.Date(int(data[3])*256+int(data[2]), time.Month(int(data[4])), int(data[5]), int(data[6]), int(data[7]), int(data[8]), 0, time.Local),
 				Unit(data[0]),

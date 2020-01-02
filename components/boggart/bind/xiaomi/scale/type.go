@@ -1,6 +1,7 @@
 package scale
 
 import (
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/protocols/bluetooth"
 	"github.com/kihamo/boggart/providers/xiaomi/scale"
@@ -25,10 +26,19 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	config.TopicWeight = config.TopicWeight.Format(sn)
 	config.TopicImpedance = config.TopicImpedance.Format(sn)
+	config.TopicProfile = config.TopicProfile.Format(sn)
+	config.TopicBMR = config.TopicBMR.Format(sn)
+	config.TopicBMI = config.TopicBMI.Format(sn)
+	config.TopicFatPercentage = config.TopicFatPercentage.Format(sn)
+	config.TopicWaterPercentage = config.TopicWaterPercentage.Format(sn)
+	config.TopicIdealWeight = config.TopicIdealWeight.Format(sn)
 
 	bind := &Bind{
 		config:   config,
 		provider: provider,
+		sex:      atomic.NewBoolNull(),
+		height:   atomic.NewUint32Null(),
+		age:      atomic.NewUint32Null(),
 	}
 	bind.SetSerialNumber(sn)
 

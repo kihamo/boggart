@@ -10,5 +10,5 @@ import (
 func init() {
 	boggart.RegisterBindType("xiaomi:roborock:root", root.Type{})
 	boggart.RegisterBindType("xiaomi:roborock:miio", miio.Type{})
-	boggart.RegisterBindType("xiaomi:scale", scale.Type{})
+	boggart.RegisterBindType("xiaomi:scale:v2", scale.Type{})
 }
