@@ -32,6 +32,14 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config.TopicFatPercentage = config.TopicFatPercentage.Format(sn)
 	config.TopicWaterPercentage = config.TopicWaterPercentage.Format(sn)
 	config.TopicIdealWeight = config.TopicIdealWeight.Format(sn)
+	config.TopicLBMCoefficient = config.TopicLBMCoefficient.Format(sn)
+	config.TopicBoneMass = config.TopicBoneMass.Format(sn)
+	config.TopicMuscleMass = config.TopicMuscleMass.Format(sn)
+	config.TopicVisceralFat = config.TopicVisceralFat.Format(sn)
+	config.TopicFatMassToIdeal = config.TopicFatMassToIdeal.Format(sn)
+	config.TopicProteinPercentage = config.TopicProteinPercentage.Format(sn)
+	config.TopicBodyType = config.TopicBodyType.Format(sn)
+	config.TopicMetabolicAge = config.TopicMetabolicAge.Format(sn)
 
 	bind := &Bind{
 		config:   config,

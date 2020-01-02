@@ -16,6 +16,14 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 		b.config.TopicFatPercentage,
 		b.config.TopicWaterPercentage,
 		b.config.TopicIdealWeight,
+		b.config.TopicLBMCoefficient,
+		b.config.TopicBoneMass,
+		b.config.TopicMuscleMass,
+		b.config.TopicVisceralFat,
+		b.config.TopicFatMassToIdeal,
+		b.config.TopicProteinPercentage,
+		b.config.TopicBodyType,
+		b.config.TopicMetabolicAge,
 	}
 }
 

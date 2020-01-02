@@ -71,7 +71,37 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 
 		// only sets impedance
 		if measure.Impedance() > 0 {
-			// TODO:
+			if e := b.MQTTPublishAsync(ctx, b.config.TopicLBMCoefficient, metrics.LBMCoefficient()); e != nil {
+				err = multierr.Append(err, e)
+			}
+
+			if e := b.MQTTPublishAsync(ctx, b.config.TopicBoneMass, metrics.BoneMass()); e != nil {
+				err = multierr.Append(err, e)
+			}
+
+			if e := b.MQTTPublishAsync(ctx, b.config.TopicMuscleMass, metrics.MuscleMass()); e != nil {
+				err = multierr.Append(err, e)
+			}
+
+			if e := b.MQTTPublishAsync(ctx, b.config.TopicVisceralFat, metrics.VisceralFat()); e != nil {
+				err = multierr.Append(err, e)
+			}
+
+			if e := b.MQTTPublishAsync(ctx, b.config.TopicFatMassToIdeal, metrics.FatMassToIdeal()); e != nil {
+				err = multierr.Append(err, e)
+			}
+
+			if e := b.MQTTPublishAsync(ctx, b.config.TopicProteinPercentage, metrics.ProteinPercentage()); e != nil {
+				err = multierr.Append(err, e)
+			}
+
+			if e := b.MQTTPublishAsync(ctx, b.config.TopicBodyType, metrics.BodyType()); e != nil {
+				err = multierr.Append(err, e)
+			}
+
+			if e := b.MQTTPublishAsync(ctx, b.config.TopicMetabolicAge, metrics.MetabolicAge()); e != nil {
+				err = multierr.Append(err, e)
+			}
 		}
 	}
 
