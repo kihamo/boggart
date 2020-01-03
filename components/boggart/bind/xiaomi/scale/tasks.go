@@ -26,6 +26,13 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 	}
 
 	for _, measure := range measures {
+		// в v2 impedance равен 0 в промежуточных результах взвешивания,
+		// поэтому такое значение можно игнорироть
+		// TODO: сделать настраиваемо это поведение
+		if measure.Impedance() == 0 {
+			continue
+		}
+
 		if e := b.MQTTPublishAsyncWithoutCache(ctx, b.config.TopicDatetime, measure.Datetime()); e != nil {
 			err = multierr.Append(err, e)
 		}
