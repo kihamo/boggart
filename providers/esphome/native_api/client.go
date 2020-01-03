@@ -230,12 +230,19 @@ func (c *Client) handlerRegister(h handler) {
 }
 
 func (c *Client) handle(message proto.Message, err error) {
-	c.mutex.Lock()
-	for i := len(c.handlers) - 1; i >= 0; i-- {
-		if c.handlers[i](message, err) {
-			c.handlers = append(c.handlers[:i], c.handlers[i+1:]...)
+	c.mutex.RLock()
+	handlers := make([]handler, len(c.handlers))
+	copy(handlers, c.handlers)
+	c.mutex.RUnlock()
+
+	for i := len(handlers) - 1; i >= 0; i-- {
+		if handlers[i](message, err) {
+			handlers = append(handlers[:i], handlers[i+1:]...)
 		}
 	}
+
+	c.mutex.Lock()
+	c.handlers = handlers
 	c.mutex.Unlock()
 }
 
