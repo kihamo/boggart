@@ -14,9 +14,9 @@ type Bind struct {
 	boggart.BindMQTT
 	config *Config
 
-	provider           *scale.Client
-	currentProfile     atomic.Value
-	setProfileDatetime atomic.Time
+	provider             *scale.Client
+	currentProfile       atomic.Value
+	measureStartDatetime atomic.Time
 }
 
 func (b *Bind) Run() error {
@@ -39,7 +39,7 @@ func (b *Bind) SetProfile(name string) *Profile {
 	for _, profile := range b.config.Profiles {
 		if profile.Name == name {
 			b.currentProfile.Store(profile)
-			b.setProfileDatetime.Set(time.Now())
+			b.measureStartDatetime.Set(time.Now())
 
 			return profile
 		}

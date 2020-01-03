@@ -32,19 +32,21 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 	}
 
 	sn := b.SerialNumber()
-	setDatetime := b.setProfileDatetime.Load()
+	measureStartDatetime := b.measureStartDatetime.Load()
 
 	for _, measure := range measures {
+		dt := measure.Datetime()
+
 		// если метрика снята после до установки профиля, то она может относится к другому профилю
 		// и испортит показатели текущего профиля
-		if measure.Datetime().Before(setDatetime) {
+		if dt.Before(measureStartDatetime) {
 			continue
 		}
 
 		// в v2 impedance равен 0 в промежуточных результах взвешивания,
 		// поэтому такое значение можно игнорироть
 		// TODO: сделать настраиваемо это поведение
-		if measure.Impedance() == 0 {
+		if measure.Impedance() == 0 || measure.Impedance() > 3000 {
 			continue
 		}
 
@@ -140,6 +142,11 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 			if e := b.MQTTPublishAsyncWithoutCache(ctx, b.config.TopicMetabolicAge.Format(profile.Name), metrics.MetabolicAge()); e != nil {
 				err = multierr.Append(err, e)
 			}
+		}
+
+		if err == nil && dt.After(measureStartDatetime) {
+			b.measureStartDatetime.Set(dt)
+			measureStartDatetime = dt
 		}
 	}
 
