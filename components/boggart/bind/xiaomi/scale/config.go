@@ -7,15 +7,41 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
+type Profile struct {
+	Name     string    `json:"name,omitempty" yaml:"name,omitempty"`
+	Sex      bool      `json:"sex,omitempty" yaml:"sex,omitempty"`
+	Height   uint64    `json:"height,omitempty" yaml:"height,omitempty"`
+	Birthday time.Time `json:"birthday,omitempty" yaml:"birthday,omitempty"`
+	Age      uint64    `json:"age,omitempty" yaml:"age,omitempty"`
+}
+
+func (p Profile) GetAge() (age uint64) {
+	if p.Age > 0 {
+		age = p.Age
+	} else if !p.Birthday.IsZero() {
+		now := time.Now()
+
+		age = uint64(now.Year() - p.Birthday.Year())
+
+		diff := time.Date(now.Year(), p.Birthday.Month(), p.Birthday.Day(), p.Birthday.Hour(), p.Birthday.Minute(), p.Birthday.Second(), p.Birthday.Nanosecond(), p.Birthday.Location())
+		if diff.After(now) {
+			age -= 1
+		}
+	}
+
+	return age
+}
+
 type Config struct {
 	MAC                    boggart.HardwareAddr `valid:",required"`
+	Profiles               map[string]*Profile  `valid:",required"`
 	UpdaterInterval        time.Duration        `mapstructure:"updater_interval" yaml:"updater_interval"`
 	CaptureDuration        time.Duration        `mapstructure:"capture_interval" yaml:"capture_interval"`
+	TopicProfile           mqtt.Topic           `mapstructure:"topic_profile" yaml:"topic_profile"`
+	TopicProfileActivate   mqtt.Topic           `mapstructure:"topic_profile_activate" yaml:"topic_profile_activate"`
 	TopicDatetime          mqtt.Topic           `mapstructure:"topic_datetime" yaml:"topic_datetime"`
 	TopicWeight            mqtt.Topic           `mapstructure:"topic_weight" yaml:"topic_weight"`
 	TopicImpedance         mqtt.Topic           `mapstructure:"topic_impedance" yaml:"topic_impedance"`
-	TopicProfile           mqtt.Topic           `mapstructure:"topic_profile" yaml:"topic_profile"`
-	TopicProfileSet        mqtt.Topic           `mapstructure:"topic_profile_set" yaml:"topic_profile_set"`
 	TopicBMR               mqtt.Topic           `mapstructure:"topic_bmr" yaml:"topic_bmr"`
 	TopicBMI               mqtt.Topic           `mapstructure:"topic_bmi" yaml:"topic_bmi"`
 	TopicFatPercentage     mqtt.Topic           `mapstructure:"topic_fat_percentage" yaml:"topic_fat_percentage"`
@@ -32,28 +58,31 @@ type Config struct {
 }
 
 func (Type) Config() interface{} {
-	var prefix mqtt.Topic = boggart.ComponentName + "/xiaomi/scale/+/"
+	var (
+		prefix        mqtt.Topic = boggart.ComponentName + "/xiaomi/scale/+/"
+		prefixProfile            = prefix + "+/"
+	)
 
 	return &Config{
 		UpdaterInterval:        time.Minute,
 		CaptureDuration:        time.Second * 10,
-		TopicDatetime:          prefix + "datetime",
-		TopicWeight:            prefix + "weight",
-		TopicImpedance:         prefix + "impedance",
 		TopicProfile:           prefix + "profile",
-		TopicProfileSet:        prefix + "profile/set",
-		TopicBMR:               prefix + "bmr",
-		TopicBMI:               prefix + "bmi",
-		TopicFatPercentage:     prefix + "fat-percentage",
-		TopicWaterPercentage:   prefix + "water-percentage",
-		TopicIdealWeight:       prefix + "ideal-weight",
-		TopicLBMCoefficient:    prefix + "lbm-coefficient",
-		TopicBoneMass:          prefix + "bone-mass",
-		TopicMuscleMass:        prefix + "muscle-mass",
-		TopicVisceralFat:       prefix + "visceral-fat",
-		TopicFatMassToIdeal:    prefix + "fat-mass-to-ideal",
-		TopicProteinPercentage: prefix + "protein-percentage",
-		TopicBodyType:          prefix + "body-type",
-		TopicMetabolicAge:      prefix + "metabolic-age",
+		TopicProfileActivate:   prefixProfile + "activate",
+		TopicDatetime:          prefixProfile + "datetime",
+		TopicWeight:            prefixProfile + "weight",
+		TopicImpedance:         prefixProfile + "impedance",
+		TopicBMR:               prefixProfile + "bmr",
+		TopicBMI:               prefixProfile + "bmi",
+		TopicFatPercentage:     prefixProfile + "fat-percentage",
+		TopicWaterPercentage:   prefixProfile + "water-percentage",
+		TopicIdealWeight:       prefixProfile + "ideal-weight",
+		TopicLBMCoefficient:    prefixProfile + "lbm-coefficient",
+		TopicBoneMass:          prefixProfile + "bone-mass",
+		TopicMuscleMass:        prefixProfile + "muscle-mass",
+		TopicVisceralFat:       prefixProfile + "visceral-fat",
+		TopicFatMassToIdeal:    prefixProfile + "fat-mass-to-ideal",
+		TopicProteinPercentage: prefixProfile + "protein-percentage",
+		TopicBodyType:          prefixProfile + "body-type",
+		TopicMetabolicAge:      prefixProfile + "metabolic-age",
 	}
 }

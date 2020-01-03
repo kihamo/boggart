@@ -1,7 +1,6 @@
 package scale
 
 import (
-	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/protocols/bluetooth"
 	"github.com/kihamo/boggart/providers/xiaomi/scale"
@@ -24,10 +23,11 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	sn := config.MAC.String()
 
+	config.TopicProfile = config.TopicProfile.Format(sn)
+	config.TopicProfileActivate = config.TopicProfileActivate.Format(sn)
 	config.TopicDatetime = config.TopicDatetime.Format(sn)
 	config.TopicWeight = config.TopicWeight.Format(sn)
 	config.TopicImpedance = config.TopicImpedance.Format(sn)
-	config.TopicProfile = config.TopicProfile.Format(sn)
 	config.TopicBMR = config.TopicBMR.Format(sn)
 	config.TopicBMI = config.TopicBMI.Format(sn)
 	config.TopicFatPercentage = config.TopicFatPercentage.Format(sn)
@@ -45,11 +45,23 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	bind := &Bind{
 		config:   config,
 		provider: provider,
-		sex:      atomic.NewBoolNull(),
-		height:   atomic.NewUint32Null(),
-		age:      atomic.NewUint32Null(),
 	}
 	bind.SetSerialNumber(sn)
+
+	if len(config.Profiles) > 0 {
+		var setProfileName string
+
+		for name, profile := range config.Profiles {
+			if setProfileName == "" {
+				setProfileName = name
+			}
+
+			profile.Name = name
+			profile.Age = profile.GetAge()
+		}
+
+		bind.SetProfile(setProfileName)
+	}
 
 	return bind, nil
 }

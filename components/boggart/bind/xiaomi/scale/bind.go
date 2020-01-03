@@ -2,6 +2,7 @@ package scale
 
 import (
 	"context"
+	"time"
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
@@ -13,15 +14,37 @@ type Bind struct {
 	boggart.BindMQTT
 	config *Config
 
-	provider *scale.Client
-
-	sex    *atomic.BoolNull
-	height *atomic.Uint32Null
-	age    *atomic.Uint32Null
+	provider           *scale.Client
+	currentProfile     atomic.Value
+	setProfileDatetime atomic.Time
 }
 
 func (b *Bind) Run() error {
-	b.updateProfile(context.Background())
+	b.notifyCurrentProfile(context.Background())
+	return nil
+}
+
+func (b *Bind) CurrentProfile() *Profile {
+	profile := b.currentProfile.Load()
+	if profile != nil {
+		if p, ok := profile.(*Profile); ok {
+			return p
+		}
+	}
+
+	return nil
+}
+
+func (b *Bind) SetProfile(name string) *Profile {
+	for _, profile := range b.config.Profiles {
+		if profile.Name == name {
+			b.currentProfile.Store(profile)
+			b.setProfileDatetime.Set(time.Now())
+
+			return profile
+		}
+	}
+
 	return nil
 }
 
