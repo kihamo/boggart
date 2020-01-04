@@ -28,8 +28,13 @@ func ConvertSerialNumber(serial string) byte {
 	return 1
 }
 
-func ResponseError(response *Response) error {
-	return PayloadError(response.Payload)
+func ResponseError(request *Request, response *Response) (err error) {
+	err = PayloadError(response.Payload)
+	if err != nil {
+		err = fmt.Errorf("request %s returns response %s with error %v", request.String(), response.String(), err)
+	}
+
+	return err
 }
 
 func PayloadError(payload []byte) error {

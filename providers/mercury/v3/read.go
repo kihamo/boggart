@@ -1,6 +1,7 @@
 package v3
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -143,18 +144,20 @@ func (m *MercuryV3) Address() (int64, error) {
 
 // 2.5.32. ЧТЕНИЕ ВСПОМОГАТЕЛЬНЫХ ПАРАМЕТРОВ.
 func (m *MercuryV3) AuxiliaryParameters(bwri int64) ([]byte, error) {
-	resp, err := m.Request(&Request{
+	request := &Request{
 		Address:            m.options.address,
 		Code:               RequestCodeReadParameter,
 		ParameterCode:      &[]byte{ParamCodeAuxiliaryParameters12}[0],
 		ParameterExtension: &[]byte{byte(bwri)}[0],
-	})
+	}
+
+	resp, err := m.Request(request)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if err := ResponseError(resp); err != nil {
+	if err := ResponseError(request, resp); err != nil {
 		return nil, err
 	}
 
@@ -277,18 +280,31 @@ func (m *MercuryV3) ReadArray(arr array, mo *month, t tariff) (a1, a2, r3, r4 ui
 
 	var resp *Response
 
-	resp, err = m.Request(&Request{
+	request := &Request{
 		Address:            m.options.address,
 		Code:               RequestCodeReadArray,
 		ParameterCode:      &[]byte{byte(code)}[0],
 		ParameterExtension: &[]byte{byte(t)}[0],
-	})
+	}
+
+	resp, err = m.Request(request)
 
 	if err != nil {
 		return
 	}
 
-	if err = ResponseError(resp); err != nil {
+	// check lenght of response
+	if len(resp.Payload) == 1 {
+		if err = ResponseError(request, resp); err == nil {
+			err = fmt.Errorf("response payload lenght must 12 or 16 bytes not %d", len(resp.Payload))
+		}
+
+		return
+	} else if arr == ArrayActiveEnergy && len(resp.Payload) != 12 {
+		err = fmt.Errorf("response payload lenght must 12 bytes not %d", len(resp.Payload))
+		return
+	} else if len(resp.Payload) != 16 {
+		err = fmt.Errorf("response payload lenght must 16 bytes not %d", len(resp.Payload))
 		return
 	}
 

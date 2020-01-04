@@ -2,6 +2,7 @@ package v3
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/kihamo/boggart/providers/mercury/v3"
@@ -30,7 +31,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 
 		sn, makeDate, version, _, err = b.provider.ForceReadParameters()
 		if err != nil {
-			return err
+			return fmt.Errorf("execute method ForceReadParameters failed with error %v", err)
 		}
 
 		b.SetSerialNumber(sn)
@@ -51,7 +52,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 			err = multierr.Append(err, e)
 		}
 	} else {
-		err = multierr.Append(err, e)
+		err = multierr.Append(err, fmt.Errorf("execute method ReadArray failed with error %v", e))
 	}
 
 	if p1, p2, p3, e := b.provider.Voltage(); e == nil {
@@ -73,7 +74,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 			err = multierr.Append(err, e)
 		}
 	} else {
-		err = multierr.Append(err, e)
+		err = multierr.Append(err, fmt.Errorf("execute method Voltage failed with error %v", e))
 	}
 
 	if p1, p2, p3, e := b.provider.Amperage(); e == nil {
@@ -95,7 +96,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 			err = multierr.Append(err, e)
 		}
 	} else {
-		err = multierr.Append(err, e)
+		err = multierr.Append(err, fmt.Errorf("execute method Amperage failed with error %v", e))
 	}
 
 	if _, p1, p2, p3, e := b.provider.Power(v3.PowerNumberP); e == nil {
@@ -117,7 +118,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 			err = multierr.Append(err, e)
 		}
 	} else {
-		err = multierr.Append(err, e)
+		err = multierr.Append(err, fmt.Errorf("execute method Power failed with error %v", e))
 	}
 
 	return err
