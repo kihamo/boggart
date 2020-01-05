@@ -75,6 +75,12 @@ func (d *SP3S) Power() (float64, error) {
 		return -1, err
 	}
 
+	// иногда приходят значения 0.FF, FFFF.FF что скорее всего является
+	// ошибкой устройства поэтому игнорируем такие значения, приравнивая их к 0
+	if data[0x05] == 255 {
+		return 0, nil
+	}
+
 	str := fmt.Sprintf("%X.%X", uint64(data[0x07])*256+uint64(data[0x06]), data[0x05])
 
 	return strconv.ParseFloat(str, 64)
