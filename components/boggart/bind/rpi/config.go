@@ -13,14 +13,14 @@ type Config struct {
 	TopicCPUFrequentie                     mqtt.Topic    `mapstructure:"topic_cpu_frequentie" yaml:"topic_cpu_frequentie"`
 	TopicTemperature                       mqtt.Topic    `mapstructure:"topic_temperature" yaml:"topic_temperature"`
 	TopicVoltage                           mqtt.Topic    `mapstructure:"topic_voltage" yaml:"topic_voltage"`
-	TopicCurrentlyUnderVoltage             mqtt.Topic    `mapstructure:"topic_throttled" yaml:"topic_throttled"`
-	TopicCurrentlyThrottled                mqtt.Topic    `mapstructure:"topic_throttled" yaml:"topic_throttled"`
-	TopicCurrentlyARMFrequencyCapped       mqtt.Topic    `mapstructure:"topic_throttled" yaml:"topic_throttled"`
-	TopicCurrentlySoftTemperatureReached   mqtt.Topic    `mapstructure:"topic_throttled" yaml:"topic_throttled"`
-	TopicSinceRebootUnderVoltage           mqtt.Topic    `mapstructure:"topic_throttled" yaml:"topic_throttled"`
-	TopicSinceRebootThrottled              mqtt.Topic    `mapstructure:"topic_throttled" yaml:"topic_throttled"`
-	TopicSinceRebootARMFrequencyCapped     mqtt.Topic    `mapstructure:"topic_throttled" yaml:"topic_throttled"`
-	TopicSinceRebootSoftTemperatureReached mqtt.Topic    `mapstructure:"topic_throttled" yaml:"topic_throttled"`
+	TopicCurrentlyUnderVoltage             mqtt.Topic    `mapstructure:"topic_currently_under_voltage" yaml:"topic_currently_under_voltage"`
+	TopicCurrentlyThrottled                mqtt.Topic    `mapstructure:"topic_currently_throttled" yaml:"topic_currently_throttled"`
+	TopicCurrentlyARMFrequencyCapped       mqtt.Topic    `mapstructure:"topic_currently_arm_frequency_capped" yaml:"topic_currently_arm_frequency_capped"`
+	TopicCurrentlySoftTemperatureReached   mqtt.Topic    `mapstructure:"topic_currently_soft_temperature_reached" yaml:"topic_currently_soft_temperature_reached"`
+	TopicSinceRebootUnderVoltage           mqtt.Topic    `mapstructure:"topic_since_reboot_under_voltage" yaml:"topic_since_reboot_under_voltage"`
+	TopicSinceRebootThrottled              mqtt.Topic    `mapstructure:"topic_since_reboot_throttled" yaml:"topic_since_reboot_throttled"`
+	TopicSinceRebootARMFrequencyCapped     mqtt.Topic    `mapstructure:"topic_since_reboot_arm_frequency_capped" yaml:"topic_since_reboot_arm_frequency_capped"`
+	TopicSinceRebootSoftTemperatureReached mqtt.Topic    `mapstructure:"topic_since_reboot_soft_temperature_reached" yaml:"topic_since_reboot_soft_temperature_reached"`
 }
 
 func (Type) Config() interface{} {

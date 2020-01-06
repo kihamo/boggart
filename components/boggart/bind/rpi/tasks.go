@@ -2,6 +2,7 @@ package rpi
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/kihamo/boggart/providers/rpi"
 	"github.com/kihamo/go-workers"
@@ -35,8 +36,11 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 		err = multierr.Append(err, e)
 	}
 
+	sn := b.SerialNumber()
+
 	if values, e := b.providerSysFS.CPUFrequentie(); e == nil {
 		for num, value := range values {
+			metricCPUFrequentie.With("serial_number", sn).With("cpu", fmt.Sprintf("cpu%d", num)).Set(float64(value))
 			if e := b.MQTTPublishAsync(ctx, b.config.TopicCPUFrequentie.Format(num), value); e != nil {
 				err = multierr.Append(err, e)
 			}
@@ -46,6 +50,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 	}
 
 	if value, e := b.providerSysFS.Temperature(); e == nil {
+		metricTemperature.With("serial_number", sn).Set(value)
 		if e := b.MQTTPublishAsync(ctx, b.config.TopicTemperature, value); e != nil {
 			err = multierr.Append(err, e)
 		}
@@ -91,6 +96,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 
 	for _, id := range voltsIDs {
 		if value, e := b.providerVCGenCMD.Voltage(id); e == nil {
+			metricVoltage.With("serial_number", sn).With("id", id.String()).Set(float64(value))
 			if e := b.MQTTPublishAsync(ctx, b.config.TopicVoltage.Format(id), value); e != nil {
 				err = multierr.Append(err, e)
 			}
