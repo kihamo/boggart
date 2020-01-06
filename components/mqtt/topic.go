@@ -62,6 +62,30 @@ func (t Topic) Split() (result []string) {
 	return result
 }
 
+func (t Topic) ValidAsPublishTopic() bool {
+	s := t.String()
+
+	if strings.Contains(s, "+") {
+		return false
+	}
+
+	if strings.Contains(s, "#") {
+		return false
+	}
+
+	return true
+}
+
+func (t Topic) ValidAsSubscribeTopic() bool {
+	if s := t.String(); strings.Contains(s, "#") {
+		if s[len(s)-1:] != "#" {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (t Topic) match(routes1 []string, routes2 []string) bool {
 	if len(routes1) == 0 {
 		return len(routes2) == 0

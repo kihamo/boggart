@@ -253,6 +253,11 @@ func (c *Component) clientSubscribe(topic mqtt.Topic, qos byte, subscription *mq
 		return errors.New("can't initialize client of MQTT")
 	}
 
+	// check topic
+	if !topic.ValidAsSubscribeTopic() {
+		return fmt.Errorf("topic %s isn't valid for subscribe", topic)
+	}
+
 	// wrap tracing
 	callback := func(client m.Client, message m.Message) {
 		span, ctx := tracing.StartSpanFromContext(context.Background(), c.Name(), "subscribe_callback")
@@ -327,6 +332,11 @@ func (c *Component) clientSubscribe(topic mqtt.Topic, qos byte, subscription *mq
 }
 
 func (c *Component) doPublish(ctx context.Context, topic mqtt.Topic, qos byte, retained bool, payload interface{}, cache bool) (err error) {
+	// check topic
+	if !topic.ValidAsPublishTopic() {
+		return fmt.Errorf("topic %s isn't valid for publish", topic)
+	}
+
 	payloadConverted := c.convertPayload(payload)
 
 	span, _ := tracing.StartSpanFromContext(ctx, c.Name(), "mqtt_publish")
