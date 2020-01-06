@@ -29,6 +29,8 @@ const (
 	IdleReasonError       = "ERROR"
 )
 
+type eventClose struct{}
+
 type Bind struct {
 	boggart.BindBase
 	boggart.BindMQTT
@@ -97,6 +99,9 @@ func (b *Bind) initConnect() error {
 func (b *Bind) Close() (err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), b.config.LivenessTimeout)
 	defer cancel()
+	defer func() {
+		b.events <- eventClose{}
+	}()
 
 	b.mutex.RLock()
 	conn := b.conn
@@ -202,6 +207,9 @@ func (b *Bind) doEvents() {
 			if t.Media != nil {
 				_ = b.MQTTPublishAsync(ctx, b.config.TopicStateContent, t.Media.ContentId)
 			}
+
+		case eventClose:
+			return
 
 		default:
 			b.Logger().Error("Unknown event", "event", fmt.Sprintf("%#v", t))
