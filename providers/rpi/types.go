@@ -1,5 +1,9 @@
 package rpi
 
+import (
+	"errors"
+)
+
 const (
 	CurrentlyUnderVoltage             uint64 = 0x00001
 	CurrentlyThrottled                uint64 = 0x00002
@@ -9,6 +13,10 @@ const (
 	SinceRebootThrottled              uint64 = 0x20000
 	SinceRebootARMFrequencyCapped     uint64 = 0x40000
 	SinceRebootSoftTemperatureReached uint64 = 0x80000
+)
+
+var (
+	ErrNotImplemented = errors.New("not implemented")
 )
 
 type Throttled uint64
