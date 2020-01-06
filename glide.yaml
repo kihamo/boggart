@@ -56,7 +56,7 @@ import:
   version: v0.9.0
 - package: github.com/yryz/ds18b20
 - package: github.com/fsnotify/fsnotify
-  version: 1485a34d5d5723fea214f5710708e19a831720e4
+  version: 4bf2d1fec78374803a39307bfb8d340688f4f28e
 - package: github.com/faiface/beep
   version: 082eb9168dd13b6829788ac8246f152d63665753
 - package: github.com/hajimehoshi/oto

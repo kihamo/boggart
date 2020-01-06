@@ -1,5 +1,5 @@
-hash: 16c2b0de9194ffe2bbf22aafbd7d1e92a298fca9421bbdf71932cd8bfe357591
-updated: 2020-01-02T01:05:40.475066+03:00
+hash: 68820b5a82d6bafa418074b0c461a13f1da7619df1e61e7d3159844d6868a8de
+updated: 2020-01-06T19:36:16.746997+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -80,7 +80,7 @@ imports:
   - vorbis
   - wav
 - name: github.com/fsnotify/fsnotify
-  version: 1485a34d5d5723fea214f5710708e19a831720e4
+  version: 4bf2d1fec78374803a39307bfb8d340688f4f28e
 - name: github.com/getsentry/sentry-go
   version: 759fbf8e9221cd2a2c3a26e3d7b41ecae2ed89d9
 - name: github.com/ghthor/gowol
@@ -89,7 +89,6 @@ imports:
   version: 147700f13610085f7387692cd6663a67c495ab87
   subpackages:
   - darwin
-  - examples/lib/dev
   - linux
   - linux/adv
   - linux/att

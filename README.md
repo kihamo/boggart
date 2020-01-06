@@ -53,7 +53,7 @@ sudo systemctl restart boggart.service && sudo journalctl -f -u boggart.service
 #### Self
 ```
 cd $GOPATH/src/github.com/kihamo/boggart/cmd/agent/
-go build -ldflags "-s -w -X 'main.Name=Boggart Agent' -X 'main.Version=`date +"%y%m%d"`' -X 'main.Build=`date +"%H%M%S"`'" -o boggart ./
+go build -ldflags "-s -w -X 'main.Name=Boggart Villa' -X 'main.Version=`date +"%y%m%d"`' -X 'main.Build=`date +"%H%M%S"`'" -o boggart ./
 sudo cp -f $GOPATH/src/github.com/kihamo/boggart/cmd/agent/boggart /usr/local/bin/boggart-agent
 sudo chmod +x /usr/local/bin/boggart-agent
 sudo systemctl restart boggart.service && sudo journalctl -f -u boggart.service
