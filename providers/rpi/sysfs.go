@@ -24,3 +24,7 @@ func (s *SysFS) Throttled() (Throttled, error) {
 func (s *SysFS) Model() (string, error) {
 	return "", ErrNotImplemented
 }
+
+func (s *SysFS) SerialNumber() (string, error) {
+	return "", ErrNotImplemented
+}

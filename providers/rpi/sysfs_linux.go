@@ -8,11 +8,12 @@ import (
 )
 
 const (
-	cpuCountPath    = "/sys/devices/system/cpu/present"
-	cpuFrequentie   = "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_cur_freq"
-	temperaturePath = "/sys/class/thermal/thermal_zone0/temp"
-	throttledPath   = "/sys/devices/platform/soc/soc:firmware/get_throttled"
-	modelPath       = "/proc/device-tree/model"
+	cpuCountPath     = "/sys/devices/system/cpu/present"
+	cpuFrequentie    = "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_cur_freq"
+	temperaturePath  = "/sys/class/thermal/thermal_zone0/temp"
+	throttledPath    = "/sys/devices/platform/soc/soc:firmware/get_throttled"
+	modelPath        = "/proc/device-tree/model"
+	serialNumberPath = "/proc/device-tree/serial-number"
 )
 
 var cpuCount []uint64
@@ -103,4 +104,13 @@ func (s *SysFS) Model() (string, error) {
 	}
 
 	return string(bytes.TrimSpace(out)), nil
+}
+
+func (s *SysFS) SerialNumber() (string, error) {
+	out, err := ioutil.ReadFile(serialNumberPath)
+	if err != nil {
+		return "", err
+	}
+
+	return string(bytes.TrimSpace(bytes.TrimRight(out, "\x00"))), nil
 }

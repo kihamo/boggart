@@ -27,6 +27,7 @@ import (
 	_ "github.com/kihamo/boggart/components/boggart/bind/owntracks"
 	_ "github.com/kihamo/boggart/components/boggart/bind/pulsar"
 	_ "github.com/kihamo/boggart/components/boggart/bind/rkcm"
+	_ "github.com/kihamo/boggart/components/boggart/bind/rpi"
 	_ "github.com/kihamo/boggart/components/boggart/bind/samsung_tizen"
 	_ "github.com/kihamo/boggart/components/boggart/bind/serial"
 	_ "github.com/kihamo/boggart/components/boggart/bind/softvideo"

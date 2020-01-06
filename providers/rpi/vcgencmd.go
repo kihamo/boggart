@@ -8,13 +8,17 @@ import (
 )
 
 const (
-	VoltsIDCore   voltsID = "core"
-	VoltsIDSDramC voltsID = "sdram_c"
-	VoltsIDSDramI voltsID = "sdram_i"
-	VoltsIDSDramP voltsID = "sdram_p"
+	VoltsIDCore   VoltsID = "core"
+	VoltsIDSDramC VoltsID = "sdram_c"
+	VoltsIDSDramI VoltsID = "sdram_i"
+	VoltsIDSDramP VoltsID = "sdram_p"
 )
 
-type voltsID = string
+type VoltsID string
+
+func (v VoltsID) String() string {
+	return string(v)
+}
 
 type VCGenCMD struct {
 }
@@ -49,8 +53,8 @@ func (v *VCGenCMD) SupportCommands() ([]string, error) {
 	return strings.Fields(text), nil
 }
 
-func (v *VCGenCMD) Volts(id voltsID) (float64, error) {
-	out, err := v.Execute("measure_volts", id)
+func (v *VCGenCMD) Voltage(id VoltsID) (float64, error) {
+	out, err := v.Execute("measure_volts", id.String())
 	if err != nil {
 		return -1, err
 	}
