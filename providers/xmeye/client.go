@@ -38,6 +38,9 @@ const (
 	CmdSysManagerResponse           uint16 = 1451
 	CmdTimeRequest                  uint16 = 1452
 	CmdDiskManagerRequest           uint16 = 1460
+	CmdFullAuthorityListRequest     uint16 = 1470
+	CmdUsersRequest                 uint16 = 1472
+	CmdGroupsRequest                uint16 = 1474
 	CmdGuardRequest                 uint16 = 1500
 	CmdUnGuardRequest               uint16 = 1502
 	CmdAlarmRequest                 uint16 = 1504

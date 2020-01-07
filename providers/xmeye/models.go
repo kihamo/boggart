@@ -110,3 +110,20 @@ type OPSystemUpgrade struct {
 	Serial       string
 	Vendor       string
 }
+
+type User struct {
+	AuthorityList []string
+	Group         string
+	Memo          string
+	Name          string
+	NoMD5         string
+	Password      string
+	Reserved      bool
+	Sharable      bool
+}
+
+type Group struct {
+	AuthorityList []string
+	Memo          string
+	Name          string
+}
