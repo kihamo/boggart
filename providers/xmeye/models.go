@@ -99,3 +99,14 @@ type AlarmInfo struct {
 	StartTime Time
 	Status    string
 }
+
+type OPSystemUpgrade struct {
+	Hardware string
+	LogoArea struct {
+		Begin Uint32
+		End   Uint32
+	}
+	LogoPartType string
+	Serial       string
+	Vendor       string
+}

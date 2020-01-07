@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"errors"
+	"io"
 )
 
 var (
@@ -69,23 +70,30 @@ func (p packet) Marshal() []byte {
 }
 
 func (p packet) LoadPayload(payload interface{}) (err error) {
-	if payload == nil {
+	switch pl := payload.(type) {
+	case nil:
 		p.Payload.Reset()
 		p.PayloadLen = 0
-		return nil
-	}
 
-	if b, ok := payload.([]byte); ok {
+	case []byte:
 		p.Payload.Reset()
-		p.PayloadLen, err = p.Payload.Write(b)
-		return err
-	}
+		p.PayloadLen, err = p.Payload.Write(pl)
 
-	encode, err := json.Marshal(payload)
-	if err == nil {
+	case io.Reader:
+		var l int64
+
 		p.Payload.Reset()
-		p.PayloadLen, err = p.Payload.Write(encode)
-		return err
+		l, err = io.Copy(p.Payload, pl)
+		p.PayloadLen = int(l)
+
+	default:
+		var encode []byte
+
+		encode, err = json.Marshal(payload)
+		if err == nil {
+			p.Payload.Reset()
+			p.PayloadLen, err = p.Payload.Write(encode)
+		}
 	}
 
 	return err

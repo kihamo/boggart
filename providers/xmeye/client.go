@@ -41,6 +41,8 @@ const (
 	CmdGuardRequest                 uint16 = 1500
 	CmdUnGuardRequest               uint16 = 1502
 	CmdAlarmRequest                 uint16 = 1504
+	CmdUpgradeRequest               uint16 = 1520
+	CmdUpgradeInfoRequest           uint16 = 1525
 	CmdConfigExportRequest          uint16 = 1542
 	CmdLogExportRequest             uint16 = 1544
 )

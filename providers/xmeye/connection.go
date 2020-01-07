@@ -8,6 +8,8 @@ import (
 )
 
 type connection struct {
+	_ int64
+
 	sessionID      uint32
 	sequenceNumber uint32
 
@@ -38,7 +40,7 @@ func (c *connection) SequenceNumber() uint32 {
 	return atomic.LoadUint32(&c.sequenceNumber)
 }
 
-func (c *connection) InSequenceNumber() {
+func (c *connection) IncrementSequenceNumber() {
 	atomic.AddUint32(&c.sequenceNumber, 1)
 }
 
@@ -53,7 +55,7 @@ func (c *connection) send(packet *packet) error {
 		return err
 	}
 
-	c.InSequenceNumber()
+	c.IncrementSequenceNumber()
 
 	return nil
 }

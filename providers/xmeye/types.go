@@ -39,8 +39,7 @@ func (t *Uint32) UnmarshalJSON(b []byte) (err error) {
 		return
 	}
 
-	source := strings.Replace(string(src), "0x", "", 1)
-	val, err := strconv.ParseUint(source, 16, 64)
+	val, err := strconv.ParseUint(string(src), 0, 64)
 	if err != nil {
 		return err
 	}
