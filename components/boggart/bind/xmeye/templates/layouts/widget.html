@@ -1,0 +1,42 @@
+{{ template "base" . }}
+
+{{ define "content" }}
+<div class="page-title">
+    <div class="form-group pull-right">
+        <div class="input-group">
+            <label class="btn-group">
+                <a href="?action=configs-export" class="btn btn-icon btn-success btn-sm">
+                    <i class="fas fa-cog" title="{{ i18n "Export configuration" . }}"></i>
+                </a>
+                <a href="?action=logs-export" class="btn btn-icon btn-success btn-sm">
+                    <i class="fas fa-headset" title="{{ i18n "Export logs" . }}"></i>
+                </a>
+            </label>
+        </div>
+    </div>
+</div>
+
+<div class="clearfix"></div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_content">
+                <div role="tabpanel">
+                    <ul class="nav nav-tabs bar_tabs" role="tablist">
+                        <li role="presentation"{{ if eq .action "default" }} class="active"{{ end }}><a href="{{ if eq .action "default" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}{{ end }}">{{ i18n "System" . }}</a></li>
+                        <li role="presentation"{{ if eq .action "logs" }} class="active"{{ end }}><a href="{{ if eq .action "logs" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=logs{{ end }}">{{ i18n "Logs" . }}</a></li>
+                        <li role="presentation"{{ if eq .action "files" }} class="active"{{ end }}><a href="{{ if eq .action "files" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=files{{ end }}">{{ i18n "Files" . }}</a></li>
+                        <li role="presentation"{{ if eq .action "account" }} class="active"{{ end }}><a href="{{ if eq .action "account" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=account{{ end }}">{{ i18n "Account" . }}</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane fade active in">
+                            {{ block "page" . }} {{ end }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}

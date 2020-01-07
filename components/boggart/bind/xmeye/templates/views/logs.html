@@ -1,0 +1,24 @@
+{{ define "page" }}
+    <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+        <thead>
+        <tr>
+            <th>{{ i18n "#" . }}</th>
+            <th>{{ i18n "Time" . }}</th>
+            <th>{{ i18n "Message" . }}</th>
+            <th>{{ i18n "Type" . }}</th>
+            <th>{{ i18n "User" . }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{ range $i, $log := .logs }}
+        <tr>
+            <td>{{ $log.Position }}</td>
+            <td><script type="application/javascript">document.write(dateToString('{{ $log.Time.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+            <td>{{ $log.Data }}</td>
+            <td>{{ $log.Type }}</td>
+            <td>{{ $log.User }}</td>
+        </tr>
+        {{ end }}
+        </tbody>
+    </table>
+{{ end }}

@@ -1,0 +1,25 @@
+{{ define "page" }}
+    <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+        <thead>
+        <tr>
+            <th>{{ i18n "User" . }}</th>
+            <th>{{ i18n "Group" . }}</th>
+            <th>{{ i18n "Comment" . }}</th>
+            <th>{{ i18n "Reserved" . }}</th>
+            <th>{{ i18n "Actions" . }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{ range $i, $user := .users }}
+        <tr>
+            <td>{{ $user.Name }}</td>
+            <td>{{ $user.Group }}</td>
+            <td>{{ $user.Memo }}</td>
+            <td>{{ if $user.Reserved }}{{ i18n "Yes" $ }}{{ else }}{{ i18n "No" $ }}{{ end }}</td>
+            <td class="text-center">
+            </td>
+        </tr>
+        {{ end }}
+        </tbody>
+    </table>
+{{ end }}
