@@ -2,6 +2,7 @@ package xmeye
 
 import (
 	"io"
+	"net/http"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -37,7 +38,13 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		vars = t.widgetActionFiles(w, r, client)
 
 	case "account":
-		vars = t.widgetActionAccount(w, r, client)
+		vars = t.widgetActionAccount(w, r, client, b)
+
+	case "user":
+		vars = t.widgetActionUser(w, r, client)
+		if len(vars) == 0 {
+			return
+		}
 
 	case "logs-export":
 		t.widgetActionLogsExport(w, r, client, b)
@@ -191,7 +198,7 @@ func (t Type) widgetActionLogs(w *dashboard.Response, r *dashboard.Request, clie
 	}
 }
 
-func (t Type) widgetActionAccount(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
+func (t Type) widgetActionAccount(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client, b boggart.BindItem) map[string]interface{} {
 	ctx := r.Context()
 
 	users, err := client.Users(ctx)
@@ -200,8 +207,75 @@ func (t Type) widgetActionAccount(w *dashboard.Response, r *dashboard.Request, c
 	}
 
 	return map[string]interface{}{
-		"users": users,
+		"users":   users,
+		"current": b.Bind().(*Bind).config.Address.User.Username(),
 	}
+}
+
+func (t Type) widgetActionUser(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
+	ctx := r.Context()
+	var user *xmeye.User
+
+	username := strings.TrimSpace(r.URL().Query().Get("username"))
+	if username != "" { // update
+		users, err := client.Users(ctx)
+		if err == nil {
+			for _, u := range users {
+				if u.Name == username {
+					user = &u
+					break
+				}
+			}
+		}
+
+		if user == nil {
+			t.NotFound(w, r)
+			return nil
+		}
+
+		if r.IsPost() {
+			user.Name = r.Original().FormValue("name")
+			user.Memo = r.Original().FormValue("memo")
+			user.Group = r.Original().FormValue("group")
+
+			if err := client.UserUpdate(ctx, username, *user); err != nil {
+				r.Session().FlashBag().Error(t.Translate(ctx, "Update user %s failed with error %v", "", username, err))
+			} else {
+				r.Session().FlashBag().Success(t.Translate(ctx, "Update user %s success", "", username))
+				t.Redirect(r.URL().Path+"?action=account", http.StatusFound, w, r)
+				return nil
+			}
+		}
+	} else { // create
+		user = &xmeye.User{}
+
+		if r.IsPost() {
+			user.Name = r.Original().FormValue("name")
+			user.Memo = r.Original().FormValue("memo")
+			user.Password = r.Original().FormValue("password")
+			user.Group = r.Original().FormValue("group")
+
+			if err := client.UserCreate(ctx, *user); err != nil {
+				r.Session().FlashBag().Error(t.Translate(ctx, "Create user failed with error %v", "", err))
+			} else {
+				r.Session().FlashBag().Success(t.Translate(ctx, "Create user %s success", "", user.Name))
+				t.Redirect(r.URL().Path+"?action=account", http.StatusFound, w, r)
+				return nil
+			}
+		}
+	}
+
+	vars := map[string]interface{}{
+		"user": user,
+	}
+
+	if groups, err := client.Groups(ctx); err != nil {
+		r.Session().FlashBag().Error(t.Translate(ctx, "Create groups failed with error %v", "", err))
+	} else {
+		vars["groups"] = groups
+	}
+
+	return vars
 }
 
 func (t Type) widgetActionFiles(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
