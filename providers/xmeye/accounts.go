@@ -24,32 +24,56 @@ func (c *Client) Users(ctx context.Context) ([]User, error) {
 	return result.Users, err
 }
 
-func (c *Client) UserCreate(ctx context.Context, user User) error {
-	// TODO:
-
+func (c *Client) UserCreate(ctx context.Context, user User) (err error) {
 	user.Password = HashPassword([]byte(user.Password))
+	if user.AuthorityList == nil {
+		user.AuthorityList = make([]string, 0)
+	}
 
-	return nil
+	_, err = c.Call(ctx, CmdUserCreateRequest, map[string]interface{}{
+		"Name":      "User",
+		"SessionID": c.connection.SessionIDAsString(),
+		"User":      user,
+	})
+
+	return err
 }
 
-func (c *Client) UserUpdate(ctx context.Context, name string, user User) error {
-	// TODO:
-
+func (c *Client) UserUpdate(ctx context.Context, name string, user User) (err error) {
 	user.Password = HashPassword([]byte(user.Password))
+	if user.AuthorityList == nil {
+		user.AuthorityList = make([]string, 0)
+	}
+
+	_, err = c.Call(ctx, CmdUserUpdateRequest, map[string]interface{}{
+		"SessionID": c.connection.SessionIDAsString(),
+		"UserName":  name,
+		"User":      user,
+	})
 
 	return nil
 }
 
-func (c *Client) UserDelete(ctx context.Context, name string) error {
-	// TODO:
-	return nil
+func (c *Client) UserDelete(ctx context.Context, name string) (err error) {
+	_, err = c.Call(ctx, CmdUserDeleteRequest, map[string]interface{}{
+		"Name":      name,
+		"SessionID": c.connection.SessionIDAsString(),
+	})
+
+	return err
 }
 
-func (c *Client) UserChangePassword(ctx context.Context, username, oldPassword, newPassword string) error {
-	// TODO:
-
+func (c *Client) UserChangePassword(ctx context.Context, username, oldPassword, newPassword string) (err error) {
 	oldPassword = HashPassword([]byte(oldPassword))
 	newPassword = HashPassword([]byte(newPassword))
+
+	_, err = c.Call(ctx, CmdUserChangePasswordRequest, map[string]interface{}{
+		"SessionID":   c.connection.SessionIDAsString(),
+		"EncryptType": "MD5",
+		"NewPassWord": newPassword,
+		"PassWord":    oldPassword,
+		"UserName":    username,
+	})
 
 	return nil
 }
@@ -64,17 +88,39 @@ func (c *Client) Groups(ctx context.Context) ([]Group, error) {
 	return result.Groups, err
 }
 
-func (c *Client) GroupCreate(ctx context.Context, group Group) error {
-	// TODO:
+func (c *Client) GroupCreate(ctx context.Context, group Group) (err error) {
+	if group.AuthorityList == nil {
+		group.AuthorityList = make([]string, 0)
+	}
+
+	_, err = c.Call(ctx, CmdGroupCreateRequest, map[string]interface{}{
+		"Name":      "Group",
+		"SessionID": c.connection.SessionIDAsString(),
+		"Group":     group,
+	})
+
+	return err
+}
+
+func (c *Client) GroupUpdate(ctx context.Context, name string, group Group) (err error) {
+	if group.AuthorityList == nil {
+		group.AuthorityList = make([]string, 0)
+	}
+
+	_, err = c.Call(ctx, CmdGroupUpdateRequest, map[string]interface{}{
+		"SessionID": c.connection.SessionIDAsString(),
+		"GroupName": name,
+		"Group":     group,
+	})
+
 	return nil
 }
 
-func (c *Client) GroupUpdate(ctx context.Context, name string, group Group) error {
-	// TODO:
-	return nil
-}
+func (c *Client) GroupDelete(ctx context.Context, name string) (err error) {
+	_, err = c.Call(ctx, CmdGroupDeleteRequest, map[string]interface{}{
+		"Name":      name,
+		"SessionID": c.connection.SessionIDAsString(),
+	})
 
-func (c *Client) GroupDelete(ctx context.Context, name string) error {
-	// TODO:
-	return nil
+	return err
 }

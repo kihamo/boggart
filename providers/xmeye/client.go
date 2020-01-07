@@ -41,6 +41,13 @@ const (
 	CmdFullAuthorityListRequest     uint16 = 1470
 	CmdUsersRequest                 uint16 = 1472
 	CmdGroupsRequest                uint16 = 1474
+	CmdGroupCreateRequest           uint16 = 1476
+	CmdGroupUpdateRequest           uint16 = 1478
+	CmdGroupDeleteRequest           uint16 = 1480
+	CmdUserCreateRequest            uint16 = 1482
+	CmdUserUpdateRequest            uint16 = 1484
+	CmdUserDeleteRequest            uint16 = 1486
+	CmdUserChangePasswordRequest    uint16 = 1488
 	CmdGuardRequest                 uint16 = 1500
 	CmdUnGuardRequest               uint16 = 1502
 	CmdAlarmRequest                 uint16 = 1504

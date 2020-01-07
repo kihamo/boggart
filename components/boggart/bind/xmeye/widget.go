@@ -191,6 +191,14 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		vars["date_to"] = end
 		vars["files"] = files
 
+	case "account":
+		users, err := client.Users(ctx)
+		if err != nil {
+			r.Session().FlashBag().Error(t.Translate(ctx, "Get failed failed with error %v", "", err))
+		}
+
+		vars["users"] = users
+
 	default:
 		if r.IsPost() {
 			err := r.Original().ParseForm()

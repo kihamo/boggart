@@ -1,5 +1,7 @@
 ## Установка и настройка telegraf
 
+Скрипты cpu_* не актуальны, так как их заменил bind rpi
+
 111100000000000001010
 ||||             ||||_ under-voltage
 ||||             |||_ currently throttled

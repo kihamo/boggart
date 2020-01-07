@@ -25,6 +25,7 @@
                         <li role="presentation"{{ if eq .action "" }} class="active"{{ end }}><a href="{{ if eq .action "" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}{{ end }}">{{ i18n "System" . }}</a></li>
                         <li role="presentation"{{ if eq .action "logs" }} class="active"{{ end }}><a href="{{ if eq .action "logs" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=logs{{ end }}">{{ i18n "Logs" . }}</a></li>
                         <li role="presentation"{{ if eq .action "files" }} class="active"{{ end }}><a href="{{ if eq .action "files" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=files{{ end }}">{{ i18n "Files" . }}</a></li>
+                        <li role="presentation"{{ if eq .action "account" }} class="active"{{ end }}><a href="{{ if eq .action "account" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=account{{ end }}">{{ i18n "Account" . }}</a></li>
                     </ul>
                     <div class="tab-content">
                         <div role="tabpanel" class="tab-pane fade active in">
@@ -144,6 +145,30 @@
                                 {{ end }}
                             </tbody>
                         </table>
+                        {{ else if eq .action "account" }}
+                            <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                                <thead>
+                                <tr>
+                                    <th>{{ i18n "User" . }}</th>
+                                    <th>{{ i18n "Group" . }}</th>
+                                    <th>{{ i18n "Comment" . }}</th>
+                                    <th>{{ i18n "Reserved" . }}</th>
+                                    <th>{{ i18n "Actions" . }}</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {{ range $i, $user := .users }}
+                                <tr>
+                                    <td>{{ $user.Name }}</td>
+                                    <td>{{ $user.Group }}</td>
+                                    <td>{{ $user.Memo }}</td>
+                                    <td>{{ if $user.Reserved }}{{ i18n "Yes" $ }}{{ else }}{{ i18n "No" $ }}{{ end }}</td>
+                                    <td class="text-center">
+                                    </td>
+                                </tr>
+                                {{ end }}
+                                </tbody>
+                            </table>
                         {{ else }}
                         <form role="form" action="?" method="post" id="settings" data-toggle="validator">
                             <table class="table dt-responsive nowrap" style="width:100%">
