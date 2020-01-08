@@ -25,25 +25,31 @@ func (b *Bind) Run() error {
 }
 
 func (b *Bind) CurrentProfile() *Profile {
-	profile := b.currentProfile.Load()
-	if profile != nil {
+	if profile := b.currentProfile.Load(); profile != nil {
 		if p, ok := profile.(*Profile); ok {
 			return p
 		}
 	}
 
-	return nil
+	return profileGuest
 }
 
 func (b *Bind) SetProfile(name string) *Profile {
-	for _, profile := range b.config.Profiles {
-		if profile.Name == name {
-			b.currentProfile.Store(profile)
-			b.measureStartDatetime.Set(time.Now())
+	var profile *Profile
 
-			return profile
+	for _, p := range b.config.Profiles {
+		if p.Name == name {
+			profile = p
+			break
 		}
 	}
+
+	if profile == nil {
+		profile = profileGuest
+	}
+
+	b.currentProfile.Store(profile)
+	b.measureStartDatetime.Set(time.Now())
 
 	return nil
 }

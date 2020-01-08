@@ -32,6 +32,8 @@ func (p Profile) GetAge() (age uint64) {
 	return age
 }
 
+var profileGuest = &Profile{Name: "guest"}
+
 type Config struct {
 	MAC                    boggart.HardwareAddr `valid:",required"`
 	Profiles               map[string]*Profile  `valid:",required"`

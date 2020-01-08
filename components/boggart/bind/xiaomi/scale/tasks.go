@@ -2,8 +2,6 @@ package scale
 
 import (
 	"context"
-	"errors"
-
 	"github.com/kihamo/boggart/providers/xiaomi/scale"
 	"github.com/kihamo/go-workers"
 	"go.uber.org/multierr"
@@ -21,17 +19,13 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskUpdater(ctx context.Context) error {
-	profile := b.CurrentProfile()
-	if profile == nil {
-		return errors.New("profile isn't set")
-	}
-
 	measures, err := b.provider.Measures(ctx)
 	if err != nil {
 		return err
 	}
 
 	sn := b.SerialNumber()
+	profile := b.CurrentProfile()
 	measureStartDatetime := b.measureStartDatetime.Load()
 
 	for _, measure := range measures {
@@ -62,6 +56,16 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		metricImpedance.With("serial_number", sn, "profile", profile.Name).Set(float64(measure.Impedance()))
 		if e := b.MQTTPublishAsyncWithoutCache(ctx, b.config.TopicImpedance.Format(profile.Name), measure.Impedance()); e != nil {
 			err = multierr.Append(err, e)
+		}
+
+		// skip guest profile
+		if profile.Height == 0 || profile.GetAge() == 0 {
+			if err == nil && dt.After(measureStartDatetime) {
+				b.measureStartDatetime.Set(dt)
+				measureStartDatetime = dt
+			}
+
+			continue
 		}
 
 		sex := scale.SexMale

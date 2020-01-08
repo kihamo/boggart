@@ -49,12 +49,7 @@ func (b *Bind) callbackMQTTProfileActive(ctx context.Context, client mqtt.Compon
 }
 
 func (b *Bind) notifyCurrentProfile(ctx context.Context) error {
-	profile := b.CurrentProfile()
-	if profile == nil {
-		return errors.New("profile isn't set")
-	}
-
-	response, err := json.Marshal(profile)
+	response, err := json.Marshal(b.CurrentProfile())
 	if err != nil {
 		return err
 	}

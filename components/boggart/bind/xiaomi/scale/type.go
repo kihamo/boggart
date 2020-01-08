@@ -49,18 +49,10 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	bind.SetSerialNumber(sn)
 
 	if len(config.Profiles) > 0 {
-		var setProfileName string
-
 		for name, profile := range config.Profiles {
-			if setProfileName == "" {
-				setProfileName = name
-			}
-
 			profile.Name = name
 			profile.Age = profile.GetAge()
 		}
-
-		bind.SetProfile(setProfileName)
 	}
 
 	return bind, nil
