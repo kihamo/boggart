@@ -20,7 +20,7 @@ func (d *dumper) Read(p []byte) (n int, err error) {
 	log.Printf("Read <<< n: %d err: %v\n", n, err)
 
 	if err == nil && n > 0 {
-		log.Println(hex.Dump(p[:n]))
+		log.Printf("\n%s\n", hex.Dump(p[:n]))
 	}
 
 	return n, err
@@ -28,21 +28,21 @@ func (d *dumper) Read(p []byte) (n int, err error) {
 
 func (d *dumper) Write(p []byte) (n int, err error) {
 	log.Printf("Write >>> err: %v\n", err)
-	log.Println(hex.Dump(p))
+	log.Printf("\n%s\n", hex.Dump(p))
 
 	return d.Conn.Write(p)
 }
 
 func (d *dumper) Invoke(request []byte) (response []byte, err error) {
 	log.Println("Write >>>")
-	log.Println(hex.Dump(request))
+	log.Printf("\n%s\n", hex.Dump(request))
 
 	if i, ok := d.Conn.(Invoker); ok {
 		response, err = i.Invoke(request)
 	}
 
 	log.Printf("Read <<< err: %v\n", err)
-	log.Println(hex.Dump(response))
+	log.Printf("\n%s\n", hex.Dump(response))
 
 	return response, err
 }

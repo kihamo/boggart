@@ -2,6 +2,7 @@ package scale
 
 import (
 	"context"
+
 	"github.com/kihamo/boggart/providers/xiaomi/scale"
 	"github.com/kihamo/go-workers"
 	"go.uber.org/multierr"
