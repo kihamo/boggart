@@ -46,6 +46,12 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			return
 		}
 
+	case "password":
+		vars = t.widgetActionPassword(w, r, client)
+		if vars == nil {
+			return
+		}
+
 	case "group":
 		vars = t.widgetActionGroup(w, r, client)
 		if len(vars) == 0 {
@@ -288,6 +294,30 @@ func (t Type) widgetActionUser(w *dashboard.Response, r *dashboard.Request, clie
 	}
 
 	return vars
+}
+
+func (t Type) widgetActionPassword(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
+	username := strings.TrimSpace(r.URL().Query().Get("username"))
+	if username == "" {
+		t.NotFound(w, r)
+		return nil
+	}
+
+	if r.IsPost() {
+		ctx := r.Context()
+		oldPassword := r.Original().FormValue("old")
+		newPassword := r.Original().FormValue("new")
+
+		if err := client.UserChangePassword(ctx, username, oldPassword, newPassword); err != nil {
+			r.Session().FlashBag().Error(t.Translate(ctx, "Change user %s password failed with error %v", "", username, err))
+		} else {
+			r.Session().FlashBag().Success(t.Translate(ctx, "Change user %s password success", "", username))
+			t.Redirect(r.URL().Path+"?action=accounts", http.StatusFound, w, r)
+			return nil
+		}
+	}
+
+	return map[string]interface{}{}
 }
 
 func (t Type) widgetActionGroup(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {

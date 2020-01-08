@@ -80,7 +80,7 @@ func New(host, username, password string) (*Client, error) {
 	client := &Client{
 		username:     username,
 		password:     []byte(password),
-		dsn:          "tcp://" + host + "?read-timeout=10s&write-timeout=10s&once=true",
+		dsn:          "tcp://" + host + "?read-timeout=10s&write-timeout=10s&once=true&debug=1&dump=1",
 		extraChannel: math.MaxUint64,
 	}
 
