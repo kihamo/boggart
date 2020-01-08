@@ -20,7 +20,7 @@ type response struct {
 }
 
 func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
-	client, err := b.Bind().(*Bind).client()
+	client, err := b.Bind().(*Bind).client(r.Context())
 	if err != nil {
 		t.InternalError(w, r, err)
 	}
@@ -42,7 +42,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 	case "user":
 		vars = t.widgetActionUser(w, r, client)
-		if len(vars) == 0 {
+		if vars == nil {
 			return
 		}
 
@@ -54,9 +54,17 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 	case "group":
 		vars = t.widgetActionGroup(w, r, client)
-		if len(vars) == 0 {
+		if vars == nil {
 			return
 		}
+
+	case "user-delete":
+		t.widgetActionUserDelete(w, r, client)
+		return
+
+	case "group-delete":
+		t.widgetActionGroupDelete(w, r, client)
+		return
 
 	case "logs-export":
 		t.widgetActionLogsExport(w, r, client, b)
@@ -223,9 +231,26 @@ func (t Type) widgetActionAccounts(w *dashboard.Response, r *dashboard.Request, 
 		r.Session().FlashBag().Error(t.Translate(ctx, "Create groups failed with error %v", "", err))
 	}
 
+	viewGroups := make([]struct {
+		xmeye.Group
+		CanRemove bool
+	}, len(groups))
+
+	for i, group := range groups {
+		viewGroups[i].Group = group
+		viewGroups[i].CanRemove = true
+
+		for _, user := range users {
+			if user.Group == group.Name {
+				viewGroups[i].CanRemove = false
+				break
+			}
+		}
+	}
+
 	return map[string]interface{}{
 		"users":   users,
-		"groups":  groups,
+		"groups":  viewGroups,
 		"current": b.Bind().(*Bind).config.Address.User.Username(),
 	}
 }
@@ -234,8 +259,7 @@ func (t Type) widgetActionUser(w *dashboard.Response, r *dashboard.Request, clie
 	ctx := r.Context()
 	var user *xmeye.User
 
-	username := strings.TrimSpace(r.URL().Query().Get("username"))
-	if username != "" { // update
+	if username := strings.TrimSpace(r.URL().Query().Get("username")); username != "" { // update
 		users, err := client.Users(ctx)
 		if err == nil {
 			for _, u := range users {
@@ -280,6 +304,10 @@ func (t Type) widgetActionUser(w *dashboard.Response, r *dashboard.Request, clie
 				t.Redirect(r.URL().Path+"?action=accounts", http.StatusFound, w, r)
 				return nil
 			}
+		} else {
+			if groupName := strings.TrimSpace(r.URL().Query().Get("groupname")); groupName != "" {
+				user.Group = groupName
+			}
 		}
 	}
 
@@ -297,8 +325,8 @@ func (t Type) widgetActionUser(w *dashboard.Response, r *dashboard.Request, clie
 }
 
 func (t Type) widgetActionPassword(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
-	username := strings.TrimSpace(r.URL().Query().Get("username"))
-	if username == "" {
+	userName := strings.TrimSpace(r.URL().Query().Get("username"))
+	if userName == "" {
 		t.NotFound(w, r)
 		return nil
 	}
@@ -308,10 +336,10 @@ func (t Type) widgetActionPassword(w *dashboard.Response, r *dashboard.Request, 
 		oldPassword := r.Original().FormValue("old")
 		newPassword := r.Original().FormValue("new")
 
-		if err := client.UserChangePassword(ctx, username, oldPassword, newPassword); err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Change user %s password failed with error %v", "", username, err))
+		if err := client.UserChangePassword(ctx, userName, oldPassword, newPassword); err != nil {
+			r.Session().FlashBag().Error(t.Translate(ctx, "Change user %s password failed with error %v", "", userName, err))
 		} else {
-			r.Session().FlashBag().Success(t.Translate(ctx, "Change user %s password success", "", username))
+			r.Session().FlashBag().Success(t.Translate(ctx, "Change user %s password success", "", userName))
 			t.Redirect(r.URL().Path+"?action=accounts", http.StatusFound, w, r)
 			return nil
 		}
@@ -324,8 +352,7 @@ func (t Type) widgetActionGroup(w *dashboard.Response, r *dashboard.Request, cli
 	ctx := r.Context()
 	var group *xmeye.Group
 
-	groupName := strings.TrimSpace(r.URL().Query().Get("groupname"))
-	if groupName != "" { // update
+	if groupName := strings.TrimSpace(r.URL().Query().Get("groupname")); groupName != "" { // update
 		groups, err := client.Groups(ctx)
 		if err == nil {
 			for _, u := range groups {
@@ -373,6 +400,52 @@ func (t Type) widgetActionGroup(w *dashboard.Response, r *dashboard.Request, cli
 	return map[string]interface{}{
 		"group": group,
 	}
+}
+
+func (t Type) widgetActionUserDelete(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) {
+	userName := strings.TrimSpace(r.URL().Query().Get("username"))
+	if userName == "" {
+		t.NotFound(w, r)
+		return
+	}
+
+	if !r.IsPost() {
+		t.MethodNotAllowed(w, r)
+		return
+	}
+
+	ctx := r.Context()
+
+	if err := client.UserDelete(ctx, userName); err != nil {
+		r.Session().FlashBag().Error(t.Translate(ctx, "Remove user %s failed with error %v", "", userName, err))
+	} else {
+		r.Session().FlashBag().Success(t.Translate(ctx, "Remove user %s success", "", userName))
+	}
+
+	t.Redirect(r.URL().Path+"?action=accounts", http.StatusFound, w, r)
+}
+
+func (t Type) widgetActionGroupDelete(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) {
+	groupName := strings.TrimSpace(r.URL().Query().Get("groupname"))
+	if groupName == "" {
+		t.NotFound(w, r)
+		return
+	}
+
+	if !r.IsPost() {
+		t.MethodNotAllowed(w, r)
+		return
+	}
+
+	ctx := r.Context()
+
+	if err := client.GroupDelete(ctx, groupName); err != nil {
+		r.Session().FlashBag().Error(t.Translate(ctx, "Remove group %s failed with error %v", "", groupName, err))
+	} else {
+		r.Session().FlashBag().Success(t.Translate(ctx, "Remove group %s success", "", groupName))
+	}
+
+	t.Redirect(r.URL().Path+"?action=accounts", http.StatusFound, w, r)
 }
 
 func (t Type) widgetActionFiles(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {

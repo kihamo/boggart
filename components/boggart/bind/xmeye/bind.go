@@ -19,11 +19,15 @@ type Bind struct {
 	alarmStreaming *xmeye.AlertStreaming
 }
 
-func (b *Bind) client() (*xmeye.Client, error) {
+func (b *Bind) client(ctx context.Context) (*xmeye.Client, error) {
 	password, _ := b.config.Address.User.Password()
 
 	provider, err := xmeye.New(b.config.Address.Host, b.config.Address.User.Username(), password)
 	if err != nil {
+		return nil, err
+	}
+
+	if err := provider.Login(ctx); err != nil {
 		return nil, err
 	}
 
@@ -32,7 +36,7 @@ func (b *Bind) client() (*xmeye.Client, error) {
 
 func (b *Bind) startAlarmStreaming() error {
 	ctx := context.Background()
-	client, err := b.client()
+	client, err := b.client(ctx)
 	if err != nil {
 		return err
 	}

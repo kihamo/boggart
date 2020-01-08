@@ -36,7 +36,7 @@ func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
 		return nil, errors.New("bind isn't online")
 	}
 
-	client, err := b.client()
+	client, err := b.client(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
 }
 
 func (b *Bind) taskUpdater(ctx context.Context) (err error) {
-	client, err := b.client()
+	client, err := b.client(ctx)
 	if err != nil {
 		return err
 	}

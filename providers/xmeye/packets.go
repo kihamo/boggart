@@ -10,7 +10,7 @@ import (
 
 var (
 	regularPacketHeader = []byte{0xff, 0x01, 0x00, 0x00}
-	payloadEOF          = []byte{0x0a, 0x00}
+	payloadEOF          = []byte{0x0a}
 )
 
 type packet struct {
@@ -36,16 +36,16 @@ func (p packet) Marshal() []byte {
 	binary.LittleEndian.PutUint32(message[0x08:], p.SequenceNumber)
 
 	// Total Packet
-	if p.TotalPacket == 0 {
-		p.TotalPacket = 1
-	}
+	//if p.TotalPacket == 0 {
+	//	p.TotalPacket = 1
+	//}
 
 	message[0x0c] = byte(p.TotalPacket)
 
 	// CurPacket
-	if p.CurrentPacket == 0 {
-		p.CurrentPacket = 1
-	}
+	//if p.CurrentPacket == 0 {
+	//	p.CurrentPacket = 1
+	//}
 
 	message[0x0d] = byte(p.CurrentPacket)
 
@@ -53,12 +53,13 @@ func (p packet) Marshal() []byte {
 	binary.LittleEndian.PutUint16(message[0x0e:], p.MessageID)
 
 	// Data Length
-	var payloadLen uint32
+	var payloadLen int
 	if p.Payload != nil {
-		payloadLen = uint32(p.Payload.Len())
+		payloadLen = p.Payload.Len()
 	}
+	payloadLen += len(payloadEOF)
 
-	binary.LittleEndian.PutUint32(message[0x10:], payloadLen)
+	binary.LittleEndian.PutUint32(message[0x10:], uint32(payloadLen))
 
 	if p.Payload != nil {
 		// DATA
@@ -74,6 +75,10 @@ func (p packet) LoadPayload(payload interface{}) (err error) {
 	case nil:
 		p.Payload.Reset()
 		p.PayloadLen = 0
+
+	case string:
+		p.Payload.Reset()
+		p.PayloadLen, err = p.Payload.Write([]byte(pl))
 
 	case []byte:
 		p.Payload.Reset()

@@ -5,7 +5,7 @@ import (
 )
 
 func (b *Bind) ReadinessProbe(ctx context.Context) error {
-	client, err := b.client()
+	client, err := b.client(ctx)
 	if err != nil {
 		return err
 	}

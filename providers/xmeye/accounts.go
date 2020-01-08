@@ -104,7 +104,7 @@ func (c *Client) UserChangePassword(ctx context.Context, name, oldPassword, newP
 		"UserName":    name,
 	})
 
-	return nil
+	return err
 }
 
 func (c *Client) Groups(ctx context.Context) ([]Group, error) {
@@ -123,8 +123,8 @@ func (c *Client) GroupCreate(ctx context.Context, group Group) (err error) {
 	}
 
 	_, err = c.Call(ctx, CmdGroupCreateRequest, map[string]interface{}{
-		"Name":      "Group",
 		"SessionID": c.connection.SessionIDAsString(),
+		"Name":      "Group",
 		"Group":     group,
 	})
 
@@ -132,6 +132,10 @@ func (c *Client) GroupCreate(ctx context.Context, group Group) (err error) {
 }
 
 func (c *Client) GroupUpdate(ctx context.Context, name string, group Group) (err error) {
+	if name == "" {
+		return errors.New("group name is empty")
+	}
+
 	if group.AuthorityList == nil {
 		group.AuthorityList = make([]string, 0)
 	}
@@ -146,6 +150,10 @@ func (c *Client) GroupUpdate(ctx context.Context, name string, group Group) (err
 }
 
 func (c *Client) GroupDelete(ctx context.Context, name string) (err error) {
+	if name == "" {
+		return errors.New("group name is empty")
+	}
+
 	_, err = c.Call(ctx, CmdGroupDeleteRequest, map[string]interface{}{
 		"Name":      name,
 		"SessionID": c.connection.SessionIDAsString(),

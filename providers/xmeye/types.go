@@ -2,6 +2,7 @@ package xmeye
 
 import (
 	"bytes"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -50,9 +51,7 @@ func (t *Uint32) UnmarshalJSON(b []byte) (err error) {
 }
 
 func (t *Uint32) MarshalJSON() ([]byte, error) {
-	dst := "0x" + strconv.FormatUint(uint64(*t), 16)
-
-	return []byte(dst), nil
+	return []byte(fmt.Sprintf("0x%08X", uint64(*t))), nil
 }
 
 func (t Uint32) String() string {

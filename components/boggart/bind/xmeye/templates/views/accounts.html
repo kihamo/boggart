@@ -16,106 +16,74 @@
         <thead>
         <tr>
             <th>{{ i18n "User" . }}</th>
-            <th>{{ i18n "Group" . }}</th>
-            <th>{{ i18n "Group comment" . }}</th>
             <th>{{ i18n "Comment" . }}</th>
             <th>{{ i18n "Actions" . }}</th>
         </tr>
         </thead>
         <tbody>
-        {{ range $user := .users }}
-        <tr{{ if eq $user.Name $.current }} class="success"{{ end }}>
-            <td>{{ $user.Name }}</td>
-            <td>{{ $user.Group }}</td>
-            <td>
-                {{ range $group := $.groups }}
-                    {{ if eq $group.Name $user.Group }}
-                        {{ $group.Memo }}
-                    {{ end }}
+        {{ range $group := .groups }}
+            <tr class="group">
+                <td colspan="2">
+                    {{ $group.Name }}{{ if $group.Memo }} ({{ $group.Memo }}){{ end }}
+                </td>
+                <td class="text-right">
+                    <div{{ if ne $group.CanRemove true }} class="btn-group" role="group"{{ end }}>
+                        {{ if $group.CanRemove }}
+                        <form method="post" action="{{ $.Request.URL.Path }}?action=group-delete&groupname={{ $group.Name }}" class="btn-group" role="group">
+                        {{ end }}
+
+                            <a href="{{ $.Request.URL.Path }}?action=user&groupname={{ $group.Name }}" class="btn btn-success btn-icon btn-xs">
+                                <i class="fas fa-user-plus" title="{{ i18n "Add user to group" $ }}"></i>
+                            </a>
+
+                            <a href="{{ $.Request.URL.Path }}?action=group&groupname={{ $group.Name }}" class="btn btn-info btn-icon btn-xs">
+                                <i class="fas fa-edit" title="{{ i18n "Edit group" $ }}"></i>
+                            </a>
+
+                        {{ if $group.CanRemove }}
+                            <button type="submit" class="btn btn-danger btn-icon btn-xs">
+                                <i class="fas fa-trash" title="{{ i18n "Remove group" $ }}"></i>
+                            </button>
+                        </form>
+                        {{ end }}
+                    </div>
+                </td>
+            </tr>
+            {{ range $user := $.users }}
+                {{ if eq $group.Name $user.Group }}
+                <tr{{ if eq $user.Name $.current }} class="success"{{ end }}>
+                    <td>{{ $user.Name }}</td>
+                    <td>{{ $user.Memo }}</td>
+                    <td class="text-right">
+                        <div{{ if or ($user.Reserved) (eq $user.Name $.current) }} class="btn-group" role="group"{{ end }}>
+                            {{ if and (ne $user.Reserved true) (ne $user.Name $.current) }}
+                            <form method="post" action="{{ $.Request.URL.Path }}?action=user-delete&username={{ $user.Name }}" class="btn-group" role="group">
+                            {{ end }}
+
+                            <a href="{{ $.Request.URL.Path }}?action=user&username={{ $user.Name }}" class="btn btn-info btn-icon btn-xs">
+                                <i class="fas fa-user-edit" title="{{ i18n "Edit user" $ }}"></i>
+                            </a>
+                            <a href="{{ $.Request.URL.Path }}?action=password&username={{ $user.Name }}" class="btn btn-warning btn-icon btn-xs">
+                                <i class="fas fa-user-lock" title="{{ i18n "Change user password" $ }}"></i>
+                            </a>
+
+                            {{ if and (ne $user.Reserved true) (ne $user.Name $.current) }}
+                                <button type="submit" class="btn btn-danger btn-icon btn-xs">
+                                    <i class="fas fa-user-times" title="{{ i18n "Remove user" $ }}"></i>
+                                </button>
+                            </form>
+                            {{ end }}
+                        </div>
+                    </td>
+                </tr>
                 {{ end }}
-            </td>
-            <td>{{ $user.Memo }}</td>
-            <td class="text-right">
-                <div class="btn-group" role="group">
-                    <a href="{{ $.Request.URL.Path }}?action=user&username={{ $user.Name }}" class="btn btn-info btn-icon btn-xs">
-                        <i class="fas fa-user-edit" title="{{ i18n "Edit user" $ }}"></i>
-                    </a>
-                    <a href="{{ $.Request.URL.Path }}?action=password&username={{ $user.Name }}" class="btn btn-warning btn-icon btn-xs">
-                        <i class="fas fa-user-lock" title="{{ i18n "Change user password" $ }}"></i>
-                    </a>
-                    {{ if and (ne $user.Reserved true) (ne $user.Name $.current) }}
-                        <a href="{{ $.Request.URL.Path }}?action=user-delete&username={{ $user.Name }}" class="btn btn-danger btn-icon btn-xs">
-                            <i class="fas fa-user-times" title="{{ i18n "Delete user" $ }}"></i>
-                        </a>
-                    {{ end }}
-                </div>
-            </td>
-        </tr>
+            {{ end }}
+
         {{ end }}
         </tbody>
     </table>
 {{ end }}
 
-{{ define "head" }}
-    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" false) }}
-    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" false) }}
-{{ end }}
-
 {{ define "js" }}
-    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net/js/jquery.dataTables.min.js" false) }}
-    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
-    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive/js/dataTables.responsive.min.js" false) }}
-    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/validator/js/validator.min.js" false) }}
-
-    <script type="application/javascript">
-        $(document).ready(function () {
-            var groupColumn = 1;
-
-            $('#accounts').DataTable({
-                paging: false,
-                fixedHeader: true,
-                language: {
-                    url: '/dashboard/datatables/i18n.json'
-                },
-                order: [[groupColumn, 'asc']],
-                columnDefs: [{
-                    visible: false,
-                    targets: groupColumn
-                },{
-                    visible: false,
-                    targets: groupColumn + 1
-                }],
-                drawCallback: function () {
-                    var api = this.api();
-                    var rows = api.rows({page: 'current'}).nodes();
-                    var last = null;
-
-                    api.column(groupColumn, {page: 'current'}).data().each(function (group, i) {
-                        var $aRow = $(rows).eq(i);
-
-                        if (last !== group) {
-                            var memo = api.row(api.row($aRow).index()).data()[groupColumn + 1];
-
-                            $aRow.before(
-                                '<tr class="group">' +
-                                    '<td colspan="' + ($aRow.children().length - 1) + '">' + group + ' - ' + memo + '</td>' +
-                                    '<td class="text-right">' +
-                                        '<div class="btn-group" role="group">' +
-                                            '<a href="{{ $.Request.URL.Path }}?action=group&groupname=' + group + '" class="btn btn-info btn-icon btn-xs">' +
-                                                '<i class="fas fa-edit" title="{{ i18n "Edit group" $ }}"></i>' +
-                                            '</a>' +
-                                            '<a href="{{ $.Request.URL.Path }}?action=group-delete&groupname=' + group + '" class="btn btn-danger btn-icon btn-xs">' +
-                                                '<i class="fas fa-trash" title="{{ i18n "Remove group" $ }}"></i>' +
-                                            '</a>' +
-                                        '</div>' +
-                                    '</td>' +
-                                '</tr>');
-                            last = group;
-                        }
-                    });
-                }
-            });
-        });
-    </script>
 {{ end }}
