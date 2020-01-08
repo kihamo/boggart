@@ -27,7 +27,7 @@
                         <li role="presentation"{{ if eq .action "default" }} class="active"{{ end }}><a href="{{ if eq .action "default" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}{{ end }}">{{ i18n "System" . }}</a></li>
                         <li role="presentation"{{ if eq .action "logs" }} class="active"{{ end }}><a href="{{ if eq .action "logs" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=logs{{ end }}">{{ i18n "Logs" . }}</a></li>
                         <li role="presentation"{{ if eq .action "files" }} class="active"{{ end }}><a href="{{ if eq .action "files" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=files{{ end }}">{{ i18n "Files" . }}</a></li>
-                        <li role="presentation"{{ if eq .action "account" }} class="active"{{ end }}><a href="{{ if eq .action "account" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=account{{ end }}">{{ i18n "Account" . }}</a></li>
+                        <li role="presentation"{{ if eq .action "accounts" }} class="active"{{ end }}><a href="{{ if eq .action "accounts" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=accounts{{ end }}">{{ i18n "Accounts" . }}</a></li>
                     </ul>
                     <div class="tab-content">
                         <div role="tabpanel" class="tab-pane fade active in">

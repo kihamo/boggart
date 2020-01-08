@@ -137,8 +137,8 @@
         </tr>
         </thead>
         <tbody>
-        {{ range $s, $storage := .storage_info }}
-            {{ range $p, $partition := $storage.Partition }}
+        {{ range $storage := .storage_info }}
+            {{ range $partition := $storage.Partition }}
             <tr>
                 <td>{{ $storage.PartNumber }}</td>
                 <td>{{ human_bytes $partition.RemainSpace.Uint32 }}</td>
@@ -165,7 +165,7 @@
         </tr>
         </thead>
         <tbody>
-        {{ range $c, $channel := .channels }}
+        {{ range $channel := .channels }}
         <tr>
             <td>{{ $channel.Number }}</td>
             <td>{{ $channel.Title }}</td>

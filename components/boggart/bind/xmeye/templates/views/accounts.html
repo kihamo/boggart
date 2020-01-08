@@ -1,0 +1,114 @@
+{{ define "page" }}
+    <div class="form-group pull-right">
+        <div class="input-group">
+            <label class="btn-group">
+                <a href="?action=user" class="btn btn-success btn-sm">
+                    <i class="fas fa-user-plus" title="{{ i18n "Create user" . }}"></i> {{ i18n "Create user" . }}
+                </a>
+                <a href="?action=group" class="btn btn-success btn-sm">
+                    <i class="fas fa-users" title="{{ i18n "Create group" . }}"></i> {{ i18n "Create group" . }}
+                </a>
+            </label>
+        </div>
+    </div>
+
+    <table class="table table-striped dt-responsive nowrap" style="width:100%" id="accounts">
+        <thead>
+        <tr>
+            <th>{{ i18n "User" . }}</th>
+            <th>{{ i18n "Group" . }}</th>
+            <th>{{ i18n "Comment" . }}</th>
+            <th>{{ i18n "Actions" . }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{ range $user := .users }}
+        <tr{{ if eq $user.Name $.current }} class="success"{{ end }}>
+            <td>{{ $user.Name }}</td>
+            <td>
+                {{ $user.Group }}
+                {{ range $group := $.groups }}
+                    {{ if eq $group.Name $user.Group }}
+                        - {{ $group.Memo }}
+                    {{ end }}
+                {{ end }}
+            </td>
+            <td>{{ $user.Memo }}</td>
+            <td class="text-right">
+                <div class="btn-group" role="group">
+                    <a href="{{ $.Request.URL.Path }}?action=user&username={{ $user.Name }}" class="btn btn-info btn-icon btn-xs">
+                        <i class="fas fa-user-edit" title="{{ i18n "Edit user" $ }}"></i>
+                    </a>
+                    <a href="{{ $.Request.URL.Path }}?action=password&username={{ $user.Name }}" class="btn btn-warning btn-icon btn-xs">
+                        <i class="fas fa-user-lock" title="{{ i18n "Change user password" $ }}"></i>
+                    </a>
+                    {{ if and (ne $user.Reserved true) (ne $user.Name $.current) }}
+                        <a href="{{ $.Request.URL.Path }}?action=user-delete&username={{ $user.Name }}" class="btn btn-danger btn-icon btn-xs">
+                            <i class="fas fa-user-times" title="{{ i18n "Delete user" $ }}"></i>
+                        </a>
+                    {{ end }}
+                </div>
+            </td>
+        </tr>
+        {{ end }}
+        </tbody>
+    </table>
+{{ end }}
+
+{{ define "head" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" false) }}
+{{ end }}
+
+{{ define "js" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net/js/jquery.dataTables.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive/js/dataTables.responsive.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/validator/js/validator.min.js" false) }}
+
+    <script type="application/javascript">
+        $(document).ready(function () {
+            var groupColumn = 1;
+
+            $('#accounts').DataTable({
+                paging: false,
+                fixedHeader: true,
+                language: {
+                    url: '/dashboard/datatables/i18n.json'
+                },
+                order: [[groupColumn, 'asc']],
+                columnDefs: [{
+                    visible: false,
+                    targets: groupColumn
+                }],
+                drawCallback: function () {
+                    var api = this.api();
+                    var rows = api.rows({page: 'current'}).nodes();
+                    var last = null;
+
+                    api.column(groupColumn, {page: 'current'}).data().each(function (group, i) {
+                        var $aRow = $(rows).eq(i);
+
+                        if (last !== group) {
+                            $aRow.before('<tr class="group">' +
+                                    '<td colspan="' + ($aRow.children().length - 1) + '">' + group + '</td>' +
+                                    '<td class="text-right">' +
+                                        '<div class="btn-group" role="group">' +
+                                            '<a href="{{ $.Request.URL.Path }}?action=group&groupname=' + group + '" class="btn btn-info btn-icon btn-xs">' +
+                                                '<i class="fas fa-edit" title="{{ i18n "Edit group" $ }}"></i>' +
+                                            '</a>' +
+                                            '<a href="{{ $.Request.URL.Path }}?action=group-delete&groupname=' + group + '" class="btn btn-danger btn-icon btn-xs">' +
+                                                '<i class="fas fa-trash" title="{{ i18n "Remove group" $ }}"></i>' +
+                                            '</a>' +
+                                        '</div>' +
+                                    '</td>' +
+                                    '</tr>');
+                            last = group;
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+{{ end }}

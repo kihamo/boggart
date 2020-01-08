@@ -32,7 +32,7 @@
             </label>
             <div class="col-md-6 col-sm-6 col-xs-12">
                 <select id="group" name="group" class="form-control select2" required="required">
-                {{ range $i, $group := .groups }}
+                {{ range $group := .groups }}
                     <option value="{{ $group.Name }}"{{ if eq $group.Name $.user.Group }}selected="selected"{{ end }}>{{ $group.Name }}</option>
                 {{ end }}
                 </select>

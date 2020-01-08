@@ -37,8 +37,8 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	case "files":
 		vars = t.widgetActionFiles(w, r, client)
 
-	case "account":
-		vars = t.widgetActionAccount(w, r, client, b)
+	case "accounts":
+		vars = t.widgetActionAccounts(w, r, client, b)
 
 	case "user":
 		vars = t.widgetActionUser(w, r, client)
@@ -198,7 +198,7 @@ func (t Type) widgetActionLogs(w *dashboard.Response, r *dashboard.Request, clie
 	}
 }
 
-func (t Type) widgetActionAccount(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client, b boggart.BindItem) map[string]interface{} {
+func (t Type) widgetActionAccounts(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client, b boggart.BindItem) map[string]interface{} {
 	ctx := r.Context()
 
 	users, err := client.Users(ctx)
@@ -206,8 +206,14 @@ func (t Type) widgetActionAccount(w *dashboard.Response, r *dashboard.Request, c
 		r.Session().FlashBag().Error(t.Translate(ctx, "Get failed failed with error %v", "", err))
 	}
 
+	groups, err := client.Groups(ctx)
+	if err != nil {
+		r.Session().FlashBag().Error(t.Translate(ctx, "Create groups failed with error %v", "", err))
+	}
+
 	return map[string]interface{}{
 		"users":   users,
+		"groups":  groups,
 		"current": b.Bind().(*Bind).config.Address.User.Username(),
 	}
 }
@@ -242,7 +248,7 @@ func (t Type) widgetActionUser(w *dashboard.Response, r *dashboard.Request, clie
 				r.Session().FlashBag().Error(t.Translate(ctx, "Update user %s failed with error %v", "", username, err))
 			} else {
 				r.Session().FlashBag().Success(t.Translate(ctx, "Update user %s success", "", username))
-				t.Redirect(r.URL().Path+"?action=account", http.StatusFound, w, r)
+				t.Redirect(r.URL().Path+"?action=accounts", http.StatusFound, w, r)
 				return nil
 			}
 		}
@@ -259,7 +265,7 @@ func (t Type) widgetActionUser(w *dashboard.Response, r *dashboard.Request, clie
 				r.Session().FlashBag().Error(t.Translate(ctx, "Create user failed with error %v", "", err))
 			} else {
 				r.Session().FlashBag().Success(t.Translate(ctx, "Create user %s success", "", user.Name))
-				t.Redirect(r.URL().Path+"?action=account", http.StatusFound, w, r)
+				t.Redirect(r.URL().Path+"?action=accounts", http.StatusFound, w, r)
 				return nil
 			}
 		}
