@@ -146,7 +146,7 @@ func (c *Client) GroupUpdate(ctx context.Context, name string, group Group) (err
 		"Group":     group,
 	})
 
-	return nil
+	return err
 }
 
 func (c *Client) GroupDelete(ctx context.Context, name string) (err error) {

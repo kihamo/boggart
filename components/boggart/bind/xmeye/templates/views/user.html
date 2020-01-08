@@ -16,13 +16,13 @@
                 <input type="text" class="form-control" name="memo" id="memo" value="{{ .user.Memo }}">
             </div>
         </div>
-        {{ if eq .user.Name "" }}
+        {{ if eq .username "" }}
         <div class="item form-group">
             <label for="password" class="control-label col-md-3 col-sm-3 col-xs-12">
             {{ i18n "Password" . }} <span class="required">*</span>
             </label>
             <div class="col-md-6 col-sm-6 col-xs-12">
-                <input type="password" class="form-control" name="password" id="password" required="required">
+                <input type="password" class="form-control" name="password" id="password" required="required" value="{{ .user.Password }}">
             </div>
         </div>
         {{ end }}
@@ -38,10 +38,24 @@
                 </select>
             </div>
         </div>
+        <div class="item form-group">
+            <label for="group" class="control-label col-md-3 col-sm-3 col-xs-12">
+            {{ i18n "Authority" . }}
+            </label>
+            <div class="col-md-6 col-sm-6 col-xs-12">
+                {{ range $authority := .authorities }}
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" class="flat" name="authorities" value="{{ $authority.Name }}" {{ if $authority.IsChecked }} checked="checked"{{ end }}> {{ $authority.Name }}
+                        </label>
+                    </div>
+                {{ end }}
+            </div>
+        </div>
         <div class="ln_solid"></div>
         <div class="form-group">
             <div class="col-md-6 col-md-offset-3">
-            {{ if ne .user.Name "" }}
+            {{ if ne .username "" }}
                 <button id="send" type="submit" class="btn btn-warning">{{ i18n "Update" . }}</button>
             {{ else }}
                 <button id="send" type="submit" class="btn btn-success">{{ i18n "Create" . }}</button>

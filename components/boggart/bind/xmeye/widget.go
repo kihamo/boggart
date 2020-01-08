@@ -259,7 +259,8 @@ func (t Type) widgetActionUser(w *dashboard.Response, r *dashboard.Request, clie
 	ctx := r.Context()
 	var user *xmeye.User
 
-	if username := strings.TrimSpace(r.URL().Query().Get("username")); username != "" { // update
+	username := strings.TrimSpace(r.URL().Query().Get("username"))
+	if username != "" { // update
 		users, err := client.Users(ctx)
 		if err == nil {
 			for _, u := range users {
@@ -279,6 +280,11 @@ func (t Type) widgetActionUser(w *dashboard.Response, r *dashboard.Request, clie
 			user.Name = r.Original().FormValue("name")
 			user.Memo = r.Original().FormValue("memo")
 			user.Group = r.Original().FormValue("group")
+			user.AuthorityList = make([]string, 0, len(r.Original().Form["authorities"]))
+
+			for _, authority := range r.Original().Form["authorities"] {
+				user.AuthorityList = append(user.AuthorityList, authority)
+			}
 
 			if err := client.UserUpdate(ctx, username, *user); err != nil {
 				r.Session().FlashBag().Error(t.Translate(ctx, "Update user %s failed with error %v", "", username, err))
@@ -296,6 +302,11 @@ func (t Type) widgetActionUser(w *dashboard.Response, r *dashboard.Request, clie
 			user.Memo = r.Original().FormValue("memo")
 			user.Password = r.Original().FormValue("password")
 			user.Group = r.Original().FormValue("group")
+			user.AuthorityList = make([]string, 0, len(r.Original().Form["authorities"]))
+
+			for _, authority := range r.Original().Form["authorities"] {
+				user.AuthorityList = append(user.AuthorityList, authority)
+			}
 
 			if err := client.UserCreate(ctx, *user); err != nil {
 				r.Session().FlashBag().Error(t.Translate(ctx, "Create user failed with error %v", "", err))
@@ -312,13 +323,36 @@ func (t Type) widgetActionUser(w *dashboard.Response, r *dashboard.Request, clie
 	}
 
 	vars := map[string]interface{}{
-		"user": user,
+		"user":     user,
+		"username": username,
 	}
 
 	if groups, err := client.Groups(ctx); err != nil {
-		r.Session().FlashBag().Error(t.Translate(ctx, "Create groups failed with error %v", "", err))
+		r.Session().FlashBag().Error(t.Translate(ctx, "Get groups failed with error %v", "", err))
 	} else {
 		vars["groups"] = groups
+	}
+
+	if authorities, err := client.FullAuthorityList(ctx); err != nil {
+		r.Session().FlashBag().Error(t.Translate(ctx, "Get authorities list failed with error %v", "", err))
+	} else {
+		list := make([]struct {
+			Name      string
+			IsChecked bool
+		}, len(authorities))
+
+		for i, name := range authorities {
+			list[i].Name = name
+
+			for _, a := range user.AuthorityList {
+				if a == name {
+					list[i].IsChecked = true
+					break
+				}
+			}
+		}
+
+		vars["authorities"] = list
 	}
 
 	return vars
@@ -350,9 +384,11 @@ func (t Type) widgetActionPassword(w *dashboard.Response, r *dashboard.Request, 
 
 func (t Type) widgetActionGroup(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
 	ctx := r.Context()
+	canEditAuthorities := true
 	var group *xmeye.Group
 
-	if groupName := strings.TrimSpace(r.URL().Query().Get("groupname")); groupName != "" { // update
+	groupName := strings.TrimSpace(r.URL().Query().Get("groupname"))
+	if groupName != "" { // update
 		groups, err := client.Groups(ctx)
 		if err == nil {
 			for _, u := range groups {
@@ -368,9 +404,28 @@ func (t Type) widgetActionGroup(w *dashboard.Response, r *dashboard.Request, cli
 			return nil
 		}
 
+		if users, err := client.Users(ctx); err != nil {
+			r.Session().FlashBag().Error(t.Translate(ctx, "Get users failed with error %v", "", err))
+		} else {
+			for _, user := range users {
+				if user.Group == groupName {
+					canEditAuthorities = false
+					break
+				}
+			}
+		}
+
 		if r.IsPost() {
 			group.Name = r.Original().FormValue("name")
 			group.Memo = r.Original().FormValue("memo")
+
+			if canEditAuthorities {
+				group.AuthorityList = make([]string, 0, len(r.Original().Form["authorities"]))
+
+				for _, authority := range r.Original().Form["authorities"] {
+					group.AuthorityList = append(group.AuthorityList, authority)
+				}
+			}
 
 			if err := client.GroupUpdate(ctx, groupName, *group); err != nil {
 				r.Session().FlashBag().Error(t.Translate(ctx, "Update group %s failed with error %v", "", groupName, err))
@@ -386,6 +441,11 @@ func (t Type) widgetActionGroup(w *dashboard.Response, r *dashboard.Request, cli
 		if r.IsPost() {
 			group.Name = r.Original().FormValue("name")
 			group.Memo = r.Original().FormValue("memo")
+			group.AuthorityList = make([]string, 0, len(r.Original().Form["authorities"]))
+
+			for _, authority := range r.Original().Form["authorities"] {
+				group.AuthorityList = append(group.AuthorityList, authority)
+			}
 
 			if err := client.GroupCreate(ctx, *group); err != nil {
 				r.Session().FlashBag().Error(t.Translate(ctx, "Create group failed with error %v", "", err))
@@ -397,9 +457,37 @@ func (t Type) widgetActionGroup(w *dashboard.Response, r *dashboard.Request, cli
 		}
 	}
 
-	return map[string]interface{}{
-		"group": group,
+	vars := map[string]interface{}{
+		"group":              group,
+		"groupname":          groupName,
+		"canEditAuthorities": canEditAuthorities,
 	}
+
+	if canEditAuthorities {
+		if authorities, err := client.FullAuthorityList(ctx); err != nil {
+			r.Session().FlashBag().Error(t.Translate(ctx, "Get authorities list failed with error %v", "", err))
+		} else {
+			list := make([]struct {
+				Name      string
+				IsChecked bool
+			}, len(authorities))
+
+			for i, name := range authorities {
+				list[i].Name = name
+
+				for _, a := range group.AuthorityList {
+					if a == name {
+						list[i].IsChecked = true
+						break
+					}
+				}
+			}
+
+			vars["authorities"] = list
+		}
+	}
+
+	return vars
 }
 
 func (t Type) widgetActionUserDelete(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) {
