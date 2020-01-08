@@ -46,6 +46,12 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			return
 		}
 
+	case "group":
+		vars = t.widgetActionGroup(w, r, client)
+		if len(vars) == 0 {
+			return
+		}
+
 	case "logs-export":
 		t.widgetActionLogsExport(w, r, client, b)
 		return
@@ -282,6 +288,61 @@ func (t Type) widgetActionUser(w *dashboard.Response, r *dashboard.Request, clie
 	}
 
 	return vars
+}
+
+func (t Type) widgetActionGroup(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
+	ctx := r.Context()
+	var group *xmeye.Group
+
+	groupName := strings.TrimSpace(r.URL().Query().Get("groupname"))
+	if groupName != "" { // update
+		groups, err := client.Groups(ctx)
+		if err == nil {
+			for _, u := range groups {
+				if u.Name == groupName {
+					group = &u
+					break
+				}
+			}
+		}
+
+		if group == nil {
+			t.NotFound(w, r)
+			return nil
+		}
+
+		if r.IsPost() {
+			group.Name = r.Original().FormValue("name")
+			group.Memo = r.Original().FormValue("memo")
+
+			if err := client.GroupUpdate(ctx, groupName, *group); err != nil {
+				r.Session().FlashBag().Error(t.Translate(ctx, "Update group %s failed with error %v", "", groupName, err))
+			} else {
+				r.Session().FlashBag().Success(t.Translate(ctx, "Update group %s success", "", groupName))
+				t.Redirect(r.URL().Path+"?action=accounts", http.StatusFound, w, r)
+				return nil
+			}
+		}
+	} else { // create
+		group = &xmeye.Group{}
+
+		if r.IsPost() {
+			group.Name = r.Original().FormValue("name")
+			group.Memo = r.Original().FormValue("memo")
+
+			if err := client.GroupCreate(ctx, *group); err != nil {
+				r.Session().FlashBag().Error(t.Translate(ctx, "Create group failed with error %v", "", err))
+			} else {
+				r.Session().FlashBag().Success(t.Translate(ctx, "Create group %s success", "", group.Name))
+				t.Redirect(r.URL().Path+"?action=accounts", http.StatusFound, w, r)
+				return nil
+			}
+		}
+	}
+
+	return map[string]interface{}{
+		"group": group,
+	}
 }
 
 func (t Type) widgetActionFiles(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {

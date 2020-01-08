@@ -17,6 +17,7 @@
         <tr>
             <th>{{ i18n "User" . }}</th>
             <th>{{ i18n "Group" . }}</th>
+            <th>{{ i18n "Group comment" . }}</th>
             <th>{{ i18n "Comment" . }}</th>
             <th>{{ i18n "Actions" . }}</th>
         </tr>
@@ -25,11 +26,11 @@
         {{ range $user := .users }}
         <tr{{ if eq $user.Name $.current }} class="success"{{ end }}>
             <td>{{ $user.Name }}</td>
+            <td>{{ $user.Group }}</td>
             <td>
-                {{ $user.Group }}
                 {{ range $group := $.groups }}
                     {{ if eq $group.Name $user.Group }}
-                        - {{ $group.Memo }}
+                        {{ $group.Memo }}
                     {{ end }}
                 {{ end }}
             </td>
@@ -81,6 +82,9 @@
                 columnDefs: [{
                     visible: false,
                     targets: groupColumn
+                },{
+                    visible: false,
+                    targets: groupColumn + 1
                 }],
                 drawCallback: function () {
                     var api = this.api();
@@ -91,8 +95,11 @@
                         var $aRow = $(rows).eq(i);
 
                         if (last !== group) {
-                            $aRow.before('<tr class="group">' +
-                                    '<td colspan="' + ($aRow.children().length - 1) + '">' + group + '</td>' +
+                            var memo = api.row(api.row($aRow).index()).data()[groupColumn + 1];
+
+                            $aRow.before(
+                                '<tr class="group">' +
+                                    '<td colspan="' + ($aRow.children().length - 1) + '">' + group + ' - ' + memo + '</td>' +
                                     '<td class="text-right">' +
                                         '<div class="btn-group" role="group">' +
                                             '<a href="{{ $.Request.URL.Path }}?action=group&groupname=' + group + '" class="btn btn-info btn-icon btn-xs">' +
@@ -103,7 +110,7 @@
                                             '</a>' +
                                         '</div>' +
                                     '</td>' +
-                                    '</tr>');
+                                '</tr>');
                             last = group;
                         }
                     });

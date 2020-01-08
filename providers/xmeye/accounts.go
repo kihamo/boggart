@@ -2,6 +2,7 @@ package xmeye
 
 import (
 	"context"
+	"errors"
 )
 
 func (c *Client) FullAuthorityList(ctx context.Context) ([]string, error) {
@@ -25,6 +26,14 @@ func (c *Client) Users(ctx context.Context) ([]User, error) {
 }
 
 func (c *Client) UserCreate(ctx context.Context, user User) (err error) {
+	if user.Name == "" {
+		return errors.New("user name is empty")
+	}
+
+	if user.Password == "" {
+		return errors.New("user password is empty")
+	}
+
 	user.Password = HashPassword([]byte(user.Password))
 	if user.AuthorityList == nil {
 		user.AuthorityList = make([]string, 0)
@@ -40,6 +49,10 @@ func (c *Client) UserCreate(ctx context.Context, user User) (err error) {
 }
 
 func (c *Client) UserUpdate(ctx context.Context, name string, user User) (err error) {
+	if name == "" {
+		return errors.New("user name is empty")
+	}
+
 	user.Password = HashPassword([]byte(user.Password))
 	if user.AuthorityList == nil {
 		user.AuthorityList = make([]string, 0)
@@ -55,6 +68,10 @@ func (c *Client) UserUpdate(ctx context.Context, name string, user User) (err er
 }
 
 func (c *Client) UserDelete(ctx context.Context, name string) (err error) {
+	if name == "" {
+		return errors.New("user name is empty")
+	}
+
 	_, err = c.Call(ctx, CmdUserDeleteRequest, map[string]interface{}{
 		"Name":      name,
 		"SessionID": c.connection.SessionIDAsString(),
@@ -63,7 +80,19 @@ func (c *Client) UserDelete(ctx context.Context, name string) (err error) {
 	return err
 }
 
-func (c *Client) UserChangePassword(ctx context.Context, username, oldPassword, newPassword string) (err error) {
+func (c *Client) UserChangePassword(ctx context.Context, name, oldPassword, newPassword string) (err error) {
+	if name == "" {
+		return errors.New("user name is empty")
+	}
+
+	if oldPassword == "" {
+		return errors.New("user old password is empty")
+	}
+
+	if newPassword == "" {
+		return errors.New("user new password is empty")
+	}
+
 	oldPassword = HashPassword([]byte(oldPassword))
 	newPassword = HashPassword([]byte(newPassword))
 
@@ -72,7 +101,7 @@ func (c *Client) UserChangePassword(ctx context.Context, username, oldPassword, 
 		"EncryptType": "MD5",
 		"NewPassWord": newPassword,
 		"PassWord":    oldPassword,
-		"UserName":    username,
+		"UserName":    name,
 	})
 
 	return nil
