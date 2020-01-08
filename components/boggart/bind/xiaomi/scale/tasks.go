@@ -33,7 +33,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 
 		// если метрика снята после до установки профиля, то она может относится к другому профилю
 		// и испортит показатели текущего профиля
-		if dt.Before(measureStartDatetime) {
+		if !dt.After(measureStartDatetime) {
 			continue
 		}
 

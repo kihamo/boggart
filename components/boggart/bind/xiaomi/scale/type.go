@@ -1,6 +1,8 @@
 package scale
 
 import (
+	"time"
+
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/protocols/bluetooth"
 	"github.com/kihamo/boggart/providers/xiaomi/scale"
@@ -46,6 +48,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		config:   config,
 		provider: provider,
 	}
+	bind.measureStartDatetime.Set(time.Now())
 	bind.SetSerialNumber(sn)
 
 	if len(config.Profiles) > 0 {
