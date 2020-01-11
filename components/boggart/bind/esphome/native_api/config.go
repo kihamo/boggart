@@ -1,4 +1,4 @@
-package esphome
+package native_api
 
 import (
 	"time"

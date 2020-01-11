@@ -6,7 +6,7 @@
 // locales/ru/LC_MESSAGES/widget.mo
 // DO NOT EDIT!
 
-package esphome
+package native_api
 
 import (
 	"bytes"

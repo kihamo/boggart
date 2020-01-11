@@ -1,11 +1,11 @@
-package esphome
+package native_api
 
 import (
 	"strconv"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/providers/esphome"
-	"github.com/kihamo/boggart/providers/esphome/native_api"
+	api "github.com/kihamo/boggart/providers/esphome/native_api"
 )
 
 type Type struct {
@@ -22,7 +22,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	bind := &Bind{
 		config: config,
-		provider: native_api.New(config.Address, config.Password).
+		provider: api.New(config.Address, config.Password).
 			WithClientID("Boggart bind").
 			WithDebug(config.Debug),
 		ota: esphome.NewOTA(otaAddress, config.OTAPassword),

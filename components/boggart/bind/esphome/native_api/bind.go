@@ -1,4 +1,4 @@
-package esphome
+package native_api
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/providers/esphome"
-	"github.com/kihamo/boggart/providers/esphome/native_api"
+	api "github.com/kihamo/boggart/providers/esphome/native_api"
 	"github.com/kihamo/boggart/providers/wifiled"
 	"go.uber.org/multierr"
 )
@@ -24,7 +24,7 @@ type Bind struct {
 	boggart.BindMQTT
 
 	config   *Config
-	provider *native_api.Client
+	provider *api.Client
 	ota      *esphome.OTA
 }
 
@@ -41,7 +41,7 @@ func (b *Bind) EntityByObjectID(ctx context.Context, objectID string) (proto.Mes
 	objectIDReplace := mqtt.NameReplace(objectID)
 
 	for _, message := range messages {
-		if e, ok := message.(native_api.MessageEntity); ok && mqtt.NameReplace(e.GetObjectId()) == objectIDReplace {
+		if e, ok := message.(api.MessageEntity); ok && mqtt.NameReplace(e.GetObjectId()) == objectIDReplace {
 			return message, nil
 		}
 	}
@@ -63,7 +63,7 @@ func (b *Bind) States(ctx context.Context, messages ...proto.Message) (map[uint3
 
 	entitiesKeys := make(map[uint32]struct{}, length)
 	for _, message := range messages {
-		e, ok := message.(native_api.MessageState)
+		e, ok := message.(api.MessageState)
 		if !ok {
 			return nil, errors.New("input message " + proto.MessageName(message) + " not implement MessageState interface")
 		}
@@ -76,7 +76,7 @@ func (b *Bind) States(ctx context.Context, messages ...proto.Message) (map[uint3
 	for {
 		select {
 		case message := <-chMessage:
-			e, ok := message.(native_api.MessageState)
+			e, ok := message.(api.MessageState)
 			if !ok {
 				return states, errors.New("output message " + proto.MessageName(message) + " not implement MessageState interface")
 			}
@@ -107,20 +107,20 @@ func (b *Bind) syncState(ctx context.Context, messages ...proto.Message) error {
 		return err
 	}
 
-	entities := make(map[uint32]native_api.MessageEntity)
+	entities := make(map[uint32]api.MessageEntity)
 	for _, message := range messages {
-		if e, ok := message.(native_api.MessageEntity); ok {
+		if e, ok := message.(api.MessageEntity); ok {
 			entities[e.GetKey()] = e
 		}
 	}
 
 	for _, state := range states {
-		messageState, ok := state.(native_api.MessageState)
+		messageState, ok := state.(api.MessageState)
 		if !ok {
 			continue
 		}
 
-		var entity native_api.MessageEntity
+		var entity api.MessageEntity
 		entity, ok = entities[messageState.GetKey()]
 		if !ok {
 			continue
@@ -128,13 +128,13 @@ func (b *Bind) syncState(ctx context.Context, messages ...proto.Message) error {
 
 		objectID := entity.GetObjectId()
 
-		if stateName, e := native_api.State(entity.(proto.Message), state, false); e == nil {
+		if stateName, e := api.State(entity.(proto.Message), state, false); e == nil {
 			if e = b.MQTTPublishAsync(ctx, b.config.TopicState.Format(sn, objectID), stateName); e != nil {
 				err = multierr.Append(err, e)
 			}
 
 			switch st := state.(type) {
-			case *native_api.LightStateResponse:
+			case *api.LightStateResponse:
 				color := wifiled.Color{
 					Red:       uint8(st.Red * 255),
 					Green:     uint8(st.Green * 255),

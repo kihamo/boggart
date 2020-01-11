@@ -1,4 +1,4 @@
-package esphome
+package native_api
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/golang/protobuf/proto"
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/providers/esphome/native_api"
+	api "github.com/kihamo/boggart/providers/esphome/native_api"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
@@ -42,8 +42,8 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			t.NotFound(w, r)
 		}
 
-		if native_api.EntityType(entity) == native_api.EntityTypeLight {
-			t.handleLight(w, r, bind, entity.(*native_api.ListEntitiesLightResponse))
+		if api.EntityType(entity) == api.EntityTypeLight {
+			t.handleLight(w, r, bind, entity.(*api.ListEntitiesLightResponse))
 		}
 
 	case "state":
@@ -94,7 +94,7 @@ func (t Type) handleIndex(w *dashboard.Response, r *dashboard.Request, bind *Bin
 				))
 			} else {
 				for _, message := range messages {
-					e, ok := message.(native_api.MessageEntity)
+					e, ok := message.(api.MessageEntity)
 					if !ok {
 						continue
 					}
@@ -102,13 +102,13 @@ func (t Type) handleIndex(w *dashboard.Response, r *dashboard.Request, bind *Bin
 					entities[e.GetKey()] = &entityRow{
 						ObjectID: e.GetObjectId(),
 						Name:     e.GetName(),
-						Type:     native_api.EntityType(message),
+						Type:     api.EntityType(message),
 						Entity:   message,
 					}
 				}
 
 				for _, message := range states {
-					s, ok := message.(native_api.MessageState)
+					s, ok := message.(api.MessageState)
 					if !ok {
 						continue
 					}
@@ -120,7 +120,7 @@ func (t Type) handleIndex(w *dashboard.Response, r *dashboard.Request, bind *Bin
 						continue
 					}
 
-					row.State, err = native_api.State(row.Entity, message, true)
+					row.State, err = api.State(row.Entity, message, true)
 					if err != nil {
 						r.Session().FlashBag().Notice(t.Translate(ctx,
 							"Unknown state type %s for entity with key %d",
@@ -139,7 +139,7 @@ func (t Type) handleIndex(w *dashboard.Response, r *dashboard.Request, bind *Bin
 	t.Render(ctx, "index", vars)
 }
 
-func (t Type) handleLight(w *dashboard.Response, r *dashboard.Request, bind *Bind, entity *native_api.ListEntitiesLightResponse) {
+func (t Type) handleLight(w *dashboard.Response, r *dashboard.Request, bind *Bind, entity *api.ListEntitiesLightResponse) {
 	ctx := r.Context()
 
 	if r.IsPost() {
@@ -147,7 +147,7 @@ func (t Type) handleLight(w *dashboard.Response, r *dashboard.Request, bind *Bin
 		if err != nil {
 			r.Session().FlashBag().Error(t.Translate(ctx, "Parse form failed with error %s", "", err.Error()))
 		} else {
-			cmd := &native_api.LightCommandRequest{
+			cmd := &api.LightCommandRequest{
 				Key: entity.Key,
 			}
 
@@ -278,70 +278,70 @@ func (t Type) handleState(w *dashboard.Response, r *dashboard.Request, bind *Bin
 
 	ctx := r.Context()
 
-	switch native_api.EntityType(entity) {
+	switch api.EntityType(entity) {
 	// TODO: CoverCommand
 
-	case native_api.EntityTypeClimate:
+	case api.EntityTypeClimate:
 		v, err := strconv.ParseUint(state, 10, 64)
 		if err != nil {
 			t.NotFound(w, r)
 			return
 		}
 
-		s := native_api.ClimateMode(v)
+		s := api.ClimateMode(v)
 
 		switch s {
-		case native_api.ClimateMode_CLIMATE_MODE_OFF:
-		case native_api.ClimateMode_CLIMATE_MODE_AUTO:
-		case native_api.ClimateMode_CLIMATE_MODE_COOL:
-		case native_api.ClimateMode_CLIMATE_MODE_HEAT:
+		case api.ClimateMode_CLIMATE_MODE_OFF:
+		case api.ClimateMode_CLIMATE_MODE_AUTO:
+		case api.ClimateMode_CLIMATE_MODE_COOL:
+		case api.ClimateMode_CLIMATE_MODE_HEAT:
 			// skip
 		default:
 			t.NotFound(w, r)
 			return
 		}
 
-		err = bind.provider.ClimateCommand(ctx, &native_api.ClimateCommandRequest{
-			Key:     entity.(*native_api.ListEntitiesClimateResponse).Key,
+		err = bind.provider.ClimateCommand(ctx, &api.ClimateCommandRequest{
+			Key:     entity.(*api.ListEntitiesClimateResponse).Key,
 			HasMode: true,
 			Mode:    s,
 		})
 
-	case native_api.EntityTypeFan:
+	case api.EntityTypeFan:
 		s, err := strconv.ParseBool(state)
 		if err != nil {
 			t.NotFound(w, r)
 			return
 		}
 
-		err = bind.provider.FanCommand(ctx, &native_api.FanCommandRequest{
-			Key:      entity.(*native_api.ListEntitiesBinarySensorResponse).Key,
+		err = bind.provider.FanCommand(ctx, &api.FanCommandRequest{
+			Key:      entity.(*api.ListEntitiesBinarySensorResponse).Key,
 			HasState: true,
 			State:    s,
 		})
 
-	case native_api.EntityTypeLight:
+	case api.EntityTypeLight:
 		s, err := strconv.ParseBool(state)
 		if err != nil {
 			t.NotFound(w, r)
 			return
 		}
 
-		err = bind.provider.LightCommand(ctx, &native_api.LightCommandRequest{
-			Key:      entity.(*native_api.ListEntitiesLightResponse).Key,
+		err = bind.provider.LightCommand(ctx, &api.LightCommandRequest{
+			Key:      entity.(*api.ListEntitiesLightResponse).Key,
 			HasState: true,
 			State:    s,
 		})
 
-	case native_api.EntityTypeSwitch:
+	case api.EntityTypeSwitch:
 		s, err := strconv.ParseBool(state)
 		if err != nil {
 			t.NotFound(w, r)
 			return
 		}
 
-		err = bind.provider.SwitchCommand(ctx, &native_api.SwitchCommandRequest{
-			Key:   entity.(*native_api.ListEntitiesSwitchResponse).Key,
+		err = bind.provider.SwitchCommand(ctx, &api.SwitchCommandRequest{
+			Key:   entity.(*api.ListEntitiesSwitchResponse).Key,
 			State: s,
 		})
 

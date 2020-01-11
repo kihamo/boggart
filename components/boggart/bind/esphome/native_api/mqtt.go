@@ -1,4 +1,4 @@
-package esphome
+package native_api
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
-	"github.com/kihamo/boggart/providers/esphome/native_api"
+	api "github.com/kihamo/boggart/providers/esphome/native_api"
 	"github.com/kihamo/boggart/providers/wifiled"
 )
 
@@ -39,24 +39,24 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return err
 			}
 
-			switch native_api.EntityType(entity) {
-			case native_api.EntityTypeFan:
-				err = b.provider.FanCommand(ctx, &native_api.FanCommandRequest{
-					Key:      entity.(native_api.MessageEntity).GetKey(),
+			switch api.EntityType(entity) {
+			case api.EntityTypeFan:
+				err = b.provider.FanCommand(ctx, &api.FanCommandRequest{
+					Key:      entity.(api.MessageEntity).GetKey(),
 					HasState: true,
 					State:    message.Bool(),
 				})
 
-			case native_api.EntityTypeLight:
-				err = b.provider.LightCommand(ctx, &native_api.LightCommandRequest{
-					Key:      entity.(native_api.MessageEntity).GetKey(),
+			case api.EntityTypeLight:
+				err = b.provider.LightCommand(ctx, &api.LightCommandRequest{
+					Key:      entity.(api.MessageEntity).GetKey(),
 					HasState: true,
 					State:    message.Bool(),
 				})
 
-			case native_api.EntityTypeSwitch:
-				err = b.provider.SwitchCommand(ctx, &native_api.SwitchCommandRequest{
-					Key:   entity.(native_api.MessageEntity).GetKey(),
+			case api.EntityTypeSwitch:
+				err = b.provider.SwitchCommand(ctx, &api.SwitchCommandRequest{
+					Key:   entity.(api.MessageEntity).GetKey(),
 					State: message.Bool(),
 				})
 			}
@@ -79,7 +79,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return err
 			}
 
-			if native_api.EntityType(entity) != native_api.EntityTypeLight {
+			if api.EntityType(entity) != api.EntityTypeLight {
 				return nil
 			}
 
@@ -89,17 +89,17 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			}
 
 			var (
-				state *native_api.LightStateResponse
-				key   = entity.(native_api.MessageEntity).GetKey()
+				state *api.LightStateResponse
+				key   = entity.(api.MessageEntity).GetKey()
 			)
 
 			if s, ok := states[key]; !ok {
 				return errors.New("failed get entity state")
 			} else {
-				state = s.(*native_api.LightStateResponse)
+				state = s.(*api.LightStateResponse)
 			}
 
-			cmd := &native_api.LightCommandRequest{
+			cmd := &api.LightCommandRequest{
 				Key:      key,
 				HasRgb:   true,
 				HasWhite: true,
@@ -150,19 +150,19 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return err
 			}
 
-			switch native_api.EntityType(entity) {
-			case native_api.EntityTypeFan:
-				err = b.provider.FanCommand(ctx, &native_api.FanCommandRequest{
-					Key:      entity.(native_api.MessageEntity).GetKey(),
+			switch api.EntityType(entity) {
+			case api.EntityTypeFan:
+				err = b.provider.FanCommand(ctx, &api.FanCommandRequest{
+					Key:      entity.(api.MessageEntity).GetKey(),
 					HasState: true,
 					State:    message.Bool(),
 				})
 
-			case native_api.EntityTypeLight:
+			case api.EntityTypeLight:
 				var (
-					state   *native_api.LightStateResponse
-					light   = entity.(native_api.MessageEntity)
-					cmd     = &native_api.LightCommandRequest{}
+					state   *api.LightStateResponse
+					light   = entity.(api.MessageEntity)
+					cmd     = &api.LightCommandRequest{}
 					request struct {
 						State            *bool   `json:"state,omitempty"`
 						Brightness       *uint8  `json:"brightness,omitempty"`
@@ -185,7 +185,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				if s, ok := states[light.GetKey()]; !ok {
 					return errors.New("failed get entity state")
 				} else {
-					state = s.(*native_api.LightStateResponse)
+					state = s.(*api.LightStateResponse)
 				}
 
 				if err := message.UnmarshalJSON(&request); err == nil {
@@ -331,9 +331,9 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 				err = b.provider.LightCommand(ctx, cmd)
 
-			case native_api.EntityTypeSwitch:
-				err = b.provider.SwitchCommand(ctx, &native_api.SwitchCommandRequest{
-					Key:   entity.(native_api.MessageEntity).GetKey(),
+			case api.EntityTypeSwitch:
+				err = b.provider.SwitchCommand(ctx, &api.SwitchCommandRequest{
+					Key:   entity.(api.MessageEntity).GetKey(),
 					State: message.Bool(),
 				})
 			}
