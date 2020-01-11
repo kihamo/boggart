@@ -1,0 +1,64 @@
+{{ define "content" }}
+
+{{ if .components }}
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_content">
+                <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>{{ i18n "ID" . }}</th>
+                            <th>{{ i18n "Type" . }}</th>
+                            <th>{{ i18n "Name" . }}</th>
+                            <th>{{ i18n "State" . }}</th>
+                            <th>{{ i18n "Actions" . }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{ range $component := .components }}
+                        <tr>
+                            <td>{{ $component.GetID }}</td>
+                            <td>{{ $component.GetType }}</td>
+                            <td>{{ $component.GetName }}</td>
+                            <td>{{ $component.GetState }}</td>
+                            <td>
+                                {{ if ne $component.GetCommandTopic.String "" }}
+                                <div class="btn-group" role="group">
+                                    {{ if or (eq $component.GetType.String "light") (eq $component.GetType.String "switch") }}
+                                        {{ if eq $component.GetState "ON" }}
+                                            <a href="{{ $.Request.URL.Path }}?action=command&component={{ $component.GetID }}&cmd=OFF" class="btn btn-danger btn-icon btn-xs">
+                                                <i class="glyphicon glyphicon-stop" title="{{ i18n "Switch off" $ }}"></i>
+                                            </a>
+                                        {{ else }}
+                                            <a href="{{ $.Request.URL.Path }}?action=command&component={{ $component.GetID }}&cmd=ON" class="btn btn-danger btn-icon btn-xs">
+                                                <i class="glyphicon glyphicon-play" title="{{ i18n "Turn on" $ }}"></i>
+                                            </a>
+                                        {{ end }}
+                                    {{ end }}
+                                </div>
+                                {{ end }}
+                            </td>
+                        </tr>
+                        {{ end }}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
+
+{{ end }}
+
+{{ define "head" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" false) }}
+{{ end }}
+
+{{ define "js" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net/js/jquery.dataTables.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive/js/dataTables.responsive.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
+{{ end }}
