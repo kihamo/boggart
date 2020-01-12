@@ -71,6 +71,7 @@
             <th>{{ i18n "Name" . }}</th>
             <th>{{ i18n "Begin time" . }}</th>
             <th>{{ i18n "End time" . }}</th>
+            <th>{{ i18n "Duration" . }}</th>
             <th>{{ i18n "Size" . }}</th>
             <th>{{ i18n "Actions" . }}</th>
         </tr>
@@ -81,6 +82,7 @@
             <td>{{ $file.FileName }}</td>
             <td><script type="application/javascript">document.write(dateToString('{{ $file.BeginTime.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
             <td><script type="application/javascript">document.write(dateToString('{{ $file.EndTime.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+            <td>{{ $file.Duration }}</td>
             <td>{{ human_bytes $file.FileLength }}</td>
             <td class="text-center">
                 <div class="btn-group btn-group-xs">

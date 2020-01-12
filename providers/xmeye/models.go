@@ -1,5 +1,9 @@
 package xmeye
 
+import (
+	"time"
+)
+
 type Response struct {
 	Name      string
 	Ret       uint64
@@ -31,6 +35,10 @@ type FileSearch struct {
 	FileLength Uint32
 	FileName   string
 	SerialNo   uint32
+}
+
+func (f FileSearch) Duration() time.Duration {
+	return f.EndTime.Sub(f.BeginTime.Time)
 }
 
 type SystemInfo struct {
