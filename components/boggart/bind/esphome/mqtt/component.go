@@ -1,4 +1,4 @@
-package components
+package mqtt
 
 import (
 	"github.com/kihamo/boggart/components/mqtt"
@@ -30,5 +30,6 @@ type Component interface {
 	GetName() string
 	GetState() string
 	GetCommandTopic() mqtt.Topic
+	GetDevice() Device
 	Subscribers() []mqtt.Subscriber
 }

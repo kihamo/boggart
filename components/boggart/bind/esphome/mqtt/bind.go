@@ -6,7 +6,6 @@ import (
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/bind/esphome/mqtt/components"
 )
 
 type Bind struct {
@@ -30,9 +29,9 @@ func (b *Bind) Close() (err error) {
 	return nil
 }
 
-func (b *Bind) Component(id string) (cmp components.Component) {
+func (b *Bind) Component(id string) (cmp Component) {
 	b.components.Range(func(_, value interface{}) bool {
-		if c := value.(components.Component); c.GetID() == id {
+		if c := value.(Component); c.GetID() == id {
 			cmp = c
 			return false
 		}
@@ -43,19 +42,23 @@ func (b *Bind) Component(id string) (cmp components.Component) {
 	return cmp
 }
 
-func (b *Bind) Components() []components.Component {
-	list := make([]components.Component, 0)
+func (b *Bind) Components() []Component {
+	list := make([]Component, 0)
 
 	b.components.Range(func(_, value interface{}) bool {
-		list = append(list, value.(components.Component))
+		list = append(list, value.(Component))
 		return true
 	})
 
 	return list
 }
 
-func (b *Bind) register(c components.Component) (err error) {
+func (b *Bind) register(c Component) (err error) {
 	b.components.Store(c.GetUniqueID(), c)
+
+	if mac := c.GetDevice().MAC(); mac != nil {
+		b.SetSerialNumber(mac.String())
+	}
 
 	subscribers := c.Subscribers()
 	if len(subscribers) > 0 {
