@@ -15,6 +15,14 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		config.TopicLog = config.TopicPrefix + "/debug"
 	}
 
+	if config.TopicBirth == "" {
+		config.TopicBirth = config.TopicPrefix + "/status"
+	}
+
+	if config.TopicWill == "" {
+		config.TopicWill = config.TopicPrefix + "/status"
+	}
+
 	bind := &Bind{
 		config: config,
 	}

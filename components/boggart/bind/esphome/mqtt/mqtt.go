@@ -53,5 +53,19 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			return b.register(component)
 		}),
+		mqtt.NewSubscriber(b.config.TopicBirth, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+			if message.String() == b.config.BirthMessage {
+				b.status.True()
+			}
+
+			return nil
+		}),
+		mqtt.NewSubscriber(b.config.TopicWill, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+			if message.String() == b.config.WillMessage {
+				b.status.False()
+			}
+
+			return nil
+		}),
 	}
 }

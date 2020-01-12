@@ -4,6 +4,7 @@ import (
 	"errors"
 	"sync"
 
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/bind/esphome/mqtt/components"
 )
@@ -14,6 +15,7 @@ type Bind struct {
 
 	config     *Config
 	components sync.Map
+	status     atomic.BoolNull
 }
 
 func (b *Bind) Close() (err error) {
