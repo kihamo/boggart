@@ -23,9 +23,7 @@ func NewComponentBinarySensor(id string) *ComponentBinarySensor {
 	return component
 }
 
-func (c *ComponentBinarySensor) SetState(message mqtt.Message) {
-	c.ComponentBase.SetState(message)
-
+func (c *ComponentBinarySensor) SetState(message mqtt.Message) error {
 	var val float64
 
 	if c.PayloadOn != "" && message.String() == c.PayloadOn {
@@ -35,4 +33,6 @@ func (c *ComponentBinarySensor) SetState(message mqtt.Message) {
 	}
 
 	metricState.With("serial_number", c.Device.MAC().String()).With("component", c.ID).Set(val)
+
+	return c.ComponentBase.SetState(message)
 }

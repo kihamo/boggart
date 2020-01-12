@@ -28,8 +28,9 @@ type Component interface {
 	GetType() ComponentType
 	GetUniqueID() string
 	GetName() string
-	GetState() string
+	GetState() interface{}
 	GetCommandTopic() mqtt.Topic
 	GetDevice() Device
+	CommandToPayload(cmd interface{}) interface{}
 	Subscribers() []mqtt.Subscriber
 }

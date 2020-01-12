@@ -12,8 +12,8 @@ func NewComponentSensor(id string) *ComponentSensor {
 	}
 }
 
-func (c *ComponentSensor) GetState() string {
-	s := c.ComponentBase.GetState()
+func (c *ComponentSensor) GetState() interface{} {
+	s := c.ComponentBase.GetState().(string)
 	if c.UnitOfMeasurement != "" {
 		s += " " + c.UnitOfMeasurement
 	}

@@ -45,7 +45,7 @@ type ComponentBase struct {
 	subscribersOnce sync.Once
 	subscribers     []mqtt.Subscriber
 	state           atomic.Value
-	setState        func(mqtt.Message)
+	setState        func(mqtt.Message) error
 }
 
 func NewComponentBase(id string, t ComponentType) *ComponentBase {
@@ -74,7 +74,7 @@ func (c *ComponentBase) GetName() string {
 	return c.Name
 }
 
-func (c *ComponentBase) GetState() string {
+func (c *ComponentBase) GetState() interface{} {
 	if s := c.state.Load(); s != nil {
 		return s.(string)
 	}
@@ -90,12 +90,18 @@ func (c *ComponentBase) GetDevice() Device {
 	return c.Device
 }
 
-func (c *ComponentBase) SetState(message mqtt.Message) {
+func (c *ComponentBase) SetState(message mqtt.Message) error {
 	c.state.Store(message.String())
 
 	if val, err := strconv.ParseFloat(message.String(), 64); err == nil {
 		metricState.With("serial_number", c.Device.MAC().String()).With("component", c.ID).Set(val)
 	}
+
+	return nil
+}
+
+func (c *ComponentBase) CommandToPayload(cmd interface{}) interface{} {
+	return cmd
 }
 
 func (c *ComponentBase) Subscribers() []mqtt.Subscriber {
@@ -104,8 +110,7 @@ func (c *ComponentBase) Subscribers() []mqtt.Subscriber {
 
 		if c.StateTopic != "" {
 			c.subscribers = append(c.subscribers, mqtt.NewSubscriber(c.StateTopic, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-				c.setState(message)
-				return nil
+				return c.setState(message)
 			}))
 		}
 	})

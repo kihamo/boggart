@@ -23,13 +23,13 @@ func NewComponentSwitch(id string) *ComponentSwitch {
 	return component
 }
 
-func (c *ComponentSwitch) SetState(message mqtt.Message) {
-	c.ComponentBase.SetState(message)
-
+func (c *ComponentSwitch) SetState(message mqtt.Message) error {
 	var val float64
 	if bytes.Equal(message.Payload(), stateON) {
 		val = 1
 	}
 
 	metricState.With("serial_number", c.Device.MAC().String()).With("component", c.ID).Set(val)
+
+	return c.ComponentBase.SetState(message)
 }

@@ -25,13 +25,19 @@
                             <td>
                                 {{ if ne $component.GetCommandTopic.String "" }}
                                 <div class="btn-group" role="group">
+                                    {{ if eq $component.GetType.String "light" }}
+                                        <a href="{{ $.Request.URL.Path }}?action=component&id={{ $component.GetID }}" class="btn btn-info btn-icon btn-xs">
+                                            <i class="glyphicon glyphicon-eye-open" title="{{ i18n "Details" $ }}"></i>
+                                        </a>
+                                    {{ end }}
+
                                     {{ if or (eq $component.GetType.String "light") (eq $component.GetType.String "switch") }}
-                                        {{ if eq $component.GetState "ON" }}
-                                            <a href="{{ $.Request.URL.Path }}?action=command&component={{ $component.GetID }}&cmd=OFF" class="btn btn-danger btn-icon btn-xs">
+                                        {{ if eq (printf "%v" $component.GetState) "ON" }}
+                                            <a href="{{ $.Request.URL.Path }}?action=command&id={{ $component.GetID }}&cmd=OFF" class="btn btn-danger btn-icon btn-xs">
                                                 <i class="glyphicon glyphicon-stop" title="{{ i18n "Switch off" $ }}"></i>
                                             </a>
                                         {{ else }}
-                                            <a href="{{ $.Request.URL.Path }}?action=command&component={{ $component.GetID }}&cmd=ON" class="btn btn-danger btn-icon btn-xs">
+                                            <a href="{{ $.Request.URL.Path }}?action=command&id={{ $component.GetID }}&cmd=ON" class="btn btn-danger btn-icon btn-xs">
                                                 <i class="glyphicon glyphicon-play" title="{{ i18n "Turn on" $ }}"></i>
                                             </a>
                                         {{ end }}
