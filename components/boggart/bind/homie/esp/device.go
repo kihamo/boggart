@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
@@ -53,20 +52,16 @@ func (b *Bind) deviceAttributesSubscriber(_ context.Context, _ mqtt.Component, m
 	switch attributeName {
 	case "online": // 2.x
 		if b.ProtocolVersionConstraint(">= 2.0, < 3.0") {
-			if message.IsTrue() {
-				b.UpdateStatus(boggart.BindStatusOnline)
-			} else {
-				b.UpdateStatus(boggart.BindStatusOffline)
-			}
+			b.updateStatus(message.Bool())
 		}
 
 	case "state": // 3.x
 		if b.ProtocolVersionConstraint(">= 3.0") {
 			switch message.String() {
 			case deviceStateReady:
-				b.UpdateStatus(boggart.BindStatusOnline)
+				b.updateStatus(true)
 			default:
-				b.UpdateStatus(boggart.BindStatusOffline)
+				b.updateStatus(false)
 			}
 		}
 	}

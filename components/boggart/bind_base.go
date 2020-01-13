@@ -11,21 +11,19 @@ import (
 )
 
 type BindBase struct {
-	statusGetter BindStatusGetter
-	statusSetter BindStatusSetter
-	mutex        sync.RWMutex
-	logger       logging.Logger
-	serialNumber string
+	statusManager BindStatusManager
+	mutex         sync.RWMutex
+	logger        logging.Logger
+	serialNumber  string
 }
 
 func (b *BindBase) Run() error {
 	return nil
 }
 
-func (b *BindBase) SetStatusManager(getter BindStatusGetter, setter BindStatusSetter) {
+func (b *BindBase) SetStatusManager(manager BindStatusManager) {
 	b.mutex.Lock()
-	b.statusGetter = getter
-	b.statusSetter = setter
+	b.statusManager = manager
 	b.mutex.Unlock()
 }
 
@@ -50,8 +48,8 @@ func (b *BindBase) Status() BindStatus {
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()
 
-	if b.statusGetter != nil {
-		return b.statusGetter()
+	if b.statusManager != nil {
+		return b.statusManager()
 	}
 
 	return BindStatusUnknown
@@ -87,14 +85,6 @@ func (b *BindBase) IsStatusRemoving() bool {
 
 func (b *BindBase) IsStatusRemoved() bool {
 	return b.IsStatus(BindStatusRemoved)
-}
-
-func (b *BindBase) UpdateStatus(status BindStatus) {
-	b.mutex.RLock()
-	if b.statusSetter != nil {
-		b.statusSetter(status)
-	}
-	b.mutex.RUnlock()
 }
 
 func (b *BindBase) WrapTaskIsOnline(fn func(context.Context) error) *task.FunctionTask {
@@ -213,7 +203,7 @@ func CheckSerialNumberInMQTTTopic(bind Bind, topic mqtt.Topic, offset int) bool 
 	return CheckValueInMQTTTopic(topic, mqtt.NameReplace(bind.SerialNumber()), offset)
 }
 
-func WrapMQTTSubscribeDeviceIsOnline(status BindStatusGetter, callback mqtt.MessageHandler) mqtt.MessageHandler {
+func WrapMQTTSubscribeDeviceIsOnline(status BindStatusManager, callback mqtt.MessageHandler) mqtt.MessageHandler {
 	return func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
 		if status() == BindStatusOnline {
 			return callback(ctx, client, message)

@@ -26,8 +26,6 @@ const (
 	managerStatusNotReady = int64(iota)
 	managerStatusReady
 	managerStatusClose
-
-	MQTTPublishTopicBindStatus mqtt.Topic = boggart.ComponentName + "/bind/+/status"
 )
 
 type bindTask interface {
@@ -36,26 +34,27 @@ type bindTask interface {
 }
 
 type Manager struct {
-	status    int64
-	storage   *sync.Map
-	dashboard dashboard.Component
-	i18n      i18n.Component
-	mqtt      mqtt.Component
-	workers   workers.Component
-	logger    logging.Logger
-	listeners *manager.ListenersManager
+	status          int64
+	storage         sync.Map
+	dashboard       dashboard.Component
+	i18n            i18n.Component
+	mqtt            mqtt.Component
+	workers         workers.Component
+	logger          logging.Logger
+	listeners       *manager.ListenersManager
+	topicBindStatus mqtt.Topic
 }
 
-func NewManager(dashboard dashboard.Component, i18n i18n.Component, mqtt mqtt.Component, workers workers.Component, logger logging.Logger, listeners *manager.ListenersManager) *Manager {
+func NewManager(dashboard dashboard.Component, i18n i18n.Component, mqtt mqtt.Component, workers workers.Component, logger logging.Logger, listeners *manager.ListenersManager, topicBindStatus mqtt.Topic) *Manager {
 	return &Manager{
-		status:    managerStatusNotReady,
-		storage:   new(sync.Map),
-		dashboard: dashboard,
-		i18n:      i18n,
-		mqtt:      mqtt,
-		workers:   workers,
-		logger:    logger,
-		listeners: listeners,
+		status:          managerStatusNotReady,
+		dashboard:       dashboard,
+		i18n:            i18n,
+		mqtt:            mqtt,
+		workers:         workers,
+		logger:          logger,
+		listeners:       listeners,
+		topicBindStatus: topicBindStatus,
 	}
 }
 
@@ -107,15 +106,14 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 		config:      config,
 	}
 
-	statusUpdate := m.itemStatusUpdate(bindItem)
-	statusUpdate(boggart.BindStatusInitializing)
+	m.itemStatusUpdate(bindItem, boggart.BindStatusInitializing)
 
 	// init logger
 	if bindLogger, ok := bind.(boggart.BindLogger); ok {
 		bindLogger.SetLogger(logging.NewLazyLogger(m.logger, m.logger.Name()+"."+id))
 	}
 
-	bind.SetStatusManager(bindItem.Status, m.bindStatusUpdate(bindItem))
+	bind.SetStatusManager(bindItem.Status)
 
 	// register mqtt
 	if mqttClient, ok := bind.(boggart.BindHasMQTTClient); ok {
@@ -129,7 +127,7 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 	// TODO: обвешать подписки враппером, что бы только в online можно было посылать
 	for _, subscriber := range bindItem.MQTTSubscribers() {
 		if err := m.mqtt.SubscribeSubscriber(subscriber); err != nil {
-			statusUpdate(boggart.BindStatusUninitialized)
+			m.itemStatusUpdate(bindItem, boggart.BindStatusUninitialized)
 			return nil, err
 		}
 	}
@@ -151,7 +149,7 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 			}
 
 			if err != nil {
-				statusUpdate(boggart.BindStatusOffline)
+				m.itemStatusUpdate(bindItem, boggart.BindStatusOffline)
 
 				m.logger.Error("Readiness probe failure",
 					"type", bindItem.Type(),
@@ -159,7 +157,7 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 					"error", err.Error(),
 				)
 			} else {
-				statusUpdate(boggart.BindStatusOnline)
+				m.itemStatusUpdate(bindItem, boggart.BindStatusOnline)
 			}
 
 			return nil, err
@@ -180,7 +178,7 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 		bindItem.probeReadiness = probeTask
 		tasks = append(tasks, bindItem.probeReadiness)
 	} else {
-		statusUpdate(boggart.BindStatusOnline)
+		m.itemStatusUpdate(bindItem, boggart.BindStatusOnline)
 	}
 
 	if probe, ok := bind.(boggart.BindHasLivenessProbe); ok {
@@ -284,8 +282,7 @@ func (m *Manager) Unregister(id string) error {
 
 	bindItem := d.(*BindItem)
 
-	statusUpdate := m.itemStatusUpdate(bindItem)
-	statusUpdate(boggart.BindStatusRemoving)
+	m.itemStatusUpdate(bindItem, boggart.BindStatusRemoving)
 
 	// unregister mqtt
 	if err := m.mqtt.UnsubscribeSubscribers(bindItem.MQTTSubscribers()); err != nil {
@@ -335,7 +332,7 @@ func (m *Manager) Unregister(id string) error {
 		}
 	}
 
-	statusUpdate(boggart.BindStatusRemoved)
+	m.itemStatusUpdate(bindItem, boggart.BindStatusRemoved)
 	return nil
 }
 
@@ -411,7 +408,7 @@ func (m *Manager) Close() error {
 
 func (m *Manager) MQTTOnConnectHandler(client mqtt.Component, restore bool) {
 	for _, item := range m.BindItems() {
-		topic := MQTTPublishTopicBindStatus.Format(item.ID())
+		topic := m.topicBindStatus.Format(item.ID())
 		err := client.PublishWithoutCache(context.Background(), topic, 1, true, strings.ToLower(item.Status().String()))
 
 		if err != nil {
@@ -459,25 +456,8 @@ func (m *Manager) mqttPublish(topic mqtt.Topic, payload interface{}) {
 	}
 }
 
-func (m *Manager) itemStatusUpdate(item *BindItem) boggart.BindStatusSetter {
-	return func(status boggart.BindStatus) {
-		if ok := item.updateStatus(status); ok {
-			m.mqttPublish(MQTTPublishTopicBindStatus.Format(item.id), strings.ToLower(status.String()))
-		}
-	}
-}
-
-func (m *Manager) bindStatusUpdate(item *BindItem) boggart.BindStatusSetter {
-	return func(status boggart.BindStatus) {
-		switch status {
-		// allow statuses
-		case boggart.BindStatusOnline, boggart.BindStatusOffline, boggart.BindStatusUnknown, boggart.BindStatusRemoved:
-			if ok := item.updateStatus(status); ok {
-				m.mqttPublish(MQTTPublishTopicBindStatus.Format(item.id), strings.ToLower(status.String()))
-			}
-
-		default:
-			m.logger.Error("Deny change status", "status", status.String(), "item-id", item.id)
-		}
+func (m *Manager) itemStatusUpdate(item *BindItem, status boggart.BindStatus) {
+	if ok := item.updateStatus(status); ok {
+		m.mqttPublish(m.topicBindStatus.Format(item.id), strings.ToLower(status.String()))
 	}
 }

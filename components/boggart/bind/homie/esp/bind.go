@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-version"
-	a "github.com/kihamo/boggart/atomic"
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
 )
 
@@ -19,26 +19,26 @@ type Bind struct {
 	boggart.BindMQTT
 
 	config     *Config
-	lastUpdate *a.TimeNull
+	lastUpdate atomic.TimeNull
 
-	deviceAttributes *sync.Map
+	deviceAttributes sync.Map
+	nodes            sync.Map
+	settings         sync.Map
 
-	nodes *sync.Map
-
-	otaEnabled  *a.Bool
-	otaRun      *a.Bool
-	otaWritten  *a.Uint32
-	otaTotal    *a.Uint32
-	otaChecksum *a.String
+	otaEnabled  atomic.Bool
+	otaRun      atomic.Bool
+	otaWritten  atomic.Uint32
+	otaTotal    atomic.Uint32
+	otaChecksum atomic.String
 	otaFlash    chan struct{}
 
-	settings *sync.Map
+	status atomic.BoolNull
 }
 
-func (b *Bind) UpdateStatus(status boggart.BindStatus) {
-	b.BindBase.UpdateStatus(status)
+func (b *Bind) updateStatus(status bool) {
+	b.status.Set(status)
 
-	if b.IsStatusOnline() && b.OTAIsRunning() {
+	if status && b.OTAIsRunning() {
 		b.otaFlash <- struct{}{}
 	}
 }

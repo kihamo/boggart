@@ -21,5 +21,10 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithDefaultFunc(func() interface{} {
 				return mqtt.NameReplace(c.application.Name())
 			}),
+		config.NewVariable(boggart.ConfigMQTTTopicBindStatus, config.ValueTypeString).
+			WithUsage("Boggart MQTT topic bind status").
+			WithDefaultFunc(func() interface{} {
+				return boggart.ComponentName + "/bind/+/status"
+			}),
 	}
 }

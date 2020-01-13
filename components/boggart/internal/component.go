@@ -117,7 +117,8 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 		a.GetComponent(mqtt.ComponentName).(mqtt.Component),
 		a.GetComponent(workers.ComponentName).(workers.Component),
 		logging.NewLazyLogger(c.logger, c.logger.Name()+".bind"),
-		c.listenersManager)
+		c.listenersManager,
+		mqtt.Topic(c.config.String(boggart.ConfigMQTTTopicBindStatus)))
 
 	c.mutex.Lock()
 	c.manager = mgr

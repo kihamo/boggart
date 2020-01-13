@@ -1,10 +1,15 @@
 package esp
 
 import (
+	"time"
+
+	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
 type Config struct {
+	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
+
 	DeviceID                           string     `valid:"required" mapstructure:"device_id" yaml:"device_id"`
 	BaseTopic                          string     `mapstructure:"base_topic" yaml:"base_topic"`
 	TopicBroadcast                     mqtt.Topic `mapstructure:"topic_broadcast" yaml:"topic_broadcast"`
@@ -31,6 +36,10 @@ func (t Type) Config() interface{} {
 	)
 
 	return &Config{
+		BindConfig: boggart.BindConfig{
+			ReadinessPeriod:  time.Second * 15,
+			ReadinessTimeout: time.Second,
+		},
 		BaseTopic:                          "homie",
 		TopicBroadcast:                     "+/$broadcast/+",
 		TopicReset:                         prefixImpl + "reset",

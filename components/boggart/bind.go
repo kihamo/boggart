@@ -40,12 +40,11 @@ type BindItem interface {
 	MQTTPublishes() []mqtt.Topic
 }
 
-type BindStatusGetter func() BindStatus
-type BindStatusSetter func(BindStatus)
+type BindStatusManager func() BindStatus
 
 type Bind interface {
 	Run() error
-	SetStatusManager(BindStatusGetter, BindStatusSetter)
+	SetStatusManager(BindStatusManager)
 	SerialNumber() string
 }
 
