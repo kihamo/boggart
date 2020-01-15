@@ -1,5 +1,5 @@
-hash: 68820b5a82d6bafa418074b0c461a13f1da7619df1e61e7d3159844d6868a8de
-updated: 2020-01-06T19:36:16.746997+03:00
+hash: 02574d3d5a94e8839201ef13dd04fe995627517c19b152dac9389e64f5216e51
+updated: 2020-01-15T00:01:29.484995+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -335,9 +335,9 @@ imports:
   - providers/gitlab
   - providers/gplus
 - name: github.com/mattn/go-colorable
-  version: 98ec13f34aabf44cc914c65a1cfb7b9bc815aef1
+  version: c742d6fb21c22a5bb6f768a683e6782e52fe0311
 - name: github.com/mattn/go-isatty
-  version: 31745d66dd679ac0ac4f8d3ecff168fce6170c6a
+  version: 219d1dc2592ebc2adbddc32cebf5ad273e81fa69
 - name: github.com/mattn/kinako
   version: 332c0a7e205a29536e672337a4bea6c7a96b04c1
   subpackages:
@@ -381,7 +381,7 @@ imports:
 - name: github.com/mourner/suncalc-go
   version: 77cea98fd55e16d1ff6e131b220012679265096b
 - name: github.com/OneOfOne/xxhash
-  version: 8f0be54a8d5ccf68817143d8c996147ec5cbd795
+  version: 85d5025fe15b385888b1886ea99f722f549a6934
 - name: github.com/opentracing-contrib/go-stdlib
   version: c9628a4f0148d7e441a4af66dc0b1653cd941c20
   subpackages:

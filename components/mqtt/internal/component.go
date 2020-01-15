@@ -6,6 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net/url"
 	"reflect"
 	"strconv"
@@ -642,6 +644,12 @@ func (c *Component) convertPayload(payload interface{}) []byte {
 		return []byte(strconv.FormatFloat(value.Seconds(), 'f', -1, 64))
 	case bytes.Buffer:
 		return value.Bytes()
+	case io.Reader:
+		if b, err := ioutil.ReadAll(value); err == nil {
+			return b
+		}
+
+		return []byte(fmt.Sprintf("%v", payload))
 	default:
 		if ref := reflect.ValueOf(value); ref.Kind() == reflect.Ptr {
 			if !ref.Elem().IsValid() {
@@ -651,7 +659,7 @@ func (c *Component) convertPayload(payload interface{}) []byte {
 			return c.convertPayload(ref.Elem().Interface())
 		}
 
-		return []byte(fmt.Sprintf("%s", payload))
+		return []byte(fmt.Sprintf("%v", payload))
 	}
 
 	return nil

@@ -61,7 +61,7 @@ type URL struct {
 }
 
 func (u URL) MarshalText() ([]byte, error) {
-	return []byte(u.String()), nil
+	return u.MarshalBinary()
 }
 
 type Location struct {
