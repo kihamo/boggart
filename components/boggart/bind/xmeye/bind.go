@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/xmeye"
 )
 
@@ -13,7 +14,8 @@ const (
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
+	di.MQTTBind
+	di.WorkersBind
 
 	config         *Config
 	alarmStreaming *xmeye.AlertStreaming
@@ -53,7 +55,7 @@ func (b *Bind) startAlarmStreaming() error {
 					return
 				}
 
-				if err := b.MQTTPublishAsync(ctx, b.config.TopicEvent.Format(b.SerialNumber(), alarm.Channel, alarm.Event), alarm.Status); err != nil {
+				if err := b.MQTTContainer().PublishAsync(ctx, b.config.TopicEvent.Format(b.SerialNumber(), alarm.Channel, alarm.Event), alarm.Status); err != nil {
 					b.Logger().Error("Send alarm to MQTT failed", "error", err.Error())
 				}
 

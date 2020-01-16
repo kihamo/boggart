@@ -169,7 +169,7 @@ func (b *Bind) SetVolume(percent int64) error {
 
 	b.getStream().SetVolume(percent)
 
-	return b.MQTTPublishAsync(context.Background(), b.config.TopicStateVolume, percent)
+	return b.MQTTContainer().PublishAsync(context.Background(), b.config.TopicStateVolume, percent)
 }
 
 func (b *Bind) Mute() bool {
@@ -183,5 +183,5 @@ func (b *Bind) SetMute(mute bool) error {
 
 	b.getStream().SetMute(mute)
 
-	return b.MQTTPublishAsync(context.Background(), b.config.TopicStateMute, mute)
+	return b.MQTTContainer().PublishAsync(context.Background(), b.config.TopicStateMute, mute)
 }

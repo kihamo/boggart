@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/go-workers/task"
 	"github.com/mourner/suncalc-go"
 )
@@ -14,7 +15,8 @@ const (
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
+	di.MQTTBind
+	di.WorkersBind
 
 	config           *Config
 	taskStateUpdater *task.FunctionTask

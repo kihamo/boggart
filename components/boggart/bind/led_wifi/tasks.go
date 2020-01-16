@@ -28,26 +28,26 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 
 	b.SetSerialNumber(strconv.FormatUint(uint64(state.DeviceName), 10))
 
-	if e := b.MQTTPublishAsync(ctx, b.config.TopicStatePower, state.Power); e != nil {
+	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStatePower, state.Power); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTTPublishAsync(ctx, b.config.TopicStateMode, state.Mode); e != nil {
+	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateMode, state.Mode); e != nil {
 		err = multierr.Append(err, err)
 	}
 
-	if e := b.MQTTPublishAsync(ctx, b.config.TopicStateSpeed, state.Speed); e != nil {
+	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateSpeed, state.Speed); e != nil {
 		err = multierr.Append(err, e)
 	}
 
 	// in HEX
-	if e := b.MQTTPublishAsync(ctx, b.config.TopicStateColor, state.Color.String()); e != nil {
+	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateColor, state.Color.String()); e != nil {
 		err = multierr.Append(err, e)
 	}
 
 	// in HSV
 	h, s, v := state.Color.HSV()
-	if e := b.MQTTPublishAsync(ctx, b.config.TopicStateColorHSV, fmt.Sprintf("%d,%.2f,%.2f", h, s, v)); e != nil {
+	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateColorHSV, fmt.Sprintf("%d,%.2f,%.2f", h, s, v)); e != nil {
 		err = multierr.Append(err, e)
 	}
 

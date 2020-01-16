@@ -6,12 +6,15 @@ import (
 	"sync"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/robbiet480/go.nut"
 )
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
+	di.MQTTBind
+	di.WorkersBind
+
 	config    *Config
 	mutex     sync.Mutex
 	variables map[string]interface{}

@@ -5,11 +5,13 @@ import (
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 )
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
+	di.MQTTBind
+	di.WorkersBind
 
 	config *Config
 

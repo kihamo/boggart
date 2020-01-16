@@ -15,6 +15,7 @@ import (
 	"github.com/hajimehoshi/oto"
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 )
 
 const (
@@ -32,7 +33,7 @@ var (
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
+	di.MQTTBind
 	config *Config
 
 	playerStatus *atomic.Int64
@@ -124,7 +125,7 @@ func (b *Bind) setPlayerStatus(status Status) {
 		return
 	}
 
-	_ = b.MQTTPublishAsync(context.Background(), b.config.TopicStateStatus, status.String())
+	_ = b.MQTTContainer().PublishAsync(context.Background(), b.config.TopicStateStatus, status.String())
 }
 
 func (b *Bind) PlayerStatus() Status {

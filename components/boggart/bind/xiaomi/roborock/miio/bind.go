@@ -2,12 +2,14 @@ package miio
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/xiaomi/miio/devices/vacuum"
 )
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
+	di.MQTTBind
+	di.WorkersBind
 
 	config *Config
 	device *vacuum.Device

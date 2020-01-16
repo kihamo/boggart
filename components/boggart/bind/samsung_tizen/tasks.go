@@ -44,8 +44,8 @@ func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
 
 	sn := b.SerialNumber()
 	// TODO:
-	_ = b.MQTTPublishAsync(ctx, b.config.TopicDeviceID.Format(sn), info.Device.ID)
-	_ = b.MQTTPublishAsync(ctx, b.config.TopicDeviceModelName.Format(sn), info.Device.Name)
+	_ = b.MQTTContainer().PublishAsync(ctx, b.config.TopicDeviceID.Format(sn), info.Device.ID)
+	_ = b.MQTTContainer().PublishAsync(ctx, b.config.TopicDeviceModelName.Format(sn), info.Device.Name)
 
 	return nil, nil
 }

@@ -2,6 +2,7 @@ package pulsar
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/pulsar"
 )
 
@@ -11,7 +12,9 @@ const (
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
+	di.MQTTBind
+	di.WorkersBind
+
 	config   *Config
 	provider *pulsar.HeatMeter
 }

@@ -57,16 +57,16 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 	if e == nil {
 		metricBattery.With("serial_number", sn).Set(float64(status.Battery))
 
-		if e := b.MQTTPublishAsync(ctx, b.config.TopicBattery.Format(sn), status.Battery); e != nil {
+		if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicBattery.Format(sn), status.Battery); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTTPublishAsync(ctx, b.config.TopicCleanArea.Format(sn), status.CleanArea); e != nil {
+		if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicCleanArea.Format(sn), status.CleanArea); e != nil {
 			err = multierr.Append(err, e)
 		}
 
 		if status.CleanTime > 0 {
-			if e := b.MQTTPublishAsync(ctx, b.config.TopicCleanTime.Format(sn), status.CleanTime); e != nil {
+			if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicCleanTime.Format(sn), status.CleanTime); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}
@@ -77,25 +77,25 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 	consumables, e := b.device.Consumables(ctx)
 	if e == nil {
 		if consumable, ok := consumables[vacuum.ConsumableFilter]; ok {
-			if e := b.MQTTPublishAsync(ctx, b.config.TopicConsumableFilter.Format(sn), consumable); e != nil {
+			if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicConsumableFilter.Format(sn), consumable); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}
 
 		if consumable, ok := consumables[vacuum.ConsumableBrushMain]; ok {
-			if e := b.MQTTPublishAsync(ctx, b.config.TopicConsumableBrushMain.Format(sn), consumable); e != nil {
+			if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicConsumableBrushMain.Format(sn), consumable); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}
 
 		if consumable, ok := consumables[vacuum.ConsumableBrushSide]; ok {
-			if e := b.MQTTPublishAsync(ctx, b.config.TopicConsumableBrushSide.Format(sn), consumable); e != nil {
+			if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicConsumableBrushSide.Format(sn), consumable); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}
 
 		if consumable, ok := consumables[vacuum.ConsumableSensor]; ok {
-			if e := b.MQTTPublishAsync(ctx, b.config.TopicConsumableSensor.Format(sn), consumable); e != nil {
+			if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicConsumableSensor.Format(sn), consumable); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}

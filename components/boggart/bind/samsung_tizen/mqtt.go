@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/ghthor/gowol"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/providers/samsung/tv"
 )
@@ -20,7 +19,7 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(b.config.TopicPower, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
+			if !b.MQTTContainer().CheckSerialNumberInTopic(message.Topic(), 2) {
 				return nil
 			}
 
@@ -38,8 +37,8 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			return b.client.SendCommand(tv.KeyPower)
 		}),
-		mqtt.NewSubscriber(b.config.TopicKey, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
+		mqtt.NewSubscriber(b.config.TopicKey, 0, b.MQTTContainer().WrapSubscribeDeviceIsOnline(func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+			if !b.MQTTContainer().CheckSerialNumberInTopic(message.Topic(), 2) {
 				return nil
 			}
 

@@ -26,14 +26,14 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 
 	sn := b.SerialNumber()
 
-	if e := b.MQTTPublishAsync(ctx, b.config.TopicState, state); e != nil {
+	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicState, state); e != nil {
 		err = multierr.Append(err, e)
 	}
 
 	if power, e := b.Power(); e == nil {
 		metricPower.With("serial_number", sn).Set(power)
 
-		if e := b.MQTTPublishAsync(ctx, b.config.TopicPower, power); e != nil {
+		if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicPower, power); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {

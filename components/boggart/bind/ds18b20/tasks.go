@@ -25,7 +25,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 
 	metricValue.With("serial_number", b.SerialNumber()).Set(value)
 
-	if err := b.MQTTPublishAsync(ctx, b.config.TopicValue, value); err != nil {
+	if err := b.MQTTContainer().PublishAsync(ctx, b.config.TopicValue, value); err != nil {
 		return err
 	}
 

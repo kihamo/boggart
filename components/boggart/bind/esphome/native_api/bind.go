@@ -8,6 +8,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/providers/esphome"
 	api "github.com/kihamo/boggart/providers/esphome/native_api"
@@ -21,7 +22,8 @@ const (
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
+	di.MQTTBind
+	di.WorkersBind
 
 	config   *Config
 	provider *api.Client
@@ -129,7 +131,7 @@ func (b *Bind) syncState(ctx context.Context, messages ...proto.Message) error {
 		objectID := entity.GetObjectId()
 
 		if stateName, e := api.State(entity.(proto.Message), state, false); e == nil {
-			if e = b.MQTTPublishAsync(ctx, b.config.TopicState.Format(sn, objectID), stateName); e != nil {
+			if e = b.MQTTContainer().PublishAsync(ctx, b.config.TopicState.Format(sn, objectID), stateName); e != nil {
 				err = multierr.Append(err, e)
 			}
 
@@ -142,42 +144,42 @@ func (b *Bind) syncState(ctx context.Context, messages ...proto.Message) error {
 					WarmWhite: uint8(st.White * 100),
 				}
 
-				if e = b.MQTTPublishAsync(ctx, b.config.TopicStateBrightness.Format(sn, objectID), st.Brightness); e != nil {
+				if e = b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateBrightness.Format(sn, objectID), st.Brightness); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				if e = b.MQTTPublishAsync(ctx, b.config.TopicStateRed.Format(sn, objectID), color.Red); e != nil {
+				if e = b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateRed.Format(sn, objectID), color.Red); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				if e = b.MQTTPublishAsync(ctx, b.config.TopicStateGreen.Format(sn, objectID), color.Green); e != nil {
+				if e = b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateGreen.Format(sn, objectID), color.Green); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				if e = b.MQTTPublishAsync(ctx, b.config.TopicStateBlue.Format(sn, objectID), color.Blue); e != nil {
+				if e = b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateBlue.Format(sn, objectID), color.Blue); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				if e = b.MQTTPublishAsync(ctx, b.config.TopicStateWhite.Format(sn, objectID), color.WarmWhite); e != nil {
+				if e = b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateWhite.Format(sn, objectID), color.WarmWhite); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				if e = b.MQTTPublishAsync(ctx, b.config.TopicStateColorTemperature.Format(sn, objectID), uint8(st.ColorTemperature*100)); e != nil {
+				if e = b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateColorTemperature.Format(sn, objectID), uint8(st.ColorTemperature*100)); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				if e = b.MQTTPublishAsync(ctx, b.config.TopicStateEffect.Format(sn, objectID), st.Effect); e != nil {
+				if e = b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateEffect.Format(sn, objectID), st.Effect); e != nil {
 					err = multierr.Append(err, e)
 				}
 
 				// in HEX
-				if e = b.MQTTPublishAsync(ctx, b.config.TopicStateColorRGB.Format(sn, objectID), color.String()); e != nil {
+				if e = b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateColorRGB.Format(sn, objectID), color.String()); e != nil {
 					err = multierr.Append(err, e)
 				}
 
 				// in HSV
 				h, s, v := color.HSV()
-				if e = b.MQTTPublishAsync(ctx, b.config.TopicStateColorHSV.Format(sn, objectID), fmt.Sprintf("%d,%.2f,%.2f", h, s, v)); e != nil {
+				if e = b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateColorHSV.Format(sn, objectID), fmt.Sprintf("%d,%.2f,%.2f", h, s, v)); e != nil {
 					err = multierr.Append(err, e)
 				}
 			}

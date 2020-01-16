@@ -4,12 +4,13 @@ import (
 	"context"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/broadlink"
 )
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
+	di.MQTTBind
 	config *ConfigRM
 
 	provider interface{}
@@ -33,5 +34,5 @@ type SupportRF433Mhz interface {
 }
 
 func (b *Bind) Run() error {
-	return b.MQTTPublishAsync(context.Background(), b.config.TopicCaptureState, false)
+	return b.MQTTContainer().PublishAsync(context.Background(), b.config.TopicCaptureState, false)
 }

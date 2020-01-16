@@ -3,7 +3,6 @@ package hilink
 import (
 	"context"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/providers/hilink/client/device"
 )
@@ -29,13 +28,13 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(b.config.TopicUSSDSend, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTUSSDSend)),
-		mqtt.NewSubscriber(b.config.TopicReboot, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTReboot)),
+		mqtt.NewSubscriber(b.config.TopicUSSDSend, 0, b.MQTTContainer().WrapSubscribeDeviceIsOnline(b.callbackMQTTUSSDSend)),
+		mqtt.NewSubscriber(b.config.TopicReboot, 0, b.MQTTContainer().WrapSubscribeDeviceIsOnline(b.callbackMQTTReboot)),
 	}
 }
 
 func (b *Bind) callbackMQTTUSSDSend(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-	if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 3) {
+	if !b.MQTTContainer().CheckSerialNumberInTopic(message.Topic(), 3) {
 		return nil
 	}
 
@@ -44,11 +43,11 @@ func (b *Bind) callbackMQTTUSSDSend(ctx context.Context, _ mqtt.Component, messa
 		return err
 	}
 
-	return b.MQTTPublishAsync(ctx, b.config.TopicUSSDResult.Format(b.SerialNumber()), content)
+	return b.MQTTContainer().PublishAsync(ctx, b.config.TopicUSSDResult.Format(b.SerialNumber()), content)
 }
 
 func (b *Bind) callbackMQTTReboot(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-	if message.IsFalse() || !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
+	if message.IsFalse() || !b.MQTTContainer().CheckSerialNumberInTopic(message.Topic(), 2) {
 		return nil
 	}
 

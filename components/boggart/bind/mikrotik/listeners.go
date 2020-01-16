@@ -92,11 +92,11 @@ func (l *Listener) Run(ctx context.Context, event workers.Event, t time.Time, ar
 			switch check[3] {
 			case "connected":
 				// TODO:
-				_ = l.bind.MQTTPublishAsync(ctx, l.bind.config.TopicWiFiConnectedMAC.Format(sn), login)
+				_ = l.bind.MQTTContainer().PublishAsync(ctx, l.bind.config.TopicWiFiConnectedMAC.Format(sn), login)
 				l.bind.updateWiFiClient(ctx)
 			case "disconnected":
 				// TODO:
-				_ = l.bind.MQTTPublishAsync(ctx, l.bind.config.TopicWiFiDisconnectedMAC.Format(sn), login)
+				_ = l.bind.MQTTContainer().PublishAsync(ctx, l.bind.config.TopicWiFiDisconnectedMAC.Format(sn), login)
 				l.bind.updateWiFiClient(ctx)
 			}
 
@@ -116,11 +116,11 @@ func (l *Listener) Run(ctx context.Context, event workers.Event, t time.Time, ar
 			switch check[2] {
 			case "in":
 				// TODO:
-				_ = l.bind.MQTTPublishAsync(ctx, l.bind.config.TopicVPNConnectedLogin.Format(sn), login)
+				_ = l.bind.MQTTContainer().PublishAsync(ctx, l.bind.config.TopicVPNConnectedLogin.Format(sn), login)
 				l.bind.updateVPNClient(ctx)
 			case "out":
 				// TODO:
-				_ = l.bind.MQTTPublishAsync(ctx, l.bind.config.TopicVPNDisconnectedLogin.Format(sn), login)
+				_ = l.bind.MQTTContainer().PublishAsync(ctx, l.bind.config.TopicVPNDisconnectedLogin.Format(sn), login)
 				l.bind.updateVPNClient(ctx)
 			}
 		}

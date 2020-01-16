@@ -4,12 +4,14 @@ import (
 	"sync"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/samsung/tv"
 )
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
+	di.MQTTBind
+	di.WorkersBind
 
 	config *Config
 	mutex  sync.RWMutex

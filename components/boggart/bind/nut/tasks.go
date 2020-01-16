@@ -46,7 +46,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 			b.variables[v.Name] = v.Value
 
 			// TODO:
-			_ = b.MQTTPublishAsync(ctx, b.config.TopicVariable.Format(sn, v.Name), v.Value)
+			_ = b.MQTTContainer().PublishAsync(ctx, b.config.TopicVariable.Format(sn, v.Name), v.Value)
 		}
 	}
 

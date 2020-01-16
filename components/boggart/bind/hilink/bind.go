@@ -10,6 +10,7 @@ import (
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/hilink"
 	"github.com/kihamo/boggart/providers/hilink/client/device"
 	"github.com/kihamo/boggart/providers/hilink/client/ussd"
@@ -22,7 +23,8 @@ var (
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
+	di.MQTTBind
+	di.WorkersBind
 
 	config                    *Config
 	client                    *hilink.Client
@@ -127,7 +129,7 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, sms *models.SMSListMessagesI
 				value *= op.SMSLimitTrafficFactor
 
 				metricLimitInternetTraffic.With("serial_number", sn).Set(value)
-				b.MQTTPublishAsync(ctx, b.config.TopicLimitInternetTraffic.Format(sn), uint64(value))
+				b.MQTTContainer().PublishAsync(ctx, b.config.TopicLimitInternetTraffic.Format(sn), uint64(value))
 
 				b.limitInternetTrafficIndex.Set(sms.Index)
 			}

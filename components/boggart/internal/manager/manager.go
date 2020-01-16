@@ -3,12 +3,14 @@ package manager
 import (
 	"context"
 	"errors"
+	"io"
 	"sort"
 	"strings"
 	"sync"
 	"sync/atomic"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
 	w "github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/manager"
@@ -45,7 +47,13 @@ type Manager struct {
 	topicBindStatus mqtt.Topic
 }
 
-func NewManager(dashboard dashboard.Component, i18n i18n.Component, mqtt mqtt.Component, workers workers.Component, logger logging.Logger, listeners *manager.ListenersManager, topicBindStatus mqtt.Topic) *Manager {
+func NewManager(dashboard dashboard.Component,
+	i18n i18n.Component,
+	mqtt mqtt.Component,
+	workers workers.Component,
+	logger logging.Logger,
+	listeners *manager.ListenersManager,
+	topicBindStatus mqtt.Topic) *Manager {
 	return &Manager{
 		status:          managerStatusNotReady,
 		dashboard:       dashboard,
@@ -113,26 +121,29 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 		bindLogger.SetLogger(logging.NewLazyLogger(m.logger, m.logger.Name()+"."+id))
 	}
 
+	bind.SetID(id)
 	bind.SetStatusManager(bindItem.Status)
 
 	// register mqtt
-	if mqttClient, ok := bind.(boggart.BindHasMQTTClient); ok {
-		mqttClient.SetMQTTClient(m.mqtt)
+	if bindSupport, ok := bind.(di.MQTTContainerSupport); ok {
+		bindSupport.SetMQTTContainer(di.NewMQTTContainer(bindItem, m.mqtt))
 	}
 
 	if err := bind.Run(); err != nil {
 		return nil, err
 	}
 
-	// TODO: обвешать подписки враппером, что бы только в online можно было посылать
-	for _, subscriber := range bindItem.MQTTSubscribers() {
-		if err := m.mqtt.SubscribeSubscriber(subscriber); err != nil {
-			m.itemStatusUpdate(bindItem, boggart.BindStatusUninitialized)
-			return nil, err
+	if bindSupport, ok := bind.(di.MQTTContainerSupport); ok {
+		// TODO: обвешать подписки враппером, что бы только в online можно было посылать
+		for _, subscriber := range bindSupport.MQTTContainer().Subscribers() {
+			if err := m.mqtt.SubscribeSubscriber(subscriber); err != nil {
+				m.itemStatusUpdate(bindItem, boggart.BindStatusUninitialized)
+				return nil, err
+			}
 		}
 	}
 
-	tasks := bindItem.Tasks()
+	tasks := make([]w.Task, 0)
 
 	// probes
 	if probe, ok := bind.(boggart.BindHasReadinessProbe); ok {
@@ -250,6 +261,15 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 		tasks = append(tasks, bindItem.probeLiveness)
 	}
 
+	if bindSupport, ok := bindItem.Bind().(di.WorkersContainerSupport); ok {
+		tasks = append(tasks, bindSupport.WorkersContainer().Tasks()...)
+
+		// register listeners
+		for _, listener := range bindSupport.WorkersContainer().Listeners() {
+			m.listeners.AddListener(listener)
+		}
+	}
+
 	// register tasks
 	for _, tsk := range tasks {
 		if tsk, ok := tsk.(bindTask); ok {
@@ -257,11 +277,6 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 		}
 
 		m.workers.AddTask(tsk)
-	}
-
-	// register listeners
-	for _, listener := range bindItem.Listeners() {
-		m.listeners.AddListener(listener)
 	}
 
 	m.storage.Store(id, bindItem)
@@ -285,16 +300,16 @@ func (m *Manager) Unregister(id string) error {
 	m.itemStatusUpdate(bindItem, boggart.BindStatusRemoving)
 
 	// unregister mqtt
-	if err := m.mqtt.UnsubscribeSubscribers(bindItem.MQTTSubscribers()); err != nil {
-		m.logger.Error("Unregister bind failed because unsubscribe MQTT failed",
-			"type", bindItem.Type(),
-			"id", bindItem.ID(),
-			"error", err.Error(),
-		)
-	}
+	if bindSupport, ok := bindItem.Bind().(di.MQTTContainerSupport); ok {
+		if err := m.mqtt.UnsubscribeSubscribers(bindSupport.MQTTContainer().Subscribers()); err != nil {
+			m.logger.Error("Unregister bind failed because unsubscribe MQTT failed",
+				"type", bindItem.Type(),
+				"id", bindItem.ID(),
+				"error", err.Error(),
+			)
+		}
 
-	if mqttClient, ok := bindItem.Bind().(boggart.BindHasMQTTClient); ok {
-		mqttClient.SetMQTTClient(nil)
+		bindSupport.MQTTContainer().SetClient(nil)
 	}
 
 	// remove probes
@@ -305,14 +320,17 @@ func (m *Manager) Unregister(id string) error {
 		m.workers.RemoveTask(bindItem.probeLiveness)
 	}
 
-	// remove tasks
-	for _, tsk := range bindItem.Tasks() {
-		m.workers.RemoveTask(tsk)
-	}
+	// workers
+	if bindSupport, ok := bindItem.Bind().(di.WorkersContainerSupport); ok {
+		// remove tasks
+		for _, tsk := range bindSupport.WorkersContainer().Tasks() {
+			m.workers.RemoveTask(tsk)
+		}
 
-	// remove listeners
-	for _, listener := range bindItem.Listeners() {
-		m.listeners.RemoveListener(listener)
+		// remove listeners
+		for _, listener := range bindSupport.WorkersContainer().Listeners() {
+			m.listeners.RemoveListener(listener)
+		}
 	}
 
 	m.storage.Delete(id)
@@ -322,7 +340,7 @@ func (m *Manager) Unregister(id string) error {
 		"id", bindItem.ID(),
 	)
 
-	if closer, ok := bindItem.Bind().(boggart.BindCloser); ok {
+	if closer, ok := bindItem.Bind().(io.Closer); ok {
 		if err := closer.Close(); err != nil {
 			m.logger.Debug("Unregister bind failed because close failed",
 				"type", bindItem.Type(),

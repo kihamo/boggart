@@ -4,12 +4,15 @@ import (
 	"context"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/wifiled"
 )
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
+	di.MQTTBind
+	di.WorkersBind
+
 	config *Config
 	bulb   *wifiled.Bulb
 }

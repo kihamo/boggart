@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/snabb/webostv"
 )
 
@@ -26,7 +27,8 @@ var defaultDialerLGWebOS = webostv.Dialer{
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
+	di.MQTTBind
+	di.WorkersBind
 
 	config *Config
 	mutex  sync.RWMutex

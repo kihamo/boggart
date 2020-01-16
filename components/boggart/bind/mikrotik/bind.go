@@ -9,6 +9,7 @@ import (
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/providers/mikrotik"
 )
@@ -20,7 +21,9 @@ var (
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
+	di.MQTTBind
+	di.WorkersBind
+
 	config            *Config
 	address           *url.URL
 	provider          *mikrotik.Client
@@ -121,7 +124,7 @@ func (b *Bind) updateWiFiClient(ctx context.Context) {
 
 		if _, ok := b.clientWiFi.Load(key); !ok {
 			b.clientWiFi.Store(key, true)
-			_ = b.MQTTPublishAsync(ctx, b.config.TopicWiFiMACState.Format(sn, key), true)
+			_ = b.MQTTContainer().PublishAsync(ctx, b.config.TopicWiFiMACState.Format(sn, key), true)
 		}
 	}
 
@@ -129,7 +132,7 @@ func (b *Bind) updateWiFiClient(ctx context.Context) {
 		b.clientWiFi.Range(func(key, value interface{}) bool {
 			if _, ok := active[key]; !ok {
 				b.clientWiFi.Delete(key)
-				_ = b.MQTTPublishAsync(ctx, b.config.TopicWiFiMACState.Format(sn, key), false)
+				_ = b.MQTTContainer().PublishAsync(ctx, b.config.TopicWiFiMACState.Format(sn, key), false)
 			}
 
 			return true
@@ -153,7 +156,7 @@ func (b *Bind) updateVPNClient(ctx context.Context) {
 
 		if _, ok := b.clientVPN.Load(key); !ok {
 			b.clientVPN.Store(key, true)
-			_ = b.MQTTPublishAsync(ctx, b.config.TopicVPNLoginState.Format(sn, key), true)
+			_ = b.MQTTContainer().PublishAsync(ctx, b.config.TopicVPNLoginState.Format(sn, key), true)
 		}
 	}
 
@@ -161,7 +164,7 @@ func (b *Bind) updateVPNClient(ctx context.Context) {
 		b.clientVPN.Range(func(key, value interface{}) bool {
 			if _, ok := active[key]; !ok {
 				b.clientVPN.Delete(key)
-				_ = b.MQTTPublishAsync(ctx, b.config.TopicVPNLoginState.Format(sn, key), false)
+				_ = b.MQTTContainer().PublishAsync(ctx, b.config.TopicVPNLoginState.Format(sn, key), false)
 			}
 
 			return true

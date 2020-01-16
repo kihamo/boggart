@@ -3,8 +3,6 @@ package boggart
 import (
 	"context"
 
-	"github.com/kihamo/boggart/components/mqtt"
-	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/event"
 	"github.com/kihamo/shadow/components/logging"
 )
@@ -34,46 +32,19 @@ type BindItem interface {
 	Tags() []string
 	Config() interface{}
 	Status() BindStatus
-	Tasks() []workers.Task
-	Listeners() []workers.ListenerWithEvents
-	MQTTSubscribers() []mqtt.Subscriber
-	MQTTPublishes() []mqtt.Topic
 }
 
 type BindStatusManager func() BindStatus
 
 type Bind interface {
 	Run() error
+	SetID(string)
 	SetStatusManager(BindStatusManager)
 	SerialNumber() string
 }
 
 type BindLogger interface {
 	SetLogger(logging.Logger)
-}
-
-type BindCloser interface {
-	Close() error
-}
-
-type BindHasTasks interface {
-	Tasks() []workers.Task
-}
-
-type BindHasListeners interface {
-	Listeners() []workers.ListenerWithEvents
-}
-
-type BindHasMQTTClient interface {
-	SetMQTTClient(mqtt.Component)
-}
-
-type BindHasMQTTSubscribers interface {
-	MQTTSubscribers() []mqtt.Subscriber
-}
-
-type BindHasMQTTPublishes interface {
-	MQTTPublishes() []mqtt.Topic
 }
 
 type BindHasReadinessProbe interface {

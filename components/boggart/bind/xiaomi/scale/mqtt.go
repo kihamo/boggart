@@ -5,9 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 
-	"go.uber.org/multierr"
-
 	"github.com/kihamo/boggart/components/mqtt"
+	"go.uber.org/multierr"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
@@ -54,7 +53,7 @@ func (b *Bind) notifyCurrentProfile(ctx context.Context) error {
 		return err
 	}
 
-	if e := b.MQTTPublishAsync(ctx, b.config.TopicProfile, response); e != nil {
+	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicProfile, response); e != nil {
 		err = multierr.Append(err, e)
 	}
 

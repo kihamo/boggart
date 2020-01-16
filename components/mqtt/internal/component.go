@@ -650,6 +650,8 @@ func (c *Component) convertPayload(payload interface{}) []byte {
 		}
 
 		return []byte(fmt.Sprintf("%v", payload))
+	case fmt.Stringer:
+		return []byte(value.String())
 	default:
 		if ref := reflect.ValueOf(value); ref.Kind() == reflect.Ptr {
 			if !ref.Elem().IsValid() {

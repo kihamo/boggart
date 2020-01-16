@@ -139,7 +139,7 @@ func (t Type) handleComponentLight(w *dashboard.Response, r *dashboard.Request, 
 			}
 
 			ctx := r.Context()
-			err := bind.MQTTPublishRawWithoutCache(ctx, component.GetCommandTopic(), 1, false, component.CommandToPayload(command))
+			err := bind.MQTTContainer().PublishRawWithoutCache(ctx, component.GetCommandTopic(), 1, false, component.CommandToPayload(command))
 
 			if err != nil {
 				r.Session().FlashBag().Error(err.Error())
@@ -176,7 +176,7 @@ func (t Type) handleCommand(w *dashboard.Response, r *dashboard.Request, bind *B
 	}
 
 	ctx := r.Context()
-	err := bind.MQTTPublishRawWithoutCache(ctx, component.GetCommandTopic(), 1, false, component.CommandToPayload(command))
+	err := bind.MQTTContainer().PublishRawWithoutCache(ctx, component.GetCommandTopic(), 1, false, component.CommandToPayload(command))
 
 	if err != nil {
 		r.Session().FlashBag().Error(err.Error())

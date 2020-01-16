@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/hikvision"
 	"github.com/kihamo/boggart/providers/hikvision/client/system"
 	"github.com/kihamo/boggart/providers/hikvision/models"
@@ -26,7 +27,8 @@ type PTZChannel struct {
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
+	di.MQTTBind
+	di.WorkersBind
 
 	mutex sync.RWMutex
 
@@ -60,7 +62,7 @@ func (b *Bind) registerEvent(event *models.EventNotificationAlert) {
 	b.mutex.Unlock()
 
 	if !ok || dt.Sub(lastFire) > b.config.EventsIgnoreInterval {
-		if err := b.MQTTPublishAsync(context.Background(), b.config.TopicEvent.Format(b.SerialNumber(), ch, event.EventType), event.ActivePostCount); err != nil {
+		if err := b.MQTTContainer().PublishAsync(context.Background(), b.config.TopicEvent.Format(b.SerialNumber(), ch, event.EventType), event.ActivePostCount); err != nil {
 			b.Logger().Error("Send event to MQTT failed", "error", err.Error())
 		}
 	}

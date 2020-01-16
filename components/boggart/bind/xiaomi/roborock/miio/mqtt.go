@@ -4,10 +4,8 @@ import (
 	"context"
 	"strconv"
 
-	"go.uber.org/multierr"
-
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
+	"go.uber.org/multierr"
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
@@ -27,16 +25,16 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(b.config.TopicSetFanPower, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSetFanPower)),
-		mqtt.NewSubscriber(b.config.TopicSetVolume, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSetVolume)),
-		mqtt.NewSubscriber(b.config.TopicTestVolume, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTTestVolume)),
-		mqtt.NewSubscriber(b.config.TopicFind, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTFind)),
-		mqtt.NewSubscriber(b.config.TopicAction, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTAction)),
+		mqtt.NewSubscriber(b.config.TopicSetFanPower, 0, b.MQTTContainer().WrapSubscribeDeviceIsOnline(b.callbackMQTTSetFanPower)),
+		mqtt.NewSubscriber(b.config.TopicSetVolume, 0, b.MQTTContainer().WrapSubscribeDeviceIsOnline(b.callbackMQTTSetVolume)),
+		mqtt.NewSubscriber(b.config.TopicTestVolume, 0, b.MQTTContainer().WrapSubscribeDeviceIsOnline(b.callbackMQTTTestVolume)),
+		mqtt.NewSubscriber(b.config.TopicFind, 0, b.MQTTContainer().WrapSubscribeDeviceIsOnline(b.callbackMQTTFind)),
+		mqtt.NewSubscriber(b.config.TopicAction, 0, b.MQTTContainer().WrapSubscribeDeviceIsOnline(b.callbackMQTTAction)),
 	}
 }
 
 func (b *Bind) callbackMQTTSetFanPower(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 3) {
+	if !b.MQTTContainer().CheckSerialNumberInTopic(message.Topic(), 3) {
 		return nil
 	}
 
@@ -54,7 +52,7 @@ func (b *Bind) callbackMQTTSetFanPower(ctx context.Context, client mqtt.Componen
 }
 
 func (b *Bind) callbackMQTTSetVolume(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 3) {
+	if !b.MQTTContainer().CheckSerialNumberInTopic(message.Topic(), 3) {
 		return nil
 	}
 
@@ -72,7 +70,7 @@ func (b *Bind) callbackMQTTSetVolume(ctx context.Context, client mqtt.Component,
 }
 
 func (b *Bind) callbackMQTTTestVolume(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 3) {
+	if !b.MQTTContainer().CheckSerialNumberInTopic(message.Topic(), 3) {
 		return nil
 	}
 
@@ -80,7 +78,7 @@ func (b *Bind) callbackMQTTTestVolume(ctx context.Context, client mqtt.Component
 }
 
 func (b *Bind) callbackMQTTFind(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
+	if !b.MQTTContainer().CheckSerialNumberInTopic(message.Topic(), 2) {
 		return nil
 	}
 
@@ -88,7 +86,7 @@ func (b *Bind) callbackMQTTFind(ctx context.Context, client mqtt.Component, mess
 }
 
 func (b *Bind) callbackMQTTAction(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
+	if !b.MQTTContainer().CheckSerialNumberInTopic(message.Topic(), 2) {
 		return nil
 	}
 
@@ -122,11 +120,11 @@ func (b *Bind) updateState(ctx context.Context) error {
 
 	status, err := b.device.Status(ctx)
 	if err == nil {
-		if e := b.MQTTPublishAsync(ctx, b.config.TopicState.Format(sn), status.State); e != nil {
+		if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicState.Format(sn), status.State); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTTPublishAsync(ctx, b.config.TopicError.Format(sn), status.Error); e != nil {
+		if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicError.Format(sn), status.Error); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
@@ -142,7 +140,7 @@ func (b *Bind) updateFanPower(ctx context.Context) error {
 
 	fan, err := b.device.FanPower(ctx)
 	if err == nil {
-		err = b.MQTTPublishAsync(ctx, b.config.TopicFanPower.Format(sn), fan)
+		err = b.MQTTContainer().PublishAsync(ctx, b.config.TopicFanPower.Format(sn), fan)
 	}
 
 	return err
@@ -156,7 +154,7 @@ func (b *Bind) updateVolume(ctx context.Context) error {
 
 	volume, err := b.device.SoundVolume(ctx)
 	if err == nil {
-		err = b.MQTTPublishAsync(ctx, b.config.TopicVolume.Format(sn), volume)
+		err = b.MQTTContainer().PublishAsync(ctx, b.config.TopicVolume.Format(sn), volume)
 	}
 
 	return err

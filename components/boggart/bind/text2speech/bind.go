@@ -8,18 +8,20 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	speechkit "github.com/kihamo/boggart/providers/yandex_speechkit_cloud"
 	"github.com/kihamo/boggart/providers/yandex_speechkit_cloud/client/generate"
 )
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
+	di.MQTTBind
 
 	config   *Config
 	provider *speechkit.Client
@@ -56,6 +58,10 @@ func trim(message string) string {
 	message = strings.Join(strings.Fields(message), " ")
 
 	return message
+}
+
+func (b *Bind) GenerateURL(ctx context.Context, text, format, quality, language, speaker, emotion string, speed float64, force bool) url.URL {
+	return url.URL{}
 }
 
 func (b *Bind) Generate(ctx context.Context, text, format, quality, language, speaker, emotion string, speed float64, force bool) (io.Reader, error) {

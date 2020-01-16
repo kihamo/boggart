@@ -59,15 +59,15 @@ func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
 		}
 	}
 
-	if e := b.MQTTPublishAsync(ctx, b.config.TopicStateModel.Format(info.SerialNo), info.HardWare); e != nil {
+	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateModel.Format(info.SerialNo), info.HardWare); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTTPublishAsync(ctx, b.config.TopicStateFirmwareVersion.Format(info.SerialNo), info.SoftWareVersion); e != nil {
+	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateFirmwareVersion.Format(info.SerialNo), info.SoftWareVersion); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTTPublishAsync(ctx, b.config.TopicStateFirmwareReleasedDate.Format(info.SerialNo), info.BuildTime); e != nil {
+	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateFirmwareReleasedDate.Format(info.SerialNo), info.BuildTime); e != nil {
 		err = multierr.Append(err, e)
 	}
 
@@ -93,18 +93,18 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 				name := strconv.FormatUint(p.LogicSerialNo, 10)
 
 				// TODO:
-				if e := b.MQTTPublishAsync(ctx, b.config.TopicStateHDDCapacity.Format(sn, p.LogicSerialNo), uint64(p.TotalSpace)*MB); e != nil {
+				if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateHDDCapacity.Format(sn, p.LogicSerialNo), uint64(p.TotalSpace)*MB); e != nil {
 					err = multierr.Append(err, e)
 				}
 
 				// TODO:
-				if e := b.MQTTPublishAsync(ctx, b.config.TopicStateHDDUsage.Format(sn, p.LogicSerialNo), uint64(p.TotalSpace-p.RemainSpace)*MB); e != nil {
+				if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateHDDUsage.Format(sn, p.LogicSerialNo), uint64(p.TotalSpace-p.RemainSpace)*MB); e != nil {
 					err = multierr.Append(err, e)
 				}
 				metricStorageUsage.With("serial_number", sn).With("name", name).Set(float64(uint64(p.TotalSpace-p.RemainSpace) * MB))
 
 				// TODO:
-				if e := b.MQTTPublishAsync(ctx, b.config.TopicStateHDDFree.Format(sn, p.LogicSerialNo), uint64(p.RemainSpace)*MB); e != nil {
+				if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateHDDFree.Format(sn, p.LogicSerialNo), uint64(p.RemainSpace)*MB); e != nil {
 					err = multierr.Append(err, e)
 				}
 				metricStorageAvailable.With("serial_number", sn).With("name", name).Set(float64(uint64(p.RemainSpace) * MB))

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
@@ -16,8 +15,8 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(b.config.TopicVariableSet, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 4) {
+		mqtt.NewSubscriber(b.config.TopicVariableSet, 0, b.MQTTContainer().WrapSubscribeDeviceIsOnline(func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+			if !b.MQTTContainer().CheckSerialNumberInTopic(message.Topic(), 4) {
 				return nil
 			}
 
@@ -46,8 +45,8 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			return errors.New("variable name " + variable + " not found")
 		})),
-		mqtt.NewSubscriber(b.config.TopicCommand, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 2) {
+		mqtt.NewSubscriber(b.config.TopicCommand, 0, b.MQTTContainer().WrapSubscribeDeviceIsOnline(func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+			if !b.MQTTContainer().CheckSerialNumberInTopic(message.Topic(), 2) {
 				return nil
 			}
 

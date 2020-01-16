@@ -10,13 +10,14 @@ import (
 	"sync"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
 	"gopkg.in/telegram-bot-api.v4"
 )
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
+	di.MQTTBind
 	config *Config
 
 	mutex  sync.RWMutex
@@ -204,7 +205,7 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 				if u.Message.Text != "" {
 					mqttTopic = b.config.TopicReceiveMessage.Format(sn, u.Message.Chat.ID)
 
-					if err := b.MQTTPublishAsync(ctx, b.config.TopicReceiveMessage.Format(sn, u.Message.Chat.ID), u.Message.Text); err != nil {
+					if err := b.MQTTContainer().PublishAsync(ctx, b.config.TopicReceiveMessage.Format(sn, u.Message.Chat.ID), u.Message.Text); err != nil {
 						b.Logger().Error("Publish message to MQTT failed",
 							"topic", mqttTopic,
 							"message", u.Message.Text,
@@ -248,7 +249,7 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 					continue
 				}
 
-				if err := b.MQTTPublishAsync(ctx, mqttTopic, link); err != nil {
+				if err := b.MQTTContainer().PublishAsync(ctx, mqttTopic, link); err != nil {
 					b.Logger().Error("Publish link to MQTT failed",
 						"topic", mqttTopic,
 						"link", link,

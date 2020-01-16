@@ -6,12 +6,13 @@ import (
 
 	"firebase.google.com/go/messaging"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"go.uber.org/multierr"
 )
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
+	di.MQTTBind
 
 	config    *Config
 	messaging *messaging.Client

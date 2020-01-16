@@ -11,7 +11,7 @@ func (b *Bind) sendCommand(cmd interface{}) error {
 		return err
 	}
 
-	return b.MQTTPublish(context.Background(), b.config.TopicOwnTracksCommand, payload)
+	return b.MQTTContainer().Publish(context.Background(), b.config.TopicOwnTracksCommand, payload)
 }
 
 func (b *Bind) CommandReportLocation() error {

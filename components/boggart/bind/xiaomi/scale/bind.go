@@ -6,14 +6,16 @@ import (
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/xiaomi/scale"
 )
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
-	config *Config
+	di.MQTTBind
+	di.WorkersBind
 
+	config               *Config
 	provider             *scale.Client
 	currentProfile       atomic.Value
 	measureStartDatetime atomic.Time

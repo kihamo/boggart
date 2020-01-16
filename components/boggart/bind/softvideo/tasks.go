@@ -26,7 +26,5 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 	sn := b.SerialNumber()
 	metricBalance.With("account", sn).Set(value)
 
-	err = b.MQTTPublishAsync(ctx, b.config.TopicBalance, value)
-
-	return err
+	return b.MQTTContainer().PublishAsync(ctx, b.config.TopicBalance, value)
 }

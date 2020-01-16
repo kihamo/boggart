@@ -4,12 +4,13 @@ import (
 	"context"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"go.uber.org/multierr"
 )
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
+	di.MQTTBind
 
 	config *Config
 }
@@ -17,15 +18,15 @@ type Bind struct {
 func (b *Bind) Run() (err error) {
 	ctx := context.Background()
 
-	if e := b.MQTTPublishAsync(ctx, b.config.TopicName, b.config.ApplicationName); e != nil {
+	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicName, b.config.ApplicationName); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTTPublishAsync(ctx, b.config.TopicVersion, b.config.ApplicationVersion); e != nil {
+	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicVersion, b.config.ApplicationVersion); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTTPublishAsync(ctx, b.config.TopicBuild, b.config.ApplicationBuild); e != nil {
+	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicBuild, b.config.ApplicationBuild); e != nil {
 		err = multierr.Append(err, e)
 	}
 

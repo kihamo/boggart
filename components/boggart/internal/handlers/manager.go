@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"time"
 
-	"github.com/kihamo/boggart/components/boggart/internal/manager"
-
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
+	"github.com/kihamo/boggart/components/boggart/internal/manager"
 	"github.com/kihamo/go-workers"
 	listeners "github.com/kihamo/go-workers/manager"
 	"github.com/kihamo/shadow/components/dashboard"
@@ -92,9 +92,9 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				SerialNumber:    bindItem.Bind().SerialNumber(),
 				Status:          bindItem.Status().String(),
 				Tags:            bindItem.Tags(),
-				Tasks:           make([]string, 0, len(bindItem.Tasks())),
-				MQTTPublishes:   make([]string, 0, len(bindItem.MQTTPublishes())),
-				MQTTSubscribers: make([]string, 0, len(bindItem.MQTTSubscribers())),
+				Tasks:           make([]string, 0),
+				MQTTPublishes:   make([]string, 0),
+				MQTTSubscribers: make([]string, 0),
 				Config:          buf.String(),
 			}
 
@@ -110,16 +110,20 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				item.HasLivenessProbe = ok
 			}
 
-			for _, task := range bindItem.Tasks() {
-				item.Tasks = append(item.Tasks, task.Name())
+			if bindSupport, ok := bindItem.Bind().(di.WorkersContainerSupport); ok {
+				for _, task := range bindSupport.WorkersContainer().Tasks() {
+					item.Tasks = append(item.Tasks, task.Name())
+				}
 			}
 
-			for _, topic := range bindItem.MQTTPublishes() {
-				item.MQTTPublishes = append(item.MQTTPublishes, topic.String())
-			}
+			if bindSupport, ok := bindItem.Bind().(di.MQTTContainerSupport); ok {
+				for _, topic := range bindSupport.MQTTContainer().Publishes() {
+					item.MQTTPublishes = append(item.MQTTPublishes, topic.String())
+				}
 
-			for _, topic := range bindItem.MQTTSubscribers() {
-				item.MQTTSubscribers = append(item.MQTTSubscribers, topic.Topic().String())
+				for _, topic := range bindSupport.MQTTContainer().Subscribers() {
+					item.MQTTSubscribers = append(item.MQTTSubscribers, topic.Topic().String())
+				}
 			}
 
 			list = append(list, item)

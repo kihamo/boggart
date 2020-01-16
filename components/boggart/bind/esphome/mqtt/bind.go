@@ -6,11 +6,12 @@ import (
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 )
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
+	di.MQTTBind
 
 	config     *Config
 	components sync.Map
@@ -18,7 +19,7 @@ type Bind struct {
 }
 
 func (b *Bind) Close() (err error) {
-	if client := b.MQTTClient(); client != nil {
+	if client := b.MQTTContainer().Client(); client != nil {
 		for _, component := range b.Components() {
 			if err = client.UnsubscribeSubscribers(component.Subscribers()); err != nil {
 				return err
@@ -62,7 +63,7 @@ func (b *Bind) register(c Component) (err error) {
 
 	subscribers := c.Subscribers()
 	if len(subscribers) > 0 {
-		client := b.MQTTClient()
+		client := b.MQTTContainer().Client()
 
 		if client == nil {
 			return errors.New("MQTT client isn't init")

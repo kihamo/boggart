@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/components/storage"
 )
@@ -24,14 +23,14 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(b.config.TopicSendMessage, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSendMessage)),
-		mqtt.NewSubscriber(b.config.TopicSendFile, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSendFileURL)),
-		mqtt.NewSubscriber(b.config.TopicSendFileURL, 0, boggart.WrapMQTTSubscribeDeviceIsOnline(b.Status, b.callbackMQTTSendFileURL)),
+		mqtt.NewSubscriber(b.config.TopicSendMessage, 0, b.MQTTContainer().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendMessage)),
+		mqtt.NewSubscriber(b.config.TopicSendFile, 0, b.MQTTContainer().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendFileURL)),
+		mqtt.NewSubscriber(b.config.TopicSendFileURL, 0, b.MQTTContainer().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendFileURL)),
 	}
 }
 
 func (b *Bind) callbackMQTTSendMessage(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-	if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 4) {
+	if !b.MQTTContainer().CheckSerialNumberInTopic(message.Topic(), 4) {
 		return nil
 	}
 
@@ -44,7 +43,7 @@ func (b *Bind) callbackMQTTSendMessage(_ context.Context, _ mqtt.Component, mess
 }
 
 func (b *Bind) callbackMQTTSendFile(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-	if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 4) {
+	if !b.MQTTContainer().CheckSerialNumberInTopic(message.Topic(), 4) {
 		return nil
 	}
 
@@ -129,7 +128,7 @@ func (b *Bind) callbackMQTTSendFile(_ context.Context, _ mqtt.Component, message
 }
 
 func (b *Bind) callbackMQTTSendFileURL(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-	if !boggart.CheckSerialNumberInMQTTTopic(b, message.Topic(), 5) {
+	if !b.MQTTContainer().CheckSerialNumberInTopic(message.Topic(), 5) {
 		return nil
 	}
 

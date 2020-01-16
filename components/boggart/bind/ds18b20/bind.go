@@ -2,12 +2,15 @@ package ds18b20
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/yryz/ds18b20"
 )
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
+	di.MQTTBind
+	di.WorkersBind
+
 	config *Config
 }
 

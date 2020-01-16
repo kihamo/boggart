@@ -9,13 +9,14 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 )
 
 var reRuntimeConfigLine = regexp.MustCompile(`(?m)\s*([[:alnum:]_]+)\s*=\s*([^;]+);`)
 
 type Bind struct {
 	boggart.BindBase
-	boggart.BindMQTT
+	di.MQTTBind
 	config                 *Config
 	cacheRuntimeConfig     map[string]string
 	cacheRuntimeConfigLock sync.Mutex
