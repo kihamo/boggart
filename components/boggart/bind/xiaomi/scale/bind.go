@@ -11,6 +11,7 @@ import (
 
 type Bind struct {
 	di.MQTTBind
+	di.LoggerBind
 	di.WorkersBind
 
 	config               *Config

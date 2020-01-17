@@ -30,6 +30,14 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 	measureStartDatetime := b.measureStartDatetime.Load()
 
 	for _, measure := range measures {
+		b.Logger().Debug("Measure",
+			"start_datetime", measureStartDatetime.String(),
+			"datetime", measure.Datetime().String(),
+			"unit", measure.Unit(),
+			"weight", measure.Weight(),
+			"Impedance", measure.Impedance(),
+		)
+
 		dt := measure.Datetime()
 
 		// если метрика снята после до установки профиля, то она может относится к другому профилю
