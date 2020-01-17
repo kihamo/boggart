@@ -10,7 +10,6 @@
 package internal
 
 import (
-	"github.com/elazarl/go-bindata-assetfs"
 	"bytes"
 	"compress/gzip"
 	"fmt"
@@ -20,6 +19,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/elazarl/go-bindata-assetfs"
 )
 
 func bindataRead(data, name string) ([]byte, error) {
@@ -225,10 +226,10 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"templates/views/cache.html": templatesViewsCacheHtml,
-	"templates/views/subscriptions.html": templatesViewsSubscriptionsHtml,
-	"locales/ru/LC_MESSAGES/cache.mo": localesRuLc_messagesCacheMo,
-	"locales/ru/LC_MESSAGES/mqtt.mo": localesRuLc_messagesMqttMo,
+	"templates/views/cache.html":              templatesViewsCacheHtml,
+	"templates/views/subscriptions.html":      templatesViewsSubscriptionsHtml,
+	"locales/ru/LC_MESSAGES/cache.mo":         localesRuLc_messagesCacheMo,
+	"locales/ru/LC_MESSAGES/mqtt.mo":          localesRuLc_messagesMqttMo,
 	"locales/ru/LC_MESSAGES/subscriptions.mo": localesRuLc_messagesSubscriptionsMo,
 }
 
@@ -271,19 +272,20 @@ type bintree struct {
 	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
+
 var _bintree = &bintree{nil, map[string]*bintree{
 	"locales": &bintree{nil, map[string]*bintree{
 		"ru": &bintree{nil, map[string]*bintree{
 			"LC_MESSAGES": &bintree{nil, map[string]*bintree{
-				"cache.mo": &bintree{localesRuLc_messagesCacheMo, map[string]*bintree{}},
-				"mqtt.mo": &bintree{localesRuLc_messagesMqttMo, map[string]*bintree{}},
+				"cache.mo":         &bintree{localesRuLc_messagesCacheMo, map[string]*bintree{}},
+				"mqtt.mo":          &bintree{localesRuLc_messagesMqttMo, map[string]*bintree{}},
 				"subscriptions.mo": &bintree{localesRuLc_messagesSubscriptionsMo, map[string]*bintree{}},
 			}},
 		}},
 	}},
 	"templates": &bintree{nil, map[string]*bintree{
 		"views": &bintree{nil, map[string]*bintree{
-			"cache.html": &bintree{templatesViewsCacheHtml, map[string]*bintree{}},
+			"cache.html":         &bintree{templatesViewsCacheHtml, map[string]*bintree{}},
 			"subscriptions.html": &bintree{templatesViewsSubscriptionsHtml, map[string]*bintree{}},
 		}},
 	}},
@@ -335,7 +337,6 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
-
 
 func assetFS() *assetfs.AssetFS {
 	assetInfo := func(path string) (os.FileInfo, error) {

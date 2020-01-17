@@ -9,13 +9,14 @@ import (
 	"bytes"
 	"compress/gzip"
 	"fmt"
-	"github.com/elazarl/go-bindata-assetfs"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/elazarl/go-bindata-assetfs"
 )
 
 func bindataRead(data, name string) ([]byte, error) {
