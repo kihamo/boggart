@@ -3,12 +3,12 @@ package mqtt
 import (
 	"time"
 
-	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
 type Config struct {
-	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
+	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
 
 	TopicDiscoveryPrefix mqtt.Topic `mapstructure:"topic_discovery_prefix" yaml:"topic_discovery_prefix"`
 	TopicPrefix          mqtt.Topic `valid:"required" mapstructure:"topic_prefix" yaml:"topic_prefix"`
@@ -21,7 +21,7 @@ type Config struct {
 
 func (t Type) Config() interface{} {
 	return &Config{
-		BindConfig: boggart.BindConfig{
+		ProbesConfig: di.ProbesConfig{
 			ReadinessPeriod:  time.Second * 15,
 			ReadinessTimeout: time.Second,
 		},

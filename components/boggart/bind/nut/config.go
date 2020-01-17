@@ -4,11 +4,12 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
 type Config struct {
-	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
+	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
 
 	Address          boggart.URL   `valid:",required"`
 	UPS              string        `valid:"required"`
@@ -22,7 +23,7 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/ups/+/"
 
 	return &Config{
-		BindConfig: boggart.BindConfig{
+		ProbesConfig: di.ProbesConfig{
 			ReadinessPeriod:  time.Minute,
 			ReadinessTimeout: time.Second * 5,
 		},

@@ -4,11 +4,12 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
 type Config struct {
-	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
+	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
 
 	Address         string        `valid:"required"`
 	UpdaterInterval time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
@@ -17,7 +18,7 @@ type Config struct {
 
 func (t Type) Config() interface{} {
 	return &Config{
-		BindConfig: boggart.BindConfig{
+		ProbesConfig: di.ProbesConfig{
 			ReadinessPeriod:  time.Minute,
 			ReadinessTimeout: time.Second * 5,
 		},

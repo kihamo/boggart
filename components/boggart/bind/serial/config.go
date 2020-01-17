@@ -3,11 +3,11 @@ package serial
 import (
 	"time"
 
-	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 )
 
 type Config struct {
-	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
+	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
 
 	Network string
 	Host    string
@@ -18,7 +18,7 @@ type Config struct {
 
 func (t Type) Config() interface{} {
 	return &Config{
-		BindConfig: boggart.BindConfig{
+		ProbesConfig: di.ProbesConfig{
 			ReadinessPeriod:  time.Minute,
 			ReadinessTimeout: time.Second * 5,
 		},

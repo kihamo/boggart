@@ -3,13 +3,15 @@ package chromecast
 import (
 	"time"
 
+	"github.com/kihamo/boggart/components/boggart/di"
+
 	"github.com/barnybug/go-cast/log"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
 type Config struct {
-	boggart.BindConfig `mapstructure:",squash" yaml:",inline"`
+	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
 
 	Debug             bool
 	Host              boggart.IP `valid:",required"`
@@ -34,7 +36,7 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/chromecast/+/"
 
 	return &Config{
-		BindConfig: boggart.BindConfig{
+		ProbesConfig: di.ProbesConfig{
 			ReadinessPeriod:  time.Second * 30,
 			ReadinessTimeout: time.Second * 5,
 			LivenessPeriod:   time.Second * 30,

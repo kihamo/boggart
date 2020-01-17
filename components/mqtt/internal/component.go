@@ -635,9 +635,9 @@ func (c *Component) convertPayload(payload interface{}) []byte {
 
 		return PayloadFalse
 	case time.Time:
-		return []byte(value.Format(time.RFC3339))
+		return []byte(value.UTC().Format(time.RFC3339))
 	case *time.Time:
-		return []byte(value.Format(time.RFC3339))
+		return []byte(value.UTC().Format(time.RFC3339))
 	case time.Duration:
 		return []byte(strconv.FormatFloat(value.Seconds(), 'f', -1, 64))
 	case *time.Duration:

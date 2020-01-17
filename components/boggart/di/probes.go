@@ -3,11 +3,19 @@ package di
 import (
 	"context"
 	"sync"
+	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 	"go.uber.org/multierr"
+)
+
+const (
+	ProbesConfigReadinessDefaultPeriod  = time.Minute
+	ProbesConfigReadinessDefaultTimeout = time.Second * 30
+	ProbesConfigLivenessDefaultPeriod   = time.Minute
+	ProbesConfigLivenessDefaultTimeout  = time.Second * 30
 )
 
 type ProbesHasReadinessProbe interface {
@@ -110,10 +118,10 @@ func (c *ProbesContainer) Readiness() workers.Task {
 		return nil, err
 	})
 
-	probePeriod := boggart.ReadinessProbeDefaultPeriod
-	probeTimeout := boggart.ReadinessProbeDefaultTimeout
+	probePeriod := ProbesConfigReadinessDefaultPeriod
+	probeTimeout := ProbesConfigReadinessDefaultTimeout
 
-	if probeConfig, ok := c.bind.Config().(boggart.BindConfigReadinessProbe); ok {
+	if probeConfig, ok := c.bind.Config().(ProbesConfigReadiness); ok {
 		probePeriod = probeConfig.ReadinessProbePeriod()
 		probeTimeout = probeConfig.ReadinessProbeTimeout()
 	}
@@ -210,10 +218,10 @@ func (c *ProbesContainer) Liveness() workers.Task {
 		return nil, err
 	})
 
-	probePeriod := boggart.LivenessProbeDefaultPeriod
-	probeTimeout := boggart.LivenessProbeDefaultTimeout
+	probePeriod := ProbesConfigLivenessDefaultPeriod
+	probeTimeout := ProbesConfigLivenessDefaultTimeout
 
-	if probeConfig, ok := c.bind.Config().(boggart.BindConfigLivenessProbe); ok {
+	if probeConfig, ok := c.bind.Config().(ProbesConfigLiveness); ok {
 		probePeriod = probeConfig.LivenessProbePeriod()
 		probeTimeout = probeConfig.LivenessProbeTimeout()
 	}
@@ -238,4 +246,45 @@ func (c *ProbesContainer) LivenessCheck(ctx context.Context) (err error) {
 	}
 
 	return err
+}
+
+type ProbesConfigReadiness interface {
+	ReadinessProbePeriod() time.Duration
+	ReadinessProbeTimeout() time.Duration
+}
+
+type ProbesConfigLiveness interface {
+	LivenessProbePeriod() time.Duration
+	LivenessProbeTimeout() time.Duration
+}
+
+type ProbesConfig struct {
+	ReadinessPeriod  time.Duration `mapstructure:"readiness_probe_period" yaml:"readiness_probe_period"`
+	ReadinessTimeout time.Duration `mapstructure:"readiness_probe_timeout" yaml:"readiness_probe_timeout"`
+	LivenessPeriod   time.Duration `mapstructure:"liveness_probe_period" yaml:"liveness_probe_period"`
+	LivenessTimeout  time.Duration `mapstructure:"liveness_probe_timeout" yaml:"liveness_probe_timeout"`
+}
+
+func (c ProbesConfig) ReadinessProbePeriod() time.Duration {
+	if c.ReadinessPeriod <= 0 {
+		return ProbesConfigReadinessDefaultPeriod
+	}
+
+	return c.ReadinessPeriod
+}
+
+func (c ProbesConfig) ReadinessProbeTimeout() time.Duration {
+	return c.ReadinessTimeout
+}
+
+func (c ProbesConfig) LivenessProbePeriod() time.Duration {
+	if c.LivenessPeriod <= 0 {
+		return ProbesConfigLivenessDefaultPeriod
+	}
+
+	return c.LivenessPeriod
+}
+
+func (c ProbesConfig) LivenessProbeTimeout() time.Duration {
+	return c.LivenessTimeout
 }
