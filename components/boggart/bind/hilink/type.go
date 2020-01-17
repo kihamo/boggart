@@ -27,7 +27,7 @@ func (t Type) CreateBind(c interface{}) (_ boggart.Bind, err error) {
 			bind.Logger().Info(message)
 		},
 		func(message string) {
-			bind.Logger().Info(message)
+			bind.Logger().Debug(message)
 		})
 
 	bind.client = hilink.New(config.Address.Host, config.Debug, l)

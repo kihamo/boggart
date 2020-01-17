@@ -4,13 +4,12 @@ import (
 	"context"
 
 	"github.com/kihamo/boggart/atomic"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/broadlink"
 )
 
 type Bind struct {
-	boggart.BindBase
+	di.MetaBind
 	di.MQTTBind
 	di.WorkersBind
 
@@ -20,6 +19,10 @@ type Bind struct {
 	power *atomic.Float32Null
 
 	provider *broadlink.SP3S
+}
+
+func (b *Bind) Run() error {
+	return nil
 }
 
 func (b *Bind) State() (bool, error) {

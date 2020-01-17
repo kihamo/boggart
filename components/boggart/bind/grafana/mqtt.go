@@ -11,7 +11,7 @@ import (
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(b.config.TopicAnnotation, 0, b.MQTTContainer().WrapSubscribeDeviceIsOnline(func(ctx context.Context, _ mqtt.Component, message mqtt.Message) (err error) {
+		mqtt.NewSubscriber(b.config.TopicAnnotation, 0, b.MQTT().WrapSubscribeDeviceIsOnline(func(ctx context.Context, _ mqtt.Component, message mqtt.Message) (err error) {
 			var request struct {
 				Title string   `json:"title,omitempty"`
 				Text  string   `json:"text,omitempty"`

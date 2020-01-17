@@ -18,13 +18,13 @@ func (b *Bind) Tasks() []workers.Task {
 	taskSerialNumber.SetRepeatInterval(time.Second * 30)
 	taskSerialNumber.SetName("serial-number")
 
-	taskClientsSync := b.WrapTaskIsOnline(b.taskClientsSync)
+	taskClientsSync := b.Workers().WrapTaskIsOnline(b.taskClientsSync)
 	taskClientsSync.SetTimeout(b.config.LivenessTimeout)
 	taskClientsSync.SetRepeats(-1)
 	taskClientsSync.SetRepeatInterval(b.config.ClientsSyncInterval)
 	taskClientsSync.SetName("clients-sync")
 
-	taskStateUpdater := b.WrapTaskIsOnline(b.taskUpdater)
+	taskStateUpdater := b.Workers().WrapTaskIsOnline(b.taskUpdater)
 	taskStateUpdater.SetRepeats(-1)
 	taskStateUpdater.SetRepeatInterval(b.config.UpdaterInterval)
 	taskStateUpdater.SetName("updater")
@@ -37,7 +37,7 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
-	if !b.IsStatusOnline() {
+	if !b.Meta().IsStatusOnline() {
 		return nil, errors.New("bind isn't online")
 	}
 
@@ -65,7 +65,7 @@ func (b *Bind) taskClientsSync(ctx context.Context) error {
 }
 
 func (b *Bind) taskUpdater(ctx context.Context) error {
-	sn := b.SerialNumber()
+	sn := b.Meta().SerialNumber()
 	if sn == "" {
 		return nil
 	}

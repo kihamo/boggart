@@ -7,7 +7,7 @@ import (
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskUpdater := b.WrapTaskIsOnline(b.taskUpdater)
+	taskUpdater := b.Workers().WrapTaskIsOnline(b.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(b.config.UpdaterInterval)
 	taskUpdater.SetName("updater")
@@ -23,8 +23,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		return err
 	}
 
-	sn := b.SerialNumber()
-	metricBalance.With("account", sn).Set(value)
+	metricBalance.With("account", b.config.Login).Set(value)
 
-	return b.MQTTContainer().PublishAsync(ctx, b.config.TopicBalance, value)
+	return b.MQTT().PublishAsync(ctx, b.config.TopicBalance, value)
 }

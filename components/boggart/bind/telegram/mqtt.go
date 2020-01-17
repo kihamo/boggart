@@ -23,14 +23,14 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(b.config.TopicSendMessage, 0, b.MQTTContainer().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendMessage)),
-		mqtt.NewSubscriber(b.config.TopicSendFile, 0, b.MQTTContainer().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendFileURL)),
-		mqtt.NewSubscriber(b.config.TopicSendFileURL, 0, b.MQTTContainer().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendFileURL)),
+		mqtt.NewSubscriber(b.config.TopicSendMessage, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendMessage)),
+		mqtt.NewSubscriber(b.config.TopicSendFile, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendFileURL)),
+		mqtt.NewSubscriber(b.config.TopicSendFileURL, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendFileURL)),
 	}
 }
 
 func (b *Bind) callbackMQTTSendMessage(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-	if !b.MQTTContainer().CheckSerialNumberInTopic(message.Topic(), 4) {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 4) {
 		return nil
 	}
 
@@ -43,7 +43,7 @@ func (b *Bind) callbackMQTTSendMessage(_ context.Context, _ mqtt.Component, mess
 }
 
 func (b *Bind) callbackMQTTSendFile(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-	if !b.MQTTContainer().CheckSerialNumberInTopic(message.Topic(), 4) {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 4) {
 		return nil
 	}
 
@@ -128,7 +128,7 @@ func (b *Bind) callbackMQTTSendFile(_ context.Context, _ mqtt.Component, message
 }
 
 func (b *Bind) callbackMQTTSendFileURL(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-	if !b.MQTTContainer().CheckSerialNumberInTopic(message.Topic(), 5) {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 5) {
 		return nil
 	}
 

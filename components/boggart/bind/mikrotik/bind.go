@@ -8,7 +8,6 @@ import (
 	"regexp"
 
 	"github.com/kihamo/boggart/atomic"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/providers/mikrotik"
@@ -20,7 +19,7 @@ var (
 )
 
 type Bind struct {
-	boggart.BindBase
+	di.MetaBind
 	di.MQTTBind
 	di.WorkersBind
 
@@ -55,11 +54,11 @@ func (b *Bind) Close() error {
 func (b *Bind) SerialNumberWait() string {
 	<-b.serialNumberLock
 
-	return b.SerialNumber()
+	return b.Meta().SerialNumber()
 }
 
 func (b *Bind) SetSerialNumber(serialNumber string) {
-	b.BindBase.SetSerialNumber(serialNumber)
+	b.Meta().SetSerialNumber(serialNumber)
 
 	if b.serialNumberReady.IsFalse() {
 		b.serialNumberReady.True()
@@ -68,7 +67,7 @@ func (b *Bind) SetSerialNumber(serialNumber string) {
 }
 
 func (b *Bind) Mac(ctx context.Context, mac string) (*Mac, error) {
-	if b.SerialNumber() == "" {
+	if b.Meta().SerialNumber() == "" {
 		return nil, errors.New("serial number is empty")
 	}
 
@@ -109,7 +108,7 @@ func (b *Bind) updateWiFiClient(ctx context.Context) {
 		return
 	}
 
-	sn := b.SerialNumber()
+	sn := b.Meta().SerialNumber()
 	active := make(map[interface{}]struct{}, len(connections))
 
 	for _, connection := range connections {
@@ -124,7 +123,7 @@ func (b *Bind) updateWiFiClient(ctx context.Context) {
 
 		if _, ok := b.clientWiFi.Load(key); !ok {
 			b.clientWiFi.Store(key, true)
-			_ = b.MQTTContainer().PublishAsync(ctx, b.config.TopicWiFiMACState.Format(sn, key), true)
+			_ = b.MQTT().PublishAsync(ctx, b.config.TopicWiFiMACState.Format(sn, key), true)
 		}
 	}
 
@@ -132,7 +131,7 @@ func (b *Bind) updateWiFiClient(ctx context.Context) {
 		b.clientWiFi.Range(func(key, value interface{}) bool {
 			if _, ok := active[key]; !ok {
 				b.clientWiFi.Delete(key)
-				_ = b.MQTTContainer().PublishAsync(ctx, b.config.TopicWiFiMACState.Format(sn, key), false)
+				_ = b.MQTT().PublishAsync(ctx, b.config.TopicWiFiMACState.Format(sn, key), false)
 			}
 
 			return true
@@ -147,7 +146,7 @@ func (b *Bind) updateVPNClient(ctx context.Context) {
 		return
 	}
 
-	sn := b.SerialNumber()
+	sn := b.Meta().SerialNumber()
 	active := make(map[interface{}]struct{}, len(connections))
 
 	for _, connection := range connections {
@@ -156,7 +155,7 @@ func (b *Bind) updateVPNClient(ctx context.Context) {
 
 		if _, ok := b.clientVPN.Load(key); !ok {
 			b.clientVPN.Store(key, true)
-			_ = b.MQTTContainer().PublishAsync(ctx, b.config.TopicVPNLoginState.Format(sn, key), true)
+			_ = b.MQTT().PublishAsync(ctx, b.config.TopicVPNLoginState.Format(sn, key), true)
 		}
 	}
 
@@ -164,7 +163,7 @@ func (b *Bind) updateVPNClient(ctx context.Context) {
 		b.clientVPN.Range(func(key, value interface{}) bool {
 			if _, ok := active[key]; !ok {
 				b.clientVPN.Delete(key)
-				_ = b.MQTTContainer().PublishAsync(ctx, b.config.TopicVPNLoginState.Format(sn, key), false)
+				_ = b.MQTT().PublishAsync(ctx, b.config.TopicVPNLoginState.Format(sn, key), false)
 			}
 
 			return true

@@ -47,14 +47,14 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	}
 
 	online := err == nil
-	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicOnline, online); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicOnline, online); e != nil {
 		err = multierr.Append(err, e)
 	}
 
 	if online {
 		metricLatency.With("address", b.address).Set(float64(latency))
 
-		if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicLatency, latency); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicLatency, latency); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}

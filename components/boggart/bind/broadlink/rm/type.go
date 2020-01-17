@@ -45,7 +45,6 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		config:   config,
 		provider: provider,
 	}
-	bind.SetSerialNumber(sn)
 
 	return bind, nil
 }

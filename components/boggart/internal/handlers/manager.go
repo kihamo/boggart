@@ -89,7 +89,6 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				Id:              bindItem.ID(),
 				Type:            bindItem.Type(),
 				Description:     bindItem.Description(),
-				SerialNumber:    bindItem.Bind().SerialNumber(),
 				Status:          bindItem.Status().String(),
 				Tags:            bindItem.Tags(),
 				Tasks:           make([]string, 0),
@@ -110,18 +109,22 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				item.HasLivenessProbe = ok
 			}
 
+			if bindSupport, ok := bindItem.Bind().(di.MetaContainerSupport); ok {
+				item.SerialNumber = bindSupport.Meta().SerialNumber()
+			}
+
 			if bindSupport, ok := bindItem.Bind().(di.WorkersContainerSupport); ok {
-				for _, task := range bindSupport.WorkersContainer().Tasks() {
+				for _, task := range bindSupport.Workers().Tasks() {
 					item.Tasks = append(item.Tasks, task.Name())
 				}
 			}
 
 			if bindSupport, ok := bindItem.Bind().(di.MQTTContainerSupport); ok {
-				for _, topic := range bindSupport.MQTTContainer().Publishes() {
+				for _, topic := range bindSupport.MQTT().Publishes() {
 					item.MQTTPublishes = append(item.MQTTPublishes, topic.String())
 				}
 
-				for _, topic := range bindSupport.MQTTContainer().Subscribers() {
+				for _, topic := range bindSupport.MQTT().Subscribers() {
 					item.MQTTSubscribers = append(item.MQTTSubscribers, topic.Topic().String())
 				}
 			}

@@ -32,10 +32,10 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	bind := &Bind{
 		config:           config,
+		serialNumber:     sn,
 		providerVCGenCMD: rpi.NewVCGenCMD(),
 		providerSysFS:    sysFS,
 	}
-	bind.SetSerialNumber(sn)
 
 	return bind, nil
 }

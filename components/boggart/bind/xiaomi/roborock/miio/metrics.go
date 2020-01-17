@@ -12,7 +12,7 @@ var (
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {
-	sn := b.SerialNumber()
+	sn := b.Meta().SerialNumber()
 	if sn == "" {
 		return
 	}
@@ -23,7 +23,7 @@ func (b *Bind) Describe(ch chan<- *snitch.Description) {
 }
 
 func (b *Bind) Collect(ch chan<- snitch.Metric) {
-	sn := b.SerialNumber()
+	sn := b.Meta().SerialNumber()
 	if sn == "" {
 		return
 	}

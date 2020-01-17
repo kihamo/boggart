@@ -8,15 +8,16 @@ import (
 	"sync"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 )
 
 var reRuntimeConfigLine = regexp.MustCompile(`(?m)\s*([[:alnum:]_]+)\s*=\s*([^;]+);`)
 
 type Bind struct {
-	boggart.BindBase
+	di.MetaBind
 	di.MQTTBind
+	di.LoggerBind
+
 	config                 *Config
 	cacheRuntimeConfig     map[string]string
 	cacheRuntimeConfigLock sync.Mutex
@@ -60,7 +61,7 @@ func (b *Bind) InitDeviceID(fileName string) error {
 		return err
 	}
 
-	b.SetSerialNumber(strings.TrimSpace(string(content)))
+	b.Meta().SetSerialNumber(strings.TrimSpace(string(content)))
 
 	return nil
 }

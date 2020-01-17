@@ -4,8 +4,11 @@ import (
 	"context"
 )
 
-func (b *Bind) ReadinessProbe(ctx context.Context) (err error) {
-	_, err = b.device.SerialNumber(ctx)
+func (b *Bind) ReadinessProbe(ctx context.Context) error {
+	sn, err := b.device.SerialNumber(ctx)
+	if err == nil {
+		b.Meta().SetSerialNumber(sn)
+	}
 
 	return err
 }

@@ -12,7 +12,7 @@ import (
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskUpdater := b.WrapTaskIsOnline(b.taskUpdater)
+	taskUpdater := b.Workers().WrapTaskIsOnline(b.taskUpdater)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(b.config.UpdaterInterval)
 	taskUpdater.SetName("updater")
@@ -41,7 +41,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 			if responseAccount, e := b.client.General.GetDebtByAccount(paramsAccount); e == nil {
 				metricBalance.With("ident", debt.Ident).Set(debt.Sum)
 
-				if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicBalance.Format(debt.Ident), responseAccount.Payload.Data.Sum); e != nil {
+				if e := b.MQTT().PublishAsync(ctx, b.config.TopicBalance.Format(debt.Ident), responseAccount.Payload.Data.Sum); e != nil {
 					err = multierr.Append(e, err)
 				}
 			} else {
@@ -65,7 +65,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 
 			metricMeterValue.With("number", strconv.FormatInt(meter.FactoryNumber, 10)).Set(value)
 
-			if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicMeterValue.Format(meter.Ident, meter.FactoryNumber), value); e != nil {
+			if e := b.MQTT().PublishAsync(ctx, b.config.TopicMeterValue.Format(meter.Ident, meter.FactoryNumber), value); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}

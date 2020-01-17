@@ -51,9 +51,6 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		provider: mercury.New(conn, opts...),
 	}
 
-	// TODO: read real serial number
-	bind.SetSerialNumber(config.Address)
-
 	// TODO: MQTT publish version
 
 	return bind, nil

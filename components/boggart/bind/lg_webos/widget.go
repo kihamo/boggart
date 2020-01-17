@@ -12,7 +12,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	bind := b.Bind().(*Bind)
 	data := make(map[string]interface{})
 
-	if !bind.IsStatusOnline() {
+	if !bind.Meta().IsStatusOnline() {
 		r.Session().FlashBag().Error(t.Translate(r.Context(), "Device is offline", ""))
 	}
 

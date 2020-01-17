@@ -3,14 +3,14 @@ package serial
 import (
 	"sync/atomic"
 
-	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/protocols/serial_network"
 )
 
 type Bind struct {
 	status uint32 // 0 - default, 1 - started, 2 - failed
 
-	boggart.BindBase
+	di.LoggerBind
 
 	server serial_network.Server
 }

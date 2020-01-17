@@ -14,7 +14,6 @@ import (
 	"github.com/faiface/beep/wav"
 	"github.com/hajimehoshi/oto"
 	"github.com/kihamo/boggart/atomic"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 )
 
@@ -32,8 +31,8 @@ var (
 )
 
 type Bind struct {
-	boggart.BindBase
 	di.MQTTBind
+
 	config *Config
 
 	playerStatus *atomic.Int64
@@ -125,7 +124,7 @@ func (b *Bind) setPlayerStatus(status Status) {
 		return
 	}
 
-	_ = b.MQTTContainer().PublishAsync(context.Background(), b.config.TopicStateStatus, status.String())
+	_ = b.MQTT().PublishAsync(context.Background(), b.config.TopicStateStatus, status.String())
 }
 
 func (b *Bind) PlayerStatus() Status {

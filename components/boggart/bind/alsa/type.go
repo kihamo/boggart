@@ -42,7 +42,5 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		mute:         atomic.NewBoolDefault(config.Mute),
 	}
 
-	bind.SetSerialNumber(sn)
-
 	return bind, nil
 }

@@ -13,7 +13,7 @@ func (b *Bind) ReadinessProbe(_ context.Context) error {
 		return err
 	}
 
-	sn := b.SerialNumber()
+	sn := b.config.Address
 
 	for _, device := range devices {
 		if device == sn {

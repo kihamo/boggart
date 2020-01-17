@@ -23,7 +23,7 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
-	if !b.IsStatusOnline() {
+	if !b.Meta().IsStatusOnline() {
 		return nil, errors.New("bind isn't online")
 	}
 
@@ -39,6 +39,6 @@ func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
 		return nil, errors.New("MAC address not found")
 	}
 
-	b.SetSerialNumber(response.Payload.MacAddress)
+	b.Meta().SetSerialNumber(response.Payload.MacAddress)
 	return nil, nil
 }

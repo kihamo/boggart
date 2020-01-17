@@ -152,7 +152,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		"error":              err,
 		"name":               name,
 		"protocol_major":     protocol,
-		"online":             bind.IsStatusOnline(),
+		"online":             bind.Meta().IsStatusOnline(),
 		"last_update":        lastUpdate,
 		"devices_attributes": bind.DeviceAttributes(),
 		"nodes":              bind.Nodes(),

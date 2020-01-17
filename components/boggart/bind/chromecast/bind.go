@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"net"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -13,7 +15,6 @@ import (
 	"github.com/barnybug/go-cast/events"
 	castnet "github.com/barnybug/go-cast/net"
 	"github.com/kihamo/boggart/atomic"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"go.uber.org/multierr"
 )
@@ -33,8 +34,9 @@ const (
 type eventClose struct{}
 
 type Bind struct {
-	boggart.BindBase
+	di.MetaBind
 	di.MQTTBind
+	di.LoggerBind
 
 	config *Config
 
@@ -56,6 +58,7 @@ type Bind struct {
 
 func (b *Bind) Run() error {
 	b.disconnected.Nil()
+	b.Meta().SetSerialNumber(net.JoinHostPort(b.config.Host.String(), strconv.Itoa(b.config.Port)))
 
 	return nil
 }
@@ -183,9 +186,9 @@ func (b *Bind) doEvents() {
 			)
 
 			volume := uint32(math.Round(t.Level * 100))
-			_ = b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateVolume, volume)
+			_ = b.MQTT().PublishAsync(ctx, b.config.TopicStateVolume, volume)
 
-			_ = b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateMute, t.Muted)
+			_ = b.MQTT().PublishAsync(ctx, b.config.TopicStateMute, t.Muted)
 
 		case controllers.MediaStatus:
 			b.Logger().Debug("Event MediaStatus",
@@ -193,7 +196,7 @@ func (b *Bind) doEvents() {
 				"reason", t.IdleReason,
 			)
 
-			_ = b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateStatus, strings.ToLower(t.PlayerState))
+			_ = b.MQTT().PublishAsync(ctx, b.config.TopicStateStatus, strings.ToLower(t.PlayerState))
 
 			if t.PlayerState == PlayerStateIdle && t.IdleReason == IdleReasonFinished {
 				b.mutex.RLock()
@@ -206,7 +209,7 @@ func (b *Bind) doEvents() {
 			}
 
 			if t.Media != nil {
-				_ = b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateContent, t.Media.ContentId)
+				_ = b.MQTT().PublishAsync(ctx, b.config.TopicStateContent, t.Media.ContentId)
 			}
 
 		case eventClose:

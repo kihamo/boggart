@@ -5,13 +5,11 @@ import (
 	"errors"
 
 	"firebase.google.com/go/messaging"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"go.uber.org/multierr"
 )
 
 type Bind struct {
-	boggart.BindBase
 	di.MQTTBind
 
 	config    *Config

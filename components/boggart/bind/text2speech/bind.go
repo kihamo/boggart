@@ -13,15 +13,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	speechkit "github.com/kihamo/boggart/providers/yandex_speechkit_cloud"
 	"github.com/kihamo/boggart/providers/yandex_speechkit_cloud/client/generate"
 )
 
 type Bind struct {
-	boggart.BindBase
 	di.MQTTBind
+	di.LoggerBind
 
 	config   *Config
 	provider *speechkit.Client

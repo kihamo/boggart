@@ -21,7 +21,7 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
-	if !b.IsStatusOnline() {
+	if !b.Meta().IsStatusOnline() {
 		return nil, errors.New("bind isn't online")
 	}
 
@@ -35,7 +35,7 @@ func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	b.SetSerialNumber(deviceInfo.DeviceId)
+	b.Meta().SetSerialNumber(deviceInfo.DeviceId)
 
 	// set tv subscribers
 	go func() {

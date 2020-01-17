@@ -46,10 +46,10 @@ func (b *Bind) callbackMQTTGenerateBinaryOptions(binary bool) func(ctx context.C
 		}
 
 		if binary {
-			return b.MQTTContainer().PublishAsync(ctx, b.config.TopicBinary, reader)
+			return b.MQTT().PublishAsync(ctx, b.config.TopicBinary, reader)
 		}
 
-		return b.MQTTContainer().PublishAsync(ctx, b.config.TopicURL, b.GenerateURL(ctx, r.Text, r.Format, r.Quality, r.Language, r.Speaker, r.Emotion, r.Speed, r.Force))
+		return b.MQTT().PublishAsync(ctx, b.config.TopicURL, b.GenerateURL(ctx, r.Text, r.Format, r.Quality, r.Language, r.Speaker, r.Emotion, r.Speed, r.Force))
 	}
 }
 
@@ -61,9 +61,9 @@ func (b *Bind) callbackMQTTGenerateBinaryText(binary bool) func(ctx context.Cont
 		}
 
 		if binary {
-			return b.MQTTContainer().PublishAsync(ctx, b.config.TopicBinary, reader)
+			return b.MQTT().PublishAsync(ctx, b.config.TopicBinary, reader)
 		}
 
-		return b.MQTTContainer().PublishAsync(ctx, b.config.TopicURL, b.GenerateURL(ctx, message.String(), "", "", "", "", "", 0, false))
+		return b.MQTT().PublishAsync(ctx, b.config.TopicURL, b.GenerateURL(ctx, message.String(), "", "", "", "", "", 0, false))
 	}
 }

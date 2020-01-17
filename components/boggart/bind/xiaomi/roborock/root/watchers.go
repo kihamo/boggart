@@ -13,7 +13,7 @@ func (b *Bind) runtimeConfigWatcher(fileName string) error {
 	}
 	defer f.Close()
 
-	sn := b.SerialNumber()
+	sn := b.Meta().SerialNumber()
 
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
@@ -32,7 +32,7 @@ func (b *Bind) runtimeConfigWatcher(fileName string) error {
 			b.cacheRuntimeConfig[key] = current
 
 			// TODO
-			_ = b.MQTTContainer().Publish(context.Background(), b.config.TopicRuntimeConfig.Format(sn, key), current)
+			_ = b.MQTT().Publish(context.Background(), b.config.TopicRuntimeConfig.Format(sn, key), current)
 		}
 
 		b.cacheRuntimeConfigLock.Unlock()

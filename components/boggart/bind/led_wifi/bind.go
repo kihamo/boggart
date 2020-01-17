@@ -3,13 +3,12 @@ package led_wifi
 import (
 	"context"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/wifiled"
 )
 
 type Bind struct {
-	boggart.BindBase
+	di.MetaBind
 	di.MQTTBind
 	di.WorkersBind
 

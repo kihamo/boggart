@@ -7,7 +7,7 @@ import (
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskStateUpdater := b.WrapTaskIsOnline(b.taskUpdater)
+	taskStateUpdater := b.Workers().WrapTaskIsOnline(b.taskUpdater)
 	taskStateUpdater.SetRepeats(-1)
 	taskStateUpdater.SetRepeatInterval(b.config.UpdaterInterval)
 	taskStateUpdater.SetName("updater")
@@ -25,7 +25,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 
 	b.mutex.Lock()
 
-	sn := b.SerialNumber()
+	sn := b.Meta().SerialNumber()
 
 	for _, v := range variables {
 		prev, ok := b.variables[v.Name]
@@ -46,7 +46,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 			b.variables[v.Name] = v.Value
 
 			// TODO:
-			_ = b.MQTTContainer().PublishAsync(ctx, b.config.TopicVariable.Format(sn, v.Name), v.Value)
+			_ = b.MQTT().PublishAsync(ctx, b.config.TopicVariable.Format(sn, v.Name), v.Value)
 		}
 	}
 

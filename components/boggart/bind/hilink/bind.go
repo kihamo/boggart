@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/atomic"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/hilink"
 	"github.com/kihamo/boggart/providers/hilink/client/device"
@@ -22,9 +21,10 @@ var (
 )
 
 type Bind struct {
-	boggart.BindBase
+	di.MetaBind
 	di.MQTTBind
 	di.WorkersBind
+	di.LoggerBind
 
 	config                    *Config
 	client                    *hilink.Client
@@ -102,7 +102,7 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, sms *models.SMSListMessagesI
 		return false
 	}
 
-	sn := b.SerialNumber()
+	sn := b.Meta().SerialNumber()
 
 	// limit traffic
 	match := op.SMSLimitTrafficRegexp.FindStringSubmatch(sms.Content)
@@ -129,7 +129,7 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, sms *models.SMSListMessagesI
 				value *= op.SMSLimitTrafficFactor
 
 				metricLimitInternetTraffic.With("serial_number", sn).Set(value)
-				b.MQTTContainer().PublishAsync(ctx, b.config.TopicLimitInternetTraffic.Format(sn), uint64(value))
+				b.MQTT().PublishAsync(ctx, b.config.TopicLimitInternetTraffic.Format(sn), uint64(value))
 
 				b.limitInternetTrafficIndex.Set(sms.Index)
 			}

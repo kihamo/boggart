@@ -7,7 +7,7 @@ import (
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskSyncState := b.WrapTaskIsOnline(b.taskSyncState)
+	taskSyncState := b.Workers().WrapTaskIsOnline(b.taskSyncState)
 	taskSyncState.SetRepeats(-1)
 	taskSyncState.SetRepeatInterval(b.config.SyncStateInterval)
 	taskSyncState.SetName("sync-state")
@@ -18,13 +18,13 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskSyncState(ctx context.Context) error {
-	if b.SerialNumber() == "" {
+	if b.Meta().SerialNumber() == "" {
 		info, err := b.provider.DeviceInfo(ctx)
 		if err != nil {
 			return err
 		}
 
-		b.SetSerialNumber(info.MacAddress)
+		b.Meta().SetSerialNumber(info.MacAddress)
 	}
 
 	entities, err := b.provider.ListEntities(ctx)

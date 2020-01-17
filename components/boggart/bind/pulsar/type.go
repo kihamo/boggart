@@ -37,23 +37,23 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		return nil, err
 	}
 
-	sn := hex.EncodeToString(deviceAddress)
+	address := hex.EncodeToString(deviceAddress)
 
-	config.TopicTemperatureIn = config.TopicTemperatureIn.Format(sn)
-	config.TopicTemperatureOut = config.TopicTemperatureOut.Format(sn)
-	config.TopicTemperatureDelta = config.TopicTemperatureDelta.Format(sn)
-	config.TopicEnergy = config.TopicEnergy.Format(sn)
-	config.TopicConsumption = config.TopicConsumption.Format(sn)
-	config.TopicCapacity = config.TopicCapacity.Format(sn)
-	config.TopicPower = config.TopicPower.Format(sn)
-	config.TopicInputPulses1 = config.TopicInputPulses1.Format(sn)
-	config.TopicInputPulses2 = config.TopicInputPulses2.Format(sn)
-	config.TopicInputPulses3 = config.TopicInputPulses3.Format(sn)
-	config.TopicInputPulses4 = config.TopicInputPulses4.Format(sn)
-	config.TopicInputVolume1 = config.TopicInputVolume1.Format(sn)
-	config.TopicInputVolume2 = config.TopicInputVolume2.Format(sn)
-	config.TopicInputVolume3 = config.TopicInputVolume3.Format(sn)
-	config.TopicInputVolume4 = config.TopicInputVolume4.Format(sn)
+	config.TopicTemperatureIn = config.TopicTemperatureIn.Format(address)
+	config.TopicTemperatureOut = config.TopicTemperatureOut.Format(address)
+	config.TopicTemperatureDelta = config.TopicTemperatureDelta.Format(address)
+	config.TopicEnergy = config.TopicEnergy.Format(address)
+	config.TopicConsumption = config.TopicConsumption.Format(address)
+	config.TopicCapacity = config.TopicCapacity.Format(address)
+	config.TopicPower = config.TopicPower.Format(address)
+	config.TopicInputPulses1 = config.TopicInputPulses1.Format(address)
+	config.TopicInputPulses2 = config.TopicInputPulses2.Format(address)
+	config.TopicInputPulses3 = config.TopicInputPulses3.Format(address)
+	config.TopicInputPulses4 = config.TopicInputPulses4.Format(address)
+	config.TopicInputVolume1 = config.TopicInputVolume1.Format(address)
+	config.TopicInputVolume2 = config.TopicInputVolume2.Format(address)
+	config.TopicInputVolume3 = config.TopicInputVolume3.Format(address)
+	config.TopicInputVolume4 = config.TopicInputVolume4.Format(address)
 
 	opts := []pulsar.Option{
 		pulsar.WithAddress(deviceAddress),
@@ -63,8 +63,8 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	bind := &Bind{
 		config:   config,
 		provider: pulsar.New(conn, opts...),
+		address:  address,
 	}
-	bind.SetSerialNumber(sn)
 
 	return bind, nil
 }

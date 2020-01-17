@@ -10,9 +10,9 @@ var (
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {
-	metricBalance.With("account", b.SerialNumber()).Describe(ch)
+	metricBalance.With("account", b.config.Login).Describe(ch)
 }
 
 func (b *Bind) Collect(ch chan<- snitch.Metric) {
-	metricBalance.With("account", b.SerialNumber()).Collect(ch)
+	metricBalance.With("account", b.config.Login).Collect(ch)
 }

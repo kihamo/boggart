@@ -35,7 +35,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 	stats := pinger.Statistics()
 
 	online := stats.PacketsRecv != 0
-	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicOnline, online); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicOnline, online); e != nil {
 		err = multierr.Append(err, e)
 	}
 
@@ -43,7 +43,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (interface{}, error) {
 		latency := uint32(stats.MaxRtt.Nanoseconds() / 1e+6)
 		metricLatency.With("host", b.config.Hostname).Set(float64(latency))
 
-		if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicLatency, latency); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicLatency, latency); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}

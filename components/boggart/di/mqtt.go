@@ -18,8 +18,8 @@ type MQTTHasPublishes interface {
 }
 
 type MQTTContainerSupport interface {
-	SetMQTTContainer(*MQTTContainer)
-	MQTTContainer() *MQTTContainer
+	SetMQTT(*MQTTContainer)
+	MQTT() *MQTTContainer
 }
 
 type MQTTBind struct {
@@ -27,13 +27,13 @@ type MQTTBind struct {
 	container *MQTTContainer
 }
 
-func (b *MQTTBind) SetMQTTContainer(container *MQTTContainer) {
+func (b *MQTTBind) SetMQTT(container *MQTTContainer) {
 	b.mutex.Lock()
 	b.container = container
 	b.mutex.Unlock()
 }
 
-func (b *MQTTBind) MQTTContainer() *MQTTContainer {
+func (b *MQTTBind) MQTT() *MQTTContainer {
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()
 
@@ -143,7 +143,13 @@ func (c *MQTTContainer) CheckValueInTopic(topic mqtt.Topic, value string, offset
 }
 
 func (c *MQTTContainer) CheckSerialNumberInTopic(topic mqtt.Topic, offset int) bool {
-	return c.CheckValueInTopic(topic, mqtt.NameReplace(c.bind.Bind().SerialNumber()), offset)
+	if bindSupport, ok := c.bind.Bind().(MetaContainerSupport); ok {
+		if sn := bindSupport.Meta().SerialNumber(); sn != "" {
+			return c.CheckValueInTopic(topic, mqtt.NameReplace(sn), offset)
+		}
+	}
+
+	return false
 }
 
 func (c *MQTTContainer) WrapSubscribeDeviceIsOnline(callback mqtt.MessageHandler) mqtt.MessageHandler {
@@ -157,7 +163,7 @@ func (c *MQTTContainer) WrapSubscribeDeviceIsOnline(callback mqtt.MessageHandler
 }
 
 func (c *MQTTContainer) Subscribers() []mqtt.Subscriber {
-	has, ok := c.bind.(MQTTHasSubscribers)
+	has, ok := c.bind.Bind().(MQTTHasSubscribers)
 	if !ok {
 		return nil
 	}
@@ -173,7 +179,7 @@ func (c *MQTTContainer) Subscribers() []mqtt.Subscriber {
 }
 
 func (c *MQTTContainer) Publishes() []mqtt.Topic {
-	has, ok := c.bind.(MQTTHasPublishes)
+	has, ok := c.bind.Bind().(MQTTHasPublishes)
 	if !ok {
 		return nil
 	}

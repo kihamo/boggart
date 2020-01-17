@@ -48,12 +48,12 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 	if b.config.PTZEnabled {
 		subscribers = append(subscribers,
-			mqtt.NewSubscriber(b.config.TopicPTZMove, 0, b.MQTTContainer().WrapSubscribeDeviceIsOnline(b.callbackMQTTAbsolute)),
-			mqtt.NewSubscriber(b.config.TopicPTZAbsolute, 0, b.MQTTContainer().WrapSubscribeDeviceIsOnline(b.callbackMQTTAbsolute)),
-			mqtt.NewSubscriber(b.config.TopicPTZContinuous, 0, b.MQTTContainer().WrapSubscribeDeviceIsOnline(b.callbackMQTTContinuous)),
-			mqtt.NewSubscriber(b.config.TopicPTZRelative, 0, b.MQTTContainer().WrapSubscribeDeviceIsOnline(b.callbackMQTTRelative)),
-			mqtt.NewSubscriber(b.config.TopicPTZPreset, 0, b.MQTTContainer().WrapSubscribeDeviceIsOnline(b.callbackMQTTPreset)),
-			mqtt.NewSubscriber(b.config.TopicPTZMomentary, 0, b.MQTTContainer().WrapSubscribeDeviceIsOnline(b.callbackMQTTMomentary)),
+			mqtt.NewSubscriber(b.config.TopicPTZMove, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTAbsolute)),
+			mqtt.NewSubscriber(b.config.TopicPTZAbsolute, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTAbsolute)),
+			mqtt.NewSubscriber(b.config.TopicPTZContinuous, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTContinuous)),
+			mqtt.NewSubscriber(b.config.TopicPTZRelative, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTRelative)),
+			mqtt.NewSubscriber(b.config.TopicPTZPreset, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTPreset)),
+			mqtt.NewSubscriber(b.config.TopicPTZMomentary, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTMomentary)),
 		)
 	}
 
@@ -76,23 +76,23 @@ func (b *Bind) updateStatusByChannelId(ctx context.Context, channelId uint64) er
 		return err
 	}
 
-	sn := b.SerialNumber()
+	sn := b.Meta().SerialNumber()
 	var result error
 
 	if channel.Status == nil || channel.Status.Elevation != status.Payload.AbsoluteHigh.Elevation {
-		if err := b.MQTTContainer().PublishAsync(ctx, b.config.TopicPTZStatusElevation.Format(sn, channelId), status.Payload.AbsoluteHigh.Elevation); err != nil {
+		if err := b.MQTT().PublishAsync(ctx, b.config.TopicPTZStatusElevation.Format(sn, channelId), status.Payload.AbsoluteHigh.Elevation); err != nil {
 			result = multierr.Append(result, err)
 		}
 	}
 
 	if channel.Status == nil || channel.Status.Azimuth != status.Payload.AbsoluteHigh.Azimuth {
-		if err := b.MQTTContainer().PublishAsync(ctx, b.config.TopicPTZStatusAzimuth.Format(sn, channelId), status.Payload.AbsoluteHigh.Azimuth); err != nil {
+		if err := b.MQTT().PublishAsync(ctx, b.config.TopicPTZStatusAzimuth.Format(sn, channelId), status.Payload.AbsoluteHigh.Azimuth); err != nil {
 			result = multierr.Append(result, err)
 		}
 	}
 
 	if channel.Status == nil || channel.Status.Zoom != status.Payload.AbsoluteHigh.Zoom {
-		if err := b.MQTTContainer().PublishAsync(ctx, b.config.TopicPTZStatusZoom.Format(sn, channelId), status.Payload.AbsoluteHigh.Zoom); err != nil {
+		if err := b.MQTT().PublishAsync(ctx, b.config.TopicPTZStatusZoom.Format(sn, channelId), status.Payload.AbsoluteHigh.Zoom); err != nil {
 			result = multierr.Append(result, err)
 		}
 	}
@@ -135,7 +135,7 @@ func (b *Bind) checkTopic(topic mqtt.Topic) (uint64, error) {
 }
 
 func (b *Bind) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	if !b.MQTTContainer().CheckSerialNumberInTopic(message.Topic(), 4) {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 4) {
 		return nil
 	}
 
@@ -164,7 +164,7 @@ func (b *Bind) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, 
 }
 
 func (b *Bind) callbackMQTTContinuous(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	if !b.MQTTContainer().CheckSerialNumberInTopic(message.Topic(), 4) {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 4) {
 		return nil
 	}
 
@@ -191,7 +191,7 @@ func (b *Bind) callbackMQTTContinuous(ctx context.Context, client mqtt.Component
 }
 
 func (b *Bind) callbackMQTTRelative(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	if !b.MQTTContainer().CheckSerialNumberInTopic(message.Topic(), 4) {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 4) {
 		return nil
 	}
 
@@ -220,7 +220,7 @@ func (b *Bind) callbackMQTTRelative(ctx context.Context, client mqtt.Component, 
 }
 
 func (b *Bind) callbackMQTTPreset(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	if !b.MQTTContainer().CheckSerialNumberInTopic(message.Topic(), 4) {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 4) {
 		return nil
 	}
 
@@ -245,7 +245,7 @@ func (b *Bind) callbackMQTTPreset(ctx context.Context, client mqtt.Component, me
 }
 
 func (b *Bind) callbackMQTTMomentary(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	if !b.MQTTContainer().CheckSerialNumberInTopic(message.Topic(), 4) {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 4) {
 		return nil
 	}
 

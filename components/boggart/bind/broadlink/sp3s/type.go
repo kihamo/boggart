@@ -42,7 +42,6 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		state:    atomic.NewBoolNull(),
 		power:    atomic.NewFloat32Null(),
 	}
-	bind.SetSerialNumber(sn)
 
 	return bind, nil
 }

@@ -41,7 +41,5 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		out:    atomic.NewBool(),
 	}
 
-	bind.SetSerialNumber(g.Name())
-
 	return bind, nil
 }

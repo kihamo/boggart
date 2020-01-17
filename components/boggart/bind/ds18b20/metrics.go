@@ -10,9 +10,9 @@ var (
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {
-	metricValue.With("serial_number", b.SerialNumber()).Describe(ch)
+	metricValue.With("serial_number", b.config.Address).Describe(ch)
 }
 
 func (b *Bind) Collect(ch chan<- snitch.Metric) {
-	metricValue.With("serial_number", b.SerialNumber()).Collect(ch)
+	metricValue.With("serial_number", b.config.Address).Collect(ch)
 }

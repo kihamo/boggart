@@ -5,12 +5,11 @@ import (
 	"sync"
 
 	"github.com/kihamo/boggart/atomic"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 )
 
 type Bind struct {
-	boggart.BindBase
+	di.MetaBind
 	di.MQTTBind
 
 	config     *Config
@@ -19,7 +18,7 @@ type Bind struct {
 }
 
 func (b *Bind) Close() (err error) {
-	if client := b.MQTTContainer().Client(); client != nil {
+	if client := b.MQTT().Client(); client != nil {
 		for _, component := range b.Components() {
 			if err = client.UnsubscribeSubscribers(component.Subscribers()); err != nil {
 				return err
@@ -58,12 +57,12 @@ func (b *Bind) register(c Component) (err error) {
 	b.components.Store(c.GetUniqueID(), c)
 
 	if mac := c.GetDevice().MAC(); mac != nil {
-		b.SetSerialNumber(mac.String())
+		b.Meta().SetSerialNumber(mac.String())
 	}
 
 	subscribers := c.Subscribers()
 	if len(subscribers) > 0 {
-		client := b.MQTTContainer().Client()
+		client := b.MQTT().Client()
 
 		if client == nil {
 			return errors.New("MQTT client isn't init")

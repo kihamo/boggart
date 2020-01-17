@@ -13,7 +13,7 @@ import (
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskUpdater := b.WrapTaskIsOnline(b.taskUpdater)
+	taskUpdater := b.Workers().WrapTaskIsOnline(b.taskUpdater)
 	taskUpdater.SetTimeout(b.config.UpdaterTimeout)
 	taskUpdater.SetRepeats(-1)
 	taskUpdater.SetRepeatInterval(b.config.UpdaterInterval)
@@ -46,13 +46,13 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 
 	if err != nil {
 		if _, ok := err.(*printer.GetPrinterStateConflict); ok {
-			err = b.MQTTContainer().PublishAsync(ctx, b.config.TopicState.Format(address), "Not operational")
+			err = b.MQTT().PublishAsync(ctx, b.config.TopicState.Format(address), "Not operational")
 		}
 
 		return err
 	}
 
-	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicState.Format(address), state.Payload.State.Text); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicState.Format(address), state.Payload.State.Text); e != nil {
 		err = multierr.Append(err, e)
 	}
 
@@ -62,16 +62,16 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 	temperature = state.Payload.Temperature.Bed
 
 	metricDeviceTemperatureActual.With("address", address).With("device", "bed").Set(temperature.Actual)
-	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateBedTemperatureActual.Format(address), temperature.Actual); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateBedTemperatureActual.Format(address), temperature.Actual); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateBedTemperatureOffset.Format(address), temperature.Offset); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateBedTemperatureOffset.Format(address), temperature.Offset); e != nil {
 		err = multierr.Append(err, e)
 	}
 
 	metricDeviceTemperatureTarget.With("address", address).With("device", "bed").Set(temperature.Target)
-	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateBedTemperatureTarget.Format(address), temperature.Target); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateBedTemperatureTarget.Format(address), temperature.Target); e != nil {
 		err = multierr.Append(err, e)
 	}
 
@@ -79,38 +79,38 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 	temperature = state.Payload.Temperature.Tool0
 
 	metricDeviceTemperatureActual.With("address", address).With("device", "tool0").Set(temperature.Actual)
-	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateTool0TemperatureActual.Format(address), temperature.Actual); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateTool0TemperatureActual.Format(address), temperature.Actual); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateTool0TemperatureOffset.Format(address), temperature.Offset); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateTool0TemperatureOffset.Format(address), temperature.Offset); e != nil {
 		err = multierr.Append(err, e)
 	}
 
 	metricDeviceTemperatureTarget.With("address", address).With("device", "tool0").Set(temperature.Target)
-	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateTool0TemperatureTarget.Format(address), temperature.Target); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateTool0TemperatureTarget.Format(address), temperature.Target); e != nil {
 		err = multierr.Append(err, e)
 	}
 
 	// Job
 	if j, e := b.provider.Job.GetJob(job.NewGetJobParamsWithContext(ctx), nil); e == nil {
-		if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateJobFileName.Format(address), j.Payload.Job.File.Name); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateJobFileName.Format(address), j.Payload.Job.File.Name); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateJobFileSize.Format(address), j.Payload.Job.File.Size); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateJobFileSize.Format(address), j.Payload.Job.File.Size); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateJobProgress.Format(address), j.Payload.Progress.Completion); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateJobProgress.Format(address), j.Payload.Progress.Completion); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateJobTime.Format(address), j.Payload.Progress.PrintTime); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateJobTime.Format(address), j.Payload.Progress.PrintTime); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateJobTimeLeft.Format(address), j.Payload.Progress.PrintTimeLeft); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateJobTimeLeft.Format(address), j.Payload.Progress.PrintTimeLeft); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
@@ -143,19 +143,19 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		}
 	}
 
-	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicLayerTotal.Format(address), layerTotal); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicLayerTotal.Format(address), layerTotal); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicLayerCurrent.Format(address), layerCurrent); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicLayerCurrent.Format(address), layerCurrent); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicHeightTotal.Format(address), heightTotal); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicHeightTotal.Format(address), heightTotal); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicHeightCurrent.Format(address), heightCurrent); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicHeightCurrent.Format(address), heightCurrent); e != nil {
 		err = multierr.Append(err, e)
 	}
 

@@ -5,13 +5,12 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/robbiet480/go.nut"
 )
 
 type Bind struct {
-	boggart.BindBase
+	di.MetaBind
 	di.MQTTBind
 	di.WorkersBind
 
@@ -69,7 +68,7 @@ func (b *Bind) ups() (ups nut.UPS, err error) {
 		if device.Name == b.config.UPS {
 			for _, v := range device.Variables {
 				if v.Name == "device.serial" {
-					b.SetSerialNumber(strings.TrimSpace(v.Value.(string)))
+					b.Meta().SetSerialNumber(strings.TrimSpace(v.Value.(string)))
 					return device, nil
 				}
 			}

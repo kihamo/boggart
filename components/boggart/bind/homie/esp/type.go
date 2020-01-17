@@ -31,7 +31,6 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		config:   config,
 		otaFlash: make(chan struct{}, 1),
 	}
-	bind.SetSerialNumber(config.DeviceID)
 
 	return bind, nil
 }

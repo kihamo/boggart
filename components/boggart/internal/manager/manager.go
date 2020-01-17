@@ -116,26 +116,29 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 
 	m.itemStatusUpdate(bindItem, boggart.BindStatusInitializing)
 
-	// init logger
-	if bindLogger, ok := bind.(boggart.BindLogger); ok {
-		bindLogger.SetLogger(logging.NewLazyLogger(m.logger, m.logger.Name()+"."+id))
+	if bindSupport, ok := bind.(di.MetaContainerSupport); ok {
+		bindSupport.SetMeta(di.NewMetaContainer(bindItem))
 	}
 
-	bind.SetID(id)
-	bind.SetStatusManager(bindItem.Status)
+	// init logger
+	if bindSupport, ok := bind.(di.LoggerContainerSupport); ok {
+		bindSupport.SetLogger(di.NewLoggerContainer(logging.NewLazyLogger(m.logger, m.logger.Name()+"."+id)))
+	}
 
 	// register mqtt
 	if bindSupport, ok := bind.(di.MQTTContainerSupport); ok {
-		bindSupport.SetMQTTContainer(di.NewMQTTContainer(bindItem, m.mqtt))
+		bindSupport.SetMQTT(di.NewMQTTContainer(bindItem, m.mqtt))
 	}
 
-	if err := bind.Run(); err != nil {
-		return nil, err
+	if runner, ok := bind.(boggart.BindRunner); ok {
+		if err := runner.Run(); err != nil {
+			return nil, err
+		}
 	}
 
 	if bindSupport, ok := bind.(di.MQTTContainerSupport); ok {
 		// TODO: обвешать подписки враппером, что бы только в online можно было посылать
-		for _, subscriber := range bindSupport.MQTTContainer().Subscribers() {
+		for _, subscriber := range bindSupport.MQTT().Subscribers() {
 			if err := m.mqtt.SubscribeSubscriber(subscriber); err != nil {
 				m.itemStatusUpdate(bindItem, boggart.BindStatusUninitialized)
 				return nil, err
@@ -262,10 +265,12 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 	}
 
 	if bindSupport, ok := bindItem.Bind().(di.WorkersContainerSupport); ok {
-		tasks = append(tasks, bindSupport.WorkersContainer().Tasks()...)
+		bindSupport.SetWorkers(di.NewWorkersContainer(bindItem))
+
+		tasks = append(tasks, bindSupport.Workers().Tasks()...)
 
 		// register listeners
-		for _, listener := range bindSupport.WorkersContainer().Listeners() {
+		for _, listener := range bindSupport.Workers().Listeners() {
 			m.listeners.AddListener(listener)
 		}
 	}
@@ -301,7 +306,7 @@ func (m *Manager) Unregister(id string) error {
 
 	// unregister mqtt
 	if bindSupport, ok := bindItem.Bind().(di.MQTTContainerSupport); ok {
-		if err := m.mqtt.UnsubscribeSubscribers(bindSupport.MQTTContainer().Subscribers()); err != nil {
+		if err := m.mqtt.UnsubscribeSubscribers(bindSupport.MQTT().Subscribers()); err != nil {
 			m.logger.Error("Unregister bind failed because unsubscribe MQTT failed",
 				"type", bindItem.Type(),
 				"id", bindItem.ID(),
@@ -309,7 +314,7 @@ func (m *Manager) Unregister(id string) error {
 			)
 		}
 
-		bindSupport.MQTTContainer().SetClient(nil)
+		bindSupport.MQTT().SetClient(nil)
 	}
 
 	// remove probes
@@ -323,12 +328,12 @@ func (m *Manager) Unregister(id string) error {
 	// workers
 	if bindSupport, ok := bindItem.Bind().(di.WorkersContainerSupport); ok {
 		// remove tasks
-		for _, tsk := range bindSupport.WorkersContainer().Tasks() {
+		for _, tsk := range bindSupport.Workers().Tasks() {
 			m.workers.RemoveTask(tsk)
 		}
 
 		// remove listeners
-		for _, listener := range bindSupport.WorkersContainer().Listeners() {
+		for _, listener := range bindSupport.Workers().Listeners() {
 			m.listeners.RemoveListener(listener)
 		}
 	}

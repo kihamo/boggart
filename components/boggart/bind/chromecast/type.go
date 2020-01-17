@@ -43,7 +43,6 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		mediaContentID: atomic.NewString(),
 		events:         make(chan events.Event, 16),
 	}
-	bind.SetSerialNumber(sn)
 
 	return bind, nil
 }

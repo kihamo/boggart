@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/kihamo/go-workers/event"
-	"github.com/kihamo/shadow/components/logging"
 )
 
 var (
@@ -36,15 +35,10 @@ type BindItem interface {
 
 type BindStatusManager func() BindStatus
 
-type Bind interface {
-	Run() error
-	SetID(string)
-	SetStatusManager(BindStatusManager)
-	SerialNumber() string
-}
+type Bind interface{}
 
-type BindLogger interface {
-	SetLogger(logging.Logger)
+type BindRunner interface {
+	Run() error
 }
 
 type BindHasReadinessProbe interface {

@@ -9,15 +9,16 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
 	"gopkg.in/telegram-bot-api.v4"
 )
 
 type Bind struct {
-	boggart.BindBase
+	di.MetaBind
 	di.MQTTBind
+	di.LoggerBind
+
 	config *Config
 
 	mutex  sync.RWMutex
@@ -144,7 +145,7 @@ func (b *Bind) initBot() (*tgbotapi.BotAPI, error) {
 		return nil, err
 	}
 
-	b.SetSerialNumber(strconv.Itoa(client.Self.ID))
+	b.Meta().SetSerialNumber(strconv.Itoa(client.Self.ID))
 	client.Debug = b.config.Debug
 
 	if b.config.UpdatesEnabled {
@@ -186,7 +187,7 @@ func (b *Bind) chatId(to string) (int64, error) {
 
 func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 	go func() {
-		sn := b.SerialNumber()
+		sn := b.Meta().SerialNumber()
 
 		for {
 			select {
@@ -205,7 +206,7 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 				if u.Message.Text != "" {
 					mqttTopic = b.config.TopicReceiveMessage.Format(sn, u.Message.Chat.ID)
 
-					if err := b.MQTTContainer().PublishAsync(ctx, b.config.TopicReceiveMessage.Format(sn, u.Message.Chat.ID), u.Message.Text); err != nil {
+					if err := b.MQTT().PublishAsync(ctx, b.config.TopicReceiveMessage.Format(sn, u.Message.Chat.ID), u.Message.Text); err != nil {
 						b.Logger().Error("Publish message to MQTT failed",
 							"topic", mqttTopic,
 							"message", u.Message.Text,
@@ -249,7 +250,7 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 					continue
 				}
 
-				if err := b.MQTTContainer().PublishAsync(ctx, mqttTopic, link); err != nil {
+				if err := b.MQTT().PublishAsync(ctx, mqttTopic, link); err != nil {
 					b.Logger().Error("Publish link to MQTT failed",
 						"topic", mqttTopic,
 						"link", link,

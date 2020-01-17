@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/kihamo/boggart/atomic"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"periph.io/x/periph/conn/gpio"
 	"periph.io/x/periph/conn/pin"
@@ -20,8 +19,8 @@ const (
 )
 
 type Bind struct {
-	boggart.BindBase
 	di.MQTTBind
+
 	config *Config
 
 	pin  pin.Pin
@@ -30,7 +29,7 @@ type Bind struct {
 }
 
 func (b *Bind) Run() error {
-	err := b.MQTTContainer().PublishAsync(context.Background(), b.config.TopicPinState, b.Read())
+	err := b.MQTT().PublishAsync(context.Background(), b.config.TopicPinState, b.Read())
 	if err != nil {
 		return err
 	}
@@ -60,7 +59,7 @@ func (b *Bind) High(ctx context.Context) error {
 
 		b.out.True()
 
-		if err := b.MQTTContainer().PublishAsync(ctx, b.config.TopicPinState, true); err != nil {
+		if err := b.MQTT().PublishAsync(ctx, b.config.TopicPinState, true); err != nil {
 			return err
 		}
 	}
@@ -80,7 +79,7 @@ func (b *Bind) Low(ctx context.Context) error {
 
 		b.out.False()
 
-		if err := b.MQTTContainer().PublishAsync(ctx, b.config.TopicPinState, false); err != nil {
+		if err := b.MQTT().PublishAsync(ctx, b.config.TopicPinState, false); err != nil {
 			return err
 		}
 	}
@@ -107,6 +106,6 @@ func (b *Bind) waitForEdge() {
 
 	for p.WaitForEdge(-1) {
 		// TODO: log
-		_ = b.MQTTContainer().PublishAsync(ctx, b.config.TopicPinState, b.Read())
+		_ = b.MQTT().PublishAsync(ctx, b.config.TopicPinState, b.Read())
 	}
 }

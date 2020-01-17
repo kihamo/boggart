@@ -22,7 +22,7 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
-	if !b.IsStatusOnline() {
+	if !b.Meta().IsStatusOnline() {
 		return nil, errors.New("bind isn't online")
 	}
 
@@ -36,16 +36,16 @@ func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
 		return nil, errors.New("device returns empty serial number")
 	}
 
-	b.SetSerialNumber(sn)
+	b.Meta().SetSerialNumber(sn)
 
 	if model, ok := configuration["modelname"]; ok {
-		if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateModel.Format(sn), model); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateModel.Format(sn), model); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
 
 	if fw, ok := configuration["firmwareversion"]; ok {
-		if e := b.MQTTContainer().PublishAsync(ctx, b.config.TopicStateFirmwareVersion.Format(sn), fw); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateFirmwareVersion.Format(sn), fw); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}

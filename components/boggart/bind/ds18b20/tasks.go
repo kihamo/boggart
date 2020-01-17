@@ -7,7 +7,7 @@ import (
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskStateUpdater := b.WrapTaskIsOnline(b.taskUpdater)
+	taskStateUpdater := b.Workers().WrapTaskIsOnline(b.taskUpdater)
 	taskStateUpdater.SetRepeats(-1)
 	taskStateUpdater.SetRepeatInterval(b.config.UpdaterInterval)
 	taskStateUpdater.SetName("updater")
@@ -23,9 +23,9 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		return err
 	}
 
-	metricValue.With("serial_number", b.SerialNumber()).Set(value)
+	metricValue.With("serial_number", b.config.Address).Set(value)
 
-	if err := b.MQTTContainer().PublishAsync(ctx, b.config.TopicValue, value); err != nil {
+	if err := b.MQTT().PublishAsync(ctx, b.config.TopicValue, value); err != nil {
 		return err
 	}
 

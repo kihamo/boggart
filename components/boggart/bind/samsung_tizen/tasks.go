@@ -22,7 +22,7 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
-	if !b.IsStatusOnline() {
+	if !b.Meta().IsStatusOnline() {
 		return nil, errors.New("bind isn't online")
 	}
 
@@ -33,19 +33,19 @@ func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
 
 	parts := strings.Split(info.ID, ":")
 	if len(parts) > 1 {
-		b.SetSerialNumber(parts[1])
+		b.Meta().SetSerialNumber(parts[1])
 	} else {
-		b.SetSerialNumber(info.ID)
+		b.Meta().SetSerialNumber(info.ID)
 	}
 
 	b.mutex.Lock()
 	b.mac = info.Device.WifiMac
 	b.mutex.Unlock()
 
-	sn := b.SerialNumber()
+	sn := b.Meta().SerialNumber()
 	// TODO:
-	_ = b.MQTTContainer().PublishAsync(ctx, b.config.TopicDeviceID.Format(sn), info.Device.ID)
-	_ = b.MQTTContainer().PublishAsync(ctx, b.config.TopicDeviceModelName.Format(sn), info.Device.Name)
+	_ = b.MQTT().PublishAsync(ctx, b.config.TopicDeviceID.Format(sn), info.Device.ID)
+	_ = b.MQTT().PublishAsync(ctx, b.config.TopicDeviceModelName.Format(sn), info.Device.Name)
 
 	return nil, nil
 }

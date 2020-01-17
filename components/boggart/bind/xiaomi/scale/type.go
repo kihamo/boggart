@@ -49,7 +49,6 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		provider: provider,
 	}
 	bind.measureStartDatetime.Set(time.Now())
-	bind.SetSerialNumber(sn)
 
 	if len(config.Profiles) > 0 {
 		for name, profile := range config.Profiles {

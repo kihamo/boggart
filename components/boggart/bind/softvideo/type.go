@@ -16,7 +16,6 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		config:   config,
 		provider: softvideo.NewClient(config.Login, config.Password, config.Debug),
 	}
-	bind.SetSerialNumber(config.Login)
 
 	return bind, nil
 }

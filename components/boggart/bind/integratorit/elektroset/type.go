@@ -14,7 +14,6 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		config: config,
 		client: elektroset.New(config.Login, config.Password),
 	}
-	bind.SetSerialNumber(bind.config.Login)
 
 	return bind, nil
 }

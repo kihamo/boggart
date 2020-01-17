@@ -17,7 +17,5 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		config: config,
 	}
 
-	bind.SetSerialNumber(config.Address)
-
 	return bind, nil
 }

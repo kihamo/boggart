@@ -1,7 +1,10 @@
 package di
 
 import (
+	"context"
 	"sync"
+
+	"github.com/kihamo/go-workers/task"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/go-workers"
@@ -16,8 +19,8 @@ type WorkersHasListeners interface {
 }
 
 type WorkersContainerSupport interface {
-	SetWorkersContainer(*WorkersContainer)
-	WorkersContainer() *WorkersContainer
+	SetWorkers(*WorkersContainer)
+	Workers() *WorkersContainer
 }
 
 type WorkersBind struct {
@@ -25,13 +28,13 @@ type WorkersBind struct {
 	container *WorkersContainer
 }
 
-func (b *WorkersBind) SetWorkersContainer(container *WorkersContainer) {
+func (b *WorkersBind) SetWorkers(container *WorkersContainer) {
 	b.mutex.Lock()
 	b.container = container
 	b.mutex.Unlock()
 }
 
-func (b *WorkersBind) WorkersContainer() *WorkersContainer {
+func (b *WorkersBind) Workers() *WorkersContainer {
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()
 
@@ -39,21 +42,21 @@ func (b *WorkersBind) WorkersContainer() *WorkersContainer {
 }
 
 type WorkersContainer struct {
-	bind boggart.Bind
+	bind boggart.BindItem
 
 	cacheMutex     sync.Mutex
 	cacheTasks     []workers.Task
 	cacheListeners []workers.ListenerWithEvents
 }
 
-func NewWorkersContainer(bind boggart.Bind) *WorkersContainer {
+func NewWorkersContainer(bind boggart.BindItem) *WorkersContainer {
 	return &WorkersContainer{
 		bind: bind,
 	}
 }
 
 func (c *WorkersContainer) Listeners() []workers.ListenerWithEvents {
-	has, ok := c.bind.(WorkersHasListeners)
+	has, ok := c.bind.Bind().(WorkersHasListeners)
 	if !ok {
 		return nil
 	}
@@ -69,7 +72,7 @@ func (c *WorkersContainer) Listeners() []workers.ListenerWithEvents {
 }
 
 func (c *WorkersContainer) Tasks() []workers.Task {
-	has, ok := c.bind.(WorkersHasTasks)
+	has, ok := c.bind.Bind().(WorkersHasTasks)
 	if !ok {
 		return nil
 	}
@@ -82,4 +85,14 @@ func (c *WorkersContainer) Tasks() []workers.Task {
 	}
 
 	return c.cacheTasks
+}
+
+func (c *WorkersContainer) WrapTaskIsOnline(fn func(context.Context) error) *task.FunctionTask {
+	return task.NewFunctionTask(func(ctx context.Context) (interface{}, error) {
+		if c.bind.Status() != boggart.BindStatusOnline {
+			return nil, nil
+		}
+
+		return nil, fn(ctx)
+	})
 }

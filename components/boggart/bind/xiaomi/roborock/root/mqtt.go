@@ -6,6 +6,6 @@ import (
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
 	return []mqtt.Topic{
-		b.config.TopicRuntimeConfig.Format(b.SerialNumber()),
+		b.config.TopicRuntimeConfig.Format(b.Meta().SerialNumber()),
 	}
 }
