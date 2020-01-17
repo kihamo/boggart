@@ -1,4 +1,4 @@
-package http
+package probes
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 )
 
-func Probe(ctx context.Context, address string, headers http.Header) error {
+func HTTPProbe(ctx context.Context, address string, headers http.Header) error {
 	u, err := url.Parse(address)
 	if err != nil {
 		return err
