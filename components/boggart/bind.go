@@ -1,8 +1,6 @@
 package boggart
 
 import (
-	"context"
-
 	"github.com/kihamo/go-workers/event"
 )
 
@@ -39,12 +37,4 @@ type Bind interface{}
 
 type BindRunner interface {
 	Run() error
-}
-
-type BindHasReadinessProbe interface {
-	ReadinessProbe(context.Context) error
-}
-
-type BindHasLivenessProbe interface {
-	LivenessProbe(context.Context) error
 }

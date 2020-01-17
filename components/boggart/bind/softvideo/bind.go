@@ -10,6 +10,7 @@ import (
 type Bind struct {
 	di.MQTTBind
 	di.WorkersBind
+	di.ProbesBind
 
 	config   *Config
 	provider *softvideo.Client

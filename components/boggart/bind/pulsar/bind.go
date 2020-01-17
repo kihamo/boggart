@@ -12,6 +12,7 @@ const (
 type Bind struct {
 	di.MQTTBind
 	di.WorkersBind
+	di.ProbesBind
 
 	config   *Config
 	provider *pulsar.HeatMeter

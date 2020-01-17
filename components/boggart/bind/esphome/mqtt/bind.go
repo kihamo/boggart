@@ -11,6 +11,7 @@ import (
 type Bind struct {
 	di.MetaBind
 	di.MQTTBind
+	di.ProbesBind
 
 	config     *Config
 	components sync.Map

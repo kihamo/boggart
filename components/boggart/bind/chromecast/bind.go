@@ -37,6 +37,7 @@ type Bind struct {
 	di.MetaBind
 	di.MQTTBind
 	di.LoggerBind
+	di.ProbesBind
 
 	config *Config
 

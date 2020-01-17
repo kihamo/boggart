@@ -101,12 +101,9 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				item.HasWidget = ok
 			}
 
-			if _, ok := bindItem.Bind().(boggart.BindHasReadinessProbe); ok {
-				item.HasReadinessProbe = ok
-			}
-
-			if _, ok := bindItem.Bind().(boggart.BindHasLivenessProbe); ok {
-				item.HasLivenessProbe = ok
+			if bindSupport, ok := bindItem.Bind().(di.ProbesContainerSupport); ok {
+				item.HasReadinessProbe = bindSupport.Probes().Readiness() != nil
+				item.HasLivenessProbe = bindSupport.Probes().Liveness() != nil
 			}
 
 			if bindSupport, ok := bindItem.Bind().(di.MetaContainerSupport); ok {

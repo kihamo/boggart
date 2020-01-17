@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/boggart/internal/manager"
 	"github.com/kihamo/shadow/components/dashboard"
 	"gopkg.in/yaml.v2"
@@ -220,13 +221,20 @@ func (h *BindHandler) actionProbe(w *dashboard.Response, r *dashboard.Request, b
 		return
 	}
 
+	bindSupport, ok := b.Bind().(di.ProbesContainerSupport)
+
+	if !ok {
+		h.NotFound(w, r)
+		return
+	}
+
 	var err error
 
 	switch t {
 	case "readiness":
-		err = h.manager.ReadinessProbeCheck(r.Context(), b.ID())
+		err = bindSupport.Probes().ReadinessCheck(r.Context())
 	case "liveness":
-		err = h.manager.LivenessProbeCheck(r.Context(), b.ID())
+		err = bindSupport.Probes().LivenessCheck(r.Context())
 	}
 
 	response := struct {

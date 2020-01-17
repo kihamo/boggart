@@ -9,6 +9,7 @@ type Bind struct {
 	di.MetaBind
 	di.MQTTBind
 	di.WorkersBind
+	di.ProbesBind
 
 	config *Config
 	device *vacuum.Device

@@ -11,6 +11,7 @@ type Bind struct {
 	status uint32 // 0 - default, 1 - started, 2 - failed
 
 	di.LoggerBind
+	di.ProbesBind
 
 	server serial_network.Server
 }

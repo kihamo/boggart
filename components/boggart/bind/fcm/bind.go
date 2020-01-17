@@ -11,6 +11,7 @@ import (
 
 type Bind struct {
 	di.MQTTBind
+	di.ProbesBind
 
 	config    *Config
 	messaging *messaging.Client

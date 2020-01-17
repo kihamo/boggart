@@ -9,6 +9,7 @@ type Bind struct {
 	di.MetaBind
 	di.WorkersBind
 	di.LoggerBind
+	di.ProbesBind
 
 	provider *home.Client
 }

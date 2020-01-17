@@ -4,21 +4,18 @@ import (
 	"sync/atomic"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/go-workers"
 )
 
 type BindItem struct {
 	status uint64
 
-	bind           boggart.Bind
-	bindType       boggart.BindType
-	id             string
-	t              string
-	description    string
-	tags           []string
-	config         interface{}
-	probeReadiness workers.Task
-	probeLiveness  workers.Task
+	bind        boggart.Bind
+	bindType    boggart.BindType
+	id          string
+	t           string
+	description string
+	tags        []string
+	config      interface{}
 }
 
 type BindItemYaml struct {
