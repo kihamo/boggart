@@ -23,6 +23,14 @@ type WorkersContainerSupport interface {
 	Workers() *WorkersContainer
 }
 
+func WorkersContainerBind(bind boggart.Bind) (*WorkersContainer, bool) {
+	if support, ok := bind.(WorkersContainerSupport); ok {
+		return support.Workers(), true
+	}
+
+	return nil, false
+}
+
 type WorkersBind struct {
 	mutex     sync.RWMutex
 	container *WorkersContainer

@@ -101,27 +101,27 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				item.HasWidget = ok
 			}
 
-			if bindSupport, ok := bindItem.Bind().(di.ProbesContainerSupport); ok {
-				item.HasReadinessProbe = bindSupport.Probes().Readiness() != nil
-				item.HasLivenessProbe = bindSupport.Probes().Liveness() != nil
+			if bindSupport, ok := di.ProbesContainerBind(bindItem.Bind()); ok {
+				item.HasReadinessProbe = bindSupport.Readiness() != nil
+				item.HasLivenessProbe = bindSupport.Liveness() != nil
 			}
 
-			if bindSupport, ok := bindItem.Bind().(di.MetaContainerSupport); ok {
-				item.SerialNumber = bindSupport.Meta().SerialNumber()
+			if bindSupport, ok := di.MetaContainerBind(bindItem.Bind()); ok {
+				item.SerialNumber = bindSupport.SerialNumber()
 			}
 
-			if bindSupport, ok := bindItem.Bind().(di.WorkersContainerSupport); ok {
-				for _, task := range bindSupport.Workers().Tasks() {
+			if bindSupport, ok := di.WorkersContainerBind(bindItem.Bind()); ok {
+				for _, task := range bindSupport.Tasks() {
 					item.Tasks = append(item.Tasks, task.Name())
 				}
 			}
 
-			if bindSupport, ok := bindItem.Bind().(di.MQTTContainerSupport); ok {
-				for _, topic := range bindSupport.MQTT().Publishes() {
+			if bindSupport, ok := di.MQTTContainerBind(bindItem.Bind()); ok {
+				for _, topic := range bindSupport.Publishes() {
 					item.MQTTPublishes = append(item.MQTTPublishes, topic.String())
 				}
 
-				for _, topic := range bindSupport.MQTT().Subscribers() {
+				for _, topic := range bindSupport.Subscribers() {
 					item.MQTTSubscribers = append(item.MQTTSubscribers, topic.Topic().String())
 				}
 			}

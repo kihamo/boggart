@@ -221,7 +221,7 @@ func (h *BindHandler) actionProbe(w *dashboard.Response, r *dashboard.Request, b
 		return
 	}
 
-	bindSupport, ok := b.Bind().(di.ProbesContainerSupport)
+	bindSupport, ok := di.ProbesContainerBind(b.Bind())
 
 	if !ok {
 		h.NotFound(w, r)
@@ -232,9 +232,9 @@ func (h *BindHandler) actionProbe(w *dashboard.Response, r *dashboard.Request, b
 
 	switch t {
 	case "readiness":
-		err = bindSupport.Probes().ReadinessCheck(r.Context())
+		err = bindSupport.ReadinessCheck(r.Context())
 	case "liveness":
-		err = bindSupport.Probes().LivenessCheck(r.Context())
+		err = bindSupport.LivenessCheck(r.Context())
 	}
 
 	response := struct {

@@ -3,12 +3,21 @@ package di
 import (
 	"sync"
 
+	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/shadow/components/logging"
 )
 
 type LoggerContainerSupport interface {
 	SetLogger(*LoggerContainer)
 	Logger() *LoggerContainer
+}
+
+func LoggerContainerBind(bind boggart.Bind) (*LoggerContainer, bool) {
+	if support, ok := bind.(LoggerContainerSupport); ok {
+		return support.Logger(), true
+	}
+
+	return nil, false
 }
 
 type LoggerBind struct {

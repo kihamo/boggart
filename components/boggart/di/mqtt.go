@@ -22,6 +22,14 @@ type MQTTContainerSupport interface {
 	MQTT() *MQTTContainer
 }
 
+func MQTTContainerBind(bind boggart.Bind) (*MQTTContainer, bool) {
+	if support, ok := bind.(MQTTContainerSupport); ok {
+		return support.MQTT(), true
+	}
+
+	return nil, false
+}
+
 type MQTTBind struct {
 	mutex     sync.RWMutex
 	container *MQTTContainer
@@ -143,8 +151,8 @@ func (c *MQTTContainer) CheckValueInTopic(topic mqtt.Topic, value string, offset
 }
 
 func (c *MQTTContainer) CheckSerialNumberInTopic(topic mqtt.Topic, offset int) bool {
-	if bindSupport, ok := c.bind.Bind().(MetaContainerSupport); ok {
-		if sn := bindSupport.Meta().SerialNumber(); sn != "" {
+	if bindSupport, ok := MetaContainerBind(c.bind.Bind()); ok {
+		if sn := bindSupport.SerialNumber(); sn != "" {
 			return c.CheckValueInTopic(topic, mqtt.NameReplace(sn), offset)
 		}
 	}

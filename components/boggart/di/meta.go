@@ -11,6 +11,14 @@ type MetaContainerSupport interface {
 	Meta() *MetaContainer
 }
 
+func MetaContainerBind(bind boggart.Bind) (*MetaContainer, bool) {
+	if support, ok := bind.(MetaContainerSupport); ok {
+		return support.Meta(), true
+	}
+
+	return nil, false
+}
+
 type MetaBind struct {
 	mutex     sync.RWMutex
 	container *MetaContainer

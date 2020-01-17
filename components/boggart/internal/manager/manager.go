@@ -136,9 +136,9 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 	}
 
 	// mqtt subscribers
-	if bindSupport, ok := bind.(di.MQTTContainerSupport); ok {
+	if bindSupport, ok := di.MQTTContainerBind(bind); ok {
 		// TODO: обвешать подписки враппером, что бы только в online можно было посылать
-		for _, subscriber := range bindSupport.MQTT().Subscribers() {
+		for _, subscriber := range bindSupport.Subscribers() {
 			if err := m.mqtt.SubscribeSubscriber(subscriber); err != nil {
 				m.itemStatusUpdate(bindItem, boggart.BindStatusUninitialized)
 				return nil, err
@@ -216,8 +216,8 @@ func (m *Manager) Unregister(id string) error {
 	m.itemStatusUpdate(bindItem, boggart.BindStatusRemoving)
 
 	// unregister mqtt
-	if bindSupport, ok := bindItem.Bind().(di.MQTTContainerSupport); ok {
-		if err := m.mqtt.UnsubscribeSubscribers(bindSupport.MQTT().Subscribers()); err != nil {
+	if bindSupport, ok := di.MQTTContainerBind(bindItem.Bind()); ok {
+		if err := m.mqtt.UnsubscribeSubscribers(bindSupport.Subscribers()); err != nil {
 			m.logger.Error("Unregister bind failed because unsubscribe MQTT failed",
 				"type", bindItem.Type(),
 				"id", bindItem.ID(),
@@ -225,29 +225,29 @@ func (m *Manager) Unregister(id string) error {
 			)
 		}
 
-		bindSupport.MQTT().SetClient(nil)
+		bindSupport.SetClient(nil)
 	}
 
 	// remove probes
-	if bindSupport, ok := bindItem.Bind().(di.ProbesContainerSupport); ok {
-		if probe := bindSupport.Probes().Readiness(); probe != nil {
+	if bindSupport, ok := di.ProbesContainerBind(bindItem.Bind()); ok {
+		if probe := bindSupport.Readiness(); probe != nil {
 			m.workers.RemoveTask(probe)
 		}
 
-		if probe := bindSupport.Probes().Liveness(); probe != nil {
+		if probe := bindSupport.Liveness(); probe != nil {
 			m.workers.RemoveTask(probe)
 		}
 	}
 
 	// workers
-	if bindSupport, ok := bindItem.Bind().(di.WorkersContainerSupport); ok {
+	if bindSupport, ok := di.WorkersContainerBind(bindItem.Bind()); ok {
 		// remove tasks
-		for _, tsk := range bindSupport.Workers().Tasks() {
+		for _, tsk := range bindSupport.Tasks() {
 			m.workers.RemoveTask(tsk)
 		}
 
 		// remove listeners
-		for _, listener := range bindSupport.Workers().Listeners() {
+		for _, listener := range bindSupport.Listeners() {
 			m.listeners.RemoveListener(listener)
 		}
 	}

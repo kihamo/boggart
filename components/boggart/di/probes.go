@@ -7,7 +7,6 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
-	"github.com/kihamo/shadow/components/logging"
 	"go.uber.org/multierr"
 )
 
@@ -22,6 +21,14 @@ type ProbesHasLivenessProbe interface {
 type ProbesContainerSupport interface {
 	SetProbes(*ProbesContainer)
 	Probes() *ProbesContainer
+}
+
+func ProbesContainerBind(bind boggart.Bind) (*ProbesContainer, bool) {
+	if support, ok := bind.(ProbesContainerSupport); ok {
+		return support.Probes(), true
+	}
+
+	return nil, false
 }
 
 type ProbesBind struct {
@@ -72,11 +79,7 @@ func (c *ProbesContainer) Readiness() workers.Task {
 		return nil
 	}
 
-	var logger logging.Logger
-
-	if bindSupport, ok := c.bind.Bind().(LoggerContainerSupport); ok {
-		logger = bindSupport.Logger()
-	}
+	logger, _ := LoggerContainerBind(c.bind.Bind())
 
 	probeTask := task.NewFunctionTask(func(ctx context.Context) (_ interface{}, err error) {
 		ch := make(chan error, 1)
@@ -147,11 +150,7 @@ func (c *ProbesContainer) Liveness() workers.Task {
 		return nil
 	}
 
-	var logger logging.Logger
-
-	if bindSupport, ok := c.bind.Bind().(LoggerContainerSupport); ok {
-		logger = bindSupport.Logger()
-	}
+	logger, _ := LoggerContainerBind(c.bind.Bind())
 
 	probeTask := task.NewFunctionTask(func(ctx context.Context) (_ interface{}, err error) {
 		currentStatus := c.bind.Status()
