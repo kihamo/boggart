@@ -2,24 +2,17 @@ package mikrotik
 
 import (
 	"context"
-	"errors"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/kihamo/boggart/providers/mikrotik"
 	"github.com/kihamo/go-workers"
-	"github.com/kihamo/go-workers/task"
+	"go.uber.org/multierr"
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskSerialNumber := task.NewFunctionTillSuccessTask(b.taskSerialNumber)
-	taskSerialNumber.SetRepeats(-1)
-	taskSerialNumber.SetRepeatInterval(time.Second * 30)
-	taskSerialNumber.SetName("serial-number")
-
 	taskClientsSync := b.Workers().WrapTaskIsOnline(b.taskClientsSync)
-	taskClientsSync.SetTimeout(b.config.LivenessTimeout)
+	taskClientsSync.SetTimeout(b.config.ReadinessTimeout)
 	taskClientsSync.SetRepeats(-1)
 	taskClientsSync.SetRepeatInterval(b.config.ClientsSyncInterval)
 	taskClientsSync.SetName("clients-sync")
@@ -30,28 +23,9 @@ func (b *Bind) Tasks() []workers.Task {
 	taskStateUpdater.SetName("updater")
 
 	return []workers.Task{
-		taskSerialNumber,
 		taskClientsSync,
 		taskStateUpdater,
 	}
-}
-
-func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
-	if !b.Meta().IsStatusOnline() {
-		return nil, errors.New("bind isn't online")
-	}
-
-	system, err := b.provider.SystemRouterboard(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	if system.SerialNumber == "" {
-		return nil, errors.New("serial number is empty")
-	}
-
-	b.SetSerialNumber(system.SerialNumber)
-	return nil, nil
 }
 
 func (b *Bind) taskClientsSync(ctx context.Context) error {
@@ -66,9 +40,6 @@ func (b *Bind) taskClientsSync(ctx context.Context) error {
 
 func (b *Bind) taskUpdater(ctx context.Context) error {
 	sn := b.Meta().SerialNumber()
-	if sn == "" {
-		return nil
-	}
 
 	arp, err := b.provider.IPARP(ctx)
 	if err != nil && !mikrotik.IsEmptyResponse(err) {
@@ -169,6 +140,35 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		metricTemperature.With("serial_number", sn).Set(float64(health.Temperature))
 	} else if !mikrotik.IsEmptyResponse(err) {
 		return err
+	}
+
+	// check upgrade
+	if checkPackages, e := b.provider.SystemPackageUpdateCheck(ctx); e == nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicPackagesInstalledVersion.Format(sn), checkPackages.InstalledVersion); e != nil {
+			err = multierr.Append(err, e)
+		}
+
+		if checkPackages.LatestVersion != "" {
+			if e := b.MQTT().PublishAsync(ctx, b.config.TopicPackagesLatestVersion.Format(sn), checkPackages.LatestVersion); e != nil {
+				err = multierr.Append(err, e)
+			}
+		}
+	} else {
+		err = multierr.Append(err, e)
+	}
+
+	if checkRouterBoard, e := b.provider.SystemRouterboard(ctx); e == nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicFirmwareInstalledVersion.Format(sn), checkRouterBoard.CurrentFirmware); e != nil {
+			err = multierr.Append(err, e)
+		}
+
+		if checkRouterBoard.UpgradeFirmware != "" {
+			if e := b.MQTT().PublishAsync(ctx, b.config.TopicFirmwareLatestVersion.Format(sn), checkRouterBoard.UpgradeFirmware); e != nil {
+				err = multierr.Append(err, e)
+			}
+		}
+	} else {
+		err = multierr.Append(err, e)
 	}
 
 	return nil

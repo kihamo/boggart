@@ -14,6 +14,8 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 		b.config.TopicVPNLoginState,
 		b.config.TopicVPNConnectedLogin,
 		b.config.TopicVPNDisconnectedLogin,
+		b.config.TopicPackagesInstalledVersion,
+		b.config.TopicPackagesLatestVersion,
 	}
 }
 

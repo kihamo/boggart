@@ -106,8 +106,16 @@ func (c *Client) doConvert(ctx context.Context, sentence []string, result interf
 		}
 	}
 
-	if c.dialer.Timeout > 0 {
-		if err := c.conn.SetDeadline(time.Now().Add(c.dialer.Timeout)); err != nil {
+	var deadline time.Time
+
+	if t, ok := ctx.Deadline(); ok {
+		deadline = t
+	} else if c.dialer.Timeout > 0 {
+		deadline = time.Now().Add(c.dialer.Timeout)
+	}
+
+	if !deadline.IsZero() {
+		if err := c.conn.SetDeadline(deadline); err != nil {
 			return err
 		}
 	}

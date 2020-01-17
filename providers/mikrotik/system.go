@@ -40,6 +40,13 @@ type SystemResource struct {
 	Platform             string  `json:"platform"`
 }
 
+type SystemPackageUpdate struct {
+	Channel          string `json:"channel"`
+	InstalledVersion string `json:"installed-version"`
+	LatestVersion    string `json:"latest-version,omitempty"`
+	Status           string `json:"status,omitempty"`
+}
+
 type SystemDisk struct {
 	Id    string `json:".id"`
 	Name  string `json:"name"`
@@ -93,6 +100,22 @@ func (c *Client) SystemResource(ctx context.Context) (result SystemResource, err
 	}
 
 	return list[0], nil
+}
+
+// need policies: write, policy
+func (c *Client) SystemPackageUpdateCheck(ctx context.Context) (result SystemPackageUpdate, err error) {
+	var list []SystemPackageUpdate
+
+	err = c.doConvert(ctx, []string{"/system/package/update/print"}, &list)
+	if err != nil {
+		return result, err
+	}
+
+	if len(list) == 0 {
+		return result, ErrEmptyResponse
+	}
+
+	return list[len(list)-1], nil
 }
 
 func (c *Client) SystemDisk(ctx context.Context) (result []SystemDisk, err error) {
