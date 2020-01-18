@@ -104,7 +104,7 @@ func (c *WorkersContainer) Tasks() []workers.Task {
 					tsk.SetName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-" + tsk.Name())
 				}
 
-				tasks[i] = c.WrapTaskLogError(tsk, logger)
+				tasks[i] = newWorkersWrapTask(tsk, logger)
 			}
 		}
 
@@ -112,32 +112,6 @@ func (c *WorkersContainer) Tasks() []workers.Task {
 	}
 
 	return c.cacheTasks
-}
-
-func (c *WorkersContainer) WrapTaskLogError(t workers.Task, logger logging.Logger) workers.Task {
-	n := task.NewFunctionTask(func(ctx context.Context) (result interface{}, err error) {
-		result, err = t.Run(ctx)
-		if err != nil {
-			logger.Error("Task ended with an error",
-				"error", err.Error(),
-				"task", t.Name(),
-			)
-		}
-
-		return result, err
-	})
-
-	n.SetName(t.Name())
-	n.SetPriority(t.Priority())
-	n.SetRepeats(t.Repeats())
-	n.SetRepeatInterval(t.RepeatInterval())
-	n.SetTimeout(t.Timeout())
-
-	if st := t.StartedAt(); st != nil {
-		n.SetStartedAt(*st)
-	}
-
-	return n
 }
 
 func (c *WorkersContainer) WrapTaskIsOnline(fn func(context.Context) error) *task.FunctionTask {
@@ -148,4 +122,47 @@ func (c *WorkersContainer) WrapTaskIsOnline(fn func(context.Context) error) *tas
 
 		return nil, fn(ctx)
 	})
+}
+
+type workersWrapTask struct {
+	task.BaseTask
+
+	original workers.Task
+	logger   logging.Logger
+}
+
+func newWorkersWrapTask(tsk workers.Task, logger logging.Logger) *workersWrapTask {
+	t := &workersWrapTask{
+		original: tsk,
+		logger:   logger,
+	}
+	t.sync()
+
+	return t
+}
+
+// обертки воркеров кривоватые, поэтому хачим синхронизацию состояния
+func (t *workersWrapTask) sync() {
+	t.SetName(t.original.Name())
+	t.SetPriority(t.original.Priority())
+	t.SetRepeats(t.original.Repeats())
+	t.SetRepeatInterval(t.original.RepeatInterval())
+	t.SetTimeout(t.original.Timeout())
+
+	if st := t.original.StartedAt(); st != nil {
+		t.SetStartedAt(*st)
+	}
+}
+
+func (t *workersWrapTask) Run(ctx context.Context) (result interface{}, err error) {
+	result, err = t.original.Run(ctx)
+	if err != nil {
+		t.logger.Error("Task ended with an error",
+			"error", err.Error(),
+			"task", t.Name(),
+		)
+	}
+
+	t.sync()
+	return result, err
 }

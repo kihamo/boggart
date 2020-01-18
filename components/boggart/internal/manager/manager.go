@@ -208,15 +208,20 @@ func (m *Manager) Unregister(id string) error {
 
 	// unregister mqtt
 	if bindSupport, ok := di.MQTTContainerBind(bindItem.Bind()); ok {
-		if err := m.mqtt.UnsubscribeSubscribers(bindSupport.Subscribers()); err != nil {
-			m.logger.Error("Unregister bind failed because unsubscribe MQTT failed",
-				"type", bindItem.Type(),
-				"id", bindItem.ID(),
-				"error", err.Error(),
-			)
-		}
+		// не блокирующее отписываемся, так как mqtt может быть не доступен
+		go func() {
+			if err := m.mqtt.UnsubscribeSubscribers(bindSupport.Subscribers()); err != nil {
+				m.logger.Error("Unregister bind failed because unsubscribe MQTT failed",
+					"type", bindItem.Type(),
+					"id", bindItem.ID(),
+					"error", err.Error(),
+				)
+			}
 
-		bindSupport.SetClient(nil)
+			if st := bindItem.Status(); st == boggart.BindStatusRemoving || st == boggart.BindStatusRemoved {
+				bindSupport.SetClient(nil)
+			}
+		}()
 	}
 
 	// remove probes

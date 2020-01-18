@@ -22,30 +22,30 @@
         <div class="x_title">
             <h2>{{ i18n "Bindings" . }}</h2>
             <ul class="nav navbar-right panel_toolbox">
-                <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                <li><a class="collapse-link"><i class="fas fa-chevron-up"></i></a></li>
                 <li>
                     <a href="/boggart/bind">
-                        <i class="glyphicon glyphicon-plus" title="{{ i18n "Add bind" . }}" data-toggle="tooltip" data-placement="bottom"></i>
+                        <i class="fas fa-plus" title="{{ i18n "Add bind" . }}" data-toggle="tooltip" data-placement="bottom"></i>
                     </a>
                 </li>
                 <li>
                     <a href="javascript:void(0)" data-toggle="modal" data-target="#config-yaml" data-modal-title="{{ i18n "Config YAML" . }}">
-                        <i class="glyphicon glyphicon-list-alt" title="{{ i18n "Config YAML" . }}" data-toggle="tooltip" data-placement="bottom"></i>
+                        <i class="fas fa-cogs" title="{{ i18n "Config YAML" . }}" data-toggle="tooltip" data-placement="bottom"></i>
                     </a>
                 </li>
                 <li>
                     <a href="/boggart/config/download" title="{{ i18n "Download YAML" . }}" data-toggle="tooltip" data-placement="bottom">
-                        <i class="glyphicon glyphicon-download"></i>
+                        <i class="fas fa-file-download"></i>
                     </a>
                 </li>
                 <li>
                     <a href="javascript:void(0)" data-toggle="modal" data-target="#modal" data-modal-title="Confirm reload config" data-modal-callback="reloadConfig();">
-                        <i class="glyphicon glyphicon-upload" title="{{ i18n "Reload config file" . }}" data-toggle="tooltip" data-placement="bottom"></i>
+                        <i class="fas fa-sync" title="{{ i18n "Reload config file" . }}" data-toggle="tooltip" data-placement="bottom"></i>
                     </a>
                 </li>
                 <li>
                     <a href="javascript:refreshTables()">
-                        <i class="glyphicon glyphicon-refresh" title="{{ i18n "Refresh data" . }}" data-toggle="tooltip" data-placement="bottom"></i>
+                        <i class="fas fa-redo" title="{{ i18n "Refresh data" . }}" data-toggle="tooltip" data-placement="bottom"></i>
                     </a>
                 </li>
             </ul>
