@@ -7,21 +7,28 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/internal/manager"
 	"github.com/kihamo/shadow/components/dashboard"
 	"gopkg.in/yaml.v2"
 )
 
+type BindItemsList []boggart.BindItem
+
+func (l BindItemsList) MarshalYAML() (interface{}, error) {
+	return struct {
+		Devices []boggart.BindItem
+	}{
+		Devices: l,
+	}, nil
+}
+
 type ConfigHandler struct {
 	dashboard.Handler
 
-	manager   *manager.Manager
 	component boggart.Component
 }
 
-func NewConfigHandler(manager *manager.Manager, component boggart.Component) *ConfigHandler {
+func NewConfigHandler(component boggart.Component) *ConfigHandler {
 	return &ConfigHandler{
-		manager:   manager,
 		component: component,
 	}
 }
@@ -77,7 +84,7 @@ func (h *ConfigHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	enc := yaml.NewEncoder(buf)
 	defer enc.Close()
 
-	if err := enc.Encode(h.manager.BindItems()); err != nil {
+	if err := enc.Encode(BindItemsList(h.component.BindItems())); err != nil {
 		panic(err.Error())
 	}
 

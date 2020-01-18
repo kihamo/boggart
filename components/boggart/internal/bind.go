@@ -1,4 +1,4 @@
-package manager
+package internal
 
 import (
 	"sync/atomic"
@@ -21,9 +21,9 @@ type BindItem struct {
 type BindItemYaml struct {
 	Type        string
 	ID          string
-	Description string
-	Tags        []string
-	Config      interface{}
+	Description string      `yaml:",omitempty"`
+	Tags        []string    `yaml:",omitempty"`
+	Config      interface{} `yaml:",omitempty"`
 }
 
 func (i *BindItem) Bind() boggart.Bind {

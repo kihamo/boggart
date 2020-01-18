@@ -25,6 +25,7 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithUsage("Boggart MQTT topic bind status").
 			WithDefaultFunc(func() interface{} {
 				return boggart.ComponentName + "/bind/+/status"
-			}),
+			}).
+			WithEditable(true),
 	}
 }

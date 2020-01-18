@@ -6,7 +6,6 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
-	"github.com/kihamo/boggart/components/boggart/internal/manager"
 	"github.com/kihamo/go-workers"
 	listeners "github.com/kihamo/go-workers/manager"
 	"github.com/kihamo/shadow/components/dashboard"
@@ -45,13 +44,13 @@ type managerListener struct {
 type ManagerHandler struct {
 	dashboard.Handler
 
-	manager          *manager.Manager
+	component        boggart.Component
 	listenersManager *listeners.ListenersManager
 }
 
-func NewManagerHandler(manager *manager.Manager, listenersManager *listeners.ListenersManager) *ManagerHandler {
+func NewManagerHandler(component boggart.Component, listenersManager *listeners.ListenersManager) *ManagerHandler {
 	return &ManagerHandler{
-		manager:          manager,
+		component:        component,
 		listenersManager: listenersManager,
 	}
 }
@@ -80,7 +79,7 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 		enc := yaml.NewEncoder(buf)
 		defer enc.Close()
 
-		for _, bindItem := range h.manager.BindItems() {
+		for _, bindItem := range h.component.BindItems() {
 			buf.Reset()
 			if err := enc.Encode(bindItem); err != nil {
 				panic(err.Error())

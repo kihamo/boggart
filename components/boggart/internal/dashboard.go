@@ -30,11 +30,11 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 	if c.routes == nil {
 		<-c.application.ReadyComponent(c.Name())
 
-		bindHandler := handlers.NewBindHandler(c.manager)
+		bindHandler := handlers.NewBindHandler(c)
 
 		c.routes = []dashboard.Route{
 			dashboard.RouteFromAssetFS(c),
-			dashboard.NewRoute("/"+c.Name()+"/manager/", handlers.NewManagerHandler(c.manager, c.listenersManager)).
+			dashboard.NewRoute("/"+c.Name()+"/manager/", handlers.NewManagerHandler(c, c.listenersManager)).
 				WithMethods([]string{http.MethodGet}).
 				WithAuth(true),
 			dashboard.NewRoute("/"+c.Name()+"/bind/", bindHandler).
@@ -46,10 +46,10 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 			dashboard.NewRoute("/"+c.Name()+"/bind/:id/:action/*path", bindHandler).
 				WithMethods([]string{http.MethodGet, http.MethodPost}).
 				WithAuth(true),
-			dashboard.NewRoute("/"+c.Name()+"/config/:action", handlers.NewConfigHandler(c.manager, c)).
+			dashboard.NewRoute("/"+c.Name()+"/config/:action", handlers.NewConfigHandler(c)).
 				WithMethods([]string{http.MethodGet, http.MethodPost}).
 				WithAuth(true),
-			dashboard.NewRoute("/"+c.Name()+"/widget/:id", handlers.NewWidgetHandler(c.manager)).
+			dashboard.NewRoute("/"+c.Name()+"/widget/:id", handlers.NewWidgetHandler(c)).
 				WithMethods([]string{http.MethodGet, http.MethodPost}),
 		}
 	}

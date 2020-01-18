@@ -8,7 +8,6 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
-	"github.com/kihamo/boggart/components/boggart/internal/manager"
 	"github.com/kihamo/shadow/components/dashboard"
 	"gopkg.in/yaml.v2"
 )
@@ -24,12 +23,12 @@ type BindYAML struct {
 type BindHandler struct {
 	dashboard.Handler
 
-	manager *manager.Manager
+	component boggart.Component
 }
 
-func NewBindHandler(manager *manager.Manager) *BindHandler {
+func NewBindHandler(component boggart.Component) *BindHandler {
 	return &BindHandler{
-		manager: manager,
+		component: component,
 	}
 }
 
@@ -40,7 +39,7 @@ func (h *BindHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 	id := q.Get(":id")
 	if id != "" {
-		bindItem = h.manager.Bind(id)
+		bindItem = h.component.Bind(id)
 		if bindItem == nil {
 			h.NotFound(w, r)
 			return
@@ -114,16 +113,16 @@ func (h *BindHandler) registerByYAML(oldID string, code []byte) (bindItem boggar
 	}
 
 	for _, id := range removeIDs {
-		if bindExists := h.manager.Bind(id); bindExists != nil {
+		if bindExists := h.component.Bind(id); bindExists != nil {
 			upgraded = true
 
-			if err := h.manager.Unregister(id); err != nil {
+			if err := h.component.UnregisterBindByID(id); err != nil {
 				return nil, false, err
 			}
 		}
 	}
 
-	bindItem, err = h.manager.Register(bindParsed.ID, bind, bindParsed.Type, bindParsed.Description, bindParsed.Tags, cfg)
+	bindItem, err = h.component.RegisterBind(bindParsed.ID, bind, bindParsed.Type, bindParsed.Description, bindParsed.Tags, cfg)
 
 	return bindItem, upgraded, err
 }
@@ -200,7 +199,7 @@ func (h *BindHandler) actionDelete(w *dashboard.Response, r *dashboard.Request, 
 		return
 	}
 
-	err := h.manager.Unregister(b.ID())
+	err := h.component.UnregisterBindByID(b.ID())
 
 	type response struct {
 		Result  string `json:"result"`
