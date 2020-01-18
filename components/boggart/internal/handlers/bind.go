@@ -274,10 +274,19 @@ func (h *BindHandler) actionLogs(w *dashboard.Response, r *dashboard.Request, b 
 	response := make([]logView, len(records))
 
 	for i, record := range bindSupport.LastRecords() {
+		response[i].Level = record.Level.String()
+		response[i].Time = record.Time
+		response[i].Message = record.Message
+
+		val := record.ContextMap()
+		if len(val) == 0 {
+			continue
+		}
+
 		buf := bytes.NewBuffer(nil)
 		enc := yaml.NewEncoder(buf)
 
-		err := enc.Encode(record.ContextMap())
+		err := enc.Encode(val)
 		if err != nil {
 			enc.Close()
 
@@ -287,9 +296,6 @@ func (h *BindHandler) actionLogs(w *dashboard.Response, r *dashboard.Request, b 
 
 		enc.Close()
 
-		response[i].Level = record.Level.String()
-		response[i].Time = record.Time
-		response[i].Message = record.Message
 		response[i].Context = buf.String()
 	}
 

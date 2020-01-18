@@ -39,7 +39,11 @@
                                     {{ end }}
                                 </td>
                                 <td>{{ $log.Message }}</td>
-                                <td><pre><code class="yaml">{{ $log.Context|raw }}</code></pre></td>
+                                <td>
+                                    {{ if $log.Context }}
+                                    <pre><code class="yaml">{{ $log.Context|raw }}</code></pre>
+                                    {{ end }}
+                                </td>
                             </tr>
                         {{ end }}
                         </tbody>

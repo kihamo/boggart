@@ -4,10 +4,10 @@ import (
 	"context"
 	"sync"
 
-	"github.com/kihamo/go-workers/task"
-
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/go-workers"
+	"github.com/kihamo/go-workers/task"
+	"github.com/kihamo/shadow/components/logging"
 )
 
 type WorkersHasTasks interface {
@@ -89,10 +89,43 @@ func (c *WorkersContainer) Tasks() []workers.Task {
 	defer c.cacheMutex.Unlock()
 
 	if c.cacheTasks == nil {
-		c.cacheTasks = has.Tasks()
+		tasks := has.Tasks()
+
+		if bindSupport, ok := c.bind.Bind().(LoggerContainerSupport); ok {
+			logger := bindSupport.Logger()
+
+			for i, t := range tasks {
+				tasks[i] = c.WrapTaskLogError(t, logger)
+			}
+		}
+
+		c.cacheTasks = tasks
 	}
 
 	return c.cacheTasks
+}
+
+func (c *WorkersContainer) WrapTaskLogError(t workers.Task, logger logging.Logger) workers.Task {
+	n := task.NewFunctionTask(func(ctx context.Context) (result interface{}, err error) {
+		result, err = t.Run(ctx)
+		if err != nil {
+			logger.Error("Task ended with an error", "error", err.Error())
+		}
+
+		return result, err
+	})
+
+	n.SetName(t.Name())
+	n.SetPriority(t.Priority())
+	n.SetRepeats(t.Repeats())
+	n.SetRepeatInterval(t.RepeatInterval())
+	n.SetTimeout(t.Timeout())
+
+	if st := t.StartedAt(); st != nil {
+		n.SetStartedAt(*st)
+	}
+
+	return n
 }
 
 func (c *WorkersContainer) WrapTaskIsOnline(fn func(context.Context) error) *task.FunctionTask {
