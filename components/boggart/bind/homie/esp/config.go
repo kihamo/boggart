@@ -9,6 +9,7 @@ import (
 
 type Config struct {
 	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
+	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
 	DeviceID                           string     `valid:"required" mapstructure:"device_id" yaml:"device_id"`
 	BaseTopic                          string     `mapstructure:"base_topic" yaml:"base_topic"`

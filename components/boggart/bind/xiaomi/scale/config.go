@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
@@ -35,6 +36,8 @@ func (p Profile) GetAge() (age uint64) {
 var profileGuest = &Profile{Name: "guest"}
 
 type Config struct {
+	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
+
 	MAC                    boggart.HardwareAddr `valid:",required"`
 	Profiles               map[string]*Profile  `valid:",required"`
 	UpdaterInterval        time.Duration        `mapstructure:"updater_interval" yaml:"updater_interval"`

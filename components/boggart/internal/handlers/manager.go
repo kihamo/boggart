@@ -28,6 +28,7 @@ type managerHandlerDevice struct {
 	HasWidget         bool     `json:"has_widget"`
 	HasReadinessProbe bool     `json:"has_readiness_probe"`
 	HasLivenessProbe  bool     `json:"has_liveness_probe"`
+	HasLogs           bool     `json:"has_logs"`
 }
 
 // easyjson:json
@@ -124,6 +125,10 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				for _, topic := range bindSupport.Subscribers() {
 					item.MQTTSubscribers = append(item.MQTTSubscribers, topic.Topic().String())
 				}
+			}
+
+			if bindSupport, ok := bindItem.Bind().(di.LoggerContainerSupport); ok {
+				item.HasLogs = len(bindSupport.LastRecords()) != 0
 			}
 
 			list = append(list, item)

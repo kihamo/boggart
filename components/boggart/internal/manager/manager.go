@@ -121,7 +121,7 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 
 	// logger container
 	if bindSupport, ok := bind.(di.LoggerContainerSupport); ok {
-		bindSupport.SetLogger(di.NewLoggerContainer(logging.NewLazyLogger(m.logger, m.logger.Name()+"."+id)))
+		bindSupport.SetLogger(di.NewLoggerContainer(bindItem, m.logger))
 	}
 
 	// mqtt container

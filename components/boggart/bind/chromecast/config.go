@@ -3,15 +3,15 @@ package chromecast
 import (
 	"time"
 
-	"github.com/kihamo/boggart/components/boggart/di"
-
 	"github.com/barnybug/go-cast/log"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
 type Config struct {
 	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
+	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
 	Debug             bool
 	Host              boggart.IP `valid:",required"`

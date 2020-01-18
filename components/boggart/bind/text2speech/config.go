@@ -4,11 +4,14 @@ import (
 	"os"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
 	speechkit "github.com/kihamo/boggart/providers/yandex_speechkit_cloud"
 )
 
 type Config struct {
+	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
+
 	Debug                      bool
 	CacheEnable                bool   `mapstructure:"cache_enabled" yaml:"cache_enabled"`
 	CacheDirectory             string `mapstructure:"cache_directory" yaml:"cache_directory"`

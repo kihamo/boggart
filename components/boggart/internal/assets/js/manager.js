@@ -54,6 +54,54 @@ $(document).ready(function () {
                     }
                 },
                 {
+                    data: null,
+                    render: function (data, type, row) {
+                        var content = '<div class="btn-group" role="group">';
+
+                        if (row.has_widget) {
+                            content += '<a href="/boggart/widget/' + row.id + '/" target="_blank" class="btn btn-primary btn-icon btn-xs">' +
+                                '<i class="fas fa-window-maximize" title="Open widget"></i>' +
+                                '</a>';
+                        }
+
+                        if (row.has_readiness_probe) {
+                            content += '<a href="/boggart/bind/' + row.id + '/readiness/" target="_blank" class="btn btn-success btn-icon btn-xs">' +
+                                '<i class="fas fa-volume-down" title="Readiness probe"></i>' +
+                                '</a>';
+                        }
+
+                        if (row.has_liveness_probe) {
+                            content += '<a href="/boggart/bind/' + row.id + '/liveness/" target="_blank" class="btn btn-success btn-icon btn-xs">' +
+                                '<i class="fas fa-volume-up" title="Liveness probe"></i>' +
+                                '</a>';
+                        }
+
+                        if (row.has_logs) {
+                            content += '<a href="/boggart/bind/' + row.id + '/logs/" target="_blank" class="btn btn-info btn-icon btn-xs">' +
+                                '<i class="fas fa-headset" title="Show last logs"></i>' +
+                                '</a>';
+                        }
+
+                        return content +
+                            '<a href="/boggart/bind/' + row.id + '/" class="btn btn-warning btn-icon btn-xs">' +
+                                '<i class="fas fa-edit" title="Edit bind"></i>' +
+                            '</a>' +
+                            '<button type="button" class="btn btn-primary btn-icon btn-xs" onclick="reloadConfig(\'' + row.id + '\');">' +
+                            '   <i class="fas fa-upload" title="Reload from config file"></i>' +
+                            '</button>' +
+                            '<button type="button" class="btn btn-danger btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Confirm unregister device #' + row.id + '" data-modal-callback="bindUnregister(\'' + row.id + '\');">' +
+                                '<i class="fas fa-trash" title="Unregister bind"></i>' +
+                            '</button>' +
+                        '</div>'
+                    }
+                },
+                {
+                    data: 'serial_number'
+                },
+                {
+                    data: 'id'
+                },
+                {
                     data: 'tasks',
                     render: function (tasks) {
                         return tasks.length;
@@ -70,47 +118,6 @@ $(document).ready(function () {
                     render: function (subscribers) {
                         return subscribers.length;
                     }
-                },
-                {
-                    data: null,
-                    render: function (data, type, row) {
-                        var content = '<div class="btn-group" role="group">';
-
-                        if (row.has_widget) {
-                            content += '<a href="/boggart/widget/' + row.id + '/" target="_blank" class="btn btn-info btn-icon btn-xs">' +
-                                '<i class="glyphicon glyphicon-new-window" title="Open widget"></i>' +
-                                '</a>';
-                        }
-
-                        if (row.has_readiness_probe) {
-                            content += '<a href="/boggart/bind/' + row.id + '/readiness/" target="_blank" class="btn btn-success btn-icon btn-xs">' +
-                                '<i class="glyphicon glyphicon-volume-down" title="Readiness probe"></i>' +
-                                '</a>';
-                        }
-
-                        if (row.has_liveness_probe) {
-                            content += '<a href="/boggart/bind/' + row.id + '/liveness/" target="_blank" class="btn btn-success btn-icon btn-xs">' +
-                                '<i class="glyphicon glyphicon-volume-up" title="Liveness probe"></i>' +
-                                '</a>';
-                        }
-
-                        return content + '<a href="/boggart/bind/' + row.id + '/" class="btn btn-warning btn-icon btn-xs">' +
-                            '<i class="glyphicon glyphicon-edit" title="Edit bind"></i>' +
-                            '</a>' +
-                            '<button type="button" class="btn btn-primary btn-icon btn-xs" onclick="reloadConfig(\'' + row.id + '\');">' +
-                            '<i class="glyphicon glyphicon-upload" title="Reload from config file"></i>' +
-                            '</a>' +
-                            '<button type="button" class="btn btn-danger btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Confirm unregister device #' + row.id + '" data-modal-callback="bindUnregister(\'' + row.id + '\');">' +
-                            '<i class="glyphicon glyphicon-trash" title="Unregister bind"></i>' +
-                            '</button>' +
-                            '</div>'
-                    }
-                },
-                {
-                    data: 'serial_number'
-                },
-                {
-                    data: 'id'
                 },
                 {
                     data: 'description'

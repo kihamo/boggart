@@ -103,3 +103,5 @@ import:
   version: 79e59b6b8fbc28e34dc8c7bc53c8a2668989f425
 - package: github.com/go-ble/ble
   version: 147700f13610085f7387692cd6663a67c495ab87
+- package: github.com/mitchellh/mapstructure
+  version: v1.1

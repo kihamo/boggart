@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
@@ -57,6 +58,10 @@ func (h *BindHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 	case "liveness":
 		h.actionProbe(w, r, bindItem, "liveness")
+		return
+
+	case "logs":
+		h.actionLogs(w, r, bindItem)
 		return
 
 	case "":
@@ -249,4 +254,47 @@ func (h *BindHandler) actionProbe(w *dashboard.Response, r *dashboard.Request, b
 	}
 
 	_ = w.SendJSON(response)
+}
+
+func (h *BindHandler) actionLogs(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
+	bindSupport, ok := b.Bind().(di.LoggerContainerSupport)
+	if !ok {
+		h.NotFound(w, r)
+		return
+	}
+
+	type logView struct {
+		Level   string
+		Time    time.Time
+		Message string
+		Context string
+	}
+
+	records := bindSupport.LastRecords()
+	response := make([]logView, len(records))
+
+	for i, record := range bindSupport.LastRecords() {
+		buf := bytes.NewBuffer(nil)
+		enc := yaml.NewEncoder(buf)
+
+		err := enc.Encode(record.ContextMap())
+		if err != nil {
+			enc.Close()
+
+			h.InternalError(w, r, err)
+			return
+		}
+
+		enc.Close()
+
+		response[i].Level = record.Level.String()
+		response[i].Time = record.Time
+		response[i].Message = record.Message
+		response[i].Context = buf.String()
+	}
+
+	h.Render(r.Context(), "logs", map[string]interface{}{
+		"bind": b,
+		"logs": response,
+	})
 }

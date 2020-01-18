@@ -1,0 +1,66 @@
+{{ define "content" }}
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>{{ i18n "Bind %s logs" $ nil nil nil .bind.ID }}</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="table-responsive">
+                    <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                        <thead>
+                        <tr>
+                            <th>{{ i18n "Time" . }}</th>
+                            <th>{{ i18n "Level" . }}</th>
+                            <th>{{ i18n "Message" . }}</th>
+                            <th>{{ i18n "Context" . }}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{ range $log := .logs }}
+                            <tr>
+                                <td><script type="application/javascript">document.write(dateToString('{{ $log.Time.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                <td>
+                                    {{ if eq $log.Level "debug" }}
+                                        <span class="label label-primary">{{ $log.Level }}</span>
+                                    {{ else if eq $log.Level "info" }}
+                                        <span class="label label-info">{{ $log.Level }}</span>
+                                    {{ else if eq $log.Level "warn" }}
+                                        <span class="label label-warning">{{ $log.Level }}</span>
+                                    {{ else if eq $log.Level "error" }}
+                                        <span class="label label-danger">{{ $log.Level }}</span>
+                                    {{ else if eq $log.Level "panic" }}
+                                        <span class="label label-danger">{{ $log.Level }}</span>
+                                    {{ else if eq $log.Level "fatal" }}
+                                        <span class="label label-danger">{{ $log.Level }}</span>
+                                    {{ else }}
+                                        <span class="label label-default">{{ $log.Level }}</span>
+                                    {{ end }}
+                                </td>
+                                <td>{{ $log.Message }}</td>
+                                <td><pre><code class="yaml">{{ $log.Context|raw }}</code></pre></td>
+                            </tr>
+                        {{ end }}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
+
+{{ define "head" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/highlightjs/css/tomorrow.min.css" false) }}
+{{ end }}
+
+{{ define "js" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net/js/jquery.dataTables.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive/js/dataTables.responsive.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/highlightjs/js/highlight.pack.min.js" false) }}
+{{ end }}
