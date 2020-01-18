@@ -77,13 +77,34 @@ func (b *Bind) GenerateURL(ctx context.Context, text, format, quality, language,
 
 	values := u.Query()
 	values.Add("text", text)
-	values.Add("speed", strconv.FormatFloat(speed, 'f', -1, 64))
-	values.Add("force", strconv.FormatBool(force))
-	values.Add("language", language)
-	values.Add("speaker", speaker)
-	values.Add("emotion", emotion)
-	values.Add("format", format)
-	values.Add("quality", quality)
+
+	if force {
+		values.Add("force", "1")
+	}
+
+	if language != "" {
+		values.Add("language", language)
+	}
+
+	if speaker != "" {
+		values.Add("speaker", speaker)
+	}
+
+	if emotion != "" {
+		values.Add("emotion", emotion)
+	}
+
+	if format != "" {
+		values.Add("format", format)
+	}
+
+	if quality != "" {
+		values.Add("quality", quality)
+	}
+
+	if speed > 0 {
+		values.Add("speed", strconv.FormatFloat(speed, 'f', -1, 64))
+	}
 
 	if keysConfig := b.Config().App().String(boggart.ConfigAccessKeys); keysConfig != "" {
 		if keys := strings.Split(keysConfig, ","); len(keys) > 0 {
