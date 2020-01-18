@@ -13,12 +13,14 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	speechkit "github.com/kihamo/boggart/providers/yandex_speechkit_cloud"
 	"github.com/kihamo/boggart/providers/yandex_speechkit_cloud/client/generate"
 )
 
 type Bind struct {
+	di.MetaBind
 	di.MQTTBind
 	di.LoggerBind
 
@@ -59,8 +61,27 @@ func trim(message string) string {
 	return message
 }
 
-func (b *Bind) GenerateURL(ctx context.Context, text, format, quality, language, speaker, emotion string, speed float64, force bool) url.URL {
-	return url.URL{}
+func (b *Bind) GenerateURL(ctx context.Context, text, format, quality, language, speaker, emotion string, speed float64, force bool) *url.URL {
+	if b.config.BaseURL.String() == "" {
+		return nil
+	}
+
+	u, _ := url.Parse(b.config.BaseURL.String())
+	u.Path = "/" + boggart.ComponentName + "/widget/" + b.Meta().ID()
+
+	values := u.Query()
+	values.Add("text", text)
+	values.Add("speed", strconv.FormatFloat(speed, 'f', -1, 64))
+	values.Add("force", strconv.FormatBool(force))
+	values.Add("language", language)
+	values.Add("speaker", speaker)
+	values.Add("emotion", emotion)
+	values.Add("format", format)
+	values.Add("quality", quality)
+
+	u.RawQuery = values.Encode()
+
+	return u
 }
 
 func (b *Bind) Generate(ctx context.Context, text, format, quality, language, speaker, emotion string, speed float64, force bool) (io.Reader, error) {
