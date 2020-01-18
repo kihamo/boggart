@@ -69,6 +69,10 @@ func (Type) Config() interface{} {
 	)
 
 	return &Config{
+		LoggerConfig: di.LoggerConfig{
+			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
+			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
+		},
 		UpdaterInterval:        time.Minute,
 		CaptureDuration:        time.Second * 10,
 		TopicProfile:           prefix + "profile",

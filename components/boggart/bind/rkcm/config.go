@@ -24,6 +24,10 @@ func (Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/service/rkcm/+/"
 
 	return &Config{
+		LoggerConfig: di.LoggerConfig{
+			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
+			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
+		},
 		Debug:           false,
 		UpdaterInterval: time.Hour,
 		TopicBalance:    prefix + "balance",

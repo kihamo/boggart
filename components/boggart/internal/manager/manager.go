@@ -28,11 +28,6 @@ const (
 	managerStatusClose
 )
 
-type bindTask interface {
-	w.Task
-	SetName(string)
-}
-
 type Manager struct {
 	status          int64
 	storage         sync.Map
@@ -188,10 +183,6 @@ func (m *Manager) Register(id string, bind boggart.Bind, t string, description s
 
 	// register tasks
 	for _, tsk := range tasks {
-		if tsk, ok := tsk.(bindTask); ok {
-			tsk.SetName("bind-" + id + "-" + t + "-" + tsk.Name())
-		}
-
 		m.workers.AddTask(tsk)
 	}
 

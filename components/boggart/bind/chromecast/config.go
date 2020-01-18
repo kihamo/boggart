@@ -42,6 +42,10 @@ func (t Type) Config() interface{} {
 			LivenessPeriod:   time.Second * 30,
 			LivenessTimeout:  time.Second * 5,
 		},
+		LoggerConfig: di.LoggerConfig{
+			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
+			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
+		},
 		Debug:             log.Debug,
 		Port:              8009,
 		Name:              boggart.ComponentName,

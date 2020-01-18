@@ -42,6 +42,10 @@ func (Type) Config() interface{} {
 	}
 
 	return &Config{
+		LoggerConfig: di.LoggerConfig{
+			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
+			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
+		},
 		CacheDirectory:             cacheDir,
 		Format:                     speechkit.FormatWAV,
 		Quality:                    speechkit.QualityHi,

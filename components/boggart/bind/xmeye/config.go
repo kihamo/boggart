@@ -30,6 +30,10 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/cctv/+/"
 
 	return &Config{
+		LoggerConfig: di.LoggerConfig{
+			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
+			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
+		},
 		UpdaterInterval:                time.Minute,
 		UpdaterTimeout:                 time.Second * 30,
 		AlarmStreamingInterval:         time.Second * 5,

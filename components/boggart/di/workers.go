@@ -10,6 +10,11 @@ import (
 	"github.com/kihamo/shadow/components/logging"
 )
 
+type bindTask interface {
+	workers.Task
+	SetName(string)
+}
+
 type WorkersHasTasks interface {
 	Tasks() []workers.Task
 }
@@ -94,8 +99,12 @@ func (c *WorkersContainer) Tasks() []workers.Task {
 		if bindSupport, ok := c.bind.Bind().(LoggerContainerSupport); ok {
 			logger := bindSupport.Logger()
 
-			for i, t := range tasks {
-				tasks[i] = c.WrapTaskLogError(t, logger)
+			for i, tsk := range tasks {
+				if tsk, ok := tsk.(bindTask); ok {
+					tsk.SetName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-" + tsk.Name())
+				}
+
+				tasks[i] = c.WrapTaskLogError(tsk, logger)
 			}
 		}
 
@@ -109,7 +118,10 @@ func (c *WorkersContainer) WrapTaskLogError(t workers.Task, logger logging.Logge
 	n := task.NewFunctionTask(func(ctx context.Context) (result interface{}, err error) {
 		result, err = t.Run(ctx)
 		if err != nil {
-			logger.Error("Task ended with an error", "error", err.Error())
+			logger.Error("Task ended with an error",
+				"error", err.Error(),
+				"task", t.Name(),
+			)
 		}
 
 		return result, err

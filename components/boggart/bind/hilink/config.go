@@ -48,6 +48,10 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/hilink/+/"
 
 	return &Config{
+		LoggerConfig: di.LoggerConfig{
+			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
+			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
+		},
 		BalanceUpdaterInterval:    time.Hour,
 		BalanceUpdaterTimeout:     time.Second * 30,
 		SMSCheckerInterval:        time.Minute,

@@ -12,8 +12,14 @@ import (
 
 const (
 	LoggerDefaultBufferedRecordsLimit uint64 = 100
-	LoggerDefaultBufferedRecordsLevel        = zap.DebugLevel
+	LoggerDefaultBufferedRecordsLevel        = LogLevel(zap.DebugLevel)
 )
+
+type LogLevel zapcore.Level
+
+func (l LogLevel) MarshalYAML() (interface{}, error) {
+	return int64(l), nil
+}
 
 type LoggerContainerSupport interface {
 	SetLogger(*LoggerContainer)
@@ -225,11 +231,11 @@ func (c *LoggerContainer) init() *LoggerContainer {
 
 		if loggerConfig, ok := c.bind.Config().(LoggerBufferedConfig); ok {
 			limit = loggerConfig.LoggerBufferedRecordsLimit()
-			level = zapcore.Level(loggerConfig.LoggerBufferedRecordsLevel())
+			level = loggerConfig.LoggerBufferedRecordsLevel()
 		}
 
 		c.observer = &loggerObserver{
-			level: level,
+			level: zapcore.Level(level),
 			limit: int(limit),
 		}
 		c.sugar = zap.New(c.observer).Sugar()
@@ -240,24 +246,24 @@ func (c *LoggerContainer) init() *LoggerContainer {
 
 type LoggerBufferedConfig interface {
 	LoggerBufferedRecordsLimit() uint64
-	LoggerBufferedRecordsLevel() int8
+	LoggerBufferedRecordsLevel() LogLevel
 }
 
 type LoggerConfig struct {
-	BufferedRecordsLimit uint64 `mapstructure:"logger_buffered_records_limit" yaml:"logger_buffered_records_limit"`
-	BufferedRecordsLevel int8   `mapstructure:"logger_buffered_records_level" yaml:"logger_buffered_records_level"`
+	BufferedRecordsLimit uint64   `mapstructure:"logger_buffered_records_limit" yaml:"logger_buffered_records_limit"`
+	BufferedRecordsLevel LogLevel `mapstructure:"logger_buffered_records_level" yaml:"logger_buffered_records_level"`
 }
 
 func (c LoggerConfig) LoggerBufferedRecordsLimit() uint64 {
 	return c.BufferedRecordsLimit
 }
 
-func (c LoggerConfig) LoggerBufferedRecordsLevel() int8 {
-	if min := int8(zap.DebugLevel); c.BufferedRecordsLevel < min {
+func (c LoggerConfig) LoggerBufferedRecordsLevel() LogLevel {
+	if min := LogLevel(zap.DebugLevel); c.BufferedRecordsLevel < min {
 		return min
 	}
 
-	if max := int8(zap.FatalLevel); c.BufferedRecordsLevel > max {
+	if max := LogLevel(zap.FatalLevel); c.BufferedRecordsLevel > max {
 		return max
 	}
 

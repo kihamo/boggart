@@ -23,6 +23,10 @@ func (t Type) Config() interface{} {
 			ReadinessPeriod:  time.Minute,
 			ReadinessTimeout: time.Second * 5,
 		},
+		LoggerConfig: di.LoggerConfig{
+			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
+			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
+		},
 		Network: "tcp",
 		Host:    "0.0.0.0",
 		Port:    8600,
