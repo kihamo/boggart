@@ -17,7 +17,7 @@ type Bind struct {
 	config               *Config
 	provider             *scale.Client
 	currentProfile       atomic.Value
-	measureStartDatetime atomic.Time
+	measureStartDatetime *atomic.Time
 }
 
 func (b *Bind) Run() error {

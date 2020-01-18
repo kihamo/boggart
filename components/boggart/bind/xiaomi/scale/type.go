@@ -3,6 +3,7 @@ package scale
 import (
 	"time"
 
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/protocols/bluetooth"
 	"github.com/kihamo/boggart/providers/xiaomi/scale"
@@ -45,10 +46,10 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config.TopicMetabolicAge = config.TopicMetabolicAge.Format(sn)
 
 	bind := &Bind{
-		config:   config,
-		provider: provider,
+		config:               config,
+		provider:             provider,
+		measureStartDatetime: atomic.NewTimeDefault(time.Now()),
 	}
-	bind.measureStartDatetime.Set(time.Now())
 
 	if len(config.Profiles) > 0 {
 		for name, profile := range config.Profiles {
