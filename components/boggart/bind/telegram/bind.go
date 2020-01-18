@@ -207,7 +207,7 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 				if u.Message.Text != "" {
 					mqttTopic = b.config.TopicReceiveMessage.Format(sn, u.Message.Chat.ID)
 
-					if err := b.MQTT().PublishAsync(ctx, b.config.TopicReceiveMessage.Format(sn, u.Message.Chat.ID), u.Message.Text); err != nil {
+					if err := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicReceiveMessage.Format(sn, u.Message.Chat.ID), u.Message.Text); err != nil {
 						b.Logger().Error("Publish message to MQTT failed",
 							"topic", mqttTopic,
 							"message", u.Message.Text,
@@ -251,7 +251,7 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 					continue
 				}
 
-				if err := b.MQTT().PublishAsync(ctx, mqttTopic, link); err != nil {
+				if err := b.MQTT().PublishAsyncWithoutCache(ctx, mqttTopic, link); err != nil {
 					b.Logger().Error("Publish link to MQTT failed",
 						"topic", mqttTopic,
 						"link", link,
