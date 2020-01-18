@@ -34,11 +34,17 @@ func (Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/text2speech/+/"
 
 	cacheDir, _ := os.UserCacheDir()
-	cacheDirBind := cacheDir + string(os.PathSeparator) + "_text2speech"
+	if cacheDir == "" {
+		cacheDir = os.TempDir()
+	}
 
-	err := os.Mkdir(cacheDirBind, 0700)
-	if err == nil || os.IsExist(err) {
-		cacheDir = cacheDirBind
+	if cacheDir != "" {
+		cacheDirBind := cacheDir + string(os.PathSeparator) + boggart.ComponentName + "_text2speech"
+
+		err := os.Mkdir(cacheDirBind, 0700)
+		if err == nil || os.IsExist(err) {
+			cacheDir = cacheDirBind
+		}
 	}
 
 	return &Config{
