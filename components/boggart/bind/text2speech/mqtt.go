@@ -7,18 +7,22 @@ import (
 )
 
 func (b *Bind) MQTTPublishes() []mqtt.Topic {
+	id := b.Meta().ID()
+
 	return []mqtt.Topic{
-		b.config.TopicURL,
-		b.config.TopicBinary,
+		b.config.TopicURL.Format(id),
+		b.config.TopicBinary.Format(id),
 	}
 }
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
+	id := b.Meta().ID()
+
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(b.config.TopicGenerateBinaryOptions, 0, b.callbackMQTTGenerateBinaryOptions(true)),
-		mqtt.NewSubscriber(b.config.TopicGenerateBinaryText, 0, b.callbackMQTTGenerateBinaryText(true)),
-		mqtt.NewSubscriber(b.config.TopicGenerateURLOptions, 0, b.callbackMQTTGenerateBinaryOptions(false)),
-		mqtt.NewSubscriber(b.config.TopicGenerateURLText, 0, b.callbackMQTTGenerateBinaryText(false)),
+		mqtt.NewSubscriber(b.config.TopicGenerateBinaryOptions.Format(id), 0, b.callbackMQTTGenerateBinaryOptions(true)),
+		mqtt.NewSubscriber(b.config.TopicGenerateBinaryText.Format(id), 0, b.callbackMQTTGenerateBinaryText(true)),
+		mqtt.NewSubscriber(b.config.TopicGenerateURLOptions.Format(id), 0, b.callbackMQTTGenerateBinaryOptions(false)),
+		mqtt.NewSubscriber(b.config.TopicGenerateURLText.Format(id), 0, b.callbackMQTTGenerateBinaryText(false)),
 	}
 }
 
@@ -46,15 +50,15 @@ func (b *Bind) callbackMQTTGenerateBinaryOptions(binary bool) func(ctx context.C
 		}
 
 		if binary {
-			return b.MQTT().PublishAsync(ctx, b.config.TopicBinary, reader)
+			return b.MQTT().PublishAsync(ctx, b.config.TopicBinary.Format(b.Meta().ID()), reader)
 		}
 
-		u := b.GenerateURL(ctx, r.Text, r.Format, r.Quality, r.Language, r.Speaker, r.Emotion, r.Speed, r.Force)
+		u, err := b.GenerateURL(ctx, r.Text, r.Format, r.Quality, r.Language, r.Speaker, r.Emotion, r.Speed, r.Force)
 		if u == nil {
-			return nil
+			return err
 		}
 
-		return b.MQTT().PublishAsync(ctx, b.config.TopicURL, u.String())
+		return b.MQTT().PublishAsync(ctx, b.config.TopicURL.Format(b.Meta().ID()), u.String())
 	}
 }
 
@@ -66,14 +70,14 @@ func (b *Bind) callbackMQTTGenerateBinaryText(binary bool) func(ctx context.Cont
 		}
 
 		if binary {
-			return b.MQTT().PublishAsync(ctx, b.config.TopicBinary, reader)
+			return b.MQTT().PublishAsync(ctx, b.config.TopicBinary.Format(b.Meta().ID()), reader)
 		}
 
-		u := b.GenerateURL(ctx, message.String(), "", "", "", "", "", 0, false)
+		u, err := b.GenerateURL(ctx, message.String(), "", "", "", "", "", 0, false)
 		if u == nil {
-			return nil
+			return err
 		}
 
-		return b.MQTT().PublishAsync(ctx, b.config.TopicURL, u.String())
+		return b.MQTT().PublishAsync(ctx, b.config.TopicURL.Format(b.Meta().ID()), u.String())
 	}
 }

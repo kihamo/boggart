@@ -8,6 +8,9 @@ import (
 
 func (c *Component) ConfigVariables() []config.Variable {
 	return []config.Variable{
+		config.NewVariable(boggart.ConfigExternalURL, config.ValueTypeString).
+			WithUsage("External URL of Boggart dashboard").
+			WithEditable(true),
 		config.NewVariable(boggart.ConfigConfigYAML, config.ValueTypeString).
 			WithUsage("Absolute path to YAML config").
 			WithDefault("config.yaml"),

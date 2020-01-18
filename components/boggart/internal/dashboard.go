@@ -92,7 +92,7 @@ func (c *Component) DashboardMiddleware() []func(http.Handler) http.Handler {
 					return
 				}
 
-				key := strings.TrimSpace(r.URL.Query().Get("key"))
+				key := strings.TrimSpace(r.URL.Query().Get(boggart.AccessKeyName))
 				if key == "" {
 					http.Error(w, http.StatusText(http.StatusUnauthorized), 401)
 					return

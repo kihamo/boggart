@@ -22,13 +22,12 @@ type Config struct {
 	Speaker                    string
 	Emotion                    string
 	Speed                      float64
-	BaseURL                    boggart.URL `mapstructure:"base_url" yaml:"base_url"`
-	TopicGenerateBinaryOptions mqtt.Topic  `mapstructure:"topic_generate_binary_options" yaml:"topic_generate_binary_options"`
-	TopicGenerateBinaryText    mqtt.Topic  `mapstructure:"topic_generate_binary_text" yaml:"topic_generate_binary_text"`
-	TopicGenerateURLOptions    mqtt.Topic  `mapstructure:"topic_generate_url_options" yaml:"topic_generate_url_options"`
-	TopicGenerateURLText       mqtt.Topic  `mapstructure:"topic_generate_url_text" yaml:"topic_generate_url_text"`
-	TopicURL                   mqtt.Topic  `mapstructure:"topic_url" yaml:"topic_url"`
-	TopicBinary                mqtt.Topic  `mapstructure:"topic_binary" yaml:"topic_binary"`
+	TopicGenerateBinaryOptions mqtt.Topic `mapstructure:"topic_generate_binary_options" yaml:"topic_generate_binary_options"`
+	TopicGenerateBinaryText    mqtt.Topic `mapstructure:"topic_generate_binary_text" yaml:"topic_generate_binary_text"`
+	TopicGenerateURLOptions    mqtt.Topic `mapstructure:"topic_generate_url_options" yaml:"topic_generate_url_options"`
+	TopicGenerateURLText       mqtt.Topic `mapstructure:"topic_generate_url_text" yaml:"topic_generate_url_text"`
+	TopicURL                   mqtt.Topic `mapstructure:"topic_url" yaml:"topic_url"`
+	TopicBinary                mqtt.Topic `mapstructure:"topic_binary" yaml:"topic_binary"`
 }
 
 func (Type) Config() interface{} {

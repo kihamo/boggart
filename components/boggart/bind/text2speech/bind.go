@@ -20,6 +20,7 @@ import (
 )
 
 type Bind struct {
+	di.ConfigBind
 	di.MetaBind
 	di.MQTTBind
 	di.LoggerBind
@@ -61,12 +62,17 @@ func trim(message string) string {
 	return message
 }
 
-func (b *Bind) GenerateURL(ctx context.Context, text, format, quality, language, speaker, emotion string, speed float64, force bool) *url.URL {
-	if b.config.BaseURL.String() == "" {
-		return nil
+func (b *Bind) GenerateURL(ctx context.Context, text, format, quality, language, speaker, emotion string, speed float64, force bool) (*url.URL, error) {
+	externalURL := b.Config().App().String(boggart.ConfigExternalURL)
+	if externalURL == "" {
+		return nil, errors.New("config external URL ins't set")
 	}
 
-	u, _ := url.Parse(b.config.BaseURL.String())
+	u, err := url.Parse(externalURL)
+	if err != nil {
+		return nil, err
+	}
+
 	u.Path = "/" + boggart.ComponentName + "/widget/" + b.Meta().ID()
 
 	values := u.Query()
@@ -79,9 +85,15 @@ func (b *Bind) GenerateURL(ctx context.Context, text, format, quality, language,
 	values.Add("format", format)
 	values.Add("quality", quality)
 
+	if keysConfig := b.Config().App().String(boggart.ConfigAccessKeys); keysConfig != "" {
+		if keys := strings.Split(keysConfig, ","); len(keys) > 0 {
+			values.Add(boggart.AccessKeyName, keys[0])
+		}
+	}
+
 	u.RawQuery = values.Encode()
 
-	return u
+	return u, nil
 }
 
 func (b *Bind) Generate(ctx context.Context, text, format, quality, language, speaker, emotion string, speed float64, force bool) (io.Reader, error) {

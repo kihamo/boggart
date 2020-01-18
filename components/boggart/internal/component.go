@@ -324,6 +324,11 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 
 	c.itemStatusUpdate(bindItem, boggart.BindStatusInitializing)
 
+	// config container
+	if bindSupport, ok := bind.(di.ConfigContainerSupport); ok {
+		bindSupport.SetConfig(di.NewConfigContainer(bindItem, c.config))
+	}
+
 	// meta container
 	if bindSupport, ok := bind.(di.MetaContainerSupport); ok {
 		bindSupport.SetMeta(di.NewMetaContainer(bindItem))

@@ -13,13 +13,6 @@ type Type struct {
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	cfg := c.(*Config)
 
-	cfg.TopicGenerateBinaryOptions = cfg.TopicGenerateBinaryOptions.Format(cfg.Key)
-	cfg.TopicGenerateBinaryText = cfg.TopicGenerateBinaryText.Format(cfg.Key)
-	cfg.TopicGenerateURLOptions = cfg.TopicGenerateURLOptions.Format(cfg.Key)
-	cfg.TopicGenerateURLText = cfg.TopicGenerateURLText.Format(cfg.Key)
-	cfg.TopicURL = cfg.TopicURL.Format(cfg.Key)
-	cfg.TopicBinary = cfg.TopicBinary.Format(cfg.Key)
-
 	bind := &Bind{
 		config: cfg,
 	}
