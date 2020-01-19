@@ -35,7 +35,8 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 			"datetime", measure.Datetime().String(),
 			"unit", measure.Unit(),
 			"weight", measure.Weight(),
-			"Impedance", measure.Impedance(),
+			"impedance", measure.Impedance(),
+			"profile", profile.Name,
 		)
 
 		dt := measure.Datetime()
