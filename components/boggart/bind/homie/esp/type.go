@@ -1,6 +1,7 @@
 package esp
 
 import (
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
 )
 
@@ -28,8 +29,9 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config.TopicOTAEnabled = config.TopicOTAEnabled.Format(config.BaseTopic, config.DeviceID)
 
 	bind := &Bind{
-		config:   config,
-		otaFlash: make(chan struct{}, 1),
+		config:     config,
+		otaFlash:   make(chan struct{}, 1),
+		lastUpdate: atomic.NewTimeNull(),
 	}
 
 	return bind, nil

@@ -21,7 +21,7 @@ type Bind struct {
 	di.ProbesBind
 
 	config     *Config
-	lastUpdate atomic.TimeNull
+	lastUpdate *atomic.TimeNull
 
 	deviceAttributes sync.Map
 	nodes            sync.Map
