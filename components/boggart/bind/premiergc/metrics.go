@@ -15,7 +15,7 @@ func (b *Bind) Describe(ch chan<- *snitch.Description) {
 		return
 	}
 
-	metricBalance.With("contract", b.config.Login).Describe(ch)
+	metricBalance.With("contract", sn).Describe(ch)
 }
 
 func (b *Bind) Collect(ch chan<- snitch.Metric) {
@@ -24,5 +24,5 @@ func (b *Bind) Collect(ch chan<- snitch.Metric) {
 		return
 	}
 
-	metricBalance.With("contract", b.config.Login).Collect(ch)
+	metricBalance.With("contract", sn).Collect(ch)
 }
