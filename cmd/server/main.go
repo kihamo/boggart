@@ -25,6 +25,7 @@ import (
 	_ "github.com/kihamo/boggart/components/boggart/bind/network"
 	_ "github.com/kihamo/boggart/components/boggart/bind/nut"
 	_ "github.com/kihamo/boggart/components/boggart/bind/owntracks"
+	_ "github.com/kihamo/boggart/components/boggart/bind/premiergc"
 	_ "github.com/kihamo/boggart/components/boggart/bind/pulsar"
 	_ "github.com/kihamo/boggart/components/boggart/bind/rkcm"
 	_ "github.com/kihamo/boggart/components/boggart/bind/rpi"

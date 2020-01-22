@@ -1,4 +1,4 @@
-package softvideo
+package premiergc
 
 import (
 	"time"
@@ -29,6 +29,6 @@ func (Type) Config() interface{} {
 			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
 		},
 		Debug:        false,
-		TopicBalance: boggart.ComponentName + "/service/softvideo/+/balance",
+		TopicBalance: boggart.ComponentName + "/service/premiergc/+/balance",
 	}
 }

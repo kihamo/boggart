@@ -26,7 +26,7 @@ type Client struct {
 	password   string
 }
 
-func NewClient(login, password string, debug bool) *Client {
+func New(login, password string, debug bool) *Client {
 	return &Client{
 		connection: http.NewClient().WithDebug(debug),
 		login:      login,
