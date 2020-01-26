@@ -30,5 +30,11 @@ func (c *Component) ConfigVariables() []config.Variable {
 				return boggart.ComponentName + "/bind/+/status"
 			}).
 			WithEditable(true),
+		config.NewVariable(boggart.ConfigMQTTTopicBindSerialNumber, config.ValueTypeString).
+			WithUsage("Boggart MQTT topic bind serial number").
+			WithDefaultFunc(func() interface{} {
+				return boggart.ComponentName + "/bind/+/serial-number"
+			}).
+			WithEditable(true),
 	}
 }

@@ -331,7 +331,7 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 
 	// meta container
 	if bindSupport, ok := bind.(di.MetaContainerSupport); ok {
-		bindSupport.SetMeta(di.NewMetaContainer(bindItem))
+		bindSupport.SetMeta(di.NewMetaContainer(bindItem, c.mqtt, c.config))
 	}
 
 	// logger container

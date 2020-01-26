@@ -2,7 +2,6 @@ package hikvision
 
 import (
 	"context"
-	"log"
 
 	"github.com/kihamo/boggart/providers/hikvision/client/content_manager"
 	"github.com/kihamo/boggart/providers/hikvision/client/ptz"
@@ -61,7 +60,7 @@ func (b *Bind) taskPTZ(ctx context.Context) (interface{}, error, bool) {
 		}
 
 		if err := b.updateStatusByChannelId(ctx, id); err != nil {
-			log.Printf("failed updated status for %s device in channel %d", b.Meta().SerialNumber(), id)
+			b.Logger().Errorf("failed updated status for %s device in channel %d", b.Meta().SerialNumber(), id)
 			continue
 		}
 

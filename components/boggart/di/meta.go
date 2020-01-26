@@ -1,9 +1,12 @@
 package di
 
 import (
+	"context"
 	"sync"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/shadow/components/config"
 )
 
 type MetaContainerSupport interface {
@@ -38,15 +41,19 @@ func (b *MetaBind) Meta() *MetaContainer {
 }
 
 type MetaContainer struct {
-	bind boggart.BindItem
+	bind   boggart.BindItem
+	mqtt   mqtt.Component
+	config config.Component
 
 	mutex        sync.RWMutex
 	serialNumber string
 }
 
-func NewMetaContainer(bind boggart.BindItem) *MetaContainer {
+func NewMetaContainer(bind boggart.BindItem, mqtt mqtt.Component, config config.Component) *MetaContainer {
 	return &MetaContainer{
-		bind: bind,
+		bind:   bind,
+		mqtt:   mqtt,
+		config: config,
 	}
 }
 
@@ -119,6 +126,12 @@ func (b *MetaContainer) SerialNumber() string {
 
 func (b *MetaContainer) SetSerialNumber(serialNumber string) {
 	b.mutex.Lock()
+	prev := b.serialNumber
 	b.serialNumber = serialNumber
 	b.mutex.Unlock()
+
+	if prev != serialNumber {
+		topic := mqtt.Topic(b.config.String(boggart.ConfigMQTTTopicBindSerialNumber)).Format(b.ID())
+		b.mqtt.PublishAsyncWithCache(context.Background(), topic, 1, true, serialNumber)
+	}
 }
