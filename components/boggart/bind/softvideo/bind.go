@@ -18,10 +18,14 @@ type Bind struct {
 
 func (b *Bind) Balance(ctx context.Context) (balance float64, err error) {
 	balance, err = b.provider.Balance(ctx)
+
 	if err == nil {
 		metricBalance.With("account", b.config.Login).Set(balance)
-		err = b.MQTT().PublishAsync(ctx, b.config.TopicBalance, balance)
+
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicBalance, balance); e != nil {
+			b.Logger().Error(e.Error())
+		}
 	}
 
-	return b.provider.Balance(ctx)
+	return balance, err
 }

@@ -37,23 +37,28 @@ func (b *Bind) GetSerialNumber(ctx context.Context) (sn string, err error) {
 
 	if sn != b.Meta().SerialNumber() {
 		b.Meta().SetSerialNumber(sn)
+		var mqttError error
 
 		if mac, e := net.ParseMAC(info.Device.WifiMac); e == nil {
 			b.mac.Store(&mac)
 		} else {
-			err = multierr.Append(err, e)
+			mqttError = multierr.Append(mqttError, e)
 		}
 
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicDeviceID.Format(sn), info.Device.ID); e != nil {
-			err = multierr.Append(err, e)
+			mqttError = multierr.Append(mqttError, e)
 		}
 
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicDeviceModelName.Format(sn), info.Device.Name); e != nil {
-			err = multierr.Append(err, e)
+			mqttError = multierr.Append(mqttError, e)
+		}
+
+		if mqttError != nil {
+			b.Logger().Error(mqttError.Error())
 		}
 	}
 
-	return sn, err
+	return sn, nil
 }
 
 func (b *Bind) MAC() *net.HardwareAddr {

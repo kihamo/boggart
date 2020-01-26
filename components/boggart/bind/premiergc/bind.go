@@ -23,7 +23,9 @@ func (b *Bind) Balance(ctx context.Context) (contract string, balance float64, e
 		b.Meta().SetSerialNumber(contract)
 
 		metricBalance.With("contract", contract).Set(balance)
-		err = b.MQTT().PublishAsync(ctx, b.config.TopicBalance.Format(contract), balance)
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicBalance.Format(contract), balance); e != nil {
+			b.Logger().Error(e.Error())
+		}
 	}
 
 	return contract, balance, err

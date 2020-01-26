@@ -32,19 +32,24 @@ func (b *Bind) GetSerialNumber(ctx context.Context) (string, error) {
 
 	if sn != b.Meta().SerialNumber() {
 		b.Meta().SetSerialNumber(sn)
+		var mqttError error
 
 		if model, ok := configuration["modelname"]; ok {
 			if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateModel.Format(sn), model); e != nil {
-				err = multierr.Append(err, e)
+				mqttError = multierr.Append(mqttError, e)
 			}
 		}
 
 		if fw, ok := configuration["firmwareversion"]; ok {
 			if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateFirmwareVersion.Format(sn), fw); e != nil {
-				err = multierr.Append(err, e)
+				mqttError = multierr.Append(mqttError, e)
 			}
+		}
+
+		if mqttError != nil {
+			b.Logger().Error(mqttError.Error())
 		}
 	}
 
-	return sn, err
+	return sn, nil
 }

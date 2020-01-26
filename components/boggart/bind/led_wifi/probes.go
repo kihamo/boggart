@@ -4,7 +4,6 @@ import (
 	"context"
 )
 
-func (b *Bind) ReadinessProbe(ctx context.Context) (err error) {
-	_, err = b.bulb.State(ctx)
-	return err
+func (b *Bind) ReadinessProbe(ctx context.Context) error {
+	return b.State(ctx)
 }

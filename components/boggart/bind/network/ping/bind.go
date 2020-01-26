@@ -31,8 +31,11 @@ func (b *Bind) Check(ctx context.Context) error {
 	stats := pinger.Statistics()
 
 	online := stats.PacketsRecv != 0
+
+	var mqttError error
+
 	if e := b.MQTT().PublishAsync(ctx, b.config.TopicOnline, online); e != nil {
-		err = multierr.Append(err, e)
+		mqttError = multierr.Append(mqttError, e)
 	}
 
 	if online {
@@ -40,8 +43,12 @@ func (b *Bind) Check(ctx context.Context) error {
 		metricLatency.With("host", b.config.Hostname).Set(float64(latency))
 
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicLatency, latency); e != nil {
-			err = multierr.Append(err, e)
+			mqttError = multierr.Append(mqttError, e)
 		}
+	}
+
+	if mqttError != nil {
+		b.Logger().Error(mqttError.Error())
 	}
 
 	return err
