@@ -5,8 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"net"
-	"strconv"
 	"strings"
 	"sync"
 
@@ -34,7 +32,6 @@ const (
 type eventClose struct{}
 
 type Bind struct {
-	di.MetaBind
 	di.MQTTBind
 	di.LoggerBind
 	di.ProbesBind
@@ -59,7 +56,6 @@ type Bind struct {
 
 func (b *Bind) Run() error {
 	b.disconnected.Nil()
-	b.Meta().SetSerialNumber(net.JoinHostPort(b.config.Host.String(), strconv.Itoa(b.config.Port)))
 
 	return nil
 }

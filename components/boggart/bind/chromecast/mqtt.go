@@ -21,10 +21,6 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(b.config.TopicVolume, 0, b.MQTT().WrapSubscribeDeviceIsOnline(func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 2) {
-				return nil
-			}
-
 			volume, err := strconv.ParseInt(message.String(), 10, 64)
 			if err != nil {
 				return err
@@ -33,31 +29,15 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			return b.SetVolume(ctx, volume)
 		})),
 		mqtt.NewSubscriber(b.config.TopicMute, 0, b.MQTT().WrapSubscribeDeviceIsOnline(func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 2) {
-				return nil
-			}
-
 			return b.SetMute(ctx, message.IsTrue())
 		})),
 		mqtt.NewSubscriber(b.config.TopicPause, 0, b.MQTT().WrapSubscribeDeviceIsOnline(func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 2) {
-				return nil
-			}
-
 			return b.Pause(ctx)
 		})),
 		mqtt.NewSubscriber(b.config.TopicStop, 0, b.MQTT().WrapSubscribeDeviceIsOnline(func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 2) {
-				return nil
-			}
-
 			return b.Stop(ctx)
 		})),
 		mqtt.NewSubscriber(b.config.TopicPlay, 0, b.MQTT().WrapSubscribeDeviceIsOnline(func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 2) {
-				return nil
-			}
-
 			if u := message.String(); u != "" {
 				return b.PlayFromURL(ctx, u)
 			}
@@ -65,10 +45,6 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			return b.Resume(ctx)
 		})),
 		mqtt.NewSubscriber(b.config.TopicSeek, 0, b.MQTT().WrapSubscribeDeviceIsOnline(func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 2) {
-				return nil
-			}
-
 			second, err := strconv.ParseUint(message.String(), 10, 64)
 			if err != nil {
 				return err
@@ -77,17 +53,9 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			return b.Seek(ctx, second)
 		})),
 		mqtt.NewSubscriber(b.config.TopicResume, 0, b.MQTT().WrapSubscribeDeviceIsOnline(func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 2) {
-				return nil
-			}
-
 			return b.Resume(ctx)
 		})),
 		mqtt.NewSubscriber(b.config.TopicAction, 0, b.MQTT().WrapSubscribeDeviceIsOnline(func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 2) {
-				return nil
-			}
-
 			action := message.String()
 
 			switch strings.ToLower(action) {
