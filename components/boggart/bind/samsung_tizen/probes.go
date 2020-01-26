@@ -5,7 +5,7 @@ import (
 )
 
 func (b *Bind) ReadinessProbe(ctx context.Context) (err error) {
-	_, err = b.client.Device(ctx)
+	_, err = b.GetSerialNumber(ctx)
 
 	return err
 }

@@ -24,11 +24,9 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			}
 
 			if message.IsTrue() {
-				b.mutex.RLock()
-				mac := b.mac
-				b.mutex.RUnlock()
-
-				return wol.MagicWake(mac, "255.255.255.255")
+				if mac := b.MAC(); mac != nil {
+					return wol.MagicWake(mac.String(), "255.255.255.255")
+				}
 			}
 
 			if !b.Meta().IsStatusOnline() {
