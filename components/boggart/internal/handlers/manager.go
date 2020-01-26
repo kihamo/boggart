@@ -18,6 +18,7 @@ type managerHandlerDevice struct {
 	Type              string   `json:"type"`
 	Description       string   `json:"description"`
 	SerialNumber      string   `json:"serial_number"`
+	MAC               string   `json:"mac"`
 	Status            string   `json:"status"`
 	Tasks             []string `json:"tasks"`
 	MQTTPublishes     []string `json:"mqtt_publishes"`
@@ -108,6 +109,10 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 
 			if bindSupport, ok := di.MetaContainerBind(bindItem.Bind()); ok {
 				item.SerialNumber = bindSupport.SerialNumber()
+
+				if mac := bindSupport.MAC(); mac != nil {
+					item.MAC = mac.String()
+				}
 			}
 
 			if bindSupport, ok := di.WorkersContainerBind(bindItem.Bind()); ok {

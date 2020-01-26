@@ -36,5 +36,11 @@ func (c *Component) ConfigVariables() []config.Variable {
 				return boggart.ComponentName + "/bind/+/serial-number"
 			}).
 			WithEditable(true),
+		config.NewVariable(boggart.ConfigMQTTTopicBindMAC, config.ValueTypeString).
+			WithUsage("Boggart MQTT topic bind MAC address").
+			WithDefaultFunc(func() interface{} {
+				return boggart.ComponentName + "/bind/+/mac"
+			}).
+			WithEditable(true),
 	}
 }

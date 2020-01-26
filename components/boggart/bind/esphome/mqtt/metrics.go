@@ -10,19 +10,19 @@ var (
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {
-	sn := b.Meta().SerialNumber()
-	if sn == "" {
+	mac := b.Meta().MAC()
+	if mac == nil {
 		return
 	}
 
-	metricState.With("serial_number", sn).Describe(ch)
+	metricState.With("mac", mac.String()).Describe(ch)
 }
 
 func (b *Bind) Collect(ch chan<- snitch.Metric) {
-	sn := b.Meta().SerialNumber()
-	if sn == "" {
+	mac := b.Meta().MAC()
+	if mac == nil {
 		return
 	}
 
-	metricState.With("serial_number", sn).Collect(ch)
+	metricState.With("mac", mac.String()).Collect(ch)
 }

@@ -239,6 +239,8 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.Description = string(in.String())
 		case "serial_number":
 			out.SerialNumber = string(in.String())
+		case "mac":
+			out.MAC = string(in.String())
 		case "status":
 			out.Status = string(in.String())
 		case "tasks":
@@ -396,6 +398,16 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.RawString(prefix)
 		}
 		out.String(string(in.SerialNumber))
+	}
+	{
+		const prefix string = ",\"mac\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.MAC))
 	}
 	{
 		const prefix string = ",\"status\":"

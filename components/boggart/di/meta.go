@@ -2,7 +2,9 @@ package di
 
 import (
 	"context"
+	"net"
 	"sync"
+	"sync/atomic"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
@@ -45,8 +47,8 @@ type MetaContainer struct {
 	mqtt   mqtt.Component
 	config config.Component
 
-	mutex        sync.RWMutex
-	serialNumber string
+	serialNumber atomic.Value
+	mac          atomic.Value
 }
 
 func NewMetaContainer(bind boggart.BindItem, mqtt mqtt.Component, config config.Component) *MetaContainer {
@@ -118,17 +120,31 @@ func (b *MetaContainer) IsStatusRemoved() bool {
 }
 
 func (b *MetaContainer) SerialNumber() string {
-	b.mutex.RLock()
-	defer b.mutex.RUnlock()
+	if sn := b.serialNumber.Load(); sn != nil {
+		return sn.(string)
+	}
 
-	return b.serialNumber
+	return ""
 }
 
 func (b *MetaContainer) SetSerialNumber(serialNumber string) {
-	b.mutex.Lock()
-	b.serialNumber = serialNumber
-	b.mutex.Unlock()
+	b.serialNumber.Store(serialNumber)
 
 	topic := mqtt.Topic(b.config.String(boggart.ConfigMQTTTopicBindSerialNumber)).Format(b.ID())
 	b.mqtt.PublishAsyncWithCache(context.Background(), topic, 1, true, serialNumber)
+}
+
+func (b *MetaContainer) MAC() *net.HardwareAddr {
+	if sn := b.mac.Load(); sn != nil {
+		return sn.(*net.HardwareAddr)
+	}
+
+	return nil
+}
+
+func (b *MetaContainer) SetMAC(mac net.HardwareAddr) {
+	b.mac.Store(&mac)
+
+	topic := mqtt.Topic(b.config.String(boggart.ConfigMQTTTopicBindMAC)).Format(b.ID())
+	b.mqtt.PublishAsyncWithCache(context.Background(), topic, 1, true, mac)
 }

@@ -3,6 +3,7 @@ package google_home
 import (
 	"context"
 	"errors"
+	"net"
 
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/google/home"
@@ -17,7 +18,7 @@ type Bind struct {
 	provider *home.Client
 }
 
-func (b *Bind) GetSerialNumber(ctx context.Context) (string, error) {
+func (b *Bind) GetMAC(ctx context.Context) (string, error) {
 	response, err := b.provider.Info.GetEurekaInfo(info.NewGetEurekaInfoParamsWithContext(ctx).
 		WithOptions(home.EurekaInfoOptionDetail.Value()).
 		WithParams(home.EurekaInfoParamDeviceInfo.Value()))
@@ -30,6 +31,9 @@ func (b *Bind) GetSerialNumber(ctx context.Context) (string, error) {
 		return "", errors.New("MAC address not found")
 	}
 
-	b.Meta().SetSerialNumber(response.Payload.MacAddress)
+	if mac, err := net.ParseMAC(response.Payload.MacAddress); err == nil {
+		b.Meta().SetMAC(mac)
+	}
+
 	return response.Payload.MacAddress, nil
 }

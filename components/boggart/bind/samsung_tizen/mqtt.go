@@ -24,7 +24,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			}
 
 			if message.IsTrue() {
-				if mac := b.MAC(); mac != nil {
+				if mac := b.Meta().MAC(); mac != nil {
 					return wol.MagicWake(mac.String(), "255.255.255.255")
 				}
 			}

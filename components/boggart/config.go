@@ -7,4 +7,5 @@ const (
 	ConfigBoggartBindID             = ComponentName + ".bind-id"
 	ConfigMQTTTopicBindStatus       = ComponentName + ".mqtt.topic-bind-status"
 	ConfigMQTTTopicBindSerialNumber = ComponentName + ".mqtt.topic-bind-serial-number"
+	ConfigMQTTTopicBindMAC          = ComponentName + ".mqtt.topic-bind-mac"
 )

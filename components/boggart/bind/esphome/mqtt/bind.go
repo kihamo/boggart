@@ -58,7 +58,7 @@ func (b *Bind) register(c Component) (err error) {
 	b.components.Store(c.GetUniqueID(), c)
 
 	if mac := c.GetDevice().MAC(); mac != nil {
-		b.Meta().SetSerialNumber(mac.String())
+		b.Meta().SetMAC(mac)
 	}
 
 	subscribers := c.Subscribers()

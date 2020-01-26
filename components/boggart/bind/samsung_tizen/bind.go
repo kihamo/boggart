@@ -4,7 +4,6 @@ import (
 	"context"
 	"net"
 	"strings"
-	"sync/atomic"
 
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/samsung/tv"
@@ -19,7 +18,6 @@ type Bind struct {
 
 	config *Config
 	client *tv.ApiV2
-	mac    atomic.Value
 }
 
 func (b *Bind) GetSerialNumber(ctx context.Context) (sn string, err error) {
@@ -40,7 +38,7 @@ func (b *Bind) GetSerialNumber(ctx context.Context) (sn string, err error) {
 		var mqttError error
 
 		if mac, e := net.ParseMAC(info.Device.WifiMac); e == nil {
-			b.mac.Store(&mac)
+			b.Meta().SetMAC(mac)
 		} else {
 			mqttError = multierr.Append(mqttError, e)
 		}
@@ -59,12 +57,4 @@ func (b *Bind) GetSerialNumber(ctx context.Context) (sn string, err error) {
 	}
 
 	return sn, nil
-}
-
-func (b *Bind) MAC() *net.HardwareAddr {
-	if mac := b.mac.Load(); mac != nil {
-		return mac.(*net.HardwareAddr)
-	}
-
-	return nil
 }
