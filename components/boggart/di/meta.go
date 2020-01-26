@@ -126,12 +126,9 @@ func (b *MetaContainer) SerialNumber() string {
 
 func (b *MetaContainer) SetSerialNumber(serialNumber string) {
 	b.mutex.Lock()
-	prev := b.serialNumber
 	b.serialNumber = serialNumber
 	b.mutex.Unlock()
 
-	if prev != serialNumber {
-		topic := mqtt.Topic(b.config.String(boggart.ConfigMQTTTopicBindSerialNumber)).Format(b.ID())
-		b.mqtt.PublishAsyncWithCache(context.Background(), topic, 1, true, serialNumber)
-	}
+	topic := mqtt.Topic(b.config.String(boggart.ConfigMQTTTopicBindSerialNumber)).Format(b.ID())
+	b.mqtt.PublishAsyncWithCache(context.Background(), topic, 1, true, serialNumber)
 }
