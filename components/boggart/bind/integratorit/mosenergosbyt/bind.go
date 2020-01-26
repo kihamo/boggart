@@ -13,6 +13,7 @@ var services = map[string]string{
 type Bind struct {
 	di.MQTTBind
 	di.WorkersBind
+	di.LoggerBind
 	di.ProbesBind
 
 	config *Config

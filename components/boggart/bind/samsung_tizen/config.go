@@ -10,6 +10,7 @@ import (
 
 type Config struct {
 	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
+	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
 	Host                 string     `valid:"host,required"`
 	TopicPower           mqtt.Topic `mapstructure:"topic_power" yaml:"topic_power"`
@@ -25,6 +26,10 @@ func (t Type) Config() interface{} {
 		ProbesConfig: di.ProbesConfig{
 			ReadinessPeriod:  time.Second * 30,
 			ReadinessTimeout: time.Second * 5,
+		},
+		LoggerConfig: di.LoggerConfig{
+			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
+			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
 		},
 		TopicPower:           prefix + "power",
 		TopicKey:             prefix + "key",

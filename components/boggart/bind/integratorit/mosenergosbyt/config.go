@@ -10,6 +10,7 @@ import (
 
 type Config struct {
 	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
+	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
 	Debug               bool
 	Login               string        `valid:"required"`
@@ -23,6 +24,10 @@ func (Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/service/mosenergosbyt/+/"
 
 	return &Config{
+		LoggerConfig: di.LoggerConfig{
+			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
+			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
+		},
 		UpdaterInterval:     time.Hour,
 		TopicBalance:        prefix + "balance",
 		TopicServiceBalance: prefix + "balance/+",

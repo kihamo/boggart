@@ -10,6 +10,7 @@ import (
 
 type ConfigRM struct {
 	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
+	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
 	Host                 string               `valid:",required"`
 	MAC                  boggart.HardwareAddr `valid:",required"`
@@ -36,6 +37,10 @@ func (t Type) Config() interface{} {
 		ProbesConfig: di.ProbesConfig{
 			ReadinessPeriod:  time.Second * 30,
 			ReadinessTimeout: time.Second * 10,
+		},
+		LoggerConfig: di.LoggerConfig{
+			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
+			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
 		},
 		CaptureDuration:      time.Second * 15,
 		ConnectionTimeout:    time.Second,

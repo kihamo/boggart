@@ -10,6 +10,7 @@ import (
 
 type Config struct {
 	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
+	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
 	Host                     string        `valid:"host,required"`
 	Token                    string        `valid:"required"`
@@ -41,6 +42,10 @@ func (t Type) Config() interface{} {
 		ProbesConfig: di.ProbesConfig{
 			ReadinessPeriod:  time.Minute,
 			ReadinessTimeout: time.Second * 5,
+		},
+		LoggerConfig: di.LoggerConfig{
+			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
+			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
 		},
 		UpdaterInterval:          time.Minute,
 		UpdaterTimeout:           time.Second * 30,

@@ -13,6 +13,7 @@ type Bind struct {
 	di.MetaBind
 	di.MQTTBind
 	di.WorkersBind
+	di.LoggerBind
 	di.ProbesBind
 
 	config    *Config

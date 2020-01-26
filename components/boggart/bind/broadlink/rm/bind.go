@@ -9,6 +9,7 @@ import (
 
 type Bind struct {
 	di.MQTTBind
+	di.LoggerBind
 	di.ProbesBind
 
 	config *ConfigRM
