@@ -15,7 +15,7 @@ func HTTPProbe(ctx context.Context, address string, headers http.Header) error {
 		return err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "GET", u.String(), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 	if err != nil {
 		return err
 	}
