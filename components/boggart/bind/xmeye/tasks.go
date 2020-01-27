@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/kihamo/boggart/providers/xmeye"
 	"github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 	"go.uber.org/multierr"
@@ -52,6 +53,25 @@ func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
 	}
 
 	b.Meta().SetSerialNumber(info.SerialNo)
+
+	if b.Meta().MAC() == nil {
+		response, err := client.ConfigGet(ctx, xmeye.ConfigNameNetworkNetCommon, false)
+		if err != nil {
+			return nil, err
+		}
+
+		if cfg, ok := response.(map[string]interface{}); ok {
+			if mac, ok := cfg["MAC"]; ok {
+				if err := b.Meta().SetMACAsString(mac.(string)); err != nil {
+					return nil, err
+				}
+			}
+		}
+
+		if b.Meta().MAC() == nil {
+			return nil, errors.New("device returns empty MAC address")
+		}
+	}
 
 	if b.config.AlarmStreamingEnabled {
 		if err = b.startAlarmStreaming(); err != nil {
