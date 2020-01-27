@@ -18,13 +18,15 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskSyncState(ctx context.Context) error {
-	if b.Meta().SerialNumber() == "" {
+	if b.Meta().MAC() == nil {
 		info, err := b.provider.DeviceInfo(ctx)
 		if err != nil {
 			return err
 		}
 
-		b.Meta().SetSerialNumber(info.MacAddress)
+		if err := b.Meta().SetMACAsString(info.MacAddress); err != nil {
+			return err
+		}
 	}
 
 	entities, err := b.provider.ListEntities(ctx)

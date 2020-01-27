@@ -8,6 +8,7 @@ import (
 )
 
 type Bind struct {
+	di.MetaBind
 	di.MQTTBind
 	di.LoggerBind
 	di.ProbesBind
@@ -35,5 +36,7 @@ type SupportRF433Mhz interface {
 }
 
 func (b *Bind) Run() error {
+	b.Meta().SetMAC(b.config.MAC.HardwareAddr)
+
 	return b.MQTT().PublishAsync(context.Background(), b.config.TopicCaptureState, false)
 }

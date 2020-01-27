@@ -25,7 +25,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		return err
 	}
 
-	sn := b.config.MAC.String()
+	mac := b.Meta().MACAsString()
 	profile := b.CurrentProfile()
 	measureStartDatetime := b.measureStartDatetime.Load()
 
@@ -58,12 +58,12 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 			err = multierr.Append(err, e)
 		}
 
-		metricWeight.With("serial_number", sn, "profile", profile.Name).Set(measure.Weight())
+		metricWeight.With("mac", mac, "profile", profile.Name).Set(measure.Weight())
 		if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicWeight.Format(profile.Name), measure.Weight()); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		metricImpedance.With("serial_number", sn, "profile", profile.Name).Set(float64(measure.Impedance()))
+		metricImpedance.With("mac", mac, "profile", profile.Name).Set(float64(measure.Impedance()))
 		if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicImpedance.Format(profile.Name), measure.Impedance()); e != nil {
 			err = multierr.Append(err, e)
 		}
@@ -90,69 +90,69 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		}
 
 		// ever
-		metricBMR.With("serial_number", sn, "profile", profile.Name).Set(float64(metrics.BMR()))
+		metricBMR.With("mac", mac, "profile", profile.Name).Set(float64(metrics.BMR()))
 		if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicBMR.Format(profile.Name), metrics.BMR()); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		metricBMR.With("serial_number", sn, "profile", profile.Name).Set(metrics.BMI())
+		metricBMR.With("mac", mac, "profile", profile.Name).Set(metrics.BMI())
 		if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicBMI.Format(profile.Name), metrics.BMI()); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		metricFatPercentage.With("serial_number", sn, "profile", profile.Name).Set(metrics.FatPercentage())
+		metricFatPercentage.With("mac", mac, "profile", profile.Name).Set(metrics.FatPercentage())
 		if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicFatPercentage.Format(profile.Name), metrics.FatPercentage()); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		metricWaterPercentage.With("serial_number", sn, "profile", profile.Name).Set(metrics.WaterPercentage())
+		metricWaterPercentage.With("mac", mac, "profile", profile.Name).Set(metrics.WaterPercentage())
 		if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicWaterPercentage.Format(profile.Name), metrics.WaterPercentage()); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		metricIdealWeight.With("serial_number", sn, "profile", profile.Name).Set(metrics.IdealWeight())
+		metricIdealWeight.With("mac", mac, "profile", profile.Name).Set(metrics.IdealWeight())
 		if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicIdealWeight.Format(profile.Name), metrics.IdealWeight()); e != nil {
 			err = multierr.Append(err, e)
 		}
 
 		// only sets impedance
 		if measure.Impedance() > 0 {
-			metricLBMCoefficient.With("serial_number", sn, "profile", profile.Name).Set(metrics.LBMCoefficient())
+			metricLBMCoefficient.With("mac", mac, "profile", profile.Name).Set(metrics.LBMCoefficient())
 			if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicLBMCoefficient.Format(profile.Name), metrics.LBMCoefficient()); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			metricBoneMass.With("serial_number", sn, "profile", profile.Name).Set(metrics.BoneMass())
+			metricBoneMass.With("mac", mac, "profile", profile.Name).Set(metrics.BoneMass())
 			if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicBoneMass.Format(profile.Name), metrics.BoneMass()); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			metricMuscleMass.With("serial_number", sn, "profile", profile.Name).Set(metrics.MuscleMass())
+			metricMuscleMass.With("mac", mac, "profile", profile.Name).Set(metrics.MuscleMass())
 			if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicMuscleMass.Format(profile.Name), metrics.MuscleMass()); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			metricVisceralFat.With("serial_number", sn, "profile", profile.Name).Set(metrics.VisceralFat())
+			metricVisceralFat.With("mac", mac, "profile", profile.Name).Set(metrics.VisceralFat())
 			if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicVisceralFat.Format(profile.Name), metrics.VisceralFat()); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			metricFatMassToIdeal.With("serial_number", sn, "profile", profile.Name).Set(metrics.FatMassToIdeal())
+			metricFatMassToIdeal.With("mac", mac, "profile", profile.Name).Set(metrics.FatMassToIdeal())
 			if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicFatMassToIdeal.Format(profile.Name), metrics.FatMassToIdeal()); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			metricProteinPercentage.With("serial_number", sn, "profile", profile.Name).Set(metrics.ProteinPercentage())
+			metricProteinPercentage.With("mac", mac, "profile", profile.Name).Set(metrics.ProteinPercentage())
 			if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicProteinPercentage.Format(profile.Name), metrics.ProteinPercentage()); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			metricBodyType.With("serial_number", sn, "profile", profile.Name).Set(float64(metrics.BodyType()))
+			metricBodyType.With("mac", mac, "profile", profile.Name).Set(float64(metrics.BodyType()))
 			if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicBodyType.Format(profile.Name), metrics.BodyType()); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			metricMetabolicAge.With("serial_number", sn, "profile", profile.Name).Set(metrics.MetabolicAge())
+			metricMetabolicAge.With("mac", mac, "profile", profile.Name).Set(metrics.MetabolicAge())
 			if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicMetabolicAge.Format(profile.Name), metrics.MetabolicAge()); e != nil {
 				err = multierr.Append(err, e)
 			}

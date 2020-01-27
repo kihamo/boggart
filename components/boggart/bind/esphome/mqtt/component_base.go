@@ -94,7 +94,7 @@ func (c *ComponentBase) SetState(message mqtt.Message) error {
 	c.state.Store(message.String())
 
 	if val, err := strconv.ParseFloat(message.String(), 64); err == nil {
-		metricState.With("serial_number", c.Device.MAC().String()).With("component", c.ID).Set(val)
+		metricState.With("mac", c.Device.MAC().String()).With("component", c.ID).Set(val)
 	}
 
 	return nil

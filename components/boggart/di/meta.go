@@ -135,11 +135,19 @@ func (b *MetaContainer) SetSerialNumber(serialNumber string) {
 }
 
 func (b *MetaContainer) MAC() *net.HardwareAddr {
-	if sn := b.mac.Load(); sn != nil {
-		return sn.(*net.HardwareAddr)
+	if mac := b.mac.Load(); mac != nil {
+		return mac.(*net.HardwareAddr)
 	}
 
 	return nil
+}
+
+func (b *MetaContainer) MACAsString() string {
+	if mac := b.MAC(); mac != nil {
+		return mac.String()
+	}
+
+	return ""
 }
 
 func (b *MetaContainer) SetMAC(mac net.HardwareAddr) {
@@ -147,4 +155,13 @@ func (b *MetaContainer) SetMAC(mac net.HardwareAddr) {
 
 	topic := mqtt.Topic(b.config.String(boggart.ConfigMQTTTopicBindMAC)).Format(b.ID())
 	b.mqtt.PublishAsyncWithCache(context.Background(), topic, 1, true, mac)
+}
+
+func (b *MetaContainer) SetMACAsString(mac string) error {
+	addr, err := net.ParseMAC(mac)
+	if err == nil {
+		b.SetMAC(addr)
+	}
+
+	return err
 }

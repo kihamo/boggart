@@ -160,6 +160,16 @@ func (c *MQTTContainer) CheckSerialNumberInTopic(topic mqtt.Topic, offset int) b
 	return false
 }
 
+func (c *MQTTContainer) CheckMACInTopic(topic mqtt.Topic, offset int) bool {
+	if bindSupport, ok := MetaContainerBind(c.bind.Bind()); ok {
+		if mac := bindSupport.MACAsString(); mac != "" {
+			return c.CheckValueInTopic(topic, mqtt.NameReplace(mac), offset)
+		}
+	}
+
+	return false
+}
+
 func (c *MQTTContainer) WrapSubscribeDeviceIsOnline(callback mqtt.MessageHandler) mqtt.MessageHandler {
 	return func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
 		if c.bind.Status() == boggart.BindStatusOnline {

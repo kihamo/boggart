@@ -3,7 +3,6 @@ package google_home
 import (
 	"context"
 	"errors"
-	"net"
 
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/google/home"
@@ -31,8 +30,8 @@ func (b *Bind) GetMAC(ctx context.Context) (string, error) {
 		return "", errors.New("MAC address not found")
 	}
 
-	if mac, err := net.ParseMAC(response.Payload.MacAddress); err == nil {
-		b.Meta().SetMAC(mac)
+	if err := b.Meta().SetMACAsString(response.Payload.MacAddress); err != nil {
+		return "", err
 	}
 
 	return response.Payload.MacAddress, nil

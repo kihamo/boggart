@@ -96,10 +96,10 @@ $(document).ready(function () {
                     }
                 },
                 {
-                    data: 'serial_number'
+                    data: 'mac'
                 },
                 {
-                    data: 'mac'
+                    data: 'serial_number'
                 },
                 {
                     data: 'id'

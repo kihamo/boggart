@@ -10,6 +10,7 @@ import (
 )
 
 type Bind struct {
+	di.MetaBind
 	di.MQTTBind
 	di.LoggerBind
 	di.WorkersBind
@@ -22,6 +23,7 @@ type Bind struct {
 
 func (b *Bind) Run() error {
 	b.notifyCurrentProfile(context.Background())
+	b.Meta().SetMAC(b.config.MAC.HardwareAddr)
 	return nil
 }
 

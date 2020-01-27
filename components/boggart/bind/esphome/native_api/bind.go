@@ -100,8 +100,8 @@ func (b *Bind) States(ctx context.Context, messages ...proto.Message) (map[uint3
 }
 
 func (b *Bind) syncState(ctx context.Context, messages ...proto.Message) error {
-	sn := b.Meta().SerialNumber()
-	if sn == "" {
+	mac := b.Meta().MACAsString()
+	if mac == "" {
 		return nil
 	}
 
@@ -132,7 +132,7 @@ func (b *Bind) syncState(ctx context.Context, messages ...proto.Message) error {
 		objectID := entity.GetObjectId()
 
 		if stateName, e := api.State(entity.(proto.Message), state, false); e == nil {
-			if e = b.MQTT().PublishAsync(ctx, b.config.TopicState.Format(sn, objectID), stateName); e != nil {
+			if e = b.MQTT().PublishAsync(ctx, b.config.TopicState.Format(mac, objectID), stateName); e != nil {
 				err = multierr.Append(err, e)
 			}
 
@@ -145,42 +145,42 @@ func (b *Bind) syncState(ctx context.Context, messages ...proto.Message) error {
 					WarmWhite: uint8(st.White * 100),
 				}
 
-				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateBrightness.Format(sn, objectID), st.Brightness); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateBrightness.Format(mac, objectID), st.Brightness); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateRed.Format(sn, objectID), color.Red); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateRed.Format(mac, objectID), color.Red); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateGreen.Format(sn, objectID), color.Green); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateGreen.Format(mac, objectID), color.Green); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateBlue.Format(sn, objectID), color.Blue); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateBlue.Format(mac, objectID), color.Blue); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateWhite.Format(sn, objectID), color.WarmWhite); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateWhite.Format(mac, objectID), color.WarmWhite); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateColorTemperature.Format(sn, objectID), uint8(st.ColorTemperature*100)); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateColorTemperature.Format(mac, objectID), uint8(st.ColorTemperature*100)); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateEffect.Format(sn, objectID), st.Effect); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateEffect.Format(mac, objectID), st.Effect); e != nil {
 					err = multierr.Append(err, e)
 				}
 
 				// in HEX
-				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateColorRGB.Format(sn, objectID), color.String()); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateColorRGB.Format(mac, objectID), color.String()); e != nil {
 					err = multierr.Append(err, e)
 				}
 
 				// in HSV
 				h, s, v := color.HSV()
-				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateColorHSV.Format(sn, objectID), fmt.Sprintf("%d,%.2f,%.2f", h, s, v)); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateColorHSV.Format(mac, objectID), fmt.Sprintf("%d,%.2f,%.2f", h, s, v)); e != nil {
 					err = multierr.Append(err, e)
 				}
 			}

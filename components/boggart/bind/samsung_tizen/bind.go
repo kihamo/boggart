@@ -2,7 +2,6 @@ package samsung_tizen
 
 import (
 	"context"
-	"net"
 	"strings"
 
 	"github.com/kihamo/boggart/components/boggart/di"
@@ -37,10 +36,8 @@ func (b *Bind) GetSerialNumber(ctx context.Context) (sn string, err error) {
 		b.Meta().SetSerialNumber(sn)
 		var mqttError error
 
-		if mac, e := net.ParseMAC(info.Device.WifiMac); e == nil {
-			b.Meta().SetMAC(mac)
-		} else {
-			mqttError = multierr.Append(mqttError, e)
+		if err := b.Meta().SetMACAsString(info.Device.WifiMac); err != nil {
+			return "", err
 		}
 
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicDeviceID.Format(sn), info.Device.ID); e != nil {

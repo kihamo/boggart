@@ -27,7 +27,7 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(b.config.TopicPower, 0, b.MQTT().WrapSubscribeDeviceIsOnline(func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 3) {
+			if !b.MQTT().CheckMACInTopic(message.Topic(), 3) {
 				return nil
 			}
 
@@ -67,7 +67,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			return err
 		})),
 		mqtt.NewSubscriber(b.config.TopicColor, 0, b.MQTT().WrapSubscribeDeviceIsOnline(func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 3) {
+			if !b.MQTT().CheckMACInTopic(message.Topic(), 3) {
 				return nil
 			}
 
@@ -138,7 +138,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			return err
 		})),
 		mqtt.NewSubscriber(b.config.TopicStateSet, 0, b.MQTT().WrapSubscribeDeviceIsOnline(func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 4) {
+			if !b.MQTT().CheckMACInTopic(message.Topic(), 4) {
 				return nil
 			}
 

@@ -24,6 +24,8 @@ type Bind struct {
 }
 
 func (b *Bind) Run() error {
+	b.Meta().SetMAC(b.config.MAC.HardwareAddr)
+
 	return nil
 }
 

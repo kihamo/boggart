@@ -29,7 +29,7 @@ func (c *ComponentSwitch) SetState(message mqtt.Message) error {
 		val = 1
 	}
 
-	metricState.With("serial_number", c.Device.MAC().String()).With("component", c.ID).Set(val)
+	metricState.With("mac", c.Device.MAC().String()).With("component", c.ID).Set(val)
 
 	return c.ComponentBase.SetState(message)
 }
