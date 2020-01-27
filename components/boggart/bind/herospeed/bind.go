@@ -32,6 +32,13 @@ func (b *Bind) GetSerialNumber(ctx context.Context) (string, error) {
 
 	if sn != b.Meta().SerialNumber() {
 		b.Meta().SetSerialNumber(sn)
+
+		if mac, ok := configuration["macip"]; ok {
+			if err := b.Meta().SetMACAsString(mac); err != nil {
+				return "", err
+			}
+		}
+
 		var mqttError error
 
 		if model, ok := configuration["modelname"]; ok {

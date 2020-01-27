@@ -72,8 +72,18 @@ func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
 		return nil, errors.New("device returns empty serial number")
 	}
 
+	if deviceInfo.Payload.MacAddress1 == "" && deviceInfo.Payload.MacAddress2 == "" {
+		return nil, errors.New("device returns empty MAC address")
+	}
+
+	if deviceInfo.Payload.MacAddress1 != "" {
+		err = b.Meta().SetMACAsString(deviceInfo.Payload.MacAddress1)
+	} else if deviceInfo.Payload.MacAddress2 != "" {
+		err = b.Meta().SetMACAsString(deviceInfo.Payload.MacAddress2)
+	}
+
 	b.Meta().SetSerialNumber(deviceInfo.Payload.SerialNumber)
-	return nil, nil
+	return nil, err
 }
 
 func (b *Bind) taskBalanceUpdater(ctx context.Context) error {

@@ -15,7 +15,13 @@ func (b *Bind) ReadinessProbe(ctx context.Context) error {
 			return errors.New("device returns empty serial number")
 		}
 
+		if deviceInfo.Payload.MacAddress == "" {
+			return errors.New("device returns empty MAC address")
+		}
+
 		b.Meta().SetSerialNumber(deviceInfo.Payload.SerialNumber)
+
+		err = b.Meta().SetMACAsString(deviceInfo.Payload.MacAddress)
 	}
 
 	return err
