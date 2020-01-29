@@ -28,6 +28,15 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 
 	var err error
 
+	if b.Meta().MAC() == nil {
+		info, e := b.device.Info(ctx)
+		if e != nil {
+			return e
+		}
+
+		b.Meta().SetMAC(info.MAC.HardwareAddr)
+	}
+
 	// only statistics
 	status, e := b.device.Status(ctx)
 	if e == nil {
