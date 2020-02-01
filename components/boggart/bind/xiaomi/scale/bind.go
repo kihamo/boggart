@@ -37,15 +37,8 @@ func (b *Bind) CurrentProfile() *Profile {
 	return profileGuest
 }
 
-func (b *Bind) SetProfile(name string) *Profile {
-	var profile *Profile
-
-	for _, p := range b.config.Profiles {
-		if p.Name == name {
-			profile = p
-			break
-		}
-	}
+func (b *Bind) SetProfile(name string) {
+	profile := b.Profile(name)
 
 	if profile == nil {
 		profile = profileGuest
@@ -53,8 +46,39 @@ func (b *Bind) SetProfile(name string) *Profile {
 
 	b.currentProfile.Store(profile)
 	b.measureStartDatetime.Set(time.Now())
+}
+
+func (b *Bind) Profile(name string) *Profile {
+	if name == "" {
+		return nil
+	}
+
+	for _, p := range b.Profiles() {
+		if p.Name == name {
+			return p
+		}
+	}
 
 	return nil
+}
+
+func (b *Bind) Profiles() []*Profile {
+	profiles := make([]*Profile, 0, len(b.config.Profiles)+1)
+	guestExist := false
+
+	for _, profile := range b.config.Profiles {
+		profiles = append(profiles, profile)
+
+		if profile.Name == profileGuest.Name {
+			guestExist = true
+		}
+	}
+
+	if !guestExist {
+		profiles = append(profiles, profileGuest)
+	}
+
+	return profiles
 }
 
 func (b *Bind) Close() error {

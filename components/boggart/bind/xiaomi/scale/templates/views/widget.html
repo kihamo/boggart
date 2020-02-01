@@ -1,0 +1,156 @@
+{{ define "content" }}
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>{{ i18n "Scale" . }}</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <form class="form-horizontal form-label-left" role="form" method="post" id="set">
+                    <div class="item form-group">
+                        <label for="profile" class="control-label col-md-3 col-sm-3 col-xs-12">
+                        {{ i18n "Profile" . }}
+                        </label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <select id="profile" name="profile" class="form-control select2">
+                            {{ range $profile := .profiles }}
+                                <option value="{{ $profile.Name }}"{{ if eq $.current_profile.Name $profile.Name }}
+                                        selected="selected"{{ end }}>{{ $profile.Name }}</option>
+                            {{ end }}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="item form-group">
+                        <label for="sex" class="control-label col-md-3 col-sm-3 col-xs-12">
+                        {{ i18n "Sex" . }}
+                        </label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <select id="sex" name="sex" class="form-control select2"{{ if ne .current_profile.Editable true }} disabled="disabled"{{ end }}>
+                                <option value="0"{{ if eq .current_profile.Sex false }} selected="selected"{{ end }}>{{ i18n "Male" . }}</option>
+                                <option value="1"{{ if eq .current_profile.Sex true }} selected="selected"{{ end }}>{{ i18n "Female" . }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="item form-group">
+                        <label for="height" class="control-label col-md-3 col-sm-3 col-xs-12">
+                        {{ i18n "Height" . }}
+                        </label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <input type="text" class="form-control" name="height" id="height"
+                                   value="{{ .current_profile.Height }}"{{ if ne .current_profile.Editable true }}
+                                   readonly="readonly" data-disable="true"{{ end }} />
+                        </div>
+                    </div>
+                    <div class="item form-group">
+                        <label for="age" class="control-label col-md-3 col-sm-3 col-xs-12">
+                        {{ i18n "Age" . }}
+                        </label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <input type="text" class="form-control" name="age" id="age"
+                                   value="{{ .current_profile.Age }}"{{ if ne .current_profile.Editable true }}
+                                   readonly="readonly" data-disable="true"{{ end }} />
+                        </div>
+                    </div>
+                    <div class="item form-group">
+                        <label for="birthday" class="control-label col-md-3 col-sm-3 col-xs-12">
+                        {{ i18n "Birthday" . }}
+                        </label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <input type="text" class="form-control" name="birthday" id="birthday"
+                                   value="{{ if ne .current_profile.Birthday.IsZero true }}{{ .current_profile.Birthday.Format "2006.01.02" }}{{ end }}"{{ if ne .current_profile.Editable true }}
+                                   readonly="readonly"{{ end }} />
+                        </div>
+                    </div>
+                    <div class="ln_solid"></div>
+                    <div class="form-group">
+                        <div class="col-md-6 col-md-offset-3">
+                            <button id="send" type="submit" class="btn btn-success">{{ i18n "Save" . }}</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
+
+{{ define "head" }}
+    {{ staticHTML (staticURL "/boggart/assets/vendor/ion.rangeSlider/css/ion.rangeSlider.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/bootstrap-daterangepicker/css/daterangepicker.min.css" false) }}
+{{ end }}
+
+{{ define "js" }}
+{{ staticHTML (staticURL "/boggart/assets/vendor/ion.rangeSlider/js/ion.rangeSlider.min.js" false) }}
+{{ staticHTML (staticURL "/dashboard/assets/vendors/moment/js/moment.min.js" false) }}
+{{ staticHTML (staticURL "/dashboard/assets/vendors/bootstrap-daterangepicker/js/daterangepicker.min.js" false) }}
+
+<script type="application/javascript">
+    var profiles = {
+        {{ range $i, $profile := .profiles }}
+        {{ if ne $i 0}},{{ end }}'{{ $profile.Name }}': {
+            sex: {{ if $profile.Sex }}1{{ else }}0{{ end }},
+            height: {{ $profile.Height }},
+            age: {{ $profile.Age }},
+            {{ if ne $profile.Birthday.IsZero true }}birthday: {{ $profile.Birthday.Format "2006.01.02" }},{{ end }}
+            editable: {{ if $profile.Editable }}true{{ else }}false{{ end }}
+        }
+        {{ end }}
+    };
+
+    $(document).ready(function () {
+        var
+                eS = $('#sex'),
+                eH = $('#height'),
+                eA = $('#age'),
+                eB = $('#birthday');
+
+        eH.ionRangeSlider({
+            skin: 'modern',
+            min: 1,
+            max: 250
+        });
+        eA.ionRangeSlider({
+            skin: 'modern',
+            min: 0,
+            max: 100
+        });
+        eB.daterangepicker({
+            minDate: moment().subtract(100, 'year'),
+            maxDate: moment().endOf('day'),
+            applyButtonClasses: 'btn-success',
+            locale: {
+                format: 'YYYY.MM.DD'
+            },
+            timePicker: false,
+            singleDatePicker: true,
+            showDropdowns: true
+        });
+
+        $('#profile').change(function () {
+            var p = $(this).val();
+
+            if (p in profiles) {
+                eS.val(profiles[p].sex).trigger('change');
+                eS.val(profiles[p].sex).select2({disabled: !profiles[p].editable});
+
+                eH.data("ionRangeSlider").update({
+                    from: profiles[p].height,
+                    disable: !profiles[p].editable,
+                });
+                eA.data("ionRangeSlider").update({
+                    from: profiles[p].age,
+                    disable: !profiles[p].editable,
+                });
+
+                if ('birthday' in profiles[p]) {
+                    eB.val(profiles[p].birthday);
+                } else {
+                    eB.val('');
+                }
+                eB.attr('readonly', !profiles[p].editable);
+            }
+        });
+    });
+</script>
+{{ end }}

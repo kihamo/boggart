@@ -14,6 +14,7 @@ type Profile struct {
 	Height   uint64    `json:"height,omitempty" yaml:"height,omitempty"`
 	Birthday time.Time `json:"birthday,omitempty" yaml:"birthday,omitempty"`
 	Age      uint64    `json:"age,omitempty" yaml:"age,omitempty"`
+	Editable bool      `json:"-" yaml:"-"`
 }
 
 func (p Profile) GetAge() (age uint64) {
@@ -33,7 +34,10 @@ func (p Profile) GetAge() (age uint64) {
 	return age
 }
 
-var profileGuest = &Profile{Name: "guest"}
+var profileGuest = &Profile{
+	Name:     "guest",
+	Editable: true,
+}
 
 type Config struct {
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
