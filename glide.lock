@@ -1,5 +1,5 @@
-hash: 02574d3d5a94e8839201ef13dd04fe995627517c19b152dac9389e64f5216e51
-updated: 2020-01-15T00:01:29.484995+03:00
+hash: b09e4cfe2109600b4d4bc8a5fa4c1a538ea200ad768add4a866b83e1ac73fbcb
+updated: 2020-02-02T03:37:40.428882+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -88,7 +88,6 @@ imports:
 - name: github.com/go-ble/ble
   version: 147700f13610085f7387692cd6663a67c495ab87
   subpackages:
-  - darwin
   - linux
   - linux/adv
   - linux/att
@@ -112,7 +111,7 @@ imports:
 - name: github.com/go-openapi/loads
   version: 74628589c3b94e3526a842d24f46589980f5ab22
 - name: github.com/go-openapi/runtime
-  version: cc90213cf1bd091201a1f7ee230feeb7662c4a48
+  version: d1fdda849ebf3073a1ca42082639b9aec7e9b15c
   subpackages:
   - client
   - logger
@@ -126,9 +125,9 @@ imports:
 - name: github.com/go-openapi/strfmt
   version: 1940fb2f8aba2045ae5493bd64b76ad4af8b5856
 - name: github.com/go-openapi/swag
-  version: 8a84ec635f1b280a7062edeab609f0667a053248
+  version: 6a1eb9830f1c6b090dcd01cee6c3983604a2306f
 - name: github.com/go-openapi/validate
-  version: 08232b6614a50c4f62d1efa77e966421d327d3d3
+  version: 0ce7161a56d25c4021e6a4b5c18418ed46909b35
 - name: github.com/go-sql-driver/mysql
   version: 9181e3a86a19bacd63e68d43ae8b7b36320d8092
 - name: github.com/go-stack/stack
@@ -195,10 +194,14 @@ imports:
   - internal/sideinfo
 - name: github.com/hajimehoshi/oto
   version: 69b46d84898282d901717ca51635af708da6c086
+- name: github.com/hashicorp/errwrap
+  version: 8a6fb523712970c966eefc6b39ed2c5e74880354
+- name: github.com/hashicorp/go-multierror
+  version: 886a7fbe3eb1c874d46f623bfa70af45f425b3d1
 - name: github.com/hashicorp/go-version
   version: d40cf49b3a77bba84a7afdbd7f1dc295d114efb1
 - name: github.com/hashicorp/golang-lru
-  version: 7f827b33c0f158ec5dfbba01bb0b14a4541fd81d
+  version: 14eae340515388ca95aa8e7b86f0de668e981f54
   subpackages:
   - simplelru
 - name: github.com/heptiolabs/healthcheck
@@ -237,7 +240,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: 70c4391b21ea167322e8d953ba9499a84a1073ad
+  version: aa92032b107a32ce283b0d7bb2638347cb8e5a30
   subpackages:
   - components/annotations
   - components/config
@@ -337,7 +340,7 @@ imports:
 - name: github.com/mattn/go-colorable
   version: c742d6fb21c22a5bb6f768a683e6782e52fe0311
 - name: github.com/mattn/go-isatty
-  version: 219d1dc2592ebc2adbddc32cebf5ad273e81fa69
+  version: cb30d6282491c185f77d9bec5d25de1bb61a06bc
 - name: github.com/mattn/kinako
   version: 332c0a7e205a29536e672337a4bea6c7a96b04c1
   subpackages:
@@ -375,7 +378,7 @@ imports:
 - name: github.com/mitchellh/gox
   version: d8caaff5a9dc98f4cfa1fcce6e7265a04689f641
 - name: github.com/mitchellh/mapstructure
-  version: 3536a929edddb9a5b34bd6861dc4a9647cb459fe
+  version: 4632c4f49fb352596def0d4005bcbe7f38fe9008
 - name: github.com/mmcloughlin/geohash
   version: a84196f7a15d0ea8c5919f1ec0f15172fb518fba
 - name: github.com/mourner/suncalc-go
@@ -423,10 +426,6 @@ imports:
   version: 975f53781597ed779763b7b65566e74c4004d8de
 - name: github.com/PuerkitoBio/urlesc
   version: de5bf2ad457846296e2031421a34e2568e304e35
-- name: github.com/raff/goble
-  version: 72afc67d6a9914be785146adfc74be518bad22d2
-  subpackages:
-  - xpc
 - name: github.com/robbiet480/go.nut
   version: 246697bfaea771ddfe4ce0d754e6e2a7b8214f0f
 - name: github.com/rubenv/sql-migrate
@@ -506,6 +505,7 @@ imports:
   - internal/color
   - internal/exit
   - zapcore
+  - zaptest/observer
 - name: gobot.io/x/gobot
   version: c1d0e3ce485df0b45076d1d93b7d9240b770d5fc
 - name: gocv.io/x/gocv
@@ -700,7 +700,7 @@ imports:
 - name: gopkg.in/telegram-bot-api.v4
   version: 9860bdfd3a171ceafb6e1eafa163482a6ef92643
 - name: gopkg.in/yaml.v2
-  version: 1f64d6156d11335c3f22d9330b0ad14fc1e789ce
+  version: 53403b58ad1b561927d19068c655246f2db79d48
 - name: periph.io/x/periph
   version: f34a1b4e75c5935f6269723ae45eacd0aa1d1a2a
   subpackages:

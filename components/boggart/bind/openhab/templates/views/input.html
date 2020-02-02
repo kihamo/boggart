@@ -1,0 +1,43 @@
+{{ define "form" }}
+<form onSubmit="return false">
+    {{ if ne .item.Category "" }}
+    <img src="{{ .Request.URL.Path }}?action=icon&icon={{ .item.Category }}&state={{ .item.State }}&format=svg&anyFormat=true" />
+    {{ end }}
+
+    {{ if ne .item.Label "" }}
+    <label for="value">{{ .item.Label }}</label>
+    {{ end }}
+
+    {{ if and (eq .type "textarea") (ne .item.Type "DateTime") (ne .item.Type "Number") }}
+        {{ if eq .style "android" }}
+            <button onclick="sendValue()">{{ i18n "OK" . }}</button>
+        {{ end }}
+
+    <textarea
+        {{ if ne .rows "" }}
+            rows="{{ .rows }}"
+        {{ end }}
+
+        {{ if ne .style "android" }}
+            onChange="sendValue()"
+        {{ end }}
+
+            id="value" name="value">{{ if ne .item.State "NULL" }}{{ .item.State }}{{ end }}</textarea>
+    {{ else }}
+    <input
+        {{ if eq .item.Type "Number" }}
+            type="number"
+        {{ else if eq .item.Type "DateTime" }}
+            type="datetime-local"
+        {{ else }}
+            type="text"
+        {{ end }}
+
+        {{ if ne .item.State "NULL" }}
+            value="{{ .item.State }}"
+        {{ end }}
+
+            id="value" name="value" onChange="sendValue()" >
+    {{ end }}
+</form>
+{{ end }}

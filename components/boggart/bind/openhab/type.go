@@ -1,10 +1,12 @@
-package hilink
+package openhab
 
 import (
-	"github.com/kihamo/boggart/atomic"
+	"net/http"
+	"net/http/httputil"
+
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/protocols/swagger"
-	"github.com/kihamo/boggart/providers/hilink"
+	"github.com/kihamo/boggart/providers/openhab"
 )
 
 type Type struct {
@@ -15,10 +17,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
 	bind := &Bind{
-		config:                    config,
-		operator:                  atomic.NewString(),
-		limitInternetTrafficIndex: atomic.NewInt64(),
-		simStatus:                 atomic.NewUint32(),
+		config: config,
 	}
 
 	l := swagger.NewLogger(
@@ -29,7 +28,15 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 			bind.Logger().Debug(message)
 		})
 
-	bind.client = hilink.New(config.Address.Host, config.Debug, l)
+	bind.provider = openhab.New(&config.Address.URL, config.Debug, l)
+
+	bind.proxy = httputil.NewSingleHostReverseProxy(&config.Address.URL)
+	director := bind.proxy.Director
+
+	bind.proxy.Director = func(request *http.Request) {
+		request.Host = config.Address.Host
+		director(request)
+	}
 
 	return bind, nil
 }
