@@ -35,6 +35,14 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	bind.proxy.Director = func(request *http.Request) {
 		request.Host = config.Address.Host
+
+		if username := config.Address.User.Username(); username != "" {
+			password, _ := config.Address.User.Password()
+			if password != "" {
+				request.SetBasicAuth(username, password)
+			}
+		}
+
 		director(request)
 	}
 

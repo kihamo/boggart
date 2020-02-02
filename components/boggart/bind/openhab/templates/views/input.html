@@ -1,7 +1,7 @@
 {{ define "form" }}
 <form onSubmit="return false">
-    {{ if ne .item.Category "" }}
-    <img src="{{ .Request.URL.Path }}?action=icon&icon={{ .item.Category }}&state={{ .item.State }}&format=svg&anyFormat=true" />
+    {{ if ne .icon_url "" }}
+    <img src="{{ .icon_url }}" />
     {{ end }}
 
     {{ if ne .item.Label "" }}

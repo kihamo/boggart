@@ -67,12 +67,24 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			response.Payload.State = t.Format("2006-01-02T15:04:05")
 		}
 
+		var iconURL string
+
+		if response.Payload.Category != "" {
+			iconURL = r.URL().Path + "/?action=icon&icon=" + response.Payload.Category +
+				"&state=" + response.Payload.State + "&format=svg&anyFormat=true"
+
+			if key := r.URL().Query().Get(boggart.AccessKeyName); key != "" {
+				iconURL += "&" + boggart.AccessKeyName + "=" + key
+			}
+		}
+
 		t.RenderLayout(r.Context(), "input", "input", map[string]interface{}{
-			"item":  response.Payload,
-			"theme": r.URL().Query().Get("theme"),
-			"type":  r.URL().Query().Get("type"),
-			"rows":  r.URL().Query().Get("rows"),
-			"style": style,
+			"item":     response.Payload,
+			"theme":    r.URL().Query().Get("theme"),
+			"type":     r.URL().Query().Get("type"),
+			"rows":     r.URL().Query().Get("rows"),
+			"style":    style,
+			"icon_url": iconURL,
 		})
 		return
 
