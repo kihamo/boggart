@@ -47,6 +47,7 @@ type Config struct {
 	UpdaterInterval        time.Duration        `mapstructure:"updater_interval" yaml:"updater_interval"`
 	CaptureDuration        time.Duration        `mapstructure:"capture_interval" yaml:"capture_interval"`
 	TopicProfile           mqtt.Topic           `mapstructure:"topic_profile" yaml:"topic_profile"`
+	TopicProfileSettings   mqtt.Topic           `mapstructure:"topic_profile_settings" yaml:"topic_profile_settings"`
 	TopicProfileActivate   mqtt.Topic           `mapstructure:"topic_profile_activate" yaml:"topic_profile_activate"`
 	TopicDatetime          mqtt.Topic           `mapstructure:"topic_datetime" yaml:"topic_datetime"`
 	TopicWeight            mqtt.Topic           `mapstructure:"topic_weight" yaml:"topic_weight"`
@@ -81,6 +82,7 @@ func (Type) Config() interface{} {
 		CaptureDuration:        time.Second * 10,
 		TopicProfile:           prefix + "profile",
 		TopicProfileActivate:   prefixProfile + "activate",
+		TopicProfileSettings:   prefix + mqtt.Topic(profileGuest.Name) + "/settings",
 		TopicDatetime:          prefixProfile + "datetime",
 		TopicWeight:            prefixProfile + "weight",
 		TopicImpedance:         prefixProfile + "impedance",

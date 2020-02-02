@@ -30,6 +30,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	config.TopicProfile = config.TopicProfile.Format(mac)
 	config.TopicProfileActivate = config.TopicProfileActivate.Format(mac)
+	config.TopicProfileSettings = config.TopicProfileSettings.Format(mac)
 	config.TopicDatetime = config.TopicDatetime.Format(mac)
 	config.TopicWeight = config.TopicWeight.Format(mac)
 	config.TopicImpedance = config.TopicImpedance.Format(mac)
