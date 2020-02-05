@@ -6,6 +6,7 @@ import (
 )
 
 type Bind struct {
+	di.MetaBind
 	di.MQTTBind
 	di.WorkersBind
 	di.LoggerBind
@@ -13,4 +14,10 @@ type Bind struct {
 
 	config   *Config
 	provider *mercury.MercuryV1
+}
+
+func (b *Bind) Run() error {
+	b.Meta().SetSerialNumber(b.config.Address)
+
+	return nil
 }

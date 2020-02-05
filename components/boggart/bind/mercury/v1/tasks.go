@@ -24,7 +24,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		return err
 	}
 
-	sn := b.config.Address
+	sn := b.Meta().SerialNumber()
 	mTariff := metricTariff.With("serial_number", sn)
 
 	mTariff.With("tariff", "1").Set(float64(t1))
