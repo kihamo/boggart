@@ -2,12 +2,9 @@ package handlers
 
 import (
 	"bytes"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
-	"github.com/kihamo/go-workers"
-	listeners "github.com/kihamo/go-workers/manager"
 	"github.com/kihamo/shadow/components/dashboard"
 	"gopkg.in/yaml.v2"
 )
@@ -31,28 +28,15 @@ type managerHandlerDevice struct {
 	HasLogs           bool     `json:"has_logs"`
 }
 
-// easyjson:json
-type managerListener struct {
-	Id         string            `json:"id"`
-	Name       string            `json:"name"`
-	Events     map[string]string `json:"events"`
-	Fires      int64             `json:"fires"`
-	FiredFirst *time.Time        `json:"fire_first"`
-	FiredLast  *time.Time        `json:"fire_last"`
-}
-
-// TODO: rename to ManagerHandler
 type ManagerHandler struct {
 	dashboard.Handler
 
-	component        boggart.Component
-	listenersManager *listeners.ListenersManager
+	component boggart.Component
 }
 
-func NewManagerHandler(component boggart.Component, listenersManager *listeners.ListenersManager) *ManagerHandler {
+func NewManagerHandler(component boggart.Component) *ManagerHandler {
 	return &ManagerHandler{
-		component:        component,
-		listenersManager: listenersManager,
+		component: component,
 	}
 }
 
@@ -133,37 +117,6 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 
 			if bindSupport, ok := bindItem.Bind().(di.LoggerContainerSupport); ok {
 				item.HasLogs = len(bindSupport.LastRecords()) != 0
-			}
-
-			list = append(list, item)
-		}
-
-		entities.Data = list
-		entities.Total = len(list)
-
-	case "listeners":
-		list := make([]managerListener, 0)
-
-		for _, l := range h.listenersManager.Listeners() {
-			item := managerListener{
-				Id:     l.Id(),
-				Name:   l.Name(),
-				Events: make(map[string]string),
-			}
-
-			listener := h.listenersManager.GetById(l.Id())
-			if listener == nil {
-				continue
-			}
-
-			md := listener.Metadata()
-			item.Fires = md[workers.ListenerMetadataFires].(int64)
-			item.FiredFirst = md[workers.ListenerMetadataFirstFiredAt].(*time.Time)
-			item.FiredLast = md[workers.ListenerMetadataLastFireAt].(*time.Time)
-
-			events := md[workers.ListenerMetadataEvents].([]workers.Event)
-			for _, event := range events {
-				item.Events[event.Id()] = event.Name()
 			}
 
 			list = append(list, item)

@@ -206,60 +206,6 @@ $(document).ready(function () {
         }
     });
 
-    var tableListeners = $('#listeners table')
-        .DataTable({
-            language: {
-                url: '/dashboard/datatables/i18n.json'
-            },
-            ajax: {
-                url: '/boggart/manager/?entity=listeners',
-                dataSrc: 'data'
-            },
-            columns: [
-                {
-                    data: 'name'
-                },
-                {
-                    data: 'id'
-                },
-                {
-                    data: 'fires'
-                },
-                {
-                    data: 'fire_first',
-                    render: function (date) {
-                        if (!date) {
-                            return '';
-                        }
-
-                        return dateToString(date);
-                    }
-                },
-                {
-                    data: 'fire_last',
-                    render: function (date) {
-                        if (!date) {
-                            return '';
-                        }
-
-                        return dateToString(date);
-                    }
-                },
-                {
-                    data: 'events',
-                    render: function (data) {
-                        var content = '';
-
-                        for (var eventId in data) {
-                            content += '<span class="label label-info">' + data[eventId] + '</span> ';
-                        }
-
-                        return content;
-                    }
-                }
-            ]
-        });
-
     window.bindUnregister = function (id) {
         $.ajax({
             type: 'POST',
@@ -317,6 +263,5 @@ $(document).ready(function () {
 
     window.refreshTables = function () {
         tableDevices.ajax.reload();
-        tableListeners.ajax.reload();
     };
 });

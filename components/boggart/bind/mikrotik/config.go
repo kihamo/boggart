@@ -13,7 +13,6 @@ type Config struct {
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
 	Address                       string        `valid:"url,required"`
-	SyslogClient                  string        `valid:"url" mapstructure:"syslog_client" yaml:"syslog_client,omitempty"`
 	ClientsSyncInterval           time.Duration `mapstructure:"clients_sync_interval" yaml:"clients_sync_interval"`
 	UpdaterInterval               time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 	TopicWiFiMACState             mqtt.Topic    `mapstructure:"topic_wifi_mac_state" yaml:"topic_wifi_mac_state"`
@@ -26,6 +25,7 @@ type Config struct {
 	TopicPackagesLatestVersion    mqtt.Topic    `mapstructure:"topic_packages_latest_version" yaml:"topic_packages_latest_version"`
 	TopicFirmwareInstalledVersion mqtt.Topic    `mapstructure:"topic_firmware_installed_version" yaml:"topic_firmware_installed_version"`
 	TopicFirmwareLatestVersion    mqtt.Topic    `mapstructure:"topic_firmware_latest_version" yaml:"topic_firmware_latest_version"`
+	TopicSyslog                   mqtt.Topic    `mapstructure:"topic_syslog" yaml:"topic_syslog"`
 }
 
 func (t Type) Config() interface{} {

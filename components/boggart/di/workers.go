@@ -19,10 +19,6 @@ type WorkersHasTasks interface {
 	Tasks() []workers.Task
 }
 
-type WorkersHasListeners interface {
-	Listeners() []workers.ListenerWithEvents
-}
-
 type WorkersContainerSupport interface {
 	SetWorkers(*WorkersContainer)
 	Workers() *WorkersContainer
@@ -57,31 +53,14 @@ func (b *WorkersBind) Workers() *WorkersContainer {
 type WorkersContainer struct {
 	bind boggart.BindItem
 
-	cacheMutex     sync.Mutex
-	cacheTasks     []workers.Task
-	cacheListeners []workers.ListenerWithEvents
+	cacheMutex sync.Mutex
+	cacheTasks []workers.Task
 }
 
 func NewWorkersContainer(bind boggart.BindItem) *WorkersContainer {
 	return &WorkersContainer{
 		bind: bind,
 	}
-}
-
-func (c *WorkersContainer) Listeners() []workers.ListenerWithEvents {
-	has, ok := c.bind.Bind().(WorkersHasListeners)
-	if !ok {
-		return nil
-	}
-
-	c.cacheMutex.Lock()
-	defer c.cacheMutex.Unlock()
-
-	if c.cacheListeners == nil {
-		c.cacheListeners = has.Listeners()
-	}
-
-	return c.cacheListeners
 }
 
 func (c *WorkersContainer) Tasks() []workers.Task {

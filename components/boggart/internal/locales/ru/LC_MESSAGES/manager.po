@@ -67,9 +67,6 @@ msgstr "Включено"
 msgid "Disabled"
 msgstr "Выключено"
 
-msgid "Listeners"
-msgstr "Слушатели"
-
 msgid "Name"
 msgstr "Имя"
 

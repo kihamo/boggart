@@ -16,9 +16,7 @@ import (
 	_ "github.com/kihamo/boggart/components/boggart/bind/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
-	"github.com/kihamo/boggart/components/syslog"
 	w "github.com/kihamo/go-workers"
-	"github.com/kihamo/go-workers/manager"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/dashboard"
@@ -40,10 +38,9 @@ type Component struct {
 	mqtt        mqtt.Component
 	workers     workers.Component
 
-	routes           []dashboard.Route
-	listenersManager *manager.ListenersManager
-	binds            sync.Map
-	closing          int32
+	routes  []dashboard.Route
+	binds   sync.Map
+	closing int32
 }
 
 type FileYAML struct {
@@ -91,9 +88,6 @@ func (c *Component) Dependencies() []shadow.Dependency {
 			Required: true,
 		},
 		{
-			Name: syslog.ComponentName,
-		},
-		{
 			Name:     workers.ComponentName,
 			Required: true,
 		},
@@ -102,7 +96,6 @@ func (c *Component) Dependencies() []shadow.Dependency {
 
 func (c *Component) Init(a shadow.Application) error {
 	c.application = a
-	c.listenersManager = manager.NewListenersManager()
 
 	return nil
 }
@@ -394,11 +387,6 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 		bindSupport.SetWorkers(di.NewWorkersContainer(bindItem))
 
 		tasks = append(tasks, bindSupport.Workers().Tasks()...)
-
-		// register listeners
-		for _, listener := range bindSupport.Workers().Listeners() {
-			c.listenersManager.AddListener(listener)
-		}
 	}
 
 	// register tasks
@@ -460,11 +448,6 @@ func (c *Component) UnregisterBindByID(id string) error {
 		// remove tasks
 		for _, tsk := range bindSupport.Tasks() {
 			c.workers.RemoveTask(tsk)
-		}
-
-		// remove listeners
-		for _, listener := range bindSupport.Listeners() {
-			c.listenersManager.RemoveListener(listener)
 		}
 	}
 

@@ -79,39 +79,6 @@
     </div>
 </div>
 
-<div class="row" id="listeners">
-    <div class="x_panel" style="height:auto">
-        <div class="x_title">
-            <h2><i class="fa fa-deaf"></i> {{ i18n "Listeners" . }}</h2>
-            <ul class="nav navbar-right panel_toolbox">
-                <li><a class="collapse-link"><i class="fa fa-chevron-down"></i></a></li>
-                <li>
-                    <a href="javascript:refreshTables()">
-                        <i class="glyphicon glyphicon-refresh" title="{{ i18n "Refresh data" . }}" data-toggle="tooltip" data-placement="bottom"></i>
-                    </a>
-                </li>
-            </ul>
-            <div class="clearfix"></div>
-        </div>
-        <div class="x_content" style="display:none">
-            <div class="table-responsive">
-                <table class="table table-striped dt-responsive nowrap" style="width:100%">
-                    <thead>
-                    <tr>
-                        <th>{{ i18n "Name" . }}</th>
-                        <th>{{ i18n "ID" . }}</th>
-                        <th>{{ i18n "Fires" . }}</th>
-                        <th>{{ i18n "First fired" . }}</th>
-                        <th>{{ i18n "Last fired" . }}</th>
-                        <th>{{ i18n "Events" . }}</th>
-                    </tr>
-                    </thead>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="row" id="types">
     <div class="x_panel" style="height:auto">
         <div class="x_title">

@@ -4,7 +4,6 @@ package handlers
 
 import (
 	json "encoding/json"
-	time "time"
 
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
@@ -19,200 +18,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(in *jlexer.Lexer, out *managerListener) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeString()
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "id":
-			out.Id = string(in.String())
-		case "name":
-			out.Name = string(in.String())
-		case "events":
-			if in.IsNull() {
-				in.Skip()
-			} else {
-				in.Delim('{')
-				if !in.IsDelim('}') {
-					out.Events = make(map[string]string)
-				} else {
-					out.Events = nil
-				}
-				for !in.IsDelim('}') {
-					key := string(in.String())
-					in.WantColon()
-					var v1 string
-					v1 = string(in.String())
-					(out.Events)[key] = v1
-					in.WantComma()
-				}
-				in.Delim('}')
-			}
-		case "fires":
-			out.Fires = int64(in.Int64())
-		case "fire_first":
-			if in.IsNull() {
-				in.Skip()
-				out.FiredFirst = nil
-			} else {
-				if out.FiredFirst == nil {
-					out.FiredFirst = new(time.Time)
-				}
-				if data := in.Raw(); in.Ok() {
-					in.AddError((*out.FiredFirst).UnmarshalJSON(data))
-				}
-			}
-		case "fire_last":
-			if in.IsNull() {
-				in.Skip()
-				out.FiredLast = nil
-			} else {
-				if out.FiredLast == nil {
-					out.FiredLast = new(time.Time)
-				}
-				if data := in.Raw(); in.Ok() {
-					in.AddError((*out.FiredLast).UnmarshalJSON(data))
-				}
-			}
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(out *jwriter.Writer, in managerListener) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"id\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.String(string(in.Id))
-	}
-	{
-		const prefix string = ",\"name\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.String(string(in.Name))
-	}
-	{
-		const prefix string = ",\"events\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		if in.Events == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
-			out.RawString(`null`)
-		} else {
-			out.RawByte('{')
-			v2First := true
-			for v2Name, v2Value := range in.Events {
-				if v2First {
-					v2First = false
-				} else {
-					out.RawByte(',')
-				}
-				out.String(string(v2Name))
-				out.RawByte(':')
-				out.String(string(v2Value))
-			}
-			out.RawByte('}')
-		}
-	}
-	{
-		const prefix string = ",\"fires\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.Int64(int64(in.Fires))
-	}
-	{
-		const prefix string = ",\"fire_first\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		if in.FiredFirst == nil {
-			out.RawString("null")
-		} else {
-			out.Raw((*in.FiredFirst).MarshalJSON())
-		}
-	}
-	{
-		const prefix string = ",\"fire_last\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		if in.FiredLast == nil {
-			out.RawString("null")
-		} else {
-			out.Raw((*in.FiredLast).MarshalJSON())
-		}
-	}
-	out.RawByte('}')
-}
-
-// MarshalJSON supports json.Marshaler interface
-func (v managerListener) MarshalJSON() ([]byte, error) {
-	w := jwriter.Writer{}
-	easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(&w, v)
-	return w.Buffer.BuildBytes(), w.Error
-}
-
-// MarshalEasyJSON supports easyjson.Marshaler interface
-func (v managerListener) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(w, v)
-}
-
-// UnmarshalJSON supports json.Unmarshaler interface
-func (v *managerListener) UnmarshalJSON(data []byte) error {
-	r := jlexer.Lexer{Data: data}
-	easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(&r, v)
-	return r.Error()
-}
-
-// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *managerListener) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(l, v)
-}
-func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandlers1(in *jlexer.Lexer, out *managerHandlerDevice) {
+func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(in *jlexer.Lexer, out *managerHandlerDevice) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -259,9 +65,9 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 					out.Tasks = (out.Tasks)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v3 string
-					v3 = string(in.String())
-					out.Tasks = append(out.Tasks, v3)
+					var v1 string
+					v1 = string(in.String())
+					out.Tasks = append(out.Tasks, v1)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -282,9 +88,9 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 					out.MQTTPublishes = (out.MQTTPublishes)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v4 string
-					v4 = string(in.String())
-					out.MQTTPublishes = append(out.MQTTPublishes, v4)
+					var v2 string
+					v2 = string(in.String())
+					out.MQTTPublishes = append(out.MQTTPublishes, v2)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -305,9 +111,9 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 					out.MQTTSubscribers = (out.MQTTSubscribers)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v5 string
-					v5 = string(in.String())
-					out.MQTTSubscribers = append(out.MQTTSubscribers, v5)
+					var v3 string
+					v3 = string(in.String())
+					out.MQTTSubscribers = append(out.MQTTSubscribers, v3)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -328,9 +134,9 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 					out.Tags = (out.Tags)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v6 string
-					v6 = string(in.String())
-					out.Tags = append(out.Tags, v6)
+					var v4 string
+					v4 = string(in.String())
+					out.Tags = append(out.Tags, v4)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -355,7 +161,7 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 		in.Consumed()
 	}
 }
-func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandlers1(out *jwriter.Writer, in managerHandlerDevice) {
+func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(out *jwriter.Writer, in managerHandlerDevice) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -431,11 +237,11 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v7, v8 := range in.Tasks {
-				if v7 > 0 {
+			for v5, v6 := range in.Tasks {
+				if v5 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v8))
+				out.String(string(v6))
 			}
 			out.RawByte(']')
 		}
@@ -452,11 +258,11 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v9, v10 := range in.MQTTPublishes {
-				if v9 > 0 {
+			for v7, v8 := range in.MQTTPublishes {
+				if v7 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v10))
+				out.String(string(v8))
 			}
 			out.RawByte(']')
 		}
@@ -473,11 +279,11 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v11, v12 := range in.MQTTSubscribers {
-				if v11 > 0 {
+			for v9, v10 := range in.MQTTSubscribers {
+				if v9 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v12))
+				out.String(string(v10))
 			}
 			out.RawByte(']')
 		}
@@ -494,11 +300,11 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v13, v14 := range in.Tags {
-				if v13 > 0 {
+			for v11, v12 := range in.Tags {
+				if v11 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v14))
+				out.String(string(v12))
 			}
 			out.RawByte(']')
 		}
@@ -559,23 +365,23 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 // MarshalJSON supports json.Marshaler interface
 func (v managerHandlerDevice) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandlers1(&w, v)
+	easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v managerHandlerDevice) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandlers1(w, v)
+	easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *managerHandlerDevice) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandlers1(&r, v)
+	easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *managerHandlerDevice) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandlers1(l, v)
+	easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(l, v)
 }

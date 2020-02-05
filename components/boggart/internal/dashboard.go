@@ -34,7 +34,7 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 
 		c.routes = []dashboard.Route{
 			dashboard.RouteFromAssetFS(c),
-			dashboard.NewRoute("/"+c.Name()+"/manager/", handlers.NewManagerHandler(c, c.listenersManager)).
+			dashboard.NewRoute("/"+c.Name()+"/manager/", handlers.NewManagerHandler(c)).
 				WithMethods([]string{http.MethodGet}).
 				WithAuth(true),
 			dashboard.NewRoute("/"+c.Name()+"/bind/", bindHandler).
