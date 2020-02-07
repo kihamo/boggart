@@ -2,6 +2,7 @@ package hikvision
 
 import (
 	"context"
+	"errors"
 
 	"github.com/kihamo/boggart/providers/hikvision/client/content_manager"
 	"github.com/kihamo/boggart/providers/hikvision/client/ptz"
@@ -77,6 +78,21 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 	if sn == "" {
 		deviceInfo, err := b.client.System.GetSystemDeviceInfo(system.NewGetSystemDeviceInfoParamsWithContext(ctx), nil)
 
+		if err != nil {
+			return err
+		}
+
+		if deviceInfo.Payload.SerialNumber == "" {
+			return errors.New("device returns empty serial number")
+		}
+
+		if deviceInfo.Payload.MacAddress == "" {
+			return errors.New("device returns empty MAC address")
+		}
+
+		b.Meta().SetSerialNumber(deviceInfo.Payload.SerialNumber)
+
+		err = b.Meta().SetMACAsString(deviceInfo.Payload.MacAddress)
 		if err != nil {
 			return err
 		}

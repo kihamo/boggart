@@ -3,10 +3,12 @@ package di
 import (
 	"context"
 	"errors"
+	"strconv"
 	"sync"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/shadow/components/logging"
 )
 
 type MQTTHasSubscribers interface {
@@ -190,7 +192,15 @@ func (c *MQTTContainer) Subscribers() []mqtt.Subscriber {
 	defer c.cacheMutex.Unlock()
 
 	if c.cacheSubscribers == nil {
-		c.cacheSubscribers = has.MQTTSubscribers()
+		if bindSupport, ok := c.bind.Bind().(LoggerContainerSupport); ok {
+			logger := bindSupport.Logger()
+
+			for _, subscriber := range has.MQTTSubscribers() {
+				c.cacheSubscribers = append(c.cacheSubscribers, newMQTTWrapSubscriber(subscriber, logger))
+			}
+		} else {
+			c.cacheSubscribers = has.MQTTSubscribers()
+		}
 	}
 
 	return c.cacheSubscribers
@@ -210,4 +220,46 @@ func (c *MQTTContainer) Publishes() []mqtt.Topic {
 	}
 
 	return c.cachePublishes
+}
+
+type mqttWrapSubscriber struct {
+	original mqtt.Subscriber
+	logger   logging.Logger
+}
+
+func newMQTTWrapSubscriber(subscriber mqtt.Subscriber, logger logging.Logger) *mqttWrapSubscriber {
+	return &mqttWrapSubscriber{
+		original: subscriber,
+		logger:   logger,
+	}
+}
+
+func (t *mqttWrapSubscriber) Topic() mqtt.Topic {
+	return t.original.Topic()
+}
+
+func (t *mqttWrapSubscriber) QOS() byte {
+	return t.original.QOS()
+}
+
+func (t *mqttWrapSubscriber) Call(ctx context.Context, client mqtt.Component, message mqtt.Message) (err error) {
+	err = t.original.Call(ctx, client, message)
+	if err != nil {
+		logPayload := message.String()
+		if len(logPayload) > 100 {
+			logPayload = logPayload[:100]
+		}
+
+		t.logger.Error(
+			"Call MQTT subscriber failed",
+			"error", err.Error(),
+			"topic.subscribe", t.Topic(),
+			"topic.call", message.Topic(),
+			"qos", strconv.Itoa(int(t.QOS())),
+			"retained", strconv.FormatBool(message.Retained()),
+			"payload", logPayload,
+		)
+	}
+
+	return err
 }
