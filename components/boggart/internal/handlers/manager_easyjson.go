@@ -149,8 +149,8 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.HasReadinessProbe = bool(in.Bool())
 		case "has_liveness_probe":
 			out.HasLivenessProbe = bool(in.Bool())
-		case "has_logs":
-			out.HasLogs = bool(in.Bool())
+		case "logs_count":
+			out.LogsCount = int(in.Int())
 		default:
 			in.SkipRecursive()
 		}
@@ -350,14 +350,14 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 		out.Bool(bool(in.HasLivenessProbe))
 	}
 	{
-		const prefix string = ",\"has_logs\":"
+		const prefix string = ",\"logs_count\":"
 		if first {
 			first = false
 			out.RawString(prefix[1:])
 		} else {
 			out.RawString(prefix)
 		}
-		out.Bool(bool(in.HasLogs))
+		out.Int(int(in.LogsCount))
 	}
 	out.RawByte('}')
 }

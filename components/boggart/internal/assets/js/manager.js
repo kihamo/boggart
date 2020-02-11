@@ -76,9 +76,9 @@ $(document).ready(function () {
                                 '</a>';
                         }
 
-                        if (row.has_logs) {
+                        if (row.logs_count > 0) {
                             content += '<a href="/boggart/bind/' + row.id + '/logs/" target="_blank" class="btn btn-info btn-icon btn-xs">' +
-                                '<i class="fas fa-headset" title="Show last logs"></i>' +
+                                '<i class="fas fa-headset" title="Show last logs"></i> ' + row.logs_count +
                                 '</a>';
                         }
 

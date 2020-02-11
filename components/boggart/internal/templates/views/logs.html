@@ -8,7 +8,7 @@
             </div>
             <div class="x_content">
                 <div class="table-responsive">
-                    <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                    <table class="table table-striped datatable dt-responsive nowrap" id="logs" style="width:100%">
                         <thead>
                         <tr>
                             <th>{{ i18n "Time" . }}</th>
@@ -67,4 +67,10 @@
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive/js/dataTables.responsive.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/highlightjs/js/highlight.pack.min.js" false) }}
+
+    <script type="application/javascript">
+        $(document).ready(function () {
+            $('#logs').DataTable().order([0, 'desc']).draw();
+        });
+    </script>
 {{ end }}

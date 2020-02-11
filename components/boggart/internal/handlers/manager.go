@@ -25,7 +25,7 @@ type managerHandlerDevice struct {
 	HasWidget         bool     `json:"has_widget"`
 	HasReadinessProbe bool     `json:"has_readiness_probe"`
 	HasLivenessProbe  bool     `json:"has_liveness_probe"`
-	HasLogs           bool     `json:"has_logs"`
+	LogsCount         int      `json:"logs_count"`
 }
 
 type ManagerHandler struct {
@@ -116,7 +116,7 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 			}
 
 			if bindSupport, ok := bindItem.Bind().(di.LoggerContainerSupport); ok {
-				item.HasLogs = len(bindSupport.LastRecords()) != 0
+				item.LogsCount = len(bindSupport.LastRecords())
 			}
 
 			list = append(list, item)
