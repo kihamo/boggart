@@ -26,6 +26,10 @@ func PingProbe(ctx context.Context, addr string) error {
 	}
 
 	pinger.Timeout = time.Until(deadline)
+	if pinger.Timeout <= 0 {
+		return errors.New("timeout value for pinger must be greater than zero")
+	}
+
 	if pinger.Timeout > overhead {
 		pinger.Timeout -= overhead
 	}
