@@ -1,5 +1,5 @@
-hash: b09e4cfe2109600b4d4bc8a5fa4c1a538ea200ad768add4a866b83e1ac73fbcb
-updated: 2020-02-02T03:37:40.428882+03:00
+hash: d52d074b034235f70c679eb2e0fdcffb5bbab38c8cad10ae54bf8a3598574364
+updated: 2020-02-16T12:23:25.159809+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -111,7 +111,7 @@ imports:
 - name: github.com/go-openapi/loads
   version: 74628589c3b94e3526a842d24f46589980f5ab22
 - name: github.com/go-openapi/runtime
-  version: d1fdda849ebf3073a1ca42082639b9aec7e9b15c
+  version: d5a301537e5208a4b0c720f36ba75c0fa802c7df
   subpackages:
   - client
   - logger
@@ -121,7 +121,7 @@ imports:
   - middleware/untyped
   - security
 - name: github.com/go-openapi/spec
-  version: 772572fd19ebcc983369e53bfaed4bde2077fe0c
+  version: dce82e4362c708e636da7feb0831bd29efb5cd97
 - name: github.com/go-openapi/strfmt
   version: 1940fb2f8aba2045ae5493bd64b76ad4af8b5856
 - name: github.com/go-openapi/swag
@@ -240,7 +240,7 @@ imports:
 - name: github.com/kihamo/gotypes
   version: c1b2b85a41fe44ea31cb3f713b175448cfb08b84
 - name: github.com/kihamo/shadow
-  version: aa92032b107a32ce283b0d7bb2638347cb8e5a30
+  version: 281579e0fd95729f66afa63b9c2032f0965075b5
   subpackages:
   - components/annotations
   - components/config
