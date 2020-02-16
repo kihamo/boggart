@@ -223,44 +223,54 @@ func (b *Bind) taskSystemUpdater(ctx context.Context) (err error) {
 
 	// signal
 	if response, e := b.client.Device.GetDeviceSignal(device.NewGetDeviceSignalParamsWithContext(ctx)); e == nil {
-		if val, e := strconv.ParseInt(strings.TrimRight(response.Payload.RSSI, "dBm"), 10, 64); e == nil {
-			metricSignalRSSI.With("serial_number", sn).Set(float64(val))
+		const dBmPostfix = "dBm"
 
-			if e = b.MQTT().PublishAsync(ctx, b.config.TopicSignalRSSI.Format(sn), val); e != nil {
+		if raw := strings.TrimRight(response.Payload.RSSI, dBmPostfix); raw != "" {
+			if val, e := strconv.ParseInt(raw, 10, 64); e == nil {
+				metricSignalRSSI.With("serial_number", sn).Set(float64(val))
+
+				if e = b.MQTT().PublishAsync(ctx, b.config.TopicSignalRSSI.Format(sn), val); e != nil {
+					err = multierr.Append(err, e)
+				}
+			} else {
 				err = multierr.Append(err, e)
 			}
-		} else {
-			err = multierr.Append(err, e)
 		}
 
-		if val, e := strconv.ParseInt(strings.TrimRight(response.Payload.RSRP, "dBm"), 10, 64); e == nil {
-			metricSignalRSRP.With("serial_number", sn).Set(float64(val))
+		if raw := strings.TrimRight(response.Payload.RSRP, dBmPostfix); raw != "" {
+			if val, e := strconv.ParseInt(raw, 10, 64); e == nil {
+				metricSignalRSRP.With("serial_number", sn).Set(float64(val))
 
-			if e = b.MQTT().PublishAsync(ctx, b.config.TopicSignalRSRP.Format(sn), val); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, b.config.TopicSignalRSRP.Format(sn), val); e != nil {
+					err = multierr.Append(err, e)
+				}
+			} else {
 				err = multierr.Append(err, e)
 			}
-		} else {
-			err = multierr.Append(err, e)
 		}
 
-		if val, e := strconv.ParseInt(strings.TrimRight(response.Payload.RSRQ, "dBm"), 10, 64); e == nil {
-			metricSignalRSRQ.With("serial_number", sn).Set(float64(val))
+		if raw := strings.TrimRight(response.Payload.RSRQ, dBmPostfix); raw != "" {
+			if val, e := strconv.ParseInt(raw, 10, 64); e == nil {
+				metricSignalRSRQ.With("serial_number", sn).Set(float64(val))
 
-			if e = b.MQTT().PublishAsync(ctx, b.config.TopicSignalRSRQ.Format(sn), val); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, b.config.TopicSignalRSRQ.Format(sn), val); e != nil {
+					err = multierr.Append(err, e)
+				}
+			} else {
 				err = multierr.Append(err, e)
 			}
-		} else {
-			err = multierr.Append(err, e)
 		}
 
-		if val, e := strconv.ParseInt(strings.TrimRight(response.Payload.SINR, "dBm"), 10, 64); e == nil {
-			metricSignalSINR.With("serial_number", sn).Set(float64(val))
+		if raw := strings.TrimRight(response.Payload.SINR, dBmPostfix); raw != "" {
+			if val, e := strconv.ParseInt(raw, 10, 64); e == nil {
+				metricSignalSINR.With("serial_number", sn).Set(float64(val))
 
-			if e = b.MQTT().PublishAsync(ctx, b.config.TopicSignalSINR.Format(sn), val); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, b.config.TopicSignalSINR.Format(sn), val); e != nil {
+					err = multierr.Append(err, e)
+				}
+			} else {
 				err = multierr.Append(err, e)
 			}
-		} else {
-			err = multierr.Append(err, e)
 		}
 	} else {
 		err = multierr.Append(err, e)
