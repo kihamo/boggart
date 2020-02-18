@@ -211,6 +211,7 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 						b.Logger().Error("Publish message to MQTT failed",
 							"topic", mqttTopic,
 							"message", u.Message.Text,
+							"error", err.Error(),
 						)
 					} else {
 						b.Logger().Debug("Receive message",
@@ -239,14 +240,15 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 					b.Logger().Error("Bot if offline",
 						"file", fileID,
 					)
-					continue
+					return
 				}
 
-				link, err := b.client.GetFileDirectURL(fileID)
+				link, err := bot.GetFileDirectURL(fileID)
 				if err != nil {
 					b.Logger().Error("Get file by direct url failed",
 						"error", err.Error(),
 						"file", fileID,
+						"error", err.Error(),
 					)
 					continue
 				}
@@ -255,6 +257,7 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 					b.Logger().Error("Publish link to MQTT failed",
 						"topic", mqttTopic,
 						"link", link,
+						"error", err.Error(),
 					)
 				}
 
@@ -266,12 +269,12 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 }
 
 func (b *Bind) Close() (err error) {
+	close(b.done)
+
 	bot := b.bot()
 	if bot != nil {
 		bot.StopReceivingUpdates()
 	}
-
-	close(b.done)
 
 	return nil
 }
