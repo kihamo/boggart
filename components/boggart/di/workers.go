@@ -122,6 +122,10 @@ func newWorkersWrapTask(tsk workers.Task, logger logging.Logger) *workersWrapTas
 }
 
 // обертки воркеров кривоватые, поэтому хачим синхронизацию состояния
+func (t *workersWrapTask) Id() string {
+	return t.original.Id()
+}
+
 func (t *workersWrapTask) sync() {
 	t.SetName(t.original.Name())
 	t.SetPriority(t.original.Priority())
