@@ -29,18 +29,20 @@
     <div class="x_panel">
         <div class="x_content">
             <div class="table-responsive">
-                <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                <table class="table table-striped datatable dt-responsive nowrap" id="items" style="width:100%">
                     <thead>
                     <tr>
                         <th>{{ i18n "Topic" . }}</th>
+                        <th>{{ i18n "Datetime" . }}</th>
                         <th>{{ i18n "Payload" . }}</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {{ range $topic, $payload := .payloads }}
+                    {{ range $i, $item := .cache_items }}
                     <tr>
-                        <td>{{ $topic }}</td>
-                        <td><pre><code>{{ printf "%s" $payload|raw }}</code></pre></td>
+                        <td>{{ $item.Topic.String }}</td>
+                        <td><script type="application/javascript">document.write(dateToString('{{ $item.Datetime.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                        <td><pre><code>{{ printf "%s" $item.Payload|raw }}</code></pre></td>
                     </tr>
                     {{ end }}
                     </tbody>
@@ -61,4 +63,10 @@
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive/js/dataTables.responsive.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
+
+    <script type="application/javascript">
+        $(document).ready(function () {
+            $('#items').DataTable().order([1, 'asc']).draw();
+        });
+    </script>
 {{ end }}

@@ -28,7 +28,7 @@ type Component interface {
 	Subscriptions() []*Subscription
 
 	OnConnectHandlerAdd(handler OnConnectHandler)
-	PayloadsCache() map[Topic][]byte
+	CacheItems() []CacheItem
 }
 
 type Message interface {

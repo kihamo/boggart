@@ -321,19 +321,21 @@ func (h *BindHandler) actionMQTT(w *dashboard.Response, r *dashboard.Request, b 
 	type itemView struct {
 		Topic      string
 		CacheTopic string
+		Datetime   time.Time
 		Payload    interface{}
 	}
 
 	items := make([]itemView, 0)
 	publishes := bindSupport.MQTT().Publishes()
 
-	for topic, payload := range h.componentMQTT.PayloadsCache() {
-		for _, item := range publishes {
-			if item.IsInclude(topic) {
+	for _, item := range h.componentMQTT.CacheItems() {
+		for _, publish := range publishes {
+			if publish.IsInclude(item.Topic()) {
 				items = append(items, itemView{
-					Topic:      item.String(),
-					CacheTopic: topic.String(),
-					Payload:    payload,
+					Topic:      publish.String(),
+					CacheTopic: item.Topic().String(),
+					Datetime:   item.Datetime(),
+					Payload:    item.Payload(),
 				})
 
 				break

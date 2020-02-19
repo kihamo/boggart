@@ -358,7 +358,7 @@ func (c *Component) doPublish(ctx context.Context, topic mqtt.Topic, qos byte, r
 	client := c.Client()
 	if client != nil {
 		if cache {
-			if val, ok := c.payloadCache.Get(topic); ok && bytes.Compare(val, payloadConverted) == 0 {
+			if val, ok := c.payloadCache.Get(topic); ok && bytes.Compare(val.Payload(), payloadConverted) == 0 {
 				metricPayloadCacheHit.Inc()
 				return nil
 			} else {
@@ -596,7 +596,7 @@ func (c *Component) OnConnectHandlerAdd(handler mqtt.OnConnectHandler) {
 	c.mutex.Unlock()
 }
 
-func (c *Component) PayloadsCache() map[mqtt.Topic][]byte {
+func (c *Component) CacheItems() []mqtt.CacheItem {
 	return c.payloadCache.Payloads()
 }
 

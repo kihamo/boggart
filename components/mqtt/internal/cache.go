@@ -2,14 +2,41 @@ package internal
 
 import (
 	"sync"
+	"time"
 
 	"github.com/hashicorp/golang-lru"
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
+type cacheItem struct {
+	datetime time.Time
+	topic    mqtt.Topic
+	payload  []byte
+}
+
 type cache struct {
 	arc  *lru.ARCCache
 	lock sync.RWMutex
+}
+
+func newCacheItem(topic mqtt.Topic, payload []byte) *cacheItem {
+	return &cacheItem{
+		datetime: time.Now(),
+		topic:    topic,
+		payload:  payload,
+	}
+}
+
+func (i *cacheItem) Payload() []byte {
+	return i.payload
+}
+
+func (i *cacheItem) Datetime() time.Time {
+	return i.datetime
+}
+
+func (i *cacheItem) Topic() mqtt.Topic {
+	return i.topic
 }
 
 func newCache(size int) (*cache, error) {
@@ -22,34 +49,34 @@ func newCache(size int) (*cache, error) {
 	return c, nil
 }
 
-func (c *cache) Get(topic mqtt.Topic) (value []byte, ok bool) {
+func (c *cache) Get(topic mqtt.Topic) (item mqtt.CacheItem, ok bool) {
 	c.lock.RLock()
 	cached, ok := c.arc.Get(topic.String())
 	c.lock.RUnlock()
 
 	if ok {
-		value = cached.([]byte)
+		item = cached.(*cacheItem)
 	}
 
-	return value, ok
+	return item, ok
 }
 
 func (c *cache) Add(topic mqtt.Topic, payload []byte) {
 	c.lock.RLock()
-	c.arc.Add(topic.String(), payload)
+	c.arc.Add(topic.String(), newCacheItem(topic, payload))
 	c.lock.RUnlock()
 }
 
-func (c *cache) Payloads() map[mqtt.Topic][]byte {
+func (c *cache) Payloads() []mqtt.CacheItem {
 	c.lock.RLock()
 	cache := c.arc
 	c.lock.RUnlock()
 
 	keys := cache.Keys()
-	result := make(map[mqtt.Topic][]byte, len(keys))
+	result := make([]mqtt.CacheItem, 0, len(keys))
 	for _, k := range keys {
 		if v, ok := cache.Get(k); ok {
-			result[mqtt.Topic(k.(string))] = v.([]byte)
+			result = append(result, v.(*cacheItem))
 		}
 	}
 

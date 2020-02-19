@@ -22,6 +22,6 @@ func (h *CacheHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	}
 
 	h.Render(r.Context(), "cache", map[string]interface{}{
-		"payloads": h.PayloadCache.Payloads(),
+		"cache_items": h.PayloadCache.Payloads(),
 	})
 }

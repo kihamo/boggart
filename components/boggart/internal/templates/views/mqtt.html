@@ -13,6 +13,7 @@
                         <tr>
                             <th>{{ i18n "Topic" . }}</th>
                             <th>{{ i18n "Topic in cache" . }}</th>
+                            <th>{{ i18n "Datetime" . }}</th>
                             <th>{{ i18n "Payload" . }}</th>
                         </tr>
                         </thead>
@@ -21,6 +22,7 @@
                         <tr>
                             <td>{{ $item.Topic }}</td>
                             <td>{{ $item.CacheTopic }}</td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ $item.Datetime.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
                             <td><pre><code>{{ printf "%s" $item.Payload|raw }}</code></pre></td>
                         </tr>
                         {{ end }}
@@ -46,7 +48,7 @@
 
     <script type="application/javascript">
         $(document).ready(function () {
-            $('#items').DataTable().order([1, 'asc']).draw();
+            $('#items').DataTable().order([2, 'asc']).draw();
         });
     </script>
 {{ end }}
