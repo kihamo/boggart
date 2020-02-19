@@ -7,7 +7,7 @@ import (
 type IPARP struct {
 	Id         string `json:".id"`
 	Address    string `json:"address"`
-	MacAddress string `json:"mac-address"`
+	MacAddress string `json:"mac-address,omitempty"`
 	Interface  string `json:"interface"`
 	Published  bool   `json:"published"`
 	Invalid    bool   `json:"invalid"`

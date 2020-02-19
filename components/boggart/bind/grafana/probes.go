@@ -2,7 +2,7 @@ package grafana
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	"github.com/kihamo/boggart/providers/grafana/client/other"
 )
@@ -14,7 +14,7 @@ func (b *Bind) ReadinessProbe(ctx context.Context) error {
 	}
 
 	if response.Payload.Database != "ok" {
-		return fmt.Errorf("databse checker returns %s", response.Payload.Database)
+		return errors.New("databse checker returns " + response.Payload.Database)
 	}
 
 	return nil

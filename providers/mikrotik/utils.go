@@ -4,7 +4,7 @@ func GetNameByMac(mac string, arp []IPARP, dns []IPDNSStatic, leases []IPDHCPSer
 	var arpRow IPARP
 
 	for _, row := range arp {
-		if row.MacAddress == mac {
+		if row.MacAddress != "" && row.MacAddress == mac {
 			for _, static := range dns {
 				if static.Address == row.Address && !static.Disabled {
 					name = static.Name

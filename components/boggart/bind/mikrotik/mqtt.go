@@ -93,7 +93,7 @@ func (b *Bind) callbackMQTTSyslog(ctx context.Context, _ mqtt.Component, message
 
 		check := wifiClientRegexp.FindStringSubmatch(content.(string))
 		if len(check) < 4 {
-			return errors.New("wifi client not found in content")
+			return nil
 		}
 
 		if _, err := net.ParseMAC(check[1]); err != nil {
@@ -126,7 +126,7 @@ func (b *Bind) callbackMQTTSyslog(ctx context.Context, _ mqtt.Component, message
 
 		check := vpnClientRegexp.FindStringSubmatch(content.(string))
 		if len(check) < 2 {
-			return errors.New("vpn client not found in content")
+			return nil
 		}
 
 		login := mqtt.NameReplace(check[1])

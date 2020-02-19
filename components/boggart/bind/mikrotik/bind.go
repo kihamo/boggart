@@ -79,14 +79,14 @@ func (b *Bind) Mac(ctx context.Context, mac string) (*Mac, error) {
 
 	if table, err := b.provider.IPARP(ctx); err == nil {
 		for _, row := range table {
-			if row.MacAddress == mac {
+			if row.MacAddress != "" && row.MacAddress == mac {
 				info.ARP.IP = row.Address
 				info.ARP.Comment = row.Comment
 				break
 			}
 		}
 	} else {
-		return nil, err
+		return nil, fmt.Errorf("IPARP failed: %w", err)
 	}
 
 	if leases, err := b.provider.IPDHCPServerLease(ctx); err == nil {
@@ -97,7 +97,7 @@ func (b *Bind) Mac(ctx context.Context, mac string) (*Mac, error) {
 			}
 		}
 	} else {
-		return nil, err
+		return nil, fmt.Errorf("IPDHCPServerLease failed: %w", err)
 	}
 
 	return info, nil
@@ -106,7 +106,7 @@ func (b *Bind) Mac(ctx context.Context, mac string) (*Mac, error) {
 func (b *Bind) updateWiFiClient(ctx context.Context) {
 	connections, err := b.provider.InterfaceWirelessRegistrationTable(ctx)
 	if err != nil {
-		// TODO: log
+		b.Logger().Error("Update WiFi client failed", "error", err.Error())
 		return
 	}
 
@@ -116,7 +116,10 @@ func (b *Bind) updateWiFiClient(ctx context.Context) {
 	for _, connection := range connections {
 		mac, err := b.Mac(ctx, connection.MacAddress)
 		if err != nil {
-			fmt.Println(err.Error())
+			b.Logger().Error("Get MAC failed",
+				"error", err.Error(),
+				"mac", connection.MacAddress,
+			)
 			return
 		}
 
@@ -144,7 +147,7 @@ func (b *Bind) updateWiFiClient(ctx context.Context) {
 func (b *Bind) updateVPNClient(ctx context.Context) {
 	connections, err := b.provider.PPPActive(ctx)
 	if err != nil {
-		// TODO: log
+		b.Logger().Error("Update VPN client failed", "error", err.Error())
 		return
 	}
 
