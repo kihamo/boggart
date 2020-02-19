@@ -8,6 +8,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/shadow/components/dashboard"
 	"gopkg.in/yaml.v2"
 )
@@ -23,12 +24,14 @@ type BindYAML struct {
 type BindHandler struct {
 	dashboard.Handler
 
-	component boggart.Component
+	componentBoggart boggart.Component
+	componentMQTT    mqtt.Component
 }
 
-func NewBindHandler(component boggart.Component) *BindHandler {
+func NewBindHandler(b boggart.Component, m mqtt.Component) *BindHandler {
 	return &BindHandler{
-		component: component,
+		componentBoggart: b,
+		componentMQTT:    m,
 	}
 }
 
@@ -39,7 +42,7 @@ func (h *BindHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 	id := q.Get(":id")
 	if id != "" {
-		bindItem = h.component.Bind(id)
+		bindItem = h.componentBoggart.Bind(id)
 		if bindItem == nil {
 			h.NotFound(w, r)
 			return
@@ -61,6 +64,10 @@ func (h *BindHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 	case "logs":
 		h.actionLogs(w, r, bindItem)
+		return
+
+	case "mqtt":
+		h.actionMQTT(w, r, bindItem)
 		return
 
 	case "":
@@ -113,16 +120,16 @@ func (h *BindHandler) registerByYAML(oldID string, code []byte) (bindItem boggar
 	}
 
 	for _, id := range removeIDs {
-		if bindExists := h.component.Bind(id); bindExists != nil {
+		if bindExists := h.componentBoggart.Bind(id); bindExists != nil {
 			upgraded = true
 
-			if err := h.component.UnregisterBindByID(id); err != nil {
+			if err := h.componentBoggart.UnregisterBindByID(id); err != nil {
 				return nil, false, err
 			}
 		}
 	}
 
-	bindItem, err = h.component.RegisterBind(bindParsed.ID, bind, bindParsed.Type, bindParsed.Description, bindParsed.Tags, cfg)
+	bindItem, err = h.componentBoggart.RegisterBind(bindParsed.ID, bind, bindParsed.Type, bindParsed.Description, bindParsed.Tags, cfg)
 
 	return bindItem, upgraded, err
 }
@@ -199,7 +206,7 @@ func (h *BindHandler) actionDelete(w *dashboard.Response, r *dashboard.Request, 
 		return
 	}
 
-	err := h.component.UnregisterBindByID(b.ID())
+	err := h.componentBoggart.UnregisterBindByID(b.ID())
 
 	type response struct {
 		Result  string `json:"result"`
@@ -301,5 +308,41 @@ func (h *BindHandler) actionLogs(w *dashboard.Response, r *dashboard.Request, b 
 	h.Render(r.Context(), "logs", map[string]interface{}{
 		"bind": b,
 		"logs": response,
+	})
+}
+
+func (h *BindHandler) actionMQTT(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
+	bindSupport, ok := b.Bind().(di.MQTTContainerSupport)
+	if !ok {
+		h.NotFound(w, r)
+		return
+	}
+
+	type itemView struct {
+		Topic      string
+		CacheTopic string
+		Payload    interface{}
+	}
+
+	items := make([]itemView, 0)
+	publishes := bindSupport.MQTT().Publishes()
+
+	for topic, payload := range h.componentMQTT.PayloadsCache() {
+		for _, item := range publishes {
+			if item.IsInclude(topic) {
+				items = append(items, itemView{
+					Topic:      item.String(),
+					CacheTopic: topic.String(),
+					Payload:    payload,
+				})
+
+				break
+			}
+		}
+	}
+
+	h.Render(r.Context(), "mqtt", map[string]interface{}{
+		"bind":  b,
+		"items": items,
 	})
 }

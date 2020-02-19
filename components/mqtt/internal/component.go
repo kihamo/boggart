@@ -596,6 +596,10 @@ func (c *Component) OnConnectHandlerAdd(handler mqtt.OnConnectHandler) {
 	c.mutex.Unlock()
 }
 
+func (c *Component) PayloadsCache() map[mqtt.Topic][]byte {
+	return c.payloadCache.Payloads()
+}
+
 func (c *Component) convertPayload(payload interface{}) []byte {
 	switch value := payload.(type) {
 	case nil:

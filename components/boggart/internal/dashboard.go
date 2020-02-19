@@ -30,7 +30,7 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 	if c.routes == nil {
 		<-c.application.ReadyComponent(c.Name())
 
-		bindHandler := handlers.NewBindHandler(c)
+		bindHandler := handlers.NewBindHandler(c, c.mqtt)
 
 		c.routes = []dashboard.Route{
 			dashboard.RouteFromAssetFS(c),
