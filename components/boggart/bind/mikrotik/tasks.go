@@ -38,63 +38,11 @@ func (b *Bind) taskClientsSync(ctx context.Context) error {
 	return nil
 }
 
-func (b *Bind) taskUpdater(ctx context.Context) error {
+func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 	sn := b.Meta().SerialNumber()
 
-	arp, err := b.provider.IPARP(ctx)
-	if err != nil && !mikrotik.IsEmptyResponse(err) {
-		return err
-	}
-
-	dns, err := b.provider.IPDNSStatic(ctx)
-	if err != nil && !mikrotik.IsEmptyResponse(err) {
-		return err
-	}
-
-	leases, err := b.provider.IPDHCPServerLease(ctx)
-	if err != nil && !mikrotik.IsEmptyResponse(err) {
-		return err
-	}
-
-	// Wifi clients
-	clients, err := b.provider.InterfaceWirelessRegistrationTable(ctx)
-	if err == nil {
-		metricWifiClients.With("serial_number", sn).Set(float64(len(clients)))
-
-		for _, client := range clients {
-			bytes := strings.Split(client.Bytes, ",")
-			if len(bytes) != 2 {
-				return err
-			}
-
-			name := mikrotik.GetNameByMac(client.MacAddress, arp, dns, leases)
-
-			sent, err := strconv.ParseFloat(bytes[0], 64)
-			if err != nil {
-				return err
-			}
-
-			received, err := strconv.ParseFloat(bytes[1], 64)
-			if err == nil {
-				metricTrafficReceivedBytes.With("serial_number", sn).With(
-					"interface", client.Interface,
-					"mac", client.MacAddress,
-					"name", name).Set(received)
-				metricTrafficSentBytes.With("serial_number", sn).With(
-					"interface", client.Interface,
-					"mac", client.MacAddress,
-					"name", name).Set(sent)
-			} else if !mikrotik.IsEmptyResponse(err) {
-				return err
-			}
-		}
-	} else if !mikrotik.IsEmptyResponse(err) {
-		return err
-	}
-
 	// Ports on mikrotik
-	stats, err := b.provider.InterfaceStats(ctx)
-	if err == nil {
+	if stats, e := b.provider.InterfaceStats(ctx); e == nil {
 		for _, stat := range stats {
 			metricTrafficReceivedBytes.With("serial_number", sn).With(
 				"interface", stat.Name,
@@ -103,23 +51,21 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 				"interface", stat.Name,
 				"mac", stat.MacAddress).Set(float64(stat.TXByte))
 		}
-	} else if !mikrotik.IsEmptyResponse(err) {
-		return err
+	} else if !mikrotik.IsEmptyResponse(e) {
+		err = multierr.Append(err, e)
 	}
 
-	resource, err := b.provider.SystemResource(ctx)
-	if err == nil {
+	if resource, e := b.provider.SystemResource(ctx); e == nil {
 		metricCPULoad.With("serial_number", sn).Set(float64(resource.CPULoad))
 		metricMemoryAvailable.With("serial_number", sn).Set(float64(resource.FreeMemory))
 		metricMemoryUsage.With("serial_number", sn).Set(float64(resource.TotalMemory - resource.FreeMemory))
 		metricStorageAvailable.With("serial_number", sn).Set(float64(resource.FreeHDDSpace))
 		metricStorageUsage.With("serial_number", sn).Set(float64(resource.TotalHDDSpace - resource.FreeHDDSpace))
-	} else if !mikrotik.IsEmptyResponse(err) {
-		return err
+	} else if !mikrotik.IsEmptyResponse(e) {
+		err = multierr.Append(err, e)
 	}
 
-	disks, err := b.provider.SystemDisk(ctx)
-	if err == nil {
+	if disks, e := b.provider.SystemDisk(ctx); e == nil {
 		for _, disk := range disks {
 			metricDiskUsage.With("serial_number", sn).With(
 				"name", disk.Name,
@@ -130,16 +76,15 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 				"label", disk.Label,
 			).Set(float64(disk.Free))
 		}
-	} else if !mikrotik.IsEmptyResponse(err) {
-		return err
+	} else if !mikrotik.IsEmptyResponse(e) {
+		err = multierr.Append(err, e)
 	}
 
-	health, err := b.provider.SystemHealth(ctx)
-	if err == nil {
+	if health, e := b.provider.SystemHealth(ctx); e == nil {
 		metricVoltage.With("serial_number", sn).Set(health.Voltage)
 		metricTemperature.With("serial_number", sn).Set(float64(health.Temperature))
-	} else if !mikrotik.IsEmptyResponse(err) {
-		return err
+	} else if !mikrotik.IsEmptyResponse(e) {
+		err = multierr.Append(err, e)
 	}
 
 	// check upgrade
@@ -171,5 +116,64 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		err = multierr.Append(err, e)
 	}
 
-	return nil
+	// Wifi clients
+	if clients, e := b.provider.InterfaceWirelessRegistrationTable(ctx); e == nil {
+		metricWifiClients.With("serial_number", sn).Set(float64(len(clients)))
+
+		var hasError bool
+
+		arp, e := b.provider.IPARP(ctx)
+		if e != nil && !mikrotik.IsEmptyResponse(e) {
+			err = multierr.Append(err, e)
+			hasError = true
+		}
+
+		dns, e := b.provider.IPDNSStatic(ctx)
+		if e != nil && !mikrotik.IsEmptyResponse(e) {
+			err = multierr.Append(err, e)
+			hasError = true
+		}
+
+		leases, e := b.provider.IPDHCPServerLease(ctx)
+		if e != nil && !mikrotik.IsEmptyResponse(e) {
+			err = multierr.Append(err, e)
+			hasError = true
+		}
+
+		if !hasError {
+			for _, client := range clients {
+				bytes := strings.Split(client.Bytes, ",")
+				if len(bytes) != 2 {
+					continue
+				}
+
+				name := mikrotik.GetNameByMac(client.MacAddress, arp, dns, leases)
+
+				sent, e := strconv.ParseFloat(bytes[0], 64)
+				if e != nil {
+					err = multierr.Append(err, e)
+					continue
+				}
+
+				received, e := strconv.ParseFloat(bytes[1], 64)
+				if e != nil {
+					err = multierr.Append(err, e)
+					continue
+				}
+
+				metricTrafficReceivedBytes.With("serial_number", sn).With(
+					"interface", client.Interface,
+					"mac", client.MacAddress,
+					"name", name).Set(received)
+				metricTrafficSentBytes.With("serial_number", sn).With(
+					"interface", client.Interface,
+					"mac", client.MacAddress,
+					"name", name).Set(sent)
+			}
+		}
+	} else if !mikrotik.IsEmptyResponse(e) {
+		err = multierr.Append(err, e)
+	}
+
+	return err
 }
