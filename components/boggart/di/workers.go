@@ -115,6 +115,7 @@ func newWorkersWrapTask(tsk workers.Task, logger logging.Logger) *workersWrapTas
 		original: tsk,
 		logger:   logger,
 	}
+	t.Init()
 	t.sync()
 
 	return t
