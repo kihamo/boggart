@@ -256,6 +256,7 @@ func (h *BindHandler) actionProbe(w *dashboard.Response, r *dashboard.Request, b
 	}
 
 	if err != nil {
+		response.Result = "failed"
 		response.Error = err.Error()
 	}
 
