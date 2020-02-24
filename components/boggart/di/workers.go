@@ -85,6 +85,12 @@ func (c *WorkersContainer) Tasks() []workers.Task {
 
 				tasks[i] = newWorkersWrapTask(tsk, logger)
 			}
+		} else {
+			for _, tsk := range tasks {
+				if tsk, ok := tsk.(bindTask); ok {
+					tsk.SetName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-" + tsk.Name())
+				}
+			}
 		}
 
 		c.cacheTasks = tasks
