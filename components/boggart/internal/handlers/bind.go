@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"net/http"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/go-workers"
 	"github.com/kihamo/shadow/components/dashboard"
 	"gopkg.in/yaml.v2"
 )
@@ -68,6 +70,10 @@ func (h *BindHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 	case "mqtt":
 		h.actionMQTT(w, r, bindItem)
+		return
+
+	case "tasks":
+		h.actionTasks(w, r, bindItem)
 		return
 
 	case "":
@@ -347,5 +353,59 @@ func (h *BindHandler) actionMQTT(w *dashboard.Response, r *dashboard.Request, b 
 	h.Render(r.Context(), "mqtt", map[string]interface{}{
 		"bind":  b,
 		"items": items,
+	})
+}
+
+func (h *BindHandler) actionTasks(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
+	bindSupport, ok := b.Bind().(di.WorkersContainerSupport)
+	if !ok {
+		h.NotFound(w, r)
+		return
+	}
+
+	ctx := r.Context()
+	tasks := bindSupport.Workers().Tasks()
+
+	run := r.URL().Query().Get("run")
+	if run != "" {
+		var task workers.Task
+
+		for _, t := range tasks {
+			if t.Id() == run {
+				task = t
+				break
+			}
+		}
+
+		if task == nil {
+			h.NotFound(w, r)
+			return
+		}
+
+		if timeout := task.Timeout(); timeout > 0 {
+			ctx, _ = context.WithTimeout(ctx, timeout)
+		}
+
+		_, err := task.Run(ctx)
+
+		response := struct {
+			Result string `json:"result"`
+			Error  string `json:"error,omitempty"`
+		}{
+			Result: "success",
+		}
+
+		if err != nil {
+			response.Result = "failed"
+			response.Error = err.Error()
+		}
+
+		_ = w.SendJSON(response)
+		return
+	}
+
+	h.Render(ctx, "tasks", map[string]interface{}{
+		"bind":  b,
+		"tasks": tasks,
 	})
 }

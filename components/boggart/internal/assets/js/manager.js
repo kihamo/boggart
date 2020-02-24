@@ -56,7 +56,7 @@ $(document).ready(function () {
                 {
                     data: null,
                     render: function (data, type, row) {
-                        var content = '<div class="btn-group" role="group" style="min-width:200px">';
+                        var content = '<div class="btn-group" role="group" style="min-width:220px">';
 
                         if (row.has_widget) {
                             content += '<a href="/boggart/widget/' + row.id + '/" target="_blank" class="btn btn-primary btn-icon btn-xs">' +
@@ -85,6 +85,12 @@ $(document).ready(function () {
                         if (row.mqtt_publishes.length > 0) {
                             content += '<a href="/boggart/bind/' + row.id + '/mqtt/" target="_blank" class="btn btn-primary btn-icon btn-xs">' +
                                 '<i class="fas fa-list" title="Show MQTT cache"></i> ' +
+                                '</a>';
+                        }
+
+                        if (row.tasks.length > 0) {
+                            content += '<a href="/boggart/bind/' + row.id + '/tasks/" target="_blank" class="btn btn-primary btn-icon btn-xs">' +
+                                '<i class="fas fa-running" title="Show tasks"></i> ' +
                                 '</a>';
                         }
 

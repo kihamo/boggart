@@ -1,0 +1,69 @@
+{{ define "content" }}
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>{{ i18n "Bind %s tasks" $ nil nil nil .bind.ID }}</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="table-responsive">
+                    <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                        <thead>
+                        <tr>
+                            <th>{{ i18n "ID" . }}</th>
+                            <th>{{ i18n "Name" . }}</th>
+                            <th>{{ i18n "Actions" . }}</th>
+                            <th>{{ i18n "Priority" . }}</th>
+                            <th>{{ i18n "Repeats" . }}</th>
+                            <th>{{ i18n "Repeat interval" . }}</th>
+                            <th>{{ i18n "Timeout" . }}</th>
+                            <th>{{ i18n "Created" . }}</th>
+                            <th>{{ i18n "Started" . }}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{ range $task := .tasks }}
+                            <tr>
+                                <td>{{ $task.Id }}</td>
+                                <td>{{ $task.Name }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="/boggart/bind/{{ $.bind.ID }}/tasks/?run={{ $task.Id }}" target="_blank" class="btn btn-success btn-icon btn-xs">
+                                            <i class="fas fa-running" title="{{ i18n "Run" $ }}"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                                <td>{{ $task.Priority }}</td>
+                                <td>{{ if ne $task.Repeats -1 }}{{ $task.Repeats }}{{ end }}</td>
+                                <td>{{ $task.RepeatInterval }}</td>
+                                <td>{{ $task.Timeout }}</td>
+                                <td><script type="application/javascript">document.write(dateToString('{{ $task.CreatedAt.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                <td>
+                                    {{ if $task.StartedAt }}
+                                    <script type="application/javascript">document.write(dateToString('{{ $task.StartedAt.Format "2006-01-02T15:04:05Z07:00" }}'))</script>
+                                    {{ end }}
+                                </td>
+                            </tr>
+                        {{ end }}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
+
+{{ define "head" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/highlightjs/css/tomorrow.min.css" false) }}
+{{ end }}
+
+{{ define "js" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net/js/jquery.dataTables.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive/js/dataTables.responsive.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
+{{ end }}
