@@ -18,3 +18,54 @@ msgstr "Создать"
 
 msgid "Update"
 msgstr "Обновить"
+
+msgid "Bind %s logs"
+msgstr "Логи привязки %s"
+
+msgid "Time"
+msgstr "Время"
+
+msgid "Level"
+msgstr "Уровень"
+
+msgid "Message"
+msgstr "Сообщение"
+
+msgid "Context"
+msgstr "Контекст"
+
+msgid "Bind %s tasks"
+msgstr "Задачи привязки %s"
+
+msgid "Priority"
+msgstr "Приоритет"
+
+msgid "Repeats"
+msgstr "Повторения"
+
+msgid "Repeat interval"
+msgstr "Интервал повтора"
+
+msgid "Timeout"
+msgstr "Таймаут"
+
+msgid "Created"
+msgstr "Создана"
+
+msgid "Started"
+msgstr "Стартовала"
+
+msgid "Execute"
+msgstr "Выполнить"
+
+msgid "Bind %s MQTT cache"
+msgstr "MQTT кэш привязки %s"
+
+msgid "Topic"
+msgstr "Топик"
+
+msgid "Topic in cache"
+msgstr "Топик в кэше"
+
+msgid "Payload"
+msgstr "Сообщение"

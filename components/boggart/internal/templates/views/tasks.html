@@ -8,7 +8,7 @@
             </div>
             <div class="x_content">
                 <div class="table-responsive">
-                    <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                    <table class="table table-hover table-striped datatable dt-responsive nowrap" id="tasks" style="width:100%">
                         <thead>
                         <tr>
                             <th>{{ i18n "ID" . }}</th>
@@ -30,7 +30,7 @@
                                 <td>
                                     <div class="btn-group" role="group">
                                         <a href="/boggart/bind/{{ $.bind.ID }}/tasks/?run={{ $task.Id }}" target="_blank" class="btn btn-success btn-icon btn-xs">
-                                            <i class="fas fa-running" title="{{ i18n "Run" $ }}"></i>
+                                            <i class="fas fa-running" title="{{ i18n "Execute" $ }}"></i>
                                         </a>
                                     </div>
                                 </td>
@@ -38,12 +38,8 @@
                                 <td>{{ if ne $task.Repeats -1 }}{{ $task.Repeats }}{{ end }}</td>
                                 <td>{{ $task.RepeatInterval }}</td>
                                 <td>{{ $task.Timeout }}</td>
-                                <td><script type="application/javascript">document.write(dateToString('{{ $task.CreatedAt.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
-                                <td>
-                                    {{ if $task.StartedAt }}
-                                    <script type="application/javascript">document.write(dateToString('{{ $task.StartedAt.Format "2006-01-02T15:04:05Z07:00" }}'))</script>
-                                    {{ end }}
-                                </td>
+                                <td>{{ $task.CreatedAt.Format "2006-01-02T15:04:05Z07:00" }}</td>
+                                <td>{{ if $task.StartedAt }}{{ $task.StartedAt.Format "2006-01-02T15:04:05Z07:00" }}{{ end }}</td>
                             </tr>
                         {{ end }}
                         </tbody>
@@ -57,13 +53,31 @@
 
 {{ define "head" }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-fixedheader-bs/css/fixedHeader.bootstrap.min.css" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" false) }}
-    {{ staticHTML (staticURL "/dashboard/assets/vendors/highlightjs/css/tomorrow.min.css" false) }}
 {{ end }}
 
 {{ define "js" }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net/js/jquery.dataTables.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-fixedheader/js/dataTables.fixedHeader.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive/js/dataTables.responsive.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
+
+    <script type="application/javascript">
+        $(document).ready(function () {
+            var table = $('#tasks');
+
+            table.one('init.dt', function () {
+                table.DataTable().rows().every(function (i) {
+                    var data = this.data();
+                    data[7] = data[7].length > 0 ? dateToString(data[7]) : '';
+                    data[8] = data[8].length > 0 ? dateToString(data[8]) : '';
+
+                    this.row(i).data(data);
+                    table.DataTable().draw();
+                });
+            });
+        });
+    </script>
 {{ end }}

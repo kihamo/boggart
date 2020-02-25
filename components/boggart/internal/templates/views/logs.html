@@ -8,7 +8,7 @@
             </div>
             <div class="x_content">
                 <div class="table-responsive">
-                    <table class="table table-striped datatable dt-responsive nowrap" id="logs" style="width:100%">
+                    <table class="table table-hover table-striped datatable dt-responsive nowrap" id="logs" style="width:100%">
                         <thead>
                         <tr>
                             <th>{{ i18n "Time" . }}</th>
@@ -20,7 +20,7 @@
                         <tbody>
                         {{ range $log := .logs }}
                             <tr>
-                                <td><script type="application/javascript">document.write(dateToString('{{ $log.Time.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                <td>{{ $log.Time.Format "2006-01-02T15:04:05Z07:00" }}</td>
                                 <td>
                                     {{ if eq $log.Level "debug" }}
                                         <span class="label label-primary">{{ $log.Level }}</span>
@@ -57,6 +57,7 @@
 
 {{ define "head" }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-fixedheader-bs/css/fixedHeader.bootstrap.min.css" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/highlightjs/css/tomorrow.min.css" false) }}
 {{ end }}
@@ -64,13 +65,25 @@
 {{ define "js" }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net/js/jquery.dataTables.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-fixedheader/js/dataTables.fixedHeader.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive/js/dataTables.responsive.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/highlightjs/js/highlight.pack.min.js" false) }}
 
     <script type="application/javascript">
         $(document).ready(function () {
-            $('#logs').DataTable().order([0, 'desc']).draw();
+            var table = $('#logs');
+
+            table.one('init.dt', function (e, settings) {
+                table.DataTable().rows().every(function (i) {
+                    var data = this.data();
+                    data[0] = data[0].length > 0 ? dateToString(data[0]) : '';
+                    this.row(i).data(data);
+                });
+
+                var api = new $.fn.dataTable.Api(settings);
+                api.order([0, 'desc']).draw();
+            });
         });
     </script>
 {{ end }}
