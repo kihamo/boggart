@@ -50,28 +50,7 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 		case "status":
 			out.Status = string(in.String())
 		case "tasks":
-			if in.IsNull() {
-				in.Skip()
-				out.Tasks = nil
-			} else {
-				in.Delim('[')
-				if out.Tasks == nil {
-					if !in.IsDelim(']') {
-						out.Tasks = make([]string, 0, 4)
-					} else {
-						out.Tasks = []string{}
-					}
-				} else {
-					out.Tasks = (out.Tasks)[:0]
-				}
-				for !in.IsDelim(']') {
-					var v1 string
-					v1 = string(in.String())
-					out.Tasks = append(out.Tasks, v1)
-					in.WantComma()
-				}
-				in.Delim(']')
-			}
+			out.Tasks = int(in.Int())
 		case "mqtt_publishes":
 			if in.IsNull() {
 				in.Skip()
@@ -88,9 +67,9 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 					out.MQTTPublishes = (out.MQTTPublishes)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v2 string
-					v2 = string(in.String())
-					out.MQTTPublishes = append(out.MQTTPublishes, v2)
+					var v1 string
+					v1 = string(in.String())
+					out.MQTTPublishes = append(out.MQTTPublishes, v1)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -111,9 +90,9 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 					out.MQTTSubscribers = (out.MQTTSubscribers)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v3 string
-					v3 = string(in.String())
-					out.MQTTSubscribers = append(out.MQTTSubscribers, v3)
+					var v2 string
+					v2 = string(in.String())
+					out.MQTTSubscribers = append(out.MQTTSubscribers, v2)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -134,9 +113,9 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 					out.Tags = (out.Tags)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v4 string
-					v4 = string(in.String())
-					out.Tags = append(out.Tags, v4)
+					var v3 string
+					v3 = string(in.String())
+					out.Tags = append(out.Tags, v3)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -233,18 +212,7 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 		} else {
 			out.RawString(prefix)
 		}
-		if in.Tasks == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-			out.RawString("null")
-		} else {
-			out.RawByte('[')
-			for v5, v6 := range in.Tasks {
-				if v5 > 0 {
-					out.RawByte(',')
-				}
-				out.String(string(v6))
-			}
-			out.RawByte(']')
-		}
+		out.Int(int(in.Tasks))
 	}
 	{
 		const prefix string = ",\"mqtt_publishes\":"
@@ -258,11 +226,11 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v7, v8 := range in.MQTTPublishes {
-				if v7 > 0 {
+			for v4, v5 := range in.MQTTPublishes {
+				if v4 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v8))
+				out.String(string(v5))
 			}
 			out.RawByte(']')
 		}
@@ -279,11 +247,11 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v9, v10 := range in.MQTTSubscribers {
-				if v9 > 0 {
+			for v6, v7 := range in.MQTTSubscribers {
+				if v6 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v10))
+				out.String(string(v7))
 			}
 			out.RawByte(']')
 		}
@@ -300,11 +268,11 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v11, v12 := range in.Tags {
-				if v11 > 0 {
+			for v8, v9 := range in.Tags {
+				if v8 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v12))
+				out.String(string(v9))
 			}
 			out.RawByte(']')
 		}

@@ -17,7 +17,7 @@ type managerHandlerDevice struct {
 	SerialNumber      string   `json:"serial_number"`
 	MAC               string   `json:"mac"`
 	Status            string   `json:"status"`
-	Tasks             []string `json:"tasks"`
+	Tasks             int      `json:"tasks"`
 	MQTTPublishes     []string `json:"mqtt_publishes"`
 	MQTTSubscribers   []string `json:"mqtt_subscribers"`
 	Tags              []string `json:"tags"`
@@ -76,7 +76,6 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				Description:     bindItem.Description(),
 				Status:          bindItem.Status().String(),
 				Tags:            bindItem.Tags(),
-				Tasks:           make([]string, 0),
 				MQTTPublishes:   make([]string, 0),
 				MQTTSubscribers: make([]string, 0),
 				Config:          buf.String(),
@@ -100,9 +99,7 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 			}
 
 			if bindSupport, ok := di.WorkersContainerBind(bindItem.Bind()); ok {
-				for _, task := range bindSupport.Tasks() {
-					item.Tasks = append(item.Tasks, task.Name())
-				}
+				item.Tasks = len(bindSupport.Tasks())
 			}
 
 			if bindSupport, ok := di.MQTTContainerBind(bindItem.Bind()); ok {

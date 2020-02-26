@@ -88,9 +88,9 @@ $(document).ready(function () {
                                 '</a>';
                         }
 
-                        if (row.tasks.length > 0) {
+                        if (row.tasks > 0) {
                             content += '<a href="/boggart/bind/' + row.id + '/tasks/" target="_blank" class="btn btn-primary btn-icon btn-xs">' +
-                                '<i class="fas fa-running" title="Show tasks"></i> ' +
+                                '<i class="fas fa-running" title="Show tasks"></i> ' + row.tasks +
                                 '</a>';
                         }
 
@@ -117,41 +117,7 @@ $(document).ready(function () {
                     data: 'id'
                 },
                 {
-                    data: 'tasks',
-                    render: function (tasks) {
-                        return tasks.length;
-                    }
-                },
-                {
-                    data: 'mqtt_publishes',
-                    render: function (publishes) {
-                        return publishes.length;
-                    }
-                },
-                {
-                    data: 'mqtt_subscribers',
-                    render: function (subscribers) {
-                        return subscribers.length;
-                    }
-                },
-                {
                     data: 'description'
-                },
-                {
-                    data: 'tasks',
-                    render: function (tasks) {
-                        var content = '';
-
-                        for (var i in tasks) {
-                            if (i > 0) {
-                                content += '<br />';
-                            }
-
-                            content += '<span class="label label-warning">' + tasks[i] + '</span>';
-                        }
-
-                        return content;
-                    }
                 },
                 {
                     data: 'mqtt_publishes',
