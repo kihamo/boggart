@@ -2,6 +2,7 @@ package di
 
 import (
 	"context"
+	"errors"
 	"sync"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -102,7 +103,7 @@ func (c *WorkersContainer) Tasks() []workers.Task {
 func (c *WorkersContainer) WrapTaskIsOnline(fn func(context.Context) error) *task.FunctionTask {
 	return task.NewFunctionTask(func(ctx context.Context) (interface{}, error) {
 		if c.bind.Status() != boggart.BindStatusOnline {
-			return nil, nil
+			return nil, errors.New("bind is offline")
 		}
 
 		return nil, fn(ctx)
