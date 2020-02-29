@@ -68,9 +68,9 @@ func (b *Bind) USSD(ctx context.Context, content string) (string, error) {
 }
 
 func (b *Bind) Balance(ctx context.Context) (float64, error) {
-	op := b.operatorSettings()
-	if op == nil {
-		return -1, errors.New("operator settings isn't found")
+	op, err := b.operatorSettings()
+	if err != nil {
+		return -1, err
 	}
 
 	content, err := b.USSD(ctx, op.BalanceUSSD)
@@ -88,18 +88,20 @@ func (b *Bind) Balance(ctx context.Context) (float64, error) {
 	return 0, errors.New("balance not found")
 }
 
-func (b *Bind) operatorSettings() *operator {
-	switch strings.ToLower(b.operator.Load()) {
+func (b *Bind) operatorSettings() (*operator, error) {
+	label := b.operator.Load()
+
+	switch strings.ToLower(label) {
 	case "tele2", "tele2 ru":
-		return operatorTele2
+		return operatorTele2, nil
 	}
 
-	return nil
+	return nil, errors.New("operator " + label + " settings isn't found")
 }
 
 func (b *Bind) checkSpecialSMS(ctx context.Context, sms *models.SMSListMessagesItems0) bool {
-	op := b.operatorSettings()
-	if op == nil {
+	op, err := b.operatorSettings()
+	if err != nil {
 		return false
 	}
 

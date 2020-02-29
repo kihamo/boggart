@@ -202,7 +202,7 @@ func (b *Bind) taskSystemUpdater(ctx context.Context) (err error) {
 
 			if b.operator.IsEmpty() {
 				plmn, err := b.client.Net.GetCurrentPLMN(net.NewGetCurrentPLMNParamsWithContext(ctx))
-				if err == nil {
+				if err == nil && plmn.Payload.FullName != "" {
 					b.operator.Set(plmn.Payload.FullName)
 					if e := b.MQTT().PublishAsync(ctx, b.config.TopicOperator.Format(sn), plmn.Payload.FullName); e != nil {
 						err = multierr.Append(err, e)
