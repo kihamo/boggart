@@ -50,7 +50,18 @@
 
     <script type="application/javascript">
         $(document).ready(function () {
-            $('#items').DataTable().order([2, 'desc']).draw();
+            var table = $('#items');
+
+            table.one('init.dt', function (e, settings) {
+                table.DataTable().rows().every(function (i) {
+                    var data = this.data();
+                    data[2] = data[2].length > 0 ? dateToString(data[2]) : '';
+                    this.row(i).data(data);
+                });
+
+                var api = new $.fn.dataTable.Api(settings);
+                api.order([2, 'desc']).draw();
+            });
         });
     </script>
 {{ end }}
