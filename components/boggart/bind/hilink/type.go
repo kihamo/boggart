@@ -19,6 +19,8 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		operator:                  atomic.NewString(),
 		limitInternetTrafficIndex: atomic.NewInt64(),
 		simStatus:                 atomic.NewUint32(),
+		ussdEnabled:               atomic.NewBool(),
+		smsEnabled:                atomic.NewBool(),
 	}
 
 	l := swagger.NewLogger(

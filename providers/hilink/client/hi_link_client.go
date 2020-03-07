@@ -13,6 +13,7 @@ import (
 
 	"github.com/kihamo/boggart/providers/hilink/client/config"
 	"github.com/kihamo/boggart/providers/hilink/client/device"
+	"github.com/kihamo/boggart/providers/hilink/client/global"
 	"github.com/kihamo/boggart/providers/hilink/client/monitoring"
 	"github.com/kihamo/boggart/providers/hilink/client/net"
 	"github.com/kihamo/boggart/providers/hilink/client/sms"
@@ -67,6 +68,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *HiLink {
 	cli.Config = config.New(transport, formats)
 
 	cli.Device = device.New(transport, formats)
+
+	cli.Global = global.New(transport, formats)
 
 	cli.Monitoring = monitoring.New(transport, formats)
 
@@ -128,6 +131,8 @@ type HiLink struct {
 
 	Device *device.Client
 
+	Global *global.Client
+
 	Monitoring *monitoring.Client
 
 	Net *net.Client
@@ -150,6 +155,8 @@ func (c *HiLink) SetTransport(transport runtime.ClientTransport) {
 	c.Config.SetTransport(transport)
 
 	c.Device.SetTransport(transport)
+
+	c.Global.SetTransport(transport)
 
 	c.Monitoring.SetTransport(transport)
 

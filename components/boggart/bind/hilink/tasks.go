@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/providers/hilink/client/device"
+	"github.com/kihamo/boggart/providers/hilink/client/global"
 	"github.com/kihamo/boggart/providers/hilink/client/monitoring"
 	"github.com/kihamo/boggart/providers/hilink/client/net"
 	"github.com/kihamo/boggart/providers/hilink/client/sms"
@@ -60,7 +61,7 @@ func (b *Bind) Tasks() []workers.Task {
 
 func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
 	if !b.Meta().IsStatusOnline() {
-		return nil, errors.New("bind isn't online")
+		return nil, errors.New("bind is offline")
 	}
 
 	deviceInfo, err := b.client.Device.GetDeviceInformation(device.NewGetDeviceInformationParamsWithContext(ctx))
@@ -83,6 +84,16 @@ func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
 	}
 
 	b.Meta().SetSerialNumber(deviceInfo.Payload.SerialNumber)
+
+	// set settings
+	settings, err := b.client.Global.GetGlobalModuleSwitch(global.NewGetGlobalModuleSwitchParamsWithContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	b.ussdEnabled.Set(settings.Payload.USSDEnabled > 0)
+	b.smsEnabled.Set(settings.Payload.SMSEnabled > 0)
+
 	return nil, err
 }
 
@@ -92,7 +103,12 @@ func (b *Bind) taskBalanceUpdater(ctx context.Context) error {
 		return nil
 	}
 
+	if b.ussdEnabled.IsFalse() || b.simStatus.Load() != 1 {
+		return nil
+	}
+
 	balance, err := b.Balance(ctx)
+
 	if err == nil {
 		metricBalance.With("serial_number", sn).Set(balance)
 
@@ -105,7 +121,7 @@ func (b *Bind) taskBalanceUpdater(ctx context.Context) error {
 }
 
 func (b *Bind) taskSMSChecker(ctx context.Context) error {
-	if b.simStatus.Load() != 1 {
+	if b.smsEnabled.IsFalse() || b.simStatus.Load() != 1 {
 		return nil
 	}
 
@@ -300,7 +316,7 @@ func (b *Bind) taskSystemUpdater(ctx context.Context) (err error) {
 }
 
 func (b *Bind) taskCleaner(ctx context.Context) (err error) {
-	if b.simStatus.Load() != 1 {
+	if b.smsEnabled.IsFalse() || b.simStatus.Load() != 1 {
 		return nil
 	}
 

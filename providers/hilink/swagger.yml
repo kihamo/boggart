@@ -26,6 +26,20 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
+  /api/global/module-switch:
+    get:
+      operationId: "getGlobalModuleSwitch"
+      tags:
+        - "global"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/ModuleSwitch"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /api/device/autorun-version:
     get:
       operationId: "getDeviceAutoRunVersion"
@@ -383,6 +397,121 @@ definitions:
         type: "integer"
         xml:
           name: "login"
+  ModuleSwitch:
+    type: "object"
+    properties:
+      USSDEnabled:
+        type: "integer"
+        xml:
+          name: "ussd_enabled"
+      BBOUEnabled:
+        type: "integer"
+        xml:
+          name: "bbou_enabled"
+      SMSEnabled:
+        type: "integer"
+        xml:
+          name: "sms_enabled"
+      SDCardEnabled:
+        type: "integer"
+        xml:
+          name: "sdcard_enabled"
+      WiFiEnabled:
+        type: "integer"
+        xml:
+          name: "wifi_enabled"
+      StatisticEnabled:
+        type: "integer"
+        xml:
+          name: "statistic_enabled"
+      HelpEnabled:
+        type: "integer"
+        xml:
+          name: "help_enabled"
+      STKEnabled:
+        type: "integer"
+        xml:
+          name: "stk_enabled"
+      PBEnabled:
+        type: "integer"
+        xml:
+          name: "pb_enabled"
+      DLNAEnabled:
+        type: "integer"
+        xml:
+          name: "dlna_enabled"
+      OTAEnabled:
+        type: "integer"
+        xml:
+          name: "ota_enabled"
+      CradleEnabled:
+        type: "integer"
+        xml:
+          name: "cradle_enabled"
+      MultSSIDEnable:
+        type: "integer"
+        xml:
+          name: "multssid_enable"
+      IPv6Enabled:
+        type: "integer"
+        xml:
+          name: "ipv6_enabled"
+      MonthlyVolumeEnabled:
+        type: "integer"
+        xml:
+          name: "monthly_volume_enabled"
+      PowersaveEnabled:
+        type: "integer"
+        xml:
+          name: "powersave_enabled"
+      SNTPEnabled:
+        type: "integer"
+        xml:
+          name: "sntp_enabled"
+      EncryptEnabled:
+        type: "integer"
+        xml:
+          name: "encrypt_enabled"
+      DataSwitchEnabled:
+        type: "integer"
+        xml:
+          name: "dataswitch_enabled"
+      PowerOffEnabled:
+        type: "integer"
+        xml:
+          name: "poweroff_enabled"
+      EcoModeEnabled:
+        type: "integer"
+        xml:
+          name: "ecomode_enabled"
+      ZoneTimeEnabled:
+        type: "integer"
+        xml:
+          name: "zonetime_enabled"
+      LocalUpdateEnabled:
+        type: "integer"
+        xml:
+          name: "localupdate_enabled"
+      CBSEnabled:
+        type: "integer"
+        xml:
+          name: "cbs_enabled"
+      QRCodeEnabled:
+        type: "integer"
+        xml:
+          name: "qrcode_enabled"
+      ChargerEnabled:
+        type: "integer"
+        xml:
+          name: "charger_enbaled"
+      APNRetryEnabled:
+        type: "integer"
+        xml:
+          name: "apn_retry_enabled"
+      GDPEenabled:
+        type: "integer"
+        xml:
+          name: "gdpr_enabled"
   DeviceBasicInformation:
     type: "object"
     properties:
