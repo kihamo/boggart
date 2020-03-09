@@ -9,7 +9,9 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -52,21 +54,23 @@ func NewGetBasicConfigOK() *GetBasicConfigOK {
 Successful operation
 */
 type GetBasicConfigOK struct {
-	Payload models.BasicConfig
+	Payload *GetBasicConfigOKBody
 }
 
 func (o *GetBasicConfigOK) Error() string {
 	return fmt.Sprintf("[POST /queryBasicCfg][%d] getBasicConfigOK  %+v", 200, o.Payload)
 }
 
-func (o *GetBasicConfigOK) GetPayload() models.BasicConfig {
+func (o *GetBasicConfigOK) GetPayload() *GetBasicConfigOKBody {
 	return o.Payload
 }
 
 func (o *GetBasicConfigOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
+	o.Payload = new(GetBasicConfigOKBody)
+
 	// response payload
-	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 
@@ -112,5 +116,67 @@ func (o *GetBasicConfigDefault) readResponse(response runtime.ClientResponse, co
 		return err
 	}
 
+	return nil
+}
+
+/*GetBasicConfigOKBody get basic config o k body
+swagger:model GetBasicConfigOKBody
+*/
+type GetBasicConfigOKBody struct {
+
+	// content
+	Content *models.BasicConfigContent `json:"content,omitempty" xml:"content"`
+
+	// status
+	Status string `json:"status,omitempty" xml:"status"`
+}
+
+// Validate validates this get basic config o k body
+func (o *GetBasicConfigOKBody) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateContent(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *GetBasicConfigOKBody) validateContent(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.Content) { // not required
+		return nil
+	}
+
+	if o.Content != nil {
+		if err := o.Content.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("getBasicConfigOK" + "." + "content")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *GetBasicConfigOKBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *GetBasicConfigOKBody) UnmarshalBinary(b []byte) error {
+	var res GetBasicConfigOKBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
 	return nil
 }

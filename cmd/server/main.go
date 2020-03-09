@@ -37,6 +37,7 @@ import (
 	_ "github.com/kihamo/boggart/components/boggart/bind/telegram"
 	_ "github.com/kihamo/boggart/components/boggart/bind/text2speech"
 	_ "github.com/kihamo/boggart/components/boggart/bind/timelapse"
+	_ "github.com/kihamo/boggart/components/boggart/bind/tvt"
 	_ "github.com/kihamo/boggart/components/boggart/bind/wol"
 	_ "github.com/kihamo/boggart/components/boggart/bind/xiaomi"
 	_ "github.com/kihamo/boggart/components/boggart/bind/xmeye"

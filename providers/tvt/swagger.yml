@@ -31,12 +31,79 @@ paths:
         200:
           description: "Successful operation"
           schema:
-            $ref: "#/definitions/BasicConfig"
+            type: "object"
+            properties:
+              status:
+                type: "string"
+                xml:
+                  name: "status"
+              content:
+                type: "object"
+                xml:
+                  name: "content"
+                $ref: "#/definitions/BasicConfigContent"
         default:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
-
+  /queryNetStatus:
+    post:
+      operationId: "getNetStatus"
+      tags:
+      - "net"
+      parameters:
+      - name: "request"
+        in: "body"
+        schema:
+          $ref: "#/definitions/Request"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "object"
+            properties:
+              status:
+                type: "string"
+                xml:
+                  name: "status"
+              content:
+                type: "object"
+                xml:
+                  name: "content"
+                $ref: "#/definitions/NetStatusContent"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /queryStorageDevInfo:
+    post:
+      operationId: "getStorageInfo"
+      tags:
+      - "storage"
+      parameters:
+      - name: "request"
+        in: "body"
+        schema:
+          $ref: "#/definitions/Request"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "object"
+            properties:
+              status:
+                type: "string"
+                xml:
+                  name: "status"
+              content:
+                type: "object"
+                xml:
+                  name: "content"
+                $ref: "#/definitions/StorageInfoContent"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
 definitions:
   Request:
     type: "object"
@@ -51,5 +118,180 @@ definitions:
         type: "integer"
         xml:
           name: "errorCode"
-  BasicConfig:
+  BasicConfigContent:
     type: "object"
+    properties:
+      sn:
+        type: "string"
+        xml:
+          name: "sn"
+      productModel:
+        type: "string"
+        xml:
+          name: "productModel"
+      softwareVersion:
+        type: "string"
+        xml:
+          name: "softwareVersion"
+  NetStatusIPGroup:
+    type: "object"
+    xml:
+      name: "ipGroup"
+    properties:
+      switch:
+        type: "boolean"
+        xml:
+          name: "switch"
+      ip:
+        type: "string"
+        xml:
+          name: "ip"
+      gateway:
+        type: "string"
+        xml:
+          name: "gateway"
+      mask:
+        type: "string"
+        xml:
+          name: "mask"
+      primaryNIC:
+        type: "string"
+        xml:
+          name: "primaryNIC"
+      dhcpStatus:
+        type: "string"
+        xml:
+          name: "dhcpStatus"
+      ipV6:
+        type: "string"
+        xml:
+          name: "ipV6"
+      gatewayV6:
+        type: "string"
+        xml:
+          name: "gatewayV6"
+      subLengthV6:
+        type: "integer"
+        xml:
+          name: "subLengthV6"
+      dhcpStatusV6:
+        type: "string"
+        xml:
+          name: "dhcpStatusV6"
+  NetStatusContent:
+    type: "object"
+    properties:
+      ipGroup:
+        xml:
+          name: "ipGroup"
+        $ref: "#/definitions/NetStatusIPGroup"
+      nic:
+        type: "array"
+        xml:
+          name: "nic>item"
+        items:
+          type: "object"
+          properties:
+            id:
+              type: "string"
+              xml:
+                name: "id,attr"
+            nicStatus:
+              type: "string"
+              xml:
+                name: "nicStatus"
+            ip:
+              type: "string"
+              xml:
+                name: "ip"
+            mask:
+              type: "string"
+              xml:
+                name: "mask"
+            gateway:
+              type: "string"
+              xml:
+                name: "gateway"
+            mac:
+              type: "string"
+              xml:
+                name: "mac"
+            dhcpStatus:
+              type: "string"
+              xml:
+                name: "dhcpStatus"
+            ipV6:
+              type: "string"
+              xml:
+                name: "ipV6"
+            gatewayV6:
+              type: "string"
+              xml:
+                name: "gatewayV6"
+            subLengthV6:
+              type: "integer"
+              xml:
+                name: "subLengthV6"
+            dhcpStatusV6:
+              type: "string"
+              xml:
+                name: "dhcpStatusV6"
+  Size:
+    type: "object"
+    properties:
+      unit:
+        type: "string"
+        xml:
+          name: "unit,attr"
+  StorageInfoContent:
+    type: "object"
+    properties:
+      disksSize:
+        xml:
+          name: "diskList>itemType>size"
+        $ref: "#/definitions/Size"
+      disks:
+        type: "array"
+        xml:
+          name: "diskList>item"
+        items:
+          type: "object"
+          properties:
+            id:
+              type: "string"
+              xml:
+                name: "id,attr"
+            slotIndex:
+              type: "integer"
+              xml:
+                name: "slotIndex"
+            diskInterfaceType:
+              type: "string"
+              xml:
+                name: "diskInterfaceType"
+            serialNum:
+              type: "string"
+              xml:
+                name: "serialNum"
+            model:
+              type: "string"
+              xml:
+                name: "model"
+            size:
+              type: "integer"
+              xml:
+                name: "size"
+            freeSpace:
+              type: "integer"
+              xml:
+                name: "freeSpace"
+            recStartDate:
+              type: "string"
+              format: "date"
+              xml:
+                name: "recStartDate"
+            recEndDate:
+              type: "string"
+              format: "date"
+              xml:
+                name: "recEndDate"

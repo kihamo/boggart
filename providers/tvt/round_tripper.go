@@ -14,13 +14,16 @@ type RoundTripper struct {
 }
 
 func (rt RoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	inBody, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		return nil, err
-	}
-
 	newInBody := []byte(`<?xml version="1.0" encoding="utf-8" ?><request version="1.0" systemType="NVMS-9000" clientType="WEB">`)
-	newInBody = append(newInBody, inBody...)
+
+	if req.Body != nil {
+		inBody, err := ioutil.ReadAll(req.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		newInBody = append(newInBody, inBody...)
+	}
 
 	req.Body = ioutil.NopCloser(bytes.NewReader(newInBody))
 	req.ContentLength = int64(len(newInBody))

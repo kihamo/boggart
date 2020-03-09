@@ -12,6 +12,8 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/kihamo/boggart/providers/tvt/client/information"
+	"github.com/kihamo/boggart/providers/tvt/client/net"
+	"github.com/kihamo/boggart/providers/tvt/client/storage"
 )
 
 // Default t v t HTTP client.
@@ -59,6 +61,10 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *TVT {
 
 	cli.Information = information.New(transport, formats)
 
+	cli.Net = net.New(transport, formats)
+
+	cli.Storage = storage.New(transport, formats)
+
 	return cli
 }
 
@@ -105,6 +111,10 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 type TVT struct {
 	Information *information.Client
 
+	Net *net.Client
+
+	Storage *storage.Client
+
 	Transport runtime.ClientTransport
 }
 
@@ -113,5 +123,9 @@ func (c *TVT) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 
 	c.Information.SetTransport(transport)
+
+	c.Net.SetTransport(transport)
+
+	c.Storage.SetTransport(transport)
 
 }
