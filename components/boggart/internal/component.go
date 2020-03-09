@@ -533,7 +533,12 @@ func (c *Component) itemStatusUpdate(item *BindItem, status boggart.BindStatus) 
 				c.logger.Error("Publish to MQTT failed", "topic", topic, "error", err.Error())
 			}
 		} else {
-			c.mqtt.PublishAsync(ctx, topic, 1, true, payload)
+			// что бы публикация зарегистрировалась в общем списке и отображалась на странице mqtt для привязки
+			if bindSupport, ok := di.MQTTContainerBind(item.Bind()); ok && bindSupport != nil {
+				bindSupport.PublishAsync(ctx, topic, payload)
+			} else {
+				c.mqtt.PublishAsync(ctx, topic, 1, true, payload)
+			}
 		}
 	}
 }

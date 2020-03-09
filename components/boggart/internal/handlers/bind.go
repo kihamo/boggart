@@ -332,18 +332,32 @@ func (h *BindHandler) actionMQTT(w *dashboard.Response, r *dashboard.Request, b 
 		Payload    interface{}
 	}
 
-	items := make([]itemView, 0)
 	publishes := bindSupport.MQTT().Publishes()
+	publishesSent := bindSupport.MQTT().PublishesSent()
+	statusTopic := mqtt.Topic(r.Config().String(boggart.ConfigMQTTTopicBindStatus))
+	items := make([]itemView, 0, len(publishesSent))
 
 	for _, item := range h.componentMQTT.CacheItems() {
-		for _, publish := range publishes {
-			if publish.IsInclude(item.Topic()) {
-				items = append(items, itemView{
-					Topic:      publish.String(),
+		for _, sent := range publishesSent {
+			if item.Topic().String() == sent.String() {
+				view := itemView{
 					CacheTopic: item.Topic().String(),
 					Datetime:   item.Datetime(),
 					Payload:    item.Payload(),
-				})
+				}
+
+				if statusTopic.IsInclude(sent) {
+					view.Topic = statusTopic.String()
+				} else {
+					for _, register := range publishes {
+						if register.IsInclude(sent) {
+							view.Topic = register.String()
+							break
+						}
+					}
+				}
+
+				items = append(items, view)
 
 				break
 			}

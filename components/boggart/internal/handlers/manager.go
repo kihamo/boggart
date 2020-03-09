@@ -19,6 +19,7 @@ type managerHandlerDevice struct {
 	Status            string   `json:"status"`
 	Tasks             int      `json:"tasks"`
 	MQTTPublishes     []string `json:"mqtt_publishes"`
+	MQTTPublishesSent int      `json:"mqtt_publishes_sent"`
 	MQTTSubscribers   []string `json:"mqtt_subscribers"`
 	Tags              []string `json:"tags"`
 	Config            string   `json:"config"`
@@ -110,6 +111,8 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				for _, topic := range bindSupport.Subscribers() {
 					item.MQTTSubscribers = append(item.MQTTSubscribers, topic.Topic().String())
 				}
+
+				item.MQTTPublishesSent = len(bindSupport.PublishesSent())
 			}
 
 			if bindSupport, ok := bindItem.Bind().(di.LoggerContainerSupport); ok {

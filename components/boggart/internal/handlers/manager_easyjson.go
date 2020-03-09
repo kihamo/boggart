@@ -74,6 +74,8 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 				}
 				in.Delim(']')
 			}
+		case "mqtt_publishes_sent":
+			out.MQTTPublishesSent = int(in.Int())
 		case "mqtt_subscribers":
 			if in.IsNull() {
 				in.Skip()
@@ -234,6 +236,16 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			}
 			out.RawByte(']')
 		}
+	}
+	{
+		const prefix string = ",\"mqtt_publishes_sent\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Int(int(in.MQTTPublishesSent))
 	}
 	{
 		const prefix string = ",\"mqtt_subscribers\":"

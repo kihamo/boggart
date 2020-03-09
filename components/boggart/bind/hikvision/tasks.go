@@ -91,6 +91,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 		}
 
 		b.Meta().SetSerialNumber(deviceInfo.Payload.SerialNumber)
+		sn = deviceInfo.Payload.SerialNumber
 
 		err = b.Meta().SetMACAsString(deviceInfo.Payload.MacAddress)
 		if err != nil {

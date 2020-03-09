@@ -56,15 +56,17 @@ type MQTTContainer struct {
 	clientMutex sync.RWMutex
 	client      mqtt.Component
 
-	cacheMutex       sync.Mutex
-	cacheSubscribers []mqtt.Subscriber
-	cachePublishes   []mqtt.Topic
+	cacheMutex         sync.RWMutex
+	cacheSubscribers   []mqtt.Subscriber
+	cachePublishes     []mqtt.Topic
+	cachePublishesSent map[string]bool
 }
 
 func NewMQTTContainer(bind boggart.BindItem, client mqtt.Component) *MQTTContainer {
 	return &MQTTContainer{
-		bind:   bind,
-		client: client,
+		bind:               bind,
+		client:             client,
+		cachePublishesSent: make(map[string]bool, 0),
 	}
 }
 
@@ -79,6 +81,12 @@ func (c *MQTTContainer) SetClient(client mqtt.Component) {
 	c.clientMutex.Lock()
 	c.client = client
 	c.clientMutex.Unlock()
+}
+
+func (c *MQTTContainer) registerPublish(topic mqtt.Topic) {
+	c.cacheMutex.Lock()
+	c.cachePublishesSent[topic.String()] = true
+	c.cacheMutex.Unlock()
 }
 
 func (c *MQTTContainer) Publish(ctx context.Context, topic mqtt.Topic, payload interface{}) error {
@@ -96,7 +104,12 @@ func (c *MQTTContainer) PublishRaw(ctx context.Context, topic mqtt.Topic, qos by
 		return errors.New("MQTT client isn't init")
 	}
 
-	return client.Publish(ctx, topic, qos, retained, payload)
+	err := client.Publish(ctx, topic, qos, retained, payload)
+	if err == nil {
+		c.registerPublish(topic)
+	}
+
+	return err
 }
 
 func (c *MQTTContainer) PublishRawWithoutCache(ctx context.Context, topic mqtt.Topic, qos byte, retained bool, payload interface{}) error {
@@ -106,7 +119,12 @@ func (c *MQTTContainer) PublishRawWithoutCache(ctx context.Context, topic mqtt.T
 		return errors.New("MQTT client isn't init")
 	}
 
-	return client.PublishWithoutCache(ctx, topic, qos, retained, payload)
+	err := client.PublishWithoutCache(ctx, topic, qos, retained, payload)
+	if err == nil {
+		c.registerPublish(topic)
+	}
+
+	return err
 }
 
 func (c *MQTTContainer) PublishAsync(ctx context.Context, topic mqtt.Topic, payload interface{}) error {
@@ -125,6 +143,8 @@ func (c *MQTTContainer) PublishAsyncRaw(ctx context.Context, topic mqtt.Topic, q
 	}
 
 	client.PublishAsync(ctx, topic, qos, retained, payload)
+	c.registerPublish(topic)
+
 	return nil
 }
 
@@ -136,6 +156,8 @@ func (c *MQTTContainer) PublishAsyncRawWithoutCache(ctx context.Context, topic m
 	}
 
 	client.PublishAsyncWithoutCache(ctx, topic, qos, retained, payload)
+	c.registerPublish(topic)
+
 	return nil
 }
 
@@ -220,6 +242,18 @@ func (c *MQTTContainer) Publishes() []mqtt.Topic {
 	}
 
 	return c.cachePublishes
+}
+
+func (c *MQTTContainer) PublishesSent() []mqtt.Topic {
+	c.cacheMutex.RLock()
+	defer c.cacheMutex.RUnlock()
+
+	list := make([]mqtt.Topic, 0, len(c.cachePublishesSent))
+	for topic := range c.cachePublishesSent {
+		list = append(list, mqtt.Topic(topic))
+	}
+
+	return list
 }
 
 type mqttWrapSubscriber struct {

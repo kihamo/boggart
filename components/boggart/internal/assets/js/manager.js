@@ -84,7 +84,7 @@ $(document).ready(function () {
 
                         if (row.mqtt_publishes.length > 0) {
                             content += '<a href="/boggart/bind/' + row.id + '/mqtt/" target="_blank" class="btn btn-primary btn-icon btn-xs">' +
-                                '<i class="fas fa-list" title="Show MQTT cache"></i> ' +
+                                '<i class="fas fa-list" title="Show MQTT cache"></i> ' + row.mqtt_publishes_sent +
                                 '</a>';
                         }
 
