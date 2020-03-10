@@ -4,16 +4,6 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
-func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	return []mqtt.Topic{
-		b.config.TopicBroadcast,
-		b.config.TopicReset,
-		b.config.TopicRestart,
-		b.config.TopicSettingsSet,
-		b.config.TopicOTAFirmware,
-	}
-}
-
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
 		// settings

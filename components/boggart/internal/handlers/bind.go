@@ -326,47 +326,37 @@ func (h *BindHandler) actionMQTT(w *dashboard.Response, r *dashboard.Request, b 
 	}
 
 	type itemView struct {
-		Topic      string
-		CacheTopic string
-		Datetime   time.Time
-		Payload    interface{}
+		Topic    string
+		Calls    uint64
+		Datetime time.Time
+		Payload  interface{}
 	}
 
 	publishes := bindSupport.MQTT().Publishes()
-	publishesSent := bindSupport.MQTT().PublishesSent()
-	statusTopic := mqtt.Topic(r.Config().String(boggart.ConfigMQTTTopicBindStatus))
-	items := make([]itemView, 0, len(publishesSent))
+	publishesItems := make([]itemView, 0, len(publishes))
 
 	for _, item := range h.componentMQTT.CacheItems() {
-		for _, sent := range publishesSent {
+		for sent, count := range publishes {
 			if item.Topic().String() == sent.String() {
 				view := itemView{
-					CacheTopic: item.Topic().String(),
-					Datetime:   item.Datetime(),
-					Payload:    item.Payload(),
+					Topic:    sent.String(),
+					Calls:    count,
+					Datetime: item.Datetime(),
+					Payload:  item.Payload(),
 				}
 
-				if statusTopic.IsInclude(sent) {
-					view.Topic = statusTopic.String()
-				} else {
-					for _, register := range publishes {
-						if register.IsInclude(sent) {
-							view.Topic = register.String()
-							break
-						}
-					}
-				}
-
-				items = append(items, view)
-
+				publishesItems = append(publishesItems, view)
 				break
 			}
 		}
 	}
 
+	subscribers := bindSupport.MQTT().Subscribers()
+
 	h.Render(r.Context(), "mqtt", map[string]interface{}{
-		"bind":  b,
-		"items": items,
+		"bind":        b,
+		"publishes":   publishesItems,
+		"subscribers": subscribers,
 	})
 }
 

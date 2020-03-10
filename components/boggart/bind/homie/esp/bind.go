@@ -89,6 +89,5 @@ func (b *Bind) LastUpdate() *time.Time {
 		return nil
 	}
 
-	t := b.lastUpdate.Load()
-	return &t
+	return b.lastUpdate.Load()
 }

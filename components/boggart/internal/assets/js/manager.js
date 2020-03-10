@@ -56,7 +56,7 @@ $(document).ready(function () {
                 {
                     data: null,
                     render: function (data, type, row) {
-                        var content = '<div class="btn-group" role="group" style="min-width:220px">';
+                        var content = '<div class="btn-group" role="group" style="min-width:240px">';
 
                         if (row.has_widget) {
                             content += '<a href="/boggart/widget/' + row.id + '/" target="_blank" class="btn btn-primary btn-icon btn-xs">' +
@@ -82,15 +82,15 @@ $(document).ready(function () {
                                 '</a>';
                         }
 
-                        if (row.mqtt_publishes.length > 0) {
-                            content += '<a href="/boggart/bind/' + row.id + '/mqtt/" target="_blank" class="btn btn-primary btn-icon btn-xs">' +
-                                '<i class="fas fa-list" title="Show MQTT cache"></i> ' + row.mqtt_publishes_sent +
-                                '</a>';
-                        }
-
                         if (row.tasks > 0) {
                             content += '<a href="/boggart/bind/' + row.id + '/tasks/" target="_blank" class="btn btn-primary btn-icon btn-xs">' +
                                 '<i class="fas fa-running" title="Show tasks"></i> ' + row.tasks +
+                                '</a>';
+                        }
+
+                        if (row.mqtt_publishes > 0 || row.mqtt_subscribers > 0) {
+                            content += '<a href="/boggart/bind/' + row.id + '/mqtt/" target="_blank" class="btn btn-primary btn-icon btn-xs">' +
+                                '<i class="fas fa-list" title="Show MQTT cache"></i> ' + row.mqtt_publishes + ' | ' + row.mqtt_subscribers +
                                 '</a>';
                         }
 
@@ -120,45 +120,13 @@ $(document).ready(function () {
                     data: 'description'
                 },
                 {
-                    data: 'mqtt_publishes',
-                    render: function (publishes) {
-                        var content = '';
-
-                        for (var i in publishes) {
-                            if (i > 0) {
-                                content += '<br />';
-                            }
-
-                            content += '<span class="label label-primary">' + publishes[i] + '</span>';
-                        }
-
-                        return content;
-                    }
-                },
-                {
-                    data: 'mqtt_subscribers',
-                    render: function (subscribers) {
-                        var content = '';
-
-                        for (var i in subscribers) {
-                            if (i > 0) {
-                                content += '<br />';
-                            }
-
-                            content += '<span class="label label-info">' + subscribers[i] + '</span>';
-                        }
-
-                        return content;
-                    }
-                },
-                {
                     data: 'config',
                     render: function (config) {
                         return '<pre><code class="yaml">' + config + '</code></pre>';
                     }
                 }
             ],
-            'drawCallback': function (settings) {
+            'drawCallback': function () {
                 var api = this.api();
                 var rows = api.rows({page: 'current'}).nodes();
                 var last = null;

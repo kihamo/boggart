@@ -6,13 +6,6 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
-func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	return []mqtt.Topic{
-		b.config.TopicState,
-		b.config.TopicPower,
-	}
-}
-
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(b.config.TopicSet, 0, b.MQTT().WrapSubscribeDeviceIsOnline(func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {

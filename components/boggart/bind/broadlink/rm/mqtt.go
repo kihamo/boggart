@@ -8,29 +8,6 @@ import (
 	"github.com/kihamo/boggart/providers/broadlink"
 )
 
-func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	topics := make([]mqtt.Topic, 0)
-
-	_, supportCapture := b.provider.(SupportCapture)
-	if supportCapture {
-		topics = append(topics, b.config.TopicCaptureState)
-
-		if _, ok := b.provider.(SupportIR); ok {
-			topics = append(topics, b.config.TopicIRCapture)
-		}
-
-		if _, ok := b.provider.(SupportRF315Mhz); ok {
-			topics = append(topics, b.config.TopicRF315mhzCapture)
-		}
-
-		if _, ok := b.provider.(SupportRF433Mhz); ok {
-			topics = append(topics, b.config.TopicRF433mhzCapture)
-		}
-	}
-
-	return topics
-}
-
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	subscribers := make([]mqtt.Subscriber, 0)
 

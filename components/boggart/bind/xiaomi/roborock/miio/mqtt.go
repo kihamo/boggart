@@ -8,22 +8,6 @@ import (
 	"go.uber.org/multierr"
 )
 
-func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	return []mqtt.Topic{
-		b.config.TopicBattery,
-		b.config.TopicCleanArea,
-		b.config.TopicCleanTime,
-		b.config.TopicFanPower,
-		b.config.TopicVolume,
-		b.config.TopicConsumableFilter,
-		b.config.TopicConsumableBrushMain,
-		b.config.TopicConsumableBrushSide,
-		b.config.TopicConsumableSensor,
-		b.config.TopicState,
-		b.config.TopicError,
-	}
-}
-
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(b.config.TopicSetFanPower, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSetFanPower)),

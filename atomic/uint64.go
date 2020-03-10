@@ -24,6 +24,14 @@ func (v *Uint64) Set(value uint64) bool {
 	return old != value
 }
 
+func (v *Uint64) Add(delta uint64) uint64 {
+	return a.AddUint64(&v.v, delta)
+}
+
+func (v *Uint64) Inc() uint64 {
+	return v.Add(1)
+}
+
 func (v *Uint64) Load() uint64 {
 	return a.LoadUint64(&v.v)
 }

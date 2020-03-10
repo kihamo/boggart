@@ -7,25 +7,6 @@ import (
 	"github.com/kihamo/boggart/providers/hilink/client/device"
 )
 
-func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	return []mqtt.Topic{
-		b.config.TopicSMS,
-		b.config.TopicSMSUnread,
-		b.config.TopicSMSInbox,
-		b.config.TopicBalance,
-		b.config.TopicOperator,
-		b.config.TopicLimitInternetTraffic,
-		b.config.TopicSignalRSSI,
-		b.config.TopicSignalRSRP,
-		b.config.TopicSignalRSRQ,
-		b.config.TopicSignalSINR,
-		b.config.TopicSignalLevel,
-		b.config.TopicConnectionTime,
-		b.config.TopicConnectionDownload,
-		b.config.TopicConnectionUpload,
-	}
-}
-
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(b.config.TopicUSSDSend, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTUSSDSend)),

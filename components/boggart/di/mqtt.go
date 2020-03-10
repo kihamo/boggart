@@ -5,7 +5,9 @@ import (
 	"errors"
 	"strconv"
 	"sync"
+	"time"
 
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/shadow/components/logging"
@@ -13,10 +15,6 @@ import (
 
 type MQTTHasSubscribers interface {
 	MQTTSubscribers() []mqtt.Subscriber
-}
-
-type MQTTHasPublishes interface {
-	MQTTPublishes() []mqtt.Topic
 }
 
 type MQTTContainerSupport interface {
@@ -50,23 +48,50 @@ func (b *MQTTBind) MQTT() *MQTTContainer {
 	return b.container
 }
 
+type MQTTSubscriber struct {
+	subscriber  mqtt.Subscriber
+	success     *atomic.Uint64
+	successTime *atomic.TimeNull
+	failed      *atomic.Uint64
+	failedTime  *atomic.TimeNull
+}
+
+func (s MQTTSubscriber) Subscriber() mqtt.Subscriber {
+	return s.subscriber
+}
+
+func (s MQTTSubscriber) SuccessCount() uint64 {
+	return s.success.Load()
+}
+
+func (s MQTTSubscriber) SuccessTime() *time.Time {
+	return s.successTime.Load()
+}
+
+func (s MQTTSubscriber) FailedCount() uint64 {
+	return s.failed.Load()
+}
+
+func (s MQTTSubscriber) FailedTime() *time.Time {
+	return s.failedTime.Load()
+}
+
 type MQTTContainer struct {
 	bind boggart.BindItem
 
 	clientMutex sync.RWMutex
 	client      mqtt.Component
 
-	cacheMutex         sync.RWMutex
-	cacheSubscribers   []mqtt.Subscriber
-	cachePublishes     []mqtt.Topic
-	cachePublishesSent map[string]bool
+	cacheMutex       sync.RWMutex
+	cacheSubscribers []MQTTSubscriber
+	cachePublishes   map[string]uint64
 }
 
 func NewMQTTContainer(bind boggart.BindItem, client mqtt.Component) *MQTTContainer {
 	return &MQTTContainer{
-		bind:               bind,
-		client:             client,
-		cachePublishesSent: make(map[string]bool, 0),
+		bind:           bind,
+		client:         client,
+		cachePublishes: make(map[string]uint64, 0),
 	}
 }
 
@@ -84,8 +109,14 @@ func (c *MQTTContainer) SetClient(client mqtt.Component) {
 }
 
 func (c *MQTTContainer) registerPublish(topic mqtt.Topic) {
+	key := topic.String()
+
 	c.cacheMutex.Lock()
-	c.cachePublishesSent[topic.String()] = true
+	if _, ok := c.cachePublishes[key]; ok {
+		c.cachePublishes[key]++
+	} else {
+		c.cachePublishes[key] = 1
+	}
 	c.cacheMutex.Unlock()
 }
 
@@ -204,7 +235,7 @@ func (c *MQTTContainer) WrapSubscribeDeviceIsOnline(callback mqtt.MessageHandler
 	}
 }
 
-func (c *MQTTContainer) Subscribers() []mqtt.Subscriber {
+func (c *MQTTContainer) Subscribers() []MQTTSubscriber {
 	has, ok := c.bind.Bind().(MQTTHasSubscribers)
 	if !ok {
 		return nil
@@ -214,43 +245,41 @@ func (c *MQTTContainer) Subscribers() []mqtt.Subscriber {
 	defer c.cacheMutex.Unlock()
 
 	if c.cacheSubscribers == nil {
-		if bindSupport, ok := c.bind.Bind().(LoggerContainerSupport); ok {
-			logger := bindSupport.Logger()
+		var logger logging.Logger
 
-			for _, subscriber := range has.MQTTSubscribers() {
-				c.cacheSubscribers = append(c.cacheSubscribers, newMQTTWrapSubscriber(subscriber, logger))
+		if bindSupport, ok := c.bind.Bind().(LoggerContainerSupport); ok {
+			logger = bindSupport.Logger()
+		}
+
+		for _, subscriber := range has.MQTTSubscribers() {
+			item := MQTTSubscriber{
+				success:     atomic.NewUint64(),
+				successTime: atomic.NewTimeNull(),
+				failed:      atomic.NewUint64(),
+				failedTime:  atomic.NewTimeNull(),
 			}
-		} else {
-			c.cacheSubscribers = has.MQTTSubscribers()
+			item.subscriber = newMQTTWrapSubscriber(subscriber, logger, func() {
+				item.success.Inc()
+				item.successTime.Set(time.Now())
+			}, func() {
+				item.failed.Inc()
+				item.failedTime.Set(time.Now())
+			})
+
+			c.cacheSubscribers = append(c.cacheSubscribers, item)
 		}
 	}
 
 	return c.cacheSubscribers
 }
 
-func (c *MQTTContainer) Publishes() []mqtt.Topic {
-	has, ok := c.bind.Bind().(MQTTHasPublishes)
-	if !ok {
-		return nil
-	}
-
-	c.cacheMutex.Lock()
-	defer c.cacheMutex.Unlock()
-
-	if c.cachePublishes == nil {
-		c.cachePublishes = has.MQTTPublishes()
-	}
-
-	return c.cachePublishes
-}
-
-func (c *MQTTContainer) PublishesSent() []mqtt.Topic {
+func (c *MQTTContainer) Publishes() map[mqtt.Topic]uint64 {
 	c.cacheMutex.RLock()
 	defer c.cacheMutex.RUnlock()
 
-	list := make([]mqtt.Topic, 0, len(c.cachePublishesSent))
-	for topic := range c.cachePublishesSent {
-		list = append(list, mqtt.Topic(topic))
+	list := make(map[mqtt.Topic]uint64, len(c.cachePublishes))
+	for topic, count := range c.cachePublishes {
+		list[mqtt.Topic(topic)] = count
 	}
 
 	return list
@@ -259,12 +288,16 @@ func (c *MQTTContainer) PublishesSent() []mqtt.Topic {
 type mqttWrapSubscriber struct {
 	original mqtt.Subscriber
 	logger   logging.Logger
+	success  func()
+	failed   func()
 }
 
-func newMQTTWrapSubscriber(subscriber mqtt.Subscriber, logger logging.Logger) *mqttWrapSubscriber {
+func newMQTTWrapSubscriber(subscriber mqtt.Subscriber, logger logging.Logger, success, failed func()) *mqttWrapSubscriber {
 	return &mqttWrapSubscriber{
 		original: subscriber,
 		logger:   logger,
+		success:  success,
+		failed:   failed,
 	}
 }
 
@@ -279,20 +312,26 @@ func (t *mqttWrapSubscriber) QOS() byte {
 func (t *mqttWrapSubscriber) Call(ctx context.Context, client mqtt.Component, message mqtt.Message) (err error) {
 	err = t.original.Call(ctx, client, message)
 	if err != nil {
-		logPayload := message.String()
-		if len(logPayload) > 100 {
-			logPayload = logPayload[:100]
+		if t.logger != nil {
+			logPayload := message.String()
+			if len(logPayload) > 100 {
+				logPayload = logPayload[:100]
+			}
+
+			t.logger.Error(
+				"Call MQTT subscriber failed",
+				"error", err.Error(),
+				"topic.subscribe", t.Topic(),
+				"topic.call", message.Topic(),
+				"qos", strconv.Itoa(int(t.QOS())),
+				"retained", strconv.FormatBool(message.Retained()),
+				"payload", logPayload,
+			)
 		}
 
-		t.logger.Error(
-			"Call MQTT subscriber failed",
-			"error", err.Error(),
-			"topic.subscribe", t.Topic(),
-			"topic.call", message.Topic(),
-			"qos", strconv.Itoa(int(t.QOS())),
-			"retained", strconv.FormatBool(message.Retained()),
-			"payload", logPayload,
-		)
+		t.failed()
+	} else {
+		t.success()
 	}
 
 	return err

@@ -9,28 +9,6 @@ import (
 	"go.uber.org/multierr"
 )
 
-func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	return []mqtt.Topic{
-		b.config.TopicProfile,
-		b.config.TopicDatetime,
-		b.config.TopicWeight,
-		b.config.TopicImpedance,
-		b.config.TopicBMR,
-		b.config.TopicBMI,
-		b.config.TopicFatPercentage,
-		b.config.TopicWaterPercentage,
-		b.config.TopicIdealWeight,
-		b.config.TopicLBMCoefficient,
-		b.config.TopicBoneMass,
-		b.config.TopicMuscleMass,
-		b.config.TopicVisceralFat,
-		b.config.TopicFatMassToIdeal,
-		b.config.TopicProteinPercentage,
-		b.config.TopicBodyType,
-		b.config.TopicMetabolicAge,
-	}
-}
-
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(b.config.TopicProfileActivate, 0, b.callbackMQTTProfileActive),

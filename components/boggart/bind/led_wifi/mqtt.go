@@ -9,16 +9,6 @@ import (
 	"github.com/kihamo/boggart/providers/wifiled"
 )
 
-func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	return []mqtt.Topic{
-		b.config.TopicStatePower,
-		b.config.TopicStateColor,
-		b.config.TopicStateColorHSV,
-		b.config.TopicStateMode,
-		b.config.TopicStateSpeed,
-	}
-}
-
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(b.config.TopicPower, 0, b.MQTT().WrapSubscribeDeviceIsOnline(func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {

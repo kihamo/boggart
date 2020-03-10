@@ -13,14 +13,6 @@ import (
 	"github.com/kihamo/boggart/components/storage"
 )
 
-func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	return []mqtt.Topic{
-		b.config.TopicReceiveMessage,
-		b.config.TopicReceiveAudio,
-		b.config.TopicReceiveVoice,
-	}
-}
-
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(b.config.TopicSendMessage, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendMessage)),

@@ -18,9 +18,8 @@ type managerHandlerDevice struct {
 	MAC               string   `json:"mac"`
 	Status            string   `json:"status"`
 	Tasks             int      `json:"tasks"`
-	MQTTPublishes     []string `json:"mqtt_publishes"`
-	MQTTPublishesSent int      `json:"mqtt_publishes_sent"`
-	MQTTSubscribers   []string `json:"mqtt_subscribers"`
+	MQTTPublishes     int      `json:"mqtt_publishes"`
+	MQTTSubscribers   int      `json:"mqtt_subscribers"`
 	Tags              []string `json:"tags"`
 	Config            string   `json:"config"`
 	HasWidget         bool     `json:"has_widget"`
@@ -72,14 +71,12 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 			}
 
 			item := managerHandlerDevice{
-				Id:              bindItem.ID(),
-				Type:            bindItem.Type(),
-				Description:     bindItem.Description(),
-				Status:          bindItem.Status().String(),
-				Tags:            bindItem.Tags(),
-				MQTTPublishes:   make([]string, 0),
-				MQTTSubscribers: make([]string, 0),
-				Config:          buf.String(),
+				Id:          bindItem.ID(),
+				Type:        bindItem.Type(),
+				Description: bindItem.Description(),
+				Status:      bindItem.Status().String(),
+				Tags:        bindItem.Tags(),
+				Config:      buf.String(),
 			}
 
 			if _, ok := bindItem.BindType().(boggart.BindTypeHasWidget); ok {
@@ -104,15 +101,8 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 			}
 
 			if bindSupport, ok := di.MQTTContainerBind(bindItem.Bind()); ok {
-				for _, topic := range bindSupport.Publishes() {
-					item.MQTTPublishes = append(item.MQTTPublishes, topic.String())
-				}
-
-				for _, topic := range bindSupport.Subscribers() {
-					item.MQTTSubscribers = append(item.MQTTSubscribers, topic.Topic().String())
-				}
-
-				item.MQTTPublishesSent = len(bindSupport.PublishesSent())
+				item.MQTTSubscribers = len(bindSupport.Subscribers())
+				item.MQTTPublishes = len(bindSupport.Publishes())
 			}
 
 			if bindSupport, ok := bindItem.Bind().(di.LoggerContainerSupport); ok {

@@ -6,12 +6,6 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
-func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	return []mqtt.Topic{
-		b.config.TopicPinState,
-	}
-}
-
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	if b.Mode() != ModeOut {
 		return nil

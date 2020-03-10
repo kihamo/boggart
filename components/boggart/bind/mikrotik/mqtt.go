@@ -8,21 +8,6 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
-func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	return []mqtt.Topic{
-		b.config.TopicWiFiMACState,
-		b.config.TopicWiFiConnectedMAC,
-		b.config.TopicWiFiDisconnectedMAC,
-		b.config.TopicVPNLoginState,
-		b.config.TopicVPNConnectedLogin,
-		b.config.TopicVPNDisconnectedLogin,
-		b.config.TopicPackagesInstalledVersion,
-		b.config.TopicPackagesLatestVersion,
-		b.config.TopicFirmwareInstalledVersion,
-		b.config.TopicFirmwareLatestVersion,
-	}
-}
-
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	subscribers := []mqtt.Subscriber{
 		mqtt.NewSubscriber(b.config.TopicWiFiMACState, 0, b.callbackMQTTWiFiSync),

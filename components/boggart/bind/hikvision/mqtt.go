@@ -15,34 +15,6 @@ import (
 	"go.uber.org/multierr"
 )
 
-func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	topics := []mqtt.Topic{
-		b.config.TopicStateModel,
-		b.config.TopicStateFirmwareVersion,
-		b.config.TopicStateFirmwareReleasedDate,
-		b.config.TopicStateUpTime,
-		b.config.TopicStateMemoryUsage,
-		b.config.TopicStateMemoryAvailable,
-		b.config.TopicStateHDDCapacity,
-		b.config.TopicStateHDDFree,
-		b.config.TopicStateHDDUsage,
-	}
-
-	if b.config.EventsEnabled {
-		topics = append(topics, b.config.TopicEvent)
-	}
-
-	if b.config.PTZEnabled {
-		topics = append(topics,
-			b.config.TopicPTZStatusElevation,
-			b.config.TopicPTZStatusAzimuth,
-			b.config.TopicPTZStatusZoom,
-		)
-	}
-
-	return topics
-}
-
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	subscribers := make([]mqtt.Subscriber, 0)
 

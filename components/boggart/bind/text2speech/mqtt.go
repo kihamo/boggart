@@ -6,15 +6,6 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
-func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	id := b.Meta().ID()
-
-	return []mqtt.Topic{
-		b.config.TopicURL.Format(id),
-		b.config.TopicBinary.Format(id),
-	}
-}
-
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	id := b.Meta().ID()
 

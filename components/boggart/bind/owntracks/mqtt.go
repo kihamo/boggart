@@ -11,31 +11,6 @@ import (
 	"go.uber.org/multierr"
 )
 
-func (b *Bind) MQTTPublishes() []mqtt.Topic {
-	topics := []mqtt.Topic{
-		b.config.TopicStateLat,
-		b.config.TopicStateLon,
-		b.config.TopicStateGeoHash,
-		b.config.TopicStateAccuracy,
-		b.config.TopicStateAltitude,
-		b.config.TopicStateBatteryLevel,
-		b.config.TopicStateVelocity,
-		b.config.TopicStateConnection,
-		b.config.TopicStateLocation,
-		b.config.TopicOwnTracksCommand,
-	}
-
-	if !b.config.UnregisterPointsAllowed {
-		for name := range b.getAllRegions() {
-			topics = append(topics, b.config.TopicRegion.Format(name))
-		}
-	} else {
-		topics = append(topics, b.config.TopicRegion)
-	}
-
-	return topics
-}
-
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	subscribers := []mqtt.Subscriber{
 		mqtt.NewSubscriber(b.config.TopicCommandReportLocation, 0, b.subscribeCommand(b.CommandReportLocation)),

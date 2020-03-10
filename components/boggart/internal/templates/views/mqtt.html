@@ -3,27 +3,72 @@
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
             <div class="x_title">
-                <h2>{{ i18n "Bind %s MQTT cache" $ nil nil nil .bind.ID }}</h2>
+                <h2>{{ i18n "Bind %s MQTT publishes" $ nil nil nil .bind.ID }}</h2>
                 <div class="clearfix"></div>
             </div>
             <div class="x_content">
                 <div class="table-responsive">
-                    <table class="table table-hover table-striped datatable dt-responsive nowrap" id="items" style="width:100%">
+                    <table class="table table-hover table-striped datatable dt-responsive nowrap" id="publishes" style="width:100%">
                         <thead>
                         <tr>
                             <th>{{ i18n "Topic" . }}</th>
-                            <th>{{ i18n "Topic in cache" . }}</th>
-                            <th>{{ i18n "Time" . }}</th>
-                            <th>{{ i18n "Payload" . }}</th>
+                            <th>{{ i18n "Calls" . }}</th>
+                            <th>{{ i18n "Last call" . }}</th>
+                            <th>{{ i18n "Last payload" . }}</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {{ range $i, $item := .items }}
+                        {{ range $publish := .publishes }}
                         <tr>
-                            <td>{{ $item.Topic }}</td>
-                            <td>{{ $item.CacheTopic }}</td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ $item.Datetime.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
-                            <td><pre><code>{{ printf "%s" $item.Payload|raw }}</code></pre></td>
+                            <td>{{ $publish.Topic }}</td>
+                            <td>{{ $publish.Calls }}</td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ $publish.Datetime.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                            <td><pre><code>{{ printf "%s" $publish.Payload|raw }}</code></pre></td>
+                        </tr>
+                        {{ end }}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>{{ i18n "Bind %s MQTT subscribers" $ nil nil nil .bind.ID }}</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped datatable dt-responsive nowrap" id="subscribers" style="width:100%">
+                        <thead>
+                        <tr>
+                            <th>{{ i18n "Topic" . }}</th>
+                            <th>{{ i18n "Success calls" . }}</th>
+                            <th>{{ i18n "Success time" . }}</th>
+                            <th>{{ i18n "Failed calls" . }}</th>
+                            <th>{{ i18n "Failed time" . }}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{ range $subscriber := .subscribers }}
+                        <tr>
+                            <td>{{ $subscriber.Subscriber.Topic.String }}</td>
+                            <td>{{ $subscriber.SuccessCount }}</td>
+                            <td>
+                                {{ if $subscriber.SuccessTime }}
+                                <script type="application/javascript">document.write(dateToString('{{ $subscriber.SuccessTime.Format "2006-01-02T15:04:05Z07:00" }}'))</script>
+                                {{ end }}
+                            </td>
+                            <td>{{ $subscriber.FailedCount }}</td>
+                            <td>
+                                {{ if $subscriber.FailedTime }}
+                                    <script type="application/javascript">document.write(dateToString('{{ $subscriber.FailedTime.Format "2006-01-02T15:04:05Z07:00" }}'))</script>
+                                {{ end }}
+                            </td>
                         </tr>
                         {{ end }}
                         </tbody>
@@ -50,12 +95,26 @@
 
     <script type="application/javascript">
         $(document).ready(function () {
-            var table = $('#items');
+            var
+                    tableP = $('#publishes'),
+                    tableS = $('#subscribers');
 
-            table.one('init.dt', function (e, settings) {
-                table.DataTable().rows().every(function (i) {
+            tableP.one('init.dt', function (e, settings) {
+                tableP.DataTable().rows().every(function (i) {
                     var data = this.data();
                     data[2] = data[2].length > 0 ? dateToString(data[2]) : '';
+                    this.row(i).data(data);
+                });
+
+                var api = new $.fn.dataTable.Api(settings);
+                api.order([2, 'desc']).draw();
+            });
+
+            tableS.one('init.dt', function (e, settings) {
+                tableS.DataTable().rows().every(function (i) {
+                    var data = this.data();
+                    data[2] = data[2].length > 0 ? dateToString(data[2]) : '';
+                    data[4] = data[4].length > 0 ? dateToString(data[4]) : '';
                     this.row(i).data(data);
                 });
 

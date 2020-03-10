@@ -347,7 +347,7 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 	if bindSupport, ok := di.MQTTContainerBind(bind); ok {
 		// TODO: обвешать подписки враппером, что бы только в online можно было посылать
 		for _, subscriber := range bindSupport.Subscribers() {
-			if err := c.mqtt.SubscribeSubscriber(subscriber); err != nil {
+			if err := c.mqtt.SubscribeSubscriber(subscriber.Subscriber()); err != nil {
 				c.itemStatusUpdate(bindItem, boggart.BindStatusUninitialized)
 				return nil, err
 			}
@@ -418,12 +418,14 @@ func (c *Component) UnregisterBindByID(id string) error {
 	if bindSupport, ok := di.MQTTContainerBind(bindItem.Bind()); ok {
 		// не блокирующее отписываемся, так как mqtt может быть не доступен
 		go func() {
-			if err := c.mqtt.UnsubscribeSubscribers(bindSupport.Subscribers()); err != nil {
-				c.logger.Error("Unregister bind failed because unsubscribe MQTT failed",
-					"type", bindItem.Type(),
-					"id", bindItem.ID(),
-					"error", err.Error(),
-				)
+			for _, subscriber := range bindSupport.Subscribers() {
+				if err := c.mqtt.UnsubscribeSubscriber(subscriber.Subscriber()); err != nil {
+					c.logger.Error("Unregister bind failed because unsubscribe MQTT failed",
+						"type", bindItem.Type(),
+						"id", bindItem.ID(),
+						"error", err.Error(),
+					)
+				}
 			}
 
 			if st := bindItem.Status(); st == boggart.BindStatusRemoving || st == boggart.BindStatusRemoved {

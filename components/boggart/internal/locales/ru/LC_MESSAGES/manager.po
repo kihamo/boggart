@@ -43,12 +43,6 @@ msgstr "Серийный номер"
 msgid "Description"
 msgstr "Описание"
 
-msgid "MQTT subscribers"
-msgstr "MQTT подписки"
-
-msgid "MQTT publishes"
-msgstr "MQTT публикации"
-
 msgid "Config"
 msgstr "Конфигурация"
 
