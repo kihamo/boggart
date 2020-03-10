@@ -14,6 +14,7 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 		b.config.TopicCleanArea,
 		b.config.TopicCleanTime,
 		b.config.TopicFanPower,
+		b.config.TopicVolume,
 		b.config.TopicConsumableFilter,
 		b.config.TopicConsumableBrushMain,
 		b.config.TopicConsumableBrushSide,

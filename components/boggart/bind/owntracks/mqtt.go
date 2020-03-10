@@ -22,6 +22,7 @@ func (b *Bind) MQTTPublishes() []mqtt.Topic {
 		b.config.TopicStateVelocity,
 		b.config.TopicStateConnection,
 		b.config.TopicStateLocation,
+		b.config.TopicOwnTracksCommand,
 	}
 
 	if !b.config.UnregisterPointsAllowed {
