@@ -6,11 +6,10 @@ import (
 	"time"
 
 	"github.com/kihamo/go-workers"
-	"github.com/kihamo/go-workers/task"
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskSerialNumber := task.NewFunctionTillSuccessTask(b.taskSerialNumber)
+	taskSerialNumber := b.Workers().WrapTaskOnceSuccess(b.taskSerialNumber)
 	taskSerialNumber.SetRepeats(-1)
 	taskSerialNumber.SetRepeatInterval(time.Second * 30)
 	taskSerialNumber.SetName("serial-number")
@@ -20,19 +19,19 @@ func (b *Bind) Tasks() []workers.Task {
 	}
 }
 
-func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
+func (b *Bind) taskSerialNumber(ctx context.Context) error {
 	if !b.Meta().IsStatusOnline() {
-		return nil, errors.New("bind isn't online")
+		return errors.New("bind isn't online")
 	}
 
 	client := b.Client()
 	if client == nil {
-		return nil, errors.New("client isn't init")
+		return errors.New("client isn't init")
 	}
 
 	deviceInfo, err := client.GetCurrentSWInformation()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	b.Meta().SetSerialNumber(deviceInfo.DeviceId)
@@ -86,5 +85,5 @@ func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
 		}
 	}()
 
-	return nil, nil
+	return nil
 }

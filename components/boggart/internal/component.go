@@ -384,7 +384,7 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 
 	// workers container
 	if bindSupport, ok := bindItem.Bind().(di.WorkersContainerSupport); ok {
-		bindSupport.SetWorkers(di.NewWorkersContainer(bindItem))
+		bindSupport.SetWorkers(di.NewWorkersContainer(bindItem, c.workers))
 
 		tasks = append(tasks, bindSupport.Workers().Tasks()...)
 	}

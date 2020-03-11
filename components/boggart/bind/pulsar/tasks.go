@@ -6,7 +6,6 @@ import (
 
 	"github.com/kihamo/boggart/providers/pulsar"
 	"github.com/kihamo/go-workers"
-	"github.com/kihamo/go-workers/task"
 	"go.uber.org/multierr"
 )
 
@@ -14,7 +13,7 @@ func (b *Bind) Tasks() []workers.Task {
 	tasks := make([]workers.Task, 0, 2)
 
 	if b.config.Address == "" {
-		taskSerialNumber := task.NewFunctionTillSuccessTask(b.taskSerialNumber)
+		taskSerialNumber := b.Workers().WrapTaskOnceSuccess(b.taskSerialNumber)
 		taskSerialNumber.SetRepeats(-1)
 		taskSerialNumber.SetRepeatInterval(time.Second * 30)
 		taskSerialNumber.SetName("serial-number")
@@ -30,14 +29,14 @@ func (b *Bind) Tasks() []workers.Task {
 	return tasks
 }
 
-func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
+func (b *Bind) taskSerialNumber(ctx context.Context) error {
 	address, err := pulsar.DeviceAddress(b.connection)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	b.createProvider(address)
-	return nil, nil
+	return nil
 }
 
 func (b *Bind) taskUpdater(ctx context.Context) error {

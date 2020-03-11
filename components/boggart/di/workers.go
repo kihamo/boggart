@@ -6,18 +6,19 @@ import (
 	"sync"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/go-workers"
+	w "github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 	"github.com/kihamo/shadow/components/logging"
+	"github.com/kihamo/shadow/components/workers"
 )
 
 type bindTask interface {
-	workers.Task
+	w.Task
 	SetName(string)
 }
 
 type WorkersHasTasks interface {
-	Tasks() []workers.Task
+	Tasks() []w.Task
 }
 
 type WorkersContainerSupport interface {
@@ -54,50 +55,77 @@ func (b *WorkersBind) Workers() *WorkersContainer {
 type WorkersContainer struct {
 	bind boggart.BindItem
 
-	cacheMutex sync.Mutex
-	cacheTasks []workers.Task
+	client workers.Component
+
+	mutex sync.RWMutex
+	tasks []w.Task
 }
 
-func NewWorkersContainer(bind boggart.BindItem) *WorkersContainer {
+func NewWorkersContainer(bind boggart.BindItem, client workers.Component) *WorkersContainer {
 	return &WorkersContainer{
-		bind: bind,
+		bind:   bind,
+		client: client,
 	}
 }
 
-func (c *WorkersContainer) Tasks() []workers.Task {
+func (c *WorkersContainer) createTask(tsk w.Task) w.Task {
+	if tsk, ok := tsk.(bindTask); ok {
+		tsk.SetName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-" + tsk.Name())
+	}
+
+	if bindSupport, ok := c.bind.Bind().(LoggerContainerSupport); ok {
+		tsk = newWorkersWrapTask(tsk, bindSupport.Logger())
+	}
+
+	return tsk
+}
+
+func (c *WorkersContainer) RegisterTask(tsk w.Task) {
+	tsk = c.createTask(tsk)
+
+	c.mutex.Lock()
+	c.tasks = append(c.tasks, tsk)
+	c.mutex.Unlock()
+
+	c.client.AddTask(tsk)
+}
+
+func (c *WorkersContainer) UnregisterTask(tsk w.Task) {
+	c.client.RemoveTask(tsk)
+
+	c.mutex.Lock()
+
+	for i := len(c.tasks) - 1; i >= 0; i-- {
+		if wrap, ok := c.tasks[i].(*workersWrapTask); ok && (wrap.original == tsk || c.tasks[i] == tsk) {
+			c.tasks = append(c.tasks[:i], c.tasks[i+1:]...)
+		}
+	}
+
+	c.mutex.Unlock()
+}
+
+func (c *WorkersContainer) Tasks() []w.Task {
+	c.mutex.RLock()
+	if c.tasks != nil {
+		defer c.mutex.RUnlock()
+
+		return append([]w.Task(nil), c.tasks...)
+	}
+	c.mutex.RUnlock()
+
 	has, ok := c.bind.Bind().(WorkersHasTasks)
 	if !ok {
 		return nil
 	}
 
-	c.cacheMutex.Lock()
-	defer c.cacheMutex.Unlock()
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
 
-	if c.cacheTasks == nil {
-		tasks := has.Tasks()
-
-		if bindSupport, ok := c.bind.Bind().(LoggerContainerSupport); ok {
-			logger := bindSupport.Logger()
-
-			for i, tsk := range tasks {
-				if tsk, ok := tsk.(bindTask); ok {
-					tsk.SetName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-" + tsk.Name())
-				}
-
-				tasks[i] = newWorkersWrapTask(tsk, logger)
-			}
-		} else {
-			for _, tsk := range tasks {
-				if tsk, ok := tsk.(bindTask); ok {
-					tsk.SetName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-" + tsk.Name())
-				}
-			}
-		}
-
-		c.cacheTasks = tasks
+	for _, tsk := range has.Tasks() {
+		c.tasks = append(c.tasks, c.createTask(tsk))
 	}
 
-	return c.cacheTasks
+	return c.tasks
 }
 
 func (c *WorkersContainer) WrapTaskIsOnline(fn func(context.Context) error) *task.FunctionTask {
@@ -110,14 +138,28 @@ func (c *WorkersContainer) WrapTaskIsOnline(fn func(context.Context) error) *tas
 	})
 }
 
+func (c *WorkersContainer) WrapTaskOnceSuccess(fn func(context.Context) error) (tsk *task.FunctionTillSuccessTask) {
+	tsk = task.NewFunctionTillSuccessTask(func(ctx context.Context) (interface{}, error) {
+		err := fn(ctx)
+
+		if err == nil {
+			c.UnregisterTask(tsk)
+		}
+
+		return nil, err
+	})
+
+	return tsk
+}
+
 type workersWrapTask struct {
 	task.BaseTask
 
-	original workers.Task
+	original w.Task
 	logger   logging.Logger
 }
 
-func newWorkersWrapTask(tsk workers.Task, logger logging.Logger) *workersWrapTask {
+func newWorkersWrapTask(tsk w.Task, logger logging.Logger) *workersWrapTask {
 	t := &workersWrapTask{
 		original: tsk,
 		logger:   logger,

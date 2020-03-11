@@ -8,12 +8,11 @@ import (
 
 	"github.com/kihamo/boggart/providers/xmeye"
 	"github.com/kihamo/go-workers"
-	"github.com/kihamo/go-workers/task"
 	"go.uber.org/multierr"
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskSerialNumber := task.NewFunctionTillSuccessTask(b.taskSerialNumber)
+	taskSerialNumber := b.Workers().WrapTaskOnceSuccess(b.taskSerialNumber)
 	taskSerialNumber.SetRepeats(-1)
 	taskSerialNumber.SetRepeatInterval(time.Second * 30)
 	taskSerialNumber.SetName("serial-number")
@@ -32,24 +31,24 @@ func (b *Bind) Tasks() []workers.Task {
 	return tasks
 }
 
-func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
+func (b *Bind) taskSerialNumber(ctx context.Context) error {
 	if !b.Meta().IsStatusOnline() {
-		return nil, errors.New("bind isn't online")
+		return errors.New("bind isn't online")
 	}
 
 	client, err := b.client(ctx)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer client.Close()
 
 	info, err := client.SystemInfo(ctx)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if info.SerialNo == "" {
-		return nil, errors.New("device returns empty serial number")
+		return errors.New("device returns empty serial number")
 	}
 
 	b.Meta().SetSerialNumber(info.SerialNo)
@@ -57,25 +56,25 @@ func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
 	if b.Meta().MAC() == nil {
 		response, err := client.ConfigGet(ctx, xmeye.ConfigNameNetworkNetCommon, false)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		if cfg, ok := response.(map[string]interface{}); ok {
 			if mac, ok := cfg["MAC"]; ok {
 				if err := b.Meta().SetMACAsString(mac.(string)); err != nil {
-					return nil, err
+					return err
 				}
 			}
 		}
 
 		if b.Meta().MAC() == nil {
-			return nil, errors.New("device returns empty MAC address")
+			return errors.New("device returns empty MAC address")
 		}
 	}
 
 	if b.config.AlarmStreamingEnabled {
 		if err = b.startAlarmStreaming(); err != nil {
-			return nil, err
+			return err
 		}
 	}
 
@@ -91,7 +90,7 @@ func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
 		err = multierr.Append(err, e)
 	}
 
-	return nil, err
+	return err
 }
 
 func (b *Bind) taskUpdater(ctx context.Context) (err error) {

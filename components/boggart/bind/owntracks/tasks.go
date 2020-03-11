@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/kihamo/go-workers"
-	"github.com/kihamo/go-workers/task"
 )
 
 func (b *Bind) Tasks() []workers.Task {
@@ -13,7 +12,7 @@ func (b *Bind) Tasks() []workers.Task {
 		return nil
 	}
 
-	taskWayPoints := task.NewFunctionTillSuccessTask(b.taskWayPoints)
+	taskWayPoints := b.Workers().WrapTaskOnceSuccess(b.taskWayPoints)
 	taskWayPoints.SetRepeats(-1)
 	taskWayPoints.SetRepeatInterval(time.Second * 10)
 	taskWayPoints.SetName("waypoints")
@@ -23,6 +22,6 @@ func (b *Bind) Tasks() []workers.Task {
 	}
 }
 
-func (b *Bind) taskWayPoints(context.Context) (interface{}, error) {
-	return nil, b.CommandWayPoints()
+func (b *Bind) taskWayPoints(context.Context) error {
+	return b.CommandWayPoints()
 }

@@ -15,12 +15,11 @@ import (
 	"github.com/kihamo/boggart/providers/hilink/client/sms"
 	"github.com/kihamo/boggart/providers/hilink/static/models"
 	"github.com/kihamo/go-workers"
-	"github.com/kihamo/go-workers/task"
 	"go.uber.org/multierr"
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskSerialNumber := task.NewFunctionTillSuccessTask(b.taskSerialNumber)
+	taskSerialNumber := b.Workers().WrapTaskOnceSuccess(b.taskSerialNumber)
 	taskSerialNumber.SetRepeats(-1)
 	taskSerialNumber.SetRepeatInterval(time.Second * 30)
 	taskSerialNumber.SetName("serial-number")
@@ -59,22 +58,22 @@ func (b *Bind) Tasks() []workers.Task {
 	return tasks
 }
 
-func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
+func (b *Bind) taskSerialNumber(ctx context.Context) error {
 	if !b.Meta().IsStatusOnline() {
-		return nil, errors.New("bind is offline")
+		return errors.New("bind is offline")
 	}
 
 	deviceInfo, err := b.client.Device.GetDeviceInformation(device.NewGetDeviceInformationParamsWithContext(ctx))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if deviceInfo.Payload.SerialNumber == "" {
-		return nil, errors.New("device returns empty serial number")
+		return errors.New("device returns empty serial number")
 	}
 
 	if deviceInfo.Payload.MacAddress1 == "" && deviceInfo.Payload.MacAddress2 == "" {
-		return nil, errors.New("device returns empty MAC address")
+		return errors.New("device returns empty MAC address")
 	}
 
 	if deviceInfo.Payload.MacAddress1 != "" {
@@ -88,13 +87,13 @@ func (b *Bind) taskSerialNumber(ctx context.Context) (interface{}, error) {
 	// set settings
 	settings, err := b.client.Global.GetGlobalModuleSwitch(global.NewGetGlobalModuleSwitchParamsWithContext(ctx))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	b.ussdEnabled.Set(settings.Payload.USSDEnabled > 0)
 	b.smsEnabled.Set(settings.Payload.SMSEnabled > 0)
 
-	return nil, err
+	return err
 }
 
 func (b *Bind) taskBalanceUpdater(ctx context.Context) error {
