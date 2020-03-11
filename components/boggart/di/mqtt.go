@@ -49,7 +49,7 @@ func (b *MQTTBind) MQTT() *MQTTContainer {
 }
 
 type MQTTSubscriber struct {
-	subscriber  mqtt.Subscriber
+	subscriber  *mqttWrapSubscriber
 	success     *atomic.Uint64
 	successTime *atomic.TimeNull
 	failed      *atomic.Uint64
@@ -82,24 +82,28 @@ type MQTTContainer struct {
 	clientMutex sync.RWMutex
 	client      mqtt.Component
 
-	cacheMutex       sync.RWMutex
-	cacheSubscribers []MQTTSubscriber
-	cachePublishes   map[string]uint64
+	mutex       sync.RWMutex
+	subscribers []MQTTSubscriber
+	publishes   map[string]uint64
 }
 
 func NewMQTTContainer(bind boggart.BindItem, client mqtt.Component) *MQTTContainer {
 	return &MQTTContainer{
-		bind:           bind,
-		client:         client,
-		cachePublishes: make(map[string]uint64, 0),
+		bind:      bind,
+		client:    client,
+		publishes: make(map[string]uint64, 0),
 	}
 }
 
-func (c *MQTTContainer) Client() mqtt.Component {
+func (c *MQTTContainer) getClient() (mqtt.Component, error) {
 	c.clientMutex.RLock()
 	defer c.clientMutex.RUnlock()
 
-	return c.client
+	if c.client == nil {
+		return nil, errors.New("MQTT client isn't init")
+	}
+
+	return c.client, nil
 }
 
 func (c *MQTTContainer) SetClient(client mqtt.Component) {
@@ -111,13 +115,13 @@ func (c *MQTTContainer) SetClient(client mqtt.Component) {
 func (c *MQTTContainer) registerPublish(topic mqtt.Topic) {
 	key := topic.String()
 
-	c.cacheMutex.Lock()
-	if _, ok := c.cachePublishes[key]; ok {
-		c.cachePublishes[key]++
+	c.mutex.Lock()
+	if _, ok := c.publishes[key]; ok {
+		c.publishes[key]++
 	} else {
-		c.cachePublishes[key] = 1
+		c.publishes[key] = 1
 	}
-	c.cacheMutex.Unlock()
+	c.mutex.Unlock()
 }
 
 func (c *MQTTContainer) Publish(ctx context.Context, topic mqtt.Topic, payload interface{}) error {
@@ -129,13 +133,12 @@ func (c *MQTTContainer) PublishWithoutCache(ctx context.Context, topic mqtt.Topi
 }
 
 func (c *MQTTContainer) PublishRaw(ctx context.Context, topic mqtt.Topic, qos byte, retained bool, payload interface{}) error {
-	client := c.Client()
-
-	if client == nil {
-		return errors.New("MQTT client isn't init")
+	client, err := c.getClient()
+	if err != nil {
+		return err
 	}
 
-	err := client.Publish(ctx, topic, qos, retained, payload)
+	err = client.Publish(ctx, topic, qos, retained, payload)
 	if err == nil {
 		c.registerPublish(topic)
 	}
@@ -144,13 +147,12 @@ func (c *MQTTContainer) PublishRaw(ctx context.Context, topic mqtt.Topic, qos by
 }
 
 func (c *MQTTContainer) PublishRawWithoutCache(ctx context.Context, topic mqtt.Topic, qos byte, retained bool, payload interface{}) error {
-	client := c.Client()
-
-	if client == nil {
-		return errors.New("MQTT client isn't init")
+	client, err := c.getClient()
+	if err != nil {
+		return err
 	}
 
-	err := client.PublishWithoutCache(ctx, topic, qos, retained, payload)
+	err = client.PublishWithoutCache(ctx, topic, qos, retained, payload)
 	if err == nil {
 		c.registerPublish(topic)
 	}
@@ -167,10 +169,9 @@ func (c *MQTTContainer) PublishAsyncWithoutCache(ctx context.Context, topic mqtt
 }
 
 func (c *MQTTContainer) PublishAsyncRaw(ctx context.Context, topic mqtt.Topic, qos byte, retained bool, payload interface{}) error {
-	client := c.Client()
-
-	if client == nil {
-		return errors.New("MQTT client isn't init")
+	client, err := c.getClient()
+	if err != nil {
+		return err
 	}
 
 	client.PublishAsync(ctx, topic, qos, retained, payload)
@@ -180,10 +181,9 @@ func (c *MQTTContainer) PublishAsyncRaw(ctx context.Context, topic mqtt.Topic, q
 }
 
 func (c *MQTTContainer) PublishAsyncRawWithoutCache(ctx context.Context, topic mqtt.Topic, qos byte, retained bool, payload interface{}) error {
-	client := c.Client()
-
-	if client == nil {
-		return errors.New("MQTT client isn't init")
+	client, err := c.getClient()
+	if err != nil {
+		return err
 	}
 
 	client.PublishAsyncWithoutCache(ctx, topic, qos, retained, payload)
@@ -235,50 +235,100 @@ func (c *MQTTContainer) WrapSubscribeDeviceIsOnline(callback mqtt.MessageHandler
 	}
 }
 
+func (c *MQTTContainer) createSubscribe(subscriber mqtt.Subscriber) MQTTSubscriber {
+	var logger logging.Logger
+
+	if bindSupport, ok := c.bind.Bind().(LoggerContainerSupport); ok {
+		logger = bindSupport.Logger()
+	}
+
+	item := MQTTSubscriber{
+		success:     atomic.NewUint64(),
+		successTime: atomic.NewTimeNull(),
+		failed:      atomic.NewUint64(),
+		failedTime:  atomic.NewTimeNull(),
+	}
+	item.subscriber = newMQTTWrapSubscriber(subscriber, logger, func() {
+		item.success.Inc()
+		item.successTime.Set(time.Now())
+	}, func() {
+		item.failed.Inc()
+		item.failedTime.Set(time.Now())
+	})
+
+	return item
+}
+
+func (c *MQTTContainer) Subscribe(subscriber mqtt.Subscriber) error {
+	client, err := c.getClient()
+	if err != nil {
+		return err
+	}
+
+	item := c.createSubscribe(subscriber)
+
+	c.mutex.Lock()
+	c.subscribers = append(c.subscribers, item)
+	c.mutex.Unlock()
+
+	return client.SubscribeSubscriber(item.Subscriber())
+}
+
+func (c *MQTTContainer) Unsubscribe(subscriber mqtt.Subscriber) error {
+	client, err := c.getClient()
+	if err != nil {
+		return err
+	}
+
+	err = client.UnsubscribeSubscriber(subscriber)
+	if err != nil {
+		return err
+	}
+
+	c.mutex.Lock()
+
+	for i := len(c.subscribers) - 1; i >= 0; i-- {
+		// смотрим напрямую в подписчика, игнорируя обертку
+		if c.subscribers[i].subscriber.original == subscriber {
+			c.subscribers = append(c.subscribers[:i], c.subscribers[i+1:]...)
+		}
+	}
+
+	c.mutex.Unlock()
+
+	return nil
+}
+
 func (c *MQTTContainer) Subscribers() []MQTTSubscriber {
+	c.mutex.RLock()
+	if c.subscribers != nil {
+		defer c.mutex.RUnlock()
+
+		return append([]MQTTSubscriber(nil), c.subscribers...)
+	}
+	c.mutex.RUnlock()
+
 	has, ok := c.bind.Bind().(MQTTHasSubscribers)
 	if !ok {
 		return nil
 	}
 
-	c.cacheMutex.Lock()
-	defer c.cacheMutex.Unlock()
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
 
-	if c.cacheSubscribers == nil {
-		var logger logging.Logger
-
-		if bindSupport, ok := c.bind.Bind().(LoggerContainerSupport); ok {
-			logger = bindSupport.Logger()
-		}
-
-		for _, subscriber := range has.MQTTSubscribers() {
-			item := MQTTSubscriber{
-				success:     atomic.NewUint64(),
-				successTime: atomic.NewTimeNull(),
-				failed:      atomic.NewUint64(),
-				failedTime:  atomic.NewTimeNull(),
-			}
-			item.subscriber = newMQTTWrapSubscriber(subscriber, logger, func() {
-				item.success.Inc()
-				item.successTime.Set(time.Now())
-			}, func() {
-				item.failed.Inc()
-				item.failedTime.Set(time.Now())
-			})
-
-			c.cacheSubscribers = append(c.cacheSubscribers, item)
-		}
+	for _, subscriber := range has.MQTTSubscribers() {
+		c.subscribers = append(c.subscribers, c.createSubscribe(subscriber))
 	}
 
-	return c.cacheSubscribers
+	return c.subscribers
 }
 
 func (c *MQTTContainer) Publishes() map[mqtt.Topic]uint64 {
-	c.cacheMutex.RLock()
-	defer c.cacheMutex.RUnlock()
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
 
-	list := make(map[mqtt.Topic]uint64, len(c.cachePublishes))
-	for topic, count := range c.cachePublishes {
+	list := make(map[mqtt.Topic]uint64, len(c.publishes))
+	for topic, count := range c.publishes {
 		list[mqtt.Topic(topic)] = count
 	}
 

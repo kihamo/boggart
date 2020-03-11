@@ -1,7 +1,6 @@
 package mqtt
 
 import (
-	"errors"
 	"sync"
 
 	"github.com/kihamo/boggart/atomic"
@@ -19,9 +18,11 @@ type Bind struct {
 }
 
 func (b *Bind) Close() (err error) {
-	if client := b.MQTT().Client(); client != nil {
-		for _, component := range b.Components() {
-			if err = client.UnsubscribeSubscribers(component.Subscribers()); err != nil {
+	client := b.MQTT()
+
+	for _, component := range b.Components() {
+		for _, subscribe := range component.Subscribers() {
+			if err = client.Unsubscribe(subscribe); err != nil {
 				return err
 			}
 		}
@@ -54,23 +55,19 @@ func (b *Bind) Components() []Component {
 	return list
 }
 
-func (b *Bind) register(c Component) (err error) {
-	b.components.Store(c.GetUniqueID(), c)
+func (b *Bind) register(component Component) (err error) {
+	b.components.Store(component.GetUniqueID(), component)
 
-	if mac := c.GetDevice().MAC(); mac != nil {
+	if mac := component.GetDevice().MAC(); mac != nil {
 		b.Meta().SetMAC(mac)
 	}
 
-	subscribers := c.Subscribers()
+	subscribers := component.Subscribers()
 	if len(subscribers) > 0 {
-		client := b.MQTT().Client()
-
-		if client == nil {
-			return errors.New("MQTT client isn't init")
-		}
+		client := b.MQTT()
 
 		for _, subscribe := range subscribers {
-			if err = client.SubscribeSubscriber(subscribe); err != nil {
+			if err = client.Subscribe(subscribe); err != nil {
 				return err
 			}
 		}
