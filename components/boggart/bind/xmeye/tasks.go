@@ -17,25 +17,12 @@ func (b *Bind) Tasks() []workers.Task {
 	taskSerialNumber.SetRepeatInterval(time.Second * 30)
 	taskSerialNumber.SetName("serial-number")
 
-	taskState := b.Workers().WrapTaskIsOnline(b.taskUpdater)
-	taskState.SetTimeout(b.config.UpdaterTimeout)
-	taskState.SetRepeats(-1)
-	taskState.SetRepeatInterval(b.config.UpdaterInterval)
-	taskState.SetName("updater")
-
-	tasks := []workers.Task{
+	return []workers.Task{
 		taskSerialNumber,
-		taskState,
 	}
-
-	return tasks
 }
 
 func (b *Bind) taskSerialNumber(ctx context.Context) error {
-	if !b.Meta().IsStatusOnline() {
-		return errors.New("bind isn't online")
-	}
-
 	client, err := b.client(ctx)
 	if err != nil {
 		return err
@@ -52,6 +39,13 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 	}
 
 	b.Meta().SetSerialNumber(info.SerialNo)
+
+	taskState := b.Workers().WrapTaskIsOnline(b.taskUpdater)
+	taskState.SetTimeout(b.config.UpdaterTimeout)
+	taskState.SetRepeats(-1)
+	taskState.SetRepeatInterval(b.config.UpdaterInterval)
+	taskState.SetName("updater")
+	b.Workers().RegisterTask(taskState)
 
 	if b.Meta().MAC() == nil {
 		response, err := client.ConfigGet(ctx, xmeye.ConfigNameNetworkNetCommon, false)
@@ -101,9 +95,6 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 	defer client.Close()
 
 	sn := b.Meta().SerialNumber()
-	if sn == "" {
-		return nil
-	}
 
 	storage, _ := client.StorageInfo(ctx)
 	for _, s := range storage {

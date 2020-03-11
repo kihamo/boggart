@@ -19,11 +19,9 @@ func (b *Bind) Tasks() []workers.Task {
 	taskUpdater.SetRepeatInterval(b.config.UpdaterInterval)
 	taskUpdater.SetName("updater")
 
-	tasks := []workers.Task{
+	return []workers.Task{
 		taskUpdater,
 	}
-
-	return tasks
 }
 
 func (b *Bind) taskUpdater(ctx context.Context) error {

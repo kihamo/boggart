@@ -20,10 +20,6 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskSerialNumber(ctx context.Context) error {
-	if !b.Meta().IsStatusOnline() {
-		return errors.New("bind isn't online")
-	}
-
 	client := b.Client()
 	if client == nil {
 		return errors.New("client isn't init")

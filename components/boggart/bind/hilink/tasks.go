@@ -24,11 +24,9 @@ func (b *Bind) Tasks() []workers.Task {
 	taskSerialNumber.SetRepeatInterval(time.Second * 30)
 	taskSerialNumber.SetName("serial-number")
 
-	tasks := []workers.Task{
+	return []workers.Task{
 		taskSerialNumber,
 	}
-
-	return tasks
 }
 
 func (b *Bind) taskSerialNumber(ctx context.Context) error {
