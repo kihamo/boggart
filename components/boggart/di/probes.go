@@ -232,9 +232,13 @@ func (c *ProbesContainer) Liveness() workers.Task {
 
 	probeTask.SetRepeatInterval(probePeriod)
 	probeTask.SetTimeout(probeTimeout)
-
 	probeTask.SetRepeats(-1)
-	probeTask.SetName("liveness-probe")
+
+	if _, ok := c.bind.Bind().(WorkersContainerSupport); ok {
+		probeTask.SetName("liveness-probe")
+	} else {
+		probeTask.SetName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-liveness-probe")
+	}
 
 	c.probeLiveness = probeTask
 	return probeTask
