@@ -12,7 +12,7 @@ func (b *Bind) Tasks() []workers.Task {
 		return nil
 	}
 
-	taskWayPoints := b.Workers().WrapTaskOnceSuccess(b.taskWayPoints)
+	taskWayPoints := b.Workers().WrapTaskIsOnlineOnceSuccess(b.taskWayPoints)
 	taskWayPoints.SetRepeats(-1)
 	taskWayPoints.SetRepeatInterval(time.Second * 10)
 	taskWayPoints.SetName("waypoints")

@@ -32,9 +32,6 @@ type Bind struct {
 	operator                  *atomic.String
 	limitInternetTrafficIndex *atomic.Int64
 	simStatus                 *atomic.Uint32
-
-	ussdEnabled *atomic.Bool
-	smsEnabled  *atomic.Bool
 }
 
 func (b *Bind) USSD(ctx context.Context, content string) (string, error) {

@@ -128,9 +128,13 @@ func (c *ProbesContainer) Readiness() workers.Task {
 
 	probeTask.SetRepeatInterval(probePeriod)
 	probeTask.SetTimeout(probeTimeout)
-
 	probeTask.SetRepeats(-1)
-	probeTask.SetName("readiness-probe")
+
+	if _, ok := c.bind.Bind().(WorkersContainerSupport); ok {
+		probeTask.SetName("readiness-probe")
+	} else {
+		probeTask.SetName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-readiness-probe")
+	}
 
 	c.probeReadiness = probeTask
 	return probeTask

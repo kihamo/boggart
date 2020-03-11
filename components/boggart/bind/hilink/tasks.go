@@ -19,50 +19,19 @@ import (
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskSerialNumber := b.Workers().WrapTaskOnceSuccess(b.taskSerialNumber)
+	taskSerialNumber := b.Workers().WrapTaskIsOnlineOnceSuccess(b.taskSerialNumber)
 	taskSerialNumber.SetRepeats(-1)
 	taskSerialNumber.SetRepeatInterval(time.Second * 30)
 	taskSerialNumber.SetName("serial-number")
 
-	taskBalanceUpdater := b.Workers().WrapTaskIsOnline(b.taskBalanceUpdater)
-	taskBalanceUpdater.SetTimeout(b.config.BalanceUpdaterTimeout)
-	taskBalanceUpdater.SetRepeats(-1)
-	taskBalanceUpdater.SetRepeatInterval(b.config.BalanceUpdaterInterval)
-	taskBalanceUpdater.SetName("balance-updater")
-
-	taskSMSChecker := b.Workers().WrapTaskIsOnline(b.taskSMSChecker)
-	taskSMSChecker.SetTimeout(b.config.SMSCheckerTimeout)
-	taskSMSChecker.SetRepeats(-1)
-	taskSMSChecker.SetRepeatInterval(b.config.SMSCheckerInterval)
-	taskSMSChecker.SetName("sms-checker")
-
-	taskSystemUpdater := b.Workers().WrapTaskIsOnline(b.taskSystemUpdater)
-	taskSystemUpdater.SetTimeout(b.config.SystemUpdaterTimeout)
-	taskSystemUpdater.SetRepeats(-1)
-	taskSystemUpdater.SetRepeatInterval(b.config.SystemUpdaterInterval)
-	taskSystemUpdater.SetName("system-updater")
-
-	taskCleaner := b.Workers().WrapTaskIsOnline(b.taskCleaner)
-	taskCleaner.SetRepeats(-1)
-	taskCleaner.SetRepeatInterval(b.config.CleanerInterval)
-	taskCleaner.SetName("cleaner")
-
 	tasks := []workers.Task{
 		taskSerialNumber,
-		taskBalanceUpdater,
-		taskSMSChecker,
-		taskSystemUpdater,
-		taskCleaner,
 	}
 
 	return tasks
 }
 
 func (b *Bind) taskSerialNumber(ctx context.Context) error {
-	if !b.Meta().IsStatusOnline() {
-		return errors.New("bind is offline")
-	}
-
 	deviceInfo, err := b.client.Device.GetDeviceInformation(device.NewGetDeviceInformationParamsWithContext(ctx))
 	if err != nil {
 		return err
@@ -90,25 +59,53 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 		return err
 	}
 
-	b.ussdEnabled.Set(settings.Payload.USSDEnabled > 0)
-	b.smsEnabled.Set(settings.Payload.SMSEnabled > 0)
+	ussdEnabled := settings.Payload.USSDEnabled > 0
+	smsEnabled := settings.Payload.SMSEnabled > 0
+
+	if ussdEnabled {
+		taskBalanceUpdater := b.Workers().WrapTaskIsOnline(b.taskBalanceUpdater)
+		taskBalanceUpdater.SetTimeout(b.config.BalanceUpdaterTimeout)
+		taskBalanceUpdater.SetRepeats(-1)
+		taskBalanceUpdater.SetRepeatInterval(b.config.BalanceUpdaterInterval)
+		taskBalanceUpdater.SetName("balance-updater")
+		b.Workers().RegisterTask(taskBalanceUpdater)
+	}
+
+	if smsEnabled {
+		taskSMSChecker := b.Workers().WrapTaskIsOnline(b.taskSMSChecker)
+		taskSMSChecker.SetTimeout(b.config.SMSCheckerTimeout)
+		taskSMSChecker.SetRepeats(-1)
+		taskSMSChecker.SetRepeatInterval(b.config.SMSCheckerInterval)
+		taskSMSChecker.SetName("sms-checker")
+		b.Workers().RegisterTask(taskSMSChecker)
+
+		taskCleaner := b.Workers().WrapTaskIsOnline(b.taskCleaner)
+		taskCleaner.SetRepeats(-1)
+		taskCleaner.SetRepeatInterval(b.config.CleanerInterval)
+		taskCleaner.SetName("cleaner")
+		b.Workers().RegisterTask(taskCleaner)
+	}
+
+	taskSystemUpdater := b.Workers().WrapTaskIsOnline(b.taskSystemUpdater)
+	taskSystemUpdater.SetTimeout(b.config.SystemUpdaterTimeout)
+	taskSystemUpdater.SetRepeats(-1)
+	taskSystemUpdater.SetRepeatInterval(b.config.SystemUpdaterInterval)
+	taskSystemUpdater.SetName("system-updater")
+	b.Workers().RegisterTask(taskSystemUpdater)
 
 	return err
 }
 
 func (b *Bind) taskBalanceUpdater(ctx context.Context) error {
-	sn := b.Meta().SerialNumber()
-	if sn == "" {
-		return nil
-	}
-
-	if b.ussdEnabled.IsFalse() || b.simStatus.Load() != 1 {
+	if b.simStatus.Load() != 1 {
 		return nil
 	}
 
 	balance, err := b.Balance(ctx)
 
 	if err == nil {
+		sn := b.Meta().SerialNumber()
+
 		metricBalance.With("serial_number", sn).Set(balance)
 
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicBalance.Format(sn), balance); e != nil {
@@ -120,12 +117,7 @@ func (b *Bind) taskBalanceUpdater(ctx context.Context) error {
 }
 
 func (b *Bind) taskSMSChecker(ctx context.Context) error {
-	if b.smsEnabled.IsFalse() || b.simStatus.Load() != 1 {
-		return nil
-	}
-
-	sn := b.Meta().SerialNumber()
-	if sn == "" {
+	if b.simStatus.Load() != 1 {
 		return nil
 	}
 
@@ -135,6 +127,8 @@ func (b *Bind) taskSMSChecker(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+
+	sn := b.Meta().SerialNumber()
 
 	metricSMSUnread.With("serial_number", sn).Set(float64(responseCount.Payload.LocalUnread))
 	if e := b.MQTT().PublishAsync(ctx, b.config.TopicSMSUnread.Format(sn), responseCount.Payload.LocalUnread); e != nil {
@@ -200,9 +194,6 @@ func (b *Bind) taskSMSChecker(ctx context.Context) error {
 
 func (b *Bind) taskSystemUpdater(ctx context.Context) (err error) {
 	sn := b.Meta().SerialNumber()
-	if sn == "" {
-		return nil
-	}
 
 	// status
 	if response, e := b.client.Monitoring.GetMonitoringStatus(monitoring.NewGetMonitoringStatusParamsWithContext(ctx)); e == nil {
@@ -315,7 +306,7 @@ func (b *Bind) taskSystemUpdater(ctx context.Context) (err error) {
 }
 
 func (b *Bind) taskCleaner(ctx context.Context) (err error) {
-	if b.smsEnabled.IsFalse() || b.simStatus.Load() != 1 {
+	if b.simStatus.Load() != 1 {
 		return nil
 	}
 

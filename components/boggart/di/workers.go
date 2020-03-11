@@ -2,7 +2,6 @@ package di
 
 import (
 	"context"
-	"errors"
 	"sync"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -131,15 +130,33 @@ func (c *WorkersContainer) Tasks() []w.Task {
 func (c *WorkersContainer) WrapTaskIsOnline(fn func(context.Context) error) *task.FunctionTask {
 	return task.NewFunctionTask(func(ctx context.Context) (interface{}, error) {
 		if c.bind.Status() != boggart.BindStatusOnline {
-			return nil, errors.New("bind is offline")
+			return nil, nil
 		}
 
 		return nil, fn(ctx)
 	})
 }
 
-func (c *WorkersContainer) WrapTaskOnceSuccess(fn func(context.Context) error) (tsk *task.FunctionTillSuccessTask) {
+func (c *WorkersContainer) WrapTaskOnceSuccess(fn func(context.Context) error) (tsk *task.FunctionTask) {
+	tsk = task.NewFunctionTask(func(ctx context.Context) (interface{}, error) {
+		err := fn(ctx)
+
+		if err == nil {
+			c.UnregisterTask(tsk)
+		}
+
+		return nil, err
+	})
+
+	return tsk
+}
+
+func (c *WorkersContainer) WrapTaskIsOnlineOnceSuccess(fn func(context.Context) error) (tsk *task.FunctionTillSuccessTask) {
 	tsk = task.NewFunctionTillSuccessTask(func(ctx context.Context) (interface{}, error) {
+		if c.bind.Status() != boggart.BindStatusOnline {
+			return nil, nil
+		}
+
 		err := fn(ctx)
 
 		if err == nil {

@@ -9,7 +9,7 @@ import (
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	taskSerialNumber := b.Workers().WrapTaskOnceSuccess(b.taskSerialNumber)
+	taskSerialNumber := b.Workers().WrapTaskIsOnlineOnceSuccess(b.taskSerialNumber)
 	taskSerialNumber.SetRepeats(-1)
 	taskSerialNumber.SetRepeatInterval(time.Second * 30)
 	taskSerialNumber.SetName("serial-number")

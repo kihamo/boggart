@@ -16,7 +16,6 @@ import (
 	_ "github.com/kihamo/boggart/components/boggart/bind/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
-	w "github.com/kihamo/go-workers"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/dashboard"
@@ -354,7 +353,14 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 		}
 	}
 
-	tasks := make([]w.Task, 0)
+	// workers container
+	if bindSupport, ok := bindItem.Bind().(di.WorkersContainerSupport); ok {
+		bindSupport.SetWorkers(di.NewWorkersContainer(bindItem, c.workers))
+
+		for _, tsk := range bindSupport.Workers().Tasks() {
+			c.workers.AddTask(tsk)
+		}
+	}
 
 	// probes container
 	if bindSupport, ok := bind.(di.ProbesContainerSupport); ok {
@@ -370,28 +376,25 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 			}))
 
 		if probe := bindSupport.Probes().Readiness(); probe != nil {
-			tasks = append(tasks, probe)
+			// если воркеры есть у привязки, то регистрируем пробы как таски, чтобы отображались в общем списке тасок
+			if bindWorkersSupport, ok := bindItem.Bind().(di.WorkersContainerSupport); ok {
+				bindWorkersSupport.Workers().RegisterTask(probe)
+			} else {
+				c.workers.AddTask(probe)
+			}
 		} else {
 			c.itemStatusUpdate(bindItem, boggart.BindStatusOnline)
 		}
 
 		if probe := bindSupport.Probes().Liveness(); probe != nil {
-			tasks = append(tasks, probe)
+			if bindWorkersSupport, ok := bindItem.Bind().(di.WorkersContainerSupport); ok {
+				bindWorkersSupport.Workers().RegisterTask(probe)
+			} else {
+				c.workers.AddTask(probe)
+			}
 		}
 	} else {
 		c.itemStatusUpdate(bindItem, boggart.BindStatusOnline)
-	}
-
-	// workers container
-	if bindSupport, ok := bindItem.Bind().(di.WorkersContainerSupport); ok {
-		bindSupport.SetWorkers(di.NewWorkersContainer(bindItem, c.workers))
-
-		tasks = append(tasks, bindSupport.Workers().Tasks()...)
-	}
-
-	// register tasks
-	for _, tsk := range tasks {
-		c.workers.AddTask(tsk)
 	}
 
 	c.binds.Store(id, bindItem)
@@ -436,12 +439,15 @@ func (c *Component) UnregisterBindByID(id string) error {
 
 	// remove probes
 	if bindSupport, ok := di.ProbesContainerBind(bindItem.Bind()); ok {
-		if probe := bindSupport.Readiness(); probe != nil {
-			c.workers.RemoveTask(probe)
-		}
+		// если воркеров нет у привязки, то удаляем таски проб вручную
+		if _, ok := bindItem.Bind().(di.WorkersContainerSupport); !ok {
+			if probe := bindSupport.Readiness(); probe != nil {
+				c.workers.RemoveTask(probe)
+			}
 
-		if probe := bindSupport.Liveness(); probe != nil {
-			c.workers.RemoveTask(probe)
+			if probe := bindSupport.Liveness(); probe != nil {
+				c.workers.RemoveTask(probe)
+			}
 		}
 	}
 
