@@ -2,6 +2,7 @@ package herospeed
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"errors"
 	"io"
@@ -14,6 +15,8 @@ import (
 
 	connection "github.com/kihamo/boggart/protocols/http"
 )
+
+var separator = []byte("<br>")
 
 type Client struct {
 	connection *connection.Client
@@ -57,7 +60,6 @@ func (c *Client) Configuration(ctx context.Context) (map[string]string, error) {
 		return nil, err
 	}
 
-	separator := "<br>"
 	separatorLen := len(separator)
 
 	split := func(data []byte, atEOF bool) (advance int, token []byte, err error) {
@@ -65,7 +67,7 @@ func (c *Client) Configuration(ctx context.Context) (map[string]string, error) {
 			return 0, nil, nil
 		}
 
-		if i := strings.Index(string(data), separator); i >= 0 {
+		if i := bytes.Index(data, separator); i >= 0 {
 			return i + separatorLen, data[0:i], nil
 		}
 
