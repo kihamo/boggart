@@ -48,7 +48,7 @@
 </div>
 {{ end }}
 
-{{ if ge (len .ups.Variables) 0 }}
+{{ if ge (len .variables) 0 }}
 <div class="row">
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel collapsed">
@@ -70,11 +70,11 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {{ range $i, $variable := .ups.Variables }}
+                        {{ range $i, $variable := .variables }}
                         <tr>
                             <td>{{ $variable.Name }}</td>
                             <td>
-                                {{ if $variable.Writeable }}
+                                {{ if $variable.Type.Writeable }}
                                     <input type="text" class="form-control" name="{{ $variable.Name }}" value="{{ $variable.Value }}" id="{{ $variable.Name }}"/>
                                 {{ else }}
                                     {{ $variable.Value }}
@@ -92,6 +92,7 @@
 </div>
 {{ end }}
 
+{{ if ge (len .commands) 0 }}
 <div class="row">
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel collapsed">
@@ -112,7 +113,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {{ range $i, $cmd := .ups.Commands }}
+                    {{ range $i, $cmd := .commands }}
                     <tr>
                         <td>{{ $cmd.Name }}</td>
                         <td>
@@ -129,6 +130,8 @@
         </div>
     </div>
 </div>
+{{ end }}
+
 {{ end }}
 
 {{ define "js" }}

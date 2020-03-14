@@ -2,6 +2,7 @@ package nut
 
 import (
 	"context"
+	"strings"
 
 	"github.com/kihamo/go-workers"
 )
@@ -23,33 +24,39 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		return err
 	}
 
-	b.mutex.Lock()
-
 	sn := b.Meta().SerialNumber()
 
-	for _, v := range variables {
-		prev, ok := b.variables[v.Name]
-		if !ok || prev != v.Value {
-			switch v.Name {
-			case "ups.load":
-				metricLoad.With("serial_number", sn).Set(float64(v.Value.(int64)))
-			case "input.voltage":
-				metricInputVoltage.With("serial_number", sn).Set(v.Value.(float64))
-			case "battery.charge":
-				metricBatteryCharge.With("serial_number", sn).Set(float64(v.Value.(int64)))
-			case "battery.runtime":
-				metricBatteryRuntime.With("serial_number", sn).Set(float64(v.Value.(int64)))
-			case "battery.voltage":
-				metricBatteryVoltage.With("serial_number", sn).Set(v.Value.(float64))
+	if sn == "" {
+		for _, v := range variables {
+			if v.Name == "device.serial" {
+				sn = strings.TrimSpace(v.Value.(string))
+				b.Meta().SetSerialNumber(sn)
+				break
 			}
-
-			b.variables[v.Name] = v.Value
-
-			// TODO:
-			_ = b.MQTT().PublishAsync(ctx, b.config.TopicVariable.Format(sn, v.Name), v.Value)
 		}
 	}
 
-	b.mutex.Unlock()
+	if sn == "" {
+		return nil
+	}
+
+	for _, v := range variables {
+		switch v.Name {
+		case "ups.load":
+			metricLoad.With("serial_number", sn).Set(float64(v.Value.(int)))
+		case "input.voltage":
+			metricInputVoltage.With("serial_number", sn).Set(v.Value.(float64))
+		case "battery.charge":
+			metricBatteryCharge.With("serial_number", sn).Set(float64(v.Value.(int)))
+		case "battery.runtime":
+			metricBatteryRuntime.With("serial_number", sn).Set(float64(v.Value.(int)))
+		case "battery.voltage":
+			metricBatteryVoltage.With("serial_number", sn).Set(v.Value.(float64))
+		}
+
+		// TODO:
+		_ = b.MQTT().PublishAsync(ctx, b.config.TopicVariable.Format(sn, v.Name), v.Value)
+	}
+
 	return nil
 }

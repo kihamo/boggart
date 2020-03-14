@@ -6,6 +6,15 @@ import (
 	"time"
 )
 
+var readBufferPool sync.Pool
+
+func init() {
+	readBufferPool.New = func() interface{} {
+		buf := make([]byte, bufferSize)
+		return &buf
+	}
+}
+
 type Net struct {
 	address string
 	options options
@@ -92,13 +101,14 @@ func (c *Net) Invoke(request []byte) (response []byte, err error) {
 		return nil, err
 	}
 
-	b := make([]byte, bufferSize)
-
 	if c.options.readTimeout > 0 {
 		if err = conn.SetReadDeadline(time.Now().Add(c.options.readTimeout)); err != nil {
 			return nil, err
 		}
 	}
+
+	b := *readBufferPool.Get().(*[]byte)
+	defer readBufferPool.Put(&b)
 
 	n, err := conn.Read(b)
 	if n > 0 {

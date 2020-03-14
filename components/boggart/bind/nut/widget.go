@@ -1,7 +1,7 @@
 package nut
 
 import (
-	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -34,11 +34,8 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 				return
 			}
 
-			ok, err := bind.SendCommand(cmd)
-			if err != nil {
-				// skip
-			} else if !ok {
-				err = errors.New("Execute command " + cmd + " return false")
+			if e := bind.SendCommand(cmd); e != nil {
+				err = fmt.Errorf("Execute command %s return error: %w", cmd, e)
 			} else {
 				successMsg = "Execute command " + cmd + " success"
 			}
@@ -53,11 +50,8 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 						continue
 					}
 
-					ok, err := bind.SetVariable(key, value[0])
-					if err != nil {
-						break
-					} else if !ok {
-						err = errors.New("Set variable " + key + " return false")
+					if e := bind.SetVariable(key, value[0]); e != nil {
+						err = fmt.Errorf("Set variable %s return error: %w", key, e)
 						break
 					}
 
@@ -92,31 +86,42 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 	ups, err := bind.ups()
 	if err != nil {
-		r.Session().FlashBag().Error(t.Translate(r.Context(), "Get UPS failed with error %s", "", err.Error()))
+		r.Session().FlashBag().Error(t.Translate(r.Context(), "Get List UPS failed with error %s", "", err.Error()))
 	}
 
-	variables := make(map[string]interface{}, len(ups.Variables))
+	variables, err := bind.Variables()
+	if err != nil {
+		r.Session().FlashBag().Error(t.Translate(r.Context(), "Get variables failed with error %s", "", err.Error()))
+	}
+
+	commands, err := bind.Commands()
+	if err != nil {
+		r.Session().FlashBag().Error(t.Translate(r.Context(), "Get commands failed with error %s", "", err.Error()))
+	}
+
+	variablesView := make(map[string]interface{}, len(variables))
 
 	var (
 		charged bool
 		runtime time.Duration
 	)
 
-	for _, v := range ups.Variables {
-		variables[v.Name] = v
+	for _, v := range variables {
+		variablesView[v.Name] = v
 
 		switch v.Name {
 		case "ups.status":
 			charged = strings.HasSuffix(v.Value.(string), " CHRG")
 
 		case "battery.runtime":
-			runtime = time.Second * time.Duration(v.Value.(int64))
+			runtime = time.Second * time.Duration(v.Value.(int))
 		}
 	}
 
 	vars := map[string]interface{}{
 		"ups":       ups,
-		"variables": variables,
+		"variables": variablesView,
+		"commands":  commands,
 		"charged":   charged,
 		"runtime":   runtime,
 		"error":     err,

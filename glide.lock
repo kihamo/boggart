@@ -1,5 +1,5 @@
-hash: 2d35a07f9dbd9e8e775f85f08ff9781ba89363633e8370ee9ba3e2038a20783a
-updated: 2020-02-16T22:53:31.805987+03:00
+hash: d4b69e3d5556785237c5f02384930613485ae432b7ef8270f536a27428cd827d
+updated: 2020-03-14T16:06:38.834379+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -97,11 +97,11 @@ imports:
   - linux/hci/evt
   - linux/hci/socket
 - name: github.com/go-openapi/analysis
-  version: 01a3bdad024cd0b80f267b070347538b6edb1c77
+  version: 421cb960388d1c41b1d4f0eee5300257ac289c97
   subpackages:
   - internal
 - name: github.com/go-openapi/errors
-  version: 9b273e805998abc751853b4e1574d66e5df888b4
+  version: 34a71fb81ae13cc914d218367d944c1cb93bc4b4
 - name: github.com/go-openapi/inflect
   version: 16a898ed1f4943794fb9b0e7afb7376a7619cf21
 - name: github.com/go-openapi/jsonpointer
@@ -111,7 +111,7 @@ imports:
 - name: github.com/go-openapi/loads
   version: 74628589c3b94e3526a842d24f46589980f5ab22
 - name: github.com/go-openapi/runtime
-  version: d5a301537e5208a4b0c720f36ba75c0fa802c7df
+  version: c2daaa2a68f30a68af3a15b3cbd83adc0c1a1880
   subpackages:
   - client
   - logger
@@ -121,13 +121,13 @@ imports:
   - middleware/untyped
   - security
 - name: github.com/go-openapi/spec
-  version: dce82e4362c708e636da7feb0831bd29efb5cd97
+  version: 1297e9a4ddf9325269fe013d7c1300aac3985f92
 - name: github.com/go-openapi/strfmt
-  version: 1940fb2f8aba2045ae5493bd64b76ad4af8b5856
+  version: 2887e74ed0fe2aea628affe322b19fc3112f98cd
 - name: github.com/go-openapi/swag
-  version: 6a1eb9830f1c6b090dcd01cee6c3983604a2306f
+  version: 59a9232e9392613952a0a4c90523c40c99140043
 - name: github.com/go-openapi/validate
-  version: 0ce7161a56d25c4021e6a4b5c18418ed46909b35
+  version: 2ddc1827652e11f55541c3a14ec2ec050f0f7ca8
 - name: github.com/go-sql-driver/mysql
   version: 9181e3a86a19bacd63e68d43ae8b7b36320d8092
 - name: github.com/go-stack/stack
@@ -426,8 +426,6 @@ imports:
   version: 975f53781597ed779763b7b65566e74c4004d8de
 - name: github.com/PuerkitoBio/urlesc
   version: de5bf2ad457846296e2031421a34e2568e304e35
-- name: github.com/robbiet480/go.nut
-  version: 246697bfaea771ddfe4ce0d754e6e2a7b8214f0f
 - name: github.com/rubenv/sql-migrate
   version: 1007f53448d75fe14190968f5de4d95ed63ebb83
   subpackages:
@@ -494,7 +492,7 @@ imports:
   - trace/propagation
   - trace/tracestate
 - name: go.uber.org/atomic
-  version: 40ae6a40a970ef4cdbffa7b24b280e316db8accc
+  version: 845920076a298bdb984fb0f1b86052e4ca0a281c
 - name: go.uber.org/multierr
   version: 3c4937480c32f4c13a875a1829af76c98ca3d40a
 - name: go.uber.org/zap
@@ -534,10 +532,6 @@ imports:
   - font
   - math/f64
   - math/fixed
-- name: golang.org/x/lint
-  version: fdd1cda4f05fd1fd86124f0ef9ce31a0b72c8448
-  subpackages:
-  - golint
 - name: golang.org/x/mobile
   version: ca3c58166ed802c9810ffc499b01bc1cd2e0153a
   subpackages:
@@ -604,9 +598,6 @@ imports:
 - name: golang.org/x/tools
   version: 554846603d9bd6cd876d3c3f3ba31aa16384c78d
   subpackages:
-  - go/ast/astutil
-  - go/gcexportdata
-  - go/internal/gcimporter
   - go/packages
 - name: google.golang.org/api
   version: 2332327d474b8b265f7d524cac166fe335d821a9
