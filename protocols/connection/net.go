@@ -107,12 +107,12 @@ func (c *Net) Invoke(request []byte) (response []byte, err error) {
 		}
 	}
 
-	b := *readBufferPool.Get().(*[]byte)
-	defer readBufferPool.Put(&b)
+	buf := readBufferPool.Get().(*[]byte)
+	defer readBufferPool.Put(buf)
 
-	n, err := conn.Read(b)
+	n, err := conn.Read(*buf)
 	if n > 0 {
-		return b[:n], err
+		return append([]byte(nil), (*buf)[:n]...), err
 	}
 
 	return nil, err
