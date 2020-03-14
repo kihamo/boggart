@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"runtime"
+	"sync"
 	"sync/atomic"
 
 	"github.com/hashicorp/go-multierror"
@@ -17,7 +18,16 @@ var (
 	prefixEnd   = []byte("END ")
 	separator   = []byte("\n")
 	resultOK    = []byte("OK")
+
+	readBufferPool sync.Pool
 )
+
+func init() {
+	readBufferPool.New = func() interface{} {
+		buf := make([]byte, 512)
+		return &buf
+	}
+}
 
 type Session struct {
 	starter    int32
@@ -105,19 +115,20 @@ func (s *Session) Request(cmd string) ([]byte, error) {
 			return nil, errors.New("response cmd could not be verified. Expected '" + cmd + "', got '" + string(multiCmd) + "'")
 		}
 
-		buf := make([]byte, 512)
-
 		prefix := append(append(prefixBegin, []byte(cmd)...), separator...)
 		suffix := append(append(prefixEnd, []byte(cmd)...), separator...)
 
 		// cut prefix
 		response = response[len(prefix):]
 
+		buf := readBufferPool.Get().(*[]byte)
+		defer readBufferPool.Put(buf)
+
 		for {
-			n, err := s.connection.Read(buf)
+			n, err := s.connection.Read(*buf)
 
 			if n > 0 {
-				response = append(response, buf[:n]...)
+				response = append(response, (*buf)[:n]...)
 
 				if bytes.HasSuffix(response, suffix) {
 					// cut postfix
