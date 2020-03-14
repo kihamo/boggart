@@ -27,7 +27,15 @@ var (
 	aesBlock, _ = aes.NewCipher(aesKey)
 
 	regularPacketHeader = []byte{0x5a, 0xa5, 0xaa, 0x55, 0x5a, 0xa5, 0xaa, 0x55}
+	readBufferPool      sync.Pool
 )
+
+func init() {
+	readBufferPool.New = func() interface{} {
+		buf := make([]byte, DefaultBufferSize)
+		return &buf
+	}
+}
 
 type Device struct {
 	mac  net.HardwareAddr
@@ -125,13 +133,15 @@ func (d *Device) request(cmd byte, payload []byte, waitResult bool) ([]byte, uin
 		return nil, requestId, nil
 	}
 
-	response := make([]byte, DefaultBufferSize)
-	size, _, err := connUDP.ReadFromUDP(response)
+	buf := readBufferPool.Get().(*[]byte)
+	defer readBufferPool.Put(buf)
+
+	size, _, err := connUDP.ReadFromUDP(*buf)
 	if err != nil {
 		return nil, requestId, err
 	}
 
-	return response[:size], requestId, nil
+	return append([]byte(nil), (*buf)[:size]...), requestId, nil
 }
 
 func (d *Device) Cmd(cmd byte, payload []byte) error {
