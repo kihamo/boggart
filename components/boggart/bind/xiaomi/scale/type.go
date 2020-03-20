@@ -21,7 +21,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		return nil, err
 	}
 
-	provider, err := scale.NewClient(device, config.MAC.HardwareAddr, config.CaptureDuration)
+	provider, err := scale.NewClient(device, config.MAC.HardwareAddr, config.CaptureDuration, config.IgnoreEmptyImpedance)
 	if err != nil {
 		return nil, err
 	}

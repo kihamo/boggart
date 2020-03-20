@@ -30,7 +30,7 @@ type Bind struct {
 }
 
 const (
-	cacheKeySeparator = string(os.PathSeparator)
+	separator = string(os.PathSeparator)
 )
 
 var messageReplacer = strings.NewReplacer(
@@ -148,7 +148,7 @@ func (b *Bind) GenerateWriter(ctx context.Context, text, format, quality, langua
 	switch format {
 	case speechkit.FormatMP3, speechkit.FormatOPUS:
 		params.SetFormat(&format)
-		cacheKey.Write([]byte(cacheKeySeparator + format))
+		cacheKey.Write([]byte(separator + format))
 
 	case speechkit.FormatWAV:
 		quality = strings.ToLower(quality)
@@ -159,14 +159,14 @@ func (b *Bind) GenerateWriter(ctx context.Context, text, format, quality, langua
 		switch quality {
 		case speechkit.QualityHi, speechkit.QualityLo:
 			params.SetQuality(&quality)
-			cacheKey.Write([]byte(cacheKeySeparator + quality))
+			cacheKey.Write([]byte(separator + quality))
 
 		default:
 			return errors.New("unknown quality " + quality)
 		}
 
 		params.SetFormat(&format)
-		cacheKey.Write([]byte(cacheKeySeparator + format))
+		cacheKey.Write([]byte(separator + format))
 
 	default:
 		return errors.New("unknown format " + format)
@@ -180,7 +180,7 @@ func (b *Bind) GenerateWriter(ctx context.Context, text, format, quality, langua
 	switch language {
 	case speechkit.LanguageEnglish, speechkit.LanguageRussian, speechkit.LanguageTurkish, speechkit.LanguageUkrainian:
 		params.SetLang(&language)
-		cacheKey.Write([]byte(cacheKeySeparator + language))
+		cacheKey.Write([]byte(separator + language))
 
 	default:
 		return errors.New("unknown language " + language)
@@ -194,7 +194,7 @@ func (b *Bind) GenerateWriter(ctx context.Context, text, format, quality, langua
 	switch speaker {
 	case speechkit.SpeakerAlyss, speechkit.SpeakerErmil, speechkit.SpeakerJane, speechkit.SpeakerOksana, speechkit.SpeakerOmazh, speechkit.SpeakerZahar:
 		params.SetSpeaker(&speaker)
-		cacheKey.Write([]byte(cacheKeySeparator + speaker))
+		cacheKey.Write([]byte(separator + speaker))
 
 	default:
 		return errors.New("unknown speaker " + speaker)
@@ -208,7 +208,7 @@ func (b *Bind) GenerateWriter(ctx context.Context, text, format, quality, langua
 	switch emotion {
 	case speechkit.EmotionNeutral, speechkit.EmotionEvil, speechkit.EmotionGood:
 		params.SetEmotion(&emotion)
-		cacheKey.Write([]byte(cacheKeySeparator + emotion))
+		cacheKey.Write([]byte(separator + emotion))
 
 	default:
 		return errors.New("unknown emotion " + emotion)
@@ -223,11 +223,11 @@ func (b *Bind) GenerateWriter(ctx context.Context, text, format, quality, langua
 	}
 
 	params.SetSpeed(&speed)
-	cacheKey.Write([]byte(cacheKeySeparator + strconv.FormatFloat(speed, 'f', -1, 64)))
-	cacheKey.Write([]byte(cacheKeySeparator + text))
+	cacheKey.Write([]byte(separator + strconv.FormatFloat(speed, 'f', -1, 64)))
+	cacheKey.Write([]byte(separator + text))
 
 	var wrapBuffer io.Writer
-	fileName := b.config.CacheDirectory + string(os.PathSeparator) + hex.EncodeToString(cacheKey.Sum(nil))
+	fileName := b.config.CacheDirectory + separator + hex.EncodeToString(cacheKey.Sum(nil))
 
 	// cache
 	if b.config.CacheEnable && !force {

@@ -39,7 +39,7 @@ func (Type) Config() interface{} {
 	}
 
 	if cacheDir != "" {
-		cacheDirBind := cacheDir + string(os.PathSeparator) + boggart.ComponentName + "_text2speech"
+		cacheDirBind := cacheDir + separator + boggart.ComponentName + "_text2speech"
 
 		err := os.Mkdir(cacheDirBind, 0700)
 		if err == nil || os.IsExist(err) {

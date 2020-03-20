@@ -46,6 +46,7 @@ type Config struct {
 	Profiles               map[string]*Profile  `valid:",required"`
 	UpdaterInterval        time.Duration        `mapstructure:"updater_interval" yaml:"updater_interval"`
 	CaptureDuration        time.Duration        `mapstructure:"capture_interval" yaml:"capture_interval"`
+	IgnoreEmptyImpedance   bool                 `mapstructure:"ignore_empty_impedance,omitempty" yaml:"ignore_empty_impedance"`
 	TopicProfile           mqtt.Topic           `mapstructure:"topic_profile" yaml:"topic_profile"`
 	TopicProfileSettings   mqtt.Topic           `mapstructure:"topic_profile_settings" yaml:"topic_profile_settings"`
 	TopicProfileActivate   mqtt.Topic           `mapstructure:"topic_profile_activate" yaml:"topic_profile_activate"`
@@ -80,6 +81,7 @@ func (Type) Config() interface{} {
 		},
 		UpdaterInterval:        time.Minute,
 		CaptureDuration:        time.Second * 10,
+		IgnoreEmptyImpedance:   true,
 		TopicProfile:           prefix + "profile",
 		TopicProfileActivate:   prefixProfile + "activate",
 		TopicProfileSettings:   prefix + mqtt.Topic(profileGuest.Name) + "/settings",
