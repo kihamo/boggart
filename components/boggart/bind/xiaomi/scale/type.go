@@ -49,6 +49,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config.TopicMetabolicAge = config.TopicMetabolicAge.Format(mac)
 
 	bind := &Bind{
+		disconnected:         atomic.NewBoolNull(),
 		config:               config,
 		provider:             provider,
 		measureStartDatetime: atomic.NewTimeDefault(time.Now()),

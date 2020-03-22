@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/go-ble/ble/linux/hci"
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/xiaomi/scale"
@@ -14,6 +15,9 @@ type Bind struct {
 	di.MQTTBind
 	di.LoggerBind
 	di.WorkersBind
+	di.ProbesBind
+
+	disconnected *atomic.BoolNull
 
 	config               *Config
 	provider             *scale.Client
@@ -22,6 +26,7 @@ type Bind struct {
 }
 
 func (b *Bind) Run() error {
+	b.disconnected.Nil()
 	b.notifyCurrentProfile(context.Background())
 	b.Meta().SetMAC(b.config.MAC.HardwareAddr)
 	return nil
@@ -79,6 +84,15 @@ func (b *Bind) Profiles() []*Profile {
 	}
 
 	return profiles
+}
+
+func (b *Bind) Measures(ctx context.Context) ([]*scale.Measure, error) {
+	measures, err := b.provider.Measures(ctx)
+	if err != nil && err == hci.ErrDisallowed {
+		b.disconnected.True()
+	}
+
+	return measures, err
 }
 
 func (b *Bind) Close() error {

@@ -20,7 +20,7 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskUpdater(ctx context.Context) error {
-	measures, err := b.provider.Measures(ctx)
+	measures, err := b.Measures(ctx)
 	if err != nil {
 		return err
 	}
