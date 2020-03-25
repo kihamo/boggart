@@ -5,7 +5,6 @@ import (
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/protocols/bluetooth"
 )
 
 type Type struct {
@@ -14,11 +13,6 @@ type Type struct {
 
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
-
-	device, err := bluetooth.NewDevice()
-	if err != nil {
-		return nil, err
-	}
 
 	mac := config.MAC.String()
 
@@ -45,7 +39,6 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	bind := &Bind{
 		disconnected:         atomic.NewBoolNull(),
 		config:               config,
-		device:               device,
 		measureStartDatetime: atomic.NewTimeDefault(time.Now()),
 	}
 

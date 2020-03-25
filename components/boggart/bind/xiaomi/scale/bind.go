@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-ble/ble"
 	"github.com/go-ble/ble/linux/hci"
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/di"
+	"github.com/kihamo/boggart/protocols/bluetooth"
 	"github.com/kihamo/boggart/providers/xiaomi/scale"
 )
 
@@ -21,7 +21,6 @@ type Bind struct {
 	disconnected *atomic.BoolNull
 
 	config               *Config
-	device               ble.Device
 	provider             *scale.Client
 	currentProfile       atomic.Value
 	measureStartDatetime *atomic.Time
@@ -32,7 +31,12 @@ func (b *Bind) Run() error {
 	b.notifyCurrentProfile(context.Background())
 	b.Meta().SetMAC(b.config.MAC.HardwareAddr)
 
-	b.provider = scale.NewClient(b.device, b.config.MAC.HardwareAddr, b.config.CaptureDuration, b.config.IgnoreEmptyImpedance)
+	device, err := bluetooth.NewDevice()
+	if err != nil {
+		return err
+	}
+
+	b.provider = scale.NewClient(device, b.config.MAC.HardwareAddr, b.config.CaptureDuration, b.config.IgnoreEmptyImpedance)
 
 	return nil
 }
