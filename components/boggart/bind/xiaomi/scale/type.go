@@ -6,7 +6,6 @@ import (
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/protocols/bluetooth"
-	"github.com/kihamo/boggart/providers/xiaomi/scale"
 )
 
 type Type struct {
@@ -17,11 +16,6 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
 	device, err := bluetooth.NewDevice()
-	if err != nil {
-		return nil, err
-	}
-
-	provider, err := scale.NewClient(device, config.MAC.HardwareAddr, config.CaptureDuration, config.IgnoreEmptyImpedance)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +45,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	bind := &Bind{
 		disconnected:         atomic.NewBoolNull(),
 		config:               config,
-		provider:             provider,
+		device:               device,
 		measureStartDatetime: atomic.NewTimeDefault(time.Now()),
 	}
 

@@ -25,7 +25,7 @@ type Client struct {
 
 var scaleUUID = ble.UUID16(0x181B)
 
-func NewClient(device ble.Device, addr net.HardwareAddr, duration time.Duration, ignoreEmptyImpedance bool) (*Client, error) {
+func NewClient(device ble.Device, addr net.HardwareAddr, duration time.Duration, ignoreEmptyImpedance bool) *Client {
 	return &Client{
 		addr:                 addr,
 		device:               device,
@@ -33,7 +33,7 @@ func NewClient(device ble.Device, addr net.HardwareAddr, duration time.Duration,
 		scanResult:           make(chan []byte),
 		scanError:            make(chan error, 1),
 		ignoreEmptyImpedance: ignoreEmptyImpedance,
-	}, nil
+	}
 }
 
 func (s *Client) advHandler(chResult chan []byte) func(a ble.Advertisement) {
@@ -82,6 +82,10 @@ SCAN:
 	for {
 		select {
 		case data := <-s.scanResult:
+			if len(data) == 0 {
+				break SCAN
+			}
+
 			// в v2 impedance равен 0 в промежуточных результах взвешивания, поэтому такое значение можно игнорировать
 			impedance := uint64(data[10])*256 + uint64(data[9])
 			if impedance == 0 && s.ignoreEmptyImpedance {
