@@ -27,6 +27,7 @@ func (b *Bind) State(ctx context.Context) error {
 	}
 
 	b.Meta().SetSerialNumber(strconv.FormatUint(uint64(state.DeviceName), 10))
+
 	var mqttErr error
 
 	if e := b.MQTT().PublishAsync(ctx, b.config.TopicStatePower, state.Power); e != nil {

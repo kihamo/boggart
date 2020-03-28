@@ -18,6 +18,7 @@ type BoolNull struct {
 func NewBoolNull() *BoolNull {
 	v := &BoolNull{}
 	v.Uint32.Set(boolNull)
+
 	return v
 }
 
@@ -32,6 +33,7 @@ func NewBoolNullDefault(value bool) *BoolNull {
 
 	v := &BoolNull{}
 	v.Uint32.Set(current)
+
 	return v
 }
 
@@ -45,6 +47,7 @@ func (v *BoolNull) Set(value bool) bool {
 	}
 
 	old := a.SwapUint32(&v.v, current)
+
 	return old != current
 }
 

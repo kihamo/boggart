@@ -23,6 +23,7 @@ func (b *Bind) callbackMQTTProfileActive(ctx context.Context, _ mqtt.Component, 
 	}
 
 	b.SetProfile(route[len(route)-2])
+
 	return b.notifyCurrentProfile(ctx)
 }
 

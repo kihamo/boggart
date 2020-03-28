@@ -70,12 +70,14 @@ func (h *DecodeHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 			Result: "failed",
 			Error:  err.Error(),
 		})
+
 		return
 	}
 
 	if debugImage != nil {
 		body, _ := ioutil.ReadAll(debugImage)
 		w.Write(body)
+
 		return
 	}
 

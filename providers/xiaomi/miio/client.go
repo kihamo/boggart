@@ -169,6 +169,7 @@ func (p *Client) Send(ctx context.Context, method string, params interface{}, re
 	if err != nil {
 		return err
 	}
+
 	request.SetBody(body)
 
 	var diff time.Duration
@@ -214,6 +215,8 @@ func (p *Client) Send(ctx context.Context, method string, params interface{}, re
 	}
 
 	var responseDefault Response
+
+	// nolint:wsl
 	if err = json.Unmarshal(response.Body(), &responseDefault); err == nil && responseDefault.ID != requestID {
 		// TODO: если requestID > responseDefault.ID то можно еще делать попытки вычитывания, обычно такое бывает
 		// из-за того что контекст прерывается быстрее чем девай отвечает и следующий реквест получает предыдущий респонс
@@ -225,5 +228,6 @@ func (p *Client) Send(ctx context.Context, method string, params interface{}, re
 	}
 
 	err = json.Unmarshal(response.Body(), &result)
+
 	return err
 }

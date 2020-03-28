@@ -44,11 +44,13 @@ func (b *Bind) updateStatusByChannelID(ctx context.Context, channelID uint64) er
 	params := ptz.NewGetPtzStatusParamsWithContext(ctx).
 		WithChannel(channelID)
 	status, err := b.client.Ptz.GetPtzStatus(params, nil)
+
 	if err != nil {
 		return err
 	}
 
 	sn := b.Meta().SerialNumber()
+
 	var result error
 
 	if channel.Status == nil || channel.Status.Elevation != status.Payload.AbsoluteHigh.Elevation {

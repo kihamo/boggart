@@ -36,8 +36,7 @@ func (t Topic) Format(args ...interface{}) Topic {
 		}
 	}
 
-	topic := strings.Join(parts, "/")
-	return Topic(topic)
+	return Topic(strings.Join(parts, "/"))
 }
 
 func (t Topic) Replace(replaces map[string]string) Topic {
@@ -47,8 +46,7 @@ func (t Topic) Replace(replaces map[string]string) Topic {
 		oldnew = append(oldnew, k, v)
 	}
 
-	topic := strings.NewReplacer(oldnew...).Replace(t.String())
-	return Topic(topic)
+	return Topic(strings.NewReplacer(oldnew...).Replace(t.String()))
 }
 
 func (t Topic) Split() (result []string) {
@@ -112,6 +110,7 @@ func (t Topic) IsInclude(topic Topic) bool {
 	}
 
 	topic = Topic(strings.TrimRight(topic.String(), "/"))
+
 	return t.match(t.Split(), topic.Split())
 }
 

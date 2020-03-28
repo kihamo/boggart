@@ -81,6 +81,7 @@ func (h *ConfigHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	}
 
 	buf := bytes.NewBuffer(nil)
+
 	enc := yaml.NewEncoder(buf)
 	defer enc.Close()
 

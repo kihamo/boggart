@@ -85,7 +85,6 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 					Result:  "failed",
 					Message: err.Error(),
 				})
-
 			} else {
 				_ = w.SendJSON(response{
 					Result:  "success",
@@ -122,8 +121,10 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 		buf := bytes.NewBuffer(nil)
 		params := streaming.NewGetStreamingPictureParamsWithContext(ctx).WithChannel(ch)
+
 		if _, err := bind.client.Streaming.GetStreamingPicture(params, nil, buf); err != nil {
 			t.NotFound(w, r)
+
 			return
 		}
 
@@ -133,7 +134,6 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			filename := b.ID() + time.Now().Format("_20060102150405.jpg")
 
 			w.Header().Set("Content-Disposition", "attachment; filename=\""+filename+"\"")
-			// w.Header().Set("Content-Type", "image/jpeg")
 		}
 
 		_, _ = io.Copy(w, buf)
@@ -146,6 +146,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 			if err == nil {
 				defer file.Close()
+
 				t := header.Header.Get("Content-Type")
 
 				switch t {

@@ -39,25 +39,12 @@ func (m *MercuryV3) Request(request *Request) (response *Response, err error) {
 }
 
 func (m *MercuryV3) RequestRaw(request *Request) (*Response, error) {
-	// fmt.Println("Request: >>>>>")
-	// fmt.Println(hex.Dump(request.Bytes()))
-
 	data, err := m.invoker.Invoke(request.Bytes())
 	if err != nil {
 		return nil, err
 	}
 
 	return ParseResponse(data)
-
-	/*
-		response, err := ParseResponse(data)
-		if err == nil {
-			fmt.Println("Response: <<<<<")
-			fmt.Println(hex.Dump(response.Bytes()))
-		}
-
-		return response, err
-	*/
 }
 
 func (m *MercuryV3) Raw() error {

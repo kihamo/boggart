@@ -44,5 +44,6 @@ func (b *Bind) sendByToken(ctx context.Context, token, text string) error {
 	}
 
 	_, err := b.messaging.Send(ctx, message)
+
 	return err
 }

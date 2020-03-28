@@ -39,6 +39,7 @@ func (c *Client) connectionInit() error {
 	}
 
 	c.connectionSet(tcpConn)
+
 	return nil
 }
 
@@ -92,7 +93,9 @@ func (c *Client) loop() {
 
 		default:
 			ctx, cancel := context.WithTimeout(context.Background(), defaultReadTimeout)
+
 			message, err := c.read(ctx)
+
 			cancel()
 
 			c.handle(message, err)
@@ -110,6 +113,7 @@ func (c *Client) write(ctx context.Context, request proto.Message) (err error) {
 
 	name := proto.MessageName(request)
 	requestType, ok := messageTypesByName[name]
+
 	if !ok {
 		return errors.New("unknown request message type")
 	}

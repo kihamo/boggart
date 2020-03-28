@@ -17,9 +17,11 @@ func GenerateCRC16(packet []byte) []byte {
 
 	for i := 0; i < len(packet); i++ {
 		result = ((result << 8) >> 8) ^ int(packet[i])
+
 		for j := 0; j < 8; j++ {
 			flag := result & 0x0001
 			result >>= 1
+
 			if flag == 1 {
 				result ^= 0xA001
 			}

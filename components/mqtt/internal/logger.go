@@ -29,7 +29,6 @@ func (l MQTTLogger) Println(v ...interface{}) {
 	}
 
 	fields := make([]interface{}, 0, 4)
-	var msg string
 
 	switch v[0] {
 	case m.NET:
@@ -57,6 +56,8 @@ func (l MQTTLogger) Println(v ...interface{}) {
 	if len(fields) == 2 {
 		v = v[1:]
 	}
+
+	var msg string
 
 	if len(v) > 0 {
 		parts := make([]string, len(v))

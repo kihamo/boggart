@@ -287,6 +287,7 @@ func (c *Client) invokeHandler(ctx context.Context, request proto.Message, h han
 	}
 
 	c.handlerRegister(h)
+
 	return nil
 }
 
@@ -299,7 +300,6 @@ func (c *Client) invokeNoDelay(ctx context.Context, request proto.Message) error
 }
 
 func (c *Client) subscribe(ctx context.Context, request proto.Message, h handlerSubscribe) (_ <-chan proto.Message, err error) {
-	chMessages := make(chan proto.Message, 1)
 	var canceled uint32
 
 	ctx, cancel := context.WithCancel(ctx)
@@ -308,6 +308,8 @@ func (c *Client) subscribe(ctx context.Context, request proto.Message, h handler
 		cancel()
 		return nil, err
 	}
+
+	chMessages := make(chan proto.Message, 1)
 
 	err = c.invokeHandler(ctx, request, func(message proto.Message, err error) bool {
 		if atomic.LoadUint32(&canceled) != 0 {

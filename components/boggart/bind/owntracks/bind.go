@@ -53,6 +53,7 @@ func (b *Bind) getAllRegions() map[string]Point {
 	}
 
 	b.mutex.RUnlock()
+
 	return all
 }
 
@@ -65,6 +66,7 @@ func (b *Bind) getAllRegionCheckers() map[string]*atomic.BoolNull {
 	}
 
 	b.mutex.RUnlock()
+
 	return all
 }
 
@@ -85,6 +87,7 @@ func (b *Bind) getOrSetRegionChecker(name string) *atomic.BoolNull {
 	}
 
 	b.checkers[name] = atomic.NewBoolNull()
+
 	return b.checkers[name]
 }
 

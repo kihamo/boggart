@@ -40,6 +40,7 @@ func (b *Bind) client(ctx context.Context) (*xmeye.Client, error) {
 func (b *Bind) startAlarmStreaming() error {
 	ctx := context.Background()
 	client, err := b.client(ctx)
+
 	if err != nil {
 		return err
 	}

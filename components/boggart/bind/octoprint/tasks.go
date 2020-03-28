@@ -25,16 +25,6 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskUpdater(ctx context.Context) error {
-	/*
-		loginParams := authorization.NewLoginParamsWithContext(ctx)
-		loginParams.Body.Passive = true
-
-		_, err := b.provider.Authorization.Login(loginParams, nil)
-		if err != nil {
-			return err
-		}
-	*/
-
 	stateParams := printer.NewGetPrinterStateParamsWithContext(ctx).
 		WithHistory(&[]bool{false}[0]).
 		WithExclude([]string{"sd"})
@@ -60,6 +50,8 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 	temperature = state.Payload.Temperature.Bed
 
 	metricDeviceTemperatureActual.With("address", address).With("device", "bed").Set(temperature.Actual)
+	metricDeviceTemperatureTarget.With("address", address).With("device", "bed").Set(temperature.Target)
+
 	if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateBedTemperatureActual.Format(address), temperature.Actual); e != nil {
 		err = multierr.Append(err, e)
 	}
@@ -68,7 +60,6 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		err = multierr.Append(err, e)
 	}
 
-	metricDeviceTemperatureTarget.With("address", address).With("device", "bed").Set(temperature.Target)
 	if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateBedTemperatureTarget.Format(address), temperature.Target); e != nil {
 		err = multierr.Append(err, e)
 	}
@@ -77,6 +68,8 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 	temperature = state.Payload.Temperature.Tool0
 
 	metricDeviceTemperatureActual.With("address", address).With("device", "tool0").Set(temperature.Actual)
+	metricDeviceTemperatureTarget.With("address", address).With("device", "tool0").Set(temperature.Target)
+
 	if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateTool0TemperatureActual.Format(address), temperature.Actual); e != nil {
 		err = multierr.Append(err, e)
 	}
@@ -85,7 +78,6 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		err = multierr.Append(err, e)
 	}
 
-	metricDeviceTemperatureTarget.With("address", address).With("device", "tool0").Set(temperature.Target)
 	if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateTool0TemperatureTarget.Format(address), temperature.Target); e != nil {
 		err = multierr.Append(err, e)
 	}

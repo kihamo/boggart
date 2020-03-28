@@ -62,9 +62,11 @@ func (b *LoggerBind) LastRecords() []observer.LoggedEntry {
 	o := c.getObserver()
 	o.mutex.RLock()
 	records := make([]observer.LoggedEntry, len(o.logs))
+
 	for i := range o.logs {
 		records[i] = o.logs[i]
 	}
+
 	o.mutex.RUnlock()
 
 	return records
@@ -90,6 +92,7 @@ func (o *loggerObserver) Check(ent zapcore.Entry, ce *zapcore.CheckedEntry) *zap
 	if o.Enabled(ent.Level) {
 		return ce.AddCore(ent, o)
 	}
+
 	return ce
 }
 

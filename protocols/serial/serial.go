@@ -95,10 +95,12 @@ func (c *Serial) Read(p []byte) (n int, err error) {
 			if re != nil {
 				if re == s.ErrTimeout {
 					err = io.EOF
+
 					break
 				}
 
 				err = re
+
 				break
 			}
 

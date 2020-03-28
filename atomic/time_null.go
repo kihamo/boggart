@@ -11,12 +11,14 @@ type TimeNull struct {
 func NewTimeNull() *TimeNull {
 	v := &TimeNull{}
 	v.Set(time.Time{})
+
 	return v
 }
 
 func NewTimeNullDefault(value time.Time) *TimeNull {
 	v := &TimeNull{}
 	v.Set(value)
+
 	return v
 }
 

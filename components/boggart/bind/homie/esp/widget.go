@@ -24,6 +24,7 @@ type response struct {
 func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
 	bind := b.Bind().(*Bind)
 	otaTimeout := defaultOTATimeout
+
 	var err error
 
 	if r.IsPost() {
@@ -96,6 +97,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 				if err == nil {
 					defer file.Close()
+
 					t := header.Header.Get("Content-Type")
 
 					switch t {

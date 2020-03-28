@@ -21,5 +21,6 @@ func (b *Bind) ReadinessProbe(ctx context.Context) error {
 	}
 
 	_, err := b.messaging.SendDryRun(ctx, message)
+
 	return err
 }

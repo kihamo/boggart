@@ -86,6 +86,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			"style":    style,
 			"icon_url": iconURL,
 		})
+
 		return
 
 	case "icon":
@@ -93,6 +94,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		req.URL.Path = "icon/" + r.URL().Query().Get("icon")
 
 		bind.proxy.ServeHTTP(w, req)
+
 		return
 	}
 

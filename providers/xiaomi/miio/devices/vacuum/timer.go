@@ -36,6 +36,7 @@ func (d *Device) Timers(ctx context.Context) ([]Timer, error) {
 
 	for _, row := range reply.Result {
 		t := Timer{}
+
 		for i, v := range row {
 			switch i {
 			case 0:

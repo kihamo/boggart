@@ -172,6 +172,7 @@ func (h *BindHandler) actionCreateOrUpdate(w *dashboard.Response, r *dashboard.R
 			}
 
 			h.Redirect(r.URL().Path, http.StatusFound, w, r)
+
 			return
 		}
 	} else {
@@ -224,6 +225,7 @@ func (h *BindHandler) actionDelete(w *dashboard.Response, r *dashboard.Request, 
 			Result:  "failed",
 			Message: err.Error(),
 		})
+
 		return
 	}
 
@@ -304,6 +306,7 @@ func (h *BindHandler) actionLogs(w *dashboard.Response, r *dashboard.Request, b 
 			enc.Close()
 
 			h.InternalError(w, r, err)
+
 			return
 		}
 
@@ -346,6 +349,7 @@ func (h *BindHandler) actionMQTT(w *dashboard.Response, r *dashboard.Request, b 
 				}
 
 				publishesItems = append(publishesItems, view)
+
 				break
 			}
 		}
@@ -409,6 +413,7 @@ func (h *BindHandler) actionTasks(w *dashboard.Response, r *dashboard.Request, b
 		}
 
 		_ = w.SendJSON(response)
+
 		return
 	}
 

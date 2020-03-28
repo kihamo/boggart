@@ -3,6 +3,8 @@ package premiergc
 import (
 	"context"
 
+	"github.com/hashicorp/go-multierror"
+
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/premiergc"
 )
@@ -22,10 +24,11 @@ func (b *Bind) Balance(ctx context.Context) (contract string, balance float64, e
 	if err == nil {
 		b.Meta().SetSerialNumber(contract)
 
-		metricBalance.With("contract", contract).Set(balance)
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicBalance.Format(contract), balance); e != nil {
-			b.Logger().Error(e.Error())
+			err = multierror.Append(err, e)
 		}
+
+		metricBalance.With("contract", contract).Set(balance)
 	}
 
 	return contract, balance, err

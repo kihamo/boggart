@@ -102,22 +102,20 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 			if p.IsCurrent {
 				name := strconv.FormatUint(p.LogicSerialNo, 10)
 
-				// TODO:
+				metricStorageUsage.With("serial_number", sn).With("name", name).Set(float64(uint64(p.TotalSpace-p.RemainSpace) * MB))
+				metricStorageAvailable.With("serial_number", sn).With("name", name).Set(float64(uint64(p.RemainSpace) * MB))
+
 				if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateHDDCapacity.Format(sn, p.LogicSerialNo), uint64(p.TotalSpace)*MB); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				// TODO:
 				if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateHDDUsage.Format(sn, p.LogicSerialNo), uint64(p.TotalSpace-p.RemainSpace)*MB); e != nil {
 					err = multierr.Append(err, e)
 				}
-				metricStorageUsage.With("serial_number", sn).With("name", name).Set(float64(uint64(p.TotalSpace-p.RemainSpace) * MB))
 
-				// TODO:
 				if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateHDDFree.Format(sn, p.LogicSerialNo), uint64(p.RemainSpace)*MB); e != nil {
 					err = multierr.Append(err, e)
 				}
-				metricStorageAvailable.With("serial_number", sn).With("name", name).Set(float64(uint64(p.RemainSpace) * MB))
 			}
 		}
 	}

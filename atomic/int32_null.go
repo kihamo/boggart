@@ -16,12 +16,14 @@ type Int32Null struct {
 func NewInt32Null() *Int32Null {
 	v := &Int32Null{}
 	v.Int64.Set(int32Null)
+
 	return v
 }
 
 func NewInt32NullDefault(value int32) *Int32Null {
 	v := &Int32Null{}
 	v.Set(value)
+
 	return v
 }
 

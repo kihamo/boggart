@@ -128,6 +128,7 @@ func (s *Session) Type(ups, name string) (t Type, err error) {
 			}
 
 			t.MaxLength = v
+
 			continue
 		}
 

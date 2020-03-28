@@ -39,6 +39,7 @@ func (c *Client) Ping(ctx context.Context) (*PingResponse, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return out.(*PingResponse), nil
 }
 
@@ -47,6 +48,7 @@ func (c *Client) DeviceInfo(ctx context.Context) (*DeviceInfoResponse, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return out.(*DeviceInfoResponse), nil
 }
 
@@ -157,6 +159,7 @@ func (c *Client) SubscribeHomeassistantServices(ctx context.Context) (*Homeassis
 	if err != nil {
 		return nil, err
 	}
+
 	return out.(*HomeassistantServiceResponse), nil
 }
 
@@ -169,6 +172,7 @@ func (c *Client) SubscribeHomeAssistantStates(ctx context.Context) (*SubscribeHo
 	if err != nil {
 		return nil, err
 	}
+
 	return out.(*SubscribeHomeAssistantStateResponse), nil
 }
 
@@ -177,6 +181,7 @@ func (c *Client) GetTime(ctx context.Context) (*GetTimeResponse, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return out.(*GetTimeResponse), nil
 }
 
@@ -234,6 +239,7 @@ func (c *Client) CameraImage(ctx context.Context, in *CameraImageRequest) (*Came
 	if err != nil {
 		return nil, err
 	}
+
 	return out.(*CameraImageResponse), nil
 }
 

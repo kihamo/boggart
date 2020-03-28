@@ -120,6 +120,7 @@ func (c *Client) Status(ctx context.Context) (Status, error) {
 		}
 
 		var err error
+
 		key := strings.TrimSpace(sp[0])
 		value := strings.TrimSpace(sp[1])
 

@@ -23,6 +23,7 @@ func (b *Bind) setVolume(ctx context.Context, level *float64, muted *bool) error
 	}
 
 	_, err := ctrlReceiver.SetVolume(ctx, &volume)
+
 	return err
 }
 
@@ -74,6 +75,7 @@ func (b *Bind) PlayFromURL(ctx context.Context, url string) error {
 	}
 
 	_, err = ctrlMedia.LoadMedia(ctx, item, 0, true, map[string]interface{}{})
+
 	return err
 }
 
@@ -97,6 +99,7 @@ func (b *Bind) Stop(ctx context.Context) error {
 	}
 
 	_, err = ctrlReceiver.QuitApp(ctx)
+
 	return err
 }
 
@@ -115,6 +118,7 @@ func (b *Bind) Resume(ctx context.Context) error {
 	}
 
 	_, err = ctrlMedia.Play(ctx)
+
 	return err
 }
 
@@ -129,5 +133,6 @@ func (b *Bind) Pause(ctx context.Context) error {
 	}
 
 	_, err = ctrlMedia.Pause(ctx)
+
 	return err
 }

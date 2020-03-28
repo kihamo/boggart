@@ -69,6 +69,7 @@ func (s *Client) Measures(ctx context.Context) ([]*Measure, error) {
 	measuresCache := make(map[time.Time]*Measure)
 
 	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
 

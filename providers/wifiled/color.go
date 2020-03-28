@@ -35,6 +35,7 @@ func (c Color) Bytes() []byte {
 func (c Color) Uint64() (value uint64) {
 	for i, b := range c.Bytes() {
 		value = value<<8 + uint64(b)
+
 		if i == 7 {
 			return
 		}
@@ -74,6 +75,7 @@ func (c Color) HSV() (h uint32, s, v float64) {
 	}
 
 	v = max * 100
+
 	return
 }
 
@@ -146,6 +148,7 @@ func ColorFromString(color string) (*Color, error) {
 		}
 
 		var r, g, b float64
+
 		c := value * saturation
 		x := c * (1 - math.Abs(math.Mod(hue/60, 2)-1))
 		m := value - c

@@ -77,6 +77,7 @@ func (b *Bind) Balance(ctx context.Context) (float64, error) {
 	}
 
 	match := op.BalanceRegexp.FindStringSubmatch(content)
+
 	for i, name := range op.BalanceRegexp.SubexpNames() {
 		if name == "value" {
 			return strconv.ParseFloat(match[i], 64)
@@ -160,6 +161,7 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, sms *models.SMSListMessagesI
 					}
 
 					var allowed bool
+
 					for _, phone := range b.config.SMSCommandsAllowedPhones {
 						if strings.Compare(phone, sms.Phone) == 0 {
 							allowed = true

@@ -92,6 +92,7 @@ func (c *Client) ConfigChannelTitleSet(ctx context.Context, names ...string) err
 		"Name":         "ChannelTitle",
 		"ChannelTitle": names,
 	})
+
 	return err
 }
 

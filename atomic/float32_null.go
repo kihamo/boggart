@@ -16,12 +16,14 @@ type Float32Null struct {
 func NewFloat32Null() *Float32Null {
 	v := &Float32Null{}
 	v.Float64.Set(float32Null)
+
 	return v
 }
 
 func NewFloat32NullDefault(value float32) *Float32Null {
 	v := &Float32Null{}
 	v.Set(value)
+
 	return v
 }
 

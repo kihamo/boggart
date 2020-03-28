@@ -111,6 +111,7 @@ func (b *Bind) otaDo(firmware *bytes.Buffer, timeout time.Duration) {
 		if ok := b.otaDelayOnline(timeout); !ok {
 			b.Logger().Warn("OTA timeout", "timeout", timeout)
 			b.otaAbort()
+
 			return
 		}
 
@@ -120,6 +121,7 @@ func (b *Bind) otaDo(firmware *bytes.Buffer, timeout time.Duration) {
 	if !b.Meta().IsStatusOnline() {
 		b.Logger().Info("Device is offline")
 		b.otaAbort()
+
 		return
 	}
 
@@ -129,10 +131,12 @@ func (b *Bind) otaDo(firmware *bytes.Buffer, timeout time.Duration) {
 		   automatically schedule OTA updates
 	*/
 	checkSumHash := md5.New()
+
 	if _, err := checkSumHash.Write(firmware.Bytes()); err != nil {
 		b.otaAbort()
 		return
 	}
+
 	checkSum := hex.EncodeToString(checkSumHash.Sum(nil)[:16])
 	b.otaChecksum.Set(checkSum)
 

@@ -107,8 +107,6 @@ func (b *Bind) StartWatch() error {
 			case <-watcher.Errors:
 				b.Logger().Error("File watcher return error", "error", err.Error())
 			}
-
-			// TODO: shutdown
 		}
 	}()
 

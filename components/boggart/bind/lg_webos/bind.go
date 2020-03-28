@@ -99,6 +99,7 @@ func (b *Bind) Toast(message string) error {
 	}
 
 	_, err := client.SystemNotificationsCreateToast(message)
+
 	return err
 }
 

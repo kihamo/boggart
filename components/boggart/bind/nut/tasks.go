@@ -31,6 +31,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 			if v.Name == "device.serial" {
 				sn = strings.TrimSpace(v.Value.(string))
 				b.Meta().SetSerialNumber(sn)
+
 				break
 			}
 		}

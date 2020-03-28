@@ -11,13 +11,12 @@ linters:
     - bodyclose
     - golint
     - unparam
-#    - gosec
     - interfacer
-#    - unconvert
-#    - goconst
-#    - prealloc
-#    - whitespace
-#    - wsl
-#    - gomnd
+#    -- unconvert
+#    -- goconst
+#    -- prealloc
+#    -- whitespace
+    - wsl
+#    -- gomnd
   disable:
     - errcheck

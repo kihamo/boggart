@@ -215,5 +215,6 @@ func (t *workersWrapTask) Run(ctx context.Context) (result interface{}, err erro
 	}
 
 	t.sync()
+
 	return result, err
 }

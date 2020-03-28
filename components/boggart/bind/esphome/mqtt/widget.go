@@ -59,6 +59,7 @@ func (t Type) handleComponent(w *dashboard.Response, r *dashboard.Request, bind 
 
 func (t Type) handleComponentLight(w *dashboard.Response, r *dashboard.Request, bind *Bind, component *ComponentLight) {
 	ctx := r.Context()
+
 	var err error
 
 	if r.IsPost() {

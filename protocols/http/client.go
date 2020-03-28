@@ -39,6 +39,7 @@ func NewClient() *Client {
 	}
 
 	client.Reset()
+
 	return client
 }
 
@@ -57,11 +58,13 @@ func (c *Client) WithUserAgent(agent string) *Client {
 	defer c.mutex.Unlock()
 
 	c.userAgent = agent
+
 	return c
 }
 
 func (c *Client) WithTimeout(timeout time.Duration) *Client {
 	c.connection.Timeout = timeout
+
 	return c
 }
 
@@ -123,11 +126,13 @@ func (c *Client) Reset() {
 
 func (c *Client) Get(ctx context.Context, u string) (*http.Response, error) {
 	request, err := http.NewRequest(http.MethodGet, u, nil)
+
 	if err != nil {
 		return nil, err
 	}
 
 	request = request.WithContext(ctx)
+
 	return c.Do(request)
 }
 

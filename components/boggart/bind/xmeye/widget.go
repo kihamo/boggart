@@ -128,6 +128,7 @@ func (t Type) widgetActionDefault(_ *dashboard.Response, r *dashboard.Request, c
 		Bitrate uint64
 		Record  bool
 	}
+
 	channels := make([]chanInfo, client.ChannelsCount())
 
 	state, err := client.WorkState(ctx)
@@ -256,6 +257,7 @@ func (t Type) widgetActionAccounts(_ *dashboard.Response, r *dashboard.Request, 
 
 func (t Type) widgetActionUser(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
 	ctx := r.Context()
+
 	var user *xmeye.User
 
 	username := strings.TrimSpace(r.URL().Query().Get("username"))
@@ -376,6 +378,7 @@ func (t Type) widgetActionPassword(w *dashboard.Response, r *dashboard.Request, 
 func (t Type) widgetActionGroup(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
 	ctx := r.Context()
 	canEditAuthorities := true
+
 	var group *xmeye.Group
 
 	groupName := strings.TrimSpace(r.URL().Query().Get("groupname"))
@@ -522,8 +525,6 @@ func (t Type) widgetActionGroupDelete(w *dashboard.Response, r *dashboard.Reques
 func (t Type) widgetActionFiles(_ *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
 	query := r.URL().Query()
 	ctx := r.Context()
-
-	var channel uint32
 	eventType := xmeye.FileSearchEventAll
 	end := time.Now()
 	start := end.Add(-time.Hour * 24 * 30)
@@ -544,6 +545,8 @@ func (t Type) widgetActionFiles(_ *dashboard.Response, r *dashboard.Request, cli
 			r.Session().FlashBag().Error(t.Translate(r.Context(), "Unknown event type %s", "", et))
 		}
 	}
+
+	var channel uint32
 
 	if channelID := query.Get("channel"); channelID != "" {
 		if cID, err := strconv.ParseUint(channelID, 10, 64); err == nil {

@@ -53,12 +53,14 @@ func (u UPS) Variables() ([]Variable, error) {
 		result[i].session = u.session
 
 		result[i].Type, err = u.session.Type(u.Name, item.Name)
+
 		if err != nil {
 			return nil, err
 		}
-		result[i].Value = result[i].Type.ConvertValue(item.Value)
 
+		result[i].Value = result[i].Type.ConvertValue(item.Value)
 		result[i].Description, err = u.session.Description(u.Name, item.Name)
+
 		if err != nil {
 			return nil, err
 		}

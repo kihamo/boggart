@@ -23,6 +23,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	}
 
 	var mode Mode
+
 	switch strings.ToLower(config.Mode) {
 	case "in":
 		mode = ModeIn

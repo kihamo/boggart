@@ -56,6 +56,7 @@ func (b *Bind) States(ctx context.Context, messages ...proto.Message) (map[uint3
 	length := len(messages)
 
 	timeout := subscribeStateTimeoutByEntity*time.Duration(length) + time.Second
+
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
@@ -65,6 +66,7 @@ func (b *Bind) States(ctx context.Context, messages ...proto.Message) (map[uint3
 	}
 
 	entitiesKeys := make(map[uint32]struct{}, length)
+
 	for _, message := range messages {
 		e, ok := message.(api.MessageState)
 		if !ok {
@@ -111,6 +113,7 @@ func (b *Bind) syncState(ctx context.Context, messages ...proto.Message) error {
 	}
 
 	entities := make(map[uint32]api.MessageEntity)
+
 	for _, message := range messages {
 		if e, ok := message.(api.MessageEntity); ok {
 			entities[e.GetKey()] = e
@@ -124,7 +127,9 @@ func (b *Bind) syncState(ctx context.Context, messages ...proto.Message) error {
 		}
 
 		var entity api.MessageEntity
+
 		entity, ok = entities[messageState.GetKey()]
+
 		if !ok {
 			continue
 		}

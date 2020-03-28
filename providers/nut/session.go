@@ -58,9 +58,11 @@ func (s *Session) Start() error {
 	}
 
 	conn, err := protocol.New(s.dsn)
+
 	if err != nil {
 		return err
 	}
+
 	s.connection = conn.(protocol.Invoker)
 	atomic.StoreInt32(&s.starter, 1)
 
@@ -91,6 +93,7 @@ func (s *Session) Close() (err error) {
 	}
 
 	atomic.StoreInt32(&s.starter, 0)
+
 	return err
 }
 

@@ -36,6 +36,7 @@ func encode(format string, img image.Image) (_ io.Reader, err error) {
 func FromBase64(code []byte) (io.Reader, error) {
 	result := make([]byte, 0)
 	_, err := base64.StdEncoding.Decode(code, result)
+
 	return bytes.NewReader(result), err
 }
 
@@ -59,8 +60,10 @@ func drawDebugBorder(img image.Image, points []image.Point) image.Image {
 	gc.SetStrokeColor(debugBorderColor)
 
 	i := 0
+
 	for {
 		currentPoint = points[i]
+
 		if i < len(points)-1 {
 			nextPoint = points[i+1]
 		} else {

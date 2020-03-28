@@ -115,6 +115,7 @@ func (c *Subscription) Callback(ctx context.Context, client Component, message M
 	}()
 
 	var wg sync.WaitGroup
+
 	wg.Add(len(subscribers))
 
 	for _, sub := range subscribers {

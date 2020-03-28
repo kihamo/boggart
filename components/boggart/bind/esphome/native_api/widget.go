@@ -277,11 +277,10 @@ func (t Type) handleState(w *dashboard.Response, r *dashboard.Request, bind *Bin
 	}
 
 	ctx := r.Context()
+
 	var err error
 
 	switch api.EntityType(entity) {
-	// TODO: CoverCommand
-
 	case api.EntityTypeClimate:
 		v, e := strconv.ParseUint(state, 10, 64)
 		if e != nil {
@@ -369,6 +368,7 @@ func (t Type) handleOTA(w *dashboard.Response, r *dashboard.Request, bind *Bind)
 
 	if err == nil {
 		defer file.Close()
+
 		t := header.Header.Get("Content-Type")
 
 		switch t {

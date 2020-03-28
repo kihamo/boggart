@@ -34,20 +34,26 @@ func NewCrypto(deviceID []byte, token string) (*Crypto, error) {
 
 	hash := md5.New()
 	_, err = hash.Write(binToken)
+
 	if err != nil {
 		return nil, err
 	}
+
 	p.key = hash.Sum(nil)
 
 	hash = md5.New()
 	_, err = hash.Write(p.key)
+
 	if err != nil {
 		return nil, err
 	}
+
 	_, err = hash.Write(binToken)
+
 	if err != nil {
 		return nil, err
 	}
+
 	p.iv = hash.Sum(nil)
 
 	p.cipher, err = aes.NewCipher(p.key)
@@ -74,6 +80,7 @@ func (p *Crypto) ReadFrom(r io.Reader) (int64, error) {
 	}
 
 	p.SetBody(p.decrypt(p.body))
+
 	return n, nil
 }
 

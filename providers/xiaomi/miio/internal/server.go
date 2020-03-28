@@ -34,6 +34,7 @@ func NewServer(file io.ReadSeeker, hostname string) (*Server, error) {
 	h := md5.New()
 
 	buf := make([]byte, 1024)
+
 	for {
 		n, err := file.Read(buf)
 		if err != nil {
@@ -47,6 +48,7 @@ func NewServer(file io.ReadSeeker, hostname string) (*Server, error) {
 	}
 
 	md5sum := hex.EncodeToString(h.Sum(nil))
+
 	file.Seek(0, 0)
 
 	if hostname == "" {
@@ -89,6 +91,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		io.Copy(w, s.file)
+
 		return
 	}
 

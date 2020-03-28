@@ -77,6 +77,7 @@ func ParseValue4Bytes(data []byte) uint64 {
 	}
 
 	result, _ := strconv.ParseUint(hex.EncodeToString([]byte{data[1], data[0], data[3], data[2]}), 16, 64)
+
 	return result
 }
 

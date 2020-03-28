@@ -126,6 +126,7 @@ func (b *Bind) taskSMSChecker(ctx context.Context) error {
 	// sms counters
 	paramsCount := sms.NewGetSMSCountParamsWithContext(ctx)
 	responseCount, err := b.client.Sms.GetSMSCount(paramsCount)
+
 	if err != nil {
 		return err
 	}
@@ -133,11 +134,12 @@ func (b *Bind) taskSMSChecker(ctx context.Context) error {
 	sn := b.Meta().SerialNumber()
 
 	metricSMSUnread.With("serial_number", sn).Set(float64(responseCount.Payload.LocalUnread))
+	metricSMSInbox.With("serial_number", sn).Set(float64(responseCount.Payload.LocalInbox))
+
 	if e := b.MQTT().PublishAsync(ctx, b.config.TopicSMSUnread.Format(sn), responseCount.Payload.LocalUnread); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	metricSMSInbox.With("serial_number", sn).Set(float64(responseCount.Payload.LocalInbox))
 	if e := b.MQTT().PublishAsync(ctx, b.config.TopicSMSInbox.Format(sn), responseCount.Payload.LocalInbox); e != nil {
 		err = multierr.Append(err, e)
 	}
@@ -158,6 +160,7 @@ func (b *Bind) taskSMSChecker(ctx context.Context) error {
 	for _, s := range responseList.Payload.Messages {
 		if s.Status != 1 {
 			payload, e := json.Marshal(s)
+
 			if err != nil {
 				err = multierr.Append(err, e)
 				continue
@@ -203,15 +206,17 @@ func (b *Bind) taskSystemUpdater(ctx context.Context) (err error) {
 
 		// только с активной SIM картой
 		if response.Payload.SimStatus == 1 {
-			metricSignalLevel.With("serial_number", sn).Set(float64(response.Payload.SignalIcon))
 			if e := b.MQTT().PublishAsync(ctx, b.config.TopicSignalLevel.Format(sn), response.Payload.SignalIcon); e != nil {
 				err = multierr.Append(err, e)
 			}
+
+			metricSignalLevel.With("serial_number", sn).Set(float64(response.Payload.SignalIcon))
 
 			if b.operator.IsEmpty() {
 				plmn, e := b.client.Net.GetCurrentPLMN(net.NewGetCurrentPLMNParamsWithContext(ctx))
 				if e == nil && plmn.Payload.FullName != "" {
 					b.operator.Set(plmn.Payload.FullName)
+
 					if e := b.MQTT().PublishAsync(ctx, b.config.TopicOperator.Format(sn), plmn.Payload.FullName); e != nil {
 						err = multierr.Append(err, e)
 					}
@@ -287,16 +292,17 @@ func (b *Bind) taskSystemUpdater(ctx context.Context) (err error) {
 	// traffic
 	if response, e := b.client.Monitoring.GetMonitoringTrafficStatistics(monitoring.NewGetMonitoringTrafficStatisticsParamsWithContext(ctx)); e == nil {
 		metricTotalConnectTime.With("serial_number", sn).Set(float64(response.Payload.TotalConnectTime))
+		metricTotalDownload.With("serial_number", sn).Set(float64(response.Payload.TotalDownload))
+		metricTotalUpload.With("serial_number", sn).Set(float64(response.Payload.TotalUpload))
+
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicConnectionTime.Format(sn), response.Payload.TotalConnectTime); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		metricTotalDownload.With("serial_number", sn).Set(float64(response.Payload.TotalDownload))
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicConnectionDownload.Format(sn), response.Payload.TotalDownload); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		metricTotalUpload.With("serial_number", sn).Set(float64(response.Payload.TotalUpload))
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicConnectionUpload.Format(sn), response.Payload.TotalUpload); e != nil {
 			err = multierr.Append(err, e)
 		}
@@ -313,6 +319,7 @@ func (b *Bind) taskCleaner(ctx context.Context) (err error) {
 	}
 
 	var page int64 = 1
+
 	for {
 		paramsList := sms.NewGetSMSListParamsWithContext(ctx).
 			WithRequest(&models.SMSListRequest{

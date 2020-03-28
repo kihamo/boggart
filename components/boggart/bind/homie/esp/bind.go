@@ -148,11 +148,9 @@ func (b *Bind) nodesSubscriber(_ context.Context, _ mqtt.Component, message mqtt
 		case "$type":
 			n.Type.Set(message.String())
 		case "$properties":
-			// TODO
 		case "$array":
-			// TODO
 		}
-	} else { // node property value
+	} else {
 		property := n.propertyLoadOrStore(route[3])
 		property.Value.Set(message.String())
 	}

@@ -16,8 +16,8 @@ type CacheHandler struct {
 func (h *CacheHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	if r.IsPost() {
 		h.PayloadCache.Purge()
-
 		h.Redirect(r.URL().Path, http.StatusFound, w, r)
+
 		return
 	}
 

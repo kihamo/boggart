@@ -12,6 +12,7 @@ func (d *HeatMeter) readMetrics(channel MetricsChannel) (float32, error) {
 		Function: FunctionReadMetrics,
 		Payload:  bs,
 	})
+
 	if err != nil {
 		return -1, err
 	}
@@ -81,6 +82,7 @@ func (d *HeatMeter) ReadSettings(param SettingsParam) ([]byte, error) {
 		Function: FunctionReadSettings,
 		Payload:  bs,
 	})
+
 	if err != nil {
 		return nil, err
 	}

@@ -61,6 +61,7 @@ func (d *SP3S) State() (bool, error) {
 func (d *SP3S) Power() (float64, error) {
 	payload := []byte{8, 0, 254, 1, 5, 1, 0, 0, 0, 45}
 	response, err := d.Call(0x6a, payload)
+
 	if err != nil {
 		return -1, err
 	}

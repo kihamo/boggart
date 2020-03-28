@@ -16,6 +16,7 @@ func GetNameByMac(mac types.HardwareAddr, arp []IPARP, dns []IPDNSStatic, leases
 			}
 
 			arpRow = row
+
 			break
 		}
 	}
@@ -24,6 +25,7 @@ func GetNameByMac(mac types.HardwareAddr, arp []IPARP, dns []IPDNSStatic, leases
 		for _, lease := range leases {
 			if lease.MacAddress.String() == mac.String() {
 				name = lease.MacAddress.String()
+
 				break
 			}
 		}

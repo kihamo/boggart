@@ -173,16 +173,16 @@ func (d *Device) Call(cmd byte, payload []byte) ([]byte, error) {
 	return result, nil
 }
 
+/*
+	Offset        Contents
+	0x00-0x03     00
+	0x04-0x12     A 15-digit value that represents this device. Broadlink's implementation uses the IMEI.
+	0x13          01
+	0x14-0x2c     00
+	0x2d          0x01
+	0x30-0x7f     NULL-terminated ASCII string containing the device name
+*/
 func (d *Device) Auth(id []byte, name string) error {
-	/*
-		Offset        Contents
-		0x00-0x03     00
-		0x04-0x12     A 15-digit value that represents this device. Broadlink's implementation uses the IMEI.
-		0x13          01
-		0x14-0x2c     00
-		0x2d          0x01
-		0x30-0x7f     NULL-terminated ASCII string containing the device name
-	*/
 	if len(id) == 0 {
 		id = []byte{0x31, 0x31, 0x31, 0x31, 0x31, 0x31, 0x31, 0x31, 0x31, 0x31, 0x31, 0x31, 0x31, 0x31, 0x31}
 	}
@@ -199,6 +199,7 @@ func (d *Device) Auth(id []byte, name string) error {
 	if nameLength > 0 {
 		nameLength--
 	}
+
 	nameLength = (nameLength / 16) * 16
 
 	size := 0x30 + nameLength
@@ -242,29 +243,28 @@ func (d *Device) DecodePacket(packet []byte) ([]byte, error) {
 	return d.decrypt(packet[0x38:]), nil
 }
 
+/*
+	Offset       Contents
+	0x00         0x5a
+	0x01         0xa5
+	0x02         0xaa
+	0x03         0x55
+	0x04         0x5a
+	0x05         0xa5
+	0x06         0xaa
+	0x07         0x55
+	0x08-0x1f    00
+	0x20-0x21    Checksum of full packet as a little-endian 16 bit integer
+	0x22-0x23    00
+	0x24-0x25    Device type as a little-endian 16 bit integer
+	0x26-0x27    Command code as a little-endian 16 bit integer
+	0x28-0x29    Packet count as a little-endian 16 bit integer
+	0x2a-0x2f    Local MAC address
+	0x30-0x33    Local device ID (obtained during authentication, 00 before authentication)
+	0x34-0x35    Checksum of unencrypted payload as a little-endian 16 bit integer
+	0x36-0x37    00
+*/
 func (d *Device) buildCmdPacket(cmd byte, payload []byte) (packet []byte, packetID uint64) {
-	/*
-		Offset       Contents
-		0x00         0x5a
-		0x01         0xa5
-		0x02         0xaa
-		0x03         0x55
-		0x04         0x5a
-		0x05         0xa5
-		0x06         0xaa
-		0x07         0x55
-		0x08-0x1f    00
-		0x20-0x21    Checksum of full packet as a little-endian 16 bit integer
-		0x22-0x23    00
-		0x24-0x25    Device type as a little-endian 16 bit integer
-		0x26-0x27    Command code as a little-endian 16 bit integer
-		0x28-0x29    Packet count as a little-endian 16 bit integer
-		0x2a-0x2f    Local MAC address
-		0x30-0x33    Local device ID (obtained during authentication, 00 before authentication)
-		0x34-0x35    Checksum of unencrypted payload as a little-endian 16 bit integer
-		0x36-0x37    00
-	*/
-
 	packet = make([]byte, 0x38)
 
 	// Build header

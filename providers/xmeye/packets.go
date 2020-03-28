@@ -54,11 +54,12 @@ func (p Packet) Marshal() []byte {
 
 	// Data Length
 	var payloadLen int
+
 	if p.payload != nil {
 		payloadLen = p.payload.Len()
 	}
-	payloadLen += len(payloadEOF)
 
+	payloadLen += len(payloadEOF)
 	binary.LittleEndian.PutUint32(message[0x10:], uint32(payloadLen))
 
 	if p.payload != nil {

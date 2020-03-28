@@ -28,6 +28,7 @@ func (r *reader) Reader(ctx context.Context) (io.Reader, error) {
 
 	// request
 	binary.BigEndian.PutUint16(lengthBuffer, uint16(len(r.command)))
+
 	if _, err = connect.Write(append(lengthBuffer, []byte(r.command)...)); err != nil {
 		return nil, err
 	}
@@ -49,6 +50,7 @@ func (r *reader) Reader(ctx context.Context) (io.Reader, error) {
 		if _, err = io.ReadFull(connect, chunk[:chunkLength]); err != nil {
 			return nil, err
 		}
+
 		response.Write(chunk)
 	}
 

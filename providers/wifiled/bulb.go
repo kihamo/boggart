@@ -124,6 +124,7 @@ func (l *Bulb) SetColorPersist(ctx context.Context, color Color) error {
 	}
 
 	_, err := l.request(ctx, []byte{CommandColorSetPersist, byte(color.Red), byte(color.Green), byte(color.Blue), byte(color.WarmWhite), byte(status), CommandLocal}, 0)
+
 	return err
 }
 
@@ -142,6 +143,7 @@ func (l *Bulb) SetColor(ctx context.Context, color Color) error {
 	}
 
 	_, err := l.request(ctx, []byte{CommandColorSet, byte(color.Red), byte(color.Green), byte(color.Blue), byte(color.WarmWhite), byte(status), CommandLocal}, 0)
+
 	return err
 }
 
@@ -179,25 +181,24 @@ func (l *Bulb) PowerOff(ctx context.Context) error {
 	return err
 }
 
+/*
+	0x81      command of requesting devices'status
+	Send      [0X81][0X8A][0X8B][check digit] / 4 bytes
+	Return    [0X81][8bit device name][8bit turn on/off][8bit mode value][8bit run/pause][8bit speed value][8bit red value][8bit green data][8bit blue data][8bit warm white data][version NO][8bit cool white data][8bit status sign][check digit] / 14 bytes
+	          Note:when module received command of checking devices's status, module will reply,
+	          [8bit turn on/off]
+	              0x23 means turn on
+	              0x24 means turn off
+	          [8bit run/pause status]
+	              0x20 means status in present
+	              0x21 means pause status, it is unuseful in this item
+	          [8bit speed value] means speed value of dynamic model
+	              range:0x01-0x1f,
+	              0x01 is the fast
+	          [0XF0] Status sign means RGB
+	          [0X0F] means W
+*/
 func (l *Bulb) State(ctx context.Context) (*State, error) {
-	/*
-		0x81      command of requesting devices'status
-		Send      [0X81][0X8A][0X8B][check digit] / 4 bytes
-		Return    [0X81][8bit device name][8bit turn on/off][8bit mode value][8bit run/pause][8bit speed value][8bit red value][8bit green data][8bit blue data][8bit warm white data][version NO][8bit cool white data][8bit status sign][check digit] / 14 bytes
-		          Note:when module received command of checking devices's status, module will reply,
-		          [8bit turn on/off]
-		              0x23 means turn on
-		              0x24 means turn off
-		          [8bit run/pause status]
-		              0x20 means status in present
-		              0x21 means pause status, it is unuseful in this item
-		          [8bit speed value] means speed value of dynamic model
-		              range:0x01-0x1f,
-		              0x01 is the fast
-		          [0XF0] Status sign means RGB
-		          [0X0F] means W
-	*/
-
 	response, err := l.request(ctx, []byte{CommandState, CommandState2, CommandState3}, 14)
 	if err != nil {
 		return nil, err

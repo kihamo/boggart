@@ -49,6 +49,7 @@ func (n *node) propertyLoadOrStore(name string) *nodeProperty {
 	}
 
 	n.properties.Store(name, property)
+
 	return property
 }
 

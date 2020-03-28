@@ -24,6 +24,7 @@ func HTTPProbe(ctx context.Context, address string, headers http.Header) error {
 		if headers == nil {
 			headers = http.Header{}
 		}
+
 		headers.Set("User-Agent", boggart.ComponentName+"/"+boggart.ComponentVersion)
 	}
 

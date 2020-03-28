@@ -11,6 +11,7 @@ import (
 
 func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
 	bind := b.Bind().(*Bind)
+
 	var err error
 
 	data := map[string]interface{}{

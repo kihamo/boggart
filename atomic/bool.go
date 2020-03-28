@@ -30,6 +30,7 @@ func (v *Bool) Set(value bool) bool {
 	}
 
 	old := a.SwapUint32(&v.v, current)
+
 	return old != current
 }
 

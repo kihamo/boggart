@@ -24,13 +24,12 @@ func NewRMMini(mac net.HardwareAddr, addr string) *RMMini {
 	}
 }
 
+/*
+	Offset    Contents
+	0x00      0x03
+	0x01-0x0f 0x00
+*/
 func (d *RMMini) StartCaptureRemoteControlCode() error {
-	/*
-		Offset    Contents
-		0x00      0x03
-		0x01-0x0f 0x00
-	*/
-
 	payload := make([]byte, 0x10)
 	payload[0] = 0x03
 
@@ -47,13 +46,12 @@ func (d *RMMini) StartCaptureRemoteControlCode() error {
 	return nil
 }
 
+/*
+	Offset    Contents
+	0x00      0x04
+	0x01-0x0f 0x00
+*/
 func (d *RMMini) ReadCapturedRemoteControlCodeRaw() ([]byte, error) {
-	/*
-		Offset    Contents
-		0x00      0x04
-		0x01-0x0f 0x00
-	*/
-
 	payload := make([]byte, 0x10)
 	payload[0] = 4
 
@@ -86,13 +84,6 @@ func (d *RMMini) ReadCapturedRemoteControlCodeRaw() ([]byte, error) {
 	}
 
 	return data[4:], nil
-
-	//sz := int(RemoteType(binary.LittleEndian.Uint16(data[6:8])))
-	//if len(data) < 8+sz {
-	//	return nil, errors.New("incomplete data")
-	//}
-
-	//return data[8:8+sz], nil
 }
 
 func (d *RMMini) ReadCapturedRemoteControlCodeRawAsString() (string, error) {

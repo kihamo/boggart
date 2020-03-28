@@ -159,6 +159,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		sort.Ints(statsKey)
+
 		for _, k := range statsKey {
 			stats = append(stats, statsByDate[k])
 		}
@@ -205,6 +206,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			Value: timeValue,
 			Error: err,
 		}
+
 		if err == nil {
 			variable.Delta = int64(now.Sub(timeValue).Seconds())
 		}

@@ -27,6 +27,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		t.Redirect(r.URL().Path, http.StatusFound, w, r)
+
 		return
 	}
 

@@ -23,14 +23,18 @@ func (m *SMSListRequest) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
+
 	return swag.WriteJSON(m)
 }
 
 func (m *SMSListRequest) UnmarshalBinary(b []byte) error {
 	var res SMSListRequest
+
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
+
 	*m = res
+
 	return nil
 }

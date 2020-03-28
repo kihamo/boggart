@@ -37,6 +37,7 @@ func blockCipher(mode cipher.BlockMode, data []byte) []byte {
 
 	result := make([]byte, size+pad)
 	mode.CryptBlocks(result[:split], data[:split])
+
 	if split < size {
 		// add padding to leftover data and feed to cipher function
 		tmp := make([]byte, aes.BlockSize)

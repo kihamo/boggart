@@ -121,6 +121,7 @@ func (p *Base) WriteTo(w io.Writer) (int64, error) {
 	}
 
 	n, err := w.Write(p.build(p.Header.Checksum))
+
 	return int64(n), err
 }
 
@@ -160,8 +161,8 @@ func (p *Base) ReadFrom(r io.Reader) (int64, error) {
 		return -1, err
 	}
 
-	result += n
 	p.Header.Unknown1 = reverse(buf)
+	result += n
 
 	// Device ID: 32 bits
 	n, err = r.Read(buf)
@@ -169,8 +170,8 @@ func (p *Base) ReadFrom(r io.Reader) (int64, error) {
 		return -1, err
 	}
 
-	result += n
 	p.Header.DeviceID = append([]byte(nil), buf...)
+	result += n
 
 	// Stamp: 32 bit unsigned int
 	n, err = r.Read(buf)
@@ -189,14 +190,14 @@ func (p *Base) ReadFrom(r io.Reader) (int64, error) {
 		return -1, err
 	}
 
-	result += n
 	p.Header.Checksum = append([]byte(nil), buf...)
+	result += n
 
 	buf = make([]byte, MaxBufferSize)
 	n, _ = r.Read(buf)
 
-	result += n
 	p.body = buf[:n]
+	result += n
 
 	return int64(result), nil
 }

@@ -36,5 +36,6 @@ func (b *Bind) callbackMQTTReboot(ctx context.Context, _ mqtt.Component, message
 	params.Request.Control = 1
 
 	_, err := b.client.Device.DeviceControl(params)
+
 	return err
 }

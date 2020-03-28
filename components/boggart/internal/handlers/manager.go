@@ -45,6 +45,7 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 		h.Render(r.Context(), "manager", map[string]interface{}{
 			"device_types": boggart.GetBindTypes(),
 		})
+
 		return
 	}
 
@@ -61,11 +62,13 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 	case "devices":
 		list := make([]managerHandlerDevice, 0)
 		buf := bytes.NewBuffer(nil)
+
 		enc := yaml.NewEncoder(buf)
 		defer enc.Close()
 
 		for _, bindItem := range h.component.BindItems() {
 			buf.Reset()
+
 			if err := enc.Encode(bindItem); err != nil {
 				panic(err.Error())
 			}

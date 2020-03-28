@@ -74,6 +74,7 @@ func (c *cache) Payloads() []mqtt.CacheItem {
 
 	keys := cache.Keys()
 	result := make([]mqtt.CacheItem, 0, len(keys))
+
 	for _, k := range keys {
 		if v, ok := cache.Get(k); ok {
 			result = append(result, v.(*cacheItem))
@@ -93,6 +94,7 @@ func (c *cache) Resize(size int) error {
 	}
 
 	c.arc = arc
+
 	return nil
 }
 

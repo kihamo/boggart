@@ -70,6 +70,7 @@ func New(address string, debug bool, logger logger.Logger) *Client {
 func (c *Client) Auth(ctx context.Context) error {
 	params := web_server.NewGetWebServerSessionParamsWithContext(ctx)
 	response, err := c.WebServer.GetWebServerSession(params)
+
 	if err != nil {
 		return err
 	}
@@ -82,6 +83,7 @@ func (c *Client) Auth(ctx context.Context) error {
 func (c *Client) Login(ctx context.Context, username, password string) error {
 	paramsAuth := web_server.NewGetWebServerSessionParamsWithContext(ctx)
 	responseAuth, err := c.WebServer.GetWebServerSession(paramsAuth)
+
 	if err != nil {
 		return err
 	}
@@ -104,5 +106,6 @@ func (c *Client) Login(ctx context.Context, username, password string) error {
 	paramsLogin.Request.PasswordType = 4
 
 	_, err = c.User.Login(paramsLogin)
+
 	return err
 }

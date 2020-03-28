@@ -137,6 +137,7 @@ func (c *ProbesContainer) Readiness() workers.Task {
 	}
 
 	c.probeReadiness = probeTask
+
 	return probeTask
 }
 
@@ -245,6 +246,7 @@ func (c *ProbesContainer) Liveness() workers.Task {
 	}
 
 	c.probeLiveness = probeTask
+
 	return probeTask
 }
 

@@ -118,6 +118,7 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 	}
 
 	var changeLocation bool
+
 	q := message.Qos()
 	r := message.Retained()
 
@@ -194,6 +195,7 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 
 	if payload.Conn != nil {
 		var v string
+
 		switch *payload.Conn {
 		case "w":
 			v = "wifi"
@@ -288,6 +290,7 @@ func (b *Bind) subscribeSyncRegions(ctx context.Context, _ mqtt.Component, messa
 	existsRegions := b.getAllRegions()
 	newRegions := make([]WayPointPayload, 0, len(existsRegions))
 	lastTst := time.Now().Unix()
+
 	for name, point := range existsRegions {
 		// точка зарегистрирована и у нас и на девайсе, пропускаем
 		if _, ok := existsDesc[name]; ok {

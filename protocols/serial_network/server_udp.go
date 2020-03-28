@@ -61,8 +61,6 @@ func (s *UDPServer) ListenAndServe() error {
 					_, _ = listen.WriteTo(writer.Bytes(), addr)
 				}
 			}
-
-			// TODO: log
 		}()
 	}
 }

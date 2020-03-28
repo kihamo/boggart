@@ -227,6 +227,7 @@ func (b *Bind) GenerateWriter(ctx context.Context, text, format, quality, langua
 	cacheKey.Write([]byte(separator + text))
 
 	var wrapBuffer io.Writer
+
 	fileName := b.config.CacheDirectory + separator + hex.EncodeToString(cacheKey.Sum(nil))
 
 	// cache

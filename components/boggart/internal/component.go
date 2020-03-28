@@ -215,6 +215,7 @@ func (c *Component) initConfigFromYaml(id string) (int, error) {
 	}
 
 	var loaded int
+
 	for _, d := range fileYAML.Devices {
 		if id != "" {
 			if d.ID == nil || *d.ID == "" || *d.ID != id {
@@ -477,6 +478,7 @@ func (c *Component) UnregisterBindByID(id string) error {
 	}
 
 	c.itemStatusUpdate(bindItem, boggart.BindStatusRemoved)
+
 	return nil
 }
 

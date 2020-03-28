@@ -19,17 +19,22 @@ func Check(c net.Conn) error {
 	)
 
 	sconn, ok := c.(syscall.Conn)
+
 	if !ok {
 		return nil
 	}
+
 	rc, err := sconn.SyscallConn()
+
 	if err != nil {
 		return err
 	}
+
 	rerr := rc.Read(func(fd uintptr) bool {
 		n, err = syscall.Read(int(fd), buff[:])
 		return true
 	})
+
 	switch {
 	case rerr != nil:
 		return rerr

@@ -74,6 +74,7 @@ func (b *Bind) Handle(message format.LogParts, length int64, err error) {
 	if val, ok := message["tag"]; ok {
 		tag = fmt.Sprintf("%v", val)
 	}
+
 	metricHandledMessage.With("address", b.addr, "tag", tag).Inc()
 
 	if err != nil {
@@ -120,6 +121,7 @@ func (b *Bind) Handle(message format.LogParts, length int64, err error) {
 			"error", err,
 			"message", message,
 		)
+
 		return
 	}
 

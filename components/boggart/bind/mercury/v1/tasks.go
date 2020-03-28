@@ -28,24 +28,21 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 	mTariff := metricTariff.With("serial_number", sn)
 
 	mTariff.With("tariff", "1").Set(float64(t1))
+	mTariff.With("tariff", "2").Set(float64(t2))
+	mTariff.With("tariff", "3").Set(float64(t3))
+	mTariff.With("tariff", "4").Set(float64(t4))
 
 	if e := b.MQTT().PublishAsync(ctx, b.config.TopicTariff1, t1); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	mTariff.With("tariff", "2").Set(float64(t2))
-
 	if e := b.MQTT().PublishAsync(ctx, b.config.TopicTariff2, t2); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	mTariff.With("tariff", "3").Set(float64(t3))
-
 	if e := b.MQTT().PublishAsync(ctx, b.config.TopicTariff3, t3); e != nil {
 		err = multierr.Append(err, e)
 	}
-
-	mTariff.With("tariff", "4").Set(float64(t4))
 
 	if e := b.MQTT().PublishAsync(ctx, b.config.TopicTariff4, t4); e != nil {
 		err = multierr.Append(err, e)
@@ -54,18 +51,16 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 	// optimization
 	if voltage, amperage, power, e := b.provider.ParamsCurrent(); e == nil {
 		metricVoltage.With("serial_number", sn).Set(float64(voltage))
+		metricAmperage.With("serial_number", sn).Set(amperage)
+		metricPower.With("serial_number", sn).Set(float64(power))
 
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicVoltage, voltage); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		metricAmperage.With("serial_number", sn).Set(amperage)
-
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicAmperage, amperage); e != nil {
 			err = multierr.Append(err, e)
 		}
-
-		metricPower.With("serial_number", sn).Set(float64(power))
 
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicPower, power); e != nil {
 			err = multierr.Append(err, e)

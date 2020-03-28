@@ -87,6 +87,9 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 		free := float64(disk.FreeSpace * unitFactor)
 		usage := capacity - free
 
+		metricStorageUsage.With("serial_number", sn).With("name", disk.SerialNum).Set(usage)
+		metricStorageAvailable.With("serial_number", sn).With("name", disk.SerialNum).Set(free)
+
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateHDDCapacity.Format(sn, disk.SerialNum), capacity); e != nil {
 			err = multierr.Append(err, e)
 		}
@@ -94,12 +97,10 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateHDDUsage.Format(sn, disk.SerialNum), usage); e != nil {
 			err = multierr.Append(err, e)
 		}
-		metricStorageUsage.With("serial_number", sn).With("name", disk.SerialNum).Set(usage)
 
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateHDDFree.Format(sn, disk.SerialNum), free); e != nil {
 			err = multierr.Append(err, e)
 		}
-		metricStorageAvailable.With("serial_number", sn).With("name", disk.SerialNum).Set(free)
 	}
 
 	return err

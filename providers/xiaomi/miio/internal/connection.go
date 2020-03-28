@@ -68,6 +68,7 @@ func (c *Connection) Invoke(ctx context.Context, request io.WriterTo, response i
 		if response != nil {
 			b := make([]byte, packet.MaxBufferSize)
 			n, _, err := c.conn.ReadFromUDP(b)
+
 			if err != nil {
 				done <- err
 				return

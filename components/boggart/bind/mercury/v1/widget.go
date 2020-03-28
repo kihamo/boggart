@@ -34,7 +34,6 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get datetime failed with error %s", "", err.Error()))
 
 			vars["stats"] = make([]*monthly, 0)
-
 		} else {
 			vars["date"] = date
 
@@ -291,6 +290,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			"delta": 0,
 			"error": err,
 		}
+
 		if err == nil {
 			variable["delta"] = int64(now.Sub(v).Seconds())
 		}

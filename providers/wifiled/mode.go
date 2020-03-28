@@ -105,5 +105,6 @@ func ModeFromString(mode string) (*Mode, error) {
 	}
 
 	m := Mode(v)
+
 	return &m, nil
 }

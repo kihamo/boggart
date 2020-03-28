@@ -358,10 +358,9 @@ func (m *MercuryV1) monthlyStat(month byte) (t1, t2, t3, t4 uint64, err error) {
 	return
 }
 
+// 0x0F текущий месяц, но модель 200 возвращает не корректные значения
+// поэтому лучше указывать месяц явно
 func (m *MercuryV1) MonthlyStat() (uint64, uint64, uint64, uint64, error) {
-	// 0x0F текущий месяц, но модель 200 возвращает не корректные значения
-	// поэтому лучше указывать месяц явно
-
 	return m.monthlyStat(0x0F)
 }
 

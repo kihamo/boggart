@@ -11,7 +11,6 @@ import (
 
 func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
 	bind := b.Bind().(*Bind)
-	var err error
 
 	data := map[string]interface{}{
 		"url":    b.Config().(*Config).WidgetFileURL,
@@ -20,6 +19,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 	status := bind.status.Load()
 	isPlaying := status == PlayerStatePlaying || status == PlayerStateBuffering
+
 	if isPlaying {
 		r.Session().FlashBag().Error(t.Translate(r.Context(), "Already playing", ""))
 	}
@@ -29,9 +29,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		data["url"] = r.Original().FormValue("url")
 
 		if !isPlaying {
-			var volume int64
-
-			volume, err = strconv.ParseInt(r.Original().FormValue("volume"), 10, 64)
+			volume, err := strconv.ParseInt(r.Original().FormValue("volume"), 10, 64)
 			if err == nil {
 				err = bind.SetVolume(r.Context(), volume)
 				if err == nil {

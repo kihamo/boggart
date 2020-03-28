@@ -104,6 +104,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 
 		if b.config.PTZEnabled {
 			ptzChannels := make(map[uint64]PTZChannel)
+
 			if list, e := b.client.Ptz.GetPtzChannels(ptz.NewGetPtzChannelsParamsWithContext(ctx), nil); e == nil {
 				for _, channel := range list.Payload {
 					ptzChannels[channel.ID] = PTZChannel{
@@ -136,22 +137,24 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 	defer b.mutex.RUnlock()
 
 	if status, e := b.client.System.GetStatus(system.NewGetStatusParamsWithContext(ctx), nil); e == nil {
+		memoryUsage := int64(status.Payload.MemoryList[0].MemoryUsage) * MB
+		memoryAvailable := int64(status.Payload.MemoryList[0].MemoryAvailable) * MB
+
+		metricUpTime.With("serial_number", sn).Set(float64(status.Payload.DeviceUpTime))
+		metricMemoryUsage.With("serial_number", sn).Set(float64(memoryUsage))
+		metricMemoryAvailable.With("serial_number", sn).Set(float64(memoryAvailable))
+
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateUpTime.Format(sn), status.Payload.DeviceUpTime); e != nil {
 			err = multierr.Append(err, e)
 		}
-		metricUpTime.With("serial_number", sn).Set(float64(status.Payload.DeviceUpTime))
 
-		memoryUsage := int64(status.Payload.MemoryList[0].MemoryUsage) * MB
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateMemoryUsage.Format(sn), memoryUsage); e != nil {
 			err = multierr.Append(err, e)
 		}
-		metricMemoryUsage.With("serial_number", sn).Set(float64(memoryUsage))
 
-		memoryAvailable := int64(status.Payload.MemoryList[0].MemoryAvailable) * MB
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateMemoryAvailable.Format(sn), memoryAvailable); e != nil {
 			err = multierr.Append(err, e)
 		}
-		metricMemoryAvailable.With("serial_number", sn).Set(float64(memoryAvailable))
 	} else {
 		err = multierr.Append(err, e)
 	}
@@ -162,6 +165,9 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 				continue
 			}
 
+			metricStorageUsage.With("serial_number", sn).With("name", hdd.Name).Set(float64((hdd.Capacity - hdd.FreeSpace) * MB))
+			metricStorageAvailable.With("serial_number", sn).With("name", hdd.Name).Set(float64(hdd.FreeSpace * MB))
+
 			if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateHDDCapacity.Format(sn, hdd.ID), hdd.Capacity*MB); e != nil {
 				err = multierr.Append(err, e)
 			}
@@ -169,12 +175,10 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 			if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateHDDUsage.Format(sn, hdd.ID), (hdd.Capacity-hdd.FreeSpace)*MB); e != nil {
 				err = multierr.Append(err, e)
 			}
-			metricStorageUsage.With("serial_number", sn).With("name", hdd.Name).Set(float64((hdd.Capacity - hdd.FreeSpace) * MB))
 
 			if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateHDDFree.Format(sn, hdd.ID), hdd.FreeSpace*MB); e != nil {
 				err = multierr.Append(err, e)
 			}
-			metricStorageAvailable.With("serial_number", sn).With("name", hdd.Name).Set(float64(hdd.FreeSpace * MB))
 		}
 	} else {
 		err = multierr.Append(err, e)

@@ -12,5 +12,6 @@ func (b *Bind) ReadinessProbe(ctx context.Context) error {
 	defer client.Close()
 
 	_, err = client.SystemInfo(ctx)
+
 	return err
 }

@@ -69,6 +69,7 @@ func (b *Bind) SendPhoto(to, name string, file io.Reader, size int64) error {
 	msg.Caption = name
 
 	_, err = bot.Send(msg)
+
 	return err
 }
 
@@ -91,6 +92,7 @@ func (b *Bind) SendAudio(to, name string, file io.Reader, size int64) error {
 	msg.Caption = name
 
 	_, err = bot.Send(msg)
+
 	return err
 }
 
@@ -113,6 +115,7 @@ func (b *Bind) SendDocument(to, name string, file io.Reader, size int64) error {
 	msg.Caption = name
 
 	_, err = bot.Send(msg)
+
 	return err
 }
 
@@ -192,15 +195,16 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 		for {
 			select {
 			case u := <-ch:
-				// TODO: фильтрация по чату
-
-				// TODO: фильтрация по юзеру
-
 				if u.Message == nil {
 					continue
 				}
 
+				// TODO: фильтрация по чату
+
+				// TODO: фильтрация по юзеру
+
 				ctx := context.Background()
+
 				var mqttTopic mqtt.Topic
 
 				if u.Message.Text != "" {
@@ -239,6 +243,7 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 					b.Logger().Error("Bot if offline",
 						"file", fileID,
 					)
+
 					return
 				}
 
@@ -249,6 +254,7 @@ func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {
 						"file", fileID,
 						"error", err.Error(),
 					)
+
 					continue
 				}
 

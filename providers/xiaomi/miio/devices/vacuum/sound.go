@@ -190,7 +190,9 @@ func (d *Device) SoundInstallLocalServer(ctx context.Context, file io.ReadSeeker
 	defer server.Close()
 
 	var status SoundInstallStatus
+
 	status, err = d.SoundInstall(ctx, server.URL().String(), server.MD5(), sid)
+
 	if err == nil {
 		if status.IsError() {
 			return errors.New("return error " + status.Error.String())

@@ -172,17 +172,20 @@ func (o *OTA) readerFromFile(filename string) (io.Reader, int, error) {
 	}
 
 	stat, err := f.Stat()
+
 	if err != nil {
 		return nil, -1, err
 	}
 
 	buf := bytes.NewBuffer(nil)
 	_, err = buf.ReadFrom(f)
+
 	if err != nil {
 		return nil, -1, err
 	}
 
 	f.Close()
+
 	return buf, int(stat.Size()), nil
 }
 
@@ -296,12 +299,15 @@ func (o *OTA) doUpload(reader io.Reader, size int) error {
 
 		// >>> auth result
 		hashMD5.Reset()
+
 		if _, err = hashMD5.Write([]byte(o.password)); err != nil {
 			return errors.New("error auth result calculate: " + err.Error())
 		}
+
 		if _, err = hashMD5.Write(nonce); err != nil {
 			return errors.New("error auth result calculate: " + err.Error())
 		}
+
 		if _, err = hashMD5.Write(cnonce); err != nil {
 			return errors.New("error auth result calculate: " + err.Error())
 		}
@@ -337,6 +343,7 @@ func (o *OTA) doUpload(reader io.Reader, size int) error {
 	body := bytes.NewBuffer(nil)
 
 	hashMD5.Reset()
+
 	if _, err = io.Copy(hashMD5, io.TeeReader(reader, body)); err != nil {
 		return errors.New("error file checksum calculate: " + err.Error())
 	}
@@ -414,7 +421,6 @@ func (o *OTA) receive(conn io.Reader, amount int, expect []byte) ([]byte, error)
 	l := len(expect)
 
 	buf := make([]byte, l+amount)
-	var offset int
 
 	start := l
 	if start < 1 {
@@ -429,7 +435,8 @@ func (o *OTA) receive(conn io.Reader, amount int, expect []byte) ([]byte, error)
 	if n != start {
 		return nil, fmt.Errorf("unexpected response start bytes %d expected %d", n, start)
 	}
-	offset += n
+
+	offset := n
 
 	// check first byte
 	if text, ok := errorText[int64(buf[0])]; ok {

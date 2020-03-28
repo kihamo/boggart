@@ -8,6 +8,7 @@ func HashPassword(password []byte) string {
 	hashMD5 := md5.Sum(password)
 
 	var n int
+
 	hash := make([]byte, 8)
 
 	for i := 0; i < 8; i++ {

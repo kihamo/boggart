@@ -128,6 +128,7 @@ func (c *Component) initClient() (err error) {
 
 	opts.OnConnect = func(client m.Client) {
 		cfg := client.OptionsReader()
+
 		var mqttVersion string
 
 		switch cfg.ProtocolVersion() {
@@ -176,6 +177,7 @@ func (c *Component) initClient() (err error) {
 	}
 
 	opts.Servers = make([]*url.URL, 0)
+
 	for _, u := range strings.Split(c.config.String(mqtt.ConfigServers), ";") {
 		if p, err := url.Parse(u); err == nil {
 			opts.Servers = append(opts.Servers, p)
@@ -263,6 +265,7 @@ func (c *Component) clientSubscribe(topic mqtt.Topic, qos byte, subscription *mq
 	// wrap tracing
 	callback := func(client m.Client, message m.Message) {
 		span, ctx := tracing.StartSpanFromContext(context.Background(), c.Name(), "subscribe_callback")
+
 		span = span.SetTag("topic", message.Topic())
 		defer span.Finish()
 
@@ -342,6 +345,7 @@ func (c *Component) doPublish(ctx context.Context, topic mqtt.Topic, qos byte, r
 	payloadConverted := c.convertPayload(payload)
 
 	span, _ := tracing.StartSpanFromContext(ctx, c.Name(), "mqtt_publish")
+
 	span = span.SetTag("topic", topic)
 	defer span.Finish()
 
@@ -552,6 +556,7 @@ func (c *Component) SubscribeSubscriber(subscriber mqtt.Subscriber) error {
 		if s.Match(topic) {
 			s.AddSubscriber(subscriber)
 			subscription = s
+
 			break
 		}
 	}
@@ -582,9 +587,11 @@ func (c *Component) SubscribeSubscriber(subscriber mqtt.Subscriber) error {
 func (c *Component) Subscriptions() []*mqtt.Subscription {
 	c.mutex.RLock()
 	subscriptions := make([]*mqtt.Subscription, 0, c.subscriptions.Len())
+
 	for e := c.subscriptions.Front(); e != nil; e = e.Next() {
 		subscriptions = append(subscriptions, e.Value.(*mqtt.Subscription))
 	}
+
 	c.mutex.RUnlock()
 
 	return subscriptions

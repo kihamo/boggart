@@ -12,6 +12,7 @@ func (c *Client) FullAuthorityList(ctx context.Context) ([]string, error) {
 	}
 
 	err := c.CallWithResult(ctx, CmdFullAuthorityListRequest, nil, &result)
+
 	return result.AuthorityList, err
 }
 
@@ -22,6 +23,7 @@ func (c *Client) Users(ctx context.Context) ([]User, error) {
 	}
 
 	err := c.CallWithResult(ctx, CmdUsersRequest, nil, &result)
+
 	return result.Users, err
 }
 
@@ -114,6 +116,7 @@ func (c *Client) Groups(ctx context.Context) ([]Group, error) {
 	}
 
 	err := c.CallWithResult(ctx, CmdGroupsRequest, nil, &result)
+
 	return result.Groups, err
 }
 

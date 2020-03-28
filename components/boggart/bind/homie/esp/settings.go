@@ -110,6 +110,7 @@ func (b *Bind) settingsSet(ctx context.Context, key string, value interface{}) (
 func (b *Bind) settingsSubscriber(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 	md := make(map[string]interface{})
 	err := message.JSONUnmarshal(&md)
+
 	if err == nil {
 		b.settings.Range(func(key, value interface{}) bool {
 			b.settings.Delete(key)

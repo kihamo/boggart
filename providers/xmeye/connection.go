@@ -80,9 +80,11 @@ func (c *connection) receive() (*Packet, error) {
 	}
 
 	bufSize := defaultPayloadBuffer
+
 	if bufSize > packet.payloadLen {
 		bufSize = packet.payloadLen
 	}
+
 	buf := make([]byte, bufSize)
 
 	for {

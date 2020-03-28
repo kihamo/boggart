@@ -34,11 +34,12 @@ func (b *Bind) GetSerialNumber(ctx context.Context) (sn string, err error) {
 
 	if sn != b.Meta().SerialNumber() {
 		b.Meta().SetSerialNumber(sn)
-		var mqttError error
 
 		if err := b.Meta().SetMACAsString(info.Device.WifiMac); err != nil {
 			return "", err
 		}
+
+		var mqttError error
 
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicDeviceID.Format(sn), info.Device.ID); e != nil {
 			mqttError = multierr.Append(mqttError, e)

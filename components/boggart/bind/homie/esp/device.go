@@ -72,17 +72,20 @@ func (b *Bind) deviceAttributesSubscriber(_ context.Context, _ mqtt.Component, m
 func (b *Bind) deviceFirmwareSubscriber(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 	route := message.Topic().Split()
 	b.registerDeviceAttributes("fw."+route[len(route)-1], message.String())
+
 	return nil
 }
 
 func (b *Bind) deviceImplementationSubscriber(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 	route := message.Topic().Split()
 	name := strings.Join(route[3:], ".")
+
 	if strings.HasPrefix(name, "ota.") {
 		return nil
 	}
 
 	b.registerDeviceAttributes("implementation."+strings.Join(route[3:], "."), message.String())
+
 	return nil
 }
 
@@ -91,6 +94,7 @@ func (b *Bind) deviceStatsSubscriber(_ context.Context, _ mqtt.Component, messag
 
 	route := message.Topic().Split()
 	attributeName := strings.Join(route[3:], ".")
+
 	var value interface{}
 
 	switch attributeName {
@@ -103,5 +107,6 @@ func (b *Bind) deviceStatsSubscriber(_ context.Context, _ mqtt.Component, messag
 	}
 
 	b.registerDeviceAttributes("stats."+attributeName, value)
+
 	return nil
 }

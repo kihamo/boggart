@@ -63,6 +63,7 @@ func MimeTypeFromData(data io.Reader) (MIMEType, error) {
 	}
 
 	t := http.DetectContentType(buf)
+
 	return MIMEType(t), nil
 }
 

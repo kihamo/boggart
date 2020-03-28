@@ -73,6 +73,7 @@ func (c *Client) Accounts(ctx context.Context) ([]Account, error) {
 	}
 
 	accounts := make([]Account, 0)
+
 	var e error
 
 	for _, row := range data {
