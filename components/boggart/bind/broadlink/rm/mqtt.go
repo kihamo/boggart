@@ -114,7 +114,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 					var request codeRequest
 
-					if err := message.UnmarshalJSON(&request); err != nil {
+					if err := message.JSONUnmarshal(&request); err != nil {
 						return err
 					}
 
@@ -134,7 +134,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 					var request codeRequest
 
-					if err := message.UnmarshalJSON(&request); err != nil {
+					if err := message.JSONUnmarshal(&request); err != nil {
 						return err
 					}
 
@@ -154,7 +154,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 					var request codeRequest
 
-					if err := message.UnmarshalJSON(&request); err != nil {
+					if err := message.JSONUnmarshal(&request); err != nil {
 						return err
 					}
 

@@ -55,7 +55,7 @@ func (b *Bind) callbackMQTTWiFiSync(ctx context.Context, client mqtt.Component, 
 func (b *Bind) callbackMQTTSyslog(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 	var request map[string]interface{}
 
-	if err := message.UnmarshalJSON(&request); err != nil {
+	if err := message.JSONUnmarshal(&request); err != nil {
 		return err
 	}
 

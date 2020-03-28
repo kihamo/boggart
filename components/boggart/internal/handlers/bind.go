@@ -387,7 +387,11 @@ func (h *BindHandler) actionTasks(w *dashboard.Response, r *dashboard.Request, b
 		}
 
 		if timeout := task.Timeout(); timeout > 0 {
-			ctx, _ = context.WithTimeout(ctx, timeout)
+			var cancel context.CancelFunc
+
+			ctx, cancel = context.WithTimeout(ctx, timeout)
+
+			defer cancel()
 		}
 
 		_, err := task.Run(ctx)

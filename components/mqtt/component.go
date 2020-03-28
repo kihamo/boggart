@@ -39,7 +39,7 @@ type Message interface {
 	MessageID() uint16
 	Payload() []byte
 	Ack()
-	UnmarshalJSON(interface{}) error
+	JSONUnmarshal(interface{}) error
 	IsTrue() bool
 	IsFalse() bool
 	Bool() bool

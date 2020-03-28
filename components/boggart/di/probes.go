@@ -143,7 +143,11 @@ func (c *ProbesContainer) Readiness() workers.Task {
 func (c *ProbesContainer) ReadinessCheck(ctx context.Context) (err error) {
 	if c.probeReadiness != nil {
 		if timeout := c.probeReadiness.Timeout(); timeout > 0 {
-			ctx, _ = context.WithTimeout(ctx, timeout)
+			var cancel context.CancelFunc
+
+			ctx, cancel = context.WithTimeout(ctx, timeout)
+
+			defer cancel()
 		}
 
 		_, err = c.probeReadiness.Run(ctx)
@@ -247,7 +251,11 @@ func (c *ProbesContainer) Liveness() workers.Task {
 func (c *ProbesContainer) LivenessCheck(ctx context.Context) (err error) {
 	if c.probeLiveness != nil {
 		if timeout := c.probeLiveness.Timeout(); timeout > 0 {
-			ctx, _ = context.WithTimeout(ctx, timeout)
+			var cancel context.CancelFunc
+
+			ctx, cancel = context.WithTimeout(ctx, timeout)
+
+			defer cancel()
 		}
 
 		_, err = c.probeLiveness.Run(ctx)

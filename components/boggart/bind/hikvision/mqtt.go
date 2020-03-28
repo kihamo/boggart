@@ -118,7 +118,7 @@ func (b *Bind) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, 
 
 	var request models.PtzAbsoluteHigh
 
-	if err := message.UnmarshalJSON(&request); err != nil {
+	if err := message.JSONUnmarshal(&request); err != nil {
 		return err
 	}
 
@@ -147,7 +147,7 @@ func (b *Bind) callbackMQTTContinuous(ctx context.Context, client mqtt.Component
 
 	var request models.PTZData
 
-	if err := message.UnmarshalJSON(&request); err != nil {
+	if err := message.JSONUnmarshal(&request); err != nil {
 		return err
 	}
 
@@ -174,7 +174,7 @@ func (b *Bind) callbackMQTTRelative(ctx context.Context, client mqtt.Component, 
 
 	var request models.PtzRelative
 
-	if err := message.UnmarshalJSON(&request); err != nil {
+	if err := message.JSONUnmarshal(&request); err != nil {
 		return err
 	}
 
@@ -228,7 +228,7 @@ func (b *Bind) callbackMQTTMomentary(ctx context.Context, client mqtt.Component,
 
 	var request models.PTZData
 
-	if err := message.UnmarshalJSON(&request); err != nil {
+	if err := message.JSONUnmarshal(&request); err != nil {
 		return err
 	}
 

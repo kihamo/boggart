@@ -5,19 +5,13 @@ import (
 	"errors"
 	"io"
 	"net"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/kihamo/boggart/types"
-	"github.com/kihamo/shadow/components/tracing"
 	"github.com/mitchellh/mapstructure"
 	"gopkg.in/routeros.v2"
-)
-
-const (
-	ComponentName = "mikrotik"
 )
 
 var (
@@ -120,11 +114,6 @@ func (c *Client) doConvert(ctx context.Context, sentence []string, result interf
 		}
 	}
 
-	span, _ := tracing.StartSpanFromContext(ctx, ComponentName, "call")
-	defer span.Finish()
-
-	span.SetTag("sentence", strings.Join(sentence, " "))
-
 	reply, err := c.safeRunArgs(sentence)
 	if err != nil && c.isRetry(err) {
 		atomic.StoreUint64(&c.connected, 0)
@@ -135,7 +124,6 @@ func (c *Client) doConvert(ctx context.Context, sentence []string, result interf
 	}
 
 	if err != nil {
-		tracing.SpanError(span, err)
 		return err
 	}
 
@@ -161,10 +149,6 @@ func (c *Client) doConvert(ctx context.Context, sentence []string, result interf
 
 	if err == nil {
 		err = mapStructureDecoder.Decode(records)
-	}
-
-	if err != nil {
-		tracing.SpanError(span, err)
 	}
 
 	return err

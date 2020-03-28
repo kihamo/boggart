@@ -102,14 +102,14 @@ func (b *Bind) notifyRegionEvent(ctx context.Context, payload *LocationPayload, 
 func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, message mqtt.Message) (err error) {
 	// skip lwt
 	var payloadLWT *LWTPayload
-	if err = message.UnmarshalJSON(&payloadLWT); err == nil {
+	if err = message.JSONUnmarshal(&payloadLWT); err == nil {
 		if err = payloadLWT.Valid(); err == nil {
 			return nil
 		}
 	}
 
 	var payload *LocationPayload
-	if err = message.UnmarshalJSON(&payload); err != nil {
+	if err = message.JSONUnmarshal(&payload); err != nil {
 		return err
 	}
 
@@ -219,7 +219,7 @@ func (b *Bind) subscribeUserLocation(ctx context.Context, _ mqtt.Component, mess
 // !!! Это событие не означает что в других регионах ситуация поменялась
 func (b *Bind) subscribeTransition(ctx context.Context, _ mqtt.Component, message mqtt.Message) (err error) {
 	var payload *TransitionPayload
-	if err = message.UnmarshalJSON(&payload); err != nil {
+	if err = message.JSONUnmarshal(&payload); err != nil {
 		return err
 	}
 
@@ -252,7 +252,7 @@ func (b *Bind) subscribeSyncRegions(ctx context.Context, _ mqtt.Component, messa
 	// одиночное добавление, вручную внесли новый пункт в список (или результат синка уже)
 	// такие добавления игнорируем, тикет все равно дернет запрос всего списка
 	var payloadOne *WayPointPayload
-	if err = message.UnmarshalJSON(&payloadOne); err == nil {
+	if err = message.JSONUnmarshal(&payloadOne); err == nil {
 		if err = payloadOne.Valid(); err == nil {
 			return nil
 		}
@@ -260,7 +260,7 @@ func (b *Bind) subscribeSyncRegions(ctx context.Context, _ mqtt.Component, messa
 
 	// _type == waypoints
 	var payload *WayPointsPayload
-	if err = message.UnmarshalJSON(&payload); err != nil {
+	if err = message.JSONUnmarshal(&payload); err != nil {
 		return err
 	}
 

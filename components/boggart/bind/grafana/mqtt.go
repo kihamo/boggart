@@ -18,7 +18,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				Tags  []string `json:"tags,omitempty"`
 			}
 
-			if err := message.UnmarshalJSON(&request); err != nil {
+			if err := message.JSONUnmarshal(&request); err != nil {
 				return err
 			}
 

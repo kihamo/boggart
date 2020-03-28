@@ -14,7 +14,7 @@ type LoginResponse struct {
 	AliveInterval uint64
 	ChannelNum    uint64
 	DataUseAES    bool
-	DeviceType    string `json:DeviceType `
+	DeviceType    string `json:"DeviceType "`
 	ExtraChannel  uint64
 	Ret           uint64
 	SessionID     Uint32

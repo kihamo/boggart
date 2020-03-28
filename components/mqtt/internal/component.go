@@ -667,6 +667,4 @@ func (c *Component) convertPayload(payload interface{}) []byte {
 
 		return []byte(fmt.Sprintf("%v", payload))
 	}
-
-	return nil
 }

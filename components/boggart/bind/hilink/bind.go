@@ -63,8 +63,6 @@ func (b *Bind) USSD(ctx context.Context, content string) (string, error) {
 			time.Sleep(time.Second)
 		}
 	}
-
-	return "", err
 }
 
 func (b *Bind) Balance(ctx context.Context) (float64, error) {

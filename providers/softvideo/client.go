@@ -7,13 +7,10 @@ import (
 	"strconv"
 
 	"github.com/kihamo/boggart/protocols/http"
-	"github.com/kihamo/shadow/components/tracing"
-	"github.com/opentracing/opentracing-go/log"
 )
 
 const (
-	AccountURL    = "https://user.softvideo.ru/"
-	ComponentName = "softvideo"
+	AccountURL = "https://user.softvideo.ru/"
 )
 
 var (
@@ -39,12 +36,8 @@ func (c *Client) AccountID() string {
 }
 
 func (c *Client) Balance(ctx context.Context) (float64, error) {
-	span, ctx := tracing.StartSpanFromContext(ctx, ComponentName, "balance")
-	defer span.Finish()
-
 	_, err := c.connection.Get(ctx, AccountURL)
 	if err != nil {
-		tracing.SpanError(span, err)
 		return -1, err
 	}
 
@@ -55,25 +48,18 @@ func (c *Client) Balance(ctx context.Context) (float64, error) {
 	})
 
 	if err != nil {
-		tracing.SpanError(span, err)
 		return -1, err
 	}
 
 	submatch := balanceRegexp.FindStringSubmatch(http.BodyFromResponse(response))
 	if len(submatch) != 2 {
-		err := errors.New("balance string not found in page")
-
-		tracing.SpanError(span, err)
-		return -1, err
+		return -1, errors.New("balance string not found in page")
 	}
 
 	balance, err := strconv.ParseFloat(submatch[1], 10)
 	if err != nil {
-		tracing.SpanError(span, err)
 		return -1, err
 	}
-
-	span.LogFields(log.Float64("balance", balance))
 
 	return balance, nil
 }

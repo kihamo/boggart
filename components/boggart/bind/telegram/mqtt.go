@@ -52,7 +52,7 @@ func (b *Bind) callbackMQTTSendFile(_ context.Context, _ mqtt.Component, message
 		payload FilePayload
 	)
 
-	if err := message.UnmarshalJSON(&payload); err == nil {
+	if err := message.JSONUnmarshal(&payload); err == nil {
 		mime = storage.MIMEType(payload.MIME)
 		name = payload.Name
 		url = payload.URL

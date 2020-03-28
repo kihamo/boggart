@@ -67,8 +67,6 @@ func (s *UDPServer) ListenAndServe() error {
 			}
 		}()
 	}
-
-	return nil
 }
 
 func (s *UDPServer) Close() error {

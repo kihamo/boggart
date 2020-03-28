@@ -358,6 +358,4 @@ func (b *Bind) taskCleaner(ctx context.Context) (err error) {
 
 		page++
 	}
-
-	return nil
 }

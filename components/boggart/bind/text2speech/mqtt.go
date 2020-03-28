@@ -30,7 +30,7 @@ func (b *Bind) callbackMQTTGenerateOptions(binary bool) func(ctx context.Context
 			Force    bool    `json:"force,omitempty"`
 		}
 
-		if err = message.UnmarshalJSON(&r); err != nil {
+		if err = message.JSONUnmarshal(&r); err != nil {
 			return err
 		}
 

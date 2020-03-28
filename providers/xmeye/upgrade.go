@@ -75,7 +75,7 @@ func (c *Client) UpgradeData(ctx context.Context, data io.ReadSeeker) error {
 		}
 
 		var result Response
-		if err = response.Payload.UnmarshalJSON(&result); err != nil {
+		if err = response.Payload.JSONUnmarshal(&result); err != nil {
 			return err
 		}
 

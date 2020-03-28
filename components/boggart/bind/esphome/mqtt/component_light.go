@@ -8,18 +8,18 @@ import (
 )
 
 type ComponentLightState struct {
-	Effect     string `json:"effect, omitempty"`
-	State      string `json:"state, omitempty"`
-	Brightness uint64 `json:"brightness, omitempty"`
+	Effect     string `json:"effect,omitempty"`
+	State      string `json:"state,omitempty"`
+	Brightness uint64 `json:"brightness,omitempty"`
 	Color      struct {
-		Red   uint64 `json:"r, omitempty"`
-		Green uint64 `json:"g, omitempty"`
-		Blue  uint64 `json:"b, omitempty"`
-	} `json:"color, omitempty"`
-	White            uint64 `json:"white_value, omitempty"`
-	ColorTemperature uint64 `json:"color_temp, omitempty"`
-	Flash            uint64 `json:"flash, omitempty"`
-	Transition       uint64 `json:"transition, omitempty"`
+		Red   uint64 `json:"r,omitempty"`
+		Green uint64 `json:"g,omitempty"`
+		Blue  uint64 `json:"b,omitempty"`
+	} `json:"color,omitempty"`
+	White            uint64 `json:"white_value,omitempty"`
+	ColorTemperature uint64 `json:"color_temp,omitempty"`
+	Flash            uint64 `json:"flash,omitempty"`
+	Transition       uint64 `json:"transition,omitempty"`
 }
 
 func (s *ComponentLightState) String() string {
@@ -66,7 +66,7 @@ func (c *ComponentLight) GetState() interface{} {
 func (c *ComponentLight) SetState(message mqtt.Message) error {
 	var state ComponentLightState
 
-	err := message.UnmarshalJSON(&state)
+	err := message.JSONUnmarshal(&state)
 	if err != nil {
 		return err
 	}

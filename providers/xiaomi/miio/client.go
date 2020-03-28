@@ -129,7 +129,11 @@ func (p *Client) Send(ctx context.Context, method string, params interface{}, re
 	}
 
 	if _, ok := ctx.Deadline(); !ok {
-		ctx, _ = context.WithTimeout(ctx, DefaultTimeout)
+		var cancel context.CancelFunc
+
+		ctx, cancel = context.WithTimeout(ctx, DefaultTimeout)
+
+		defer cancel()
 	}
 
 	requestID := atomic.AddUint32(&p.packetsCounter, 1)

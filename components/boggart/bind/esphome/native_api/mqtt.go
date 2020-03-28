@@ -172,7 +172,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 					state = s.(*api.LightStateResponse)
 				}
 
-				if err := message.UnmarshalJSON(&request); err == nil {
+				if err := message.JSONUnmarshal(&request); err == nil {
 					if request.State != nil {
 						cmd.HasState = true
 						cmd.State = *request.State

@@ -52,7 +52,7 @@ func (m *message) Ack() {
 	m.msg.Ack()
 }
 
-func (m *message) UnmarshalJSON(v interface{}) error {
+func (m *message) JSONUnmarshal(v interface{}) error {
 	return json.Unmarshal(m.msg.Payload(), v)
 }
 

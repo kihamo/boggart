@@ -38,7 +38,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				component = NewComponentBase(id, t)
 			}
 
-			if err := message.UnmarshalJSON(component); err != nil {
+			if err := message.JSONUnmarshal(component); err != nil {
 				return err
 			}
 

@@ -139,7 +139,7 @@ func (c *Client) CallWithResult(ctx context.Context, code uint16, payload, resul
 		return err
 	}
 
-	return packet.Payload.UnmarshalJSON(result)
+	return packet.Payload.JSONUnmarshal(result)
 }
 
 func (c *Client) Cmd(ctx context.Context, code uint16, cmd string) (*packet, error) {

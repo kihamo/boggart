@@ -135,7 +135,7 @@ func NewPayload() *Payload {
 	}
 }
 
-func (p *Payload) UnmarshalJSON(v interface{}) error {
+func (p *Payload) JSONUnmarshal(v interface{}) error {
 	// обрезаем признак конца строки
 	payload := p.Bytes()
 
@@ -149,7 +149,7 @@ func (p *Payload) UnmarshalJSON(v interface{}) error {
 func (p *Payload) Error() error {
 	var result Response
 
-	if err := p.UnmarshalJSON(&result); err == nil {
+	if err := p.JSONUnmarshal(&result); err == nil {
 		text, ok := codeErrorsText[int64(result.Ret)]
 		if ok {
 			return errors.New(text)
