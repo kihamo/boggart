@@ -8,6 +8,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/elazarl/go-bindata-assetfs"
+	"github.com/kihamo/boggart/types"
 	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/i18n"
 	"github.com/mitchellh/mapstructure"
@@ -71,14 +72,14 @@ func ValidateBindConfig(t BindType, config map[string]interface{}) (cfg interfac
 			Metadata: nil,
 			Result:   &prepare,
 			DecodeHook: mapstructure.ComposeDecodeHookFunc(
-				mapstructure.StringToTimeHookFunc(time.RFC3339),
-				mapstructure.StringToTimeDurationHookFunc(),
-				mapstructure.StringToIPNetHookFunc(),
-				StringToIPHookFunc(),
-				StringToMACHookFunc(),
-				StringToURLHookFunc(),
-				mapstructure.StringToSliceHookFunc(","),
-				mapstructure.StringToSliceHookFunc(";"),
+				types.StringToTimeHookFunc(time.RFC3339),
+				types.StringToTimeDurationHookFunc(),
+				types.StringToIPNetHookFunc(),
+				types.StringToIPHookFunc(),
+				types.StringToMACHookFunc(),
+				types.StringToURLHookFunc(),
+				types.StringToSliceHookFunc(","),
+				types.StringToSliceHookFunc(";"),
 			),
 		})
 

@@ -2,7 +2,7 @@ package rpi
 
 import (
 	"context"
-	"fmt"
+	"strconv"
 
 	"github.com/kihamo/boggart/providers/rpi"
 	"github.com/kihamo/go-workers"
@@ -40,7 +40,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 
 	if values, e := b.providerSysFS.CPUFrequentie(); e == nil {
 		for num, value := range values {
-			metricCPUFrequentie.With("serial_number", sn).With("cpu", fmt.Sprintf("cpu%d", num)).Set(float64(value))
+			metricCPUFrequentie.With("serial_number", sn).With("cpu", "cpu"+strconv.FormatUint(num, 10)).Set(float64(value))
 			if e := b.MQTT().PublishAsync(ctx, b.config.TopicCPUFrequentie.Format(num), value); e != nil {
 				err = multierr.Append(err, e)
 			}

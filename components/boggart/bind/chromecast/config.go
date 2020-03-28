@@ -7,6 +7,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/types"
 )
 
 type Config struct {
@@ -14,8 +15,8 @@ type Config struct {
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
 	Debug             bool
-	Host              boggart.IP `valid:",required"`
-	Port              int        `valid:"port"`
+	Host              types.IP `valid:",required"`
+	Port              int      `valid:"port"`
 	Name              string
 	WidgetFileURL     string     `mapstructure:"widget_file_url" yaml:"widget_file_url"`
 	TopicVolume       mqtt.Topic `mapstructure:"topic_volume" yaml:"topic_volume"`

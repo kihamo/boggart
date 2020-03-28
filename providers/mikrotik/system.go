@@ -5,56 +5,56 @@ import (
 )
 
 type SystemHealth struct {
-	Voltage     float64 `json:"voltage"`
-	Temperature uint64  `json:"temperature"`
+	Voltage     float64 `mapstructure:"voltage"`
+	Temperature uint64  `mapstructure:"temperature"`
 }
 
-type SystemRouterboard struct {
-	Routerboard     bool   `json:"routerboard"`
-	Model           string `json:"model"`
-	SerialNumber    string `json:"serial-number"`
-	FirmwareType    string `json:"firmware-type"`
-	FactoryFirmware string `json:"factory-firmware"`
-	CurrentFirmware string `json:"current-firmware"`
-	UpgradeFirmware string `json:"upgrade-firmware"`
+type SystemRouterBoard struct {
+	RouterBoard     bool   `mapstructure:"routerboard"`
+	Model           string `mapstructure:"model"`
+	SerialNumber    string `mapstructure:"serial-number"`
+	FirmwareType    string `mapstructure:"firmware-type"`
+	FactoryFirmware string `mapstructure:"factory-firmware"`
+	CurrentFirmware string `mapstructure:"current-firmware"`
+	UpgradeFirmware string `mapstructure:"upgrade-firmware"`
 }
 
 type SystemResource struct {
-	Uptime               string  `json:"uptime"`
-	Version              string  `json:"version"`
-	BuildTime            string  `json:"build-time"`
-	FactorySoftware      string  `json:"factory-software"`
-	FreeMemory           uint64  `json:"free-memory"`
-	TotalMemory          uint64  `json:"total-memory"`
-	CPU                  string  `json:"cpu"`
-	CPUCount             uint64  `json:"cpu-count"`
-	CPUFrequency         uint64  `json:"cpu-frequency"`
-	CPULoad              uint64  `json:"cpu-load"`
-	FreeHDDSpace         uint64  `json:"free-hdd-space"`
-	TotalHDDSpace        uint64  `json:"total-hdd-space"`
-	WriteSectSinceReboot float64 `json:"write-sect-since-reboot"`
-	WriteSectTotal       float64 `json:"write-sect-total"`
-	BadBlocks            float64 `json:"bad-blocks"`
-	ArchitectureName     string  `json:"architecture-name"`
-	BoardName            string  `json:"board-name"`
-	Platform             string  `json:"platform"`
+	Uptime               string  `mapstructure:"uptime"`
+	Version              string  `mapstructure:"version"`
+	BuildTime            string  `mapstructure:"build-time"`
+	FactorySoftware      string  `mapstructure:"factory-software"`
+	FreeMemory           uint64  `mapstructure:"free-memory"`
+	TotalMemory          uint64  `mapstructure:"total-memory"`
+	CPU                  string  `mapstructure:"cpu"`
+	CPUCount             uint64  `mapstructure:"cpu-count"`
+	CPUFrequency         uint64  `mapstructure:"cpu-frequency"`
+	CPULoad              uint64  `mapstructure:"cpu-load"`
+	FreeHDDSpace         uint64  `mapstructure:"free-hdd-space"`
+	TotalHDDSpace        uint64  `mapstructure:"total-hdd-space"`
+	WriteSectSinceReboot float64 `mapstructure:"write-sect-since-reboot"`
+	WriteSectTotal       float64 `mapstructure:"write-sect-total"`
+	BadBlocks            float64 `mapstructure:"bad-blocks"`
+	ArchitectureName     string  `mapstructure:"architecture-name"`
+	BoardName            string  `mapstructure:"board-name"`
+	Platform             string  `mapstructure:"platform"`
 }
 
 type SystemPackageUpdate struct {
-	Channel          string `json:"channel"`
-	InstalledVersion string `json:"installed-version"`
-	LatestVersion    string `json:"latest-version,omitempty"`
-	Status           string `json:"status,omitempty"`
+	Channel          string `mapstructure:"channel"`
+	InstalledVersion string `mapstructure:"installed-version"`
+	LatestVersion    string `mapstructure:"latest-version,omitempty"`
+	Status           string `mapstructure:"status,omitempty"`
 }
 
 type SystemDisk struct {
-	Id    string `json:".id"`
-	Name  string `json:"name"`
-	Label string `json:"label"`
-	Type  string `json:"type"`
-	Disk  string `json:"disk"`
-	Free  uint64 `json:"free"`
-	Size  uint64 `json:"size"`
+	Id    string `mapstructure:".id"`
+	Name  string `mapstructure:"name"`
+	Label string `mapstructure:"label"`
+	Type  string `mapstructure:"type"`
+	Disk  string `mapstructure:"disk"`
+	Free  uint64 `mapstructure:"free"`
+	Size  uint64 `mapstructure:"size"`
 }
 
 func (c *Client) SystemHealth(ctx context.Context) (result SystemHealth, err error) {
@@ -72,8 +72,8 @@ func (c *Client) SystemHealth(ctx context.Context) (result SystemHealth, err err
 	return list[0], nil
 }
 
-func (c *Client) SystemRouterboard(ctx context.Context) (result SystemRouterboard, err error) {
-	var list []SystemRouterboard
+func (c *Client) SystemRouterBoard(ctx context.Context) (result SystemRouterBoard, err error) {
+	var list []SystemRouterBoard
 
 	err = c.doConvert(ctx, []string{"/system/routerboard/print"}, &list)
 	if err != nil {

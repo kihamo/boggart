@@ -3,7 +3,6 @@ package telegram
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"net/url"
 	"strconv"
@@ -132,7 +131,7 @@ func (b *Bind) SendFileAsURL(to, name, u string) error {
 		return err
 	}
 
-	msg := tgbotapi.NewMessage(chatId, fmt.Sprintf("%s [view](%s)", name, u))
+	msg := tgbotapi.NewMessage(chatId, name+" [view]("+u+")")
 	msg.ParseMode = "Markdown"
 
 	_, err = bot.Send(msg)

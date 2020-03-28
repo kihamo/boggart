@@ -2,6 +2,7 @@ package gpio
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/kihamo/boggart/atomic"
@@ -16,7 +17,7 @@ type Type struct {
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
-	g := gpioreg.ByName(fmt.Sprintf("GPIO%d", config.Pin))
+	g := gpioreg.ByName("GPIO" + strconv.FormatUint(config.Pin, 10))
 	if g == nil {
 		return nil, fmt.Errorf("GPIO %d not found", config.Pin)
 	}

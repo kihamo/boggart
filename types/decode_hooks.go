@@ -1,4 +1,4 @@
-package boggart
+package types
 
 import (
 	"fmt"
@@ -7,6 +7,16 @@ import (
 	"reflect"
 
 	"github.com/mitchellh/mapstructure"
+)
+
+var (
+	DecodeHookExec               = mapstructure.DecodeHookExec
+	ComposeDecodeHookFunc        = mapstructure.ComposeDecodeHookFunc
+	StringToSliceHookFunc        = mapstructure.StringToSliceHookFunc
+	StringToTimeDurationHookFunc = mapstructure.StringToTimeDurationHookFunc
+	StringToIPNetHookFunc        = mapstructure.StringToIPNetHookFunc
+	StringToTimeHookFunc         = mapstructure.StringToTimeHookFunc
+	WeaklyTypedHook              = mapstructure.WeaklyTypedHook
 )
 
 func StringToIPHookFunc() mapstructure.DecodeHookFunc {

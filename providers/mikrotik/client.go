@@ -3,7 +3,6 @@ package mikrotik
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"net"
 	"strings"
@@ -11,8 +10,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/kihamo/gotypes"
+	"github.com/kihamo/boggart/types"
 	"github.com/kihamo/shadow/components/tracing"
+	"github.com/mitchellh/mapstructure"
 	"gopkg.in/routeros.v2"
 )
 
@@ -148,9 +148,19 @@ func (c *Client) doConvert(ctx context.Context, sentence []string, result interf
 		records = append(records, re.Map)
 	}
 
-	converter := gotypes.NewConverter(records, result)
-	if !converter.Valid() {
-		err = fmt.Errorf("failed convert fields: %v", strings.Join(converter.GetInvalidFields(), ","))
+	mapStructureDecoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		Metadata: nil,
+		Result:   &result,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			types.StringToIPNetHookFunc(),
+			types.StringToIPHookFunc(),
+			types.StringToMACHookFunc(),
+		),
+		WeaklyTypedInput: true,
+	})
+
+	if err == nil {
+		err = mapStructureDecoder.Decode(records)
 	}
 
 	if err != nil {

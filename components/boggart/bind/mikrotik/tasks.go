@@ -46,10 +46,10 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 		for _, stat := range stats {
 			metricTrafficReceivedBytes.With("serial_number", sn).With(
 				"interface", stat.Name,
-				"mac", stat.MacAddress).Set(float64(stat.RXByte))
+				"mac", stat.MacAddress.String()).Set(float64(stat.RXByte))
 			metricTrafficSentBytes.With("serial_number", sn).With(
 				"interface", stat.Name,
-				"mac", stat.MacAddress).Set(float64(stat.TXByte))
+				"mac", stat.MacAddress.String()).Set(float64(stat.TXByte))
 		}
 	} else if !mikrotik.IsEmptyResponse(e) {
 		err = multierr.Append(err, e)
@@ -102,7 +102,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 		err = multierr.Append(err, e)
 	}
 
-	if checkRouterBoard, e := b.provider.SystemRouterboard(ctx); e == nil {
+	if checkRouterBoard, e := b.provider.SystemRouterBoard(ctx); e == nil {
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicFirmwareInstalledVersion.Format(sn), checkRouterBoard.CurrentFirmware); e != nil {
 			err = multierr.Append(err, e)
 		}
@@ -163,11 +163,11 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 
 				metricTrafficReceivedBytes.With("serial_number", sn).With(
 					"interface", client.Interface,
-					"mac", client.MacAddress,
+					"mac", client.MacAddress.String(),
 					"name", name).Set(received)
 				metricTrafficSentBytes.With("serial_number", sn).With(
 					"interface", client.Interface,
-					"mac", client.MacAddress,
+					"mac", client.MacAddress.String(),
 					"name", name).Set(sent)
 			}
 		}

@@ -6,20 +6,21 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/types"
 )
 
 type Config struct {
 	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
-	Host              string               `valid:",required"`
-	MAC               boggart.HardwareAddr `valid:",required"`
-	Model             string               `valid:"in(sp3seu|sp3sus),required"`
-	UpdaterInterval   time.Duration        `mapstructure:"updater_interval" yaml:"updater_interval"`
-	ConnectionTimeout time.Duration        `mapstructure:"connection_timeout" yaml:"connection_timeout"`
-	TopicState        mqtt.Topic           `mapstructure:"topic_state" yaml:"topic_state"`
-	TopicPower        mqtt.Topic           `mapstructure:"topic_power" yaml:"topic_power"`
-	TopicSet          mqtt.Topic           `mapstructure:"topic_set" yaml:"topic_set"`
+	Host              string             `valid:",required"`
+	MAC               types.HardwareAddr `valid:",required"`
+	Model             string             `valid:"in(sp3seu|sp3sus),required"`
+	UpdaterInterval   time.Duration      `mapstructure:"updater_interval" yaml:"updater_interval"`
+	ConnectionTimeout time.Duration      `mapstructure:"connection_timeout" yaml:"connection_timeout"`
+	TopicState        mqtt.Topic         `mapstructure:"topic_state" yaml:"topic_state"`
+	TopicPower        mqtt.Topic         `mapstructure:"topic_power" yaml:"topic_power"`
+	TopicSet          mqtt.Topic         `mapstructure:"topic_set" yaml:"topic_set"`
 }
 
 func (t Type) Config() interface{} {

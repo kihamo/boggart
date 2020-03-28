@@ -2,47 +2,49 @@ package mikrotik
 
 import (
 	"context"
+
+	"github.com/kihamo/boggart/types"
 )
 
 type IPARP struct {
-	Id         string `json:".id"`
-	Address    string `json:"address"`
-	MacAddress string `json:"mac-address,omitempty"`
-	Interface  string `json:"interface"`
-	Published  bool   `json:"published"`
-	Invalid    bool   `json:"invalid"`
-	DHCP       bool   `json:"DHCP"`
-	Dynamic    bool   `json:"dynamic"`
-	Complete   bool   `json:"complete"`
-	Disabled   bool   `json:"disabled"`
-	Comment    string `json:"comment,omitempty"`
+	Id         string             `mapstructure:".id"`
+	Address    types.IP           `mapstructure:"address"`
+	MacAddress types.HardwareAddr `mapstructure:"mac-address,omitempty"`
+	Interface  string             `mapstructure:"interface"`
+	Published  bool               `mapstructure:"published"`
+	Invalid    bool               `mapstructure:"invalid"`
+	DHCP       bool               `mapstructure:"DHCP"`
+	Dynamic    bool               `mapstructure:"dynamic"`
+	Complete   bool               `mapstructure:"complete"`
+	Disabled   bool               `mapstructure:"disabled"`
+	Comment    string             `mapstructure:"comment,omitempty"`
 }
 
 type IPDHCPServerLease struct {
-	Id           string `json:".id"`
-	Address      string `json:"address"`
-	MacAddress   string `json:"mac-address"`
-	AddressLists string `json:"address-lists"`
-	Server       string `json:"server"`
-	DHCPOption   string `json:"dhcp-option"`
-	Status       string `json:"status"`
-	LastSeen     string `json:"last-seen"`
-	Radius       bool   `json:"radius"`
-	Dynamic      bool   `json:"dynamic"`
-	Blocked      bool   `json:"blocked"`
-	Disabled     bool   `json:"disabled"`
-	Comment      string `json:"comment,omitempty"`
+	Id           string             `mapstructure:".id"`
+	Address      types.IP           `mapstructure:"address"`
+	MacAddress   types.HardwareAddr `mapstructure:"mac-address"`
+	AddressLists string             `mapstructure:"address-lists"`
+	Server       string             `mapstructure:"server"`
+	DHCPOption   string             `mapstructure:"dhcp-option"`
+	Status       string             `mapstructure:"status"`
+	LastSeen     string             `mapstructure:"last-seen"`
+	Radius       bool               `mapstructure:"radius"`
+	Dynamic      bool               `mapstructure:"dynamic"`
+	Blocked      bool               `mapstructure:"blocked"`
+	Disabled     bool               `mapstructure:"disabled"`
+	Comment      string             `mapstructure:"comment,omitempty"`
 }
 
 type IPDNSStatic struct {
-	Id       string `json:".id"`
-	Name     string `json:"name"`
-	Regexp   string `json:"regexp"`
-	Address  string `json:"address"`
-	TTL      string `json:"ttl"`
-	Dynamic  bool   `json:"dynamic"`
-	Disabled bool   `json:"disabled"`
-	Comment  string `json:"comment,omitempty"`
+	Id       string   `mapstructure:".id"`
+	Name     string   `mapstructure:"name"`
+	Regexp   string   `mapstructure:"regexp"`
+	Address  types.IP `mapstructure:"address"`
+	TTL      string   `mapstructure:"ttl"`
+	Dynamic  bool     `mapstructure:"dynamic"`
+	Disabled bool     `mapstructure:"disabled"`
+	Comment  string   `mapstructure:"comment,omitempty"`
 }
 
 func (c *Client) IPARP(ctx context.Context) (result []IPARP, err error) {

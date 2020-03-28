@@ -6,7 +6,7 @@ import (
 )
 
 func (b *Bind) ReadinessProbe(ctx context.Context) error {
-	system, err := b.provider.SystemRouterboard(ctx)
+	system, err := b.provider.SystemRouterBoard(ctx)
 	if err != nil {
 		return err
 	}

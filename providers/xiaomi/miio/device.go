@@ -7,8 +7,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/providers/xiaomi/miio/internal"
+	"github.com/kihamo/boggart/types"
 )
 
 const (
@@ -27,21 +27,21 @@ type Device struct {
 }
 
 type InfoPayload struct {
-	HardwareVersion string               `json:"hw_ver"`
-	FirmwareVersion string               `json:"fw_ver"`
-	Token           string               `json:"token"`
-	LifeTime        time.Duration        `json:"life"`
-	MAC             boggart.HardwareAddr `json:"mac"`
-	Model           string               `json:"model"`
+	HardwareVersion string             `json:"hw_ver"`
+	FirmwareVersion string             `json:"fw_ver"`
+	Token           string             `json:"token"`
+	LifeTime        time.Duration      `json:"life"`
+	MAC             types.HardwareAddr `json:"mac"`
+	Model           string             `json:"model"`
 	AccessPoint     struct {
-		BSSID boggart.HardwareAddr `json:"bssid"`
-		RSSI  int                  `json:"rssi"`
-		SSID  string               `json:"ssid"`
+		BSSID types.HardwareAddr `json:"bssid"`
+		RSSI  int                `json:"rssi"`
+		SSID  string             `json:"ssid"`
 	} `json:"ap"`
 	Network struct {
-		Gateway net.IP         `json:"gw"`
-		LocalIP net.IP         `json:"localIp"`
-		Mask    boggart.IPMask `json:"mask"`
+		Gateway net.IP       `json:"gw"`
+		LocalIP net.IP       `json:"localIp"`
+		Mask    types.IPMask `json:"mask"`
 	} `json:"netif"`
 }
 

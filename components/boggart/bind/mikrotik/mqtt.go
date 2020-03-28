@@ -85,12 +85,7 @@ func (b *Bind) callbackMQTTSyslog(ctx context.Context, _ mqtt.Component, message
 			return err
 		}
 
-		mac, err := b.Mac(ctx, check[1])
-		if err != nil {
-			return err
-		}
-
-		login := mqtt.NameReplace(mac.Address)
+		login := mqtt.NameReplace(check[1])
 
 		switch check[3] {
 		case "connected":

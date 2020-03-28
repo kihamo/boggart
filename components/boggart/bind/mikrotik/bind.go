@@ -2,8 +2,6 @@ package mikrotik
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"net/url"
 	"regexp"
 
@@ -34,17 +32,6 @@ type Bind struct {
 	clientVPN         *PreloadMap
 }
 
-type Mac struct {
-	Address string
-	ARP     struct {
-		IP      string
-		Comment string
-	}
-	DHCP struct {
-		Hostname string
-	}
-}
-
 func (b *Bind) Close() error {
 	if b.serialNumberReady.IsFalse() {
 		close(b.serialNumberLock)
@@ -68,41 +55,6 @@ func (b *Bind) SetSerialNumber(serialNumber string) {
 	}
 }
 
-func (b *Bind) Mac(ctx context.Context, mac string) (*Mac, error) {
-	if b.Meta().SerialNumber() == "" {
-		return nil, errors.New("serial number is empty")
-	}
-
-	info := &Mac{
-		Address: mac,
-	}
-
-	if table, err := b.provider.IPARP(ctx); err == nil {
-		for _, row := range table {
-			if row.MacAddress != "" && row.MacAddress == mac {
-				info.ARP.IP = row.Address
-				info.ARP.Comment = row.Comment
-				break
-			}
-		}
-	} else {
-		return nil, fmt.Errorf("IPARP failed: %w", err)
-	}
-
-	if leases, err := b.provider.IPDHCPServerLease(ctx); err == nil {
-		for _, lease := range leases {
-			if lease.MacAddress == mac {
-				info.DHCP.Hostname = lease.MacAddress
-				break
-			}
-		}
-	} else {
-		return nil, fmt.Errorf("IPDHCPServerLease failed: %w", err)
-	}
-
-	return info, nil
-}
-
 func (b *Bind) updateWiFiClient(ctx context.Context) {
 	connections, err := b.provider.InterfaceWirelessRegistrationTable(ctx)
 	if err != nil {
@@ -114,16 +66,7 @@ func (b *Bind) updateWiFiClient(ctx context.Context) {
 	active := make(map[interface{}]struct{}, len(connections))
 
 	for _, connection := range connections {
-		mac, err := b.Mac(ctx, connection.MacAddress)
-		if err != nil {
-			b.Logger().Error("Get MAC failed",
-				"error", err.Error(),
-				"mac", connection.MacAddress,
-			)
-			return
-		}
-
-		key := mqtt.NameReplace(mac.Address)
+		key := mqtt.NameReplace(connection.MacAddress.String())
 		active[key] = struct{}{}
 
 		if _, ok := b.clientWiFi.Load(key); !ok {

@@ -1,4 +1,4 @@
-package boggart
+package types
 
 import (
 	"net"

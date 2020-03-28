@@ -1,5 +1,5 @@
-hash: d4b69e3d5556785237c5f02384930613485ae432b7ef8270f536a27428cd827d
-updated: 2020-03-14T16:06:38.834379+03:00
+hash: cca92c9ec2c2a15cb0d4f1deb6caa6dba4f75c08a7bc77dc4d58b2ab63a3ac95
+updated: 2020-03-28T16:53:47.878976+03:00
 imports:
 - name: cloud.google.com/go
   version: 756b0e0009e81a539e95b2821201b2bf1153a475
@@ -111,7 +111,7 @@ imports:
 - name: github.com/go-openapi/loads
   version: 74628589c3b94e3526a842d24f46589980f5ab22
 - name: github.com/go-openapi/runtime
-  version: c2daaa2a68f30a68af3a15b3cbd83adc0c1a1880
+  version: c42b563795754e2c4a497435bee531e18e93bfb0
   subpackages:
   - client
   - logger
@@ -172,7 +172,7 @@ imports:
   subpackages:
   - js
 - name: github.com/gorilla/websocket
-  version: c3e18be99d19e6b3e8f1559eea2c161a665c4b6b
+  version: b65e62901fc1c0d968042419e74789f6af455eb9
 - name: github.com/grpc-ecosystem/go-grpc-middleware
   version: c250d6563d4d4c20252cd865923440e829844f4e
   subpackages:
@@ -378,7 +378,7 @@ imports:
 - name: github.com/mitchellh/gox
   version: d8caaff5a9dc98f4cfa1fcce6e7265a04689f641
 - name: github.com/mitchellh/mapstructure
-  version: 4632c4f49fb352596def0d4005bcbe7f38fe9008
+  version: 9e4011917e467353a5cacb6b11f3991b381055c8
 - name: github.com/mmcloughlin/geohash
   version: a84196f7a15d0ea8c5919f1ec0f15172fb518fba
 - name: github.com/mourner/suncalc-go

@@ -6,15 +6,16 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
+	"github.com/kihamo/boggart/types"
 )
 
 type Config struct {
 	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
-	SaveDirectory  string      `valid:"required" mapstructure:"save_directory" yaml:"save_directory"`
-	CaptureURL     boggart.URL `valid:"required" mapstructure:"capture_url" yaml:"capture_url"`
-	FileNameFormat string      `mapstructure:"file_name_format" yaml:"file_name_format"`
+	SaveDirectory  string    `valid:"required" mapstructure:"save_directory" yaml:"save_directory"`
+	CaptureURL     types.URL `valid:"required" mapstructure:"capture_url" yaml:"capture_url"`
+	FileNameFormat string    `mapstructure:"file_name_format" yaml:"file_name_format"`
 }
 
 func (Type) Config() interface{} {

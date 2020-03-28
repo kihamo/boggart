@@ -130,7 +130,7 @@ func templateFunctionHumanBytes(size interface{}) string {
 	const unit = 1024
 
 	if b < unit {
-		return fmt.Sprintf("%d B", b)
+		return s + " B"
 	}
 
 	div, exp := int64(unit), 0

@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/providers/xiaomi/miio"
+	"github.com/kihamo/boggart/types"
 )
 
 /*
@@ -60,17 +60,17 @@ ROUTER	miIO.config_router	Set Wifi settings of the device
 */
 
 type Locale struct {
-	Name     string           `json:"name"`
-	Bom      string           `json:"bom"`
-	Location string           `json:"location"`
-	Language string           `json:"language"`
-	WiFiPlan string           `json:"wifiplan"`
-	Timezone boggart.Location `json:"timezone"`
+	Name     string         `json:"name"`
+	Bom      string         `json:"bom"`
+	Location string         `json:"location"`
+	Language string         `json:"language"`
+	WiFiPlan string         `json:"wifiplan"`
+	Timezone types.Location `json:"timezone"`
 }
 
 type Gateway struct {
-	IP  boggart.IP           `json:"gateway_ip"`
-	MAC boggart.HardwareAddr `json:"gateway_mac"`
+	IP  types.IP           `json:"gateway_ip"`
+	MAC types.HardwareAddr `json:"gateway_mac"`
 }
 
 type LogUploadStatus struct {

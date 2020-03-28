@@ -2,21 +2,23 @@ package mikrotik
 
 import (
 	"context"
+
+	"github.com/kihamo/boggart/types"
 )
 
 type PPPActive struct {
-	Id            string `json:".id"`
-	Name          string `json:"name"`
-	Service       string `json:"service"`
-	CallerID      string `json:"caller-id"`
-	Address       string `json:"address"`
-	Uptime        string `json:"uptime"`
-	Encoding      string `json:"encoding"`
-	SessionID     string `json:"session-id"`
-	LimitBytesIn  uint64 `json:"limit-bytes-in"`
-	LimitBytesOut uint64 `json:"limit-bytes-out"`
-	Radius        bool   `json:"radius"`
-	Comment       string `json:"comment,omitempty"`
+	Id            string   `mapstructure:".id"`
+	Name          string   `mapstructure:"name"`
+	Service       string   `mapstructure:"service"`
+	CallerID      string   `mapstructure:"caller-id"`
+	Address       types.IP `mapstructure:"address"`
+	Uptime        string   `mapstructure:"uptime"`
+	Encoding      string   `mapstructure:"encoding"`
+	SessionID     string   `mapstructure:"session-id"`
+	LimitBytesIn  uint64   `mapstructure:"limit-bytes-in"`
+	LimitBytesOut uint64   `mapstructure:"limit-bytes-out"`
+	Radius        bool     `mapstructure:"radius"`
+	Comment       string   `mapstructure:"comment,omitempty"`
 }
 
 func (c *Client) PPPActive(ctx context.Context) (result []PPPActive, err error) {

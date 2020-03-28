@@ -2,21 +2,23 @@ package mikrotik
 
 import (
 	"context"
+
+	"github.com/kihamo/boggart/types"
 )
 
 type InterfaceStats struct {
-	Id         string `json:".id"`
-	Name       string `json:"name"`
-	MacAddress string `json:"mac-address,omitempty"`
-	TXByte     uint64 `json:"tx-byte"`
-	RXByte     uint64 `json:"rx-byte"`
+	Id         string             `mapstructure:".id"`
+	Name       string             `mapstructure:"name"`
+	MacAddress types.HardwareAddr `mapstructure:"mac-address,omitempty"`
+	TXByte     uint64             `mapstructure:"tx-byte"`
+	RXByte     uint64             `mapstructure:"rx-byte"`
 }
 
 type InterfaceWirelessRegistrationTable struct {
-	Id         string `json:".id"`
-	MacAddress string `json:"mac-address"`
-	Interface  string `json:"interface"`
-	Bytes      string `json:"bytes"`
+	Id         string             `mapstructure:".id"`
+	MacAddress types.HardwareAddr `mapstructure:"mac-address"`
+	Interface  string             `mapstructure:"interface"`
+	Bytes      string             `mapstructure:"bytes"`
 }
 
 func (c *Client) InterfaceStats(ctx context.Context) (result []InterfaceStats, err error) {
