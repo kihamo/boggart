@@ -141,8 +141,7 @@ func (b *Bind) syncState(ctx context.Context, messages ...proto.Message) error {
 				err = multierr.Append(err, e)
 			}
 
-			switch st := state.(type) {
-			case *api.LightStateResponse:
+			if st, ok := state.(*api.LightStateResponse); ok {
 				color := wifiled.Color{
 					Red:       uint8(st.Red * 255),
 					Green:     uint8(st.Green * 255),

@@ -36,9 +36,9 @@ type Base struct {
 
 type Header struct {
 	Length   uint16
+	Stamp    uint32
 	Unknown1 []byte
 	DeviceID []byte
-	Stamp    uint32
 	Checksum []byte
 }
 

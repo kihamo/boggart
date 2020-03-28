@@ -175,8 +175,7 @@ func (t Type) widgetActionDefaultPost(w *dashboard.Response, r *dashboard.Reques
 	err := r.Original().ParseForm()
 	if err == nil {
 		for key, value := range r.Original().PostForm {
-			switch key {
-			case "time":
+			if key == "time" {
 				var t time.Time
 
 				if strings.Compare(value[0], "now") == 0 {
@@ -266,7 +265,9 @@ func (t Type) widgetActionUser(w *dashboard.Response, r *dashboard.Request, clie
 		if err == nil {
 			for _, u := range users {
 				if u.Name == username {
+					u := u
 					user = &u
+
 					break
 				}
 			}
@@ -308,10 +309,8 @@ func (t Type) widgetActionUser(w *dashboard.Response, r *dashboard.Request, clie
 				t.Redirect(r.URL().Path+"?action=accounts", http.StatusFound, w, r)
 				return nil
 			}
-		} else {
-			if groupName := strings.TrimSpace(r.URL().Query().Get("groupname")); groupName != "" {
-				user.Group = groupName
-			}
+		} else if groupName := strings.TrimSpace(r.URL().Query().Get("groupname")); groupName != "" {
+			user.Group = groupName
 		}
 	}
 
@@ -387,7 +386,9 @@ func (t Type) widgetActionGroup(w *dashboard.Response, r *dashboard.Request, cli
 		if err == nil {
 			for _, u := range groups {
 				if u.Name == groupName {
+					u := u
 					group = &u
+
 					break
 				}
 			}
@@ -602,7 +603,7 @@ func (t Type) widgetActionFiles(_ *dashboard.Response, r *dashboard.Request, cli
 	}
 
 	for i := range files {
-		files[i].FileLength = files[i].FileLength * 1024
+		files[i].FileLength *= 1024
 	}
 
 	return map[string]interface{}{

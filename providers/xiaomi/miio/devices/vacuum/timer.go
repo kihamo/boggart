@@ -61,7 +61,7 @@ func (d *Device) Timers(ctx context.Context) ([]Timer, error) {
 	return result, nil
 }
 
-func (d *Device) DisableTimer(ctx context.Context, ID uint64, value bool) error {
+func (d *Device) DisableTimer(ctx context.Context, timerID uint64, value bool) error {
 	val := "off"
 	if value {
 		val = "on"
@@ -69,7 +69,7 @@ func (d *Device) DisableTimer(ctx context.Context, ID uint64, value bool) error 
 
 	var reply miio.ResponseOK
 
-	err := d.Client().Send(ctx, "upd_timer", []string{strconv.FormatUint(ID, 10), val}, &reply)
+	err := d.Client().Send(ctx, "upd_timer", []string{strconv.FormatUint(timerID, 10), val}, &reply)
 	if err != nil {
 		return err
 	}
@@ -81,10 +81,10 @@ func (d *Device) DisableTimer(ctx context.Context, ID uint64, value bool) error 
 	return nil
 }
 
-func (d *Device) RemoveTimer(ctx context.Context, ID uint64) error {
+func (d *Device) RemoveTimer(ctx context.Context, timerID uint64) error {
 	var reply miio.ResponseOK
 
-	err := d.Client().Send(ctx, "del_timer", []string{strconv.FormatUint(ID, 10)}, &reply)
+	err := d.Client().Send(ctx, "del_timer", []string{strconv.FormatUint(timerID, 10)}, &reply)
 	if err != nil {
 		return err
 	}

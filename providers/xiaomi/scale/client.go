@@ -100,7 +100,7 @@ SCAN:
 				impedance)
 
 			if m.unit == UnitKG || m.unit == UnitKG2 {
-				m.weight = m.weight / 2
+				m.weight /= 2
 			}
 
 			measuresCache[m.datetime] = m

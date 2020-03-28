@@ -89,8 +89,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 						continue
 					}
 
-					switch key {
-					case "effect":
+					if key == "effect" {
 						mode, err := wifiled.ModeFromString(strings.TrimSpace(value[0]))
 						if err == nil {
 							err = bind.bulb.SetMode(ctx, *mode, state.Speed)

@@ -107,8 +107,8 @@ type BindTypeWidget struct {
 	dashboard.Handler
 }
 
-func (b *BindTypeWidget) Translate(ctx context.Context, ID string, context string, format ...interface{}) string {
-	return i18n.Locale(ctx).Translate(I18nDomainFromContext(ctx), ID, context, format...)
+func (b *BindTypeWidget) Translate(ctx context.Context, messageID string, context string, format ...interface{}) string {
+	return i18n.Locale(ctx).Translate(I18nDomainFromContext(ctx), messageID, context, format...)
 }
 
 func (b *BindTypeWidget) TranslatePlural(ctx context.Context, singleID, pluralID string, number int, context string, format ...interface{}) string {

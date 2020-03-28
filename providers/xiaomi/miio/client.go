@@ -207,11 +207,8 @@ func (p *Client) Send(ctx context.Context, method string, params interface{}, re
 	}
 
 	var responseUnknown ResponseUnknownMethod
-	if err = json.Unmarshal(response.Body(), &responseUnknown); err == nil {
-		switch responseUnknown.Result {
-		case "unknown_method":
-			return errors.New("unknown method")
-		}
+	if err = json.Unmarshal(response.Body(), &responseUnknown); err == nil && responseUnknown.Result == "unknown_method" {
+		return errors.New("unknown method")
 	}
 
 	var responseDefault Response

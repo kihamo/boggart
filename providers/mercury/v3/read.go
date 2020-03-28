@@ -294,16 +294,17 @@ func (m *MercuryV3) ReadArray(arr array, mo *month, t tariff) (a1, a2, r3, r4 ui
 	}
 
 	// check length of response
-	if len(resp.Payload) == 1 {
+	switch v := len(resp.Payload); {
+	case v == 1:
 		if err = ResponseError(request, resp); err == nil {
 			err = fmt.Errorf("response payload length must 12 or 16 bytes not %d", len(resp.Payload))
 		}
 
 		return
-	} else if arr == ArrayActiveEnergy && len(resp.Payload) != 12 {
+	case arr == ArrayActiveEnergy && v != 12:
 		err = fmt.Errorf("response payload length must 12 bytes not %d", len(resp.Payload))
 		return
-	} else if len(resp.Payload) != 16 {
+	case v != 16:
 		err = fmt.Errorf("response payload length must 16 bytes not %d", len(resp.Payload))
 		return
 	}
@@ -332,5 +333,5 @@ func (m *MercuryV3) ReadArray(arr array, mo *month, t tariff) (a1, a2, r3, r4 ui
 		r4 = ParseValue4Bytes(resp.Payload[12:16])
 	}
 
-	return
+	return a1, a2, r3, r4, err
 }

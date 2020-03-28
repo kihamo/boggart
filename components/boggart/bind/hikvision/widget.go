@@ -65,8 +65,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 						continue
 					}
 
-					switch key {
-					case "ir-cut-filter-type":
+					if key == "ir-cut-filter-type" {
 						params := image.NewSetImageIrCutFilterParamsWithContext(ctx).
 							WithChannel(ch).
 							WithIrcutFilter(&models.IrcutFilter{

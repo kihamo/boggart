@@ -77,8 +77,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 
 	var unitFactor int64 = 1
 
-	switch disks.Payload.Content.DisksSize.Unit {
-	case "MB":
+	if disks.Payload.Content.DisksSize.Unit == "MB" {
 		unitFactor = 1024
 	}
 

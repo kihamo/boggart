@@ -52,17 +52,18 @@ func (c Color) HSV() (h uint32, s, v float64) {
 	max := math.Max(math.Max(r, g), b)
 	min := math.Min(math.Min(r, g), b)
 
-	if max == min {
+	switch max {
+	case min:
 		h = 0
-	} else if max == r {
+	case r:
 		if g >= b {
 			h = uint32(60 * ((g - b) / (max - min)))
 		} else {
 			h = uint32(60*((g-b)/(max-min)) + 360)
 		}
-	} else if max == g {
+	case g:
 		h = uint32(60*((b-r)/(max-min)) + 120)
-	} else if max == b {
+	case b:
 		h = uint32(60*((r-g)/(max-min)) + 240)
 	}
 
@@ -76,7 +77,7 @@ func (c Color) HSV() (h uint32, s, v float64) {
 
 	v = max * 100
 
-	return
+	return h, s, v
 }
 
 func (c Color) String() string {

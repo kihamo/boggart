@@ -15,6 +15,8 @@ type Config struct {
 
 	Address                   types.URL `valid:",required"`
 	Debug                     bool
+	SMSCommandsEnabled        bool          `mapstructure:"sms_commands_enabled" yaml:"sms_commands_enabled"`
+	CleanerSpecial            bool          `mapstructure:"cleaner_special" yaml:"cleaner_special"`
 	BalanceUpdaterInterval    time.Duration `mapstructure:"balance_interval" yaml:"balance_interval"`
 	BalanceUpdaterTimeout     time.Duration `mapstructure:"balance_timeout" yaml:"balance_timeout"`
 	SMSCheckerInterval        time.Duration `mapstructure:"sms_checker_interval" yaml:"sms_checker_interval"`
@@ -22,10 +24,8 @@ type Config struct {
 	SystemUpdaterInterval     time.Duration `mapstructure:"system_interval" yaml:"system_interval"`
 	SystemUpdaterTimeout      time.Duration `mapstructure:"system_timeout" yaml:"system_timeout"`
 	CleanerInterval           time.Duration `mapstructure:"cleaner_interval" yaml:"cleaner_interval"`
-	SMSCommandsEnabled        bool          `mapstructure:"sms_commands_enabled" yaml:"sms_commands_enabled"`
-	SMSCommandsAllowedPhones  []string      `mapstructure:"sms_commands_allowed_phones" yaml:"sms_commands_allowed_phones"`
-	CleanerSpecial            bool          `mapstructure:"cleaner_special" yaml:"cleaner_special"`
 	CleanerDuration           time.Duration `mapstructure:"cleaner_duration" yaml:"cleaner_duration"`
+	SMSCommandsAllowedPhones  []string      `mapstructure:"sms_commands_allowed_phones" yaml:"sms_commands_allowed_phones"`
 	TopicUSSDSend             mqtt.Topic    `mapstructure:"topic_ussd_send" yaml:"topic_ussd_send"`
 	TopicUSSDResult           mqtt.Topic    `mapstructure:"topic_ussd_result" yaml:"topic_ussd_result"`
 	TopicReboot               mqtt.Topic    `mapstructure:"topic_reboot" yaml:"topic_reboot"`

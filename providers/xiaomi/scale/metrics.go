@@ -93,18 +93,19 @@ func (m *Metrics) FatPercentage() (value float64) {
 
 	coefficient := 1.0
 
-	if m.sex == SexMale && m.weight < 61 {
+	switch v := m.weight; {
+	case m.sex == SexMale && v < 61:
 		coefficient = .98
-	} else if m.sex == SexFemale && m.weight > 60 {
+	case m.sex == SexFemale && v > 60:
 		coefficient = .96
 
-		if m.height > 160 {
+		if v > 160 {
 			coefficient *= 1.03
 		}
-	} else if m.sex == SexFemale && m.weight < 50 {
+	case m.sex == SexFemale && v < 50:
 		coefficient = 1.02
 
-		if m.height > 160 {
+		if v > 160 {
 			coefficient *= 1.03
 		}
 	}
@@ -203,7 +204,7 @@ func (m *Metrics) FatMassToIdeal() (value float64) {
 	value = (m.weight * (m.FatPercentage() / 100)) - (m.weight * (m.scales.FatPercentage()[2] / 100))
 
 	if value < 0 {
-		value = value * -1
+		value *= -1
 	}
 
 	return value
@@ -228,19 +229,21 @@ func (m *Metrics) MetabolicAge() (value float64) {
 }
 
 func (m *Metrics) BodyType() (value uint64) {
-	if m.FatPercentage() > m.scales.FatPercentage()[2] {
+	switch v := m.FatPercentage(); {
+	case v > m.scales.FatPercentage()[2]:
 		value = 0
-	} else if m.FatPercentage() < m.scales.FatPercentage()[1] {
+	case v < m.scales.FatPercentage()[1]:
 		value = 2
-	} else {
+	default:
 		value = 1
 	}
 
-	if m.MuscleMass() > m.scales.MuscleMass()[1] {
+	switch v := m.MuscleMass(); {
+	case v > m.scales.MuscleMass()[1]:
 		value = 2 + (value * 3)
-	} else if m.MuscleMass() < m.scales.MuscleMass()[0] {
-		value = value * 3
-	} else {
+	case v < m.scales.MuscleMass()[0]:
+		value *= 3
+	default:
 		value = 1 + (value * 3)
 	}
 

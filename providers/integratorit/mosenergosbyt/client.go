@@ -75,13 +75,13 @@ func (c *Client) Accounts(ctx context.Context) ([]Account, error) {
 	return data, nil
 }
 
-func (c *Client) CurrentBalance(ctx context.Context, IDAbonent uint64) (*Balance, error) {
+func (c *Client) CurrentBalance(ctx context.Context, abonentID uint64) (*Balance, error) {
 	var data []Balance
 
 	err := c.base.DoRequest(ctx, "sql", map[string]string{"query": "smorodinaTransProxy"}, map[string]string{
 		"plugin":      "smorodinaTransProxy",
 		"proxyquery":  "AbonentCurrentBalance",
-		"vl_provider": `{"id_abonent": ` + strconv.FormatUint(IDAbonent, 10) + `}`,
+		"vl_provider": `{"id_abonent": ` + strconv.FormatUint(abonentID, 10) + `}`,
 	}, &data)
 
 	if err != nil {
@@ -91,13 +91,13 @@ func (c *Client) CurrentBalance(ctx context.Context, IDAbonent uint64) (*Balance
 	return &data[0], nil
 }
 
-func (c *Client) Payments(ctx context.Context, IDAbonent uint64, dateStart, dateEnd time.Time) ([]Payment, error) {
+func (c *Client) Payments(ctx context.Context, abonentID uint64, dateStart, dateEnd time.Time) ([]Payment, error) {
 	var data []Payment
 
 	err := c.base.DoRequest(ctx, "sql", map[string]string{"query": "smorodinaTransProxy"}, map[string]string{
 		"plugin":      "smorodinaTransProxy",
 		"proxyquery":  "AbonentPays",
-		"vl_provider": `{"id_abonent": ` + strconv.FormatUint(IDAbonent, 10) + `}`,
+		"vl_provider": `{"id_abonent": ` + strconv.FormatUint(abonentID, 10) + `}`,
 		"dt_st":       dateStart.Format(time.RFC3339),
 		"dt_en":       dateEnd.Format(time.RFC3339),
 	}, &data)
@@ -105,13 +105,13 @@ func (c *Client) Payments(ctx context.Context, IDAbonent uint64, dateStart, date
 	return data, err
 }
 
-func (c *Client) ChargeDetail(ctx context.Context, IDAbonent uint64, dateStart, dateEnd time.Time) ([]Charge, error) {
+func (c *Client) ChargeDetail(ctx context.Context, abonentID uint64, dateStart, dateEnd time.Time) ([]Charge, error) {
 	var data []Charge
 
 	err := c.base.DoRequest(ctx, "sql", map[string]string{"query": "smorodinaTransProxy"}, map[string]string{
 		"plugin":          "smorodinaTransProxy",
 		"proxyquery":      "AbonentChargeDetail",
-		"vl_provider":     `{"id_abonent": ` + strconv.FormatUint(IDAbonent, 10) + `}`,
+		"vl_provider":     `{"id_abonent": ` + strconv.FormatUint(abonentID, 10) + `}`,
 		"dt_period_start": dateStart.Format(time.RFC3339),
 		"dt_period_end":   dateEnd.Format(time.RFC3339),
 		"kd_tp_mode":      "1",

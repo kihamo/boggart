@@ -87,10 +87,8 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 								return err
 							}
 						}
-					} else { // stop
-						if len(captureFlush) == 0 {
-							captureFlush <- struct{}{}
-						}
+					} else if len(captureFlush) == 0 {
+						captureFlush <- struct{}{}
 					}
 
 					return nil

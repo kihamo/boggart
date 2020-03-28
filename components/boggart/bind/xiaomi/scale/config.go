@@ -10,12 +10,12 @@ import (
 )
 
 type Profile struct {
-	Name     string    `json:"name,omitempty" yaml:"name,omitempty"`
 	Sex      bool      `json:"sex,omitempty" yaml:"sex,omitempty"`
-	Height   uint64    `json:"height,omitempty" yaml:"height,omitempty"`
-	Birthday time.Time `json:"birthday,omitempty" yaml:"birthday,omitempty"`
-	Age      uint64    `json:"age,omitempty" yaml:"age,omitempty"`
 	Editable bool      `json:"-" yaml:"-"`
+	Name     string    `json:"name,omitempty" yaml:"name,omitempty"`
+	Height   uint64    `json:"height,omitempty" yaml:"height,omitempty"`
+	Age      uint64    `json:"age,omitempty" yaml:"age,omitempty"`
+	Birthday time.Time `json:"birthday,omitempty" yaml:"birthday,omitempty"`
 }
 
 func (p Profile) GetAge() (age uint64) {

@@ -270,10 +270,8 @@ func (c *Component) Shutdown() error {
 func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, description string, tags []string, config interface{}) (boggart.BindItem, error) {
 	if id == "" {
 		id = uuid.New()
-	} else {
-		if existsBind := c.Bind(id); existsBind != nil {
-			return nil, errors.New("bind item with id " + id + " already exist")
-		}
+	} else if existsBind := c.Bind(id); existsBind != nil {
+		return nil, errors.New("bind item with id " + id + " already exist")
 	}
 
 	bindType, err := boggart.GetBindType(t)

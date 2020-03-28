@@ -54,17 +54,17 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 						continue
 					}
 
-					if balance.ValueT1 != nil && (t1Date == nil || (*balance.DatetimeEntity).After(*t1Date)) {
+					if balance.ValueT1 != nil && (t1Date == nil || balance.DatetimeEntity.After(*t1Date)) {
 						t1 = balance.ValueT1
 						t1Date = &balance.DatetimeEntity.Time
 					}
 
-					if balance.ValueT2 != nil && (t2Date == nil || (*balance.DatetimeEntity).After(*t2Date)) {
+					if balance.ValueT2 != nil && (t2Date == nil || balance.DatetimeEntity.After(*t2Date)) {
 						t2 = balance.ValueT2
 						t2Date = &balance.DatetimeEntity.Time
 					}
 
-					if balance.ValueT3 != nil && (t3Date == nil || (*balance.DatetimeEntity).After(*t3Date)) {
+					if balance.ValueT3 != nil && (t3Date == nil || balance.DatetimeEntity.After(*t3Date)) {
 						t3 = balance.ValueT3
 						t3Date = &balance.DatetimeEntity.Time
 					}

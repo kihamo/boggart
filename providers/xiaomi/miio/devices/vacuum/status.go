@@ -58,20 +58,20 @@ type StatusError uint64
 */
 
 type Status struct {
-	MessageVersion  uint32        `json:"msg_ver"`
-	MessageSequence uint32        `json:"msg_seq"`
-	State           StatusState   `json:"state"`
-	Battery         uint32        `json:"battery"`
-	CleanTime       time.Duration `json:"clean_time"`
-	CleanArea       uint32        `json:"clean_area"` // mm2
-	Error           StatusError   `json:"error_code"`
 	MapPresent      bool          `json:"map_present"`
 	InCleaning      bool          `json:"in_cleaning"`
 	InReturning     bool          `json:"in_returning"`
 	InFreshState    bool          `json:"in_fresh_state"`
 	LabStatus       bool          `json:"lab_status"`
-	FanPower        uint32        `json:"fan_power"`
 	DNDEnabled      bool          `json:"dnd_enabled"`
+	MessageVersion  uint32        `json:"msg_ver"`
+	MessageSequence uint32        `json:"msg_seq"`
+	Battery         uint32        `json:"battery"`
+	CleanArea       uint32        `json:"clean_area"` // mm2
+	FanPower        uint32        `json:"fan_power"`
+	State           StatusState   `json:"state"`
+	Error           StatusError   `json:"error_code"`
+	CleanTime       time.Duration `json:"clean_time"`
 }
 
 func (s StatusState) String() string {

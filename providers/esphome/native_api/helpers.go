@@ -106,5 +106,5 @@ func State(entityMessage, stateMessage proto.Message, unit bool) (state string, 
 		err = errors.New("unknown state type " + proto.MessageName(stateMessage))
 	}
 
-	return
+	return state, err
 }

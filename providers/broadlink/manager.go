@@ -51,14 +51,14 @@ func LocalAddr() (*net.UDPAddr, error) {
 // - Подключиться к незащищенной точке BroadlinkProv
 // - Запустить Setup
 // - Подключиться к сети указанной в Setup и через Discover обнаружить устройство
-func SetupWiFi(SSID, password string, securityMode int) (err error) {
+func SetupWiFi(ssid, password string, securityMode int) (err error) {
 	var packet [0x88]byte
 
 	// 0x26 14 (Always 14)
 	packet[0x26] = 0x14
 
 	// 0x44-0x63 SSID Name (zero padding is appended)
-	copy(packet[0x44:], SSID)
+	copy(packet[0x44:], ssid)
 
 	// 0x64-0x83 Password (zero padding is appended)
 	if len(password) > 0x1f { // WIFI password
@@ -68,7 +68,7 @@ func SetupWiFi(SSID, password string, securityMode int) (err error) {
 	copy(packet[0x64:], password)
 
 	// 0x84	Character length of SSID
-	packet[0x84] = byte(len(SSID))
+	packet[0x84] = byte(len(ssid))
 
 	// 0x85	Character length of password
 	packet[0x85] = byte(len(password))

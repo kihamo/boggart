@@ -5,19 +5,19 @@ import (
 )
 
 type Response struct {
-	Name      string
 	Ret       uint64
+	Name      string
 	SessionID string
 }
 
 type LoginResponse struct {
+	DataUseAES    bool
+	SessionID     Uint32
 	AliveInterval uint64
 	ChannelNum    uint64
-	DataUseAES    bool
-	DeviceType    string `json:"DeviceType "`
 	ExtraChannel  uint64
 	Ret           uint64
-	SessionID     Uint32
+	DeviceType    string `json:"DeviceType "`
 }
 
 type LogSearch struct {
@@ -29,12 +29,12 @@ type LogSearch struct {
 }
 
 type FileSearch struct {
-	BeginTime  Time
 	DiskNo     uint32
+	SerialNo   uint32
+	BeginTime  Time
 	EndTime    Time
 	FileLength Uint32
 	FileName   string
-	SerialNo   uint32
 }
 
 func (f FileSearch) Duration() time.Duration {
@@ -45,22 +45,22 @@ type SystemInfo struct {
 	AlarmInChannel  uint64
 	AlarmOutChannel uint64
 	AudioInChannel  uint64
-	BuildTime       Time
 	CombineSwitch   uint64
-	DeviceRunTime   Uint32
 	DigChannel      uint64
-	EncryptVersion  string
 	ExtraChannel    uint64
+	TalkInChannel   uint64
+	TalkOutChannel  uint64
+	VideoInChannel  uint64
+	VideoOutChannel uint64
+	BuildTime       Time
+	UpdataTime      Time
+	UpdataType      Uint32
+	DeviceRunTime   Uint32
+	EncryptVersion  string
 	HardWare        string
 	HardWareVersion string
 	SerialNo        string
 	SoftWareVersion string
-	TalkInChannel   uint64
-	TalkOutChannel  uint64
-	UpdataTime      Time
-	UpdataType      Uint32
-	VideoInChannel  uint64
-	VideoOutChannel uint64
 }
 
 type OEMInfo struct {

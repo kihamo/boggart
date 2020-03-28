@@ -10,13 +10,16 @@ linters:
   enable:
     - bodyclose
     - golint
-    - unparam
     - interfacer
     - unconvert
-#    -- goconst
-#    -- prealloc
-#    -- whitespace
+    - maligned
+    - unparam
+    - dogsled
+    - nakedret
+    - prealloc
+    - scopelint
+    - gocritic
+    - whitespace
     - wsl
-#    -- gomnd
   disable:
     - errcheck

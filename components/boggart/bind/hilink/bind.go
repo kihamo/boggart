@@ -175,8 +175,7 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, sms *models.SMSListMessagesI
 						return true
 					}
 
-					switch cmd {
-					case "reboot":
+					if cmd == "reboot" {
 						params := device.NewDeviceControlParams()
 						params.Request.Control = 1
 

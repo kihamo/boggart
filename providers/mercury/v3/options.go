@@ -2,8 +2,8 @@ package v3
 
 type options struct {
 	address     byte
-	accessLevel accessLevel
 	password    LevelPassword
+	accessLevel accessLevel
 }
 
 type Option interface {
