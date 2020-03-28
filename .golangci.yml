@@ -21,5 +21,11 @@ linters:
     - gocritic
     - whitespace
     - wsl
+    - goprintffuncname
   disable:
     - errcheck
+    - gochecknoglobals
+
+linters-settings:
+  maligned:
+    suggest-new: true
