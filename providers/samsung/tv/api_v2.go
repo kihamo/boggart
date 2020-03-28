@@ -16,17 +16,17 @@ import (
 )
 
 const (
-	ApiV2BasePath      = "/api/v2/"
-	ApiV2LegacyPort    = 55000
-	ApiV2WebSocketPort = 8001
-	ApiV2ApplicationId = "SamsungTV"
+	APIv2BasePath      = "/api/v2/"
+	APIv2LegacyPort    = 55000
+	APIv2WebSocketPort = 8001
+	APIv2ApplicationID = "SamsungTV"
 )
 
 const (
 	KeyPower = "KEY_POWER"
 )
 
-type ApiV2DeviceResponse struct {
+type APIv2DeviceResponse struct {
 	Device struct {
 		OS                string
 		CountryCode       string
@@ -70,7 +70,7 @@ type ApiV2DeviceResponse struct {
 	}
 }
 
-func (r *ApiV2DeviceResponse) UnmarshalJSON(b []byte) error {
+func (r *APIv2DeviceResponse) UnmarshalJSON(b []byte) error {
 	var t map[string]interface{}
 
 	if err := json.Unmarshal(b, &t); err != nil {
@@ -176,7 +176,7 @@ func (r *ApiV2DeviceResponse) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-type ApiV2SendCommandRequest struct {
+type APIv2SendCommandRequest struct {
 	Method string `json:"method"`
 	Params struct {
 		Cmd          string
@@ -186,27 +186,27 @@ type ApiV2SendCommandRequest struct {
 	} `json:"params"`
 }
 
-type ApiV2 struct {
+type APIv2 struct {
 	mutex sync.RWMutex
 
 	host    string
 	client  *http.Client
 	connect *websocket.Conn
-	info    *ApiV2DeviceResponse
+	info    *APIv2DeviceResponse
 }
 
-func NewApiV2(host string) *ApiV2 {
-	return &ApiV2{
+func NewAPIv2(host string) *APIv2 {
+	return &APIv2{
 		host:   host,
 		client: http.NewClient(),
 	}
 }
 
-func (a *ApiV2) Host() string {
+func (a *APIv2) Host() string {
 	return a.host
 }
 
-func (a *ApiV2) support() *ApiV2DeviceResponse {
+func (a *APIv2) support() *APIv2DeviceResponse {
 	a.mutex.RLock()
 	info := a.info
 	a.mutex.RUnlock()
@@ -217,7 +217,7 @@ func (a *ApiV2) support() *ApiV2DeviceResponse {
 
 	device, err := a.Device(context.Background())
 	if err != nil {
-		return &ApiV2DeviceResponse{}
+		return &APIv2DeviceResponse{}
 	}
 
 	a.mutex.Lock()
@@ -227,7 +227,7 @@ func (a *ApiV2) support() *ApiV2DeviceResponse {
 	return &device
 }
 
-func (a *ApiV2) RemoteControlConnect() (*websocket.Conn, error) {
+func (a *APIv2) RemoteControlConnect() (*websocket.Conn, error) {
 	if !a.support().Support.RemoteAvailable {
 		return nil, errors.New("remote control isn't supported")
 	}
@@ -246,9 +246,9 @@ func (a *ApiV2) RemoteControlConnect() (*websocket.Conn, error) {
 
 	u := url.URL{
 		Scheme:  "ws",
-		Host:    net.JoinHostPort(a.host, strconv.Itoa(ApiV2WebSocketPort)),
-		Path:    ApiV2BasePath + "channels/samsung.remote.control",
-		RawPath: "name=" + base64.StdEncoding.EncodeToString([]byte(ApiV2ApplicationId)),
+		Host:    net.JoinHostPort(a.host, strconv.Itoa(APIv2WebSocketPort)),
+		Path:    APIv2BasePath + "channels/samsung.remote.control",
+		RawPath: "name=" + base64.StdEncoding.EncodeToString([]byte(APIv2ApplicationID)),
 	}
 
 	connect, _, err := dialer.Dial(u.String(), nil)
@@ -266,13 +266,13 @@ func (a *ApiV2) RemoteControlConnect() (*websocket.Conn, error) {
 	return connect, err
 }
 
-func (a *ApiV2) Device(ctx context.Context) (ApiV2DeviceResponse, error) {
-	reply := ApiV2DeviceResponse{}
+func (a *APIv2) Device(ctx context.Context) (APIv2DeviceResponse, error) {
+	reply := APIv2DeviceResponse{}
 
 	u := url.URL{
 		Scheme: "http",
-		Host:   net.JoinHostPort(a.host, strconv.Itoa(ApiV2WebSocketPort)),
-		Path:   ApiV2BasePath,
+		Host:   net.JoinHostPort(a.host, strconv.Itoa(APIv2WebSocketPort)),
+		Path:   APIv2BasePath,
 	}
 
 	response, err := a.client.Get(ctx, u.String())
@@ -287,13 +287,13 @@ func (a *ApiV2) Device(ctx context.Context) (ApiV2DeviceResponse, error) {
 	return reply, nil
 }
 
-func (a *ApiV2) SendCommand(command string) error {
+func (a *APIv2) SendCommand(command string) error {
 	connect, err := a.RemoteControlConnect()
 	if err != nil {
 		return err
 	}
 
-	msg := ApiV2SendCommandRequest{
+	msg := APIv2SendCommandRequest{
 		Method: "ms.remote.control",
 		Params: struct {
 			Cmd          string

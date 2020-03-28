@@ -6,7 +6,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
-	speechkit "github.com/kihamo/boggart/providers/yandex_speechkit_cloud"
+	"github.com/kihamo/boggart/providers/yandex_speechkit_cloud"
 )
 
 type Config struct {

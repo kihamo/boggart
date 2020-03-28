@@ -11,7 +11,7 @@ type Response struct {
 	Length    byte
 	ErrorCode byte
 	Payload   []byte
-	Id        []byte
+	ID        []byte
 	CRC       []byte
 }
 
@@ -26,7 +26,7 @@ func ParseResponse(data []byte) (*Response, error) {
 		Address:  data[:4],
 		Function: data[4],
 		Length:   data[5],
-		Id:       data[l-4 : l-2],
+		ID:       data[l-4 : l-2],
 		CRC:      data[l-2:],
 	}
 
@@ -43,7 +43,7 @@ func (r *Response) Bytes() []byte {
 	packet := append(r.Address, r.Function)
 	packet = append(packet, r.Length)
 	packet = append(packet, r.Payload...)
-	packet = append(packet, r.Id...)
+	packet = append(packet, r.ID...)
 	packet = append(packet, r.CRC...)
 
 	return packet

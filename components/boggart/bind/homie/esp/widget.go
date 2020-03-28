@@ -38,7 +38,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 						continue
 					}
 
-					err = bind.SettingsSet(r.Context(), key, value[0])
+					err = bind.settingsSet(r.Context(), key, value[0])
 					if err != nil {
 						break
 					}
@@ -154,7 +154,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		"online":             bind.Meta().IsStatusOnline(),
 		"last_update":        lastUpdate,
 		"devices_attributes": bind.DeviceAttributes(),
-		"nodes":              bind.Nodes(),
+		"nodes":              bind.nodesList(),
 		"ota_enabled":        bind.OTAIsEnabled(),
 		"ota_running":        bind.OTAIsRunning(),
 		"ota_written":        otaWritten,
@@ -162,7 +162,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		"ota_checksum":       bind.OTAChecksum(),
 		"ota_progress":       (float64(otaWritten) * float64(100)) / float64(otaTotal),
 		"ota_timeout":        otaTimeout,
-		"settings":           bind.SettingsAll(),
+		"settings":           bind.settingsAll(),
 	}
 
 	if lastUpdate != nil {

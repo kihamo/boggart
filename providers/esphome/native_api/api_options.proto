@@ -1,5 +1,5 @@
 syntax = "proto2";
-package native_api;
+package nativeapi;
 import "google/protobuf/descriptor.proto";
 
 

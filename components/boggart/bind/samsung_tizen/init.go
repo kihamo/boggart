@@ -1,4 +1,4 @@
-package samsung_tizen
+package tizen
 
 import (
 	"github.com/kihamo/boggart/components/boggart"

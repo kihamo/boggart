@@ -81,11 +81,12 @@ func (c *Client) Do(request *http.Request) (*http.Response, error) {
 	debug := atomic.LoadUint64(&c.debug)
 
 	if debug == 1 {
-		if dump, err := httputil.DumpRequestOut(request, true); err != nil {
+		dump, err := httputil.DumpRequestOut(request, true)
+		if err != nil {
 			return nil, err
-		} else {
-			fmt.Printf("\n\n%q", dump)
 		}
+
+		fmt.Printf("\n\n%q", dump)
 	}
 
 	request, closer := tracing.TraceRequest(opentracing.GlobalTracer(), request)
@@ -97,11 +98,12 @@ func (c *Client) Do(request *http.Request) (*http.Response, error) {
 	}
 
 	if debug == 1 {
-		if dump, err := httputil.DumpResponse(response, true); err != nil {
+		dump, err := httputil.DumpResponse(response, true)
+		if err != nil {
 			return nil, err
-		} else {
-			fmt.Printf("\n\n%q", dump)
 		}
+
+		fmt.Printf("\n\n%q", dump)
 	}
 
 	c.mutex.Lock()

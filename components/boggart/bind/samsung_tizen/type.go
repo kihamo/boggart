@@ -1,4 +1,4 @@
-package samsung_tizen
+package tizen
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
@@ -12,7 +12,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	bind := &Bind{
 		config: config,
-		client: tv.NewApiV2(config.Host),
+		client: tv.NewAPIv2(config.Host),
 	}
 
 	return bind, nil

@@ -361,9 +361,9 @@ func (c *Component) doPublish(ctx context.Context, topic mqtt.Topic, qos byte, r
 			if val, ok := c.payloadCache.Get(topic); ok && bytes.Equal(val.Payload(), payloadConverted) {
 				metricPayloadCacheHit.Inc()
 				return nil
-			} else {
-				metricPayloadCacheMiss.Inc()
 			}
+
+			metricPayloadCacheMiss.Inc()
 		}
 
 		token := client.Publish(topic.String(), qos, retained, payloadConverted)

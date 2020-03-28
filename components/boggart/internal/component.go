@@ -13,7 +13,7 @@ import (
 	"sync/atomic"
 
 	"github.com/kihamo/boggart/components/boggart"
-	_ "github.com/kihamo/boggart/components/boggart/bind/boggart"
+	_ "github.com/kihamo/boggart/components/boggart/bind/boggart" // nolint:golint
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/shadow"

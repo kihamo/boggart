@@ -1,4 +1,4 @@
-package yandex_speechkit_cloud
+package speechkit
 
 import (
 	"github.com/go-openapi/runtime"

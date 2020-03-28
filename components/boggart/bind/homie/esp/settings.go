@@ -40,7 +40,7 @@ func (b *Bind) settingsParse(e reflect.Value, prefix string) {
 	}
 }
 
-func (b *Bind) SettingsAll() map[string]settingsOption {
+func (b *Bind) settingsAll() map[string]settingsOption {
 	result := make(map[string]settingsOption)
 
 	b.settings.Range(func(key, value interface{}) bool {
@@ -51,7 +51,7 @@ func (b *Bind) SettingsAll() map[string]settingsOption {
 	return result
 }
 
-func (b *Bind) SettingsGet(key string) (value settingsOption, ok bool) {
+func (b *Bind) settingsGet(key string) (value settingsOption, ok bool) {
 	if v, o := b.settings.Load(key); o {
 		return v.(settingsOption), o
 	}
@@ -59,8 +59,8 @@ func (b *Bind) SettingsGet(key string) (value settingsOption, ok bool) {
 	return value, ok
 }
 
-func (b *Bind) SettingsSet(ctx context.Context, key string, value interface{}) (err error) {
-	md, ok := b.SettingsGet(key)
+func (b *Bind) settingsSet(ctx context.Context, key string, value interface{}) (err error) {
+	md, ok := b.settingsGet(key)
 	if !ok {
 		return errors.New("config option " + key + " not found")
 	}

@@ -7,7 +7,7 @@ import (
 )
 
 type IPARP struct {
-	Id         string             `mapstructure:".id"`
+	ID         string             `mapstructure:".id"`
 	Address    types.IP           `mapstructure:"address"`
 	MacAddress types.HardwareAddr `mapstructure:"mac-address,omitempty"`
 	Interface  string             `mapstructure:"interface"`
@@ -21,7 +21,7 @@ type IPARP struct {
 }
 
 type IPDHCPServerLease struct {
-	Id           string             `mapstructure:".id"`
+	ID           string             `mapstructure:".id"`
 	Address      types.IP           `mapstructure:"address"`
 	MacAddress   types.HardwareAddr `mapstructure:"mac-address"`
 	AddressLists string             `mapstructure:"address-lists"`
@@ -37,7 +37,7 @@ type IPDHCPServerLease struct {
 }
 
 type IPDNSStatic struct {
-	Id       string   `mapstructure:".id"`
+	ID       string   `mapstructure:".id"`
 	Name     string   `mapstructure:"name"`
 	Regexp   string   `mapstructure:"regexp"`
 	Address  types.IP `mapstructure:"address"`

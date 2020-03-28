@@ -76,11 +76,11 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	}
 
 	switch format {
-	case yandex_speechkit_cloud.FormatMP3:
+	case speechkit.FormatMP3:
 		w.Header().Set("Content-Type", "audio/mpeg")
-	case yandex_speechkit_cloud.FormatWAV:
+	case speechkit.FormatWAV:
 		w.Header().Set("Content-Type", "audio/wav")
-	case yandex_speechkit_cloud.FormatOPUS:
+	case speechkit.FormatOPUS:
 		w.Header().Set("Content-Type", "audio/opus")
 	}
 

@@ -16,7 +16,7 @@ type streamWrapper struct {
 	format beep.Format
 }
 
-func NewStreamWrapper(source beep.Streamer, format beep.Format, volume int64, mute bool) *streamWrapper {
+func newStreamWrapper(source beep.Streamer, format beep.Format, volume int64, mute bool) *streamWrapper {
 	return &streamWrapper{
 		source: effects.Volume{
 			Streamer: source,

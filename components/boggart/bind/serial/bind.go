@@ -13,7 +13,7 @@ type Bind struct {
 	di.LoggerBind
 	di.ProbesBind
 
-	server serial_network.Server
+	server serialnetwork.Server
 }
 
 func (b *Bind) Run() error {

@@ -13,7 +13,7 @@ type speakerWrapper struct {
 	player     *oto.Player
 }
 
-func NewSpeakerWrapper(player *oto.Player, bufferSize, numBytes int) *speakerWrapper {
+func newSpeakerWrapper(player *oto.Player, bufferSize, numBytes int) *speakerWrapper {
 	return &speakerWrapper{
 		bufferSize: bufferSize,
 		numBytes:   numBytes,

@@ -8,9 +8,9 @@ run:
 
 linters:
   enable:
-#    - bodyclose
-#    - golint
-#    - unparam
+    - bodyclose
+    - golint
+    - unparam
 #    - gosec
     - interfacer
 #    - unconvert

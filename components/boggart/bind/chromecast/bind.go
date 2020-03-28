@@ -225,12 +225,12 @@ func (b *Bind) Media(ctx context.Context) (*controllers.MediaController, error) 
 	b.mutex.RUnlock()
 
 	if ctrlMedia == nil {
-		transportId, err := b.launchApp(ctx, cast.AppMedia)
+		transportID, err := b.launchApp(ctx, cast.AppMedia)
 		if err != nil {
 			return nil, err
 		}
 
-		ctrlMedia = controllers.NewMediaController(conn, b.events, cast.DefaultSender, transportId)
+		ctrlMedia = controllers.NewMediaController(conn, b.events, cast.DefaultSender, transportID)
 		if err := ctrlMedia.Start(ctx); err != nil {
 			return nil, err
 		}

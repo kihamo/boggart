@@ -1,4 +1,4 @@
-package native_api
+package nativeapi
 
 import (
 	"strconv"

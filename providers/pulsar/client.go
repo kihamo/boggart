@@ -52,12 +52,12 @@ func (d *HeatMeter) Request(request *Request) (*Response, error) {
 	}
 
 	// check ID
-	if !bytes.Equal(response.Id, request.Id) {
+	if !bytes.Equal(response.ID, request.ID) {
 		return nil, errors.New(
 			"error ID of response packet " +
 				hex.EncodeToString(data) + " have " +
-				hex.EncodeToString(response.Id) + " want " +
-				hex.EncodeToString(request.Id))
+				hex.EncodeToString(response.ID) + " want " +
+				hex.EncodeToString(request.ID))
 	}
 
 	// check error

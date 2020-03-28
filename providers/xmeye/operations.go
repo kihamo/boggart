@@ -38,7 +38,7 @@ func (c *Client) OPTimeSetting(ctx context.Context, t time.Time) error {
 func (c *Client) LogExport(ctx context.Context) (io.Reader, error) {
 	packet, err := c.Call(ctx, CmdLogExportRequest, nil)
 
-	return packet.Payload, err
+	return packet.payload, err
 }
 
 // FIXME: после reboot через ручку странное поведение, девайс не перезагружается

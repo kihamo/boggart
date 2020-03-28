@@ -1,4 +1,4 @@
-package native_api
+package nativeapi
 
 import (
 	"context"
@@ -77,11 +77,12 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				key   = entity.(api.MessageEntity).GetKey()
 			)
 
-			if s, ok := states[key]; !ok {
+			s, ok := states[key]
+			if !ok {
 				return errors.New("failed get entity state")
-			} else {
-				state = s.(*api.LightStateResponse)
 			}
+
+			state = s.(*api.LightStateResponse)
 
 			cmd := &api.LightCommandRequest{
 				Key:      key,
@@ -166,11 +167,12 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 					return e
 				}
 
-				if s, ok := states[light.GetKey()]; !ok {
+				s, ok := states[light.GetKey()]
+				if !ok {
 					return errors.New("failed get entity state")
-				} else {
-					state = s.(*api.LightStateResponse)
 				}
+
+				state = s.(*api.LightStateResponse)
 
 				if e := message.JSONUnmarshal(&request); e == nil {
 					if request.State != nil {

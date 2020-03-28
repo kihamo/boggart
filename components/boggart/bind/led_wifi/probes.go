@@ -1,4 +1,4 @@
-package led_wifi
+package ledwifi
 
 import (
 	"context"

@@ -3,6 +3,7 @@ package vacuum
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/kihamo/boggart/providers/xiaomi/miio"
@@ -25,7 +26,7 @@ func (d *Device) Timezone(ctx context.Context) (*time.Location, error) {
 	return time.LoadLocation(reply.Result[0])
 }
 
-func (d *Device) SetTimezone(ctx context.Context, zone time.Location) error {
+func (d *Device) SetTimezone(ctx context.Context, zone fmt.Stringer) error {
 	var reply miio.ResponseOK
 
 	err := d.Client().Send(ctx, "set_timezone", []string{zone.String()}, &reply)

@@ -66,7 +66,7 @@ func (b *Bind) initSpeaker() error {
 	}
 
 	b.mutex.Lock()
-	b.speaker = NewSpeakerWrapper(player, bufferSize, numBytes)
+	b.speaker = newSpeakerWrapper(player, bufferSize, numBytes)
 	b.mutex.Unlock()
 
 	return nil
@@ -99,7 +99,7 @@ func (b *Bind) initStream(s io.ReadCloser, f string) (err error) {
 	}
 
 	b.mutex.Lock()
-	b.stream = NewStreamWrapper(source, format, b.Volume(), b.Mute())
+	b.stream = newStreamWrapper(source, format, b.Volume(), b.Mute())
 	b.mutex.Unlock()
 
 	return nil

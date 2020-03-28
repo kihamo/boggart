@@ -183,11 +183,11 @@ func (t Type) handleCommand(w *dashboard.Response, r *dashboard.Request, bind *B
 		r.Session().FlashBag().Success(t.Translate(ctx, "Success toggle", ""))
 	}
 
-	redirectUrl := &url.URL{}
-	*redirectUrl = *r.Original().URL
-	redirectUrl.RawQuery = ""
+	redirectURL := &url.URL{}
+	*redirectURL = *r.Original().URL
+	redirectURL.RawQuery = ""
 
-	t.Redirect(redirectUrl.String(), http.StatusFound, w, r)
+	t.Redirect(redirectURL.String(), http.StatusFound, w, r)
 }
 
 func (t Type) handleIndex(_ *dashboard.Response, r *dashboard.Request, bind *Bind) {

@@ -7,7 +7,7 @@ import (
 )
 
 type InterfaceStats struct {
-	Id         string             `mapstructure:".id"`
+	ID         string             `mapstructure:".id"`
 	Name       string             `mapstructure:"name"`
 	MacAddress types.HardwareAddr `mapstructure:"mac-address,omitempty"`
 	TXByte     uint64             `mapstructure:"tx-byte"`
@@ -15,7 +15,7 @@ type InterfaceStats struct {
 }
 
 type InterfaceWirelessRegistrationTable struct {
-	Id         string             `mapstructure:".id"`
+	ID         string             `mapstructure:".id"`
 	MacAddress types.HardwareAddr `mapstructure:"mac-address"`
 	Interface  string             `mapstructure:"interface"`
 	Bytes      string             `mapstructure:"bytes"`

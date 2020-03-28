@@ -44,12 +44,12 @@ func (c *connection) IncrementSequenceNumber() {
 	atomic.AddUint32(&c.sequenceNumber, 1)
 }
 
-func (c *connection) send(packet *packet) error {
+func (c *connection) send(packet *Packet) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	packet.SessionID = c.SessionID()
-	packet.SequenceNumber = c.SequenceNumber()
+	packet.sessionID = c.SessionID()
+	packet.sequenceNumber = c.SequenceNumber()
 
 	if _, err := c.Write(packet.Marshal()); err != nil {
 		return err
@@ -60,7 +60,7 @@ func (c *connection) send(packet *packet) error {
 	return nil
 }
 
-func (c *connection) receive() (*packet, error) {
+func (c *connection) receive() (*Packet, error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -75,13 +75,13 @@ func (c *connection) receive() (*packet, error) {
 		return nil, err
 	}
 
-	if packet.PayloadLen == 0 {
+	if packet.payloadLen == 0 {
 		return packet, nil
 	}
 
 	bufSize := defaultPayloadBuffer
-	if bufSize > packet.PayloadLen {
-		bufSize = packet.PayloadLen
+	if bufSize > packet.payloadLen {
+		bufSize = packet.payloadLen
 	}
 	buf := make([]byte, bufSize)
 
@@ -91,17 +91,17 @@ func (c *connection) receive() (*packet, error) {
 			return packet, err
 		}
 
-		_, err = packet.Payload.Write(buf[:n])
+		_, err = packet.payload.Write(buf[:n])
 		if err != nil {
 			return packet, err
 		}
 
 		// чтобы не прочитать следующий пакет урезаем буфер (актуально для режима потока, там пакеты идут один за другим)
-		if delta := packet.PayloadLen - packet.Payload.Len(); delta < bufSize {
+		if delta := packet.payloadLen - packet.payload.Len(); delta < bufSize {
 			buf = make([]byte, delta)
 		}
 
-		if packet.Payload.Len() >= packet.PayloadLen {
+		if packet.payload.Len() >= packet.payloadLen {
 			break
 		}
 	}

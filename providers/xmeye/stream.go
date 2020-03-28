@@ -8,7 +8,7 @@ import (
 type stream struct {
 	*connection
 
-	claim   *packet
+	claim   *Packet
 	request func() error
 
 	reader *io.PipeReader
@@ -16,7 +16,7 @@ type stream struct {
 	once   sync.Once
 }
 
-func newStream(conn *connection, claim *packet, request func() error) *stream {
+func newStream(conn *connection, claim *Packet, request func() error) *stream {
 	s := &stream{
 		connection: conn,
 		claim:      claim,
@@ -54,7 +54,7 @@ func (s *stream) Read(p []byte) (n int, err error) {
 			return
 		}
 
-		if err := response.Payload.Error(); err != nil {
+		if err := response.payload.Error(); err != nil {
 			return
 		}
 
@@ -66,9 +66,9 @@ func (s *stream) Read(p []byte) (n int, err error) {
 					return
 				}
 
-				response.Payload.WriteTo(s.writer)
+				response.payload.WriteTo(s.writer)
 
-				if response.CurrentPacket == 0x01 {
+				if response.currentPacket == 0x01 {
 					s.writer.Close()
 					return
 				}

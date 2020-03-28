@@ -1,4 +1,4 @@
-package lg_webos
+package webos
 
 import (
 	"github.com/kihamo/boggart/atomic"

@@ -98,5 +98,5 @@ func (c *Client) ConfigChannelTitleSet(ctx context.Context, names ...string) err
 func (c *Client) ConfigExport(ctx context.Context) (io.Reader, error) {
 	packet, err := c.Call(ctx, CmdConfigExportRequest, nil)
 
-	return packet.Payload, err
+	return packet.payload, err
 }

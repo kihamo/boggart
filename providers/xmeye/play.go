@@ -28,7 +28,7 @@ func (c *Client) PlayStream(ctx context.Context, begin, end time.Time, name stri
 	}
 
 	claim := newPacket()
-	claim.MessageID = CmdPlayClaimRequest
+	claim.messageID = CmdPlayClaimRequest
 	err = claim.LoadPayload(map[string]interface{}{
 		"Name":      "OPPlayBack",
 		"SessionID": c.connection.SessionIDAsString(),
@@ -48,7 +48,7 @@ func (c *Client) PlayStream(ctx context.Context, begin, end time.Time, name stri
 	}
 
 	request := newPacket()
-	request.MessageID = CmdPlayRequest
+	request.messageID = CmdPlayRequest
 	err = request.LoadPayload(map[string]interface{}{
 		"Name":      "OPPlayBack",
 		"SessionID": c.connection.SessionIDAsString(),

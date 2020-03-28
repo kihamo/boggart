@@ -39,12 +39,12 @@ func (b *Bind) SendMessage(to, message string) error {
 		return errors.New("bot is offline")
 	}
 
-	chatId, err := b.chatId(to)
+	chatID, err := b.chatID(to)
 	if err != nil {
 		return err
 	}
 
-	msg := tgbotapi.NewMessage(chatId, message)
+	msg := tgbotapi.NewMessage(chatID, message)
 	_, err = bot.Send(msg)
 
 	return err
@@ -56,12 +56,12 @@ func (b *Bind) SendPhoto(to, name string, file io.Reader, size int64) error {
 		return errors.New("bot is offline")
 	}
 
-	chatId, err := b.chatId(to)
+	chatID, err := b.chatID(to)
 	if err != nil {
 		return err
 	}
 
-	msg := tgbotapi.NewPhotoUpload(chatId, tgbotapi.FileReader{
+	msg := tgbotapi.NewPhotoUpload(chatID, tgbotapi.FileReader{
 		Name:   name,
 		Reader: file,
 		Size:   size,
@@ -78,12 +78,12 @@ func (b *Bind) SendAudio(to, name string, file io.Reader, size int64) error {
 		return errors.New("bot is offline")
 	}
 
-	chatId, err := b.chatId(to)
+	chatID, err := b.chatID(to)
 	if err != nil {
 		return err
 	}
 
-	msg := tgbotapi.NewAudioUpload(chatId, tgbotapi.FileReader{
+	msg := tgbotapi.NewAudioUpload(chatID, tgbotapi.FileReader{
 		Name:   name,
 		Reader: file,
 		Size:   size,
@@ -100,12 +100,12 @@ func (b *Bind) SendDocument(to, name string, file io.Reader, size int64) error {
 		return errors.New("bot is offline")
 	}
 
-	chatId, err := b.chatId(to)
+	chatID, err := b.chatID(to)
 	if err != nil {
 		return err
 	}
 
-	msg := tgbotapi.NewDocumentUpload(chatId, tgbotapi.FileReader{
+	msg := tgbotapi.NewDocumentUpload(chatID, tgbotapi.FileReader{
 		Name:   name,
 		Reader: file,
 		Size:   size,
@@ -122,7 +122,7 @@ func (b *Bind) SendFileAsURL(to, name, u string) error {
 		return errors.New("bot is offline")
 	}
 
-	chatId, err := b.chatId(to)
+	chatID, err := b.chatID(to)
 	if err != nil {
 		return err
 	}
@@ -131,7 +131,7 @@ func (b *Bind) SendFileAsURL(to, name, u string) error {
 		return err
 	}
 
-	msg := tgbotapi.NewMessage(chatId, name+" [view]("+u+")")
+	msg := tgbotapi.NewMessage(chatID, name+" [view]("+u+")")
 	msg.ParseMode = "Markdown"
 
 	_, err = bot.Send(msg)
@@ -176,13 +176,13 @@ func (b *Bind) bot() *tgbotapi.BotAPI {
 	return b.client
 }
 
-func (b *Bind) chatId(to string) (int64, error) {
-	chatId, err := strconv.Atoi(to)
+func (b *Bind) chatID(to string) (int64, error) {
+	chatID, err := strconv.Atoi(to)
 	if err != nil {
 		return -1, err
 	}
 
-	return int64(chatId), err
+	return int64(chatID), err
 }
 
 func (b *Bind) listenUpdates(ch tgbotapi.UpdatesChannel) {

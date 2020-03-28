@@ -1,4 +1,4 @@
-package lg_webos
+package webos
 
 import (
 	"errors"

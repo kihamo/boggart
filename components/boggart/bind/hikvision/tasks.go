@@ -36,6 +36,7 @@ func (b *Bind) Tasks() []workers.Task {
 	return tasks
 }
 
+// nolint:golint
 func (b *Bind) taskPTZ(ctx context.Context) (interface{}, error, bool) {
 	if !b.Meta().IsStatusOnline() {
 		return nil, nil, false
@@ -60,7 +61,7 @@ func (b *Bind) taskPTZ(ctx context.Context) (interface{}, error, bool) {
 			continue
 		}
 
-		if err := b.updateStatusByChannelId(ctx, id); err != nil {
+		if err := b.updateStatusByChannelID(ctx, id); err != nil {
 			b.Logger().Errorf("failed updated status for %s device in channel %d", b.Meta().SerialNumber(), id)
 			continue
 		}

@@ -43,8 +43,8 @@ func (c *Client) UpgradeData(ctx context.Context, data io.ReadSeeker) error {
 	data.Seek(0, 0)
 
 	packet := newPacket()
-	packet.MessageID = 1522
-	packet.TotalPacket = packets
+	packet.messageID = 1522
+	packet.totalPacket = packets
 
 	for i := uint16(1); i <= packets; i++ {
 		n, err := data.Read(buf)
@@ -56,9 +56,9 @@ func (c *Client) UpgradeData(ctx context.Context, data io.ReadSeeker) error {
 			break
 		}
 
-		packet.PayloadLen = n
+		packet.payloadLen = n
 		if i == packets {
-			packet.CurrentPacket = 1
+			packet.currentPacket = 1
 		}
 
 		if err := packet.LoadPayload(buf); err != nil {
@@ -75,12 +75,12 @@ func (c *Client) UpgradeData(ctx context.Context, data io.ReadSeeker) error {
 		}
 
 		var result Response
-		if err = response.Payload.JSONUnmarshal(&result); err != nil {
+		if err = response.payload.JSONUnmarshal(&result); err != nil {
 			return err
 		}
 
 		if result.Ret != CodeUpgradeData {
-			fmt.Println(response.Payload)
+			fmt.Println(response.payload)
 			break
 		}
 	}

@@ -12,6 +12,7 @@ import (
 )
 
 const (
+	OTAStatusUnknown     otaStatus = "unknown"
 	OTAStatusDownloading otaStatus = "downloading"
 	OTAStatusInstalling  otaStatus = "installing"
 	OTAStatusFailed      otaStatus = "failed"
@@ -117,7 +118,7 @@ func (d *Device) OTALocalServer(ctx context.Context, file io.ReadSeeker) error {
 		ticker := time.NewTicker(time.Second)
 
 		for range ticker.C {
-			if status, err := d.OTAStatus(ctx); err == nil {
+			if status, err := d.otaStatus(ctx); err == nil {
 				switch status {
 				case OTAStatusFailed:
 					return errors.New("OTA install failed")
@@ -153,7 +154,7 @@ func (d *Device) OTA(ctx context.Context, url, md5sum string) error {
 	return nil
 }
 
-func (d *Device) OTAStatus(ctx context.Context) (otaStatus, error) {
+func (d *Device) otaStatus(ctx context.Context) (otaStatus, error) {
 	var reply struct {
 		Response
 		Result []string `json:"result"`
@@ -161,7 +162,7 @@ func (d *Device) OTAStatus(ctx context.Context) (otaStatus, error) {
 
 	err := d.Client().Send(ctx, "miIO.get_ota_state", nil, &reply)
 	if err != nil {
-		return "", err
+		return OTAStatusUnknown, err
 	}
 
 	return otaStatus(reply.Result[0]), nil

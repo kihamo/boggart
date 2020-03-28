@@ -1,4 +1,4 @@
-package serial_network
+package serialnetwork
 
 import (
 	"io"

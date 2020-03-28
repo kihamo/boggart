@@ -48,7 +48,7 @@ type SystemPackageUpdate struct {
 }
 
 type SystemDisk struct {
-	Id    string `mapstructure:".id"`
+	ID    string `mapstructure:".id"`
 	Name  string `mapstructure:"name"`
 	Label string `mapstructure:"label"`
 	Type  string `mapstructure:"type"`

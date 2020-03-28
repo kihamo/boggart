@@ -25,7 +25,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 			bind.Logger().Debug(message)
 		})
 
-	bind.provider = yandex_speechkit_cloud.New(cfg.Debug, l)
+	bind.provider = speechkit.New(cfg.Debug, l)
 
 	return bind, nil
 }

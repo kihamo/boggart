@@ -15,7 +15,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
-	speechkit "github.com/kihamo/boggart/providers/yandex_speechkit_cloud"
+	"github.com/kihamo/boggart/providers/yandex_speechkit_cloud"
 	"github.com/kihamo/boggart/providers/yandex_speechkit_cloud/client/generate"
 )
 

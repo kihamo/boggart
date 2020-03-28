@@ -1,4 +1,4 @@
-package web_api
+package webapi
 
 // https://esphome.io/web-api/index.html
 

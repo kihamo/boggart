@@ -1,4 +1,4 @@
-package samsung_tizen
+package tizen
 
 import (
 	"context"
@@ -16,7 +16,7 @@ type Bind struct {
 	di.ProbesBind
 
 	config *Config
-	client *tv.ApiV2
+	client *tv.APIv2
 }
 
 func (b *Bind) GetSerialNumber(ctx context.Context) (sn string, err error) {

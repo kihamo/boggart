@@ -7,7 +7,7 @@ import (
 )
 
 type PPPActive struct {
-	Id            string   `mapstructure:".id"`
+	ID            string   `mapstructure:".id"`
 	Name          string   `mapstructure:"name"`
 	Service       string   `mapstructure:"service"`
 	CallerID      string   `mapstructure:"caller-id"`

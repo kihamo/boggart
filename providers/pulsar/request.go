@@ -10,15 +10,7 @@ type Request struct {
 	Address  []byte
 	Function byte
 	Payload  []byte
-	Id       []byte
-}
-
-func (r *Request) ID() []byte {
-	if r.Id == nil {
-		r.Id = serial.GenerateRequestID()
-	}
-
-	return r.Id
+	ID       []byte
 }
 
 func (r *Request) Bytes() []byte {
@@ -33,7 +25,11 @@ func (r *Request) Bytes() []byte {
 	packet = append(packet, r.Payload...)
 
 	// request id
-	packet = append(packet, r.ID()...)
+	if r.ID == nil {
+		r.ID = serial.GenerateRequestID()
+	}
+
+	packet = append(packet, r.ID...)
 
 	// check sum CRC16
 	packet = append(packet, serial.GenerateCRC16(packet)...)

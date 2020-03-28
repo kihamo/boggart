@@ -32,17 +32,17 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return subscribers
 }
 
-func (b *Bind) updateStatusByChannelId(ctx context.Context, channelId uint64) error {
+func (b *Bind) updateStatusByChannelID(ctx context.Context, channelID uint64) error {
 	b.mutex.RLock()
-	channel, ok := b.ptzChannels[channelId]
+	channel, ok := b.ptzChannels[channelID]
 	b.mutex.RUnlock()
 
 	if !ok {
-		return fmt.Errorf("channel %d not found", channelId)
+		return fmt.Errorf("channel %d not found", channelID)
 	}
 
 	params := ptz.NewGetPtzStatusParamsWithContext(ctx).
-		WithChannel(channelId)
+		WithChannel(channelID)
 	status, err := b.client.Ptz.GetPtzStatus(params, nil)
 	if err != nil {
 		return err
@@ -52,19 +52,19 @@ func (b *Bind) updateStatusByChannelId(ctx context.Context, channelId uint64) er
 	var result error
 
 	if channel.Status == nil || channel.Status.Elevation != status.Payload.AbsoluteHigh.Elevation {
-		if err := b.MQTT().PublishAsync(ctx, b.config.TopicPTZStatusElevation.Format(sn, channelId), status.Payload.AbsoluteHigh.Elevation); err != nil {
+		if err := b.MQTT().PublishAsync(ctx, b.config.TopicPTZStatusElevation.Format(sn, channelID), status.Payload.AbsoluteHigh.Elevation); err != nil {
 			result = multierr.Append(result, err)
 		}
 	}
 
 	if channel.Status == nil || channel.Status.Azimuth != status.Payload.AbsoluteHigh.Azimuth {
-		if err := b.MQTT().PublishAsync(ctx, b.config.TopicPTZStatusAzimuth.Format(sn, channelId), status.Payload.AbsoluteHigh.Azimuth); err != nil {
+		if err := b.MQTT().PublishAsync(ctx, b.config.TopicPTZStatusAzimuth.Format(sn, channelID), status.Payload.AbsoluteHigh.Azimuth); err != nil {
 			result = multierr.Append(result, err)
 		}
 	}
 
 	if channel.Status == nil || channel.Status.Zoom != status.Payload.AbsoluteHigh.Zoom {
-		if err := b.MQTT().PublishAsync(ctx, b.config.TopicPTZStatusZoom.Format(sn, channelId), status.Payload.AbsoluteHigh.Zoom); err != nil {
+		if err := b.MQTT().PublishAsync(ctx, b.config.TopicPTZStatusZoom.Format(sn, channelID), status.Payload.AbsoluteHigh.Zoom); err != nil {
 			result = multierr.Append(result, err)
 		}
 	}
@@ -72,7 +72,7 @@ func (b *Bind) updateStatusByChannelId(ctx context.Context, channelId uint64) er
 	channel.Status = status.Payload.AbsoluteHigh
 
 	b.mutex.Lock()
-	b.ptzChannels[channelId] = channel
+	b.ptzChannels[channelID] = channel
 	b.mutex.Unlock()
 
 	if result != nil {
@@ -93,17 +93,17 @@ func (b *Bind) checkTopic(topic mqtt.Topic) (uint64, error) {
 
 	parts := topic.Split()
 
-	channelId, err := strconv.ParseUint(parts[4], 10, 64)
+	channelID, err := strconv.ParseUint(parts[4], 10, 64)
 	if err != nil {
 		return 0, err
 	}
 
-	_, ok := channels[channelId]
+	_, ok := channels[channelID]
 	if !ok {
-		return 0, fmt.Errorf("channel %d not found", channelId)
+		return 0, fmt.Errorf("channel %d not found", channelID)
 	}
 
-	return channelId, nil
+	return channelID, nil
 }
 
 func (b *Bind) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
@@ -132,7 +132,7 @@ func (b *Bind) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, 
 		return err
 	}
 
-	return b.updateStatusByChannelId(ctx, channelID)
+	return b.updateStatusByChannelID(ctx, channelID)
 }
 
 func (b *Bind) callbackMQTTContinuous(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
@@ -159,7 +159,7 @@ func (b *Bind) callbackMQTTContinuous(ctx context.Context, client mqtt.Component
 		return err
 	}
 
-	return b.updateStatusByChannelId(ctx, channelID)
+	return b.updateStatusByChannelID(ctx, channelID)
 }
 
 func (b *Bind) callbackMQTTRelative(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
@@ -167,7 +167,7 @@ func (b *Bind) callbackMQTTRelative(ctx context.Context, client mqtt.Component, 
 		return nil
 	}
 
-	channelId, err := b.checkTopic(message.Topic())
+	channelID, err := b.checkTopic(message.Topic())
 	if err != nil {
 		return err
 	}
@@ -179,7 +179,7 @@ func (b *Bind) callbackMQTTRelative(ctx context.Context, client mqtt.Component, 
 	}
 
 	params := ptz.NewSetPtzPositionRelativeParamsWithContext(ctx).
-		WithChannel(channelId).
+		WithChannel(channelID).
 		WithPTZData(&models.PTZData{
 			Relative: &request,
 		})
@@ -188,7 +188,7 @@ func (b *Bind) callbackMQTTRelative(ctx context.Context, client mqtt.Component, 
 		return err
 	}
 
-	return b.updateStatusByChannelId(ctx, channelId)
+	return b.updateStatusByChannelID(ctx, channelID)
 }
 
 func (b *Bind) callbackMQTTPreset(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
@@ -196,7 +196,7 @@ func (b *Bind) callbackMQTTPreset(ctx context.Context, client mqtt.Component, me
 		return nil
 	}
 
-	channelId, err := b.checkTopic(message.Topic())
+	channelID, err := b.checkTopic(message.Topic())
 	if err != nil {
 		return err
 	}
@@ -207,13 +207,13 @@ func (b *Bind) callbackMQTTPreset(ctx context.Context, client mqtt.Component, me
 	}
 
 	params := ptz.NewGotoPtzPresetParamsWithContext(ctx).
-		WithChannel(channelId).
+		WithChannel(channelID).
 		WithPreset(presetID)
 	if _, err := b.client.Ptz.GotoPtzPreset(params, nil); err != nil {
 		return err
 	}
 
-	return b.updateStatusByChannelId(ctx, channelId)
+	return b.updateStatusByChannelID(ctx, channelID)
 }
 
 func (b *Bind) callbackMQTTMomentary(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
@@ -221,7 +221,7 @@ func (b *Bind) callbackMQTTMomentary(ctx context.Context, client mqtt.Component,
 		return nil
 	}
 
-	channelId, err := b.checkTopic(message.Topic())
+	channelID, err := b.checkTopic(message.Topic())
 	if err != nil {
 		return err
 	}
@@ -235,12 +235,12 @@ func (b *Bind) callbackMQTTMomentary(ctx context.Context, client mqtt.Component,
 	request.Duration = strfmt.Duration(time.Duration(request.Duration) * time.Millisecond)
 
 	params := ptz.NewSetPtzMomentaryParamsWithContext(ctx).
-		WithChannel(channelId).
+		WithChannel(channelID).
 		WithPTZData(&request)
 
 	if _, err := b.client.Ptz.SetPtzMomentary(params, nil); err != nil {
 		return err
 	}
 
-	return b.updateStatusByChannelId(ctx, channelId)
+	return b.updateStatusByChannelID(ctx, channelID)
 }

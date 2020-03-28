@@ -5,11 +5,11 @@ curl "https://raw.githubusercontent.com/esphome/esphome/dev/esphome/components/a
 curl "https://raw.githubusercontent.com/esphome/esphome/dev/esphome/components/api/api_options.proto" -o ./api_options.proto
 
 sed -i '' '2i\
-package native_api;
+package nativeapi;
 ' api.proto
 
 sed -i '' '2i\
-package native_api;
+package nativeapi;
 ' api_options.proto
 
 protoc --proto_path=./ --go_out=plugins=grpc:./ *.proto

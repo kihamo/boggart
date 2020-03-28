@@ -1,6 +1,6 @@
 // +build !windows,!appengine
 
-package native_api
+package nativeapi
 
 import (
 	"errors"

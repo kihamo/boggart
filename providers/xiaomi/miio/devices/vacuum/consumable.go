@@ -22,6 +22,7 @@ const (
 
 type consumable string
 
+// nolint:golint
 func (d *Device) Consumables(ctx context.Context) (map[consumable]time.Duration, error) {
 	type response struct {
 		miio.Response

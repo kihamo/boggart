@@ -22,10 +22,10 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	switch config.Network {
 	case "tcp", "tcp4", "tcp6":
-		bind.server = serial_network.NewTCPServer(config.Network, address, dial)
+		bind.server = serialnetwork.NewTCPServer(config.Network, address, dial)
 
 	case "udp", "udp4", "udp6":
-		bind.server = serial_network.NewUDPServer(config.Network, address, dial)
+		bind.server = serialnetwork.NewUDPServer(config.Network, address, dial)
 
 	default:
 		return nil, errors.New("unsupported network " + config.Network)

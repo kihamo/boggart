@@ -31,7 +31,7 @@ type Client struct {
 	connOnce sync.Once
 
 	address  string
-	deviceId []byte
+	deviceID []byte
 	token    string
 }
 
@@ -110,16 +110,16 @@ func (p *Client) Hello(ctx context.Context) (packet.Packet, error) {
 }
 
 func (p *Client) DeviceID() ([]byte, error) {
-	if p.deviceId == nil {
+	if p.deviceID == nil {
 		response, err := p.Hello(context.Background())
 		if err != nil {
 			return nil, err
 		}
 
-		p.deviceId = response.DeviceID()
+		p.deviceID = response.DeviceID()
 	}
 
-	return p.deviceId, nil
+	return p.deviceID, nil
 }
 
 func (p *Client) Send(ctx context.Context, method string, params interface{}, result interface{}) error {
@@ -203,13 +203,13 @@ func (p *Client) Send(ctx context.Context, method string, params interface{}, re
 	var responseError ResponseError
 	if err = json.Unmarshal(response.Body(), &responseError); err == nil && len(responseError.Error.Message) > 0 {
 		return errors.New(responseError.Error.Message)
-	} else {
-		var responseUnknown ResponseUnknownMethod
-		if err = json.Unmarshal(response.Body(), &responseUnknown); err == nil {
-			switch responseUnknown.Result {
-			case "unknown_method":
-				return errors.New("unknown method")
-			}
+	}
+
+	var responseUnknown ResponseUnknownMethod
+	if err = json.Unmarshal(response.Body(), &responseUnknown); err == nil {
+		switch responseUnknown.Result {
+		case "unknown_method":
+			return errors.New("unknown method")
 		}
 	}
 

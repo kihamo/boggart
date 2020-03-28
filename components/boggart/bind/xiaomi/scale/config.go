@@ -28,7 +28,7 @@ func (p Profile) GetAge() (age uint64) {
 
 		diff := time.Date(now.Year(), p.Birthday.Month(), p.Birthday.Day(), p.Birthday.Hour(), p.Birthday.Minute(), p.Birthday.Second(), p.Birthday.Nanosecond(), p.Birthday.Location())
 		if diff.After(now) {
-			age -= 1
+			age--
 		}
 	}
 

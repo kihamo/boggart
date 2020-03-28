@@ -120,14 +120,14 @@ func (s *Session) Type(ups, name string) (t Type, err error) {
 
 		if strings.HasPrefix(tp, "STRING:") {
 			t.Name = "STRING"
-
 			parts := strings.SplitN(tp, ":", 2)
-			if v, err := strconv.Atoi(parts[1]); err != nil {
+
+			v, err := strconv.Atoi(parts[1])
+			if err != nil {
 				return t, err
-			} else {
-				t.MaxLength = v
 			}
 
+			t.MaxLength = v
 			continue
 		}
 

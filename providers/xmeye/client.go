@@ -102,7 +102,7 @@ func (c *Client) IsAuth() bool {
 	return c.connection.SessionID() > 0
 }
 
-func (c *Client) Call(ctx context.Context, code uint16, payload interface{}) (*packet, error) {
+func (c *Client) Call(ctx context.Context, code uint16, payload interface{}) (*Packet, error) {
 	if !c.IsAuth() && code != CmdLoginResponse && code != CmdLogoutResponse {
 		if err := c.Login(ctx); err != nil {
 			return nil, err
@@ -110,7 +110,7 @@ func (c *Client) Call(ctx context.Context, code uint16, payload interface{}) (*p
 	}
 
 	packet := newPacket()
-	packet.MessageID = code
+	packet.messageID = code
 
 	if err := packet.LoadPayload(payload); err != nil {
 		return nil, err
@@ -125,7 +125,7 @@ func (c *Client) Call(ctx context.Context, code uint16, payload interface{}) (*p
 		return nil, err
 	}
 
-	return p, p.Payload.Error()
+	return p, p.payload.Error()
 }
 
 func (c *Client) CallWithResult(ctx context.Context, code uint16, payload, result interface{}) error {
@@ -135,14 +135,14 @@ func (c *Client) CallWithResult(ctx context.Context, code uint16, payload, resul
 	}
 
 	if writer, ok := result.(io.Writer); ok {
-		_, err = packet.Payload.WriteTo(writer)
+		_, err = packet.payload.WriteTo(writer)
 		return err
 	}
 
-	return packet.Payload.JSONUnmarshal(result)
+	return packet.payload.JSONUnmarshal(result)
 }
 
-func (c *Client) Cmd(ctx context.Context, code uint16, cmd string) (*packet, error) {
+func (c *Client) Cmd(ctx context.Context, code uint16, cmd string) (*Packet, error) {
 	return c.Call(ctx, code, map[string]string{
 		"Name":      cmd,
 		"SessionID": c.connection.SessionIDAsString(),

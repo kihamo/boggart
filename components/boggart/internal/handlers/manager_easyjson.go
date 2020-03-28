@@ -38,7 +38,7 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 		}
 		switch key {
 		case "id":
-			out.Id = string(in.String())
+			out.ID = string(in.String())
 		case "type":
 			out.Type = string(in.String())
 		case "description":
@@ -110,7 +110,7 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 		} else {
 			out.RawString(prefix)
 		}
-		out.String(string(in.Id))
+		out.String(string(in.ID))
 	}
 	{
 		const prefix string = ",\"type\":"

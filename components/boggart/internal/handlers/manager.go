@@ -11,7 +11,7 @@ import (
 
 // easyjson:json
 type managerHandlerDevice struct {
-	Id                string   `json:"id"`
+	ID                string   `json:"id"`
 	Type              string   `json:"type"`
 	Description       string   `json:"description"`
 	SerialNumber      string   `json:"serial_number"`
@@ -71,7 +71,7 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 			}
 
 			item := managerHandlerDevice{
-				Id:          bindItem.ID(),
+				ID:          bindItem.ID(),
 				Type:        bindItem.Type(),
 				Description: bindItem.Description(),
 				Status:      bindItem.Status().String(),

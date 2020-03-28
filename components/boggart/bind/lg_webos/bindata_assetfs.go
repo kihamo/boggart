@@ -4,7 +4,7 @@
 // locales/ru/LC_MESSAGES/widget.mo
 // DO NOT EDIT!
 
-package lg_webos
+package webos
 
 import (
 	"bytes"

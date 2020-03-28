@@ -188,6 +188,7 @@ func newWorkersWrapTask(tsk w.Task, logger logging.Logger) *workersWrapTask {
 }
 
 // обертки воркеров кривоватые, поэтому хачим синхронизацию состояния
+// nolint:golint
 func (t *workersWrapTask) Id() string {
 	return t.original.Id()
 }

@@ -1,4 +1,4 @@
-package google_home
+package home
 
 import (
 	"github.com/kihamo/boggart/components/boggart"

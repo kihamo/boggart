@@ -162,7 +162,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 						v, err = time.LoadLocation(value[0])
 						if err == nil {
-							err = bind.device.SetTimezone(ctx, *v)
+							err = bind.device.SetTimezone(ctx, v)
 						}
 					}
 
