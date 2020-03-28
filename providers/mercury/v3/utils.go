@@ -28,7 +28,7 @@ func ConvertSerialNumber(serial string) byte {
 	return 1
 }
 
-func ResponseError(request *Request, response *Response) (err error) {
+func ResponseError(request fmt.Stringer, response *Response) (err error) {
 	err = PayloadError(response.Payload)
 	if err != nil {
 		err = fmt.Errorf("request %s returns response %s with error %v", request.String(), response.String(), err)
@@ -72,7 +72,7 @@ func ParseType(data []byte) *Type {
 }
 
 func ParseValue4Bytes(data []byte) uint64 {
-	if bytes.Compare(data, []byte{255, 255, 255, 255}) == 0 {
+	if bytes.Equal(data, []byte{255, 255, 255, 255}) {
 		return 0
 	}
 

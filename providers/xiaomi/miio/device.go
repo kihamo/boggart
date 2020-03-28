@@ -13,9 +13,9 @@ import (
 
 const (
 	OTAStatusDownloading otaStatus = "downloading"
-	OTAStatusInstalling            = "installing"
-	OTAStatusFailed                = "failed"
-	OTAStatusIdle                  = "idle"
+	OTAStatusInstalling  otaStatus = "installing"
+	OTAStatusFailed      otaStatus = "failed"
+	OTAStatusIdle        otaStatus = "idle"
 )
 
 type otaStatus string

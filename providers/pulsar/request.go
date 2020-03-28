@@ -15,7 +15,7 @@ type Request struct {
 
 func (r *Request) ID() []byte {
 	if r.Id == nil {
-		r.Id = serial.GenerateRequestId()
+		r.Id = serial.GenerateRequestID()
 	}
 
 	return r.Id

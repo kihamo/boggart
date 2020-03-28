@@ -55,7 +55,6 @@ func (t Type) handleComponent(w *dashboard.Response, r *dashboard.Request, bind 
 	}
 
 	t.NotFound(w, r)
-	return
 }
 
 func (t Type) handleComponentLight(w *dashboard.Response, r *dashboard.Request, bind *Bind, component *ComponentLight) {
@@ -191,7 +190,7 @@ func (t Type) handleCommand(w *dashboard.Response, r *dashboard.Request, bind *B
 	t.Redirect(redirectUrl.String(), http.StatusFound, w, r)
 }
 
-func (t Type) handleIndex(w *dashboard.Response, r *dashboard.Request, bind *Bind) {
+func (t Type) handleIndex(_ *dashboard.Response, r *dashboard.Request, bind *Bind) {
 	ctx := r.Context()
 
 	t.Render(ctx, "index", map[string]interface{}{

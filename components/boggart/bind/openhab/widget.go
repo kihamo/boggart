@@ -97,7 +97,6 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	}
 
 	t.NotFound(w, r)
-	return
 }
 
 func (t Type) WidgetAssetFS() *assetfs.AssetFS {

@@ -213,7 +213,7 @@ func (c *Client) read(ctx context.Context) (message proto.Message, err error) {
 
 	// parse payload
 	responsePacketPayload := make([]byte, responsePacketHead[1])
-	n, err = conn.Read(responsePacketPayload)
+	_, err = conn.Read(responsePacketPayload)
 
 	if err != nil {
 		c.connectionCheckBroken()

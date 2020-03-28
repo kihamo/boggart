@@ -91,7 +91,7 @@ func (c *connection) receive() (*packet, error) {
 			return packet, err
 		}
 
-		n, err = packet.Payload.Write(buf[:n])
+		_, err = packet.Payload.Write(buf[:n])
 		if err != nil {
 			return packet, err
 		}

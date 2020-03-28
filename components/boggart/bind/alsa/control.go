@@ -53,6 +53,7 @@ func (b *Bind) PlayFromURL(url string) error {
 	if err != nil {
 		return err
 	}
+	defer response.Body.Close()
 
 	if err := b.initStream(response.Body, format); err != nil {
 		return err

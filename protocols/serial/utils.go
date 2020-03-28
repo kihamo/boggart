@@ -7,7 +7,7 @@ import (
 	"math/big"
 )
 
-func GenerateRequestId() []byte {
+func GenerateRequestID() []byte {
 	id, _ := rand.Int(rand.Reader, big.NewInt(0xFFFF))
 	return Pad(id.Bytes(), 2)
 }

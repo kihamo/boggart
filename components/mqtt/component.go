@@ -2,6 +2,7 @@ package mqtt
 
 import (
 	"context"
+	"fmt"
 
 	m "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kihamo/shadow"
@@ -32,6 +33,8 @@ type Component interface {
 }
 
 type Message interface {
+	fmt.Stringer
+
 	Duplicate() bool
 	Qos() byte
 	Retained() bool
@@ -43,7 +46,6 @@ type Message interface {
 	IsTrue() bool
 	IsFalse() bool
 	Bool() bool
-	String() string
 	Float64() float64
 }
 

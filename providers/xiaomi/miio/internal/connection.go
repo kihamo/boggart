@@ -42,7 +42,7 @@ func NewConnection(address string) (*Connection, error) {
 	}, nil
 }
 
-func (c *Connection) Invoke(ctx context.Context, request packet.Packet, response packet.Packet) (err error) {
+func (c *Connection) Invoke(ctx context.Context, request io.WriterTo, response io.ReaderFrom) (err error) {
 	done := make(chan error, 1)
 
 	go func() {
@@ -68,6 +68,10 @@ func (c *Connection) Invoke(ctx context.Context, request packet.Packet, response
 		if response != nil {
 			b := make([]byte, packet.MaxBufferSize)
 			n, _, err := c.conn.ReadFromUDP(b)
+			if err != nil {
+				done <- err
+				return
+			}
 
 			if n > 0 {
 				_, err = response.ReadFrom(bytes.NewBuffer(b[:n]))

@@ -87,7 +87,7 @@ func (b *Bind) checkTopic(topic mqtt.Topic) (uint64, error) {
 	channels := b.ptzChannels
 	b.mutex.RUnlock()
 
-	if channels == nil || len(channels) == 0 {
+	if len(channels) == 0 {
 		return 0, errors.New("channels is empty")
 	}
 
@@ -111,7 +111,7 @@ func (b *Bind) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, 
 		return nil
 	}
 
-	channelId, err := b.checkTopic(message.Topic())
+	channelID, err := b.checkTopic(message.Topic())
 	if err != nil {
 		return err
 	}
@@ -123,7 +123,7 @@ func (b *Bind) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, 
 	}
 
 	params := ptz.NewSetPtzPositionAbsoluteParamsWithContext(ctx).
-		WithChannel(channelId).
+		WithChannel(channelID).
 		WithPTZData(&models.PTZData{
 			AbsoluteHigh: &request,
 		})
@@ -132,7 +132,7 @@ func (b *Bind) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, 
 		return err
 	}
 
-	return b.updateStatusByChannelId(ctx, channelId)
+	return b.updateStatusByChannelId(ctx, channelID)
 }
 
 func (b *Bind) callbackMQTTContinuous(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
@@ -140,7 +140,7 @@ func (b *Bind) callbackMQTTContinuous(ctx context.Context, client mqtt.Component
 		return nil
 	}
 
-	channelId, err := b.checkTopic(message.Topic())
+	channelID, err := b.checkTopic(message.Topic())
 	if err != nil {
 		return err
 	}
@@ -152,14 +152,14 @@ func (b *Bind) callbackMQTTContinuous(ctx context.Context, client mqtt.Component
 	}
 
 	params := ptz.NewSetPtzContinuousParamsWithContext(ctx).
-		WithChannel(channelId).
+		WithChannel(channelID).
 		WithPTZData(&request)
 
 	if _, err = b.client.Ptz.SetPtzContinuous(params, nil); err != nil {
 		return err
 	}
 
-	return b.updateStatusByChannelId(ctx, channelId)
+	return b.updateStatusByChannelId(ctx, channelID)
 }
 
 func (b *Bind) callbackMQTTRelative(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
@@ -201,14 +201,14 @@ func (b *Bind) callbackMQTTPreset(ctx context.Context, client mqtt.Component, me
 		return err
 	}
 
-	presetId, err := strconv.ParseUint(message.String(), 10, 64)
+	presetID, err := strconv.ParseUint(message.String(), 10, 64)
 	if err != nil {
 		return err
 	}
 
 	params := ptz.NewGotoPtzPresetParamsWithContext(ctx).
 		WithChannel(channelId).
-		WithPreset(presetId)
+		WithPreset(presetID)
 	if _, err := b.client.Ptz.GotoPtzPreset(params, nil); err != nil {
 		return err
 	}

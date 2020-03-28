@@ -32,7 +32,7 @@ func (l logger) Printf(format string, args ...interface{}) {
 		cut = cutSize
 	}
 
-	l.f1(record[:cutSize])
+	l.f1(record[:cut])
 }
 
 func (l logger) Debugf(format string, args ...interface{}) {

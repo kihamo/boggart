@@ -51,7 +51,7 @@ func (d *Device) CleanSummary(ctx context.Context) (CleanSummary, error) {
 
 		case 3:
 			values := v.([]interface{})
-			result.CleanupIDs = make([]uint64, len(values), len(values))
+			result.CleanupIDs = make([]uint64, len(values))
 
 			for i2, v2 := range values {
 				result.CleanupIDs[i2] = uint64(v2.(float64))

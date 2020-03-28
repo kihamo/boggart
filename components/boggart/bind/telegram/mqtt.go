@@ -16,7 +16,7 @@ import (
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(b.config.TopicSendMessage, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendMessage)),
-		mqtt.NewSubscriber(b.config.TopicSendFile, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendFileURL)),
+		mqtt.NewSubscriber(b.config.TopicSendFile, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendFile)),
 		mqtt.NewSubscriber(b.config.TopicSendFileURL, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendFileURL)),
 	}
 }

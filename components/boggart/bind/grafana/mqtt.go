@@ -29,8 +29,8 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 					Tags: request.Tags,
 				})
 
-			for _, dashboardId := range b.config.Dashboards {
-				params.Request.DashboardID = dashboardId
+			for _, dashboardID := range b.config.Dashboards {
+				params.Request.DashboardID = dashboardID
 
 				if _, e := b.provider.Annotation.CreateAnnotation(params, nil); e != nil {
 					err = multierr.Append(err, e)

@@ -59,7 +59,7 @@ func (b *Bind) SetVariable(name, value string) error {
 	}
 
 	for _, variable := range variables {
-		if strings.ToLower(variable.Name) == strings.ToLower(name) {
+		if strings.EqualFold(variable.Name, name) {
 			return variable.Set(value)
 		}
 	}
@@ -74,7 +74,7 @@ func (b *Bind) SendCommand(name string) error {
 	}
 
 	for _, command := range commands {
-		if strings.ToLower(command.Name) == strings.ToLower(name) {
+		if strings.EqualFold(command.Name, name) {
 			return command.Call()
 		}
 	}

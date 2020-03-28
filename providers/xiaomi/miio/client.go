@@ -84,7 +84,6 @@ func (p *Client) SetDump(enabled bool) {
 	if enabled {
 		atomic.StoreUint32(&p.dump, 1)
 	} else {
-
 		atomic.StoreUint32(&p.dump, 0)
 	}
 }
@@ -198,7 +197,7 @@ func (p *Client) Send(ctx context.Context, method string, params interface{}, re
 		return nil
 	}
 
-	diff = time.Now().Sub(response.Stamp())
+	diff = time.Since(response.Stamp())
 	atomic.StoreInt64(&p.stampDiff, int64(diff))
 
 	var responseError ResponseError

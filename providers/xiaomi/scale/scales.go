@@ -108,7 +108,7 @@ type Scales struct {
 }
 
 func NewScales(sex sex, age uint64, weight float64, height uint64) (*Scales, error) {
-	if height <= 0 || height > 220 {
+	if height == 0 || height > 220 {
 		return nil, errors.New("height is either too low or too high (limits: <0cm and >220cm)")
 	}
 
@@ -116,7 +116,7 @@ func NewScales(sex sex, age uint64, weight float64, height uint64) (*Scales, err
 		return nil, errors.New("weight is either too low or too high (limits: <10kg and >200kg)")
 	}
 
-	if age <= 0 || age > 99 {
+	if age == 0 || age > 99 {
 		return nil, errors.New("age is either too low or too high (limits: <= 0 years and > 99 years)")
 	}
 

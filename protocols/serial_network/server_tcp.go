@@ -45,7 +45,7 @@ func (s *TCPServer) ListenAndServe() error {
 
 		go func() {
 			defer conn.Close()
-			s.serial.ReadWrite(conn, conn)
+			_ = s.serial.ReadWrite(conn, conn)
 		}()
 	}
 

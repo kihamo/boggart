@@ -76,10 +76,9 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 
 	// first initialization
 	if sn == "" {
-		deviceInfo, err := b.client.System.GetSystemDeviceInfo(system.NewGetSystemDeviceInfoParamsWithContext(ctx), nil)
-
-		if err != nil {
-			return err
+		deviceInfo, e := b.client.System.GetSystemDeviceInfo(system.NewGetSystemDeviceInfoParamsWithContext(ctx), nil)
+		if e != nil {
+			return e
 		}
 
 		if deviceInfo.Payload.SerialNumber == "" {

@@ -66,7 +66,7 @@ func (s *Client) Measures(ctx context.Context) ([]*Measure, error) {
 		err error
 	)
 
-	measuresCache := make(map[time.Time]*Measure, 0)
+	measuresCache := make(map[time.Time]*Measure)
 
 	wg.Add(1)
 	go func() {
@@ -107,7 +107,7 @@ SCAN:
 		case err = <-s.scanError:
 			break SCAN
 
-		case _ = <-ctx.Done():
+		case <-ctx.Done():
 			err = ctx.Err()
 
 			break SCAN

@@ -30,7 +30,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		stats := make([]*stat, 0)
-		statsByDate := make(map[int]*stat, 0)
+		statsByDate := make(map[int]*stat)
 		statsKey := make([]int, 0)
 		end := time.Now()
 

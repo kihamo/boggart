@@ -20,7 +20,7 @@ const (
 	DefaultESP8266Port = 8266
 	DefaultESP32Port   = 3232
 
-	Version_1_0 = 1
+	Version1_0 = 1
 
 	CodeOK            = 0
 	CodeRequestAuth   = 1
@@ -238,11 +238,12 @@ func (o *OTA) doUpload(reader io.Reader, size int) error {
 	var response []byte
 
 	// <<< version 2
-	if response, err = o.receive(conn, 1, []byte{CodeOK}); err != nil {
+	response, err = o.receive(conn, 1, []byte{CodeOK})
+	if err != nil {
 		return err
 	}
 
-	if response[0] != Version_1_0 {
+	if response[0] != Version1_0 {
 		return fmt.Errorf("unsupported OTA version %x", response[0])
 	}
 
@@ -252,12 +253,13 @@ func (o *OTA) doUpload(reader io.Reader, size int) error {
 	}
 
 	// <<< features 1
-	if response, err = o.receive(conn, 0, []byte{CodeHeaderOK}); err != nil {
+	if _, err = o.receive(conn, 0, []byte{CodeHeaderOK}); err != nil {
 		return err
 	}
 
 	// <<< auth
-	if response, err = o.receive(conn, 1, nil); err != nil {
+	response, err = o.receive(conn, 1, nil)
+	if err != nil {
 		return err
 	}
 
@@ -309,7 +311,7 @@ func (o *OTA) doUpload(reader io.Reader, size int) error {
 		}
 
 		// <<< auth result 1
-		if response, err = o.receive(conn, 0, []byte{CodeAuthOK}); err != nil {
+		if _, err = o.receive(conn, 0, []byte{CodeAuthOK}); err != nil {
 			return err
 		}
 	}
@@ -327,7 +329,7 @@ func (o *OTA) doUpload(reader io.Reader, size int) error {
 	}
 
 	// <<< binary size 1
-	if response, err = o.receive(conn, 0, []byte{CodeUpdatePrepare}); err != nil {
+	if _, err = o.receive(conn, 0, []byte{CodeUpdatePrepare}); err != nil {
 		return err
 	}
 
@@ -350,7 +352,7 @@ func (o *OTA) doUpload(reader io.Reader, size int) error {
 	}
 
 	// <<< checksum 1
-	if response, err = o.receive(conn, 0, []byte{CodeBinMD5}); err != nil {
+	if _, err = o.receive(conn, 0, []byte{CodeBinMD5}); err != nil {
 		return err
 	}
 
@@ -388,12 +390,12 @@ func (o *OTA) doUpload(reader io.Reader, size int) error {
 	}
 
 	// <<< receive OK 1
-	if response, err = o.receive(conn, 0, []byte{CodeReceiveOK}); err != nil {
+	if _, err = o.receive(conn, 0, []byte{CodeReceiveOK}); err != nil {
 		return err
 	}
 
 	// <<< Update end 1
-	if response, err = o.receive(conn, 0, []byte{CodeUpdateEnd}); err != nil {
+	if _, err = o.receive(conn, 0, []byte{CodeUpdateEnd}); err != nil {
 		return err
 	}
 
@@ -408,7 +410,7 @@ func (o *OTA) doUpload(reader io.Reader, size int) error {
 	return nil
 }
 
-func (o *OTA) receive(conn net.Conn, amount int, expect []byte) ([]byte, error) {
+func (o *OTA) receive(conn io.Reader, amount int, expect []byte) ([]byte, error) {
 	l := len(expect)
 
 	buf := make([]byte, l+amount)

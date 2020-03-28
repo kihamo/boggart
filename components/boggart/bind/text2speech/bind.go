@@ -232,8 +232,10 @@ func (b *Bind) GenerateWriter(ctx context.Context, text, format, quality, langua
 	// cache
 	if b.config.CacheEnable && !force {
 		if _, err := os.Stat(fileName); err == nil {
-			if f, err := os.Open(fileName); err == nil {
+			if f, e := os.Open(fileName); e == nil {
 				_, err = io.Copy(writer, f)
+			} else {
+				err = e
 			}
 
 			return err
@@ -262,9 +264,9 @@ func (b *Bind) GenerateWriter(ctx context.Context, text, format, quality, langua
 	}
 
 	if b.config.CacheEnable {
-		f, err := os.Create(fileName)
-		if err != nil {
-			return err
+		f, e := os.Create(fileName)
+		if e != nil {
+			return e
 		}
 
 		_, err = io.Copy(io.MultiWriter(f, writer), wrapBuffer.(io.Reader))

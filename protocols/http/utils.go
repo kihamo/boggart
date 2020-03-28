@@ -16,7 +16,7 @@ func BodyFromResponse(r *http.Response) string {
 	return ""
 }
 
-func JsonUnmarshal(r *http.Response, v interface{}) error {
+func JSONUnmarshal(r *http.Response, v interface{}) error {
 	defer r.Body.Close()
 
 	body, err := ioutil.ReadAll(r.Body)

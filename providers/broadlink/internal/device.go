@@ -122,15 +122,15 @@ func (d *Device) request(cmd byte, payload []byte, waitResult bool) ([]byte, uin
 		return nil, 0, err
 	}
 
-	requestPacket, requestId := d.buildCmdPacket(cmd, payload)
+	requestPacket, requestID := d.buildCmdPacket(cmd, payload)
 
 	_, err = connUDP.Write(requestPacket)
 	if err != nil {
-		return nil, requestId, err
+		return nil, requestID, err
 	}
 
 	if !waitResult {
-		return nil, requestId, nil
+		return nil, requestID, nil
 	}
 
 	buf := readBufferPool.Get().(*[]byte)
@@ -138,10 +138,10 @@ func (d *Device) request(cmd byte, payload []byte, waitResult bool) ([]byte, uin
 
 	size, _, err := connUDP.ReadFromUDP(*buf)
 	if err != nil {
-		return nil, requestId, err
+		return nil, requestID, err
 	}
 
-	return append([]byte(nil), (*buf)[:size]...), requestId, nil
+	return append([]byte(nil), (*buf)[:size]...), requestID, nil
 }
 
 func (d *Device) Cmd(cmd byte, payload []byte) error {

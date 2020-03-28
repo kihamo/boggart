@@ -305,6 +305,7 @@ func (c *Client) subscribe(ctx context.Context, request proto.Message, h handler
 	ctx, cancel := context.WithCancel(ctx)
 
 	if err != nil {
+		cancel()
 		return nil, err
 	}
 
@@ -327,14 +328,10 @@ func (c *Client) subscribe(ctx context.Context, request proto.Message, h handler
 	})
 
 	go func() {
-		select {
-		case <-ctx.Done():
+		<-ctx.Done()
 
-			atomic.StoreUint32(&canceled, 1)
-			cancel()
-
-			return
-		}
+		atomic.StoreUint32(&canceled, 1)
+		cancel()
 	}()
 
 	return chMessages, err

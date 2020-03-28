@@ -110,6 +110,7 @@ var codeErrorsText = map[int64]string{
 	CodeSyntax:              "illegal configuration syntax",
 }
 
+/*
 var codeSuccessText = map[int64]string{
 	CodeOK:                "ok",
 	CodeCompleteSearch:    "complete search results",
@@ -124,6 +125,7 @@ var codeSuccessText = map[int64]string{
 	CodeImportSuccessful:  "import successful, restart required",
 	CodeImportReboot:      "import successful, reboot required",
 }
+*/
 
 type Payload struct {
 	*bytes.Buffer

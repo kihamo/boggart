@@ -1,0 +1,23 @@
+run:
+  skip-dirs:
+    - test
+    - tools
+    - docs
+    - openhab2
+  skip-dirs-use-default: true
+
+linters:
+  enable:
+#    - bodyclose
+#    - golint
+#    - unparam
+#    - gosec
+    - interfacer
+#    - unconvert
+#    - goconst
+#    - prealloc
+#    - whitespace
+#    - wsl
+#    - gomnd
+  disable:
+    - errcheck

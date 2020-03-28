@@ -280,7 +280,7 @@ func (a *ApiV2) Device(ctx context.Context) (ApiV2DeviceResponse, error) {
 		return reply, err
 	}
 
-	if err := http.JsonUnmarshal(response, &reply); err != nil {
+	if err := http.JSONUnmarshal(response, &reply); err != nil {
 		return reply, err
 	}
 

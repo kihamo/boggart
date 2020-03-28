@@ -40,7 +40,7 @@ func (c *Client) UpgradeData(ctx context.Context, data io.ReadSeeker) error {
 		packets++
 	}
 
-	data.Seek(io.SeekStart, 0)
+	data.Seek(0, 0)
 
 	packet := newPacket()
 	packet.MessageID = 1522

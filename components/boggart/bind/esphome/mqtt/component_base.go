@@ -90,6 +90,7 @@ func (c *ComponentBase) GetDevice() Device {
 	return c.Device
 }
 
+// nolint:interfacer
 func (c *ComponentBase) SetState(message mqtt.Message) error {
 	c.state.Store(message.String())
 

@@ -91,7 +91,7 @@ func NewMQTTContainer(bind boggart.BindItem, client mqtt.Component) *MQTTContain
 	return &MQTTContainer{
 		bind:      bind,
 		client:    client,
-		publishes: make(map[string]uint64, 0),
+		publishes: make(map[string]uint64),
 	}
 }
 

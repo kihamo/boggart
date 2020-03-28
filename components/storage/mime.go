@@ -77,6 +77,7 @@ func MimeTypeFromURL(url string) (mimeType MIMEType, err error) {
 	if err != nil {
 		return MIMETypeUnknown, err
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode == http.StatusOK {
 		mimeType, err = MimeTypeFromHTTPHeader(response.Header)
@@ -95,6 +96,7 @@ func MimeTypeFromURL(url string) (mimeType MIMEType, err error) {
 	if err != nil {
 		return MIMETypeUnknown, err
 	}
+	defer response.Body.Close()
 
 	mimeType, err = MimeTypeFromHTTPHeader(response.Header)
 	if err != nil {

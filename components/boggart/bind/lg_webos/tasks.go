@@ -37,9 +37,12 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 		var err error
 
 		// current state
-		if state, err := client.ApplicationManagerGetForegroundAppInfo(); err == nil {
+		state, err := client.ApplicationManagerGetForegroundAppInfo()
+		if err == nil {
 			err = b.monitorForegroundAppInfo(state)
-		} else {
+		}
+
+		if err != nil {
 			b.Logger().Warn("Failed get current app info", "error", err.Error())
 		}
 
@@ -53,9 +56,12 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 		var err error
 
 		// current state
-		if state, err := client.AudioGetStatus(); err == nil {
+		state, err := client.AudioGetStatus()
+		if err == nil {
 			err = b.monitorAudio(state)
-		} else {
+		}
+
+		if err != nil {
 			b.Logger().Warn("Failed get current audio status", "error", err.Error())
 		}
 
@@ -69,9 +75,12 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 		var err error
 
 		// current state
-		if state, err := client.TvGetCurrentChannel(); err == nil {
+		state, err := client.TvGetCurrentChannel()
+		if err == nil {
 			err = b.monitorTvCurrentChannel(state)
-		} else {
+		}
+
+		if err != nil {
 			b.Logger().Warn("Failed get current tv channel", "error", err.Error())
 		}
 

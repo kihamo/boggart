@@ -2,6 +2,7 @@ package wol
 
 import (
 	"errors"
+	"fmt"
 	"net"
 
 	"github.com/ghthor/gowol"
@@ -13,7 +14,7 @@ type Bind struct {
 	config *Config
 }
 
-func (b *Bind) WOL(mac net.HardwareAddr, ip net.IP, subnet net.IP) error {
+func (b *Bind) WOL(mac fmt.Stringer, ip net.IP, subnet net.IP) error {
 	if mac == nil {
 		return errors.New("MAC isn't set")
 	}

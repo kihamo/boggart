@@ -199,32 +199,34 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			if err == nil {
 				port, err := strconv.ParseUint(r.Original().FormValue("port"), 10, 64)
 
-				u := bytes.NewBuffer(nil)
-				err = xml.EscapeText(u, []byte(r.Original().FormValue("url")))
-
 				if err == nil {
-					params := event.NewSetNotificationHttpHostParamsWithContext(ctx).
-						WithHttpHost(notification.Payload.ID).
-						WithHttpHostNotification(&models.HttpHostNotification{
-							ID:                       notification.Payload.ID,
-							ProtocolType:             notification.Payload.ProtocolType,
-							ParameterFormatType:      notification.Payload.ParameterFormatType,
-							HttpAuthenticationMethod: notification.Payload.HttpAuthenticationMethod,
+					u := bytes.NewBuffer(nil)
+					err = xml.EscapeText(u, []byte(r.Original().FormValue("url")))
 
-							AddressingFormatType: r.Original().FormValue("address-format"),
-							URL:                  &[]string{u.String()}[0],
-							PortNo:               port,
-						})
+					if err == nil {
+						params := event.NewSetNotificationHttpHostParamsWithContext(ctx).
+							WithHttpHost(notification.Payload.ID).
+							WithHttpHostNotification(&models.HttpHostNotification{
+								ID:                       notification.Payload.ID,
+								ProtocolType:             notification.Payload.ProtocolType,
+								ParameterFormatType:      notification.Payload.ParameterFormatType,
+								HttpAuthenticationMethod: notification.Payload.HttpAuthenticationMethod,
 
-					if hostname := r.Original().FormValue("hostname"); len(hostname) > 0 {
-						params.HttpHostNotification.HostName = &hostname
+								AddressingFormatType: r.Original().FormValue("address-format"),
+								URL:                  &[]string{u.String()}[0],
+								PortNo:               port,
+							})
+
+						if hostname := r.Original().FormValue("hostname"); len(hostname) > 0 {
+							params.HttpHostNotification.HostName = &hostname
+						}
+
+						if ip := r.Original().FormValue("ip"); len(ip) > 0 {
+							params.HttpHostNotification.IPAddress = &ip
+						}
+
+						_, err = bind.client.Event.SetNotificationHttpHost(params, nil)
 					}
-
-					if ip := r.Original().FormValue("ip"); len(ip) > 0 {
-						params.HttpHostNotification.IPAddress = &ip
-					}
-
-					_, err = bind.client.Event.SetNotificationHttpHost(params, nil)
 				}
 
 				if err != nil {

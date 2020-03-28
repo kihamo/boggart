@@ -168,7 +168,7 @@ func (s *AlertStreaming) start() {
 	go s.loop(pr)
 }
 
-func (s *AlertStreaming) loop(pr *io.PipeReader) {
+func (s *AlertStreaming) loop(pr io.ReadCloser) {
 	reader := bufio.NewReader(pr)
 	parseBuffer := bytes.NewBuffer(nil)
 
@@ -214,8 +214,8 @@ func (s *AlertStreaming) loop(pr *io.PipeReader) {
 				continue
 			}
 
-			event := &models.EventNotificationAlert{}
-			err = xml.Unmarshal(parseBuffer.Bytes(), event)
+			e := &models.EventNotificationAlert{}
+			err = xml.Unmarshal(parseBuffer.Bytes(), e)
 
 			parseBuffer.Reset()
 
@@ -223,7 +223,7 @@ func (s *AlertStreaming) loop(pr *io.PipeReader) {
 				if err != nil {
 					s.errors <- err
 				} else {
-					s.alerts <- event
+					s.alerts <- e
 				}
 			}()
 		}

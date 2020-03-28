@@ -53,9 +53,14 @@ func (c *Client) DeviceInfo(ctx context.Context) (*DeviceInfoResponse, error) {
 func (c *Client) ListEntities(ctx context.Context) (_ []proto.Message, err error) {
 	chMessages := make(chan proto.Message, 1)
 	chDone := make(chan error, 1)
-	var canceled uint32
 
-	ctx, cancel := context.WithCancel(ctx)
+	var (
+		canceled uint32
+		cancel   context.CancelFunc
+	)
+
+	ctx, cancel = context.WithCancel(ctx)
+	defer cancel()
 
 	err = c.invokeHandler(ctx, &ListEntitiesRequest{}, func(message proto.Message, err error) bool {
 		if atomic.LoadUint32(&canceled) != 0 {
@@ -98,7 +103,6 @@ func (c *Client) ListEntities(ctx context.Context) (_ []proto.Message, err error
 		select {
 		case <-ctx.Done():
 			atomic.StoreUint32(&canceled, 1)
-			cancel()
 			return nil, ctx.Err()
 
 		case err := <-chDone:
@@ -145,7 +149,7 @@ func (c *Client) SubscribeLogs(ctx context.Context, logLevel LogLevel, dumpConfi
 }
 
 func (c *Client) SubscribeHomeassistantServices(ctx context.Context) (*HomeassistantServiceResponse, error) {
-	if err := c.authenticateCheck(ctx); err != nil {
+	if err := c.authenticateCheck(); err != nil {
 		return nil, err
 	}
 
@@ -157,7 +161,7 @@ func (c *Client) SubscribeHomeassistantServices(ctx context.Context) (*Homeassis
 }
 
 func (c *Client) SubscribeHomeAssistantStates(ctx context.Context) (*SubscribeHomeAssistantStateResponse, error) {
-	if err := c.authenticateCheck(ctx); err != nil {
+	if err := c.authenticateCheck(); err != nil {
 		return nil, err
 	}
 
@@ -177,47 +181,52 @@ func (c *Client) GetTime(ctx context.Context) (*GetTimeResponse, error) {
 }
 
 func (c *Client) ExecuteService(ctx context.Context, key uint32, args []*ExecuteServiceArgument) error {
-	if err := c.authenticateCheck(ctx); err != nil {
+	if err := c.authenticateCheck(); err != nil {
 		return err
 	}
 
 	return c.invokeNoDelay(ctx, &ExecuteServiceRequest{Key: key, Args: args})
 }
 
+// nolint:interfacer
 func (c *Client) CoverCommand(ctx context.Context, in *CoverCommandRequest) error {
-	if err := c.authenticateCheck(ctx); err != nil {
+	if err := c.authenticateCheck(); err != nil {
 		return err
 	}
 
 	return c.invokeNoDelay(ctx, in)
 }
 
+// nolint:interfacer
 func (c *Client) FanCommand(ctx context.Context, in *FanCommandRequest) error {
-	if err := c.authenticateCheck(ctx); err != nil {
+	if err := c.authenticateCheck(); err != nil {
 		return err
 	}
 
 	return c.invokeNoDelay(ctx, in)
 }
 
+// nolint:interfacer
 func (c *Client) LightCommand(ctx context.Context, in *LightCommandRequest) error {
-	if err := c.authenticateCheck(ctx); err != nil {
+	if err := c.authenticateCheck(); err != nil {
 		return err
 	}
 
 	return c.invokeNoDelay(ctx, in)
 }
 
+// nolint:interfacer
 func (c *Client) SwitchCommand(ctx context.Context, in *SwitchCommandRequest) error {
-	if err := c.authenticateCheck(ctx); err != nil {
+	if err := c.authenticateCheck(); err != nil {
 		return err
 	}
 
 	return c.invokeNoDelay(ctx, in)
 }
 
+// nolint:interfacer
 func (c *Client) CameraImage(ctx context.Context, in *CameraImageRequest) (*CameraImageResponse, error) {
-	if err := c.authenticateCheck(ctx); err != nil {
+	if err := c.authenticateCheck(); err != nil {
 		return nil, err
 	}
 
@@ -228,8 +237,9 @@ func (c *Client) CameraImage(ctx context.Context, in *CameraImageRequest) (*Came
 	return out.(*CameraImageResponse), nil
 }
 
+// nolint:interfacer
 func (c *Client) ClimateCommand(ctx context.Context, in *ClimateCommandRequest) error {
-	if err := c.authenticateCheck(ctx); err != nil {
+	if err := c.authenticateCheck(); err != nil {
 		return err
 	}
 

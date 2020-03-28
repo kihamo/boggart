@@ -122,15 +122,15 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			return err
 		})),
-		mqtt.NewSubscriber(b.config.TopicStateSet, 0, b.MQTT().WrapSubscribeDeviceIsOnline(func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(b.config.TopicStateSet, 0, b.MQTT().WrapSubscribeDeviceIsOnline(func(ctx context.Context, _ mqtt.Component, message mqtt.Message) (err error) {
 			if !b.MQTT().CheckMACInTopic(message.Topic(), 4) {
 				return nil
 			}
 
 			parts := message.Topic().Split()
 
-			entity, err := b.EntityByObjectID(ctx, parts[len(parts)-3])
-			if err != nil {
+			entity, e := b.EntityByObjectID(ctx, parts[len(parts)-3])
+			if e != nil {
 				return err
 			}
 
@@ -161,9 +161,9 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 					}
 				)
 
-				states, err := b.States(ctx, entity)
-				if err != nil {
-					return err
+				states, e := b.States(ctx, entity)
+				if e != nil {
+					return e
 				}
 
 				if s, ok := states[light.GetKey()]; !ok {
@@ -172,7 +172,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 					state = s.(*api.LightStateResponse)
 				}
 
-				if err := message.JSONUnmarshal(&request); err == nil {
+				if e := message.JSONUnmarshal(&request); e == nil {
 					if request.State != nil {
 						cmd.HasState = true
 						cmd.State = *request.State
@@ -305,7 +305,6 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 							cmd.Effect = val
 						}
 					}
-
 				} else {
 					cmd.State = message.Bool()
 				}

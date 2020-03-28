@@ -58,13 +58,11 @@ func (s *UDPServer) ListenAndServe() error {
 			err := s.serial.ReadWrite(reader, writer)
 			if err == nil {
 				if writer.Len() > 0 {
-					listen.WriteTo(writer.Bytes(), addr)
+					_, _ = listen.WriteTo(writer.Bytes(), addr)
 				}
 			}
 
-			if err != nil {
-				// TODO: log
-			}
+			// TODO: log
 		}()
 	}
 }

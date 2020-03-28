@@ -109,7 +109,7 @@ func (c *Component) ConfigWatchers() []config.Watcher {
 		}, c.watchPayloadCacheEnabled),
 		config.NewWatcher([]string{
 			mqtt.ConfigPayloadCacheSize,
-		}, c.watchConnect),
+		}, c.watchPayloadCacheSize),
 	}
 }
 

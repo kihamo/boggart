@@ -59,6 +59,7 @@ func (c *Client) Configuration(ctx context.Context) (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer response.Body.Close()
 
 	separatorLen := len(separator)
 

@@ -49,6 +49,10 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 		err = b.Meta().SetMACAsString(deviceInfo.Payload.MacAddress2)
 	}
 
+	if err != nil {
+		return err
+	}
+
 	b.Meta().SetSerialNumber(deviceInfo.Payload.SerialNumber)
 
 	// set settings
@@ -91,7 +95,7 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 	taskSystemUpdater.SetName("system-updater")
 	b.Workers().RegisterTask(taskSystemUpdater)
 
-	return err
+	return nil
 }
 
 func (b *Bind) taskBalanceUpdater(ctx context.Context) error {
@@ -146,9 +150,9 @@ func (b *Bind) taskSMSChecker(ctx context.Context) error {
 			BoxType:   1,
 		})
 
-	responseList, err := b.client.Sms.GetSMSList(paramsList)
-	if err != nil {
-		return err
+	responseList, e := b.client.Sms.GetSMSList(paramsList)
+	if e != nil {
+		return multierr.Append(err, e)
 	}
 
 	for _, s := range responseList.Payload.Messages {
@@ -205,8 +209,8 @@ func (b *Bind) taskSystemUpdater(ctx context.Context) (err error) {
 			}
 
 			if b.operator.IsEmpty() {
-				plmn, err := b.client.Net.GetCurrentPLMN(net.NewGetCurrentPLMNParamsWithContext(ctx))
-				if err == nil && plmn.Payload.FullName != "" {
+				plmn, e := b.client.Net.GetCurrentPLMN(net.NewGetCurrentPLMNParamsWithContext(ctx))
+				if e == nil && plmn.Payload.FullName != "" {
 					b.operator.Set(plmn.Payload.FullName)
 					if e := b.MQTT().PublishAsync(ctx, b.config.TopicOperator.Format(sn), plmn.Payload.FullName); e != nil {
 						err = multierr.Append(err, e)
@@ -335,7 +339,7 @@ func (b *Bind) taskCleaner(ctx context.Context) (err error) {
 					continue
 				}
 
-				remove = time.Now().Sub(d) > b.config.CleanerDuration
+				remove = time.Since(d) > b.config.CleanerDuration
 			}
 
 			if remove {

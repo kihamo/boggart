@@ -127,7 +127,6 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 				Result:  "failed",
 				Message: err.Error(),
 			})
-
 		} else {
 			_ = w.SendJSON(response{
 				Result:  "success",

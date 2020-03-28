@@ -97,7 +97,7 @@ func (t Type) WidgetAssetFS() *assetfs.AssetFS {
 	return assetFS()
 }
 
-func (t Type) widgetActionDefault(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
+func (t Type) widgetActionDefault(_ *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
 	ctx := r.Context()
 
 	tm, err := client.OPTime(ctx)
@@ -196,7 +196,6 @@ func (t Type) widgetActionDefaultPost(w *dashboard.Response, r *dashboard.Reques
 			Result:  "failed",
 			Message: err.Error(),
 		})
-
 	} else {
 		_ = w.SendJSON(response{
 			Result:  "success",
@@ -205,7 +204,7 @@ func (t Type) widgetActionDefaultPost(w *dashboard.Response, r *dashboard.Reques
 	}
 }
 
-func (t Type) widgetActionLogs(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
+func (t Type) widgetActionLogs(_ *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
 	ctx := r.Context()
 
 	logs, err := client.LogSearch(ctx, time.Now().Add(-time.Hour), time.Now(), 0)
@@ -218,7 +217,7 @@ func (t Type) widgetActionLogs(w *dashboard.Response, r *dashboard.Request, clie
 	}
 }
 
-func (t Type) widgetActionAccounts(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client, b boggart.BindItem) map[string]interface{} {
+func (t Type) widgetActionAccounts(_ *dashboard.Response, r *dashboard.Request, client *xmeye.Client, b boggart.BindItem) map[string]interface{} {
 	ctx := r.Context()
 
 	users, err := client.Users(ctx)
@@ -280,11 +279,7 @@ func (t Type) widgetActionUser(w *dashboard.Response, r *dashboard.Request, clie
 			user.Name = r.Original().FormValue("name")
 			user.Memo = r.Original().FormValue("memo")
 			user.Group = r.Original().FormValue("group")
-			user.AuthorityList = make([]string, 0, len(r.Original().Form["authorities"]))
-
-			for _, authority := range r.Original().Form["authorities"] {
-				user.AuthorityList = append(user.AuthorityList, authority)
-			}
+			user.AuthorityList = r.Original().Form["authorities"]
 
 			if err := client.UserUpdate(ctx, username, *user); err != nil {
 				r.Session().FlashBag().Error(t.Translate(ctx, "Update user %s failed with error %v", "", username, err))
@@ -302,11 +297,7 @@ func (t Type) widgetActionUser(w *dashboard.Response, r *dashboard.Request, clie
 			user.Memo = r.Original().FormValue("memo")
 			user.Password = r.Original().FormValue("password")
 			user.Group = r.Original().FormValue("group")
-			user.AuthorityList = make([]string, 0, len(r.Original().Form["authorities"]))
-
-			for _, authority := range r.Original().Form["authorities"] {
-				user.AuthorityList = append(user.AuthorityList, authority)
-			}
+			user.AuthorityList = r.Original().Form["authorities"]
 
 			if err := client.UserCreate(ctx, *user); err != nil {
 				r.Session().FlashBag().Error(t.Translate(ctx, "Create user failed with error %v", "", err))
@@ -420,11 +411,7 @@ func (t Type) widgetActionGroup(w *dashboard.Response, r *dashboard.Request, cli
 			group.Memo = r.Original().FormValue("memo")
 
 			if canEditAuthorities {
-				group.AuthorityList = make([]string, 0, len(r.Original().Form["authorities"]))
-
-				for _, authority := range r.Original().Form["authorities"] {
-					group.AuthorityList = append(group.AuthorityList, authority)
-				}
+				group.AuthorityList = r.Original().Form["authorities"]
 			}
 
 			if err := client.GroupUpdate(ctx, groupName, *group); err != nil {
@@ -441,11 +428,7 @@ func (t Type) widgetActionGroup(w *dashboard.Response, r *dashboard.Request, cli
 		if r.IsPost() {
 			group.Name = r.Original().FormValue("name")
 			group.Memo = r.Original().FormValue("memo")
-			group.AuthorityList = make([]string, 0, len(r.Original().Form["authorities"]))
-
-			for _, authority := range r.Original().Form["authorities"] {
-				group.AuthorityList = append(group.AuthorityList, authority)
-			}
+			group.AuthorityList = r.Original().Form["authorities"]
 
 			if err := client.GroupCreate(ctx, *group); err != nil {
 				r.Session().FlashBag().Error(t.Translate(ctx, "Create group failed with error %v", "", err))
@@ -536,7 +519,7 @@ func (t Type) widgetActionGroupDelete(w *dashboard.Response, r *dashboard.Reques
 	t.Redirect(r.URL().Path+"?action=accounts", http.StatusFound, w, r)
 }
 
-func (t Type) widgetActionFiles(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
+func (t Type) widgetActionFiles(_ *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
 	query := r.URL().Query()
 	ctx := r.Context()
 

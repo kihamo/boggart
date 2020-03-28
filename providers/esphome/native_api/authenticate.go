@@ -39,7 +39,7 @@ func (c *Client) authenticateClose() {
 	atomic.StoreUint32(&c.authenticated, authNone)
 }
 
-func (c *Client) authenticateCheck(ctx context.Context) (err error) {
+func (c *Client) authenticateCheck() (err error) {
 	switch atomic.LoadUint32(&c.authenticated) {
 	case authNone:
 		err = ErrAuthenticated

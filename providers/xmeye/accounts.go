@@ -64,7 +64,7 @@ func (c *Client) UserUpdate(ctx context.Context, name string, user User) (err er
 		"User":      user,
 	})
 
-	return nil
+	return err
 }
 
 func (c *Client) UserDelete(ctx context.Context, name string) (err error) {

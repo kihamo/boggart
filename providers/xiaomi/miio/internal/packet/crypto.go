@@ -12,12 +12,10 @@ import (
 type Crypto struct {
 	Base
 
-	token []byte
-	iv    []byte
-	key   []byte
-
-	cipher        cipher.Block
-	bodyDecrypted []byte
+	token  []byte
+	iv     []byte
+	key    []byte
+	cipher cipher.Block
 }
 
 func NewCrypto(deviceID []byte, token string) (*Crypto, error) {

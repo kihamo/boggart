@@ -61,7 +61,7 @@ func (t Type) WidgetAssetFS() *assetfs.AssetFS {
 	return assetFS()
 }
 
-func (t Type) handleIndex(w *dashboard.Response, r *dashboard.Request, bind *Bind) {
+func (t Type) handleIndex(_ *dashboard.Response, r *dashboard.Request, bind *Bind) {
 	ctx := r.Context()
 	otaWritten, otaTotal := bind.ota.Progress()
 
@@ -270,20 +270,21 @@ func (t Type) handleState(w *dashboard.Response, r *dashboard.Request, bind *Bin
 		return
 	}
 
-	entity, err := bind.EntityByObjectID(r.Context(), objectID)
-	if err != nil {
+	entity, e := bind.EntityByObjectID(r.Context(), objectID)
+	if e != nil {
 		t.NotFound(w, r)
 		return
 	}
 
 	ctx := r.Context()
+	var err error
 
 	switch api.EntityType(entity) {
 	// TODO: CoverCommand
 
 	case api.EntityTypeClimate:
-		v, err := strconv.ParseUint(state, 10, 64)
-		if err != nil {
+		v, e := strconv.ParseUint(state, 10, 64)
+		if e != nil {
 			t.NotFound(w, r)
 			return
 		}
@@ -308,8 +309,8 @@ func (t Type) handleState(w *dashboard.Response, r *dashboard.Request, bind *Bin
 		})
 
 	case api.EntityTypeFan:
-		s, err := strconv.ParseBool(state)
-		if err != nil {
+		s, e := strconv.ParseBool(state)
+		if e != nil {
 			t.NotFound(w, r)
 			return
 		}
@@ -321,8 +322,8 @@ func (t Type) handleState(w *dashboard.Response, r *dashboard.Request, bind *Bin
 		})
 
 	case api.EntityTypeLight:
-		s, err := strconv.ParseBool(state)
-		if err != nil {
+		s, e := strconv.ParseBool(state)
+		if e != nil {
 			t.NotFound(w, r)
 			return
 		}
@@ -334,8 +335,8 @@ func (t Type) handleState(w *dashboard.Response, r *dashboard.Request, bind *Bin
 		})
 
 	case api.EntityTypeSwitch:
-		s, err := strconv.ParseBool(state)
-		if err != nil {
+		s, e := strconv.ParseBool(state)
+		if e != nil {
 			t.NotFound(w, r)
 			return
 		}
@@ -390,6 +391,4 @@ func (t Type) handleOTA(w *dashboard.Response, r *dashboard.Request, bind *Bind)
 	} else {
 		_, _ = w.Write([]byte("success"))
 	}
-
-	return
 }
