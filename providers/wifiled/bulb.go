@@ -123,7 +123,7 @@ func (l *Bulb) SetColorPersist(ctx context.Context, color Color) error {
 		status = False
 	}
 
-	_, err := l.request(ctx, []byte{CommandColorSetPersist, byte(color.Red), byte(color.Green), byte(color.Blue), byte(color.WarmWhite), byte(status), CommandLocal}, 0)
+	_, err := l.request(ctx, []byte{CommandColorSetPersist, color.Red, color.Green, color.Blue, color.WarmWhite, byte(status), CommandLocal}, 0)
 
 	return err
 }
@@ -142,7 +142,7 @@ func (l *Bulb) SetColor(ctx context.Context, color Color) error {
 		status = False
 	}
 
-	_, err := l.request(ctx, []byte{CommandColorSet, byte(color.Red), byte(color.Green), byte(color.Blue), byte(color.WarmWhite), byte(status), CommandLocal}, 0)
+	_, err := l.request(ctx, []byte{CommandColorSet, color.Red, color.Green, color.Blue, color.WarmWhite, byte(status), CommandLocal}, 0)
 
 	return err
 }
@@ -155,7 +155,7 @@ func (l *Bulb) SetMode(ctx context.Context, mode Mode, speed uint8) error {
 		          If command is remote (0xF0): [0xF0 remote][0X61][0x00][check digit]
 		          Note:mode value refers to definition in the end of file,range of speed value is 0x01--0x1F
 	*/
-	_, err := l.request(ctx, []byte{CommandMode, byte(mode), byte(speed), CommandLocal}, 0)
+	_, err := l.request(ctx, []byte{CommandMode, byte(mode), speed, CommandLocal}, 0)
 	return err
 }
 
@@ -210,14 +210,14 @@ func (l *Bulb) State(ctx context.Context) (*State, error) {
 	}
 
 	result := &State{
-		DeviceName: uint8(response[1]),
+		DeviceName: response[1],
 		Mode:       Mode(response[3]),
-		Speed:      uint8(response[5]),
+		Speed:      response[5],
 		Color: Color{
-			Red:       uint8(response[6]),
-			Green:     uint8(response[7]),
-			Blue:      uint8(response[8]),
-			WarmWhite: uint8(response[9]),
+			Red:       response[6],
+			Green:     response[7],
+			Blue:      response[8],
+			WarmWhite: response[9],
 		},
 	}
 

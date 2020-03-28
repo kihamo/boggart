@@ -34,12 +34,12 @@ const (
 	EurekaInfoParamNightModeParams = eurekaInfoParam("night_mode_params")
 	EurekaInfoParamUserEq          = eurekaInfoParam("user_eq")
 	EurekaInfoParamRoomQualizer    = eurekaInfoParam("room_equalizer")
-	EurekaInfoParamAll             = eurekaInfoParam(EurekaInfoParamVersion + "," + EurekaInfoParamAudio +
+	EurekaInfoParamAll             = EurekaInfoParamVersion + "," + EurekaInfoParamAudio +
 		"," + EurekaInfoParamName + "," + EurekaInfoParamBuildInfo + "," + EurekaInfoParamDetail +
 		"," + EurekaInfoParamDeviceInfo + "," + EurekaInfoParamNet + "," + EurekaInfoParamWifi +
 		"," + EurekaInfoParamSetup + "," + EurekaInfoParamSettings + "," + EurekaInfoParamOptIn +
 		"," + EurekaInfoParamOpencast + "," + EurekaInfoParamMultizone + "," + EurekaInfoParamProxy +
-		"," + EurekaInfoParamNightModeParams + "," + EurekaInfoParamUserEq + "," + EurekaInfoParamRoomQualizer)
+		"," + EurekaInfoParamNightModeParams + "," + EurekaInfoParamUserEq + "," + EurekaInfoParamRoomQualizer
 )
 
 func (o eurekaInfoOption) Value() *string {

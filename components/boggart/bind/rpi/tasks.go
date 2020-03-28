@@ -98,7 +98,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 
 	for _, id := range voltsIDs {
 		if value, e := b.providerVCGenCMD.Voltage(id); e == nil {
-			metricVoltage.With("serial_number", sn).With("id", id.String()).Set(float64(value))
+			metricVoltage.With("serial_number", sn).With("id", id.String()).Set(value)
 
 			if e := b.MQTT().PublishAsync(ctx, b.config.TopicVoltage.Format(id), value); e != nil {
 				err = multierr.Append(err, e)

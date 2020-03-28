@@ -29,5 +29,5 @@ func (v *Float64) Load() float64 {
 }
 
 func (v *Float64) String() string {
-	return strconv.FormatFloat(float64(v.Load()), 'f', -1, 64)
+	return strconv.FormatFloat(v.Load(), 'f', -1, 64)
 }

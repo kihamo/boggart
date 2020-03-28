@@ -219,9 +219,9 @@ func (m *Metrics) ProteinPercentage() (value float64) {
 
 func (m *Metrics) MetabolicAge() (value float64) {
 	if m.sex == SexFemale {
-		value = (m.height * -1.1165) + (m.weight * 1.5784) + (m.age * 0.4615) + (float64(m.impedance) * 0.0415) + 83.2548
+		value = (m.height * -1.1165) + (m.weight * 1.5784) + (m.age * 0.4615) + (m.impedance * 0.0415) + 83.2548
 	} else {
-		value = (m.height * -0.7471) + (m.weight * 0.9161) + (m.age * 0.4184) + (float64(m.impedance) * 0.0517) + 54.2267
+		value = (m.height * -0.7471) + (m.weight * 0.9161) + (m.age * 0.4184) + (m.impedance * 0.0517) + 54.2267
 	}
 
 	return checkValueOverflow(value, 15, 80)

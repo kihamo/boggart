@@ -12,7 +12,7 @@ linters:
     - golint
     - unparam
     - interfacer
-#    -- unconvert
+    - unconvert
 #    -- goconst
 #    -- prealloc
 #    -- whitespace
