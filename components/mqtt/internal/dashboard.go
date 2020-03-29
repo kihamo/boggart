@@ -19,7 +19,7 @@ func (c *Component) DashboardMenu() dashboard.Menu {
 	return dashboard.NewMenu("MQTT").
 		WithIcon("list").
 		WithChild(dashboard.NewMenu("Subscriptions").WithRoute(routes[1])).
-		WithChild(dashboard.NewMenu("Cache").WithUrl("/" + c.Name() + "/cache"))
+		WithChild(dashboard.NewMenu("Cache").WithURL("/" + c.Name() + "/cache"))
 }
 
 func (c *Component) DashboardRoutes() []dashboard.Route {
