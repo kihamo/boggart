@@ -18,7 +18,8 @@ type MetaContainerSupport interface {
 
 func MetaContainerBind(bind boggart.Bind) (*MetaContainer, bool) {
 	if support, ok := bind.(MetaContainerSupport); ok {
-		return support.Meta(), true
+		container := support.Meta()
+		return container, container != nil
 	}
 
 	return nil, false

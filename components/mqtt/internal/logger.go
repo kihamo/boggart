@@ -57,18 +57,19 @@ func (l MQTTLogger) Println(v ...interface{}) {
 		v = v[1:]
 	}
 
-	var msg string
+	var msg strings.Builder
 
 	if len(v) > 0 {
-		parts := make([]string, len(v))
 		for i, value := range v {
-			parts[i] = fmt.Sprintf("%v", value)
-		}
+			if i != 0 {
+				fmt.Fprint(&msg, " ")
+			}
 
-		msg = strings.Join(parts, " ")
+			fmt.Fprintf(&msg, "%v", value)
+		}
 	}
 
-	l.ln(msg, fields...)
+	l.ln(msg.String(), fields...)
 }
 
 func (l MQTTLogger) Printf(format string, v ...interface{}) {

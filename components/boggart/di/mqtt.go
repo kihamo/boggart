@@ -24,7 +24,8 @@ type MQTTContainerSupport interface {
 
 func MQTTContainerBind(bind boggart.Bind) (*MQTTContainer, bool) {
 	if support, ok := bind.(MQTTContainerSupport); ok {
-		return support.MQTT(), true
+		container := support.MQTT()
+		return container, container != nil
 	}
 
 	return nil, false
@@ -236,11 +237,7 @@ func (c *MQTTContainer) WrapSubscribeDeviceIsOnline(callback mqtt.MessageHandler
 }
 
 func (c *MQTTContainer) createSubscribe(subscriber mqtt.Subscriber) MQTTSubscriber {
-	var logger logging.Logger
-
-	if bindSupport, ok := c.bind.Bind().(LoggerContainerSupport); ok {
-		logger = bindSupport.Logger()
-	}
+	logger, _ := LoggerContainerBind(c.bind.Bind())
 
 	item := MQTTSubscriber{
 		success:     atomic.NewUint64(),

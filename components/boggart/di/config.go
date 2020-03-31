@@ -14,7 +14,8 @@ type ConfigContainerSupport interface {
 
 func ConfigContainerBind(bind boggart.Bind) (*ConfigContainer, bool) {
 	if support, ok := bind.(ConfigContainerSupport); ok {
-		return support.Config(), true
+		container := support.Config()
+		return container, container != nil
 	}
 
 	return nil, false

@@ -376,8 +376,8 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 
 		if probe := bindSupport.Probes().Readiness(); probe != nil {
 			// если воркеры есть у привязки, то регистрируем пробы как таски, чтобы отображались в общем списке тасок
-			if bindWorkersSupport, ok := bindItem.Bind().(di.WorkersContainerSupport); ok {
-				bindWorkersSupport.Workers().RegisterTask(probe)
+			if bindWorkersSupport, ok := di.WorkersContainerBind(bindItem.Bind()); ok {
+				bindWorkersSupport.RegisterTask(probe)
 			} else {
 				c.workers.AddTask(probe)
 			}
@@ -386,8 +386,8 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 		}
 
 		if probe := bindSupport.Probes().Liveness(); probe != nil {
-			if bindWorkersSupport, ok := bindItem.Bind().(di.WorkersContainerSupport); ok {
-				bindWorkersSupport.Workers().RegisterTask(probe)
+			if bindWorkersSupport, ok := di.WorkersContainerBind(bindItem.Bind()); ok {
+				bindWorkersSupport.RegisterTask(probe)
 			} else {
 				c.workers.AddTask(probe)
 			}

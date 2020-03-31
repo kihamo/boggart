@@ -27,7 +27,8 @@ type WorkersContainerSupport interface {
 
 func WorkersContainerBind(bind boggart.Bind) (*WorkersContainer, bool) {
 	if support, ok := bind.(WorkersContainerSupport); ok {
-		return support.Workers(), true
+		container := support.Workers()
+		return container, container != nil
 	}
 
 	return nil, false
@@ -72,8 +73,15 @@ func (c *WorkersContainer) createTask(tsk w.Task) w.Task {
 		tsk.SetName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-" + tsk.Name())
 	}
 
-	if bindSupport, ok := c.bind.Bind().(LoggerContainerSupport); ok {
-		tsk = newWorkersWrapTask(tsk, bindSupport.Logger())
+	if logger, ok := LoggerContainerBind(c.bind.Bind()); ok {
+		// не логировать дважды ошибку с таски о пробе
+		if probes, ok := ProbesContainerBind(c.bind.Bind()); ok {
+			if tsk == probes.Liveness() || tsk == probes.Readiness() {
+				logger = nil
+			}
+		}
+
+		tsk = newWorkersWrapTask(tsk, logger)
 	}
 
 	return tsk
@@ -207,7 +215,7 @@ func (t *workersWrapTask) sync() {
 
 func (t *workersWrapTask) Run(ctx context.Context) (result interface{}, err error) {
 	result, err = t.original.Run(ctx)
-	if err != nil {
+	if err != nil && t.logger != nil {
 		t.logger.Error("Task ended with an error",
 			"error", err.Error(),
 			"task", t.Name(),

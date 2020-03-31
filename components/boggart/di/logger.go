@@ -29,7 +29,8 @@ type LoggerContainerSupport interface {
 
 func LoggerContainerBind(bind boggart.Bind) (*LoggerContainer, bool) {
 	if support, ok := bind.(LoggerContainerSupport); ok {
-		return support.Logger(), true
+		container := support.Logger()
+		return container, container != nil
 	}
 
 	return nil, false

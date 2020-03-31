@@ -33,7 +33,8 @@ type ProbesContainerSupport interface {
 
 func ProbesContainerBind(bind boggart.Bind) (*ProbesContainer, bool) {
 	if support, ok := bind.(ProbesContainerSupport); ok {
-		return support.Probes(), true
+		container := support.Probes()
+		return container, container != nil
 	}
 
 	return nil, false
