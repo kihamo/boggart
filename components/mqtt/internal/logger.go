@@ -62,7 +62,7 @@ func (l MQTTLogger) Println(v ...interface{}) {
 	if len(v) > 0 {
 		for i, value := range v {
 			if i != 0 {
-				fmt.Fprint(&msg, " ")
+				msg.WriteString(" ")
 			}
 
 			fmt.Fprintf(&msg, "%v", value)
