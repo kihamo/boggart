@@ -314,10 +314,9 @@ github.com/kihamo/gotypes v0.0.0-20161225095921-c1b2b85a41fe h1:tPzbTI6UkYAnF2O5
 github.com/kihamo/gotypes v0.0.0-20161225095921-c1b2b85a41fe/go.mod h1:Ea+63Rptr1cn2lZLAq4FtbjhJiTD5pS0MnCsta84xqY=
 github.com/kihamo/shadow v0.0.0-20200330225116-059bbff4efa1 h1:Ec9JpHCzdzPCFEOD5BsuJzf3qogs2UOZIa2O2v4pudI=
 github.com/kihamo/shadow v0.0.0-20200330225116-059bbff4efa1/go.mod h1:tYZfEmsZHoAjo83qj5bTLRtXwiXaVYGvDJK7wMEhGbQ=
-github.com/kihamo/snitch v0.0.0-20200330224422-503550c7d652 h1:CYoeGqJXz7NkaV2oU2Kw2dvuTx8f7t1OfFYn3ae+7tg=
 github.com/kihamo/snitch v0.0.0-20200330224422-503550c7d652/go.mod h1:olFj6DX2IOweEqkZQ3c9d4TMLc1FKl5tisLwT7/oh40=
-github.com/kihamo/snitch v0.0.0-20200331005414-02d83f3ac93c h1:EOvrsvR2UMHhjB8R1qeKcISfAs1WU49+Hj3Mwy5DtcM=
-github.com/kihamo/snitch v0.0.0-20200331005414-02d83f3ac93c/go.mod h1:olFj6DX2IOweEqkZQ3c9d4TMLc1FKl5tisLwT7/oh40=
+github.com/kihamo/snitch v0.0.0-20200401211736-cb0e82de9fd9 h1:s1X/oNS5+Z+aiGkifll45JTwqB4QGAfy5GuJQUNqaB0=
+github.com/kihamo/snitch v0.0.0-20200401211736-cb0e82de9fd9/go.mod h1:olFj6DX2IOweEqkZQ3c9d4TMLc1FKl5tisLwT7/oh40=
 github.com/kisielk/errcheck v1.1.0/go.mod h1:EZBBE59ingxPouuu3KfxchcWSUPOHkagtvWXihfKN4Q=
 github.com/kisielk/errcheck v1.2.0/go.mod h1:/BMXB+zMLi60iA8Vv6Ksmxu/1UDYcXs4uQLJ+jE2L00=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
