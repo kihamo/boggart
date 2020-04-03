@@ -28,29 +28,30 @@ func (l MQTTLogger) Println(v ...interface{}) {
 		return
 	}
 
-	fields := make([]interface{}, 0, 4)
+	fields := make([]interface{}, 2)
+	fields[0] = fieldMQTTComponent
 
 	switch v[0] {
 	case m.NET:
-		fields = append(fields, fieldMQTTComponent, "net")
+		fields[1] = "net"
 	case m.PNG:
-		fields = append(fields, fieldMQTTComponent, "pinger")
+		fields[1] = "pinger"
 	case m.CLI:
-		fields = append(fields, fieldMQTTComponent, "client")
+		fields[1] = "client"
 	case m.DEC:
-		fields = append(fields, fieldMQTTComponent, "decode")
+		fields[1] = "decode"
 	case m.MES:
-		fields = append(fields, fieldMQTTComponent, "message")
+		fields[1] = "message"
 	case m.STR:
-		fields = append(fields, fieldMQTTComponent, "store")
+		fields[1] = "store"
 	case m.MID:
-		fields = append(fields, fieldMQTTComponent, "msgids")
+		fields[1] = "msgids"
 	case m.TST:
-		fields = append(fields, fieldMQTTComponent, "test")
+		fields[1] = "test"
 	case m.STA:
-		fields = append(fields, fieldMQTTComponent, "state")
+		fields[1] = "state"
 	case m.ERR:
-		fields = append(fields, fieldMQTTComponent, "error")
+		fields[1] = "error"
 	}
 
 	if len(fields) == 2 {

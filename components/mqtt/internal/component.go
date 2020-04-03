@@ -22,8 +22,6 @@ import (
 	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/logging"
-	"github.com/kihamo/shadow/components/tracing"
-	"github.com/opentracing/opentracing-go/log"
 )
 
 type Component struct {
@@ -59,9 +57,9 @@ func (c *Component) Dependencies() []shadow.Dependency {
 		{
 			Name: logging.ComponentName,
 		},
-		{
-			Name: tracing.ComponentName,
-		},
+		//{
+		//	Name: tracing.ComponentName,
+		//},
 	}
 }
 
@@ -85,7 +83,7 @@ func (c *Component) Run(a shadow.Application, ready chan<- struct{}) (err error)
 
 	clientLogger := logging.NewLazyLogger(c.logger, c.Name()+".client")
 	m.ERROR = NewMQTTLogger(clientLogger.Error, clientLogger.Errorf)
-	m.CRITICAL = NewMQTTLogger(clientLogger.Error, clientLogger.Errorf)
+	m.CRITICAL = m.ERROR
 	m.WARN = NewMQTTLogger(clientLogger.Warn, clientLogger.Warnf)
 	m.DEBUG = NewMQTTLogger(clientLogger.Debug, clientLogger.Debugf)
 
@@ -264,17 +262,18 @@ func (c *Component) clientSubscribe(topic mqtt.Topic, qos byte, subscription *mq
 
 	// wrap tracing
 	callback := func(client m.Client, message m.Message) {
-		span, ctx := tracing.StartSpanFromContext(context.Background(), c.Name(), "subscribe_callback")
+		ctx := context.Background()
+		//span, ctx := tracing.StartSpanFromContext(context.Background(), c.Name(), "subscribe_callback")
 
-		span = span.SetTag("topic", message.Topic())
-		defer span.Finish()
-
-		span.LogFields(
-			log.Int("qos", int(message.Qos())),
-			log.String("payload", string(message.Payload())),
-			log.Bool("retained", message.Retained()),
-			log.String("topic.subscribe", topic.String()),
-		)
+		//span = span.SetTag("topic", message.Topic())
+		//defer span.Finish()
+		//
+		//span.LogFields(
+		//	log.Int("qos", int(message.Qos())),
+		//	log.String("payload", string(message.Payload())),
+		//	log.Bool("retained", message.Retained()),
+		//	log.String("topic.subscribe", topic.String()),
+		//)
 
 		msg := newMessage(message)
 
@@ -297,7 +296,7 @@ func (c *Component) clientSubscribe(topic mqtt.Topic, qos byte, subscription *mq
 			if err := subscription.Callback(ctx, c, msg); err != nil {
 				metricSubscriberCalls.With("status", "failure", "topic", topic.String()).Inc()
 
-				tracing.SpanError(span, err)
+				//tracing.SpanError(span, err)
 
 				c.logger.Error(
 					"Call MQTT subscriber failed",
@@ -344,16 +343,16 @@ func (c *Component) doPublish(ctx context.Context, topic mqtt.Topic, qos byte, r
 
 	payloadConverted := c.convertPayload(payload)
 
-	span, _ := tracing.StartSpanFromContext(ctx, c.Name(), "mqtt_publish")
-
-	span = span.SetTag("topic", topic)
-	defer span.Finish()
-
-	span.LogFields(
-		log.Int("qos", int(qos)),
-		log.String("payload", string(payloadConverted)),
-		log.Bool("retained", retained),
-	)
+	//span, _ := tracing.StartSpanFromContext(ctx, c.Name(), "mqtt_publish")
+	//
+	//span = span.SetTag("topic", topic)
+	//defer span.Finish()
+	//
+	//span.LogFields(
+	//	log.Int("qos", int(qos)),
+	//	log.String("payload", string(payloadConverted)),
+	//	log.Bool("retained", retained),
+	//)
 
 	if cache && !c.config.Bool(mqtt.ConfigPayloadCacheEnabled) {
 		cache = false
@@ -381,7 +380,7 @@ func (c *Component) doPublish(ctx context.Context, topic mqtt.Topic, qos byte, r
 	if err != nil {
 		metricPublish.With("status", "failure").Inc()
 
-		tracing.SpanError(span, err)
+		//tracing.SpanError(span, err)
 
 		logPayload := payloadConverted
 		if len(logPayload) > 100 {

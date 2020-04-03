@@ -30,15 +30,14 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/influxdata/influxdb v1.7.8
 	github.com/kihamo/go-workers v2.1.7+incompatible
-	github.com/kihamo/shadow v0.0.0-20200330225116-059bbff4efa1
-	github.com/kihamo/snitch v0.0.0-20200401211736-cb0e82de9fd9
+	github.com/kihamo/shadow v0.0.0-20200403214540-ca636f3cc9f0
+	github.com/kihamo/snitch v0.0.0-20200403214744-17c0c01bc0d7
 	github.com/llgcode/draw2d v0.0.0-20200110163050-b96d8208fcfc
 	github.com/mailru/easyjson v0.7.1
 	github.com/mitchellh/mapstructure v1.2.2
 	github.com/mmcloughlin/geohash v0.9.0
 	github.com/mourner/suncalc-go v0.0.0-20141021103505-77cea98fd55e
 	github.com/opentracing-contrib/go-stdlib v0.0.0-20190519235532-cf7a6c988dc9
-	github.com/opentracing/opentracing-go v1.1.0
 	github.com/pborman/uuid v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/snabb/webostv v0.0.1
