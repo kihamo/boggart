@@ -58,3 +58,4 @@ require (
 )
 
 replace github.com/barnybug/go-cast v0.0.0-20190910160619-d2aa97f56d4e => github.com/kihamo/go-cast v0.0.0-20190130214031-2bd907ad55c2
+replace github.com/sparrc/go-ping => github.com/davidhoo/go-ping v0.0.0-20200326035551-4c02d67da013

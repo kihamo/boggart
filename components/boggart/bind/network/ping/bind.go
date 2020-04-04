@@ -22,7 +22,7 @@ func (b *Bind) Check(ctx context.Context) error {
 		return err
 	}
 
-	pinger.SetPrivileged(true)
+	pinger.SetPrivileged(b.config.Privileged)
 
 	pinger.Count = b.config.Retry
 	pinger.Timeout = b.config.ReadinessProbeTimeout()
