@@ -72,8 +72,6 @@ github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d/go.mod h1:ma
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/davidhoo/go-ping v0.0.0-20200326035551-4c02d67da013 h1:BXW5/fAShJi0S6Q4of27wGpCsk4mFncNeOnk1BIsU+g=
-github.com/davidhoo/go-ping v0.0.0-20200326035551-4c02d67da013/go.mod h1:jjqPlXSXRKcFF/wOR7F2rzcU8sbti1M1hO6Vnl2NEPQ=
 github.com/deckarep/golang-set v1.7.1 h1:SCQV0S6gTtp6itiFrTqI+pfmJ4LN85S1YzhDf9rTHJQ=
 github.com/deckarep/golang-set v1.7.1/go.mod h1:93vsz/8Wt4joVM7c2AVqh+YRMiUSc14yDtF28KmMOgQ=
 github.com/denisbrodbeck/machineid v1.0.1 h1:geKr9qtkB876mXguW2X6TU4ZynleN6ezuMSRhl4D7AQ=
@@ -310,6 +308,8 @@ github.com/kataras/pio v0.0.0-20190103105442-ea782b38602d/go.mod h1:NV88laa9UiiD
 github.com/kihamo/go-cast v0.0.0-20190130214031-2bd907ad55c2 h1:l1jr8EquKmRezIwW4sI60XL0Brin2fcqv9AnHLmz1IE=
 github.com/kihamo/go-cast v0.0.0-20190130214031-2bd907ad55c2/go.mod h1:ahgEtt6ATzCeOAvGCqTGWw7DeewyPZDq05WA+dlCprw=
 github.com/kihamo/go-grafana-api v0.0.0-20180122174539-b9af836f6e9d/go.mod h1:tsZ8kui+vN0WhM98DPME1MKh0TD2MTVvE/Ig+qi+rn8=
+github.com/kihamo/go-ping v0.0.0-20200405124135-bc7921838e0d h1:QC6T8c8oaP+ENLz23+wVZ2t5sxduiFytGg7XCk3bKf4=
+github.com/kihamo/go-ping v0.0.0-20200405124135-bc7921838e0d/go.mod h1:u92LMiGH1rEADLe6M4HhVk74jXR0eKbHMgUZ4DID8Ec=
 github.com/kihamo/go-workers v2.1.7+incompatible h1:OcxgzaRxzWCoGLXG4zOHauU9RG9Ef+C6Qbbs6NVoIPY=
 github.com/kihamo/go-workers v2.1.7+incompatible/go.mod h1:/25LqDRVdScSTfeBInL4i45Q9JDc6ddM6toL1lEUkaQ=
 github.com/kihamo/gotypes v0.0.0-20161225095921-c1b2b85a41fe h1:tPzbTI6UkYAnF2O55sh0106hHotsyQLEFlsqcwjeUZU=
