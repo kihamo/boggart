@@ -3,6 +3,7 @@ module github.com/kihamo/boggart
 go 1.13
 
 require (
+	cloud.google.com/go/firestore v1.2.0 // indirect
 	firebase.google.com/go v3.12.0+incompatible
 	github.com/PuerkitoBio/goquery v1.5.1
 	github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496
