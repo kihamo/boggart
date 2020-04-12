@@ -28,10 +28,10 @@ require (
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/hashicorp/go-version v1.2.0
 	github.com/hashicorp/golang-lru v0.5.4
-	github.com/influxdata/influxdb v1.7.8
+	github.com/influxdata/influxdb v1.8.0
 	github.com/kihamo/go-workers v2.1.7+incompatible
-	github.com/kihamo/shadow v0.0.0-20200403233902-aad3d5191b6d
-	github.com/kihamo/snitch v0.0.0-20200403214744-17c0c01bc0d7
+	github.com/kihamo/shadow v0.0.0-20200412160130-a95972d7c957
+	github.com/kihamo/snitch v0.0.0-20200412155652-f210fc24715b
 	github.com/llgcode/draw2d v0.0.0-20200110163050-b96d8208fcfc
 	github.com/mailru/easyjson v0.7.1
 	github.com/mitchellh/mapstructure v1.2.2
@@ -58,4 +58,5 @@ require (
 )
 
 replace github.com/barnybug/go-cast v0.0.0-20190910160619-d2aa97f56d4e => github.com/kihamo/go-cast v0.0.0-20190130214031-2bd907ad55c2
+
 replace github.com/sparrc/go-ping => github.com/kihamo/go-ping v0.0.0-20200405124135-bc7921838e0d
