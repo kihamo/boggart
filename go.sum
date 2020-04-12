@@ -403,12 +403,15 @@ github.com/kihamo/go-workers v2.1.7+incompatible h1:OcxgzaRxzWCoGLXG4zOHauU9RG9E
 github.com/kihamo/go-workers v2.1.7+incompatible/go.mod h1:/25LqDRVdScSTfeBInL4i45Q9JDc6ddM6toL1lEUkaQ=
 github.com/kihamo/gotypes v0.0.0-20161225095921-c1b2b85a41fe h1:tPzbTI6UkYAnF2O55sh0106hHotsyQLEFlsqcwjeUZU=
 github.com/kihamo/gotypes v0.0.0-20161225095921-c1b2b85a41fe/go.mod h1:Ea+63Rptr1cn2lZLAq4FtbjhJiTD5pS0MnCsta84xqY=
-github.com/kihamo/shadow v0.0.0-20200412160130-a95972d7c957 h1:2oU7wRg6kR040nrvLDu937dhI7GAx3p06sMxq+LB0PQ=
-github.com/kihamo/shadow v0.0.0-20200412160130-a95972d7c957/go.mod h1:A1sOovmj4C8dGDsVUgfzEQuRnY7eEcqNbJ7klmV1WVA=
+github.com/kihamo/shadow v0.0.0-20200412183331-48a81a32c00a h1:2Z0D6kKIHhkIyeVWa/1jN6jLUyPTMfKyEJEx3s1sCg8=
+github.com/kihamo/shadow v0.0.0-20200412183331-48a81a32c00a/go.mod h1:Em6N1KJFNjtkkoEfU5Wu77QQzVtG2XIEJAy/2BRTXSw=
+github.com/kihamo/shadow v0.0.0-20200412185102-25db29c8fa3b h1:HF5Pj9wlLaoFCQfkiTYoYREBrQM7Pspa4To4t5RhZFA=
+github.com/kihamo/shadow v0.0.0-20200412185102-25db29c8fa3b/go.mod h1:Em6N1KJFNjtkkoEfU5Wu77QQzVtG2XIEJAy/2BRTXSw=
 github.com/kihamo/snitch v0.0.0-20200412155652-f210fc24715b h1:K5dlrF9ua9bq8yh1ZQFs8RrthMaIGv0blxxpCenFoBo=
 github.com/kihamo/snitch v0.0.0-20200412155652-f210fc24715b/go.mod h1:olFj6DX2IOweEqkZQ3c9d4TMLc1FKl5tisLwT7/oh40=
 github.com/kihamo/snitch v0.0.0-20200412164121-10528dc1020c h1:sF0pH5p8vH2beMXu4Op7Ow07jIqX7oOGgSJb7lctobE=
 github.com/kihamo/snitch v0.0.0-20200412164121-10528dc1020c/go.mod h1:olFj6DX2IOweEqkZQ3c9d4TMLc1FKl5tisLwT7/oh40=
+github.com/kihamo/snitch v0.0.0-20200412182537-3478a87783e1/go.mod h1:olFj6DX2IOweEqkZQ3c9d4TMLc1FKl5tisLwT7/oh40=
 github.com/kisielk/errcheck v1.1.0/go.mod h1:EZBBE59ingxPouuu3KfxchcWSUPOHkagtvWXihfKN4Q=
 github.com/kisielk/errcheck v1.2.0/go.mod h1:/BMXB+zMLi60iA8Vv6Ksmxu/1UDYcXs4uQLJ+jE2L00=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
