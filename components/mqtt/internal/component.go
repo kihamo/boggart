@@ -24,6 +24,8 @@ import (
 	"github.com/kihamo/shadow/components/logging"
 )
 
+const timeFormat = "2006-01-02T15:04:05+0000"
+
 type Component struct {
 	lostConnections uint64
 
@@ -645,9 +647,9 @@ func (c *Component) convertPayload(payload interface{}) []byte {
 
 		return PayloadFalse
 	case time.Time:
-		return []byte(value.UTC().Format(time.RFC3339))
+		return []byte(value.UTC().Format(timeFormat))
 	case *time.Time:
-		return []byte(value.UTC().Format(time.RFC3339))
+		return []byte(value.UTC().Format(timeFormat))
 	case time.Duration:
 		return []byte(strconv.FormatFloat(value.Seconds(), 'f', -1, 64))
 	case *time.Duration:
