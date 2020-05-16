@@ -113,6 +113,11 @@ func (c *Client) NextError() <-chan error {
 	return c.errors
 }
 
+func (c *Client) SkipBootLoader() error {
+	_, err := c.conn.Write([]byte{0xEF})
+	return err
+}
+
 func (c *Client) Call(frame *Frame) error {
 	data, err := frame.MarshalBinary()
 	if err != nil {
