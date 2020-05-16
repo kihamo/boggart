@@ -2,6 +2,7 @@ package z_stack
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"sync"
 
@@ -110,6 +111,44 @@ func (c *Client) NextError() <-chan error {
 	c.init()
 
 	return c.errors
+}
+
+func (c *Client) Call(frame *Frame) error {
+	data, err := frame.MarshalBinary()
+	if err != nil {
+		return err
+	}
+
+	_, err = c.conn.Write(data)
+	return err
+}
+
+func (c *Client) CallWithResult(ctx context.Context, request *Frame, waiter func(frame *Frame) bool) (*Frame, error) {
+	data, err := request.MarshalBinary()
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err = c.conn.Write(data); err != nil {
+		return nil, err
+	}
+
+	for {
+		select {
+		case response := <-c.NextFrame():
+			if waiter(response) {
+				return response, nil
+			}
+
+		case err := <-c.NextError():
+			return nil, err
+
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		}
+	}
+
+	return nil, nil
 }
 
 func (c *Client) Close() error {
