@@ -2,7 +2,6 @@ package z_stack
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"sync"
 
@@ -14,31 +13,35 @@ type Client struct {
 	once sync.Once
 	lock sync.RWMutex
 
-	responses <-chan []byte
-	errors    <-chan error
-	done      chan<- struct{}
+	errors chan error
+	frames chan *Frame
+	done   chan<- struct{}
 }
 
 func New(conn connection.Conn) *Client {
 	return &Client{
-		conn: connection.NewLooper(conn),
+		conn:   connection.NewLooper(conn),
+		errors: make(chan error),
+		frames: make(chan *Frame),
 	}
 }
 
-func (c *Client) Call() error {
+func (c *Client) init() {
 	c.once.Do(func() {
-		responses, errors, done := c.conn.Loop()
-
-		c.lock.Lock()
-		c.responses = responses
-		c.errors = errors
-		c.done = done
-		c.lock.Unlock()
+		go c.loop()
 	})
+}
+
+func (c *Client) loop() {
+	responses, errors, done := c.conn.Loop()
+
+	c.lock.Lock()
+	c.done = done
+	c.lock.Unlock()
 
 	for {
 		select {
-		case data := <-c.responses:
+		case data := <-responses:
 			if len(data) == 0 {
 				continue
 			}
@@ -61,23 +64,44 @@ func (c *Client) Call() error {
 
 				var frame Frame
 				if err := frame.UnmarshalBinary(data[:l]); err != nil {
-					return err
+					go func(e error) {
+						c.errors <- e
+					}(err)
+
+					data = data[:0]
+					continue
 				}
 
-				fmt.Println(frame)
+				go func(f *Frame) {
+					c.frames <- f
+				}(&frame)
 
 				// cut data
 				data = data[l:]
 			}
 
-		case e := <-c.errors:
-			if e == io.EOF {
+		case err := <-errors:
+			if err == io.EOF {
 				continue
 			}
 
-			fmt.Println("E", e)
+			go func(e error) {
+				c.errors <- e
+			}(err)
 		}
 	}
+}
+
+func (c *Client) NextFrame() <-chan *Frame {
+	c.init()
+
+	return c.frames
+}
+
+func (c *Client) NextError() <-chan error {
+	c.init()
+
+	return c.errors
 }
 
 func (c *Client) Close() error {
@@ -87,5 +111,5 @@ func (c *Client) Close() error {
 	}
 	c.lock.RUnlock()
 
-	return nil
+	return c.conn.Close()
 }

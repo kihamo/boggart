@@ -1,8 +1,10 @@
 package z_stack
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"strconv"
 )
 
 const (
@@ -39,7 +41,8 @@ const (
 	FrameLengthMax = 258
 
 	PositionFrameLength = 1
-	PositionCommand     = 2
+	PositionCommand1    = 2
+	PositionCommand2    = 3
 	PositionData        = 4
 )
 
@@ -76,7 +79,7 @@ func (f *Frame) UnmarshalBinary(data []byte) error {
 	// MT CMD = LEN (1) + CMD (2) + DATA (0-250)
 	f.Length = uint16(data[PositionFrameLength])
 
-	cmd := uint16(data[PositionCommand])
+	cmd := uint16(data[PositionCommand1])
 	f.Type = (cmd & 0xE0) >> 5
 	f.SubSystem = cmd & 0x1F
 
@@ -97,6 +100,7 @@ func (f *Frame) UnmarshalBinary(data []byte) error {
 		return fmt.Errorf("unknown sub system of frame command 0x%X in data 0x%X", f.SubSystem, data)
 	}
 
+	f.CommandID = uint16(data[PositionCommand2])
 	f.Data = data[PositionData : f.Length-1]
 	f.FCS = data[f.Length+FrameLengthMin-1]
 
@@ -106,6 +110,24 @@ func (f *Frame) UnmarshalBinary(data []byte) error {
 	}
 
 	return nil
+}
+
+func (f *Frame) String() string {
+	buffer := bytes.NewBuffer(nil)
+
+	buffer.WriteString(strconv.FormatUint(uint64(f.Length), 10))
+	buffer.WriteString(" - ")
+	buffer.WriteString(strconv.FormatUint(uint64(f.Type), 10))
+	buffer.WriteString(" - ")
+	buffer.WriteString(strconv.FormatUint(uint64(f.SubSystem), 10))
+	buffer.WriteString(" - ")
+	buffer.WriteString(strconv.FormatUint(uint64(f.CommandID), 10))
+	buffer.WriteString(" - ")
+	buffer.WriteString(fmt.Sprint(f.Data))
+	buffer.WriteString(" - ")
+	buffer.WriteString(strconv.FormatUint(uint64(f.FCS), 10))
+
+	return buffer.String()
 }
 
 /*
