@@ -14,16 +14,14 @@ type Client struct {
 	once sync.Once
 	lock sync.RWMutex
 
-	errors chan error
-	frames chan *Frame
-	done   chan<- struct{}
+	done     chan<- struct{}
+	watchers []*Watcher
 }
 
 func New(conn connection.Conn) *Client {
 	return &Client{
-		conn:   connection.NewLooper(conn),
-		errors: make(chan error),
-		frames: make(chan *Frame),
+		conn:     connection.NewLooper(conn),
+		watchers: make([]*Watcher, 0),
 	}
 }
 
@@ -68,7 +66,12 @@ func (c *Client) loop() {
 				var frame Frame
 				if err := frame.UnmarshalBinary(data[:l]); err != nil {
 					go func(e error) {
-						c.errors <- e
+						c.lock.RLock()
+						defer c.lock.RUnlock()
+
+						for _, w := range c.watchers {
+							w.notifyError(e)
+						}
 					}(err)
 
 					data = data[:0]
@@ -83,8 +86,13 @@ func (c *Client) loop() {
 
 			if len(frames) > 0 {
 				go func(f []*Frame) {
-					for _, frame := range f {
-						c.frames <- frame
+					c.lock.RLock()
+					defer c.lock.RUnlock()
+
+					for _, w := range c.watchers {
+						for _, frame := range f {
+							w.notifyFrame(frame)
+						}
 					}
 				}(frames)
 			}
@@ -95,22 +103,38 @@ func (c *Client) loop() {
 			}
 
 			go func(e error) {
-				c.errors <- e
+				c.lock.RLock()
+				defer c.lock.RUnlock()
+
+				for _, w := range c.watchers {
+					w.notifyError(e)
+				}
 			}(err)
 		}
 	}
 }
 
-func (c *Client) NextFrame() <-chan *Frame {
+func (c *Client) Watch() *Watcher {
 	c.init()
 
-	return c.frames
+	watcher := NewWatcher()
+
+	c.lock.Lock()
+	c.watchers = append(c.watchers, watcher)
+	c.lock.Unlock()
+
+	return watcher
 }
 
-func (c *Client) NextError() <-chan error {
-	c.init()
+func (c *Client) unregisterWatcher(watcher *Watcher) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
 
-	return c.errors
+	for i := len(c.watchers) - 1; i >= 0; i-- {
+		if c.watchers[i] == watcher {
+			c.watchers = append(c.watchers[:i], c.watchers[i+1:]...)
+		}
+	}
 }
 
 func (c *Client) SkipBootLoader() error {
@@ -119,6 +143,8 @@ func (c *Client) SkipBootLoader() error {
 }
 
 func (c *Client) Call(frame *Frame) error {
+	c.init()
+
 	data, err := frame.MarshalBinary()
 	if err != nil {
 		return err
@@ -129,6 +155,11 @@ func (c *Client) Call(frame *Frame) error {
 }
 
 func (c *Client) CallWithResult(ctx context.Context, request *Frame, waiter func(frame *Frame) bool) (*Frame, error) {
+	watcher := c.Watch()
+	defer func() {
+		c.unregisterWatcher(watcher)
+	}()
+
 	data, err := request.MarshalBinary()
 	if err != nil {
 		return nil, err
@@ -140,12 +171,12 @@ func (c *Client) CallWithResult(ctx context.Context, request *Frame, waiter func
 
 	for {
 		select {
-		case response := <-c.NextFrame():
+		case response := <-watcher.NextFrame():
 			if waiter(response) {
 				return response, nil
 			}
 
-		case err := <-c.NextError():
+		case err := <-watcher.NextError():
 			return nil, err
 
 		case <-ctx.Done():
@@ -162,6 +193,10 @@ func (c *Client) Close() error {
 		c.done <- struct{}{}
 	}
 	c.lock.RUnlock()
+
+	c.lock.Lock()
+	c.watchers = c.watchers[:0]
+	c.lock.Unlock()
 
 	return c.conn.Close()
 }
