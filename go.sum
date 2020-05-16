@@ -411,6 +411,7 @@ github.com/kihamo/snitch v0.0.0-20200412155652-f210fc24715b h1:K5dlrF9ua9bq8yh1Z
 github.com/kihamo/snitch v0.0.0-20200412155652-f210fc24715b/go.mod h1:olFj6DX2IOweEqkZQ3c9d4TMLc1FKl5tisLwT7/oh40=
 github.com/kihamo/snitch v0.0.0-20200412164121-10528dc1020c h1:sF0pH5p8vH2beMXu4Op7Ow07jIqX7oOGgSJb7lctobE=
 github.com/kihamo/snitch v0.0.0-20200412164121-10528dc1020c/go.mod h1:olFj6DX2IOweEqkZQ3c9d4TMLc1FKl5tisLwT7/oh40=
+github.com/kihamo/snitch v0.0.0-20200412182537-3478a87783e1 h1:9LLnHjW6WOaIC2GG+y/73QCTzhRxu05CNPkXg4Mh2TI=
 github.com/kihamo/snitch v0.0.0-20200412182537-3478a87783e1/go.mod h1:olFj6DX2IOweEqkZQ3c9d4TMLc1FKl5tisLwT7/oh40=
 github.com/kisielk/errcheck v1.1.0/go.mod h1:EZBBE59ingxPouuu3KfxchcWSUPOHkagtvWXihfKN4Q=
 github.com/kisielk/errcheck v1.2.0/go.mod h1:/BMXB+zMLi60iA8Vv6Ksmxu/1UDYcXs4uQLJ+jE2L00=
