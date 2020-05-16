@@ -56,7 +56,16 @@ type Frame struct {
 }
 
 func (f Frame) MarshalBinary() ([]byte, error) {
-	return nil, nil
+	buffer := make([]byte, 0, FrameLengthMin+len(f.Data))
+	buffer = append(buffer,
+		byte(f.Length),
+		byte(((f.Type<<5)&0xE0)|(f.SubSystem&0x1F)),
+		byte(f.CommandID))
+	buffer = append(buffer, f.Data...)
+	buffer = append(buffer, checksum(buffer))
+	buffer = append([]byte{SOF}, buffer...)
+
+	return buffer, nil
 }
 
 func (f *Frame) UnmarshalBinary(data []byte) error {
@@ -101,7 +110,7 @@ func (f *Frame) UnmarshalBinary(data []byte) error {
 	}
 
 	f.CommandID = uint16(data[PositionCommand2])
-	f.Data = data[PositionData : f.Length-1]
+	f.Data = data[PositionData : PositionData+f.Length]
 	f.FCS = data[f.Length+FrameLengthMin-1]
 
 	// checksum validate

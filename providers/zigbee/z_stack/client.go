@@ -33,18 +33,20 @@ func (c *Client) init() {
 }
 
 func (c *Client) loop() {
-	responses, errors, done := c.conn.Loop()
+	chResponses, chErrors, chDone := c.conn.Loop()
 
 	c.lock.Lock()
-	c.done = done
+	c.done = chDone
 	c.lock.Unlock()
 
 	for {
 		select {
-		case data := <-responses:
+		case data := <-chResponses:
 			if len(data) == 0 {
 				continue
 			}
+
+			frames := make([]*Frame, 0)
 
 			for {
 				i := bytes.IndexByte(data, SOF)
@@ -72,15 +74,21 @@ func (c *Client) loop() {
 					continue
 				}
 
-				go func(f *Frame) {
-					c.frames <- f
-				}(&frame)
+				frames = append(frames, &frame)
 
 				// cut data
 				data = data[l:]
 			}
 
-		case err := <-errors:
+			if len(frames) > 0 {
+				go func(f []*Frame) {
+					for _, frame := range f {
+						c.frames <- frame
+					}
+				}(frames)
+			}
+
+		case err := <-chErrors:
 			if err == io.EOF {
 				continue
 			}
