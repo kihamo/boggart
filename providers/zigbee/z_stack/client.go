@@ -85,14 +85,22 @@ func (c *Client) loop() {
 			}
 
 			if len(frames) > 0 {
-				go func(f []*Frame) {
+				go func(fs []*Frame) {
 					c.lock.RLock()
 					defer c.lock.RUnlock()
+					/*
+						if len(fs) > 0 {
+							sort.SliceStable(fs, func(i, j int) bool {
+								if fs[i].CommandID() == CommandAfIncomingMessage && fs[i].CommandID() == fs[j].CommandID() {
+									return binary.LittleEndian.Uint32(fs[i].Data()[11:15]) < binary.LittleEndian.Uint32(fs[j].Data()[11:15])
+								}
 
-					for _, w := range c.watchers {
-						for _, frame := range f {
-							w.notifyFrame(frame)
+								return false
+							})
 						}
+					*/
+					for _, w := range c.watchers {
+						w.notifyFrames(fs...)
 					}
 				}(frames)
 			}

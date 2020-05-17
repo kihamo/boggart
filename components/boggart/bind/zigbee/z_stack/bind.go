@@ -33,6 +33,7 @@ func (b *Bind) Run() error {
 
 	go func() {
 		watcher := b.client.Watch()
+		var maxTimeStamp uint32
 
 		for {
 			select {
@@ -45,6 +46,12 @@ func (b *Bind) Run() error {
 						b.Logger().Warn("Parse received message", "error", err.Error())
 						continue
 					}
+
+					if message.TimeStamp <= maxTimeStamp {
+						continue
+					}
+
+					maxTimeStamp = message.TimeStamp
 
 					ctx := context.Background()
 					sourceAddress := strconv.FormatUint(uint64(message.SrcAddr), 10)

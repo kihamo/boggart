@@ -26,25 +26,21 @@ func (l *looper) Loop() (<-chan []byte, <-chan error, chan<- struct{}) {
 	done := make(chan struct{}, 1)
 
 	go func() {
+		buf := make([]byte, bufferSize)
+
 		for {
 			select {
 			case <-done:
 				return
 
 			default:
-				buf := readBufferPool.Get().(*[]byte)
-
-				n, err := l.Conn.Read(*buf)
+				n, err := l.Conn.Read(buf)
 
 				if n > 0 {
-					bufferCopy := append([]byte(nil), (*buf)[:n]...)
-
 					go func(d []byte) {
 						response <- d
-					}(bufferCopy)
+					}(buf[:n])
 				}
-
-				readBufferPool.Put(buf)
 
 				if err != nil {
 					go func(e error) {

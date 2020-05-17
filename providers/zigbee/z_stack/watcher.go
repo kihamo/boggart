@@ -12,9 +12,11 @@ func NewWatcher() *Watcher {
 	}
 }
 
-func (w *Watcher) notifyFrame(frame *Frame) {
+func (w *Watcher) notifyFrames(frames ...*Frame) {
 	go func() {
-		w.frames <- frame
+		for _, frame := range frames {
+			w.frames <- frame
+		}
 	}()
 }
 
