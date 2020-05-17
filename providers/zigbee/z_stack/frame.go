@@ -60,6 +60,10 @@ func (f *Frame) SetCommand0(value uint16) {
 	f.subSystem = value & 0x1F
 }
 
+func (f *Frame) SetCommand1(value uint16) {
+	f.SetCommandID(value)
+}
+
 func (f *Frame) Length() uint16 {
 	return f.length
 }
@@ -90,6 +94,10 @@ func (f *Frame) SetCommandID(value uint16) {
 
 func (f *Frame) Data() []byte {
 	return append([]byte(nil), f.data...)
+}
+
+func (f *Frame) DataAsBuffer() *Buffer {
+	return NewBuffer(f.Data())
 }
 
 func (f *Frame) SetData(value []byte) {

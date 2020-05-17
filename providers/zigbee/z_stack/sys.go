@@ -2,7 +2,6 @@ package z_stack
 
 import (
 	"context"
-	"encoding/binary"
 	"time"
 )
 
@@ -70,15 +69,15 @@ func (c *Client) SysVersion() (*SysVersion, error) {
 		return nil, err
 	}
 
-	data := response.Data()
+	data := response.DataAsBuffer()
 
 	return &SysVersion{
-		TransportRevision: uint8(data[0]),
-		Product:           uint8(data[1]),
-		MajorRelease:      uint8(data[2]),
-		MinorRelease:      uint8(data[3]),
-		MainTrel:          uint8(data[4]),
-		HardwareRevision:  binary.LittleEndian.Uint32(data[5:9]),
+		TransportRevision: data.ReadUint8(),
+		Product:           data.ReadUint8(), // zStack12 = 0, zStack3x0 = 1, zStack30x = 2,
+		MajorRelease:      data.ReadUint8(),
+		MinorRelease:      data.ReadUint8(),
+		MainTrel:          data.ReadUint8(),
+		HardwareRevision:  data.ReadUint32(),
 	}, err
 }
 

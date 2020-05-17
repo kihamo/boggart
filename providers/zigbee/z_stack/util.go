@@ -2,7 +2,6 @@ package z_stack
 
 import (
 	"context"
-	"encoding/binary"
 
 	"github.com/kihamo/boggart/protocols/serial"
 )
@@ -20,7 +19,6 @@ type UtilDeviceInfo struct {
 func (c *Client) UtilGetDeviceInfo() (*UtilDeviceInfo, error) {
 	request := &Frame{}
 	request.SetCommand0(0x27)
-	request.SetCommandID(0x00)
 
 	waiter, timeout := WaiterSREQ(request)
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
@@ -31,23 +29,21 @@ func (c *Client) UtilGetDeviceInfo() (*UtilDeviceInfo, error) {
 		return nil, err
 	}
 
-	data := response.Data()
-	devicesCount := (len(data) - 14) / 2
+	data := response.DataAsBuffer()
+	devicesCount := (data.Len() - 14) / 2
 
 	info := &UtilDeviceInfo{
-		Status:           data[0] == byte(0),
-		IEEEAddr:         serial.Reverse(data[1:9]),
-		ShortAddr:        binary.LittleEndian.Uint16(data[9:11]),
-		DeviceType:       data[11],
-		DeviceState:      data[12],
-		NumAssocDevices:  data[13],
+		Status:           data.ReadUint8() == 0,
+		IEEEAddr:         serial.Reverse(data.Next(8)),
+		ShortAddr:        data.ReadUint16(),
+		DeviceType:       data.ReadUint8(),
+		DeviceState:      data.ReadUint8(),
+		NumAssocDevices:  data.ReadUint8(),
 		AssocDevicesList: make([]uint16, 0, devicesCount),
 	}
 
 	for i := 0; i < devicesCount; i++ {
-		info.AssocDevicesList = append(info.AssocDevicesList,
-			binary.LittleEndian.Uint16(data[14+(i*2):14+2+(i*2)]),
-		)
+		info.AssocDevicesList = append(info.AssocDevicesList, data.ReadUint16())
 	}
 
 	return info, err
