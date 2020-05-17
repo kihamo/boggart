@@ -1,0 +1,32 @@
+package z_stack
+
+import (
+	"context"
+	"encoding/hex"
+	"time"
+
+	"github.com/kihamo/go-workers"
+)
+
+func (b *Bind) Tasks() []workers.Task {
+
+	taskSerialNumber := b.Workers().WrapTaskIsOnlineOnceSuccess(b.taskSerialNumber)
+	taskSerialNumber.SetRepeats(-1)
+	taskSerialNumber.SetRepeatInterval(time.Second * 30)
+	taskSerialNumber.SetName("serial-number")
+
+	return []workers.Task{
+		taskSerialNumber,
+	}
+}
+
+func (b *Bind) taskSerialNumber(ctx context.Context) error {
+	info, err := b.client.UtilGetDeviceInfo()
+	if err != nil {
+		return err
+	}
+
+	b.Meta().SetSerialNumber(hex.EncodeToString(info.IEEEAddr))
+
+	return nil
+}

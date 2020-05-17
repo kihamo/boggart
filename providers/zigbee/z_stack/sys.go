@@ -38,7 +38,7 @@ func WaiterSREQ(request *Frame) (func(*Frame) bool, time.Duration) {
 	}, time.Millisecond * 6000
 }
 
-func (c *Client) SysPing() error {
+func (c *Client) SysPing() (uint16, error) {
 	request := &Frame{}
 	request.SetCommand0(0x21)
 	request.SetCommandID(0x01)
@@ -47,12 +47,12 @@ func (c *Client) SysPing() error {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	_, err := c.CallWithResult(ctx, request, waiter)
+	response, err := c.CallWithResult(ctx, request, waiter)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return err
+	return response.DataAsBuffer().ReadUint16(), err
 }
 
 func (c *Client) SysVersion() (*SysVersion, error) {
