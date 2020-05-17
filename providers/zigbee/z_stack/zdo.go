@@ -2,7 +2,6 @@ package z_stack
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/kihamo/boggart/protocols/serial"
 )
@@ -21,8 +20,6 @@ func (c *Client) ZDOExtNwkInfo() (*ExtNwkInfo, error) {
 	request := &Frame{}
 	request.SetCommand0(0x25) // Type 0x1, SubSystem 0x5
 	request.SetCommandID(0x50)
-
-	fmt.Println(request.MarshalBinary())
 
 	waiter, timeout := WaiterSREQ(request)
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)

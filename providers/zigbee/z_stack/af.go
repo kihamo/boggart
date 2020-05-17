@@ -9,6 +9,12 @@ const (
 	CommandAfIncomingMessage = 0x81
 )
 
+type FramePayloadReportRecorder struct {
+	AttributeID   uint16
+	DataType      uint8
+	AttributeData interface{}
+}
+
 type AfIncomingMessage struct {
 	GroupID        uint16
 	ClusterID      uint16
@@ -34,13 +40,7 @@ type AfIncomingMessage struct {
 			CommandIdentifier         uint8
 		}
 		Payload struct {
-			AttributeID      uint16
-			DataType         uint8
-			NumberOfElements uint16
-			AttributeData    []struct {
-				Type  uint8
-				Value interface{}
-			}
+			Report *[]FramePayloadReportRecorder
 		}
 	}
 }
@@ -84,63 +84,53 @@ func (c *Client) AfIncomingMessage(frame *Frame) (*AfIncomingMessage, error) {
 	msg.Frame.Header.TransactionSequenceNumber = payload.ReadUint8()
 	msg.Frame.Header.CommandIdentifier = payload.ReadUint8()
 
+	//fmt.Println("Header:")
+	//fmt.Println("  frameControlValue", flowControlValue)
+	//fmt.Println("  frameType", msg.Frame.Header.FrameType)
+	//fmt.Println("  manufacturerSpecific", msg.Frame.Header.ManufacturerSpecific)
+	//fmt.Println("  manufacturerCode", msg.Frame.Header.ManufacturerCode)
+	//fmt.Println("  direction", msg.Frame.Header.Direction)
+	//fmt.Println("  disableDefaultResponse", msg.Frame.Header.DisableDefaultResponse)
+	//fmt.Println("  transactionSequenceNumber", msg.Frame.Header.TransactionSequenceNumber)
+	//fmt.Println("  commandIdentifier", msg.Frame.Header.CommandIdentifier)
+	//fmt.Println("-----")
+
 	// parse payload
 	switch msg.Frame.Header.FrameType {
 	case 0x0: // global
-		// onli xiaomi https://github.com/Koenkk/zigbee-herdsman/blob/5151e5b0922a98abf64adf644def3adfb6970c93/src/zcl/zclFrame.ts#L239
-		if msg.Frame.Header.CommandIdentifier == 0xA {
-			// https://github.com/Koenkk/zigbee-herdsman/blob/5151e5b0922a98abf64adf644def3adfb6970c93/src/zcl/definition/foundation.ts#L120
-			msg.Frame.Payload.AttributeID = payload.ReadUint16()
-			msg.Frame.Payload.DataType = payload.ReadUint8()
+		switch msg.Frame.Header.CommandIdentifier {
+		// only xiaomi https://github.com/Koenkk/zigbee-herdsman/blob/5151e5b0922a98abf64adf644def3adfb6970c93/src/zcl/zclFrame.ts#L239
+		case 10:
+			reports := make([]FramePayloadReportRecorder, 0)
 
-			// struct
-			if msg.Frame.Payload.DataType == 0x4C {
-				msg.Frame.Payload.NumberOfElements = payload.ReadUint16()
-
-				for i := uint16(0); i < msg.Frame.Payload.NumberOfElements; i++ {
-					msg.Frame.Payload.AttributeData = append(msg.Frame.Payload.AttributeData,
-						struct {
-							Type  uint8
-							Value interface{}
-						}{
-							Type:  payload.ReadUint8(),
-							Value: payload.ReadUint16(),
-						})
+			for payload.Len() > 0 {
+				report := FramePayloadReportRecorder{
+					AttributeID: payload.ReadUint16(),
+					DataType:    payload.ReadUint8(),
 				}
-			} else {
-				return nil, fmt.Errorf("unsupported data type %d", msg.Frame.Payload.DataType)
+				report.AttributeData = payload.ReadByType(report.DataType)
+
+				reports = append(reports, report)
 			}
-			/*
-							    report: {
-				        ID: 10,
-				        parseStrategy: 'repetitive',
-				        parameters: [
-				            {name: 'attrId', type: DataType.uint16},
-				            {name: 'dataType', type: DataType.uint8},
-				            {name: 'attrData', type: BuffaloZclDataType.USE_DATA_TYPE},
-				        ],
-				    },
-			*/
-		} else {
+
+			msg.Frame.Payload.Report = &reports
+
+		default:
 			return nil, fmt.Errorf("unsupported command identifier %d", msg.Frame.Header.CommandIdentifier)
 		}
-	case 0x1: // specific
-		// TODO:
+
+	//case 0x1: // specific
+
 	default:
 		return nil, fmt.Errorf("unsupported frameType %d", msg.Frame.Header.FrameType)
 	}
 
-	fmt.Println("frameControlValue", 24)
-	fmt.Println("frameType", msg.Frame.Header.FrameType)
-	fmt.Println("manufacturerSpecific", msg.Frame.Header.ManufacturerSpecific)
-	fmt.Println("direction", msg.Frame.Header.Direction)
-	fmt.Println("disableDefaultResponse", msg.Frame.Header.DisableDefaultResponse)
-	fmt.Println("transactionSequenceNumber", msg.Frame.Header.TransactionSequenceNumber)
-	fmt.Println("commandIdentifier", msg.Frame.Header.CommandIdentifier)
-	fmt.Println("AttributeID", msg.Frame.Payload.AttributeID)
-	fmt.Println("DataType", msg.Frame.Payload.DataType)
-	fmt.Println("NumberOfElements", msg.Frame.Payload.NumberOfElements)
-	fmt.Println("AttributeData", msg.Frame.Payload.AttributeData)
+	//fmt.Println("Payload:")
+	//fmt.Println("  Report", msg.Frame.Payload)
+	//fmt.Println("  AttributeID", (*msg.Frame.Payload.Report)[0].AttributeID)
+	//fmt.Println("  DataType", (*msg.Frame.Payload.Report)[0].DataType)
+	//fmt.Println("  AttributeData", (*msg.Frame.Payload.Report)[0].AttributeData)
+	//fmt.Println("-----")
 
 	return msg, nil
 }
