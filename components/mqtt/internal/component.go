@@ -360,11 +360,30 @@ func (c *Component) doPublish(ctx context.Context, topic mqtt.Topic, qos byte, r
 		cache = false
 	}
 
+	var logPayload string
+	if len(payloadConverted) > 100 {
+		logPayload = string(payloadConverted[:100])
+	} else {
+		logPayload = string(payloadConverted)
+	}
+
+	logQOS := strconv.Itoa(int(qos))
+	logRetained := strconv.FormatBool(retained)
+
 	client := c.Client()
 	if client != nil {
 		if cache {
 			if val, ok := c.payloadCache.Get(topic); ok && bytes.Equal(val.Payload(), payloadConverted) {
 				metricPayloadCacheHit.Inc()
+
+				c.logger.Debug(
+					"Publish MQTT topic skip because there is cache hit",
+					"topic", topic,
+					"qos", logQOS,
+					"retained", logRetained,
+					"payload", logPayload,
+				)
+
 				return nil
 			}
 
@@ -384,18 +403,13 @@ func (c *Component) doPublish(ctx context.Context, topic mqtt.Topic, qos byte, r
 
 		//tracing.SpanError(span, err)
 
-		logPayload := payloadConverted
-		if len(logPayload) > 100 {
-			logPayload = logPayload[:100]
-		}
-
 		c.logger.Error(
 			"Publish MQTT topic failed",
 			"error", err.Error(),
 			"topic", topic,
-			"qos", strconv.Itoa(int(qos)),
-			"retained", strconv.FormatBool(retained),
-			"payload", string(logPayload),
+			"qos", logQOS,
+			"retained", logRetained,
+			"payload", logPayload,
 		)
 	} else {
 		metricPublish.With("status", "success").Inc()

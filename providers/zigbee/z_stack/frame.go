@@ -176,16 +176,17 @@ func (f *Frame) UnmarshalBinary(data []byte) error {
 func (f *Frame) String() string {
 	buffer := bytes.NewBuffer(nil)
 
+	buffer.WriteString("len: ")
 	buffer.WriteString(strconv.FormatUint(uint64(f.Length()), 10))
-	buffer.WriteString(" - ")
+	buffer.WriteString(" type: ")
 	buffer.WriteString(strconv.FormatUint(uint64(f.Type()), 10))
-	buffer.WriteString(" - ")
+	buffer.WriteString(" sub system: ")
 	buffer.WriteString(strconv.FormatUint(uint64(f.SubSystem()), 10))
-	buffer.WriteString(" - ")
+	buffer.WriteString(" command id: ")
 	buffer.WriteString(strconv.FormatUint(uint64(f.CommandID()), 10))
-	buffer.WriteString(" - ")
+	buffer.WriteString(" data: ")
 	buffer.WriteString(fmt.Sprint(f.Data()))
-	buffer.WriteString(" - ")
+	buffer.WriteString(" fcs: ")
 	buffer.WriteString(strconv.FormatUint(uint64(f.FCS()), 10))
 
 	return buffer.String()

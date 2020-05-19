@@ -10,7 +10,7 @@ require (
 	github.com/barnybug/go-cast v0.0.0-20190910160619-d2aa97f56d4e
 	github.com/bieber/barcode v0.0.0-20190908000948-a94135955bb1
 	github.com/denisbrodbeck/machineid v1.0.1
-	github.com/eclipse/paho.mqtt.golang v1.2.1-0.20200121105743-0d940dd29fd2
+	github.com/eclipse/paho.mqtt.golang v1.2.1-0.20200511074540-4c98a2381d16
 	github.com/elazarl/go-bindata-assetfs v1.0.0
 	github.com/faiface/beep v1.0.2
 	github.com/fsnotify/fsnotify v1.4.9
@@ -47,7 +47,7 @@ require (
 	go.uber.org/multierr v1.5.0
 	go.uber.org/zap v1.14.1
 	gocv.io/x/gocv v0.22.0 // indirect
-	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e
+	golang.org/x/net v0.0.0-20200513185701-a91f0712d120
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	google.golang.org/api v0.20.0
 	google.golang.org/grpc v1.28.0

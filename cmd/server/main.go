@@ -40,6 +40,7 @@ import (
 	_ "github.com/kihamo/boggart/components/boggart/bind/wol"
 	_ "github.com/kihamo/boggart/components/boggart/bind/xiaomi"
 	_ "github.com/kihamo/boggart/components/boggart/bind/xmeye"
+	_ "github.com/kihamo/boggart/components/boggart/bind/zigbee/z_stack"
 	_ "github.com/kihamo/boggart/components/boggart/instance"
 	_ "github.com/kihamo/boggart/components/mqtt/instance"
 	_ "github.com/kihamo/boggart/components/storage/instance"

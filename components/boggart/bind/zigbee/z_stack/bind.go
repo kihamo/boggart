@@ -33,12 +33,18 @@ func (b *Bind) Run() error {
 
 	go func() {
 		watcher := b.client.Watch()
-		var maxTimeStamp uint32
 
 		for {
 			select {
 			case frame := <-watcher.NextFrame():
-				b.Logger().Debug("Received Zigbee message", "frame", frame.String())
+				b.Logger().Debug("Received Zigbee message",
+					"length", frame.Length(),
+					"type", frame.Type(),
+					"sub-system", frame.SubSystem(),
+					"command-id", frame.CommandID(),
+					"data", frame.Data(),
+					"fcs", frame.FCS(),
+				)
 
 				if frame.CommandID() == z_stack.CommandAfIncomingMessage {
 					message, err := b.client.AfIncomingMessage(frame)
@@ -46,12 +52,6 @@ func (b *Bind) Run() error {
 						b.Logger().Warn("Parse received message", "error", err.Error())
 						continue
 					}
-
-					if message.TimeStamp <= maxTimeStamp {
-						continue
-					}
-
-					maxTimeStamp = message.TimeStamp
 
 					ctx := context.Background()
 					sourceAddress := strconv.FormatUint(uint64(message.SrcAddr), 10)
