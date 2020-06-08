@@ -28,7 +28,7 @@ type Client struct {
 	stampDiff      int64
 
 	conn     *internal.Connection
-	connOnce sync.Once
+	connOnce *sync.Once
 
 	address  string
 	deviceID []byte
@@ -37,30 +37,28 @@ type Client struct {
 
 func NewClient(address, token string) *Client {
 	return &Client{
-		address: address,
-		token:   token,
+		address:  address,
+		token:    token,
+		connOnce: new(sync.Once),
 	}
 }
 
 func (p *Client) lazyConnect(ctx context.Context) (conn *internal.Connection, err error) {
-	var start bool
-
 	p.connOnce.Do(func() {
-		start = true
-		// p.SetDump(true)
+		p.conn, err = internal.NewConnection(p.address)
+		if err != nil {
+			p.connOnce = new(sync.Once)
+		} else {
+			// p.SetDump(true)
 
-		conn, err = internal.NewConnection(p.address)
-		if err == nil {
-			p.conn = conn
+			// начинаем сессию hello пакетом
+			_, err = p.Hello(ctx)
 		}
 	})
 
-	// начинаем сессию hello пакетом
-	if start {
-		_, err = p.Hello(ctx)
-	}
+	conn = p.conn
 
-	return p.conn, err
+	return conn, err
 }
 
 func (p *Client) Close() error {

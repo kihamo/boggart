@@ -19,13 +19,14 @@ var (
 
 type Serial struct {
 	options options
-	once    sync.Once
+	once    *sync.Once
 	port    s.Port
 }
 
 func Dial(opts ...Option) *Serial {
 	conn := &Serial{
 		options: defaultOptions(),
+		once:    new(sync.Once),
 	}
 
 	for _, opt := range opts {
@@ -65,6 +66,9 @@ func (c *Serial) connect() (port s.Port, err error) {
 	if c.options.once {
 		c.once.Do(func() {
 			c.port, err = s.Open(&c.options.Config)
+			if err != nil {
+				c.once = new(sync.Once)
+			}
 		})
 
 		port = c.port

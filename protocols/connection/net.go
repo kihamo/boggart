@@ -18,7 +18,7 @@ func init() {
 type Net struct {
 	address string
 	options options
-	once    sync.Once
+	once    *sync.Once
 	conn    net.Conn
 }
 
@@ -28,6 +28,7 @@ func Dial(address string, opts ...Option) *Net {
 		options: options{
 			network: "tcp",
 		},
+		once: new(sync.Once),
 	}
 
 	for _, opt := range opts {
@@ -41,6 +42,9 @@ func (c *Net) connect() (conn net.Conn, err error) {
 	if c.options.once {
 		c.once.Do(func() {
 			c.conn, err = net.Dial(c.options.network, c.address)
+			if err != nil {
+				c.once = new(sync.Once)
+			}
 		})
 
 		conn = c.conn
