@@ -7,7 +7,6 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	w "github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
-	"github.com/kihamo/shadow/components/logging"
 	"github.com/kihamo/shadow/components/workers"
 )
 
@@ -181,10 +180,10 @@ type workersWrapTask struct {
 	task.BaseTask
 
 	original w.Task
-	logger   logging.Logger
+	logger   *LoggerContainer
 }
 
-func newWorkersWrapTask(tsk w.Task, logger logging.Logger) *workersWrapTask {
+func newWorkersWrapTask(tsk w.Task, logger *LoggerContainer) *workersWrapTask {
 	t := &workersWrapTask{
 		original: tsk,
 		logger:   logger,

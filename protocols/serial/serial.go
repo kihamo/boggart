@@ -35,7 +35,7 @@ func Dial(opts ...Option) *Serial {
 
 	if !conn.options.allowMultiRequest {
 		multiRequestsMutex.Lock()
-		multiRequestsConnections[conn.options.Config.Address] = &sync.Mutex{}
+		multiRequestsConnections[conn.options.Config.Address] = new(sync.Mutex)
 		multiRequestsMutex.Unlock()
 	}
 
