@@ -64,8 +64,8 @@ func (d *Device) Client() *Client {
 	return d.client
 }
 
-func (d *Device) ID() ([]byte, error) {
-	return d.client.DeviceID()
+func (d *Device) ID(ctx context.Context) ([]byte, error) {
+	return d.client.DeviceID(ctx)
 }
 
 func (d *Device) Close() error {

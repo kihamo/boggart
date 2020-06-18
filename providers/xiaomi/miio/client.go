@@ -43,7 +43,7 @@ func NewClient(address, token string) *Client {
 	}
 }
 
-func (p *Client) lazyConnect(ctx context.Context) (conn *internal.Connection, err error) {
+func (p *Client) lazyConnect(ctx context.Context) (_ *internal.Connection, err error) {
 	p.connOnce.Do(func() {
 		p.conn, err = internal.NewConnection(p.address)
 		if err != nil {
@@ -56,9 +56,7 @@ func (p *Client) lazyConnect(ctx context.Context) (conn *internal.Connection, er
 		}
 	})
 
-	conn = p.conn
-
-	return conn, err
+	return p.conn, err
 }
 
 func (p *Client) Close() error {
@@ -107,9 +105,9 @@ func (p *Client) Hello(ctx context.Context) (packet.Packet, error) {
 	return response, nil
 }
 
-func (p *Client) DeviceID() ([]byte, error) {
+func (p *Client) DeviceID(ctx context.Context) ([]byte, error) {
 	if p.deviceID == nil {
-		response, err := p.Hello(context.Background())
+		response, err := p.Hello(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -144,7 +142,7 @@ func (p *Client) Send(ctx context.Context, method string, params interface{}, re
 		return err
 	}
 
-	deviceID, err := p.DeviceID()
+	deviceID, err := p.DeviceID(ctx)
 	if err != nil {
 		return err
 	}
