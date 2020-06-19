@@ -25,8 +25,10 @@ func (Type) Config() interface{} {
 
 	return &Config{
 		ProbesConfig: di.ProbesConfig{
-			LivenessPeriod:  time.Minute * 10,
-			LivenessTimeout: time.Second * 5,
+			ReadinessPeriod:  time.Second * 30,
+			ReadinessTimeout: time.Second * 5,
+			LivenessPeriod:   time.Minute * 10,
+			LivenessTimeout:  time.Second * 5,
 		},
 		LoggerConfig: di.LoggerConfig{
 			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,

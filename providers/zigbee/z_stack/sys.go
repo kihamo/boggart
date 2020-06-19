@@ -38,13 +38,13 @@ func WaiterSREQ(request *Frame) (func(*Frame) bool, time.Duration) {
 	}, time.Millisecond * 6000
 }
 
-func (c *Client) SysPing() (uint16, error) {
+func (c *Client) SysPing(ctx context.Context) (uint16, error) {
 	request := &Frame{}
 	request.SetCommand0(0x21)
 	request.SetCommandID(0x01)
 
 	waiter, timeout := WaiterSREQ(request)
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	response, err := c.CallWithResult(ctx, request, waiter)
@@ -55,13 +55,13 @@ func (c *Client) SysPing() (uint16, error) {
 	return response.DataAsBuffer().ReadUint16(), err
 }
 
-func (c *Client) SysVersion() (*SysVersion, error) {
+func (c *Client) SysVersion(ctx context.Context) (*SysVersion, error) {
 	request := &Frame{}
 	request.SetCommand0(0x21)
 	request.SetCommandID(0x02)
 
 	waiter, timeout := WaiterSREQ(request)
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	response, err := c.CallWithResult(ctx, request, waiter)
@@ -81,14 +81,14 @@ func (c *Client) SysVersion() (*SysVersion, error) {
 	}, err
 }
 
-func (c *Client) SysADCRead(channel, resolution uint8) (uint16, error) {
+func (c *Client) SysADCRead(ctx context.Context, channel, resolution uint8) (uint16, error) {
 	request := &Frame{}
 	request.SetCommand0(0x21)
 	request.SetCommandID(0x0D)
 	request.SetData([]byte{channel, resolution})
 
 	waiter, timeout := WaiterSREQ(request)
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	_, err := c.CallWithResult(ctx, request, waiter)

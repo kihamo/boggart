@@ -2,12 +2,14 @@ package di
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/go-workers"
+	w "github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
+	"github.com/kihamo/shadow/components/workers"
 	"go.uber.org/multierr"
 )
 
@@ -64,21 +66,63 @@ type ProbesContainer struct {
 	statusManager func(boggart.BindStatus)
 	register      func() error
 	unregister    func() error
+	client        workers.Component
 
-	probeReadiness workers.Task
-	probeLiveness  workers.Task
+	probeReadiness w.Task
+	probeLiveness  w.Task
 }
 
-func NewProbesContainer(bind boggart.BindItem, statusManager func(boggart.BindStatus), register, unregister func() error) *ProbesContainer {
+func NewProbesContainer(bind boggart.BindItem, statusManager func(boggart.BindStatus), register, unregister func() error, client workers.Component) *ProbesContainer {
 	return &ProbesContainer{
 		bind:          bind,
 		statusManager: statusManager,
 		register:      register,
 		unregister:    unregister,
+		client:        client,
 	}
 }
 
-func (c *ProbesContainer) Readiness() workers.Task {
+func (c *ProbesContainer) HookRegister() {
+	if probe := c.Readiness(); probe != nil {
+		// если воркеры есть у привязки, то регистрируем пробы как таски, чтобы отображались в общем списке тасок
+		if bindWorkersSupport, ok := WorkersContainerBind(c.bind.Bind()); ok {
+			bindWorkersSupport.RegisterTask(probe)
+		} else {
+			fmt.Println("RAW ADD PROBE READ")
+			c.client.AddTask(probe)
+		}
+	} else {
+		c.statusManager(boggart.BindStatusOnline)
+	}
+
+	if probe := c.Liveness(); probe != nil {
+		if bindWorkersSupport, ok := WorkersContainerBind(c.bind.Bind()); ok {
+			bindWorkersSupport.RegisterTask(probe)
+		} else {
+			c.client.AddTask(probe)
+		}
+	}
+}
+
+func (c *ProbesContainer) HookUnregister() {
+	if probe := c.Readiness(); probe != nil {
+		if bindWorkersSupport, ok := WorkersContainerBind(c.bind.Bind()); ok {
+			bindWorkersSupport.UnregisterTask(probe)
+		} else {
+			c.client.RemoveTask(probe)
+		}
+	}
+
+	if probe := c.Liveness(); probe != nil {
+		if bindWorkersSupport, ok := WorkersContainerBind(c.bind.Bind()); ok {
+			bindWorkersSupport.UnregisterTask(probe)
+		} else {
+			c.client.RemoveTask(probe)
+		}
+	}
+}
+
+func (c *ProbesContainer) Readiness() w.Task {
 	if c.probeReadiness != nil {
 		return c.probeReadiness
 	}
@@ -158,7 +202,7 @@ func (c *ProbesContainer) ReadinessCheck(ctx context.Context) (err error) {
 	return err
 }
 
-func (c *ProbesContainer) Liveness() workers.Task {
+func (c *ProbesContainer) Liveness() w.Task {
 	if c.probeLiveness != nil {
 		return c.probeLiveness
 	}

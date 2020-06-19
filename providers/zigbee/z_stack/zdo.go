@@ -2,6 +2,7 @@ package z_stack
 
 import (
 	"context"
+	"errors"
 
 	"github.com/kihamo/boggart/protocols/serial"
 )
@@ -16,13 +17,13 @@ type ExtNwkInfo struct {
 	Channel       uint8
 }
 
-func (c *Client) ZDOExtNwkInfo() (*ExtNwkInfo, error) {
+func (c *Client) ZDOExtNwkInfo(ctx context.Context) (*ExtNwkInfo, error) {
 	request := &Frame{}
 	request.SetCommand0(0x25) // Type 0x1, SubSystem 0x5
 	request.SetCommandID(0x50)
 
 	waiter, timeout := WaiterSREQ(request)
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	response, err := c.CallWithResult(ctx, request, waiter)
@@ -41,4 +42,34 @@ func (c *Client) ZDOExtNwkInfo() (*ExtNwkInfo, error) {
 		ParentExtAddr: serial.Reverse(data.Next(8)),
 		Channel:       data.ReadUint8(),
 	}, nil
+}
+
+func (c *Client) ZDOPermitJoin(ctx context.Context, seconds uint8) (interface{}, error) {
+	request := &Frame{}
+	request.SetCommand0(0x25) // Type 0x1, SubSystem 0x5
+	request.SetCommandID(0x36)
+	request.SetData([]byte{
+		0xFF, 0xFC, // broadcast
+		seconds, 0,
+	})
+
+	waiter, timeout := WaiterSREQ(request)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	response, err := c.CallWithResult(ctx, request, waiter)
+	if err != nil {
+		return nil, err
+	}
+
+	if response.Command0() != 0x65 && response.Command1() != 0x36 {
+		return nil, errors.New("bad response")
+	}
+
+	data := response.Data()
+	if len(data) == 0 || data[0] != 0 {
+		return nil, errors.New("failure")
+	}
+
+	return nil, nil
 }

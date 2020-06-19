@@ -9,7 +9,6 @@ import (
 )
 
 func (b *Bind) Tasks() []workers.Task {
-
 	taskSerialNumber := b.Workers().WrapTaskIsOnlineOnceSuccess(b.taskSerialNumber)
 	taskSerialNumber.SetRepeats(-1)
 	taskSerialNumber.SetRepeatInterval(time.Second * 30)
@@ -21,7 +20,12 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskSerialNumber(ctx context.Context) error {
-	info, err := b.client.UtilGetDeviceInfo()
+	client, err := b.getClient()
+	if err != nil {
+		return err
+	}
+
+	info, err := client.UtilGetDeviceInfo(ctx)
 	if err != nil {
 		return err
 	}

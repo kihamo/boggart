@@ -3,7 +3,9 @@ package z_stack
 import (
 	"context"
 	"strconv"
+	"sync"
 
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/protocols/connection"
 	"github.com/kihamo/boggart/providers/zigbee/z_stack"
@@ -18,21 +20,50 @@ type Bind struct {
 
 	config *Config
 
-	client *z_stack.Client
-	done   chan struct{}
+	disconnected *atomic.BoolNull
+	client       *z_stack.Client
+	onceClient   *atomic.Once
+	lock         sync.RWMutex
+	done         chan struct{}
+}
+
+func (b *Bind) getClient() (_ *z_stack.Client, err error) {
+	b.onceClient.Do(func() {
+		b.disconnected.Nil()
+		var conn connection.Conn
+
+		conn, err = connection.New(b.config.ConnectionDSN)
+		if err != nil {
+			b.disconnected.True()
+		}
+
+		b.client = z_stack.New(conn)
+	})
+
+	if err != nil {
+		b.onceClient.Reset()
+	}
+
+	return b.client, err
 }
 
 func (b *Bind) Run() error {
-	conn, err := connection.New(b.config.ConnectionDSN)
+	b.onceClient.Reset()
+	doneCh := make(chan struct{})
+
+	b.lock.Lock()
+	b.done = doneCh
+	b.lock.Unlock()
+
+	client, err := b.getClient()
 	if err != nil {
 		return err
 	}
 
-	b.client = z_stack.New(conn)
-	b.done = make(chan struct{})
-
 	go func() {
-		watcher := b.client.Watch()
+		defer b.disconnected.True()
+
+		watcher := client.Watch()
 
 		for {
 			select {
@@ -47,7 +78,7 @@ func (b *Bind) Run() error {
 				)
 
 				if frame.CommandID() == z_stack.CommandAfIncomingMessage {
-					message, err := b.client.AfIncomingMessage(frame)
+					message, err := client.AfIncomingMessage(frame)
 					if err != nil {
 						b.Logger().Warn("Parse received message", "error", err.Error())
 						continue
@@ -107,7 +138,10 @@ func (b *Bind) Run() error {
 			case err := <-watcher.NextError():
 				b.Logger().Warn("Watcher error", "error", err.Error())
 
-			case <-b.done:
+			case <-watcher.Done():
+				return
+
+			case <-doneCh:
 				return
 			}
 		}
@@ -117,9 +151,15 @@ func (b *Bind) Run() error {
 }
 
 func (b *Bind) Close() (err error) {
-	close(b.done)
+	b.lock.RLock()
+	defer b.lock.RUnlock()
 
-	return b.client.Close()
+	if b.client != nil {
+		// close(b.done)
+		return b.client.Close()
+	}
+
+	return nil
 }
 
 func ToPercentageCR2032(voltage uint16) (percentage uint16) {

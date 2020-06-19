@@ -3,7 +3,7 @@ package connection
 type Looper interface {
 	Conn
 
-	Loop() (responses <-chan []byte, errors <-chan error, done chan<- struct{})
+	Loop() (responses <-chan []byte, errors <-chan error, kill chan<- struct{}, done <-chan struct{})
 }
 
 type looper struct {
@@ -20,9 +20,10 @@ func NewLooper(conn Conn) Looper {
 	}
 }
 
-func (l *looper) Loop() (<-chan []byte, <-chan error, chan<- struct{}) {
+func (l *looper) Loop() (<-chan []byte, <-chan error, chan<- struct{}, <-chan struct{}) {
 	response := make(chan []byte)
 	errors := make(chan error)
+	kill := make(chan struct{}, 1)
 	done := make(chan struct{}, 1)
 
 	go func() {
@@ -30,26 +31,26 @@ func (l *looper) Loop() (<-chan []byte, <-chan error, chan<- struct{}) {
 
 		for {
 			select {
-			case <-done:
+			case <-kill:
+				close(response)
+				close(errors)
+				close(done)
+
 				return
 
 			default:
 				n, err := l.Conn.Read(buf)
 
 				if n > 0 {
-					go func(d []byte) {
-						response <- d
-					}(buf[:n])
+					response <- buf[:n]
 				}
 
 				if err != nil {
-					go func(e error) {
-						errors <- e
-					}(err)
+					errors <- err
 				}
 			}
 		}
 	}()
 
-	return response, errors, done
+	return response, errors, kill, done
 }

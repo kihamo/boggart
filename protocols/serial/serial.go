@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	s "github.com/goburrow/serial"
+	"github.com/kihamo/boggart/atomic"
 )
 
 const (
@@ -19,14 +20,13 @@ var (
 
 type Serial struct {
 	options options
-	once    *sync.Once
-	port    s.Port
+	once    *atomic.Once
 }
 
 func Dial(opts ...Option) *Serial {
 	conn := &Serial{
 		options: defaultOptions(),
-		once:    new(sync.Once),
+		once:    &atomic.Once{},
 	}
 
 	for _, opt := range opts {
@@ -65,13 +65,12 @@ func (c *Serial) Unlock() {
 func (c *Serial) connect() (port s.Port, err error) {
 	if c.options.once {
 		c.once.Do(func() {
-			c.port, err = s.Open(&c.options.Config)
-			if err != nil {
-				c.once = new(sync.Once)
-			}
+			port, err = s.Open(&c.options.Config)
 		})
 
-		port = c.port
+		if err != nil {
+			c.once.Reset()
+		}
 	} else {
 		port, err = s.Open(&c.options.Config)
 	}

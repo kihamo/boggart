@@ -3,8 +3,10 @@ package z_stack
 import (
 	"bytes"
 	"context"
+	"errors"
 	"io"
 	"sync"
+	"sync/atomic"
 
 	"github.com/kihamo/boggart/protocols/connection"
 )
@@ -14,13 +16,15 @@ type Client struct {
 	once sync.Once
 	lock sync.RWMutex
 
-	done     chan<- struct{}
+	closed   uint32
+	done     chan struct{}
 	watchers []*Watcher
 }
 
 func New(conn connection.Conn) *Client {
 	return &Client{
 		conn:     connection.NewLooper(conn),
+		done:     make(chan struct{}),
 		watchers: make([]*Watcher, 0),
 	}
 }
@@ -32,15 +36,18 @@ func (c *Client) init() {
 }
 
 func (c *Client) loop() {
-	chResponses, chErrors, chDone := c.conn.Loop()
+	chReceiveResponses, chReceiveErrors, chConnKill, chConnDone := c.conn.Loop()
 
-	c.lock.Lock()
-	c.done = chDone
-	c.lock.Unlock()
+	closer := func() {
+		atomic.StoreUint32(&c.closed, 1)
+
+		chConnKill <- struct{}{} // kill connect
+		c.unregisterAllWatcher()
+	}
 
 	for {
 		select {
-		case data := <-chResponses:
+		case data := <-chReceiveResponses:
 			if len(data) == 0 {
 				continue
 			}
@@ -105,8 +112,8 @@ func (c *Client) loop() {
 				}(frames)
 			}
 
-		case err := <-chErrors:
-			if err == io.EOF {
+		case err := <-chReceiveErrors:
+			if err == nil || err == io.EOF {
 				continue
 			}
 
@@ -118,18 +125,26 @@ func (c *Client) loop() {
 					w.notifyError(e)
 				}
 			}(err)
+
+			closer()
+
+		case <-c.done:
+			closer()
+
+		case <-chConnDone:
+			return
 		}
 	}
 }
 
 func (c *Client) Watch() *Watcher {
-	c.init()
-
 	watcher := NewWatcher()
 
 	c.lock.Lock()
 	c.watchers = append(c.watchers, watcher)
 	c.lock.Unlock()
+
+	c.init()
 
 	return watcher
 }
@@ -141,16 +156,36 @@ func (c *Client) unregisterWatcher(watcher *Watcher) {
 	for i := len(c.watchers) - 1; i >= 0; i-- {
 		if c.watchers[i] == watcher {
 			c.watchers = append(c.watchers[:i], c.watchers[i+1:]...)
+			watcher.close()
 		}
 	}
 }
 
+func (c *Client) unregisterAllWatcher() {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	for i := len(c.watchers) - 1; i >= 0; i-- {
+		c.watchers[i].close()
+	}
+
+	c.watchers = c.watchers[:0]
+}
+
 func (c *Client) SkipBootLoader() error {
+	if c.isClosed() {
+		return errors.New("connection is closed")
+	}
+
 	_, err := c.conn.Write([]byte{0xEF})
 	return err
 }
 
 func (c *Client) Call(frame *Frame) error {
+	if c.isClosed() {
+		return errors.New("connection is closed")
+	}
+
 	c.init()
 
 	data, err := frame.MarshalBinary()
@@ -163,6 +198,10 @@ func (c *Client) Call(frame *Frame) error {
 }
 
 func (c *Client) CallWithResult(ctx context.Context, request *Frame, waiter func(frame *Frame) bool) (*Frame, error) {
+	if c.isClosed() {
+		return nil, errors.New("connection is closed")
+	}
+
 	watcher := c.Watch()
 	defer func() {
 		c.unregisterWatcher(watcher)
@@ -195,16 +234,16 @@ func (c *Client) CallWithResult(ctx context.Context, request *Frame, waiter func
 	return nil, nil
 }
 
-func (c *Client) Close() error {
-	c.lock.RLock()
-	if c.done != nil {
-		c.done <- struct{}{}
-	}
-	c.lock.RUnlock()
+func (c *Client) isClosed() bool {
+	return atomic.LoadUint32(&c.closed) != 0
+}
 
-	c.lock.Lock()
-	c.watchers = c.watchers[:0]
-	c.lock.Unlock()
+func (c *Client) Close() error {
+	if c.isClosed() {
+		return nil
+	}
+
+	close(c.done)
 
 	return c.conn.Close()
 }

@@ -55,9 +55,17 @@ type Frame struct {
 	fcs       byte
 }
 
+func (f *Frame) Command0() uint16 {
+	return ((f.typ << 5) & 0xE0) | (f.subSystem & 0x1F)
+}
+
 func (f *Frame) SetCommand0(value uint16) {
 	f.typ = (value & 0xE0) >> 5
 	f.subSystem = value & 0x1F
+}
+
+func (f *Frame) Command1() uint16 {
+	return f.CommandID()
 }
 
 func (f *Frame) SetCommand1(value uint16) {

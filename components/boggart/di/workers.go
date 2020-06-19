@@ -67,6 +67,26 @@ func NewWorkersContainer(bind boggart.BindItem, client workers.Component) *Worke
 	}
 }
 
+func (c *WorkersContainer) HookRegister() {
+	// инициализируем таски из привязки
+	if has, ok := c.bind.Bind().(WorkersHasTasks); ok {
+		tasks := has.Tasks()
+		c.tasks = make([]w.Task, 0, len(tasks)+2) // 2 на пробы запас
+
+		for _, tsk := range has.Tasks() {
+			c.RegisterTask(tsk)
+		}
+	} else {
+		c.tasks = make([]w.Task, 0, 2)
+	}
+}
+
+func (c *WorkersContainer) HookUnregister() {
+	for _, tsk := range c.Tasks() {
+		c.UnregisterTask(tsk)
+	}
+}
+
 func (c *WorkersContainer) createTask(tsk w.Task) w.Task {
 	if tsk, ok := tsk.(bindTask); ok {
 		tsk.SetName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-" + tsk.Name())
@@ -112,26 +132,9 @@ func (c *WorkersContainer) UnregisterTask(tsk w.Task) {
 
 func (c *WorkersContainer) Tasks() []w.Task {
 	c.mutex.RLock()
-	if c.tasks != nil {
-		defer c.mutex.RUnlock()
+	defer c.mutex.RUnlock()
 
-		return append([]w.Task(nil), c.tasks...)
-	}
-	c.mutex.RUnlock()
-
-	has, ok := c.bind.Bind().(WorkersHasTasks)
-	if !ok {
-		return nil
-	}
-
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	for _, tsk := range has.Tasks() {
-		c.tasks = append(c.tasks, c.createTask(tsk))
-	}
-
-	return c.tasks
+	return append([]w.Task(nil), c.tasks...)
 }
 
 func (c *WorkersContainer) WrapTaskIsOnline(fn func(context.Context) error) *task.FunctionTask {
@@ -158,8 +161,8 @@ func (c *WorkersContainer) WrapTaskOnceSuccess(fn func(context.Context) error) (
 	return tsk
 }
 
-func (c *WorkersContainer) WrapTaskIsOnlineOnceSuccess(fn func(context.Context) error) (tsk *task.FunctionTillSuccessTask) {
-	tsk = task.NewFunctionTillSuccessTask(func(ctx context.Context) (interface{}, error) {
+func (c *WorkersContainer) WrapTaskIsOnlineOnceSuccess(fn func(context.Context) error) (tsk *task.FunctionTask) {
+	tsk = task.NewFunctionTask(func(ctx context.Context) (interface{}, error) {
 		if c.bind.Status() != boggart.BindStatusOnline {
 			return nil, nil
 		}
@@ -168,6 +171,10 @@ func (c *WorkersContainer) WrapTaskIsOnlineOnceSuccess(fn func(context.Context) 
 
 		if err == nil {
 			c.UnregisterTask(tsk)
+
+			if attempt, ok := w.AttemptFromContext(ctx); ok {
+				tsk.SetRepeats(attempt)
+			}
 		}
 
 		return nil, err

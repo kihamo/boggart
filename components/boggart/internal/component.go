@@ -354,16 +354,15 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 
 	// workers container
 	if bindSupport, ok := bindItem.Bind().(di.WorkersContainerSupport); ok {
-		bindSupport.SetWorkers(di.NewWorkersContainer(bindItem, c.workers))
+		ctr := di.NewWorkersContainer(bindItem, c.workers)
 
-		for _, tsk := range bindSupport.Workers().Tasks() {
-			c.workers.AddTask(tsk)
-		}
+		bindSupport.SetWorkers(ctr)
+		ctr.HookRegister()
 	}
 
 	// probes container
 	if bindSupport, ok := bind.(di.ProbesContainerSupport); ok {
-		bindSupport.SetProbes(di.NewProbesContainer(
+		ctr := di.NewProbesContainer(
 			bindItem,
 			func(status boggart.BindStatus) {
 				c.itemStatusUpdate(bindItem, status)
@@ -372,26 +371,11 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 				return err
 			}, func() error {
 				return c.UnregisterBindByID(bindItem.ID())
-			}))
+			},
+			c.workers)
 
-		if probe := bindSupport.Probes().Readiness(); probe != nil {
-			// если воркеры есть у привязки, то регистрируем пробы как таски, чтобы отображались в общем списке тасок
-			if bindWorkersSupport, ok := di.WorkersContainerBind(bindItem.Bind()); ok {
-				bindWorkersSupport.RegisterTask(probe)
-			} else {
-				c.workers.AddTask(probe)
-			}
-		} else {
-			c.itemStatusUpdate(bindItem, boggart.BindStatusOnline)
-		}
-
-		if probe := bindSupport.Probes().Liveness(); probe != nil {
-			if bindWorkersSupport, ok := di.WorkersContainerBind(bindItem.Bind()); ok {
-				bindWorkersSupport.RegisterTask(probe)
-			} else {
-				c.workers.AddTask(probe)
-			}
-		}
+		bindSupport.SetProbes(ctr)
+		ctr.HookRegister()
 	} else {
 		c.itemStatusUpdate(bindItem, boggart.BindStatusOnline)
 	}
@@ -438,24 +422,12 @@ func (c *Component) UnregisterBindByID(id string) error {
 
 	// remove probes
 	if bindSupport, ok := di.ProbesContainerBind(bindItem.Bind()); ok {
-		// если воркеров нет у привязки, то удаляем таски проб вручную
-		if _, ok := bindItem.Bind().(di.WorkersContainerSupport); !ok {
-			if probe := bindSupport.Readiness(); probe != nil {
-				c.workers.RemoveTask(probe)
-			}
-
-			if probe := bindSupport.Liveness(); probe != nil {
-				c.workers.RemoveTask(probe)
-			}
-		}
+		bindSupport.HookUnregister()
 	}
 
 	// workers
 	if bindSupport, ok := di.WorkersContainerBind(bindItem.Bind()); ok {
-		// remove tasks
-		for _, tsk := range bindSupport.Tasks() {
-			c.workers.RemoveTask(tsk)
-		}
+		bindSupport.HookUnregister()
 	}
 
 	c.binds.Delete(id)
