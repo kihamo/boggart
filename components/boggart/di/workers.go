@@ -89,10 +89,6 @@ func (c *WorkersContainer) HookUnregister() {
 	defer c.mutex.Unlock()
 
 	for _, tsk := range c.tasks {
-		if wrap, ok := tsk.(*workersWrapTask); ok {
-			c.client.RemoveTask(wrap.original)
-		}
-
 		c.client.RemoveTask(tsk)
 	}
 
@@ -134,24 +130,8 @@ func (c *WorkersContainer) UnregisterTask(tsk w.Task) {
 	defer c.mutex.Unlock()
 
 	for i := len(c.tasks) - 1; i >= 0; i-- {
-		if strings.Compare(c.tasks[i].Id(), tsk.Id()) != 0 {
-			continue
-		}
-
-		if wrap, ok := c.tasks[i].(*workersWrapTask); ok && (wrap.original == tsk || c.tasks[i] == tsk) {
-			if wrap.original == tsk {
-				c.client.RemoveTask(wrap.original)
-			}
-
-			if c.tasks[i] == tsk {
-				c.client.RemoveTask(c.tasks[i])
-			}
-
-			c.tasks = append(c.tasks[:i], c.tasks[i+1:]...)
-
-		} else if c.tasks[i] == tsk {
+		if strings.Compare(c.tasks[i].Id(), tsk.Id()) == 0 {
 			c.client.RemoveTask(c.tasks[i])
-
 			c.tasks = append(c.tasks[:i], c.tasks[i+1:]...)
 		}
 	}
