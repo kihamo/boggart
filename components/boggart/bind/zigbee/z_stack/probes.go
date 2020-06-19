@@ -7,13 +7,13 @@ import (
 	"github.com/kihamo/boggart/providers/zigbee/z_stack"
 )
 
-//func (b *Bind) LivenessProbe(_ context.Context) error {
-//	if b.disconnected.IsTrue() {
-//		return errors.New("disconnected")
-//	}
-//
-//	return nil
-//}
+func (b *Bind) LivenessProbe(_ context.Context) error {
+	if b.disconnected.IsTrue() {
+		return errors.New("disconnected")
+	}
+
+	return nil
+}
 
 func (b *Bind) ReadinessProbe(ctx context.Context) (err error) {
 	if b.disconnected.IsNil() {

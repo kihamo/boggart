@@ -2,7 +2,6 @@ package di
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"time"
 
@@ -88,7 +87,6 @@ func (c *ProbesContainer) HookRegister() {
 		if bindWorkersSupport, ok := WorkersContainerBind(c.bind.Bind()); ok {
 			bindWorkersSupport.RegisterTask(probe)
 		} else {
-			fmt.Println("RAW ADD PROBE READ")
 			c.client.AddTask(probe)
 		}
 	} else {
@@ -105,20 +103,18 @@ func (c *ProbesContainer) HookRegister() {
 }
 
 func (c *ProbesContainer) HookUnregister() {
+	// если есть DI воркеров, то там удалиться все через стандартный механизм,
+	// дополнительно ничего не нужно делать
+	if _, ok := WorkersContainerBind(c.bind.Bind()); ok {
+		return
+	}
+
 	if probe := c.Readiness(); probe != nil {
-		if bindWorkersSupport, ok := WorkersContainerBind(c.bind.Bind()); ok {
-			bindWorkersSupport.UnregisterTask(probe)
-		} else {
-			c.client.RemoveTask(probe)
-		}
+		c.client.RemoveTask(probe)
 	}
 
 	if probe := c.Liveness(); probe != nil {
-		if bindWorkersSupport, ok := WorkersContainerBind(c.bind.Bind()); ok {
-			bindWorkersSupport.UnregisterTask(probe)
-		} else {
-			c.client.RemoveTask(probe)
-		}
+		c.client.RemoveTask(probe)
 	}
 }
 

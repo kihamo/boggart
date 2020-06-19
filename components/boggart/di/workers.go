@@ -2,6 +2,7 @@ package di
 
 import (
 	"context"
+	"strings"
 	"sync"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -64,6 +65,7 @@ func NewWorkersContainer(bind boggart.BindItem, client workers.Component) *Worke
 	return &WorkersContainer{
 		bind:   bind,
 		client: client,
+		tasks:  make([]w.Task, 0, 2),
 	}
 }
 
@@ -71,25 +73,36 @@ func (c *WorkersContainer) HookRegister() {
 	// инициализируем таски из привязки
 	if has, ok := c.bind.Bind().(WorkersHasTasks); ok {
 		tasks := has.Tasks()
-		c.tasks = make([]w.Task, 0, len(tasks)+2) // 2 на пробы запас
 
-		for _, tsk := range has.Tasks() {
+		c.mutex.Lock()
+		c.tasks = make([]w.Task, 0, len(tasks)+2) // 2 на пробы запас
+		c.mutex.Unlock()
+
+		for _, tsk := range tasks {
 			c.RegisterTask(tsk)
 		}
-	} else {
-		c.tasks = make([]w.Task, 0, 2)
 	}
 }
 
 func (c *WorkersContainer) HookUnregister() {
-	for _, tsk := range c.Tasks() {
-		c.UnregisterTask(tsk)
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	for _, tsk := range c.tasks {
+		if wrap, ok := tsk.(*workersWrapTask); ok {
+			c.client.RemoveTask(wrap.original)
+		}
+
+		c.client.RemoveTask(tsk)
 	}
+
+	c.tasks = c.tasks[:0]
 }
 
 func (c *WorkersContainer) createTask(tsk w.Task) w.Task {
-	if tsk, ok := tsk.(bindTask); ok {
-		tsk.SetName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-" + tsk.Name())
+	if t, ok := tsk.(bindTask); ok {
+		t.SetName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-" + t.Name())
+		tsk = t
 	}
 
 	if logger, ok := LoggerContainerBind(c.bind.Bind()); ok {
@@ -100,7 +113,7 @@ func (c *WorkersContainer) createTask(tsk w.Task) w.Task {
 			}
 		}
 
-		tsk = newWorkersWrapTask(tsk, logger)
+		return newWorkersWrapTask(tsk, logger)
 	}
 
 	return tsk
@@ -117,17 +130,31 @@ func (c *WorkersContainer) RegisterTask(tsk w.Task) {
 }
 
 func (c *WorkersContainer) UnregisterTask(tsk w.Task) {
-	c.client.RemoveTask(tsk)
-
 	c.mutex.Lock()
+	defer c.mutex.Unlock()
 
 	for i := len(c.tasks) - 1; i >= 0; i-- {
+		if strings.Compare(c.tasks[i].Id(), tsk.Id()) != 0 {
+			continue
+		}
+
 		if wrap, ok := c.tasks[i].(*workersWrapTask); ok && (wrap.original == tsk || c.tasks[i] == tsk) {
+			if wrap.original == tsk {
+				c.client.RemoveTask(wrap.original)
+			}
+
+			if c.tasks[i] == tsk {
+				c.client.RemoveTask(c.tasks[i])
+			}
+
+			c.tasks = append(c.tasks[:i], c.tasks[i+1:]...)
+
+		} else if c.tasks[i] == tsk {
+			c.client.RemoveTask(c.tasks[i])
+
 			c.tasks = append(c.tasks[:i], c.tasks[i+1:]...)
 		}
 	}
-
-	c.mutex.Unlock()
 }
 
 func (c *WorkersContainer) Tasks() []w.Task {
