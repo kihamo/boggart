@@ -30,7 +30,7 @@ require (
 	github.com/hashicorp/go-version v1.2.0
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/influxdata/influxdb v1.8.0
-	github.com/kihamo/go-workers v2.1.7+incompatible
+	github.com/kihamo/go-workers v2.1.8-0.20200620141938-31fefb5789a8+incompatible
 	github.com/kihamo/shadow v0.0.0-20200412185102-25db29c8fa3b
 	github.com/kihamo/snitch v0.0.0-20200412182537-3478a87783e1
 	github.com/llgcode/draw2d v0.0.0-20200110163050-b96d8208fcfc

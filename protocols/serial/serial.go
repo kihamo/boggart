@@ -21,6 +21,7 @@ var (
 type Serial struct {
 	options options
 	once    *atomic.Once
+	port    s.Port
 }
 
 func Dial(opts ...Option) *Serial {
@@ -65,12 +66,14 @@ func (c *Serial) Unlock() {
 func (c *Serial) connect() (port s.Port, err error) {
 	if c.options.once {
 		c.once.Do(func() {
-			port, err = s.Open(&c.options.Config)
+			c.port, err = s.Open(&c.options.Config)
 		})
 
 		if err != nil {
 			c.once.Reset()
 		}
+
+		port = c.port
 	} else {
 		port, err = s.Open(&c.options.Config)
 	}

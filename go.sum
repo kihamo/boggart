@@ -132,8 +132,6 @@ github.com/dgryski/go-bitstream v0.0.0-20180413035011-3522498ce2c8/go.mod h1:VMa
 github.com/docker/go-units v0.3.3/go.mod h1:fgPhTUdO+D/Jk86RDLlptpiXQzgHJF7gydDDbaIK4Dk=
 github.com/docker/go-units v0.4.0/go.mod h1:fgPhTUdO+D/Jk86RDLlptpiXQzgHJF7gydDDbaIK4Dk=
 github.com/eclipse/paho.mqtt.golang v1.2.0/go.mod h1:H9keYFcgq3Qr5OUJm/JZI/i6U7joQ8SYLhZwfeOo6Ts=
-github.com/eclipse/paho.mqtt.golang v1.2.1-0.20200121105743-0d940dd29fd2 h1:DW6WrARxK5J+o8uAKCiACi5wy9EK1UzrsCpGBPsKHAA=
-github.com/eclipse/paho.mqtt.golang v1.2.1-0.20200121105743-0d940dd29fd2/go.mod h1:H9keYFcgq3Qr5OUJm/JZI/i6U7joQ8SYLhZwfeOo6Ts=
 github.com/eclipse/paho.mqtt.golang v1.2.1-0.20200511074540-4c98a2381d16 h1:2SKUzg/P3CofHec+V21L5srPwqdQqtcrIFb6MCkJxFs=
 github.com/eclipse/paho.mqtt.golang v1.2.1-0.20200511074540-4c98a2381d16/go.mod h1:eTzb4gxwwyWpqBUHGQZ4ABAV7+Jgm1PklsYT/eo8Hcc=
 github.com/eknkc/amber v0.0.0-20171010120322-cdade1c07385/go.mod h1:0vRUJqYpeSZifjYj7uP3BG/gKcuzL9xWVV/Y+cK33KM=
@@ -403,16 +401,12 @@ github.com/kihamo/go-ping v0.0.0-20200405124135-bc7921838e0d h1:QC6T8c8oaP+ENLz2
 github.com/kihamo/go-ping v0.0.0-20200405124135-bc7921838e0d/go.mod h1:u92LMiGH1rEADLe6M4HhVk74jXR0eKbHMgUZ4DID8Ec=
 github.com/kihamo/go-workers v2.1.7+incompatible h1:OcxgzaRxzWCoGLXG4zOHauU9RG9Ef+C6Qbbs6NVoIPY=
 github.com/kihamo/go-workers v2.1.7+incompatible/go.mod h1:/25LqDRVdScSTfeBInL4i45Q9JDc6ddM6toL1lEUkaQ=
+github.com/kihamo/go-workers v2.1.8-0.20200620141938-31fefb5789a8+incompatible h1:Bkx93lgIYUJiDwwAFVUBIeBPBcpERgyzn7WXnXw8J/k=
+github.com/kihamo/go-workers v2.1.8-0.20200620141938-31fefb5789a8+incompatible/go.mod h1:/25LqDRVdScSTfeBInL4i45Q9JDc6ddM6toL1lEUkaQ=
 github.com/kihamo/gotypes v0.0.0-20161225095921-c1b2b85a41fe h1:tPzbTI6UkYAnF2O55sh0106hHotsyQLEFlsqcwjeUZU=
 github.com/kihamo/gotypes v0.0.0-20161225095921-c1b2b85a41fe/go.mod h1:Ea+63Rptr1cn2lZLAq4FtbjhJiTD5pS0MnCsta84xqY=
-github.com/kihamo/shadow v0.0.0-20200412183331-48a81a32c00a h1:2Z0D6kKIHhkIyeVWa/1jN6jLUyPTMfKyEJEx3s1sCg8=
-github.com/kihamo/shadow v0.0.0-20200412183331-48a81a32c00a/go.mod h1:Em6N1KJFNjtkkoEfU5Wu77QQzVtG2XIEJAy/2BRTXSw=
 github.com/kihamo/shadow v0.0.0-20200412185102-25db29c8fa3b h1:HF5Pj9wlLaoFCQfkiTYoYREBrQM7Pspa4To4t5RhZFA=
 github.com/kihamo/shadow v0.0.0-20200412185102-25db29c8fa3b/go.mod h1:Em6N1KJFNjtkkoEfU5Wu77QQzVtG2XIEJAy/2BRTXSw=
-github.com/kihamo/snitch v0.0.0-20200412155652-f210fc24715b h1:K5dlrF9ua9bq8yh1ZQFs8RrthMaIGv0blxxpCenFoBo=
-github.com/kihamo/snitch v0.0.0-20200412155652-f210fc24715b/go.mod h1:olFj6DX2IOweEqkZQ3c9d4TMLc1FKl5tisLwT7/oh40=
-github.com/kihamo/snitch v0.0.0-20200412164121-10528dc1020c h1:sF0pH5p8vH2beMXu4Op7Ow07jIqX7oOGgSJb7lctobE=
-github.com/kihamo/snitch v0.0.0-20200412164121-10528dc1020c/go.mod h1:olFj6DX2IOweEqkZQ3c9d4TMLc1FKl5tisLwT7/oh40=
 github.com/kihamo/snitch v0.0.0-20200412182537-3478a87783e1 h1:9LLnHjW6WOaIC2GG+y/73QCTzhRxu05CNPkXg4Mh2TI=
 github.com/kihamo/snitch v0.0.0-20200412182537-3478a87783e1/go.mod h1:olFj6DX2IOweEqkZQ3c9d4TMLc1FKl5tisLwT7/oh40=
 github.com/kisielk/errcheck v1.1.0/go.mod h1:EZBBE59ingxPouuu3KfxchcWSUPOHkagtvWXihfKN4Q=
