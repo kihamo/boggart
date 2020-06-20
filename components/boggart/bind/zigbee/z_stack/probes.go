@@ -18,7 +18,7 @@ func (b *Bind) LivenessProbe(_ context.Context) error {
 func (b *Bind) ReadinessProbe(ctx context.Context) (err error) {
 	if b.disconnected.IsNil() {
 		var client *z_stack.Client
-		client, err = b.getClient()
+		client, err = b.getClient(ctx)
 
 		if err != nil {
 			_, err = client.SysPing(ctx)

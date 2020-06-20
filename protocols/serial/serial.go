@@ -71,9 +71,9 @@ func (c *Serial) connect() (port s.Port, err error) {
 
 		if err != nil {
 			c.once.Reset()
+		} else {
+			port = c.port
 		}
-
-		port = c.port
 	} else {
 		port, err = s.Open(&c.options.Config)
 	}

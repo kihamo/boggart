@@ -27,7 +27,7 @@ type Bind struct {
 	done         chan struct{}
 }
 
-func (b *Bind) getClient() (_ *z_stack.Client, err error) {
+func (b *Bind) getClient(ctx context.Context) (_ *z_stack.Client, err error) {
 	b.onceClient.Do(func() {
 		b.disconnected.Nil()
 		var conn connection.Conn
@@ -38,6 +38,7 @@ func (b *Bind) getClient() (_ *z_stack.Client, err error) {
 		}
 
 		b.client = z_stack.New(conn)
+		err = b.client.Boot(ctx)
 	})
 
 	if err != nil {
@@ -55,7 +56,7 @@ func (b *Bind) Run() error {
 	b.done = doneCh
 	b.lock.Unlock()
 
-	client, err := b.getClient()
+	client, err := b.getClient(context.Background())
 	if err != nil {
 		return err
 	}

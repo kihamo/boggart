@@ -7,6 +7,7 @@ import (
 	"io"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/kihamo/boggart/protocols/connection"
 )
@@ -172,6 +173,124 @@ func (c *Client) unregisterAllWatcher() {
 	c.watchers = c.watchers[:0]
 }
 
+func (c *Client) Boot(ctx context.Context) error {
+	/*
+	 * Start as coordinator
+	 */
+	device, err := c.UtilGetDeviceInfo(ctx)
+	if err != nil {
+		return err
+	}
+
+	if device.DeviceState == DeviceStateCoordinator {
+		ctxWait, cancel := context.WithTimeout(ctx, time.Millisecond*6000)
+		defer cancel()
+
+		waitResponse, waitErr := c.WaitAsync(ctxWait, func(response *Frame) bool {
+			return response.Type() == TypeAREQ && response.SubSystem() == SubSystemZDOInterface && response.CommandID() == 0xC0
+		})
+
+		status, err := c.ZDOStartupFromApp(ctx, 100)
+		if err != nil {
+			return err
+		}
+
+		if status != 0 {
+			return errors.New("startup from app failed")
+		}
+
+		select {
+		case r := <-waitResponse:
+			if r.Data()[0] != DeviceStateCoordinator {
+				return errors.New("failed state change after startup from app")
+			}
+
+		case e := <-waitErr:
+			return e
+		}
+	}
+
+	/*
+	 * Register endpoints
+	 */
+	ctxWait, cancel := context.WithTimeout(ctx, time.Millisecond*6000)
+	defer cancel()
+
+	/*
+		ZDO_ACTIVE_EP_RSP
+
+		This callback message is in response to the ZDO Active Endpoint Request.
+
+		Usage:
+			AREQ:
+				         1         |       1     |       1     |    2    |   1    |    2    |       1       |     0-77
+				Length = 0x06-0x53 | Cmd0 = 0x45 | Cmd1 = 0x85 | SrcAddr | Status | NwkAddr | ActiveEPCount | ActiveEPList
+			Attributes:
+				SrcAddr       2 bytes    The message’s source network address.
+				Status        1 bytes    This field indicates either SUCCESS or FAILURE.
+				NWKAddr       2 bytes    Device’s short address that this response describes.
+				ActiveEPCount 1 byte     Number of active endpoint in the list
+				ActiveEPList  0-77 bytes Array of active endpoints on this device.
+
+		Example from zigbee2mqtt:
+			zigbee-herdsman:adapter:zStack:znp:AREQ <-- ZDO - activeEpRsp - {"srcaddr":0,"status":0,"nwkaddr":0,"activeepcount":0,"activeeplist":[]} +14ms
+	*/
+	waitResponse, waitErr := c.WaitAsync(ctxWait, func(response *Frame) bool {
+		return response.Type() == TypeAREQ && response.SubSystem() == SubSystemZDOInterface && response.CommandID() == 0x85
+	})
+
+	err = c.ZDOActiveEndpoints(ctx)
+	if err != nil {
+		return err
+	}
+
+	registeredEndpoints := make(map[uint8]bool)
+
+	select {
+	case r := <-waitResponse:
+		for _, id := range r.Data()[6:] {
+			registeredEndpoints[uint8(id)] = true
+		}
+
+	case e := <-waitErr:
+		return e
+	}
+
+	// register endpoints
+	endpoints := []Endpoint{{
+		EndPoint:  1,
+		AppProfId: 0x0104,
+	}, {
+		EndPoint:  2,
+		AppProfId: 0x0101,
+	}, {
+		EndPoint:  3,
+		AppProfId: 0x0105,
+	}, {
+		EndPoint:  4,
+		AppProfId: 0x0107,
+	}, {
+		EndPoint:  5,
+		AppProfId: 0x0108,
+	}, {
+		EndPoint:  6,
+		AppProfId: 0x0109,
+	}, {
+		EndPoint:  8,
+		AppProfId: 0x0104,
+	}}
+
+	for _, endpoint := range endpoints {
+		if !registeredEndpoints[endpoint.EndPoint] {
+			if err := c.AfRegister(ctx, endpoint); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 func (c *Client) SkipBootLoader() error {
 	if c.isClosed() {
 		return errors.New("connection is closed")
@@ -216,6 +335,19 @@ func (c *Client) CallWithResult(ctx context.Context, request *Frame, waiter func
 		return nil, err
 	}
 
+	return c.Wait(ctx, waiter)
+}
+
+func (c *Client) Wait(ctx context.Context, waiter func(frame *Frame) bool) (*Frame, error) {
+	if c.isClosed() {
+		return nil, errors.New("connection is closed")
+	}
+
+	watcher := c.Watch()
+	defer func() {
+		c.unregisterWatcher(watcher)
+	}()
+
 	for {
 		select {
 		case response := <-watcher.NextFrame():
@@ -230,8 +362,21 @@ func (c *Client) CallWithResult(ctx context.Context, request *Frame, waiter func
 			return nil, ctx.Err()
 		}
 	}
+}
 
-	return nil, nil
+func (c *Client) WaitAsync(ctx context.Context, waiter func(frame *Frame) bool) (<-chan *Frame, <-chan error) {
+	response := make(chan *Frame, 1)
+	err := make(chan error, 1)
+
+	go func() {
+		if r, e := c.Wait(ctx, waiter); e != nil {
+			err <- e
+		} else {
+			response <- r
+		}
+	}()
+
+	return response, err
 }
 
 func (c *Client) isClosed() bool {

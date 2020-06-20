@@ -20,7 +20,7 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskSerialNumber(ctx context.Context) error {
-	client, err := b.getClient()
+	client, err := b.getClient(ctx)
 	if err != nil {
 		return err
 	}

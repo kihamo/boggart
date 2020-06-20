@@ -104,102 +104,52 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 	_ = first
 	{
 		const prefix string = ",\"id\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.ID))
 	}
 	{
 		const prefix string = ",\"type\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Type))
 	}
 	{
 		const prefix string = ",\"description\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Description))
 	}
 	{
 		const prefix string = ",\"serial_number\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.SerialNumber))
 	}
 	{
 		const prefix string = ",\"mac\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.MAC))
 	}
 	{
 		const prefix string = ",\"status\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Status))
 	}
 	{
 		const prefix string = ",\"tasks\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int(int(in.Tasks))
 	}
 	{
 		const prefix string = ",\"mqtt_publishes\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int(int(in.MQTTPublishes))
 	}
 	{
 		const prefix string = ",\"mqtt_subscribers\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int(int(in.MQTTSubscribers))
 	}
 	{
 		const prefix string = ",\"tags\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		if in.Tags == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -215,52 +165,27 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 	}
 	{
 		const prefix string = ",\"config\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Config))
 	}
 	{
 		const prefix string = ",\"has_widget\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Bool(bool(in.HasWidget))
 	}
 	{
 		const prefix string = ",\"has_readiness_probe\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Bool(bool(in.HasReadinessProbe))
 	}
 	{
 		const prefix string = ",\"has_liveness_probe\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Bool(bool(in.HasLivenessProbe))
 	}
 	{
 		const prefix string = ",\"logs_count\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int(int(in.LogsCount))
 	}
 	out.RawByte('}')
