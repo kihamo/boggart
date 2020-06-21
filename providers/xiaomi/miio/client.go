@@ -8,10 +8,10 @@ import (
 	"log"
 	"net"
 	"strconv"
-	"sync"
-	"sync/atomic"
+	a "sync/atomic"
 	"time"
 
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/providers/xiaomi/miio/internal"
 	"github.com/kihamo/boggart/providers/xiaomi/miio/internal/packet"
 )
@@ -28,7 +28,7 @@ type Client struct {
 	stampDiff      int64
 
 	conn     *internal.Connection
-	connOnce *sync.Once
+	connOnce *atomic.Once
 
 	address  string
 	deviceID []byte
@@ -39,22 +39,24 @@ func NewClient(address, token string) *Client {
 	return &Client{
 		address:  address,
 		token:    token,
-		connOnce: new(sync.Once),
+		connOnce: new(atomic.Once),
 	}
 }
 
 func (p *Client) lazyConnect(ctx context.Context) (_ *internal.Connection, err error) {
 	p.connOnce.Do(func() {
 		p.conn, err = internal.NewConnection(p.address)
-		if err != nil {
-			p.connOnce = new(sync.Once)
-		} else {
+		if err == nil {
 			// p.SetDump(true)
 
 			// начинаем сессию hello пакетом
 			_, err = p.Hello(ctx)
 		}
 	})
+
+	if err != nil {
+		p.connOnce.Reset()
+	}
 
 	return p.conn, err
 }
@@ -78,14 +80,14 @@ func (p *Client) LocalAddr() (*net.UDPAddr, error) {
 
 func (p *Client) SetDump(enabled bool) {
 	if enabled {
-		atomic.StoreUint32(&p.dump, 1)
+		a.StoreUint32(&p.dump, 1)
 	} else {
-		atomic.StoreUint32(&p.dump, 0)
+		a.StoreUint32(&p.dump, 0)
 	}
 }
 
 func (p *Client) SetPacketsCounter(count uint32) {
-	atomic.StoreUint32(&p.packetsCounter, count)
+	a.StoreUint32(&p.packetsCounter, count)
 }
 
 func (p *Client) Hello(ctx context.Context) (packet.Packet, error) {
@@ -131,7 +133,7 @@ func (p *Client) Send(ctx context.Context, method string, params interface{}, re
 		defer cancel()
 	}
 
-	requestID := atomic.AddUint32(&p.packetsCounter, 1)
+	requestID := a.AddUint32(&p.packetsCounter, 1)
 	body, err := json.Marshal(Request{
 		ID:     requestID,
 		Method: method,
@@ -170,10 +172,10 @@ func (p *Client) Send(ctx context.Context, method string, params interface{}, re
 
 	var diff time.Duration
 
-	diff = time.Duration(atomic.LoadInt64(&p.stampDiff))
+	diff = time.Duration(a.LoadInt64(&p.stampDiff))
 	request.SetStamp(time.Now().Add(diff))
 
-	dump := atomic.LoadUint32(&p.dump) == 1
+	dump := a.LoadUint32(&p.dump) == 1
 	if dump {
 		log.Printf("Request #%d raw: "+request.Dump(), requestID)
 		log.Printf("Request #%d body: "+string(body), requestID)
@@ -195,7 +197,7 @@ func (p *Client) Send(ctx context.Context, method string, params interface{}, re
 	}
 
 	diff = time.Since(response.Stamp())
-	atomic.StoreInt64(&p.stampDiff, int64(diff))
+	a.StoreInt64(&p.stampDiff, int64(diff))
 
 	var responseError ResponseError
 	if err = json.Unmarshal(response.Body(), &responseError); err == nil && len(responseError.Error.Message) > 0 {
