@@ -13,6 +13,7 @@ type Config struct {
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
 	ConnectionDSN       string     `mapstructure:"connection_dsn" yaml:"connection_dsn" valid:"required"`
+	PermitJoin          bool       `mapstructure:"permit_join" yaml:"permit_join"`
 	TopicLinkQuality    mqtt.Topic `mapstructure:"topic_link_quality" yaml:"topic_link_quality"`
 	TopicBatteryPercent mqtt.Topic `mapstructure:"topic_battery_percent" yaml:"topic_battery_percent"`
 	TopicBatteryVoltage mqtt.Topic `mapstructure:"topic_battery_voltage" yaml:"topic_battery_voltage"`
@@ -34,6 +35,7 @@ func (Type) Config() interface{} {
 			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
 			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
 		},
+		PermitJoin:          false,
 		TopicLinkQuality:    prefix + "link-quality",
 		TopicBatteryPercent: prefix + "battery/percent",
 		TopicBatteryVoltage: prefix + "battery/voltage",

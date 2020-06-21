@@ -3,9 +3,7 @@ package z_stack
 import (
 	"bytes"
 	"context"
-	"encoding/hex"
 	"errors"
-	"fmt"
 	"io"
 	"sync"
 	"sync/atomic"
@@ -38,6 +36,7 @@ type Client struct {
 	closed   uint32
 	done     chan struct{}
 	watchers []*Watcher
+	devices  sync.Map
 }
 
 func New(conn connection.Conn) *Client {
@@ -236,6 +235,20 @@ func (c *Client) Boot(ctx context.Context) error {
 		}
 	}
 
+	// регистрируем привязанные устройства хотя инормация по ним не полная
+	// полную информацию добираем через синхронизацию с таблицей на устройстве
+	if len(device.AssocDevicesList) > 0 {
+		for _, networkAddress := range device.AssocDevicesList {
+			c.deviceAdd(Device{
+				networkAddress: networkAddress,
+			})
+		}
+
+		go func() {
+			c.SyncDevices(context.Background())
+		}()
+	}
+
 	/*
 	 * Register endpoints
 	 */
@@ -329,29 +342,36 @@ func (c *Client) Boot(ctx context.Context) error {
 				switch frame.SubSystem() {
 				case SubSystemZDOInterface:
 					switch frame.CommandID() {
-					case 202: // tcDeviceInd
-						fmt.Println("WATCH tcDeviceInd")
-
+					case 0xCA: // tcDeviceInd
 						if msg, err := c.ZDODeviceJoinedMessage(frame); err == nil {
-							fmt.Println(
-								"nwkaddr", msg.NetworkAddress,
-								"extaddr", hex.EncodeToString(msg.ExtendAddress),
-								"parentaddr", msg.ParentAddress,
-							)
+							device := c.Device(msg.NetworkAddress)
+							if device != nil {
+								device.SetIEEEAddress(msg.ExtendAddress)
+							} else {
+								c.deviceAdd(Device{
+									networkAddress: msg.NetworkAddress,
+									ieeeAddress:    msg.ExtendAddress,
+									// msg.ParentAddress
+								})
+							}
 						}
 
-					case 193: // endDeviceAnnceInd
-						fmt.Println("WATCH endDeviceAnnceInd")
-
+					case 0xC1: // endDeviceAnnceInd
 						if msg, err := c.ZDOEndDeviceAnnounceMessage(frame); err == nil {
-							fmt.Println(msg)
+							device := c.Device(msg.NetworkAddress)
+							if device != nil {
+								device.SetCapabilities(msg.Capabilities)
+							} else {
+								c.deviceAdd(Device{
+									networkAddress: msg.NetworkAddress,
+									capabilities:   msg.Capabilities,
+								})
+							}
 						}
 
-					case 201: // leaveInd
-						fmt.Println("WATCH leaveInd")
-
+					case 0xC9: // leaveInd
 						if msg, err := c.ZDODeviceLeaveMessage(frame); err == nil {
-							fmt.Println(msg)
+							c.deviceRemove(msg.SourceAddress)
 						}
 					}
 
@@ -435,6 +455,97 @@ func (c *Client) PermitJoin(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (c *Client) SyncDevices(ctx context.Context) error {
+	// вычитывает таблицу LQI с устройства, эта операция медленная поэтому запускается в фоне
+	// чтобы собрать детальную информацию про устройства
+
+	list, err := c.LQI(ctx, 0)
+	if err != nil {
+		return err
+	}
+
+	for _, item := range list {
+		if device := c.Device(item.NetworkAddress); device != nil {
+			device.SetIEEEAddress(item.ExtendedAddress)
+		}
+	}
+
+	return nil
+}
+
+func (c *Client) LQI(ctx context.Context, networkAddress uint16) ([]NeighborLqiListItem, error) {
+	request := func(index uint8) (*ZDOLQIMessage, error) {
+		ctxWait, cancel := context.WithTimeout(ctx, time.Millisecond*6000)
+		defer cancel()
+
+		waitResponse, waitErr := c.WaitAsync(ctxWait, func(response *Frame) bool {
+			return response.Type() == TypeAREQ && response.SubSystem() == SubSystemZDOInterface && response.CommandID() == 0xB1
+		})
+
+		if err := c.ZDOLQI(ctx, networkAddress, index); err != nil {
+			return nil, err
+		}
+
+		for {
+			select {
+			case frame := <-waitResponse:
+				return c.ZDOLQIMessage(frame)
+
+			case e := <-waitErr:
+				return nil, e
+			}
+		}
+	}
+
+	msg, err := request(0)
+	if err != nil {
+		return nil, err
+	}
+
+	total := int(msg.NeighborTableEntries)
+	list := make([]NeighborLqiListItem, 0, total)
+	list = append(list, msg.NeighborLqiList...)
+
+	for i := uint8(1); len(list) < total; i++ {
+		msg, err := request(i)
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, msg.NeighborLqiList...)
+	}
+
+	return list, nil
+}
+
+func (c *Client) deviceAdd(device Device) {
+	c.devices.Store(device.NetworkAddress(), &device)
+}
+
+func (c *Client) deviceRemove(networkAddress uint16) {
+	c.devices.Delete(networkAddress)
+}
+
+func (c *Client) Devices() []*Device {
+	devices := make([]*Device, 0)
+
+	c.devices.Range(func(key, value interface{}) bool {
+		devices = append(devices, value.(*Device))
+		return true
+	})
+
+	return devices
+}
+
+func (c *Client) Device(networkAddress uint16) *Device {
+	value, ok := c.devices.Load(networkAddress)
+	if !ok {
+		return nil
+	}
+
+	return value.(*Device)
 }
 
 func (c *Client) SkipBootLoader() error {

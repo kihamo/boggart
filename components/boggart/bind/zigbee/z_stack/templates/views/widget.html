@@ -1,0 +1,32 @@
+{{ define "content" }}
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>{{ i18n "ZigBee devices" . }}</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                    <thead>
+                    <tr>
+                        <th>{{ i18n "Network address" . }}</th>
+                        <th>{{ i18n "IEEE address" . }}</th>
+                        <th>{{ i18n "Capabilities" . }}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{ range $device := .devices }}
+                    <tr>
+                        <td>{{ $device.NetworkAddress }}</td>
+                        <td>{{ $device.IEEEAddressAsString }}</td>
+                        <td>{{ $device.Capabilities }}</td>
+                    </tr>
+                    {{ end }}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}

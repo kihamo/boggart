@@ -38,7 +38,20 @@ func (b *Bind) getClient(ctx context.Context) (_ *z_stack.Client, err error) {
 		}
 
 		b.client = z_stack.New(conn)
-		err = b.client.Boot(ctx)
+
+		go func() {
+			ctx := context.Background()
+
+			err := b.client.Boot(ctx)
+
+			if err == nil && b.config.PermitJoin {
+				err = b.client.PermitJoin(ctx)
+			}
+
+			if err != nil {
+				b.onceClient.Reset()
+			}
+		}()
 	})
 
 	if err != nil {
@@ -85,8 +98,17 @@ func (b *Bind) Run() error {
 						continue
 					}
 
+					var sourceAddress string
+
+					if device := client.Device(message.SrcAddr); device != nil {
+						sourceAddress = device.IEEEAddressAsString()
+					}
+
+					if sourceAddress == "" {
+						sourceAddress = strconv.FormatUint(uint64(message.SrcAddr), 10)
+					}
+
 					ctx := context.Background()
-					sourceAddress := strconv.FormatUint(uint64(message.SrcAddr), 10)
 					sn := b.Meta().SerialNumber()
 
 					if sn != "" {

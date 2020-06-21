@@ -24,25 +24,46 @@ type ZDOGroup struct {
 	Name   []byte
 }
 
-type ZDODeviceJoined struct {
+type ZDODeviceJoinedMessage struct {
 	NetworkAddress uint16
 	ExtendAddress  []byte
 	ParentAddress  uint16
 }
 
-type ZDOEndDeviceAnnounce struct {
+type ZDOEndDeviceAnnounceMessage struct {
 	SourceAddress  uint16
 	NetworkAddress uint16
 	IEEEAddress    []byte
-	Capabilites    uint8
+	Capabilities   uint8
 }
 
-type ZDODeviceLeave struct {
+type ZDODeviceLeaveMessage struct {
 	SourceAddress  uint16
 	ExtendAddress  []byte
 	Request        uint8
 	RemoveChildren uint8
 	Rejoin         uint8
+}
+
+type NeighborLqiListItem struct {
+	ExtendedPanID   []byte
+	ExtendedAddress []byte
+	NetworkAddress  uint16
+	DeviceType      uint8
+	RxOnWhenIdle    uint8
+	Relationship    uint8
+	PermitJoining   uint8
+	Depth           uint8
+	LQI             uint8
+}
+
+type ZDOLQIMessage struct {
+	SourceAddress        uint16
+	Status               uint8
+	NeighborTableEntries uint8
+	StartIndex           uint8
+	NeighborLQIListCount uint8
+	NeighborLqiList      []NeighborLqiListItem
 }
 
 func (c *Client) ZDOExtNwkInfo(ctx context.Context) (*ExtNwkInfo, error) {
@@ -310,7 +331,30 @@ func (c *Client) ZDOExtAddToGroup(ctx context.Context, endpoint uint8, group uin
 	return nil
 }
 
-func (c *Client) ZDODeviceJoinedMessage(frame *Frame) (*ZDODeviceJoined, error) {
+func (c *Client) ZDOLQI(ctx context.Context, networkAddress uint16, startIndex uint8) error {
+	dataIn := NewBuffer(nil)
+	dataIn.WriteUint16(networkAddress) // DstAddr
+	dataIn.WriteUint8(startIndex)      // StartIndex
+
+	request := &Frame{}
+	request.SetCommand0(0x25) // Type 0x1, SubSystem 0x5
+	request.SetCommandID(0x31)
+	request.SetDataAsBuffer(dataIn)
+
+	response, err := c.CallWithResultSREQ(ctx, request)
+	if err != nil {
+		return err
+	}
+
+	dataOut := response.Data()
+	if len(dataOut) == 0 || dataOut[0] != 0 {
+		return errors.New("failure")
+	}
+
+	return nil
+}
+
+func (c *Client) ZDODeviceJoinedMessage(frame *Frame) (*ZDODeviceJoinedMessage, error) {
 	if frame.SubSystem() != SubSystemZDOInterface {
 		return nil, errors.New("frame isn't a ZDO interface")
 	}
@@ -321,7 +365,7 @@ func (c *Client) ZDODeviceJoinedMessage(frame *Frame) (*ZDODeviceJoined, error) 
 
 	dataOut := frame.DataAsBuffer()
 
-	return &ZDODeviceJoined{
+	return &ZDODeviceJoinedMessage{
 		NetworkAddress: dataOut.ReadUint16(),
 		ExtendAddress:  dataOut.ReadIEEEAddr(),
 		ParentAddress:  dataOut.ReadUint16(),
@@ -336,12 +380,12 @@ func (c *Client) ZDODeviceJoinedMessage(frame *Frame) (*ZDODeviceJoined, error) 
 	Usage:
 		AREQ:
 			       1      |      1      |      1      |    2    |    2    |    8     |      1
-			Length = 0x0D | Cmd0 = 0x45 | Cmd1 = 0xC1 | SrcAddr | NwkAddr | IEEEAddr | Capabilites
+			Length = 0x0D | Cmd0 = 0x45 | Cmd1 = 0xC1 | SrcAddr | NwkAddr | IEEEAddr | Capabilities
 		Attributes:
 			SrcAddr     2 bytes Source address of the message.
 			NwkAddr     2 bytes Specifies the device’ s short address.
 			IEEEAddr    8 bytes Specifies the 64 bit IEEE address of source device.
-			Capabilites 1 byte  Specifies the MAC capabilities of the device.
+			Capabilities 1 byte  Specifies the MAC capabilities of the device.
 			                    Bit: 0 – Alternate PAN Coordinator
 			                         1 – Device type: 1- ZigBee Router; 0 – End Device
 			                         2 – Power Source: 1 Main powered
@@ -351,7 +395,7 @@ func (c *Client) ZDODeviceJoinedMessage(frame *Frame) (*ZDODeviceJoined, error) 
 			                         6 – Security capability
 			                         7 – Reserved
 */
-func (c *Client) ZDOEndDeviceAnnounceMessage(frame *Frame) (*ZDOEndDeviceAnnounce, error) {
+func (c *Client) ZDOEndDeviceAnnounceMessage(frame *Frame) (*ZDOEndDeviceAnnounceMessage, error) {
 	if frame.SubSystem() != SubSystemZDOInterface {
 		return nil, errors.New("frame isn't a ZDO interface")
 	}
@@ -362,15 +406,15 @@ func (c *Client) ZDOEndDeviceAnnounceMessage(frame *Frame) (*ZDOEndDeviceAnnounc
 
 	dataOut := frame.DataAsBuffer()
 
-	return &ZDOEndDeviceAnnounce{
+	return &ZDOEndDeviceAnnounceMessage{
 		SourceAddress:  dataOut.ReadUint16(),
 		NetworkAddress: dataOut.ReadUint16(),
 		IEEEAddress:    dataOut.ReadIEEEAddr(),
-		Capabilites:    dataOut.ReadUint8(),
+		Capabilities:   dataOut.ReadUint8(),
 	}, nil
 }
 
-func (c *Client) ZDODeviceLeaveMessage(frame *Frame) (*ZDODeviceLeave, error) {
+func (c *Client) ZDODeviceLeaveMessage(frame *Frame) (*ZDODeviceLeaveMessage, error) {
 	if frame.SubSystem() != SubSystemZDOInterface {
 		return nil, errors.New("frame isn't a ZDO interface")
 	}
@@ -381,11 +425,80 @@ func (c *Client) ZDODeviceLeaveMessage(frame *Frame) (*ZDODeviceLeave, error) {
 
 	dataOut := frame.DataAsBuffer()
 
-	return &ZDODeviceLeave{
+	return &ZDODeviceLeaveMessage{
 		SourceAddress:  dataOut.ReadUint16(),
 		ExtendAddress:  dataOut.ReadIEEEAddr(),
 		Request:        dataOut.ReadUint8(),
 		RemoveChildren: dataOut.ReadUint8(),
 		Rejoin:         dataOut.ReadUint8(),
 	}, nil
+}
+
+/*
+	ZDO_MGMT_LQI_RSP
+
+	This callback message is in response to the ZDO Management LQI Request.
+
+	Usage:
+		AREQ:
+			         1         |      1      |       1     |    2    |    1   |            1         |      1     |             1          |            0-66
+			Length = 0x06-0x48 | Cmd0 = 0x45 | Cmd1 = 0xB1 | SrcAddr | Status | NeighborTableEntries | StartIndex | NeighborTableListCount | NeighborTableListRecords
+		Attributes:
+			SrcAddr              2 bytes    Source address of the message
+			Status               1 byte     This field indicates either SUCCESS or FAILURE.
+			NeighborTableEntries 1 byte     Total number of entries available in the device.
+			StartIndex           1 byte     Where in the total number of entries this response starts.
+			NeighborLqiListCount 1 byte     Number of entries in this response.
+			NeighborLqiList      0-66 bytes An array of NeighborLqiList items. NeighborLQICount contains the number of items in this table.
+			                                ExtendedPanID                          8 bytes
+			                                ExtendedAddress                        8 bytes
+			                                NetworkAddress                         2 bytes
+			                                DeviceType/ RxOnWhenIdle/ Relationship 1 byte
+			                                PermitJoining                          1 byte
+			                                Depth                                  1 byte
+			                                LQI                                    1 byte
+*/
+func (c *Client) ZDOLQIMessage(frame *Frame) (*ZDOLQIMessage, error) {
+	if frame.SubSystem() != SubSystemZDOInterface {
+		return nil, errors.New("frame isn't a ZDO interface")
+	}
+
+	if frame.CommandID() != 0xB1 {
+		return nil, errors.New("frame isn't a LQI message")
+	}
+
+	dataOut := frame.DataAsBuffer()
+
+	msg := &ZDOLQIMessage{
+		SourceAddress:        dataOut.ReadUint16(),
+		Status:               dataOut.ReadUint8(),
+		NeighborTableEntries: dataOut.ReadUint8(),
+		StartIndex:           dataOut.ReadUint8(),
+		NeighborLQIListCount: dataOut.ReadUint8(),
+		NeighborLqiList:      make([]NeighborLqiListItem, 0, 3),
+	}
+
+	if msg.Status != 0 {
+		return nil, errors.New("failure")
+	}
+
+	for i := uint8(0); i < msg.NeighborLQIListCount; i++ {
+		item := NeighborLqiListItem{
+			ExtendedPanID:   dataOut.ReadIEEEAddr(),
+			ExtendedAddress: dataOut.ReadIEEEAddr(),
+			NetworkAddress:  dataOut.ReadUint16(),
+		}
+
+		v := dataOut.ReadUint8()
+		item.DeviceType = v & 0x03
+		item.RxOnWhenIdle = (v & 0x0C) >> 2
+		item.Relationship = (v & 0x70) >> 4
+		item.PermitJoining = dataOut.ReadUint8() & 0x03
+		item.Depth = dataOut.ReadUint8()
+		item.LQI = dataOut.ReadUint8()
+
+		msg.NeighborLqiList = append(msg.NeighborLqiList, item)
+	}
+
+	return msg, nil
 }
