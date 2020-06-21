@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+
+	"github.com/kihamo/boggart/protocols/serial"
 )
 
 // https://github.com/zigbeer/zcl-packet/wiki/6.-Appendix
@@ -93,10 +95,14 @@ func (b *Buffer) ReadByType(t uint8) interface{} {
 	case DataTypeUint40:
 		lsb, msb := b.ReadUint40()
 		return []interface{}{lsb, msb}
+	case DataTypeCharStr:
+		return b.ReadCharStr()
 	case DataTypeStruct:
 		return b.ReadStruct()
+	case DataTypeIEEEAddr:
+		return b.ReadIEEEAddr()
 	default:
-		panic("unknown type of buffer " + fmt.Sprintln(t))
+		panic("unknown type of buffer " + fmt.Sprintf("%d %s", t, b.Bytes()))
 	}
 
 	return nil
@@ -149,6 +155,11 @@ func (b *Buffer) ReadUint40() (uint32, uint8) {
 	return b.ReadUint32(), b.ReadUint8()
 }
 
+func (b *Buffer) ReadCharStr() string {
+	l := int(b.ReadUint8())
+	return string(b.Next(l))
+}
+
 func (b *Buffer) ReadStruct() TypeStruct {
 	s := TypeStruct{
 		Count: b.ReadUint16(),
@@ -166,4 +177,8 @@ func (b *Buffer) ReadStruct() TypeStruct {
 	}
 
 	return s
+}
+
+func (b *Buffer) ReadIEEEAddr() []byte {
+	return serial.Reverse(b.Next(8))
 }

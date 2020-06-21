@@ -3,7 +3,9 @@ package z_stack
 import (
 	"bytes"
 	"context"
+	"encoding/hex"
 	"errors"
+	"fmt"
 	"io"
 	"sync"
 	"sync/atomic"
@@ -206,7 +208,7 @@ func (c *Client) Boot(ctx context.Context) error {
 		return err
 	}
 
-	if device.DeviceState == DeviceStateCoordinator {
+	if device.DeviceState != DeviceStateCoordinator {
 		ctxWait, cancel := context.WithTimeout(ctx, time.Millisecond*6000)
 		defer cancel()
 
@@ -310,6 +312,69 @@ func (c *Client) Boot(ctx context.Context) error {
 			return err
 		}
 	}
+
+	/*
+	 * Start default watcher
+	 */
+
+	go func() {
+		watcher := c.Watch()
+		defer func() {
+			c.unregisterWatcher(watcher)
+		}()
+
+		for {
+			select {
+			case frame := <-watcher.NextFrame():
+				switch frame.SubSystem() {
+				case SubSystemZDOInterface:
+					switch frame.CommandID() {
+					case 202: // tcDeviceInd
+						fmt.Println("WATCH tcDeviceInd")
+
+						if msg, err := c.ZDODeviceJoinedMessage(frame); err == nil {
+							fmt.Println(
+								"nwkaddr", msg.NetworkAddress,
+								"extaddr", hex.EncodeToString(msg.ExtendAddress),
+								"parentaddr", msg.ParentAddress,
+							)
+						}
+
+					case 193: // endDeviceAnnceInd
+						fmt.Println("WATCH endDeviceAnnceInd")
+
+						if msg, err := c.ZDOEndDeviceAnnounceMessage(frame); err == nil {
+							fmt.Println(msg)
+						}
+
+					case 201: // leaveInd
+						fmt.Println("WATCH leaveInd")
+
+						if msg, err := c.ZDODeviceLeaveMessage(frame); err == nil {
+							fmt.Println(msg)
+						}
+					}
+
+				case SubSystemAFInterface:
+
+				}
+
+				//if frame.CommandID() == CommandAfIncomingMessage {
+				//	msg, err := c.AfIncomingMessage(frame)
+				//	if err != nil {
+				//		continue
+				//	}
+				//
+				//	fmt.Println("AF INCOMING", msg)
+				//	fmt.Println((*msg.Frame.Payload.Report)[0])
+				//} else {
+				//	fmt.Println("DEFAULT WATCHER", frame)
+				//}
+
+			case <-watcher.NextError():
+			}
+		}
+	}()
 
 	return nil
 }

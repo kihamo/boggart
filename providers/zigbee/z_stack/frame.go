@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"sync"
 )
 
 type Frame struct {
@@ -14,13 +15,21 @@ type Frame struct {
 	commandID uint16
 	data      []byte
 	fcs       byte
+
+	lock sync.RWMutex
 }
 
 func (f *Frame) Command0() uint16 {
+	f.lock.RLock()
+	defer f.lock.RUnlock()
+
 	return ((f.typ << 5) & 0xE0) | (f.subSystem & 0x1F)
 }
 
 func (f *Frame) SetCommand0(value uint16) {
+	f.lock.Lock()
+	defer f.lock.Unlock()
+
 	f.typ = (value & 0xE0) >> 5
 	f.subSystem = value & 0x1F
 }
@@ -34,34 +43,58 @@ func (f *Frame) SetCommand1(value uint16) {
 }
 
 func (f *Frame) Length() uint16 {
+	f.lock.RLock()
+	defer f.lock.RUnlock()
+
 	return f.length
 }
 
 func (f *Frame) Type() uint16 {
+	f.lock.RLock()
+	defer f.lock.RUnlock()
+
 	return f.typ
 }
 
 func (f *Frame) SetType(value uint16) {
+	f.lock.Lock()
+	defer f.lock.Unlock()
+
 	f.typ = value
 }
 
 func (f *Frame) SubSystem() uint16 {
+	f.lock.RLock()
+	defer f.lock.RUnlock()
+
 	return f.subSystem
 }
 
 func (f *Frame) SetSubSystem(value uint16) {
+	f.lock.Lock()
+	defer f.lock.Unlock()
+
 	f.subSystem = value
 }
 
 func (f *Frame) CommandID() uint16 {
+	f.lock.RLock()
+	defer f.lock.RUnlock()
+
 	return f.commandID
 }
 
 func (f *Frame) SetCommandID(value uint16) {
+	f.lock.Lock()
+	defer f.lock.Unlock()
+
 	f.commandID = value
 }
 
 func (f *Frame) Data() []byte {
+	f.lock.RLock()
+	defer f.lock.RUnlock()
+
 	return append([]byte(nil), f.data...)
 }
 
@@ -70,6 +103,9 @@ func (f *Frame) DataAsBuffer() *Buffer {
 }
 
 func (f *Frame) SetData(value []byte) {
+	f.lock.Lock()
+	defer f.lock.Unlock()
+
 	f.length = uint16(len(value))
 	f.data = value
 }
@@ -79,10 +115,16 @@ func (f *Frame) SetDataAsBuffer(buf *Buffer) {
 }
 
 func (f *Frame) FCS() byte {
+	f.lock.RLock()
+	defer f.lock.RUnlock()
+
 	return f.fcs
 }
 
 func (f Frame) MarshalBinary() ([]byte, error) {
+	f.lock.RLock()
+	defer f.lock.RUnlock()
+
 	buffer := make([]byte, 0, FrameLengthMin+f.length)
 	buffer = append(buffer,
 		byte(f.length),
@@ -112,10 +154,10 @@ func (f *Frame) UnmarshalBinary(data []byte) error {
 		return errors.New("first byte of frame isn't SOF")
 	}
 
-	// MT CMD = LEN (1) + CMD (2) + DATA (0-250)
-	f.length = uint16(data[PositionFrameLength])
-
 	f.SetCommand0(uint16(data[PositionCommand1]))
+
+	f.lock.Lock()
+	defer f.lock.Unlock()
 
 	switch f.typ {
 	case TypePoll, TypeSREQ, TypeAREQ, TypeSRSP:
@@ -134,6 +176,8 @@ func (f *Frame) UnmarshalBinary(data []byte) error {
 		return fmt.Errorf("unknown sub system of frame command 0x%X in data 0x%X", f.subSystem, data)
 	}
 
+	// MT CMD = LEN (1) + CMD (2) + DATA (0-250)
+	f.length = uint16(data[PositionFrameLength])
 	f.commandID = uint16(data[PositionCommand2])
 	f.data = data[PositionData : PositionData+f.length]
 	f.fcs = data[f.length+FrameLengthMin-1]

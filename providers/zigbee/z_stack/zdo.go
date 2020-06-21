@@ -18,10 +18,31 @@ type ExtNwkInfo struct {
 	Channel       uint8
 }
 
-type Group struct {
+type ZDOGroup struct {
 	Status uint8
 	ID     uint16
 	Name   []byte
+}
+
+type ZDODeviceJoined struct {
+	NetworkAddress uint16
+	ExtendAddress  []byte
+	ParentAddress  uint16
+}
+
+type ZDOEndDeviceAnnounce struct {
+	SourceAddress  uint16
+	NetworkAddress uint16
+	IEEEAddress    []byte
+	Capabilites    uint8
+}
+
+type ZDODeviceLeave struct {
+	SourceAddress  uint16
+	ExtendAddress  []byte
+	Request        uint8
+	RemoveChildren uint8
+	Rejoin         uint8
 }
 
 func (c *Client) ZDOExtNwkInfo(ctx context.Context) (*ExtNwkInfo, error) {
@@ -237,7 +258,7 @@ func (c *Client) ZDONodeDescription(ctx context.Context, DstAddr, NWKAddrOfInter
 		zigbee-herdsman:adapter:zStack:unpi:parser --> parsed 19 - 3 - 5 - 74 - [0,132,11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] - 179 +1ms
 		zigbee-herdsman:adapter:zStack:znp:SRSP <-- ZDO - extFindGroup - {"status":0,"groupid":2948,"namelen":0,"groupname":{"type":"Buffer","data":[]}} +13ms
 */
-func (c *Client) ZDOExtFindGroup(ctx context.Context, endpoint uint8, group uint16) (*Group, error) {
+func (c *Client) ZDOExtFindGroup(ctx context.Context, endpoint uint8, group uint16) (*ZDOGroup, error) {
 	dataIn := NewBuffer(nil)
 	dataIn.WriteUint8(endpoint)
 	dataIn.WriteUint16(group)
@@ -257,7 +278,7 @@ func (c *Client) ZDOExtFindGroup(ctx context.Context, endpoint uint8, group uint
 		return nil, errors.New("failure")
 	}
 
-	g := &Group{
+	g := &ZDOGroup{
 		Status: dataOut.ReadUint8(),
 		ID:     dataOut.ReadUint16(),
 	}
@@ -287,4 +308,84 @@ func (c *Client) ZDOExtAddToGroup(ctx context.Context, endpoint uint8, group uin
 	fmt.Println("ZDOExtAddToGroup", response)
 
 	return nil
+}
+
+func (c *Client) ZDODeviceJoinedMessage(frame *Frame) (*ZDODeviceJoined, error) {
+	if frame.SubSystem() != SubSystemZDOInterface {
+		return nil, errors.New("frame isn't a ZDO interface")
+	}
+
+	if frame.CommandID() != 0xCA {
+		return nil, errors.New("frame isn't a device joined command")
+	}
+
+	dataOut := frame.DataAsBuffer()
+
+	return &ZDODeviceJoined{
+		NetworkAddress: dataOut.ReadUint16(),
+		ExtendAddress:  dataOut.ReadIEEEAddr(),
+		ParentAddress:  dataOut.ReadUint16(),
+	}, nil
+}
+
+/*
+	ZDO_END_DEVICE_ANNCE_IND
+
+	This callback indicates the ZDO End Device Announce.
+
+	Usage:
+		AREQ:
+			       1      |      1      |      1      |    2    |    2    |    8     |      1
+			Length = 0x0D | Cmd0 = 0x45 | Cmd1 = 0xC1 | SrcAddr | NwkAddr | IEEEAddr | Capabilites
+		Attributes:
+			SrcAddr     2 bytes Source address of the message.
+			NwkAddr     2 bytes Specifies the device’ s short address.
+			IEEEAddr    8 bytes Specifies the 64 bit IEEE address of source device.
+			Capabilites 1 byte  Specifies the MAC capabilities of the device.
+			                    Bit: 0 – Alternate PAN Coordinator
+			                         1 – Device type: 1- ZigBee Router; 0 – End Device
+			                         2 – Power Source: 1 Main powered
+			                         3 – Receiver on when Idle
+			                         4 – Reserved
+			                         5 – Reserved
+			                         6 – Security capability
+			                         7 – Reserved
+*/
+func (c *Client) ZDOEndDeviceAnnounceMessage(frame *Frame) (*ZDOEndDeviceAnnounce, error) {
+	if frame.SubSystem() != SubSystemZDOInterface {
+		return nil, errors.New("frame isn't a ZDO interface")
+	}
+
+	if frame.CommandID() != 0xC1 {
+		return nil, errors.New("frame isn't a end device announce command")
+	}
+
+	dataOut := frame.DataAsBuffer()
+
+	return &ZDOEndDeviceAnnounce{
+		SourceAddress:  dataOut.ReadUint16(),
+		NetworkAddress: dataOut.ReadUint16(),
+		IEEEAddress:    dataOut.ReadIEEEAddr(),
+		Capabilites:    dataOut.ReadUint8(),
+	}, nil
+}
+
+func (c *Client) ZDODeviceLeaveMessage(frame *Frame) (*ZDODeviceLeave, error) {
+	if frame.SubSystem() != SubSystemZDOInterface {
+		return nil, errors.New("frame isn't a ZDO interface")
+	}
+
+	if frame.CommandID() != 0xC9 {
+		return nil, errors.New("frame isn't a device leave command")
+	}
+
+	dataOut := frame.DataAsBuffer()
+
+	return &ZDODeviceLeave{
+		SourceAddress:  dataOut.ReadUint16(),
+		ExtendAddress:  dataOut.ReadIEEEAddr(),
+		Request:        dataOut.ReadUint8(),
+		RemoveChildren: dataOut.ReadUint8(),
+		Rejoin:         dataOut.ReadUint8(),
+	}, nil
 }

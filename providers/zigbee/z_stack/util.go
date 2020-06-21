@@ -2,8 +2,6 @@ package z_stack
 
 import (
 	"context"
-
-	"github.com/kihamo/boggart/protocols/serial"
 )
 
 type UtilDeviceInfo struct {
@@ -30,7 +28,7 @@ func (c *Client) UtilGetDeviceInfo(ctx context.Context) (*UtilDeviceInfo, error)
 
 	info := &UtilDeviceInfo{
 		Status:           dataOut.ReadUint8() == 0,
-		IEEEAddr:         serial.Reverse(dataOut.Next(8)),
+		IEEEAddr:         dataOut.ReadIEEEAddr(),
 		ShortAddr:        dataOut.ReadUint16(),
 		DeviceType:       dataOut.ReadUint8(),
 		DeviceState:      dataOut.ReadUint8(),

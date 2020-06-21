@@ -42,7 +42,7 @@ func (l *looper) Loop() (<-chan []byte, <-chan error, chan<- struct{}, <-chan st
 				n, err := l.Conn.Read(buf)
 
 				if n > 0 {
-					response <- buf[:n]
+					response <- append([]byte(nil), buf[:n]...)
 				}
 
 				if err != nil {
