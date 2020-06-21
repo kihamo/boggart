@@ -83,22 +83,22 @@ func (c *Client) AfIncomingMessage(frame *Frame) (*AfIncomingMessage, error) {
 		return nil, errors.New("frame isn't a af_incoming_msg")
 	}
 
-	data := frame.DataAsBuffer()
+	dataOut := frame.DataAsBuffer()
 
 	msg := &AfIncomingMessage{
-		GroupID:        data.ReadUint16(),
-		ClusterID:      data.ReadUint16(),
-		SrcAddr:        data.ReadUint16(),
-		SrcEndpoint:    data.ReadUint8(),
-		DstEndpoint:    data.ReadUint8(),
-		WasBroadcast:   data.ReadUint8(),
-		LinkQuality:    data.ReadUint8(),
-		SecurityUse:    data.ReadUint8(),
-		TimeStamp:      data.ReadUint32(),
-		TransSeqNumber: data.ReadUint8(),
-		Len:            data.ReadUint8(),
+		GroupID:        dataOut.ReadUint16(),
+		ClusterID:      dataOut.ReadUint16(),
+		SrcAddr:        dataOut.ReadUint16(),
+		SrcEndpoint:    dataOut.ReadUint8(),
+		DstEndpoint:    dataOut.ReadUint8(),
+		WasBroadcast:   dataOut.ReadUint8(),
+		LinkQuality:    dataOut.ReadUint8(),
+		SecurityUse:    dataOut.ReadUint8(),
+		TimeStamp:      dataOut.ReadUint32(),
+		TransSeqNumber: dataOut.ReadUint8(),
+		Len:            dataOut.ReadUint8(),
 	}
-	msg.Data = data.Next(int(msg.Len))
+	msg.Data = dataOut.Next(int(msg.Len))
 
 	payload := NewBuffer(msg.Data)
 
@@ -221,9 +221,9 @@ func (c *Client) AfRegister(ctx context.Context, endpoint Endpoint) error {
 		return errors.New("bad response")
 	}
 
-	data := response.Data()
-	if len(data) == 0 || data[0] != 0 {
-		if data[0] == 0xB8 {
+	dataOut := response.Data()
+	if len(dataOut) == 0 || dataOut[0] != 0 {
+		if dataOut[0] == 0xB8 {
 			return errors.New("already registered")
 		}
 

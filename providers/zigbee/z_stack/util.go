@@ -25,21 +25,21 @@ func (c *Client) UtilGetDeviceInfo(ctx context.Context) (*UtilDeviceInfo, error)
 		return nil, err
 	}
 
-	data := response.DataAsBuffer()
-	devicesCount := (data.Len() - 14) / 2
+	dataOut := response.DataAsBuffer()
+	devicesCount := (dataOut.Len() - 14) / 2
 
 	info := &UtilDeviceInfo{
-		Status:           data.ReadUint8() == 0,
-		IEEEAddr:         serial.Reverse(data.Next(8)),
-		ShortAddr:        data.ReadUint16(),
-		DeviceType:       data.ReadUint8(),
-		DeviceState:      data.ReadUint8(),
-		NumAssocDevices:  data.ReadUint8(),
+		Status:           dataOut.ReadUint8() == 0,
+		IEEEAddr:         serial.Reverse(dataOut.Next(8)),
+		ShortAddr:        dataOut.ReadUint16(),
+		DeviceType:       dataOut.ReadUint8(),
+		DeviceState:      dataOut.ReadUint8(),
+		NumAssocDevices:  dataOut.ReadUint8(),
 		AssocDevicesList: make([]uint16, 0, devicesCount),
 	}
 
 	for i := 0; i < devicesCount; i++ {
-		info.AssocDevicesList = append(info.AssocDevicesList, data.ReadUint16())
+		info.AssocDevicesList = append(info.AssocDevicesList, dataOut.ReadUint16())
 	}
 
 	return info, err

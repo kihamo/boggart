@@ -34,16 +34,16 @@ func (c *Client) ZDOExtNwkInfo(ctx context.Context) (*ExtNwkInfo, error) {
 		return nil, err
 	}
 
-	data := response.DataAsBuffer()
+	dataOut := response.DataAsBuffer()
 
 	return &ExtNwkInfo{
-		ShortAddr:     data.ReadUint16(),
-		DevState:      data.ReadUint8(),
-		PanID:         data.ReadUint16(),
-		ParentAddr:    data.ReadUint16(),
-		ExtendedPanID: serial.Reverse(data.Next(8)),
-		ParentExtAddr: serial.Reverse(data.Next(8)),
-		Channel:       data.ReadUint8(),
+		ShortAddr:     dataOut.ReadUint16(),
+		DevState:      dataOut.ReadUint8(),
+		PanID:         dataOut.ReadUint16(),
+		ParentAddr:    dataOut.ReadUint16(),
+		ExtendedPanID: serial.Reverse(dataOut.Next(8)),
+		ParentExtAddr: serial.Reverse(dataOut.Next(8)),
+		Channel:       dataOut.ReadUint8(),
 	}, nil
 }
 
@@ -125,8 +125,8 @@ func (c *Client) ZDOPermitJoin(ctx context.Context, seconds uint8) error {
 		return errors.New("bad response")
 	}
 
-	data := response.Data()
-	if len(data) == 0 || data[0] != 0 {
+	dataOut := response.Data()
+	if len(dataOut) == 0 || dataOut[0] != 0 {
 		return errors.New("failure")
 	}
 
@@ -183,8 +183,8 @@ func (c *Client) ZDOActiveEndpoints(ctx context.Context) error {
 		return errors.New("bad response")
 	}
 
-	data := response.Data()
-	if len(data) == 0 || data[0] != 0 {
+	dataOut := response.Data()
+	if len(dataOut) == 0 || dataOut[0] != 0 {
 		return errors.New("failure")
 	}
 

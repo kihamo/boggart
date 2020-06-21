@@ -54,15 +54,15 @@ func (c *Client) SysVersion(ctx context.Context) (*SysVersion, error) {
 		return nil, err
 	}
 
-	data := response.DataAsBuffer()
+	dataOut := response.DataAsBuffer()
 
 	return &SysVersion{
-		TransportRevision: data.ReadUint8(),
-		Product:           data.ReadUint8(), // zStack12 = 0, zStack3x0 = 1, zStack30x = 2,
-		MajorRelease:      data.ReadUint8(),
-		MinorRelease:      data.ReadUint8(),
-		MainTrel:          data.ReadUint8(),
-		HardwareRevision:  data.ReadUint32(),
+		TransportRevision: dataOut.ReadUint8(),
+		Product:           dataOut.ReadUint8(), // zStack12 = 0, zStack3x0 = 1, zStack30x = 2,
+		MajorRelease:      dataOut.ReadUint8(),
+		MinorRelease:      dataOut.ReadUint8(),
+		MainTrel:          dataOut.ReadUint8(),
+		HardwareRevision:  dataOut.ReadUint32(),
 	}, err
 }
 

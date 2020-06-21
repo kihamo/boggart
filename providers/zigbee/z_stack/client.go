@@ -272,13 +272,13 @@ func (c *Client) Boot(ctx context.Context) error {
 
 	select {
 	case r := <-waitResponse:
-		data := r.Data()
+		dataOut := r.Data()
 
-		if data[2] != 0 {
+		if dataOut[2] != 0 {
 			return errors.New("get active endpoints failed")
 		}
 
-		for _, id := range data[6:] {
+		for _, id := range dataOut[6:] {
 			registeredEndpoints[uint8(id)] = true
 		}
 
