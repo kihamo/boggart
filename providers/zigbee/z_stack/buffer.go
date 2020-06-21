@@ -106,17 +106,43 @@ func (b *Buffer) ReadBoolean() bool {
 	return b.ReadUint8() != 0
 }
 
+func (b *Buffer) WriteBoolean(value bool) {
+	if value {
+		b.WriteByte(1)
+	} else {
+		b.WriteByte(0)
+	}
+}
+
 func (b *Buffer) ReadUint8() uint8 {
 	value, _ := b.ReadByte()
 	return value
+}
+
+func (b *Buffer) WriteUint8(value uint8) {
+	b.WriteByte(value)
 }
 
 func (b *Buffer) ReadUint16() uint16 {
 	return binary.LittleEndian.Uint16(b.Next(2))
 }
 
+func (b *Buffer) WriteUint16(value uint16) {
+	convert := make([]byte, 2)
+	binary.LittleEndian.PutUint16(convert, value)
+
+	b.Write(convert)
+}
+
 func (b *Buffer) ReadUint32() uint32 {
 	return binary.LittleEndian.Uint32(b.Next(4))
+}
+
+func (b *Buffer) WriteUint32(value uint32) {
+	convert := make([]byte, 4)
+	binary.LittleEndian.PutUint32(convert, value)
+
+	b.Write(convert)
 }
 
 func (b *Buffer) ReadUint40() (uint32, uint8) {

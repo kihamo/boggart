@@ -3,6 +3,7 @@ package z_stack
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/kihamo/boggart/protocols/serial"
 )
@@ -17,16 +18,18 @@ type ExtNwkInfo struct {
 	Channel       uint8
 }
 
+type Group struct {
+	Status uint8
+	ID     uint16
+	Name   []byte
+}
+
 func (c *Client) ZDOExtNwkInfo(ctx context.Context) (*ExtNwkInfo, error) {
 	request := &Frame{}
 	request.SetCommand0(0x25) // Type 0x1, SubSystem 0x5
 	request.SetCommandID(0x50)
 
-	waiter, timeout := WaiterSREQ(request)
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-
-	response, err := c.CallWithResult(ctx, request, waiter)
+	response, err := c.CallWithResultSREQ(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -82,11 +85,7 @@ func (c *Client) ZDOStartupFromApp(ctx context.Context, delay uint8) (status int
 	request.SetCommandID(0x40)
 	request.SetData([]byte{delay})
 
-	waiter, timeout := WaiterSREQ(request)
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-
-	response, err := c.CallWithResult(ctx, request, waiter)
+	response, err := c.CallWithResultSREQ(ctx, request)
 	if err != nil {
 		return -1, err
 	}
@@ -94,34 +93,44 @@ func (c *Client) ZDOStartupFromApp(ctx context.Context, delay uint8) (status int
 	return int8(response.Data()[0]), nil
 }
 
-func (c *Client) ZDOPermitJoin(ctx context.Context, seconds uint8) (interface{}, error) {
+/*
+	Example from zigbee2mqtt:
+		zigbee-herdsman:controller:log Permit joining +250ms
+		zigbee-herdsman:adapter:zStack:znp:SREQ --> ZDO - mgmtPermitJoinReq - {"addrmode":15,"dstaddr":65532,"duration":254,"tcsignificance":0} +13ms
+		zigbee-herdsman:adapter:zStack:unpi:writer --> frame [254,5,37,54,15,252,255,254,0,228] +13ms
+		zigbee-herdsman:adapter:zStack:unpi:parser <-- [254,1,101,54,0,82] +21ms
+		zigbee-herdsman:adapter:zStack:unpi:parser --- parseNext [254,1,101,54,0,82] +0ms
+		zigbee-herdsman:adapter:zStack:unpi:parser --> parsed 1 - 3 - 5 - 54 - [0] - 82 +0ms
+		zigbee-herdsman:adapter:zStack:znp:SRSP <-- ZDO - mgmtPermitJoinReq - {"status":0} +21ms
+		zigbee-herdsman:adapter:zStack:unpi:parser --- parseNext [] +1ms
+*/
+func (c *Client) ZDOPermitJoin(ctx context.Context, seconds uint8) error {
+	dataIn := NewBuffer(nil)
+	dataIn.WriteUint8(0x0F)    // AddrMode (поле отсутствует в оригинальной документации) networkAddress === null ? 0x0F : 0x02;
+	dataIn.WriteUint16(0xFFFC) // DstAddr (0xFFFC -- broadcast)
+	dataIn.WriteUint8(seconds) // Duration
+	dataIn.WriteUint8(0)       // TCSignificance
+
 	request := &Frame{}
 	request.SetCommand0(0x25) // Type 0x1, SubSystem 0x5
 	request.SetCommandID(0x36)
-	request.SetData([]byte{
-		0xFF, 0xFC, // broadcast
-		seconds, 0,
-	})
+	request.SetDataAsBuffer(dataIn)
 
-	waiter, timeout := WaiterSREQ(request)
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-
-	response, err := c.CallWithResult(ctx, request, waiter)
+	response, err := c.CallWithResultSREQ(ctx, request)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if response.Command0() != 0x65 && response.Command1() != 0x36 {
-		return nil, errors.New("bad response")
+		return errors.New("bad response")
 	}
 
 	data := response.Data()
 	if len(data) == 0 || data[0] != 0 {
-		return nil, errors.New("failure")
+		return errors.New("failure")
 	}
 
-	return nil, nil
+	return nil
 }
 
 /*
@@ -156,19 +165,16 @@ func (c *Client) ZDOPermitJoin(ctx context.Context, seconds uint8) (interface{},
 		zigbee-herdsman:adapter:zStack:unpi:parser --> parsed 6 - 2 - 5 - 133 - [0,0,0,0,0,0] - 198 +1ms
 */
 func (c *Client) ZDOActiveEndpoints(ctx context.Context) error {
+	dataIn := NewBuffer(nil)
+	dataIn.WriteUint16(0) // DstAddr
+	dataIn.WriteUint16(0) // NWKAddrOfInterest
+
 	request := &Frame{}
 	request.SetCommand0(0x25) // Type 0x1, SubSystem 0x5
 	request.SetCommandID(0x05)
-	request.SetData([]byte{
-		0, 0, // DstAddr
-		0, 0, // NWKAddrOfInterest
-	})
+	request.SetDataAsBuffer(dataIn)
 
-	waiter, timeout := WaiterSREQ(request)
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-
-	response, err := c.CallWithResult(ctx, request, waiter)
+	response, err := c.CallWithResultSREQ(ctx, request)
 	if err != nil {
 		return err
 	}
@@ -181,6 +187,104 @@ func (c *Client) ZDOActiveEndpoints(ctx context.Context) error {
 	if len(data) == 0 || data[0] != 0 {
 		return errors.New("failure")
 	}
+
+	return nil
+}
+
+func (c *Client) ZDONodeDescription(ctx context.Context, DstAddr, NWKAddrOfInterest uint16) error {
+	dataIn := NewBuffer(nil)
+	dataIn.WriteUint16(DstAddr)           // DstAddr
+	dataIn.WriteUint16(NWKAddrOfInterest) // NWKAddrOfInterest
+
+	request := &Frame{}
+	request.SetCommand0(0x25) // Type 0x1, SubSystem 0x5
+	request.SetCommandID(0x02)
+	request.SetDataAsBuffer(dataIn)
+
+	response, err := c.CallWithResultSREQ(ctx, request)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(response)
+
+	return nil
+}
+
+/*
+	Usage:
+		SREQ:
+			       1      |       1     |       1     |     1    |    2
+			Length = 0x03 | Cmd0 = 0x25 | Cmd1 = 0x4A | Endpoint | GroupID
+		Attributes:
+			Endpoint 1 byte  Endpoint ID.
+			GroupID  2 bytes Group ID.
+
+		SRSP:
+			       1      |       1     |       1     |    1   |    2    |    1    |     ?
+			Length = 0x01 | Cmd0 = 0x25 | Cmd1 = 0x02 | Status | GroupID | NameLen | GroupName
+		Attributes:
+			Status    1 byte  Status is either exist (0) or not exists (1).
+			GroupID   2 bytes Group ID.
+			NameLen   1 byte  Group name length.
+			GroupName ? bytes Group name
+
+	Example from zigbee2mqtt:
+		zigbee-herdsman:adapter:zStack:znp:SREQ --> ZDO - extFindGroup - {"endpoint":242,"groupid":2948} +7ms
+		zigbee-herdsman:adapter:zStack:unpi:writer --> frame [254,3,37,74,242,132,11,17] +6ms
+		zigbee-herdsman:adapter:zStack:unpi:parser <-- [254,19,101,74,0,132,11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,179] +11ms
+		zigbee-herdsman:adapter:zStack:unpi:parser --- parseNext [254,19,101,74,0,132,11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,179] +0ms
+		zigbee-herdsman:adapter:zStack:unpi:parser --> parsed 19 - 3 - 5 - 74 - [0,132,11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] - 179 +1ms
+		zigbee-herdsman:adapter:zStack:znp:SRSP <-- ZDO - extFindGroup - {"status":0,"groupid":2948,"namelen":0,"groupname":{"type":"Buffer","data":[]}} +13ms
+*/
+func (c *Client) ZDOExtFindGroup(ctx context.Context, endpoint uint8, group uint16) (*Group, error) {
+	dataIn := NewBuffer(nil)
+	dataIn.WriteUint8(endpoint)
+	dataIn.WriteUint16(group)
+
+	request := &Frame{}
+	request.SetCommand0(0x25) // Type 0x1, SubSystem 0x5
+	request.SetCommandID(0x4A)
+	request.SetDataAsBuffer(dataIn)
+
+	response, err := c.CallWithResultSREQ(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	dataOut := response.DataAsBuffer()
+	if dataOut.Len() < 4 {
+		return nil, errors.New("failure")
+	}
+
+	g := &Group{
+		Status: dataOut.ReadUint8(),
+		ID:     dataOut.ReadUint16(),
+	}
+	dataOut.ReadUint8()      // namelen
+	g.Name = dataOut.Bytes() // name
+
+	return g, nil
+}
+
+func (c *Client) ZDOExtAddToGroup(ctx context.Context, endpoint uint8, group uint16, groupName []byte) error {
+	dataIn := NewBuffer(nil)
+	dataIn.WriteUint8(endpoint)              // endpoint
+	dataIn.WriteUint16(group)                // groupid
+	dataIn.WriteUint8(uint8(len(groupName))) // namelen
+	dataIn.Write(groupName)                  // groupname
+
+	request := &Frame{}
+	request.SetCommand0(0x25) // Type 0x1, SubSystem 0x5
+	request.SetCommandID(0x02)
+	request.SetDataAsBuffer(dataIn)
+
+	response, err := c.CallWithResultSREQ(ctx, request)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("ZDOExtAddToGroup", response)
 
 	return nil
 }

@@ -2,7 +2,6 @@ package z_stack
 
 import (
 	"context"
-	"encoding/binary"
 	"errors"
 	"fmt"
 )
@@ -53,38 +52,30 @@ type Endpoint struct {
 	AppDeviceId       uint16
 	AddDevVer         uint8
 	LatencyReq        uint8
-	AppInClusterList  []uint8
-	AppOutClusterList []uint8
+	AppInClusterList  []uint16
+	AppOutClusterList []uint16
 }
 
-func (e Endpoint) Bytes() []byte {
-	data := make([]byte, 0, 73)
-	data = append(data, e.EndPoint) // EndPoint
+func (e Endpoint) AsBuffer() *Buffer {
+	dataOut := NewBuffer(nil)
+	dataOut.WriteUint8(e.EndPoint)
+	dataOut.WriteUint16(e.AppProfId)
+	dataOut.WriteUint16(e.AppDeviceId)
+	dataOut.WriteUint8(e.AddDevVer)
+	dataOut.WriteUint8(e.LatencyReq)
+	dataOut.WriteUint8(uint8(len(e.AppInClusterList)))
 
-	// AppProfId
-	convert := make([]byte, 2)
-	if e.AppProfId > 0 {
-		binary.LittleEndian.PutUint16(convert, e.AppProfId)
+	for _, id := range e.AppInClusterList {
+		dataOut.WriteUint16(id)
 	}
-	data = append(data, convert...)
 
-	// AppDeviceId
-	convert = make([]byte, 2)
-	if e.AppDeviceId > 0 {
-		binary.LittleEndian.PutUint16(convert, e.AppDeviceId)
+	dataOut.WriteUint8(uint8(len(e.AppOutClusterList)))
+
+	for _, id := range e.AppOutClusterList {
+		dataOut.WriteUint16(id)
 	}
-	data = append(data, convert...)
 
-	data = append(data,
-		e.AddDevVer,                    // AddDevVer
-		e.LatencyReq,                   // LatencyReq
-		uint8(len(e.AppInClusterList)), // AppNumInClusters
-	)
-	data = append(data, e.AppInClusterList...)           // // AppInClusterList
-	data = append(data, uint8(len(e.AppOutClusterList))) // AppNumOutClusters
-	data = append(data, e.AppOutClusterList...)          // AppOutClusterList
-
-	return data
+	return dataOut
 }
 
 func (c *Client) AfIncomingMessage(frame *Frame) (*AfIncomingMessage, error) {
@@ -219,13 +210,9 @@ func (c *Client) AfRegister(ctx context.Context, endpoint Endpoint) error {
 	request := &Frame{}
 	request.SetCommand0(0x24) // Type 0x1, SubSystem 0x5
 	request.SetCommandID(0x00)
-	request.SetData(endpoint.Bytes())
+	request.SetDataAsBuffer(endpoint.AsBuffer())
 
-	waiter, timeout := WaiterSREQ(request)
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-
-	response, err := c.CallWithResult(ctx, request, waiter)
+	response, err := c.CallWithResultSREQ(ctx, request)
 	if err != nil {
 		return err
 	}

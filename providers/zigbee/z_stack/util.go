@@ -20,11 +20,7 @@ func (c *Client) UtilGetDeviceInfo(ctx context.Context) (*UtilDeviceInfo, error)
 	request := &Frame{}
 	request.SetCommand0(0x27)
 
-	waiter, timeout := WaiterSREQ(request)
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-
-	response, err := c.CallWithResult(ctx, request, waiter)
+	response, err := c.CallWithResultSREQ(ctx, request)
 	if err != nil {
 		return nil, err
 	}

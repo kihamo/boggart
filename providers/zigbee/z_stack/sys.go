@@ -2,7 +2,6 @@ package z_stack
 
 import (
 	"context"
-	"time"
 )
 
 const (
@@ -32,22 +31,12 @@ type SysVersion struct {
 	HardwareRevision  uint32
 }
 
-func WaiterSREQ(request *Frame) (func(*Frame) bool, time.Duration) {
-	return func(response *Frame) bool {
-		return response.Type() == TypeSRSP && response.SubSystem() == request.SubSystem() && response.CommandID() == request.CommandID()
-	}, time.Millisecond * 6000
-}
-
 func (c *Client) SysPing(ctx context.Context) (uint16, error) {
 	request := &Frame{}
 	request.SetCommand0(0x21)
 	request.SetCommandID(0x01)
 
-	waiter, timeout := WaiterSREQ(request)
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-
-	response, err := c.CallWithResult(ctx, request, waiter)
+	response, err := c.CallWithResultSREQ(ctx, request)
 	if err != nil {
 		return 0, err
 	}
@@ -60,11 +49,7 @@ func (c *Client) SysVersion(ctx context.Context) (*SysVersion, error) {
 	request.SetCommand0(0x21)
 	request.SetCommandID(0x02)
 
-	waiter, timeout := WaiterSREQ(request)
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-
-	response, err := c.CallWithResult(ctx, request, waiter)
+	response, err := c.CallWithResultSREQ(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -87,11 +72,7 @@ func (c *Client) SysADCRead(ctx context.Context, channel, resolution uint8) (uin
 	request.SetCommandID(0x0D)
 	request.SetData([]byte{channel, resolution})
 
-	waiter, timeout := WaiterSREQ(request)
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-
-	_, err := c.CallWithResult(ctx, request, waiter)
+	_, err := c.CallWithResultSREQ(ctx, request)
 	if err != nil {
 		return 0, err
 	}

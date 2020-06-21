@@ -74,6 +74,10 @@ func (f *Frame) SetData(value []byte) {
 	f.data = value
 }
 
+func (f *Frame) SetDataAsBuffer(buf *Buffer) {
+	f.SetData(buf.Bytes())
+}
+
 func (f *Frame) FCS() byte {
 	return f.fcs
 }
