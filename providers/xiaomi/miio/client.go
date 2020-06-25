@@ -44,15 +44,17 @@ func NewClient(address, token string) *Client {
 }
 
 func (p *Client) lazyConnect(ctx context.Context) (_ *internal.Connection, err error) {
+	var first bool
+
 	p.connOnce.Do(func() {
 		p.conn, err = internal.NewConnection(p.address)
-		if err == nil {
-			// p.SetDump(true)
-
-			// начинаем сессию hello пакетом
-			_, err = p.Hello(ctx)
-		}
+		first = true
 	})
+
+	if err == nil && first {
+		// начинаем сессию hello пакетом
+		_, err = p.Hello(ctx)
+	}
 
 	if err != nil {
 		p.connOnce.Reset()
