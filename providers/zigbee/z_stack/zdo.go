@@ -76,7 +76,7 @@ type NetworkListItem struct {
 	PermitJoining   bool
 }
 
-type ZDONetworkDiscoveryMessage struct {
+type ZDOManagementNetworkDiscoveryMessage struct {
 	SourceAddress    uint16
 	Status           uint8
 	NetworkCount     uint8
@@ -86,11 +86,7 @@ type ZDONetworkDiscoveryMessage struct {
 }
 
 func (c *Client) ZDOExtNetworkInfo(ctx context.Context) (*ExtNetworkInfo, error) {
-	request := &Frame{}
-	request.SetCommand0(0x25) // Type 0x1, SubSystem 0x5
-	request.SetCommandID(0x50)
-
-	response, err := c.CallWithResultSREQ(ctx, request)
+	response, err := c.CallWithResultSREQ(ctx, NewFrame(0x25, 0x50))
 	if err != nil {
 		return nil, err
 	}
@@ -141,12 +137,10 @@ func (c *Client) ZDOExtNetworkInfo(ctx context.Context) (*ExtNetworkInfo, error)
 		zigbee-herdsman:adapter:zStack:unpi:parser --> parsed 1 - 2 - 5 - 192 - [9] - 141 +0ms
 */
 func (c *Client) ZDOStartupFromApp(ctx context.Context, delay uint8) (status int8, err error) {
-	request := &Frame{}
-	request.SetCommand0(0x25) // Type 0x1, SubSystem 0x5
-	request.SetCommandID(0x40)
-	request.SetData([]byte{delay})
+	dataIn := NewBuffer(nil)
+	dataIn.WriteUint8(delay)
 
-	response, err := c.CallWithResultSREQ(ctx, request)
+	response, err := c.CallWithResultSREQ(ctx, dataIn.Frame(0x25, 0x40))
 	if err != nil {
 		return -1, err
 	}
@@ -172,12 +166,7 @@ func (c *Client) ZDOPermitJoin(ctx context.Context, seconds uint8) error {
 	dataIn.WriteUint8(seconds) // Duration
 	dataIn.WriteUint8(0)       // TCSignificance
 
-	request := &Frame{}
-	request.SetCommand0(0x25) // Type 0x1, SubSystem 0x5
-	request.SetCommandID(0x36)
-	request.SetDataAsBuffer(dataIn)
-
-	response, err := c.CallWithResultSREQ(ctx, request)
+	response, err := c.CallWithResultSREQ(ctx, dataIn.Frame(0x25, 0x36))
 	if err != nil {
 		return err
 	}
@@ -230,12 +219,7 @@ func (c *Client) ZDOActiveEndpoints(ctx context.Context) error {
 	dataIn.WriteUint16(0) // DstAddr
 	dataIn.WriteUint16(0) // NWKAddrOfInterest
 
-	request := &Frame{}
-	request.SetCommand0(0x25) // Type 0x1, SubSystem 0x5
-	request.SetCommandID(0x05)
-	request.SetDataAsBuffer(dataIn)
-
-	response, err := c.CallWithResultSREQ(ctx, request)
+	response, err := c.CallWithResultSREQ(ctx, dataIn.Frame(0x25, 0x05))
 	if err != nil {
 		return err
 	}
@@ -257,12 +241,7 @@ func (c *Client) ZDONodeDescription(ctx context.Context, DstAddr, NWKAddrOfInter
 	dataIn.WriteUint16(DstAddr)           // DstAddr
 	dataIn.WriteUint16(NWKAddrOfInterest) // NWKAddrOfInterest
 
-	request := &Frame{}
-	request.SetCommand0(0x25) // Type 0x1, SubSystem 0x5
-	request.SetCommandID(0x02)
-	request.SetDataAsBuffer(dataIn)
-
-	response, err := c.CallWithResultSREQ(ctx, request)
+	response, err := c.CallWithResultSREQ(ctx, dataIn.Frame(0x25, 0x02))
 	if err != nil {
 		return err
 	}
@@ -303,12 +282,7 @@ func (c *Client) ZDOExtFindGroup(ctx context.Context, endpoint uint8, group uint
 	dataIn.WriteUint8(endpoint)
 	dataIn.WriteUint16(group)
 
-	request := &Frame{}
-	request.SetCommand0(0x25) // Type 0x1, SubSystem 0x5
-	request.SetCommandID(0x4A)
-	request.SetDataAsBuffer(dataIn)
-
-	response, err := c.CallWithResultSREQ(ctx, request)
+	response, err := c.CallWithResultSREQ(ctx, dataIn.Frame(0x25, 0x4A))
 	if err != nil {
 		return nil, err
 	}
@@ -335,12 +309,7 @@ func (c *Client) ZDOExtAddToGroup(ctx context.Context, endpoint uint8, group uin
 	dataIn.WriteUint8(uint8(len(groupName))) // namelen
 	dataIn.Write(groupName)                  // groupname
 
-	request := &Frame{}
-	request.SetCommand0(0x25) // Type 0x1, SubSystem 0x5
-	request.SetCommandID(0x02)
-	request.SetDataAsBuffer(dataIn)
-
-	response, err := c.CallWithResultSREQ(ctx, request)
+	response, err := c.CallWithResultSREQ(ctx, dataIn.Frame(0x25, 0x02))
 	if err != nil {
 		return err
 	}
@@ -355,12 +324,7 @@ func (c *Client) ZDOLQI(ctx context.Context, networkAddress uint16, startIndex u
 	dataIn.WriteUint16(networkAddress) // DstAddr
 	dataIn.WriteUint8(startIndex)      // StartIndex
 
-	request := &Frame{}
-	request.SetCommand0(0x25) // Type 0x1, SubSystem 0x5
-	request.SetCommandID(0x31)
-	request.SetDataAsBuffer(dataIn)
-
-	response, err := c.CallWithResultSREQ(ctx, request)
+	response, err := c.CallWithResultSREQ(ctx, dataIn.Frame(0x25, 0x31))
 	if err != nil {
 		return err
 	}
@@ -411,19 +375,51 @@ func (c *Client) ZDOLQI(ctx context.Context, networkAddress uint16, startIndex u
 		Attributes:
 			Status 1 byte Status is either Success (0) or Failure (1).
 */
-func (c *Client) ZDONetworkDiscovery(ctx context.Context, dstAddr uint16, scanChannels uint32, scanDuration, startIndex uint8) error {
+func (c *Client) ZDOManagementNetworkDiscovery(ctx context.Context, dstAddr uint16, scanChannels uint32, scanDuration, startIndex uint8) error {
 	dataIn := NewBuffer(nil)
 	dataIn.WriteUint16(dstAddr)      // DstAddr
 	dataIn.WriteUint32(scanChannels) // ScanChannels
 	dataIn.WriteUint8(scanDuration)  // ScanDuration
 	dataIn.WriteUint8(startIndex)    // StartIndex
 
-	request := &Frame{}
-	request.SetCommand0(0x65) // Type 0x1, SubSystem 0x5
-	request.SetCommandID(0x30)
-	request.SetDataAsBuffer(dataIn)
+	response, err := c.CallWithResultSREQ(ctx, dataIn.Frame(0x65, 0x30))
+	if err != nil {
+		return err
+	}
 
-	response, err := c.CallWithResultSREQ(ctx, request)
+	dataOut := response.Data()
+	if len(dataOut) == 0 || dataOut[0] != 0 {
+		return errors.New("failure")
+	}
+
+	return nil
+}
+
+/*
+	ZDO_MGMT_RTG_REQ
+
+	This command is generated to request the Routing Table of the destination device
+
+	Usage:
+		SREQ:
+			       1      |      1      |      1      |    2    |     1
+			Length = 0x03 | Cmd0 = 0x25 | Cmd1 = 0x32 | DstAddr | StartIndex
+		Attributes:
+			DstAddr    2 bytes Specifies the network address of the device generating the query.
+			StartIndex 1 byte  Specifies where to start in the response array list. The result may contain more entries than can be reported, so this field allows the user to retrieve the responses anywhere in the array list.
+
+		SRSP:
+			       1      |      1      |      1      |    1
+			Length = 0x01 | Cmd0 = 0x65 | Cmd1 = 0x32 | Status
+		Attributes:
+			Status 1 byte Status is either Success (0) or Failure (1).
+*/
+func (c *Client) ZDORoutingTable(ctx context.Context, dstAddr uint16, startIndex uint8) error {
+	dataIn := NewBuffer(nil)
+	dataIn.WriteUint16(dstAddr)   // dstAddr
+	dataIn.WriteUint8(startIndex) // StartIndex
+
+	response, err := c.CallWithResultSREQ(ctx, dataIn.Frame(0x25, 0x32))
 	if err != nil {
 		return err
 	}
@@ -585,18 +581,64 @@ func (c *Client) ZDOLQIMessage(frame *Frame) (*ZDOLQIMessage, error) {
 	return msg, nil
 }
 
-func (c *Client) ZDONetworkDiscoveryMessage(frame *Frame) (*ZDONetworkDiscoveryMessage, error) {
+func (c *Client) ZDONetworkDiscoveryMessage(frame *Frame) (*ZDOManagementNetworkDiscoveryMessage, error) {
 	if frame.SubSystem() != SubSystemZDOInterface {
 		return nil, errors.New("frame isn't a ZDO interface")
 	}
 
-	if frame.CommandID() != 0xB0 {
-		return nil, errors.New("frame isn't a LQI message")
+	if frame.CommandID() != CommandManagementNetworkDiscoveryResponse {
+		return nil, errors.New("frame isn't a network discovery message")
 	}
 
 	dataOut := frame.DataAsBuffer()
 
-	msg := &ZDONetworkDiscoveryMessage{
+	msg := &ZDOManagementNetworkDiscoveryMessage{
+		SourceAddress:    dataOut.ReadUint16(),
+		Status:           dataOut.ReadUint8(),
+		NetworkCount:     dataOut.ReadUint8(),
+		StartIndex:       dataOut.ReadUint8(),
+		NetworkListCount: dataOut.ReadUint8(),
+		NetworkList:      make([]NetworkListItem, 0, 12),
+	}
+
+	if msg.Status != 0 {
+		return nil, errors.New("failure")
+	}
+
+	for i := uint8(0); i < msg.NetworkListCount; i++ {
+		item := NetworkListItem{
+			PAN:            dataOut.ReadUint16(),
+			LogicalChannel: dataOut.ReadUint8(),
+		}
+
+		v := dataOut.ReadUint8()
+		item.StackProfile = v & 0x0F
+		item.ZigBeeVersion = (v & 0xF0) >> 4
+
+		v = dataOut.ReadUint8()
+		item.BeaconOrder = v & 0x0F
+		item.SuperFrameOrder = (v & 0xF0) >> 4
+
+		msg.NetworkList = append(msg.NetworkList, item)
+	}
+
+	return msg, nil
+}
+
+func (c *Client) ZDOManagementRoutingTableMessage(frame *Frame) (*ZDOManagementNetworkDiscoveryMessage, error) {
+	if frame.SubSystem() != SubSystemZDOInterface {
+		return nil, errors.New("frame isn't a ZDO interface")
+	}
+
+	if frame.CommandID() != CommandManagementRoutingTableResponse {
+		return nil, errors.New("frame isn't a routing table message")
+	}
+
+	dataOut := frame.DataAsBuffer()
+
+	fmt.Println("TEST", dataOut.Bytes())
+
+	msg := &ZDOManagementNetworkDiscoveryMessage{
 		SourceAddress:    dataOut.ReadUint16(),
 		Status:           dataOut.ReadUint8(),
 		NetworkCount:     dataOut.ReadUint8(),

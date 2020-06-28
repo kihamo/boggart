@@ -15,10 +15,7 @@ type UtilDeviceInfo struct {
 }
 
 func (c *Client) UtilGetDeviceInfo(ctx context.Context) (*UtilDeviceInfo, error) {
-	request := &Frame{}
-	request.SetCommand0(0x27)
-
-	response, err := c.CallWithResultSREQ(ctx, request)
+	response, err := c.CallWithResultSREQ(ctx, NewFrame(0x27, 0x00))
 	if err != nil {
 		return nil, err
 	}

@@ -84,6 +84,13 @@ func NewBuffer(data []byte) *Buffer {
 	}
 }
 
+func (b *Buffer) Frame(cmd0, cmd1 uint16) *Frame {
+	f := NewFrame(cmd0, cmd1)
+	f.SetDataAsBuffer(b)
+
+	return f
+}
+
 func (b *Buffer) ReadByType(t uint8) interface{} {
 	switch t {
 	case DataTypeBoolean:

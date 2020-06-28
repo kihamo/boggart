@@ -19,6 +19,14 @@ type Frame struct {
 	lock sync.RWMutex
 }
 
+func NewFrame(cmd0, cmd1 uint16) *Frame {
+	f := &Frame{}
+	f.SetCommand0(cmd0)
+	f.SetCommand1(cmd1)
+
+	return f
+}
+
 func (f *Frame) Command0() uint16 {
 	f.lock.RLock()
 	defer f.lock.RUnlock()
@@ -197,7 +205,11 @@ func (f *Frame) String() string {
 	buffer.WriteString(strconv.FormatUint(uint64(f.Length()), 10))
 	buffer.WriteString(" type: ")
 	buffer.WriteString(strconv.FormatUint(uint64(f.Type()), 10))
-	buffer.WriteString(" sub system: ")
+	buffer.WriteString(" cmd0: ")
+	buffer.WriteString(strconv.FormatUint(uint64(f.Command0()), 10))
+	buffer.WriteString(" (0x")
+	buffer.WriteString(fmt.Sprintf("%X", f.Command0()))
+	buffer.WriteString(") sub system: ")
 	buffer.WriteString(strconv.FormatUint(uint64(f.SubSystem()), 10))
 	buffer.WriteString(" (0x")
 	buffer.WriteString(fmt.Sprintf("%X", f.SubSystem()))

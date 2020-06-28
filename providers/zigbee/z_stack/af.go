@@ -203,12 +203,7 @@ func (c *Client) AfIncomingMessage(frame *Frame) (*AfIncomingMessage, error) {
 		zigbee-herdsman:adapter:zStack:unpi:parser --- parseNext [] +1ms
 */
 func (c *Client) AfRegister(ctx context.Context, endpoint Endpoint) error {
-	request := &Frame{}
-	request.SetCommand0(0x24) // Type 0x1, SubSystem 0x5
-	request.SetCommandID(0x00)
-	request.SetDataAsBuffer(endpoint.AsBuffer())
-
-	response, err := c.CallWithResultSREQ(ctx, request)
+	response, err := c.CallWithResultSREQ(ctx, endpoint.AsBuffer().Frame(0x24, 0x00))
 	if err != nil {
 		return err
 	}

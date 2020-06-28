@@ -27,11 +27,7 @@ func (v *SysVersion) Type() string {
 }
 
 func (c *Client) SysPing(ctx context.Context) (uint16, error) {
-	request := &Frame{}
-	request.SetCommand0(0x21)
-	request.SetCommandID(0x01)
-
-	response, err := c.CallWithResultSREQ(ctx, request)
+	response, err := c.CallWithResultSREQ(ctx, NewFrame(0x21, 0x01))
 	if err != nil {
 		return 0, err
 	}
@@ -40,11 +36,7 @@ func (c *Client) SysPing(ctx context.Context) (uint16, error) {
 }
 
 func (c *Client) SysVersion(ctx context.Context) (*SysVersion, error) {
-	request := &Frame{}
-	request.SetCommand0(0x21)
-	request.SetCommandID(0x02)
-
-	response, err := c.CallWithResultSREQ(ctx, request)
+	response, err := c.CallWithResultSREQ(ctx, NewFrame(0x21, 0x02))
 	if err != nil {
 		return nil, err
 	}
@@ -62,12 +54,11 @@ func (c *Client) SysVersion(ctx context.Context) (*SysVersion, error) {
 }
 
 func (c *Client) SysADCRead(ctx context.Context, channel, resolution uint8) (uint16, error) {
-	request := &Frame{}
-	request.SetCommand0(0x21)
-	request.SetCommandID(0x0D)
-	request.SetData([]byte{channel, resolution})
+	dataIn := NewBuffer(nil)
+	dataIn.WriteUint8(channel)    // channel
+	dataIn.WriteUint8(resolution) // resolution
 
-	_, err := c.CallWithResultSREQ(ctx, request)
+	_, err := c.CallWithResultSREQ(ctx, dataIn.Frame(0x21, 0x0D))
 	if err != nil {
 		return 0, err
 	}

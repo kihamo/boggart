@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"sync"
 	"sync/atomic"
@@ -209,10 +210,7 @@ func (c *Client) Boot(ctx context.Context) error {
 	}
 
 	if device.DeviceState != DeviceStateCoordinator {
-		ctxWait, cancel := context.WithTimeout(ctx, time.Millisecond*6000)
-		defer cancel()
-
-		waitResponse, waitErr := c.WaitAsync(ctxWait, func(response *Frame) bool {
+		waitResponse, waitErr := c.WaitAsync(ctx, func(response *Frame) bool {
 			return response.Type() == TypeAREQ && response.SubSystem() == SubSystemZDOInterface && response.CommandID() == 0xC0
 		})
 
@@ -254,9 +252,6 @@ func (c *Client) Boot(ctx context.Context) error {
 	/*
 	 * Register endpoints
 	 */
-	ctxWait, cancel := context.WithTimeout(ctx, time.Millisecond*6000)
-	defer cancel()
-
 	/*
 		ZDO_ACTIVE_EP_RSP
 
@@ -276,7 +271,7 @@ func (c *Client) Boot(ctx context.Context) error {
 		Example from zigbee2mqtt:
 			zigbee-herdsman:adapter:zStack:znp:AREQ <-- ZDO - activeEpRsp - {"srcaddr":0,"status":0,"nwkaddr":0,"activeepcount":0,"activeeplist":[]} +14ms
 	*/
-	waitResponse, waitErr := c.WaitAsync(ctxWait, func(response *Frame) bool {
+	waitResponse, waitErr := c.WaitAsync(ctx, func(response *Frame) bool {
 		return response.Type() == TypeAREQ && response.SubSystem() == SubSystemZDOInterface && response.CommandID() == CommandActiveEndpointResponse
 	})
 
@@ -418,9 +413,6 @@ func (c *Client) PermitJoin(ctx context.Context, seconds uint8) error {
 		return nil
 	}
 
-	ctxWait, cancel := context.WithTimeout(ctx, time.Millisecond*6000)
-	defer cancel()
-
 	/*
 		ZDO_MGMT_PERMIT_JOIN_RSP
 
@@ -441,7 +433,7 @@ func (c *Client) PermitJoin(ctx context.Context, seconds uint8) error {
 			zigbee-herdsman:adapter:zStack:znp:AREQ <-- ZDO - mgmtPermitJoinRsp - {"srcaddr":0,"status":0} +47ms
 	*/
 
-	waitResponse, waitErr := c.WaitAsync(ctxWait, func(response *Frame) bool {
+	waitResponse, waitErr := c.WaitAsync(ctx, func(response *Frame) bool {
 		return response.Type() == TypeAREQ && response.SubSystem() == SubSystemZDOInterface && response.CommandID() == CommandManagementPermitJoinResponse
 	})
 
@@ -502,10 +494,7 @@ func (c *Client) SyncDevices(ctx context.Context) error {
 
 func (c *Client) LQI(ctx context.Context, networkAddress uint16) ([]NeighborLqiListItem, error) {
 	request := func(index uint8) (*ZDOLQIMessage, error) {
-		ctxWait, cancel := context.WithTimeout(ctx, time.Millisecond*6000)
-		defer cancel()
-
-		waitResponse, waitErr := c.WaitAsync(ctxWait, func(response *Frame) bool {
+		waitResponse, waitErr := c.WaitAsync(ctx, func(response *Frame) bool {
 			return response.Type() == TypeAREQ && response.SubSystem() == SubSystemZDOInterface && response.CommandID() == 0xB1
 		})
 
@@ -546,17 +535,14 @@ func (c *Client) LQI(ctx context.Context, networkAddress uint16) ([]NeighborLqiL
 }
 
 func (c *Client) NetworkDiscovery(ctx context.Context) ([]NetworkListItem, error) {
-	request := func(index uint8) (*ZDONetworkDiscoveryMessage, error) {
+	request := func(index uint8) (*ZDOManagementNetworkDiscoveryMessage, error) {
 		scanDuration := uint8(1)
 
-		ctxWait, cancel := context.WithTimeout(ctx, time.Duration(scanDuration+6)*time.Second)
-		defer cancel()
-
-		waitResponse, waitErr := c.WaitAsync(ctxWait, func(response *Frame) bool {
+		waitResponse, waitErr := c.WaitAsyncWithTimeout(ctx, func(response *Frame) bool {
 			return response.Type() == TypeAREQ && response.SubSystem() == SubSystemZDOInterface && response.CommandID() == 0xB0
-		})
+		}, time.Duration(scanDuration+6)*time.Second)
 
-		if err := c.ZDONetworkDiscovery(ctx, 0, ScanChannelsAllChannels, scanDuration, 0); err != nil {
+		if err := c.ZDOManagementNetworkDiscovery(ctx, 0, ScanChannelsAllChannels, scanDuration, index); err != nil {
 			return nil, err
 		}
 
@@ -592,32 +578,35 @@ func (c *Client) NetworkDiscovery(ctx context.Context) ([]NetworkListItem, error
 	return list, nil
 }
 
-func (c *Client) deviceAdd(device *Device) {
-	c.devices.Store(device.NetworkAddress(), device)
-}
+func (c *Client) RoutingTable(ctx context.Context, dstAddr uint16) ([]interface{}, error) {
+	request := func(index uint8) (*ZDOManagementNetworkDiscoveryMessage, error) {
+		waitResponse, waitErr := c.WaitAsyncWithTimeout(ctx, func(response *Frame) bool {
+			return response.Type() == TypeAREQ && response.SubSystem() == SubSystemZDOInterface && response.CommandID() == CommandManagementRoutingTableResponse
+		}, time.Second*10)
 
-func (c *Client) deviceRemove(networkAddress uint16) {
-	c.devices.Delete(networkAddress)
-}
+		if err := c.ZDORoutingTable(ctx, dstAddr, index); err != nil {
+			return nil, err
+		}
 
-func (c *Client) Devices() []*Device {
-	devices := make([]*Device, 0)
+		for {
+			select {
+			case frame := <-waitResponse:
+				return c.ZDOManagementRoutingTableMessage(frame)
 
-	c.devices.Range(func(key, value interface{}) bool {
-		devices = append(devices, value.(*Device))
-		return true
-	})
-
-	return devices
-}
-
-func (c *Client) Device(networkAddress uint16) *Device {
-	value, ok := c.devices.Load(networkAddress)
-	if !ok {
-		return nil
+			case e := <-waitErr:
+				return nil, e
+			}
+		}
 	}
 
-	return value.(*Device)
+	msg, err := request(0)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println(msg)
+
+	return nil, nil
 }
 
 func (c *Client) SkipBootLoader() error {
@@ -668,18 +657,22 @@ func (c *Client) CallWithResult(ctx context.Context, request *Frame, waiter func
 }
 
 func (c *Client) CallWithResultSREQ(ctx context.Context, request *Frame) (*Frame, error) {
-	ctx, cancel := context.WithTimeout(ctx, time.Millisecond*6000)
-	defer cancel()
-
 	return c.CallWithResult(ctx, request, func(response *Frame) bool {
 		return response.Type() == TypeSRSP && response.SubSystem() == request.SubSystem() && response.CommandID() == request.CommandID()
 	})
 }
 
 func (c *Client) Wait(ctx context.Context, waiter func(frame *Frame) bool) (*Frame, error) {
+	return c.WaitWithTimeout(ctx, waiter, DefaultWaitTimeout)
+}
+
+func (c *Client) WaitWithTimeout(ctx context.Context, waiter func(frame *Frame) bool, timeout time.Duration) (*Frame, error) {
 	if c.isClosed() {
 		return nil, errors.New("connection is closed")
 	}
+
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
 
 	watcher := c.Watch()
 	defer func() {
@@ -703,11 +696,15 @@ func (c *Client) Wait(ctx context.Context, waiter func(frame *Frame) bool) (*Fra
 }
 
 func (c *Client) WaitAsync(ctx context.Context, waiter func(frame *Frame) bool) (<-chan *Frame, <-chan error) {
+	return c.WaitAsyncWithTimeout(ctx, waiter, DefaultWaitTimeout)
+}
+
+func (c *Client) WaitAsyncWithTimeout(ctx context.Context, waiter func(frame *Frame) bool, timeout time.Duration) (<-chan *Frame, <-chan error) {
 	response := make(chan *Frame, 1)
 	err := make(chan error, 1)
 
 	go func() {
-		if r, e := c.Wait(ctx, waiter); e != nil {
+		if r, e := c.WaitWithTimeout(ctx, waiter, timeout); e != nil {
 			err <- e
 		} else {
 			response <- r

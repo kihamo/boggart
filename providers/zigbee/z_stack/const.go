@@ -1,5 +1,9 @@
 package z_stack
 
+import (
+	"time"
+)
+
 const (
 	VersionZStack12  = 0
 	VersionZStack3x0 = 1
@@ -103,11 +107,15 @@ const (
 	ADCResolutionBit12 = 0x02
 	ADCResolutionBit14 = 0x03
 
-	CommandAfIncomingMessage            = 0x81
-	CommandActiveEndpointResponse       = 0x85
-	CommandManagementPermitJoinResponse = 0xB6
-	CommandEndDeviceAnnounceInd         = 0xC1
-	CommandLeaveInd                     = 0xC9
-	CommandTcDeviceInd                  = 0xCA
-	CommandPermitJoinInd                = 0xCB
+	CommandAfIncomingMessage                  = 0x81
+	CommandActiveEndpointResponse             = 0x85
+	CommandManagementNetworkDiscoveryResponse = 0xB0
+	CommandManagementRoutingTableResponse     = 0xB2
+	CommandManagementPermitJoinResponse       = 0xB6
+	CommandEndDeviceAnnounceInd               = 0xC1
+	CommandLeaveInd                           = 0xC9
+	CommandTcDeviceInd                        = 0xCA
+	CommandPermitJoinInd                      = 0xCB
+
+	DefaultWaitTimeout = time.Millisecond * 6000
 )

@@ -2,8 +2,9 @@ package z_stack
 
 import (
 	"encoding/hex"
-	a "github.com/kihamo/boggart/atomic"
 	"sync/atomic"
+
+	a "github.com/kihamo/boggart/atomic"
 )
 
 type Device struct {
@@ -66,4 +67,32 @@ func (d *Device) DeviceTypeAsString() string {
 
 func (d *Device) SetDeviceType(deviceType uint8) {
 	atomic.StoreUint32(&d.deviceType, uint32(deviceType))
+}
+
+func (c *Client) deviceAdd(device *Device) {
+	c.devices.Store(device.NetworkAddress(), device)
+}
+
+func (c *Client) deviceRemove(networkAddress uint16) {
+	c.devices.Delete(networkAddress)
+}
+
+func (c *Client) Devices() []*Device {
+	devices := make([]*Device, 0)
+
+	c.devices.Range(func(key, value interface{}) bool {
+		devices = append(devices, value.(*Device))
+		return true
+	})
+
+	return devices
+}
+
+func (c *Client) Device(networkAddress uint16) *Device {
+	value, ok := c.devices.Load(networkAddress)
+	if !ok {
+		return nil
+	}
+
+	return value.(*Device)
 }
