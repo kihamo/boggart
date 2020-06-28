@@ -15,7 +15,8 @@ type Config struct {
 	ConnectionDSN        string        `mapstructure:"connection_dsn" yaml:"connection_dsn" valid:"required"`
 	PermitJoin           bool          `mapstructure:"permit_join" yaml:"permit_join"`
 	PermitJoinDuration   time.Duration `mapstructure:"permit_join_duration" yaml:"permit_join_duration"`
-	TopicPermitJoinState mqtt.Topic    `mapstructure:"topic_permit_join" yaml:"topic_permit_join"`
+	TopicPermitJoin      mqtt.Topic    `mapstructure:"topic_permit_join" yaml:"topic_permit_join"`
+	TopicPermitJoinState mqtt.Topic    `mapstructure:"topic_permit_join_state" yaml:"topic_permit_join_state"`
 	TopicLinkQuality     mqtt.Topic    `mapstructure:"topic_link_quality" yaml:"topic_link_quality"`
 	TopicBatteryPercent  mqtt.Topic    `mapstructure:"topic_battery_percent" yaml:"topic_battery_percent"`
 	TopicBatteryVoltage  mqtt.Topic    `mapstructure:"topic_battery_voltage" yaml:"topic_battery_voltage"`
@@ -42,6 +43,7 @@ func (Type) Config() interface{} {
 		},
 		PermitJoin:           false,
 		PermitJoinDuration:   255 * time.Second,
+		TopicPermitJoin:      prefix + "permit-join",
 		TopicPermitJoinState: prefix + "permit-join/state",
 		TopicLinkQuality:     prefixDevice + "link-quality",
 		TopicBatteryPercent:  prefixDevice + "battery/percent",
