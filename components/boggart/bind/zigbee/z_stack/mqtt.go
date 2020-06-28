@@ -8,7 +8,8 @@ import (
 
 func (b *Bind) syncPermitJoin() {
 	if sn := b.Meta().SerialNumber(); sn != "" {
-		b.MQTT().PublishAsync(context.TODO(), b.config.TopicPermitJoinState.Format(sn), b.client.PermitJoinEnabled())
+		b.MQTT().PublishAsync(context.TODO(), b.config.TopicStatePermitJoin.Format(sn), b.client.PermitJoinEnabled())
+		b.MQTT().PublishAsync(context.TODO(), b.config.TopicStatePermitJoinDuration.Format(sn), b.permitJoinDuration())
 	}
 }
 

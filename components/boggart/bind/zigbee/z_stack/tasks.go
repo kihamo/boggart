@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/kihamo/go-workers"
+	"go.uber.org/multierr"
 )
 
 func (b *Bind) Tasks() []workers.Task {
@@ -30,8 +31,42 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 		return err
 	}
 
-	b.Meta().SetSerialNumber(hex.EncodeToString(info.IEEEAddr))
+	sn := hex.EncodeToString(info.IEEEAddr)
+	b.Meta().SetSerialNumber(sn)
 	b.syncPermitJoin()
 
-	return nil
+	version, err := client.SysVersion(ctx)
+	if err != nil {
+		return err
+	}
+
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicVersionTransportRevision.Format(sn), version.TransportRevision); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicVersionProduct.Format(sn), version.Product); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicVersionMajorRelease.Format(sn), version.MajorRelease); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicVersionMinorRelease.Format(sn), version.MinorRelease); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicVersionMainTrel.Format(sn), version.MainTrel); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicVersionHardwareRevision.Format(sn), version.HardwareRevision); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicVersionType.Format(sn), version.Type()); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	return err
 }

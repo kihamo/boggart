@@ -4,24 +4,6 @@ import (
 	"context"
 )
 
-const (
-	ADCChannelAIN0              = 0x00
-	ADCChannelAIN1              = 0x01
-	ADCChannelAIN2              = 0x02
-	ADCChannelAIN3              = 0x03
-	ADCChannelAIN4              = 0x04
-	ADCChannelAIN5              = 0x05
-	ADCChannelAIN6              = 0x06
-	ADCChannelAIN7              = 0x07
-	ADCChannelTemperatureSensor = 0x0E
-	ADCChannelVoltageReading    = 0x0F
-
-	ADCResolutionBit8  = 0x00
-	ADCResolutionBit10 = 0x01
-	ADCResolutionBit12 = 0x02
-	ADCResolutionBit14 = 0x03
-)
-
 type SysVersion struct {
 	TransportRevision uint8
 	Product           uint8
@@ -29,6 +11,19 @@ type SysVersion struct {
 	MinorRelease      uint8
 	MainTrel          uint8
 	HardwareRevision  uint32
+}
+
+func (v *SysVersion) Type() string {
+	switch v.Product {
+	case VersionZStack12:
+		return "zStack12"
+	case VersionZStack3x0:
+		return "zStack3x0"
+	case VersionZStack30x:
+		return "zStack30x"
+	}
+
+	return ""
 }
 
 func (c *Client) SysPing(ctx context.Context) (uint16, error) {

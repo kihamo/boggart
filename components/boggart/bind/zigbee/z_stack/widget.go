@@ -20,6 +20,12 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		vars["devices"] = client.Devices()
 		vars["permit_join"] = client.PermitJoinEnabled()
 
+		if version, err := client.SysVersion(ctx); err == nil {
+			vars["version"] = version
+		} else {
+			errors = append(errors, err.Error())
+		}
+
 		if info, err := client.UtilGetDeviceInfo(ctx); err == nil {
 			vars["info"] = map[string]interface{}{
 				"ieee_address": hex.EncodeToString(info.IEEEAddr),

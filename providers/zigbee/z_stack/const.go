@@ -1,6 +1,10 @@
 package z_stack
 
 const (
+	VersionZStack12  = 0
+	VersionZStack3x0 = 1
+	VersionZStack30x = 2
+
 	// A POLL command is used to retrieve queued data. This command is only applicable to SPI transport.
 	// For a POLL command the subsystem and Id are set to zero and data length is zero.
 	TypePoll = 0x0
@@ -77,6 +81,22 @@ const (
 	ScanChannelsChannel24   = 0x01000000
 	ScanChannelsChannel25   = 0x02000000
 	ScanChannelsChannel26   = 0x04000000
+
+	ADCChannelAIN0              = 0x00
+	ADCChannelAIN1              = 0x01
+	ADCChannelAIN2              = 0x02
+	ADCChannelAIN3              = 0x03
+	ADCChannelAIN4              = 0x04
+	ADCChannelAIN5              = 0x05
+	ADCChannelAIN6              = 0x06
+	ADCChannelAIN7              = 0x07
+	ADCChannelTemperatureSensor = 0x0E
+	ADCChannelVoltageReading    = 0x0F
+
+	ADCResolutionBit8  = 0x00
+	ADCResolutionBit10 = 0x01
+	ADCResolutionBit12 = 0x02
+	ADCResolutionBit14 = 0x03
 
 	CommandAfIncomingMessage            = 0x81
 	CommandActiveEndpointResponse       = 0x85

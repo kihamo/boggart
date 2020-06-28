@@ -7,7 +7,7 @@
                 <div class="clearfix"></div>
             </div>
             <div class="x_content">
-                <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                <table class="table table-striped dt-responsive nowrap" style="width:100%">
                     <thead>
                     <tr>
                         <th class="md-col-2">{{ i18n "Variable" . }}</th>
@@ -19,6 +19,28 @@
                         <td>{{ i18n "Permit join" . }}</td>
                         <td>{{ if .permit_join }}enabled{{ else }}disabled{{ end }}</td>
                     </tr>
+                    {{ if .version }}
+                    <tr>
+                        <td>{{ i18n "Transport revision" . }}</td>
+                        <td>{{ .version.TransportRevision }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ i18n "Product" . }}</td>
+                        <td>{{ .version.Product }} ({{ .version.Type }})</td>
+                    </tr>
+                    <tr>
+                        <td>{{ i18n "Version" . }}</td>
+                        <td>v. {{ .version.MajorRelease }}.{{ .version.MinorRelease }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ i18n "Main trel" . }}</td>
+                        <td>{{ .version.MainTrel }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ i18n "Hardware revision" . }}</td>
+                        <td>{{ .version.HardwareRevision }}</td>
+                    </tr>
+                    {{ end }}
                     {{ if .info }}
                     <tr>
                         <td>{{ i18n "Device IEEE address" . }}</td>
