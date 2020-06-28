@@ -441,7 +441,7 @@ func (c *Client) ZDODeviceJoinedMessage(frame *Frame) (*ZDODeviceJoinedMessage, 
 		return nil, errors.New("frame isn't a ZDO interface")
 	}
 
-	if frame.CommandID() != 0xCA {
+	if frame.CommandID() != CommandTcDeviceInd {
 		return nil, errors.New("frame isn't a device joined command")
 	}
 
@@ -482,7 +482,7 @@ func (c *Client) ZDOEndDeviceAnnounceMessage(frame *Frame) (*ZDOEndDeviceAnnounc
 		return nil, errors.New("frame isn't a ZDO interface")
 	}
 
-	if frame.CommandID() != 0xC1 {
+	if frame.CommandID() != CommandEndDeviceAnnounceInd {
 		return nil, errors.New("frame isn't a end device announce command")
 	}
 
@@ -501,7 +501,7 @@ func (c *Client) ZDODeviceLeaveMessage(frame *Frame) (*ZDODeviceLeaveMessage, er
 		return nil, errors.New("frame isn't a ZDO interface")
 	}
 
-	if frame.CommandID() != 0xC9 {
+	if frame.CommandID() != CommandLeaveInd {
 		return nil, errors.New("frame isn't a device leave command")
 	}
 

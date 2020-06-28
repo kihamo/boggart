@@ -2,6 +2,7 @@ package z_stack
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"sync"
 	"time"
@@ -96,77 +97,88 @@ func (b *Bind) Run() error {
 			case frame := <-watcher.NextFrame():
 				b.Logger().Debug("Received Zigbee message",
 					"length", frame.Length(),
-					"type", frame.Type(),
-					"sub-system", frame.SubSystem(),
-					"command-id", frame.CommandID(),
-					"data", frame.Data(),
+					"type", fmt.Sprintf("0x%X", frame.Type()),
+					"sub-system", fmt.Sprintf("0x%X", frame.SubSystem()),
+					"command-id", fmt.Sprintf("0x%X", frame.CommandID()),
+					"data", fmt.Sprintf("%v", frame.Data()),
 					"fcs", frame.FCS(),
 				)
 
-				if frame.CommandID() == z_stack.CommandAfIncomingMessage {
-					message, err := client.AfIncomingMessage(frame)
-					if err != nil {
-						b.Logger().Warn("Parse received message", "error", err.Error())
-						continue
-					}
+				if frame.Type() == z_stack.TypeAREQ {
+					switch frame.CommandID() {
 
-					var sourceAddress string
+					case z_stack.CommandAfIncomingMessage:
+						message, err := client.AfIncomingMessage(frame)
+						if err != nil {
+							b.Logger().Warn("Parse received message", "error", err.Error())
+							continue
+						}
 
-					if device := client.Device(message.SrcAddr); device != nil {
-						sourceAddress = device.IEEEAddressAsString()
-					}
+						var sourceAddress string
 
-					if sourceAddress == "" {
-						sourceAddress = strconv.FormatUint(uint64(message.SrcAddr), 10)
-					}
+						if device := client.Device(message.SrcAddr); device != nil {
+							sourceAddress = device.IEEEAddressAsString()
+						}
 
-					ctx := context.Background()
-					sn := b.Meta().SerialNumber()
+						if sourceAddress == "" {
+							sourceAddress = strconv.FormatUint(uint64(message.SrcAddr), 10)
+						}
 
-					if sn != "" {
-						metricLinkQuality.With("serial_number", sn).With("srcaddr", sourceAddress).Set(float64(message.LinkQuality))
-						_ = b.MQTT().Publish(ctx, b.config.TopicLinkQuality.Format(sn, sourceAddress), message.LinkQuality)
-					}
+						ctx := context.Background()
+						sn := b.Meta().SerialNumber()
 
-					if message.Frame.Payload.Report != nil && len(*message.Frame.Payload.Report) > 0 {
-						report := (*message.Frame.Payload.Report)[0]
+						if sn != "" {
+							metricLinkQuality.With("serial_number", sn).With("srcaddr", sourceAddress).Set(float64(message.LinkQuality))
+							_ = b.MQTT().Publish(ctx, b.config.TopicLinkQuality.Format(sn, sourceAddress), message.LinkQuality)
+						}
 
-						switch report.AttributeID {
-						// battery
-						case 65282:
-							elements := report.AttributeData.(z_stack.TypeStruct).Elements
-							if len(elements) > 1 {
-								if sn != "" {
-									voltage := elements[1].Value.(uint16)
-									percent := ToPercentageCR2032(voltage)
+						if message.Frame.Payload.Report != nil && len(*message.Frame.Payload.Report) > 0 {
+							report := (*message.Frame.Payload.Report)[0]
 
-									metricBatteryPercent.With("serial_number", sn).With("srcaddr", sourceAddress).Set(float64(percent))
-									_ = b.MQTT().Publish(ctx, b.config.TopicBatteryPercent.Format(sn, sourceAddress), percent)
+							switch report.AttributeID {
+							// battery
+							case 65282:
+								elements := report.AttributeData.(z_stack.TypeStruct).Elements
+								if len(elements) > 1 {
+									if sn != "" {
+										voltage := elements[1].Value.(uint16)
+										percent := ToPercentageCR2032(voltage)
 
-									metricBatteryVoltage.With("serial_number", sn).With("srcaddr", sourceAddress).Set(float64(voltage))
-									_ = b.MQTT().Publish(ctx, b.config.TopicBatteryVoltage.Format(sn, sourceAddress), voltage)
+										metricBatteryPercent.With("serial_number", sn).With("srcaddr", sourceAddress).Set(float64(percent))
+										_ = b.MQTT().Publish(ctx, b.config.TopicBatteryPercent.Format(sn, sourceAddress), percent)
+
+										metricBatteryVoltage.With("serial_number", sn).With("srcaddr", sourceAddress).Set(float64(voltage))
+										_ = b.MQTT().Publish(ctx, b.config.TopicBatteryVoltage.Format(sn, sourceAddress), voltage)
+									}
+								} else {
+									b.Logger().Warn("Battery element not found", "elements", len(elements))
 								}
-							} else {
-								b.Logger().Warn("Battery element not found", "elements", len(elements))
-							}
 
-							// double click
-						case 32768:
-							_ = b.MQTT().PublishWithoutCache(ctx, b.config.TopicOnOff.Format(sn, sourceAddress), true)
-							_ = b.MQTT().Publish(ctx, b.config.TopicClick.Format(sn, sourceAddress), report.AttributeData)
+								// double click
+							case 32768:
+								_ = b.MQTT().PublishWithoutCache(ctx, b.config.TopicOnOff.Format(sn, sourceAddress), true)
+								_ = b.MQTT().Publish(ctx, b.config.TopicClick.Format(sn, sourceAddress), report.AttributeData)
 
-							// hmmm
-						default:
-							if sn != "" && report.DataType == z_stack.DataTypeBoolean {
-								value := report.AttributeData.(bool)
+								// hmmm
+							default:
+								if sn != "" && report.DataType == z_stack.DataTypeBoolean {
+									value := report.AttributeData.(bool)
 
-								_ = b.MQTT().PublishWithoutCache(ctx, b.config.TopicOnOff.Format(sn, sourceAddress), value)
+									_ = b.MQTT().PublishWithoutCache(ctx, b.config.TopicOnOff.Format(sn, sourceAddress), value)
 
-								if value {
-									_ = b.MQTT().Publish(ctx, b.config.TopicClick.Format(sn, sourceAddress), 1)
+									if value {
+										_ = b.MQTT().Publish(ctx, b.config.TopicClick.Format(sn, sourceAddress), 1)
+									}
 								}
 							}
 						}
+
+					// permit join sync
+					case z_stack.CommandPermitJoinInd, z_stack.CommandManagementPermitJoinResponse:
+						go func() {
+							time.Sleep(time.Second) // грязный хак что бы клиент успел у себя внутри изменить состояние
+							b.syncPermitJoin()
+						}()
 					}
 				}
 

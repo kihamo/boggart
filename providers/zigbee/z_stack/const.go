@@ -3,20 +3,20 @@ package z_stack
 const (
 	// A POLL command is used to retrieve queued data. This command is only applicable to SPI transport.
 	// For a POLL command the subsystem and Id are set to zero and data length is zero.
-	TypePoll = 0
+	TypePoll = 0x0
 
 	// A synchronous request that requires an immediate response.
 	// For example, a function call with a return value would use an SREQ command.
-	TypeSREQ = 1
+	TypeSREQ = 0x1
 
 	// An asynchronous request.
 	// For example, a callback event or a function call with no return value would use an AREQ command.
-	TypeAREQ = 2
+	TypeAREQ = 0x2
 
 	// A synchronous response. This type of command is only sent in response to a SREQ command.
 	// For an SRSP command the subsystem and Id are set to the same values as the corresponding SREQ.
 	// The length of an SRSP is generally nonzero, so an SRSP with length=0 can be used to indicate an error.
-	TypeSRSP = 3
+	TypeSRSP = 0x3
 
 	SubSystemReserved       = 0x00
 	SubSystemSysInterface   = 0x01
@@ -77,4 +77,12 @@ const (
 	ScanChannelsChannel24   = 0x01000000
 	ScanChannelsChannel25   = 0x02000000
 	ScanChannelsChannel26   = 0x04000000
+
+	CommandAfIncomingMessage            = 0x81
+	CommandActiveEndpointResponse       = 0x85
+	CommandManagementPermitJoinResponse = 0xB6
+	CommandEndDeviceAnnounceInd         = 0xC1
+	CommandLeaveInd                     = 0xC9
+	CommandTcDeviceInd                  = 0xCA
+	CommandPermitJoinInd                = 0xCB
 )

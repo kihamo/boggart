@@ -12,18 +12,22 @@ type Config struct {
 	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
-	ConnectionDSN       string        `mapstructure:"connection_dsn" yaml:"connection_dsn" valid:"required"`
-	PermitJoin          bool          `mapstructure:"permit_join" yaml:"permit_join"`
-	PermitJoinDuration  time.Duration `mapstructure:"permit_join_duration" yaml:"permit_join_duration"`
-	TopicLinkQuality    mqtt.Topic    `mapstructure:"topic_link_quality" yaml:"topic_link_quality"`
-	TopicBatteryPercent mqtt.Topic    `mapstructure:"topic_battery_percent" yaml:"topic_battery_percent"`
-	TopicBatteryVoltage mqtt.Topic    `mapstructure:"topic_battery_voltage" yaml:"topic_battery_voltage"`
-	TopicOnOff          mqtt.Topic    `mapstructure:"topic_on_off" yaml:"topic_on_off"`
-	TopicClick          mqtt.Topic    `mapstructure:"topic_click" yaml:"topic_click"`
+	ConnectionDSN        string        `mapstructure:"connection_dsn" yaml:"connection_dsn" valid:"required"`
+	PermitJoin           bool          `mapstructure:"permit_join" yaml:"permit_join"`
+	PermitJoinDuration   time.Duration `mapstructure:"permit_join_duration" yaml:"permit_join_duration"`
+	TopicPermitJoinState mqtt.Topic    `mapstructure:"topic_permit_join" yaml:"topic_permit_join"`
+	TopicLinkQuality     mqtt.Topic    `mapstructure:"topic_link_quality" yaml:"topic_link_quality"`
+	TopicBatteryPercent  mqtt.Topic    `mapstructure:"topic_battery_percent" yaml:"topic_battery_percent"`
+	TopicBatteryVoltage  mqtt.Topic    `mapstructure:"topic_battery_voltage" yaml:"topic_battery_voltage"`
+	TopicOnOff           mqtt.Topic    `mapstructure:"topic_on_off" yaml:"topic_on_off"`
+	TopicClick           mqtt.Topic    `mapstructure:"topic_click" yaml:"topic_click"`
 }
 
 func (Type) Config() interface{} {
-	var prefix mqtt.Topic = boggart.ComponentName + "/zigbee/zstack/+/+/"
+	var (
+		prefix       mqtt.Topic = boggart.ComponentName + "/zigbee/zstack/+/"
+		prefixDevice            = prefix + "+/"
+	)
 
 	return &Config{
 		ProbesConfig: di.ProbesConfig{
@@ -36,12 +40,13 @@ func (Type) Config() interface{} {
 			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
 			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
 		},
-		PermitJoin:          false,
-		PermitJoinDuration:  255 * time.Second,
-		TopicLinkQuality:    prefix + "link-quality",
-		TopicBatteryPercent: prefix + "battery/percent",
-		TopicBatteryVoltage: prefix + "battery/voltage",
-		TopicOnOff:          prefix + "on-off",
-		TopicClick:          prefix + "click",
+		PermitJoin:           false,
+		PermitJoinDuration:   255 * time.Second,
+		TopicPermitJoinState: prefix + "permit-join/state",
+		TopicLinkQuality:     prefixDevice + "link-quality",
+		TopicBatteryPercent:  prefixDevice + "battery/percent",
+		TopicBatteryVoltage:  prefixDevice + "battery/voltage",
+		TopicOnOff:           prefixDevice + "on-off",
+		TopicClick:           prefixDevice + "click",
 	}
 }

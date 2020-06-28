@@ -276,7 +276,7 @@ func (c *Client) Boot(ctx context.Context) error {
 			zigbee-herdsman:adapter:zStack:znp:AREQ <-- ZDO - activeEpRsp - {"srcaddr":0,"status":0,"nwkaddr":0,"activeepcount":0,"activeeplist":[]} +14ms
 	*/
 	waitResponse, waitErr := c.WaitAsync(ctxWait, func(response *Frame) bool {
-		return response.Type() == TypeAREQ && response.SubSystem() == SubSystemZDOInterface && response.CommandID() == 0x85
+		return response.Type() == TypeAREQ && response.SubSystem() == SubSystemZDOInterface && response.CommandID() == CommandActiveEndpointResponse
 	})
 
 	err = c.ZDOActiveEndpoints(ctx)
@@ -343,7 +343,7 @@ func (c *Client) Boot(ctx context.Context) error {
 				switch frame.SubSystem() {
 				case SubSystemZDOInterface:
 					switch frame.CommandID() {
-					case 0xCA: // tcDeviceInd
+					case CommandTcDeviceInd:
 						if msg, err := c.ZDODeviceJoinedMessage(frame); err == nil {
 							device := c.Device(msg.NetworkAddress)
 							if device != nil {
@@ -357,7 +357,7 @@ func (c *Client) Boot(ctx context.Context) error {
 							}
 						}
 
-					case 0xC1: // endDeviceAnnceInd
+					case CommandEndDeviceAnnounceInd:
 						if msg, err := c.ZDOEndDeviceAnnounceMessage(frame); err == nil {
 							device := c.Device(msg.NetworkAddress)
 							if device != nil {
@@ -370,12 +370,12 @@ func (c *Client) Boot(ctx context.Context) error {
 							}
 						}
 
-					case 0xC9: // leaveInd
+					case CommandLeaveInd:
 						if msg, err := c.ZDODeviceLeaveMessage(frame); err == nil {
 							c.deviceRemove(msg.SourceAddress)
 						}
 
-					case 0xCB: // permitJoinInd
+					case CommandPermitJoinInd:
 						atomic.StoreUint32(&c.permitJoin, 0)
 					}
 
@@ -440,7 +440,7 @@ func (c *Client) PermitJoin(ctx context.Context, seconds uint8) error {
 	*/
 
 	waitResponse, waitErr := c.WaitAsync(ctxWait, func(response *Frame) bool {
-		return response.Type() == TypeAREQ && response.SubSystem() == SubSystemZDOInterface && response.CommandID() == 0xB6
+		return response.Type() == TypeAREQ && response.SubSystem() == SubSystemZDOInterface && response.CommandID() == CommandManagementPermitJoinResponse
 	})
 
 	/*

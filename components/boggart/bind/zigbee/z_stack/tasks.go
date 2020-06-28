@@ -31,6 +31,7 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 	}
 
 	b.Meta().SetSerialNumber(hex.EncodeToString(info.IEEEAddr))
+	b.syncPermitJoin()
 
 	return nil
 }

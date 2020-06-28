@@ -6,10 +6,6 @@ import (
 	"fmt"
 )
 
-const (
-	CommandAfIncomingMessage = 0x81
-)
-
 type FramePayloadReportRecorder struct {
 	AttributeID   uint16
 	DataType      uint8
