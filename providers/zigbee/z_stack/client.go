@@ -408,7 +408,7 @@ func (c *Client) PermitJoinDisable(ctx context.Context) error {
 }
 
 func (c *Client) PermitJoin(ctx context.Context, seconds uint8) error {
-	if c.PermitJoinEnabled() {
+	if (seconds > 0 && c.PermitJoinEnabled()) || (seconds == 0 && !c.PermitJoinEnabled()) {
 		return nil
 	}
 
