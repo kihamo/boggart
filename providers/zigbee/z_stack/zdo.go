@@ -8,7 +8,7 @@ import (
 	"github.com/kihamo/boggart/protocols/serial"
 )
 
-type ExtNwkInfo struct {
+type ExtNetworkInfo struct {
 	ShortAddr     uint16
 	DevState      uint8
 	PanID         uint16
@@ -66,7 +66,26 @@ type ZDOLQIMessage struct {
 	NeighborLqiList      []NeighborLqiListItem
 }
 
-func (c *Client) ZDOExtNwkInfo(ctx context.Context) (*ExtNwkInfo, error) {
+type NetworkListItem struct {
+	PAN             uint16
+	LogicalChannel  uint8
+	StackProfile    uint8
+	ZigBeeVersion   uint8
+	BeaconOrder     uint8
+	SuperFrameOrder uint8
+	PermitJoining   bool
+}
+
+type ZDONetworkDiscoveryMessage struct {
+	SourceAddress    uint16
+	Status           uint8
+	NetworkCount     uint8
+	StartIndex       uint8
+	NetworkListCount uint8
+	NetworkList      []NetworkListItem
+}
+
+func (c *Client) ZDOExtNetworkInfo(ctx context.Context) (*ExtNetworkInfo, error) {
 	request := &Frame{}
 	request.SetCommand0(0x25) // Type 0x1, SubSystem 0x5
 	request.SetCommandID(0x50)
@@ -78,7 +97,7 @@ func (c *Client) ZDOExtNwkInfo(ctx context.Context) (*ExtNwkInfo, error) {
 
 	dataOut := response.DataAsBuffer()
 
-	return &ExtNwkInfo{
+	return &ExtNetworkInfo{
 		ShortAddr:     dataOut.ReadUint16(),
 		DevState:      dataOut.ReadUint8(),
 		PanID:         dataOut.ReadUint16(),
@@ -354,6 +373,69 @@ func (c *Client) ZDOLQI(ctx context.Context, networkAddress uint16, startIndex u
 	return nil
 }
 
+/*
+	ZDO_MGMT_NWK_DISC_REQ
+
+	This command is generated to request the destination device to perform a network discovery.
+
+	Usage:
+		SREQ:
+			       1       |      1      |       1     |    2    |       4      |      1       |      1
+			Length =  0x08 | Cmd0 = 0x45 | Cmd1 = 0x30 | DstAddr | ScanChannels | ScanDuration | StartIndex
+		Attributes:
+			DstAddr      2 bytes Specifies the network address of the device performing the discovery.
+			ScanChannels 4 bytes Specifies the Bit Mask for channels to scan:
+			                     NONE         0x00000000
+			                     ALL_CHANNELS 0x07FFF800
+			                     CHANNEL 11   0x00000800
+			                     CHANNEL 12   0x00001000
+			                     CHANNEL 13   0x00002000
+			                     CHANNEL 14   0x00004000
+			                     CHANNEL 15   0x00008000
+			                     CHANNEL 16   0x00010000
+			                     CHANNEL 17   0x00020000
+			                     CHANNEL 18   0x00040000
+			                     CHANNEL 19   0x00080000
+			                     CHANNEL 20   0x00100000
+			                     CHANNEL 21   0x00200000
+			                     CHANNEL 22   0x00400000
+			                     CHANNEL 23   0x00800000
+			                     CHANNEL 24   0x01000000
+			                     CHANNEL 25   0x02000000
+			                     CHANNEL 26   0x04000000
+			ScanDuration 1 byte  Specifies the scanning time.
+			StartIndex   1 byte  Specifies where to start in the response array list. The result may contain more entries than can be reported, so this field allows the user to retrieve the responses anywhere in the array list.
+		SRSP:
+			       1      |      1      |      1      |   1
+			Length = 0x01 | Cmd0 = 0x65 | Cmd1 = 0x30 | Status
+		Attributes:
+			Status 1 byte Status is either Success (0) or Failure (1).
+*/
+func (c *Client) ZDONetworkDiscovery(ctx context.Context, dstAddr uint16, scanChannels uint32, scanDuration, startIndex uint8) error {
+	dataIn := NewBuffer(nil)
+	dataIn.WriteUint16(dstAddr)      // DstAddr
+	dataIn.WriteUint32(scanChannels) // ScanChannels
+	dataIn.WriteUint8(scanDuration)  // ScanDuration
+	dataIn.WriteUint8(startIndex)    // StartIndex
+
+	request := &Frame{}
+	request.SetCommand0(0x65) // Type 0x1, SubSystem 0x5
+	request.SetCommandID(0x30)
+	request.SetDataAsBuffer(dataIn)
+
+	response, err := c.CallWithResultSREQ(ctx, request)
+	if err != nil {
+		return err
+	}
+
+	dataOut := response.Data()
+	if len(dataOut) == 0 || dataOut[0] != 0 {
+		return errors.New("failure")
+	}
+
+	return nil
+}
+
 func (c *Client) ZDODeviceJoinedMessage(frame *Frame) (*ZDODeviceJoinedMessage, error) {
 	if frame.SubSystem() != SubSystemZDOInterface {
 		return nil, errors.New("frame isn't a ZDO interface")
@@ -498,6 +580,50 @@ func (c *Client) ZDOLQIMessage(frame *Frame) (*ZDOLQIMessage, error) {
 		item.LQI = dataOut.ReadUint8()
 
 		msg.NeighborLqiList = append(msg.NeighborLqiList, item)
+	}
+
+	return msg, nil
+}
+
+func (c *Client) ZDONetworkDiscoveryMessage(frame *Frame) (*ZDONetworkDiscoveryMessage, error) {
+	if frame.SubSystem() != SubSystemZDOInterface {
+		return nil, errors.New("frame isn't a ZDO interface")
+	}
+
+	if frame.CommandID() != 0xB0 {
+		return nil, errors.New("frame isn't a LQI message")
+	}
+
+	dataOut := frame.DataAsBuffer()
+
+	msg := &ZDONetworkDiscoveryMessage{
+		SourceAddress:    dataOut.ReadUint16(),
+		Status:           dataOut.ReadUint8(),
+		NetworkCount:     dataOut.ReadUint8(),
+		StartIndex:       dataOut.ReadUint8(),
+		NetworkListCount: dataOut.ReadUint8(),
+		NetworkList:      make([]NetworkListItem, 0, 12),
+	}
+
+	if msg.Status != 0 {
+		return nil, errors.New("failure")
+	}
+
+	for i := uint8(0); i < msg.NetworkListCount; i++ {
+		item := NetworkListItem{
+			PAN:            dataOut.ReadUint16(),
+			LogicalChannel: dataOut.ReadUint8(),
+		}
+
+		v := dataOut.ReadUint8()
+		item.StackProfile = v & 0x0F
+		item.ZigBeeVersion = (v & 0xF0) >> 4
+
+		v = dataOut.ReadUint8()
+		item.BeaconOrder = v & 0x0F
+		item.SuperFrameOrder = (v & 0xF0) >> 4
+
+		msg.NetworkList = append(msg.NetworkList, item)
 	}
 
 	return msg, nil

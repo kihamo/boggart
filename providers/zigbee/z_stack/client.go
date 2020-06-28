@@ -33,10 +33,11 @@ type Client struct {
 	loopOnce sync.Once
 	loopLock sync.RWMutex
 
-	closed   uint32
-	done     chan struct{}
-	watchers []*Watcher
-	devices  sync.Map
+	closed     uint32
+	done       chan struct{}
+	watchers   []*Watcher
+	devices    sync.Map
+	permitJoin uint32
 }
 
 func New(conn connection.Conn) *Client {
@@ -373,6 +374,9 @@ func (c *Client) Boot(ctx context.Context) error {
 						if msg, err := c.ZDODeviceLeaveMessage(frame); err == nil {
 							c.deviceRemove(msg.SourceAddress)
 						}
+
+					case 0xCB: // permitJoinInd
+						atomic.StoreUint32(&c.permitJoin, 0)
 					}
 
 				case SubSystemAFInterface:
@@ -399,7 +403,19 @@ func (c *Client) Boot(ctx context.Context) error {
 	return nil
 }
 
-func (c *Client) PermitJoin(ctx context.Context) error {
+func (c *Client) PermitJoinEnabled() bool {
+	return atomic.LoadUint32(&c.permitJoin) != 0
+}
+
+func (c *Client) PermitJoinDisable(ctx context.Context) error {
+	return c.PermitJoin(ctx, 0)
+}
+
+func (c *Client) PermitJoin(ctx context.Context, seconds uint8) error {
+	if c.PermitJoinEnabled() {
+		return nil
+	}
+
 	ctxWait, cancel := context.WithTimeout(ctx, time.Millisecond*6000)
 	defer cancel()
 
@@ -440,7 +456,7 @@ func (c *Client) PermitJoin(ctx context.Context) error {
 		установлен ранее.
 	*/
 
-	if err := c.ZDOPermitJoin(ctx, 255); err != nil {
+	if err := c.ZDOPermitJoin(ctx, seconds); err != nil {
 		return err
 	}
 
@@ -448,6 +464,12 @@ func (c *Client) PermitJoin(ctx context.Context) error {
 	case r := <-waitResponse:
 		if r.Data()[2] != 0 {
 			return errors.New("enable permit join failed")
+		}
+
+		if seconds == 0 {
+			atomic.StoreUint32(&c.permitJoin, 0)
+		} else {
+			atomic.StoreUint32(&c.permitJoin, 1)
 		}
 
 	case e := <-waitErr:
@@ -515,6 +537,53 @@ func (c *Client) LQI(ctx context.Context, networkAddress uint16) ([]NeighborLqiL
 		}
 
 		list = append(list, msg.NeighborLqiList...)
+	}
+
+	return list, nil
+}
+
+func (c *Client) NetworkDiscovery(ctx context.Context) ([]NetworkListItem, error) {
+	request := func(index uint8) (*ZDONetworkDiscoveryMessage, error) {
+		scanDuration := uint8(1)
+
+		ctxWait, cancel := context.WithTimeout(ctx, time.Duration(scanDuration+6)*time.Second)
+		defer cancel()
+
+		waitResponse, waitErr := c.WaitAsync(ctxWait, func(response *Frame) bool {
+			return response.Type() == TypeAREQ && response.SubSystem() == SubSystemZDOInterface && response.CommandID() == 0xB0
+		})
+
+		if err := c.ZDONetworkDiscovery(ctx, 0, ScanChannelsAllChannels, scanDuration, 0); err != nil {
+			return nil, err
+		}
+
+		for {
+			select {
+			case frame := <-waitResponse:
+				return c.ZDONetworkDiscoveryMessage(frame)
+
+			case e := <-waitErr:
+				return nil, e
+			}
+		}
+	}
+
+	msg, err := request(0)
+	if err != nil {
+		return nil, err
+	}
+
+	total := int(msg.NetworkCount)
+	list := make([]NetworkListItem, 0, total)
+	list = append(list, msg.NetworkList...)
+
+	for i := uint8(1); len(list) < total; i++ {
+		msg, err := request(i)
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, msg.NetworkList...)
 	}
 
 	return list, nil

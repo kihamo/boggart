@@ -4,6 +4,7 @@ import (
 	"context"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/di"
@@ -45,7 +46,9 @@ func (b *Bind) getClient(ctx context.Context) (_ *z_stack.Client, err error) {
 			err := b.client.Boot(ctx)
 
 			if err == nil && b.config.PermitJoin {
-				err = b.client.PermitJoin(ctx)
+				err = b.client.PermitJoin(ctx, b.permitJoinDuration())
+			} else {
+				err = b.client.PermitJoinDisable(ctx)
 			}
 
 			if err != nil {
@@ -59,6 +62,15 @@ func (b *Bind) getClient(ctx context.Context) (_ *z_stack.Client, err error) {
 	}
 
 	return b.client, err
+}
+
+func (b *Bind) permitJoinDuration() uint8 {
+	duration := b.config.PermitJoinDuration / time.Second
+	if duration > 255 {
+		return 255
+	}
+
+	return uint8(duration)
 }
 
 func (b *Bind) Run() error {

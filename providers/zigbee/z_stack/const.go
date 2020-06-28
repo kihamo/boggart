@@ -58,4 +58,23 @@ const (
 
 	// Device has lost information about its parent
 	DeviceStateOrphan = 0x0A
+
+	ScanChannelsNone        = 0x00000000
+	ScanChannelsAllChannels = 0x07FFF800
+	ScanChannelsChannel11   = 0x00000800
+	ScanChannelsChannel12   = 0x00001000
+	ScanChannelsChannel13   = 0x00002000
+	ScanChannelsChannel14   = 0x00004000
+	ScanChannelsChannel15   = 0x00008000
+	ScanChannelsChannel16   = 0x00010000
+	ScanChannelsChannel17   = 0x00020000
+	ScanChannelsChannel18   = 0x00040000
+	ScanChannelsChannel19   = 0x00080000
+	ScanChannelsChannel20   = 0x00100000
+	ScanChannelsChannel21   = 0x00200000
+	ScanChannelsChannel22   = 0x00400000
+	ScanChannelsChannel23   = 0x00800000
+	ScanChannelsChannel24   = 0x01000000
+	ScanChannelsChannel25   = 0x02000000
+	ScanChannelsChannel26   = 0x04000000
 )

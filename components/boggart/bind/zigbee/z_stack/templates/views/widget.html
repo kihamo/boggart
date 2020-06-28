@@ -10,6 +10,40 @@
                 <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
                     <thead>
                     <tr>
+                        <th class="md-col-2">{{ i18n "Variable" . }}</th>
+                        <th class="md-col-2">{{ i18n "Value" . }}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>{{ i18n "Permit join" . }}</td>
+                        <td>{{ if .permit_join }}enabled{{ else }}disabled{{ end }}</td>
+                    </tr>
+                    {{ if .info }}
+                    <tr>
+                        <td>{{ i18n "Device IEEE address" . }}</td>
+                        <td>{{ .info.ieee_address }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if .network }}
+                    <tr>
+                        <td>{{ i18n "Network PAN ID" . }}</td>
+                        <td>{{ .network.pan_id }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ i18n "Network extended PAN ID" . }}</td>
+                        <td>{{ .network.extended_pan_id }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ i18n "Network channel" . }}</td>
+                        <td>{{ .network.channel }}</td>
+                    </tr>
+                    {{ end }}
+                    </tbody>
+                </table>
+                <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                    <thead>
+                    <tr>
                         <th>{{ i18n "Network address" . }}</th>
                         <th>{{ i18n "IEEE address" . }}</th>
                         <th>{{ i18n "Capabilities" . }}</th>
@@ -29,4 +63,34 @@
         </div>
     </div>
 </div>
+{{ end }}
+
+{{ define "head" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" false) }}
+{{ end }}
+
+{{ define "js" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net/js/jquery.dataTables.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive/js/dataTables.responsive.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/highlightjs/js/highlight.pack.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/validator/js/validator.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/dropzonejs/js/dropzone.min.js" false) }}
+    <script type="application/javascript">
+        $(document).ready(function () {
+            {{ if and .errors (ge (len .errors) 0) }}
+                {{ range $error := .errors }}
+                    new PNotify({
+                        title: 'Error',
+                        text: '{{ $error }}',
+                        type: 'error',
+                        hide: false,
+                        styling: 'bootstrap3'
+                    });
+                {{ end }}
+            {{ end }}
+        });
+    </script>
 {{ end }}
