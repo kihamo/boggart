@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
@@ -107,26 +106,38 @@ func (c *Component) Run(a shadow.Application, ready chan<- struct{}) (err error)
 
 func (c *Component) initClient() (err error) {
 	opts := m.NewClientOptions()
-	opts.Store = NewStore(c.logger)
+	opts.SetStore(NewStore(c.logger))
 
-	opts.ClientID = c.config.String(mqtt.ConfigClientID)
-	opts.Username = c.config.String(mqtt.ConfigUsername)
-	opts.Password = c.config.String(mqtt.ConfigPassword)
-	opts.ConnectTimeout = c.config.Duration(mqtt.ConfigConnectionTimeout)
-	opts.CleanSession = c.config.Bool(mqtt.ConfigClearSession)
-	opts.ResumeSubs = c.config.Bool(mqtt.ConfigResumeSubs)
-	opts.WriteTimeout = c.config.Duration(mqtt.ConfigWriteTimeout)
+	opts.SetClientID(c.config.String(mqtt.ConfigClientID))
+	opts.SetUsername(c.config.String(mqtt.ConfigUsername))
+	opts.SetPassword(c.config.String(mqtt.ConfigPassword))
+	opts.SetCleanSession(c.config.Bool(mqtt.ConfigClearSession))
+	opts.SetResumeSubs(c.config.Bool(mqtt.ConfigResumeSubs))
+	opts.SetOrderMatters(c.config.Bool(mqtt.ConfigOrderMatters))
 
-	opts.WillEnabled = c.config.Bool(mqtt.ConfigLWTEnabled)
-	opts.WillTopic = c.config.String(mqtt.ConfigLWTTopic)
-	opts.WillPayload = []byte(c.config.String(mqtt.ConfigLWTPayload))
-	opts.WillQos = byte(c.config.Int(mqtt.ConfigLWTQOS))
-	opts.WillRetained = c.config.Bool(mqtt.ConfigLWTRetained)
+	opts.SetConnectTimeout(c.config.Duration(mqtt.ConfigConnectionTimeout))
+	opts.SetConnectRetry(c.config.Bool(mqtt.ConfigConnectionRetryEnabled))
+	opts.SetConnectRetryInterval(c.config.Duration(mqtt.ConfigConnectionRetryInterval))
 
-	opts.ConnectRetry = true
-	opts.ConnectRetryInterval = time.Second * 5
+	opts.SetKeepAlive(c.config.Duration(mqtt.ConfigKeepAlive))
+	opts.SetWriteTimeout(c.config.Duration(mqtt.ConfigWriteTimeout))
+	opts.SetPingTimeout(c.config.Duration(mqtt.ConfigPingTimeout))
 
-	opts.OnConnect = func(client m.Client) {
+	opts.SetAutoReconnect(c.config.Bool(mqtt.ConfigReconnectEnabled))
+	opts.SetMaxReconnectInterval(c.config.Duration(mqtt.ConfigReconnectMaxInterval))
+
+	if c.config.Bool(mqtt.ConfigLWTEnabled) {
+		opts.SetWill(
+			c.config.String(mqtt.ConfigLWTTopic),
+			c.config.String(mqtt.ConfigLWTPayload),
+			byte(c.config.Int(mqtt.ConfigLWTQOS)),
+			c.config.Bool(mqtt.ConfigLWTRetained))
+	} else {
+		opts.UnsetWill()
+	}
+
+	// specific handlers
+	opts.SetOnConnectHandler(func(client m.Client) {
 		cfg := client.OptionsReader()
 
 		var mqttVersion string
@@ -161,34 +172,32 @@ func (c *Component) initClient() (err error) {
 			go handler(c, !restore)
 		}
 		c.mutex.RUnlock()
-	}
-	opts.OnConnectionLost = func(client m.Client, reason error) {
+	})
+
+	opts.SetConnectionLostHandler(func(client m.Client, reason error) {
 		atomic.AddUint64(&c.lostConnections, 1)
 		c.logger.Error("Connection lost", "error", reason.Error(), "count", atomic.LoadUint64(&c.lostConnections))
 		metricConnectionLost.Inc()
-	}
+	})
 
-	opts.DefaultPublishHandler = func(_ m.Client, message m.Message) {
+	opts.SetReconnectingHandler(func(_ m.Client, _ *m.ClientOptions) {
+		c.logger.Debug("Attempt reconnect")
+	})
+
+	opts.SetDefaultPublishHandler(func(_ m.Client, message m.Message) {
 		c.logger.Warn("Received that does not match any known subscriptions",
 			"topic", message.Topic(),
 			"qos", message.Qos(),
 			"retained", message.Retained(),
 		)
-	}
-
-	opts.Servers = make([]*url.URL, 0)
+	})
 
 	for _, u := range strings.Split(c.config.String(mqtt.ConfigServers), ";") {
-		if p, err := url.Parse(u); err == nil {
-			opts.Servers = append(opts.Servers, p)
-		}
+		opts.AddBroker(u)
 	}
 
 	client := m.NewClient(opts)
-	token := client.Connect()
-	token.Wait()
-
-	err = token.Error()
+	err = c.tokenWait(client.Connect())
 
 	c.mutex.Lock()
 	c.client = client
@@ -211,6 +220,16 @@ func (c *Component) initSubscribers() error {
 	return nil
 }
 
+func (c *Component) tokenWait(token m.Token) error {
+	timeout := c.config.Duration(mqtt.ConfigTokenWaitTimeout)
+
+	if !token.WaitTimeout(timeout) {
+		return errors.New("token wait didn't return in an expected time " + timeout.String())
+	}
+
+	return token.Error()
+}
+
 func (c *Component) Shutdown() (err error) {
 	c.mutex.RLock()
 	client := c.client
@@ -218,14 +237,11 @@ func (c *Component) Shutdown() (err error) {
 
 	if client != nil {
 		if c.config.Bool(mqtt.ConfigLWTEnabled) {
-			token := client.Publish(
+			err = c.tokenWait(client.Publish(
 				c.config.String(mqtt.ConfigLWTTopic),
 				byte(c.config.Int(mqtt.ConfigLWTQOS)),
 				c.config.Bool(mqtt.ConfigLWTRetained),
-				[]byte(c.config.String(mqtt.ConfigLWTPayload)))
-			token.Wait()
-
-			err = token.Error()
+				[]byte(c.config.String(mqtt.ConfigLWTPayload))))
 		}
 
 		client.Disconnect(250)
@@ -325,9 +341,8 @@ func (c *Component) clientSubscribe(topic mqtt.Topic, qos byte, subscription *mq
 	}
 
 	token := client.Subscribe(topic.String(), qos, callback)
-	token.Wait()
 
-	err := token.Error()
+	err := c.tokenWait(token)
 	if err == nil {
 		metricSubscribe.With("status", "success", "topic", topic.String()).Inc()
 	} else {
@@ -390,10 +405,7 @@ func (c *Component) doPublish(ctx context.Context, topic mqtt.Topic, qos byte, r
 			metricPayloadCacheMiss.Inc()
 		}
 
-		token := client.Publish(topic.String(), qos, retained, payloadConverted)
-		token.Wait()
-
-		err = token.Error()
+		err = c.tokenWait(client.Publish(topic.String(), qos, retained, payloadConverted))
 	} else {
 		err = errors.New("can't initialize client of MQTT")
 	}
@@ -458,8 +470,8 @@ func (c *Component) Unsubscribe(topic mqtt.Topic) error {
 		return errors.New("can't initialize client of MQTT")
 	}
 
-	if token := client.Unsubscribe(topic.String()); token.Wait() && token.Error() != nil {
-		return token.Error()
+	if err := c.tokenWait(client.Unsubscribe(topic.String())); err != nil {
+		return err
 	}
 
 	c.mutex.Lock()
@@ -477,11 +489,7 @@ func (c *Component) Unsubscribe(topic mqtt.Topic) error {
 		if subscription.Len() == 0 {
 			topic := subscription.Topic().String()
 
-			token := client.Unsubscribe(topic)
-			token.Wait()
-			err := token.Error()
-
-			if err == nil {
+			if err := c.tokenWait(client.Unsubscribe(topic)); err == nil {
 				c.subscriptions.Remove(element)
 				c.logger.Debug("Unsubscribe", "topic", topic)
 			} else {
@@ -512,11 +520,7 @@ func (c *Component) UnsubscribeSubscriber(subscriber mqtt.Subscriber) error {
 			if subscription.Len() == 0 {
 				topic := subscriber.Topic().String()
 
-				token := client.Unsubscribe(topic)
-				token.Wait()
-				err := token.Error()
-
-				if err == nil {
+				if err := c.tokenWait(client.Unsubscribe(topic)); err == nil {
 					c.subscriptions.Remove(element)
 					c.logger.Debug("Unsubscribe", "topic", topic)
 				} else {

@@ -78,6 +78,11 @@ default-agent
 scan on
 ```
 
+В случае ошибки hci0: can't up device: connection timed out необходимо перезапустить службу
+```
+service bluetooth restart
+```
+
 ## Agent Roborock
 Кросс компиляция не возможна из-за ошибок, поэтому собирать надо на реальном устройстве. Подойдет Raspberry PI, так как платформа на нем аналогичная
 
