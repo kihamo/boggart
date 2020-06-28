@@ -85,6 +85,21 @@ type ZDOManagementNetworkDiscoveryMessage struct {
 	NetworkList      []NetworkListItem
 }
 
+type RoutingTableListItem struct {
+	DestinationAddress uint16
+	Status             uint8
+	NextHop            uint16
+}
+
+type ZDOManagementRoutingTableMessage struct {
+	SourceAddress         uint16
+	Status                uint8
+	RoutingTableEntries   uint8
+	StartIndex            uint8
+	RoutingTableListCount uint8
+	RoutingTableList      []RoutingTableListItem
+}
+
 func (c *Client) ZDOExtNetworkInfo(ctx context.Context) (*ExtNetworkInfo, error) {
 	response, err := c.CallWithResultSREQ(ctx, NewFrame(0x25, 0x50))
 	if err != nil {
@@ -625,7 +640,7 @@ func (c *Client) ZDONetworkDiscoveryMessage(frame *Frame) (*ZDOManagementNetwork
 	return msg, nil
 }
 
-func (c *Client) ZDOManagementRoutingTableMessage(frame *Frame) (*ZDOManagementNetworkDiscoveryMessage, error) {
+func (c *Client) ZDOManagementRoutingTableMessage(frame *Frame) (*ZDOManagementRoutingTableMessage, error) {
 	if frame.SubSystem() != SubSystemZDOInterface {
 		return nil, errors.New("frame isn't a ZDO interface")
 	}
@@ -636,36 +651,25 @@ func (c *Client) ZDOManagementRoutingTableMessage(frame *Frame) (*ZDOManagementN
 
 	dataOut := frame.DataAsBuffer()
 
-	fmt.Println("TEST", dataOut.Bytes())
-
-	msg := &ZDOManagementNetworkDiscoveryMessage{
-		SourceAddress:    dataOut.ReadUint16(),
-		Status:           dataOut.ReadUint8(),
-		NetworkCount:     dataOut.ReadUint8(),
-		StartIndex:       dataOut.ReadUint8(),
-		NetworkListCount: dataOut.ReadUint8(),
-		NetworkList:      make([]NetworkListItem, 0, 12),
+	msg := &ZDOManagementRoutingTableMessage{
+		SourceAddress:         dataOut.ReadUint16(),
+		Status:                dataOut.ReadUint8(),
+		RoutingTableEntries:   dataOut.ReadUint8(),
+		StartIndex:            dataOut.ReadUint8(),
+		RoutingTableListCount: dataOut.ReadUint8(),
+		RoutingTableList:      make([]RoutingTableListItem, 0, 15),
 	}
 
 	if msg.Status != 0 {
 		return nil, errors.New("failure")
 	}
 
-	for i := uint8(0); i < msg.NetworkListCount; i++ {
-		item := NetworkListItem{
-			PAN:            dataOut.ReadUint16(),
-			LogicalChannel: dataOut.ReadUint8(),
-		}
-
-		v := dataOut.ReadUint8()
-		item.StackProfile = v & 0x0F
-		item.ZigBeeVersion = (v & 0xF0) >> 4
-
-		v = dataOut.ReadUint8()
-		item.BeaconOrder = v & 0x0F
-		item.SuperFrameOrder = (v & 0xF0) >> 4
-
-		msg.NetworkList = append(msg.NetworkList, item)
+	for i := uint8(0); i < msg.RoutingTableListCount; i++ {
+		msg.RoutingTableList = append(msg.RoutingTableList, RoutingTableListItem{
+			DestinationAddress: dataOut.ReadUint16(),
+			Status:             dataOut.ReadUint8(),
+			NextHop:            dataOut.ReadUint16(),
+		})
 	}
 
 	return msg, nil

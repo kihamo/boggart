@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"sync"
 	"sync/atomic"
@@ -578,11 +577,11 @@ func (c *Client) NetworkDiscovery(ctx context.Context) ([]NetworkListItem, error
 	return list, nil
 }
 
-func (c *Client) RoutingTable(ctx context.Context, dstAddr uint16) ([]interface{}, error) {
-	request := func(index uint8) (*ZDOManagementNetworkDiscoveryMessage, error) {
-		waitResponse, waitErr := c.WaitAsyncWithTimeout(ctx, func(response *Frame) bool {
+func (c *Client) RoutingTable(ctx context.Context, dstAddr uint16) ([]RoutingTableListItem, error) {
+	request := func(index uint8) (*ZDOManagementRoutingTableMessage, error) {
+		waitResponse, waitErr := c.WaitAsync(ctx, func(response *Frame) bool {
 			return response.Type() == TypeAREQ && response.SubSystem() == SubSystemZDOInterface && response.CommandID() == CommandManagementRoutingTableResponse
-		}, time.Second*10)
+		})
 
 		if err := c.ZDORoutingTable(ctx, dstAddr, index); err != nil {
 			return nil, err
@@ -604,9 +603,20 @@ func (c *Client) RoutingTable(ctx context.Context, dstAddr uint16) ([]interface{
 		return nil, err
 	}
 
-	fmt.Println(msg)
+	total := int(msg.RoutingTableListCount)
+	list := make([]RoutingTableListItem, 0, total)
+	list = append(list, msg.RoutingTableList...)
 
-	return nil, nil
+	for i := uint8(1); len(list) < total; i++ {
+		msg, err := request(i)
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, msg.RoutingTableList...)
+	}
+
+	return list, nil
 }
 
 func (c *Client) SkipBootLoader() error {
