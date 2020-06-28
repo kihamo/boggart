@@ -22,6 +22,11 @@ const (
 	// The length of an SRSP is generally nonzero, so an SRSP with length=0 can be used to indicate an error.
 	TypeSRSP = 0x3
 
+	DeviceTypeNone        = 0
+	DeviceTypeCoordinator = 1
+	DeviceTypeRouter      = 2
+	DeviceTypeEndDevice   = 4
+
 	SubSystemReserved       = 0x00
 	SubSystemSysInterface   = 0x01
 	SubSystemMACInterface   = 0x02

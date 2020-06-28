@@ -2,43 +2,37 @@ package z_stack
 
 import (
 	"encoding/hex"
-	"sync"
+	a "github.com/kihamo/boggart/atomic"
+	"sync/atomic"
 )
 
 type Device struct {
-	networkAddress uint16
-	ieeeAddress    []byte
-	capabilities   uint8
+	networkAddress uint32
+	ieeeAddress    *a.Bytes
+	capabilities   uint32
+	deviceType     uint32
+}
 
-	lock sync.RWMutex
+func NewDevice() *Device {
+	return &Device{
+		ieeeAddress: a.NewBytes(),
+	}
 }
 
 func (d *Device) NetworkAddress() uint16 {
-	d.lock.RLock()
-	defer d.lock.RUnlock()
-
-	return d.networkAddress
+	return uint16(atomic.LoadUint32(&d.networkAddress))
 }
 
 func (d *Device) SetNetworkAddress(address uint16) {
-	d.lock.Lock()
-	defer d.lock.Unlock()
-
-	d.networkAddress = address
+	atomic.StoreUint32(&d.networkAddress, uint32(address))
 }
 
 func (d *Device) IEEEAddress() []byte {
-	d.lock.RLock()
-	defer d.lock.RUnlock()
-
-	return d.ieeeAddress
+	return d.ieeeAddress.Load()
 }
 
 func (d *Device) SetIEEEAddress(address []byte) {
-	d.lock.Lock()
-	defer d.lock.Unlock()
-
-	d.ieeeAddress = address
+	d.ieeeAddress.Set(address)
 }
 
 func (d *Device) IEEEAddressAsString() string {
@@ -46,15 +40,30 @@ func (d *Device) IEEEAddressAsString() string {
 }
 
 func (d *Device) Capabilities() uint8 {
-	d.lock.RLock()
-	defer d.lock.RUnlock()
-
-	return d.capabilities
+	return uint8(atomic.LoadUint32(&d.capabilities))
 }
 
 func (d *Device) SetCapabilities(capabilities uint8) {
-	d.lock.Lock()
-	defer d.lock.Unlock()
+	atomic.StoreUint32(&d.capabilities, uint32(capabilities))
+}
 
-	d.capabilities = capabilities
+func (d *Device) DeviceType() uint8 {
+	return uint8(atomic.LoadUint32(&d.deviceType))
+}
+
+func (d *Device) DeviceTypeAsString() string {
+	switch d.DeviceType() {
+	case DeviceTypeCoordinator:
+		return "coordinator"
+	case DeviceTypeRouter:
+		return "router"
+	case DeviceTypeEndDevice:
+		return "end device"
+	}
+
+	return "none"
+}
+
+func (d *Device) SetDeviceType(deviceType uint8) {
+	atomic.StoreUint32(&d.deviceType, uint32(deviceType))
 }

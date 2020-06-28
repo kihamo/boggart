@@ -240,9 +240,10 @@ func (c *Client) Boot(ctx context.Context) error {
 	// полную информацию добираем через синхронизацию с таблицей на устройстве
 	if len(device.AssocDevicesList) > 0 {
 		for _, networkAddress := range device.AssocDevicesList {
-			c.deviceAdd(Device{
-				networkAddress: networkAddress,
-			})
+			d := NewDevice()
+			d.SetNetworkAddress(networkAddress)
+
+			c.deviceAdd(d)
 		}
 
 		go func() {
@@ -349,11 +350,11 @@ func (c *Client) Boot(ctx context.Context) error {
 							if device != nil {
 								device.SetIEEEAddress(msg.ExtendAddress)
 							} else {
-								c.deviceAdd(Device{
-									networkAddress: msg.NetworkAddress,
-									ieeeAddress:    msg.ExtendAddress,
-									// msg.ParentAddress
-								})
+								d := NewDevice()
+								d.SetNetworkAddress(msg.NetworkAddress)
+								d.SetIEEEAddress(msg.ExtendAddress)
+
+								c.deviceAdd(d)
 							}
 						}
 
@@ -363,10 +364,11 @@ func (c *Client) Boot(ctx context.Context) error {
 							if device != nil {
 								device.SetCapabilities(msg.Capabilities)
 							} else {
-								c.deviceAdd(Device{
-									networkAddress: msg.NetworkAddress,
-									capabilities:   msg.Capabilities,
-								})
+								d := NewDevice()
+								d.SetNetworkAddress(msg.NetworkAddress)
+								d.SetCapabilities(msg.Capabilities)
+
+								c.deviceAdd(d)
 							}
 						}
 
@@ -491,6 +493,7 @@ func (c *Client) SyncDevices(ctx context.Context) error {
 	for _, item := range list {
 		if device := c.Device(item.NetworkAddress); device != nil {
 			device.SetIEEEAddress(item.ExtendedAddress)
+			device.SetDeviceType(item.DeviceType)
 		}
 	}
 
@@ -589,8 +592,8 @@ func (c *Client) NetworkDiscovery(ctx context.Context) ([]NetworkListItem, error
 	return list, nil
 }
 
-func (c *Client) deviceAdd(device Device) {
-	c.devices.Store(device.NetworkAddress(), &device)
+func (c *Client) deviceAdd(device *Device) {
+	c.devices.Store(device.NetworkAddress(), device)
 }
 
 func (c *Client) deviceRemove(networkAddress uint16) {

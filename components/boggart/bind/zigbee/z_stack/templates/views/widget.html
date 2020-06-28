@@ -69,6 +69,7 @@
                         <th>{{ i18n "Network address" . }}</th>
                         <th>{{ i18n "IEEE address" . }}</th>
                         <th>{{ i18n "Capabilities" . }}</th>
+                        <th>{{ i18n "Device type" . }}</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -77,6 +78,7 @@
                         <td>{{ $device.NetworkAddress }}</td>
                         <td>{{ $device.IEEEAddressAsString }}</td>
                         <td>{{ $device.Capabilities }}</td>
+                        <td>{{ $device.DeviceTypeAsString }}</td>
                     </tr>
                     {{ end }}
                     </tbody>
