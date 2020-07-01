@@ -7,62 +7,74 @@
                 <div class="clearfix"></div>
             </div>
             <div class="x_content">
-                <table class="table table-striped dt-responsive nowrap" style="width:100%">
-                    <thead>
-                    <tr>
-                        <th class="md-col-2">{{ i18n "Variable" . }}</th>
-                        <th class="md-col-2">{{ i18n "Value" . }}</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td>{{ i18n "Permit join" . }}</td>
-                        <td>{{ if .permit_join }}enabled{{ else }}disabled{{ end }}</td>
-                    </tr>
-                    {{ if .version }}
-                    <tr>
-                        <td>{{ i18n "Transport revision" . }}</td>
-                        <td>{{ .version.TransportRevision }}</td>
-                    </tr>
-                    <tr>
-                        <td>{{ i18n "Product" . }}</td>
-                        <td>{{ .version.Product }} ({{ .version.Type }})</td>
-                    </tr>
-                    <tr>
-                        <td>{{ i18n "Version" . }}</td>
-                        <td>v. {{ .version.MajorRelease }}.{{ .version.MinorRelease }}</td>
-                    </tr>
-                    <tr>
-                        <td>{{ i18n "Main trel" . }}</td>
-                        <td>{{ .version.MainTrel }}</td>
-                    </tr>
-                    <tr>
-                        <td>{{ i18n "Hardware revision" . }}</td>
-                        <td>{{ .version.HardwareRevision }}</td>
-                    </tr>
-                    {{ end }}
-                    {{ if .info }}
-                    <tr>
-                        <td>{{ i18n "Device IEEE address" . }}</td>
-                        <td>{{ .info.ieee_address }}</td>
-                    </tr>
-                    {{ end }}
-                    {{ if .network }}
-                    <tr>
-                        <td>{{ i18n "Network PAN ID" . }}</td>
-                        <td>{{ .network.pan_id }}</td>
-                    </tr>
-                    <tr>
-                        <td>{{ i18n "Network extended PAN ID" . }}</td>
-                        <td>{{ .network.extended_pan_id }}</td>
-                    </tr>
-                    <tr>
-                        <td>{{ i18n "Network channel" . }}</td>
-                        <td>{{ .network.channel }}</td>
-                    </tr>
-                    {{ end }}
-                    </tbody>
-                </table>
+                <form role="form" action="?action=settings" method="post" id="settings">
+                    <table class="table table-striped dt-responsive nowrap" style="width:100%">
+                        <thead>
+                        <tr>
+                            <th class="md-col-2">{{ i18n "Variable" . }}</th>
+                            <th class="md-col-2">{{ i18n "Value" . }}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>{{ i18n "Permit join" . }}</td>
+                            <td>{{ if .permit_join }}enabled{{ else }}disabled{{ end }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ i18n "LED enabled" . }}</td>
+                            <td>
+                                {{ if .led_support }}
+                                    <input type="checkbox" class="js-switch" name="led" id="led" value="on" {{ if eq (print .led_enabled) "true" }} checked{{ end }} />
+                                {{ else }}
+                                    <td>{{ if .led_enabled }}enabled{{ else }}disabled{{ end }}</td>
+                                {{ end }}
+                            </td>
+                        </tr>
+                        {{ if .version }}
+                        <tr>
+                            <td>{{ i18n "Transport revision" . }}</td>
+                            <td>{{ .version.TransportRevision }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ i18n "Product" . }}</td>
+                            <td>{{ .version.Product }} ({{ .version.Type }})</td>
+                        </tr>
+                        <tr>
+                            <td>{{ i18n "Version" . }}</td>
+                            <td>v. {{ .version.MajorRelease }}.{{ .version.MinorRelease }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ i18n "Main trel" . }}</td>
+                            <td>{{ .version.MainTrel }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ i18n "Hardware revision" . }}</td>
+                            <td>{{ .version.HardwareRevision }}</td>
+                        </tr>
+                        {{ end }}
+                        {{ if .info }}
+                        <tr>
+                            <td>{{ i18n "Device IEEE address" . }}</td>
+                            <td>{{ .info.ieee_address }}</td>
+                        </tr>
+                        {{ end }}
+                        {{ if .network }}
+                        <tr>
+                            <td>{{ i18n "Network PAN ID" . }}</td>
+                            <td>{{ .network.pan_id }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ i18n "Network extended PAN ID" . }}</td>
+                            <td>{{ .network.extended_pan_id }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ i18n "Network channel" . }}</td>
+                            <td>{{ .network.channel }}</td>
+                        </tr>
+                        {{ end }}
+                        </tbody>
+                    </table>
+                </form>
                 <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
                     <thead>
                     <tr>
@@ -99,9 +111,7 @@
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive/js/dataTables.responsive.min.js" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
-    {{ staticHTML (staticURL "/dashboard/assets/vendors/highlightjs/js/highlight.pack.min.js" false) }}
-    {{ staticHTML (staticURL "/dashboard/assets/vendors/validator/js/validator.min.js" false) }}
-    {{ staticHTML (staticURL "/dashboard/assets/vendors/dropzonejs/js/dropzone.min.js" false) }}
+
     <script type="application/javascript">
         $(document).ready(function () {
             {{ if and .errors (ge (len .errors) 0) }}
@@ -115,6 +125,47 @@
                     });
                 {{ end }}
             {{ end }}
+
+            function successHandler(r) {
+                if (r.result === 'failed') {
+                    new PNotify({
+                        title: 'Error',
+                        text: r.message,
+                        type: 'error',
+                        hide: false,
+                        styling: 'bootstrap3'
+                    });
+                } else if (r.message !== 'undefined') {
+                    new PNotify({
+                        title: 'Success',
+                        text: r.message,
+                        type: 'success',
+                        hide: false,
+                        styling: 'bootstrap3'
+                    });
+                }
+            }
+
+            $('#settings input[id]').change(function() {
+                var
+                        f = $('#settings'),
+                        e = $(this),
+                        data = {}
+                ;
+
+                if (e.prop('type') === 'checkbox') {
+                    data[e.prop('id')] = e.prop('checked') ? 'on' : 'off';
+                } else {
+                    data[e.prop('id')] = e.val();
+                }
+
+                $.ajax({
+                    type: f.prop('method'),
+                    url: f.prop('action'),
+                    data: data,
+                    success: successHandler
+                });
+            });
         });
     </script>
 {{ end }}

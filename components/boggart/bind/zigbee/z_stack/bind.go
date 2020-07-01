@@ -47,7 +47,7 @@ func (b *Bind) getClient(ctx context.Context) (_ *z_stack.Client, err error) {
 			err := b.client.Boot(ctx)
 
 			if err == nil && b.config.DisableLED {
-				err = b.client.SetLED(ctx, false)
+				err = b.client.LEDDisable(ctx)
 			}
 
 			if err == nil && b.config.PermitJoin {

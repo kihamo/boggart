@@ -2,15 +2,75 @@ package z_stack
 
 import (
 	"encoding/hex"
+	"fmt"
+	"strings"
 
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
+type response struct {
+	Result  string `json:"result"`
+	Message string `json:"message,omitempty"`
+}
+
 func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
 	bind := b.Bind().(*Bind)
 	ctx := r.Context()
+
+	if r.IsPost() {
+		if r.URL().Query().Get("action") != "settings" {
+			t.NotFound(w, r)
+			return
+		}
+
+		var (
+			err        error
+			successMsg string
+		)
+
+		err = r.Original().ParseForm()
+		if err == nil {
+			keys := make([]string, 0)
+
+			for key, value := range r.Original().PostForm {
+				if len(value) == 0 {
+					continue
+				}
+
+				switch key {
+				case "led":
+					err = bind.client.LED(ctx, value[0] == "on")
+				}
+
+				if err != nil {
+					err = fmt.Errorf("change setting %s return error: %w", key, err)
+					break
+				}
+
+				keys = append(keys, key)
+			}
+
+			if err == nil {
+				successMsg = "Change variables (" + strings.Join(keys, ",") + ") value success"
+			}
+		}
+
+		if err != nil {
+			_ = w.SendJSON(response{
+				Result:  "failed",
+				Message: err.Error(),
+			})
+		} else {
+			_ = w.SendJSON(response{
+				Result:  "success",
+				Message: successMsg,
+			})
+		}
+
+		return
+	}
 
 	vars := make(map[string]interface{})
 	errors := make([]string, 0)
@@ -18,9 +78,11 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	client, err := bind.getClient(ctx)
 	if err == nil {
 		vars["devices"] = client.Devices()
+		vars["led_support"] = client.LEDSupport(ctx)
+		vars["led_enabled"] = client.LEDEnabled()
 		vars["permit_join"] = client.PermitJoinEnabled()
 
-		if version, err := client.SysVersion(ctx); err == nil {
+		if version, err := client.Version(ctx); err == nil {
 			vars["version"] = version
 		} else {
 			errors = append(errors, err.Error())

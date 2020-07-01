@@ -35,7 +35,7 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 	b.Meta().SetSerialNumber(sn)
 	b.syncPermitJoin()
 
-	version, err := client.SysVersion(ctx)
+	version, err := client.Version(ctx)
 	if err != nil {
 		return err
 	}

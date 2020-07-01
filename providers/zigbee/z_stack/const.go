@@ -107,6 +107,8 @@ const (
 	ADCResolutionBit12 = 0x02
 	ADCResolutionBit14 = 0x03
 
+	CommandGetDeviceInfo                      = 0x00
+	CommandLEDControl                         = 0x0A
 	CommandAfIncomingMessage                  = 0x81
 	CommandActiveEndpointResponse             = 0x85
 	CommandManagementNetworkDiscoveryResponse = 0xB0

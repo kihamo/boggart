@@ -16,7 +16,7 @@ type UtilDeviceInfo struct {
 }
 
 func (c *Client) UtilGetDeviceInfo(ctx context.Context) (*UtilDeviceInfo, error) {
-	response, err := c.CallWithResultSREQ(ctx, NewFrame(0x27, 0x00))
+	response, err := c.CallWithResultSREQ(ctx, NewFrame(0x27, CommandGetDeviceInfo))
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (c *Client) UtilLEDControl(ctx context.Context, LedId uint8, mode bool) err
 	dataIn.WriteUint8(LedId)  // LedId
 	dataIn.WriteBoolean(mode) // Mode
 
-	response, err := c.CallWithResultSREQ(ctx, dataIn.Frame(0x27, 0x0A))
+	response, err := c.CallWithResultSREQ(ctx, dataIn.Frame(0x27, CommandLEDControl))
 	if err != nil {
 		return err
 	}
