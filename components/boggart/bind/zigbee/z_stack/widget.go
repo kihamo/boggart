@@ -40,6 +40,13 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 				}
 
 				switch key {
+				case "permit-join":
+					if value[0] == "on" {
+						err = bind.client.PermitJoin(ctx, bind.permitJoinDuration())
+					} else {
+						err = bind.client.PermitJoinDisable(ctx)
+					}
+
 				case "led":
 					err = bind.client.LED(ctx, value[0] == "on")
 				}

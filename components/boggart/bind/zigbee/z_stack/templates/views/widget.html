@@ -18,7 +18,9 @@
                         <tbody>
                         <tr>
                             <td>{{ i18n "Permit join" . }}</td>
-                            <td>{{ if .permit_join }}enabled{{ else }}disabled{{ end }}</td>
+                            <td>
+                                <input type="checkbox" class="js-switch" name="permit-join" id="permit-join" value="on" {{ if eq (print .permit_join) "true" }} checked{{ end }} />
+                            </td>
                         </tr>
                         <tr>
                             <td>{{ i18n "LED enabled" . }}</td>
