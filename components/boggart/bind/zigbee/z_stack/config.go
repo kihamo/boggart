@@ -13,6 +13,7 @@ type Config struct {
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
 	ConnectionDSN                 string        `mapstructure:"connection_dsn" yaml:"connection_dsn" valid:"required"`
+	DisableLED                    bool          `mapstructure:"disable_led" yaml:"disable_led"`
 	PermitJoin                    bool          `mapstructure:"permit_join" yaml:"permit_join"`
 	PermitJoinDuration            time.Duration `mapstructure:"permit_join_duration" yaml:"permit_join_duration"`
 	TopicPermitJoin               mqtt.Topic    `mapstructure:"topic_permit_join" yaml:"topic_permit_join"`
@@ -49,6 +50,7 @@ func (Type) Config() interface{} {
 			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
 			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
 		},
+		DisableLED:                    false,
 		PermitJoin:                    false,
 		PermitJoinDuration:            255 * time.Second,
 		TopicPermitJoin:               prefix + "permit-join",

@@ -619,6 +619,19 @@ func (c *Client) RoutingTable(ctx context.Context, dstAddr uint16) ([]RoutingTab
 	return list, nil
 }
 
+func (c *Client) SetLED(ctx context.Context, enabled bool) error {
+	version, err := c.SysVersion(ctx)
+	if err != nil {
+		return err
+	}
+
+	if version.Product == VersionZStack3x0 {
+		return errors.New("adapter doesn't support LED")
+	}
+
+	return c.UtilLEDControl(ctx, 3, enabled)
+}
+
 func (c *Client) SkipBootLoader() error {
 	if c.isClosed() {
 		return errors.New("connection is closed")

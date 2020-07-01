@@ -2,6 +2,7 @@ package z_stack
 
 import (
 	"context"
+	"errors"
 )
 
 type UtilDeviceInfo struct {
@@ -38,4 +39,41 @@ func (c *Client) UtilGetDeviceInfo(ctx context.Context) (*UtilDeviceInfo, error)
 	}
 
 	return info, err
+}
+
+/**
+UTIL_LED_CONTROL
+
+This command is used by the tester to control the LEDs on the board.
+
+Usage:
+	SREQ:
+		       1      |      1      |      1      |   1   |  1
+		Length = 0x02 | Cmd0 = 0x27 | Cmd1 = 0x0A | LedId | Mode
+	Attributes:
+		Laded 1 byte The LED number
+		Mode  1 byte 0: OFF, 1: ON
+
+	SRSP:
+		       1      |      1      |      1      |    1
+		Length = 0x01 | Cmd0 = 0x67 | Cmd1 = 0x0A | Status
+	Attributes:
+		Status 1 byte Status is either Success (0) or Failure (1).
+*/
+func (c *Client) UtilLEDControl(ctx context.Context, LedId uint8, mode bool) error {
+	dataIn := NewBuffer(nil)
+	dataIn.WriteUint8(LedId)  // LedId
+	dataIn.WriteBoolean(mode) // Mode
+
+	response, err := c.CallWithResultSREQ(ctx, dataIn.Frame(0x27, 0x0A))
+	if err != nil {
+		return err
+	}
+
+	dataOut := response.DataAsBuffer()
+	if dataOut.Len() == 0 || dataOut.ReadUint8() != 0 {
+		return errors.New("failure")
+	}
+
+	return nil
 }
