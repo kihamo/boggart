@@ -10,12 +10,11 @@ import (
 	"io"
 
 	"github.com/go-openapi/runtime"
-
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 )
 
 // New creates a new streaming API client.
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *Client {
+func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
 	return &Client{transport: transport, formats: formats}
 }
 
@@ -27,8 +26,15 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientService is the interface for Client methods
+type ClientService interface {
+	GetStreamingPicture(params *GetStreamingPictureParams, authInfo runtime.ClientAuthInfoWriter, writer io.Writer) (*GetStreamingPictureOK, error)
+
+	SetTransport(transport runtime.ClientTransport)
+}
+
 /*
-GetStreamingPicture get streaming picture API
+  GetStreamingPicture get streaming picture API
 */
 func (a *Client) GetStreamingPicture(params *GetStreamingPictureParams, authInfo runtime.ClientAuthInfoWriter, writer io.Writer) (*GetStreamingPictureOK, error) {
 	// TODO: Validate the params before sending

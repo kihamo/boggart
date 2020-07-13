@@ -6,31 +6,31 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 )
 
 // PtzAbsoluteHigh ptz absolute high
+//
 // swagger:model PtzAbsoluteHigh
 type PtzAbsoluteHigh struct {
 
 	// azimuth
 	// Maximum: 3600
 	// Minimum: 0
-	Azimuth *uint64 `json:"azimuth,omitempty" xml:"azimuth"`
+	Azimuth *uint64 `json:"azimuth,omitempty" xml:"azimuth,omitempty"`
 
 	// elevation
 	// Maximum: 2700
 	// Minimum: -900
-	Elevation *int64 `json:"elevation,omitempty" xml:"elevation"`
+	Elevation *int64 `json:"elevation,omitempty" xml:"elevation,omitempty"`
 
 	// zoom
 	// Maximum: 1000
 	// Minimum: 0
-	Zoom *uint64 `json:"zoom,omitempty" xml:"absoluteZoom"`
+	Zoom *uint64 `json:"zoom,omitempty" xml:"absoluteZoom,omitempty"`
 }
 
 // Validate validates this ptz absolute high

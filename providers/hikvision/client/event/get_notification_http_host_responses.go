@@ -10,22 +10,21 @@ import (
 	"io"
 
 	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/strfmt"
 
-	strfmt "github.com/go-openapi/strfmt"
-
-	models "github.com/kihamo/boggart/providers/hikvision/models"
+	static "github.com/kihamo/boggart/providers/hikvision/static/models"
 )
 
-// GetNotificationHttpHostReader is a Reader for the GetNotificationHttpHost structure.
-type GetNotificationHttpHostReader struct {
+// GetNotificationHTTPHostReader is a Reader for the GetNotificationHTTPHost structure.
+type GetNotificationHTTPHostReader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *GetNotificationHttpHostReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *GetNotificationHTTPHostReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 	case 200:
-		result := NewGetNotificationHttpHostOK()
+		result := NewGetNotificationHTTPHostOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -36,30 +35,30 @@ func (o *GetNotificationHttpHostReader) ReadResponse(response runtime.ClientResp
 	}
 }
 
-// NewGetNotificationHttpHostOK creates a GetNotificationHttpHostOK with default headers values
-func NewGetNotificationHttpHostOK() *GetNotificationHttpHostOK {
-	return &GetNotificationHttpHostOK{}
+// NewGetNotificationHTTPHostOK creates a GetNotificationHTTPHostOK with default headers values
+func NewGetNotificationHTTPHostOK() *GetNotificationHTTPHostOK {
+	return &GetNotificationHTTPHostOK{}
 }
 
-/*GetNotificationHttpHostOK handles this case with default header values.
+/*GetNotificationHTTPHostOK handles this case with default header values.
 
 Successful operation
 */
-type GetNotificationHttpHostOK struct {
-	Payload *models.HttpHostNotification
+type GetNotificationHTTPHostOK struct {
+	Payload *static.HTTPHostNotification
 }
 
-func (o *GetNotificationHttpHostOK) Error() string {
+func (o *GetNotificationHTTPHostOK) Error() string {
 	return fmt.Sprintf("[GET /Event/notification/httpHosts/{httpHost}][%d] getNotificationHttpHostOK  %+v", 200, o.Payload)
 }
 
-func (o *GetNotificationHttpHostOK) GetPayload() *models.HttpHostNotification {
+func (o *GetNotificationHTTPHostOK) GetPayload() *static.HTTPHostNotification {
 	return o.Payload
 }
 
-func (o *GetNotificationHttpHostOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *GetNotificationHTTPHostOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.HttpHostNotification)
+	o.Payload = new(static.HTTPHostNotification)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

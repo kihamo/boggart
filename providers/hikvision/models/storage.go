@@ -9,14 +9,14 @@ import (
 	"encoding/json"
 	"strconv"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 )
 
 // Storage storage
+//
 // swagger:model Storage
 type Storage struct {
 
@@ -28,7 +28,7 @@ type Storage struct {
 
 	// work mode
 	// Enum: [group quota extract]
-	WorkMode string `json:"workMode,omitempty" xml:"workMode"`
+	WorkMode string `json:"workMode,omitempty" xml:"workMode,omitempty"`
 }
 
 // Validate validates this storage
@@ -129,7 +129,7 @@ const (
 
 // prop value enum
 func (m *Storage) validateWorkModeEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, storageTypeWorkModePropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, storageTypeWorkModePropEnum, true); err != nil {
 		return err
 	}
 	return nil
@@ -168,36 +168,37 @@ func (m *Storage) UnmarshalBinary(b []byte) error {
 }
 
 // StorageHddListItems0 storage hdd list items0
+//
 // swagger:model StorageHddListItems0
 type StorageHddListItems0 struct {
 
 	// capacity
-	Capacity int64 `json:"capacity,omitempty" xml:"hdd>capacity"`
+	Capacity int64 `json:"capacity,omitempty" xml:"hdd>capacity,omitempty"`
 
 	// free space
-	FreeSpace int64 `json:"freeSpace,omitempty" xml:"hdd>freeSpace"`
+	FreeSpace int64 `json:"freeSpace,omitempty" xml:"hdd>freeSpace,omitempty"`
 
 	// group
-	Group string `json:"group,omitempty" xml:"hdd>group"`
+	Group string `json:"group,omitempty" xml:"hdd>group,omitempty"`
 
 	// id
-	ID string `json:"id,omitempty" xml:"hdd>id"`
+	ID string `json:"id,omitempty" xml:"hdd>id,omitempty"`
 
 	// name
-	Name string `json:"name,omitempty" xml:"hdd>hddName"`
+	Name string `json:"name,omitempty" xml:"hdd>hddName,omitempty"`
 
 	// path
-	Path string `json:"path,omitempty" xml:"hdd>hddPath"`
+	Path string `json:"path,omitempty" xml:"hdd>hddPath,omitempty"`
 
 	// property
 	// Enum: [RW RO Redund]
-	Property string `json:"property,omitempty" xml:"hdd>property"`
+	Property string `json:"property,omitempty" xml:"hdd>property,omitempty"`
 
 	// status
-	Status string `json:"status,omitempty" xml:"hdd>status"`
+	Status string `json:"status,omitempty" xml:"hdd>status,omitempty"`
 
 	// type
-	Type string `json:"type,omitempty" xml:"hdd>hddType"`
+	Type string `json:"type,omitempty" xml:"hdd>hddType,omitempty"`
 }
 
 // Validate validates this storage hdd list items0
@@ -240,7 +241,7 @@ const (
 
 // prop value enum
 func (m *StorageHddListItems0) validatePropertyEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, storageHddListItems0TypePropertyPropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, storageHddListItems0TypePropertyPropEnum, true); err != nil {
 		return err
 	}
 	return nil
@@ -279,55 +280,56 @@ func (m *StorageHddListItems0) UnmarshalBinary(b []byte) error {
 }
 
 // StorageNasListItems0 storage nas list items0
+//
 // swagger:model StorageNasListItems0
 type StorageNasListItems0 struct {
 
 	// addressing format type
 	// Enum: [ipaddress hostname]
-	AddressingFormatType string `json:"addressingFormatType,omitempty" xml:"nas>addressingFormatType"`
+	AddressingFormatType string `json:"addressingFormatType,omitempty" xml:"nas>addressingFormatType,omitempty"`
 
 	// capacity
-	Capacity int64 `json:"capacity,omitempty" xml:"nas>capacity"`
+	Capacity int64 `json:"capacity,omitempty" xml:"nas>capacity,omitempty"`
 
 	// free space
-	FreeSpace int64 `json:"freeSpace,omitempty" xml:"nas>freeSpace"`
+	FreeSpace int64 `json:"freeSpace,omitempty" xml:"nas>freeSpace,omitempty"`
 
 	// group
-	Group string `json:"group,omitempty" xml:"nas>group"`
+	Group string `json:"group,omitempty" xml:"nas>group,omitempty"`
 
 	// host name
-	HostName string `json:"hostName,omitempty" xml:"nas>hostName"`
+	HostName string `json:"hostName,omitempty" xml:"nas>hostName,omitempty"`
 
 	// id
-	ID string `json:"id,omitempty" xml:"nas>id"`
+	ID string `json:"id,omitempty" xml:"nas>id,omitempty"`
 
 	// ip address
-	IPAddress string `json:"ipAddress,omitempty" xml:"nas>ipAddress"`
+	IPAddress string `json:"ipAddress,omitempty" xml:"nas>ipAddress,omitempty"`
 
 	// ipv6 address
-	IPV6Address string `json:"ipv6Address,omitempty" xml:"nas>ipv6Address"`
+	IPV6Address string `json:"ipv6Address,omitempty" xml:"nas>ipv6Address,omitempty"`
 
 	// password
-	Password string `json:"password,omitempty" xml:"nas>password"`
+	Password string `json:"password,omitempty" xml:"nas>password,omitempty"`
 
 	// path
-	Path string `json:"path,omitempty" xml:"nas>path"`
+	Path string `json:"path,omitempty" xml:"nas>path,omitempty"`
 
 	// port no
-	PortNo int64 `json:"portNo,omitempty" xml:"nas>portNo"`
+	PortNo int64 `json:"portNo,omitempty" xml:"nas>portNo,omitempty"`
 
 	// property
 	// Enum: [RW RO RDD]
-	Property string `json:"property,omitempty" xml:"nas>property"`
+	Property string `json:"property,omitempty" xml:"nas>property,omitempty"`
 
 	// status
-	Status string `json:"status,omitempty" xml:"nas>status"`
+	Status string `json:"status,omitempty" xml:"nas>status,omitempty"`
 
 	// type
-	Type string `json:"type,omitempty" xml:"nas>nasType"`
+	Type string `json:"type,omitempty" xml:"nas>nasType,omitempty"`
 
 	// user name
-	UserName string `json:"userName,omitempty" xml:"nas>userName"`
+	UserName string `json:"userName,omitempty" xml:"nas>userName,omitempty"`
 }
 
 // Validate validates this storage nas list items0
@@ -371,7 +373,7 @@ const (
 
 // prop value enum
 func (m *StorageNasListItems0) validateAddressingFormatTypeEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, storageNasListItems0TypeAddressingFormatTypePropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, storageNasListItems0TypeAddressingFormatTypePropEnum, true); err != nil {
 		return err
 	}
 	return nil
@@ -417,7 +419,7 @@ const (
 
 // prop value enum
 func (m *StorageNasListItems0) validatePropertyEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, storageNasListItems0TypePropertyPropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, storageNasListItems0TypePropertyPropEnum, true); err != nil {
 		return err
 	}
 	return nil

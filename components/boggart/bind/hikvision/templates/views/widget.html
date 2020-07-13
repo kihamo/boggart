@@ -39,6 +39,25 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="panel">
+                                                <a class="panel-heading" role="tab" id="image-accordion-flip" data-toggle="collapse" data-parent="#image-accordion" href="#image-collapse-flip" aria-expanded="true" aria-controls="image-collapse-flip">
+                                                    <h4 class="panel-title">{{ i18n "Flip" $ }}</h4>
+                                                </a>
+                                                <div id="image-collapse-flip" class="panel-collapse collapse" role="tabpanel" aria-labelledby="image-accordion-flip">
+                                                    <div class="panel-body">
+                                                        <label for="flip">
+                                                            {{ i18n "Flip" $ }} <span class="required">*</span>
+                                                        </label>
+                                                        <select id="flip" class="form-control select2" required="required">
+                                                            <option value="disabled"{{ if not $channel.ImageFlipEnabled }} selected="selected"{{ end }}>{{ i18n "Disabled" $ }}</option>
+                                                            <option value="LEFTRIGHT"{{ if eq $channel.ImageFlipStyle "LEFTRIGHT" }} selected="selected"{{ end }}>{{ i18n "Left / right" $ }}</option>
+                                                            <option value="UPDOWN"{{ if eq $channel.ImageFlipStyle "UPDOWN" }} selected="selected"{{ end }}>{{ i18n "Up / down" $ }}</option>
+                                                            <option value="CENTER"{{ if eq $channel.ImageFlipStyle "CENTER" }} selected="selected"{{ end }}>{{ i18n "Center" $ }}</option>
+                                                            <!--<option value="AUTO"{{ if eq $channel.ImageFlipStyle "AUTO" }} selected="selected"{{ end }}>{{ i18n "Auto" $ }}</option>-->
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <!--
                                             <div class="panel">
                                                 <a class="panel-heading collapsed" role="tab" id="image-accordion-other" data-toggle="collapse" data-parent="#image-accordion" href="#image-collapse-other" aria-expanded="false" aria-controls="image-collapse-other">

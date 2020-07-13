@@ -9,12 +9,11 @@ import (
 	"fmt"
 
 	"github.com/go-openapi/runtime"
-
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 )
 
 // New creates a new system API client.
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *Client {
+func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
 	return &Client{transport: transport, formats: formats}
 }
 
@@ -26,8 +25,23 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientService is the interface for Client methods
+type ClientService interface {
+	GetStatus(params *GetStatusParams, authInfo runtime.ClientAuthInfoWriter) (*GetStatusOK, error)
+
+	GetSystemDeviceInfo(params *GetSystemDeviceInfoParams, authInfo runtime.ClientAuthInfoWriter) (*GetSystemDeviceInfoOK, error)
+
+	GetSystemUpgradeStatus(params *GetSystemUpgradeStatusParams, authInfo runtime.ClientAuthInfoWriter) (*GetSystemUpgradeStatusOK, error)
+
+	Reboot(params *RebootParams, authInfo runtime.ClientAuthInfoWriter) (*RebootOK, error)
+
+	UpdateSystemFirmware(params *UpdateSystemFirmwareParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateSystemFirmwareOK, error)
+
+	SetTransport(transport runtime.ClientTransport)
+}
+
 /*
-GetStatus get status API
+  GetStatus get status API
 */
 func (a *Client) GetStatus(params *GetStatusParams, authInfo runtime.ClientAuthInfoWriter) (*GetStatusOK, error) {
 	// TODO: Validate the params before sending
@@ -62,7 +76,7 @@ func (a *Client) GetStatus(params *GetStatusParams, authInfo runtime.ClientAuthI
 }
 
 /*
-GetSystemDeviceInfo get system device info API
+  GetSystemDeviceInfo get system device info API
 */
 func (a *Client) GetSystemDeviceInfo(params *GetSystemDeviceInfoParams, authInfo runtime.ClientAuthInfoWriter) (*GetSystemDeviceInfoOK, error) {
 	// TODO: Validate the params before sending
@@ -97,7 +111,7 @@ func (a *Client) GetSystemDeviceInfo(params *GetSystemDeviceInfoParams, authInfo
 }
 
 /*
-GetSystemUpgradeStatus get system upgrade status API
+  GetSystemUpgradeStatus get system upgrade status API
 */
 func (a *Client) GetSystemUpgradeStatus(params *GetSystemUpgradeStatusParams, authInfo runtime.ClientAuthInfoWriter) (*GetSystemUpgradeStatusOK, error) {
 	// TODO: Validate the params before sending
@@ -132,7 +146,7 @@ func (a *Client) GetSystemUpgradeStatus(params *GetSystemUpgradeStatusParams, au
 }
 
 /*
-Reboot reboot API
+  Reboot reboot API
 */
 func (a *Client) Reboot(params *RebootParams, authInfo runtime.ClientAuthInfoWriter) (*RebootOK, error) {
 	// TODO: Validate the params before sending
@@ -167,7 +181,7 @@ func (a *Client) Reboot(params *RebootParams, authInfo runtime.ClientAuthInfoWri
 }
 
 /*
-UpdateSystemFirmware updates the firmware of the device
+  UpdateSystemFirmware updates the firmware of the device
 */
 func (a *Client) UpdateSystemFirmware(params *UpdateSystemFirmwareParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateSystemFirmwareOK, error) {
 	// TODO: Validate the params before sending

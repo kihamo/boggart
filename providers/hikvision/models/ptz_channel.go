@@ -8,82 +8,82 @@ package models
 import (
 	"encoding/json"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 )
 
 // PtzChannel ptz channel
+//
 // swagger:model PtzChannel
 type PtzChannel struct {
 
 	// r s485 baud rate
-	RS485BaudRate int64 `json:"RS485BaudRate,omitempty" xml:"PTZChannel>PTZRs485Para>baudRate"`
+	RS485BaudRate int64 `json:"RS485BaudRate,omitempty" xml:"PTZChannel>PTZRs485Para>baudRate,omitempty"`
 
 	// r s485 data bits
-	RS485DataBits int64 `json:"RS485DataBits,omitempty" xml:"PTZChannel>PTZRs485Para>dataBits"`
+	RS485DataBits int64 `json:"RS485DataBits,omitempty" xml:"PTZChannel>PTZRs485Para>dataBits,omitempty"`
 
 	// r s485 flow control
 	// Enum: [none software hardware]
-	RS485FlowControl string `json:"RS485FlowControl,omitempty" xml:"PTZChannel>PTZRs485Para>flowCtrl"`
+	RS485FlowControl string `json:"RS485FlowControl,omitempty" xml:"PTZChannel>PTZRs485Para>flowCtrl,omitempty"`
 
 	// r s485 parity type
 	// Enum: [none even odd mark space]
-	RS485ParityType string `json:"RS485ParityType,omitempty" xml:"PTZChannel>PTZRs485Para>parityType"`
+	RS485ParityType string `json:"RS485ParityType,omitempty" xml:"PTZChannel>PTZRs485Para>parityType,omitempty"`
 
 	// r s485 stop bits
-	RS485StopBits float64 `json:"RS485StopBits,omitempty" xml:"PTZChannel>PTZRs485Para>stopBits"`
+	RS485StopBits float64 `json:"RS485StopBits,omitempty" xml:"PTZChannel>PTZRs485Para>stopBits,omitempty"`
 
 	// auto patrol speed
-	AutoPatrolSpeed int64 `json:"autoPatrolSpeed,omitempty" xml:"PTZChannel>autoPatrolSpeed"`
+	AutoPatrolSpeed int64 `json:"autoPatrolSpeed,omitempty" xml:"PTZChannel>autoPatrolSpeed,omitempty"`
 
 	// control address
-	ControlAddress string `json:"controlAddress,omitempty" xml:"PTZChannel>controlAddress>Address"`
+	ControlAddress string `json:"controlAddress,omitempty" xml:"PTZChannel>controlAddress>Address,omitempty"`
 
 	// control enabled
-	ControlEnabled bool `json:"controlEnabled,omitempty" xml:"PTZChannel>controlAddress>enabled"`
+	ControlEnabled bool `json:"controlEnabled,omitempty" xml:"PTZChannel>controlAddress>enabled,omitempty"`
 
 	// control protocol
-	ControlProtocol string `json:"controlProtocol,omitempty" xml:"PTZChannel>controlProtocol"`
+	ControlProtocol string `json:"controlProtocol,omitempty" xml:"PTZChannel>controlProtocol,omitempty"`
 
 	// default preset ID
-	DefaultPresetID string `json:"defaultPresetID,omitempty" xml:"PTZChannel>defaultPresetID"`
+	DefaultPresetID string `json:"defaultPresetID,omitempty" xml:"PTZChannel>defaultPresetID,omitempty"`
 
 	// enabled
-	Enabled bool `json:"enabled,omitempty" xml:"PTZChannel>enabled"`
+	Enabled bool `json:"enabled,omitempty" xml:"PTZChannel>enabled,omitempty"`
 
 	// id
-	ID uint64 `json:"id,omitempty" xml:"PTZChannel>id"`
+	ID uint64 `json:"id,omitempty" xml:"PTZChannel>id,omitempty"`
 
 	// key board control speed
-	KeyBoardControlSpeed string `json:"keyBoardControlSpeed,omitempty" xml:"PTZChannel>keyBoardControlSpeed"`
+	KeyBoardControlSpeed string `json:"keyBoardControlSpeed,omitempty" xml:"PTZChannel>keyBoardControlSpeed,omitempty"`
 
 	// manual control speed
 	// Enum: [pedestrian nonMotorVehicle motorVehicle selfadaptive compatible]
-	ManualControlSpeed string `json:"manualControlSpeed,omitempty" xml:"PTZChannel>manualControlSpeed"`
+	ManualControlSpeed string `json:"manualControlSpeed,omitempty" xml:"PTZChannel>manualControlSpeed,omitempty"`
 
 	// pan max speed
-	PanMaxSpeed int64 `json:"panMaxSpeed,omitempty" xml:"PTZChannel>panMaxSpeed"`
+	PanMaxSpeed int64 `json:"panMaxSpeed,omitempty" xml:"PTZChannel>panMaxSpeed,omitempty"`
 
 	// pan support
-	PanSupport bool `json:"panSupport,omitempty" xml:"PTZChannel>panSupport"`
+	PanSupport bool `json:"panSupport,omitempty" xml:"PTZChannel>panSupport,omitempty"`
 
 	// preset speed
-	PresetSpeed int64 `json:"presetSpeed,omitempty" xml:"PTZChannel>presetSpeed"`
+	PresetSpeed int64 `json:"presetSpeed,omitempty" xml:"PTZChannel>presetSpeed,omitempty"`
 
 	// tilt max speed
-	TiltMaxSpeed int64 `json:"tiltMaxSpeed,omitempty" xml:"PTZChannel>tiltMaxSpeed"`
+	TiltMaxSpeed int64 `json:"tiltMaxSpeed,omitempty" xml:"PTZChannel>tiltMaxSpeed,omitempty"`
 
 	// tilt support
-	TiltSupport bool `json:"tiltSupport,omitempty" xml:"PTZChannel>tiltSupport"`
+	TiltSupport bool `json:"tiltSupport,omitempty" xml:"PTZChannel>tiltSupport,omitempty"`
 
 	// video input ID
-	VideoInputID uint64 `json:"videoInputID,omitempty" xml:"PTZChannel>videoInputID"`
+	VideoInputID uint64 `json:"videoInputID,omitempty" xml:"PTZChannel>videoInputID,omitempty"`
 
 	// zoom support
-	ZoomSupport bool `json:"zoomSupport,omitempty" xml:"PTZChannel>zoomSupport"`
+	ZoomSupport bool `json:"zoomSupport,omitempty" xml:"PTZChannel>zoomSupport,omitempty"`
 }
 
 // Validate validates this ptz channel
@@ -134,7 +134,7 @@ const (
 
 // prop value enum
 func (m *PtzChannel) validateRS485FlowControlEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, ptzChannelTypeRS485FlowControlPropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, ptzChannelTypeRS485FlowControlPropEnum, true); err != nil {
 		return err
 	}
 	return nil
@@ -186,7 +186,7 @@ const (
 
 // prop value enum
 func (m *PtzChannel) validateRS485ParityTypeEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, ptzChannelTypeRS485ParityTypePropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, ptzChannelTypeRS485ParityTypePropEnum, true); err != nil {
 		return err
 	}
 	return nil
@@ -238,7 +238,7 @@ const (
 
 // prop value enum
 func (m *PtzChannel) validateManualControlSpeedEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, ptzChannelTypeManualControlSpeedPropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, ptzChannelTypeManualControlSpeedPropEnum, true); err != nil {
 		return err
 	}
 	return nil

@@ -6,20 +6,20 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // SystemUpgradeStatus system upgrade status
+//
 // swagger:model SystemUpgradeStatus
 type SystemUpgradeStatus struct {
 
 	// percent
-	Percent int64 `json:"percent,omitempty" xml:"percent"`
+	Percent int64 `json:"percent,omitempty" xml:"percent,omitempty"`
 
 	// upgrading
-	Upgrading bool `json:"upgrading,omitempty" xml:"upgrading"`
+	Upgrading bool `json:"upgrading,omitempty" xml:"upgrading,omitempty"`
 }
 
 // Validate validates this system upgrade status

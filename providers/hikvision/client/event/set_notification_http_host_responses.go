@@ -10,22 +10,21 @@ import (
 	"io"
 
 	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/strfmt"
 
-	strfmt "github.com/go-openapi/strfmt"
-
-	models "github.com/kihamo/boggart/providers/hikvision/models"
+	"github.com/kihamo/boggart/providers/hikvision/models"
 )
 
-// SetNotificationHttpHostReader is a Reader for the SetNotificationHttpHost structure.
-type SetNotificationHttpHostReader struct {
+// SetNotificationHTTPHostReader is a Reader for the SetNotificationHTTPHost structure.
+type SetNotificationHTTPHostReader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *SetNotificationHttpHostReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *SetNotificationHTTPHostReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 	case 200:
-		result := NewSetNotificationHttpHostOK()
+		result := NewSetNotificationHTTPHostOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -36,28 +35,28 @@ func (o *SetNotificationHttpHostReader) ReadResponse(response runtime.ClientResp
 	}
 }
 
-// NewSetNotificationHttpHostOK creates a SetNotificationHttpHostOK with default headers values
-func NewSetNotificationHttpHostOK() *SetNotificationHttpHostOK {
-	return &SetNotificationHttpHostOK{}
+// NewSetNotificationHTTPHostOK creates a SetNotificationHTTPHostOK with default headers values
+func NewSetNotificationHTTPHostOK() *SetNotificationHTTPHostOK {
+	return &SetNotificationHTTPHostOK{}
 }
 
-/*SetNotificationHttpHostOK handles this case with default header values.
+/*SetNotificationHTTPHostOK handles this case with default header values.
 
 Successful operation
 */
-type SetNotificationHttpHostOK struct {
+type SetNotificationHTTPHostOK struct {
 	Payload *models.Status
 }
 
-func (o *SetNotificationHttpHostOK) Error() string {
+func (o *SetNotificationHTTPHostOK) Error() string {
 	return fmt.Sprintf("[PUT /Event/notification/httpHosts/{httpHost}][%d] setNotificationHttpHostOK  %+v", 200, o.Payload)
 }
 
-func (o *SetNotificationHttpHostOK) GetPayload() *models.Status {
+func (o *SetNotificationHTTPHostOK) GetPayload() *models.Status {
 	return o.Payload
 }
 
-func (o *SetNotificationHttpHostOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *SetNotificationHTTPHostOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Status)
 

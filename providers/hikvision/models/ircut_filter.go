@@ -8,20 +8,20 @@ package models
 import (
 	"encoding/json"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 )
 
 // IrcutFilter ircut filter
+//
 // swagger:model IrcutFilter
 type IrcutFilter struct {
 
 	// type
 	// Enum: [auto day night shedule eventTrigger]
-	Type string `json:"type,omitempty" xml:"IrcutFilterType"`
+	Type string `json:"type,omitempty" xml:"IrcutFilterType,omitempty"`
 }
 
 // Validate validates this ircut filter
@@ -70,7 +70,7 @@ const (
 
 // prop value enum
 func (m *IrcutFilter) validateTypeEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, ircutFilterTypeTypePropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, ircutFilterTypeTypePropEnum, true); err != nil {
 		return err
 	}
 	return nil

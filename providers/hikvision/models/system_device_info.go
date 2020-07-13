@@ -6,80 +6,80 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // SystemDeviceInfo system device info
+//
 // swagger:model SystemDeviceInfo
 type SystemDeviceInfo struct {
 
 	// boot released date
-	BootReleasedDate string `json:"bootReleasedDate,omitempty" xml:"bootReleasedDate"`
+	BootReleasedDate string `json:"bootReleasedDate,omitempty" xml:"bootReleasedDate,omitempty"`
 
 	// boot version
-	BootVersion string `json:"bootVersion,omitempty" xml:"bootVersion"`
+	BootVersion string `json:"bootVersion,omitempty" xml:"bootVersion,omitempty"`
 
 	// decoder released date
-	DecoderReleasedDate string `json:"decoderReleasedDate,omitempty" xml:"decoderReleasedDate"`
+	DecoderReleasedDate string `json:"decoderReleasedDate,omitempty" xml:"decoderReleasedDate,omitempty"`
 
 	// decoder version
-	DecoderVersion string `json:"decoderVersion,omitempty" xml:"decoderVersion"`
+	DecoderVersion string `json:"decoderVersion,omitempty" xml:"decoderVersion,omitempty"`
 
 	// device description
-	DeviceDescription string `json:"deviceDescription,omitempty" xml:"deviceDescription"`
+	DeviceDescription string `json:"deviceDescription,omitempty" xml:"deviceDescription,omitempty"`
 
 	// device ID
-	DeviceID string `json:"deviceID,omitempty" xml:"deviceID"`
+	DeviceID string `json:"deviceID,omitempty" xml:"deviceID,omitempty"`
 
 	// device location
-	DeviceLocation string `json:"deviceLocation,omitempty" xml:"deviceLocation"`
+	DeviceLocation string `json:"deviceLocation,omitempty" xml:"deviceLocation,omitempty"`
 
 	// device name
-	DeviceName string `json:"deviceName,omitempty" xml:"deviceName"`
+	DeviceName string `json:"deviceName,omitempty" xml:"deviceName,omitempty"`
 
 	// device type
-	DeviceType string `json:"deviceType,omitempty" xml:"deviceType"`
+	DeviceType string `json:"deviceType,omitempty" xml:"deviceType,omitempty"`
 
 	// encoder released date
-	EncoderReleasedDate string `json:"encoderReleasedDate,omitempty" xml:"encoderReleasedDate"`
+	EncoderReleasedDate string `json:"encoderReleasedDate,omitempty" xml:"encoderReleasedDate,omitempty"`
 
 	// encoder version
-	EncoderVersion string `json:"encoderVersion,omitempty" xml:"encoderVersion"`
+	EncoderVersion string `json:"encoderVersion,omitempty" xml:"encoderVersion,omitempty"`
 
 	// firmware released date
-	FirmwareReleasedDate string `json:"firmwareReleasedDate,omitempty" xml:"firmwareReleasedDate"`
+	FirmwareReleasedDate string `json:"firmwareReleasedDate,omitempty" xml:"firmwareReleasedDate,omitempty"`
 
 	// firmware version
-	FirmwareVersion string `json:"firmwareVersion,omitempty" xml:"firmwareVersion"`
+	FirmwareVersion string `json:"firmwareVersion,omitempty" xml:"firmwareVersion,omitempty"`
 
 	// firmware version info
-	FirmwareVersionInfo string `json:"firmwareVersionInfo,omitempty" xml:"firmwareVersionInfo"`
+	FirmwareVersionInfo string `json:"firmwareVersionInfo,omitempty" xml:"firmwareVersionInfo,omitempty"`
 
 	// hardware version
-	HardwareVersion string `json:"hardwareVersion,omitempty" xml:"hardwareVersion"`
+	HardwareVersion string `json:"hardwareVersion,omitempty" xml:"hardwareVersion,omitempty"`
 
 	// mac address
-	MacAddress string `json:"macAddress,omitempty" xml:"macAddress"`
+	MacAddress string `json:"macAddress,omitempty" xml:"macAddress,omitempty"`
 
 	// model
-	Model string `json:"model,omitempty" xml:"model"`
+	Model string `json:"model,omitempty" xml:"model,omitempty"`
 
 	// serial number
-	SerialNumber string `json:"serialNumber,omitempty" xml:"serialNumber"`
+	SerialNumber string `json:"serialNumber,omitempty" xml:"serialNumber,omitempty"`
 
 	// support beep
-	SupportBeep bool `json:"supportBeep,omitempty" xml:"supportBeep"`
+	SupportBeep bool `json:"supportBeep,omitempty" xml:"supportBeep,omitempty"`
 
 	// support video loss
-	SupportVideoLoss bool `json:"supportVideoLoss,omitempty" xml:"supportVideoLoss"`
+	SupportVideoLoss bool `json:"supportVideoLoss,omitempty" xml:"supportVideoLoss,omitempty"`
 
 	// system contact
-	SystemContact string `json:"systemContact,omitempty" xml:"systemContact"`
+	SystemContact string `json:"systemContact,omitempty" xml:"systemContact,omitempty"`
 
 	// telecontrol ID
-	TelecontrolID int64 `json:"telecontrolID,omitempty" xml:"telecontrolID"`
+	TelecontrolID int64 `json:"telecontrolID,omitempty" xml:"telecontrolID,omitempty"`
 }
 
 // Validate validates this system device info

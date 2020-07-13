@@ -8,14 +8,14 @@ package models
 import (
 	"strconv"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 )
 
 // SystemStatus system status
+//
 // swagger:model SystemStatus
 type SystemStatus struct {
 
@@ -33,13 +33,13 @@ type SystemStatus struct {
 
 	// current device time
 	// Format: date-time
-	CurrentDeviceTime strfmt.DateTime `json:"currentDeviceTime,omitempty" xml:"currentDeviceTime"`
+	CurrentDeviceTime strfmt.DateTime `json:"currentDeviceTime,omitempty" xml:"currentDeviceTime,omitempty"`
 
 	// device up time
-	DeviceUpTime int64 `json:"deviceUpTime,omitempty" xml:"deviceUpTime"`
+	DeviceUpTime int64 `json:"deviceUpTime,omitempty" xml:"deviceUpTime,omitempty"`
 
 	// total reboot count
-	TotalRebootCount int64 `json:"totalRebootCount,omitempty" xml:"totalRebootCount"`
+	TotalRebootCount int64 `json:"totalRebootCount,omitempty" xml:"totalRebootCount,omitempty"`
 }
 
 // Validate validates this system status
@@ -204,14 +204,15 @@ func (m *SystemStatus) UnmarshalBinary(b []byte) error {
 }
 
 // SystemStatusCPUListItems0 system status CPU list items0
+//
 // swagger:model SystemStatusCPUListItems0
 type SystemStatusCPUListItems0 struct {
 
 	// cpu description
-	CPUDescription string `json:"cpuDescription,omitempty" xml:"CPU>cpuDescription"`
+	CPUDescription string `json:"cpuDescription,omitempty" xml:"CPU>cpuDescription,omitempty"`
 
 	// cpu utilization
-	CPUUtilization int64 `json:"cpuUtilization,omitempty" xml:"CPU>cpuUtilization"`
+	CPUUtilization int64 `json:"cpuUtilization,omitempty" xml:"CPU>cpuUtilization,omitempty"`
 }
 
 // Validate validates this system status CPU list items0
@@ -238,38 +239,39 @@ func (m *SystemStatusCPUListItems0) UnmarshalBinary(b []byte) error {
 }
 
 // SystemStatusCameraListItems0 system status camera list items0
+//
 // swagger:model SystemStatusCameraListItems0
 type SystemStatusCameraListItems0 struct {
 
 	// camera run total time
-	CameraRunTotalTime int64 `json:"cameraRunTotalTime,omitempty" xml:"Camera>cameraRunTotalTime"`
+	CameraRunTotalTime int64 `json:"cameraRunTotalTime,omitempty" xml:"Camera>cameraRunTotalTime,omitempty"`
 
 	// focus reverse times
-	FocusReverseTimes int64 `json:"focusReverseTimes,omitempty" xml:"Camera>focusReverseTimes"`
+	FocusReverseTimes int64 `json:"focusReverseTimes,omitempty" xml:"Camera>focusReverseTimes,omitempty"`
 
 	// focus total steps
-	FocusTotalSteps int64 `json:"focusTotalSteps,omitempty" xml:"Camera>focusTotalSteps"`
+	FocusTotalSteps int64 `json:"focusTotalSteps,omitempty" xml:"Camera>focusTotalSteps,omitempty"`
 
 	// icr shift times
-	IcrShiftTimes int64 `json:"icrShiftTimes,omitempty" xml:"Camera>icrShiftTimes"`
+	IcrShiftTimes int64 `json:"icrShiftTimes,omitempty" xml:"Camera>icrShiftTimes,omitempty"`
 
 	// icr total steps
-	IcrTotalSteps int64 `json:"icrTotalSteps,omitempty" xml:"Camera>icrTotalSteps"`
+	IcrTotalSteps int64 `json:"icrTotalSteps,omitempty" xml:"Camera>icrTotalSteps,omitempty"`
 
 	// iris shift times
-	IrisShiftTimes int64 `json:"irisShiftTimes,omitempty" xml:"Camera>irisShiftTimes"`
+	IrisShiftTimes int64 `json:"irisShiftTimes,omitempty" xml:"Camera>irisShiftTimes,omitempty"`
 
 	// iris total steps
-	IrisTotalSteps int64 `json:"irisTotalSteps,omitempty" xml:"Camera>irisTotalSteps"`
+	IrisTotalSteps int64 `json:"irisTotalSteps,omitempty" xml:"Camera>irisTotalSteps,omitempty"`
 
 	// lens intir times
-	LensIntirTimes int64 `json:"lensIntirTimes,omitempty" xml:"Camera>lensIntirTimes"`
+	LensIntirTimes int64 `json:"lensIntirTimes,omitempty" xml:"Camera>lensIntirTimes,omitempty"`
 
 	// zoom reverse times
-	ZoomReverseTimes int64 `json:"zoomReverseTimes,omitempty" xml:"Camera>zoomReverseTimes"`
+	ZoomReverseTimes int64 `json:"zoomReverseTimes,omitempty" xml:"Camera>zoomReverseTimes,omitempty"`
 
 	// zoom total steps
-	ZoomTotalSteps int64 `json:"zoomTotalSteps,omitempty" xml:"Camera>zoomTotalSteps"`
+	ZoomTotalSteps int64 `json:"zoomTotalSteps,omitempty" xml:"Camera>zoomTotalSteps,omitempty"`
 }
 
 // Validate validates this system status camera list items0
@@ -296,32 +298,33 @@ func (m *SystemStatusCameraListItems0) UnmarshalBinary(b []byte) error {
 }
 
 // SystemStatusDomeInfoListItems0 system status dome info list items0
+//
 // swagger:model SystemStatusDomeInfoListItems0
 type SystemStatusDomeInfoListItems0 struct {
 
 	// dome run total time
-	DomeRunTotalTime int64 `json:"domeRunTotalTime,omitempty" xml:"DomeInfo>domeRunTotalTime"`
+	DomeRunTotalTime int64 `json:"domeRunTotalTime,omitempty" xml:"DomeInfo>domeRunTotalTime,omitempty"`
 
 	// fan state
-	FanState int64 `json:"fanState,omitempty" xml:"DomeInfo>fanState"`
+	FanState int64 `json:"fanState,omitempty" xml:"DomeInfo>fanState,omitempty"`
 
 	// heat state
-	HeatState int64 `json:"heatState,omitempty" xml:"DomeInfo>heatState"`
+	HeatState int64 `json:"heatState,omitempty" xml:"DomeInfo>heatState,omitempty"`
 
 	// pan total rounds
-	PanTotalRounds int64 `json:"panTotalRounds,omitempty" xml:"DomeInfo>panTotalRounds"`
+	PanTotalRounds int64 `json:"panTotalRounds,omitempty" xml:"DomeInfo>panTotalRounds,omitempty"`
 
 	// run time between ntwenty pforty
-	RunTimeBetweenNtwentyPforty int64 `json:"runTimeBetweenNtwentyPforty,omitempty" xml:"DomeInfo>runTimeBetweenNtwentyPforty"`
+	RunTimeBetweenNtwentyPforty int64 `json:"runTimeBetweenNtwentyPforty,omitempty" xml:"DomeInfo>runTimeBetweenNtwentyPforty,omitempty"`
 
 	// run time under negativetwenty
-	RunTimeUnderNegativetwenty int64 `json:"runTimeUnderNegativetwenty,omitempty" xml:"DomeInfo>runTimeUnderNegativetwenty"`
+	RunTimeUnderNegativetwenty int64 `json:"runTimeUnderNegativetwenty,omitempty" xml:"DomeInfo>runTimeUnderNegativetwenty,omitempty"`
 
 	// runtime over positiveforty
-	RuntimeOverPositiveforty int64 `json:"runtimeOverPositiveforty,omitempty" xml:"DomeInfo>runtimeOverPositiveforty"`
+	RuntimeOverPositiveforty int64 `json:"runtimeOverPositiveforty,omitempty" xml:"DomeInfo>runtimeOverPositiveforty,omitempty"`
 
 	// tilt total rounds
-	TiltTotalRounds int64 `json:"tiltTotalRounds,omitempty" xml:"DomeInfo>tiltTotalRounds"`
+	TiltTotalRounds int64 `json:"tiltTotalRounds,omitempty" xml:"DomeInfo>tiltTotalRounds,omitempty"`
 }
 
 // Validate validates this system status dome info list items0
@@ -348,17 +351,18 @@ func (m *SystemStatusDomeInfoListItems0) UnmarshalBinary(b []byte) error {
 }
 
 // SystemStatusMemoryListItems0 system status memory list items0
+//
 // swagger:model SystemStatusMemoryListItems0
 type SystemStatusMemoryListItems0 struct {
 
 	// memory available
-	MemoryAvailable float64 `json:"memoryAvailable,omitempty" xml:"Memory>memoryAvailable"`
+	MemoryAvailable float64 `json:"memoryAvailable,omitempty" xml:"Memory>memoryAvailable,omitempty"`
 
 	// memory description
-	MemoryDescription string `json:"memoryDescription,omitempty" xml:"Memory>memoryDescription"`
+	MemoryDescription string `json:"memoryDescription,omitempty" xml:"Memory>memoryDescription,omitempty"`
 
 	// memory usage
-	MemoryUsage float64 `json:"memoryUsage,omitempty" xml:"Memory>memoryUsage"`
+	MemoryUsage float64 `json:"memoryUsage,omitempty" xml:"Memory>memoryUsage,omitempty"`
 }
 
 // Validate validates this system status memory list items0

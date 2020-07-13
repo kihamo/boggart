@@ -13,141 +13,140 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
-	strfmt "github.com/go-openapi/strfmt"
-
-	models "github.com/kihamo/boggart/providers/hikvision/models"
+	static "github.com/kihamo/boggart/providers/hikvision/static/models"
 )
 
-// NewSetNotificationHttpHostParams creates a new SetNotificationHttpHostParams object
+// NewSetNotificationHTTPHostParams creates a new SetNotificationHTTPHostParams object
 // with the default values initialized.
-func NewSetNotificationHttpHostParams() *SetNotificationHttpHostParams {
+func NewSetNotificationHTTPHostParams() *SetNotificationHTTPHostParams {
 	var ()
-	return &SetNotificationHttpHostParams{
+	return &SetNotificationHTTPHostParams{
 
 		timeout: cr.DefaultTimeout,
 	}
 }
 
-// NewSetNotificationHttpHostParamsWithTimeout creates a new SetNotificationHttpHostParams object
+// NewSetNotificationHTTPHostParamsWithTimeout creates a new SetNotificationHTTPHostParams object
 // with the default values initialized, and the ability to set a timeout on a request
-func NewSetNotificationHttpHostParamsWithTimeout(timeout time.Duration) *SetNotificationHttpHostParams {
+func NewSetNotificationHTTPHostParamsWithTimeout(timeout time.Duration) *SetNotificationHTTPHostParams {
 	var ()
-	return &SetNotificationHttpHostParams{
+	return &SetNotificationHTTPHostParams{
 
 		timeout: timeout,
 	}
 }
 
-// NewSetNotificationHttpHostParamsWithContext creates a new SetNotificationHttpHostParams object
+// NewSetNotificationHTTPHostParamsWithContext creates a new SetNotificationHTTPHostParams object
 // with the default values initialized, and the ability to set a context for a request
-func NewSetNotificationHttpHostParamsWithContext(ctx context.Context) *SetNotificationHttpHostParams {
+func NewSetNotificationHTTPHostParamsWithContext(ctx context.Context) *SetNotificationHTTPHostParams {
 	var ()
-	return &SetNotificationHttpHostParams{
+	return &SetNotificationHTTPHostParams{
 
 		Context: ctx,
 	}
 }
 
-// NewSetNotificationHttpHostParamsWithHTTPClient creates a new SetNotificationHttpHostParams object
+// NewSetNotificationHTTPHostParamsWithHTTPClient creates a new SetNotificationHTTPHostParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
-func NewSetNotificationHttpHostParamsWithHTTPClient(client *http.Client) *SetNotificationHttpHostParams {
+func NewSetNotificationHTTPHostParamsWithHTTPClient(client *http.Client) *SetNotificationHTTPHostParams {
 	var ()
-	return &SetNotificationHttpHostParams{
+	return &SetNotificationHTTPHostParams{
 		HTTPClient: client,
 	}
 }
 
-/*SetNotificationHttpHostParams contains all the parameters to send to the API endpoint
-for the set notification http host operation typically these are written to a http.Request
+/*SetNotificationHTTPHostParams contains all the parameters to send to the API endpoint
+for the set notification Http host operation typically these are written to a http.Request
 */
-type SetNotificationHttpHostParams struct {
+type SetNotificationHTTPHostParams struct {
 
-	/*HttpHostNotification*/
-	HttpHostNotification *models.HttpHostNotification
-	/*HttpHost
+	/*HTTPHostNotification*/
+	HTTPHostNotification *static.HTTPHostNotification
+	/*HTTPHost
 	  HTTP host ID
 
 	*/
-	HttpHost uint64
+	HTTPHost uint64
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
 }
 
-// WithTimeout adds the timeout to the set notification http host params
-func (o *SetNotificationHttpHostParams) WithTimeout(timeout time.Duration) *SetNotificationHttpHostParams {
+// WithTimeout adds the timeout to the set notification Http host params
+func (o *SetNotificationHTTPHostParams) WithTimeout(timeout time.Duration) *SetNotificationHTTPHostParams {
 	o.SetTimeout(timeout)
 	return o
 }
 
-// SetTimeout adds the timeout to the set notification http host params
-func (o *SetNotificationHttpHostParams) SetTimeout(timeout time.Duration) {
+// SetTimeout adds the timeout to the set notification Http host params
+func (o *SetNotificationHTTPHostParams) SetTimeout(timeout time.Duration) {
 	o.timeout = timeout
 }
 
-// WithContext adds the context to the set notification http host params
-func (o *SetNotificationHttpHostParams) WithContext(ctx context.Context) *SetNotificationHttpHostParams {
+// WithContext adds the context to the set notification Http host params
+func (o *SetNotificationHTTPHostParams) WithContext(ctx context.Context) *SetNotificationHTTPHostParams {
 	o.SetContext(ctx)
 	return o
 }
 
-// SetContext adds the context to the set notification http host params
-func (o *SetNotificationHttpHostParams) SetContext(ctx context.Context) {
+// SetContext adds the context to the set notification Http host params
+func (o *SetNotificationHTTPHostParams) SetContext(ctx context.Context) {
 	o.Context = ctx
 }
 
-// WithHTTPClient adds the HTTPClient to the set notification http host params
-func (o *SetNotificationHttpHostParams) WithHTTPClient(client *http.Client) *SetNotificationHttpHostParams {
+// WithHTTPClient adds the HTTPClient to the set notification Http host params
+func (o *SetNotificationHTTPHostParams) WithHTTPClient(client *http.Client) *SetNotificationHTTPHostParams {
 	o.SetHTTPClient(client)
 	return o
 }
 
-// SetHTTPClient adds the HTTPClient to the set notification http host params
-func (o *SetNotificationHttpHostParams) SetHTTPClient(client *http.Client) {
+// SetHTTPClient adds the HTTPClient to the set notification Http host params
+func (o *SetNotificationHTTPHostParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithHttpHostNotification adds the httpHostNotification to the set notification http host params
-func (o *SetNotificationHttpHostParams) WithHttpHostNotification(httpHostNotification *models.HttpHostNotification) *SetNotificationHttpHostParams {
-	o.SetHttpHostNotification(httpHostNotification)
+// WithHTTPHostNotification adds the hTTPHostNotification to the set notification Http host params
+func (o *SetNotificationHTTPHostParams) WithHTTPHostNotification(hTTPHostNotification *static.HTTPHostNotification) *SetNotificationHTTPHostParams {
+	o.SetHTTPHostNotification(hTTPHostNotification)
 	return o
 }
 
-// SetHttpHostNotification adds the httpHostNotification to the set notification http host params
-func (o *SetNotificationHttpHostParams) SetHttpHostNotification(httpHostNotification *models.HttpHostNotification) {
-	o.HttpHostNotification = httpHostNotification
+// SetHTTPHostNotification adds the httpHostNotification to the set notification Http host params
+func (o *SetNotificationHTTPHostParams) SetHTTPHostNotification(hTTPHostNotification *static.HTTPHostNotification) {
+	o.HTTPHostNotification = hTTPHostNotification
 }
 
-// WithHttpHost adds the httpHost to the set notification http host params
-func (o *SetNotificationHttpHostParams) WithHttpHost(httpHost uint64) *SetNotificationHttpHostParams {
-	o.SetHttpHost(httpHost)
+// WithHTTPHost adds the hTTPHost to the set notification Http host params
+func (o *SetNotificationHTTPHostParams) WithHTTPHost(hTTPHost uint64) *SetNotificationHTTPHostParams {
+	o.SetHTTPHost(hTTPHost)
 	return o
 }
 
-// SetHttpHost adds the httpHost to the set notification http host params
-func (o *SetNotificationHttpHostParams) SetHttpHost(httpHost uint64) {
-	o.HttpHost = httpHost
+// SetHTTPHost adds the httpHost to the set notification Http host params
+func (o *SetNotificationHTTPHostParams) SetHTTPHost(hTTPHost uint64) {
+	o.HTTPHost = hTTPHost
 }
 
 // WriteToRequest writes these params to a swagger request
-func (o *SetNotificationHttpHostParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
+func (o *SetNotificationHTTPHostParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
 	if err := r.SetTimeout(o.timeout); err != nil {
 		return err
 	}
 	var res []error
 
-	if o.HttpHostNotification != nil {
-		if err := r.SetBodyParam(o.HttpHostNotification); err != nil {
+	if o.HTTPHostNotification != nil {
+		if err := r.SetBodyParam(o.HTTPHostNotification); err != nil {
 			return err
 		}
 	}
 
 	// path param httpHost
-	if err := r.SetPathParam("httpHost", swag.FormatUint64(o.HttpHost)); err != nil {
+	if err := r.SetPathParam("httpHost", swag.FormatUint64(o.HTTPHost)); err != nil {
 		return err
 	}
 

@@ -10,10 +10,9 @@ import (
 	"io"
 
 	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/strfmt"
 
-	strfmt "github.com/go-openapi/strfmt"
-
-	models "github.com/kihamo/boggart/providers/hikvision/models"
+	"github.com/kihamo/boggart/providers/hikvision/models"
 )
 
 // GetSystemUpgradeStatusReader is a Reader for the GetSystemUpgradeStatus structure.

@@ -9,12 +9,11 @@ import (
 	"fmt"
 
 	"github.com/go-openapi/runtime"
-
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 )
 
 // New creates a new ptz API client.
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *Client {
+func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
 	return &Client{transport: transport, formats: formats}
 }
 
@@ -26,8 +25,27 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientService is the interface for Client methods
+type ClientService interface {
+	GetPtzChannels(params *GetPtzChannelsParams, authInfo runtime.ClientAuthInfoWriter) (*GetPtzChannelsOK, error)
+
+	GetPtzStatus(params *GetPtzStatusParams, authInfo runtime.ClientAuthInfoWriter) (*GetPtzStatusOK, error)
+
+	GotoPtzPreset(params *GotoPtzPresetParams, authInfo runtime.ClientAuthInfoWriter) (*GotoPtzPresetOK, error)
+
+	SetPtzContinuous(params *SetPtzContinuousParams, authInfo runtime.ClientAuthInfoWriter) (*SetPtzContinuousOK, error)
+
+	SetPtzMomentary(params *SetPtzMomentaryParams, authInfo runtime.ClientAuthInfoWriter) (*SetPtzMomentaryOK, error)
+
+	SetPtzPositionAbsolute(params *SetPtzPositionAbsoluteParams, authInfo runtime.ClientAuthInfoWriter) (*SetPtzPositionAbsoluteOK, error)
+
+	SetPtzPositionRelative(params *SetPtzPositionRelativeParams, authInfo runtime.ClientAuthInfoWriter) (*SetPtzPositionRelativeOK, error)
+
+	SetTransport(transport runtime.ClientTransport)
+}
+
 /*
-GetPtzChannels its is used to get the list of p t z channels for the device
+  GetPtzChannels its is used to get the list of p t z channels for the device
 */
 func (a *Client) GetPtzChannels(params *GetPtzChannelsParams, authInfo runtime.ClientAuthInfoWriter) (*GetPtzChannelsOK, error) {
 	// TODO: Validate the params before sending
@@ -62,7 +80,7 @@ func (a *Client) GetPtzChannels(params *GetPtzChannelsParams, authInfo runtime.C
 }
 
 /*
-GetPtzStatus its is used to get currently p t z coordinate position for the device
+  GetPtzStatus its is used to get currently p t z coordinate position for the device
 */
 func (a *Client) GetPtzStatus(params *GetPtzStatusParams, authInfo runtime.ClientAuthInfoWriter) (*GetPtzStatusOK, error) {
 	// TODO: Validate the params before sending
@@ -97,7 +115,7 @@ func (a *Client) GetPtzStatus(params *GetPtzStatusParams, authInfo runtime.Clien
 }
 
 /*
-GotoPtzPreset its is used to move a particular p t z channel to a ID preset position for the device
+  GotoPtzPreset its is used to move a particular p t z channel to a ID preset position for the device
 */
 func (a *Client) GotoPtzPreset(params *GotoPtzPresetParams, authInfo runtime.ClientAuthInfoWriter) (*GotoPtzPresetOK, error) {
 	// TODO: Validate the params before sending
@@ -132,7 +150,7 @@ func (a *Client) GotoPtzPreset(params *GotoPtzPresetParams, authInfo runtime.Cli
 }
 
 /*
-SetPtzContinuous its is used to control p t z move around and zoom for the device
+  SetPtzContinuous its is used to control p t z move around and zoom for the device
 */
 func (a *Client) SetPtzContinuous(params *SetPtzContinuousParams, authInfo runtime.ClientAuthInfoWriter) (*SetPtzContinuousOK, error) {
 	// TODO: Validate the params before sending
@@ -167,7 +185,7 @@ func (a *Client) SetPtzContinuous(params *SetPtzContinuousParams, authInfo runti
 }
 
 /*
-SetPtzMomentary its is used to control p t z move around and zoom in a period of time for the device
+  SetPtzMomentary its is used to control p t z move around and zoom in a period of time for the device
 */
 func (a *Client) SetPtzMomentary(params *SetPtzMomentaryParams, authInfo runtime.ClientAuthInfoWriter) (*SetPtzMomentaryOK, error) {
 	// TODO: Validate the params before sending
@@ -202,7 +220,7 @@ func (a *Client) SetPtzMomentary(params *SetPtzMomentaryParams, authInfo runtime
 }
 
 /*
-SetPtzPositionAbsolute its is used to move a particular p t z channel to a absolute position which is defined by absolute for the device
+  SetPtzPositionAbsolute its is used to move a particular p t z channel to a absolute position which is defined by absolute for the device
 */
 func (a *Client) SetPtzPositionAbsolute(params *SetPtzPositionAbsoluteParams, authInfo runtime.ClientAuthInfoWriter) (*SetPtzPositionAbsoluteOK, error) {
 	// TODO: Validate the params before sending
@@ -237,7 +255,7 @@ func (a *Client) SetPtzPositionAbsolute(params *SetPtzPositionAbsoluteParams, au
 }
 
 /*
-SetPtzPositionRelative its is used to move the position which is defined by position x position y to the screen center and relative zoom for the device
+  SetPtzPositionRelative its is used to move the position which is defined by position x position y to the screen center and relative zoom for the device
 */
 func (a *Client) SetPtzPositionRelative(params *SetPtzPositionRelativeParams, authInfo runtime.ClientAuthInfoWriter) (*SetPtzPositionRelativeOK, error) {
 	// TODO: Validate the params before sending

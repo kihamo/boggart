@@ -13,7 +13,8 @@ type Config struct {
 	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
-	Address                        types.URL     `valid:",required"`
+	Address                        types.URL `valid:",required"`
+	Debug                          bool
 	UpdaterInterval                time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 	UpdaterTimeout                 time.Duration `mapstructure:"updater_timeout" yaml:"updater_timeout"`
 	PTZInterval                    time.Duration `mapstructure:"ptz_interval" yaml:"ptz_interval"`

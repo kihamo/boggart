@@ -8,73 +8,73 @@ package models
 import (
 	"encoding/json"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 )
 
 // EventNotificationAlert event notification alert
+//
 // swagger:model EventNotificationAlert
 type EventNotificationAlert struct {
 
 	// active post count
-	ActivePostCount uint64 `json:"activePostCount,omitempty" xml:"activePostCount"`
+	ActivePostCount uint64 `json:"activePostCount,omitempty" xml:"activePostCount,omitempty"`
 
 	// channel ID
-	ChannelID uint64 `json:"channelID,omitempty" xml:"channelID"`
+	ChannelID uint64 `json:"channelID,omitempty" xml:"channelID,omitempty"`
 
 	// date time
 	// Format: date-time
-	DateTime strfmt.DateTime `json:"dateTime,omitempty" xml:"dateTime"`
+	DateTime strfmt.DateTime `json:"dateTime,omitempty" xml:"dateTime,omitempty"`
 
 	// dyn channel ID
-	DynChannelID uint64 `json:"dynChannelID,omitempty" xml:"dynChannelID"`
+	DynChannelID uint64 `json:"dynChannelID,omitempty" xml:"dynChannelID,omitempty"`
 
 	// dyn input i o port ID
-	DynInputIOPortID string `json:"dynInputIOPortID,omitempty" xml:"dynInputIOPortID"`
+	DynInputIOPortID string `json:"dynInputIOPortID,omitempty" xml:"dynInputIOPortID,omitempty"`
 
 	// event description
-	EventDescription string `json:"eventDescription,omitempty" xml:"eventDescription"`
+	EventDescription string `json:"eventDescription,omitempty" xml:"eventDescription,omitempty"`
 
 	// event push
-	EventPush string `json:"eventPush,omitempty" xml:"Extensions>eventPush"`
+	EventPush string `json:"eventPush,omitempty" xml:"Extensions>eventPush,omitempty"`
 
 	// event state
 	// Enum: [active inactive]
-	EventState string `json:"eventState,omitempty" xml:"eventState"`
+	EventState string `json:"eventState,omitempty" xml:"eventState,omitempty"`
 
 	// event type
 	// Enum: [IO VMD videoloss shelteralarm facedetection defocus audioexception scenechangedetection fielddetection linedetection regionEntrance regionExiting loitering group rapidMove parking unattendedBaggage attendedBaggage PIR peopleDetection]
-	EventType string `json:"eventType,omitempty" xml:"eventType"`
+	EventType string `json:"eventType,omitempty" xml:"eventType,omitempty"`
 
 	// input i o port ID
-	InputIOPortID uint64 `json:"inputIOPortID,omitempty" xml:"inputIOPortID"`
+	InputIOPortID uint64 `json:"inputIOPortID,omitempty" xml:"inputIOPortID,omitempty"`
 
 	// ip address
-	IPAddress string `json:"ipAddress,omitempty" xml:"ipAddress"`
+	IPAddress string `json:"ipAddress,omitempty" xml:"ipAddress,omitempty"`
 
 	// ipv6 address
-	IPV6Address string `json:"ipv6Address,omitempty" xml:"ipv6Address"`
+	IPV6Address string `json:"ipv6Address,omitempty" xml:"ipv6Address,omitempty"`
 
 	// mac address
-	MacAddress string `json:"macAddress,omitempty" xml:"macAddress"`
+	MacAddress string `json:"macAddress,omitempty" xml:"macAddress,omitempty"`
 
 	// port
-	Port uint64 `json:"port,omitempty" xml:"portNo"`
+	Port uint64 `json:"port,omitempty" xml:"portNo,omitempty"`
 
 	// protocol
-	Protocol string `json:"protocol,omitempty" xml:"protocol"`
+	Protocol string `json:"protocol,omitempty" xml:"protocol,omitempty"`
 
 	// region ID
-	RegionID string `json:"regionID,omitempty" xml:"DetectionRegionList>DetectionRegionEntry>regionID"`
+	RegionID string `json:"regionID,omitempty" xml:"DetectionRegionList>DetectionRegionEntry>regionID,omitempty"`
 
 	// sensitivity level
-	SensitivityLevel uint64 `json:"sensitivityLevel,omitempty" xml:"DetectionRegionList>DetectionRegionEntry>sensitivityLevel"`
+	SensitivityLevel uint64 `json:"sensitivityLevel,omitempty" xml:"DetectionRegionList>DetectionRegionEntry>sensitivityLevel,omitempty"`
 
 	// serial number
-	SerialNumber string `json:"serialNumber,omitempty" xml:"Extensions>serialNumber"`
+	SerialNumber string `json:"serialNumber,omitempty" xml:"Extensions>serialNumber,omitempty"`
 }
 
 // Validate validates this event notification alert
@@ -135,7 +135,7 @@ const (
 
 // prop value enum
 func (m *EventNotificationAlert) validateEventStateEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, eventNotificationAlertTypeEventStatePropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, eventNotificationAlertTypeEventStatePropEnum, true); err != nil {
 		return err
 	}
 	return nil
@@ -232,7 +232,7 @@ const (
 
 // prop value enum
 func (m *EventNotificationAlert) validateEventTypeEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, eventNotificationAlertTypeEventTypePropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, eventNotificationAlertTypeEventTypePropEnum, true); err != nil {
 		return err
 	}
 	return nil

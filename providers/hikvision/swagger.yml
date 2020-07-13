@@ -109,6 +109,27 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/Status"
+  /Image/channels/{channel}/ImageFlip:
+    put:
+      operationId: "setImageFlip"
+      tags:
+      - "image"
+      parameters:
+      - name: "channel"
+        in: "path"
+        description: "Channel ID"
+        required: true
+        type: "integer"
+        format: "uint64"
+      - name: "ImageFlip"
+        in: "body"
+        schema:
+          $ref: "#/definitions/ImageFlip"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Status"
   /PTZCtrl/channels:
     get:
       operationId: "getPtzChannels"
@@ -503,6 +524,11 @@ definitions:
         xml:
           name: "Extensions>eventPush"
   HttpHostNotification:
+    x-go-type:
+      import:
+        package: "github.com/kihamo/boggart/providers/hikvision/static/models"
+        alias: "static"
+      type: "HTTPHostNotification"
     type: "object"
     properties:
       id:
@@ -723,6 +749,23 @@ definitions:
         - "eventTrigger"
         xml:
           name: "IrcutFilterType"
+  ImageFlip:
+    type: "object"
+    properties:
+      enabled:
+        type: "boolean"
+        x-omitempty: false
+        xml:
+          name: "enabled"
+      style:
+        type: "string"
+        enum:
+        - "LEFTRIGHT"
+        - "UPDOWN"
+        - "CENTER"
+        - "AUTO"
+        xml:
+          name: "ImageFlipStyle"
   ImageChannels:
     type: "array"
     xml:

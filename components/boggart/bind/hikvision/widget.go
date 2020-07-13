@@ -18,6 +18,7 @@ import (
 	"github.com/kihamo/boggart/providers/hikvision/client/streaming"
 	"github.com/kihamo/boggart/providers/hikvision/client/system"
 	"github.com/kihamo/boggart/providers/hikvision/models"
+	static "github.com/kihamo/boggart/providers/hikvision/static/models"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
@@ -65,7 +66,9 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 						continue
 					}
 
-					if key == "ir-cut-filter-type" {
+					switch key {
+
+					case "ir-cut-filter-type":
 						params := image.NewSetImageIrCutFilterParamsWithContext(ctx).
 							WithChannel(ch).
 							WithIrcutFilter(&models.IrcutFilter{
@@ -73,6 +76,21 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 							})
 
 						_, err = bind.client.Image.SetImageIrCutFilter(params, nil)
+
+					case "flip":
+						flip := &models.ImageFlip{
+							Enabled: value[0] != "disabled",
+						}
+
+						if flip.Enabled {
+							flip.Style = value[0]
+						}
+
+						params := image.NewSetImageFlipParamsWithContext(ctx).
+							WithChannel(ch).
+							WithImageFlip(flip)
+
+						_, err = bind.client.Image.SetImageFlip(params, nil)
 					}
 
 					break
@@ -187,10 +205,10 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			return
 		}
 
-		params := event.NewGetNotificationHttpHostParamsWithContext(ctx).
-			WithHttpHost(1)
+		params := event.NewGetNotificationHTTPHostParamsWithContext(ctx).
+			WithHTTPHost(1)
 
-		notification, err := bind.client.Event.GetNotificationHttpHost(params, nil)
+		notification, err := bind.client.Event.GetNotificationHTTPHost(params, nil)
 		if err != nil {
 			r.Session().FlashBag().Error(t.Translate(ctx, "Get notification http host failed with error %s", "", err.Error()))
 		}
@@ -204,13 +222,13 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 					err = xml.EscapeText(u, []byte(r.Original().FormValue("url")))
 
 					if err == nil {
-						params := event.NewSetNotificationHttpHostParamsWithContext(ctx).
-							WithHttpHost(notification.Payload.ID).
-							WithHttpHostNotification(&models.HttpHostNotification{
+						params := event.NewSetNotificationHTTPHostParamsWithContext(ctx).
+							WithHTTPHost(notification.Payload.ID).
+							WithHTTPHostNotification(&static.HTTPHostNotification{
 								ID:                       notification.Payload.ID,
 								ProtocolType:             notification.Payload.ProtocolType,
 								ParameterFormatType:      notification.Payload.ParameterFormatType,
-								HttpAuthenticationMethod: notification.Payload.HttpAuthenticationMethod,
+								HTTPAuthenticationMethod: notification.Payload.HTTPAuthenticationMethod,
 
 								AddressingFormatType: r.Original().FormValue("address-format"),
 								URL:                  &[]string{u.String()}[0],
@@ -218,14 +236,14 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 							})
 
 						if hostname := r.Original().FormValue("hostname"); len(hostname) > 0 {
-							params.HttpHostNotification.HostName = &hostname
+							params.HTTPHostNotification.HostName = &hostname
 						}
 
 						if ip := r.Original().FormValue("ip"); len(ip) > 0 {
-							params.HttpHostNotification.IPAddress = &ip
+							params.HTTPHostNotification.IPAddress = &ip
 						}
 
-						_, err = bind.client.Event.SetNotificationHttpHost(params, nil)
+						_, err = bind.client.Event.SetNotificationHTTPHost(params, nil)
 					}
 				}
 

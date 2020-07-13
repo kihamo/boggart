@@ -6,41 +6,41 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 )
 
 // PTZData p t z data
+//
 // swagger:model PTZData
 type PTZData struct {
 
 	// absolute high
-	AbsoluteHigh *PtzAbsoluteHigh `json:"absoluteHigh,omitempty" xml:"AbsoluteHigh"`
+	AbsoluteHigh *PtzAbsoluteHigh `json:"absoluteHigh,omitempty" xml:"AbsoluteHigh,omitempty"`
 
 	// duration
 	// Format: duration
-	Duration strfmt.Duration `json:"duration,omitempty" xml:"Momentary>duration"`
+	Duration strfmt.Duration `json:"duration,omitempty" xml:"Momentary>duration,omitempty"`
 
 	// pan
 	// Maximum: 100
 	// Minimum: -100
-	Pan *int64 `json:"pan,omitempty" xml:"pan"`
+	Pan *int64 `json:"pan,omitempty" xml:"pan,omitempty"`
 
 	// relative
-	Relative *PtzRelative `json:"relative,omitempty" xml:"Relative"`
+	Relative *PtzRelative `json:"relative,omitempty" xml:"Relative,omitempty"`
 
 	// tilt
 	// Maximum: 100
 	// Minimum: -100
-	Tilt *int64 `json:"tilt,omitempty" xml:"tilt"`
+	Tilt *int64 `json:"tilt,omitempty" xml:"tilt,omitempty"`
 
 	// zoom
 	// Maximum: 100
 	// Minimum: -100
-	Zoom *int64 `json:"zoom,omitempty" xml:"zoom"`
+	Zoom *int64 `json:"zoom,omitempty" xml:"zoom,omitempty"`
 }
 
 // Validate validates this p t z data

@@ -6,27 +6,27 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 )
 
 // PtzRelative ptz relative
+//
 // swagger:model PtzRelative
 type PtzRelative struct {
 
 	// x
-	X int64 `json:"X,omitempty" xml:"Relative>positionX"`
+	X int64 `json:"X,omitempty" xml:"Relative>positionX,omitempty"`
 
 	// y
-	Y int64 `json:"Y,omitempty" xml:"Relative>positionY"`
+	Y int64 `json:"Y,omitempty" xml:"Relative>positionY,omitempty"`
 
 	// zoom
 	// Maximum: 100
 	// Minimum: -100
-	Zoom *int64 `json:"zoom,omitempty" xml:"Relative>relativeZoom"`
+	Zoom *int64 `json:"zoom,omitempty" xml:"Relative>relativeZoom,omitempty"`
 }
 
 // Validate validates this ptz relative

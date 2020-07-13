@@ -10,12 +10,11 @@ import (
 	"io"
 
 	"github.com/go-openapi/runtime"
-
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 )
 
 // New creates a new event API client.
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *Client {
+func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
 	return &Client{transport: transport, formats: formats}
 }
 
@@ -27,8 +26,19 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientService is the interface for Client methods
+type ClientService interface {
+	GetNotificationAlertStream(params *GetNotificationAlertStreamParams, authInfo runtime.ClientAuthInfoWriter, writer io.Writer) (*GetNotificationAlertStreamOK, error)
+
+	GetNotificationHTTPHost(params *GetNotificationHTTPHostParams, authInfo runtime.ClientAuthInfoWriter) (*GetNotificationHTTPHostOK, error)
+
+	SetNotificationHTTPHost(params *SetNotificationHTTPHostParams, authInfo runtime.ClientAuthInfoWriter) (*SetNotificationHTTPHostOK, error)
+
+	SetTransport(transport runtime.ClientTransport)
+}
+
 /*
-GetNotificationAlertStream its is used to get the event notification data stream through h t t p server push
+  GetNotificationAlertStream its is used to get the event notification data stream through HTTP server push
 */
 func (a *Client) GetNotificationAlertStream(params *GetNotificationAlertStreamParams, authInfo runtime.ClientAuthInfoWriter, writer io.Writer) (*GetNotificationAlertStreamOK, error) {
 	// TODO: Validate the params before sending
@@ -63,12 +73,12 @@ func (a *Client) GetNotificationAlertStream(params *GetNotificationAlertStreamPa
 }
 
 /*
-GetNotificationHttpHost its is used to get the configuration of a particular e mail
+  GetNotificationHTTPHost its is used to get the configuration of a particular e mail
 */
-func (a *Client) GetNotificationHttpHost(params *GetNotificationHttpHostParams, authInfo runtime.ClientAuthInfoWriter) (*GetNotificationHttpHostOK, error) {
+func (a *Client) GetNotificationHTTPHost(params *GetNotificationHTTPHostParams, authInfo runtime.ClientAuthInfoWriter) (*GetNotificationHTTPHostOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetNotificationHttpHostParams()
+		params = NewGetNotificationHTTPHostParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
@@ -79,7 +89,7 @@ func (a *Client) GetNotificationHttpHost(params *GetNotificationHttpHostParams, 
 		ConsumesMediaTypes: []string{"application/xml"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &GetNotificationHttpHostReader{formats: a.formats},
+		Reader:             &GetNotificationHTTPHostReader{formats: a.formats},
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
@@ -87,7 +97,7 @@ func (a *Client) GetNotificationHttpHost(params *GetNotificationHttpHostParams, 
 	if err != nil {
 		return nil, err
 	}
-	success, ok := result.(*GetNotificationHttpHostOK)
+	success, ok := result.(*GetNotificationHTTPHostOK)
 	if ok {
 		return success, nil
 	}
@@ -98,12 +108,12 @@ func (a *Client) GetNotificationHttpHost(params *GetNotificationHttpHostParams, 
 }
 
 /*
-SetNotificationHttpHost its is used to get the configuration of a particular e mail
+  SetNotificationHTTPHost its is used to get the configuration of a particular e mail
 */
-func (a *Client) SetNotificationHttpHost(params *SetNotificationHttpHostParams, authInfo runtime.ClientAuthInfoWriter) (*SetNotificationHttpHostOK, error) {
+func (a *Client) SetNotificationHTTPHost(params *SetNotificationHTTPHostParams, authInfo runtime.ClientAuthInfoWriter) (*SetNotificationHTTPHostOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewSetNotificationHttpHostParams()
+		params = NewSetNotificationHTTPHostParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
@@ -114,7 +124,7 @@ func (a *Client) SetNotificationHttpHost(params *SetNotificationHttpHostParams, 
 		ConsumesMediaTypes: []string{"application/xml"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &SetNotificationHttpHostReader{formats: a.formats},
+		Reader:             &SetNotificationHTTPHostReader{formats: a.formats},
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
@@ -122,7 +132,7 @@ func (a *Client) SetNotificationHttpHost(params *SetNotificationHttpHostParams, 
 	if err != nil {
 		return nil, err
 	}
-	success, ok := result.(*SetNotificationHttpHostOK)
+	success, ok := result.(*SetNotificationHTTPHostOK)
 	if ok {
 		return success, nil
 	}

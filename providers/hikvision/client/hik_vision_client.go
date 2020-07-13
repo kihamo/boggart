@@ -8,8 +8,7 @@ package client
 import (
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
-
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 
 	"github.com/kihamo/boggart/providers/hikvision/client/content_manager"
 	"github.com/kihamo/boggart/providers/hikvision/client/event"
@@ -61,19 +60,12 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *HikVision 
 
 	cli := new(HikVision)
 	cli.Transport = transport
-
 	cli.ContentManager = content_manager.New(transport, formats)
-
 	cli.Event = event.New(transport, formats)
-
 	cli.Image = image.New(transport, formats)
-
 	cli.Ptz = ptz.New(transport, formats)
-
 	cli.Streaming = streaming.New(transport, formats)
-
 	cli.System = system.New(transport, formats)
-
 	return cli
 }
 
@@ -118,17 +110,17 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // HikVision is a client for hik vision
 type HikVision struct {
-	ContentManager *content_manager.Client
+	ContentManager content_manager.ClientService
 
-	Event *event.Client
+	Event event.ClientService
 
-	Image *image.Client
+	Image image.ClientService
 
-	Ptz *ptz.Client
+	Ptz ptz.ClientService
 
-	Streaming *streaming.Client
+	Streaming streaming.ClientService
 
-	System *system.Client
+	System system.ClientService
 
 	Transport runtime.ClientTransport
 }
@@ -136,17 +128,10 @@ type HikVision struct {
 // SetTransport changes the transport on the client and all its subresources
 func (c *HikVision) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
-
 	c.ContentManager.SetTransport(transport)
-
 	c.Event.SetTransport(transport)
-
 	c.Image.SetTransport(transport)
-
 	c.Ptz.SetTransport(transport)
-
 	c.Streaming.SetTransport(transport)
-
 	c.System.SetTransport(transport)
-
 }

@@ -9,14 +9,14 @@ import (
 	"encoding/json"
 	"strconv"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 )
 
 // ImageChannels image channels
+//
 // swagger:model ImageChannels
 type ImageChannels []*ImageChannelsItems0
 
@@ -47,55 +47,56 @@ func (m ImageChannels) Validate(formats strfmt.Registry) error {
 }
 
 // ImageChannelsItems0 image channels items0
+//
 // swagger:model ImageChannelsItems0
 type ImageChannelsItems0 struct {
 
 	// image flip enabled
-	ImageFlipEnabled bool `json:"ImageFlipEnabled,omitempty" xml:"ImageChannel>ImageFlip>enabled"`
+	ImageFlipEnabled bool `json:"ImageFlipEnabled,omitempty" xml:"ImageChannel>ImageFlip>enabled,omitempty"`
 
 	// image flip style
 	// Enum: [LEFTRIGHT UPDOWN CENTER AUTO]
-	ImageFlipStyle string `json:"ImageFlipStyle,omitempty" xml:"ImageChannel>ImageFlip>ImageFlipStyle"`
+	ImageFlipStyle string `json:"ImageFlipStyle,omitempty" xml:"ImageChannel>ImageFlip>ImageFlipStyle,omitempty"`
 
 	// ir cut filter ext night to day filter level
 	// Enum: [low normal high]
-	IrCutFilterExtNightToDayFilterLevel string `json:"IrCutFilterExtNightToDayFilterLevel,omitempty" xml:"ImageChannel>IrcutFilterExt>nightToDayFilterLevel"`
+	IrCutFilterExtNightToDayFilterLevel string `json:"IrCutFilterExtNightToDayFilterLevel,omitempty" xml:"ImageChannel>IrcutFilterExt>nightToDayFilterLevel,omitempty"`
 
 	// ir cut filter ext night to day filter time
-	IrCutFilterExtNightToDayFilterTime int64 `json:"IrCutFilterExtNightToDayFilterTime,omitempty" xml:"ImageChannel>IrcutFilterExt>nightToDayFilterTime"`
+	IrCutFilterExtNightToDayFilterTime int64 `json:"IrCutFilterExtNightToDayFilterTime,omitempty" xml:"ImageChannel>IrcutFilterExt>nightToDayFilterTime,omitempty"`
 
 	// ir cut filter ext schedule time range begin
-	IrCutFilterExtScheduleTimeRangeBegin string `json:"IrCutFilterExtScheduleTimeRangeBegin,omitempty" xml:"ImageChannel>IrcutFilterExt>TimeRange>beginTime"`
+	IrCutFilterExtScheduleTimeRangeBegin string `json:"IrCutFilterExtScheduleTimeRangeBegin,omitempty" xml:"ImageChannel>IrcutFilterExt>TimeRange>beginTime,omitempty"`
 
 	// ir cut filter ext schedule time range end
-	IrCutFilterExtScheduleTimeRangeEnd string `json:"IrCutFilterExtScheduleTimeRangeEnd,omitempty" xml:"ImageChannel>IrcutFilterExt>TimeRange>endTime"`
+	IrCutFilterExtScheduleTimeRangeEnd string `json:"IrCutFilterExtScheduleTimeRangeEnd,omitempty" xml:"ImageChannel>IrcutFilterExt>TimeRange>endTime,omitempty"`
 
 	// ir cut filter ext schedule type
-	IrCutFilterExtScheduleType string `json:"IrCutFilterExtScheduleType,omitempty" xml:"ImageChannel>IrcutFilterExt>scheduleType"`
+	IrCutFilterExtScheduleType string `json:"IrCutFilterExtScheduleType,omitempty" xml:"ImageChannel>IrcutFilterExt>scheduleType,omitempty"`
 
 	// ir cut filter ext type
 	// Enum: [auto day night shedule eventTrigger]
-	IrCutFilterExtType string `json:"IrCutFilterExtType,omitempty" xml:"ImageChannel>IrcutFilterExt>IrcutFilterType"`
+	IrCutFilterExtType string `json:"IrCutFilterExtType,omitempty" xml:"ImageChannel>IrcutFilterExt>IrcutFilterType,omitempty"`
 
 	// ircut filter level
 	// Enum: [low normal high]
-	IrcutFilterLevel string `json:"IrcutFilterLevel,omitempty" xml:"ImageChannel>IrcutFilter>IrcutFilterLevel"`
+	IrcutFilterLevel string `json:"IrcutFilterLevel,omitempty" xml:"ImageChannel>IrcutFilter>IrcutFilterLevel,omitempty"`
 
 	// ircut filter time
-	IrcutFilterTime int64 `json:"IrcutFilterTime,omitempty" xml:"ImageChannel>IrcutFilter>IrcutFilterTime"`
+	IrcutFilterTime int64 `json:"IrcutFilterTime,omitempty" xml:"ImageChannel>IrcutFilter>IrcutFilterTime,omitempty"`
 
 	// ircut filter type
 	// Enum: [auto day night shedule eventTrigger]
-	IrcutFilterType string `json:"IrcutFilterType,omitempty" xml:"ImageChannel>IrcutFilter>IrcutFilterType"`
+	IrcutFilterType string `json:"IrcutFilterType,omitempty" xml:"ImageChannel>IrcutFilter>IrcutFilterType,omitempty"`
 
 	// enabled
-	Enabled bool `json:"enabled,omitempty" xml:"ImageChannel>enabled"`
+	Enabled bool `json:"enabled,omitempty" xml:"ImageChannel>enabled,omitempty"`
 
 	// id
-	ID int64 `json:"id,omitempty" xml:"ImageChannel>id"`
+	ID int64 `json:"id,omitempty" xml:"ImageChannel>id,omitempty"`
 
 	// video input ID
-	VideoInputID int64 `json:"videoInputID,omitempty" xml:"ImageChannel>videoInputID"`
+	VideoInputID int64 `json:"videoInputID,omitempty" xml:"ImageChannel>videoInputID,omitempty"`
 }
 
 // Validate validates this image channels items0
@@ -157,7 +158,7 @@ const (
 
 // prop value enum
 func (m *ImageChannelsItems0) validateImageFlipStyleEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, imageChannelsItems0TypeImageFlipStylePropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, imageChannelsItems0TypeImageFlipStylePropEnum, true); err != nil {
 		return err
 	}
 	return nil
@@ -203,7 +204,7 @@ const (
 
 // prop value enum
 func (m *ImageChannelsItems0) validateIrCutFilterExtNightToDayFilterLevelEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, imageChannelsItems0TypeIrCutFilterExtNightToDayFilterLevelPropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, imageChannelsItems0TypeIrCutFilterExtNightToDayFilterLevelPropEnum, true); err != nil {
 		return err
 	}
 	return nil
@@ -255,7 +256,7 @@ const (
 
 // prop value enum
 func (m *ImageChannelsItems0) validateIrCutFilterExtTypeEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, imageChannelsItems0TypeIrCutFilterExtTypePropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, imageChannelsItems0TypeIrCutFilterExtTypePropEnum, true); err != nil {
 		return err
 	}
 	return nil
@@ -301,7 +302,7 @@ const (
 
 // prop value enum
 func (m *ImageChannelsItems0) validateIrcutFilterLevelEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, imageChannelsItems0TypeIrcutFilterLevelPropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, imageChannelsItems0TypeIrcutFilterLevelPropEnum, true); err != nil {
 		return err
 	}
 	return nil
@@ -353,7 +354,7 @@ const (
 
 // prop value enum
 func (m *ImageChannelsItems0) validateIrcutFilterTypeEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, imageChannelsItems0TypeIrcutFilterTypePropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, imageChannelsItems0TypeIrcutFilterTypePropEnum, true); err != nil {
 		return err
 	}
 	return nil

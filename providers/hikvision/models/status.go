@@ -8,27 +8,27 @@ package models
 import (
 	"encoding/json"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 )
 
 // Status status
+//
 // swagger:model Status
 type Status struct {
 
 	// code
 	// Maximum: 7
-	Code uint64 `json:"code,omitempty" xml:"statusCode"`
+	Code uint64 `json:"code,omitempty" xml:"statusCode,omitempty"`
 
 	// string
-	String string `json:"string,omitempty" xml:"statusString"`
+	String string `json:"string,omitempty" xml:"statusString,omitempty"`
 
 	// sub code
 	// Enum: [ok riskPassword noMemory serviceUnavailable upgrading deviceBusy reConnectIpc deviceError badFlash 28181Uninitialized notSupport lowPrivilege badAuthorization methodNotAllowed notSetHdiskRedund invalidOperation notActivated hasActivated badXmlFormat badParameters badHostAddress badXmlContent badIPv4Address badIPv6Address conflictIPv4Address conflictIPv6Address badDomainName connectSreverFail conflictDomainName badPort portError importErrorData badNetMask badVersion badDevType badLanguage incorrentUserNameOrPassword invalidStoragePoolOfCloudServer noFreeSpaceOfStoragePool fileFormatError fileContentError UnSupportCapture unableCalibrate pleaseCalibrate SNMPv3PasswordNone SNMPv3NameDifferent notSupportDeicing notMeetDeicing alarmInputOccupied notSupportWithAPMode rebootRequired]
-	SubCode string `json:"subCode,omitempty" xml:"subStatusCode"`
+	SubCode string `json:"subCode,omitempty" xml:"subStatusCode,omitempty"`
 }
 
 // Validate validates this status
@@ -232,7 +232,7 @@ const (
 
 // prop value enum
 func (m *Status) validateSubCodeEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, statusTypeSubCodePropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, statusTypeSubCodePropEnum, true); err != nil {
 		return err
 	}
 	return nil
