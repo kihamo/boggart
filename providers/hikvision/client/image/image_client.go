@@ -27,6 +27,8 @@ type Client struct {
 
 // ClientService is the interface for Client methods
 type ClientService interface {
+	GetImageChannelCapabilities(params *GetImageChannelCapabilitiesParams, authInfo runtime.ClientAuthInfoWriter) (*GetImageChannelCapabilitiesOK, error)
+
 	GetImageChannels(params *GetImageChannelsParams, authInfo runtime.ClientAuthInfoWriter) (*GetImageChannelsOK, error)
 
 	SetImageFlip(params *SetImageFlipParams, authInfo runtime.ClientAuthInfoWriter) (*SetImageFlipOK, error)
@@ -34,6 +36,41 @@ type ClientService interface {
 	SetImageIrCutFilter(params *SetImageIrCutFilterParams, authInfo runtime.ClientAuthInfoWriter) (*SetImageIrCutFilterOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
+}
+
+/*
+  GetImageChannelCapabilities get image channel capabilities API
+*/
+func (a *Client) GetImageChannelCapabilities(params *GetImageChannelCapabilitiesParams, authInfo runtime.ClientAuthInfoWriter) (*GetImageChannelCapabilitiesOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetImageChannelCapabilitiesParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getImageChannelCapabilities",
+		Method:             "GET",
+		PathPattern:        "/Image/channels/{channel}/capabilities",
+		ProducesMediaTypes: []string{"application/xml"},
+		ConsumesMediaTypes: []string{"application/xml"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GetImageChannelCapabilitiesReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetImageChannelCapabilitiesOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getImageChannelCapabilities: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
