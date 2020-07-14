@@ -20,6 +20,7 @@ const (
 
 type Bind struct {
 	di.MQTTBind
+	di.LoggerBind
 
 	config *Config
 
@@ -105,7 +106,16 @@ func (b *Bind) waitForEdge() {
 	ctx := context.Background()
 
 	for p.WaitForEdge(-1) {
-		// TODO: log
-		_ = b.MQTT().PublishAsync(ctx, b.config.TopicPinState, b.Read())
+		v := b.Read()
+
+		if v {
+			b.Logger().Debugf("Pin %s edge high", p.String())
+		} else {
+			b.Logger().Debugf("Pin %s edge log", p.String())
+		}
+
+		if err := b.MQTT().PublishAsync(ctx, b.config.TopicPinState, v); err != nil {
+			b.Logger().Errorf("Publish to %s topic failed with error %v", b.config.TopicPinState, err)
+		}
 	}
 }
