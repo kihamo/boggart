@@ -1,7 +1,9 @@
 package z_stack
 
 import (
+	"bytes"
 	"context"
+	"encoding/binary"
 	"errors"
 	"sync/atomic"
 	"time"
@@ -23,6 +25,92 @@ var endpoints = []Endpoint{
 	{EndPoint: 242, AppProfId: 0xA1E0},
 }
 
+type NvItem struct {
+	id    uint16
+	value []byte
+}
+
+var (
+	nvItemZnpHasConfigured = func(version *SysVersion) NvItem {
+		i := NvItem{
+			id:    NvItemIDHasConfiguredZStack1,
+			value: []byte{0x55},
+		}
+
+		if version.Product != VersionZStack12 {
+			i.id = NvItemIDHasConfiguredZStack3
+		}
+
+		return i
+	}
+	nvItemStartupOption = func() NvItem {
+		return NvItem{
+			id:    0x03,
+			value: []byte{0x02},
+		}
+	}
+	nvItemLogicalType = func(t uint8) NvItem {
+		return NvItem{
+			id:    0x87,
+			value: []byte{t},
+		}
+	}
+	nvItemNetworkKeyDistribute = func(distribute bool) NvItem {
+		i := NvItem{
+			id: 0x63,
+		}
+
+		if distribute {
+			i.value = []byte{0x01}
+		} else {
+			i.value = []byte{0x00}
+		}
+
+		return i
+	}
+	nvItemZdoDirectCb = func() NvItem {
+		return NvItem{
+			id:    0x8F,
+			value: []byte{0x01},
+		}
+	}
+	nvItemPanID = func(panID uint16) NvItem {
+		value := make([]byte, 2)
+		binary.LittleEndian.PutUint16(value, panID)
+
+		return NvItem{
+			id:    0x83,
+			value: value,
+		}
+	}
+	nvItemChannelList = func(channel uint32) NvItem {
+		channel = 1 << channel
+
+		value := make([]byte, 4)
+		binary.LittleEndian.PutUint32(value, channel)
+
+		return NvItem{
+			id:    0x84,
+			value: value,
+		}
+	}
+	nvItemExtendedPanID = func(panID []byte) NvItem {
+		return NvItem{
+			id:    0x2D,
+			value: panID,
+		}
+	}
+	nvItemTcLinKey = func() NvItem {
+		return NvItem{
+			id: 0x0101,
+			value: []byte{
+				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x5A, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6C,
+				0x6c, 0x69, 0x61, 0x6e, 0x63, 0x65, 0x30, 0x39, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+			},
+		}
+	}
+)
+
 func (c *Client) Version(ctx context.Context) (_ *SysVersion, err error) {
 	c.versionOnce.Do(func() {
 		c.version, err = c.SysVersion(ctx)
@@ -36,17 +124,70 @@ func (c *Client) Version(ctx context.Context) (_ *SysVersion, err error) {
 }
 
 func (c *Client) SkipBootLoader() error {
-	if c.isClosed() {
-		return errors.New("connection is closed")
-	}
-
-	_, err := c.conn.Write([]byte{0xEF})
+	_, err := c.Write([]byte{0xEF})
 	return err
 }
 
-func (c *Client) Boot(ctx context.Context) error {
+func (c *Client) Reset(ctx context.Context, t uint8) error {
+	/*
+		SYS_RESET_IND
+
+		This command is sent by the device to indicate the reset
+
+		Usage:
+			AREQ:
+				       1      |      1      |      1      |    1   |       1      |     1     |     1    |    1     |   1
+				Length = 0x06 | Cmd0 = 0x41 | Cmd1 = 0x80 | Reason | TransportRev | ProductId | MajorRel | MinorRel | HwRev
+			Attributes:
+				Reason       1 byte Reason for the reset.
+				                    0x00 Power-up
+				                    0x01 External
+				                    0x02 Watch-dog
+				TransportRev 1 byte Transport protocol revision.
+				Product      1 byte Major release number.
+				MinorRel     1 byte Minor release number.
+				HwRev        1 byte Hardware revision number.
+	*/
+	waitResponse, waitErr := c.WaitAsync(ctx, func(response *Frame) bool {
+		return response.Type() == TypeAREQ && response.SubSystem() == SubSystemSysInterface && response.CommandID() == 0x80
+	})
+
+	err := c.SysReset(ctx, t)
+	if err != nil {
+		return err
+	}
+
+	select {
+	case <-waitResponse:
+		// TODO: return struct
+		return nil
+
+	case e := <-waitErr:
+		return e
+	}
+
+	return nil
+}
+
+func (c *Client) Boot(ctx context.Context) (err error) {
 	if err := c.SkipBootLoader(); err != nil {
 		return err
+	}
+	time.Sleep(time.Second)
+
+	// Initialization check
+	valid := true
+
+	// check hasConfigured flag
+	if valid, err = c.InitializationCheck(ctx); err != nil {
+		return err
+	}
+
+	// Initialization run if valid == false
+	if !valid {
+		if err = c.initialization(ctx); err != nil {
+			return err
+		}
 	}
 
 	/*
@@ -61,9 +202,12 @@ func (c *Client) Boot(ctx context.Context) error {
 		return err
 	}
 
-	if device.DeviceState != DeviceStateCoordinator {
+	if device.DeviceState != DeviceStateStartedCoordinator {
 		waitResponse, waitErr := c.WaitAsync(ctx, func(response *Frame) bool {
-			return response.Type() == TypeAREQ && response.SubSystem() == SubSystemZDOInterface && response.CommandID() == 0xC0
+			return response.Type() == TypeAREQ &&
+				response.SubSystem() == SubSystemZDOInterface &&
+				response.CommandID() == 0xC0 &&
+				DeviceState(response.Data()[0]) == DeviceStateStartedCoordinator
 		})
 
 		status, err := c.ZDOStartupFromApp(ctx, 100)
@@ -71,15 +215,12 @@ func (c *Client) Boot(ctx context.Context) error {
 			return err
 		}
 
-		if status != 0 {
+		if status != 0 && status != 1 {
 			return errors.New("startup from app failed")
 		}
 
 		select {
-		case r := <-waitResponse:
-			if r.Data()[0] != DeviceStateCoordinator {
-				return errors.New("failed state change after startup from app")
-			}
+		case <-waitResponse:
 
 		case e := <-waitErr:
 			return e
@@ -436,6 +577,144 @@ func (c *Client) LED(ctx context.Context, enabled bool) error {
 	}
 
 	return err
+}
+
+func (c *Client) nwItemValidate(ctx context.Context, item NvItem) (bool, error) {
+	response, err := c.SysOsalNvRead(ctx, item.id, 0x00)
+	if err != nil {
+		return false, err
+	}
+
+	return bytes.Equal(response.Value, item.value), nil
+}
+
+func (c *Client) nvItemWrite(ctx context.Context, item NvItem) error {
+	return c.SysOsalNvWrite(ctx, item.id, 0, item.value)
+}
+
+func (c *Client) InitializationCheck(ctx context.Context) (valid bool, err error) {
+	version, err := c.Version(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	valid = true
+
+	if valid, err = c.nwItemValidate(ctx, nvItemZnpHasConfigured(version)); err != nil {
+		return false, err
+	}
+
+	if valid {
+		if valid, err = c.nwItemValidate(ctx, nvItemChannelList(c.channel)); err != nil {
+			return false, err
+		}
+	}
+
+	if valid {
+		if valid, err = c.nwItemValidate(ctx, nvItemNetworkKeyDistribute(c.networkKeyDistribute)); err != nil {
+			return false, err
+		}
+	}
+
+	if valid && version.Product != VersionZStack3x0 {
+		response, err := c.ZbReadConfiguration(ctx, ZdConfigurationNetworkKey)
+
+		if err != nil {
+			return false, err
+		}
+
+		valid = bytes.Equal(response.Value, c.networkKey)
+	}
+
+	if valid {
+		if valid, err = c.nwItemValidate(ctx, nvItemPanID(c.panID)); err != nil {
+			return false, err
+		}
+	}
+
+	if valid {
+		if valid, err = c.nwItemValidate(ctx, nvItemExtendedPanID(c.extendedPanID)); err != nil {
+			return false, err
+		}
+	}
+
+	return valid, err
+}
+
+func (c *Client) initialization(ctx context.Context) (err error) {
+	version, err := c.Version(ctx)
+	if err != nil {
+		return err
+	}
+
+	if err = c.Reset(ctx, ResetTypeSoft); err != nil {
+		return err
+	}
+
+	// STARTUP_OPTION
+	if err = c.nvItemWrite(ctx, nvItemStartupOption()); err != nil {
+		return err
+	}
+
+	if err = c.Reset(ctx, ResetTypeSoft); err != nil {
+		return err
+	}
+
+	// logical type as coordinator
+	if err = c.nvItemWrite(ctx, nvItemLogicalType(0x00)); err != nil {
+		return err
+	}
+
+	// network key distribute
+	if err = c.nvItemWrite(ctx, nvItemNetworkKeyDistribute(c.networkKeyDistribute)); err != nil {
+		return err
+	}
+
+	// zdo direct cb
+	if err = c.nvItemWrite(ctx, nvItemZdoDirectCb()); err != nil {
+		return err
+	}
+
+	// channel list
+	if err = c.nvItemWrite(ctx, nvItemChannelList(c.channel)); err != nil {
+		return err
+	}
+
+	// pan id
+	if err = c.nvItemWrite(ctx, nvItemPanID(c.panID)); err != nil {
+		return err
+	}
+
+	// extended pan id
+	if err = c.nvItemWrite(ctx, nvItemExtendedPanID(c.extendedPanID)); err != nil {
+		return err
+	}
+
+	if version.Product == VersionZStack12 {
+		// network key
+		if err = c.ZbWriteConfiguration(ctx, ZdConfigurationNetworkKey, c.networkKey); err != nil {
+			return err
+		}
+
+		// TC link key
+		if err = c.nvItemWrite(ctx, nvItemTcLinKey()); err != nil {
+			return err
+		}
+	}
+
+	// NV_ITEM_UNINIT
+	if err = c.SysOsalNvItemInit(ctx, NvItemIDHasConfiguredZStack1, []byte{0x00}); err != nil {
+		return err
+	}
+
+	// ZNP has configured
+	if err = c.nvItemWrite(ctx, nvItemZnpHasConfigured(version)); err != nil {
+		//return err
+	}
+
+	c.nwItemValidate(ctx, nvItemZnpHasConfigured(version))
+
+	return nil
 }
 
 func (c *Client) defaultWatcher() {

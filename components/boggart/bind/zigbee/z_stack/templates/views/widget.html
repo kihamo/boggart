@@ -56,6 +56,14 @@
                         {{ end }}
                         {{ if .info }}
                         <tr>
+                            <td>{{ i18n "Device type" . }}</td>
+                            <td>{{ .info.device_type }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ i18n "Device state" . }}</td>
+                            <td>{{ .info.device_state }}</td>
+                        </tr>
+                        <tr>
                             <td>{{ i18n "Device IEEE address" . }}</td>
                             <td>{{ .info.ieee_address }}</td>
                         </tr>
@@ -72,6 +80,12 @@
                         <tr>
                             <td>{{ i18n "Network channel" . }}</td>
                             <td>{{ .network.channel }}</td>
+                        </tr>
+                        {{ end }}
+                        {{ if .checks }}
+                        <tr>
+                            <td>{{ i18n "Initialization check" . }}</td>
+                            <td>{{ if .checks.init }}valid{{ else }}not valid{{ end }}</td>
                         </tr>
                         {{ end }}
                         </tbody>

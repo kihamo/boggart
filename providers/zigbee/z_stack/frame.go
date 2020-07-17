@@ -122,9 +122,36 @@ func (f *Frame) SetDataAsBuffer(buf *Buffer) {
 	f.SetData(buf.Bytes())
 }
 
+func (f *Frame) Description() string {
+	if ss, ok := definitions[f.SubSystem()]; ok {
+		if def, ok := ss[f.CommandID()]; ok {
+			for _, t := range def.types {
+				if t == f.Type() {
+					return def.name
+				}
+			}
+		}
+	}
+
+	return "unknown frame"
+}
+
 func (f *Frame) FCS() byte {
 	f.lock.RLock()
 	defer f.lock.RUnlock()
+
+	// lazy recalculation fcs
+	if f.fcs == 0 {
+		if b, e := f.MarshalBinary(); e == nil {
+			f.lock.RUnlock()
+			f.lock.Lock()
+
+			f.fcs = b[len(b)-1]
+
+			f.lock.Unlock()
+			f.lock.RLock()
+		}
+	}
 
 	return f.fcs
 }
@@ -201,7 +228,21 @@ func (f *Frame) UnmarshalBinary(data []byte) error {
 func (f *Frame) String() string {
 	buffer := bytes.NewBuffer(nil)
 
-	buffer.WriteString("len: ")
+	buffer.WriteString(f.Description())
+	buffer.WriteString(" [")
+
+	switch f.Type() {
+	case TypePoll:
+		buffer.WriteString("POLL")
+	case TypeSREQ:
+		buffer.WriteString("SREQ")
+	case TypeAREQ:
+		buffer.WriteString("AREQ")
+	case TypeSRSP:
+		buffer.WriteString("SRSP")
+	}
+
+	buffer.WriteString("] len: ")
 	buffer.WriteString(strconv.FormatUint(uint64(f.Length()), 10))
 	buffer.WriteString(" type: ")
 	buffer.WriteString(strconv.FormatUint(uint64(f.Type()), 10))

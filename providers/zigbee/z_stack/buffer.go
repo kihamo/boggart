@@ -189,3 +189,7 @@ func (b *Buffer) ReadStruct() TypeStruct {
 func (b *Buffer) ReadIEEEAddr() []byte {
 	return serial.Reverse(b.Next(8))
 }
+
+func (b *Buffer) ReadCommandStatus() CommandStatus {
+	return CommandStatus(b.ReadUint8())
+}

@@ -1,8 +1,14 @@
 package z_stack
 
+//go:generate /bin/bash -c "enumer -type=DeviceState -trimprefix=DeviceState -output=device_state_enumer.go"
+//go:generate /bin/bash -c "enumer -type=CommandStatus -trimprefix=CommandStatus -output=command_status_enumer.go"
+
 import (
 	"time"
 )
+
+type DeviceState uint8
+type CommandStatus uint8
 
 const (
 	VersionZStack12  = 0
@@ -51,26 +57,17 @@ const (
 	PositionCommand2    = 3
 	PositionData        = 4
 
-	// Initialized - not started automatically 0x01: Initialized - not connected to anything 0x02: Discovering PAN's to join
-	DeviceStateInitialized = 0x00
-
-	// Joining a PAN
-	DeviceStateJoining = 0x03
-
-	// Rejoining a PAN, only for end devices
-	DeviceStateRejoining = 0x04
-
-	// Joined but not yet authenticated by trust center 0x06: Started as device after authentication
-	DeviceStateUnauthentication = 0x05
-
-	// Device joined, authenticated and is a router 0x08: Starting as ZigBee Coordinator
-	DeviceStateRouter = 0x07
-
-	// Started as ZigBee Coordinator
-	DeviceStateCoordinator = 0x09
-
-	// Device has lost information about its parent
-	DeviceStateOrphan = 0x0A
+	DeviceStateInitializedNotStarted   DeviceState = 0x00 // Initialized - not started automatically
+	DeviceStateInitializedNotConnected DeviceState = 0x01 // Initialized - not connected to anything
+	DeviceStateDiscoveringPAN          DeviceState = 0x02 // Discovering PAN's to join
+	DeviceStateJoiningPAN              DeviceState = 0x03 // Joining a PAN
+	DeviceStateRejoiningPAN            DeviceState = 0x04 // Rejoining a PAN, only for end devices
+	DeviceStateUnauthentication        DeviceState = 0x05 // Joined but not yet authenticated by trust center
+	DeviceStateStartedDevice           DeviceState = 0x06 // Started as device after authentication
+	DeviceStateRouter                  DeviceState = 0x07 // Device joined, authenticated and is a router
+	DeviceStateStartingCoordinator     DeviceState = 0x08 // Starting as ZigBee Coordinator
+	DeviceStateStartedCoordinator      DeviceState = 0x09 // Started as ZigBee Coordinator
+	DeviceStateOrphan                  DeviceState = 0x0A // Device has lost information about its parent
 
 	ScanChannelsNone        = 0x00000000
 	ScanChannelsAllChannels = 0x07FFF800
@@ -119,5 +116,25 @@ const (
 	CommandTcDeviceInd                        = 0xCA
 	CommandPermitJoinInd                      = 0xCB
 
+	ResetTypeHard = 0x0
+	ResetTypeSoft = 0x1
+
+	// https://github.com/Koenkk/zigbee-herdsman/blob/9299a5ffed13baa0007866ad10af8ef0d1bfb63d/src/adapter/z-stack/constants/common.ts#L159
+	CommandStatusSuccess           CommandStatus = 0x00
+	CommandStatusFailure           CommandStatus = 0x01
+	CommandStatusInvalidParam      CommandStatus = 0x02
+	CommandStatusNvItemInitialized CommandStatus = 0x09
+	CommandStatusApsDuplicateEntry CommandStatus = 0xB8
+	CommandStatusNwkInvalidRequest CommandStatus = 0xC2
+
+	NvItemIDHasConfiguredZStack1 = 0x0F00
+	NvItemIDHasConfiguredZStack3 = 0x0060
+
+	ZdConfigurationNetworkKey = 0x62
+
 	DefaultWaitTimeout = time.Millisecond * 6000
 )
+
+func (i CommandStatus) Error() string {
+	return i.String()
+}

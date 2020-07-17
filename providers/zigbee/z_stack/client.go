@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 
 	"io"
 	"sync"
@@ -28,15 +29,26 @@ type Client struct {
 	devices     sync.Map
 	permitJoin  uint32
 	enabledLed  uint32
+
+	channel              uint32
+	panID                uint16
+	extendedPanID        []byte
+	networkKeyDistribute bool
+	networkKey           []byte
 }
 
 func New(conn connection.Conn) *Client {
 	return &Client{
-		conn:        connection.NewLooper(conn),
-		done:        make(chan struct{}),
-		watchers:    make([]*Watcher, 0),
-		versionOnce: new(a.Once),
-		enabledLed:  1,
+		conn:                 connection.NewLooper(conn),
+		done:                 make(chan struct{}),
+		watchers:             make([]*Watcher, 0),
+		versionOnce:          new(a.Once),
+		enabledLed:           1,
+		channel:              11,
+		panID:                0x1A62,
+		extendedPanID:        []byte{0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD},
+		networkKeyDistribute: false,
+		networkKey:           []byte{0x01, 0x03, 0x05, 0x07, 0x09, 0x0B, 0x0D, 0x0F, 0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0D},
 	}
 }
 
@@ -59,6 +71,8 @@ func (c *Client) loop() {
 	for {
 		select {
 		case data := <-chReceiveResponses:
+			fmt.Printf("\033[35m <<< %v %X \033[0m\n", data, data)
+
 			if len(data) == 0 {
 				continue
 			}
@@ -95,6 +109,8 @@ func (c *Client) loop() {
 					data = data[:0]
 					continue
 				}
+
+				fmt.Println("\033[32m <<< Main frame", frame.String(), "\033[0m")
 
 				frames = append(frames, &frame)
 
@@ -183,23 +199,31 @@ func (c *Client) unregisterAllWatcher() {
 	c.watchers = c.watchers[:0]
 }
 
-func (c *Client) Call(frame *Frame) error {
+func (c *Client) Write(data []byte) (int, error) {
 	if c.isClosed() {
-		return errors.New("connection is closed")
+		return -1, errors.New("connection is closed")
 	}
 
 	c.init()
 
+	fmt.Printf("\033[35m >>> %v %X \033[0m\n", data, data)
+
+	return c.conn.Write(data)
+}
+
+func (c *Client) Call(frame *Frame) error {
 	data, err := frame.MarshalBinary()
 	if err != nil {
 		return err
 	}
 
-	_, err = c.conn.Write(data)
+	fmt.Printf("\033[34m >>> %v %X \033[0m\n", frame.String(), data)
+
+	_, err = c.Write(data)
 	return err
 }
 
-func (c *Client) CallWithResult(ctx context.Context, request *Frame, waiter func(frame *Frame) bool) (*Frame, error) {
+func (c *Client) CallWithResult(ctx context.Context, frame *Frame, waiter func(frame *Frame) bool) (*Frame, error) {
 	if c.isClosed() {
 		return nil, errors.New("connection is closed")
 	}
@@ -209,12 +233,8 @@ func (c *Client) CallWithResult(ctx context.Context, request *Frame, waiter func
 		c.unregisterWatcher(watcher)
 	}()
 
-	data, err := request.MarshalBinary()
+	err := c.Call(frame)
 	if err != nil {
-		return nil, err
-	}
-
-	if _, err = c.conn.Write(data); err != nil {
 		return nil, err
 	}
 

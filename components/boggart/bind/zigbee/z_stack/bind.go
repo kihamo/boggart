@@ -100,6 +100,7 @@ func (b *Bind) Run() error {
 			select {
 			case frame := <-watcher.NextFrame():
 				b.Logger().Debug("Received Zigbee message",
+					"description", frame.Description(),
 					"length", frame.Length(),
 					"type", fmt.Sprintf("0x%X", frame.Type()),
 					"sub-system", fmt.Sprintf("0x%X", frame.SubSystem()),

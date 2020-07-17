@@ -97,6 +97,8 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 		if info, err := client.UtilGetDeviceInfo(ctx); err == nil {
 			vars["info"] = map[string]interface{}{
+				"device_type":  info.DeviceType,
+				"device_state": info.DeviceState,
 				"ieee_address": hex.EncodeToString(info.IEEEAddr),
 			}
 		} else {
@@ -108,6 +110,14 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 				"pan_id":          info.PanID,
 				"extended_pan_id": hex.EncodeToString(info.ExtendedPanID),
 				"channel":         info.Channel,
+			}
+		} else {
+			errors = append(errors, err.Error())
+		}
+
+		if check, err := client.InitializationCheck(ctx); err == nil {
+			vars["checks"] = map[string]interface{}{
+				"init": check,
 			}
 		} else {
 			errors = append(errors, err.Error())

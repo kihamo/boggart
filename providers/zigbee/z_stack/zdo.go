@@ -59,7 +59,7 @@ type NeighborLqiListItem struct {
 
 type ZDOLQIMessage struct {
 	SourceAddress        uint16
-	Status               uint8
+	Status               CommandStatus
 	NeighborTableEntries uint8
 	StartIndex           uint8
 	NeighborLQIListCount uint8
@@ -78,7 +78,7 @@ type NetworkListItem struct {
 
 type ZDOManagementNetworkDiscoveryMessage struct {
 	SourceAddress    uint16
-	Status           uint8
+	Status           CommandStatus
 	NetworkCount     uint8
 	StartIndex       uint8
 	NetworkListCount uint8
@@ -93,7 +93,7 @@ type RoutingTableListItem struct {
 
 type ZDOManagementRoutingTableMessage struct {
 	SourceAddress         uint16
-	Status                uint8
+	Status                CommandStatus
 	RoutingTableEntries   uint8
 	StartIndex            uint8
 	RoutingTableListCount uint8
@@ -151,16 +151,16 @@ func (c *Client) ZDOExtNetworkInfo(ctx context.Context) (*ExtNetworkInfo, error)
 		zigbee-herdsman:adapter:zStack:unpi:parser --- parseNext [254,1,69,192,9,141] +0ms
 		zigbee-herdsman:adapter:zStack:unpi:parser --> parsed 1 - 2 - 5 - 192 - [9] - 141 +0ms
 */
-func (c *Client) ZDOStartupFromApp(ctx context.Context, delay uint8) (status int8, err error) {
+func (c *Client) ZDOStartupFromApp(ctx context.Context, delay uint8) (uint8, error) {
 	dataIn := NewBuffer(nil)
 	dataIn.WriteUint8(delay)
 
 	response, err := c.CallWithResultSREQ(ctx, dataIn.Frame(0x25, 0x40))
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
-	return int8(response.Data()[0]), nil
+	return response.DataAsBuffer().ReadUint8(), nil
 }
 
 /*
@@ -190,9 +190,13 @@ func (c *Client) ZDOPermitJoin(ctx context.Context, seconds uint8) error {
 		return errors.New("bad response")
 	}
 
-	dataOut := response.Data()
-	if len(dataOut) == 0 || dataOut[0] != 0 {
+	dataOut := response.DataAsBuffer()
+	if dataOut.Len() == 0 {
 		return errors.New("failure")
+	}
+
+	if status := dataOut.ReadCommandStatus(); status != CommandStatusSuccess {
+		return status
 	}
 
 	return nil
@@ -243,9 +247,13 @@ func (c *Client) ZDOActiveEndpoints(ctx context.Context) error {
 		return errors.New("bad response")
 	}
 
-	dataOut := response.Data()
-	if len(dataOut) == 0 || dataOut[0] != 0 {
+	dataOut := response.DataAsBuffer()
+	if dataOut.Len() == 0 {
 		return errors.New("failure")
+	}
+
+	if status := dataOut.ReadCommandStatus(); status != CommandStatusSuccess {
+		return status
 	}
 
 	return nil
@@ -344,9 +352,13 @@ func (c *Client) ZDOLQI(ctx context.Context, networkAddress uint16, startIndex u
 		return err
 	}
 
-	dataOut := response.Data()
-	if len(dataOut) == 0 || dataOut[0] != 0 {
+	dataOut := response.DataAsBuffer()
+	if dataOut.Len() == 0 {
 		return errors.New("failure")
+	}
+
+	if status := dataOut.ReadCommandStatus(); status != CommandStatusSuccess {
+		return status
 	}
 
 	return nil
@@ -402,9 +414,13 @@ func (c *Client) ZDOManagementNetworkDiscovery(ctx context.Context, dstAddr uint
 		return err
 	}
 
-	dataOut := response.Data()
-	if len(dataOut) == 0 || dataOut[0] != 0 {
+	dataOut := response.DataAsBuffer()
+	if dataOut.Len() == 0 {
 		return errors.New("failure")
+	}
+
+	if status := dataOut.ReadCommandStatus(); status != CommandStatusSuccess {
+		return status
 	}
 
 	return nil
@@ -439,9 +455,13 @@ func (c *Client) ZDORoutingTable(ctx context.Context, dstAddr uint16, startIndex
 		return err
 	}
 
-	dataOut := response.Data()
-	if len(dataOut) == 0 || dataOut[0] != 0 {
+	dataOut := response.DataAsBuffer()
+	if dataOut.Len() == 0 {
 		return errors.New("failure")
+	}
+
+	if status := dataOut.ReadCommandStatus(); status != CommandStatusSuccess {
+		return status
 	}
 
 	return nil
@@ -561,18 +581,21 @@ func (c *Client) ZDOLQIMessage(frame *Frame) (*ZDOLQIMessage, error) {
 	}
 
 	dataOut := frame.DataAsBuffer()
+	if dataOut.Len() == 0 {
+		return nil, errors.New("failure")
+	}
 
 	msg := &ZDOLQIMessage{
 		SourceAddress:        dataOut.ReadUint16(),
-		Status:               dataOut.ReadUint8(),
+		Status:               dataOut.ReadCommandStatus(),
 		NeighborTableEntries: dataOut.ReadUint8(),
 		StartIndex:           dataOut.ReadUint8(),
 		NeighborLQIListCount: dataOut.ReadUint8(),
 		NeighborLqiList:      make([]NeighborLqiListItem, 0, 3),
 	}
 
-	if msg.Status != 0 {
-		return nil, errors.New("failure")
+	if msg.Status != CommandStatusSuccess {
+		return nil, msg.Status
 	}
 
 	for i := uint8(0); i < msg.NeighborLQIListCount; i++ {
@@ -609,15 +632,15 @@ func (c *Client) ZDONetworkDiscoveryMessage(frame *Frame) (*ZDOManagementNetwork
 
 	msg := &ZDOManagementNetworkDiscoveryMessage{
 		SourceAddress:    dataOut.ReadUint16(),
-		Status:           dataOut.ReadUint8(),
+		Status:           dataOut.ReadCommandStatus(),
 		NetworkCount:     dataOut.ReadUint8(),
 		StartIndex:       dataOut.ReadUint8(),
 		NetworkListCount: dataOut.ReadUint8(),
 		NetworkList:      make([]NetworkListItem, 0, 12),
 	}
 
-	if msg.Status != 0 {
-		return nil, errors.New("failure")
+	if msg.Status != CommandStatusSuccess {
+		return nil, msg.Status
 	}
 
 	for i := uint8(0); i < msg.NetworkListCount; i++ {
@@ -653,15 +676,15 @@ func (c *Client) ZDOManagementRoutingTableMessage(frame *Frame) (*ZDOManagementR
 
 	msg := &ZDOManagementRoutingTableMessage{
 		SourceAddress:         dataOut.ReadUint16(),
-		Status:                dataOut.ReadUint8(),
+		Status:                dataOut.ReadCommandStatus(),
 		RoutingTableEntries:   dataOut.ReadUint8(),
 		StartIndex:            dataOut.ReadUint8(),
 		RoutingTableListCount: dataOut.ReadUint8(),
 		RoutingTableList:      make([]RoutingTableListItem, 0, 15),
 	}
 
-	if msg.Status != 0 {
-		return nil, errors.New("failure")
+	if msg.Status != CommandStatusSuccess {
+		return nil, msg.Status
 	}
 
 	for i := uint8(0); i < msg.RoutingTableListCount; i++ {

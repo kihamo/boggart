@@ -15,7 +15,7 @@ type SysVersion struct {
 }
 
 type NVItem struct {
-	Status uint8
+	Status CommandStatus
 	Length uint8
 	Value  []byte
 }
@@ -80,6 +80,32 @@ func (c *Client) SysADCRead(ctx context.Context, channel, resolution uint8) (uin
 	return 0, err
 }
 
+func (c *Client) SysOsalNvItemInit(ctx context.Context, id uint16, value []byte) error {
+	l := len(value)
+
+	dataIn := NewBuffer(nil)
+	dataIn.WriteUint16(id)
+	dataIn.WriteUint16(uint16(l))
+	dataIn.WriteUint8(uint8(l))
+	dataIn.Write(value)
+
+	response, err := c.CallWithResultSREQ(ctx, dataIn.Frame(0x21, 0x07))
+	if err != nil {
+		return err
+	}
+
+	dataOut := response.DataAsBuffer()
+	if dataOut.Len() == 0 {
+		return errors.New("failure")
+	}
+
+	if status := dataOut.ReadCommandStatus(); status != CommandStatusSuccess {
+		return status
+	}
+
+	return nil
+}
+
 /**
 SYS_OSAL_NV_READ
 
@@ -101,9 +127,9 @@ Usage:
 		Len    1 byte      Length of the NV value.
 		Value  0-128 bytes Value of the NV item.
 */
-func (c *Client) SysOsalNvRead(ctx context.Context, id uint32, offset uint8) (*NVItem, error) {
+func (c *Client) SysOsalNvRead(ctx context.Context, id uint16, offset uint8) (*NVItem, error) {
 	dataIn := NewBuffer(nil)
-	dataIn.WriteUint32(id)    // id
+	dataIn.WriteUint16(id)    // id
 	dataIn.WriteUint8(offset) // offset
 
 	response, err := c.CallWithResultSREQ(ctx, dataIn.Frame(0x21, 0x08))
@@ -113,10 +139,14 @@ func (c *Client) SysOsalNvRead(ctx context.Context, id uint32, offset uint8) (*N
 
 	dataOut := response.DataAsBuffer()
 	item := &NVItem{
-		Status: dataOut.ReadUint8(),
+		Status: dataOut.ReadCommandStatus(),
 		Length: dataOut.ReadUint8(),
 	}
 	item.Value = dataOut.Next(int(item.Length))
+
+	if item.Status != CommandStatusSuccess && item.Status != CommandStatusInvalidParam {
+		return nil, item.Status
+	}
 
 	return item, nil
 }
@@ -143,12 +173,12 @@ Usage:
 		Status 1 byte Status is either Success (0) or Failure (1).
 
 */
-func (c *Client) SysOsalNvWrite(ctx context.Context, id uint32, offset, length uint8, value []byte) error {
+func (c *Client) SysOsalNvWrite(ctx context.Context, id uint16, offset uint8, value []byte) error {
 	dataIn := NewBuffer(nil)
-	dataIn.WriteUint32(id)    // id
-	dataIn.WriteUint8(offset) // offset
-	dataIn.WriteUint8(length) // length
-	dataIn.Write(value)       // value
+	dataIn.WriteUint16(id)               // id
+	dataIn.WriteUint8(offset)            // offset
+	dataIn.WriteUint8(uint8(len(value))) // length
+	dataIn.Write(value)                  // value
 
 	response, err := c.CallWithResultSREQ(ctx, dataIn.Frame(0x21, 0x09))
 	if err != nil {
@@ -156,9 +186,20 @@ func (c *Client) SysOsalNvWrite(ctx context.Context, id uint32, offset, length u
 	}
 
 	dataOut := response.DataAsBuffer()
-	if dataOut.Len() == 0 || dataOut.ReadUint8() != 0 {
+	if dataOut.Len() == 0 {
 		return errors.New("failure")
 	}
 
+	if status := dataOut.ReadCommandStatus(); status != CommandStatusSuccess {
+		return status
+	}
+
 	return nil
+}
+
+func (c *Client) SysReset(ctx context.Context, t uint8) error {
+	dataIn := NewBuffer(nil)
+	dataIn.WriteUint8(t) // type
+
+	return c.Call(dataIn.Frame(0x41, 0x00))
 }

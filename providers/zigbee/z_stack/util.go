@@ -10,7 +10,7 @@ type UtilDeviceInfo struct {
 	IEEEAddr         []byte
 	ShortAddr        uint16
 	DeviceType       uint8
-	DeviceState      uint8
+	DeviceState      DeviceState
 	NumAssocDevices  uint8
 	AssocDevicesList []uint16
 }
@@ -29,7 +29,7 @@ func (c *Client) UtilGetDeviceInfo(ctx context.Context) (*UtilDeviceInfo, error)
 		IEEEAddr:         dataOut.ReadIEEEAddr(),
 		ShortAddr:        dataOut.ReadUint16(),
 		DeviceType:       dataOut.ReadUint8(),
-		DeviceState:      dataOut.ReadUint8(),
+		DeviceState:      DeviceState(dataOut.ReadUint8()),
 		NumAssocDevices:  dataOut.ReadUint8(),
 		AssocDevicesList: make([]uint16, 0, devicesCount),
 	}
@@ -71,8 +71,12 @@ func (c *Client) UtilLEDControl(ctx context.Context, LedId uint8, mode bool) err
 	}
 
 	dataOut := response.DataAsBuffer()
-	if dataOut.Len() == 0 || dataOut.ReadUint8() != 0 {
+	if dataOut.Len() == 0 {
 		return errors.New("failure")
+	}
+
+	if status := dataOut.ReadCommandStatus(); status != CommandStatusSuccess {
+		return status
 	}
 
 	return nil

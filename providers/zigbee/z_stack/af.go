@@ -212,13 +212,13 @@ func (c *Client) AfRegister(ctx context.Context, endpoint Endpoint) error {
 		return errors.New("bad response")
 	}
 
-	dataOut := response.Data()
-	if len(dataOut) == 0 || dataOut[0] != 0 {
-		if dataOut[0] == 0xB8 {
-			return errors.New("already registered")
-		}
-
+	dataOut := response.DataAsBuffer()
+	if dataOut.Len() == 0 {
 		return errors.New("failure")
+	}
+
+	if status := dataOut.ReadCommandStatus(); status != CommandStatusSuccess {
+		return status
 	}
 
 	return nil
