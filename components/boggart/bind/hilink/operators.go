@@ -6,6 +6,7 @@ import (
 
 type operator struct {
 	BalanceUSSD           string
+	LimitTrafficUSSD      string
 	BalanceRegexp         *regexp.Regexp
 	SMSLimitTrafficRegexp *regexp.Regexp
 	SMSLimitTrafficFactor float64
@@ -18,7 +19,8 @@ type operator struct {
 var (
 	operatorTele2 = &operator{
 		BalanceUSSD:           "*105#",
-		BalanceRegexp:         regexp.MustCompile(`OCTATOK (?P<value>\d+\.\d{2})\sp\..*?`),
+		LimitTrafficUSSD:      "*155*0#",
+		BalanceRegexp:         regexp.MustCompile(`Баланс (?P<value>\d+\.\d{2})\spуб\..*?`),
 		SMSLimitTrafficRegexp: regexp.MustCompile(`остатки пакетов:.*?(?P<value1>\d+)\s*МБ,\s*неиспользованные остатки с прошлого периода:.*?(?P<value2>\d+)\s*МБ*?`),
 		SMSLimitTrafficFactor: 1024 * 1024,
 	}

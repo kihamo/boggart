@@ -71,6 +71,13 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 		taskBalanceUpdater.SetRepeatInterval(b.config.BalanceUpdaterInterval)
 		taskBalanceUpdater.SetName("balance-updater")
 		b.Workers().RegisterTask(taskBalanceUpdater)
+
+		taskLimitTrafficUpdater := b.Workers().WrapTaskIsOnline(b.taskLimitTrafficUpdater)
+		taskLimitTrafficUpdater.SetTimeout(b.config.LimitTrafficUpdaterTimeout)
+		taskLimitTrafficUpdater.SetRepeats(-1)
+		taskLimitTrafficUpdater.SetRepeatInterval(b.config.LimitTrafficUpdaterInterval)
+		taskLimitTrafficUpdater.SetName("limit-traffic-updater")
+		b.Workers().RegisterTask(taskLimitTrafficUpdater)
 	}
 
 	if smsEnabled {
@@ -115,6 +122,24 @@ func (b *Bind) taskBalanceUpdater(ctx context.Context) error {
 		}
 	}
 
+	return err
+}
+
+func (b *Bind) taskLimitTrafficUpdater(ctx context.Context) error {
+	if b.simStatus.Load() != 1 || b.operator.IsEmpty() {
+		return nil
+	}
+
+	op, err := b.operatorSettings()
+	if err != nil {
+		return err
+	}
+
+	if op.LimitTrafficUSSD == "" {
+		return nil
+	}
+
+	_, err = b.USSD(ctx, op.LimitTrafficUSSD)
 	return err
 }
 

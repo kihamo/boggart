@@ -78,9 +78,11 @@ func (b *Bind) Balance(ctx context.Context) (float64, error) {
 
 	match := op.BalanceRegexp.FindStringSubmatch(content)
 
-	for i, name := range op.BalanceRegexp.SubexpNames() {
-		if name == "value" {
-			return strconv.ParseFloat(match[i], 64)
+	if len(match) > 0 {
+		for i, name := range op.BalanceRegexp.SubexpNames() {
+			if name == "value" {
+				return strconv.ParseFloat(match[i], 64)
+			}
 		}
 	}
 
