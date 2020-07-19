@@ -18,6 +18,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 		mqtt.NewSubscriber(b.config.TopicSendMessage, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendMessage)),
 		mqtt.NewSubscriber(b.config.TopicSendFile, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendFile)),
 		mqtt.NewSubscriber(b.config.TopicSendFileURL, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendFileURL)),
+		mqtt.NewSubscriber(b.config.TopicSendFileBase64, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendFileBase64)),
 	}
 }
 
@@ -78,24 +79,14 @@ func (b *Bind) callbackMQTTSendFile(_ context.Context, _ mqtt.Component, message
 	if mime == storage.MIMETypeUnknown {
 		mime, err = storage.MimeTypeFromHTTPHeader(response.Header)
 		if err != nil {
-			copyBody := &bytes.Buffer{}
-			if _, err := io.CopyN(copyBody, response.Body, 128); err != nil {
-				return err
-			}
+			var restored io.Reader
 
-			mime, err = storage.MimeTypeFromData(bytes.NewBuffer(copyBody.Bytes()))
+			mime, restored, err = storage.MimeTypeFromDataRestored(response.Body)
 			if err != nil {
 				return err
 			}
 
-			// довычитываем все остальное, так как body уже порвался на две части до 128 и послке
-			if _, err := io.Copy(copyBody, response.Body); err != nil {
-				return err
-			}
-
-			// присваиваем обратно, чтобы с этим можно было проджолжать работать
-			response.Body = ioutil.NopCloser(copyBody)
-			defer copyBody.Reset()
+			response.Body = ioutil.NopCloser(restored)
 		}
 	}
 
@@ -106,14 +97,14 @@ func (b *Bind) callbackMQTTSendFile(_ context.Context, _ mqtt.Component, message
 	}
 
 	switch mime {
-	case storage.MIMETypeJPEG:
-		err = b.SendPhoto(to, name, response.Body, response.ContentLength)
+	case storage.MIMETypeJPEG, storage.MIMETypeJPG, storage.MIMETypeGIF, storage.MIMETypePNG:
+		err = b.SendPhoto(to, name, response.Body)
 
 	case storage.MIMETypeMPEG, storage.MIMETypeWAVE, storage.MIMETypeOGG:
-		err = b.SendAudio(to, name, response.Body, response.ContentLength)
+		err = b.SendAudio(to, name, response.Body)
 
 	default:
-		err = b.SendDocument(to, name, response.Body, response.ContentLength)
+		err = b.SendDocument(to, name, response.Body)
 	}
 
 	return err
@@ -130,4 +121,41 @@ func (b *Bind) callbackMQTTSendFileURL(_ context.Context, _ mqtt.Component, mess
 	}
 
 	return b.SendFileAsURL(routes[len(routes)-3], "File at "+time.Now().Format(time.RFC1123Z), message.String())
+}
+
+func (b *Bind) callbackMQTTSendFileBase64(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 5) || message.Len() == 0 {
+		return nil
+	}
+
+	routes := message.Topic().Split()
+	if len(routes) < 1 {
+		return errors.New("bad topic name")
+	}
+
+	payload, err := message.Base64()
+	if err != nil {
+		return err
+	}
+
+	mime, restored, err := storage.MimeTypeFromDataRestored(bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	to := routes[len(routes)-3]
+	name := "File at " + time.Now().Format(time.RFC1123Z)
+
+	switch mime {
+	case storage.MIMETypeJPEG, storage.MIMETypeJPG, storage.MIMETypeGIF, storage.MIMETypePNG:
+		err = b.SendPhoto(to, name, restored)
+
+	case storage.MIMETypeMPEG, storage.MIMETypeWAVE, storage.MIMETypeOGG:
+		err = b.SendAudio(to, name, restored)
+
+	default:
+		err = b.SendDocument(to, name, restored)
+	}
+
+	return err
 }

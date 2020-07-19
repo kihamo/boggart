@@ -50,7 +50,7 @@ func (b *Bind) SendMessage(to, message string) error {
 	return err
 }
 
-func (b *Bind) SendPhoto(to, name string, file io.Reader, size int64) error {
+func (b *Bind) SendPhoto(to, name string, file io.Reader) error {
 	bot := b.bot()
 	if bot == nil {
 		return errors.New("bot is offline")
@@ -64,7 +64,7 @@ func (b *Bind) SendPhoto(to, name string, file io.Reader, size int64) error {
 	msg := tgbotapi.NewPhotoUpload(chatID, tgbotapi.FileReader{
 		Name:   name,
 		Reader: file,
-		Size:   size,
+		Size:   -1,
 	})
 	msg.Caption = name
 
@@ -73,7 +73,7 @@ func (b *Bind) SendPhoto(to, name string, file io.Reader, size int64) error {
 	return err
 }
 
-func (b *Bind) SendAudio(to, name string, file io.Reader, size int64) error {
+func (b *Bind) SendAudio(to, name string, file io.Reader) error {
 	bot := b.bot()
 	if bot == nil {
 		return errors.New("bot is offline")
@@ -87,7 +87,7 @@ func (b *Bind) SendAudio(to, name string, file io.Reader, size int64) error {
 	msg := tgbotapi.NewAudioUpload(chatID, tgbotapi.FileReader{
 		Name:   name,
 		Reader: file,
-		Size:   size,
+		Size:   -1,
 	})
 	msg.Caption = name
 
@@ -96,7 +96,7 @@ func (b *Bind) SendAudio(to, name string, file io.Reader, size int64) error {
 	return err
 }
 
-func (b *Bind) SendDocument(to, name string, file io.Reader, size int64) error {
+func (b *Bind) SendDocument(to, name string, file io.Reader) error {
 	bot := b.bot()
 	if bot == nil {
 		return errors.New("bot is offline")
@@ -110,7 +110,7 @@ func (b *Bind) SendDocument(to, name string, file io.Reader, size int64) error {
 	msg := tgbotapi.NewDocumentUpload(chatID, tgbotapi.FileReader{
 		Name:   name,
 		Reader: file,
-		Size:   size,
+		Size:   -1,
 	})
 	msg.Caption = name
 

@@ -5,11 +5,20 @@
 {{ define "js" }}
 <script type="application/javascript">
     function download() {
-        var a = document.createElement('a');
+        {{ if eq .style "basicui" }}
+            var a = document.createElement('a');
 
-        a.href = document.getElementById('image-data').src;
-        a.download = '{{ .filename }}';
-        a.click();
+            a.href = document.getElementById('image-data').src;
+            a.download = '{{ .filename }}';
+            a.click();
+        {{ else }}
+            var matches = document.getElementById('image-data').src.match(/^data:(.+\/.+);base64,(.*)$/);
+
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("POST", "{{ .Request.URL.String }}", true);
+            xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xmlHttp.send("mime=" + encodeURIComponent(matches[1]) + "&payload=" + encodeURIComponent(matches[2]));
+        {{ end }}
     }
 
     {{ if gt .refresh 0 }}

@@ -20,6 +20,7 @@ type Config struct {
 	TopicSendMessage    mqtt.Topic `mapstructure:"topic_send_message" yaml:"topic_send_message"`
 	TopicSendFile       mqtt.Topic `mapstructure:"topic_send_file" yaml:"topic_send_file"`
 	TopicSendFileURL    mqtt.Topic `mapstructure:"topic_send_file_url" yaml:"topic_send_file_url"`
+	TopicSendFileBase64 mqtt.Topic `mapstructure:"topic_send_file_base64" yaml:"topic_send_file_base64"`
 	TopicReceiveMessage mqtt.Topic `mapstructure:"topic_receive_message" yaml:"topic_receive_message"`
 	TopicReceiveAudio   mqtt.Topic `mapstructure:"topic_receive_audio" yaml:"topic_receive_audio"`
 	TopicReceiveVoice   mqtt.Topic `mapstructure:"topic_receive_voice" yaml:"topic_receive_voice"`
@@ -46,6 +47,7 @@ func (t Type) Config() interface{} {
 		TopicSendMessage:    prefix + "send/+/message",
 		TopicSendFile:       prefix + "send/+/file",
 		TopicSendFileURL:    prefix + "send/+/file/url",
+		TopicSendFileBase64: prefix + "send/+/file/base64",
 		TopicReceiveMessage: prefix + "receive/+/message",
 		TopicReceiveAudio:   prefix + "receive/+/audio",
 		TopicReceiveVoice:   prefix + "receive/+/voice",

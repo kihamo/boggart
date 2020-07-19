@@ -1,7 +1,6 @@
 package openhab
 
 import (
-	"bytes"
 	"encoding/base64"
 	"io"
 	"io/ioutil"
@@ -10,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kihamo/boggart/components/storage"
-
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/components/storage"
 	"github.com/kihamo/boggart/providers/openhab/client/items"
 	"github.com/kihamo/shadow/components/dashboard"
 )
@@ -85,6 +84,26 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		return
 
 	case "image":
+		// send to mqtt
+		if r.IsPost() {
+			topic := q.Get("topic")
+			if topic == "" {
+				t.NotFound(w, r)
+				return
+			}
+
+			if err := r.Original().ParseForm(); err == nil {
+				for key, value := range r.Original().PostForm {
+					if key == "payload" {
+						bind.MQTT().PublishAsync(r.Context(), mqtt.Topic(topic), strings.Join(value, ";"))
+						break
+					}
+				}
+			}
+
+			return
+		}
+
 		u := q.Get("url")
 		if u == "" {
 			t.NotFound(w, r)
@@ -101,27 +120,16 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 		mime, err = storage.MimeTypeFromHTTPHeader(response.Header)
 		if err != nil {
-			copyBody := &bytes.Buffer{}
-			if _, err := io.CopyN(copyBody, response.Body, 128); err != nil {
-				t.InternalError(w, r, err)
-				return
-			}
+			var restored io.Reader
 
-			mime, err = storage.MimeTypeFromData(bytes.NewBuffer(copyBody.Bytes()))
+			mime, restored, err = storage.MimeTypeFromDataRestored(response.Body)
 			if err != nil {
 				t.InternalError(w, r, err)
 				return
 			}
 
-			// довычитываем все остальное, так как body уже порвался на две части до 128 и послке
-			if _, err := io.Copy(copyBody, response.Body); err != nil {
-				t.InternalError(w, r, err)
-				return
-			}
-
 			// присваиваем обратно, чтобы с этим можно было проджолжать работать
-			response.Body = ioutil.NopCloser(copyBody)
-			defer copyBody.Reset()
+			response.Body = ioutil.NopCloser(restored)
 		}
 
 		body, err := ioutil.ReadAll(response.Body)

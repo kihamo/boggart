@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"bytes"
 	"errors"
 	"io"
 	"mime"
@@ -50,6 +51,26 @@ func MimeTypeFromHTTPHeader(header http.Header) (MIMEType, error) {
 	}
 
 	return MIMETypeUnknown, nil
+}
+
+func MimeTypeFromDataRestored(data io.Reader) (MIMEType, io.Reader, error) {
+	buf := make([]byte, 128)
+
+	if _, err := data.Read(buf); err != nil {
+		return MIMETypeUnknown, nil, err
+	}
+
+	t, err := MimeTypeFromData(bytes.NewBuffer(buf))
+	if err != nil {
+		return MIMETypeUnknown, nil, err
+	}
+
+	restored := bytes.NewBuffer(buf)
+	if _, err := io.Copy(restored, data); err != nil {
+		return MIMETypeMPEG, nil, err
+	}
+
+	return MIMEType(t), restored, nil
 }
 
 func MimeTypeFromData(data io.Reader) (MIMEType, error) {

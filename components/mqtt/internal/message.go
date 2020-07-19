@@ -2,6 +2,7 @@ package internal
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"strconv"
 
@@ -75,4 +76,17 @@ func (m *message) String() string {
 func (m *message) Float64() float64 {
 	v, _ := strconv.ParseFloat(m.String(), 64)
 	return v
+}
+
+func (m *message) Base64() ([]byte, error) {
+	payload := m.msg.Payload()
+
+	buf := make([]byte, base64.StdEncoding.DecodedLen(len(payload)))
+	_, err := base64.StdEncoding.Decode(buf, payload)
+
+	return buf, err
+}
+
+func (m *message) Len() int {
+	return len(m.msg.Payload())
 }
