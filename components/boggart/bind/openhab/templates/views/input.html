@@ -1,4 +1,4 @@
-{{ define "form" }}
+{{ define "body" }}
 <form onSubmit="return false">
     {{ if ne .icon_url "" }}
     <img src="{{ .icon_url }}" />
@@ -40,4 +40,106 @@
             id="value" name="value" onChange="sendValue()" >
     {{ end }}
 </form>
+{{ end }}
+
+{{ define "head" }}
+<style type="text/css">
+    {{ if eq .style "android" }}
+    * {
+        line-height: 40px;
+    }
+    body {
+        font-size: 18px;
+    }
+    img {
+        margin-left: 2px;
+        width: 40px;
+        height: 40px;
+    }
+    label {
+        padding-left: 5px;
+    }
+    input, button {
+        height: 32px !important;
+        max-height: 32px !important;
+        text-align: center !important;
+        line-height: 32px !important;
+    }
+    textarea {
+        line-height: 1.5em;
+    }
+    button {
+        float: right;
+        line-height: 28px !important;
+    }
+    input, textarea {
+        max-width: 50%;
+        min-width: 50%;
+    }
+    input, textarea, button {
+        background-color: #252525;
+        border: 1px solid #f4f4f4;
+        color: #f4f4f4;
+        border-radius: 4px;
+        margin: 3px 4px 3px 0;
+        min-height: 32px;
+    }
+    {{ else if eq .style "basicui" }}
+    * {
+        line-height: 36px;
+    }
+    body {
+        background-color: #fff;
+        color: #000;
+        font-family: "Roboto","Helvetica","Arial",sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        width: 50%;
+        padding: 8px 0;
+    }
+    img {
+        margin-left: 16px;
+        width: 32px;
+        height: 32px;
+    }
+    label {
+        height: 36px;
+        padding-left: 16px;
+        color: #616161;
+    }
+    input {
+        height: 36px;
+    }
+    textarea {
+        line-height: 1.5em;
+    }
+    input, textarea {
+        background-color: #ececec;
+        border: 0;
+        min-height: 36px;
+        max-width: 50%;
+        min-width: 150px;
+        vertical-align: middle;
+        padding: 0 8px;
+        font-family: "Roboto","Helvetica","Arial",sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        letter-spacing: 0;
+        margin-right: 24px;
+        margin-left: 4px;
+        border-radius: 3px;
+    }
+    {{ end }}
+</style>
+{{ end }}
+
+{{ define "js" }}
+<script type="application/javascript">
+    function sendValue() {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("POST", "{{ .Request.URL.String }}", true);
+        xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xmlHttp.send("value=" + document.getElementById('value').value)
+    }
+</script>
 {{ end }}

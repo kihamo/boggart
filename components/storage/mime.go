@@ -17,6 +17,9 @@ var (
 const (
 	MIMETypeUnknown     = MIMEType("")
 	MIMETypeJPEG        = MIMEType("image/jpeg")
+	MIMETypeJPG         = MIMEType("image/jpg")
+	MIMETypeGIF         = MIMEType("image/gif")
+	MIMETypePNG         = MIMEType("image/png")
 	MIMETypeMPEG        = MIMEType("audio/mpeg")
 	MIMETypeWAVE        = MIMEType("audio/vnd.wave")
 	MIMETypeFLAC        = MIMEType("audio/flac")
