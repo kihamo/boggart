@@ -84,6 +84,10 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 		err = multierr.Append(err, e)
 	}
 
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateUpTime.Format(info.SerialNo), time.Duration(info.DeviceRunTime)*time.Minute); e != nil {
+		err = multierr.Append(err, e)
+	}
+
 	return err
 }
 
