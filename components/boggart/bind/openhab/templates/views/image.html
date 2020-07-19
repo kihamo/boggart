@@ -1,5 +1,5 @@
 {{ define "body" }}
-    <img src="data:{{ .mime }};base64,{{ .base64 }}" id="image-data" onclick="download()" />
+    <img src="data:{{ .mime }};base64,{{ .base64 }}" id="image-data" onclick="download()" style="width:100%" />
 {{ end }}
 
 {{ define "js" }}

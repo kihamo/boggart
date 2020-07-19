@@ -178,7 +178,9 @@ func (t Type) WidgetAssetFS() *assetfs.AssetFS {
 }
 
 func (t Type) initUI(vars map[string]interface{}, r *dashboard.Request) map[string]interface{} {
-	style := r.URL().Query().Get("style")
+	q := r.URL().Query()
+
+	style := q.Get("style")
 	switch style {
 	case "android", "basicui":
 		// skip
@@ -190,7 +192,7 @@ func (t Type) initUI(vars map[string]interface{}, r *dashboard.Request) map[stri
 		}
 	}
 	vars["style"] = style
-	vars["theme"] = r.URL().Query().Get("theme")
+	vars["theme"] = q.Get("theme")
 
 	return vars
 }
