@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/kihamo/boggart/components/storage"
+	"github.com/kihamo/boggart/mime"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
@@ -62,8 +63,8 @@ func (h *FSHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		return
 	}
 
-	if mime, err := storage.MimeTypeFromData(file); err == nil {
-		w.Header().Set("Content-Type", mime.String())
+	if mimeType, err := mime.TypeFromData(file); err == nil {
+		w.Header().Set("Content-Type", mimeType.String())
 		w.Header().Set("Content-Length", strconv.FormatInt(stat.Size(), 10))
 	}
 

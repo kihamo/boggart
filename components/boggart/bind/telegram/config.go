@@ -1,11 +1,13 @@
 package telegram
 
 import (
+	"os"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/types"
 )
 
 type Config struct {
@@ -17,6 +19,10 @@ type Config struct {
 	UpdatesEnabled      bool       `mapstructure:"updates_enabled" yaml:"updates_enabled"`
 	UpdatesBuffer       int        `mapstructure:"updates_buffer" yaml:"updates_buffer"`
 	UpdatesTimeout      int        `mapstructure:"updates_timeout" yaml:"updates_timeout"`
+	UseURLForSendFile   bool       `mapstructure:"use_url_for_send_file" yaml:"use_url_for_send_file"`
+	FileURLPrefix       types.URL  `mapstructure:"file_url_prefix" yaml:"file_url_prefix"`
+	FileDirectory       string     `mapstructure:"file_directory" yaml:"file_directory"`
+	FileAutoClean       bool       `mapstructure:"file_auto_clean" yaml:"file_auto_clean"`
 	TopicSendMessage    mqtt.Topic `mapstructure:"topic_send_message" yaml:"topic_send_message"`
 	TopicSendFile       mqtt.Topic `mapstructure:"topic_send_file" yaml:"topic_send_file"`
 	TopicSendFileURL    mqtt.Topic `mapstructure:"topic_send_file_url" yaml:"topic_send_file_url"`
@@ -28,6 +34,20 @@ type Config struct {
 
 func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/telegram/+/"
+
+	cacheDir, _ := os.UserCacheDir()
+	if cacheDir == "" {
+		cacheDir = os.TempDir()
+	}
+
+	if cacheDir != "" {
+		cacheDirBind := cacheDir + string(os.PathSeparator) + boggart.ComponentName + "_telegram"
+
+		err := os.Mkdir(cacheDirBind, 0700)
+		if err == nil || os.IsExist(err) {
+			cacheDir = cacheDirBind
+		}
+	}
 
 	return &Config{
 		ProbesConfig: di.ProbesConfig{
@@ -44,6 +64,9 @@ func (t Type) Config() interface{} {
 		UpdatesEnabled:      false,
 		UpdatesBuffer:       100,
 		UpdatesTimeout:      60,
+		UseURLForSendFile:   true,
+		FileDirectory:       cacheDir,
+		FileAutoClean:       true,
 		TopicSendMessage:    prefix + "send/+/message",
 		TopicSendFile:       prefix + "send/+/file",
 		TopicSendFileURL:    prefix + "send/+/file/url",

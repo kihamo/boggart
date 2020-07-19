@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/barnybug/go-cast/controllers"
-	"github.com/kihamo/boggart/components/storage"
+	"github.com/kihamo/boggart/mime"
 )
 
 func (b *Bind) setVolume(ctx context.Context, level *float64, muted *bool) error {
@@ -52,14 +52,14 @@ func (b *Bind) SetMute(ctx context.Context, mute bool) error {
 }
 
 func (b *Bind) PlayFromURL(ctx context.Context, url string) error {
-	mimeType, err := storage.MimeTypeFromURL(url)
+	mimeType, err := mime.TypeFromURL(url)
 	if err != nil {
 		return err
 	}
 
 	// TODO: check support format https://developers.google.com/cast/docs/media
 
-	if mimeType == storage.MIMETypeUnknown {
+	if mimeType == mime.TypeUnknown {
 		return errors.New("unknown audio format")
 	}
 

@@ -12,7 +12,7 @@ import (
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
-	"github.com/kihamo/boggart/components/storage"
+	"github.com/kihamo/boggart/mime"
 	"github.com/kihamo/boggart/providers/openhab/client/items"
 	"github.com/kihamo/shadow/components/dashboard"
 )
@@ -116,13 +116,13 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			return
 		}
 
-		var mime storage.MIMEType
+		var mimeType mime.Type
 
-		mime, err = storage.MimeTypeFromHTTPHeader(response.Header)
+		mimeType, err = mime.TypeFromHTTPHeader(response.Header)
 		if err != nil {
 			var restored io.Reader
 
-			mime, restored, err = storage.MimeTypeFromDataRestored(response.Body)
+			mimeType, restored, err = mime.TypeFromDataRestored(response.Body)
 			if err != nil {
 				t.InternalError(w, r, err)
 				return
@@ -138,16 +138,8 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			return
 		}
 
-		var ext string
-
-		switch mime {
-		case storage.MIMETypeJPEG, storage.MIMETypeJPG:
-			ext = "jpg"
-		case storage.MIMETypePNG:
-			ext = "png"
-		case storage.MIMETypeGIF:
-			ext = "gif"
-		default:
+		ext := mimeType.Extension()
+		if ext == "" {
 			ext = "image"
 		}
 
@@ -161,7 +153,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		t.RenderLayout(r.Context(), "image", "ui", t.initUI(map[string]interface{}{
-			"mime":     mime,
+			"mime":     mimeType,
 			"base64":   base64.StdEncoding.EncodeToString(body),
 			"filename": time.Now().Format("20060102150405." + ext),
 			"refresh":  refresh,

@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/mqtt"
-	"github.com/kihamo/boggart/components/storage"
+	"github.com/kihamo/boggart/mime"
 )
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
@@ -46,15 +46,15 @@ func (b *Bind) callbackMQTTSendFile(_ context.Context, _ mqtt.Component, message
 	}
 
 	var (
-		mime storage.MIMEType
-		name string
-		url  string
+		mimeType mime.Type
+		name     string
+		url      string
 
 		payload FilePayload
 	)
 
 	if err := message.JSONUnmarshal(&payload); err == nil {
-		mime = storage.MIMEType(payload.MIME)
+		mimeType = mime.Type(payload.MIME)
 		name = payload.Name
 		url = payload.URL
 	} else {
@@ -76,12 +76,12 @@ func (b *Bind) callbackMQTTSendFile(_ context.Context, _ mqtt.Component, message
 	}
 	defer response.Body.Close()
 
-	if mime == storage.MIMETypeUnknown {
-		mime, err = storage.MimeTypeFromHTTPHeader(response.Header)
+	if mimeType == mime.TypeUnknown {
+		mimeType, err = mime.TypeFromHTTPHeader(response.Header)
 		if err != nil {
 			var restored io.Reader
 
-			mime, restored, err = storage.MimeTypeFromDataRestored(response.Body)
+			mimeType, restored, err = mime.TypeFromDataRestored(response.Body)
 			if err != nil {
 				return err
 			}
@@ -96,14 +96,11 @@ func (b *Bind) callbackMQTTSendFile(_ context.Context, _ mqtt.Component, message
 		name = "File at " + time.Now().Format(time.RFC1123Z)
 	}
 
-	switch mime {
-	case storage.MIMETypeJPEG, storage.MIMETypeJPG, storage.MIMETypeGIF, storage.MIMETypePNG:
+	if mimeType.IsImage() {
 		err = b.SendPhoto(to, name, response.Body)
-
-	case storage.MIMETypeMPEG, storage.MIMETypeWAVE, storage.MIMETypeOGG:
+	} else if mimeType.IsAudio() {
 		err = b.SendAudio(to, name, response.Body)
-
-	default:
+	} else {
 		err = b.SendDocument(to, name, response.Body)
 	}
 
@@ -138,7 +135,7 @@ func (b *Bind) callbackMQTTSendFileBase64(_ context.Context, _ mqtt.Component, m
 		return err
 	}
 
-	mime, restored, err := storage.MimeTypeFromDataRestored(bytes.NewReader(payload))
+	mimeType, restored, err := mime.TypeFromDataRestored(bytes.NewReader(payload))
 	if err != nil {
 		return err
 	}
@@ -146,14 +143,11 @@ func (b *Bind) callbackMQTTSendFileBase64(_ context.Context, _ mqtt.Component, m
 	to := routes[len(routes)-3]
 	name := "File at " + time.Now().Format(time.RFC1123Z)
 
-	switch mime {
-	case storage.MIMETypeJPEG, storage.MIMETypeJPG, storage.MIMETypeGIF, storage.MIMETypePNG:
+	if mimeType.IsImage() {
 		err = b.SendPhoto(to, name, restored)
-
-	case storage.MIMETypeMPEG, storage.MIMETypeWAVE, storage.MIMETypeOGG:
+	} else if mimeType.IsAudio() {
 		err = b.SendAudio(to, name, restored)
-
-	default:
+	} else {
 		err = b.SendDocument(to, name, restored)
 	}
 

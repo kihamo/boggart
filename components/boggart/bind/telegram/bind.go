@@ -1,19 +1,37 @@
 package telegram
 
 import (
+	"bytes"
 	"context"
+	"crypto/md5"
+	"encoding/hex"
 	"errors"
 	"io"
+	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
+	"time"
 
+	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/mime"
+	"github.com/kihamo/boggart/types"
 	"gopkg.in/telegram-bot-api.v4"
 )
 
+const (
+	paramFileName = "file"
+	paramMIME     = "mime"
+	paramRandom   = "_t"
+)
+
 type Bind struct {
+	di.ConfigBind
 	di.MetaBind
 	di.MQTTBind
 	di.LoggerBind
@@ -24,11 +42,37 @@ type Bind struct {
 	mutex  sync.RWMutex
 	client *tgbotapi.BotAPI
 	done   chan struct{}
+
+	fileServer http.Handler
 }
 
 func (b *Bind) Run() error {
 	b.client = nil
 	b.done = make(chan struct{})
+
+	if b.config.FileURLPrefix.String() == "" {
+		appConfig := b.Config().App()
+
+		u, err := url.Parse(appConfig.String(boggart.ConfigExternalURL))
+		if err == nil {
+			u.Path = "/" + boggart.ComponentName + "/widget/" + b.Meta().ID()
+
+			// access keys
+			if keysConfig := appConfig.String(boggart.ConfigAccessKeys); keysConfig != "" {
+				if keys := strings.Split(keysConfig, ","); len(keys) > 0 {
+					q := u.Query()
+					q.Add(boggart.AccessKeyName, keys[0])
+					u.RawQuery = q.Encode()
+				}
+			}
+
+			b.config.FileURLPrefix = types.URL{URL: *u}
+		} else {
+			b.config.UseURLForSendFile = false
+		}
+	}
+
+	b.fileServer = http.FileServer(http.Dir(b.config.FileDirectory))
 
 	return nil
 }
@@ -51,6 +95,15 @@ func (b *Bind) SendMessage(to, message string) error {
 }
 
 func (b *Bind) SendPhoto(to, name string, file io.Reader) error {
+	if b.config.UseURLForSendFile {
+		u, err := b.SaveFile(file)
+		if err != nil {
+			return err
+		}
+
+		return b.SendFileAsURL(to, name, u)
+	}
+
 	bot := b.bot()
 	if bot == nil {
 		return errors.New("bot is offline")
@@ -74,6 +127,15 @@ func (b *Bind) SendPhoto(to, name string, file io.Reader) error {
 }
 
 func (b *Bind) SendAudio(to, name string, file io.Reader) error {
+	if b.config.UseURLForSendFile {
+		u, err := b.SaveFile(file)
+		if err != nil {
+			return err
+		}
+
+		return b.SendFileAsURL(to, name, u)
+	}
+
 	bot := b.bot()
 	if bot == nil {
 		return errors.New("bot is offline")
@@ -97,6 +159,15 @@ func (b *Bind) SendAudio(to, name string, file io.Reader) error {
 }
 
 func (b *Bind) SendDocument(to, name string, file io.Reader) error {
+	if b.config.UseURLForSendFile {
+		u, err := b.SaveFile(file)
+		if err != nil {
+			return err
+		}
+
+		return b.SendFileAsURL(to, name, u)
+	}
+
 	bot := b.bot()
 	if bot == nil {
 		return errors.New("bot is offline")
@@ -138,6 +209,60 @@ func (b *Bind) SendFileAsURL(to, name, u string) error {
 	msg.ParseMode = "Markdown"
 
 	_, err = bot.Send(msg)
+
+	return err
+}
+
+func (b *Bind) SaveFile(reader io.Reader) (string, error) {
+	hash := md5.New()
+
+	file := bytes.NewBuffer(nil)
+	defer file.Reset()
+
+	multi := io.MultiWriter(hash, file)
+
+	if _, err := io.Copy(multi, reader); err != nil {
+		return "", err
+	}
+
+	id := hex.EncodeToString(hash.Sum(nil))
+	filePath := filepath.Join(b.config.FileDirectory, id)
+
+	f, err := os.Create(filePath)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	mimeType, restored, err := mime.TypeFromDataRestored(file)
+	if err != nil {
+		return "", err
+	}
+
+	_, err = io.Copy(f, restored)
+	if err != nil {
+		return "", err
+	}
+
+	u := b.config.FileURLPrefix.URL
+	q := u.Query()
+	q.Add(paramFileName, id)
+	q.Add(paramMIME, mimeType.String())
+	// телега кэширует урлы и второй раз не прийдет и механизм очистки не сработает,
+	// поэтому добавляем рандом
+	q.Add(paramRandom, strconv.FormatInt(time.Now().Unix(), 10))
+	u.RawQuery = q.Encode()
+
+	return u.String(), nil
+}
+
+func (b *Bind) RemoveFile(id string) error {
+	filePath := filepath.Join(b.config.FileDirectory, id)
+
+	_, err := os.Stat(filePath)
+	if err == nil {
+		return os.Remove(filePath)
+	}
 
 	return err
 }

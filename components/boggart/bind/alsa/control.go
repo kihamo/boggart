@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/kihamo/boggart/components/storage"
+	"github.com/kihamo/boggart/mime"
 )
 
 func (b *Bind) PlayFromURL(url string) error {
@@ -14,7 +14,7 @@ func (b *Bind) PlayFromURL(url string) error {
 		return ErrorAlreadyPlaying
 	}
 
-	mimeType, err := storage.MimeTypeFromURL(url)
+	mimeType, err := mime.TypeFromURL(url)
 	if err != nil {
 		return err
 	}
@@ -22,16 +22,16 @@ func (b *Bind) PlayFromURL(url string) error {
 	var format string
 
 	switch mimeType {
-	case storage.MIMETypeMPEG:
+	case mime.TypeMPEG:
 		format = AudioFormatMP3
 
-	case storage.MIMETypeOGG:
+	case mime.TypeOGG:
 		format = AudioFormatOGG
 
-	case storage.MIMETypeWAVE:
+	case mime.TypeWAVE:
 		format = AudioFormatWAV
 
-	case storage.MIMETypeFLAC:
+	case mime.TypeFLAC:
 		format = AudioFormatFLAC
 
 	default:
@@ -67,7 +67,7 @@ func (b *Bind) PlayFromReader(reader io.ReadCloser) error {
 		return ErrorAlreadyPlaying
 	}
 
-	mimeType, err := storage.MimeTypeFromData(reader)
+	mimeType, err := mime.TypeFromData(reader)
 	if err != nil {
 		return err
 	}
@@ -75,16 +75,16 @@ func (b *Bind) PlayFromReader(reader io.ReadCloser) error {
 	var format string
 
 	switch mimeType {
-	case storage.MIMETypeMPEG:
+	case mime.TypeMPEG:
 		format = AudioFormatMP3
 
-	case storage.MIMETypeOGG:
+	case mime.TypeOGG:
 		format = AudioFormatOGG
 
-	case storage.MIMETypeWAVE:
+	case mime.TypeWAVE:
 		format = AudioFormatWAV
 
-	case storage.MIMETypeFLAC:
+	case mime.TypeFLAC:
 		format = AudioFormatFLAC
 
 	default:
