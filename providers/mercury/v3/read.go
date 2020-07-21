@@ -66,7 +66,7 @@ func (m *MercuryV3) ReadParameter(param byte) (*Buffer, error) {
 	request := m.NewRequest(RequestCodeReadParameter).
 		WithParameterCode(param)
 
-	response, err := m.Request(request)
+	response, err := m.Invoke(request)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +142,7 @@ func (m *MercuryV3) AuxiliaryParameters(bwri uint8) (*Response, error) {
 		WithParameterCode(ParamCodeAuxiliaryParameters12).
 		WithParameterExtension(bwri)
 
-	response, err := m.Request(request)
+	response, err := m.Invoke(request)
 	if err != nil {
 		return nil, err
 	}
@@ -270,7 +270,7 @@ func (m *MercuryV3) ReadArray(arr array, mo *month, t tariff) (a1, a2, r3, r4 ui
 		WithParameterCode(code).
 		WithParameterExtension(uint8(t))
 
-	response, err = m.Request(request)
+	response, err = m.Invoke(request)
 	if err != nil {
 		return
 	}

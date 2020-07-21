@@ -24,13 +24,13 @@ func New(conn connection.Conn, opts ...Option) *MercuryV3 {
 	return m
 }
 
-func (m *MercuryV3) Request(request *Request) (response *Response, err error) {
+func (m *MercuryV3) Invoke(request *Request) (response *Response, err error) {
 	err = m.ChannelOpen(m.options.accessLevel, m.options.password)
 	if err != nil {
 		return response, err
 	}
 
-	response, err = m.RequestRaw(request)
+	response, err = m.InvokeRaw(request)
 	if err == nil {
 		err = m.ChannelClose()
 	}
@@ -38,7 +38,7 @@ func (m *MercuryV3) Request(request *Request) (response *Response, err error) {
 	return response, err
 }
 
-func (m *MercuryV3) RequestRaw(request *Request) (*Response, error) {
+func (m *MercuryV3) InvokeRaw(request *Request) (*Response, error) {
 	data, err := m.invoker.Invoke(request.Bytes())
 	if err != nil {
 		return nil, err
