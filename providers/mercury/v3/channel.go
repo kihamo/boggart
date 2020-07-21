@@ -2,52 +2,34 @@ package v3
 
 // 2.1. ЗАПРОС НА ТЕСТИРОВАНИЕ КАНАЛА СВЯЗИ
 func (m *MercuryV3) ChannelTest() error {
-	request := &Request{
-		Address: m.options.address,
-		Code:    RequestCodeChannelTest,
-	}
-
-	resp, err := m.RequestRaw(request)
-
+	response, err := m.RequestRaw(m.NewRequest(RequestCodeChannelTest))
 	if err != nil {
 		return err
 	}
 
-	return ResponseError(request, resp)
+	return response.GetError()
 }
 
 // 2.2. ЗАПРОСЫ НА ОТКРЫТИЕ/ЗАКРЫТИЕ КАНАЛА СВЯЗИ
 func (m *MercuryV3) ChannelOpen(level accessLevel, password LevelPassword) error {
-	l := byte(level)
+	request := m.NewRequest(RequestCodeChannelOpen).
+		WithParameterCode(byte(level)).
+		WithParameters(password.Bytes())
 
-	request := &Request{
-		Address:       m.options.address,
-		Code:          RequestCodeChannelOpen,
-		ParameterCode: &l,
-		Parameters:    password.Bytes(),
-	}
-
-	resp, err := m.RequestRaw(request)
-
+	response, err := m.RequestRaw(request)
 	if err != nil {
 		return err
 	}
 
-	return ResponseError(request, resp)
+	return response.GetError()
 }
 
 // 2.2. ЗАПРОСЫ НА ОТКРЫТИЕ/ЗАКРЫТИЕ КАНАЛА СВЯЗИ
 func (m *MercuryV3) ChannelClose() error {
-	request := &Request{
-		Address: m.options.address,
-		Code:    RequestCodeChannelClose,
-	}
-
-	resp, err := m.RequestRaw(request)
-
+	response, err := m.RequestRaw(m.NewRequest(RequestCodeChannelClose))
 	if err != nil {
 		return err
 	}
 
-	return ResponseError(request, resp)
+	return response.GetError()
 }

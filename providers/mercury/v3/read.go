@@ -1,6 +1,7 @@
 package v3
 
 import (
+	"errors"
 	"fmt"
 	"time"
 )
@@ -44,12 +45,12 @@ const (
 	Tariff3   tariff = 0x3
 	Tariff4   tariff = 0x4
 
-	AuxiliaryPower        int64 = 0x0
-	AuxiliaryVoltage      int64 = 0x1
-	AuxiliaryAmperage     int64 = 0x2
-	AuxiliaryPowerFactors int64 = 0x3
-	AuxiliaryFrequency    int64 = 0x4
-	AuxiliaryPhasesAngle  int64 = 0x5
+	AuxiliaryPower        uint8 = 0x0
+	AuxiliaryVoltage      uint8 = 0x1
+	AuxiliaryAmperage     uint8 = 0x2
+	AuxiliaryPowerFactors uint8 = 0x3
+	AuxiliaryFrequency    uint8 = 0x4
+	AuxiliaryPhasesAngle  uint8 = 0x5
 
 	PowerNumberP powerNumber = 0x0
 	PowerNumberQ powerNumber = 0x1
@@ -61,121 +62,110 @@ const (
 	PhaseNumber3   phase = 0x3
 )
 
-func (m *MercuryV3) ReadParameter(param byte) ([]byte, error) {
-	resp, err := m.Request(&Request{
-		Address:       m.options.address,
-		Code:          RequestCodeReadParameter,
-		ParameterCode: &[]byte{param}[0],
-	})
+func (m *MercuryV3) ReadParameter(param byte) (*Buffer, error) {
+	request := m.NewRequest(RequestCodeReadParameter).
+		WithParameterCode(param)
 
+	response, err := m.Request(request)
 	if err != nil {
 		return nil, err
 	}
 
-	return resp.Payload, err
+	return response.PayloadAsBuffer(), err
 }
 
 // 2.5.18. ЧТЕНИЕ СЕРИЙНОГО НОМЕРА СЧЕТЧИКА И ДАТЫ ВЫПУСКА.
 func (m *MercuryV3) SerialNumberAndBuildDate() (serialNumber string, buildDate time.Time, err error) {
-	resp, err := m.ReadParameter(ParamCodeSerialNumberAndBuildDate)
-
+	value, err := m.ReadParameter(ParamCodeSerialNumberAndBuildDate)
 	if err != nil {
 		return
 	}
 
-	serialNumber = ParseSerialNumber(resp[0:4])
-	buildDate = ParseBuildDate(resp[4:7])
+	serialNumber = value.ReadSerialNumber()
+	buildDate = value.ReadBuildDate()
 
 	return
 }
 
 // 2.5.19. УСКОРЕННЫЙ РЕЖИМ ЧТЕНИЯ ИНДИВИДУАЛЬНЫХ ПАРАМЕТРОВ ПРИБОРА.
 func (m *MercuryV3) ForceReadParameters() (serialNumber string, buildDate time.Time, firmwareVersion string, t *Type, err error) {
-	resp, err := m.ReadParameter(ParamCodeForceReadParameters)
-
+	value, err := m.ReadParameter(ParamCodeForceReadParameters)
 	if err != nil {
 		return
 	}
 
-	serialNumber = ParseSerialNumber(resp[0:4])
-	buildDate = ParseBuildDate(resp[4:7])
-	firmwareVersion = ParseFirmwareVersion(resp[7:10])
-	t = ParseType(resp[9:16])
+	serialNumber = value.ReadSerialNumber()
+	buildDate = value.ReadBuildDate()
+	firmwareVersion = value.ReadFirmwareVersion()
+	// TODO: t = ParseType(value.Next(6))
 
 	return
 }
 
 // 2.5.20. ЧТЕНИЕ КОЭФФИЦИЕНТА ТРАНСФОРМАЦИИ СЧЁТЧИКА.
 func (m *MercuryV3) TransformationCoefficient() (uint8, uint8, error) {
-	resp, err := m.ReadParameter(ParamCodeTransformationCoefficient)
-
+	value, err := m.ReadParameter(ParamCodeTransformationCoefficient)
 	if err != nil {
 		return 0, 0, err
 	}
 
-	return resp[0]*10 + resp[1], resp[2]*10 + resp[3], nil
+	return value.ReadUint8()*10 + value.ReadUint8(), value.ReadUint8()*10 + value.ReadUint8(), nil
 }
 
 // 2.5.21. ЧТЕНИЕ ВЕРСИИ ПО СЧЁТЧИКА.
 func (m *MercuryV3) FirmwareVersion() (string, error) {
-	resp, err := m.ReadParameter(ParamCodeVersion)
-
+	value, err := m.ReadParameter(ParamCodeVersion)
 	if err != nil {
 		return "", err
 	}
 
-	return ParseFirmwareVersion(resp), nil
+	return value.ReadFirmwareVersion(), nil
 }
 
 // 2.5.23. ЧТЕНИЕ СЕТЕВОГО АДРЕСА.
 func (m *MercuryV3) Address() (int64, error) {
-	resp, err := m.ReadParameter(ParamCodeAddress)
-
+	value, err := m.ReadParameter(ParamCodeAddress)
 	if err != nil {
 		return 0, err
 	}
 
-	if err := PayloadError(resp); err != nil {
-		return 0, err
+	if value.ReadUint8() != ResponseCodeOK {
+		return 0, errors.New("first byte not equal 0")
 	}
 
-	return int64(resp[1]), nil
+	return int64(value.ReadUint8()), nil
 }
 
 // 2.5.32. ЧТЕНИЕ ВСПОМОГАТЕЛЬНЫХ ПАРАМЕТРОВ.
-func (m *MercuryV3) AuxiliaryParameters(bwri int64) ([]byte, error) {
-	request := &Request{
-		Address:            m.options.address,
-		Code:               RequestCodeReadParameter,
-		ParameterCode:      &[]byte{ParamCodeAuxiliaryParameters12}[0],
-		ParameterExtension: &[]byte{byte(bwri)}[0],
-	}
+func (m *MercuryV3) AuxiliaryParameters(bwri uint8) (*Response, error) {
+	request := m.NewRequest(RequestCodeReadParameter).
+		WithParameterCode(ParamCodeAuxiliaryParameters12).
+		WithParameterExtension(bwri)
 
-	resp, err := m.Request(request)
-
+	response, err := m.Request(request)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := ResponseError(request, resp); err != nil {
+	if err = response.GetError(); err != nil {
 		return nil, err
 	}
 
-	return resp.Payload, nil
+	return response, nil
 }
 
 // 2.5.32.1 Ответ прибора на запрос чтения мощности.
 func (m *MercuryV3) Power(number powerNumber) (sum, phase1, phase2, phase3 float64, err error) {
-	var resp []byte
+	var response *Response
 
-	bwri := AuxiliaryPower<<4 | int64(number)<<2 | int64(PhaseNumberAll)
-	resp, err = m.AuxiliaryParameters(bwri)
-
+	response, err = m.AuxiliaryParameters(AuxiliaryPower<<4 | uint8(number)<<2 | uint8(PhaseNumberAll))
 	if err == nil {
-		sum = float64(ParseValue3Bytes(resp[:3])) / 100
-		phase1 = float64(ParseValue3Bytes(resp[3:6])) / 100
-		phase2 = float64(ParseValue3Bytes(resp[6:9])) / 100
-		phase3 = float64(ParseValue3Bytes(resp[9:12])) / 100
+		dataOut := response.PayloadAsBuffer()
+
+		sum = float64(dataOut.ReadUint32By3Byte()) / 100
+		phase1 = float64(dataOut.ReadUint32By3Byte()) / 100
+		phase2 = float64(dataOut.ReadUint32By3Byte()) / 100
+		phase3 = float64(dataOut.ReadUint32By3Byte()) / 100
 	}
 
 	return
@@ -183,45 +173,45 @@ func (m *MercuryV3) Power(number powerNumber) (sum, phase1, phase2, phase3 float
 
 // 2.5.32.2 Ответ прибора на запрос чтения фазного и линейного напряжения, тока и углов между фазными напряжениями.
 func (m *MercuryV3) Voltage() (phase1, phase2, phase3 float64, err error) {
-	var resp []byte
+	var response *Response
 
-	bwri := AuxiliaryVoltage<<4 | 0x1
-	resp, err = m.AuxiliaryParameters(bwri)
-
+	response, err = m.AuxiliaryParameters(AuxiliaryVoltage<<4 | 0x1)
 	if err == nil {
-		phase1 = float64(ParseValue3Bytes(resp[:3])) / 100
-		phase2 = float64(ParseValue3Bytes(resp[3:6])) / 100
-		phase3 = float64(ParseValue3Bytes(resp[6:9])) / 100
+		dataOut := response.PayloadAsBuffer()
+
+		phase1 = float64(dataOut.ReadUint32By3Byte()) / 100
+		phase2 = float64(dataOut.ReadUint32By3Byte()) / 100
+		phase3 = float64(dataOut.ReadUint32By3Byte()) / 100
 	}
 
 	return
 }
 
 func (m *MercuryV3) Amperage() (phase1, phase2, phase3 float64, err error) {
-	var resp []byte
+	var response *Response
 
-	bwri := AuxiliaryAmperage<<4 | 0x1
-	resp, err = m.AuxiliaryParameters(bwri)
-
+	response, err = m.AuxiliaryParameters(AuxiliaryAmperage<<4 | 0x1)
 	if err == nil {
-		phase1 = float64(ParseValue3Bytes(resp[:3])) / 1000
-		phase2 = float64(ParseValue3Bytes(resp[3:6])) / 1000
-		phase3 = float64(ParseValue3Bytes(resp[6:9])) / 1000
+		dataOut := response.PayloadAsBuffer()
+
+		phase1 = float64(dataOut.ReadUint32By3Byte()) / 1000
+		phase2 = float64(dataOut.ReadUint32By3Byte()) / 1000
+		phase3 = float64(dataOut.ReadUint32By3Byte()) / 1000
 	}
 
 	return
 }
 
 func (m *MercuryV3) PhasesAngle() (phase1, phase2, phase3 float64, err error) {
-	var resp []byte
+	var response *Response
 
-	bwri := AuxiliaryPhasesAngle<<4 | 0x1
-	resp, err = m.AuxiliaryParameters(bwri)
-
+	response, err = m.AuxiliaryParameters(AuxiliaryPhasesAngle<<4 | 0x1)
 	if err == nil {
-		phase1 = float64(ParseValue3Bytes(resp[:3])) / 1000
-		phase2 = float64(ParseValue3Bytes(resp[3:6])) / 1000
-		phase3 = float64(ParseValue3Bytes(resp[6:9])) / 1000
+		dataOut := response.PayloadAsBuffer()
+
+		phase1 = float64(dataOut.ReadUint32By3Byte()) / 1000
+		phase2 = float64(dataOut.ReadUint32By3Byte()) / 1000
+		phase3 = float64(dataOut.ReadUint32By3Byte()) / 1000
 	}
 
 	return
@@ -229,16 +219,16 @@ func (m *MercuryV3) PhasesAngle() (phase1, phase2, phase3 float64, err error) {
 
 // 2.5.32.3 Ответ прибора на запрос чтения коэффициентов мощности.
 func (m *MercuryV3) PowerFactors() (sum, phase1, phase2, phase3 float64, err error) {
-	var resp []byte
+	var response *Response
 
-	bwri := AuxiliaryPowerFactors<<4 | int64(PhaseNumberAll)
-	resp, err = m.AuxiliaryParameters(bwri)
-
+	response, err = m.AuxiliaryParameters(AuxiliaryPowerFactors<<4 | uint8(PhaseNumberAll))
 	if err == nil {
-		sum = float64(ParseValue3Bytes(resp[:3])) / 1000
-		phase1 = float64(ParseValue3Bytes(resp[3:6])) / 1000
-		phase2 = float64(ParseValue3Bytes(resp[6:9])) / 1000
-		phase3 = float64(ParseValue3Bytes(resp[9:12])) / 1000
+		dataOut := response.PayloadAsBuffer()
+
+		sum = float64(dataOut.ReadUint32By3Byte()) / 1000
+		phase1 = float64(dataOut.ReadUint32By3Byte()) / 1000
+		phase2 = float64(dataOut.ReadUint32By3Byte()) / 1000
+		phase3 = float64(dataOut.ReadUint32By3Byte()) / 1000
 	}
 
 	return
@@ -246,66 +236,60 @@ func (m *MercuryV3) PowerFactors() (sum, phase1, phase2, phase3 float64, err err
 
 // 2.5.32.4 Ответ прибора на запрос чтения частоты (запрос 11h, 14h, 16h).
 func (m *MercuryV3) Frequency() (float64, error) {
-	bwri := AuxiliaryFrequency << 4
-	resp, err := m.AuxiliaryParameters(bwri)
-
+	response, err := m.AuxiliaryParameters(AuxiliaryFrequency << 4)
 	if err != nil {
 		return -1, err
 	}
 
-	return float64(ParseValue3Bytes(resp) / 100), nil
+	dataOut := response.PayloadAsBuffer()
+
+	return float64(dataOut.ReadUint32By3Byte() / 100), nil
 }
 
 // 2.5.33. ЧТЕНИЕ ВАРИАНТА ИСПОЛНЕНИЯ.
 func (m *MercuryV3) Type() (*Type, error) {
-	resp, err := m.ReadParameter(ParamCodeType)
-
+	_, err := m.ReadParameter(ParamCodeType)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := PayloadError(resp); err != nil {
-		return nil, err
-	}
-
-	return ParseType(resp), nil
+	// TODO:
+	return nil, nil
 }
 
-func (m *MercuryV3) ReadArray(arr array, mo *month, t tariff) (a1, a2, r3, r4 uint64, err error) {
-	code := int(arr)
+func (m *MercuryV3) ReadArray(arr array, mo *month, t tariff) (a1, a2, r3, r4 uint32, err error) {
+	code := uint8(arr)
 
 	if mo != nil {
-		code |= int(*mo)
+		code |= uint8(*mo)
 	}
 
-	var resp *Response
+	var response *Response
 
-	request := &Request{
-		Address:            m.options.address,
-		Code:               RequestCodeReadArray,
-		ParameterCode:      &[]byte{byte(code)}[0],
-		ParameterExtension: &[]byte{byte(t)}[0],
-	}
+	request := m.NewRequest(RequestCodeReadArray).
+		WithParameterCode(code).
+		WithParameterExtension(uint8(t))
 
-	resp, err = m.Request(request)
-
+	response, err = m.Request(request)
 	if err != nil {
 		return
 	}
 
+	dataOut := response.PayloadAsBuffer()
+
 	// check length of response
-	switch v := len(resp.Payload); {
+	switch v := dataOut.Len(); {
 	case v == 1:
-		if err = ResponseError(request, resp); err == nil {
-			err = fmt.Errorf("response payload length must 12 or 16 bytes not %d", len(resp.Payload))
+		if err = response.GetError(); err == nil {
+			err = fmt.Errorf("response payload length must 12 or 16 bytes not %d", dataOut.Len())
 		}
 
 		return
 	case arr == ArrayActiveEnergy && v != 12:
-		err = fmt.Errorf("response payload length must 12 bytes not %d", len(resp.Payload))
+		err = fmt.Errorf("response payload length must 12 bytes not %d", dataOut.Len())
 		return
 	case v != 16:
-		err = fmt.Errorf("response payload length must 16 bytes not %d", len(resp.Payload))
+		err = fmt.Errorf("response payload length must 16 bytes not %d", dataOut.Len())
 		return
 	}
 
@@ -325,12 +309,12 @@ func (m *MercuryV3) ReadArray(arr array, mo *month, t tariff) (a1, a2, r3, r4 ui
 	//   > R2
 	//   > R3
 	//   > R4
-	a1 = ParseValue4Bytes(resp.Payload[0:4])
-	a2 = ParseValue4Bytes(resp.Payload[4:8])
-	r3 = ParseValue4Bytes(resp.Payload[8:12])
+	a1 = dataOut.ReadUint32()
+	a2 = dataOut.ReadUint32()
+	r3 = dataOut.ReadUint32()
 
-	if len(resp.Payload) > 12 {
-		r4 = ParseValue4Bytes(resp.Payload[12:16])
+	if dataOut.Len() > 12 {
+		r4 = dataOut.ReadUint32()
 	}
 
 	return a1, a2, r3, r4, err

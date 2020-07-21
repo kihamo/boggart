@@ -48,7 +48,7 @@ func (m *MercuryV3) RequestRaw(request *Request) (*Response, error) {
 }
 
 func (m *MercuryV3) Raw() error {
-	bwri := int64(0x8<<4) | int64(PhaseNumber1)
+	bwri := uint8(0x8<<4) | uint8(PhaseNumber1)
 	resp, err := m.AuxiliaryParameters(bwri)
 
 	if err != nil {
@@ -58,4 +58,8 @@ func (m *MercuryV3) Raw() error {
 	fmt.Println(resp)
 
 	return nil
+}
+
+func (m *MercuryV3) NewRequest(code requestCode) *Request {
+	return NewRequest(m.options.address, code)
 }

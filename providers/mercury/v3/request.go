@@ -41,26 +41,48 @@ const (
 )
 
 type Request struct {
-	Address            byte
-	Code               requestCode
-	ParameterCode      *byte
-	ParameterExtension *byte
-	Parameters         []byte
+	address            byte
+	code               requestCode
+	parameterCode      *byte
+	parameterExtension *byte
+	parameters         []byte
+}
+
+func NewRequest(address byte, code requestCode) *Request {
+	return &Request{
+		address: address,
+		code:    code,
+	}
+}
+
+func (r *Request) WithParameterCode(code uint8) *Request {
+	r.parameterCode = &[]byte{byte(code)}[0]
+	return r
+}
+
+func (r *Request) WithParameterExtension(ext uint8) *Request {
+	r.parameterExtension = &[]byte{byte(ext)}[0]
+	return r
+}
+
+func (r *Request) WithParameters(params []byte) *Request {
+	r.parameters = params
+	return r
 }
 
 func (r *Request) Bytes() []byte {
-	packet := append([]byte{r.Address}, byte(r.Code))
+	packet := append([]byte{r.address}, byte(r.code))
 
-	if r.ParameterCode != nil {
-		packet = append(packet, *r.ParameterCode)
+	if r.parameterCode != nil {
+		packet = append(packet, *r.parameterCode)
 	}
 
-	if r.ParameterExtension != nil {
-		packet = append(packet, *r.ParameterExtension)
+	if r.parameterExtension != nil {
+		packet = append(packet, *r.parameterExtension)
 	}
 
-	if len(r.Parameters) > 0 {
-		packet = append(packet, r.Parameters...)
+	if len(r.parameters) > 0 {
+		packet = append(packet, r.parameters...)
 	}
 
 	packet = append(packet, serial.GenerateCRC16(packet)...)

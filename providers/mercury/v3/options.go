@@ -1,5 +1,9 @@
 package v3
 
+import (
+	"strconv"
+)
+
 type options struct {
 	address     byte
 	password    LevelPassword
@@ -40,7 +44,24 @@ func WithAddress(address byte) Option {
 
 func WithAddressAsString(address string) Option {
 	return newFuncOption(func(o *options) {
-		o.address = ConvertSerialNumber(address)
+		// Отделите три последние цифры серийного номера, это будет число N.
+		number, _ := strconv.ParseInt(address[len(address)-3:], 10, 0)
+
+		// Если N>=240 адресом являются две последние цифры серийного номера.
+		if number >= 240 {
+			number, _ = strconv.ParseInt(address[len(address)-2:], 10, 0)
+
+			o.address = byte(number)
+			return
+		}
+
+		// Если N<240 адресом являются три последние цифры.
+		if number < 240 {
+			o.address = byte(number)
+			return
+		}
+
+		o.address = 1
 	})
 }
 

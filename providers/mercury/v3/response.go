@@ -3,6 +3,7 @@ package v3
 import (
 	"encoding/hex"
 	"errors"
+	"sync"
 )
 
 const (
@@ -15,9 +16,11 @@ const (
 )
 
 type Response struct {
-	Address byte
-	Payload []byte
-	CRC     []byte
+	address byte
+	payload []byte
+	crc     []byte
+
+	lock sync.RWMutex
 }
 
 func ParseResponse(data []byte) (*Response, error) {
@@ -26,19 +29,58 @@ func ParseResponse(data []byte) (*Response, error) {
 	}
 
 	return &Response{
-		Address: data[0],
-		Payload: data[1 : len(data)-2],
-		CRC:     data[len(data)-2:],
+		address: data[0],
+		payload: data[1 : len(data)-2],
+		crc:     data[len(data)-2:],
 	}, nil
 }
 
 func (r *Response) Bytes() []byte {
-	packet := append([]byte{r.Address}, r.Payload...)
-	packet = append(packet, r.CRC...)
+	packet := append([]byte{r.Address()}, r.Payload()...)
+	packet = append(packet, r.CRC()...)
 
 	return packet
 }
 
+func (r *Response) Address() byte {
+	return r.address
+}
+
+func (r *Response) Payload() []byte {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
+
+	return append([]byte(nil), r.payload...)
+}
+
+func (r *Response) CRC() []byte {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
+
+	return append([]byte(nil), r.crc...)
+}
+
+func (r *Response) PayloadAsBuffer() *Buffer {
+	return NewBuffer(r.Payload())
+}
+
 func (r *Response) String() string {
 	return hex.EncodeToString(r.Bytes())
+}
+
+func (r *Response) GetError() error {
+	switch r.Payload()[0] {
+	case ResponseCodeBadRequest:
+		return errors.New("bad request")
+	case ResponseCodeInternalError:
+		return errors.New("internal error")
+	case ResponseCodeAccessDenied:
+		return errors.New("access denied")
+	case ResponseCodeTimeCorrectFiled:
+		return errors.New("correct time failed")
+	case ResponseCodeChannelClosed:
+		return errors.New("channel is closed")
+	}
+
+	return nil
 }
