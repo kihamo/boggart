@@ -162,10 +162,17 @@ func (m *MercuryV3) Power(number powerNumber) (sum, phase1, phase2, phase3 float
 	if err == nil {
 		dataOut := response.PayloadAsBuffer()
 
-		sum = float64(dataOut.ReadUint32By3Byte()) / 100
-		phase1 = float64(dataOut.ReadUint32By3Byte()) / 100
-		phase2 = float64(dataOut.ReadUint32By3Byte()) / 100
-		phase3 = float64(dataOut.ReadUint32By3Byte()) / 100
+		dataOut.ReadByte() // направление мощности
+		sum = float64(dataOut.ReadUint16()) / 100
+
+		dataOut.ReadByte() // направление мощности
+		phase1 = float64(dataOut.ReadUint16()) / 100
+
+		dataOut.ReadByte() // направление мощности
+		phase2 = float64(dataOut.ReadUint16()) / 100
+
+		dataOut.ReadByte() // направление мощности
+		phase3 = float64(dataOut.ReadUint16()) / 100
 	}
 
 	return
