@@ -1,283 +1,295 @@
 package v1
 
 import (
-	"bytes"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"strconv"
 	"time"
 )
 
-func (m *MercuryV1) AddressGroup() ([]byte, error) {
-	response, err := m.Request(&Request{
-		Command: RequestCommandReadAddressGroup,
-	})
+/*
+	Чтение группового адреса счетчика
 
-	if err != nil {
-		return nil, err
+	CMD: 20h
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-GADDR-CRC
+*/
+func (m *MercuryV1) AddressGroup() (address []byte, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadAddressGroup))
+	if err == nil {
+		address = response.PayloadAsBuffer().Next(4)
 	}
 
-	return response.Payload, nil
+	return address, nil
 }
 
+/*
+	Чтение внутренних часов и календаря счетчика
+
+	CMD: 21h
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-timedate-CRC
+*/
 func (m *MercuryV1) Datetime() (date time.Time, err error) {
-	response, err := m.Request(&Request{
-		Command: RequestCommandReadDatetime,
-	})
-
+	response, err := m.Invoke(NewRequest(RequestCommandReadDatetime))
 	if err == nil {
-		date = ParseDatetime(response.Payload, m.options.location)
+		date = response.PayloadAsBuffer().ReadTimeDateWithDayOfWeek(m.options.location)
 	}
 
-	return
+	return date, err
 }
 
-func (m *MercuryV1) SerialNumber() (sn int64, err error) {
-	response, err := m.Request(&Request{
-		Command: RequestCommandReadSerialNumber,
-	})
+/*
+	Чтение лимита мощности
 
-	if err != nil {
-		sn, err = strconv.ParseInt(hex.EncodeToString(response.Payload), 16, 0)
-	}
-
-	return
-}
-
-func (m *MercuryV1) WordType() error {
-	response, err := m.Request(&Request{
-		Command: RequestCommandReadWordType,
-	})
-	if err != nil {
-		return err
-	}
-
-	// TODO:
-	_ = response
-
-	return nil
-}
-
-func (m *MercuryV1) MakeDate() (date time.Time, err error) {
-	response, err := m.Request(&Request{
-		Command: RequestCommandReadMakeDate,
-	})
-
+	CMD: 22h
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-mpower-CRC
+*/
+func (m *MercuryV1) PowerMaximum() (maximum uint64, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadPowerMaximum))
 	if err == nil {
-		date = ParseDate(response.Payload, m.options.location)
+		maximum = response.PayloadAsBuffer().ReadBCD(2) * 10
 	}
 
-	return
+	return maximum, err
 }
 
+/*
+	Чтение лимита энергии за месяц
+
+	CMD: 23h
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-menerg-CRC
+*/
+func (m *MercuryV1) EnergyMaximum() (maximum uint64, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadEnergyMaximum))
+	if err == nil {
+		maximum = response.PayloadAsBuffer().ReadBCD(2) * 1000
+	}
+
+	return maximum, err
+}
+
+/*
+	Чтение флага сезонного времени
+
+	CMD: 24h
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-flag-CRC
+*/
+func (m *MercuryV1) DaylightSavingTime() (flag bool, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadDaylightSavingTime))
+	if err == nil {
+		flag = response.PayloadAsBuffer().ReadBool()
+	}
+
+	return flag, err
+}
+
+/*
+	Чтение величины коррекции времени
+
+	CMD: 25h
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-timecor-CRC
+*/
+func (m *MercuryV1) TimeCorrection() (duration time.Duration, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadTimeCorrection))
+	if err == nil {
+		duration = time.Duration(response.PayloadAsBuffer().ReadUint8())
+	}
+
+	// Коррекция времени в счетчике Меркурий 200 возможна в диапазоне ±30 минут в течение года.
+	// Коррекция времени в счетчике Меркурий 230 возможна в диапазоне ±30 секунд в течении суток.
+
+	return duration, err
+}
+
+/*
+	Чтение текущей мощности в нагрузке
+
+	CMD: 26h
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-m-CRC
+*/
+func (m *MercuryV1) PowerCurrent() (power uint64, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadPowerCurrent))
+	if err == nil {
+		power = response.PayloadAsBuffer().ReadBCD(2) * 10
+	}
+
+	return power, err
+}
+
+/*
+	Чтение содержимого тарифных аккумуляторов активной энергии
+
+	CMD: 27h
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-count*4-CRC
+*/
+func (m *MercuryV1) PowerCounters() (t1, t2, t3, t4 uint64, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadPowerCounters))
+	if err == nil {
+		dataOut := response.PayloadAsBuffer()
+
+		t1 = dataOut.ReadCount()
+		t2 = dataOut.ReadCount()
+		t3 = dataOut.ReadCount()
+		t4 = dataOut.ReadCount()
+	}
+
+	return t1, t2, t3, t4, err
+}
+
+/*
+	Чтение содержимого тарифных аккумуляторов активной энергии
+
+	CMD: 28h
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-ver-DataVer-CRC
+*/
 func (m *MercuryV1) Version() (version string, date time.Time, err error) {
-	response, err := m.Request(&Request{
-		Command: RequestCommandReadVersion,
-	})
-
+	response, err := m.Invoke(NewRequest(RequestCommandReadVersion))
 	if err == nil {
-		version = fmt.Sprintf("%d.%d.%d", ParseInt(response.Payload[0]), ParseInt(response.Payload[1]), ParseInt(response.Payload[2]))
-		date = ParseDate(response.Payload[3:], m.options.location)
+		dataOut := response.PayloadAsBuffer()
+
+		// FIXME: [1 0 0 6 4 21]
+		// по доке 2 байта на версию 4 на дату, но такое впечатление что 3 и 3
+
+		version = fmt.Sprintf("%d.%d.%d", dataOut.ReadUint8(), dataOut.ReadUint8(), dataOut.ReadUint8())
+		date = dataOut.ReadDate()
 	}
 
-	return
+	return version, date, err
 }
 
-// PowerMaximum return maximum of power in W
-func (m *MercuryV1) PowerMaximum() (maximum int64, err error) {
-	response, err := m.Request(&Request{
-		Command: RequestCommandReadPowerMaximum,
-	})
+/*
+	Чтение напряжения на литиевой батарее
 
-	if err == nil {
-		maximum = ParseInt(response.Payload...) * 10
-	}
-
-	return
-}
-
-// EnergyMaximum return maximum of energy in W/h
-func (m *MercuryV1) EnergyMaximum() (maximum int64, err error) {
-	response, err := m.Request(&Request{
-		Command: RequestCommandReadEnergyMaximum,
-	})
-
-	if err == nil {
-		maximum = ParseInt(response.Payload...) * 1000
-	}
-
-	return
-}
-
-// BatteryVoltage return voltage of battery in V
+	CMD: 29h
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-VVVV-CRC
+*/
 func (m *MercuryV1) BatteryVoltage() (voltage float64, err error) {
-	response, err := m.Request(&Request{
-		Command: RequestCommandReadBatteryVoltage,
-	})
-
+	response, err := m.Invoke(NewRequest(RequestCommandReadBatteryVoltage))
 	if err == nil {
-		voltage = float64(ParseInt(response.Payload...)) / 100
+		voltage = float64(response.PayloadAsBuffer().ReadBCD(4)) / 100
 	}
 
-	return
+	return voltage, err
 }
 
-func (m *MercuryV1) DisplayMode() (t1, t2, t3, t4, amount, power, t, date bool, err error) {
-	r, err := m.Request(&Request{
-		Command: RequestCommandReadDisplayMode,
-	})
+/*
+	Чтение режима индикации
 
+	CMD: 2Ah
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-displ-CRC
+*/
+func (m *MercuryV1) DisplayMode() (t1, t2, t3, t4, amount, power, t, date bool, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadDisplayMode))
 	if err == nil {
-		bit := int(r.Payload[0])
+		bit := response.PayloadAsBuffer().ReadUint8()
 		t1, t2, t3, t4, amount, power, t, date = bit&displayModeTariff1 != 0, bit&displayModeTariff2 != 0,
 			bit&displayModeTariff3 != 0, bit&displayModeTariff4 != 0,
 			bit&displayModeAmount != 0, bit&displayModePower != 0,
 			bit&displayModeTime != 0, bit&displayModeDate != 0
 	}
 
-	return
+	return t1, t2, t3, t4, amount, power, t, date, err
 }
 
-// PowerCounters returns value of T1, T2, T3 and T4 in W/h
-func (m *MercuryV1) PowerCounters() (t1, t2, t3, t4 uint64, err error) {
-	r, err := m.Request(&Request{
-		Command: RequestCommandReadPowerCounters,
-	})
+/*
+	Чтение времени последнего отключения напряжения
 
-	if err == nil {
-		values := make([]uint64, 4)
-		for i := 0; i < len(r.Payload); i += 4 {
-			values[i/4] = ParseUint(r.Payload[i:i+4]...) * 10
-		}
-
-		t1, t2, t3, t4 = values[0], values[1], values[2], values[3]
-	}
-
-	return
-}
-
-// PowerUser return power in W
-func (m *MercuryV1) PowerCurrent() (power uint64, err error) {
-	r, err := m.Request(&Request{
-		Command: RequestCommandReadPowerCurrent,
-	})
-
-	if err == nil {
-		power = ParseUint(r.Payload...)
-	}
-
-	return
-}
-
-func (m *MercuryV1) DaylightSavingTime() (flag bool, err error) {
-	r, err := m.Request(&Request{
-		Command: RequestCommandReadDaylightSavingTime,
-	})
-
-	if err == nil {
-		flag = !bytes.Equal(r.Payload, []byte{0})
-	}
-
-	return
-}
-
-func (m *MercuryV1) TimeCorrection() (duration uint64, err error) {
-	r, err := m.Request(&Request{
-		Command: RequestCommandReadTimeCorrection,
-	})
-
-	if err == nil {
-		duration = uint64(r.Payload[0])
-	}
-
-	// Коррекция времени в счетчике Меркурий 200 возможна в диапазоне ±30 минут в течение года.
-	// Коррекция времени в счетчике Меркурий 230 возможна в диапазоне ±30 секунд в течении суток.
-
-	return
-}
-
-// ParamsCurrent returns current value of voltage in V, amperage in A, power in W
-func (m *MercuryV1) ParamsCurrent() (voltage uint64, amperage float64, power uint64, err error) {
-	r, err := m.Request(&Request{
-		Command: RequestCommandReadParamsCurrent,
-	})
-
-	if err == nil {
-		voltage = ParseUint(r.Payload[0:2]...) / 10
-		amperage = ParseFloat(r.Payload[2:4]...) / 100
-		power = ParseUint(r.Payload[4:7]...)
-	}
-
-	return
-}
-
+	CMD: 2Bh
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-timedate-CRC
+*/
 func (m *MercuryV1) LastPowerOffDatetime() (date time.Time, err error) {
-	r, err := m.Request(&Request{
-		Command: RequestCommandReadLastPowerOffDatetime,
-	})
-
+	response, err := m.Invoke(NewRequest(RequestCommandReadLastPowerOffDatetime))
 	if err == nil {
-		date = ParseDatetime(r.Payload, m.options.location)
+		date = response.PayloadAsBuffer().ReadTimeDateWithDayOfWeek(m.options.location)
 	}
 
-	return
+	return date, err
 }
 
+/*
+	Чтение времени последнего включения напряжения
+
+	CMD: 2Ch
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-timedate-CRC
+*/
 func (m *MercuryV1) LastPowerOnDatetime() (date time.Time, err error) {
-	r, err := m.Request(&Request{
-		Command: RequestCommandReadLastPowerOnDatetime,
-	})
-
+	response, err := m.Invoke(NewRequest(RequestCommandReadLastPowerOnDatetime))
 	if err == nil {
-		date = ParseDatetime(r.Payload, m.options.location)
+		date = response.PayloadAsBuffer().ReadTimeDateWithDayOfWeek(m.options.location)
 	}
 
-	return
+	return date, err
 }
 
-func (m *MercuryV1) LastCloseCap() (date time.Time, err error) {
-	r, err := m.Request(&Request{
-		Command: RequestCommandReadLastCloseCap,
-	})
+/*
+	Чтение серийного номера
 
+	CMD: 2Fh
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-serial-CRC
+*/
+func (m *MercuryV1) SerialNumber() (sn []byte, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadSerialNumber))
 	if err == nil {
-		date = ParseDatetime(r.Payload, m.options.location)
+		sn = response.PayloadAsBuffer().Next(4)
 	}
 
-	return
+	// TODO: конвертировать в что-то человекочитаемое
+
+	return sn, err
 }
 
-func (m *MercuryV1) TariffCount() (count uint64, err error) {
-	r, err := m.Request(&Request{
-		Command: RequestCommandReadTariffCount,
-	})
+/*
+	Чтение количества действующих тарифов
 
+	CMD: 2Eh
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-tarif-CRC
+*/
+func (m *MercuryV1) TariffCount() (count uint8, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadTariffCount))
 	if err == nil {
-		count = uint64(r.Payload[0])
+		count = response.PayloadAsBuffer().ReadUint8()
 	}
 
-	return
+	return count, err
 }
 
+/*
+	Чтение таблицы праздничных дней
+
+	CMD: 30h
+	Request: ADDR-CMD-ii1-CRC
+	Response: ADDR-CMD-(dd-mon)*8-CRC
+*/
 func (m *MercuryV1) Holidays() ([]time.Time, error) {
-	response1, err := m.Request(&Request{
-		Command: RequestCommandReadHolidays,
-		Payload: []byte{0},
-	})
+	request := NewRequest(RequestCommandReadHolidays).
+		WithPayload([]byte{0})
+
+	response1, err := m.Invoke(request)
 	if err != nil {
 		return nil, err
 	}
 
-	response2, err := m.Request(&Request{
-		Command: RequestCommandReadHolidays,
-		Payload: []byte{1},
-	})
+	request = request.WithPayload([]byte{1})
+	response2, err := m.Invoke(request)
 	if err != nil {
 		return nil, err
 	}
 
-	response := append(response1.Payload, response2.Payload...)
+	response := append(response1.Payload(), response2.Payload()...)
 	days := make([]time.Time, 0)
 	year := time.Now().Year()
 
@@ -292,70 +304,28 @@ func (m *MercuryV1) Holidays() ([]time.Time, error) {
 	return days, nil
 }
 
-func (m *MercuryV1) MaximumPower() (power int64, date time.Time, powerReset int64, dateReset time.Time, err error) {
-	r, err := m.Request(&Request{
-		Command: RequestCommandReadMaximum,
-		Payload: []byte{MaximumPower},
-	})
+/*
+	Чтение месячных срезов
 
-	if err == nil {
-		power = ParseInt(r.Payload[:2]...)
-		date = ParseDatetime(r.Payload[2:8], m.options.location)
-		powerReset = ParseInt(r.Payload[8:10]...)
-		dateReset = ParseDatetime(r.Payload[10:], m.options.location)
-	}
-
-	return
-}
-
-func (m *MercuryV1) MaximumAmperage() (amperage float64, date time.Time, amperageReset float64, dateReset time.Time, err error) {
-	r, err := m.Request(&Request{
-		Command: RequestCommandReadMaximum,
-		Payload: []byte{MaximumAmperage},
-	})
-
-	if err == nil {
-		amperage = ParseFloat(r.Payload[:2]...) / 100
-		date = ParseDatetime(r.Payload[2:8], m.options.location)
-		amperageReset = ParseFloat(r.Payload[8:10]...) / 100
-		dateReset = ParseDatetime(r.Payload[10:], m.options.location)
-	}
-
-	return
-}
-
-func (m *MercuryV1) MaximumVoltage() (voltage uint64, date time.Time, voltageReset uint64, dateReset time.Time, err error) {
-	r, err := m.Request(&Request{
-		Command: RequestCommandReadMaximum,
-		Payload: []byte{MaximumVoltage},
-	})
-
-	if err == nil {
-		voltage = ParseUint(r.Payload[:2]...) / 10
-		date = ParseDatetime(r.Payload[2:8], m.options.location)
-		voltageReset = ParseUint(r.Payload[8:10]...) / 10
-		dateReset = ParseDatetime(r.Payload[10:], m.options.location)
-	}
-
-	return
-}
-
+	CMD: 32h
+	Request: ADDR-CMD-ii3-CRC
+	Response: ADDR-CMD-count*4 -CRC
+*/
 func (m *MercuryV1) monthlyStat(month byte) (t1, t2, t3, t4 uint64, err error) {
-	r, err := m.Request(&Request{
-		Command: RequestCommandReadMonthlyStat,
-		Payload: []byte{month},
-	})
+	request := NewRequest(RequestCommandReadMonthlyStat).
+		WithPayload([]byte{month})
 
+	response, err := m.Invoke(request)
 	if err == nil {
-		values := make([]uint64, 4)
-		for i := 0; i < len(r.Payload); i += 4 {
-			values[i/4] = ParseUint(r.Payload[i:i+4]...) * 10
-		}
+		dataOut := response.PayloadAsBuffer()
 
-		t1, t2, t3, t4 = values[0], values[1], values[2], values[3]
+		t1 = dataOut.ReadCount()
+		t2 = dataOut.ReadCount()
+		t3 = dataOut.ReadCount()
+		t4 = dataOut.ReadCount()
 	}
 
-	return
+	return t1, t2, t3, t4, err
 }
 
 // 0x0F текущий месяц, но модель 200 возвращает не корректные значения
@@ -369,78 +339,229 @@ func (m *MercuryV1) MonthlyStatByMonth(month time.Month) (uint64, uint64, uint64
 	return m.monthlyStat(byte(int(month) - 1))
 }
 
-func (m *MercuryV1) EventsPowerOnOff(index uint64) (event bool, t time.Time, err error) {
+/*
+	Чтение максимумов
+
+	CMD: 33h
+	Request: ADDR-CMD-ii4-CRC
+	Response: ADDR-CMD-max-maxr-CRC
+*/
+func (m *MercuryV1) maximum(option uint8) (max uint64, maxDate time.Time, maxReset uint64, maxResetDate time.Time, err error) {
+	request := NewRequest(RequestCommandReadMaximum).
+		WithPayload([]byte{option})
+
+	response, err := m.Invoke(request)
+	if err == nil {
+		dataOut := response.PayloadAsBuffer()
+
+		max = dataOut.ReadBCD(2)
+		maxDate = dataOut.ReadTimeDate(m.options.location)
+		maxReset = dataOut.ReadBCD(2)
+		maxResetDate = dataOut.ReadTimeDate(m.options.location)
+	}
+
+	return max, maxDate, maxReset, maxResetDate, err
+}
+
+func (m *MercuryV1) MaximumPower() (power uint64, date time.Time, powerReset uint64, dateReset time.Time, err error) {
+	return m.maximum(MaximumPower)
+}
+
+func (m *MercuryV1) MaximumAmperage() (amperage float64, maxDate time.Time, amperageReset float64, maxResetDate time.Time, err error) {
+	max, maxDate, maxReset, maxResetDate, err := m.maximum(MaximumAmperage)
+	if err == nil {
+		amperage = float64(max) / 100
+		amperageReset = float64(maxReset) / 100
+	}
+
+	return amperage, maxDate, amperageReset, maxResetDate, err
+}
+
+func (m *MercuryV1) MaximumVoltage() (voltage uint64, maxDate time.Time, voltageReset uint64, maxResetDate time.Time, err error) {
+	voltage, maxDate, voltageReset, maxResetDate, err = m.maximum(MaximumVoltage)
+	if err == nil {
+		voltage /= 10
+		voltageReset /= 10
+	}
+
+	return voltage, maxDate, voltageReset, maxResetDate, err
+}
+
+/*
+	Чтение буфера событий вкл/выкл
+
+	CMD: 34h
+	Request: ADDR-CMD-ii5-CRC
+	Response: ADDR-CMD-event1-CRC
+*/
+func (m *MercuryV1) EventsPowerOnOff(index uint8) (event bool, t time.Time, err error) {
 	if index > MaxEventsIndex {
-		err = errors.New("wrong index value #" + strconv.FormatUint(index, 16))
+		err = errors.New("wrong index value #" + strconv.FormatUint(uint64(index), 16))
 	} else {
-		var r *Response
+		var response *Response
 
-		r, err = m.Request(&Request{
-			Command: RequestCommandReadEventsPowerOnOff,
-			Payload: []byte{uint8(index)},
-		})
+		request := NewRequest(RequestCommandReadEventsPowerOnOff).
+			WithPayload([]byte{index})
 
-		if err == nil && !bytes.Equal(r.Payload[4:], []byte{255, 255, 255}) {
-			event = r.Payload[0] != 1
-			t = ParseDatetime(r.Payload, m.options.location)
+		response, err = m.Invoke(request)
+		if err == nil {
+			dataOut := response.PayloadAsBuffer()
+
+			event = !dataOut.ReadBool()
+			t = dataOut.ReadTimeDate(m.options.location)
 		}
 	}
 
 	return event, t, err
 }
 
-func (m *MercuryV1) EventsOpenClose(index uint64) (event bool, t time.Time, err error) {
+/*
+	Чтение буфера событий отк/закр
+
+	CMD: 35h
+	Request: ADDR-CMD-ii5-CRC
+	Response: ADDR-CMD-event2-CRC
+*/
+func (m *MercuryV1) EventsOpenClose(index uint8) (event bool, t time.Time, err error) {
 	if index > MaxEventsIndex {
-		err = errors.New("wrong index value #" + strconv.FormatUint(index, 16))
+		err = errors.New("wrong index value #" + strconv.FormatUint(uint64(index), 16))
 	} else {
-		var r *Response
+		var response *Response
 
-		r, err = m.Request(&Request{
-			Command: RequestCommandReadEventsOpenClose,
-			Payload: []byte{uint8(index)},
-		})
+		request := NewRequest(RequestCommandReadEventsOpenClose).
+			WithPayload([]byte{uint8(index)})
 
-		if err == nil && !bytes.Equal(r.Payload[4:], []byte{255, 255, 255}) {
-			event = r.Payload[0] == 0
-			t = ParseDatetime(r.Payload, m.options.location)
+		response, err = m.Invoke(request)
+		if err == nil {
+			dataOut := response.PayloadAsBuffer()
+
+			event = !dataOut.ReadBool()
+			t = dataOut.ReadTimeDate(m.options.location)
 		}
 	}
 
 	return event, t, err
 }
 
-func (m *MercuryV1) CurrentTariff() (tariff uint64, err error) {
-	r, err := m.Request(&Request{
-		Command: RequestCommandReadCurrentTariff,
-	})
+/*
+	Чтение тарифа
 
+	CMD: 60h
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD- Tarif-CRC
+*/
+func (m *MercuryV1) CurrentTariff() (tariff uint8, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadCurrentTariff))
 	if err == nil {
-		tariff = uint64(r.Payload[0])
+		tariff = response.PayloadAsBuffer().ReadUint8()
 	}
 
-	return
+	return tariff, err
 }
 
-func (m *MercuryV1) DisplayTime() (t1, t2, t3, t4 uint64, err error) {
-	r, err := m.Request(&Request{
-		Command: RequestCommandReadDisplayTime,
-	})
+/*
+	Чтение времени последнего вскрытия крышки счётчика
 
+	CMD: 61h
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-timedate-CRC
+*/
+func (m *MercuryV1) LastOpenCap() (date time.Time, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadLastOpenCap))
 	if err == nil {
-		t1, t2, t3, t4 = uint64(r.Payload[0]), uint64(r.Payload[1]), uint64(r.Payload[2]), uint64(r.Payload[3])
+		date = response.PayloadAsBuffer().ReadTimeDateWithDayOfWeek(m.options.location)
 	}
 
-	return
+	return date, err
 }
 
-func (m *MercuryV1) WorkingTime() (under, without uint64, err error) {
-	r, err := m.Request(&Request{
-		Command: RequestCommandReadWorkingTime,
-	})
+/*
+	Чтение времени последнего закрытия крышки счётчика
 
+	CMD: 62h
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-timedate-CRC
+*/
+func (m *MercuryV1) LastCloseCap() (date time.Time, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadLastCloseCap))
 	if err == nil {
-		under = ParseUint(r.Payload[0:3]...)
-		without = ParseUint(r.Payload[3:6]...)
+		date = response.PayloadAsBuffer().ReadTimeDateWithDayOfWeek(m.options.location)
+	}
+
+	return date, err
+}
+
+/*
+	Чтение значений U,I,P
+
+	CMD: 63h
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-V-I-P-CRC
+*/
+func (m *MercuryV1) ParamsCurrent() (voltage uint64, amperage float64, power uint64, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadParamsCurrent))
+	if err == nil {
+		dataOut := response.PayloadAsBuffer()
+
+		voltage = dataOut.ReadBCD(2) / 10
+		amperage = float64(dataOut.ReadBCD(2)) / 100
+		power = dataOut.ReadBCD(3)
+	}
+
+	return voltage, amperage, power, err
+}
+
+/*
+	Чтение даты изготовления
+
+	CMD: 63h
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-datefabric-CRC
+*/
+func (m *MercuryV1) MakeDate() (date time.Time, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadMakeDate))
+	if err == nil {
+		date = response.PayloadAsBuffer().ReadDate()
+	}
+
+	return date, err
+}
+
+/*
+	Чтение даты изготовления
+
+	CMD: 67h
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-TIMEDISPL-CRC
+*/
+func (m *MercuryV1) DisplayTime() (t1, t2, t3, t4 uint8, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadDisplayTime))
+	if err == nil {
+		dataOut := response.PayloadAsBuffer()
+
+		t1 = dataOut.ReadUint8()
+		t2 = dataOut.ReadUint8()
+		t3 = dataOut.ReadUint8()
+		t4 = dataOut.ReadUint8()
+	}
+
+	return t1, t2, t3, t4, err
+}
+
+/*
+	Чтение времени наработки
+
+	CMD: 69h
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-TL-TLB-CRC
+*/
+func (m *MercuryV1) WorkingTime() (under, without time.Duration, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadWorkingTime))
+	if err == nil {
+		dataOut := response.PayloadAsBuffer()
+
+		under = time.Duration(dataOut.ReadBCD(3)) * time.Hour
+		without = time.Duration(dataOut.ReadBCD(3)) * time.Hour
 	}
 
 	return

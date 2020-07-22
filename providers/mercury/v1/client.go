@@ -43,12 +43,12 @@ func New(conn connection.Conn, opts ...Option) *MercuryV1 {
 	return m
 }
 
-func (m *MercuryV1) Request(request *Request) (*Response, error) {
-	if len(request.Address) == 0 {
-		request.Address = m.options.address
+func (m *MercuryV1) Invoke(request *Request) (*Response, error) {
+	if len(request.address) == 0 {
+		request = request.WithAddress(m.options.address)
 	}
 
-	if len(request.Address) == 0 {
+	if len(request.address) == 0 {
 		return nil, errors.New("device address is empty")
 	}
 
@@ -63,12 +63,12 @@ func (m *MercuryV1) Request(request *Request) (*Response, error) {
 	}
 
 	// check ADDR
-	if !bytes.Equal(response.Address, request.Address) {
+	if !bytes.Equal(response.address, request.address) {
 		return nil, errors.New(
 			"error ADDR of response packet " +
 				hex.EncodeToString(data) + " have " +
-				hex.EncodeToString(response.Address) + " want " +
-				hex.EncodeToString(request.Address))
+				hex.EncodeToString(response.address) + " want " +
+				hex.EncodeToString(request.address))
 	}
 
 	return response, nil

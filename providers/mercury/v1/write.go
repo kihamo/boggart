@@ -43,11 +43,10 @@ func (m *MercuryV1) SetDisplayMode(t1, t2, t3, t4, amount, power, time, date boo
 		bit |= displayModeDate
 	}
 
-	_, err := m.Request(&Request{
-		Command: RequestCommandWriteDisplayMode,
-		Payload: []byte{byte(bit)},
-	})
+	request := NewRequest(RequestCommandWriteDisplayMode).
+		WithPayload([]byte{byte(bit)})
 
+	_, err := m.Invoke(request)
 	return err
 }
 
@@ -56,11 +55,10 @@ func (m *MercuryV1) SetDisplayMode(t1, t2, t3, t4, amount, power, time, date boo
 // t2 / 10 / время индикации энергии текущего тарифа
 // t3 /  5 / время индикации мощности, времени и даты
 // t4 / 30 / время индикации после нажатия кнопки
-func (m *MercuryV1) SetDisplayTime(t1, t2, t3, t4 uint64) error {
-	_, err := m.Request(&Request{
-		Command: RequestCommandWriteDisplayTime,
-		Payload: []byte{byte(t1), byte(t2), byte(t3), byte(t4)},
-	})
+func (m *MercuryV1) SetDisplayTime(t1, t2, t3, t4 uint8) error {
+	request := NewRequest(RequestCommandWriteDisplayTime).
+		WithPayload([]byte{t1, t2, t3, t4})
 
+	_, err := m.Invoke(request)
 	return err
 }

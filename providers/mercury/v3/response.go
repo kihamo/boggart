@@ -53,15 +53,15 @@ func (r *Response) Payload() []byte {
 	return append([]byte(nil), r.payload...)
 }
 
+func (r *Response) PayloadAsBuffer() *Buffer {
+	return NewBuffer(r.Payload())
+}
+
 func (r *Response) CRC() []byte {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
 	return append([]byte(nil), r.crc...)
-}
-
-func (r *Response) PayloadAsBuffer() *Buffer {
-	return NewBuffer(r.Payload())
 }
 
 func (r *Response) String() string {

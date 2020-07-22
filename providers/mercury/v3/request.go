@@ -48,11 +48,15 @@ type Request struct {
 	parameters         []byte
 }
 
-func NewRequest(address byte, code requestCode) *Request {
+func NewRequest(code requestCode) *Request {
 	return &Request{
-		address: address,
-		code:    code,
+		code: code,
 	}
+}
+
+func (r *Request) WithAddress(address uint8) *Request {
+	r.address = address
+	return r
 }
 
 func (r *Request) WithParameterCode(code uint8) *Request {

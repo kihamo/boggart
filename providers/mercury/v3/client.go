@@ -1,6 +1,7 @@
 package v3
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/kihamo/boggart/protocols/connection"
@@ -39,6 +40,14 @@ func (m *MercuryV3) Invoke(request *Request) (response *Response, err error) {
 }
 
 func (m *MercuryV3) InvokeRaw(request *Request) (*Response, error) {
+	if request.address == 0 {
+		request = request.WithAddress(m.options.address)
+	}
+
+	if request.address == 0 {
+		return nil, errors.New("device address is empty")
+	}
+
 	data, err := m.invoker.Invoke(request.Bytes())
 	if err != nil {
 		return nil, err
@@ -58,8 +67,4 @@ func (m *MercuryV3) Raw() error {
 	fmt.Println(resp)
 
 	return nil
-}
-
-func (m *MercuryV3) NewRequest(code requestCode) *Request {
-	return NewRequest(m.options.address, code)
 }

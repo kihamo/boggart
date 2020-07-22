@@ -34,8 +34,16 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get datetime failed with error %s", "", err.Error()))
 
 			vars["stats"] = make([]*monthly, 0)
-		} else {
+		}
+
+		tariffCount, err := bind.provider.TariffCount()
+		if err != nil {
+			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get tariff count failed with error %s", "", err.Error()))
+		}
+
+		if err == nil {
 			vars["date"] = date
+			vars["tariff_count"] = tariffCount
 
 			var (
 				t1, t2, t3, t4 uint64
@@ -139,69 +147,74 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 	case "events-on-off":
-		var stopTime time.Time
-
-		type event struct {
-			State bool
-			Time  time.Time
-		}
-
-		events := make([]event, 0, v1.MaxEventsIndex)
-
-		for i := uint64(0); i <= v1.MaxEventsIndex; i++ {
-			state, date, err := bind.provider.EventsPowerOnOff(i)
-
-			if err != nil {
-				r.Session().FlashBag().Error(t.Translate(r.Context(), "Get event %02x failed with error %s", "", i, err.Error()))
-				continue
+		if makeDate, err := bind.provider.MakeDate(); err != nil {
+			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get make date failed with error %s", "", err.Error()))
+		} else {
+			type event struct {
+				State bool
+				Time  time.Time
 			}
 
-			if date == stopTime {
-				break
+			events := make([]event, 0, v1.MaxEventsIndex)
+
+			for i := uint8(0); i <= v1.MaxEventsIndex; i++ {
+				state, date, err := bind.provider.EventsPowerOnOff(i)
+
+				if err != nil {
+					r.Session().FlashBag().Error(t.Translate(r.Context(), "Get event %02x failed with error %s", "", i, err.Error()))
+					break
+				}
+
+				if date.Before(makeDate) {
+					break
+				}
+
+				events = append(events, event{
+					State: state,
+					Time:  date,
+				})
 			}
 
-			events = append(events, event{
-				State: state,
-				Time:  date,
-			})
+			vars["events"] = events
 		}
-
-		vars["events"] = events
 
 	case "events-open-close":
-		var stopTime time.Time
+		if makeDate, err := bind.provider.MakeDate(); err != nil {
+			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get make date failed with error %s", "", err.Error()))
+		} else {
 
-		type event struct {
-			State bool
-			Time  time.Time
-		}
-
-		events := make([]event, 0, v1.MaxEventsIndex)
-
-		for i := uint64(0); i <= v1.MaxEventsIndex; i++ {
-			state, date, err := bind.provider.EventsOpenClose(i)
-
-			if err != nil {
-				r.Session().FlashBag().Error(t.Translate(r.Context(), "Get event %02x failed with error %s", "", i, err.Error()))
-				continue
+			type event struct {
+				State bool
+				Time  time.Time
 			}
 
-			if date == stopTime {
-				break
+			events := make([]event, 0, v1.MaxEventsIndex)
+
+			for i := uint8(0); i <= v1.MaxEventsIndex; i++ {
+				state, date, err := bind.provider.EventsOpenClose(i)
+
+				if err != nil {
+					r.Session().FlashBag().Error(t.Translate(r.Context(), "Get event %02x failed with error %s", "", i, err.Error()))
+					break
+				}
+
+				if date.Before(makeDate) {
+					break
+				}
+
+				events = append(events, event{
+					State: state,
+					Time:  date,
+				})
 			}
 
-			events = append(events, event{
-				State: state,
-				Time:  date,
-			})
+			vars["events"] = events
 		}
-
-		vars["events"] = events
 
 	case "display":
 		var (
 			modeT1, modeT2, modeT3, modeT4, modeAmount, modePower, modeTime, modeDate bool
-			timeT1, timeT2, timeT3, timeT4                                            uint64
+			timeT1, timeT2, timeT3, timeT4                                            uint8
 			err                                                                       error
 		)
 
@@ -222,18 +235,28 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 				r.Session().FlashBag().Success(t.Translate(r.Context(), "Change display mode success", ""))
 			}
 
-			timeT1, err = strconv.ParseUint(r.Original().FormValue("time_t1"), 10, 64)
+			var timeValue uint64
 
-			if err == nil {
-				timeT2, err = strconv.ParseUint(r.Original().FormValue("time_t2"), 10, 64)
+			if timeValue, err = strconv.ParseUint(r.Original().FormValue("time_t1"), 10, 64); err == nil {
+				timeT1 = uint8(timeValue)
 			}
 
 			if err == nil {
-				timeT3, err = strconv.ParseUint(r.Original().FormValue("time_t3"), 10, 64)
+				if timeValue, err = strconv.ParseUint(r.Original().FormValue("time_t2"), 10, 64); err == nil {
+					timeT2 = uint8(timeValue)
+				}
 			}
 
 			if err == nil {
-				timeT4, err = strconv.ParseUint(r.Original().FormValue("time_t4"), 10, 64)
+				if timeValue, err = strconv.ParseUint(r.Original().FormValue("time_t3"), 10, 64); err == nil {
+					timeT3 = uint8(timeValue)
+				}
+			}
+
+			if err == nil {
+				if timeValue, err = strconv.ParseUint(r.Original().FormValue("time_t4"), 10, 64); err == nil {
+					timeT4 = uint8(timeValue)
+				}
 			}
 
 			if err == nil {

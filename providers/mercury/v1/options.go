@@ -1,6 +1,9 @@
 package v1
 
 import (
+	"encoding/hex"
+	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -41,13 +44,35 @@ func WithAddress(address []byte) Option {
 
 func WithAddress200AsString(address string) Option {
 	return newFuncOption(func(o *options) {
-		o.address = ConvertSerialNumber200(address)
+		if len(address) < 6 {
+			o.address = nil
+			return
+		}
+
+		number, _ := strconv.ParseInt(address[len(address)-6:], 10, 0)
+		h, _ := hex.DecodeString(fmt.Sprintf("%06x", number))
+
+		sn := make([]byte, 4)
+		copy(sn[4-len(h):], h)
+
+		o.address = sn
 	})
 }
 
 func WithAddressAsString(address string) Option {
 	return newFuncOption(func(o *options) {
-		o.address = ConvertSerialNumber(address)
+		if len(address) < 8 {
+			o.address = nil
+			return
+		}
+
+		number, _ := strconv.ParseInt(address[:8], 10, 0)
+		h, _ := hex.DecodeString(fmt.Sprintf("%08x", number))
+
+		sn := make([]byte, 4)
+		copy(sn[4-len(h):], h)
+
+		o.address = sn
 	})
 }
 

@@ -39,24 +39,41 @@ const (
 	RequestCommandReadMaximum          = 0x33 // чтение месячных срезов
 	RequestCommandReadEventsPowerOnOff = 0x34 // чтение буфера событий включений/выключения
 	RequestCommandReadEventsOpenClose  = 0x35 // чтение буфера событий включений/выключения
-	RequestCommandReadCurrentTariff    = 0x60 // чтение тарифа
-	RequestCommandReadLastCloseCap     = 0x62 // чтение времение последнего закрытия крышки счетчика
-	RequestCommandReadParamsCurrent    = 0x63 // чтение текущих параметров сети U, I, P
-	RequestCommandReadWordType         = 0x65 // чтение слова исполнения
-	RequestCommandReadMakeDate         = 0x66 // чтение даты изготовления
-	RequestCommandReadDisplayTime      = 0x67 // чтение времени индекации
-	RequestCommandReadWorkingTime      = 0x69 // чтение времени наработки
+
+	RequestCommandReadCurrentTariff = 0x60 // чтение тарифа
+	RequestCommandReadLastOpenCap   = 0x61 // Чтение времени последнего вскрытия крышки счётчика
+	RequestCommandReadLastCloseCap  = 0x62 // чтение времение последнего закрытия крышки счетчика
+	RequestCommandReadParamsCurrent = 0x63 // чтение текущих параметров сети U, I, P
+	RequestCommandReadMakeDate      = 0x66 // чтение даты изготовления
+	RequestCommandReadDisplayTime   = 0x67 // чтение времени индекации
+	RequestCommandReadWorkingTime   = 0x69 // чтение времени наработки
 )
 
 type Request struct {
-	Address []byte
-	Command requestCommand
-	Payload []byte
+	address []byte
+	command requestCommand
+	payload []byte
+}
+
+func NewRequest(command requestCommand) *Request {
+	return &Request{
+		command: command,
+	}
+}
+
+func (r *Request) WithAddress(address []byte) *Request {
+	r.address = address
+	return r
+}
+
+func (r *Request) WithPayload(payload []byte) *Request {
+	r.payload = payload
+	return r
 }
 
 func (r *Request) Bytes() []byte {
-	packet := append(r.Address, byte(r.Command))
-	packet = append(packet, r.Payload...)
+	packet := append(r.address, byte(r.command))
+	packet = append(packet, r.payload...)
 	packet = append(packet, serial.GenerateCRC16(packet)...)
 
 	return packet

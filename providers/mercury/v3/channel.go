@@ -2,7 +2,7 @@ package v3
 
 // 2.1. ЗАПРОС НА ТЕСТИРОВАНИЕ КАНАЛА СВЯЗИ
 func (m *MercuryV3) ChannelTest() error {
-	response, err := m.InvokeRaw(m.NewRequest(RequestCodeChannelTest))
+	response, err := m.InvokeRaw(NewRequest(RequestCodeChannelTest))
 	if err != nil {
 		return err
 	}
@@ -12,7 +12,7 @@ func (m *MercuryV3) ChannelTest() error {
 
 // 2.2. ЗАПРОСЫ НА ОТКРЫТИЕ/ЗАКРЫТИЕ КАНАЛА СВЯЗИ
 func (m *MercuryV3) ChannelOpen(level accessLevel, password LevelPassword) error {
-	request := m.NewRequest(RequestCodeChannelOpen).
+	request := NewRequest(RequestCodeChannelOpen).
 		WithParameterCode(byte(level)).
 		WithParameters(password.Bytes())
 
@@ -26,7 +26,7 @@ func (m *MercuryV3) ChannelOpen(level accessLevel, password LevelPassword) error
 
 // 2.2. ЗАПРОСЫ НА ОТКРЫТИЕ/ЗАКРЫТИЕ КАНАЛА СВЯЗИ
 func (m *MercuryV3) ChannelClose() error {
-	response, err := m.InvokeRaw(m.NewRequest(RequestCodeChannelClose))
+	response, err := m.InvokeRaw(NewRequest(RequestCodeChannelClose))
 	if err != nil {
 		return err
 	}

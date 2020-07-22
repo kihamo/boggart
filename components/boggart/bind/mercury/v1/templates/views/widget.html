@@ -28,16 +28,17 @@
                                     <thead>
                                     <tr>
                                         <th>{{ i18n "Month" . }}</th>
-                                        <th>{{ i18n "T1 / Wh" . }}</th>
-                                        <th>{{ i18n "T2 / Wh" . }}</th>
-                                        <th>{{ i18n "T3 / Wh" . }}</th>
-                                        <th>{{ i18n "T4 / Wh" . }}</th>
+                                        {{ if gt $.tariff_count 0 }}<th>{{ i18n "T1 / Wh" . }}</th>{{ end }}
+                                        {{ if gt $.tariff_count 1 }}<th>{{ i18n "T2 / Wh" . }}</th>{{ end }}
+                                        {{ if gt $.tariff_count 2 }}<th>{{ i18n "T3 / Wh" . }}</th>{{ end }}
+                                        {{ if gt $.tariff_count 3 }}<th>{{ i18n "T4 / Wh" . }}</th>{{ end }}
                                     </tr>
                                     </thead>
                                     <tbody>
                                     {{ range $i, $stats := .stats }}
                                     <tr{{ if and (eq $stats.Month $.date.Month) (eq $stats.Year $.date.Year) }} class="success"{{ end }}>
                                         <td>{{ i18n $stats.Month.String $ nil "dashboard" }} {{ $stats.Year }}</td>
+                                        {{ if gt $.tariff_count 0 }}
                                         <td>
                                             <script type="application/javascript">document.write(valueFormat({{ $stats.T1 }}))</script>
                                             {{ if gt $stats.T1Trend 0 }}
@@ -50,6 +51,8 @@
                                                 <span class="label label-default"><script type="application/javascript">document.write(valueFormat({{ $stats.T1Delta }}))</script></span>
                                             {{ end }}
                                         </td>
+                                        {{ end }}
+                                        {{ if gt $.tariff_count 1 }}
                                         <td>
                                             <script type="application/javascript">document.write(valueFormat({{ $stats.T2 }}))</script>
                                             {{ if gt $stats.T2Trend 0 }}
@@ -62,6 +65,8 @@
                                                 <span class="label label-default"><script type="application/javascript">document.write(valueFormat({{ $stats.T2Delta }}))</script></span>
                                             {{ end }}
                                         </td>
+                                        {{ end }}
+                                        {{ if gt $.tariff_count 2 }}
                                         <td>
                                             <script type="application/javascript">document.write(valueFormat({{ $stats.T3 }}))</script>
                                             {{ if gt $stats.T3Trend 0 }}
@@ -74,6 +79,8 @@
                                                 <span class="label label-default"><script type="application/javascript">document.write(valueFormat({{ $stats.T3Delta }}))</script></span>
                                             {{ end }}
                                         </td>
+                                        {{ end }}
+                                        {{ if gt $.tariff_count 3 }}
                                         <td>
                                             <script type="application/javascript">document.write(valueFormat({{ $stats.T4 }}))</script>
                                             {{ if gt $stats.T4Trend 0 }}
@@ -86,6 +93,7 @@
                                                 <span class="label label-default"><script type="application/javascript">document.write(valueFormat({{ $stats.T4Delta }}))</script></span>
                                             {{ end }}
                                         </td>
+                                        {{ end }}
                                     </tr>
                                     {{ end }}
                                     </tbody>

@@ -63,7 +63,7 @@ const (
 )
 
 func (m *MercuryV3) ReadParameter(param byte) (*Buffer, error) {
-	request := m.NewRequest(RequestCodeReadParameter).
+	request := NewRequest(RequestCodeReadParameter).
 		WithParameterCode(param)
 
 	response, err := m.Invoke(request)
@@ -138,7 +138,7 @@ func (m *MercuryV3) Address() (int64, error) {
 
 // 2.5.32. ЧТЕНИЕ ВСПОМОГАТЕЛЬНЫХ ПАРАМЕТРОВ.
 func (m *MercuryV3) AuxiliaryParameters(bwri uint8) (*Response, error) {
-	request := m.NewRequest(RequestCodeReadParameter).
+	request := NewRequest(RequestCodeReadParameter).
 		WithParameterCode(ParamCodeAuxiliaryParameters12).
 		WithParameterExtension(bwri)
 
@@ -273,7 +273,7 @@ func (m *MercuryV3) ReadArray(arr array, mo *month, t tariff) (a1, a2, r3, r4 ui
 
 	var response *Response
 
-	request := m.NewRequest(RequestCodeReadArray).
+	request := NewRequest(RequestCodeReadArray).
 		WithParameterCode(code).
 		WithParameterExtension(uint8(t))
 
