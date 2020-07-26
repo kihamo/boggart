@@ -113,7 +113,7 @@ func (b *Bind) Run() error {
 					switch frame.CommandID() {
 
 					case z_stack.CommandAfIncomingMessage:
-						message, err := client.AfIncomingMessage(frame)
+						message, err := z_stack.AfIncomingMessageParse(frame)
 						if err != nil {
 							b.Logger().Warn("Parse received message", "error", err.Error())
 							continue

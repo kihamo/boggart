@@ -66,7 +66,7 @@ type BindTypeHasWidgetAssetFS interface {
 	WidgetAssetFS() *assetfs.AssetFS
 }
 
-func ValidateBindConfig(t BindType, config map[string]interface{}) (cfg interface{}, err error) {
+func ValidateBindConfig(t BindType, config interface{}) (cfg interface{}, err error) {
 	if prepare := t.Config(); prepare != nil {
 		mapStructureDecoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 			Metadata: nil,

@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -20,7 +21,7 @@ type BindYAML struct {
 	ID          string
 	Description string
 	Tags        []string
-	Config      map[string]interface{}
+	Config      interface{}
 }
 
 type BindHandler struct {
@@ -144,6 +145,7 @@ func (h *BindHandler) actionCreateOrUpdate(w *dashboard.Response, r *dashboard.R
 	buf := bytes.NewBuffer(nil)
 
 	var err error
+	vars := make(map[string]interface{})
 
 	if r.IsPost() {
 		code := r.Original().FormValue("yaml")
@@ -180,21 +182,56 @@ func (h *BindHandler) actionCreateOrUpdate(w *dashboard.Response, r *dashboard.R
 		defer enc.Close()
 
 		if b == nil {
-			err = enc.Encode(&BindYAML{
+			bindYAML := &BindYAML{
 				Description: "Description of new bind",
 				Tags:        []string{"tag_label"},
 				Config: map[string]interface{}{
 					"config_key": "config_value",
 				},
-			})
+			}
+			isAjax := false
+
+			if typeName := r.URL().Query().Get("type"); typeName != "" && r.IsAjax() {
+				bindYAML.Type = typeName
+				isAjax = true
+			} else {
+				types := make([]string, 0)
+				for typeName := range boggart.GetBindTypes() {
+					types = append(types, typeName)
+				}
+				sort.Strings(types)
+				vars["types"] = types
+
+				if len(types) > 0 {
+					bindYAML.Type = types[0]
+				}
+			}
+
+			if bindYAML.Type != "" {
+				if t, err := boggart.GetBindType(bindYAML.Type); err == nil {
+					bindYAML.Config = t.Config()
+				} else {
+					bindYAML.Type = ""
+				}
+			}
+
+			err = enc.Encode(bindYAML)
+
+			if isAjax {
+				if err == nil {
+					_ = w.SendJSON(buf.String())
+					return
+				}
+
+				h.InternalError(w, r, err)
+				return
+			}
 		} else {
 			err = enc.Encode(b)
 		}
 	}
 
-	vars := map[string]interface{}{
-		"yaml": buf.String(),
-	}
+	vars["yaml"] = buf.String()
 
 	if err != nil {
 		r.Session().FlashBag().Error(err.Error())
