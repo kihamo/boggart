@@ -41,7 +41,7 @@ const (
 )
 
 type Request struct {
-	address            byte
+	address            uint8
 	code               requestCode
 	parameterCode      *byte
 	parameterExtension *byte

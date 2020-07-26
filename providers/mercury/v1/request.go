@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"encoding/binary"
 	"encoding/hex"
 
 	"github.com/kihamo/boggart/protocols/serial"
@@ -50,7 +51,7 @@ const (
 )
 
 type Request struct {
-	address []byte
+	address uint32
 	command requestCommand
 	payload []byte
 }
@@ -61,7 +62,7 @@ func NewRequest(command requestCommand) *Request {
 	}
 }
 
-func (r *Request) WithAddress(address []byte) *Request {
+func (r *Request) WithAddress(address uint32) *Request {
 	r.address = address
 	return r
 }
@@ -72,7 +73,10 @@ func (r *Request) WithPayload(payload []byte) *Request {
 }
 
 func (r *Request) Bytes() []byte {
-	packet := append(r.address, byte(r.command))
+	packet := make([]byte, 4)
+	binary.LittleEndian.PutUint32(packet, r.address)
+
+	packet = append(packet, byte(r.command))
 	packet = append(packet, r.payload...)
 	packet = append(packet, serial.GenerateCRC16(packet)...)
 

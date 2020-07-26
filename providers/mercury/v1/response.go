@@ -2,6 +2,7 @@ package v1
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/hex"
 	"errors"
 	"sync"
@@ -10,10 +11,10 @@ import (
 )
 
 type Response struct {
-	address []byte
+	address uint32
 	command requestCommand
 	payload []byte
-	crc     []byte
+	crc     uint16
 
 	lock sync.RWMutex
 }
@@ -26,17 +27,17 @@ func ParseResponse(data []byte) (*Response, error) {
 	}
 
 	response := &Response{
-		address: data[:4],
+		address: binary.LittleEndian.Uint32(data[:4]),
 		command: requestCommand(data[4]),
 		payload: data[5 : l-2],
-		crc:     data[l-2:],
+		crc:     binary.LittleEndian.Uint16(data[l-2:]),
 	}
 
 	crc := serial.GenerateCRC16(data[:l-2])
-	if !bytes.Equal(crc, response.crc) {
+	if !bytes.Equal(crc, data[l-2:]) {
 		return nil, errors.New("error CRC16 of response packet " +
 			hex.EncodeToString(data) + " have " +
-			hex.EncodeToString(response.crc) + " want " +
+			hex.EncodeToString(data[l-2:]) + " want " +
 			hex.EncodeToString(crc))
 	}
 
@@ -44,18 +45,26 @@ func ParseResponse(data []byte) (*Response, error) {
 }
 
 func (r *Response) Bytes() []byte {
-	packet := append(r.Address(), byte(r.Command()))
+	var buf []byte
+
+	buf = make([]byte, 4)
+	binary.LittleEndian.PutUint32(buf, r.Address())
+
+	packet := append(buf, byte(r.Command()))
 	packet = append(packet, r.Payload()...)
-	packet = append(packet, r.CRC()...)
+
+	buf = make([]byte, 2)
+	binary.LittleEndian.PutUint16(buf, r.CRC())
+	packet = append(packet, buf...)
 
 	return packet
 }
 
-func (r *Response) Address() []byte {
+func (r *Response) Address() uint32 {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
-	return append([]byte(nil), r.address...)
+	return r.address
 }
 
 func (r *Response) Command() requestCommand {
@@ -76,11 +85,11 @@ func (r *Response) PayloadAsBuffer() *Buffer {
 	return NewBuffer(r.Payload())
 }
 
-func (r *Response) CRC() []byte {
+func (r *Response) CRC() uint16 {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
-	return append([]byte(nil), r.crc...)
+	return r.crc
 }
 
 func (r *Response) String() string {

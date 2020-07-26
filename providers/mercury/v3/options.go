@@ -1,11 +1,13 @@
 package v3
 
 import (
+	"fmt"
 	"strconv"
+	"strings"
 )
 
 type options struct {
-	address     byte
+	address     uint8
 	password    LevelPassword
 	accessLevel accessLevel
 }
@@ -30,13 +32,13 @@ func newFuncOption(f func(*options)) *funcOption {
 
 func defaultOptions() options {
 	return options{
-		address:     0x0,
+		address:     AddressUniveral,
 		accessLevel: AccessLevel1,
 		password:    DefaultPasswordLevel1,
 	}
 }
 
-func WithAddress(address byte) Option {
+func WithAddress(address uint8) Option {
 	return newFuncOption(func(o *options) {
 		o.address = address
 	})
@@ -45,19 +47,24 @@ func WithAddress(address byte) Option {
 func WithAddressAsString(address string) Option {
 	return newFuncOption(func(o *options) {
 		// Отделите три последние цифры серийного номера, это будет число N.
+		clean := strings.Split(address, "-")
+		address = clean[0]
+
 		number, _ := strconv.ParseInt(address[len(address)-3:], 10, 0)
+
+		fmt.Println(number, address[len(address)-3:])
 
 		// Если N>=240 адресом являются две последние цифры серийного номера.
 		if number >= 240 {
 			number, _ = strconv.ParseInt(address[len(address)-2:], 10, 0)
 
-			o.address = byte(number)
+			o.address = uint8(number)
 			return
 		}
 
 		// Если N<240 адресом являются три последние цифры.
 		if number < 240 {
-			o.address = byte(number)
+			o.address = uint8(number)
 			return
 		}
 

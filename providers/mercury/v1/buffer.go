@@ -2,6 +2,7 @@ package v1
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/hex"
 	"strconv"
 	"time"
@@ -25,6 +26,10 @@ func (b *Buffer) ReadBCD(n int) uint64 {
 func (b *Buffer) ReadUint8() uint8 {
 	result, _ := b.ReadByte()
 	return result
+}
+
+func (b *Buffer) ReadUint32() uint32 {
+	return binary.LittleEndian.Uint32(b.Next(4))
 }
 
 func (b *Buffer) ReadBool() bool {

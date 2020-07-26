@@ -14,10 +14,10 @@ import (
 	Request: ADDR-CMD-CRC
 	Response: ADDR-CMD-GADDR-CRC
 */
-func (m *MercuryV1) AddressGroup() (address []byte, err error) {
+func (m *MercuryV1) AddressGroup() (address uint32, err error) {
 	response, err := m.Invoke(NewRequest(RequestCommandReadAddressGroup))
 	if err == nil {
-		address = response.PayloadAsBuffer().Next(4)
+		address = response.PayloadAsBuffer().ReadUint32()
 	}
 
 	return address, nil
@@ -240,13 +240,11 @@ func (m *MercuryV1) LastPowerOnDatetime() (date time.Time, err error) {
 	Request: ADDR-CMD-CRC
 	Response: ADDR-CMD-serial-CRC
 */
-func (m *MercuryV1) SerialNumber() (sn []byte, err error) {
+func (m *MercuryV1) SerialNumber() (sn uint32, err error) {
 	response, err := m.Invoke(NewRequest(RequestCommandReadSerialNumber))
 	if err == nil {
-		sn = response.PayloadAsBuffer().Next(4)
+		sn = response.PayloadAsBuffer().ReadUint32()
 	}
-
-	// TODO: конвертировать в что-то человекочитаемое
 
 	return sn, err
 }

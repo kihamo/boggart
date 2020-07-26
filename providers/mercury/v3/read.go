@@ -123,7 +123,7 @@ func (m *MercuryV3) FirmwareVersion() (string, error) {
 }
 
 // 2.5.23. ЧТЕНИЕ СЕТЕВОГО АДРЕСА.
-func (m *MercuryV3) Address() (int64, error) {
+func (m *MercuryV3) Address() (uint8, error) {
 	value, err := m.ReadParameter(ParamCodeAddress)
 	if err != nil {
 		return 0, err
@@ -133,7 +133,7 @@ func (m *MercuryV3) Address() (int64, error) {
 		return 0, errors.New("first byte not equal 0")
 	}
 
-	return int64(value.ReadUint8()), nil
+	return value.ReadUint8(), nil
 }
 
 // 2.5.32. ЧТЕНИЕ ВСПОМОГАТЕЛЬНЫХ ПАРАМЕТРОВ.

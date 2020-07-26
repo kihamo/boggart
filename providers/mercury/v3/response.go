@@ -1,6 +1,7 @@
 package v3
 
 import (
+	"encoding/binary"
 	"encoding/hex"
 	"errors"
 	"sync"
@@ -16,9 +17,9 @@ const (
 )
 
 type Response struct {
-	address byte
+	address uint8
 	payload []byte
-	crc     []byte
+	crc     uint16
 
 	lock sync.RWMutex
 }
@@ -31,18 +32,21 @@ func ParseResponse(data []byte) (*Response, error) {
 	return &Response{
 		address: data[0],
 		payload: data[1 : len(data)-2],
-		crc:     data[len(data)-2:],
+		crc:     binary.LittleEndian.Uint16(data[len(data)-2:]),
 	}, nil
 }
 
 func (r *Response) Bytes() []byte {
 	packet := append([]byte{r.Address()}, r.Payload()...)
-	packet = append(packet, r.CRC()...)
+
+	crc := make([]byte, 2)
+	binary.LittleEndian.PutUint16(crc, r.CRC())
+	packet = append(packet, crc...)
 
 	return packet
 }
 
-func (r *Response) Address() byte {
+func (r *Response) Address() uint8 {
 	return r.address
 }
 
@@ -57,11 +61,11 @@ func (r *Response) PayloadAsBuffer() *Buffer {
 	return NewBuffer(r.Payload())
 }
 
-func (r *Response) CRC() []byte {
+func (r *Response) CRC() uint16 {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
-	return append([]byte(nil), r.crc...)
+	return r.crc
 }
 
 func (r *Response) String() string {

@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"strconv"
@@ -8,7 +9,7 @@ import (
 )
 
 type options struct {
-	address  []byte
+	address  uint32
 	location *time.Location
 }
 
@@ -36,7 +37,7 @@ func defaultOptions() options {
 	}
 }
 
-func WithAddress(address []byte) Option {
+func WithAddress(address uint32) Option {
 	return newFuncOption(func(o *options) {
 		o.address = address
 	})
@@ -45,7 +46,7 @@ func WithAddress(address []byte) Option {
 func WithAddress200AsString(address string) Option {
 	return newFuncOption(func(o *options) {
 		if len(address) < 6 {
-			o.address = nil
+			o.address = 0
 			return
 		}
 
@@ -55,14 +56,14 @@ func WithAddress200AsString(address string) Option {
 		sn := make([]byte, 4)
 		copy(sn[4-len(h):], h)
 
-		o.address = sn
+		o.address = binary.LittleEndian.Uint32(sn)
 	})
 }
 
 func WithAddressAsString(address string) Option {
 	return newFuncOption(func(o *options) {
 		if len(address) < 8 {
-			o.address = nil
+			o.address = 0
 			return
 		}
 
@@ -72,7 +73,7 @@ func WithAddressAsString(address string) Option {
 		sn := make([]byte, 4)
 		copy(sn[4-len(h):], h)
 
-		o.address = sn
+		o.address = binary.LittleEndian.Uint32(sn)
 	})
 }
 

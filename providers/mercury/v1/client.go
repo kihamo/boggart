@@ -1,9 +1,8 @@
 package v1
 
 import (
-	"bytes"
-	"encoding/hex"
 	"errors"
+	"fmt"
 
 	"github.com/kihamo/boggart/protocols/connection"
 )
@@ -44,11 +43,11 @@ func New(conn connection.Conn, opts ...Option) *MercuryV1 {
 }
 
 func (m *MercuryV1) Invoke(request *Request) (*Response, error) {
-	if len(request.address) == 0 {
+	if request.address == 0 {
 		request = request.WithAddress(m.options.address)
 	}
 
-	if len(request.address) == 0 {
+	if request.address == 0 {
 		return nil, errors.New("device address is empty")
 	}
 
@@ -63,12 +62,9 @@ func (m *MercuryV1) Invoke(request *Request) (*Response, error) {
 	}
 
 	// check ADDR
-	if !bytes.Equal(response.address, request.address) {
-		return nil, errors.New(
-			"error ADDR of response packet " +
-				hex.EncodeToString(data) + " have " +
-				hex.EncodeToString(response.address) + " want " +
-				hex.EncodeToString(request.address))
+	if response.address != request.address {
+		return nil, fmt.Errorf("error ADDR of response packet %X have %X want %X",
+			data, response.address, request.address)
 	}
 
 	return response, nil
