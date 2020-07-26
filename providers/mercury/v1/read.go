@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"strconv"
@@ -234,19 +235,25 @@ func (m *MercuryV1) LastPowerOnDatetime() (date time.Time, err error) {
 }
 
 /*
-	Чтение серийного номера
+	Чтение количества действующих тарифов
 
-	CMD: 2Fh
+	CMD: 2Dh
 	Request: ADDR-CMD-CRC
-	Response: ADDR-CMD-serial-CRC
+	Response: ADDR-CMD-function-CRC
+
+	Функциональное назначение выходного ключа импульсного выхода
+		0 - телеметрический выход 5000 имп/кВт.ч
+		1 - телеметрический выход 10000 имп/кВт.ч
+		2 - выход частоты встроенного кварца поделенной на 8
+		3 - управление нагрузкой
 */
-func (m *MercuryV1) SerialNumber() (sn uint32, err error) {
-	response, err := m.Invoke(NewRequest(RequestCommandReadSerialNumber))
+func (m *MercuryV1) OptocouplerFunction() (count uint8, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadOptocouplerFunction))
 	if err == nil {
-		sn = response.PayloadAsBuffer().ReadUint32()
+		count = response.PayloadAsBuffer().ReadUint8()
 	}
 
-	return sn, err
+	return count, err
 }
 
 /*
@@ -263,6 +270,22 @@ func (m *MercuryV1) TariffCount() (count uint8, err error) {
 	}
 
 	return count, err
+}
+
+/*
+	Чтение серийного номера
+
+	CMD: 2Fh
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-serial-CRC
+*/
+func (m *MercuryV1) SerialNumber() (sn uint32, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadSerialNumber))
+	if err == nil {
+		sn = response.PayloadAsBuffer().ReadUint32()
+	}
+
+	return sn, err
 }
 
 /*
@@ -303,13 +326,68 @@ func (m *MercuryV1) Holidays() ([]time.Time, error) {
 }
 
 /*
+	Чтение таблицы переключений тарифных зон
+
+	CMD: 31h
+	Request: ADDR-CMD-ii2-CRC
+	Response: ADDR-CMD-(nh-mm)*16-CRC
+
+	nh - Часы временной точки смены тарифа. В двух старших битах заложен номер тарифа 00 – 1, 01 – 2, 10 – 3, 11 – 4.
+*/
+func (m *MercuryV1) tariffZoneChanged(month uint8) (zones [][]uint8, err error) {
+	var response *Response
+
+	request := NewRequest(RequestCommandReadTariffZoneChanged).
+		WithPayload([]byte{month})
+
+	response, err = m.Invoke(request)
+	if err == nil {
+		dataOut := response.PayloadAsBuffer()
+		zones = make([][]uint8, 0)
+
+		for dataOut.Len() > 0 {
+			value := dataOut.ReadUint8()
+
+			if value == 255 {
+				break
+			}
+
+			tariffBit := value >> 6
+			hourBit := value & ^(tariffBit << 6)
+
+			hour, _ := strconv.ParseUint(hex.EncodeToString([]byte{hourBit}), 10, 64)
+			minute := dataOut.ReadBCD(1)
+
+			zones = append(zones, []uint8{tariffBit + 1, uint8(hour), uint8(minute)})
+		}
+	}
+
+	return zones, err
+}
+
+func (m *MercuryV1) ReadTariffZoneChanged() ([][]uint8, error) {
+	return m.tariffZoneChanged(CurrentMonth)
+}
+
+func (m *MercuryV1) ReadTariffZoneChangedByMonth(month time.Month) ([][]uint8, error) {
+	switch month {
+	case time.January, time.February, time.March, time.April, time.May, time.June,
+		time.July, time.August, time.September, time.October, time.November, time.December:
+	default:
+		return nil, errors.New("wrong month " + strconv.FormatInt(int64(month), 16))
+	}
+
+	return m.tariffZoneChanged(uint8(month) - 1)
+}
+
+/*
 	Чтение месячных срезов
 
 	CMD: 32h
 	Request: ADDR-CMD-ii3-CRC
-	Response: ADDR-CMD-count*4 -CRC
+	Response: ADDR-CMD-count*4-CRC
 */
-func (m *MercuryV1) monthlyStat(month byte) (t1, t2, t3, t4 uint64, err error) {
+func (m *MercuryV1) monthlyStat(month uint8) (t1, t2, t3, t4 uint64, err error) {
 	request := NewRequest(RequestCommandReadMonthlyStat).
 		WithPayload([]byte{month})
 
@@ -329,12 +407,19 @@ func (m *MercuryV1) monthlyStat(month byte) (t1, t2, t3, t4 uint64, err error) {
 // 0x0F текущий месяц, но модель 200 возвращает не корректные значения
 // поэтому лучше указывать месяц явно
 func (m *MercuryV1) MonthlyStat() (uint64, uint64, uint64, uint64, error) {
-	return m.monthlyStat(0x0F)
+	return m.monthlyStat(CurrentMonth)
 }
 
 // значения счетчика на 1 число месяца
 func (m *MercuryV1) MonthlyStatByMonth(month time.Month) (uint64, uint64, uint64, uint64, error) {
-	return m.monthlyStat(byte(int(month) - 1))
+	switch month {
+	case time.January, time.February, time.March, time.April, time.May, time.June,
+		time.July, time.August, time.September, time.October, time.November, time.December:
+	default:
+		return 0, 0, 0, 0, errors.New("wrong month " + strconv.FormatInt(int64(month), 16))
+	}
+
+	return m.monthlyStat(uint8(month) - 1)
 }
 
 /*
@@ -439,6 +524,34 @@ func (m *MercuryV1) EventsOpenClose(index uint8) (event bool, t time.Time, err e
 	}
 
 	return event, t, err
+}
+
+/*
+	Чтение буфера событий реле
+
+	CMD: 3Аh
+	Request: ADDR-CMD-ii5-CRC
+	Response: ADDR-CMD-event5-CRC
+*/
+func (m *MercuryV1) EventsRelay(index uint8) (tariff uint8, err error) {
+	if index > MaxEventsIndex {
+		err = errors.New("wrong index value #" + strconv.FormatUint(uint64(index), 16))
+	} else {
+		var response *Response
+
+		request := NewRequest(RequestCommandReadEventsRelay).
+			WithPayload([]byte{uint8(index)})
+
+		response, err = m.Invoke(request)
+		if err == nil {
+			dataOut := response.PayloadAsBuffer()
+
+			fmt.Println(response.payload)
+			fmt.Println(dataOut.ReadTimeDate(m.options.location))
+		}
+	}
+
+	return tariff, err
 }
 
 /*

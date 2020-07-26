@@ -18,6 +18,7 @@ const (
 	displayModeDate
 
 	MaxEventsIndex = 0x3F
+	CurrentMonth   = 0x0F
 
 	MaximumPower    = 0x0
 	MaximumAmperage = 0x1
