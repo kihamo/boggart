@@ -31,7 +31,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/influxdata/influxdb v1.8.0
 	github.com/kihamo/go-workers v2.1.8-0.20200620141938-31fefb5789a8+incompatible
-	github.com/kihamo/shadow v0.0.0-20200412185102-25db29c8fa3b
+	github.com/kihamo/shadow v0.0.0-20200726144526-4ac78a600203
 	github.com/kihamo/snitch v0.0.0-20200412182537-3478a87783e1
 	github.com/llgcode/draw2d v0.0.0-20200110163050-b96d8208fcfc
 	github.com/mailru/easyjson v0.7.1
@@ -50,6 +50,7 @@ require (
 	golang.org/x/mod v0.3.0 // indirect
 	golang.org/x/net v0.0.0-20200625001655-4c5254603344
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
+	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208 // indirect
 	golang.org/x/sys v0.0.0-20200610111108-226ff32320da // indirect
 	golang.org/x/tools v0.0.0-20200612220849-54c614fe050c // indirect
 	google.golang.org/api v0.20.0
@@ -66,5 +67,3 @@ require (
 replace github.com/barnybug/go-cast v0.0.0-20190910160619-d2aa97f56d4e => github.com/kihamo/go-cast v0.0.0-20190130214031-2bd907ad55c2
 
 replace github.com/sparrc/go-ping => github.com/kihamo/go-ping v0.0.0-20200405124135-bc7921838e0d
-
-replace github.com/kihamo/shadow v0.0.0-20200412160130-a95972d7c957 => /Users/kihamo/go/src/github.com/kihamo/shadow
