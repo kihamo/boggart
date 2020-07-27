@@ -130,18 +130,15 @@ func (m *MercuryV1) PowerCurrent() (power uint64, err error) {
 	Request: ADDR-CMD-CRC
 	Response: ADDR-CMD-count*4-CRC
 */
-func (m *MercuryV1) PowerCounters() (t1, t2, t3, t4 uint64, err error) {
+func (m *MercuryV1) PowerCounters() (values *TariffValues, err error) {
 	response, err := m.Invoke(NewRequest(RequestCommandReadPowerCounters))
 	if err == nil {
 		dataOut := response.PayloadAsBuffer()
 
-		t1 = dataOut.ReadCount()
-		t2 = dataOut.ReadCount()
-		t3 = dataOut.ReadCount()
-		t4 = dataOut.ReadCount()
+		values = NewTariffValues(dataOut.ReadCount(), dataOut.ReadCount(), dataOut.ReadCount(), dataOut.ReadCount())
 	}
 
-	return t1, t2, t3, t4, err
+	return values, err
 }
 
 /*
@@ -189,17 +186,13 @@ func (m *MercuryV1) BatteryVoltage() (voltage float64, err error) {
 	Request: ADDR-CMD-CRC
 	Response: ADDR-CMD-displ-CRC
 */
-func (m *MercuryV1) DisplayMode() (t1, t2, t3, t4, amount, power, t, date bool, err error) {
+func (m *MercuryV1) DisplayMode() (mode *DisplayMode, err error) {
 	response, err := m.Invoke(NewRequest(RequestCommandReadDisplayMode))
 	if err == nil {
-		bit := response.PayloadAsBuffer().ReadUint8()
-		t1, t2, t3, t4, amount, power, t, date = bit&displayModeTariff1 != 0, bit&displayModeTariff2 != 0,
-			bit&displayModeTariff3 != 0, bit&displayModeTariff4 != 0,
-			bit&displayModeAmount != 0, bit&displayModePower != 0,
-			bit&displayModeTime != 0, bit&displayModeDate != 0
+		mode = NewDisplayMode(response.PayloadAsBuffer().ReadUint8())
 	}
 
-	return t1, t2, t3, t4, amount, power, t, date, err
+	return mode, err
 }
 
 /*
@@ -387,7 +380,7 @@ func (m *MercuryV1) ReadTariffZoneChangedByMonth(month time.Month) ([][]uint8, e
 	Request: ADDR-CMD-ii3-CRC
 	Response: ADDR-CMD-count*4-CRC
 */
-func (m *MercuryV1) monthlyStat(month uint8) (t1, t2, t3, t4 uint64, err error) {
+func (m *MercuryV1) monthlyStat(month uint8) (values *TariffValues, err error) {
 	request := NewRequest(RequestCommandReadMonthlyStat).
 		WithPayload([]byte{month})
 
@@ -395,28 +388,25 @@ func (m *MercuryV1) monthlyStat(month uint8) (t1, t2, t3, t4 uint64, err error) 
 	if err == nil {
 		dataOut := response.PayloadAsBuffer()
 
-		t1 = dataOut.ReadCount()
-		t2 = dataOut.ReadCount()
-		t3 = dataOut.ReadCount()
-		t4 = dataOut.ReadCount()
+		values = NewTariffValues(dataOut.ReadCount(), dataOut.ReadCount(), dataOut.ReadCount(), dataOut.ReadCount())
 	}
 
-	return t1, t2, t3, t4, err
+	return values, err
 }
 
 // 0x0F текущий месяц, но модель 200 возвращает не корректные значения
 // поэтому лучше указывать месяц явно
-func (m *MercuryV1) MonthlyStat() (uint64, uint64, uint64, uint64, error) {
+func (m *MercuryV1) MonthlyStat() (*TariffValues, error) {
 	return m.monthlyStat(CurrentMonth)
 }
 
 // значения счетчика на 1 число месяца
-func (m *MercuryV1) MonthlyStatByMonth(month time.Month) (uint64, uint64, uint64, uint64, error) {
+func (m *MercuryV1) MonthlyStatByMonth(month time.Month) (*TariffValues, error) {
 	switch month {
 	case time.January, time.February, time.March, time.April, time.May, time.June,
 		time.July, time.August, time.September, time.October, time.November, time.December:
 	default:
-		return 0, 0, 0, 0, errors.New("wrong month " + strconv.FormatInt(int64(month), 16))
+		return nil, errors.New("wrong month " + strconv.FormatInt(int64(month), 16))
 	}
 
 	return m.monthlyStat(uint8(month) - 1)
@@ -639,24 +629,25 @@ func (m *MercuryV1) MakeDate() (date time.Time, err error) {
 }
 
 /*
-	Чтение даты изготовления
+	Чтение времени индикации
 
 	CMD: 67h
 	Request: ADDR-CMD-CRC
 	Response: ADDR-CMD-TIMEDISPL-CRC
 */
-func (m *MercuryV1) DisplayTime() (t1, t2, t3, t4 uint8, err error) {
+func (m *MercuryV1) DisplayTime() (values *TariffValues, err error) {
 	response, err := m.Invoke(NewRequest(RequestCommandReadDisplayTime))
 	if err == nil {
 		dataOut := response.PayloadAsBuffer()
 
-		t1 = dataOut.ReadUint8()
-		t2 = dataOut.ReadUint8()
-		t3 = dataOut.ReadUint8()
-		t4 = dataOut.ReadUint8()
+		values = NewTariffValues(
+			uint64(dataOut.ReadUint8()),
+			uint64(dataOut.ReadUint8()),
+			uint64(dataOut.ReadUint8()),
+			uint64(dataOut.ReadUint8()))
 	}
 
-	return t1, t2, t3, t4, err
+	return values, err
 }
 
 /*
@@ -675,5 +666,106 @@ func (m *MercuryV1) WorkingTime() (under, without time.Duration, err error) {
 		without = time.Duration(dataOut.ReadBCD(3)) * time.Hour
 	}
 
-	return
+	return under, without, err
+}
+
+/*
+	Чтение режима доп. индикации
+
+	CMD: 6Bh
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-displ1-TIMED-CRC
+*/
+func (m *MercuryV1) DisplayModeExt() (mode *DisplayModeExt, timed uint8, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadDisplayModeExt))
+	if err == nil {
+		dataOut := response.PayloadAsBuffer()
+
+		mode = NewDisplayModeExt(dataOut.ReadUint8())
+		timed = dataOut.ReadUint8()
+	}
+
+	return mode, timed, err
+}
+
+/*
+	Чтение времени последней парам. счётчика
+
+	CMD: 6Bh
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-timedate-CRC
+*/
+func (m *MercuryV1) ParamLastChange() (datetime time.Time, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadParamLastChange))
+	if err == nil {
+		datetime = response.PayloadAsBuffer().ReadTimeDateWithDayOfWeek(m.options.location)
+	}
+
+	return datetime, err
+}
+
+/*
+	Чтение режима управления реле
+
+	CMD: 6Dh
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-RELE-CRC
+*/
+func (m *MercuryV1) RelayMode() (byLimits, buttonEmulation, enabled bool, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadRelayMode))
+	if err == nil {
+		enabled = true
+
+		switch response.Payload()[0] {
+		case 0x55:
+			byLimits = true
+		case 0x5A:
+			buttonEmulation = true
+		case 0xAA:
+			enabled = false
+		}
+	}
+
+	return byLimits, buttonEmulation, enabled, err
+}
+
+/*
+	Чтение потарифных лимитов Энергии (остатки)
+
+	CMD: 6Eh
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-mp1-mp2-mp3-mp4-CRC
+*/
+func (m *MercuryV1) PowerLimits() (t1, t2, t3, t4 uint64, flag1, flag2, flag3, flag4 bool, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadPowerLimits))
+	if err == nil {
+		dataOut := response.PayloadAsBuffer()
+
+		t1 = dataOut.ReadBCD(3)
+		flag1 = dataOut.ReadUint8() == 0xAA
+		t2 = dataOut.ReadBCD(3)
+		flag2 = dataOut.ReadUint8() == 0xAA
+		t3 = dataOut.ReadBCD(3)
+		flag3 = dataOut.ReadUint8() == 0xAA
+		t4 = dataOut.ReadBCD(3)
+		flag4 = dataOut.ReadUint8() == 0xAA
+	}
+
+	return t1, t2, t3, t4, flag1, flag2, flag3, flag4, err
+}
+
+/*
+	Чтение флага разрешения индикации под батарейкой
+
+	CMD: 6Fh
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-flag1-CRC
+*/
+func (m *MercuryV1) AllowIndicationUnderBattery() (flag bool, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadAllowIndicationUnderBattery))
+	if err == nil {
+		flag = response.Payload()[0] == 0x55
+	}
+
+	return flag, err
 }

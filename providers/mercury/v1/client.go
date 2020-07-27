@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	displayModeTariff1 = 1 << iota
+	displayModeTariff1 uint8 = 1 << iota
 	displayModeTariff2
 	displayModeTariff3
 	displayModeTariff4
@@ -16,6 +16,17 @@ const (
 	displayModePower
 	displayModeTime
 	displayModeDate
+)
+
+const (
+	displayModeTariffSchedule uint8 = 1 << iota
+	displayModeUIF
+	displayModeReactiveEnergy
+	displayModeMaximumResets
+	displayModeWorkingTime
+	displayModeBatteryLifetime
+	displayModePowerLimit
+	displayModeEnergyLimit
 
 	MaxEventsIndex = 0x3F
 	CurrentMonth   = 0x0F

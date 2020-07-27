@@ -40,7 +40,7 @@
                                         <td>{{ i18n $stats.Month.String $ nil "dashboard" }} {{ $stats.Year }}</td>
                                         {{ if gt $.tariff_count 0 }}
                                         <td>
-                                            <script type="application/javascript">document.write(valueFormat({{ $stats.T1 }}))</script>
+                                            <script type="application/javascript">document.write(valueFormat({{ $stats.Values.Tariff1 }}))</script>
                                             {{ if gt $stats.T1Trend 0 }}
                                                 <span class="label label-danger"><script type="application/javascript">document.write(valueFormat({{ $stats.T1Delta }}))</script> / <script type="application/javascript">document.write(valueFormat({{ $stats.T1Trend }}))</script></span>
                                             {{ else if lt $stats.T1Trend 0 }}
@@ -54,7 +54,7 @@
                                         {{ end }}
                                         {{ if gt $.tariff_count 1 }}
                                         <td>
-                                            <script type="application/javascript">document.write(valueFormat({{ $stats.T2 }}))</script>
+                                            <script type="application/javascript">document.write(valueFormat({{ $stats.Values.Tariff2 }}))</script>
                                             {{ if gt $stats.T2Trend 0 }}
                                                 <span class="label label-danger"><script type="application/javascript">document.write(valueFormat({{ $stats.T2Delta }}))</script> / <script type="application/javascript">document.write(valueFormat({{ $stats.T2Trend }}))</script></span>
                                             {{ else if lt $stats.T2Trend 0 }}
@@ -68,7 +68,7 @@
                                         {{ end }}
                                         {{ if gt $.tariff_count 2 }}
                                         <td>
-                                            <script type="application/javascript">document.write(valueFormat({{ $stats.T3 }}))</script>
+                                            <script type="application/javascript">document.write(valueFormat({{ $stats.Values.Tariff3 }}))</script>
                                             {{ if gt $stats.T3Trend 0 }}
                                                 <span class="label label-danger"><script type="application/javascript">document.write(valueFormat({{ $stats.T3Delta }}))</script> / <script type="application/javascript">document.write(valueFormat({{ $stats.T3Trend }}))</script></span>
                                             {{ else if lt $stats.T3Trend 0 }}
@@ -82,7 +82,7 @@
                                         {{ end }}
                                         {{ if gt $.tariff_count 3 }}
                                         <td>
-                                            <script type="application/javascript">document.write(valueFormat({{ $stats.T4 }}))</script>
+                                            <script type="application/javascript">document.write(valueFormat({{ $stats.Values.Tariff4 }}))</script>
                                             {{ if gt $stats.T4Trend 0 }}
                                                 <span class="label label-danger"><script type="application/javascript">document.write(valueFormat({{ $stats.T4Delta }}))</script> / <script type="application/javascript">document.write(valueFormat({{ $stats.T4Trend }}))</script></span>
                                             {{ else if lt $stats.T4Trend 0 }}
@@ -139,7 +139,7 @@
                                             {{ i18n "Show T1" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
-                                            <input type="checkbox" class="js-switch" name="mode_t1" id="mode_t1" {{ if eq (print .mode_t1) "true" }} checked{{ end }} />
+                                            <input type="checkbox" class="js-switch" name="mode_t1" id="mode_t1" {{ if eq (print .mode.IsTariff1) "true" }} checked{{ end }} />
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -147,7 +147,7 @@
                                             {{ i18n "Show T2" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
-                                            <input type="checkbox" class="js-switch" name="mode_t2" id="mode_t2" {{ if eq (print .mode_t2) "true" }} checked{{ end }} />
+                                            <input type="checkbox" class="js-switch" name="mode_t2" id="mode_t2" {{ if eq (print .mode.IsTariff2) "true" }} checked{{ end }} />
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -155,7 +155,7 @@
                                             {{ i18n "Show T3" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
-                                            <input type="checkbox" class="js-switch" name="mode_t3" id="mode_t3" {{ if eq (print .mode_t3) "true" }} checked{{ end }} />
+                                            <input type="checkbox" class="js-switch" name="mode_t3" id="mode_t3" {{ if eq (print .mode.IsTariff3) "true" }} checked{{ end }} />
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -163,7 +163,7 @@
                                             {{ i18n "Show T4" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
-                                            <input type="checkbox" class="js-switch" name="mode_t4" id="mode_t4" {{ if eq (print .mode_t4) "true" }} checked{{ end }} />
+                                            <input type="checkbox" class="js-switch" name="mode_t4" id="mode_t4" {{ if eq (print .mode.IsTariff4) "true" }} checked{{ end }} />
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -171,7 +171,7 @@
                                             {{ i18n "Show amount" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
-                                            <input type="checkbox" class="js-switch" name="mode_amount" id="mode_amount" {{ if eq (print .mode_amount) "true" }} checked{{ end }} />
+                                            <input type="checkbox" class="js-switch" name="mode_amount" id="mode_amount" {{ if eq (print .mode.IsAmount) "true" }} checked{{ end }} />
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -179,7 +179,7 @@
                                             {{ i18n "Show power" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
-                                            <input type="checkbox" class="js-switch" name="mode_power" id="mode_power" {{ if eq (print .mode_power) "true" }} checked{{ end }} />
+                                            <input type="checkbox" class="js-switch" name="mode_power" id="mode_power" {{ if eq (print .mode.IsPower) "true" }} checked{{ end }} />
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -187,7 +187,7 @@
                                             {{ i18n "Show time" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
-                                            <input type="checkbox" class="js-switch" name="mode_time" id="mode_time" {{ if eq (print .mode_time) "true" }} checked{{ end }} />
+                                            <input type="checkbox" class="js-switch" name="mode_time" id="mode_time" {{ if eq (print .mode.IsTime) "true" }} checked{{ end }} />
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -195,7 +195,7 @@
                                             {{ i18n "Show date" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
-                                            <input type="checkbox" class="js-switch" name="mode_date" id="mode_date" {{ if eq (print .date) "true" }} checked{{ end }} />
+                                            <input type="checkbox" class="js-switch" name="mode_date" id="mode_date" {{ if eq (print .mode.IsDate) "true" }} checked{{ end }} />
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -203,7 +203,7 @@
                                             {{ i18n "Interval for not current tariff" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
-                                            <input type="number" name="time_t1" id="time_t1" value="{{ .time_t1 }}" pattern="^[-+]?[0-9]*$"/>
+                                            <input type="number" name="time_t1" id="time_t1" value="{{ .time.Tariff1 }}" pattern="^[-+]?[0-9]*$"/>
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -211,7 +211,7 @@
                                             {{ i18n "Interval for current tariff" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
-                                            <input type="number" name="time_t2" id="time_t2" value="{{ .time_t2 }}" pattern="^[-+]?[0-9]*$"/>
+                                            <input type="number" name="time_t2" id="time_t2" value="{{ .time.Tariff2 }}" pattern="^[-+]?[0-9]*$"/>
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -219,7 +219,7 @@
                                             {{ i18n "Interval for power, time and date" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
-                                            <input type="number" name="time_t3" id="time_t3" value="{{ .time_t3 }}" pattern="^[-+]?[0-9]*$"/>
+                                            <input type="number" name="time_t3" id="time_t3" value="{{ .time.Tariff3 }}" pattern="^[-+]?[0-9]*$"/>
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -227,7 +227,7 @@
                                             {{ i18n "Interval for after press back button" . }} <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
-                                            <input type="number" name="time_t4" id="time_t4" value="{{ .time_t4 }}" pattern="^[-+]?[0-9]*$"/>
+                                            <input type="number" name="time_t4" id="time_t4" value="{{ .time.Tariff4 }}" pattern="^[-+]?[0-9]*$"/>
                                         </div>
                                     </div>
 
@@ -285,6 +285,15 @@
                                                 </td>
                                             {{ end }}
                                             <td>{{ i18n "Current date and time on meter" . }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ i18n "Param last change" . }}</td>
+                                            {{ if .param_last_change_data.error }}
+                                                <td class="text-danger">{{ .param_last_change_data.error.Error }}</td>
+                                            {{ else }}
+                                                <td><script type="application/javascript">document.write(dateToString('{{ .param_last_change_data.value.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                            {{ end }}
+                                            <td>{{ i18n "Param last change date" . }}</td>
                                         </tr>
                                         <tr>
                                             <td>{{ i18n "Make date" . }}</td>

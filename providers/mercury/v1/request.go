@@ -75,13 +75,13 @@ const (
 	RequestCommandReadMakeDate    = 0x66 // чтение даты изготовления
 	RequestCommandReadDisplayTime = 0x67 // чтение времени индекации
 	// 0x68 // чтение режима лимита мощности
-	RequestCommandReadWorkingTime = 0x69 // чтение времени наработки
-	// 0x6A // чтение режима доп. индикации
-	// 0x6B // чтение времени последней парам. счётчика
+	RequestCommandReadWorkingTime     = 0x69 // чтение времени наработки
+	RequestCommandReadDisplayModeExt  = 0x6A // чтение режима доп. индикации
+	RequestCommandReadParamLastChange = 0x6B // чтение времени последней парам. счётчика
 	// 0x6C // чтение номера модема и системы и уровня сигнала
-	// 0x6D // чтение режима управления реле
-	// 0x6E // чтение потарифных лимитов Энергии (остатки)
-	// 0x6F // чтение флага разрешения индикации под батарейкой
+	RequestCommandReadRelayMode                   = 0x6D // чтение режима управления реле
+	RequestCommandReadPowerLimits                 = 0x6E // чтение потарифных лимитов Энергии (остатки)
+	RequestCommandReadAllowIndicationUnderBattery = 0x6F // чтение флага разрешения индикации под батарейкой
 )
 
 type Request struct {

@@ -24,7 +24,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		type monthly struct {
 			Month                              time.Month
 			Year                               int
-			T1, T2, T3, T4                     uint64
+			Values                             *v1.TariffValues
 			T1Delta, T2Delta, T3Delta, T4Delta uint64
 			T1Trend, T2Trend, T3Trend, T4Trend int64
 		}
@@ -46,10 +46,9 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			vars["tariff_count"] = tariffCount
 
 			var (
-				t1, t2, t3, t4 uint64
-				last           time.Month
-				err            error
-				monthRequest   time.Month
+				last         time.Month
+				err          error
+				monthRequest time.Month
 			)
 
 			if r.URL().Query().Get("all") != "" {
@@ -63,7 +62,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			for i := 1; i <= int(last); i++ {
 				monthRequest = time.Month(i)
 
-				t1, t2, t3, t4, err = bind.provider.MonthlyStatByMonth(monthRequest)
+				statsValues, err := bind.provider.MonthlyStatByMonth(monthRequest)
 				if err != nil {
 					mAsString := t.Translate(r.Context(), monthRequest.String(), "")
 					r.Session().FlashBag().Error(t.Translate(r.Context(), "Get statistics for %s failed with error %s", "", mAsString, err.Error()))
@@ -71,10 +70,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 				}
 
 				stat := &monthly{
-					T1: t1,
-					T2: t2,
-					T3: t3,
-					T4: t4,
+					Values: statsValues,
 				}
 
 				// счетчик отдает статистику на 1 число следующего месяца, поэтому разделяем месяца
@@ -102,18 +98,15 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			})
 
 			// отдельно запрашиваем текущий месяц
-			t1, t2, t3, t4, err = bind.provider.PowerCounters()
+			powerValues, err := bind.provider.PowerCounters()
 			if err != nil {
 				mAsString := t.Translate(r.Context(), date.Month().String(), "")
 				r.Session().FlashBag().Error(t.Translate(r.Context(), "Get statistics for %s failed with error %s", "", mAsString, err.Error()))
 			} else {
 				stat := &monthly{
-					Month: date.Month(),
-					Year:  date.Year(),
-					T1:    t1,
-					T2:    t2,
-					T3:    t3,
-					T4:    t4,
+					Month:  date.Month(),
+					Year:   date.Year(),
+					Values: powerValues,
 				}
 
 				stats = append(stats, stat)
@@ -125,10 +118,10 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 					continue
 				}
 
-				current.T1Delta = current.T1 - stats[i-1].T1
-				current.T2Delta = current.T2 - stats[i-1].T2
-				current.T3Delta = current.T3 - stats[i-1].T3
-				current.T4Delta = current.T4 - stats[i-1].T4
+				current.T1Delta = current.Values.Tariff1() - stats[i-1].Values.Tariff1()
+				current.T2Delta = current.Values.Tariff2() - stats[i-1].Values.Tariff2()
+				current.T3Delta = current.Values.Tariff3() - stats[i-1].Values.Tariff3()
+				current.T4Delta = current.Values.Tariff4() - stats[i-1].Values.Tariff4()
 			}
 
 			// trends
@@ -212,89 +205,80 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 	case "display":
-		var (
-			modeT1, modeT2, modeT3, modeT4, modeAmount, modePower, modeTime, modeDate bool
-			timeT1, timeT2, timeT3, timeT4                                            uint8
-			err                                                                       error
-		)
+		var err error
+
+		mode, err := bind.provider.DisplayMode()
+		if err != nil {
+			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get display mode failed with error %s", "", err.Error()))
+		}
+
+		timeValues, err := bind.provider.DisplayTime()
+		if err != nil {
+			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get display time failed with error %s", "", err.Error()))
+		}
 
 		if r.IsPost() {
-			modeT1 = r.Original().FormValue("mode_t1") != ""
-			modeT2 = r.Original().FormValue("mode_t2") != ""
-			modeT3 = r.Original().FormValue("mode_t3") != ""
-			modeT4 = r.Original().FormValue("mode_t4") != ""
-			modeAmount = r.Original().FormValue("mode_amount") != ""
-			modePower = r.Original().FormValue("mode_power") != ""
-			modeTime = r.Original().FormValue("mode_time") != ""
-			modeDate = r.Original().FormValue("mode_date") != ""
+			mode.SetTariff1(r.Original().FormValue("mode_t1") != "")
+			mode.SetTariff2(r.Original().FormValue("mode_t2") != "")
+			mode.SetTariff3(r.Original().FormValue("mode_t3") != "")
+			mode.SetTariff4(r.Original().FormValue("mode_t4") != "")
+			mode.SetAmount(r.Original().FormValue("mode_amount") != "")
+			mode.SetPower(r.Original().FormValue("mode_power") != "")
+			mode.SetTime(r.Original().FormValue("mode_time") != "")
+			mode.SetDate(r.Original().FormValue("mode_date") != "")
 
-			err = bind.provider.SetDisplayMode(modeT1, modeT2, modeT3, modeT4, modeAmount, modePower, modeTime, modeDate)
-			if err != nil {
-				r.Session().FlashBag().Error(t.Translate(r.Context(), "Change display mode failed with error %s", "", err.Error()))
-			} else {
-				r.Session().FlashBag().Success(t.Translate(r.Context(), "Change display mode success", ""))
+			if mode.IsChanged() {
+				err = bind.provider.SetDisplayMode(mode)
+				if err != nil {
+					r.Session().FlashBag().Error(t.Translate(r.Context(), "Change display mode failed with error %s", "", err.Error()))
+				} else {
+					r.Session().FlashBag().Success(t.Translate(r.Context(), "Change display mode success", ""))
+				}
 			}
 
 			var timeValue uint64
 
 			if timeValue, err = strconv.ParseUint(r.Original().FormValue("time_t1"), 10, 64); err == nil {
-				timeT1 = uint8(timeValue)
+				timeValues.SetTariff1(timeValue)
 			}
 
 			if err == nil {
 				if timeValue, err = strconv.ParseUint(r.Original().FormValue("time_t2"), 10, 64); err == nil {
-					timeT2 = uint8(timeValue)
+					timeValues.SetTariff2(timeValue)
 				}
 			}
 
 			if err == nil {
 				if timeValue, err = strconv.ParseUint(r.Original().FormValue("time_t3"), 10, 64); err == nil {
-					timeT3 = uint8(timeValue)
+					timeValues.SetTariff3(timeValue)
 				}
 			}
 
 			if err == nil {
 				if timeValue, err = strconv.ParseUint(r.Original().FormValue("time_t4"), 10, 64); err == nil {
-					timeT4 = uint8(timeValue)
+					timeValues.SetTariff4(timeValue)
+				}
+			}
+
+			if err != nil {
+				r.Session().FlashBag().Error(t.Translate(r.Context(), "Parse value failed with error %s", "", err.Error()))
+			} else if timeValues.IsChanged() {
+				err = bind.provider.SetDisplayTime(timeValues)
+				if err != nil {
+					r.Session().FlashBag().Error(t.Translate(r.Context(), "Change display time failed with error %s", "", err.Error()))
+				} else {
+					r.Session().FlashBag().Success(t.Translate(r.Context(), "Change display time success", ""))
 				}
 			}
 
 			if err == nil {
-				err = bind.provider.SetDisplayTime(timeT1, timeT2, timeT3, timeT4)
-			}
-
-			if err != nil {
-				r.Session().FlashBag().Error(t.Translate(r.Context(), "Change display time failed with error %s", "", err.Error()))
-			} else {
-				r.Session().FlashBag().Success(t.Translate(r.Context(), "Change display time success", ""))
 				t.Redirect(r.URL().Path+"?action="+action, http.StatusFound, w, r)
 				return
 			}
 		}
 
-		modeT1, modeT2, modeT3, modeT4, modeAmount, modePower, modeTime, modeDate, err = bind.provider.DisplayMode()
-		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get display mode failed with error %s", "", err.Error()))
-		}
-
-		vars["mode_t1"] = modeT1
-		vars["mode_t2"] = modeT2
-		vars["mode_t3"] = modeT3
-		vars["mode_t4"] = modeT4
-		vars["mode_amount"] = modeAmount
-		vars["mode_power"] = modePower
-		vars["mode_time"] = modeTime
-		vars["mode_date"] = modeDate
-
-		timeT1, timeT2, timeT3, timeT4, err = bind.provider.DisplayTime()
-		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get display time failed with error %s", "", err.Error()))
-		}
-
-		vars["time_t1"] = timeT1
-		vars["time_t2"] = timeT2
-		vars["time_t3"] = timeT3
-		vars["time_t4"] = timeT4
+		vars["mode"] = mode
+		vars["time"] = timeValues
 
 	case "holidays":
 		days, err := bind.provider.Holidays()
@@ -319,6 +303,13 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		vars["datetime"] = variable
+
+		// param last change
+		v, err = bind.provider.ParamLastChange()
+		vars["param_last_change_data"] = map[string]interface{}{
+			"value": v,
+			"error": err,
+		}
 
 		// make date
 		v, err = bind.provider.MakeDate()
