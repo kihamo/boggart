@@ -69,7 +69,7 @@ const (
 	RequestCommandReadLastCloseCap  uint8 = 0x62 // чтение времение последнего закрытия крышки счетчика
 	RequestCommandReadParamsCurrent uint8 = 0x63 // чтение текущих параметров сети U, I, P
 	// 0x64 // чтение коэффициента коррекции хода часов Введена для чтения коэффициента коррекции без перемычки.
-	// 0x65 // чтение слова исполнения
+	RequestCommandReadModel       uint8 = 0x65 // чтение слова исполнения
 	RequestCommandReadMakeDate    uint8 = 0x66 // чтение даты изготовления
 	RequestCommandReadDisplayTime uint8 = 0x67 // чтение времени индекации
 	// 0x68 // чтение режима лимита мощности

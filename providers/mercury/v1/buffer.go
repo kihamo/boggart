@@ -28,6 +28,10 @@ func (b *Buffer) ReadUint8() uint8 {
 	return result
 }
 
+func (b *Buffer) ReadUint16() uint16 {
+	return binary.LittleEndian.Uint16(b.Next(2))
+}
+
 func (b *Buffer) ReadUint32() uint32 {
 	return binary.LittleEndian.Uint32(b.Next(4))
 }

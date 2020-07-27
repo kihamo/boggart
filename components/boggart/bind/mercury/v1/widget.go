@@ -403,6 +403,17 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 				"error": err,
 			}
 		}
+
+		// model
+		twoSensors, relay, err := bind.provider.Model()
+		vars["model_two_sensors"] = map[string]interface{}{
+			"value": twoSensors,
+			"error": err,
+		}
+		vars["model_relay"] = map[string]interface{}{
+			"value": relay,
+			"error": err,
+		}
 	}
 
 	t.Render(r.Context(), "widget", vars)

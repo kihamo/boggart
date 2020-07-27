@@ -536,6 +536,7 @@ func (m *MercuryV1) EventsRelay(index uint8) (tariff uint8, err error) {
 		if err == nil {
 			dataOut := response.PayloadAsBuffer()
 
+			// TODO:
 			fmt.Println(response.payload)
 			fmt.Println(dataOut.ReadTimeDate(m.options.location))
 		}
@@ -613,9 +614,30 @@ func (m *MercuryV1) UIPCurrent() (voltage uint64, amperage float64, power uint64
 }
 
 /*
+	Чтение слова исполнения
+
+	CMD: 65h
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-ispoln-CRC
+
+	https://github.com/instalator/ioBroker.mercury/blob/fd1195fd4695c513ae4a12e211e0a3dd290f21dc/lib/mercury.js#L1294
+*/
+func (m *MercuryV1) Model() (twoSensors, relay bool, err error) {
+	response, err := m.Invoke(NewRequest(RequestCommandReadModel))
+	if err == nil {
+		dataOut := response.PayloadAsBuffer()
+
+		twoSensors = dataOut.ReadUint8() > 0
+		relay = dataOut.ReadUint8() > 0
+	}
+
+	return twoSensors, relay, err
+}
+
+/*
 	Чтение даты изготовления
 
-	CMD: 63h
+	CMD: 66h
 	Request: ADDR-CMD-CRC
 	Response: ADDR-CMD-datefabric-CRC
 */

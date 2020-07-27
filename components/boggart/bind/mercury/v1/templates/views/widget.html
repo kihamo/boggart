@@ -426,6 +426,24 @@
                                             <td></td>
                                         </tr>
                                         {{ end }}
+                                        <tr>
+                                            <td>{{ i18n "Two sensors" . }}</td>
+                                                {{ if .model_two_sensors.error }}
+                                                    <td class="text-danger">{{ .model_two_sensors.error.Error }}</td>
+                                                {{ else }}
+                                                    <td>{{ if .model_two_sensors.value }}{{ i18n "yes" . }}{{ else }}{{ i18n "no" . }}{{ end }}</td>
+                                                {{ end }}
+                                            <td>{{ i18n "Two current sensors" . }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ i18n "Relay" . }}</td>
+                                                {{ if .model_relay.error }}
+                                                    <td class="text-danger">{{ .model_relay.error.Error }}</td>
+                                                {{ else }}
+                                                    <td>{{ if .model_relay.value }}{{ i18n "yes" . }}{{ else }}{{ i18n "no" . }}{{ end }}</td>
+                                                {{ end }}
+                                            <td>{{ i18n "Inner relay" . }}</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             {{ end }}
