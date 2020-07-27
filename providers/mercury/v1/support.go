@@ -23,8 +23,13 @@ func init() {
 		Device200: {
 			RequestCommandReadParamLastChange: false,
 			RequestCommandReadMaximum:         false,
+			RequestCommandReadDisplayModeExt:  false,
 		},
 	}
+}
+
+func CommandNotSupported(err error) bool {
+	return err == ErrCommandNotSupported
 }
 
 func IsCommandSupported(device, command uint8) bool {

@@ -306,7 +306,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 		// param last change
 		v, err = bind.provider.ParamLastChange()
-		if err != v1.ErrCommandNotSupported {
+		if !v1.CommandNotSupported(err) {
 			vars["param_last_change_data"] = map[string]interface{}{
 				"value": v,
 				"error": err,
@@ -358,7 +358,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 		// V max
 		voltageMax, voltageMaxDate, voltageMaxReset, voltageMaxDateReset, err := bind.provider.MaximumVoltage()
-		if err != v1.ErrCommandNotSupported {
+		if !v1.CommandNotSupported(err) {
 			vars["voltage_max"] = map[string]interface{}{
 				"value": voltageMax,
 				"date":  voltageMaxDate,
@@ -374,7 +374,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 		// A max
 		amperageMax, amperageMaxDate, amperageMaxReset, amperageMaxDateReset, err := bind.provider.MaximumAmperage()
-		if err != v1.ErrCommandNotSupported {
+		if !v1.CommandNotSupported(err) {
 			vars["amperage_max"] = map[string]interface{}{
 				"value": amperageMax,
 				"date":  amperageMaxDate,
@@ -390,7 +390,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 		// Watts max
 		powerMax, powerMaxDate, powerMaxReset, powerMaxDateReset, err := bind.provider.MaximumPower()
-		if err != v1.ErrCommandNotSupported {
+		if !v1.CommandNotSupported(err) {
 			vars["power_max"] = map[string]interface{}{
 				"value": powerMax,
 				"date":  powerMaxDate,
