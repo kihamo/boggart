@@ -10,6 +10,7 @@ import (
 
 type options struct {
 	address  uint32
+	device   uint8
 	location *time.Location
 }
 
@@ -33,6 +34,7 @@ func newFuncOption(f func(*options)) *funcOption {
 
 func defaultOptions() options {
 	return options{
+		device:   DeviceUnknown,
 		location: time.Now().Location(),
 	}
 }
@@ -74,6 +76,12 @@ func WithAddressAsString(address string) Option {
 		copy(sn[4-len(h):], h)
 
 		o.address = binary.LittleEndian.Uint32(sn)
+	})
+}
+
+func WithDevice(device uint8) Option {
+	return newFuncOption(func(o *options) {
+		o.device = device
 	})
 }
 

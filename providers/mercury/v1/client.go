@@ -55,6 +55,10 @@ func New(conn connection.Conn, opts ...Option) *MercuryV1 {
 }
 
 func (m *MercuryV1) Invoke(request *Request) (*Response, error) {
+	if !IsCommandSupported(m.options.device, request.command) {
+		return nil, ErrCommandNotSupported
+	}
+
 	if request.address == 0 {
 		request = request.WithAddress(m.options.address)
 	}

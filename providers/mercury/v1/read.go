@@ -599,7 +599,7 @@ func (m *MercuryV1) LastCloseCap() (date time.Time, err error) {
 	Request: ADDR-CMD-CRC
 	Response: ADDR-CMD-V-I-P-CRC
 */
-func (m *MercuryV1) ParamsCurrent() (voltage uint64, amperage float64, power uint64, err error) {
+func (m *MercuryV1) UIPCurrent() (voltage uint64, amperage float64, power uint64, err error) {
 	response, err := m.Invoke(NewRequest(RequestCommandReadParamsCurrent))
 	if err == nil {
 		dataOut := response.PayloadAsBuffer()

@@ -10,14 +10,20 @@ import (
 func init() {
 	boggart.RegisterBindType("mercury:200", v1.Type{
 		SerialNumberFunc: mercury1.WithAddress200AsString,
+		Device:           mercury1.Device200,
 	})
-
-	version1 := v1.Type{
+	boggart.RegisterBindType("mercury:201", v1.Type{
 		SerialNumberFunc: mercury1.WithAddressAsString,
-	}
-	boggart.RegisterBindType("mercury:201", version1)
-	boggart.RegisterBindType("mercury:203", version1)
-	boggart.RegisterBindType("mercury:206", version1)
+		Device:           mercury1.Device201,
+	})
+	boggart.RegisterBindType("mercury:203", v1.Type{
+		SerialNumberFunc: mercury1.WithAddressAsString,
+		Device:           mercury1.Device203,
+	})
+	boggart.RegisterBindType("mercury:206", v1.Type{
+		SerialNumberFunc: mercury1.WithAddressAsString,
+		Device:           mercury1.Device206,
+	})
 
 	version3 := v3.Type{}
 	boggart.RegisterBindType("mercury:203.2TD", version3)

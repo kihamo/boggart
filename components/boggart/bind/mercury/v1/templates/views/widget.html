@@ -286,6 +286,7 @@
                                             {{ end }}
                                             <td>{{ i18n "Current date and time on meter" . }}</td>
                                         </tr>
+                                        {{ if .param_last_change_data }}
                                         <tr>
                                             <td>{{ i18n "Param last change" . }}</td>
                                             {{ if .param_last_change_data.error }}
@@ -295,6 +296,7 @@
                                             {{ end }}
                                             <td>{{ i18n "Param last change date" . }}</td>
                                         </tr>
+                                        {{ end }}
                                         <tr>
                                             <td>{{ i18n "Make date" . }}</td>
                                             {{ if .make_date.error }}
@@ -340,6 +342,7 @@
                                             {{ end }}
                                             <td>{{ i18n "Current voltage" . }}</td>
                                         </tr>
+                                        {{ if .voltage_max }}
                                         <tr>
                                             <td>{{ i18n "Voltage maximum can't reset" . }}</td>
                                             {{ if .voltage_max.error }}
@@ -349,6 +352,8 @@
                                             {{ end }}
                                             <td></td>
                                         </tr>
+                                        {{ end }}
+                                        {{ if .voltage_max_reset }}
                                         <tr>
                                             <td>{{ i18n "Voltage maximum can reset" . }}</td>
                                             {{ if .voltage_max_reset.error }}
@@ -358,6 +363,7 @@
                                             {{ end }}
                                             <td></td>
                                         </tr>
+                                        {{ end }}
                                         <tr>
                                             <td>{{ i18n "Amperage" . }}</td>
                                             {{ if .amperage.error }}
@@ -367,6 +373,7 @@
                                             {{ end }}
                                             <td>{{ i18n "Current amperage" . }}</td>
                                         </tr>
+                                        {{ if .amperage_max }}
                                         <tr>
                                             <td>{{ i18n "Amperage maximum can't reset" . }}</td>
                                             {{ if .amperage_max.error }}
@@ -376,6 +383,8 @@
                                             {{ end }}
                                             <td></td>
                                         </tr>
+                                        {{ end }}
+                                        {{ if .amperage_max_reset }}
                                         <tr>
                                             <td>{{ i18n "Amperage maximum can reset" . }}</td>
                                             {{ if .amperage_max_reset.error }}
@@ -385,6 +394,7 @@
                                             {{ end }}
                                             <td></td>
                                         </tr>
+                                        {{ end }}
                                         <tr>
                                             <td>{{ i18n "Power" . }}</td>
                                             {{ if .power.error }}
@@ -394,6 +404,7 @@
                                             {{ end }}
                                             <td>{{ i18n "Current power" . }}</td>
                                         </tr>
+                                        {{ if .power_max }}
                                         <tr>
                                             <td>{{ i18n "Power maximum can't reset" . }}</td>
                                             {{ if .power_max.error }}
@@ -403,6 +414,8 @@
                                             {{ end }}
                                             <td></td>
                                         </tr>
+                                        {{ end }}
+                                        {{ if .power_max_reset }}
                                         <tr>
                                             <td>{{ i18n "Power maximum can reset" . }}</td>
                                             {{ if .power_max_reset.error }}
@@ -412,6 +425,7 @@
                                             {{ end }}
                                             <td></td>
                                         </tr>
+                                        {{ end }}
                                     </tbody>
                                 </table>
                             {{ end }}

@@ -65,7 +65,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 	}
 
 	// optimization
-	if voltage, amperage, power, e := b.provider.ParamsCurrent(); e == nil {
+	if voltage, amperage, power, e := b.provider.UIPCurrent(); e == nil {
 		metricVoltage.With("serial_number", sn).Set(float64(voltage))
 		metricAmperage.With("serial_number", sn).Set(amperage)
 		metricPower.With("serial_number", sn).Set(float64(power))

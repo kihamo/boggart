@@ -306,9 +306,11 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 		// param last change
 		v, err = bind.provider.ParamLastChange()
-		vars["param_last_change_data"] = map[string]interface{}{
-			"value": v,
-			"error": err,
+		if err != v1.ErrCommandNotSupported {
+			vars["param_last_change_data"] = map[string]interface{}{
+				"value": v,
+				"error": err,
+			}
 		}
 
 		// make date
@@ -340,7 +342,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		// V, A, Watts
-		voltage, amperage, power, err := bind.provider.ParamsCurrent()
+		voltage, amperage, power, err := bind.provider.UIPCurrent()
 		vars["voltage"] = map[string]interface{}{
 			"value": voltage,
 			"error": err,
@@ -356,44 +358,50 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 		// V max
 		voltageMax, voltageMaxDate, voltageMaxReset, voltageMaxDateReset, err := bind.provider.MaximumVoltage()
-		vars["voltage_max"] = map[string]interface{}{
-			"value": voltageMax,
-			"date":  voltageMaxDate,
-			"error": err,
-		}
+		if err != v1.ErrCommandNotSupported {
+			vars["voltage_max"] = map[string]interface{}{
+				"value": voltageMax,
+				"date":  voltageMaxDate,
+				"error": err,
+			}
 
-		vars["voltage_max_reset"] = map[string]interface{}{
-			"value": voltageMaxReset,
-			"date":  voltageMaxDateReset,
-			"error": err,
+			vars["voltage_max_reset"] = map[string]interface{}{
+				"value": voltageMaxReset,
+				"date":  voltageMaxDateReset,
+				"error": err,
+			}
 		}
 
 		// A max
 		amperageMax, amperageMaxDate, amperageMaxReset, amperageMaxDateReset, err := bind.provider.MaximumAmperage()
-		vars["amperage_max"] = map[string]interface{}{
-			"value": amperageMax,
-			"date":  amperageMaxDate,
-			"error": err,
-		}
+		if err != v1.ErrCommandNotSupported {
+			vars["amperage_max"] = map[string]interface{}{
+				"value": amperageMax,
+				"date":  amperageMaxDate,
+				"error": err,
+			}
 
-		vars["amperage_max_reset"] = map[string]interface{}{
-			"value": amperageMaxReset,
-			"date":  amperageMaxDateReset,
-			"error": err,
+			vars["amperage_max_reset"] = map[string]interface{}{
+				"value": amperageMaxReset,
+				"date":  amperageMaxDateReset,
+				"error": err,
+			}
 		}
 
 		// Watts max
 		powerMax, powerMaxDate, powerMaxReset, powerMaxDateReset, err := bind.provider.MaximumPower()
-		vars["power_max"] = map[string]interface{}{
-			"value": powerMax,
-			"date":  powerMaxDate,
-			"error": err,
-		}
+		if err != v1.ErrCommandNotSupported {
+			vars["power_max"] = map[string]interface{}{
+				"value": powerMax,
+				"date":  powerMaxDate,
+				"error": err,
+			}
 
-		vars["power_max_reset"] = map[string]interface{}{
-			"value": powerMaxReset,
-			"date":  powerMaxDateReset,
-			"error": err,
+			vars["power_max_reset"] = map[string]interface{}{
+				"value": powerMaxReset,
+				"date":  powerMaxDateReset,
+				"error": err,
+			}
 		}
 	}
 

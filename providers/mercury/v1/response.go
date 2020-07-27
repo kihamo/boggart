@@ -12,7 +12,7 @@ import (
 
 type Response struct {
 	address uint32
-	command requestCommand
+	command uint8
 	payload []byte
 	crc     uint16
 
@@ -28,7 +28,7 @@ func ParseResponse(data []byte) (*Response, error) {
 
 	response := &Response{
 		address: binary.LittleEndian.Uint32(data[:4]),
-		command: requestCommand(data[4]),
+		command: data[4],
 		payload: data[5 : l-2],
 		crc:     binary.LittleEndian.Uint16(data[l-2:]),
 	}
@@ -50,7 +50,7 @@ func (r *Response) Bytes() []byte {
 	buf = make([]byte, 4)
 	binary.LittleEndian.PutUint32(buf, r.Address())
 
-	packet := append(buf, byte(r.Command()))
+	packet := append(buf, r.Command())
 	packet = append(packet, r.Payload()...)
 
 	buf = make([]byte, 2)
@@ -67,7 +67,7 @@ func (r *Response) Address() uint32 {
 	return r.address
 }
 
-func (r *Response) Command() requestCommand {
+func (r *Response) Command() uint8 {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
