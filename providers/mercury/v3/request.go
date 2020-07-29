@@ -7,34 +7,34 @@ import (
 )
 
 const (
-	RequestCodeChannelTest     uint8 = 0x0
-	RequestCodeChannelOpen     uint8 = 0x1
-	RequestCodeChannelClose    uint8 = 0x2
-	RequestCodeWriteParameters uint8 = 0x3
-	RequestCodeReadData        uint8 = 0x4
-	RequestCodeReadArray       uint8 = 0x5
-	RequestCodeReadByAddress   uint8 = 0x6
-	RequestCodeWriteByAddress  uint8 = 0x7
-	RequestCodeReadParameter   uint8 = 0x8
+	CodeChannelTest     = 0x0
+	CodeChannelOpen     = 0x1
+	CodeChannelClose    = 0x2
+	CodeWriteParameters = 0x3
+	CodeReadData        = 0x4
+	CodeReadArray       = 0x5
+	CodeReadByAddress   = 0x6
+	CodeWriteByAddress  = 0x7
+	CodeReadParameter   = 0x8
 
-	AccessLevel1 uint8 = 0x1
-	AccessLevel2 uint8 = 0x2
+	AccessLevel1 = 0x1
+	AccessLevel2 = 0x2
 
-	ParamCodeSerialNumberAndBuildDate       uint8 = 0x00
-	ParamCodeForceReadParameters            uint8 = 0x01
-	ParamCodeTransformationCoefficient      uint8 = 0x02
-	ParamCodeVersion                        uint8 = 0x03
-	ParamCodeAddress                        uint8 = 0x05
-	ParamCodeSelfDiagnostics                uint8 = 0x0A
-	ParamCodeLocation                       uint8 = 0x0B
-	ParamCodeAuxiliaryParameters3           uint8 = 0x11
-	ParamCodeType                           uint8 = 0x12
-	ParamCodeAuxiliaryParameters12          uint8 = 0x16
-	ParamCodeTarifficatorStatus             uint8 = 0x17
-	ParamCodeLoadManager                    uint8 = 0x18
-	ParamCodeLimitPower                     uint8 = 0x19
-	ParamCodeMultiplierTimeoutMainInterface uint8 = 0x1D
-	ParamCodeCRC16                          uint8 = 0x26
+	ParamCodeSerialNumberAndBuildDate       = 0x00
+	ParamCodeForceReadParameters            = 0x01
+	ParamCodeTransformationCoefficient      = 0x02
+	ParamCodeVersion                        = 0x03
+	ParamCodeAddress                        = 0x05
+	ParamCodeSelfDiagnostics                = 0x0A
+	ParamCodeLocation                       = 0x0B
+	ParamCodeAuxiliaryParameters3           = 0x11
+	ParamCodeType                           = 0x12
+	ParamCodeAuxiliaryParameters12          = 0x16
+	ParamCodeTarifficatorStatus             = 0x17
+	ParamCodeLoadManager                    = 0x18
+	ParamCodeLimitPower                     = 0x19
+	ParamCodeMultiplierTimeoutMainInterface = 0x1D
+	ParamCodeCRC16                          = 0x26
 )
 
 type Request struct {
