@@ -21,9 +21,9 @@ var (
 func init() {
 	supported = map[uint8]map[uint8]bool{
 		Device200: {
-			RequestCommandReadParamLastChange: false,
-			RequestCommandReadMaximum:         false,
-			RequestCommandReadDisplayModeExt:  false,
+			CommandReadParamLastChange: false,
+			CommandReadMaximum:         false,
+			CommandReadDisplayModeExt:  false,
 		},
 	}
 }

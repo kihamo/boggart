@@ -11,9 +11,9 @@ func (m *MercuryV3) ChannelTest() error {
 }
 
 // 2.2. ЗАПРОСЫ НА ОТКРЫТИЕ/ЗАКРЫТИЕ КАНАЛА СВЯЗИ
-func (m *MercuryV3) ChannelOpen(level accessLevel, password LevelPassword) error {
+func (m *MercuryV3) ChannelOpen(level uint8, password LevelPassword) error {
 	request := NewRequest(RequestCodeChannelOpen).
-		WithParameterCode(byte(level)).
+		WithParameterCode(level).
 		WithParameters(password.Bytes())
 
 	response, err := m.InvokeRaw(request)

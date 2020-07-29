@@ -1,7 +1,6 @@
 package v3
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -9,7 +8,7 @@ import (
 type options struct {
 	address     uint8
 	password    LevelPassword
-	accessLevel accessLevel
+	accessLevel uint8
 }
 
 type Option interface {
@@ -52,8 +51,6 @@ func WithAddressAsString(address string) Option {
 
 		number, _ := strconv.ParseInt(address[len(address)-3:], 10, 0)
 
-		fmt.Println(number, address[len(address)-3:])
-
 		// Если N>=240 адресом являются две последние цифры серийного номера.
 		if number >= 240 {
 			number, _ = strconv.ParseInt(address[len(address)-2:], 10, 0)
@@ -72,7 +69,7 @@ func WithAddressAsString(address string) Option {
 	})
 }
 
-func WithAccessLevel(accessLevel accessLevel) Option {
+func WithAccessLevel(accessLevel uint8) Option {
 	return newFuncOption(func(o *options) {
 		o.accessLevel = accessLevel
 	})

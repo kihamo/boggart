@@ -9,7 +9,7 @@ package v1
 // false / разрешает индикацию времени
 // false / разрешает индикацию даты
 func (m *MercuryV1) SetDisplayMode(mode *DisplayMode) error {
-	request := NewRequest(RequestCommandWriteDisplayMode).
+	request := NewRequest(CommandWriteDisplayMode).
 		WithPayload([]byte{mode.Bit()})
 
 	_, err := m.Invoke(request)
@@ -22,7 +22,7 @@ func (m *MercuryV1) SetDisplayMode(mode *DisplayMode) error {
 // t3 /  5 / время индикации мощности, времени и даты
 // t4 / 30 / время индикации после нажатия кнопки
 func (m *MercuryV1) SetDisplayTime(values *TariffValues) error {
-	request := NewRequest(RequestCommandWriteDisplayTime).
+	request := NewRequest(CommandWriteDisplayTime).
 		WithPayload([]byte{uint8(values.Tariff1()), uint8(values.Tariff2()), uint8(values.Tariff3()), uint8(values.Tariff4())})
 
 	_, err := m.Invoke(request)
