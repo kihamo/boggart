@@ -15,6 +15,7 @@ import (
 func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
 	bind := b.Bind().(*Bind)
 	vars := map[string]interface{}{}
+	ctx := r.Context()
 
 	action := r.URL().Query().Get("action")
 	vars["action"] = action
@@ -31,14 +32,14 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 		date, err := bind.provider.Datetime()
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get datetime failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(t.Translate(ctx, "Get datetime failed with error %s", "", err.Error()))
 
 			vars["stats"] = make([]*monthly, 0)
 		}
 
 		tariffCount, err := bind.provider.TariffCount()
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get tariff count failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(t.Translate(ctx, "Get tariff count failed with error %s", "", err.Error()))
 		}
 
 		if err == nil {
@@ -64,8 +65,8 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 				statsValues, err := bind.provider.MonthlyStatByMonth(monthRequest)
 				if err != nil {
-					mAsString := t.Translate(r.Context(), monthRequest.String(), "")
-					r.Session().FlashBag().Error(t.Translate(r.Context(), "Get statistics for %s failed with error %s", "", mAsString, err.Error()))
+					mAsString := t.Translate(ctx, monthRequest.String(), "")
+					r.Session().FlashBag().Error(t.Translate(ctx, "Get statistics for %s failed with error %s", "", mAsString, err.Error()))
 					continue
 				}
 
@@ -100,8 +101,8 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			// отдельно запрашиваем текущий месяц
 			powerValues, err := bind.provider.PowerCounters()
 			if err != nil {
-				mAsString := t.Translate(r.Context(), date.Month().String(), "")
-				r.Session().FlashBag().Error(t.Translate(r.Context(), "Get statistics for %s failed with error %s", "", mAsString, err.Error()))
+				mAsString := t.Translate(ctx, date.Month().String(), "")
+				r.Session().FlashBag().Error(t.Translate(ctx, "Get statistics for %s failed with error %s", "", mAsString, err.Error()))
 			} else {
 				stat := &monthly{
 					Month:  date.Month(),
@@ -141,7 +142,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 	case "events-on-off":
 		if makeDate, err := bind.provider.MakeDate(); err != nil {
-			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get make date failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(t.Translate(ctx, "Get make date failed with error %s", "", err.Error()))
 		} else {
 			type event struct {
 				State bool
@@ -154,7 +155,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 				state, date, err := bind.provider.EventsPowerOnOff(i)
 
 				if err != nil {
-					r.Session().FlashBag().Error(t.Translate(r.Context(), "Get event %02x failed with error %s", "", i, err.Error()))
+					r.Session().FlashBag().Error(t.Translate(ctx, "Get event %02x failed with error %s", "", i, err.Error()))
 					break
 				}
 
@@ -173,7 +174,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 	case "events-open-close":
 		if makeDate, err := bind.provider.MakeDate(); err != nil {
-			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get make date failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(t.Translate(ctx, "Get make date failed with error %s", "", err.Error()))
 		} else {
 
 			type event struct {
@@ -187,7 +188,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 				state, date, err := bind.provider.EventsOpenClose(i)
 
 				if err != nil {
-					r.Session().FlashBag().Error(t.Translate(r.Context(), "Get event %02x failed with error %s", "", i, err.Error()))
+					r.Session().FlashBag().Error(t.Translate(ctx, "Get event %02x failed with error %s", "", i, err.Error()))
 					break
 				}
 
@@ -209,12 +210,12 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 		mode, err := bind.provider.DisplayMode()
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get display mode failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(t.Translate(ctx, "Get display mode failed with error %s", "", err.Error()))
 		}
 
 		timeValues, err := bind.provider.DisplayTime()
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get display time failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(t.Translate(ctx, "Get display time failed with error %s", "", err.Error()))
 		}
 
 		if r.IsPost() {
@@ -230,9 +231,9 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			if mode.IsChanged() {
 				err = bind.provider.SetDisplayMode(mode)
 				if err != nil {
-					r.Session().FlashBag().Error(t.Translate(r.Context(), "Change display mode failed with error %s", "", err.Error()))
+					r.Session().FlashBag().Error(t.Translate(ctx, "Change display mode failed with error %s", "", err.Error()))
 				} else {
-					r.Session().FlashBag().Success(t.Translate(r.Context(), "Change display mode success", ""))
+					r.Session().FlashBag().Success(t.Translate(ctx, "Change display mode success", ""))
 				}
 			}
 
@@ -261,13 +262,13 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			}
 
 			if err != nil {
-				r.Session().FlashBag().Error(t.Translate(r.Context(), "Parse value failed with error %s", "", err.Error()))
+				r.Session().FlashBag().Error(t.Translate(ctx, "Parse value failed with error %s", "", err.Error()))
 			} else if timeValues.IsChanged() {
 				err = bind.provider.SetDisplayTime(timeValues)
 				if err != nil {
-					r.Session().FlashBag().Error(t.Translate(r.Context(), "Change display time failed with error %s", "", err.Error()))
+					r.Session().FlashBag().Error(t.Translate(ctx, "Change display time failed with error %s", "", err.Error()))
 				} else {
-					r.Session().FlashBag().Success(t.Translate(r.Context(), "Change display time success", ""))
+					r.Session().FlashBag().Success(t.Translate(ctx, "Change display time success", ""))
 				}
 			}
 
@@ -283,7 +284,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	case "holidays":
 		days, err := bind.provider.Holidays()
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get holidays failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(t.Translate(ctx, "Get holidays failed with error %s", "", err.Error()))
 		}
 
 		vars["holidays"] = days
@@ -416,7 +417,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 	}
 
-	t.Render(r.Context(), "widget", vars)
+	t.Render(ctx, "widget", vars)
 }
 
 func (t Type) WidgetAssetFS() *assetfs.AssetFS {

@@ -1,0 +1,74 @@
+{{ define "content" }}
+<script type="application/javascript">
+    function valueFormat(n) {
+        return new Intl.NumberFormat().format(n);
+    }
+</script>
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_content">
+                <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                    <thead>
+                    <tr>
+                        <th>{{ i18n "Date" . }}</th>
+                        {{ if eq (index .tariffs 1) true }}<th>{{ i18n "T1 / Wh" . }}</th>{{ end }}
+                        {{ if eq (index .tariffs 2) true }}<th>{{ i18n "T2 / Wh" . }}</th>{{ end }}
+                        {{ if eq (index .tariffs 3) true }}<th>{{ i18n "T3 / Wh" . }}</th>{{ end }}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{ range $row := .rows }}
+                    <tr>
+                        <td><script type="application/javascript">document.write(dateToString('{{ $row.Date.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                        <td>
+                        {{ with $row.Values.tariff1 }}
+                            <script type="application/javascript">document.write(valueFormat({{ index . 0 }}))</script>
+                            {{ if gt (index . 2) 0.0 }}
+                                <span class="label label-danger"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script> / <script type="application/javascript">document.write(valueFormat({{ index . 2 }}))</script></span>
+                            {{ else if lt (index . 2) 0.0 }}
+                                <span class="label label-success"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script> / <script type="application/javascript">document.write(valueFormat({{ index . 2 }}))</script></span>
+                            {{ else if eq (index . 2) 0.0 }}
+                                <span class="label label-info"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script> / <script type="application/javascript">document.write(valueFormat({{ index . 2 }}))</script></span>
+                            {{ else if gt (index . 1) 0.0 }}
+                                <span class="label label-default"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script></span>
+                            {{ end }}
+                        {{ end }}
+                        </td>
+                        <td>
+                            {{ with $row.Values.tariff2 }}
+                                <script type="application/javascript">document.write(valueFormat({{ index . 0 }}))</script>
+                            {{ if gt (index . 2) 0.0 }}
+                                <span class="label label-danger"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script> / <script type="application/javascript">document.write(valueFormat({{ index . 2 }}))</script></span>
+                            {{ else if lt (index . 2) 0.0 }}
+                                <span class="label label-success"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script> / <script type="application/javascript">document.write(valueFormat({{ index . 2 }}))</script></span>
+                            {{ else if eq (index . 2) 0.0 }}
+                                <span class="label label-info"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script> / <script type="application/javascript">document.write(valueFormat({{ index . 2 }}))</script></span>
+                            {{ else if gt (index . 1) 0.0 }}
+                                <span class="label label-default"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script></span>
+                            {{ end }}
+                            {{ end }}
+                        </td>
+                        <td>
+                            {{ with $row.Values.tariff3 }}
+                                <script type="application/javascript">document.write(valueFormat({{ index . 0 }}))</script>
+                            {{ if gt (index . 2) 0.0 }}
+                                <span class="label label-danger"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script> / <script type="application/javascript">document.write(valueFormat({{ index . 2 }}))</script></span>
+                            {{ else if lt (index . 2) 0.0 }}
+                                <span class="label label-success"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script> / <script type="application/javascript">document.write(valueFormat({{ index . 2 }}))</script></span>
+                            {{ else if eq (index . 2) 0.0 }}
+                                <span class="label label-info"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script> / <script type="application/javascript">document.write(valueFormat({{ index . 2 }}))</script></span>
+                            {{ else if gt (index . 1) 0.0 }}
+                                <span class="label label-default"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script></span>
+                            {{ end }}
+                            {{ end }}
+                        </td>
+                    </tr>
+                    {{ end }}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}

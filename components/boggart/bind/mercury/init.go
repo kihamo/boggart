@@ -27,8 +27,12 @@ func init() {
 
 	version3 := v3.Type{}
 	boggart.RegisterBindType("mercury:203.2TD", version3)
+	boggart.RegisterBindType("mercury:204", version3)
+	boggart.RegisterBindType("mercury:208", version3)
 	boggart.RegisterBindType("mercury:230", version3)
 	boggart.RegisterBindType("mercury:231", version3)
 	boggart.RegisterBindType("mercury:233", version3)
 	boggart.RegisterBindType("mercury:234", version3)
+	boggart.RegisterBindType("mercury:236", version3)
+	boggart.RegisterBindType("mercury:238", version3)
 }

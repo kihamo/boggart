@@ -19,9 +19,8 @@ type Config struct {
 	BalanceDetailsInterval time.Duration `mapstructure:"balance_details_interval" yaml:"balance_details_interval"`
 	TopicBalance           mqtt.Topic    `mapstructure:"topic_balance" yaml:"topic_balance"`
 	TopicServiceBalance    mqtt.Topic    `mapstructure:"topic_service_balance" yaml:"topic_service_balance"`
-	TopicMeterValueT1      mqtt.Topic    `mapstructure:"topic_meter_value_t1" yaml:"topic_meter_value_t1"`
-	TopicMeterValueT2      mqtt.Topic    `mapstructure:"topic_meter_value_t2" yaml:"topic_meter_value_t2"`
-	TopicMeterValueT3      mqtt.Topic    `mapstructure:"topic_meter_value_t3" yaml:"topic_meter_value_t3"`
+	TopicMeterValue        mqtt.Topic    `mapstructure:"topic_meter_value" yaml:"topic_meter_value"`
+	TopicMeterDate         mqtt.Topic    `mapstructure:"topic_meter_date" yaml:"topic_meter_date"`
 }
 
 func (Type) Config() interface{} {
@@ -36,8 +35,7 @@ func (Type) Config() interface{} {
 		BalanceDetailsInterval: time.Hour * 24 * 31,
 		TopicBalance:           prefix + "balance",
 		TopicServiceBalance:    prefix + "balance/+",
-		TopicMeterValueT1:      prefix + "meter/1",
-		TopicMeterValueT2:      prefix + "meter/2",
-		TopicMeterValueT3:      prefix + "meter/3",
+		TopicMeterValue:        prefix + "meter/+/+/value",
+		TopicMeterDate:         prefix + "meter/+/+/date",
 	}
 }
