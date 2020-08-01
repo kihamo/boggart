@@ -3,6 +3,7 @@ package miio
 import (
 	"context"
 	"strconv"
+	"time"
 
 	"github.com/kihamo/boggart/components/mqtt"
 	"go.uber.org/multierr"
@@ -91,6 +92,7 @@ func (b *Bind) callbackMQTTAction(ctx context.Context, client mqtt.Component, me
 	}
 
 	if err == nil {
+		time.Sleep(time.Second * 5)
 		err = b.updateState(ctx)
 	}
 
