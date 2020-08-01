@@ -20,6 +20,7 @@ type Config struct {
 	TopicBattery             mqtt.Topic    `mapstructure:"topic_battery" yaml:"topic_battery"`
 	TopicCleanArea           mqtt.Topic    `mapstructure:"topic_clean_area" yaml:"topic_clean_area"`
 	TopicCleanTime           mqtt.Topic    `mapstructure:"topic_clean_time" yaml:"topic_clean_time"`
+	TopicLastCleanDateTime   mqtt.Topic    `mapstructure:"topic_last_clean_datetime" yaml:"topic_last_clean_datetime"`
 	TopicFanPower            mqtt.Topic    `mapstructure:"topic_fan_power" yaml:"topic_fan_power"`
 	TopicVolume              mqtt.Topic    `mapstructure:"topic_volume" yaml:"topic_volume"`
 	TopicConsumableFilter    mqtt.Topic    `mapstructure:"topic_consumable_filter" yaml:"topic_consumable_filter"`
@@ -52,6 +53,7 @@ func (t Type) Config() interface{} {
 		TopicBattery:             prefix + "battery",
 		TopicCleanArea:           prefix + "clean/area",
 		TopicCleanTime:           prefix + "clean/time",
+		TopicLastCleanDateTime:   prefix + "clean/last/time",
 		TopicFanPower:            prefix + "fan-power",
 		TopicVolume:              prefix + "volume",
 		TopicConsumableFilter:    prefix + "consumable/filter",
