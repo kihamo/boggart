@@ -8,6 +8,7 @@ import (
 
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/providers/xiaomi/miio/devices/vacuum"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
@@ -204,6 +205,26 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			r.Session().FlashBag().Error(t.Translate(ctx, "Get timezone failed with error %s", "", err.Error()))
 		} else {
 			vars["timezone"] = timezone.String()
+		}
+
+	case "history":
+		summary, err := bind.device.CleanSummary(ctx)
+		if err != nil {
+			r.Session().FlashBag().Error(t.Translate(ctx, "Get clean summary failed with error %s", "", err.Error()))
+		} else {
+			details := make([]vacuum.CleanDetail, 0, len(summary.CleanupIDs))
+			for _, id := range summary.CleanupIDs {
+				detail, err := bind.device.CleanDetails(ctx, id)
+				if err != nil {
+					r.Session().FlashBag().Error(t.Translate(ctx, "Get clean summary detail %d failed with error %s", "", id, err.Error()))
+					continue
+				}
+
+				details = append(details, detail)
+			}
+
+			vars["summary"] = summary
+			vars["details"] = details
 		}
 
 	default:

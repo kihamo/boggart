@@ -7,6 +7,7 @@
                     <ul class="nav nav-tabs bar_tabs" role="tablist">
                         <li role="presentation"{{ if eq .action "" }} class="active"{{ end }}><a href="{{ if eq .action "" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}{{ end }}">{{ i18n "Status" . }}</a></li>
                         <li role="presentation"{{ if eq .action "settings" }} class="active"{{ end }}><a href="{{ if eq .action "settings" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=settings{{ end }}">{{ i18n "Settings" . }}</a></li>
+                        <li role="presentation"{{ if eq .action "history" }} class="active"{{ end }}><a href="{{ if eq .action "history" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=history{{ end }}">{{ i18n "History" . }}</a></li>
                     </ul>
                     <div class="tab-content">
                         <div role="tabpanel" class="tab-pane fade active in">
@@ -147,6 +148,56 @@
                                     </div>
                                 </div>
                             </form>
+                        {{ else if eq .action "history" }}
+                            {{ if .summary}}
+                                <div class="row top_tiles">
+                                    <div class="animated flipInY col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                                        <div class="tile-stats">
+                                            <div class="icon"><i class="fa fa-clock fa-5x"></i></div>
+                                            <div class="count">{{ .summary.TotalTimeHuman }}</div>
+                                            <h3>{{ i18n "Total time" }}</h3>
+                                        </div>
+                                    </div>
+                                    <div class="animated flipInY col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                                        <div class="tile-stats">
+                                            <div class="icon"><i class="fa fa-crop fa-5x"></i></div>
+                                            <div class="count">{{ .summary.TotalAreaHuman }}</div>
+                                            <h3>{{ i18n "Total area" }}</h3>
+                                        </div>
+                                    </div>
+                                    <div class="animated flipInY col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                                        <div class="tile-stats">
+                                            <div class="icon"><i class="fa fa-hashtag fa-5x"></i></div>
+                                            <div class="count">{{ .summary.TotalCleanups }}</div>
+                                            <h3>{{ i18n "Total cleanups" }}</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            {{ end }}
+                            {{ if .details }}
+                                <div class="row">
+                                    <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                                        <thead>
+                                        <tr>
+                                            <th>{{ i18n "Start time" . }}</th>
+                                            <th>{{ i18n "End time" . }}</th>
+                                            <th>{{ i18n "Duration" . }}</th>
+                                            <th>{{ i18n "Area" . }}</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {{ range $detail := .details }}
+                                        <tr class="{{ if $detail.Completed }}success{{ else }}danger{{ end }}">
+                                            <td><script type="application/javascript">document.write(dateToString('{{ $detail.StartTime.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                            <td><script type="application/javascript">document.write(dateToString('{{ $detail.EndTime.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                            <td>{{ $detail.CleaningDuration }}</td>
+                                            <td>{{ $detail.Area }}</td>
+                                        </tr>
+                                        {{ end }}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {{ end }}
                         {{ else }}
                             {{ if .info }}
                             <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">

@@ -2,9 +2,16 @@ package vacuum
 
 import (
 	"context"
+	"math"
+	"strconv"
 	"time"
 
 	"github.com/kihamo/boggart/providers/xiaomi/miio"
+)
+
+var (
+	humanTime = []string{"s", "m", "h"}
+	humanArea = []string{"cm2", "dm2", "m2", "km2"}
 )
 
 type CleanSummary struct {
@@ -12,6 +19,38 @@ type CleanSummary struct {
 	TotalArea     uint64 // mm2
 	TotalCleanups uint64
 	CleanupIDs    []uint64
+}
+
+func (c CleanSummary) TotalTimeHuman() string {
+	val := c.TotalTime.Seconds()
+
+	for i := 0; ; i++ {
+		v := float64(val / 60)
+
+		if v < 1 || i == len(humanTime)-1 {
+			return strconv.Itoa(int(math.Round(val))) + " " + humanTime[i]
+		}
+
+		val = v
+	}
+
+	return ""
+}
+
+func (c CleanSummary) TotalAreaHuman() string {
+	val := float64(c.TotalArea)
+
+	for i := 0; ; i++ {
+		v := float64(val / 100)
+
+		if v < 1 || i == len(humanArea)-1 {
+			return strconv.Itoa(int(math.Round(val))) + " " + humanArea[i]
+		}
+
+		val = v
+	}
+
+	return ""
 }
 
 type CleanDetail struct {
