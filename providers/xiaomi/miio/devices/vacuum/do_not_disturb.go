@@ -16,7 +16,7 @@ type DoNotDisturb struct {
 }
 
 func (d *Device) DoNotDisturb(ctx context.Context) (result DoNotDisturb, err error) {
-	type response struct {
+	var response struct {
 		miio.Response
 
 		Result []struct {
@@ -26,11 +26,9 @@ func (d *Device) DoNotDisturb(ctx context.Context) (result DoNotDisturb, err err
 		} `json:"result"`
 	}
 
-	var reply response
-
-	err = d.Client().Send(ctx, "get_dnd_timer", nil, &reply)
+	err = d.Client().CallRPC(ctx, "get_dnd_timer", nil, &response)
 	if err == nil {
-		r := &reply.Result[0]
+		r := &response.Result[0]
 		result.Enabled = r.Enabled == 1
 		result.StartHour = r.StartHour
 		result.StartMinute = r.StartMinute
@@ -42,14 +40,14 @@ func (d *Device) DoNotDisturb(ctx context.Context) (result DoNotDisturb, err err
 }
 
 func (d *Device) DisableDoNotDisturb(ctx context.Context) error {
-	var reply miio.ResponseOK
+	var response miio.ResponseOK
 
-	err := d.Client().Send(ctx, "close_dnd_timer", nil, &reply)
+	err := d.Client().CallRPC(ctx, "close_dnd_timer", nil, &response)
 	if err != nil {
 		return err
 	}
 
-	if !miio.ResponseIsOK(reply) {
+	if !miio.ResponseIsOK(response) {
 		return errors.New("device return not OK response")
 	}
 
@@ -57,14 +55,14 @@ func (d *Device) DisableDoNotDisturb(ctx context.Context) error {
 }
 
 func (d *Device) SetDoNotDisturb(ctx context.Context, startHour, startMinute, endHour, endMinute uint64) error {
-	var reply miio.ResponseOK
+	var response miio.ResponseOK
 
-	err := d.Client().Send(ctx, "set_dnd_timer", []uint64{startHour, startMinute, endHour, endMinute}, &reply)
+	err := d.Client().CallRPC(ctx, "set_dnd_timer", []uint64{startHour, startMinute, endHour, endMinute}, &response)
 	if err != nil {
 		return err
 	}
 
-	if !miio.ResponseIsOK(reply) {
+	if !miio.ResponseIsOK(response) {
 		return errors.New("device return not OK response")
 	}
 

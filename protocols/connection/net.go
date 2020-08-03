@@ -3,7 +3,6 @@ package connection
 import (
 	"net"
 	"sync"
-	"time"
 )
 
 var readBufferPool sync.Pool
@@ -55,31 +54,27 @@ func (c *Net) connect() (conn net.Conn, err error) {
 	return conn, err
 }
 
-func (c *Net) Read(b []byte) (n int, err error) {
+func (c *Net) Read(b []byte) (int, error) {
 	conn, err := c.connect()
 	if err != nil {
 		return -1, err
 	}
 
-	if c.options.readTimeout > 0 {
-		if err = conn.SetReadDeadline(time.Now().Add(c.options.readTimeout)); err != nil {
-			return -1, err
-		}
+	if err = SetDeadline(c.options.readTimeout, conn.SetReadDeadline); err != nil {
+		return -1, err
 	}
 
 	return conn.Read(b)
 }
 
-func (c *Net) Write(b []byte) (n int, err error) {
+func (c *Net) Write(b []byte) (int, error) {
 	conn, err := c.connect()
 	if err != nil {
 		return -1, err
 	}
 
-	if c.options.writeTimeout > 0 {
-		if err = conn.SetWriteDeadline(time.Now().Add(c.options.writeTimeout)); err != nil {
-			return -1, err
-		}
+	if err = SetDeadline(c.options.writeTimeout, conn.SetWriteDeadline); err != nil {
+		return -1, err
 	}
 
 	return conn.Write(b)
@@ -95,20 +90,16 @@ func (c *Net) Invoke(request []byte) (response []byte, err error) {
 		return nil, err
 	}
 
-	if c.options.writeTimeout > 0 {
-		if err = conn.SetWriteDeadline(time.Now().Add(c.options.writeTimeout)); err != nil {
-			return nil, err
-		}
+	if err = SetDeadline(c.options.writeTimeout, conn.SetWriteDeadline); err != nil {
+		return nil, err
 	}
 
 	if _, err = conn.Write(request); err != nil {
 		return nil, err
 	}
 
-	if c.options.readTimeout > 0 {
-		if err = conn.SetReadDeadline(time.Now().Add(c.options.readTimeout)); err != nil {
-			return nil, err
-		}
+	if err = SetDeadline(c.options.readTimeout, conn.SetReadDeadline); err != nil {
+		return nil, err
 	}
 
 	buf := readBufferPool.Get().(*[]byte)

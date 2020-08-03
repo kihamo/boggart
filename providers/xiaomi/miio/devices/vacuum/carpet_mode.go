@@ -15,7 +15,7 @@ type CarpetMode struct {
 }
 
 func (d *Device) CarpetMode(ctx context.Context) (result CarpetMode, err error) {
-	type response struct {
+	var response struct {
 		miio.Response
 
 		Result []struct {
@@ -25,11 +25,9 @@ func (d *Device) CarpetMode(ctx context.Context) (result CarpetMode, err error) 
 		} `json:"result"`
 	}
 
-	var reply response
-
-	err = d.Client().Send(ctx, "get_carpet_mode", nil, &reply)
+	err = d.Client().CallRPC(ctx, "get_carpet_mode", nil, &response)
 	if err == nil {
-		r := &reply.Result[0]
+		r := &response.Result[0]
 		result.Enabled = r.Enabled == 1
 		result.CurrentIntegral = r.CurrentIntegral
 		result.CurrentHigh = r.CurrentHigh
@@ -41,7 +39,7 @@ func (d *Device) CarpetMode(ctx context.Context) (result CarpetMode, err error) 
 }
 
 func (d *Device) SetCarpetMode(ctx context.Context, enabled bool, integral, high, low, stallTime uint64) error {
-	var reply miio.ResponseOK
+	var response miio.ResponseOK
 
 	request := map[string]uint64{
 		"enable":           0,
@@ -55,7 +53,7 @@ func (d *Device) SetCarpetMode(ctx context.Context, enabled bool, integral, high
 		request["enable"] = 1
 	}
 
-	err := d.Client().Send(ctx, "set_carpet_mode", []interface{}{request}, &reply)
+	err := d.Client().CallRPC(ctx, "set_carpet_mode", []interface{}{request}, &response)
 	if err != nil {
 		return err
 	}

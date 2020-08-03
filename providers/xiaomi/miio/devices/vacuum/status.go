@@ -171,7 +171,7 @@ func (e StatusError) String() string {
 }
 
 func (d *Device) Status(ctx context.Context) (result Status, err error) {
-	type response struct {
+	var response struct {
 		miio.Response
 
 		Result []struct {
@@ -186,11 +186,9 @@ func (d *Device) Status(ctx context.Context) (result Status, err error) {
 		} `json:"result"`
 	}
 
-	var reply response
-
-	err = d.Client().Send(ctx, "get_status", nil, &reply)
+	err = d.Client().CallRPC(ctx, "get_status", nil, &response)
 	if err == nil {
-		r := &reply.Result[0]
+		r := &response.Result[0]
 		result.MessageVersion = r.MessageVersion
 		result.MessageSequence = r.MessageSequence
 		result.State = r.State

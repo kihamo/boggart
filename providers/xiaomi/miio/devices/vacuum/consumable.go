@@ -24,21 +24,19 @@ type consumable string
 
 // nolint:golint
 func (d *Device) Consumables(ctx context.Context) (map[consumable]time.Duration, error) {
-	type response struct {
+	var response struct {
 		miio.Response
 
 		Result []map[string]uint64 `json:"result"`
 	}
 
-	var reply response
-
-	err := d.Client().Send(ctx, "get_consumable", nil, &reply)
+	err := d.Client().CallRPC(ctx, "get_consumable", nil, &response)
 	if err != nil {
 		return nil, err
 	}
 
-	consumables := make(map[consumable]time.Duration, len(reply.Result[0]))
-	for n, v := range reply.Result[0] {
+	consumables := make(map[consumable]time.Duration, len(response.Result[0]))
+	for n, v := range response.Result[0] {
 		consumables[consumable(n)] = time.Duration(v) * time.Second
 	}
 
@@ -46,14 +44,14 @@ func (d *Device) Consumables(ctx context.Context) (map[consumable]time.Duration,
 }
 
 func (d *Device) ConsumableReset(ctx context.Context, consumable consumable) error {
-	var reply miio.ResponseOK
+	var response miio.ResponseOK
 
-	err := d.Client().Send(ctx, "reset_consumable", []string{string(consumable)}, &reply)
+	err := d.Client().CallRPC(ctx, "reset_consumable", []string{string(consumable)}, &response)
 	if err != nil {
 		return err
 	}
 
-	if !miio.ResponseIsOK(reply) {
+	if !miio.ResponseIsOK(response) {
 		return errors.New("device return not OK response")
 	}
 

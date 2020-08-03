@@ -92,7 +92,7 @@ func New(address, token string) *Device {
 }
 
 func (d *Device) SerialNumber(ctx context.Context) (string, error) {
-	type response struct {
+	var response struct {
 		miio.Response
 
 		Result []struct {
@@ -100,25 +100,23 @@ func (d *Device) SerialNumber(ctx context.Context) (string, error) {
 		} `json:"result"`
 	}
 
-	var reply response
-
-	err := d.Client().Send(ctx, "get_serial_number", nil, &reply)
+	err := d.Client().CallRPC(ctx, "get_serial_number", nil, &response)
 	if err != nil {
 		return "", err
 	}
 
-	return reply.Result[0].SerialNumber, nil
+	return response.Result[0].SerialNumber, nil
 }
 
 func (d *Device) Start(ctx context.Context) error {
-	var reply miio.ResponseOK
+	var response miio.ResponseOK
 
-	err := d.Client().Send(ctx, "app_start", nil, &reply)
+	err := d.Client().CallRPC(ctx, "app_start", nil, &response)
 	if err != nil {
 		return err
 	}
 
-	if !miio.ResponseIsOK(reply) {
+	if !miio.ResponseIsOK(response) {
 		return errors.New("device return not OK response")
 	}
 
@@ -126,14 +124,14 @@ func (d *Device) Start(ctx context.Context) error {
 }
 
 func (d *Device) Spot(ctx context.Context) error {
-	var reply miio.ResponseOK
+	var response miio.ResponseOK
 
-	err := d.Client().Send(ctx, "app_spot", nil, &reply)
+	err := d.Client().CallRPC(ctx, "app_spot", nil, &response)
 	if err != nil {
 		return err
 	}
 
-	if !miio.ResponseIsOK(reply) {
+	if !miio.ResponseIsOK(response) {
 		return errors.New("device return not OK response")
 	}
 
@@ -141,14 +139,14 @@ func (d *Device) Spot(ctx context.Context) error {
 }
 
 func (d *Device) Stop(ctx context.Context) error {
-	var reply miio.ResponseOK
+	var response miio.ResponseOK
 
-	err := d.Client().Send(ctx, "app_stop", nil, &reply)
+	err := d.Client().CallRPC(ctx, "app_stop", nil, &response)
 	if err != nil {
 		return err
 	}
 
-	if !miio.ResponseIsOK(reply) {
+	if !miio.ResponseIsOK(response) {
 		return errors.New("device return not OK response")
 	}
 
@@ -156,14 +154,14 @@ func (d *Device) Stop(ctx context.Context) error {
 }
 
 func (d *Device) Pause(ctx context.Context) error {
-	var reply miio.ResponseOK
+	var response miio.ResponseOK
 
-	err := d.Client().Send(ctx, "app_pause", nil, &reply)
+	err := d.Client().CallRPC(ctx, "app_pause", nil, &response)
 	if err != nil {
 		return err
 	}
 
-	if !miio.ResponseIsOK(reply) {
+	if !miio.ResponseIsOK(response) {
 		return errors.New("device return not OK response")
 	}
 
@@ -171,14 +169,14 @@ func (d *Device) Pause(ctx context.Context) error {
 }
 
 func (d *Device) Home(ctx context.Context) error {
-	var reply miio.ResponseOK
+	var response miio.ResponseOK
 
-	err := d.Client().Send(ctx, "app_charge", nil, &reply)
+	err := d.Client().CallRPC(ctx, "app_charge", nil, &response)
 	if err != nil {
 		return err
 	}
 
-	if !miio.ResponseIsOK(reply) {
+	if !miio.ResponseIsOK(response) {
 		return errors.New("device return not OK response")
 	}
 
@@ -186,14 +184,14 @@ func (d *Device) Home(ctx context.Context) error {
 }
 
 func (d *Device) Find(ctx context.Context) error {
-	var reply miio.ResponseOK
+	var response miio.ResponseOK
 
-	err := d.Client().Send(ctx, "find_me", nil, &reply)
+	err := d.Client().CallRPC(ctx, "find_me", nil, &response)
 	if err != nil {
 		return err
 	}
 
-	if !miio.ResponseIsOK(reply) {
+	if !miio.ResponseIsOK(response) {
 		return errors.New("device return not OK response")
 	}
 
@@ -201,72 +199,66 @@ func (d *Device) Find(ctx context.Context) error {
 }
 
 func (d *Device) Locale(ctx context.Context) (Locale, error) {
-	type response struct {
+	var response struct {
 		miio.Response
 
 		Result []Locale `json:"result"`
 	}
 
-	var reply response
-
-	err := d.Client().Send(ctx, "app_get_locale", nil, &reply)
+	err := d.Client().CallRPC(ctx, "app_get_locale", nil, &response)
 	if err != nil {
 		return Locale{}, err
 	}
 
-	return reply.Result[0], nil
+	return response.Result[0], nil
 }
 
 func (d *Device) Gateway(ctx context.Context) (Gateway, error) {
-	type response struct {
+	var response struct {
 		miio.Response
 
 		Result []Gateway `json:"result"`
 	}
 
-	var reply response
-
-	err := d.Client().Send(ctx, "get_gateway", nil, &reply)
+	err := d.Client().CallRPC(ctx, "get_gateway", nil, &response)
 	if err != nil {
 		return Gateway{}, err
 	}
 
-	return reply.Result[0], nil
+	return response.Result[0], nil
 }
 
 func (d *Device) LogUploadStatus(ctx context.Context) (LogUploadStatus, error) {
-	type response struct {
+	var response struct {
 		miio.Response
 
 		Result []LogUploadStatus `json:"result"`
 	}
 
-	var reply response
-
-	err := d.Client().Send(ctx, "get_log_upload_status", nil, &reply)
+	err := d.Client().CallRPC(ctx, "get_log_upload_status", nil, &response)
 	if err != nil {
 		return LogUploadStatus{}, err
 	}
 
-	return reply.Result[0], nil
+	return response.Result[0], nil
 }
 
 func (d *Device) SetLabStatus(ctx context.Context, enabled bool) error {
 	var (
-		reply  miio.ResponseOK
-		status int64
+		response miio.ResponseOK
+		status   int64
 	)
 
 	if enabled {
 		status = 1
 	}
 
-	err := d.Client().Send(ctx, "set_lab_status", []int64{status}, &reply)
+	err := d.Client().CallRPC(ctx, "set_lab_status", []int64{status}, &response)
 	if err != nil {
 		return err
 	}
 
-	if !miio.ResponseIsOK(reply) {
+	if !miio.ResponseIsOK(response) {
 		return errors.New("device return not OK response")
 	}
 

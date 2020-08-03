@@ -73,14 +73,14 @@ func (e SoundInstallStatusError) String() string {
 }
 
 func (d *Device) SoundVolumeTest(ctx context.Context) error {
-	var reply miio.ResponseOK
+	var response miio.ResponseOK
 
-	err := d.Client().Send(ctx, "test_sound_volume", nil, &reply)
+	err := d.Client().CallRPC(ctx, "test_sound_volume", nil, &response)
 	if err != nil {
 		return err
 	}
 
-	if !miio.ResponseIsOK(reply) {
+	if !miio.ResponseIsOK(response) {
 		return errors.New("device return not OK response")
 	}
 
@@ -88,20 +88,18 @@ func (d *Device) SoundVolumeTest(ctx context.Context) error {
 }
 
 func (d *Device) SoundVolume(ctx context.Context) (uint32, error) {
-	type response struct {
+	var response struct {
 		miio.Response
 
 		Result []uint32 `json:"result"`
 	}
 
-	var reply response
-
-	err := d.Client().Send(ctx, "get_sound_volume", nil, &reply)
+	err := d.Client().CallRPC(ctx, "get_sound_volume", nil, &response)
 	if err != nil {
 		return 0, err
 	}
 
-	return reply.Result[0], nil
+	return response.Result[0], nil
 }
 
 func (d *Device) SetSoundVolume(ctx context.Context, volume uint32) error {
@@ -109,14 +107,14 @@ func (d *Device) SetSoundVolume(ctx context.Context, volume uint32) error {
 		volume = 100
 	}
 
-	var reply miio.ResponseOK
+	var response miio.ResponseOK
 
-	err := d.Client().Send(ctx, "change_sound_volume", []uint32{volume}, &reply)
+	err := d.Client().CallRPC(ctx, "change_sound_volume", []uint32{volume}, &response)
 	if err != nil {
 		return err
 	}
 
-	if !miio.ResponseIsOK(reply) {
+	if !miio.ResponseIsOK(response) {
 		return errors.New("device return not OK response")
 	}
 
@@ -127,59 +125,53 @@ func (d *Device) SetSoundVolume(ctx context.Context, volume uint32) error {
 // English       {"result":[{"sid_in_use":3,"sid_version":2,"sid_in_progress":0,"location":"prc","bom":"A.03.0002","language":"prc","msg_ver":2}],"id":1557236769}
 // По-умолчанию  {"result":[{"sid_in_use":1,"sid_version":2,"sid_in_progress":0,"location":"prc","bom":"A.03.0002","language":"prc","msg_ver":2}],"id":1557236821}
 func (d *Device) SoundCurrent(ctx context.Context) (Sound, error) {
-	type response struct {
+	var response struct {
 		miio.Response
 
 		Result []Sound `json:"result"`
 	}
 
-	var reply response
-
-	err := d.Client().Send(ctx, "get_current_sound", nil, &reply)
+	err := d.Client().CallRPC(ctx, "get_current_sound", nil, &response)
 	if err != nil {
 		return Sound{}, err
 	}
 
-	return reply.Result[0], nil
+	return response.Result[0], nil
 }
 
 func (d *Device) SoundInstall(ctx context.Context, url, md5sum string, sid uint64) (SoundInstallStatus, error) {
-	type response struct {
+	var response struct {
 		miio.Response
 
 		Result []SoundInstallStatus `json:"result"`
 	}
 
-	var reply response
-
-	err := d.Client().Send(ctx, "dnld_install_sound", map[string]interface{}{
+	err := d.Client().CallRPC(ctx, "dnld_install_sound", map[string]interface{}{
 		"md5": md5sum,
 		"url": url,
 		"sid": sid,
 		//"sver": 2,
-	}, &reply)
+	}, &response)
 	if err != nil {
 		return SoundInstallStatus{}, err
 	}
 
-	return reply.Result[0], nil
+	return response.Result[0], nil
 }
 
 func (d *Device) SoundInstallProgress(ctx context.Context) (SoundInstallStatus, error) {
-	type response struct {
+	var response struct {
 		miio.Response
 
 		Result []SoundInstallStatus `json:"result"`
 	}
 
-	var reply response
-
-	err := d.Client().Send(ctx, "get_sound_progress", nil, &reply)
+	err := d.Client().CallRPC(ctx, "get_sound_progress", nil, &response)
 	if err != nil {
 		return SoundInstallStatus{}, err
 	}
 
-	return reply.Result[0], nil
+	return response.Result[0], nil
 }
 
 func (d *Device) SoundInstallLocalServer(ctx context.Context, file io.ReadSeeker, sid uint64) error {

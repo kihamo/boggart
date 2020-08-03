@@ -64,7 +64,7 @@ func (d *Device) Client() *Client {
 	return d.client
 }
 
-func (d *Device) ID(ctx context.Context) ([]byte, error) {
+func (d *Device) ID(ctx context.Context) (uint16, error) {
 	return d.client.DeviceID(ctx)
 }
 
@@ -73,36 +73,34 @@ func (d *Device) Close() error {
 }
 
 func (d *Device) Info(ctx context.Context) (InfoPayload, error) {
-	var reply struct {
+	var response struct {
 		Response
 		Result InfoPayload `json:"result"`
 	}
 
-	err := d.Client().Send(ctx, "miIO.info", nil, &reply)
+	err := d.Client().CallRPC(ctx, "miIO.info", nil, &response)
 	if err != nil {
 		return InfoPayload{}, err
 	}
 
-	reply.Result.LifeTime *= time.Second
+	response.Result.LifeTime *= time.Second
 
-	return reply.Result, nil
+	return response.Result, nil
 }
 
 func (d *Device) WiFiStatus(ctx context.Context) (WiFiStatusPayload, error) {
-	type response struct {
+	var response struct {
 		Response
 
 		Result WiFiStatusPayload `json:"result"`
 	}
 
-	var reply response
-
-	err := d.Client().Send(ctx, "miIO.wifi_assoc_state", nil, &reply)
+	err := d.Client().CallRPC(ctx, "miIO.wifi_assoc_state", nil, &response)
 	if err != nil {
 		return WiFiStatusPayload{}, err
 	}
 
-	return reply.Result, nil
+	return response.Result, nil
 }
 
 // проверить загрузку на устройстве можно в /mnt/data/.temp
@@ -134,20 +132,20 @@ func (d *Device) OTALocalServer(ctx context.Context, file io.ReadSeeker) error {
 }
 
 func (d *Device) OTA(ctx context.Context, url, md5sum string) error {
-	var reply ResponseOK
+	var response ResponseOK
 
-	err := d.Client().Send(ctx, "miIO.ota", map[string]interface{}{
+	err := d.Client().CallRPC(ctx, "miIO.ota", map[string]interface{}{
 		"mode":     "normal",
 		"install":  "1",
 		"app_url":  url,
 		"file_md5": md5sum,
 		"proc":     "dnld install",
-	}, &reply)
+	}, &response)
 	if err != nil {
 		return err
 	}
 
-	if !ResponseIsOK(reply) {
+	if !ResponseIsOK(response) {
 		return errors.New("device return not OK response")
 	}
 
@@ -155,31 +153,31 @@ func (d *Device) OTA(ctx context.Context, url, md5sum string) error {
 }
 
 func (d *Device) otaStatus(ctx context.Context) (otaStatus, error) {
-	var reply struct {
+	var response struct {
 		Response
 		Result []string `json:"result"`
 	}
 
-	err := d.Client().Send(ctx, "miIO.get_ota_state", nil, &reply)
+	err := d.Client().CallRPC(ctx, "miIO.get_ota_state", nil, &response)
 	if err != nil {
 		return OTAStatusUnknown, err
 	}
 
-	return otaStatus(reply.Result[0]), nil
+	return otaStatus(response.Result[0]), nil
 }
 
 func (d *Device) OTAProgress(ctx context.Context) (uint64, error) {
-	var reply struct {
+	var response struct {
 		Response
 		Result []uint64 `json:"result"`
 	}
 
-	err := d.Client().Send(ctx, "miIO.get_ota_progress", nil, &reply)
+	err := d.Client().CallRPC(ctx, "miIO.get_ota_progress", nil, &response)
 	if err != nil {
 		return 0, err
 	}
 
-	return reply.Result[0], nil
+	return response.Result[0], nil
 }
 
 func (d *Device) HostnameForLocalServer() string {

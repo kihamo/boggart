@@ -19,22 +19,20 @@ type Timer struct {
 }
 
 func (d *Device) Timers(ctx context.Context) ([]Timer, error) {
-	type response struct {
+	var response struct {
 		miio.Response
 
 		Result [][]interface{} `json:"result"`
 	}
 
-	var reply response
-
-	err := d.Client().Send(ctx, "get_timer", nil, &reply)
+	err := d.Client().CallRPC(ctx, "get_timer", nil, &response)
 	if err != nil {
 		return nil, err
 	}
 
-	result := make([]Timer, 0, len(reply.Result))
+	result := make([]Timer, 0, len(response.Result))
 
-	for _, row := range reply.Result {
+	for _, row := range response.Result {
 		t := Timer{}
 
 		for i, v := range row {
@@ -67,14 +65,14 @@ func (d *Device) DisableTimer(ctx context.Context, timerID uint64, value bool) e
 		val = "on"
 	}
 
-	var reply miio.ResponseOK
+	var response miio.ResponseOK
 
-	err := d.Client().Send(ctx, "upd_timer", []string{strconv.FormatUint(timerID, 10), val}, &reply)
+	err := d.Client().CallRPC(ctx, "upd_timer", []string{strconv.FormatUint(timerID, 10), val}, &response)
 	if err != nil {
 		return err
 	}
 
-	if !miio.ResponseIsOK(reply) {
+	if !miio.ResponseIsOK(response) {
 		return errors.New("device return not OK response")
 	}
 
@@ -82,14 +80,14 @@ func (d *Device) DisableTimer(ctx context.Context, timerID uint64, value bool) e
 }
 
 func (d *Device) RemoveTimer(ctx context.Context, timerID uint64) error {
-	var reply miio.ResponseOK
+	var response miio.ResponseOK
 
-	err := d.Client().Send(ctx, "del_timer", []string{strconv.FormatUint(timerID, 10)}, &reply)
+	err := d.Client().CallRPC(ctx, "del_timer", []string{strconv.FormatUint(timerID, 10)}, &response)
 	if err != nil {
 		return err
 	}
 
-	if !miio.ResponseIsOK(reply) {
+	if !miio.ResponseIsOK(response) {
 		return errors.New("device return not OK response")
 	}
 
@@ -97,7 +95,7 @@ func (d *Device) RemoveTimer(ctx context.Context, timerID uint64) error {
 }
 
 func (d *Device) SetTimer(ctx context.Context, cron, action string, fanPower uint64) error {
-	var reply miio.ResponseOK
+	var response miio.ResponseOK
 
 	request := [][]interface{}{{
 		strconv.FormatInt(time.Now().Unix(), 10),
@@ -107,12 +105,12 @@ func (d *Device) SetTimer(ctx context.Context, cron, action string, fanPower uin
 		},
 	}}
 
-	err := d.Client().Send(ctx, "set_timer", request, &reply)
+	err := d.Client().CallRPC(ctx, "set_timer", request, &response)
 	if err != nil {
 		return err
 	}
 
-	if !miio.ResponseIsOK(reply) {
+	if !miio.ResponseIsOK(response) {
 		return errors.New("device return not OK response")
 	}
 

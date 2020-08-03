@@ -1,230 +1,322 @@
 package miio
 
 import (
+	"bytes"
 	"context"
-	"encoding/json"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/md5"
+	"encoding/hex"
 	"errors"
 	"io"
-	"log"
 	"net"
 	"strconv"
 	a "sync/atomic"
 	"time"
 
 	"github.com/kihamo/boggart/atomic"
-	"github.com/kihamo/boggart/providers/xiaomi/miio/internal"
-	"github.com/kihamo/boggart/providers/xiaomi/miio/internal/packet"
+	"github.com/kihamo/boggart/protocols/connection"
 )
 
 const (
 	DefaultTimeout = time.Second * 5
+	DefaultPort    = 54321
 )
 
 type Client struct {
 	io.Closer
 
 	packetsCounter uint32
-	dump           uint32
 	stampDiff      int64
 
-	conn     *internal.Connection
+	conn     connection.ObserverConnection
 	connOnce *atomic.Once
 
-	address  string
-	deviceID []byte
-	token    string
+	address     string
+	token       string
+	tokenBytes  []byte
+	helloPacket *Packet
+
+	cryptoOnce   *atomic.Once
+	cryptoCipher cipher.Block
+	cryptoIV     []byte
 }
+
+/*
+Заметки:
+- Пылесос очень чувствителен к счетчику пакетов, он похоже кэширует соответствие ip и счетчика
+  поэтому если с одного ip начинать несколько сессий со сбросом счетчик, то пылесос не отвечает
+*/
 
 func NewClient(address, token string) *Client {
+	t, _ := hex.DecodeString(token)
+
 	return &Client{
-		address:  address,
-		token:    token,
-		connOnce: new(atomic.Once),
+		address:    address,
+		token:      token,
+		tokenBytes: t,
+		connOnce:   new(atomic.Once),
+		cryptoOnce: new(atomic.Once),
 	}
 }
 
-func (p *Client) lazyConnect(ctx context.Context) (_ *internal.Connection, err error) {
-	var first bool
+func (c *Client) lazyConnect(ctx context.Context) (_ connection.ObserverConnection, err error) {
+	c.connOnce.Do(func() {
+		options := []connection.Option{
+			connection.WithNetwork("udp"),
+			connection.WithReadTimeout(DefaultTimeout),
+			connection.WithWriteTimeout(DefaultTimeout),
+			connection.WithOnce(true),
+		}
+		host := net.JoinHostPort(c.address, strconv.Itoa(DefaultPort))
+		dial := connection.Dial(host, options...)
+		conn := connection.NewObserverConnection(dial)
 
-	p.connOnce.Do(func() {
-		p.conn, err = internal.NewConnection(p.address)
-		first = true
+		// начинаем сессию hello пакетом
+		var response *Packet
+
+		response, err = c.hello(conn)
+		if err == nil {
+			c.helloPacket = response
+		}
+
+		c.conn = conn
 	})
 
-	if err == nil && first {
-		// начинаем сессию hello пакетом
-		_, err = p.Hello(ctx)
-	}
-
 	if err != nil {
-		p.connOnce.Reset()
+		c.connOnce.Reset()
+		return nil, err
 	}
 
-	return p.conn, err
+	return c.conn, nil
 }
 
-func (p *Client) Close() error {
-	if p.conn != nil {
-		return p.conn.Close()
+func (c *Client) initCrypto() (err error) {
+	defer func() {
+		if err != nil {
+			c.cryptoOnce.Reset()
+		}
+	}()
+
+	c.cryptoOnce.Do(func() {
+		var token []byte
+
+		token, err = hex.DecodeString(c.token)
+		if err != nil {
+			return
+		}
+
+		hash := md5.New()
+
+		if _, err = hash.Write(token); err != nil {
+			return
+		}
+
+		key := hash.Sum(nil)
+
+		hash.Reset()
+
+		if _, err = hash.Write(key); err != nil {
+			return
+		}
+
+		if _, err = hash.Write(token); err != nil {
+			return
+		}
+
+		c.cryptoIV = hash.Sum(nil)
+
+		if c.cryptoCipher, err = aes.NewCipher(key); err != nil {
+			return
+		}
+	})
+
+	return err
+}
+
+func (c *Client) Close() error {
+	if c.conn != nil {
+		return c.conn.Close()
 	}
 
 	return nil
 }
 
-func (p *Client) LocalAddr() (*net.UDPAddr, error) {
-	connect, err := p.lazyConnect(context.Background())
+func (c *Client) LocalAddr() (*net.UDPAddr, error) {
+	return nil, errors.New("not supported")
+}
+
+func (c *Client) SetPacketsCounter(count uint32) {
+	a.StoreUint32(&c.packetsCounter, count)
+}
+
+func (c *Client) PacketsCounter() uint32 {
+	return a.LoadUint32(&c.packetsCounter)
+}
+
+func (c *Client) hello(conn connection.Invoker) (*Packet, error) {
+	requestPacket := NewPacket(nil)
+	requestPacket.SetUnknown(0xFFFFFFFF)
+	requestPacket.SetDeviceType(0xFFFF)
+	requestPacket.SetDeviceID(0xFFFF)
+	requestPacket.SetTimestamp(time.Unix(int64(0xFFFFFFFF), 0))
+
+	requestData, err := requestPacket.MarshalBinary()
 	if err != nil {
 		return nil, err
 	}
 
-	return connect.LocalAddr(), nil
-}
-
-func (p *Client) SetDump(enabled bool) {
-	if enabled {
-		a.StoreUint32(&p.dump, 1)
-	} else {
-		a.StoreUint32(&p.dump, 0)
-	}
-}
-
-func (p *Client) SetPacketsCounter(count uint32) {
-	a.StoreUint32(&p.packetsCounter, count)
-}
-
-func (p *Client) Hello(ctx context.Context) (packet.Packet, error) {
-	conn, err := p.lazyConnect(ctx)
+	responseData, err := conn.Invoke(requestData)
 	if err != nil {
 		return nil, err
 	}
 
-	request := packet.NewHello()
-	response := packet.NewBase()
+	responsePacket := NewPacket(nil)
+	err = responsePacket.UnmarshalBinary(responseData)
 
-	err = conn.Invoke(ctx, request, response)
-	if err != nil {
-		return nil, err
-	}
-
-	return response, nil
+	return responsePacket, err
 }
 
-func (p *Client) DeviceID(ctx context.Context) ([]byte, error) {
-	if p.deviceID == nil {
-		response, err := p.Hello(ctx)
-		if err != nil {
-			return nil, err
+func (c *Client) DeviceID(ctx context.Context) (uint16, error) {
+	_, err := c.lazyConnect(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	return c.helloPacket.DeviceID(), nil
+}
+
+func (c *Client) CallRPC(ctx context.Context, method string, params, response interface{}) error {
+	conn, err := c.lazyConnect(ctx)
+	if err != nil {
+		return err
+	}
+
+	requestPacket := NewPacket(c.tokenBytes)
+	requestPacket.SetPayloadRPC(0, method, params)
+
+	requestPacket.SetDeviceID(c.helloPacket.DeviceID())
+	requestPacket.SetDeviceType(c.helloPacket.DeviceType())
+
+	diff := time.Duration(a.LoadInt64(&c.stampDiff))
+	requestPacket.SetTimestamp(time.Now().Add(diff))
+
+	requestID := a.AddUint32(&c.packetsCounter, 1)
+	requestPacket.SetPayloadRPC(requestID, method, params)
+
+	if err := c.encrypt(requestPacket); err != nil {
+		return err
+	}
+
+	requestData, err := requestPacket.MarshalBinary()
+	if err != nil {
+		return err
+	}
+
+	done := make(chan struct{}, 1)
+
+	observer := connection.ObserverFunc(func(responseData []byte, e error) {
+		closer := func(e error) {
+			err = e
+			done <- struct{}{}
 		}
 
-		p.deviceID = response.DeviceID()
-	}
+		if e != nil {
+			closer(e)
+			return
+		}
 
-	return p.deviceID, nil
-}
+		responsePacket := NewPacket(nil)
 
-func (p *Client) Send(ctx context.Context, method string, params interface{}, result interface{}) error {
-	if params == nil {
-		params = []interface{}{}
-	}
+		if e = responsePacket.UnmarshalBinary(responseData); e != nil {
+			closer(e)
+			return
+		}
 
-	if _, ok := ctx.Deadline(); !ok {
-		var cancel context.CancelFunc
+		if e = c.decrypt(responsePacket); e != nil {
+			closer(e)
+			return
+		}
 
-		ctx, cancel = context.WithTimeout(ctx, DefaultTimeout)
+		a.StoreInt64(&c.stampDiff, int64(time.Since(responsePacket.Timestamp())))
 
-		defer cancel()
-	}
+		var responseError ResponseError
+		if e = responsePacket.PayloadJSON(&responseError); e == nil && len(responseError.Error.Message) > 0 {
+			closer(errors.New(responseError.Error.Message))
+			return
+		}
 
-	requestID := a.AddUint32(&p.packetsCounter, 1)
-	body, err := json.Marshal(Request{
-		ID:     requestID,
-		Method: method,
-		Params: params,
+		var responseUnknown ResponseUnknownMethod
+		if e = responsePacket.PayloadJSON(&responseUnknown); e == nil && responseUnknown.Result == "unknown_method" {
+			closer(errors.New("unknown method"))
+			return
+		}
+
+		var responseDefault Response
+		if e = responsePacket.PayloadJSON(&responseDefault); e == nil && responseDefault.ID != requestID {
+			// если requestID > responseDefault.ID то можно еще делать попытки вычитывания, обычно такое бывает
+			// из-за того что контекст прерывается быстрее чем девай отвечает и следующий реквест получает предыдущий респонс
+			return
+		}
+
+		e = responsePacket.PayloadJSON(&response)
+		closer(e)
 	})
+	conn.Attach(observer)
+	defer conn.Detach(observer)
 
-	if err != nil {
-		return err
+	if _, e := conn.Write(requestData); e != nil {
+		return e
 	}
 
-	deviceID, err := p.DeviceID(ctx)
-	if err != nil {
-		return err
+	select {
+	case <-done:
+
+	case <-ctx.Done():
+		err = ctx.Err()
 	}
-
-	conn, err := p.lazyConnect(ctx)
-	if err != nil {
-		return err
-	}
-
-	var response packet.Packet
-
-	if result != nil {
-		response, err = packet.NewCrypto(deviceID, p.token)
-		if err != nil {
-			return err
-		}
-	}
-
-	request, err := packet.NewCrypto(deviceID, p.token)
-	if err != nil {
-		return err
-	}
-
-	request.SetBody(body)
-
-	var diff time.Duration
-
-	diff = time.Duration(a.LoadInt64(&p.stampDiff))
-	request.SetStamp(time.Now().Add(diff))
-
-	dump := a.LoadUint32(&p.dump) == 1
-	if dump {
-		log.Printf("Request #%d raw: "+request.Dump(), requestID)
-		log.Printf("Request #%d body: "+string(body), requestID)
-	}
-
-	err = conn.Invoke(ctx, request, response)
-
-	if err != nil {
-		return err
-	}
-
-	if dump {
-		log.Println("Response raw: " + response.Dump())
-		log.Println("Response body: " + string(response.Body()))
-	}
-
-	if result == nil {
-		return nil
-	}
-
-	diff = time.Since(response.Stamp())
-	a.StoreInt64(&p.stampDiff, int64(diff))
-
-	var responseError ResponseError
-	if err = json.Unmarshal(response.Body(), &responseError); err == nil && len(responseError.Error.Message) > 0 {
-		return errors.New(responseError.Error.Message)
-	}
-
-	var responseUnknown ResponseUnknownMethod
-	if err = json.Unmarshal(response.Body(), &responseUnknown); err == nil && responseUnknown.Result == "unknown_method" {
-		return errors.New("unknown method")
-	}
-
-	var responseDefault Response
-
-	// nolint:wsl
-	if err = json.Unmarshal(response.Body(), &responseDefault); err == nil && responseDefault.ID != requestID {
-		// TODO: если requestID > responseDefault.ID то можно еще делать попытки вычитывания, обычно такое бывает
-		// из-за того что контекст прерывается быстрее чем девай отвечает и следующий реквест получает предыдущий респонс
-
-		return errors.New("response ID could not be verified. Expected " +
-			strconv.FormatUint(uint64(requestID), 10) +
-			", got " +
-			strconv.FormatUint(uint64(responseDefault.ID), 10))
-	}
-
-	err = json.Unmarshal(response.Body(), &result)
 
 	return err
+}
+
+func (c *Client) encrypt(packet *Packet) error {
+	if err := c.initCrypto(); err != nil {
+		return err
+	}
+
+	payload := packet.Payload()
+	blockSize := c.cryptoCipher.BlockSize()
+
+	paddingCount := blockSize - len(payload)%blockSize
+	paddingData := bytes.Repeat([]byte{byte(paddingCount)}, paddingCount)
+
+	dataOriginal := append(payload, paddingData...)
+	dataEncrypted := make([]byte, len(dataOriginal))
+
+	encrypter := cipher.NewCBCEncrypter(c.cryptoCipher, c.cryptoIV)
+	encrypter.CryptBlocks(dataEncrypted, dataOriginal)
+
+	packet.SetPayload(dataEncrypted)
+
+	return nil
+}
+
+func (c *Client) decrypt(packet *Packet) error {
+	if err := c.initCrypto(); err != nil {
+		return err
+	}
+
+	payload := packet.Payload()
+
+	dataOriginal := make([]byte, len(payload))
+
+	decrypter := cipher.NewCBCDecrypter(c.cryptoCipher, c.cryptoIV)
+	decrypter.CryptBlocks(dataOriginal, payload)
+
+	length := len(dataOriginal)
+	unPadding := int(dataOriginal[length-1])
+
+	packet.SetPayload(dataOriginal[:(length-unPadding)-1])
+
+	return nil
 }

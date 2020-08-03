@@ -16,20 +16,18 @@ const (
 )
 
 func (d *Device) FanPower(ctx context.Context) (uint32, error) {
-	type response struct {
+	var response struct {
 		miio.Response
 
 		Result []uint32 `json:"result"`
 	}
 
-	var reply response
-
-	err := d.Client().Send(ctx, "get_custom_mode", nil, &reply)
+	err := d.Client().CallRPC(ctx, "get_custom_mode", nil, &response)
 	if err != nil {
 		return 0, err
 	}
 
-	return reply.Result[0], nil
+	return response.Result[0], nil
 }
 
 func (d *Device) SetFanPower(ctx context.Context, power uint64) error {
@@ -39,14 +37,14 @@ func (d *Device) SetFanPower(ctx context.Context, power uint64) error {
 		power = 1
 	}
 
-	var reply miio.ResponseOK
+	var response miio.ResponseOK
 
-	err := d.Client().Send(ctx, "set_custom_mode", []uint64{power}, &reply)
+	err := d.Client().CallRPC(ctx, "set_custom_mode", []uint64{power}, &response)
 	if err != nil {
 		return err
 	}
 
-	if !miio.ResponseIsOK(reply) {
+	if !miio.ResponseIsOK(response) {
 		return errors.New("device return not OK response")
 	}
 

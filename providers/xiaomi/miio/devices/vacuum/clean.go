@@ -23,22 +23,20 @@ type CleanDetail struct {
 }
 
 func (d *Device) CleanSummary(ctx context.Context) (CleanSummary, error) {
-	type response struct {
+	var response struct {
 		miio.Response
 
 		Result []interface{} `json:"result"`
 	}
 
-	var reply response
-
-	err := d.Client().Send(ctx, "get_clean_summary", nil, &reply)
+	err := d.Client().CallRPC(ctx, "get_clean_summary", nil, &response)
 	if err != nil {
 		return CleanSummary{}, err
 	}
 
 	result := CleanSummary{}
 
-	for i, v := range reply.Result {
+	for i, v := range response.Result {
 		switch i {
 		case 0:
 			result.TotalTime = time.Duration(v.(float64)) * time.Second
@@ -63,22 +61,20 @@ func (d *Device) CleanSummary(ctx context.Context) (CleanSummary, error) {
 }
 
 func (d *Device) CleanDetails(ctx context.Context, id uint64) (CleanDetail, error) {
-	type response struct {
+	var response struct {
 		miio.Response
 
 		Result [][]int64 `json:"result"`
 	}
 
-	var reply response
-
-	err := d.Client().Send(ctx, "get_clean_record", []uint64{id}, &reply)
+	err := d.Client().CallRPC(ctx, "get_clean_record", []uint64{id}, &response)
 	if err != nil {
 		return CleanDetail{}, err
 	}
 
 	result := CleanDetail{}
 
-	for i, v := range reply.Result[0] {
+	for i, v := range response.Result[0] {
 		switch i {
 		case 0:
 			result.StartTime = time.Unix(v, 0)

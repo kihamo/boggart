@@ -45,7 +45,7 @@ func (l *looper) Loop() (<-chan []byte, <-chan error, chan<- struct{}, <-chan st
 					response <- append([]byte(nil), buf[:n]...)
 				}
 
-				if err != nil {
+				if err != nil && !IsTimeout(err) {
 					errors <- err
 				}
 			}
