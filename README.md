@@ -143,3 +143,11 @@ sudo echo "5" > /sys/class/gpio/unexport
 cd /Users/kihamo/go/src/github.com/kihamo/boggart/openhab2/esphome
 docker run --rm -p 6052:6052 -p 6123:6123 -v "${PWD}":/config -e ESPHOME_DASHBOARD_USE_PING=true -it esphome/esphome
 ```
+
+# openhab
+
+```
+sudo systemctl stop openhab2
+sudo openhab-cli clean-cache
+sudo systemctl start openhab2
+```

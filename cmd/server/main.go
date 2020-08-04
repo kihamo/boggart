@@ -16,6 +16,7 @@ import (
 	_ "github.com/kihamo/boggart/components/boggart/bind/hikvision"
 	_ "github.com/kihamo/boggart/components/boggart/bind/hilink"
 	_ "github.com/kihamo/boggart/components/boggart/bind/homie"
+	_ "github.com/kihamo/boggart/components/boggart/bind/influxdb"
 	_ "github.com/kihamo/boggart/components/boggart/bind/integratorit"
 	_ "github.com/kihamo/boggart/components/boggart/bind/led_wifi"
 	_ "github.com/kihamo/boggart/components/boggart/bind/lg_webos"
