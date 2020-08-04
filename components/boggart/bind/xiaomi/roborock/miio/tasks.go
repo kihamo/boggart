@@ -122,20 +122,5 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		err = multierr.Append(err, e)
 	}
 
-	// last clean time
-	if summary, e := b.device.CleanSummary(ctx); e == nil {
-		if len(summary.CleanupIDs) > 0 {
-			if details, e := b.device.CleanDetails(ctx, summary.CleanupIDs[0]); e == nil {
-				if e := b.MQTT().PublishAsync(ctx, b.config.TopicLastCleanStartDateTime.Format(sn), details.EndTime); e != nil {
-					err = multierr.Append(err, e)
-				}
-			} else {
-				err = multierr.Append(err, e)
-			}
-		}
-	} else {
-		err = multierr.Append(err, e)
-	}
-
 	return err
 }
