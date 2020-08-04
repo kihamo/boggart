@@ -45,13 +45,35 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicBattery.Format(sn), status.Battery); e != nil {
 			err = multierr.Append(err, e)
 		}
+	} else {
+		err = multierr.Append(err, e)
+	}
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicCleanArea.Format(sn), status.CleanArea); e != nil {
-			err = multierr.Append(err, e)
-		}
+	summary, e := b.device.CleanSummary(ctx)
+	if e == nil {
+		if len(summary.CleanupIDs) > 0 {
+			lastClean, e := b.device.CleanDetails(ctx, summary.CleanupIDs[0])
+			if e == nil {
+				if e := b.MQTT().PublishAsync(ctx, b.config.TopicLastCleanCompleted.Format(sn), lastClean.Completed); e != nil {
+					err = multierr.Append(err, e)
+				}
 
-		if status.CleanTime > 0 {
-			if e := b.MQTT().PublishAsync(ctx, b.config.TopicCleanTime.Format(sn), status.CleanTime); e != nil {
+				if e := b.MQTT().PublishAsync(ctx, b.config.TopicLastCleanArea.Format(sn), lastClean.Area); e != nil {
+					err = multierr.Append(err, e)
+				}
+
+				if e := b.MQTT().PublishAsync(ctx, b.config.TopicLastCleanStartDateTime.Format(sn), lastClean.StartTime); e != nil {
+					err = multierr.Append(err, e)
+				}
+
+				if e := b.MQTT().PublishAsync(ctx, b.config.TopicLastCleanStartEndTime.Format(sn), lastClean.EndTime); e != nil {
+					err = multierr.Append(err, e)
+				}
+
+				if e := b.MQTT().PublishAsync(ctx, b.config.TopicLastCleanDuration.Format(sn), lastClean.CleaningDuration); e != nil {
+					err = multierr.Append(err, e)
+				}
+			} else {
 				err = multierr.Append(err, e)
 			}
 		}
@@ -104,7 +126,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 	if summary, e := b.device.CleanSummary(ctx); e == nil {
 		if len(summary.CleanupIDs) > 0 {
 			if details, e := b.device.CleanDetails(ctx, summary.CleanupIDs[0]); e == nil {
-				if e := b.MQTT().PublishAsync(ctx, b.config.TopicLastCleanDateTime.Format(sn), details.EndTime); e != nil {
+				if e := b.MQTT().PublishAsync(ctx, b.config.TopicLastCleanStartDateTime.Format(sn), details.EndTime); e != nil {
 					err = multierr.Append(err, e)
 				}
 			} else {
