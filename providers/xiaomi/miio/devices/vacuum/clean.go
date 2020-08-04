@@ -10,8 +10,9 @@ import (
 )
 
 var (
-	humanTime = []string{"s", "m", "h"}
-	humanArea = []string{"cm2", "dm2", "m2", "km2"}
+	humanTime   = []string{"s", "m", "h"}
+	humanArea   = []string{"mm", "cm2", "dm2", "m2"}
+	humanPrefix = []string{"K", "M", "G"}
 )
 
 type CleanSummary struct {
@@ -39,12 +40,29 @@ func (c CleanSummary) TotalTimeHuman() string {
 
 func (c CleanSummary) TotalAreaHuman() string {
 	val := float64(c.TotalArea)
+	step := 100.0
 
 	for i := 0; ; i++ {
-		v := float64(val / 100)
+		v := val / step
 
 		if v < 1 || i == len(humanArea)-1 {
-			return strconv.Itoa(int(math.Round(val))) + " " + humanArea[i]
+			prefix := ""
+			prefixIndex := 0
+			prefixStep := 1000.0
+
+			for {
+				val /= 1000
+
+				if val < prefixStep || prefixIndex == len(humanPrefix)-1 {
+					prefix = humanPrefix[prefixIndex]
+					break
+				}
+
+				prefixIndex++
+				prefixStep += 1000
+			}
+
+			return strconv.Itoa(int(math.Round(val))) + prefix + " " + humanArea[i]
 		}
 
 		val = v
