@@ -66,7 +66,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 					err = multierr.Append(err, e)
 				}
 
-				if e := b.MQTT().PublishAsync(ctx, b.config.TopicLastCleanStartEndTime.Format(sn), lastClean.EndTime); e != nil {
+				if e := b.MQTT().PublishAsync(ctx, b.config.TopicLastCleanEndDateTime.Format(sn), lastClean.EndTime); e != nil {
 					err = multierr.Append(err, e)
 				}
 

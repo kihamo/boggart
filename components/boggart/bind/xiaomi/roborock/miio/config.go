@@ -21,7 +21,7 @@ type Config struct {
 	TopicLastCleanCompleted     mqtt.Topic    `mapstructure:"topic_last_clean_completed" yaml:"topic_last_clean_completed"`
 	TopicLastCleanArea          mqtt.Topic    `mapstructure:"topic_last_clean_area" yaml:"topic_last_clean_area"`
 	TopicLastCleanStartDateTime mqtt.Topic    `mapstructure:"topic_last_clean_start_datetime" yaml:"topic_last_clean_start_datetime"`
-	TopicLastCleanStartEndTime  mqtt.Topic    `mapstructure:"topic_last_clean_end_datetime" yaml:"topic_last_clean_end_datetime"`
+	TopicLastCleanEndDateTime   mqtt.Topic    `mapstructure:"topic_last_clean_end_datetime" yaml:"topic_last_clean_end_datetime"`
 	TopicLastCleanDuration      mqtt.Topic    `mapstructure:"topic_last_clean_duration" yaml:"topic_last_clean_duration"`
 	TopicFanPower               mqtt.Topic    `mapstructure:"topic_fan_power" yaml:"topic_fan_power"`
 	TopicVolume                 mqtt.Topic    `mapstructure:"topic_volume" yaml:"topic_volume"`
@@ -56,7 +56,7 @@ func (t Type) Config() interface{} {
 		TopicLastCleanCompleted:     prefix + "clean/last/completed",
 		TopicLastCleanArea:          prefix + "clean/last/area",
 		TopicLastCleanStartDateTime: prefix + "clean/last/start-time",
-		TopicLastCleanStartEndTime:  prefix + "clean/last/end-time",
+		TopicLastCleanEndDateTime:   prefix + "clean/last/end-time",
 		TopicLastCleanDuration:      prefix + "clean/last/duration",
 		TopicFanPower:               prefix + "fan-power",
 		TopicVolume:                 prefix + "volume",
