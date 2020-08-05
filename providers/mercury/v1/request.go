@@ -19,6 +19,10 @@ func NewRequest(command uint8) *Request {
 	}
 }
 
+func (r *Request) Address() uint32 {
+	return r.address
+}
+
 func (r *Request) WithAddress(address uint32) *Request {
 	r.address = address
 	return r
@@ -29,7 +33,7 @@ func (r *Request) WithPayload(payload []byte) *Request {
 	return r
 }
 
-func (r *Request) Bytes() []byte {
+func (r *Request) MarshalBinary() (_ []byte, err error) {
 	packet := make([]byte, 4)
 	binary.LittleEndian.PutUint32(packet, r.address)
 
@@ -37,9 +41,10 @@ func (r *Request) Bytes() []byte {
 	packet = append(packet, r.payload...)
 	packet = append(packet, serial.GenerateCRC16(packet)...)
 
-	return packet
+	return packet, nil
 }
 
 func (r *Request) String() string {
-	return hex.EncodeToString(r.Bytes())
+	data, _ := r.MarshalBinary()
+	return hex.EncodeToString(data)
 }

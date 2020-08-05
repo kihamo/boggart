@@ -160,20 +160,26 @@ func (m *MercuryV1) Invoke(request *Request) (*Response, error) {
 		return nil, errors.New("device address is empty")
 	}
 
-	data, err := m.invoker.Invoke(request.Bytes())
+	requestData, err := request.MarshalBinary()
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := ParseResponse(data)
+	responseData, err := m.invoker.Invoke(requestData)
 	if err != nil {
+		return nil, err
+	}
+
+	response := NewResponse()
+
+	if err = response.UnmarshalBinary(responseData); err != nil {
 		return nil, err
 	}
 
 	// check ADDR
-	if response.address != request.address {
+	if response.Address() != request.Address() {
 		return nil, fmt.Errorf("error ADDR of response packet %X have %X want %X",
-			data, response.address, request.address)
+			responseData, response.Address(), request.Address())
 	}
 
 	return response, nil
