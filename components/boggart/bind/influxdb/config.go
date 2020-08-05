@@ -1,11 +1,11 @@
 package influxdb
 
 import (
-	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/mqtt"
 	"time"
 
+	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/types"
 )
 
