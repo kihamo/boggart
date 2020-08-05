@@ -48,12 +48,22 @@ func (m *MercuryV3) InvokeRaw(request *Request) (*Response, error) {
 		return nil, errors.New("device address can't be reserved 0xF1...0xFF")
 	}
 
-	data, err := m.invoker.Invoke(request.Bytes())
+	requestData, err := request.MarshalBinary()
 	if err != nil {
 		return nil, err
 	}
 
-	return ParseResponse(data)
+	responseData, err := m.invoker.Invoke(requestData)
+	if err != nil {
+		return nil, err
+	}
+
+	response := NewResponse()
+	if err = response.UnmarshalBinary(responseData); err != nil {
+		return nil, err
+	}
+
+	return response, err
 }
 
 func (m *MercuryV3) Raw() error {

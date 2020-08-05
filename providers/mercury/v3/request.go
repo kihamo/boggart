@@ -71,7 +71,7 @@ func (r *Request) WithParameters(params []byte) *Request {
 	return r
 }
 
-func (r *Request) Bytes() []byte {
+func (r *Request) MarshalBinary() (_ []byte, err error) {
 	packet := append([]byte{r.address}, r.code)
 
 	if r.parameterCode != nil {
@@ -88,9 +88,10 @@ func (r *Request) Bytes() []byte {
 
 	packet = append(packet, serial.GenerateCRC16(packet)...)
 
-	return packet
+	return packet, nil
 }
 
 func (r *Request) String() string {
-	return hex.EncodeToString(r.Bytes())
+	data, _ := r.MarshalBinary()
+	return hex.EncodeToString(data)
 }

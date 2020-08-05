@@ -24,26 +24,8 @@ type Response struct {
 	lock sync.RWMutex
 }
 
-func ParseResponse(data []byte) (*Response, error) {
-	if len(data) < 4 {
-		return nil, errors.New("bad packet " + hex.EncodeToString(data) + " length")
-	}
-
-	return &Response{
-		address: data[0],
-		payload: data[1 : len(data)-2],
-		crc:     binary.LittleEndian.Uint16(data[len(data)-2:]),
-	}, nil
-}
-
-func (r *Response) Bytes() []byte {
-	packet := append([]byte{r.Address()}, r.Payload()...)
-
-	crc := make([]byte, 2)
-	binary.LittleEndian.PutUint16(crc, r.CRC())
-	packet = append(packet, crc...)
-
-	return packet
+func NewResponse() *Response {
+	return &Response{}
 }
 
 func (r *Response) Address() uint8 {
@@ -68,8 +50,31 @@ func (r *Response) CRC() uint16 {
 	return r.crc
 }
 
+func (r *Response) MarshalBinary() (_ []byte, err error) {
+	packet := append([]byte{r.Address()}, r.Payload()...)
+
+	crc := make([]byte, 2)
+	binary.LittleEndian.PutUint16(crc, r.CRC())
+	packet = append(packet, crc...)
+
+	return packet, nil
+}
+
+func (r *Response) UnmarshalBinary(data []byte) (err error) {
+	if len(data) < 4 {
+		return errors.New("bad packet " + hex.EncodeToString(data) + " length")
+	}
+
+	r.address = data[0]
+	r.payload = data[1 : len(data)-2]
+	r.crc = binary.LittleEndian.Uint16(data[len(data)-2:])
+
+	return nil
+}
+
 func (r *Response) String() string {
-	return hex.EncodeToString(r.Bytes())
+	data, _ := r.MarshalBinary()
+	return hex.EncodeToString(data)
 }
 
 func (r *Response) GetError() error {
