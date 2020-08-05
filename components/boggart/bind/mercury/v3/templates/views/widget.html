@@ -45,10 +45,10 @@
                         </tr>
                         <tr>
                             <td>{{ i18n "Address" . }}</td>
-                            {{ if .firmware_version.error }}
-                                <td class="text-danger" colspan="3">{{ .firmware_version.error.Error }}</td>
+                            {{ if .address.error }}
+                                <td class="text-danger" colspan="3">{{ .address.error.Error }}</td>
                             {{ else }}
-                                <td colspan="3">{{ .firmware_version.value }}</td>
+                                <td colspan="3">{{ .address.value }}</td>
                             {{ end }}
                             <td>{{ i18n "Device network address" . }}</td>
                         </tr>
