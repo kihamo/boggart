@@ -1,0 +1,208 @@
+{{ define "content" }}
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>{{ i18n "Current measurements" . }}</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                    <thead>
+                    <tr>
+                        <th class="md-col-2">{{ i18n "Measurement" . }}</th>
+                        <th colspan="3">{{ i18n "Value" . }}</th>
+                        <th>{{ i18n "Description" . }}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ i18n "Serial number" . }}</td>
+                            {{ if .serial_number.error }}
+                                <td class="text-danger" colspan="3">{{ .serial_number.error.Error }}</td>
+                            {{ else }}
+                                <td colspan="3">{{ .serial_number.value }}</td>
+                            {{ end }}
+                            <td>{{ i18n "Device serial number" . }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ i18n "Build date" . }}</td>
+                            {{ if .build_date.error }}
+                                <td class="text-danger" colspan="3">{{ .build_date.error.Error }}</td>
+                            {{ else }}
+                                <td colspan="3">{{ .build_date.value.Format "2006-01-02" }}</td>
+                            {{ end }}
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>{{ i18n "Firmware version" . }}</td>
+                            {{ if .firmware_version.error }}
+                                <td class="text-danger" colspan="3">{{ .firmware_version.error.Error }}</td>
+                            {{ else }}
+                                <td colspan="3">{{ .firmware_version.value }}</td>
+                            {{ end }}
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>{{ i18n "Address" . }}</td>
+                            {{ if .firmware_version.error }}
+                                <td class="text-danger" colspan="3">{{ .firmware_version.error.Error }}</td>
+                            {{ else }}
+                                <td colspan="3">{{ .firmware_version.value }}</td>
+                            {{ end }}
+                            <td>{{ i18n "Device network address" . }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ i18n "Power" . }}</td>
+                            {{ if .power.error }}
+                                <td class="text-danger" colspan="3">{{ .power.error.Error }}</td>
+                            {{ else }}
+                                <td colspan="3">{{ i18n "%.2f W" . nil nil nil .power.value }}</td>
+                            {{ end }}
+                            <td>{{ i18n "Power summary" . }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ i18n "Power factors" . }}</td>
+                            {{ if .power_factors.error }}
+                                <td class="text-danger" colspan="3">{{ .power_factors.error.Error }}</td>
+                            {{ else }}
+                                <td colspan="3">{{ i18n "%.2f W" . nil nil nil .power_factors.value }}</td>
+                            {{ end }}
+                            <td>{{ i18n "Power factors summary" . }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ i18n "Frequency" . }}</td>
+                            {{ if .frequency.error }}
+                                <td class="text-danger" colspan="3">{{ .frequency.error.Error }}</td>
+                            {{ else }}
+                                <td colspan="3">{{ i18n "%.2f W" . nil nil nil .frequency.value }}</td>
+                            {{ end }}
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>{{ i18n "Frequency" . }}</td>
+                            {{ if .frequency.error }}
+                                <td class="text-danger" colspan="3">{{ .frequency.error.Error }}</td>
+                            {{ else }}
+                                <td colspan="3">{{ i18n "%.2f W" . nil nil nil .frequency.value }}</td>
+                            {{ end }}
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>{{ i18n "Power tariff 1" . }}</td>
+                            {{ if .power_t1.error }}
+                                <td class="text-danger" colspan="3">{{ .power_t1.error.Error }}</td>
+                            {{ else }}
+                                <td colspan="3">{{ i18n "%.d W" . nil nil nil .power_t1.value }}</td>
+                            {{ end }}
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th></th>
+                            <th>{{ i18n "Phase 1" . }}</th>
+                            <th>{{ i18n "Phase 2" . }}</th>
+                            <th>{{ i18n "Phase 3" . }}</th>
+                            <th></th>
+                        </tr>
+                        <tr>
+                            <td>{{ i18n "Voltage" . }}</td>
+                            {{ if .voltage_phase1.error }}
+                                <td class="text-danger">{{ .voltage_phase1.error.Error }}</td>
+                            {{ else }}
+                                <td>{{ i18n "%.2f V" . nil nil nil .voltage_phase1.value }}</td>
+                            {{ end }}
+                            {{ if .voltage_phase2.error }}
+                                <td class="text-danger">{{ .voltage_phase2.error.Error }}</td>
+                            {{ else }}
+                                <td>{{ i18n "%.2f V" . nil nil nil .voltage_phase2.value }}</td>
+                            {{ end }}
+                            {{ if .voltage_phase3.error }}
+                                <td class="text-danger">{{ .voltage_phase3.error.Error }}</td>
+                            {{ else }}
+                                <td>{{ i18n "%.2f V" . nil nil nil .voltage_phase3.value }}</td>
+                            {{ end }}
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>{{ i18n "Amperage" . }}</td>
+                            {{ if .amperage_phase1.error }}
+                                <td class="text-danger">{{ .amperage_phase1.error.Error }}</td>
+                            {{ else }}
+                                <td>{{ i18n "%.2f A" . nil nil nil .amperage_phase1.value }}</td>
+                            {{ end }}
+                            {{ if .amperage_phase2.error }}
+                                <td class="text-danger">{{ .amperage_phase2.error.Error }}</td>
+                            {{ else }}
+                                <td>{{ i18n "%.2f A" . nil nil nil .amperage_phase2.value }}</td>
+                            {{ end }}
+                            {{ if .amperage_phase3.error }}
+                                <td class="text-danger">{{ .amperage_phase3.error.Error }}</td>
+                            {{ else }}
+                                <td>{{ i18n "%.2f A" . nil nil nil .amperage_phase3.value }}</td>
+                            {{ end }}
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>{{ i18n "Power" . }}</td>
+                            {{ if .power_phase1.error }}
+                                <td class="text-danger">{{ .power_phase1.error.Error }}</td>
+                            {{ else }}
+                                <td>{{ i18n "%.2f W" . nil nil nil .power_phase1.value }}</td>
+                            {{ end }}
+                            {{ if .power_phase2.error }}
+                                <td class="text-danger">{{ .power_phase2.error.Error }}</td>
+                            {{ else }}
+                                <td>{{ i18n "%.2f W" . nil nil nil .power_phase2.value }}</td>
+                            {{ end }}
+                            {{ if .power_phase3.error }}
+                                <td class="text-danger">{{ .power_phase3.error.Error }}</td>
+                            {{ else }}
+                                <td>{{ i18n "%.2f W" . nil nil nil .power_phase3.value }}</td>
+                            {{ end }}
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>{{ i18n "Phases angle" . }}</td>
+                            {{ if .angle_phase1.error }}
+                                <td class="text-danger">{{ .angle_phase1.error.Error }}</td>
+                            {{ else }}
+                                <td>{{ i18n "%.2f deg" . nil nil nil .angle_phase1.value }}</td>
+                            {{ end }}
+                            {{ if .angle_phase2.error }}
+                                <td class="text-danger">{{ .angle_phase2.error.Error }}</td>
+                            {{ else }}
+                                <td>{{ i18n "%.2f deg" . nil nil nil .angle_phase2.value }}</td>
+                            {{ end }}
+                            {{ if .angle_phase3.error }}
+                                <td class="text-danger">{{ .angle_phase3.error.Error }}</td>
+                            {{ else }}
+                                <td>{{ i18n "%.2f deg" . nil nil nil .angle_phase3.value }}</td>
+                            {{ end }}
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>{{ i18n "Power factors" . }}</td>
+                            {{ if .power_factors_phase1.error }}
+                                <td class="text-danger">{{ .power_factors_phase1.error.Error }}</td>
+                            {{ else }}
+                                <td>{{ i18n "%.2f" . nil nil nil .power_factors_phase1.value }}</td>
+                            {{ end }}
+                            {{ if .power_factors_phase2.error }}
+                                <td class="text-danger">{{ .power_factors_phase2.error.Error }}</td>
+                            {{ else }}
+                                <td>{{ i18n "%.2f" . nil nil nil .power_factors_phase2.value }}</td>
+                            {{ end }}
+                            {{ if .power_factors_phase3.error }}
+                                <td class="text-danger">{{ .power_factors_phase3.error.Error }}</td>
+                            {{ else }}
+                                <td>{{ i18n "%.2f" . nil nil nil .power_factors_phase3.value }}</td>
+                            {{ end }}
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}

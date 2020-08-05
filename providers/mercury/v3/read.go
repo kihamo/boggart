@@ -264,6 +264,7 @@ func (m *MercuryV3) Type() (*Type, error) {
 	return nil, nil
 }
 
+// 2.5.16.1 Запросы на чтение массивов в пределах 12 месяцев
 func (m *MercuryV3) ReadArray(arr array, mo *month, t tariff) (a1, a2, r3, r4 uint32, err error) {
 	code := uint8(arr)
 
