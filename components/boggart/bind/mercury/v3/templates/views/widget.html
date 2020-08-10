@@ -80,15 +80,6 @@
                             <td></td>
                         </tr>
                         <tr>
-                            <td>{{ i18n "Power factors" . }}</td>
-                            {{ if .power_factors.error }}
-                                <td class="text-danger" colspan="3">{{ .power_factors.error.Error }}</td>
-                            {{ else }}
-                                <td colspan="3">{{ i18n "%.2f" . nil nil nil .power_factors.value }}</td>
-                            {{ end }}
-                            <td>{{ i18n "Summary" . }}</td>
-                        </tr>
-                        <tr>
                             <td>{{ i18n "Power tariff 1" . }}</td>
                             {{ if .power_t1.error }}
                                 <td class="text-danger" colspan="3">{{ .power_t1.error.Error }}</td>
