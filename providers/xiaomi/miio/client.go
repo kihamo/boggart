@@ -20,8 +20,7 @@ import (
 )
 
 const (
-	DefaultTimeout = time.Second * 5
-	DefaultPort    = 54321
+	DefaultPort = 54321
 )
 
 type Client struct {
@@ -66,8 +65,11 @@ func (c *Client) lazyConnect(ctx context.Context) (_ connection.ObserverConnecti
 		t := transport.New(
 			transport.WithAddress(net.JoinHostPort(c.address, strconv.Itoa(DefaultPort))),
 			transport.WithNetwork("udp"),
-			transport.WithReadTimeout(DefaultTimeout),
-			transport.WithWriteTimeout(DefaultTimeout),
+			// слишком большое значение ставить нельзя, так как вычитка происходит
+			// постоянно, большой риск попадание на блокировку длительностью в весь
+			// таймаут, если ответ не успеет прийти в эту вычитку и она свалится по таймауту
+			transport.WithReadTimeout(time.Second*1),
+			transport.WithWriteTimeout(time.Second*3),
 		)
 
 		conn := connection.NewObserverConnection(t,
