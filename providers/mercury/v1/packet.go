@@ -10,7 +10,7 @@ import (
 	"github.com/kihamo/boggart/protocols/serial"
 )
 
-type Response struct {
+type Packet struct {
 	address uint32
 	command uint8
 	payload []byte
@@ -19,43 +19,67 @@ type Response struct {
 	lock sync.RWMutex
 }
 
-func NewResponse() *Response {
-	return &Response{}
+func NewPacket() *Packet {
+	return &Packet{}
 }
 
-func (r *Response) Address() uint32 {
+func (r *Packet) Address() uint32 {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
 	return r.address
 }
 
-func (r *Response) Command() uint8 {
+func (r *Packet) WithAddress(address uint32) *Packet {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+
+	r.address = address
+	return r
+}
+
+func (r *Packet) Command() uint8 {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
 	return r.command
 }
 
-func (r *Response) Payload() []byte {
+func (r *Packet) WithCommand(command uint8) *Packet {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+
+	r.command = command
+	return r
+}
+
+func (r *Packet) Payload() []byte {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
 	return append([]byte(nil), r.payload...)
 }
 
-func (r *Response) PayloadAsBuffer() *Buffer {
+func (r *Packet) PayloadAsBuffer() *Buffer {
 	return NewBuffer(r.Payload())
 }
 
-func (r *Response) CRC() uint16 {
+func (r *Packet) WithPayload(payload []byte) *Packet {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+
+	r.payload = payload
+	return r
+}
+
+func (r *Packet) CRC() uint16 {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
 	return r.crc
 }
 
-func (r *Response) MarshalBinary() (_ []byte, err error) {
+func (r *Packet) MarshalBinary() (_ []byte, err error) {
 	var buf []byte
 
 	buf = make([]byte, 4)
@@ -64,6 +88,10 @@ func (r *Response) MarshalBinary() (_ []byte, err error) {
 	packet := append(buf, r.Command())
 	packet = append(packet, r.Payload()...)
 
+	r.lock.Lock()
+	r.crc = binary.LittleEndian.Uint16(serial.GenerateCRC16(packet))
+	r.lock.Unlock()
+
 	buf = make([]byte, 2)
 	binary.LittleEndian.PutUint16(buf, r.CRC())
 	packet = append(packet, buf...)
@@ -71,7 +99,7 @@ func (r *Response) MarshalBinary() (_ []byte, err error) {
 	return packet, nil
 }
 
-func (r *Response) UnmarshalBinary(data []byte) (err error) {
+func (r *Packet) UnmarshalBinary(data []byte) (err error) {
 	l := len(data)
 
 	if l < 7 {
@@ -94,7 +122,7 @@ func (r *Response) UnmarshalBinary(data []byte) (err error) {
 	return nil
 }
 
-func (r *Response) String() string {
+func (r *Packet) String() string {
 	data, _ := r.MarshalBinary()
 	return hex.EncodeToString(data)
 }

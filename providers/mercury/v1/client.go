@@ -150,16 +150,16 @@ func New(conn connection.Connection, opts ...Option) *MercuryV1 {
 	return m
 }
 
-func (m *MercuryV1) Invoke(request *Request) (*Response, error) {
-	if !IsCommandSupported(m.options.device, request.command) {
+func (m *MercuryV1) Invoke(request *Packet) (*Packet, error) {
+	if !IsCommandSupported(m.options.device, request.Command()) {
 		return nil, ErrCommandNotSupported
 	}
 
-	if request.address == 0 {
+	if request.Address() == 0 {
 		request = request.WithAddress(m.options.address)
 	}
 
-	if request.address == 0 {
+	if request.Address() == 0 {
 		return nil, errors.New("device address is empty")
 	}
 
@@ -173,7 +173,7 @@ func (m *MercuryV1) Invoke(request *Request) (*Response, error) {
 		return nil, err
 	}
 
-	response := NewResponse()
+	response := NewPacket()
 
 	if err = response.UnmarshalBinary(responseData); err != nil {
 		return nil, err

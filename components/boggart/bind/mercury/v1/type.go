@@ -55,18 +55,31 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		provider: mercury.New(conn, opts...),
 	}
 
-	conn.ApplyOptions(connection.WithDumpRead(func(bytes []byte) {
-		bind.Logger().Debug("Read packet",
-			"payload", fmt.Sprintf("%v", bytes),
-			"hex", hex.EncodeToString(bytes),
-		)
-	}))
-	conn.ApplyOptions(connection.WithDumpWrite(func(bytes []byte) {
-		bind.Logger().Debug("Write packet",
-			"payload", fmt.Sprintf("%v", bytes),
-			"hex", hex.EncodeToString(bytes),
-		)
-	}))
+	dump := func(message string) func([]byte) {
+		return func(data []byte) {
+			args := make([]interface{}, 0)
+
+			packet := mercury.NewPacket()
+			if err := packet.UnmarshalBinary(data); err == nil {
+				args = append(args,
+					"address", fmt.Sprintf("0x%X", packet.Address()),
+					"command", fmt.Sprintf("0x%X", packet.Command()),
+					"payload", fmt.Sprintf("%v", packet.Payload()),
+					"crc", fmt.Sprintf("0x%X", packet.CRC()),
+				)
+			} else {
+				args = append(args,
+					"payload", fmt.Sprintf("%v", data),
+					"hex", "0x"+hex.EncodeToString(data),
+				)
+			}
+
+			bind.Logger().Debug(message, args...)
+		}
+	}
+
+	conn.ApplyOptions(connection.WithDumpRead(dump("Read packet")))
+	conn.ApplyOptions(connection.WithDumpWrite(dump("Write packet")))
 
 	// TODO: MQTT publish version
 
