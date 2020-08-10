@@ -26,7 +26,7 @@ type Serial struct {
 
 func Dial(opts ...Option) *Serial {
 	conn := &Serial{
-		options: defaultOptions(),
+		options: DefaultOptions(),
 		once:    &atomic.Once{},
 	}
 

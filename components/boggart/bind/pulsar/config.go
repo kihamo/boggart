@@ -15,10 +15,10 @@ type Config struct {
 	ConnectionDSN         string `mapstructure:"connection_dsn" yaml:"connection_dsn" valid:"required"`
 	Address               string
 	Location              string
-	Input1Offset          float32       `mapstructure:"input1_offset" valid:"float"`
-	Input2Offset          float32       `mapstructure:"input2_offset" valid:"float"`
-	Input3Offset          float32       `mapstructure:"input3_offset" valid:"float"`
-	Input4Offset          float32       `mapstructure:"input4_offset" valid:"float"`
+	Input1Offset          float32       `mapstructure:"input1_offset" yaml:"input1_offset" valid:"float"`
+	Input2Offset          float32       `mapstructure:"input2_offset" yaml:"input2_offset" valid:"float"`
+	Input3Offset          float32       `mapstructure:"input3_offset" yaml:"input3_offset" valid:"float"`
+	Input4Offset          float32       `mapstructure:"input4_offset" yaml:"input4_offset" valid:"float"`
 	UpdaterInterval       time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 	TopicTemperatureIn    mqtt.Topic    `mapstructure:"topic_temperature_in" yaml:"topic_temperature_in"`
 	TopicTemperatureOut   mqtt.Topic    `mapstructure:"topic_temperature_out" yaml:"topic_temperature_out"`

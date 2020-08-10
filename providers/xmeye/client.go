@@ -84,13 +84,13 @@ func New(host, username, password string) (*Client, error) {
 		extraChannel: math.MaxUint64,
 	}
 
-	dial, err := protocol.New(client.dsn)
+	dial, err := protocol.NewByDSNString(client.dsn)
 	if err != nil {
 		return nil, err
 	}
 
 	client.connection = &connection{
-		Conn:           dial,
+		Connection:     dial,
 		sessionID:      0,
 		sequenceNumber: 0,
 	}

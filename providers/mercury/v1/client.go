@@ -130,14 +130,17 @@ const (
 )
 
 type MercuryV1 struct {
-	invoker connection.Invoker
-	options options
+	connection connection.Connection
+	options    options
 }
 
-func New(conn connection.Conn, opts ...Option) *MercuryV1 {
+func New(conn connection.Connection, opts ...Option) *MercuryV1 {
+	conn.ApplyOptions(connection.WithGlobalLock(true))
+	conn.ApplyOptions(connection.WithOnceInit(true))
+
 	m := &MercuryV1{
-		invoker: connection.NewInvoker(conn),
-		options: defaultOptions(),
+		connection: conn,
+		options:    defaultOptions(),
 	}
 
 	for _, opt := range opts {
@@ -165,7 +168,7 @@ func (m *MercuryV1) Invoke(request *Request) (*Response, error) {
 		return nil, err
 	}
 
-	responseData, err := m.invoker.Invoke(requestData)
+	responseData, err := m.connection.Invoke(requestData)
 	if err != nil {
 		return nil, err
 	}

@@ -2,6 +2,7 @@ package influxdb
 
 import (
 	"context"
+
 	"github.com/kihamo/go-workers"
 	"go.uber.org/multierr"
 )

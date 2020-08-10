@@ -1,6 +1,7 @@
 package broadlink
 
 import (
+	"encoding/base64"
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
@@ -92,7 +93,7 @@ func (d *RMMini) ReadCapturedRemoteControlCodeRawAsString() (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf("%04x", code), nil
+	return base64.StdEncoding.EncodeToString(code), nil
 }
 
 func (d *RMMini) ReadCapturedRemoteControlCode() (RemoteType, []byte, error) {
@@ -114,7 +115,7 @@ func (d *RMMini) ReadCapturedRemoteControlCodeAsString() (RemoteType, string, er
 		return remoteType, "", err
 	}
 
-	return remoteType, fmt.Sprintf("%04x", code), err
+	return remoteType, base64.StdEncoding.EncodeToString(code), err
 }
 
 func (d *RMMini) SendRemoteControlCode(remoteType RemoteType, code []byte, count int) error {

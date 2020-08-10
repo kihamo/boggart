@@ -67,13 +67,13 @@ func (c *Client) PlayStream(ctx context.Context, begin, end time.Time, name stri
 		return nil, err
 	}
 
-	dial, err := protocol.New(c.dsn)
+	dial, err := protocol.NewByDSNString(c.dsn)
 	if err != nil {
 		return nil, err
 	}
 
 	return newStream(&connection{
-		Conn:           dial,
+		Connection:     dial,
 		sessionID:      c.connection.SessionID(),
 		sequenceNumber: 0,
 	}, claim, func() error {

@@ -1,14 +1,11 @@
 package connection
 
-import (
-	"time"
-)
-
 type options struct {
-	network      string
-	readTimeout  time.Duration
-	writeTimeout time.Duration
-	once         bool
+	onceInit   bool
+	lockLocal  bool
+	lockGlobal bool
+	dumpRead   func([]byte)
+	dumpWrite  func([]byte)
 }
 
 type Option interface {
@@ -29,26 +26,47 @@ func newFuncOption(f func(*options)) *funcOption {
 	}
 }
 
-func WithNetwork(network string) Option {
+func DefaultOptions() options {
+	return options{}
+}
+
+func WithOnceInit(flag bool) Option {
 	return newFuncOption(func(o *options) {
-		o.network = network
+		o.onceInit = flag
 	})
 }
 
-func WithReadTimeout(timeout time.Duration) Option {
+func WithLock(flag bool) Option {
+	return WithGlobalLock(flag)
+}
+
+func WithGlobalLock(flag bool) Option {
 	return newFuncOption(func(o *options) {
-		o.readTimeout = timeout
+		o.lockGlobal = flag
 	})
 }
 
-func WithWriteTimeout(timeout time.Duration) Option {
+func WithLocalLock(flag bool) Option {
 	return newFuncOption(func(o *options) {
-		o.writeTimeout = timeout
+		o.lockLocal = flag
 	})
 }
 
-func WithOnce(once bool) Option {
+func WithDump(dump func([]byte)) Option {
 	return newFuncOption(func(o *options) {
-		o.once = once
+		o.dumpRead = dump
+		o.dumpWrite = dump
+	})
+}
+
+func WithDumpRead(dump func([]byte)) Option {
+	return newFuncOption(func(o *options) {
+		o.dumpRead = dump
+	})
+}
+
+func WithDumpWrite(dump func([]byte)) Option {
+	return newFuncOption(func(o *options) {
+		o.dumpWrite = dump
 	})
 }

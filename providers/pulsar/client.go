@@ -10,14 +10,17 @@ import (
 )
 
 type HeatMeter struct {
-	invoker connection.Invoker
-	options options
+	connection connection.Connection
+	options    options
 }
 
-func New(conn connection.Conn, opts ...Option) *HeatMeter {
+func New(conn connection.Connection, opts ...Option) *HeatMeter {
+	conn.ApplyOptions(connection.WithGlobalLock(true))
+	conn.ApplyOptions(connection.WithOnceInit(true))
+
 	client := &HeatMeter{
-		invoker: connection.NewInvoker(conn),
-		options: defaultOptions(),
+		connection: conn,
+		options:    defaultOptions(),
 	}
 
 	for _, opt := range opts {
@@ -32,7 +35,7 @@ func (d *HeatMeter) Request(request *Request) (*Response, error) {
 		request.Address = d.options.address
 	}
 
-	data, err := d.invoker.Invoke(request.Bytes())
+	data, err := d.connection.Invoke(request.Bytes())
 	if err != nil {
 		return nil, err
 	}

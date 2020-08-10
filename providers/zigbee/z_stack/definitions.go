@@ -499,6 +499,18 @@ var definitions = map[uint16]map[uint16]definition{
 			name:  "ZDO_MSG_CB_INCOMING",
 			types: []uint16{TypeAREQ},
 		},
+		0xCA: {
+			name:  "ZDO_TC_DEVICE_IND",
+			types: []uint16{TypeAREQ},
+		},
+		0xCB: {
+			name:  "ZDO_PERMIT_JOIN_IND",
+			types: []uint16{TypeAREQ},
+		},
+		0x50: {
+			name:  "ZDO_EXT_NWK_INFO",
+			types: []uint16{TypeSREQ, TypeSRSP},
+		},
 	},
 	SubSystemSAPIInterface: {
 		0x05: {

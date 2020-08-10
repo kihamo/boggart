@@ -23,7 +23,6 @@ type AfIncomingMessage struct {
 	SecurityUse    uint8
 	TimeStamp      uint32
 	TransSeqNumber uint8
-	Len            uint8
 	Data           []byte
 
 	Frame struct {
@@ -74,7 +73,7 @@ func (e Endpoint) AsBuffer() *Buffer {
 	return dataOut
 }
 
-func (c *Client) AfIncomingMessage(frame *Frame) (*AfIncomingMessage, error) {
+func AfIncomingMessageParse(frame *Frame) (*AfIncomingMessage, error) {
 	if frame.CommandID() != CommandAfIncomingMessage {
 		return nil, errors.New("frame isn't a af_incoming_msg")
 	}
@@ -92,9 +91,9 @@ func (c *Client) AfIncomingMessage(frame *Frame) (*AfIncomingMessage, error) {
 		SecurityUse:    dataOut.ReadUint8(),
 		TimeStamp:      dataOut.ReadUint32(),
 		TransSeqNumber: dataOut.ReadUint8(),
-		Len:            dataOut.ReadUint8(),
 	}
-	msg.Data = dataOut.Next(int(msg.Len))
+	l := dataOut.ReadUint8()
+	msg.Data = dataOut.Next(int(l))
 
 	payload := NewBuffer(msg.Data)
 
@@ -148,7 +147,20 @@ func (c *Client) AfIncomingMessage(frame *Frame) (*AfIncomingMessage, error) {
 			return nil, fmt.Errorf("unsupported command identifier %d", msg.Frame.Header.CommandIdentifier)
 		}
 
-		//case 0x1: // specific
+	case 0x1: // specific
+		fmt.Println("Cluster", msg.ClusterID)
+		fmt.Println("Qua", msg.LinkQuality)
+
+		if msg.Frame.Header.Direction == 0 { // client to server
+
+		} else { // server to client
+
+		}
+		fmt.Println("Command", msg.Frame.Header.CommandIdentifier)
+		fmt.Println("fieldControl", payload.ReadUint8())
+		fmt.Println("manufacturerCode", payload.ReadUint16())
+		fmt.Println("imageType", payload.ReadUint16())
+		fmt.Println("fileVersion", payload.ReadUint32())
 
 	default:
 		return nil, fmt.Errorf("unsupported frameType %d", msg.Frame.Header.FrameType)

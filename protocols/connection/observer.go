@@ -3,6 +3,8 @@ package connection
 import (
 	"io"
 	"sync"
+
+	"github.com/kihamo/boggart/protocols/connection/transport"
 )
 
 type ObserveFunc struct {
@@ -15,17 +17,18 @@ type Observer interface {
 }
 
 type ObserverConnection interface {
-	Invoker
+	Connection
 
 	Attach(Observer)
 	Detach(Observer)
 }
 
 type observerConnection struct {
+	Connection
+
 	observers     []Observer
 	observersLock sync.RWMutex
 
-	conn     Looper
 	connOnce sync.Once
 }
 
@@ -41,61 +44,59 @@ func ObserverFunc(f func([]byte, error)) Observer {
 	return &ObserveFunc{f: f}
 }
 
-func NewObserverConnection(conn Conn) ObserverConnection {
-	if i, ok := conn.(ObserverConnection); ok {
-		return i
-	}
+func NewObserverConnection(transport transport.Transport, options ...Option) ObserverConnection {
+	conn := New(transport, append([]Option{
+		WithLocalLock(true),
+	}, options...)...)
 
 	return &observerConnection{
-		conn: NewLooper(conn),
+		Connection: conn,
 	}
 }
 
-func (m *observerConnection) initLoop() {
+func (m *observerConnection) doLoop() {
 	m.connOnce.Do(func() {
-		go m.loop()
-	})
-}
+		go func() {
+			chReceivePackets, chReceiveErrors, chConnKill, chConnDone := m.Connection.Loop()
 
-func (m *observerConnection) loop() {
-	chReceivePackets, chReceiveErrors, chConnKill, chConnDone := m.conn.Loop()
-
-	closer := func() {
-		chConnKill <- struct{}{} // kill connect
-	}
-
-	for {
-		select {
-		case packet := <-chReceivePackets:
-			go func(data []byte) {
-				m.observersLock.RLock()
-				defer m.observersLock.RUnlock()
-
-				for _, o := range m.observers {
-					o.Packet(append([]byte(nil), data...))
-				}
-			}(packet)
-
-		case err := <-chReceiveErrors:
-			if err == nil || err == io.EOF {
-				continue
+			closer := func() {
+				chConnKill <- struct{}{} // kill connect
 			}
 
-			go func(e error) {
-				m.observersLock.RLock()
-				defer m.observersLock.RUnlock()
+			for {
+				select {
+				case packet := <-chReceivePackets:
+					go func(data []byte) {
+						m.observersLock.RLock()
+						defer m.observersLock.RUnlock()
 
-				for _, o := range m.observers {
-					o.Error(e)
+						for _, o := range m.observers {
+							o.Packet(append([]byte(nil), data...))
+						}
+					}(packet)
+
+				case err := <-chReceiveErrors:
+					if err == nil || err == io.EOF {
+						continue
+					}
+
+					go func(e error) {
+						m.observersLock.RLock()
+						defer m.observersLock.RUnlock()
+
+						for _, o := range m.observers {
+							o.Error(e)
+						}
+					}(err)
+
+					closer()
+
+				case <-chConnDone:
+					return
 				}
-			}(err)
-
-			closer()
-
-		case <-chConnDone:
-			return
-		}
-	}
+			}
+		}()
+	})
 }
 
 func (m *observerConnection) Attach(o Observer) {
@@ -103,7 +104,7 @@ func (m *observerConnection) Attach(o Observer) {
 	m.observers = append(m.observers, o)
 	m.observersLock.Unlock()
 
-	m.initLoop()
+	m.doLoop()
 }
 
 func (m *observerConnection) Detach(o Observer) {
@@ -119,10 +120,8 @@ func (m *observerConnection) Detach(o Observer) {
 }
 
 func (m *observerConnection) Invoke(request []byte) (response []byte, err error) {
-	if locker, ok := m.conn.(sync.Locker); ok {
-		locker.Lock()
-		defer locker.Unlock()
-	}
+	//m.Lock()
+	//defer m.Unlock()
 
 	done := make(chan struct{}, 1)
 
@@ -136,7 +135,7 @@ func (m *observerConnection) Invoke(request []byte) (response []byte, err error)
 	m.Attach(observer)
 	defer m.Detach(observer)
 
-	if _, err := m.conn.Write(request); err != nil {
+	if _, err := m.Write(request); err != nil {
 		return response, err
 	}
 
@@ -146,17 +145,13 @@ func (m *observerConnection) Invoke(request []byte) (response []byte, err error)
 }
 
 func (m *observerConnection) Read(p []byte) (n int, err error) {
-	m.initLoop()
+	m.doLoop()
 
-	return m.conn.Read(p)
+	return m.Connection.Read(p)
 }
 
 func (m *observerConnection) Write(p []byte) (n int, err error) {
-	m.initLoop()
+	m.doLoop()
 
-	return m.conn.Write(p)
-}
-
-func (m *observerConnection) Close() error {
-	return m.conn.Close()
+	return m.Connection.Write(p)
 }

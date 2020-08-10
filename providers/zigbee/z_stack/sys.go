@@ -16,7 +16,6 @@ type SysVersion struct {
 
 type NVItem struct {
 	Status CommandStatus
-	Length uint8
 	Value  []byte
 }
 
@@ -140,9 +139,9 @@ func (c *Client) SysOsalNvRead(ctx context.Context, id uint16, offset uint8) (*N
 	dataOut := response.DataAsBuffer()
 	item := &NVItem{
 		Status: dataOut.ReadCommandStatus(),
-		Length: dataOut.ReadUint8(),
 	}
-	item.Value = dataOut.Next(int(item.Length))
+	l := dataOut.ReadUint8()
+	item.Value = dataOut.Next(int(l))
 
 	if item.Status != CommandStatusSuccess && item.Status != CommandStatusInvalidParam {
 		return nil, item.Status

@@ -31,7 +31,7 @@ func init() {
 
 type Session struct {
 	starter    int32
-	connection protocol.Invoker
+	connection protocol.Connection
 
 	dsn      string
 	username string
@@ -57,13 +57,13 @@ func (s *Session) Start() error {
 		return nil
 	}
 
-	conn, err := protocol.New(s.dsn)
+	conn, err := protocol.NewByDSNString(s.dsn)
 
 	if err != nil {
 		return err
 	}
 
-	s.connection = conn.(protocol.Invoker)
+	s.connection = conn
 	atomic.StoreInt32(&s.starter, 1)
 
 	if s.username != "" {

@@ -16,7 +16,7 @@ import (
 )
 
 type Client struct {
-	conn     connection.Looper
+	conn     connection.Connection
 	loopOnce sync.Once
 	loopLock sync.RWMutex
 
@@ -37,9 +37,9 @@ type Client struct {
 	networkKey           []byte
 }
 
-func New(conn connection.Conn) *Client {
+func New(conn connection.Connection) *Client {
 	return &Client{
-		conn:                 connection.NewLooper(conn),
+		conn:                 conn,
 		done:                 make(chan struct{}),
 		watchers:             make([]*Watcher, 0),
 		versionOnce:          new(a.Once),
@@ -206,7 +206,7 @@ func (c *Client) Write(data []byte) (int, error) {
 
 	c.init()
 
-	fmt.Printf("\033[35m >>> %v %X \033[0m\n", data, data)
+	//fmt.Printf("\033[35m >>> %v %X \033[0m\n", data, data)
 
 	return c.conn.Write(data)
 }
@@ -217,7 +217,7 @@ func (c *Client) Call(frame *Frame) error {
 		return err
 	}
 
-	fmt.Printf("\033[34m >>> %v %X \033[0m\n", frame.String(), data)
+	//fmt.Printf("\033[34m >>> %v %X \033[0m\n", frame.String(), data)
 
 	_, err = c.Write(data)
 	return err

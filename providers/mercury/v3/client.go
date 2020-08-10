@@ -8,14 +8,17 @@ import (
 )
 
 type MercuryV3 struct {
-	invoker connection.Invoker
-	options options
+	connection connection.Connection
+	options    options
 }
 
-func New(conn connection.Conn, opts ...Option) *MercuryV3 {
+func New(conn connection.Connection, opts ...Option) *MercuryV3 {
+	conn.ApplyOptions(connection.WithLock(true))
+	conn.ApplyOptions(connection.WithOnceInit(true))
+
 	m := &MercuryV3{
-		invoker: connection.NewInvoker(conn),
-		options: defaultOptions(),
+		connection: conn,
+		options:    defaultOptions(),
 	}
 
 	for _, opt := range opts {
@@ -53,7 +56,7 @@ func (m *MercuryV3) InvokeRaw(request *Request) (*Response, error) {
 		return nil, err
 	}
 
-	responseData, err := m.invoker.Invoke(requestData)
+	responseData, err := m.connection.Invoke(requestData)
 	if err != nil {
 		return nil, err
 	}

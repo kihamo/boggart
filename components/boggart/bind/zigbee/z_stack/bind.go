@@ -32,9 +32,9 @@ type Bind struct {
 func (b *Bind) getClient(ctx context.Context) (_ *z_stack.Client, err error) {
 	b.onceClient.Do(func() {
 		b.disconnected.Nil()
-		var conn connection.Conn
+		var conn connection.Connection
 
-		conn, err = connection.New(b.config.ConnectionDSN)
+		conn, err = connection.NewByDSNString(b.config.ConnectionDSN)
 		if err != nil {
 			b.disconnected.True()
 		}

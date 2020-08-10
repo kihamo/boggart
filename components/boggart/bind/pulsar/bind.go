@@ -24,11 +24,11 @@ type Bind struct {
 	provider *pulsar.HeatMeter
 
 	location   *time.Location
-	connection connection.Conn
+	connection connection.Connection
 }
 
 func (b *Bind) Run() (err error) {
-	b.connection, err = connection.New(b.config.ConnectionDSN)
+	b.connection, err = connection.NewByDSNString(b.config.ConnectionDSN)
 
 	if b.config.Address != "" {
 		var address []byte

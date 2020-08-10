@@ -13,7 +13,7 @@ type connection struct {
 	sessionID      uint32
 	sequenceNumber uint32
 
-	protocol.Conn
+	protocol.Connection
 
 	lock sync.Mutex
 }
@@ -65,7 +65,7 @@ func (c *connection) receive() (*Packet, error) {
 	defer c.lock.Unlock()
 
 	head := make([]byte, 0x14) // read head
-	if _, err := c.Conn.Read(head); err != nil {
+	if _, err := c.Connection.Read(head); err != nil {
 		return nil, err
 	}
 

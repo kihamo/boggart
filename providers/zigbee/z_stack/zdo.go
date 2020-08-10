@@ -3,7 +3,6 @@ package z_stack
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/kihamo/boggart/protocols/serial"
 )
@@ -19,7 +18,7 @@ type ExtNetworkInfo struct {
 }
 
 type ZDOGroup struct {
-	Status uint8
+	Status CommandStatus
 	ID     uint16
 	Name   []byte
 }
@@ -269,7 +268,14 @@ func (c *Client) ZDONodeDescription(ctx context.Context, DstAddr, NWKAddrOfInter
 		return err
 	}
 
-	fmt.Println(response)
+	dataOut := response.DataAsBuffer()
+	if dataOut.Len() == 0 {
+		return errors.New("failure")
+	}
+
+	if status := dataOut.ReadCommandStatus(); status != CommandStatusSuccess {
+		return status
+	}
 
 	return nil
 }
@@ -316,11 +322,11 @@ func (c *Client) ZDOExtFindGroup(ctx context.Context, endpoint uint8, group uint
 	}
 
 	g := &ZDOGroup{
-		Status: dataOut.ReadUint8(),
+		Status: dataOut.ReadCommandStatus(),
 		ID:     dataOut.ReadUint16(),
 	}
-	dataOut.ReadUint8()      // namelen
-	g.Name = dataOut.Bytes() // name
+	l := dataOut.ReadUint8()      // namelen
+	g.Name = dataOut.Next(int(l)) // name
 
 	return g, nil
 }
@@ -337,7 +343,14 @@ func (c *Client) ZDOExtAddToGroup(ctx context.Context, endpoint uint8, group uin
 		return err
 	}
 
-	fmt.Println("ZDOExtAddToGroup", response)
+	dataOut := response.DataAsBuffer()
+	if dataOut.Len() == 0 {
+		return errors.New("failure")
+	}
+
+	if status := dataOut.ReadCommandStatus(); status != CommandStatusSuccess {
+		return status
+	}
 
 	return nil
 }

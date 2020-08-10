@@ -2,182 +2,97 @@ package connection
 
 import (
 	"errors"
-	"net/url"
-	"strconv"
-	"strings"
-	"time"
+	"fmt"
 
-	"github.com/kihamo/boggart/protocols/serial"
+	"github.com/kihamo/boggart/protocols/connection/transport"
+	"github.com/kihamo/boggart/protocols/connection/transport/net"
+	"github.com/kihamo/boggart/protocols/connection/transport/serial"
 )
 
-func New(dsn string) (conn Conn, err error) {
-	if dsn == "" {
-		return nil, errors.New("DSN is empty")
-	}
-
-	u, err := url.Parse(dsn)
+func NewByDSNString(dsn string) (conn Connection, err error) {
+	d, err := ParseDSN(dsn)
 	if err != nil {
 		return nil, err
 	}
 
-	switch u.Scheme {
-	case "tcp", "tcp4", "tcp6":
-		options := []Option{
-			WithNetwork(u.Scheme),
+	return NewByDSN(d)
+}
+
+func NewByDSN(dsn *DSN) (Connection, error) {
+	var t transport.Transport
+
+	switch dsn.Scheme {
+	case "tcp", "tcp4", "tcp6", "udp", "udp4", "udp6", "unixgram":
+		options := []net.Option{
+			net.WithNetwork(dsn.Scheme),
+			net.WithAddress(dsn.Host),
 		}
 
-		for key, value := range u.Query() {
-			switch strings.ToLower(key) {
-			case "read-timeout":
-				v, err := time.ParseDuration(value[0])
-				if err != nil {
-					return nil, err
-				}
-
-				options = append(options, WithReadTimeout(v))
-
-			case "write-timeout":
-				v, err := time.ParseDuration(value[0])
-				if err != nil {
-					return nil, err
-				}
-
-				options = append(options, WithWriteTimeout(v))
-
-			case "timeout":
-				v, err := time.ParseDuration(value[0])
-				if err != nil {
-					return nil, err
-				}
-
-				options = append(options, WithReadTimeout(v), WithWriteTimeout(v))
-
-			case "once":
-				v, err := strconv.ParseBool(value[0])
-				if err != nil {
-					return nil, err
-				}
-
-				options = append(options, WithOnce(v))
-			}
+		if dsn.Timeout != nil {
+			options = append(options, net.WithTimeout(*dsn.Timeout))
 		}
 
-		conn = Dial(u.Host, options...)
-
-	case "udp", "udp4", "udp6", "unixgram":
-		options := []Option{
-			WithNetwork(u.Scheme),
+		if dsn.ReadTimeout != nil {
+			options = append(options, net.WithReadTimeout(*dsn.ReadTimeout))
 		}
 
-		for key, value := range u.Query() {
-			switch strings.ToLower(key) {
-			case "read-timeout":
-				v, err := time.ParseDuration(value[0])
-				if err != nil {
-					return nil, err
-				}
-
-				options = append(options, WithReadTimeout(v))
-
-			case "write-timeout":
-				v, err := time.ParseDuration(value[0])
-				if err != nil {
-					return nil, err
-				}
-
-				options = append(options, WithWriteTimeout(v))
-
-			case "timeout":
-				v, err := time.ParseDuration(value[0])
-				if err != nil {
-					return nil, err
-				}
-
-				options = append(options, WithReadTimeout(v), WithWriteTimeout(v))
-
-			case "once":
-				v, err := strconv.ParseBool(value[0])
-				if err != nil {
-					return nil, err
-				}
-
-				options = append(options, WithOnce(v))
-			}
+		if dsn.WriteTimeout != nil {
+			options = append(options, net.WithWriteTimeout(*dsn.WriteTimeout))
 		}
 
-		conn = Dial(u.Host, options...)
+		t = net.New(options...)
 
 	case "serial":
 		options := []serial.Option{
-			serial.WithAddress(u.EscapedPath()),
+			serial.WithAddress(dsn.EscapedPath()),
 		}
 
-		for key, value := range u.Query() {
-			switch strings.ToLower(key) {
-			case "baudrate":
-				v, err := strconv.ParseInt(value[0], 10, 64)
-				if err != nil {
-					return nil, err
-				}
-
-				options = append(options, serial.WithBaudRate(int(v)))
-
-			case "databits":
-				v, err := strconv.ParseInt(value[0], 10, 64)
-				if err != nil {
-					return nil, err
-				}
-
-				options = append(options, serial.WithDataBits(int(v)))
-
-			case "stopbits":
-				v, err := strconv.ParseInt(value[0], 10, 64)
-				if err != nil {
-					return nil, err
-				}
-
-				options = append(options, serial.WithStopBits(int(v)))
-
-			case "parity":
-				options = append(options, serial.WithParity(value[0]))
-
-			case "timeout":
-				v, err := time.ParseDuration(value[0])
-				if err != nil {
-					return nil, err
-				}
-
-				options = append(options, serial.WithTimeout(v))
-
-			case "once":
-				v, err := strconv.ParseBool(value[0])
-				if err != nil {
-					return nil, err
-				}
-
-				options = append(options, serial.WithOnce(v))
-			}
+		if dsn.BaudRate != nil {
+			options = append(options, serial.WithBaudRate(int(*dsn.BaudRate)))
 		}
 
-		conn = NewIO(serial.Dial(options...))
+		if dsn.DataBits != nil {
+			options = append(options, serial.WithDataBits(int(*dsn.DataBits)))
+		}
+
+		if dsn.StopBits != nil {
+			options = append(options, serial.WithStopBits(int(*dsn.StopBits)))
+		}
+
+		if dsn.Parity != nil {
+			options = append(options, serial.WithParity(*dsn.Parity))
+		}
+
+		if dsn.Timeout != nil {
+			options = append(options, serial.WithTimeout(*dsn.Timeout))
+		}
+
+		t = serial.New(options...)
 
 	default:
-		err = errors.New("unknown connection type for DSN " + dsn)
+		return nil, errors.New("unknown connection type for DSN " + dsn.String())
 	}
 
-	for key, value := range u.Query() {
-		switch strings.ToLower(key) {
-		case "invoke":
-			if v, err := strconv.ParseBool(value[0]); err == nil && v {
-				conn = NewInvoker(conn)
-			}
+	// Wrappers
+	options := make([]Option, 0)
 
-		case "dump":
-			if v, err := strconv.ParseBool(value[0]); err == nil && v {
-				conn = NewDumper(conn)
-			}
-		}
+	if dsn.OnceInit != nil {
+		options = append(options, WithOnceInit(*dsn.OnceInit))
 	}
 
-	return conn, err
+	if dsn.LockLocal != nil {
+		options = append(options, WithLocalLock(*dsn.LockLocal))
+	}
+
+	if dsn.LockGlobal != nil {
+		options = append(options, WithGlobalLock(*dsn.LockGlobal))
+	}
+
+	if dsn.Dump != nil && *dsn.Dump {
+		options = append(options, WithDump(func(bytes []byte) {
+			fmt.Println(bytes)
+		}))
+	}
+
+	return New(t, options...), nil
 }

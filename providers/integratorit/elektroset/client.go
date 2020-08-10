@@ -121,3 +121,51 @@ func (c *Client) BalanceDetails(ctx context.Context, number string, provider Pro
 
 	return data, nil
 }
+
+func (c *Client) IndicatorInfo(ctx context.Context, number string, provider Provider) (*IndicationInfo, error) {
+	vlProvider, err := json.Marshal(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	data := make([]IndicationInfo, 0)
+
+	err = c.base.DoRequest(ctx, "sql", map[string]string{"query": "proxy", "plugin": "bytTmbProxy", "proxyquery": "tmb_info_ind"}, map[string]string{
+		"nn_ls":       number,
+		"nm_email":    c.base.Login(),
+		"vl_provider": string(vlProvider),
+	}, &data)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(data) == 0 {
+		return nil, errors.New("bad response")
+	}
+
+	return &data[0], nil
+}
+
+func (c *Client) CurrentRate(ctx context.Context, number string, provider Provider) (*Rate, error) {
+	vlProvider, err := json.Marshal(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	data := make([]Rate, 0)
+
+	err = c.base.DoRequest(ctx, "sql", map[string]string{"query": "proxy", "plugin": "bytTmbProxy", "proxyquery": "tmb_current_rate"}, map[string]string{
+		"nn_ls":       number,
+		"nm_email":    c.base.Login(),
+		"vl_provider": string(vlProvider),
+	}, &data)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(data) == 0 {
+		return nil, errors.New("bad response")
+	}
+
+	return &data[0], nil
+}

@@ -16,6 +16,7 @@ import (
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/protocols/connection"
+	transport "github.com/kihamo/boggart/protocols/connection/transport/net"
 )
 
 const (
@@ -62,15 +63,23 @@ func NewClient(address, token string) *Client {
 
 func (c *Client) lazyConnect(ctx context.Context) (_ connection.ObserverConnection, err error) {
 	c.connOnce.Do(func() {
-		options := []connection.Option{
-			connection.WithNetwork("udp"),
-			connection.WithReadTimeout(DefaultTimeout),
-			connection.WithWriteTimeout(DefaultTimeout),
-			connection.WithOnce(true),
-		}
-		host := net.JoinHostPort(c.address, strconv.Itoa(DefaultPort))
-		dial := connection.Dial(host, options...)
-		conn := connection.NewObserverConnection(dial)
+		t := transport.New(
+			transport.WithAddress(net.JoinHostPort(c.address, strconv.Itoa(DefaultPort))),
+			transport.WithNetwork("udp"),
+			transport.WithReadTimeout(DefaultTimeout),
+			transport.WithWriteTimeout(DefaultTimeout),
+		)
+
+		conn := connection.NewObserverConnection(t,
+			connection.WithOnceInit(true),
+			connection.WithLocalLock(true),
+			//connection.WithDumpRead(func(data []byte) {
+			//	fmt.Println(time.Now(), "read dump", data)
+			//}),
+			//connection.WithDumpWrite(func(data []byte) {
+			//	fmt.Println(time.Now(), "write dump", data)
+			//}),
+		)
 
 		// начинаем сессию hello пакетом
 		var response *Packet
@@ -154,7 +163,7 @@ func (c *Client) PacketsCounter() uint32 {
 	return a.LoadUint32(&c.packetsCounter)
 }
 
-func (c *Client) hello(conn connection.Invoker) (*Packet, error) {
+func (c *Client) hello(conn connection.Connection) (*Packet, error) {
 	requestPacket := NewPacket(nil)
 	requestPacket.SetUnknown(0xFFFFFFFF)
 	requestPacket.SetDeviceType(0xFFFF)

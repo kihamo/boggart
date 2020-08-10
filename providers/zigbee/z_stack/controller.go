@@ -309,7 +309,7 @@ func (c *Client) Boot(ctx context.Context) (err error) {
 	// check exists
 	if group, err := c.ZDOExtFindGroup(ctx, ep, groupID); err != nil {
 		return err
-	} else if group.Status != 0 {
+	} else if group.Status != CommandStatusSuccess {
 		// register if not exists
 		if err = c.ZDOExtAddToGroup(ctx, ep, groupID, nil); err != nil {
 			return err

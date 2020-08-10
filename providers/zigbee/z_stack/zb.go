@@ -8,7 +8,6 @@ import (
 type ZbConfigurationMessage struct {
 	Status   CommandStatus
 	ConfigID uint8
-	Len      uint8
 	Value    []byte
 }
 
@@ -50,9 +49,9 @@ func (c *Client) ZbReadConfiguration(ctx context.Context, configID uint8) (*ZbCo
 	msg := &ZbConfigurationMessage{
 		Status:   dataOut.ReadCommandStatus(),
 		ConfigID: dataOut.ReadUint8(),
-		Len:      dataOut.ReadUint8(),
 	}
-	msg.Value = dataOut.Next(int(msg.Len))
+	l := dataOut.ReadUint8()
+	msg.Value = dataOut.Next(int(l))
 
 	if msg.Status != CommandStatusSuccess {
 		return nil, msg.Status
