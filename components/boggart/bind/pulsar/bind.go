@@ -2,6 +2,7 @@ package pulsar
 
 import (
 	"encoding/hex"
+	"fmt"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart/di"
@@ -29,6 +30,20 @@ type Bind struct {
 
 func (b *Bind) Run() (err error) {
 	b.connection, err = connection.NewByDSNString(b.config.ConnectionDSN)
+	if err != nil {
+		b.connection.ApplyOptions(connection.WithDumpRead(func(bytes []byte) {
+			b.Logger().Debug("Read packet",
+				"payload", fmt.Sprintf("%v", bytes),
+				"hex", hex.EncodeToString(bytes),
+			)
+		}))
+		b.connection.ApplyOptions(connection.WithDumpWrite(func(bytes []byte) {
+			b.Logger().Debug("Write packet",
+				"payload", fmt.Sprintf("%v", bytes),
+				"hex", hex.EncodeToString(bytes),
+			)
+		}))
+	}
 
 	if b.config.Address != "" {
 		var address []byte

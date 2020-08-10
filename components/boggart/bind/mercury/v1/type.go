@@ -1,6 +1,8 @@
 package v1
 
 import (
+	"encoding/hex"
+	"fmt"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -52,6 +54,19 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		config:   config,
 		provider: mercury.New(conn, opts...),
 	}
+
+	conn.ApplyOptions(connection.WithDumpRead(func(bytes []byte) {
+		bind.Logger().Debug("Read packet",
+			"payload", fmt.Sprintf("%v", bytes),
+			"hex", hex.EncodeToString(bytes),
+		)
+	}))
+	conn.ApplyOptions(connection.WithDumpWrite(func(bytes []byte) {
+		bind.Logger().Debug("Write packet",
+			"payload", fmt.Sprintf("%v", bytes),
+			"hex", hex.EncodeToString(bytes),
+		)
+	}))
 
 	// TODO: MQTT publish version
 

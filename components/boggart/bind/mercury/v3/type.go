@@ -1,6 +1,9 @@
 package v3
 
 import (
+	"encoding/hex"
+	"fmt"
+
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/protocols/connection"
 	mercury "github.com/kihamo/boggart/providers/mercury/v3"
@@ -23,8 +26,23 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		opts = append(opts, mercury.WithAddressAsString(config.Address))
 	}
 
-	return &Bind{
+	bind := &Bind{
 		provider: mercury.New(conn, opts...),
 		config:   config,
-	}, nil
+	}
+
+	conn.ApplyOptions(connection.WithDumpRead(func(bytes []byte) {
+		bind.Logger().Debug("Read packet",
+			"payload", fmt.Sprintf("%v", bytes),
+			"hex", hex.EncodeToString(bytes),
+		)
+	}))
+	conn.ApplyOptions(connection.WithDumpWrite(func(bytes []byte) {
+		bind.Logger().Debug("Write packet",
+			"payload", fmt.Sprintf("%v", bytes),
+			"hex", hex.EncodeToString(bytes),
+		)
+	}))
+
+	return bind, nil
 }

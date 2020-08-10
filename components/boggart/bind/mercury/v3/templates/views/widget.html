@@ -80,13 +80,13 @@
                             <td></td>
                         </tr>
                         <tr>
-                            <td>{{ i18n "Frequency" . }}</td>
-                            {{ if .frequency.error }}
-                                <td class="text-danger" colspan="3">{{ .frequency.error.Error }}</td>
+                            <td>{{ i18n "Power factors" . }}</td>
+                            {{ if .power_factors.error }}
+                                <td class="text-danger" colspan="3">{{ .power_factors.error.Error }}</td>
                             {{ else }}
-                                <td colspan="3">{{ i18n "%.2f W" . nil nil nil .frequency.value }}</td>
+                                <td colspan="3">{{ i18n "%.2f" . nil nil nil .power_factors.value }}</td>
                             {{ end }}
-                            <td></td>
+                            <td>{{ i18n "Summary" . }}</td>
                         </tr>
                         <tr>
                             <td>{{ i18n "Power tariff 1" . }}</td>
@@ -95,7 +95,7 @@
                             {{ else }}
                                 <td colspan="3">{{ i18n "%.d W" . nil nil nil .power_t1.value }}</td>
                             {{ end }}
-                            <td></td>
+                            <td>{{ i18n "Summary" . }}</td>
                         </tr>
                         <tr>
                             <th></th>
