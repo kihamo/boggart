@@ -7,17 +7,17 @@ import (
 )
 
 func (d *HeatMeter) readMetrics(channel MetricsChannel) (float32, error) {
-	bs := serial.Pad(serial.Reverse(channel.toBytes()), 4)
-	response, err := d.Request(&Request{
-		Function: FunctionReadMetrics,
-		Payload:  bs,
-	})
+	request := NewPacket().
+		WithFunction(FunctionReadMetrics).
+		WithPayload(serial.Pad(serial.Reverse(channel.toBytes()), 4))
+
+	response, err := d.Invoke(request)
 
 	if err != nil {
 		return -1, err
 	}
 
-	return serial.ToFloat32(serial.Reverse(response.Payload)), nil
+	return serial.ToFloat32(serial.Reverse(response.Payload())), nil
 }
 
 /*
@@ -46,16 +46,19 @@ func (d *HeatMeter) readArchive(channel MetricsChannel, start, end time.Time, t 
 	bs = append(bs, TimeToBytes(start)...)
 	bs = append(bs, TimeToBytes(end)...)
 
-	response, err := d.Request(&Request{
-		Function: FunctionReadArchive,
-		Payload:  bs,
-	})
+	request := NewPacket().
+		WithFunction(FunctionReadArchive).
+		WithPayload(bs)
+
+	response, err := d.Invoke(request)
 	if err != nil {
 		return time.Time{}, nil, err
 	}
 
-	begin := BytesToTime(response.Payload[4:10], d.options.location)
-	raw := serial.Reverse(response.Payload[10:])
+	payload := response.Payload()
+
+	begin := BytesToTime(payload[4:10], d.options.location)
+	raw := serial.Reverse(payload[10:])
 	values := make([]float32, 0)
 
 	for i := 0; i < len(raw); i += 4 {
@@ -66,28 +69,26 @@ func (d *HeatMeter) readArchive(channel MetricsChannel, start, end time.Time, t 
 }
 
 func (d *HeatMeter) Datetime() (time.Time, error) {
-	response, err := d.Request(&Request{
-		Function: FunctionReadDatetime,
-	})
+	response, err := d.Invoke(NewPacket().WithFunction(FunctionReadDatetime))
 	if err != nil {
 		return time.Time{}, err
 	}
 
-	return BytesToTime(response.Payload, d.options.location), nil
+	return BytesToTime(response.Payload(), d.options.location), nil
 }
 
 func (d *HeatMeter) ReadSettings(param SettingsParam) ([]byte, error) {
-	bs := serial.Pad(param.toBytes(), 2)
-	response, err := d.Request(&Request{
-		Function: FunctionReadSettings,
-		Payload:  bs,
-	})
+	request := NewPacket().
+		WithFunction(FunctionReadSettings).
+		WithPayload(serial.Pad(param.toBytes(), 2))
+
+	response, err := d.Invoke(request)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return serial.Reverse(response.Payload), nil
+	return serial.Reverse(response.Payload()), nil
 }
 
 func (d *HeatMeter) DaylightSavingTime() (bool, error) {

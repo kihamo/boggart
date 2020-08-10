@@ -30,42 +30,47 @@ func New(conn connection.Connection, opts ...Option) *HeatMeter {
 	return client
 }
 
-func (d *HeatMeter) Request(request *Request) (*Response, error) {
-	if len(request.Address) == 0 {
-		request.Address = d.options.address
+func (d *HeatMeter) Invoke(request *Packet) (*Packet, error) {
+	if len(request.address) == 0 {
+		request = request.WithAddress(d.options.address)
 	}
 
-	data, err := d.connection.Invoke(request.Bytes())
+	requestData, err := request.MarshalBinary()
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := ParseResponse(data)
+	responseData, err := d.connection.Invoke(requestData)
 	if err != nil {
+		return nil, err
+	}
+
+	response := NewPacket()
+	if err = response.UnmarshalBinary(responseData); err != nil {
 		return nil, err
 	}
 
 	// check ADDR
-	if !bytes.Equal(response.Address, request.Address) {
+	if !bytes.Equal(response.Address(), request.Address()) {
 		return nil, errors.New(
 			"error ADDR of response packet " +
-				hex.EncodeToString(data) + " have " +
-				hex.EncodeToString(response.Address) + " want " +
-				hex.EncodeToString(request.Address))
+				hex.EncodeToString(responseData) + " have " +
+				hex.EncodeToString(response.Address()) + " want " +
+				hex.EncodeToString(request.Address()))
 	}
 
 	// check ID
-	if !bytes.Equal(response.ID, request.ID) {
+	if !bytes.Equal(response.ID(), request.ID()) {
 		return nil, errors.New(
 			"error ID of response packet " +
-				hex.EncodeToString(data) + " have " +
-				hex.EncodeToString(response.ID) + " want " +
-				hex.EncodeToString(request.ID))
+				hex.EncodeToString(responseData) + " have " +
+				hex.EncodeToString(response.ID()) + " want " +
+				hex.EncodeToString(request.ID()))
 	}
 
 	// check error
-	if response.Function == FunctionBadCommand {
-		return nil, fmt.Errorf("returns error code #%d", response.ErrorCode)
+	if response.Function() == FunctionBadCommand {
+		return nil, fmt.Errorf("returns error code #%d", response.ErrorCode())
 	}
 
 	return response, nil
