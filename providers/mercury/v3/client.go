@@ -43,7 +43,7 @@ func (m *MercuryV3) Invoke(request *Request) (response *Response, err error) {
 }
 
 func (m *MercuryV3) InvokeRaw(request *Request) (*Response, error) {
-	if request.address == 0 {
+	if request.Address() == 0 {
 		request = request.WithAddress(m.options.address)
 	}
 

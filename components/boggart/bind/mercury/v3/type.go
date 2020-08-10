@@ -31,17 +31,46 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		config:   config,
 	}
 
-	conn.ApplyOptions(connection.WithDumpRead(func(bytes []byte) {
-		bind.Logger().Debug("Read packet",
-			"payload", fmt.Sprintf("%v", bytes),
-			"hex", hex.EncodeToString(bytes),
-		)
+	conn.ApplyOptions(connection.WithDumpRead(func(data []byte) {
+		args := make([]interface{}, 0)
+
+		packet := mercury.NewResponse()
+		if err := packet.UnmarshalBinary(data); err == nil {
+			args = append(args,
+				"address", fmt.Sprintf("0x%X", packet.Address()),
+				"payload", fmt.Sprintf("%v", packet.Payload()),
+				"crc", fmt.Sprintf("0x%X", packet.CRC()),
+			)
+		} else {
+			args = append(args,
+				"payload", fmt.Sprintf("%v", data),
+				"hex", "0x"+hex.EncodeToString(data),
+			)
+		}
+
+		bind.Logger().Debug("Read packet", args...)
 	}))
-	conn.ApplyOptions(connection.WithDumpWrite(func(bytes []byte) {
-		bind.Logger().Debug("Write packet",
-			"payload", fmt.Sprintf("%v", bytes),
-			"hex", hex.EncodeToString(bytes),
-		)
+	conn.ApplyOptions(connection.WithDumpWrite(func(data []byte) {
+		args := make([]interface{}, 0)
+
+		packet := mercury.NewRequest()
+		if err := packet.UnmarshalBinary(data); err == nil {
+			args = append(args,
+				"address", fmt.Sprintf("0x%X", packet.Address()),
+				"code", fmt.Sprintf("0x%X", packet.Code()),
+				"parameter.code", fmt.Sprintf("0x%X", packet.ParameterCode()),
+				"parameter.extension", fmt.Sprintf("0x%X", packet.ParameterExtension()),
+				"parameters", fmt.Sprintf("%v", packet.Parameters()),
+				"crc", fmt.Sprintf("0x%X", packet.CRC()),
+			)
+		} else {
+			args = append(args,
+				"payload", fmt.Sprintf("%v", data),
+				"hex", "0x"+hex.EncodeToString(data),
+			)
+		}
+
+		bind.Logger().Debug("Write packet", args...)
 	}))
 
 	return bind, nil

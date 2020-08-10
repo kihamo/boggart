@@ -1,7 +1,10 @@
 package v3
 
 import (
+	"bytes"
+	"encoding/binary"
 	"encoding/hex"
+	"errors"
 
 	"github.com/kihamo/boggart/protocols/serial"
 )
@@ -43,12 +46,15 @@ type Request struct {
 	parameterCode      *uint8
 	parameterExtension *uint8
 	parameters         []byte
+	crc                uint16
 }
 
-func NewRequest(code uint8) *Request {
-	return &Request{
-		code: code,
-	}
+func NewRequest() *Request {
+	return &Request{}
+}
+
+func (r *Request) Address() uint8 {
+	return r.address
 }
 
 func (r *Request) WithAddress(address uint8) *Request {
@@ -56,14 +62,39 @@ func (r *Request) WithAddress(address uint8) *Request {
 	return r
 }
 
+func (r *Request) Code() uint8 {
+	return r.code
+}
+
+func (r *Request) WithCode(code uint8) *Request {
+	r.code = code
+	return r
+}
+
+func (r *Request) ParameterCode() *uint8 {
+	return r.parameterCode
+}
+
 func (r *Request) WithParameterCode(code uint8) *Request {
 	r.parameterCode = &[]uint8{code}[0]
 	return r
 }
 
+func (r *Request) ParameterExtension() *uint8 {
+	return r.parameterExtension
+}
+
 func (r *Request) WithParameterExtension(ext uint8) *Request {
 	r.parameterExtension = &[]uint8{ext}[0]
 	return r
+}
+
+func (r *Request) Parameters() []byte {
+	return append([]byte(nil), r.parameters...)
+}
+
+func (r *Request) CRC() uint16 {
+	return r.crc
 }
 
 func (r *Request) WithParameters(params []byte) *Request {
@@ -72,23 +103,61 @@ func (r *Request) WithParameters(params []byte) *Request {
 }
 
 func (r *Request) MarshalBinary() (_ []byte, err error) {
-	packet := append([]byte{r.address}, r.code)
+	packet := append([]byte{r.Address()}, r.Code())
 
-	if r.parameterCode != nil {
-		packet = append(packet, *r.parameterCode)
+	if code := r.ParameterCode(); code != nil {
+		packet = append(packet, *code)
 	}
 
-	if r.parameterExtension != nil {
-		packet = append(packet, *r.parameterExtension)
+	if ext := r.ParameterExtension(); ext != nil {
+		packet = append(packet, *ext)
 	}
 
-	if len(r.parameters) > 0 {
-		packet = append(packet, r.parameters...)
+	if params := r.Parameters(); len(params) > 0 {
+		packet = append(packet, params...)
 	}
 
-	packet = append(packet, serial.GenerateCRC16(packet)...)
+	crc := serial.GenerateCRC16(packet)
+	r.crc = binary.LittleEndian.Uint16(crc)
+	packet = append(packet, crc...)
 
 	return packet, nil
+}
+
+func (r *Request) UnmarshalBinary(data []byte) (err error) {
+	l := len(data)
+
+	if len(data) < 4 {
+		return errors.New("bad packet " + hex.EncodeToString(data) + " length")
+	}
+
+	r.address = data[0]
+	r.code = data[1]
+
+	if len(data) > 4 {
+		r.parameterCode = &data[2]
+	}
+
+	if len(data) > 5 {
+		r.parameterExtension = &data[3]
+	}
+
+	if len(data) > 6 {
+		r.parameters = data[4 : l-2]
+	}
+
+	r.crc = binary.LittleEndian.Uint16(data[l-2:])
+
+	// check crc
+	crc := serial.GenerateCRC16(data[:l-2])
+	if !bytes.Equal(crc, data[l-2:]) {
+		return errors.New("error CRC16 of response packet " +
+			hex.EncodeToString(data) + " have " +
+			hex.EncodeToString(data[l-2:]) + " want " +
+			hex.EncodeToString(crc))
+	}
+
+	return nil
 }
 
 func (r *Request) String() string {
