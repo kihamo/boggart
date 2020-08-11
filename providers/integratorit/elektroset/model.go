@@ -4,6 +4,12 @@ import (
 	"github.com/kihamo/boggart/providers/integratorit/internal"
 )
 
+const (
+	TariffPlanEntityPay   = 1 // оплата
+	TariffPlanEntityBill  = 2 // счет
+	TariffPlanEntityValue = 3 // показания
+)
+
 type Provider struct {
 	KDReg    uint64 `json:"kd_reg"`
 	NMSchema string `json:"nm_schema"`
@@ -29,14 +35,18 @@ type Account struct {
 }
 
 type BalanceDetail struct {
-	DatetimePeriod *internal.Time `json:"dt_period"`
-	DatetimeEntity *internal.Time `json:"dt_entity"`
-	Zone1          *string        `json:"nm_zone1"`
-	Zone2          *string        `json:"nm_zone2"`
-	Zone3          *string        `json:"nm_zone3"`
-	ValueT1        *float64       `json:"vl_t1"`
-	ValueT2        *float64       `json:"vl_t2"`
-	ValueT3        *float64       `json:"vl_t3"`
+	DatetimeEntity     internal.Time  `json:"dt_entity"`
+	KDTariffPlanEntity int64          `json:"kd_tp_entity"`
+	DatetimePeriod     *internal.Time `json:"dt_period"`
+	Sum                *float64       `json:"sm_entity"`
+	KDStatusBill       *int64         `json:"kd_st_bill"` // всегда 0 у выставленных счетов, у остальных null
+	NameZone1          *string        `json:"nm_zone1"`
+	NameZone2          *string        `json:"nm_zone2"`
+	NameZone3          *string        `json:"nm_zone3"`
+	ValueT1            *float64       `json:"vl_t1"`
+	ValueT2            *float64       `json:"vl_t2"`
+	ValueT3            *float64       `json:"vl_t3"`
+	ValueConsump       *string        `json:"vl_consump"`
 }
 
 type IndicationInfo struct {
@@ -65,16 +75,16 @@ type IndicationInfo struct {
 
 type Rate struct {
 	DatetimeStart *internal.Date `json:"dt_start_act"`
-	Time1         string         `json:"nm_time_zone1"`
-	Time2         string         `json:"nm_time_zone2"`
-	Time3         string         `json:"nm_time_zone3"`
+	NameTime1     string         `json:"nm_time_zone1"`
+	NameTime2     string         `json:"nm_time_zone2"`
+	NameTime3     string         `json:"nm_time_zone3"`
 	TariffPlan    string         `json:"nm_tp_rate"`
-	Zone1         string         `json:"nm_zone1"`
-	Zone2         string         `json:"nm_zone2"`
-	Zone3         string         `json:"nm_zone3"`
-	Rate1         float64        `json:"vl_rate_zone1"`
-	Rate2         float64        `json:"vl_rate_zone2"`
-	Rate3         float64        `json:"vl_rate_zone3"`
+	NameZone1     string         `json:"nm_zone1"`
+	NameZone2     string         `json:"nm_zone2"`
+	NameZone3     string         `json:"nm_zone3"`
+	ValueRate1    float64        `json:"vl_rate_zone1"`
+	ValueRate2    float64        `json:"vl_rate_zone2"`
+	ValueRate3    float64        `json:"vl_rate_zone3"`
 }
 
 type BillFile struct {

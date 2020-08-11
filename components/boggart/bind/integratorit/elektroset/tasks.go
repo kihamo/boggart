@@ -2,9 +2,14 @@ package elektroset
 
 import (
 	"context"
+	"errors"
+	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/providers/integratorit/elektroset"
 	"github.com/kihamo/go-workers"
 	"go.uber.org/multierr"
 )
@@ -49,35 +54,42 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 			}
 
 			// balance
-			if balances, e := b.client.BalanceDetails(ctx, account.Number, service.Provider, dateStart, dateEnd); e == nil {
+			if details, e := b.client.BalanceDetails(ctx, account.Number, service.Provider, dateStart, dateEnd); e == nil {
 				values := make([]value, 3)
+				lastBill := time.Time{}
 
-				for _, balance := range balances {
-					if balance.DatetimeEntity == nil {
-						continue
-					}
-
-					if v := values[0]; balance.ValueT1 != nil && (v.date.IsZero() || balance.DatetimeEntity.After(v.date)) {
-						values[0] = value{
-							tariff: "1",
-							value:  *balance.ValueT1,
-							date:   balance.DatetimeEntity.Time,
+				for _, balance := range details {
+					switch balance.KDTariffPlanEntity {
+					// выставленные счета
+					case elektroset.TariffPlanEntityBill:
+						if lastBill.IsZero() || balance.DatetimeEntity.After(lastBill) {
+							lastBill = balance.DatetimeEntity.Time
 						}
-					}
 
-					if v := values[1]; balance.ValueT2 != nil && (v.date.IsZero() || balance.DatetimeEntity.After(v.date)) {
-						values[1] = value{
-							tariff: "2",
-							value:  *balance.ValueT2,
-							date:   balance.DatetimeEntity.Time,
+					// показания
+					case elektroset.TariffPlanEntityValue:
+						if v := values[0]; balance.ValueT1 != nil && (v.date.IsZero() || balance.DatetimeEntity.After(v.date)) {
+							values[0] = value{
+								tariff: "1",
+								value:  *balance.ValueT1,
+								date:   balance.DatetimeEntity.Time,
+							}
 						}
-					}
 
-					if v := values[2]; balance.ValueT3 != nil && (v.date.IsZero() || balance.DatetimeEntity.After(v.date)) {
-						values[2] = value{
-							tariff: "3",
-							value:  *balance.ValueT3,
-							date:   balance.DatetimeEntity.Time,
+						if v := values[1]; balance.ValueT2 != nil && (v.date.IsZero() || balance.DatetimeEntity.After(v.date)) {
+							values[1] = value{
+								tariff: "2",
+								value:  *balance.ValueT2,
+								date:   balance.DatetimeEntity.Time,
+							}
+						}
+
+						if v := values[2]; balance.ValueT3 != nil && (v.date.IsZero() || balance.DatetimeEntity.After(v.date)) {
+							values[2] = value{
+								tariff: "3",
+								value:  *balance.ValueT3,
+								date:   balance.DatetimeEntity.Time,
+							}
 						}
 					}
 				}
@@ -99,6 +111,14 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 						err = multierr.Append(err, e)
 					}
 				}
+
+				if !lastBill.IsZero() {
+					if billLink, e := b.generateBillURL(lastBill); e == nil {
+						if e := b.MQTT().PublishAsync(ctx, b.config.TopicLastBill.Format(account.Number, serviceID), billLink); e != nil {
+							err = multierr.Append(err, e)
+						}
+					}
+				}
 			} else {
 				err = multierr.Append(err, e)
 			}
@@ -112,4 +132,32 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 	}
 
 	return err
+}
+
+func (b *Bind) generateBillURL(period time.Time) (*url.URL, error) {
+	externalURL := b.Config().App().String(boggart.ConfigExternalURL)
+	if externalURL == "" {
+		return nil, errors.New("config external URL ins't set")
+	}
+
+	u, err := url.Parse(externalURL)
+	if err != nil {
+		return nil, err
+	}
+
+	u.Path = "/" + boggart.ComponentName + "/widget/" + b.Meta().ID()
+
+	values := u.Query()
+	values.Add("action", "bill")
+	values.Add("period", period.Format(layoutPeriod))
+
+	if keysConfig := b.Config().App().String(boggart.ConfigAccessKeys); keysConfig != "" {
+		if keys := strings.Split(keysConfig, ","); len(keys) > 0 {
+			values.Add(boggart.AccessKeyName, keys[0])
+		}
+	}
+
+	u.RawQuery = values.Encode()
+
+	return u, nil
 }

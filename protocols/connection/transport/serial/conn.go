@@ -2,6 +2,7 @@ package serial
 
 import (
 	"bytes"
+	"errors"
 	"io"
 
 	"github.com/goburrow/serial"
@@ -41,6 +42,10 @@ func (s *Serial) Dial() (_ transport.Transport, err error) {
 }
 
 func (s *Serial) Read(p []byte) (n int, err error) {
+	if s.port == nil {
+		return -1, errors.New("connection isn't init")
+	}
+
 	buffer := bytes.NewBuffer(nil)
 
 	for {
@@ -75,11 +80,19 @@ func (s *Serial) Read(p []byte) (n int, err error) {
 }
 
 func (s *Serial) Write(p []byte) (n int, err error) {
+	if s.port == nil {
+		return -1, errors.New("connection isn't init")
+	}
+
 	return s.port.Write(p)
 }
 
 func (s *Serial) Close() error {
-	return s.port.Close()
+	if s.port != nil {
+		return s.port.Close()
+	}
+
+	return nil
 }
 
 func (s *Serial) Options() map[string]interface{} {

@@ -21,6 +21,7 @@ type Config struct {
 	TopicServiceBalance    mqtt.Topic    `mapstructure:"topic_service_balance" yaml:"topic_service_balance"`
 	TopicMeterValue        mqtt.Topic    `mapstructure:"topic_meter_value" yaml:"topic_meter_value"`
 	TopicMeterDate         mqtt.Topic    `mapstructure:"topic_meter_date" yaml:"topic_meter_date"`
+	TopicLastBill          mqtt.Topic    `mapstructure:"topic_last_bill" yaml:"topic_last_bill"`
 }
 
 func (Type) Config() interface{} {
@@ -32,10 +33,11 @@ func (Type) Config() interface{} {
 			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
 		},
 		UpdaterInterval:        time.Hour,
-		BalanceDetailsInterval: time.Hour * 24 * 31,
+		BalanceDetailsInterval: time.Hour * 24 * 31 * 2, // нужно минимум 2 месяца, что бы счет попал в выборку
 		TopicBalance:           prefix + "balance",
 		TopicServiceBalance:    prefix + "balance/+",
 		TopicMeterValue:        prefix + "meter/+/+/value",
 		TopicMeterDate:         prefix + "meter/+/+/date",
+		TopicLastBill:          prefix + "bill/last",
 	}
 }

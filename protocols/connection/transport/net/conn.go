@@ -1,6 +1,7 @@
 package net
 
 import (
+	"errors"
 	"net"
 	"time"
 
@@ -50,6 +51,10 @@ func (c *Net) Dial() (_ transport.Transport, err error) {
 }
 
 func (c *Net) Read(b []byte) (_ int, err error) {
+	if c.conn == nil {
+		return -1, errors.New("connection isn't init")
+	}
+
 	if err = SetDeadline(c.options.readTimeout, c.conn.SetReadDeadline); err != nil {
 		return -1, err
 	}
@@ -58,6 +63,10 @@ func (c *Net) Read(b []byte) (_ int, err error) {
 }
 
 func (c *Net) Write(b []byte) (_ int, err error) {
+	if c.conn == nil {
+		return -1, errors.New("connection isn't init")
+	}
+
 	if err = SetDeadline(c.options.writeTimeout, c.conn.SetWriteDeadline); err != nil {
 		return -1, err
 	}
@@ -66,7 +75,11 @@ func (c *Net) Write(b []byte) (_ int, err error) {
 }
 
 func (c *Net) Close() error {
-	return c.conn.Close()
+	if c.conn != nil {
+		return c.conn.Close()
+	}
+
+	return nil
 }
 
 func (c *Net) Options() map[string]interface{} {
