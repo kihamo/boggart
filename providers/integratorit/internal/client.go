@@ -71,7 +71,10 @@ func (c *Client) Session() string {
 
 func (c *Client) DoRequest(ctx context.Context, action string, query, body map[string]string, data interface{}) error {
 	values := url.Values{}
-	values.Add("action", action)
+
+	if action != "" {
+		values.Add("action", action)
+	}
 
 	for key, val := range query {
 		values.Add(key, val)
@@ -96,6 +99,7 @@ func (c *Client) DoRequest(ctx context.Context, action string, query, body map[s
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
