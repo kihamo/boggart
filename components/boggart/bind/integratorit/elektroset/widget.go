@@ -48,11 +48,9 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 					return
 				}
 
-				for key, values := range response.Header {
-					for _, value := range values {
-						w.Header().Add(key, value)
-					}
-				}
+				w.Header().Set("Content-Disposition", "attachment; filename=\"elektroset_bill_"+period.Format("20060102")+".pdf\"")
+				w.Header().Set("Content-Type", response.Header.Get("Content-Type"))
+				w.Header().Set("Content-Length", response.Header.Get("Content-Length"))
 
 				_, err = io.Copy(w, response.Body)
 				if err != nil {
