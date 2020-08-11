@@ -76,3 +76,7 @@ type Rate struct {
 	Rate2         float64        `json:"vl_rate_zone2"`
 	Rate3         float64        `json:"vl_rate_zone3"`
 }
+
+type BillFile struct {
+	Link string `json:"link_bill"`
+}

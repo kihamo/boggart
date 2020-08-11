@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -168,4 +169,38 @@ func (c *Client) CurrentRate(ctx context.Context, number string, provider Provid
 	}
 
 	return &data[0], nil
+}
+
+func (c *Client) BillFile(ctx context.Context, number string, provider Provider, period time.Time) (string, error) {
+	vlProvider, err := json.Marshal(provider)
+	if err != nil {
+		return "", err
+	}
+
+	data := make([]BillFile, 0)
+
+	err = c.base.DoRequest(ctx, "sql", map[string]string{"query": "proxy", "plugin": "bytTmbProxy", "proxyquery": "tmb_file_bill_period"}, map[string]string{
+		"nn_ls":       number,
+		"v_email":     c.base.Login(),
+		"vl_provider": string(vlProvider),
+		"dt_period":   period.Format(dateFormatLayout),
+	}, &data)
+	if err != nil {
+		return "", err
+	}
+
+	if len(data) == 0 {
+		return "", errors.New("bad response")
+	}
+
+	link, err := url.Parse(data[0].Link)
+	if err != nil {
+		return "", err
+	}
+
+	values := link.Query()
+	values.Add("session", c.base.Session())
+	link.RawQuery = values.Encode()
+
+	return link.String(), err
 }
