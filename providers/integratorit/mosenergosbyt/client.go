@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"strconv"
 	"time"
 
@@ -142,16 +143,13 @@ func (c *Client) ChargeDetail(ctx context.Context, abonentID uint64, dateStart, 
 
 	return data, err
 }
-func (c *Client) Bill(ctx context.Context, abonentID uint64, billUUID string, period time.Time) ([]interface{}, error) {
-	var data []interface{}
 
-	err := c.base.DoRequest(ctx, "", nil, map[string]string{
+func (c *Client) Bill(ctx context.Context, abonentID uint64, billUUID string, period time.Time, writer io.Writer) error {
+	return c.base.DoRequest(ctx, "", nil, map[string]string{
 		"action":  "sql",
 		"plugin":  "smorodinaReportProxy",
 		"query":   "smorodinaProxy",
 		"rParams": "ID_ABONENT=" + strconv.Itoa(int(abonentID)) + "&DT_PERIOD=" + period.Format("02.01.2006"),
 		"rUuid":   billUUID,
-	}, &data)
-
-	return data, err
+	}, writer)
 }

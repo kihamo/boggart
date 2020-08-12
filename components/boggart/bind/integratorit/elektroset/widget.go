@@ -1,6 +1,7 @@
 package elektroset
 
 import (
+	"encoding/json"
 	"io"
 	"time"
 
@@ -21,48 +22,44 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 	switch action {
 	case "bill":
+		account := query.Get("account")
+
 		period, err := time.Parse(layoutPeriod, query.Get("period"))
 		if err != nil {
 			widget.NotFound(w, r)
 			return
 		}
 
-		accounts, err := b.client.Accounts(ctx)
+		var provider elektroset.Provider
+		err = json.Unmarshal([]byte(query.Get("provider")), &provider)
+		if err != nil {
+			widget.NotFound(w, r)
+			return
+		}
+
+		billLink, err := b.client.BillFile(ctx, account, provider, period)
 		if err != nil {
 			widget.InternalError(w, r, err)
 			return
 		}
 
-		for _, account := range accounts {
-			for _, service := range account.Services {
-				billLink, err := b.client.BillFile(ctx, account.Number, service.Provider, period)
-				if err != nil {
-					widget.InternalError(w, r, err)
-					return
-				}
-
-				response, err := http.NewClient().Get(ctx, billLink)
-				if err != nil {
-					widget.InternalError(w, r, err)
-					return
-				}
-
-				w.Header().Set("Content-Disposition", "attachment; filename=\"elektroset_bill_"+period.Format("20060102")+".pdf\"")
-				w.Header().Set("Content-Type", response.Header.Get("Content-Type"))
-				w.Header().Set("Content-Length", response.Header.Get("Content-Length"))
-
-				_, err = io.Copy(w, response.Body)
-				if err != nil {
-					widget.InternalError(w, r, err)
-					return
-				}
-
-				response.Body.Close()
-				return
-			}
+		response, err := http.NewClient().Get(ctx, billLink)
+		if err != nil {
+			widget.InternalError(w, r, err)
+			return
 		}
 
-		widget.NotFound(w, r)
+		w.Header().Set("Content-Disposition", "attachment; filename=\"elektroset_bill_"+period.Format("20060102")+".pdf\"")
+		w.Header().Set("Content-Type", response.Header.Get("Content-Type"))
+		w.Header().Set("Content-Length", response.Header.Get("Content-Length"))
+
+		_, err = io.Copy(w, response.Body)
+		if err != nil {
+			widget.InternalError(w, r, err)
+			return
+		}
+
+		response.Body.Close()
 		return
 
 	default:

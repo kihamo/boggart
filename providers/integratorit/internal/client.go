@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"io/ioutil"
 	"net/url"
 	"strings"
@@ -100,6 +101,11 @@ func (c *Client) DoRequest(ctx context.Context, action string, query, body map[s
 		return err
 	}
 	defer resp.Body.Close()
+
+	if writer, ok := data.(io.Writer); ok {
+		_, err = io.Copy(writer, resp.Body)
+		return err
+	}
 
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {

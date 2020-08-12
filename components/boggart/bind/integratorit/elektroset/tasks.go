@@ -2,6 +2,7 @@ package elektroset
 
 import (
 	"context"
+	"encoding/json"
 	"strconv"
 	"time"
 
@@ -62,7 +63,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 							lastBill = balance.DatetimeEntity.Time
 						}
 
-					// показания
+						// показания
 					case elektroset.TariffPlanEntityValue:
 						if v := values[0]; balance.ValueT1 != nil && (v.date.IsZero() || balance.DatetimeEntity.After(v.date)) {
 							values[0] = value{
@@ -109,9 +110,13 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 				}
 
 				if !lastBill.IsZero() {
+					provider, _ := json.Marshal(service.Provider)
+
 					billLink, e := b.Widget().URL(map[string]string{
-						"action": "bill",
-						"period": lastBill.Format(layoutPeriod),
+						"action":   "bill",
+						"period":   lastBill.Format(layoutPeriod),
+						"account":  account.Number,
+						"provider": string(provider),
 					})
 
 					if e == nil {
