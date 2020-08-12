@@ -142,7 +142,7 @@ func (b *Bind) handleComponentLight(w *dashboard.Response, r *dashboard.Request,
 			err := b.MQTT().PublishRawWithoutCache(ctx, component.GetCommandTopic(), 1, false, component.CommandToPayload(command))
 
 			if err != nil {
-				widget.FlashError(r, err.Error(), "")
+				widget.FlashError(r, err, "")
 			} else {
 				widget.FlashSuccess(r, "Success toggle", "")
 
@@ -180,7 +180,7 @@ func (b *Bind) handleCommand(w *dashboard.Response, r *dashboard.Request) {
 	err := b.MQTT().PublishRawWithoutCache(ctx, component.GetCommandTopic(), 1, false, component.CommandToPayload(command))
 
 	if err != nil {
-		widget.FlashError(r, err.Error(), "")
+		widget.FlashError(r, err, "")
 	} else {
 		widget.FlashSuccess(r, "Success toggle", "")
 	}

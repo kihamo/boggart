@@ -56,7 +56,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		if err != nil {
-			widget.FlashError(r, err.Error(), "")
+			widget.FlashError(r, err, "")
 		} else {
 			widget.FlashError(r, "Profile set success", "")
 			widget.Redirect(r.URL().Path, http.StatusFound, w, r)

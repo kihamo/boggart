@@ -12,15 +12,12 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/mime"
-	"github.com/kihamo/boggart/types"
 	"gopkg.in/telegram-bot-api.v4"
 )
 
@@ -52,23 +49,7 @@ func (b *Bind) Run() error {
 	b.done = make(chan struct{})
 
 	if b.config.FileURLPrefix.String() == "" {
-		appConfig := b.Config().App()
-
-		u, err := url.Parse(appConfig.String(boggart.ConfigExternalURL))
-		if err == nil {
-			u.Path = "/" + boggart.ComponentName + "/widget/" + b.Meta().ID()
-
-			// access keys
-			if keysConfig := appConfig.String(boggart.ConfigAccessKeys); keysConfig != "" {
-				if keys := strings.Split(keysConfig, ","); len(keys) > 0 {
-					q := u.Query()
-					q.Add(boggart.AccessKeyName, keys[0])
-					u.RawQuery = q.Encode()
-				}
-			}
-
-			b.config.FileURLPrefix = types.URL{URL: *u}
-		} else {
+		if _, err := b.Widget().URL(nil); err != nil {
 			b.config.UseURLForSendFile = false
 		}
 	}
@@ -245,14 +226,16 @@ func (b *Bind) SaveFile(reader io.Reader) (string, error) {
 		return "", err
 	}
 
-	u := b.config.FileURLPrefix.URL
-	q := u.Query()
-	q.Add(paramFileName, id)
-	q.Add(paramMIME, mimeType.String())
-	// телега кэширует урлы и второй раз не прийдет и механизм очистки не сработает,
-	// поэтому добавляем рандом
-	q.Add(paramRandom, strconv.FormatInt(time.Now().Unix(), 10))
-	u.RawQuery = q.Encode()
+	u, err := b.Widget().URL(map[string]string{
+		paramFileName: id,
+		paramMIME:     mimeType.String(),
+		// телега кэширует урлы и второй раз не прийдет и механизм очистки не сработает,
+		// поэтому добавляем рандом
+		paramRandom: strconv.FormatInt(time.Now().Unix(), 10),
+	})
+	if err != nil {
+		return "", err
+	}
 
 	return u.String(), nil
 }

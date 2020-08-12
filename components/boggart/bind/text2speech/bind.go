@@ -13,7 +13,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/yandex_speechkit_cloud"
 	"github.com/kihamo/boggart/providers/yandex_speechkit_cloud/client/generate"
@@ -64,58 +63,38 @@ func trim(message string) string {
 }
 
 func (b *Bind) GenerateURL(ctx context.Context, text, format, quality, language, speaker, emotion string, speed float64, force bool) (*url.URL, error) {
-	externalURL := b.Config().App().String(boggart.ConfigExternalURL)
-	if externalURL == "" {
-		return nil, errors.New("config external URL ins't set")
+	vs := map[string]string{
+		"text": text,
 	}
-
-	u, err := url.Parse(externalURL)
-	if err != nil {
-		return nil, err
-	}
-
-	u.Path = "/" + boggart.ComponentName + "/widget/" + b.Meta().ID()
-
-	values := u.Query()
-	values.Add("text", text)
-
 	if force {
-		values.Add("force", "1")
+		vs["force"] = "1"
 	}
 
 	if language != "" {
-		values.Add("language", language)
+		vs["language"] = language
 	}
 
 	if speaker != "" {
-		values.Add("speaker", speaker)
+		vs["speaker"] = speaker
 	}
 
 	if emotion != "" {
-		values.Add("emotion", emotion)
+		vs["emotion"] = emotion
 	}
 
 	if format != "" {
-		values.Add("format", format)
+		vs["format"] = format
 	}
 
 	if quality != "" {
-		values.Add("quality", quality)
+		vs["quality"] = quality
 	}
 
 	if speed > 0 {
-		values.Add("speed", strconv.FormatFloat(speed, 'f', -1, 64))
+		vs["quality"] = strconv.FormatFloat(speed, 'f', -1, 64)
 	}
 
-	if keysConfig := b.Config().App().String(boggart.ConfigAccessKeys); keysConfig != "" {
-		if keys := strings.Split(keysConfig, ","); len(keys) > 0 {
-			values.Add(boggart.AccessKeyName, keys[0])
-		}
-	}
-
-	u.RawQuery = values.Encode()
-
-	return u, nil
+	return b.Widget().URL(vs)
 }
 
 func (b *Bind) Generate(ctx context.Context, text, format, quality, language, speaker, emotion string, speed float64, force bool) (io.Reader, error) {

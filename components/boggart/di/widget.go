@@ -2,11 +2,14 @@ package di
 
 import (
 	"context"
+	"errors"
 	"net/url"
+	"strings"
 	"sync"
 
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/i18n"
 )
@@ -50,12 +53,15 @@ func (b *WidgetBind) Widget() *WidgetContainer {
 
 type WidgetContainer struct {
 	dashboard.Handler
-	bind boggart.BindItem
+
+	bind      boggart.BindItem
+	configApp config.Component
 }
 
-func NewWidgetContainer(bind boggart.BindItem) *WidgetContainer {
+func NewWidgetContainer(bind boggart.BindItem, configApp config.Component) *WidgetContainer {
 	return &WidgetContainer{
-		bind: bind,
+		bind:      bind,
+		configApp: configApp,
 	}
 }
 
@@ -96,12 +102,46 @@ func (c *WidgetContainer) TranslatePlural(ctx context.Context, singleID, pluralI
 	return i18n.Locale(ctx).TranslatePlural(boggart.I18nDomainFromContext(ctx), singleID, pluralID, number, context, format...)
 }
 
-func (c *WidgetContainer) URL() (*url.URL, error) {
-	return nil, nil
+func (c *WidgetContainer) URL(vs map[string]string) (*url.URL, error) {
+	externalURL := c.configApp.String(boggart.ConfigExternalURL)
+	if externalURL == "" {
+		return nil, errors.New("config external URL ins't set")
+	}
+
+	u, err := url.Parse(externalURL)
+	if err != nil {
+		return nil, err
+	}
+
+	u.Path = "/" + boggart.ComponentName + "/widget/" + c.bind.ID()
+
+	values := u.Query()
+
+	if keysConfig := c.configApp.String(boggart.ConfigAccessKeys); keysConfig != "" {
+		if keys := strings.Split(keysConfig, ","); len(keys) > 0 {
+			values.Add(boggart.AccessKeyName, keys[0])
+		}
+	}
+
+	for k, v := range vs {
+		values.Add(k, v)
+	}
+
+	u.RawQuery = values.Encode()
+
+	return u, nil
 }
 
-func (c *WidgetContainer) FlashError(r *dashboard.Request, messageID string, context string, format ...interface{}) {
-	r.Session().FlashBag().Error(c.Translate(r.Context(), messageID, context, format...))
+func (c *WidgetContainer) FlashError(r *dashboard.Request, messageID interface{}, context string, format ...interface{}) {
+	var id string
+
+	if e, ok := messageID.(error); ok {
+		id = e.Error()
+	} else {
+		id = messageID.(string)
+	}
+
+	r.Session().FlashBag().Error(c.Translate(r.Context(), id, context, format...))
 }
 
 func (c *WidgetContainer) FlashSuccess(r *dashboard.Request, messageID string, context string, format ...interface{}) {

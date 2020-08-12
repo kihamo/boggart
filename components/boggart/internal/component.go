@@ -313,7 +313,7 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 
 	// widget container
 	if bindSupport, ok := bind.(di.WidgetContainerSupport); ok {
-		ctr := di.NewWidgetContainer(bindItem)
+		ctr := di.NewWidgetContainer(bindItem, c.config)
 
 		bindSupport.SetWidget(ctr)
 

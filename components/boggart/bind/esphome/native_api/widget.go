@@ -340,7 +340,7 @@ func (b *Bind) handleState(w *dashboard.Response, r *dashboard.Request) {
 	}
 
 	if err != nil {
-		widget.FlashError(r, err.Error(), "")
+		widget.FlashError(r, err, "")
 	} else {
 		widget.FlashSuccess(r, "Success toggle", "")
 	}

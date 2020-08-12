@@ -2,13 +2,9 @@ package elektroset
 
 import (
 	"context"
-	"errors"
-	"net/url"
 	"strconv"
-	"strings"
 	"time"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/providers/integratorit/elektroset"
 	"github.com/kihamo/go-workers"
 	"go.uber.org/multierr"
@@ -113,7 +109,12 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 				}
 
 				if !lastBill.IsZero() {
-					if billLink, e := b.generateBillURL(lastBill); e == nil {
+					billLink, e := b.Widget().URL(map[string]string{
+						"action": "bill",
+						"period": lastBill.Format(layoutPeriod),
+					})
+
+					if e == nil {
 						if e := b.MQTT().PublishAsync(ctx, b.config.TopicLastBill.Format(account.Number, serviceID), billLink); e != nil {
 							err = multierr.Append(err, e)
 						}
@@ -132,32 +133,4 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 	}
 
 	return err
-}
-
-func (b *Bind) generateBillURL(period time.Time) (*url.URL, error) {
-	externalURL := b.Config().App().String(boggart.ConfigExternalURL)
-	if externalURL == "" {
-		return nil, errors.New("config external URL ins't set")
-	}
-
-	u, err := url.Parse(externalURL)
-	if err != nil {
-		return nil, err
-	}
-
-	u.Path = "/" + boggart.ComponentName + "/widget/" + b.Meta().ID()
-
-	values := u.Query()
-	values.Add("action", "bill")
-	values.Add("period", period.Format(layoutPeriod))
-
-	if keysConfig := b.Config().App().String(boggart.ConfigAccessKeys); keysConfig != "" {
-		if keys := strings.Split(keysConfig, ","); len(keys) > 0 {
-			values.Add(boggart.AccessKeyName, keys[0])
-		}
-	}
-
-	u.RawQuery = values.Encode()
-
-	return u, nil
 }
