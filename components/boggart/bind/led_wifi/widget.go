@@ -5,14 +5,13 @@ import (
 	"strings"
 
 	"github.com/elazarl/go-bindata-assetfs"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/providers/wifiled"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
-func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
-	bind := b.Bind().(*Bind)
+func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	ctx := r.Context()
+	widget := b.Widget()
 
 	vars := map[string]interface{}{
 		"effects": map[wifiled.Mode]string{
@@ -44,13 +43,9 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		},
 	}
 
-	state, err := bind.bulb.State(ctx)
+	state, err := b.bulb.State(ctx)
 	if err != nil {
-		r.Session().FlashBag().Error(t.Translate(ctx,
-			"Get state failed with error %s",
-			"",
-			err.Error(),
-		))
+		r.Session().FlashBag().Error(widget.Translate(ctx, "Get state failed with error %s", "", err.Error()))
 	} else {
 		vars["state"] = state
 	}
@@ -58,7 +53,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	if r.IsPost() {
 		err := r.Original().ParseForm()
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Parse form failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Parse form failed with error %s", "", err.Error()))
 		} else {
 			var power bool
 
@@ -73,13 +68,13 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 			if power != state.Power {
 				if power {
-					err = bind.bulb.PowerOn(ctx)
+					err = b.bulb.PowerOn(ctx)
 				} else {
-					err = bind.bulb.PowerOff(ctx)
+					err = b.bulb.PowerOff(ctx)
 				}
 
 				if err != nil {
-					r.Session().FlashBag().Error(t.Translate(ctx, "Change state failed with error %s", "", err.Error()))
+					r.Session().FlashBag().Error(widget.Translate(ctx, "Change state failed with error %s", "", err.Error()))
 				}
 			}
 
@@ -92,23 +87,23 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 					if key == "effect" {
 						mode, err := wifiled.ModeFromString(strings.TrimSpace(value[0]))
 						if err == nil {
-							err = bind.bulb.SetMode(ctx, *mode, state.Speed)
+							err = b.bulb.SetMode(ctx, *mode, state.Speed)
 						}
 
 						if err != nil {
-							r.Session().FlashBag().Error(t.Translate(ctx, "Change mode failed with error %s", "", err.Error()))
+							r.Session().FlashBag().Error(widget.Translate(ctx, "Change mode failed with error %s", "", err.Error()))
 						}
 					}
 				}
 			}
 
-			t.Redirect(r.URL().Path, http.StatusFound, w, r)
+			widget.Redirect(r.URL().Path, http.StatusFound, w, r)
 		}
 	}
 
-	t.Render(ctx, "index", vars)
+	widget.Render(ctx, "widget", vars)
 }
 
-func (t Type) WidgetAssetFS() *assetfs.AssetFS {
+func (b *Bind) WidgetAssetFS() *assetfs.AssetFS {
 	return assetFS()
 }

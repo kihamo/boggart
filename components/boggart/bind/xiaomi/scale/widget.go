@@ -7,18 +7,17 @@ import (
 	"time"
 
 	"github.com/elazarl/go-bindata-assetfs"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
-func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
-	bind := b.Bind().(*Bind)
+func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	ctx := r.Context()
+	widget := b.Widget()
 
 	if r.IsPost() {
 		var err error
 
-		profile := bind.Profile(r.Original().FormValue("profile"))
+		profile := b.Profile(r.Original().FormValue("profile"))
 		if profile == nil {
 			err = errors.New("Profile not found")
 		} else if profile.Editable {
@@ -52,25 +51,25 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		if err == nil {
-			bind.SetProfile(profile.Name)
-			err = bind.notifyCurrentProfile(ctx)
+			b.SetProfile(profile.Name)
+			err = b.notifyCurrentProfile(ctx)
 		}
 
 		if err != nil {
 			r.Session().FlashBag().Error(err.Error())
 		} else {
-			r.Session().FlashBag().Info(t.Translate(ctx, "Profile set success", ""))
-			t.Redirect(r.URL().Path, http.StatusFound, w, r)
+			r.Session().FlashBag().Info(widget.Translate(ctx, "Profile set success", ""))
+			widget.Redirect(r.URL().Path, http.StatusFound, w, r)
 			return
 		}
 	}
 
-	t.Render(r.Context(), "widget", map[string]interface{}{
-		"current_profile": bind.CurrentProfile(),
-		"profiles":        bind.Profiles(),
+	widget.Render(r.Context(), "widget", map[string]interface{}{
+		"current_profile": b.CurrentProfile(),
+		"profiles":        b.Profiles(),
 	})
 }
 
-func (t Type) WidgetAssetFS() *assetfs.AssetFS {
+func (b *Bind) WidgetAssetFS() *assetfs.AssetFS {
 	return assetFS()
 }

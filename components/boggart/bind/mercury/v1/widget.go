@@ -7,15 +7,14 @@ import (
 	"time"
 
 	"github.com/elazarl/go-bindata-assetfs"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/providers/mercury/v1"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
-func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
-	bind := b.Bind().(*Bind)
+func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	vars := map[string]interface{}{}
 	ctx := r.Context()
+	widget := b.Widget()
 
 	action := r.URL().Query().Get("action")
 	vars["action"] = action
@@ -30,16 +29,16 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			T1Trend, T2Trend, T3Trend, T4Trend int64
 		}
 
-		date, err := bind.provider.Datetime()
+		date, err := b.provider.Datetime()
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Get datetime failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Get datetime failed with error %s", "", err.Error()))
 
 			vars["stats"] = make([]*monthly, 0)
 		}
 
-		tariffCount, err := bind.provider.TariffCount()
+		tariffCount, err := b.provider.TariffCount()
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Get tariff count failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Get tariff count failed with error %s", "", err.Error()))
 		}
 
 		if err == nil {
@@ -63,10 +62,10 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			for i := 1; i <= int(last); i++ {
 				monthRequest = time.Month(i)
 
-				statsValues, err := bind.provider.MonthlyStatByMonth(monthRequest)
+				statsValues, err := b.provider.MonthlyStatByMonth(monthRequest)
 				if err != nil {
-					mAsString := t.Translate(ctx, monthRequest.String(), "")
-					r.Session().FlashBag().Error(t.Translate(ctx, "Get statistics for %s failed with error %s", "", mAsString, err.Error()))
+					mAsString := widget.Translate(ctx, monthRequest.String(), "")
+					r.Session().FlashBag().Error(widget.Translate(ctx, "Get statistics for %s failed with error %s", "", mAsString, err.Error()))
 					continue
 				}
 
@@ -99,10 +98,10 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			})
 
 			// отдельно запрашиваем текущий месяц
-			powerValues, err := bind.provider.PowerCounters()
+			powerValues, err := b.provider.PowerCounters()
 			if err != nil {
-				mAsString := t.Translate(ctx, date.Month().String(), "")
-				r.Session().FlashBag().Error(t.Translate(ctx, "Get statistics for %s failed with error %s", "", mAsString, err.Error()))
+				mAsString := widget.Translate(ctx, date.Month().String(), "")
+				r.Session().FlashBag().Error(widget.Translate(ctx, "Get statistics for %s failed with error %s", "", mAsString, err.Error()))
 			} else {
 				stat := &monthly{
 					Month:  date.Month(),
@@ -141,8 +140,8 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 	case "events-on-off":
-		if makeDate, err := bind.provider.MakeDate(); err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Get make date failed with error %s", "", err.Error()))
+		if makeDate, err := b.provider.MakeDate(); err != nil {
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Get make date failed with error %s", "", err.Error()))
 		} else {
 			type event struct {
 				State bool
@@ -152,10 +151,10 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			events := make([]event, 0, v1.MaxEventsIndex)
 
 			for i := uint8(0); i <= v1.MaxEventsIndex; i++ {
-				state, date, err := bind.provider.EventsPowerOnOff(i)
+				state, date, err := b.provider.EventsPowerOnOff(i)
 
 				if err != nil {
-					r.Session().FlashBag().Error(t.Translate(ctx, "Get event %02x failed with error %s", "", i, err.Error()))
+					r.Session().FlashBag().Error(widget.Translate(ctx, "Get event %02x failed with error %s", "", i, err.Error()))
 					break
 				}
 
@@ -173,8 +172,8 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 	case "events-open-close":
-		if makeDate, err := bind.provider.MakeDate(); err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Get make date failed with error %s", "", err.Error()))
+		if makeDate, err := b.provider.MakeDate(); err != nil {
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Get make date failed with error %s", "", err.Error()))
 		} else {
 
 			type event struct {
@@ -185,10 +184,10 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			events := make([]event, 0, v1.MaxEventsIndex)
 
 			for i := uint8(0); i <= v1.MaxEventsIndex; i++ {
-				state, date, err := bind.provider.EventsOpenClose(i)
+				state, date, err := b.provider.EventsOpenClose(i)
 
 				if err != nil {
-					r.Session().FlashBag().Error(t.Translate(ctx, "Get event %02x failed with error %s", "", i, err.Error()))
+					r.Session().FlashBag().Error(widget.Translate(ctx, "Get event %02x failed with error %s", "", i, err.Error()))
 					break
 				}
 
@@ -208,14 +207,14 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	case "display":
 		var err error
 
-		mode, err := bind.provider.DisplayMode()
+		mode, err := b.provider.DisplayMode()
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Get display mode failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Get display mode failed with error %s", "", err.Error()))
 		}
 
-		timeValues, err := bind.provider.DisplayTime()
+		timeValues, err := b.provider.DisplayTime()
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Get display time failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Get display time failed with error %s", "", err.Error()))
 		}
 
 		if r.IsPost() {
@@ -229,11 +228,11 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			mode.SetDate(r.Original().FormValue("mode_date") != "")
 
 			if mode.IsChanged() {
-				err = bind.provider.SetDisplayMode(mode)
+				err = b.provider.SetDisplayMode(mode)
 				if err != nil {
-					r.Session().FlashBag().Error(t.Translate(ctx, "Change display mode failed with error %s", "", err.Error()))
+					r.Session().FlashBag().Error(widget.Translate(ctx, "Change display mode failed with error %s", "", err.Error()))
 				} else {
-					r.Session().FlashBag().Success(t.Translate(ctx, "Change display mode success", ""))
+					r.Session().FlashBag().Success(widget.Translate(ctx, "Change display mode success", ""))
 				}
 			}
 
@@ -262,18 +261,18 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			}
 
 			if err != nil {
-				r.Session().FlashBag().Error(t.Translate(ctx, "Parse value failed with error %s", "", err.Error()))
+				r.Session().FlashBag().Error(widget.Translate(ctx, "Parse value failed with error %s", "", err.Error()))
 			} else if timeValues.IsChanged() {
-				err = bind.provider.SetDisplayTime(timeValues)
+				err = b.provider.SetDisplayTime(timeValues)
 				if err != nil {
-					r.Session().FlashBag().Error(t.Translate(ctx, "Change display time failed with error %s", "", err.Error()))
+					r.Session().FlashBag().Error(widget.Translate(ctx, "Change display time failed with error %s", "", err.Error()))
 				} else {
-					r.Session().FlashBag().Success(t.Translate(ctx, "Change display time success", ""))
+					r.Session().FlashBag().Success(widget.Translate(ctx, "Change display time success", ""))
 				}
 			}
 
 			if err == nil {
-				t.Redirect(r.URL().Path+"?action="+action, http.StatusFound, w, r)
+				widget.Redirect(r.URL().Path+"?action="+action, http.StatusFound, w, r)
 				return
 			}
 		}
@@ -282,9 +281,9 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		vars["time"] = timeValues
 
 	case "holidays":
-		days, err := bind.provider.Holidays()
+		days, err := b.provider.Holidays()
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Get holidays failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Get holidays failed with error %s", "", err.Error()))
 		}
 
 		vars["holidays"] = days
@@ -292,7 +291,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	default:
 		// date time
 		now := time.Now()
-		v, err := bind.provider.Datetime()
+		v, err := b.provider.Datetime()
 		variable := map[string]interface{}{
 			"value": v,
 			"delta": 0,
@@ -306,7 +305,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		vars["datetime"] = variable
 
 		// param last change
-		v, err = bind.provider.ParamLastChange()
+		v, err = b.provider.ParamLastChange()
 		if !v1.CommandNotSupported(err) {
 			vars["param_last_change_data"] = map[string]interface{}{
 				"value": v,
@@ -315,35 +314,35 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		// make date
-		v, err = bind.provider.MakeDate()
+		v, err = b.provider.MakeDate()
 		vars["make_date"] = map[string]interface{}{
 			"value": v,
 			"error": err,
 		}
 
 		// last power off
-		v, err = bind.provider.LastPowerOffDatetime()
+		v, err = b.provider.LastPowerOffDatetime()
 		vars["last_power_off_datetime"] = map[string]interface{}{
 			"value": v,
 			"error": err,
 		}
 
 		// last power on
-		v, err = bind.provider.LastPowerOnDatetime()
+		v, err = b.provider.LastPowerOnDatetime()
 		vars["last_power_on_datetime"] = map[string]interface{}{
 			"value": v,
 			"error": err,
 		}
 
 		// last close cap
-		v, err = bind.provider.LastCloseCap()
+		v, err = b.provider.LastCloseCap()
 		vars["last_close_cap_datetime"] = map[string]interface{}{
 			"value": v,
 			"error": err,
 		}
 
 		// V, A, Watts
-		voltage, amperage, power, err := bind.provider.UIPCurrent()
+		voltage, amperage, power, err := b.provider.UIPCurrent()
 		vars["voltage"] = map[string]interface{}{
 			"value": voltage,
 			"error": err,
@@ -358,7 +357,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		// V max
-		voltageMax, voltageMaxDate, voltageMaxReset, voltageMaxDateReset, err := bind.provider.MaximumVoltage()
+		voltageMax, voltageMaxDate, voltageMaxReset, voltageMaxDateReset, err := b.provider.MaximumVoltage()
 		if !v1.CommandNotSupported(err) {
 			vars["voltage_max"] = map[string]interface{}{
 				"value": voltageMax,
@@ -374,7 +373,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		// A max
-		amperageMax, amperageMaxDate, amperageMaxReset, amperageMaxDateReset, err := bind.provider.MaximumAmperage()
+		amperageMax, amperageMaxDate, amperageMaxReset, amperageMaxDateReset, err := b.provider.MaximumAmperage()
 		if !v1.CommandNotSupported(err) {
 			vars["amperage_max"] = map[string]interface{}{
 				"value": amperageMax,
@@ -390,7 +389,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		// Watts max
-		powerMax, powerMaxDate, powerMaxReset, powerMaxDateReset, err := bind.provider.MaximumPower()
+		powerMax, powerMaxDate, powerMaxReset, powerMaxDateReset, err := b.provider.MaximumPower()
 		if !v1.CommandNotSupported(err) {
 			vars["power_max"] = map[string]interface{}{
 				"value": powerMax,
@@ -406,7 +405,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		// model
-		twoSensors, relay, err := bind.provider.Model()
+		twoSensors, relay, err := b.provider.Model()
 		vars["model_two_sensors"] = map[string]interface{}{
 			"value": twoSensors,
 			"error": err,
@@ -417,9 +416,9 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 	}
 
-	t.Render(ctx, "widget", vars)
+	widget.Render(ctx, "widget", vars)
 }
 
-func (t Type) WidgetAssetFS() *assetfs.AssetFS {
+func (b *Bind) WidgetAssetFS() *assetfs.AssetFS {
 	return assetFS()
 }

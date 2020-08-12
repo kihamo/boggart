@@ -82,7 +82,7 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				Config:      buf.String(),
 			}
 
-			if _, ok := bindItem.BindType().(boggart.BindTypeHasWidget); ok {
+			if _, ok := di.WidgetContainerBind(bindItem.Bind()); ok {
 				item.HasWidget = ok
 			}
 

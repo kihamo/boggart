@@ -17,6 +17,7 @@ type Bind struct {
 	di.LoggerBind
 	di.WorkersBind
 	di.ProbesBind
+	di.WidgetBind
 
 	disconnected *atomic.BoolNull
 

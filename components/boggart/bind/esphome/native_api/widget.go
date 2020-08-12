@@ -11,7 +11,6 @@ import (
 
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/golang/protobuf/proto"
-	"github.com/kihamo/boggart/components/boggart"
 	api "github.com/kihamo/boggart/providers/esphome/native_api"
 	"github.com/kihamo/shadow/components/dashboard"
 )
@@ -24,74 +23,67 @@ type entityRow struct {
 	Entity   proto.Message
 }
 
-func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
-	bind := b.Bind().(*Bind)
+func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	q := r.URL().Query()
+	widget := b.Widget()
 
 	switch q.Get("action") {
 	case "entity":
 		objectID := q.Get("object")
 
 		if objectID == "" {
-			t.NotFound(w, r)
+			widget.NotFound(w, r)
 			return
 		}
 
-		entity, err := bind.EntityByObjectID(r.Context(), objectID)
+		entity, err := b.EntityByObjectID(r.Context(), objectID)
 		if err != nil {
-			t.NotFound(w, r)
+			widget.NotFound(w, r)
 		}
 
 		if api.EntityType(entity) == api.EntityTypeLight {
-			t.handleLight(w, r, bind, entity.(*api.ListEntitiesLightResponse))
+			b.handleLight(w, r, entity.(*api.ListEntitiesLightResponse))
 		}
 
 	case "state":
-		t.handleState(w, r, bind)
+		b.handleState(w, r)
 
 	case "ota":
-		t.handleOTA(w, r, bind)
+		b.handleOTA(w, r)
 
 	default:
-		t.handleIndex(w, r, bind)
+		b.handleIndex(w, r)
 	}
 }
 
-func (t Type) WidgetAssetFS() *assetfs.AssetFS {
+func (b *Bind) WidgetAssetFS() *assetfs.AssetFS {
 	return assetFS()
 }
 
-func (t Type) handleIndex(_ *dashboard.Response, r *dashboard.Request, bind *Bind) {
+func (b *Bind) handleIndex(_ *dashboard.Response, r *dashboard.Request) {
 	ctx := r.Context()
-	otaWritten, otaTotal := bind.ota.Progress()
+	widget := b.Widget()
+	otaWritten, otaTotal := b.ota.Progress()
 
 	vars := map[string]interface{}{
-		"ota_running":  bind.ota.IsRunning(),
+		"ota_running":  b.ota.IsRunning(),
 		"ota_written":  otaWritten,
 		"ota_total":    otaTotal,
-		"ota_checksum": bind.ota.Checksum(),
+		"ota_checksum": b.ota.Checksum(),
 		"ota_progress": (float64(otaWritten) * float64(100)) / float64(otaTotal),
-		"ota_error":    bind.ota.LastError(),
+		"ota_error":    b.ota.LastError(),
 	}
 
-	if !bind.ota.IsRunning() {
-		messages, err := bind.provider.ListEntities(ctx)
+	if !b.ota.IsRunning() {
+		messages, err := b.provider.ListEntities(ctx)
 		entities := make(map[uint32]*entityRow, len(messages))
 
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx,
-				"Get list entities failed with error %s",
-				"",
-				err.Error(),
-			))
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Get list entities failed with error %s", "", err.Error()))
 		} else {
-			states, err := bind.States(ctx, messages...)
+			states, err := b.States(ctx, messages...)
 			if err != nil {
-				r.Session().FlashBag().Error(t.Translate(ctx,
-					"Get state of entities failed with error: %s",
-					"",
-					err.Error(),
-				))
+				r.Session().FlashBag().Error(widget.Translate(ctx, "Get state of entities failed with error: %s", "", err.Error()))
 			} else {
 				for _, message := range messages {
 					e, ok := message.(api.MessageEntity)
@@ -122,12 +114,7 @@ func (t Type) handleIndex(_ *dashboard.Response, r *dashboard.Request, bind *Bin
 
 					row.State, err = api.State(row.Entity, message, true)
 					if err != nil {
-						r.Session().FlashBag().Notice(t.Translate(ctx,
-							"Unknown state type %s for entity with key %d",
-							"",
-							proto.MessageName(message),
-							s.GetKey(),
-						))
+						r.Session().FlashBag().Notice(widget.Translate(ctx, "Unknown state type %s for entity with key %d", "", proto.MessageName(message), s.GetKey()))
 					}
 				}
 			}
@@ -136,16 +123,17 @@ func (t Type) handleIndex(_ *dashboard.Response, r *dashboard.Request, bind *Bin
 		vars["entities"] = entities
 	}
 
-	t.Render(ctx, "index", vars)
+	widget.Render(ctx, "index", vars)
 }
 
-func (t Type) handleLight(w *dashboard.Response, r *dashboard.Request, bind *Bind, entity *api.ListEntitiesLightResponse) {
+func (b *Bind) handleLight(w *dashboard.Response, r *dashboard.Request, entity *api.ListEntitiesLightResponse) {
 	ctx := r.Context()
+	widget := b.Widget()
 
 	if r.IsPost() {
 		err := r.Original().ParseForm()
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Parse form failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Parse form failed with error %s", "", err.Error()))
 		} else {
 			cmd := &api.LightCommandRequest{
 				Key: entity.Key,
@@ -224,7 +212,7 @@ func (t Type) handleLight(w *dashboard.Response, r *dashboard.Request, bind *Bin
 				}
 
 				if err != nil {
-					r.Session().FlashBag().Error(t.Translate(ctx, "Parse param %s failed with error %s", "", key, err.Error()))
+					r.Session().FlashBag().Error(widget.Translate(ctx, "Parse param %s failed with error %s", "", key, err.Error()))
 					err = nil
 				}
 			}
@@ -234,12 +222,12 @@ func (t Type) handleLight(w *dashboard.Response, r *dashboard.Request, bind *Bin
 				cmd.HasState = true
 			}
 
-			err = bind.provider.LightCommand(ctx, cmd)
+			err = b.provider.LightCommand(ctx, cmd)
 			if err != nil {
-				r.Session().FlashBag().Error(t.Translate(ctx, "Execute command failed with error %s", "", err.Error()))
+				r.Session().FlashBag().Error(widget.Translate(ctx, "Execute command failed with error %s", "", err.Error()))
 			} else {
-				go bind.syncState(context.Background(), entity)
-				t.Redirect(r.URL().Path+"?action=entity&object="+entity.GetObjectId(), http.StatusFound, w, r)
+				go b.syncState(context.Background(), entity)
+				widget.Redirect(r.URL().Path+"?action=entity&object="+entity.GetObjectId(), http.StatusFound, w, r)
 				return
 			}
 		}
@@ -249,30 +237,31 @@ func (t Type) handleLight(w *dashboard.Response, r *dashboard.Request, bind *Bin
 		"entity": entity,
 	}
 
-	states, err := bind.States(ctx, entity)
+	states, err := b.States(ctx, entity)
 	if err == nil {
 		vars["state"] = states[entity.GetKey()]
 	}
 
 	vars["error"] = err
 
-	t.Render(ctx, "light", vars)
+	widget.Render(ctx, "light", vars)
 }
 
-func (t Type) handleState(w *dashboard.Response, r *dashboard.Request, bind *Bind) {
+func (b *Bind) handleState(w *dashboard.Response, r *dashboard.Request) {
 	q := r.URL().Query()
+	widget := b.Widget()
 
 	objectID := q.Get("object")
 	state := q.Get("state")
 
 	if objectID == "" || state == "" {
-		t.NotFound(w, r)
+		widget.NotFound(w, r)
 		return
 	}
 
-	entity, e := bind.EntityByObjectID(r.Context(), objectID)
+	entity, e := b.EntityByObjectID(r.Context(), objectID)
 	if e != nil {
-		t.NotFound(w, r)
+		widget.NotFound(w, r)
 		return
 	}
 
@@ -284,7 +273,7 @@ func (t Type) handleState(w *dashboard.Response, r *dashboard.Request, bind *Bin
 	case api.EntityTypeClimate:
 		v, e := strconv.ParseUint(state, 10, 64)
 		if e != nil {
-			t.NotFound(w, r)
+			widget.NotFound(w, r)
 			return
 		}
 
@@ -297,11 +286,11 @@ func (t Type) handleState(w *dashboard.Response, r *dashboard.Request, bind *Bin
 		case api.ClimateMode_CLIMATE_MODE_HEAT:
 			// skip
 		default:
-			t.NotFound(w, r)
+			widget.NotFound(w, r)
 			return
 		}
 
-		err = bind.provider.ClimateCommand(ctx, &api.ClimateCommandRequest{
+		err = b.provider.ClimateCommand(ctx, &api.ClimateCommandRequest{
 			Key:     entity.(*api.ListEntitiesClimateResponse).Key,
 			HasMode: true,
 			Mode:    s,
@@ -310,11 +299,11 @@ func (t Type) handleState(w *dashboard.Response, r *dashboard.Request, bind *Bin
 	case api.EntityTypeFan:
 		s, e := strconv.ParseBool(state)
 		if e != nil {
-			t.NotFound(w, r)
+			widget.NotFound(w, r)
 			return
 		}
 
-		err = bind.provider.FanCommand(ctx, &api.FanCommandRequest{
+		err = b.provider.FanCommand(ctx, &api.FanCommandRequest{
 			Key:      entity.(*api.ListEntitiesBinarySensorResponse).Key,
 			HasState: true,
 			State:    s,
@@ -323,11 +312,11 @@ func (t Type) handleState(w *dashboard.Response, r *dashboard.Request, bind *Bin
 	case api.EntityTypeLight:
 		s, e := strconv.ParseBool(state)
 		if e != nil {
-			t.NotFound(w, r)
+			widget.NotFound(w, r)
 			return
 		}
 
-		err = bind.provider.LightCommand(ctx, &api.LightCommandRequest{
+		err = b.provider.LightCommand(ctx, &api.LightCommandRequest{
 			Key:      entity.(*api.ListEntitiesLightResponse).Key,
 			HasState: true,
 			State:    s,
@@ -336,34 +325,34 @@ func (t Type) handleState(w *dashboard.Response, r *dashboard.Request, bind *Bin
 	case api.EntityTypeSwitch:
 		s, e := strconv.ParseBool(state)
 		if e != nil {
-			t.NotFound(w, r)
+			widget.NotFound(w, r)
 			return
 		}
 
-		err = bind.provider.SwitchCommand(ctx, &api.SwitchCommandRequest{
+		err = b.provider.SwitchCommand(ctx, &api.SwitchCommandRequest{
 			Key:   entity.(*api.ListEntitiesSwitchResponse).Key,
 			State: s,
 		})
 
 	default:
-		t.NotFound(w, r)
+		widget.NotFound(w, r)
 		return
 	}
 
 	if err != nil {
 		r.Session().FlashBag().Error(err.Error())
 	} else {
-		r.Session().FlashBag().Success(t.Translate(ctx, "Success toggle", ""))
+		r.Session().FlashBag().Success(widget.Translate(ctx, "Success toggle", ""))
 	}
 
 	redirectURL := &url.URL{}
 	*redirectURL = *r.Original().URL
 	redirectURL.RawQuery = ""
 
-	t.Redirect(redirectURL.String(), http.StatusFound, w, r)
+	widget.Redirect(redirectURL.String(), http.StatusFound, w, r)
 }
 
-func (t Type) handleOTA(w *dashboard.Response, r *dashboard.Request, bind *Bind) {
+func (b *Bind) handleOTA(w *dashboard.Response, r *dashboard.Request) {
 	file, header, err := r.Original().FormFile("firmware")
 
 	if err == nil {
@@ -377,7 +366,7 @@ func (t Type) handleOTA(w *dashboard.Response, r *dashboard.Request, bind *Bind)
 			_, err = buf.ReadFrom(file)
 
 			if err == nil {
-				err = bind.ota.UploadAsync(buf)
+				err = b.ota.UploadAsync(buf)
 			}
 
 		default:

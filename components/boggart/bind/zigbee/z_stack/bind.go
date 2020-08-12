@@ -19,6 +19,7 @@ type Bind struct {
 	di.LoggerBind
 	di.ProbesBind
 	di.WorkersBind
+	di.WidgetBind
 
 	config *Config
 

@@ -9,9 +9,7 @@ import (
 	mercury "github.com/kihamo/boggart/providers/mercury/v3"
 )
 
-type Type struct {
-	boggart.BindTypeWidget
-}
+type Type struct{}
 
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)

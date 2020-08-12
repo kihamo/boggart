@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/elazarl/go-bindata-assetfs"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/shadow/components/dashboard"
 	tm "github.com/kihamo/shadow/misc/time"
 )
@@ -21,9 +20,9 @@ type response struct {
 	Message string `json:"message,omitempty"`
 }
 
-func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
-	bind := b.Bind().(*Bind)
+func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	otaTimeout := defaultOTATimeout
+	widget := b.Widget()
 
 	var err error
 
@@ -39,7 +38,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 						continue
 					}
 
-					err = bind.settingsSet(r.Context(), key, value[0])
+					err = b.settingsSet(r.Context(), key, value[0])
 					if err != nil {
 						break
 					}
@@ -51,13 +50,13 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			}
 
 		case "restart":
-			err = bind.Restart(r.Context())
+			err = b.Restart(r.Context())
 			if err == nil {
 				successMsg = "Send restart signal success"
 			}
 
 		case "reset":
-			err = bind.Reset(r.Context())
+			err = b.Reset(r.Context())
 			if err == nil {
 				successMsg = "Send reset signal success"
 			}
@@ -67,11 +66,11 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			if err == nil {
 				level := r.Original().PostFormValue("level")
 				if level == "" {
-					t.NotFound(w, r)
+					widget.NotFound(w, r)
 					return
 				}
 
-				err = bind.Broadcast(r.Context(), level, r.Original().PostFormValue("message"))
+				err = b.Broadcast(r.Context(), level, r.Original().PostFormValue("message"))
 				if err == nil {
 					successMsg = "Send broadcast message success"
 				}
@@ -102,7 +101,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 					switch t {
 					case "application/macbinary":
-						err = bind.OTA(r.Context(), file, otaTimeout)
+						err = b.OTA(r.Context(), file, otaTimeout)
 
 					default:
 						err = errors.New("unknown content type " + t)
@@ -120,7 +119,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			return
 
 		default:
-			t.NotFound(w, r)
+			widget.NotFound(w, r)
 			return
 		}
 
@@ -139,41 +138,41 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		return
 	}
 
-	otaWritten, otaTotal := bind.OTAProgress()
+	otaWritten, otaTotal := b.OTAProgress()
 
-	name, _ := bind.DeviceAttribute("name")
+	name, _ := b.DeviceAttribute("name")
 
-	protocol, ok := bind.DeviceAttribute("homie")
+	protocol, ok := b.DeviceAttribute("homie")
 	if ok && len(protocol.(string)) > 0 {
 		protocol = protocol.(string)[:1]
 	}
 
-	lastUpdate := bind.LastUpdate()
+	lastUpdate := b.LastUpdate()
 	vars := map[string]interface{}{
 		"error":              err,
 		"name":               name,
 		"protocol_major":     protocol,
-		"online":             bind.Meta().IsStatusOnline(),
+		"online":             b.Meta().IsStatusOnline(),
 		"last_update":        lastUpdate,
-		"devices_attributes": bind.DeviceAttributes(),
-		"nodes":              bind.nodesList(),
-		"ota_enabled":        bind.OTAIsEnabled(),
-		"ota_running":        bind.OTAIsRunning(),
+		"devices_attributes": b.DeviceAttributes(),
+		"nodes":              b.nodesList(),
+		"ota_enabled":        b.OTAIsEnabled(),
+		"ota_running":        b.OTAIsRunning(),
 		"ota_written":        otaWritten,
 		"ota_total":          otaTotal,
-		"ota_checksum":       bind.OTAChecksum(),
+		"ota_checksum":       b.OTAChecksum(),
 		"ota_progress":       (float64(otaWritten) * float64(100)) / float64(otaTotal),
 		"ota_timeout":        otaTimeout,
-		"settings":           bind.settingsAll(),
+		"settings":           b.settingsAll(),
 	}
 
 	if lastUpdate != nil {
 		vars["last_update_delta"] = tm.DateSinceAsMessage(*lastUpdate)
 	}
 
-	t.Render(r.Context(), "widget", vars)
+	widget.Render(r.Context(), "widget", vars)
 }
 
-func (t Type) WidgetAssetFS() *assetfs.AssetFS {
+func (b *Bind) WidgetAssetFS() *assetfs.AssetFS {
 	return assetFS()
 }

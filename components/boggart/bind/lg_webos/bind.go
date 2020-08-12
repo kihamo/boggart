@@ -30,6 +30,7 @@ type Bind struct {
 	di.WorkersBind
 	di.LoggerBind
 	di.ProbesBind
+	di.WidgetBind
 
 	config *Config
 	mutex  sync.RWMutex

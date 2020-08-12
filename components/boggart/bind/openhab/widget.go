@@ -17,16 +17,16 @@ import (
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
-func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
-	bind := b.Bind().(*Bind)
+func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	q := r.URL().Query()
+	widget := b.Widget()
 
 	action := q.Get("action")
 	switch action {
 	case "input":
 		id := strings.TrimSpace(q.Get("id"))
 		if id == "" {
-			t.NotFound(w, r)
+			widget.NotFound(w, r)
 			return
 		}
 
@@ -40,9 +40,9 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 				WithItemname(id).
 				WithBody(value)
 
-			_, err := bind.provider.Items.PutItemState(paramsPut)
+			_, err := b.provider.Items.PutItemState(paramsPut)
 			if err != nil {
-				t.InternalError(w, r, err)
+				widget.InternalError(w, r, err)
 				return
 			}
 
@@ -52,9 +52,9 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		paramsGet := items.NewGetItemDataParams().
 			WithItemname(id)
 
-		response, err := bind.provider.Items.GetItemData(paramsGet)
+		response, err := b.provider.Items.GetItemData(paramsGet)
 		if err != nil {
-			t.NotFound(w, r)
+			widget.NotFound(w, r)
 			return
 		}
 
@@ -74,7 +74,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			}
 		}
 
-		t.RenderLayout(r.Context(), "input", "ui", t.initUI(map[string]interface{}{
+		widget.RenderLayout(r.Context(), "input", "ui", b.initUI(map[string]interface{}{
 			"item":     response.Payload,
 			"type":     q.Get("type"),
 			"rows":     q.Get("rows"),
@@ -88,14 +88,14 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		if r.IsPost() {
 			topic := q.Get("topic")
 			if topic == "" {
-				t.NotFound(w, r)
+				widget.NotFound(w, r)
 				return
 			}
 
 			if err := r.Original().ParseForm(); err == nil {
 				for key, value := range r.Original().PostForm {
 					if key == "payload" {
-						bind.MQTT().PublishAsync(r.Context(), mqtt.Topic(topic), strings.Join(value, ";"))
+						b.MQTT().PublishAsync(r.Context(), mqtt.Topic(topic), strings.Join(value, ";"))
 						break
 					}
 				}
@@ -106,13 +106,13 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 		u := q.Get("url")
 		if u == "" {
-			t.NotFound(w, r)
+			widget.NotFound(w, r)
 			return
 		}
 
 		response, err := http.Get(u)
 		if err != nil {
-			t.InternalError(w, r, err)
+			widget.InternalError(w, r, err)
 			return
 		}
 
@@ -124,7 +124,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 			mimeType, restored, err = mime.TypeFromDataRestored(response.Body)
 			if err != nil {
-				t.InternalError(w, r, err)
+				widget.InternalError(w, r, err)
 				return
 			}
 
@@ -134,7 +134,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 		body, err := ioutil.ReadAll(response.Body)
 		if err != nil {
-			t.InternalError(w, r, err)
+			widget.InternalError(w, r, err)
 			return
 		}
 
@@ -147,12 +147,12 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		if v := q.Get("refresh"); v != "" {
 			refresh, err = strconv.ParseInt(v, 10, 64)
 			if err != nil {
-				t.InternalError(w, r, err)
+				widget.InternalError(w, r, err)
 				return
 			}
 		}
 
-		t.RenderLayout(r.Context(), "image", "ui", t.initUI(map[string]interface{}{
+		widget.RenderLayout(r.Context(), "image", "ui", b.initUI(map[string]interface{}{
 			"mime":     mimeType,
 			"base64":   base64.StdEncoding.EncodeToString(body),
 			"filename": time.Now().Format("20060102150405." + ext),
@@ -165,19 +165,19 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		req := r.Original().Clone(r.Context())
 		req.URL.Path = "icon/" + r.URL().Query().Get("icon")
 
-		bind.proxy.ServeHTTP(w, req)
+		b.proxy.ServeHTTP(w, req)
 
 		return
 	}
 
-	t.NotFound(w, r)
+	widget.NotFound(w, r)
 }
 
-func (t Type) WidgetAssetFS() *assetfs.AssetFS {
+func (b *Bind) WidgetAssetFS() *assetfs.AssetFS {
 	return assetFS()
 }
 
-func (t Type) initUI(vars map[string]interface{}, r *dashboard.Request) map[string]interface{} {
+func (b *Bind) initUI(vars map[string]interface{}, r *dashboard.Request) map[string]interface{} {
 	q := r.URL().Query()
 
 	style := q.Get("style")

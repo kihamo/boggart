@@ -279,30 +279,6 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 		return nil, err
 	}
 
-	// register widget
-	if widget, ok := bindType.(boggart.BindTypeHasWidgetAssetFS); ok {
-		if fs := widget.WidgetAssetFS(); fs != nil {
-			name := boggart.ComponentName + "-bind-" + t
-
-			// templates
-			render := c.dashboard.Renderer()
-			if !render.IsRegisterNamespace(name) {
-				if err := render.RegisterNamespace(name, fs); err != nil {
-					return nil, err
-				}
-			}
-
-			// asset fs
-			c.dashboard.RegisterAssetFS(name, fs)
-
-			// i18n
-			if c.i18n != nil {
-				fs.Prefix = "locales"
-				c.i18n.LoadLocaleFromFiles(name, i18n.FromAssetFS(fs))
-			}
-		}
-	}
-
 	bindItem := &BindItem{
 		bind:        bind,
 		bindType:    bindType,
@@ -333,6 +309,34 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 	// mqtt container
 	if bindSupport, ok := bind.(di.MQTTContainerSupport); ok {
 		bindSupport.SetMQTT(di.NewMQTTContainer(bindItem, c.mqtt))
+	}
+
+	// widget container
+	if bindSupport, ok := bind.(di.WidgetContainerSupport); ok {
+		ctr := di.NewWidgetContainer(bindItem)
+
+		bindSupport.SetWidget(ctr)
+
+		if fs := ctr.AssetFS(); fs != nil {
+			name := ctr.TemplateNamespace()
+
+			// templates
+			render := c.dashboard.Renderer()
+			if !render.IsRegisterNamespace(name) {
+				if err := render.RegisterNamespace(name, fs); err != nil {
+					return nil, err
+				}
+			}
+
+			// asset fs
+			c.dashboard.RegisterAssetFS(name, fs)
+
+			// i18n
+			if c.i18n != nil {
+				fs.Prefix = "locales"
+				c.i18n.LoadLocaleFromFiles(name, i18n.FromAssetFS(fs))
+			}
+		}
 	}
 
 	if runner, ok := bind.(boggart.BindRunner); ok {

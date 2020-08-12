@@ -13,9 +13,7 @@ import (
 ~/openhab-cloud$ mongo 127.0.0.1:27017/openhab --eval "db.userdevices.find()"
 */
 
-type Type struct {
-	boggart.BindTypeWidget
-}
+type Type struct{}
 
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)

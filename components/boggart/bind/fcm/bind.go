@@ -13,6 +13,7 @@ type Bind struct {
 	di.MQTTBind
 	di.LoggerBind
 	di.ProbesBind
+	di.WidgetBind
 
 	config    *Config
 	messaging *messaging.Client

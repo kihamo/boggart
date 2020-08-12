@@ -6,17 +6,18 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kihamo/boggart/components/boggart"
+	"github.com/elazarl/go-bindata-assetfs"
+
 	"github.com/kihamo/boggart/mime"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
-func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
+func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	q := r.URL().Query()
 	id := q.Get(paramFileName)
 
 	if id == "" {
-		t.NotFound(w, r)
+		b.Widget().NotFound(w, r)
 		return
 	}
 
@@ -49,12 +50,15 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	*r2.URL = *r1.URL
 	r2.URL.Path = "/" + id
 
-	bind := b.Bind().(*Bind)
-	bind.fileServer.ServeHTTP(w, r2)
+	b.fileServer.ServeHTTP(w, r2)
 
-	if bind.config.FileAutoClean {
+	if b.config.FileAutoClean {
 		if strings.Contains(r1.Header.Get("user-agent"), "TelegramBot (like TwitterBot)") {
-			bind.RemoveFile(id)
+			b.RemoveFile(id)
 		}
 	}
+}
+
+func (b *Bind) WidgetAssetFS() *assetfs.AssetFS {
+	return nil
 }

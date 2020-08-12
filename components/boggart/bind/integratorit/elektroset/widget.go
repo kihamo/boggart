@@ -5,17 +5,16 @@ import (
 	"time"
 
 	"github.com/elazarl/go-bindata-assetfs"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/protocols/http"
 	"github.com/kihamo/boggart/providers/integratorit/elektroset"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
-func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
-	bind := b.Bind().(*Bind)
+func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	vars := map[string]interface{}{}
 	ctx := r.Context()
 	query := r.URL().Query()
+	widget := b.Widget()
 
 	action := query.Get("action")
 	vars["action"] = action
@@ -24,27 +23,27 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	case "bill":
 		period, err := time.Parse(layoutPeriod, query.Get("period"))
 		if err != nil {
-			t.NotFound(w, r)
+			widget.NotFound(w, r)
 			return
 		}
 
-		accounts, err := bind.client.Accounts(ctx)
+		accounts, err := b.client.Accounts(ctx)
 		if err != nil {
-			t.InternalError(w, r, err)
+			widget.InternalError(w, r, err)
 			return
 		}
 
 		for _, account := range accounts {
 			for _, service := range account.Services {
-				billLink, err := bind.client.BillFile(ctx, account.Number, service.Provider, period)
+				billLink, err := b.client.BillFile(ctx, account.Number, service.Provider, period)
 				if err != nil {
-					t.InternalError(w, r, err)
+					widget.InternalError(w, r, err)
 					return
 				}
 
 				response, err := http.NewClient().Get(ctx, billLink)
 				if err != nil {
-					t.InternalError(w, r, err)
+					widget.InternalError(w, r, err)
 					return
 				}
 
@@ -54,7 +53,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 				_, err = io.Copy(w, response.Body)
 				if err != nil {
-					t.InternalError(w, r, err)
+					widget.InternalError(w, r, err)
 					return
 				}
 
@@ -63,7 +62,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			}
 		}
 
-		t.NotFound(w, r)
+		widget.NotFound(w, r)
 		return
 
 	default:
@@ -76,14 +75,14 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		rowsByTime := make(map[time.Time]*row)
 		tariffs := make(map[int64]bool, 3)
 
-		accounts, err := bind.client.Accounts(ctx)
+		accounts, err := b.client.Accounts(ctx)
 		if err == nil {
 			dateStart := time.Now().Add(-time.Hour * 24 * 365)
 			dateEnd := time.Now()
 
 			for _, account := range accounts {
 				for _, service := range account.Services {
-					if balances, e := bind.client.BalanceDetails(ctx, account.Number, service.Provider, dateStart, dateEnd); e == nil {
+					if balances, e := b.client.BalanceDetails(ctx, account.Number, service.Provider, dateStart, dateEnd); e == nil {
 						for _, balance := range balances {
 							switch balance.KDTariffPlanEntity {
 							// показания
@@ -115,7 +114,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 							}
 						}
 					} else {
-						r.Session().FlashBag().Error(t.Translate(ctx, "Get balance details failed with error %s", "", err.Error()))
+						r.Session().FlashBag().Error(widget.Translate(ctx, "Get balance details failed with error %s", "", err.Error()))
 					}
 				}
 
@@ -144,16 +143,16 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 				}
 			}
 		} else {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Get accounts failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Get accounts failed with error %s", "", err.Error()))
 		}
 
 		vars["rows"] = rows
 		vars["tariffs"] = tariffs
 	}
 
-	t.Render(ctx, "widget", vars)
+	widget.Render(ctx, "widget", vars)
 }
 
-func (t Type) WidgetAssetFS() *assetfs.AssetFS {
+func (b *Bind) WidgetAssetFS() *assetfs.AssetFS {
 	return assetFS()
 }

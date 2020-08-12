@@ -11,6 +11,7 @@ type Bind struct {
 	di.MetaBind
 	di.MQTTBind
 	di.ProbesBind
+	di.WidgetBind
 
 	config     *Config
 	components sync.Map

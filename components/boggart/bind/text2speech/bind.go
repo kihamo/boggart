@@ -24,6 +24,7 @@ type Bind struct {
 	di.MetaBind
 	di.MQTTBind
 	di.LoggerBind
+	di.WidgetBind
 
 	config   *Config
 	provider *speechkit.Client

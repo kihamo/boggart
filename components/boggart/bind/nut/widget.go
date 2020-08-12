@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/elazarl/go-bindata-assetfs"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
@@ -15,8 +14,8 @@ type response struct {
 	Message string `json:"message,omitempty"`
 }
 
-func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
-	bind := b.Bind().(*Bind)
+func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
+	widget := b.Widget()
 
 	if r.IsPost() {
 		var (
@@ -30,11 +29,11 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		case "cmd":
 			cmd := strings.TrimSpace(q.Get("cmd"))
 			if cmd == "" {
-				t.NotFound(w, r)
+				widget.NotFound(w, r)
 				return
 			}
 
-			if e := bind.SendCommand(cmd); e != nil {
+			if e := b.SendCommand(cmd); e != nil {
 				err = fmt.Errorf("Execute command %s return error: %w", cmd, e)
 			} else {
 				successMsg = "Execute command " + cmd + " success"
@@ -50,7 +49,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 						continue
 					}
 
-					if e := bind.SetVariable(key, value[0]); e != nil {
+					if e := b.SetVariable(key, value[0]); e != nil {
 						err = fmt.Errorf("Set variable %s return error: %w", key, e)
 						break
 					}
@@ -64,7 +63,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			}
 
 		default:
-			t.NotFound(w, r)
+			widget.NotFound(w, r)
 			return
 		}
 
@@ -83,19 +82,19 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		return
 	}
 
-	ups, err := bind.ups()
+	ups, err := b.ups()
 	if err != nil {
-		r.Session().FlashBag().Error(t.Translate(r.Context(), "Get List UPS failed with error %s", "", err.Error()))
+		r.Session().FlashBag().Error(widget.Translate(r.Context(), "Get List UPS failed with error %s", "", err.Error()))
 	}
 
-	variables, err := bind.Variables()
+	variables, err := b.Variables()
 	if err != nil {
-		r.Session().FlashBag().Error(t.Translate(r.Context(), "Get variables failed with error %s", "", err.Error()))
+		r.Session().FlashBag().Error(widget.Translate(r.Context(), "Get variables failed with error %s", "", err.Error()))
 	}
 
-	commands, err := bind.Commands()
+	commands, err := b.Commands()
 	if err != nil {
-		r.Session().FlashBag().Error(t.Translate(r.Context(), "Get commands failed with error %s", "", err.Error()))
+		r.Session().FlashBag().Error(widget.Translate(r.Context(), "Get commands failed with error %s", "", err.Error()))
 	}
 
 	variablesView := make(map[string]interface{}, len(variables))
@@ -126,9 +125,9 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		"error":     err,
 	}
 
-	t.Render(r.Context(), "widget", vars)
+	widget.Render(r.Context(), "widget", vars)
 }
 
-func (t Type) WidgetAssetFS() *assetfs.AssetFS {
+func (b *Bind) WidgetAssetFS() *assetfs.AssetFS {
 	return assetFS()
 }

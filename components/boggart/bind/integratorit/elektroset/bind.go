@@ -16,6 +16,7 @@ type Bind struct {
 	di.ProbesBind
 	di.ConfigBind
 	di.MetaBind
+	di.WidgetBind
 
 	config *Config
 	client *elektroset.Client

@@ -5,19 +5,19 @@ import (
 	"io"
 	"strconv"
 
-	"github.com/kihamo/boggart/components/boggart"
+	"github.com/elazarl/go-bindata-assetfs"
+
 	"github.com/kihamo/boggart/providers/yandex_speechkit_cloud"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
-func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
-	bind := b.Bind().(*Bind)
-
+func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	q := r.URL().Query()
 	text := q.Get("text")
+	widget := b.Widget()
 
 	if text == "" {
-		t.NotFound(w, r)
+		widget.NotFound(w, r)
 		return
 	}
 
@@ -31,7 +31,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	if val := q.Get("speed"); val != "" {
 		speed, err = strconv.ParseFloat(val, 64)
 		if err != nil {
-			t.NotFound(w, r)
+			widget.NotFound(w, r)
 			return
 		}
 	}
@@ -39,7 +39,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	if val := q.Get("force"); val != "" {
 		force, err = strconv.ParseBool(val)
 		if err != nil {
-			t.NotFound(w, r)
+			widget.NotFound(w, r)
 			return
 		}
 	}
@@ -65,14 +65,14 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	}
 
 	if format == "" {
-		format = bind.config.Format
+		format = b.config.Format
 	}
 
 	writer := bytes.NewBuffer(nil)
 
-	err = bind.GenerateWriter(r.Context(), text, format, quality, language, speaker, emotion, speed, force, writer)
+	err = b.GenerateWriter(r.Context(), text, format, quality, language, speaker, emotion, speed, force, writer)
 	if err != nil {
-		t.InternalError(w, r, err)
+		widget.InternalError(w, r, err)
 	}
 
 	switch format {
@@ -85,4 +85,8 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	}
 
 	io.Copy(w, writer)
+}
+
+func (b *Bind) WidgetAssetFS() *assetfs.AssetFS {
+	return nil
 }

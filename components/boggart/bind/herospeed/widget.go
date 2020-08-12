@@ -7,36 +7,33 @@ import (
 	"time"
 
 	"github.com/elazarl/go-bindata-assetfs"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
-func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
-	bind := b.Bind().(*Bind)
-
+func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	query := r.URL().Query()
 	action := query.Get("action")
 	ctx := r.Context()
-	cfg := b.Config().(*Config)
+	widget := b.Widget()
 
 	vars := map[string]interface{}{
 		"action":                   action,
-		"preview_refresh_interval": cfg.PreviewRefreshInterval.Seconds(),
+		"preview_refresh_interval": b.config.PreviewRefreshInterval.Seconds(),
 	}
 
 	switch action {
 	case "preview":
 		buf := bytes.NewBuffer(nil)
 
-		if err := bind.client.Snapshot(ctx, buf); err != nil {
-			t.InternalError(w, r, err)
+		if err := b.client.Snapshot(ctx, buf); err != nil {
+			widget.InternalError(w, r, err)
 			return
 		}
 
 		w.Header().Set("Content-Length", strconv.FormatInt(int64(buf.Len()), 10))
 
 		if download := query.Get("download"); download != "" {
-			filename := b.ID() + time.Now().Format("_20060102150405.jpg")
+			filename := b.Meta().ID() + time.Now().Format("_20060102150405.jpg")
 
 			w.Header().Set("Content-Disposition", "attachment; filename=\""+filename+"\"")
 			w.Header().Set("Content-Type", "image/jpeg")
@@ -47,17 +44,17 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		return
 
 	case "configuration":
-		configuration, err := bind.client.Configuration(ctx)
+		configuration, err := b.client.Configuration(ctx)
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Get configuration failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Get configuration failed with error %s", "", err.Error()))
 		}
 
 		vars["configuration"] = configuration
 	}
 
-	t.Render(ctx, "widget", vars)
+	widget.Render(ctx, "widget", vars)
 }
 
-func (t Type) WidgetAssetFS() *assetfs.AssetFS {
+func (b *Bind) WidgetAssetFS() *assetfs.AssetFS {
 	return assetFS()
 }

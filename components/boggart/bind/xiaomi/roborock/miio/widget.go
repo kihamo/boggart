@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/elazarl/go-bindata-assetfs"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/providers/xiaomi/miio/devices/vacuum"
 	"github.com/kihamo/shadow/components/dashboard"
 )
@@ -17,10 +16,10 @@ type response struct {
 	Message string `json:"message,omitempty"`
 }
 
-func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
-	bind := b.Bind().(*Bind)
+func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	ctx := r.Context()
 	action := r.URL().Query().Get("action")
+	widget := b.Widget()
 
 	vars := map[string]interface{}{
 		"action": action,
@@ -28,16 +27,16 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 	switch action {
 	case "settings":
-		carpetMode, err := bind.device.CarpetMode(ctx)
+		carpetMode, err := b.device.CarpetMode(ctx)
 		if err != nil && !r.IsPost() {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Get carpet mode failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Get carpet mode failed with error %s", "", err.Error()))
 		} else {
 			vars["carpetMode"] = carpetMode
 		}
 
-		dnd, err := bind.device.DoNotDisturb(ctx)
+		dnd, err := b.device.DoNotDisturb(ctx)
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Get do not disturb failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Get do not disturb failed with error %s", "", err.Error()))
 		} else {
 			now := time.Now()
 
@@ -56,7 +55,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 					switch key {
 					case "carpet-mode-enabled":
-						err = bind.device.SetCarpetMode(ctx,
+						err = b.device.SetCarpetMode(ctx,
 							strings.EqualFold(value[0], "true"),
 							carpetMode.CurrentIntegral,
 							carpetMode.CurrentHigh,
@@ -68,7 +67,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 						v, err = strconv.ParseUint(value[0], 10, 64)
 
 						if err == nil {
-							err = bind.device.SetCarpetMode(ctx,
+							err = b.device.SetCarpetMode(ctx,
 								carpetMode.Enabled,
 								v,
 								carpetMode.CurrentHigh,
@@ -81,7 +80,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 						v, err = strconv.ParseUint(value[0], 10, 64)
 
 						if err == nil {
-							err = bind.device.SetCarpetMode(ctx,
+							err = b.device.SetCarpetMode(ctx,
 								carpetMode.Enabled,
 								carpetMode.CurrentIntegral,
 								v,
@@ -94,7 +93,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 						v, err = strconv.ParseUint(value[0], 10, 64)
 
 						if err == nil {
-							err = bind.device.SetCarpetMode(ctx,
+							err = b.device.SetCarpetMode(ctx,
 								carpetMode.Enabled,
 								carpetMode.CurrentIntegral,
 								carpetMode.CurrentHigh,
@@ -107,7 +106,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 						v, err = strconv.ParseUint(value[0], 10, 64)
 
 						if err == nil {
-							err = bind.device.SetCarpetMode(ctx,
+							err = b.device.SetCarpetMode(ctx,
 								carpetMode.Enabled,
 								carpetMode.CurrentIntegral,
 								carpetMode.CurrentHigh,
@@ -120,14 +119,14 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 						v, err = strconv.ParseUint(value[0], 10, 64)
 						if err == nil {
-							err = bind.device.SetFanPower(ctx, v)
+							err = b.device.SetFanPower(ctx, v)
 						}
 
 					case "dnd-enabled":
 						if strings.EqualFold(value[0], "true") {
-							err = bind.device.SetDoNotDisturb(ctx, dnd.StartHour, dnd.StartMinute, dnd.EndHour, dnd.EndMinute)
+							err = b.device.SetDoNotDisturb(ctx, dnd.StartHour, dnd.StartMinute, dnd.EndHour, dnd.EndMinute)
 						} else {
-							err = bind.device.DisableDoNotDisturb(ctx)
+							err = b.device.DisableDoNotDisturb(ctx)
 						}
 
 					case "dnd-time":
@@ -143,7 +142,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 							if err == nil {
 								end, err = time.Parse("15:04", strings.TrimSpace(split[1]))
 								if err == nil {
-									err = bind.device.SetDoNotDisturb(ctx, uint64(start.Hour()), uint64(start.Minute()), uint64(end.Hour()), uint64(end.Minute()))
+									err = b.device.SetDoNotDisturb(ctx, uint64(start.Hour()), uint64(start.Minute()), uint64(end.Hour()), uint64(end.Minute()))
 								}
 							}
 						} else {
@@ -155,7 +154,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 						v, err = strconv.ParseUint(value[0], 10, 64)
 						if err == nil {
-							err = bind.device.SetSoundVolume(ctx, uint32(v))
+							err = b.device.SetSoundVolume(ctx, uint32(v))
 						}
 
 					case "timezone":
@@ -163,7 +162,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 						v, err = time.LoadLocation(value[0])
 						if err == nil {
-							err = bind.device.SetTimezone(ctx, v)
+							err = b.device.SetTimezone(ctx, v)
 						}
 					}
 
@@ -186,37 +185,37 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			return
 		}
 
-		fanPower, err := bind.device.FanPower(ctx)
+		fanPower, err := b.device.FanPower(ctx)
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Get fan power failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Get fan power failed with error %s", "", err.Error()))
 		} else {
 			vars["fanPower"] = fanPower
 		}
 
-		volume, err := bind.device.SoundVolume(ctx)
+		volume, err := b.device.SoundVolume(ctx)
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Get volume failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Get volume failed with error %s", "", err.Error()))
 		} else {
 			vars["volume"] = volume
 		}
 
-		timezone, err := bind.device.Timezone(ctx)
+		timezone, err := b.device.Timezone(ctx)
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Get timezone failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Get timezone failed with error %s", "", err.Error()))
 		} else {
 			vars["timezone"] = timezone.String()
 		}
 
 	case "history":
-		summary, err := bind.device.CleanSummary(ctx)
+		summary, err := b.device.CleanSummary(ctx)
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Get clean summary failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Get clean summary failed with error %s", "", err.Error()))
 		} else {
 			details := make([]vacuum.CleanDetail, 0, len(summary.CleanupIDs))
 			for _, id := range summary.CleanupIDs {
-				detail, err := bind.device.CleanDetails(ctx, id)
+				detail, err := b.device.CleanDetails(ctx, id)
 				if err != nil {
-					r.Session().FlashBag().Error(t.Translate(ctx, "Get clean summary detail %d failed with error %s", "", id, err.Error()))
+					r.Session().FlashBag().Error(widget.Translate(ctx, "Get clean summary detail %d failed with error %s", "", id, err.Error()))
 					continue
 				}
 
@@ -228,31 +227,31 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 	default:
-		status, err := bind.device.Status(ctx)
+		status, err := b.device.Status(ctx)
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Get status failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Get status failed with error %s", "", err.Error()))
 		}
 
 		vars["status"] = status
 
-		info, err := bind.device.Info(ctx)
+		info, err := b.device.Info(ctx)
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Get info failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Get info failed with error %s", "", err.Error()))
 		}
 
 		vars["info"] = info
 
-		wifi, err := bind.device.WiFiStatus(ctx)
+		wifi, err := b.device.WiFiStatus(ctx)
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Get WiFi status failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Get WiFi status failed with error %s", "", err.Error()))
 		}
 
 		vars["wifi"] = wifi
 	}
 
-	t.Render(ctx, "widget", vars)
+	widget.Render(ctx, "widget", vars)
 }
 
-func (t Type) WidgetAssetFS() *assetfs.AssetFS {
+func (b *Bind) WidgetAssetFS() *assetfs.AssetFS {
 	return assetFS()
 }

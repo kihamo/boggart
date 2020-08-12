@@ -11,8 +11,6 @@ import (
 )
 
 type Type struct {
-	boggart.BindTypeWidget
-
 	SerialNumberFunc func(address string) mercury.Option
 	Device           uint8
 }

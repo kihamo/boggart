@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/elazarl/go-bindata-assetfs"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
@@ -15,13 +14,13 @@ type response struct {
 	Message string `json:"message,omitempty"`
 }
 
-func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
-	bind := b.Bind().(*Bind)
+func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	ctx := r.Context()
+	widget := b.Widget()
 
 	if r.IsPost() {
 		if r.URL().Query().Get("action") != "settings" {
-			t.NotFound(w, r)
+			widget.NotFound(w, r)
 			return
 		}
 
@@ -42,13 +41,13 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 				switch key {
 				case "permit-join":
 					if value[0] == "on" {
-						err = bind.client.PermitJoin(ctx, bind.permitJoinDuration())
+						err = b.client.PermitJoin(ctx, b.permitJoinDuration())
 					} else {
-						err = bind.client.PermitJoinDisable(ctx)
+						err = b.client.PermitJoinDisable(ctx)
 					}
 
 				case "led":
-					err = bind.client.LED(ctx, value[0] == "on")
+					err = b.client.LED(ctx, value[0] == "on")
 				}
 
 				if err != nil {
@@ -82,7 +81,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	vars := make(map[string]interface{})
 	errors := make([]string, 0)
 
-	client, err := bind.getClient(ctx)
+	client, err := b.getClient(ctx)
 	if err == nil {
 		vars["devices"] = client.Devices()
 		vars["led_support"] = client.LEDSupport(ctx)
@@ -127,9 +126,9 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 	}
 
 	vars["errors"] = errors
-	t.Render(ctx, "widget", vars)
+	widget.Render(ctx, "widget", vars)
 }
 
-func (t Type) WidgetAssetFS() *assetfs.AssetFS {
+func (b *Bind) WidgetAssetFS() *assetfs.AssetFS {
 	return assetFS()
 }

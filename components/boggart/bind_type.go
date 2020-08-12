@@ -1,16 +1,12 @@
 package boggart
 
 import (
-	"context"
 	"errors"
 	"sync"
 	"time"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/types"
-	"github.com/kihamo/shadow/components/dashboard"
-	"github.com/kihamo/shadow/components/i18n"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -58,14 +54,6 @@ type BindType interface {
 	CreateBind(config interface{}) (Bind, error)
 }
 
-type BindTypeHasWidget interface {
-	Widget(*dashboard.Response, *dashboard.Request, BindItem)
-}
-
-type BindTypeHasWidgetAssetFS interface {
-	WidgetAssetFS() *assetfs.AssetFS
-}
-
 func ValidateBindConfig(t BindType, config interface{}) (cfg interface{}, err error) {
 	if prepare := t.Config(); prepare != nil {
 		mapStructureDecoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
@@ -101,16 +89,4 @@ func ValidateBindConfig(t BindType, config interface{}) (cfg interface{}, err er
 	}
 
 	return cfg, err
-}
-
-type BindTypeWidget struct {
-	dashboard.Handler
-}
-
-func (b *BindTypeWidget) Translate(ctx context.Context, messageID string, context string, format ...interface{}) string {
-	return i18n.Locale(ctx).Translate(I18nDomainFromContext(ctx), messageID, context, format...)
-}
-
-func (b *BindTypeWidget) TranslatePlural(ctx context.Context, singleID, pluralID string, number int, context string, format ...interface{}) string {
-	return i18n.Locale(ctx).TranslatePlural(I18nDomainFromContext(ctx), singleID, pluralID, number, context, format...)
 }

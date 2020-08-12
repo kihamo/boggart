@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
@@ -31,14 +32,9 @@ func (h *WidgetHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		return
 	}
 
-	widget, ok := bind.BindType().(boggart.BindTypeHasWidget)
-	if !ok {
+	if widget, ok := di.WidgetContainerBind(bind.Bind()); ok {
+		widget.Handle(w, r)
+	} else {
 		h.NotFound(w, r)
-		return
 	}
-
-	r = r.WithContext(dashboard.ContextWithTemplateNamespace(r.Context(), boggart.ComponentName+"-bind-"+bind.Type()))
-	r = r.WithContext(boggart.ContextWithI18nDomain(r.Context(), boggart.ComponentName+"-bind-"+bind.Type()))
-
-	widget.Widget(w, r, bind)
 }

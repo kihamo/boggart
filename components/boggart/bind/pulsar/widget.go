@@ -5,15 +5,13 @@ import (
 	"time"
 
 	"github.com/elazarl/go-bindata-assetfs"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/providers/pulsar"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
-func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
-	bind := b.Bind().(*Bind)
-	config := b.Config().(*Config)
+func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	q := r.URL().Query()
+	widget := b.Widget()
 	vars := map[string]interface{}{
 		"action": q.Get("action"),
 	}
@@ -62,7 +60,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			if tm, err := time.Parse(time.RFC3339, queryTime); err == nil {
 				start = tm
 			} else {
-				r.Session().FlashBag().Error(t.Translate(r.Context(), "Parse date from failed with error %s", "", err.Error()))
+				r.Session().FlashBag().Error(widget.Translate(r.Context(), "Parse date from failed with error %s", "", err.Error()))
 			}
 		}
 
@@ -70,7 +68,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			if tm, err := time.Parse(time.RFC3339, queryTime); err == nil {
 				end = tm
 			} else {
-				r.Session().FlashBag().Error(t.Translate(r.Context(), "Parse date to failed with error %s", "", err.Error()))
+				r.Session().FlashBag().Error(widget.Translate(r.Context(), "Parse date to failed with error %s", "", err.Error()))
 			}
 		}
 
@@ -78,9 +76,9 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		vars["date_to"] = end
 
 		// energy
-		date, values, err = bind.provider.EnergyArchive(start, end, period)
+		date, values, err = b.provider.EnergyArchive(start, end, period)
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get energy archive failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(r.Context(), "Get energy archive failed with error %s", "", err.Error()))
 		} else {
 			for _, value := range values {
 				key := int(date.Unix())
@@ -95,15 +93,15 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		// pulse input 1
-		date, values, err = bind.provider.PulseInput1Archive(start, end, period)
+		date, values, err = b.provider.PulseInput1Archive(start, end, period)
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get pulse %d archive failed with error %s", "", 1, err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(r.Context(), "Get pulse %d archive failed with error %s", "", 1, err.Error()))
 		} else {
 			for _, value := range values {
 				row, ok := statsByDate[int(date.Unix())]
 				if ok {
 					row.Pulse1 = value
-					row.Pulse1Volume = bind.inputVolume(value, config.Input1Offset)
+					row.Pulse1Volume = b.inputVolume(value, b.config.Input1Offset)
 				}
 
 				date = nextData(period, date)
@@ -111,15 +109,15 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		// pulse input 2
-		date, values, err = bind.provider.PulseInput2Archive(start, end, period)
+		date, values, err = b.provider.PulseInput2Archive(start, end, period)
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get pulse %d archive failed with error %s", "", 2, err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(r.Context(), "Get pulse %d archive failed with error %s", "", 2, err.Error()))
 		} else {
 			for _, value := range values {
 				row, ok := statsByDate[int(date.Unix())]
 				if ok {
 					row.Pulse2 = value
-					row.Pulse2Volume = bind.inputVolume(value, config.Input2Offset)
+					row.Pulse2Volume = b.inputVolume(value, b.config.Input2Offset)
 				}
 
 				date = nextData(period, date)
@@ -127,15 +125,15 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		// pulse input 3
-		date, values, err = bind.provider.PulseInput3Archive(start, end, period)
+		date, values, err = b.provider.PulseInput3Archive(start, end, period)
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get pulse %d archive failed with error %s", "", 3, err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(r.Context(), "Get pulse %d archive failed with error %s", "", 3, err.Error()))
 		} else {
 			for _, value := range values {
 				row, ok := statsByDate[int(date.Unix())]
 				if ok {
 					row.Pulse3 = value
-					row.Pulse3Volume = bind.inputVolume(value, config.Input3Offset)
+					row.Pulse3Volume = b.inputVolume(value, b.config.Input3Offset)
 				}
 
 				date = nextData(period, date)
@@ -143,15 +141,15 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 		// pulse input 4
-		date, values, err = bind.provider.PulseInput4Archive(start, end, period)
+		date, values, err = b.provider.PulseInput4Archive(start, end, period)
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(r.Context(), "Get pulse %d archive failed with error %s", "", 4, err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(r.Context(), "Get pulse %d archive failed with error %s", "", 4, err.Error()))
 		} else {
 			for _, value := range values {
 				row, ok := statsByDate[int(date.Unix())]
 				if ok {
 					row.Pulse4 = value
-					row.Pulse4Volume = bind.inputVolume(value, config.Input4Offset)
+					row.Pulse4Volume = b.inputVolume(value, b.config.Input4Offset)
 				}
 
 				date = nextData(period, date)
@@ -201,7 +199,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 		// date time
 		now := time.Now()
-		timeValue, err := bind.provider.Datetime()
+		timeValue, err := b.provider.Datetime()
 		variable := metricView{
 			Value: timeValue,
 			Error: err,
@@ -213,83 +211,83 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 		vars["datetime"] = variable
 
-		floatValue, err := bind.provider.TemperatureIn()
+		floatValue, err := b.provider.TemperatureIn()
 		vars["temperature_in"] = metricView{
 			Value: floatValue,
 			Error: err,
 		}
 
-		floatValue, err = bind.provider.TemperatureOut()
+		floatValue, err = b.provider.TemperatureOut()
 		vars["temperature_out"] = metricView{
 			Value: floatValue,
 			Error: err,
 		}
 
-		floatValue, err = bind.provider.TemperatureDelta()
+		floatValue, err = b.provider.TemperatureDelta()
 		vars["temperature_delta"] = metricView{
 			Value: floatValue,
 			Error: err,
 		}
 
-		floatValue, err = bind.provider.Power()
+		floatValue, err = b.provider.Power()
 		vars["power"] = metricView{
 			Value: floatValue,
 			Error: err,
 		}
 
-		floatValue, err = bind.provider.Energy()
+		floatValue, err = b.provider.Energy()
 		vars["energy"] = metricView{
 			Value: floatValue,
 			Error: err,
 		}
 
-		floatValue, err = bind.provider.Capacity()
+		floatValue, err = b.provider.Capacity()
 		vars["capacity"] = metricView{
 			Value: floatValue,
 			Error: err,
 		}
 
-		floatValue, err = bind.provider.Consumption()
+		floatValue, err = b.provider.Consumption()
 		vars["consumption"] = metricView{
 			Value: floatValue,
 			Error: err,
 		}
 
-		floatValue, err = bind.provider.PulseInput1()
+		floatValue, err = b.provider.PulseInput1()
 		vars["pusle_input_1"] = metricView{
 			Value: floatValue,
 			Error: err,
 		}
 
-		floatValue, err = bind.provider.PulseInput2()
+		floatValue, err = b.provider.PulseInput2()
 		vars["pusle_input_2"] = metricView{
 			Value: floatValue,
 			Error: err,
 		}
 
-		floatValue, err = bind.provider.PulseInput3()
+		floatValue, err = b.provider.PulseInput3()
 		vars["pusle_input_3"] = metricView{
 			Value: floatValue,
 			Error: err,
 		}
 
-		floatValue, err = bind.provider.PulseInput4()
+		floatValue, err = b.provider.PulseInput4()
 		vars["pusle_input_4"] = metricView{
 			Value: floatValue,
 			Error: err,
 		}
 
-		durationValue, err := bind.provider.OperatingTime()
+		durationValue, err := b.provider.OperatingTime()
 		vars["operating_time"] = metricView{
 			Value: durationValue,
 			Error: err,
 		}
 	}
 
-	t.Render(r.Context(), "widget", vars)
+	widget.Render(r.Context(), "widget", vars)
 }
 
-func (t Type) WidgetAssetFS() *assetfs.AssetFS {
+func (b *Bind) WidgetAssetFS() *assetfs.AssetFS {
 	return assetFS()
 }
 

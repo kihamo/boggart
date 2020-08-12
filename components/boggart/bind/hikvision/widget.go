@@ -27,18 +27,16 @@ type response struct {
 	Message string `json:"message,omitempty"`
 }
 
-func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
-	bind := b.Bind().(*Bind)
-
+func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	query := r.URL().Query()
 	action := query.Get("action")
 	ctx := r.Context()
-	cfg := b.Config().(*Config)
+	widget := b.Widget()
 
 	vars := map[string]interface{}{
 		"action":                   action,
-		"events_enabled":           cfg.EventsEnabled,
-		"preview_refresh_interval": cfg.PreviewRefreshInterval.Seconds(),
+		"events_enabled":           b.config.EventsEnabled,
+		"preview_refresh_interval": b.config.PreviewRefreshInterval.Seconds(),
 	}
 
 	switch action {
@@ -50,11 +48,11 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			)
 
 			if channel := query.Get("channel"); channel == "" {
-				ch = b.Config().(*Config).WidgetChannel
+				ch = b.config.WidgetChannel
 			} else {
 				ch, err = strconv.ParseUint(channel, 10, 64)
 				if err != nil {
-					t.NotFound(w, r)
+					widget.NotFound(w, r)
 					return
 				}
 			}
@@ -75,7 +73,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 								Type: value[0],
 							})
 
-						_, err = bind.client.Image.SetImageIrCutFilter(params, nil)
+						_, err = b.client.Image.SetImageIrCutFilter(params, nil)
 
 					case "flip":
 						flip := &models.ImageFlip{
@@ -90,7 +88,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 							WithChannel(ch).
 							WithImageFlip(flip)
 
-						_, err = bind.client.Image.SetImageFlip(params, nil)
+						_, err = b.client.Image.SetImageFlip(params, nil)
 					}
 
 					break
@@ -112,9 +110,9 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			return
 		}
 
-		response, err := bind.client.Image.GetImageChannels(image.NewGetImageChannelsParamsWithContext(ctx), nil)
+		response, err := b.client.Image.GetImageChannels(image.NewGetImageChannelsParamsWithContext(ctx), nil)
 		if err != nil {
-			t.NotFound(w, r)
+			widget.NotFound(w, r)
 			return
 		}
 
@@ -127,11 +125,11 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		)
 
 		if channel := query.Get("channel"); channel == "" {
-			ch = b.Config().(*Config).WidgetChannel
+			ch = b.config.WidgetChannel
 		} else {
 			ch, err = strconv.ParseUint(channel, 10, 64)
 			if err != nil {
-				t.NotFound(w, r)
+				widget.NotFound(w, r)
 				return
 			}
 		}
@@ -139,16 +137,15 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		buf := bytes.NewBuffer(nil)
 		params := streaming.NewGetStreamingPictureParamsWithContext(ctx).WithChannel(ch)
 
-		if _, err := bind.client.Streaming.GetStreamingPicture(params, nil, buf); err != nil {
-			t.NotFound(w, r)
-
+		if _, err := b.client.Streaming.GetStreamingPicture(params, nil, buf); err != nil {
+			widget.NotFound(w, r)
 			return
 		}
 
 		w.Header().Set("Content-Length", strconv.FormatInt(int64(buf.Len()), 10))
 
 		if download := query.Get("download"); download != "" {
-			filename := b.ID() + time.Now().Format("_20060102150405.jpg")
+			filename := b.Meta().ID() + time.Now().Format("_20060102150405.jpg")
 
 			w.Header().Set("Content-Disposition", "attachment; filename=\""+filename+"\"")
 		}
@@ -168,7 +165,7 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 				switch t {
 				case "application/octet-stream":
-					bind.FirmwareUpdate(file)
+					b.FirmwareUpdate(file)
 
 				default:
 					err = errors.New("unknown content type " + t)
@@ -185,32 +182,32 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			return
 		}
 
-		info, err := bind.client.System.GetSystemDeviceInfo(system.NewGetSystemDeviceInfoParamsWithContext(ctx), nil)
+		info, err := b.client.System.GetSystemDeviceInfo(system.NewGetSystemDeviceInfoParamsWithContext(ctx), nil)
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Get device info failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Get device info failed with error %s", "", err.Error()))
 		}
 
 		vars["info"] = info.Payload
 
-		upgrade, err := bind.client.System.GetSystemUpgradeStatus(system.NewGetSystemUpgradeStatusParamsWithContext(ctx), nil)
+		upgrade, err := b.client.System.GetSystemUpgradeStatus(system.NewGetSystemUpgradeStatusParamsWithContext(ctx), nil)
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Get upgrade status failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Get upgrade status failed with error %s", "", err.Error()))
 		}
 
 		vars["upgrade"] = upgrade.Payload
 
 	case "notification":
-		if !bind.config.EventsEnabled {
-			t.NotFound(w, r)
+		if !b.config.EventsEnabled {
+			widget.NotFound(w, r)
 			return
 		}
 
 		params := event.NewGetNotificationHTTPHostParamsWithContext(ctx).
 			WithHTTPHost(1)
 
-		notification, err := bind.client.Event.GetNotificationHTTPHost(params, nil)
+		notification, err := b.client.Event.GetNotificationHTTPHost(params, nil)
 		if err != nil {
-			r.Session().FlashBag().Error(t.Translate(ctx, "Get notification http host failed with error %s", "", err.Error()))
+			r.Session().FlashBag().Error(widget.Translate(ctx, "Get notification http host failed with error %s", "", err.Error()))
 		}
 
 		if r.IsPost() {
@@ -243,17 +240,17 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 							params.HTTPHostNotification.IPAddress = &ip
 						}
 
-						_, err = bind.client.Event.SetNotificationHTTPHost(params, nil)
+						_, err = b.client.Event.SetNotificationHTTPHost(params, nil)
 					}
 				}
 
 				if err != nil {
 					r.Session().FlashBag().Error(err.Error())
 				} else {
-					r.Session().FlashBag().Success(t.Translate(ctx, "Success", ""))
+					r.Session().FlashBag().Success(widget.Translate(ctx, "Success", ""))
 				}
 
-				t.Redirect(r.URL().Path+"?action="+action, http.StatusFound, w, r)
+				widget.Redirect(r.URL().Path+"?action="+action, http.StatusFound, w, r)
 			}
 
 			return
@@ -294,13 +291,13 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 		}
 
 	case "event":
-		if !bind.config.EventsEnabled || !r.IsPost() {
-			t.NotFound(w, r)
+		if !b.config.EventsEnabled || !r.IsPost() {
+			widget.NotFound(w, r)
 			return
 		}
 
 		if content, err := ioutil.ReadAll(r.Original().Body); err == nil {
-			bind.Logger().Debug("Call hikvision event " + string(content))
+			b.Logger().Debug("Call hikvision event " + string(content))
 
 			e := &models.EventNotificationAlert{}
 
@@ -310,23 +307,23 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			err = d.Decode(e)
 
 			if err != nil {
-				bind.Logger().Error("Parse event failed",
+				b.Logger().Error("Parse event failed",
 					"error", err.Error(),
 					"body", string(content),
 				)
 
-				t.InternalError(w, r, err)
+				widget.InternalError(w, r, err)
 			} else {
-				bind.registerEvent(e)
+				b.registerEvent(e)
 			}
 		}
 
 		return
 	}
 
-	t.Render(ctx, "widget", vars)
+	widget.Render(ctx, "widget", vars)
 }
 
-func (t Type) WidgetAssetFS() *assetfs.AssetFS {
+func (b *Bind) WidgetAssetFS() *assetfs.AssetFS {
 	return assetFS()
 }

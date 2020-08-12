@@ -5,9 +5,7 @@ import (
 	"github.com/kihamo/boggart/providers/nut"
 )
 
-type Type struct {
-	boggart.BindTypeWidget
-}
+type Type struct{}
 
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	cfg := c.(*Config)

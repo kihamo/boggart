@@ -5,23 +5,21 @@ import (
 	"strconv"
 
 	"github.com/elazarl/go-bindata-assetfs"
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
-func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
-	bind := b.Bind().(*Bind)
-
+func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
+	widget := b.Widget()
 	var err error
 
 	data := map[string]interface{}{
-		"url":    b.Config().(*Config).WidgetFileURL,
-		"volume": bind.Volume(),
+		"url":    b.config.WidgetFileURL,
+		"volume": b.Volume(),
 	}
 
-	isPlaying := bind.PlayerStatus() == StatusPlaying
+	isPlaying := b.PlayerStatus() == StatusPlaying
 	if isPlaying {
-		r.Session().FlashBag().Error(t.Translate(r.Context(), "Already playing", ""))
+		r.Session().FlashBag().Error(widget.Translate(r.Context(), "Already playing", ""))
 	}
 
 	if r.IsPost() {
@@ -33,10 +31,10 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 
 			volume, err = strconv.ParseInt(r.Original().FormValue("volume"), 10, 64)
 			if err == nil {
-				err = bind.SetVolume(volume)
+				err = b.SetVolume(volume)
 				if err == nil {
 					url := r.Original().FormValue("url")
-					err = bind.PlayFromURL(url)
+					err = b.PlayFromURL(url)
 					data["url"] = url
 				}
 			}
@@ -44,16 +42,16 @@ func (t Type) Widget(w *dashboard.Response, r *dashboard.Request, b boggart.Bind
 			if err != nil {
 				r.Session().FlashBag().Error(err.Error())
 			} else {
-				r.Session().FlashBag().Info(t.Translate(r.Context(), "File playing", ""))
-				t.Redirect(r.URL().Path, http.StatusFound, w, r)
+				r.Session().FlashBag().Info(widget.Translate(r.Context(), "File playing", ""))
+				widget.Redirect(r.URL().Path, http.StatusFound, w, r)
 				return
 			}
 		}
 	}
 
-	t.Render(r.Context(), "widget", data)
+	widget.Render(r.Context(), "widget", data)
 }
 
-func (t Type) WidgetAssetFS() *assetfs.AssetFS {
+func (b *Bind) WidgetAssetFS() *assetfs.AssetFS {
 	return assetFS()
 }
