@@ -16,9 +16,9 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		err := b.Send(ctx, r.Original().FormValue("message"))
 
 		if err != nil {
-			r.Session().FlashBag().Error(err.Error())
+			widget.FlashError(r, err.Error(), "")
 		} else {
-			r.Session().FlashBag().Info(widget.Translate(ctx, "Message sent", ""))
+			widget.FlashInfo(r, "Message sent", "")
 			widget.Redirect(r.URL().Path, http.StatusFound, w, r)
 			return
 		}

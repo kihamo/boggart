@@ -104,17 +104,17 @@ func (b *Bind) widgetActionDefault(_ *dashboard.Response, r *dashboard.Request, 
 
 	tm, err := client.OPTime(ctx)
 	if err != nil {
-		r.Session().FlashBag().Error(widget.Translate(ctx, "Get current time failed with error %v", "", err))
+		widget.FlashError(r, "Get current time failed with error %v", "", err)
 	}
 
 	info, err := client.SystemInfo(ctx)
 	if err != nil {
-		r.Session().FlashBag().Error(widget.Translate(ctx, "Get system info failed with error %v", "", err))
+		widget.FlashError(r, "Get system info failed with error %v", "", err)
 	}
 
 	storage, err := client.StorageInfo(ctx)
 	if err != nil {
-		r.Session().FlashBag().Error(widget.Translate(ctx, "Get storage info failed with error %v", "", err))
+		widget.FlashError(r, "Get storage info failed with error %v", "", err)
 	} else {
 		for s, st := range storage {
 			for p := range st.Partition {
@@ -135,7 +135,7 @@ func (b *Bind) widgetActionDefault(_ *dashboard.Response, r *dashboard.Request, 
 
 	state, err := client.WorkState(ctx)
 	if err != nil {
-		r.Session().FlashBag().Error(widget.Translate(ctx, "Get work state failed with error %v", "", err))
+		widget.FlashError(r, "Get work state failed with error %v", "", err)
 	} else {
 		for i, state := range state.ChannelState {
 			channels[i].Number = i + 1
@@ -150,7 +150,7 @@ func (b *Bind) widgetActionDefault(_ *dashboard.Response, r *dashboard.Request, 
 
 	titles, err := client.ConfigChannelTitleGet(ctx)
 	if err != nil {
-		r.Session().FlashBag().Error(widget.Translate(ctx, "Get channels title failed with error %v", "", err))
+		widget.FlashError(r, "Get channels title failed with error %v", "", err)
 	} else {
 		for i, title := range titles {
 			channels[i].Number = i + 1
@@ -211,7 +211,7 @@ func (b *Bind) widgetActionLogs(_ *dashboard.Response, r *dashboard.Request, cli
 
 	logs, err := client.LogSearch(ctx, time.Now().Add(-time.Hour), time.Now(), 0)
 	if err != nil {
-		r.Session().FlashBag().Error(b.Widget().Translate(ctx, "Get logs failed with error %v", "", err))
+		b.Widget().FlashError(r, "Get logs failed with error %v", "", err)
 	}
 
 	return map[string]interface{}{
@@ -225,12 +225,12 @@ func (b *Bind) widgetActionAccounts(_ *dashboard.Response, r *dashboard.Request,
 
 	users, err := client.Users(ctx)
 	if err != nil {
-		r.Session().FlashBag().Error(widget.Translate(ctx, "Get failed failed with error %v", "", err))
+		widget.FlashError(r, "Get failed failed with error %v", "", err)
 	}
 
 	groups, err := client.Groups(ctx)
 	if err != nil {
-		r.Session().FlashBag().Error(widget.Translate(ctx, "Create groups failed with error %v", "", err))
+		widget.FlashError(r, "Create groups failed with error %v", "", err)
 	}
 
 	viewGroups := make([]struct {
@@ -289,9 +289,9 @@ func (b *Bind) widgetActionUser(w *dashboard.Response, r *dashboard.Request, cli
 			user.AuthorityList = r.Original().Form["authorities"]
 
 			if err := client.UserUpdate(ctx, username, *user); err != nil {
-				r.Session().FlashBag().Error(widget.Translate(ctx, "Update user %s failed with error %v", "", username, err))
+				widget.FlashError(r, "Update user %s failed with error %v", "", username, err)
 			} else {
-				r.Session().FlashBag().Success(widget.Translate(ctx, "Update user %s success", "", username))
+				widget.FlashError(r, "Update user %s success", "", username)
 				widget.Redirect(r.URL().Path+"?action=accounts", http.StatusFound, w, r)
 				return nil
 			}
@@ -307,9 +307,9 @@ func (b *Bind) widgetActionUser(w *dashboard.Response, r *dashboard.Request, cli
 			user.AuthorityList = r.Original().Form["authorities"]
 
 			if err := client.UserCreate(ctx, *user); err != nil {
-				r.Session().FlashBag().Error(widget.Translate(ctx, "Create user failed with error %v", "", err))
+				widget.FlashError(r, "Create user failed with error %v", "", err)
 			} else {
-				r.Session().FlashBag().Success(widget.Translate(ctx, "Create user %s success", "", user.Name))
+				widget.FlashSuccess(r, "Create user %s success", "", user.Name)
 				widget.Redirect(r.URL().Path+"?action=accounts", http.StatusFound, w, r)
 				return nil
 			}
@@ -324,13 +324,13 @@ func (b *Bind) widgetActionUser(w *dashboard.Response, r *dashboard.Request, cli
 	}
 
 	if groups, err := client.Groups(ctx); err != nil {
-		r.Session().FlashBag().Error(widget.Translate(ctx, "Get groups failed with error %v", "", err))
+		widget.FlashError(r, "Get groups failed with error %v", "", err)
 	} else {
 		vars["groups"] = groups
 	}
 
 	if authorities, err := client.FullAuthorityList(ctx); err != nil {
-		r.Session().FlashBag().Error(widget.Translate(ctx, "Get authorities list failed with error %v", "", err))
+		widget.FlashError(r, "Get authorities list failed with error %v", "", err)
 	} else {
 		list := make([]struct {
 			Name      string
@@ -369,9 +369,9 @@ func (b *Bind) widgetActionPassword(w *dashboard.Response, r *dashboard.Request,
 		newPassword := r.Original().FormValue("new")
 
 		if err := client.UserChangePassword(ctx, userName, oldPassword, newPassword); err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Change user %s password failed with error %v", "", userName, err))
+			widget.FlashError(r, "Change user %s password failed with error %v", "", userName, err)
 		} else {
-			r.Session().FlashBag().Success(widget.Translate(ctx, "Change user %s password success", "", userName))
+			widget.FlashError(r, "Change user %s password success", "", userName)
 			widget.Redirect(r.URL().Path+"?action=accounts", http.StatusFound, w, r)
 			return nil
 		}
@@ -407,7 +407,7 @@ func (b *Bind) widgetActionGroup(w *dashboard.Response, r *dashboard.Request, cl
 		}
 
 		if users, err := client.Users(ctx); err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get users failed with error %v", "", err))
+			widget.FlashError(r, "Get users failed with error %v", "", err)
 		} else {
 			for _, user := range users {
 				if user.Group == groupName {
@@ -426,9 +426,9 @@ func (b *Bind) widgetActionGroup(w *dashboard.Response, r *dashboard.Request, cl
 			}
 
 			if err := client.GroupUpdate(ctx, groupName, *group); err != nil {
-				r.Session().FlashBag().Error(widget.Translate(ctx, "Update group %s failed with error %v", "", groupName, err))
+				widget.FlashError(r, "Update group %s failed with error %v", "", groupName, err)
 			} else {
-				r.Session().FlashBag().Success(widget.Translate(ctx, "Update group %s success", "", groupName))
+				widget.FlashSuccess(r, "Update group %s success", "", groupName)
 				widget.Redirect(r.URL().Path+"?action=accounts", http.StatusFound, w, r)
 				return nil
 			}
@@ -442,9 +442,9 @@ func (b *Bind) widgetActionGroup(w *dashboard.Response, r *dashboard.Request, cl
 			group.AuthorityList = r.Original().Form["authorities"]
 
 			if err := client.GroupCreate(ctx, *group); err != nil {
-				r.Session().FlashBag().Error(widget.Translate(ctx, "Create group failed with error %v", "", err))
+				widget.FlashError(r, "Create group failed with error %v", "", err)
 			} else {
-				r.Session().FlashBag().Success(widget.Translate(ctx, "Create group %s success", "", group.Name))
+				widget.FlashSuccess(r, "Create group %s success", "", group.Name)
 				widget.Redirect(r.URL().Path+"?action=accounts", http.StatusFound, w, r)
 				return nil
 			}
@@ -459,7 +459,7 @@ func (b *Bind) widgetActionGroup(w *dashboard.Response, r *dashboard.Request, cl
 
 	if canEditAuthorities {
 		if authorities, err := client.FullAuthorityList(ctx); err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get authorities list failed with error %v", "", err))
+			widget.FlashError(r, "Get authorities list failed with error %v", "", err)
 		} else {
 			list := make([]struct {
 				Name      string
@@ -501,9 +501,9 @@ func (b *Bind) widgetActionUserDelete(w *dashboard.Response, r *dashboard.Reques
 	ctx := r.Context()
 
 	if err := client.UserDelete(ctx, userName); err != nil {
-		r.Session().FlashBag().Error(widget.Translate(ctx, "Remove user %s failed with error %v", "", userName, err))
+		widget.FlashError(r, "Remove user %s failed with error %v", "", userName, err)
 	} else {
-		r.Session().FlashBag().Success(widget.Translate(ctx, "Remove user %s success", "", userName))
+		widget.FlashSuccess(r, "Remove user %s success", "", userName)
 	}
 
 	widget.Redirect(r.URL().Path+"?action=accounts", http.StatusFound, w, r)
@@ -526,9 +526,9 @@ func (b *Bind) widgetActionGroupDelete(w *dashboard.Response, r *dashboard.Reque
 	ctx := r.Context()
 
 	if err := client.GroupDelete(ctx, groupName); err != nil {
-		r.Session().FlashBag().Error(widget.Translate(ctx, "Remove group %s failed with error %v", "", groupName, err))
+		widget.FlashError(r, "Remove group %s failed with error %v", "", groupName, err)
 	} else {
-		r.Session().FlashBag().Success(widget.Translate(ctx, "Remove group %s success", "", groupName))
+		widget.FlashSuccess(r, "Remove group %s success", "", groupName)
 	}
 
 	widget.Redirect(r.URL().Path+"?action=accounts", http.StatusFound, w, r)
@@ -555,7 +555,7 @@ func (b *Bind) widgetActionFiles(_ *dashboard.Response, r *dashboard.Request, cl
 		case "H":
 			eventType = xmeye.FileSearchEventManual
 		default:
-			r.Session().FlashBag().Error(widget.Translate(r.Context(), "Unknown event type %s", "", et))
+			widget.FlashError(r, "Unknown event type %s", "", et)
 		}
 	}
 
@@ -565,7 +565,7 @@ func (b *Bind) widgetActionFiles(_ *dashboard.Response, r *dashboard.Request, cl
 		if cID, err := strconv.ParseUint(channelID, 10, 64); err == nil {
 			channel = uint32(cID)
 		} else {
-			r.Session().FlashBag().Error(widget.Translate(r.Context(), "Parse channel ID failed with error %v", "", err))
+			widget.FlashError(r, "Parse channel ID failed with error %v", "", err)
 		}
 	}
 
@@ -573,7 +573,7 @@ func (b *Bind) widgetActionFiles(_ *dashboard.Response, r *dashboard.Request, cl
 		if cID, err := strconv.ParseUint(channelID, 10, 64); err == nil {
 			channel = uint32(cID)
 		} else {
-			r.Session().FlashBag().Error(widget.Translate(r.Context(), "Parse channel ID failed with error %v", "", err))
+			widget.FlashError(r, "Parse channel ID failed with error %v", "", err)
 		}
 	}
 
@@ -581,7 +581,7 @@ func (b *Bind) widgetActionFiles(_ *dashboard.Response, r *dashboard.Request, cl
 		if tm, err := time.Parse(time.RFC3339, queryTime); err == nil {
 			start = tm
 		} else {
-			r.Session().FlashBag().Error(widget.Translate(r.Context(), "Parse date from failed with error %v", "", err))
+			widget.FlashError(r, "Parse date from failed with error %v", "", err)
 		}
 	}
 
@@ -589,27 +589,27 @@ func (b *Bind) widgetActionFiles(_ *dashboard.Response, r *dashboard.Request, cl
 		if tm, err := time.Parse(time.RFC3339, queryTime); err == nil {
 			end = tm
 		} else {
-			r.Session().FlashBag().Error(widget.Translate(r.Context(), "Parse date to failed with error %v", "", err))
+			widget.FlashError(r, "Parse date to failed with error %v", "", err)
 		}
 	}
 
 	channels, err := client.ConfigChannelTitleGet(ctx)
 	if err != nil {
-		r.Session().FlashBag().Error(widget.Translate(ctx, "Get channels title failed with error %v", "", err))
+		widget.FlashError(r, "Get channels title failed with error %v", "", err)
 	}
 
 	files := make([]xmeye.FileSearch, 0)
 
 	filesH264, err := client.FileSearch(ctx, start, end, channel, eventType, xmeye.FileSearchH264)
 	if err != nil {
-		r.Session().FlashBag().Error(widget.Translate(ctx, "Get files H264 failed with error %v", "", err))
+		widget.FlashError(r, "Get files H264 failed with error %v", "", err)
 	} else {
 		files = append(files, filesH264...)
 	}
 
 	filesJPEG, err := client.FileSearch(ctx, start, end, channel, eventType, xmeye.FileSearchJPEG)
 	if err != nil {
-		r.Session().FlashBag().Error(widget.Translate(ctx, "Get files JPEG failed with error %v", "", err))
+		widget.FlashError(r, "Get files JPEG failed with error %v", "", err)
 	} else {
 		files = append(files, filesJPEG...)
 	}
@@ -633,7 +633,7 @@ func (b *Bind) widgetActionLogsExport(w *dashboard.Response, r *dashboard.Reques
 
 	reader, err := client.LogExport(ctx)
 	if err != nil {
-		r.Session().FlashBag().Error(b.Widget().Translate(ctx, "Export logs failed with error %v", "", err))
+		b.Widget().FlashError(r, "Export logs failed with error %v", "", err)
 		return
 	}
 
@@ -650,7 +650,7 @@ func (b *Bind) widgetActionConfigsExport(w *dashboard.Response, r *dashboard.Req
 
 	reader, err := client.ConfigExport(ctx)
 	if err != nil {
-		r.Session().FlashBag().Error(b.Widget().Translate(ctx, "Export config failed with error %v", "", err))
+		b.Widget().FlashError(r, "Export config failed with error %v", "", err)
 		return
 	}
 

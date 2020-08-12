@@ -31,14 +31,14 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 		date, err := b.provider.Datetime()
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get datetime failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Get datetime failed with error %v", "", err)
 
 			vars["stats"] = make([]*monthly, 0)
 		}
 
 		tariffCount, err := b.provider.TariffCount()
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get tariff count failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Get tariff count failed with error %v", "", err)
 		}
 
 		if err == nil {
@@ -65,7 +65,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 				statsValues, err := b.provider.MonthlyStatByMonth(monthRequest)
 				if err != nil {
 					mAsString := widget.Translate(ctx, monthRequest.String(), "")
-					r.Session().FlashBag().Error(widget.Translate(ctx, "Get statistics for %s failed with error %s", "", mAsString, err.Error()))
+					widget.FlashError(r, "Get statistics for %s failed with error %v", "", mAsString, err)
 					continue
 				}
 
@@ -101,7 +101,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			powerValues, err := b.provider.PowerCounters()
 			if err != nil {
 				mAsString := widget.Translate(ctx, date.Month().String(), "")
-				r.Session().FlashBag().Error(widget.Translate(ctx, "Get statistics for %s failed with error %s", "", mAsString, err.Error()))
+				widget.FlashError(r, "Get statistics for %s failed with error %v", "", mAsString, err)
 			} else {
 				stat := &monthly{
 					Month:  date.Month(),
@@ -141,7 +141,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 	case "events-on-off":
 		if makeDate, err := b.provider.MakeDate(); err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get make date failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Get make date failed with error %v", "", err)
 		} else {
 			type event struct {
 				State bool
@@ -154,7 +154,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 				state, date, err := b.provider.EventsPowerOnOff(i)
 
 				if err != nil {
-					r.Session().FlashBag().Error(widget.Translate(ctx, "Get event %02x failed with error %s", "", i, err.Error()))
+					widget.FlashError(r, "Get event %02x failed with error %v", "", i, err)
 					break
 				}
 
@@ -173,7 +173,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 	case "events-open-close":
 		if makeDate, err := b.provider.MakeDate(); err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get make date failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Get make date failed with error %v", "", err)
 		} else {
 
 			type event struct {
@@ -187,7 +187,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 				state, date, err := b.provider.EventsOpenClose(i)
 
 				if err != nil {
-					r.Session().FlashBag().Error(widget.Translate(ctx, "Get event %02x failed with error %s", "", i, err.Error()))
+					widget.FlashError(r, "Get event %02x failed with error %v", "", i, err)
 					break
 				}
 
@@ -209,12 +209,12 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 		mode, err := b.provider.DisplayMode()
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get display mode failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Get display mode failed with error %v", "", err)
 		}
 
 		timeValues, err := b.provider.DisplayTime()
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get display time failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Get display time failed with error %v", "", err)
 		}
 
 		if r.IsPost() {
@@ -230,9 +230,9 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			if mode.IsChanged() {
 				err = b.provider.SetDisplayMode(mode)
 				if err != nil {
-					r.Session().FlashBag().Error(widget.Translate(ctx, "Change display mode failed with error %s", "", err.Error()))
+					widget.FlashError(r, "Change display mode failed with error %v", "", err)
 				} else {
-					r.Session().FlashBag().Success(widget.Translate(ctx, "Change display mode success", ""))
+					widget.FlashSuccess(r, "Change display mode success", "")
 				}
 			}
 
@@ -261,13 +261,13 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			}
 
 			if err != nil {
-				r.Session().FlashBag().Error(widget.Translate(ctx, "Parse value failed with error %s", "", err.Error()))
+				widget.FlashError(r, "Parse value failed with error %v", "", err)
 			} else if timeValues.IsChanged() {
 				err = b.provider.SetDisplayTime(timeValues)
 				if err != nil {
-					r.Session().FlashBag().Error(widget.Translate(ctx, "Change display time failed with error %s", "", err.Error()))
+					widget.FlashError(r, "Change display time failed with error %v", "", err)
 				} else {
-					r.Session().FlashBag().Success(widget.Translate(ctx, "Change display time success", ""))
+					widget.FlashSuccess(r, "Change display time success", "")
 				}
 			}
 
@@ -283,7 +283,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	case "holidays":
 		days, err := b.provider.Holidays()
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get holidays failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Get holidays failed with error %v", "", err)
 		}
 
 		vars["holidays"] = days

@@ -19,7 +19,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 	isPlaying := b.PlayerStatus() == StatusPlaying
 	if isPlaying {
-		r.Session().FlashBag().Error(widget.Translate(r.Context(), "Already playing", ""))
+		widget.FlashError(r, "Already playing", "")
 	}
 
 	if r.IsPost() {
@@ -40,9 +40,9 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			}
 
 			if err != nil {
-				r.Session().FlashBag().Error(err.Error())
+				widget.FlashError(r, err.Error(), "")
 			} else {
-				r.Session().FlashBag().Info(widget.Translate(r.Context(), "File playing", ""))
+				widget.FlashInfo(r, "File playing", "")
 				widget.Redirect(r.URL().Path, http.StatusFound, w, r)
 				return
 			}

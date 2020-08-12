@@ -84,17 +84,17 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 	ups, err := b.ups()
 	if err != nil {
-		r.Session().FlashBag().Error(widget.Translate(r.Context(), "Get List UPS failed with error %s", "", err.Error()))
+		widget.FlashError(r, "Get List UPS failed with error %v", "", err)
 	}
 
 	variables, err := b.Variables()
 	if err != nil {
-		r.Session().FlashBag().Error(widget.Translate(r.Context(), "Get variables failed with error %s", "", err.Error()))
+		widget.FlashError(r, "Get variables failed with error %v", "", err)
 	}
 
 	commands, err := b.Commands()
 	if err != nil {
-		r.Session().FlashBag().Error(widget.Translate(r.Context(), "Get commands failed with error %s", "", err.Error()))
+		widget.FlashError(r, "Get commands failed with error %v", "", err)
 	}
 
 	variablesView := make(map[string]interface{}, len(variables))

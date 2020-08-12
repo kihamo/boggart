@@ -79,11 +79,11 @@ func (b *Bind) handleIndex(_ *dashboard.Response, r *dashboard.Request) {
 		entities := make(map[uint32]*entityRow, len(messages))
 
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get list entities failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Get list entities failed with error %v", "", err)
 		} else {
 			states, err := b.States(ctx, messages...)
 			if err != nil {
-				r.Session().FlashBag().Error(widget.Translate(ctx, "Get state of entities failed with error: %s", "", err.Error()))
+				widget.FlashError(r, "Get state of entities failed with error: %v", "")
 			} else {
 				for _, message := range messages {
 					e, ok := message.(api.MessageEntity)
@@ -114,7 +114,7 @@ func (b *Bind) handleIndex(_ *dashboard.Response, r *dashboard.Request) {
 
 					row.State, err = api.State(row.Entity, message, true)
 					if err != nil {
-						r.Session().FlashBag().Notice(widget.Translate(ctx, "Unknown state type %s for entity with key %d", "", proto.MessageName(message), s.GetKey()))
+						widget.FlashInfo(r, "Unknown state type %s for entity with key %d", "", proto.MessageName(message), s.GetKey())
 					}
 				}
 			}
@@ -133,7 +133,7 @@ func (b *Bind) handleLight(w *dashboard.Response, r *dashboard.Request, entity *
 	if r.IsPost() {
 		err := r.Original().ParseForm()
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Parse form failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Parse form failed with error %v", "", err)
 		} else {
 			cmd := &api.LightCommandRequest{
 				Key: entity.Key,
@@ -212,7 +212,7 @@ func (b *Bind) handleLight(w *dashboard.Response, r *dashboard.Request, entity *
 				}
 
 				if err != nil {
-					r.Session().FlashBag().Error(widget.Translate(ctx, "Parse param %s failed with error %s", "", key, err.Error()))
+					widget.FlashError(r, "Parse param %s failed with error %v", "", key, err)
 					err = nil
 				}
 			}
@@ -224,7 +224,7 @@ func (b *Bind) handleLight(w *dashboard.Response, r *dashboard.Request, entity *
 
 			err = b.provider.LightCommand(ctx, cmd)
 			if err != nil {
-				r.Session().FlashBag().Error(widget.Translate(ctx, "Execute command failed with error %s", "", err.Error()))
+				widget.FlashError(r, "Execute command failed with error %v", "", err)
 			} else {
 				go b.syncState(context.Background(), entity)
 				widget.Redirect(r.URL().Path+"?action=entity&object="+entity.GetObjectId(), http.StatusFound, w, r)
@@ -340,9 +340,9 @@ func (b *Bind) handleState(w *dashboard.Response, r *dashboard.Request) {
 	}
 
 	if err != nil {
-		r.Session().FlashBag().Error(err.Error())
+		widget.FlashError(r, err.Error(), "")
 	} else {
-		r.Session().FlashBag().Success(widget.Translate(ctx, "Success toggle", ""))
+		widget.FlashSuccess(r, "Success toggle", "")
 	}
 
 	redirectURL := &url.URL{}

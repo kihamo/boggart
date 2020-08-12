@@ -12,7 +12,7 @@ import (
 )
 
 type WidgetHandler interface {
-	WidgetHandler(w *dashboard.Response, r *dashboard.Request)
+	WidgetHandler(*dashboard.Response, *dashboard.Request)
 	WidgetAssetFS() *assetfs.AssetFS
 }
 
@@ -59,43 +59,55 @@ func NewWidgetContainer(bind boggart.BindItem) *WidgetContainer {
 	}
 }
 
-func (b *WidgetContainer) Bind() boggart.Bind {
-	return b.bind.Bind()
+func (c *WidgetContainer) Bind() boggart.Bind {
+	return c.bind.Bind()
 }
 
-func (b *WidgetContainer) Handle(w *dashboard.Response, r *dashboard.Request) {
-	if h, ok := b.Bind().(WidgetHandler); ok {
-		r = r.WithContext(dashboard.ContextWithTemplateNamespace(r.Context(), b.TemplateNamespace()))
-		r = r.WithContext(boggart.ContextWithI18nDomain(r.Context(), b.I18nDomain()))
+func (c *WidgetContainer) Handle(w *dashboard.Response, r *dashboard.Request) {
+	if h, ok := c.Bind().(WidgetHandler); ok {
+		r = r.WithContext(dashboard.ContextWithTemplateNamespace(r.Context(), c.TemplateNamespace()))
+		r = r.WithContext(boggart.ContextWithI18nDomain(r.Context(), c.I18nDomain()))
 
 		h.WidgetHandler(w, r)
 	}
 }
 
-func (b *WidgetContainer) AssetFS() *assetfs.AssetFS {
-	if w, ok := b.Bind().(WidgetHandler); ok {
+func (c *WidgetContainer) AssetFS() *assetfs.AssetFS {
+	if w, ok := c.Bind().(WidgetHandler); ok {
 		return w.WidgetAssetFS()
 	}
 
 	return nil
 }
 
-func (b *WidgetContainer) TemplateNamespace() string {
-	return boggart.ComponentName + "-bind-" + b.bind.ID()
+func (c *WidgetContainer) TemplateNamespace() string {
+	return boggart.ComponentName + "-bind-" + c.bind.ID()
 }
 
-func (b *WidgetContainer) I18nDomain() string {
-	return boggart.ComponentName + "-bind-" + b.bind.ID()
+func (c *WidgetContainer) I18nDomain() string {
+	return boggart.ComponentName + "-bind-" + c.bind.ID()
 }
 
-func (b *WidgetContainer) Translate(ctx context.Context, messageID string, context string, format ...interface{}) string {
+func (c *WidgetContainer) Translate(ctx context.Context, messageID string, context string, format ...interface{}) string {
 	return i18n.Locale(ctx).Translate(boggart.I18nDomainFromContext(ctx), messageID, context, format...)
 }
 
-func (b *WidgetContainer) TranslatePlural(ctx context.Context, singleID, pluralID string, number int, context string, format ...interface{}) string {
+func (c *WidgetContainer) TranslatePlural(ctx context.Context, singleID, pluralID string, number int, context string, format ...interface{}) string {
 	return i18n.Locale(ctx).TranslatePlural(boggart.I18nDomainFromContext(ctx), singleID, pluralID, number, context, format...)
 }
 
-func (b *WidgetContainer) URL() (*url.URL, error) {
+func (c *WidgetContainer) URL() (*url.URL, error) {
 	return nil, nil
+}
+
+func (c *WidgetContainer) FlashError(r *dashboard.Request, messageID string, context string, format ...interface{}) {
+	r.Session().FlashBag().Error(c.Translate(r.Context(), messageID, context, format...))
+}
+
+func (c *WidgetContainer) FlashSuccess(r *dashboard.Request, messageID string, context string, format ...interface{}) {
+	r.Session().FlashBag().Success(c.Translate(r.Context(), messageID, context, format...))
+}
+
+func (c *WidgetContainer) FlashInfo(r *dashboard.Request, messageID string, context string, format ...interface{}) {
+	r.Session().FlashBag().Info(c.Translate(r.Context(), messageID, context, format...))
 }

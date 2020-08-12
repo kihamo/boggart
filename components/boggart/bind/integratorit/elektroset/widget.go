@@ -114,7 +114,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 							}
 						}
 					} else {
-						r.Session().FlashBag().Error(widget.Translate(ctx, "Get balance details failed with error %s", "", err.Error()))
+						widget.FlashError(r, "Get balance details failed with error %v", "", err)
 					}
 				}
 
@@ -143,7 +143,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 				}
 			}
 		} else {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get accounts failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Get accounts failed with error %v", "")
 		}
 
 		vars["rows"] = rows

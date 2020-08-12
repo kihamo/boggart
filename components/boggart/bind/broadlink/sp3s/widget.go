@@ -13,15 +13,15 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	if r.IsPost() {
 		if r.Original().FormValue("state") != "" {
 			if err := b.On(r.Context()); err != nil {
-				r.Session().FlashBag().Error(widget.Translate(r.Context(), "On failed with error %s", "", err.Error()))
+				widget.FlashError(r, "On failed with error %v", "", err)
 			} else {
-				r.Session().FlashBag().Success(widget.Translate(r.Context(), "On success", ""))
+				widget.FlashSuccess(r, "On success", "")
 			}
 		} else {
 			if err := b.Off(r.Context()); err != nil {
-				r.Session().FlashBag().Error(widget.Translate(r.Context(), "Off failed with error %s", "", err.Error()))
+				widget.FlashError(r, "Off failed with error %v", "")
 			} else {
-				r.Session().FlashBag().Success(widget.Translate(r.Context(), "Off success", ""))
+				widget.FlashSuccess(r, "Off success", "")
 			}
 		}
 
@@ -32,12 +32,12 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 	state, err := b.State()
 	if err != nil {
-		r.Session().FlashBag().Error(widget.Translate(r.Context(), "Get state failed with error %s", "", err.Error()))
+		widget.FlashError(r, "Get state failed with error %v", "")
 	}
 
 	power, err := b.Power()
 	if err != nil {
-		r.Session().FlashBag().Error(widget.Translate(r.Context(), "Get power failed with error %s", "", err.Error()))
+		widget.FlashError(r, "Get power failed with error %v", "")
 	}
 
 	widget.Render(r.Context(), "widget", map[string]interface{}{

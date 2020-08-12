@@ -46,7 +46,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	case "configuration":
 		configuration, err := b.client.Configuration(ctx)
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get configuration failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Get configuration failed with error %v", "", err)
 		}
 
 		vars["configuration"] = configuration

@@ -60,7 +60,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			if tm, err := time.Parse(time.RFC3339, queryTime); err == nil {
 				start = tm
 			} else {
-				r.Session().FlashBag().Error(widget.Translate(r.Context(), "Parse date from failed with error %s", "", err.Error()))
+				widget.FlashError(r, "Parse date from failed with error %v", "", err)
 			}
 		}
 
@@ -68,7 +68,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			if tm, err := time.Parse(time.RFC3339, queryTime); err == nil {
 				end = tm
 			} else {
-				r.Session().FlashBag().Error(widget.Translate(r.Context(), "Parse date to failed with error %s", "", err.Error()))
+				widget.FlashError(r, "Parse date to failed with error %v", "", err)
 			}
 		}
 
@@ -78,7 +78,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		// energy
 		date, values, err = b.provider.EnergyArchive(start, end, period)
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(r.Context(), "Get energy archive failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Get energy archive failed with error %v", "", err)
 		} else {
 			for _, value := range values {
 				key := int(date.Unix())
@@ -95,7 +95,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		// pulse input 1
 		date, values, err = b.provider.PulseInput1Archive(start, end, period)
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(r.Context(), "Get pulse %d archive failed with error %s", "", 1, err.Error()))
+			widget.FlashError(r, "Get pulse %d archive failed with error %v", "", 1, err)
 		} else {
 			for _, value := range values {
 				row, ok := statsByDate[int(date.Unix())]
@@ -111,7 +111,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		// pulse input 2
 		date, values, err = b.provider.PulseInput2Archive(start, end, period)
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(r.Context(), "Get pulse %d archive failed with error %s", "", 2, err.Error()))
+			widget.FlashError(r, "Get pulse %d archive failed with error %v", "", 2, err)
 		} else {
 			for _, value := range values {
 				row, ok := statsByDate[int(date.Unix())]
@@ -127,7 +127,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		// pulse input 3
 		date, values, err = b.provider.PulseInput3Archive(start, end, period)
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(r.Context(), "Get pulse %d archive failed with error %s", "", 3, err.Error()))
+			widget.FlashError(r, "Get pulse %d archive failed with error %v", "", 3, err)
 		} else {
 			for _, value := range values {
 				row, ok := statsByDate[int(date.Unix())]
@@ -143,7 +143,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		// pulse input 4
 		date, values, err = b.provider.PulseInput4Archive(start, end, period)
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(r.Context(), "Get pulse %d archive failed with error %s", "", 4, err.Error()))
+			widget.FlashError(r, "Get pulse %d archive failed with error %v", "", 4, err)
 		} else {
 			for _, value := range values {
 				row, ok := statsByDate[int(date.Unix())]

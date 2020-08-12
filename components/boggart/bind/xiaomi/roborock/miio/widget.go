@@ -29,14 +29,14 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	case "settings":
 		carpetMode, err := b.device.CarpetMode(ctx)
 		if err != nil && !r.IsPost() {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get carpet mode failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Get carpet mode failed with error %v", "", err)
 		} else {
 			vars["carpetMode"] = carpetMode
 		}
 
 		dnd, err := b.device.DoNotDisturb(ctx)
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get do not disturb failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Get do not disturb failed with error %v", "", err)
 		} else {
 			now := time.Now()
 
@@ -187,21 +187,21 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 		fanPower, err := b.device.FanPower(ctx)
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get fan power failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Get fan power failed with error %v", "", err)
 		} else {
 			vars["fanPower"] = fanPower
 		}
 
 		volume, err := b.device.SoundVolume(ctx)
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get volume failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Get volume failed with error %v", "", err)
 		} else {
 			vars["volume"] = volume
 		}
 
 		timezone, err := b.device.Timezone(ctx)
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get timezone failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Get timezone failed with error %v", "", err)
 		} else {
 			vars["timezone"] = timezone.String()
 		}
@@ -209,13 +209,13 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	case "history":
 		summary, err := b.device.CleanSummary(ctx)
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get clean summary failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Get clean summary failed with error %v", "", err)
 		} else {
 			details := make([]vacuum.CleanDetail, 0, len(summary.CleanupIDs))
 			for _, id := range summary.CleanupIDs {
 				detail, err := b.device.CleanDetails(ctx, id)
 				if err != nil {
-					r.Session().FlashBag().Error(widget.Translate(ctx, "Get clean summary detail %d failed with error %s", "", id, err.Error()))
+					widget.FlashError(r, "Get clean summary detail %d failed with error %v", "", id, err)
 					continue
 				}
 
@@ -229,21 +229,21 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	default:
 		status, err := b.device.Status(ctx)
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get status failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Get status failed with error %v", "", err)
 		}
 
 		vars["status"] = status
 
 		info, err := b.device.Info(ctx)
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get info failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Get info failed with error %v", "", err)
 		}
 
 		vars["info"] = info
 
 		wifi, err := b.device.WiFiStatus(ctx)
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get WiFi status failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Get WiFi status failed with error %v", "", err)
 		}
 
 		vars["wifi"] = wifi

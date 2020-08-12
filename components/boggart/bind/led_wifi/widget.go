@@ -45,7 +45,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 	state, err := b.bulb.State(ctx)
 	if err != nil {
-		r.Session().FlashBag().Error(widget.Translate(ctx, "Get state failed with error %s", "", err.Error()))
+		widget.FlashError(r, "Get state failed with error %v", "", err)
 	} else {
 		vars["state"] = state
 	}
@@ -53,7 +53,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	if r.IsPost() {
 		err := r.Original().ParseForm()
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Parse form failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Parse form failed with error %v", "", err)
 		} else {
 			var power bool
 
@@ -74,7 +74,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 				}
 
 				if err != nil {
-					r.Session().FlashBag().Error(widget.Translate(ctx, "Change state failed with error %s", "", err.Error()))
+					widget.FlashError(r, "Change state failed with error %v", "", err)
 				}
 			}
 
@@ -91,7 +91,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 						}
 
 						if err != nil {
-							r.Session().FlashBag().Error(widget.Translate(ctx, "Change mode failed with error %s", "", err.Error()))
+							widget.FlashError(r, "Change mode failed with error %v", "", err)
 						}
 					}
 				}

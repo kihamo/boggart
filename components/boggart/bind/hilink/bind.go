@@ -182,7 +182,7 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, sms *models.SMSListMessagesI
 						params.Request.Control = 1
 
 						if _, err := b.client.Device.DeviceControl(params); err != nil {
-							b.Logger().Errorf("Reboot failed with error %s", err.Error())
+							b.Logger().Errorf("Reboot failed with error %v", err)
 						}
 					}
 

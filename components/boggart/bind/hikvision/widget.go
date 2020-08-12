@@ -184,14 +184,14 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 		info, err := b.client.System.GetSystemDeviceInfo(system.NewGetSystemDeviceInfoParamsWithContext(ctx), nil)
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get device info failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Get device info failed with error %v", "", err)
 		}
 
 		vars["info"] = info.Payload
 
 		upgrade, err := b.client.System.GetSystemUpgradeStatus(system.NewGetSystemUpgradeStatusParamsWithContext(ctx), nil)
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get upgrade status failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Get upgrade status failed with error %v", "", err)
 		}
 
 		vars["upgrade"] = upgrade.Payload
@@ -207,7 +207,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 		notification, err := b.client.Event.GetNotificationHTTPHost(params, nil)
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Get notification http host failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Get notification http host failed with error %v", "", err)
 		}
 
 		if r.IsPost() {
@@ -245,9 +245,9 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 				}
 
 				if err != nil {
-					r.Session().FlashBag().Error(err.Error())
+					widget.FlashError(r, err.Error(), "")
 				} else {
-					r.Session().FlashBag().Success(widget.Translate(ctx, "Success", ""))
+					widget.FlashSuccess(r, "Success", "")
 				}
 
 				widget.Redirect(r.URL().Path+"?action="+action, http.StatusFound, w, r)

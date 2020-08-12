@@ -65,7 +65,7 @@ func (b *Bind) handleComponentLight(w *dashboard.Response, r *dashboard.Request,
 	if r.IsPost() {
 		err = r.Original().ParseForm()
 		if err != nil {
-			r.Session().FlashBag().Error(widget.Translate(ctx, "Parse form failed with error %s", "", err.Error()))
+			widget.FlashError(r, "Parse form failed with error %v", "", err)
 		} else {
 			command := component.GetState().(*ComponentLightState)
 			command.SetState(false)
@@ -133,7 +133,7 @@ func (b *Bind) handleComponentLight(w *dashboard.Response, r *dashboard.Request,
 				}
 
 				if err != nil {
-					r.Session().FlashBag().Error(widget.Translate(ctx, "Parse param %s failed with error %s", "", key, err.Error()))
+					widget.FlashError(r, "Parse param %s failed with error %v", "", key, err)
 					err = nil
 				}
 			}
@@ -142,9 +142,9 @@ func (b *Bind) handleComponentLight(w *dashboard.Response, r *dashboard.Request,
 			err := b.MQTT().PublishRawWithoutCache(ctx, component.GetCommandTopic(), 1, false, component.CommandToPayload(command))
 
 			if err != nil {
-				r.Session().FlashBag().Error(err.Error())
+				widget.FlashError(r, err.Error(), "")
 			} else {
-				r.Session().FlashBag().Success(widget.Translate(ctx, "Success toggle", ""))
+				widget.FlashSuccess(r, "Success toggle", "")
 
 				widget.Redirect(r.URL().Path+"?action=component&id="+component.GetID(), http.StatusFound, w, r)
 				return
@@ -180,9 +180,9 @@ func (b *Bind) handleCommand(w *dashboard.Response, r *dashboard.Request) {
 	err := b.MQTT().PublishRawWithoutCache(ctx, component.GetCommandTopic(), 1, false, component.CommandToPayload(command))
 
 	if err != nil {
-		r.Session().FlashBag().Error(err.Error())
+		widget.FlashError(r, err.Error(), "")
 	} else {
-		r.Session().FlashBag().Success(widget.Translate(ctx, "Success toggle", ""))
+		widget.FlashSuccess(r, "Success toggle", "")
 	}
 
 	redirectURL := &url.URL{}

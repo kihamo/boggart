@@ -13,15 +13,15 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	if r.IsPost() {
 		if r.Original().FormValue("level") != "" {
 			if err := b.High(r.Context()); err != nil {
-				r.Session().FlashBag().Error(widget.Translate(r.Context(), "Set high level failed with error %s", "", err.Error()))
+				widget.FlashError(r, "Set high level failed with error %v", "", err)
 			} else {
-				r.Session().FlashBag().Success(widget.Translate(r.Context(), "Set high level success", ""))
+				widget.FlashSuccess(r, "Set high level success", "")
 			}
 		} else {
 			if err := b.Low(r.Context()); err != nil {
-				r.Session().FlashBag().Error(widget.Translate(r.Context(), "Set low level failed with error %s", "", err.Error()))
+				widget.FlashError(r, "Set low level failed with error %v", "", err)
 			} else {
-				r.Session().FlashBag().Success(widget.Translate(r.Context(), "Set low level success", ""))
+				widget.FlashSuccess(r, "Set low level success", "")
 			}
 		}
 
