@@ -3,6 +3,7 @@ package elektroset
 import (
 	"encoding/json"
 	"io"
+	"sort"
 	"time"
 
 	"github.com/elazarl/go-bindata-assetfs"
@@ -95,17 +96,17 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 								}
 
 								if balance.ValueT1 != nil {
-									r.Values["tariff1"] = [3]float64{*balance.ValueT1 * 1000}
+									r.Values["tariff1"] = [3]float64{*balance.ValueT1}
 									tariffs[1] = true
 								}
 
 								if balance.ValueT2 != nil {
-									r.Values["tariff2"] = [3]float64{*balance.ValueT2 * 1000}
+									r.Values["tariff2"] = [3]float64{*balance.ValueT2}
 									tariffs[2] = true
 								}
 
 								if balance.ValueT3 != nil {
-									r.Values["tariff3"] = [3]float64{*balance.ValueT3 * 1000}
+									r.Values["tariff3"] = [3]float64{*balance.ValueT3}
 									tariffs[3] = true
 								}
 							}
@@ -142,6 +143,14 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		} else {
 			widget.FlashError(r, "Get accounts failed with error %v", "")
 		}
+
+		sort.SliceStable(rows, func(i, j int) bool {
+			if rows[i].Date.Year() == rows[j].Date.Year() {
+				return int(rows[i].Date.Month()) > int(rows[j].Date.Month())
+			}
+
+			return rows[i].Date.Year() > rows[j].Date.Year()
+		})
 
 		vars["rows"] = rows
 		vars["tariffs"] = tariffs
