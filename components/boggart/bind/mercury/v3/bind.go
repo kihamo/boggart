@@ -17,12 +17,13 @@ type Bind struct {
 	di.ProbesBind
 	di.WidgetBind
 
-	config   *Config
-	provider *mercury.MercuryV3
+	config     *Config
+	provider   *mercury.MercuryV3
+	connection connection.Connection
 }
 
-func (b *Bind) Run() error {
-	conn, err := connection.NewByDSNString(b.config.ConnectionDSN)
+func (b *Bind) Run() (err error) {
+	b.connection, err = connection.NewByDSNString(b.config.ConnectionDSN)
 	if err != nil {
 		return err
 	}
@@ -32,9 +33,9 @@ func (b *Bind) Run() error {
 		opts = append(opts, mercury.WithAddressAsString(b.config.Address))
 	}
 
-	b.provider = mercury.New(conn, opts...)
+	b.provider = mercury.New(b.connection, opts...)
 
-	conn.ApplyOptions(connection.WithDumpRead(func(data []byte) {
+	b.connection.ApplyOptions(connection.WithDumpRead(func(data []byte) {
 		args := make([]interface{}, 0)
 
 		packet := mercury.NewResponse()
@@ -53,7 +54,7 @@ func (b *Bind) Run() error {
 
 		b.Logger().Debug("Read packet", args...)
 	}))
-	conn.ApplyOptions(connection.WithDumpWrite(func(data []byte) {
+	b.connection.ApplyOptions(connection.WithDumpWrite(func(data []byte) {
 		args := make([]interface{}, 0)
 
 		packet := mercury.NewRequest()
@@ -77,4 +78,8 @@ func (b *Bind) Run() error {
 	}))
 
 	return nil
+}
+
+func (b *Bind) Close() error {
+	return b.connection.Close()
 }

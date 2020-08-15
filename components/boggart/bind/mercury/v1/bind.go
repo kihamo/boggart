@@ -18,14 +18,15 @@ type Bind struct {
 	di.ProbesBind
 	di.WidgetBind
 
-	config   *Config
-	provider *mercury.MercuryV1
+	config     *Config
+	provider   *mercury.MercuryV1
+	connection connection.Connection
 }
 
-func (b *Bind) Run() error {
+func (b *Bind) Run() (err error) {
 	b.Meta().SetSerialNumber(b.config.Address)
 
-	conn, err := connection.NewByDSNString(b.config.ConnectionDSN)
+	b.connection, err = connection.NewByDSNString(b.config.ConnectionDSN)
 	if err != nil {
 		return err
 	}
@@ -58,8 +59,8 @@ func (b *Bind) Run() error {
 		}
 	}
 
-	conn.ApplyOptions(connection.WithDumpRead(dump("Read packet")))
-	conn.ApplyOptions(connection.WithDumpWrite(dump("Write packet")))
+	b.connection.ApplyOptions(connection.WithDumpRead(dump("Read packet")))
+	b.connection.ApplyOptions(connection.WithDumpWrite(dump("Write packet")))
 
 	t := b.Meta().BindType().(Type)
 
@@ -69,7 +70,11 @@ func (b *Bind) Run() error {
 		mercury.WithLocation(loc),
 	}
 
-	b.provider = mercury.New(conn, opts...)
+	b.provider = mercury.New(b.connection, opts...)
 
 	return nil
+}
+
+func (b *Bind) Close() error {
+	return b.connection.Close()
 }

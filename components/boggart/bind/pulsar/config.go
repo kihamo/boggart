@@ -41,6 +41,12 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/"
 
 	return &Config{
+		ProbesConfig: di.ProbesConfig{
+			LivenessPeriod:   time.Minute,
+			LivenessTimeout:  time.Second * 10,
+			ReadinessPeriod:  time.Minute,
+			ReadinessTimeout: time.Second * 10,
+		},
 		LoggerConfig: di.LoggerConfig{
 			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
 			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
