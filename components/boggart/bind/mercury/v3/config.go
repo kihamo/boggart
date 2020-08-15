@@ -34,6 +34,8 @@ func (t Type) Config() interface{} {
 
 	return &Config{
 		ProbesConfig: di.ProbesConfig{
+			LivenessPeriod:   time.Minute,
+			LivenessTimeout:  time.Second * 30,
 			ReadinessPeriod:  time.Minute,
 			ReadinessTimeout: time.Second * 30,
 		},
