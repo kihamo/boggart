@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"io"
+	"sync"
 
 	"github.com/goburrow/serial"
 	"github.com/kihamo/boggart/atomic"
@@ -11,9 +12,10 @@ import (
 )
 
 type Serial struct {
-	options options
-	once    *atomic.Once
-	port    serial.Port
+	options   options
+	once      *atomic.Once
+	port      serial.Port
+	portMutex sync.Mutex // внутри port поле fd не защищено от race
 }
 
 func New(options ...Option) *Serial {
@@ -49,7 +51,9 @@ func (s *Serial) Read(p []byte) (n int, err error) {
 	buffer := bytes.NewBuffer(nil)
 
 	for {
+		s.portMutex.Lock()
 		n, err = s.port.Read(p)
+		s.portMutex.Unlock()
 
 		if n > 0 {
 			buffer.Write(p[:n])
@@ -84,11 +88,17 @@ func (s *Serial) Write(p []byte) (n int, err error) {
 		return -1, errors.New("connection isn't init")
 	}
 
+	s.portMutex.Lock()
+	defer s.portMutex.Unlock()
+
 	return s.port.Write(p)
 }
 
 func (s *Serial) Close() error {
 	if s.port != nil {
+		s.portMutex.Lock()
+		defer s.portMutex.Unlock()
+
 		return s.port.Close()
 	}
 
