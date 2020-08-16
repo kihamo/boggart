@@ -98,6 +98,8 @@
                         <th>{{ i18n "IEEE address" . }}</th>
                         <th>{{ i18n "Capabilities" . }}</th>
                         <th>{{ i18n "Device type" . }}</th>
+                        <th>{{ i18n "Manufacturer code" . }}</th>
+                        <th>{{ i18n "Last seen" . }}</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -107,6 +109,8 @@
                         <td>{{ $device.IEEEAddressAsString }}</td>
                         <td>{{ $device.Capabilities }}</td>
                         <td>{{ $device.DeviceTypeAsString }}</td>
+                        <td>{{ printf "0x%X" $device.ManufacturerCode }}</td>
+                        <td><script type="application/javascript">document.write(dateToString('{{ $device.LastSeen.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
                     </tr>
                     {{ end }}
                     </tbody>

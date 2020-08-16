@@ -37,6 +37,10 @@ const (
 	DeviceTypeRouter      = 2
 	DeviceTypeEndDevice   = 4
 
+	DeviceLogicalTypeCoordinator = 0
+	DeviceLogicalTypeRouter      = 1
+	DeviceLogicalTypeEndDevice   = 2
+
 	SubSystemReserved       = 0x00
 	SubSystemSysInterface   = 0x01
 	SubSystemMACInterface   = 0x02
@@ -107,7 +111,9 @@ const (
 	CommandGetDeviceInfo                      = 0x00
 	CommandLEDControl                         = 0x0A
 	CommandAfIncomingMessage                  = 0x81
-	CommandActiveEndpointResponse             = 0x85
+	CommandNodeDescriptionResponse            = 0x82
+	CommandSimpleDescriptorResponse           = 0x84
+	CommandActiveEndpointsResponse            = 0x85
 	CommandManagementNetworkDiscoveryResponse = 0xB0
 	CommandManagementRoutingTableResponse     = 0xB2
 	CommandManagementPermitJoinResponse       = 0xB6
@@ -133,6 +139,10 @@ const (
 	ZdConfigurationNetworkKey = 0x62
 
 	DefaultWaitTimeout = time.Millisecond * 6000
+
+	InterviewStatusDefault = uint32(0) + 1
+	InterviewStatusStarted
+	InterviewStatusCompleted
 )
 
 func (i CommandStatus) Error() string {

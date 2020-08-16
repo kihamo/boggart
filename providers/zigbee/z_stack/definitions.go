@@ -513,8 +513,40 @@ var definitions = map[uint16]map[uint16]definition{
 		},
 	},
 	SubSystemSAPIInterface: {
+		0x00: {
+			name:  "ZB_START_REQUEST",
+			types: []uint16{TypeSREQ, TypeSRSP},
+		},
+		0x01: {
+			name:  "ZB_BIND_DEVICE",
+			types: []uint16{TypeSREQ, TypeSRSP},
+		},
+		0x02: {
+			name:  "ZB_ALLOW_BIND",
+			types: []uint16{TypeSREQ, TypeSRSP},
+		},
+		0x03: {
+			name:  "ZB_SEND_DATA_REQUEST",
+			types: []uint16{TypeSREQ, TypeSRSP},
+		},
+		0x04: {
+			name:  "ZB_READ_CONFIGURATION",
+			types: []uint16{TypeSREQ, TypeSRSP},
+		},
 		0x05: {
 			name:  "ZB_WRITE_CONFIGURATION",
+			types: []uint16{TypeSREQ, TypeSRSP},
+		},
+		0x06: {
+			name:  "ZB_GET_DEVICE_INFO",
+			types: []uint16{TypeSREQ, TypeSRSP},
+		},
+		0x07: {
+			name:  "ZB_FIND_DEVICE_REQUEST",
+			types: []uint16{TypeSREQ, TypeSRSP},
+		},
+		0x08: {
+			name:  "ZB_PERMIT_JOINING_REQUEST",
 			types: []uint16{TypeSREQ, TypeSRSP},
 		},
 	},

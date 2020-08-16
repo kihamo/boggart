@@ -2,6 +2,7 @@ package z_stack
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"strconv"
 	"sync"
@@ -25,6 +26,7 @@ type Bind struct {
 
 	disconnected *atomic.BoolNull
 	client       *z_stack.Client
+	connection   connection.Connection
 	onceClient   *atomic.Once
 	lock         sync.RWMutex
 	done         chan struct{}
@@ -33,23 +35,54 @@ type Bind struct {
 func (b *Bind) getClient(ctx context.Context) (_ *z_stack.Client, err error) {
 	b.onceClient.Do(func() {
 		b.disconnected.Nil()
-		var conn connection.Connection
 
-		conn, err = connection.NewByDSNString(b.config.ConnectionDSN)
+		b.connection, err = connection.NewByDSNString(b.config.ConnectionDSN)
 		if err != nil {
 			b.disconnected.True()
 		}
 
-		b.client = z_stack.New(conn)
+		dump := func(message string) func([]byte) {
+			return func(data []byte) {
+				args := make([]interface{}, 0)
+
+				var frame z_stack.Frame
+				if err := frame.UnmarshalBinary(data); err == nil {
+					args = append(args,
+						"description", frame.Description(),
+						"length", frame.Length(),
+						"type", fmt.Sprintf("0x%X", frame.Type()),
+						"sub-system", fmt.Sprintf("0x%X", frame.SubSystem()),
+						"command-id", fmt.Sprintf("0x%X", frame.CommandID()),
+						"data", fmt.Sprintf("%v", frame.Data()),
+						"fcs", frame.FCS(),
+					)
+				} else {
+					args = append(args,
+						"payload", fmt.Sprintf("%v", data),
+						"hex", "0x"+hex.EncodeToString(data),
+					)
+				}
+
+				fmt.Println(append([]interface{}{message}, args...)...)
+
+				b.Logger().Debug(message, args...)
+			}
+		}
+
+		b.connection.ApplyOptions(connection.WithDumpRead(dump("Read frame")))
+		b.connection.ApplyOptions(connection.WithDumpWrite(dump("Write frame")))
+
+		opts := []z_stack.Option{
+			z_stack.WithChannel(b.config.Channel),
+			z_stack.WithLEDEnabled(b.config.LEDEnabled),
+		}
+
+		b.client = z_stack.New(b.connection, opts...)
 
 		go func() {
 			ctx := context.Background()
 
 			err := b.client.Boot(ctx)
-
-			if err == nil && b.config.DisableLED {
-				err = b.client.LEDDisable(ctx)
-			}
 
 			if err == nil && b.config.PermitJoin {
 				err = b.client.PermitJoin(ctx, b.permitJoinDuration())
@@ -100,23 +133,13 @@ func (b *Bind) Run() error {
 		for {
 			select {
 			case frame := <-watcher.NextFrame():
-				b.Logger().Debug("Received Zigbee message",
-					"description", frame.Description(),
-					"length", frame.Length(),
-					"type", fmt.Sprintf("0x%X", frame.Type()),
-					"sub-system", fmt.Sprintf("0x%X", frame.SubSystem()),
-					"command-id", fmt.Sprintf("0x%X", frame.CommandID()),
-					"data", fmt.Sprintf("%v", frame.Data()),
-					"fcs", frame.FCS(),
-				)
-
 				if frame.Type() == z_stack.TypeAREQ {
 					switch frame.CommandID() {
 
 					case z_stack.CommandAfIncomingMessage:
 						message, err := z_stack.AfIncomingMessageParse(frame)
 						if err != nil {
-							b.Logger().Warn("Parse received message", "error", err.Error())
+							b.Logger().Warn("Parse received message failed", "error", err.Error())
 							continue
 						}
 
@@ -179,7 +202,7 @@ func (b *Bind) Run() error {
 							}
 						}
 
-					// permit join sync
+						// permit join sync
 					case z_stack.CommandPermitJoinInd, z_stack.CommandManagementPermitJoinResponse:
 						go func() {
 							time.Sleep(time.Second) // грязный хак что бы клиент успел у себя внутри изменить состояние

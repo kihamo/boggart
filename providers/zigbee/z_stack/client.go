@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
-
 	"io"
 	"sync"
 	"sync/atomic"
@@ -16,7 +14,9 @@ import (
 )
 
 type Client struct {
-	conn     connection.Connection
+	conn    connection.Connection
+	options options
+
 	loopOnce sync.Once
 	loopLock sync.RWMutex
 
@@ -26,30 +26,27 @@ type Client struct {
 
 	versionOnce *a.Once
 	version     *SysVersion
-	devices     sync.Map
-	permitJoin  uint32
-	enabledLed  uint32
 
-	channel              uint32
-	panID                uint16
-	extendedPanID        []byte
-	networkKeyDistribute bool
-	networkKey           []byte
+	permitJoinState uint32
+	ledState        uint32
+
+	devices sync.Map
 }
 
-func New(conn connection.Connection) *Client {
-	return &Client{
-		conn:                 conn,
-		done:                 make(chan struct{}),
-		watchers:             make([]*Watcher, 0),
-		versionOnce:          new(a.Once),
-		enabledLed:           1,
-		channel:              11,
-		panID:                0x1A62,
-		extendedPanID:        []byte{0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD},
-		networkKeyDistribute: false,
-		networkKey:           []byte{0x01, 0x03, 0x05, 0x07, 0x09, 0x0B, 0x0D, 0x0F, 0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0D},
+func New(conn connection.Connection, opts ...Option) *Client {
+	c := &Client{
+		conn:        conn,
+		options:     DefaultOptions(),
+		done:        make(chan struct{}),
+		watchers:    make([]*Watcher, 0),
+		versionOnce: new(a.Once),
 	}
+
+	for _, opt := range opts {
+		opt.apply(&c.options)
+	}
+
+	return c
 }
 
 func (c *Client) init() {
@@ -71,7 +68,7 @@ func (c *Client) loop() {
 	for {
 		select {
 		case data := <-chReceiveResponses:
-			fmt.Printf("\033[35m <<< %v %X \033[0m\n", data, data)
+			//fmt.Printf("\033[35m Receive <<< %v %X \033[0m\n", data, data)
 
 			if len(data) == 0 {
 				continue
@@ -110,7 +107,7 @@ func (c *Client) loop() {
 					continue
 				}
 
-				fmt.Println("\033[32m <<< Main frame", frame.String(), "\033[0m")
+				//fmt.Println("\033[32m Receive and parse <<< ", frame.String(), "\033[0m")
 
 				frames = append(frames, &frame)
 

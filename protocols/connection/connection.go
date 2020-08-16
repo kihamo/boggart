@@ -31,7 +31,7 @@ type Connection interface {
 	io.ReadWriteCloser
 	sync.Locker
 	Invoke(request []byte) (response []byte, err error)
-	Loop() (responses <-chan []byte, errors <-chan error, kill chan<- struct{}, done <-chan struct{})
+	Loop() (responses <-chan []byte, errors <-chan error, innerKill chan<- struct{}, outerDone <-chan struct{})
 	ApplyOptions(options ...Option)
 }
 
@@ -47,6 +47,9 @@ type Wrapper struct {
 	transport      transport.Transport
 	transportMutex sync.RWMutex
 
+	openLoops      []chan struct{}
+	openLoopsMutex sync.RWMutex
+
 	options options
 
 	applyMutex sync.Mutex
@@ -57,6 +60,7 @@ type Wrapper struct {
 func New(transport transport.Transport, options ...Option) Connection {
 	w := &Wrapper{
 		transport: transport,
+		openLoops: make([]chan struct{}, 0),
 		initDial:  new(atomic.Once),
 	}
 	w.ApplyOptions(options...)
@@ -140,6 +144,12 @@ func (w *Wrapper) Write(p []byte) (n int, err error) {
 }
 
 func (w *Wrapper) Close() error {
+	w.openLoopsMutex.RLock()
+	for _, ch := range w.openLoops {
+		ch <- struct{}{}
+	}
+	w.openLoopsMutex.RUnlock()
+
 	w.transportMutex.RLock()
 	t := w.transport
 	w.transportMutex.RUnlock()
@@ -219,18 +229,27 @@ func (w *Wrapper) Invoke(request []byte) (response []byte, err error) {
 func (w *Wrapper) Loop() (<-chan []byte, <-chan error, chan<- struct{}, <-chan struct{}) {
 	response := make(chan []byte)
 	errors := make(chan error)
-	kill := make(chan struct{}, 1)
-	done := make(chan struct{}, 1)
+	innerKill := make(chan struct{}, 1)
+	outerDone := make(chan struct{}, 1)
 
 	go func() {
 		buf := make([]byte, BufferSize)
 
 		for {
 			select {
-			case <-kill:
+			case <-innerKill:
 				close(response)
 				close(errors)
-				close(done)
+				close(outerDone)
+
+				w.openLoopsMutex.Lock()
+				for i, ch := range w.openLoops {
+					if ch == innerKill {
+						w.openLoops = append(w.openLoops[:i], w.openLoops[i+1:]...)
+						break
+					}
+				}
+				w.openLoopsMutex.Unlock()
 
 				return
 
@@ -248,7 +267,11 @@ func (w *Wrapper) Loop() (<-chan []byte, <-chan error, chan<- struct{}, <-chan s
 		}
 	}()
 
-	return response, errors, kill, done
+	w.openLoopsMutex.Lock()
+	w.openLoops = append(w.openLoops, innerKill)
+	w.openLoopsMutex.Unlock()
+
+	return response, errors, innerKill, outerDone
 }
 
 func (w *Wrapper) ApplyOptions(options ...Option) {

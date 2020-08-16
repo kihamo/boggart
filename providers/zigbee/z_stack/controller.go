@@ -7,6 +7,8 @@ import (
 	"errors"
 	"sync/atomic"
 	"time"
+
+	"github.com/kihamo/boggart/providers/zigbee/z_stack/model"
 )
 
 var endpoints = []Endpoint{
@@ -197,12 +199,12 @@ func (c *Client) Boot(ctx context.Context) (err error) {
 	/*
 	 * Start as coordinator
 	 */
-	device, err := c.UtilGetDeviceInfo(ctx)
+	info, err := c.UtilGetDeviceInfo(ctx)
 	if err != nil {
 		return err
 	}
 
-	if device.DeviceState != DeviceStateStartedCoordinator {
+	if info.DeviceState != DeviceStateStartedCoordinator {
 		waitResponse, waitErr := c.WaitAsync(ctx, func(response *Frame) bool {
 			return response.Type() == TypeAREQ &&
 				response.SubSystem() == SubSystemZDOInterface &&
@@ -229,66 +231,19 @@ func (c *Client) Boot(ctx context.Context) (err error) {
 
 	// регистрируем привязанные устройства хотя инормация по ним не полная
 	// полную информацию добираем через синхронизацию с таблицей на устройстве
-	if len(device.AssocDevicesList) > 0 {
-		for _, networkAddress := range device.AssocDevicesList {
-			d := NewDevice()
-			d.SetNetworkAddress(networkAddress)
-
-			c.deviceAdd(d)
-		}
-
-		go func() {
-			c.SyncDevices(context.Background())
-		}()
-	}
+	c.onDeviceInfo(info)
 
 	/*
 	 * Register endpoints
 	 */
-	/*
-		ZDO_ACTIVE_EP_RSP
-
-		This callback message is in response to the ZDO Active Endpoint Request.
-
-		Usage:
-			AREQ:
-				         1         |       1     |       1     |    2    |   1    |    2    |       1       |     0-77
-				Length = 0x06-0x53 | Cmd0 = 0x45 | Cmd1 = 0x85 | SrcAddr | Status | NwkAddr | ActiveEPCount | ActiveEPList
-			Attributes:
-				SrcAddr       2 bytes    The message’s source network address.
-				Status        1 bytes    This field indicates either SUCCESS or FAILURE.
-				NWKAddr       2 bytes    Device’s short address that this response describes.
-				ActiveEPCount 1 byte     Number of active endpoint in the list
-				ActiveEPList  0-77 bytes Array of active endpoints on this device.
-
-		Example from zigbee2mqtt:
-			zigbee-herdsman:adapter:zStack:znp:AREQ <-- ZDO - activeEpRsp - {"srcaddr":0,"status":0,"nwkaddr":0,"activeepcount":0,"activeeplist":[]} +14ms
-	*/
-	waitResponse, waitErr := c.WaitAsync(ctx, func(response *Frame) bool {
-		return response.Type() == TypeAREQ && response.SubSystem() == SubSystemZDOInterface && response.CommandID() == CommandActiveEndpointResponse
-	})
-
-	err = c.ZDOActiveEndpoints(ctx)
+	activeEndpoints, err := c.ActiveEndpoints(ctx, 0)
 	if err != nil {
 		return err
 	}
 
-	registeredEndpoints := make(map[uint8]bool)
-
-	select {
-	case r := <-waitResponse:
-		dataOut := r.Data()
-
-		if dataOut[2] != 0 {
-			return errors.New("get active endpoints failed")
-		}
-
-		for _, id := range dataOut[6:] {
-			registeredEndpoints[uint8(id)] = true
-		}
-
-	case e := <-waitErr:
-		return e
+	registeredEndpoints := make(map[uint8]bool, len(activeEndpoints.Endpoints))
+	for _, endpoint := range activeEndpoints.Endpoints {
+		registeredEndpoints[endpoint] = true
 	}
 
 	// register endpoints
@@ -322,11 +277,16 @@ func (c *Client) Boot(ctx context.Context) (err error) {
 
 	go c.defaultWatcher()
 
-	return nil
+	/*
+	 * More options
+	 */
+	err = c.LED(ctx, c.options.LEDEnabled)
+
+	return err
 }
 
 func (c *Client) PermitJoinEnabled() bool {
-	return atomic.LoadUint32(&c.permitJoin) != 0
+	return atomic.LoadUint32(&c.permitJoinState) != 0
 }
 
 func (c *Client) PermitJoinDisable(ctx context.Context) error {
@@ -386,9 +346,9 @@ func (c *Client) PermitJoin(ctx context.Context, seconds uint8) error {
 		}
 
 		if seconds == 0 {
-			atomic.StoreUint32(&c.permitJoin, 0)
+			atomic.StoreUint32(&c.permitJoinState, 0)
 		} else {
-			atomic.StoreUint32(&c.permitJoin, 1)
+			atomic.StoreUint32(&c.permitJoinState, 1)
 		}
 
 	case e := <-waitErr:
@@ -411,10 +371,69 @@ func (c *Client) SyncDevices(ctx context.Context) error {
 		if device := c.Device(item.NetworkAddress); device != nil {
 			device.SetIEEEAddress(item.ExtendedAddress)
 			device.SetDeviceType(item.DeviceType)
+
+			// c.InterviewDevice(ctx, device)
 		}
 	}
 
 	return nil
+}
+
+func (c *Client) InterviewDevice(ctx context.Context, device *model.Device) (err error) {
+	addr := device.NetworkAddress()
+
+	// description
+	var desc *ZDODescriptionResponse
+	for attempt := 0; attempt < 6; attempt++ {
+		desc, err = c.NodeDescription(ctx, addr)
+		if err == nil {
+			break
+		}
+	}
+
+	if err != nil {
+		return err
+	}
+
+	device.SetManufacturerCode(desc.ManufacturerCode)
+
+	switch desc.LogicalType {
+	case DeviceLogicalTypeCoordinator:
+		device.SetDeviceType(DeviceTypeCoordinator)
+	case DeviceLogicalTypeRouter:
+		device.SetDeviceType(DeviceTypeRouter)
+	case DeviceLogicalTypeEndDevice:
+		device.SetDeviceType(DeviceTypeEndDevice)
+	default:
+		device.SetDeviceType(DeviceTypeNone)
+	}
+
+	// endpoints
+	var activeEndpoints *ZDOActiveEndpointsResponse
+	for attempt := 0; attempt < 2; attempt++ {
+		activeEndpoints, err = c.ActiveEndpoints(ctx, addr)
+		if err == nil {
+			break
+		}
+	}
+
+	if err != nil {
+		return err
+	}
+
+	for _, endpointID := range activeEndpoints.Endpoints {
+		endpoint := device.Endpoint(endpointID)
+		if endpoint == nil {
+			endpoint = model.NewEndpoint(endpointID)
+			device.EndpointAdd(endpoint)
+		}
+
+		if descriptor, err := c.SimpleDescriptor(ctx, addr, endpointID); err == nil {
+			endpoint.SetProfileID(descriptor.ProfileID)
+		}
+	}
+
+	return err
 }
 
 func (c *Client) LQI(ctx context.Context, networkAddress uint16) ([]NeighborLqiListItem, error) {
@@ -427,14 +446,12 @@ func (c *Client) LQI(ctx context.Context, networkAddress uint16) ([]NeighborLqiL
 			return nil, err
 		}
 
-		for {
-			select {
-			case frame := <-waitResponse:
-				return c.ZDOLQIMessage(frame)
+		select {
+		case frame := <-waitResponse:
+			return ZDOLQIMessageParse(frame)
 
-			case e := <-waitErr:
-				return nil, e
-			}
+		case e := <-waitErr:
+			return nil, e
 		}
 	}
 
@@ -471,14 +488,12 @@ func (c *Client) NetworkDiscovery(ctx context.Context) ([]NetworkListItem, error
 			return nil, err
 		}
 
-		for {
-			select {
-			case frame := <-waitResponse:
-				return c.ZDONetworkDiscoveryMessage(frame)
+		select {
+		case frame := <-waitResponse:
+			return ZDONetworkDiscoveryMessageParse(frame)
 
-			case e := <-waitErr:
-				return nil, e
-			}
+		case e := <-waitErr:
+			return nil, e
 		}
 	}
 
@@ -513,14 +528,12 @@ func (c *Client) RoutingTable(ctx context.Context, dstAddr uint16) ([]RoutingTab
 			return nil, err
 		}
 
-		for {
-			select {
-			case frame := <-waitResponse:
-				return c.ZDOManagementRoutingTableMessage(frame)
+		select {
+		case frame := <-waitResponse:
+			return ZDOManagementRoutingTableMessageParse(frame)
 
-			case e := <-waitErr:
-				return nil, e
-			}
+		case e := <-waitErr:
+			return nil, e
 		}
 	}
 
@@ -545,8 +558,68 @@ func (c *Client) RoutingTable(ctx context.Context, dstAddr uint16) ([]RoutingTab
 	return list, nil
 }
 
+func (c *Client) NodeDescription(ctx context.Context, networkAddress uint16) (_ *ZDODescriptionResponse, err error) {
+	waitResponse, waitErr := c.WaitAsync(ctx, func(response *Frame) bool {
+		return response.Type() == TypeAREQ && response.SubSystem() == SubSystemZDOInterface && response.CommandID() == CommandNodeDescriptionResponse
+	})
+
+	if err = c.ZDONodeDescription(ctx, networkAddress, networkAddress); err != nil {
+		return nil, err
+	}
+
+	select {
+	case frame := <-waitResponse:
+		return ZDONodeDescriptionResponseParse(frame)
+
+	case err = <-waitErr:
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+func (c *Client) SimpleDescriptor(ctx context.Context, networkAddress uint16, endpoint uint8) (_ *ZDOSimpleDescriptorResponse, err error) {
+	waitResponse, waitErr := c.WaitAsync(ctx, func(response *Frame) bool {
+		return response.Type() == TypeAREQ && response.SubSystem() == SubSystemZDOInterface && response.CommandID() == CommandSimpleDescriptorResponse
+	})
+
+	if err = c.ZDOSimpleDescriptor(ctx, networkAddress, networkAddress, endpoint); err != nil {
+		return nil, err
+	}
+
+	select {
+	case frame := <-waitResponse:
+		return ZDOSimpleDescriptorResponseParse(frame)
+
+	case err = <-waitErr:
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+func (c *Client) ActiveEndpoints(ctx context.Context, networkAddress uint16) (_ *ZDOActiveEndpointsResponse, err error) {
+	waitResponse, waitErr := c.WaitAsync(ctx, func(response *Frame) bool {
+		return response.Type() == TypeAREQ && response.SubSystem() == SubSystemZDOInterface && response.CommandID() == CommandActiveEndpointsResponse
+	})
+
+	if err = c.ZDOActiveEndpoints(ctx, networkAddress, networkAddress); err != nil {
+		return nil, err
+	}
+
+	select {
+	case frame := <-waitResponse:
+		return ZDOActiveEndpointsResponseParse(frame)
+
+	case err = <-waitErr:
+		return nil, err
+	}
+
+	return nil, nil
+}
+
 func (c *Client) LEDEnabled() bool {
-	return atomic.LoadUint32(&c.enabledLed) != 0
+	return atomic.LoadUint32(&c.ledState) != 0
 }
 
 func (c *Client) LEDSupport(ctx context.Context) bool {
@@ -570,9 +643,9 @@ func (c *Client) LED(ctx context.Context, enabled bool) error {
 	err := c.UtilLEDControl(ctx, 3, enabled)
 	if err == nil {
 		if enabled {
-			atomic.StoreUint32(&c.enabledLed, 1)
+			atomic.StoreUint32(&c.ledState, 1)
 		} else {
-			atomic.StoreUint32(&c.enabledLed, 0)
+			atomic.StoreUint32(&c.ledState, 0)
 		}
 	}
 
@@ -605,13 +678,13 @@ func (c *Client) InitializationCheck(ctx context.Context) (valid bool, err error
 	}
 
 	if valid {
-		if valid, err = c.nwItemValidate(ctx, nvItemChannelList(c.channel)); err != nil {
+		if valid, err = c.nwItemValidate(ctx, nvItemChannelList(c.options.Channel)); err != nil {
 			return false, err
 		}
 	}
 
 	if valid {
-		if valid, err = c.nwItemValidate(ctx, nvItemNetworkKeyDistribute(c.networkKeyDistribute)); err != nil {
+		if valid, err = c.nwItemValidate(ctx, nvItemNetworkKeyDistribute(c.options.networkKeyDistribute)); err != nil {
 			return false, err
 		}
 	}
@@ -623,17 +696,17 @@ func (c *Client) InitializationCheck(ctx context.Context) (valid bool, err error
 			return false, err
 		}
 
-		valid = bytes.Equal(response.Value, c.networkKey)
+		valid = bytes.Equal(response.Value, c.options.networkKey)
 	}
 
 	if valid {
-		if valid, err = c.nwItemValidate(ctx, nvItemPanID(c.panID)); err != nil {
+		if valid, err = c.nwItemValidate(ctx, nvItemPanID(c.options.panID)); err != nil {
 			return false, err
 		}
 	}
 
 	if valid {
-		if valid, err = c.nwItemValidate(ctx, nvItemExtendedPanID(c.extendedPanID)); err != nil {
+		if valid, err = c.nwItemValidate(ctx, nvItemExtendedPanID(c.options.extendedPanID)); err != nil {
 			return false, err
 		}
 	}
@@ -666,7 +739,7 @@ func (c *Client) initialization(ctx context.Context) (err error) {
 	}
 
 	// network key distribute
-	if err = c.nvItemWrite(ctx, nvItemNetworkKeyDistribute(c.networkKeyDistribute)); err != nil {
+	if err = c.nvItemWrite(ctx, nvItemNetworkKeyDistribute(c.options.networkKeyDistribute)); err != nil {
 		return err
 	}
 
@@ -676,23 +749,23 @@ func (c *Client) initialization(ctx context.Context) (err error) {
 	}
 
 	// channel list
-	if err = c.nvItemWrite(ctx, nvItemChannelList(c.channel)); err != nil {
+	if err = c.nvItemWrite(ctx, nvItemChannelList(c.options.Channel)); err != nil {
 		return err
 	}
 
 	// pan id
-	if err = c.nvItemWrite(ctx, nvItemPanID(c.panID)); err != nil {
+	if err = c.nvItemWrite(ctx, nvItemPanID(c.options.panID)); err != nil {
 		return err
 	}
 
 	// extended pan id
-	if err = c.nvItemWrite(ctx, nvItemExtendedPanID(c.extendedPanID)); err != nil {
+	if err = c.nvItemWrite(ctx, nvItemExtendedPanID(c.options.extendedPanID)); err != nil {
 		return err
 	}
 
 	if version.Product == VersionZStack12 {
 		// network key
-		if err = c.ZbWriteConfiguration(ctx, ZdConfigurationNetworkKey, c.networkKey); err != nil {
+		if err = c.ZbWriteConfiguration(ctx, ZdConfigurationNetworkKey, c.options.networkKey); err != nil {
 			return err
 		}
 
@@ -717,6 +790,79 @@ func (c *Client) initialization(ctx context.Context) (err error) {
 	return nil
 }
 
+func (c *Client) onDeviceJoined(msg *ZDODeviceJoinedMessage) {
+	// TODO: фильтрацию по подключаемым устройствам надо делать тут
+
+	device := c.Device(msg.NetworkAddress)
+	if device != nil {
+		//if device.NetworkAddress() != msg.NetworkAddress {
+		//	fmt.Println("Different network address", device.NetworkAddress(), msg.ExtendAddress)
+		//}
+
+		device.SetIEEEAddress(msg.ExtendAddress)
+	} else {
+		device = model.NewDevice(msg.NetworkAddress)
+		device.SetIEEEAddress(msg.ExtendAddress)
+
+		c.deviceAdd(device)
+	}
+
+	device.UpdateLastSeen()
+
+	// ignore started interview
+	if device.InterviewStatus() == InterviewStatusStarted {
+		return
+	}
+
+	device.SetInterviewStatus(InterviewStatusStarted)
+
+	// TODO: log error
+	if err := c.InterviewDevice(context.Background(), device); err != nil {
+		device.SetInterviewStatus(InterviewStatusDefault)
+	} else {
+		device.SetInterviewStatus(InterviewStatusCompleted)
+	}
+}
+
+func (c *Client) onDeviceAnnounce(msg *ZDOEndDeviceAnnounceMessage) {
+	device := c.Device(msg.NetworkAddress)
+	if device != nil {
+		// TODO: хм похоже network address тоже может меняться
+		device.SetCapabilities(msg.Capabilities)
+
+		device.UpdateLastSeen()
+	} else {
+		d := model.NewDevice(msg.NetworkAddress)
+		d.SetCapabilities(msg.Capabilities)
+
+		c.deviceAdd(d)
+	}
+}
+
+func (c *Client) onDeviceLeave(msg *ZDODeviceLeaveMessage) {
+	device := c.Device(msg.SourceAddress)
+	if device != nil {
+		c.deviceRemove(msg.SourceAddress)
+	}
+}
+
+func (c *Client) onDeviceInfo(msg *UtilDeviceInfo) {
+	if len(msg.AssocDevicesList) == 0 {
+		return
+	}
+
+	for _, networkAddress := range msg.AssocDevicesList {
+		device := c.Device(networkAddress)
+		if device == nil {
+			c.deviceAdd(model.NewDevice(networkAddress))
+		}
+	}
+
+	go func() {
+		c.SyncDevices(context.Background())
+	}()
+}
+
 func (c *Client) defaultWatcher() {
 	watcher := c.Watch()
 	defer func() {
@@ -730,40 +876,32 @@ func (c *Client) defaultWatcher() {
 			case SubSystemZDOInterface:
 				switch frame.CommandID() {
 				case CommandTcDeviceInd:
-					if msg, err := c.ZDODeviceJoinedMessage(frame); err == nil {
-						device := c.Device(msg.NetworkAddress)
-						if device != nil {
-							device.SetIEEEAddress(msg.ExtendAddress)
-						} else {
-							d := NewDevice()
-							d.SetNetworkAddress(msg.NetworkAddress)
-							d.SetIEEEAddress(msg.ExtendAddress)
-
-							c.deviceAdd(d)
-						}
+					if msg, err := ZDODeviceJoinedMessageParse(frame); err == nil {
+						c.onDeviceJoined(msg)
 					}
 
 				case CommandEndDeviceAnnounceInd:
-					if msg, err := c.ZDOEndDeviceAnnounceMessage(frame); err == nil {
-						device := c.Device(msg.NetworkAddress)
-						if device != nil {
-							device.SetCapabilities(msg.Capabilities)
-						} else {
-							d := NewDevice()
-							d.SetNetworkAddress(msg.NetworkAddress)
-							d.SetCapabilities(msg.Capabilities)
-
-							c.deviceAdd(d)
-						}
+					if msg, err := ZDOEndDeviceAnnounceMessageParse(frame); err == nil {
+						c.onDeviceAnnounce(msg)
 					}
 
+					// https://github.com/Koenkk/zigbee-herdsman/blob/5f6af2fbf0cc2323040e643d42eb0e5359eaa009/src/adapter/z-stack/adapter/zStackAdapter.ts#L634
+
 				case CommandLeaveInd:
-					if msg, err := c.ZDODeviceLeaveMessage(frame); err == nil {
-						c.deviceRemove(msg.SourceAddress)
+					if msg, err := ZDODeviceLeaveMessageParse(frame); err == nil {
+						c.onDeviceLeave(msg)
 					}
 
 				case CommandPermitJoinInd:
-					atomic.StoreUint32(&c.permitJoin, 0)
+					atomic.StoreUint32(&c.permitJoinState, 0)
+				}
+
+			case SubSystemUtilInterface:
+				switch frame.CommandID() {
+				case CommandGetDeviceInfo:
+					if msg, err := UtilGetDeviceInfoParse(frame); err == nil {
+						c.onDeviceInfo(msg)
+					}
 				}
 			}
 
