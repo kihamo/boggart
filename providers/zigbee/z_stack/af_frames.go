@@ -73,6 +73,10 @@ func (e Endpoint) AsBuffer() *Buffer {
 }
 
 func AfIncomingMessageParse(frame *Frame) (*AfIncomingMessage, error) {
+	if frame.SubSystem() != SubSystemAFInterface {
+		return nil, errors.New("frame isn't a AF interface")
+	}
+
 	if frame.CommandID() != CommandAfIncomingMessage {
 		return nil, errors.New("frame isn't a af_incoming_msg")
 	}

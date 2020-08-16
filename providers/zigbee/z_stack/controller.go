@@ -863,6 +863,21 @@ func (c *Client) onDeviceInfo(msg *UtilDeviceInfo) {
 	}()
 }
 
+func (c *Client) onAfIncomingMessage(msg *AfIncomingMessage) {
+	device := c.Device(msg.SrcAddr)
+	if device == nil {
+		return
+	}
+
+	device.UpdateLastSeen()
+
+	endpoint := device.Endpoint(msg.DstEndpoint)
+	if endpoint == nil {
+		endpoint = model.NewEndpoint(msg.DstEndpoint)
+		device.EndpointAdd(endpoint)
+	}
+}
+
 func (c *Client) defaultWatcher() {
 	watcher := c.Watch()
 	defer func() {
@@ -873,6 +888,13 @@ func (c *Client) defaultWatcher() {
 		select {
 		case frame := <-watcher.NextFrame():
 			switch frame.SubSystem() {
+			case SubSystemAFInterface:
+				if frame.CommandID() == CommandAfIncomingMessage {
+					if msg, err := AfIncomingMessageParse(frame); err == nil {
+						c.onAfIncomingMessage(msg)
+					}
+				}
+
 			case SubSystemZDOInterface:
 				switch frame.CommandID() {
 				case CommandTcDeviceInd:
@@ -897,8 +919,7 @@ func (c *Client) defaultWatcher() {
 				}
 
 			case SubSystemUtilInterface:
-				switch frame.CommandID() {
-				case CommandGetDeviceInfo:
+				if frame.CommandID() == CommandGetDeviceInfo {
 					if msg, err := UtilGetDeviceInfoParse(frame); err == nil {
 						c.onDeviceInfo(msg)
 					}

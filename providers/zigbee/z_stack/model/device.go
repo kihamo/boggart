@@ -102,6 +102,11 @@ func (d *Device) SetManufacturerCode(code uint16) {
 }
 
 func (d *Device) EndpointAdd(endpoint *Endpoint) {
+	// ignore exists
+	if d.Endpoint(endpoint.ID()) != nil {
+		return
+	}
+
 	d.endpoints.Store(endpoint.ID(), endpoint)
 }
 
