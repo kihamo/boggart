@@ -372,7 +372,7 @@ func (c *Client) SyncDevices(ctx context.Context) error {
 			device.SetIEEEAddress(item.ExtendedAddress)
 			device.SetDeviceType(item.DeviceType)
 
-			// c.InterviewDevice(ctx, device)
+			c.InterviewDevice(ctx, device)
 		}
 	}
 
@@ -391,21 +391,19 @@ func (c *Client) InterviewDevice(ctx context.Context, device *model.Device) (err
 		}
 	}
 
-	if err != nil {
-		return err
-	}
+	if err == nil {
+		device.SetManufacturerCode(desc.ManufacturerCode)
 
-	device.SetManufacturerCode(desc.ManufacturerCode)
-
-	switch desc.LogicalType {
-	case DeviceLogicalTypeCoordinator:
-		device.SetDeviceType(DeviceTypeCoordinator)
-	case DeviceLogicalTypeRouter:
-		device.SetDeviceType(DeviceTypeRouter)
-	case DeviceLogicalTypeEndDevice:
-		device.SetDeviceType(DeviceTypeEndDevice)
-	default:
-		device.SetDeviceType(DeviceTypeNone)
+		switch desc.LogicalType {
+		case DeviceLogicalTypeCoordinator:
+			device.SetDeviceType(DeviceTypeCoordinator)
+		case DeviceLogicalTypeRouter:
+			device.SetDeviceType(DeviceTypeRouter)
+		case DeviceLogicalTypeEndDevice:
+			device.SetDeviceType(DeviceTypeEndDevice)
+		default:
+			device.SetDeviceType(DeviceTypeNone)
+		}
 	}
 
 	// endpoints
@@ -417,19 +415,19 @@ func (c *Client) InterviewDevice(ctx context.Context, device *model.Device) (err
 		}
 	}
 
-	if err != nil {
-		return err
-	}
+	if err == nil {
+		for _, endpointID := range activeEndpoints.Endpoints {
+			endpoint := device.Endpoint(endpointID)
+			if endpoint == nil {
+				endpoint = model.NewEndpoint(endpointID)
+				device.EndpointAdd(endpoint)
+			}
 
-	for _, endpointID := range activeEndpoints.Endpoints {
-		endpoint := device.Endpoint(endpointID)
-		if endpoint == nil {
-			endpoint = model.NewEndpoint(endpointID)
-			device.EndpointAdd(endpoint)
-		}
-
-		if descriptor, err := c.SimpleDescriptor(ctx, addr, endpointID); err == nil {
-			endpoint.SetProfileID(descriptor.ProfileID)
+			if descriptor, err := c.SimpleDescriptor(ctx, addr, endpointID); err == nil {
+				endpoint.SetProfileID(descriptor.ProfileID)
+				endpoint.SetInClusterList(descriptor.InClusterList)
+				endpoint.SetOutClusterList(descriptor.OutClusterList)
+			}
 		}
 	}
 
@@ -558,24 +556,38 @@ func (c *Client) RoutingTable(ctx context.Context, dstAddr uint16) ([]RoutingTab
 	return list, nil
 }
 
-func (c *Client) NodeDescription(ctx context.Context, networkAddress uint16) (_ *ZDODescriptionResponse, err error) {
-	waitResponse, waitErr := c.WaitAsync(ctx, func(response *Frame) bool {
-		return response.Type() == TypeAREQ && response.SubSystem() == SubSystemZDOInterface && response.CommandID() == CommandNodeDescriptionResponse
-	})
+func (c *Client) NodeDescription(ctx context.Context, networkAddress uint16) (msg *ZDODescriptionResponse, err error) {
+	request := func() (*ZDODescriptionResponse, error) {
+		waitResponse, waitErr := c.WaitAsync(ctx, func(response *Frame) bool {
+			return response.Type() == TypeAREQ && response.SubSystem() == SubSystemZDOInterface && response.CommandID() == CommandNodeDescriptionResponse
+		})
 
-	if err = c.ZDONodeDescription(ctx, networkAddress, networkAddress); err != nil {
-		return nil, err
+		if e := c.ZDONodeDescription(ctx, networkAddress, networkAddress); e != nil {
+			return nil, e
+		}
+
+		select {
+		case frame := <-waitResponse:
+			return ZDONodeDescriptionResponseParse(frame)
+
+		case e := <-waitErr:
+			return nil, e
+		}
 	}
 
-	select {
-	case frame := <-waitResponse:
-		return ZDONodeDescriptionResponseParse(frame)
+	// Magic :)
+	// https://github.com/Koenkk/zigbee2mqtt/issues/3276
+	msg, err = request()
+	if err != nil {
+		err = c.ZDODiscoverRoute(ctx, networkAddress, 0, 0x0F*2)
+		if err != nil {
+			return nil, err
+		}
 
-	case err = <-waitErr:
-		return nil, err
+		msg, err = request()
 	}
 
-	return nil, nil
+	return msg, err
 }
 
 func (c *Client) SimpleDescriptor(ctx context.Context, networkAddress uint16, endpoint uint8) (_ *ZDOSimpleDescriptorResponse, err error) {

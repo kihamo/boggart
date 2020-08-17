@@ -3,7 +3,7 @@
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
             <div class="x_title">
-                <h2>{{ i18n "ZigBee devices" . }}</h2>
+                <h2>{{ i18n "ZigBee device" . }}</h2>
                 <div class="clearfix"></div>
             </div>
             <div class="x_content">
@@ -91,6 +91,18 @@
                         </tbody>
                     </table>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>{{ i18n "Devices and endpoints" . }}</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
                 <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
                     <thead>
                     <tr>
@@ -112,6 +124,32 @@
                         <td>{{ printf "0x%X" $device.ManufacturerCode }}</td>
                         <td><script type="application/javascript">document.write(dateToString('{{ $device.LastSeen.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
                     </tr>
+                    {{ end }}
+                    </tbody>
+                </table>
+                <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                    <thead>
+                    <tr>
+                        <th>{{ i18n "Endpoint" . }}</th>
+                        <th>{{ i18n "Profile ID" . }}</th>
+                        <th>{{ i18n "In clusters" . }}</th>
+                        <th>{{ i18n "Out clusters" . }}</th>
+                        <th>{{ i18n "Network address" . }}</th>
+                        <th>{{ i18n "IEEE address" . }}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{ range $device := .devices }}
+                        {{ range $endpoint := $device.Endpoints }}
+                        <tr>
+                            <td>{{ $endpoint.ID }}</td>
+                            <td>{{ $endpoint.ProfileID }}</td>
+                            <td>{{ $endpoint.InClusterList }}</td>
+                            <td>{{ $endpoint.OutClusterList }}</td>
+                            <td>{{ $device.NetworkAddress }}</td>
+                            <td>{{ $device.IEEEAddressAsString }}</td>
+                        </tr>
+                        {{ end }}
                     {{ end }}
                     </tbody>
                 </table>

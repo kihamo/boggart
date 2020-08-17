@@ -173,13 +173,13 @@ func ZDOSimpleDescriptorResponseParse(frame *Frame) (*ZDOSimpleDescriptorRespons
 	msg.DeviceVersion = dataOut.ReadUint8()
 
 	msg.NumInClusters = dataOut.ReadUint8()
-	msg.InClusterList = make([]uint16, msg.NumInClusters)
+	msg.InClusterList = make([]uint16, 0, msg.NumInClusters)
 	for i := uint8(1); i <= msg.NumInClusters; i++ {
 		msg.InClusterList = append(msg.InClusterList, dataOut.ReadUint16())
 	}
 
 	msg.NumOutClusters = dataOut.ReadUint8()
-	msg.OutClusterList = make([]uint16, msg.NumOutClusters)
+	msg.OutClusterList = make([]uint16, 0, msg.NumOutClusters)
 	for i := uint8(1); i <= msg.NumOutClusters; i++ {
 		msg.OutClusterList = append(msg.OutClusterList, dataOut.ReadUint16())
 	}

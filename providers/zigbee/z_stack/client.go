@@ -82,11 +82,7 @@ func (c *Client) loop() {
 					data = data[i:]
 				}
 
-				if len(data) < FrameLengthMin {
-					break
-				}
-
-				if data[0] != SOF {
+				if len(data) < FrameLengthMin || data[0] != SOF {
 					break
 				}
 

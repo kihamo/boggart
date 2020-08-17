@@ -449,3 +449,26 @@ func (c *Client) ZDORoutingTable(ctx context.Context, dstAddr uint16, startIndex
 
 	return nil
 }
+
+func (c *Client) ZDODiscoverRoute(ctx context.Context, dstAddr uint16, options, radius uint8) error {
+	dataIn := NewBuffer(nil)
+	dataIn.WriteUint16(dstAddr) // dstAddr
+	dataIn.WriteUint8(options)  // options
+	dataIn.WriteUint8(radius)   // radius
+
+	response, err := c.CallWithResultSREQ(ctx, dataIn.Frame(0x25, 0x45))
+	if err != nil {
+		return err
+	}
+
+	dataOut := response.DataAsBuffer()
+	if dataOut.Len() == 0 {
+		return errors.New("failure")
+	}
+
+	if status := dataOut.ReadCommandStatus(); status != CommandStatusSuccess {
+		return status
+	}
+
+	return nil
+}

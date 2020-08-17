@@ -351,6 +351,10 @@ var definitions = map[uint16]map[uint16]definition{
 			name:  "ZDO_AUTO_FIND_DESTINATION",
 			types: []uint16{TypeAREQ},
 		},
+		0x45: {
+			name:  "ZDO_DISCOVER_ROUTE",
+			types: []uint16{TypeSREQ, TypeSRSP},
+		},
 		0x4A: {
 			name:  "UTIL_ASSOC_GET_WITH_ADDRESS",
 			types: []uint16{TypeSREQ, TypeSRSP},

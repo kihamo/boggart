@@ -1,6 +1,7 @@
 package z_stack
 
 import (
+	"bytes"
 	"context"
 	"encoding/hex"
 	"fmt"
@@ -43,29 +44,49 @@ func (b *Bind) getClient(ctx context.Context) (_ *z_stack.Client, err error) {
 
 		dump := func(message string) func([]byte) {
 			return func(data []byte) {
-				args := make([]interface{}, 0)
-
-				var frame z_stack.Frame
-				if err := frame.UnmarshalBinary(data); err == nil {
-					args = append(args,
-						"description", frame.Description(),
-						"length", frame.Length(),
-						"type", fmt.Sprintf("0x%X", frame.Type()),
-						"sub-system", fmt.Sprintf("0x%X", frame.SubSystem()),
-						"command-id", fmt.Sprintf("0x%X", frame.CommandID()),
-						"data", fmt.Sprintf("%v", frame.Data()),
-						"fcs", frame.FCS(),
-					)
-				} else {
-					args = append(args,
-						"payload", fmt.Sprintf("%v", data),
-						"hex", "0x"+hex.EncodeToString(data),
-					)
+				if len(data) == 0 {
+					return
 				}
 
-				fmt.Println(append([]interface{}{message}, args...)...)
+				for {
+					i := bytes.IndexByte(data, z_stack.SOF)
+					if i > 0 {
+						data = data[i:]
+					}
 
-				b.Logger().Debug(message, args...)
+					if len(data) < z_stack.FrameLengthMin || data[0] != z_stack.SOF {
+						return
+					}
+
+					l := uint16(data[z_stack.PositionFrameLength]) + z_stack.FrameLengthMin
+					args := make([]interface{}, 0)
+
+					var frame z_stack.Frame
+					if err := frame.UnmarshalBinary(data[:l]); err == nil {
+						args = append(args,
+							"description", frame.Description(),
+							"length", frame.Length(),
+							"type", fmt.Sprintf("0x%X", frame.Type()),
+							"sub-system", fmt.Sprintf("0x%X", frame.SubSystem()),
+							"command-id", fmt.Sprintf("0x%X", frame.CommandID()),
+							"data", fmt.Sprintf("%v", frame.Data()),
+							"fcs", frame.FCS(),
+						)
+
+						data = data[l:]
+
+					} else {
+						args = append(args,
+							"payload", fmt.Sprintf("%v", data),
+							"hex", "0x"+hex.EncodeToString(data),
+						)
+
+						data = data[:0]
+					}
+
+					b.Logger().Debug(message, args...)
+					//fmt.Println(append([]interface{}{message}, args...)...)
+				}
 			}
 		}
 
