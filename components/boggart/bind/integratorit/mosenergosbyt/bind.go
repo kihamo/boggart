@@ -1,6 +1,9 @@
 package mosenergosbyt
 
 import (
+	"context"
+	"errors"
+
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/integratorit/mosenergosbyt"
 )
@@ -15,12 +18,48 @@ const (
 )
 
 type Bind struct {
+	di.MetaBind
 	di.MQTTBind
 	di.WorkersBind
 	di.LoggerBind
 	di.ProbesBind
 	di.WidgetBind
 
-	config *Config
-	client *mosenergosbyt.Client
+	config  *Config
+	client  *mosenergosbyt.Client
+	account string
+}
+
+func (b *Bind) Run() error {
+	accounts, err := b.client.Accounts(context.Background())
+	if err != nil {
+		return err
+	}
+
+	for i, account := range accounts {
+		if (b.config.Account == "" && i == 0) || b.config.Account == account.NNAccount {
+			b.config.Account = account.NNAccount
+			b.account = account.NNAccount
+			break
+		}
+	}
+
+	return nil
+}
+
+func (b *Bind) Account(ctx context.Context) (*mosenergosbyt.Account, error) {
+	if b.account != "" {
+		accounts, err := b.client.Accounts(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, account := range accounts {
+			if account.NNAccount == b.account {
+				return &account, nil
+			}
+		}
+	}
+
+	return nil, errors.New("account not found")
 }

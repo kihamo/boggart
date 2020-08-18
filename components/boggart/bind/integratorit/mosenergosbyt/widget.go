@@ -1,7 +1,6 @@
 package mosenergosbyt
 
 import (
-	"strconv"
 	"time"
 
 	"github.com/elazarl/go-bindata-assetfs"
@@ -10,6 +9,13 @@ import (
 
 func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	widget := b.Widget()
+
+	account, err := b.Account(r.Context())
+	if err != nil {
+		widget.NotFound(w, r)
+		return
+	}
+
 	query := r.URL().Query()
 
 	action := query.Get("action")
@@ -26,16 +32,10 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		return
 	}
 
-	abonent, err := strconv.ParseUint(query.Get("abonent"), 10, 64)
-	if err != nil {
-		widget.NotFound(w, r)
-		return
-	}
-
 	w.Header().Set("Content-Disposition", "attachment; filename=\"mosenergosbyt_bill_"+period.Format("20060102")+".pdf\"")
 	w.Header().Set("Content-Type", "application/pdf")
 
-	if err := b.client.Bill(r.Context(), abonent, uuid, period, w); err != nil {
+	if err := b.client.Bill(r.Context(), account.Provider.IDAbonent, uuid, period, w); err != nil {
 		widget.InternalError(w, r, err)
 	}
 }

@@ -13,8 +13,9 @@ type Config struct {
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
 	Debug                  bool
-	Login                  string        `valid:"required"`
-	Password               string        `valid:"required"`
+	Login                  string `valid:"required"`
+	Password               string `valid:"required"`
+	Account                string
 	UpdaterInterval        time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 	BalanceDetailsInterval time.Duration `mapstructure:"balance_details_interval" yaml:"balance_details_interval"`
 	TopicBalance           mqtt.Topic    `mapstructure:"topic_balance" yaml:"topic_balance"`

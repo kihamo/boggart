@@ -22,66 +22,61 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskUpdater(ctx context.Context) error {
-	accounts, err := b.client.Accounts(ctx)
+	account, err := b.Account(ctx)
 	if err != nil {
 		return err
 	}
 
-	for _, account := range accounts {
-		if balance, e := b.client.CurrentBalance(ctx, account.Provider.IDAbonent); e != nil {
+	if balance, e := b.client.CurrentBalance(ctx, account.Provider.IDAbonent); e != nil {
+		err = multierr.Append(e, err)
+	} else {
+		metricBalance.With("account", account.NNAccount).Set(balance.Balance)
+
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicBalance.Format(account.NNAccount), balance.Balance); e != nil {
 			err = multierr.Append(e, err)
-		} else {
-			accountID := strconv.FormatUint(account.Provider.IDAbonent, 10)
+		}
 
-			metricBalance.With("account", accountID).Set(balance.Balance)
+		for i, service := range balance.Services {
+			var serviceID string
 
-			if e := b.MQTT().PublishAsync(ctx, b.config.TopicBalance.Format(accountID), balance.Balance); e != nil {
-				err = multierr.Append(e, err)
+			if id, ok := services[strings.ToLower(service.Service)]; ok {
+				serviceID = id
+			} else {
+				serviceID = strconv.FormatInt(int64(i), 10)
 			}
 
-			for i, service := range balance.Services {
-				var serviceID string
+			metricServiceBalance.With("account", account.NNAccount, "service", serviceID).Set(service.Balance)
 
-				if id, ok := services[strings.ToLower(service.Service)]; ok {
-					serviceID = id
-				} else {
-					serviceID = strconv.FormatInt(int64(i), 10)
-				}
+			if e := b.MQTT().PublishAsync(ctx, b.config.TopicServiceBalance.Format(account.NNAccount, serviceID), service.Balance); e != nil {
+				err = multierr.Append(e, err)
+			}
+		}
+	}
 
-				metricServiceBalance.With("account", accountID, "service", serviceID).Set(service.Balance)
+	// last bill
+	if details, e := b.client.ChargeDetail(ctx, account.Provider.IDAbonent, time.Now().Add(-b.config.BalanceDetailsInterval), time.Now()); e != nil {
+		err = multierr.Append(e, err)
+	} else {
+		lastBillTime := time.Time{}
+		lastBillUUID := ""
 
-				if e := b.MQTT().PublishAsync(ctx, b.config.TopicServiceBalance.Format(accountID, serviceID), service.Balance); e != nil {
-					err = multierr.Append(e, err)
-				}
+		for _, detail := range details {
+			if lastBillTime.IsZero() || detail.Period.After(lastBillTime) {
+				lastBillTime = detail.Period.Time
+				lastBillUUID = detail.Services[0].ReportUUID
 			}
 		}
 
-		// last bill
-		if details, e := b.client.ChargeDetail(ctx, account.Provider.IDAbonent, time.Now().Add(-b.config.BalanceDetailsInterval), time.Now()); e != nil {
-			err = multierr.Append(e, err)
-		} else {
-			lastBillTime := time.Time{}
-			lastBillUUID := ""
+		if !lastBillTime.IsZero() {
+			billLink, e := b.Widget().URL(map[string]string{
+				"action": "bill",
+				"period": lastBillTime.Format(layoutPeriod),
+				"uuid":   lastBillUUID,
+			})
 
-			for _, detail := range details {
-				if lastBillTime.IsZero() || detail.Period.After(lastBillTime) {
-					lastBillTime = detail.Period.Time
-					lastBillUUID = detail.Services[0].ReportUUID
-				}
-			}
-
-			if !lastBillTime.IsZero() {
-				billLink, e := b.Widget().URL(map[string]string{
-					"action":  "bill",
-					"abonent": strconv.FormatUint(account.Provider.IDAbonent, 10),
-					"period":  lastBillTime.Format(layoutPeriod),
-					"uuid":    lastBillUUID,
-				})
-
-				if e == nil {
-					if e := b.MQTT().PublishAsync(ctx, b.config.TopicLastBill.Format(account.Provider.IDAbonent), billLink); e != nil {
-						err = multierr.Append(err, e)
-					}
+			if e == nil {
+				if e := b.MQTT().PublishAsync(ctx, b.config.TopicLastBill.Format(account.NNAccount), billLink); e != nil {
+					err = multierr.Append(err, e)
 				}
 			}
 		}
