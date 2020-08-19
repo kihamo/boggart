@@ -15,15 +15,18 @@ var (
 	humanPrefix = []string{"K", "M", "G"}
 )
 
-type CleanSummary struct {
-	TotalTime     time.Duration
-	TotalArea     uint64 // mm2
-	TotalCleanups uint64
-	CleanupIDs    []uint64
+type CleanTime struct {
+	time.Duration
 }
 
-func (c CleanSummary) TotalTimeHuman() string {
-	val := c.TotalTime.Seconds()
+func newCleanTime(d int64) CleanTime {
+	return CleanTime{
+		Duration: time.Duration(d) * time.Second,
+	}
+}
+
+func (t CleanTime) String() string {
+	val := t.Seconds()
 
 	for i := 0; ; i++ {
 		v := float64(val / 60)
@@ -38,8 +41,10 @@ func (c CleanSummary) TotalTimeHuman() string {
 	return ""
 }
 
-func (c CleanSummary) TotalAreaHuman() string {
-	val := float64(c.TotalArea)
+type CleanArea uint64 // mm2
+
+func (a CleanArea) String() string {
+	val := float64(a)
 	step := 100.0
 
 	for i := 0; ; i++ {
@@ -50,16 +55,18 @@ func (c CleanSummary) TotalAreaHuman() string {
 			prefixIndex := 0
 			prefixStep := 1000.0
 
-			for {
-				val /= 1000
+			if v > 1 {
+				for {
+					val /= 1000
 
-				if val < prefixStep || prefixIndex == len(humanPrefix)-1 {
-					prefix = humanPrefix[prefixIndex]
-					break
+					if val < prefixStep || prefixIndex == len(humanPrefix)-1 {
+						prefix = humanPrefix[prefixIndex]
+						break
+					}
+
+					prefixIndex++
+					prefixStep += 1000
 				}
-
-				prefixIndex++
-				prefixStep += 1000
 			}
 
 			return strconv.Itoa(int(math.Round(val))) + prefix + " " + humanArea[i]
@@ -71,11 +78,18 @@ func (c CleanSummary) TotalAreaHuman() string {
 	return ""
 }
 
+type CleanSummary struct {
+	TotalTime     CleanTime
+	TotalArea     CleanArea
+	TotalCleanups uint64
+	CleanupIDs    []uint64
+}
+
 type CleanDetail struct {
 	StartTime        time.Time
 	EndTime          time.Time
-	CleaningDuration time.Duration
-	Area             uint64 // mm2
+	CleaningDuration CleanTime
+	Area             CleanArea // mm2
 	Completed        bool
 }
 
@@ -96,10 +110,10 @@ func (d *Device) CleanSummary(ctx context.Context) (CleanSummary, error) {
 	for i, v := range response.Result {
 		switch i {
 		case 0:
-			result.TotalTime = time.Duration(v.(float64)) * time.Second
+			result.TotalTime = newCleanTime(int64(v.(float64)))
 
 		case 1:
-			result.TotalArea = uint64(v.(float64))
+			result.TotalArea = CleanArea(v.(float64))
 
 		case 2:
 			result.TotalCleanups = uint64(v.(float64))
@@ -140,10 +154,10 @@ func (d *Device) CleanDetails(ctx context.Context, id uint64) (CleanDetail, erro
 			result.EndTime = time.Unix(v, 0)
 
 		case 2:
-			result.CleaningDuration = time.Duration(v) * time.Second
+			result.CleaningDuration = newCleanTime(v)
 
 		case 3:
-			result.Area = uint64(v)
+			result.Area = CleanArea(v)
 
 		case 5:
 			result.Completed = v == 1
