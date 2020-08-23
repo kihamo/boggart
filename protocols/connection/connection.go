@@ -208,8 +208,12 @@ func (w *Wrapper) Invoke(request []byte) (response []byte, err error) {
 
 			buffer.Write((*buf)[:n])
 
-			// FIXME: если ответ будет ровно равен len(*buf) то следующий цикл приведет к блокировке
-			if n < len(*buf) {
+			if w.options.readCheck != nil {
+				if !w.options.readCheck(buffer.Bytes()) {
+					break
+				}
+			} else if n < len(*buf) {
+				// FIXME: если ответ будет ровно равен len(*buf) то следующий цикл приведет к блокировке
 				break
 			}
 		}

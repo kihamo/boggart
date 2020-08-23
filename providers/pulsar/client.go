@@ -17,6 +17,7 @@ type HeatMeter struct {
 func New(conn connection.Connection, opts ...Option) *HeatMeter {
 	conn.ApplyOptions(connection.WithGlobalLock(true))
 	conn.ApplyOptions(connection.WithOnceInit(true))
+	conn.ApplyOptions(connection.WithReadCheck(ReadCheck))
 
 	client := &HeatMeter{
 		connection: conn,

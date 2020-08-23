@@ -122,3 +122,7 @@ func (p *Packet) String() string {
 	data, _ := p.MarshalBinary()
 	return hex.EncodeToString(data)
 }
+
+func ReadCheck(b []byte) bool {
+	return len(b) <= 10
+}

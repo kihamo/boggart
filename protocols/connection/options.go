@@ -6,6 +6,7 @@ type options struct {
 	lockGlobal bool
 	dumpRead   func([]byte)
 	dumpWrite  func([]byte)
+	readCheck  func([]byte) bool
 }
 
 type Option interface {
@@ -68,5 +69,11 @@ func WithDumpRead(dump func([]byte)) Option {
 func WithDumpWrite(dump func([]byte)) Option {
 	return newFuncOption(func(o *options) {
 		o.dumpWrite = dump
+	})
+}
+
+func WithReadCheck(check func([]byte) bool) Option {
+	return newFuncOption(func(o *options) {
+		o.readCheck = check
 	})
 }

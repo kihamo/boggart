@@ -152,7 +152,10 @@ sudo openhab-cli clean-cache
 sudo systemctl start openhab2
 ```
 
-# docker swarm
+# docker
+
+#### Swarm
+Инициализация кластера
 ```
 docker swarm init --advertise-addr 192.168.70.10
 ```
@@ -160,3 +163,47 @@ docker swarm init --advertise-addr 192.168.70.10
 ```
 docker swarm join-token manager
 ```
+
+Включаем не защищенные репы в маке
+```
+For docker desktop 2.3.x in MAC , it can be set as follows: Go to "docker" -> "preferences" -> "Docker Engine" and add the following:
+
+insecure-registries": [
+    "my private docker hub  url"
+  ]
+```
+
+#### Registry
+```
+docker run -d -p 5000:5000 --restart=always --name registry registry:2
+```
+
+#### Сборка образа
+Собираем через docker-composer
+```
+docker-compose build boggart-server
+```
+
+Пушим в удаленную приватную репу
+```
+docker-compose push boggart-server
+```
+
+Деплоем через stack (на ноде)
+```
+cd $GOPATH/src/github.com/kihamo/boggart/
+docker stack deploy --compose-file docker-compose.yml boggart
+```
+Просмотр лога предпоследнего контейнера (аналог кшал лога)
+```
+docker service logs -f $(docker stack ps boggart -q | head -2 | tail -1)
+```
+```
+docker service logs -f $(docker stack ps boggart -q | head -1)
+```
+Залезаем внутрь реплики
+```
+docker exec -it $(docker ps -q -f name=boggart_boggart-server) /bin/bash
+```
+Как правильно прокидывать устройства
+https://github.com/Koenkk/zigbee2mqtt/issues/2049

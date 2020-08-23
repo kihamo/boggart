@@ -1,21 +1,39 @@
-version: '3.7'
+version: '3.8'
 services:
   boggart-server:
-    image: "boggart-server:latest"
+    image: "registry.shosho.ru/boggart-server:latest"
     build:
       target: "server"
       context: "./"
       dockerfile: "./Dockerfile"
     ports:
-      - "8881:80"
-    env_file: "./cmd/test/boggart.env"
-    volumes:
-      - "./cmd/test/config.yaml:/config.yaml"
+      - "8881:8080"
+      - "1514:1514"
+    env_file: "./cmd/server/boggart.env"
     container_name: "boggart_server"
+    configs:
+      - source: "boggart_server_config_yaml"
+        target: "/config.yaml"
+    volumes:
+      - "storage:/data/boggart_timelapse/villa/cam1/"
     devices:
       - "/dev/ttyUSB0:/dev/ttyUSB0"
+    restart: always
+    network_mode: host
+    privileged: true
     deploy:
+      placement:
+        constraints: [node.role == manager]
       resources:
         limits:
-          cpus: '0.70'
+          cpus: "0.70"
           memory: 500M
+      replicas: 1
+
+volumes:
+  storage:
+    driver: local
+
+configs:
+  boggart_server_config_yaml:
+    file: "./cmd/server/config.yaml"
