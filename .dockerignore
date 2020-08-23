@@ -1,0 +1,13 @@
+.git
+*.pdf
+*.log
+.DS_Store
+.gitignore
+.golangci.yml
+.idea
+docs
+openhab2
+test
+docker-compose.yml
+README.md
+cmd/test

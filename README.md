@@ -151,3 +151,12 @@ sudo systemctl stop openhab2
 sudo openhab-cli clean-cache
 sudo systemctl start openhab2
 ```
+
+# docker swarm
+```
+docker swarm init --advertise-addr 192.168.70.10
+```
+Что бы потом получить строку с джоинтом к кластеру
+```
+docker swarm join-token manager
+```

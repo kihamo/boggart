@@ -1,0 +1,21 @@
+version: '3.7'
+services:
+  boggart-server:
+    image: "boggart-server:latest"
+    build:
+      target: "server"
+      context: "./"
+      dockerfile: "./Dockerfile"
+    ports:
+      - "8881:80"
+    env_file: "./cmd/test/boggart.env"
+    volumes:
+      - "./cmd/test/config.yaml:/config.yaml"
+    container_name: "boggart_server"
+    devices:
+      - "/dev/ttyUSB0:/dev/ttyUSB0"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.70'
+          memory: 500M
