@@ -1,13 +1,5 @@
 package boggart
 
-import (
-	"github.com/kihamo/go-workers/event"
-)
-
-var (
-	BindEventSyslogReceive = event.NewBaseEvent("SyslogReceive")
-)
-
 type BindStatus uint64
 
 const (

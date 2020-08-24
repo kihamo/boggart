@@ -70,6 +70,13 @@ func (c *WidgetContainer) Bind() boggart.Bind {
 }
 
 func (c *WidgetContainer) Handle(w *dashboard.Response, r *dashboard.Request) {
+	switch c.bind.Status() {
+	case boggart.BindStatusOnline, boggart.BindStatusOffline:
+	default:
+		c.NotFound(w, r)
+		return
+	}
+
 	if h, ok := c.Bind().(WidgetHandler); ok {
 		r = r.WithContext(dashboard.ContextWithTemplateNamespace(r.Context(), c.TemplateNamespace()))
 		r = r.WithContext(boggart.ContextWithI18nDomain(r.Context(), c.I18nDomain()))

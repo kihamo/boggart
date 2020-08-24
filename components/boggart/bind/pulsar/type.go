@@ -3,6 +3,7 @@ package pulsar
 import (
 	"time"
 
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
 )
 
@@ -17,8 +18,9 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	}
 
 	bind := &Bind{
-		config:   config,
-		location: loc,
+		config:         config,
+		location:       loc,
+		connectionOnce: &atomic.Once{},
 	}
 
 	return bind, nil

@@ -131,6 +131,12 @@ func (c *ProbesContainer) Readiness() w.Task {
 	logger, _ := LoggerContainerBind(c.bind.Bind())
 
 	probeTask := task.NewFunctionTask(func(ctx context.Context) (_ interface{}, err error) {
+		switch c.bind.Status() {
+		case boggart.BindStatusInitializing, boggart.BindStatusOnline, boggart.BindStatusOffline:
+		default:
+			return nil, nil
+		}
+
 		ch := make(chan error, 1)
 		go func() {
 			ch <- has.ReadinessProbe(ctx)
@@ -211,8 +217,9 @@ func (c *ProbesContainer) Liveness() w.Task {
 	logger, _ := LoggerContainerBind(c.bind.Bind())
 
 	probeTask := task.NewFunctionTask(func(ctx context.Context) (_ interface{}, err error) {
-		currentStatus := c.bind.Status()
-		if currentStatus != boggart.BindStatusOnline && currentStatus != boggart.BindStatusOffline {
+		switch c.bind.Status() {
+		case boggart.BindStatusOnline, boggart.BindStatusOffline:
+		default:
 			return nil, nil
 		}
 

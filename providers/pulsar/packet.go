@@ -123,6 +123,10 @@ func (p *Packet) String() string {
 	return hex.EncodeToString(data)
 }
 
-func ReadCheck(b []byte) bool {
-	return len(b) <= 10
+func ReadCheck(data []byte) bool {
+	if len(data) < 6 {
+		return true
+	}
+
+	return uint8(len(data)) < data[5]
 }

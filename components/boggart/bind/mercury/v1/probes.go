@@ -11,6 +11,9 @@ func (b *Bind) LivenessProbe(ctx context.Context) (err error) {
 }
 
 func (b *Bind) ReadinessProbe(_ context.Context) (err error) {
-	_, _, err = b.provider.Version()
+	if provider, e := b.Provider(); e == nil {
+		_, _, err = provider.Version()
+	}
+
 	return err
 }

@@ -19,12 +19,17 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskUpdater(ctx context.Context) error {
-	tariffCount, err := b.provider.TariffCount()
+	provider, err := b.Provider()
 	if err != nil {
 		return err
 	}
 
-	powerValues, err := b.provider.PowerCounters()
+	tariffCount, err := provider.TariffCount()
+	if err != nil {
+		return err
+	}
+
+	powerValues, err := provider.PowerCounters()
 	if err != nil {
 		return err
 	}
@@ -65,7 +70,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 	}
 
 	// optimization
-	if voltage, amperage, power, e := b.provider.UIPCurrent(); e == nil {
+	if voltage, amperage, power, e := provider.UIPCurrent(); e == nil {
 		metricVoltage.With("serial_number", sn).Set(float64(voltage))
 		metricAmperage.With("serial_number", sn).Set(amperage)
 		metricPower.With("serial_number", sn).Set(float64(power))
@@ -85,7 +90,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		err = multierr.Append(err, e)
 	}
 
-	if voltage, e := b.provider.BatteryVoltage(); e == nil {
+	if voltage, e := provider.BatteryVoltage(); e == nil {
 		metricBatteryVoltage.With("serial_number", sn).Set(voltage)
 
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicBatteryVoltage, voltage); e != nil {
@@ -95,7 +100,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		err = multierr.Append(err, e)
 	}
 
-	if date, e := b.provider.LastPowerOffDatetime(); e == nil {
+	if date, e := provider.LastPowerOffDatetime(); e == nil {
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicLastPowerOff, date); e != nil {
 			err = multierr.Append(err, e)
 		}
@@ -103,7 +108,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		err = multierr.Append(err, e)
 	}
 
-	if date, e := b.provider.LastPowerOnDatetime(); e == nil {
+	if date, e := provider.LastPowerOnDatetime(); e == nil {
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicLastPowerOn, date); e != nil {
 			err = multierr.Append(err, e)
 		}
@@ -111,7 +116,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		err = multierr.Append(err, e)
 	}
 
-	if date, e := b.provider.MakeDate(); e == nil {
+	if date, e := provider.MakeDate(); e == nil {
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicMakeDate, date); e != nil {
 			err = multierr.Append(err, e)
 		}
@@ -119,7 +124,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		err = multierr.Append(err, e)
 	}
 
-	if version, date, e := b.provider.Version(); e == nil {
+	if version, date, e := provider.Version(); e == nil {
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicFirmwareDate, date); e != nil {
 			err = multierr.Append(err, e)
 		}

@@ -10,8 +10,14 @@ import (
 )
 
 func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
-	q := r.URL().Query()
 	widget := b.Widget()
+	provider := b.Provider()
+	if provider == nil {
+		widget.NotFound(w, r)
+		return
+	}
+
+	q := r.URL().Query()
 	vars := map[string]interface{}{
 		"action": q.Get("action"),
 	}
@@ -76,7 +82,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		vars["date_to"] = end
 
 		// energy
-		date, values, err = b.provider.EnergyArchive(start, end, period)
+		date, values, err = provider.EnergyArchive(start, end, period)
 		if err != nil {
 			widget.FlashError(r, "Get energy archive failed with error %v", "", err)
 		} else {
@@ -93,7 +99,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		// pulse input 1
-		date, values, err = b.provider.PulseInput1Archive(start, end, period)
+		date, values, err = provider.PulseInput1Archive(start, end, period)
 		if err != nil {
 			widget.FlashError(r, "Get pulse %d archive failed with error %v", "", 1, err)
 		} else {
@@ -109,7 +115,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		// pulse input 2
-		date, values, err = b.provider.PulseInput2Archive(start, end, period)
+		date, values, err = provider.PulseInput2Archive(start, end, period)
 		if err != nil {
 			widget.FlashError(r, "Get pulse %d archive failed with error %v", "", 2, err)
 		} else {
@@ -125,7 +131,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		// pulse input 3
-		date, values, err = b.provider.PulseInput3Archive(start, end, period)
+		date, values, err = provider.PulseInput3Archive(start, end, period)
 		if err != nil {
 			widget.FlashError(r, "Get pulse %d archive failed with error %v", "", 3, err)
 		} else {
@@ -141,7 +147,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		// pulse input 4
-		date, values, err = b.provider.PulseInput4Archive(start, end, period)
+		date, values, err = provider.PulseInput4Archive(start, end, period)
 		if err != nil {
 			widget.FlashError(r, "Get pulse %d archive failed with error %v", "", 4, err)
 		} else {
@@ -199,7 +205,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 		// date time
 		now := time.Now()
-		timeValue, err := b.provider.Datetime()
+		timeValue, err := provider.Datetime()
 		variable := metricView{
 			Value: timeValue,
 			Error: err,
@@ -211,73 +217,73 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 		vars["datetime"] = variable
 
-		floatValue, err := b.provider.TemperatureIn()
+		floatValue, err := provider.TemperatureIn()
 		vars["temperature_in"] = metricView{
 			Value: floatValue,
 			Error: err,
 		}
 
-		floatValue, err = b.provider.TemperatureOut()
+		floatValue, err = provider.TemperatureOut()
 		vars["temperature_out"] = metricView{
 			Value: floatValue,
 			Error: err,
 		}
 
-		floatValue, err = b.provider.TemperatureDelta()
+		floatValue, err = provider.TemperatureDelta()
 		vars["temperature_delta"] = metricView{
 			Value: floatValue,
 			Error: err,
 		}
 
-		floatValue, err = b.provider.Power()
+		floatValue, err = provider.Power()
 		vars["power"] = metricView{
 			Value: floatValue,
 			Error: err,
 		}
 
-		floatValue, err = b.provider.Energy()
+		floatValue, err = provider.Energy()
 		vars["energy"] = metricView{
 			Value: floatValue,
 			Error: err,
 		}
 
-		floatValue, err = b.provider.Capacity()
+		floatValue, err = provider.Capacity()
 		vars["capacity"] = metricView{
 			Value: floatValue,
 			Error: err,
 		}
 
-		floatValue, err = b.provider.Consumption()
+		floatValue, err = provider.Consumption()
 		vars["consumption"] = metricView{
 			Value: floatValue,
 			Error: err,
 		}
 
-		floatValue, err = b.provider.PulseInput1()
+		floatValue, err = provider.PulseInput1()
 		vars["pusle_input_1"] = metricView{
 			Value: floatValue,
 			Error: err,
 		}
 
-		floatValue, err = b.provider.PulseInput2()
+		floatValue, err = provider.PulseInput2()
 		vars["pusle_input_2"] = metricView{
 			Value: floatValue,
 			Error: err,
 		}
 
-		floatValue, err = b.provider.PulseInput3()
+		floatValue, err = provider.PulseInput3()
 		vars["pusle_input_3"] = metricView{
 			Value: floatValue,
 			Error: err,
 		}
 
-		floatValue, err = b.provider.PulseInput4()
+		floatValue, err = provider.PulseInput4()
 		vars["pusle_input_4"] = metricView{
 			Value: floatValue,
 			Error: err,
 		}
 
-		durationValue, err := b.provider.OperatingTime()
+		durationValue, err := provider.OperatingTime()
 		vars["operating_time"] = metricView{
 			Value: durationValue,
 			Error: err,

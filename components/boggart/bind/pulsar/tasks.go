@@ -30,14 +30,17 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskSerialNumber(ctx context.Context) error {
-	address, err := pulsar.DeviceAddress(b.connection)
+	conn, err := b.getConnection()
 	if err != nil {
 		return err
 	}
 
-	b.createProvider(address)
+	address, err := pulsar.DeviceAddress(conn)
+	if err != nil {
+		return err
+	}
 
-	return nil
+	return b.createProvider(address)
 }
 
 func (b *Bind) taskUpdater(ctx context.Context) error {
@@ -46,9 +49,14 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		return nil
 	}
 
+	provider := b.Provider()
+	if provider == nil {
+		return nil
+	}
+
 	var result error
 
-	if current, err := b.provider.TemperatureIn(); err == nil {
+	if current, err := provider.TemperatureIn(); err == nil {
 		metricTemperatureIn.With("serial_number", sn).Set(float64(current))
 
 		if err := b.MQTT().PublishAsync(ctx, b.config.TopicTemperatureIn.Format(sn), current); err != nil {
@@ -58,7 +66,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		result = multierr.Append(result, err)
 	}
 
-	if current, err := b.provider.TemperatureOut(); err == nil {
+	if current, err := provider.TemperatureOut(); err == nil {
 		metricTemperatureOut.With("serial_number", sn).Set(float64(current))
 
 		if err := b.MQTT().PublishAsync(ctx, b.config.TopicTemperatureOut.Format(sn), current); err != nil {
@@ -68,7 +76,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		result = multierr.Append(result, err)
 	}
 
-	if current, err := b.provider.TemperatureDelta(); err == nil {
+	if current, err := provider.TemperatureDelta(); err == nil {
 		metricTemperatureDelta.With("serial_number", sn).Set(float64(current))
 
 		if err := b.MQTT().PublishAsync(ctx, b.config.TopicTemperatureDelta.Format(sn), current); err != nil {
@@ -78,7 +86,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		result = multierr.Append(result, err)
 	}
 
-	if current, err := b.provider.Energy(); err == nil {
+	if current, err := provider.Energy(); err == nil {
 		metricEnergy.With("serial_number", sn).Set(float64(current))
 
 		if err := b.MQTT().PublishAsync(ctx, b.config.TopicEnergy.Format(sn), current); err != nil {
@@ -88,7 +96,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		result = multierr.Append(result, err)
 	}
 
-	if current, err := b.provider.Consumption(); err == nil {
+	if current, err := provider.Consumption(); err == nil {
 		metricConsumption.With("serial_number", sn).Set(float64(current))
 
 		if err := b.MQTT().PublishAsync(ctx, b.config.TopicConsumption.Format(sn), current); err != nil {
@@ -98,7 +106,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		result = multierr.Append(result, err)
 	}
 
-	if current, err := b.provider.Capacity(); err == nil {
+	if current, err := provider.Capacity(); err == nil {
 		metricCapacity.With("serial_number", sn).Set(float64(current))
 
 		if err := b.MQTT().PublishAsync(ctx, b.config.TopicCapacity.Format(sn), current); err != nil {
@@ -108,7 +116,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		result = multierr.Append(result, err)
 	}
 
-	if current, err := b.provider.Power(); err == nil {
+	if current, err := provider.Power(); err == nil {
 		metricPower.With("serial_number", sn).Set(float64(current))
 
 		if err := b.MQTT().PublishAsync(ctx, b.config.TopicPower.Format(sn), current); err != nil {
@@ -119,7 +127,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 	}
 
 	// inputs
-	if current, err := b.provider.PulseInput1(); err == nil {
+	if current, err := provider.PulseInput1(); err == nil {
 		volume := b.inputVolume(current, b.config.Input1Offset)
 
 		metricInputPulses.With("serial_number", sn).With("input", "1").Set(float64(current))
@@ -136,7 +144,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		result = multierr.Append(result, err)
 	}
 
-	if current, err := b.provider.PulseInput2(); err == nil {
+	if current, err := provider.PulseInput2(); err == nil {
 		volume := b.inputVolume(current, b.config.Input2Offset)
 
 		metricInputPulses.With("serial_number", sn).With("input", "2").Set(float64(current))
@@ -153,7 +161,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		result = multierr.Append(result, err)
 	}
 
-	if current, err := b.provider.PulseInput3(); err == nil {
+	if current, err := provider.PulseInput3(); err == nil {
 		volume := b.inputVolume(current, b.config.Input3Offset)
 
 		metricInputPulses.With("serial_number", sn).With("input", "3").Set(float64(current))
@@ -170,7 +178,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		result = multierr.Append(result, err)
 	}
 
-	if current, err := b.provider.PulseInput4(); err == nil {
+	if current, err := provider.PulseInput4(); err == nil {
 		volume := b.inputVolume(current, b.config.Input4Offset)
 
 		metricInputPulses.With("serial_number", sn).With("input", "4").Set(float64(current))

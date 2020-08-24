@@ -12,9 +12,15 @@ import (
 )
 
 func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
+	widget := b.Widget()
+	provider, err := b.Provider()
+	if err != nil {
+		widget.NotFound(w, r)
+		return
+	}
+
 	vars := map[string]interface{}{}
 	ctx := r.Context()
-	widget := b.Widget()
 
 	action := r.URL().Query().Get("action")
 	vars["action"] = action
@@ -29,14 +35,14 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			T1Trend, T2Trend, T3Trend, T4Trend int64
 		}
 
-		date, err := b.provider.Datetime()
+		date, err := provider.Datetime()
 		if err != nil {
 			widget.FlashError(r, "Get datetime failed with error %v", "", err)
 
 			vars["stats"] = make([]*monthly, 0)
 		}
 
-		tariffCount, err := b.provider.TariffCount()
+		tariffCount, err := provider.TariffCount()
 		if err != nil {
 			widget.FlashError(r, "Get tariff count failed with error %v", "", err)
 		}
@@ -62,7 +68,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			for i := 1; i <= int(last); i++ {
 				monthRequest = time.Month(i)
 
-				statsValues, err := b.provider.MonthlyStatByMonth(monthRequest)
+				statsValues, err := provider.MonthlyStatByMonth(monthRequest)
 				if err != nil {
 					mAsString := widget.Translate(ctx, monthRequest.String(), "")
 					widget.FlashError(r, "Get statistics for %s failed with error %v", "", mAsString, err)
@@ -98,7 +104,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			})
 
 			// отдельно запрашиваем текущий месяц
-			powerValues, err := b.provider.PowerCounters()
+			powerValues, err := provider.PowerCounters()
 			if err != nil {
 				mAsString := widget.Translate(ctx, date.Month().String(), "")
 				widget.FlashError(r, "Get statistics for %s failed with error %v", "", mAsString, err)
@@ -140,7 +146,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 	case "events-on-off":
-		if makeDate, err := b.provider.MakeDate(); err != nil {
+		if makeDate, err := provider.MakeDate(); err != nil {
 			widget.FlashError(r, "Get make date failed with error %v", "", err)
 		} else {
 			type event struct {
@@ -151,7 +157,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			events := make([]event, 0, v1.MaxEventsIndex)
 
 			for i := uint8(0); i <= v1.MaxEventsIndex; i++ {
-				state, date, err := b.provider.EventsPowerOnOff(i)
+				state, date, err := provider.EventsPowerOnOff(i)
 
 				if err != nil {
 					widget.FlashError(r, "Get event %02x failed with error %v", "", i, err)
@@ -172,7 +178,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 	case "events-open-close":
-		if makeDate, err := b.provider.MakeDate(); err != nil {
+		if makeDate, err := provider.MakeDate(); err != nil {
 			widget.FlashError(r, "Get make date failed with error %v", "", err)
 		} else {
 
@@ -184,7 +190,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			events := make([]event, 0, v1.MaxEventsIndex)
 
 			for i := uint8(0); i <= v1.MaxEventsIndex; i++ {
-				state, date, err := b.provider.EventsOpenClose(i)
+				state, date, err := provider.EventsOpenClose(i)
 
 				if err != nil {
 					widget.FlashError(r, "Get event %02x failed with error %v", "", i, err)
@@ -207,12 +213,12 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	case "display":
 		var err error
 
-		mode, err := b.provider.DisplayMode()
+		mode, err := provider.DisplayMode()
 		if err != nil {
 			widget.FlashError(r, "Get display mode failed with error %v", "", err)
 		}
 
-		timeValues, err := b.provider.DisplayTime()
+		timeValues, err := provider.DisplayTime()
 		if err != nil {
 			widget.FlashError(r, "Get display time failed with error %v", "", err)
 		}
@@ -228,7 +234,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			mode.SetDate(r.Original().FormValue("mode_date") != "")
 
 			if mode.IsChanged() {
-				err = b.provider.SetDisplayMode(mode)
+				err = provider.SetDisplayMode(mode)
 				if err != nil {
 					widget.FlashError(r, "Change display mode failed with error %v", "", err)
 				} else {
@@ -263,7 +269,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			if err != nil {
 				widget.FlashError(r, "Parse value failed with error %v", "", err)
 			} else if timeValues.IsChanged() {
-				err = b.provider.SetDisplayTime(timeValues)
+				err = provider.SetDisplayTime(timeValues)
 				if err != nil {
 					widget.FlashError(r, "Change display time failed with error %v", "", err)
 				} else {
@@ -281,7 +287,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		vars["time"] = timeValues
 
 	case "holidays":
-		days, err := b.provider.Holidays()
+		days, err := provider.Holidays()
 		if err != nil {
 			widget.FlashError(r, "Get holidays failed with error %v", "", err)
 		}
@@ -291,7 +297,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	default:
 		// date time
 		now := time.Now()
-		v, err := b.provider.Datetime()
+		v, err := provider.Datetime()
 		variable := map[string]interface{}{
 			"value": v,
 			"delta": 0,
@@ -305,7 +311,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		vars["datetime"] = variable
 
 		// param last change
-		v, err = b.provider.ParamLastChange()
+		v, err = provider.ParamLastChange()
 		if !v1.CommandNotSupported(err) {
 			vars["param_last_change_data"] = map[string]interface{}{
 				"value": v,
@@ -314,35 +320,35 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		// make date
-		v, err = b.provider.MakeDate()
+		v, err = provider.MakeDate()
 		vars["make_date"] = map[string]interface{}{
 			"value": v,
 			"error": err,
 		}
 
 		// last power off
-		v, err = b.provider.LastPowerOffDatetime()
+		v, err = provider.LastPowerOffDatetime()
 		vars["last_power_off_datetime"] = map[string]interface{}{
 			"value": v,
 			"error": err,
 		}
 
 		// last power on
-		v, err = b.provider.LastPowerOnDatetime()
+		v, err = provider.LastPowerOnDatetime()
 		vars["last_power_on_datetime"] = map[string]interface{}{
 			"value": v,
 			"error": err,
 		}
 
 		// last close cap
-		v, err = b.provider.LastCloseCap()
+		v, err = provider.LastCloseCap()
 		vars["last_close_cap_datetime"] = map[string]interface{}{
 			"value": v,
 			"error": err,
 		}
 
 		// V, A, Watts
-		voltage, amperage, power, err := b.provider.UIPCurrent()
+		voltage, amperage, power, err := provider.UIPCurrent()
 		vars["voltage"] = map[string]interface{}{
 			"value": voltage,
 			"error": err,
@@ -357,7 +363,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		// V max
-		voltageMax, voltageMaxDate, voltageMaxReset, voltageMaxDateReset, err := b.provider.MaximumVoltage()
+		voltageMax, voltageMaxDate, voltageMaxReset, voltageMaxDateReset, err := provider.MaximumVoltage()
 		if !v1.CommandNotSupported(err) {
 			vars["voltage_max"] = map[string]interface{}{
 				"value": voltageMax,
@@ -373,7 +379,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		// A max
-		amperageMax, amperageMaxDate, amperageMaxReset, amperageMaxDateReset, err := b.provider.MaximumAmperage()
+		amperageMax, amperageMaxDate, amperageMaxReset, amperageMaxDateReset, err := provider.MaximumAmperage()
 		if !v1.CommandNotSupported(err) {
 			vars["amperage_max"] = map[string]interface{}{
 				"value": amperageMax,
@@ -389,7 +395,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		// Watts max
-		powerMax, powerMaxDate, powerMaxReset, powerMaxDateReset, err := b.provider.MaximumPower()
+		powerMax, powerMaxDate, powerMaxReset, powerMaxDateReset, err := provider.MaximumPower()
 		if !v1.CommandNotSupported(err) {
 			vars["power_max"] = map[string]interface{}{
 				"value": powerMax,
@@ -405,7 +411,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		// model
-		twoSensors, relay, err := b.provider.Model()
+		twoSensors, relay, err := provider.Model()
 		vars["model_two_sensors"] = map[string]interface{}{
 			"value": twoSensors,
 			"error": err,

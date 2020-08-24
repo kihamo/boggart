@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
 	mercury "github.com/kihamo/boggart/providers/mercury/v1"
 )
@@ -28,6 +29,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config.TopicFirmwareVersion = config.TopicFirmwareVersion.Format(config.Address)
 
 	return &Bind{
-		config: config,
+		config:       config,
+		providerOnce: &atomic.Once{},
 	}, nil
 }

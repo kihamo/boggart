@@ -30,3 +30,7 @@ func (o *Once) Reset() {
 
 	atomic.StoreUint32(&o.done, 0)
 }
+
+func (o *Once) IsDone() bool {
+	return atomic.LoadUint32(&o.done) != 0
+}
