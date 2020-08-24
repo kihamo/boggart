@@ -21,8 +21,10 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		return
 	}
 
-	var mimeType string
-	fileNameExt := ""
+	var (
+		mimeType    string
+		fileNameExt string
+	)
 
 	if mimeType = q.Get(paramMIME); mimeType != "" {
 		fileNameExt = mime.Type(mimeType).Extension()

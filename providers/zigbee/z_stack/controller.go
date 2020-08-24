@@ -1,4 +1,4 @@
-package z_stack
+package zstack
 
 import (
 	"bytes"
@@ -12,19 +12,19 @@ import (
 )
 
 var endpoints = []Endpoint{
-	{EndPoint: 1, AppProfId: 0x0104},
-	{EndPoint: 2, AppProfId: 0x0101},
-	{EndPoint: 3, AppProfId: 0x0105},
-	{EndPoint: 4, AppProfId: 0x0107},
-	{EndPoint: 5, AppProfId: 0x0108},
-	{EndPoint: 6, AppProfId: 0x0109},
-	{EndPoint: 8, AppProfId: 0x0104},
-	{EndPoint: 11, AppProfId: 0x0104, AppDeviceId: 0x0400, AppOutClusterList: []uint16{1280, 1282}},
-	{EndPoint: 12, AppProfId: 0xC05E},
-	{EndPoint: 13, AppProfId: 0x0104, AppInClusterList: []uint16{25}},
-	{EndPoint: 47, AppProfId: 0x0104},
-	{EndPoint: 110, AppProfId: 0x0104},
-	{EndPoint: 242, AppProfId: 0xA1E0},
+	{EndPoint: 1, AppProfID: 0x0104},
+	{EndPoint: 2, AppProfID: 0x0101},
+	{EndPoint: 3, AppProfID: 0x0105},
+	{EndPoint: 4, AppProfID: 0x0107},
+	{EndPoint: 5, AppProfID: 0x0108},
+	{EndPoint: 6, AppProfID: 0x0109},
+	{EndPoint: 8, AppProfID: 0x0104},
+	{EndPoint: 11, AppProfID: 0x0104, AppDeviceID: 0x0400, AppOutClusterList: []uint16{1280, 1282}},
+	{EndPoint: 12, AppProfID: 0xC05E},
+	{EndPoint: 13, AppProfID: 0x0104, AppInClusterList: []uint16{25}},
+	{EndPoint: 47, AppProfID: 0x0104},
+	{EndPoint: 110, AppProfID: 0x0104},
+	{EndPoint: 242, AppProfID: 0xA1E0},
 }
 
 type NvItem struct {
@@ -167,18 +167,17 @@ func (c *Client) Reset(ctx context.Context, t uint8) error {
 	case e := <-waitErr:
 		return e
 	}
-
-	return nil
 }
 
 func (c *Client) Boot(ctx context.Context) (err error) {
 	if err := c.SkipBootLoader(); err != nil {
 		return err
 	}
+
 	time.Sleep(time.Second)
 
 	// Initialization check
-	valid := true
+	var valid bool
 
 	// check hasConfigured flag
 	if valid, err = c.InitializationCheck(ctx); err != nil {
@@ -278,7 +277,7 @@ func (c *Client) Boot(ctx context.Context) (err error) {
 	go c.defaultWatcher()
 
 	/*
-	 * More options
+	 * More Options
 	 */
 	err = c.LED(ctx, c.options.LEDEnabled)
 
@@ -361,7 +360,6 @@ func (c *Client) PermitJoin(ctx context.Context, seconds uint8) error {
 func (c *Client) SyncDevices(ctx context.Context) error {
 	// вычитывает таблицу LQI с устройства, эта операция медленная поэтому запускается в фоне
 	// чтобы собрать детальную информацию про устройства
-
 	list, err := c.LQI(ctx, 0)
 	if err != nil {
 		return err
@@ -606,8 +604,6 @@ func (c *Client) SimpleDescriptor(ctx context.Context, networkAddress uint16, en
 	case err = <-waitErr:
 		return nil, err
 	}
-
-	return nil, nil
 }
 
 func (c *Client) ActiveEndpoints(ctx context.Context, networkAddress uint16) (_ *ZDOActiveEndpointsResponse, err error) {
@@ -626,8 +622,6 @@ func (c *Client) ActiveEndpoints(ctx context.Context, networkAddress uint16) (_ 
 	case err = <-waitErr:
 		return nil, err
 	}
-
-	return nil, nil
 }
 
 func (c *Client) LEDEnabled() bool {
@@ -793,9 +787,9 @@ func (c *Client) initialization(ctx context.Context) (err error) {
 	}
 
 	// ZNP has configured
-	if err = c.nvItemWrite(ctx, nvItemZnpHasConfigured(version)); err != nil {
-		//return err
-	}
+	//if err = c.nvItemWrite(ctx, nvItemZnpHasConfigured(version)); err != nil {
+	//	//return err
+	//}
 
 	c.nwItemValidate(ctx, nvItemZnpHasConfigured(version))
 
@@ -804,13 +798,11 @@ func (c *Client) initialization(ctx context.Context) (err error) {
 
 func (c *Client) onDeviceJoined(msg *ZDODeviceJoinedMessage) {
 	// TODO: фильтрацию по подключаемым устройствам надо делать тут
-
 	device := c.Device(msg.NetworkAddress)
 	if device != nil {
 		//if device.NetworkAddress() != msg.NetworkAddress {
 		//	fmt.Println("Different network address", device.NetworkAddress(), msg.ExtendAddress)
 		//}
-
 		device.SetIEEEAddress(msg.ExtendAddress)
 	} else {
 		device = model.NewDevice(msg.NetworkAddress)
@@ -892,6 +884,7 @@ func (c *Client) onAfIncomingMessage(msg *AfIncomingMessage) {
 
 func (c *Client) defaultWatcher() {
 	watcher := c.Watch()
+
 	defer func() {
 		c.unregisterWatcher(watcher)
 	}()

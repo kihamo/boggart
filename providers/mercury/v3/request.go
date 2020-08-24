@@ -41,12 +41,12 @@ const (
 )
 
 type Request struct {
-	address            uint8
-	code               uint8
+	parameters         []byte
 	parameterCode      *uint8
 	parameterExtension *uint8
-	parameters         []byte
 	crc                uint16
+	address            uint8
+	code               uint8
 }
 
 func NewRequest() *Request {

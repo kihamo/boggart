@@ -13,6 +13,7 @@ type CacheHandler struct {
 	PayloadCache mqtt.Cache
 }
 
+//nolint
 func (h *CacheHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	if r.IsPost() {
 		h.PayloadCache.Purge()

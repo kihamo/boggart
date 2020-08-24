@@ -50,7 +50,7 @@ type Wrapper struct {
 	openLoops      []chan struct{}
 	openLoopsMutex sync.RWMutex
 
-	options options
+	options Options
 
 	applyMutex sync.Mutex
 	initDial   *atomic.Once
@@ -292,6 +292,7 @@ func (w *Wrapper) ApplyOptions(options ...Option) {
 			if _, ok := lockerMap[addr]; !ok {
 				lockerMap[addr] = new(sync.Mutex)
 			}
+
 			lockMutex = lockerMap[addr]
 			lockerMapMutex.Unlock()
 		} else {

@@ -1,4 +1,4 @@
-package z_stack
+package zstack
 
 import (
 	"context"
@@ -8,12 +8,12 @@ import (
 )
 
 type ZDOExtNetworkInfo struct {
-	ShortAddr     uint16
-	DevState      uint8
-	PanID         uint16
-	ParentAddr    uint16
 	ExtendedPanID []byte
 	ParentExtAddr []byte
+	ShortAddr     uint16
+	PanID         uint16
+	ParentAddr    uint16
+	DevState      uint8
 	Channel       uint8
 }
 
@@ -228,10 +228,10 @@ func (c *Client) ZDOActiveEndpoints(ctx context.Context, dstAddress, networkAddr
 	return nil
 }
 
-func (c *Client) ZDONodeDescription(ctx context.Context, DstAddr, NWKAddrOfInterest uint16) error {
+func (c *Client) ZDONodeDescription(ctx context.Context, dstAddr, nwkAddrOfInterest uint16) error {
 	dataIn := NewBuffer(nil)
-	dataIn.WriteUint16(DstAddr)           // DstAddr
-	dataIn.WriteUint16(NWKAddrOfInterest) // NWKAddrOfInterest
+	dataIn.WriteUint16(dstAddr)           // DstAddr
+	dataIn.WriteUint16(nwkAddrOfInterest) // NWKAddrOfInterest
 
 	response, err := c.CallWithResultSREQ(ctx, dataIn.Frame(0x25, 0x02))
 	if err != nil {
@@ -453,7 +453,7 @@ func (c *Client) ZDORoutingTable(ctx context.Context, dstAddr uint16, startIndex
 func (c *Client) ZDODiscoverRoute(ctx context.Context, dstAddr uint16, options, radius uint8) error {
 	dataIn := NewBuffer(nil)
 	dataIn.WriteUint16(dstAddr) // dstAddr
-	dataIn.WriteUint8(options)  // options
+	dataIn.WriteUint8(options)  // Options
 	dataIn.WriteUint8(radius)   // radius
 
 	response, err := c.CallWithResultSREQ(ctx, dataIn.Frame(0x25, 0x45))

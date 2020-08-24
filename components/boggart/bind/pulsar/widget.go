@@ -12,6 +12,7 @@ import (
 func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	widget := b.Widget()
 	provider := b.Provider()
+
 	if provider == nil {
 		widget.NotFound(w, r)
 		return

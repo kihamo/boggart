@@ -1,4 +1,4 @@
-package z_stack
+package zstack
 
 import (
 	"encoding/hex"
@@ -81,7 +81,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	vars := make(map[string]interface{})
 	errors := make([]string, 0)
 
-	client, err := b.getClient(ctx)
+	client, err := b.getClient()
 	if err == nil {
 		vars["devices"] = client.Devices()
 		vars["led_support"] = client.LEDSupport(ctx)

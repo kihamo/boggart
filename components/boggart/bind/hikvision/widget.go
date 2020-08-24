@@ -65,7 +65,6 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 					}
 
 					switch key {
-
 					case "ir-cut-filter-type":
 						params := image.NewSetImageIrCutFilterParamsWithContext(ctx).
 							WithChannel(ch).

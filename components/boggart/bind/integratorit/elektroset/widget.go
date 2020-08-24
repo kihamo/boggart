@@ -33,6 +33,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 		var provider elektroset.Provider
 		err = json.Unmarshal([]byte(query.Get("provider")), &provider)
+
 		if err != nil {
 			widget.NotFound(w, r)
 			return
@@ -61,6 +62,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		response.Body.Close()
+
 		return
 
 	default:
@@ -82,9 +84,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 				for _, service := range account.Services {
 					if balances, e := b.client.BalanceDetails(ctx, account.Number, service.Provider, dateStart, dateEnd); e == nil {
 						for _, balance := range balances {
-							switch balance.KDTariffPlanEntity {
-							// показания
-							case elektroset.TariffPlanEntityValue:
+							if balance.KDTariffPlanEntity == elektroset.TariffPlanEntityValue {
 								r, ok := rowsByTime[balance.DatetimeEntity.Time]
 								if !ok && (balance.ValueT1 != nil || balance.ValueT2 != nil || balance.ValueT3 != nil) {
 									r = &row{

@@ -243,9 +243,9 @@ func (c *ProbesContainer) Liveness() w.Task {
 		if err == nil {
 			c.metricProbes.With("probe", "liveness", "status", "success", "id", c.bind.ID(), "type", c.bind.Type()).Inc()
 			return nil, nil
-		} else {
-			c.metricProbes.With("probe", "liveness", "status", "failed", "id", c.bind.ID(), "type", c.bind.Type()).Inc()
 		}
+
+		c.metricProbes.With("probe", "liveness", "status", "failed", "id", c.bind.ID(), "type", c.bind.Type()).Inc()
 
 		if logger != nil {
 			logger.Error("Liveness probe failure",

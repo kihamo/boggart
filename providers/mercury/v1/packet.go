@@ -11,10 +11,10 @@ import (
 )
 
 type Packet struct {
-	address uint32
-	command uint8
 	payload []byte
+	address uint32
 	crc     uint16
+	command uint8
 
 	lock sync.RWMutex
 }
@@ -35,6 +35,7 @@ func (r *Packet) WithAddress(address uint32) *Packet {
 	defer r.lock.Unlock()
 
 	r.address = address
+
 	return r
 }
 
@@ -50,6 +51,7 @@ func (r *Packet) WithCommand(command uint8) *Packet {
 	defer r.lock.Unlock()
 
 	r.command = command
+
 	return r
 }
 
@@ -69,6 +71,7 @@ func (r *Packet) WithPayload(payload []byte) *Packet {
 	defer r.lock.Unlock()
 
 	r.payload = payload
+
 	return r
 }
 

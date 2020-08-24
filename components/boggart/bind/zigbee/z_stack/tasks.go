@@ -1,4 +1,4 @@
-package z_stack
+package zstack
 
 import (
 	"context"
@@ -21,7 +21,7 @@ func (b *Bind) Tasks() []workers.Task {
 }
 
 func (b *Bind) taskSerialNumber(ctx context.Context) error {
-	client, err := b.getClient(ctx)
+	client, err := b.getClient()
 	if err != nil {
 		return err
 	}

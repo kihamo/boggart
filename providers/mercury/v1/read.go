@@ -300,6 +300,7 @@ func (m *MercuryV1) Holidays() ([]time.Time, error) {
 
 	request = request.WithPayload([]byte{1})
 	response2, err := m.Invoke(request)
+
 	if err != nil {
 		return nil, err
 	}

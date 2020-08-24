@@ -142,9 +142,9 @@ func (h *BindHandler) registerByYAML(oldID string, code []byte) (bindItem boggar
 }
 
 func (h *BindHandler) actionCreateOrUpdate(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
-	buf := bytes.NewBuffer(nil)
-
 	var err error
+
+	buf := bytes.NewBuffer(nil)
 	vars := make(map[string]interface{})
 
 	if r.IsPost() {
@@ -308,7 +308,7 @@ func (h *BindHandler) actionProbe(w *dashboard.Response, r *dashboard.Request, b
 	_ = w.SendJSON(response)
 }
 
-func (h *BindHandler) actionLogs(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
+func (h *BindHandler) actionLogs(w http.ResponseWriter, r *dashboard.Request, b boggart.BindItem) {
 	bindSupport, ok := b.Bind().(di.LoggerContainerSupport)
 	if !ok {
 		h.NotFound(w, r)
@@ -358,7 +358,7 @@ func (h *BindHandler) actionLogs(w *dashboard.Response, r *dashboard.Request, b 
 	})
 }
 
-func (h *BindHandler) actionMQTT(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
+func (h *BindHandler) actionMQTT(w http.ResponseWriter, r *dashboard.Request, b boggart.BindItem) {
 	bindSupport, ok := b.Bind().(di.MQTTContainerSupport)
 	if !ok {
 		h.NotFound(w, r)

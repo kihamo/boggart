@@ -1,4 +1,4 @@
-package z_stack
+package zstack
 
 import (
 	"time"
@@ -14,25 +14,25 @@ type Config struct {
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
 	ConnectionDSN                 string        `mapstructure:"connection_dsn" yaml:"connection_dsn" valid:"required"`
-	LEDEnabled                    bool          `mapstructure:"led_enabled" yaml:"led_enabled"`
-	PermitJoin                    bool          `mapstructure:"permit_join" yaml:"permit_join"`
+	TopicPermitJoin               mqtt.Topic    `mapstructure:"topic_permit_join" yaml:"topic_permit_join"`
+	TopicVersionTransportRevision mqtt.Topic    `mapstructure:"topic_version_transport_revision" yaml:"topic_version_transport_revision"`
+	TopicVersionProduct           mqtt.Topic    `mapstructure:"topic_version_product" yaml:"topic_version_product"`
+	TopicVersionMajorRelease      mqtt.Topic    `mapstructure:"topic_version_major_release" yaml:"topic_version_major_release"`
+	TopicVersionMinorRelease      mqtt.Topic    `mapstructure:"topic_version_minor_release" yaml:"topic_version_minor_release"`
+	TopicVersionMainTrel          mqtt.Topic    `mapstructure:"topic_version_main_trel" yaml:"topic_version_main_trel"`
+	TopicVersionHardwareRevision  mqtt.Topic    `mapstructure:"topic_version_hardware_revision" yaml:"topic_version_hardware_revision"`
+	TopicVersionType              mqtt.Topic    `mapstructure:"topic_version_type" yaml:"topic_version_type"`
+	TopicStatePermitJoin          mqtt.Topic    `mapstructure:"topic_state_permit_join" yaml:"topic_state_permit_join"`
+	TopicStatePermitJoinDuration  mqtt.Topic    `mapstructure:"topic_state_permit_join_duration" yaml:"topic_state_permit_join_duration"`
+	TopicLinkQuality              mqtt.Topic    `mapstructure:"topic_link_quality" yaml:"topic_link_quality"`
+	TopicBatteryPercent           mqtt.Topic    `mapstructure:"topic_battery_percent" yaml:"topic_battery_percent"`
+	TopicBatteryVoltage           mqtt.Topic    `mapstructure:"topic_battery_voltage" yaml:"topic_battery_voltage"`
+	TopicOnOff                    mqtt.Topic    `mapstructure:"topic_on_off" yaml:"topic_on_off"`
+	TopicClick                    mqtt.Topic    `mapstructure:"topic_click" yaml:"topic_click"`
 	PermitJoinDuration            time.Duration `mapstructure:"permit_join_duration" yaml:"permit_join_duration"`
 	Channel                       uint32
-	TopicPermitJoin               mqtt.Topic `mapstructure:"topic_permit_join" yaml:"topic_permit_join"`
-	TopicVersionTransportRevision mqtt.Topic `mapstructure:"topic_version_transport_revision" yaml:"topic_version_transport_revision"`
-	TopicVersionProduct           mqtt.Topic `mapstructure:"topic_version_product" yaml:"topic_version_product"`
-	TopicVersionMajorRelease      mqtt.Topic `mapstructure:"topic_version_major_release" yaml:"topic_version_major_release"`
-	TopicVersionMinorRelease      mqtt.Topic `mapstructure:"topic_version_minor_release" yaml:"topic_version_minor_release"`
-	TopicVersionMainTrel          mqtt.Topic `mapstructure:"topic_version_main_trel" yaml:"topic_version_main_trel"`
-	TopicVersionHardwareRevision  mqtt.Topic `mapstructure:"topic_version_hardware_revision" yaml:"topic_version_hardware_revision"`
-	TopicVersionType              mqtt.Topic `mapstructure:"topic_version_type" yaml:"topic_version_type"`
-	TopicStatePermitJoin          mqtt.Topic `mapstructure:"topic_state_permit_join" yaml:"topic_state_permit_join"`
-	TopicStatePermitJoinDuration  mqtt.Topic `mapstructure:"topic_state_permit_join_duration" yaml:"topic_state_permit_join_duration"`
-	TopicLinkQuality              mqtt.Topic `mapstructure:"topic_link_quality" yaml:"topic_link_quality"`
-	TopicBatteryPercent           mqtt.Topic `mapstructure:"topic_battery_percent" yaml:"topic_battery_percent"`
-	TopicBatteryVoltage           mqtt.Topic `mapstructure:"topic_battery_voltage" yaml:"topic_battery_voltage"`
-	TopicOnOff                    mqtt.Topic `mapstructure:"topic_on_off" yaml:"topic_on_off"`
-	TopicClick                    mqtt.Topic `mapstructure:"topic_click" yaml:"topic_click"`
+	LEDEnabled                    bool `mapstructure:"led_enabled" yaml:"led_enabled"`
+	PermitJoin                    bool `mapstructure:"permit_join" yaml:"permit_join"`
 }
 
 func (Type) Config() interface{} {
@@ -41,7 +41,7 @@ func (Type) Config() interface{} {
 		prefixDevice            = prefix + "+/"
 	)
 
-	def := z_stack.DefaultOptions()
+	def := zstack.DefaultOptions()
 
 	return &Config{
 		ProbesConfig: di.ProbesConfig{

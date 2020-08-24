@@ -99,7 +99,7 @@ func TypeFromDataRestored(data io.Reader) (Type, io.Reader, error) {
 		return TypeMPEG, nil, err
 	}
 
-	return Type(t), restored, nil
+	return t, restored, nil
 }
 
 func TypeFromData(data io.Reader) (Type, error) {

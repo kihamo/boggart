@@ -13,18 +13,7 @@ type Config struct {
 	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
-	Address                        types.URL `valid:",required"`
-	Debug                          bool
-	UpdaterInterval                time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
-	UpdaterTimeout                 time.Duration `mapstructure:"updater_timeout" yaml:"updater_timeout"`
-	PTZInterval                    time.Duration `mapstructure:"ptz_interval" yaml:"ptz_interval"`
-	PTZTimeout                     time.Duration `mapstructure:"ptz_timeout" yaml:"ptz_timeout"`
-	PTZEnabled                     bool          `mapstructure:"ptz_enabled" yaml:"ptz_enabled,omitempty"`
-	EventsEnabled                  bool          `mapstructure:"events_enabled" yaml:"events_enabled,omitempty"`
-	EventsStreamingEnabled         bool          `mapstructure:"events_streaming_enabled" yaml:"events_streaming_enabled,omitempty"`
-	EventsIgnoreInterval           time.Duration `mapstructure:"events_ignore_interval" yaml:"events_ignore_interval,omitempty"`
-	WidgetChannel                  uint64        `mapstructure:"widget_channel" yaml:"widget_channel,omitempty"`
-	PreviewRefreshInterval         time.Duration `mapstructure:"preview_refresh_interval" yaml:"preview_refresh_interval,omitempty"`
+	Address                        types.URL     `valid:",required"`
 	TopicPTZMove                   mqtt.Topic    `mapstructure:"topic_ptz_move" yaml:"topic_ptz_move"`
 	TopicPTZAbsolute               mqtt.Topic    `mapstructure:"topic_ptz_absolute" yaml:"topic_ptz_absolute"`
 	TopicPTZContinuous             mqtt.Topic    `mapstructure:"topic_ptz_continuous" yaml:"topic_ptz_continuous"`
@@ -44,6 +33,17 @@ type Config struct {
 	TopicStateHDDCapacity          mqtt.Topic    `mapstructure:"topic_state_hdd_capacity" yaml:"topic_state_hdd_capacity"`
 	TopicStateHDDFree              mqtt.Topic    `mapstructure:"topic_state_hdd_free" yaml:"topic_state_hdd_free"`
 	TopicStateHDDUsage             mqtt.Topic    `mapstructure:"topic_state_hdd_usage" yaml:"topic_state_hdd_usage"`
+	UpdaterInterval                time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
+	UpdaterTimeout                 time.Duration `mapstructure:"updater_timeout" yaml:"updater_timeout"`
+	PTZInterval                    time.Duration `mapstructure:"ptz_interval" yaml:"ptz_interval"`
+	PTZTimeout                     time.Duration `mapstructure:"ptz_timeout" yaml:"ptz_timeout"`
+	EventsIgnoreInterval           time.Duration `mapstructure:"events_ignore_interval" yaml:"events_ignore_interval,omitempty"`
+	PreviewRefreshInterval         time.Duration `mapstructure:"preview_refresh_interval" yaml:"preview_refresh_interval,omitempty"`
+	WidgetChannel                  uint64        `mapstructure:"widget_channel" yaml:"widget_channel,omitempty"`
+	Debug                          bool
+	PTZEnabled                     bool `mapstructure:"ptz_enabled" yaml:"ptz_enabled,omitempty"`
+	EventsEnabled                  bool `mapstructure:"events_enabled" yaml:"events_enabled,omitempty"`
+	EventsStreamingEnabled         bool `mapstructure:"events_streaming_enabled" yaml:"events_streaming_enabled,omitempty"`
 }
 
 func (t Type) Config() interface{} {

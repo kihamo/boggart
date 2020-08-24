@@ -1,6 +1,6 @@
 package connection
 
-type options struct {
+type Options struct {
 	onceInit   bool
 	lockLocal  bool
 	lockGlobal bool
@@ -10,29 +10,29 @@ type options struct {
 }
 
 type Option interface {
-	apply(*options)
+	apply(*Options)
 }
 
 type funcOption struct {
-	f func(*options)
+	f func(*Options)
 }
 
-func (fdo *funcOption) apply(do *options) {
+func (fdo *funcOption) apply(do *Options) {
 	fdo.f(do)
 }
 
-func newFuncOption(f func(*options)) *funcOption {
+func newFuncOption(f func(*Options)) *funcOption {
 	return &funcOption{
 		f: f,
 	}
 }
 
-func DefaultOptions() options {
-	return options{}
+func DefaultOptions() Options {
+	return Options{}
 }
 
 func WithOnceInit(flag bool) Option {
-	return newFuncOption(func(o *options) {
+	return newFuncOption(func(o *Options) {
 		o.onceInit = flag
 	})
 }
@@ -42,38 +42,38 @@ func WithLock(flag bool) Option {
 }
 
 func WithGlobalLock(flag bool) Option {
-	return newFuncOption(func(o *options) {
+	return newFuncOption(func(o *Options) {
 		o.lockGlobal = flag
 	})
 }
 
 func WithLocalLock(flag bool) Option {
-	return newFuncOption(func(o *options) {
+	return newFuncOption(func(o *Options) {
 		o.lockLocal = flag
 	})
 }
 
 func WithDump(dump func([]byte)) Option {
-	return newFuncOption(func(o *options) {
+	return newFuncOption(func(o *Options) {
 		o.dumpRead = dump
 		o.dumpWrite = dump
 	})
 }
 
 func WithDumpRead(dump func([]byte)) Option {
-	return newFuncOption(func(o *options) {
+	return newFuncOption(func(o *Options) {
 		o.dumpRead = dump
 	})
 }
 
 func WithDumpWrite(dump func([]byte)) Option {
-	return newFuncOption(func(o *options) {
+	return newFuncOption(func(o *Options) {
 		o.dumpWrite = dump
 	})
 }
 
 func WithReadCheck(check func([]byte) bool) Option {
-	return newFuncOption(func(o *options) {
+	return newFuncOption(func(o *Options) {
 		o.readCheck = check
 	})
 }

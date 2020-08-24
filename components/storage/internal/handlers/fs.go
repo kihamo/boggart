@@ -18,6 +18,7 @@ type FSHandler struct {
 	Component storage.Component
 }
 
+//nolint
 func (h *FSHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	namespace := strings.ToLower(r.URL().Query().Get(":namespace"))
 	if namespace == "" {

@@ -60,7 +60,7 @@ func NewClient(address, token string) *Client {
 	}
 }
 
-func (c *Client) lazyConnect(ctx context.Context) (_ connection.ObserverConnection, err error) {
+func (c *Client) lazyConnect() (_ connection.ObserverConnection, err error) {
 	c.connOnce.Do(func() {
 		t := transport.New(
 			transport.WithAddress(net.JoinHostPort(c.address, strconv.Itoa(DefaultPort))),
@@ -189,7 +189,7 @@ func (c *Client) hello(conn connection.Connection) (*Packet, error) {
 }
 
 func (c *Client) DeviceID(ctx context.Context) (uint16, error) {
-	_, err := c.lazyConnect(ctx)
+	_, err := c.lazyConnect()
 	if err != nil {
 		return 0, err
 	}
@@ -198,7 +198,7 @@ func (c *Client) DeviceID(ctx context.Context) (uint16, error) {
 }
 
 func (c *Client) CallRPC(ctx context.Context, method string, params, response interface{}) error {
-	conn, err := c.lazyConnect(ctx)
+	conn, err := c.lazyConnect()
 	if err != nil {
 		return err
 	}
@@ -274,6 +274,7 @@ func (c *Client) CallRPC(ctx context.Context, method string, params, response in
 		closer(e)
 	})
 	conn.Attach(observer)
+
 	defer conn.Detach(observer)
 
 	if _, e := conn.Write(requestData); e != nil {

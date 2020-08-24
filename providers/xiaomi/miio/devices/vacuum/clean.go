@@ -29,7 +29,7 @@ func (t CleanTime) String() string {
 	val := t.Seconds()
 
 	for i := 0; ; i++ {
-		v := float64(val / 60)
+		v := val / 60
 
 		if v < 1 || i == len(humanTime)-1 {
 			return strconv.Itoa(int(math.Round(val))) + " " + humanTime[i]
@@ -37,8 +37,6 @@ func (t CleanTime) String() string {
 
 		val = v
 	}
-
-	return ""
 }
 
 type CleanArea uint64 // mm2
@@ -64,8 +62,8 @@ func (a CleanArea) String() string {
 						break
 					}
 
-					prefixIndex++
 					prefixStep += 1000
+					prefixIndex++
 				}
 			}
 
@@ -74,8 +72,6 @@ func (a CleanArea) String() string {
 
 		val = v
 	}
-
-	return ""
 }
 
 type CleanSummary struct {

@@ -10,7 +10,6 @@ import (
 
 func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	widget := b.Widget()
-	var err error
 
 	data := map[string]interface{}{
 		"url":    b.config.WidgetFileURL,
@@ -27,9 +26,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		data["url"] = r.Original().FormValue("url")
 
 		if !isPlaying {
-			var volume int64
-
-			volume, err = strconv.ParseInt(r.Original().FormValue("volume"), 10, 64)
+			volume, err := strconv.ParseInt(r.Original().FormValue("volume"), 10, 64)
 			if err == nil {
 				err = b.SetVolume(volume)
 				if err == nil {

@@ -174,7 +174,6 @@ func (p *Packet) MarshalBinary() (_ []byte, err error) {
 			}
 
 			p.checksum = hash.Sum(nil)
-
 		} else {
 			p.checksum = bytes.Repeat([]byte{0xFF}, 16)
 		}

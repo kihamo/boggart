@@ -1,4 +1,4 @@
-package z_stack
+package zstack
 
 import (
 	"context"
@@ -17,8 +17,8 @@ func (b *Bind) LivenessProbe(_ context.Context) error {
 
 func (b *Bind) ReadinessProbe(ctx context.Context) (err error) {
 	if b.disconnected.IsNil() {
-		var client *z_stack.Client
-		client, err = b.getClient(ctx)
+		var client *zstack.Client
+		client, err = b.getClient()
 
 		if err != nil {
 			_, err = client.SysPing(ctx)

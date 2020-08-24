@@ -40,6 +40,7 @@ func (b *Bind) Run() error {
 		if (b.config.Account == "" && i == 0) || b.config.Account == account.NNAccount {
 			b.config.Account = account.NNAccount
 			b.account = account.NNAccount
+
 			break
 		}
 	}

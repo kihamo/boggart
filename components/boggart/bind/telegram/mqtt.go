@@ -96,11 +96,12 @@ func (b *Bind) callbackMQTTSendFile(_ context.Context, _ mqtt.Component, message
 		name = "File at " + time.Now().Format(time.RFC1123Z)
 	}
 
-	if mimeType.IsImage() {
+	switch v := mimeType; {
+	case v.IsImage():
 		err = b.SendPhoto(to, name, response.Body)
-	} else if mimeType.IsAudio() {
+	case v.IsAudio():
 		err = b.SendAudio(to, name, response.Body)
-	} else {
+	default:
 		err = b.SendDocument(to, name, response.Body)
 	}
 
@@ -143,11 +144,12 @@ func (b *Bind) callbackMQTTSendFileBase64(_ context.Context, _ mqtt.Component, m
 	to := routes[len(routes)-3]
 	name := "File at " + time.Now().Format(time.RFC1123Z)
 
-	if mimeType.IsImage() {
+	switch v := mimeType; {
+	case v.IsImage():
 		err = b.SendPhoto(to, name, restored)
-	} else if mimeType.IsAudio() {
+	case v.IsAudio():
 		err = b.SendAudio(to, name, restored)
-	} else {
+	default:
 		err = b.SendDocument(to, name, restored)
 	}
 

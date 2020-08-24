@@ -1,4 +1,4 @@
-package z_stack
+package zstack
 
 import (
 	"bytes"
@@ -157,15 +157,14 @@ func (f *Frame) FCS() byte {
 }
 
 func (f Frame) MarshalBinary() ([]byte, error) {
-	f.lock.RLock()
-	defer f.lock.RUnlock()
+	l := f.Length()
 
-	buffer := make([]byte, 0, FrameLengthMin+f.length)
+	buffer := make([]byte, 0, FrameLengthMin+l)
 	buffer = append(buffer,
-		byte(f.length),
-		byte(((f.typ<<5)&0xE0)|(f.subSystem&0x1F)),
-		byte(f.commandID))
-	buffer = append(buffer, f.data...)
+		byte(l),
+		byte(((f.Type()<<5)&0xE0)|(f.SubSystem()&0x1F)),
+		byte(f.CommandID()))
+	buffer = append(buffer, f.Data()...)
 	buffer = append(buffer, checksum(buffer))
 	buffer = append([]byte{SOF}, buffer...)
 
@@ -174,7 +173,6 @@ func (f Frame) MarshalBinary() ([]byte, error) {
 
 func (f *Frame) UnmarshalBinary(data []byte) error {
 	// frame size: SOF + MT CMD + FCS
-
 	// min length: 1 + 3 + 1 = 5
 	if len(data) < FrameLengthMin {
 		return errors.New("frame length less than 5")

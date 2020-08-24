@@ -1,4 +1,4 @@
-package z_stack
+package zstack
 
 import (
 	"github.com/kihamo/boggart/providers/zigbee/z_stack/model"

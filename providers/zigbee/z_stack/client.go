@@ -1,4 +1,4 @@
-package z_stack
+package zstack
 
 import (
 	"bytes"
@@ -15,7 +15,7 @@ import (
 
 type Client struct {
 	conn    connection.Connection
-	options options
+	options Options
 
 	loopOnce sync.Once
 	loopLock sync.RWMutex
@@ -62,17 +62,18 @@ func (c *Client) loop() {
 		atomic.StoreUint32(&c.closed, 1)
 
 		chConnKill <- struct{}{} // kill connect
+
 		c.unregisterAllWatcher()
 	}
 
 	for {
 		select {
 		case data := <-chReceiveResponses:
-			//fmt.Printf("\033[35m Receive <<< %v %X \033[0m\n", data, data)
-
 			if len(data) == 0 {
 				continue
 			}
+
+			//fmt.Printf("\033[35m Receive <<< %v %X \033[0m\n", data, data)
 
 			frames := make([]*Frame, 0)
 
@@ -100,6 +101,7 @@ func (c *Client) loop() {
 					}(err)
 
 					data = data[:0]
+
 					continue
 				}
 
@@ -176,6 +178,7 @@ func (c *Client) unregisterWatcher(watcher *Watcher) {
 	for i := len(c.watchers) - 1; i >= 0; i-- {
 		if c.watchers[i] == watcher {
 			c.watchers = append(c.watchers[:i], c.watchers[i+1:]...)
+
 			watcher.close()
 		}
 	}
@@ -213,6 +216,7 @@ func (c *Client) Call(frame *Frame) error {
 	//fmt.Printf("\033[34m >>> %v %X \033[0m\n", frame.String(), data)
 
 	_, err = c.Write(data)
+
 	return err
 }
 
@@ -222,6 +226,7 @@ func (c *Client) CallWithResult(ctx context.Context, frame *Frame, waiter func(f
 	}
 
 	watcher := c.Watch()
+
 	defer func() {
 		c.unregisterWatcher(watcher)
 	}()
@@ -253,6 +258,7 @@ func (c *Client) WaitWithTimeout(ctx context.Context, waiter func(frame *Frame) 
 	defer cancel()
 
 	watcher := c.Watch()
+
 	defer func() {
 		c.unregisterWatcher(watcher)
 	}()

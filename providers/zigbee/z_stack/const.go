@@ -1,4 +1,4 @@
-package z_stack
+package zstack
 
 //go:generate /bin/bash -c "enumer -type=DeviceState -trimprefix=DeviceState -output=device_state_enumer.go"
 //go:generate /bin/bash -c "enumer -type=CommandStatus -trimprefix=CommandStatus -output=command_status_enumer.go"

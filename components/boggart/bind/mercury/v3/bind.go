@@ -82,7 +82,6 @@ func (b *Bind) Provider() (provider *mercury.MercuryV3, err error) {
 
 		b.connection = conn
 		b.provider = mercury.New(conn, opts...)
-
 	})
 
 	if err != nil {

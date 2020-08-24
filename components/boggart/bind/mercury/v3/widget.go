@@ -9,6 +9,7 @@ import (
 func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	widget := b.Widget()
 	provider, err := b.Provider()
+
 	if err != nil {
 		widget.NotFound(w, r)
 		return
@@ -123,6 +124,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		"error": err,
 	}
 
+	//nolint
 	valueUint32, _, _, _, err := provider.ReadArray(v3.ArrayReset, nil, v3.Tariff1)
 	vars["power_t1"] = map[string]interface{}{
 		"value": valueUint32,

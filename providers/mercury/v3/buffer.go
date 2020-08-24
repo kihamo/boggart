@@ -26,7 +26,7 @@ func (b *Buffer) readUint32(data []byte) uint32 {
 		data = []byte{data[0], 0, data[1], data[2]}
 	}
 
-	if bytes.Compare(data, zero) == 0 {
+	if bytes.Equal(data, zero) {
 		return 0
 	}
 

@@ -1,4 +1,4 @@
-package z_stack
+package zstack
 
 import (
 	"context"
@@ -6,13 +6,13 @@ import (
 )
 
 type UtilDeviceInfo struct {
-	Status           CommandStatus
 	IEEEAddr         []byte
+	AssocDevicesList []uint16
 	ShortAddr        uint16
+	Status           CommandStatus
 	DeviceType       uint8
 	DeviceState      DeviceState
 	NumAssocDevices  uint8
-	AssocDevicesList []uint16
 }
 
 /*
@@ -75,9 +75,9 @@ Usage:
 	Attributes:
 		Status 1 byte Status is either Success (0) or Failure (1).
 */
-func (c *Client) UtilLEDControl(ctx context.Context, LedId uint8, mode bool) error {
+func (c *Client) UtilLEDControl(ctx context.Context, ledID uint8, mode bool) error {
 	dataIn := NewBuffer(nil)
-	dataIn.WriteUint8(LedId)  // LedId
+	dataIn.WriteUint8(ledID)  // LedId
 	dataIn.WriteBoolean(mode) // Mode
 
 	response, err := c.CallWithResultSREQ(ctx, dataIn.Frame(0x27, CommandLEDControl))

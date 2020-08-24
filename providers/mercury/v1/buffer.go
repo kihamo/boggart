@@ -37,11 +37,7 @@ func (b *Buffer) ReadUint32() uint32 {
 }
 
 func (b *Buffer) ReadBool() bool {
-	if b.ReadUint8() == 0 {
-		return false
-	}
-
-	return true
+	return b.ReadUint8() != 0
 }
 
 /*

@@ -1,4 +1,4 @@
-package z_stack
+package zstack
 
 import (
 	"context"
@@ -13,11 +13,11 @@ import (
 	Usage:
 		SREQ:
 			          1        |      1      |       1     |     1    |      2    |      2      |     1     |      1     |        1         |       0-32       |         1         |       0-32
-			Length = 0x09-0x49 | Cmd0 = 0x24 | Cmd1 = 0x00 | EndPoint | AppProfId | AppDeviceId | AppDevVer | LatencyReq | AppNumInClusters | AppInClusterList | AppNumOutClusters | AppOutClusterList
+			Length = 0x09-0x49 | Cmd0 = 0x24 | Cmd1 = 0x00 | EndPoint | AppProfID | AppDeviceID | AppDevVer | LatencyReq | AppNumInClusters | AppInClusterList | AppNumOutClusters | AppOutClusterList
 		Attributes:
 			EndPoint          1 byte   Specifies the endpoint of the device
-			AppProfId         2 bytes  Specifies the profile Id of the application
-			AppDeviceId       2 bytes  Specifies the device description Id for this endpoint
+			AppProfID         2 bytes  Specifies the profile Id of the application
+			AppDeviceID       2 bytes  Specifies the device description Id for this endpoint
 			AddDevVer         1 byte   Specifies the device version number
 			LatencyReq        1 byte   Specifies latency.
 			                           0x00-No latency

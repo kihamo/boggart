@@ -1,4 +1,4 @@
-package z_stack
+package zstack
 
 import (
 	"bytes"
@@ -26,14 +26,14 @@ type Bind struct {
 	config *Config
 
 	disconnected *atomic.BoolNull
-	client       *z_stack.Client
+	client       *zstack.Client
 	connection   connection.Connection
 	onceClient   *atomic.Once
 	lock         sync.RWMutex
 	done         chan struct{}
 }
 
-func (b *Bind) getClient(ctx context.Context) (_ *z_stack.Client, err error) {
+func (b *Bind) getClient() (_ *zstack.Client, err error) {
 	b.onceClient.Do(func() {
 		b.disconnected.Nil()
 
@@ -49,19 +49,19 @@ func (b *Bind) getClient(ctx context.Context) (_ *z_stack.Client, err error) {
 				}
 
 				for {
-					i := bytes.IndexByte(data, z_stack.SOF)
+					i := bytes.IndexByte(data, zstack.SOF)
 					if i > 0 {
 						data = data[i:]
 					}
 
-					if len(data) < z_stack.FrameLengthMin || data[0] != z_stack.SOF {
+					if len(data) < zstack.FrameLengthMin || data[0] != zstack.SOF {
 						return
 					}
 
-					l := uint16(data[z_stack.PositionFrameLength]) + z_stack.FrameLengthMin
+					l := uint16(data[zstack.PositionFrameLength]) + zstack.FrameLengthMin
 					args := make([]interface{}, 0)
 
-					var frame z_stack.Frame
+					var frame zstack.Frame
 					if err := frame.UnmarshalBinary(data[:l]); err == nil {
 						args = append(args,
 							"description", frame.Description(),
@@ -74,7 +74,6 @@ func (b *Bind) getClient(ctx context.Context) (_ *z_stack.Client, err error) {
 						)
 
 						data = data[l:]
-
 					} else {
 						args = append(args,
 							"payload", fmt.Sprintf("%v", data),
@@ -93,12 +92,12 @@ func (b *Bind) getClient(ctx context.Context) (_ *z_stack.Client, err error) {
 		b.connection.ApplyOptions(connection.WithDumpRead(dump("Read frame")))
 		b.connection.ApplyOptions(connection.WithDumpWrite(dump("Write frame")))
 
-		opts := []z_stack.Option{
-			z_stack.WithChannel(b.config.Channel),
-			z_stack.WithLEDEnabled(b.config.LEDEnabled),
+		opts := []zstack.Option{
+			zstack.WithChannel(b.config.Channel),
+			zstack.WithLEDEnabled(b.config.LEDEnabled),
 		}
 
-		b.client = z_stack.New(b.connection, opts...)
+		b.client = zstack.New(b.connection, opts...)
 
 		go func() {
 			ctx := context.Background()
@@ -135,13 +134,14 @@ func (b *Bind) permitJoinDuration() uint8 {
 
 func (b *Bind) Run() error {
 	b.onceClient.Reset()
+
 	doneCh := make(chan struct{})
 
 	b.lock.Lock()
 	b.done = doneCh
 	b.lock.Unlock()
 
-	client, err := b.getClient(context.Background())
+	client, err := b.getClient()
 	if err != nil {
 		return err
 	}
@@ -154,11 +154,10 @@ func (b *Bind) Run() error {
 		for {
 			select {
 			case frame := <-watcher.NextFrame():
-				if frame.Type() == z_stack.TypeAREQ {
+				if frame.Type() == zstack.TypeAREQ {
 					switch frame.CommandID() {
-
-					case z_stack.CommandAfIncomingMessage:
-						message, err := z_stack.AfIncomingMessageParse(frame)
+					case zstack.CommandAfIncomingMessage:
+						message, err := zstack.AfIncomingMessageParse(frame)
 						if err != nil {
 							b.Logger().Warn("Parse received message failed", "error", err.Error())
 							continue
@@ -188,7 +187,7 @@ func (b *Bind) Run() error {
 							switch report.AttributeID {
 							// battery
 							case 65282:
-								elements := report.AttributeData.(z_stack.TypeStruct).Elements
+								elements := report.AttributeData.(zstack.TypeStruct).Elements
 								if len(elements) > 1 {
 									if sn != "" {
 										voltage := elements[1].Value.(uint16)
@@ -211,7 +210,7 @@ func (b *Bind) Run() error {
 
 								// hmmm
 							default:
-								if sn != "" && report.DataType == z_stack.DataTypeBoolean {
+								if sn != "" && report.DataType == zstack.DataTypeBoolean {
 									value := report.AttributeData.(bool)
 
 									_ = b.MQTT().PublishWithoutCache(ctx, b.config.TopicOnOff.Format(sn, sourceAddress), value)
@@ -224,7 +223,7 @@ func (b *Bind) Run() error {
 						}
 
 						// permit join sync
-					case z_stack.CommandPermitJoinInd, z_stack.CommandManagementPermitJoinResponse:
+					case zstack.CommandPermitJoinInd, zstack.CommandManagementPermitJoinResponse:
 						go func() {
 							time.Sleep(time.Second) // грязный хак что бы клиент успел у себя внутри изменить состояние
 							b.syncPermitJoin()

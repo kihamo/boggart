@@ -5,6 +5,7 @@ run:
     - tools
     - docs
     - openhab2
+    - components/barcode
   skip-dirs-use-default: true
 
 linters:

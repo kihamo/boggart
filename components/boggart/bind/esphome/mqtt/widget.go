@@ -56,7 +56,7 @@ func (b *Bind) handleComponent(w *dashboard.Response, r *dashboard.Request) {
 	widget.NotFound(w, r)
 }
 
-func (b *Bind) handleComponentLight(w *dashboard.Response, r *dashboard.Request, component *ComponentLight) {
+func (b *Bind) handleComponentLight(w http.ResponseWriter, r *dashboard.Request, component *ComponentLight) {
 	ctx := r.Context()
 	widget := b.Widget()
 

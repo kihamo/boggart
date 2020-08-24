@@ -126,7 +126,7 @@ func (b *Bind) handleIndex(_ *dashboard.Response, r *dashboard.Request) {
 	widget.Render(ctx, "index", vars)
 }
 
-func (b *Bind) handleLight(w *dashboard.Response, r *dashboard.Request, entity *api.ListEntitiesLightResponse) {
+func (b *Bind) handleLight(w http.ResponseWriter, r *dashboard.Request, entity *api.ListEntitiesLightResponse) {
 	ctx := r.Context()
 	widget := b.Widget()
 

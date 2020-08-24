@@ -1,4 +1,4 @@
-package z_stack
+package zstack
 
 import (
 	"github.com/kihamo/boggart/atomic"

@@ -26,7 +26,7 @@ func (v *Bytes) Set(value []byte) bool {
 	v.v = value
 	v.m.Unlock()
 
-	return bytes.Compare(old, value) != 0
+	return !bytes.Equal(old, value)
 }
 
 func (v *Bytes) Load() []byte {

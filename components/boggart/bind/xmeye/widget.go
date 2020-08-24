@@ -257,7 +257,7 @@ func (b *Bind) widgetActionAccounts(_ *dashboard.Response, r *dashboard.Request,
 	}
 }
 
-func (b *Bind) widgetActionUser(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
+func (b *Bind) widgetActionUser(w http.ResponseWriter, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
 	ctx := r.Context()
 	widget := b.Widget()
 
@@ -354,7 +354,7 @@ func (b *Bind) widgetActionUser(w *dashboard.Response, r *dashboard.Request, cli
 	return vars
 }
 
-func (b *Bind) widgetActionPassword(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
+func (b *Bind) widgetActionPassword(w http.ResponseWriter, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
 	widget := b.Widget()
 
 	userName := strings.TrimSpace(r.URL().Query().Get("username"))
@@ -380,7 +380,7 @@ func (b *Bind) widgetActionPassword(w *dashboard.Response, r *dashboard.Request,
 	return map[string]interface{}{}
 }
 
-func (b *Bind) widgetActionGroup(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
+func (b *Bind) widgetActionGroup(w http.ResponseWriter, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
 	ctx := r.Context()
 	widget := b.Widget()
 	canEditAuthorities := true
@@ -484,7 +484,7 @@ func (b *Bind) widgetActionGroup(w *dashboard.Response, r *dashboard.Request, cl
 	return vars
 }
 
-func (b *Bind) widgetActionUserDelete(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) {
+func (b *Bind) widgetActionUserDelete(w http.ResponseWriter, r *dashboard.Request, client *xmeye.Client) {
 	widget := b.Widget()
 
 	userName := strings.TrimSpace(r.URL().Query().Get("username"))
@@ -509,7 +509,7 @@ func (b *Bind) widgetActionUserDelete(w *dashboard.Response, r *dashboard.Reques
 	widget.Redirect(r.URL().Path+"?action=accounts", http.StatusFound, w, r)
 }
 
-func (b *Bind) widgetActionGroupDelete(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) {
+func (b *Bind) widgetActionGroupDelete(w http.ResponseWriter, r *dashboard.Request, client *xmeye.Client) {
 	widget := b.Widget()
 
 	groupName := strings.TrimSpace(r.URL().Query().Get("groupname"))
@@ -662,7 +662,7 @@ func (b *Bind) widgetActionConfigsExport(w *dashboard.Response, r *dashboard.Req
 	_, _ = io.Copy(w, reader)
 }
 
-func (b *Bind) widgetActionDownload(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) {
+func (b *Bind) widgetActionDownload(w http.ResponseWriter, r *dashboard.Request, client *xmeye.Client) {
 	widget := b.Widget()
 
 	name := strings.TrimSpace(r.URL().Query().Get("name"))

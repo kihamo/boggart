@@ -140,6 +140,7 @@ func (b *Bind) taskLimitTrafficUpdater(ctx context.Context) error {
 	}
 
 	_, err = b.USSD(ctx, op.LimitTrafficUSSD)
+
 	return err
 }
 

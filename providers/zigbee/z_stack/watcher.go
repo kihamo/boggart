@@ -1,4 +1,4 @@
-package z_stack
+package zstack
 
 type Watcher struct {
 	frames chan *Frame

@@ -52,6 +52,7 @@ func (m *HTTPHostNotification) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+
 	return nil
 }
 
@@ -62,6 +63,7 @@ func init() {
 	if err := json.Unmarshal([]byte(`["ipaddress","hostname"]`), &res); err != nil {
 		panic(err)
 	}
+
 	for _, v := range res {
 		httpHostNotificationTypeAddressingFormatTypePropEnum = append(httpHostNotificationTypeAddressingFormatTypePropEnum, v)
 	}
@@ -77,14 +79,10 @@ const (
 
 // prop value enum
 func (m *HTTPHostNotification) validateAddressingFormatTypeEnum(path, location string, value string) error {
-	if err := validate.EnumCase(path, location, value, httpHostNotificationTypeAddressingFormatTypePropEnum, true); err != nil {
-		return err
-	}
-	return nil
+	return validate.EnumCase(path, location, value, httpHostNotificationTypeAddressingFormatTypePropEnum, true)
 }
 
-func (m *HTTPHostNotification) validateAddressingFormatType(formats strfmt.Registry) error {
-
+func (m *HTTPHostNotification) validateAddressingFormatType(_ strfmt.Registry) error {
 	if swag.IsZero(m.AddressingFormatType) { // not required
 		return nil
 	}
@@ -104,6 +102,7 @@ func init() {
 	if err := json.Unmarshal([]byte(`["MD5digest","none"]`), &res); err != nil {
 		panic(err)
 	}
+
 	for _, v := range res {
 		httpHostNotificationTypeHTTPAuthenticationMethodPropEnum = append(httpHostNotificationTypeHTTPAuthenticationMethodPropEnum, v)
 	}
@@ -119,14 +118,10 @@ const (
 
 // prop value enum
 func (m *HTTPHostNotification) validateHTTPAuthenticationMethodEnum(path, location string, value string) error {
-	if err := validate.EnumCase(path, location, value, httpHostNotificationTypeHTTPAuthenticationMethodPropEnum, true); err != nil {
-		return err
-	}
-	return nil
+	return validate.EnumCase(path, location, value, httpHostNotificationTypeHTTPAuthenticationMethodPropEnum, true)
 }
 
-func (m *HTTPHostNotification) validateHTTPAuthenticationMethod(formats strfmt.Registry) error {
-
+func (m *HTTPHostNotification) validateHTTPAuthenticationMethod(_ strfmt.Registry) error {
 	if swag.IsZero(m.HTTPAuthenticationMethod) { // not required
 		return nil
 	}
@@ -146,6 +141,7 @@ func init() {
 	if err := json.Unmarshal([]byte(`["XML","querystring"]`), &res); err != nil {
 		panic(err)
 	}
+
 	for _, v := range res {
 		httpHostNotificationTypeParameterFormatTypePropEnum = append(httpHostNotificationTypeParameterFormatTypePropEnum, v)
 	}
@@ -161,14 +157,10 @@ const (
 
 // prop value enum
 func (m *HTTPHostNotification) validateParameterFormatTypeEnum(path, location string, value string) error {
-	if err := validate.EnumCase(path, location, value, httpHostNotificationTypeParameterFormatTypePropEnum, true); err != nil {
-		return err
-	}
-	return nil
+	return validate.EnumCase(path, location, value, httpHostNotificationTypeParameterFormatTypePropEnum, true)
 }
 
-func (m *HTTPHostNotification) validateParameterFormatType(formats strfmt.Registry) error {
-
+func (m *HTTPHostNotification) validateParameterFormatType(_ strfmt.Registry) error {
 	if swag.IsZero(m.ParameterFormatType) { // not required
 		return nil
 	}
@@ -185,9 +177,11 @@ var httpHostNotificationTypeProtocolTypePropEnum []interface{}
 
 func init() {
 	var res []string
+
 	if err := json.Unmarshal([]byte(`["HTTP","HTTPS"]`), &res); err != nil {
 		panic(err)
 	}
+
 	for _, v := range res {
 		httpHostNotificationTypeProtocolTypePropEnum = append(httpHostNotificationTypeProtocolTypePropEnum, v)
 	}
@@ -203,14 +197,10 @@ const (
 
 // prop value enum
 func (m *HTTPHostNotification) validateProtocolTypeEnum(path, location string, value string) error {
-	if err := validate.EnumCase(path, location, value, httpHostNotificationTypeProtocolTypePropEnum, true); err != nil {
-		return err
-	}
-	return nil
+	return validate.EnumCase(path, location, value, httpHostNotificationTypeProtocolTypePropEnum, true)
 }
 
-func (m *HTTPHostNotification) validateProtocolType(formats strfmt.Registry) error {
-
+func (m *HTTPHostNotification) validateProtocolType(_ strfmt.Registry) error {
 	if swag.IsZero(m.ProtocolType) { // not required
 		return nil
 	}
@@ -228,15 +218,19 @@ func (m *HTTPHostNotification) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
+
 	return swag.WriteJSON(m)
 }
 
 // UnmarshalBinary interface implementation
 func (m *HTTPHostNotification) UnmarshalBinary(b []byte) error {
 	var res HTTPHostNotification
+
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
+
 	*m = res
+
 	return nil
 }

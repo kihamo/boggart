@@ -19,11 +19,7 @@ func (m *OptString) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 
 	for _, a := range start.Attr {
 		if a.Name.Local == "opt" {
-			m.opts = make([]string, 0)
-
-			for _, opt := range strings.Split(a.Value, ",") {
-				m.opts = append(m.opts, opt)
-			}
+			m.opts = strings.Split(a.Value, ",")
 
 			break
 		}

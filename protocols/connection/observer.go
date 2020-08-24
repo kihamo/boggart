@@ -114,15 +114,11 @@ func (m *observerConnection) Detach(o Observer) {
 	for i := len(m.observers) - 1; i >= 0; i-- {
 		if m.observers[i] == o {
 			m.observers = append(m.observers[:i], m.observers[i+1:]...)
-			// watcher.close()
 		}
 	}
 }
 
 func (m *observerConnection) Invoke(request []byte) (response []byte, err error) {
-	//m.Lock()
-	//defer m.Unlock()
-
 	done := make(chan struct{}, 1)
 
 	observer := ObserverFunc(func(packet []byte, e error) {
@@ -130,9 +126,9 @@ func (m *observerConnection) Invoke(request []byte) (response []byte, err error)
 		err = e
 
 		done <- struct{}{}
-
 	})
 	m.Attach(observer)
+
 	defer m.Detach(observer)
 
 	if _, err := m.Write(request); err != nil {

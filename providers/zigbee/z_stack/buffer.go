@@ -1,4 +1,4 @@
-package z_stack
+package zstack
 
 import (
 	"bytes"
@@ -56,9 +56,9 @@ const (
 	DataTypeTod          uint8 = 224
 	DataTypeDate         uint8 = 225
 	DataTypeUtc          uint8 = 226
-	DataTypeClusterId    uint8 = 232
-	DataTypeAttrId       uint8 = 233
-	DataTypeBacOid       uint8 = 234
+	DataTypeClusterID    uint8 = 232
+	DataTypeAttrID       uint8 = 233
+	DataTypeBacOID       uint8 = 234
 	DataTypeIEEEAddr     uint8 = 240
 	DataTypeSecKey       uint8 = 241
 	DataTypeUnknown      uint8 = 255
@@ -108,11 +108,9 @@ func (b *Buffer) ReadByType(t uint8) interface{} {
 		return b.ReadStruct()
 	case DataTypeIEEEAddr:
 		return b.ReadIEEEAddr()
-	default:
-		panic("unknown type of buffer " + fmt.Sprintf("%d %s", t, b.Bytes()))
 	}
 
-	return nil
+	panic("unknown type of buffer " + fmt.Sprintf("%d %s", t, b.Bytes()))
 }
 
 func (b *Buffer) ReadBoolean() bool {

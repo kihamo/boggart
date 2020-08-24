@@ -17,11 +17,10 @@ const (
 )
 
 type Response struct {
-	address uint8
 	payload []byte
+	lock    sync.RWMutex
 	crc     uint16
-
-	lock sync.RWMutex
+	address uint8
 }
 
 func NewResponse() *Response {

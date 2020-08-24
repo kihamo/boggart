@@ -1,4 +1,4 @@
-package z_stack
+package zstack
 
 import (
 	"errors"
@@ -12,18 +12,7 @@ type FramePayloadReportRecorder struct {
 }
 
 type AfIncomingMessage struct {
-	GroupID        uint16
-	ClusterID      uint16
-	SrcAddr        uint16
-	SrcEndpoint    uint8
-	DstEndpoint    uint8
-	WasBroadcast   uint8
-	LinkQuality    uint8
-	SecurityUse    uint8
-	TimeStamp      uint32
-	TransSeqNumber uint8
-	Data           []byte
-
+	Data  []byte
 	Frame struct {
 		Header struct {
 			FrameType                 uint8
@@ -38,12 +27,22 @@ type AfIncomingMessage struct {
 			Report *[]FramePayloadReportRecorder
 		}
 	}
+	TimeStamp      uint32
+	GroupID        uint16
+	ClusterID      uint16
+	SrcAddr        uint16
+	SrcEndpoint    uint8
+	DstEndpoint    uint8
+	WasBroadcast   uint8
+	LinkQuality    uint8
+	SecurityUse    uint8
+	TransSeqNumber uint8
 }
 
 type Endpoint struct {
 	EndPoint          uint8
-	AppProfId         uint16
-	AppDeviceId       uint16
+	AppProfID         uint16
+	AppDeviceID       uint16
 	AddDevVer         uint8
 	LatencyReq        uint8
 	AppInClusterList  []uint16
@@ -53,8 +52,8 @@ type Endpoint struct {
 func (e Endpoint) AsBuffer() *Buffer {
 	dataOut := NewBuffer(nil)
 	dataOut.WriteUint8(e.EndPoint)
-	dataOut.WriteUint16(e.AppProfId)
-	dataOut.WriteUint16(e.AppDeviceId)
+	dataOut.WriteUint16(e.AppProfID)
+	dataOut.WriteUint16(e.AppDeviceID)
 	dataOut.WriteUint8(e.AddDevVer)
 	dataOut.WriteUint8(e.LatencyReq)
 	dataOut.WriteUint8(uint8(len(e.AppInClusterList)))
@@ -154,11 +153,11 @@ func AfIncomingMessageParse(frame *Frame) (*AfIncomingMessage, error) {
 		fmt.Println("Cluster", msg.ClusterID)
 		fmt.Println("Qua", msg.LinkQuality)
 
-		if msg.Frame.Header.Direction == 0 { // client to server
-
-		} else { // server to client
-
-		}
+		//if msg.Frame.Header.Direction == 0 { // client to server
+		//
+		//} else { // server to client
+		//
+		//}
 		fmt.Println("Command", msg.Frame.Header.CommandIdentifier)
 		fmt.Println("fieldControl", payload.ReadUint8())
 		fmt.Println("manufacturerCode", payload.ReadUint16())

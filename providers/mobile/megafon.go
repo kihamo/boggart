@@ -54,7 +54,9 @@ func (m *Megafon) auth(ctx context.Context) (string, error) {
 		return "", err
 	}
 
-	doc, err := goquery.NewDocumentFromResponse(response)
+	defer response.Body.Close()
+
+	doc, err := goquery.NewDocumentFromReader(response.Body)
 	if err != nil {
 		return "", err
 	}

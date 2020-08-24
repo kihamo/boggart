@@ -117,11 +117,7 @@ func (c *MQTTContainer) registerPublish(topic mqtt.Topic) {
 	key := topic.String()
 
 	c.mutex.Lock()
-	if _, ok := c.publishes[key]; ok {
-		c.publishes[key]++
-	} else {
-		c.publishes[key] = 1
-	}
+	c.publishes[key]++
 	c.mutex.Unlock()
 }
 

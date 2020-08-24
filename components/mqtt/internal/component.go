@@ -352,24 +352,13 @@ func (c *Component) clientSubscribe(topic mqtt.Topic, qos byte, subscription *mq
 	return err
 }
 
-func (c *Component) doPublish(ctx context.Context, topic mqtt.Topic, qos byte, retained bool, payload interface{}, cache bool) (err error) {
+func (c *Component) doPublish(_ context.Context, topic mqtt.Topic, qos byte, retained bool, payload interface{}, cache bool) (err error) {
 	// check topic
 	if !topic.ValidAsPublishTopic() {
 		return errors.New("topic " + topic.String() + " isn't valid for publish")
 	}
 
 	payloadConverted := c.convertPayload(payload)
-
-	//span, _ := tracing.StartSpanFromContext(ctx, c.Name(), "mqtt_publish")
-	//
-	//span = span.SetTag("topic", topic)
-	//defer span.Finish()
-	//
-	//span.LogFields(
-	//	log.Int("qos", int(qos)),
-	//	log.String("payload", string(payloadConverted)),
-	//	log.Bool("retained", retained),
-	//)
 
 	if cache && !c.config.Bool(mqtt.ConfigPayloadCacheEnabled) {
 		cache = false
@@ -412,8 +401,6 @@ func (c *Component) doPublish(ctx context.Context, topic mqtt.Topic, qos byte, r
 
 	if err != nil {
 		metricPublish.With("status", "failure").Inc()
-
-		//tracing.SpanError(span, err)
 
 		c.logger.Error(
 			"Publish MQTT topic failed",

@@ -19,7 +19,7 @@ var (
 )
 
 type Serial struct {
-	options options
+	options Options
 	once    *atomic.Once
 	port    s.Port
 }

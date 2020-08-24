@@ -111,6 +111,8 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		response, err := http.Get(u)
+		defer response.Body.Close()
+
 		if err != nil {
 			widget.InternalError(w, r, err)
 			return
@@ -191,6 +193,7 @@ func (b *Bind) initUI(vars map[string]interface{}, r *dashboard.Request) map[str
 			style = "basicui"
 		}
 	}
+
 	vars["style"] = style
 	vars["theme"] = q.Get("theme")
 

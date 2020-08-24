@@ -93,6 +93,7 @@ func (b *Bind) callbackMQTTAction(ctx context.Context, client mqtt.Component, me
 
 	if err == nil {
 		time.Sleep(time.Second * 5)
+
 		err = b.updateState(ctx)
 	}
 

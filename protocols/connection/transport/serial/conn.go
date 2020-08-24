@@ -7,13 +7,11 @@ import (
 	"sync"
 
 	"github.com/goburrow/serial"
-	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/protocols/connection/transport"
 )
 
 type Serial struct {
-	options   options
-	once      *atomic.Once
+	options   Options
 	port      serial.Port
 	portMutex sync.Mutex // внутри port поле fd не защищено от race
 }

@@ -23,11 +23,12 @@ func (m *OptBoolean) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error 
 			m.opts = make([]bool, 0, 2)
 
 			for _, f := range strings.Split(a.Value, ",") {
-				if opt, err := strconv.ParseBool(f); err != nil {
+				opt, err := strconv.ParseBool(f)
+				if err != nil {
 					return err
-				} else {
-					m.opts = append(m.opts, opt)
 				}
+
+				m.opts = append(m.opts, opt)
 			}
 
 			break

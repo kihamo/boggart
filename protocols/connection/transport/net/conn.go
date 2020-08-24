@@ -21,7 +21,7 @@ func SetDeadline(duration time.Duration, f func(t time.Time) error) error {
 }
 
 type Net struct {
-	options options
+	options Options
 	conn    net.Conn
 }
 

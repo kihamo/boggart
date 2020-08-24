@@ -14,15 +14,9 @@ type Config struct {
 	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
+	FileURLPrefix       types.URL `mapstructure:"file_url_prefix" yaml:"file_url_prefix"`
 	Token               string
-	Debug               bool
-	UpdatesEnabled      bool       `mapstructure:"updates_enabled" yaml:"updates_enabled"`
-	UpdatesBuffer       int        `mapstructure:"updates_buffer" yaml:"updates_buffer"`
-	UpdatesTimeout      int        `mapstructure:"updates_timeout" yaml:"updates_timeout"`
-	UseURLForSendFile   bool       `mapstructure:"use_url_for_send_file" yaml:"use_url_for_send_file"`
-	FileURLPrefix       types.URL  `mapstructure:"file_url_prefix" yaml:"file_url_prefix"`
 	FileDirectory       string     `mapstructure:"file_directory" yaml:"file_directory"`
-	FileAutoClean       bool       `mapstructure:"file_auto_clean" yaml:"file_auto_clean"`
 	TopicSendMessage    mqtt.Topic `mapstructure:"topic_send_message" yaml:"topic_send_message"`
 	TopicSendFile       mqtt.Topic `mapstructure:"topic_send_file" yaml:"topic_send_file"`
 	TopicSendFileURL    mqtt.Topic `mapstructure:"topic_send_file_url" yaml:"topic_send_file_url"`
@@ -30,6 +24,12 @@ type Config struct {
 	TopicReceiveMessage mqtt.Topic `mapstructure:"topic_receive_message" yaml:"topic_receive_message"`
 	TopicReceiveAudio   mqtt.Topic `mapstructure:"topic_receive_audio" yaml:"topic_receive_audio"`
 	TopicReceiveVoice   mqtt.Topic `mapstructure:"topic_receive_voice" yaml:"topic_receive_voice"`
+	UpdatesBuffer       int        `mapstructure:"updates_buffer" yaml:"updates_buffer"`
+	UpdatesTimeout      int        `mapstructure:"updates_timeout" yaml:"updates_timeout"`
+	Debug               bool
+	UpdatesEnabled      bool `mapstructure:"updates_enabled" yaml:"updates_enabled"`
+	UseURLForSendFile   bool `mapstructure:"use_url_for_send_file" yaml:"use_url_for_send_file"`
+	FileAutoClean       bool `mapstructure:"file_auto_clean" yaml:"file_auto_clean"`
 }
 
 func (t Type) Config() interface{} {

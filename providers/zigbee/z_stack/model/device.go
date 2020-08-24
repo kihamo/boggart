@@ -110,10 +110,6 @@ func (d *Device) EndpointAdd(endpoint *Endpoint) {
 	d.endpoints.Store(endpoint.ID(), endpoint)
 }
 
-func (d *Device) endpointRemove(id uint8) {
-	d.endpoints.Delete(id)
-}
-
 func (d *Device) Endpoints() []*Endpoint {
 	endpoints := make([]*Endpoint, 0)
 

@@ -1,34 +1,34 @@
-package z_stack
+package zstack
 
-type options struct {
+type Options struct {
+	extendedPanID        []byte
+	networkKey           []byte
 	Channel              uint32
 	panID                uint16
-	extendedPanID        []byte
 	networkKeyDistribute bool
-	networkKey           []byte
 	LEDEnabled           bool
 }
 
 type Option interface {
-	apply(*options)
+	apply(*Options)
 }
 
 type funcOption struct {
-	f func(*options)
+	f func(*Options)
 }
 
-func (fdo *funcOption) apply(do *options) {
+func (fdo *funcOption) apply(do *Options) {
 	fdo.f(do)
 }
 
-func newFuncOption(f func(*options)) *funcOption {
+func newFuncOption(f func(*Options)) *funcOption {
 	return &funcOption{
 		f: f,
 	}
 }
 
-func DefaultOptions() options {
-	return options{
+func DefaultOptions() Options {
+	return Options{
 		Channel:              11,
 		panID:                0x1A62,
 		extendedPanID:        []byte{0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD},
@@ -39,37 +39,37 @@ func DefaultOptions() options {
 }
 
 func WithChannel(channel uint32) Option {
-	return newFuncOption(func(o *options) {
+	return newFuncOption(func(o *Options) {
 		o.Channel = channel
 	})
 }
 
 func WithPanID(panID uint16) Option {
-	return newFuncOption(func(o *options) {
+	return newFuncOption(func(o *Options) {
 		o.panID = panID
 	})
 }
 
 func WithExtendedPanID(extendedPanID []byte) Option {
-	return newFuncOption(func(o *options) {
+	return newFuncOption(func(o *Options) {
 		o.extendedPanID = extendedPanID
 	})
 }
 
 func WithNetworkKeyDistribute(flag bool) Option {
-	return newFuncOption(func(o *options) {
+	return newFuncOption(func(o *Options) {
 		o.networkKeyDistribute = flag
 	})
 }
 
 func WithNetworkKey(networkKey []byte) Option {
-	return newFuncOption(func(o *options) {
+	return newFuncOption(func(o *Options) {
 		o.networkKey = networkKey
 	})
 }
 
 func WithLEDEnabled(flag bool) Option {
-	return newFuncOption(func(o *options) {
+	return newFuncOption(func(o *Options) {
 		o.LEDEnabled = flag
 	})
 }

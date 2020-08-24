@@ -14,6 +14,7 @@ func (m *MercuryV1) SetDisplayMode(mode *DisplayMode) error {
 		WithPayload([]byte{mode.Bit()})
 
 	_, err := m.Invoke(request)
+
 	return err
 }
 
@@ -28,5 +29,6 @@ func (m *MercuryV1) SetDisplayTime(values *TariffValues) error {
 		WithPayload([]byte{uint8(values.Tariff1()), uint8(values.Tariff2()), uint8(values.Tariff3()), uint8(values.Tariff4())})
 
 	_, err := m.Invoke(request)
+
 	return err
 }

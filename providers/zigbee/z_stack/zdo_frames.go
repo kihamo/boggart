@@ -1,22 +1,22 @@
-package z_stack
+package zstack
 
 import (
 	"errors"
 )
 
 type ZDOSimpleDescriptorResponse struct {
+	InClusterList  []uint16
+	OutClusterList []uint16
 	SourceAddress  uint16
-	Status         CommandStatus
 	NetworkAddress uint16
-	Length         uint8
-	Endpoint       uint8
 	ProfileID      uint16
 	DeviceID       uint16
+	Status         CommandStatus
+	Length         uint8
+	Endpoint       uint8
 	DeviceVersion  uint8
 	NumInClusters  uint8
-	InClusterList  []uint16
 	NumOutClusters uint8
-	OutClusterList []uint16
 }
 
 type ZDOActiveEndpointsResponse struct {
@@ -29,38 +29,38 @@ type ZDOActiveEndpointsResponse struct {
 
 type ZDODescriptionResponse struct {
 	SourceAddress              uint16
-	Status                     CommandStatus
 	NetworkAddress             uint16
+	ManufacturerCode           uint16
+	MaxInTransferSize          uint16
+	ServerMask                 uint16
+	MaxOutTransferSize         uint16
+	Status                     CommandStatus
 	LogicalType                uint8
 	ComplexDescriptorAvailable uint8
 	UserDescriptorAvailable    uint8
 	APSFlags                   uint8
 	FrequencyBand              uint8
 	MacCapabilitiesFlags       uint8
-	ManufacturerCode           uint16
 	MaxBufferSize              uint8
-	MaxInTransferSize          uint16
-	ServerMask                 uint16
-	MaxOutTransferSize         uint16
 	DescriptorCapabilities     uint8
 }
 
 type ZDODeviceJoinedMessage struct {
-	NetworkAddress uint16
 	ExtendAddress  []byte
+	NetworkAddress uint16
 	ParentAddress  uint16
 }
 
 type ZDOEndDeviceAnnounceMessage struct {
+	IEEEAddress    []byte
 	SourceAddress  uint16
 	NetworkAddress uint16
-	IEEEAddress    []byte
 	Capabilities   uint8
 }
 
 type ZDODeviceLeaveMessage struct {
-	SourceAddress  uint16
 	ExtendAddress  []byte
+	SourceAddress  uint16
 	Request        uint8
 	RemoveChildren uint8
 	Rejoin         uint8
@@ -174,12 +174,14 @@ func ZDOSimpleDescriptorResponseParse(frame *Frame) (*ZDOSimpleDescriptorRespons
 
 	msg.NumInClusters = dataOut.ReadUint8()
 	msg.InClusterList = make([]uint16, 0, msg.NumInClusters)
+
 	for i := uint8(1); i <= msg.NumInClusters; i++ {
 		msg.InClusterList = append(msg.InClusterList, dataOut.ReadUint16())
 	}
 
 	msg.NumOutClusters = dataOut.ReadUint8()
 	msg.OutClusterList = make([]uint16, 0, msg.NumOutClusters)
+
 	for i := uint8(1); i <= msg.NumOutClusters; i++ {
 		msg.OutClusterList = append(msg.OutClusterList, dataOut.ReadUint16())
 	}

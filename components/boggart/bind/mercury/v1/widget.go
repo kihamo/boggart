@@ -14,6 +14,7 @@ import (
 func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	widget := b.Widget()
 	provider, err := b.Provider()
+
 	if err != nil {
 		widget.NotFound(w, r)
 		return
@@ -72,6 +73,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 				if err != nil {
 					mAsString := widget.Translate(ctx, monthRequest.String(), "")
 					widget.FlashError(r, "Get statistics for %s failed with error %v", "", mAsString, err)
+
 					continue
 				}
 
@@ -181,7 +183,6 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		if makeDate, err := provider.MakeDate(); err != nil {
 			widget.FlashError(r, "Get make date failed with error %v", "", err)
 		} else {
-
 			type event struct {
 				State bool
 				Time  time.Time
