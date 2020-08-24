@@ -9,6 +9,7 @@ import (
 	w "github.com/kihamo/go-workers"
 	"github.com/kihamo/go-workers/task"
 	"github.com/kihamo/shadow/components/workers"
+	"github.com/kihamo/snitch"
 	"go.uber.org/multierr"
 )
 
@@ -69,15 +70,20 @@ type ProbesContainer struct {
 
 	probeReadiness w.Task
 	probeLiveness  w.Task
+
+	metricReadiness snitch.Counter
+	metricLiveness  snitch.Counter
 }
 
-func NewProbesContainer(bind boggart.BindItem, statusManager func(boggart.BindStatus), register, unregister func() error, client workers.Component) *ProbesContainer {
+func NewProbesContainer(bind boggart.BindItem, statusManager func(boggart.BindStatus), register, unregister func() error, client workers.Component, metricReadiness, metricLiveness snitch.Counter) *ProbesContainer {
 	return &ProbesContainer{
-		bind:          bind,
-		statusManager: statusManager,
-		register:      register,
-		unregister:    unregister,
-		client:        client,
+		bind:            bind,
+		statusManager:   statusManager,
+		register:        register,
+		unregister:      unregister,
+		client:          client,
+		metricReadiness: metricReadiness,
+		metricLiveness:  metricLiveness,
 	}
 }
 
@@ -150,6 +156,7 @@ func (c *ProbesContainer) Readiness() w.Task {
 
 		if err != nil {
 			c.statusManager(boggart.BindStatusOffline)
+			c.metricReadiness.With("status", "failed", "id", c.bind.ID(), "type", c.bind.Type()).Inc()
 
 			if logger != nil {
 				logger.Error("Readiness probe failure",
@@ -160,6 +167,7 @@ func (c *ProbesContainer) Readiness() w.Task {
 			}
 		} else {
 			c.statusManager(boggart.BindStatusOnline)
+			c.metricReadiness.With("status", "success", "id", c.bind.ID(), "type", c.bind.Type()).Inc()
 		}
 
 		return nil, err
@@ -235,7 +243,10 @@ func (c *ProbesContainer) Liveness() w.Task {
 		}
 
 		if err == nil {
+			c.metricLiveness.With("status", "success", "id", c.bind.ID(), "type", c.bind.Type()).Inc()
 			return nil, nil
+		} else {
+			c.metricLiveness.With("status", "failed", "id", c.bind.ID(), "type", c.bind.Type()).Inc()
 		}
 
 		if logger != nil {
