@@ -377,8 +377,7 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 				return c.UnregisterBindByID(bindItem.ID())
 			},
 			c.workers,
-			metricReadiness,
-			metricLiveness)
+			metricProbes)
 
 		bindSupport.SetProbes(ctr)
 		ctr.HookRegister()
