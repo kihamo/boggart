@@ -20,8 +20,9 @@ type response struct {
 
 func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	widget := b.Widget()
+	ctx := r.Context()
 
-	client, err := b.client(r.Context())
+	client, err := b.client(ctx)
 	if err != nil {
 		widget.InternalError(w, r, err)
 	}
@@ -91,7 +92,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 	vars["action"] = action
 
-	widget.RenderLayout(r.Context(), action, "widget", vars)
+	widget.RenderLayout(ctx, action, "widget", vars)
 }
 
 func (b *Bind) WidgetAssetFS() *assetfs.AssetFS {
@@ -559,35 +560,30 @@ func (b *Bind) widgetActionFiles(_ *dashboard.Response, r *dashboard.Request, cl
 		}
 	}
 
-	var channel uint32
+	var (
+		channelID    uint32
+		channelTitle string
+	)
 
-	if channelID := query.Get("channel"); channelID != "" {
-		if cID, err := strconv.ParseUint(channelID, 10, 64); err == nil {
-			channel = uint32(cID)
+	if raw := query.Get("channel"); raw != "" {
+		if val, err := strconv.ParseUint(raw, 10, 64); err == nil {
+			channelID = uint32(val)
 		} else {
 			widget.FlashError(r, "Parse channel ID failed with error %v", "", err)
 		}
 	}
 
-	if channelID := query.Get("channel"); channelID != "" {
-		if cID, err := strconv.ParseUint(channelID, 10, 64); err == nil {
-			channel = uint32(cID)
-		} else {
-			widget.FlashError(r, "Parse channel ID failed with error %v", "", err)
-		}
-	}
-
-	if queryTime := query.Get("from"); queryTime != "" {
-		if tm, err := time.Parse(time.RFC3339, queryTime); err == nil {
-			start = tm
+	if raw := query.Get("from"); raw != "" {
+		if val, err := time.Parse(time.RFC3339, raw); err == nil {
+			start = val
 		} else {
 			widget.FlashError(r, "Parse date from failed with error %v", "", err)
 		}
 	}
 
-	if queryTime := query.Get("to"); queryTime != "" {
-		if tm, err := time.Parse(time.RFC3339, queryTime); err == nil {
-			end = tm
+	if raw := query.Get("to"); raw != "" {
+		if val, err := time.Parse(time.RFC3339, raw); err == nil {
+			end = val
 		} else {
 			widget.FlashError(r, "Parse date to failed with error %v", "", err)
 		}
@@ -596,18 +592,25 @@ func (b *Bind) widgetActionFiles(_ *dashboard.Response, r *dashboard.Request, cl
 	channels, err := client.ConfigChannelTitleGet(ctx)
 	if err != nil {
 		widget.FlashError(r, "Get channels title failed with error %v", "", err)
+	} else {
+		for id, title := range channels {
+			if uint32(id) == channelID {
+				channelTitle = title
+				break
+			}
+		}
 	}
 
 	files := make([]xmeye.FileSearch, 0)
 
-	filesH264, err := client.FileSearch(ctx, start, end, channel, eventType, xmeye.FileSearchH264)
+	filesH264, err := client.FileSearch(ctx, start, end, channelID, eventType, xmeye.FileSearchH264)
 	if err != nil {
 		widget.FlashError(r, "Get files H264 failed with error %v", "", err)
 	} else {
 		files = append(files, filesH264...)
 	}
 
-	filesJPEG, err := client.FileSearch(ctx, start, end, channel, eventType, xmeye.FileSearchJPEG)
+	filesJPEG, err := client.FileSearch(ctx, start, end, channelID, eventType, xmeye.FileSearchJPEG)
 	if err != nil {
 		widget.FlashError(r, "Get files JPEG failed with error %v", "", err)
 	} else {
@@ -619,12 +622,13 @@ func (b *Bind) widgetActionFiles(_ *dashboard.Response, r *dashboard.Request, cl
 	}
 
 	return map[string]interface{}{
-		"event_type": eventType,
-		"channels":   channels,
-		"channel":    channel,
-		"date_from":  start,
-		"date_to":    end,
-		"files":      files,
+		"event_type":    eventType,
+		"channels":      channels,
+		"channel_id":    channelID,
+		"channel_title": channelTitle,
+		"date_from":     start,
+		"date_to":       end,
+		"files":         files,
 	}
 }
 
@@ -671,6 +675,11 @@ func (b *Bind) widgetActionDownload(w http.ResponseWriter, r *dashboard.Request,
 		return
 	}
 
+	filename := strings.TrimSpace(r.URL().Query().Get("filename"))
+	if filename == "" {
+		filename = name
+	}
+
 	begin := time.Now().Add(-time.Hour * 24 * 30)
 	end := time.Now()
 
@@ -687,6 +696,6 @@ func (b *Bind) widgetActionDownload(w http.ResponseWriter, r *dashboard.Request,
 		w.Header().Set("Content-Type", "image/jpeg")
 	}
 
-	w.Header().Set("Content-Disposition", "attachment; filename=\""+name+"\"")
+	w.Header().Set("Content-Disposition", "attachment; filename=\""+filename+"\"")
 	_, _ = io.Copy(w, reader)
 }

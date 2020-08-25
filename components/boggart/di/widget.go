@@ -2,7 +2,6 @@ package di
 
 import (
 	"context"
-	"errors"
 	"net/url"
 	"strings"
 	"sync"
@@ -13,6 +12,24 @@ import (
 	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/i18n"
 )
+
+type contextKey string
+
+var (
+	contextKeyWidget = contextKey("widget")
+)
+
+func ContextWithWidget(ctx context.Context, widget *WidgetContainer) context.Context {
+	return context.WithValue(ctx, contextKeyWidget, widget)
+}
+
+func WidgetFromContext(c context.Context) *WidgetContainer {
+	if v := c.Value(contextKeyWidget); v != nil {
+		return v.(*WidgetContainer)
+	}
+
+	return nil
+}
 
 type WidgetHandler interface {
 	WidgetHandler(*dashboard.Response, *dashboard.Request)
@@ -78,8 +95,10 @@ func (c *WidgetContainer) Handle(w *dashboard.Response, r *dashboard.Request) {
 	}
 
 	if h, ok := c.Bind().(WidgetHandler); ok {
-		r = r.WithContext(dashboard.ContextWithTemplateNamespace(r.Context(), c.TemplateNamespace()))
+		r = r.WithContext(ContextWithWidget(r.Context(), c))
 		r = r.WithContext(boggart.ContextWithI18nDomain(r.Context(), c.I18nDomain()))
+		r = r.WithContext(dashboard.ContextWithTemplateNamespace(r.Context(), c.TemplateNamespace()))
+		r = r.WithContext(dashboard.ContextWithRequest(r.Context(), r))
 
 		h.WidgetHandler(w, r)
 	}
@@ -110,12 +129,7 @@ func (c *WidgetContainer) TranslatePlural(ctx context.Context, singleID, pluralI
 }
 
 func (c *WidgetContainer) URL(vs map[string]string) (*url.URL, error) {
-	externalURL := c.configApp.String(boggart.ConfigExternalURL)
-	if externalURL == "" {
-		return nil, errors.New("config external URL ins't set")
-	}
-
-	u, err := url.Parse(externalURL)
+	u, err := url.Parse(c.configApp.String(boggart.ConfigExternalURL))
 	if err != nil {
 		return nil, err
 	}

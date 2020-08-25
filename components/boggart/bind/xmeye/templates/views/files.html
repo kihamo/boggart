@@ -25,7 +25,7 @@
                             <div class="input-prepend input-group" style="width: 100%">
                                 <select id="channel" name="channel" class="form-control select2" required="required">
                                 {{ range $id, $title := .channels }}
-                                    <option value="{{ $id }}"{{ if eq $.channel $id }} selected="selected"{{ end }}>{{ $title }}</option>
+                                    <option value="{{ $id }}"{{ if eq $.channel_id $id }} selected="selected"{{ end }}>{{ $title }}</option>
                                 {{ end }}
                                 </select>
                             </div>
@@ -86,7 +86,7 @@
             <td>{{ human_bytes $file.FileLength }}</td>
             <td class="text-center">
                 <div class="btn-group btn-group-xs">
-                    <a href="{{ $.Request.URL.Path }}?action=download&name={{ $file.FileName }}" class="btn btn-success btn-icon"><i class="fas fa-file-download" title="{{ i18n "Download" $ }}"></i></a>
+                    <a href="{{ widget_url $ "action" "download" "name" $file.FileName "filename" (print $.channel_title "_" ($file.BeginTime.Format "20060102_150405") "_" ($file.EndTime.Format "20060102_150405") $file.Ext) }}" class="btn btn-success btn-icon"><i class="fas fa-file-download" title="{{ i18n "Download" $ }}"></i></a>
                 </div>
             </td>
         </tr>

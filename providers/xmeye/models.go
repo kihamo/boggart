@@ -1,6 +1,8 @@
 package xmeye
 
 import (
+	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -35,6 +37,10 @@ type FileSearch struct {
 	EndTime    Time
 	FileLength Uint32
 	FileName   string
+}
+
+func (f FileSearch) Ext() string {
+	return strings.ToLower(filepath.Ext(f.FileName))
 }
 
 func (f FileSearch) Duration() time.Duration {
