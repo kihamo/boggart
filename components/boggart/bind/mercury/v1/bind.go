@@ -27,6 +27,7 @@ type Bind struct {
 
 func (b *Bind) Run() error {
 	b.Meta().SetSerialNumber(b.config.Address)
+	b.providerOnce.Reset()
 
 	return nil
 }

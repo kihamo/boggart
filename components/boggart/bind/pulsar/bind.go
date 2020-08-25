@@ -39,6 +39,8 @@ func (b *Bind) Run() error {
 		}
 	}
 
+	b.connectionOnce.Reset()
+
 	return nil
 }
 

@@ -24,6 +24,12 @@ type Bind struct {
 	connection   connection.Connection
 }
 
+func (b *Bind) Run() error {
+	b.providerOnce.Reset()
+
+	return nil
+}
+
 func (b *Bind) Provider() (provider *mercury.MercuryV3, err error) {
 	b.providerOnce.Do(func() {
 		var conn connection.Connection
