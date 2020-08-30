@@ -20,6 +20,7 @@ import (
 	_ "github.com/kihamo/boggart/components/boggart/bind/integratorit"
 	_ "github.com/kihamo/boggart/components/boggart/bind/led_wifi"
 	_ "github.com/kihamo/boggart/components/boggart/bind/lg_webos"
+	_ "github.com/kihamo/boggart/components/boggart/bind/mail"
 	_ "github.com/kihamo/boggart/components/boggart/bind/mercury"
 	_ "github.com/kihamo/boggart/components/boggart/bind/mikrotik"
 	_ "github.com/kihamo/boggart/components/boggart/bind/network"

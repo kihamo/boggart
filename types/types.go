@@ -64,6 +64,17 @@ func (u URL) MarshalText() ([]byte, error) {
 	return u.MarshalBinary()
 }
 
+func ParseURL(raw string) (URL, error) {
+	u, err := url.Parse(raw)
+	if err != nil {
+		return URL{}, err
+	}
+
+	return URL{
+		URL: *u,
+	}, nil
+}
+
 type Location struct {
 	time.Location
 }
