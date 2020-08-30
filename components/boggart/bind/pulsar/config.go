@@ -15,6 +15,7 @@ type Config struct {
 	ConnectionDSN         string `mapstructure:"connection_dsn" yaml:"connection_dsn" valid:"required"`
 	Address               string
 	Location              string
+	InputsCount           int64         `mapstructure:"inputs_count" yaml:"inputs_count"`
 	Input1Offset          float32       `mapstructure:"input1_offset" yaml:"input1_offset" valid:"float"`
 	Input2Offset          float32       `mapstructure:"input2_offset" yaml:"input2_offset" valid:"float"`
 	Input3Offset          float32       `mapstructure:"input3_offset" yaml:"input3_offset" valid:"float"`
@@ -51,6 +52,7 @@ func (t Type) Config() interface{} {
 			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
 			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
 		},
+		InputsCount:           2,
 		Location:              time.Now().Location().String(),
 		UpdaterInterval:       time.Minute,
 		TopicTemperatureIn:    prefix + "temperature_in",

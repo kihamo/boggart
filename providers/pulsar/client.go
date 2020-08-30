@@ -71,7 +71,7 @@ func (d *HeatMeter) Invoke(request *Packet) (*Packet, error) {
 
 	// check error
 	if response.Function() == FunctionBadCommand {
-		return nil, fmt.Errorf("returns error code #%d", response.ErrorCode())
+		return nil, fmt.Errorf("returns error code %v", response.ErrorCode())
 	}
 
 	return response, nil

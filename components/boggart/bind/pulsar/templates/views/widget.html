@@ -69,10 +69,10 @@
                                 <tr>
                                     <th>{{ i18n "Date" . }}</th>
                                     <th>{{ i18n "Energy" . }}<br />{{ i18n "Gcal" . }}</th>
-                                    <th>{{ i18n "Pulse input %d" . nil nil nil 1 }}<br />{{ raw (i18n "m<sup>3</sup> / pulses" .) }}</th>
-                                    <th>{{ i18n "Pulse input %d" . nil nil nil 2 }}<br />{{ raw (i18n "m<sup>3</sup> / pulses" .) }}</th>
-                                    <th>{{ i18n "Pulse input %d" . nil nil nil 3 }}<br />{{ raw (i18n "m<sup>3</sup> / pulses" .) }}</th>
-                                    <th>{{ i18n "Pulse input %d" . nil nil nil 4 }}<br />{{ raw (i18n "m<sup>3</sup> / pulses" .) }}</th>
+                                    {{ if gt .Bind.Config.InputsCount 0 }}<th>{{ i18n "Pulse input %d" . nil nil nil 1 }}<br />{{ raw (i18n "m<sup>3</sup> / pulses" .) }}</th>{{ end }}
+                                    {{ if gt .Bind.Config.InputsCount 1 }}<th>{{ i18n "Pulse input %d" . nil nil nil 2 }}<br />{{ raw (i18n "m<sup>3</sup> / pulses" .) }}</th>{{ end }}
+                                    {{ if gt .Bind.Config.InputsCount 2 }}<th>{{ i18n "Pulse input %d" . nil nil nil 3 }}<br />{{ raw (i18n "m<sup>3</sup> / pulses" .) }}</th>{{ end }}
+                                    {{ if gt .Bind.Config.InputsCount 3 }}<th>{{ i18n "Pulse input %d" . nil nil nil 4 }}<br />{{ raw (i18n "m<sup>3</sup> / pulses" .) }}</th>{{ end }}
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -110,6 +110,7 @@
                                             </span>
                                         {{ end }}
                                     </td>
+                                    {{ if gt .Bind.Config.InputsCount 0 }}
                                     <td>
                                         <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse1Volume }}))</script> / {{ $stat.Pulse1 }}
                                         {{ if gt $stat.Pulse1Trend 0.0 }}
@@ -133,6 +134,8 @@
                                             </span>
                                         {{ end }}
                                     </td>
+                                    {{ end }}
+                                    {{ if gt .Bind.Config.InputsCount 1 }}
                                     <td>
                                         <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse2Volume }}))</script> / {{ $stat.Pulse2 }}
                                         {{ if gt $stat.Pulse2Trend 0.0 }}
@@ -156,6 +159,8 @@
                                             </span>
                                         {{ end }}
                                     </td>
+                                    {{ end }}
+                                    {{ if gt .Bind.Config.InputsCount 2 }}
                                     <td>
                                         <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse3Volume }}))</script> / {{ $stat.Pulse3 }}
                                         {{ if gt $stat.Pulse3Trend 0.0 }}
@@ -179,6 +184,8 @@
                                             </span>
                                         {{ end }}
                                     </td>
+                                    {{ end }}
+                                    {{ if gt .Bind.Config.InputsCount 3 }}
                                     <td>
                                         <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse4Volume }}))</script> / {{ $stat.Pulse4 }}
                                         {{ if gt $stat.Pulse4Trend 0.0 }}
@@ -202,6 +209,7 @@
                                             </span>
                                         {{ end }}
                                     </td>
+                                    {{ end }}
                                 </tr>
                                 {{ end }}
                                 </tbody>
@@ -290,6 +298,7 @@
                                             <td><script type="application/javascript">document.write(valueFormat({{ .consumption.Value }}))</script> {{ raw (i18n "m<sup>3</sup>/h") }}</td>
                                         {{ end }}
                                     </tr>
+                                    {{ if gt .Bind.Config.InputsCount 0 }}
                                     <tr>
                                         <td>{{ i18n "Pulse input %d" . nil nil nil 1 }}</td>
                                         {{ if .pusle_input_1.Error }}
@@ -298,6 +307,8 @@
                                             <td><script type="application/javascript">document.write(valueFormat({{ .pusle_input_1.Value }}))</script> {{ i18n "pulses" }}</td>
                                         {{ end }}
                                     </tr>
+                                    {{ end }}
+                                    {{ if gt .Bind.Config.InputsCount 1 }}
                                     <tr>
                                         <td>{{ i18n "Pulse input %d" . nil nil nil 2 }}</td>
                                         {{ if .pusle_input_2.Error }}
@@ -306,6 +317,8 @@
                                             <td><script type="application/javascript">document.write(valueFormat({{ .pusle_input_2.Value }}))</script> {{ i18n "pulses" }}</td>
                                         {{ end }}
                                     </tr>
+                                    {{ end }}
+                                    {{ if gt .Bind.Config.InputsCount 2 }}
                                     <tr>
                                         <td>{{ i18n "Pulse input %d" . nil nil nil 3 }}</td>
                                         {{ if .pusle_input_3.Error }}
@@ -314,6 +327,8 @@
                                             <td><script type="application/javascript">document.write(valueFormat({{ .pusle_input_3.Value }}))</script> {{ i18n "pulses" }}</td>
                                         {{ end }}
                                     </tr>
+                                    {{ end }}
+                                    {{ if gt .Bind.Config.InputsCount 3 }}
                                     <tr>
                                         <td>{{ i18n "Pulse input %d" . nil nil nil 4 }}</td>
                                         {{ if .pusle_input_4.Error }}
@@ -322,6 +337,7 @@
                                             <td><script type="application/javascript">document.write(valueFormat({{ .pusle_input_4.Value }}))</script> {{ i18n "pulses" }}</td>
                                         {{ end }}
                                     </tr>
+                                    {{ end }}
                                     <tr>
                                         <td>{{ i18n "Operating time" . }}</td>
                                         {{ if .operating_time.Error }}

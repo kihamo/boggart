@@ -104,6 +104,18 @@ func (c *WidgetContainer) Handle(w *dashboard.Response, r *dashboard.Request) {
 	}
 }
 
+func (c *WidgetContainer) Render(ctx context.Context, view string, data map[string]interface{}) {
+	data["Bind"] = c.bind
+
+	c.Handler.Render(ctx, view, data)
+}
+
+func (c *WidgetContainer) RenderLayout(ctx context.Context, view, layout string, data map[string]interface{}) {
+	data["Bind"] = c.bind
+
+	c.Handler.RenderLayout(ctx, view, layout, data)
+}
+
 func (c *WidgetContainer) AssetFS() *assetfs.AssetFS {
 	if w, ok := c.Bind().(WidgetHandler); ok {
 		return w.WidgetAssetFS()

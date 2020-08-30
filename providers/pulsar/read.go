@@ -100,6 +100,15 @@ func (d *HeatMeter) DaylightSavingTime() (bool, error) {
 	return serial.ToUint64(value) == 1, nil
 }
 
+func (d *HeatMeter) Version() (uint16, error) {
+	value, err := d.ReadSettings(SettingsParamVersion)
+	if err != nil {
+		return 0, err
+	}
+
+	return uint16(serial.ToUint64(value)), nil
+}
+
 func (d *HeatMeter) Diagnostics() ([]byte, error) {
 	value, err := d.ReadSettings(SettingsParamDiagnostics)
 	if err != nil {
@@ -110,15 +119,6 @@ func (d *HeatMeter) Diagnostics() ([]byte, error) {
 	return value, nil
 }
 
-func (d *HeatMeter) Version() (uint16, error) {
-	value, err := d.ReadSettings(SettingsParamVersion)
-	if err != nil {
-		return 0, err
-	}
-
-	return uint16(serial.ToUint64(value)), nil
-}
-
 func (d *HeatMeter) BatteryVoltage() (float32, error) {
 	value, err := d.ReadSettings(SettingsParamBatteryVoltage)
 	if err != nil {
@@ -126,6 +126,15 @@ func (d *HeatMeter) BatteryVoltage() (float32, error) {
 	}
 
 	return serial.ToFloat32(serial.Reverse(value)), nil
+}
+
+func (d *HeatMeter) DeviceTemperature() ([]byte, error) {
+	value, err := d.ReadSettings(SettingsParamDeviceTemperature)
+	if err != nil {
+		return nil, err
+	}
+
+	return value, err
 }
 
 func (d *HeatMeter) OperatingTime() (time.Duration, error) {

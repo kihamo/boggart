@@ -2,6 +2,7 @@ package pulsar
 
 import (
 	"math/big"
+	"strconv"
 )
 
 const (
@@ -60,6 +61,7 @@ const (
 type MetricsChannel int
 type SettingsParam int
 type ArchiveType int
+type ErrorCode uint8
 
 func (i MetricsChannel) toInt64() int64 {
 	return int64(i)
@@ -83,4 +85,40 @@ func (i ArchiveType) toInt64() int64 {
 
 func (i ArchiveType) toBytes() []byte {
 	return big.NewInt(i.toInt64()).Bytes()
+}
+
+/*
+ERROR_CODE - (uint8_t) код ошибки:
+(0x01) - отсутствует запрашиваемый код функции;
+(0x02) - ошибка в битовой маске запроса;
+(0x03) - ошибочная длинна запроса;
+(0x04) - отсутствует параметр
+(0x05) - запись заблокирована, требуется авторизация;
+(0x06) - записываемое значение (параметр) находится вне заданного
+диапазона;
+(0x07) - отсутствует запрашиваемый тип архива;
+(0x08) – превышение максимального количества архивных значений за один
+пакет;
+*/
+func (i ErrorCode) Error() string {
+	switch i {
+	case 0x01:
+		return "function is empty"
+	case 0x02:
+		return "wrong bit mask"
+	case 0x03:
+		return "wrong length of request"
+	case 0x04:
+		return "parameter ie empty"
+	case 0x05:
+		return "write blocked, need authorization"
+	case 0x06:
+		return "range of value is wrong"
+	case 0x07:
+		return "type archive is empty"
+	case 0x08:
+		return "exceeding the maximum number of archived values"
+	}
+
+	return "unknown error code " + strconv.FormatUint(uint64(i), 10)
 }

@@ -100,66 +100,74 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		// pulse input 1
-		date, values, err = provider.PulseInput1Archive(start, end, period)
-		if err != nil {
-			widget.FlashError(r, "Get pulse %d archive failed with error %v", "", 1, err)
-		} else {
-			for _, value := range values {
-				row, ok := statsByDate[int(date.Unix())]
-				if ok {
-					row.Pulse1 = value
-					row.Pulse1Volume = b.inputVolume(value, b.config.Input1Offset)
-				}
+		if b.config.InputsCount > 0 {
+			date, values, err = provider.PulseInput1Archive(start, end, period)
+			if err != nil {
+				widget.FlashError(r, "Get pulse %d archive failed with error %v", "", 1, err)
+			} else {
+				for _, value := range values {
+					row, ok := statsByDate[int(date.Unix())]
+					if ok {
+						row.Pulse1 = value
+						row.Pulse1Volume = b.inputVolume(value, b.config.Input1Offset)
+					}
 
-				date = nextData(period, date)
+					date = nextData(period, date)
+				}
 			}
 		}
 
 		// pulse input 2
-		date, values, err = provider.PulseInput2Archive(start, end, period)
-		if err != nil {
-			widget.FlashError(r, "Get pulse %d archive failed with error %v", "", 2, err)
-		} else {
-			for _, value := range values {
-				row, ok := statsByDate[int(date.Unix())]
-				if ok {
-					row.Pulse2 = value
-					row.Pulse2Volume = b.inputVolume(value, b.config.Input2Offset)
-				}
+		if b.config.InputsCount > 1 {
+			date, values, err = provider.PulseInput2Archive(start, end, period)
+			if err != nil {
+				widget.FlashError(r, "Get pulse %d archive failed with error %v", "", 2, err)
+			} else {
+				for _, value := range values {
+					row, ok := statsByDate[int(date.Unix())]
+					if ok {
+						row.Pulse2 = value
+						row.Pulse2Volume = b.inputVolume(value, b.config.Input2Offset)
+					}
 
-				date = nextData(period, date)
+					date = nextData(period, date)
+				}
 			}
 		}
 
 		// pulse input 3
-		date, values, err = provider.PulseInput3Archive(start, end, period)
-		if err != nil {
-			widget.FlashError(r, "Get pulse %d archive failed with error %v", "", 3, err)
-		} else {
-			for _, value := range values {
-				row, ok := statsByDate[int(date.Unix())]
-				if ok {
-					row.Pulse3 = value
-					row.Pulse3Volume = b.inputVolume(value, b.config.Input3Offset)
-				}
+		if b.config.InputsCount > 2 {
+			date, values, err = provider.PulseInput3Archive(start, end, period)
+			if err != nil {
+				widget.FlashError(r, "Get pulse %d archive failed with error %v", "", 3, err)
+			} else {
+				for _, value := range values {
+					row, ok := statsByDate[int(date.Unix())]
+					if ok {
+						row.Pulse3 = value
+						row.Pulse3Volume = b.inputVolume(value, b.config.Input3Offset)
+					}
 
-				date = nextData(period, date)
+					date = nextData(period, date)
+				}
 			}
 		}
 
 		// pulse input 4
-		date, values, err = provider.PulseInput4Archive(start, end, period)
-		if err != nil {
-			widget.FlashError(r, "Get pulse %d archive failed with error %v", "", 4, err)
-		} else {
-			for _, value := range values {
-				row, ok := statsByDate[int(date.Unix())]
-				if ok {
-					row.Pulse4 = value
-					row.Pulse4Volume = b.inputVolume(value, b.config.Input4Offset)
-				}
+		if b.config.InputsCount > 3 {
+			date, values, err = provider.PulseInput4Archive(start, end, period)
+			if err != nil {
+				widget.FlashError(r, "Get pulse %d archive failed with error %v", "", 4, err)
+			} else {
+				for _, value := range values {
+					row, ok := statsByDate[int(date.Unix())]
+					if ok {
+						row.Pulse4 = value
+						row.Pulse4Volume = b.inputVolume(value, b.config.Input4Offset)
+					}
 
-				date = nextData(period, date)
+					date = nextData(period, date)
+				}
 			}
 		}
 
@@ -260,28 +268,36 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			Error: err,
 		}
 
-		floatValue, err = provider.PulseInput1()
-		vars["pusle_input_1"] = metricView{
-			Value: floatValue,
-			Error: err,
+		if b.config.InputsCount > 0 {
+			floatValue, err = provider.PulseInput1()
+			vars["pusle_input_1"] = metricView{
+				Value: floatValue,
+				Error: err,
+			}
 		}
 
-		floatValue, err = provider.PulseInput2()
-		vars["pusle_input_2"] = metricView{
-			Value: floatValue,
-			Error: err,
+		if b.config.InputsCount > 1 {
+			floatValue, err = provider.PulseInput2()
+			vars["pusle_input_2"] = metricView{
+				Value: floatValue,
+				Error: err,
+			}
 		}
 
-		floatValue, err = provider.PulseInput3()
-		vars["pusle_input_3"] = metricView{
-			Value: floatValue,
-			Error: err,
+		if b.config.InputsCount > 2 {
+			floatValue, err = provider.PulseInput3()
+			vars["pusle_input_3"] = metricView{
+				Value: floatValue,
+				Error: err,
+			}
 		}
 
-		floatValue, err = provider.PulseInput4()
-		vars["pusle_input_4"] = metricView{
-			Value: floatValue,
-			Error: err,
+		if b.config.InputsCount > 3 {
+			floatValue, err = provider.PulseInput4()
+			vars["pusle_input_4"] = metricView{
+				Value: floatValue,
+				Error: err,
+			}
 		}
 
 		durationValue, err := provider.OperatingTime()

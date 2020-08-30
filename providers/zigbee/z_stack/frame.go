@@ -156,7 +156,7 @@ func (f *Frame) FCS() byte {
 	return f.fcs
 }
 
-func (f Frame) MarshalBinary() ([]byte, error) {
+func (f *Frame) MarshalBinary() ([]byte, error) {
 	l := f.Length()
 
 	buffer := make([]byte, 0, FrameLengthMin+l)
