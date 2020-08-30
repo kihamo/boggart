@@ -5,5 +5,5 @@ import (
 )
 
 func (b *Bind) ReadinessProbe(ctx context.Context) error {
-	return b.Capture(ctx)
+	return b.Capture(ctx, nil)
 }

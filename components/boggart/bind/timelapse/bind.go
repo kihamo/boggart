@@ -21,11 +21,12 @@ type Bind struct {
 	di.ConfigBind
 	di.LoggerBind
 	di.ProbesBind
+	di.WidgetBind
 
 	config *Config
 }
 
-func (b *Bind) Capture(ctx context.Context) error {
+func (b *Bind) Capture(ctx context.Context, writer io.Writer) error {
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, b.config.CaptureURL.String(), nil)
 	if err != nil {
 		return err
@@ -72,7 +73,15 @@ func (b *Bind) Capture(ctx context.Context) error {
 	}
 	defer fd.Close()
 
-	_, err = io.Copy(fd, response.Body)
+	var w io.Writer
+
+	if writer != nil {
+		w = io.MultiWriter(fd, writer)
+	} else {
+		w = fd
+	}
+
+	_, err = io.Copy(w, response.Body)
 
 	return err
 }
