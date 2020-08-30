@@ -110,7 +110,7 @@
                                             </span>
                                         {{ end }}
                                     </td>
-                                    {{ if gt .Bind.Config.InputsCount 0 }}
+                                    {{ if gt $.Bind.Config.InputsCount 0 }}
                                     <td>
                                         <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse1Volume }}))</script> / {{ $stat.Pulse1 }}
                                         {{ if gt $stat.Pulse1Trend 0.0 }}
@@ -135,7 +135,7 @@
                                         {{ end }}
                                     </td>
                                     {{ end }}
-                                    {{ if gt .Bind.Config.InputsCount 1 }}
+                                    {{ if gt $.Bind.Config.InputsCount 1 }}
                                     <td>
                                         <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse2Volume }}))</script> / {{ $stat.Pulse2 }}
                                         {{ if gt $stat.Pulse2Trend 0.0 }}
@@ -160,7 +160,7 @@
                                         {{ end }}
                                     </td>
                                     {{ end }}
-                                    {{ if gt .Bind.Config.InputsCount 2 }}
+                                    {{ if gt $.Bind.Config.InputsCount 2 }}
                                     <td>
                                         <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse3Volume }}))</script> / {{ $stat.Pulse3 }}
                                         {{ if gt $stat.Pulse3Trend 0.0 }}
@@ -185,7 +185,7 @@
                                         {{ end }}
                                     </td>
                                     {{ end }}
-                                    {{ if gt .Bind.Config.InputsCount 3 }}
+                                    {{ if gt $.Bind.Config.InputsCount 3 }}
                                     <td>
                                         <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse4Volume }}))</script> / {{ $stat.Pulse4 }}
                                         {{ if gt $stat.Pulse4Trend 0.0 }}

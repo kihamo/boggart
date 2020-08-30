@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"crypto/md5"
 	"encoding/binary"
+	"encoding/hex"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"time"
 )
 
@@ -192,8 +193,12 @@ func (p *Packet) MarshalBinary() (_ []byte, err error) {
 }
 
 func (p *Packet) UnmarshalBinary(data []byte) (err error) {
+	if len(data) < 32 {
+		return errors.New("bad packet " + hex.EncodeToString(data) + " length")
+	}
+
 	if magic := data[:2]; !bytes.Equal(magicBytes, magic) {
-		return fmt.Errorf("magic number could not be verified. Expected 0x2131, got 0x%X", magic)
+		return errors.New("magic number could not be verified. Expected 0x2131, got 0x" + hex.EncodeToString(magic))
 	}
 
 	// Packet length: 16 bits unsigned int
