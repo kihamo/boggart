@@ -15,7 +15,10 @@ func ConnErrorProbe(err error) error {
 		return err
 	}
 
-	if strings.Contains(err.Error(), "use of closed network connection") {
+	switch v := err.Error(); {
+	case
+		strings.Contains(v, "use of closed network connection"),
+		strings.Contains(v, "bad file descriptor"):
 		return err
 	}
 
