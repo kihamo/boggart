@@ -61,11 +61,14 @@ func (b *Bind) getConnection() (conn connection.Connection, err error) {
 						"address", "0x"+hex.EncodeToString(packet.Address()),
 						"function", fmt.Sprintf("0x%X", packet.Function()),
 						"length", packet.Length(),
-						"error-code", fmt.Sprintf("0x%X", packet.ErrorCode()),
 						"payload", fmt.Sprintf("%v", packet.Payload()),
 						"id", "0x"+hex.EncodeToString(packet.ID()),
 						"crc", "0x"+hex.EncodeToString(packet.CRC()),
 					)
+
+					if e := packet.Error(); e != nil {
+						args = append(args, "error-code", packet.Error())
+					}
 				} else {
 					args = append(args,
 						"payload", fmt.Sprintf("%v", data),

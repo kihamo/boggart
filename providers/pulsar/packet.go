@@ -11,7 +11,7 @@ type Packet struct {
 	address   []byte // 4 bytes
 	function  uint8  // 1 byte
 	length    uint8  // 1 byte
-	errorCode ErrorCode
+	errorCode uint8
 	payload   []byte
 	id        []byte // 2 bytes
 	crc       []byte // 2 bytes
@@ -51,8 +51,12 @@ func (p *Packet) WithFunction(function uint8) *Packet {
 	return p
 }
 
-func (p *Packet) ErrorCode() ErrorCode {
-	return p.errorCode
+func (p *Packet) Error() error {
+	if p.errorCode > 0 {
+		return ErrorCode(p.errorCode)
+	}
+
+	return nil
 }
 
 func (p *Packet) Payload() []byte {
@@ -110,7 +114,7 @@ func (p *Packet) UnmarshalBinary(data []byte) (err error) {
 	p.crc = data[l-2:]
 
 	if p.function == FunctionBadCommand {
-		p.errorCode = ErrorCode(data[6])
+		p.errorCode = data[6]
 	} else {
 		p.payload = data[6 : l-4]
 	}

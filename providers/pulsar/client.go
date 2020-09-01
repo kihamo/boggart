@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/hex"
 	"errors"
-	"fmt"
 
 	"github.com/kihamo/boggart/protocols/connection"
 )
@@ -69,10 +68,5 @@ func (d *HeatMeter) Invoke(request *Packet) (*Packet, error) {
 				hex.EncodeToString(request.ID()))
 	}
 
-	// check error
-	if response.Function() == FunctionBadCommand {
-		return nil, fmt.Errorf("returns error code %v", response.ErrorCode())
-	}
-
-	return response, nil
+	return response, response.Error()
 }
