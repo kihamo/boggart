@@ -40,6 +40,10 @@ func NewByDSN(dsn *DSN) (Connection, error) {
 			options = append(options, net.WithWriteTimeout(*dsn.WriteTimeout))
 		}
 
+		if dsn.DialTimeout != nil {
+			options = append(options, net.WithDialTimeout(*dsn.DialTimeout))
+		}
+
 		t = net.New(options...)
 
 	case "serial":

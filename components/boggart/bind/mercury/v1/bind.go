@@ -34,9 +34,21 @@ func (b *Bind) Run() error {
 
 func (b *Bind) Provider() (provider *mercury.MercuryV1, err error) {
 	b.providerOnce.Do(func() {
-		var conn connection.Connection
+		var (
+			conn connection.Connection
+			dsn *connection.DSN
+		)
 
-		conn, err = connection.NewByDSNString(b.config.ConnectionDSN)
+		dsn, err = connection.ParseDSN(b.config.ConnectionDSN)
+		if err != nil {
+			return
+		}
+
+		if dsn.DialTimeout == nil {
+			dsn.DialTimeout = &[]time.Duration{time.Second}[0]
+		}
+
+		conn, err = connection.NewByDSN(dsn)
 		if err != nil {
 			return
 		}

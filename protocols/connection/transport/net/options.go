@@ -9,6 +9,7 @@ type Options struct {
 	address      string
 	readTimeout  time.Duration
 	writeTimeout time.Duration
+	dialTimeout  time.Duration
 }
 
 func (o *Options) Map() map[string]interface{} {
@@ -17,6 +18,7 @@ func (o *Options) Map() map[string]interface{} {
 		"address":      o.address,
 		"readTimeout":  o.readTimeout,
 		"writeTimeout": o.writeTimeout,
+		"dialTimeout":  o.dialTimeout,
 	}
 }
 
@@ -65,6 +67,12 @@ func WithReadTimeout(timeout time.Duration) Option {
 func WithWriteTimeout(timeout time.Duration) Option {
 	return newFuncOption(func(o *Options) {
 		o.writeTimeout = timeout
+	})
+}
+
+func WithDialTimeout(timeout time.Duration) Option {
+	return newFuncOption(func(o *Options) {
+		o.dialTimeout = timeout
 	})
 }
 

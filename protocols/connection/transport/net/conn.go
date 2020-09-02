@@ -42,7 +42,7 @@ func (c *Net) Dial() (_ transport.Transport, err error) {
 		options: c.options,
 	}
 
-	w.conn, err = net.Dial(c.options.network, c.options.address)
+	w.conn, err = net.DialTimeout(c.options.network, c.options.address, c.options.dialTimeout)
 	if err != nil {
 		return nil, err
 	}

@@ -13,6 +13,7 @@ type DSN struct {
 
 	ReadTimeout  *time.Duration
 	WriteTimeout *time.Duration
+	DialTimeout  *time.Duration
 	Timeout      *time.Duration
 	OnceInit     *bool
 	LockLocal    *bool
@@ -55,6 +56,14 @@ func ParseDSN(dsn string) (*DSN, error) {
 			}
 
 			d.WriteTimeout = &v
+
+		case "dial-timeout":
+			v, err := time.ParseDuration(value[0])
+			if err != nil {
+				return nil, err
+			}
+
+			d.DialTimeout = &v
 
 		case "timeout":
 			v, err := time.ParseDuration(value[0])
