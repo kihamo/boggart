@@ -46,7 +46,21 @@ func (b *Bind) Run() error {
 
 func (b *Bind) getConnection() (conn connection.Connection, err error) {
 	b.connectionOnce.Do(func() {
-		conn, err = connection.NewByDSNString(b.config.ConnectionDSN)
+		var (
+			conn connection.Connection
+			dsn *connection.DSN
+		)
+
+		dsn, err = connection.ParseDSN(b.config.ConnectionDSN)
+		if err != nil {
+			return
+		}
+
+		if dsn.DialTimeout == nil {
+			dsn.DialTimeout = &[]time.Duration{time.Second}[0]
+		}
+
+		conn, err = connection.NewByDSN(dsn)
 		if err != nil {
 			return
 		}
