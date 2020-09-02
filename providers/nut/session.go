@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/hashicorp/go-multierror"
 	protocol "github.com/kihamo/boggart/protocols/connection"
@@ -57,7 +58,16 @@ func (s *Session) Start() error {
 		return nil
 	}
 
-	conn, err := protocol.NewByDSNString(s.dsn)
+	dsn, err := protocol.ParseDSN(s.dsn)
+	if err != nil {
+		return err
+	}
+
+	if dsn.DialTimeout == nil {
+		dsn.DialTimeout = &[]time.Duration{time.Second}[0]
+	}
+
+	conn, err := protocol.NewByDSN(dsn)
 
 	if err != nil {
 		return err
