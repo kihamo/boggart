@@ -26,6 +26,7 @@ import (
 	_ "github.com/kihamo/boggart/components/boggart/bind/network"
 	_ "github.com/kihamo/boggart/components/boggart/bind/nut"
 	_ "github.com/kihamo/boggart/components/boggart/bind/openhab"
+	_ "github.com/kihamo/boggart/components/boggart/bind/openweathermap"
 	_ "github.com/kihamo/boggart/components/boggart/bind/owntracks"
 	_ "github.com/kihamo/boggart/components/boggart/bind/premiergc"
 	_ "github.com/kihamo/boggart/components/boggart/bind/pulsar"

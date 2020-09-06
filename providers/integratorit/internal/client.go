@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	connection "github.com/kihamo/boggart/protocols/http"
 )
 
@@ -118,6 +119,9 @@ func (c *Client) DoRequest(ctx context.Context, action string, query, body map[s
 	}
 
 	err = json.Unmarshal(b, r)
+	if err != nil {
+		err = multierror.Append(err, errors.New("bad content "+string(b)))
+	}
 
 	if err == nil && r.ErrorMessage != "" {
 		if strings.Compare(r.ErrorMessage, "Session not found, specified query requires authentication") == 0 {
