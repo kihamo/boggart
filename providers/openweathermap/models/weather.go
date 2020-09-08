@@ -6,8 +6,12 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // Weather weather
@@ -22,14 +26,121 @@ type Weather struct {
 	Icon string `json:"icon,omitempty"`
 
 	// id
+	// Enum: [200 201 202 210 211 212 221 230 231 232 300 301 302 310 311 312 313 314 321 500 501 502 503 504 511 520 521 522 531 600 601 602 611 612 613 615 616 620 621 622 701 711 721 731 741 751 761 762 771 781 800 801 802 803 804]
 	ID uint64 `json:"id,omitempty"`
 
 	// main
+	// Enum: [Thunderstorm Drizzle Rain Snow Atmosphere Clear Clouds]
 	Main string `json:"main,omitempty"`
 }
 
 // Validate validates this weather
 func (m *Weather) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateMain(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+var weatherTypeIDPropEnum []interface{}
+
+func init() {
+	var res []uint64
+	if err := json.Unmarshal([]byte(`[200,201,202,210,211,212,221,230,231,232,300,301,302,310,311,312,313,314,321,500,501,502,503,504,511,520,521,522,531,600,601,602,611,612,613,615,616,620,621,622,701,711,721,731,741,751,761,762,771,781,800,801,802,803,804]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		weatherTypeIDPropEnum = append(weatherTypeIDPropEnum, v)
+	}
+}
+
+// prop value enum
+func (m *Weather) validateIDEnum(path, location string, value uint64) error {
+	if err := validate.EnumCase(path, location, value, weatherTypeIDPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Weather) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateIDEnum("id", "body", m.ID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var weatherTypeMainPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["Thunderstorm","Drizzle","Rain","Snow","Atmosphere","Clear","Clouds"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		weatherTypeMainPropEnum = append(weatherTypeMainPropEnum, v)
+	}
+}
+
+const (
+
+	// WeatherMainThunderstorm captures enum value "Thunderstorm"
+	WeatherMainThunderstorm string = "Thunderstorm"
+
+	// WeatherMainDrizzle captures enum value "Drizzle"
+	WeatherMainDrizzle string = "Drizzle"
+
+	// WeatherMainRain captures enum value "Rain"
+	WeatherMainRain string = "Rain"
+
+	// WeatherMainSnow captures enum value "Snow"
+	WeatherMainSnow string = "Snow"
+
+	// WeatherMainAtmosphere captures enum value "Atmosphere"
+	WeatherMainAtmosphere string = "Atmosphere"
+
+	// WeatherMainClear captures enum value "Clear"
+	WeatherMainClear string = "Clear"
+
+	// WeatherMainClouds captures enum value "Clouds"
+	WeatherMainClouds string = "Clouds"
+)
+
+// prop value enum
+func (m *Weather) validateMainEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, weatherTypeMainPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Weather) validateMain(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Main) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateMainEnum("main", "body", m.Main); err != nil {
+		return err
+	}
+
 	return nil
 }
 

@@ -317,6 +317,93 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
+  /data/2.5/onecall?lat={lat}&lon={lon}:
+    get:
+      operationId: "getOneCall"
+      tags:
+      - "onecall"
+      parameters:
+      - name: "lat"
+        in: "query"
+        description: "Coordinates of the location of your interest"
+        required: true
+        type: "number"
+      - name: "lon"
+        in: "query"
+        description: "Coordinates of the location of your interest"
+        required: true
+        type: "number"
+      - name: "units"
+        in: "query"
+        description: "Standard, metric, and imperial units are available"
+        required: false
+        type: "string"
+        enum: ["imperial", "metric"]
+      - name: "exclude"
+        in: "query"
+        description: "Exclude some parts of the weather data from the API response. It should be a comma-delimited list (without spaces)"
+        required: false
+        type: "array"
+        items:
+          type: "string"
+      - name: "lang"
+        in: "query"
+        description: "Multilingual support"
+        required: false
+        type: "string"
+        enum: ["af", "al", "ar", "az", "bg", "ca", "cz", "da", "de", "el", "en", "eu", "fa", "fi", "fr", "gl", "he", "hi", "hr", "hu", "id", "it", "ja", "kr", "la", "lt", "mk", "no", "nl", "pl", "pt", "pt_br", "ro", "ru", "sv", "se", "sk", "sl", "sp", "es", "sr", "th", "tr", "ua", "uk", "vi", "zh_cn", "zh_tw", "zu"]
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/OneCall"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /data/2.5/onecall/timemachine?lat={lat}&lon={lon}:
+    get:
+      operationId: "getOneCallTimeMachine"
+      tags:
+      - "onecall"
+      parameters:
+      - name: "lat"
+        in: "query"
+        description: "Coordinates of the location of your interest"
+        required: true
+        type: "number"
+      - name: "lon"
+        in: "query"
+        description: "Coordinates of the location of your interest"
+        required: true
+        type: "number"
+      - name: "units"
+        in: "query"
+        description: "Standard, metric, and imperial units are available"
+        required: false
+        type: "string"
+        enum: ["imperial", "metric"]
+      - name: "dt"
+        in: "query"
+        description: "Exclude some parts of the weather data from the API response. It should be a comma-delimited list (without spaces)"
+        required: true
+        type: "integer"
+        format: "uint64"
+      - name: "lang"
+        in: "query"
+        description: "Multilingual support"
+        required: false
+        type: "string"
+        enum: ["af", "al", "ar", "az", "bg", "ca", "cz", "da", "de", "el", "en", "eu", "fa", "fi", "fr", "gl", "he", "hi", "hr", "hu", "id", "it", "ja", "kr", "la", "lt", "mk", "no", "nl", "pl", "pt", "pt_br", "ro", "ru", "sv", "se", "sk", "sl", "sp", "es", "sr", "th", "tr", "ua", "uk", "vi", "zh_cn", "zh_tw", "zu"]
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/OneCallTimeMachine"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
 definitions:
   Error:
     type: "object"
@@ -415,6 +502,280 @@ definitions:
         type: "array"
         items:
           $ref: '#/definitions/ForecastListItem'
+  OneCall:
+    type: "object"
+    properties:
+      lon:
+        type: "number"
+      lat:
+        type: "number"
+      timezone:
+        type: "string"
+      timezone_offset:
+        type: "integer"
+        format: "uint64"
+      current:
+        type: "object"
+        properties:
+          dt:
+            type: "integer"
+            format: "uint64"
+          sunrise:
+            type: "integer"
+            format: "uint64"
+          sunset:
+            type: "integer"
+            format: "uint64"
+          temp:
+            type: "number"
+          feels_like:
+            type: "number"
+          pressure:
+            type: "number"
+          humidity:
+            type: "integer"
+            format: "uint64"
+          dew_point:
+            type: "number"
+          uvi:
+            type: "number"
+          clouds:
+            type: "integer"
+            format: "uint64"
+          visibility:
+            type: "integer"
+            format: "uint64"
+          wind_speed:
+            type: "number"
+          wind_gust:
+            type: "number"
+          pop:
+            type: "number"
+          rain:
+            $ref: '#/definitions/Rain'
+          snow:
+            $ref: '#/definitions/Snow'
+          weather:
+            type: "array"
+            items:
+              $ref: '#/definitions/Weather'
+      minutely:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            dt:
+              type: "integer"
+              format: "uint64"
+            precipitation:
+              type: "number"
+      hourly:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            dt:
+              type: "integer"
+              format: "uint64"
+            temp:
+              type: "number"
+            feels_like:
+              type: "number"
+            pressure:
+              type: "number"
+            humidity:
+              type: "integer"
+              format: "uint64"
+            dew_point:
+              type: "number"
+            clouds:
+              type: "integer"
+              format: "uint64"
+            visibility:
+              type: "integer"
+              format: "uint64"
+            wind_speed:
+              type: "number"
+            wind_gust:
+              type: "number"
+            rain:
+              $ref: '#/definitions/Rain'
+            snow:
+              $ref: '#/definitions/Snow'
+            weather:
+              type: "array"
+              items:
+                $ref: '#/definitions/Weather'
+      daily:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            dt:
+              type: "integer"
+              format: "uint64"
+            sunrise:
+              type: "integer"
+              format: "uint64"
+            sunset:
+              type: "integer"
+              format: "uint64"
+            temp:
+              type: "object"
+              properties:
+                morn:
+                  type: "number"
+                day:
+                  type: "number"
+                eve:
+                  type: "number"
+                night:
+                  type: "number"
+                min:
+                  type: "number"
+                max:
+                  type: "number"
+            feels_like:
+              type: "object"
+              properties:
+                morn:
+                  type: "number"
+                day:
+                  type: "number"
+                eve:
+                  type: "number"
+                night:
+                  type: "number"
+            pressure:
+              type: "number"
+            humidity:
+              type: "integer"
+              format: "uint64"
+            dew_point:
+              type: "number"
+            wind_speed:
+              type: "number"
+            wind_gust:
+              type: "number"
+            wind_deg:
+              type: "integer"
+              format: "uint64"
+            clouds:
+              type: "integer"
+              format: "uint64"
+            uvi:
+              type: "number"
+            visibility:
+              type: "integer"
+              format: "uint64"
+            pop:
+              type: "number"
+            rain:
+              type: "number"
+            snow:
+              type: "number"
+            weather:
+              type: "array"
+              items:
+                $ref: '#/definitions/Weather'
+  OneCallTimeMachine:
+    type: "object"
+    properties:
+      lon:
+        type: "number"
+      lat:
+        type: "number"
+      timezone:
+        type: "string"
+      timezone_offset:
+        type: "integer"
+        format: "uint64"
+      current:
+        type: "object"
+        properties:
+          dt:
+            type: "integer"
+            format: "uint64"
+          sunrise:
+            type: "integer"
+            format: "uint64"
+          sunset:
+            type: "integer"
+            format: "uint64"
+          temp:
+            type: "number"
+          feels_like:
+            type: "number"
+          pressure:
+            type: "number"
+          humidity:
+            type: "integer"
+            format: "uint64"
+          dew_point:
+            type: "number"
+          uvi:
+            type: "number"
+          clouds:
+            type: "integer"
+            format: "uint64"
+          visibility:
+            type: "integer"
+            format: "uint64"
+          wind_speed:
+            type: "number"
+          wind_gust:
+            type: "number"
+          wind_deg:
+            type: "integer"
+            format: "uint64"
+          rain:
+            type: "number"
+          snow:
+            type: "number"
+          weather:
+            type: "array"
+            items:
+              $ref: '#/definitions/Weather'
+      hourly:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            dt:
+              type: "integer"
+              format: "uint64"
+            temp:
+              type: "number"
+            feels_like:
+              type: "number"
+            pressure:
+              type: "number"
+            humidity:
+              type: "integer"
+              format: "uint64"
+            dew_point:
+              type: "number"
+            clouds:
+              type: "integer"
+              format: "uint64"
+            visibility:
+              type: "integer"
+              format: "uint64"
+            wind_speed:
+              type: "number"
+            wind_gust:
+              type: "number"
+            wind_deg:
+              type: "integer"
+              format: "uint64"
+            rain:
+              $ref: '#/definitions/Rain'
+            snow:
+              $ref: '#/definitions/Snow'
+            weather:
+              type: "array"
+              items:
+                $ref: '#/definitions/Weather'
   Coord:
     type: "object"
     properties:
@@ -450,8 +811,18 @@ definitions:
       id:
         type: "integer"
         format: "uint64"
+        enum: [
+          200, 201, 202, 210, 211, 212, 221, 230, 231, 232,
+          300, 301, 302, 310, 311, 312, 313, 314, 321,
+          500, 501, 502, 503, 504, 511, 520, 521, 522, 531,
+          600, 601, 602, 611, 612, 613, 615, 616, 620, 621, 622,
+          701, 711, 721, 731, 741, 751, 761, 762, 771, 781,
+          800,
+          801, 802, 803, 804
+        ]
       main:
         type: "string"
+        enum: ["Thunderstorm", "Drizzle", "Rain", "Snow", "Atmosphere", "Clear", "Clouds"]
       description:
         type: "string"
       icon:

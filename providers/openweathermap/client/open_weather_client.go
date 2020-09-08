@@ -11,6 +11,7 @@ import (
 	"github.com/go-openapi/strfmt"
 
 	"github.com/kihamo/boggart/providers/openweathermap/client/forecast"
+	"github.com/kihamo/boggart/providers/openweathermap/client/onecall"
 	"github.com/kihamo/boggart/providers/openweathermap/client/weather"
 )
 
@@ -57,6 +58,7 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *OpenWeathe
 	cli := new(OpenWeather)
 	cli.Transport = transport
 	cli.Forecast = forecast.New(transport, formats)
+	cli.Onecall = onecall.New(transport, formats)
 	cli.Weather = weather.New(transport, formats)
 	return cli
 }
@@ -104,6 +106,8 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 type OpenWeather struct {
 	Forecast forecast.ClientService
 
+	Onecall onecall.ClientService
+
 	Weather weather.ClientService
 
 	Transport runtime.ClientTransport
@@ -113,5 +117,6 @@ type OpenWeather struct {
 func (c *OpenWeather) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 	c.Forecast.SetTransport(transport)
+	c.Onecall.SetTransport(transport)
 	c.Weather.SetTransport(transport)
 }
