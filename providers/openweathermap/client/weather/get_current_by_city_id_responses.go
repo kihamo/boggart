@@ -55,7 +55,7 @@ type GetCurrentByCityIDOK struct {
 }
 
 func (o *GetCurrentByCityIDOK) Error() string {
-	return fmt.Sprintf("[GET /data/2.5/weather?id={id}&mode=json][%d] getCurrentByCityIdOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /data/2.5/weather?id={id}][%d] getCurrentByCityIdOK  %+v", 200, o.Payload)
 }
 
 func (o *GetCurrentByCityIDOK) GetPayload() *models.Current {
@@ -97,7 +97,7 @@ func (o *GetCurrentByCityIDDefault) Code() int {
 }
 
 func (o *GetCurrentByCityIDDefault) Error() string {
-	return fmt.Sprintf("[GET /data/2.5/weather?id={id}&mode=json][%d] getCurrentByCityID default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[GET /data/2.5/weather?id={id}][%d] getCurrentByCityID default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *GetCurrentByCityIDDefault) GetPayload() *models.Error {

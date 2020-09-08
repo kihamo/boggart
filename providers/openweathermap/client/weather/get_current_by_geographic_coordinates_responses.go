@@ -55,7 +55,7 @@ type GetCurrentByGeographicCoordinatesOK struct {
 }
 
 func (o *GetCurrentByGeographicCoordinatesOK) Error() string {
-	return fmt.Sprintf("[GET /data/2.5/weather?lat={lat}&lon={lon}&mode=json][%d] getCurrentByGeographicCoordinatesOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /data/2.5/weather?lat={lat}&lon={lon}][%d] getCurrentByGeographicCoordinatesOK  %+v", 200, o.Payload)
 }
 
 func (o *GetCurrentByGeographicCoordinatesOK) GetPayload() *models.Current {
@@ -97,7 +97,7 @@ func (o *GetCurrentByGeographicCoordinatesDefault) Code() int {
 }
 
 func (o *GetCurrentByGeographicCoordinatesDefault) Error() string {
-	return fmt.Sprintf("[GET /data/2.5/weather?lat={lat}&lon={lon}&mode=json][%d] getCurrentByGeographicCoordinates default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[GET /data/2.5/weather?lat={lat}&lon={lon}][%d] getCurrentByGeographicCoordinates default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *GetCurrentByGeographicCoordinatesDefault) GetPayload() *models.Error {

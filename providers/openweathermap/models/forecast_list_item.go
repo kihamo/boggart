@@ -6,41 +6,37 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"strconv"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
-// Current current
+// ForecastListItem forecast list item
 //
-// swagger:model Current
-type Current struct {
-
-	// base
-	Base string `json:"base,omitempty"`
+// swagger:model ForecastListItem
+type ForecastListItem struct {
 
 	// clouds
 	Clouds *Clouds `json:"clouds,omitempty"`
 
-	// cod
-	Cod uint64 `json:"cod,omitempty"`
-
-	// coord
-	Coord *Coord `json:"coord,omitempty"`
+	// country
+	Country string `json:"country,omitempty"`
 
 	// dt
 	Dt uint64 `json:"dt,omitempty"`
 
-	// id
-	ID uint64 `json:"id,omitempty"`
+	// dt txt
+	DtTxt string `json:"dt_txt,omitempty"`
 
 	// main
 	Main *Main `json:"main,omitempty"`
 
-	// name
-	Name string `json:"name,omitempty"`
+	// pop
+	Pop float64 `json:"pop,omitempty"`
 
 	// rain
 	Rain *Rain `json:"rain,omitempty"`
@@ -48,11 +44,20 @@ type Current struct {
 	// snow
 	Snow *Snow `json:"snow,omitempty"`
 
+	// sunrise
+	Sunrise uint64 `json:"sunrise,omitempty"`
+
+	// sunset
+	Sunset uint64 `json:"sunset,omitempty"`
+
 	// sys
-	Sys *CurrentSys `json:"sys,omitempty"`
+	Sys *ForecastListItemSys `json:"sys,omitempty"`
 
 	// timezone
 	Timezone uint64 `json:"timezone,omitempty"`
+
+	// visibility
+	Visibility uint64 `json:"visibility,omitempty"`
 
 	// weather
 	Weather []*Weather `json:"weather"`
@@ -61,15 +66,11 @@ type Current struct {
 	Wind *Wind `json:"wind,omitempty"`
 }
 
-// Validate validates this current
-func (m *Current) Validate(formats strfmt.Registry) error {
+// Validate validates this forecast list item
+func (m *ForecastListItem) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateClouds(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateCoord(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -103,7 +104,7 @@ func (m *Current) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Current) validateClouds(formats strfmt.Registry) error {
+func (m *ForecastListItem) validateClouds(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Clouds) { // not required
 		return nil
@@ -121,25 +122,7 @@ func (m *Current) validateClouds(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Current) validateCoord(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Coord) { // not required
-		return nil
-	}
-
-	if m.Coord != nil {
-		if err := m.Coord.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("coord")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *Current) validateMain(formats strfmt.Registry) error {
+func (m *ForecastListItem) validateMain(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Main) { // not required
 		return nil
@@ -157,7 +140,7 @@ func (m *Current) validateMain(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Current) validateRain(formats strfmt.Registry) error {
+func (m *ForecastListItem) validateRain(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Rain) { // not required
 		return nil
@@ -175,7 +158,7 @@ func (m *Current) validateRain(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Current) validateSnow(formats strfmt.Registry) error {
+func (m *ForecastListItem) validateSnow(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Snow) { // not required
 		return nil
@@ -193,7 +176,7 @@ func (m *Current) validateSnow(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Current) validateSys(formats strfmt.Registry) error {
+func (m *ForecastListItem) validateSys(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Sys) { // not required
 		return nil
@@ -211,7 +194,7 @@ func (m *Current) validateSys(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Current) validateWeather(formats strfmt.Registry) error {
+func (m *ForecastListItem) validateWeather(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Weather) { // not required
 		return nil
@@ -236,7 +219,7 @@ func (m *Current) validateWeather(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Current) validateWind(formats strfmt.Registry) error {
+func (m *ForecastListItem) validateWind(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Wind) { // not required
 		return nil
@@ -255,7 +238,7 @@ func (m *Current) validateWind(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *Current) MarshalBinary() ([]byte, error) {
+func (m *ForecastListItem) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -263,8 +246,8 @@ func (m *Current) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *Current) UnmarshalBinary(b []byte) error {
-	var res Current
+func (m *ForecastListItem) UnmarshalBinary(b []byte) error {
+	var res ForecastListItem
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -272,34 +255,75 @@ func (m *Current) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// CurrentSys current sys
+// ForecastListItemSys forecast list item sys
 //
-// swagger:model CurrentSys
-type CurrentSys struct {
+// swagger:model ForecastListItemSys
+type ForecastListItemSys struct {
 
-	// country
-	Country string `json:"country,omitempty"`
-
-	// id
-	ID uint64 `json:"id,omitempty"`
-
-	// message
-	Message float64 `json:"message,omitempty"`
-
-	// sunrise
-	Sunrise uint64 `json:"sunrise,omitempty"`
-
-	// sunset
-	Sunset uint64 `json:"sunset,omitempty"`
+	// pod
+	// Enum: [d n]
+	Pod string `json:"pod,omitempty"`
 }
 
-// Validate validates this current sys
-func (m *CurrentSys) Validate(formats strfmt.Registry) error {
+// Validate validates this forecast list item sys
+func (m *ForecastListItemSys) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validatePod(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+var forecastListItemSysTypePodPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["d","n"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		forecastListItemSysTypePodPropEnum = append(forecastListItemSysTypePodPropEnum, v)
+	}
+}
+
+const (
+
+	// ForecastListItemSysPodD captures enum value "d"
+	ForecastListItemSysPodD string = "d"
+
+	// ForecastListItemSysPodN captures enum value "n"
+	ForecastListItemSysPodN string = "n"
+)
+
+// prop value enum
+func (m *ForecastListItemSys) validatePodEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, forecastListItemSysTypePodPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ForecastListItemSys) validatePod(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Pod) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validatePodEnum("sys"+"."+"pod", "body", m.Pod); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (m *CurrentSys) MarshalBinary() ([]byte, error) {
+func (m *ForecastListItemSys) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -307,8 +331,8 @@ func (m *CurrentSys) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *CurrentSys) UnmarshalBinary(b []byte) error {
-	var res CurrentSys
+func (m *ForecastListItemSys) UnmarshalBinary(b []byte) error {
+	var res ForecastListItemSys
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

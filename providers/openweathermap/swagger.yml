@@ -159,7 +159,164 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
-
+  /data/2.5/forecast?q={q}:
+    get:
+      operationId: "getForecastByCityName"
+      tags:
+      - "forecast"
+      parameters:
+      - name: "q"
+        in: "query"
+        description: "City name, state code and country code divided by comma, use ISO 3166 country code"
+        required: true
+        type: "string"
+      - name: "units"
+        in: "query"
+        description: "Standard, metric, and imperial units are available"
+        required: false
+        type: "string"
+        enum: ["imperial", "metric"]
+      - name: "cnt"
+        in: "query"
+        description: "To limit number of listed cities please setup 'cnt' parameter that specifies the number of lines returned"
+        required: false
+        type: "integer"
+        format: "uint64"
+      - name: "lang"
+        in: "query"
+        description: "Multilingual support"
+        required: false
+        type: "string"
+        enum: ["af", "al", "ar", "az", "bg", "ca", "cz", "da", "de", "el", "en", "eu", "fa", "fi", "fr", "gl", "he", "hi", "hr", "hu", "id", "it", "ja", "kr", "la", "lt", "mk", "no", "nl", "pl", "pt", "pt_br", "ro", "ru", "sv", "se", "sk", "sl", "sp", "es", "sr", "th", "tr", "ua", "uk", "vi", "zh_cn", "zh_tw", "zu"]
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Forecast"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /data/2.5/forecast?id={id}:
+    get:
+      operationId: "getForecastByCityID"
+      tags:
+      - "forecast"
+      parameters:
+      - name: "id"
+        in: "query"
+        description: "City ID"
+        required: true
+        type: "integer"
+        format: "uint64"
+      - name: "units"
+        in: "query"
+        description: "Standard, metric, and imperial units are available"
+        required: false
+        type: "string"
+        enum: ["imperial", "metric"]
+      - name: "cnt"
+        in: "query"
+        description: "To limit number of listed cities please setup 'cnt' parameter that specifies the number of lines returned"
+        required: false
+        type: "integer"
+        format: "uint64"
+      - name: "lang"
+        in: "query"
+        description: "Multilingual support"
+        required: false
+        type: "string"
+        enum: ["af", "al", "ar", "az", "bg", "ca", "cz", "da", "de", "el", "en", "eu", "fa", "fi", "fr", "gl", "he", "hi", "hr", "hu", "id", "it", "ja", "kr", "la", "lt", "mk", "no", "nl", "pl", "pt", "pt_br", "ro", "ru", "sv", "se", "sk", "sl", "sp", "es", "sr", "th", "tr", "ua", "uk", "vi", "zh_cn", "zh_tw", "zu"]
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Forecast"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /data/2.5/forecast?lat={lat}&lon={lon}:
+    get:
+      operationId: "getForecastByGeographicCoordinates"
+      tags:
+      - "forecast"
+      parameters:
+      - name: "lat"
+        in: "query"
+        description: "Coordinates of the location of your interest"
+        required: true
+        type: "number"
+      - name: "lon"
+        in: "query"
+        description: "Coordinates of the location of your interest"
+        required: true
+        type: "number"
+      - name: "units"
+        in: "query"
+        description: "Standard, metric, and imperial units are available"
+        required: false
+        type: "string"
+        enum: ["imperial", "metric"]
+      - name: "cnt"
+        in: "query"
+        description: "To limit number of listed cities please setup 'cnt' parameter that specifies the number of lines returned"
+        required: false
+        type: "integer"
+        format: "uint64"
+      - name: "lang"
+        in: "query"
+        description: "Multilingual support"
+        required: false
+        type: "string"
+        enum: ["af", "al", "ar", "az", "bg", "ca", "cz", "da", "de", "el", "en", "eu", "fa", "fi", "fr", "gl", "he", "hi", "hr", "hu", "id", "it", "ja", "kr", "la", "lt", "mk", "no", "nl", "pl", "pt", "pt_br", "ro", "ru", "sv", "se", "sk", "sl", "sp", "es", "sr", "th", "tr", "ua", "uk", "vi", "zh_cn", "zh_tw", "zu"]
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Forecast"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /data/2.5/forecast?zip={zip}:
+    get:
+      operationId: "getForecastByZIPCode"
+      tags:
+      - "forecast"
+      parameters:
+      - name: "zip"
+        in: "query"
+        description: "ZIP code"
+        required: true
+        type: "string"
+      - name: "units"
+        in: "query"
+        description: "Standard, metric, and imperial units are available"
+        required: false
+        type: "string"
+        enum: ["imperial", "metric"]
+      - name: "cnt"
+        in: "query"
+        description: "To limit number of listed cities please setup 'cnt' parameter that specifies the number of lines returned"
+        required: false
+        type: "integer"
+        format: "uint64"
+      - name: "lang"
+        in: "query"
+        description: "Multilingual support"
+        required: false
+        type: "string"
+        enum: ["af", "al", "ar", "az", "bg", "ca", "cz", "da", "de", "el", "en", "eu", "fa", "fi", "fr", "gl", "he", "hi", "hr", "hu", "id", "it", "ja", "kr", "la", "lt", "mk", "no", "nl", "pl", "pt", "pt_br", "ro", "ru", "sv", "se", "sk", "sl", "sp", "es", "sr", "th", "tr", "ua", "uk", "vi", "zh_cn", "zh_tw", "zu"]
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Forecast"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
 definitions:
   Error:
     type: "object"
@@ -172,78 +329,23 @@ definitions:
     type: "object"
     properties:
       coord:
-        type: "object"
-        properties:
-          lon:
-            type: "number"
-          lat:
-            type: "number"
+        $ref: '#/definitions/Coord'
       weather:
         type: "array"
         items:
-          type: "object"
-          properties:
-            id:
-              type: "integer"
-              format: "uint64"
-            main:
-              type: "string"
-            description:
-              type: "string"
-            icon:
-              type: "string"
+          $ref: '#/definitions/Weather'
       base:
         type: "string"
       main:
-        type: "object"
-        properties:
-          temp:
-            type: "number"
-          feels_like:
-            type: "number"
-          pressure:
-            type: "number"
-          humidity:
-            type: "integer"
-            format: "uint64"
-          temp_min:
-            type: "number"
-          temp_max:
-            type: "number"
-          sea_level:
-            type: "number"
-          grnd_level:
-            type: "number"
+        $ref: '#/definitions/Main'
       wind:
-        type: "object"
-        properties:
-          speed:
-            type: "number"
-          deg:
-            type: "integer"
-            format: "uint64"
-          gust:
-            type: "number"
+        $ref: '#/definitions/Wind'
       clouds:
-        type: "object"
-        properties:
-          all:
-            type: "integer"
-            format: "uint64"
+        $ref: '#/definitions/Clouds'
       rain:
-        type: "object"
-        properties:
-          1h:
-            type: "number"
-          3h:
-            type: "number"
+        $ref: '#/definitions/Rain'
       snow:
-        type: "object"
-        properties:
-          1h:
-            type: "number"
-          3h:
-            type: "number"
+        $ref: '#/definitions/Snow'
       dt:
         type: "integer"
         format: "uint64"
@@ -273,5 +375,158 @@ definitions:
       name:
         type: "string"
       cod:
+        type: "integer"
+        format: "uint64"
+  Forecast:
+    type: "object"
+    properties:
+      cod:
+        type: "string"
+      message:
+        type: "number"
+      cnt:
+        type: "integer"
+        format: "uint64"
+      city:
+        type: "object"
+        properties:
+          id:
+            type: "integer"
+            format: "uint64"
+          name:
+            type: "string"
+          coord:
+            $ref: '#/definitions/Coord'
+          country:
+            type: "string"
+          population:
+            type: "integer"
+            format: "uint64"
+          timezone:
+            type: "integer"
+            format: "uint64"
+          sunrise:
+            type: "integer"
+            format: "uint64"
+          sunset:
+            type: "integer"
+            format: "uint64"
+      list:
+        type: "array"
+        items:
+          $ref: '#/definitions/ForecastListItem'
+  Coord:
+    type: "object"
+    properties:
+      lon:
+        type: "number"
+      lat:
+        type: "number"
+  Main:
+    type: "object"
+    properties:
+      temp:
+        type: "number"
+      feels_like:
+        type: "number"
+      pressure:
+        type: "number"
+      humidity:
+        type: "integer"
+        format: "uint64"
+      temp_min:
+        type: "number"
+      temp_max:
+        type: "number"
+      temp_kf:
+        type: "number"
+      sea_level:
+        type: "number"
+      grnd_level:
+        type: "number"
+  Weather:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "uint64"
+      main:
+        type: "string"
+      description:
+        type: "string"
+      icon:
+        type: "string"
+  Wind:
+    type: "object"
+    properties:
+      speed:
+        type: "number"
+      deg:
+        type: "integer"
+        format: "uint64"
+      gust:
+        type: "number"
+  Clouds:
+    type: "object"
+    properties:
+      all:
+        type: "integer"
+        format: "uint64"
+  Rain:
+    type: "object"
+    properties:
+      1h:
+        type: "number"
+      3h:
+        type: "number"
+  Snow:
+    type: "object"
+    properties:
+      1h:
+        type: "number"
+      3h:
+        type: "number"
+  ForecastListItem:
+    type: "object"
+    properties:
+      weather:
+        type: "array"
+        items:
+          $ref: '#/definitions/Weather'
+      main:
+        $ref: '#/definitions/Main'
+      wind:
+        $ref: '#/definitions/Wind'
+      clouds:
+        $ref: '#/definitions/Clouds'
+      rain:
+        $ref: '#/definitions/Rain'
+      snow:
+        $ref: '#/definitions/Snow'
+      visibility:
+        type: "integer"
+        format: "uint64"
+      pop:
+        type: "number"
+      sys:
+        type: "object"
+        properties:
+          pod:
+            type: "string"
+            enum: ["d", "n"]
+      dt_txt:
+        type: "string"
+      dt:
+        type: "integer"
+        format: "uint64"
+      country:
+        type: "string"
+      timezone:
+        type: "integer"
+        format: "uint64"
+      sunrise:
+        type: "integer"
+        format: "uint64"
+      sunset:
         type: "integer"
         format: "uint64"

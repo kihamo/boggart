@@ -55,7 +55,7 @@ type GetCurrentByZIPCodeOK struct {
 }
 
 func (o *GetCurrentByZIPCodeOK) Error() string {
-	return fmt.Sprintf("[GET /data/2.5/weather?zip={zip}&mode=json][%d] getCurrentByZIpCodeOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /data/2.5/weather?zip={zip}][%d] getCurrentByZIpCodeOK  %+v", 200, o.Payload)
 }
 
 func (o *GetCurrentByZIPCodeOK) GetPayload() *models.Current {
@@ -97,7 +97,7 @@ func (o *GetCurrentByZIPCodeDefault) Code() int {
 }
 
 func (o *GetCurrentByZIPCodeDefault) Error() string {
-	return fmt.Sprintf("[GET /data/2.5/weather?zip={zip}&mode=json][%d] getCurrentByZIPCode default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[GET /data/2.5/weather?zip={zip}][%d] getCurrentByZIPCode default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *GetCurrentByZIPCodeDefault) GetPayload() *models.Error {
