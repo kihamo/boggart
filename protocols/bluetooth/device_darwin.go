@@ -8,6 +8,5 @@ import (
 
 // DefaultDevice ...
 func NewDevice(opts ...ble.Option) (d ble.Device, err error) {
-	//return darwin.NewDevice(opts...)
 	return NewDummyDevice(opts...)
 }

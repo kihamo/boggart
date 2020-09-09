@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/kihamo/boggart/providers/integratorit/internal"
 )
 
@@ -83,7 +84,7 @@ func (c *Client) Accounts(ctx context.Context) ([]Account, error) {
 	for i, account := range data {
 		if account.ProviderRAW != "" {
 			if err := json.Unmarshal([]byte(account.ProviderRAW), &account.Provider); err != nil {
-				return nil, err
+				return nil, multierror.Append(err, errors.New("bad accounts content "+account.ProviderRAW))
 			}
 
 			data[i].Provider = account.Provider

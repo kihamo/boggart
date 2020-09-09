@@ -23,10 +23,8 @@ type Bind struct {
 
 func (b *Bind) lang(ctx context.Context) *string {
 	var lang string
-	locale := i18n.Locale(ctx).Locale()
 
-	switch locale {
-	case "ru":
+	if locale := i18n.Locale(ctx).Locale(); locale == "ru" {
 		lang = locale
 	}
 

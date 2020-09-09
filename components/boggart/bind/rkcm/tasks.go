@@ -57,7 +57,7 @@ func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 		WithPwd(b.config.Password)
 	if responseMeters, e := b.client.General.GetMeterValuesEverydayMode(paramsMeters); e == nil {
 		for _, meter := range responseMeters.Payload.Meter {
-			value, e := strconv.ParseFloat(strings.Replace(meter.Value[0].Value, ",", ".", -1), 64)
+			value, e := strconv.ParseFloat(strings.ReplaceAll(meter.Value[0].Value, ",", "."), 64)
 			if e != nil {
 				err = multierr.Append(err, e)
 				continue

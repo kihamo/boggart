@@ -6,12 +6,13 @@ require (
 	cloud.google.com/go/firestore v1.2.0 // indirect
 	firebase.google.com/go v3.12.0+incompatible
 	github.com/PuerkitoBio/goquery v1.5.1
+	github.com/alvaroloes/enumer v1.1.2 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535
 	github.com/barnybug/go-cast v0.0.0-20190910160619-d2aa97f56d4e
 	github.com/bieber/barcode v0.0.0-20190908000948-a94135955bb1
 	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/eclipse/paho.mqtt.golang v1.2.1-0.20200609161119-ca94c5368c77
-	github.com/elazarl/go-bindata-assetfs v1.0.0
+	github.com/elazarl/go-bindata-assetfs v1.0.1
 	github.com/faiface/beep v1.0.2
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/ghthor/gowol v0.0.0-20180205141434-eb42ead1b24e
@@ -35,7 +36,7 @@ require (
 	github.com/kihamo/shadow v0.0.0-20200726144526-4ac78a600203
 	github.com/kihamo/snitch v0.0.0-20200412182537-3478a87783e1
 	github.com/llgcode/draw2d v0.0.0-20200110163050-b96d8208fcfc
-	github.com/mailru/easyjson v0.7.1
+	github.com/mailru/easyjson v0.7.6
 	github.com/mitchellh/mapstructure v1.3.2
 	github.com/mmcloughlin/geohash v0.9.0
 	github.com/mourner/suncalc-go v0.0.0-20141021103505-77cea98fd55e
@@ -49,11 +50,11 @@ require (
 	go.uber.org/zap v1.14.1
 	gocv.io/x/gocv v0.22.0 // indirect
 	golang.org/x/mod v0.3.0 // indirect
-	golang.org/x/net v0.0.0-20200625001655-4c5254603344
+	golang.org/x/net v0.0.0-20200904194848-62affa334b73
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208 // indirect
 	golang.org/x/sys v0.0.0-20200610111108-226ff32320da // indirect
-	golang.org/x/tools v0.0.0-20200612220849-54c614fe050c // indirect
+	golang.org/x/tools v0.0.0-20200908211811-12e1bf57a112 // indirect
 	google.golang.org/api v0.20.0
 	google.golang.org/appengine v1.6.6 // indirect
 	google.golang.org/grpc v1.28.0

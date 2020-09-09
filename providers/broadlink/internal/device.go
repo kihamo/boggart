@@ -212,7 +212,7 @@ func (d *Device) Auth(id []byte, name string) error {
 	payload := make([]byte, size)
 	copy(payload[0x04:0x13], id)
 	payload[0x2d] = 0x01
-	copy(payload[0x30:], []byte(name))
+	copy(payload[0x30:], name)
 
 	response, err := d.Call(CommandAuth, payload)
 	if err != nil {

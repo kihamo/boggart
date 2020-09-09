@@ -84,7 +84,6 @@ func (b *Bind) getClient() (_ *zstack.Client, err error) {
 					}
 
 					b.Logger().Debug(message, args...)
-					//fmt.Println(append([]interface{}{message}, args...)...)
 				}
 			}
 		}

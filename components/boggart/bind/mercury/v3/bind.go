@@ -35,7 +35,7 @@ func (b *Bind) Provider() (provider *mercury.MercuryV3, err error) {
 	b.providerOnce.Do(func() {
 		var (
 			conn connection.Connection
-			dsn *connection.DSN
+			dsn  *connection.DSN
 		)
 
 		dsn, err = connection.ParseDSN(b.config.ConnectionDSN)

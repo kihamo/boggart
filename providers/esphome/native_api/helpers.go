@@ -85,7 +85,7 @@ func State(entityMessage, stateMessage proto.Message, unit bool) (state string, 
 			template := "%." + strconv.FormatInt(int64(e.GetAccuracyDecimals()), 10) + "f"
 
 			if unit {
-				template += " " + strings.Replace(e.GetUnitOfMeasurement(), "%", "%%", -1)
+				template += " " + strings.ReplaceAll(e.GetUnitOfMeasurement(), "%", "%%")
 			}
 
 			state = fmt.Sprintf(template, float64(v.GetState()))

@@ -176,8 +176,6 @@ func (s *AlertStreaming) loop(pr io.ReadCloser) {
 		parseBuffer.Reset()
 		pr.Close()
 
-		//close(s.alerts)
-		//close(s.errors)
 		close(s.done)
 	}()
 

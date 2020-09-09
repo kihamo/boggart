@@ -48,7 +48,7 @@ func (b *Bind) getConnection() (conn connection.Connection, err error) {
 	b.connectionOnce.Do(func() {
 		var (
 			conn connection.Connection
-			dsn *connection.DSN
+			dsn  *connection.DSN
 		)
 
 		dsn, err = connection.ParseDSN(b.config.ConnectionDSN)
