@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"container/list"
 	"context"
+	"encoding"
 	"errors"
 	"fmt"
 	"io"
@@ -670,6 +671,12 @@ func (c *Component) convertPayload(payload interface{}) []byte {
 	case fmt.Stringer:
 		return []byte(value.String())
 	default:
+		if bin, ok := value.(encoding.BinaryMarshaler); ok {
+			if raw, err := bin.MarshalBinary(); err == nil {
+				return c.convertPayload(raw)
+			}
+		}
+
 		if ref := reflect.ValueOf(value); ref.Kind() == reflect.Ptr {
 			if !ref.Elem().IsValid() {
 				return c.convertPayload(nil)
