@@ -1,6 +1,8 @@
 package openweathermap
 
 import (
+	"net/url"
+
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/runtime/logger"
 	"github.com/kihamo/boggart/providers/openweathermap/client"
@@ -26,4 +28,12 @@ func New(apiKey string, debug bool, logger logger.Logger) *Client {
 	}
 
 	return cl
+}
+
+func Icon(id string) *url.URL {
+	u := &url.URL{}
+	u.Host = "openweathermap.org"
+	u.Path = "/img/w/" + id + ".png"
+
+	return u
 }

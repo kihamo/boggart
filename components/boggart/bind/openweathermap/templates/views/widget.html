@@ -147,7 +147,7 @@
                                     {{ if ne $w.Icon "" }}
                                     <tr>
                                         <td>{{ i18n "Weather icon id" . }}</td>
-                                        <td><img alt="{{ $w.Icon }}" title="{{ $w.Icon }}" src="//openweathermap.org/img/w/{{ $w.Icon }}.png" /></td>
+                                        <td><img alt="{{ $w.Icon }}" title="{{ $w.Icon }}" src="{{ raw (call $.icon $w.Icon) }}" /></td>
                                     </tr>
                                     {{ end }}
                                 {{ end }}

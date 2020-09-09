@@ -33,7 +33,7 @@ require (
 	github.com/influxdata/influxdb v1.8.0
 	github.com/influxdata/influxdb-client-go v1.4.0
 	github.com/kihamo/go-workers v2.1.8-0.20200620141938-31fefb5789a8+incompatible
-	github.com/kihamo/shadow v0.0.0-20200726144526-4ac78a600203
+	github.com/kihamo/shadow v0.0.0-20200909215707-feda2bd3a2c9
 	github.com/kihamo/snitch v0.0.0-20200412182537-3478a87783e1
 	github.com/llgcode/draw2d v0.0.0-20200110163050-b96d8208fcfc
 	github.com/mailru/easyjson v0.7.6
@@ -41,6 +41,7 @@ require (
 	github.com/mmcloughlin/geohash v0.9.0
 	github.com/mourner/suncalc-go v0.0.0-20141021103505-77cea98fd55e
 	github.com/opentracing-contrib/go-stdlib v0.0.0-20190519235532-cf7a6c988dc9
+	github.com/pascaldekloe/name v1.0.0 // indirect
 	github.com/pborman/uuid v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/snabb/webostv v0.0.1
@@ -54,7 +55,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208 // indirect
 	golang.org/x/sys v0.0.0-20200610111108-226ff32320da // indirect
-	golang.org/x/tools v0.0.0-20200908211811-12e1bf57a112 // indirect
+	golang.org/x/tools v0.0.0-20200909205333-6a8222ee2526 // indirect
 	google.golang.org/api v0.20.0
 	google.golang.org/appengine v1.6.6 // indirect
 	google.golang.org/grpc v1.28.0

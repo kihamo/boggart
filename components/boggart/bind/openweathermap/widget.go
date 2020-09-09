@@ -2,6 +2,7 @@ package openweathermap
 
 import (
 	"github.com/elazarl/go-bindata-assetfs"
+	"github.com/kihamo/boggart/providers/openweathermap"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
@@ -15,6 +16,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 	widget.Render(r.Context(), "widget", map[string]interface{}{
 		"current": current,
+		"icon":    openweathermap.Icon,
 	})
 }
 
