@@ -27,7 +27,7 @@ type Bind struct {
 
 	config  *Config
 	client  *mosenergosbyt.Client
-	account string
+	account *string
 }
 
 func (b *Bind) Run() error {
@@ -36,10 +36,14 @@ func (b *Bind) Run() error {
 		return err
 	}
 
-	for i, account := range accounts {
-		if (b.config.Account == "" && i == 0) || b.config.Account == account.NNAccount {
+	for _, account := range accounts {
+		if account.Provider.IDAbonent == 0 {
+			continue
+		}
+
+		if account.Provider.IDAbonent > 0 && ((b.config.Account == "" && b.account == nil) || b.config.Account == account.NNAccount) {
 			b.config.Account = account.NNAccount
-			b.account = account.NNAccount
+			b.account = &account.NNAccount
 
 			break
 		}
@@ -49,14 +53,14 @@ func (b *Bind) Run() error {
 }
 
 func (b *Bind) Account(ctx context.Context) (*mosenergosbyt.Account, error) {
-	if b.account != "" {
+	if b.account != nil {
 		accounts, err := b.client.Accounts(ctx)
 		if err != nil {
 			return nil, err
 		}
 
 		for _, account := range accounts {
-			if account.NNAccount == b.account {
+			if account.NNAccount == *b.account {
 				return &account, nil
 			}
 		}
