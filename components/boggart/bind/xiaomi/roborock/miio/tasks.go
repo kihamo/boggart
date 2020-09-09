@@ -58,7 +58,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 					err = multierr.Append(err, e)
 				}
 
-				if e := b.MQTT().PublishAsync(ctx, b.config.TopicLastCleanArea.Format(sn), lastClean.Area); e != nil {
+				if e := b.MQTT().PublishAsync(ctx, b.config.TopicLastCleanArea.Format(sn), uint64(lastClean.Area)); e != nil {
 					err = multierr.Append(err, e)
 				}
 
@@ -70,7 +70,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 					err = multierr.Append(err, e)
 				}
 
-				if e := b.MQTT().PublishAsync(ctx, b.config.TopicLastCleanDuration.Format(sn), lastClean.CleaningDuration); e != nil {
+				if e := b.MQTT().PublishAsync(ctx, b.config.TopicLastCleanDuration.Format(sn), lastClean.CleaningDuration.Duration); e != nil {
 					err = multierr.Append(err, e)
 				}
 			} else {
