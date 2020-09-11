@@ -24,7 +24,6 @@ type Client struct {
 
 	debug      uint64
 	connection *http.Client
-	cookies    []*http.Cookie
 	userAgent  string
 }
 
@@ -36,7 +35,7 @@ func NewClient() *Client {
 		userAgent: DefaultUserAgent,
 	}
 
-	client.Reset()
+	client.connection.Jar, _ = cookiejar.New(nil)
 
 	return client
 }
@@ -61,23 +60,29 @@ func (c *Client) WithUserAgent(agent string) *Client {
 }
 
 func (c *Client) WithTimeout(timeout time.Duration) *Client {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
 	c.connection.Timeout = timeout
 
 	return c
 }
 
 func (c *Client) Do(request *http.Request) (*http.Response, error) {
-	if agent := request.Header.Get("User-Agent"); agent == "" {
-		c.mutex.RLock()
-		request.Header.Set("User-Agent", c.userAgent)
-		c.mutex.RUnlock()
-	}
+	const UserAgentHeader = "User-Agent"
 
 	c.mutex.RLock()
-	for _, cookie := range c.cookies {
+	if agent := request.Header.Get(UserAgentHeader); agent == "" {
+		request.Header.Set(UserAgentHeader, c.userAgent)
+	}
+
+	conn := c.connection
+	c.mutex.RUnlock()
+
+	// для дампа, внутри склиент сам эти куки добавит
+	for _, cookie := range conn.Jar.Cookies(request.URL) {
 		request.AddCookie(cookie)
 	}
-	c.mutex.RUnlock()
 
 	debug := atomic.LoadUint64(&c.debug)
 
@@ -93,7 +98,7 @@ func (c *Client) Do(request *http.Request) (*http.Response, error) {
 	//request, closer := tracing.TraceRequest(opentracing.GlobalTracer(), request)
 	//defer closer.Finish()
 
-	response, err := c.connection.Do(request)
+	response, err := conn.Do(request)
 	if err != nil {
 		return nil, err
 	}
@@ -107,10 +112,6 @@ func (c *Client) Do(request *http.Request) (*http.Response, error) {
 		fmt.Printf("\n\n%q", dump)
 	}
 
-	c.mutex.Lock()
-	c.cookies = append(c.cookies, response.Cookies()...)
-	c.mutex.Unlock()
-
 	return response, nil
 }
 
@@ -119,7 +120,6 @@ func (c *Client) Reset() {
 	defer c.mutex.Unlock()
 
 	c.connection.Jar, _ = cookiejar.New(nil)
-	c.cookies = []*http.Cookie{}
 }
 
 func (c *Client) Get(ctx context.Context, u string) (*http.Response, error) {

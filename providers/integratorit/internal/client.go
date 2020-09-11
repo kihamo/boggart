@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
+	"net/http"
 	"net/url"
 	"strings"
 	"sync"
@@ -102,6 +103,10 @@ func (c *Client) DoRequest(ctx context.Context, action string, query, body map[s
 		return err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return errors.New("response status isn't 200 OK")
+	}
 
 	if writer, ok := data.(io.Writer); ok {
 		_, err = io.Copy(writer, resp.Body)
