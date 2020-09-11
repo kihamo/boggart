@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -105,7 +106,7 @@ func (c *Client) DoRequest(ctx context.Context, action string, query, body map[s
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return errors.New("response status isn't 200 OK")
+		return errors.New("response status isn't 200 OK returns " + strconv.Itoa(resp.StatusCode))
 	}
 
 	if writer, ok := data.(io.Writer); ok {
