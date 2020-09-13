@@ -3,6 +3,55 @@
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
             <div class="x_title">
+                <h2>{{ i18n "Daily" . }}</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="temperature"><b>{{ i18n (.current_datetime.Format "Monday") . }}</b>, {{ .current_datetime.Format "15:04" }}</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="weather-icon">
+                            <canvas height="84" width="84" id="skycons_current"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-sm-8">
+                        <div class="weather-text">
+                            <h2>{{ .current.Name }}<br><i>{{ range $w := .current.Weather }} {{ i18n $w.Description $ }}{{ end }}</i></h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <div class="weather-text pull-right">
+                        <h3 class="degrees">{{ .current.Main.Temp }}</h3>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <div class="row weather-days" style="margin-left:15%">
+                {{ range $day, $item := .forecast }}
+                    <div class="col-sm-2">
+                        <div class="daily-weather" style="text-align:center">
+                            <h2 class="day">{{ $day.Format "02" }} {{ i18n ($day.Format "January") $ }}</h2>
+                            <h3 class="degrees">{{ $item.Min.Main.Temp }}</h3>
+                            <h3 class="degrees">{{ $item.Max.Main.Temp }}</h3>
+                            <canvas id="skycons_{{ $day.Day }}" width="32" height="32"></canvas>
+                            <h5>{{ $item.Max.Wind.Speed }} <i>m/s</i></h5>
+                        </div>
+                    </div>
+                {{ end }}
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
                 <h2>{{ i18n "Weather" . }}</h2>
                 <div class="clearfix"></div>
             </div>
@@ -196,4 +245,95 @@
         </div>
     </div>
 </div>
+{{ end }}
+
+{{ define "js" }}
+{{ staticHTML (staticURL "/boggart/assets/vendor/skycons/skycons.js" false) }}
+
+<script type="application/javascript">
+    function convertSkycons(weatherId) {
+        switch (weatherId) {
+            // return Skycons.CLEAR_NIGHT;
+            // return Skycons.PARTLY_CLOUDY_DAY;
+            // return Skycons.PARTLY_CLOUDY_NIGHT;
+
+            case 801:
+            case 802:
+            case 803:
+            case 804:
+                return Skycons.CLOUDY;
+
+            case 200:
+            case 201:
+            case 202:
+            case 230:
+            case 231:
+            case 232:
+            case 300:
+            case 301:
+            case 302:
+            case 310:
+            case 311:
+            case 312:
+            case 313:
+            case 314:
+            case 321:
+            case 500:
+            case 501:
+            case 502:
+            case 503:
+            case 504:
+            case 511:
+            case 520:
+            case 521:
+            case 522:
+            case 531:
+                return Skycons.RAIN;
+
+            case 611:
+            case 612:
+            case 613:
+                return Skycons.SLEET;
+
+            case 600:
+            case 601:
+            case 602:
+            case 615:
+            case 616:
+            case 620:
+            case 621:
+            case 622:
+                return Skycons.SNOW;
+
+            case 731:
+            case 781:
+                return Skycons.WIND;
+
+            case 701:
+            case 711:
+            case 721:
+            case 741:
+            case 751:
+            case 761:
+            case 762:
+            case 771:
+                return Skycons.FOG;
+
+            case 800:
+            default:
+                return Skycons.CLEAR_DAY;
+        }
+    }
+
+    $(document).ready(function () {
+        var icons = new Skycons({"color": "#73879C"});
+        icons.set("skycons_current", convertSkycons({{ (index .current.Weather 0).ID }}));
+
+        {{ range $day, $item := .forecast }}
+            icons.set("skycons_{{ $day.Day }}", convertSkycons({{ (index $item.Max.Weather 0).ID }}));
+        {{ end }}
+
+        icons.play();
+    });
+</script>
 {{ end }}
