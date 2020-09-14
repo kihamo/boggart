@@ -20,7 +20,7 @@ type Config struct {
 	Latitude              float64
 	Longitude             float64
 	Zip                   string     `mapstructure:"zip" yaml:"zip"`
-	TopicCurrent          mqtt.Topic `mapstructure:"topic_current" yaml:"topic_current"`
+	TopicCurrentTemp      mqtt.Topic `mapstructure:"topic_current_temp" yaml:"topic_current_temp"`
 	TopicDailyTempMin     mqtt.Topic `mapstructure:"topic_daily_temp_min" yaml:"topic_daily_temp_min"`
 	TopicDailyTempMax     mqtt.Topic `mapstructure:"topic_daily_temp_max" yaml:"topic_daily_temp_max"`
 	TopicDailyTempDay     mqtt.Topic `mapstructure:"topic_daily_temp_day" yaml:"topic_daily_temp_day"`
@@ -39,7 +39,7 @@ func (t Type) Config() interface{} {
 		},
 		Units:                 "metric",
 		UpdaterInterval:       time.Minute * 15,
-		TopicCurrent:          prefix + "current",
+		TopicCurrentTemp:      prefix + "current",
 		TopicDailyTempMin:     prefix + "daily/+/min",
 		TopicDailyTempMax:     prefix + "daily/+/max",
 		TopicDailyTempDay:     prefix + "daily/+/day",

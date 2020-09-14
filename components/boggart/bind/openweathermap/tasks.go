@@ -28,7 +28,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 	id := b.Meta().ID()
 
 	metricCurrent.With("id", id).Set(response.Current.Temp)
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicCurrent, response.Current.Temp); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicCurrentTemp.Format(id), response.Current.Temp); e != nil {
 		err = multierr.Append(err, e)
 	}
 
