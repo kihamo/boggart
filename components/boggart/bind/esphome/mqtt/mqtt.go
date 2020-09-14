@@ -18,22 +18,22 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			switch t {
 			case ComponentTypeBinarySensor:
 				component = NewComponentBinarySensor(id)
-			//case components.ComponentTypeCover.String():
-			//	component.Type = components.ComponentTypeCover
-			//case components.ComponentTypeFan.String():
-			//	component.Type = components.ComponentTypeFan
+			// case components.ComponentTypeCover.String():
+			// 	component.Type = components.ComponentTypeCover
+			// case components.ComponentTypeFan.String():
+			// 	component.Type = components.ComponentTypeFan
 			case ComponentTypeLight:
 				component = NewComponentLight(id)
 			case ComponentTypeSensor:
 				component = NewComponentSensor(id)
 			case ComponentTypeSwitch:
 				component = NewComponentSwitch(id)
-			//case components.ComponentTypeTextSensor.String():
-			//	component.Type = components.ComponentTypeTextSensor
-			//case components.ComponentTypeCamera.String():
-			//	component.Type = components.ComponentTypeCamera
-			//case components.ComponentTypeClimate.String():
-			//	component.Type = components.ComponentTypeClimate
+			// case components.ComponentTypeTextSensor.String():
+			// 	component.Type = components.ComponentTypeTextSensor
+			// case components.ComponentTypeCamera.String():
+			// 	component.Type = components.ComponentTypeCamera
+			// case components.ComponentTypeClimate.String():
+			// 	component.Type = components.ComponentTypeClimate
 			default:
 				component = NewComponentBase(id, t)
 			}

@@ -150,7 +150,7 @@ func (d *Device) SoundInstall(ctx context.Context, url, md5sum string, sid uint6
 		"md5": md5sum,
 		"url": url,
 		"sid": sid,
-		//"sver": 2,
+		// "sver": 2,
 	}, &response)
 	if err != nil {
 		return SoundInstallStatus{}, err

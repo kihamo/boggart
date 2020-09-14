@@ -36,16 +36,16 @@ func (p Packet) Marshal() []byte {
 	binary.LittleEndian.PutUint32(message[0x08:], p.sequenceNumber)
 
 	// Total Packet
-	//if p.TotalPacket == 0 {
+	// if p.TotalPacket == 0 {
 	//	p.TotalPacket = 1
-	//}
+	// }
 
 	message[0x0c] = byte(p.totalPacket)
 
 	// CurPacket
-	//if p.CurrentPacket == 0 {
+	// if p.CurrentPacket == 0 {
 	//	p.CurrentPacket = 1
-	//}
+	// }
 
 	message[0x0d] = byte(p.currentPacket)
 
