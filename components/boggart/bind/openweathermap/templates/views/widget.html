@@ -1,4 +1,5 @@
 {{ define "content" }}
+{{ if and .daily .current }}
 <div class="row">
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
@@ -9,7 +10,7 @@
             <div class="x_content">
                 <div class="row">
                     <div class="col-sm-12">
-                        <div class="temperature"><b>{{ i18n (.current_datetime.Format "Monday") . }}</b>, {{ .current_datetime.Format "15:04" }}</div>
+                        <div class="temperature"><b>{{ i18n (.current.Dt.Time.Format "Monday") . }}</b>, {{ .current.Dt.Time.Format "15:04" }}</div>
                     </div>
                 </div>
                 <div class="row">
@@ -20,27 +21,29 @@
                     </div>
                     <div class="col-sm-8">
                         <div class="weather-text">
-                            <h2>{{ .current.Name }}<br><i>{{ range $w := .current.Weather }} {{ i18n $w.Description $ }}{{ end }}</i></h2>
+                            <h2>{{ .location_name }}<br><i>{{ range $w := .current.Weather }} {{ i18n $w.Description $ }}{{ end }}</i></h2>
                         </div>
                     </div>
                 </div>
                 <div class="col-sm-12">
                     <div class="weather-text pull-right">
-                        <h3 class="degrees">{{ .current.Main.Temp }}</h3>
+                        <h3 class="degrees">{{ .current.Temp }}</h3>
                     </div>
                 </div>
                 <div class="clearfix"></div>
-                <div class="row weather-days" style="margin-left:15%">
-                {{ range $day, $item := .forecast }}
+                <div class="row weather-days">
+                {{ range $i, $day := .daily }}
+                    {{ if lt $i 6 }}
                     <div class="col-sm-2">
                         <div class="daily-weather" style="text-align:center">
-                            <h2 class="day">{{ $day.Format "02" }} {{ i18n ($day.Format "January") $ }}</h2>
-                            <h3 class="degrees">{{ $item.Min.Main.Temp }}</h3>
-                            <h3 class="degrees">{{ $item.Max.Main.Temp }}</h3>
-                            <canvas id="skycons_{{ $day.Day }}" width="32" height="32"></canvas>
-                            <h5>{{ $item.Max.Wind.Speed }} <i>m/s</i></h5>
+                            <h2 class="day">{{ $day.Dt.Time.Format "02" }} {{ i18n ($day.Dt.Time.Format "January") $ }}</h2>
+                            <h3 class="degrees">{{ $day.Temp.Min }}</h3>
+                            <h3 class="degrees">{{ $day.Temp.Max }}</h3>
+                            <canvas id="skycons_{{ $day.Dt.Time.Day }}" width="32" height="32"></canvas>
+                            <h5>{{ $day.WindSpeed }} <i>m/s</i></h5>
                         </div>
                     </div>
+                    {{ end }}
                 {{ end }}
                     <div class="clearfix"></div>
                 </div>
@@ -48,206 +51,11 @@
         </div>
     </div>
 </div>
-<div class="row">
-    <div class="col-md-12 col-sm-12 col-xs-12">
-        <div class="x_panel">
-            <div class="x_title">
-                <h2>{{ i18n "Weather" . }}</h2>
-                <div class="clearfix"></div>
-            </div>
-            <div class="x_content">
-                <table class="table table-striped dt-responsive nowrap" style="width:100%">
-                    <thead>
-                    <tr>
-                        <th>{{ i18n "Parameter" . }}</th>
-                        <th>{{ i18n "Value" . }}</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                        {{ if .current }}
-                            <tr>
-                                <th colspan="2">{{ i18n "City" . }}</th>
-                            </tr>
-                            {{ if .current.Coord }}
-                            <tr>
-                                <td>{{ i18n "Latitude" . }}</td>
-                                <td>{{ .current.Coord.Lat }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Longitude" . }}</td>
-                                <td>{{ .current.Coord.Lon }}</td>
-                            </tr>
-                            {{ end }}
-                            <tr>
-                                <td>{{ i18n "ID" . }}</td>
-                                <td>{{ .current.ID }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Name" . }}</td>
-                                <td>{{ .current.Name }}</td>
-                            </tr>
-                            {{ if .current.Sys }}
-                            <tr>
-                                <th colspan="2">{{ i18n "System" . }}</th>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "ID" . }}</td>
-                                <td>{{ .current.Sys.ID }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Message" . }}</td>
-                                <td>{{ .current.Sys.Message }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Country code" . }}</td>
-                                <td>{{ .current.Sys.Country }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Sunrise time" . }}</td>
-                                <td>{{ .current.Sys.Sunrise }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Sunset time" . }}</td>
-                                <td>{{ .current.Sys.Sunset }}</td>
-                            </tr>
-                            {{ end }}
-                            <tr>
-                                <th colspan="2">{{ i18n "Datetime" . }}</th>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Time of data calculation" . }}</td>
-                                <td>{{ .current.Dt }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Shift in seconds from UTC" . }}</td>
-                                <td>{{ .current.Timezone }}</td>
-                            </tr>
-                            <tr>
-                                <th colspan="2">{{ i18n "Other" . }}</th>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Cod" . }}</td>
-                                <td>{{ .current.Cod }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Base" . }}</td>
-                                <td>{{ .current.Base }}</td>
-                            </tr>
-                            {{ if .current.Wind }}
-                            <tr>
-                                <th colspan="2">{{ i18n "Wind" . }}</th>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Wind speed" . }}</td>
-                                <td>{{ .current.Wind.Speed }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Wind direction, degrees (meteorological)" . }}</td>
-                                <td>{{ .current.Wind.Deg }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Wind gust" . }}</td>
-                                <td>{{ .current.Wind.Gust }}</td>
-                            </tr>
-                            {{ end }}
-                            {{ if .current.Rain }}
-                            <tr>
-                                <th colspan="2">{{ i18n "Rain" . }}</th>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Rain volume for the last 1 hour, mm" . }}</td>
-                                <td>{{ .current.Rain.Nr1h }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Rain volume for the last 3 hours, mm" . }}</td>
-                                <td>{{ .current.Rain.Nr3h }}</td>
-                            </tr>
-                            {{ end }}
-                            {{ if .current.Snow }}
-                            <tr>
-                                <th colspan="2">{{ i18n "Show" . }}</th>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Snow volume for the last 1 hour, mm" . }}</td>
-                                <td>{{ .current.Snow.Nr1h }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Snow volume for the last 3 hours, mm" . }}</td>
-                                <td>{{ .current.Snow.Nr3h }}</td>
-                            </tr>
-                            {{ end }}
-                            {{ if .current.Weather }}
-                            <tr>
-                                <th colspan="2">{{ i18n "Weather" . }}</th>
-                            </tr>
-                                {{ range $w := .current.Weather }}
-                                <tr>
-                                    <td>{{ i18n "Weather condition id" . }}</td>
-                                    <td>{{ $w.ID }}</td>
-                                </tr>
-                                <tr>
-                                    <td>{{ i18n "Group of weather parameters (Rain, Snow, Extreme etc.)" . }}</td>
-                                    <td>{{ $w.Main }}</td>
-                                </tr>
-                                <tr>
-                                    <td>{{ i18n "Weather condition within the group. You can get the output in your language" . }}</td>
-                                    <td>{{ $w.Description }}</td>
-                                </tr>
-                                    {{ if ne $w.Icon "" }}
-                                    <tr>
-                                        <td>{{ i18n "Weather icon id" . }}</td>
-                                        <td><img alt="{{ $w.Icon }}" title="{{ $w.Icon }}" src="{{ raw (call $.icon $w.Icon) }}" /></td>
-                                    </tr>
-                                    {{ end }}
-                                {{ end }}
-                            {{ end }}
-                            {{ if .current.Main }}
-                            <tr>
-                                <th colspan="2">{{ i18n "Main" . }}</th>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Temperature" . }}</td>
-                                <td>{{ .current.Main.Temp }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Temperature. This temperature parameter accounts for the human perception of weather" . }}</td>
-                                <td>{{ .current.Main.FeelsLike }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Atmospheric pressure (on the sea level, if there is no sea_level or grnd_level data), hPa" . }}</td>
-                                <td>{{ .current.Main.Pressure }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Humidity, %" . }}</td>
-                                <td>{{ .current.Main.Humidity }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Minimum temperature at the moment. This is minimal currently observed temperature (within large megalopolises and urban areas)" . }}</td>
-                                <td>{{ .current.Main.TempMin }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Maximum temperature at the moment. This is maximal currently observed temperature (within large megalopolises and urban areas)" . }}</td>
-                                <td>{{ .current.Main.TempMax }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Atmospheric pressure on the sea level, hPa" . }}</td>
-                                <td>{{ .current.Main.SeaLevel }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ i18n "Atmospheric pressure on the ground level, hPa" . }}</td>
-                                <td>{{ .current.Main.GrndLevel }}</td>
-                            </tr>
-                            {{ end }}
-                        {{ end }}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
+{{ end }}
 {{ end }}
 
 {{ define "js" }}
+{{ if and .daily .current }}
 {{ staticHTML (staticURL "/boggart/assets/vendor/skycons/skycons.js" false) }}
 
 <script type="application/javascript">
@@ -329,11 +137,12 @@
         var icons = new Skycons({"color": "#73879C"});
         icons.set("skycons_current", convertSkycons({{ (index .current.Weather 0).ID }}));
 
-        {{ range $day, $item := .forecast }}
-            icons.set("skycons_{{ $day.Day }}", convertSkycons({{ (index $item.Max.Weather 0).ID }}));
+        {{ range $day := .daily }}
+            icons.set("skycons_{{ $day.Dt.Time.Day }}", convertSkycons({{ (index $day.Weather 0).ID }}));
         {{ end }}
 
         icons.play();
     });
 </script>
+{{ end }}
 {{ end }}

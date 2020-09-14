@@ -11,6 +11,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+	static "github.com/kihamo/boggart/providers/openweathermap/static/models"
 )
 
 // OneCall one call
@@ -192,7 +193,8 @@ type OneCallCurrent struct {
 	DewPoint float64 `json:"dew_point,omitempty"`
 
 	// dt
-	Dt uint64 `json:"dt,omitempty"`
+	// Format: date-time
+	Dt static.DateTime `json:"dt,omitempty"`
 
 	// feels like
 	FeelsLike float64 `json:"feels_like,omitempty"`
@@ -213,10 +215,12 @@ type OneCallCurrent struct {
 	Snow *Snow `json:"snow,omitempty"`
 
 	// sunrise
-	Sunrise uint64 `json:"sunrise,omitempty"`
+	// Format: date-time
+	Sunrise static.DateTime `json:"sunrise,omitempty"`
 
 	// sunset
-	Sunset uint64 `json:"sunset,omitempty"`
+	// Format: date-time
+	Sunset static.DateTime `json:"sunset,omitempty"`
 
 	// temp
 	Temp float64 `json:"temp,omitempty"`
@@ -241,11 +245,23 @@ type OneCallCurrent struct {
 func (m *OneCallCurrent) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateDt(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateRain(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateSnow(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateSunrise(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateSunset(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -256,6 +272,22 @@ func (m *OneCallCurrent) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *OneCallCurrent) validateDt(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Dt) { // not required
+		return nil
+	}
+
+	if err := m.Dt.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("current" + "." + "dt")
+		}
+		return err
+	}
+
 	return nil
 }
 
@@ -290,6 +322,38 @@ func (m *OneCallCurrent) validateSnow(formats strfmt.Registry) error {
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *OneCallCurrent) validateSunrise(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Sunrise) { // not required
+		return nil
+	}
+
+	if err := m.Sunrise.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("current" + "." + "sunrise")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *OneCallCurrent) validateSunset(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Sunset) { // not required
+		return nil
+	}
+
+	if err := m.Sunset.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("current" + "." + "sunset")
+		}
+		return err
 	}
 
 	return nil
@@ -350,7 +414,8 @@ type OneCallDailyItems0 struct {
 	DewPoint float64 `json:"dew_point,omitempty"`
 
 	// dt
-	Dt uint64 `json:"dt,omitempty"`
+	// Format: date-time
+	Dt static.DateTime `json:"dt,omitempty"`
 
 	// feels like
 	FeelsLike *OneCallDailyItems0FeelsLike `json:"feels_like,omitempty"`
@@ -371,10 +436,12 @@ type OneCallDailyItems0 struct {
 	Snow float64 `json:"snow,omitempty"`
 
 	// sunrise
-	Sunrise uint64 `json:"sunrise,omitempty"`
+	// Format: date-time
+	Sunrise static.DateTime `json:"sunrise,omitempty"`
 
 	// sunset
-	Sunset uint64 `json:"sunset,omitempty"`
+	// Format: date-time
+	Sunset static.DateTime `json:"sunset,omitempty"`
 
 	// temp
 	Temp *OneCallDailyItems0Temp `json:"temp,omitempty"`
@@ -402,7 +469,19 @@ type OneCallDailyItems0 struct {
 func (m *OneCallDailyItems0) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateDt(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateFeelsLike(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateSunrise(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateSunset(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -420,6 +499,22 @@ func (m *OneCallDailyItems0) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *OneCallDailyItems0) validateDt(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Dt) { // not required
+		return nil
+	}
+
+	if err := m.Dt.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("dt")
+		}
+		return err
+	}
+
+	return nil
+}
+
 func (m *OneCallDailyItems0) validateFeelsLike(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.FeelsLike) { // not required
@@ -433,6 +528,38 @@ func (m *OneCallDailyItems0) validateFeelsLike(formats strfmt.Registry) error {
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *OneCallDailyItems0) validateSunrise(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Sunrise) { // not required
+		return nil
+	}
+
+	if err := m.Sunrise.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("sunrise")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *OneCallDailyItems0) validateSunset(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Sunset) { // not required
+		return nil
+	}
+
+	if err := m.Sunset.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("sunset")
+		}
+		return err
 	}
 
 	return nil
@@ -599,7 +726,8 @@ type OneCallHourlyItems0 struct {
 	DewPoint float64 `json:"dew_point,omitempty"`
 
 	// dt
-	Dt uint64 `json:"dt,omitempty"`
+	// Format: date-time
+	Dt static.DateTime `json:"dt,omitempty"`
 
 	// feels like
 	FeelsLike float64 `json:"feels_like,omitempty"`
@@ -636,6 +764,10 @@ type OneCallHourlyItems0 struct {
 func (m *OneCallHourlyItems0) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateDt(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateRain(formats); err != nil {
 		res = append(res, err)
 	}
@@ -651,6 +783,22 @@ func (m *OneCallHourlyItems0) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *OneCallHourlyItems0) validateDt(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Dt) { // not required
+		return nil
+	}
+
+	if err := m.Dt.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("dt")
+		}
+		return err
+	}
+
 	return nil
 }
 
@@ -739,7 +887,8 @@ func (m *OneCallHourlyItems0) UnmarshalBinary(b []byte) error {
 type OneCallMinutelyItems0 struct {
 
 	// dt
-	Dt uint64 `json:"dt,omitempty"`
+	// Format: date-time
+	Dt static.DateTime `json:"dt,omitempty"`
 
 	// precipitation
 	Precipitation float64 `json:"precipitation,omitempty"`
@@ -747,6 +896,31 @@ type OneCallMinutelyItems0 struct {
 
 // Validate validates this one call minutely items0
 func (m *OneCallMinutelyItems0) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateDt(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *OneCallMinutelyItems0) validateDt(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Dt) { // not required
+		return nil
+	}
+
+	if err := m.Dt.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("dt")
+		}
+		return err
+	}
+
 	return nil
 }
 

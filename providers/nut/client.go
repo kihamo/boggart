@@ -21,7 +21,7 @@ func New(host, username, password string) *Client {
 	}
 
 	return &Client{
-		dsn:      "tcp://" + host + "?read-timeout=10s&write-timeout=10s&once=true", //&debug=1&dump=1",
+		dsn:      "tcp://" + host + "?read-timeout=10s&write-timeout=10s&once=true",
 		username: username,
 		password: password,
 	}

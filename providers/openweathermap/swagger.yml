@@ -405,6 +405,14 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 definitions:
+  DateTime:
+    type: "string"
+    format: "date-time"
+    x-go-type:
+      type: "DateTime"
+      import:
+        alias: "static"
+        package: "github.com/kihamo/boggart/providers/openweathermap/static/models"
   Error:
     type: "object"
     properties:
@@ -434,8 +442,7 @@ definitions:
       snow:
         $ref: '#/definitions/Snow'
       dt:
-        type: "integer"
-        format: "uint64"
+        $ref: "#/definitions/DateTime"
       sys:
         type: "object"
         properties:
@@ -448,11 +455,9 @@ definitions:
           country:
             type: "string"
           sunrise:
-            type: "integer"
-            format: "uint64"
+            $ref: "#/definitions/DateTime"
           sunset:
-            type: "integer"
-            format: "uint64"
+            $ref: "#/definitions/DateTime"
       timezone:
         type: "integer"
         format: "uint64"
@@ -493,11 +498,9 @@ definitions:
             type: "integer"
             format: "uint64"
           sunrise:
-            type: "integer"
-            format: "uint64"
+            $ref: "#/definitions/DateTime"
           sunset:
-            type: "integer"
-            format: "uint64"
+            $ref: "#/definitions/DateTime"
       list:
         type: "array"
         items:
@@ -518,14 +521,11 @@ definitions:
         type: "object"
         properties:
           dt:
-            type: "integer"
-            format: "uint64"
+            $ref: "#/definitions/DateTime"
           sunrise:
-            type: "integer"
-            format: "uint64"
+            $ref: "#/definitions/DateTime"
           sunset:
-            type: "integer"
-            format: "uint64"
+            $ref: "#/definitions/DateTime"
           temp:
             type: "number"
           feels_like:
@@ -565,8 +565,7 @@ definitions:
           type: "object"
           properties:
             dt:
-              type: "integer"
-              format: "uint64"
+              $ref: "#/definitions/DateTime"
             precipitation:
               type: "number"
       hourly:
@@ -575,8 +574,7 @@ definitions:
           type: "object"
           properties:
             dt:
-              type: "integer"
-              format: "uint64"
+              $ref: "#/definitions/DateTime"
             temp:
               type: "number"
             feels_like:
@@ -612,14 +610,11 @@ definitions:
           type: "object"
           properties:
             dt:
-              type: "integer"
-              format: "uint64"
+              $ref: "#/definitions/DateTime"
             sunrise:
-              type: "integer"
-              format: "uint64"
+              $ref: "#/definitions/DateTime"
             sunset:
-              type: "integer"
-              format: "uint64"
+              $ref: "#/definitions/DateTime"
             temp:
               type: "object"
               properties:
@@ -694,14 +689,11 @@ definitions:
         type: "object"
         properties:
           dt:
-            type: "integer"
-            format: "uint64"
+            $ref: "#/definitions/DateTime"
           sunrise:
-            type: "integer"
-            format: "uint64"
+            $ref: "#/definitions/DateTime"
           sunset:
-            type: "integer"
-            format: "uint64"
+            $ref: "#/definitions/DateTime"
           temp:
             type: "number"
           feels_like:
@@ -742,8 +734,7 @@ definitions:
           type: "object"
           properties:
             dt:
-              type: "integer"
-              format: "uint64"
+              $ref: "#/definitions/DateTime"
             temp:
               type: "number"
             feels_like:
@@ -888,16 +879,13 @@ definitions:
       dt_txt:
         type: "string"
       dt:
-        type: "integer"
-        format: "uint64"
+        $ref: "#/definitions/DateTime"
       country:
         type: "string"
       timezone:
         type: "integer"
         format: "uint64"
       sunrise:
-        type: "integer"
-        format: "uint64"
+        $ref: "#/definitions/DateTime"
       sunset:
-        type: "integer"
-        format: "uint64"
+        $ref: "#/definitions/DateTime"

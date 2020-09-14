@@ -11,6 +11,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+	static "github.com/kihamo/boggart/providers/openweathermap/static/models"
 )
 
 // Current current
@@ -31,7 +32,8 @@ type Current struct {
 	Coord *Coord `json:"coord,omitempty"`
 
 	// dt
-	Dt uint64 `json:"dt,omitempty"`
+	// Format: date-time
+	Dt static.DateTime `json:"dt,omitempty"`
 
 	// id
 	ID uint64 `json:"id,omitempty"`
@@ -70,6 +72,10 @@ func (m *Current) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateCoord(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateDt(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -134,6 +140,22 @@ func (m *Current) validateCoord(formats strfmt.Registry) error {
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *Current) validateDt(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Dt) { // not required
+		return nil
+	}
+
+	if err := m.Dt.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("dt")
+		}
+		return err
 	}
 
 	return nil
@@ -287,14 +309,61 @@ type CurrentSys struct {
 	Message float64 `json:"message,omitempty"`
 
 	// sunrise
-	Sunrise uint64 `json:"sunrise,omitempty"`
+	// Format: date-time
+	Sunrise static.DateTime `json:"sunrise,omitempty"`
 
 	// sunset
-	Sunset uint64 `json:"sunset,omitempty"`
+	// Format: date-time
+	Sunset static.DateTime `json:"sunset,omitempty"`
 }
 
 // Validate validates this current sys
 func (m *CurrentSys) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateSunrise(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateSunset(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *CurrentSys) validateSunrise(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Sunrise) { // not required
+		return nil
+	}
+
+	if err := m.Sunrise.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("sys" + "." + "sunrise")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *CurrentSys) validateSunset(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Sunset) { // not required
+		return nil
+	}
+
+	if err := m.Sunset.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("sys" + "." + "sunset")
+		}
+		return err
+	}
+
 	return nil
 }
 

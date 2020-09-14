@@ -13,6 +13,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
+	static "github.com/kihamo/boggart/providers/openweathermap/static/models"
 )
 
 // ForecastListItem forecast list item
@@ -27,7 +28,8 @@ type ForecastListItem struct {
 	Country string `json:"country,omitempty"`
 
 	// dt
-	Dt uint64 `json:"dt,omitempty"`
+	// Format: date-time
+	Dt static.DateTime `json:"dt,omitempty"`
 
 	// dt txt
 	DtTxt string `json:"dt_txt,omitempty"`
@@ -45,10 +47,12 @@ type ForecastListItem struct {
 	Snow *Snow `json:"snow,omitempty"`
 
 	// sunrise
-	Sunrise uint64 `json:"sunrise,omitempty"`
+	// Format: date-time
+	Sunrise static.DateTime `json:"sunrise,omitempty"`
 
 	// sunset
-	Sunset uint64 `json:"sunset,omitempty"`
+	// Format: date-time
+	Sunset static.DateTime `json:"sunset,omitempty"`
 
 	// sys
 	Sys *ForecastListItemSys `json:"sys,omitempty"`
@@ -74,6 +78,10 @@ func (m *ForecastListItem) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateDt(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateMain(formats); err != nil {
 		res = append(res, err)
 	}
@@ -83,6 +91,14 @@ func (m *ForecastListItem) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateSnow(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateSunrise(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateSunset(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -117,6 +133,22 @@ func (m *ForecastListItem) validateClouds(formats strfmt.Registry) error {
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *ForecastListItem) validateDt(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Dt) { // not required
+		return nil
+	}
+
+	if err := m.Dt.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("dt")
+		}
+		return err
 	}
 
 	return nil
@@ -171,6 +203,38 @@ func (m *ForecastListItem) validateSnow(formats strfmt.Registry) error {
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *ForecastListItem) validateSunrise(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Sunrise) { // not required
+		return nil
+	}
+
+	if err := m.Sunrise.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("sunrise")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *ForecastListItem) validateSunset(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Sunset) { // not required
+		return nil
+	}
+
+	if err := m.Sunset.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("sunset")
+		}
+		return err
 	}
 
 	return nil

@@ -11,6 +11,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+	static "github.com/kihamo/boggart/providers/openweathermap/static/models"
 )
 
 // OneCallTimeMachine one call time machine
@@ -128,7 +129,8 @@ type OneCallTimeMachineCurrent struct {
 	DewPoint float64 `json:"dew_point,omitempty"`
 
 	// dt
-	Dt uint64 `json:"dt,omitempty"`
+	// Format: date-time
+	Dt static.DateTime `json:"dt,omitempty"`
 
 	// feels like
 	FeelsLike float64 `json:"feels_like,omitempty"`
@@ -146,10 +148,12 @@ type OneCallTimeMachineCurrent struct {
 	Snow float64 `json:"snow,omitempty"`
 
 	// sunrise
-	Sunrise uint64 `json:"sunrise,omitempty"`
+	// Format: date-time
+	Sunrise static.DateTime `json:"sunrise,omitempty"`
 
 	// sunset
-	Sunset uint64 `json:"sunset,omitempty"`
+	// Format: date-time
+	Sunset static.DateTime `json:"sunset,omitempty"`
 
 	// temp
 	Temp float64 `json:"temp,omitempty"`
@@ -177,6 +181,18 @@ type OneCallTimeMachineCurrent struct {
 func (m *OneCallTimeMachineCurrent) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateDt(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateSunrise(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateSunset(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateWeather(formats); err != nil {
 		res = append(res, err)
 	}
@@ -184,6 +200,54 @@ func (m *OneCallTimeMachineCurrent) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *OneCallTimeMachineCurrent) validateDt(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Dt) { // not required
+		return nil
+	}
+
+	if err := m.Dt.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("current" + "." + "dt")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *OneCallTimeMachineCurrent) validateSunrise(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Sunrise) { // not required
+		return nil
+	}
+
+	if err := m.Sunrise.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("current" + "." + "sunrise")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *OneCallTimeMachineCurrent) validateSunset(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Sunset) { // not required
+		return nil
+	}
+
+	if err := m.Sunset.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("current" + "." + "sunset")
+		}
+		return err
+	}
+
 	return nil
 }
 
@@ -242,7 +306,8 @@ type OneCallTimeMachineHourlyItems0 struct {
 	DewPoint float64 `json:"dew_point,omitempty"`
 
 	// dt
-	Dt uint64 `json:"dt,omitempty"`
+	// Format: date-time
+	Dt static.DateTime `json:"dt,omitempty"`
 
 	// feels like
 	FeelsLike float64 `json:"feels_like,omitempty"`
@@ -282,6 +347,10 @@ type OneCallTimeMachineHourlyItems0 struct {
 func (m *OneCallTimeMachineHourlyItems0) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateDt(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateRain(formats); err != nil {
 		res = append(res, err)
 	}
@@ -297,6 +366,22 @@ func (m *OneCallTimeMachineHourlyItems0) Validate(formats strfmt.Registry) error
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *OneCallTimeMachineHourlyItems0) validateDt(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Dt) { // not required
+		return nil
+	}
+
+	if err := m.Dt.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("dt")
+		}
+		return err
+	}
+
 	return nil
 }
 

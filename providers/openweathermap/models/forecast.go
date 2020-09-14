@@ -11,6 +11,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+	static "github.com/kihamo/boggart/providers/openweathermap/static/models"
 )
 
 // Forecast forecast
@@ -134,10 +135,12 @@ type ForecastCity struct {
 	Population uint64 `json:"population,omitempty"`
 
 	// sunrise
-	Sunrise uint64 `json:"sunrise,omitempty"`
+	// Format: date-time
+	Sunrise static.DateTime `json:"sunrise,omitempty"`
 
 	// sunset
-	Sunset uint64 `json:"sunset,omitempty"`
+	// Format: date-time
+	Sunset static.DateTime `json:"sunset,omitempty"`
 
 	// timezone
 	Timezone uint64 `json:"timezone,omitempty"`
@@ -148,6 +151,14 @@ func (m *ForecastCity) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCoord(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateSunrise(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateSunset(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -170,6 +181,38 @@ func (m *ForecastCity) validateCoord(formats strfmt.Registry) error {
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *ForecastCity) validateSunrise(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Sunrise) { // not required
+		return nil
+	}
+
+	if err := m.Sunrise.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("city" + "." + "sunrise")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *ForecastCity) validateSunset(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Sunset) { // not required
+		return nil
+	}
+
+	if err := m.Sunset.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("city" + "." + "sunset")
+		}
+		return err
 	}
 
 	return nil
