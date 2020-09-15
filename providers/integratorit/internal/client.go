@@ -35,7 +35,7 @@ type Client struct {
 
 func New(baseURL, login, password string, auth Auth) *Client {
 	return &Client{
-		connection: connection.NewClient(), //.WithDebug(true),
+		connection: connection.NewClient(),
 		auth:       auth,
 		baseURL:    baseURL,
 		login:      login,

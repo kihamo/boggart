@@ -1,12 +1,9 @@
 package handlers
 
 import (
-	"bytes"
-
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/shadow/components/dashboard"
-	"gopkg.in/yaml.v2"
 )
 
 // easyjson:json
@@ -21,7 +18,6 @@ type managerHandlerDevice struct {
 	MQTTPublishes     int      `json:"mqtt_publishes"`
 	MQTTSubscribers   int      `json:"mqtt_subscribers"`
 	Tags              []string `json:"tags"`
-	Config            string   `json:"config"`
 	HasWidget         bool     `json:"has_widget"`
 	HasReadinessProbe bool     `json:"has_readiness_probe"`
 	HasLivenessProbe  bool     `json:"has_liveness_probe"`
@@ -61,25 +57,14 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 	switch r.URL().Query().Get("entity") {
 	case "devices":
 		list := make([]managerHandlerDevice, 0)
-		buf := bytes.NewBuffer(nil)
-
-		enc := yaml.NewEncoder(buf)
-		defer enc.Close()
 
 		for _, bindItem := range h.component.BindItems() {
-			buf.Reset()
-
-			if err := enc.Encode(bindItem); err != nil {
-				panic(err.Error())
-			}
-
 			item := managerHandlerDevice{
 				ID:          bindItem.ID(),
 				Type:        bindItem.Type(),
 				Description: bindItem.Description(),
 				Status:      bindItem.Status().String(),
 				Tags:        bindItem.Tags(),
-				Config:      buf.String(),
 			}
 
 			if _, ok := di.WidgetContainerBind(bindItem.Bind()); ok {

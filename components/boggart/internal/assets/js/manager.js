@@ -98,8 +98,11 @@ $(document).ready(function () {
                             '<a href="/boggart/bind/' + row.id + '/" class="btn btn-warning btn-icon btn-xs">' +
                                 '<i class="fas fa-edit" title="Edit bind"></i>' +
                             '</a>' +
+                            '<button type="button" class="btn btn-success btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Device config #' + row.id + '" data-modal-url="/boggart/config/modal/' + row.id + '">' +
+                                '<i class="fas fa-cog" title="Show bind config"></i>' +
+                            '</button>' +
                             '<button type="button" class="btn btn-primary btn-icon btn-xs" onclick="reloadConfig(\'' + row.id + '\');">' +
-                            '   <i class="fas fa-upload" title="Reload from config file"></i>' +
+                                '<i class="fas fa-upload" title="Reload from config file"></i>' +
                             '</button>' +
                             '<button type="button" class="btn btn-danger btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Confirm unregister device #' + row.id + '" data-modal-callback="bindUnregister(\'' + row.id + '\');">' +
                                 '<i class="fas fa-trash" title="Unregister bind"></i>' +
@@ -118,12 +121,6 @@ $(document).ready(function () {
                 },
                 {
                     data: 'description'
-                },
-                {
-                    data: 'config',
-                    render: function (config) {
-                        return '<pre><code class="yaml">' + config + '</code></pre>';
-                    }
                 }
             ],
             'drawCallback': function () {

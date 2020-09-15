@@ -1,25 +1,5 @@
 {{ define "content" }}
     {{ if not .modal }}
-    <script type="application/javascript">
-        $(document).ready(function () {
-            hljs.initHighlightingOnLoad();
-
-            if(ClipboardJS.isSupported()) {
-                var cb = new ClipboardJS("#copy-button");
-                cb.on('success', function(e) {
-                    $('#copy-button').tooltip({
-                        title: '{{ i18n "Config copied" . }}'
-                    }).tooltip('show');
-                    e.clearSelection();
-                });
-                cb.on('error', function(e) {
-                    e.clearSelection();
-                });
-            } else {
-                $('#copy-button').hide();
-            }
-        });
-    </script>
     <div class="row" id="devices">
         <div class="x_panel">
             <div class="x_title">
@@ -42,7 +22,7 @@
     </style>
     {{ end }}
 
-            <pre style="padding: 0;"><code class="yaml" id="yaml">{{ .yaml|raw }}</code></pre>
+            <pre style="padding: 0;" class="snippet"><code class="yaml" id="yaml">{{ .yaml|raw }}</code></pre>
     {{ if not .modal }}
             </div>
         </div>
@@ -52,9 +32,49 @@
 
 {{ define "head" }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/highlightjs/css/tomorrow.min.css" false) }}
+    {{ staticHTML (staticURL "/boggart/assets/vendor/clipboard.js/css/clipboard.min.css" false) }}
 {{ end }}
 
 {{ define "js" }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/highlightjs/js/highlight.pack.min.js" false) }}
-    {{ staticHTML (staticURL "/boggart/assets/vendor/clipboard.js/clipboard.min.js" false) }}
+    {{ staticHTML (staticURL "/boggart/assets/vendor/clipboard.js/js/clipboard.min.js" false) }}
+
+    <script type="application/javascript">
+        var cbSuccess = function(e) {
+            e.clearSelection();
+            $(e.trigger).tooltip({
+                title: '{{ i18n "Config copied" . }}'
+            }).tooltip('show');
+        };
+
+        var cbError = function(e) {
+            e.clearSelection();
+        };
+
+        $(document).ready(function () {
+            hljs.initHighlightingOnLoad();
+
+            if(ClipboardJS.isSupported()) {
+                $('.snippet').each(function(){
+                    $(this).prepend('<button class="btn" data-placement="bottom" data-clipboard-action="copy"><img class="clippy" width="13" src="/boggart/assets/vendor/clipboard.js/images/clippy.svg" alt="{{ i18n "Copy to clipboard" . }}"></button>');
+                });
+
+                var cb = new ClipboardJS('.snippet [data-clipboard-action]', {
+                    target: function(trigger) {
+                        return trigger.nextElementSibling;
+                    }
+                });
+                cb.on('success', cbSuccess);
+                cb.on('error', cbError);
+
+                {{ if not .modal }}
+                    var cbExt = new ClipboardJS('#copy-button');
+                    cbExt.on('success', cbSuccess);
+                    cbExt.on('error', cbError);
+            } else {
+                $('#copy-button').hide();
+                {{ end }}
+            }
+        });
+    </script>
 {{ end }}

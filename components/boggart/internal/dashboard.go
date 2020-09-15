@@ -33,6 +33,7 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 		<-c.application.ReadyComponent(c.Name())
 
 		bindHandler := handlers.NewBindHandler(c, c.mqtt)
+		configHandler := handlers.NewConfigHandler(c)
 
 		c.routes = []dashboard.Route{
 			dashboard.RouteFromAssetFS(c),
@@ -48,7 +49,10 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 			dashboard.NewRoute("/"+c.Name()+"/bind/:id/:action/*path", bindHandler).
 				WithMethods([]string{http.MethodGet, http.MethodPost}).
 				WithAuth(true),
-			dashboard.NewRoute("/"+c.Name()+"/config/:action", handlers.NewConfigHandler(c)).
+			dashboard.NewRoute("/"+c.Name()+"/config/:action", configHandler).
+				WithMethods([]string{http.MethodGet, http.MethodPost}).
+				WithAuth(true),
+			dashboard.NewRoute("/"+c.Name()+"/config/:action/:id", configHandler).
 				WithMethods([]string{http.MethodGet, http.MethodPost}).
 				WithAuth(true),
 			dashboard.NewRoute("/"+c.Name()+"/widget/:id", handlers.NewWidgetHandler(c)).

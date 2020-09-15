@@ -9,7 +9,7 @@ require (
 	github.com/alvaroloes/enumer v1.1.2 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535
 	github.com/barnybug/go-cast v0.0.0-20190910160619-d2aa97f56d4e
-	github.com/bieber/barcode v0.0.0-20190908000948-a94135955bb1
+	github.com/bieber/barcode v0.0.0-20190908000948-a94135955bb1 // indirect
 	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/eclipse/paho.mqtt.golang v1.2.1-0.20200609161119-ca94c5368c77
 	github.com/elazarl/go-bindata-assetfs v1.0.1
@@ -33,9 +33,9 @@ require (
 	github.com/influxdata/influxdb v1.8.0
 	github.com/influxdata/influxdb-client-go v1.4.0
 	github.com/kihamo/go-workers v2.1.8-0.20200620141938-31fefb5789a8+incompatible
-	github.com/kihamo/shadow v0.0.0-20200909215707-feda2bd3a2c9
+	github.com/kihamo/shadow v0.0.0-20200915221010-571d7b219ef1
 	github.com/kihamo/snitch v0.0.0-20200412182537-3478a87783e1
-	github.com/llgcode/draw2d v0.0.0-20200110163050-b96d8208fcfc
+	github.com/llgcode/draw2d v0.0.0-20200110163050-b96d8208fcfc // indirect
 	github.com/mailru/easyjson v0.7.6
 	github.com/mitchellh/mapstructure v1.3.2
 	github.com/mmcloughlin/geohash v0.9.0

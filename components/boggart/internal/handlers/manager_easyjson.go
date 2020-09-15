@@ -78,8 +78,6 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 				}
 				in.Delim(']')
 			}
-		case "config":
-			out.Config = string(in.String())
 		case "has_widget":
 			out.HasWidget = bool(in.Bool())
 		case "has_readiness_probe":
@@ -162,11 +160,6 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			}
 			out.RawByte(']')
 		}
-	}
-	{
-		const prefix string = ",\"config\":"
-		out.RawString(prefix)
-		out.String(string(in.Config))
 	}
 	{
 		const prefix string = ",\"has_widget\":"

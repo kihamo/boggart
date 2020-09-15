@@ -36,6 +36,7 @@ func NewConfigHandler(component boggart.Component) *ConfigHandler {
 func (h *ConfigHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	q := r.URL().Query()
 	action := q.Get(":action")
+	id := q.Get(":id")
 
 	if action == "reload" && r.IsPost() {
 		type response struct {
@@ -44,7 +45,7 @@ func (h *ConfigHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		// reload by ID
-		if id := q.Get("id"); id != "" {
+		if id != "" {
 			if err := h.component.ReloadConfigByID(id); err != nil {
 				_ = w.SendJSON(response{
 					Result:  "failed",
@@ -78,6 +79,7 @@ func (h *ConfigHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 	if action != "download" && action != "modal" && action != "view" {
 		h.NotFound(w, r)
+		return
 	}
 
 	buf := bytes.NewBuffer(nil)
@@ -85,8 +87,27 @@ func (h *ConfigHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	enc := yaml.NewEncoder(buf)
 	defer enc.Close()
 
-	if err := enc.Encode(BindItemsList(h.component.BindItems())); err != nil {
-		panic(err.Error())
+	var value interface{}
+
+	if id != "" {
+		for _, item := range h.component.BindItems() {
+			if item.ID() == id {
+				value = item
+				break
+			}
+		}
+
+		if value == nil {
+			h.NotFound(w, r)
+			return
+		}
+	} else {
+		value = BindItemsList(h.component.BindItems())
+	}
+
+	if err := enc.Encode(value); err != nil {
+		h.InternalError(w, r, err)
+		return
 	}
 
 	switch action {
