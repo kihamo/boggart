@@ -108,7 +108,16 @@
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" false) }}
 
     <style type="text/css">
+        .btn .badge {
+            margin-left: 4px;
+            top: -1px;
+        }
+
         @media (max-width: 768px) {
+            .btn .badge {
+                margin-left: 5px;
+            }
+
             .dtr-title {
                 display: inline !important;
             }
