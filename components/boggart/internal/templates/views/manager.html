@@ -106,6 +106,25 @@
 {{ define "head" }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" false) }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" false) }}
+
+    <style type="text/css">
+        @media (max-width: 768px) {
+            .dtr-title {
+                display: inline !important;
+            }
+            .dtr-title:after {
+                content:"\a";
+                white-space: pre;
+            }
+
+            .btn-group .btn {
+                padding: 5px 10px;
+                font-size: 12px;
+                line-height: 1.5;
+                border-radius: 3px;
+            }
+        }
+    </style>
 {{ end }}
 
 {{ define "js" }}

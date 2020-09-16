@@ -95,9 +95,6 @@ func (c *Client) Do(request *http.Request) (*http.Response, error) {
 		fmt.Printf("\n\n%q", dump)
 	}
 
-	//request, closer := tracing.TraceRequest(opentracing.GlobalTracer(), request)
-	//defer closer.Finish()
-
 	response, err := conn.Do(request)
 	if err != nil {
 		return nil, err
