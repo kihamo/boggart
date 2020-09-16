@@ -46,7 +46,7 @@ func (h *BindHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	id := q.Get(":id")
 	if id != "" {
 		bindItem = h.componentBoggart.Bind(id)
-		if bindItem == nil {
+		if bindItem == nil || bindItem.Type() == boggart.ComponentName {
 			h.NotFound(w, r)
 			return
 		}

@@ -46,7 +46,18 @@ func (h *ConfigHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 		// reload by ID
 		if id != "" {
-			if err := h.component.ReloadConfigByID(id); err != nil {
+			bind := h.component.Bind(id)
+			if bind == nil {
+				_ = w.SendJSON(response{
+					Result:  "failed",
+					Message: "Bind " + id + " not found",
+				})
+			} else if bind.Type() == boggart.ComponentName {
+				_ = w.SendJSON(response{
+					Result:  "failed",
+					Message: "Can't reload config from special bind " + boggart.ComponentName,
+				})
+			} else if err := h.component.ReloadConfigByID(id); err != nil {
 				_ = w.SendJSON(response{
 					Result:  "failed",
 					Message: err.Error(),
@@ -90,12 +101,7 @@ func (h *ConfigHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	var value interface{}
 
 	if id != "" {
-		for _, item := range h.component.BindItems() {
-			if item.ID() == id {
-				value = item
-				break
-			}
-		}
+		value = h.component.Bind(id)
 
 		if value == nil {
 			h.NotFound(w, r)

@@ -94,20 +94,25 @@ $(document).ready(function () {
                                 '</a>';
                         }
 
-                        return content +
-                            '<a href="/boggart/bind/' + row.id + '/" class="btn btn-warning btn-icon btn-xs">' +
-                                '<i class="fas fa-edit" title="Edit bind"></i>' +
-                            '</a>' +
+                        content +=
                             '<button type="button" class="btn btn-success btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Device config #' + row.id + '" data-modal-url="/boggart/config/modal/' + row.id + '">' +
                                 '<i class="fas fa-cog" title="Show bind config"></i>' +
-                            '</button>' +
-                            '<button type="button" class="btn btn-primary btn-icon btn-xs" onclick="reloadConfig(\'' + row.id + '\');">' +
-                                '<i class="fas fa-upload" title="Reload from config file"></i>' +
-                            '</button>' +
-                            '<button type="button" class="btn btn-danger btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Confirm unregister device #' + row.id + '" data-modal-callback="bindUnregister(\'' + row.id + '\');">' +
-                                '<i class="fas fa-trash" title="Unregister bind"></i>' +
-                            '</button>' +
-                        '</div>'
+                            '</button>';
+
+                        if (row.type !== "boggart") {
+                            content +=
+                                '<a href="/boggart/bind/' + row.id + '/" class="btn btn-warning btn-icon btn-xs">' +
+                                    '<i class="fas fa-edit" title="Edit bind"></i>' +
+                                '</a>' +
+                                '<button type="button" class="btn btn-primary btn-icon btn-xs" onclick="reloadConfig(\'' + row.id + '\');">' +
+                                    '<i class="fas fa-upload" title="Reload from config file"></i>' +
+                                '</button>' +
+                                '<button type="button" class="btn btn-danger btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Confirm unregister device #' + row.id + '" data-modal-callback="bindUnregister(\'' + row.id + '\');">' +
+                                    '<i class="fas fa-trash" title="Unregister bind"></i>' +
+                                '</button>';
+                        }
+
+                        return content + '</div>'
                     }
                 },
                 {
@@ -174,7 +179,7 @@ $(document).ready(function () {
         var url = '/boggart/config/reload';
 
         if (typeof id !== 'undefined') {
-            url += '?id=' + id
+            url += '/' + id
         }
 
         $.ajax({
