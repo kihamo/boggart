@@ -6,6 +6,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/providers/openweathermap"
 )
 
 type Config struct {
@@ -19,7 +20,8 @@ type Config struct {
 	CityName              string `mapstructure:"city_name" yaml:"city_name"`
 	Latitude              float64
 	Longitude             float64
-	Zip                   string     `mapstructure:"zip" yaml:"zip"`
+	Zip                   string `mapstructure:"zip" yaml:"zip"`
+	Price                 int
 	TopicCurrentTemp      mqtt.Topic `mapstructure:"topic_current_temp" yaml:"topic_current_temp"`
 	TopicDailyTempMin     mqtt.Topic `mapstructure:"topic_daily_temp_min" yaml:"topic_daily_temp_min"`
 	TopicDailyTempMax     mqtt.Topic `mapstructure:"topic_daily_temp_max" yaml:"topic_daily_temp_max"`
@@ -38,6 +40,7 @@ func (t Type) Config() interface{} {
 			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
 		},
 		Units:                 "metric",
+		Price:                 openweathermap.PriceFree,
 		UpdaterInterval:       time.Minute * 15,
 		TopicCurrentTemp:      prefix + "current",
 		TopicDailyTempMin:     prefix + "daily/+/min",

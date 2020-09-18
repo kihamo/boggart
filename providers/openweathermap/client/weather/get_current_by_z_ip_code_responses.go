@@ -29,6 +29,12 @@ func (o *GetCurrentByZIPCodeReader) ReadResponse(response runtime.ClientResponse
 			return nil, err
 		}
 		return result, nil
+	case 429:
+		result := NewGetCurrentByZIPCodeTooManyRequests()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
 	default:
 		result := NewGetCurrentByZIPCodeDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -65,6 +71,39 @@ func (o *GetCurrentByZIPCodeOK) GetPayload() *models.Current {
 func (o *GetCurrentByZIPCodeOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Current)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetCurrentByZIPCodeTooManyRequests creates a GetCurrentByZIPCodeTooManyRequests with default headers values
+func NewGetCurrentByZIPCodeTooManyRequests() *GetCurrentByZIPCodeTooManyRequests {
+	return &GetCurrentByZIPCodeTooManyRequests{}
+}
+
+/*GetCurrentByZIPCodeTooManyRequests handles this case with default header values.
+
+Account is blocked
+*/
+type GetCurrentByZIPCodeTooManyRequests struct {
+	Payload *models.Error
+}
+
+func (o *GetCurrentByZIPCodeTooManyRequests) Error() string {
+	return fmt.Sprintf("[GET /data/2.5/weather?zip={zip}][%d] getCurrentByZIpCodeTooManyRequests  %+v", 429, o.Payload)
+}
+
+func (o *GetCurrentByZIPCodeTooManyRequests) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *GetCurrentByZIPCodeTooManyRequests) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

@@ -29,6 +29,12 @@ func (o *GetOneCallTimeMachineReader) ReadResponse(response runtime.ClientRespon
 			return nil, err
 		}
 		return result, nil
+	case 429:
+		result := NewGetOneCallTimeMachineTooManyRequests()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
 	default:
 		result := NewGetOneCallTimeMachineDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -65,6 +71,39 @@ func (o *GetOneCallTimeMachineOK) GetPayload() *models.OneCallTimeMachine {
 func (o *GetOneCallTimeMachineOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.OneCallTimeMachine)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetOneCallTimeMachineTooManyRequests creates a GetOneCallTimeMachineTooManyRequests with default headers values
+func NewGetOneCallTimeMachineTooManyRequests() *GetOneCallTimeMachineTooManyRequests {
+	return &GetOneCallTimeMachineTooManyRequests{}
+}
+
+/*GetOneCallTimeMachineTooManyRequests handles this case with default header values.
+
+Account is blocked
+*/
+type GetOneCallTimeMachineTooManyRequests struct {
+	Payload *models.Error
+}
+
+func (o *GetOneCallTimeMachineTooManyRequests) Error() string {
+	return fmt.Sprintf("[GET /data/2.5/onecall/timemachine?lat={lat}&lon={lon}][%d] getOneCallTimeMachineTooManyRequests  %+v", 429, o.Payload)
+}
+
+func (o *GetOneCallTimeMachineTooManyRequests) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *GetOneCallTimeMachineTooManyRequests) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

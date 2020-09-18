@@ -21,7 +21,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 			bind.Logger().Debug(message)
 		})
 
-	bind.client = openweathermap.New(bind.config.APIKey, bind.config.Debug, l)
+	bind.client = openweathermap.New(bind.config.APIKey, bind.config.Price, bind.config.Debug, l)
 
 	return bind, nil
 }

@@ -114,16 +114,16 @@ func AfIncomingMessageParse(frame *Frame) (*AfIncomingMessage, error) {
 	msg.Frame.Header.TransactionSequenceNumber = payload.ReadUint8()
 	msg.Frame.Header.CommandIdentifier = payload.ReadUint8()
 
-	//fmt.Println("Header:")
-	//fmt.Println("  frameControlValue", flowControlValue)
-	//fmt.Println("  frameType", msg.Frame.Header.FrameType)
-	//fmt.Println("  manufacturerSpecific", msg.Frame.Header.ManufacturerSpecific)
-	//fmt.Println("  manufacturerCode", msg.Frame.Header.ManufacturerCode)
-	//fmt.Println("  direction", msg.Frame.Header.Direction)
-	//fmt.Println("  disableDefaultResponse", msg.Frame.Header.DisableDefaultResponse)
-	//fmt.Println("  transactionSequenceNumber", msg.Frame.Header.TransactionSequenceNumber)
-	//fmt.Println("  commandIdentifier", msg.Frame.Header.CommandIdentifier)
-	//fmt.Println("-----")
+	// fmt.Println("Header:")
+	// fmt.Println("  frameControlValue", flowControlValue)
+	// fmt.Println("  frameType", msg.Frame.Header.FrameType)
+	// fmt.Println("  manufacturerSpecific", msg.Frame.Header.ManufacturerSpecific)
+	// fmt.Println("  manufacturerCode", msg.Frame.Header.ManufacturerCode)
+	// fmt.Println("  direction", msg.Frame.Header.Direction)
+	// fmt.Println("  disableDefaultResponse", msg.Frame.Header.DisableDefaultResponse)
+	// fmt.Println("  transactionSequenceNumber", msg.Frame.Header.TransactionSequenceNumber)
+	// fmt.Println("  commandIdentifier", msg.Frame.Header.CommandIdentifier)
+	// fmt.Println("-----")
 
 	// parse payload
 	switch msg.Frame.Header.FrameType {

@@ -59,9 +59,6 @@ func (c *Component) Dependencies() []shadow.Dependency {
 		{
 			Name: logging.ComponentName,
 		},
-		//{
-		//	Name: tracing.ComponentName,
-		//},
 	}
 }
 
@@ -282,18 +279,6 @@ func (c *Component) clientSubscribe(topic mqtt.Topic, qos byte, subscription *mq
 	// wrap tracing
 	callback := func(client m.Client, message m.Message) {
 		ctx := context.Background()
-		//span, ctx := tracing.StartSpanFromContext(context.Background(), c.Name(), "subscribe_callback")
-
-		//span = span.SetTag("topic", message.Topic())
-		//defer span.Finish()
-		//
-		//span.LogFields(
-		//	log.Int("qos", int(message.Qos())),
-		//	log.String("payload", string(message.Payload())),
-		//	log.Bool("retained", message.Retained()),
-		//	log.String("topic.subscribe", topic.String()),
-		//)
-
 		msg := newMessage(message)
 
 		// в отдельной рутине, так как если зависнет хендлер клиент MQTT не сделает ack на сообщение

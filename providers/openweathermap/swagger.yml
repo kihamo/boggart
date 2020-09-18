@@ -48,6 +48,10 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/Current"
+        429:
+          description: "Account is blocked"
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: "Unexpected error"
           schema:
@@ -81,6 +85,10 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/Current"
+        429:
+          description: "Account is blocked"
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: "Unexpected error"
           schema:
@@ -118,6 +126,10 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/Current"
+        429:
+          description: "Account is blocked"
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: "Unexpected error"
           schema:
@@ -155,6 +167,10 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/Current"
+        429:
+          description: "Account is blocked"
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: "Unexpected error"
           schema:
@@ -193,6 +209,10 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/Forecast"
+        429:
+          description: "Account is blocked"
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: "Unexpected error"
           schema:
@@ -232,6 +252,10 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/Forecast"
+        429:
+          description: "Account is blocked"
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: "Unexpected error"
           schema:
@@ -275,6 +299,10 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/Forecast"
+        429:
+          description: "Account is blocked"
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: "Unexpected error"
           schema:
@@ -313,6 +341,10 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/Forecast"
+        429:
+          description: "Account is blocked"
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: "Unexpected error"
           schema:
@@ -357,6 +389,10 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/OneCall"
+        429:
+          description: "Account is blocked"
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: "Unexpected error"
           schema:
@@ -400,6 +436,10 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/OneCallTimeMachine"
+        429:
+          description: "Account is blocked"
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: "Unexpected error"
           schema:

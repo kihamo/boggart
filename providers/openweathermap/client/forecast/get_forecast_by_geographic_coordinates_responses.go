@@ -29,6 +29,12 @@ func (o *GetForecastByGeographicCoordinatesReader) ReadResponse(response runtime
 			return nil, err
 		}
 		return result, nil
+	case 429:
+		result := NewGetForecastByGeographicCoordinatesTooManyRequests()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
 	default:
 		result := NewGetForecastByGeographicCoordinatesDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -65,6 +71,39 @@ func (o *GetForecastByGeographicCoordinatesOK) GetPayload() *models.Forecast {
 func (o *GetForecastByGeographicCoordinatesOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Forecast)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetForecastByGeographicCoordinatesTooManyRequests creates a GetForecastByGeographicCoordinatesTooManyRequests with default headers values
+func NewGetForecastByGeographicCoordinatesTooManyRequests() *GetForecastByGeographicCoordinatesTooManyRequests {
+	return &GetForecastByGeographicCoordinatesTooManyRequests{}
+}
+
+/*GetForecastByGeographicCoordinatesTooManyRequests handles this case with default header values.
+
+Account is blocked
+*/
+type GetForecastByGeographicCoordinatesTooManyRequests struct {
+	Payload *models.Error
+}
+
+func (o *GetForecastByGeographicCoordinatesTooManyRequests) Error() string {
+	return fmt.Sprintf("[GET /data/2.5/forecast?lat={lat}&lon={lon}][%d] getForecastByGeographicCoordinatesTooManyRequests  %+v", 429, o.Payload)
+}
+
+func (o *GetForecastByGeographicCoordinatesTooManyRequests) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *GetForecastByGeographicCoordinatesTooManyRequests) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

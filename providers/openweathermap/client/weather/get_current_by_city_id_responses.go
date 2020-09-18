@@ -29,6 +29,12 @@ func (o *GetCurrentByCityIDReader) ReadResponse(response runtime.ClientResponse,
 			return nil, err
 		}
 		return result, nil
+	case 429:
+		result := NewGetCurrentByCityIDTooManyRequests()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
 	default:
 		result := NewGetCurrentByCityIDDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -65,6 +71,39 @@ func (o *GetCurrentByCityIDOK) GetPayload() *models.Current {
 func (o *GetCurrentByCityIDOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Current)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetCurrentByCityIDTooManyRequests creates a GetCurrentByCityIDTooManyRequests with default headers values
+func NewGetCurrentByCityIDTooManyRequests() *GetCurrentByCityIDTooManyRequests {
+	return &GetCurrentByCityIDTooManyRequests{}
+}
+
+/*GetCurrentByCityIDTooManyRequests handles this case with default header values.
+
+Account is blocked
+*/
+type GetCurrentByCityIDTooManyRequests struct {
+	Payload *models.Error
+}
+
+func (o *GetCurrentByCityIDTooManyRequests) Error() string {
+	return fmt.Sprintf("[GET /data/2.5/weather?id={id}][%d] getCurrentByCityIdTooManyRequests  %+v", 429, o.Payload)
+}
+
+func (o *GetCurrentByCityIDTooManyRequests) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *GetCurrentByCityIDTooManyRequests) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

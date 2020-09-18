@@ -29,6 +29,12 @@ func (o *GetOneCallReader) ReadResponse(response runtime.ClientResponse, consume
 			return nil, err
 		}
 		return result, nil
+	case 429:
+		result := NewGetOneCallTooManyRequests()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
 	default:
 		result := NewGetOneCallDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -65,6 +71,39 @@ func (o *GetOneCallOK) GetPayload() *models.OneCall {
 func (o *GetOneCallOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.OneCall)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetOneCallTooManyRequests creates a GetOneCallTooManyRequests with default headers values
+func NewGetOneCallTooManyRequests() *GetOneCallTooManyRequests {
+	return &GetOneCallTooManyRequests{}
+}
+
+/*GetOneCallTooManyRequests handles this case with default header values.
+
+Account is blocked
+*/
+type GetOneCallTooManyRequests struct {
+	Payload *models.Error
+}
+
+func (o *GetOneCallTooManyRequests) Error() string {
+	return fmt.Sprintf("[GET /data/2.5/onecall?lat={lat}&lon={lon}][%d] getOneCallTooManyRequests  %+v", 429, o.Payload)
+}
+
+func (o *GetOneCallTooManyRequests) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *GetOneCallTooManyRequests) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
