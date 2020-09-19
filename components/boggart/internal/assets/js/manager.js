@@ -64,16 +64,16 @@ $(document).ready(function () {
                                 '</a>';
                         }
 
-                        if (row.has_readiness_probe) {
-                            content += '<a href="/boggart/bind/' + row.id + '/readiness/" target="_blank" class="btn btn-success btn-icon btn-xs">' +
-                                '<i class="fas fa-volume-down" title="Readiness probe"></i>' +
-                                '</a>';
-                        }
-
-                        if (row.has_liveness_probe) {
-                            content += '<a href="/boggart/bind/' + row.id + '/liveness/" target="_blank" class="btn btn-success btn-icon btn-xs">' +
-                                '<i class="fas fa-volume-up" title="Liveness probe"></i>' +
-                                '</a>';
+                        if (row.has_readiness_probe || row.has_liveness_probe) {
+                            content += '<div class="btn-group">' +
+                                '<button type="button" class="btn btn-success btn-icon btn-xs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+                                '<i class="fas fa-volume-up" title="Probes"></i> <span class="caret"></span>' +
+                                '</button>' +
+                                '<ul class="dropdown-menu">' +
+                                '<li><a href="/boggart/bind/' + row.id + '/liveness/" target="_blank">Liveness</a></li>' +
+                                '<li><a href="/boggart/bind/' + row.id + '/readiness/" target="_blank">Readiness</a></li>' +
+                                '</ul>' +
+                                '</div>';
                         }
 
                         if (row.logs_count > 0) {
@@ -94,19 +94,23 @@ $(document).ready(function () {
                                 '</a>';
                         }
 
-                        content +=
-                            '<button type="button" class="btn btn-success btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Device config #' + row.id + '" data-modal-url="/boggart/config/modal/' + row.id + '">' +
-                                '<i class="fas fa-cog" title="Show bind config"></i>' +
-                            '</button>';
+                        content += '<div class="btn-group">' +
+                            '<button type="button" class="btn btn-success btn-icon btn-xs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+                            '<i class="fas fa-cog" title="Config"></i> <span class="caret"></span>' +
+                            '</button>' +
+                            '<ul class="dropdown-menu">' +
+                            '<li><a href="javascript:void(0)" data-toggle="modal" data-target="#modal" data-modal-title="Device config #' + row.id + '" data-modal-url="/boggart/config/modal/' + row.id + '">Show config</a></li>';
+
+                        if (row.type !== "boggart") {
+                            content += '<li><a href="/boggart/bind/' + row.id + '/" target="_blank">Edit bind</a></li>' +
+                                '<li><a href="javascript:void(0)" onclick="reloadConfig(\'' + row.id + '\');">Reload from config file</a></li>';
+                        }
+
+                        content += '</ul>' +
+                            '</div>';
 
                         if (row.type !== "boggart") {
                             content +=
-                                '<a href="/boggart/bind/' + row.id + '/" class="btn btn-warning btn-icon btn-xs">' +
-                                    '<i class="fas fa-edit" title="Edit bind"></i>' +
-                                '</a>' +
-                                '<button type="button" class="btn btn-primary btn-icon btn-xs" onclick="reloadConfig(\'' + row.id + '\');">' +
-                                    '<i class="fas fa-upload" title="Reload from config file"></i>' +
-                                '</button>' +
                                 '<button type="button" class="btn btn-danger btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Confirm unregister device #' + row.id + '" data-modal-callback="bindUnregister(\'' + row.id + '\');">' +
                                     '<i class="fas fa-trash" title="Unregister bind"></i>' +
                                 '</button>';
