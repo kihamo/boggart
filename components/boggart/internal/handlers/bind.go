@@ -315,6 +315,15 @@ func (h *BindHandler) actionLogs(w http.ResponseWriter, r *dashboard.Request, b 
 		return
 	}
 
+	if r.IsPost() && r.URL().Query().Get("clean") == "1" {
+		bindSupport.Clean()
+
+		r.Session().FlashBag().Success("Logs cleaned")
+
+		h.Redirect(r.URL().Path, http.StatusFound, w, r)
+		return
+	}
+
 	type logView struct {
 		Level   string
 		Time    time.Time

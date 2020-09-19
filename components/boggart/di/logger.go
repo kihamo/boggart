@@ -25,6 +25,7 @@ type LoggerContainerSupport interface {
 	SetLogger(*LoggerContainer)
 	Logger() *LoggerContainer
 	LastRecords() []observer.LoggedEntry
+	Clean()
 }
 
 func LoggerContainerBind(bind boggart.Bind) (*LoggerContainer, bool) {
@@ -56,21 +57,17 @@ func (b *LoggerBind) Logger() *LoggerContainer {
 
 func (b *LoggerBind) LastRecords() []observer.LoggedEntry {
 	c := b.Logger()
-	if c == nil {
-		return nil
+	if c != nil {
+		return c.getObserver().Records()
 	}
 
-	o := c.getObserver()
-	o.mutex.RLock()
-	records := make([]observer.LoggedEntry, len(o.logs))
+	return nil
+}
 
-	for i := range o.logs {
-		records[i] = o.logs[i]
+func (b *LoggerBind) Clean() {
+	if c := b.Logger(); c != nil {
+		c.getObserver().Clean()
 	}
-
-	o.mutex.RUnlock()
-
-	return records
 }
 
 type loggerObserver struct {
@@ -142,6 +139,22 @@ func (o *loggerObserver) Write(entry zapcore.Entry, fields []zapcore.Field) erro
 
 func (o *loggerObserver) Sync() error {
 	return nil
+}
+
+func (o *loggerObserver) Records() []observer.LoggedEntry {
+	o.mutex.RLock()
+	defer o.mutex.RUnlock()
+
+	tmp := make([]observer.LoggedEntry, len(o.logs))
+	copy(tmp, o.logs)
+
+	return tmp
+}
+
+func (o *loggerObserver) Clean() {
+	o.mutex.Lock()
+	o.logs = o.logs[:0]
+	o.mutex.Unlock()
 }
 
 type LoggerContainer struct {
