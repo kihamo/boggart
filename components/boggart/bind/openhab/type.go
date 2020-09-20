@@ -44,5 +44,11 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		director(request)
 	}
 
+	if config.ProxyEnabled {
+		bind.proxyServer = &http.Server{
+			Addr: config.ProxyAddress,
+		}
+	}
+
 	return bind, nil
 }
