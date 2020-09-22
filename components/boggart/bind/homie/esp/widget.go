@@ -152,7 +152,6 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		"error":              err,
 		"name":               name,
 		"protocol_major":     protocol,
-		"online":             b.Meta().IsStatusOnline(),
 		"last_update":        lastUpdate,
 		"devices_attributes": b.DeviceAttributes(),
 		"nodes":              b.nodesList(),

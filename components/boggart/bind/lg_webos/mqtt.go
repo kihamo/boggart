@@ -93,7 +93,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return wol.MagicWake(b.Meta().SerialNumber(), "255.255.255.255")
 			}
 
-			if !b.Meta().IsStatusOnline() {
+			if !b.Meta().Status().IsStatusOnline() {
 				return errors.New("bind isn't online")
 			}
 

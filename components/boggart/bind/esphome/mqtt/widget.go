@@ -159,9 +159,13 @@ func (b *Bind) handleComponentLight(w http.ResponseWriter, r *dashboard.Request,
 }
 
 func (b *Bind) handleCommand(w *dashboard.Response, r *dashboard.Request) {
-	q := r.URL().Query()
 	widget := b.Widget()
+	if !b.Meta().Status().IsStatusOnline() {
+		widget.NotFound(w, r)
+		return
+	}
 
+	q := r.URL().Query()
 	componentID := q.Get("id")
 	command := q.Get("cmd")
 

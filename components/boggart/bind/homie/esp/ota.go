@@ -70,7 +70,7 @@ func (b *Bind) OTA(ctx context.Context, file io.Reader, timeout time.Duration) e
 			brand = string(matches[1])
 		}
 	*/
-	if !b.Meta().IsStatusOnline() && timeout == 0 {
+	if !b.Meta().Status().IsStatusOnline() && timeout == 0 {
 		return errors.New("device isn't online")
 	}
 
@@ -107,7 +107,7 @@ func (b *Bind) otaDo(firmware *bytes.Buffer, timeout time.Duration) {
 	// running flash
 	b.otaStart()
 
-	if !b.Meta().IsStatusOnline() && timeout > 0 {
+	if !b.Meta().Status().IsStatusOnline() && timeout > 0 {
 		if ok := b.otaDelayOnline(timeout); !ok {
 			b.Logger().Warn("OTA timeout", "timeout", timeout)
 			b.otaAbort()
@@ -118,7 +118,7 @@ func (b *Bind) otaDo(firmware *bytes.Buffer, timeout time.Duration) {
 		b.Logger().Info("Device is online. Continue OTA flash")
 	}
 
-	if !b.Meta().IsStatusOnline() {
+	if !b.Meta().Status().IsStatusOnline() {
 		b.Logger().Info("Device is offline")
 		b.otaAbort()
 

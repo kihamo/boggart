@@ -11,7 +11,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	data := make(map[string]interface{})
 	widget := b.Widget()
 
-	if !b.Meta().IsStatusOnline() {
+	if !b.Meta().Status().IsStatusOnline() {
 		widget.FlashError(r, "Device is offline", "")
 	}
 

@@ -331,6 +331,7 @@ func (h *BindHandler) actionLogs(w http.ResponseWriter, r *dashboard.Request, b 
 		r.Session().FlashBag().Success("Logs cleaned")
 
 		h.Redirect(r.URL().Path, http.StatusFound, w, r)
+
 		return
 	}
 

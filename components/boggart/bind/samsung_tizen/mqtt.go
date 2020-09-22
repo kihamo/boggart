@@ -22,7 +22,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				}
 			}
 
-			if !b.Meta().IsStatusOnline() {
+			if !b.Meta().Status().IsStatusOnline() {
 				return errors.New("bind isn't online")
 			}
 

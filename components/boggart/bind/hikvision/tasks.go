@@ -38,7 +38,7 @@ func (b *Bind) Tasks() []workers.Task {
 
 // nolint:golint
 func (b *Bind) taskPTZ(ctx context.Context) (interface{}, error, bool) {
-	if !b.Meta().IsStatusOnline() {
+	if !b.Meta().Status().IsStatusOnline() {
 		return nil, nil, false
 	}
 

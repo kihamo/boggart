@@ -88,38 +88,6 @@ func (b *MetaContainer) Status() boggart.BindStatus {
 	return b.bind.Status()
 }
 
-func (b *MetaContainer) IsStatus(status boggart.BindStatus) bool {
-	return b.Status() == status
-}
-
-func (b *MetaContainer) IsStatusUnknown() bool {
-	return b.IsStatus(boggart.BindStatusUnknown)
-}
-
-func (b *MetaContainer) IsStatusUninitialized() bool {
-	return b.IsStatus(boggart.BindStatusUninitialized)
-}
-
-func (b *MetaContainer) IsStatusInitializing() bool {
-	return b.IsStatus(boggart.BindStatusInitializing)
-}
-
-func (b *MetaContainer) IsStatusOnline() bool {
-	return b.IsStatus(boggart.BindStatusOnline)
-}
-
-func (b *MetaContainer) IsStatusOffline() bool {
-	return b.IsStatus(boggart.BindStatusOffline)
-}
-
-func (b *MetaContainer) IsStatusRemoving() bool {
-	return b.IsStatus(boggart.BindStatusRemoving)
-}
-
-func (b *MetaContainer) IsStatusRemoved() bool {
-	return b.IsStatus(boggart.BindStatusRemoved)
-}
-
 func (b *MetaContainer) SerialNumber() string {
 	if sn := b.serialNumber.Load(); sn != nil {
 		return sn.(string)
