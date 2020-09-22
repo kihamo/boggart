@@ -50,7 +50,21 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 		case "status":
 			out.Status = string(in.String())
 		case "tasks":
-			out.Tasks = int(in.Int())
+			if in.IsNull() {
+				in.Skip()
+			} else {
+				in.Delim('{')
+				out.Tasks = make(map[string]string)
+				for !in.IsDelim('}') {
+					key := string(in.String())
+					in.WantColon()
+					var v1 string
+					v1 = string(in.String())
+					(out.Tasks)[key] = v1
+					in.WantComma()
+				}
+				in.Delim('}')
+			}
 		case "mqtt_publishes":
 			out.MQTTPublishes = int(in.Int())
 		case "mqtt_subscribers":
@@ -71,9 +85,9 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 					out.Tags = (out.Tags)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v1 string
-					v1 = string(in.String())
-					out.Tags = append(out.Tags, v1)
+					var v2 string
+					v2 = string(in.String())
+					out.Tags = append(out.Tags, v2)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -133,7 +147,23 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 	{
 		const prefix string = ",\"tasks\":"
 		out.RawString(prefix)
-		out.Int(int(in.Tasks))
+		if in.Tasks == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
+			out.RawString(`null`)
+		} else {
+			out.RawByte('{')
+			v3First := true
+			for v3Name, v3Value := range in.Tasks {
+				if v3First {
+					v3First = false
+				} else {
+					out.RawByte(',')
+				}
+				out.String(string(v3Name))
+				out.RawByte(':')
+				out.String(string(v3Value))
+			}
+			out.RawByte('}')
+		}
 	}
 	{
 		const prefix string = ",\"mqtt_publishes\":"
@@ -152,11 +182,11 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v2, v3 := range in.Tags {
-				if v2 > 0 {
+			for v4, v5 := range in.Tags {
+				if v4 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v3))
+				out.String(string(v5))
 			}
 			out.RawByte(']')
 		}

@@ -82,10 +82,24 @@ $(document).ready(function () {
                                 '</a>';
                         }
 
-                        if (row.tasks > 0) {
-                            content += '<a href="/boggart/bind/' + row.id + '/tasks/" target="_blank" class="btn btn-primary btn-icon btn-xs">' +
-                                '<i class="fas fa-running" title="Show tasks"></i> <span class="badge">' + row.tasks + '</span>' +
-                                '</a>';
+                        if (row.tasks) {
+                            var l = Object.keys(row.tasks).length;
+
+                            if (l > 0) {
+                                content += '<div class="btn-group">' +
+                                    '<button type="button" class="btn btn-primary btn-icon btn-xs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+                                    '<i class="fas fa-running" title="Tasks"></i> <span class="badge">' + l + '</span> <span class="caret"></span>' +
+                                    '</button>' +
+                                    '<ul class="dropdown-menu">' +
+                                    '<li><a href="/boggart/bind/' + row.id + '/tasks/" target="_blank">Show all</a></li>' +
+                                    '<li role="separator" class="divider"></li>';
+
+                                for (const [id, name] of Object.entries(row.tasks)) {
+                                    content +=  '<li><a href="/boggart/bind/' + row.id + '/tasks/?run=' + id + '" target="_blank">' + name + '</a></li>';
+                                }
+
+                                content += '</div>'
+                            }
                         }
 
                         if (row.mqtt_publishes > 0 || row.mqtt_subscribers > 0) {

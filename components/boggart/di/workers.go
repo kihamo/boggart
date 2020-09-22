@@ -95,9 +95,23 @@ func (c *WorkersContainer) HookUnregister() {
 	c.tasks = c.tasks[:0]
 }
 
+func (c *WorkersContainer) TaskShortName(tsk w.Task) string {
+	for _, t := range c.Tasks() {
+		if t.Id() == tsk.Id() {
+			return strings.TrimPrefix(tsk.Name(), c.prefixTaskName(tsk))
+		}
+	}
+
+	return tsk.Name()
+}
+
+func (c *WorkersContainer) prefixTaskName(tsk w.Task) string {
+	return "bind-" + c.bind.ID() + "-" + c.bind.Type() + "-"
+}
+
 func (c *WorkersContainer) createTask(tsk w.Task) w.Task {
 	if t, ok := tsk.(bindTask); ok {
-		t.SetName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-" + t.Name())
+		t.SetName(c.prefixTaskName(tsk) + t.Name())
 		tsk = t
 	}
 
