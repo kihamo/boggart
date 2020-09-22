@@ -86,22 +86,31 @@ func NewProbesContainer(bind boggart.BindItem, statusManager func(boggart.BindSt
 }
 
 func (c *ProbesContainer) HookRegister() {
-	if probe := c.Readiness(); probe != nil {
+	probeReadiness := c.Readiness()
+	probeLiveness := c.Liveness()
+
+	if probeReadiness == nil && probeLiveness == nil {
+		return
+	}
+
+	bindWorkersSupport, ok := WorkersContainerBind(c.bind.Bind())
+
+	if probeReadiness != nil {
 		// если воркеры есть у привязки, то регистрируем пробы как таски, чтобы отображались в общем списке тасок
-		if bindWorkersSupport, ok := WorkersContainerBind(c.bind.Bind()); ok {
-			bindWorkersSupport.RegisterTask(probe)
+		if ok {
+			bindWorkersSupport.RegisterTask(probeReadiness)
 		} else {
-			c.client.AddTask(probe)
+			c.client.AddTask(probeReadiness)
 		}
 	} else {
 		c.statusManager(boggart.BindStatusOnline)
 	}
 
-	if probe := c.Liveness(); probe != nil {
-		if bindWorkersSupport, ok := WorkersContainerBind(c.bind.Bind()); ok {
-			bindWorkersSupport.RegisterTask(probe)
+	if probeLiveness != nil {
+		if ok {
+			bindWorkersSupport.RegisterTask(probeLiveness)
 		} else {
-			c.client.AddTask(probe)
+			c.client.AddTask(probeLiveness)
 		}
 	}
 }

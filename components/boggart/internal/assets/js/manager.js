@@ -69,10 +69,17 @@ $(document).ready(function () {
                                 '<button type="button" class="btn btn-success btn-icon btn-xs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
                                 '<i class="fas fa-volume-up" title="Probes"></i> <span class="caret"></span>' +
                                 '</button>' +
-                                '<ul class="dropdown-menu">' +
-                                '<li><a href="/boggart/bind/' + row.id + '/liveness/" target="_blank">Liveness</a></li>' +
-                                '<li><a href="/boggart/bind/' + row.id + '/readiness/" target="_blank">Readiness</a></li>' +
-                                '</ul>' +
+                                '<ul class="dropdown-menu">';
+
+                            if (row.has_liveness_probe) {
+                                content += '<li><a href="/boggart/bind/' + row.id + '/liveness/" target="_blank">Liveness</a></li>';
+                            }
+
+                            if (row.has_readiness_probe) {
+                                content += '<li><a href="/boggart/bind/' + row.id + '/readiness/" target="_blank">Readiness</a></li>';
+                            }
+
+                            content += '</ul>' +
                                 '</div>';
                         }
 
@@ -82,24 +89,20 @@ $(document).ready(function () {
                                 '</a>';
                         }
 
-                        if (row.tasks) {
-                            var l = Object.keys(row.tasks).length;
+                        if (row.tasks && row.tasks.length > 0) {
+                            content += '<div class="btn-group">' +
+                                '<button type="button" class="btn btn-primary btn-icon btn-xs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+                                '<i class="fas fa-running" title="Tasks"></i> <span class="badge">' + row.tasks.length + '</span> <span class="caret"></span>' +
+                                '</button>' +
+                                '<ul class="dropdown-menu">' +
+                                '<li><a href="/boggart/bind/' + row.id + '/tasks/" target="_blank">Show all</a></li>' +
+                                '<li role="separator" class="divider"></li>';
 
-                            if (l > 0) {
-                                content += '<div class="btn-group">' +
-                                    '<button type="button" class="btn btn-primary btn-icon btn-xs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
-                                    '<i class="fas fa-running" title="Tasks"></i> <span class="badge">' + l + '</span> <span class="caret"></span>' +
-                                    '</button>' +
-                                    '<ul class="dropdown-menu">' +
-                                    '<li><a href="/boggart/bind/' + row.id + '/tasks/" target="_blank">Show all</a></li>' +
-                                    '<li role="separator" class="divider"></li>';
-
-                                for (const [id, name] of Object.entries(row.tasks)) {
-                                    content +=  '<li><a href="/boggart/bind/' + row.id + '/tasks/?run=' + id + '" target="_blank">Run ' + name + '</a></li>';
-                                }
-
-                                content += '</div>'
+                            for (var i in row.tasks) {
+                                content +=  '<li><a href="/boggart/bind/' + row.id + '/tasks/?run=' + row.tasks[i][0] + '" target="_blank">Run ' + row.tasks[i][1] + '</a></li>';
                             }
+
+                            content += '</div>'
                         }
 
                         if (row.mqtt_publishes > 0 || row.mqtt_subscribers > 0) {

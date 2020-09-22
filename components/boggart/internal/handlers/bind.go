@@ -288,8 +288,18 @@ func (h *BindHandler) actionProbe(w *dashboard.Response, r *dashboard.Request, b
 
 	switch t {
 	case "readiness":
+		if bindSupport.Readiness() == nil {
+			h.NotFound(w, r)
+			return
+		}
+
 		err = bindSupport.ReadinessCheck(r.Context())
 	case "liveness":
+		if bindSupport.Liveness() == nil {
+			h.NotFound(w, r)
+			return
+		}
+
 		err = bindSupport.LivenessCheck(r.Context())
 	}
 

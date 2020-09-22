@@ -8,20 +8,20 @@ import (
 
 // easyjson:json
 type managerHandlerDevice struct {
-	ID                string            `json:"id"`
-	Type              string            `json:"type"`
-	Description       string            `json:"description"`
-	SerialNumber      string            `json:"serial_number"`
-	MAC               string            `json:"mac"`
-	Status            string            `json:"status"`
-	Tasks             map[string]string `json:"tasks"`
-	MQTTPublishes     int               `json:"mqtt_publishes"`
-	MQTTSubscribers   int               `json:"mqtt_subscribers"`
-	Tags              []string          `json:"tags"`
-	HasWidget         bool              `json:"has_widget"`
-	HasReadinessProbe bool              `json:"has_readiness_probe"`
-	HasLivenessProbe  bool              `json:"has_liveness_probe"`
-	LogsCount         int               `json:"logs_count"`
+	ID                string     `json:"id"`
+	Type              string     `json:"type"`
+	Description       string     `json:"description"`
+	SerialNumber      string     `json:"serial_number"`
+	MAC               string     `json:"mac"`
+	Status            string     `json:"status"`
+	Tasks             [][]string `json:"tasks"`
+	MQTTPublishes     int        `json:"mqtt_publishes"`
+	MQTTSubscribers   int        `json:"mqtt_subscribers"`
+	Tags              []string   `json:"tags"`
+	HasWidget         bool       `json:"has_widget"`
+	HasReadinessProbe bool       `json:"has_readiness_probe"`
+	HasLivenessProbe  bool       `json:"has_liveness_probe"`
+	LogsCount         int        `json:"logs_count"`
 }
 
 type ManagerHandler struct {
@@ -85,9 +85,11 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 			}
 
 			if bindSupport, ok := di.WorkersContainerBind(bindItem.Bind()); ok {
-				item.Tasks = make(map[string]string, len(bindSupport.Tasks()))
+				item.Tasks = make([][]string, 0, len(bindSupport.Tasks()))
 				for _, t := range bindSupport.Tasks() {
-					item.Tasks[t.Id()] = bindSupport.TaskShortName(t)
+					item.Tasks = append(item.Tasks, []string{
+						t.Id(), bindSupport.TaskShortName(t),
+					})
 				}
 			}
 
