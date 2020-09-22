@@ -95,7 +95,7 @@ $(document).ready(function () {
                                     '<li role="separator" class="divider"></li>';
 
                                 for (const [id, name] of Object.entries(row.tasks)) {
-                                    content +=  '<li><a href="/boggart/bind/' + row.id + '/tasks/?run=' + id + '" target="_blank">' + name + '</a></li>';
+                                    content +=  '<li><a href="/boggart/bind/' + row.id + '/tasks/?run=' + id + '" target="_blank">Run ' + name + '</a></li>';
                                 }
 
                                 content += '</div>'
