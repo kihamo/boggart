@@ -1,6 +1,7 @@
 package mqtt
 
 import (
+	"net"
 	"sync"
 
 	"github.com/kihamo/boggart/atomic"
@@ -9,13 +10,18 @@ import (
 
 type Bind struct {
 	di.MetaBind
+	di.LoggerBind
 	di.MQTTBind
 	di.ProbesBind
 	di.WidgetBind
+	di.WorkersBind
 
 	config     *Config
 	components sync.Map
 	status     atomic.BoolNull
+
+	ip      net.IP
+	ipMutex sync.RWMutex
 }
 
 func (b *Bind) Close() (err error) {

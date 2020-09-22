@@ -2,12 +2,13 @@ package mqtt
 
 import (
 	"context"
+	"net"
 
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
-	return []mqtt.Subscriber{
+	subscribers := []mqtt.Subscriber{
 		mqtt.NewSubscriber(b.config.TopicDiscoveryPrefix+"/+/"+b.config.TopicPrefix+"/+/config", 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			var component Component
 
@@ -59,4 +60,16 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			return nil
 		}),
 	}
+
+	if b.config.TopicIPAddressSensor != "" {
+		subscribers = append(subscribers, mqtt.NewSubscriber(b.config.TopicIPAddressSensor, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+			b.ipMutex.Lock()
+			b.ip = net.ParseIP(message.String())
+			b.ipMutex.Unlock()
+
+			return nil
+		}))
+	}
+
+	return subscribers
 }

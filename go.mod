@@ -44,6 +44,8 @@ require (
 	github.com/pascaldekloe/name v1.0.0 // indirect
 	github.com/pborman/uuid v1.2.0
 	github.com/pkg/errors v0.9.1
+	github.com/prometheus/client_model v0.2.0
+	github.com/prometheus/common v0.9.1
 	github.com/snabb/webostv v0.0.1
 	github.com/sparrc/go-ping v0.0.0-20190613174326-4e5b6552494c
 	github.com/yryz/ds18b20 v0.0.0-20180211073435-3cf383a40624
