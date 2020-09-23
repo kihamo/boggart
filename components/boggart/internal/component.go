@@ -137,7 +137,7 @@ func (c *Component) registerDefaultBinds() (int, error) {
 		return -1, err
 	}
 
-	cfg, err := boggart.ValidateBindConfig(kind, map[string]interface{}{
+	cfg, _, err := boggart.ValidateBindConfig(kind, map[string]interface{}{
 		"application_name":    c.application.Name(),
 		"application_version": c.application.Version(),
 		"application_build":   c.application.Build(),
@@ -236,7 +236,7 @@ func (c *Component) initConfigFromYaml(id string) (int, error) {
 			return -1, err
 		}
 
-		cfg, err := boggart.ValidateBindConfig(kind, d.Config)
+		cfg, md, err := boggart.ValidateBindConfig(kind, d.Config)
 		if err != nil {
 			return -1, fmt.Errorf("config of device type %s validate failed with error: %v", d.Type, err)
 		}
@@ -253,6 +253,14 @@ func (c *Component) initConfigFromYaml(id string) (int, error) {
 
 		if _, err := c.RegisterBind(id, bind, d.Type, d.Description, d.Tags, cfg); err != nil {
 			return -1, err
+		}
+
+		if len(md.Unused) > 0 {
+			if logger, ok := di.LoggerContainerBind(bind); ok {
+				for _, field := range md.Unused {
+					logger.Warn("Unused config field", "field", field)
+				}
+			}
 		}
 
 		loaded++

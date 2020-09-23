@@ -104,7 +104,7 @@ func (h *BindHandler) registerByYAML(oldID string, code []byte) (bindItem boggar
 		return nil, false, err
 	}
 
-	cfg, err := boggart.ValidateBindConfig(kind, bindParsed.Config)
+	cfg, md, err := boggart.ValidateBindConfig(kind, bindParsed.Config)
 	if err != nil {
 		return nil, false, err
 	}
@@ -137,6 +137,14 @@ func (h *BindHandler) registerByYAML(oldID string, code []byte) (bindItem boggar
 	}
 
 	bindItem, err = h.componentBoggart.RegisterBind(bindParsed.ID, bind, bindParsed.Type, bindParsed.Description, bindParsed.Tags, cfg)
+
+	if len(md.Unused) > 0 {
+		if logger, ok := di.LoggerContainerBind(bind); ok {
+			for _, field := range md.Unused {
+				logger.Warn("Unused config field", "field", field)
+			}
+		}
+	}
 
 	return bindItem, upgraded, err
 }

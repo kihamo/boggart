@@ -54,10 +54,12 @@ type BindType interface {
 	CreateBind(config interface{}) (Bind, error)
 }
 
-func ValidateBindConfig(t BindType, config interface{}) (cfg interface{}, err error) {
+func ValidateBindConfig(t BindType, config interface{}) (cfg interface{}, md *mapstructure.Metadata, err error) {
 	if prepare := t.Config(); prepare != nil {
+		md = new(mapstructure.Metadata)
+
 		mapStructureDecoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-			Metadata: nil,
+			Metadata: md,
 			Result:   &prepare,
 			DecodeHook: mapstructure.ComposeDecodeHookFunc(
 				types.StringToTimeHookFunc(time.RFC3339),
@@ -72,15 +74,15 @@ func ValidateBindConfig(t BindType, config interface{}) (cfg interface{}, err er
 		})
 
 		if err != nil {
-			return cfg, err
+			return cfg, md, err
 		}
 
 		if err := mapStructureDecoder.Decode(config); err != nil {
-			return cfg, err
+			return cfg, md, err
 		}
 
 		if _, err = govalidator.ValidateStruct(prepare); err != nil {
-			return cfg, err
+			return cfg, md, err
 		}
 
 		cfg = prepare
@@ -88,5 +90,5 @@ func ValidateBindConfig(t BindType, config interface{}) (cfg interface{}, err er
 		cfg = config
 	}
 
-	return cfg, err
+	return cfg, md, err
 }
