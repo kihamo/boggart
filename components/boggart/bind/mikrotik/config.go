@@ -13,6 +13,7 @@ type Config struct {
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
 	Address                       string        `valid:"url,required"`
+	ClientTimeout                 time.Duration `mapstructure:"client_timeout" yaml:"client_timeout"`
 	ClientsSyncInterval           time.Duration `mapstructure:"clients_sync_interval" yaml:"clients_sync_interval"`
 	UpdaterInterval               time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 	TopicWiFiMACState             mqtt.Topic    `mapstructure:"topic_wifi_mac_state" yaml:"topic_wifi_mac_state"`
@@ -40,6 +41,7 @@ func (t Type) Config() interface{} {
 			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
 			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
 		},
+		ClientTimeout:                 time.Second * 10,
 		ClientsSyncInterval:           time.Minute,
 		UpdaterInterval:               time.Minute * 5,
 		TopicWiFiMACState:             prefix + "wifi/clients/+/state",

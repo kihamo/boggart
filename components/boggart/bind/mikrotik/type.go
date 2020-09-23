@@ -2,7 +2,6 @@ package mikrotik
 
 import (
 	"net/url"
-	"time"
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
@@ -25,7 +24,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	bind := &Bind{
 		config:            config,
 		address:           u,
-		provider:          mikrotik.NewClient(u.Host, username, password, time.Second*10),
+		provider:          mikrotik.NewClient(u.Host, username, password, config.ClientTimeout),
 		serialNumberLock:  make(chan struct{}),
 		serialNumberReady: atomic.NewBool(),
 	}
