@@ -4,24 +4,26 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/shadow/components/dashboard"
+	"go.uber.org/zap/zapcore"
 )
 
 // easyjson:json
 type managerHandlerDevice struct {
-	ID                string     `json:"id"`
-	Type              string     `json:"type"`
-	Description       string     `json:"description"`
-	SerialNumber      string     `json:"serial_number"`
-	MAC               string     `json:"mac"`
-	Status            string     `json:"status"`
-	Tasks             [][]string `json:"tasks"`
-	MQTTPublishes     int        `json:"mqtt_publishes"`
-	MQTTSubscribers   int        `json:"mqtt_subscribers"`
-	Tags              []string   `json:"tags"`
-	HasWidget         bool       `json:"has_widget"`
-	HasReadinessProbe bool       `json:"has_readiness_probe"`
-	HasLivenessProbe  bool       `json:"has_liveness_probe"`
-	LogsCount         int        `json:"logs_count"`
+	Tasks             [][]string    `json:"tasks"`
+	Tags              []string      `json:"tags"`
+	ID                string        `json:"id"`
+	Type              string        `json:"type"`
+	Description       string        `json:"description"`
+	SerialNumber      string        `json:"serial_number"`
+	MAC               string        `json:"mac"`
+	Status            string        `json:"status"`
+	MQTTPublishes     int           `json:"mqtt_publishes"`
+	MQTTSubscribers   int           `json:"mqtt_subscribers"`
+	LogsCount         int           `json:"logs_count"`
+	HasWidget         bool          `json:"has_widget"`
+	HasReadinessProbe bool          `json:"has_readiness_probe"`
+	HasLivenessProbe  bool          `json:"has_liveness_probe"`
+	LogsMaxLevel      zapcore.Level `json:"logs_max_level"`
 }
 
 type ManagerHandler struct {
@@ -60,11 +62,12 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 
 		for _, bindItem := range h.component.BindItems() {
 			item := managerHandlerDevice{
-				ID:          bindItem.ID(),
-				Type:        bindItem.Type(),
-				Description: bindItem.Description(),
-				Status:      bindItem.Status().String(),
-				Tags:        bindItem.Tags(),
+				ID:           bindItem.ID(),
+				Type:         bindItem.Type(),
+				Description:  bindItem.Description(),
+				Status:       bindItem.Status().String(),
+				Tags:         bindItem.Tags(),
+				LogsMaxLevel: zapcore.DebugLevel,
 			}
 
 			if _, ok := di.WidgetContainerBind(bindItem.Bind()); ok {
@@ -99,7 +102,14 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 			}
 
 			if bindSupport, ok := bindItem.Bind().(di.LoggerContainerSupport); ok {
-				item.LogsCount = len(bindSupport.LastRecords())
+				records := bindSupport.LastRecords()
+				item.LogsCount = len(records)
+
+				for _, r := range records {
+					if r.Level > item.LogsMaxLevel {
+						item.LogsMaxLevel = r.Level
+					}
+				}
 			}
 
 			list = append(list, item)

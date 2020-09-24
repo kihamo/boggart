@@ -37,18 +37,6 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			continue
 		}
 		switch key {
-		case "id":
-			out.ID = string(in.String())
-		case "type":
-			out.Type = string(in.String())
-		case "description":
-			out.Description = string(in.String())
-		case "serial_number":
-			out.SerialNumber = string(in.String())
-		case "mac":
-			out.MAC = string(in.String())
-		case "status":
-			out.Status = string(in.String())
 		case "tasks":
 			if in.IsNull() {
 				in.Skip()
@@ -93,10 +81,6 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 				}
 				in.Delim(']')
 			}
-		case "mqtt_publishes":
-			out.MQTTPublishes = int(in.Int())
-		case "mqtt_subscribers":
-			out.MQTTSubscribers = int(in.Int())
 		case "tags":
 			if in.IsNull() {
 				in.Skip()
@@ -120,14 +104,34 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 				}
 				in.Delim(']')
 			}
+		case "id":
+			out.ID = string(in.String())
+		case "type":
+			out.Type = string(in.String())
+		case "description":
+			out.Description = string(in.String())
+		case "serial_number":
+			out.SerialNumber = string(in.String())
+		case "mac":
+			out.MAC = string(in.String())
+		case "status":
+			out.Status = string(in.String())
+		case "mqtt_publishes":
+			out.MQTTPublishes = int(in.Int())
+		case "mqtt_subscribers":
+			out.MQTTSubscribers = int(in.Int())
+		case "logs_count":
+			out.LogsCount = int(in.Int())
 		case "has_widget":
 			out.HasWidget = bool(in.Bool())
 		case "has_readiness_probe":
 			out.HasReadinessProbe = bool(in.Bool())
 		case "has_liveness_probe":
 			out.HasLivenessProbe = bool(in.Bool())
-		case "logs_count":
-			out.LogsCount = int(in.Int())
+		case "logs_max_level":
+			if data := in.UnsafeBytes(); in.Ok() {
+				in.AddError((out.LogsMaxLevel).UnmarshalText(data))
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -143,8 +147,51 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"id\":"
+		const prefix string = ",\"tasks\":"
 		out.RawString(prefix[1:])
+		if in.Tasks == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v4, v5 := range in.Tasks {
+				if v4 > 0 {
+					out.RawByte(',')
+				}
+				if v5 == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+					out.RawString("null")
+				} else {
+					out.RawByte('[')
+					for v6, v7 := range v5 {
+						if v6 > 0 {
+							out.RawByte(',')
+						}
+						out.String(string(v7))
+					}
+					out.RawByte(']')
+				}
+			}
+			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"tags\":"
+		out.RawString(prefix)
+		if in.Tags == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v8, v9 := range in.Tags {
+				if v8 > 0 {
+					out.RawByte(',')
+				}
+				out.String(string(v9))
+			}
+			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"id\":"
+		out.RawString(prefix)
 		out.String(string(in.ID))
 	}
 	{
@@ -173,33 +220,6 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 		out.String(string(in.Status))
 	}
 	{
-		const prefix string = ",\"tasks\":"
-		out.RawString(prefix)
-		if in.Tasks == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-			out.RawString("null")
-		} else {
-			out.RawByte('[')
-			for v4, v5 := range in.Tasks {
-				if v4 > 0 {
-					out.RawByte(',')
-				}
-				if v5 == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-					out.RawString("null")
-				} else {
-					out.RawByte('[')
-					for v6, v7 := range v5 {
-						if v6 > 0 {
-							out.RawByte(',')
-						}
-						out.String(string(v7))
-					}
-					out.RawByte(']')
-				}
-			}
-			out.RawByte(']')
-		}
-	}
-	{
 		const prefix string = ",\"mqtt_publishes\":"
 		out.RawString(prefix)
 		out.Int(int(in.MQTTPublishes))
@@ -210,20 +230,9 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 		out.Int(int(in.MQTTSubscribers))
 	}
 	{
-		const prefix string = ",\"tags\":"
+		const prefix string = ",\"logs_count\":"
 		out.RawString(prefix)
-		if in.Tags == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-			out.RawString("null")
-		} else {
-			out.RawByte('[')
-			for v8, v9 := range in.Tags {
-				if v8 > 0 {
-					out.RawByte(',')
-				}
-				out.String(string(v9))
-			}
-			out.RawByte(']')
-		}
+		out.Int(int(in.LogsCount))
 	}
 	{
 		const prefix string = ",\"has_widget\":"
@@ -241,9 +250,9 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 		out.Bool(bool(in.HasLivenessProbe))
 	}
 	{
-		const prefix string = ",\"logs_count\":"
+		const prefix string = ",\"logs_max_level\":"
 		out.RawString(prefix)
-		out.Int(int(in.LogsCount))
+		out.RawText((in.LogsMaxLevel).MarshalText())
 	}
 	out.RawByte('}')
 }

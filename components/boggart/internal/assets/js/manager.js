@@ -64,31 +64,6 @@ $(document).ready(function () {
                                 '</a>';
                         }
 
-                        if (row.has_readiness_probe || row.has_liveness_probe) {
-                            content += '<div class="btn-group">' +
-                                '<button type="button" class="btn btn-success btn-icon btn-xs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
-                                '<i class="fas fa-volume-up" title="Probes"></i> <span class="caret"></span>' +
-                                '</button>' +
-                                '<ul class="dropdown-menu">';
-
-                            if (row.has_liveness_probe) {
-                                content += '<li><a href="/boggart/bind/' + row.id + '/liveness/" target="_blank">Liveness</a></li>';
-                            }
-
-                            if (row.has_readiness_probe) {
-                                content += '<li><a href="/boggart/bind/' + row.id + '/readiness/" target="_blank">Readiness</a></li>';
-                            }
-
-                            content += '</ul>' +
-                                '</div>';
-                        }
-
-                        if (row.logs_count > 0) {
-                            content += '<a href="/boggart/bind/' + row.id + '/logs/" target="_blank" class="btn btn-info btn-icon btn-xs">' +
-                                '<i class="fas fa-headset" title="Show last logs"></i> <span class="badge">' + row.logs_count + '</span>' +
-                                '</a>';
-                        }
-
                         if (row.tasks && row.tasks.length > 0) {
                             content += '<div class="btn-group">' +
                                 '<button type="button" class="btn btn-primary btn-icon btn-xs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
@@ -102,7 +77,55 @@ $(document).ready(function () {
                                 content +=  '<li><a href="/boggart/bind/' + row.id + '/tasks/?run=' + row.tasks[i][0] + '" target="_blank">Run ' + row.tasks[i][1] + '</a></li>';
                             }
 
-                            content += '</div>'
+                            content += '</ul></div>';
+                        } else if (row.has_readiness_probe || row.has_liveness_probe) {
+                            var l = 0;
+                            var menu = '';
+
+                            if (row.has_liveness_probe) {
+                                l++;
+                                menu += '<li><a href="/boggart/bind/' + row.id + '/liveness/" target="_blank">Run liveness probe</a></li>';
+                            }
+
+                            if (row.has_readiness_probe) {
+                                l++;
+                                menu += '<li><a href="/boggart/bind/' + row.id + '/readiness/" target="_blank">Run readiness probe</a></li>';
+                            }
+
+                            content += '<div class="btn-group">' +
+                                '<button type="button" class="btn btn-primary btn-icon btn-xs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+                                '<i class="fas fa-running" title="Probes"></i> <span class="badge">' + l + '</span> <span class="caret"></span>' +
+                                '</button>' +
+                                '<ul class="dropdown-menu">' + menu + '</ul></div>';
+                        }
+
+                        if (row.logs_count > 0) {
+                            var cl = 'success';
+
+                            switch(row.logs_max_level) {
+                                case 'debug':
+                                    cl = 'primary';
+                                    break;
+                                case 'info':
+                                    cl = 'info';
+                                    break;
+                                case 'warn':
+                                    cl = 'warning';
+                                    break;
+                                case 'error':
+                                    cl = 'danger';
+                                    break;
+                                case 'panic':
+                                    cl = 'danger';
+                                    break;
+                                case 'fatal':
+                                    cl = 'danger';
+                                    break;
+                            }
+
+                            content += '<a href="/boggart/bind/' + row.id + '/logs/" target="_blank" class="btn btn-' + cl +' btn-icon btn-xs">' +
+                                '<i class="fas fa-headset" title="Show last logs"></i> <span class="badge">' + row.logs_count + '</span>' +
+                                '</a>';
                         }
 
                         if (row.mqtt_publishes > 0 || row.mqtt_subscribers > 0) {
