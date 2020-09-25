@@ -86,10 +86,14 @@ func (c *WidgetContainer) Bind() boggart.Bind {
 	return c.bind.Bind()
 }
 
+func (c *WidgetContainer) HandleAllowed() bool {
+	st := c.bind.Status()
+
+	return st == boggart.BindStatusOnline || st == boggart.BindStatusOffline
+}
+
 func (c *WidgetContainer) Handle(w *dashboard.Response, r *dashboard.Request) {
-	switch c.bind.Status() {
-	case boggart.BindStatusOnline, boggart.BindStatusOffline:
-	default:
+	if !c.HandleAllowed() {
 		c.NotFound(w, r)
 		return
 	}
@@ -105,12 +109,20 @@ func (c *WidgetContainer) Handle(w *dashboard.Response, r *dashboard.Request) {
 }
 
 func (c *WidgetContainer) Render(ctx context.Context, view string, data map[string]interface{}) {
+	if data == nil {
+		data = make(map[string]interface{}, 1)
+	}
+
 	data["Bind"] = c.bind
 
 	c.Handler.Render(ctx, view, data)
 }
 
 func (c *WidgetContainer) RenderLayout(ctx context.Context, view, layout string, data map[string]interface{}) {
+	if data == nil {
+		data = make(map[string]interface{}, 1)
+	}
+
 	data["Bind"] = c.bind
 
 	c.Handler.RenderLayout(ctx, view, layout, data)

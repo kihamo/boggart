@@ -299,106 +299,123 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 
 	c.itemStatusUpdate(bindItem, boggart.BindStatusInitializing)
 
-	// config container
-	if bindSupport, ok := bind.(di.ConfigContainerSupport); ok {
-		bindSupport.SetConfig(di.NewConfigContainer(bindItem, c.config))
-	}
-
-	// meta container
-	if bindSupport, ok := bind.(di.MetaContainerSupport); ok {
-		bindSupport.SetMeta(di.NewMetaContainer(bindItem, c.mqtt, c.config))
-	}
-
-	// logger container
-	if bindSupport, ok := bind.(di.LoggerContainerSupport); ok {
-		bindSupport.SetLogger(di.NewLoggerContainer(bindItem, c.logger))
-	}
-
-	// mqtt container
-	if bindSupport, ok := bind.(di.MQTTContainerSupport); ok {
-		bindSupport.SetMQTT(di.NewMQTTContainer(bindItem, c.mqtt))
-	}
-
-	// widget container
-	if bindSupport, ok := bind.(di.WidgetContainerSupport); ok {
-		ctr := di.NewWidgetContainer(bindItem, c.config)
-
-		bindSupport.SetWidget(ctr)
-
-		if fs := ctr.AssetFS(); fs != nil {
-			name := ctr.TemplateNamespace()
-
-			// templates
-			render := c.dashboard.Renderer()
-			if !render.IsRegisterNamespace(name) {
-				if err := render.RegisterNamespace(name, fs); err != nil {
-					return nil, err
-				}
-			}
-
-			// asset fs
-			c.dashboard.RegisterAssetFS(name, fs)
-
-			// i18n
-			if c.i18n != nil {
-				fs.Prefix = "locales"
-				c.i18n.LoadLocaleFromFiles(name, i18n.FromAssetFS(fs))
-			}
-		}
-	}
-
-	if runner, ok := bind.(boggart.BindRunner); ok {
-		if err := runner.Run(); err != nil {
-			return nil, err
-		}
-	}
-
-	// mqtt subscribers
-	if bindSupport, ok := di.MQTTContainerBind(bind); ok {
-		// TODO: обвешать подписки враппером, что бы только в online можно было посылать
-		for _, subscriber := range bindSupport.Subscribers() {
-			if err := c.mqtt.SubscribeSubscriber(subscriber.Subscriber()); err != nil {
-				c.itemStatusUpdate(bindItem, boggart.BindStatusUninitialized)
-				return nil, err
-			}
-		}
-	}
-
-	// workers container
-	if bindSupport, ok := bindItem.Bind().(di.WorkersContainerSupport); ok {
-		ctr := di.NewWorkersContainer(bindItem, c.workers)
-
-		bindSupport.SetWorkers(ctr)
-		ctr.HookRegister()
-	}
-
-	// probes container
-	if bindSupport, ok := bind.(di.ProbesContainerSupport); ok {
-		ctr := di.NewProbesContainer(
-			bindItem,
-			func(status boggart.BindStatus) {
-				c.itemStatusUpdate(bindItem, status)
-			}, func() error {
-				_, err := c.RegisterBind(bindItem.ID(), bindItem.Bind(), bindItem.Type(), bindItem.Description(), bindItem.Tags(), bindItem.Config())
-				return err
-			}, func() error {
-				return c.UnregisterBindByID(bindItem.ID())
-			},
-			c.workers,
-			metricProbes)
-
-		bindSupport.SetProbes(ctr)
-		ctr.HookRegister()
-	} else {
-		c.itemStatusUpdate(bindItem, boggart.BindStatusOnline)
-	}
-
 	c.binds.Store(id, bindItem)
 
-	c.logger.Debug("Register bind",
-		"type", bindItem.Type(),
-		"id", bindItem.ID(),
-	)
+	c.logger.Debug("Register bind", "type", bindItem.Type(), "id", bindItem.ID())
+
+	go func() {
+		// config container
+		if bindSupport, ok := bind.(di.ConfigContainerSupport); ok {
+			bindSupport.SetConfig(di.NewConfigContainer(bindItem, c.config))
+		}
+
+		// meta container
+		if bindSupport, ok := bind.(di.MetaContainerSupport); ok {
+			bindSupport.SetMeta(di.NewMetaContainer(bindItem, c.mqtt, c.config))
+		}
+
+		// logger container
+		if bindSupport, ok := bind.(di.LoggerContainerSupport); ok {
+			bindSupport.SetLogger(di.NewLoggerContainer(bindItem, c.logger))
+		}
+
+		// mqtt container
+		if bindSupport, ok := bind.(di.MQTTContainerSupport); ok {
+			bindSupport.SetMQTT(di.NewMQTTContainer(bindItem, c.mqtt))
+		}
+
+		// widget container
+		if bindSupport, ok := bind.(di.WidgetContainerSupport); ok {
+			ctr := di.NewWidgetContainer(bindItem, c.config)
+
+			bindSupport.SetWidget(ctr)
+
+			if fs := ctr.AssetFS(); fs != nil {
+				name := ctr.TemplateNamespace()
+
+				// templates
+				render := c.dashboard.Renderer()
+				if !render.IsRegisterNamespace(name) {
+					if err := render.RegisterNamespace(name, fs); err != nil {
+						c.itemStatusUpdate(bindItem, boggart.BindStatusUninitialized)
+						c.logger.Error("Bind templates failed",
+							"type", bindItem.Type(),
+							"id", bindItem.ID(),
+							"err", err.Error(),
+						)
+						return
+					}
+				}
+
+				// asset fs
+				c.dashboard.RegisterAssetFS(name, fs)
+
+				// i18n
+				if c.i18n != nil {
+					fs.Prefix = "locales"
+					c.i18n.LoadLocaleFromFiles(name, i18n.FromAssetFS(fs))
+				}
+			}
+		}
+
+		if runner, ok := bind.(boggart.BindRunner); ok {
+			if err := runner.Run(); err != nil {
+				c.itemStatusUpdate(bindItem, boggart.BindStatusUninitialized)
+				c.logger.Error("Bind run failed",
+					"type", bindItem.Type(),
+					"id", bindItem.ID(),
+					"err", err.Error(),
+				)
+				return
+			}
+		}
+
+		// mqtt subscribers
+		if bindSupport, ok := di.MQTTContainerBind(bind); ok {
+			// TODO: обвешать подписки враппером, что бы только в online можно было посылать
+			for _, subscriber := range bindSupport.Subscribers() {
+				if err := c.mqtt.SubscribeSubscriber(subscriber.Subscriber()); err != nil {
+					c.itemStatusUpdate(bindItem, boggart.BindStatusUninitialized)
+					c.logger.Error("Bind mqtt subscribe failed",
+						"type", bindItem.Type(),
+						"id", bindItem.ID(),
+						"err", err.Error(),
+						"subscriber", subscriber.Subscriber().Topic().String(),
+					)
+					return
+				}
+			}
+		}
+
+		// workers container
+		if bindSupport, ok := bindItem.Bind().(di.WorkersContainerSupport); ok {
+			ctr := di.NewWorkersContainer(bindItem, c.workers)
+
+			bindSupport.SetWorkers(ctr)
+			ctr.HookRegister()
+		}
+
+		// probes container
+		if bindSupport, ok := bind.(di.ProbesContainerSupport); ok {
+			ctr := di.NewProbesContainer(
+				bindItem,
+				func(status boggart.BindStatus) {
+					c.itemStatusUpdate(bindItem, status)
+				}, func() error {
+					_, err := c.RegisterBind(bindItem.ID(), bindItem.Bind(), bindItem.Type(), bindItem.Description(), bindItem.Tags(), bindItem.Config())
+					return err
+				}, func() error {
+					return c.UnregisterBindByID(bindItem.ID())
+				},
+				c.workers,
+				metricProbes)
+
+			bindSupport.SetProbes(ctr)
+			ctr.HookRegister()
+		} else {
+			c.itemStatusUpdate(bindItem, boggart.BindStatusOnline)
+		}
+	}()
 
 	return bindItem, nil
 }

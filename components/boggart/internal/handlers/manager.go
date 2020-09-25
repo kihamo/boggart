@@ -70,8 +70,8 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				LogsMaxLevel: zapcore.DebugLevel,
 			}
 
-			if _, ok := di.WidgetContainerBind(bindItem.Bind()); ok {
-				item.HasWidget = ok
+			if bindSupport, ok := di.WidgetContainerBind(bindItem.Bind()); ok {
+				item.HasWidget = ok && bindSupport.HandleAllowed()
 			}
 
 			if bindSupport, ok := di.ProbesContainerBind(bindItem.Bind()); ok {

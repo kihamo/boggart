@@ -120,24 +120,21 @@ func (c *Client) Reset() {
 }
 
 func (c *Client) Get(ctx context.Context, u string) (*http.Response, error) {
-	request, err := http.NewRequest(http.MethodGet, u, nil)
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 
 	if err != nil {
 		return nil, err
 	}
-
-	request = request.WithContext(ctx)
 
 	return c.Do(request)
 }
 
 func (c *Client) GetAjax(ctx context.Context, u string) (*http.Response, error) {
-	request, err := http.NewRequest(http.MethodGet, u, nil)
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	request = request.WithContext(ctx)
 	request.Header.Set("X-Requested-With", "XMLHttpRequest")
 
 	return c.Do(request)
@@ -149,12 +146,11 @@ func (c *Client) Post(ctx context.Context, u string, data map[string]string) (*h
 		values[key] = []string{val}
 	}
 
-	request, err := http.NewRequest(http.MethodPost, u, strings.NewReader(values.Encode()))
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, u, strings.NewReader(values.Encode()))
 	if err != nil {
 		return nil, err
 	}
 
-	request = request.WithContext(ctx)
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	return c.Do(request)

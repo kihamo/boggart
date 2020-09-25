@@ -35,22 +35,18 @@ $(document).ready(function () {
                 {
                     data: 'status',
                     render: function (status) {
+                        var cl = 'default';
+
                         switch (status.toLowerCase()) {
-                            case 'online':
-                                return '<span class="label label-success">' + status + '</span>';
-
-                            case 'offline':
-                                return '<span class="label label-danger">' + status + '</span>';
-
-                            case 'removing':
-                                return '<span class="label label-info">' + status + '</span>';
-
-                            case 'removed':
-                                return '<span class="label label-warning">' + status + '</span>';
-
-                            default:
-                                return '<span class="label label-default">' + status + '</span>';
+                            case 'online':        cl = 'success'; break;
+                            case 'offline':       cl = 'warning'; break;
+                            case 'removing':      cl = 'warning'; break;
+                            case 'removed':       cl = 'danger';  break;
+                            case 'initializing':  cl = 'warning'; break;
+                            case 'uninitialized': cl = 'danger';  break;
                         }
+
+                        return '<span class="label label-' + cl + '">' + status + '</span>';
                     }
                 },
                 {
