@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 )
 
@@ -24,6 +25,33 @@ type Bind struct {
 	di.WidgetBind
 
 	config *Config
+}
+
+func (b *Bind) Run() error {
+	if b.config.SaveDirectory == "" {
+		cacheDir, _ := os.UserCacheDir()
+		if cacheDir == "" {
+			cacheDir = os.TempDir()
+		}
+
+		if cacheDir != "" {
+			cacheDirBind := cacheDir + string(os.PathSeparator) + boggart.ComponentName + "_timelapse"
+
+			err := os.Mkdir(cacheDirBind, os.FileMode(b.config.SaveDirectoryMode))
+
+			if err == nil {
+				b.Logger().Info("Cache dir created", "path", cacheDirBind)
+			}
+
+			if err == nil || os.IsExist(err) {
+				cacheDir = cacheDirBind
+			}
+		}
+
+		b.config.SaveDirectory = cacheDir
+	}
+
+	return nil
 }
 
 func (b *Bind) Capture(ctx context.Context, writer io.Writer) error {
@@ -67,7 +95,7 @@ func (b *Bind) Capture(ctx context.Context, writer io.Writer) error {
 
 	fileName := b.config.SaveDirectory + string(os.PathSeparator) + time.Now().Format(b.config.FileNameFormat) + ext
 
-	fd, err := os.OpenFile(fileName, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0660)
+	fd, err := os.OpenFile(fileName, os.O_CREATE|os.O_EXCL|os.O_WRONLY, os.FileMode(b.config.FileMode))
 	if err != nil {
 		return err
 	}
