@@ -17,10 +17,7 @@ type Config struct {
 
 func (t Type) Config() interface{} {
 	return &Config{
-		LoggerConfig: di.LoggerConfig{
-			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
-			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
-		},
-		TopicSend: boggart.ComponentName + "/mail/#",
+		LoggerConfig: di.LoggerConfigDefaults(),
+		TopicSend:    boggart.ComponentName + "/mail/#",
 	}
 }

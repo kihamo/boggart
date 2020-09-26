@@ -31,10 +31,7 @@ func (t Type) Config() interface{} {
 		ProbesConfig: di.ProbesConfig{
 			ReadinessPeriod: time.Second * 3,
 		},
-		LoggerConfig: di.LoggerConfig{
-			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
-			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
-		},
+		LoggerConfig:       di.LoggerConfigDefaults(),
 		TopicPower:         prefix + "power",
 		TopicColor:         prefix + "color",
 		TopicMode:          prefix + "mode",

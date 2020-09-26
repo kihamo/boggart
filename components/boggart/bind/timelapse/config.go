@@ -19,15 +19,12 @@ type Config struct {
 }
 
 func (Type) Config() interface{} {
+	probesConfig := di.ProbesConfigDefaults()
+	probesConfig.ReadinessPeriod = time.Minute * 10
+
 	return &Config{
-		ProbesConfig: di.ProbesConfig{
-			ReadinessPeriod:  time.Minute * 10,
-			ReadinessTimeout: di.ProbesConfigLivenessDefaultTimeout,
-		},
-		LoggerConfig: di.LoggerConfig{
-			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
-			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
-		},
+		ProbesConfig:      probesConfig,
+		LoggerConfig:      di.LoggerConfigDefaults(),
 		FileNameFormat:    "20060102_150405",
 		FileMode:          0664,
 		SaveDirectoryMode: 0774,

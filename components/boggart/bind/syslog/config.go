@@ -26,10 +26,7 @@ func (Type) Config() interface{} {
 			ReadinessPeriod:  time.Minute * 10,
 			ReadinessTimeout: di.ProbesConfigLivenessDefaultTimeout,
 		},
-		LoggerConfig: di.LoggerConfig{
-			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
-			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
-		},
+		LoggerConfig: di.LoggerConfigDefaults(),
 		Hostname:     "127.0.0.1",
 		Port:         514,
 		Timeout:      0,

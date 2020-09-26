@@ -23,10 +23,7 @@ func (t Type) Config() interface{} {
 			ReadinessPeriod:  time.Second * 30,
 			ReadinessTimeout: time.Second * 5,
 		},
-		LoggerConfig: di.LoggerConfig{
-			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
-			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
-		},
+		LoggerConfig: di.LoggerConfigDefaults(),
 		ProxyEnabled: true,
 		ProxyAddress: ":8089",
 	}

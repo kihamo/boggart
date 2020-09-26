@@ -48,10 +48,7 @@ func (t Type) Config() interface{} {
 			ReadinessPeriod:  time.Minute,
 			ReadinessTimeout: time.Second * 10,
 		},
-		LoggerConfig: di.LoggerConfig{
-			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
-			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
-		},
+		LoggerConfig:          di.LoggerConfigDefaults(),
 		InputsCount:           2,
 		Location:              time.Now().Location().String(),
 		UpdaterInterval:       time.Minute,

@@ -27,10 +27,7 @@ func (t Type) Config() interface{} {
 			ReadinessPeriod:  time.Second * 30,
 			ReadinessTimeout: time.Second * 5,
 		},
-		LoggerConfig: di.LoggerConfig{
-			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
-			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
-		},
+		LoggerConfig:         di.LoggerConfigDefaults(),
 		TopicPower:           prefix + "power",
 		TopicKey:             prefix + "key",
 		TopicDeviceID:        prefix + "device/id",

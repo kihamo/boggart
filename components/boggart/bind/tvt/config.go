@@ -28,10 +28,7 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/cctv/+/"
 
 	return &Config{
-		LoggerConfig: di.LoggerConfig{
-			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
-			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
-		},
+		LoggerConfig:              di.LoggerConfigDefaults(),
 		UpdaterInterval:           time.Minute,
 		UpdaterTimeout:            time.Second * 30,
 		TopicStateModel:           prefix + "state/model",

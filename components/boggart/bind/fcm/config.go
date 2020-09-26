@@ -23,10 +23,7 @@ func (Type) Config() interface{} {
 			ReadinessPeriod:  time.Minute,
 			ReadinessTimeout: time.Second * 5,
 		},
-		LoggerConfig: di.LoggerConfig{
-			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
-			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
-		},
-		TopicSend: boggart.ComponentName + "/fcm/+/send",
+		LoggerConfig: di.LoggerConfigDefaults(),
+		TopicSend:    boggart.ComponentName + "/fcm/+/send",
 	}
 }

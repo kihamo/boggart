@@ -31,10 +31,7 @@ func (t Type) Config() interface{} {
 			ReadinessPeriod:  time.Second * 30,
 			ReadinessTimeout: time.Second * 10,
 		},
-		LoggerConfig: di.LoggerConfig{
-			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
-			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
-		},
+		LoggerConfig:      di.LoggerConfigDefaults(),
 		UpdaterInterval:   time.Second * 3, // as e-control app, refresh every 3 sec,
 		ConnectionTimeout: time.Second,
 		TopicState:        prefix + "state",

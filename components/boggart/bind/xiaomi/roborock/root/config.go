@@ -16,10 +16,7 @@ type Config struct {
 
 func (t Type) Config() interface{} {
 	return &Config{
-		LoggerConfig: di.LoggerConfig{
-			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
-			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
-		},
+		LoggerConfig:       di.LoggerConfigDefaults(),
 		DeviceIDFile:       "/mnt/data/miio/device.uid",
 		RuntimeConfigFile:  "/mnt/data/rockrobo/RoboController.cfg",
 		TopicRuntimeConfig: boggart.ComponentName + "/+/runtime/+",

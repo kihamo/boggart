@@ -41,11 +41,8 @@ func (t Type) Config() interface{} {
 			ReadinessPeriod:  time.Minute,
 			ReadinessTimeout: time.Second * 10,
 		},
-		LoggerConfig: di.LoggerConfig{
-			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
-			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
-		},
-		Location: time.Now().Location().String(),
+		LoggerConfig: di.LoggerConfigDefaults(),
+		Location:     time.Now().Location().String(),
 		/*
 			При отсутствии тока в последовательной цепи и значении напряжения, равном 1,15Uном, испытательный выход
 			счётчика не создаёт более одного импульса в течение времени, равного 4,4 мин и 3,5 мин для счётчиков класса

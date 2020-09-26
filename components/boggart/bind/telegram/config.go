@@ -56,10 +56,7 @@ func (t Type) Config() interface{} {
 			LivenessPeriod:   time.Second * 30,
 			LivenessTimeout:  time.Second * 10,
 		},
-		LoggerConfig: di.LoggerConfig{
-			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
-			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
-		},
+		LoggerConfig:        di.LoggerConfigDefaults(),
 		Debug:               false,
 		UpdatesEnabled:      false,
 		UpdatesBuffer:       100,

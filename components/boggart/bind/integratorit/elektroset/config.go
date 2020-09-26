@@ -28,10 +28,7 @@ func (Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/service/elektroset/+/"
 
 	return &Config{
-		LoggerConfig: di.LoggerConfig{
-			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
-			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
-		},
+		LoggerConfig:           di.LoggerConfigDefaults(),
 		UpdaterInterval:        time.Hour,
 		BalanceDetailsInterval: time.Hour * 24 * 31 * 2, // нужно минимум 2 месяца, что бы счет попал в выборку
 		TopicBalance:           prefix + "balance",

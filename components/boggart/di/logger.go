@@ -174,61 +174,109 @@ func NewLoggerContainer(bind boggart.BindItem, logger logging.Logger) *LoggerCon
 }
 
 func (c *LoggerContainer) Debug(message string, args ...interface{}) {
+	if c == nil {
+		return
+	}
+
 	c.Logger.Debug(message, args...)
 	c.getSugar().Debugw(message, args...)
 }
 
 func (c *LoggerContainer) Debugf(template string, args ...interface{}) {
+	if c == nil {
+		return
+	}
+
 	c.Logger.Debugf(template, args...)
 	c.getSugar().Debugf(template, args...)
 }
 
 func (c *LoggerContainer) Info(message string, args ...interface{}) {
+	if c == nil {
+		return
+	}
+
 	c.Logger.Info(message, args...)
 	c.getSugar().Infow(message, args...)
 }
 
 func (c *LoggerContainer) Infof(template string, args ...interface{}) {
+	if c == nil {
+		return
+	}
+
 	c.Logger.Infof(template, args...)
 	c.getSugar().Infof(template, args...)
 }
 
 func (c *LoggerContainer) Warn(message string, args ...interface{}) {
+	if c == nil {
+		return
+	}
+
 	c.Logger.Warn(message, args...)
 	c.getSugar().Warnw(message, args...)
 }
 
 func (c *LoggerContainer) Warnf(template string, args ...interface{}) {
+	if c == nil {
+		return
+	}
+
 	c.Logger.Warnf(template, args...)
 	c.getSugar().Warnf(template, args...)
 }
 
 func (c *LoggerContainer) Error(message string, args ...interface{}) {
+	if c == nil {
+		return
+	}
+
 	c.Logger.Error(message, args...)
 	c.getSugar().Errorw(message, args...)
 }
 
 func (c *LoggerContainer) Errorf(template string, args ...interface{}) {
+	if c == nil {
+		return
+	}
+
 	c.Logger.Errorf(template, args...)
 	c.getSugar().Errorf(template, args...)
 }
 
 func (c *LoggerContainer) Panic(message string, args ...interface{}) {
+	if c == nil {
+		return
+	}
+
 	c.Logger.Panic(message, args...)
 	c.getSugar().Panicw(message, args...)
 }
 
 func (c *LoggerContainer) Panicf(template string, args ...interface{}) {
+	if c == nil {
+		return
+	}
+
 	c.Logger.Panicf(template, args...)
 	c.getSugar().Panicf(template, args...)
 }
 
 func (c *LoggerContainer) Fatal(message string, args ...interface{}) {
+	if c == nil {
+		return
+	}
+
 	c.Logger.Fatal(message, args...)
 	c.getSugar().Fatalw(message, args...)
 }
 
 func (c *LoggerContainer) Fatalf(template string, args ...interface{}) {
+	if c == nil {
+		return
+	}
+
 	c.Logger.Fatalf(template, args...)
 	c.getSugar().Fatalf(template, args...)
 }
@@ -242,6 +290,10 @@ func (c *LoggerContainer) getObserver() *loggerObserver {
 }
 
 func (c *LoggerContainer) init() *LoggerContainer {
+	if c == nil {
+		return nil
+	}
+
 	c.once.Do(func() {
 		limit := LoggerDefaultBufferedRecordsLimit
 		level := LoggerDefaultBufferedRecordsLevel
@@ -269,6 +321,13 @@ type LoggerBufferedConfig interface {
 type LoggerConfig struct {
 	BufferedRecordsLimit uint64   `mapstructure:"logger_buffered_records_limit" yaml:"logger_buffered_records_limit"`
 	BufferedRecordsLevel LogLevel `mapstructure:"logger_buffered_records_level" yaml:"logger_buffered_records_level"`
+}
+
+func LoggerConfigDefaults() (c LoggerConfig) {
+	c.BufferedRecordsLimit = LoggerDefaultBufferedRecordsLimit
+	c.BufferedRecordsLevel = LoggerDefaultBufferedRecordsLevel
+
+	return c
 }
 
 func (c LoggerConfig) LoggerBufferedRecordsLimit() uint64 {

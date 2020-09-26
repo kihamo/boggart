@@ -12,10 +12,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
-)
-
-const (
-	DefaultUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36"
+	protocol "github.com/kihamo/boggart/protocols/http"
 )
 
 type Bind struct {
@@ -60,7 +57,7 @@ func (b *Bind) Capture(ctx context.Context, writer io.Writer) error {
 		return err
 	}
 
-	request.Header.Set("User-Agent", DefaultUserAgent)
+	request.Header.Set("User-Agent", protocol.DefaultUserAgent)
 
 	response, err := http.DefaultClient.Do(request)
 	if err != nil {

@@ -24,10 +24,7 @@ func (Type) Config() interface{} {
 			ReadinessPeriod:  time.Hour,
 			ReadinessTimeout: time.Second * 10,
 		},
-		LoggerConfig: di.LoggerConfig{
-			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
-			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
-		},
+		LoggerConfig: di.LoggerConfigDefaults(),
 		Debug:        false,
 		TopicBalance: boggart.ComponentName + "/service/premiergc/+/balance",
 	}

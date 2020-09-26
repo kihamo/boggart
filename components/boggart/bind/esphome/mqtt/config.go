@@ -28,10 +28,7 @@ func (t Type) Config() interface{} {
 			ReadinessPeriod:  time.Second * 15,
 			ReadinessTimeout: time.Second,
 		},
-		LoggerConfig: di.LoggerConfig{
-			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
-			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
-		},
+		LoggerConfig:          di.LoggerConfigDefaults(),
 		TopicDiscoveryPrefix:  "homeassistant",
 		BirthMessage:          "online",
 		WillMessage:           "offline",

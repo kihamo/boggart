@@ -242,7 +242,7 @@ func (t *workersWrapTask) sync() {
 
 func (t *workersWrapTask) Run(ctx context.Context) (result interface{}, err error) {
 	result, err = t.original.Run(ctx)
-	if err != nil && t.logger != nil {
+	if err != nil {
 		t.logger.Error("Task ended with an error",
 			"error", err.Error(),
 			"task", t.Name(),

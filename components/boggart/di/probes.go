@@ -3,6 +3,7 @@ package di
 import (
 	"context"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -14,10 +15,14 @@ import (
 )
 
 const (
-	ProbesConfigReadinessDefaultPeriod  = time.Minute
-	ProbesConfigReadinessDefaultTimeout = time.Second * 30
-	ProbesConfigLivenessDefaultPeriod   = time.Minute
-	ProbesConfigLivenessDefaultTimeout  = time.Second * 30
+	ProbesConfigReadinessDefaultPeriod                  = time.Minute
+	ProbesConfigReadinessDefaultTimeout                 = time.Second * 30
+	ProbesConfigReadinessDefaultThresholdSuccess uint64 = 1
+	ProbesConfigReadinessDefaultThresholdFailure uint64 = 1
+	ProbesConfigLivenessDefaultPeriod                   = time.Minute
+	ProbesConfigLivenessDefaultTimeout                  = time.Second * 30
+	ProbesConfigLivenessDefaultThresholdSuccess  uint64 = 1
+	ProbesConfigLivenessDefaultThresholdFailure  uint64 = 1
 )
 
 type ProbesHasReadinessProbe interface {
@@ -143,6 +148,19 @@ func (c *ProbesContainer) Readiness() w.Task {
 
 	logger, _ := LoggerContainerBind(c.bind.Bind())
 
+	probePeriod := ProbesConfigReadinessDefaultPeriod
+	probeTimeout := ProbesConfigReadinessDefaultTimeout
+	probeThresholdSuccess := ProbesConfigReadinessDefaultThresholdSuccess
+	probeThresholdFailure := ProbesConfigReadinessDefaultThresholdFailure
+	var probeSuccess, probeFailure uint64
+
+	if probeConfig, ok := c.bind.Config().(ProbesConfigReadiness); ok {
+		probePeriod = probeConfig.ReadinessProbePeriod()
+		probeTimeout = probeConfig.ReadinessProbeTimeout()
+		probeThresholdSuccess = probeConfig.ReadinessProbeThresholdSuccess()
+		probeThresholdFailure = probeConfig.ReadinessProbeThresholdFailure()
+	}
+
 	probeTask := task.NewFunctionTask(func(ctx context.Context) (_ interface{}, err error) {
 		switch c.bind.Status() {
 		case boggart.BindStatusInitializing, boggart.BindStatusOnline, boggart.BindStatusOffline:
@@ -161,32 +179,46 @@ func (c *ProbesContainer) Readiness() w.Task {
 		case err = <-ch:
 		}
 
-		if err != nil {
-			c.statusManager(boggart.BindStatusOffline)
+		if err == nil {
+			threshold := atomic.AddUint64(&probeSuccess, 1)
+			atomic.StoreUint64(&probeFailure, 0)
+
+			c.metricProbes.With("probe", "readiness", "status", "success", "id", c.bind.ID(), "type", c.bind.Type()).Inc()
+
+			if threshold != probeThresholdSuccess {
+				return nil, nil
+			}
+
+			atomic.StoreUint64(&probeSuccess, 0)
+		} else {
+			threshold := atomic.AddUint64(&probeFailure, 1)
+			atomic.StoreUint64(&probeSuccess, 0)
+
 			c.metricProbes.With("probe", "readiness", "status", "failed", "id", c.bind.ID(), "type", c.bind.Type()).Inc()
 
-			if logger != nil {
-				logger.Error("Readiness probe failure",
-					"type", c.bind.Type(),
-					"id", c.bind.ID(),
-					"error", err.Error(),
-				)
+			logger.Error("Readiness probe failure",
+				"type", c.bind.Type(),
+				"id", c.bind.ID(),
+				"error", err.Error(),
+				"threshold", threshold,
+			)
+
+			if threshold != probeThresholdFailure {
+				return nil, err
 			}
+
+			atomic.StoreUint64(&probeFailure, 0)
+		}
+
+		if err != nil {
+			c.statusManager(boggart.BindStatusOffline)
+
 		} else {
 			c.statusManager(boggart.BindStatusOnline)
-			c.metricProbes.With("probe", "readiness", "status", "success", "id", c.bind.ID(), "type", c.bind.Type()).Inc()
 		}
 
 		return nil, err
 	})
-
-	probePeriod := ProbesConfigReadinessDefaultPeriod
-	probeTimeout := ProbesConfigReadinessDefaultTimeout
-
-	if probeConfig, ok := c.bind.Config().(ProbesConfigReadiness); ok {
-		probePeriod = probeConfig.ReadinessProbePeriod()
-		probeTimeout = probeConfig.ReadinessProbeTimeout()
-	}
 
 	probeTask.SetRepeatInterval(probePeriod)
 	probeTask.SetTimeout(probeTimeout)
@@ -231,6 +263,19 @@ func (c *ProbesContainer) Liveness() w.Task {
 
 	logger, _ := LoggerContainerBind(c.bind.Bind())
 
+	probePeriod := ProbesConfigLivenessDefaultPeriod
+	probeTimeout := ProbesConfigLivenessDefaultTimeout
+	probeThresholdSuccess := ProbesConfigLivenessDefaultThresholdSuccess
+	probeThresholdFailure := ProbesConfigLivenessDefaultThresholdFailure
+	var probeSuccess, probeFailure uint64
+
+	if probeConfig, ok := c.bind.Config().(ProbesConfigLiveness); ok {
+		probePeriod = probeConfig.LivenessProbePeriod()
+		probeTimeout = probeConfig.LivenessProbeTimeout()
+		probeThresholdSuccess = probeConfig.LivenessProbeThresholdSuccess()
+		probeThresholdFailure = probeConfig.LivenessProbeThresholdFailure()
+	}
+
 	probeTask := task.NewFunctionTask(func(ctx context.Context) (_ interface{}, err error) {
 		switch c.bind.Status() {
 		case boggart.BindStatusOnline, boggart.BindStatusOffline:
@@ -250,41 +295,54 @@ func (c *ProbesContainer) Liveness() w.Task {
 		}
 
 		if err == nil {
+			threshold := atomic.AddUint64(&probeSuccess, 1)
+			atomic.StoreUint64(&probeFailure, 0)
+
 			c.metricProbes.With("probe", "liveness", "status", "success", "id", c.bind.ID(), "type", c.bind.Type()).Inc()
+
+			if threshold == probeThresholdSuccess {
+				atomic.StoreUint64(&probeSuccess, 0)
+			}
+
+			// success return
 			return nil, nil
-		}
+		} else {
+			threshold := atomic.AddUint64(&probeFailure, 1)
+			atomic.StoreUint64(&probeSuccess, 0)
 
-		c.metricProbes.With("probe", "liveness", "status", "failed", "id", c.bind.ID(), "type", c.bind.Type()).Inc()
+			c.metricProbes.With("probe", "liveness", "status", "failed", "id", c.bind.ID(), "type", c.bind.Type()).Inc()
 
-		if logger != nil {
 			logger.Error("Liveness probe failure",
 				"type", c.bind.Type(),
 				"id", c.bind.ID(),
 				"error", err.Error(),
+				"threshold", threshold,
 			)
+
+			if threshold != probeThresholdFailure {
+				return nil, err
+			}
+
+			atomic.StoreUint64(&probeFailure, 0)
 		}
 
 		if e := c.unregister(); e != nil {
-			if logger != nil {
-				logger.Error("Unregister after liveness probe failure",
-					"type", c.bind.Type(),
-					"id", c.bind.ID(),
-					"error", e.Error(),
-				)
-			}
+			logger.Error("Unregister after liveness probe failure",
+				"type", c.bind.Type(),
+				"id", c.bind.ID(),
+				"error", e.Error(),
+			)
 
 			err = multierr.Append(err, e)
 			return nil, err
 		}
 
 		if e := c.register(); e != nil {
-			if logger != nil {
-				logger.Error("Register after liveness probe failure",
-					"type", c.bind.Type(),
-					"id", c.bind.ID(),
-					"error", e.Error(),
-				)
-			}
+			logger.Error("Register after liveness probe failure",
+				"type", c.bind.Type(),
+				"id", c.bind.ID(),
+				"error", e.Error(),
+			)
 
 			err = multierr.Append(err, e)
 			return nil, err
@@ -292,14 +350,6 @@ func (c *ProbesContainer) Liveness() w.Task {
 
 		return nil, err
 	})
-
-	probePeriod := ProbesConfigLivenessDefaultPeriod
-	probeTimeout := ProbesConfigLivenessDefaultTimeout
-
-	if probeConfig, ok := c.bind.Config().(ProbesConfigLiveness); ok {
-		probePeriod = probeConfig.LivenessProbePeriod()
-		probeTimeout = probeConfig.LivenessProbeTimeout()
-	}
 
 	probeTask.SetRepeatInterval(probePeriod)
 	probeTask.SetTimeout(probeTimeout)
@@ -335,18 +385,37 @@ func (c *ProbesContainer) LivenessCheck(ctx context.Context) (err error) {
 type ProbesConfigReadiness interface {
 	ReadinessProbePeriod() time.Duration
 	ReadinessProbeTimeout() time.Duration
+	ReadinessProbeThresholdSuccess() uint64
+	ReadinessProbeThresholdFailure() uint64
 }
 
 type ProbesConfigLiveness interface {
 	LivenessProbePeriod() time.Duration
 	LivenessProbeTimeout() time.Duration
+	LivenessProbeThresholdSuccess() uint64
+	LivenessProbeThresholdFailure() uint64
 }
 
 type ProbesConfig struct {
-	ReadinessPeriod  time.Duration `mapstructure:"readiness_probe_period" yaml:"readiness_probe_period"`
-	ReadinessTimeout time.Duration `mapstructure:"readiness_probe_timeout" yaml:"readiness_probe_timeout"`
-	LivenessPeriod   time.Duration `mapstructure:"liveness_probe_period" yaml:"liveness_probe_period"`
-	LivenessTimeout  time.Duration `mapstructure:"liveness_probe_timeout" yaml:"liveness_probe_timeout"`
+	ReadinessPeriod           time.Duration `mapstructure:"readiness_probe_period" yaml:"readiness_probe_period"`
+	ReadinessTimeout          time.Duration `mapstructure:"readiness_probe_timeout" yaml:"readiness_probe_timeout"`
+	ReadinessThresholdSuccess uint64        `mapstructure:"readiness_threshold_success" yaml:"readiness_threshold_success"`
+	ReadinessThresholdFailure uint64        `mapstructure:"readiness_threshold_failure" yaml:"readiness_threshold_failure"`
+	LivenessPeriod            time.Duration `mapstructure:"liveness_probe_period" yaml:"liveness_probe_period"`
+	LivenessTimeout           time.Duration `mapstructure:"liveness_probe_timeout" yaml:"liveness_probe_timeout"`
+	LivenessThresholdSuccess  uint64        `mapstructure:"liveness_threshold_success" yaml:"liveness_threshold_success"`
+	LivenessThresholdFailure  uint64        `mapstructure:"liveness_threshold_failure" yaml:"liveness_threshold_failure"`
+}
+
+func ProbesConfigDefaults() (c ProbesConfig) {
+	c.ReadinessPeriod = ProbesConfigReadinessDefaultPeriod
+	c.ReadinessThresholdSuccess = ProbesConfigReadinessDefaultThresholdSuccess
+	c.ReadinessThresholdFailure = ProbesConfigReadinessDefaultThresholdFailure
+	c.LivenessPeriod = ProbesConfigLivenessDefaultPeriod
+	c.LivenessThresholdSuccess = ProbesConfigLivenessDefaultThresholdSuccess
+	c.LivenessThresholdFailure = ProbesConfigLivenessDefaultThresholdFailure
+
+	return c
 }
 
 func (c ProbesConfig) ReadinessProbePeriod() time.Duration {
@@ -361,6 +430,22 @@ func (c ProbesConfig) ReadinessProbeTimeout() time.Duration {
 	return c.ReadinessTimeout
 }
 
+func (c ProbesConfig) ReadinessProbeThresholdSuccess() uint64 {
+	if c.ReadinessThresholdSuccess == 0 {
+		return ProbesConfigReadinessDefaultThresholdSuccess
+	}
+
+	return c.ReadinessThresholdSuccess
+}
+
+func (c ProbesConfig) ReadinessProbeThresholdFailure() uint64 {
+	if c.ReadinessThresholdFailure == 0 {
+		return ProbesConfigReadinessDefaultThresholdFailure
+	}
+
+	return c.ReadinessThresholdFailure
+}
+
 func (c ProbesConfig) LivenessProbePeriod() time.Duration {
 	if c.LivenessPeriod <= 0 {
 		return ProbesConfigLivenessDefaultPeriod
@@ -371,4 +456,20 @@ func (c ProbesConfig) LivenessProbePeriod() time.Duration {
 
 func (c ProbesConfig) LivenessProbeTimeout() time.Duration {
 	return c.LivenessTimeout
+}
+
+func (c ProbesConfig) LivenessProbeThresholdSuccess() uint64 {
+	if c.LivenessThresholdSuccess == 0 {
+		return ProbesConfigLivenessDefaultThresholdSuccess
+	}
+
+	return c.LivenessThresholdSuccess
+}
+
+func (c ProbesConfig) LivenessProbeThresholdFailure() uint64 {
+	if c.LivenessThresholdFailure == 0 {
+		return ProbesConfigLivenessDefaultThresholdFailure
+	}
+
+	return c.LivenessThresholdFailure
 }

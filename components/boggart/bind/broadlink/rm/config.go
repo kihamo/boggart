@@ -39,10 +39,7 @@ func (t Type) Config() interface{} {
 			ReadinessPeriod:  time.Second * 30,
 			ReadinessTimeout: time.Second * 10,
 		},
-		LoggerConfig: di.LoggerConfig{
-			BufferedRecordsLimit: di.LoggerDefaultBufferedRecordsLimit,
-			BufferedRecordsLevel: di.LoggerDefaultBufferedRecordsLevel,
-		},
+		LoggerConfig:         di.LoggerConfigDefaults(),
 		CaptureDuration:      time.Second * 15,
 		ConnectionTimeout:    time.Second,
 		TopicCapture:         prefix + "capture",
