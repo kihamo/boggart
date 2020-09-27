@@ -5,6 +5,7 @@ import (
 	"context"
 	"io"
 	"strconv"
+	"time"
 
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/mime"
@@ -47,30 +48,60 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			page = v
 		}
 
-		if files, err := b.Files(); err == nil {
+		to := time.Now()
+
+		var from *time.Time
+
+		if queryTime := q.Get("from"); queryTime != "" {
+			if tm, err := time.Parse(time.RFC3339, queryTime); err == nil {
+				from = &tm
+			} else {
+				widget.FlashError(r, "Parse date from failed with error %v", "", err)
+			}
+		}
+
+		if queryTime := q.Get("to"); queryTime != "" {
+			if tm, err := time.Parse(time.RFC3339, queryTime); err == nil {
+				to = tm
+			} else {
+				widget.FlashError(r, "Parse date to failed with error %v", "", err)
+			}
+		}
+
+		if files, err := b.Files(from, &to); err == nil {
+			l := len(files)
+
 			offsetLeft := (page - 1) * b.config.FilesOnPage
-			if offsetLeft > len(files) {
+			if offsetLeft > l {
 				widget.NotFound(w, r)
 				return
 			}
 
 			offsetRight := page * b.config.FilesOnPage
-			if offsetRight > len(files) {
-				offsetRight = len(files)
+			if offsetRight > l {
+				offsetRight = l
 			}
 
-			totalPages := len(files) / b.config.FilesOnPage
-			if len(files)%b.config.FilesOnPage > 0 {
+			totalPages := l / b.config.FilesOnPage
+			if l%b.config.FilesOnPage > 0 {
 				totalPages++
 			}
 
 			vars["files"] = files[offsetLeft:offsetRight]
-			vars["total"] = len(files)
+			vars["total"] = l
 			vars["page"] = page
 			vars["pages"] = totalPages
+
+			if from == nil && l > 0 {
+				tm := files[l-1].ModTime()
+				from = &tm
+			}
 		} else {
 			widget.FlashError(r, "Get files failed with error %v", "", err)
 		}
+
+		vars["date_from"] = from
+		vars["date_to"] = to
 	}
 
 	widget.Render(ctx, "widget", vars)

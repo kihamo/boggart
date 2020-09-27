@@ -122,7 +122,7 @@
                         <td>{{ $device.Capabilities }}</td>
                         <td>{{ $device.DeviceTypeAsString }}</td>
                         <td>{{ printf "0x%X" $device.ManufacturerCode }}</td>
-                        <td><script type="application/javascript">document.write(dateToString('{{ $device.LastSeen.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                        <td><script type="application/javascript">document.write(dateToString('{{ $device.LastSeen.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                     </tr>
                     {{ end }}
                     </tbody>

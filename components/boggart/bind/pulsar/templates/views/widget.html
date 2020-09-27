@@ -50,9 +50,9 @@
                                             </div>
                                         </fieldset>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-2">
+                                        &nbsp;
                                         <fieldset>
-                                            &nbsp;
                                             <div class="control-group">
                                                 <div class="controls">
                                                     <div class="input-prepend input-group">
@@ -84,7 +84,7 @@
                                         {{ else if eq $.period "daily" }}
                                             {{ $stat.Date.Day }} {{ i18n $stat.Date.Month.String $ nil "dashboard" }} {{ $stat.Date.Year }}
                                         {{ else }}
-                                            <script type="application/javascript">document.write(dateToString('{{ $stat.Date.Format "2006-01-02T15:04:05Z07:00" }}'))</script>
+                                            <script type="application/javascript">document.write(dateToString('{{ $stat.Date.Format "2006-01-02T15:04:05-07:00" }}'))</script>
                                         {{ end }}
                                     </td>
                                     <td>
@@ -229,7 +229,7 @@
                                             <td class="text-danger">{{ .datetime.Error.Error }}</td>
                                         {{ else }}
                                             <td>
-                                                <script type="application/javascript">document.write(dateToString('{{ .datetime.Value.Format "2006-01-02T15:04:05Z07:00" }}'))</script>
+                                                <script type="application/javascript">document.write(dateToString('{{ .datetime.Value.Format "2006-01-02T15:04:05-07:00" }}'))</script>
                                                 {{ if ne .datetime.Delta 0 }}
                                                 <strong class="text-danger">
                                                     {{ if gt .datetime.Delta 0 }}
@@ -380,12 +380,14 @@
                         format: 'YYYY.MM.DD HH:mm'
                     },
                     ranges: {
-                        '{{ i18n "Today" . }}': [moment(), moment()],
-                        '{{ i18n "Yesterday" . }}': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                        '{{ i18n "This month" . }}': [moment().startOf('month'), moment().endOf('month')],
-                        '{{ i18n "Last month" . }}': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
-                        '{{ i18n "This year" . }}': [moment().startOf('year'), moment().endOf('year')],
-                        '{{ i18n "Last year" . }}': [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')]
+                        '{{ i18n "Today" . "daterangepicker" "boggart" }}': [moment().startOf('day'), moment()],
+                        '{{ i18n "Yesterday" . "daterangepicker" "boggart" }}': [moment().subtract(1, 'days').startOf('day'), moment().subtract(1, 'days').endOf('day')],
+                        '{{ i18n "This week" . "daterangepicker" "boggart" }}': [moment().startOf('isoWeek'), moment().endOf('isoWeek')],
+                        '{{ i18n "Last week" . "daterangepicker" "boggart" }}': [moment().subtract(1, 'isoWeek').startOf('isoWeek'), moment().subtract(1, 'isoWeek').endOf('isoWeek')],
+                        '{{ i18n "This month" . "daterangepicker" "boggart" }}': [moment().startOf('month'), moment().endOf('month')],
+                        '{{ i18n "Last month" . "daterangepicker" "boggart" }}': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+                        '{{ i18n "This year" . "daterangepicker" "boggart" }}': [moment().startOf('year'), moment().endOf('year')],
+                        '{{ i18n "Last year" . "daterangepicker" "boggart" }}': [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')]
                     },
                 });
 

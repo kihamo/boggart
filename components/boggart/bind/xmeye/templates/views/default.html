@@ -36,13 +36,13 @@
             <tr>
                 <td>{{ i18n "Build time" . }}</td>
                 <td>
-                    <script type="application/javascript">document.write(dateToString('{{ .system_info.BuildTime.Format "2006-01-02T15:04:05Z07:00" }}'))</script>
+                    <script type="application/javascript">document.write(dateToString('{{ .system_info.BuildTime.Format "2006-01-02T15:04:05-07:00" }}'))</script>
                 </td>
             </tr>
             <tr>
                 <td>{{ i18n "Update time" . }}</td>
                 <td>
-                    <script type="application/javascript">document.write(dateToString('{{ .system_info.UpdataTime.Format "2006-01-02T15:04:05Z07:00" }}'))</script>
+                    <script type="application/javascript">document.write(dateToString('{{ .system_info.UpdataTime.Format "2006-01-02T15:04:05-07:00" }}'))</script>
                 </td>
             </tr>
             <tr>

@@ -46,7 +46,7 @@ func (h *BindHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	id := q.Get(":id")
 	if id != "" {
 		bindItem = h.componentBoggart.Bind(id)
-		if bindItem == nil || bindItem.Type() == boggart.ComponentName {
+		if bindItem == nil {
 			h.NotFound(w, r)
 			return
 		}
@@ -54,6 +54,11 @@ func (h *BindHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 	switch q.Get(":action") {
 	case "unregister":
+		if bindItem.Type() == boggart.ComponentName {
+			h.NotFound(w, r)
+			return
+		}
+
 		h.actionDelete(w, r, bindItem)
 		return
 
@@ -78,6 +83,11 @@ func (h *BindHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		return
 
 	case "":
+		if bindItem.Type() == boggart.ComponentName {
+			h.NotFound(w, r)
+			return
+		}
+
 		h.actionCreateOrUpdate(w, r, bindItem)
 		return
 

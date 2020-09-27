@@ -19,74 +19,74 @@
                     <tbody>
                         <tr>
                             <td>{{ i18n "Night" . }}</td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.NightBefore.Start.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.NightBefore.End.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.NightBefore.Start.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.NightBefore.End.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                             <td>{{ .times.NightBefore.Duration.String }}</td>
                         </tr>
                         <tr>
                             <td>{{ i18n "Nadir" . }}</td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.Nadir.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.Nadir.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td>{{ i18n "Astronomical dawn" . }}</td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.AstronomicalDawn.Start.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.AstronomicalDawn.End.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.AstronomicalDawn.Start.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.AstronomicalDawn.End.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                             <td>{{ .times.AstronomicalDawn.Duration.String }}</td>
                         </tr>
                         <tr>
                             <td>{{ i18n "Nautical dawn" . }}</td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.NauticalDawn.Start.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.NauticalDawn.End.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.NauticalDawn.Start.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.NauticalDawn.End.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                             <td>{{ .times.NauticalDawn.Duration.String }}</td>
                         </tr>
                         <tr>
                             <td>{{ i18n "Civil dawn" . }}</td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.CivilDawn.Start.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.CivilDawn.End.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.CivilDawn.Start.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.CivilDawn.End.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                             <td>{{ .times.CivilDawn.Duration.String }}</td>
                         </tr>
                         <tr>
                             <td>{{ i18n "Sunrise" . }}</td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.Sunrise.Start.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.Sunrise.End.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.Sunrise.Start.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.Sunrise.End.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                             <td>{{ .times.Sunrise.Duration.String }}</td>
                         </tr>
                         <tr>
                             <td>{{ i18n "Solar noon" . }}</td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.SolarNoon.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.SolarNoon.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td>{{ i18n "Sunset" . }}</td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.Sunset.Start.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.Sunset.End.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.Sunset.Start.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.Sunset.End.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                             <td>{{ .times.Sunset.Duration.String }}</td>
                         </tr>
                         <tr>
                             <td>{{ i18n "Civil dusk" . }}</td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.CivilDusk.Start.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.CivilDusk.End.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.CivilDusk.Start.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.CivilDusk.End.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                             <td>{{ .times.CivilDusk.Duration.String }}</td>
                         </tr>
                         <tr>
                             <td>{{ i18n "Nautical dusk" . }}</td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.NauticalDusk.Start.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.NauticalDusk.End.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.NauticalDusk.Start.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.NauticalDusk.End.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                             <td>{{ .times.NauticalDusk.Duration.String }}</td>
                         </tr>
                         <tr>
                             <td>{{ i18n "Astronomical dusk" . }}</td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.AstronomicalDusk.Start.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.AstronomicalDusk.End.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.AstronomicalDusk.Start.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.AstronomicalDusk.End.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                             <td>{{ .times.AstronomicalDusk.Duration.String }}</td>
                         </tr>
                         <tr>
                             <td>{{ i18n "Night" . }}</td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.NightAfter.Start.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
-                            <td><script type="application/javascript">document.write(dateToString('{{ .times.NightAfter.End.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.NightAfter.Start.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ .times.NightAfter.End.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                             <td>{{ .times.NightAfter.Duration.String }}</td>
                         </tr>
                     </tbody>

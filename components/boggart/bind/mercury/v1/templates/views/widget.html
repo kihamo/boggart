@@ -21,7 +21,7 @@
                         <div role="tabpanel" class="tab-pane fade active in">
                             {{ if eq .action "monthly" }}
                                 <p class="text-muted font-13 m-b-30">
-                                    {{ raw (i18n "Current date time on device %s" . nil nil nil (print "<script type=\"application/javascript\">document.write(dateToString('" (.date.Format "2006-01-02T15:04:05Z07:00") "'))</script>")) }}
+                                    {{ raw (i18n "Current date time on device %s" . nil nil nil (print "<script type=\"application/javascript\">document.write(dateToString('" (.date.Format "2006-01-02T15:04:05-07:00") "'))</script>")) }}
                                 </p>
 
                                 <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
@@ -109,7 +109,7 @@
                                 <tbody>
                                     {{ range $i, $event := .events }}
                                     <tr>
-                                        <td><script type="application/javascript">document.write(dateToString('{{ $event.Time.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                        <td><script type="application/javascript">document.write(dateToString('{{ $event.Time.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                                         <td>{{ if $event.State }}{{ i18n "on" $ }}{{ else }}{{ i18n "off" $ }}{{ end }}</td>
                                     </tr>
                                     {{ end }}
@@ -126,7 +126,7 @@
                                 <tbody>
                                     {{ range $i, $event := .events }}
                                     <tr>
-                                        <td><script type="application/javascript">document.write(dateToString('{{ $event.Time.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                        <td><script type="application/javascript">document.write(dateToString('{{ $event.Time.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                                         <td>{{ if $event.State }}{{ i18n "open" $ }}{{ else }}{{ i18n "close" $ }}{{ end }}</td>
                                     </tr>
                                     {{ end }}
@@ -272,7 +272,7 @@
                                                 <td class="text-danger">{{ .datetime.error.Error }}</td>
                                             {{ else }}
                                                 <td>
-                                                    <script type="application/javascript">document.write(dateToString('{{ .datetime.value.Format "2006-01-02T15:04:05Z07:00" }}'))</script>
+                                                    <script type="application/javascript">document.write(dateToString('{{ .datetime.value.Format "2006-01-02T15:04:05-07:00" }}'))</script>
                                                     {{ if ne .datetime.delta 0 }}
                                                         <strong class="text-danger">
                                                         {{ if gt .datetime.delta 0 }}
@@ -292,7 +292,7 @@
                                             {{ if .param_last_change_data.error }}
                                                 <td class="text-danger">{{ .param_last_change_data.error.Error }}</td>
                                             {{ else }}
-                                                <td><script type="application/javascript">document.write(dateToString('{{ .param_last_change_data.value.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                                <td><script type="application/javascript">document.write(dateToString('{{ .param_last_change_data.value.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                                             {{ end }}
                                             <td>{{ i18n "Param last change date" . }}</td>
                                         </tr>
@@ -311,7 +311,7 @@
                                             {{ if .last_power_off_datetime.error }}
                                                 <td class="text-danger">{{ .last_power_off_datetime.error.Error }}</td>
                                             {{ else }}
-                                                <td><script type="application/javascript">document.write(dateToString('{{ .last_power_off_datetime.value.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                                <td><script type="application/javascript">document.write(dateToString('{{ .last_power_off_datetime.value.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                                             {{ end }}
                                             <td></td>
                                         </tr>
@@ -320,7 +320,7 @@
                                             {{ if .last_power_on_datetime.error }}
                                                 <td class="text-danger">{{ .last_power_on_datetime.error.Error }}</td>
                                             {{ else }}
-                                                <td><script type="application/javascript">document.write(dateToString('{{ .last_power_on_datetime.value.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                                <td><script type="application/javascript">document.write(dateToString('{{ .last_power_on_datetime.value.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                                             {{ end }}
                                             <td></td>
                                         </tr>
@@ -329,7 +329,7 @@
                                             {{ if .last_close_cap_datetime.error }}
                                                 <td class="text-danger">{{ .last_close_cap_datetime.error.Error }}</td>
                                             {{ else }}
-                                                <td><script type="application/javascript">document.write(dateToString('{{ .last_close_cap_datetime.value.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                                <td><script type="application/javascript">document.write(dateToString('{{ .last_close_cap_datetime.value.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                                             {{ end }}
                                             <td></td>
                                         </tr>
@@ -348,7 +348,7 @@
                                             {{ if .voltage_max.error }}
                                                 <td class="text-danger">{{ .voltage_max.error.Error }}</td>
                                             {{ else }}
-                                                <td>{{ i18n "%d V" . nil nil nil .voltage_max.value }} {{ i18n "at" . }} <script type="application/javascript">document.write(dateToString('{{ .voltage_max.date.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                                <td>{{ i18n "%d V" . nil nil nil .voltage_max.value }} {{ i18n "at" . }} <script type="application/javascript">document.write(dateToString('{{ .voltage_max.date.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                                             {{ end }}
                                             <td></td>
                                         </tr>
@@ -359,7 +359,7 @@
                                             {{ if .voltage_max_reset.error }}
                                                 <td class="text-danger">{{ .voltage_max_reset.error.Error }}</td>
                                             {{ else }}
-                                                <td>{{ i18n "%d V" . nil nil nil .voltage_max_reset.value }} {{ i18n "at" . }} <script type="application/javascript">document.write(dateToString('{{ .voltage_max_reset.date.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                                <td>{{ i18n "%d V" . nil nil nil .voltage_max_reset.value }} {{ i18n "at" . }} <script type="application/javascript">document.write(dateToString('{{ .voltage_max_reset.date.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                                             {{ end }}
                                             <td></td>
                                         </tr>
@@ -379,7 +379,7 @@
                                             {{ if .amperage_max.error }}
                                                 <td class="text-danger">{{ .amperage_max.error.Error }}</td>
                                             {{ else }}
-                                                <td>{{ i18n "%.2f A" . nil nil nil .amperage_max.value  }} {{ i18n "at" . }} <script type="application/javascript">document.write(dateToString('{{ .amperage_max.date.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                                <td>{{ i18n "%.2f A" . nil nil nil .amperage_max.value  }} {{ i18n "at" . }} <script type="application/javascript">document.write(dateToString('{{ .amperage_max.date.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                                             {{ end }}
                                             <td></td>
                                         </tr>
@@ -390,7 +390,7 @@
                                             {{ if .amperage_max_reset.error }}
                                                 <td class="text-danger">{{ .amperage_max_reset.error.Error }}</td>
                                             {{ else }}
-                                                <td>{{ i18n "%.2f A" . nil nil nil .amperage_max_reset.value }} {{ i18n "at" . }} <script type="application/javascript">document.write(dateToString('{{ .amperage_max_reset.date.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                                <td>{{ i18n "%.2f A" . nil nil nil .amperage_max_reset.value }} {{ i18n "at" . }} <script type="application/javascript">document.write(dateToString('{{ .amperage_max_reset.date.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                                             {{ end }}
                                             <td></td>
                                         </tr>
@@ -410,7 +410,7 @@
                                             {{ if .power_max.error }}
                                                 <td class="text-danger">{{ .power_max.error.Error }}</td>
                                             {{ else }}
-                                                <td>{{ i18n "%d W" . nil nil nil .power_max.value }} {{ i18n "at" . }} <script type="application/javascript">document.write(dateToString('{{ .power_max.date.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                                <td>{{ i18n "%d W" . nil nil nil .power_max.value }} {{ i18n "at" . }} <script type="application/javascript">document.write(dateToString('{{ .power_max.date.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                                             {{ end }}
                                             <td></td>
                                         </tr>
@@ -421,7 +421,7 @@
                                             {{ if .power_max_reset.error }}
                                                 <td class="text-danger">{{ .power_max_reset.error.Error }}</td>
                                             {{ else }}
-                                                <td>{{ i18n "%d W" . nil nil nil .power_max_reset.value }} {{ i18n "at" . }} <script type="application/javascript">document.write(dateToString('{{ .power_max_reset.date.Format "2006-01-02T15:04:05Z07:00" }}'))</script></td>
+                                                <td>{{ i18n "%d W" . nil nil nil .power_max_reset.value }} {{ i18n "at" . }} <script type="application/javascript">document.write(dateToString('{{ .power_max_reset.date.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
                                             {{ end }}
                                             <td></td>
                                         </tr>

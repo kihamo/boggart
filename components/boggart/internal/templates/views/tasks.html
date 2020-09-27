@@ -38,8 +38,8 @@
                                 <td>{{ if ne $task.Repeats -1 }}{{ $task.Repeats }}{{ end }}</td>
                                 <td>{{ $task.RepeatInterval }}</td>
                                 <td>{{ $task.Timeout }}</td>
-                                <td>{{ $task.CreatedAt.Format "2006-01-02T15:04:05Z07:00" }}</td>
-                                <td>{{ if $task.StartedAt }}{{ $task.StartedAt.Format "2006-01-02T15:04:05Z07:00" }}{{ end }}</td>
+                                <td>{{ $task.CreatedAt.Format "2006-01-02T15:04:05-07:00" }}</td>
+                                <td>{{ if $task.StartedAt }}{{ $task.StartedAt.Format "2006-01-02T15:04:05-07:00" }}{{ end }}</td>
                             </tr>
                         {{ end }}
                         </tbody>

@@ -100,23 +100,5 @@ msgstr "Суточная"
 msgid "Hourly"
 msgstr "Часовая"
 
-msgid "Today"
-msgstr "Сегодня"
-
-msgid "Yesterday"
-msgstr "Вчера"
-
-msgid "This month"
-msgstr "Этот месяц"
-
-msgid "Last month"
-msgstr "Предыдущий месяц"
-
-msgid "This year"
-msgstr "Этот год"
-
-msgid "Last year"
-msgstr "Предыдущий год"
-
 msgid "Show"
 msgstr "Показать"

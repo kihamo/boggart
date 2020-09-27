@@ -45,9 +45,9 @@
             <div class="x_content">
                 <p class="text-muted font-13 m-b-30">
                     {{ if .last_update_delta }}
-                        {{ raw (i18n "Last online time %s (%s)" . nil nil nil (print "<script type=\"application/javascript\">document.write(dateToString('" (.last_update.Format "2006-01-02T15:04:05Z07:00") "'))</script>") .last_update_delta ) }}
+                        {{ raw (i18n "Last online time %s (%s)" . nil nil nil (print "<script type=\"application/javascript\">document.write(dateToString('" (.last_update.Format "2006-01-02T15:04:05-07:00") "'))</script>") .last_update_delta ) }}
                     {{ else }}
-                        {{ raw ( i18n "Last online time %s" . nil nil nil (print "<script type=\"application/javascript\">document.write(dateToString('" (.last_update.Format "2006-01-02T15:04:05Z07:00") "'))</script>") ) }}
+                        {{ raw ( i18n "Last online time %s" . nil nil nil (print "<script type=\"application/javascript\">document.write(dateToString('" (.last_update.Format "2006-01-02T15:04:05-07:00") "'))</script>") ) }}
                     {{ end }}
                 </p>
 

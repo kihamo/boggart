@@ -112,7 +112,7 @@ func (b *Bind) Capture(ctx context.Context, writer io.Writer) error {
 	return err
 }
 
-func (b *Bind) Files() ([]os.FileInfo, error) {
+func (b *Bind) Files(from, to *time.Time) ([]os.FileInfo, error) {
 	dir, err := os.Open(b.config.SaveDirectory)
 	if err != nil {
 		return nil, err
@@ -122,7 +122,9 @@ func (b *Bind) Files() ([]os.FileInfo, error) {
 	files, err := dir.Readdir(-1)
 	if err == nil {
 		for i := len(files) - 1; i >= 0; i-- {
-			if files[i].IsDir() || files[i].Size() == 0 {
+			if files[i].IsDir() || files[i].Size() == 0 ||
+				(from != nil && files[i].ModTime().Before(*from)) ||
+				(to != nil && files[i].ModTime().After(*to)) {
 				files = append(files[:i], files[i+1:]...)
 			}
 		}
