@@ -39,11 +39,12 @@ type Config struct {
 func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/octoprint/+/"
 
+	probesConfig := di.ProbesConfigDefaults()
+	probesConfig.ReadinessPeriod = time.Second * 30
+	probesConfig.ReadinessTimeout = time.Second * 5
+
 	return &Config{
-		ProbesConfig: di.ProbesConfig{
-			ReadinessPeriod:  time.Second * 30,
-			ReadinessTimeout: time.Second * 5,
-		},
+		ProbesConfig:                     probesConfig,
 		LoggerConfig:                     di.LoggerConfigDefaults(),
 		UpdaterInterval:                  time.Second * 30,
 		UpdaterTimeout:                   time.Second * 5,

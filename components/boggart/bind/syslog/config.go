@@ -21,11 +21,11 @@ type Config struct {
 }
 
 func (Type) Config() interface{} {
+	probesConfig := di.ProbesConfigDefaults()
+	probesConfig.ReadinessPeriod = time.Minute * 10
+
 	return &Config{
-		ProbesConfig: di.ProbesConfig{
-			ReadinessPeriod:  time.Minute * 10,
-			ReadinessTimeout: di.ProbesConfigLivenessDefaultTimeout,
-		},
+		ProbesConfig: probesConfig,
 		LoggerConfig: di.LoggerConfigDefaults(),
 		Hostname:     "127.0.0.1",
 		Port:         514,

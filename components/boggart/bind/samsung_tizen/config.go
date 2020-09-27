@@ -22,11 +22,12 @@ type Config struct {
 func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/tv/+/"
 
+	probesConfig := di.ProbesConfigDefaults()
+	probesConfig.ReadinessPeriod = time.Second * 30
+	probesConfig.ReadinessTimeout = time.Second * 5
+
 	return &Config{
-		ProbesConfig: di.ProbesConfig{
-			ReadinessPeriod:  time.Second * 30,
-			ReadinessTimeout: time.Second * 5,
-		},
+		ProbesConfig:         probesConfig,
 		LoggerConfig:         di.LoggerConfigDefaults(),
 		TopicPower:           prefix + "power",
 		TopicKey:             prefix + "key",

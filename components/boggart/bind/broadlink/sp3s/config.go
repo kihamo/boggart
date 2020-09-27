@@ -26,11 +26,12 @@ type Config struct {
 func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/socket/+/"
 
+	probesConfig := di.ProbesConfigDefaults()
+	probesConfig.ReadinessPeriod = time.Second * 30
+	probesConfig.ReadinessTimeout = time.Second * 10
+
 	return &Config{
-		ProbesConfig: di.ProbesConfig{
-			ReadinessPeriod:  time.Second * 30,
-			ReadinessTimeout: time.Second * 10,
-		},
+		ProbesConfig:      probesConfig,
 		LoggerConfig:      di.LoggerConfigDefaults(),
 		UpdaterInterval:   time.Second * 3, // as e-control app, refresh every 3 sec,
 		ConnectionTimeout: time.Second,

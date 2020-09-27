@@ -41,20 +41,21 @@ func (Type) Config() interface{} {
 		prefixDevice            = prefix + "+/"
 	)
 
-	def := zstack.DefaultOptions()
+	zstackConfig := zstack.DefaultOptions()
+
+	probesConfig := di.ProbesConfigDefaults()
+	probesConfig.ReadinessPeriod = time.Second * 30
+	probesConfig.ReadinessTimeout = time.Second * 5
+	probesConfig.LivenessPeriod = time.Minute * 10
+	probesConfig.LivenessTimeout = time.Second * 5
 
 	return &Config{
-		ProbesConfig: di.ProbesConfig{
-			ReadinessPeriod:  time.Second * 30,
-			ReadinessTimeout: time.Second * 5,
-			LivenessPeriod:   time.Minute * 10,
-			LivenessTimeout:  time.Second * 5,
-		},
+		ProbesConfig:                  probesConfig,
 		LoggerConfig:                  di.LoggerConfigDefaults(),
 		PermitJoin:                    false,
 		PermitJoinDuration:            255 * time.Second,
-		Channel:                       def.Channel,
-		LEDEnabled:                    def.LEDEnabled,
+		Channel:                       zstackConfig.Channel,
+		LEDEnabled:                    zstackConfig.LEDEnabled,
 		TopicPermitJoin:               prefix + "permit-join",
 		TopicVersionTransportRevision: prefix + "version/transport-revision",
 		TopicVersionProduct:           prefix + "version/product",

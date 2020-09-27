@@ -49,13 +49,14 @@ func (t Type) Config() interface{} {
 		}
 	}
 
+	probesConfig := di.ProbesConfigDefaults()
+	probesConfig.ReadinessPeriod = time.Minute
+	probesConfig.ReadinessTimeout = time.Second * 10
+	probesConfig.LivenessPeriod = time.Second * 30
+	probesConfig.LivenessTimeout = time.Second * 10
+
 	return &Config{
-		ProbesConfig: di.ProbesConfig{
-			ReadinessPeriod:  time.Minute,
-			ReadinessTimeout: time.Second * 10,
-			LivenessPeriod:   time.Second * 30,
-			LivenessTimeout:  time.Second * 10,
-		},
+		ProbesConfig:        probesConfig,
 		LoggerConfig:        di.LoggerConfigDefaults(),
 		Debug:               false,
 		UpdatesEnabled:      false,

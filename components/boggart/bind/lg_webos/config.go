@@ -32,13 +32,14 @@ type Config struct {
 func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/tv/+/"
 
+	probesConfig := di.ProbesConfigDefaults()
+	probesConfig.ReadinessPeriod = time.Second * 30
+	probesConfig.ReadinessTimeout = time.Second * 10
+	probesConfig.LivenessPeriod = time.Second * 30
+	probesConfig.LivenessTimeout = time.Second * 10
+
 	return &Config{
-		ProbesConfig: di.ProbesConfig{
-			ReadinessPeriod:  time.Second * 30,
-			ReadinessTimeout: time.Second * 10,
-			LivenessPeriod:   time.Second * 30,
-			LivenessTimeout:  time.Second * 10,
-		},
+		ProbesConfig:            probesConfig,
 		LoggerConfig:            di.LoggerConfigDefaults(),
 		UpdaterInterval:         time.Minute,
 		TopicApplication:        prefix + "application",

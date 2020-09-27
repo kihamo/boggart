@@ -41,13 +41,14 @@ type Config struct {
 func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/"
 
+	probesConfig := di.ProbesConfigDefaults()
+	probesConfig.LivenessPeriod = time.Minute
+	probesConfig.LivenessTimeout = time.Second * 10
+	probesConfig.ReadinessPeriod = time.Minute
+	probesConfig.ReadinessTimeout = time.Second * 10
+
 	return &Config{
-		ProbesConfig: di.ProbesConfig{
-			LivenessPeriod:   time.Minute,
-			LivenessTimeout:  time.Second * 10,
-			ReadinessPeriod:  time.Minute,
-			ReadinessTimeout: time.Second * 10,
-		},
+		ProbesConfig:          probesConfig,
 		LoggerConfig:          di.LoggerConfigDefaults(),
 		InputsCount:           2,
 		Location:              time.Now().Location().String(),

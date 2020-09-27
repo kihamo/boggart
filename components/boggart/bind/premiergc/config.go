@@ -19,11 +19,12 @@ type Config struct {
 }
 
 func (Type) Config() interface{} {
+	probesConfig := di.ProbesConfigDefaults()
+	probesConfig.ReadinessPeriod = time.Hour
+	probesConfig.ReadinessTimeout = time.Second * 10
+
 	return &Config{
-		ProbesConfig: di.ProbesConfig{
-			ReadinessPeriod:  time.Hour,
-			ReadinessTimeout: time.Second * 10,
-		},
+		ProbesConfig: probesConfig,
 		LoggerConfig: di.LoggerConfigDefaults(),
 		Debug:        false,
 		TopicBalance: boggart.ComponentName + "/service/premiergc/+/balance",

@@ -24,23 +24,24 @@ type Config struct {
 }
 
 func (t Type) Config() interface{} {
-	def := serial.DefaultOptions()
+	serialConfig := serial.DefaultOptions()
+
+	probesConfig := di.ProbesConfigDefaults()
+	probesConfig.ReadinessPeriod = time.Minute
+	probesConfig.ReadinessTimeout = time.Second * 5
 
 	return &Config{
-		ProbesConfig: di.ProbesConfig{
-			ReadinessPeriod:  time.Minute,
-			ReadinessTimeout: time.Second * 5,
-		},
+		ProbesConfig: probesConfig,
 		LoggerConfig: di.LoggerConfigDefaults(),
 		Network:      "tcp",
 		Host:         "0.0.0.0",
 		Port:         8600,
-		Target:       def.Address,
-		BaudRate:     def.BaudRate,
-		DataBits:     def.DataBits,
-		StopBits:     def.StopBits,
-		Parity:       def.Parity,
-		Timeout:      def.Timeout,
+		Target:       serialConfig.Address,
+		BaudRate:     serialConfig.BaudRate,
+		DataBits:     serialConfig.DataBits,
+		StopBits:     serialConfig.StopBits,
+		Parity:       serialConfig.Parity,
+		Timeout:      serialConfig.Timeout,
 		Once:         true,
 	}
 }

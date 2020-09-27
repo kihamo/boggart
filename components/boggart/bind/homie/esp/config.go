@@ -36,11 +36,12 @@ func (t Type) Config() interface{} {
 		prefixImpl            = prefix + "$implementation/"
 	)
 
+	probesConfig := di.ProbesConfigDefaults()
+	probesConfig.ReadinessPeriod = time.Second * 15
+	probesConfig.ReadinessTimeout = time.Second
+
 	return &Config{
-		ProbesConfig: di.ProbesConfig{
-			ReadinessPeriod:  time.Second * 15,
-			ReadinessTimeout: time.Second,
-		},
+		ProbesConfig:                       probesConfig,
 		LoggerConfig:                       di.LoggerConfigDefaults(),
 		BaseTopic:                          "homie",
 		TopicBroadcast:                     "+/$broadcast/+",

@@ -34,11 +34,12 @@ type ConfigRM struct {
 func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/remote-control/+/"
 
+	probesConfig := di.ProbesConfigDefaults()
+	probesConfig.ReadinessPeriod = time.Second * 30
+	probesConfig.ReadinessTimeout = time.Second * 10
+
 	return &ConfigRM{
-		ProbesConfig: di.ProbesConfig{
-			ReadinessPeriod:  time.Second * 30,
-			ReadinessTimeout: time.Second * 10,
-		},
+		ProbesConfig:         probesConfig,
 		LoggerConfig:         di.LoggerConfigDefaults(),
 		CaptureDuration:      time.Second * 15,
 		ConnectionTimeout:    time.Second,
