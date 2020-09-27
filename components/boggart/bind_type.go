@@ -68,6 +68,7 @@ func ValidateBindConfig(t BindType, config interface{}) (cfg interface{}, md *ma
 				types.StringToIPHookFunc(),
 				types.StringToMACHookFunc(),
 				types.StringToURLHookFunc(),
+				types.StringToFileModeHookFunc(),
 				types.StringToSliceHookFunc(","),
 				types.StringToSliceHookFunc(";"),
 			),

@@ -1,8 +1,11 @@
 package types
 
 import (
+	"fmt"
 	"net"
 	"net/url"
+	"os"
+	"strconv"
 	"time"
 )
 
@@ -91,6 +94,30 @@ func (l *Location) UnmarshalText(text []byte) error {
 			Location: *location,
 		}
 	}
+
+	return err
+}
+
+type FileMode struct {
+	os.FileMode
+}
+
+func (t FileMode) MarshalText() ([]byte, error) {
+	return []byte(fmt.Sprintf("0%o", t.FileMode)), nil
+}
+
+func (t *FileMode) UnmarshalText(text []byte) error {
+	// as octal number
+	mode, err := strconv.ParseUint(string(text), 8, 32)
+	if err == nil {
+		*t = FileMode{
+			FileMode: os.FileMode(mode),
+		}
+
+		return nil
+	}
+
+	// TODO: as string
 
 	return err
 }

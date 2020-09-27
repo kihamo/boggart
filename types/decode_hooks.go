@@ -100,3 +100,19 @@ func StringToURLHookFunc() mapstructure.DecodeHookFunc {
 		return data, nil
 	}
 }
+
+func StringToFileModeHookFunc() mapstructure.DecodeHookFunc {
+	return func(f reflect.Type, t reflect.Type, data interface{}) (interface{}, error) {
+		if f.Kind() != reflect.String {
+			return data, nil
+		}
+
+		if t == reflect.TypeOf(FileMode{}) {
+			mode := &FileMode{}
+			err := mode.UnmarshalText([]byte(data.(string)))
+			return *mode, err
+		}
+
+		return data, nil
+	}
+}
