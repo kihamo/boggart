@@ -7,6 +7,7 @@ import (
 	"mime"
 	"net/http"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -34,7 +35,7 @@ func (b *Bind) Run() error {
 		if cacheDir != "" {
 			cacheDirBind := cacheDir + string(os.PathSeparator) + boggart.ComponentName + "_timelapse"
 
-			err := os.Mkdir(cacheDirBind, os.FileMode(b.config.SaveDirectoryMode))
+			err := os.Mkdir(cacheDirBind, b.config.SaveDirectoryMode.FileMode)
 
 			if err == nil {
 				b.Logger().Info("Cache dir created", "path", cacheDirBind)
@@ -92,7 +93,7 @@ func (b *Bind) Capture(ctx context.Context, writer io.Writer) error {
 
 	fileName := b.config.SaveDirectory + string(os.PathSeparator) + time.Now().Format(b.config.FileNameFormat) + ext
 
-	fd, err := os.OpenFile(fileName, os.O_CREATE|os.O_EXCL|os.O_WRONLY, os.FileMode(b.config.FileMode))
+	fd, err := os.OpenFile(fileName, os.O_CREATE|os.O_EXCL|os.O_WRONLY, b.config.FileMode.FileMode)
 	if err != nil {
 		return err
 	}
@@ -107,6 +108,40 @@ func (b *Bind) Capture(ctx context.Context, writer io.Writer) error {
 	}
 
 	_, err = io.Copy(w, response.Body)
+
+	return err
+}
+
+func (b *Bind) Files() ([]os.FileInfo, error) {
+	dir, err := os.Open(b.config.SaveDirectory)
+	if err != nil {
+		return nil, err
+	}
+	defer dir.Close()
+
+	files, err := dir.Readdir(-1)
+	if err == nil {
+		for i := len(files) - 1; i >= 0; i-- {
+			if files[i].IsDir() || files[i].Size() == 0 {
+				files = append(files[:i], files[i+1:]...)
+			}
+		}
+	}
+
+	sort.Slice(files, func(i, j int) bool { return files[i].Name() > files[j].Name() })
+
+	return files, err
+}
+
+func (b *Bind) Load(filename string, writer io.Writer) error {
+	filename = b.config.SaveDirectory + string(os.PathSeparator) + filename
+	f, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	_, err = io.Copy(writer, f)
 
 	return err
 }

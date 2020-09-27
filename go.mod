@@ -33,7 +33,7 @@ require (
 	github.com/influxdata/influxdb v1.8.0
 	github.com/influxdata/influxdb-client-go v1.4.0
 	github.com/kihamo/go-workers v2.1.8-0.20200620141938-31fefb5789a8+incompatible
-	github.com/kihamo/shadow v0.0.0-20200925192942-5b9ec58a9e61
+	github.com/kihamo/shadow v0.0.0-20200927200341-de3e61f6bd60
 	github.com/kihamo/snitch v0.0.0-20200412182537-3478a87783e1
 	github.com/llgcode/draw2d v0.0.0-20200110163050-b96d8208fcfc // indirect
 	github.com/mailru/easyjson v0.7.6
