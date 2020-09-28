@@ -69,31 +69,39 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		if files, err := b.Files(from, &to); err == nil {
-			l := len(files)
+			filesTotal := len(files)
 
 			offsetLeft := (page - 1) * b.config.FilesOnPage
-			if offsetLeft > l {
+			if offsetLeft > filesTotal {
 				widget.NotFound(w, r)
 				return
 			}
 
 			offsetRight := page * b.config.FilesOnPage
-			if offsetRight > l {
-				offsetRight = l
+			if offsetRight > filesTotal {
+				offsetRight = filesTotal
 			}
 
-			totalPages := l / b.config.FilesOnPage
-			if l%b.config.FilesOnPage > 0 {
-				totalPages++
+			pagesTotal := filesTotal / b.config.FilesOnPage
+			if filesTotal%b.config.FilesOnPage > 0 {
+				pagesTotal++
+			}
+
+			var sizeTotal int64
+			for _, f := range files {
+				sizeTotal += f.Size()
 			}
 
 			vars["files"] = files[offsetLeft:offsetRight]
-			vars["total"] = l
+			vars["files_total"] = filesTotal
+			vars["offset_left"] = offsetLeft
+			vars["offset_right"] = offsetRight
+			vars["size_total"] = sizeTotal
 			vars["page"] = page
-			vars["pages"] = totalPages
+			vars["pages"] = pagesTotal
 
-			if from == nil && l > 0 {
-				tm := files[l-1].ModTime()
+			if from == nil && filesTotal > 0 {
+				tm := files[filesTotal-1].ModTime()
 				from = &tm
 			}
 		} else {

@@ -37,18 +37,19 @@
                 {{ if .files }}
                     {{ block "paginator" . }} {{ end }}
                     <div class="row">
+                        <p class="text-center">{{ i18n "Showing %d to %d of %d entries (total size %s)" . nil nil nil (add .offset_left 1) .offset_right .files_total (human_bytes .size_total) }}</p>
                         {{ range $file := .files }}
                         <div class="col-sm-6 col-md-4">
                             <div class="thumbnail">
                                 <img style="width: 100%; display: block;" src="?action=thumbnail&file={{ $file.Name }}" alt="image" />
                                 <div class="caption text-center">
                                     <h3>{{ $file.Name }}</h3>
-                                    <p>{{ human_bytes $file.Size }}</p>
-                                    <p><a href="?action=download&file={{ $file.Name }}" class="btn btn-primary" role="button">{{ i18n "Download" $ }}</a></p>
+                                    <p><a href="?action=download&file={{ $file.Name }}" class="btn btn-primary" role="button">{{ i18n "Download %s" $ nil nil nil (human_bytes $file.Size) }}</a></p>
                                 </div>
                             </div>
                         </div>
                         {{ end }}
+                        <p class="text-center">{{ i18n "Showing %d to %d of %d entries (total size %s)" . nil nil nil (add .offset_left 1) .offset_right .files_total (human_bytes .size_total) }}</p>
                     </div>
                     {{ block "paginator" . }} {{ end }}
                 {{ end }}

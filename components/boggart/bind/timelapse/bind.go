@@ -21,6 +21,9 @@ type Bind struct {
 	di.LoggerBind
 	di.ProbesBind
 	di.WidgetBind
+	di.MQTTBind
+	di.MetaBind
+	di.WorkersBind
 
 	config *Config
 }
