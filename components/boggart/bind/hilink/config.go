@@ -51,6 +51,7 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/hilink/+/"
 
 	return &Config{
+		ProbesConfig:                di.ProbesConfigDefaults(),
 		LoggerConfig:                di.LoggerConfigDefaults(),
 		BalanceUpdaterInterval:      time.Hour,
 		BalanceUpdaterTimeout:       time.Second * 30,

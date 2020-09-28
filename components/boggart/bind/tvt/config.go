@@ -28,6 +28,7 @@ func (t Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/cctv/+/"
 
 	return &Config{
+		ProbesConfig:              di.ProbesConfigDefaults(),
 		LoggerConfig:              di.LoggerConfigDefaults(),
 		UpdaterInterval:           time.Minute,
 		UpdaterTimeout:            time.Second * 30,

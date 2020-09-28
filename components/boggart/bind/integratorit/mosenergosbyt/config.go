@@ -27,6 +27,7 @@ func (Type) Config() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/service/mosenergosbyt/+/"
 
 	return &Config{
+		ProbesConfig:           di.ProbesConfigDefaults(),
 		LoggerConfig:           di.LoggerConfigDefaults(),
 		UpdaterInterval:        time.Hour,
 		BalanceDetailsInterval: time.Hour * 24 * 31 * 2, // нужно минимум 2 месяца, что бы счет попал в выборку
