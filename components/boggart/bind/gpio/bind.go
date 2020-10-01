@@ -112,7 +112,7 @@ func (b *Bind) waitForEdge() {
 		if v {
 			b.Logger().Debugf("Pin %s edge high", p.String())
 		} else {
-			b.Logger().Debugf("Pin %s edge log", p.String())
+			b.Logger().Debugf("Pin %s edge low", p.String())
 		}
 
 		if err := b.MQTT().PublishAsync(ctx, b.config.TopicPinState, v); err != nil {
