@@ -14,21 +14,17 @@ var (
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {
-	sn := b.Meta().SerialNumber()
-
-	metricTariff.With("serial_number", sn).Describe(ch)
-	metricVoltage.With("serial_number", sn).Describe(ch)
-	metricAmperage.With("serial_number", sn).Describe(ch)
-	metricPower.With("serial_number", sn).Describe(ch)
-	metricBatteryVoltage.With("serial_number", sn).Describe(ch)
+	metricTariff.With("serial_number", b.config.Address).Describe(ch)
+	metricVoltage.With("serial_number", b.config.Address).Describe(ch)
+	metricAmperage.With("serial_number", b.config.Address).Describe(ch)
+	metricPower.With("serial_number", b.config.Address).Describe(ch)
+	metricBatteryVoltage.With("serial_number", b.config.Address).Describe(ch)
 }
 
 func (b *Bind) Collect(ch chan<- snitch.Metric) {
-	sn := b.Meta().SerialNumber()
-
-	metricTariff.With("serial_number", sn).Collect(ch)
-	metricVoltage.With("serial_number", sn).Collect(ch)
-	metricAmperage.With("serial_number", sn).Collect(ch)
-	metricPower.With("serial_number", sn).Collect(ch)
-	metricBatteryVoltage.With("serial_number", sn).Collect(ch)
+	metricTariff.With("serial_number", b.config.Address).Collect(ch)
+	metricVoltage.With("serial_number", b.config.Address).Collect(ch)
+	metricAmperage.With("serial_number", b.config.Address).Collect(ch)
+	metricPower.With("serial_number", b.config.Address).Collect(ch)
+	metricBatteryVoltage.With("serial_number", b.config.Address).Collect(ch)
 }

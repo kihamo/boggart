@@ -42,7 +42,7 @@ require (
 	github.com/mourner/suncalc-go v0.0.0-20141021103505-77cea98fd55e
 	github.com/opentracing-contrib/go-stdlib v0.0.0-20190519235532-cf7a6c988dc9
 	github.com/pascaldekloe/name v1.0.0 // indirect
-	github.com/pborman/uuid v1.2.0
+	github.com/pborman/uuid v1.2.1
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_model v0.2.0
 	github.com/prometheus/common v0.9.1

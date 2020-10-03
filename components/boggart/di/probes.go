@@ -162,9 +162,7 @@ func (c *ProbesContainer) Readiness() w.Task {
 	}
 
 	probeTask := task.NewFunctionTask(func(ctx context.Context) (_ interface{}, err error) {
-		switch c.bind.Status() {
-		case boggart.BindStatusInitializing, boggart.BindStatusOnline, boggart.BindStatusOffline:
-		default:
+		if s := c.bind.Status(); !s.IsStatusInitializing() && !s.IsStatusOnline() && !s.IsStatusOffline() {
 			return nil, nil
 		}
 
@@ -277,9 +275,7 @@ func (c *ProbesContainer) Liveness() w.Task {
 	}
 
 	probeTask := task.NewFunctionTask(func(ctx context.Context) (_ interface{}, err error) {
-		switch c.bind.Status() {
-		case boggart.BindStatusOnline, boggart.BindStatusOffline:
-		default:
+		if s := c.bind.Status(); !s.IsStatusOnline() && !s.IsStatusOffline() {
 			return nil, nil
 		}
 

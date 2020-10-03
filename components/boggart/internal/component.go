@@ -444,7 +444,7 @@ func (c *Component) UnregisterBindByID(id string) error {
 				}
 			}
 
-			if st := bindItem.Status(); st == boggart.BindStatusRemoving || st == boggart.BindStatusRemoved {
+			if s := bindItem.Status(); s.IsStatusRemoving() || s.IsStatusRemoved() {
 				bindSupport.SetClient(nil)
 			}
 		}()

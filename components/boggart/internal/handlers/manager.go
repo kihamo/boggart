@@ -90,8 +90,13 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 			if bindSupport, ok := di.WorkersContainerBind(bindItem.Bind()); ok {
 				item.Tasks = make([][]string, 0, len(bindSupport.Tasks()))
 				for _, t := range bindSupport.Tasks() {
+					name := bindSupport.TaskShortName(t)
+					if !bindSupport.TaskRegisteredInQueue(t) {
+						name += " (!)"
+					}
+
 					item.Tasks = append(item.Tasks, []string{
-						t.Id(), bindSupport.TaskShortName(t),
+						t.Id(), name,
 					})
 				}
 			}

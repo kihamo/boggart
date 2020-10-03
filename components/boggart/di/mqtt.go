@@ -224,7 +224,7 @@ func (c *MQTTContainer) CheckMACInTopic(topic mqtt.Topic, offset int) bool {
 
 func (c *MQTTContainer) WrapSubscribeDeviceIsOnline(callback mqtt.MessageHandler) mqtt.MessageHandler {
 	return func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-		if c.bind.Status() == boggart.BindStatusOnline {
+		if c.bind.Status().IsStatusOnline() {
 			return callback(ctx, client, message)
 		}
 

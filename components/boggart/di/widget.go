@@ -87,9 +87,9 @@ func (c *WidgetContainer) Bind() boggart.Bind {
 }
 
 func (c *WidgetContainer) HandleAllowed() bool {
-	st := c.bind.Status()
+	status := c.bind.Status()
 
-	return st == boggart.BindStatusOnline || st == boggart.BindStatusOffline
+	return status.IsStatusOnline() || status.IsStatusOffline()
 }
 
 func (c *WidgetContainer) Handle(w *dashboard.Response, r *dashboard.Request) {

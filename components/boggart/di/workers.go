@@ -105,6 +105,10 @@ func (c *WorkersContainer) TaskShortName(tsk w.Task) string {
 	return tsk.Name()
 }
 
+func (c *WorkersContainer) TaskRegisteredInQueue(tsk w.Task) bool {
+	return c.client.GetTaskMetadata(tsk.Id()) != nil
+}
+
 func (c *WorkersContainer) prefixTaskName() string {
 	return "bind-" + c.bind.ID() + "-" + c.bind.Type() + "-"
 }
@@ -160,7 +164,7 @@ func (c *WorkersContainer) Tasks() []w.Task {
 
 func (c *WorkersContainer) WrapTaskIsOnline(fn func(context.Context) error) *task.FunctionTask {
 	return task.NewFunctionTask(func(ctx context.Context) (interface{}, error) {
-		if c.bind.Status() != boggart.BindStatusOnline {
+		if !c.bind.Status().IsStatusOnline() {
 			return nil, nil
 		}
 
@@ -184,18 +188,20 @@ func (c *WorkersContainer) WrapTaskOnceSuccess(fn func(context.Context) error) (
 
 func (c *WorkersContainer) WrapTaskIsOnlineOnceSuccess(fn func(context.Context) error) (tsk *task.FunctionTask) {
 	tsk = task.NewFunctionTask(func(ctx context.Context) (interface{}, error) {
-		if c.bind.Status() != boggart.BindStatusOnline {
+		if !c.bind.Status().IsStatusOnline() {
 			return nil, nil
 		}
 
 		err := fn(ctx)
 
 		if err == nil {
-			c.UnregisterTask(tsk)
-
 			if attempt, ok := w.AttemptFromContext(ctx); ok {
 				tsk.SetRepeats(attempt)
+			} else {
+				tsk.SetRepeats(0)
 			}
+
+			c.UnregisterTask(tsk)
 		}
 
 		return nil, err

@@ -485,6 +485,16 @@ github.com/kihamo/go-workers v2.1.7+incompatible h1:OcxgzaRxzWCoGLXG4zOHauU9RG9E
 github.com/kihamo/go-workers v2.1.7+incompatible/go.mod h1:/25LqDRVdScSTfeBInL4i45Q9JDc6ddM6toL1lEUkaQ=
 github.com/kihamo/go-workers v2.1.8-0.20200620141938-31fefb5789a8+incompatible h1:Bkx93lgIYUJiDwwAFVUBIeBPBcpERgyzn7WXnXw8J/k=
 github.com/kihamo/go-workers v2.1.8-0.20200620141938-31fefb5789a8+incompatible/go.mod h1:/25LqDRVdScSTfeBInL4i45Q9JDc6ddM6toL1lEUkaQ=
+github.com/kihamo/go-workers v2.1.8-0.20201003105138-246e161138ee+incompatible h1:i/L1HfmKEpRAIwqdgMTRNRQBjHWNgwmLMkCi7Tn81UI=
+github.com/kihamo/go-workers v2.1.8-0.20201003105138-246e161138ee+incompatible/go.mod h1:/25LqDRVdScSTfeBInL4i45Q9JDc6ddM6toL1lEUkaQ=
+github.com/kihamo/go-workers v2.1.8-0.20201003114322-04a269b9ae01+incompatible h1:govwxn+QPHygITg0xEPdqZ0oA3K2/oMFzlDqx9Cqeeo=
+github.com/kihamo/go-workers v2.1.8-0.20201003114322-04a269b9ae01+incompatible/go.mod h1:/25LqDRVdScSTfeBInL4i45Q9JDc6ddM6toL1lEUkaQ=
+github.com/kihamo/go-workers v2.1.8-0.20201003115526-23b139c05763+incompatible h1:Bmvngm1o/M5q4fILyDIXrRJ8SttsNQURXRBZbF4xJr0=
+github.com/kihamo/go-workers v2.1.8-0.20201003115526-23b139c05763+incompatible/go.mod h1:/25LqDRVdScSTfeBInL4i45Q9JDc6ddM6toL1lEUkaQ=
+github.com/kihamo/go-workers v2.1.8-0.20201003120228-ff8332c8c669+incompatible h1:JBHyGEokPv2VOJcB8eUIxs6tXW+Ta8iAe/dTBz1CLbU=
+github.com/kihamo/go-workers v2.1.8-0.20201003120228-ff8332c8c669+incompatible/go.mod h1:/25LqDRVdScSTfeBInL4i45Q9JDc6ddM6toL1lEUkaQ=
+github.com/kihamo/go-workers v2.1.8-0.20201003120432-dccca0566da3+incompatible h1:62Dt/YGj9nSosbfxJtvk9R8xQQMa4IyPhDeZ+Bu03qM=
+github.com/kihamo/go-workers v2.1.8-0.20201003120432-dccca0566da3+incompatible/go.mod h1:/25LqDRVdScSTfeBInL4i45Q9JDc6ddM6toL1lEUkaQ=
 github.com/kihamo/gotypes v0.0.0-20161225095921-c1b2b85a41fe h1:tPzbTI6UkYAnF2O55sh0106hHotsyQLEFlsqcwjeUZU=
 github.com/kihamo/gotypes v0.0.0-20161225095921-c1b2b85a41fe/go.mod h1:Ea+63Rptr1cn2lZLAq4FtbjhJiTD5pS0MnCsta84xqY=
 github.com/kihamo/shadow v0.0.0-20200412185102-25db29c8fa3b h1:HF5Pj9wlLaoFCQfkiTYoYREBrQM7Pspa4To4t5RhZFA=
@@ -639,6 +649,8 @@ github.com/pascaldekloe/name v1.0.0/go.mod h1:Z//MfYJnH4jVpQ9wkclwu2I2MkHmXTlT9w
 github.com/paulbellamy/ratecounter v0.2.0/go.mod h1:Hfx1hDpSGoqxkVVpBi/IlYD7kChlfo5C6hzIHwPqfFE=
 github.com/pborman/uuid v1.2.0 h1:J7Q5mO4ysT1dv8hyrUGHb9+ooztCXu1D8MY8DZYsu3g=
 github.com/pborman/uuid v1.2.0/go.mod h1:X/NO0urCmaxf9VXbdlT7C2Yzkj2IKimNn4k+gtPdI/k=
+github.com/pborman/uuid v1.2.1 h1:+ZZIw58t/ozdjRaXh/3awHfmWRbzYxJoAdNJxe/3pvw=
+github.com/pborman/uuid v1.2.1/go.mod h1:X/NO0urCmaxf9VXbdlT7C2Yzkj2IKimNn4k+gtPdI/k=
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
 github.com/pelletier/go-toml v1.4.0/go.mod h1:PN7xzY2wHTK0K9p34ErDQMlFxa51Fk0OUruD3k1mMwo=
 github.com/peterh/liner v1.0.1-0.20180619022028-8c1271fcf47f/go.mod h1:xIteQHvHuaLYG9IFj6mSxM0fCKrs34IrEQUhOYuGPHc=

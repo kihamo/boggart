@@ -13,7 +13,14 @@ func (c *Component) Describe(ch chan<- *snitch.Description) {
 	metricProbes.Describe(ch)
 
 	c.binds.Range(func(_ interface{}, item interface{}) bool {
-		if collector, ok := item.(*BindItem).Bind().(snitch.Collector); ok {
+		bindItem := item.(*BindItem)
+		status := bindItem.Status()
+
+		if !status.IsStatusOnline() && !status.IsStatusOffline() {
+			return true
+		}
+
+		if collector, ok := bindItem.Bind().(snitch.Collector); ok {
 			collector.Describe(ch)
 		}
 
@@ -25,7 +32,14 @@ func (c *Component) Collect(ch chan<- snitch.Metric) {
 	metricProbes.Collect(ch)
 
 	c.binds.Range(func(_ interface{}, item interface{}) bool {
-		if collector, ok := item.(*BindItem).Bind().(snitch.Collector); ok {
+		bindItem := item.(*BindItem)
+		status := bindItem.Status()
+
+		if !status.IsStatusOnline() && !status.IsStatusOffline() {
+			return true
+		}
+
+		if collector, ok := bindItem.Bind().(snitch.Collector); ok {
 			collector.Collect(ch)
 		}
 

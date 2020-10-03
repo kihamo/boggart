@@ -17,6 +17,9 @@ var (
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {
 	id := b.Meta().ID()
+	if id == "" {
+		return
+	}
 
 	metricCurrent.With("id", id).Describe(ch)
 	metricTempMin.With("id", id).Describe(ch)
@@ -29,6 +32,9 @@ func (b *Bind) Describe(ch chan<- *snitch.Description) {
 
 func (b *Bind) Collect(ch chan<- snitch.Metric) {
 	id := b.Meta().ID()
+	if id == "" {
+		return
+	}
 
 	metricCurrent.With("id", id).Collect(ch)
 	metricTempMin.With("id", id).Collect(ch)
