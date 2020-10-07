@@ -62,7 +62,11 @@ func (b *Bind) taskPTZ(ctx context.Context) (interface{}, error, bool) {
 		}
 
 		if err := b.updateStatusByChannelID(ctx, id); err != nil {
-			b.Logger().Errorf("failed updated status for %s device in channel %d", b.Meta().SerialNumber(), id)
+			b.Logger().Error("Failed updated status",
+				"serial_number", b.Meta().SerialNumber(),
+				"channel", id,
+				"error", err.Error(),
+			)
 			continue
 		}
 
