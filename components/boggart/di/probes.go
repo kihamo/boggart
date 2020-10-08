@@ -152,6 +152,7 @@ func (c *ProbesContainer) Readiness() w.Task {
 	probeTimeout := ProbesConfigReadinessDefaultTimeout
 	probeThresholdSuccess := ProbesConfigReadinessDefaultThresholdSuccess
 	probeThresholdFailure := ProbesConfigReadinessDefaultThresholdFailure
+
 	var probeSuccess, probeFailure uint64
 
 	if probeConfig, ok := c.bind.Config().(ProbesConfigReadiness); ok {
@@ -265,6 +266,7 @@ func (c *ProbesContainer) Liveness() w.Task {
 	probeTimeout := ProbesConfigLivenessDefaultTimeout
 	probeThresholdSuccess := ProbesConfigLivenessDefaultThresholdSuccess
 	probeThresholdFailure := ProbesConfigLivenessDefaultThresholdFailure
+
 	var probeSuccess, probeFailure uint64
 
 	if probeConfig, ok := c.bind.Config().(ProbesConfigLiveness); ok {
@@ -302,25 +304,25 @@ func (c *ProbesContainer) Liveness() w.Task {
 
 			// success return
 			return nil, nil
-		} else {
-			threshold := atomic.AddUint64(&probeFailure, 1)
-			atomic.StoreUint64(&probeSuccess, 0)
-
-			c.metricProbes.With("probe", "liveness", "status", "failed", "id", c.bind.ID(), "type", c.bind.Type()).Inc()
-
-			logger.Error("Liveness probe failure",
-				"type", c.bind.Type(),
-				"id", c.bind.ID(),
-				"error", err.Error(),
-				"threshold", threshold,
-			)
-
-			if threshold != probeThresholdFailure {
-				return nil, err
-			}
-
-			atomic.StoreUint64(&probeFailure, 0)
 		}
+
+		threshold := atomic.AddUint64(&probeFailure, 1)
+		atomic.StoreUint64(&probeSuccess, 0)
+
+		c.metricProbes.With("probe", "liveness", "status", "failed", "id", c.bind.ID(), "type", c.bind.Type()).Inc()
+
+		logger.Error("Liveness probe failure",
+			"type", c.bind.Type(),
+			"id", c.bind.ID(),
+			"error", err.Error(),
+			"threshold", threshold,
+		)
+
+		if threshold != probeThresholdFailure {
+			return nil, err
+		}
+
+		atomic.StoreUint64(&probeFailure, 0)
 
 		if e := c.unregister(); e != nil {
 			logger.Error("Unregister after liveness probe failure",

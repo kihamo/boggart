@@ -343,6 +343,7 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 							"id", bindItem.ID(),
 							"err", err.Error(),
 						)
+
 						return
 					}
 				}
@@ -427,11 +428,12 @@ func (c *Component) UnregisterBindByID(id string) error {
 	}
 
 	bindItem := d.(*BindItem)
+	bind := bindItem.Bind()
 
 	c.itemStatusUpdate(bindItem, boggart.BindStatusRemoving)
 
 	// unregister mqtt
-	if bindSupport, ok := di.MQTTContainerBind(bindItem.Bind()); ok {
+	if bindSupport, ok := di.MQTTContainerBind(bind); ok {
 		// не блокирующее отписываемся, так как mqtt может быть не доступен
 		go func() {
 			for _, subscriber := range bindSupport.Subscribers() {
@@ -451,12 +453,12 @@ func (c *Component) UnregisterBindByID(id string) error {
 	}
 
 	// remove probes
-	if bindSupport, ok := di.ProbesContainerBind(bindItem.Bind()); ok {
+	if bindSupport, ok := di.ProbesContainerBind(bind); ok {
 		bindSupport.HookUnregister()
 	}
 
 	// workers
-	if bindSupport, ok := di.WorkersContainerBind(bindItem.Bind()); ok {
+	if bindSupport, ok := di.WorkersContainerBind(bind); ok {
 		bindSupport.HookUnregister()
 	}
 
@@ -467,7 +469,7 @@ func (c *Component) UnregisterBindByID(id string) error {
 		"id", bindItem.ID(),
 	)
 
-	if closer, ok := bindItem.Bind().(io.Closer); ok {
+	if closer, ok := bind.(io.Closer); ok {
 		if err := closer.Close(); err != nil {
 			c.logger.Debug("Unregister bind failed because close failed",
 				"type", bindItem.Type(),

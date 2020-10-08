@@ -49,6 +49,26 @@ paths:
       operationId: "getFeed"
       tags:
         - "feed"
+      parameters:
+      - name: "filter[type]"
+        in: "query"
+        description: "Filter by type"
+        type: "integer"
+        format: "uint64"
+        enum:
+          - 1 # создание пропуска
+          - 2 # изменение пропуска
+          - 4 # изменение статуса пропуска Гость внутри / Гость снаружи / Пропуск закрыт
+      - name: "filter[fromConfidant]"
+        in: "query"
+        description: "Filter by confidant"
+        type: "integer"
+        format: "uint64"
+      - name: "page"
+        in: "query"
+        description: "Page number"
+        type: "integer"
+        format: "uint64"
       responses:
         200:
           description: "Successful operation"
@@ -63,6 +83,12 @@ paths:
       operationId: "getPasses"
       tags:
         - "passes"
+      parameters:
+      - name: "page"
+        in: "query"
+        description: "Page number"
+        type: "integer"
+        format: "uint64"
       responses:
         200:
           description: "Successful operation"
@@ -299,6 +325,27 @@ definitions:
       # options
       inviteLink:
         type: "string"
+  Pagination:
+    type: "object"
+    properties:
+      prev:
+        type: "integer"
+        format: "uint64"
+      current:
+        type: "integer"
+        format: "uint64"
+      next:
+        type: "integer"
+        format: "uint64"
+      last:
+        type: "integer"
+        format: "uint64"
+      total:
+        type: "integer"
+        format: "uint64"
+      perPage:
+        type: "integer"
+        format: "uint64"
   ErrorResponse:
     type: "object"
     properties:
@@ -323,6 +370,8 @@ definitions:
             type: "array"
             items:
               $ref: "#/definitions/Feed"
+          pagination:
+            $ref: "#/definitions/Pagination"
       error:
         $ref: "#/definitions/Error"
   PassResponse:
@@ -342,5 +391,7 @@ definitions:
             type: "array"
             items:
               $ref: "#/definitions/Pass"
+          pagination:
+            $ref: "#/definitions/Pagination"
       error:
         $ref: "#/definitions/Error"

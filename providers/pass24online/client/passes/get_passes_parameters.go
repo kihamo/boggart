@@ -14,12 +14,13 @@ import (
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 )
 
 // NewGetPassesParams creates a new GetPassesParams object
 // with the default values initialized.
 func NewGetPassesParams() *GetPassesParams {
-
+	var ()
 	return &GetPassesParams{
 
 		timeout: cr.DefaultTimeout,
@@ -29,7 +30,7 @@ func NewGetPassesParams() *GetPassesParams {
 // NewGetPassesParamsWithTimeout creates a new GetPassesParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewGetPassesParamsWithTimeout(timeout time.Duration) *GetPassesParams {
-
+	var ()
 	return &GetPassesParams{
 
 		timeout: timeout,
@@ -39,7 +40,7 @@ func NewGetPassesParamsWithTimeout(timeout time.Duration) *GetPassesParams {
 // NewGetPassesParamsWithContext creates a new GetPassesParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewGetPassesParamsWithContext(ctx context.Context) *GetPassesParams {
-
+	var ()
 	return &GetPassesParams{
 
 		Context: ctx,
@@ -49,7 +50,7 @@ func NewGetPassesParamsWithContext(ctx context.Context) *GetPassesParams {
 // NewGetPassesParamsWithHTTPClient creates a new GetPassesParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewGetPassesParamsWithHTTPClient(client *http.Client) *GetPassesParams {
-
+	var ()
 	return &GetPassesParams{
 		HTTPClient: client,
 	}
@@ -59,6 +60,13 @@ func NewGetPassesParamsWithHTTPClient(client *http.Client) *GetPassesParams {
 for the get passes operation typically these are written to a http.Request
 */
 type GetPassesParams struct {
+
+	/*Page
+	  Page number
+
+	*/
+	Page *uint64
+
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -97,6 +105,17 @@ func (o *GetPassesParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithPage adds the page to the get passes params
+func (o *GetPassesParams) WithPage(page *uint64) *GetPassesParams {
+	o.SetPage(page)
+	return o
+}
+
+// SetPage adds the page to the get passes params
+func (o *GetPassesParams) SetPage(page *uint64) {
+	o.Page = page
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *GetPassesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -104,6 +123,22 @@ func (o *GetPassesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 		return err
 	}
 	var res []error
+
+	if o.Page != nil {
+
+		// query param page
+		var qrPage uint64
+		if o.Page != nil {
+			qrPage = *o.Page
+		}
+		qPage := swag.FormatUint64(qrPage)
+		if qPage != "" {
+			if err := r.SetQueryParam("page", qPage); err != nil {
+				return err
+			}
+		}
+
+	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

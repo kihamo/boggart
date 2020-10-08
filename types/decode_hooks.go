@@ -110,6 +110,7 @@ func StringToFileModeHookFunc() mapstructure.DecodeHookFunc {
 		if t == reflect.TypeOf(FileMode{}) {
 			mode := &FileMode{}
 			err := mode.UnmarshalText([]byte(data.(string)))
+
 			return *mode, err
 		}
 

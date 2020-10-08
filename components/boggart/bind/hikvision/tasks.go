@@ -67,6 +67,7 @@ func (b *Bind) taskPTZ(ctx context.Context) (interface{}, error, bool) {
 				"channel", id,
 				"error", err.Error(),
 			)
+
 			continue
 		}
 

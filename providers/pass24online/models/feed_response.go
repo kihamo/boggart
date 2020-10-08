@@ -104,6 +104,9 @@ type FeedResponseBody struct {
 
 	// collection
 	Collection []*Feed `json:"collection"`
+
+	// pagination
+	Pagination *Pagination `json:"pagination,omitempty"`
 }
 
 // Validate validates this feed response body
@@ -111,6 +114,10 @@ func (m *FeedResponseBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCollection(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validatePagination(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -140,6 +147,24 @@ func (m *FeedResponseBody) validateCollection(formats strfmt.Registry) error {
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (m *FeedResponseBody) validatePagination(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Pagination) { // not required
+		return nil
+	}
+
+	if m.Pagination != nil {
+		if err := m.Pagination.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("body" + "." + "pagination")
+			}
+			return err
+		}
 	}
 
 	return nil

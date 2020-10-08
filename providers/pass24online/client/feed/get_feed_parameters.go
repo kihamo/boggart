@@ -14,12 +14,13 @@ import (
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 )
 
 // NewGetFeedParams creates a new GetFeedParams object
 // with the default values initialized.
 func NewGetFeedParams() *GetFeedParams {
-
+	var ()
 	return &GetFeedParams{
 
 		timeout: cr.DefaultTimeout,
@@ -29,7 +30,7 @@ func NewGetFeedParams() *GetFeedParams {
 // NewGetFeedParamsWithTimeout creates a new GetFeedParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewGetFeedParamsWithTimeout(timeout time.Duration) *GetFeedParams {
-
+	var ()
 	return &GetFeedParams{
 
 		timeout: timeout,
@@ -39,7 +40,7 @@ func NewGetFeedParamsWithTimeout(timeout time.Duration) *GetFeedParams {
 // NewGetFeedParamsWithContext creates a new GetFeedParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewGetFeedParamsWithContext(ctx context.Context) *GetFeedParams {
-
+	var ()
 	return &GetFeedParams{
 
 		Context: ctx,
@@ -49,7 +50,7 @@ func NewGetFeedParamsWithContext(ctx context.Context) *GetFeedParams {
 // NewGetFeedParamsWithHTTPClient creates a new GetFeedParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewGetFeedParamsWithHTTPClient(client *http.Client) *GetFeedParams {
-
+	var ()
 	return &GetFeedParams{
 		HTTPClient: client,
 	}
@@ -59,6 +60,23 @@ func NewGetFeedParamsWithHTTPClient(client *http.Client) *GetFeedParams {
 for the get feed operation typically these are written to a http.Request
 */
 type GetFeedParams struct {
+
+	/*FilterFromConfidant
+	  Filter by confidant
+
+	*/
+	FilterFromConfidant *uint64
+	/*FilterType
+	  Filter by type
+
+	*/
+	FilterType *uint64
+	/*Page
+	  Page number
+
+	*/
+	Page *uint64
+
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -97,6 +115,39 @@ func (o *GetFeedParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithFilterFromConfidant adds the filterFromConfidant to the get feed params
+func (o *GetFeedParams) WithFilterFromConfidant(filterFromConfidant *uint64) *GetFeedParams {
+	o.SetFilterFromConfidant(filterFromConfidant)
+	return o
+}
+
+// SetFilterFromConfidant adds the filterFromConfidant to the get feed params
+func (o *GetFeedParams) SetFilterFromConfidant(filterFromConfidant *uint64) {
+	o.FilterFromConfidant = filterFromConfidant
+}
+
+// WithFilterType adds the filterType to the get feed params
+func (o *GetFeedParams) WithFilterType(filterType *uint64) *GetFeedParams {
+	o.SetFilterType(filterType)
+	return o
+}
+
+// SetFilterType adds the filterType to the get feed params
+func (o *GetFeedParams) SetFilterType(filterType *uint64) {
+	o.FilterType = filterType
+}
+
+// WithPage adds the page to the get feed params
+func (o *GetFeedParams) WithPage(page *uint64) *GetFeedParams {
+	o.SetPage(page)
+	return o
+}
+
+// SetPage adds the page to the get feed params
+func (o *GetFeedParams) SetPage(page *uint64) {
+	o.Page = page
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *GetFeedParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -104,6 +155,54 @@ func (o *GetFeedParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regis
 		return err
 	}
 	var res []error
+
+	if o.FilterFromConfidant != nil {
+
+		// query param filter[fromConfidant]
+		var qrFilterFromConfidant uint64
+		if o.FilterFromConfidant != nil {
+			qrFilterFromConfidant = *o.FilterFromConfidant
+		}
+		qFilterFromConfidant := swag.FormatUint64(qrFilterFromConfidant)
+		if qFilterFromConfidant != "" {
+			if err := r.SetQueryParam("filter[fromConfidant]", qFilterFromConfidant); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	if o.FilterType != nil {
+
+		// query param filter[type]
+		var qrFilterType uint64
+		if o.FilterType != nil {
+			qrFilterType = *o.FilterType
+		}
+		qFilterType := swag.FormatUint64(qrFilterType)
+		if qFilterType != "" {
+			if err := r.SetQueryParam("filter[type]", qFilterType); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	if o.Page != nil {
+
+		// query param page
+		var qrPage uint64
+		if o.Page != nil {
+			qrPage = *o.Page
+		}
+		qPage := swag.FormatUint64(qrPage)
+		if qPage != "" {
+			if err := r.SetQueryParam("page", qPage); err != nil {
+				return err
+			}
+		}
+
+	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

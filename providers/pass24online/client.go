@@ -87,8 +87,7 @@ func (c *Client) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 
 func (c *Client) AuthenticateRequest(req runtime.ClientRequest, reg strfmt.Registry) (err error) {
-	switch req.GetPath() {
-	case "/auth/login/":
+	if req.GetPath() == "/auth/login/" {
 		return nil
 	}
 
