@@ -1,0 +1,61 @@
+{{ define "content" }}
+    {{ if .feed }}
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_content">
+                    <table class="table table-hover table-striped datatable dt-responsive nowrap" id="feed" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>{{ i18n "Date" . }}</th>
+                                <th>{{ i18n "Message" . }}</th>
+                                <th>{{ i18n "Author" . }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{ range $item := .feed }}
+                            <tr>
+                                <td>{{ $item.HappenedAt.Time.Format "2006-01-02T15:04:05-07:00" }}</td>
+                                <td>{{ $item.Message }}</td>
+                                <td>{{ if $item.InitiatedBy }}{{ $item.InitiatedBy.Name }}{{ end }}</td>
+                            </tr>
+                            {{ end }}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{ end }}
+{{ end }}
+
+{{ define "head" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-fixedheader-bs/css/fixedHeader.bootstrap.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" false) }}
+{{ end }}
+
+{{ define "js" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net/js/jquery.dataTables.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-fixedheader/js/dataTables.fixedHeader.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive/js/dataTables.responsive.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
+
+    <script type="application/javascript">
+        $(document).ready(function () {
+            var table = $('#feed');
+
+            table.one('init.dt', function (e, settings) {
+                var api = new $.fn.dataTable.Api(settings);
+                api.order([0, 'desc']).draw();
+
+                table.DataTable().rows().every(function (i) {
+                    var data = this.data();
+                    data[0] = data[0].length > 0 ? dateToString(data[0]) : '';
+                    this.row(i).data(data);
+                });
+            });
+        });
+    </script>
+{{ end }}

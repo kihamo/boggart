@@ -97,14 +97,14 @@
             var table = $('#logs');
 
             table.one('init.dt', function (e, settings) {
+                var api = new $.fn.dataTable.Api(settings);
+                api.order([0, 'desc']).draw();
+
                 table.DataTable().rows().every(function (i) {
                     var data = this.data();
                     data[0] = data[0].length > 0 ? dateToString(data[0]) : '';
                     this.row(i).data(data);
                 });
-
-                var api = new $.fn.dataTable.Api(settings);
-                api.order([0, 'desc']).draw();
             });
         });
     </script>

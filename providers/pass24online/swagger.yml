@@ -1,0 +1,346 @@
+---
+
+swagger: "2.0"
+info:
+  title: "pass24online"
+  version: "1"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+schemes:
+- "https"
+host: "mobile-api.pass24online.ru"
+basePath: "/v1/"
+securityDefinitions:
+  basicAuth:
+    type: "basic"
+security:
+- basicAuth: []
+paths:
+  /auth/login/:
+    post:
+      security: []
+      operationId: "login"
+      tags:
+        - "auth"
+      parameters:
+      - name: "phone"
+        in: "query"
+        description: "Phone number"
+        required: true
+        type: "string"
+      - name: "password"
+        in: "query"
+        description: "Password"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/LoginResponse"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /feed:
+    get:
+      operationId: "getFeed"
+      tags:
+        - "feed"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/FeedResponse"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /passes:
+    get:
+      operationId: "getPasses"
+      tags:
+        - "passes"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/PassesResponse"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /passes/{id}:
+    get:
+      operationId: "getPassByID"
+      tags:
+      - "passes"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Pass ID"
+        required: true
+        type: "integer"
+        format: "uint64"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/PassResponse"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+definitions:
+  DateTime:
+    type: "string"
+    format: "date-time"
+    x-go-type:
+      import:
+        alias: "extend"
+        package: "github.com/kihamo/boggart/protocols/swagger"
+      type: "DateTime"
+    x-nullable: true
+  DateTimeCustom:
+    type: "string"
+    format: "date-time"
+    x-go-type:
+      import:
+        alias: "custom"
+        package: "github.com/kihamo/boggart/providers/pass24online/static/model"
+      type: "DateTime"
+    x-nullable: true
+  Error:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+      code:
+        type: "string"
+  Feed:
+    type: "object"
+    properties:
+      subjectType:
+        type: "string"
+      subject:
+        $ref: "#/definitions/Pass"
+      happenedAt:
+        $ref: "#/definitions/DateTimeCustom"
+      initiatedBy:
+        type: "object"
+        properties:
+          id:
+            type: "integer"
+            format: "uint64"
+          name:
+            type: "string"
+          type:
+            type: "string"
+      type:
+        type: "integer"
+        format: "uint64"
+      eventData:
+        type: "object"
+        additionalProperties:
+          type: "object"
+      title:
+        type: "string"
+      message:
+        type: "string"
+  Pass:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "uint64"
+      object:
+        type: "object"
+        properties:
+          id:
+            type: "integer"
+            format: "uint64"
+          name:
+            type: "string"
+          phone:
+            type: "string"
+          vehicleTypes:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                id:
+                  type: "integer"
+                  format: "uint64"
+                name:
+                  type: "string"
+                sort:
+                  type: "string"
+      tenant:
+        type: "object"
+        properties:
+          id:
+            type: "integer"
+          name:
+            type: "string"
+          phone:
+            type: "string"
+      fromConfidant:
+        type: "boolean"
+      address:
+        type: "object"
+        properties:
+          id:
+            type: "integer"
+            format: "uint64"
+          name:
+            type: "string"
+          objectId:
+            type: "integer"
+            format: "uint64"
+      startsAt:
+        $ref: "#/definitions/DateTime"
+      expiresAt:
+        $ref: "#/definitions/DateTime"
+      createdAt:
+        $ref: "#/definitions/DateTime"
+      updatedAt:
+        $ref: "#/definitions/DateTime"
+      closedAt:
+        $ref: "#/definitions/DateTime"
+      durationType:
+        type: "integer"
+        format: "uint64"
+      guestType:
+        type: "integer"
+        format: "uint64"
+      guestData:
+        type: "object"
+        properties:
+          vehicleType:
+            type: "integer"
+            format: "uint64"
+          vehicleTypeName:
+            type: "string"
+          vehicleTypeObject:
+            type: "object"
+            properties:
+              id:
+                type: "integer"
+                format: "uint64"
+              name:
+                type: "string"
+              sort:
+                type: "string"
+              object:
+                type: "object"
+                properties:
+                  id:
+                    type: "integer"
+                    format: "uint64"
+                  name:
+                    type: "string"
+                  phone:
+                    type: "string"
+                  options:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "integer"
+                          format: "uint64"
+                        name:
+                          type: "string"
+                        icon:
+                          type: "string"
+                        guestType:
+                          type: "array"
+                          items:
+                            type: "integer"
+                            format: "uint64"
+                  availableOptions:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "integer"
+                          format: "uint64"
+                        name:
+                          type: "string"
+                        icon:
+                          type: "string"
+                        guestType:
+                          type: "string"
+          model:
+            type: "object"
+            properties:
+              id:
+                type: "integer"
+                format: "uint64"
+              name:
+                type: "string"
+              nameTranslate:
+                type: "string"
+              title:
+                type: "string"
+          plateNumber:
+            type: "string"
+          typePlateNumber:
+            type: "string"
+      status:
+        type: "integer"
+      title:
+        type: "string"
+      comment:
+        type: "string"
+      # options
+      inviteLink:
+        type: "string"
+  ErrorResponse:
+    type: "object"
+    properties:
+      body:
+        type: "string"
+      error:
+        $ref: "#/definitions/Error"
+  LoginResponse:
+    type: "object"
+    properties:
+      body:
+        type: "string"
+      error:
+        $ref: "#/definitions/Error"
+  FeedResponse:
+    type: "object"
+    properties:
+      body:
+        type: "object"
+        properties:
+          collection:
+            type: "array"
+            items:
+              $ref: "#/definitions/Feed"
+      error:
+        $ref: "#/definitions/Error"
+  PassResponse:
+    type: "object"
+    properties:
+      body:
+        $ref: "#/definitions/Pass"
+      error:
+        $ref: "#/definitions/Error"
+  PassesResponse:
+    type: "object"
+    properties:
+      body:
+        type: "object"
+        properties:
+          collection:
+            type: "array"
+            items:
+              $ref: "#/definitions/Pass"
+      error:
+        $ref: "#/definitions/Error"
