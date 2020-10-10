@@ -83,7 +83,7 @@ func (h *BindHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		return
 
 	case "":
-		if bindItem.Type() == boggart.ComponentName {
+		if bindItem != nil && bindItem.Type() == boggart.ComponentName {
 			h.NotFound(w, r)
 			return
 		}
