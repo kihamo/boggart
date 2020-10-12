@@ -63,6 +63,10 @@ func (b *Bind) Components() []Component {
 }
 
 func (b *Bind) register(component Component) (err error) {
+	if _, ok := b.components.Load(component.GetUniqueID()); ok {
+		return nil
+	}
+
 	b.components.Store(component.GetUniqueID(), component)
 
 	if mac := component.GetDevice().MAC(); mac != nil {
