@@ -15,7 +15,9 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		device: vacuum.New(config.Host, config.Token),
 	}
 
-	bind.device.Client().SetPacketsCounter(config.PacketsCounter)
+	if config.PacketsCounter > 0 {
+		bind.device.Client().SetPacketsCounter(config.PacketsCounter)
+	}
 
 	return bind, nil
 }
