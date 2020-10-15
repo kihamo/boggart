@@ -52,11 +52,12 @@ func NewClient(address, token string) *Client {
 	t, _ := hex.DecodeString(token)
 
 	return &Client{
-		address:    address,
-		token:      token,
-		tokenBytes: t,
-		connOnce:   new(atomic.Once),
-		cryptoOnce: new(atomic.Once),
+		packetsCounter: uint32(time.Now().Unix()),
+		address:        address,
+		token:          token,
+		tokenBytes:     t,
+		connOnce:       new(atomic.Once),
+		cryptoOnce:     new(atomic.Once),
 	}
 }
 
