@@ -13,7 +13,7 @@ import (
 	"sync/atomic"
 
 	"github.com/kihamo/boggart/components/boggart"
-	_ "github.com/kihamo/boggart/components/boggart/bind/boggart" // nolint:golint
+	bb "github.com/kihamo/boggart/components/boggart/bind/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/shadow"
@@ -149,6 +149,10 @@ func (c *Component) registerDefaultBinds() (int, error) {
 	bind, err := kind.CreateBind(cfg)
 	if err != nil {
 		return -1, err
+	}
+
+	if bindSupport, ok := bind.(*bb.Bind); ok {
+		bindSupport.SetApplication(c.application)
 	}
 
 	bindID := c.config.String(boggart.ConfigBoggartBindID)
