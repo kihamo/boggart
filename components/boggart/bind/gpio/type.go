@@ -36,6 +36,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	bind := &Bind{
 		config: config,
+		done:   make(chan struct{}),
 		pin:    g,
 		mode:   mode,
 		out:    atomic.NewBool(),

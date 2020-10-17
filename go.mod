@@ -67,7 +67,7 @@ require (
 	gopkg.in/routeros.v2 v2.0.0-20190905230420-1bbf141cdd91
 	gopkg.in/telegram-bot-api.v4 v4.6.4
 	gopkg.in/yaml.v2 v2.3.0
-	periph.io/x/periph v3.6.2+incompatible
+	periph.io/x/periph v3.6.4+incompatible
 )
 
 replace github.com/barnybug/go-cast v0.0.0-20190910160619-d2aa97f56d4e => github.com/kihamo/go-cast v0.0.0-20190130214031-2bd907ad55c2

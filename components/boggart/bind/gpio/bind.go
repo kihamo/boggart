@@ -24,6 +24,7 @@ type Bind struct {
 	di.WidgetBind
 
 	config *Config
+	done   chan struct{}
 
 	pin  pin.Pin
 	mode Mode
@@ -36,11 +37,22 @@ func (b *Bind) Run() error {
 		return err
 	}
 
-	if _, ok := b.pin.(gpio.PinIn); ok {
-		go func() {
-			b.waitForEdge()
-		}()
+	b.done = make(chan struct{})
+
+	if p, ok := b.pin.(gpio.PinIn); ok {
+		err = p.In(gpio.PullNoChange, gpio.BothEdges)
+		if err != nil {
+			return err
+		}
+
+		go b.waitForEdge()
 	}
+
+	return nil
+}
+
+func (b *Bind) Close() error {
+	close(b.done)
 
 	return nil
 }
@@ -103,20 +115,27 @@ func (b *Bind) Read() bool {
 
 func (b *Bind) waitForEdge() {
 	p := b.pin.(gpio.PinIn)
-	_ = p.In(gpio.PullNoChange, gpio.BothEdges)
 	ctx := context.Background()
 
-	for p.WaitForEdge(-1) {
-		v := b.Read()
+	for {
+		select {
+		case <-b.done:
+			return
 
-		if v {
-			b.Logger().Debugf("Pin %s edge high", p.String())
-		} else {
-			b.Logger().Debugf("Pin %s edge low", p.String())
-		}
+		default:
+			if p.WaitForEdge(-1) {
+				v := b.Read()
 
-		if err := b.MQTT().PublishAsync(ctx, b.config.TopicPinState, v); err != nil {
-			b.Logger().Errorf("Publish to %s topic failed with error %v", b.config.TopicPinState, err)
+				if v {
+					b.Logger().Debugf("Pin %s edge high", p.String())
+				} else {
+					b.Logger().Debugf("Pin %s edge low", p.String())
+				}
+
+				if err := b.MQTT().PublishAsync(ctx, b.config.TopicPinState, v); err != nil {
+					b.Logger().Errorf("Publish to %s topic failed with error %v", b.config.TopicPinState, err)
+				}
+			}
 		}
 	}
 }
