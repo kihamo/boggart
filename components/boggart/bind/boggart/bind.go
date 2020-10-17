@@ -30,6 +30,11 @@ func (b *Bind) Run() (err error) {
 		err = multierr.Append(err, e)
 	}
 
+	// защита на случай, если запустят с retained
+	if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicShutdown, false); e != nil {
+		err = multierr.Append(err, e)
+	}
+
 	return err
 }
 
