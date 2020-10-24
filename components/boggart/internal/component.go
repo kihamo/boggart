@@ -308,6 +308,19 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 	c.logger.Debug("Register bind", "type", bindItem.Type(), "id", bindItem.ID())
 
 	go func() {
+		var err error
+
+		defer func() {
+			if err != nil {
+				c.itemStatusUpdate(bindItem, boggart.BindStatusUninitialized)
+				c.itemLogger(bind).Error("Bind run failed",
+					"type", bindItem.Type(),
+					"id", bindItem.ID(),
+					"err", err.Error(),
+				)
+			}
+		}()
+
 		// config container
 		if bindSupport, ok := bind.(di.ConfigContainerSupport); ok {
 			bindSupport.SetConfig(di.NewConfigContainer(bindItem, c.config))
@@ -340,14 +353,8 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 				// templates
 				render := c.dashboard.Renderer()
 				if !render.IsRegisterNamespace(name) {
-					if err := render.RegisterNamespace(name, fs); err != nil {
-						c.itemStatusUpdate(bindItem, boggart.BindStatusUninitialized)
-						c.logger.Error("Bind templates failed",
-							"type", bindItem.Type(),
-							"id", bindItem.ID(),
-							"err", err.Error(),
-						)
-
+					if err = render.RegisterNamespace(name, fs); err != nil {
+						err = fmt.Errorf("bind templates failed: %w", err)
 						return
 					}
 				}
@@ -364,13 +371,7 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 		}
 
 		if runner, ok := bind.(boggart.BindRunner); ok {
-			if err := runner.Run(); err != nil {
-				c.itemStatusUpdate(bindItem, boggart.BindStatusUninitialized)
-				c.logger.Error("Bind run failed",
-					"type", bindItem.Type(),
-					"id", bindItem.ID(),
-					"err", err.Error(),
-				)
+			if err = runner.Run(); err != nil {
 				return
 			}
 		}
@@ -379,13 +380,10 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 		if bindSupport, ok := di.MQTTContainerBind(bind); ok {
 			// TODO: обвешать подписки враппером, что бы только в online можно было посылать
 			for _, subscriber := range bindSupport.Subscribers() {
-				if err := c.mqtt.SubscribeSubscriber(subscriber.Subscriber()); err != nil {
-					c.itemStatusUpdate(bindItem, boggart.BindStatusUninitialized)
-					c.logger.Error("Bind mqtt subscribe failed",
-						"type", bindItem.Type(),
-						"id", bindItem.ID(),
-						"err", err.Error(),
-						"subscriber", subscriber.Subscriber().Topic().String(),
+				if err = c.mqtt.SubscribeSubscriber(subscriber.Subscriber()); err != nil {
+					err = fmt.Errorf("bind mqtt subscribe %s failed: %w",
+						subscriber.Subscriber().Topic().String(),
+						err,
 					)
 					return
 				}
@@ -433,6 +431,7 @@ func (c *Component) UnregisterBindByID(id string) error {
 
 	bindItem := d.(*BindItem)
 	bind := bindItem.Bind()
+	logger := c.itemLogger(bind)
 
 	c.itemStatusUpdate(bindItem, boggart.BindStatusRemoving)
 
@@ -442,7 +441,7 @@ func (c *Component) UnregisterBindByID(id string) error {
 		go func() {
 			for _, subscriber := range bindSupport.Subscribers() {
 				if err := c.mqtt.UnsubscribeSubscriber(subscriber.Subscriber()); err != nil {
-					c.logger.Error("Unregister bind failed because unsubscribe MQTT failed",
+					logger.Error("Unregister bind failed because unsubscribe MQTT failed",
 						"type", bindItem.Type(),
 						"id", bindItem.ID(),
 						"error", err.Error(),
@@ -468,14 +467,14 @@ func (c *Component) UnregisterBindByID(id string) error {
 
 	c.binds.Delete(id)
 
-	c.logger.Debug("Unregister bind",
+	logger.Debug("Unregister bind",
 		"type", bindItem.Type(),
 		"id", bindItem.ID(),
 	)
 
 	if closer, ok := bind.(io.Closer); ok {
 		if err := closer.Close(); err != nil {
-			c.logger.Debug("Unregister bind failed because close failed",
+			logger.Debug("Unregister bind failed because close failed",
 				"type", bindItem.Type(),
 				"id", bindItem.ID(),
 				"error", err.Error(),
@@ -531,7 +530,7 @@ func (c *Component) mqttOnConnectHandler(client mqtt.Component, restore bool) {
 
 		err := client.PublishWithoutCache(context.Background(), topic, 1, true, strings.ToLower(item.Status().String()))
 		if err != nil {
-			c.logger.Error("Restore publish to MQTT failed", "topic", topic, "error", err.Error())
+			c.itemLogger(item.Bind()).Error("Restore publish to MQTT failed", "topic", topic, "error", err.Error())
 		}
 	}
 }
@@ -546,7 +545,7 @@ func (c *Component) itemStatusUpdate(item *BindItem, status boggart.BindStatus) 
 		// при закрытии шлем синхронно, что бы блочить операцию Close компонента
 		if atomic.LoadInt32(&c.closing) != 0 {
 			if err := c.mqtt.PublishWithoutCache(ctx, topic, 1, true, payload); err != nil {
-				c.logger.Error("Publish to MQTT failed", "topic", topic, "error", err.Error())
+				c.itemLogger(item.Bind()).Error("Publish to MQTT failed", "topic", topic, "error", err.Error())
 			}
 		} else {
 			// что бы публикация зарегистрировалась в общем списке и отображалась на странице mqtt для привязки
@@ -557,4 +556,12 @@ func (c *Component) itemStatusUpdate(item *BindItem, status boggart.BindStatus) 
 			}
 		}
 	}
+}
+
+func (c *Component) itemLogger(bind boggart.Bind) logging.Logger {
+	if logger, ok := di.LoggerContainerBind(bind); ok {
+		return logger
+	}
+
+	return c.logger
 }
