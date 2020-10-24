@@ -5,7 +5,6 @@ import (
 	"errors"
 	"strconv"
 	"sync"
-	"time"
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
@@ -50,11 +49,11 @@ func (b *MQTTBind) MQTT() *MQTTContainer {
 }
 
 type MQTTSubscriber struct {
-	subscriber  *mqttWrapSubscriber
-	success     *atomic.Uint64
-	successTime *atomic.TimeNull
-	failed      *atomic.Uint64
-	failedTime  *atomic.TimeNull
+	subscriber     *mqttWrapSubscriber
+	success        *atomic.Uint64
+	successMessage *atomic.Value
+	failed         *atomic.Uint64
+	failedMessage  *atomic.Value
 }
 
 func (s MQTTSubscriber) Subscriber() mqtt.Subscriber {
@@ -65,16 +64,24 @@ func (s MQTTSubscriber) SuccessCount() uint64 {
 	return s.success.Load()
 }
 
-func (s MQTTSubscriber) SuccessTime() *time.Time {
-	return s.successTime.Load()
+func (s MQTTSubscriber) SuccessMessage() mqtt.Message {
+	if v := s.successMessage.Load(); v != nil {
+		return v.(mqtt.Message)
+	}
+
+	return nil
 }
 
 func (s MQTTSubscriber) FailedCount() uint64 {
 	return s.failed.Load()
 }
 
-func (s MQTTSubscriber) FailedTime() *time.Time {
-	return s.failedTime.Load()
+func (s MQTTSubscriber) FailedMessage() mqtt.Message {
+	if v := s.failedMessage.Load(); v != nil {
+		return v.(mqtt.Message)
+	}
+
+	return nil
 }
 
 type MQTTContainer struct {
@@ -236,17 +243,17 @@ func (c *MQTTContainer) createSubscribe(subscriber mqtt.Subscriber) MQTTSubscrib
 	logger, _ := LoggerContainerBind(c.bind.Bind())
 
 	item := MQTTSubscriber{
-		success:     atomic.NewUint64(),
-		successTime: atomic.NewTimeNull(),
-		failed:      atomic.NewUint64(),
-		failedTime:  atomic.NewTimeNull(),
+		success:        atomic.NewUint64(),
+		successMessage: atomic.NewValue(),
+		failed:         atomic.NewUint64(),
+		failedMessage:  atomic.NewValue(),
 	}
-	item.subscriber = newMQTTWrapSubscriber(subscriber, logger, func() {
+	item.subscriber = newMQTTWrapSubscriber(subscriber, logger, func(message mqtt.Message) {
 		item.success.Inc()
-		item.successTime.Set(time.Now())
-	}, func() {
+		item.successMessage.Store(message)
+	}, func(message mqtt.Message) {
 		item.failed.Inc()
-		item.failedTime.Set(time.Now())
+		item.failedMessage.Store(message)
 	})
 
 	return item
@@ -331,11 +338,11 @@ func (c *MQTTContainer) Publishes() map[mqtt.Topic]uint64 {
 type mqttWrapSubscriber struct {
 	original mqtt.Subscriber
 	logger   logging.Logger
-	success  func()
-	failed   func()
+	success  func(mqtt.Message)
+	failed   func(mqtt.Message)
 }
 
-func newMQTTWrapSubscriber(subscriber mqtt.Subscriber, logger logging.Logger, success, failed func()) *mqttWrapSubscriber {
+func newMQTTWrapSubscriber(subscriber mqtt.Subscriber, logger logging.Logger, success, failed func(mqtt.Message)) *mqttWrapSubscriber {
 	return &mqttWrapSubscriber{
 		original: subscriber,
 		logger:   logger,
@@ -372,9 +379,9 @@ func (t *mqttWrapSubscriber) Call(ctx context.Context, client mqtt.Component, me
 			)
 		}
 
-		t.failed()
+		t.failed(message)
 	} else {
-		t.success()
+		t.success(message)
 	}
 
 	return err

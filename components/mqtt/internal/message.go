@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"strconv"
+	"time"
 
 	m "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kihamo/boggart/components/mqtt"
@@ -16,13 +17,19 @@ var (
 )
 
 type message struct {
-	msg m.Message
+	msg      m.Message
+	datetime time.Time
 }
 
 func newMessage(msg m.Message) *message {
 	return &message{
-		msg: msg,
+		msg:      msg,
+		datetime: time.Now(),
 	}
+}
+
+func (m *message) Datetime() time.Time {
+	return m.datetime
 }
 
 func (m *message) Duplicate() bool {

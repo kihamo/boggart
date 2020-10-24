@@ -3,6 +3,7 @@ package mqtt
 import (
 	"context"
 	"fmt"
+	"time"
 
 	m "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kihamo/shadow"
@@ -35,6 +36,7 @@ type Component interface {
 type Message interface {
 	fmt.Stringer
 
+	Datetime() time.Time
 	Duplicate() bool
 	Qos() byte
 	Retained() bool

@@ -47,26 +47,40 @@
                         <thead>
                         <tr>
                             <th>{{ i18n "Topic" . }}</th>
-                            <th>{{ i18n "Success calls" . }}</th>
+                            <th>{{ i18n "Calls" . }}</th>
                             <th>{{ i18n "Success time" . }}</th>
-                            <th>{{ i18n "Failed calls" . }}</th>
                             <th>{{ i18n "Failed time" . }}</th>
+                            <th>{{ i18n "Success payload" . }}</th>
+                            <th>{{ i18n "Failed payload" . }}</th>
                         </tr>
                         </thead>
                         <tbody>
                         {{ range $subscriber := .subscribers }}
                         <tr>
                             <td>{{ $subscriber.Subscriber.Topic.String }}</td>
-                            <td>{{ $subscriber.SuccessCount }}</td>
                             <td>
-                                {{ if $subscriber.SuccessTime }}
-                                <script type="application/javascript">document.write(dateToString('{{ $subscriber.SuccessTime.Format "2006-01-02T15:04:05-07:00" }}'))</script>
+                                <div class="btn-group" role="group" style="min-width: 96px">
+                                    <button class="btn btn-xs btn-success">{{ $subscriber.SuccessCount }}</button>
+                                    <button class="btn btn-xs btn-danger">{{ $subscriber.FailedCount }}</button>
+                                </div>
+                            <td>
+                                {{ if $subscriber.SuccessMessage }}
+                                <script type="application/javascript">document.write(dateToString('{{ $subscriber.SuccessMessage.Datetime.Format "2006-01-02T15:04:05-07:00" }}'))</script>
                                 {{ end }}
                             </td>
-                            <td>{{ $subscriber.FailedCount }}</td>
                             <td>
-                                {{ if $subscriber.FailedTime }}
-                                    <script type="application/javascript">document.write(dateToString('{{ $subscriber.FailedTime.Format "2006-01-02T15:04:05-07:00" }}'))</script>
+                                {{ if $subscriber.FailedMessage }}
+                                    <script type="application/javascript">document.write(dateToString('{{ $subscriber.FailedMessage.Datetime.Format "2006-01-02T15:04:05-07:00" }}'))</script>
+                                {{ end }}
+                            </td>
+                            <td>
+                                {{ if $subscriber.SuccessMessage }}
+                                    <pre><code>{{ printf "%s" $subscriber.SuccessMessage.Payload|raw }}</code></pre>
+                                {{ end }}
+                            </td>
+                            <td>
+                                {{ if $subscriber.FailedMessage }}
+                                    <pre><code>{{ printf "%s" $subscriber.FailedMessage.Payload|raw }}</code></pre>
                                 {{ end }}
                             </td>
                         </tr>

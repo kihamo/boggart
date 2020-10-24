@@ -7,3 +7,7 @@ import (
 type Value struct {
 	atomic.Value
 }
+
+func NewValue() *Value {
+	return &Value{}
+}
