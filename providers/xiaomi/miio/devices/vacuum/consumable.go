@@ -9,10 +9,11 @@ import (
 )
 
 const (
-	ConsumableFilter    consumable = "filter_work_time"
-	ConsumableBrushMain consumable = "main_brush_work_time"
-	ConsumableBrushSide consumable = "side_brush_work_time"
-	ConsumableSensor    consumable = "sensor_dirty_time"
+	ConsumableFilter        consumable = "filter_work_time"
+	ConsumableFilterElement consumable = "filter_element_work_time"
+	ConsumableBrushMain     consumable = "main_brush_work_time"
+	ConsumableBrushSide     consumable = "side_brush_work_time"
+	ConsumableSensor        consumable = "sensor_dirty_time"
 
 	ConsumableLifetimeFilter    time.Duration = 150
 	ConsumableLifetimeBrushMain time.Duration = 300

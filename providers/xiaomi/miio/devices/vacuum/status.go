@@ -63,12 +63,15 @@ type Status struct {
 	InReturning     bool          `json:"in_returning"`
 	InFreshState    bool          `json:"in_fresh_state"`
 	LabStatus       bool          `json:"lab_status"`
+	LockStatus      bool          `json:"lock_status"`
 	DNDEnabled      bool          `json:"dnd_enabled"`
+	WaterBoxStatus  bool          `json:"water_box_status"`
 	MessageVersion  uint32        `json:"msg_ver"`
 	MessageSequence uint32        `json:"msg_seq"`
 	Battery         uint32        `json:"battery"`
 	CleanArea       uint32        `json:"clean_area"` // mm2
 	FanPower        uint32        `json:"fan_power"`
+	MapStatus       uint32        `json:"map_status"`
 	State           StatusState   `json:"state"`
 	Error           StatusError   `json:"error_code"`
 	CleanTime       time.Duration `json:"clean_time"`
@@ -177,12 +180,14 @@ func (d *Device) Status(ctx context.Context) (result Status, err error) {
 		Result []struct {
 			Status
 
-			MapPresent   uint64 `json:"map_present"`
-			InCleaning   uint64 `json:"in_cleaning"`
-			InReturning  uint64 `json:"in_returning"`
-			InFreshState uint64 `json:"in_fresh_state"`
-			LabStatus    uint64 `json:"lab_status"`
-			DNDEnabled   uint64 `json:"dnd_enabled"`
+			MapPresent     uint64 `json:"map_present"`
+			InCleaning     uint64 `json:"in_cleaning"`
+			InReturning    uint64 `json:"in_returning"`
+			InFreshState   uint64 `json:"in_fresh_state"`
+			LockStatus     uint64 `json:"lab_status"`
+			LabStatus      uint64 `json:"lab_status"`
+			DNDEnabled     uint64 `json:"dnd_enabled"`
+			WaterBoxStatus uint64 `json:"water_box_status"`
 		} `json:"result"`
 	}
 
@@ -201,8 +206,10 @@ func (d *Device) Status(ctx context.Context) (result Status, err error) {
 		result.InReturning = r.InReturning == 1
 		result.InFreshState = r.InFreshState == 1
 		result.LabStatus = r.LabStatus == 1
+		result.LockStatus = r.LockStatus == 1
 		result.FanPower = r.FanPower
 		result.DNDEnabled = r.DNDEnabled == 1
+		result.WaterBoxStatus = r.WaterBoxStatus == 1
 	}
 
 	return result, err

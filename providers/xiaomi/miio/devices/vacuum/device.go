@@ -60,12 +60,14 @@ ROUTER	miIO.config_router	Set Wifi settings of the device
 */
 
 type Locale struct {
-	Name     string         `json:"name"`
-	Bom      string         `json:"bom"`
-	Location string         `json:"location"`
-	Language string         `json:"language"`
-	WiFiPlan string         `json:"wifiplan"`
-	Timezone types.Location `json:"timezone"`
+	Name       string         `json:"name"`
+	Bom        string         `json:"bom"`
+	Location   string         `json:"location"`
+	Language   string         `json:"language"`
+	WiFiPlan   string         `json:"wifiplan"`
+	LogServer  string         `json:"logserver"`
+	Timezone   types.Location `json:"timezone"`
+	FeatureSet int64          `json:"featureset"`
 }
 
 type Gateway struct {
