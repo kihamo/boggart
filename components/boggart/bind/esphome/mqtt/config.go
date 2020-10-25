@@ -16,9 +16,9 @@ type Config struct {
 	TopicLog              mqtt.Topic    `mapstructure:"topic_log" yaml:"topic_log"`
 	TopicBirth            mqtt.Topic    `mapstructure:"topic_birth" yaml:"topic_birth"`
 	TopicWill             mqtt.Topic    `mapstructure:"topic_will" yaml:"topic_will"`
-	TopicIPAddressSensor  mqtt.Topic    `mapstructure:"topic_ip_address_sensor" yaml:"topic_ip_address_sensor"`
 	BirthMessage          string        `mapstructure:"birth_message" yaml:"birth_message"`
 	WillMessage           string        `mapstructure:"will_message" yaml:"will_message"`
+	IPAddressSensorID     string        `mapstructure:"ip_address_sensor_id" yaml:"ip_address_sensor_id"`
 	ImportMetricsInterval time.Duration `mapstructure:"import_metrics_interval" yaml:"import_metrics_interval"`
 }
 

@@ -20,8 +20,7 @@ type Bind struct {
 	components sync.Map
 	status     atomic.BoolNull
 
-	ip      net.IP
-	ipMutex sync.RWMutex
+	ip *atomic.Value
 }
 
 func (b *Bind) Close() (err error) {
@@ -60,6 +59,14 @@ func (b *Bind) Components() []Component {
 	})
 
 	return list
+}
+
+func (b *Bind) IP() net.IP {
+	if v := b.ip.Load(); v != nil {
+		return v.(net.IP)
+	}
+
+	return nil
 }
 
 func (b *Bind) register(component Component) (err error) {

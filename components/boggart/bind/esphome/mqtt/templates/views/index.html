@@ -23,26 +23,34 @@
                             <td>{{ $component.GetName }}</td>
                             <td>{{ $component.GetState }}</td>
                             <td>
-                                {{ if ne $component.GetCommandTopic.String "" }}
+                                {{ if or (ne $component.GetCommandTopic.String "") (eq $component.GetID $.Bind.Config.IPAddressSensorID) }}
                                 <div class="btn-group" role="group">
-                                    {{ if eq $component.GetType.String "light" }}
-                                        <a href="{{ $.Request.URL.Path }}?action=component&id={{ $component.GetID }}" class="btn btn-info btn-icon btn-xs">
-                                            <i class="glyphicon glyphicon-eye-open" title="{{ i18n "Details" $ }}"></i>
-                                        </a>
-                                    {{ end }}
+                                    {{ if ne $component.GetCommandTopic.String ""}}
+                                        {{ if eq $component.GetType.String "light" }}
+                                            <a href="{{ $.Request.URL.Path }}?action=component&id={{ $component.GetID }}" class="btn btn-info btn-icon btn-xs">
+                                                <i class="glyphicon glyphicon-eye-open" title="{{ i18n "Details" $ }}"></i>
+                                            </a>
+                                        {{ end }}
 
-                                    {{ if $.Bind.Status.IsStatusOnline }}
-                                        {{ if or (eq $component.GetType.String "light") (eq $component.GetType.String "switch") }}
-                                            {{ if eq (printf "%v" $component.GetState) "ON" }}
-                                                <a href="{{ $.Request.URL.Path }}?action=command&id={{ $component.GetID }}&cmd=OFF" class="btn btn-danger btn-icon btn-xs">
-                                                    <i class="glyphicon glyphicon-stop" title="{{ i18n "Switch off" $ }}"></i>
-                                                </a>
-                                            {{ else }}
-                                                <a href="{{ $.Request.URL.Path }}?action=command&id={{ $component.GetID }}&cmd=ON" class="btn btn-danger btn-icon btn-xs">
-                                                    <i class="glyphicon glyphicon-play" title="{{ i18n "Turn on" $ }}"></i>
-                                                </a>
+                                        {{ if $.Bind.Status.IsStatusOnline }}
+                                            {{ if or (eq $component.GetType.String "light") (eq $component.GetType.String "switch") }}
+                                                {{ if eq (printf "%v" $component.GetState) "ON" }}
+                                                    <a href="{{ $.Request.URL.Path }}?action=command&id={{ $component.GetID }}&cmd=OFF" class="btn btn-danger btn-icon btn-xs">
+                                                        <i class="glyphicon glyphicon-stop" title="{{ i18n "Switch off" $ }}"></i>
+                                                    </a>
+                                                {{ else }}
+                                                    <a href="{{ $.Request.URL.Path }}?action=command&id={{ $component.GetID }}&cmd=ON" class="btn btn-danger btn-icon btn-xs">
+                                                        <i class="glyphicon glyphicon-play" title="{{ i18n "Turn on" $ }}"></i>
+                                                    </a>
+                                                {{ end }}
                                             {{ end }}
                                         {{ end }}
+                                    {{ end }}
+
+                                    {{ if and $.Bind.Status.IsStatusOnline (eq $component.GetID $.Bind.Config.IPAddressSensorID) }}
+                                        <a href="http://{{ $component.GetState }}/" class="btn btn-info btn-icon btn-xs" target="_blank">
+                                            <i class="glyphicon glyphicon-globe" title="{{ i18n "Open Web server" $ }}"></i>
+                                        </a>
                                     {{ end }}
                                 </div>
                                 {{ end }}

@@ -12,7 +12,7 @@ import (
 )
 
 func (b *Bind) Tasks() []workers.Task {
-	if b.config.TopicIPAddressSensor == "" {
+	if b.config.IPAddressSensorID == "" {
 		return nil
 	}
 
@@ -32,10 +32,7 @@ func (b *Bind) taskImportMetrics(ctx context.Context) error {
 		return nil
 	}
 
-	b.ipMutex.RLock()
-	ip := b.ip
-	b.ipMutex.RUnlock()
-
+	ip := b.IP()
 	if ip == nil {
 		return nil
 	}

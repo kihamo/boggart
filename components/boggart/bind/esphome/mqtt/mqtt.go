@@ -43,6 +43,13 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return err
 			}
 
+			if b.config.IPAddressSensorID == id {
+				b.MQTT().Subscribe(mqtt.NewSubscriber(component.TopicState(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+					b.ip.Store(net.ParseIP(message.String()))
+					return nil
+				}))
+			}
+
 			return b.register(component)
 		}),
 		mqtt.NewSubscriber(b.config.TopicBirth, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
@@ -59,16 +66,6 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			return nil
 		}),
-	}
-
-	if b.config.TopicIPAddressSensor != "" {
-		subscribers = append(subscribers, mqtt.NewSubscriber(b.config.TopicIPAddressSensor, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-			b.ipMutex.Lock()
-			b.ip = net.ParseIP(message.String())
-			b.ipMutex.Unlock()
-
-			return nil
-		}))
 	}
 
 	return subscribers

@@ -1,6 +1,7 @@
 package mqtt
 
 import (
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
 )
 
@@ -23,6 +24,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	bind := &Bind{
 		config: config,
+		ip:     atomic.NewValue(),
 	}
 
 	return bind, nil

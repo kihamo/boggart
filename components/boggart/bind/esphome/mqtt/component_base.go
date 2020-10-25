@@ -118,3 +118,7 @@ func (c *ComponentBase) Subscribers() []mqtt.Subscriber {
 
 	return c.subscribers
 }
+
+func (c *ComponentBase) TopicState() mqtt.Topic {
+	return c.StateTopic
+}

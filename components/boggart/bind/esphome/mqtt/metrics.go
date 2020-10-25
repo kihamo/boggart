@@ -32,7 +32,7 @@ func (b *Bind) Describe(ch chan<- *snitch.Description) {
 
 	metricState.With("mac", mac).Describe(ch)
 
-	if b.config.TopicIPAddressSensor != "" {
+	if b.IP() != nil {
 		metricSensorValue.With("mac", mac).Describe(ch)
 		metricSensorFailed.With("mac", mac).Describe(ch)
 		metricBinarySensorValue.With("mac", mac).Describe(ch)
@@ -59,7 +59,7 @@ func (b *Bind) Collect(ch chan<- snitch.Metric) {
 
 	metricState.With("mac", mac).Collect(ch)
 
-	if b.config.TopicIPAddressSensor != "" {
+	if b.IP() != nil {
 		metricSensorValue.With("mac", mac).Collect(ch)
 		metricSensorFailed.With("mac", mac).Collect(ch)
 		metricBinarySensorValue.With("mac", mac).Collect(ch)

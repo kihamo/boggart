@@ -33,4 +33,5 @@ type Component interface {
 	GetDevice() Device
 	CommandToPayload(cmd interface{}) interface{}
 	Subscribers() []mqtt.Subscriber
+	TopicState() mqtt.Topic
 }
