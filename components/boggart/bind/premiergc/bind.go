@@ -10,10 +10,11 @@ import (
 )
 
 type Bind struct {
+	di.LoggerBind
 	di.MetaBind
+	di.MetricsBind
 	di.MQTTBind
 	di.ProbesBind
-	di.LoggerBind
 
 	config   *Config
 	provider *premiergc.Client

@@ -7,6 +7,7 @@ import (
 
 type Bind struct {
 	di.MetaBind
+	di.MetricsBind
 	di.MQTTBind
 	di.WorkersBind
 

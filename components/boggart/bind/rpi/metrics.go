@@ -1,14 +1,13 @@
 package rpi
 
 import (
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/snitch"
 )
 
 var (
-	metricCPUFrequentie = snitch.NewGauge(boggart.ComponentName+"_bind_pri_cpu_frequentie_hz", "CPU frequentie in Hz")
-	metricTemperature   = snitch.NewGauge(boggart.ComponentName+"_bind_pri_temperature_celsius", "Core temperature of BCM2835 SoC")
-	metricVoltage       = snitch.NewGauge(boggart.ComponentName+"_bind_rpi_voltage_volts", "Voltage in volts")
+	metricCPUFrequentie = snitch.NewGauge("cpu_frequentie_hz", "CPU frequentie in Hz")
+	metricTemperature   = snitch.NewGauge("temperature_celsius", "Core temperature of BCM2835 SoC")
+	metricVoltage       = snitch.NewGauge("voltage_volts", "Voltage in volts")
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {

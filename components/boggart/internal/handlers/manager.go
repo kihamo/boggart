@@ -9,21 +9,24 @@ import (
 
 // easyjson:json
 type managerHandlerDevice struct {
-	Tasks             [][]string    `json:"tasks"`
-	Tags              []string      `json:"tags"`
-	ID                string        `json:"id"`
-	Type              string        `json:"type"`
-	Description       string        `json:"description"`
-	SerialNumber      string        `json:"serial_number"`
-	MAC               string        `json:"mac"`
-	Status            string        `json:"status"`
-	MQTTPublishes     int           `json:"mqtt_publishes"`
-	MQTTSubscribers   int           `json:"mqtt_subscribers"`
-	LogsCount         int           `json:"logs_count"`
-	HasWidget         bool          `json:"has_widget"`
-	HasReadinessProbe bool          `json:"has_readiness_probe"`
-	HasLivenessProbe  bool          `json:"has_liveness_probe"`
-	LogsMaxLevel      zapcore.Level `json:"logs_max_level"`
+	Tasks                    [][]string    `json:"tasks"`
+	Tags                     []string      `json:"tags"`
+	ID                       string        `json:"id"`
+	Type                     string        `json:"type"`
+	Description              string        `json:"description"`
+	SerialNumber             string        `json:"serial_number"`
+	MAC                      string        `json:"mac"`
+	Status                   string        `json:"status"`
+	MetricsDescriptionsCount uint64        `json:"metrics_descriptions_count"`
+	MetricsCollectCount      uint64        `json:"metrics_collect_count"`
+	MQTTPublishes            int           `json:"mqtt_publishes"`
+	MQTTSubscribers          int           `json:"mqtt_subscribers"`
+	LogsCount                int           `json:"logs_count"`
+	HasMetrics               bool          `json:"has_metrics"`
+	HasWidget                bool          `json:"has_widget"`
+	HasReadinessProbe        bool          `json:"has_readiness_probe"`
+	HasLivenessProbe         bool          `json:"has_liveness_probe"`
+	LogsMaxLevel             zapcore.Level `json:"logs_max_level"`
 }
 
 type ManagerHandler struct {
@@ -99,6 +102,12 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 						t.Id(), name,
 					})
 				}
+			}
+
+			if bindSupport, ok := di.MetricsContainerBind(bindItem.Bind()); ok {
+				item.HasMetrics = true
+				item.MetricsDescriptionsCount = bindSupport.DescriptionsCount()
+				item.MetricsCollectCount = bindSupport.CollectCount()
 			}
 
 			if bindSupport, ok := di.MQTTContainerBind(bindItem.Bind()); ok {

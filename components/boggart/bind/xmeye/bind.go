@@ -12,12 +12,13 @@ const (
 )
 
 type Bind struct {
-	di.MetaBind
-	di.MQTTBind
-	di.WorkersBind
 	di.LoggerBind
+	di.MetaBind
+	di.MetricsBind
+	di.MQTTBind
 	di.ProbesBind
 	di.WidgetBind
+	di.WorkersBind
 
 	config         *Config
 	alarmStreaming *xmeye.AlertStreaming

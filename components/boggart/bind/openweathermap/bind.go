@@ -14,11 +14,12 @@ import (
 )
 
 type Bind struct {
-	di.MQTTBind
-	di.WorkersBind
 	di.LoggerBind
-	di.WidgetBind
 	di.MetaBind
+	di.MetricsBind
+	di.MQTTBind
+	di.WidgetBind
+	di.WorkersBind
 
 	config *Config
 	client *openweathermap.Client

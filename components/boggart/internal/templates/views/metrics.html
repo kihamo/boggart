@@ -1,0 +1,68 @@
+{{ define "content" }}
+<div class="row">
+    <div class="x_panel">
+        <div class="x_title">
+            <h2>{{ i18n "Bind %s metrics" $ nil nil nil .bind.ID }}</h2>
+            <div class="clearfix"></div>
+        </div>
+        <div class="x_content">
+            <div class="table-responsive">
+                <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>{{ i18n "Name" . }}</th>
+                            <th>{{ i18n "Value" . }}</th>
+                            <th>{{ i18n "Labels" . }}</th>
+                            <th class="md-col-1">{{ i18n "Type" . }}</th>
+                            <th>{{ i18n "Description" . }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{ range $m, $measure := .measures }}
+                        <tr>
+                            <td>{{ $measure.Description.Name }}</td>
+                            <td>
+                                {{ $type := $measure.Description.Type.String }}
+                                {{ if or (eq $type "histogram") (eq $type "timer") }}
+                                    <span class="label label-info">count: {{ $measure.Value.SampleCount }}</span>
+                                    <span class="label label-info">min: {{ $measure.Value.SampleMin }}</span>
+                                    <span class="label label-info">max: {{ $measure.Value.SampleMax }}</span>
+                                    <span class="label label-info">variance: {{ $measure.Value.SampleVariance }}</span>
+                                    {{ range $q, $value := $measure.Value.Quantiles }}
+                                        <span class="label label-info">{{ $q }}: {{ $value }}</span>
+                                    {{ end }}
+                                {{ else }}
+                                    <span class="label label-info">count: {{ $measure.Value.SampleCount }}</span>
+                                    <span class="label label-info">value: {{ $measure.Value.Value }}</span>
+                                {{ end }}
+                            </td>
+                            <td>
+                                {{ range $l, $label := $measure.Description.Labels }}
+                                    <span class="label label-success">{{ $label.Key }}: {{ $label.Value }}</span>
+                                {{ end }}
+                            </td>
+                            <td>{{ $measure.Description.Type }}</td>
+                            <td>{{ $measure.Description.Help }}</td>
+                        </tr>
+                        {{ end }}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
+
+{{ define "head" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-fixedheader-bs/css/fixedHeader.bootstrap.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" false) }}
+{{ end }}
+
+{{ define "js" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net/js/jquery.dataTables.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-fixedheader/js/dataTables.fixedHeader.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive/js/dataTables.responsive.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
+{{ end }}

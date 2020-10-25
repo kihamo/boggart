@@ -29,9 +29,9 @@ const (
 
 type Bind struct {
 	di.ConfigBind
+	di.LoggerBind
 	di.MetaBind
 	di.MQTTBind
-	di.LoggerBind
 	di.ProbesBind
 	di.WidgetBind
 

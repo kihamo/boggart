@@ -1,12 +1,11 @@
 package softvideo
 
 import (
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/snitch"
 )
 
 var (
-	metricBalance = snitch.NewGauge(boggart.ComponentName+"_bind_softvideo_balance_rubles", "SoftVideo balance in rubles")
+	metricBalance = snitch.NewGauge("balance_rubles", "SoftVideo balance in rubles")
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {

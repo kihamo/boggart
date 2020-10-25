@@ -116,12 +116,18 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.MAC = string(in.String())
 		case "status":
 			out.Status = string(in.String())
+		case "metrics_descriptions_count":
+			out.MetricsDescriptionsCount = uint64(in.Uint64())
+		case "metrics_collect_count":
+			out.MetricsCollectCount = uint64(in.Uint64())
 		case "mqtt_publishes":
 			out.MQTTPublishes = int(in.Int())
 		case "mqtt_subscribers":
 			out.MQTTSubscribers = int(in.Int())
 		case "logs_count":
 			out.LogsCount = int(in.Int())
+		case "has_metrics":
+			out.HasMetrics = bool(in.Bool())
 		case "has_widget":
 			out.HasWidget = bool(in.Bool())
 		case "has_readiness_probe":
@@ -220,6 +226,16 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 		out.String(string(in.Status))
 	}
 	{
+		const prefix string = ",\"metrics_descriptions_count\":"
+		out.RawString(prefix)
+		out.Uint64(uint64(in.MetricsDescriptionsCount))
+	}
+	{
+		const prefix string = ",\"metrics_collect_count\":"
+		out.RawString(prefix)
+		out.Uint64(uint64(in.MetricsCollectCount))
+	}
+	{
 		const prefix string = ",\"mqtt_publishes\":"
 		out.RawString(prefix)
 		out.Int(int(in.MQTTPublishes))
@@ -233,6 +249,11 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 		const prefix string = ",\"logs_count\":"
 		out.RawString(prefix)
 		out.Int(int(in.LogsCount))
+	}
+	{
+		const prefix string = ",\"has_metrics\":"
+		out.RawString(prefix)
+		out.Bool(bool(in.HasMetrics))
 	}
 	{
 		const prefix string = ",\"has_widget\":"

@@ -16,12 +16,13 @@ import (
 )
 
 type Bind struct {
-	di.MetaBind
-	di.MQTTBind
 	di.LoggerBind
+	di.MetaBind
+	di.MetricsBind
+	di.MQTTBind
 	di.ProbesBind
-	di.WorkersBind
 	di.WidgetBind
+	di.WorkersBind
 
 	config *Config
 

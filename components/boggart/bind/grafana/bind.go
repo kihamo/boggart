@@ -6,8 +6,8 @@ import (
 )
 
 type Bind struct {
-	di.MQTTBind
 	di.LoggerBind
+	di.MQTTBind
 	di.ProbesBind
 
 	config   *Config

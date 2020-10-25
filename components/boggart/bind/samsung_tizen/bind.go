@@ -10,9 +10,9 @@ import (
 )
 
 type Bind struct {
+	di.LoggerBind
 	di.MetaBind
 	di.MQTTBind
-	di.LoggerBind
 	di.ProbesBind
 
 	config *Config

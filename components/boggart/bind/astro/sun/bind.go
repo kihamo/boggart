@@ -14,8 +14,8 @@ const (
 
 type Bind struct {
 	di.MQTTBind
-	di.WorkersBind
 	di.WidgetBind
+	di.WorkersBind
 
 	config           *Config
 	taskStateUpdater *task.FunctionTask

@@ -1,18 +1,17 @@
 package openweathermap
 
 import (
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/snitch"
 )
 
 var (
-	metricCurrent     = snitch.NewGauge(boggart.ComponentName+"_bind_openweathermap_current", "Current weather")
-	metricTempMin     = snitch.NewGauge(boggart.ComponentName+"_bind_openweathermap_temp_min", "Min daily temperature")
-	metricTempMax     = snitch.NewGauge(boggart.ComponentName+"_bind_openweathermap_temp_max", "Max daily temperature")
-	metricTempDay     = snitch.NewGauge(boggart.ComponentName+"_bind_openweathermap_temp_day", "Day temperature")
-	metricTempNight   = snitch.NewGauge(boggart.ComponentName+"_bind_openweathermap_temp_night", "Night temperature")
-	metricTempMorning = snitch.NewGauge(boggart.ComponentName+"_bind_openweathermap_temp_morning", "Morning temperature")
-	metricWindSpeed   = snitch.NewGauge(boggart.ComponentName+"_bind_openweathermap_temp_wind_speed", "Wind speed")
+	metricCurrent     = snitch.NewGauge("current", "Current weather")
+	metricTempMin     = snitch.NewGauge("temp_min", "Min daily temperature")
+	metricTempMax     = snitch.NewGauge("temp_max", "Max daily temperature")
+	metricTempDay     = snitch.NewGauge("temp_day", "Day temperature")
+	metricTempNight   = snitch.NewGauge("temp_night", "Night temperature")
+	metricTempMorning = snitch.NewGauge("temp_morning", "Morning temperature")
+	metricWindSpeed   = snitch.NewGauge("temp_wind_speed", "Wind speed")
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {

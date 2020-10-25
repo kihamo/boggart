@@ -20,12 +20,12 @@ const (
 )
 
 type Bind struct {
+	di.LoggerBind
 	di.MetaBind
 	di.MQTTBind
-	di.WorkersBind
-	di.LoggerBind
 	di.ProbesBind
 	di.WidgetBind
+	di.WorkersBind
 
 	config   *Config
 	provider *api.Client

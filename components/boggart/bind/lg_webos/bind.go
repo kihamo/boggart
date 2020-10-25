@@ -25,12 +25,12 @@ var defaultDialerLGWebOS = webostv.Dialer{
 }
 
 type Bind struct {
+	di.LoggerBind
 	di.MetaBind
 	di.MQTTBind
-	di.WorkersBind
-	di.LoggerBind
 	di.ProbesBind
 	di.WidgetBind
+	di.WorkersBind
 
 	config *Config
 	mutex  sync.RWMutex

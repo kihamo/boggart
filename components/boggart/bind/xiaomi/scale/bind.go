@@ -12,12 +12,13 @@ import (
 )
 
 type Bind struct {
-	di.MetaBind
-	di.MQTTBind
 	di.LoggerBind
-	di.WorkersBind
+	di.MetaBind
+	di.MetricsBind
+	di.MQTTBind
 	di.ProbesBind
 	di.WidgetBind
+	di.WorkersBind
 
 	disconnected *atomic.BoolNull
 

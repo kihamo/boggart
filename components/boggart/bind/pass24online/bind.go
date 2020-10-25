@@ -10,9 +10,9 @@ import (
 
 type Bind struct {
 	di.LoggerBind
+	di.MQTTBind
 	di.WidgetBind
 	di.WorkersBind
-	di.MQTTBind
 
 	config   *Config
 	provider *pass24online.Client

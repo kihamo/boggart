@@ -32,8 +32,8 @@ const (
 type eventClose struct{}
 
 type Bind struct {
-	di.MQTTBind
 	di.LoggerBind
+	di.MQTTBind
 	di.ProbesBind
 	di.WidgetBind
 

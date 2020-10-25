@@ -6,11 +6,11 @@ import (
 )
 
 type Bind struct {
+	di.LoggerBind
+	di.MetaBind
 	di.MQTTBind
 	di.ProbesBind
-	di.LoggerBind
 	di.WorkersBind
-	di.MetaBind
 
 	config *Config
 	client influxdb2.Client

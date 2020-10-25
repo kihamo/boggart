@@ -1,16 +1,15 @@
 package nut
 
 import (
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/snitch"
 )
 
 var (
-	metricLoad           = snitch.NewGauge(boggart.ComponentName+"_bind_nut_load_percent", "Load on UPS (percent of full)")
-	metricInputVoltage   = snitch.NewGauge(boggart.ComponentName+"_bind_nut_input_voltage_volts", "Input voltage volts")
-	metricBatteryCharge  = snitch.NewGauge(boggart.ComponentName+"_bind_nut_battery_charge_percent", "Battery charge (percent of full)")
-	metricBatteryRuntime = snitch.NewGauge(boggart.ComponentName+"_bind_nut_battery_runtime_seconds", "Battery runtime seconds")
-	metricBatteryVoltage = snitch.NewGauge(boggart.ComponentName+"_bind_nut_battery_voltage_volts", "Battery voltage volts")
+	metricLoad           = snitch.NewGauge("load_percent", "Load on UPS (percent of full)")
+	metricInputVoltage   = snitch.NewGauge("input_voltage_volts", "Input voltage volts")
+	metricBatteryCharge  = snitch.NewGauge("battery_charge_percent", "Battery charge (percent of full)")
+	metricBatteryRuntime = snitch.NewGauge("battery_runtime_seconds", "Battery runtime seconds")
+	metricBatteryVoltage = snitch.NewGauge("battery_voltage_volts", "Battery voltage volts")
 )
 
 /*

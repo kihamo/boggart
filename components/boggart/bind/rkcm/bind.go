@@ -6,10 +6,11 @@ import (
 )
 
 type Bind struct {
-	di.MQTTBind
-	di.WorkersBind
 	di.LoggerBind
+	di.MetricsBind
+	di.MQTTBind
 	di.ProbesBind
+	di.WorkersBind
 
 	config *Config
 	client *rkcm.Client

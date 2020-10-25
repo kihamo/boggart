@@ -336,6 +336,11 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 			bindSupport.SetLogger(di.NewLoggerContainer(bindItem, c.logger))
 		}
 
+		// metrics container
+		if bindSupport, ok := bind.(di.MetricsContainerSupport); ok {
+			bindSupport.SetMetrics(di.NewMetricsContainer(bindItem))
+		}
+
 		// mqtt container
 		if bindSupport, ok := bind.(di.MQTTContainerSupport); ok {
 			bindSupport.SetMQTT(di.NewMQTTContainer(bindItem, c.mqtt))

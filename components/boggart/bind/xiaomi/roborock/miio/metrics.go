@@ -1,14 +1,13 @@
 package miio
 
 import (
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/snitch"
 )
 
 var (
-	metricBattery   = snitch.NewGauge(boggart.ComponentName+"_bind_xiaomi_roborock_miio_battery_percent", "Roborock battery in percents")
-	metricCleanArea = snitch.NewGauge(boggart.ComponentName+"_bind_xiaomi_roborock_miio_clean_area_millimeters", "Roborock clean area in millimeters")
-	metricCleanTime = snitch.NewGauge(boggart.ComponentName+"_bind_xiaomi_roborock_miio_clean_time_seconds", "Roborock clean time in seconds")
+	metricBattery   = snitch.NewGauge("battery_percent", "Roborock battery in percents")
+	metricCleanArea = snitch.NewGauge("clean_area_millimeters", "Roborock clean area in millimeters")
+	metricCleanTime = snitch.NewGauge("clean_time_seconds", "Roborock clean time in seconds")
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {

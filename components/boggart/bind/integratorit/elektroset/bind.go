@@ -10,13 +10,14 @@ const (
 )
 
 type Bind struct {
-	di.MQTTBind
-	di.WorkersBind
-	di.LoggerBind
-	di.ProbesBind
 	di.ConfigBind
+	di.LoggerBind
 	di.MetaBind
+	di.MetricsBind
+	di.MQTTBind
+	di.ProbesBind
 	di.WidgetBind
+	di.WorkersBind
 
 	config *Config
 	client *elektroset.Client

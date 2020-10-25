@@ -14,9 +14,9 @@ import (
 var reRuntimeConfigLine = regexp.MustCompile(`(?m)\s*([[:alnum:]_]+)\s*=\s*([^;]+);`)
 
 type Bind struct {
+	di.LoggerBind
 	di.MetaBind
 	di.MQTTBind
-	di.LoggerBind
 
 	config                 *Config
 	cacheRuntimeConfig     map[string]string

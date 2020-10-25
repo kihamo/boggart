@@ -1,20 +1,19 @@
 package pulsar
 
 import (
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/snitch"
 )
 
 var (
-	metricTemperatureIn    = snitch.NewGauge(boggart.ComponentName+"_bind_pulsar_temperature_in_celsius", "Pulsar temperature in in celsius")
-	metricTemperatureOut   = snitch.NewGauge(boggart.ComponentName+"_bind_pulsar_temperature_out_celsius", "Pulsar temperature out in celsius")
-	metricTemperatureDelta = snitch.NewGauge(boggart.ComponentName+"_bind_pulsar_temperature_delta_celsius", "Pulsar temperature delta in celsius")
-	metricEnergy           = snitch.NewGauge(boggart.ComponentName+"_bind_pulsar_energy_gigacalories", "Pulsar energy in gigacalories")
-	metricConsumption      = snitch.NewGauge(boggart.ComponentName+"_bind_pulsar_consumption_cubic_meters_per_hour", "Pulsar consumption in cubic meters per hour")
-	metricCapacity         = snitch.NewGauge(boggart.ComponentName+"_bind_pulsar_capacity_cubic_meters", "Pulsar capacity in cubic meters")
-	metricPower            = snitch.NewGauge(boggart.ComponentName+"_bind_pulsar_power_gigacalories_per_hour", "Pulsar power in gigacalories per hour")
-	metricInputPulses      = snitch.NewGauge(boggart.ComponentName+"_bind_pulsar_input_pulses_count", "Pulsar input in pulses")
-	metricInputVolume      = snitch.NewGauge(boggart.ComponentName+"_bind_pulsar_input_volume_cubic_meters", "Pulsar input volume in cubic meters")
+	metricTemperatureIn    = snitch.NewGauge("temperature_in_celsius", "Pulsar temperature in in celsius")
+	metricTemperatureOut   = snitch.NewGauge("temperature_out_celsius", "Pulsar temperature out in celsius")
+	metricTemperatureDelta = snitch.NewGauge("temperature_delta_celsius", "Pulsar temperature delta in celsius")
+	metricEnergy           = snitch.NewGauge("energy_gigacalories", "Pulsar energy in gigacalories")
+	metricConsumption      = snitch.NewGauge("consumption_cubic_meters_per_hour", "Pulsar consumption in cubic meters per hour")
+	metricCapacity         = snitch.NewGauge("capacity_cubic_meters", "Pulsar capacity in cubic meters")
+	metricPower            = snitch.NewGauge("power_gigacalories_per_hour", "Pulsar power in gigacalories per hour")
+	metricInputPulses      = snitch.NewGauge("input_pulses_count", "Pulsar input in pulses")
+	metricInputVolume      = snitch.NewGauge("input_volume_cubic_meters", "Pulsar input volume in cubic meters")
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {

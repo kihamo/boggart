@@ -1,12 +1,11 @@
 package ds18b20
 
 import (
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/snitch"
 )
 
 var (
-	metricValue = snitch.NewGauge(boggart.ComponentName+"_bind_ds18b20_value_celsius", "DS18B20 sensor value in celsius")
+	metricValue = snitch.NewGauge("value_celsius", "Value in celsius")
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {

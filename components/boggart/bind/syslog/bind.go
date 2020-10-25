@@ -17,8 +17,9 @@ type Bind struct {
 
 	di.ConfigBind
 	di.LoggerBind
-	di.ProbesBind
+	di.MetricsBind
 	di.MQTTBind
+	di.ProbesBind
 
 	config *Config
 	mutex  sync.Mutex

@@ -54,7 +54,7 @@ $(document).ready(function () {
                 {
                     data: null,
                     render: function (data, type, row) {
-                        var content = '<div class="btn-group" role="group" style="min-width:260px">';
+                        var content = '<div class="btn-group" role="group" style="min-width:350px">';
 
                         if (row.has_widget) {
                             content += '<a href="/boggart/widget/' + row.id + '/" target="_blank" class="btn btn-primary btn-icon btn-xs">' +
@@ -123,6 +123,12 @@ $(document).ready(function () {
 
                             content += '<a href="/boggart/bind/' + row.id + '/logs/" target="_blank" class="btn btn-' + cl +' btn-icon btn-xs">' +
                                 '<i class="fas fa-headset" title="Show last logs"></i> <span class="badge">' + row.logs_count + '</span>' +
+                                '</a>';
+                        }
+
+                        if (row.has_metrics) {
+                            content += '<a href="/boggart/bind/' + row.id + '/metrics/" target="_blank" class="btn btn-primary btn-icon btn-xs">' +
+                                '<i class="fas fa-thermometer-empty" title="Show metrics"></i> <span class="badge">' + row.metrics_descriptions_count + ' | ' + row.metrics_collect_count + '</span>' +
                                 '</a>';
                         }
 

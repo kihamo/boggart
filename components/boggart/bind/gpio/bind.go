@@ -19,8 +19,8 @@ const (
 )
 
 type Bind struct {
-	di.MQTTBind
 	di.LoggerBind
+	di.MQTTBind
 	di.WidgetBind
 
 	config *Config

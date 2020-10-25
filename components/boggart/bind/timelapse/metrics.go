@@ -1,13 +1,12 @@
 package timelapse
 
 import (
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/snitch"
 )
 
 var (
-	metricTotalFiles = snitch.NewGauge(boggart.ComponentName+"_bind_timelapse_file_total", "Total files")
-	metricTotalSize  = snitch.NewGauge(boggart.ComponentName+"_bind_timelapse_size_total_bytes", "Total sizes in bytes")
+	metricTotalFiles = snitch.NewGauge("file_total", "Total files")
+	metricTotalSize  = snitch.NewGauge("size_total_bytes", "Total sizes in bytes")
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {

@@ -1,23 +1,22 @@
 package hilink
 
 import (
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/snitch"
 )
 
 var (
-	metricBalance              = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_balance_rubles", "HiLink balance in rubles")
-	metricLimitInternetTraffic = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_limit_internet_traffic_bytes", "HiLink limit internet traffic in bytes")
-	metricSignalRSSI           = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_signal_rssi_decibel", "HiLink signal RSSI in decibel")
-	metricSignalRSRP           = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_signal_rsrp_decibel", "HiLink signal RSRP in decibel")
-	metricSignalRSRQ           = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_signal_rsrq_decibel", "HiLink signal RSRQ in decibel")
-	metricSignalSINR           = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_signal_sinr_decibel", "HiLink signal SINR in decibel")
-	metricSignalLevel          = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_signal_level", "HiLink signal level")
-	metricTotalConnectTime     = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_total_connection_time_seconds", "HiLink total connection time in seconds")
-	metricTotalDownload        = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_total_download_bytes", "HiLink total download in bytes")
-	metricTotalUpload          = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_total_upload_bytes", "HiLink total upload in bytes")
-	metricSMSUnread            = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_sms_unread", "HiLink SMS unread")
-	metricSMSInbox             = snitch.NewGauge(boggart.ComponentName+"_bind_hilink_sms_inbox", "HiLink SMS inbox")
+	metricBalance              = snitch.NewGauge("balance_rubles", "Balance in rubles")
+	metricLimitInternetTraffic = snitch.NewGauge("limit_internet_traffic_bytes", "Limit internet traffic in bytes")
+	metricSignalRSSI           = snitch.NewGauge("signal_rssi_decibel", "Signal RSSI in decibel")
+	metricSignalRSRP           = snitch.NewGauge("signal_rsrp_decibel", "Signal RSRP in decibel")
+	metricSignalRSRQ           = snitch.NewGauge("signal_rsrq_decibel", "Signal RSRQ in decibel")
+	metricSignalSINR           = snitch.NewGauge("signal_sinr_decibel", "Signal SINR in decibel")
+	metricSignalLevel          = snitch.NewGauge("signal_level", "Signal level")
+	metricTotalConnectTime     = snitch.NewGauge("total_connection_time_seconds", "Total connection time in seconds")
+	metricTotalDownload        = snitch.NewGauge("total_download_bytes", "Total download in bytes")
+	metricTotalUpload          = snitch.NewGauge("total_upload_bytes", "Total upload in bytes")
+	metricSMSUnread            = snitch.NewGauge("sms_unread", "SMS unread")
+	metricSMSInbox             = snitch.NewGauge("sms_inbox", "SMS inbox")
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {

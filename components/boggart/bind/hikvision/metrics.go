@@ -1,16 +1,15 @@
 package hikvision
 
 import (
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/snitch"
 )
 
 var (
-	metricUpTime           = snitch.NewGauge(boggart.ComponentName+"_bind_hikvision_uptime_seconds", "HikVision uptime in seconds")
-	metricMemoryUsage      = snitch.NewGauge(boggart.ComponentName+"_bind_hikvision_memory_usage_bytes", "HikVision memory usage in bytes")
-	metricMemoryAvailable  = snitch.NewGauge(boggart.ComponentName+"_bind_hikvision_memory_available_bytes", "HikVision memory available in bytes")
-	metricStorageUsage     = snitch.NewGauge(boggart.ComponentName+"_bind_hikvision_storage_usage_bytes", "HikVision storage usage in bytes")
-	metricStorageAvailable = snitch.NewGauge(boggart.ComponentName+"_bind_hikvision_storage_available_bytes", "HikVision storage available in bytes")
+	metricUpTime           = snitch.NewGauge("uptime_seconds", "Uptime in seconds")
+	metricMemoryUsage      = snitch.NewGauge("memory_usage_bytes", "Memory usage in bytes")
+	metricMemoryAvailable  = snitch.NewGauge("memory_available_bytes", "Memory available in bytes")
+	metricStorageUsage     = snitch.NewGauge("storage_usage_bytes", "Storage usage in bytes")
+	metricStorageAvailable = snitch.NewGauge("storage_available_bytes", "Storage available in bytes")
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {

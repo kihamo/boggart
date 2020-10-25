@@ -8,6 +8,7 @@ import (
 )
 
 type Bind struct {
+	di.MetricsBind
 	di.MQTTBind
 	di.WorkersBind
 

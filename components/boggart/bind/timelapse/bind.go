@@ -19,10 +19,11 @@ import (
 type Bind struct {
 	di.ConfigBind
 	di.LoggerBind
+	di.MetaBind
+	di.MetricsBind
+	di.MQTTBind
 	di.ProbesBind
 	di.WidgetBind
-	di.MQTTBind
-	di.MetaBind
 	di.WorkersBind
 
 	config *Config

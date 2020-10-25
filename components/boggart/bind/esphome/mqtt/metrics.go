@@ -1,27 +1,26 @@
 package mqtt
 
 import (
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/snitch"
 )
 
 var (
-	metricState              = snitch.NewGauge(boggart.ComponentName+"_bind_esphome_state", "ESPHome component state")
-	metricSensorValue        = snitch.NewGauge(boggart.ComponentName+"_bind_esphome_sensor_value", "ESPHome metric esphome_sensor_value")
-	metricSensorFailed       = snitch.NewGauge(boggart.ComponentName+"_bind_esphome_sensor_failed", "ESPHome metric esphome_sensor_failed")
-	metricBinarySensorValue  = snitch.NewGauge(boggart.ComponentName+"_bind_esphome_binary_sensor_value", "ESPHome metric esphome_binary_sensor_value")
-	metricBinarySensorFailed = snitch.NewGauge(boggart.ComponentName+"_bind_esphome_binary_sensor_failed", "ESPHome metric esphome_binary_sensor_failed")
-	metricFanValue           = snitch.NewGauge(boggart.ComponentName+"_bind_esphome_fan_value", "ESPHome metric esphome_fan_value")
-	metricFanFailed          = snitch.NewGauge(boggart.ComponentName+"_bind_esphome_fan_failed", "ESPHome metric esphome_fan_failed")
-	metricFanSpeed           = snitch.NewGauge(boggart.ComponentName+"_bind_esphome_fan_speed", "ESPHome metric esphome_fan_speed")
-	metricFanOscillation     = snitch.NewGauge(boggart.ComponentName+"_bind_esphome_fan_oscillation", "ESPHome metric esphome_fan_oscillation")
-	metricLightState         = snitch.NewGauge(boggart.ComponentName+"_bind_esphome_light_state", "ESPHome metric esphome_light_state")
-	metricLightColor         = snitch.NewGauge(boggart.ComponentName+"_bind_esphome_light_color", "ESPHome metric esphome_light_color")
-	metricLightEffectActive  = snitch.NewGauge(boggart.ComponentName+"_bind_esphome_light_effect_active", "ESPHome metric esphome_light_effect_active")
-	metricCoverValue         = snitch.NewGauge(boggart.ComponentName+"_bind_esphome_cover_value", "ESPHome metric esphome_cover_value")
-	metricCoverFailed        = snitch.NewGauge(boggart.ComponentName+"_bind_esphome_cover_failed", "ESPHome metric esphome_cover_failed")
-	metricSwitchValue        = snitch.NewGauge(boggart.ComponentName+"_bind_esphome_cover_value", "ESPHome metric esphome_switch_value")
-	metricSwitchFailed       = snitch.NewGauge(boggart.ComponentName+"_bind_esphome_cover_failed", "ESPHome metric esphome_switch_failed")
+	metricState              = snitch.NewGauge("state", "Component state")
+	metricSensorValue        = snitch.NewGauge("sensor_value", "Export metric esphome_sensor_value")
+	metricSensorFailed       = snitch.NewGauge("sensor_failed", "Export metric esphome_sensor_failed")
+	metricBinarySensorValue  = snitch.NewGauge("binary_sensor_value", "Export metric esphome_binary_sensor_value")
+	metricBinarySensorFailed = snitch.NewGauge("binary_sensor_failed", "Export metric esphome_binary_sensor_failed")
+	metricFanValue           = snitch.NewGauge("fan_value", "Export metric esphome_fan_value")
+	metricFanFailed          = snitch.NewGauge("fan_failed", "Export metric esphome_fan_failed")
+	metricFanSpeed           = snitch.NewGauge("fan_speed", "Export metric esphome_fan_speed")
+	metricFanOscillation     = snitch.NewGauge("fan_oscillation", "Export metric esphome_fan_oscillation")
+	metricLightState         = snitch.NewGauge("light_state", "Export metric esphome_light_state")
+	metricLightColor         = snitch.NewGauge("light_color", "Export metric esphome_light_color")
+	metricLightEffectActive  = snitch.NewGauge("light_effect_active", "Export metric esphome_light_effect_active")
+	metricCoverValue         = snitch.NewGauge("cover_value", "Export metric esphome_cover_value")
+	metricCoverFailed        = snitch.NewGauge("cover_failed", "Export metric esphome_cover_failed")
+	metricSwitchValue        = snitch.NewGauge("cover_value", "Export metric esphome_switch_value")
+	metricSwitchFailed       = snitch.NewGauge("cover_failed", "Export metric esphome_switch_failed")
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {

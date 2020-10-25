@@ -1,14 +1,13 @@
 package zstack
 
 import (
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/snitch"
 )
 
 var (
-	metricLinkQuality    = snitch.NewGauge(boggart.ComponentName+"_bind_zigbee_link_quality", "Indicates the link quality measured during reception")
-	metricBatteryPercent = snitch.NewGauge(boggart.ComponentName+"_bind_zigbee_battery_percent", "Battery voltage in percent")
-	metricBatteryVoltage = snitch.NewGauge(boggart.ComponentName+"_bind_zigbee_battery_voltage", "Battery voltage")
+	metricLinkQuality    = snitch.NewGauge("link_quality", "Indicates the link quality measured during reception")
+	metricBatteryPercent = snitch.NewGauge("battery_percent", "Battery voltage in percent")
+	metricBatteryVoltage = snitch.NewGauge("battery_voltage", "Battery voltage")
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {

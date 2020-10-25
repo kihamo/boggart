@@ -1,13 +1,12 @@
 package octoprint
 
 import (
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/snitch"
 )
 
 var (
-	metricDeviceTemperatureActual = snitch.NewGauge(boggart.ComponentName+"_bind_octoprint_temperature_actual", "Current temperature")
-	metricDeviceTemperatureTarget = snitch.NewGauge(boggart.ComponentName+"_bind_octoprint_temperature_target", "Target temperature")
+	metricDeviceTemperatureActual = snitch.NewGauge("temperature_actual", "Current temperature")
+	metricDeviceTemperatureTarget = snitch.NewGauge("temperature_target", "Target temperature")
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {

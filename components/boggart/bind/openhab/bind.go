@@ -10,9 +10,9 @@ import (
 )
 
 type Bind struct {
-	di.MQTTBind
-	di.MetaBind
 	di.LoggerBind
+	di.MetaBind
+	di.MQTTBind
 	di.ProbesBind
 	di.WidgetBind
 

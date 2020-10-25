@@ -74,6 +74,10 @@ func (h *BindHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		h.actionLogs(w, r, bindItem)
 		return
 
+	case "metrics":
+		h.actionMetrics(w, r, bindItem)
+		return
+
 	case "mqtt":
 		h.actionMQTT(w, r, bindItem)
 		return
@@ -393,6 +397,24 @@ func (h *BindHandler) actionLogs(w http.ResponseWriter, r *dashboard.Request, b 
 	h.Render(r.Context(), "logs", map[string]interface{}{
 		"bind": b,
 		"logs": response,
+	})
+}
+
+func (h *BindHandler) actionMetrics(w http.ResponseWriter, r *dashboard.Request, b boggart.BindItem) {
+	bindSupport, ok := b.Bind().(di.MetricsContainerSupport)
+	if !ok {
+		h.NotFound(w, r)
+		return
+	}
+
+	measures, err := bindSupport.Metrics().Gather()
+	if err != nil {
+		r.Session().FlashBag().Error(err.Error())
+	}
+
+	h.Render(r.Context(), "metrics", map[string]interface{}{
+		"bind":     b,
+		"measures": measures,
 	})
 }
 

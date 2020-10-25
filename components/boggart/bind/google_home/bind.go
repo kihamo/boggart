@@ -10,8 +10,8 @@ import (
 )
 
 type Bind struct {
-	di.MetaBind
 	di.LoggerBind
+	di.MetaBind
 	di.ProbesBind
 
 	provider *home.Client

@@ -8,9 +8,10 @@ import (
 )
 
 type Bind struct {
+	di.LoggerBind
+	di.MetricsBind
 	di.MQTTBind
 	di.ProbesBind
-	di.LoggerBind
 
 	config   *Config
 	provider *softvideo.Client
