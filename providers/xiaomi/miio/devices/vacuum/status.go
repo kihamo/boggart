@@ -184,7 +184,7 @@ func (d *Device) Status(ctx context.Context) (result Status, err error) {
 			InCleaning     uint64 `json:"in_cleaning"`
 			InReturning    uint64 `json:"in_returning"`
 			InFreshState   uint64 `json:"in_fresh_state"`
-			LockStatus     uint64 `json:"lab_status"`
+			LockStatus     uint64 `json:"lock_status"`
 			LabStatus      uint64 `json:"lab_status"`
 			DNDEnabled     uint64 `json:"dnd_enabled"`
 			WaterBoxStatus uint64 `json:"water_box_status"`

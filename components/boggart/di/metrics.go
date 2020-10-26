@@ -54,6 +54,7 @@ type MetricsContainer struct {
 	prefix            string
 	descriptionsCount uint64
 	collectCount      uint64
+	emptyCount        uint64
 }
 
 func NewMetricsContainer(bind boggart.BindItem) *MetricsContainer {
@@ -107,7 +108,10 @@ func (c *MetricsContainer) Collect(ch chan<- snitch.Metric) {
 	}
 
 	tmpCh := make(chan snitch.Metric, metricsSizeOfChannel)
-	var count uint64
+	var (
+		count      uint64
+		emptyCount uint64
+	)
 
 	go func() {
 		c.collector.Collect(tmpCh)
@@ -116,6 +120,11 @@ func (c *MetricsContainer) Collect(ch chan<- snitch.Metric) {
 
 	for v := range tmpCh {
 		count++
+
+		if m, err := v.Measure(); err == nil && m.SampleCount != nil && *m.SampleCount == 0 {
+			emptyCount++
+		}
+
 		ch <- &metricWrapper{
 			metric:    v,
 			container: c,
@@ -123,6 +132,7 @@ func (c *MetricsContainer) Collect(ch chan<- snitch.Metric) {
 	}
 
 	atomic.StoreUint64(&c.collectCount, count)
+	atomic.StoreUint64(&c.emptyCount, emptyCount)
 }
 
 func (c *MetricsContainer) DescriptionsCount() (count uint64) {
@@ -149,9 +159,17 @@ func (c *MetricsContainer) CollectCount() uint64 {
 	return atomic.LoadUint64(&c.collectCount)
 }
 
+func (c *MetricsContainer) EmptyCount() uint64 {
+	return atomic.LoadUint64(&c.emptyCount)
+}
+
 func (c *MetricsContainer) Gather() (snitch.Measures, error) {
 	tmpCh := make(chan snitch.Metric, metricsSizeOfChannel)
 	measures := make(snitch.Measures, 0)
+	var (
+		count      uint64
+		emptyCount uint64
+	)
 
 	go func() {
 		c.Collect(tmpCh)
@@ -159,9 +177,15 @@ func (c *MetricsContainer) Gather() (snitch.Measures, error) {
 	}()
 
 	for metric := range tmpCh {
+		count++
+
 		value, err := metric.Measure()
 		if err != nil {
 			return nil, err
+		}
+
+		if value.SampleCount != nil && *value.SampleCount == 0 {
+			emptyCount++
 		}
 
 		measures = append(measures, &snitch.Measure{
@@ -170,6 +194,9 @@ func (c *MetricsContainer) Gather() (snitch.Measures, error) {
 			Value:       value,
 		})
 	}
+
+	atomic.StoreUint64(&c.descriptionsCount, count)
+	atomic.StoreUint64(&c.emptyCount, emptyCount)
 
 	return measures, nil
 }

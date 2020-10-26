@@ -120,6 +120,8 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.MetricsDescriptionsCount = uint64(in.Uint64())
 		case "metrics_collect_count":
 			out.MetricsCollectCount = uint64(in.Uint64())
+		case "metrics_empty_count":
+			out.MetricsEmptyCount = uint64(in.Uint64())
 		case "mqtt_publishes":
 			out.MQTTPublishes = int(in.Int())
 		case "mqtt_subscribers":
@@ -234,6 +236,11 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 		const prefix string = ",\"metrics_collect_count\":"
 		out.RawString(prefix)
 		out.Uint64(uint64(in.MetricsCollectCount))
+	}
+	{
+		const prefix string = ",\"metrics_empty_count\":"
+		out.RawString(prefix)
+		out.Uint64(uint64(in.MetricsEmptyCount))
 	}
 	{
 		const prefix string = ",\"mqtt_publishes\":"

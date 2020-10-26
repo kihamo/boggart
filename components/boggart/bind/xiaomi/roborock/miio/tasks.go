@@ -54,6 +54,9 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		if len(summary.CleanupIDs) > 0 {
 			lastClean, e := b.device.CleanDetails(ctx, summary.CleanupIDs[0])
 			if e == nil {
+				metricCleanArea.With("serial_number", sn).Set(float64(lastClean.Area))
+				metricCleanTime.With("serial_number", sn).Set(lastClean.CleaningDuration.Duration.Seconds())
+
 				if e := b.MQTT().PublishAsync(ctx, b.config.TopicLastCleanCompleted.Format(sn), lastClean.Completed); e != nil {
 					err = multierr.Append(err, e)
 				}

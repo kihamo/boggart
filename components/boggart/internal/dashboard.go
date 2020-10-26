@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -121,9 +122,22 @@ func (c *Component) DashboardMiddleware() []func(http.Handler) http.Handler {
 
 func (c *Component) DashboardTemplateFunctions() map[string]interface{} {
 	return template.FuncMap{
+		"pointer":     templateFunctionPointer,
 		"human_bytes": templateFunctionHumanBytes,
 		"widget_url":  templateFunctionWidgetURL,
 	}
+}
+
+func templateFunctionPointer(v interface{}) interface{} {
+	if ref := reflect.ValueOf(v); ref.Kind() == reflect.Ptr {
+		if !ref.Elem().IsValid() {
+			return nil
+		}
+
+		return ref.Elem().Interface()
+	}
+
+	return v
 }
 
 func templateFunctionHumanBytes(size interface{}) string {

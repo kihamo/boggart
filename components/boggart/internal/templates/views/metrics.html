@@ -19,12 +19,12 @@
                     </thead>
                     <tbody>
                         {{ range $m, $measure := .measures }}
-                        <tr>
+                        <tr{{ if empty (pointer $measure.Value.SampleCount) }} class="danger"{{ end }}>
                             <td>{{ $measure.Description.Name }}</td>
                             <td>
                                 {{ $type := $measure.Description.Type.String }}
+                                <span class="label label-info">count: {{ $measure.Value.SampleCount }}</span>
                                 {{ if or (eq $type "histogram") (eq $type "timer") }}
-                                    <span class="label label-info">count: {{ $measure.Value.SampleCount }}</span>
                                     <span class="label label-info">min: {{ $measure.Value.SampleMin }}</span>
                                     <span class="label label-info">max: {{ $measure.Value.SampleMax }}</span>
                                     <span class="label label-info">variance: {{ $measure.Value.SampleVariance }}</span>
@@ -32,7 +32,6 @@
                                         <span class="label label-info">{{ $q }}: {{ $value }}</span>
                                     {{ end }}
                                 {{ else }}
-                                    <span class="label label-info">count: {{ $measure.Value.SampleCount }}</span>
                                     <span class="label label-info">value: {{ $measure.Value.Value }}</span>
                                 {{ end }}
                             </td>

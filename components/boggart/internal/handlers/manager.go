@@ -19,6 +19,7 @@ type managerHandlerDevice struct {
 	Status                   string        `json:"status"`
 	MetricsDescriptionsCount uint64        `json:"metrics_descriptions_count"`
 	MetricsCollectCount      uint64        `json:"metrics_collect_count"`
+	MetricsEmptyCount        uint64        `json:"metrics_empty_count"`
 	MQTTPublishes            int           `json:"mqtt_publishes"`
 	MQTTSubscribers          int           `json:"mqtt_subscribers"`
 	LogsCount                int           `json:"logs_count"`
@@ -108,6 +109,7 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				item.HasMetrics = true
 				item.MetricsDescriptionsCount = bindSupport.DescriptionsCount()
 				item.MetricsCollectCount = bindSupport.CollectCount()
+				item.MetricsEmptyCount = bindSupport.EmptyCount()
 			}
 
 			if bindSupport, ok := di.MQTTContainerBind(bindItem.Bind()); ok {
