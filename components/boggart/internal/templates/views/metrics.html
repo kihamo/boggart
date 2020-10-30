@@ -25,14 +25,14 @@
                                 {{ $type := $measure.Description.Type.String }}
                                 <span class="label label-info">count: {{ $measure.Value.SampleCount }}</span>
                                 {{ if or (eq $type "histogram") (eq $type "timer") }}
-                                    <span class="label label-info">min: {{ $measure.Value.SampleMin }}</span>
-                                    <span class="label label-info">max: {{ $measure.Value.SampleMax }}</span>
-                                    <span class="label label-info">variance: {{ $measure.Value.SampleVariance }}</span>
+                                    <span class="label label-info">min: {{ format_float (pointer $measure.Value.SampleMin) 'f' -1 64 }}</span>
+                                    <span class="label label-info">max: {{ format_float (pointer $measure.Value.SampleMax) 'f' -1 64 }}</span>
+                                    <span class="label label-info">variance: {{ format_float (pointer $measure.Value.SampleVariance) 'f' -1 64 }}</span>
                                     {{ range $q, $value := $measure.Value.Quantiles }}
-                                        <span class="label label-info">{{ $q }}: {{ $value }}</span>
+                                        <span class="label label-info">{{ $q }}: {{ format_float (pointer $value) 'f' -1 64 }}</span>
                                     {{ end }}
                                 {{ else }}
-                                    <span class="label label-info">value: {{ $measure.Value.Value }}</span>
+                                    <span class="label label-info">value: {{ format_float (pointer $measure.Value.Value) 'f' -1 64 }}</span>
                                 {{ end }}
                             </td>
                             <td>
