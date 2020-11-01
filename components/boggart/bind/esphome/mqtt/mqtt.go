@@ -19,22 +19,22 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			switch t {
 			case ComponentTypeBinarySensor:
 				component = NewComponentBinarySensor(id)
-			// case components.ComponentTypeCover.String():
-			// 	component.Type = components.ComponentTypeCover
-			// case components.ComponentTypeFan.String():
-			// 	component.Type = components.ComponentTypeFan
+				// case components.ComponentTypeCover.String():
+				// 	component.Type = components.ComponentTypeCover
+				// case components.ComponentTypeFan.String():
+				// 	component.Type = components.ComponentTypeFan
 			case ComponentTypeLight:
 				component = NewComponentLight(id)
 			case ComponentTypeSensor:
 				component = NewComponentSensor(id)
 			case ComponentTypeSwitch:
 				component = NewComponentSwitch(id)
-			// case components.ComponentTypeTextSensor.String():
-			// 	component.Type = components.ComponentTypeTextSensor
-			// case components.ComponentTypeCamera.String():
-			// 	component.Type = components.ComponentTypeCamera
-			// case components.ComponentTypeClimate.String():
-			// 	component.Type = components.ComponentTypeClimate
+				// case components.ComponentTypeTextSensor.String():
+				// 	component.Type = components.ComponentTypeTextSensor
+				// case components.ComponentTypeCamera.String():
+				// 	component.Type = components.ComponentTypeCamera
+				// case components.ComponentTypeClimate.String():
+				// 	component.Type = components.ComponentTypeClimate
 			default:
 				component = NewComponentBase(id, t)
 			}
@@ -43,11 +43,13 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return err
 			}
 
-			if b.config.IPAddressSensorID == id {
+			if b.config.IPAddressSensorID == id && b.ipSubscriber.IsFalse() {
 				b.MQTT().Subscribe(mqtt.NewSubscriber(component.TopicState(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 					b.ip.Store(net.ParseIP(message.String()))
 					return nil
 				}))
+
+				b.ipSubscriber.True()
 			}
 
 			return b.register(component)

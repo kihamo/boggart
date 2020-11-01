@@ -21,7 +21,14 @@ type Bind struct {
 	components sync.Map
 	status     atomic.BoolNull
 
-	ip *atomic.Value
+	ip           *atomic.Value
+	ipSubscriber *atomic.Bool
+}
+
+func (b *Bind) Run() error {
+	b.ipSubscriber.False()
+
+	return nil
 }
 
 func (b *Bind) Close() (err error) {
