@@ -5,6 +5,7 @@ import (
 
 	"github.com/eclipse/paho.mqtt.golang"
 	"github.com/eclipse/paho.mqtt.golang/packets"
+	"github.com/kihamo/boggart/performance"
 	"github.com/kihamo/shadow/components/logging"
 )
 
@@ -57,7 +58,7 @@ func (s *Store) Put(key string, message packets.ControlPacket) {
 			"topic", m.TopicName,
 			"qos", m.Qos,
 			"retained", m.Retain,
-			"payload", string(m.Payload),
+			"payload", performance.UnsafeBytes2String(m.Payload),
 		)
 
 	case *packets.PubrecPacket:

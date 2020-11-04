@@ -1,14 +1,15 @@
 package root
 
 import (
+	"bytes"
 	"io/ioutil"
 	"os"
 	"regexp"
-	"strings"
 	"sync"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/kihamo/boggart/components/boggart/di"
+	"github.com/kihamo/boggart/performance"
 )
 
 var reRuntimeConfigLine = regexp.MustCompile(`(?m)\s*([[:alnum:]_]+)\s*=\s*([^;]+);`)
@@ -61,7 +62,7 @@ func (b *Bind) InitDeviceID(fileName string) error {
 		return err
 	}
 
-	b.Meta().SetSerialNumber(strings.TrimSpace(string(content)))
+	b.Meta().SetSerialNumber(performance.UnsafeBytes2String(bytes.TrimSpace(content)))
 
 	return nil
 }

@@ -6,10 +6,10 @@ import (
 	"encoding/json"
 	"strconv"
 	"time"
-	"unsafe"
 
 	m "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/performance"
 )
 
 var (
@@ -78,8 +78,7 @@ func (m *message) IsFalse() bool {
 }
 
 func (m *message) String() string {
-	payload := m.msg.Payload()
-	return *(*string)(unsafe.Pointer(&payload))
+	return performance.UnsafeBytes2String(m.msg.Payload())
 }
 
 func (m *message) Float64() float64 {

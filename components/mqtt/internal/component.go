@@ -18,6 +18,7 @@ import (
 
 	m "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/performance"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/dashboard"
@@ -352,9 +353,9 @@ func (c *Component) doPublish(_ context.Context, topic mqtt.Topic, qos byte, ret
 
 	var logPayload string
 	if len(payloadConverted) > 100 {
-		logPayload = string(payloadConverted[:100])
+		logPayload = performance.UnsafeBytes2String(payloadConverted[:100])
 	} else {
-		logPayload = string(payloadConverted)
+		logPayload = performance.UnsafeBytes2String(payloadConverted)
 	}
 
 	logQOS := strconv.Itoa(int(qos))

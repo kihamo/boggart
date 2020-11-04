@@ -13,6 +13,7 @@ import (
 
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/performance"
 	"github.com/kihamo/boggart/providers/hikvision/client/event"
 	"github.com/kihamo/boggart/providers/hikvision/client/image"
 	"github.com/kihamo/boggart/providers/hikvision/client/streaming"
@@ -296,7 +297,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		if content, err := ioutil.ReadAll(r.Original().Body); err == nil {
-			b.Logger().Debug("Call hikvision event " + string(content))
+			b.Logger().Debug("Call hikvision event " + performance.UnsafeBytes2String(content))
 
 			e := &models.EventNotificationAlert{}
 
@@ -308,7 +309,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			if err != nil {
 				b.Logger().Error("Parse event failed",
 					"error", err.Error(),
-					"body", string(content),
+					"body", performance.UnsafeBytes2String(content),
 				)
 
 				widget.InternalError(w, r, err)

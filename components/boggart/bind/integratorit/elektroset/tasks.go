@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/kihamo/boggart/performance"
 	"github.com/kihamo/boggart/providers/integratorit/elektroset"
 	"github.com/kihamo/go-workers"
 	"go.uber.org/multierr"
@@ -116,7 +117,7 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 						"action":   "bill",
 						"period":   lastBill.Format(layoutPeriod),
 						"account":  account.Number,
-						"provider": string(provider),
+						"provider": performance.UnsafeBytes2String(provider),
 					})
 
 					if e == nil {
