@@ -92,9 +92,11 @@ func (c *ComponentBase) GetDevice() Device {
 
 // nolint:interfacer
 func (c *ComponentBase) SetState(message mqtt.Message) error {
-	c.state.Store(message.String())
+	state := message.String()
 
-	if val, err := strconv.ParseFloat(message.String(), 64); err == nil {
+	c.state.Store(state)
+
+	if val, err := strconv.ParseFloat(state, 64); err == nil {
 		metricState.With("mac", c.Device.MAC().String()).With("component", c.ID).Set(val)
 	}
 
