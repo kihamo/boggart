@@ -48,7 +48,7 @@ func (b *Bind) SMS(ctx context.Context, content string, phones ...string) error 
 	params := sms.NewSendSMSParamsWithContext(ctx)
 	params.Request.Index = -1
 	params.Request.Reserved = 1
-	params.Request.Date = time.Now().Format("2006-01-02 15:04:05")
+	params.Request.Date = time.Now().Format(hilink.TimeFormat)
 	params.Request.Phones = phones
 	params.Request.Content = content
 	params.Request.Length = int64(len(content))

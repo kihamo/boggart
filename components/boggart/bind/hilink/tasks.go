@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kihamo/boggart/providers/hilink"
 	"github.com/kihamo/boggart/providers/hilink/client/device"
 	"github.com/kihamo/boggart/providers/hilink/client/global"
 	"github.com/kihamo/boggart/providers/hilink/client/monitoring"
@@ -366,7 +367,7 @@ func (b *Bind) taskCleaner(ctx context.Context) (err error) {
 		for _, s := range response.Payload.Messages {
 			remove := b.config.CleanerSpecial && b.checkSpecialSMS(ctx, s)
 			if !remove {
-				d, e := time.Parse("2006-01-02 15:04:05", s.Date)
+				d, e := time.Parse(hilink.TimeFormat, s.Date)
 
 				if e != nil {
 					continue

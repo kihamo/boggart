@@ -21,6 +21,8 @@ import (
 const (
 	headerToken   = "__RequestVerificationToken"
 	headerSession = "Cookie"
+
+	TimeFormat = "2006-01-02 15:04:05"
 )
 
 type Client struct {
