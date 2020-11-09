@@ -24,14 +24,15 @@ func (t ComponentType) String() string {
 }
 
 type Component interface {
-	GetID() string
-	GetType() ComponentType
-	GetUniqueID() string
-	GetName() string
-	GetState() interface{}
-	GetCommandTopic() mqtt.Topic
-	GetDevice() Device
+	ID() string
+	Type() ComponentType
+	UniqueID() string
+	Name() string
+	State() interface{}
+	StateTopic() mqtt.Topic
+	CommandTopic() mqtt.Topic
+	AvailabilityTopic() mqtt.Topic
+	Device() Device
 	CommandToPayload(cmd interface{}) interface{}
 	Subscribers() []mqtt.Subscriber
-	TopicState() mqtt.Topic
 }

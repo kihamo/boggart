@@ -55,7 +55,7 @@ func NewComponentLight(id string) *ComponentLight {
 	return component
 }
 
-func (c *ComponentLight) GetState() interface{} {
+func (c *ComponentLight) State() interface{} {
 	if s := c.state.Load(); s != nil {
 		return s.(*ComponentLightState)
 	}

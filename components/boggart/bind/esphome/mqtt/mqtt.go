@@ -44,7 +44,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			}
 
 			if b.config.IPAddressSensorID == id && b.ipSubscriber.IsFalse() {
-				b.MQTT().Subscribe(mqtt.NewSubscriber(component.TopicState(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+				b.MQTT().Subscribe(mqtt.NewSubscriber(component.StateTopic(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 					b.ip.Store(net.ParseIP(message.String()))
 					return nil
 				}))

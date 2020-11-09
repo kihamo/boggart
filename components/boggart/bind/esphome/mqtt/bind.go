@@ -47,7 +47,7 @@ func (b *Bind) Close() (err error) {
 
 func (b *Bind) Component(id string) (cmp Component) {
 	b.components.Range(func(_, value interface{}) bool {
-		if c := value.(Component); c.GetID() == id {
+		if c := value.(Component); c.ID() == id {
 			cmp = c
 			return false
 		}
@@ -78,13 +78,13 @@ func (b *Bind) IP() net.IP {
 }
 
 func (b *Bind) register(component Component) (err error) {
-	if _, ok := b.components.Load(component.GetUniqueID()); ok {
+	if _, ok := b.components.Load(component.UniqueID()); ok {
 		return nil
 	}
 
-	b.components.Store(component.GetUniqueID(), component)
+	b.components.Store(component.UniqueID(), component)
 
-	if mac := component.GetDevice().MAC(); mac != nil {
+	if mac := component.Device().MAC(); mac != nil {
 		b.Meta().SetMAC(mac)
 	}
 

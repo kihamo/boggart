@@ -46,7 +46,7 @@ func (b *Bind) handleComponent(w *dashboard.Response, r *dashboard.Request) {
 		return
 	}
 
-	if component.GetType() == ComponentTypeLight {
+	if component.Type() == ComponentTypeLight {
 		if light, ok := component.(*ComponentLight); ok {
 			b.handleComponentLight(w, r, light)
 			return
@@ -67,7 +67,7 @@ func (b *Bind) handleComponentLight(w http.ResponseWriter, r *dashboard.Request,
 		if err != nil {
 			widget.FlashError(r, "Parse form failed with error %v", "", err)
 		} else {
-			command := component.GetState().(*ComponentLightState)
+			command := component.State().(*ComponentLightState)
 			command.SetState(false)
 
 			for key, value := range r.Original().PostForm {
@@ -139,14 +139,14 @@ func (b *Bind) handleComponentLight(w http.ResponseWriter, r *dashboard.Request,
 			}
 
 			ctx := r.Context()
-			err := b.MQTT().PublishRawWithoutCache(ctx, component.GetCommandTopic(), 1, false, component.CommandToPayload(command))
+			err := b.MQTT().PublishRawWithoutCache(ctx, component.CommandTopic(), 1, false, component.CommandToPayload(command))
 
 			if err != nil {
 				widget.FlashError(r, err, "")
 			} else {
 				widget.FlashSuccess(r, "Success toggle", "")
 
-				widget.Redirect(r.URL().Path+"?action=component&id="+component.GetID(), http.StatusFound, w, r)
+				widget.Redirect(r.URL().Path+"?action=component&id="+component.ID(), http.StatusFound, w, r)
 				return
 			}
 		}
@@ -175,13 +175,13 @@ func (b *Bind) handleCommand(w *dashboard.Response, r *dashboard.Request) {
 	}
 
 	component := b.Component(componentID)
-	if component == nil || component.GetCommandTopic() == "" {
+	if component == nil || component.CommandTopic() == "" {
 		widget.NotFound(w, r)
 		return
 	}
 
 	ctx := r.Context()
-	err := b.MQTT().PublishRawWithoutCache(ctx, component.GetCommandTopic(), 1, false, component.CommandToPayload(command))
+	err := b.MQTT().PublishRawWithoutCache(ctx, component.CommandTopic(), 1, false, component.CommandToPayload(command))
 
 	if err != nil {
 		widget.FlashError(r, err, "")

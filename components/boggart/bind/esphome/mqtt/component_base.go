@@ -2,6 +2,7 @@ package mqtt
 
 import (
 	"context"
+	"encoding/json"
 	"net"
 	"strconv"
 	"sync"
@@ -30,17 +31,23 @@ func (d Device) MAC() (mac net.HardwareAddr) {
 	return mac
 }
 
+type componentBaseJsonData struct {
+	Icon                string     `json:"icon"`
+	Name                string     `json:"name"`
+	StateTopic          mqtt.Topic `json:"state_topic"`
+	CommandTopic        mqtt.Topic `json:"command_topic"`
+	AvailabilityTopic   mqtt.Topic `json:"availability_topic"`
+	PayloadAvailable    string     `json:"payload_available"`
+	PayloadNotAvailable string     `json:"payload_not_available"`
+	UniqueID            string     `json:"unique_id"`
+	Device              Device     `json:"device"`
+}
+
 type ComponentBase struct {
-	ID                  string        `json:"-"`
-	Type                ComponentType `json:"-"`
-	Icon                string        `json:"icon"`
-	Name                string        `json:"name"`
-	StateTopic          mqtt.Topic    `json:"state_topic"`
-	CommandTopic        mqtt.Topic    `json:"command_topic"`
-	PayloadAvailable    string        `json:"payload_available"`
-	PayloadNotAvailable string        `json:"payload_not_available"`
-	UniqueID            string        `json:"unique_id"`
-	Device              Device        `json:"device"`
+	componentBaseJsonData
+
+	id  string
+	typ ComponentType
 
 	subscribersOnce sync.Once
 	subscribers     []mqtt.Subscriber
@@ -50,31 +57,35 @@ type ComponentBase struct {
 
 func NewComponentBase(id string, t ComponentType) *ComponentBase {
 	component := &ComponentBase{
-		ID:   id,
-		Type: t,
+		id:  id,
+		typ: t,
 	}
 	component.setState = component.SetState
 
 	return component
 }
 
-func (c *ComponentBase) GetID() string {
-	return c.ID
+func (c *ComponentBase) UnmarshalJSON(b []byte) error {
+	return json.Unmarshal(b, &c.componentBaseJsonData)
 }
 
-func (c *ComponentBase) GetType() ComponentType {
-	return c.Type
+func (c *ComponentBase) ID() string {
+	return c.id
 }
 
-func (c *ComponentBase) GetUniqueID() string {
-	return c.UniqueID
+func (c *ComponentBase) Type() ComponentType {
+	return c.typ
 }
 
-func (c *ComponentBase) GetName() string {
-	return c.Name
+func (c *ComponentBase) UniqueID() string {
+	return c.componentBaseJsonData.UniqueID
 }
 
-func (c *ComponentBase) GetState() interface{} {
+func (c *ComponentBase) Name() string {
+	return c.componentBaseJsonData.Name
+}
+
+func (c *ComponentBase) State() interface{} {
 	if s := c.state.Load(); s != nil {
 		return s.(string)
 	}
@@ -82,12 +93,20 @@ func (c *ComponentBase) GetState() interface{} {
 	return ""
 }
 
-func (c *ComponentBase) GetCommandTopic() mqtt.Topic {
-	return c.CommandTopic
+func (c *ComponentBase) StateTopic() mqtt.Topic {
+	return c.componentBaseJsonData.StateTopic
 }
 
-func (c *ComponentBase) GetDevice() Device {
-	return c.Device
+func (c *ComponentBase) CommandTopic() mqtt.Topic {
+	return c.componentBaseJsonData.CommandTopic
+}
+
+func (c *ComponentBase) AvailabilityTopic() mqtt.Topic {
+	return c.componentBaseJsonData.AvailabilityTopic
+}
+
+func (c *ComponentBase) Device() Device {
+	return c.componentBaseJsonData.Device
 }
 
 // nolint:interfacer
@@ -97,7 +116,7 @@ func (c *ComponentBase) SetState(message mqtt.Message) error {
 	c.state.Store(state)
 
 	if val, err := strconv.ParseFloat(state, 64); err == nil {
-		metricState.With("mac", c.Device.MAC().String()).With("component", c.ID).Set(val)
+		metricState.With("mac", c.Device().MAC().String()).With("component", c.ID()).Set(val)
 	}
 
 	return nil
@@ -111,16 +130,12 @@ func (c *ComponentBase) Subscribers() []mqtt.Subscriber {
 	c.subscribersOnce.Do(func() {
 		c.subscribers = make([]mqtt.Subscriber, 0)
 
-		if c.StateTopic != "" {
-			c.subscribers = append(c.subscribers, mqtt.NewSubscriber(c.StateTopic, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+		if topic := c.StateTopic(); topic != "" {
+			c.subscribers = append(c.subscribers, mqtt.NewSubscriber(topic, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 				return c.setState(message)
 			}))
 		}
 	})
 
 	return c.subscribers
-}
-
-func (c *ComponentBase) TopicState() mqtt.Topic {
-	return c.StateTopic
 }
