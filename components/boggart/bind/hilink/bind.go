@@ -36,6 +36,27 @@ type Bind struct {
 	simStatus                 *atomic.Uint32
 }
 
+func (b *Bind) SMS(ctx context.Context, content string, phones ...string) error {
+	if len(content) == 0 {
+		return errors.New("sms content is empty")
+	}
+
+	if len(phones) == 0 {
+		return errors.New("sms phones list is empty")
+	}
+
+	params := sms.NewSendSMSParamsWithContext(ctx)
+	params.Request.Index = -1
+	params.Request.Reserved = 1
+	params.Request.Date = time.Now().Format("2006-01-02 15:04:05")
+	params.Request.Phones = phones
+	params.Request.Content = content
+	params.Request.Length = int64(len(content))
+
+	_, err := b.client.Sms.SendSMS(params)
+	return err
+}
+
 func (b *Bind) USSD(ctx context.Context, content string) (string, error) {
 	if content == "" {
 		return "", nil
@@ -191,15 +212,9 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, smsItem *models.SMSListMessa
 					case "status":
 						balance, err := b.Balance(ctx)
 						if err == nil {
-							params := sms.NewSendSMSParamsWithContext(ctx)
-							params.Request.Index = -1
-							params.Request.Reserved = 1
-							params.Request.Date = time.Now().Format("2006-01-02 15:04:05")
-							params.Request.Phones = []string{smsItem.Phone}
-							params.Request.Content = "A'm OK. My balance is " + strconv.FormatFloat(balance, 'f', -1, 64)
-							params.Request.Length = int64(len(params.Request.Content))
-
-							_, err = b.client.Sms.SendSMS(params)
+							err = b.SMS(ctx,
+								"A'm OK. My balance is "+strconv.FormatFloat(balance, 'f', -1, 64),
+								smsItem.Phone)
 						}
 
 						if err != nil {

@@ -2,6 +2,7 @@ package hilink
 
 import (
 	"context"
+	"errors"
 
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/providers/hilink/client/device"
@@ -9,9 +10,23 @@ import (
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
+		mqtt.NewSubscriber(b.config.TopicSMSSend, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSMSSend)),
 		mqtt.NewSubscriber(b.config.TopicUSSDSend, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTUSSDSend)),
 		mqtt.NewSubscriber(b.config.TopicReboot, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTReboot)),
 	}
+}
+
+func (b *Bind) callbackMQTTSMSSend(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 4) {
+		return nil
+	}
+
+	routes := message.Topic().Split()
+	if len(routes) < 1 {
+		return errors.New("bad topic name")
+	}
+
+	return b.SMS(ctx, message.String(), routes[len(routes)-2])
 }
 
 func (b *Bind) callbackMQTTUSSDSend(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {

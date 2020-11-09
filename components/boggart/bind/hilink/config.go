@@ -28,6 +28,7 @@ type Config struct {
 	CleanerInterval             time.Duration `mapstructure:"cleaner_interval" yaml:"cleaner_interval"`
 	CleanerDuration             time.Duration `mapstructure:"cleaner_duration" yaml:"cleaner_duration"`
 	SMSCommandsAllowedPhones    []string      `mapstructure:"sms_commands_allowed_phones" yaml:"sms_commands_allowed_phones"`
+	TopicSMSSend                mqtt.Topic    `mapstructure:"topic_sms_send" yaml:"topic_sms_send"`
 	TopicUSSDSend               mqtt.Topic    `mapstructure:"topic_ussd_send" yaml:"topic_ussd_send"`
 	TopicUSSDResult             mqtt.Topic    `mapstructure:"topic_ussd_result" yaml:"topic_ussd_result"`
 	TopicReboot                 mqtt.Topic    `mapstructure:"topic_reboot" yaml:"topic_reboot"`
@@ -64,6 +65,7 @@ func (t Type) Config() interface{} {
 		CleanerInterval:             time.Hour,
 		CleanerSpecial:              true,
 		CleanerDuration:             time.Hour * 24 * 90,
+		TopicSMSSend:                prefix + "sms/+/send",
 		TopicUSSDSend:               prefix + "ussd/send",
 		TopicUSSDResult:             prefix + "ussd",
 		TopicReboot:                 prefix + "reboot",
