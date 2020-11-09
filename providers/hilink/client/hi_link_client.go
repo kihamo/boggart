@@ -8,8 +8,7 @@ package client
 import (
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
-
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 
 	"github.com/kihamo/boggart/providers/hilink/client/config"
 	"github.com/kihamo/boggart/providers/hilink/client/device"
@@ -64,25 +63,15 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *HiLink {
 
 	cli := new(HiLink)
 	cli.Transport = transport
-
 	cli.Config = config.New(transport, formats)
-
 	cli.Device = device.New(transport, formats)
-
 	cli.Global = global.New(transport, formats)
-
 	cli.Monitoring = monitoring.New(transport, formats)
-
 	cli.Net = net.New(transport, formats)
-
 	cli.Sms = sms.New(transport, formats)
-
 	cli.User = user.New(transport, formats)
-
 	cli.Ussd = ussd.New(transport, formats)
-
 	cli.WebServer = web_server.New(transport, formats)
-
 	return cli
 }
 
@@ -127,23 +116,23 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // HiLink is a client for hi link
 type HiLink struct {
-	Config *config.Client
+	Config config.ClientService
 
-	Device *device.Client
+	Device device.ClientService
 
-	Global *global.Client
+	Global global.ClientService
 
-	Monitoring *monitoring.Client
+	Monitoring monitoring.ClientService
 
-	Net *net.Client
+	Net net.ClientService
 
-	Sms *sms.Client
+	Sms sms.ClientService
 
-	User *user.Client
+	User user.ClientService
 
-	Ussd *ussd.Client
+	Ussd ussd.ClientService
 
-	WebServer *web_server.Client
+	WebServer web_server.ClientService
 
 	Transport runtime.ClientTransport
 }
@@ -151,23 +140,13 @@ type HiLink struct {
 // SetTransport changes the transport on the client and all its subresources
 func (c *HiLink) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
-
 	c.Config.SetTransport(transport)
-
 	c.Device.SetTransport(transport)
-
 	c.Global.SetTransport(transport)
-
 	c.Monitoring.SetTransport(transport)
-
 	c.Net.SetTransport(transport)
-
 	c.Sms.SetTransport(transport)
-
 	c.User.SetTransport(transport)
-
 	c.Ussd.SetTransport(transport)
-
 	c.WebServer.SetTransport(transport)
-
 }

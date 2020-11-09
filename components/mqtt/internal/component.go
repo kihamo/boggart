@@ -607,31 +607,31 @@ func (c *Component) convertPayload(payload interface{}) []byte {
 	case []byte:
 		return value
 	case string:
-		return []byte(value)
+		return performance.UnsafeString2Bytes(value)
 	case float64:
-		return []byte(strconv.FormatFloat(value, 'f', -1, 64))
+		return strconv.AppendFloat(nil, value, 'f', -1, 64)
 	case float32:
-		return []byte(strconv.FormatFloat(float64(value), 'f', -1, 64))
+		return strconv.AppendFloat(nil, float64(value), 'f', -1, 64)
 	case int64:
-		return []byte(strconv.FormatInt(value, 10))
+		return strconv.AppendInt(nil, value, 10)
 	case int32:
-		return []byte(strconv.FormatInt(int64(value), 10))
+		return strconv.AppendInt(nil, int64(value), 10)
 	case int16:
-		return []byte(strconv.FormatInt(int64(value), 10))
+		return strconv.AppendInt(nil, int64(value), 10)
 	case int8:
-		return []byte(strconv.FormatInt(int64(value), 10))
+		return strconv.AppendInt(nil, int64(value), 10)
 	case int:
-		return []byte(strconv.FormatInt(int64(value), 10))
+		return strconv.AppendInt(nil, int64(value), 10)
 	case uint64:
-		return []byte(strconv.FormatUint(value, 10))
+		return strconv.AppendUint(nil, value, 10)
 	case uint32:
-		return []byte(strconv.FormatUint(uint64(value), 10))
+		return strconv.AppendUint(nil, uint64(value), 10)
 	case uint16:
-		return []byte(strconv.FormatUint(uint64(value), 10))
+		return strconv.AppendUint(nil, uint64(value), 10)
 	case uint8:
-		return []byte(strconv.FormatUint(uint64(value), 10))
+		return strconv.AppendUint(nil, uint64(value), 10)
 	case uint:
-		return []byte(strconv.FormatUint(uint64(value), 10))
+		return strconv.AppendUint(nil, uint64(value), 10)
 	case bool:
 		if value {
 			return PayloadTrue
@@ -639,13 +639,13 @@ func (c *Component) convertPayload(payload interface{}) []byte {
 
 		return PayloadFalse
 	case time.Time:
-		return []byte(value.UTC().Format(timeFormat))
+		return performance.UnsafeString2Bytes(value.UTC().Format(timeFormat))
 	case *time.Time:
-		return []byte(value.UTC().Format(timeFormat))
+		return performance.UnsafeString2Bytes(value.UTC().Format(timeFormat))
 	case time.Duration:
-		return []byte(strconv.FormatFloat(value.Seconds(), 'f', -1, 64))
+		return strconv.AppendFloat(nil, value.Seconds(), 'f', -1, 64)
 	case *time.Duration:
-		return []byte(strconv.FormatFloat(value.Seconds(), 'f', -1, 64))
+		return strconv.AppendFloat(nil, value.Seconds(), 'f', -1, 64)
 	case bytes.Buffer:
 		return value.Bytes()
 	case io.Reader:
@@ -653,9 +653,9 @@ func (c *Component) convertPayload(payload interface{}) []byte {
 			return b
 		}
 
-		return []byte(fmt.Sprintf("%v", payload))
+		return performance.UnsafeString2Bytes(fmt.Sprintf("%v", payload))
 	case fmt.Stringer:
-		return []byte(value.String())
+		return performance.UnsafeString2Bytes(value.String())
 	default:
 		if bin, ok := value.(encoding.BinaryMarshaler); ok {
 			if raw, err := bin.MarshalBinary(); err == nil {
@@ -671,6 +671,6 @@ func (c *Component) convertPayload(payload interface{}) []byte {
 			return c.convertPayload(ref.Elem().Interface())
 		}
 
-		return []byte(fmt.Sprintf("%v", payload))
+		return performance.UnsafeString2Bytes(fmt.Sprintf("%v", payload))
 	}
 }

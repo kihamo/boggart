@@ -10,11 +10,10 @@ import (
 	"io"
 
 	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
-	strfmt "github.com/go-openapi/strfmt"
-
-	models "github.com/kihamo/boggart/providers/hilink/models"
+	"github.com/kihamo/boggart/providers/hilink/models"
 )
 
 // RemoveSMSReader is a Reader for the RemoveSMS structure.
@@ -122,7 +121,7 @@ swagger:model RemoveSMSBody
 type RemoveSMSBody struct {
 
 	// index
-	Index int64 `json:"Index,omitempty" xml:"Index"`
+	Index int64 `json:"Index,omitempty" xml:"Index,omitempty"`
 }
 
 // Validate validates this remove s m s body

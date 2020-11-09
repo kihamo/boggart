@@ -8,18 +8,18 @@ package models
 import (
 	"strconv"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // SMSList s m s list
+//
 // swagger:model SMSList
 type SMSList struct {
 
 	// count
-	Count int64 `json:"Count,omitempty" xml:"Count"`
+	Count int64 `json:"Count,omitempty" xml:"Count,omitempty"`
 
 	// messages
 	Messages []*SMSListMessagesItems0 `json:"Messages" xml:"Messages>Message"`
@@ -83,35 +83,36 @@ func (m *SMSList) UnmarshalBinary(b []byte) error {
 }
 
 // SMSListMessagesItems0 s m s list messages items0
+//
 // swagger:model SMSListMessagesItems0
 type SMSListMessagesItems0 struct {
 
 	// content
-	Content string `json:"Content,omitempty" xml:"Content"`
+	Content string `json:"Content,omitempty" xml:"Content,omitempty"`
 
 	// date
-	Date string `json:"Date,omitempty" xml:"Date"`
+	Date string `json:"Date,omitempty" xml:"Date,omitempty"`
 
 	// index
-	Index int64 `json:"Index,omitempty" xml:"Index"`
+	Index int64 `json:"Index,omitempty" xml:"Index,omitempty"`
 
 	// phone
-	Phone string `json:"Phone,omitempty" xml:"Phone"`
+	Phone string `json:"Phone,omitempty" xml:"Phone,omitempty"`
 
 	// priority
-	Priority int64 `json:"Priority,omitempty" xml:"Priority"`
+	Priority int64 `json:"Priority,omitempty" xml:"Priority,omitempty"`
 
 	// save type
-	SaveType int64 `json:"SaveType,omitempty" xml:"SaveType"`
+	SaveType int64 `json:"SaveType,omitempty" xml:"SaveType,omitempty"`
 
 	// sca
-	Sca string `json:"Sca,omitempty" xml:"Sca"`
+	Sca string `json:"Sca,omitempty" xml:"Sca,omitempty"`
 
 	// sms type
-	SmsType int64 `json:"SmsType,omitempty" xml:"SmsType"`
+	SmsType int64 `json:"SmsType,omitempty" xml:"SmsType,omitempty"`
 
 	// status
-	Status int64 `json:"Status,omitempty" xml:"Smstat"`
+	Status int64 `json:"Status,omitempty" xml:"Smstat,omitempty"`
 }
 
 // Validate validates this s m s list messages items0

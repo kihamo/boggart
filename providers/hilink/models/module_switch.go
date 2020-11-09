@@ -6,98 +6,98 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // ModuleSwitch module switch
+//
 // swagger:model ModuleSwitch
 type ModuleSwitch struct {
 
 	// a p n retry enabled
-	APNRetryEnabled int64 `json:"APNRetryEnabled,omitempty" xml:"apn_retry_enabled"`
+	APNRetryEnabled int64 `json:"APNRetryEnabled,omitempty" xml:"apn_retry_enabled,omitempty"`
 
 	// b b o u enabled
-	BBOUEnabled int64 `json:"BBOUEnabled,omitempty" xml:"bbou_enabled"`
+	BBOUEnabled int64 `json:"BBOUEnabled,omitempty" xml:"bbou_enabled,omitempty"`
 
 	// c b s enabled
-	CBSEnabled int64 `json:"CBSEnabled,omitempty" xml:"cbs_enabled"`
+	CBSEnabled int64 `json:"CBSEnabled,omitempty" xml:"cbs_enabled,omitempty"`
 
 	// charger enabled
-	ChargerEnabled int64 `json:"ChargerEnabled,omitempty" xml:"charger_enbaled"`
+	ChargerEnabled int64 `json:"ChargerEnabled,omitempty" xml:"charger_enbaled,omitempty"`
 
 	// cradle enabled
-	CradleEnabled int64 `json:"CradleEnabled,omitempty" xml:"cradle_enabled"`
+	CradleEnabled int64 `json:"CradleEnabled,omitempty" xml:"cradle_enabled,omitempty"`
 
 	// d l n a enabled
-	DLNAEnabled int64 `json:"DLNAEnabled,omitempty" xml:"dlna_enabled"`
+	DLNAEnabled int64 `json:"DLNAEnabled,omitempty" xml:"dlna_enabled,omitempty"`
 
 	// data switch enabled
-	DataSwitchEnabled int64 `json:"DataSwitchEnabled,omitempty" xml:"dataswitch_enabled"`
+	DataSwitchEnabled int64 `json:"DataSwitchEnabled,omitempty" xml:"dataswitch_enabled,omitempty"`
 
 	// eco mode enabled
-	EcoModeEnabled int64 `json:"EcoModeEnabled,omitempty" xml:"ecomode_enabled"`
+	EcoModeEnabled int64 `json:"EcoModeEnabled,omitempty" xml:"ecomode_enabled,omitempty"`
 
 	// encrypt enabled
-	EncryptEnabled int64 `json:"EncryptEnabled,omitempty" xml:"encrypt_enabled"`
+	EncryptEnabled int64 `json:"EncryptEnabled,omitempty" xml:"encrypt_enabled,omitempty"`
 
 	// g d p eenabled
-	GDPEenabled int64 `json:"GDPEenabled,omitempty" xml:"gdpr_enabled"`
+	GDPEenabled int64 `json:"GDPEenabled,omitempty" xml:"gdpr_enabled,omitempty"`
 
 	// help enabled
-	HelpEnabled int64 `json:"HelpEnabled,omitempty" xml:"help_enabled"`
+	HelpEnabled int64 `json:"HelpEnabled,omitempty" xml:"help_enabled,omitempty"`
 
 	// IPv6 enabled
-	IPV6Enabled int64 `json:"IPv6Enabled,omitempty" xml:"ipv6_enabled"`
+	IPV6Enabled int64 `json:"IPv6Enabled,omitempty" xml:"ipv6_enabled,omitempty"`
 
 	// local update enabled
-	LocalUpdateEnabled int64 `json:"LocalUpdateEnabled,omitempty" xml:"localupdate_enabled"`
+	LocalUpdateEnabled int64 `json:"LocalUpdateEnabled,omitempty" xml:"localupdate_enabled,omitempty"`
 
 	// monthly volume enabled
-	MonthlyVolumeEnabled int64 `json:"MonthlyVolumeEnabled,omitempty" xml:"monthly_volume_enabled"`
+	MonthlyVolumeEnabled int64 `json:"MonthlyVolumeEnabled,omitempty" xml:"monthly_volume_enabled,omitempty"`
 
 	// mult s s ID enable
-	MultSSIDEnable int64 `json:"MultSSIDEnable,omitempty" xml:"multssid_enable"`
+	MultSSIDEnable int64 `json:"MultSSIDEnable,omitempty" xml:"multssid_enable,omitempty"`
 
 	// o t a enabled
-	OTAEnabled int64 `json:"OTAEnabled,omitempty" xml:"ota_enabled"`
+	OTAEnabled int64 `json:"OTAEnabled,omitempty" xml:"ota_enabled,omitempty"`
 
 	// p b enabled
-	PBEnabled int64 `json:"PBEnabled,omitempty" xml:"pb_enabled"`
+	PBEnabled int64 `json:"PBEnabled,omitempty" xml:"pb_enabled,omitempty"`
 
 	// power off enabled
-	PowerOffEnabled int64 `json:"PowerOffEnabled,omitempty" xml:"poweroff_enabled"`
+	PowerOffEnabled int64 `json:"PowerOffEnabled,omitempty" xml:"poweroff_enabled,omitempty"`
 
 	// powersave enabled
-	PowersaveEnabled int64 `json:"PowersaveEnabled,omitempty" xml:"powersave_enabled"`
+	PowersaveEnabled int64 `json:"PowersaveEnabled,omitempty" xml:"powersave_enabled,omitempty"`
 
 	// q r code enabled
-	QRCodeEnabled int64 `json:"QRCodeEnabled,omitempty" xml:"qrcode_enabled"`
+	QRCodeEnabled int64 `json:"QRCodeEnabled,omitempty" xml:"qrcode_enabled,omitempty"`
 
 	// s d card enabled
-	SDCardEnabled int64 `json:"SDCardEnabled,omitempty" xml:"sdcard_enabled"`
+	SDCardEnabled int64 `json:"SDCardEnabled,omitempty" xml:"sdcard_enabled,omitempty"`
 
 	// s m s enabled
-	SMSEnabled int64 `json:"SMSEnabled,omitempty" xml:"sms_enabled"`
+	SMSEnabled int64 `json:"SMSEnabled,omitempty" xml:"sms_enabled,omitempty"`
 
 	// s n t p enabled
-	SNTPEnabled int64 `json:"SNTPEnabled,omitempty" xml:"sntp_enabled"`
+	SNTPEnabled int64 `json:"SNTPEnabled,omitempty" xml:"sntp_enabled,omitempty"`
 
 	// s t k enabled
-	STKEnabled int64 `json:"STKEnabled,omitempty" xml:"stk_enabled"`
+	STKEnabled int64 `json:"STKEnabled,omitempty" xml:"stk_enabled,omitempty"`
 
 	// statistic enabled
-	StatisticEnabled int64 `json:"StatisticEnabled,omitempty" xml:"statistic_enabled"`
+	StatisticEnabled int64 `json:"StatisticEnabled,omitempty" xml:"statistic_enabled,omitempty"`
 
 	// u s s d enabled
-	USSDEnabled int64 `json:"USSDEnabled,omitempty" xml:"ussd_enabled"`
+	USSDEnabled int64 `json:"USSDEnabled,omitempty" xml:"ussd_enabled,omitempty"`
 
 	// wi fi enabled
-	WiFiEnabled int64 `json:"WiFiEnabled,omitempty" xml:"wifi_enabled"`
+	WiFiEnabled int64 `json:"WiFiEnabled,omitempty" xml:"wifi_enabled,omitempty"`
 
 	// zone time enabled
-	ZoneTimeEnabled int64 `json:"ZoneTimeEnabled,omitempty" xml:"zonetime_enabled"`
+	ZoneTimeEnabled int64 `json:"ZoneTimeEnabled,omitempty" xml:"zonetime_enabled,omitempty"`
 }
 
 // Validate validates this module switch

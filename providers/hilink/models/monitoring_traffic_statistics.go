@@ -6,41 +6,41 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // MonitoringTrafficStatistics monitoring traffic statistics
+//
 // swagger:model MonitoringTrafficStatistics
 type MonitoringTrafficStatistics struct {
 
 	// current connect time
-	CurrentConnectTime int64 `json:"CurrentConnectTime,omitempty" xml:"CurrentConnectTime"`
+	CurrentConnectTime int64 `json:"CurrentConnectTime,omitempty" xml:"CurrentConnectTime,omitempty"`
 
 	// current download
-	CurrentDownload int64 `json:"CurrentDownload,omitempty" xml:"CurrentDownload"`
+	CurrentDownload int64 `json:"CurrentDownload,omitempty" xml:"CurrentDownload,omitempty"`
 
 	// current download rate
-	CurrentDownloadRate int64 `json:"CurrentDownloadRate,omitempty" xml:"CurrentDownloadRate"`
+	CurrentDownloadRate int64 `json:"CurrentDownloadRate,omitempty" xml:"CurrentDownloadRate,omitempty"`
 
 	// current upload
-	CurrentUpload int64 `json:"CurrentUpload,omitempty" xml:"CurrentUpload"`
+	CurrentUpload int64 `json:"CurrentUpload,omitempty" xml:"CurrentUpload,omitempty"`
 
 	// current upload rate
-	CurrentUploadRate int64 `json:"CurrentUploadRate,omitempty" xml:"CurrentUploadRate"`
+	CurrentUploadRate int64 `json:"CurrentUploadRate,omitempty" xml:"CurrentUploadRate,omitempty"`
 
 	// show traffic
-	ShowTraffic int64 `json:"ShowTraffic,omitempty" xml:"showtraffic"`
+	ShowTraffic int64 `json:"ShowTraffic,omitempty" xml:"showtraffic,omitempty"`
 
 	// total connect time
-	TotalConnectTime int64 `json:"TotalConnectTime,omitempty" xml:"TotalConnectTime"`
+	TotalConnectTime int64 `json:"TotalConnectTime,omitempty" xml:"TotalConnectTime,omitempty"`
 
 	// total download
-	TotalDownload int64 `json:"TotalDownload,omitempty" xml:"TotalDownload"`
+	TotalDownload int64 `json:"TotalDownload,omitempty" xml:"TotalDownload,omitempty"`
 
 	// total upload
-	TotalUpload int64 `json:"TotalUpload,omitempty" xml:"TotalUpload"`
+	TotalUpload int64 `json:"TotalUpload,omitempty" xml:"TotalUpload,omitempty"`
 }
 
 // Validate validates this monitoring traffic statistics

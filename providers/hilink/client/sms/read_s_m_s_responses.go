@@ -10,11 +10,10 @@ import (
 	"io"
 
 	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
-	strfmt "github.com/go-openapi/strfmt"
-
-	models "github.com/kihamo/boggart/providers/hilink/models"
+	"github.com/kihamo/boggart/providers/hilink/models"
 )
 
 // ReadSMSReader is a Reader for the ReadSMS structure.
@@ -122,7 +121,7 @@ swagger:model ReadSMSBody
 type ReadSMSBody struct {
 
 	// index
-	Index int64 `json:"Index,omitempty" xml:"Index"`
+	Index int64 `json:"Index,omitempty" xml:"Index,omitempty"`
 }
 
 // Validate validates this read s m s body

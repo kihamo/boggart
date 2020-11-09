@@ -12,12 +12,11 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 
-	strfmt "github.com/go-openapi/strfmt"
-
-	models "github.com/kihamo/boggart/providers/hilink/models"
+	"github.com/kihamo/boggart/providers/hilink/models"
 )
 
 // DeviceControlReader is a Reader for the DeviceControl structure.
@@ -126,7 +125,7 @@ type DeviceControlBody struct {
 
 	// control
 	// Enum: [1 2 3 4]
-	Control int64 `json:"Control,omitempty" xml:"Control"`
+	Control int64 `json:"Control,omitempty" xml:"Control,omitempty"`
 }
 
 // Validate validates this device control body
@@ -157,7 +156,7 @@ func init() {
 
 // prop value enum
 func (o *DeviceControlBody) validateControlEnum(path, location string, value int64) error {
-	if err := validate.Enum(path, location, value, deviceControlBodyTypeControlPropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, deviceControlBodyTypeControlPropEnum, true); err != nil {
 		return err
 	}
 	return nil

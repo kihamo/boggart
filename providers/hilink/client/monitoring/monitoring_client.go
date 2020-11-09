@@ -7,12 +7,11 @@ package monitoring
 
 import (
 	"github.com/go-openapi/runtime"
-
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 )
 
 // New creates a new monitoring API client.
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *Client {
+func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
 	return &Client{transport: transport, formats: formats}
 }
 
@@ -24,8 +23,17 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientService is the interface for Client methods
+type ClientService interface {
+	GetMonitoringStatus(params *GetMonitoringStatusParams) (*GetMonitoringStatusOK, error)
+
+	GetMonitoringTrafficStatistics(params *GetMonitoringTrafficStatisticsParams) (*GetMonitoringTrafficStatisticsOK, error)
+
+	SetTransport(transport runtime.ClientTransport)
+}
+
 /*
-GetMonitoringStatus get monitoring status API
+  GetMonitoringStatus get monitoring status API
 */
 func (a *Client) GetMonitoringStatus(params *GetMonitoringStatusParams) (*GetMonitoringStatusOK, error) {
 	// TODO: Validate the params before sending
@@ -58,7 +66,7 @@ func (a *Client) GetMonitoringStatus(params *GetMonitoringStatusParams) (*GetMon
 }
 
 /*
-GetMonitoringTrafficStatistics get monitoring traffic statistics API
+  GetMonitoringTrafficStatistics get monitoring traffic statistics API
 */
 func (a *Client) GetMonitoringTrafficStatistics(params *GetMonitoringTrafficStatisticsParams) (*GetMonitoringTrafficStatisticsOK, error) {
 	// TODO: Validate the params before sending

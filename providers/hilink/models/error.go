@@ -6,20 +6,20 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // Error error
+//
 // swagger:model Error
 type Error struct {
 
 	// code
-	Code int64 `json:"code,omitempty" xml:"code"`
+	Code int64 `json:"code,omitempty" xml:"code,omitempty"`
 
 	// message
-	Message string `json:"message,omitempty" xml:"message"`
+	Message string `json:"message,omitempty" xml:"message,omitempty"`
 }
 
 // Validate validates this error

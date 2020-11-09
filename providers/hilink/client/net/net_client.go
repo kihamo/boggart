@@ -7,12 +7,11 @@ package net
 
 import (
 	"github.com/go-openapi/runtime"
-
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 )
 
 // New creates a new net API client.
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *Client {
+func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
 	return &Client{transport: transport, formats: formats}
 }
 
@@ -24,8 +23,15 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientService is the interface for Client methods
+type ClientService interface {
+	GetCurrentPLMN(params *GetCurrentPLMNParams) (*GetCurrentPLMNOK, error)
+
+	SetTransport(transport runtime.ClientTransport)
+}
+
 /*
-GetCurrentPLMN get current p l m n API
+  GetCurrentPLMN get current p l m n API
 */
 func (a *Client) GetCurrentPLMN(params *GetCurrentPLMNParams) (*GetCurrentPLMNOK, error) {
 	// TODO: Validate the params before sending

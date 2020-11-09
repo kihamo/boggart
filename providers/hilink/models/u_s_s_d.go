@@ -6,23 +6,23 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // USSD u s s d
+//
 // swagger:model USSD
 type USSD struct {
 
 	// code type
-	CodeType string `json:"CodeType,omitempty" xml:"codeType"`
+	CodeType string `json:"CodeType,omitempty" xml:"codeType,omitempty"`
 
 	// content
-	Content string `json:"Content,omitempty" xml:"content"`
+	Content string `json:"Content,omitempty" xml:"content,omitempty"`
 
 	// timeout
-	Timeout string `json:"Timeout,omitempty" xml:"timeout"`
+	Timeout string `json:"Timeout,omitempty" xml:"timeout,omitempty"`
 }
 
 // Validate validates this u s s d

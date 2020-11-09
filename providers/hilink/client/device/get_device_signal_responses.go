@@ -10,10 +10,9 @@ import (
 	"io"
 
 	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/strfmt"
 
-	strfmt "github.com/go-openapi/strfmt"
-
-	models "github.com/kihamo/boggart/providers/hilink/models"
+	"github.com/kihamo/boggart/providers/hilink/models"
 )
 
 // GetDeviceSignalReader is a Reader for the GetDeviceSignal structure.

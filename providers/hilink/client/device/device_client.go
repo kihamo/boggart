@@ -7,12 +7,11 @@ package device
 
 import (
 	"github.com/go-openapi/runtime"
-
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 )
 
 // New creates a new device API client.
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *Client {
+func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
 	return &Client{transport: transport, formats: formats}
 }
 
@@ -24,8 +23,25 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientService is the interface for Client methods
+type ClientService interface {
+	DeviceControl(params *DeviceControlParams) (*DeviceControlOK, error)
+
+	GetCompressLogFile(params *GetCompressLogFileParams) (*GetCompressLogFileOK, error)
+
+	GetDeviceAutoRunVersion(params *GetDeviceAutoRunVersionParams) (*GetDeviceAutoRunVersionOK, error)
+
+	GetDeviceBasicInformation(params *GetDeviceBasicInformationParams) (*GetDeviceBasicInformationOK, error)
+
+	GetDeviceInformation(params *GetDeviceInformationParams) (*GetDeviceInformationOK, error)
+
+	GetDeviceSignal(params *GetDeviceSignalParams) (*GetDeviceSignalOK, error)
+
+	SetTransport(transport runtime.ClientTransport)
+}
+
 /*
-DeviceControl device control API
+  DeviceControl device control API
 */
 func (a *Client) DeviceControl(params *DeviceControlParams) (*DeviceControlOK, error) {
 	// TODO: Validate the params before sending
@@ -58,7 +74,7 @@ func (a *Client) DeviceControl(params *DeviceControlParams) (*DeviceControlOK, e
 }
 
 /*
-GetCompressLogFile get compress log file API
+  GetCompressLogFile get compress log file API
 */
 func (a *Client) GetCompressLogFile(params *GetCompressLogFileParams) (*GetCompressLogFileOK, error) {
 	// TODO: Validate the params before sending
@@ -91,7 +107,7 @@ func (a *Client) GetCompressLogFile(params *GetCompressLogFileParams) (*GetCompr
 }
 
 /*
-GetDeviceAutoRunVersion get device auto run version API
+  GetDeviceAutoRunVersion get device auto run version API
 */
 func (a *Client) GetDeviceAutoRunVersion(params *GetDeviceAutoRunVersionParams) (*GetDeviceAutoRunVersionOK, error) {
 	// TODO: Validate the params before sending
@@ -124,7 +140,7 @@ func (a *Client) GetDeviceAutoRunVersion(params *GetDeviceAutoRunVersionParams) 
 }
 
 /*
-GetDeviceBasicInformation get device basic information API
+  GetDeviceBasicInformation get device basic information API
 */
 func (a *Client) GetDeviceBasicInformation(params *GetDeviceBasicInformationParams) (*GetDeviceBasicInformationOK, error) {
 	// TODO: Validate the params before sending
@@ -157,7 +173,7 @@ func (a *Client) GetDeviceBasicInformation(params *GetDeviceBasicInformationPara
 }
 
 /*
-GetDeviceInformation get device information API
+  GetDeviceInformation get device information API
 */
 func (a *Client) GetDeviceInformation(params *GetDeviceInformationParams) (*GetDeviceInformationOK, error) {
 	// TODO: Validate the params before sending
@@ -190,7 +206,7 @@ func (a *Client) GetDeviceInformation(params *GetDeviceInformationParams) (*GetD
 }
 
 /*
-GetDeviceSignal get device signal API
+  GetDeviceSignal get device signal API
 */
 func (a *Client) GetDeviceSignal(params *GetDeviceSignalParams) (*GetDeviceSignalOK, error) {
 	// TODO: Validate the params before sending

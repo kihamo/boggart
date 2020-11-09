@@ -6,17 +6,17 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // USSDStatus u s s d status
+//
 // swagger:model USSDStatus
 type USSDStatus struct {
 
 	// result
-	Result int64 `json:"Result,omitempty" xml:"result"`
+	Result int64 `json:"Result,omitempty" xml:"result,omitempty"`
 }
 
 // Validate validates this u s s d status

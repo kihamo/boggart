@@ -6,20 +6,20 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // SessionToken session token
+//
 // swagger:model SessionToken
 type SessionToken struct {
 
 	// session
-	Session string `json:"Session,omitempty" xml:"SesInfo"`
+	Session string `json:"Session,omitempty" xml:"SesInfo,omitempty"`
 
 	// token
-	Token string `json:"Token,omitempty" xml:"TokInfo"`
+	Token string `json:"Token,omitempty" xml:"TokInfo,omitempty"`
 }
 
 // Validate validates this session token

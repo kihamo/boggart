@@ -219,6 +219,25 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
+  /api/sms/send-sms:
+    post:
+      operationId: "sendSMS"
+      tags:
+        - "sms"
+      parameters:
+      - name: "request"
+        in: "body"
+        schema:
+          $ref: "#/definitions/SMSSendRequest"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "string"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /api/sms/set-read:
     post:
       operationId: "readSMS"
@@ -928,6 +947,45 @@ definitions:
         type: "integer"
         xml:
           name: "NewMsg"
+  SMSSendRequest:
+    x-nullable: false
+    x-go-type:
+      import:
+        package: "github.com/kihamo/boggart/providers/hilink/static/models"
+        alias: "static"
+      type: "SMSSendRequest"
+    type: "object"
+    properties:
+      Index:
+        type: "integer"
+        xml:
+          name: "Index"
+      Phones:
+        type: "array"
+        xml:
+          name: "Phones>Phone"
+        items:
+          type: "string"
+      Sca:
+        type: "string"
+        xml:
+          name: "Sca"
+      Content:
+        type: "string"
+        xml:
+          name: "Content"
+      Length:
+        type: "integer"
+        xml:
+          name: "Length"
+      Reserved:
+        type: "integer"
+        xml:
+          name: "Reserved"
+      Date:
+        type: "string"
+        xml:
+          name: "Date"
   SMSListRequest:
     x-go-type:
       import:

@@ -6,53 +6,53 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // SMSCount s m s count
+//
 // swagger:model SMSCount
 type SMSCount struct {
 
 	// local deleted
-	LocalDeleted int64 `json:"LocalDeleted,omitempty" xml:"LocalDeleted"`
+	LocalDeleted int64 `json:"LocalDeleted,omitempty" xml:"LocalDeleted,omitempty"`
 
 	// local draft
-	LocalDraft int64 `json:"LocalDraft,omitempty" xml:"LocalDraft"`
+	LocalDraft int64 `json:"LocalDraft,omitempty" xml:"LocalDraft,omitempty"`
 
 	// local inbox
-	LocalInbox int64 `json:"LocalInbox,omitempty" xml:"LocalInbox"`
+	LocalInbox int64 `json:"LocalInbox,omitempty" xml:"LocalInbox,omitempty"`
 
 	// local max
-	LocalMax int64 `json:"LocalMax,omitempty" xml:"LocalMax"`
+	LocalMax int64 `json:"LocalMax,omitempty" xml:"LocalMax,omitempty"`
 
 	// local outbox
-	LocalOutbox int64 `json:"LocalOutbox,omitempty" xml:"LocalOutbox"`
+	LocalOutbox int64 `json:"LocalOutbox,omitempty" xml:"LocalOutbox,omitempty"`
 
 	// local unread
-	LocalUnread int64 `json:"LocalUnread,omitempty" xml:"LocalUnread"`
+	LocalUnread int64 `json:"LocalUnread,omitempty" xml:"LocalUnread,omitempty"`
 
 	// new msg
-	NewMsg int64 `json:"NewMsg,omitempty" xml:"NewMsg"`
+	NewMsg int64 `json:"NewMsg,omitempty" xml:"NewMsg,omitempty"`
 
 	// sim draft
-	SimDraft int64 `json:"SimDraft,omitempty" xml:"SimDraft"`
+	SimDraft int64 `json:"SimDraft,omitempty" xml:"SimDraft,omitempty"`
 
 	// sim inbox
-	SimInbox int64 `json:"SimInbox,omitempty" xml:"SimInbox"`
+	SimInbox int64 `json:"SimInbox,omitempty" xml:"SimInbox,omitempty"`
 
 	// sim max
-	SimMax int64 `json:"SimMax,omitempty" xml:"SimMax"`
+	SimMax int64 `json:"SimMax,omitempty" xml:"SimMax,omitempty"`
 
 	// sim outbox
-	SimOutbox int64 `json:"SimOutbox,omitempty" xml:"SimOutbox"`
+	SimOutbox int64 `json:"SimOutbox,omitempty" xml:"SimOutbox,omitempty"`
 
 	// sim unread
-	SimUnread int64 `json:"SimUnread,omitempty" xml:"SimUnread"`
+	SimUnread int64 `json:"SimUnread,omitempty" xml:"SimUnread,omitempty"`
 
 	// sim used
-	SimUsed int64 `json:"SimUsed,omitempty" xml:"SimUsed"`
+	SimUsed int64 `json:"SimUsed,omitempty" xml:"SimUsed,omitempty"`
 }
 
 // Validate validates this s m s count

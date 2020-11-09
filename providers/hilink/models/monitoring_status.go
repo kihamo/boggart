@@ -8,104 +8,104 @@ package models
 import (
 	"encoding/json"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 )
 
 // MonitoringStatus monitoring status
+//
 // swagger:model MonitoringStatus
 type MonitoringStatus struct {
 
 	// battery level
-	BatteryLevel int64 `json:"BatteryLevel,omitempty" xml:"BatteryLevel"`
+	BatteryLevel int64 `json:"BatteryLevel,omitempty" xml:"BatteryLevel,omitempty"`
 
 	// battery percent
-	BatteryPercent int64 `json:"BatteryPercent,omitempty" xml:"BatteryPercent"`
+	BatteryPercent int64 `json:"BatteryPercent,omitempty" xml:"BatteryPercent,omitempty"`
 
 	// battery status
-	BatteryStatus int64 `json:"BatteryStatus,omitempty" xml:"BatteryStatus"`
+	BatteryStatus int64 `json:"BatteryStatus,omitempty" xml:"BatteryStatus,omitempty"`
 
 	// cell roam
-	CellRoam int64 `json:"CellRoam,omitempty" xml:"cellroam"`
+	CellRoam int64 `json:"CellRoam,omitempty" xml:"cellroam,omitempty"`
 
 	// classify
-	Classify string `json:"Classify,omitempty" xml:"classify"`
+	Classify string `json:"Classify,omitempty" xml:"classify,omitempty"`
 
 	// connection status
-	ConnectionStatus int64 `json:"ConnectionStatus,omitempty" xml:"ConnectionStatus"`
+	ConnectionStatus int64 `json:"ConnectionStatus,omitempty" xml:"ConnectionStatus,omitempty"`
 
 	// current network type
-	CurrentNetworkType int64 `json:"CurrentNetworkType,omitempty" xml:"CurrentNetworkType"`
+	CurrentNetworkType int64 `json:"CurrentNetworkType,omitempty" xml:"CurrentNetworkType,omitempty"`
 
 	// current network type ex
-	CurrentNetworkTypeEx int64 `json:"CurrentNetworkTypeEx,omitempty" xml:"CurrentNetworkTypeEx"`
+	CurrentNetworkTypeEx int64 `json:"CurrentNetworkTypeEx,omitempty" xml:"CurrentNetworkTypeEx,omitempty"`
 
 	// current service domain
-	CurrentServiceDomain int64 `json:"CurrentServiceDomain,omitempty" xml:"CurrentServiceDomain"`
+	CurrentServiceDomain int64 `json:"CurrentServiceDomain,omitempty" xml:"CurrentServiceDomain,omitempty"`
 
 	// current total wi fiuser
-	CurrentTotalWiFiuser int64 `json:"CurrentTotalWiFiuser,omitempty" xml:"currenttotalwifiuser"`
+	CurrentTotalWiFiuser int64 `json:"CurrentTotalWiFiuser,omitempty" xml:"currenttotalwifiuser,omitempty"`
 
 	// current wi fi user
-	CurrentWiFiUser int64 `json:"CurrentWiFiUser,omitempty" xml:"CurrentWifiUser"`
+	CurrentWiFiUser int64 `json:"CurrentWiFiUser,omitempty" xml:"CurrentWifiUser,omitempty"`
 
 	// fly mode
-	FlyMode int64 `json:"FlyMode,omitempty" xml:"flymode"`
+	FlyMode int64 `json:"FlyMode,omitempty" xml:"flymode,omitempty"`
 
 	// l t e c a status
-	LTECAStatus int64 `json:"LTECAStatus,omitempty" xml:"ltecastatus"`
+	LTECAStatus int64 `json:"LTECAStatus,omitempty" xml:"ltecastatus,omitempty"`
 
 	// max signal
-	MaxSignal int64 `json:"MaxSignal,omitempty" xml:"maxsignal"`
+	MaxSignal int64 `json:"MaxSignal,omitempty" xml:"maxsignal,omitempty"`
 
 	// primary DNS
-	PrimaryDNS string `json:"PrimaryDNS,omitempty" xml:"PrimaryDns"`
+	PrimaryDNS string `json:"PrimaryDNS,omitempty" xml:"PrimaryDns,omitempty"`
 
 	// primary IPv6 DNS
-	PrimaryIPV6DNS string `json:"PrimaryIPv6DNS,omitempty" xml:"PrimaryIPv6Dns"`
+	PrimaryIPV6DNS string `json:"PrimaryIPv6DNS,omitempty" xml:"PrimaryIPv6Dns,omitempty"`
 
 	// roaming status
-	RoamingStatus int64 `json:"RoamingStatus,omitempty" xml:"RoamingStatus"`
+	RoamingStatus int64 `json:"RoamingStatus,omitempty" xml:"RoamingStatus,omitempty"`
 
 	// secondary DNS
-	SecondaryDNS string `json:"SecondaryDNS,omitempty" xml:"SecondaryDns"`
+	SecondaryDNS string `json:"SecondaryDNS,omitempty" xml:"SecondaryDns,omitempty"`
 
 	// secondary IPv6 DNS
-	SecondaryIPV6DNS string `json:"SecondaryIPv6DNS,omitempty" xml:"SecondaryIPv6Dns"`
+	SecondaryIPV6DNS string `json:"SecondaryIPv6DNS,omitempty" xml:"SecondaryIPv6Dns,omitempty"`
 
 	// service status
-	ServiceStatus int64 `json:"ServiceStatus,omitempty" xml:"ServiceStatus"`
+	ServiceStatus int64 `json:"ServiceStatus,omitempty" xml:"ServiceStatus,omitempty"`
 
 	// signal icon
-	SignalIcon int64 `json:"SignalIcon,omitempty" xml:"SignalIcon"`
+	SignalIcon int64 `json:"SignalIcon,omitempty" xml:"SignalIcon,omitempty"`
 
 	// signal strength
-	SignalStrength int64 `json:"SignalStrength,omitempty" xml:"SignalStrength"`
+	SignalStrength int64 `json:"SignalStrength,omitempty" xml:"SignalStrength,omitempty"`
 
 	// sim status
 	// Enum: [0 1 2 3 4 240 255]
-	SimStatus int64 `json:"SimStatus,omitempty" xml:"SimStatus"`
+	SimStatus int64 `json:"SimStatus,omitempty" xml:"SimStatus,omitempty"`
 
 	// simlock status
-	SimlockStatus int64 `json:"SimlockStatus,omitempty" xml:"simlockStatus"`
+	SimlockStatus int64 `json:"SimlockStatus,omitempty" xml:"simlockStatus,omitempty"`
 
 	// total wi fi user
-	TotalWiFiUser int64 `json:"TotalWiFiUser,omitempty" xml:"TotalWifiUser"`
+	TotalWiFiUser int64 `json:"TotalWiFiUser,omitempty" xml:"TotalWifiUser,omitempty"`
 
 	// wi fi frequence
-	WiFiFrequence int64 `json:"WiFiFrequence,omitempty" xml:"wififrequence"`
+	WiFiFrequence int64 `json:"WiFiFrequence,omitempty" xml:"wififrequence,omitempty"`
 
 	// wi fi indoor only
-	WiFiIndoorOnly int64 `json:"WiFiIndoorOnly,omitempty" xml:"wifiindooronly"`
+	WiFiIndoorOnly int64 `json:"WiFiIndoorOnly,omitempty" xml:"wifiindooronly,omitempty"`
 
 	// wifi connection status
-	WifiConnectionStatus int64 `json:"WifiConnectionStatus,omitempty" xml:"WifiConnectionStatus"`
+	WifiConnectionStatus int64 `json:"WifiConnectionStatus,omitempty" xml:"WifiConnectionStatus,omitempty"`
 
 	// wifi status
-	WifiStatus int64 `json:"WifiStatus,omitempty" xml:"WifiStatus"`
+	WifiStatus int64 `json:"WifiStatus,omitempty" xml:"WifiStatus,omitempty"`
 }
 
 // Validate validates this monitoring status
@@ -136,7 +136,7 @@ func init() {
 
 // prop value enum
 func (m *MonitoringStatus) validateSimStatusEnum(path, location string, value int64) error {
-	if err := validate.Enum(path, location, value, monitoringStatusTypeSimStatusPropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, monitoringStatusTypeSimStatusPropEnum, true); err != nil {
 		return err
 	}
 	return nil

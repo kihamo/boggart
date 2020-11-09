@@ -6,17 +6,17 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // AutoRunVersion auto run version
+//
 // swagger:model AutoRunVersion
 type AutoRunVersion struct {
 
 	// version
-	Version string `json:"version,omitempty" xml:"Version"`
+	Version string `json:"version,omitempty" xml:"Version,omitempty"`
 }
 
 // Validate validates this auto run version

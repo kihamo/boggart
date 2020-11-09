@@ -7,12 +7,11 @@ package sms
 
 import (
 	"github.com/go-openapi/runtime"
-
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 )
 
 // New creates a new sms API client.
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *Client {
+func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
 	return &Client{transport: transport, formats: formats}
 }
 
@@ -24,8 +23,23 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientService is the interface for Client methods
+type ClientService interface {
+	GetSMSCount(params *GetSMSCountParams) (*GetSMSCountOK, error)
+
+	GetSMSList(params *GetSMSListParams) (*GetSMSListOK, error)
+
+	ReadSMS(params *ReadSMSParams) (*ReadSMSOK, error)
+
+	RemoveSMS(params *RemoveSMSParams) (*RemoveSMSOK, error)
+
+	SendSMS(params *SendSMSParams) (*SendSMSOK, error)
+
+	SetTransport(transport runtime.ClientTransport)
+}
+
 /*
-GetSMSCount get s m s count API
+  GetSMSCount get s m s count API
 */
 func (a *Client) GetSMSCount(params *GetSMSCountParams) (*GetSMSCountOK, error) {
 	// TODO: Validate the params before sending
@@ -58,7 +72,7 @@ func (a *Client) GetSMSCount(params *GetSMSCountParams) (*GetSMSCountOK, error) 
 }
 
 /*
-GetSMSList get s m s list API
+  GetSMSList get s m s list API
 */
 func (a *Client) GetSMSList(params *GetSMSListParams) (*GetSMSListOK, error) {
 	// TODO: Validate the params before sending
@@ -91,7 +105,7 @@ func (a *Client) GetSMSList(params *GetSMSListParams) (*GetSMSListOK, error) {
 }
 
 /*
-ReadSMS read s m s API
+  ReadSMS read s m s API
 */
 func (a *Client) ReadSMS(params *ReadSMSParams) (*ReadSMSOK, error) {
 	// TODO: Validate the params before sending
@@ -124,7 +138,7 @@ func (a *Client) ReadSMS(params *ReadSMSParams) (*ReadSMSOK, error) {
 }
 
 /*
-RemoveSMS remove s m s API
+  RemoveSMS remove s m s API
 */
 func (a *Client) RemoveSMS(params *RemoveSMSParams) (*RemoveSMSOK, error) {
 	// TODO: Validate the params before sending
@@ -153,6 +167,39 @@ func (a *Client) RemoveSMS(params *RemoveSMSParams) (*RemoveSMSOK, error) {
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*RemoveSMSDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+  SendSMS send s m s API
+*/
+func (a *Client) SendSMS(params *SendSMSParams) (*SendSMSOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewSendSMSParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "sendSMS",
+		Method:             "POST",
+		PathPattern:        "/api/sms/send-sms",
+		ProducesMediaTypes: []string{"application/xml"},
+		ConsumesMediaTypes: []string{"application/xml"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &SendSMSReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*SendSMSOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*SendSMSDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 

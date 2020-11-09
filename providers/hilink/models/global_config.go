@@ -6,17 +6,17 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // GlobalConfig global config
+//
 // swagger:model GlobalConfig
 type GlobalConfig struct {
 
 	// login
-	Login int64 `json:"Login,omitempty" xml:"login"`
+	Login int64 `json:"Login,omitempty" xml:"login,omitempty"`
 }
 
 // Validate validates this global config

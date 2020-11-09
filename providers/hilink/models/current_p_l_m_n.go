@@ -6,29 +6,29 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // CurrentPLMN current p l m n
+//
 // swagger:model CurrentPLMN
 type CurrentPLMN struct {
 
 	// full name
-	FullName string `json:"FullName,omitempty" xml:"FullName"`
+	FullName string `json:"FullName,omitempty" xml:"FullName,omitempty"`
 
 	// numeric
-	Numeric int64 `json:"Numeric,omitempty" xml:"Numeric"`
+	Numeric int64 `json:"Numeric,omitempty" xml:"Numeric,omitempty"`
 
 	// rat
-	Rat int64 `json:"Rat,omitempty" xml:"Rat"`
+	Rat int64 `json:"Rat,omitempty" xml:"Rat,omitempty"`
 
 	// short name
-	ShortName string `json:"ShortName,omitempty" xml:"ShortName"`
+	ShortName string `json:"ShortName,omitempty" xml:"ShortName,omitempty"`
 
 	// state
-	State int64 `json:"State,omitempty" xml:"State"`
+	State int64 `json:"State,omitempty" xml:"State,omitempty"`
 }
 
 // Validate validates this current p l m n

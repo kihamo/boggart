@@ -6,41 +6,41 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // DeviceBasicInformation device basic information
+//
 // swagger:model DeviceBasicInformation
 type DeviceBasicInformation struct {
 
 	// autoupdate guide status
-	AutoupdateGuideStatus bool `json:"AutoupdateGuideStatus,omitempty" xml:"autoupdate_guide_status"`
+	AutoupdateGuideStatus bool `json:"AutoupdateGuideStatus,omitempty" xml:"autoupdate_guide_status,omitempty"`
 
 	// classify
-	Classify string `json:"Classify,omitempty" xml:"classify"`
+	Classify string `json:"Classify,omitempty" xml:"classify,omitempty"`
 
 	// device name
-	DeviceName string `json:"DeviceName,omitempty" xml:"devicename"`
+	DeviceName string `json:"DeviceName,omitempty" xml:"devicename,omitempty"`
 
 	// multi mode
-	MultiMode bool `json:"MultiMode,omitempty" xml:"multimode"`
+	MultiMode bool `json:"MultiMode,omitempty" xml:"multimode,omitempty"`
 
 	// product family
-	ProductFamily string `json:"ProductFamily,omitempty" xml:"productfamily"`
+	ProductFamily string `json:"ProductFamily,omitempty" xml:"productfamily,omitempty"`
 
 	// restore default status
-	RestoreDefaultStatus bool `json:"RestoreDefaultStatus,omitempty" xml:"restore_default_status"`
+	RestoreDefaultStatus bool `json:"RestoreDefaultStatus,omitempty" xml:"restore_default_status,omitempty"`
 
 	// sim save pin enable
-	SimSavePinEnable bool `json:"SimSavePinEnable,omitempty" xml:"sim_save_pin_enable"`
+	SimSavePinEnable bool `json:"SimSavePinEnable,omitempty" xml:"sim_save_pin_enable,omitempty"`
 
 	// software version
-	SoftwareVersion string `json:"SoftwareVersion,omitempty" xml:"SoftwareVersion"`
+	SoftwareVersion string `json:"SoftwareVersion,omitempty" xml:"SoftwareVersion,omitempty"`
 
 	// web UI version
-	WebUIVersion string `json:"WebUIVersion,omitempty" xml:"WebUIVersion"`
+	WebUIVersion string `json:"WebUIVersion,omitempty" xml:"WebUIVersion,omitempty"`
 }
 
 // Validate validates this device basic information

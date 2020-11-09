@@ -6,65 +6,65 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // DeviceInformation device information
+//
 // swagger:model DeviceInformation
 type DeviceInformation struct {
 
 	// classify
-	Classify string `json:"Classify,omitempty" xml:"Classify"`
+	Classify string `json:"Classify,omitempty" xml:"Classify,omitempty"`
 
 	// device name
-	DeviceName string `json:"DeviceName,omitempty" xml:"DeviceName"`
+	DeviceName string `json:"DeviceName,omitempty" xml:"DeviceName,omitempty"`
 
 	// hardware version
-	HardwareVersion string `json:"HardwareVersion,omitempty" xml:"HardwareVersion"`
+	HardwareVersion string `json:"HardwareVersion,omitempty" xml:"HardwareVersion,omitempty"`
 
 	// i c c ID
-	ICCID string `json:"ICCID,omitempty" xml:"Iccid"`
+	ICCID string `json:"ICCID,omitempty" xml:"Iccid,omitempty"`
 
 	// i m e i
-	IMEI string `json:"IMEI,omitempty" xml:"Imei"`
+	IMEI string `json:"IMEI,omitempty" xml:"Imei,omitempty"`
 
 	// i m s i
-	IMSI string `json:"IMSI,omitempty" xml:"Imsi"`
+	IMSI string `json:"IMSI,omitempty" xml:"Imsi,omitempty"`
 
 	// m s i s d n
-	MSISDN string `json:"MSISDN,omitempty" xml:"Msisdn"`
+	MSISDN string `json:"MSISDN,omitempty" xml:"Msisdn,omitempty"`
 
 	// mac address1
-	MacAddress1 string `json:"MacAddress1,omitempty" xml:"MacAddress1"`
+	MacAddress1 string `json:"MacAddress1,omitempty" xml:"MacAddress1,omitempty"`
 
 	// mac address2
-	MacAddress2 string `json:"MacAddress2,omitempty" xml:"MacAddress2"`
+	MacAddress2 string `json:"MacAddress2,omitempty" xml:"MacAddress2,omitempty"`
 
 	// product family
-	ProductFamily string `json:"ProductFamily,omitempty" xml:"ProductFamily"`
+	ProductFamily string `json:"ProductFamily,omitempty" xml:"ProductFamily,omitempty"`
 
 	// serial number
-	SerialNumber string `json:"SerialNumber,omitempty" xml:"SerialNumber"`
+	SerialNumber string `json:"SerialNumber,omitempty" xml:"SerialNumber,omitempty"`
 
 	// software version
-	SoftwareVersion string `json:"SoftwareVersion,omitempty" xml:"SoftwareVersion"`
+	SoftwareVersion string `json:"SoftwareVersion,omitempty" xml:"SoftwareVersion,omitempty"`
 
 	// support mode
-	SupportMode string `json:"SupportMode,omitempty" xml:"supportmode"`
+	SupportMode string `json:"SupportMode,omitempty" xml:"supportmode,omitempty"`
 
 	// wan IP address
-	WanIPAddress string `json:"WanIPAddress,omitempty" xml:"WanIPAddress"`
+	WanIPAddress string `json:"WanIPAddress,omitempty" xml:"WanIPAddress,omitempty"`
 
 	// wan IPv6 address
-	WanIPV6Address string `json:"WanIPv6Address,omitempty" xml:"WanIPv6Address"`
+	WanIPV6Address string `json:"WanIPv6Address,omitempty" xml:"WanIPv6Address,omitempty"`
 
 	// web UI version
-	WebUIVersion string `json:"WebUIVersion,omitempty" xml:"WebUIVersion"`
+	WebUIVersion string `json:"WebUIVersion,omitempty" xml:"WebUIVersion,omitempty"`
 
 	// work mode
-	WorkMode string `json:"WorkMode,omitempty" xml:"workmode"`
+	WorkMode string `json:"WorkMode,omitempty" xml:"workmode,omitempty"`
 }
 
 // Validate validates this device information

@@ -12,6 +12,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/hilink"
 	"github.com/kihamo/boggart/providers/hilink/client/device"
+	"github.com/kihamo/boggart/providers/hilink/client/sms"
 	"github.com/kihamo/boggart/providers/hilink/client/ussd"
 	"github.com/kihamo/boggart/providers/hilink/models"
 )
@@ -101,7 +102,7 @@ func (b *Bind) operatorSettings() (*operator, error) {
 	return nil, errors.New("operator " + label + " settings isn't found")
 }
 
-func (b *Bind) checkSpecialSMS(ctx context.Context, sms *models.SMSListMessagesItems0) bool {
+func (b *Bind) checkSpecialSMS(ctx context.Context, smsItem *models.SMSListMessagesItems0) bool {
 	op, err := b.operatorSettings()
 	if err != nil {
 		return false
@@ -110,7 +111,7 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, sms *models.SMSListMessagesI
 	sn := b.Meta().SerialNumber()
 
 	// limit traffic
-	match := op.SMSLimitTrafficRegexp.FindStringSubmatch(sms.Content)
+	match := op.SMSLimitTrafficRegexp.FindStringSubmatch(smsItem.Content)
 	if len(match) > 0 {
 		var (
 			value float64
@@ -130,13 +131,13 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, sms *models.SMSListMessagesI
 		}
 
 		if found {
-			if sms.Index > b.limitInternetTrafficIndex.Load() {
+			if smsItem.Index > b.limitInternetTrafficIndex.Load() {
 				value *= op.SMSLimitTrafficFactor
 
 				metricLimitInternetTraffic.With("serial_number", sn).Set(value)
 				b.MQTT().PublishAsync(ctx, b.config.TopicLimitInternetTraffic.Format(sn), uint64(value))
 
-				b.limitInternetTrafficIndex.Set(sms.Index)
+				b.limitInternetTrafficIndex.Set(smsItem.Index)
 			}
 
 			return true
@@ -145,16 +146,17 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, sms *models.SMSListMessagesI
 
 	// special commands
 	if b.config.SMSCommandsEnabled {
-		match = cmdRegexp.FindStringSubmatch(sms.Content)
+		match = cmdRegexp.FindStringSubmatch(smsItem.Content)
 		if len(match) > 0 {
 			for i, name := range cmdRegexp.SubexpNames() {
 				if name == "command" {
-					cmd := strings.ToLower(match[i])
+					cmd := strings.ToLower(strings.TrimSpace(match[i]))
 
 					switch cmd {
-					case "reboot":
+					case "reboot", "status":
 						// поддерживаемые команды
 					default:
+						b.Logger().Warnf("Unknown command %s from phone number %s ", cmd, smsItem.Phone)
 						return false
 					}
 
@@ -166,7 +168,7 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, sms *models.SMSListMessagesI
 					var allowed bool
 
 					for _, phone := range b.config.SMSCommandsAllowedPhones {
-						if strings.Compare(phone, sms.Phone) == 0 {
+						if strings.Compare(phone, smsItem.Phone) == 0 {
 							allowed = true
 							break
 						}
@@ -174,16 +176,34 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, sms *models.SMSListMessagesI
 
 					// выполнение команд с номера не разрешено
 					if !allowed {
-						b.Logger().Warnf("Unauthorized execute command %s from phone number %s ", cmd, sms.Phone)
+						b.Logger().Warnf("Unauthorized execute command %s from phone number %s ", cmd, smsItem.Phone)
 						return true
 					}
 
-					if cmd == "reboot" {
-						params := device.NewDeviceControlParams()
+					switch cmd {
+					case "reboot":
+						params := device.NewDeviceControlParamsWithContext(ctx)
 						params.Request.Control = 1
 
 						if _, err := b.client.Device.DeviceControl(params); err != nil {
 							b.Logger().Errorf("Reboot failed with error %v", err)
+						}
+					case "status":
+						balance, err := b.Balance(ctx)
+						if err == nil {
+							params := sms.NewSendSMSParamsWithContext(ctx)
+							params.Request.Index = -1
+							params.Request.Reserved = 1
+							params.Request.Date = time.Now().Format("2006-01-02 15:04:05")
+							params.Request.Phones = []string{smsItem.Phone}
+							params.Request.Content = "A'm OK. My balance is " + strconv.FormatFloat(balance, 'f', -1, 64)
+							params.Request.Length = int64(len(params.Request.Content))
+
+							_, err = b.client.Sms.SendSMS(params)
+						}
+
+						if err != nil {
+							b.Logger().Errorf("Send status SMS failed with error %v", err)
 						}
 					}
 

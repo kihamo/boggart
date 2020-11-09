@@ -10,11 +10,10 @@ import (
 	"io"
 
 	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
-	strfmt "github.com/go-openapi/strfmt"
-
-	models "github.com/kihamo/boggart/providers/hilink/models"
+	"github.com/kihamo/boggart/providers/hilink/models"
 )
 
 // LoginReader is a Reader for the Login structure.
@@ -122,13 +121,13 @@ swagger:model LoginBody
 type LoginBody struct {
 
 	// password
-	Password string `json:"Password,omitempty" xml:"Password"`
+	Password string `json:"Password,omitempty" xml:"Password,omitempty"`
 
 	// password type
-	PasswordType int64 `json:"PasswordType,omitempty" xml:"password_type"`
+	PasswordType int64 `json:"PasswordType,omitempty" xml:"password_type,omitempty"`
 
 	// username
-	Username string `json:"Username,omitempty" xml:"Username"`
+	Username string `json:"Username,omitempty" xml:"Username,omitempty"`
 }
 
 // Validate validates this login body

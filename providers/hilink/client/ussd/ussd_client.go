@@ -7,12 +7,11 @@ package ussd
 
 import (
 	"github.com/go-openapi/runtime"
-
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 )
 
 // New creates a new ussd API client.
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *Client {
+func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
 	return &Client{transport: transport, formats: formats}
 }
 
@@ -24,8 +23,21 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientService is the interface for Client methods
+type ClientService interface {
+	GetUSSD(params *GetUSSDParams) (*GetUSSDOK, error)
+
+	GetUSSDStatus(params *GetUSSDStatusParams) (*GetUSSDStatusOK, error)
+
+	ReleaseUSSD(params *ReleaseUSSDParams) (*ReleaseUSSDOK, error)
+
+	SendUSSD(params *SendUSSDParams) (*SendUSSDOK, error)
+
+	SetTransport(transport runtime.ClientTransport)
+}
+
 /*
-GetUSSD get u s s d API
+  GetUSSD get u s s d API
 */
 func (a *Client) GetUSSD(params *GetUSSDParams) (*GetUSSDOK, error) {
 	// TODO: Validate the params before sending
@@ -58,7 +70,7 @@ func (a *Client) GetUSSD(params *GetUSSDParams) (*GetUSSDOK, error) {
 }
 
 /*
-GetUSSDStatus get u s s d status API
+  GetUSSDStatus get u s s d status API
 */
 func (a *Client) GetUSSDStatus(params *GetUSSDStatusParams) (*GetUSSDStatusOK, error) {
 	// TODO: Validate the params before sending
@@ -91,7 +103,7 @@ func (a *Client) GetUSSDStatus(params *GetUSSDStatusParams) (*GetUSSDStatusOK, e
 }
 
 /*
-ReleaseUSSD release u s s d API
+  ReleaseUSSD release u s s d API
 */
 func (a *Client) ReleaseUSSD(params *ReleaseUSSDParams) (*ReleaseUSSDOK, error) {
 	// TODO: Validate the params before sending
@@ -124,7 +136,7 @@ func (a *Client) ReleaseUSSD(params *ReleaseUSSDParams) (*ReleaseUSSDOK, error) 
 }
 
 /*
-SendUSSD send u s s d API
+  SendUSSD send u s s d API
 */
 func (a *Client) SendUSSD(params *SendUSSDParams) (*SendUSSDOK, error) {
 	// TODO: Validate the params before sending
