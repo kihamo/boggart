@@ -52,6 +52,19 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				b.ipSubscriber.True()
 			}
 
+			if cmp, ok := component.(*ComponentBinarySensor); ok && cmp.DeviceClass() == "connectivity" && cmp.StateTopic() != "" && b.connectivitySubscriber.IsFalse() {
+				b.connectivitySubscriber.True()
+				b.MQTT().Subscribe(mqtt.NewSubscriber(component.StateTopic(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+					if cmp.ConvertState(message.String()) {
+						b.status.True()
+					} else {
+						b.status.False()
+					}
+
+					return nil
+				}))
+			}
+
 			return b.register(component)
 		}),
 		mqtt.NewSubscriber(b.config.TopicBirth, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {

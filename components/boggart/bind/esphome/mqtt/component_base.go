@@ -31,20 +31,18 @@ func (d Device) MAC() (mac net.HardwareAddr) {
 	return mac
 }
 
-type componentBaseJsonData struct {
-	Icon                string     `json:"icon"`
-	Name                string     `json:"name"`
-	StateTopic          mqtt.Topic `json:"state_topic"`
-	CommandTopic        mqtt.Topic `json:"command_topic"`
-	AvailabilityTopic   mqtt.Topic `json:"availability_topic"`
-	PayloadAvailable    string     `json:"payload_available"`
-	PayloadNotAvailable string     `json:"payload_not_available"`
-	UniqueID            string     `json:"unique_id"`
-	Device              Device     `json:"device"`
-}
-
 type ComponentBase struct {
-	componentBaseJsonData
+	data struct {
+		Icon                string     `json:"icon"`
+		Name                string     `json:"name"`
+		StateTopic          mqtt.Topic `json:"state_topic"`
+		CommandTopic        mqtt.Topic `json:"command_topic"`
+		AvailabilityTopic   mqtt.Topic `json:"availability_topic"`
+		PayloadAvailable    string     `json:"payload_available"`
+		PayloadNotAvailable string     `json:"payload_not_available"`
+		UniqueID            string     `json:"unique_id"`
+		Device              Device     `json:"device"`
+	}
 
 	id  string
 	typ ComponentType
@@ -66,7 +64,7 @@ func NewComponentBase(id string, t ComponentType) *ComponentBase {
 }
 
 func (c *ComponentBase) UnmarshalJSON(b []byte) error {
-	return json.Unmarshal(b, &c.componentBaseJsonData)
+	return json.Unmarshal(b, &c.data)
 }
 
 func (c *ComponentBase) ID() string {
@@ -78,11 +76,11 @@ func (c *ComponentBase) Type() ComponentType {
 }
 
 func (c *ComponentBase) UniqueID() string {
-	return c.componentBaseJsonData.UniqueID
+	return c.data.UniqueID
 }
 
 func (c *ComponentBase) Name() string {
-	return c.componentBaseJsonData.Name
+	return c.data.Name
 }
 
 func (c *ComponentBase) State() interface{} {
@@ -94,19 +92,19 @@ func (c *ComponentBase) State() interface{} {
 }
 
 func (c *ComponentBase) StateTopic() mqtt.Topic {
-	return c.componentBaseJsonData.StateTopic
+	return c.data.StateTopic
 }
 
 func (c *ComponentBase) CommandTopic() mqtt.Topic {
-	return c.componentBaseJsonData.CommandTopic
+	return c.data.CommandTopic
 }
 
 func (c *ComponentBase) AvailabilityTopic() mqtt.Topic {
-	return c.componentBaseJsonData.AvailabilityTopic
+	return c.data.AvailabilityTopic
 }
 
 func (c *ComponentBase) Device() Device {
-	return c.componentBaseJsonData.Device
+	return c.data.Device
 }
 
 // nolint:interfacer

@@ -37,13 +37,15 @@ func (s *ComponentLightState) SetState(state bool) {
 type ComponentLight struct {
 	*ComponentBase
 
-	Schema           string   `json:"schema"`
-	Brightness       bool     `json:"brightness"`
-	RGB              bool     `json:"rgb"`
-	ColorTemperature bool     `json:"color_temp"`
-	White            bool     `json:"white_value"`
-	Effect           bool     `json:"effect"`
-	EffectList       []string `json:"effect_list"`
+	data struct {
+		Schema           string   `json:"schema"`
+		Brightness       bool     `json:"brightness"`
+		RGB              bool     `json:"rgb"`
+		ColorTemperature bool     `json:"color_temp"`
+		White            bool     `json:"white_value"`
+		Effect           bool     `json:"effect"`
+		EffectList       []string `json:"effect_list"`
+	}
 }
 
 func NewComponentLight(id string) *ComponentLight {
@@ -96,4 +98,12 @@ func (c *ComponentLight) CommandToPayload(cmd interface{}) interface{} {
 	payload, _ := json.Marshal(state)
 
 	return payload
+}
+
+func (c *ComponentLight) UnmarshalJSON(b []byte) error {
+	if err := c.ComponentBase.UnmarshalJSON(b); err != nil {
+		return err
+	}
+
+	return json.Unmarshal(b, &c.data)
 }

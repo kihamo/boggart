@@ -17,9 +17,10 @@ type Bind struct {
 	di.WidgetBind
 	di.WorkersBind
 
-	config     *Config
-	components sync.Map
-	status     atomic.BoolNull
+	config                 *Config
+	components             sync.Map
+	status                 atomic.BoolNull
+	connectivitySubscriber *atomic.Bool
 
 	ip           *atomic.Value
 	ipSubscriber *atomic.Bool
@@ -27,6 +28,7 @@ type Bind struct {
 
 func (b *Bind) Run() error {
 	b.ipSubscriber.False()
+	b.connectivitySubscriber.False()
 
 	return nil
 }

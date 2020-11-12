@@ -23,9 +23,10 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	}
 
 	bind := &Bind{
-		config:       config,
-		ip:           atomic.NewValue(),
-		ipSubscriber: atomic.NewBool(),
+		config:                 config,
+		ip:                     atomic.NewValue(),
+		ipSubscriber:           atomic.NewBool(),
+		connectivitySubscriber: atomic.NewBool(),
 	}
 
 	return bind, nil
