@@ -78,121 +78,125 @@
                                 </div>
                             {{ end }}
                         {{ else if eq .action "system" }}
-                            <div class="x_title">
-                                <h2>{{ i18n "Basic information" . }}</h2>
-                                <div class="clearfix"></div>
-                            </div>
-
-                            <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
-                                <thead>
-                                <tr>
-                                    <th class="col-md-4">{{ i18n "Parameter" . }}</th>
-                                    <th>{{ i18n "Value" . }}</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>{{ i18n "Device name" . }}</td>
-                                        <td>{{ .info.DeviceName }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{ i18n "Device number" . }}</td>
-                                        <td>{{ .info.TelecontrolID }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{ i18n "Model" . }}</td>
-                                        <td>{{ .info.Model }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{ i18n "Serial number" . }}</td>
-                                        <td>{{ .info.SerialNumber }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{ i18n "Firmware version" . }}</td>
-                                        <td>{{ .info.FirmwareVersion }} {{ .info.FirmwareReleasedDate }}</td>
-                                    </tr>
-                                    {{ if ne .info.FirmwareVersionInfo "" }}
-                                    <tr>
-                                        <td>{{ i18n "Firmware version info" . }}</td>
-                                        <td>{{ .info.FirmwareVersionInfo }}</td>
-                                    </tr>
-                                    {{ end }}
-                                    <tr>
-                                        <td>{{ i18n "Encoder version" . }}</td>
-                                        <td>{{ .info.EncoderVersion }} {{ .info.EncoderReleasedDate }}</td>
-                                    </tr>
-                                    {{ if ne .info.DecoderVersion "" }}
-                                    <tr>
-                                        <td>{{ i18n "Decoder version" . }}</td>
-                                        <td>{{ .info.DecoderVersion }} {{ .info.DecoderReleasedDate }}</td>
-                                    </tr>
-                                    {{ end }}
-                                    {{ if ne .info.BootVersion "" }}
-                                    <tr>
-                                        <td>{{ i18n "Boot version" . }}</td>
-                                        <td>{{ .info.BootVersion }} {{ .info.BootReleasedDate }}</td>
-                                    </tr>
-                                    {{ end }}
-                                    <tr>
-                                        <td>{{ i18n "Device ID" . }}</td>
-                                        <td>{{ .info.DeviceID }}</td>
-                                    </tr>
-                                    {{ if ne .info.DeviceDescription "" }}
-                                    <tr>
-                                        <td>{{ i18n "Device description" . }}</td>
-                                        <td>{{ .info.DeviceDescription }}</td>
-                                    </tr>
-                                    {{ end }}
-                                    {{ if ne .info.DeviceLocation "" }}
-                                    <tr>
-                                        <td>{{ i18n "Device location" . }}</td>
-                                        <td>{{ .info.DeviceLocation }}</td>
-                                    </tr>
-                                    {{ end }}
-                                    {{ if ne .info.SystemContact "" }}
-                                    <tr>
-                                        <td>{{ i18n "System contact" . }}</td>
-                                        <td>{{ .info.SystemContact }}</td>
-                                    </tr>
-                                    {{ end }}
-                                    <tr>
-                                        <td>{{ i18n "Mac address" . }}</td>
-                                        <td>{{ .info.MacAddress }}</td>
-                                    </tr>
-                                    {{ if ne .info.HardwareVersion "" }}
-                                    <tr>
-                                        <td>{{ i18n "Hardware version" . }}</td>
-                                        <td>{{ .info.HardwareVersion }}</td>
-                                    </tr>
-                                    {{ end }}
-                                    <tr>
-                                        <td>{{ i18n "Device type" . }}</td>
-                                        <td>{{ .info.DeviceType }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{ i18n "Support beep" . }}</td>
-                                        <td>{{ .info.SupportBeep }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{ i18n "Support video loss" . }}</td>
-                                        <td>{{ .info.SupportVideoLoss }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-
-                            <div class="x_title">
-                                <h2>{{ i18n "Update firmware" . }}</h2>
-                                <div class="clearfix"></div>
-                            </div>
-
-                            {{ if .upgrade.Upgrading }}
-                                <div class="progress" style="margin-bottom:0">
-                                    <div class="progress-bar progress-bar-striped progress-bar-info active" role="progressbar" aria-valuenow="{{ .upgrade.Percent }}" aria-valuemin="0" aria-valuemax="100" style="width:{{ .upgrade.Percent }}%">
-                                        <span style="line-height:20px">{{ .upgrade.Percent }}%</span>
-                                    </div>
+                            {{ if .info }}
+                                <div class="x_title">
+                                    <h2>{{ i18n "Basic information" . }}</h2>
+                                    <div class="clearfix"></div>
                                 </div>
-                            {{ else }}
-                                <form class="form-horizontal form-label-left dropzone" role="form" method="post" id="firmware" action="?action=system" novalidate></form>
+
+                                <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                                    <thead>
+                                    <tr>
+                                        <th class="col-md-4">{{ i18n "Parameter" . }}</th>
+                                        <th>{{ i18n "Value" . }}</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>{{ i18n "Device name" . }}</td>
+                                            <td>{{ .info.DeviceName }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ i18n "Device number" . }}</td>
+                                            <td>{{ .info.TelecontrolID }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ i18n "Model" . }}</td>
+                                            <td>{{ .info.Model }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ i18n "Serial number" . }}</td>
+                                            <td>{{ .info.SerialNumber }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ i18n "Firmware version" . }}</td>
+                                            <td>{{ .info.FirmwareVersion }} {{ .info.FirmwareReleasedDate }}</td>
+                                        </tr>
+                                        {{ if ne .info.FirmwareVersionInfo "" }}
+                                        <tr>
+                                            <td>{{ i18n "Firmware version info" . }}</td>
+                                            <td>{{ .info.FirmwareVersionInfo }}</td>
+                                        </tr>
+                                        {{ end }}
+                                        <tr>
+                                            <td>{{ i18n "Encoder version" . }}</td>
+                                            <td>{{ .info.EncoderVersion }} {{ .info.EncoderReleasedDate }}</td>
+                                        </tr>
+                                        {{ if ne .info.DecoderVersion "" }}
+                                        <tr>
+                                            <td>{{ i18n "Decoder version" . }}</td>
+                                            <td>{{ .info.DecoderVersion }} {{ .info.DecoderReleasedDate }}</td>
+                                        </tr>
+                                        {{ end }}
+                                        {{ if ne .info.BootVersion "" }}
+                                        <tr>
+                                            <td>{{ i18n "Boot version" . }}</td>
+                                            <td>{{ .info.BootVersion }} {{ .info.BootReleasedDate }}</td>
+                                        </tr>
+                                        {{ end }}
+                                        <tr>
+                                            <td>{{ i18n "Device ID" . }}</td>
+                                            <td>{{ .info.DeviceID }}</td>
+                                        </tr>
+                                        {{ if ne .info.DeviceDescription "" }}
+                                        <tr>
+                                            <td>{{ i18n "Device description" . }}</td>
+                                            <td>{{ .info.DeviceDescription }}</td>
+                                        </tr>
+                                        {{ end }}
+                                        {{ if ne .info.DeviceLocation "" }}
+                                        <tr>
+                                            <td>{{ i18n "Device location" . }}</td>
+                                            <td>{{ .info.DeviceLocation }}</td>
+                                        </tr>
+                                        {{ end }}
+                                        {{ if ne .info.SystemContact "" }}
+                                        <tr>
+                                            <td>{{ i18n "System contact" . }}</td>
+                                            <td>{{ .info.SystemContact }}</td>
+                                        </tr>
+                                        {{ end }}
+                                        <tr>
+                                            <td>{{ i18n "Mac address" . }}</td>
+                                            <td>{{ .info.MacAddress }}</td>
+                                        </tr>
+                                        {{ if ne .info.HardwareVersion "" }}
+                                        <tr>
+                                            <td>{{ i18n "Hardware version" . }}</td>
+                                            <td>{{ .info.HardwareVersion }}</td>
+                                        </tr>
+                                        {{ end }}
+                                        <tr>
+                                            <td>{{ i18n "Device type" . }}</td>
+                                            <td>{{ .info.DeviceType }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ i18n "Support beep" . }}</td>
+                                            <td>{{ .info.SupportBeep }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ i18n "Support video loss" . }}</td>
+                                            <td>{{ .info.SupportVideoLoss }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            {{ end }}
+
+                            {{ if .upgrade }}
+                                <div class="x_title">
+                                    <h2>{{ i18n "Update firmware" . }}</h2>
+                                    <div class="clearfix"></div>
+                                </div>
+
+                                {{ if .upgrade.Upgrading }}
+                                    <div class="progress" style="margin-bottom:0">
+                                        <div class="progress-bar progress-bar-striped progress-bar-info active" role="progressbar" aria-valuenow="{{ .upgrade.Percent }}" aria-valuemin="0" aria-valuemax="100" style="width:{{ .upgrade.Percent }}%">
+                                            <span style="line-height:20px">{{ .upgrade.Percent }}%</span>
+                                        </div>
+                                    </div>
+                                {{ else }}
+                                    <form class="form-horizontal form-label-left dropzone" role="form" method="post" id="firmware" action="?action=system" novalidate></form>
+                                {{ end }}
                             {{ end }}
                         {{ else if and .events_enabled (eq .action "notification") }}
                             <form role="form" data-toggle="validator" id="notification-settings" action="{{ $.Request.URL.Path }}?action=notification" method="post" class="form-horizontal form-label-left">

@@ -185,16 +185,16 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		info, err := b.client.System.GetSystemDeviceInfo(system.NewGetSystemDeviceInfoParamsWithContext(ctx), nil)
 		if err != nil {
 			widget.FlashError(r, "Get device info failed with error %v", "", err)
+		} else {
+			vars["info"] = info.Payload
 		}
-
-		vars["info"] = info.Payload
 
 		upgrade, err := b.client.System.GetSystemUpgradeStatus(system.NewGetSystemUpgradeStatusParamsWithContext(ctx), nil)
 		if err != nil {
 			widget.FlashError(r, "Get upgrade status failed with error %v", "", err)
+		} else {
+			vars["upgrade"] = upgrade.Payload
 		}
-
-		vars["upgrade"] = upgrade.Payload
 
 	case "notification":
 		if !b.config.EventsEnabled {
