@@ -210,3 +210,13 @@ docker exec -it $(docker ps -q -f name=boggart_boggart-server) /bin/bash
 ```
 Как правильно прокидывать устройства
 https://github.com/Koenkk/zigbee2mqtt/issues/2049
+
+#### zigbee2mqtt
+```
+cd /opt/zigbee2mqtt
+npm ci
+```
+
+```
+DEBUG="zigbee-herdsman*" npm start
+```

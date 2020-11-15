@@ -1,0 +1,201 @@
+{{ define "content" }}
+    {{ if .settings}}
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>{{ i18n "Configuration" . }}</h2>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <form role="form" action="?action=settings" method="post" id="settings">
+                        <table class="table table-striped dt-responsive nowrap" style="width:100%">
+                            <thead>
+                            <tr>
+                                <th class="md-col-2">{{ i18n "Variable" . }}</th>
+                                <th class="md-col-2">{{ i18n "Value" . }}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{{ i18n "Permit join" . }}</td>
+                                    <td>
+                                        <input type="checkbox" class="js-switch" name="permit-join" id="permit-join" value="on" {{ if eq (print .settings.PermitJoin) "true" }} checked{{ end }} />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>{{ i18n "Log level" . }}</td>
+                                    <td>
+                                        <select id="log-level" class="form-control select2" required="required">
+                                            <option value="debug"{{ if eq .settings.LogLevel "debug" }} selected="selected"{{ end }}>{{ i18n "Debug" . }}</option>
+                                            <option value="info"{{ if eq .settings.LogLevel "info" }} selected="selected"{{ end }}>{{ i18n "Informational" . }}</option>
+                                            <option value="warn"{{ if eq .settings.LogLevel "warn" }} selected="selected"{{ end }}>{{ i18n "Warning" . }}</option>
+                                            <option value="error"{{ if eq .settings.LogLevel "error" }} selected="selected"{{ end }}>{{ i18n "Error" . }}</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>{{ i18n "Zigbee2mqtt version" . }}</td>
+                                    <td><a href="https://github.com/Koenkk/zigbee2mqtt/releases/tag/{{ .settings.Version }}" target="_blank">{{ .settings.Version }}</a></td>
+                                </tr>
+                                <tr>
+                                    <td>{{ i18n "Zigbee2mqtt commit" . }}</td>
+                                    <td><a href="https://github.com/Koenkk/zigbee2mqtt/commit/{{ .settings.Commit }}" target="_blank">{{ .settings.Commit }}</a></td>
+                                </tr>
+                                <tr>
+                                    <td>{{ i18n "Transport revision" . }}</td>
+                                    <td>{{ .settings.Coordinator.Meta.TransportRevision }}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{ i18n "Product" . }}</td>
+                                    <td>{{ .settings.Coordinator.Meta.Product }}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{ i18n "Version" . }}</td>
+                                    <td>v. {{ .settings.Coordinator.Meta.MajorRelease }}.{{ .settings.Coordinator.Meta.MinorRelease }}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{ i18n "Main trel" . }}</td>
+                                    <td>{{ .settings.Coordinator.Meta.MainTrel }}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{ i18n "Hardware revision" . }}</td>
+                                    <td>{{ .settings.Coordinator.Meta.HardwareRevision }}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{ i18n "Network PAN ID" . }}</td>
+                                    <td>{{ .settings.Network.PanID }}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{ i18n "Network extended PAN ID" . }}</td>
+                                    <td>{{ .settings.Network.ExtendedPanID }}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{ i18n "Network channel" . }}</td>
+                                    <td>{{ .settings.Network.Channel }}</td>
+                                </tr>
+                                {{ if .settings.Config }}
+                                <tr>
+                                    <td>{{ i18n "Disable led" . }}</td>
+                                    <td>{{ if .settings.Config.Serial.DisableLed }}disabled{{ else }}enabled{{ end }}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{ i18n "Port" . }}</td>
+                                    <td>{{ .settings.Config.Serial.Port }}</td>
+                                </tr>
+                                {{ end }}
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{ end }}
+
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>{{ i18n "Devices" . }}</h2>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                        <thead>
+                        <tr>
+                            <th>{{ i18n "Friendly Name" . }}</th>
+                            <th>{{ i18n "Network address" . }}</th>
+                            <th>{{ i18n "IEEE address" . }}</th>
+                            <th>{{ i18n "Device type" . }}</th>
+                            <th>{{ i18n "Last seen" . }}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{ range $device := .devices }}
+                        <tr>
+                            <td>{{ $device.FriendlyName }}</td>
+                            <td>{{ $device.NetworkAddress }}</td>
+                            <td>{{ $device.IEEEAddress }}</td>
+                            <td>{{ $device.Type }}</td>
+                            <td><script type="application/javascript">document.write(dateToString('{{ $device.LastSeen.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
+                        </tr>
+                        {{ end }}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{{ end }}
+
+{{ define "head" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" false) }}
+{{ end }}
+
+{{ define "js" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net/js/jquery.dataTables.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive/js/dataTables.responsive.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
+
+    <script type="application/javascript">
+        $(document).ready(function () {
+            {{ if .errors }}
+                {{ if ge (len .errors) 0 }}
+                    {{ range $error := .errors }}
+                        new PNotify({
+                            title: 'Error',
+                            text: '{{ $error }}',
+                            type: 'error',
+                            hide: false,
+                            styling: 'bootstrap3'
+                        });
+                    {{ end }}
+                {{ end }}
+            {{ end }}
+
+            function successHandler(r) {
+                if (r.result === 'failed') {
+                    new PNotify({
+                        title: 'Error',
+                        text: r.message,
+                        type: 'error',
+                        hide: false,
+                        styling: 'bootstrap3'
+                    });
+                } else if (r.message !== 'undefined') {
+                    new PNotify({
+                        title: 'Success',
+                        text: r.message,
+                        type: 'success',
+                        hide: false,
+                        styling: 'bootstrap3'
+                    });
+                }
+            }
+
+            $('#settings input[id],#settings select').change(function() {
+                var
+                        f = $('#settings'),
+                        e = $(this),
+                        data = {}
+                ;
+
+                if (e.prop('type') === 'checkbox') {
+                    data[e.prop('id')] = e.prop('checked') ? 'on' : 'off';
+                } else {
+                    data[e.prop('id')] = e.val();
+                }
+
+                $.ajax({
+                    type: f.prop('method'),
+                    url: f.prop('action'),
+                    data: data,
+                    success: successHandler
+                });
+            });
+        });
+    </script>
+{{ end }}

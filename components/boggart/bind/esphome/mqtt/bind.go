@@ -27,6 +27,7 @@ type Bind struct {
 }
 
 func (b *Bind) Run() error {
+	b.status.Nil()
 	b.ipSubscriber.False()
 	b.connectivitySubscriber.False()
 

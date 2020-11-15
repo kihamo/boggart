@@ -136,6 +136,10 @@ func (c *MetricsContainer) Collect(ch chan<- snitch.Metric) {
 }
 
 func (c *MetricsContainer) DescriptionsCount() (count uint64) {
+	if c.collector == nil {
+		return 0
+	}
+
 	count = atomic.LoadUint64(&c.descriptionsCount)
 	if count == 0 {
 		tmpCh := make(chan *snitch.Description, metricsSizeOfChannel)
