@@ -16,9 +16,14 @@ type response struct {
 func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	ctx := r.Context()
 	widget := b.Widget()
+	vars := map[string]interface{}{}
 
-	if r.IsPost() {
-		if r.URL().Query().Get("action") != "settings" {
+	action := r.URL().Query().Get("action")
+	vars["action"] = action
+
+	switch action {
+	case "settings":
+		if !r.IsPost() {
 			widget.NotFound(w, r)
 			return
 		}
@@ -70,11 +75,25 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		return
-	}
 
-	vars := map[string]interface{}{
-		"settings": b.Settings(),
-		"devices":  b.Devices(),
+	case "map":
+		network, err := b.NetworkMap(ctx)
+		if err != nil {
+			widget.FlashError(r, "Get network map failed with error %v", "", err)
+		} else {
+			vars["network_map"] = network
+
+			for _, node := range network.Nodes {
+				if node.Type == "Coordinator" {
+					vars["coordinator_address"] = node.IEEEAddress
+					break
+				}
+			}
+		}
+
+	default:
+		vars["settings"] = b.Settings()
+		vars["devices"] = b.Devices()
 	}
 
 	widget.Render(ctx, "widget", vars)

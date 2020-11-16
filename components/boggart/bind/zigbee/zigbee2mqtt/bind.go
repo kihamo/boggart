@@ -48,6 +48,12 @@ func (b *Bind) setSettingsFromMessage(message mqtt.Message) error {
 	}
 
 	b.settingsLock.Lock()
+
+	// для случая когда из /config приходит не полная инфа, сохраняем то, что пришло из /info
+	if settings.Config == nil && b.settings != nil && b.settings.Config != nil {
+		settings.Config = b.settings.Config
+	}
+
 	b.settings = &settings
 	b.settingsLock.Unlock()
 
@@ -57,7 +63,7 @@ func (b *Bind) setSettingsFromMessage(message mqtt.Message) error {
 func (b *Bind) setState(ctx context.Context, flag bool) error {
 	if flag {
 		if b.status.True() {
-			return b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicDeviceGet, true)
+			return b.MQTT().PublishAsyncRawWithoutCache(ctx, b.config.TopicDeviceGet, 1, false, true)
 		}
 
 		return nil
@@ -80,10 +86,25 @@ func (b *Bind) Devices() []*Device {
 	return devices
 }
 
+func (b *Bind) NetworkMap(ctx context.Context) (*NetworkMap, error) {
+	message, err := b.MQTT().Request(ctx, b.config.TopicNetworkMapRequest, b.config.TopicNetworkMapResponse, "raw")
+	if err != nil {
+		return nil, err
+	}
+
+	m := &NetworkMap{}
+
+	if err := message.JSONUnmarshal(&m); err != nil {
+		return nil, err
+	}
+
+	return m, nil
+}
+
 func (b *Bind) SetPermitJoin(ctx context.Context, flag bool) error {
-	return b.MQTT().PublishWithoutCache(ctx, b.config.TopicPermitJoin, flag)
+	return b.MQTT().PublishAsyncRawWithoutCache(ctx, b.config.TopicPermitJoin, 1, false, flag)
 }
 
 func (b *Bind) SetLogLevel(ctx context.Context, level string) error {
-	return b.MQTT().PublishWithoutCache(ctx, b.config.TopicLogLevel, level)
+	return b.MQTT().PublishAsyncRawWithoutCache(ctx, b.config.TopicLogLevel, 1, false, level)
 }

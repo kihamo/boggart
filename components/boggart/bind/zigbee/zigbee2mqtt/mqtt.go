@@ -36,6 +36,9 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			return nil
 		}),
+		mqtt.NewSubscriber(b.config.TopicConfig, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+			return b.setSettingsFromMessage(message)
+		}),
 	}
 
 	if b.config.NewAPI {
@@ -74,6 +77,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 				return nil
 			}),
+			// info отправляется один раз, config при старте + при изменениях, поэтому config надо слушать всегда
 			mqtt.NewSubscriber(b.config.TopicInfo, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 				return b.setSettingsFromMessage(message)
 			}),
@@ -102,9 +106,6 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				}
 
 				return nil
-			}),
-			mqtt.NewSubscriber(b.config.TopicConfig, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-				return b.setSettingsFromMessage(message)
 			}),
 		)
 	}

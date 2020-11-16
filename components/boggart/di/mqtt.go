@@ -196,6 +196,41 @@ func (c *MQTTContainer) PublishAsyncRawWithoutCache(ctx context.Context, topic m
 	return nil
 }
 
+func (c *MQTTContainer) Request(ctx context.Context, requestTopic, responseTopic mqtt.Topic, requestPayload interface{}) (_ mqtt.Message, err error) {
+	response := make(chan mqtt.Message, 1)
+	single := make(chan struct{})
+
+	subscribe := mqtt.NewSubscriber(responseTopic, 1, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+		response <- message
+		<-single
+
+		return nil
+	})
+
+	err = c.Subscribe(subscribe)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		close(single)
+		c.Unsubscribe(subscribe)
+	}()
+
+	err = c.PublishRawWithoutCache(ctx, requestTopic, 1, false, requestPayload)
+	if err != nil {
+		return nil, err
+	}
+
+	select {
+	case m := <-response:
+		return m, nil
+
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+}
+
 func (c *MQTTContainer) CheckValueInTopic(topic mqtt.Topic, value string, offset int) bool {
 	if value == "" {
 		return false

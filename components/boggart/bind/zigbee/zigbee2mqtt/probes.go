@@ -8,7 +8,7 @@ import (
 
 func (b *Bind) ReadinessProbe(ctx context.Context) (err error) {
 	if b.config.NewAPI {
-		err = b.MQTT().PublishWithoutCache(ctx, b.config.TopicHealthCheckRequest, true)
+		err = b.MQTT().PublishRawWithoutCache(ctx, b.config.TopicHealthCheckRequest, 1, false, true)
 		if err != nil {
 			return err
 		}
