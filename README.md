@@ -85,6 +85,14 @@ scan on
 service bluetooth restart
 ```
 
+В случае ошибки Sap driver initialization failed.
+```
+/etc/systemd/system/bluetooth.target.wants/bluetooth.service
+ExecStart=/usr/lib/bluetooth/bluetoothd --noplugin=sap
+sudo systemctl daemon-reload
+sudo service bluetooth restart
+```
+
 ## Agent Roborock
 Кросс компиляция не возможна из-за ошибок, поэтому собирать надо на реальном устройстве. Подойдет Raspberry PI, так как платформа на нем аналогичная
 

@@ -16,7 +16,7 @@ require (
 	github.com/faiface/beep v1.0.2
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/ghthor/gowol v0.0.0-20180205141434-eb42ead1b24e
-	github.com/go-ble/ble v0.0.0-20200120171844-0a73a9da88eb
+	github.com/go-ble/ble v0.0.0-20200407180624-067514cd6e24
 	github.com/go-openapi/errors v0.19.6
 	github.com/go-openapi/runtime v0.19.16
 	github.com/go-openapi/strfmt v0.19.5

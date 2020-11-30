@@ -187,6 +187,8 @@ github.com/glycerine/go-unsnap-stream v0.0.0-20180323001048-9f0cb55181dd/go.mod 
 github.com/glycerine/goconvey v0.0.0-20190410193231-58a59202ab31/go.mod h1:Ogl1Tioa0aV7gstGFO7KhffUsb9M4ydbEbbxpcEDc24=
 github.com/go-ble/ble v0.0.0-20200120171844-0a73a9da88eb h1:YLbB9CgjUw1U9GxEqGvM2ld9YqHRoBeEEM7f8A8l9x0=
 github.com/go-ble/ble v0.0.0-20200120171844-0a73a9da88eb/go.mod h1:nwmyxHsP2cqjashMTTAl3A5t6V3vzev1rLgMb/pZ7jc=
+github.com/go-ble/ble v0.0.0-20200407180624-067514cd6e24 h1:6St0uI/mfzuJX/y596wl2dJmA1VfdBSqopaUfS29z24=
+github.com/go-ble/ble v0.0.0-20200407180624-067514cd6e24/go.mod h1:nwmyxHsP2cqjashMTTAl3A5t6V3vzev1rLgMb/pZ7jc=
 github.com/go-check/check v0.0.0-20180628173108-788fd7840127/go.mod h1:9ES+weclKsC9YodN5RgxqK/VD9HM9JsCSh7rNhMZE98=
 github.com/go-chi/chi v4.0.2+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxmMeXJVKy9tTv1XzQ=
 github.com/go-errors/errors v1.0.1 h1:LUHzmkK3GUKUrL/1gfBUxAHzcev3apQlezX/+O7ma6w=
