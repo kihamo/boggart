@@ -16,9 +16,12 @@ type Config struct {
 	Password     string `valid:"required"`
 	Debug        bool
 	TopicBalance mqtt.Topic `mapstructure:"topic_balance" yaml:"topic_balance"`
+	TopicPromise mqtt.Topic `mapstructure:"topic_promise" yaml:"topic_promise"`
 }
 
 func (Type) Config() interface{} {
+	var prefix mqtt.Topic = boggart.ComponentName + "/service/softvideo/+/"
+
 	probesConfig := di.ProbesConfigDefaults()
 	probesConfig.ReadinessPeriod = time.Hour
 	probesConfig.ReadinessTimeout = time.Second * 10
@@ -27,6 +30,7 @@ func (Type) Config() interface{} {
 		ProbesConfig: probesConfig,
 		LoggerConfig: di.LoggerConfigDefaults(),
 		Debug:        false,
-		TopicBalance: boggart.ComponentName + "/service/softvideo/+/balance",
+		TopicBalance: prefix + "balance",
+		TopicPromise: prefix + "promise",
 	}
 }

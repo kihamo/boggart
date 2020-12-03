@@ -14,7 +14,7 @@ const (
 )
 
 var (
-	balanceRegexp = regexp.MustCompile(`(?:badge-success|badge-important)">([^\s]+)[^<]*</span>`)
+	balanceRegexp = regexp.MustCompile(`(?:badge-success|badge-important|badge-warning)">([\d.-]+)(?:[\s(]+([+\-\d]+)[\s)]+)*[^<]*</span>`)
 )
 
 type Client struct {
@@ -35,10 +35,10 @@ func (c *Client) AccountID() string {
 	return c.login
 }
 
-func (c *Client) Balance(ctx context.Context) (float64, error) {
-	_, err := c.connection.Get(ctx, AccountURL)
+func (c *Client) Balance(ctx context.Context) (balance, promise float64, err error) {
+	_, err = c.connection.Get(ctx, AccountURL)
 	if err != nil {
-		return -1, err
+		return -1, -1, err
 	}
 
 	response, err := c.connection.Post(ctx, AccountURL, map[string]string{
@@ -48,18 +48,23 @@ func (c *Client) Balance(ctx context.Context) (float64, error) {
 	})
 
 	if err != nil {
-		return -1, err
+		return -1, -1, err
 	}
 
 	submatch := balanceRegexp.FindStringSubmatch(http.BodyFromResponse(response))
-	if len(submatch) != 2 {
-		return -1, errors.New("balance string not found in page")
+	if len(submatch) != 3 {
+		return -1, -1, errors.New("balance string not found in page")
 	}
 
-	balance, err := strconv.ParseFloat(submatch[1], 10)
+	balance, err = strconv.ParseFloat(submatch[1], 10)
 	if err != nil {
-		return -1, err
+		return -1, -1, err
 	}
 
-	return balance, nil
+	promise, err = strconv.ParseFloat(submatch[2], 10)
+	if err != nil {
+		return -1, -1, err
+	}
+
+	return balance, promise, nil
 }

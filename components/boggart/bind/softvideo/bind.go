@@ -3,6 +3,7 @@ package softvideo
 import (
 	"context"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/softvideo"
 )
@@ -17,16 +18,20 @@ type Bind struct {
 	provider *softvideo.Client
 }
 
-func (b *Bind) Balance(ctx context.Context) (balance float64, err error) {
-	balance, err = b.provider.Balance(ctx)
+func (b *Bind) Balance(ctx context.Context) (balance, promise float64, err error) {
+	balance, promise, err = b.provider.Balance(ctx)
 
 	if err == nil {
 		metricBalance.With("account", b.config.Login).Set(balance)
 
 		if e := b.MQTT().PublishAsync(ctx, b.config.TopicBalance, balance); e != nil {
-			b.Logger().Error(e.Error())
+			err = multierror.Append(err, e)
+		}
+
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicPromise, promise); e != nil {
+			err = multierror.Append(err, e)
 		}
 	}
 
-	return balance, err
+	return balance, promise, err
 }

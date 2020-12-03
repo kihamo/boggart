@@ -11,6 +11,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
 	config.TopicBalance = config.TopicBalance.Format(config.Login)
+	config.TopicPromise = config.TopicPromise.Format(config.Login)
 
 	bind := &Bind{
 		config:   config,

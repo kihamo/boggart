@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/hashicorp/go-multierror"
-
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/premiergc"
 )
