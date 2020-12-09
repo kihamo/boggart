@@ -61,9 +61,11 @@ func (c *Client) Balance(ctx context.Context) (balance, promise float64, err err
 		return -1, -1, err
 	}
 
-	promise, err = strconv.ParseFloat(submatch[2], 10)
-	if err != nil {
-		return -1, -1, err
+	if submatch[2] != "" {
+		promise, err = strconv.ParseFloat(submatch[2], 10)
+		if err != nil {
+			return -1, -1, err
+		}
 	}
 
 	return balance, promise, nil
