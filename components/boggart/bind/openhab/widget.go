@@ -111,12 +111,13 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		response, err := http.Get(u)
-		defer response.Body.Close()
 
 		if err != nil {
 			widget.InternalError(w, r, err)
 			return
 		}
+
+		defer response.Body.Close()
 
 		var mimeType mime.Type
 
