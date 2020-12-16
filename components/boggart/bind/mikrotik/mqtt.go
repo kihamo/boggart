@@ -21,7 +21,11 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 }
 
 func (b *Bind) callbackMQTTWiFiSync(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	sn := b.SerialNumberWait()
+	sn, err := b.SerialNumberWait(ctx)
+	if err != nil {
+		return err
+	}
+
 	if sn == "" || !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 5) {
 		return nil
 	}
@@ -71,7 +75,11 @@ func (b *Bind) callbackMQTTSyslog(ctx context.Context, _ mqtt.Component, message
 
 	switch tag {
 	case "wifi":
-		sn := b.SerialNumberWait()
+		sn, err := b.SerialNumberWait(ctx)
+		if err != nil {
+			return err
+		}
+
 		if sn == "" {
 			return errors.New("serial number is empty")
 		}
@@ -99,7 +107,11 @@ func (b *Bind) callbackMQTTSyslog(ctx context.Context, _ mqtt.Component, message
 		}
 
 	case "vpn":
-		sn := b.SerialNumberWait()
+		sn, err := b.SerialNumberWait(ctx)
+		if err != nil {
+			return err
+		}
+
 		if sn == "" {
 			return errors.New("serial number is empty")
 		}

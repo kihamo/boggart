@@ -2,6 +2,7 @@ package mikrotik
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"regexp"
 
@@ -41,10 +42,18 @@ func (b *Bind) Close() error {
 	return nil
 }
 
-func (b *Bind) SerialNumberWait() string {
-	<-b.serialNumberLock
+func (b *Bind) SerialNumberWait(ctx context.Context) (string, error) {
+	// максимально ждем один цикл отработки таски
+	ctx, cancel := context.WithTimeout(ctx, b.config.ClientsSyncInterval+b.config.ReadinessTimeout)
+	defer cancel()
 
-	return b.Meta().SerialNumber()
+	select {
+	case <-ctx.Done():
+		return "", fmt.Errorf("get serial number failed with error: %v", ctx.Err())
+
+	case <-b.serialNumberLock:
+		return b.Meta().SerialNumber(), nil
+	}
 }
 
 func (b *Bind) SetSerialNumber(serialNumber string) {
