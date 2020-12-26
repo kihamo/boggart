@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
+	client "github.com/kihamo/boggart/providers/pantum"
 	"github.com/kihamo/boggart/providers/pantum/client/om"
 	"github.com/kihamo/go-workers"
 )
@@ -27,14 +28,15 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		return err
 	}
 
+	database := client.DatabaseToMap(response.Payload)
+
 	if b.Meta().SerialNumber() == "" {
-		for _, p := range response.Payload {
-			switch p.Name {
-			case "omSerialNumber":
-				b.Meta().SetSerialNumber(p.Value)
-			case "omMACAddress":
-				b.Meta().SetMACAsString(p.Value)
-			}
+		if value, ok := database["omSerialNumber"]; ok {
+			b.Meta().SetSerialNumber(value.(string))
+		}
+
+		if value, ok := database["omMACAddress"]; ok {
+			b.Meta().SetMACAsString(value.(string))
 		}
 	}
 
@@ -43,110 +45,50 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		return nil
 	}
 
-	for _, p := range response.Payload {
-		switch p.Name {
-		case "omTonerRemain":
-			if v, e := strconv.ParseUint(p.Value, 10, 64); e == nil {
-				metricTonerRemain.With("serial_number", sn).Set(float64(v))
+	var product client.ProductID
+	if value, ok := database["omProductID"]; ok {
+		product = client.ProductIDConvert(value.(string))
 
-				if e := b.MQTT().PublishAsync(ctx, b.config.TopicTonerRemain.Format(sn), v); e != nil {
-					err = fmt.Errorf("send mqtt message about toner remain failed: %w", err)
-				}
-			} else {
-				err = fmt.Errorf("oarse toner remain value failed: %w", err)
-			}
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicProductID.Format(sn), product.String()); e != nil {
+			err = fmt.Errorf("send mqtt message about printer status failed: %w", err)
+		}
+	}
 
-		case "omPrinterStatus":
-			//0: "Initialization"
-			//1: "Sleep"
-			//2: "Warming Up…"
-			//3: "Ready"
-			//4: "Printing …"
-			//5: "Error"
-			//134: "Canceling …"
+	if flag, ok := database["omErrorFlag"]; ok {
+		if modules, ok := database["omStatusModule"]; ok {
+			status := client.PrinterStatus(flag.(string), modules.(string))
 
-			var v string
-
-			switch p.Value {
-			case "0":
-				v = "initialization"
-			case "1":
-				v = "sleep"
-			case "2":
-				v = "warming up"
-			case "3":
-				v = "ready"
-			case "4":
-				v = "printing"
-			case "5":
-				v = "error"
-			case "134":
-				v = "canceling"
-			default:
-				v = "unknown"
-			}
-
-			if e := b.MQTT().PublishAsync(ctx, b.config.TopicPrinterStatus.Format(sn), v); e != nil {
+			if e := b.MQTT().PublishAsync(ctx, b.config.TopicPrinterStatus.Format(sn), status); e != nil {
 				err = fmt.Errorf("send mqtt message about printer status failed: %w", err)
 			}
+		}
+	}
 
-		case "omCartridgeStatus":
-			//0: "Normal"
-			//1: "Cartridge not detected"
-			//2: "Cartridge mismatch"
-			//3: "Cartridge Life Expired"
-			//4: "Toner Low"
-			//5: "Unknown Status"
+	if value, ok := database["omTonerRemain"]; ok {
+		if v, e := strconv.ParseUint(value.(string), 10, 64); e == nil {
+			metricTonerRemain.With("serial_number", sn).Set(float64(v))
 
-			var v string
-
-			switch p.Value {
-			case "0":
-				v = "normal"
-			case "1":
-				v = "not detected"
-			case "2":
-				v = "mismatch"
-			case "3":
-				v = "expired"
-			case "4":
-				v = "toner low"
-			default:
-				v = "unknown"
+			if e := b.MQTT().PublishAsync(ctx, b.config.TopicTonerRemain.Format(sn), v); e != nil {
+				err = fmt.Errorf("send mqtt message about toner remain failed: %w", err)
 			}
+		} else {
+			err = fmt.Errorf("oarse toner remain value failed: %w", err)
+		}
+	}
 
-			if e := b.MQTT().PublishAsync(ctx, b.config.TopicCartridgeStatus.Format(sn), v); e != nil {
-				err = fmt.Errorf("send mqtt message about cartridge status failed: %w", err)
-			}
+	if value, ok := database["omCartridgeStatus"]; ok {
+		status := client.CartridgeStatusConvert(value.(string))
 
-		case "omDrumStatus":
-			//0: "Normal"
-			//1: "Drum unit is uninstalled"
-			//2: "Type of the drum unit is unmatched"
-			//3: "Drum unit is invalid"
-			//4: "Life of the drum unit will come to an end"
-			//5: "Unknown Status"
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicCartridgeStatus.Format(sn), status.String()); e != nil {
+			err = fmt.Errorf("send mqtt message about cartridge status failed: %w", err)
+		}
+	}
 
-			var v string
+	if value, ok := database["omDrumStatus"]; ok {
+		status := client.DrumStatusConvert(value.(string))
 
-			switch p.Value {
-			case "0":
-				v = "normal"
-			case "1":
-				v = "uninstalled"
-			case "2":
-				v = "unmatched"
-			case "3":
-				v = "invalid"
-			case "4":
-				v = "expired"
-			default:
-				v = "unknown"
-			}
-
-			if e := b.MQTT().PublishAsync(ctx, b.config.TopicDrumStatus.Format(sn), v); e != nil {
-				err = fmt.Errorf("send mqtt message about drum status failed: %w", err)
-			}
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicDrumStatus.Format(sn), status.String()); e != nil {
+			err = fmt.Errorf("send mqtt message about drum status failed: %w", err)
 		}
 	}
 

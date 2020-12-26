@@ -17,6 +17,7 @@ type Config struct {
 	Debug                bool
 	UpdaterInterval      time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 	UpdaterTimeout       time.Duration `mapstructure:"updater_timeout" yaml:"updater_timeout"`
+	TopicProductID       mqtt.Topic    `mapstructure:"topic_product_id" yaml:"topic_product_id"`
 	TopicTonerRemain     mqtt.Topic    `mapstructure:"topic_toner_remain" yaml:"topic_toner_remain"`
 	TopicPrinterStatus   mqtt.Topic    `mapstructure:"topic_printer_status" yaml:"topic_printer_status"`
 	TopicCartridgeStatus mqtt.Topic    `mapstructure:"topic_cartridge_status" yaml:"topic_cartridge_status"`
@@ -35,6 +36,7 @@ func (t Type) Config() interface{} {
 		LoggerConfig:         di.LoggerConfigDefaults(),
 		UpdaterInterval:      time.Minute,
 		UpdaterTimeout:       time.Second * 10,
+		TopicProductID:       prefix + "state/product-id",
 		TopicTonerRemain:     prefix + "state/toner",
 		TopicPrinterStatus:   prefix + "state/printer",
 		TopicCartridgeStatus: prefix + "state/cartridge",

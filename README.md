@@ -228,3 +228,27 @@ npm ci
 ```
 DEBUG="zigbee-herdsman*" npm start
 ```
+
+#### Wake on LAN
+```
+sudo ethtool -s INTERFACE
+```
+```
+sudo vim /etc/systemd/system/wol.service
+```
+```
+[Unit]
+Description=Configure Wake On LAN
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/ethtool -s INTERFACE wol g
+
+[Install]
+WantedBy=basic.target
+```
+```
+sudo systemctl daemon-reload
+sudo systemctl enable wol.service
+sudo systemctl start wol.service
+```

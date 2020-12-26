@@ -38,6 +38,11 @@ func init() {
 }
 
 type Device struct {
+	timeout        int64
+	kind           int
+	id             uint32
+	packetsCounter uint64
+
 	mac  net.HardwareAddr
 	host string
 
@@ -45,11 +50,7 @@ type Device struct {
 	aesIV    []byte
 	aesBlock cipher.Block
 
-	id             uint32
-	kind           int
-	timeout        int64
-	packetsCounter uint64
-	requestMutex   sync.Mutex
+	requestMutex sync.Mutex
 }
 
 func NewDevice(kind int, mac net.HardwareAddr, host string) *Device {

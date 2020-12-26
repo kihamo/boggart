@@ -3,6 +3,7 @@ package main // import "github.com/kihamo/boggart/cmd/agent"
 import (
 	"log"
 
+	_ "github.com/kihamo/boggart/components/boggart/bind/broadlink"
 	_ "github.com/kihamo/boggart/components/boggart/bind/ds18b20"
 	_ "github.com/kihamo/boggart/components/boggart/bind/esphome"
 	_ "github.com/kihamo/boggart/components/boggart/bind/gpio"

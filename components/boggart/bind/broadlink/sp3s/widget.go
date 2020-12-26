@@ -19,7 +19,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			}
 		} else {
 			if err := b.Off(r.Context()); err != nil {
-				widget.FlashError(r, "Off failed with error %v", "")
+				widget.FlashError(r, "Off failed with error %v", "", err)
 			} else {
 				widget.FlashSuccess(r, "Off success", "")
 			}
@@ -32,12 +32,12 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 	state, err := b.State()
 	if err != nil {
-		widget.FlashError(r, "Get state failed with error %v", "")
+		widget.FlashError(r, "Get state failed with error %v", "", err)
 	}
 
 	power, err := b.Power()
 	if err != nil {
-		widget.FlashError(r, "Get power failed with error %v", "")
+		widget.FlashError(r, "Get power failed with error %v", "", err)
 	}
 
 	widget.Render(r.Context(), "widget", map[string]interface{}{
