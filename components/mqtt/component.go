@@ -48,6 +48,7 @@ type Message interface {
 	IsTrue() bool
 	IsFalse() bool
 	Bool() bool
+	Float64() float64
 	Base64() ([]byte, error)
 	Len() int
 }
