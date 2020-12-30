@@ -55,7 +55,7 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 			dashboard.NewRoute("/"+c.Name()+"/config/:action/:id", configHandler).
 				WithMethods([]string{http.MethodGet, http.MethodPost}).
 				WithAuth(true),
-			dashboard.NewRoute("/"+c.Name()+"/widget/:id", handlers.NewWidgetHandler(c)).
+			dashboard.NewRoute("/"+c.Name()+"/widget/:id/", handlers.NewWidgetHandler(c)).
 				WithMethods([]string{http.MethodGet, http.MethodPost}),
 		}
 	}
