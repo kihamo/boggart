@@ -1,0 +1,45 @@
+{{ define "content" }}
+
+<div class="row" id="devices">
+    <div class="x_panel">
+        <div class="x_title">
+            <h2>{{ i18n "State" . }}</h2>
+            <div class="clearfix"></div>
+        </div>
+        <div class="x_content">
+            <div class="table-responsive">
+                <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
+                    <thead>
+                    <tr>
+                        <th>{{ i18n "Option" . }}</th>
+                        <th>{{ i18n "Value" . }}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ i18n "Is connected" . }}</td>
+                            <td>{{ if .is_connected }}{{ i18n "Yes" . }}{{ else }}{{ i18n "No" . }}{{ end }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ i18n "Is connection open" . }}</td>
+                            <td>{{ if .is_connection_open }}{{ i18n "Yes" . }}{{ else }}{{ i18n "No" . }}{{ end }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
+
+{{ define "head" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" false) }}
+{{ end }}
+
+{{ define "js" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net/js/jquery.dataTables.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive/js/dataTables.responsive.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
+{{ end }}

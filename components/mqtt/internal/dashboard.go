@@ -18,14 +18,20 @@ func (c *Component) DashboardMenu() dashboard.Menu {
 
 	return dashboard.NewMenu("MQTT").
 		WithIcon("list").
-		WithChild(dashboard.NewMenu("Subscriptions").WithRoute(routes[1])).
-		WithChild(dashboard.NewMenu("Cache").WithURL("/" + c.Name() + "/cache"))
+		WithChild(dashboard.NewMenu("State").WithRoute(routes[1])).
+		WithChild(dashboard.NewMenu("Subscriptions").WithRoute(routes[2])).
+		WithChild(dashboard.NewMenu("Cache").WithRoute(routes[3]))
 }
 
 func (c *Component) DashboardRoutes() []dashboard.Route {
 	if c.routes == nil {
 		c.routes = []dashboard.Route{
 			dashboard.RouteFromAssetFS(c),
+			dashboard.NewRoute("/"+c.Name()+"/state/", &handlers.StateHandler{
+				Component: c,
+			}).
+				WithMethods([]string{http.MethodGet}).
+				WithAuth(true),
 			dashboard.NewRoute("/"+c.Name()+"/subscriptions/", &handlers.SubscriptionsHandler{
 				Component: c,
 			}).
