@@ -4,16 +4,29 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/atomic"
+	"github.com/pborman/uuid"
 )
 
 type Meta struct {
 	id         string
-	firstRunAt atomic.TimeNull
-	lastRunAt  atomic.TimeNull
+	firstRunAt *atomic.TimeNull
+	lastRunAt  *atomic.TimeNull
+	nextRunAt  *atomic.TimeNull
+	attempts   *atomic.Uint64
+	fails      *atomic.Uint64
+	status     *atomic.Uint32
+}
 
-	attempts atomic.Uint64
-	fails    atomic.Uint64
-	status   atomic.Uint32
+func newMeta() *Meta {
+	return &Meta{
+		id:         uuid.New(),
+		firstRunAt: atomic.NewTimeNull(),
+		lastRunAt:  atomic.NewTimeNull(),
+		nextRunAt:  atomic.NewTimeNull(),
+		attempts:   atomic.NewUint64(),
+		fails:      atomic.NewUint64(),
+		status:     atomic.NewUint32(),
+	}
 }
 
 func (m Meta) ID() string {
@@ -26,6 +39,10 @@ func (m Meta) FirstRunAt() *time.Time {
 
 func (m Meta) LastRunAt() *time.Time {
 	return m.lastRunAt.Load()
+}
+
+func (m Meta) NextRunAt() *time.Time {
+	return m.nextRunAt.Load()
 }
 
 func (m Meta) Attempts() uint64 {

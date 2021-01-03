@@ -43,9 +43,7 @@ func (t *TaskBase) WithHandler(handler Handler) *TaskBase {
 }
 
 func (t *TaskBase) WithHandlerFunc(handler func(context.Context) error) *TaskBase {
-	return t.WithHandlerFuncFull(HandlerFunc(func(ctx context.Context, _ Meta, _ Task) error {
-		return handler(ctx)
-	}))
+	return t.WithHandler(HandlerFuncFromShortToLong(handler))
 }
 
 func (t *TaskBase) WithHandlerFuncFull(handler HandlerFunc) *TaskBase {

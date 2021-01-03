@@ -117,10 +117,18 @@ func (m *Manager) Schedule(id string) (schedule Schedule, _ error) {
 
 func (m *Manager) Meta(id string) (meta Meta, _ error) {
 	if w := m.worker(id); w != nil {
-		return w.meta, nil
+		return *w.meta, nil
 	}
 
 	return meta, ErrTaskNotFound
+}
+
+func (m *Manager) Task(id string) (task Task, _ error) {
+	if w := m.worker(id); w != nil {
+		return w.task, nil
+	}
+
+	return nil, ErrTaskNotFound
 }
 
 func (m *Manager) Cancel(id string) {

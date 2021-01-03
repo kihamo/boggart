@@ -1,12 +1,13 @@
 package tasks
 
 import (
+	"sync"
 	"time"
 )
 
 var (
-	background = ScheduleFunc(func(Meta) time.Time {
-		return time.Now()
+	background = ScheduleFunc(func(Meta) (t time.Time) {
+		return t
 	})
 )
 
@@ -14,14 +15,36 @@ type Schedule interface {
 	Next(Meta) time.Time
 }
 
-func ScheduleBackground() Schedule {
-	return background
-}
-
 type ScheduleFunc func(Meta) time.Time
 
 func (f ScheduleFunc) Next(meta Meta) time.Time {
 	return f(meta)
+}
+
+func ScheduleBackground() Schedule {
+	return background
+}
+
+func ScheduleNow() Schedule {
+	var once sync.Once
+
+	return ScheduleFunc(func(Meta) (t time.Time) {
+		once.Do(func() {
+			t = time.Now()
+		})
+
+		return t
+	})
+}
+
+func ScheduleStartAt(parent Schedule, startAt time.Time) Schedule {
+	return ScheduleFunc(func(meta Meta) (t time.Time) {
+		if startAt.After(time.Now()) {
+			return startAt
+		}
+
+		return parent.Next(meta)
+	})
 }
 
 func ScheduleWithStopFunc(parent Schedule, fn func(meta Meta) bool) Schedule {
@@ -45,6 +68,30 @@ func ScheduleWithDuration(parent Schedule, duration time.Duration) Schedule {
 		}
 
 		next := time.Now().Add(duration)
+		if t.IsZero() || next.Before(t) {
+			t = next
+		}
+
+		return t
+	})
+}
+
+func ScheduleWithDailyTime(parent Schedule, hour, min, sec int, loc *time.Location) Schedule {
+	return ScheduleFunc(func(meta Meta) (t time.Time) {
+		if parent != nil {
+			t = parent.Next(meta)
+		}
+
+		now := time.Now()
+		if loc == nil {
+			loc = now.Location()
+		}
+
+		next := time.Date(now.Year(), now.Month(), now.Day(), hour, min, sec, 0, loc)
+		if next.Before(now) {
+			next = next.Add(time.Hour * 24)
+		}
+
 		if t.IsZero() || next.After(t) {
 			t = next
 		}

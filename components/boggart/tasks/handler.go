@@ -17,6 +17,12 @@ func (f HandlerFunc) Handle(ctx context.Context, meta Meta, task Task) error {
 	return f(ctx, meta, task)
 }
 
+func HandlerFuncFromShortToLong(handler func(ctx context.Context) error) Handler {
+	return HandlerFunc(func(ctx context.Context, _ Meta, _ Task) error {
+		return handler(ctx)
+	})
+}
+
 func HandlerWithTimeout(parent Handler, timeout time.Duration) Handler {
 	return HandlerFunc(func(ctx context.Context, meta Meta, task Task) error {
 		if parent == nil {

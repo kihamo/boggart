@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/atomic"
-	"github.com/pborman/uuid"
 )
 
 // внутренняя сущность, которая используется в менеджере для работы с задачей
@@ -18,7 +17,7 @@ type worker struct {
 	removeFn func(string)
 
 	task Task
-	meta Meta
+	meta *Meta
 
 	cancelMutex sync.Mutex
 	cancelFn    context.CancelFunc
@@ -30,22 +29,20 @@ type worker struct {
 }
 
 func newWorker(ready, remove func(string), task Task) *worker {
-	w := &worker{
+	return &worker{
 		readyFn:         ready,
 		removeFn:        remove,
 		task:            task,
+		meta:            newMeta(),
 		schedulerChange: make(chan time.Duration, 1),
 		schedulerDone:   make(chan struct{}),
 	}
-	w.meta.id = uuid.New()
-
-	return w
 }
 
 func (w *worker) RunScheduler() {
 	now := time.Now()
 
-	next := w.task.Schedule().Next(w.meta)
+	next := w.task.Schedule().Next(*w.meta)
 	if next.IsZero() {
 		// FIXME: надо различать случай, когда время не возможно определить из-за не сработавшего фактора
 		// например, объект в данный момент не активен и поэтому задача для него не выполняется, но как только
@@ -59,10 +56,24 @@ func (w *worker) RunScheduler() {
 		return
 	}
 
+	w.meta.nextRunAt.Set(next)
+
 	duration := next.Sub(now)
+
+	// FIXME: dirty hack, но пока так, точность запуска - 1 секунда
+	// между time.Now() и schedule.Next() который так же возвращает time.Now() проходит время в несколько наносекунд
+	// и этот оверхед дает дельту, хотя фактически имелось ввиду одно и тоже время, поэтому принудительно сфильтровываем
+	// все что меньше секунды
+	if duration < time.Second {
+		go w.readyFn(w.meta.id)
+		return
+	}
+
+	needChangeDuration := true
 
 	// тикер запускаем только один раз
 	w.schedulerOnce.Do(func() {
+		needChangeDuration = false
 		w.schedulerTicker = time.NewTicker(duration)
 
 		go func() {
@@ -85,7 +96,9 @@ func (w *worker) RunScheduler() {
 		}()
 	})
 
-	w.schedulerChange <- duration
+	if needChangeDuration {
+		w.schedulerChange <- duration
+	}
 }
 
 func (w *worker) Handle(ctx context.Context) error {
@@ -110,7 +123,7 @@ func (w *worker) Handle(ctx context.Context) error {
 	ctx, w.cancelFn = context.WithCancel(ctx)
 	w.cancelMutex.Unlock()
 
-	err := w.task.Handler().Handle(ctx, w.meta, w.task)
+	err := w.task.Handler().Handle(ctx, *w.meta, w.task)
 
 	w.cancelMutex.Lock()
 	w.cancelFn = nil
