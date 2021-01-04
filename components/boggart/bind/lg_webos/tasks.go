@@ -5,17 +5,24 @@ import (
 	"errors"
 	"time"
 
-	"github.com/kihamo/go-workers"
+	"github.com/kihamo/boggart/components/boggart/tasks"
 )
 
-func (b *Bind) Tasks() []workers.Task {
-	taskSerialNumber := b.Workers().WrapTaskIsOnlineOnceSuccess(b.taskSerialNumber)
-	taskSerialNumber.SetRepeats(-1)
-	taskSerialNumber.SetRepeatInterval(time.Second * 30)
-	taskSerialNumber.SetName("serial-number")
-
-	return []workers.Task{
-		taskSerialNumber,
+func (b *Bind) Tasks() []tasks.Task {
+	return []tasks.Task{
+		tasks.NewTask().
+			WithName("serial-number").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerFuncFromShortToLong(b.taskSerialNumber),
+				),
+			).
+			WithSchedule(
+				tasks.ScheduleWithSuccessLimit(
+					tasks.ScheduleWithDuration(tasks.ScheduleNow(), time.Second*30),
+					1,
+				),
+			),
 	}
 }
 

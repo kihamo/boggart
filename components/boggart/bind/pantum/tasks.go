@@ -5,20 +5,24 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/kihamo/boggart/components/boggart/tasks"
 	client "github.com/kihamo/boggart/providers/pantum"
 	"github.com/kihamo/boggart/providers/pantum/client/om"
-	"github.com/kihamo/go-workers"
 )
 
-func (b *Bind) Tasks() []workers.Task {
-	taskUpdater := b.Workers().WrapTaskIsOnline(b.taskUpdater)
-	taskUpdater.SetTimeout(b.config.UpdaterTimeout)
-	taskUpdater.SetRepeats(-1)
-	taskUpdater.SetRepeatInterval(b.config.UpdaterInterval)
-	taskUpdater.SetName("updater")
-
-	return []workers.Task{
-		taskUpdater,
+func (b *Bind) Tasks() []tasks.Task {
+	return []tasks.Task{
+		tasks.NewTask().
+			WithName("updater").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerWithTimeout(
+						tasks.HandlerFuncFromShortToLong(b.taskUpdater),
+						b.config.UpdaterTimeout,
+					),
+				),
+			).
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
 	}
 }
 

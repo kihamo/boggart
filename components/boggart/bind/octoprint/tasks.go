@@ -4,23 +4,27 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/providers/octoprint/client/job"
 	"github.com/kihamo/boggart/providers/octoprint/client/plugin_display_layer_progress"
 	"github.com/kihamo/boggart/providers/octoprint/client/printer"
 	"github.com/kihamo/boggart/providers/octoprint/models"
-	"github.com/kihamo/go-workers"
 	"go.uber.org/multierr"
 )
 
-func (b *Bind) Tasks() []workers.Task {
-	taskUpdater := b.Workers().WrapTaskIsOnline(b.taskUpdater)
-	taskUpdater.SetTimeout(b.config.UpdaterTimeout)
-	taskUpdater.SetRepeats(-1)
-	taskUpdater.SetRepeatInterval(b.config.UpdaterInterval)
-	taskUpdater.SetName("updater")
-
-	return []workers.Task{
-		taskUpdater,
+func (b *Bind) Tasks() []tasks.Task {
+	return []tasks.Task{
+		tasks.NewTask().
+			WithName("updater").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerWithTimeout(
+						tasks.HandlerFuncFromShortToLong(b.taskUpdater),
+						b.config.UpdaterTimeout,
+					),
+				),
+			).
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
 	}
 }
 

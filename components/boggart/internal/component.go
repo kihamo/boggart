@@ -15,6 +15,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	bb "github.com/kihamo/boggart/components/boggart/bind/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
+	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/components/config"
@@ -22,7 +23,6 @@ import (
 	"github.com/kihamo/shadow/components/i18n"
 	"github.com/kihamo/shadow/components/logging"
 	"github.com/kihamo/shadow/components/metrics"
-	"github.com/kihamo/shadow/components/workers"
 	"github.com/pborman/uuid"
 	"gopkg.in/yaml.v2"
 	"periph.io/x/periph/host"
@@ -35,11 +35,11 @@ type Component struct {
 	i18n        i18n.Component
 	logger      logging.Logger
 	mqtt        mqtt.Component
-	workers     workers.Component
 
-	routes  []dashboard.Route
-	binds   sync.Map
-	closing int32
+	routes       []dashboard.Route
+	binds        sync.Map
+	closing      int32
+	tasksManager *tasks.Manager
 }
 
 type FileYAML struct {
@@ -86,15 +86,12 @@ func (c *Component) Dependencies() []shadow.Dependency {
 			Name:     metrics.ComponentName,
 			Required: true,
 		},
-		{
-			Name:     workers.ComponentName,
-			Required: true,
-		},
 	}
 }
 
 func (c *Component) Init(a shadow.Application) error {
 	c.application = a
+	c.tasksManager = tasks.NewManager()
 
 	return nil
 }
@@ -106,9 +103,6 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 	<-a.ReadyComponent(mqtt.ComponentName)
 	c.mqtt = a.GetComponent(mqtt.ComponentName).(mqtt.Component)
 	c.mqtt.OnConnectHandlerAdd(c.mqttOnConnectHandler)
-
-	<-a.ReadyComponent(workers.ComponentName)
-	c.workers = a.GetComponent(workers.ComponentName).(workers.Component)
 
 	if a.HasComponent(i18n.ComponentName) {
 		<-a.ReadyComponent(i18n.ComponentName)
@@ -397,10 +391,14 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 
 		// workers container
 		if bindSupport, ok := bindItem.Bind().(di.WorkersContainerSupport); ok {
-			ctr := di.NewWorkersContainer(bindItem, c.workers)
+			ctr := di.NewWorkersContainer(bindItem, c.tasksManager)
 
 			bindSupport.SetWorkers(ctr)
-			ctr.HookRegister()
+
+			if err = ctr.HookRegister(); err != nil {
+				err = fmt.Errorf("register tasks failed: %w", err)
+				return
+			}
 		}
 
 		// probes container
@@ -415,11 +413,15 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 				}, func() error {
 					return c.UnregisterBindByID(bindItem.ID())
 				},
-				c.workers,
+				c.tasksManager,
 				metricProbes)
 
 			bindSupport.SetProbes(ctr)
-			ctr.HookRegister()
+
+			if err = ctr.HookRegister(); err != nil {
+				err = fmt.Errorf("register probes failed: %w", err)
+				return
+			}
 		} else {
 			c.itemStatusUpdate(bindItem, boggart.BindStatusOnline)
 		}

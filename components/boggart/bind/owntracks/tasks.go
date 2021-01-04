@@ -4,21 +4,28 @@ import (
 	"context"
 	"time"
 
-	"github.com/kihamo/go-workers"
+	"github.com/kihamo/boggart/components/boggart/tasks"
 )
 
-func (b *Bind) Tasks() []workers.Task {
+func (b *Bind) Tasks() []tasks.Task {
 	if !b.config.RegionsSyncEnabled {
 		return nil
 	}
 
-	taskWayPoints := b.Workers().WrapTaskIsOnlineOnceSuccess(b.taskWayPoints)
-	taskWayPoints.SetRepeats(-1)
-	taskWayPoints.SetRepeatInterval(time.Second * 10)
-	taskWayPoints.SetName("waypoints")
-
-	return []workers.Task{
-		taskWayPoints,
+	return []tasks.Task{
+		tasks.NewTask().
+			WithName("waypoints").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerFuncFromShortToLong(b.taskWayPoints),
+				),
+			).
+			WithSchedule(
+				tasks.ScheduleWithSuccessLimit(
+					tasks.ScheduleWithDuration(tasks.ScheduleNow(), time.Second*10),
+					1,
+				),
+			),
 	}
 }
 

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"bytes"
-	"context"
 	"errors"
 	"net/http"
 	"sort"
@@ -10,8 +9,8 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
+	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/components/mqtt"
-	"github.com/kihamo/go-workers"
 	"github.com/kihamo/shadow/components/dashboard"
 	"gopkg.in/yaml.v2"
 )
@@ -310,14 +309,14 @@ func (h *BindHandler) actionProbe(w *dashboard.Response, r *dashboard.Request, b
 
 	switch t {
 	case "readiness":
-		if bindSupport.Readiness() == nil {
+		if bindSupport.ReadinessTaskID() == "" {
 			h.NotFound(w, r)
 			return
 		}
 
 		err = bindSupport.ReadinessCheck(r.Context())
 	case "liveness":
-		if bindSupport.Liveness() == nil {
+		if bindSupport.LivenessTaskID() == "" {
 			h.NotFound(w, r)
 			return
 		}
@@ -469,33 +468,15 @@ func (h *BindHandler) actionTasks(w *dashboard.Response, r *dashboard.Request, b
 	}
 
 	ctx := r.Context()
-	tasks := bindSupport.Workers().Tasks()
+	ctr := bindSupport.Workers()
+	runID := r.URL().Query().Get("run")
 
-	run := r.URL().Query().Get("run")
-	if run != "" {
-		var task workers.Task
-
-		for _, t := range tasks {
-			if t.Id() == run {
-				task = t
-				break
-			}
-		}
-
-		if task == nil {
+	if runID != "" {
+		err := ctr.TaskRun(ctx, runID)
+		if errors.Is(err, tasks.ErrTaskNotFound) {
 			h.NotFound(w, r)
 			return
 		}
-
-		if timeout := task.Timeout(); timeout > 0 {
-			var cancel context.CancelFunc
-
-			ctx, cancel = context.WithTimeout(ctx, timeout)
-
-			defer cancel()
-		}
-
-		_, err := task.Run(ctx)
 
 		response := struct {
 			Result string `json:"result"`
@@ -514,8 +495,29 @@ func (h *BindHandler) actionTasks(w *dashboard.Response, r *dashboard.Request, b
 		return
 	}
 
+	ids := ctr.TasksID()
+	type taskView struct {
+		Task      tasks.Task
+		Meta      *tasks.Meta
+		ShortName string
+	}
+	tasksView := make([]taskView, 0, len(ids))
+	var err error
+
+	for _, id := range ids {
+		view := taskView{}
+
+		view.Task, view.Meta, err = ctr.TaskByID(id[0])
+		if err == nil {
+			view.ShortName = ctr.TaskShortName(view.Task.Name())
+		} else {
+			view.ShortName = ctr.TaskShortName(id[1])
+		}
+		tasksView = append(tasksView, view)
+	}
+
 	h.Render(ctx, "tasks", map[string]interface{}{
 		"bind":  b,
-		"tasks": tasks,
+		"tasks": tasksView,
 	})
 }

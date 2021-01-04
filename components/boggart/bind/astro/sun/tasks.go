@@ -2,24 +2,21 @@ package sun
 
 import (
 	"context"
-	"time"
 
-	"github.com/kihamo/go-workers"
-	"github.com/kihamo/go-workers/task"
+	"github.com/kihamo/boggart/components/boggart/tasks"
 	"go.uber.org/multierr"
 )
 
-func (b *Bind) Tasks() []workers.Task {
-	b.taskStateUpdater = task.NewFunctionTask(b.taskUpdater)
-	b.taskStateUpdater.SetRepeats(-1)
-	b.taskStateUpdater.SetName("updater")
-
-	return []workers.Task{
-		b.taskStateUpdater,
+func (b *Bind) Tasks() []tasks.Task {
+	return []tasks.Task{
+		tasks.NewTask().
+			WithName("updater").
+			WithSchedule(tasks.ScheduleWithDailyTime(tasks.ScheduleNow(), 0, 0, 0, nil)).
+			WithHandlerFunc(b.taskUpdater),
 	}
 }
 
-func (b *Bind) taskUpdater(ctx context.Context) (_ interface{}, err error) {
+func (b *Bind) taskUpdater(ctx context.Context) (err error) {
 	times := b.Times()
 
 	if e := b.MQTT().PublishAsync(ctx, b.config.TopicNadir, times.Nadir); e != nil {
@@ -150,10 +147,5 @@ func (b *Bind) taskUpdater(ctx context.Context) (_ interface{}, err error) {
 		err = multierr.Append(err, e)
 	}
 
-	// change start date (only one of 24 hours)
-	now := time.Now()
-	todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-	b.taskStateUpdater.SetRepeatInterval(todayStart.Add(dayDuration).Sub(now))
-
-	return nil, err
+	return err
 }

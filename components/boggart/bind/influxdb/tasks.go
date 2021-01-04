@@ -3,19 +3,23 @@ package influxdb
 import (
 	"context"
 
-	"github.com/kihamo/go-workers"
+	"github.com/kihamo/boggart/components/boggart/tasks"
 	"go.uber.org/multierr"
 )
 
-func (b *Bind) Tasks() []workers.Task {
-	taskExecute := b.Workers().WrapTaskIsOnline(b.taskExecute)
-	taskExecute.SetTimeout(b.config.ExecuteTimeout)
-	taskExecute.SetRepeats(-1)
-	taskExecute.SetRepeatInterval(b.config.ExecuteInterval)
-	taskExecute.SetName("execute")
-
-	return []workers.Task{
-		taskExecute,
+func (b *Bind) Tasks() []tasks.Task {
+	return []tasks.Task{
+		tasks.NewTask().
+			WithName("execute").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerWithTimeout(
+						tasks.HandlerFuncFromShortToLong(b.taskExecute),
+						b.config.ExecuteTimeout,
+					),
+				),
+			).
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.ExecuteInterval)),
 	}
 }
 

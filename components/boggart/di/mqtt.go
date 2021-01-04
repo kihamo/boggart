@@ -12,7 +12,7 @@ import (
 	"github.com/kihamo/shadow/components/logging"
 )
 
-type MQTTHasSubscribers interface {
+type BindHasMQTTSubscribers interface {
 	MQTTSubscribers() []mqtt.Subscriber
 }
 
@@ -343,7 +343,7 @@ func (c *MQTTContainer) Subscribers() []MQTTSubscriber {
 	}
 	c.mutex.RUnlock()
 
-	has, ok := c.bind.Bind().(MQTTHasSubscribers)
+	has, ok := c.bind.Bind().(BindHasMQTTSubscribers)
 	if !ok {
 		return nil
 	}

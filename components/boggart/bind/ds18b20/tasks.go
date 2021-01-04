@@ -3,17 +3,19 @@ package ds18b20
 import (
 	"context"
 
-	"github.com/kihamo/go-workers"
+	"github.com/kihamo/boggart/components/boggart/tasks"
 )
 
-func (b *Bind) Tasks() []workers.Task {
-	taskStateUpdater := b.Workers().WrapTaskIsOnline(b.taskUpdater)
-	taskStateUpdater.SetRepeats(-1)
-	taskStateUpdater.SetRepeatInterval(b.config.UpdaterInterval)
-	taskStateUpdater.SetName("updater")
-
-	return []workers.Task{
-		taskStateUpdater,
+func (b *Bind) Tasks() []tasks.Task {
+	return []tasks.Task{
+		tasks.NewTask().
+			WithName("updater").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerFuncFromShortToLong(b.taskUpdater),
+				),
+			).
+			WithSchedule(tasks.ScheduleWithDuration(nil, b.config.UpdaterInterval)),
 	}
 }
 

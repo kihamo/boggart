@@ -2,22 +2,16 @@ package di
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"sync"
 
 	"github.com/kihamo/boggart/components/boggart"
-	w "github.com/kihamo/go-workers"
-	"github.com/kihamo/go-workers/task"
-	"github.com/kihamo/shadow/components/workers"
+	"github.com/kihamo/boggart/components/boggart/tasks"
 )
 
-type bindTask interface {
-	w.Task
-	SetName(string)
-}
-
-type WorkersHasTasks interface {
-	Tasks() []w.Task
+type BindHasTasks interface {
+	Tasks() []tasks.Task
 }
 
 type WorkersContainerSupport interface {
@@ -55,207 +49,136 @@ func (b *WorkersBind) Workers() *WorkersContainer {
 type WorkersContainer struct {
 	bind boggart.BindItem
 
-	client workers.Component
+	manager *tasks.Manager
 
-	mutex sync.RWMutex
-	tasks []w.Task
+	tasksIDMutex sync.RWMutex
+	tasksID      [][2]string
 }
 
-func NewWorkersContainer(bind boggart.BindItem, client workers.Component) *WorkersContainer {
+func NewWorkersContainer(bind boggart.BindItem, manager *tasks.Manager) *WorkersContainer {
 	return &WorkersContainer{
-		bind:   bind,
-		client: client,
-		tasks:  make([]w.Task, 0, 2),
+		bind:    bind,
+		manager: manager,
+		tasksID: make([][2]string, 0, 2),
 	}
 }
 
-func (c *WorkersContainer) HookRegister() {
-	// инициализируем таски из привязки
-	if has, ok := c.bind.Bind().(WorkersHasTasks); ok {
-		tasks := has.Tasks()
-
-		c.mutex.Lock()
-		c.tasks = make([]w.Task, 0, len(tasks)+2) // 2 на пробы запас
-		c.mutex.Unlock()
-
-		for _, tsk := range tasks {
-			c.RegisterTask(tsk)
-		}
+func (c *WorkersContainer) HookRegister() (err error) {
+	has, ok := c.bind.Bind().(BindHasTasks)
+	if !ok {
+		return nil
 	}
+
+	list := has.Tasks()
+	tmpList := make([][2]string, 0, len(list)+2) // 2 на пробы запас
+
+	var id string
+
+	for _, tsk := range list {
+		id, err = c.RegisterTask(tsk)
+		if err != nil {
+			break
+		}
+
+		tmpList = append(tmpList, [2]string{id, tsk.Name()})
+	}
+
+	c.tasksIDMutex.Lock()
+	c.tasksID = tmpList
+	c.tasksIDMutex.Unlock()
+
+	return err
 }
 
 func (c *WorkersContainer) HookUnregister() {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
+	c.tasksIDMutex.Lock()
+	defer c.tasksIDMutex.Unlock()
 
-	for _, tsk := range c.tasks {
-		c.client.RemoveTask(tsk)
+	for _, tsk := range c.tasksID {
+		c.manager.Unregister(tsk[0])
 	}
 
-	c.tasks = c.tasks[:0]
+	c.tasksID = c.tasksID[:0]
 }
 
-func (c *WorkersContainer) TaskShortName(tsk w.Task) string {
-	for _, t := range c.Tasks() {
-		if t.Id() == tsk.Id() {
-			return strings.TrimPrefix(tsk.Name(), c.prefixTaskName())
-		}
-	}
-
-	return tsk.Name()
+func (c *WorkersContainer) TaskShortName(name string) string {
+	return strings.TrimPrefix(name, c.prefixTaskName())
 }
 
-func (c *WorkersContainer) TaskRegisteredInQueue(tsk w.Task) bool {
-	return c.client.GetTaskMetadata(tsk.Id()) != nil
+func (c *WorkersContainer) TaskRegisteredInQueue(id string) bool {
+	_, err := c.manager.Meta(id)
+	return err == nil
 }
 
 func (c *WorkersContainer) prefixTaskName() string {
 	return "bind-" + c.bind.ID() + "-" + c.bind.Type() + "-"
 }
 
-func (c *WorkersContainer) createTask(tsk w.Task) w.Task {
-	if t, ok := tsk.(bindTask); ok {
-		t.SetName(c.prefixTaskName() + t.Name())
-		tsk = t
-	}
+func (c *WorkersContainer) RegisterTask(tsk tasks.Task) (id string, err error) {
+	if t, ok := tsk.(*tasks.TaskBase); ok {
+		if logger, ok := LoggerContainerBind(c.bind.Bind()); ok {
+			// не логировать дважды ошибку с таски о пробе
+			if _, ok := ProbesContainerBind(c.bind.Bind()); ok {
+				shortName := c.TaskShortName(t.Name())
 
-	if logger, ok := LoggerContainerBind(c.bind.Bind()); ok {
-		// не логировать дважды ошибку с таски о пробе
-		if probes, ok := ProbesContainerBind(c.bind.Bind()); ok {
-			if tsk == probes.Liveness() || tsk == probes.Readiness() {
-				logger = nil
+				if shortName == "readiness-probe" || shortName == "liveness-probe" {
+					logger = nil
+				}
+			}
+
+			if logger != nil {
+				t.WithHandler(tasks.HandlerWithLogger(t.Handler(), logger))
 			}
 		}
 
-		return newWorkersWrapTask(tsk, logger)
+		tsk = t.WithName(c.prefixTaskName() + t.Name())
 	}
 
-	return tsk
-}
-
-func (c *WorkersContainer) RegisterTask(tsk w.Task) {
-	tsk = c.createTask(tsk)
-
-	c.mutex.Lock()
-	c.tasks = append(c.tasks, tsk)
-	c.mutex.Unlock()
-
-	c.client.AddTask(tsk)
-}
-
-func (c *WorkersContainer) UnregisterTask(tsk w.Task) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	for i := len(c.tasks) - 1; i >= 0; i-- {
-		if strings.Compare(c.tasks[i].Id(), tsk.Id()) == 0 {
-			c.client.RemoveTask(c.tasks[i])
-			c.tasks = append(c.tasks[:i], c.tasks[i+1:]...)
-		}
+	id, err = c.manager.Register(tsk)
+	if err == nil {
+		c.tasksIDMutex.Lock()
+		c.tasksID = append(c.tasksID, [2]string{id, tsk.Name()})
+		c.tasksIDMutex.Unlock()
 	}
+
+	return id, err
 }
 
-func (c *WorkersContainer) Tasks() []w.Task {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
+func (c *WorkersContainer) TasksID() [][2]string {
+	c.tasksIDMutex.RLock()
+	defer c.tasksIDMutex.RUnlock()
 
-	return append([]w.Task(nil), c.tasks...)
+	return append([][2]string(nil), c.tasksID...)
 }
 
-func (c *WorkersContainer) WrapTaskIsOnline(fn func(context.Context) error) *task.FunctionTask {
-	return task.NewFunctionTask(func(ctx context.Context) (interface{}, error) {
-		if !c.bind.Status().IsStatusOnline() {
-			return nil, nil
-		}
-
-		return nil, fn(ctx)
-	})
+func (c *WorkersContainer) TaskRun(ctx context.Context, id string) error {
+	return c.manager.Handle(ctx, id)
 }
 
-func (c *WorkersContainer) WrapTaskOnceSuccess(fn func(context.Context) error) (tsk *task.FunctionTask) {
-	tsk = task.NewFunctionTask(func(ctx context.Context) (interface{}, error) {
-		err := fn(ctx)
-
-		if err == nil {
-			c.UnregisterTask(tsk)
-		}
-
-		return nil, err
-	})
-
-	return tsk
-}
-
-func (c *WorkersContainer) WrapTaskIsOnlineOnceSuccess(fn func(context.Context) error) (tsk *task.FunctionTask) {
-	tsk = task.NewFunctionTask(func(ctx context.Context) (interface{}, error) {
-		if !c.bind.Status().IsStatusOnline() {
-			return nil, nil
-		}
-
-		err := fn(ctx)
-
-		if err == nil {
-			if attempt, ok := w.AttemptFromContext(ctx); ok {
-				tsk.SetRepeats(attempt)
-			} else {
-				tsk.SetRepeats(0)
-			}
-
-			c.UnregisterTask(tsk)
-		}
-
-		return nil, err
-	})
-
-	return tsk
-}
-
-type workersWrapTask struct {
-	task.BaseTask
-
-	original w.Task
-	logger   *LoggerContainer
-}
-
-func newWorkersWrapTask(tsk w.Task, logger *LoggerContainer) *workersWrapTask {
-	t := &workersWrapTask{
-		original: tsk,
-		logger:   logger,
-	}
-	t.Init()
-	t.sync()
-
-	return t
-}
-
-// обертки воркеров кривоватые, поэтому хачим синхронизацию состояния
-// nolint:golint
-func (t *workersWrapTask) Id() string {
-	return t.original.Id()
-}
-
-func (t *workersWrapTask) sync() {
-	t.SetName(t.original.Name())
-	t.SetPriority(t.original.Priority())
-	t.SetRepeats(t.original.Repeats())
-	t.SetRepeatInterval(t.original.RepeatInterval())
-	t.SetTimeout(t.original.Timeout())
-
-	if st := t.original.StartedAt(); st != nil {
-		t.SetStartedAt(*st)
-	}
-}
-
-func (t *workersWrapTask) Run(ctx context.Context) (result interface{}, err error) {
-	result, err = t.original.Run(ctx)
+func (c *WorkersContainer) TaskByID(id string) (tasks.Task, *tasks.Meta, error) {
+	task, err := c.manager.Task(id)
 	if err != nil {
-		t.logger.Error("Task ended with an error",
-			"error", err.Error(),
-			"task", t.Name(),
-		)
+		return nil, nil, err
 	}
 
-	t.sync()
+	meta, err := c.manager.Meta(id)
+	if err != nil {
+		return nil, nil, err
+	}
 
-	return result, err
+	return task, &meta, err
+}
+
+func (c *WorkersContainer) WrapTaskIsOnline(parent tasks.Handler) tasks.Handler {
+	return tasks.HandlerFunc(func(ctx context.Context, meta tasks.Meta, task tasks.Task) error {
+		if parent == nil {
+			return tasks.ErrParentHandlerIsNil
+		}
+
+		if !c.bind.Status().IsStatusOnline() {
+			return errors.New("bind isn't online")
+		}
+
+		return parent.Handle(ctx, meta, task)
+	})
 }

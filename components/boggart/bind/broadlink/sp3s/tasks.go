@@ -3,18 +3,20 @@ package sp3s
 import (
 	"context"
 
-	"github.com/kihamo/go-workers"
+	"github.com/kihamo/boggart/components/boggart/tasks"
 	"go.uber.org/multierr"
 )
 
-func (b *Bind) Tasks() []workers.Task {
-	taskUpdater := b.Workers().WrapTaskIsOnline(b.taskUpdater)
-	taskUpdater.SetRepeats(-1)
-	taskUpdater.SetRepeatInterval(b.config.UpdaterInterval)
-	taskUpdater.SetName("updater")
-
-	return []workers.Task{
-		taskUpdater,
+func (b *Bind) Tasks() []tasks.Task {
+	return []tasks.Task{
+		tasks.NewTask().
+			WithName("updater").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerFuncFromShortToLong(b.taskUpdater),
+				),
+			).
+			WithSchedule(tasks.ScheduleWithDuration(nil, b.config.UpdaterInterval)),
 	}
 }
 

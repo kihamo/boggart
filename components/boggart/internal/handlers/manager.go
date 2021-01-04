@@ -79,8 +79,8 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 			}
 
 			if bindSupport, ok := di.ProbesContainerBind(bindItem.Bind()); ok {
-				item.HasReadinessProbe = bindSupport.Readiness() != nil
-				item.HasLivenessProbe = bindSupport.Liveness() != nil
+				item.HasReadinessProbe = bindSupport.ReadinessTaskID() != ""
+				item.HasLivenessProbe = bindSupport.LivenessTaskID() != ""
 			}
 
 			if bindSupport, ok := di.MetaContainerBind(bindItem.Bind()); ok {
@@ -92,15 +92,16 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 			}
 
 			if bindSupport, ok := di.WorkersContainerBind(bindItem.Bind()); ok {
-				item.Tasks = make([][]string, 0, len(bindSupport.Tasks()))
-				for _, t := range bindSupport.Tasks() {
-					name := bindSupport.TaskShortName(t)
-					if !bindSupport.TaskRegisteredInQueue(t) {
+				ids := bindSupport.TasksID()
+				item.Tasks = make([][]string, 0, len(ids))
+				for _, id := range ids {
+					name := bindSupport.TaskShortName(id[1])
+					if !bindSupport.TaskRegisteredInQueue(id[0]) {
 						name += " (!)"
 					}
 
 					item.Tasks = append(item.Tasks, []string{
-						t.Id(), name,
+						id[0], name,
 					})
 				}
 			}

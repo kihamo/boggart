@@ -44,6 +44,8 @@ func (w *worker) RunScheduler() {
 
 	next := w.task.Schedule().Next(*w.meta)
 	if next.IsZero() {
+		// fmt.Println("Remove IsZero", w.meta.id, w.task.Name())
+
 		// FIXME: надо различать случай, когда время не возможно определить из-за не сработавшего фактора
 		// например, объект в данный момент не активен и поэтому задача для него не выполняется, но как только
 		// он станет активен, задачу можно выполнить
@@ -52,6 +54,8 @@ func (w *worker) RunScheduler() {
 	}
 
 	if now.After(next) {
+		// fmt.Println("Remove After", w.meta.id, w.task.Name())
+
 		w.removeFn(w.meta.id)
 		return
 	}
@@ -123,7 +127,16 @@ func (w *worker) Handle(ctx context.Context) error {
 	ctx, w.cancelFn = context.WithCancel(ctx)
 	w.cancelMutex.Unlock()
 
+	metricHandleStatus.With("status", "started").Inc()
+
 	err := w.task.Handler().Handle(ctx, *w.meta, w.task)
+
+	metricHandleStatus.With("status", "finished").Inc()
+	if err == nil {
+		metricHandleStatus.With("status", "success").Inc()
+	} else {
+		metricHandleStatus.With("status", "fail").Inc()
+	}
 
 	w.cancelMutex.Lock()
 	w.cancelFn = nil

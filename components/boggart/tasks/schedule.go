@@ -2,6 +2,7 @@ package tasks
 
 import (
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -62,6 +63,10 @@ func ScheduleWithStopFunc(parent Schedule, fn func(meta Meta) bool) Schedule {
 }
 
 func ScheduleWithDuration(parent Schedule, duration time.Duration) Schedule {
+	if duration <= 0 {
+		return parent
+	}
+
 	return ScheduleFunc(func(meta Meta) (t time.Time) {
 		if parent != nil {
 			t = parent.Next(meta)
@@ -116,4 +121,32 @@ func ScheduleWithFailsLimit(parent Schedule, limit uint64) Schedule {
 	return ScheduleWithStopFunc(parent, func(meta Meta) bool {
 		return limit > 0 && meta.Fails() >= limit
 	})
+}
+
+type ScheduleControl struct {
+	Schedule
+
+	flag uint32
+}
+
+func (s *ScheduleControl) Next(meta Meta) (t time.Time) {
+	if atomic.LoadUint32(&s.flag) == 1 || s.Schedule == nil {
+		return t
+	}
+
+	return s.Schedule.Next(meta)
+}
+
+func (s *ScheduleControl) Enable() {
+	atomic.StoreUint32(&s.flag, 0)
+}
+
+func (s *ScheduleControl) Disable() {
+	atomic.StoreUint32(&s.flag, 1)
+}
+
+func ScheduleWithControl(parent Schedule) *ScheduleControl {
+	return &ScheduleControl{
+		Schedule: parent,
+	}
 }

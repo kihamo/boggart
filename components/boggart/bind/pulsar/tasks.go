@@ -4,29 +4,42 @@ import (
 	"context"
 	"time"
 
+	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/providers/pulsar"
-	"github.com/kihamo/go-workers"
 	"go.uber.org/multierr"
 )
 
-func (b *Bind) Tasks() []workers.Task {
-	tasks := make([]workers.Task, 0, 2)
+func (b *Bind) Tasks() []tasks.Task {
+	list := make([]tasks.Task, 0, 2)
 
 	if b.config.Address == "" {
-		taskSerialNumber := b.Workers().WrapTaskIsOnlineOnceSuccess(b.taskSerialNumber)
-		taskSerialNumber.SetRepeats(-1)
-		taskSerialNumber.SetRepeatInterval(time.Second * 30)
-		taskSerialNumber.SetName("serial-number")
-		tasks = append(tasks, taskSerialNumber)
+		list = append(list,
+			tasks.NewTask().
+				WithName("serial-number").
+				WithHandler(
+					b.Workers().WrapTaskIsOnline(
+						tasks.HandlerFuncFromShortToLong(b.taskSerialNumber),
+					),
+				).
+				WithSchedule(
+					tasks.ScheduleWithSuccessLimit(
+						tasks.ScheduleWithDuration(tasks.ScheduleNow(), time.Second*30),
+						1,
+					),
+				),
+		)
 	}
 
-	taskStateUpdater := b.Workers().WrapTaskIsOnline(b.taskUpdater)
-	taskStateUpdater.SetRepeats(-1)
-	taskStateUpdater.SetRepeatInterval(b.config.UpdaterInterval)
-	taskStateUpdater.SetName("updater")
-	tasks = append(tasks, taskStateUpdater)
+	list = append(list, tasks.NewTask().
+		WithName("updater").
+		WithHandler(
+			b.Workers().WrapTaskIsOnline(
+				tasks.HandlerFuncFromShortToLong(b.taskUpdater),
+			),
+		).
+		WithSchedule(tasks.ScheduleWithDuration(nil, b.config.UpdaterInterval)))
 
-	return tasks
+	return list
 }
 
 func (b *Bind) taskSerialNumber(ctx context.Context) error {

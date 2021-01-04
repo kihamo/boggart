@@ -4,42 +4,50 @@ import (
 	"context"
 	"errors"
 
+	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/providers/hikvision/client/content_manager"
 	"github.com/kihamo/boggart/providers/hikvision/client/ptz"
 	"github.com/kihamo/boggart/providers/hikvision/client/system"
-	"github.com/kihamo/go-workers"
-	"github.com/kihamo/go-workers/task"
 	"go.uber.org/multierr"
 )
 
-func (b *Bind) Tasks() []workers.Task {
-	taskState := b.Workers().WrapTaskIsOnline(b.taskUpdater)
-	taskState.SetTimeout(b.config.UpdaterTimeout)
-	taskState.SetRepeats(-1)
-	taskState.SetRepeatInterval(b.config.UpdaterInterval)
-	taskState.SetName("updater")
-
-	tasks := []workers.Task{
-		taskState,
+func (b *Bind) Tasks() []tasks.Task {
+	list := []tasks.Task{
+		tasks.NewTask().
+			WithName("updater").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerWithTimeout(
+						tasks.HandlerFuncFromShortToLong(b.taskUpdater), b.config.UpdaterTimeout,
+					),
+				),
+			).
+			WithSchedule(tasks.ScheduleWithDuration(nil, b.config.UpdaterInterval)),
 	}
 
 	if b.config.PTZEnabled {
-		taskPTZStatus := task.NewFunctionTillStopTask(b.taskPTZ)
-		taskPTZStatus.SetTimeout(b.config.PTZTimeout)
-		taskPTZStatus.SetRepeats(-1)
-		taskPTZStatus.SetRepeatInterval(b.config.PTZInterval)
-		taskPTZStatus.SetName("ptz")
-
-		tasks = append(tasks, taskPTZStatus)
+		list = append(list,
+			tasks.NewTask().
+				WithName("ptz").
+				WithHandler(
+					tasks.HandlerWithTimeout(
+						tasks.HandlerFunc(b.taskPTZ), b.config.PTZTimeout,
+					),
+				).
+				WithSchedule(
+					tasks.ScheduleWithControl(
+						tasks.ScheduleWithDuration(nil, b.config.PTZInterval),
+					),
+				),
+		)
 	}
 
-	return tasks
+	return list
 }
 
-// nolint:golint
-func (b *Bind) taskPTZ(ctx context.Context) (interface{}, error, bool) {
+func (b *Bind) taskPTZ(ctx context.Context, _ tasks.Meta, task tasks.Task) error {
 	if !b.Meta().Status().IsStatusOnline() {
-		return nil, nil, false
+		return nil
 	}
 
 	b.mutex.RLock()
@@ -47,34 +55,38 @@ func (b *Bind) taskPTZ(ctx context.Context) (interface{}, error, bool) {
 	b.mutex.RUnlock()
 
 	if channels == nil {
-		return nil, nil, false
-	}
-
-	if len(channels) == 0 {
-		return nil, nil, true
+		return nil
 	}
 
 	stop := true
 
-	for id, channel := range channels {
-		if !channel.Channel.Enabled {
-			continue
+	if len(channels) != 0 {
+		for id, channel := range channels {
+			if !channel.Channel.Enabled {
+				continue
+			}
+
+			if err := b.updateStatusByChannelID(ctx, id); err != nil {
+				b.Logger().Error("Failed updated status",
+					"serial_number", b.Meta().SerialNumber(),
+					"channel", id,
+					"error", err.Error(),
+				)
+
+				continue
+			}
+
+			stop = false
 		}
-
-		if err := b.updateStatusByChannelID(ctx, id); err != nil {
-			b.Logger().Error("Failed updated status",
-				"serial_number", b.Meta().SerialNumber(),
-				"channel", id,
-				"error", err.Error(),
-			)
-
-			continue
-		}
-
-		stop = false
 	}
 
-	return nil, nil, stop
+	if stop {
+		if schedule, ok := task.Schedule().(*tasks.ScheduleControl); ok {
+			schedule.Disable()
+		}
+	}
+
+	return nil
 }
 
 func (b *Bind) taskUpdater(ctx context.Context) (err error) {

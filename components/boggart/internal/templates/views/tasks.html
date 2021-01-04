@@ -11,35 +11,63 @@
                     <table class="table table-hover table-striped datatable dt-responsive nowrap" id="tasks" style="width:100%">
                         <thead>
                         <tr>
-                            <th>{{ i18n "ID" . }}</th>
                             <th>{{ i18n "Name" . }}</th>
+                            <th>{{ i18n "Status" . }}</th>
                             <th>{{ i18n "Actions" . }}</th>
-                            <th>{{ i18n "Priority" . }}</th>
-                            <th>{{ i18n "Repeats" . }}</th>
-                            <th>{{ i18n "Repeat interval" . }}</th>
-                            <th>{{ i18n "Timeout" . }}</th>
-                            <th>{{ i18n "Created" . }}</th>
-                            <th>{{ i18n "Started" . }}</th>
+                            <th>{{ i18n "Attempts" . }}</th>
+                            <th>{{ i18n "First run" . }}</th>
+                            <th>{{ i18n "Last run" . }}</th>
+                            <th>{{ i18n "Next run" . }}</th>
                         </tr>
                         </thead>
                         <tbody>
                         {{ range $task := .tasks }}
-                            <tr>
-                                <td>{{ $task.Id }}</td>
-                                <td>{{ $task.Name }}</td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <a href="/boggart/bind/{{ $.bind.ID }}/tasks/?run={{ $task.Id }}" target="_blank" class="btn btn-success btn-icon btn-xs">
-                                            <i class="fas fa-running" title="{{ i18n "Execute" $ }}"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                                <td>{{ $task.Priority }}</td>
-                                <td>{{ if ne $task.Repeats -1 }}{{ $task.Repeats }}{{ end }}</td>
-                                <td>{{ $task.RepeatInterval }}</td>
-                                <td>{{ $task.Timeout }}</td>
-                                <td>{{ $task.CreatedAt.Format "2006-01-02T15:04:05-07:00" }}</td>
-                                <td>{{ if $task.StartedAt }}{{ $task.StartedAt.Format "2006-01-02T15:04:05-07:00" }}{{ end }}</td>
+                            <tr{{ if $task.Meta }}{{ else }} class="warning"{{ end}}>
+                                <td>{{ $task.ShortName }}</td>
+                                {{ if $task.Meta }}
+                                    <td>{{ $task.Meta.Status.String }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="/boggart/bind/{{ $.bind.ID }}/tasks/?run={{ $task.Meta.ID }}" target="_blank" class="btn btn-success btn-icon btn-xs">
+                                                <i class="fas fa-running" title="{{ i18n "Execute" $ }}"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group" style="min-width: 96px">
+                                            <button class="btn btn-xs btn-success">{{ $task.Meta.Success }}</button>
+                                            <button class="btn btn-xs btn-danger">{{ $task.Meta.Fails }}</button>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {{ if $task.Meta.FirstRunAt }}
+                                            <script type="application/javascript">document.write(dateToString('{{ $task.Meta.FirstRunAt.Format "2006-01-02T15:04:05-07:00" }}'))</script>
+                                        {{ else }}
+                                            {{ i18n "None" . }}
+                                        {{ end }}
+                                    </td>
+                                    <td>
+                                        {{ if $task.Meta.LastRunAt }}
+                                            <script type="application/javascript">document.write(dateToString('{{ $task.Meta.LastRunAt.Format "2006-01-02T15:04:05-07:00" }}'))</script>
+                                        {{ else }}
+                                            {{ i18n "None" . }}
+                                        {{ end }}
+                                    </td>
+                                    <td>
+                                        {{ if $task.Meta.NextRunAt }}
+                                            <script type="application/javascript">document.write(dateToString('{{ $task.Meta.NextRunAt.Format "2006-01-02T15:04:05-07:00" }}'))</script>
+                                        {{ else }}
+                                            {{ i18n "None" . }}
+                                        {{ end }}
+                                    </td>
+                                {{ else }}
+                                    <td>{{ i18n "Removed" . }}</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                {{ end }}
                             </tr>
                         {{ end }}
                         </tbody>

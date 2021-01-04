@@ -6,19 +6,26 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/providers/xmeye"
-	"github.com/kihamo/go-workers"
 	"go.uber.org/multierr"
 )
 
-func (b *Bind) Tasks() []workers.Task {
-	taskSerialNumber := b.Workers().WrapTaskIsOnlineOnceSuccess(b.taskSerialNumber)
-	taskSerialNumber.SetRepeats(-1)
-	taskSerialNumber.SetRepeatInterval(time.Second * 30)
-	taskSerialNumber.SetName("serial-number")
-
-	return []workers.Task{
-		taskSerialNumber,
+func (b *Bind) Tasks() []tasks.Task {
+	return []tasks.Task{
+		tasks.NewTask().
+			WithName("serial-number").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerFuncFromShortToLong(b.taskSerialNumber),
+				),
+			).
+			WithSchedule(
+				tasks.ScheduleWithSuccessLimit(
+					tasks.ScheduleWithDuration(tasks.ScheduleNow(), time.Second*30),
+					1,
+				),
+			),
 	}
 }
 
@@ -40,12 +47,22 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 
 	b.Meta().SetSerialNumber(info.SerialNo)
 
-	taskState := b.Workers().WrapTaskIsOnline(b.taskUpdater)
-	taskState.SetTimeout(b.config.UpdaterTimeout)
-	taskState.SetRepeats(-1)
-	taskState.SetRepeatInterval(b.config.UpdaterInterval)
-	taskState.SetName("updater")
-	b.Workers().RegisterTask(taskState)
+	_, err = b.Workers().RegisterTask(
+		tasks.NewTask().
+			WithName("updater").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerWithTimeout(
+						tasks.HandlerFuncFromShortToLong(b.taskUpdater),
+						b.config.UpdaterTimeout,
+					),
+				),
+			).
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
+	)
+	if err != nil {
+		return err
+	}
 
 	if b.Meta().MAC() == nil {
 		response, err := client.ConfigGet(ctx, xmeye.ConfigNameNetworkNetCommon, false)

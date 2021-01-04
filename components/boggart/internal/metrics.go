@@ -13,6 +13,7 @@ var (
 func (c *Component) Describe(ch chan<- *snitch.Description) {
 	metricProbes.Describe(ch)
 
+	c.tasksManager.Describe(ch)
 	c.binds.Range(func(_ interface{}, item interface{}) bool {
 		if bindSupport, ok := di.MetricsContainerBind(item.(*BindItem).Bind()); ok {
 			bindSupport.Describe(ch)
@@ -25,6 +26,7 @@ func (c *Component) Describe(ch chan<- *snitch.Description) {
 func (c *Component) Collect(ch chan<- snitch.Metric) {
 	metricProbes.Collect(ch)
 
+	c.tasksManager.Collect(ch)
 	c.binds.Range(func(_ interface{}, item interface{}) bool {
 		if bindSupport, ok := di.MetricsContainerBind(item.(*BindItem).Bind()); ok {
 			bindSupport.Collect(ch)

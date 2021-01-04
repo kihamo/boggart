@@ -24,6 +24,10 @@ func HandlerFuncFromShortToLong(handler func(ctx context.Context) error) Handler
 }
 
 func HandlerWithTimeout(parent Handler, timeout time.Duration) Handler {
+	if timeout <= 0 {
+		return parent
+	}
+
 	return HandlerFunc(func(ctx context.Context, meta Meta, task Task) error {
 		if parent == nil {
 			return ErrParentHandlerIsNil

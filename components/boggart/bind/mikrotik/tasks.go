@@ -5,26 +5,32 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/providers/mikrotik"
-	"github.com/kihamo/go-workers"
 	"go.uber.org/multierr"
 )
 
-func (b *Bind) Tasks() []workers.Task {
-	taskClientsSync := b.Workers().WrapTaskIsOnline(b.taskClientsSync)
-	taskClientsSync.SetTimeout(b.config.ReadinessTimeout)
-	taskClientsSync.SetRepeats(-1)
-	taskClientsSync.SetRepeatInterval(b.config.ClientsSyncInterval)
-	taskClientsSync.SetName("clients-sync")
-
-	taskStateUpdater := b.Workers().WrapTaskIsOnline(b.taskUpdater)
-	taskStateUpdater.SetRepeats(-1)
-	taskStateUpdater.SetRepeatInterval(b.config.UpdaterInterval)
-	taskStateUpdater.SetName("updater")
-
-	return []workers.Task{
-		taskClientsSync,
-		taskStateUpdater,
+func (b *Bind) Tasks() []tasks.Task {
+	return []tasks.Task{
+		tasks.NewTask().
+			WithName("clients-sync").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerWithTimeout(
+						tasks.HandlerFuncFromShortToLong(b.taskClientsSync),
+						b.config.ReadinessTimeout,
+					),
+				),
+			).
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.ClientsSyncInterval)),
+		tasks.NewTask().
+			WithName("updater").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerFuncFromShortToLong(b.taskUpdater),
+				),
+			).
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
 	}
 }
 

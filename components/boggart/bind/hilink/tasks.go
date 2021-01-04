@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/providers/hilink"
 	"github.com/kihamo/boggart/providers/hilink/client/device"
 	"github.com/kihamo/boggart/providers/hilink/client/global"
@@ -15,18 +16,24 @@ import (
 	"github.com/kihamo/boggart/providers/hilink/client/net"
 	"github.com/kihamo/boggart/providers/hilink/client/sms"
 	"github.com/kihamo/boggart/providers/hilink/static/models"
-	"github.com/kihamo/go-workers"
 	"go.uber.org/multierr"
 )
 
-func (b *Bind) Tasks() []workers.Task {
-	taskSerialNumber := b.Workers().WrapTaskIsOnlineOnceSuccess(b.taskSerialNumber)
-	taskSerialNumber.SetRepeats(-1)
-	taskSerialNumber.SetRepeatInterval(time.Second * 30)
-	taskSerialNumber.SetName("serial-number")
-
-	return []workers.Task{
-		taskSerialNumber,
+func (b *Bind) Tasks() []tasks.Task {
+	return []tasks.Task{
+		tasks.NewTask().
+			WithName("serial-number").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerFuncFromShortToLong(b.taskSerialNumber),
+				),
+			).
+			WithSchedule(
+				tasks.ScheduleWithSuccessLimit(
+					tasks.ScheduleWithDuration(tasks.ScheduleNow(), time.Second*30),
+					1,
+				),
+			),
 	}
 }
 
@@ -66,42 +73,70 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 	smsEnabled := settings.Payload.SMSEnabled > 0
 
 	if ussdEnabled {
-		taskBalanceUpdater := b.Workers().WrapTaskIsOnline(b.taskBalanceUpdater)
-		taskBalanceUpdater.SetTimeout(b.config.BalanceUpdaterTimeout)
-		taskBalanceUpdater.SetRepeats(-1)
-		taskBalanceUpdater.SetRepeatInterval(b.config.BalanceUpdaterInterval)
-		taskBalanceUpdater.SetName("balance-updater")
-		b.Workers().RegisterTask(taskBalanceUpdater)
+		b.Workers().RegisterTask(tasks.NewTask().
+			WithName("balance-updater").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerWithTimeout(
+						tasks.HandlerFuncFromShortToLong(b.taskBalanceUpdater),
+						b.config.BalanceUpdaterTimeout,
+					),
+				),
+			).
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.BalanceUpdaterInterval)),
+		)
 
-		taskLimitTrafficUpdater := b.Workers().WrapTaskIsOnline(b.taskLimitTrafficUpdater)
-		taskLimitTrafficUpdater.SetTimeout(b.config.LimitTrafficUpdaterTimeout)
-		taskLimitTrafficUpdater.SetRepeats(-1)
-		taskLimitTrafficUpdater.SetRepeatInterval(b.config.LimitTrafficUpdaterInterval)
-		taskLimitTrafficUpdater.SetName("limit-traffic-updater")
-		b.Workers().RegisterTask(taskLimitTrafficUpdater)
+		b.Workers().RegisterTask(tasks.NewTask().
+			WithName("limit-traffic-updater").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerWithTimeout(
+						tasks.HandlerFuncFromShortToLong(b.taskLimitTrafficUpdater),
+						b.config.LimitTrafficUpdaterTimeout,
+					),
+				),
+			).
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.LimitTrafficUpdaterInterval)),
+		)
 	}
 
 	if smsEnabled {
-		taskSMSChecker := b.Workers().WrapTaskIsOnline(b.taskSMSChecker)
-		taskSMSChecker.SetTimeout(b.config.SMSCheckerTimeout)
-		taskSMSChecker.SetRepeats(-1)
-		taskSMSChecker.SetRepeatInterval(b.config.SMSCheckerInterval)
-		taskSMSChecker.SetName("sms-checker")
-		b.Workers().RegisterTask(taskSMSChecker)
+		b.Workers().RegisterTask(tasks.NewTask().
+			WithName("sms-checker").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerWithTimeout(
+						tasks.HandlerFuncFromShortToLong(b.taskSMSChecker),
+						b.config.SMSCheckerTimeout,
+					),
+				),
+			).
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.SMSCheckerInterval)),
+		)
 
-		taskCleaner := b.Workers().WrapTaskIsOnline(b.taskCleaner)
-		taskCleaner.SetRepeats(-1)
-		taskCleaner.SetRepeatInterval(b.config.CleanerInterval)
-		taskCleaner.SetName("cleaner")
-		b.Workers().RegisterTask(taskCleaner)
+		b.Workers().RegisterTask(tasks.NewTask().
+			WithName("cleaner").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerFuncFromShortToLong(b.taskCleaner),
+				),
+			).
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.CleanerInterval)),
+		)
 	}
 
-	taskSystemUpdater := b.Workers().WrapTaskIsOnline(b.taskSystemUpdater)
-	taskSystemUpdater.SetTimeout(b.config.SystemUpdaterTimeout)
-	taskSystemUpdater.SetRepeats(-1)
-	taskSystemUpdater.SetRepeatInterval(b.config.SystemUpdaterInterval)
-	taskSystemUpdater.SetName("system-updater")
-	b.Workers().RegisterTask(taskSystemUpdater)
+	b.Workers().RegisterTask(tasks.NewTask().
+		WithName("system-updater").
+		WithHandler(
+			b.Workers().WrapTaskIsOnline(
+				tasks.HandlerWithTimeout(
+					tasks.HandlerFuncFromShortToLong(b.taskSystemUpdater),
+					b.config.SystemUpdaterTimeout,
+				),
+			),
+		).
+		WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.SystemUpdaterInterval)),
+	)
 
 	return nil
 }

@@ -84,6 +84,8 @@ func (m *Manager) Register(task Task) (id string, _ error) {
 	m.workers[worker.meta.id] = worker
 	m.workersMutex.Unlock()
 
+	metricWorkers.Inc()
+
 	worker.RunScheduler()
 
 	return worker.meta.id, nil
@@ -96,6 +98,8 @@ func (m *Manager) Unregister(id string) {
 		m.workersMutex.Lock()
 		delete(m.workers, id)
 		m.workersMutex.Unlock()
+
+		metricWorkers.Dec()
 	}
 }
 

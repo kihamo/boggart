@@ -3,17 +3,19 @@ package nativeapi
 import (
 	"context"
 
-	"github.com/kihamo/go-workers"
+	"github.com/kihamo/boggart/components/boggart/tasks"
 )
 
-func (b *Bind) Tasks() []workers.Task {
-	taskSyncState := b.Workers().WrapTaskIsOnline(b.taskSyncState)
-	taskSyncState.SetRepeats(-1)
-	taskSyncState.SetRepeatInterval(b.config.SyncStateInterval)
-	taskSyncState.SetName("sync-state")
-
-	return []workers.Task{
-		taskSyncState,
+func (b *Bind) Tasks() []tasks.Task {
+	return []tasks.Task{
+		tasks.NewTask().
+			WithName("sync-state").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerFuncFromShortToLong(b.taskSyncState),
+				),
+			).
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.SyncStateInterval)),
 	}
 }
 

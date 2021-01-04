@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart/di"
-	"github.com/kihamo/go-workers/task"
 	"github.com/mourner/suncalc-go"
 )
 
@@ -17,8 +16,7 @@ type Bind struct {
 	di.WidgetBind
 	di.WorkersBind
 
-	config           *Config
-	taskStateUpdater *task.FunctionTask
+	config *Config
 }
 
 type Time struct {

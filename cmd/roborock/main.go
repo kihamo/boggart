@@ -17,7 +17,6 @@ import (
 	_ "github.com/kihamo/shadow/components/ota/instance"
 	_ "github.com/kihamo/shadow/components/profiling/instance"
 	_ "github.com/kihamo/shadow/components/tracing/instance"
-	_ "github.com/kihamo/shadow/components/workers/instance"
 )
 
 var (

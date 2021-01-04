@@ -4,22 +4,26 @@ import (
 	"context"
 	"errors"
 
+	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/providers/tvt/client/information"
 	"github.com/kihamo/boggart/providers/tvt/client/net"
 	"github.com/kihamo/boggart/providers/tvt/client/storage"
-	"github.com/kihamo/go-workers"
 	"go.uber.org/multierr"
 )
 
-func (b *Bind) Tasks() []workers.Task {
-	taskState := b.Workers().WrapTaskIsOnline(b.taskUpdater)
-	taskState.SetTimeout(b.config.UpdaterTimeout)
-	taskState.SetRepeats(-1)
-	taskState.SetRepeatInterval(b.config.UpdaterInterval)
-	taskState.SetName("updater")
-
-	return []workers.Task{
-		taskState,
+func (b *Bind) Tasks() []tasks.Task {
+	return []tasks.Task{
+		tasks.NewTask().
+			WithName("updater").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerWithTimeout(
+						tasks.HandlerFuncFromShortToLong(b.taskUpdater),
+						b.config.UpdaterTimeout,
+					),
+				),
+			).
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
 	}
 }
 

@@ -5,24 +5,26 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/kihamo/go-workers"
+	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/snitch"
 	"github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
 )
 
-func (b *Bind) Tasks() []workers.Task {
+func (b *Bind) Tasks() []tasks.Task {
 	if b.config.IPAddressSensorID == "" {
 		return nil
 	}
 
-	taskImportMetrics := b.Workers().WrapTaskIsOnline(b.taskImportMetrics)
-	taskImportMetrics.SetRepeats(-1)
-	taskImportMetrics.SetRepeatInterval(b.config.ImportMetricsInterval)
-	taskImportMetrics.SetName("import-metrics")
-
-	return []workers.Task{
-		taskImportMetrics,
+	return []tasks.Task{
+		tasks.NewTask().
+			WithName("import-metrics").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerFuncFromShortToLong(b.taskImportMetrics),
+				),
+			).
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.ImportMetricsInterval)),
 	}
 }
 
