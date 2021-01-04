@@ -481,6 +481,8 @@ github.com/kihamo/gotypes v0.0.0-20161225095921-c1b2b85a41fe h1:tPzbTI6UkYAnF2O5
 github.com/kihamo/gotypes v0.0.0-20161225095921-c1b2b85a41fe/go.mod h1:Ea+63Rptr1cn2lZLAq4FtbjhJiTD5pS0MnCsta84xqY=
 github.com/kihamo/shadow v0.0.0-20201030220011-52686be178a0 h1:j27Le7HZPdcPf58CDlyXf1O1bn/zCzZYLt2PYJqDI1s=
 github.com/kihamo/shadow v0.0.0-20201030220011-52686be178a0/go.mod h1:u5iKKpczcO3b0zivw976MePYsQDWwY4FDIFyNqFzEm0=
+github.com/kihamo/shadow v0.0.0-20210104204319-88f4280b2a26 h1:nFa0x1x5MLCMQXFwiCIx5EhyIBiGpDogKxx7IM92mW4=
+github.com/kihamo/shadow v0.0.0-20210104204319-88f4280b2a26/go.mod h1:u5iKKpczcO3b0zivw976MePYsQDWwY4FDIFyNqFzEm0=
 github.com/kihamo/snitch v0.0.0-20200412182537-3478a87783e1 h1:9LLnHjW6WOaIC2GG+y/73QCTzhRxu05CNPkXg4Mh2TI=
 github.com/kihamo/snitch v0.0.0-20200412182537-3478a87783e1/go.mod h1:olFj6DX2IOweEqkZQ3c9d4TMLc1FKl5tisLwT7/oh40=
 github.com/kisielk/errcheck v1.1.0/go.mod h1:EZBBE59ingxPouuu3KfxchcWSUPOHkagtvWXihfKN4Q=
@@ -884,6 +886,8 @@ golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208 h1:qwRHBd0NqMbJxfbotnDhm2By
 golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9 h1:SQFwaSi55rU7vdNs9Yr0Z324VNlrF+0wMqRXT4St8ck=
 golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
+golang.org/x/sync v0.0.0-20201207232520-09787c993a3a h1:DcqTD9SDLc+1P/r1EmRBwnVsrOwW+kk2vWf9n+1sGhs=
+golang.org/x/sync v0.0.0-20201207232520-09787c993a3a/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sys v0.0.0-20180823144017-11551d06cbcc/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20180830151530-49385e6e1522/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20180905080454-ebe1bf3edb33/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=

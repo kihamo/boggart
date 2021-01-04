@@ -31,7 +31,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/influxdata/influxdb v1.8.0
 	github.com/influxdata/influxdb-client-go v1.4.0
-	github.com/kihamo/shadow v0.0.0-20201030220011-52686be178a0
+	github.com/kihamo/shadow v0.0.0-20210104204319-88f4280b2a26
 	github.com/kihamo/snitch v0.0.0-20200412182537-3478a87783e1
 	github.com/llgcode/draw2d v0.0.0-20200930101115-bfaf5d914d1e
 	github.com/mailru/easyjson v0.7.6
@@ -51,7 +51,7 @@ require (
 	gocv.io/x/gocv v0.25.0 // indirect
 	golang.org/x/net v0.0.0-20200904194848-62affa334b73
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
-	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9 // indirect
+	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a // indirect
 	golang.org/x/sys v0.0.0-20200610111108-226ff32320da // indirect
 	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
 	golang.org/x/tools v0.0.0-20200911040025-d179df38ff46 // indirect
