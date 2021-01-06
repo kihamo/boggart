@@ -7,7 +7,7 @@ import (
 
 func (b *Bind) LivenessProbe(ctx context.Context) error {
 	if client := b.Client(); client != nil {
-		_, _, _, _, _, _, err := client.GetCurrentTime()
+		_, err := client.SystemGetSystemInfo()
 		return err
 	}
 

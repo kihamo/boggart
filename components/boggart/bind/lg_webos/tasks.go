@@ -38,6 +38,7 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 	}
 
 	b.Meta().SetSerialNumber(deviceInfo.DeviceId)
+	b.Meta().SetMACAsString(deviceInfo.DeviceId)
 
 	// set tv subscribers
 	go func() {
