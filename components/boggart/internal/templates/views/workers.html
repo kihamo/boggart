@@ -91,19 +91,19 @@
                             '</div>';
                         }
                     },{
-                        data: 'first_run_at',
-                        render: function (t) {
-                            return typeof t !== 'undefined' && t.length > 0 ? dateToString(t) : '{{ i18n "None" . }}';
+                        data: null,
+                        render: function (data, type, row) {
+                            return typeof row.first_run_at !== 'undefined' && row.first_run_at.length > 0 ? dateToString(row.first_run_at) : '{{ i18n "None" . }}';
                         }
                     },{
-                        data: 'last_run_at',
-                        render: function (t) {
-                            return typeof t !== 'undefined' && t.length > 0 ? dateToString(t) : '{{ i18n "None" . }}';
+                        data: null,
+                        render: function (data, type, row) {
+                            return typeof row.last_run_at !== 'undefined' && row.last_run_at.length > 0 ? dateToString(row.last_run_at) : '{{ i18n "None" . }}';
                         }
                     },{
-                        data: 'next_run_at',
-                        render: function (t) {
-                            return typeof t !== 'undefined' && t.length > 0 ? dateToString(t) : '{{ i18n "None" . }}';
+                        data: null,
+                        render: function (data, type, row) {
+                            return typeof row.next_run_at !== 'undefined' && row.next_run_at.length > 0 ? dateToString(row.next_run_at) : '{{ i18n "None" . }}';
                         }
                     },{
                         data: 'id'
