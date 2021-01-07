@@ -72,7 +72,7 @@ $(document).ready(function () {
                                 '<li role="separator" class="divider"></li>';
 
                             for (var i in row.tasks) {
-                                content +=  '<li><a href="/boggart/bind/' + row.id + '/tasks/?run=' + row.tasks[i][0] + '" target="_blank">Run ' + row.tasks[i][1] + '</a></li>';
+                                content +=  '<li><a href="/boggart/workers/?id=' + row.tasks[i][0] + '&action=run" target="_blank">Run ' + row.tasks[i][1] + '</a></li>';
                             }
 
                             content += '</ul></div>';
