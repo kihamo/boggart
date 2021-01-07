@@ -3,8 +3,15 @@ package tasks
 import (
 	"context"
 	"io"
+	"sort"
+	"strings"
 	"sync"
 )
+
+type InfoItem struct {
+	Task Task
+	Meta *Meta
+}
 
 type Manager struct {
 	io.Closer
@@ -149,6 +156,32 @@ func (m *Manager) Recalculate(id string) error {
 	}
 
 	return ErrTaskNotFound
+}
+
+func (m *Manager) Info() []*InfoItem {
+	m.workersMutex.RLock()
+	defer m.workersMutex.RUnlock()
+
+	items := make([]*InfoItem, 0, len(m.workers))
+
+	for _, worker := range m.workers {
+		items = append(items, &InfoItem{
+			Task: worker.task,
+			Meta: worker.meta,
+		})
+	}
+
+	sort.SliceStable(items, func(i, j int) bool {
+		cmp := strings.Compare(items[i].Task.Name(), items[j].Task.Name())
+
+		if cmp == 0 {
+			return items[i].Meta.ID() < items[j].Meta.ID()
+		}
+
+		return cmp > 0
+	})
+
+	return items
 }
 
 func (m *Manager) Close() (err error) {

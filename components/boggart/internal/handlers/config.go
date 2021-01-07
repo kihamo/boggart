@@ -39,34 +39,17 @@ func (h *ConfigHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	id := q.Get(":id")
 
 	if action == "reload" && r.IsPost() {
-		type response struct {
-			Result  string `json:"result"`
-			Message string `json:"message,omitempty"`
-		}
-
 		// reload by ID
 		if id != "" {
 			bind := h.component.Bind(id)
 			if bind == nil {
-				_ = w.SendJSON(response{
-					Result:  "failed",
-					Message: "Bind " + id + " not found",
-				})
+				_ = w.SendJSON(boggart.NewResponseJSON().Failed("Bind " + id + " not found"))
 			} else if bind.Type() == boggart.ComponentName {
-				_ = w.SendJSON(response{
-					Result:  "failed",
-					Message: "Can't reload config from special bind " + boggart.ComponentName,
-				})
+				_ = w.SendJSON(boggart.NewResponseJSON().Failed("Can't reload config from special bind " + boggart.ComponentName))
 			} else if err := h.component.ReloadConfigByID(id); err != nil {
-				_ = w.SendJSON(response{
-					Result:  "failed",
-					Message: err.Error(),
-				})
+				_ = w.SendJSON(boggart.NewResponseJSON().FailedError(err))
 			} else {
-				_ = w.SendJSON(response{
-					Result:  "success",
-					Message: "Bind " + id + " reloaded from file",
-				})
+				_ = w.SendJSON(boggart.NewResponseJSON().Success("Bind " + id + " reloaded from file"))
 			}
 
 			return
@@ -74,15 +57,9 @@ func (h *ConfigHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 		// reload all
 		if loaded, err := h.component.ReloadConfig(); err != nil {
-			_ = w.SendJSON(response{
-				Result:  "failed",
-				Message: err.Error(),
-			})
+			_ = w.SendJSON(boggart.NewResponseJSON().FailedError(err))
 		} else {
-			_ = w.SendJSON(response{
-				Result:  "success",
-				Message: "Loaded " + strconv.FormatInt(int64(loaded), 10) + " binds",
-			})
+			_ = w.SendJSON(boggart.NewResponseJSON().Success("Loaded " + strconv.FormatInt(int64(loaded), 10) + " binds"))
 		}
 
 		return

@@ -23,11 +23,6 @@ import (
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
-type response struct {
-	Result  string `json:"result"`
-	Message string `json:"message,omitempty"`
-}
-
 func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	query := r.URL().Query()
 	action := query.Get("action")
@@ -96,15 +91,9 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			}
 
 			if err != nil {
-				_ = w.SendJSON(response{
-					Result:  "failed",
-					Message: err.Error(),
-				})
+				_ = w.SendJSON(boggart.NewResponseJSON().FailedError(err))
 			} else {
-				_ = w.SendJSON(response{
-					Result:  "success",
-					Message: "Save success",
-				})
+				_ = w.SendJSON(boggart.NewResponseJSON().Success("Save success"))
 			}
 
 			return

@@ -6,13 +6,9 @@ import (
 	"time"
 
 	"github.com/elazarl/go-bindata-assetfs"
+	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/shadow/components/dashboard"
 )
-
-type response struct {
-	Result  string `json:"result"`
-	Message string `json:"message,omitempty"`
-}
 
 func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	widget := b.Widget()
@@ -68,15 +64,9 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		if err != nil {
-			_ = w.SendJSON(response{
-				Result:  "failed",
-				Message: err.Error(),
-			})
+			_ = w.SendJSON(boggart.NewResponseJSON().FailedError(err))
 		} else {
-			_ = w.SendJSON(response{
-				Result:  "success",
-				Message: successMsg,
-			})
+			_ = w.SendJSON(boggart.NewResponseJSON().Success(successMsg))
 		}
 
 		return

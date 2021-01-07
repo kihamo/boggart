@@ -28,7 +28,7 @@
                                     <td>{{ $task.Meta.Status.String }}</td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <a href="/boggart/bind/{{ $.bind.ID }}/tasks/?run={{ $task.Meta.ID }}" target="_blank" class="btn btn-success btn-icon btn-xs">
+                                            <a href="/boggart/workers/?id={{ $task.Meta.ID }}&action=run" target="_blank" class="btn btn-success btn-icon btn-xs">
                                                 <i class="fas fa-running" title="{{ i18n "Execute" $ }}"></i>
                                             </a>
                                         </div>
@@ -41,23 +41,17 @@
                                     </td>
                                     <td>
                                         {{ if $task.Meta.FirstRunAt }}
-                                            <script type="application/javascript">document.write(dateToString('{{ $task.Meta.FirstRunAt.Format "2006-01-02T15:04:05-07:00" }}'))</script>
-                                        {{ else }}
-                                            {{ i18n "None" . }}
+                                            {{ $task.Meta.FirstRunAt.Format "2006-01-02T15:04:05-07:00" }}
                                         {{ end }}
                                     </td>
                                     <td>
                                         {{ if $task.Meta.LastRunAt }}
-                                            <script type="application/javascript">document.write(dateToString('{{ $task.Meta.LastRunAt.Format "2006-01-02T15:04:05-07:00" }}'))</script>
-                                        {{ else }}
-                                            {{ i18n "None" . }}
+                                            {{ $task.Meta.LastRunAt.Format "2006-01-02T15:04:05-07:00" }}
                                         {{ end }}
                                     </td>
                                     <td>
                                         {{ if $task.Meta.NextRunAt }}
-                                            <script type="application/javascript">document.write(dateToString('{{ $task.Meta.NextRunAt.Format "2006-01-02T15:04:05-07:00" }}'))</script>
-                                        {{ else }}
-                                            {{ i18n "None" . }}
+                                            {{ $task.Meta.NextRunAt.Format "2006-01-02T15:04:05-07:00" }}
                                         {{ end }}
                                     </td>
                                 {{ else }}
@@ -99,8 +93,10 @@
             table.one('init.dt', function () {
                 table.DataTable().rows().every(function (i) {
                     var data = this.data();
-                    data[7] = data[7].length > 0 ? dateToString(data[7]) : '';
-                    data[8] = data[8].length > 0 ? dateToString(data[8]) : '';
+
+                    data[4] = data[4].length > 0 ? dateToString(data[4]) : '{{ i18n "None" . }}';
+                    data[5] = data[5].length > 0 ? dateToString(data[5]) : '{{ i18n "None" . }}';
+                    data[6] = data[6].length > 0 ? dateToString(data[6]) : '{{ i18n "None" . }}';
 
                     this.row(i).data(data);
                     table.DataTable().draw();

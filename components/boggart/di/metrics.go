@@ -108,6 +108,7 @@ func (c *MetricsContainer) Collect(ch chan<- snitch.Metric) {
 	}
 
 	tmpCh := make(chan snitch.Metric, metricsSizeOfChannel)
+
 	var (
 		count      uint64
 		emptyCount uint64

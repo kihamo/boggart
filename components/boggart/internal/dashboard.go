@@ -25,6 +25,7 @@ func (c *Component) DashboardMenu() dashboard.Menu {
 	return dashboard.NewMenu("Smart home").
 		WithIcon("home").
 		WithChild(dashboard.NewMenu("Manager").WithRoute(routes[1])).
+		WithChild(dashboard.NewMenu("Workers").WithRoute(routes[7])).
 		WithChild(dashboard.NewMenu("Config YAML").WithURL("/" + c.Name() + "/config/view"))
 }
 
@@ -55,6 +56,8 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 			dashboard.NewRoute("/"+c.Name()+"/config/:action/:id", configHandler).
 				WithMethods([]string{http.MethodGet, http.MethodPost}).
 				WithAuth(true),
+			dashboard.NewRoute("/"+c.Name()+"/workers/", handlers.NewWorkersHandler(c.tasksManager)).
+				WithMethods([]string{http.MethodGet, http.MethodPost}),
 			dashboard.NewRoute("/"+c.Name()+"/widget/:id/", handlers.NewWidgetHandler(c)).
 				WithMethods([]string{http.MethodGet, http.MethodPost}),
 		}

@@ -272,24 +272,13 @@ func (h *BindHandler) actionDelete(w *dashboard.Response, r *dashboard.Request, 
 	}
 
 	err := h.componentBoggart.UnregisterBindByID(b.ID())
-
-	type response struct {
-		Result  string `json:"result"`
-		Message string `json:"message,omitempty"`
-	}
-
 	if err != nil {
-		_ = w.SendJSON(response{
-			Result:  "failed",
-			Message: err.Error(),
-		})
+		_ = w.SendJSON(boggart.NewResponseJSON().FailedError(err))
 
 		return
 	}
 
-	_ = w.SendJSON(response{
-		Result: "success",
-	})
+	_ = w.SendJSON(boggart.NewResponseJSON().Success(""))
 }
 
 func (h *BindHandler) actionProbe(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem, t string) {
@@ -324,19 +313,11 @@ func (h *BindHandler) actionProbe(w *dashboard.Response, r *dashboard.Request, b
 		err = bindSupport.LivenessCheck(r.Context())
 	}
 
-	response := struct {
-		Result string `json:"result"`
-		Error  string `json:"error,omitempty"`
-	}{
-		Result: "success",
-	}
-
 	if err != nil {
-		response.Result = "failed"
-		response.Error = err.Error()
+		_ = w.SendJSON(boggart.NewResponseJSON().FailedError(err))
 	}
 
-	_ = w.SendJSON(response)
+	_ = w.SendJSON(boggart.NewResponseJSON().Success(""))
 }
 
 func (h *BindHandler) actionLogs(w http.ResponseWriter, r *dashboard.Request, b boggart.BindItem) {
@@ -467,33 +448,7 @@ func (h *BindHandler) actionTasks(w *dashboard.Response, r *dashboard.Request, b
 		return
 	}
 
-	ctx := r.Context()
 	ctr := bindSupport.Workers()
-	runID := r.URL().Query().Get("run")
-
-	if runID != "" {
-		err := ctr.TaskRun(ctx, runID)
-		if errors.Is(err, tasks.ErrTaskNotFound) {
-			h.NotFound(w, r)
-			return
-		}
-
-		response := struct {
-			Result string `json:"result"`
-			Error  string `json:"error,omitempty"`
-		}{
-			Result: "success",
-		}
-
-		if err != nil {
-			response.Result = "failed"
-			response.Error = err.Error()
-		}
-
-		_ = w.SendJSON(response)
-
-		return
-	}
 
 	ids := ctr.TasksID()
 	type taskView struct {
@@ -501,22 +456,19 @@ func (h *BindHandler) actionTasks(w *dashboard.Response, r *dashboard.Request, b
 		Meta      *tasks.Meta
 		ShortName string
 	}
-	tasksView := make([]taskView, 0, len(ids))
+	tasksView := make([]taskView, len(ids))
 	var err error
 
-	for _, id := range ids {
-		view := taskView{}
-
-		view.Task, view.Meta, err = ctr.TaskByID(id[0])
+	for i, id := range ids {
+		tasksView[i].Task, tasksView[i].Meta, err = ctr.TaskByID(id[0])
 		if err == nil {
-			view.ShortName = ctr.TaskShortName(view.Task.Name())
+			tasksView[i].ShortName = ctr.TaskShortName(tasksView[i].Task.Name())
 		} else {
-			view.ShortName = ctr.TaskShortName(id[1])
+			tasksView[i].ShortName = ctr.TaskShortName(id[1])
 		}
-		tasksView = append(tasksView, view)
 	}
 
-	h.Render(ctx, "tasks", map[string]interface{}{
+	h.Render(r.Context(), "tasks", map[string]interface{}{
 		"bind":  b,
 		"tasks": tasksView,
 	})
