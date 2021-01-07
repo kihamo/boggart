@@ -51,14 +51,7 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 		return
 	}
 
-	entities := struct {
-		Draw     int         `json:"draw"`
-		Total    int         `json:"recordsTotal"`
-		Filtered int         `json:"recordsFiltered"`
-		Data     interface{} `json:"data"`
-		Error    string      `json:"error,omitempty"`
-	}{}
-	entities.Draw = 1
+	entities := boggart.NewResponseDataTable()
 
 	switch r.URL().Query().Get("entity") {
 	case "devices":

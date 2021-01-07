@@ -68,7 +68,7 @@ $(document).ready(function () {
                                 '<i class="fas fa-running" title="Tasks"></i> <span class="badge">' + row.tasks.length + '</span> <span class="caret"></span>' +
                                 '</button>' +
                                 '<ul class="dropdown-menu">' +
-                                '<li><a href="/boggart/bind/' + row.id + '/tasks/" target="_blank">Show all</a></li>' +
+                                '<li><a href="/boggart/workers/?search=bind-' + row.id + '-' + row.type + '-" target="_blank">Show all</a></li>' +
                                 '<li role="separator" class="divider"></li>';
 
                             for (var i in row.tasks) {

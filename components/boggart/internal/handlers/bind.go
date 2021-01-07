@@ -9,7 +9,6 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
-	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/shadow/components/dashboard"
 	"gopkg.in/yaml.v2"
@@ -79,10 +78,6 @@ func (h *BindHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 	case "mqtt":
 		h.actionMQTT(w, r, bindItem)
-		return
-
-	case "tasks":
-		h.actionTasks(w, r, bindItem)
 		return
 
 	case "":
@@ -438,38 +433,5 @@ func (h *BindHandler) actionMQTT(w http.ResponseWriter, r *dashboard.Request, b 
 		"bind":        b,
 		"publishes":   publishesItems,
 		"subscribers": subscribers,
-	})
-}
-
-func (h *BindHandler) actionTasks(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem) {
-	bindSupport, ok := b.Bind().(di.WorkersContainerSupport)
-	if !ok {
-		h.NotFound(w, r)
-		return
-	}
-
-	ctr := bindSupport.Workers()
-
-	ids := ctr.TasksID()
-	type taskView struct {
-		Task      tasks.Task
-		Meta      *tasks.Meta
-		ShortName string
-	}
-	tasksView := make([]taskView, len(ids))
-	var err error
-
-	for i, id := range ids {
-		tasksView[i].Task, tasksView[i].Meta, err = ctr.TaskByID(id[0])
-		if err == nil {
-			tasksView[i].ShortName = ctr.TaskShortName(tasksView[i].Task.Name())
-		} else {
-			tasksView[i].ShortName = ctr.TaskShortName(id[1])
-		}
-	}
-
-	h.Render(r.Context(), "tasks", map[string]interface{}{
-		"bind":  b,
-		"tasks": tasksView,
 	})
 }

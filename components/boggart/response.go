@@ -26,3 +26,17 @@ func (r *ResponseJSON) Success(message string) *ResponseJSON {
 
 	return r
 }
+
+type ResponseDataTable struct {
+	Draw     int         `json:"draw"`
+	Total    int         `json:"recordsTotal"`
+	Filtered int         `json:"recordsFiltered"`
+	Data     interface{} `json:"data"`
+	Error    string      `json:"error,omitempty"`
+}
+
+func NewResponseDataTable() *ResponseDataTable {
+	return &ResponseDataTable{
+		Draw: 1,
+	}
+}

@@ -1,14 +1,21 @@
 {{ define "content" }}
-<div class="row">
+<div class="row" id="workers">
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
             <div class="x_title">
                 <h2>{{ i18n "Workers info" . }}</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li>
+                        <a href="javascript:refreshTables()">
+                            <i class="fas fa-redo" title="{{ i18n "Refresh data" . }}" data-toggle="tooltip" data-placement="bottom"></i>
+                        </a>
+                    </li>
+                </ul>
                 <div class="clearfix"></div>
             </div>
             <div class="x_content">
                 <div class="table-responsive">
-                    <table class="table table-hover table-striped datatable dt-responsive nowrap" id="workers" style="width:100%">
+                    <table class="table table-striped dt-responsive nowrap" style="width:100%">
                         <thead>
                         <tr>
                             <th>{{ i18n "Name" . }}</th>
@@ -21,49 +28,6 @@
                             <th>{{ i18n "ID" . }}</th>
                         </tr>
                         </thead>
-                        <tbody>
-                        {{ range $info := .workers }}
-                            <tr>
-                                <td>{{ $info.Task.Name }}</td>
-                                <td>{{ $info.Meta.Status.String }}</td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <a href="/boggart/workers/?id={{ $info.Meta.ID }}&action=run" target="_blank" class="btn btn-success btn-icon btn-xs">
-                                            <i class="fas fa-running" title="{{ i18n "Execute" $ }}"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-info btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Confirm recalculate worker #{{ $info.Meta.ID }}" data-modal-callback="workerAction('recalculate', '{{ $info.Meta.ID }}');">
-                                            <i class="fas fa-clock" title="{{ i18n "Recalculate" $ }}"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-danger btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Confirm unregister worker #{{ $info.Meta.ID }}" data-modal-callback="workerAction('unregister', '{{ $info.Meta.ID }}');">
-                                            <i class="fas fa-trash" title="{{ i18n "Unregister" $ }}"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="btn-group" role="group" style="min-width: 96px">
-                                        <button class="btn btn-xs btn-success">{{ $info.Meta.Success }}</button>
-                                        <button class="btn btn-xs btn-danger">{{ $info.Meta.Fails }}</button>
-                                    </div>
-                                </td>
-                                <td>
-                                {{ if $info.Meta.FirstRunAt }}
-                                    {{ $info.Meta.FirstRunAt.Format "2006-01-02T15:04:05-07:00" }}
-                                {{ end }}
-                                </td>
-                                <td>
-                                {{ if $info.Meta.LastRunAt }}
-                                    {{ $info.Meta.LastRunAt.Format "2006-01-02T15:04:05-07:00" }}
-                                {{ end }}
-                                </td>
-                                <td>
-                                {{ if $info.Meta.NextRunAt }}
-                                    {{ $info.Meta.NextRunAt.Format "2006-01-02T15:04:05-07:00" }}
-                                {{ end }}
-                                </td>
-                                <td>{{ $info.Meta.ID }}</td>
-                            </tr>
-                        {{ end }}
-                        </tbody>
                     </table>
                 </div>
             </div>
@@ -87,25 +51,81 @@
 
     <script type="application/javascript">
         $(document).ready(function () {
-            var table = $('#workers');
+            var tableWorkers = $('#workers table')
+                .DataTable({
+                    stateSave: true,
+                    stateDuration: 0,
+                    pageLength: 50,
+                    language: {
+                        url: '/dashboard/datatables/i18n.json?locale=' + window.shadowLocale
+                    },
+                    ajax: {
+                        url: '/boggart/workers/?action=list',
+                        dataSrc: 'data'
+                    },
+                    columns: [{
+                        data: 'name'
+                    },{
+                        data: 'status'
+                    },{
+                        data: null,
+                        render: function (data, type, row) {
+                            return '<div class="btn-group" role="group">' +
+                                '<a href="/boggart/workers/?id=' + row.id + '&action=run" target="_blank" class="btn btn-success btn-icon btn-xs">' +
+                                    '<i class="fas fa-running" title="{{ i18n "Execute" $ }}"></i>' +
+                                '</a>' +
+                                '<button type="button" class="btn btn-info btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Confirm recalculate worker #' + row.id + '" data-modal-callback="workerAction(\'recalculate\', \'' + row.id + '\');">' +
+                                    '<i class="fas fa-clock" title="{{ i18n "Recalculate" $ }}"></i>' +
+                                '</button>' +
+                                '<button type="button" class="btn btn-danger btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Confirm unregister worker #' + row.id + '" data-modal-callback="workerAction(\'unregister\', \'' + row.id + '\');">' +
+                                    '<i class="fas fa-trash" title="{{ i18n "Unregister" $ }}"></i>' +
+                                '</button>' +
+                            '</div>';
+                        }
+                    },{
+                        data: null,
+                        render: function (data, type, row) {
+                            return '<div class="btn-group" role="group" style="min-width:96px">' +
+                                 '<button class="btn btn-xs btn-success" title="{{ i18n "Count success attempts" . }}">' + row.attempts_success + '</button>' +
+                                 '<button class="btn btn-xs btn-danger" title="{{ i18n "Count fails attempts" . }}">' + row.attempts_fails + '</button>' +
+                            '</div>';
+                        }
+                    },{
+                        data: 'first_run_at',
+                        render: function (t) {
+                            return typeof t !== 'undefined' && t.length > 0 ? dateToString(t) : '{{ i18n "None" . }}';
+                        }
+                    },{
+                        data: 'last_run_at',
+                        render: function (t) {
+                            return typeof t !== 'undefined' && t.length > 0 ? dateToString(t) : '{{ i18n "None" . }}';
+                        }
+                    },{
+                        data: 'next_run_at',
+                        render: function (t) {
+                            return typeof t !== 'undefined' && t.length > 0 ? dateToString(t) : '{{ i18n "None" . }}';
+                        }
+                    },{
+                        data: 'id'
+                    }],
+                    initComplete: function() {
+                        var vars = {};
+                        window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+                            vars[key] = value;
+                        });
 
-            table.one('init.dt', function () {
-                table.DataTable().rows().every(function (i) {
-                    var data = this.data();
+                        if (!vars.hasOwnProperty('search')) {
+                            vars['search'] = '';
+                        }
 
-                    data[4] = data[4].length > 0 ? dateToString(data[4]) : '{{ i18n "None" . }}';
-                    data[5] = data[5].length > 0 ? dateToString(data[5]) : '{{ i18n "None" . }}';
-                    data[6] = data[6].length > 0 ? dateToString(data[6]) : '{{ i18n "None" . }}';
-
-                    this.row(i).data(data);
-                    table.DataTable().draw();
+                        this.api().search(vars['search']).draw();
+                    }
                 });
-            });
 
             window.workerAction = function (action, id) {
                 $.ajax({
                     type: 'POST',
-                    url: '/boggart/workers?action=' + action + '&id=' + id,
+                    url: '/boggart/workers/?action=' + action + '&id=' + id,
                     success: function (r) {
                         if (r.result === 'failed') {
                             new PNotify({
@@ -125,10 +145,13 @@
                             });
                         }
 
-                        // TODO: reload
-                        // table.ajax.reload();
+                        refreshTables();
                     }
                 });
+            };
+
+            window.refreshTables = function () {
+                tableWorkers.ajax.reload();
             };
         });
     </script>
