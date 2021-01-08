@@ -300,7 +300,7 @@ func (c *ProbesContainer) LivenessTask() tasks.Task {
 	if _, ok := c.bind.Bind().(WorkersContainerSupport); ok {
 		task.WithName("liveness-probe")
 	} else {
-		task.WithName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-readiness-probe")
+		task.WithName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-liveness-probe")
 	}
 
 	task.WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), probePeriod))
