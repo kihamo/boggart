@@ -187,16 +187,7 @@ func (c *ProbesContainer) ReadinessTask() tasks.Task {
 	}
 
 	// task
-	task := tasks.NewTask()
-
-	if _, ok := c.bind.Bind().(WorkersContainerSupport); ok {
-		task.WithName("readiness-probe")
-	} else {
-		task.WithName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-readiness-probe")
-	}
-
-	task.WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), probePeriod))
-	task.WithHandlerFunc(func(ctx context.Context) (err error) {
+	handler := func(ctx context.Context) (err error) {
 		if s := c.bind.Status(); !s.IsStatusInitializing() && !s.IsStatusOnline() && !s.IsStatusOffline() {
 			return nil
 		}
@@ -250,10 +241,12 @@ func (c *ProbesContainer) ReadinessTask() tasks.Task {
 		}
 
 		return err
-	})
-	task.WithHandler(tasks.HandlerWithTimeout(task.Handler(), probeTimeout))
+	}
 
-	return task
+	return tasks.NewTask().
+		WithName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-readiness-probe").
+		WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), probePeriod)).
+		WithHandler(tasks.HandlerWithTimeout(tasks.HandlerFuncFromShortToLong(handler), probeTimeout))
 }
 
 func (c *ProbesContainer) ReadinessCheck(ctx context.Context) (err error) {
@@ -295,16 +288,7 @@ func (c *ProbesContainer) LivenessTask() tasks.Task {
 	}
 
 	// task
-	task := tasks.NewTask()
-
-	if _, ok := c.bind.Bind().(WorkersContainerSupport); ok {
-		task.WithName("liveness-probe")
-	} else {
-		task.WithName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-liveness-probe")
-	}
-
-	task.WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), probePeriod))
-	task.WithHandlerFunc(func(ctx context.Context) (err error) {
+	handler := func(ctx context.Context) (err error) {
 		if s := c.bind.Status(); !s.IsStatusOnline() && !s.IsStatusOffline() {
 			return nil
 		}
@@ -372,10 +356,12 @@ func (c *ProbesContainer) LivenessTask() tasks.Task {
 		}
 
 		return nil
-	})
-	task.WithHandler(tasks.HandlerWithTimeout(task.Handler(), probeTimeout))
+	}
 
-	return task
+	return tasks.NewTask().
+		WithName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-liveness-probe").
+		WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), probePeriod)).
+		WithHandler(tasks.HandlerWithTimeout(tasks.HandlerFuncFromShortToLong(handler), probeTimeout))
 }
 
 func (c *ProbesContainer) LivenessCheck(ctx context.Context) (err error) {
