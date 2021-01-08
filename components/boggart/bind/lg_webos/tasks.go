@@ -32,13 +32,14 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 		return errors.New("client isn't init")
 	}
 
-	deviceInfo, err := client.GetCurrentSWInformation()
-	if err != nil {
-		return err
-	}
+	if mac := b.Meta().MAC(); mac == nil {
+		deviceInfo, err := client.GetCurrentSWInformation()
+		if err != nil {
+			return err
+		}
 
-	b.Meta().SetSerialNumber(deviceInfo.DeviceId)
-	b.Meta().SetMACAsString(deviceInfo.DeviceId)
+		b.Meta().SetMACAsString(deviceInfo.DeviceId)
+	}
 
 	// set tv subscribers
 	go func() {

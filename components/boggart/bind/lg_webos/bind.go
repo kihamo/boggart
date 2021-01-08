@@ -49,6 +49,10 @@ func (b *Bind) Run() error {
 	b.client = nil
 	b.quitMonitors = make(chan struct{})
 
+	if b.config.MAC != nil {
+		b.Meta().SetMAC(b.config.MAC.HardwareAddr)
+	}
+
 	return nil
 }
 

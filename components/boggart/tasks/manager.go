@@ -148,7 +148,7 @@ func (m *Manager) Cancel(id string) {
 	}
 }
 
-// Принудительно обновляет внутренний шедулер в воркере, на случай если произошли изменений
+// Принудительно обновляет внутренний шедулер в воркере, на случай если произошли изменения
 func (m *Manager) Recalculate(id string) error {
 	if w := m.worker(id); w != nil {
 		w.RunScheduler()

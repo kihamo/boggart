@@ -169,6 +169,10 @@ func (c *WorkersContainer) TaskByID(id string) (tasks.Task, *tasks.Meta, error) 
 	return task, &meta, err
 }
 
+func (c *WorkersContainer) ScheduleRecalculate(id string) error {
+	return c.manager.Recalculate(id)
+}
+
 func (c *WorkersContainer) WrapTaskIsOnline(parent tasks.Handler) tasks.Handler {
 	return tasks.HandlerFunc(func(ctx context.Context, meta tasks.Meta, task tasks.Task) error {
 		if parent == nil {

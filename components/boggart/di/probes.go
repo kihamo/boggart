@@ -244,7 +244,7 @@ func (c *ProbesContainer) ReadinessTask() tasks.Task {
 	}
 
 	return tasks.NewTask().
-		WithName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-readiness-probe").
+		WithName("readiness-probe").
 		WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), probePeriod)).
 		WithHandler(tasks.HandlerWithTimeout(tasks.HandlerFuncFromShortToLong(handler), probeTimeout))
 }
@@ -359,7 +359,7 @@ func (c *ProbesContainer) LivenessTask() tasks.Task {
 	}
 
 	return tasks.NewTask().
-		WithName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-liveness-probe").
+		WithName("liveness-probe").
 		WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), probePeriod)).
 		WithHandler(tasks.HandlerWithTimeout(tasks.HandlerFuncFromShortToLong(handler), probeTimeout))
 }

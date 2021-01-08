@@ -6,14 +6,16 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/types"
 )
 
 type Config struct {
 	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
-	Host                    string     `valid:"host,required"`
-	Key                     string     `valid:"required"`
+	Host                    string `valid:"host,required"`
+	Key                     string `valid:"required"`
+	MAC                     *types.HardwareAddr
 	TopicApplication        mqtt.Topic `mapstructure:"topic_application" yaml:"topic_application"`
 	TopicMute               mqtt.Topic `mapstructure:"topic_mute" yaml:"topic_mute"`
 	TopicVolume             mqtt.Topic `mapstructure:"topic_volume" yaml:"topic_volume"`
