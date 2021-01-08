@@ -102,11 +102,7 @@ func ScheduleWithDuration(parent Schedule, duration time.Duration) Schedule {
 }
 
 func ScheduleWithDailyTime(parent Schedule, hour, min, sec int, loc *time.Location) Schedule {
-	return ScheduleFunc(func(meta Meta) (t time.Time) {
-		if parent != nil {
-			t = parent.Next(meta)
-		}
-
+	return ScheduleWithFunc(parent, func(meta Meta) (t time.Time) {
 		now := time.Now()
 		if loc == nil {
 			loc = now.Location()
@@ -117,11 +113,7 @@ func ScheduleWithDailyTime(parent Schedule, hour, min, sec int, loc *time.Locati
 			next = next.Add(time.Hour * 24)
 		}
 
-		if t.IsZero() || next.After(t) {
-			t = next
-		}
-
-		return t
+		return next
 	})
 }
 
