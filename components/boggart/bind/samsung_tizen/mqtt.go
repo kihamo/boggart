@@ -12,7 +12,7 @@ import (
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(b.config.TopicPower, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 2) {
+			if !b.MQTT().CheckMACInTopic(message.Topic(), 2) {
 				return nil
 			}
 
@@ -29,7 +29,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			return b.client.SendCommand(tv.KeyPower)
 		}),
 		mqtt.NewSubscriber(b.config.TopicKey, 0, b.MQTT().WrapSubscribeDeviceIsOnline(func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 2) {
+			if !b.MQTT().CheckMACInTopic(message.Topic(), 2) {
 				return nil
 			}
 
