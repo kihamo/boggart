@@ -1,6 +1,7 @@
 package nut
 
 import (
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/providers/nut"
 )
@@ -18,8 +19,9 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	}
 
 	bind := &Bind{
-		config:   cfg,
-		provider: nut.New(cfg.Address.Host, username, password),
+		config:          cfg,
+		provider:        nut.New(cfg.Address.Host, username, password),
+		updaterInterval: atomic.NewDurationDefault(cfg.UpdaterInterval),
 	}
 
 	return bind, nil

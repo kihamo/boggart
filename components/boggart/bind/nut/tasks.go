@@ -3,6 +3,7 @@ package nut
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/kihamo/boggart/components/boggart/tasks"
 )
@@ -16,7 +17,14 @@ func (b *Bind) Tasks() []tasks.Task {
 					tasks.HandlerFuncFromShortToLong(b.taskUpdater),
 				),
 			).
-			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
+			WithSchedule(
+				tasks.ScheduleWithDurationFunc(
+					tasks.ScheduleNow(),
+					func(meta tasks.Meta) time.Duration {
+						return b.updaterInterval.Load()
+					},
+				),
+			),
 	}
 }
 
@@ -55,6 +63,8 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 			metricBatteryRuntime.With("serial_number", sn).Set(float64(v.Value.(int)))
 		case "battery.voltage":
 			metricBatteryVoltage.With("serial_number", sn).Set(v.Value.(float64))
+		case "driver.parameter.pollfreq":
+			b.updaterInterval.Set(time.Duration(v.Value.(int)) * time.Second)
 		}
 
 		// TODO:

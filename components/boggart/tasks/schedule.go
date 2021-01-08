@@ -62,8 +62,8 @@ func ScheduleWithStopFunc(parent Schedule, fn func(meta Meta) bool) Schedule {
 	})
 }
 
-func ScheduleWithDuration(parent Schedule, duration time.Duration) Schedule {
-	if duration <= 0 {
+func ScheduleWithFunc(parent Schedule, f ScheduleFunc) Schedule {
+	if f == nil {
 		return parent
 	}
 
@@ -72,12 +72,32 @@ func ScheduleWithDuration(parent Schedule, duration time.Duration) Schedule {
 			t = parent.Next(meta)
 		}
 
-		next := time.Now().Add(duration)
+		next := f(meta)
 		if t.IsZero() || next.Before(t) {
 			t = next
 		}
 
 		return t
+	})
+}
+
+func ScheduleWithDurationFunc(parent Schedule, duration func(Meta) time.Duration) Schedule {
+	if duration == nil {
+		return parent
+	}
+
+	return ScheduleWithFunc(parent, func(meta Meta) (t time.Time) {
+		return time.Now().Add(duration(meta))
+	})
+}
+
+func ScheduleWithDuration(parent Schedule, duration time.Duration) Schedule {
+	if duration <= 0 {
+		return parent
+	}
+
+	return ScheduleWithDurationFunc(parent, func(meta Meta) time.Duration {
+		return duration
 	})
 }
 

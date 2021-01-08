@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/nut"
 )
@@ -17,8 +18,9 @@ type Bind struct {
 	di.WidgetBind
 	di.WorkersBind
 
-	config   *Config
-	provider *nut.Client
+	config          *Config
+	provider        *nut.Client
+	updaterInterval *atomic.Duration
 }
 
 func (b *Bind) ups() (ups nut.UPS, err error) {
