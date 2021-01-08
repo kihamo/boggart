@@ -76,18 +76,18 @@ $(document).ready(function () {
                             }
 
                             content += '</ul></div>';
-                        } else if (row.has_readiness_probe || row.has_liveness_probe) {
+                        } else if (row.probe_liveness.length > 0 || row.probe_readiness.length > 0) {
                             var l = 0;
                             var menu = '';
 
-                            if (row.has_liveness_probe) {
+                            if (row.probe_liveness.length > 0) {
                                 l++;
-                                menu += '<li><a href="/boggart/bind/' + row.id + '/liveness/" target="_blank">Run liveness probe</a></li>';
+                                menu += '<li><a href="/boggart/workers/?id=' + row.probe_liveness + '&action=run" target="_blank">Run liveness probe</a></li>';
                             }
 
-                            if (row.has_readiness_probe) {
+                            if (row.probe_readiness.length > 0) {
                                 l++;
-                                menu += '<li><a href="/boggart/bind/' + row.id + '/readiness/" target="_blank">Run readiness probe</a></li>';
+                                menu += '<li><a href="/boggart/workers/?id=' + row.probe_readiness + '&action=run" target="_blank">Run readiness probe</a></li>';
                             }
 
                             content += '<div class="btn-group">' +

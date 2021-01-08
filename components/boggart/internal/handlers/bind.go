@@ -60,14 +60,6 @@ func (h *BindHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		h.actionDelete(w, r, bindItem)
 		return
 
-	case "readiness":
-		h.actionProbe(w, r, bindItem, "readiness")
-		return
-
-	case "liveness":
-		h.actionProbe(w, r, bindItem, "liveness")
-		return
-
 	case "logs":
 		h.actionLogs(w, r, bindItem)
 		return
@@ -271,45 +263,6 @@ func (h *BindHandler) actionDelete(w *dashboard.Response, r *dashboard.Request, 
 		_ = w.SendJSON(boggart.NewResponseJSON().FailedError(err))
 
 		return
-	}
-
-	_ = w.SendJSON(boggart.NewResponseJSON().Success(""))
-}
-
-func (h *BindHandler) actionProbe(w *dashboard.Response, r *dashboard.Request, b boggart.BindItem, t string) {
-	if b == nil {
-		h.NotFound(w, r)
-		return
-	}
-
-	bindSupport, ok := di.ProbesContainerBind(b.Bind())
-
-	if !ok {
-		h.NotFound(w, r)
-		return
-	}
-
-	var err error
-
-	switch t {
-	case "readiness":
-		if bindSupport.ReadinessTaskID() == "" {
-			h.NotFound(w, r)
-			return
-		}
-
-		err = bindSupport.ReadinessCheck(r.Context())
-	case "liveness":
-		if bindSupport.LivenessTaskID() == "" {
-			h.NotFound(w, r)
-			return
-		}
-
-		err = bindSupport.LivenessCheck(r.Context())
-	}
-
-	if err != nil {
-		_ = w.SendJSON(boggart.NewResponseJSON().FailedError(err))
 	}
 
 	_ = w.SendJSON(boggart.NewResponseJSON().Success(""))

@@ -17,6 +17,8 @@ type managerHandlerDevice struct {
 	SerialNumber             string        `json:"serial_number"`
 	MAC                      string        `json:"mac"`
 	Status                   string        `json:"status"`
+	ProbeReadiness           string        `json:"probe_readiness"`
+	ProbeLiveness            string        `json:"probe_liveness"`
 	MetricsDescriptionsCount uint64        `json:"metrics_descriptions_count"`
 	MetricsCollectCount      uint64        `json:"metrics_collect_count"`
 	MetricsEmptyCount        uint64        `json:"metrics_empty_count"`
@@ -25,8 +27,6 @@ type managerHandlerDevice struct {
 	LogsCount                int           `json:"logs_count"`
 	HasMetrics               bool          `json:"has_metrics"`
 	HasWidget                bool          `json:"has_widget"`
-	HasReadinessProbe        bool          `json:"has_readiness_probe"`
-	HasLivenessProbe         bool          `json:"has_liveness_probe"`
 	LogsMaxLevel             zapcore.Level `json:"logs_max_level"`
 }
 
@@ -72,8 +72,8 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 			}
 
 			if bindSupport, ok := di.ProbesContainerBind(bindItem.Bind()); ok {
-				item.HasReadinessProbe = bindSupport.ReadinessTaskID() != ""
-				item.HasLivenessProbe = bindSupport.LivenessTaskID() != ""
+				item.ProbeReadiness = bindSupport.ReadinessTaskID()
+				item.ProbeLiveness = bindSupport.LivenessTaskID()
 			}
 
 			if bindSupport, ok := di.MetaContainerBind(bindItem.Bind()); ok {

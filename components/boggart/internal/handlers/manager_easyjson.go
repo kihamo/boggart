@@ -116,6 +116,10 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.MAC = string(in.String())
 		case "status":
 			out.Status = string(in.String())
+		case "probe_readiness":
+			out.ProbeReadiness = string(in.String())
+		case "probe_liveness":
+			out.ProbeLiveness = string(in.String())
 		case "metrics_descriptions_count":
 			out.MetricsDescriptionsCount = uint64(in.Uint64())
 		case "metrics_collect_count":
@@ -132,10 +136,6 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.HasMetrics = bool(in.Bool())
 		case "has_widget":
 			out.HasWidget = bool(in.Bool())
-		case "has_readiness_probe":
-			out.HasReadinessProbe = bool(in.Bool())
-		case "has_liveness_probe":
-			out.HasLivenessProbe = bool(in.Bool())
 		case "logs_max_level":
 			if data := in.UnsafeBytes(); in.Ok() {
 				in.AddError((out.LogsMaxLevel).UnmarshalText(data))
@@ -228,6 +228,16 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 		out.String(string(in.Status))
 	}
 	{
+		const prefix string = ",\"probe_readiness\":"
+		out.RawString(prefix)
+		out.String(string(in.ProbeReadiness))
+	}
+	{
+		const prefix string = ",\"probe_liveness\":"
+		out.RawString(prefix)
+		out.String(string(in.ProbeLiveness))
+	}
+	{
 		const prefix string = ",\"metrics_descriptions_count\":"
 		out.RawString(prefix)
 		out.Uint64(uint64(in.MetricsDescriptionsCount))
@@ -266,16 +276,6 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 		const prefix string = ",\"has_widget\":"
 		out.RawString(prefix)
 		out.Bool(bool(in.HasWidget))
-	}
-	{
-		const prefix string = ",\"has_readiness_probe\":"
-		out.RawString(prefix)
-		out.Bool(bool(in.HasReadinessProbe))
-	}
-	{
-		const prefix string = ",\"has_liveness_probe\":"
-		out.RawString(prefix)
-		out.Bool(bool(in.HasLivenessProbe))
 	}
 	{
 		const prefix string = ",\"logs_max_level\":"

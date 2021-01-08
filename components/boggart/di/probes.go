@@ -90,8 +90,8 @@ func NewProbesContainer(bind boggart.BindItem, statusManager func(boggart.BindSt
 }
 
 func (c *ProbesContainer) HookRegister() (err error) {
-	taskReadiness := c.ReadinessTask()
-	taskLiveness := c.LivenessTask()
+	taskReadiness := c.taskReadiness()
+	taskLiveness := c.taskLiveness()
 
 	if taskReadiness == nil && taskLiveness == nil {
 		return nil
@@ -106,6 +106,7 @@ func (c *ProbesContainer) HookRegister() (err error) {
 		if ok {
 			id, err = bindWorkersSupport.RegisterTask(taskReadiness)
 		} else {
+			taskReadiness.WithName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-" + taskReadiness.Name())
 			id, err = c.tasksManager.Register(taskReadiness)
 		}
 
@@ -124,6 +125,7 @@ func (c *ProbesContainer) HookRegister() (err error) {
 		if ok {
 			id, err = bindWorkersSupport.RegisterTask(taskLiveness)
 		} else {
+			taskLiveness.WithName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-" + taskLiveness.Name())
 			id, err = c.tasksManager.Register(taskLiveness)
 		}
 
@@ -163,7 +165,7 @@ func (c *ProbesContainer) HookUnregister() {
 	}
 }
 
-func (c *ProbesContainer) ReadinessTask() tasks.Task {
+func (c *ProbesContainer) taskReadiness() *tasks.TaskBase {
 	has, ok := c.bind.Bind().(BindHasReadinessProbe)
 	if !ok {
 		return nil
@@ -249,14 +251,6 @@ func (c *ProbesContainer) ReadinessTask() tasks.Task {
 		WithHandler(tasks.HandlerWithTimeout(tasks.HandlerFuncFromShortToLong(handler), probeTimeout))
 }
 
-func (c *ProbesContainer) ReadinessCheck(ctx context.Context) (err error) {
-	if id := c.ReadinessTaskID(); id != "" {
-		return c.tasksManager.Handle(ctx, id)
-	}
-
-	return nil
-}
-
 func (c *ProbesContainer) ReadinessTaskID() string {
 	c.probeIDMutex.RLock()
 	defer c.probeIDMutex.RUnlock()
@@ -264,7 +258,7 @@ func (c *ProbesContainer) ReadinessTaskID() string {
 	return c.probeReadinessID
 }
 
-func (c *ProbesContainer) LivenessTask() tasks.Task {
+func (c *ProbesContainer) taskLiveness() *tasks.TaskBase {
 	has, ok := c.bind.Bind().(BindHasLivenessProbe)
 	if !ok {
 		return nil
@@ -362,14 +356,6 @@ func (c *ProbesContainer) LivenessTask() tasks.Task {
 		WithName("liveness-probe").
 		WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), probePeriod)).
 		WithHandler(tasks.HandlerWithTimeout(tasks.HandlerFuncFromShortToLong(handler), probeTimeout))
-}
-
-func (c *ProbesContainer) LivenessCheck(ctx context.Context) (err error) {
-	if id := c.LivenessTaskID(); id != "" {
-		return c.tasksManager.Handle(ctx, id)
-	}
-
-	return nil
 }
 
 func (c *ProbesContainer) LivenessTaskID() string {

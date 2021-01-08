@@ -96,5 +96,5 @@ func (b *Bind) taskUpdater(ctx context.Context) error {
 		}
 	}
 
-	return nil
+	return err
 }
