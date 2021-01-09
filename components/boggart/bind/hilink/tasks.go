@@ -25,7 +25,7 @@ func (b *Bind) Tasks() []tasks.Task {
 			WithName("serial-number").
 			WithHandler(
 				b.Workers().WrapTaskIsOnline(
-					tasks.HandlerFuncFromShortToLong(b.taskSerialNumber),
+					tasks.HandlerFuncFromShortToLong(b.taskSerialNumberHandler),
 				),
 			).
 			WithSchedule(
@@ -37,7 +37,7 @@ func (b *Bind) Tasks() []tasks.Task {
 	}
 }
 
-func (b *Bind) taskSerialNumber(ctx context.Context) error {
+func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 	deviceInfo, err := b.client.Device.GetDeviceInformation(device.NewGetDeviceInformationParamsWithContext(ctx))
 	if err != nil {
 		return err
@@ -78,7 +78,7 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 			WithHandler(
 				b.Workers().WrapTaskIsOnline(
 					tasks.HandlerWithTimeout(
-						tasks.HandlerFuncFromShortToLong(b.taskBalanceUpdater),
+						tasks.HandlerFuncFromShortToLong(b.taskBalanceUpdaterHandler),
 						b.config.BalanceUpdaterTimeout,
 					),
 				),
@@ -91,7 +91,7 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 			WithHandler(
 				b.Workers().WrapTaskIsOnline(
 					tasks.HandlerWithTimeout(
-						tasks.HandlerFuncFromShortToLong(b.taskLimitTrafficUpdater),
+						tasks.HandlerFuncFromShortToLong(b.taskLimitTrafficUpdaterHandler),
 						b.config.LimitTrafficUpdaterTimeout,
 					),
 				),
@@ -106,7 +106,7 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 			WithHandler(
 				b.Workers().WrapTaskIsOnline(
 					tasks.HandlerWithTimeout(
-						tasks.HandlerFuncFromShortToLong(b.taskSMSChecker),
+						tasks.HandlerFuncFromShortToLong(b.taskSMSCheckerHandler),
 						b.config.SMSCheckerTimeout,
 					),
 				),
@@ -118,7 +118,7 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 			WithName("cleaner").
 			WithHandler(
 				b.Workers().WrapTaskIsOnline(
-					tasks.HandlerFuncFromShortToLong(b.taskCleaner),
+					tasks.HandlerFuncFromShortToLong(b.taskCleanerHandler),
 				),
 			).
 			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.CleanerInterval)),
@@ -130,7 +130,7 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 		WithHandler(
 			b.Workers().WrapTaskIsOnline(
 				tasks.HandlerWithTimeout(
-					tasks.HandlerFuncFromShortToLong(b.taskSystemUpdater),
+					tasks.HandlerFuncFromShortToLong(b.taskSystemUpdaterHandler),
 					b.config.SystemUpdaterTimeout,
 				),
 			),
@@ -141,7 +141,7 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 	return nil
 }
 
-func (b *Bind) taskBalanceUpdater(ctx context.Context) error {
+func (b *Bind) taskBalanceUpdaterHandler(ctx context.Context) error {
 	if b.simStatus.Load() != 1 {
 		return nil
 	}
@@ -161,7 +161,7 @@ func (b *Bind) taskBalanceUpdater(ctx context.Context) error {
 	return err
 }
 
-func (b *Bind) taskLimitTrafficUpdater(ctx context.Context) error {
+func (b *Bind) taskLimitTrafficUpdaterHandler(ctx context.Context) error {
 	if b.simStatus.Load() != 1 || b.operator.IsEmpty() {
 		return nil
 	}
@@ -180,7 +180,7 @@ func (b *Bind) taskLimitTrafficUpdater(ctx context.Context) error {
 	return err
 }
 
-func (b *Bind) taskSMSChecker(ctx context.Context) error {
+func (b *Bind) taskSMSCheckerHandler(ctx context.Context) error {
 	if b.simStatus.Load() != 1 {
 		return nil
 	}
@@ -259,7 +259,7 @@ func (b *Bind) taskSMSChecker(ctx context.Context) error {
 	return err
 }
 
-func (b *Bind) taskSystemUpdater(ctx context.Context) (err error) {
+func (b *Bind) taskSystemUpdaterHandler(ctx context.Context) (err error) {
 	sn := b.Meta().SerialNumber()
 
 	// status
@@ -375,7 +375,7 @@ func (b *Bind) taskSystemUpdater(ctx context.Context) (err error) {
 	return err
 }
 
-func (b *Bind) taskCleaner(ctx context.Context) (err error) {
+func (b *Bind) taskCleanerHandler(ctx context.Context) error {
 	if b.simStatus.Load() != 1 {
 		return nil
 	}

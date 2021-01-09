@@ -17,7 +17,7 @@ func (b *Bind) Tasks() []tasks.Task {
 			WithName("waypoints").
 			WithHandler(
 				b.Workers().WrapTaskIsOnline(
-					tasks.HandlerFuncFromShortToLong(b.taskWayPoints),
+					tasks.HandlerFuncFromShortToLong(b.taskWayPointsHandler),
 				),
 			).
 			WithSchedule(
@@ -29,6 +29,6 @@ func (b *Bind) Tasks() []tasks.Task {
 	}
 }
 
-func (b *Bind) taskWayPoints(context.Context) error {
+func (b *Bind) taskWayPointsHandler(context.Context) error {
 	return b.CommandWayPoints()
 }

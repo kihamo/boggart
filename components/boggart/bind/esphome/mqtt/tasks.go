@@ -21,14 +21,14 @@ func (b *Bind) Tasks() []tasks.Task {
 			WithName("import-metrics").
 			WithHandler(
 				b.Workers().WrapTaskIsOnline(
-					tasks.HandlerFuncFromShortToLong(b.taskImportMetrics),
+					tasks.HandlerFuncFromShortToLong(b.taskImportMetricsHandler),
 				),
 			).
 			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.ImportMetricsInterval)),
 	}
 }
 
-func (b *Bind) taskImportMetrics(ctx context.Context) error {
+func (b *Bind) taskImportMetricsHandler(ctx context.Context) error {
 	mac := b.Meta().MACAsString()
 	if mac == "" {
 		return nil

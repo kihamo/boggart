@@ -18,14 +18,14 @@ func (b *Bind) Tasks() []tasks.Task {
 			WithName("updater").
 			WithHandler(
 				b.Workers().WrapTaskIsOnline(
-					tasks.HandlerFuncFromShortToLong(b.taskUpdater),
+					tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
 				),
 			).
 			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
 	}
 }
 
-func (b *Bind) taskUpdater(ctx context.Context) error {
+func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	accounts, err := b.client.Accounts(ctx)
 	if err != nil {
 		return err

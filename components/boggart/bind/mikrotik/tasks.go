@@ -17,7 +17,7 @@ func (b *Bind) Tasks() []tasks.Task {
 			WithHandler(
 				b.Workers().WrapTaskIsOnline(
 					tasks.HandlerWithTimeout(
-						tasks.HandlerFuncFromShortToLong(b.taskClientsSync),
+						tasks.HandlerFuncFromShortToLong(b.taskClientsSyncHandler),
 						b.config.ReadinessTimeout,
 					),
 				),
@@ -27,14 +27,14 @@ func (b *Bind) Tasks() []tasks.Task {
 			WithName("updater").
 			WithHandler(
 				b.Workers().WrapTaskIsOnline(
-					tasks.HandlerFuncFromShortToLong(b.taskUpdater),
+					tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
 				),
 			).
 			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
 	}
 }
 
-func (b *Bind) taskClientsSync(ctx context.Context) error {
+func (b *Bind) taskClientsSyncHandler(ctx context.Context) error {
 	b.updateWiFiClient(ctx)
 	b.clientWiFi.Ready()
 
@@ -44,7 +44,7 @@ func (b *Bind) taskClientsSync(ctx context.Context) error {
 	return nil
 }
 
-func (b *Bind) taskUpdater(ctx context.Context) (err error) {
+func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 	sn := b.Meta().SerialNumber()
 
 	// Ports on mikrotik

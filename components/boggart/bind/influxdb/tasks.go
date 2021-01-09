@@ -14,7 +14,7 @@ func (b *Bind) Tasks() []tasks.Task {
 			WithHandler(
 				b.Workers().WrapTaskIsOnline(
 					tasks.HandlerWithTimeout(
-						tasks.HandlerFuncFromShortToLong(b.taskExecute),
+						tasks.HandlerFuncFromShortToLong(b.taskExecuteHandler),
 						b.config.ExecuteTimeout,
 					),
 				),
@@ -23,7 +23,7 @@ func (b *Bind) Tasks() []tasks.Task {
 	}
 }
 
-func (b *Bind) taskExecute(ctx context.Context) (err error) {
+func (b *Bind) taskExecuteHandler(ctx context.Context) error {
 	api := b.client.QueryAPI(b.config.Organization)
 
 	result, err := api.Query(ctx, b.config.Query)

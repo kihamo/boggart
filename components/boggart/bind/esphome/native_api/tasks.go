@@ -12,14 +12,14 @@ func (b *Bind) Tasks() []tasks.Task {
 			WithName("sync-state").
 			WithHandler(
 				b.Workers().WrapTaskIsOnline(
-					tasks.HandlerFuncFromShortToLong(b.taskSyncState),
+					tasks.HandlerFuncFromShortToLong(b.taskSyncStateHandler),
 				),
 			).
 			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.SyncStateInterval)),
 	}
 }
 
-func (b *Bind) taskSyncState(ctx context.Context) error {
+func (b *Bind) taskSyncStateHandler(ctx context.Context) error {
 	if b.Meta().MAC() == nil {
 		info, err := b.provider.DeviceInfo(ctx)
 		if err != nil {

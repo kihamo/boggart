@@ -14,7 +14,7 @@ func (b *Bind) Tasks() []tasks.Task {
 			WithName("serial-number").
 			WithHandler(
 				b.Workers().WrapTaskIsOnline(
-					tasks.HandlerFuncFromShortToLong(b.taskSerialNumber),
+					tasks.HandlerFuncFromShortToLong(b.taskSerialNumberHandler),
 				),
 			).
 			WithSchedule(
@@ -26,7 +26,7 @@ func (b *Bind) Tasks() []tasks.Task {
 	}
 }
 
-func (b *Bind) taskSerialNumber(ctx context.Context) error {
+func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 	client := b.Client()
 	if client == nil {
 		return errors.New("client isn't init")

@@ -18,7 +18,7 @@ func (b *Bind) Tasks() []tasks.Task {
 			WithHandler(
 				b.Workers().WrapTaskIsOnline(
 					tasks.HandlerWithTimeout(
-						tasks.HandlerFuncFromShortToLong(b.taskUpdater), b.config.UpdaterTimeout,
+						tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler), b.config.UpdaterTimeout,
 					),
 				),
 			).
@@ -32,7 +32,7 @@ func (b *Bind) Tasks() []tasks.Task {
 				WithHandler(
 					b.Workers().WrapTaskIsOnline(
 						tasks.HandlerWithTimeout(
-							tasks.HandlerFunc(b.taskPTZ), b.config.PTZTimeout,
+							tasks.HandlerFunc(b.taskPTZHandler), b.config.PTZTimeout,
 						),
 					),
 				).
@@ -47,7 +47,7 @@ func (b *Bind) Tasks() []tasks.Task {
 	return list
 }
 
-func (b *Bind) taskPTZ(ctx context.Context, _ tasks.Meta, task tasks.Task) error {
+func (b *Bind) taskPTZHandler(ctx context.Context, _ tasks.Meta, task tasks.Task) error {
 	b.mutex.RLock()
 	channels := b.ptzChannels
 	b.mutex.RUnlock()
@@ -87,7 +87,7 @@ func (b *Bind) taskPTZ(ctx context.Context, _ tasks.Meta, task tasks.Task) error
 	return nil
 }
 
-func (b *Bind) taskUpdater(ctx context.Context) (err error) {
+func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 	sn := b.Meta().SerialNumber()
 
 	// first initialization

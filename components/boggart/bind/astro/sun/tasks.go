@@ -12,11 +12,11 @@ func (b *Bind) Tasks() []tasks.Task {
 		tasks.NewTask().
 			WithName("updater").
 			WithSchedule(tasks.ScheduleWithDailyTime(tasks.ScheduleNow(), 0, 0, 0, nil)).
-			WithHandlerFunc(b.taskUpdater),
+			WithHandlerFunc(b.taskUpdaterHandler),
 	}
 }
 
-func (b *Bind) taskUpdater(ctx context.Context) (err error) {
+func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 	times := b.Times()
 
 	if e := b.MQTT().PublishAsync(ctx, b.config.TopicNadir, times.Nadir); e != nil {

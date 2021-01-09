@@ -17,7 +17,7 @@ func (b *Bind) Tasks() []tasks.Task {
 			WithHandler(
 				b.Workers().WrapTaskIsOnline(
 					tasks.HandlerWithTimeout(
-						tasks.HandlerFuncFromShortToLong(b.taskUpdater),
+						tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
 						b.config.UpdaterTimeout,
 					),
 				),
@@ -26,7 +26,7 @@ func (b *Bind) Tasks() []tasks.Task {
 	}
 }
 
-func (b *Bind) taskUpdater(ctx context.Context) error {
+func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	response, err := b.provider.Om.GetDatabase(om.NewGetDatabaseParamsWithContext(ctx))
 	if err != nil {
 		return err

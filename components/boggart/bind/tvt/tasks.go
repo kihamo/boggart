@@ -18,7 +18,7 @@ func (b *Bind) Tasks() []tasks.Task {
 			WithHandler(
 				b.Workers().WrapTaskIsOnline(
 					tasks.HandlerWithTimeout(
-						tasks.HandlerFuncFromShortToLong(b.taskUpdater),
+						tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
 						b.config.UpdaterTimeout,
 					),
 				),
@@ -27,7 +27,7 @@ func (b *Bind) Tasks() []tasks.Task {
 	}
 }
 
-func (b *Bind) taskUpdater(ctx context.Context) (err error) {
+func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 	sn := b.Meta().SerialNumber()
 	if sn == "" {
 		baseCfg, e := b.client.Information.GetBasicConfig(information.NewGetBasicConfigParamsWithContext(ctx), nil)

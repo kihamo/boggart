@@ -19,7 +19,7 @@ func (b *Bind) Tasks() []tasks.Task {
 			WithHandler(
 				b.Workers().WrapTaskIsOnline(
 					tasks.HandlerWithTimeout(
-						tasks.HandlerFuncFromShortToLong(b.taskUpdater),
+						tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
 						b.config.UpdaterTimeout,
 					),
 				),
@@ -28,7 +28,7 @@ func (b *Bind) Tasks() []tasks.Task {
 	}
 }
 
-func (b *Bind) taskUpdater(ctx context.Context) error {
+func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	stateParams := printer.NewGetPrinterStateParamsWithContext(ctx).
 		WithHistory(&[]bool{false}[0]).
 		WithExclude([]string{"sd"})

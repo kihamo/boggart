@@ -17,7 +17,7 @@ func (b *Bind) Tasks() []tasks.Task {
 			WithName("serial-number").
 			WithHandler(
 				b.Workers().WrapTaskIsOnline(
-					tasks.HandlerFuncFromShortToLong(b.taskSerialNumber),
+					tasks.HandlerFuncFromShortToLong(b.taskSerialNumberHandler),
 				),
 			).
 			WithSchedule(
@@ -29,7 +29,7 @@ func (b *Bind) Tasks() []tasks.Task {
 	}
 }
 
-func (b *Bind) taskSerialNumber(ctx context.Context) error {
+func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 	client, err := b.client(ctx)
 	if err != nil {
 		return err
@@ -53,7 +53,7 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 			WithHandler(
 				b.Workers().WrapTaskIsOnline(
 					tasks.HandlerWithTimeout(
-						tasks.HandlerFuncFromShortToLong(b.taskUpdater),
+						tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
 						b.config.UpdaterTimeout,
 					),
 				),
@@ -108,7 +108,7 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 	return err
 }
 
-func (b *Bind) taskUpdater(ctx context.Context) (err error) {
+func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	client, err := b.client(ctx)
 	if err != nil {
 		return err
