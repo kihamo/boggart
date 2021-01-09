@@ -35,9 +35,16 @@ type Bind struct {
 
 func (b *Bind) Run() error {
 	if b.config.Address != "" {
-		if address, err := hex.DecodeString(b.config.Address); err == nil {
-			return b.createProvider(address)
+		address, err := hex.DecodeString(b.config.Address)
+		if err != nil {
+			return err
 		}
+
+		if err = b.createProvider(address); err != nil {
+			return err
+		}
+
+		b.Meta().SetSerialNumber(b.config.Address)
 	}
 
 	b.connectionOnce.Reset()

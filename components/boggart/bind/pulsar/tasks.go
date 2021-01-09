@@ -28,16 +28,17 @@ func (b *Bind) Tasks() []tasks.Task {
 					),
 				),
 		)
+	} else {
+		list = append(list, tasks.NewTask().
+			WithName("updater").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerFuncFromShortToLong(b.taskUpdater),
+				),
+			).
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
+		)
 	}
-
-	list = append(list, tasks.NewTask().
-		WithName("updater").
-		WithHandler(
-			b.Workers().WrapTaskIsOnline(
-				tasks.HandlerFuncFromShortToLong(b.taskUpdater),
-			),
-		).
-		WithSchedule(tasks.ScheduleWithDuration(nil, b.config.UpdaterInterval)))
 
 	return list
 }
@@ -53,7 +54,21 @@ func (b *Bind) taskSerialNumber(ctx context.Context) error {
 		return err
 	}
 
-	return b.createProvider(address)
+	if err = b.createProvider(address); err != nil {
+		return err
+	}
+
+	_, err = b.Workers().RegisterTask(tasks.NewTask().
+		WithName("updater").
+		WithHandler(
+			b.Workers().WrapTaskIsOnline(
+				tasks.HandlerFuncFromShortToLong(b.taskUpdater),
+			),
+		).
+		WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
+	)
+
+	return err
 }
 
 func (b *Bind) taskUpdater(ctx context.Context) error {

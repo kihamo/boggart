@@ -86,22 +86,22 @@ func (t *Time) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	(*t).Time = time.Unix(v/1000, v%1000)
+	t.Time = time.Unix(v/1000, v%1000)
 	return nil
 }
 
 type NetworkMap struct {
 	Links []struct {
+		Routes               []interface{} `json:"routes"`
+		Source               Address       `json:"source"`
+		Target               Address       `json:"target"`
+		SourceIEEEAddress    string        `json:"sourceIeeeAddr"`
+		TargetIEEEAddress    string        `json:"targetIeeeAddr"`
+		SourceNetworkAddress uint16        `json:"sourceNwkAddr"`
 		Depth                uint8         `json:"depth"`
 		LinkQuality          uint8         `json:"linkquality"`
 		LQI                  uint8         `json:"lqi"`
 		Relationship         uint8         `json:"relationship"`
-		Routes               []interface{} `json:"routes"`
-		Source               Address       `json:"source"`
-		SourceIEEEAddress    string        `json:"sourceIeeeAddr"`
-		SourceNetworkAddress uint16        `json:"sourceNwkAddr"`
-		Target               Address       `json:"target"`
-		TargetIEEEAddress    string        `json:"targetIeeeAddr"`
 	} `json:"links"`
 	Nodes []struct {
 		Address

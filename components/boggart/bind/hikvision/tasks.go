@@ -22,7 +22,7 @@ func (b *Bind) Tasks() []tasks.Task {
 					),
 				),
 			).
-			WithSchedule(tasks.ScheduleWithDuration(nil, b.config.UpdaterInterval)),
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
 	}
 
 	if b.config.PTZEnabled {
@@ -30,13 +30,15 @@ func (b *Bind) Tasks() []tasks.Task {
 			tasks.NewTask().
 				WithName("ptz").
 				WithHandler(
-					tasks.HandlerWithTimeout(
-						tasks.HandlerFunc(b.taskPTZ), b.config.PTZTimeout,
+					b.Workers().WrapTaskIsOnline(
+						tasks.HandlerWithTimeout(
+							tasks.HandlerFunc(b.taskPTZ), b.config.PTZTimeout,
+						),
 					),
 				).
 				WithSchedule(
 					tasks.ScheduleWithControl(
-						tasks.ScheduleWithDuration(nil, b.config.PTZInterval),
+						tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.PTZInterval),
 					),
 				),
 		)
@@ -46,10 +48,6 @@ func (b *Bind) Tasks() []tasks.Task {
 }
 
 func (b *Bind) taskPTZ(ctx context.Context, _ tasks.Meta, task tasks.Task) error {
-	if !b.Meta().Status().IsStatusOnline() {
-		return nil
-	}
-
 	b.mutex.RLock()
 	channels := b.ptzChannels
 	b.mutex.RUnlock()

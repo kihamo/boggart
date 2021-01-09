@@ -18,7 +18,7 @@ func (b *Bind) ReadinessProbe(ctx context.Context) (err error) {
 			deadline = time.Now().Add(time.Second * 5)
 		}
 
-		time.Sleep(deadline.Sub(time.Now()) - time.Millisecond*500)
+		time.Sleep(time.Until(deadline) - time.Millisecond*500)
 	}
 
 	if b.status.IsTrue() {

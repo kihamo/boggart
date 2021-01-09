@@ -14,9 +14,7 @@ import (
 	_ "github.com/kihamo/shadow/components/logging/instance"
 	_ "github.com/kihamo/shadow/components/messengers/instance"
 	_ "github.com/kihamo/shadow/components/metrics/instance"
-	_ "github.com/kihamo/shadow/components/ota/instance"
 	_ "github.com/kihamo/shadow/components/profiling/instance"
-	_ "github.com/kihamo/shadow/components/tracing/instance"
 )
 
 var (

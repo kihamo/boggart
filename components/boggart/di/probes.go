@@ -106,7 +106,7 @@ func (c *ProbesContainer) HookRegister() (err error) {
 		if ok {
 			id, err = bindWorkersSupport.RegisterTask(taskReadiness)
 		} else {
-			taskReadiness.WithName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-" + taskReadiness.Name())
+			taskReadiness.WithName("bind/" + c.bind.Type() + "/" + c.bind.ID() + "/" + taskReadiness.Name())
 			id, err = c.tasksManager.Register(taskReadiness)
 		}
 
@@ -125,7 +125,7 @@ func (c *ProbesContainer) HookRegister() (err error) {
 		if ok {
 			id, err = bindWorkersSupport.RegisterTask(taskLiveness)
 		} else {
-			taskLiveness.WithName("bind-" + c.bind.ID() + "-" + c.bind.Type() + "-" + taskLiveness.Name())
+			taskLiveness.WithName("bind/" + c.bind.Type() + "/" + c.bind.ID() + "/" + taskLiveness.Name())
 			id, err = c.tasksManager.Register(taskLiveness)
 		}
 

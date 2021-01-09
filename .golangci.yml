@@ -22,11 +22,12 @@ linters:
     - scopelint
     - gocritic
     - whitespace
-    - wsl
+    # - wsl
     - goprintffuncname
   disable:
     - errcheck
     - gochecknoglobals
+    - wsl
 
 linters-settings:
   maligned:

@@ -111,7 +111,7 @@ func (c *WorkersContainer) TaskRegisteredInQueue(id string) bool {
 }
 
 func (c *WorkersContainer) prefixTaskName() string {
-	return "bind-" + c.bind.ID() + "-" + c.bind.Type() + "-"
+	return "bind/" + c.bind.Type() + "/" + c.bind.ID() + "/"
 }
 
 func (c *WorkersContainer) RegisterTask(tsk tasks.Task) (id string, err error) {
