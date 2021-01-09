@@ -15,6 +15,7 @@ type workersHandlerItem struct {
 	ID              string     `json:"id"`
 	Name            string     `json:"name,omitempty"`
 	Status          string     `json:"status"`
+	LastDuration    string     `json:"last_run_duration,omitempty"`
 	AttemptsSuccess uint64     `json:"attempts_success"`
 	AttemptsFails   uint64     `json:"attempts_fails"`
 	FirstRunAt      *time.Time `json:"first_run_at,omitempty"`
@@ -137,6 +138,10 @@ func (h *WorkersHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				data[i].FirstRunAt = item.Meta.FirstRunAt()
 				data[i].LastRunAt = item.Meta.LastRunAt()
 				data[i].NextRunAt = item.Meta.NextRunAt()
+
+				if v := item.Meta.LastRunDuration(); v != nil {
+					data[i].LastDuration = item.Meta.LastRunDuration().String()
+				}
 			}
 
 			reply := boggart.NewResponseDataTable()

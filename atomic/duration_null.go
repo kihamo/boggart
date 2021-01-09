@@ -24,17 +24,23 @@ func (v *DurationNull) Set(value time.Duration) bool {
 	return v.Int64Null.Set(int64(value))
 }
 
-func (v *DurationNull) Load() time.Duration {
-	return time.Duration(v.Int64Null.Load())
-}
-
-func (v *DurationNull) String() string {
+func (v *DurationNull) Load() *time.Duration {
 	v.m.RLock()
 	defer v.m.RUnlock()
 
 	if v.n {
+		return nil
+	}
+
+	value := time.Duration(v.v)
+	return &value
+}
+
+func (v *DurationNull) String() string {
+	value := v.Load()
+	if value == nil {
 		return nilString
 	}
 
-	return time.Duration(v.v).String()
+	return value.String()
 }

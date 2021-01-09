@@ -129,7 +129,9 @@ func (w *worker) Handle(ctx context.Context) error {
 
 	metricHandleStatus.With("status", "started").Inc()
 
+	startAt := time.Now()
 	err := w.task.Handler().Handle(ctx, *w.meta, w.task)
+	w.meta.lastRunDuration.Set(time.Since(startAt))
 
 	metricHandleStatus.With("status", "finished").Inc()
 	if err == nil {

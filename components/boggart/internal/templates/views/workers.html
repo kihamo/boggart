@@ -22,8 +22,9 @@
                             <th>{{ i18n "Status" . }}</th>
                             <th>{{ i18n "Actions" . }}</th>
                             <th>{{ i18n "Attempts" . }}</th>
-                            <th>{{ i18n "First run" . }}</th>
+                            <th>{{ i18n "Last run duration" . }}</th>
                             <th>{{ i18n "Last run" . }}</th>
+                            <th>{{ i18n "First run" . }}</th>
                             <th>{{ i18n "Next run" . }}</th>
                             <th>{{ i18n "ID" . }}</th>
                         </tr>
@@ -93,12 +94,17 @@
                     },{
                         data: null,
                         render: function (data, type, row) {
-                            return typeof row.first_run_at !== 'undefined' && row.first_run_at.length > 0 ? dateToString(row.first_run_at) : '{{ i18n "None" . }}';
+                            return typeof row.last_run_duration !== 'undefined' && row.last_run_duration.length > 0 ? row.last_run_duration : '{{ i18n "None" . }}';
                         }
                     },{
                         data: null,
                         render: function (data, type, row) {
                             return typeof row.last_run_at !== 'undefined' && row.last_run_at.length > 0 ? dateToString(row.last_run_at) : '{{ i18n "None" . }}';
+                        }
+                    },{
+                        data: null,
+                        render: function (data, type, row) {
+                            return typeof row.first_run_at !== 'undefined' && row.first_run_at.length > 0 ? dateToString(row.first_run_at) : '{{ i18n "None" . }}';
                         }
                     },{
                         data: null,

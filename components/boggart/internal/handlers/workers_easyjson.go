@@ -44,6 +44,8 @@ func easyjsonE6f1d0abDecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.Name = string(in.String())
 		case "status":
 			out.Status = string(in.String())
+		case "last_run_duration":
+			out.LastDuration = string(in.String())
 		case "attempts_success":
 			out.AttemptsSuccess = uint64(in.Uint64())
 		case "attempts_fails":
@@ -112,6 +114,11 @@ func easyjsonE6f1d0abEncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 		const prefix string = ",\"status\":"
 		out.RawString(prefix)
 		out.String(string(in.Status))
+	}
+	if in.LastDuration != "" {
+		const prefix string = ",\"last_run_duration\":"
+		out.RawString(prefix)
+		out.String(string(in.LastDuration))
 	}
 	{
 		const prefix string = ",\"attempts_success\":"

@@ -8,29 +8,35 @@ import (
 )
 
 type Meta struct {
-	id         string
-	firstRunAt *atomic.TimeNull
-	lastRunAt  *atomic.TimeNull
-	nextRunAt  *atomic.TimeNull
-	attempts   *atomic.Uint64
-	fails      *atomic.Uint64
-	status     *atomic.Uint32
+	id              string
+	lastRunDuration *atomic.DurationNull
+	firstRunAt      *atomic.TimeNull
+	lastRunAt       *atomic.TimeNull
+	nextRunAt       *atomic.TimeNull
+	attempts        *atomic.Uint64
+	fails           *atomic.Uint64
+	status          *atomic.Uint32
 }
 
 func newMeta() *Meta {
 	return &Meta{
-		id:         uuid.New(),
-		firstRunAt: atomic.NewTimeNull(),
-		lastRunAt:  atomic.NewTimeNull(),
-		nextRunAt:  atomic.NewTimeNull(),
-		attempts:   atomic.NewUint64(),
-		fails:      atomic.NewUint64(),
-		status:     atomic.NewUint32(),
+		id:              uuid.New(),
+		lastRunDuration: atomic.NewDurationNull(),
+		firstRunAt:      atomic.NewTimeNull(),
+		lastRunAt:       atomic.NewTimeNull(),
+		nextRunAt:       atomic.NewTimeNull(),
+		attempts:        atomic.NewUint64(),
+		fails:           atomic.NewUint64(),
+		status:          atomic.NewUint32(),
 	}
 }
 
 func (m Meta) ID() string {
 	return m.id
+}
+
+func (m Meta) LastRunDuration() *time.Duration {
+	return m.lastRunDuration.Load()
 }
 
 func (m Meta) FirstRunAt() *time.Time {
