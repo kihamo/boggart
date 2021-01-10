@@ -2,8 +2,10 @@ package mikrotik
 
 import (
 	"context"
+	"errors"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/providers/mikrotik"
@@ -12,6 +14,49 @@ import (
 
 func (b *Bind) Tasks() []tasks.Task {
 	return []tasks.Task{
+		tasks.NewTask().
+			WithName("serial-number").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerFuncFromShortToLong(b.taskSerialNumberHandler),
+				),
+			).
+			WithSchedule(
+				tasks.ScheduleWithSuccessLimit(
+					tasks.ScheduleWithDuration(tasks.ScheduleNow(), time.Second*30),
+					1,
+				),
+			),
+	}
+}
+
+func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
+	system, err := b.provider.SystemRouterBoard(ctx)
+	if err != nil {
+		return err
+	}
+
+	if system.SerialNumber == "" {
+		return errors.New("serial number is empty")
+	}
+
+	b.SetSerialNumber(system.SerialNumber)
+
+	_, err = b.Workers().RegisterTask(
+		tasks.NewTask().
+			WithName("updater").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
+				),
+			).
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
+	)
+	if err != nil {
+		return err
+	}
+
+	_, err = b.Workers().RegisterTask(
 		tasks.NewTask().
 			WithName("clients-sync").
 			WithHandler(
@@ -23,15 +68,9 @@ func (b *Bind) Tasks() []tasks.Task {
 				),
 			).
 			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.ClientsSyncInterval)),
-		tasks.NewTask().
-			WithName("updater").
-			WithHandler(
-				b.Workers().WrapTaskIsOnline(
-					tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
-				),
-			).
-			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
-	}
+	)
+
+	return err
 }
 
 func (b *Bind) taskClientsSyncHandler(ctx context.Context) error {

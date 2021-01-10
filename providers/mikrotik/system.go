@@ -57,6 +57,15 @@ type SystemDisk struct {
 	Size  uint64 `mapstructure:"size"`
 }
 
+type SystemClock struct {
+	Date               string `mapstructure:"date"`
+	Time               string `mapstructure:"time"`
+	TimeZoneName       string `mapstructure:"time-zone-name"`
+	GMTOffset          string `mapstructure:"gmt-offset"`
+	TimeZoneAutodetect bool   `mapstructure:"time-zone-autodetect"`
+	DstActive          bool   `mapstructure:"dst-active"`
+}
+
 func (c *Client) SystemHealth(ctx context.Context) (result SystemHealth, err error) {
 	var list []SystemHealth
 
@@ -121,4 +130,19 @@ func (c *Client) SystemPackageUpdateCheck(ctx context.Context) (result SystemPac
 func (c *Client) SystemDisk(ctx context.Context) (result []SystemDisk, err error) {
 	err = c.doConvert(ctx, []string{"/disk/print"}, &result)
 	return result, err
+}
+
+func (c *Client) SystemClock(ctx context.Context) (result SystemClock, err error) {
+	var list []SystemClock
+
+	err = c.doConvert(ctx, []string{"/system/clock/print"}, &list)
+	if err != nil {
+		return result, err
+	}
+
+	if len(list) == 0 {
+		return result, ErrEmptyResponse
+	}
+
+	return list[len(list)-1], nil
 }
