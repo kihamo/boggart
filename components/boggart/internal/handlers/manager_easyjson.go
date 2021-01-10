@@ -18,7 +18,87 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(in *jlexer.Lexer, out *managerHandlerDevice) {
+func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(in *jlexer.Lexer, out *managerHandlerDeviceTask) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "id":
+			out.ID = string(in.String())
+		case "name":
+			out.Name = string(in.String())
+		case "registered":
+			out.Registered = bool(in.Bool())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(out *jwriter.Writer, in managerHandlerDeviceTask) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"id\":"
+		out.RawString(prefix[1:])
+		out.String(string(in.ID))
+	}
+	{
+		const prefix string = ",\"name\":"
+		out.RawString(prefix)
+		out.String(string(in.Name))
+	}
+	{
+		const prefix string = ",\"registered\":"
+		out.RawString(prefix)
+		out.Bool(bool(in.Registered))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v managerHandlerDeviceTask) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v managerHandlerDeviceTask) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *managerHandlerDeviceTask) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *managerHandlerDeviceTask) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(l, v)
+}
+func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandlers1(in *jlexer.Lexer, out *managerHandlerDevice) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -45,37 +125,16 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 				in.Delim('[')
 				if out.Tasks == nil {
 					if !in.IsDelim(']') {
-						out.Tasks = make([][]string, 0, 2)
+						out.Tasks = make([]managerHandlerDeviceTask, 0, 1)
 					} else {
-						out.Tasks = [][]string{}
+						out.Tasks = []managerHandlerDeviceTask{}
 					}
 				} else {
 					out.Tasks = (out.Tasks)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v1 []string
-					if in.IsNull() {
-						in.Skip()
-						v1 = nil
-					} else {
-						in.Delim('[')
-						if v1 == nil {
-							if !in.IsDelim(']') {
-								v1 = make([]string, 0, 4)
-							} else {
-								v1 = []string{}
-							}
-						} else {
-							v1 = (v1)[:0]
-						}
-						for !in.IsDelim(']') {
-							var v2 string
-							v2 = string(in.String())
-							v1 = append(v1, v2)
-							in.WantComma()
-						}
-						in.Delim(']')
-					}
+					var v1 managerHandlerDeviceTask
+					(v1).UnmarshalEasyJSON(in)
 					out.Tasks = append(out.Tasks, v1)
 					in.WantComma()
 				}
@@ -97,9 +156,9 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 					out.Tags = (out.Tags)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v3 string
-					v3 = string(in.String())
-					out.Tags = append(out.Tags, v3)
+					var v2 string
+					v2 = string(in.String())
+					out.Tags = append(out.Tags, v2)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -150,7 +209,7 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 		in.Consumed()
 	}
 }
-func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(out *jwriter.Writer, in managerHandlerDevice) {
+func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandlers1(out *jwriter.Writer, in managerHandlerDevice) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -161,22 +220,11 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v4, v5 := range in.Tasks {
-				if v4 > 0 {
+			for v3, v4 := range in.Tasks {
+				if v3 > 0 {
 					out.RawByte(',')
 				}
-				if v5 == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-					out.RawString("null")
-				} else {
-					out.RawByte('[')
-					for v6, v7 := range v5 {
-						if v6 > 0 {
-							out.RawByte(',')
-						}
-						out.String(string(v7))
-					}
-					out.RawByte(']')
-				}
+				(v4).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -188,11 +236,11 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v8, v9 := range in.Tags {
-				if v8 > 0 {
+			for v5, v6 := range in.Tags {
+				if v5 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v9))
+				out.String(string(v6))
 			}
 			out.RawByte(']')
 		}
@@ -288,23 +336,23 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 // MarshalJSON supports json.Marshaler interface
 func (v managerHandlerDevice) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(&w, v)
+	easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandlers1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v managerHandlerDevice) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(w, v)
+	easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandlers1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *managerHandlerDevice) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(&r, v)
+	easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandlers1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *managerHandlerDevice) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandlers(l, v)
+	easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandlers1(l, v)
 }

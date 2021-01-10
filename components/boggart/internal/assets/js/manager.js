@@ -63,19 +63,27 @@ $(document).ready(function () {
                         }
 
                         if (row.tasks && row.tasks.length > 0) {
+                            var
+                                unregistered = 0,
+                                listContent = '';
+
+                            for (var i in row.tasks) {
+                                if (row.tasks[i].registered) {
+                                    listContent += '<li><a href="/boggart/workers/?id=' + row.tasks[i].id + '&action=run" target="_blank">' + row.tasks[i].name + '</a></li>';
+                                } else {
+                                    listContent += '<li><a href="javascript:void(0)"><del>' + row.tasks[i].name + '</del></a></li>';
+                                    unregistered++;
+                                }
+                            }
+
                             content += '<div class="btn-group">' +
                                 '<button type="button" class="btn btn-primary btn-icon btn-xs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
-                                '<i class="fas fa-running" title="Tasks"></i> <span class="badge">' + row.tasks.length + '</span> <span class="caret"></span>' +
+                                '<i class="fas fa-running" title="Tasks"></i> <span class="badge">' + row.tasks.length + ' | ' + unregistered + '</span> <span class="caret"></span>' +
                                 '</button>' +
                                 '<ul class="dropdown-menu">' +
                                 '<li><a href="/boggart/workers/?search=bind/' + row.type + '/' + row.id + '/" target="_blank">Show all</a></li>' +
-                                '<li role="separator" class="divider"></li>';
-
-                            for (var i in row.tasks) {
-                                content +=  '<li><a href="/boggart/workers/?id=' + row.tasks[i][0] + '&action=run" target="_blank">Run ' + row.tasks[i][1] + '</a></li>';
-                            }
-
-                            content += '</ul></div>';
+                                '<li role="separator" class="divider"></li>' + listContent + '</ul>' +
+                                '</div>';
                         } else if (row.probe_liveness.length > 0 || row.probe_readiness.length > 0) {
                             var l = 0;
                             var menu = '';

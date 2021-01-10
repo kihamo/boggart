@@ -8,26 +8,33 @@ import (
 )
 
 // easyjson:json
+type managerHandlerDeviceTask struct {
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Registered bool   `json:"registered"`
+}
+
+// easyjson:json
 type managerHandlerDevice struct {
-	Tasks                    [][]string    `json:"tasks"`
-	Tags                     []string      `json:"tags"`
-	ID                       string        `json:"id"`
-	Type                     string        `json:"type"`
-	Description              string        `json:"description"`
-	SerialNumber             string        `json:"serial_number"`
-	MAC                      string        `json:"mac"`
-	Status                   string        `json:"status"`
-	ProbeReadiness           string        `json:"probe_readiness"`
-	ProbeLiveness            string        `json:"probe_liveness"`
-	MetricsDescriptionsCount uint64        `json:"metrics_descriptions_count"`
-	MetricsCollectCount      uint64        `json:"metrics_collect_count"`
-	MetricsEmptyCount        uint64        `json:"metrics_empty_count"`
-	MQTTPublishes            int           `json:"mqtt_publishes"`
-	MQTTSubscribers          int           `json:"mqtt_subscribers"`
-	LogsCount                int           `json:"logs_count"`
-	HasMetrics               bool          `json:"has_metrics"`
-	HasWidget                bool          `json:"has_widget"`
-	LogsMaxLevel             zapcore.Level `json:"logs_max_level"`
+	Tasks                    []managerHandlerDeviceTask `json:"tasks"`
+	Tags                     []string                   `json:"tags"`
+	ID                       string                     `json:"id"`
+	Type                     string                     `json:"type"`
+	Description              string                     `json:"description"`
+	SerialNumber             string                     `json:"serial_number"`
+	MAC                      string                     `json:"mac"`
+	Status                   string                     `json:"status"`
+	ProbeReadiness           string                     `json:"probe_readiness"`
+	ProbeLiveness            string                     `json:"probe_liveness"`
+	MetricsDescriptionsCount uint64                     `json:"metrics_descriptions_count"`
+	MetricsCollectCount      uint64                     `json:"metrics_collect_count"`
+	MetricsEmptyCount        uint64                     `json:"metrics_empty_count"`
+	MQTTPublishes            int                        `json:"mqtt_publishes"`
+	MQTTSubscribers          int                        `json:"mqtt_subscribers"`
+	LogsCount                int                        `json:"logs_count"`
+	HasMetrics               bool                       `json:"has_metrics"`
+	HasWidget                bool                       `json:"has_widget"`
+	LogsMaxLevel             zapcore.Level              `json:"logs_max_level"`
 }
 
 type ManagerHandler struct {
@@ -86,16 +93,11 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 
 			if bindSupport, ok := di.WorkersContainerBind(bindItem.Bind()); ok {
 				ids := bindSupport.TasksID()
-				item.Tasks = make([][]string, 0, len(ids))
-				for _, id := range ids {
-					name := bindSupport.TaskShortName(id[1])
-					if !bindSupport.TaskRegisteredInQueue(id[0]) {
-						name += " (!)"
-					}
-
-					item.Tasks = append(item.Tasks, []string{
-						id[0], name,
-					})
+				item.Tasks = make([]managerHandlerDeviceTask, len(ids))
+				for i, id := range ids {
+					item.Tasks[i].ID = id[0]
+					item.Tasks[i].Name = bindSupport.TaskShortName(id[1])
+					item.Tasks[i].Registered = bindSupport.TaskRegisteredInQueue(id[0])
 				}
 			}
 

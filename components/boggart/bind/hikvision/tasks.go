@@ -3,6 +3,7 @@ package hikvision
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/providers/hikvision/client/content_manager"
@@ -12,7 +13,57 @@ import (
 )
 
 func (b *Bind) Tasks() []tasks.Task {
-	list := []tasks.Task{
+	return []tasks.Task{
+		tasks.NewTask().
+			WithName("serial-number").
+			WithHandler(
+				b.Workers().WrapTaskIsOnline(
+					tasks.HandlerFuncFromShortToLong(b.taskSerialNumberHandler),
+				),
+			).
+			WithSchedule(
+				tasks.ScheduleWithSuccessLimit(
+					tasks.ScheduleWithDuration(tasks.ScheduleNow(), time.Second*30),
+					1,
+				),
+			),
+	}
+}
+
+func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
+	deviceInfo, err := b.client.System.GetSystemDeviceInfo(system.NewGetSystemDeviceInfoParamsWithContext(ctx), nil)
+	if err != nil {
+		return err
+	}
+
+	if deviceInfo.Payload.SerialNumber == "" {
+		return errors.New("device returns empty serial number")
+	}
+
+	if deviceInfo.Payload.MacAddress == "" {
+		return errors.New("device returns empty MAC address")
+	}
+
+	b.Meta().SetSerialNumber(deviceInfo.Payload.SerialNumber)
+
+	err = b.Meta().SetMACAsString(deviceInfo.Payload.MacAddress)
+	if err != nil {
+		return err
+	}
+
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateModel.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.Model); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateFirmwareVersion.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.FirmwareVersion); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateFirmwareReleasedDate.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.FirmwareReleasedDate); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	_, e := b.Workers().RegisterTask(
 		tasks.NewTask().
 			WithName("updater").
 			WithHandler(
@@ -23,10 +74,34 @@ func (b *Bind) Tasks() []tasks.Task {
 				),
 			).
 			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
+	)
+
+	if e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	if b.config.EventsEnabled && b.config.EventsStreamingEnabled {
+		b.startAlertStreaming()
 	}
 
 	if b.config.PTZEnabled {
-		list = append(list,
+		ptzChannels := make(map[uint64]PTZChannel)
+
+		if list, e := b.client.Ptz.GetPtzChannels(ptz.NewGetPtzChannelsParamsWithContext(ctx), nil); e == nil {
+			for _, channel := range list.Payload {
+				ptzChannels[channel.ID] = PTZChannel{
+					Channel: channel,
+				}
+			}
+		} else {
+			err = multierr.Append(err, e)
+		}
+
+		b.mutex.Lock()
+		b.ptzChannels = ptzChannels
+		b.mutex.Unlock()
+
+		_, e = b.Workers().RegisterTask(
 			tasks.NewTask().
 				WithName("ptz").
 				WithHandler(
@@ -42,9 +117,13 @@ func (b *Bind) Tasks() []tasks.Task {
 					),
 				),
 		)
+
+		if e != nil {
+			err = multierr.Append(err, e)
+		}
 	}
 
-	return list
+	return err
 }
 
 func (b *Bind) taskPTZHandler(ctx context.Context, _ tasks.Meta, task tasks.Task) error {
@@ -89,67 +168,6 @@ func (b *Bind) taskPTZHandler(ctx context.Context, _ tasks.Meta, task tasks.Task
 
 func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 	sn := b.Meta().SerialNumber()
-
-	// first initialization
-	if sn == "" {
-		deviceInfo, e := b.client.System.GetSystemDeviceInfo(system.NewGetSystemDeviceInfoParamsWithContext(ctx), nil)
-		if e != nil {
-			return e
-		}
-
-		if deviceInfo.Payload.SerialNumber == "" {
-			return errors.New("device returns empty serial number")
-		}
-
-		if deviceInfo.Payload.MacAddress == "" {
-			return errors.New("device returns empty MAC address")
-		}
-
-		b.Meta().SetSerialNumber(deviceInfo.Payload.SerialNumber)
-		sn = deviceInfo.Payload.SerialNumber
-
-		err = b.Meta().SetMACAsString(deviceInfo.Payload.MacAddress)
-		if err != nil {
-			return err
-		}
-
-		if b.config.EventsEnabled && b.config.EventsStreamingEnabled {
-			b.startAlertStreaming()
-		}
-
-		if b.config.PTZEnabled {
-			ptzChannels := make(map[uint64]PTZChannel)
-
-			if list, e := b.client.Ptz.GetPtzChannels(ptz.NewGetPtzChannelsParamsWithContext(ctx), nil); e == nil {
-				for _, channel := range list.Payload {
-					ptzChannels[channel.ID] = PTZChannel{
-						Channel: channel,
-					}
-				}
-			} else {
-				err = multierr.Append(err, e)
-			}
-
-			b.mutex.Lock()
-			b.ptzChannels = ptzChannels
-			b.mutex.Unlock()
-		}
-
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateModel.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.Model); e != nil {
-			err = multierr.Append(err, e)
-		}
-
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateFirmwareVersion.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.FirmwareVersion); e != nil {
-			err = multierr.Append(err, e)
-		}
-
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateFirmwareReleasedDate.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.FirmwareReleasedDate); e != nil {
-			err = multierr.Append(err, e)
-		}
-	}
-
-	b.mutex.RLock()
-	defer b.mutex.RUnlock()
 
 	if status, e := b.client.System.GetStatus(system.NewGetStatusParamsWithContext(ctx), nil); e == nil {
 		memoryUsage := int64(status.Payload.MemoryList[0].MemoryUsage) * MB
