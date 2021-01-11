@@ -18,24 +18,6 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 		mqtt.NewSubscriber(b.config.TopicState, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			return b.setState(ctx, bytes.Equal(message.Payload(), PayloadOnline))
 		}),
-		mqtt.NewSubscriber(b.config.TopicDevices, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			var devices []*Device
-
-			if err := message.JSONUnmarshal(&devices); err != nil {
-				return err
-			}
-
-			b.devicesLock.Lock()
-			b.devices = make(map[string]*Device, len(devices))
-
-			for _, d := range devices {
-				b.devices[d.IEEEAddress] = d
-			}
-
-			b.devicesLock.Unlock()
-
-			return nil
-		}),
 		mqtt.NewSubscriber(b.config.TopicConfig, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			return b.setSettingsFromMessage(message)
 		}),
@@ -43,6 +25,29 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 	if b.config.NewAPI {
 		subscribers = append(subscribers,
+			mqtt.NewSubscriber(b.config.TopicDevices, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+				var devices []*DeviceNewAPI
+
+				if err := message.JSONUnmarshal(&devices); err != nil {
+					return err
+				}
+
+				b.devicesLock.Lock()
+				b.devices = make(map[string]*Device, len(devices))
+
+				for _, d := range devices {
+					b.devices[d.IEEEAddress] = &Device{
+						FriendlyName:   d.FriendlyName,
+						IEEEAddress:    d.IEEEAddress,
+						NetworkAddress: d.NetworkAddress,
+						Type:           d.Type,
+					}
+				}
+
+				b.devicesLock.Unlock()
+
+				return nil
+			}),
 			mqtt.NewSubscriber(b.config.TopicHealthCheckResponse, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 				var hc HealthCheck
 
@@ -51,7 +56,8 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				}
 
 				return b.setState(ctx, hc.Status == "ok" && hc.Data.Healthy)
-			}), mqtt.NewSubscriber(b.config.TopicLogging, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+			}),
+			mqtt.NewSubscriber(b.config.TopicLogging, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 				var log LogNewAPI
 
 				if err := message.JSONUnmarshal(&log); err != nil {
@@ -84,6 +90,24 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 		)
 	} else {
 		subscribers = append(subscribers,
+			mqtt.NewSubscriber(b.config.TopicDevicesResponse, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+				var devices []*Device
+
+				if err := message.JSONUnmarshal(&devices); err != nil {
+					return err
+				}
+
+				b.devicesLock.Lock()
+				b.devices = make(map[string]*Device, len(devices))
+
+				for _, d := range devices {
+					b.devices[d.IEEEAddress] = d
+				}
+
+				b.devicesLock.Unlock()
+
+				return nil
+			}),
 			mqtt.NewSubscriber(b.config.TopicLog, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 				var log Log
 

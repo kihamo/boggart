@@ -16,8 +16,8 @@ type Config struct {
 	TopicState              mqtt.Topic `mapstructure:"topic_state" yaml:"topic_state"`
 	TopicConfig             mqtt.Topic `mapstructure:"topic_config" yaml:"topic_config"`
 	TopicLog                mqtt.Topic `mapstructure:"topic_log" yaml:"topic_log"`
-	TopicDeviceGet          mqtt.Topic `mapstructure:"topic_device_get" yaml:"topic_device_get"`
-	TopicDevices            mqtt.Topic `mapstructure:"topic_devices" yaml:"topic_devices"`
+	TopicDevicesRequest     mqtt.Topic `mapstructure:"topic_devices_request" yaml:"topic_devices_request"`
+	TopicDevicesResponse    mqtt.Topic `mapstructure:"topic_devices_response" yaml:"topic_devices_response"`
 	TopicPermitJoin         mqtt.Topic `mapstructure:"topic_permit_join" yaml:"topic_permit_join"`
 	TopicLastSeen           mqtt.Topic `mapstructure:"topic_last_seen" yaml:"topic_last_seen"`
 	TopicElapsed            mqtt.Topic `mapstructure:"topic_elapsed" yaml:"topic_elapsed"`
@@ -32,6 +32,7 @@ type Config struct {
 	TopicHealthCheckResponse mqtt.Topic `mapstructure:"topic_health_check_response" yaml:"topic_health_check_response"`
 	TopicLogging             mqtt.Topic `mapstructure:"topic_logging" yaml:"topic_logging"`
 	TopicInfo                mqtt.Topic `mapstructure:"topic_info" yaml:"topic_info"`
+	TopicDevices             mqtt.Topic `mapstructure:"topic_devices" yaml:"topic_devices"`
 }
 
 func (Type) Config() interface{} {
@@ -49,8 +50,8 @@ func (Type) Config() interface{} {
 		TopicState:              prefix + "/bridge/state",
 		TopicConfig:             prefix + "/bridge/config",
 		TopicLog:                prefix + "/bridge/log",
-		TopicDeviceGet:          prefix + "/bridge/config/devices/get",
-		TopicDevices:            prefix + "/bridge/config/devices",
+		TopicDevicesRequest:     prefix + "/bridge/config/devices/get",
+		TopicDevicesResponse:    prefix + "/bridge/config/devices",
 		TopicPermitJoin:         prefix + "/bridge/config/permit_join",
 		TopicLastSeen:           prefix + "/bridge/config/last_seen",
 		TopicElapsed:            prefix + "/bridge/config/elapsed",
@@ -64,5 +65,6 @@ func (Type) Config() interface{} {
 		TopicHealthCheckResponse: prefix + "/bridge/response/health_check",
 		TopicLogging:             prefix + "/bridge/logging",
 		TopicInfo:                prefix + "/bridge/info",
+		TopicDevices:             prefix + "/bridge/devices",
 	}
 }

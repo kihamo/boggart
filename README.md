@@ -289,6 +289,9 @@ Mapping
 - 7 Reset 24 / 13
 
 0. Download firmware
+
+!!! source_routing - max 5 devices !!!
+
 ```
 cd flash_cc2531
 wget https://github.com/Koenkk/Z-Stack-firmware/raw/master/coordinator/Z-Stack_Home_1.2/bin/source_routing/CC2531_SOURCE_ROUTING_20190619.zip

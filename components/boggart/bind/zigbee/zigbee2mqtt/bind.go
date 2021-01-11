@@ -63,7 +63,7 @@ func (b *Bind) setSettingsFromMessage(message mqtt.Message) error {
 func (b *Bind) setState(ctx context.Context, flag bool) error {
 	if flag {
 		if b.status.True() {
-			return b.MQTT().PublishAsyncRawWithoutCache(ctx, b.config.TopicDeviceGet, 1, false, true)
+			return b.MQTT().PublishAsyncRawWithoutCache(ctx, b.config.TopicDevicesRequest, 1, false, true)
 		}
 
 		return nil

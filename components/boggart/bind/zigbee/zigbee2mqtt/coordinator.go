@@ -64,7 +64,14 @@ type Device struct {
 	FriendlyName   string `json:"friendly_name"`
 	IEEEAddress    string `json:"ieeeAddr"`
 	NetworkAddress uint16 `json:"networkAddress"`
-	LastSeen       Time   `json:"lastSeen"`
+	LastSeen       *Time  `json:"lastSeen,omitempty"`
+	Type           string `json:"type"`
+}
+
+type DeviceNewAPI struct {
+	FriendlyName   string `json:"friendly_name"`
+	IEEEAddress    string `json:"ieee_address"`
+	NetworkAddress uint16 `json:"network_address"`
 	Type           string `json:"type"`
 }
 
