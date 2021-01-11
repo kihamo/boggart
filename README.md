@@ -229,6 +229,94 @@ npm ci
 DEBUG="zigbee-herdsman*" npm start
 ```
 
+#### CC2531 firmware with Rpi
+
+
+##### Pins on stick CC2531
+```
+      /\/\/\ Antenna /\/\/\
+        GND [1] | [2] V++
+            ---------
+Debug Clock [3] | [4] Debug Data
+            ---------
+  SPI Select 5  |  6  SPI Clock
+            ---------
+      Reset [7] |  8  SPI Data out
+            ---------
+   3.3V out  9  | 10  SPI Data in
+            ---------
+           |   USB   |
+            ---------
+```
+
+##### Pins on stick RPi B
+```
+      ---------
+          |
+      ---------
+          |
+      ---------
+          |
+      ---------
+          |
+      ---------
+          |
+      ---------
+          |
+      ---------
+          |
+      ---------
+          |
+      ---------
+ 3.3V [2] |
+      ---------
+ MOSI [4] |
+      ---------
+ MISO [7] |
+      ---------
+          | [3] CE0
+      ---------
+  GND [1] |
+      ---------
+
+      ------------
+      3.5 JACK | O
+      ------------
+```
+Mapping
+- 3 Debug Clock -> 27 / 10
+- 4 Debug Data -> 28 / 12
+- 7 Reset 24 / 13
+
+0. Download firmware
+```
+cd flash_cc2531
+wget https://github.com/Koenkk/Z-Stack-firmware/raw/master/coordinator/Z-Stack_Home_1.2/bin/source_routing/CC2531_SOURCE_ROUTING_20190619.zip
+rm -rf CC2531ZNP*
+unzip CC2531_SOURCE_ROUTING_20190619.zip
+```
+1. Check
+```
+./cc_chipid -c 10 -d 12 -r 13
+  ID = b524.
+```
+2. Erase
+```
+./cc_erase  -c 10 -d 12 -r 13
+  ID = b524.
+  erase result = 00a2.
+```
+3. Flash
+```
+./cc_write -c 10 -d 12 -r 13 CC2531ZNP-Prod.hex
+  ID = b524.
+  reading line 15490.
+  file loaded (15497 lines read).
+writing page 128/128.
+verifying page 128/128.
+ flash OK.
+```
+
 #### Wake on LAN
 ```
 sudo ethtool -s INTERFACE
