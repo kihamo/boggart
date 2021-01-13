@@ -69,11 +69,17 @@ $(document).ready(function () {
 
                             for (var i in row.tasks) {
                                 if (row.tasks[i].registered) {
-                                    listContent += '<li><a href="/boggart/workers/?id=' + row.tasks[i].id + '&action=run" target="_blank">' + row.tasks[i].name + '</a></li>';
+                                    listContent += '<li><a href="/boggart/workers/?id=' + row.tasks[i].id + '&action=run" target="_blank">' + row.tasks[i].name;
                                 } else {
-                                    listContent += '<li><a href="javascript:void(0)"><del>' + row.tasks[i].name + '</del></a></li>';
+                                    listContent += '<li><a href="javascript:void(0)"><del>' + row.tasks[i].name + '</del>';
                                     unregistered++;
                                 }
+
+                                if (row.tasks[i].custom_schedule) {
+                                    listContent += ' <span class="badge">schedule</span>';
+                                }
+
+                                listContent += '</a></li>';
                             }
 
                             content += '<div class="btn-group">' +
@@ -84,25 +90,6 @@ $(document).ready(function () {
                                 '<li><a href="/boggart/workers/?search=bind/' + row.type + '/' + row.id + '/" target="_blank">Show all</a></li>' +
                                 '<li role="separator" class="divider"></li>' + listContent + '</ul>' +
                                 '</div>';
-                        } else if (row.probe_liveness.length > 0 || row.probe_readiness.length > 0) {
-                            var l = 0;
-                            var menu = '';
-
-                            if (row.probe_liveness.length > 0) {
-                                l++;
-                                menu += '<li><a href="/boggart/workers/?id=' + row.probe_liveness + '&action=run" target="_blank">Run liveness probe</a></li>';
-                            }
-
-                            if (row.probe_readiness.length > 0) {
-                                l++;
-                                menu += '<li><a href="/boggart/workers/?id=' + row.probe_readiness + '&action=run" target="_blank">Run readiness probe</a></li>';
-                            }
-
-                            content += '<div class="btn-group">' +
-                                '<button type="button" class="btn btn-primary btn-icon btn-xs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
-                                '<i class="fas fa-running" title="Probes"></i> <span class="badge">' + l + '</span> <span class="caret"></span>' +
-                                '</button>' +
-                                '<ul class="dropdown-menu">' + menu + '</ul></div>';
                         }
 
                         if (row.logs_count > 0) {

@@ -105,11 +105,6 @@ func (c *WorkersContainer) TaskShortName(name string) string {
 	return strings.TrimPrefix(name, c.prefixTaskName())
 }
 
-func (c *WorkersContainer) TaskRegisteredInQueue(id string) bool {
-	_, err := c.manager.Meta(id)
-	return err == nil
-}
-
 func (c *WorkersContainer) prefixTaskName() string {
 	return "bind/" + c.bind.Type() + "/" + c.bind.ID() + "/"
 }
@@ -121,7 +116,7 @@ func (c *WorkersContainer) RegisterTask(tsk tasks.Task) (id string, err error) {
 			if _, ok := ProbesContainerBind(c.bind.Bind()); ok {
 				shortName := c.TaskShortName(t.Name())
 
-				if shortName == "readiness-probe" || shortName == "liveness-probe" {
+				if shortName == ProbesConfigReadinessDefaultName || shortName == ProbesConfigLivenessDefaultName {
 					logger = nil
 				}
 			}

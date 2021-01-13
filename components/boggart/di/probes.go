@@ -17,18 +17,28 @@ const (
 	ProbesConfigReadinessDefaultTimeout                 = time.Second * 30
 	ProbesConfigReadinessDefaultThresholdSuccess uint64 = 1
 	ProbesConfigReadinessDefaultThresholdFailure uint64 = 1
+	ProbesConfigReadinessDefaultName                    = "readiness-probe"
 	ProbesConfigLivenessDefaultPeriod                   = time.Minute
 	ProbesConfigLivenessDefaultTimeout                  = time.Second * 30
 	ProbesConfigLivenessDefaultThresholdSuccess  uint64 = 1
 	ProbesConfigLivenessDefaultThresholdFailure  uint64 = 1
+	ProbesConfigLivenessDefaultName                     = "liveness-probe"
 )
 
-type BindHasReadinessProbe interface {
+type BindHasReadinessProbeHandler interface {
 	ReadinessProbe(context.Context) error
 }
 
-type BindHasLivenessProbe interface {
+type BindHasReadinessProbeSchedule interface {
+	ReadinessProbeSchedule(tasks.Meta) time.Time
+}
+
+type BindHasLivenessProbeHandler interface {
 	LivenessProbe(context.Context) error
+}
+
+type BindHasLivenessProbeSchedule interface {
+	LivenessProbeSchedule(tasks.Meta) time.Time
 }
 
 type ProbesContainerSupport interface {
@@ -166,7 +176,7 @@ func (c *ProbesContainer) HookUnregister() {
 }
 
 func (c *ProbesContainer) taskReadiness() *tasks.TaskBase {
-	has, ok := c.bind.Bind().(BindHasReadinessProbe)
+	hasHandler, ok := c.bind.Bind().(BindHasReadinessProbeHandler)
 	if !ok {
 		return nil
 	}
@@ -189,6 +199,14 @@ func (c *ProbesContainer) taskReadiness() *tasks.TaskBase {
 	}
 
 	// task
+	var schedule tasks.Schedule
+
+	if hasSchedule, ok := c.bind.Bind().(BindHasReadinessProbeSchedule); ok {
+		schedule = tasks.ScheduleFunc(hasSchedule.ReadinessProbeSchedule)
+	} else {
+		schedule = tasks.ScheduleWithDuration(tasks.ScheduleNow(), probePeriod)
+	}
+
 	handler := func(ctx context.Context) (err error) {
 		if s := c.bind.Status(); !s.IsStatusInitializing() && !s.IsStatusOnline() && !s.IsStatusOffline() {
 			return nil
@@ -196,7 +214,7 @@ func (c *ProbesContainer) taskReadiness() *tasks.TaskBase {
 
 		ch := make(chan error, 1)
 		go func() {
-			ch <- has.ReadinessProbe(ctx)
+			ch <- hasHandler.ReadinessProbe(ctx)
 		}()
 
 		select {
@@ -246,8 +264,8 @@ func (c *ProbesContainer) taskReadiness() *tasks.TaskBase {
 	}
 
 	return tasks.NewTask().
-		WithName("readiness-probe").
-		WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), probePeriod)).
+		WithName(ProbesConfigReadinessDefaultName).
+		WithSchedule(schedule).
 		WithHandler(tasks.HandlerWithTimeout(tasks.HandlerFuncFromShortToLong(handler), probeTimeout))
 }
 
@@ -259,7 +277,7 @@ func (c *ProbesContainer) ReadinessTaskID() string {
 }
 
 func (c *ProbesContainer) taskLiveness() *tasks.TaskBase {
-	has, ok := c.bind.Bind().(BindHasLivenessProbe)
+	hasHandler, ok := c.bind.Bind().(BindHasLivenessProbeHandler)
 	if !ok {
 		return nil
 	}
@@ -282,6 +300,14 @@ func (c *ProbesContainer) taskLiveness() *tasks.TaskBase {
 	}
 
 	// task
+	var schedule tasks.Schedule
+
+	if hasSchedule, ok := c.bind.Bind().(BindHasLivenessProbeSchedule); ok {
+		schedule = tasks.ScheduleFunc(hasSchedule.LivenessProbeSchedule)
+	} else {
+		schedule = tasks.ScheduleWithDuration(tasks.ScheduleNow(), probePeriod)
+	}
+
 	handler := func(ctx context.Context) (err error) {
 		if s := c.bind.Status(); !s.IsStatusOnline() && !s.IsStatusOffline() {
 			return nil
@@ -289,7 +315,7 @@ func (c *ProbesContainer) taskLiveness() *tasks.TaskBase {
 
 		ch := make(chan error, 1)
 		go func() {
-			ch <- has.LivenessProbe(ctx)
+			ch <- hasHandler.LivenessProbe(ctx)
 		}()
 
 		select {
@@ -353,8 +379,8 @@ func (c *ProbesContainer) taskLiveness() *tasks.TaskBase {
 	}
 
 	return tasks.NewTask().
-		WithName("liveness-probe").
-		WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), probePeriod)).
+		WithName(ProbesConfigLivenessDefaultName).
+		WithSchedule(schedule).
 		WithHandler(tasks.HandlerWithTimeout(tasks.HandlerFuncFromShortToLong(handler), probeTimeout))
 }
 

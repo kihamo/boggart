@@ -43,6 +43,8 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.Name = string(in.String())
 		case "registered":
 			out.Registered = bool(in.Bool())
+		case "custom_schedule":
+			out.CustomSchedule = bool(in.Bool())
 		default:
 			in.SkipRecursive()
 		}
@@ -71,6 +73,11 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 		const prefix string = ",\"registered\":"
 		out.RawString(prefix)
 		out.Bool(bool(in.Registered))
+	}
+	{
+		const prefix string = ",\"custom_schedule\":"
+		out.RawString(prefix)
+		out.Bool(bool(in.CustomSchedule))
 	}
 	out.RawByte('}')
 }
@@ -175,10 +182,6 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.MAC = string(in.String())
 		case "status":
 			out.Status = string(in.String())
-		case "probe_readiness":
-			out.ProbeReadiness = string(in.String())
-		case "probe_liveness":
-			out.ProbeLiveness = string(in.String())
 		case "metrics_descriptions_count":
 			out.MetricsDescriptionsCount = uint64(in.Uint64())
 		case "metrics_collect_count":
@@ -274,16 +277,6 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 		const prefix string = ",\"status\":"
 		out.RawString(prefix)
 		out.String(string(in.Status))
-	}
-	{
-		const prefix string = ",\"probe_readiness\":"
-		out.RawString(prefix)
-		out.String(string(in.ProbeReadiness))
-	}
-	{
-		const prefix string = ",\"probe_liveness\":"
-		out.RawString(prefix)
-		out.String(string(in.ProbeLiveness))
 	}
 	{
 		const prefix string = ",\"metrics_descriptions_count\":"
