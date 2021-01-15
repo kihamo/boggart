@@ -125,10 +125,6 @@ func (b *Bind) GenerateConfigOpenHab() []generators.Step {
 			FilePath: openhab.DirectoryItems + filePrefix + ".items",
 			Content:  content,
 		})
-		steps = append(steps, generators.Step{
-			FilePath: openhab.DirectoryItems + filePrefix + ".items",
-			Content:  content,
-		})
 	}
 
 	return steps
