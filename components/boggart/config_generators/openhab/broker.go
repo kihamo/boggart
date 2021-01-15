@@ -1,11 +1,5 @@
 package openhab
 
-import (
-	"strconv"
-
-	"github.com/eclipse/paho.mqtt.golang"
-)
-
 const (
 	BrokerTypeID        = "broker"
 	BrokerReconnectTime = 60000
@@ -297,20 +291,4 @@ func (b *Broker) Items() Items {
 
 func (b *Broker) String() string {
 	return "Bridge " + b.thing.String()
-}
-
-func BrokerFromClientOptionsReader(ops *mqtt.ClientOptionsReader) *Broker {
-	server := ops.Servers()[0]
-	port, _ := strconv.Atoi(server.Port())
-	tsl := ops.TLSConfig()
-
-	return NewBroker(ops.ClientID(), server.Hostname()).
-		WithLabel("Auto generate from boggart").
-		// WithClientID("openhab").
-		WithKeepAlive(int(ops.KeepAlive().Seconds())).
-		WithUsername(ops.Username()).
-		WithPassword(ops.Password()).
-		WithTimeoutInMs(ops.WriteTimeout().Milliseconds()).
-		WithPort(port).
-		WithSecure(tsl != nil)
 }

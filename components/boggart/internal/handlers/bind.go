@@ -3,8 +3,11 @@ package handlers
 import (
 	"bytes"
 	"errors"
+	"io"
 	"net/http"
+	"path/filepath"
 	"sort"
+	"strconv"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -400,7 +403,9 @@ func (h *BindHandler) actionConfigGenerator(w http.ResponseWriter, r *dashboard.
 		return
 	}
 
-	vendor := r.URL().Query().Get("vendor")
+	q := r.URL().Query()
+
+	vendor := q.Get("vendor")
 	var steps []generators.Step
 
 	switch vendor {
@@ -418,6 +423,39 @@ func (h *BindHandler) actionConfigGenerator(w http.ResponseWriter, r *dashboard.
 
 	if len(steps) == 0 {
 		h.NotFound(w, r)
+		return
+	}
+
+	if filePath := q.Get("file"); filePath != "" {
+		index := -1
+		if s := q.Get("step"); s != "" {
+			if i, err := strconv.Atoi(s); err == nil {
+				index = i
+			}
+		}
+
+		buf := bytes.NewBuffer(nil)
+
+		for i, step := range steps {
+			if index > -1 && i != index || step.FilePath != filePath {
+				continue
+			}
+
+			if buf.Len() > 0 {
+				buf.WriteString("\n\n")
+			}
+
+			buf.WriteString(step.Content)
+
+			if index > -1 && i == index {
+				break
+			}
+		}
+
+		w.Header().Set("Content-Length", strconv.FormatInt(int64(buf.Len()), 10))
+		w.Header().Set("Content-Disposition", "attachment; filename=\""+filepath.Base(filePath)+"\"")
+
+		_, _ = io.Copy(w, buf)
 		return
 	}
 

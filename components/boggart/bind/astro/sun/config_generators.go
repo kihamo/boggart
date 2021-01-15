@@ -1,8 +1,6 @@
 package sun
 
 import (
-	"strings"
-
 	"github.com/kihamo/boggart/components/boggart/config_generators"
 	"github.com/kihamo/boggart/components/boggart/config_generators/openhab"
 )
@@ -14,15 +12,15 @@ func (b *Bind) GenerateConfigOpenHab() []generators.Step {
 	}
 
 	meta := b.Meta()
-	filePrefix := openhab.IDReplace(strings.ToLower(meta.Type()))
-	itemPrefix := openhab.IDReplace(strings.Title(strings.ToLower(meta.ID()))) + "_"
+	filePrefix := openhab.FilePrefixFromBindMeta(meta)
+	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
 
 	broker := openhab.BrokerFromClientOptionsReader(opts)
 
 	steps := []generators.Step{
 		{
-			Description: "things/broker.things",
-			Content:     broker.String(),
+			FilePath: openhab.DirectoryThings + "broker.things",
+			Content:  broker.String(),
 		},
 	}
 
@@ -117,15 +115,19 @@ func (b *Bind) GenerateConfigOpenHab() []generators.Step {
 
 	if content := thing.String(); content != "" {
 		steps = append(steps, generators.Step{
-			Description: "things/" + filePrefix + ".things",
-			Content:     content,
+			FilePath: openhab.DirectoryThings + filePrefix + ".things",
+			Content:  content,
 		})
 	}
 
 	if content := thing.Items().String(); content != "" {
 		steps = append(steps, generators.Step{
-			Description: "items/" + filePrefix + ".items",
-			Content:     content,
+			FilePath: openhab.DirectoryItems + filePrefix + ".items",
+			Content:  content,
+		})
+		steps = append(steps, generators.Step{
+			FilePath: openhab.DirectoryItems + filePrefix + ".items",
+			Content:  content,
 		})
 	}
 

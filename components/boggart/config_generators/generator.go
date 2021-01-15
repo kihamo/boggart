@@ -2,6 +2,7 @@ package generators
 
 type Step struct {
 	Description string
+	FilePath    string
 	Content     string
 }
 

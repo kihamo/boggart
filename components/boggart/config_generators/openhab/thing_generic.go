@@ -1,9 +1,5 @@
 package openhab
 
-import (
-	"github.com/kihamo/boggart/components/boggart/di"
-)
-
 const (
 	GenericThingTypeID = "topic"
 )
@@ -129,9 +125,4 @@ func (t *GenericThing) String() string {
 	}
 
 	return s
-}
-
-func GenericThingFromBindMeta(meta *di.MetaContainer) *GenericThing {
-	return NewGenericThing(meta.ID()).
-		WithLabel(meta.Description())
 }
