@@ -12,6 +12,7 @@ const (
 )
 
 type Bind struct {
+	di.MetaBind
 	di.MQTTBind
 	di.WidgetBind
 	di.WorkersBind

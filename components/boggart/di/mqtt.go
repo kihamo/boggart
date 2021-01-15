@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"sync"
 
+	m "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
@@ -201,6 +202,7 @@ func (c *MQTTContainer) Request(ctx context.Context, requestTopic, responseTopic
 	single := make(chan struct{})
 
 	subscribe := mqtt.NewSubscriber(responseTopic, 1, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+		// TODO: иногда рутина на этом месте блокируется навечно, возможно из-за того что больше одного сообщения приходит
 		response <- message
 		<-single
 
@@ -368,6 +370,16 @@ func (c *MQTTContainer) Publishes() map[mqtt.Topic]uint64 {
 	}
 
 	return list
+}
+
+func (c *MQTTContainer) ClientOptions() (*m.ClientOptionsReader, error) {
+	client, err := c.getClient()
+	if err != nil {
+		return nil, err
+	}
+
+	opts := client.Client().OptionsReader()
+	return &opts, nil
 }
 
 type mqttWrapSubscriber struct {

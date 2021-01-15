@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/config_generators"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/shadow/components/dashboard"
@@ -70,6 +71,10 @@ func (h *BindHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 	case "mqtt":
 		h.actionMQTT(w, r, bindItem)
+		return
+
+	case "config-generator":
+		h.actionConfigGenerator(w, r, bindItem)
 		return
 
 	case "":
@@ -386,5 +391,38 @@ func (h *BindHandler) actionMQTT(w http.ResponseWriter, r *dashboard.Request, b 
 		"bind":        b,
 		"publishes":   publishesItems,
 		"subscribers": subscribers,
+	})
+}
+
+func (h *BindHandler) actionConfigGenerator(w http.ResponseWriter, r *dashboard.Request, b boggart.BindItem) {
+	if _, ok := di.MQTTContainerBind(b.Bind()); !ok {
+		h.NotFound(w, r)
+		return
+	}
+
+	vendor := r.URL().Query().Get("vendor")
+	var steps []generators.Step
+
+	switch vendor {
+	case "openhab":
+		if generator, ok := b.Bind().(generators.HasGeneratorOpenHab); ok {
+			steps = generator.GenerateConfigOpenHab()
+		} else {
+			h.NotFound(w, r)
+			return
+		}
+	default:
+		h.NotFound(w, r)
+		return
+	}
+
+	if len(steps) == 0 {
+		h.NotFound(w, r)
+		return
+	}
+
+	h.Render(r.Context(), "generator", map[string]interface{}{
+		"vendor": vendor,
+		"steps":  steps,
 	})
 }
