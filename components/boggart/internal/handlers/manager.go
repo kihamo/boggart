@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/config_generators"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/shadow/components/dashboard"
@@ -20,6 +21,7 @@ type managerHandlerDeviceTask struct {
 type managerHandlerDevice struct {
 	Tasks                    []managerHandlerDeviceTask `json:"tasks"`
 	Tags                     []string                   `json:"tags"`
+	ConfigGenerators         []string                   `json:"config_generators"`
 	ID                       string                     `json:"id"`
 	Type                     string                     `json:"type"`
 	Description              string                     `json:"description"`
@@ -69,12 +71,13 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 		for _, bindItem := range h.component.BindItems() {
 			bind := bindItem.Bind()
 			item := managerHandlerDevice{
-				ID:           bindItem.ID(),
-				Type:         bindItem.Type(),
-				Description:  bindItem.Description(),
-				Status:       bindItem.Status().String(),
-				Tags:         bindItem.Tags(),
-				LogsMaxLevel: zapcore.DebugLevel,
+				ID:               bindItem.ID(),
+				Type:             bindItem.Type(),
+				Description:      bindItem.Description(),
+				Status:           bindItem.Status().String(),
+				Tags:             bindItem.Tags(),
+				LogsMaxLevel:     zapcore.DebugLevel,
+				ConfigGenerators: make([]string, 0),
 			}
 
 			if bindSupport, ok := di.WidgetContainerBind(bind); ok {
@@ -154,6 +157,10 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 						item.LogsMaxLevel = r.Level
 					}
 				}
+			}
+
+			if _, ok := bind.(generators.HasGeneratorOpenHab); ok {
+				item.ConfigGenerators = append(item.ConfigGenerators, "openhab")
 			}
 
 			list = append(list, item)

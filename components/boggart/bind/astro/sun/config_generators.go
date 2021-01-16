@@ -27,6 +27,7 @@ func (b *Bind) GenerateConfigOpenHab() []generators.Step {
 	thing := openhab.GenericThingFromBindMeta(meta).
 		WithBroker(broker).
 		AddChannels(
+			openhab.BindStatusChannel(meta),
 			openhab.NewChannel("Nadir", openhab.ChannelTypeDateTime).
 				WithStateTopic(b.config.TopicNadir).
 				AddItems(
@@ -56,11 +57,26 @@ func (b *Bind) GenerateConfigOpenHab() []generators.Step {
 						WithIcon("time"),
 				),
 			openhab.NewChannel("AstronomicalDawnStart", openhab.ChannelTypeDateTime).
-				WithStateTopic(b.config.TopicAstronomicalDawnStart),
+				WithStateTopic(b.config.TopicAstronomicalDawnStart).
+				AddItems(
+					openhab.NewItem(itemPrefix+"AstronomicalDawnStart", openhab.ItemTypeDateTime).
+						WithLabel("Astronomical dawn start [%d s]").
+						WithIcon("time"),
+				),
 			openhab.NewChannel("AstronomicalDawnEnd", openhab.ChannelTypeDateTime).
-				WithStateTopic(b.config.TopicAstronomicalDawnEnd),
+				WithStateTopic(b.config.TopicAstronomicalDawnEnd).
+				AddItems(
+					openhab.NewItem(itemPrefix+"AstronomicalDawnEnd", openhab.ItemTypeDateTime).
+						WithLabel("Astronomical dawn end [%d s]").
+						WithIcon("time"),
+				),
 			openhab.NewChannel("AstronomicalDawnDuration", openhab.ChannelTypeNumber).
-				WithStateTopic(b.config.TopicAstronomicalDawnDuration),
+				WithStateTopic(b.config.TopicAstronomicalDawnDuration).
+				AddItems(
+					openhab.NewItem(itemPrefix+"AstronomicalDawnDuration", openhab.ItemTypeNumber).
+						WithLabel("Astronomical dawn duration [%d s]").
+						WithIcon("time"),
+				),
 			openhab.NewChannel("DawnStart", openhab.ChannelTypeDateTime).
 				WithStateTopic(b.config.TopicNauticalDawnStart),
 			openhab.NewChannel("DawnEnd", openhab.ChannelTypeDateTime).

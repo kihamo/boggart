@@ -47,6 +47,36 @@ func BrokerFromClientOptionsReader(ops *mqtt.ClientOptionsReader) *Broker {
 		WithSecure(tsl != nil)
 }
 
+func BindStatusChannel(meta *di.MetaContainer) *Channel {
+	return NewChannel("BindStatus", ChannelTypeString).
+		WithStateTopic(meta.MQTTTopicStatus()).
+		AddItems(
+			NewItem(ItemPrefixFromBindMeta(meta)+"BindStatus", ItemTypeString).
+				WithLabel("Bind status [%s]").
+				WithIcon("text"),
+		)
+}
+
+func BindSerialNumberChannel(meta *di.MetaContainer) *Channel {
+	return NewChannel("BindSerialNumber", ChannelTypeString).
+		WithStateTopic(meta.MQTTTopicStatus()).
+		AddItems(
+			NewItem(ItemPrefixFromBindMeta(meta)+"BindSerialNumber", ItemTypeString).
+				WithLabel("Bind serial number [%s]").
+				WithIcon("text"),
+		)
+}
+
+func BindMACChannel(meta *di.MetaContainer) *Channel {
+	return NewChannel("BindMAC", ChannelTypeString).
+		WithStateTopic(meta.MQTTTopicStatus()).
+		AddItems(
+			NewItem(ItemPrefixFromBindMeta(meta)+"BindMAC", ItemTypeString).
+				WithLabel("Bind MAC address [%s]").
+				WithIcon("text"),
+		)
+}
+
 func GenericThingFromBindMeta(meta *di.MetaContainer) *GenericThing {
 	return NewGenericThing(meta.ID()).
 		WithLabel(meta.Description())

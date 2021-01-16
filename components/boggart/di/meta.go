@@ -99,8 +99,7 @@ func (b *MetaContainer) SerialNumber() string {
 func (b *MetaContainer) SetSerialNumber(serialNumber string) {
 	b.serialNumber.Store(serialNumber)
 
-	topic := mqtt.Topic(b.config.String(boggart.ConfigMQTTTopicBindSerialNumber)).Format(b.ID())
-	b.mqtt.PublishAsyncWithCache(context.Background(), topic, 1, true, serialNumber)
+	b.mqtt.PublishAsyncWithCache(context.Background(), b.MQTTTopicSerialNumber(), 1, true, serialNumber)
 }
 
 func (b *MetaContainer) MAC() *net.HardwareAddr {
@@ -122,8 +121,7 @@ func (b *MetaContainer) MACAsString() string {
 func (b *MetaContainer) SetMAC(mac net.HardwareAddr) {
 	b.mac.Store(&mac)
 
-	topic := mqtt.Topic(b.config.String(boggart.ConfigMQTTTopicBindMAC)).Format(b.ID())
-	b.mqtt.PublishAsyncWithCache(context.Background(), topic, 1, true, mac)
+	b.mqtt.PublishAsyncWithCache(context.Background(), b.MQTTTopicMAC(), 1, true, mac)
 }
 
 func (b *MetaContainer) SetMACAsString(mac string) error {
@@ -133,4 +131,16 @@ func (b *MetaContainer) SetMACAsString(mac string) error {
 	}
 
 	return err
+}
+
+func (b *MetaContainer) MQTTTopicStatus() mqtt.Topic {
+	return mqtt.Topic(b.config.String(boggart.ConfigMQTTTopicBindStatus)).Format(b.ID())
+}
+
+func (b *MetaContainer) MQTTTopicSerialNumber() mqtt.Topic {
+	return mqtt.Topic(b.config.String(boggart.ConfigMQTTTopicBindSerialNumber)).Format(b.ID())
+}
+
+func (b *MetaContainer) MQTTTopicMAC() mqtt.Topic {
+	return mqtt.Topic(b.config.String(boggart.ConfigMQTTTopicBindMAC)).Format(b.ID())
 }

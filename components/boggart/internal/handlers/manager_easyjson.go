@@ -170,6 +170,29 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 				}
 				in.Delim(']')
 			}
+		case "config_generators":
+			if in.IsNull() {
+				in.Skip()
+				out.ConfigGenerators = nil
+			} else {
+				in.Delim('[')
+				if out.ConfigGenerators == nil {
+					if !in.IsDelim(']') {
+						out.ConfigGenerators = make([]string, 0, 4)
+					} else {
+						out.ConfigGenerators = []string{}
+					}
+				} else {
+					out.ConfigGenerators = (out.ConfigGenerators)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v3 string
+					v3 = string(in.String())
+					out.ConfigGenerators = append(out.ConfigGenerators, v3)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
 		case "id":
 			out.ID = string(in.String())
 		case "type":
@@ -223,11 +246,11 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v3, v4 := range in.Tasks {
-				if v3 > 0 {
+			for v4, v5 := range in.Tasks {
+				if v4 > 0 {
 					out.RawByte(',')
 				}
-				(v4).MarshalEasyJSON(out)
+				(v5).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -239,11 +262,27 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v5, v6 := range in.Tags {
-				if v5 > 0 {
+			for v6, v7 := range in.Tags {
+				if v6 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v6))
+				out.String(string(v7))
+			}
+			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"config_generators\":"
+		out.RawString(prefix)
+		if in.ConfigGenerators == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v8, v9 := range in.ConfigGenerators {
+				if v8 > 0 {
+					out.RawByte(',')
+				}
+				out.String(string(v9))
 			}
 			out.RawByte(']')
 		}
