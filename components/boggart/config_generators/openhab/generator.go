@@ -87,12 +87,12 @@ func BindMACChannel(meta *di.MetaContainer) *Channel {
 }
 
 func GenericThingFromBindMeta(meta *di.MetaContainer) *GenericThing {
-	return NewGenericThing(meta.ID()).
+	return NewGenericThing(strings.ToLower(meta.ID())).
 		WithLabel(meta.Description())
 }
 
 func ItemPrefixFromBindMeta(meta *di.MetaContainer) string {
-	return IDNormalize(strings.Title(strings.ToLower(meta.ID()))) + "_"
+	return IDNormalizeCamelCase(meta.ID()) + "_"
 }
 
 func FilePrefixFromBindMeta(meta *di.MetaContainer) string {
