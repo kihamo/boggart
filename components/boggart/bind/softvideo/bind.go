@@ -10,12 +10,19 @@ import (
 
 type Bind struct {
 	di.LoggerBind
+	di.MetaBind
 	di.MetricsBind
 	di.MQTTBind
 	di.ProbesBind
 
 	config   *Config
 	provider *softvideo.Client
+}
+
+func (b *Bind) Run() error {
+	b.Meta().SetSerialNumber(b.config.Login)
+
+	return nil
 }
 
 func (b *Bind) Balance(ctx context.Context) (balance, promise float64, err error) {
