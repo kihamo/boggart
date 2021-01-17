@@ -30,6 +30,8 @@ type Channel struct {
 }
 
 func NewChannel(id, typ string) *Channel {
+	// TODO: id не может называться State (экспериментально полученное значение)
+
 	return (&Channel{
 		id:         IDNormalize(id),
 		typ:        typ,

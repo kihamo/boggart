@@ -315,6 +315,11 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 			}
 		}()
 
+		// mqtt container
+		if bindSupport, ok := bind.(di.MQTTContainerSupport); ok {
+			bindSupport.SetMQTT(di.NewMQTTContainer(bindItem, c.mqtt))
+		}
+
 		// config container
 		if bindSupport, ok := bind.(di.ConfigContainerSupport); ok {
 			bindSupport.SetConfig(di.NewConfigContainer(bindItem, c.config))
@@ -333,11 +338,6 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 		// metrics container
 		if bindSupport, ok := bind.(di.MetricsContainerSupport); ok {
 			bindSupport.SetMetrics(di.NewMetricsContainer(bindItem))
-		}
-
-		// mqtt container
-		if bindSupport, ok := bind.(di.MQTTContainerSupport); ok {
-			bindSupport.SetMQTT(di.NewMQTTContainer(bindItem, c.mqtt))
 		}
 
 		// widget container

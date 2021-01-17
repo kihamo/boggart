@@ -47,17 +47,24 @@ type MetaContainer struct {
 	bind   boggart.BindItem
 	mqtt   mqtt.Component
 	config config.Component
+	diMQTT *MQTTContainer
 
 	serialNumber atomic.Value
 	mac          atomic.Value
 }
 
 func NewMetaContainer(bind boggart.BindItem, mqtt mqtt.Component, config config.Component) *MetaContainer {
-	return &MetaContainer{
+	ctr := &MetaContainer{
 		bind:   bind,
 		mqtt:   mqtt,
 		config: config,
 	}
+
+	if ctrMQTT, ok := MQTTContainerBind(bind.Bind()); ok {
+		ctr.diMQTT = ctrMQTT
+	}
+
+	return ctr
 }
 
 func (b *MetaContainer) BindType() boggart.BindType {
@@ -99,6 +106,11 @@ func (b *MetaContainer) SerialNumber() string {
 func (b *MetaContainer) SetSerialNumber(serialNumber string) {
 	b.serialNumber.Store(serialNumber)
 
+	if b.diMQTT != nil {
+		b.diMQTT.PublishAsync(context.Background(), b.MQTTTopicSerialNumber(), serialNumber)
+		return
+	}
+
 	b.mqtt.PublishAsyncWithCache(context.Background(), b.MQTTTopicSerialNumber(), 1, true, serialNumber)
 }
 
@@ -120,6 +132,11 @@ func (b *MetaContainer) MACAsString() string {
 
 func (b *MetaContainer) SetMAC(mac net.HardwareAddr) {
 	b.mac.Store(&mac)
+
+	if b.diMQTT != nil {
+		b.diMQTT.PublishAsync(context.Background(), b.MQTTTopicMAC(), mac)
+		return
+	}
 
 	b.mqtt.PublishAsyncWithCache(context.Background(), b.MQTTTopicMAC(), 1, true, mac)
 }
