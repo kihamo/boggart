@@ -483,6 +483,8 @@ github.com/kihamo/shadow v0.0.0-20201030220011-52686be178a0 h1:j27Le7HZPdcPf58CD
 github.com/kihamo/shadow v0.0.0-20201030220011-52686be178a0/go.mod h1:u5iKKpczcO3b0zivw976MePYsQDWwY4FDIFyNqFzEm0=
 github.com/kihamo/shadow v0.0.0-20210104204319-88f4280b2a26 h1:nFa0x1x5MLCMQXFwiCIx5EhyIBiGpDogKxx7IM92mW4=
 github.com/kihamo/shadow v0.0.0-20210104204319-88f4280b2a26/go.mod h1:u5iKKpczcO3b0zivw976MePYsQDWwY4FDIFyNqFzEm0=
+github.com/kihamo/shadow v0.0.0-20210117180201-48c64b9911ae h1:mObKPZWcF2wxEe5s30t3506iz8wZpN55SwhgVLDNE00=
+github.com/kihamo/shadow v0.0.0-20210117180201-48c64b9911ae/go.mod h1:u5iKKpczcO3b0zivw976MePYsQDWwY4FDIFyNqFzEm0=
 github.com/kihamo/snitch v0.0.0-20200412182537-3478a87783e1 h1:9LLnHjW6WOaIC2GG+y/73QCTzhRxu05CNPkXg4Mh2TI=
 github.com/kihamo/snitch v0.0.0-20200412182537-3478a87783e1/go.mod h1:olFj6DX2IOweEqkZQ3c9d4TMLc1FKl5tisLwT7/oh40=
 github.com/kisielk/errcheck v1.1.0/go.mod h1:EZBBE59ingxPouuu3KfxchcWSUPOHkagtvWXihfKN4Q=

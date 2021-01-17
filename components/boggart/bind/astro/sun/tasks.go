@@ -91,7 +91,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicSetEnd, times.Sunset.Start); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicSetEnd, times.Sunset.End); e != nil {
 		err = multierr.Append(err, e)
 	}
 
@@ -103,7 +103,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicCivilDuskEnd, times.CivilDusk.Start); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicCivilDuskEnd, times.CivilDusk.End); e != nil {
 		err = multierr.Append(err, e)
 	}
 
@@ -115,7 +115,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicNauticalDuskEnd, times.NauticalDusk.Start); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicNauticalDuskEnd, times.NauticalDusk.End); e != nil {
 		err = multierr.Append(err, e)
 	}
 
@@ -127,7 +127,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicAstronomicalDuskEnd, times.AstronomicalDusk.Start); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicAstronomicalDuskEnd, times.AstronomicalDusk.End); e != nil {
 		err = multierr.Append(err, e)
 	}
 

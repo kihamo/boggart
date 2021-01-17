@@ -31,7 +31,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/influxdata/influxdb v1.8.0
 	github.com/influxdata/influxdb-client-go v1.4.0
-	github.com/kihamo/shadow v0.0.0-20210104204319-88f4280b2a26
+	github.com/kihamo/shadow v0.0.0-20210117180201-48c64b9911ae
 	github.com/kihamo/snitch v0.0.0-20200412182537-3478a87783e1
 	github.com/llgcode/draw2d v0.0.0-20200930101115-bfaf5d914d1e
 	github.com/mailru/easyjson v0.7.6
