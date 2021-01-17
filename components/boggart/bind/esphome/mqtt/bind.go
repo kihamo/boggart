@@ -1,11 +1,13 @@
 package mqtt
 
 import (
+	"context"
 	"net"
 	"sync"
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/di"
+	"github.com/kihamo/boggart/components/mqtt"
 )
 
 type Bind struct {
@@ -30,20 +32,6 @@ func (b *Bind) Run() error {
 	b.status.Nil()
 	b.ipSubscriber.False()
 	b.connectivitySubscriber.False()
-
-	return nil
-}
-
-func (b *Bind) Close() (err error) {
-	client := b.MQTT()
-
-	for _, component := range b.Components() {
-		for _, subscribe := range component.Subscribers() {
-			if err = client.Unsubscribe(subscribe); err != nil {
-				return err
-			}
-		}
-	}
 
 	return nil
 }
@@ -91,15 +79,10 @@ func (b *Bind) register(component Component) (err error) {
 		b.Meta().SetMAC(mac)
 	}
 
-	subscribers := component.Subscribers()
-	if len(subscribers) > 0 {
-		client := b.MQTT()
-
-		for _, subscribe := range subscribers {
-			if err = client.Subscribe(subscribe); err != nil {
-				return err
-			}
-		}
+	if topic := component.StateTopic(); topic != "" {
+		b.MQTT().Subscribe(mqtt.NewSubscriber(topic, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+			return component.SetState(message)
+		}))
 	}
 
 	return err

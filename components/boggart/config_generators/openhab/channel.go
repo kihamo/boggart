@@ -31,7 +31,7 @@ type Channel struct {
 
 func NewChannel(id, typ string) *Channel {
 	return (&Channel{
-		id:         IDReplace(id),
+		id:         IDNormalize(id),
 		typ:        typ,
 		parameters: newParameters(),
 		items:      make(Items, 0),
@@ -95,7 +95,7 @@ func (c *Channel) WithTransformationPatternOut(transformationPatternOut string) 
 	return c
 }
 
-func (c *Channel) WithCommandTopic(commandTopic string) *Channel {
+func (c *Channel) WithCommandTopic(commandTopic mqtt.Topic) *Channel {
 	const key = "commandTopic"
 
 	if commandTopic == "" {

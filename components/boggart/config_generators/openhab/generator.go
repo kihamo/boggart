@@ -27,8 +27,17 @@ var replacerID = strings.NewReplacer(
 	"-", "_",
 )
 
-func IDReplace(id string) string {
+func IDNormalize(id string) string {
 	return replacerID.Replace(id)
+}
+
+func IDNormalizeCamelCase(id string) string {
+	id = IDNormalize(id)
+	id = strings.ReplaceAll(id, "_", " ")
+	id = strings.Title(id)
+	id = strings.ReplaceAll(id, " ", "")
+
+	return id
 }
 
 func BrokerFromClientOptionsReader(ops *mqtt.ClientOptionsReader) *Broker {
@@ -59,7 +68,7 @@ func BindStatusChannel(meta *di.MetaContainer) *Channel {
 
 func BindSerialNumberChannel(meta *di.MetaContainer) *Channel {
 	return NewChannel("BindSerialNumber", ChannelTypeString).
-		WithStateTopic(meta.MQTTTopicStatus()).
+		WithStateTopic(meta.MQTTTopicSerialNumber()).
 		AddItems(
 			NewItem(ItemPrefixFromBindMeta(meta)+"BindSerialNumber", ItemTypeString).
 				WithLabel("Bind serial number [%s]").
@@ -69,7 +78,7 @@ func BindSerialNumberChannel(meta *di.MetaContainer) *Channel {
 
 func BindMACChannel(meta *di.MetaContainer) *Channel {
 	return NewChannel("BindMAC", ChannelTypeString).
-		WithStateTopic(meta.MQTTTopicStatus()).
+		WithStateTopic(meta.MQTTTopicMAC()).
 		AddItems(
 			NewItem(ItemPrefixFromBindMeta(meta)+"BindMAC", ItemTypeString).
 				WithLabel("Bind MAC address [%s]").
@@ -83,9 +92,9 @@ func GenericThingFromBindMeta(meta *di.MetaContainer) *GenericThing {
 }
 
 func ItemPrefixFromBindMeta(meta *di.MetaContainer) string {
-	return IDReplace(strings.Title(strings.ToLower(meta.ID()))) + "_"
+	return IDNormalize(strings.Title(strings.ToLower(meta.ID()))) + "_"
 }
 
 func FilePrefixFromBindMeta(meta *di.MetaContainer) string {
-	return IDReplace(strings.ToLower(meta.Type()))
+	return IDNormalize(strings.ToLower(meta.Type()))
 }

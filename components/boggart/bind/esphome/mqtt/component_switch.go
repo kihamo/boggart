@@ -3,6 +3,7 @@ package mqtt
 import (
 	"bytes"
 
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
@@ -11,25 +12,50 @@ var (
 )
 
 type ComponentSwitch struct {
-	*ComponentBase
+	*componentBase
+
+	state *atomic.BoolNull
 }
 
 func NewComponentSwitch(id string) *ComponentSwitch {
-	component := &ComponentSwitch{
-		ComponentBase: NewComponentBase(id, ComponentTypeSwitch),
+	return &ComponentSwitch{
+		componentBase: newComponentBase(id, ComponentTypeSwitch),
+		state:         atomic.NewBoolNull(),
 	}
-	component.setState = component.SetState
+}
 
-	return component
+func (c *ComponentSwitch) State() interface{} {
+	if c.state.IsNil() {
+		return nil
+	}
+
+	return c.state.Load()
+}
+
+func (c *ComponentSwitch) StateFormat() string {
+	if c.state.IsNil() {
+		return ""
+	}
+
+	if c.state.IsTrue() {
+		return "ON"
+	}
+
+	return "OFF"
 }
 
 func (c *ComponentSwitch) SetState(message mqtt.Message) error {
-	var val float64
-	if bytes.Equal(message.Payload(), stateON) {
-		val = 1
+	payload := message.Payload()
+
+	if bytes.Equal(payload, stateON) {
+		c.state.True()
+		metricState.With("mac", c.Device().MAC().String()).With("component", c.ID()).Set(1)
+
+		return nil
 	}
 
-	metricState.With("mac", c.Device().MAC().String()).With("component", c.ID()).Set(val)
+	c.state.False()
+	metricState.With("mac", c.Device().MAC().String()).With("component", c.ID()).Set(0)
 
-	return c.ComponentBase.SetState(message)
+	return nil
 }

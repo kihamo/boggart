@@ -3,6 +3,7 @@ package mqtt
 import (
 	"encoding/json"
 	"fmt"
+	"sync/atomic"
 
 	"github.com/kihamo/boggart/components/mqtt"
 )
@@ -35,7 +36,7 @@ func (s *ComponentLightState) SetState(state bool) {
 }
 
 type ComponentLight struct {
-	*ComponentBase
+	*componentBase
 
 	data struct {
 		Schema           string   `json:"schema"`
@@ -46,15 +47,14 @@ type ComponentLight struct {
 		Effect           bool     `json:"effect"`
 		EffectList       []string `json:"effect_list"`
 	}
+
+	state atomic.Value
 }
 
 func NewComponentLight(id string) *ComponentLight {
-	component := &ComponentLight{
-		ComponentBase: NewComponentBase(id, ComponentTypeLight),
+	return &ComponentLight{
+		componentBase: newComponentBase(id, ComponentTypeLight),
 	}
-	component.setState = component.SetState
-
-	return component
 }
 
 func (c *ComponentLight) State() interface{} {
@@ -62,14 +62,21 @@ func (c *ComponentLight) State() interface{} {
 		return s.(*ComponentLightState)
 	}
 
-	return &ComponentLightState{}
+	return nil
+}
+
+func (c *ComponentLight) StateFormat() string {
+	if s := c.state.Load(); s != nil {
+		return s.(*ComponentLightState).String()
+	}
+
+	return ""
 }
 
 func (c *ComponentLight) SetState(message mqtt.Message) error {
 	var state ComponentLightState
 
-	err := message.JSONUnmarshal(&state)
-	if err != nil {
+	if err := message.JSONUnmarshal(&state); err != nil {
 		return err
 	}
 
@@ -101,7 +108,7 @@ func (c *ComponentLight) CommandToPayload(cmd interface{}) interface{} {
 }
 
 func (c *ComponentLight) UnmarshalJSON(b []byte) error {
-	if err := c.ComponentBase.UnmarshalJSON(b); err != nil {
+	if err := c.componentBase.UnmarshalJSON(b); err != nil {
 		return err
 	}
 

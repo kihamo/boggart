@@ -26,7 +26,20 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			case ComponentTypeLight:
 				component = NewComponentLight(id)
 			case ComponentTypeSensor:
-				component = NewComponentSensor(id)
+				// text_sensor прикидывается обычным sensor и их надо распознать (HA просто не поддерживает такой тип)
+				// распознование очень хрупкое и основывается на проверке признаков unit_of_measurement, expire_after и
+				// force_update, которые есть у sensor, но нет у text_sensor
+				var check ComponentSensorData
+				if err := message.JSONUnmarshal(&check); err == nil {
+					if check.UnitOfMeasurement != nil || check.ExpireAfter != nil || check.ForceUpdate != nil {
+						component = NewComponentSensor(id)
+					}
+				}
+
+				if component == nil {
+					component = NewComponentDefault(id, ComponentTypeTextSensor)
+				}
+
 			case ComponentTypeSwitch:
 				component = NewComponentSwitch(id)
 				// case components.ComponentTypeTextSensor.String():
@@ -36,7 +49,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				// case components.ComponentTypeClimate.String():
 				// 	component.Type = components.ComponentTypeClimate
 			default:
-				component = NewComponentBase(id, t)
+				component = NewComponentDefault(id, t)
 			}
 
 			if err := message.JSONUnmarshal(component); err != nil {
@@ -52,15 +65,14 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				b.ipSubscriber.True()
 			}
 
-			if cmp, ok := component.(*ComponentBinarySensor); ok && cmp.DeviceClass() == "connectivity" && cmp.StateTopic() != "" && b.connectivitySubscriber.IsFalse() {
+			if cmp, ok := component.(*ComponentBinarySensor); ok && cmp.DeviceClass() == DeviceClassConnectivity && cmp.StateTopic() != "" && b.connectivitySubscriber.IsFalse() {
 				b.connectivitySubscriber.True()
 				b.MQTT().Subscribe(mqtt.NewSubscriber(component.StateTopic(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-					if cmp.ConvertState(message.String()) {
-						b.status.True()
-					} else {
-						b.status.False()
+					if err := cmp.SetState(message); err != nil {
+						return err
 					}
 
+					b.status.Set(cmp.State().(bool))
 					return nil
 				}))
 			}

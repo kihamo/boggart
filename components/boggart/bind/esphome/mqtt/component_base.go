@@ -1,12 +1,8 @@
 package mqtt
 
 import (
-	"context"
 	"encoding/json"
 	"net"
-	"strconv"
-	"sync"
-	"sync/atomic"
 
 	"github.com/kihamo/boggart/components/mqtt"
 )
@@ -31,7 +27,7 @@ func (d Device) MAC() (mac net.HardwareAddr) {
 	return mac
 }
 
-type ComponentBase struct {
+type componentBase struct {
 	data struct {
 		Icon                string     `json:"icon"`
 		Name                string     `json:"name"`
@@ -46,94 +42,55 @@ type ComponentBase struct {
 
 	id  string
 	typ ComponentType
-
-	subscribersOnce sync.Once
-	subscribers     []mqtt.Subscriber
-	state           atomic.Value
-	setState        func(mqtt.Message) error
 }
 
-func NewComponentBase(id string, t ComponentType) *ComponentBase {
-	component := &ComponentBase{
+func newComponentBase(id string, t ComponentType) *componentBase {
+	return &componentBase{
 		id:  id,
 		typ: t,
 	}
-	component.setState = component.SetState
-
-	return component
 }
 
-func (c *ComponentBase) UnmarshalJSON(b []byte) error {
+func (c *componentBase) UnmarshalJSON(b []byte) error {
 	return json.Unmarshal(b, &c.data)
 }
 
-func (c *ComponentBase) ID() string {
+func (c *componentBase) ID() string {
 	return c.id
 }
 
-func (c *ComponentBase) Type() ComponentType {
+func (c *componentBase) Type() ComponentType {
 	return c.typ
 }
 
-func (c *ComponentBase) UniqueID() string {
+func (c *componentBase) UniqueID() string {
 	return c.data.UniqueID
 }
 
-func (c *ComponentBase) Name() string {
+func (c *componentBase) Name() string {
 	return c.data.Name
 }
 
-func (c *ComponentBase) State() interface{} {
-	if s := c.state.Load(); s != nil {
-		return s.(string)
-	}
-
-	return ""
+func (c *componentBase) Icon() string {
+	return c.data.Icon
 }
 
-func (c *ComponentBase) StateTopic() mqtt.Topic {
+func (c *componentBase) StateTopic() mqtt.Topic {
 	return c.data.StateTopic
 }
 
-func (c *ComponentBase) CommandTopic() mqtt.Topic {
+func (c *componentBase) CommandTopic() mqtt.Topic {
 	return c.data.CommandTopic
 }
 
-func (c *ComponentBase) AvailabilityTopic() mqtt.Topic {
+func (c *componentBase) AvailabilityTopic() mqtt.Topic {
 	return c.data.AvailabilityTopic
 }
 
-func (c *ComponentBase) Device() Device {
+func (c *componentBase) Device() Device {
 	return c.data.Device
 }
 
-// nolint:interfacer
-func (c *ComponentBase) SetState(message mqtt.Message) error {
-	state := message.String()
-
-	c.state.Store(state)
-
-	if val, err := strconv.ParseFloat(state, 64); err == nil {
-		metricState.With("mac", c.Device().MAC().String()).With("component", c.ID()).Set(val)
-	}
-
-	return nil
-}
-
-func (c *ComponentBase) CommandToPayload(cmd interface{}) interface{} {
+func (c *componentBase) CommandToPayload(cmd interface{}) interface{} {
 	return cmd
-}
-
-func (c *ComponentBase) Subscribers() []mqtt.Subscriber {
-	c.subscribersOnce.Do(func() {
-		c.subscribers = make([]mqtt.Subscriber, 0)
-
-		if topic := c.StateTopic(); topic != "" {
-			c.subscribers = append(c.subscribers, mqtt.NewSubscriber(topic, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-				return c.setState(message)
-			}))
-		}
-	})
-
-	return c.subscribers
 }

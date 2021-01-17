@@ -21,7 +21,7 @@
                             <td>{{ $component.ID }}</td>
                             <td>{{ $component.Type }}</td>
                             <td>{{ $component.Name }}</td>
-                            <td>{{ $component.State }}</td>
+                            <td>{{ $component.StateFormat }}</td>
                             <td>
                                 {{ if or (ne $component.CommandTopic.String "") (eq $component.ID $.Bind.Config.IPAddressSensorID) }}
                                 <div class="btn-group" role="group">
@@ -34,7 +34,7 @@
 
                                         {{ if $.Bind.Status.IsStatusOnline }}
                                             {{ if or (eq $component.Type.String "light") (eq $component.Type.String "switch") }}
-                                                {{ if eq (printf "%v" $component.State) "ON" }}
+                                                {{ if eq (printf "%v" $component.StateFormat) "ON" }}
                                                     <a href="{{ $.Request.URL.Path }}?action=command&id={{ $component.ID }}&cmd=OFF" class="btn btn-danger btn-icon btn-xs">
                                                         <i class="glyphicon glyphicon-stop" title="{{ i18n "Switch off" $ }}"></i>
                                                     </a>

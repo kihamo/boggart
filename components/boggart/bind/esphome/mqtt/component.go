@@ -28,11 +28,13 @@ type Component interface {
 	Type() ComponentType
 	UniqueID() string
 	Name() string
+	Icon() string
 	State() interface{}
+	StateFormat() string
+	SetState(mqtt.Message) error
 	StateTopic() mqtt.Topic
 	CommandTopic() mqtt.Topic
 	AvailabilityTopic() mqtt.Topic
 	Device() Device
 	CommandToPayload(cmd interface{}) interface{}
-	Subscribers() []mqtt.Subscriber
 }

@@ -16,8 +16,8 @@ type thing struct {
 
 func newThing(id, bindingID, typeID string) *thing {
 	return (&thing{
-		bindingID:  IDReplace(bindingID),
-		typeID:     IDReplace(typeID),
+		bindingID:  IDNormalize(bindingID),
+		typeID:     IDNormalize(typeID),
 		parameters: newParameters(),
 	}).
 		withID(id)
@@ -32,7 +32,7 @@ func (t *thing) ThingID() string {
 }
 
 func (t *thing) withID(id string) *thing {
-	t.id = IDReplace(id)
+	t.id = IDNormalize(id)
 	return t
 }
 
