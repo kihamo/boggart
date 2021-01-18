@@ -5,26 +5,52 @@ import (
 	"strings"
 
 	"github.com/eclipse/paho.mqtt.golang"
+	"github.com/kihamo/boggart/components/boggart/config_generators"
 	"github.com/kihamo/boggart/components/boggart/di"
 )
 
 const (
 	BindingID = "mqtt"
 
-	DirectoryThings = "things/"
-	DirectoryItems  = "items/"
+	DirectoryThings    = "things/"
+	DirectoryItems     = "items/"
+	DirectoryTransform = "transform/"
+
+	StepDefaultTransformHumanBytes = DirectoryTransform + "human_bytes.js"
 )
 
-var replacerID = strings.NewReplacer(
-	":", "_",
-	"{", "_",
-	"}", "_",
-	"[", "_",
-	"]", "_",
-	"@", "_",
-	" ", "_",
-	"\"", "_",
-	"-", "_",
+var (
+	replacerID = strings.NewReplacer(
+		":", "_",
+		"{", "_",
+		"}", "_",
+		"[", "_",
+		"]", "_",
+		"@", "_",
+		" ", "_",
+		"\"", "_",
+		"-", "_",
+	)
+
+	defaultSteps = map[string]generators.Step{
+		StepDefaultTransformHumanBytes: {
+			FilePath: StepDefaultTransformHumanBytes,
+			Content: `(function(i) {
+    var
+        d = 2,
+        e = ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
+        c = 1024;
+
+    if (0 === i || '0' === i) {
+        return '0 ' + e[0];
+    }
+
+    var f = Math.floor(Math.log(i) / Math.log(c));
+
+    return parseFloat((i / Math.pow(c, f)).toFixed(d)) + ' ' + e[f];
+})(input);`,
+		},
+	}
 )
 
 func IDNormalize(id string) string {
@@ -97,4 +123,8 @@ func ItemPrefixFromBindMeta(meta *di.MetaContainer) string {
 
 func FilePrefixFromBindMeta(meta *di.MetaContainer) string {
 	return IDNormalize(strings.ToLower(meta.Type()))
+}
+
+func StepDefault(name string) generators.Step {
+	return defaultSteps[name]
 }
