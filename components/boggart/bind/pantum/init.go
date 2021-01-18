@@ -5,10 +5,5 @@ import (
 )
 
 func init() {
-	t := Type{}
-	boggart.RegisterBindType("pantum", t)
-	boggart.RegisterBindType("pantum:m6700", t)
-	boggart.RegisterBindType("pantum:m6800", t)
-	boggart.RegisterBindType("pantum:m7100", t)
-	boggart.RegisterBindType("pantum:m7200", t)
+	boggart.RegisterBindType("pantum", Type{}, "pantum:m6700", "pantum:m6800", "pantum:m7100", "pantum:m7200")
 }

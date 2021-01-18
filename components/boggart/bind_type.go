@@ -15,7 +15,7 @@ var (
 	bindTypes      = make(map[string]BindType)
 )
 
-func RegisterBindType(name string, kind BindType) {
+func RegisterBindType(name string, kind BindType, aliases ...string) {
 	bindTypesMutex.Lock()
 	defer bindTypesMutex.Unlock()
 
@@ -23,11 +23,13 @@ func RegisterBindType(name string, kind BindType) {
 		panic("Bind type name is nil")
 	}
 
-	if _, dup := bindTypes[name]; dup {
-		panic("Register called twice for bind type " + name)
-	}
+	for _, name := range append([]string{name}, aliases...) {
+		if _, dup := bindTypes[name]; dup {
+			panic("Register called twice for bind type " + name)
+		}
 
-	bindTypes[name] = kind
+		bindTypes[name] = kind
+	}
 }
 
 func GetBindType(name string) (BindType, error) {

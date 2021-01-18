@@ -25,14 +25,7 @@ func init() {
 		Device:           mercury1.Device206,
 	})
 
-	version3 := v3.Type{}
-	boggart.RegisterBindType("mercury:203.2TD", version3)
-	boggart.RegisterBindType("mercury:204", version3)
-	boggart.RegisterBindType("mercury:208", version3)
-	boggart.RegisterBindType("mercury:230", version3)
-	boggart.RegisterBindType("mercury:231", version3)
-	boggart.RegisterBindType("mercury:233", version3)
-	boggart.RegisterBindType("mercury:234", version3)
-	boggart.RegisterBindType("mercury:236", version3)
-	boggart.RegisterBindType("mercury:238", version3)
+	boggart.RegisterBindType("mercury:v3", v3.Type{}, "mercury:203.2TD", "mercury:204", "mercury:208",
+		"mercury:230", "mercury:231", "mercury:233", "mercury:234", "mercury:236", "mercury:238",
+	)
 }

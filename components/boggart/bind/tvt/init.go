@@ -5,6 +5,5 @@ import (
 )
 
 func init() {
-	boggart.RegisterBindType("tvt", Type{})
-	boggart.RegisterBindType("praxis:vdr", Type{})
+	boggart.RegisterBindType("tvt", Type{}, "praxis:vdr")
 }

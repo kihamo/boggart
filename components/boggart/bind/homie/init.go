@@ -6,6 +6,5 @@ import (
 )
 
 func init() {
-	boggart.RegisterBindType("homie:esp8266", esp.Type{})
-	boggart.RegisterBindType("homie:esp32", esp.Type{})
+	boggart.RegisterBindType("homie", esp.Type{}, "homie:esp8266", "homie:esp32")
 }

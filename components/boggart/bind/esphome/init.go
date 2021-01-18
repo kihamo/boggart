@@ -7,9 +7,6 @@ import (
 )
 
 func init() {
-	nativeAPI := nativeapi.Type{}
-	boggart.RegisterBindType("esphome", nativeAPI)
-	boggart.RegisterBindType("esphome:native_api", nativeAPI)
-
+	boggart.RegisterBindType("esphome", nativeapi.Type{}, "esphome:native_api")
 	boggart.RegisterBindType("esphome:mqtt", mqtt.Type{})
 }
