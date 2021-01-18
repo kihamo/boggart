@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"reflect"
+	"sort"
+
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/config_generators"
 	"github.com/kihamo/boggart/components/boggart/di"
@@ -55,8 +58,29 @@ func NewManagerHandler(component boggart.Component, manager *tasks.Manager) *Man
 
 func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	if !r.IsAjax() {
+		type typeView struct {
+			Name    string
+			Package string
+		}
+
+		types := boggart.GetBindTypes()
+		view := make([]typeView, 0, len(types))
+
+		for name, bindType := range types {
+			t := reflect.TypeOf(bindType)
+
+			view = append(view, typeView{
+				Name:    name,
+				Package: t.PkgPath(),
+			})
+		}
+
+		sort.SliceStable(view, func(i, j int) bool {
+			return view[i].Name < view[j].Name
+		})
+
 		h.Render(r.Context(), "manager", map[string]interface{}{
-			"device_types": boggart.GetBindTypes(),
+			"types": view,
 		})
 
 		return

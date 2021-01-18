@@ -87,12 +87,14 @@
                     <thead>
                     <tr>
                         <th>{{ i18n "Type" . }}</th>
+                        <th>{{ i18n "Package" . }}</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {{ range $name, $type := .device_types }}
+                    {{ range $type := .types }}
                     <tr>
-                        <td>{{ $name }}</td>
+                        <td>{{ $type.Name }}</td>
+                        <td>{{ $type.Package }}</td>
                     </tr>
                     {{ end }}
                     </tbody>
