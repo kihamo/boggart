@@ -406,12 +406,18 @@ func (h *BindHandler) actionConfigGenerator(w http.ResponseWriter, r *dashboard.
 	q := r.URL().Query()
 
 	vendor := q.Get("vendor")
-	var steps []generators.Step
+	var (
+		steps []generators.Step
+		err   error
+	)
 
 	switch vendor {
 	case "openhab":
 		if generator, ok := b.Bind().(generators.HasGeneratorOpenHab); ok {
-			steps = generator.GenerateConfigOpenHab()
+			steps, err = generator.GenerateConfigOpenHab()
+			if err != nil {
+				r.Session().FlashBag().Error(err.Error())
+			}
 		} else {
 			h.NotFound(w, r)
 			return
@@ -421,7 +427,7 @@ func (h *BindHandler) actionConfigGenerator(w http.ResponseWriter, r *dashboard.
 		return
 	}
 
-	if len(steps) == 0 {
+	if len(steps) == 0 && err == nil {
 		h.NotFound(w, r)
 		return
 	}

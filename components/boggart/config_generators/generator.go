@@ -7,5 +7,5 @@ type Step struct {
 }
 
 type HasGeneratorOpenHab interface {
-	GenerateConfigOpenHab() []Step
+	GenerateConfigOpenHab() ([]Step, error)
 }

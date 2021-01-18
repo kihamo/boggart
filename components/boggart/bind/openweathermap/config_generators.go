@@ -7,17 +7,16 @@ import (
 	"github.com/kihamo/boggart/components/boggart/config_generators/openhab"
 )
 
-func (b *Bind) GenerateConfigOpenHab() []generators.Step {
+func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 	opts, err := b.MQTT().ClientOptions()
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	meta := b.Meta()
 	id := meta.ID()
 	filePrefix := openhab.FilePrefixFromBindMeta(meta)
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
-
 	broker := openhab.BrokerFromClientOptionsReader(opts)
 
 	steps := []generators.Step{
@@ -114,5 +113,5 @@ func (b *Bind) GenerateConfigOpenHab() []generators.Step {
 		})
 	}
 
-	return steps
+	return steps, nil
 }

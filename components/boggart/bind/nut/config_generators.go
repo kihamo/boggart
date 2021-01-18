@@ -1,27 +1,27 @@
 package nut
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/kihamo/boggart/components/boggart/config_generators"
 	"github.com/kihamo/boggart/components/boggart/config_generators/openhab"
 )
 
-func (b *Bind) GenerateConfigOpenHab() []generators.Step {
-	opts, err := b.MQTT().ClientOptions()
-	if err != nil {
-		return nil
-	}
-
+func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 	meta := b.Meta()
-	filePrefix := openhab.FilePrefixFromBindMeta(meta)
-	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
-
 	sn := meta.SerialNumber()
 	if sn == "" {
-		sn = "+"
+		return nil, errors.New("serial number is empty")
 	}
 
+	opts, err := b.MQTT().ClientOptions()
+	if err != nil {
+		return nil, err
+	}
+
+	filePrefix := openhab.FilePrefixFromBindMeta(meta)
+	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
 	broker := openhab.BrokerFromClientOptionsReader(opts)
 
 	steps := []generators.Step{
@@ -97,5 +97,5 @@ func (b *Bind) GenerateConfigOpenHab() []generators.Step {
 		})
 	}
 
-	return steps
+	return steps, nil
 }
