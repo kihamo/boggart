@@ -9,18 +9,18 @@ import (
 )
 
 type ComponentLightState struct {
-	Effect     string `json:"effect,omitempty"`
-	State      string `json:"state,omitempty"`
-	Brightness uint64 `json:"brightness,omitempty"`
+	Effect     string `json:"effect"`
+	State      string `json:"state"`
+	Brightness uint64 `json:"brightness"`
 	Color      struct {
-		Red   uint64 `json:"r,omitempty"`
-		Green uint64 `json:"g,omitempty"`
-		Blue  uint64 `json:"b,omitempty"`
-	} `json:"color,omitempty"`
-	White            uint64 `json:"white_value,omitempty"`
-	ColorTemperature uint64 `json:"color_temp,omitempty"`
-	Flash            uint64 `json:"flash,omitempty"`
-	Transition       uint64 `json:"transition,omitempty"`
+		Red   uint64 `json:"r"`
+		Green uint64 `json:"g"`
+		Blue  uint64 `json:"b"`
+	} `json:"color"`
+	White            uint64 `json:"white_value"`
+	ColorTemperature uint64 `json:"color_temp"`
+	Flash            uint64 `json:"flash"`
+	Transition       uint64 `json:"transition"`
 }
 
 func (s *ComponentLightState) String() string {
@@ -105,6 +105,34 @@ func (c *ComponentLight) CommandToPayload(cmd interface{}) interface{} {
 	payload, _ := json.Marshal(state)
 
 	return payload
+}
+
+func (c *ComponentLight) Schema() string {
+	return c.data.Schema
+}
+
+func (c *ComponentLight) Brightness() bool {
+	return c.data.Brightness
+}
+
+func (c *ComponentLight) RGB() bool {
+	return c.data.RGB
+}
+
+func (c *ComponentLight) ColorTemperature() bool {
+	return c.data.ColorTemperature
+}
+
+func (c *ComponentLight) White() bool {
+	return c.data.White
+}
+
+func (c *ComponentLight) Effect() bool {
+	return c.data.Effect
+}
+
+func (c *ComponentLight) EffectList() []string {
+	return c.data.EffectList
 }
 
 func (c *ComponentLight) UnmarshalJSON(b []byte) error {
