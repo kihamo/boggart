@@ -432,6 +432,40 @@ func (h *BindHandler) actionConfigGenerator(w http.ResponseWriter, r *dashboard.
 		return
 	}
 
+	// merge steps by file
+	stepsMerged := make(map[string]int, len(steps))
+
+	for i := len(steps) - 1; i >= 0; i-- {
+		if steps[i].Content == "" {
+			steps = append(steps[:i], steps[i+1:]...)
+			continue
+		}
+
+		if steps[i].FilePath == "" {
+			continue
+		}
+
+		if existStepIndex, ok := stepsMerged[steps[i].FilePath]; !ok {
+			// оставляем только последний вариант
+			stepsMerged[steps[i].FilePath] = len(steps) - i
+		} else {
+			// все остальные склеиваем
+			existStep := &steps[len(steps)-existStepIndex]
+
+			if existStep.Description != "" {
+				existStep.Description = "\n" + existStep.Description
+			}
+			existStep.Description = steps[i].Description + existStep.Description
+
+			if existStep.Content != "" {
+				existStep.Content = "\n" + existStep.Content
+			}
+			existStep.Content = steps[i].Content + existStep.Content
+
+			steps = append(steps[:i], steps[i+1:]...)
+		}
+	}
+
 	if filePath := q.Get("file"); filePath != "" {
 		index := -1
 		if s := q.Get("step"); s != "" {
