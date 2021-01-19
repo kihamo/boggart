@@ -8,36 +8,20 @@ import (
 )
 
 func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
-	opts, err := b.MQTT().ClientOptions()
-	if err != nil {
-		return nil, err
-	}
-
 	meta := b.Meta()
 	id := meta.ID()
-	filePrefix := openhab.FilePrefixFromBindMeta(meta)
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
-	broker := openhab.BrokerFromClientOptionsReader(opts)
+	channels := make([]*openhab.Channel, 0, 1+7*6)
 
-	steps := []generators.Step{
-		{
-			FilePath: openhab.DirectoryThings + "broker.things",
-			Content:  broker.String(),
-		},
-	}
-
-	thing := openhab.GenericThingFromBindMeta(meta).
-		WithBroker(broker).
-		AddChannels(
-			openhab.BindStatusChannel(meta),
-			openhab.NewChannel("CurrentTemp", openhab.ChannelTypeNumber).
-				WithStateTopic(b.config.TopicCurrentTemp.Format(id)).
-				AddItems(
-					openhab.NewItem(itemPrefix+"CurrentTemp", openhab.ItemTypeNumber).
-						WithLabel("Current temperature").
-						WithIcon("temperature"),
-				),
-		)
+	channels = append(channels,
+		openhab.NewChannel("CurrentTemp", openhab.ChannelTypeNumber).
+			WithStateTopic(b.config.TopicCurrentTemp.Format(id)).
+			AddItems(
+				openhab.NewItem(itemPrefix+"CurrentTemp", openhab.ItemTypeNumber).
+					WithLabel("Current temperature").
+					WithIcon("temperature"),
+			),
+	)
 
 	var (
 		dayName  string
@@ -53,7 +37,7 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 			dayLabel = "Next " + strconv.Itoa(i)
 		}
 
-		thing.AddChannels(
+		channels = append(channels,
 			openhab.NewChannel(dayName+"TempMin", openhab.ChannelTypeNumber).
 				WithStateTopic(b.config.TopicDailyTempMin.Format(id, i)).
 				AddItems(
@@ -99,19 +83,5 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 		)
 	}
 
-	if content := thing.String(); content != "" {
-		steps = append(steps, generators.Step{
-			FilePath: openhab.DirectoryThings + filePrefix + ".things",
-			Content:  content,
-		})
-	}
-
-	if content := thing.Items().String(); content != "" {
-		steps = append(steps, generators.Step{
-			FilePath: openhab.DirectoryItems + filePrefix + ".items",
-			Content:  content,
-		})
-	}
-
-	return steps, nil
+	return openhab.StepsByBind(b, nil, channels...)
 }

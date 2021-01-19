@@ -1,10 +1,12 @@
 package openhab
 
 import (
+	"errors"
 	"strconv"
 	"strings"
 
 	"github.com/eclipse/paho.mqtt.golang"
+	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/config_generators"
 	"github.com/kihamo/boggart/components/boggart/di"
 )
@@ -50,6 +52,7 @@ var (
     return parseFloat((i / Math.pow(c, f)).toFixed(d)) + ' ' + e[f];
 })(input);`,
 		},
+		// TODO: human duration
 	}
 )
 
@@ -80,6 +83,67 @@ func BrokerFromClientOptionsReader(ops *mqtt.ClientOptionsReader) *Broker {
 		WithTimeoutInMs(ops.WriteTimeout().Milliseconds()).
 		WithPort(port).
 		WithSecure(tsl != nil)
+}
+
+func StepsByBind(bind boggart.Bind, steps []generators.Step, channels ...*Channel) ([]generators.Step, error) {
+	ctrMQTT, ok := di.MQTTContainerBind(bind)
+	if !ok {
+		return nil, errors.New("bind not supported MQTT container")
+	}
+
+	ctrMeta, ok := di.MetaContainerBind(bind)
+	if !ok {
+		return nil, errors.New("bind not supported Meta container")
+	}
+
+	opts, err := ctrMQTT.ClientOptions()
+	if err != nil {
+		return nil, err
+	}
+
+	broker := BrokerFromClientOptionsReader(opts)
+
+	thing := GenericThingFromBindMeta(ctrMeta).
+		WithBroker(broker).
+		AddChannels(BindStatusChannel(ctrMeta))
+
+	if ctrMeta.SerialNumber() != "" {
+		thing.AddChannels(BindSerialNumberChannel(ctrMeta))
+	}
+
+	if ctrMeta.MAC() != nil {
+		thing.AddChannels(BindMACChannel(ctrMeta))
+	}
+
+	filePrefix := FilePrefixFromBindMeta(ctrMeta)
+
+	thing.AddChannels(channels...)
+
+	list := make([]generators.Step, 0, len(steps)+3)
+	list = append(list, steps...)
+
+	if content := broker.String(); content != "" {
+		list = append(list, generators.Step{
+			FilePath: DirectoryThings + "broker.things",
+			Content:  content,
+		})
+	}
+
+	if content := thing.String(); content != "" {
+		list = append(list, generators.Step{
+			FilePath: DirectoryThings + filePrefix + ".things",
+			Content:  content,
+		})
+	}
+
+	if content := thing.Items().String(); content != "" {
+		list = append(list, generators.Step{
+			FilePath: DirectoryItems + filePrefix + ".items",
+			Content:  content,
+		})
+	}
+
+	return list, nil
 }
 
 func BindStatusChannel(meta *di.MetaContainer) *Channel {

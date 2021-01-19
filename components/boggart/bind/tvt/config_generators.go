@@ -16,84 +16,55 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 		return nil, errors.New("serial number is empty")
 	}
 
-	opts, err := b.MQTT().ClientOptions()
+	disks, err := b.client.Storage.GetStorageInfo(storage.NewGetStorageInfoParamsWithContext(context.Background()), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	filePrefix := openhab.FilePrefixFromBindMeta(meta)
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
-	broker := openhab.BrokerFromClientOptionsReader(opts)
+	channels := make([]*openhab.Channel, 0, 2+len(disks.Payload.Content.Disks)*3)
 
-	steps := []generators.Step{
-		openhab.StepDefault(openhab.StepDefaultTransformHumanBytes),
-		{
-			FilePath: openhab.DirectoryThings + "broker.things",
-			Content:  broker.String(),
-		},
-	}
+	channels = append(channels,
+		openhab.NewChannel("Model", openhab.ChannelTypeString).
+			WithStateTopic(b.config.TopicStateModel.Format(sn)).
+			AddItems(
+				openhab.NewItem(itemPrefix+"Model", openhab.ItemTypeString).
+					WithLabel("Model"),
+			),
+		openhab.NewChannel("FirmwareVersion", openhab.ChannelTypeString).
+			WithStateTopic(b.config.TopicStateFirmwareVersion.Format(sn)).
+			AddItems(
+				openhab.NewItem(itemPrefix+"FirmwareVersion", openhab.ItemTypeString).
+					WithLabel("Firmware version"),
+			),
+	)
 
-	thing := openhab.GenericThingFromBindMeta(meta).
-		WithBroker(broker).
-		AddChannels(
-			openhab.BindStatusChannel(meta),
-			openhab.BindSerialNumberChannel(meta),
-			openhab.BindMACChannel(meta),
-			openhab.NewChannel("Model", openhab.ChannelTypeString).
-				WithStateTopic(b.config.TopicStateModel.Format(sn)).
+	for _, disk := range disks.Payload.Content.Disks {
+		id := openhab.IDNormalizeCamelCase(disk.SerialNum)
+
+		channels = append(channels,
+			openhab.NewChannel(id+"_HDDCapacity", openhab.ChannelTypeNumber).
+				WithStateTopic(b.config.TopicStateHDDCapacity.Format(sn, disk.SerialNum)).
 				AddItems(
-					openhab.NewItem(itemPrefix+"Model", openhab.ItemTypeString).
-						WithLabel("Model"),
+					openhab.NewItem(itemPrefix+id+"_HDDCapacity", openhab.ItemTypeNumber).
+						WithLabel("HDD capacity [JS(human_bytes.js):%s]"),
 				),
-			openhab.NewChannel("FirmwareVersion", openhab.ChannelTypeString).
-				WithStateTopic(b.config.TopicStateFirmwareVersion.Format(sn)).
+			openhab.NewChannel(id+"_HDDUsage", openhab.ChannelTypeNumber).
+				WithStateTopic(b.config.TopicStateHDDUsage.Format(sn, disk.SerialNum)).
 				AddItems(
-					openhab.NewItem(itemPrefix+"FirmwareVersion", openhab.ItemTypeString).
-						WithLabel("Firmware version"),
+					openhab.NewItem(itemPrefix+id+"_HDDUsage", openhab.ItemTypeNumber).
+						WithLabel("HDD usage [JS(human_bytes.js):%s]"),
+				),
+			openhab.NewChannel(id+"_HDDFree", openhab.ChannelTypeNumber).
+				WithStateTopic(b.config.TopicStateHDDFree.Format(sn, disk.SerialNum)).
+				AddItems(
+					openhab.NewItem(itemPrefix+id+"_HDDFree", openhab.ItemTypeNumber).
+						WithLabel("HDD free [JS(human_bytes.js):%s]"),
 				),
 		)
-
-	disks, err := b.client.Storage.GetStorageInfo(storage.NewGetStorageInfoParamsWithContext(context.Background()), nil)
-	if err == nil {
-		for _, disk := range disks.Payload.Content.Disks {
-			id := openhab.IDNormalizeCamelCase(disk.SerialNum)
-
-			thing.AddChannels(
-				openhab.NewChannel(id+"_HDDCapacity", openhab.ChannelTypeNumber).
-					WithStateTopic(b.config.TopicStateHDDCapacity.Format(sn, disk.SerialNum)).
-					AddItems(
-						openhab.NewItem(itemPrefix+id+"_HDDCapacity", openhab.ItemTypeNumber).
-							WithLabel("HDD capacity [JS(human_bytes.js):%s]"),
-					),
-				openhab.NewChannel(id+"_HDDUsage", openhab.ChannelTypeNumber).
-					WithStateTopic(b.config.TopicStateHDDUsage.Format(sn, disk.SerialNum)).
-					AddItems(
-						openhab.NewItem(itemPrefix+id+"_HDDUsage", openhab.ItemTypeNumber).
-							WithLabel("HDD usage [JS(human_bytes.js):%s]"),
-					),
-				openhab.NewChannel(id+"_HDDFree", openhab.ChannelTypeNumber).
-					WithStateTopic(b.config.TopicStateHDDFree.Format(sn, disk.SerialNum)).
-					AddItems(
-						openhab.NewItem(itemPrefix+id+"_HDDFree", openhab.ItemTypeNumber).
-							WithLabel("HDD free [JS(human_bytes.js):%s]"),
-					),
-			)
-		}
 	}
 
-	if content := thing.String(); content != "" {
-		steps = append(steps, generators.Step{
-			FilePath: openhab.DirectoryThings + filePrefix + ".things",
-			Content:  content,
-		})
-	}
-
-	if content := thing.Items().String(); content != "" {
-		steps = append(steps, generators.Step{
-			FilePath: openhab.DirectoryItems + filePrefix + ".items",
-			Content:  content,
-		})
-	}
-
-	return steps, nil
+	return openhab.StepsByBind(b, []generators.Step{
+		openhab.StepDefault(openhab.StepDefaultTransformHumanBytes),
+	}, channels...)
 }

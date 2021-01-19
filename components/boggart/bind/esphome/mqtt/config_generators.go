@@ -10,34 +10,13 @@ import (
 )
 
 func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
-	opts, err := b.MQTT().ClientOptions()
-	if err != nil {
-		return nil, err
-	}
-
-	meta := b.Meta()
-	filePrefix := openhab.FilePrefixFromBindMeta(meta)
-	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
-	broker := openhab.BrokerFromClientOptionsReader(opts)
-
-	steps := []generators.Step{
-		{
-			FilePath: openhab.DirectoryThings + "broker.things",
-			Content:  broker.String(),
-		},
-	}
-
-	thing := openhab.GenericThingFromBindMeta(meta).
-		WithBroker(broker).
-		AddChannels(
-			openhab.BindStatusChannel(meta),
-			openhab.BindMACChannel(meta),
-		)
-
 	components := b.Components()
 	sort.SliceStable(components, func(i, j int) bool {
 		return components[i].ID() < components[j].ID()
 	})
+
+	itemPrefix := openhab.ItemPrefixFromBindMeta(b.Meta())
+	channels := make([]*openhab.Channel, 0, len(components))
 
 	for _, component := range components {
 		id := openhab.IDNormalizeCamelCase(component.ID())
@@ -109,7 +88,7 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 			}
 		}
 
-		thing.AddChannels(
+		channels = append(channels,
 			openhab.NewChannel(id, channelType).
 				WithStateTopic(component.StateTopic()).
 				WithCommandTopic(component.CommandTopic()).
@@ -123,21 +102,7 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 		)
 	}
 
-	if content := thing.String(); content != "" {
-		steps = append(steps, generators.Step{
-			FilePath: openhab.DirectoryThings + filePrefix + ".things",
-			Content:  content,
-		})
-	}
-
-	if content := thing.Items().String(); content != "" {
-		steps = append(steps, generators.Step{
-			FilePath: openhab.DirectoryItems + filePrefix + ".items",
-			Content:  content,
-		})
-	}
-
-	return steps, nil
+	return openhab.StepsByBind(b, nil, channels...)
 }
 
 func OpenHabIconConverter(icon string) string {

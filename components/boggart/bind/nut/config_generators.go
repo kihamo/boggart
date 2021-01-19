@@ -15,34 +15,22 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 		return nil, errors.New("serial number is empty")
 	}
 
-	opts, err := b.MQTT().ClientOptions()
+	variables, err := b.Variables()
 	if err != nil {
 		return nil, err
 	}
 
-	filePrefix := openhab.FilePrefixFromBindMeta(meta)
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
-	broker := openhab.BrokerFromClientOptionsReader(opts)
+	channels := make([]*openhab.Channel, 0, 1+len(variables))
 
-	steps := []generators.Step{
-		{
-			FilePath: openhab.DirectoryThings + "broker.things",
-			Content:  broker.String(),
-		},
-	}
-
-	thing := openhab.GenericThingFromBindMeta(meta).
-		WithBroker(broker).
-		AddChannels(
-			openhab.BindStatusChannel(meta),
-			openhab.BindSerialNumberChannel(meta),
-			openhab.NewChannel("Command", openhab.ChannelTypeString).
-				WithStateTopic(b.config.TopicCommand.Format(sn)).
-				AddItems(
-					openhab.NewItem(itemPrefix+"Command", openhab.ItemTypeString).
-						WithLabel("Command"),
-				),
-		)
+	channels = append(channels,
+		openhab.NewChannel("Command", openhab.ChannelTypeString).
+			WithStateTopic(b.config.TopicCommand.Format(sn)).
+			AddItems(
+				openhab.NewItem(itemPrefix+"Command", openhab.ItemTypeString).
+					WithLabel("Command"),
+			),
+	)
 
 	if variables, err := b.Variables(); err == nil {
 		var channel *openhab.Channel
@@ -79,23 +67,9 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 				channel.WithCommandTopic(b.config.TopicVariableSet.Format(sn, v.Name))
 			}
 
-			thing.AddChannels(channel)
+			channels = append(channels, channel)
 		}
 	}
 
-	if content := thing.String(); content != "" {
-		steps = append(steps, generators.Step{
-			FilePath: openhab.DirectoryThings + filePrefix + ".things",
-			Content:  content,
-		})
-	}
-
-	if content := thing.Items().String(); content != "" {
-		steps = append(steps, generators.Step{
-			FilePath: openhab.DirectoryItems + filePrefix + ".items",
-			Content:  content,
-		})
-	}
-
-	return steps, nil
+	return openhab.StepsByBind(b, nil, channels...)
 }

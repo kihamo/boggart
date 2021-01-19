@@ -23,6 +23,7 @@ func (t GenericThings) String() string {
 type GenericThing struct {
 	*thing
 
+	broker   *Broker
 	channels []*Channel
 }
 
@@ -47,6 +48,7 @@ func (t *GenericThing) WithLocation(location string) *GenericThing {
 }
 
 func (t *GenericThing) WithBroker(broker *Broker) *GenericThing {
+	t.broker = broker
 	t.thing.withBridge(broker.BrokerID())
 
 	for _, channel := range t.channels {
@@ -109,6 +111,10 @@ func (t *GenericThing) Items() Items {
 	}
 
 	return items
+}
+
+func (t *GenericThing) Broker() *Broker {
+	return t.broker
 }
 
 func (t *GenericThing) String() string {
