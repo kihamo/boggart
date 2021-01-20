@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"net/url"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -189,7 +190,12 @@ func (h *BindHandler) actionCreateOrUpdate(w *dashboard.Response, r *dashboard.R
 				r.Session().FlashBag().Success("Bind register success with id " + bind.ID())
 			}
 
-			h.Redirect(r.URL().Path, http.StatusFound, w, r)
+			redirectURL := &url.URL{}
+			*redirectURL = *r.URL()
+			redirectURL.Path = "/" + h.componentBoggart.Name() + "/manager/"
+			redirectURL.RawQuery = "search=" + url.QueryEscape(bind.ID())
+
+			h.Redirect(redirectURL.String(), http.StatusFound, w, r)
 
 			return
 		}

@@ -171,6 +171,8 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, smsItem *models.SMSListMessa
 		if len(match) > 0 {
 			for i, name := range cmdRegexp.SubexpNames() {
 				if name == "command" {
+					// TODO: надо игнорировать номера операторов
+
 					cmd := strings.ToLower(strings.TrimSpace(match[i]))
 
 					switch cmd {

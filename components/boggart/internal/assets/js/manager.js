@@ -187,7 +187,7 @@ $(document).ready(function () {
                     data: 'description'
                 }
             ],
-            'drawCallback': function () {
+            drawCallback: function () {
                 var api = this.api();
                 var rows = api.rows({page: 'current'}).nodes();
                 var last = null;
@@ -200,6 +200,18 @@ $(document).ready(function () {
                         last = group;
                     }
                 });
+            },
+            initComplete: function() {
+                var vars = {};
+                window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+                    vars[key] = value;
+                });
+
+                if (!vars.hasOwnProperty('search')) {
+                    vars['search'] = '';
+                }
+
+                this.api().search(vars['search']).draw();
             }
         });
     tableDevices.on('click', 'tr.group', function () {
