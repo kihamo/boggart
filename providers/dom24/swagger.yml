@@ -1,0 +1,200 @@
+---
+
+swagger: "2.0"
+info:
+  title: "Dom 24"
+  version: "0.1.0"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+schemes:
+- "https"
+host: "api.sm-center.ru"
+basePath: "/dgservicnew/"
+paths:
+  /auth/login:
+    post:
+      operationId: "login"
+      tags:
+      - "auth"
+      parameters:
+      - name: "request"
+        in: "body"
+        schema:
+          type: "object"
+          properties:
+            phone:
+              type: "string"
+            password:
+              type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: '#/definitions/Account'
+        401:
+          description: "Unauthorized"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /User/AddAccountByIdent:
+    post:
+      operationId: "addByIdent"
+      tags:
+      - "user"
+      parameters:
+      - name: "request"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          required:
+            - Ident
+            - Confirm
+            - PinCode
+          properties:
+            Ident:
+              type: "string"
+            Confirm:
+              type: "boolean"
+            PinCode:
+              type: "string"
+
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: '#/definitions/Account'
+        401:
+          description: "Unauthorized"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /User/DeleteAccountByIdent:
+    post:
+      operationId: "deleteByIdent"
+      tags:
+      - "user"
+      parameters:
+      - name: "request"
+        in: "body"
+        schema:
+          type: "object"
+          properties:
+            Ident:
+              type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+        401:
+          description: "Unauthorized"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /Public/DownloadBill/{id}:
+    get:
+      operationId: "download"
+      tags:
+      - "bill"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Bill ID"
+        required: true
+        type: "integer"
+        format: "uint64"
+      - name: "inJpg"
+        in: "query"
+        description: "JPEG format or not"
+        type: "integer"
+        format: "uint64"
+      produces:
+      - 'application/pdf'
+      - 'image/jpeg'
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "file"
+        401:
+          description: "Unauthorized"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Error:
+    type: "object"
+    properties:
+      error:
+        type: "string"
+  Account:
+    type: "object"
+    properties:
+      address:
+        type: "string"
+      login:
+        type: "string"
+      isDispatcher:
+        type: "boolean"
+      accounts:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            id:
+              type: "integer"
+              format: "uint64"
+            ident:
+              type: "string"
+            fio:
+              type: "string"
+            address:
+              type: "string"
+            company:
+              type: "string"
+            cn:
+              type: "string"
+            metersStartDay:
+              type: "integer"
+              format: "uint64"
+            metersEndDay:
+              type: "integer"
+              format: "uint64"
+            metersAccessFlag:
+              type: "boolean"
+            metersPeriodStartIsCurrent:
+              type: "boolean"
+            metersPeriodEndIsCurrent:
+              type: "boolean"
+            phone:
+              type: "string"
+      email:
+        type: "string"
+      phone:
+        type: "string"
+      fio:
+        type: "string"
+      birthday:
+        type: "string"
+      acx:
+        type: "string"
+      companyPhone:
+        type: "string"
+      accessOSS:
+        type: "boolean"
+      userSettings:
+        type: "string"
+
