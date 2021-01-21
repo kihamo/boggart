@@ -41,6 +41,29 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
+  /Meters/List:
+    get:
+      operationId: "list"
+      tags:
+      - "meters"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "object"
+            properties:
+              Data:
+                type: "array"
+                items:
+                  $ref: "#/definitions/Meter"
+        401:
+          description: "Unauthorized"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /User/AddAccountByIdent:
     post:
       operationId: "addByIdent"
@@ -53,9 +76,9 @@ paths:
         schema:
           type: "object"
           required:
-            - Ident
-            - Confirm
-            - PinCode
+          - Ident
+          - Confirm
+          - PinCode
           properties:
             Ident:
               type: "string"
@@ -63,7 +86,6 @@ paths:
               type: "boolean"
             PinCode:
               type: "string"
-
       responses:
         200:
           description: "Successful operation"
@@ -197,4 +219,91 @@ definitions:
         type: "boolean"
       userSettings:
         type: "string"
-
+  Meter:
+    type: "object"
+    properties:
+      ID:
+        type: "integer"
+        format: "uint64"
+      ident:
+        type: "string"
+      FactoryNumber:
+        type: "string"
+      LastCheckupDate:
+        type: "string"
+      NextCheckupDate:
+        type: "string"
+      RecheckInterval:
+        type: "integer"
+        format: "uint64"
+      TariffNumberInt:
+        type: "integer"
+        format: "uint64"
+      Resource:
+        type: "string"
+      Address:
+        type: "string"
+      UniqueNum:
+        type: "string"
+      NumberOfDecimalPlaces:
+        type: "integer"
+        format: "uint64"
+      NumberOfIntegerPart:
+        type: "integer"
+        format: "uint64"
+      CustomName:
+        type: "string"
+      IsDisabled:
+        type: "boolean"
+      Units:
+        type: "string"
+      TariffNumber:
+        type: "string" # ????
+      ValuesStartDay:
+        type: "integer"
+        format: "uint64"
+      ValuesEndDay:
+        type: "integer"
+        format: "uint64"
+      ValuesCanAdd:
+        type: "boolean"
+      ValuesPeriodStartIsCurrent:
+        type: "boolean"
+      ValuesPeriodEndIsCurrent:
+        type: "boolean"
+      AutoValueGettingOnly:
+        type: "boolean"
+      PeriodMessage:
+        type: "string"
+      Tariff1Name:
+        type: "string"
+      Tariff2Name:
+        type: "string"
+      Tariff3Name:
+        type: "string"
+      HouseId:
+        type: "integer"
+        format: "uint64"
+      StartDate:
+        type: "string"
+      StartValue:
+        type: "number"
+      StartValueT2:
+        type: "number"
+      StartValueT3:
+        type: "number"
+      Values:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            Period:
+              type: "string"
+            IsCurrentPeriod:
+              type: "boolean"
+            Value:
+              type: "number"
+            ValueT2:
+              type: "number"
+            ValueT3:
+              type: "number"
