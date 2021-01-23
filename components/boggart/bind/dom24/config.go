@@ -10,9 +10,11 @@ type Config struct {
 	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
-	Phone    string `valid:"required"`
-	Password string `valid:"required"`
-	Debug    bool
+	Accounts                []string
+	Phone                   string `valid:"required"`
+	Password                string `valid:"required"`
+	AutoRegisterIfNotExists bool   `mapstructure:"auto_register_if_not_exists" yaml:"auto_register_if_not_exists"`
+	Debug                   bool
 }
 
 func (Type) Config() interface{} {
@@ -21,8 +23,9 @@ func (Type) Config() interface{} {
 	probesConfig.ReadinessTimeout = time.Second * 10
 
 	return &Config{
-		ProbesConfig: probesConfig,
-		LoggerConfig: di.LoggerConfigDefaults(),
-		Debug:        false,
+		ProbesConfig:            probesConfig,
+		LoggerConfig:            di.LoggerConfigDefaults(),
+		AutoRegisterIfNotExists: true,
+		Debug:                   false,
 	}
 }

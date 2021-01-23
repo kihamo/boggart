@@ -35,19 +35,76 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	ctx := r.Context()
 	widget := b.Widget()
 
-	accounts := make(map[string]*widgetAccountView, 0)
+	exists := make(map[string]bool)
+	accounts := make(map[string]*widgetAccountView)
+	vars := make(map[string]interface{}, 2)
+
+	if v := r.URL().Query().Get("account"); v != "" {
+		if parts := strings.Split(v, ","); len(parts) > 0 {
+			for _, part := range parts {
+				exists[part] = false
+			}
+
+			vars["filter"] = parts
+		}
+	}
 
 	userResponse, err := b.provider.User.UserInfo(user.NewUserInfoParamsWithContext(ctx))
 	if err != nil {
 		widget.FlashError(r, "Get user info failed %v", "", err)
-	} else {
-		for _, item := range userResponse.GetPayload().Accounts {
-			accounts[item.Ident] = &widgetAccountView{
-				ID:           item.Ident,
-				Address:      item.Address,
-				FIO:          item.FIO,
-				Company:      item.Company,
-				Transactions: make([]*widgetAccountTransactionView, 0),
+
+		widget.Render(r.Context(), "widget", vars)
+		return
+	}
+
+	for _, item := range userResponse.GetPayload().Accounts {
+		if _, ok := exists[item.Ident]; len(exists) > 0 && !ok {
+			continue
+		}
+
+		if len(exists) > 0 {
+			exists[item.Ident] = true
+		}
+
+		accounts[item.Ident] = &widgetAccountView{
+			ID:           item.Ident,
+			Address:      item.Address,
+			FIO:          item.FIO,
+			Company:      item.Company,
+			Transactions: make([]*widgetAccountTransactionView, 0),
+		}
+	}
+
+	// проверяем все ли учетки найдены, если нет то пытаемся их добавить
+	if b.config.AutoRegisterIfNotExists {
+		for ident, exist := range exists {
+			if exist {
+				continue
+			}
+
+			params := user.NewAddByIdentParamsWithContext(ctx)
+			params.Request.Ident = &[]string{ident}[0]
+
+			addedResponse, err := b.provider.User.AddByIdent(params)
+			if err != nil {
+				widget.FlashError(r, "Add account #%s failed %v", "", ident, err)
+				continue
+			}
+
+			for _, item := range addedResponse.GetPayload().Accounts {
+				if item.Ident != ident {
+					continue
+				}
+
+				accounts[item.Ident] = &widgetAccountView{
+					ID:           item.Ident,
+					Address:      item.Address,
+					FIO:          item.Fio,
+					Company:      item.Company,
+					Transactions: make([]*widgetAccountTransactionView, 0),
+				}
+
+				break
 			}
 		}
 	}
@@ -59,11 +116,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		for _, item := range accountingResponse.GetPayload().Data {
 			account, ok := accounts[item.Ident]
 			if !ok {
-				account = &widgetAccountView{
-					ID:           item.Ident,
-					Address:      item.Address,
-					Transactions: make([]*widgetAccountTransactionView, 0),
-				}
+				continue
 			}
 
 			account.Type = item.AccountType
@@ -98,9 +151,25 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 	}
 
-	widget.Render(r.Context(), "widget", map[string]interface{}{
-		"accounts": accounts,
-	})
+	vars["accounts"] = accounts
+
+	// удаляем учетки, которые автоматически добавляли
+	if b.config.AutoRegisterIfNotExists {
+		for ident, exist := range exists {
+			if exist {
+				continue
+			}
+
+			params := user.NewDeleteByIdentParamsWithContext(ctx)
+			params.Request.Ident = ident
+
+			if _, err := b.provider.User.DeleteByIdent(params); err != nil {
+				widget.FlashError(r, "Delete account #%s failed %v", "", ident, err)
+			}
+		}
+	}
+
+	widget.Render(r.Context(), "widget", vars)
 }
 
 func (b *Bind) WidgetAssetFS() *assetfs.AssetFS {
