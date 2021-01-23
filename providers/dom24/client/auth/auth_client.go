@@ -7,11 +7,12 @@ package auth
 
 import (
 	"github.com/go-openapi/runtime"
-	"github.com/go-openapi/strfmt"
+
+	strfmt "github.com/go-openapi/strfmt"
 )
 
 // New creates a new auth API client.
-func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
+func New(transport runtime.ClientTransport, formats strfmt.Registry) *Client {
 	return &Client{transport: transport, formats: formats}
 }
 
@@ -23,15 +24,8 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
-// ClientService is the interface for Client methods
-type ClientService interface {
-	Login(params *LoginParams) (*LoginOK, error)
-
-	SetTransport(transport runtime.ClientTransport)
-}
-
 /*
-  Login login API
+Login login API
 */
 func (a *Client) Login(params *LoginParams) (*LoginOK, error) {
 	// TODO: Validate the params before sending

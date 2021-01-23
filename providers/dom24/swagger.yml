@@ -3,7 +3,7 @@
 swagger: "2.0"
 info:
   title: "Dom 24"
-  version: "0.1.0"
+  version: "1"
 consumes:
 - "application/json"
 produces:
@@ -41,6 +41,29 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
+  /Accounting/Info:
+    get:
+      operationId: "accountingInfo"
+      tags:
+      - "accounting"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "object"
+            properties:
+              Data:
+                type: "array"
+                items:
+                  $ref: "#/definitions/AccountingInfo"
+        401:
+          description: "Unauthorized"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /Meters/List:
     get:
       operationId: "list"
@@ -56,6 +79,24 @@ paths:
                 type: "array"
                 items:
                   $ref: "#/definitions/Meter"
+        401:
+          description: "Unauthorized"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /User/Info:
+    get:
+      operationId: "userInfo"
+      tags:
+      - "user"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: '#/definitions/UserInfo'
         401:
           description: "Unauthorized"
           schema:
@@ -157,6 +198,14 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 definitions:
+  DateCustom:
+    type: "string"
+    format: "date"
+    x-go-type:
+      import:
+        alias: "custom"
+        package: "github.com/kihamo/boggart/providers/dom24/static/models"
+      type: "Date"
   Error:
     type: "object"
     properties:
@@ -218,6 +267,113 @@ definitions:
       accessOSS:
         type: "boolean"
       userSettings:
+        type: "string"
+  AccountingInfo:
+    type: "object"
+    properties:
+      AccountID:
+        type: "integer"
+        format: "uint64"
+      AccountType:
+        type: "string"
+      Address:
+        type: "string"
+      BonusBalance:
+        type: "number"
+      Comission:
+        type: "number"
+      DebtActualDate:
+        type: "string"
+      DontShowInsurance:
+        type: "boolean"
+      HouseId:
+        type: "integer"
+        format: "uint64"
+      INN:
+        type: "string"
+      Ident:
+        type: "string"
+      InsuranceSum:
+        type: "number"
+      Sum:
+        type: "number"
+      SumFine:
+        type: "number"
+      TotalSum:
+        type: "number"
+      Bills:
+        type: "array"
+        items:
+          $ref: "#/definitions/Bill"
+#      MobilePayments:
+#        type: "array"
+#        items:
+#          type: "object"
+      Payments:
+        type: "array"
+        items:
+          $ref: "#/definitions/Payment"
+#      PendingPayments:
+#        type: "array"
+#        items:
+#          type: "object"
+  Bill:
+    type: "object"
+    properties:
+      Date:
+        $ref: "#/definitions/DateCustom"
+      FileLink:
+        type: "string"
+      HasFile:
+        type: "boolean"
+      ID:
+        type: "integer"
+        format: "uint64"
+      Ident:
+        type: "string"
+      Period:
+        type: "string"
+      Total:
+        type: "number"
+  Payment:
+    type: "object"
+    properties:
+      Date:
+        $ref: "#/definitions/DateCustom"
+      Ident:
+        type: "string"
+      Period:
+        type: "string"
+      Sum:
+        type: "number"
+  UserInfo:
+    type: "object"
+    properties:
+      Accounts:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            Address:
+              type: "string"
+            Company:
+              type: "string"
+            FIO:
+              type: "string"
+            Id:
+              type: "integer"
+              format: "uint64"
+            Ident:
+              type: "string"
+      CanPay:
+        type: "boolean"
+      Email:
+        type: "string"
+      FIO:
+        type: "string"
+      Login:
+        type: "string"
+      Phone:
         type: "string"
   Meter:
     type: "object"
@@ -285,7 +441,7 @@ definitions:
         type: "integer"
         format: "uint64"
       StartDate:
-        type: "string"
+        $ref: "#/definitions/DateCustom"
       StartValue:
         type: "number"
       StartValueT2:
@@ -298,7 +454,7 @@ definitions:
           type: "object"
           properties:
             Period:
-              type: "string"
+              $ref: "#/definitions/DateCustom"
             IsCurrentPeriod:
               type: "boolean"
             Value:

@@ -8,13 +8,15 @@ package models
 import (
 	"strconv"
 
+	strfmt "github.com/go-openapi/strfmt"
+
 	"github.com/go-openapi/errors"
-	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+
+	custom "github.com/kihamo/boggart/providers/dom24/static/models"
 )
 
 // Meter meter
-//
 // swagger:model Meter
 type Meter struct {
 
@@ -61,7 +63,8 @@ type Meter struct {
 	Resource string `json:"Resource,omitempty"`
 
 	// start date
-	StartDate string `json:"StartDate,omitempty"`
+	// Format: date
+	StartDate custom.Date `json:"StartDate,omitempty"`
 
 	// start value
 	StartValue float64 `json:"StartValue,omitempty"`
@@ -119,6 +122,10 @@ type Meter struct {
 func (m *Meter) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateStartDate(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateValues(formats); err != nil {
 		res = append(res, err)
 	}
@@ -126,6 +133,22 @@ func (m *Meter) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *Meter) validateStartDate(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.StartDate) { // not required
+		return nil
+	}
+
+	if err := m.StartDate.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("StartDate")
+		}
+		return err
+	}
+
 	return nil
 }
 
@@ -173,7 +196,6 @@ func (m *Meter) UnmarshalBinary(b []byte) error {
 }
 
 // MeterValuesItems0 meter values items0
-//
 // swagger:model MeterValuesItems0
 type MeterValuesItems0 struct {
 
@@ -181,7 +203,8 @@ type MeterValuesItems0 struct {
 	IsCurrentPeriod bool `json:"IsCurrentPeriod,omitempty"`
 
 	// period
-	Period string `json:"Period,omitempty"`
+	// Format: date
+	Period custom.Date `json:"Period,omitempty"`
 
 	// value
 	Value float64 `json:"Value,omitempty"`
@@ -195,6 +218,31 @@ type MeterValuesItems0 struct {
 
 // Validate validates this meter values items0
 func (m *MeterValuesItems0) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validatePeriod(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *MeterValuesItems0) validatePeriod(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Period) { // not required
+		return nil
+	}
+
+	if err := m.Period.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("Period")
+		}
+		return err
+	}
+
 	return nil
 }
 

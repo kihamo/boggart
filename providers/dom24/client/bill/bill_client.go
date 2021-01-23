@@ -9,11 +9,12 @@ import (
 	"io"
 
 	"github.com/go-openapi/runtime"
-	"github.com/go-openapi/strfmt"
+
+	strfmt "github.com/go-openapi/strfmt"
 )
 
 // New creates a new bill API client.
-func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
+func New(transport runtime.ClientTransport, formats strfmt.Registry) *Client {
 	return &Client{transport: transport, formats: formats}
 }
 
@@ -25,15 +26,8 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
-// ClientService is the interface for Client methods
-type ClientService interface {
-	Download(params *DownloadParams, writer io.Writer) (*DownloadOK, error)
-
-	SetTransport(transport runtime.ClientTransport)
-}
-
 /*
-  Download download API
+Download download API
 */
 func (a *Client) Download(params *DownloadParams, writer io.Writer) (*DownloadOK, error) {
 	// TODO: Validate the params before sending

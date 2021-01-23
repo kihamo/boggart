@@ -29,11 +29,11 @@ const (
 type Client struct {
 	*client.Dom24
 
-	tokenLock sync.RWMutex
-	token     string
+	tokenLock  sync.RWMutex
+	tokenValue string
 }
 
-func New(debug bool, logger logger.Logger) *Client {
+func New(phone, password string, debug bool, logger logger.Logger) *Client {
 	cl := &Client{
 		Dom24: client.NewHTTPClient(nil),
 	}
@@ -47,6 +47,16 @@ func New(debug bool, logger logger.Logger) *Client {
 
 			response, err = originTransport.RoundTrip(request)
 			if err != nil {
+				return response, err
+			}
+
+			if response.StatusCode == http.StatusUnauthorized {
+				cl.setToken("")
+
+				return response, err
+			}
+
+			if response.StatusCode != http.StatusOK {
 				return response, err
 			}
 
@@ -78,9 +88,8 @@ func New(debug bool, logger logger.Logger) *Client {
 
 			for _, cookie := range response.Cookies() {
 				if cookie.Name == headerToken {
-					cl.tokenLock.Lock()
-					cl.token, _ = url.QueryUnescape(cookie.Value)
-					cl.tokenLock.Unlock()
+					v, _ := url.QueryUnescape(cookie.Value)
+					cl.setToken(v)
 				}
 			}
 
@@ -88,12 +97,21 @@ func New(debug bool, logger logger.Logger) *Client {
 		})
 
 		rt.DefaultAuthentication = runtime.ClientAuthInfoWriterFunc(func(req runtime.ClientRequest, _ strfmt.Registry) (err error) {
-			cl.tokenLock.RLock()
-			defer cl.tokenLock.RUnlock()
+			token := cl.token()
 
-			if cl.token != "" {
+			if token == "" && req.GetPath() != "/auth/login" {
+				params := auth.NewLoginParams()
+				params.Request.Phone = phone
+				params.Request.Password = password
+
+				if _, err := cl.Dom24.Auth.Login(params); err == nil {
+					token = cl.token()
+				}
+			}
+
+			if token != "" {
 				// какие-то конченные разработчики, которые дрочат на регистр в заголовках
-				req.GetHeaderParams()[headerToken] = []string{cl.token}
+				req.GetHeaderParams()[headerToken] = []string{token}
 			}
 
 			return nil
@@ -114,6 +132,19 @@ func New(debug bool, logger logger.Logger) *Client {
 	}
 
 	return cl
+}
+
+func (c *Client) setToken(token string) {
+	c.tokenLock.Lock()
+	c.tokenValue = token
+	c.tokenLock.Unlock()
+}
+
+func (c *Client) token() string {
+	c.tokenLock.RLock()
+	defer c.tokenLock.RUnlock()
+
+	return c.tokenValue
 }
 
 func (c *Client) Login(ctx context.Context, phone, password string) (*models.Account, error) {

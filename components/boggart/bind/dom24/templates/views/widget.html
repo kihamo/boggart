@@ -1,0 +1,83 @@
+{{ define "content" }}
+    {{ if .accounts }}
+        {{ range $account := .accounts }}
+        <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h2>{{ $account.Type }} #{{ $account.ID }}</h2>
+                        <ul class="nav navbar-right panel_toolbox">
+                            <li><a class="collapse-link"><i class="fas fa-chevron-up"></i></a></li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <section class="content invoice">
+                            <div class="row">
+                                <div class="invoice-header">
+                                    <h2 class="pull-right">{{ $account.Address }}</h2>
+                                </div>
+                            </div>
+                            <div class="row invoice-info">
+                                <div class="col-sm-4 invoice-col">
+                                    {{ i18n "From" $ }}
+                                    <address>
+                                        <strong>{{ $account.FIO }}</strong>
+                                    </address>
+                                </div>
+                                <div class="col-sm-4 invoice-col">
+                                    {{ i18n "To" $ }}
+                                    <address>
+                                        <strong>{{ $account.Company }}</strong><br />
+                                        {{ i18n "INN" $ }}: {{ $account.CompanyINN }}
+                                    </address>
+                                </div>
+                            </div>
+                            {{ if $account.Transactions }}
+                            <div class="row">
+                                <div class="table">
+                                    <table class="table table-striped nowrap">
+                                        <thead>
+                                        <tr>
+                                            <th>{{ i18n "Date" $ }}</th>
+                                            <th>{{ i18n "Period" $ }}</th>
+                                            <th>{{ i18n "Amount" $ }}</th>
+                                            <th>{{ i18n "File" $ }}</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {{ range $transaction := $account.Transactions }}
+                                        <tr>
+                                            <td>{{ $transaction.Date }}</td>
+                                            <td>{{ $transaction.Period }}</td>
+                                            <td class="{{ if $transaction.IsPayment }}text-success{{ else }}text-danger{{ end }}">
+                                                {{ if $transaction.IsPayment }}
+                                                    <i class="fas fa-sign-out-alt" title="{{ i18n "Payment" $ }}"></i>
+                                                {{ else }}
+                                                    <i class="fas fa-sign-in-alt" title="{{ i18n "Bill" $ }}"></i>
+                                                {{ end }}
+
+                                                {{ $transaction.Amount }} &#8381;
+                                            </td>
+                                            <td>
+                                                {{ if $transaction.FileURL }}
+                                                    <a href="{{ $transaction.FileURL }}" class="btn btn-info btn-icon btn-xs" target="_blank">
+                                                        <i class="fas fa-download" title="{{ i18n "Download" $ }}"></i>
+                                                    </a>
+                                                {{ end }}
+                                            </td>
+                                        </tr>
+                                        {{ end }}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {{ end }}
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ end }}
+    {{ end }}
+{{ end }}

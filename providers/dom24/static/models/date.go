@@ -1,6 +1,7 @@
 package swagger
 
 import (
+	"bytes"
 	"time"
 
 	"github.com/go-openapi/strfmt"
@@ -27,7 +28,7 @@ func (m *Date) Validate(formats strfmt.Registry) error {
 }
 
 func (m *Date) UnmarshalJSON(b []byte) error {
-	t, err := time.Parse(Format, string(b))
+	t, err := time.Parse(Format, string(bytes.Trim(b, "\"")))
 	if err != nil {
 		return err
 	}

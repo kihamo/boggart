@@ -8,8 +8,10 @@ package client
 import (
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/strfmt"
 
+	strfmt "github.com/go-openapi/strfmt"
+
+	"github.com/kihamo/boggart/providers/dom24/client/accounting"
 	"github.com/kihamo/boggart/providers/dom24/client/auth"
 	"github.com/kihamo/boggart/providers/dom24/client/bill"
 	"github.com/kihamo/boggart/providers/dom24/client/meters"
@@ -58,10 +60,17 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Dom24 {
 
 	cli := new(Dom24)
 	cli.Transport = transport
+
+	cli.Accounting = accounting.New(transport, formats)
+
 	cli.Auth = auth.New(transport, formats)
+
 	cli.Bill = bill.New(transport, formats)
+
 	cli.Meters = meters.New(transport, formats)
+
 	cli.User = user.New(transport, formats)
+
 	return cli
 }
 
@@ -106,13 +115,15 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // Dom24 is a client for dom24
 type Dom24 struct {
-	Auth auth.ClientService
+	Accounting *accounting.Client
 
-	Bill bill.ClientService
+	Auth *auth.Client
 
-	Meters meters.ClientService
+	Bill *bill.Client
 
-	User user.ClientService
+	Meters *meters.Client
+
+	User *user.Client
 
 	Transport runtime.ClientTransport
 }
@@ -120,8 +131,15 @@ type Dom24 struct {
 // SetTransport changes the transport on the client and all its subresources
 func (c *Dom24) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
+
+	c.Accounting.SetTransport(transport)
+
 	c.Auth.SetTransport(transport)
+
 	c.Bill.SetTransport(transport)
+
 	c.Meters.SetTransport(transport)
+
 	c.User.SetTransport(transport)
+
 }

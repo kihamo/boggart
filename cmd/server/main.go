@@ -6,6 +6,7 @@ import (
 	_ "github.com/kihamo/boggart/components/boggart/bind/astro"
 	_ "github.com/kihamo/boggart/components/boggart/bind/broadlink"
 	_ "github.com/kihamo/boggart/components/boggart/bind/chromecast"
+	_ "github.com/kihamo/boggart/components/boggart/bind/dom24"
 	_ "github.com/kihamo/boggart/components/boggart/bind/ds18b20"
 	_ "github.com/kihamo/boggart/components/boggart/bind/esphome"
 	_ "github.com/kihamo/boggart/components/boggart/bind/fcm"

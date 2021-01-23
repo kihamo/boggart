@@ -7,11 +7,12 @@ package user
 
 import (
 	"github.com/go-openapi/runtime"
-	"github.com/go-openapi/strfmt"
+
+	strfmt "github.com/go-openapi/strfmt"
 )
 
 // New creates a new user API client.
-func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
+func New(transport runtime.ClientTransport, formats strfmt.Registry) *Client {
 	return &Client{transport: transport, formats: formats}
 }
 
@@ -23,17 +24,8 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
-// ClientService is the interface for Client methods
-type ClientService interface {
-	AddByIdent(params *AddByIdentParams) (*AddByIdentOK, error)
-
-	DeleteByIdent(params *DeleteByIdentParams) (*DeleteByIdentOK, error)
-
-	SetTransport(transport runtime.ClientTransport)
-}
-
 /*
-  AddByIdent add by ident API
+AddByIdent add by ident API
 */
 func (a *Client) AddByIdent(params *AddByIdentParams) (*AddByIdentOK, error) {
 	// TODO: Validate the params before sending
@@ -66,7 +58,7 @@ func (a *Client) AddByIdent(params *AddByIdentParams) (*AddByIdentOK, error) {
 }
 
 /*
-  DeleteByIdent delete by ident API
+DeleteByIdent delete by ident API
 */
 func (a *Client) DeleteByIdent(params *DeleteByIdentParams) (*DeleteByIdentOK, error) {
 	// TODO: Validate the params before sending
@@ -95,6 +87,39 @@ func (a *Client) DeleteByIdent(params *DeleteByIdentParams) (*DeleteByIdentOK, e
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*DeleteByIdentDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+UserInfo user info API
+*/
+func (a *Client) UserInfo(params *UserInfoParams) (*UserInfoOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewUserInfoParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "userInfo",
+		Method:             "GET",
+		PathPattern:        "/User/Info",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &UserInfoReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*UserInfoOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*UserInfoDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 

@@ -10,10 +10,11 @@ import (
 	"io"
 
 	"github.com/go-openapi/runtime"
-	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
-	"github.com/kihamo/boggart/providers/dom24/models"
+	strfmt "github.com/go-openapi/strfmt"
+
+	models "github.com/kihamo/boggart/providers/dom24/models"
 )
 
 // DeleteByIdentReader is a Reader for the DeleteByIdent structure.
