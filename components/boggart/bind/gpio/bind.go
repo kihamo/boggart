@@ -20,6 +20,7 @@ const (
 
 type Bind struct {
 	di.LoggerBind
+	di.MetaBind
 	di.MQTTBind
 	di.WidgetBind
 
@@ -130,6 +131,10 @@ func (b *Bind) waitForEdge() {
 					b.Logger().Debugf("Pin %s edge high", p.String())
 				} else {
 					b.Logger().Debugf("Pin %s edge low", p.String())
+				}
+
+				if b.config.Inverted {
+					v = !v
 				}
 
 				if err := b.MQTT().PublishAsync(ctx, b.config.TopicPinState, v); err != nil {

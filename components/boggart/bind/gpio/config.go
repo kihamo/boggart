@@ -9,8 +9,9 @@ import (
 type Config struct {
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
-	Pin           uint64     `valid:"required"`
-	Mode          string     `valid:"in(in|out)"`
+	Pin           uint64 `valid:"required"`
+	Mode          string `valid:"in(in|out)"`
+	Inverted      bool
 	TopicPinState mqtt.Topic `mapstructure:"topic_pin_state" yaml:"topic_pin_state"`
 	TopicPinSet   mqtt.Topic `mapstructure:"topic_pin_set" yaml:"topic_pin_set"`
 }

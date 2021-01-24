@@ -16,7 +16,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			b.config.TopicPinSet,
 			0,
 			func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-				if message.IsTrue() {
+				if message.IsTrue() && !b.config.Inverted {
 					return b.High(ctx)
 				}
 
