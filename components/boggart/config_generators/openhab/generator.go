@@ -186,7 +186,7 @@ func ItemPrefixFromBindMeta(meta *di.MetaContainer) string {
 }
 
 func FilePrefixFromBindMeta(meta *di.MetaContainer) string {
-	return IDNormalize(strings.ToLower(meta.Type()))
+	return IDNormalize("bind_" + strings.ToLower(meta.Type()))
 }
 
 func StepDefault(name string) generators.Step {

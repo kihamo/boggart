@@ -18,7 +18,7 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 			WithStateTopic(b.config.TopicCurrentTemp.Format(id)).
 			AddItems(
 				openhab.NewItem(itemPrefix+"CurrentTemp", openhab.ItemTypeNumber).
-					WithLabel("Current temperature").
+					WithLabel("Current temperature [%.2f °C]").
 					WithIcon("temperature"),
 			),
 	)

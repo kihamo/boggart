@@ -2,5 +2,6 @@
 *.log
 vendor/*
 /openhab2
+/openhab3
 components/openhab/swagger.json
 cmd/test

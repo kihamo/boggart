@@ -19,6 +19,7 @@ type Config struct {
 	TopicVariable    mqtt.Topic    `mapstructure:"topic_variable" yaml:"topic_variable"`
 	TopicVariableSet mqtt.Topic    `mapstructure:"topic_variable_set" yaml:"topic_variable_set"`
 	TopicCommand     mqtt.Topic    `mapstructure:"topic_command" yaml:"topic_command"`
+	TopicCommandRun  mqtt.Topic    `mapstructure:"topic_command_run" yaml:"topic_command_run"`
 }
 
 func (t Type) Config() interface{} {
@@ -34,6 +35,7 @@ func (t Type) Config() interface{} {
 		UpdaterInterval:  time.Minute,
 		TopicVariable:    prefix + "variable/+",
 		TopicVariableSet: prefix + "variable/+/set",
-		TopicCommand:     prefix + "command",
+		TopicCommand:     prefix + "command/+",
+		TopicCommandRun:  prefix + "command/+/run",
 	}
 }

@@ -13,21 +13,21 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 			WithStateTopic(b.config.TopicNadir).
 			AddItems(
 				openhab.NewItem(itemPrefix+"Nadir", openhab.ItemTypeDateTime).
-					WithLabel("Nadir").
+					WithLabel("Nadir [%1$tH:%1$tM:%1$tS %1$tz]").
 					WithIcon("moon"),
 			),
 		openhab.NewChannel("NightBeforeStart", openhab.ChannelTypeDateTime).
 			WithStateTopic(b.config.TopicNightBeforeStart).
 			AddItems(
 				openhab.NewItem(itemPrefix+"NightBeforeStart", openhab.ItemTypeDateTime).
-					WithLabel("Night before start").
+					WithLabel("Night before start [%1$tH:%1$tM:%1$tS %1$tz]").
 					WithIcon("moon"),
 			),
 		openhab.NewChannel("NightBeforeEnd", openhab.ChannelTypeDateTime).
 			WithStateTopic(b.config.TopicNightBeforeEnd).
 			AddItems(
 				openhab.NewItem(itemPrefix+"NightBeforeEnd", openhab.ItemTypeDateTime).
-					WithLabel("Night before end").
+					WithLabel("Night before end [%1$tH:%1$tM:%1$tS %1$tz]").
 					WithIcon("moon"),
 			),
 		openhab.NewChannel("NightBeforeDuration", openhab.ChannelTypeNumber).
@@ -41,14 +41,14 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 			WithStateTopic(b.config.TopicAstronomicalDawnStart).
 			AddItems(
 				openhab.NewItem(itemPrefix+"AstronomicalDawnStart", openhab.ItemTypeDateTime).
-					WithLabel("Astronomical dawn start").
+					WithLabel("Astronomical dawn start [%1$tH:%1$tM:%1$tS %1$tz]").
 					WithIcon("sunrise"),
 			),
 		openhab.NewChannel("AstronomicalDawnEnd", openhab.ChannelTypeDateTime).
 			WithStateTopic(b.config.TopicAstronomicalDawnEnd).
 			AddItems(
 				openhab.NewItem(itemPrefix+"AstronomicalDawnEnd", openhab.ItemTypeDateTime).
-					WithLabel("Astronomical dawn end").
+					WithLabel("Astronomical dawn end [%1$tH:%1$tM:%1$tS %1$tz]").
 					WithIcon("sunrise"),
 			),
 		openhab.NewChannel("AstronomicalDawnDuration", openhab.ChannelTypeNumber).
@@ -62,14 +62,14 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 			WithStateTopic(b.config.TopicNauticalDawnStart).
 			AddItems(
 				openhab.NewItem(itemPrefix+"NauticalDawnStart", openhab.ItemTypeDateTime).
-					WithLabel("Nautical dawn start").
+					WithLabel("Nautical dawn start [%1$tH:%1$tM:%1$tS %1$tz]").
 					WithIcon("sunrise"),
 			),
 		openhab.NewChannel("NauticalDawnEnd", openhab.ChannelTypeDateTime).
 			WithStateTopic(b.config.TopicNauticalDawnEnd).
 			AddItems(
 				openhab.NewItem(itemPrefix+"NauticalDawnEnd", openhab.ItemTypeDateTime).
-					WithLabel("Nautical dawn end").
+					WithLabel("Nautical dawn end [%1$tH:%1$tM:%1$tS %1$tz]").
 					WithIcon("sunrise"),
 			),
 		openhab.NewChannel("NauticalDawnDuration", openhab.ChannelTypeNumber).
@@ -83,14 +83,14 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 			WithStateTopic(b.config.TopicCivilDawnStart).
 			AddItems(
 				openhab.NewItem(itemPrefix+"CivilDawnStart", openhab.ItemTypeDateTime).
-					WithLabel("Civil dawn start").
+					WithLabel("Civil dawn start [%1$tH:%1$tM:%1$tS %1$tz]").
 					WithIcon("sunrise"),
 			),
 		openhab.NewChannel("CivilDawnEnd", openhab.ChannelTypeDateTime).
 			WithStateTopic(b.config.TopicCivilDawnEnd).
 			AddItems(
 				openhab.NewItem(itemPrefix+"CivilDawnEnd", openhab.ItemTypeDateTime).
-					WithLabel("Civil dawn end").
+					WithLabel("Civil dawn end [%1$tH:%1$tM:%1$tS %1$tz]").
 					WithIcon("sunrise"),
 			),
 		openhab.NewChannel("CivilDawnDuration", openhab.ChannelTypeNumber).
@@ -104,14 +104,14 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 			WithStateTopic(b.config.TopicRiseStart).
 			AddItems(
 				openhab.NewItem(itemPrefix+"RiseStart", openhab.ItemTypeDateTime).
-					WithLabel("Sunrise start").
+					WithLabel("Sunrise start [%1$tH:%1$tM:%1$tS %1$tz]").
 					WithIcon("sunrise"),
 			),
 		openhab.NewChannel("RiseEnd", openhab.ChannelTypeDateTime).
 			WithStateTopic(b.config.TopicRiseEnd).
 			AddItems(
 				openhab.NewItem(itemPrefix+"RiseEnd", openhab.ItemTypeDateTime).
-					WithLabel("Sunrise end").
+					WithLabel("Sunrise end [%1$tH:%1$tM:%1$tS %1$tz]").
 					WithIcon("sunrise"),
 			),
 		openhab.NewChannel("RiseDuration", openhab.ChannelTypeNumber).
@@ -125,21 +125,21 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 			WithStateTopic(b.config.TopicSolarNoon).
 			AddItems(
 				openhab.NewItem(itemPrefix+"SolarNoon", openhab.ItemTypeDateTime).
-					WithLabel("Solar noon").
+					WithLabel("Solar noon [%1$tH:%1$tM:%1$tS %1$tz]").
 					WithIcon("sun"),
 			),
 		openhab.NewChannel("SetStart", openhab.ChannelTypeDateTime).
 			WithStateTopic(b.config.TopicSetStart).
 			AddItems(
 				openhab.NewItem(itemPrefix+"SetStart", openhab.ItemTypeDateTime).
-					WithLabel("Sunset start").
+					WithLabel("Sunset start [%1$tH:%1$tM:%1$tS %1$tz]").
 					WithIcon("sunset"),
 			),
 		openhab.NewChannel("SetEnd", openhab.ChannelTypeDateTime).
 			WithStateTopic(b.config.TopicSetEnd).
 			AddItems(
 				openhab.NewItem(itemPrefix+"SetEnd", openhab.ItemTypeDateTime).
-					WithLabel("Sunset end").
+					WithLabel("Sunset end [%1$tH:%1$tM:%1$tS %1$tz]").
 					WithIcon("sunset"),
 			),
 		openhab.NewChannel("SetDuration", openhab.ChannelTypeNumber).
@@ -153,14 +153,14 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 			WithStateTopic(b.config.TopicCivilDuskStart).
 			AddItems(
 				openhab.NewItem(itemPrefix+"CivilDuskStart", openhab.ItemTypeDateTime).
-					WithLabel("Civil dusk start").
+					WithLabel("Civil dusk start [%1$tH:%1$tM:%1$tS %1$tz]").
 					WithIcon("sunset"),
 			),
 		openhab.NewChannel("CivilDuskEnd", openhab.ChannelTypeDateTime).
 			WithStateTopic(b.config.TopicCivilDuskEnd).
 			AddItems(
 				openhab.NewItem(itemPrefix+"CivilDuskEnd", openhab.ItemTypeDateTime).
-					WithLabel("Civil dusk end").
+					WithLabel("Civil dusk end [%1$tH:%1$tM:%1$tS %1$tz]").
 					WithIcon("sunset"),
 			),
 		openhab.NewChannel("CivilDuskDuration", openhab.ChannelTypeNumber).
@@ -174,14 +174,14 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 			WithStateTopic(b.config.TopicNauticalDuskStart).
 			AddItems(
 				openhab.NewItem(itemPrefix+"NauticalDuskStart", openhab.ItemTypeDateTime).
-					WithLabel("Nautical dusk start").
+					WithLabel("Nautical dusk start [%1$tH:%1$tM:%1$tS %1$tz]").
 					WithIcon("sunset"),
 			),
 		openhab.NewChannel("NauticalDuskEnd", openhab.ChannelTypeDateTime).
 			WithStateTopic(b.config.TopicNauticalDuskEnd).
 			AddItems(
 				openhab.NewItem(itemPrefix+"NauticalDuskEnd", openhab.ItemTypeDateTime).
-					WithLabel("Nautical dusk end").
+					WithLabel("Nautical dusk end [%1$tH:%1$tM:%1$tS %1$tz]").
 					WithIcon("sunset"),
 			),
 		openhab.NewChannel("NauticalDuskDuration", openhab.ChannelTypeNumber).
@@ -195,14 +195,14 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 			WithStateTopic(b.config.TopicAstronomicalDuskStart).
 			AddItems(
 				openhab.NewItem(itemPrefix+"AstronomicalDuskStart", openhab.ItemTypeDateTime).
-					WithLabel("Astronomical dusk start").
+					WithLabel("Astronomical dusk start [%1$tH:%1$tM:%1$tS %1$tz]").
 					WithIcon("sunset"),
 			),
 		openhab.NewChannel("AstronomicalDuskEnd", openhab.ChannelTypeDateTime).
 			WithStateTopic(b.config.TopicAstronomicalDuskEnd).
 			AddItems(
 				openhab.NewItem(itemPrefix+"AstronomicalDuskEnd", openhab.ItemTypeDateTime).
-					WithLabel("Astronomical dusk end").
+					WithLabel("Astronomical dusk end [%1$tH:%1$tM:%1$tS %1$tz]").
 					WithIcon("sunset"),
 			),
 		openhab.NewChannel("AstronomicalDuskDuration", openhab.ChannelTypeNumber).
@@ -216,14 +216,14 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 			WithStateTopic(b.config.TopicNightAfterStart).
 			AddItems(
 				openhab.NewItem(itemPrefix+"NightAfterStart", openhab.ItemTypeDateTime).
-					WithLabel("Night after start").
+					WithLabel("Night after start [%1$tH:%1$tM:%1$tS %1$tz]").
 					WithIcon("moon"),
 			),
 		openhab.NewChannel("NightAfterEnd", openhab.ChannelTypeDateTime).
 			WithStateTopic(b.config.TopicNightAfterEnd).
 			AddItems(
 				openhab.NewItem(itemPrefix+"NightAfterEnd", openhab.ItemTypeDateTime).
-					WithLabel("Night after end").
+					WithLabel("Night after end [%1$tH:%1$tM:%1$tS %1$tz]").
 					WithIcon("moon"),
 			),
 		openhab.NewChannel("NightAfterDuration", openhab.ChannelTypeNumber).

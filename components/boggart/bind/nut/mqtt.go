@@ -21,12 +21,18 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			return b.SetVariable(route[len(route)-2], message.String())
 		})),
-		mqtt.NewSubscriber(b.config.TopicCommand, 0, b.MQTT().WrapSubscribeDeviceIsOnline(func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 2) {
+		mqtt.NewSubscriber(b.config.TopicCommandRun, 0, b.MQTT().WrapSubscribeDeviceIsOnline(func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+			if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 4) {
 				return nil
 			}
 
-			return b.SendCommand(message.String())
+			cmd := message.String()
+
+			if err := b.SendCommand(cmd); err != nil {
+				return err
+			}
+
+			return b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicCommand.Format(b.Meta().SerialNumber(), cmd), "done")
 		})),
 	}
 }
