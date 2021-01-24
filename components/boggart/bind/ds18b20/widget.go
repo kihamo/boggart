@@ -6,11 +6,15 @@ import (
 )
 
 func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
-	value, err := b.Temperature()
+	widget := b.Widget()
+
+	values, err := b.Temperatures()
+	if err != nil {
+		widget.FlashError(r, "Get values failed %v", "", err)
+	}
 
 	b.Widget().Render(r.Context(), "widget", map[string]interface{}{
-		"value": value,
-		"error": err,
+		"values": values,
 	})
 }
 

@@ -2,6 +2,7 @@ package ds18b20
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/kihamo/boggart/components/boggart/tasks"
 )
@@ -19,17 +20,19 @@ func (b *Bind) Tasks() []tasks.Task {
 	}
 }
 
-func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
-	value, err := b.Temperature()
+func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
+	values, err := b.Temperatures()
 	if err != nil {
 		return err
 	}
 
-	metricValue.With("serial_number", b.config.Address).Set(value)
+	for sensor, value := range values {
+		metricValue.With("serial_number", sensor).Set(value)
 
-	if err := b.MQTT().PublishAsync(ctx, b.config.TopicValue, value); err != nil {
-		return err
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicValue.Format(sensor), value); e != nil {
+			err = fmt.Errorf("publish value for sensor %s return error: %w", sensor, e)
+		}
 	}
 
-	return nil
+	return err
 }

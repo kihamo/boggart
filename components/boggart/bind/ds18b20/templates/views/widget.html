@@ -11,21 +11,23 @@
                 <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
                     <thead>
                         <tr>
+                            <th>{{ i18n "Sensor" . }}</th>
                             <th>{{ i18n "Measurement" . }}</th>
                             <th>{{ i18n "Value" . }}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>{{ i18n "Temperature" . }}</td>
-                            {{ if .error }}
-                                <td class="text-danger">{{ .error.Error }}</td>
-                            {{ else }}
+                        {{ if .values }}
+                            {{ range $sensor, $value := .values }}
+                            <tr>
+                                <td>{{ $sensor }}</td>
+                                <td>{{ i18n "Temperature" . }}</td>
                                 <td>
-                                    <script type="application/javascript">document.write(valueFormat({{ .value }}))</script> {{ i18n "°C" }}
+                                    <script type="application/javascript">document.write(valueFormat({{ $value }}))</script> {{ i18n "°C" }}
                                 </td>
+                            </tr>
                             {{ end }}
-                        </tr>
+                        {{ end }}
                     </tbody>
                 </table>
             </div>
