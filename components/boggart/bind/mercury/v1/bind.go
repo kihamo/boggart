@@ -24,13 +24,25 @@ type Bind struct {
 	provider     *mercury.MercuryV1
 	providerOnce *atomic.Once
 	connection   connection.Connection
+	tariffCount  *atomic.Uint32Null
 }
 
 func (b *Bind) Run() error {
 	b.Meta().SetSerialNumber(b.config.Address)
 	b.providerOnce.Reset()
+	b.tariffCount.Nil()
 
-	return nil
+	provider, err := b.Provider()
+	if err != nil {
+		return err
+	}
+
+	tariffCount, err := provider.TariffCount()
+	if err == nil {
+		b.tariffCount.Set(uint32(tariffCount))
+	}
+
+	return err
 }
 
 func (b *Bind) Provider() (provider *mercury.MercuryV1, err error) {

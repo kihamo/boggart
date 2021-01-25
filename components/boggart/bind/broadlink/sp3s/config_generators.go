@@ -8,7 +8,9 @@ import (
 func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 	itemPrefix := openhab.ItemPrefixFromBindMeta(b.Meta())
 
-	return openhab.StepsByBind(b, nil,
+	return openhab.StepsByBind(b, []generators.Step{
+		openhab.StepDefault(openhab.StepDefaultTransformHumanWatts),
+	},
 		openhab.NewChannel("Status", openhab.ChannelTypeSwitch).
 			WithStateTopic(b.config.TopicState).
 			WithCommandTopic(b.config.TopicSet).
@@ -22,7 +24,7 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 			WithStateTopic(b.config.TopicPower).
 			AddItems(
 				openhab.NewItem(itemPrefix+"Power", openhab.ItemTypeNumber).
-					WithLabel("Power [%.1f W]").
+					WithLabel("Power [JS(human_watts.js):%s]").
 					WithIcon("energy"),
 			),
 	)

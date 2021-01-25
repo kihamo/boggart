@@ -19,6 +19,7 @@ const (
 	DirectoryTransform = "transform/"
 
 	StepDefaultTransformHumanBytes = DirectoryTransform + "human_bytes.js"
+	StepDefaultTransformHumanWatts = DirectoryTransform + "human_watts.js"
 )
 
 var (
@@ -42,6 +43,23 @@ var (
         d = 2,
         e = ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
         c = 1024;
+
+    if (0 === i || '0' === i) {
+        return '0 ' + e[0];
+    }
+
+    var f = Math.floor(Math.log(i) / Math.log(c));
+
+    return parseFloat((i / Math.pow(c, f)).toFixed(d)) + ' ' + e[f];
+})(input);`,
+		},
+		StepDefaultTransformHumanWatts: {
+			FilePath: StepDefaultTransformHumanWatts,
+			Content: `(function(i) {
+    var
+        d = 2,
+        e = ['watts', 'KW', 'MW', 'GW', 'TW', 'PW', 'EW', 'ZW', 'YW'],
+        c = 1e3;
 
     if (0 === i || '0' === i) {
         return '0 ' + e[0];

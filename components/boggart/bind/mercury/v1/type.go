@@ -14,10 +14,7 @@ type Type struct {
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
-	config.TopicTariff1 = config.TopicTariff1.Format(config.Address)
-	config.TopicTariff2 = config.TopicTariff2.Format(config.Address)
-	config.TopicTariff3 = config.TopicTariff3.Format(config.Address)
-	config.TopicTariff4 = config.TopicTariff4.Format(config.Address)
+	config.TopicTariff = config.TopicTariff.Format(config.Address)
 	config.TopicVoltage = config.TopicVoltage.Format(config.Address)
 	config.TopicAmperage = config.TopicAmperage.Format(config.Address)
 	config.TopicPower = config.TopicPower.Format(config.Address)
@@ -31,5 +28,6 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	return &Bind{
 		config:       config,
 		providerOnce: &atomic.Once{},
+		tariffCount:  atomic.NewUint32Null(),
 	}, nil
 }

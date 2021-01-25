@@ -16,10 +16,7 @@ type Config struct {
 	Address              string `valid:"required"`
 	Location             string
 	UpdaterInterval      time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
-	TopicTariff1         mqtt.Topic    `mapstructure:"topic_tariff_1" yaml:"topic_tariff_1"`
-	TopicTariff2         mqtt.Topic    `mapstructure:"topic_tariff_2" yaml:"topic_tariff_2"`
-	TopicTariff3         mqtt.Topic    `mapstructure:"topic_tariff_3" yaml:"topic_tariff_3"`
-	TopicTariff4         mqtt.Topic    `mapstructure:"topic_tariff_4" yaml:"topic_tariff_4"`
+	TopicTariff          mqtt.Topic    `mapstructure:"topic_tariff" yaml:"topic_tariff"`
 	TopicVoltage         mqtt.Topic    `mapstructure:"topic_voltage" yaml:"topic_voltage"`
 	TopicAmperage        mqtt.Topic    `mapstructure:"topic_amperage" yaml:"topic_amperage"`
 	TopicPower           mqtt.Topic    `mapstructure:"topic_power" yaml:"topic_power"`
@@ -50,10 +47,7 @@ func (t Type) Config() interface{} {
 			точности 1 и 2 соответственно.
 		*/
 		UpdaterInterval:      time.Minute * 5,
-		TopicTariff1:         prefix + "tariff/1",
-		TopicTariff2:         prefix + "tariff/2",
-		TopicTariff3:         prefix + "tariff/3",
-		TopicTariff4:         prefix + "tariff/4",
+		TopicTariff:          prefix + "tariff/+",
 		TopicVoltage:         prefix + "voltage",
 		TopicAmperage:        prefix + "amperage",
 		TopicPower:           prefix + "power",

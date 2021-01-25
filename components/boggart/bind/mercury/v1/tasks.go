@@ -26,22 +26,18 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		return err
 	}
 
-	tariffCount, err := provider.TariffCount()
-	if err != nil {
-		return err
-	}
-
 	powerValues, err := provider.PowerCounters()
 	if err != nil {
 		return err
 	}
 
+	tariffCount := b.tariffCount.Load()
 	mTariff := metricTariff.With("serial_number", b.config.Address)
 
 	if tariffCount > 0 {
 		mTariff.With("tariff", "1").Set(float64(powerValues.Tariff1()))
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicTariff1, powerValues.Tariff1()); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicTariff.Format(1), powerValues.Tariff1()); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
@@ -49,7 +45,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	if tariffCount > 1 {
 		mTariff.With("tariff", "2").Set(float64(powerValues.Tariff2()))
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicTariff2, powerValues.Tariff2()); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicTariff.Format(2), powerValues.Tariff2()); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
@@ -57,7 +53,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	if tariffCount > 2 {
 		mTariff.With("tariff", "3").Set(float64(powerValues.Tariff3()))
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicTariff3, powerValues.Tariff3()); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicTariff.Format(3), powerValues.Tariff3()); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
@@ -65,7 +61,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	if tariffCount > 3 {
 		mTariff.With("tariff", "4").Set(float64(powerValues.Tariff4()))
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicTariff4, powerValues.Tariff4()); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicTariff.Format(4), powerValues.Tariff4()); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
