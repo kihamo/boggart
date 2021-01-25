@@ -17,7 +17,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 }
 
 func (b *Bind) callbackMQTTSMSSend(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 4) {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -4) {
 		return nil
 	}
 
@@ -30,7 +30,7 @@ func (b *Bind) callbackMQTTSMSSend(ctx context.Context, _ mqtt.Component, messag
 }
 
 func (b *Bind) callbackMQTTUSSDSend(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 3) {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -3) {
 		return nil
 	}
 
@@ -43,7 +43,7 @@ func (b *Bind) callbackMQTTUSSDSend(ctx context.Context, _ mqtt.Component, messa
 }
 
 func (b *Bind) callbackMQTTReboot(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-	if message.IsFalse() || !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 2) {
+	if message.IsFalse() || !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -2) {
 		return nil
 	}
 

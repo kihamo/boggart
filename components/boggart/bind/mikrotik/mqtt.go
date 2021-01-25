@@ -26,7 +26,7 @@ func (b *Bind) callbackMQTTWiFiSync(ctx context.Context, client mqtt.Component, 
 		return err
 	}
 
-	if sn == "" || !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 5) {
+	if sn == "" || !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -5) {
 		return nil
 	}
 

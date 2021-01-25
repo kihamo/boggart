@@ -17,7 +17,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(b.config.TopicPermitJoin, 0, b.MQTT().WrapSubscribeDeviceIsOnline(
 			func(ctx context.Context, _ mqtt.Component, message mqtt.Message) (err error) {
-				if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 2) {
+				if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -2) {
 					return nil
 				}
 

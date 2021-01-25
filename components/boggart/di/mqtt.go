@@ -233,17 +233,41 @@ func (c *MQTTContainer) Request(ctx context.Context, requestTopic, responseTopic
 	}
 }
 
+// смещение человеко понятное и стартует с единицы:
+//   offset == 0 игнорируется
+//   offset > 0 смещение от лева к праву 2 => (a [b] c d e f)
+//   offset < 0 смещение от права к леву -2 => (a b c d [e] f)
 func (c *MQTTContainer) CheckValueInTopic(topic mqtt.Topic, value string, offset int) bool {
-	if value == "" {
+	if value == "" || offset == 0 {
 		return false
 	}
 
 	routes := topic.Split()
+
+	if offset > 0 {
+		if len(routes) < offset {
+			return false
+		}
+
+		return routes[offset-1] == value
+	}
+
+	offset *= -1
 	if len(routes) < offset {
 		return false
 	}
 
 	return routes[len(routes)-offset] == value
+}
+
+func (c *MQTTContainer) CheckBindIDInTopic(topic mqtt.Topic, offset int) bool {
+	if bindSupport, ok := MetaContainerBind(c.bind.Bind()); ok {
+		if id := bindSupport.ID(); id != "" {
+			return c.CheckValueInTopic(topic, mqtt.NameReplace(id), offset)
+		}
+	}
+
+	return false
 }
 
 func (c *MQTTContainer) CheckSerialNumberInTopic(topic mqtt.Topic, offset int) bool {

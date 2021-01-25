@@ -23,7 +23,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 }
 
 func (b *Bind) callbackMQTTSendMessage(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 4) {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -4) {
 		return nil
 	}
 
@@ -36,7 +36,7 @@ func (b *Bind) callbackMQTTSendMessage(_ context.Context, _ mqtt.Component, mess
 }
 
 func (b *Bind) callbackMQTTSendFile(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 4) {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -4) {
 		return nil
 	}
 
@@ -109,7 +109,7 @@ func (b *Bind) callbackMQTTSendFile(_ context.Context, _ mqtt.Component, message
 }
 
 func (b *Bind) callbackMQTTSendFileURL(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 5) {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -5) {
 		return nil
 	}
 
@@ -122,7 +122,7 @@ func (b *Bind) callbackMQTTSendFileURL(_ context.Context, _ mqtt.Component, mess
 }
 
 func (b *Bind) callbackMQTTSendFileBase64(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 5) || message.Len() == 0 {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -5) || message.Len() == 0 {
 		return nil
 	}
 

@@ -109,7 +109,7 @@ func (b *Bind) checkTopic(topic mqtt.Topic) (uint64, error) {
 }
 
 func (b *Bind) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 4) {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -4) {
 		return nil
 	}
 
@@ -138,7 +138,7 @@ func (b *Bind) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, 
 }
 
 func (b *Bind) callbackMQTTContinuous(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 4) {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -4) {
 		return nil
 	}
 
@@ -165,7 +165,7 @@ func (b *Bind) callbackMQTTContinuous(ctx context.Context, client mqtt.Component
 }
 
 func (b *Bind) callbackMQTTRelative(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 4) {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -4) {
 		return nil
 	}
 
@@ -194,7 +194,7 @@ func (b *Bind) callbackMQTTRelative(ctx context.Context, client mqtt.Component, 
 }
 
 func (b *Bind) callbackMQTTPreset(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 4) {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -4) {
 		return nil
 	}
 
@@ -219,7 +219,7 @@ func (b *Bind) callbackMQTTPreset(ctx context.Context, client mqtt.Component, me
 }
 
 func (b *Bind) callbackMQTTMomentary(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 4) {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -4) {
 		return nil
 	}
 

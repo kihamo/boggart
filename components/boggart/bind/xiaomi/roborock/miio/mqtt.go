@@ -20,7 +20,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 }
 
 func (b *Bind) callbackMQTTSetFanPower(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 3) {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -3) {
 		return nil
 	}
 
@@ -38,7 +38,7 @@ func (b *Bind) callbackMQTTSetFanPower(ctx context.Context, client mqtt.Componen
 }
 
 func (b *Bind) callbackMQTTSetVolume(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 3) {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -3) {
 		return nil
 	}
 
@@ -56,7 +56,7 @@ func (b *Bind) callbackMQTTSetVolume(ctx context.Context, client mqtt.Component,
 }
 
 func (b *Bind) callbackMQTTTestVolume(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 3) {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -3) {
 		return nil
 	}
 
@@ -64,7 +64,7 @@ func (b *Bind) callbackMQTTTestVolume(ctx context.Context, client mqtt.Component
 }
 
 func (b *Bind) callbackMQTTFind(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 2) {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -2) {
 		return nil
 	}
 
@@ -72,7 +72,7 @@ func (b *Bind) callbackMQTTFind(ctx context.Context, client mqtt.Component, mess
 }
 
 func (b *Bind) callbackMQTTAction(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), 2) {
+	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -2) {
 		return nil
 	}
 

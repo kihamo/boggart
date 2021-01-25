@@ -14,6 +14,7 @@ var (
 )
 
 type Bind struct {
+	di.MetaBind
 	di.MQTTBind
 
 	config *Config

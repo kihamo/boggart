@@ -10,14 +10,18 @@ import (
 type Config struct {
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
-	DSN       types.URL  `valid:"required"`
-	Sender    string     `valid:"email,required"`
-	TopicSend mqtt.Topic `mapstructure:"topic_send" yaml:"topic_send"`
+	DSN            types.URL  `valid:"required"`
+	Sender         string     `valid:"email,required"`
+	TopicSend      mqtt.Topic `mapstructure:"topic_send" yaml:"topic_send"`
+	TopicSendMulti mqtt.Topic `mapstructure:"topic_send_multi" yaml:"topic_send_multi"`
 }
 
 func (t Type) Config() interface{} {
+	var prefix mqtt.Topic = boggart.ComponentName + "/mail/+/"
+
 	return &Config{
-		LoggerConfig: di.LoggerConfigDefaults(),
-		TopicSend:    boggart.ComponentName + "/mail/#",
+		LoggerConfig:   di.LoggerConfigDefaults(),
+		TopicSend:      prefix + "send",
+		TopicSendMulti: prefix + "send/#",
 	}
 }
