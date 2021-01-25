@@ -14,7 +14,6 @@ type Config struct {
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
 	Address                        types.URL     `valid:",required"`
-	TopicPTZMove                   mqtt.Topic    `mapstructure:"topic_ptz_move" yaml:"topic_ptz_move"`
 	TopicPTZAbsolute               mqtt.Topic    `mapstructure:"topic_ptz_absolute" yaml:"topic_ptz_absolute"`
 	TopicPTZContinuous             mqtt.Topic    `mapstructure:"topic_ptz_continuous" yaml:"topic_ptz_continuous"`
 	TopicPTZRelative               mqtt.Topic    `mapstructure:"topic_ptz_relative" yaml:"topic_ptz_relative"`
@@ -41,7 +40,6 @@ type Config struct {
 	PreviewRefreshInterval         time.Duration `mapstructure:"preview_refresh_interval" yaml:"preview_refresh_interval,omitempty"`
 	WidgetChannel                  uint64        `mapstructure:"widget_channel" yaml:"widget_channel,omitempty"`
 	Debug                          bool
-	PTZEnabled                     bool `mapstructure:"ptz_enabled" yaml:"ptz_enabled,omitempty"`
 	EventsEnabled                  bool `mapstructure:"events_enabled" yaml:"events_enabled,omitempty"`
 	EventsStreamingEnabled         bool `mapstructure:"events_streaming_enabled" yaml:"events_streaming_enabled,omitempty"`
 }
@@ -63,7 +61,6 @@ func (t Type) Config() interface{} {
 		EventsIgnoreInterval:           time.Second * 5,
 		WidgetChannel:                  101,
 		PreviewRefreshInterval:         time.Second * 5,
-		TopicPTZMove:                   prefix + "ptz/+/move",
 		TopicPTZAbsolute:               prefix + "ptz/+/absolute",
 		TopicPTZContinuous:             prefix + "ptz/+/continuous",
 		TopicPTZRelative:               prefix + "ptz/+/relative",

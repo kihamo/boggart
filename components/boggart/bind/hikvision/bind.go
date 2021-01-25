@@ -41,8 +41,6 @@ type Bind struct {
 	alertStreamingHistory map[string]time.Time
 	alertStreaming        *hikvision.AlertStreaming
 
-	ptzChannels map[uint64]PTZChannel
-
 	config *Config
 }
 

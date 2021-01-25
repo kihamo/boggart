@@ -320,42 +320,59 @@ func (c *MQTTContainer) createSubscribe(subscriber mqtt.Subscriber) MQTTSubscrib
 	return item
 }
 
-func (c *MQTTContainer) Subscribe(subscriber mqtt.Subscriber) error {
+func (c *MQTTContainer) Subscribe(subscribers ...mqtt.Subscriber) error {
+	if len(subscribers) == 0 {
+		return nil
+	}
+
 	client, err := c.getClient()
 	if err != nil {
 		return err
 	}
 
-	item := c.createSubscribe(subscriber)
+	for _, s := range subscribers {
+		item := c.createSubscribe(s)
 
-	c.mutex.Lock()
-	c.subscribers = append(c.subscribers, item)
-	c.mutex.Unlock()
+		err = client.SubscribeSubscriber(item.Subscriber())
+		if err != nil {
+			return err
+		}
 
-	return client.SubscribeSubscriber(item.Subscriber())
+		c.mutex.Lock()
+		c.subscribers = append(c.subscribers, item)
+		c.mutex.Unlock()
+	}
+
+	return nil
 }
 
-func (c *MQTTContainer) Unsubscribe(subscriber mqtt.Subscriber) error {
+func (c *MQTTContainer) Unsubscribe(subscribers ...mqtt.Subscriber) error {
+	if len(subscribers) == 0 {
+		return nil
+	}
+
 	client, err := c.getClient()
 	if err != nil {
 		return err
 	}
 
-	err = client.UnsubscribeSubscriber(subscriber)
-	if err != nil {
-		return err
-	}
-
-	c.mutex.Lock()
-
-	for i := len(c.subscribers) - 1; i >= 0; i-- {
-		// смотрим напрямую в подписчика, игнорируя обертку
-		if c.subscribers[i].subscriber.original == subscriber {
-			c.subscribers = append(c.subscribers[:i], c.subscribers[i+1:]...)
+	for _, s := range subscribers {
+		err = client.UnsubscribeSubscriber(s)
+		if err != nil {
+			return err
 		}
-	}
 
-	c.mutex.Unlock()
+		c.mutex.Lock()
+
+		for i := len(c.subscribers) - 1; i >= 0; i-- {
+			// смотрим напрямую в подписчика, игнорируя обертку
+			if c.subscribers[i].subscriber.original == s {
+				c.subscribers = append(c.subscribers[:i], c.subscribers[i+1:]...)
+			}
+		}
+
+		c.mutex.Unlock()
+	}
 
 	return nil
 }

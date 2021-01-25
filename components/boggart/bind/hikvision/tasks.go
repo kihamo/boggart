@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart/tasks"
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/providers/hikvision/client/content_manager"
 	"github.com/kihamo/boggart/providers/hikvision/client/ptz"
 	"github.com/kihamo/boggart/providers/hikvision/client/system"
@@ -84,82 +85,66 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 		b.startAlertStreaming()
 	}
 
-	if b.config.PTZEnabled {
-		ptzChannels := make(map[uint64]PTZChannel)
-
-		if list, e := b.client.Ptz.GetPtzChannels(ptz.NewGetPtzChannelsParamsWithContext(ctx), nil); e == nil {
-			for _, channel := range list.Payload {
-				ptzChannels[channel.ID] = PTZChannel{
-					Channel: channel,
-				}
+	if channels, e := b.client.Ptz.GetPtzChannels(ptz.NewGetPtzChannelsParamsWithContext(ctx), nil); e == nil && len(channels.Payload) > 0 {
+		// FIXME: почему-то при ответе
+		// <?xml version="1.0" encoding="UTF-8"?>
+		// <PTZChannelList  version="2.0" xmlns="http://www.std-cgi.com/ver20/XMLSchema">
+		// </PTZChannelList >
+		// создается 1 пустой элемент, поэтому быстрохак
+		if !(len(channels.Payload) == 1 && channels.Payload[0].ID == 0) {
+			e = b.MQTT().Subscribe(
+				mqtt.NewSubscriber(b.config.TopicPTZAbsolute, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTAbsolute)),
+				mqtt.NewSubscriber(b.config.TopicPTZContinuous, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTContinuous)),
+				mqtt.NewSubscriber(b.config.TopicPTZRelative, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTRelative)),
+				mqtt.NewSubscriber(b.config.TopicPTZPreset, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTPreset)),
+				mqtt.NewSubscriber(b.config.TopicPTZMomentary, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTMomentary)),
+			)
+			if e == nil {
+				err = multierr.Append(err, e)
 			}
-		} else {
-			err = multierr.Append(err, e)
-		}
 
-		b.mutex.Lock()
-		b.ptzChannels = ptzChannels
-		b.mutex.Unlock()
-
-		_, e = b.Workers().RegisterTask(
-			tasks.NewTask().
-				WithName("ptz").
-				WithHandler(
-					b.Workers().WrapTaskIsOnline(
-						tasks.HandlerWithTimeout(
-							tasks.HandlerFunc(b.taskPTZHandler), b.config.PTZTimeout,
+			_, e = b.Workers().RegisterTask(
+				tasks.NewTask().
+					WithName("ptz").
+					WithHandler(
+						b.Workers().WrapTaskIsOnline(
+							tasks.HandlerWithTimeout(
+								tasks.HandlerFuncFromShortToLong(b.taskPTZHandler), b.config.PTZTimeout,
+							),
+						),
+					).
+					WithSchedule(
+						tasks.ScheduleWithControl(
+							tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.PTZInterval),
 						),
 					),
-				).
-				WithSchedule(
-					tasks.ScheduleWithControl(
-						tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.PTZInterval),
-					),
-				),
-		)
-
-		if e != nil {
-			err = multierr.Append(err, e)
+			)
+			if e != nil {
+				err = multierr.Append(err, e)
+			}
 		}
 	}
 
 	return err
 }
 
-func (b *Bind) taskPTZHandler(ctx context.Context, _ tasks.Meta, task tasks.Task) error {
-	b.mutex.RLock()
-	channels := b.ptzChannels
-	b.mutex.RUnlock()
-
-	if channels == nil {
-		return nil
+func (b *Bind) taskPTZHandler(ctx context.Context) error {
+	channels, err := b.client.Ptz.GetPtzChannels(ptz.NewGetPtzChannelsParamsWithContext(ctx), nil)
+	if err != nil {
+		return err
 	}
 
-	stop := true
-
-	if len(channels) != 0 {
-		for id, channel := range channels {
-			if !channel.Channel.Enabled {
-				continue
-			}
-
-			if err := b.updateStatusByChannelID(ctx, id); err != nil {
-				b.Logger().Error("Failed updated status",
-					"serial_number", b.Meta().SerialNumber(),
-					"channel", id,
-					"error", err.Error(),
-				)
-
-				continue
-			}
-
-			stop = false
+	for _, ch := range channels.Payload {
+		if !ch.Enabled {
+			continue
 		}
-	}
 
-	if stop {
-		if schedule, ok := task.Schedule().(*tasks.ScheduleControl); ok {
-			schedule.Disable()
+		if err := b.updateStatusByChannelID(ctx, ch.ID); err != nil {
+			b.Logger().Error("Failed updated status",
+				"serial_number", b.Meta().SerialNumber(),
+				"channel", ch.ID,
+				"error", err.Error(),
+			)
 		}
 	}
 

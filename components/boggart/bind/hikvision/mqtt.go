@@ -3,7 +3,6 @@ package hikvision
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -11,36 +10,10 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/providers/hikvision/client/ptz"
 	"github.com/kihamo/boggart/providers/hikvision/models"
-	er "github.com/pkg/errors"
 	"go.uber.org/multierr"
 )
 
-func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
-	subscribers := make([]mqtt.Subscriber, 0)
-
-	if b.config.PTZEnabled {
-		subscribers = append(subscribers,
-			mqtt.NewSubscriber(b.config.TopicPTZMove, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTAbsolute)),
-			mqtt.NewSubscriber(b.config.TopicPTZAbsolute, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTAbsolute)),
-			mqtt.NewSubscriber(b.config.TopicPTZContinuous, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTContinuous)),
-			mqtt.NewSubscriber(b.config.TopicPTZRelative, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTRelative)),
-			mqtt.NewSubscriber(b.config.TopicPTZPreset, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTPreset)),
-			mqtt.NewSubscriber(b.config.TopicPTZMomentary, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTMomentary)),
-		)
-	}
-
-	return subscribers
-}
-
 func (b *Bind) updateStatusByChannelID(ctx context.Context, channelID uint64) error {
-	b.mutex.RLock()
-	channel, ok := b.ptzChannels[channelID]
-	b.mutex.RUnlock()
-
-	if !ok {
-		return fmt.Errorf("channel %d not found", channelID)
-	}
-
 	params := ptz.NewGetPtzStatusParamsWithContext(ctx).
 		WithChannel(channelID)
 	status, err := b.client.Ptz.GetPtzStatus(params, nil)
@@ -51,61 +24,28 @@ func (b *Bind) updateStatusByChannelID(ctx context.Context, channelID uint64) er
 
 	sn := b.Meta().SerialNumber()
 
-	var result error
-
-	if channel.Status == nil || channel.Status.Elevation != status.Payload.AbsoluteHigh.Elevation {
-		if err := b.MQTT().PublishAsync(ctx, b.config.TopicPTZStatusElevation.Format(sn, channelID), status.Payload.AbsoluteHigh.Elevation); err != nil {
-			result = multierr.Append(result, err)
-		}
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicPTZStatusElevation.Format(sn, channelID), status.Payload.AbsoluteHigh.Elevation); e != nil {
+		err = multierr.Append(err, e)
 	}
 
-	if channel.Status == nil || channel.Status.Azimuth != status.Payload.AbsoluteHigh.Azimuth {
-		if err := b.MQTT().PublishAsync(ctx, b.config.TopicPTZStatusAzimuth.Format(sn, channelID), status.Payload.AbsoluteHigh.Azimuth); err != nil {
-			result = multierr.Append(result, err)
-		}
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicPTZStatusAzimuth.Format(sn, channelID), status.Payload.AbsoluteHigh.Azimuth); e != nil {
+		err = multierr.Append(err, e)
 	}
 
-	if channel.Status == nil || channel.Status.Zoom != status.Payload.AbsoluteHigh.Zoom {
-		if err := b.MQTT().PublishAsync(ctx, b.config.TopicPTZStatusZoom.Format(sn, channelID), status.Payload.AbsoluteHigh.Zoom); err != nil {
-			result = multierr.Append(result, err)
-		}
+	if e := b.MQTT().PublishAsync(ctx, b.config.TopicPTZStatusZoom.Format(sn, channelID), status.Payload.AbsoluteHigh.Zoom); e != nil {
+		err = multierr.Append(err, e)
 	}
 
-	channel.Status = status.Payload.AbsoluteHigh
-
-	b.mutex.Lock()
-	b.ptzChannels[channelID] = channel
-	b.mutex.Unlock()
-
-	if result != nil {
-		result = er.Wrap(result, "Failed send to MQTT")
-	}
-
-	return result
+	return err
 }
 
 func (b *Bind) checkTopic(topic mqtt.Topic) (uint64, error) {
-	b.mutex.RLock()
-	channels := b.ptzChannels
-	b.mutex.RUnlock()
-
-	if len(channels) == 0 {
-		return 0, errors.New("channels is empty")
-	}
-
 	parts := topic.Split()
-
-	channelID, err := strconv.ParseUint(parts[4], 10, 64)
-	if err != nil {
-		return 0, err
+	if len(parts) < 5 {
+		return 0, errors.New("bad topic")
 	}
 
-	_, ok := channels[channelID]
-	if !ok {
-		return 0, fmt.Errorf("channel %d not found", channelID)
-	}
-
-	return channelID, nil
+	return strconv.ParseUint(parts[4], 10, 64)
 }
 
 func (b *Bind) callbackMQTTAbsolute(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
