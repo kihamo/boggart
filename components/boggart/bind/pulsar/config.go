@@ -28,14 +28,8 @@ type Config struct {
 	TopicConsumption      mqtt.Topic    `mapstructure:"topic_consumption" yaml:"topic_consumption"`
 	TopicCapacity         mqtt.Topic    `mapstructure:"topic_capacity" yaml:"topic_capacity"`
 	TopicPower            mqtt.Topic    `mapstructure:"topic_power" yaml:"topic_power"`
-	TopicInputPulses1     mqtt.Topic    `mapstructure:"topic_pulses_1" yaml:"topic_pulses_1"`
-	TopicInputPulses2     mqtt.Topic    `mapstructure:"topic_pulses_2" yaml:"topic_pulses_2"`
-	TopicInputPulses3     mqtt.Topic    `mapstructure:"topic_pulses_3" yaml:"topic_pulses_3"`
-	TopicInputPulses4     mqtt.Topic    `mapstructure:"topic_pulses_4" yaml:"topic_pulses_4"`
-	TopicInputVolume1     mqtt.Topic    `mapstructure:"topic_volume_1" yaml:"topic_volume_1"`
-	TopicInputVolume2     mqtt.Topic    `mapstructure:"topic_volume_2" yaml:"topic_volume_2"`
-	TopicInputVolume3     mqtt.Topic    `mapstructure:"topic_volume_3" yaml:"topic_volume_3"`
-	TopicInputVolume4     mqtt.Topic    `mapstructure:"topic_volume_4" yaml:"topic_volume_4"`
+	TopicInputPulses      mqtt.Topic    `mapstructure:"topic_pulses" yaml:"topic_pulses"`
+	TopicInputVolume      mqtt.Topic    `mapstructure:"topic_volume" yaml:"topic_volume"`
 }
 
 func (t Type) Config() interface{} {
@@ -60,13 +54,7 @@ func (t Type) Config() interface{} {
 		TopicConsumption:      prefix + "consumption",
 		TopicCapacity:         prefix + "capacity",
 		TopicPower:            prefix + "power",
-		TopicInputPulses1:     prefix + "input/1/pulses",
-		TopicInputPulses2:     prefix + "input/2/pulses",
-		TopicInputPulses3:     prefix + "input/3/pulses",
-		TopicInputPulses4:     prefix + "input/4/pulses",
-		TopicInputVolume1:     prefix + "input/1/volume",
-		TopicInputVolume2:     prefix + "input/2/volume",
-		TopicInputVolume3:     prefix + "input/3/volume",
-		TopicInputVolume4:     prefix + "input/4/volume",
+		TopicInputPulses:      prefix + "input/pulses/+",
+		TopicInputVolume:      prefix + "input/volume/+",
 	}
 }

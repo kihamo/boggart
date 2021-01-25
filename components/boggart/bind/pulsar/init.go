@@ -5,5 +5,5 @@ import (
 )
 
 func init() {
-	boggart.RegisterBindType("pulsar:heat_meter", Type{})
+	boggart.RegisterBindType("pulsar:heat_meter", Type{}, "pulsar")
 }

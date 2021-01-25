@@ -157,16 +157,18 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	// inputs
 	if b.config.InputsCount > 0 {
 		if current, err := provider.PulseInput1(); err == nil {
+			const input1 = "1"
+
 			volume := b.inputVolume(current, b.config.Input1Offset)
 
-			metricInputPulses.With("serial_number", sn).With("input", "1").Set(float64(current))
-			metricInputVolume.With("serial_number", sn).With("input", "1").Set(float64(volume))
+			metricInputPulses.With("serial_number", sn).With("input", input1).Set(float64(current))
+			metricInputVolume.With("serial_number", sn).With("input", input1).Set(float64(volume))
 
-			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputPulses1.Format(sn), current); err != nil {
+			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputPulses.Format(sn, input1), current); err != nil {
 				result = multierr.Append(result, err)
 			}
 
-			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputVolume1.Format(sn), volume); err != nil {
+			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputVolume.Format(sn, input1), volume); err != nil {
 				result = multierr.Append(result, err)
 			}
 		} else {
@@ -176,16 +178,18 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 
 	if b.config.InputsCount > 1 {
 		if current, err := provider.PulseInput2(); err == nil {
+			const input2 = "2"
+
 			volume := b.inputVolume(current, b.config.Input2Offset)
 
-			metricInputPulses.With("serial_number", sn).With("input", "2").Set(float64(current))
-			metricInputVolume.With("serial_number", sn).With("input", "2").Set(float64(volume))
+			metricInputPulses.With("serial_number", sn).With("input", input2).Set(float64(current))
+			metricInputVolume.With("serial_number", sn).With("input", input2).Set(float64(volume))
 
-			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputPulses2.Format(sn), current); err != nil {
+			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputPulses.Format(sn, input2), current); err != nil {
 				result = multierr.Append(result, err)
 			}
 
-			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputVolume2.Format(sn), volume); err != nil {
+			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputVolume.Format(sn, input2), volume); err != nil {
 				result = multierr.Append(result, err)
 			}
 		} else {
@@ -195,16 +199,18 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 
 	if b.config.InputsCount > 2 {
 		if current, err := provider.PulseInput3(); err == nil {
+			const input3 = "3"
+
 			volume := b.inputVolume(current, b.config.Input3Offset)
 
-			metricInputPulses.With("serial_number", sn).With("input", "3").Set(float64(current))
-			metricInputVolume.With("serial_number", sn).With("input", "3").Set(float64(volume))
+			metricInputPulses.With("serial_number", sn).With("input", input3).Set(float64(current))
+			metricInputVolume.With("serial_number", sn).With("input", input3).Set(float64(volume))
 
-			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputPulses3.Format(sn), current); err != nil {
+			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputPulses.Format(sn, input3), current); err != nil {
 				result = multierr.Append(result, err)
 			}
 
-			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputVolume3.Format(sn), volume); err != nil {
+			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputVolume.Format(sn, input3), volume); err != nil {
 				result = multierr.Append(result, err)
 			}
 		} else {
@@ -214,16 +220,18 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 
 	if b.config.InputsCount > 3 {
 		if current, err := provider.PulseInput4(); err == nil {
+			const input4 = "4"
+
 			volume := b.inputVolume(current, b.config.Input4Offset)
 
-			metricInputPulses.With("serial_number", sn).With("input", "4").Set(float64(current))
-			metricInputVolume.With("serial_number", sn).With("input", "4").Set(float64(volume))
+			metricInputPulses.With("serial_number", sn).With("input", input4).Set(float64(current))
+			metricInputVolume.With("serial_number", sn).With("input", input4).Set(float64(volume))
 
-			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputPulses4.Format(sn), current); err != nil {
+			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputPulses.Format(sn, input4), current); err != nil {
 				result = multierr.Append(result, err)
 			}
 
-			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputVolume4.Format(sn), volume); err != nil {
+			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputVolume.Format(sn, input4), volume); err != nil {
 				result = multierr.Append(result, err)
 			}
 		} else {
