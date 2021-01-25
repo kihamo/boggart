@@ -139,6 +139,10 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 		)
 
 		for _, ch := range ptzChannels.Payload {
+			if ch.ID < 1 {
+				continue
+			}
+
 			channels = append(channels,
 				openhab.NewChannel(idPTZAbsolute, openhab.ChannelTypeString).
 					WithCommandTopic(b.config.TopicPTZAbsolute.Format(sn, ch.ID)).
