@@ -1,6 +1,7 @@
 package webos
 
 import (
+	"context"
 	"errors"
 	"net"
 	"net/http"
@@ -51,6 +52,8 @@ func (b *Bind) Run() error {
 
 	if b.config.MAC != nil {
 		b.Meta().SetMAC(b.config.MAC.HardwareAddr)
+
+		return b.MQTT().PublishAsync(context.Background(), b.config.TopicStatePower.Format(b.Meta().MACAsString()), false)
 	}
 
 	return nil
