@@ -33,7 +33,7 @@ type Bind struct {
 }
 
 func (b *Bind) Run() error {
-	err := b.MQTT().PublishAsync(context.Background(), b.config.TopicPinState, b.Read())
+	err := b.publishState(context.Background(), b.Read())
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func (b *Bind) High(ctx context.Context) error {
 
 		b.out.True()
 
-		if err := b.MQTT().PublishAsync(ctx, b.config.TopicPinState, true); err != nil {
+		if err := b.publishState(ctx, true); err != nil {
 			return err
 		}
 	}
@@ -94,7 +94,7 @@ func (b *Bind) Low(ctx context.Context) error {
 
 		b.out.False()
 
-		if err := b.MQTT().PublishAsync(ctx, b.config.TopicPinState, false); err != nil {
+		if err := b.publishState(ctx, false); err != nil {
 			return err
 		}
 	}
@@ -133,11 +133,7 @@ func (b *Bind) waitForEdge() {
 					b.Logger().Debugf("Pin %s edge low", p.String())
 				}
 
-				if b.config.Inverted {
-					v = !v
-				}
-
-				if err := b.MQTT().PublishAsync(ctx, b.config.TopicPinState, v); err != nil {
+				if err := b.publishState(ctx, v); err != nil {
 					b.Logger().Errorf("Publish to %s topic failed with error %v", b.config.TopicPinState, err)
 				}
 			}

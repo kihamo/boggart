@@ -24,3 +24,11 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			}),
 	}
 }
+
+func (b *Bind) publishState(ctx context.Context, value bool) error {
+	if b.config.Inverted {
+		value = !value
+	}
+
+	return b.MQTT().PublishAsync(ctx, b.config.TopicPinState, value)
+}
