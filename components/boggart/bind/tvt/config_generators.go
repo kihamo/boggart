@@ -24,17 +24,25 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
 	channels := make([]*openhab.Channel, 0, 2+len(disks.Payload.Content.Disks)*3)
 
+	const (
+		idModel           = "Model"
+		idFirmwareVersion = "FirmwareVersion"
+		idHDDCapacity     = "HDDCapacity"
+		idHDDUsage        = "HDDUsage"
+		idHDDFree         = "HDDFree"
+	)
+
 	channels = append(channels,
-		openhab.NewChannel("Model", openhab.ChannelTypeString).
+		openhab.NewChannel(idModel, openhab.ChannelTypeString).
 			WithStateTopic(b.config.TopicStateModel.Format(sn)).
 			AddItems(
-				openhab.NewItem(itemPrefix+"Model", openhab.ItemTypeString).
+				openhab.NewItem(itemPrefix+idModel, openhab.ItemTypeString).
 					WithLabel("Model"),
 			),
-		openhab.NewChannel("FirmwareVersion", openhab.ChannelTypeString).
+		openhab.NewChannel(idFirmwareVersion, openhab.ChannelTypeString).
 			WithStateTopic(b.config.TopicStateFirmwareVersion.Format(sn)).
 			AddItems(
-				openhab.NewItem(itemPrefix+"FirmwareVersion", openhab.ItemTypeString).
+				openhab.NewItem(itemPrefix+idFirmwareVersion, openhab.ItemTypeString).
 					WithLabel("Firmware version"),
 			),
 	)
@@ -43,23 +51,26 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 		id := openhab.IDNormalizeCamelCase(disk.SerialNum)
 
 		channels = append(channels,
-			openhab.NewChannel(id+"_HDDCapacity", openhab.ChannelTypeNumber).
+			openhab.NewChannel(id+idHDDCapacity, openhab.ChannelTypeNumber).
 				WithStateTopic(b.config.TopicStateHDDCapacity.Format(sn, disk.SerialNum)).
 				AddItems(
-					openhab.NewItem(itemPrefix+id+"_HDDCapacity", openhab.ItemTypeNumber).
-						WithLabel("HDD capacity [JS(human_bytes.js):%s]"),
+					openhab.NewItem(itemPrefix+id+idHDDCapacity, openhab.ItemTypeNumber).
+						WithLabel("HDD capacity [JS(human_bytes.js):%s]").
+						WithIcon("chart"),
 				),
-			openhab.NewChannel(id+"_HDDUsage", openhab.ChannelTypeNumber).
+			openhab.NewChannel(id+idHDDUsage, openhab.ChannelTypeNumber).
 				WithStateTopic(b.config.TopicStateHDDUsage.Format(sn, disk.SerialNum)).
 				AddItems(
-					openhab.NewItem(itemPrefix+id+"_HDDUsage", openhab.ItemTypeNumber).
-						WithLabel("HDD usage [JS(human_bytes.js):%s]"),
+					openhab.NewItem(itemPrefix+id+idHDDUsage, openhab.ItemTypeNumber).
+						WithLabel("HDD usage [JS(human_bytes.js):%s]").
+						WithIcon("chart"),
 				),
-			openhab.NewChannel(id+"_HDDFree", openhab.ChannelTypeNumber).
+			openhab.NewChannel(id+idHDDFree, openhab.ChannelTypeNumber).
 				WithStateTopic(b.config.TopicStateHDDFree.Format(sn, disk.SerialNum)).
 				AddItems(
-					openhab.NewItem(itemPrefix+id+"_HDDFree", openhab.ItemTypeNumber).
-						WithLabel("HDD free [JS(human_bytes.js):%s]"),
+					openhab.NewItem(itemPrefix+id+idHDDFree, openhab.ItemTypeNumber).
+						WithLabel("HDD free [JS(human_bytes.js):%s]").
+						WithIcon("chart"),
 				),
 		)
 	}
