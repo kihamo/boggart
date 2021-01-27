@@ -154,6 +154,10 @@ func (b *MetaContainer) MQTTTopicStatus() mqtt.Topic {
 	return mqtt.Topic(b.config.String(boggart.ConfigMQTTTopicBindStatus)).Format(b.ID())
 }
 
+func (b *MetaContainer) MQTTTopicReload() mqtt.Topic {
+	return mqtt.Topic(b.config.String(boggart.ConfigMQTTTopicBindReload)).Format(b.ID())
+}
+
 func (b *MetaContainer) MQTTTopicSerialNumber() mqtt.Topic {
 	return mqtt.Topic(b.config.String(boggart.ConfigMQTTTopicBindSerialNumber)).Format(b.ID())
 }

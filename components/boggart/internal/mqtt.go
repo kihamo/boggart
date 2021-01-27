@@ -1,26 +1,28 @@
 package internal
 
 import (
+	"bytes"
 	"context"
 	"errors"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
-const (
-	MQTTSubscribeTopicBindReloadByPayload mqtt.Topic = boggart.ComponentName + "/bind/reload"
-	MQTTSubscribeTopicBindReloadByTopic   mqtt.Topic = boggart.ComponentName + "/bind/+/reload"
+var (
+	payloadReload = []byte(`reload`)
+	payloadDone   = []byte(`done`)
 )
 
 func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(MQTTSubscribeTopicBindReloadByPayload, 0, c.callbackBindReloadInPayload),
-		mqtt.NewSubscriber(MQTTSubscribeTopicBindReloadByTopic, 0, c.callbackBindReloadInTopic),
+		mqtt.NewSubscriber(mqtt.Topic(c.config.String(boggart.ConfigMQTTTopicAllBindsReload)), 0, c.callbackBindReloadInPayload),
+		mqtt.NewSubscriber(mqtt.Topic(c.config.String(boggart.ConfigMQTTTopicBindReload)), 0, c.callbackBindReloadInTopic),
 	}
 }
 
-func (c *Component) callbackBindReloadInPayload(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+func (c *Component) callbackBindReloadInPayload(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 	id := message.String()
 	if len(id) < 1 {
 		return errors.New("bad bind id")
@@ -30,10 +32,32 @@ func (c *Component) callbackBindReloadInPayload(ctx context.Context, _ mqtt.Comp
 }
 
 func (c *Component) callbackBindReloadInTopic(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-	route := message.Topic().Split()
+	if !bytes.Equal(message.Payload(), payloadReload) {
+		return nil
+	}
+
+	topic := message.Topic()
+
+	route := topic.Split()
 	if len(route) < 1 {
 		return errors.New("bad bind id")
 	}
 
-	return c.ReloadConfigByID(route[len(route)-2])
+	bindID := route[len(route)-2]
+
+	if err := c.ReloadConfigByID(bindID); err != nil {
+		return err
+	}
+
+	item := c.Bind(bindID)
+	if item == nil {
+		return errors.New("bind " + bindID + "isn't registered")
+	}
+
+	if bindSupport, ok := di.MQTTContainerBind(item.Bind()); ok && bindSupport != nil {
+		return bindSupport.PublishAsyncWithoutCache(ctx, topic, payloadDone)
+	}
+
+	c.mqtt.PublishAsyncWithoutCache(ctx, topic, 1, false, payloadDone)
+	return nil
 }

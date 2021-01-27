@@ -24,12 +24,22 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithDefaultFunc(func() interface{} {
 				return mqtt.NameReplace(c.application.Name())
 			}),
+		config.NewVariable(boggart.ConfigMQTTTopicAllBindsReload, config.ValueTypeString).
+			WithUsage("Boggart MQTT topic all binds reload from config file").
+			WithDefaultFunc(func() interface{} {
+				return boggart.ComponentName + "/bind/reload"
+			}),
 		config.NewVariable(boggart.ConfigMQTTTopicBindStatus, config.ValueTypeString).
 			WithUsage("Boggart MQTT topic bind status").
 			WithDefaultFunc(func() interface{} {
 				return boggart.ComponentName + "/bind/+/status"
 			}).
 			WithEditable(true),
+		config.NewVariable(boggart.ConfigMQTTTopicBindReload, config.ValueTypeString).
+			WithUsage("Boggart MQTT topic bind reload from config file").
+			WithDefaultFunc(func() interface{} {
+				return boggart.ComponentName + "/bind/+/reload"
+			}),
 		config.NewVariable(boggart.ConfigMQTTTopicBindSerialNumber, config.ValueTypeString).
 			WithUsage("Boggart MQTT topic bind serial number").
 			WithDefaultFunc(func() interface{} {

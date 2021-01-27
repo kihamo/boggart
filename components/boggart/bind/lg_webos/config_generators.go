@@ -70,6 +70,11 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 					WithIcon("video"),
 			),
 		openhab.NewChannel(idToast, openhab.ChannelTypeString).
-			WithCommandTopic(b.config.TopicToast),
+			WithCommandTopic(b.config.TopicToast).
+			AddItems(
+				openhab.NewItem(itemPrefix+idToast, openhab.ItemTypeString).
+					WithLabel("Toast").
+					WithIcon("text"),
+			),
 	)
 }

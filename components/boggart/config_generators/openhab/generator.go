@@ -123,7 +123,10 @@ func StepsByBind(bind boggart.Bind, steps []generators.Step, channels ...*Channe
 
 	thing := GenericThingFromBindMeta(ctrMeta).
 		WithBroker(broker).
-		AddChannels(BindStatusChannel(ctrMeta))
+		AddChannels(
+			BindStatusChannel(ctrMeta),
+			BindReloadChannel(ctrMeta),
+		)
 
 	if ctrMeta.SerialNumber() != "" {
 		thing.AddChannels(BindSerialNumberChannel(ctrMeta))
@@ -165,20 +168,39 @@ func StepsByBind(bind boggart.Bind, steps []generators.Step, channels ...*Channe
 }
 
 func BindStatusChannel(meta *di.MetaContainer) *Channel {
-	return NewChannel("BindStatus", ChannelTypeString).
+	const id = "BindStatus"
+
+	return NewChannel(id, ChannelTypeString).
 		WithStateTopic(meta.MQTTTopicStatus()).
 		AddItems(
-			NewItem(ItemPrefixFromBindMeta(meta)+"BindStatus", ItemTypeString).
+			NewItem(ItemPrefixFromBindMeta(meta)+id, ItemTypeString).
 				WithLabel("Bind status [%s]").
 				WithIcon("text"),
 		)
 }
 
+func BindReloadChannel(meta *di.MetaContainer) *Channel {
+	const id = "BindReload"
+
+	return NewChannel(id, ChannelTypeSwitch).
+		WithStateTopic(meta.MQTTTopicReload()).
+		WithCommandTopic(meta.MQTTTopicReload()).
+		WithOn("reload").
+		WithOff("done").
+		AddItems(
+			NewItem(ItemPrefixFromBindMeta(meta)+id, ItemTypeSwitch).
+				WithLabel("Bind reload [%s]").
+				WithIcon("switch"),
+		)
+}
+
 func BindSerialNumberChannel(meta *di.MetaContainer) *Channel {
-	return NewChannel("BindSerialNumber", ChannelTypeString).
+	const id = "BindSerialNumber"
+
+	return NewChannel(id, ChannelTypeString).
 		WithStateTopic(meta.MQTTTopicSerialNumber()).
 		AddItems(
-			NewItem(ItemPrefixFromBindMeta(meta)+"BindSerialNumber", ItemTypeString).
+			NewItem(ItemPrefixFromBindMeta(meta)+id, ItemTypeString).
 				WithLabel("Bind serial number [%s]").
 				WithIcon("text"),
 		)
