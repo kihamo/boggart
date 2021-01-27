@@ -55,7 +55,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	if val, _, _, _, e := provider.ReadArray(v3.ArrayReset, nil, v3.Tariff1); e == nil {
 		metricTariff.With("serial_number", sn).With("tariff", "1").Set(float64(val))
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicTariff1.Format(sn), val); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicTariff.Format(sn), val); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {
@@ -67,15 +67,15 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		metricVoltage.With("serial_number", sn).With("phase", "2").Set(p2)
 		metricVoltage.With("serial_number", sn).With("phase", "3").Set(p3)
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicVoltage1.Format(sn), p1); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicVoltagePhase1.Format(sn), p1); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicVoltage2.Format(sn), p2); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicVoltagePhase2.Format(sn), p2); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicVoltage3.Format(sn), p3); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicVoltagePhase3.Format(sn), p3); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {
@@ -87,15 +87,19 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		metricAmperage.With("serial_number", sn).With("phase", "2").Set(p2)
 		metricAmperage.With("serial_number", sn).With("phase", "3").Set(p3)
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicAmperage1.Format(sn), p1); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicAmperagePhase1.Format(sn), p1); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicAmperage2.Format(sn), p2); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicAmperagePhase2.Format(sn), p2); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicAmperage3.Format(sn), p3); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicAmperagePhase3.Format(sn), p3); e != nil {
+			err = multierr.Append(err, e)
+		}
+
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicAmperageTotal.Format(sn), p1+p2+p3); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {
@@ -107,15 +111,19 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		metricPower.With("serial_number", sn).With("phase", "2").Set(p2)
 		metricPower.With("serial_number", sn).With("phase", "3").Set(p3)
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicPower1.Format(sn), p1); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicPowerPhase1.Format(sn), p1); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicPower2.Format(sn), p2); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicPowerPhase2.Format(sn), p2); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicPower3.Format(sn), p3); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicPowerPhase3.Format(sn), p3); e != nil {
+			err = multierr.Append(err, e)
+		}
+
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicPowerTotal.Format(sn), p1+p2+p3); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {
