@@ -37,7 +37,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 			continue
 		}
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicFeedEvent.Format(b.config.Phone), collection[i].Message); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config.TopicFeedEvent, collection[i].Message); e != nil {
 			err = multierr.Append(err, e)
 		}
 

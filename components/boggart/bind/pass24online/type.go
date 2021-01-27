@@ -12,6 +12,8 @@ type Type struct{}
 func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	config := c.(*Config)
 
+	config.TopicFeedEvent = config.TopicFeedEvent.Format(config.Phone)
+
 	bind := &Bind{
 		config:            config,
 		feedStartDatetime: atomic.NewTime(),

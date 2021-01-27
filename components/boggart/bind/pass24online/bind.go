@@ -10,6 +10,7 @@ import (
 
 type Bind struct {
 	di.LoggerBind
+	di.MetaBind
 	di.MQTTBind
 	di.WidgetBind
 	di.WorkersBind
