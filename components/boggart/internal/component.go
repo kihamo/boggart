@@ -555,6 +555,10 @@ func (c *Component) itemStatusUpdate(item *BindItem, status boggart.BindStatus) 
 				c.itemLogger(item.Bind()).Error("Publish to MQTT failed", "topic", topic, "error", err.Error())
 			}
 		} else {
+			// FIXME: всегда нужно слать синхронно, так как асинхронность не гарантирует порядок
+			// и статус иногда проскакивает не тот. Правильнее организовать внутри свою очередь,
+			// чтобы не блочить работу с привязкой.
+
 			// что бы публикация зарегистрировалась в общем списке и отображалась на странице mqtt для привязки
 			if bindSupport, ok := di.MQTTContainerBind(item.Bind()); ok && bindSupport != nil {
 				bindSupport.PublishAsync(ctx, topic, payload)
