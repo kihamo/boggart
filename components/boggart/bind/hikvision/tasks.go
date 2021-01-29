@@ -114,9 +114,7 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 						),
 					).
 					WithSchedule(
-						tasks.ScheduleWithControl(
-							tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.PTZInterval),
-						),
+						tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.PTZInterval),
 					),
 			)
 			if e != nil {

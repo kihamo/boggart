@@ -16,12 +16,10 @@ type Config struct {
 	ClientTimeout                 time.Duration `mapstructure:"client_timeout" yaml:"client_timeout"`
 	ClientsSyncInterval           time.Duration `mapstructure:"clients_sync_interval" yaml:"clients_sync_interval"`
 	UpdaterInterval               time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
+	SyslogTagWireless             string        `mapstructure:"topic_syslog_tag_wireless" yaml:"topic_syslog_tag_wireless"`
+	SyslogTagL2TP                 string        `mapstructure:"topic_syslog_tag_l2tp" yaml:"topic_syslog_tag_l2tp"`
 	TopicWiFiMACState             mqtt.Topic    `mapstructure:"topic_wifi_mac_state" yaml:"topic_wifi_mac_state"`
-	TopicWiFiConnectedMAC         mqtt.Topic    `mapstructure:"topic_wifi_connected_mac" yaml:"topic_wifi_connected_mac"`
-	TopicWiFiDisconnectedMAC      mqtt.Topic    `mapstructure:"topic_wifi_disconnected_mac" yaml:"topic_wifi_disconnected_mac"`
-	TopicVPNLoginState            mqtt.Topic    `mapstructure:"topic_vpn_login_state" yaml:"topic_vpn_login_state"`
-	TopicVPNConnectedLogin        mqtt.Topic    `mapstructure:"topic_vpn_connected_login" yaml:"topic_vpn_connected_login"`
-	TopicVPNDisconnectedLogin     mqtt.Topic    `mapstructure:"topic_vpn_disconnected_login" yaml:"topic_vpn_disconnected_login"`
+	TopicInterfaceConnect         mqtt.Topic    `mapstructure:"topic_interface_connect" yaml:"topic_interface_connect"`
 	TopicPackagesInstalledVersion mqtt.Topic    `mapstructure:"topic_packages_installed_version" yaml:"topic_packages_installed_version"`
 	TopicPackagesLatestVersion    mqtt.Topic    `mapstructure:"topic_packages_latest_version" yaml:"topic_packages_latest_version"`
 	TopicFirmwareInstalledVersion mqtt.Topic    `mapstructure:"topic_firmware_installed_version" yaml:"topic_firmware_installed_version"`
@@ -42,12 +40,9 @@ func (t Type) Config() interface{} {
 		ClientTimeout:                 time.Second * 10,
 		ClientsSyncInterval:           time.Minute,
 		UpdaterInterval:               time.Minute * 5,
-		TopicWiFiMACState:             prefix + "wifi/clients/+/state",
-		TopicWiFiConnectedMAC:         prefix + "wifi/clients/last/on/mac",
-		TopicWiFiDisconnectedMAC:      prefix + "wifi/clients/last/off/mac",
-		TopicVPNLoginState:            prefix + "vpn/clients/+/state",
-		TopicVPNConnectedLogin:        prefix + "vpn/clients/last/on/login",
-		TopicVPNDisconnectedLogin:     prefix + "vpn/clients/last/off/login",
+		SyslogTagWireless:             "wifi",
+		SyslogTagL2TP:                 "vpn",
+		TopicInterfaceConnect:         prefix + "+/+",
 		TopicPackagesInstalledVersion: prefix + "packages/installed-version",
 		TopicPackagesLatestVersion:    prefix + "packages/latest-version",
 		TopicFirmwareInstalledVersion: prefix + "firmware/installed-version",

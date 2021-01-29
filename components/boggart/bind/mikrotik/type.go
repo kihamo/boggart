@@ -22,15 +22,11 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	password, _ := u.User.Password()
 
 	bind := &Bind{
-		config:            config,
-		address:           u,
-		provider:          mikrotik.NewClient(u.Host, username, password, config.ClientTimeout),
-		serialNumberLock:  make(chan struct{}),
-		serialNumberReady: atomic.NewBool(),
+		config:                  config,
+		address:                 u,
+		provider:                mikrotik.NewClient(u.Host, username, password, config.ClientTimeout),
+		connectionsZombieKiller: &atomic.Once{},
 	}
-
-	bind.clientWiFi = NewPreloadMap()
-	bind.clientVPN = NewPreloadMap()
 
 	return bind, nil
 }

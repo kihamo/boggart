@@ -3,11 +3,13 @@ package mikrotik
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart/tasks"
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/providers/mikrotik"
 	"go.uber.org/multierr"
 )
@@ -40,7 +42,7 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 		return errors.New("serial number is empty")
 	}
 
-	b.SetSerialNumber(system.SerialNumber)
+	b.Meta().SetSerialNumber(system.SerialNumber)
 
 	_, err = b.Workers().RegisterTask(
 		tasks.NewTask().
@@ -62,25 +64,119 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 			WithHandler(
 				b.Workers().WrapTaskIsOnline(
 					tasks.HandlerWithTimeout(
-						tasks.HandlerFuncFromShortToLong(b.taskClientsSyncHandler),
+						tasks.HandlerFunc(b.taskInterfaceConnectionHandler),
 						b.config.ReadinessTimeout,
 					),
 				),
 			).
 			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.ClientsSyncInterval)),
 	)
+	if err != nil {
+		return err
+	}
 
-	return err
-}
-
-func (b *Bind) taskClientsSyncHandler(ctx context.Context) error {
-	b.updateWiFiClient(ctx)
-	b.clientWiFi.Ready()
-
-	b.updateVPNClient(ctx)
-	b.clientVPN.Ready()
+	if b.config.TopicSyslog != "" {
+		return b.MQTT().Subscribe(mqtt.NewSubscriber(b.config.TopicSyslog, 0, b.callbackMQTTSyslog))
+	}
 
 	return nil
+}
+
+func (b *Bind) taskInterfaceConnectionHandler(ctx context.Context, meta tasks.Meta, _ tasks.Task) (err error) {
+	var (
+		storedWireless bool
+		storedL2TP     bool
+	)
+
+	// 0. Формируем индекс новой версии
+	version := meta.Attempts()
+
+	// 1. Формируем новую версию данных, получая активные соединения по каждому из типов
+
+	// 1.1 Wireless
+	if connections, e := b.provider.InterfaceWirelessRegistrationTable(ctx); e == nil {
+		for _, connection := range connections {
+			item := &storeItem{
+				version:       version,
+				interfaceType: InterfaceWireless,
+				name:          mqtt.NameReplace(connection.MacAddress.String()),
+			}
+
+			actual, loaded := b.connectionsActive.LoadOrStore(item.String(), item)
+			if loaded {
+				actual.(*storeItem).version = version
+			}
+		}
+
+		storedWireless = true
+	} else {
+		// TODO: wrap
+		err = fmt.Errorf("get wireless registration table failed: %w", e)
+	}
+
+	// 1.2 L2TP
+	if connections, e := b.provider.PPPActive(ctx); e == nil {
+		for _, connection := range connections {
+			item := &storeItem{
+				version:       version,
+				interfaceType: InterfaceL2TPServer,
+				name:          mqtt.NameReplace(connection.Name),
+			}
+
+			actual, loaded := b.connectionsActive.LoadOrStore(item.String(), item)
+			if loaded {
+				actual.(*storeItem).version = version
+			}
+		}
+
+		storedL2TP = true
+	} else {
+		// TODO: wrap
+		err = fmt.Errorf("get active ppp connections failed: %w", e)
+	}
+
+	// 2. Теперь рассылаем актуальные версии в MQTT, а то, что меньше текущей версии еще и удаляем
+	sn := b.Meta().SerialNumber()
+
+	b.connectionsActive.Range(func(key, value interface{}) bool {
+		item := value.(*storeItem)
+		var payload bool
+
+		if item.version == version {
+			payload = true
+		} else if item.interfaceType == InterfaceWireless && storedWireless || item.interfaceType == InterfaceL2TPServer && storedL2TP {
+			payload = false
+			b.connectionsActive.Delete(key)
+		} else {
+			return true
+		}
+
+		_ = b.MQTT().PublishAsync(ctx, b.config.TopicInterfaceConnect.Format(sn, item.interfaceType, item.name), payload)
+		return true
+	})
+
+	// 3. После первого успешного обновления справочников, необходимо запустить разово подписчика MQTT
+	//    который зачистит записи зобми (те, которые из-за retained остались в MQTT, но из роутера мы уже
+	//    их не получаем, так как например их удалили)
+	if err == nil {
+		b.connectionsZombieKiller.Do(func() {
+			// TODO: придумать как в конце удалить эту подписку, так как операция нужна разовая
+
+			err = b.MQTT().Subscribe(
+				mqtt.NewSubscriber(
+					b.config.TopicInterfaceConnect.Format(b.Meta().SerialNumber()),
+					0,
+					b.callbackMQTTInterfacesZombies,
+				),
+			)
+		})
+
+		if err != nil {
+			b.connectionsZombieKiller.Reset()
+		}
+	}
+
+	return err
 }
 
 func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {

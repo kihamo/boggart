@@ -2,60 +2,46 @@ package mikrotik
 
 import (
 	"context"
-	"errors"
 	"net"
 
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
-func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
-	subscribers := []mqtt.Subscriber{
-		mqtt.NewSubscriber(b.config.TopicWiFiMACState, 0, b.callbackMQTTWiFiSync),
-	}
-
-	if b.config.TopicSyslog != "" {
-		subscribers = append(subscribers, mqtt.NewSubscriber(b.config.TopicSyslog, 0, b.callbackMQTTSyslog))
-	}
-
-	return subscribers
-}
-
-func (b *Bind) callbackMQTTWiFiSync(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	sn, err := b.SerialNumberWait(ctx)
-	if err != nil {
-		return err
-	}
-
-	if sn == "" || !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -5) {
+// подписываемся на собственные топики, это нужно для того чтобы при первом старте
+// выключить активность соединений, которые удалены в самом микротике и соответственно
+// они будут не доступны в последующий обновлениях, а в топике и них ретеншен сообщение с true
+func (b *Bind) callbackMQTTInterfacesZombies(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+	if message.IsFalse() {
 		return nil
 	}
+	/*
+		parts := message.Topic().Split()
+		key := parts[len(parts)-2]
 
-	parts := message.Topic().Split()
-	key := parts[len(parts)-2]
+		// проверяем наличие в списке, дождавшись первоначальной загрузки
+		value, ok := b.clientWiFi.LoadWait(key)
 
-	// проверяем наличие в списке, дождавшись первоначальной загрузки
-	value, ok := b.clientWiFi.LoadWait(key)
+		topic := b.config.TopicWiFiMACState.Format(sn, key)
 
-	topic := b.config.TopicWiFiMACState.Format(sn, key)
+		// если в списке нет, значит удаляем из mqtt (если там не удалено)
+		if !ok {
+			if message.IsTrue() {
+				return b.MQTT().PublishAsyncRaw(ctx, topic, 1, true, "")
+			}
 
-	// если в списке нет, значит удаляем из mqtt (если там не удалено)
-	if !ok {
-		if message.IsTrue() {
-			return b.MQTT().PublishAsyncRaw(ctx, topic, 1, true, "")
+			return nil
 		}
 
-		return nil
-	}
-
-	// если state отличается от того что в списке, значит отправляем тот что из списка, так как там мастер данные
-	state := value.(bool)
-	if state != message.Bool() {
-		return b.MQTT().PublishAsync(ctx, topic, state)
-	}
-
+		// если state отличается от того что в списке, значит отправляем тот что из списка, так как там мастер данные
+		state := value.(bool)
+		if state != message.Bool() {
+			return b.MQTT().PublishAsync(ctx, topic, state)
+		}
+	*/
 	return nil
 }
 
+// Для ускорения проверки изменения в подключениях, чекаем syslog сообщения и парсим оттуда необходиму инфу
 func (b *Bind) callbackMQTTSyslog(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 	var request map[string]interface{}
 
@@ -73,17 +59,10 @@ func (b *Bind) callbackMQTTSyslog(ctx context.Context, _ mqtt.Component, message
 		return nil
 	}
 
+	sn := b.Meta().SerialNumber()
+
 	switch tag {
-	case "wifi":
-		sn, err := b.SerialNumberWait(ctx)
-		if err != nil {
-			return err
-		}
-
-		if sn == "" {
-			return errors.New("serial number is empty")
-		}
-
+	case b.config.SyslogTagWireless:
 		check := wifiClientRegexp.FindStringSubmatch(content.(string))
 		if len(check) < 4 {
 			return nil
@@ -94,45 +73,38 @@ func (b *Bind) callbackMQTTSyslog(ctx context.Context, _ mqtt.Component, message
 		}
 
 		login := mqtt.NameReplace(check[1])
+		var payload bool
 
 		switch check[3] {
 		case "connected":
-			// TODO:
-			_ = b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicWiFiConnectedMAC.Format(sn), login)
-			b.updateWiFiClient(ctx)
+			payload = true
 		case "disconnected":
-			// TODO:
-			_ = b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicWiFiDisconnectedMAC.Format(sn), login)
-			b.updateWiFiClient(ctx)
+			payload = false
 		}
 
-	case "vpn":
-		sn, err := b.SerialNumberWait(ctx)
-		if err != nil {
-			return err
-		}
+		_ = b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicInterfaceConnect.Format(sn, InterfaceWireless, login), payload)
+		// FIXME: запускать глобальную синхронизацию, а не принимать решение на уровне здесь
 
-		if sn == "" {
-			return errors.New("serial number is empty")
-		}
-
+	case b.config.SyslogTagL2TP:
 		check := vpnClientRegexp.FindStringSubmatch(content.(string))
 		if len(check) < 2 {
 			return nil
 		}
 
 		login := mqtt.NameReplace(check[1])
+		var payload bool
 
 		switch check[2] {
 		case "in":
-			// TODO:
-			_ = b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicVPNConnectedLogin.Format(sn), login)
-			b.updateVPNClient(ctx)
+			payload = true
 		case "out":
-			// TODO:
-			_ = b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicVPNDisconnectedLogin.Format(sn), login)
-			b.updateVPNClient(ctx)
+			payload = false
+		default:
+			return nil
 		}
+
+		_ = b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicInterfaceConnect.Format(sn, InterfaceL2TPServer, login), payload)
+		// FIXME: запускать глобальную синхронизацию, а не принимать решение на уровне здесь
 	}
 
 	return nil
