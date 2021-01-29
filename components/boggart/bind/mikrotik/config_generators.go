@@ -100,7 +100,7 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 						continue
 					}
 
-					id += strings.ReplaceAll(mac, ":", "")
+					id += openhab.IDNormalizeCamelCase(strings.ReplaceAll(mac, ":", ""))
 				}
 
 				channels = append(channels,

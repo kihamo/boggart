@@ -2,6 +2,7 @@ package mikrotik
 
 import (
 	"net/url"
+	"strings"
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart"
@@ -17,6 +18,12 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	macMappingCase := make(map[string]string, len(config.MacAddressMapping))
+	for mac, alias := range config.MacAddressMapping {
+		macMappingCase[strings.ToLower(mac)] = alias
+	}
+	config.MacAddressMapping = macMappingCase
 
 	username := u.User.Username()
 	password, _ := u.User.Password()
