@@ -57,6 +57,10 @@ type SystemDisk struct {
 	Size  uint64 `mapstructure:"size"`
 }
 
+type SystemIdentity struct {
+	Name string `mapstructure:"name"`
+}
+
 type SystemClock struct {
 	Date               string `mapstructure:"date"`
 	Time               string `mapstructure:"time"`
@@ -136,6 +140,21 @@ func (c *Client) SystemClock(ctx context.Context) (result SystemClock, err error
 	var list []SystemClock
 
 	err = c.doConvert(ctx, []string{"/system/clock/print"}, &list)
+	if err != nil {
+		return result, err
+	}
+
+	if len(list) == 0 {
+		return result, ErrEmptyResponse
+	}
+
+	return list[len(list)-1], nil
+}
+
+func (c *Client) SystemIdentity(ctx context.Context) (result SystemIdentity, err error) {
+	var list []SystemIdentity
+
+	err = c.doConvert(ctx, []string{"/system/identity/print"}, &list)
 	if err != nil {
 		return result, err
 	}

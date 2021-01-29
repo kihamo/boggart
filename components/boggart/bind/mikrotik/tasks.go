@@ -14,10 +14,16 @@ import (
 	"go.uber.org/multierr"
 )
 
+const (
+	TaskNameSerialNumber        = "serial-number"
+	TaskNameUpdater             = "updater"
+	TaskNameInterfaceConnection = "connections"
+)
+
 func (b *Bind) Tasks() []tasks.Task {
 	return []tasks.Task{
 		tasks.NewTask().
-			WithName("serial-number").
+			WithName(TaskNameSerialNumber).
 			WithHandler(
 				b.Workers().WrapTaskHandlerIsOnline(
 					tasks.HandlerFuncFromShortToLong(b.taskSerialNumberHandler),
@@ -46,7 +52,7 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 
 	_, err = b.Workers().RegisterTask(
 		tasks.NewTask().
-			WithName("updater").
+			WithName(TaskNameUpdater).
 			WithHandler(
 				b.Workers().WrapTaskHandlerIsOnline(
 					tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
@@ -60,7 +66,7 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 
 	_, err = b.Workers().RegisterTask(
 		tasks.NewTask().
-			WithName("clients-sync").
+			WithName(TaskNameInterfaceConnection).
 			WithHandler(
 				b.Workers().WrapTaskHandlerIsOnline(
 					tasks.HandlerWithTimeout(
