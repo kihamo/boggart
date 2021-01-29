@@ -59,8 +59,6 @@ func (b *Bind) callbackMQTTSyslog(ctx context.Context, _ mqtt.Component, message
 		return nil
 	}
 
-	sn := b.Meta().SerialNumber()
-
 	switch tag {
 	case b.config.SyslogTagWireless:
 		check := wifiClientRegexp.FindStringSubmatch(content.(string))
@@ -72,18 +70,11 @@ func (b *Bind) callbackMQTTSyslog(ctx context.Context, _ mqtt.Component, message
 			return err
 		}
 
-		login := mqtt.NameReplace(check[1])
-		var payload bool
-
-		switch check[3] {
-		case "connected":
-			payload = true
-		case "disconnected":
-			payload = false
+		if check[3] == "connected" || check[3] == "disconnected" {
+			return b.Workers().TaskRunByName(ctx, TaskNameInterfaceConnection)
 		}
 
-		_ = b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicInterfaceConnect.Format(sn, InterfaceWireless, login), payload)
-		// FIXME: запускать глобальную синхронизацию, а не принимать решение на уровне здесь
+		return b.Workers().TaskRunByName(ctx, TaskNameInterfaceConnection)
 
 	case b.config.SyslogTagL2TP:
 		check := vpnClientRegexp.FindStringSubmatch(content.(string))
@@ -91,20 +82,9 @@ func (b *Bind) callbackMQTTSyslog(ctx context.Context, _ mqtt.Component, message
 			return nil
 		}
 
-		login := mqtt.NameReplace(check[1])
-		var payload bool
-
-		switch check[2] {
-		case "in":
-			payload = true
-		case "out":
-			payload = false
-		default:
-			return nil
+		if check[2] == "in" || check[2] == "out" {
+			return b.Workers().TaskRunByName(ctx, TaskNameInterfaceConnection)
 		}
-
-		_ = b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicInterfaceConnect.Format(sn, InterfaceL2TPServer, login), payload)
-		// FIXME: запускать глобальную синхронизацию, а не принимать решение на уровне здесь
 	}
 
 	return nil

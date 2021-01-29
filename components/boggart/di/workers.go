@@ -165,6 +165,8 @@ func (c *WorkersContainer) TaskRunByID(ctx context.Context, id string) error {
 }
 
 func (c *WorkersContainer) TaskRunByName(ctx context.Context, name string) error {
+	name = c.prefixTaskName() + name
+
 	for _, item := range c.TasksID() {
 		if item[1] == name {
 			if err := c.TaskRunByID(ctx, item[0]); err != nil {
@@ -181,6 +183,8 @@ func (c *WorkersContainer) ScheduleRecalculateByID(id string) error {
 }
 
 func (c *WorkersContainer) ScheduleRecalculateByName(name string) error {
+	name = c.prefixTaskName() + name
+
 	for _, item := range c.TasksID() {
 		if item[1] == name {
 			if err := c.ScheduleRecalculateByID(item[0]); err != nil {

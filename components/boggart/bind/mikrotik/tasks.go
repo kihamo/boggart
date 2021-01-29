@@ -103,9 +103,10 @@ func (b *Bind) taskInterfaceConnectionHandler(ctx context.Context, meta tasks.Me
 	if connections, e := b.provider.InterfaceWirelessRegistrationTable(ctx); e == nil {
 		for _, connection := range connections {
 			item := &storeItem{
-				version:       version,
-				interfaceType: InterfaceWireless,
-				name:          mqtt.NameReplace(connection.MacAddress.String()),
+				version:        version,
+				interfaceType:  InterfaceWireless,
+				interfaceName:  connection.Interface,
+				connectionName: connection.MacAddress.String(),
 			}
 
 			actual, loaded := b.connectionsActive.LoadOrStore(item.String(), item)
@@ -121,16 +122,32 @@ func (b *Bind) taskInterfaceConnectionHandler(ctx context.Context, meta tasks.Me
 	}
 
 	// 1.2 L2TP
+
+	// 1.2.1 Сначала вычитываем все интерфейсы сконфигурированные, что бы сработал механизм деактивации
+	//       не активных для этого простовляем им версию 0, чтобы механиз ниже сработал
+	if connections, e := b.provider.InterfaceL2TPServer(ctx); e == nil {
+		for _, connection := range connections {
+			item := &storeItem{
+				version:        0,
+				interfaceType:  InterfaceL2TPServer,
+				interfaceName:  connection.Name,
+				connectionName: connection.User,
+			}
+
+			b.connectionsActive.LoadOrStore(item.String(), item)
+		}
+	}
+
+	// 1.2.2 Получаем активные соединения и регистрируем их
 	if connections, e := b.provider.PPPActive(ctx); e == nil {
 		for _, connection := range connections {
 			item := &storeItem{
-				version:       version,
-				interfaceType: InterfaceL2TPServer,
-				name:          mqtt.NameReplace(connection.Name),
+				version:        version,
+				interfaceType:  InterfaceL2TPServer,
+				connectionName: connection.Name,
 			}
 
-			actual, loaded := b.connectionsActive.LoadOrStore(item.String(), item)
-			if loaded {
+			if actual, loaded := b.connectionsActive.Load(item.String()); loaded {
 				actual.(*storeItem).version = version
 			}
 		}
@@ -157,7 +174,7 @@ func (b *Bind) taskInterfaceConnectionHandler(ctx context.Context, meta tasks.Me
 			return true
 		}
 
-		_ = b.MQTT().PublishAsync(ctx, b.config.TopicInterfaceConnect.Format(sn, item.interfaceType, item.name), payload)
+		_ = b.MQTT().PublishAsync(ctx, b.config.TopicInterfaceConnect.Format(sn, item.interfaceType, item.interfaceName, item.connectionName), payload)
 		return true
 	})
 

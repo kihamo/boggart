@@ -12,19 +12,21 @@ type Config struct {
 	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
-	Address                       string        `valid:"url,required"`
-	ClientTimeout                 time.Duration `mapstructure:"client_timeout" yaml:"client_timeout"`
-	ClientsSyncInterval           time.Duration `mapstructure:"clients_sync_interval" yaml:"clients_sync_interval"`
-	UpdaterInterval               time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
-	SyslogTagWireless             string        `mapstructure:"topic_syslog_tag_wireless" yaml:"topic_syslog_tag_wireless"`
-	SyslogTagL2TP                 string        `mapstructure:"topic_syslog_tag_l2tp" yaml:"topic_syslog_tag_l2tp"`
-	TopicWiFiMACState             mqtt.Topic    `mapstructure:"topic_wifi_mac_state" yaml:"topic_wifi_mac_state"`
-	TopicInterfaceConnect         mqtt.Topic    `mapstructure:"topic_interface_connect" yaml:"topic_interface_connect"`
-	TopicPackagesInstalledVersion mqtt.Topic    `mapstructure:"topic_packages_installed_version" yaml:"topic_packages_installed_version"`
-	TopicPackagesLatestVersion    mqtt.Topic    `mapstructure:"topic_packages_latest_version" yaml:"topic_packages_latest_version"`
-	TopicFirmwareInstalledVersion mqtt.Topic    `mapstructure:"topic_firmware_installed_version" yaml:"topic_firmware_installed_version"`
-	TopicFirmwareLatestVersion    mqtt.Topic    `mapstructure:"topic_firmware_latest_version" yaml:"topic_firmware_latest_version"`
-	TopicSyslog                   mqtt.Topic    `mapstructure:"topic_syslog" yaml:"topic_syslog"`
+	Address                       string            `valid:"url,required"`
+	ClientTimeout                 time.Duration     `mapstructure:"client_timeout" yaml:"client_timeout"`
+	ClientsSyncInterval           time.Duration     `mapstructure:"clients_sync_interval" yaml:"clients_sync_interval"`
+	UpdaterInterval               time.Duration     `mapstructure:"updater_interval" yaml:"updater_interval"`
+	SyslogTagWireless             string            `mapstructure:"syslog_tag_wireless" yaml:"syslog_tag_wireless"`
+	SyslogTagL2TP                 string            `mapstructure:"syslog_tag_l2tp" yaml:"syslog_tag_l2tp"`
+	MacAddressMapping             map[string]string `mapstructure:"mac_address_mapping" yaml:"mac_address_mapping"`
+	IgnoreUnknownMacAddress       bool              `mapstructure:"ignore_unknown_mac_address" yaml:"ignore_unknown_mac_address"`
+	TopicWiFiMACState             mqtt.Topic        `mapstructure:"topic_wifi_mac_state" yaml:"topic_wifi_mac_state"`
+	TopicInterfaceConnect         mqtt.Topic        `mapstructure:"topic_interface_connect" yaml:"topic_interface_connect"`
+	TopicPackagesInstalledVersion mqtt.Topic        `mapstructure:"topic_packages_installed_version" yaml:"topic_packages_installed_version"`
+	TopicPackagesLatestVersion    mqtt.Topic        `mapstructure:"topic_packages_latest_version" yaml:"topic_packages_latest_version"`
+	TopicFirmwareInstalledVersion mqtt.Topic        `mapstructure:"topic_firmware_installed_version" yaml:"topic_firmware_installed_version"`
+	TopicFirmwareLatestVersion    mqtt.Topic        `mapstructure:"topic_firmware_latest_version" yaml:"topic_firmware_latest_version"`
+	TopicSyslog                   mqtt.Topic        `mapstructure:"topic_syslog" yaml:"topic_syslog"`
 }
 
 func (t Type) Config() interface{} {
@@ -42,7 +44,8 @@ func (t Type) Config() interface{} {
 		UpdaterInterval:               time.Minute * 5,
 		SyslogTagWireless:             "wifi",
 		SyslogTagL2TP:                 "vpn",
-		TopicInterfaceConnect:         prefix + "+/+",
+		IgnoreUnknownMacAddress:       true,
+		TopicInterfaceConnect:         prefix + "+/+/+",
 		TopicPackagesInstalledVersion: prefix + "packages/installed-version",
 		TopicPackagesLatestVersion:    prefix + "packages/latest-version",
 		TopicFirmwareInstalledVersion: prefix + "firmware/installed-version",

@@ -37,11 +37,12 @@ type Bind struct {
 }
 
 type storeItem struct {
-	version       uint64
-	name          string
-	interfaceType string
+	version        uint64
+	connectionName string
+	interfaceType  string
+	interfaceName  string // is unique
 }
 
 func (i storeItem) String() string {
-	return i.interfaceType + "/" + i.name
+	return i.interfaceType + "/" + i.connectionName
 }
