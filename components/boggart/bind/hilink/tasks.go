@@ -24,7 +24,7 @@ func (b *Bind) Tasks() []tasks.Task {
 		tasks.NewTask().
 			WithName("serial-number").
 			WithHandler(
-				b.Workers().WrapTaskIsOnline(
+				b.Workers().WrapTaskHandlerIsOnline(
 					tasks.HandlerFuncFromShortToLong(b.taskSerialNumberHandler),
 				),
 			).
@@ -76,7 +76,7 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 		b.Workers().RegisterTask(tasks.NewTask().
 			WithName("balance-updater").
 			WithHandler(
-				b.Workers().WrapTaskIsOnline(
+				b.Workers().WrapTaskHandlerIsOnline(
 					tasks.HandlerWithTimeout(
 						tasks.HandlerFuncFromShortToLong(b.taskBalanceUpdaterHandler),
 						b.config.BalanceUpdaterTimeout,
@@ -89,7 +89,7 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 		b.Workers().RegisterTask(tasks.NewTask().
 			WithName("limit-traffic-updater").
 			WithHandler(
-				b.Workers().WrapTaskIsOnline(
+				b.Workers().WrapTaskHandlerIsOnline(
 					tasks.HandlerWithTimeout(
 						tasks.HandlerFuncFromShortToLong(b.taskLimitTrafficUpdaterHandler),
 						b.config.LimitTrafficUpdaterTimeout,
@@ -104,7 +104,7 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 		b.Workers().RegisterTask(tasks.NewTask().
 			WithName("sms-checker").
 			WithHandler(
-				b.Workers().WrapTaskIsOnline(
+				b.Workers().WrapTaskHandlerIsOnline(
 					tasks.HandlerWithTimeout(
 						tasks.HandlerFuncFromShortToLong(b.taskSMSCheckerHandler),
 						b.config.SMSCheckerTimeout,
@@ -117,7 +117,7 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 		b.Workers().RegisterTask(tasks.NewTask().
 			WithName("cleaner").
 			WithHandler(
-				b.Workers().WrapTaskIsOnline(
+				b.Workers().WrapTaskHandlerIsOnline(
 					tasks.HandlerFuncFromShortToLong(b.taskCleanerHandler),
 				),
 			).
@@ -128,7 +128,7 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 	b.Workers().RegisterTask(tasks.NewTask().
 		WithName("system-updater").
 		WithHandler(
-			b.Workers().WrapTaskIsOnline(
+			b.Workers().WrapTaskHandlerIsOnline(
 				tasks.HandlerWithTimeout(
 					tasks.HandlerFuncFromShortToLong(b.taskSystemUpdaterHandler),
 					b.config.SystemUpdaterTimeout,

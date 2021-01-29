@@ -12,7 +12,7 @@ func (b *Bind) Tasks() []tasks.Task {
 		tasks.NewTask().
 			WithName("execute").
 			WithHandler(
-				b.Workers().WrapTaskIsOnline(
+				b.Workers().WrapTaskHandlerIsOnline(
 					tasks.HandlerWithTimeout(
 						tasks.HandlerFuncFromShortToLong(b.taskExecuteHandler),
 						b.config.ExecuteTimeout,

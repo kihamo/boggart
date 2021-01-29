@@ -17,7 +17,7 @@ func (b *Bind) Tasks() []tasks.Task {
 		tasks.NewTask().
 			WithName("updater").
 			WithHandler(
-				b.Workers().WrapTaskIsOnline(
+				b.Workers().WrapTaskHandlerIsOnline(
 					tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
 				),
 			).

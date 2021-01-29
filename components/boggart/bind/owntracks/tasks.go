@@ -16,7 +16,7 @@ func (b *Bind) Tasks() []tasks.Task {
 		tasks.NewTask().
 			WithName("waypoints").
 			WithHandler(
-				b.Workers().WrapTaskIsOnline(
+				b.Workers().WrapTaskHandlerIsOnline(
 					tasks.HandlerFuncFromShortToLong(b.taskWayPointsHandler),
 				),
 			).

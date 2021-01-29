@@ -14,7 +14,7 @@ func (b *Bind) Tasks() []tasks.Task {
 		tasks.NewTask().
 			WithName("serial-number").
 			WithHandler(
-				b.Workers().WrapTaskIsOnline(
+				b.Workers().WrapTaskHandlerIsOnline(
 					tasks.HandlerFuncFromShortToLong(b.taskSerialNumberHandler),
 				),
 			).

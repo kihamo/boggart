@@ -146,11 +146,7 @@ func (c *WorkersContainer) TasksID() [][2]string {
 	return append([][2]string(nil), c.tasksID...)
 }
 
-func (c *WorkersContainer) TaskRun(ctx context.Context, id string) error {
-	return c.manager.Handle(ctx, id)
-}
-
-func (c *WorkersContainer) TaskByID(id string) (tasks.Task, *tasks.Meta, error) {
+func (c *WorkersContainer) TaskInfoByID(id string) (tasks.Task, *tasks.Meta, error) {
 	task, err := c.manager.Task(id)
 	if err != nil {
 		return nil, nil, err
@@ -164,11 +160,39 @@ func (c *WorkersContainer) TaskByID(id string) (tasks.Task, *tasks.Meta, error) 
 	return task, &meta, err
 }
 
-func (c *WorkersContainer) ScheduleRecalculate(id string) error {
+func (c *WorkersContainer) TaskRunByID(ctx context.Context, id string) error {
+	return c.manager.Handle(ctx, id)
+}
+
+func (c *WorkersContainer) TaskRunByName(ctx context.Context, name string) error {
+	for _, item := range c.TasksID() {
+		if item[1] == name {
+			if err := c.TaskRunByID(ctx, item[0]); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func (c *WorkersContainer) ScheduleRecalculateByID(id string) error {
 	return c.manager.Recalculate(id)
 }
 
-func (c *WorkersContainer) WrapTaskIsOnline(parent tasks.Handler) tasks.Handler {
+func (c *WorkersContainer) ScheduleRecalculateByName(name string) error {
+	for _, item := range c.TasksID() {
+		if item[1] == name {
+			if err := c.ScheduleRecalculateByID(item[0]); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func (c *WorkersContainer) WrapTaskHandlerIsOnline(parent tasks.Handler) tasks.Handler {
 	return tasks.HandlerFunc(func(ctx context.Context, meta tasks.Meta, task tasks.Task) error {
 		if parent == nil {
 			return tasks.ErrParentHandlerIsNil

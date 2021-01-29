@@ -17,7 +17,7 @@ func (b *Bind) Tasks() []tasks.Task {
 			tasks.NewTask().
 				WithName("serial-number").
 				WithHandler(
-					b.Workers().WrapTaskIsOnline(
+					b.Workers().WrapTaskHandlerIsOnline(
 						tasks.HandlerFuncFromShortToLong(b.taskSerialNumberHandler),
 					),
 				).
@@ -32,7 +32,7 @@ func (b *Bind) Tasks() []tasks.Task {
 		list = append(list, tasks.NewTask().
 			WithName("updater").
 			WithHandler(
-				b.Workers().WrapTaskIsOnline(
+				b.Workers().WrapTaskHandlerIsOnline(
 					tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
 				),
 			).
@@ -61,7 +61,7 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 	_, err = b.Workers().RegisterTask(tasks.NewTask().
 		WithName("updater").
 		WithHandler(
-			b.Workers().WrapTaskIsOnline(
+			b.Workers().WrapTaskHandlerIsOnline(
 				tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
 			),
 		).

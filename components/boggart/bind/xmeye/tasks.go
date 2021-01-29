@@ -16,7 +16,7 @@ func (b *Bind) Tasks() []tasks.Task {
 		tasks.NewTask().
 			WithName("serial-number").
 			WithHandler(
-				b.Workers().WrapTaskIsOnline(
+				b.Workers().WrapTaskHandlerIsOnline(
 					tasks.HandlerFuncFromShortToLong(b.taskSerialNumberHandler),
 				),
 			).
@@ -51,7 +51,7 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 		tasks.NewTask().
 			WithName("updater").
 			WithHandler(
-				b.Workers().WrapTaskIsOnline(
+				b.Workers().WrapTaskHandlerIsOnline(
 					tasks.HandlerWithTimeout(
 						tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
 						b.config.UpdaterTimeout,
