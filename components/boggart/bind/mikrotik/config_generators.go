@@ -116,7 +116,7 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 						WithOff("false").
 						AddItems(
 							openhab.NewItem(itemPrefix+id, openhab.ItemTypeContact).
-								WithLabel("Interface "+iface.Name+" connect "+alias).
+								WithLabel(alias+"connected to "+iface.Name).
 								WithIcon("network"),
 						),
 				)
@@ -139,7 +139,7 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 						WithOff("false").
 						AddItems(
 							openhab.NewItem(itemPrefix+id, openhab.ItemTypeContact).
-								WithLabel("Interface L2TP "+i.User).
+								WithLabel(i.User+" connected to L2TP").
 								WithIcon("boy_3"),
 						),
 				)
