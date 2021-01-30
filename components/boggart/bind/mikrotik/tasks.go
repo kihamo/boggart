@@ -129,7 +129,7 @@ func (b *Bind) taskInterfaceConnectionHandler(ctx context.Context, meta tasks.Me
 		for _, connection := range connections {
 			item := &storeItem{
 				version:        0,
-				interfaceType:  interfaceWirelessMQTT,
+				interfaceType:  interfaceL2TPServerMQTT,
 				interfaceName:  mqtt.NameReplace(connection.Name),
 				connectionName: mqtt.NameReplace(connection.User),
 			}

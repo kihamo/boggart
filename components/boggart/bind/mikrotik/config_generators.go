@@ -116,8 +116,8 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 						WithOff("false").
 						AddItems(
 							openhab.NewItem(itemPrefix+id, openhab.ItemTypeContact).
-								WithLabel("Interface "+iface.Name+" connect "+mac).
-								WithIcon("wireless"),
+								WithLabel("Interface "+iface.Name+" connect "+alias).
+								WithIcon("network"),
 						),
 				)
 			}
