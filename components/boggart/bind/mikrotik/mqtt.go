@@ -2,8 +2,10 @@ package mikrotik
 
 import (
 	"context"
+	"errors"
 	"net"
 
+	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
@@ -66,22 +68,25 @@ func (b *Bind) callbackMQTTSyslog(ctx context.Context, _ mqtt.Component, message
 			return err
 		}
 
-		if check[3] == "connected" || check[3] == "disconnected" {
-			return b.Workers().TaskRunByName(ctx, TaskNameInterfaceConnection)
-		}
-
-		return b.Workers().TaskRunByName(ctx, TaskNameInterfaceConnection)
-
-	case b.config.SyslogTagL2TP:
-		check := vpnClientRegexp.FindStringSubmatch(content.(string))
-		if len(check) < 2 {
+		if check[3] != "connected" && check[3] != "disconnected" {
 			return nil
 		}
 
-		if check[2] == "in" || check[2] == "out" {
-			return b.Workers().TaskRunByName(ctx, TaskNameInterfaceConnection)
+	case b.config.SyslogTagL2TP:
+		check := vpnClientRegexp.FindStringSubmatch(content.(string))
+		if len(check) < 2 || check[2] != "in" && check[2] != "out" {
+			return nil
 		}
+
+	default:
+		return nil
 	}
 
-	return nil
+	err := b.Workers().TaskRunByName(ctx, TaskNameInterfaceConnection)
+	// скорее всего все выполнится нормально и смысла засирать лог нет :)
+	if err != nil && errors.Is(err, tasks.ErrAlreadyRunning) {
+		return nil
+	}
+
+	return err
 }
