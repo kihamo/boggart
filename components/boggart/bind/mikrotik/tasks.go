@@ -104,9 +104,9 @@ func (b *Bind) taskInterfaceConnectionHandler(ctx context.Context, meta tasks.Me
 		for _, connection := range connections {
 			item := &storeItem{
 				version:        version,
-				interfaceType:  InterfaceWireless,
-				interfaceName:  connection.Interface,
-				connectionName: connection.MacAddress.String(),
+				interfaceType:  interfaceWirelessMQTT,
+				interfaceName:  mqtt.NameReplace(connection.Interface),
+				connectionName: mqtt.NameReplace(connection.MacAddress.String()),
 			}
 
 			actual, loaded := b.connectionsActive.LoadOrStore(item.String(), item)
@@ -129,9 +129,9 @@ func (b *Bind) taskInterfaceConnectionHandler(ctx context.Context, meta tasks.Me
 		for _, connection := range connections {
 			item := &storeItem{
 				version:        0,
-				interfaceType:  InterfaceL2TPServer,
-				interfaceName:  connection.Name,
-				connectionName: connection.User,
+				interfaceType:  interfaceWirelessMQTT,
+				interfaceName:  mqtt.NameReplace(connection.Name),
+				connectionName: mqtt.NameReplace(connection.User),
 			}
 
 			b.connectionsActive.LoadOrStore(item.String(), item)
@@ -143,8 +143,8 @@ func (b *Bind) taskInterfaceConnectionHandler(ctx context.Context, meta tasks.Me
 		for _, connection := range connections {
 			item := &storeItem{
 				version:        version,
-				interfaceType:  InterfaceL2TPServer,
-				connectionName: connection.Name,
+				interfaceType:  interfaceL2TPServerMQTT,
+				connectionName: mqtt.NameReplace(connection.Name),
 			}
 
 			if actual, loaded := b.connectionsActive.Load(item.String()); loaded {
@@ -167,7 +167,7 @@ func (b *Bind) taskInterfaceConnectionHandler(ctx context.Context, meta tasks.Me
 
 		if item.version == version {
 			payload = true
-		} else if item.interfaceType == InterfaceWireless && storedWireless || item.interfaceType == InterfaceL2TPServer && storedL2TP {
+		} else if item.interfaceType == interfaceWirelessMQTT && storedWireless || item.interfaceType == interfaceL2TPServerMQTT && storedL2TP {
 			payload = false
 			b.connectionsActive.Delete(key)
 		} else {
@@ -183,7 +183,8 @@ func (b *Bind) taskInterfaceConnectionHandler(ctx context.Context, meta tasks.Me
 	//    их не получаем, так как например их удалили)
 	if err == nil {
 		b.connectionsZombieKiller.Do(func() {
-			// TODO: придумать как в конце удалить эту подписку, так как операция нужна разовая
+			// TODO: придумать как в конце удалить эту подписку, так как операция нужна разовая,
+			// а с таким подходом после каждой публикации будет прогонять еще раз
 
 			err = b.MQTT().Subscribe(
 				mqtt.NewSubscriber(

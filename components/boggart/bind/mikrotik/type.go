@@ -21,7 +21,10 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 	macMappingCase := make(map[string]string, len(config.MacAddressMapping))
 	for mac, alias := range config.MacAddressMapping {
-		macMappingCase[strings.ToLower(mac)] = alias
+		mac := strings.ReplaceAll(mac, "-", ":")
+		mac = strings.ToLower(mac)
+
+		macMappingCase[mac] = alias
 	}
 	config.MacAddressMapping = macMappingCase
 

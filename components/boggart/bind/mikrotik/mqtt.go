@@ -11,33 +11,29 @@ import (
 // выключить активность соединений, которые удалены в самом микротике и соответственно
 // они будут не доступны в последующий обновлениях, а в топике и них ретеншен сообщение с true
 func (b *Bind) callbackMQTTInterfacesZombies(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-	if message.IsFalse() {
+	if message.IsFalse() || !message.Retained() {
 		return nil
 	}
-	/*
-		parts := message.Topic().Split()
-		key := parts[len(parts)-2]
 
-		// проверяем наличие в списке, дождавшись первоначальной загрузки
-		value, ok := b.clientWiFi.LoadWait(key)
+	topic := message.Topic()
+	parts := topic.Split()
 
-		topic := b.config.TopicWiFiMACState.Format(sn, key)
+	if len(parts) < 3 {
+		return nil
+	}
 
-		// если в списке нет, значит удаляем из mqtt (если там не удалено)
-		if !ok {
-			if message.IsTrue() {
-				return b.MQTT().PublishAsyncRaw(ctx, topic, 1, true, "")
-			}
+	// проверяем наличие в списке
+	item := &storeItem{
+		version:        0,
+		connectionName: parts[len(parts)-1],
+		interfaceName:  parts[len(parts)-2],
+		interfaceType:  parts[len(parts)-3],
+	}
 
-			return nil
-		}
+	if _, ok := b.connectionsActive.Load(item.String()); !ok {
+		return b.MQTT().PublishAsyncRaw(ctx, topic, message.Qos(), true, false)
+	}
 
-		// если state отличается от того что в списке, значит отправляем тот что из списка, так как там мастер данные
-		state := value.(bool)
-		if state != message.Bool() {
-			return b.MQTT().PublishAsync(ctx, topic, state)
-		}
-	*/
 	return nil
 }
 

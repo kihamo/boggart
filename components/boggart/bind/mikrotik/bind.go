@@ -7,6 +7,7 @@ import (
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/di"
+	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/providers/mikrotik"
 )
 
@@ -18,6 +19,11 @@ var (
 const (
 	InterfaceWireless   = "wlan"
 	InterfaceL2TPServer = "l2tp-in"
+)
+
+var (
+	interfaceWirelessMQTT   = mqtt.NameReplace(InterfaceWireless)
+	interfaceL2TPServerMQTT = mqtt.NameReplace(InterfaceL2TPServer)
 )
 
 type Bind struct {

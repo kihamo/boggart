@@ -20,7 +20,6 @@ type Config struct {
 	SyslogTagL2TP                 string            `mapstructure:"syslog_tag_l2tp" yaml:"syslog_tag_l2tp"`
 	MacAddressMapping             map[string]string `mapstructure:"mac_address_mapping" yaml:"mac_address_mapping"`
 	IgnoreUnknownMacAddress       bool              `mapstructure:"ignore_unknown_mac_address" yaml:"ignore_unknown_mac_address"`
-	TopicWiFiMACState             mqtt.Topic        `mapstructure:"topic_wifi_mac_state" yaml:"topic_wifi_mac_state"`
 	TopicInterfaceConnect         mqtt.Topic        `mapstructure:"topic_interface_connect" yaml:"topic_interface_connect"`
 	TopicPackagesInstalledVersion mqtt.Topic        `mapstructure:"topic_packages_installed_version" yaml:"topic_packages_installed_version"`
 	TopicPackagesLatestVersion    mqtt.Topic        `mapstructure:"topic_packages_latest_version" yaml:"topic_packages_latest_version"`
