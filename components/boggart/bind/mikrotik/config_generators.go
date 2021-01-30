@@ -82,26 +82,32 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 
 		switch iface.Type {
 		case InterfaceWireless:
-			for _, i := range wirelessConnections {
-				if i.Interface != iface.Name {
-					continue
-				}
+			var connections map[string]string
 
-				mac := i.MacAddress.String()
+			if b.config.IgnoreUnknownMacAddress {
+				connections = b.config.MacAddressMapping
+			} else {
+				connections = make(map[string]string)
 
-				id = idInterface +
-					openhab.IDNormalizeCamelCase(iface.Type) + "_" +
-					openhab.IDNormalizeCamelCase(iface.Name) + "_"
-
-				if alias, ok := b.config.MacAddressMapping[mac]; ok {
-					id += openhab.IDNormalizeCamelCase(alias)
-				} else {
-					if b.config.IgnoreUnknownMacAddress {
+				for _, i := range wirelessConnections {
+					if i.Interface != iface.Name {
 						continue
 					}
 
-					id += openhab.IDNormalizeCamelCase(strings.ReplaceAll(mac, ":", ""))
+					mac := i.MacAddress.String()
+					if alias, ok := b.config.MacAddressMapping[mac]; ok {
+						connections[mac] = alias
+					} else {
+						connections[mac] = strings.ReplaceAll(mac, ":", "")
+					}
 				}
+			}
+
+			for mac, alias := range connections {
+				id = idInterface +
+					openhab.IDNormalizeCamelCase(iface.Type) + "_" +
+					openhab.IDNormalizeCamelCase(iface.Name) + "_" +
+					openhab.IDNormalizeCamelCase(alias)
 
 				channels = append(channels,
 					openhab.NewChannel(id, openhab.ChannelTypeContact).
