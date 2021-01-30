@@ -38,9 +38,9 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 			err = multierr.Append(e, err)
 		}
 
-		for i, service := range balance.Services {
-			var serviceID string
+		var serviceID string
 
+		for i, service := range balance.Services {
 			if id, ok := services[strings.ToLower(service.Service)]; ok {
 				serviceID = id
 			} else {
