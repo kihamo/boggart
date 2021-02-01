@@ -40,14 +40,16 @@ type componentBase struct {
 		Device              Device     `json:"device"`
 	}
 
-	id  string
-	typ ComponentType
+	id             string
+	typ            ComponentType
+	discoveryTopic mqtt.Topic
 }
 
-func newComponentBase(id string, t ComponentType) *componentBase {
+func newComponentBase(id string, t ComponentType, discoveryTopic mqtt.Topic) *componentBase {
 	return &componentBase{
-		id:  id,
-		typ: t,
+		id:             id,
+		typ:            t,
+		discoveryTopic: discoveryTopic,
 	}
 }
 
@@ -61,6 +63,10 @@ func (c *componentBase) ID() string {
 
 func (c *componentBase) Type() ComponentType {
 	return c.typ
+}
+
+func (c *componentBase) DiscoveryTopic() mqtt.Topic {
+	return c.discoveryTopic
 }
 
 func (c *componentBase) UniqueID() string {

@@ -13,9 +13,9 @@ type ComponentDefault struct {
 	state atomic.Value
 }
 
-func NewComponentDefault(id string, t ComponentType) *ComponentDefault {
+func NewComponentDefault(id string, t ComponentType, discoveryTopic mqtt.Topic) *ComponentDefault {
 	return &ComponentDefault{
-		componentBase: newComponentBase(id, t),
+		componentBase: newComponentBase(id, t, discoveryTopic),
 	}
 }
 

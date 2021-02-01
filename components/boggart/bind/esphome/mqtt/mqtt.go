@@ -10,21 +10,27 @@ import (
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	subscribers := []mqtt.Subscriber{
 		mqtt.NewSubscriber(b.config.TopicDiscoveryPrefix+"/+/"+b.config.TopicPrefix+"/+/config", 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+			// компонент удаляют, поэтому пришла пустота на которую реагировать не надо
+			if len(message.Payload()) == 0 {
+				return nil
+			}
+
 			var component Component
 
-			parts := message.Topic().Split()
+			topic := message.Topic()
+			parts := topic.Split()
 			t := ComponentType(parts[len(parts)-4])
 			id := parts[len(parts)-2]
 
 			switch t {
 			case ComponentTypeBinarySensor:
-				component = NewComponentBinarySensor(id)
+				component = NewComponentBinarySensor(id, topic)
 				// case components.ComponentTypeCover.String():
 				// 	component.Type = components.ComponentTypeCover
 				// case components.ComponentTypeFan.String():
 				// 	component.Type = components.ComponentTypeFan
 			case ComponentTypeLight:
-				component = NewComponentLight(id)
+				component = NewComponentLight(id, topic)
 			case ComponentTypeSensor:
 				// text_sensor прикидывается обычным sensor и их надо распознать (HA просто не поддерживает такой тип)
 				// распознование очень хрупкое и основывается на проверке признаков unit_of_measurement, expire_after и
@@ -32,16 +38,16 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				var check ComponentSensorData
 				if err := message.JSONUnmarshal(&check); err == nil {
 					if check.UnitOfMeasurement != nil || check.ExpireAfter != nil || check.ForceUpdate != nil {
-						component = NewComponentSensor(id)
+						component = NewComponentSensor(id, topic)
 					}
 				}
 
 				if component == nil {
-					component = NewComponentDefault(id, ComponentTypeTextSensor)
+					component = NewComponentDefault(id, ComponentTypeTextSensor, topic)
 				}
 
 			case ComponentTypeSwitch:
-				component = NewComponentSwitch(id)
+				component = NewComponentSwitch(id, topic)
 				// case components.ComponentTypeTextSensor.String():
 				// 	component.Type = components.ComponentTypeTextSensor
 				// case components.ComponentTypeCamera.String():
@@ -49,7 +55,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				// case components.ComponentTypeClimate.String():
 				// 	component.Type = components.ComponentTypeClimate
 			default:
-				component = NewComponentDefault(id, t)
+				component = NewComponentDefault(id, t, topic)
 			}
 
 			if err := message.JSONUnmarshal(component); err != nil {

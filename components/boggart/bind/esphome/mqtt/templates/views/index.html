@@ -22,9 +22,8 @@
                             <td>{{ $component.Type }}</td>
                             <td>{{ $component.Name }}</td>
                             <td>{{ $component.StateFormat }}</td>
-                            <td>
+                            <td class="btn-group text-right" role="group">
                                 {{ if or (ne $component.CommandTopic.String "") (eq $component.ID $.Bind.Config.IPAddressSensorID) }}
-                                <div class="btn-group" role="group">
                                     {{ if ne $component.CommandTopic.String ""}}
                                         {{ if eq $component.Type.String "light" }}
                                             <a href="{{ $.Request.URL.Path }}?action=component&id={{ $component.ID }}" class="btn btn-info btn-icon btn-xs">
@@ -35,11 +34,11 @@
                                         {{ if $.Bind.Status.IsStatusOnline }}
                                             {{ if or (eq $component.Type.String "light") (eq $component.Type.String "switch") }}
                                                 {{ if eq (printf "%v" $component.StateFormat) "ON" }}
-                                                    <a href="{{ $.Request.URL.Path }}?action=command&id={{ $component.ID }}&cmd=OFF" class="btn btn-danger btn-icon btn-xs">
+                                                    <a href="{{ $.Request.URL.Path }}?action=command&id={{ $component.ID }}&cmd=OFF" class="btn btn-success btn-icon btn-xs">
                                                         <i class="glyphicon glyphicon-stop" title="{{ i18n "Switch off" $ }}"></i>
                                                     </a>
                                                 {{ else }}
-                                                    <a href="{{ $.Request.URL.Path }}?action=command&id={{ $component.ID }}&cmd=ON" class="btn btn-danger btn-icon btn-xs">
+                                                    <a href="{{ $.Request.URL.Path }}?action=command&id={{ $component.ID }}&cmd=ON" class="btn btn-success btn-icon btn-xs">
                                                         <i class="glyphicon glyphicon-play" title="{{ i18n "Turn on" $ }}"></i>
                                                     </a>
                                                 {{ end }}
@@ -52,7 +51,13 @@
                                             <i class="glyphicon glyphicon-globe" title="{{ i18n "Open Web server" $ }}"></i>
                                         </a>
                                     {{ end }}
-                                </div>
+
+                                {{ end }}
+
+                                {{ if ne $component.DiscoveryTopic.String ""}}
+                                    <a href="{{ $.Request.URL.Path }}?action=delete&id={{ $component.ID }}" class="btn btn-danger btn-icon btn-xs">
+                                        <i class="glyphicon glyphicon-trash" title="{{ i18n "Remove" $ }}"></i>
+                                    </a>
                                 {{ end }}
                             </td>
                         </tr>

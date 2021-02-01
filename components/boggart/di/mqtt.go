@@ -197,6 +197,10 @@ func (c *MQTTContainer) PublishAsyncRawWithoutCache(ctx context.Context, topic m
 	return nil
 }
 
+func (c *MQTTContainer) Delete(ctx context.Context, topic mqtt.Topic) error {
+	return c.PublishWithoutCache(ctx, topic, nil)
+}
+
 func (c *MQTTContainer) Request(ctx context.Context, requestTopic, responseTopic mqtt.Topic, requestPayload interface{}) (_ mqtt.Message, err error) {
 	response := make(chan mqtt.Message, 1)
 	single := make(chan struct{})

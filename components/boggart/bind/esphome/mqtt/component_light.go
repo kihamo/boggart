@@ -51,9 +51,9 @@ type ComponentLight struct {
 	state atomic.Value
 }
 
-func NewComponentLight(id string) *ComponentLight {
+func NewComponentLight(id string, discoveryTopic mqtt.Topic) *ComponentLight {
 	return &ComponentLight{
-		componentBase: newComponentBase(id, ComponentTypeLight),
+		componentBase: newComponentBase(id, ComponentTypeLight, discoveryTopic),
 	}
 }
 

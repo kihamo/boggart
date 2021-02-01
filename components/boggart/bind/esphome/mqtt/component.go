@@ -32,6 +32,7 @@ type Component interface {
 	State() interface{}
 	StateFormat() string
 	SetState(mqtt.Message) error
+	DiscoveryTopic() mqtt.Topic
 	StateTopic() mqtt.Topic
 	CommandTopic() mqtt.Topic
 	AvailabilityTopic() mqtt.Topic

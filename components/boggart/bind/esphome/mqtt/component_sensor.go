@@ -25,9 +25,9 @@ type ComponentSensor struct {
 	accuracyDecimals *atomic.Uint64
 }
 
-func NewComponentSensor(id string) *ComponentSensor {
+func NewComponentSensor(id string, discoveryTopic mqtt.Topic) *ComponentSensor {
 	return &ComponentSensor{
-		componentBase:    newComponentBase(id, ComponentTypeSensor),
+		componentBase:    newComponentBase(id, ComponentTypeSensor, discoveryTopic),
 		state:            atomic.NewFloat32Null(),
 		accuracyDecimals: atomic.NewUint64(),
 	}

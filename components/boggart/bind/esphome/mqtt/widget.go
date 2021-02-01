@@ -20,6 +20,9 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	case "command":
 		b.handleCommand(w, r)
 
+	case "delete":
+		b.handleDelete(w, r)
+
 	default:
 		b.handleIndex(w, r)
 	}
@@ -187,6 +190,57 @@ func (b *Bind) handleCommand(w *dashboard.Response, r *dashboard.Request) {
 		widget.FlashError(r, err, "")
 	} else {
 		widget.FlashSuccess(r, "Success toggle", "")
+	}
+
+	redirectURL := &url.URL{}
+	*redirectURL = *r.Original().URL
+	redirectURL.RawQuery = ""
+
+	widget.Redirect(redirectURL.String(), http.StatusFound, w, r)
+}
+
+func (b *Bind) handleDelete(w *dashboard.Response, r *dashboard.Request) {
+	widget := b.Widget()
+
+	componentID := r.URL().Query().Get("id")
+	if componentID == "" {
+		widget.NotFound(w, r)
+		return
+	}
+
+	component := b.Component(componentID)
+	if component == nil {
+		widget.NotFound(w, r)
+		return
+	}
+
+	ctx := r.Context()
+	var isFailed bool
+
+	if topic := component.DiscoveryTopic(); topic != "" {
+		if err := b.MQTT().Delete(ctx, topic); err != nil {
+			widget.FlashError(r, "Delete topic %v failed with error %v", "", topic, err)
+			isFailed = true
+		}
+	}
+
+	if topic := component.StateTopic(); topic != "" {
+		if err := b.MQTT().Delete(ctx, topic); err != nil {
+			widget.FlashError(r, "Delete topic %v failed with error %v", "", topic, err)
+			isFailed = true
+		}
+	}
+
+	if topic := component.CommandTopic(); topic != "" {
+		if err := b.MQTT().Delete(ctx, topic); err != nil {
+			widget.FlashError(r, "Delete topic %v failed with error %v", "", topic, err)
+			isFailed = true
+		}
+	}
+
+	if !isFailed {
+		b.components.Delete(component.UniqueID())
+		widget.FlashSuccess(r, "Remove component %s success", "", componentID)
 	}
 
 	redirectURL := &url.URL{}

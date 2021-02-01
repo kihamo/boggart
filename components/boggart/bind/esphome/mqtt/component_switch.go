@@ -17,9 +17,9 @@ type ComponentSwitch struct {
 	state *atomic.BoolNull
 }
 
-func NewComponentSwitch(id string) *ComponentSwitch {
+func NewComponentSwitch(id string, discoveryTopic mqtt.Topic) *ComponentSwitch {
 	return &ComponentSwitch{
-		componentBase: newComponentBase(id, ComponentTypeSwitch),
+		componentBase: newComponentBase(id, ComponentTypeSwitch, discoveryTopic),
 		state:         atomic.NewBoolNull(),
 	}
 }

@@ -25,9 +25,9 @@ type ComponentBinarySensor struct {
 	state *atomic.BoolNull
 }
 
-func NewComponentBinarySensor(id string) *ComponentBinarySensor {
+func NewComponentBinarySensor(id string, discoveryTopic mqtt.Topic) *ComponentBinarySensor {
 	return &ComponentBinarySensor{
-		componentBase: newComponentBase(id, ComponentTypeBinarySensor),
+		componentBase: newComponentBase(id, ComponentTypeBinarySensor, discoveryTopic),
 		state:         atomic.NewBoolNull(),
 	}
 }
