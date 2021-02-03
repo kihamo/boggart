@@ -2,6 +2,7 @@ package miio
 
 import (
 	"context"
+	"time"
 
 	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/providers/xiaomi/miio/devices/vacuum"
@@ -10,6 +11,31 @@ import (
 
 func (b *Bind) Tasks() []tasks.Task {
 	return []tasks.Task{
+		tasks.NewTask().
+			WithName("serial-number").
+			WithHandler(
+				b.Workers().WrapTaskHandlerIsOnline(
+					tasks.HandlerFuncFromShortToLong(b.taskSerialNumberHandler),
+				),
+			).
+			WithSchedule(
+				tasks.ScheduleWithSuccessLimit(
+					tasks.ScheduleWithDuration(tasks.ScheduleNow(), time.Second*30),
+					1,
+				),
+			),
+	}
+}
+
+func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
+	sn, err := b.device.SerialNumber(ctx)
+	if err != nil {
+		return err
+	}
+
+	b.Meta().SetSerialNumber(sn)
+
+	_, err = b.Workers().RegisterTask(
 		tasks.NewTask().
 			WithName("updater").
 			WithHandler(
@@ -21,7 +47,9 @@ func (b *Bind) Tasks() []tasks.Task {
 				),
 			).
 			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
-	}
+	)
+
+	return err
 }
 
 func (b *Bind) taskUpdaterHandler(ctx context.Context) error {

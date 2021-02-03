@@ -9,6 +9,10 @@ import (
 	"go.uber.org/multierr"
 )
 
+var (
+	payloadDone = []byte(`done`)
+)
+
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(b.config.TopicSetFanPower, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSetFanPower)),
@@ -56,19 +60,29 @@ func (b *Bind) callbackMQTTSetVolume(ctx context.Context, client mqtt.Component,
 }
 
 func (b *Bind) callbackMQTTTestVolume(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -3) {
+	if !message.IsTrue() || !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -3) {
 		return nil
 	}
 
-	return b.device.SoundVolumeTest(ctx)
+	err := b.device.SoundVolumeTest(ctx)
+	if err != nil {
+		return err
+	}
+
+	return b.MQTT().PublishAsyncRawWithoutCache(ctx, message.Topic(), 1, false, payloadDone)
 }
 
 func (b *Bind) callbackMQTTFind(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-	if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -2) {
+	if !message.IsTrue() || !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -2) {
 		return nil
 	}
 
-	return b.device.Find(ctx)
+	err := b.device.Find(ctx)
+	if err != nil {
+		return err
+	}
+
+	return b.MQTT().PublishAsyncRawWithoutCache(ctx, message.Topic(), 1, false, payloadDone)
 }
 
 func (b *Bind) callbackMQTTAction(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
