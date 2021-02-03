@@ -63,7 +63,7 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 					AddItems(
 						openhab.NewItem(itemPrefix+id+idBill, openhab.ItemTypeString).
 							WithLabel("Bill "+service.NMServiceType+" [%s]").
-							WithIcon("text"),
+							WithIcon("returnpipe"),
 					),
 			)
 

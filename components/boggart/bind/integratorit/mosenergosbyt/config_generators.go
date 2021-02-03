@@ -36,7 +36,7 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 			AddItems(
 				openhab.NewItem(itemPrefix+idBill, openhab.ItemTypeString).
 					WithLabel("Bill [%s]").
-					WithIcon("text"),
+					WithIcon("returnpipe"),
 			),
 		openhab.NewChannel(idAccountBalance, openhab.ChannelTypeNumber).
 			WithStateTopic(b.config.TopicBalance.Format(account.NNAccount)).

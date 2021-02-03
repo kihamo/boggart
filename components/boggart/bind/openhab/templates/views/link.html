@@ -1,0 +1,74 @@
+{{ define "body" }}
+    {{ if ne .icon_url "" }}
+    <img src="{{ .icon_url }}"/>
+    {{ end }}
+
+    {{ if ne .item.Label "" }}
+        <label><a href="{{ .item.State }}">{{ .item.Label }}</a></label>
+    {{ else }}
+        <label><a href="{{ .item.State }}">{{ .item.Name }}</a></label>
+    {{ end }}
+{{ end }}
+
+{{ define "head" }}
+<style type="text/css">
+    {{ if eq .style "android" }}
+    * {
+        line-height: 40px;
+    }
+    body {
+        font-size: 18px;
+    }
+    img {
+        margin-left: 2px;
+        width: 40px;
+        height: 40px;
+    }
+    label {
+        padding-left: 5px;
+    }
+    a {
+        color: #aeaeae;
+    }
+    {{ else if eq .style "basicui" }}
+    * {
+        line-height: 36px;
+    }
+    body {
+        font-family: "Roboto","Helvetica","Arial",sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        width: 50%;
+        padding: 8px 0;
+    {{ if eq .theme "dark" }}
+        background-color: #232323;
+        color: #c0c0c0;
+    {{ else }}
+        background-color: #fff;
+        color: #000;
+    {{ end }}
+    }
+    img {
+        margin-left: 16px;
+        width: 32px;
+        height: 32px;
+    }
+    label {
+        height: 36px;
+        padding-left: 16px;
+    {{ if eq .theme "dark" }}
+        color: #c0c0c0;
+    {{ else }}
+        color: #616161;
+    {{ end }}
+    }
+    a {
+    {{ if eq .theme "dark" }}
+        color: #c0c0c0;
+    {{ else }}
+        color: #000;
+    {{ end }}
+    }
+    {{ end }}
+</style>
+{{ end }}

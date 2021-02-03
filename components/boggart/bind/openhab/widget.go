@@ -14,6 +14,7 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/mime"
 	"github.com/kihamo/boggart/providers/openhab/client/items"
+	"github.com/kihamo/boggart/providers/openhab/models"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
@@ -21,8 +22,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	q := r.URL().Query()
 	widget := b.Widget()
 
-	action := q.Get("action")
-	switch action {
+	switch q.Get("action") {
 	case "input":
 		id := strings.TrimSpace(q.Get("id"))
 		if id == "" {
@@ -63,22 +63,34 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			response.Payload.State = t.Format("2006-01-02T15:04:05")
 		}
 
-		var iconURL string
-
-		if response.Payload.Category != "" {
-			iconURL = r.URL().Path + "/?action=icon&icon=" + response.Payload.Category +
-				"&state=" + response.Payload.State + "&format=svg&anyFormat=true"
-
-			if key := q.Get(boggart.AccessKeyName); key != "" {
-				iconURL += "&" + boggart.AccessKeyName + "=" + key
-			}
-		}
-
 		widget.RenderLayout(r.Context(), "input", "ui", b.initUI(map[string]interface{}{
 			"item":     response.Payload,
 			"type":     q.Get("type"),
 			"rows":     q.Get("rows"),
-			"icon_url": iconURL,
+			"icon_url": b.iconURL(r, response.Payload),
+		}, r))
+
+		return
+
+	case "link":
+		id := strings.TrimSpace(q.Get("id"))
+		if id == "" {
+			widget.NotFound(w, r)
+			return
+		}
+
+		paramsGet := items.NewGetItemDataParams().
+			WithItemname(id)
+
+		response, err := b.provider.Items.GetItemData(paramsGet)
+		if err != nil {
+			widget.NotFound(w, r)
+			return
+		}
+
+		widget.RenderLayout(r.Context(), "link", "ui", b.initUI(map[string]interface{}{
+			"item":     response.Payload,
+			"icon_url": b.iconURL(r, response.Payload),
 		}, r))
 
 		return
@@ -178,6 +190,19 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 func (b *Bind) WidgetAssetFS() *assetfs.AssetFS {
 	return assetFS()
+}
+
+func (b *Bind) iconURL(r *dashboard.Request, payload *models.EnrichedItemDTO) (icon string) {
+	if payload.Category != "" {
+		icon = r.URL().Path + "/?action=icon&icon=" + payload.Category +
+			"&state=" + payload.State + "&format=svg&anyFormat=true"
+
+		if key := r.URL().Query().Get(boggart.AccessKeyName); key != "" {
+			icon += "&" + boggart.AccessKeyName + "=" + key
+		}
+	}
+
+	return icon
 }
 
 func (b *Bind) initUI(vars map[string]interface{}, r *dashboard.Request) map[string]interface{} {

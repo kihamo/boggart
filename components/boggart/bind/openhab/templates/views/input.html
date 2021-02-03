@@ -89,13 +89,18 @@
         line-height: 36px;
     }
     body {
-        background-color: #fff;
-        color: #000;
         font-family: "Roboto","Helvetica","Arial",sans-serif;
         font-size: 14px;
         font-weight: 500;
         width: 50%;
         padding: 8px 0;
+    {{ if eq .theme "dark" }}
+        background-color: #232323;
+        color: #c0c0c0;
+    {{ else }}
+        background-color: #fff;
+        color: #000;
+    {{ end }}
     }
     img {
         margin-left: 16px;
@@ -105,7 +110,11 @@
     label {
         height: 36px;
         padding-left: 16px;
+    {{ if eq .theme "dark" }}
+        color: #c0c0c0;
+    {{ else }}
         color: #616161;
+    {{ end }}
     }
     input {
         height: 36px;
@@ -114,7 +123,6 @@
         line-height: 1.5em;
     }
     input, textarea {
-        background-color: #ececec;
         border: 0;
         min-height: 36px;
         max-width: 50%;
@@ -128,6 +136,13 @@
         margin-right: 24px;
         margin-left: 4px;
         border-radius: 3px;
+    {{ if eq .theme "dark" }}
+        color: #f9f9f9;
+        background-color: #191919;
+        border: 1px solid #2e2e2e;
+    {{ else }}
+        background-color: #ececec;
+    {{ end }}
     }
     {{ end }}
 </style>

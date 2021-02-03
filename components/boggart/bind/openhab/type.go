@@ -36,9 +36,7 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 
 		if username := config.Address.User.Username(); username != "" {
 			password, _ := config.Address.User.Password()
-			if password != "" {
-				request.SetBasicAuth(username, password)
-			}
+			request.SetBasicAuth(username, password)
 		}
 
 		director(request)
