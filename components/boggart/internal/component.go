@@ -545,7 +545,10 @@ func (c *Component) mqttOnConnectHandler(client mqtt.Component, restore bool) {
 func (c *Component) itemStatusUpdate(item *BindItem, status boggart.BindStatus) {
 	if ok := item.updateStatus(status); ok {
 		topic := mqtt.Topic(c.config.String(boggart.ConfigMQTTTopicBindStatus)).Format(item.ID())
-		payload := strings.ToLower(status.String())
+		name := status.String()
+		payload := strings.ToLower(name)
+
+		metricBindStatus.With("bind", item.ID(), "status", name)
 
 		ctx := context.Background()
 

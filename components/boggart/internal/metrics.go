@@ -7,11 +7,13 @@ import (
 )
 
 var (
-	metricProbes = snitch.NewCounter(boggart.ComponentName+"_probes", "Readiness check")
+	metricProbes     = snitch.NewCounter(boggart.ComponentName+"_probes", "Readiness check")
+	metricBindStatus = snitch.NewCounter(boggart.ComponentName+"_bind_status", "Bind status")
 )
 
 func (c *Component) Describe(ch chan<- *snitch.Description) {
 	metricProbes.Describe(ch)
+	metricBindStatus.Describe(ch)
 
 	c.tasksManager.Describe(ch)
 	c.binds.Range(func(_ interface{}, item interface{}) bool {
@@ -25,6 +27,7 @@ func (c *Component) Describe(ch chan<- *snitch.Description) {
 
 func (c *Component) Collect(ch chan<- snitch.Metric) {
 	metricProbes.Collect(ch)
+	metricBindStatus.Collect(ch)
 
 	c.tasksManager.Collect(ch)
 	c.binds.Range(func(_ interface{}, item interface{}) bool {
