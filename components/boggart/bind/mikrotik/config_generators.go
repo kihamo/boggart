@@ -61,14 +61,14 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 					WithIcon("text"),
 			),
 		openhab.NewChannel(idFirmwareInstalledVersion, openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicPackagesLatestVersion.Format(sn)).
+			WithStateTopic(b.config.TopicFirmwareInstalledVersion.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idFirmwareInstalledVersion, openhab.ItemTypeString).
 					WithLabel("Firmware installed version").
 					WithIcon("text"),
 			),
 		openhab.NewChannel(idFirmwareLatestVersion, openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicPackagesLatestVersion.Format(sn)).
+			WithStateTopic(b.config.TopicFirmwareLatestVersion.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idFirmwareLatestVersion, openhab.ItemTypeString).
 					WithLabel("Firmware latest version").
