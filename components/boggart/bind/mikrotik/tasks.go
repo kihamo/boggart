@@ -101,61 +101,54 @@ func (b *Bind) taskInterfaceConnectionHandler(ctx context.Context, meta tasks.Me
 
 	// 1.1 Wireless
 	if connections, e := b.provider.InterfaceWirelessRegistrationTable(ctx); e == nil {
+		var isUpdated bool
+
+		// чтобы в первую загрузку пометить все элементы как старые
+		b.connectionsFirstLoad[InterfaceWireless].Do(func() {
+			isUpdated = true
+		})
+
 		for _, connection := range connections {
-			item := &storeItem{
+			b.loadOrStoreItem(&storeItem{
 				version:        version,
+				isUpdated:      isUpdated,
 				interfaceType:  interfaceWirelessMQTT,
 				interfaceName:  mqtt.NameReplace(connection.Interface),
 				connectionName: mqtt.NameReplace(connection.MacAddress.String()),
-			}
-
-			actual, loaded := b.connectionsActive.LoadOrStore(item.String(), item)
-			if loaded {
-				actual.(*storeItem).version = version
-			}
+			})
 		}
 
 		storedWireless = true
 	} else {
-		// TODO: wrap
 		err = fmt.Errorf("get wireless registration table failed: %w", e)
 	}
 
 	// 1.2 L2TP
-
-	// 1.2.1 Сначала вычитываем все интерфейсы сконфигурированные, что бы сработал механизм деактивации
-	//       не активных для этого простовляем им версию 0, чтобы механиз ниже сработал
 	if connections, e := b.provider.InterfaceL2TPServer(ctx); e == nil {
+		var isUpdated bool
+
+		// чтобы в первую загрузку пометить все элементы как старые
+		b.connectionsFirstLoad[InterfaceL2TPServer].Do(func() {
+			isUpdated = true
+		})
+
 		for _, connection := range connections {
-			item := &storeItem{
-				version:        0,
+			if !connection.Running {
+				continue
+			}
+
+			b.loadOrStoreItem(&storeItem{
+				version:        version,
+				isUpdated:      isUpdated,
 				interfaceType:  interfaceL2TPServerMQTT,
 				interfaceName:  mqtt.NameReplace(connection.Name),
 				connectionName: mqtt.NameReplace(connection.User),
-			}
-
-			b.connectionsActive.LoadOrStore(item.String(), item)
-		}
-	}
-
-	// 1.2.2 Получаем активные соединения и регистрируем их
-	if connections, e := b.provider.PPPActive(ctx); e == nil {
-		for _, connection := range connections {
-			item := &storeItem{
-				version:        version,
-				interfaceType:  interfaceL2TPServerMQTT,
-				connectionName: mqtt.NameReplace(connection.Name),
-			}
-
-			if actual, loaded := b.connectionsActive.Load(item.String()); loaded {
-				actual.(*storeItem).version = version
-			}
+			})
 		}
 
 		storedL2TP = true
 	} else {
-		// TODO: wrap
-		err = fmt.Errorf("get active ppp connections failed: %w", e)
+		err = fmt.Errorf("get ppp connections failed: %w", e)
 	}
 
 	// 2. Теперь рассылаем актуальные версии в MQTT, а то, что меньше текущей версии еще и удаляем
@@ -165,16 +158,32 @@ func (b *Bind) taskInterfaceConnectionHandler(ctx context.Context, meta tasks.Me
 		item := value.(*storeItem)
 		var payload bool
 
-		if item.version == version {
+		if item.version != version {
+			// среди активных не обнаружено, принимаем решение об исключении
+			if item.interfaceType == interfaceWirelessMQTT && storedWireless {
+				payload = false
+			} else if item.interfaceType == interfaceL2TPServerMQTT && storedL2TP {
+				payload = false
+			} else {
+				return true
+			}
+		} else if !item.isUpdated {
+			// значит пришел новый элемент и это новый коннект
 			payload = true
-		} else if item.interfaceType == interfaceWirelessMQTT && storedWireless || item.interfaceType == interfaceL2TPServerMQTT && storedL2TP {
-			payload = false
-			b.connectionsActive.Delete(key)
 		} else {
 			return true
 		}
 
-		_ = b.MQTT().PublishAsync(ctx, b.config.TopicInterfaceConnect.Format(sn, item.interfaceType, item.interfaceName, item.connectionName), payload)
+		_ = b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicInterfaceConnect.Format(sn, item.interfaceType, item.interfaceName, item.connectionName), payload)
+
+		if payload {
+			_ = b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicInterfaceLastConnect.Format(sn, item.interfaceType, item.interfaceName), item.connectionName)
+		} else {
+			b.connectionsActive.Delete(key)
+
+			_ = b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicInterfaceLastDisconnect.Format(sn, item.interfaceType, item.interfaceName), item.connectionName)
+		}
+
 		return true
 	})
 

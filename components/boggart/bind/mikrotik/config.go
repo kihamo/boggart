@@ -21,6 +21,8 @@ type Config struct {
 	MacAddressMapping             map[string]string `mapstructure:"mac_address_mapping" yaml:"mac_address_mapping"`
 	IgnoreUnknownMacAddress       bool              `mapstructure:"ignore_unknown_mac_address" yaml:"ignore_unknown_mac_address"`
 	TopicInterfaceConnect         mqtt.Topic        `mapstructure:"topic_interface_connect" yaml:"topic_interface_connect"`
+	TopicInterfaceLastConnect     mqtt.Topic        `mapstructure:"topic_interface_last_connect" yaml:"topic_interface_last_connect"`
+	TopicInterfaceLastDisconnect  mqtt.Topic        `mapstructure:"topic_interface_last_disconnect" yaml:"topic_interface_last_disconnect"`
 	TopicPackagesInstalledVersion mqtt.Topic        `mapstructure:"topic_packages_installed_version" yaml:"topic_packages_installed_version"`
 	TopicPackagesLatestVersion    mqtt.Topic        `mapstructure:"topic_packages_latest_version" yaml:"topic_packages_latest_version"`
 	TopicFirmwareInstalledVersion mqtt.Topic        `mapstructure:"topic_firmware_installed_version" yaml:"topic_firmware_installed_version"`
@@ -44,7 +46,9 @@ func (t Type) Config() interface{} {
 		SyslogTagWireless:             "wifi",
 		SyslogTagL2TP:                 "vpn",
 		IgnoreUnknownMacAddress:       true,
-		TopicInterfaceConnect:         prefix + "+/+/+",
+		TopicInterfaceConnect:         prefix + "interface/+/+/+",
+		TopicInterfaceLastConnect:     prefix + "connect/+/+",
+		TopicInterfaceLastDisconnect:  prefix + "disconnect/+/+",
 		TopicPackagesInstalledVersion: prefix + "packages/installed-version",
 		TopicPackagesLatestVersion:    prefix + "packages/latest-version",
 		TopicFirmwareInstalledVersion: prefix + "firmware/installed-version",

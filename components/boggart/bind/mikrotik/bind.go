@@ -40,10 +40,12 @@ type Bind struct {
 
 	connectionsActive       sync.Map
 	connectionsZombieKiller *atomic.Once
+	connectionsFirstLoad    map[string]*atomic.Once
 }
 
 type storeItem struct {
 	version        uint64
+	isUpdated      bool
 	connectionName string
 	interfaceType  string
 	interfaceName  string // is unique
@@ -51,4 +53,20 @@ type storeItem struct {
 
 func (i storeItem) String() string {
 	return i.interfaceType + "/" + i.connectionName
+}
+
+func (b *Bind) Run() error {
+	for _, o := range b.connectionsFirstLoad {
+		o.Reset()
+	}
+
+	return nil
+}
+
+func (b *Bind) loadOrStoreItem(item *storeItem) {
+	actual, loaded := b.connectionsActive.LoadOrStore(item.String(), item)
+	if loaded {
+		actual.(*storeItem).version = item.version
+		actual.(*storeItem).isUpdated = true
+	}
 }

@@ -36,6 +36,10 @@ func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
 		address:                 u,
 		provider:                mikrotik.NewClient(u.Host, username, password, config.ClientTimeout),
 		connectionsZombieKiller: &atomic.Once{},
+		connectionsFirstLoad: map[string]*atomic.Once{
+			InterfaceWireless:   {},
+			InterfaceL2TPServer: {},
+		},
 	}
 
 	return bind, nil

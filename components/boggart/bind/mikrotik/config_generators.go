@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"sync"
 
 	"github.com/kihamo/boggart/components/boggart/config_generators"
 	"github.com/kihamo/boggart/components/boggart/config_generators/openhab"
@@ -39,6 +40,8 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 		idFirmwareInstalledVersion = "FirmwareInstalledVersion"
 		idFirmwareLatestVersion    = "FirmwareLatestVersion"
 		idInterface                = "Interface"
+		idLastConnected            = "LastConnected"
+		idLastDisconnected         = "LastDisconnected"
 	)
 
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
@@ -73,7 +76,10 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 			),
 	}
 
-	var id string
+	var (
+		id       string
+		lastL2TP sync.Once
+	)
 
 	for _, iface := range interfaces {
 		if iface.Disabled {
@@ -103,42 +109,82 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 				}
 			}
 
+			id = idInterface +
+				openhab.IDNormalizeCamelCase(iface.Type) + "_" +
+				openhab.IDNormalizeCamelCase(iface.Name) + "_"
+
+			if len(connections) > 0 {
+				channels = append(channels,
+					openhab.NewChannel(id+idLastConnected, openhab.ChannelTypeString).
+						WithStateTopic(b.config.TopicInterfaceLastConnect.Format(sn, iface.Type, iface.Name)).
+						AddItems(
+							openhab.NewItem(itemPrefix+id+idLastConnected, openhab.ItemTypeString).
+								WithLabel("Last connected to "+iface.Name).
+								WithIcon("network"),
+						),
+					openhab.NewChannel(id+idLastDisconnected, openhab.ChannelTypeString).
+						WithStateTopic(b.config.TopicInterfaceLastDisconnect.Format(sn, iface.Type, iface.Name)).
+						AddItems(
+							openhab.NewItem(itemPrefix+id+idLastDisconnected, openhab.ItemTypeString).
+								WithLabel("Last disconnected to "+iface.Name).
+								WithIcon("network"),
+						),
+				)
+			}
+
 			for mac, alias := range connections {
-				id = idInterface +
-					openhab.IDNormalizeCamelCase(iface.Type) + "_" +
-					openhab.IDNormalizeCamelCase(iface.Name) + "_" +
-					openhab.IDNormalizeCamelCase(alias)
+				clientId := "Client" + openhab.IDNormalizeCamelCase(alias)
 
 				channels = append(channels,
-					openhab.NewChannel(id, openhab.ChannelTypeContact).
+					openhab.NewChannel(id+clientId, openhab.ChannelTypeContact).
 						WithStateTopic(b.config.TopicInterfaceConnect.Format(sn, iface.Type, iface.Name, mac)).
 						WithOn("true").
 						WithOff("false").
 						AddItems(
-							openhab.NewItem(itemPrefix+id, openhab.ItemTypeContact).
-								WithLabel(alias+"connected to "+iface.Name).
+							openhab.NewItem(itemPrefix+id+clientId, openhab.ItemTypeContact).
+								WithLabel(alias+" connected to "+iface.Name).
 								WithIcon("network"),
 						),
 				)
 			}
 
 		case InterfaceL2TPServer:
+			id = idInterface +
+				openhab.IDNormalizeCamelCase(iface.Type) + "_"
+
 			for _, i := range interfacesL2TP {
 				if i.Name != iface.Name {
 					continue
 				}
 
-				id = idInterface +
-					openhab.IDNormalizeCamelCase(iface.Type) + "_" +
-					openhab.IDNormalizeCamelCase(i.User)
+				lastL2TP.Do(func() {
+					channels = append(channels,
+						openhab.NewChannel(id+idLastConnected, openhab.ChannelTypeString).
+							WithStateTopic(b.config.TopicInterfaceLastConnect.Format(sn, iface.Type)).
+							AddItems(
+								openhab.NewItem(itemPrefix+id+idLastConnected, openhab.ItemTypeString).
+									WithLabel("Last connected to L2TP").
+									WithIcon("network"),
+							),
+						openhab.NewChannel(id+idLastDisconnected, openhab.ChannelTypeString).
+							WithStateTopic(b.config.TopicInterfaceLastDisconnect.Format(sn, iface.Type)).
+							AddItems(
+								openhab.NewItem(itemPrefix+id+idLastDisconnected, openhab.ItemTypeString).
+									WithLabel("Last disconnected to L2TP").
+									WithIcon("network"),
+							),
+					)
+				})
+
+				clientId := "Client" + openhab.IDNormalizeCamelCase(i.User)
 
 				channels = append(channels,
-					openhab.NewChannel(id, openhab.ChannelTypeContact).
+					openhab.NewChannel(id+clientId, openhab.ChannelTypeContact).
 						WithStateTopic(b.config.TopicInterfaceConnect.Format(sn, iface.Type, iface.Name, i.User)).
 						WithOn("true").
 						WithOff("false").
 						AddItems(
-							openhab.NewItem(itemPrefix+id, openhab.ItemTypeContact).
+							openhab.NewItem(itemPrefix+id+clientId, openhab.ItemTypeContact).
 								WithLabel(i.User+" connected to L2TP").
 								WithIcon("boy_3"),
 						),
