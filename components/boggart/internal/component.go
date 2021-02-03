@@ -548,7 +548,7 @@ func (c *Component) itemStatusUpdate(item *BindItem, status boggart.BindStatus) 
 		name := status.String()
 		payload := strings.ToLower(name)
 
-		metricBindStatus.With("bind", item.ID(), "status", name)
+		metricBindStatus.With("bind", item.ID(), "status", name).Inc()
 
 		ctx := context.Background()
 

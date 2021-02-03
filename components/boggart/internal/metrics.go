@@ -8,7 +8,7 @@ import (
 
 var (
 	metricProbes     = snitch.NewCounter(boggart.ComponentName+"_probes", "Readiness check")
-	metricBindStatus = snitch.NewCounter(boggart.ComponentName+"_bind_status", "Bind status")
+	metricBindStatus = snitch.NewCounter(boggart.ComponentName+"_status_bind", "Bind status")
 )
 
 func (c *Component) Describe(ch chan<- *snitch.Description) {
