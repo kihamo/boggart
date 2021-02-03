@@ -1,6 +1,7 @@
 package elektroset
 
 import (
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/integratorit/elektroset"
 )
@@ -19,6 +20,7 @@ type Bind struct {
 	di.WidgetBind
 	di.WorkersBind
 
-	config *Config
-	client *elektroset.Client
+	config      *Config
+	client      *elektroset.Client
+	metersCount *atomic.Uint32Null
 }

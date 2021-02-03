@@ -94,11 +94,14 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 					}
 				}
 
+				var metersCount uint32
+
 				for _, v := range values {
 					if v.date.IsZero() {
 						continue
 					}
 
+					metersCount++
 					v.value *= 1000
 
 					metricMeterValue.With("account", account.Number, "service", serviceID, "tariff", v.tariff).Set(v.value)
@@ -111,6 +114,8 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 						err = multierr.Append(err, e)
 					}
 				}
+
+				b.metersCount.Set(metersCount)
 
 				if !lastBill.IsZero() {
 					provider, _ := json.Marshal(service.Provider)
