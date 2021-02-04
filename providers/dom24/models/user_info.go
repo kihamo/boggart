@@ -8,13 +8,13 @@ package models
 import (
 	"strconv"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // UserInfo user info
+//
 // swagger:model UserInfo
 type UserInfo struct {
 
@@ -95,6 +95,7 @@ func (m *UserInfo) UnmarshalBinary(b []byte) error {
 }
 
 // UserInfoAccountsItems0 user info accounts items0
+//
 // swagger:model UserInfoAccountsItems0
 type UserInfoAccountsItems0 struct {
 

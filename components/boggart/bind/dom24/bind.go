@@ -12,10 +12,11 @@ import (
 type Bind struct {
 	di.LoggerBind
 	di.MetaBind
-	//di.MetricsBind
-	//di.MQTTBind
-	//di.ProbesBind
+	di.MetricsBind
+	di.MQTTBind
+	di.ProbesBind
 	di.WidgetBind
+	di.WorkersBind
 
 	config   *Config
 	provider *dom24.Client

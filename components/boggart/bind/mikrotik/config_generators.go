@@ -133,15 +133,15 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 			}
 
 			for mac, alias := range connections {
-				clientId := "Client" + openhab.IDNormalizeCamelCase(alias)
+				clientID := "Client" + openhab.IDNormalizeCamelCase(alias)
 
 				channels = append(channels,
-					openhab.NewChannel(id+clientId, openhab.ChannelTypeContact).
+					openhab.NewChannel(id+clientID, openhab.ChannelTypeContact).
 						WithStateTopic(b.config.TopicInterfaceConnect.Format(sn, iface.Type, iface.Name, mac)).
 						WithOn("true").
 						WithOff("false").
 						AddItems(
-							openhab.NewItem(itemPrefix+id+clientId, openhab.ItemTypeContact).
+							openhab.NewItem(itemPrefix+id+clientID, openhab.ItemTypeContact).
 								WithLabel(alias+" connected to "+iface.Name).
 								WithIcon("network"),
 						),
@@ -176,15 +176,15 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 					)
 				})
 
-				clientId := "Client" + openhab.IDNormalizeCamelCase(i.User)
+				clientID := "Client" + openhab.IDNormalizeCamelCase(i.User)
 
 				channels = append(channels,
-					openhab.NewChannel(id+clientId, openhab.ChannelTypeContact).
+					openhab.NewChannel(id+clientID, openhab.ChannelTypeContact).
 						WithStateTopic(b.config.TopicInterfaceConnect.Format(sn, iface.Type, iface.Name, i.User)).
 						WithOn("true").
 						WithOff("false").
 						AddItems(
-							openhab.NewItem(itemPrefix+id+clientId, openhab.ItemTypeContact).
+							openhab.NewItem(itemPrefix+id+clientID, openhab.ItemTypeContact).
 								WithLabel(i.User+" connected to L2TP").
 								WithIcon("boy_3"),
 						),

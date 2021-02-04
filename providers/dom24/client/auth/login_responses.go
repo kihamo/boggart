@@ -10,11 +10,10 @@ import (
 	"io"
 
 	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
-	strfmt "github.com/go-openapi/strfmt"
-
-	models "github.com/kihamo/boggart/providers/dom24/models"
+	"github.com/kihamo/boggart/providers/dom24/models"
 )
 
 // LoginReader is a Reader for the Login structure.

@@ -8,15 +8,14 @@ package models
 import (
 	"strconv"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
-
 	custom "github.com/kihamo/boggart/providers/dom24/static/models"
 )
 
 // Meter meter
+//
 // swagger:model Meter
 type Meter struct {
 
@@ -196,6 +195,7 @@ func (m *Meter) UnmarshalBinary(b []byte) error {
 }
 
 // MeterValuesItems0 meter values items0
+//
 // swagger:model MeterValuesItems0
 type MeterValuesItems0 struct {
 

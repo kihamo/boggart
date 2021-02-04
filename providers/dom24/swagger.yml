@@ -41,6 +41,24 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
+  /Config/MobileAppSettings:
+    get:
+      operationId: "mobileAppSettings"
+      tags:
+        - "config"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: '#/definitions/MobileAppSettings'
+        401:
+          description: "Unauthorized"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /Accounting/Info:
     get:
       operationId: "accountingInfo"
@@ -211,6 +229,94 @@ definitions:
     properties:
       error:
         type: "string"
+  MobileAppSettings:
+    type: "object"
+    properties:
+      showAds:
+        type: "boolean"
+      adsType:
+        type: "integer"
+      adsCodeIOS:
+        type: "string"
+      adsCodeAndroid:
+        type: "string"
+      enableOSS:
+        type: "boolean"
+      useDispatcherAuth:
+        type: "boolean"
+      color:
+        type: "string"
+      servicePercent:
+        type: "number"
+      DontShowDebt:
+        type: "boolean"
+      registerWithoutSMS:
+        type: "boolean"
+      сheckCrashSystem:
+        type: "boolean"
+      menu:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            id:
+              type: "integer"
+            name_app:
+              type: "string"
+            simple_name:
+              type: "string"
+            visible:
+              type: "integer"
+      main_name:
+        type: "string"
+      phone:
+        type: "string"
+      address:
+        type: "string"
+      appLinkIOS:
+        type: "string"
+      appLinkAndroid:
+        type: "string"
+      appIconFile:
+        type: "string"
+      siteIconFile:
+        type: "string"
+      bonusOfertaFile:
+        type: "string"
+      useBonusSystem:
+        type: "boolean"
+      chooseIdentByHouse:
+        type: "boolean"
+      startScreen:
+        type: "string"
+      language:
+        type: "string"
+      useAccountPinCode:
+        type: "boolean"
+      requireBirthDate:
+        type: "boolean"
+      disableCommentingRequests:
+        type: "boolean"
+      districtsExists:
+        type: "boolean"
+      housesExists:
+        type: "boolean"
+      streetsExists:
+        type: "boolean"
+      premisesExists:
+        type: "boolean"
+      appTheme:
+        type: "string"
+      showOurService:
+        type: "boolean"
+      blockUserAuth:
+        type: "boolean"
+      MockupCount:
+        type: "integer"
+      MockupMaxWidth:
+        type: "integer"
+      MockupMaxHeight:
+        type: "integer"
   Account:
     type: "object"
     properties:
