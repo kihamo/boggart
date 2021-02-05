@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"sync"
+	"time"
 
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
@@ -29,8 +30,9 @@ const (
 type Client struct {
 	*client.Dom24
 
-	tokenLock  sync.RWMutex
-	tokenValue string
+	tokenLock    sync.RWMutex
+	tokenValue   string
+	tokenExpires *time.Time
 }
 
 func New(phone, password string, debug bool, logger logger.Logger) *Client {
@@ -51,7 +53,7 @@ func New(phone, password string, debug bool, logger logger.Logger) *Client {
 			}
 
 			if response.StatusCode == http.StatusUnauthorized {
-				cl.setToken("")
+				cl.setToken("", nil)
 
 				return response, err
 			}
@@ -89,7 +91,7 @@ func New(phone, password string, debug bool, logger logger.Logger) *Client {
 			for _, cookie := range response.Cookies() {
 				if cookie.Name == headerToken {
 					v, _ := url.QueryUnescape(cookie.Value)
-					cl.setToken(v)
+					cl.setToken(v, &cookie.Expires)
 				}
 			}
 
@@ -134,17 +136,33 @@ func New(phone, password string, debug bool, logger logger.Logger) *Client {
 	return cl
 }
 
-func (c *Client) setToken(token string) {
+func (c *Client) setToken(token string, expires *time.Time) {
+	if token == "" {
+		expires = nil
+	}
+
 	c.tokenLock.Lock()
 	c.tokenValue = token
+	c.tokenExpires = expires
 	c.tokenLock.Unlock()
 }
 
 func (c *Client) token() string {
 	c.tokenLock.RLock()
-	defer c.tokenLock.RUnlock()
+	value := c.tokenValue
+	expires := c.tokenExpires
+	c.tokenLock.RUnlock()
 
-	return c.tokenValue
+	if expires != nil && !expires.IsZero() && time.Now().After(*expires) {
+		value = ""
+
+		c.tokenLock.Lock()
+		c.tokenValue = ""
+		c.tokenExpires = nil
+		c.tokenLock.Unlock()
+	}
+
+	return value
 }
 
 func (c *Client) Login(ctx context.Context, phone, password string) (*models.Account, error) {
