@@ -32,17 +32,25 @@ func (b *Bind) Run() error {
 	b.providerOnce.Reset()
 	b.tariffCount.Nil()
 
-	provider, err := b.Provider()
-	if err != nil {
-		return err
-	}
+	return nil
+}
 
-	tariffCount, err := provider.TariffCount()
-	if err == nil {
+func (b *Bind) TariffCount() (uint32, error) {
+	if b.tariffCount.IsNil() {
+		provider, err := b.Provider()
+		if err != nil {
+			return 0, err
+		}
+
+		tariffCount, err := provider.TariffCount()
+		if err != nil {
+			return 0, err
+		}
+
 		b.tariffCount.Set(uint32(tariffCount))
 	}
 
-	return err
+	return b.tariffCount.Load(), nil
 }
 
 func (b *Bind) Provider() (provider *mercury.MercuryV1, err error) {

@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/kihamo/boggart/components/boggart/config_generators"
@@ -9,13 +9,14 @@ import (
 )
 
 func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
-	if b.tariffCount.IsNil() {
-		return nil, errors.New("tariff count is nil")
+	tariffCount, err := b.TariffCount()
+
+	if err != nil {
+		return nil, fmt.Errorf("get tariff count failed: %w", err)
 	}
 
 	meta := b.Meta()
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
-	tariffCount := b.tariffCount.Load()
 
 	channels := make([]*openhab.Channel, 0, tariffCount+9)
 

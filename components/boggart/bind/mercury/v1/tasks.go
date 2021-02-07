@@ -26,12 +26,16 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		return err
 	}
 
+	tariffCount, err := b.TariffCount()
+	if err != nil {
+		return err
+	}
+
 	powerValues, err := provider.PowerCounters()
 	if err != nil {
 		return err
 	}
 
-	tariffCount := b.tariffCount.Load()
 	mTariff := metricTariff.With("serial_number", b.config.Address)
 
 	if tariffCount > 0 {
