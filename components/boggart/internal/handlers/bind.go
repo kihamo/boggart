@@ -6,11 +6,9 @@ import (
 	"net/http"
 	"net/url"
 	"sort"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
-	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/shadow/components/dashboard"
 	"gopkg.in/yaml.v2"
 )
@@ -26,14 +24,12 @@ type BindYAML struct {
 type BindHandler struct {
 	dashboard.Handler
 
-	componentBoggart boggart.Component
-	componentMQTT    mqtt.Component
+	component boggart.Component
 }
 
-func NewBindHandler(b boggart.Component, m mqtt.Component) *BindHandler {
+func NewBindHandler(b boggart.Component) *BindHandler {
 	return &BindHandler{
-		componentBoggart: b,
-		componentMQTT:    m,
+		component: b,
 	}
 }
 
@@ -44,7 +40,7 @@ func (h *BindHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 	id := q.Get(":id")
 	if id != "" {
-		bindItem = h.componentBoggart.Bind(id)
+		bindItem = h.component.Bind(id)
 		if bindItem == nil {
 			h.NotFound(w, r)
 			return
@@ -59,18 +55,6 @@ func (h *BindHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		h.actionDelete(w, r, bindItem)
-		return
-
-	case "logs":
-		h.actionLogs(w, r, bindItem)
-		return
-
-	case "metrics":
-		h.actionMetrics(w, r, bindItem)
-		return
-
-	case "mqtt":
-		h.actionMQTT(w, r, bindItem)
 		return
 
 	case "":
@@ -128,16 +112,16 @@ func (h *BindHandler) registerByYAML(oldID string, code []byte) (bindItem boggar
 	}
 
 	for _, id := range removeIDs {
-		if bindExists := h.componentBoggart.Bind(id); bindExists != nil {
+		if bindExists := h.component.Bind(id); bindExists != nil {
 			upgraded = true
 
-			if err := h.componentBoggart.UnregisterBindByID(id); err != nil {
+			if err := h.component.UnregisterBindByID(id); err != nil {
 				return nil, false, err
 			}
 		}
 	}
 
-	bindItem, err = h.componentBoggart.RegisterBind(bindParsed.ID, bind, bindParsed.Type, bindParsed.Description, bindParsed.Tags, cfg)
+	bindItem, err = h.component.RegisterBind(bindParsed.ID, bind, bindParsed.Type, bindParsed.Description, bindParsed.Tags, cfg)
 
 	if len(md.Unused) > 0 {
 		if logger, ok := di.LoggerContainerBind(bind); ok {
@@ -184,7 +168,7 @@ func (h *BindHandler) actionCreateOrUpdate(w *dashboard.Response, r *dashboard.R
 
 			redirectURL := &url.URL{}
 			*redirectURL = *r.URL()
-			redirectURL.Path = "/" + h.componentBoggart.Name() + "/manager/"
+			redirectURL.Path = "/" + h.component.Name() + "/manager/"
 			redirectURL.RawQuery = "search=" + url.QueryEscape(bind.ID())
 
 			h.Redirect(redirectURL.String(), http.StatusFound, w, r)
@@ -264,7 +248,7 @@ func (h *BindHandler) actionDelete(w *dashboard.Response, r *dashboard.Request, 
 		return
 	}
 
-	err := h.componentBoggart.UnregisterBindByID(b.ID())
+	err := h.component.UnregisterBindByID(b.ID())
 	if err != nil {
 		_ = w.SendJSON(boggart.NewResponseJSON().FailedError(err))
 
@@ -272,125 +256,4 @@ func (h *BindHandler) actionDelete(w *dashboard.Response, r *dashboard.Request, 
 	}
 
 	_ = w.SendJSON(boggart.NewResponseJSON().Success(""))
-}
-
-func (h *BindHandler) actionLogs(w http.ResponseWriter, r *dashboard.Request, b boggart.BindItem) {
-	bindSupport, ok := b.Bind().(di.LoggerContainerSupport)
-	if !ok {
-		h.NotFound(w, r)
-		return
-	}
-
-	if r.IsPost() && r.URL().Query().Get("clean") == "1" {
-		bindSupport.Clean()
-
-		r.Session().FlashBag().Success("Logs cleaned")
-
-		h.Redirect(r.URL().Path, http.StatusFound, w, r)
-
-		return
-	}
-
-	type logView struct {
-		Level   string
-		Time    time.Time
-		Message string
-		Context string
-	}
-
-	records := bindSupport.LastRecords()
-	response := make([]logView, len(records))
-
-	for i, record := range bindSupport.LastRecords() {
-		response[i].Level = record.Level.String()
-		response[i].Time = record.Time
-		response[i].Message = record.Message
-
-		val := record.ContextMap()
-		if len(val) == 0 {
-			continue
-		}
-
-		buf := bytes.NewBuffer(nil)
-		enc := yaml.NewEncoder(buf)
-
-		err := enc.Encode(val)
-		if err != nil {
-			enc.Close()
-
-			h.InternalError(w, r, err)
-
-			return
-		}
-
-		enc.Close()
-
-		response[i].Context = buf.String()
-	}
-
-	h.Render(r.Context(), "logs", map[string]interface{}{
-		"bind": b,
-		"logs": response,
-	})
-}
-
-func (h *BindHandler) actionMetrics(w http.ResponseWriter, r *dashboard.Request, b boggart.BindItem) {
-	bindSupport, ok := b.Bind().(di.MetricsContainerSupport)
-	if !ok {
-		h.NotFound(w, r)
-		return
-	}
-
-	measures, err := bindSupport.Metrics().Gather()
-	if err != nil {
-		r.Session().FlashBag().Error(err.Error())
-	}
-
-	h.Render(r.Context(), "metrics", map[string]interface{}{
-		"bind":     b,
-		"measures": measures,
-	})
-}
-
-func (h *BindHandler) actionMQTT(w http.ResponseWriter, r *dashboard.Request, b boggart.BindItem) {
-	bindSupport, ok := b.Bind().(di.MQTTContainerSupport)
-	if !ok {
-		h.NotFound(w, r)
-		return
-	}
-
-	type itemView struct {
-		Topic    string
-		Calls    uint64
-		Datetime time.Time
-		Payload  interface{}
-	}
-
-	publishes := bindSupport.MQTT().Publishes()
-	publishesItems := make([]itemView, 0, len(publishes))
-
-	for _, item := range h.componentMQTT.CacheItems() {
-		for sent, count := range publishes {
-			if item.Topic().String() == sent.String() {
-				view := itemView{
-					Topic:    sent.String(),
-					Calls:    count,
-					Datetime: item.Datetime(),
-					Payload:  item.Payload(),
-				}
-
-				publishesItems = append(publishesItems, view)
-
-				break
-			}
-		}
-	}
-
-	subscribers := bindSupport.MQTT().Subscribers()
-
-	h.Render(r.Context(), "mqtt", map[string]interface{}{
-		"bind":        b,
-		"publishes":   publishesItems,
-		"subscribers": subscribers,
-	})
 }

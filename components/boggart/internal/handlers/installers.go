@@ -26,8 +26,6 @@ func NewInstallerHandler(b boggart.Component) *InstallerHandler {
 func (h *InstallerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	q := r.URL().Query()
 
-	var bindItem boggart.BindItem
-
 	id := q.Get(":id")
 	systemID := q.Get(":system")
 
@@ -36,7 +34,7 @@ func (h *InstallerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request
 		return
 	}
 
-	bindItem = h.component.Bind(id)
+	bindItem := h.component.Bind(id)
 	if bindItem == nil {
 		h.NotFound(w, r)
 		return

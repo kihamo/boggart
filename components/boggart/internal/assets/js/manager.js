@@ -116,13 +116,13 @@ $(document).ready(function () {
                                     break;
                             }
 
-                            content += '<a href="/boggart/bind/' + row.id + '/logs/" target="_blank" class="btn btn-' + cl +' btn-icon btn-xs">' +
+                            content += '<a href="/boggart/logs/' + row.id + '/" target="_blank" class="btn btn-' + cl +' btn-icon btn-xs">' +
                                 '<i class="fas fa-headset" title="Show last logs"></i> <span class="badge">' + row.logs_count + '</span>' +
                                 '</a>';
                         }
 
                         if (row.has_metrics) {
-                            content += '<a href="/boggart/bind/' + row.id + '/metrics/" target="_blank" class="btn btn-icon btn-xs';
+                            content += '<a href="/boggart/metrics/' + row.id + '/" target="_blank" class="btn btn-icon btn-xs';
 
                             if (row.metrics_empty_count > 0) {
                                 content += ' btn-warning';
@@ -136,7 +136,7 @@ $(document).ready(function () {
                         }
 
                         if (row.mqtt_publishes > 0 || row.mqtt_subscribers > 0) {
-                            content += '<a href="/boggart/bind/' + row.id + '/mqtt/" target="_blank" class="btn btn-primary btn-icon btn-xs">' +
+                            content += '<a href="/boggart/mqtt/' + row.id + '/" target="_blank" class="btn btn-primary btn-icon btn-xs">' +
                                 '<i class="fas fa-list" title="Show MQTT cache"></i> <span class="badge">' + row.mqtt_publishes + ' | ' + row.mqtt_subscribers + '</span>' +
                                 '</a>';
                         }

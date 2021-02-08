@@ -24,8 +24,8 @@ func (c *Component) DashboardMenu() dashboard.Menu {
 
 	return dashboard.NewMenu("Smart home").
 		WithIcon("home").
-		WithChild(dashboard.NewMenu("Manager").WithRoute(routes[1])).
-		WithChild(dashboard.NewMenu("Workers").WithRoute(routes[8])).
+		WithChild(dashboard.NewMenu("Manager").WithRoute(routes[8])).
+		WithChild(dashboard.NewMenu("Workers").WithRoute(routes[12])).
 		WithChild(dashboard.NewMenu("Config YAML").WithURL("/" + c.Name() + "/config/view"))
 }
 
@@ -33,14 +33,11 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 	if c.routes == nil {
 		<-c.application.ReadyComponent(c.Name())
 
-		bindHandler := handlers.NewBindHandler(c, c.mqtt)
+		bindHandler := handlers.NewBindHandler(c)
 		configHandler := handlers.NewConfigHandler(c)
 
 		c.routes = []dashboard.Route{
 			dashboard.RouteFromAssetFS(c),
-			dashboard.NewRoute("/"+c.Name()+"/manager/", handlers.NewManagerHandler(c, c.tasksManager)).
-				WithMethods([]string{http.MethodGet}).
-				WithAuth(true),
 			dashboard.NewRoute("/"+c.Name()+"/bind/", bindHandler).
 				WithMethods([]string{http.MethodGet, http.MethodPost}).
 				WithAuth(true),
@@ -59,11 +56,23 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 			dashboard.NewRoute("/"+c.Name()+"/installer/:id/:system/", handlers.NewInstallerHandler(c)).
 				WithMethods([]string{http.MethodGet}).
 				WithAuth(true),
-			dashboard.NewRoute("/"+c.Name()+"/workers/", handlers.NewWorkersHandler(c.tasksManager)).
-				WithMethods([]string{http.MethodGet, http.MethodPost}).
+			dashboard.NewRoute("/"+c.Name()+"/logs/:id/", handlers.NewLogsHandler(c)).
+				WithMethods([]string{http.MethodGet}).
+				WithAuth(true),
+			dashboard.NewRoute("/"+c.Name()+"/manager/", handlers.NewManagerHandler(c, c.tasksManager)).
+				WithMethods([]string{http.MethodGet}).
+				WithAuth(true),
+			dashboard.NewRoute("/"+c.Name()+"/metrics/:id/", handlers.NewMetricsHandler(c)).
+				WithMethods([]string{http.MethodGet}).
+				WithAuth(true),
+			dashboard.NewRoute("/"+c.Name()+"/mqtt/:id/", handlers.NewMQTTHandler(c, c.mqtt)).
+				WithMethods([]string{http.MethodGet}).
 				WithAuth(true),
 			dashboard.NewRoute("/"+c.Name()+"/widget/:id/", handlers.NewWidgetHandler(c)).
 				WithMethods([]string{http.MethodGet, http.MethodPost}),
+			dashboard.NewRoute("/"+c.Name()+"/workers/", handlers.NewWorkersHandler(c.tasksManager)).
+				WithMethods([]string{http.MethodGet, http.MethodPost}).
+				WithAuth(true),
 		}
 	}
 
