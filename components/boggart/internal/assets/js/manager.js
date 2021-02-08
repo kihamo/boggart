@@ -153,11 +153,10 @@ $(document).ready(function () {
                                 '<li><a href="javascript:void(0)" onclick="reloadConfig(\'' + row.id + '\');">Reload from config file</a></li>';
                         }
 
-                        if (row.config_generators.length > 0) {
-                            for (var i in row.config_generators) {
-                                content += '<li><a href="/boggart/bind/' + row.id + '/config-generator/?vendor=' + row.config_generators[i] + '" target="_blank">' +
-                                    row.config_generators[i].charAt(0).toUpperCase() + row.config_generators[i].slice(1) +
-                                    ' configs</a></li>';
+                        if (row.installers.length > 0) {
+                            for (var i in row.installers) {
+                                content += '<li><a href="/boggart/installer/' + row.id + '/' + row.installers[i] + '/" target="_blank">Installer ' +
+                                    row.installers[i].charAt(0).toUpperCase() + row.installers[i].slice(1) + '</a></li>';
                             }
                         }
 

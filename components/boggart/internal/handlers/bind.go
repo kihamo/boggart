@@ -3,16 +3,12 @@ package handlers
 import (
 	"bytes"
 	"errors"
-	"io"
 	"net/http"
 	"net/url"
-	"path/filepath"
 	"sort"
-	"strconv"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/config_generators"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/shadow/components/dashboard"
@@ -75,10 +71,6 @@ func (h *BindHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 
 	case "mqtt":
 		h.actionMQTT(w, r, bindItem)
-		return
-
-	case "config-generator":
-		h.actionConfigGenerator(w, r, bindItem)
 		return
 
 	case "":
@@ -400,113 +392,5 @@ func (h *BindHandler) actionMQTT(w http.ResponseWriter, r *dashboard.Request, b 
 		"bind":        b,
 		"publishes":   publishesItems,
 		"subscribers": subscribers,
-	})
-}
-
-func (h *BindHandler) actionConfigGenerator(w http.ResponseWriter, r *dashboard.Request, b boggart.BindItem) {
-	if _, ok := di.MQTTContainerBind(b.Bind()); !ok {
-		h.NotFound(w, r)
-		return
-	}
-
-	q := r.URL().Query()
-
-	vendor := q.Get("vendor")
-	var (
-		steps []generators.Step
-		err   error
-	)
-
-	switch vendor {
-	case "openhab":
-		if generator, ok := b.Bind().(generators.HasGeneratorOpenHab); ok {
-			steps, err = generator.GenerateConfigOpenHab()
-			if err != nil {
-				r.Session().FlashBag().Error(err.Error())
-			}
-		} else {
-			h.NotFound(w, r)
-			return
-		}
-	default:
-		h.NotFound(w, r)
-		return
-	}
-
-	if len(steps) == 0 && err == nil {
-		h.NotFound(w, r)
-		return
-	}
-
-	// merge steps by file
-	stepsMerged := make(map[string]int, len(steps))
-
-	for i := len(steps) - 1; i >= 0; i-- {
-		if steps[i].Content == "" {
-			steps = append(steps[:i], steps[i+1:]...)
-			continue
-		}
-
-		if steps[i].FilePath == "" {
-			continue
-		}
-
-		if existStepIndex, ok := stepsMerged[steps[i].FilePath]; !ok {
-			// оставляем только последний вариант
-			stepsMerged[steps[i].FilePath] = len(steps) - i
-		} else {
-			// все остальные склеиваем
-			existStep := &steps[len(steps)-existStepIndex]
-
-			if existStep.Description != "" {
-				existStep.Description = "\n" + existStep.Description
-			}
-			existStep.Description = steps[i].Description + existStep.Description
-
-			if existStep.Content != "" {
-				existStep.Content = "\n" + existStep.Content
-			}
-			existStep.Content = steps[i].Content + existStep.Content
-
-			steps = append(steps[:i], steps[i+1:]...)
-		}
-	}
-
-	if filePath := q.Get("file"); filePath != "" {
-		index := -1
-		if s := q.Get("step"); s != "" {
-			if i, err := strconv.Atoi(s); err == nil {
-				index = i
-			}
-		}
-
-		buf := bytes.NewBuffer(nil)
-
-		for i, step := range steps {
-			if index > -1 && i != index || step.FilePath != filePath {
-				continue
-			}
-
-			if buf.Len() > 0 {
-				buf.WriteString("\n\n")
-			}
-
-			buf.WriteString(step.Content)
-
-			if index > -1 && i == index {
-				break
-			}
-		}
-
-		w.Header().Set("Content-Length", strconv.FormatInt(int64(buf.Len()), 10))
-		w.Header().Set("Content-Disposition", "attachment; filename=\""+filepath.Base(filePath)+"\"")
-
-		_, _ = io.Copy(w, buf)
-		return
-	}
-
-	h.Render(r.Context(), "generator", map[string]interface{}{
-		"vendor": vendor,
-		"steps":  steps,
 	})
 }

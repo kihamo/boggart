@@ -170,25 +170,25 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 				}
 				in.Delim(']')
 			}
-		case "config_generators":
+		case "installers":
 			if in.IsNull() {
 				in.Skip()
-				out.ConfigGenerators = nil
+				out.Installers = nil
 			} else {
 				in.Delim('[')
-				if out.ConfigGenerators == nil {
+				if out.Installers == nil {
 					if !in.IsDelim(']') {
-						out.ConfigGenerators = make([]string, 0, 4)
+						out.Installers = make([]string, 0, 4)
 					} else {
-						out.ConfigGenerators = []string{}
+						out.Installers = []string{}
 					}
 				} else {
-					out.ConfigGenerators = (out.ConfigGenerators)[:0]
+					out.Installers = (out.Installers)[:0]
 				}
 				for !in.IsDelim(']') {
 					var v3 string
 					v3 = string(in.String())
-					out.ConfigGenerators = append(out.ConfigGenerators, v3)
+					out.Installers = append(out.Installers, v3)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -272,13 +272,13 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 		}
 	}
 	{
-		const prefix string = ",\"config_generators\":"
+		const prefix string = ",\"installers\":"
 		out.RawString(prefix)
-		if in.ConfigGenerators == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+		if in.Installers == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v8, v9 := range in.ConfigGenerators {
+			for v8, v9 := range in.Installers {
 				if v8 > 0 {
 					out.RawByte(',')
 				}

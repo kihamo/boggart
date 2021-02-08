@@ -5,8 +5,8 @@ import (
 	"sort"
 
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/components/boggart/config_generators"
 	"github.com/kihamo/boggart/components/boggart/di"
+	"github.com/kihamo/boggart/components/boggart/installer"
 	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/shadow/components/dashboard"
 	"go.uber.org/zap/zapcore"
@@ -24,7 +24,7 @@ type managerHandlerDeviceTask struct {
 type managerHandlerDevice struct {
 	Tasks                    []managerHandlerDeviceTask `json:"tasks"`
 	Tags                     []string                   `json:"tags"`
-	ConfigGenerators         []string                   `json:"config_generators"`
+	Installers               []string                   `json:"installers"`
 	ID                       string                     `json:"id"`
 	Type                     string                     `json:"type"`
 	Description              string                     `json:"description"`
@@ -95,13 +95,13 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 		for _, bindItem := range h.component.BindItems() {
 			bind := bindItem.Bind()
 			item := managerHandlerDevice{
-				ID:               bindItem.ID(),
-				Type:             bindItem.Type(),
-				Description:      bindItem.Description(),
-				Status:           bindItem.Status().String(),
-				Tags:             bindItem.Tags(),
-				LogsMaxLevel:     zapcore.DebugLevel,
-				ConfigGenerators: make([]string, 0),
+				ID:           bindItem.ID(),
+				Type:         bindItem.Type(),
+				Description:  bindItem.Description(),
+				Status:       bindItem.Status().String(),
+				Tags:         bindItem.Tags(),
+				LogsMaxLevel: zapcore.DebugLevel,
+				Installers:   make([]string, 0),
 			}
 
 			if bindSupport, ok := di.WidgetContainerBind(bind); ok {
@@ -183,8 +183,10 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 				}
 			}
 
-			if _, ok := bind.(generators.HasGeneratorOpenHab); ok {
-				item.ConfigGenerators = append(item.ConfigGenerators, "openhab")
+			if bindSupport, ok := bind.(installer.HasInstaller); ok {
+				for _, system := range bindSupport.InstallersSupport() {
+					item.Installers = append(item.Installers, string(system))
+				}
 			}
 
 			list = append(list, item)
