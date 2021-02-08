@@ -20,39 +20,49 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 
 	for _, component := range components {
 		id := openhab.IDNormalizeCamelCase(component.ID())
-		label := strings.Title(component.Name())
-		icon := OpenHabIconConverter(component.Icon())
-		channelType := openhab.ChannelTypeString
-		itemType := openhab.ItemTypeString
-
-		var (
-			payloadOn  string
-			payloadOff string
-		)
 
 		switch component.Type() {
 		case ComponentTypeBinarySensor:
-			payloadOn = "ON"
-			payloadOff = "OFF"
+			var (
+				channel *openhab.Channel
+				item    *openhab.Item
+			)
 
 			if cmp, ok := component.(*ComponentBinarySensor); ok && cmp.PayloadOn() != "" && cmp.PayloadOff() != "" {
-				// для компонентов с определенными значения on/off переключатель switch в openhab не сработает
-				channelType = openhab.ChannelTypeContact
-				itemType = openhab.ItemTypeContact
+				channel = openhab.NewChannel(id, openhab.ChannelTypeContact).
+					WithOn(cmp.PayloadOn()).
+					WithOff(cmp.PayloadOff())
 
-				payloadOn = cmp.PayloadOn()
-				payloadOff = cmp.PayloadOff()
+				item = openhab.NewItem(itemPrefix+id, openhab.ItemTypeContact).
+					WithIcon(OpenHabIconConverter(component.Icon(), "contact"))
 			} else if component.CommandTopic() == "" {
 				// если switch не управляемый переводим его в режим readonly
-				channelType = openhab.ChannelTypeContact
-				itemType = openhab.ItemTypeContact
+				channel = openhab.NewChannel(id, openhab.ChannelTypeContact).
+					WithOn("ON").
+					WithOff("OFF")
+
+				item = openhab.NewItem(itemPrefix+id, openhab.ItemTypeContact).
+					WithIcon(OpenHabIconConverter(component.Icon(), "contact"))
 			} else {
-				channelType = openhab.ChannelTypeSwitch
-				itemType = openhab.ItemTypeSwitch
+				channel = openhab.NewChannel(id, openhab.ChannelTypeSwitch).
+					WithOn("ON").
+					WithOff("OFF")
+
+				item = openhab.NewItem(itemPrefix+id, openhab.ItemTypeSwitch).
+					WithIcon(OpenHabIconConverter(component.Icon(), "contact"))
 			}
+
+			channels = append(channels,
+				channel.
+					WithStateTopic(component.StateTopic()).
+					WithCommandTopic(component.CommandTopic()).
+					AddItems(
+						item.WithLabel(strings.Title(component.Name())),
+					),
+			)
+
 		case ComponentTypeSensor:
-			channelType = openhab.ChannelTypeNumber
-			itemType = openhab.ItemTypeNumber
+			label := strings.Title(component.Name())
 
 			if cmp, ok := component.(*ComponentSensor); ok {
 				label += " [%." + strconv.FormatUint(cmp.AccuracyDecimals(), 10) + "f"
@@ -63,49 +73,121 @@ func (b *Bind) GenerateConfigOpenHab() ([]generators.Step, error) {
 
 				label += "]"
 			}
+
+			channels = append(channels,
+				openhab.NewChannel(id, openhab.ChannelTypeNumber).
+					WithStateTopic(component.StateTopic()).
+					WithCommandTopic(component.CommandTopic()).
+					AddItems(
+						openhab.NewItem(itemPrefix+id, openhab.ItemTypeNumber).
+							WithLabel(label).
+							WithIcon(OpenHabIconConverter(component.Icon(), "")),
+					),
+			)
+
 		case ComponentTypeSwitch:
-			payloadOn = "ON"
-			payloadOff = "OFF"
+			var (
+				channel *openhab.Channel
+				item    *openhab.Item
+			)
 
 			// если switch не управляемый переводим его в режим readonly
 			if component.CommandTopic() == "" {
-				channelType = openhab.ChannelTypeContact
-				itemType = openhab.ItemTypeContact
+				channel = openhab.NewChannel(id, openhab.ChannelTypeContact)
+
+				item = openhab.NewItem(itemPrefix+id, openhab.ItemTypeContact).
+					WithIcon(OpenHabIconConverter(component.Icon(), "contact"))
 			} else {
-				channelType = openhab.ChannelTypeSwitch
-				itemType = openhab.ItemTypeSwitch
-			}
-		}
+				channel = openhab.NewChannel(id, openhab.ChannelTypeSwitch).
+					WithCommandTopic(component.CommandTopic())
 
-		if icon == "" {
-			switch channelType {
-			case openhab.ChannelTypeContact:
-				icon = "contact"
-			case openhab.ChannelTypeSwitch:
-				icon = "switch"
-			case openhab.ChannelTypeDateTime:
-				icon = "time"
+				item = openhab.NewItem(itemPrefix+id, openhab.ItemTypeSwitch).
+					WithIcon(OpenHabIconConverter(component.Icon(), "switch"))
 			}
-		}
 
-		channels = append(channels,
-			openhab.NewChannel(id, channelType).
-				WithStateTopic(component.StateTopic()).
-				WithCommandTopic(component.CommandTopic()).
-				WithOn(payloadOn).
-				WithOff(payloadOff).
-				AddItems(
-					openhab.NewItem(itemPrefix+id, itemType).
-						WithLabel(label).
-						WithIcon(icon),
-				),
-		)
+			channels = append(channels,
+				channel.
+					WithStateTopic(component.StateTopic()).
+					WithOn("ON").
+					WithOff("OFF").
+					AddItems(
+						item.WithLabel(strings.Title(component.Name())),
+					),
+			)
+
+		case ComponentTypeLight:
+			channels = append(channels,
+				openhab.NewChannel(id, openhab.ChannelTypeSwitch).
+					WithStateTopic(component.StateTopic()).
+					WithCommandTopic(component.CommandTopic()).
+					WithOn("ON").
+					WithOff("OFF").
+					WithTransformationPattern("JSONPATH:$.state").
+					WithFormatBeforePublish(`{\"state\":%s}`).
+					AddItems(
+						openhab.NewItem(itemPrefix+id, openhab.ItemTypeSwitch).
+							WithLabel(strings.Title(component.Name())).
+							WithIcon(OpenHabIconConverter(component.Icon(), "light")),
+					),
+			)
+
+			if cmp, ok := component.(*ComponentLight); ok {
+				if cmp.Brightness() {
+					const idPostfix = "Brightness"
+
+					channels = append(channels,
+						openhab.NewChannel(id+idPostfix, openhab.ChannelTypeDimmer).
+							WithStateTopic(component.StateTopic()).
+							WithCommandTopic(component.CommandTopic()).
+							WithMin(0).
+							WithMax(255).
+							WithStep(1).
+							WithTransformationPattern("JSONPATH:$.brightness").
+							WithFormatBeforePublish(`{\"brightness\":%s}`).
+							AddItems(
+								openhab.NewItem(itemPrefix+id+idPostfix, openhab.ItemTypeDimmer).
+									WithLabel(strings.Title(component.Name())+" brightness [%.0f %%]").
+									WithIcon(OpenHabIconConverter(component.Icon(), "heating-40")),
+							),
+					)
+				}
+
+				if cmp.Effect() {
+					const idPostfix = "Effect"
+
+					channels = append(channels,
+						openhab.NewChannel(id+idPostfix, openhab.ChannelTypeString).
+							WithStateTopic(component.StateTopic()).
+							WithCommandTopic(component.CommandTopic()).
+							WithTransformationPattern("JSONPATH:$.effect").
+							WithFormatBeforePublish(`{\"effect\":%s}`).
+							AddItems(
+								openhab.NewItem(itemPrefix+id+idPostfix, openhab.ItemTypeString).
+									WithLabel(strings.Title(component.Name())+" effect").
+									WithIcon(OpenHabIconConverter(component.Icon(), "rgb")),
+							),
+					)
+				}
+			}
+
+		default:
+			channels = append(channels,
+				openhab.NewChannel(id, openhab.ChannelTypeString).
+					WithStateTopic(component.StateTopic()).
+					WithCommandTopic(component.CommandTopic()).
+					AddItems(
+						openhab.NewItem(itemPrefix+id, openhab.ItemTypeString).
+							WithLabel(strings.Title(component.Name())).
+							WithIcon(OpenHabIconConverter(component.Icon(), "")),
+					),
+			)
+		}
 	}
 
 	return openhab.StepsByBind(b, nil, channels...)
 }
 
-func OpenHabIconConverter(icon string) string {
+func OpenHabIconConverter(icon, def string) string {
 	switch icon {
 	//case "mdi:axis-arrow":
 	//case "mdi:axis-x-arrow":
@@ -249,5 +331,5 @@ func OpenHabIconConverter(icon string) string {
 		return icon
 	}
 
-	return ""
+	return def
 }
