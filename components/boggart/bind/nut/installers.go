@@ -10,12 +10,29 @@ import (
 )
 
 func (b *Bind) InstallersSupport() []installer.System {
-	return []installer.System{
-		installer.SystemOpenHab,
+	systems := []installer.System{
+		installer.SystemCron,
 	}
+
+	if b.Meta().SerialNumber() != "" {
+		systems = append(systems, installer.SystemOpenHab)
+	}
+
+	return systems
 }
 
-func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.Step, error) {
+func (b *Bind) InstallerSteps(_ context.Context, system installer.System) ([]installer.Step, error) {
+	if system == installer.SystemCron {
+		return []installer.Step{{
+			FilePath:    "/etc/cron.d/nut",
+			Description: "Иногда драйвер для APC залипает, для решения этой проблемы можно поставить перезапуск службы в cron, например каждый час",
+			Content:     `echo "0 */1 * * * root service nut-driver restart && service nut-server restart" > /etc/cron.d/nut`,
+		}, {
+			Description: "Reload cron service",
+			Content:     "sudo service cron reload",
+		}}, nil
+	}
+
 	meta := b.Meta()
 	sn := meta.SerialNumber()
 	if sn == "" {

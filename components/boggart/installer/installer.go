@@ -8,7 +8,7 @@ type System string
 
 const (
 	SystemOpenHab System = "OpenHab"
-	SystemUbuntu  System = "Ubuntu"
+	SystemCron    System = "Cron"
 )
 
 type Step struct {

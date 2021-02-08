@@ -4,7 +4,13 @@
         <div class="col-md-12 col-sm-12 col-xs-12">
             <div class="x_panel">
                 <div class="x_title">
-                    <h2>{{ if $step.Description }}{{ i18n $step.Description . }}{{ else }}{{ $step.FilePath }}{{ end }}</h2>
+                    <h2>
+                    {{ if $step.FilePath }}
+                        {{ i18n "Step %d change file %s" . nil nil (add1 $i) $step.FilePath }}
+                    {{ else }}
+                        {{ i18n "Step %d" . nil nil (add1 $i) }}
+                    {{ end }}
+                    </h2>
                     <ul class="nav navbar-right panel_toolbox">
                         <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
                         <li class="dropdown">
@@ -19,6 +25,7 @@
                     <div class="clearfix"></div>
                 </div>
                 <div class="x_content">
+                    {{ if $step.Description }}<p>{{ i18n $step.Description . }}</p>{{ end }}
                     <pre class="snippet" id="step-{{ $i }}"><code class="plaintext">{{ $step.Content }}</code></pre>
                 </div>
             </div>
