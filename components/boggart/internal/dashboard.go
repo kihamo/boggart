@@ -57,7 +57,7 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 				WithMethods([]string{http.MethodGet}).
 				WithAuth(true),
 			dashboard.NewRoute("/"+c.Name()+"/logs/:id/", handlers.NewLogsHandler(c)).
-				WithMethods([]string{http.MethodGet}).
+				WithMethods([]string{http.MethodGet, http.MethodPost}).
 				WithAuth(true),
 			dashboard.NewRoute("/"+c.Name()+"/manager/", handlers.NewManagerHandler(c, c.tasksManager)).
 				WithMethods([]string{http.MethodGet}).
