@@ -33,6 +33,7 @@
                     <table class="table table-hover table-striped datatable dt-responsive nowrap" id="logs" style="width:100%">
                         <thead>
                         <tr>
+                            <th>{{ i18n "#" . }}</th>
                             <th>{{ i18n "Time" . }}</th>
                             <th>{{ i18n "Level" . }}</th>
                             <th>{{ i18n "Message" . }}</th>
@@ -40,8 +41,9 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {{ range $log := .logs }}
+                        {{ range $i, $log := reverse .logs }}
                             <tr>
+                                <td>{{ add1 $i }}</td>
                                 <td>{{ $log.Time.Format "2006-01-02T15:04:05-07:00" }}</td>
                                 <td>
                                     {{ if eq $log.Level "debug" }}
@@ -60,7 +62,7 @@
                                         <span class="label label-success">{{ $log.Level }}</span>
                                     {{ end }}
                                 </td>
-                                <td>{{ $log.Message }}</td>
+                                <td><pre><code>{{ $log.Message|raw }}</code></pre></td>
                                 <td>
                                     {{ if $log.Context }}
                                     <pre><code class="yaml">{{ $log.Context|raw }}</code></pre>
@@ -96,13 +98,10 @@
         $(document).ready(function () {
             var table = $('#logs');
 
-            table.one('init.dt', function (e, settings) {
-                var api = new $.fn.dataTable.Api(settings);
-                api.order([0, 'desc']).draw();
-
+            table.one('init.dt', function () {
                 table.DataTable().rows().every(function (i) {
                     var data = this.data();
-                    data[0] = data[0].length > 0 ? dateToString(data[0]) : '';
+                    data[1] = data[1].length > 0 ? dateToString(data[1]) : '';
                     this.row(i).data(data);
                 });
             });
