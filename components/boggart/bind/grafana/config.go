@@ -15,7 +15,6 @@ type Config struct {
 
 	Address         types.URL `valid:",required"`
 	Debug           bool
-	Name            string `valid:",required"`
 	Dashboards      []int64
 	TopicAnnotation mqtt.Topic `mapstructure:"topic_annotation" yaml:"topic_annotation"`
 }

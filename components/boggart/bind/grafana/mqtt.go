@@ -10,8 +10,10 @@ import (
 )
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
+	cfg := b.config()
+
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(b.config.TopicAnnotation, 0, b.MQTT().WrapSubscribeDeviceIsOnline(func(ctx context.Context, _ mqtt.Component, message mqtt.Message) (err error) {
+		mqtt.NewSubscriber(cfg.TopicAnnotation.Format(b.Meta().ID()), 0, b.MQTT().WrapSubscribeDeviceIsOnline(func(ctx context.Context, _ mqtt.Component, message mqtt.Message) (err error) {
 			var request struct {
 				Title string   `json:"title,omitempty"`
 				Text  string   `json:"text,omitempty"`
@@ -29,7 +31,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 					Tags: request.Tags,
 				})
 
-			for _, dashboardID := range b.config.Dashboards {
+			for _, dashboardID := range cfg.Dashboards {
 				params.Request.DashboardID = dashboardID
 
 				if _, e := b.provider.Annotation.CreateAnnotation(params, nil); e != nil {

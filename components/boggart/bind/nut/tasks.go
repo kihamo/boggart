@@ -68,7 +68,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		}
 
 		// TODO:
-		_ = b.MQTT().PublishAsync(ctx, b.config.TopicVariable.Format(sn, v.Name), v.Value)
+		_ = b.MQTT().PublishAsync(ctx, b.config().TopicVariable.Format(sn, v.Name), v.Value)
 	}
 
 	return nil

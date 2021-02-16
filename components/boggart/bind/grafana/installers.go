@@ -14,7 +14,8 @@ func (b *Bind) InstallersSupport() []installer.System {
 }
 
 func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.Step, error) {
-	itemPrefix := openhab.ItemPrefixFromBindMeta(b.Meta())
+	meta := b.Meta()
+	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
 
 	const idAnnotation = "Annotation"
 
@@ -38,7 +39,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 })(input);`,
 	}},
 		openhab.NewChannel(idAnnotation, openhab.ChannelTypeString).
-			WithCommandTopic(b.config.TopicAnnotation).
+			WithCommandTopic(b.config().TopicAnnotation.Format(meta.ID())).
 			WithTransformationPatternOut("JS:grafana_annotation.js").
 			AddItems(
 				openhab.NewItem(itemPrefix+idAnnotation, openhab.ItemTypeString).

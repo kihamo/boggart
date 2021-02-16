@@ -28,7 +28,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 
 		channels = append(channels,
 			openhab.NewChannel(id, openhab.ChannelTypeNumber).
-				WithStateTopic(b.config.TopicValue.Format(sensor)).
+				WithStateTopic(b.config().TopicValue.Format(sensor)).
 				AddItems(
 					openhab.NewItem(itemPrefix+id, openhab.ItemTypeNumber).
 						WithLabel("Temperature [%.2f °C]").

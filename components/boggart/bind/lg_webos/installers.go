@@ -15,6 +15,8 @@ func (b *Bind) InstallersSupport() []installer.System {
 
 func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.Step, error) {
 	itemPrefix := openhab.ItemPrefixFromBindMeta(b.Meta())
+	cfg := b.config()
+	mac := b.Meta().MACAsString()
 
 	const (
 		idApplication = "Application"
@@ -29,16 +31,16 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 
 	return openhab.StepsByBind(b, nil,
 		openhab.NewChannel(idApplication, openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicStateApplication).
-			WithCommandTopic(b.config.TopicApplication).
+			WithStateTopic(cfg.TopicStateApplication.Format(mac)).
+			WithCommandTopic(cfg.TopicApplication.Format(mac)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idApplication, openhab.ItemTypeString).
 					WithLabel("Application").
 					WithIcon("screen"),
 			),
 		openhab.NewChannel(idMute, openhab.ChannelTypeSwitch).
-			WithStateTopic(b.config.TopicStateMute).
-			WithCommandTopic(b.config.TopicMute).
+			WithStateTopic(cfg.TopicStateMute.Format(mac)).
+			WithCommandTopic(cfg.TopicMute.Format(mac)).
 			WithOn("true").
 			WithOff("false").
 			AddItems(
@@ -47,8 +49,8 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 					WithIcon("soundvolume_mute"),
 			),
 		openhab.NewChannel(idVolume, openhab.ChannelTypeDimmer).
-			WithStateTopic(b.config.TopicStateVolume).
-			WithCommandTopic(b.config.TopicVolume).
+			WithStateTopic(cfg.TopicStateVolume.Format(mac)).
+			WithCommandTopic(cfg.TopicVolume.Format(mac)).
 			WithMin(0).
 			WithMax(100).
 			WithStep(1).
@@ -58,12 +60,12 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 					WithIcon("soundvolume"),
 			),
 		openhab.NewChannel(idVolumeUp, openhab.ChannelTypeDimmer).
-			WithCommandTopic(b.config.TopicVolumeUp),
+			WithCommandTopic(cfg.TopicVolumeUp.Format(mac)),
 		openhab.NewChannel(idVolumeDown, openhab.ChannelTypeDimmer).
-			WithCommandTopic(b.config.TopicVolumeDown),
+			WithCommandTopic(cfg.TopicVolumeDown.Format(mac)),
 		openhab.NewChannel(idPower, openhab.ChannelTypeSwitch).
-			WithStateTopic(b.config.TopicStatePower).
-			WithCommandTopic(b.config.TopicPower).
+			WithStateTopic(cfg.TopicStatePower.Format(mac)).
+			WithCommandTopic(cfg.TopicPower.Format(mac)).
 			WithOn("true").
 			WithOff("false").
 			AddItems(
@@ -71,14 +73,14 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 					WithLabel("Power"),
 			),
 		openhab.NewChannel(idChannel, openhab.ChannelTypeNumber).
-			WithStateTopic(b.config.TopicStateChannelNumber).
+			WithStateTopic(cfg.TopicStateChannelNumber.Format(mac)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idChannel, openhab.ItemTypeNumber).
 					WithLabel("Channel").
 					WithIcon("video"),
 			),
 		openhab.NewChannel(idToast, openhab.ChannelTypeString).
-			WithCommandTopic(b.config.TopicToast).
+			WithCommandTopic(cfg.TopicToast.Format(mac)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idToast, openhab.ItemTypeString).
 					WithLabel("Toast").

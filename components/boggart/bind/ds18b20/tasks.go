@@ -16,7 +16,7 @@ func (b *Bind) Tasks() []tasks.Task {
 					tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
 				),
 			).
-			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config().UpdaterInterval)),
 	}
 }
 
@@ -29,7 +29,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 	for sensor, value := range values {
 		metricValue.With("serial_number", sensor).Set(value)
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicValue.Format(sensor), value); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config().TopicValue.Format(sensor), value); e != nil {
 			err = fmt.Errorf("publish value for sensor %s return error: %w", sensor, e)
 		}
 	}

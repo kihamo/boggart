@@ -34,12 +34,15 @@ type Bind struct {
 	di.WidgetBind
 	di.WorkersBind
 
-	config *Config
 	mutex  sync.RWMutex
 	client *webostv.Tv
 
 	power        *atomic.BoolNull
 	quitMonitors chan struct{}
+}
+
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
 }
 
 func (b *Bind) Run() error {
@@ -51,17 +54,19 @@ func (b *Bind) Run() error {
 	b.client = nil
 	b.quitMonitors = make(chan struct{})
 
-	if b.config.MAC != nil {
-		b.Meta().SetMAC(b.config.MAC.HardwareAddr)
+	if cfg := b.config(); cfg.MAC != nil {
+		b.Meta().SetMAC(cfg.MAC.HardwareAddr)
 
-		return b.MQTT().PublishAsync(context.Background(), b.config.TopicStatePower.Format(b.Meta().MACAsString()), false)
+		return b.MQTT().PublishAsync(context.Background(), cfg.TopicStatePower.Format(b.Meta().MACAsString()), false)
 	}
 
 	return nil
 }
 
 func (b *Bind) initClient() error {
-	client, err := defaultDialerLGWebOS.Dial(b.config.Host)
+	cfg := b.config()
+
+	client, err := defaultDialerLGWebOS.Dial(cfg.Host)
 	if err != nil {
 		return err
 	}
@@ -78,13 +83,13 @@ func (b *Bind) initClient() error {
 		}
 	}()
 
-	newKey, err := client.Register(b.config.Key)
+	newKey, err := client.Register(cfg.Key)
 	if err != nil {
 		return err
 	}
 
-	if b.config.Key != newKey {
-		b.Logger().Warnf("Key changed before %s after %s", b.config.Key, newKey)
+	if cfg.Key != newKey {
+		b.Logger().Warnf("Key changed before %s after %s", cfg.Key, newKey)
 	}
 
 	b.mutex.Lock()

@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/kihamo/boggart/components/boggart/di"
+	"github.com/kihamo/boggart/protocols/swagger"
 	"github.com/kihamo/boggart/providers/google/home"
 	"github.com/kihamo/boggart/providers/google/home/client/info"
 )
@@ -16,6 +17,23 @@ type Bind struct {
 	di.ProbesBind
 
 	provider *home.Client
+}
+
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
+func (b *Bind) Run() error {
+	cfg := b.config()
+	b.provider = home.New(cfg.Address.String(), cfg.Debug, swagger.NewLogger(
+		func(message string) {
+			b.Logger().Info(message)
+		},
+		func(message string) {
+			b.Logger().Debug(message)
+		}))
+
+	return nil
 }
 
 func (b *Bind) GetMAC(ctx context.Context) (string, error) {

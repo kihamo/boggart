@@ -16,12 +16,18 @@ type Bind struct {
 	di.MQTTBind
 	di.ProbesBind
 
-	config   *Config
 	provider *softvideo.Client
 }
 
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
 func (b *Bind) Run() error {
-	b.Meta().SetSerialNumber(b.config.Login)
+	cfg := b.config()
+
+	b.Meta().SetSerialNumber(cfg.Login)
+	b.provider = softvideo.New(cfg.Login, cfg.Password, cfg.Debug)
 
 	return nil
 }
@@ -30,13 +36,15 @@ func (b *Bind) Balance(ctx context.Context) (balance, promise float64, err error
 	balance, promise, err = b.provider.Balance(ctx)
 
 	if err == nil {
-		metricBalance.With("account", b.config.Login).Set(balance)
+		cfg := b.config()
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicBalance, balance); e != nil {
+		metricBalance.With("account", cfg.Login).Set(balance)
+
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicBalance.Format(cfg.Login), balance); e != nil {
 			err = multierror.Append(err, e)
 		}
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicPromise, promise); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicPromise.Format(cfg.Login), promise); e != nil {
 			err = multierror.Append(err, e)
 		}
 	}

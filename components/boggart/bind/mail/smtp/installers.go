@@ -21,7 +21,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 
 	return openhab.StepsByBind(b, nil,
 		openhab.NewChannel(idSend, openhab.ChannelTypeString).
-			WithCommandTopic(b.config.TopicSend.Format(meta.ID())).
+			WithCommandTopic(b.config().TopicSend.Format(meta.ID())).
 			AddItems(
 				openhab.NewItem(itemPrefix+idSend, openhab.ItemTypeString),
 			),

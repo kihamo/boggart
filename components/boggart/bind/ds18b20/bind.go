@@ -14,13 +14,15 @@ type Bind struct {
 	di.ProbesBind
 	di.WidgetBind
 	di.WorkersBind
+}
 
-	config *Config
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
 }
 
 func (b *Bind) Sensors() ([]string, error) {
-	if len(b.config.Sensors) > 0 {
-		return b.config.Sensors, nil
+	if sensors := b.config().Sensors; len(sensors) > 0 {
+		return sensors, nil
 	}
 
 	return ds18b20.Sensors()

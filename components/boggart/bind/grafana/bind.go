@@ -2,6 +2,7 @@ package grafana
 
 import (
 	"github.com/kihamo/boggart/components/boggart/di"
+	"github.com/kihamo/boggart/protocols/swagger"
 	"github.com/kihamo/boggart/providers/grafana"
 )
 
@@ -12,6 +13,22 @@ type Bind struct {
 	di.MQTTBind
 	di.ProbesBind
 
-	config   *Config
 	provider *grafana.Client
+}
+
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
+func (b *Bind) Run() error {
+	cfg := b.config()
+	b.provider = grafana.New(cfg.Address.String(), cfg.Debug, swagger.NewLogger(
+		func(message string) {
+			b.Logger().Info(message)
+		},
+		func(message string) {
+			b.Logger().Debug(message)
+		}))
+
+	return nil
 }

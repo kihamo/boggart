@@ -18,18 +18,40 @@ type Bind struct {
 	di.MetaBind
 	di.MQTTBind
 
-	config *Config
-	auth   smtp.Auth
+	auth smtp.Auth
+}
+
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
+func (b *Bind) Run() error {
+	var (
+		username string
+		password string
+	)
+
+	cfg := b.config()
+
+	if user := cfg.DSN.User; user != nil {
+		username = user.Username()
+		password, _ = user.Password()
+	}
+
+	b.auth = smtp.PlainAuth("", username, password, cfg.DSN.Hostname())
+
+	return nil
 }
 
 func (b *Bind) Send(to []string, subject string, body []byte) error {
+	cfg := b.config()
 	payload := bytes.NewBuffer(body)
 	mimeType := http.DetectContentType(body)
 
 	message := bytes.NewBuffer(nil)
 
 	message.WriteString("From: ")
-	message.WriteString(b.config.Sender)
+	message.WriteString(cfg.Sender)
 	message.Write(crlf)
 
 	message.WriteString("To: ")
@@ -51,5 +73,5 @@ func (b *Bind) Send(to []string, subject string, body []byte) error {
 	message.Write(crlf)
 	message.ReadFrom(payload)
 
-	return smtp.SendMail(b.config.DSN.Host, b.auth, b.config.Sender, to, message.Bytes())
+	return smtp.SendMail(cfg.DSN.Host, b.auth, cfg.Sender, to, message.Bytes())
 }

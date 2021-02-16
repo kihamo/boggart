@@ -19,9 +19,28 @@ type Bind struct {
 	di.WidgetBind
 	di.WorkersBind
 
-	config          *Config
 	provider        *nut.Client
 	updaterInterval *atomic.Duration
+}
+
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
+func (b *Bind) Run() error {
+	var username, password string
+
+	cfg := b.config()
+
+	if cfg.Address.User != nil {
+		username = cfg.Address.User.Username()
+		password, _ = cfg.Address.User.Password()
+	}
+
+	b.provider = nut.New(cfg.Address.Host, username, password)
+	b.updaterInterval.Set(cfg.UpdaterInterval)
+
+	return nil
 }
 
 func (b *Bind) ups() (ups nut.UPS, err error) {
@@ -30,13 +49,15 @@ func (b *Bind) ups() (ups nut.UPS, err error) {
 		return ups, err
 	}
 
+	cfg := b.config()
+
 	for _, device := range devices {
-		if device.Name == b.config.UPS {
+		if device.Name == cfg.UPS {
 			return device, nil
 		}
 	}
 
-	return ups, errors.New("device " + b.config.UPS + " not found")
+	return ups, errors.New("device " + cfg.UPS + " not found")
 }
 
 func (b *Bind) Variables() ([]nut.Variable, error) {

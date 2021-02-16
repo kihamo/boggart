@@ -50,6 +50,7 @@ func (b *Bind) InstallerSteps(_ context.Context, system installer.System) ([]ins
 	}
 
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
+	cfg := b.config()
 	channels := make([]*openhab.Channel, 0, len(variables)+len(commands))
 
 	var channel *openhab.Channel
@@ -81,9 +82,9 @@ func (b *Bind) InstallerSteps(_ context.Context, system installer.System) ([]ins
 				)
 		}
 
-		channel.WithStateTopic(b.config.TopicVariable.Format(sn, v.Name))
+		channel.WithStateTopic(cfg.TopicVariable.Format(sn, v.Name))
 		if v.Type.Writeable {
-			channel.WithCommandTopic(b.config.TopicVariableSet.Format(sn, v.Name))
+			channel.WithCommandTopic(cfg.TopicVariableSet.Format(sn, v.Name))
 		}
 
 		channels = append(channels, channel)
@@ -95,8 +96,8 @@ func (b *Bind) InstallerSteps(_ context.Context, system installer.System) ([]ins
 
 		channels = append(channels,
 			openhab.NewChannel(id, openhab.ChannelTypeSwitch).
-				WithStateTopic(b.config.TopicCommand.Format(sn, cmd.Name)).
-				WithCommandTopic(b.config.TopicCommandRun.Format(sn, cmd.Name)).
+				WithStateTopic(cfg.TopicCommand.Format(sn, cmd.Name)).
+				WithCommandTopic(cfg.TopicCommandRun.Format(sn, cmd.Name)).
 				WithOn(cmd.Name).
 				WithOff("done").
 				AddItems(

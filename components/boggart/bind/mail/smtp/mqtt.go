@@ -16,9 +16,11 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 		To      []string        `json:"to"`
 	}
 
+	cfg := b.config()
+
 	subscribers := make([]mqtt.Subscriber, 0, 2)
 	subscribers = append(subscribers,
-		mqtt.NewSubscriber(b.config.TopicSend, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(cfg.TopicSend, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if !b.MQTT().CheckBindIDInTopic(message.Topic(), 3) {
 				return nil
 			}
@@ -35,7 +37,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 	index := -1
 
-	for i, value := range b.config.TopicSendMulti.Format(b.Meta().ID()).Split() {
+	for i, value := range cfg.TopicSendMulti.Format(b.Meta().ID()).Split() {
 		if value == "#" || value == "+" {
 			index = i
 			break
@@ -44,7 +46,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 	if index != -1 {
 		subscribers = append(subscribers,
-			mqtt.NewSubscriber(b.config.TopicSendMulti, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+			mqtt.NewSubscriber(cfg.TopicSendMulti, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 				if !b.MQTT().CheckBindIDInTopic(message.Topic(), 3) {
 					return nil
 				}

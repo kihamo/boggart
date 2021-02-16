@@ -8,6 +8,8 @@ import (
 )
 
 func (b *Bind) Tasks() []tasks.Task {
+	cfg := b.config()
+
 	return []tasks.Task{
 		tasks.NewTask().
 			WithName("execute").
@@ -15,18 +17,19 @@ func (b *Bind) Tasks() []tasks.Task {
 				b.Workers().WrapTaskHandlerIsOnline(
 					tasks.HandlerWithTimeout(
 						tasks.HandlerFuncFromShortToLong(b.taskExecuteHandler),
-						b.config.ExecuteTimeout,
+						cfg.ExecuteTimeout,
 					),
 				),
 			).
-			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.ExecuteInterval)),
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.ExecuteInterval)),
 	}
 }
 
 func (b *Bind) taskExecuteHandler(ctx context.Context) error {
-	api := b.client.QueryAPI(b.config.Organization)
+	cfg := b.config()
+	api := b.client.QueryAPI(cfg.Organization)
 
-	result, err := api.Query(ctx, b.config.Query)
+	result, err := api.Query(ctx, cfg.Query)
 	if err != nil {
 		return err
 	}
@@ -36,7 +39,7 @@ func (b *Bind) taskExecuteHandler(ctx context.Context) error {
 	}
 
 	for result.Next() {
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicResult.Format(b.Meta().ID()), result.Record().Value()); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicResult.Format(b.Meta().ID()), result.Record().Value()); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
