@@ -80,6 +80,10 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 
 				bind := bindType.CreateBind()
 
+				if _, ok := bind.(boggart.BindRunnable); ok {
+					item.Features = append(item.Features, "runnable")
+				}
+
 				if _, ok := bind.(di.ConfigContainerSupport); ok {
 					item.Features = append(item.Features, "config")
 				}
