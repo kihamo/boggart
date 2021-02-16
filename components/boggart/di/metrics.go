@@ -49,7 +49,7 @@ func (b *MetricsBind) Metrics() *MetricsContainer {
 type MetricsContainer struct {
 	snitch.Collector
 
-	bind              boggart.BindItem
+	bindItem          boggart.BindItem
 	collector         snitch.Collector
 	prefix            string
 	descriptionsCount uint64
@@ -57,13 +57,13 @@ type MetricsContainer struct {
 	emptyCount        uint64
 }
 
-func NewMetricsContainer(bind boggart.BindItem) *MetricsContainer {
+func NewMetricsContainer(bindItem boggart.BindItem) *MetricsContainer {
 	c := &MetricsContainer{
-		bind:   bind,
-		prefix: boggart.ComponentName + "_bind_" + strings.ReplaceAll(bind.Type(), ":", "_") + "_",
+		bindItem: bindItem,
+		prefix:   boggart.ComponentName + "_bind_" + strings.ReplaceAll(bindItem.Type(), ":", "_") + "_",
 	}
 
-	if collector, ok := c.bind.Bind().(snitch.Collector); ok {
+	if collector, ok := c.bindItem.Bind().(snitch.Collector); ok {
 		c.collector = collector
 	}
 
@@ -80,7 +80,7 @@ func (c *MetricsContainer) description(desc *snitch.Description) *snitch.Descrip
 }
 
 func (c *MetricsContainer) Describe(ch chan<- *snitch.Description) {
-	status := c.bind.Status()
+	status := c.bindItem.Status()
 	if !status.IsStatusOnline() && !status.IsStatusOffline() || c.collector == nil {
 		return
 	}
@@ -102,7 +102,7 @@ func (c *MetricsContainer) Describe(ch chan<- *snitch.Description) {
 }
 
 func (c *MetricsContainer) Collect(ch chan<- snitch.Metric) {
-	status := c.bind.Status()
+	status := c.bindItem.Status()
 	if !status.IsStatusOnline() && !status.IsStatusOffline() || c.collector == nil {
 		return
 	}

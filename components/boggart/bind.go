@@ -59,6 +59,6 @@ type BindStatusManager func() BindStatus
 
 type Bind interface{}
 
-type BindRunner interface {
+type BindRunnable interface {
 	Run() error
 }

@@ -44,23 +44,23 @@ func (b *MetaBind) Meta() *MetaContainer {
 }
 
 type MetaContainer struct {
-	bind   boggart.BindItem
-	mqtt   mqtt.Component
-	config config.Component
-	diMQTT *MQTTContainer
+	bindItem boggart.BindItem
+	mqtt     mqtt.Component
+	config   config.Component
+	diMQTT   *MQTTContainer
 
 	serialNumber atomic.Value
 	mac          atomic.Value
 }
 
-func NewMetaContainer(bind boggart.BindItem, mqtt mqtt.Component, config config.Component) *MetaContainer {
+func NewMetaContainer(bindItem boggart.BindItem, mqtt mqtt.Component, config config.Component) *MetaContainer {
 	ctr := &MetaContainer{
-		bind:   bind,
-		mqtt:   mqtt,
-		config: config,
+		bindItem: bindItem,
+		mqtt:     mqtt,
+		config:   config,
 	}
 
-	if ctrMQTT, ok := MQTTContainerBind(bind.Bind()); ok {
+	if ctrMQTT, ok := MQTTContainerBind(bindItem.Bind()); ok {
 		ctr.diMQTT = ctrMQTT
 	}
 
@@ -68,31 +68,31 @@ func NewMetaContainer(bind boggart.BindItem, mqtt mqtt.Component, config config.
 }
 
 func (b *MetaContainer) BindType() boggart.BindType {
-	return b.bind.BindType()
+	return b.bindItem.BindType()
 }
 
 func (b *MetaContainer) ID() string {
-	return b.bind.ID()
+	return b.bindItem.ID()
 }
 
 func (b *MetaContainer) Type() string {
-	return b.bind.Type()
+	return b.bindItem.Type()
 }
 
 func (b *MetaContainer) Description() string {
-	return b.bind.Description()
+	return b.bindItem.Description()
 }
 
 func (b *MetaContainer) Tags() []string {
-	return b.bind.Tags()
+	return b.bindItem.Tags()
 }
 
 func (b *MetaContainer) Config() interface{} {
-	return b.bind.Config()
+	return b.bindItem.Config()
 }
 
 func (b *MetaContainer) Status() boggart.BindStatus {
-	return b.bind.Status()
+	return b.bindItem.Status()
 }
 
 func (b *MetaContainer) SerialNumber() string {

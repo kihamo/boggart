@@ -71,23 +71,23 @@ func (b *WidgetBind) Widget() *WidgetContainer {
 type WidgetContainer struct {
 	dashboard.Handler
 
-	bind      boggart.BindItem
+	bindItem  boggart.BindItem
 	configApp config.Component
 }
 
-func NewWidgetContainer(bind boggart.BindItem, configApp config.Component) *WidgetContainer {
+func NewWidgetContainer(bindItem boggart.BindItem, configApp config.Component) *WidgetContainer {
 	return &WidgetContainer{
-		bind:      bind,
+		bindItem:  bindItem,
 		configApp: configApp,
 	}
 }
 
 func (c *WidgetContainer) Bind() boggart.Bind {
-	return c.bind.Bind()
+	return c.bindItem.Bind()
 }
 
 func (c *WidgetContainer) HandleAllowed() bool {
-	status := c.bind.Status()
+	status := c.bindItem.Status()
 
 	return status.IsStatusOnline() || status.IsStatusOffline()
 }
@@ -113,7 +113,7 @@ func (c *WidgetContainer) Render(ctx context.Context, view string, data map[stri
 		data = make(map[string]interface{}, 1)
 	}
 
-	data["Bind"] = c.bind
+	data["Bind"] = c.bindItem
 
 	c.Handler.Render(ctx, view, data)
 }
@@ -123,7 +123,7 @@ func (c *WidgetContainer) RenderLayout(ctx context.Context, view, layout string,
 		data = make(map[string]interface{}, 1)
 	}
 
-	data["Bind"] = c.bind
+	data["Bind"] = c.bindItem
 
 	c.Handler.RenderLayout(ctx, view, layout, data)
 }
@@ -137,11 +137,11 @@ func (c *WidgetContainer) AssetFS() *assetfs.AssetFS {
 }
 
 func (c *WidgetContainer) TemplateNamespace() string {
-	return boggart.ComponentName + "-bind-" + c.bind.ID()
+	return boggart.ComponentName + "-bind-" + c.bindItem.ID()
 }
 
 func (c *WidgetContainer) I18nDomain() string {
-	return boggart.ComponentName + "-bind-" + c.bind.ID()
+	return boggart.ComponentName + "-bind-" + c.bindItem.ID()
 }
 
 func (c *WidgetContainer) Translate(ctx context.Context, messageID string, context string, format ...interface{}) string {
@@ -158,7 +158,7 @@ func (c *WidgetContainer) URL(vs map[string]string) (*url.URL, error) {
 		return nil, err
 	}
 
-	u.Path = "/" + boggart.ComponentName + "/widget/" + c.bind.ID()
+	u.Path = "/" + boggart.ComponentName + "/widget/" + c.bindItem.ID()
 
 	values := u.Query()
 

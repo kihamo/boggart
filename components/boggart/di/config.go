@@ -40,19 +40,19 @@ func (b *ConfigBind) Config() *ConfigContainer {
 }
 
 type ConfigContainer struct {
-	bind      boggart.BindItem
+	bindItem  boggart.BindItem
 	configApp config.Component
 }
 
-func NewConfigContainer(bind boggart.BindItem, configApp config.Component) *ConfigContainer {
+func NewConfigContainer(bindItem boggart.BindItem, configApp config.Component) *ConfigContainer {
 	return &ConfigContainer{
-		bind:      bind,
+		bindItem:  bindItem,
 		configApp: configApp,
 	}
 }
 
 func (b *ConfigContainer) Bind() interface{} {
-	return b.bind.Config()
+	return b.bindItem.Config()
 }
 
 func (b *ConfigContainer) App() config.Component {

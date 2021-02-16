@@ -369,7 +369,7 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 			}
 		}
 
-		if runner, ok := bind.(boggart.BindRunner); ok {
+		if runner, ok := bind.(boggart.BindRunnable); ok {
 			if err = runner.Run(); err != nil {
 				return
 			}

@@ -86,7 +86,7 @@ func (s MQTTSubscriber) FailedMessage() mqtt.Message {
 }
 
 type MQTTContainer struct {
-	bind boggart.BindItem
+	bindItem boggart.BindItem
 
 	clientMutex sync.RWMutex
 	client      mqtt.Component
@@ -96,9 +96,9 @@ type MQTTContainer struct {
 	publishes   map[string]uint64
 }
 
-func NewMQTTContainer(bind boggart.BindItem, client mqtt.Component) *MQTTContainer {
+func NewMQTTContainer(bindItem boggart.BindItem, client mqtt.Component) *MQTTContainer {
 	return &MQTTContainer{
-		bind:      bind,
+		bindItem:  bindItem,
 		client:    client,
 		publishes: make(map[string]uint64),
 	}
@@ -265,7 +265,7 @@ func (c *MQTTContainer) CheckValueInTopic(topic mqtt.Topic, value string, offset
 }
 
 func (c *MQTTContainer) CheckBindIDInTopic(topic mqtt.Topic, offset int) bool {
-	if bindSupport, ok := MetaContainerBind(c.bind.Bind()); ok {
+	if bindSupport, ok := MetaContainerBind(c.bindItem.Bind()); ok {
 		if id := bindSupport.ID(); id != "" {
 			return c.CheckValueInTopic(topic, mqtt.NameReplace(id), offset)
 		}
@@ -275,7 +275,7 @@ func (c *MQTTContainer) CheckBindIDInTopic(topic mqtt.Topic, offset int) bool {
 }
 
 func (c *MQTTContainer) CheckSerialNumberInTopic(topic mqtt.Topic, offset int) bool {
-	if bindSupport, ok := MetaContainerBind(c.bind.Bind()); ok {
+	if bindSupport, ok := MetaContainerBind(c.bindItem.Bind()); ok {
 		if sn := bindSupport.SerialNumber(); sn != "" {
 			return c.CheckValueInTopic(topic, mqtt.NameReplace(sn), offset)
 		}
@@ -285,7 +285,7 @@ func (c *MQTTContainer) CheckSerialNumberInTopic(topic mqtt.Topic, offset int) b
 }
 
 func (c *MQTTContainer) CheckMACInTopic(topic mqtt.Topic, offset int) bool {
-	if bindSupport, ok := MetaContainerBind(c.bind.Bind()); ok {
+	if bindSupport, ok := MetaContainerBind(c.bindItem.Bind()); ok {
 		if mac := bindSupport.MACAsString(); mac != "" {
 			return c.CheckValueInTopic(topic, mqtt.NameReplace(mac), offset)
 		}
@@ -296,7 +296,7 @@ func (c *MQTTContainer) CheckMACInTopic(topic mqtt.Topic, offset int) bool {
 
 func (c *MQTTContainer) WrapSubscribeDeviceIsOnline(callback mqtt.MessageHandler) mqtt.MessageHandler {
 	return func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-		if c.bind.Status().IsStatusOnline() {
+		if c.bindItem.Status().IsStatusOnline() {
 			return callback(ctx, client, message)
 		}
 
@@ -305,7 +305,7 @@ func (c *MQTTContainer) WrapSubscribeDeviceIsOnline(callback mqtt.MessageHandler
 }
 
 func (c *MQTTContainer) createSubscribe(subscriber mqtt.Subscriber) MQTTSubscriber {
-	logger, _ := LoggerContainerBind(c.bind.Bind())
+	logger, _ := LoggerContainerBind(c.bindItem.Bind())
 
 	item := MQTTSubscriber{
 		success:        atomic.NewUint64(),
@@ -390,7 +390,7 @@ func (c *MQTTContainer) Subscribers() []MQTTSubscriber {
 	}
 	c.mutex.RUnlock()
 
-	has, ok := c.bind.Bind().(BindHasMQTTSubscribers)
+	has, ok := c.bindItem.Bind().(BindHasMQTTSubscribers)
 	if !ok {
 		return nil
 	}

@@ -74,7 +74,7 @@ func (b *ProbesBind) Probes() *ProbesContainer {
 }
 
 type ProbesContainer struct {
-	bind boggart.BindItem
+	bindItem boggart.BindItem
 
 	statusManager func(boggart.BindStatus)
 	register      func() error
@@ -88,9 +88,9 @@ type ProbesContainer struct {
 	metricProbes snitch.Counter
 }
 
-func NewProbesContainer(bind boggart.BindItem, statusManager func(boggart.BindStatus), register, unregister func() error, manager *tasks.Manager, metricProbes snitch.Counter) *ProbesContainer {
+func NewProbesContainer(bindItem boggart.BindItem, statusManager func(boggart.BindStatus), register, unregister func() error, manager *tasks.Manager, metricProbes snitch.Counter) *ProbesContainer {
 	return &ProbesContainer{
-		bind:          bind,
+		bindItem:      bindItem,
 		statusManager: statusManager,
 		register:      register,
 		unregister:    unregister,
@@ -109,14 +109,14 @@ func (c *ProbesContainer) HookRegister() (err error) {
 
 	var id string
 
-	bindWorkersSupport, ok := WorkersContainerBind(c.bind.Bind())
+	bindWorkersSupport, ok := WorkersContainerBind(c.bindItem.Bind())
 
 	if taskReadiness != nil {
 		// если воркеры есть у привязки, то регистрируем пробы как таски, чтобы отображались в общем списке тасок
 		if ok {
 			id, err = bindWorkersSupport.RegisterTask(taskReadiness)
 		} else {
-			taskReadiness.WithName("bind/" + c.bind.Type() + "/" + c.bind.ID() + "/" + taskReadiness.Name())
+			taskReadiness.WithName("bind/" + c.bindItem.Type() + "/" + c.bindItem.ID() + "/" + taskReadiness.Name())
 			id, err = c.tasksManager.Register(taskReadiness)
 		}
 
@@ -135,7 +135,7 @@ func (c *ProbesContainer) HookRegister() (err error) {
 		if ok {
 			id, err = bindWorkersSupport.RegisterTask(taskLiveness)
 		} else {
-			taskLiveness.WithName("bind/" + c.bind.Type() + "/" + c.bind.ID() + "/" + taskLiveness.Name())
+			taskLiveness.WithName("bind/" + c.bindItem.Type() + "/" + c.bindItem.ID() + "/" + taskLiveness.Name())
 			id, err = c.tasksManager.Register(taskLiveness)
 		}
 
@@ -154,7 +154,7 @@ func (c *ProbesContainer) HookRegister() (err error) {
 func (c *ProbesContainer) HookUnregister() {
 	// если есть DI воркеров, то там удалиться все через стандартный механизм,
 	// дополнительно ничего не нужно делать
-	if _, ok := WorkersContainerBind(c.bind.Bind()); ok {
+	if _, ok := WorkersContainerBind(c.bindItem.Bind()); ok {
 		return
 	}
 
@@ -176,13 +176,15 @@ func (c *ProbesContainer) HookUnregister() {
 }
 
 func (c *ProbesContainer) taskReadiness() *tasks.TaskBase {
-	hasHandler, ok := c.bind.Bind().(BindHasReadinessProbeHandler)
+	bind := c.bindItem.Bind()
+
+	hasHandler, ok := bind.(BindHasReadinessProbeHandler)
 	if !ok {
 		return nil
 	}
 
 	// options
-	logger, _ := LoggerContainerBind(c.bind.Bind())
+	logger, _ := LoggerContainerBind(bind)
 
 	probePeriod := ProbesConfigReadinessDefaultPeriod
 	probeTimeout := ProbesConfigReadinessDefaultTimeout
@@ -191,24 +193,26 @@ func (c *ProbesContainer) taskReadiness() *tasks.TaskBase {
 
 	var probeSuccess, probeFailure uint64
 
-	if probeConfig, ok := c.bind.Config().(ProbesConfigReadiness); ok {
-		probePeriod = probeConfig.ReadinessProbePeriod()
-		probeTimeout = probeConfig.ReadinessProbeTimeout()
-		probeThresholdSuccess = probeConfig.ReadinessProbeThresholdSuccess()
-		probeThresholdFailure = probeConfig.ReadinessProbeThresholdFailure()
+	if bindSupport, ok := ConfigContainerBind(bind); ok {
+		if probeConfig, ok := bindSupport.Bind().(ProbesConfigReadiness); ok {
+			probePeriod = probeConfig.ReadinessProbePeriod()
+			probeTimeout = probeConfig.ReadinessProbeTimeout()
+			probeThresholdSuccess = probeConfig.ReadinessProbeThresholdSuccess()
+			probeThresholdFailure = probeConfig.ReadinessProbeThresholdFailure()
+		}
 	}
 
 	// task
 	var schedule tasks.Schedule
 
-	if hasSchedule, ok := c.bind.Bind().(BindHasReadinessProbeSchedule); ok {
+	if hasSchedule, ok := bind.(BindHasReadinessProbeSchedule); ok {
 		schedule = tasks.ScheduleFunc(hasSchedule.ReadinessProbeSchedule)
 	} else {
 		schedule = tasks.ScheduleWithDuration(tasks.ScheduleNow(), probePeriod)
 	}
 
 	handler := func(ctx context.Context) (err error) {
-		if s := c.bind.Status(); !s.IsStatusInitializing() && !s.IsStatusOnline() && !s.IsStatusOffline() {
+		if s := c.bindItem.Status(); !s.IsStatusInitializing() && !s.IsStatusOnline() && !s.IsStatusOffline() {
 			return nil
 		}
 
@@ -227,7 +231,12 @@ func (c *ProbesContainer) taskReadiness() *tasks.TaskBase {
 			threshold := atomic.AddUint64(&probeSuccess, 1)
 			atomic.StoreUint64(&probeFailure, 0)
 
-			c.metricProbes.With("probe", "readiness", "status", "success", "id", c.bind.ID(), "type", c.bind.Type()).Inc()
+			c.metricProbes.With(
+				"probe", "readiness",
+				"status", "success",
+				"id", c.bindItem.ID(),
+				"type", c.bindItem.Type(),
+			).Inc()
 
 			if threshold != probeThresholdSuccess {
 				return nil
@@ -238,11 +247,16 @@ func (c *ProbesContainer) taskReadiness() *tasks.TaskBase {
 			threshold := atomic.AddUint64(&probeFailure, 1)
 			atomic.StoreUint64(&probeSuccess, 0)
 
-			c.metricProbes.With("probe", "readiness", "status", "failed", "id", c.bind.ID(), "type", c.bind.Type()).Inc()
+			c.metricProbes.With(
+				"probe", "readiness",
+				"status", "failed",
+				"id", c.bindItem.ID(),
+				"type", c.bindItem.Type(),
+			).Inc()
 
 			logger.Error("Readiness probe failure",
-				"type", c.bind.Type(),
-				"id", c.bind.ID(),
+				"type", c.bindItem.Type(),
+				"id", c.bindItem.ID(),
 				"error", err.Error(),
 				"threshold", threshold,
 			)
@@ -277,13 +291,15 @@ func (c *ProbesContainer) ReadinessTaskID() string {
 }
 
 func (c *ProbesContainer) taskLiveness() *tasks.TaskBase {
-	hasHandler, ok := c.bind.Bind().(BindHasLivenessProbeHandler)
+	bind := c.bindItem.Bind()
+
+	hasHandler, ok := bind.(BindHasLivenessProbeHandler)
 	if !ok {
 		return nil
 	}
 
 	// options
-	logger, _ := LoggerContainerBind(c.bind.Bind())
+	logger, _ := LoggerContainerBind(bind)
 
 	probePeriod := ProbesConfigLivenessDefaultPeriod
 	probeTimeout := ProbesConfigLivenessDefaultTimeout
@@ -292,24 +308,26 @@ func (c *ProbesContainer) taskLiveness() *tasks.TaskBase {
 
 	var probeSuccess, probeFailure uint64
 
-	if probeConfig, ok := c.bind.Config().(ProbesConfigLiveness); ok {
-		probePeriod = probeConfig.LivenessProbePeriod()
-		probeTimeout = probeConfig.LivenessProbeTimeout()
-		probeThresholdSuccess = probeConfig.LivenessProbeThresholdSuccess()
-		probeThresholdFailure = probeConfig.LivenessProbeThresholdFailure()
+	if bindSupport, ok := ConfigContainerBind(bind); ok {
+		if probeConfig, ok := bindSupport.Bind().(ProbesConfigLiveness); ok {
+			probePeriod = probeConfig.LivenessProbePeriod()
+			probeTimeout = probeConfig.LivenessProbeTimeout()
+			probeThresholdSuccess = probeConfig.LivenessProbeThresholdSuccess()
+			probeThresholdFailure = probeConfig.LivenessProbeThresholdFailure()
+		}
 	}
 
 	// task
 	var schedule tasks.Schedule
 
-	if hasSchedule, ok := c.bind.Bind().(BindHasLivenessProbeSchedule); ok {
+	if hasSchedule, ok := bind.(BindHasLivenessProbeSchedule); ok {
 		schedule = tasks.ScheduleFunc(hasSchedule.LivenessProbeSchedule)
 	} else {
 		schedule = tasks.ScheduleWithDuration(tasks.ScheduleNow(), probePeriod)
 	}
 
 	handler := func(ctx context.Context) (err error) {
-		if s := c.bind.Status(); !s.IsStatusOnline() && !s.IsStatusOffline() {
+		if s := c.bindItem.Status(); !s.IsStatusOnline() && !s.IsStatusOffline() {
 			return nil
 		}
 
@@ -328,7 +346,12 @@ func (c *ProbesContainer) taskLiveness() *tasks.TaskBase {
 			threshold := atomic.AddUint64(&probeSuccess, 1)
 			atomic.StoreUint64(&probeFailure, 0)
 
-			c.metricProbes.With("probe", "liveness", "status", "success", "id", c.bind.ID(), "type", c.bind.Type()).Inc()
+			c.metricProbes.With(
+				"probe", "liveness",
+				"status", "success",
+				"id", c.bindItem.ID(),
+				"type", c.bindItem.Type(),
+			).Inc()
 
 			if threshold == probeThresholdSuccess {
 				atomic.StoreUint64(&probeSuccess, 0)
@@ -341,11 +364,16 @@ func (c *ProbesContainer) taskLiveness() *tasks.TaskBase {
 		threshold := atomic.AddUint64(&probeFailure, 1)
 		atomic.StoreUint64(&probeSuccess, 0)
 
-		c.metricProbes.With("probe", "liveness", "status", "failed", "id", c.bind.ID(), "type", c.bind.Type()).Inc()
+		c.metricProbes.With(
+			"probe", "liveness",
+			"status", "failed",
+			"id", c.bindItem.ID(),
+			"type", c.bindItem.Type(),
+		).Inc()
 
 		logger.Error("Liveness probe failure",
-			"type", c.bind.Type(),
-			"id", c.bind.ID(),
+			"type", c.bindItem.Type(),
+			"id", c.bindItem.ID(),
 			"error", err.Error(),
 			"threshold", threshold,
 		)
@@ -358,8 +386,8 @@ func (c *ProbesContainer) taskLiveness() *tasks.TaskBase {
 
 		if err := c.unregister(); err != nil {
 			logger.Error("Unregister after liveness probe failure",
-				"type", c.bind.Type(),
-				"id", c.bind.ID(),
+				"type", c.bindItem.Type(),
+				"id", c.bindItem.ID(),
 				"error", err.Error(),
 			)
 			return err
@@ -367,8 +395,8 @@ func (c *ProbesContainer) taskLiveness() *tasks.TaskBase {
 
 		if err := c.register(); err != nil {
 			logger.Error("Register after liveness probe failure",
-				"type", c.bind.Type(),
-				"id", c.bind.ID(),
+				"type", c.bindItem.Type(),
+				"id", c.bindItem.ID(),
 				"error", err.Error(),
 			)
 

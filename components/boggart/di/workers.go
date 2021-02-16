@@ -47,7 +47,7 @@ func (b *WorkersBind) Workers() *WorkersContainer {
 }
 
 type WorkersContainer struct {
-	bind boggart.BindItem
+	bindItem boggart.BindItem
 
 	manager *tasks.Manager
 
@@ -55,16 +55,16 @@ type WorkersContainer struct {
 	tasksID      [][2]string
 }
 
-func NewWorkersContainer(bind boggart.BindItem, manager *tasks.Manager) *WorkersContainer {
+func NewWorkersContainer(bindItem boggart.BindItem, manager *tasks.Manager) *WorkersContainer {
 	return &WorkersContainer{
-		bind:    bind,
-		manager: manager,
-		tasksID: make([][2]string, 0, 2),
+		bindItem: bindItem,
+		manager:  manager,
+		tasksID:  make([][2]string, 0, 2),
 	}
 }
 
 func (c *WorkersContainer) HookRegister() (err error) {
-	has, ok := c.bind.Bind().(BindHasTasks)
+	has, ok := c.bindItem.Bind().(BindHasTasks)
 	if !ok {
 		return nil
 	}
@@ -106,14 +106,14 @@ func (c *WorkersContainer) TaskShortName(name string) string {
 }
 
 func (c *WorkersContainer) prefixTaskName() string {
-	return "bind/" + c.bind.Type() + "/" + c.bind.ID() + "/"
+	return "bind/" + c.bindItem.Type() + "/" + c.bindItem.ID() + "/"
 }
 
 func (c *WorkersContainer) RegisterTask(tsk tasks.Task) (id string, err error) {
 	if t, ok := tsk.(*tasks.TaskBase); ok {
-		if logger, ok := LoggerContainerBind(c.bind.Bind()); ok {
+		if logger, ok := LoggerContainerBind(c.bindItem.Bind()); ok {
 			// не логировать дважды ошибку с таски о пробе
-			if _, ok := ProbesContainerBind(c.bind.Bind()); ok {
+			if _, ok := ProbesContainerBind(c.bindItem.Bind()); ok {
 				shortName := c.TaskShortName(t.Name())
 
 				if shortName == ProbesConfigReadinessDefaultName || shortName == ProbesConfigLivenessDefaultName {
@@ -202,7 +202,7 @@ func (c *WorkersContainer) WrapTaskHandlerIsOnline(parent tasks.Handler) tasks.H
 			return tasks.ErrParentHandlerIsNil
 		}
 
-		if !c.bind.Status().IsStatusOnline() {
+		if !c.bindItem.Status().IsStatusOnline() {
 			return errors.New("bind isn't online")
 		}
 

@@ -43,6 +43,8 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 		idConsumableSensor    = "ConsumableSensor"
 	)
 
+	done := string(payloadDone)
+
 	return openhab.StepsByBind(b, nil,
 		openhab.NewChannel(idBattery, openhab.ChannelTypeNumber).
 			WithStateTopic(b.config.TopicBattery.Format(sn)).
@@ -71,7 +73,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 			WithStateTopic(b.config.TopicTestVolume.Format(sn)).
 			WithCommandTopic(b.config.TopicTestVolume.Format(sn)).
 			WithOn("true").
-			WithOff("done").
+			WithOff(done).
 			AddItems(
 				openhab.NewItem(itemPrefix+idVolumeTest, openhab.ItemTypeSwitch).
 					WithLabel("Volume test").
@@ -81,7 +83,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 			WithStateTopic(b.config.TopicFind.Format(sn)).
 			WithCommandTopic(b.config.TopicFind.Format(sn)).
 			WithOn("true").
-			WithOff("done").
+			WithOff(done).
 			AddItems(
 				openhab.NewItem(itemPrefix+idFindMe, openhab.ItemTypeSwitch).
 					WithLabel("Find me").

@@ -159,17 +159,17 @@ func (o *loggerObserver) Clean() {
 
 type LoggerContainer struct {
 	logging.Logger
-	bind boggart.BindItem
+	bindItem boggart.BindItem
 
 	sugar    *zap.SugaredLogger
 	observer *loggerObserver
 	once     sync.Once
 }
 
-func NewLoggerContainer(bind boggart.BindItem, logger logging.Logger) *LoggerContainer {
+func NewLoggerContainer(bindItem boggart.BindItem, logger logging.Logger) *LoggerContainer {
 	return &LoggerContainer{
-		Logger: logging.NewLazyLogger(logger, logger.Name()+"."+bind.ID()),
-		bind:   bind,
+		Logger:   logging.NewLazyLogger(logger, logger.Name()+"."+bindItem.ID()),
+		bindItem: bindItem,
 	}
 }
 
@@ -298,9 +298,11 @@ func (c *LoggerContainer) init() *LoggerContainer {
 		limit := LoggerDefaultBufferedRecordsLimit
 		level := LoggerDefaultBufferedRecordsLevel
 
-		if loggerConfig, ok := c.bind.Config().(LoggerBufferedConfig); ok {
-			limit = loggerConfig.LoggerBufferedRecordsLimit()
-			level = loggerConfig.LoggerBufferedRecordsLevel()
+		if bindSupport, ok := ConfigContainerBind(c.bindItem.Bind()); ok {
+			if loggerConfig, ok := bindSupport.Bind().(LoggerBufferedConfig); ok {
+				limit = loggerConfig.LoggerBufferedRecordsLimit()
+				level = loggerConfig.LoggerBufferedRecordsLevel()
+			}
 		}
 
 		c.observer = &loggerObserver{
