@@ -26,6 +26,7 @@ var defaultDialerLGWebOS = webostv.Dialer{
 }
 
 type Bind struct {
+	di.ConfigBind
 	di.LoggerBind
 	di.MetaBind
 	di.MQTTBind

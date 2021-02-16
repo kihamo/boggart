@@ -9,6 +9,7 @@ import (
 )
 
 type Bind struct {
+	di.ConfigBind
 	di.MetaBind
 	di.MQTTBind
 	di.WidgetBind

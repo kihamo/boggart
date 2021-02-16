@@ -31,6 +31,7 @@ var (
 )
 
 type Bind struct {
+	di.ConfigBind
 	di.MQTTBind
 	di.WidgetBind
 

@@ -10,6 +10,7 @@ import (
 type Bind struct {
 	status uint32 // 0 - default, 1 - started, 2 - failed
 
+	di.ConfigBind
 	di.LoggerBind
 	di.ProbesBind
 

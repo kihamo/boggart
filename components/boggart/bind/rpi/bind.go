@@ -6,6 +6,7 @@ import (
 )
 
 type Bind struct {
+	di.ConfigBind
 	di.MetaBind
 	di.MetricsBind
 	di.MQTTBind

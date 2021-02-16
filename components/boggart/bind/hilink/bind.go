@@ -22,6 +22,7 @@ var (
 )
 
 type Bind struct {
+	di.ConfigBind
 	di.LoggerBind
 	di.MetaBind
 	di.MetricsBind

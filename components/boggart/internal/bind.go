@@ -4,6 +4,7 @@ import (
 	"sync/atomic"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 )
 
 type BindItem struct {
@@ -70,11 +71,17 @@ func (i *BindItem) updateStatus(status boggart.BindStatus) bool {
 }
 
 func (i *BindItem) MarshalYAML() (interface{}, error) {
+	var config interface{}
+
+	if bindSupport, ok := di.ConfigContainerBind(i.bind); ok {
+		config = bindSupport.Bind()
+	}
+
 	return BindItemYaml{
 		Type:        i.Type(),
 		ID:          i.ID(),
 		Description: i.Description(),
 		Tags:        i.Tags(),
-		Config:      i.Config(),
+		Config:      config,
 	}, nil
 }

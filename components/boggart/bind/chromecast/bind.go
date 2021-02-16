@@ -32,7 +32,9 @@ const (
 type eventClose struct{}
 
 type Bind struct {
+	di.ConfigBind
 	di.LoggerBind
+	di.MetaBind
 	di.MQTTBind
 	di.ProbesBind
 	di.WidgetBind
