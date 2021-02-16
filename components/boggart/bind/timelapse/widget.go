@@ -70,20 +70,21 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 		if files, err := b.Files(from, &to); err == nil {
 			filesTotal := len(files)
+			cfg := b.config()
 
-			offsetLeft := (page - 1) * b.config.FilesOnPage
+			offsetLeft := (page - 1) * cfg.FilesOnPage
 			if offsetLeft > filesTotal {
 				widget.NotFound(w, r)
 				return
 			}
 
-			offsetRight := page * b.config.FilesOnPage
+			offsetRight := page * cfg.FilesOnPage
 			if offsetRight > filesTotal {
 				offsetRight = filesTotal
 			}
 
-			pagesTotal := filesTotal / b.config.FilesOnPage
-			if filesTotal%b.config.FilesOnPage > 0 {
+			pagesTotal := filesTotal / cfg.FilesOnPage
+			if filesTotal%cfg.FilesOnPage > 0 {
 				pagesTotal++
 			}
 

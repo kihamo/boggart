@@ -13,8 +13,6 @@ type Bind struct {
 	di.ConfigBind
 	di.MQTTBind
 	di.WidgetBind
-
-	config *Config
 }
 
 func (b *Bind) WOL(mac fmt.Stringer, ip net.IP, subnet net.IP) error {

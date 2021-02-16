@@ -25,12 +25,16 @@ type Bind struct {
 	di.ProbesBind
 	di.WidgetBind
 	di.WorkersBind
+}
 
-	config *Config
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
 }
 
 func (b *Bind) Run() error {
-	if b.config.SaveDirectory == "" {
+	cfg := b.config()
+
+	if cfg.SaveDirectory == "" {
 		cacheDir, _ := os.UserCacheDir()
 		if cacheDir == "" {
 			cacheDir = os.TempDir()
@@ -39,7 +43,7 @@ func (b *Bind) Run() error {
 		if cacheDir != "" {
 			cacheDirBind := cacheDir + string(os.PathSeparator) + boggart.ComponentName + "_timelapse"
 
-			err := os.Mkdir(cacheDirBind, b.config.SaveDirectoryMode.FileMode)
+			err := os.Mkdir(cacheDirBind, cfg.SaveDirectoryMode.FileMode)
 
 			if err == nil {
 				b.Logger().Info("Cache dir created", "path", cacheDirBind)
@@ -50,14 +54,16 @@ func (b *Bind) Run() error {
 			}
 		}
 
-		b.config.SaveDirectory = cacheDir
+		cfg.SaveDirectory = cacheDir
 	}
 
 	return nil
 }
 
 func (b *Bind) Capture(ctx context.Context, writer io.Writer) error {
-	request, err := http.NewRequestWithContext(ctx, http.MethodGet, b.config.CaptureURL.String(), nil)
+	cfg := b.config()
+
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, cfg.CaptureURL.String(), nil)
 	if err != nil {
 		return err
 	}
@@ -95,9 +101,9 @@ func (b *Bind) Capture(ctx context.Context, writer io.Writer) error {
 		}
 	}
 
-	fileName := b.config.SaveDirectory + string(os.PathSeparator) + time.Now().Format(b.config.FileNameFormat) + ext
+	fileName := cfg.SaveDirectory + string(os.PathSeparator) + time.Now().Format(cfg.FileNameFormat) + ext
 
-	fd, err := os.OpenFile(fileName, os.O_CREATE|os.O_EXCL|os.O_WRONLY, b.config.FileMode.FileMode)
+	fd, err := os.OpenFile(fileName, os.O_CREATE|os.O_EXCL|os.O_WRONLY, cfg.FileMode.FileMode)
 	if err != nil {
 		return err
 	}
@@ -117,7 +123,7 @@ func (b *Bind) Capture(ctx context.Context, writer io.Writer) error {
 }
 
 func (b *Bind) Files(from, to *time.Time) ([]os.FileInfo, error) {
-	dir, err := os.Open(b.config.SaveDirectory)
+	dir, err := os.Open(b.config().SaveDirectory)
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +146,7 @@ func (b *Bind) Files(from, to *time.Time) ([]os.FileInfo, error) {
 }
 
 func (b *Bind) Load(filename string, writer io.Writer) error {
-	filename = b.config.SaveDirectory + string(os.PathSeparator) + filename
+	filename = b.config().SaveDirectory + string(os.PathSeparator) + filename
 	f, err := os.Open(filename)
 	if err != nil {
 		return err

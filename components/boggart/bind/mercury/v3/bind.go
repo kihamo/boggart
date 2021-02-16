@@ -21,10 +21,13 @@ type Bind struct {
 	di.WidgetBind
 	di.WorkersBind
 
-	config       *Config
 	provider     *mercury.MercuryV3
 	providerOnce *atomic.Once
 	connection   connection.Connection
+}
+
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
 }
 
 func (b *Bind) Run() error {
@@ -40,7 +43,9 @@ func (b *Bind) Provider() (provider *mercury.MercuryV3, err error) {
 			dsn  *connection.DSN
 		)
 
-		dsn, err = connection.ParseDSN(b.config.ConnectionDSN)
+		cfg := b.config()
+
+		dsn, err = connection.ParseDSN(cfg.ConnectionDSN)
 		if err != nil {
 			return
 		}
@@ -97,8 +102,8 @@ func (b *Bind) Provider() (provider *mercury.MercuryV3, err error) {
 		}))
 
 		opts := make([]mercury.Option, 0)
-		if b.config.Address != "" {
-			opts = append(opts, mercury.WithAddressAsString(b.config.Address))
+		if cfg.Address != "" {
+			opts = append(opts, mercury.WithAddressAsString(cfg.Address))
 		}
 
 		b.connection = conn

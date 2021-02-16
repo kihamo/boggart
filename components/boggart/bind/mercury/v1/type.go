@@ -11,23 +11,9 @@ type Type struct {
 	Device           uint8
 }
 
-func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
-	config := c.(*Config)
-
-	config.TopicTariff = config.TopicTariff.Format(config.Address)
-	config.TopicVoltage = config.TopicVoltage.Format(config.Address)
-	config.TopicAmperage = config.TopicAmperage.Format(config.Address)
-	config.TopicPower = config.TopicPower.Format(config.Address)
-	config.TopicBatteryVoltage = config.TopicBatteryVoltage.Format(config.Address)
-	config.TopicLastPowerOff = config.TopicLastPowerOff.Format(config.Address)
-	config.TopicLastPowerOn = config.TopicLastPowerOn.Format(config.Address)
-	config.TopicMakeDate = config.TopicMakeDate.Format(config.Address)
-	config.TopicFirmwareDate = config.TopicFirmwareDate.Format(config.Address)
-	config.TopicFirmwareVersion = config.TopicFirmwareVersion.Format(config.Address)
-
+func (t Type) CreateBind() boggart.Bind {
 	return &Bind{
-		config:       config,
 		providerOnce: &atomic.Once{},
 		tariffCount:  atomic.NewUint32Null(),
-	}, nil
+	}
 }

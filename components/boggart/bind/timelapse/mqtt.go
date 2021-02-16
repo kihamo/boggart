@@ -8,7 +8,7 @@ import (
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(b.config.TopicCapture.Format(b.Meta().ID()), 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(b.config().TopicCapture.Format(b.Meta().ID()), 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			return b.Capture(ctx, nil)
 		}),
 	}

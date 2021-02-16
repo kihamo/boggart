@@ -21,15 +21,18 @@ type Bind struct {
 	di.WidgetBind
 	di.WorkersBind
 
-	config       *Config
 	provider     *mercury.MercuryV1
 	providerOnce *atomic.Once
 	connection   connection.Connection
 	tariffCount  *atomic.Uint32Null
 }
 
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
 func (b *Bind) Run() error {
-	b.Meta().SetSerialNumber(b.config.Address)
+	b.Meta().SetSerialNumber(b.config().Address)
 	b.providerOnce.Reset()
 	b.tariffCount.Nil()
 
@@ -61,7 +64,9 @@ func (b *Bind) Provider() (provider *mercury.MercuryV1, err error) {
 			dsn  *connection.DSN
 		)
 
-		dsn, err = connection.ParseDSN(b.config.ConnectionDSN)
+		cfg := b.config()
+
+		dsn, err = connection.ParseDSN(cfg.ConnectionDSN)
 		if err != nil {
 			return
 		}
@@ -75,7 +80,7 @@ func (b *Bind) Provider() (provider *mercury.MercuryV1, err error) {
 			return
 		}
 
-		loc, err := time.LoadLocation(b.config.Location)
+		loc, err := time.LoadLocation(cfg.Location)
 		if err != nil {
 			return
 		}
@@ -109,7 +114,7 @@ func (b *Bind) Provider() (provider *mercury.MercuryV1, err error) {
 		t := b.Meta().BindType().(Type)
 
 		opts := []mercury.Option{
-			t.SerialNumberFunc(b.config.Address),
+			t.SerialNumberFunc(cfg.Address),
 			mercury.WithDevice(t.Device),
 			mercury.WithLocation(loc),
 		}

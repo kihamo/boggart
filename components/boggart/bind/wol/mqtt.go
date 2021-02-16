@@ -9,8 +9,10 @@ import (
 )
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
+	cfg := b.Config().Bind().(*Config)
+
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(b.config.TopicWOL, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(cfg.TopicWOL, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			route := message.Topic().Split()
 			if len(route) < 1 {
 				return errors.New("bad topic name")
@@ -23,7 +25,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			return b.WOL(mac, nil, nil)
 		}),
-		mqtt.NewSubscriber(b.config.TopicWOLWithIPAndSubnet, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(cfg.TopicWOLWithIPAndSubnet, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			route := message.Topic().Split()
 			if len(route) < 3 {
 				return errors.New("bad topic name")
