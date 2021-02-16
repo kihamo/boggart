@@ -140,14 +140,8 @@ func (c *Component) registerDefaultBinds() (int, error) {
 		return -1, err
 	}
 
-	bind, err := kind.CreateBind(cfg)
-	if err != nil {
-		return -1, err
-	}
-
-	if bindSupport, ok := bind.(*bb.Bind); ok {
-		bindSupport.SetApplication(c.application)
-	}
+	bind := &bb.Bind{}
+	bind.SetApplication(c.application)
 
 	bindID := c.config.String(boggart.ConfigBoggartBindID)
 
@@ -239,15 +233,12 @@ func (c *Component) initConfigFromYaml(id string) (int, error) {
 			return -1, fmt.Errorf("config of device type %s validate failed with error: %v", d.Type, err)
 		}
 
-		bind, err := kind.CreateBind(cfg)
-		if err != nil {
-			return -1, err
-		}
-
 		var id string
 		if d.ID != nil && *d.ID != "" {
 			id = *d.ID
 		}
+
+		bind := kind.CreateBind()
 
 		if _, err := c.RegisterBind(id, bind, d.Type, d.Description, d.Tags, cfg); err != nil {
 			return -1, err
@@ -300,6 +291,39 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 
 	c.logger.Debug("Register bind", "type", bindItem.Type(), "id", bindItem.ID())
 
+	// инициализацию делаем обязательно синхронно
+
+	// mqtt container
+	if bindSupport, ok := bind.(di.MQTTContainerSupport); ok {
+		bindSupport.SetMQTT(di.NewMQTTContainer(bindItem, c.mqtt))
+	}
+
+	// config container
+	if bindSupport, ok := bind.(di.ConfigContainerSupport); ok {
+		bindSupport.SetConfig(di.NewConfigContainer(config, c.config))
+	}
+
+	// meta container
+	if bindSupport, ok := bind.(di.MetaContainerSupport); ok {
+		bindSupport.SetMeta(di.NewMetaContainer(bindItem, c.mqtt, c.config))
+	}
+
+	// logger container
+	if bindSupport, ok := bind.(di.LoggerContainerSupport); ok {
+		bindSupport.SetLogger(di.NewLoggerContainer(bindItem, c.logger))
+	}
+
+	// metrics container
+	if bindSupport, ok := bind.(di.MetricsContainerSupport); ok {
+		bindSupport.SetMetrics(di.NewMetricsContainer(bindItem))
+	}
+
+	// widget container
+	if bindSupport, ok := bind.(di.WidgetContainerSupport); ok {
+		bindSupport.SetWidget(di.NewWidgetContainer(bindItem, c.config))
+	}
+
+	// а запуск произведем в рутине
 	go func() {
 		var err error
 
@@ -314,36 +338,8 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 			}
 		}()
 
-		// mqtt container
-		if bindSupport, ok := bind.(di.MQTTContainerSupport); ok {
-			bindSupport.SetMQTT(di.NewMQTTContainer(bindItem, c.mqtt))
-		}
-
-		// config container
-		if bindSupport, ok := bind.(di.ConfigContainerSupport); ok {
-			bindSupport.SetConfig(di.NewConfigContainer(config, c.config))
-		}
-
-		// meta container
-		if bindSupport, ok := bind.(di.MetaContainerSupport); ok {
-			bindSupport.SetMeta(di.NewMetaContainer(bindItem, c.mqtt, c.config))
-		}
-
-		// logger container
-		if bindSupport, ok := bind.(di.LoggerContainerSupport); ok {
-			bindSupport.SetLogger(di.NewLoggerContainer(bindItem, c.logger))
-		}
-
-		// metrics container
-		if bindSupport, ok := bind.(di.MetricsContainerSupport); ok {
-			bindSupport.SetMetrics(di.NewMetricsContainer(bindItem))
-		}
-
-		// widget container
 		if bindSupport, ok := bind.(di.WidgetContainerSupport); ok {
-			ctr := di.NewWidgetContainer(bindItem, c.config)
-
-			bindSupport.SetWidget(ctr)
+			ctr := bindSupport.Widget()
 
 			if fs := ctr.AssetFS(); fs != nil {
 				name := ctr.TemplateNamespace()

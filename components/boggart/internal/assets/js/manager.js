@@ -146,7 +146,7 @@ $(document).ready(function () {
                             '<i class="fas fa-cog" title="Config"></i> <span class="caret"></span>' +
                             '</button>' +
                             '<ul class="dropdown-menu">' +
-                            '<li><a href="javascript:void(0)" data-toggle="modal" data-target="#modal" data-modal-title="Device config #' + row.id + '" data-modal-url="/boggart/config/modal/' + row.id + '">Show config</a></li>';
+                            '<li><a href="javascript:void(0)" data-toggle="modal" data-target="#modal" data-modal-title="Device config #' + row.id + '" data-modal-url="/boggart/config/modal/' + row.id + '/?short=1">Show config</a></li>';
 
                         if (row.type !== "boggart") {
                             content += '<li><a href="/boggart/bind/' + row.id + '/" target="_blank">Edit bind</a></li>' +

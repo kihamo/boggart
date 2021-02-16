@@ -6,9 +6,8 @@ import (
 )
 
 type Config struct {
-	Lat  float64 `valid:"required"`
-	Lon  float64 `valid:"required"`
-	Name string  `valid:"required"`
+	Lat float64 `valid:"required"`
+	Lon float64 `valid:"required"`
 
 	TopicNadir                    mqtt.Topic `mapstructure:"topic_nadir" yaml:"topic_nadir"`
 	TopicNightBeforeStart         mqtt.Topic `mapstructure:"topic_night_before_start" yaml:"topic_night_before_start"`

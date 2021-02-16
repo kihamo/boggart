@@ -3,6 +3,7 @@ package handlers
 import (
 	"reflect"
 	"sort"
+	"sync"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
@@ -42,45 +43,85 @@ type managerHandlerDevice struct {
 	LogsMaxLevel             zapcore.Level              `json:"logs_max_level"`
 }
 
+type managerHandlerTypeView struct {
+	Name     string
+	Package  string
+	Features []string
+}
+
 type ManagerHandler struct {
 	dashboard.Handler
 
 	component boggart.Component
 	manager   *tasks.Manager
+
+	typesOnce sync.Once
+	types     []managerHandlerTypeView
 }
 
 func NewManagerHandler(component boggart.Component, manager *tasks.Manager) *ManagerHandler {
 	return &ManagerHandler{
 		component: component,
 		manager:   manager,
+		types:     make([]managerHandlerTypeView, 0, len(boggart.GetBindTypes())),
 	}
 }
 
 func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	if !r.IsAjax() {
-		type typeView struct {
-			Name    string
-			Package string
-		}
+		h.typesOnce.Do(func() {
+			for name, bindType := range boggart.GetBindTypes() {
+				t := reflect.TypeOf(bindType)
+				item := managerHandlerTypeView{
+					Name:     name,
+					Package:  t.PkgPath(),
+					Features: make([]string, 0),
+				}
 
-		types := boggart.GetBindTypes()
-		view := make([]typeView, 0, len(types))
+				bind := bindType.CreateBind()
 
-		for name, bindType := range types {
-			t := reflect.TypeOf(bindType)
+				if _, ok := bind.(di.ConfigContainerSupport); ok {
+					item.Features = append(item.Features, "config")
+				}
 
-			view = append(view, typeView{
-				Name:    name,
-				Package: t.PkgPath(),
+				if _, ok := bind.(di.LoggerContainerSupport); ok {
+					item.Features = append(item.Features, "logger")
+				}
+
+				if _, ok := bind.(di.MetaContainerSupport); ok {
+					item.Features = append(item.Features, "meta")
+				}
+
+				if _, ok := bind.(di.MetricsContainerSupport); ok {
+					item.Features = append(item.Features, "metrics")
+				}
+
+				if _, ok := bind.(di.MQTTContainerSupport); ok {
+					item.Features = append(item.Features, "mqtt")
+				}
+
+				if _, ok := bind.(di.ProbesContainerSupport); ok {
+					item.Features = append(item.Features, "probes")
+				}
+
+				if _, ok := bind.(di.WidgetContainerSupport); ok {
+					item.Features = append(item.Features, "widget")
+				}
+
+				if _, ok := bind.(di.WorkersContainerSupport); ok {
+					item.Features = append(item.Features, "workers")
+				}
+
+				h.types = append(h.types, item)
+			}
+
+			sort.SliceStable(h.types, func(i, j int) bool {
+				return h.types[i].Name < h.types[j].Name
 			})
-		}
-
-		sort.SliceStable(view, func(i, j int) bool {
-			return view[i].Name < view[j].Name
 		})
 
 		h.Render(r.Context(), "manager", map[string]interface{}{
-			"types": view,
+			"types": h.types,
 		})
 
 		return

@@ -6,6 +6,6 @@ import (
 
 type Type struct{}
 
-func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
-	return &Bind{}, nil
+func (t Type) CreateBind() boggart.Bind {
+	return &Bind{}
 }

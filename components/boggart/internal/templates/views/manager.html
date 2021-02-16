@@ -7,10 +7,10 @@
                 <h4 class="modal-title">{{ i18n "Config YAML" . }}</h4>
             </div>
             <div class="modal-body">
-                <iframe src="/boggart/config/modal" width="100%" frameborder="0"></iframe>
+                <iframe src="/boggart/config/modal/" width="100%" frameborder="0"></iframe>
             </div>
             <div class="modal-footer">
-                <a href="/boggart/config/download" class="btn btn-success">{{ i18n "Download" . }}</a>
+                <a href="/boggart/config/download/" class="btn btn-success">{{ i18n "Download" . }}</a>
                 <button type="button" class="btn btn-default" data-dismiss="modal">{{ i18n "Close" . }}</button>
             </div>
         </div>
@@ -24,7 +24,7 @@
             <ul class="nav navbar-right panel_toolbox">
                 <li><a class="collapse-link"><i class="fas fa-chevron-up"></i></a></li>
                 <li>
-                    <a href="/boggart/bind">
+                    <a href="/boggart/bind/">
                         <i class="fas fa-plus" title="{{ i18n "Add bind" . }}" data-toggle="tooltip" data-placement="bottom"></i>
                     </a>
                 </li>
@@ -34,7 +34,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="/boggart/config/download" title="{{ i18n "Download YAML" . }}" data-toggle="tooltip" data-placement="bottom">
+                    <a href="/boggart/config/download/" title="{{ i18n "Download YAML" . }}" data-toggle="tooltip" data-placement="bottom">
                         <i class="fas fa-file-download"></i>
                     </a>
                 </li>
@@ -88,6 +88,7 @@
                     <tr>
                         <th>{{ i18n "Type" . }}</th>
                         <th>{{ i18n "Package" . }}</th>
+                        <th>{{ i18n "Features" . }}</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -95,6 +96,11 @@
                     <tr>
                         <td>{{ $type.Name }}</td>
                         <td>{{ $type.Package }}</td>
+                        <td>
+                            {{ range $feature := $type.Features }}
+                            <span class="label label-info">{{ i18n $feature $ }}</span>
+                            {{ end }}
+                        </td>
                     </tr>
                     {{ end }}
                     </tbody>

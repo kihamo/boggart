@@ -17,8 +17,6 @@ type Bind struct {
 	di.MQTTBind
 	di.WidgetBind
 	di.WorkersBind
-
-	config *Config
 }
 
 type Time struct {
@@ -42,6 +40,10 @@ type Times struct {
 	AstronomicalDusk Time
 }
 
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
 func (b *Bind) Times() Times {
 	t := Times{}
 
@@ -50,9 +52,9 @@ func (b *Bind) Times() Times {
 	// для 00:00:00 почему-то считает предыдущий день, поэтому берем полдень
 	todaySolarNoon := time.Date(now.Year(), now.Month(), now.Day(), 12, 0, 0, 0, now.Location())
 
-	timesYesterday := suncalc.SunTimes(todaySolarNoon.Add(-dayDuration), b.config.Lat, b.config.Lon)
-	timesToday := suncalc.SunTimes(todaySolarNoon, b.config.Lat, b.config.Lon)
-	timesTomorrow := suncalc.SunTimes(todaySolarNoon.Add(dayDuration), b.config.Lat, b.config.Lon)
+	timesYesterday := suncalc.SunTimes(todaySolarNoon.Add(-dayDuration), b.config().Lat, b.config().Lon)
+	timesToday := suncalc.SunTimes(todaySolarNoon, b.config().Lat, b.config().Lon)
+	timesTomorrow := suncalc.SunTimes(todaySolarNoon.Add(dayDuration), b.config().Lat, b.config().Lon)
 
 	t.NightBefore.Start = timesYesterday["night"]
 	t.NightBefore.End = timesToday["nightEnd"]

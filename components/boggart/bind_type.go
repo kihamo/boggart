@@ -53,7 +53,7 @@ func GetBindTypes() map[string]BindType {
 
 type BindType interface {
 	ConfigDefaults() interface{}
-	CreateBind(config interface{}) (Bind, error)
+	CreateBind() Bind
 }
 
 func ValidateBindConfig(t BindType, config interface{}) (cfg interface{}, md *mapstructure.Metadata, err error) {

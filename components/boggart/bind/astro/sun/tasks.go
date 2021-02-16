@@ -18,132 +18,134 @@ func (b *Bind) Tasks() []tasks.Task {
 
 func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 	times := b.Times()
+	cfg := b.config()
+	id := b.Meta().ID()
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicNadir, times.Nadir); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicNadir.Format(id), times.Nadir); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicNightBeforeStart, times.NightBefore.Start); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicNightBeforeStart.Format(id), times.NightBefore.Start); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicNightBeforeEnd, times.NightBefore.End); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicNightBeforeEnd.Format(id), times.NightBefore.End); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicNightBeforeDuration, times.NightBefore.Duration); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicNightBeforeDuration.Format(id), times.NightBefore.Duration); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicAstronomicalDawnStart, times.AstronomicalDawn.Start); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicAstronomicalDawnStart.Format(id), times.AstronomicalDawn.Start); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicAstronomicalDawnEnd, times.AstronomicalDawn.End); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicAstronomicalDawnEnd.Format(id), times.AstronomicalDawn.End); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicAstronomicalDawnDuration, times.AstronomicalDawn.Duration); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicAstronomicalDawnDuration.Format(id), times.AstronomicalDawn.Duration); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicNauticalDawnStart, times.NauticalDawn.Start); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicNauticalDawnStart.Format(id), times.NauticalDawn.Start); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicNauticalDawnEnd, times.NauticalDawn.End); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicNauticalDawnEnd.Format(id), times.NauticalDawn.End); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicNauticalDawnDuration, times.NauticalDawn.Duration); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicNauticalDawnDuration.Format(id), times.NauticalDawn.Duration); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicCivilDawnStart, times.CivilDawn.Start); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicCivilDawnStart.Format(id), times.CivilDawn.Start); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicCivilDawnEnd, times.CivilDawn.End); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicCivilDawnEnd.Format(id), times.CivilDawn.End); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicCivilDawnDuration, times.CivilDawn.Duration); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicCivilDawnDuration.Format(id), times.CivilDawn.Duration); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicRiseStart, times.Sunrise.Start); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicRiseStart.Format(id), times.Sunrise.Start); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicRiseEnd, times.Sunrise.End); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicRiseEnd.Format(id), times.Sunrise.End); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicRiseDuration, times.Sunrise.Duration); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicRiseDuration.Format(id), times.Sunrise.Duration); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicSolarNoon, times.SolarNoon); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicSolarNoon.Format(id), times.SolarNoon); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicSetStart, times.Sunset.Start); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicSetStart.Format(id), times.Sunset.Start); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicSetEnd, times.Sunset.End); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicSetEnd.Format(id), times.Sunset.End); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicSetDuration, times.Sunset.Duration); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicSetDuration.Format(id), times.Sunset.Duration); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicCivilDuskStart, times.CivilDusk.Start); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicCivilDuskStart.Format(id), times.CivilDusk.Start); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicCivilDuskEnd, times.CivilDusk.End); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicCivilDuskEnd.Format(id), times.CivilDusk.End); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicCivilDuskDuration, times.CivilDusk.Duration); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicCivilDuskDuration.Format(id), times.CivilDusk.Duration); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicNauticalDuskStart, times.NauticalDusk.Start); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicNauticalDuskStart.Format(id), times.NauticalDusk.Start); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicNauticalDuskEnd, times.NauticalDusk.End); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicNauticalDuskEnd.Format(id), times.NauticalDusk.End); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicNauticalDuskDuration, times.NauticalDusk.Duration); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicNauticalDuskDuration.Format(id), times.NauticalDusk.Duration); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicAstronomicalDuskStart, times.AstronomicalDusk.Start); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicAstronomicalDuskStart.Format(id), times.AstronomicalDusk.Start); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicAstronomicalDuskEnd, times.AstronomicalDusk.End); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicAstronomicalDuskEnd.Format(id), times.AstronomicalDusk.End); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicAstronomicalDuskDuration, times.AstronomicalDusk.Duration); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicAstronomicalDuskDuration.Format(id), times.AstronomicalDusk.Duration); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicNightAfterStart, times.NightAfter.Start); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicNightAfterStart.Format(id), times.NightAfter.Start); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicNightAfterEnd, times.NightAfter.End); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicNightAfterEnd.Format(id), times.NightAfter.End); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicNightAfterDuration, times.NightAfter.Duration); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicNightAfterDuration.Format(id), times.NightAfter.Duration); e != nil {
 		err = multierr.Append(err, e)
 	}
 
