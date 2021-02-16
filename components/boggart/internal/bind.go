@@ -16,7 +16,6 @@ type BindItem struct {
 	t           string
 	description string
 	tags        []string
-	config      interface{}
 }
 
 type BindItemYaml struct {
@@ -55,10 +54,6 @@ func (i *BindItem) Tags() []string {
 	return i.tags
 }
 
-func (i *BindItem) Config() interface{} {
-	return i.config
-}
-
 func (i *BindItem) Status() boggart.BindStatus {
 	return boggart.BindStatus(atomic.LoadUint64(&i.status))
 }
@@ -71,11 +66,7 @@ func (i *BindItem) updateStatus(status boggart.BindStatus) bool {
 }
 
 func (i *BindItem) MarshalYAML() (interface{}, error) {
-	var config interface{}
-
-	if bindSupport, ok := di.ConfigContainerBind(i.bind); ok {
-		config = bindSupport.Bind()
-	}
+	config, _ := di.ConfigForBind(i.bind)
 
 	return BindItemYaml{
 		Type:        i.Type(),

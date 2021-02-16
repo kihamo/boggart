@@ -193,8 +193,8 @@ func (c *ProbesContainer) taskReadiness() *tasks.TaskBase {
 
 	var probeSuccess, probeFailure uint64
 
-	if bindSupport, ok := ConfigContainerBind(bind); ok {
-		if probeConfig, ok := bindSupport.Bind().(ProbesConfigReadiness); ok {
+	if config, ok := ConfigForBind(bind); ok {
+		if probeConfig, ok := config.(ProbesConfigReadiness); ok {
 			probePeriod = probeConfig.ReadinessProbePeriod()
 			probeTimeout = probeConfig.ReadinessProbeTimeout()
 			probeThresholdSuccess = probeConfig.ReadinessProbeThresholdSuccess()
@@ -308,8 +308,8 @@ func (c *ProbesContainer) taskLiveness() *tasks.TaskBase {
 
 	var probeSuccess, probeFailure uint64
 
-	if bindSupport, ok := ConfigContainerBind(bind); ok {
-		if probeConfig, ok := bindSupport.Bind().(ProbesConfigLiveness); ok {
+	if config, ok := ConfigForBind(bind); ok {
+		if probeConfig, ok := config.(ProbesConfigLiveness); ok {
 			probePeriod = probeConfig.LivenessProbePeriod()
 			probeTimeout = probeConfig.LivenessProbeTimeout()
 			probeThresholdSuccess = probeConfig.LivenessProbeThresholdSuccess()

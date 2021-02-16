@@ -21,6 +21,14 @@ func ConfigContainerBind(bind boggart.Bind) (*ConfigContainer, bool) {
 	return nil, false
 }
 
+func ConfigForBind(bind boggart.Bind) (interface{}, bool) {
+	if support, ok := ConfigContainerBind(bind); ok {
+		return support.Bind(), false
+	}
+
+	return nil, false
+}
+
 type ConfigBind struct {
 	mutex     sync.RWMutex
 	container *ConfigContainer
@@ -40,19 +48,19 @@ func (b *ConfigBind) Config() *ConfigContainer {
 }
 
 type ConfigContainer struct {
-	bindItem  boggart.BindItem
-	configApp config.Component
+	configBind interface{}
+	configApp  config.Component
 }
 
-func NewConfigContainer(bindItem boggart.BindItem, configApp config.Component) *ConfigContainer {
+func NewConfigContainer(configBind interface{}, configApp config.Component) *ConfigContainer {
 	return &ConfigContainer{
-		bindItem:  bindItem,
-		configApp: configApp,
+		configBind: configBind,
+		configApp:  configApp,
 	}
 }
 
 func (b *ConfigContainer) Bind() interface{} {
-	return b.bindItem.Config()
+	return b.configBind
 }
 
 func (b *ConfigContainer) App() config.Component {

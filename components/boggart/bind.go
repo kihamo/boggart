@@ -51,7 +51,6 @@ type BindItem interface {
 	Type() string
 	Description() string
 	Tags() []string
-	Config() interface{}
 	Status() BindStatus
 }
 

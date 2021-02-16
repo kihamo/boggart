@@ -298,8 +298,8 @@ func (c *LoggerContainer) init() *LoggerContainer {
 		limit := LoggerDefaultBufferedRecordsLimit
 		level := LoggerDefaultBufferedRecordsLevel
 
-		if bindSupport, ok := ConfigContainerBind(c.bindItem.Bind()); ok {
-			if loggerConfig, ok := bindSupport.Bind().(LoggerBufferedConfig); ok {
+		if config, ok := ConfigForBind(c.bindItem.Bind()); ok {
+			if loggerConfig, ok := config.(LoggerBufferedConfig); ok {
 				limit = loggerConfig.LoggerBufferedRecordsLimit()
 				level = loggerConfig.LoggerBufferedRecordsLevel()
 			}

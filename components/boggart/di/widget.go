@@ -88,8 +88,8 @@ func (c *WidgetContainer) globalVariables() map[string]interface{} {
 		"Meta":   struct{}{},
 	}
 
-	if bindSupport, ok := ConfigContainerBind(c.bindItem.Bind()); ok {
-		vars["Config"] = bindSupport.Bind()
+	if config, ok := ConfigForBind(c.bindItem.Bind()); ok {
+		vars["Config"] = config
 	}
 
 	if bindSupport, ok := MetaContainerBind(c.bindItem.Bind()); ok {

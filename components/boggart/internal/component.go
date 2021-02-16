@@ -292,7 +292,6 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 		t:           t,
 		description: description,
 		tags:        tags,
-		config:      config,
 	}
 
 	c.itemStatusUpdate(bindItem, boggart.BindStatusInitializing)
@@ -322,7 +321,7 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 
 		// config container
 		if bindSupport, ok := bind.(di.ConfigContainerSupport); ok {
-			bindSupport.SetConfig(di.NewConfigContainer(bindItem, c.config))
+			bindSupport.SetConfig(di.NewConfigContainer(config, c.config))
 		}
 
 		// meta container
@@ -408,7 +407,9 @@ func (c *Component) RegisterBind(id string, bind boggart.Bind, t string, descrip
 				func(status boggart.BindStatus) {
 					c.itemStatusUpdate(bindItem, status)
 				}, func() error {
-					_, err := c.RegisterBind(bindItem.ID(), bindItem.Bind(), bindItem.Type(), bindItem.Description(), bindItem.Tags(), bindItem.Config())
+					cfg, _ := di.ConfigForBind(bindItem.Bind())
+
+					_, err := c.RegisterBind(bindItem.ID(), bindItem.Bind(), bindItem.Type(), bindItem.Description(), bindItem.Tags(), cfg)
 					return err
 				}, func() error {
 					return c.UnregisterBindByID(bindItem.ID())
