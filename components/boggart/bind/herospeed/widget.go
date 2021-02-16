@@ -18,7 +18,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 	vars := map[string]interface{}{
 		"action":                   action,
-		"preview_refresh_interval": b.config.PreviewRefreshInterval.Seconds(),
+		"preview_refresh_interval": b.config().PreviewRefreshInterval.Seconds(),
 	}
 
 	switch action {

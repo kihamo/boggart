@@ -14,20 +14,24 @@ type Bind struct {
 	di.MetricsBind
 	di.MQTTBind
 	di.ProbesBind
+}
 
-	config *Config
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
 }
 
 func (b *Bind) Check(ctx context.Context) error {
-	pinger, err := ping.NewPinger(b.config.Hostname)
+	cfg := b.config()
+
+	pinger, err := ping.NewPinger(cfg.Hostname)
 	if err != nil {
 		return err
 	}
 
-	pinger.SetPrivileged(b.config.Privileged)
+	pinger.SetPrivileged(cfg.Privileged)
 
-	pinger.Count = b.config.Retry
-	pinger.Timeout = b.config.ReadinessProbeTimeout()
+	pinger.Count = cfg.Retry
+	pinger.Timeout = cfg.ReadinessProbeTimeout()
 
 	pinger.Run()
 	stats := pinger.Statistics()
@@ -36,15 +40,15 @@ func (b *Bind) Check(ctx context.Context) error {
 
 	var mqttError error
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicOnline, online); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicOnline.Format(cfg.Hostname), online); e != nil {
 		mqttError = multierr.Append(mqttError, e)
 	}
 
 	if online {
 		latency := uint32(stats.MaxRtt.Nanoseconds() / 1e+6)
-		metricLatency.With("host", b.config.Hostname).Set(float64(latency))
+		metricLatency.With("host", cfg.Hostname).Set(float64(latency))
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicLatency, latency); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicLatency.Format(cfg.Hostname), latency); e != nil {
 			mqttError = multierr.Append(mqttError, e)
 		}
 	}

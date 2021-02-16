@@ -16,8 +16,8 @@ func (b *Bind) ReadinessProbe(ctx context.Context) error {
 		},
 	}
 
-	if len(b.config.Tokens) > 0 {
-		message.Token = b.config.Tokens[0]
+	if tokens := b.config().Tokens; len(tokens) > 0 {
+		message.Token = tokens[0]
 	}
 
 	_, err := b.messaging.SendDryRun(ctx, message)

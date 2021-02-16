@@ -9,9 +9,9 @@ var (
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {
-	metricLatency.With("host", b.config.Hostname).Describe(ch)
+	metricLatency.With("host", b.config().Hostname).Describe(ch)
 }
 
 func (b *Bind) Collect(ch chan<- snitch.Metric) {
-	metricLatency.With("host", b.config.Hostname).Collect(ch)
+	metricLatency.With("host", b.config().Hostname).Collect(ch)
 }

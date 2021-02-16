@@ -1,22 +1,11 @@
 package herospeed
 
 import (
-	"strconv"
-
 	"github.com/kihamo/boggart/components/boggart"
-	"github.com/kihamo/boggart/providers/herospeed"
 )
 
 type Type struct{}
 
-func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
-	config := c.(*Config)
-
-	port, _ := strconv.ParseInt(config.Address.Port(), 10, 64)
-	password, _ := config.Address.User.Password()
-
-	return &Bind{
-		client: herospeed.New(config.Address.Hostname(), port, config.Address.User.Username(), password),
-		config: config,
-	}, nil
+func (t Type) CreateBind() boggart.Bind {
+	return &Bind{}
 }

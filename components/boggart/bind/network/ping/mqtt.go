@@ -7,8 +7,10 @@ import (
 )
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
+	cfg := b.config()
+
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(b.config.TopicCheck, 0, func(ctx context.Context, _ mqtt.Component, _ mqtt.Message) error {
+		mqtt.NewSubscriber(cfg.TopicCheck.Format(cfg.Hostname), 0, func(ctx context.Context, _ mqtt.Component, _ mqtt.Message) error {
 			return b.Check(ctx)
 		}),
 	}

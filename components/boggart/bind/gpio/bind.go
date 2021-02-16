@@ -3,10 +3,14 @@ package gpio
 import (
 	"context"
 	"errors"
+	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"periph.io/x/periph/conn/gpio"
+	"periph.io/x/periph/conn/gpio/gpioreg"
 	"periph.io/x/periph/conn/pin"
 )
 
@@ -25,20 +29,40 @@ type Bind struct {
 	di.MQTTBind
 	di.WidgetBind
 
-	config *Config
-	done   chan struct{}
+	done chan struct{}
 
 	pin  pin.Pin
 	mode Mode
 	out  *atomic.Bool
 }
 
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
 func (b *Bind) Run() error {
+	cfg := b.config()
+
+	g := gpioreg.ByName("GPIO" + strconv.FormatUint(cfg.Pin, 10))
+	if g == nil {
+		return fmt.Errorf("GPIO %d not found", cfg.Pin)
+	}
+
+	switch strings.ToLower(cfg.Mode) {
+	case "in":
+		b.mode = ModeIn
+	case "out":
+		b.mode = ModeOut
+	default:
+		b.mode = ModeDefault
+	}
+
 	err := b.publishState(context.Background(), b.Read())
 	if err != nil {
 		return err
 	}
 
+	b.out.False()
 	b.done = make(chan struct{})
 
 	if p, ok := b.pin.(gpio.PinIn); ok {
@@ -135,7 +159,7 @@ func (b *Bind) waitForEdge() {
 				}
 
 				if err := b.publishState(ctx, v); err != nil {
-					b.Logger().Errorf("Publish to %s topic failed with error %v", b.config.TopicPinState, err)
+					b.Logger().Errorf("Publish to %s topic failed with error %v", b.config().TopicPinState.Format(b.pin.Number()), err)
 				}
 			}
 		}

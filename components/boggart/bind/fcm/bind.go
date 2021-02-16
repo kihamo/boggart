@@ -4,9 +4,12 @@ import (
 	"context"
 	"errors"
 
+	"firebase.google.com/go"
 	"firebase.google.com/go/messaging"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"go.uber.org/multierr"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/option"
 )
 
 type Bind struct {
@@ -16,8 +19,36 @@ type Bind struct {
 	di.ProbesBind
 	di.WidgetBind
 
-	config    *Config
 	messaging *messaging.Client
+	projectID string
+}
+
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
+func (b *Bind) Run() error {
+	ctx := context.Background()
+	cfg := b.config()
+
+	credentialsJSON := []byte(cfg.Credentials)
+	credentials, err := google.CredentialsFromJSON(ctx, credentialsJSON)
+	if err != nil {
+		return err
+	}
+
+	b.projectID = credentials.ProjectID
+
+	opts := option.WithCredentialsJSON(credentialsJSON)
+
+	app, err := firebase.NewApp(ctx, nil, opts)
+	if err != nil {
+		return err
+	}
+
+	b.messaging, err = app.Messaging(ctx)
+
+	return err
 }
 
 func (b *Bind) Send(ctx context.Context, text string) (err error) {
@@ -25,7 +56,7 @@ func (b *Bind) Send(ctx context.Context, text string) (err error) {
 		return errors.New("text is empty")
 	}
 
-	for _, token := range b.config.Tokens {
+	for _, token := range b.config().Tokens {
 		if e := b.sendByToken(ctx, token, text); e != nil {
 			err = multierr.Append(err, e)
 		}

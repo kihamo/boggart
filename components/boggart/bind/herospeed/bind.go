@@ -3,6 +3,7 @@ package herospeed
 import (
 	"context"
 	"errors"
+	"strconv"
 
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/herospeed"
@@ -17,8 +18,22 @@ type Bind struct {
 	di.ProbesBind
 	di.WidgetBind
 
-	config *Config
 	client *herospeed.Client
+}
+
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
+func (b *Bind) Run() error {
+	cfg := b.config()
+
+	port, _ := strconv.ParseInt(cfg.Address.Port(), 10, 64)
+	password, _ := cfg.Address.User.Password()
+
+	b.client = herospeed.New(cfg.Address.Hostname(), port, cfg.Address.User.Username(), password)
+
+	return nil
 }
 
 func (b *Bind) GetSerialNumber(ctx context.Context) (string, error) {
@@ -42,15 +57,16 @@ func (b *Bind) GetSerialNumber(ctx context.Context) (string, error) {
 		}
 
 		var mqttError error
+		cfg := b.config()
 
 		if model, ok := configuration["modelname"]; ok {
-			if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateModel.Format(sn), model); e != nil {
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateModel.Format(sn), model); e != nil {
 				mqttError = multierr.Append(mqttError, e)
 			}
 		}
 
 		if fw, ok := configuration["firmwareversion"]; ok {
-			if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateFirmwareVersion.Format(sn), fw); e != nil {
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateFirmwareVersion.Format(sn), fw); e != nil {
 				mqttError = multierr.Append(mqttError, e)
 			}
 		}

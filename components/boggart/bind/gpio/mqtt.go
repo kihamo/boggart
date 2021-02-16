@@ -11,12 +11,14 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 		return nil
 	}
 
+	cfg := b.config()
+
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(
-			b.config.TopicPinSet,
+			cfg.TopicPinSet.Format(b.pin.Number()),
 			0,
 			func(ctx context.Context, client mqtt.Component, message mqtt.Message) error {
-				if message.IsTrue() && !b.config.Inverted {
+				if message.IsTrue() && !cfg.Inverted {
 					return b.High(ctx)
 				}
 
@@ -26,9 +28,11 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 }
 
 func (b *Bind) publishState(ctx context.Context, value bool) error {
-	if b.config.Inverted {
+	cfg := b.config()
+
+	if cfg.Inverted {
 		value = !value
 	}
 
-	return b.MQTT().PublishAsync(ctx, b.config.TopicPinState, value)
+	return b.MQTT().PublishAsync(ctx, cfg.TopicPinState.Format(b.pin.Number()), value)
 }

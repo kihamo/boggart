@@ -22,6 +22,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 	}
 
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
+	cfg := b.config()
 
 	const (
 		idModel           = "Model"
@@ -30,13 +31,13 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 
 	return openhab.StepsByBind(b, nil,
 		openhab.NewChannel(idModel, openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicStateModel.Format(sn)).
+			WithStateTopic(cfg.TopicStateModel.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idModel, openhab.ItemTypeString).
 					WithLabel("Model"),
 			),
 		openhab.NewChannel(idFirmwareVersion, openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicStateFirmwareVersion.Format(sn)).
+			WithStateTopic(cfg.TopicStateFirmwareVersion.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idFirmwareVersion, openhab.ItemTypeString).
 					WithLabel("Firmware version"),

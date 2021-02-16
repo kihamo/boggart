@@ -16,6 +16,8 @@ func (b *Bind) InstallersSupport() []installer.System {
 func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.Step, error) {
 	meta := b.Meta()
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
+	cfg := b.config()
+	pinNumber := b.pin.Number()
 	const id = "GPIO"
 
 	var channel *openhab.Channel
@@ -28,14 +30,14 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 			)
 	} else {
 		channel = openhab.NewChannel(id, openhab.ChannelTypeSwitch).
-			WithCommandTopic(b.config.TopicPinSet).
+			WithCommandTopic(cfg.TopicPinSet.Format(pinNumber)).
 			AddItems(
 				openhab.NewItem(itemPrefix+id, openhab.ItemTypeSwitch).
 					WithLabel(meta.Description() + "[]"),
 			)
 	}
 
-	channel.WithStateTopic(b.config.TopicPinState).
+	channel.WithStateTopic(cfg.TopicPinState.Format(pinNumber)).
 		WithLabel(meta.Description()).
 		WithOn("true").
 		WithOff("false")
