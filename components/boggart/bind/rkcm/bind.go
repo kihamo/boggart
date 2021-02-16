@@ -2,6 +2,7 @@ package rkcm
 
 import (
 	"github.com/kihamo/boggart/components/boggart/di"
+	"github.com/kihamo/boggart/protocols/swagger"
 	"github.com/kihamo/boggart/providers/rkcm"
 )
 
@@ -13,6 +14,21 @@ type Bind struct {
 	di.ProbesBind
 	di.WorkersBind
 
-	config *Config
 	client *rkcm.Client
+}
+
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
+func (b *Bind) Run() error {
+	b.client = rkcm.New(b.config().Debug, swagger.NewLogger(
+		func(message string) {
+			b.Logger().Info(message)
+		},
+		func(message string) {
+			b.Logger().Debug(message)
+		}))
+
+	return nil
 }

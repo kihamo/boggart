@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/kihamo/boggart/components/boggart/di"
+	"github.com/kihamo/boggart/protocols/swagger"
 	"github.com/kihamo/boggart/providers/dom24"
 	"github.com/kihamo/boggart/providers/dom24/client/user"
 )
@@ -19,17 +20,30 @@ type Bind struct {
 	di.WidgetBind
 	di.WorkersBind
 
-	config   *Config
 	provider *dom24.Client
 }
 
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
 func (b *Bind) Run() error {
-	b.Meta().SetSerialNumber(b.config.Phone)
+	cfg := b.config()
+
+	b.Meta().SetSerialNumber(cfg.Phone)
+
+	b.provider = dom24.New(cfg.Phone, cfg.Password, cfg.Debug, swagger.NewLogger(
+		func(message string) {
+			b.Logger().Info(message)
+		},
+		func(message string) {
+			b.Logger().Debug(message)
+		}))
 
 	// пытаемся зарегистрировать счета, которые еще не зарегистрированы, но определены в конфиге
-	if b.config.AutoRegisterIfNotExists && len(b.config.Accounts) > 0 {
-		exists := make(map[string]bool, len(b.config.Accounts))
-		for _, account := range b.config.Accounts {
+	if cfg.AutoRegisterIfNotExists && len(cfg.Accounts) > 0 {
+		exists := make(map[string]bool, len(cfg.Accounts))
+		for _, account := range cfg.Accounts {
 			exists[account] = false
 		}
 

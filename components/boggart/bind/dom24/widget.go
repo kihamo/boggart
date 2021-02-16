@@ -120,7 +120,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		// проверяем все ли учетки найдены, если нет то пытаемся их добавить
-		if b.config.AutoRegisterIfNotExists {
+		if b.config().AutoRegisterIfNotExists {
 			for ident, exist := range exists {
 				if exist {
 					continue
@@ -198,7 +198,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		vars["accounts"] = accounts
 
 		// удаляем учетки, которые автоматически добавляли
-		if b.config.AutoRegisterIfNotExists {
+		if b.config().AutoRegisterIfNotExists {
 			for ident, exist := range exists {
 				if exist {
 					continue

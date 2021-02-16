@@ -26,7 +26,6 @@ type Bind struct {
 	di.WidgetBind
 	di.WorkersBind
 
-	config         *Config
 	provider       *pulsar.HeatMeter
 	providerMutex  sync.RWMutex
 	connection     connection.Connection
@@ -34,9 +33,22 @@ type Bind struct {
 	location       *time.Location
 }
 
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
 func (b *Bind) Run() error {
-	if b.config.Address != "" {
-		address, err := hex.DecodeString(b.config.Address)
+	cfg := b.config()
+
+	loc, err := time.LoadLocation(cfg.Location)
+	if err != nil {
+		return err
+	}
+
+	b.location = loc
+
+	if cfg.Address != "" {
+		address, err := hex.DecodeString(cfg.Address)
 		if err != nil {
 			return err
 		}
@@ -45,7 +57,7 @@ func (b *Bind) Run() error {
 			return err
 		}
 
-		b.Meta().SetSerialNumber(b.config.Address)
+		b.Meta().SetSerialNumber(cfg.Address)
 	}
 
 	b.connectionOnce.Reset()
@@ -60,7 +72,7 @@ func (b *Bind) getConnection() (conn connection.Connection, err error) {
 			dsn  *connection.DSN
 		)
 
-		dsn, err = connection.ParseDSN(b.config.ConnectionDSN)
+		dsn, err = connection.ParseDSN(b.config().ConnectionDSN)
 		if err != nil {
 			return
 		}

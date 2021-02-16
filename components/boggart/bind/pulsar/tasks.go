@@ -11,8 +11,9 @@ import (
 
 func (b *Bind) Tasks() []tasks.Task {
 	list := make([]tasks.Task, 0, 2)
+	cfg := b.config()
 
-	if b.config.Address == "" {
+	if cfg.Address == "" {
 		list = append(list,
 			tasks.NewTask().
 				WithName("serial-number").
@@ -36,7 +37,7 @@ func (b *Bind) Tasks() []tasks.Task {
 					tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
 				),
 			).
-			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.UpdaterInterval)),
 		)
 	}
 
@@ -65,7 +66,7 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 				tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
 			),
 		).
-		WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
+		WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config().UpdaterInterval)),
 	)
 
 	return err
@@ -83,11 +84,12 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	}
 
 	var result error
+	cfg := b.config()
 
 	if current, err := provider.TemperatureIn(); err == nil {
 		metricTemperatureIn.With("serial_number", sn).Set(float64(current))
 
-		if err := b.MQTT().PublishAsync(ctx, b.config.TopicTemperatureIn.Format(sn), current); err != nil {
+		if err := b.MQTT().PublishAsync(ctx, cfg.TopicTemperatureIn.Format(sn), current); err != nil {
 			result = multierr.Append(result, err)
 		}
 	} else {
@@ -97,7 +99,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	if current, err := provider.TemperatureOut(); err == nil {
 		metricTemperatureOut.With("serial_number", sn).Set(float64(current))
 
-		if err := b.MQTT().PublishAsync(ctx, b.config.TopicTemperatureOut.Format(sn), current); err != nil {
+		if err := b.MQTT().PublishAsync(ctx, cfg.TopicTemperatureOut.Format(sn), current); err != nil {
 			result = multierr.Append(result, err)
 		}
 	} else {
@@ -107,7 +109,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	if current, err := provider.TemperatureDelta(); err == nil {
 		metricTemperatureDelta.With("serial_number", sn).Set(float64(current))
 
-		if err := b.MQTT().PublishAsync(ctx, b.config.TopicTemperatureDelta.Format(sn), current); err != nil {
+		if err := b.MQTT().PublishAsync(ctx, cfg.TopicTemperatureDelta.Format(sn), current); err != nil {
 			result = multierr.Append(result, err)
 		}
 	} else {
@@ -117,7 +119,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	if current, err := provider.Energy(); err == nil {
 		metricEnergy.With("serial_number", sn).Set(float64(current))
 
-		if err := b.MQTT().PublishAsync(ctx, b.config.TopicEnergy.Format(sn), current); err != nil {
+		if err := b.MQTT().PublishAsync(ctx, cfg.TopicEnergy.Format(sn), current); err != nil {
 			result = multierr.Append(result, err)
 		}
 	} else {
@@ -127,7 +129,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	if current, err := provider.Consumption(); err == nil {
 		metricConsumption.With("serial_number", sn).Set(float64(current))
 
-		if err := b.MQTT().PublishAsync(ctx, b.config.TopicConsumption.Format(sn), current); err != nil {
+		if err := b.MQTT().PublishAsync(ctx, cfg.TopicConsumption.Format(sn), current); err != nil {
 			result = multierr.Append(result, err)
 		}
 	} else {
@@ -137,7 +139,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	if current, err := provider.Capacity(); err == nil {
 		metricCapacity.With("serial_number", sn).Set(float64(current))
 
-		if err := b.MQTT().PublishAsync(ctx, b.config.TopicCapacity.Format(sn), current); err != nil {
+		if err := b.MQTT().PublishAsync(ctx, cfg.TopicCapacity.Format(sn), current); err != nil {
 			result = multierr.Append(result, err)
 		}
 	} else {
@@ -147,7 +149,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	if current, err := provider.Power(); err == nil {
 		metricPower.With("serial_number", sn).Set(float64(current))
 
-		if err := b.MQTT().PublishAsync(ctx, b.config.TopicPower.Format(sn), current); err != nil {
+		if err := b.MQTT().PublishAsync(ctx, cfg.TopicPower.Format(sn), current); err != nil {
 			result = multierr.Append(result, err)
 		}
 	} else {
@@ -155,20 +157,20 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	}
 
 	// inputs
-	if b.config.InputsCount > 0 {
+	if cfg.InputsCount > 0 {
 		if current, err := provider.PulseInput1(); err == nil {
 			const input1 = "1"
 
-			volume := b.inputVolume(current, b.config.Input1Offset)
+			volume := b.inputVolume(current, cfg.Input1Offset)
 
 			metricInputPulses.With("serial_number", sn).With("input", input1).Set(float64(current))
 			metricInputVolume.With("serial_number", sn).With("input", input1).Set(float64(volume))
 
-			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputPulses.Format(sn, input1), current); err != nil {
+			if err := b.MQTT().PublishAsync(ctx, cfg.TopicInputPulses.Format(sn, input1), current); err != nil {
 				result = multierr.Append(result, err)
 			}
 
-			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputVolume.Format(sn, input1), volume); err != nil {
+			if err := b.MQTT().PublishAsync(ctx, cfg.TopicInputVolume.Format(sn, input1), volume); err != nil {
 				result = multierr.Append(result, err)
 			}
 		} else {
@@ -176,20 +178,20 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		}
 	}
 
-	if b.config.InputsCount > 1 {
+	if cfg.InputsCount > 1 {
 		if current, err := provider.PulseInput2(); err == nil {
 			const input2 = "2"
 
-			volume := b.inputVolume(current, b.config.Input2Offset)
+			volume := b.inputVolume(current, cfg.Input2Offset)
 
 			metricInputPulses.With("serial_number", sn).With("input", input2).Set(float64(current))
 			metricInputVolume.With("serial_number", sn).With("input", input2).Set(float64(volume))
 
-			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputPulses.Format(sn, input2), current); err != nil {
+			if err := b.MQTT().PublishAsync(ctx, cfg.TopicInputPulses.Format(sn, input2), current); err != nil {
 				result = multierr.Append(result, err)
 			}
 
-			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputVolume.Format(sn, input2), volume); err != nil {
+			if err := b.MQTT().PublishAsync(ctx, cfg.TopicInputVolume.Format(sn, input2), volume); err != nil {
 				result = multierr.Append(result, err)
 			}
 		} else {
@@ -197,20 +199,20 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		}
 	}
 
-	if b.config.InputsCount > 2 {
+	if cfg.InputsCount > 2 {
 		if current, err := provider.PulseInput3(); err == nil {
 			const input3 = "3"
 
-			volume := b.inputVolume(current, b.config.Input3Offset)
+			volume := b.inputVolume(current, cfg.Input3Offset)
 
 			metricInputPulses.With("serial_number", sn).With("input", input3).Set(float64(current))
 			metricInputVolume.With("serial_number", sn).With("input", input3).Set(float64(volume))
 
-			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputPulses.Format(sn, input3), current); err != nil {
+			if err := b.MQTT().PublishAsync(ctx, cfg.TopicInputPulses.Format(sn, input3), current); err != nil {
 				result = multierr.Append(result, err)
 			}
 
-			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputVolume.Format(sn, input3), volume); err != nil {
+			if err := b.MQTT().PublishAsync(ctx, cfg.TopicInputVolume.Format(sn, input3), volume); err != nil {
 				result = multierr.Append(result, err)
 			}
 		} else {
@@ -218,20 +220,20 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		}
 	}
 
-	if b.config.InputsCount > 3 {
+	if cfg.InputsCount > 3 {
 		if current, err := provider.PulseInput4(); err == nil {
 			const input4 = "4"
 
-			volume := b.inputVolume(current, b.config.Input4Offset)
+			volume := b.inputVolume(current, cfg.Input4Offset)
 
 			metricInputPulses.With("serial_number", sn).With("input", input4).Set(float64(current))
 			metricInputVolume.With("serial_number", sn).With("input", input4).Set(float64(volume))
 
-			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputPulses.Format(sn, input4), current); err != nil {
+			if err := b.MQTT().PublishAsync(ctx, cfg.TopicInputPulses.Format(sn, input4), current); err != nil {
 				result = multierr.Append(result, err)
 			}
 
-			if err := b.MQTT().PublishAsync(ctx, b.config.TopicInputVolume.Format(sn, input4), volume); err != nil {
+			if err := b.MQTT().PublishAsync(ctx, cfg.TopicInputVolume.Format(sn, input4), volume); err != nil {
 				result = multierr.Append(result, err)
 			}
 		} else {

@@ -22,6 +22,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 	}
 
 	itemPrefix := openhab.ItemPrefixFromBindMeta(b.Meta())
+	cfg := b.config()
 
 	const (
 		idBalance = "Balance"
@@ -36,14 +37,14 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 
 		channels = append(channels,
 			openhab.NewChannel(id+idBalance, openhab.ChannelTypeNumber).
-				WithStateTopic(b.config.TopicAccountBalance.Format(account.Ident)).
+				WithStateTopic(cfg.TopicAccountBalance.Format(account.Ident)).
 				AddItems(
 					openhab.NewItem(itemPrefix+id+idBalance, openhab.ItemTypeNumber).
 						WithLabel(account.AccountType+" #"+account.Ident+" [%.2f ₽]").
 						WithIcon("price"),
 				),
 			openhab.NewChannel(id+idBill, openhab.ChannelTypeString).
-				WithStateTopic(b.config.TopicAccountBill.Format(account.Ident)).
+				WithStateTopic(cfg.TopicAccountBill.Format(account.Ident)).
 				AddItems(
 					openhab.NewItem(itemPrefix+id+idBill, openhab.ItemTypeString).
 						WithLabel("Bill #"+account.Ident+" [%s]").

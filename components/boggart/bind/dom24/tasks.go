@@ -19,7 +19,7 @@ func (b *Bind) Tasks() []tasks.Task {
 					tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
 				),
 			).
-			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config().UpdaterInterval)),
 	}
 }
 
@@ -29,10 +29,12 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		return fmt.Errorf("get accounting info failed: %w", err)
 	}
 
+	cfg := b.config()
+
 	for _, account := range accountingResponse.GetPayload().Data {
 		metricAccountBalance.With("account", account.Ident).Set(account.TotalSum)
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicAccountBalance.Format(account.Ident), account.TotalSum); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicAccountBalance.Format(account.Ident), account.TotalSum); e != nil {
 			err = multierr.Append(err, e)
 		}
 
@@ -48,7 +50,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 				})
 
 				if e == nil {
-					if e := b.MQTT().PublishAsync(ctx, b.config.TopicAccountBill.Format(account.Ident), billLink); e != nil {
+					if e := b.MQTT().PublishAsync(ctx, cfg.TopicAccountBill.Format(account.Ident), billLink); e != nil {
 						err = multierr.Append(err, e)
 					}
 				}
