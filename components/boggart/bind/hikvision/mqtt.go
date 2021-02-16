@@ -23,16 +23,17 @@ func (b *Bind) updateStatusByChannelID(ctx context.Context, channelID uint64) er
 	}
 
 	sn := b.Meta().SerialNumber()
+	cfg := b.config()
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicPTZStatusElevation.Format(sn, channelID), status.Payload.AbsoluteHigh.Elevation); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicPTZStatusElevation.Format(sn, channelID), status.Payload.AbsoluteHigh.Elevation); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicPTZStatusAzimuth.Format(sn, channelID), status.Payload.AbsoluteHigh.Azimuth); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicPTZStatusAzimuth.Format(sn, channelID), status.Payload.AbsoluteHigh.Azimuth); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicPTZStatusZoom.Format(sn, channelID), status.Payload.AbsoluteHigh.Zoom); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicPTZStatusZoom.Format(sn, channelID), status.Payload.AbsoluteHigh.Zoom); e != nil {
 		err = multierr.Append(err, e)
 	}
 

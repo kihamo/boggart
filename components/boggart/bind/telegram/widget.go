@@ -54,7 +54,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 	b.fileServer.ServeHTTP(w, r2)
 
-	if b.config.FileAutoClean {
+	if b.config().FileAutoClean {
 		if strings.Contains(r1.Header.Get("user-agent"), "TelegramBot (like TwitterBot)") {
 			b.RemoveFile(id)
 		}

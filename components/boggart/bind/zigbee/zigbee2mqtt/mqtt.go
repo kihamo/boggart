@@ -14,18 +14,20 @@ var (
 )
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
+	cfg := b.config()
+
 	subscribers := []mqtt.Subscriber{
-		mqtt.NewSubscriber(b.config.TopicState, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(cfg.TopicState, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			return b.setState(ctx, bytes.Equal(message.Payload(), PayloadOnline))
 		}),
-		mqtt.NewSubscriber(b.config.TopicConfig, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(cfg.TopicConfig, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			return b.setSettingsFromMessage(message)
 		}),
 	}
 
-	if b.config.NewAPI {
+	if cfg.NewAPI {
 		subscribers = append(subscribers,
-			mqtt.NewSubscriber(b.config.TopicDevices, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+			mqtt.NewSubscriber(cfg.TopicDevices, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 				var devices []*DeviceNewAPI
 
 				if err := message.JSONUnmarshal(&devices); err != nil {
@@ -48,7 +50,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 				return nil
 			}),
-			mqtt.NewSubscriber(b.config.TopicHealthCheckResponse, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+			mqtt.NewSubscriber(cfg.TopicHealthCheckResponse, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 				var hc HealthCheck
 
 				if err := message.JSONUnmarshal(&hc); err != nil {
@@ -57,7 +59,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 				return b.setState(ctx, hc.Status == "ok" && hc.Data.Healthy)
 			}),
-			mqtt.NewSubscriber(b.config.TopicLogging, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+			mqtt.NewSubscriber(cfg.TopicLogging, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 				var log LogNewAPI
 
 				if err := message.JSONUnmarshal(&log); err != nil {
@@ -84,13 +86,13 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return nil
 			}),
 			// info отправляется один раз, config при старте + при изменениях, поэтому config надо слушать всегда
-			mqtt.NewSubscriber(b.config.TopicInfo, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+			mqtt.NewSubscriber(cfg.TopicInfo, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 				return b.setSettingsFromMessage(message)
 			}),
 		)
 	} else {
 		subscribers = append(subscribers,
-			mqtt.NewSubscriber(b.config.TopicDevicesResponse, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+			mqtt.NewSubscriber(cfg.TopicDevicesResponse, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 				var devices []*Device
 
 				if err := message.JSONUnmarshal(&devices); err != nil {
@@ -108,7 +110,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 				return nil
 			}),
-			mqtt.NewSubscriber(b.config.TopicLog, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+			mqtt.NewSubscriber(cfg.TopicLog, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 				var log Log
 
 				if err := message.JSONUnmarshal(&log); err != nil {

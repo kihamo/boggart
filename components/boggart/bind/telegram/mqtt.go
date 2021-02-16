@@ -14,11 +14,13 @@ import (
 )
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
+	cfg := b.config()
+
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(b.config.TopicSendMessage, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendMessage)),
-		mqtt.NewSubscriber(b.config.TopicSendFile, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendFile)),
-		mqtt.NewSubscriber(b.config.TopicSendFileURL, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendFileURL)),
-		mqtt.NewSubscriber(b.config.TopicSendFileBase64, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendFileBase64)),
+		mqtt.NewSubscriber(cfg.TopicSendMessage, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendMessage)),
+		mqtt.NewSubscriber(cfg.TopicSendFile, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendFile)),
+		mqtt.NewSubscriber(cfg.TopicSendFileURL, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendFileURL)),
+		mqtt.NewSubscriber(cfg.TopicSendFileBase64, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSendFileBase64)),
 	}
 }
 

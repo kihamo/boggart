@@ -18,7 +18,6 @@ type Bind struct {
 	di.ProbesBind
 	di.WidgetBind
 
-	config *Config
 	status atomic.BoolNull
 
 	settings     *Settings
@@ -26,6 +25,10 @@ type Bind struct {
 
 	devices     map[string]*Device
 	devicesLock sync.RWMutex
+}
+
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
 }
 
 func (b *Bind) Run() error {
@@ -64,7 +67,7 @@ func (b *Bind) setSettingsFromMessage(message mqtt.Message) error {
 func (b *Bind) setState(ctx context.Context, flag bool) error {
 	if flag {
 		if b.status.True() {
-			return b.MQTT().PublishAsyncRawWithoutCache(ctx, b.config.TopicDevicesRequest, 1, false, true)
+			return b.MQTT().PublishAsyncRawWithoutCache(ctx, b.config().TopicDevicesRequest, 1, false, true)
 		}
 
 		return nil
@@ -88,7 +91,9 @@ func (b *Bind) Devices() []*Device {
 }
 
 func (b *Bind) NetworkMap(ctx context.Context) (*NetworkMap, error) {
-	message, err := b.MQTT().Request(ctx, b.config.TopicNetworkMapRequest, b.config.TopicNetworkMapResponse, "raw")
+	cfg := b.config()
+
+	message, err := b.MQTT().Request(ctx, cfg.TopicNetworkMapRequest, cfg.TopicNetworkMapResponse, "raw")
 	if err != nil {
 		return nil, err
 	}
@@ -103,9 +108,9 @@ func (b *Bind) NetworkMap(ctx context.Context) (*NetworkMap, error) {
 }
 
 func (b *Bind) SetPermitJoin(ctx context.Context, flag bool) error {
-	return b.MQTT().PublishAsyncRawWithoutCache(ctx, b.config.TopicPermitJoin, 1, false, flag)
+	return b.MQTT().PublishAsyncRawWithoutCache(ctx, b.config().TopicPermitJoin, 1, false, flag)
 }
 
 func (b *Bind) SetLogLevel(ctx context.Context, level string) error {
-	return b.MQTT().PublishAsyncRawWithoutCache(ctx, b.config.TopicLogLevel, 1, false, level)
+	return b.MQTT().PublishAsyncRawWithoutCache(ctx, b.config().TopicLogLevel, 1, false, level)
 }

@@ -9,10 +9,12 @@ import (
 )
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
+	cfg := b.config()
+
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(b.config.TopicSMSSend, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSMSSend)),
-		mqtt.NewSubscriber(b.config.TopicUSSDSend, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTUSSDSend)),
-		mqtt.NewSubscriber(b.config.TopicReboot, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTReboot)),
+		mqtt.NewSubscriber(cfg.TopicSMSSend, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSMSSend)),
+		mqtt.NewSubscriber(cfg.TopicUSSDSend, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTUSSDSend)),
+		mqtt.NewSubscriber(cfg.TopicReboot, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTReboot)),
 	}
 }
 
@@ -39,7 +41,7 @@ func (b *Bind) callbackMQTTUSSDSend(ctx context.Context, _ mqtt.Component, messa
 		return err
 	}
 
-	return b.MQTT().PublishAsync(ctx, b.config.TopicUSSDResult.Format(b.Meta().SerialNumber()), content)
+	return b.MQTT().PublishAsync(ctx, b.config().TopicUSSDResult.Format(b.Meta().SerialNumber()), content)
 }
 
 func (b *Bind) callbackMQTTReboot(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {

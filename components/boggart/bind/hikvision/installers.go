@@ -24,6 +24,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 	}
 
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
+	cfg := b.config()
 
 	const (
 		idModel                = "Model"
@@ -36,39 +37,39 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 
 	channels := []*openhab.Channel{
 		openhab.NewChannel(idModel, openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicStateModel.Format(sn)).
+			WithStateTopic(cfg.TopicStateModel.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idModel, openhab.ItemTypeString).
 					WithLabel("Model"),
 			),
 		openhab.NewChannel(idFirmwareVersion, openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicStateFirmwareVersion.Format(sn)).
+			WithStateTopic(cfg.TopicStateFirmwareVersion.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idFirmwareVersion, openhab.ItemTypeString).
 					WithLabel("Firmware version"),
 			),
 		openhab.NewChannel(idFirmwareReleasedDate, openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicStateFirmwareReleasedDate.Format(sn)).
+			WithStateTopic(cfg.TopicStateFirmwareReleasedDate.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idFirmwareReleasedDate, openhab.ItemTypeString).
 					WithLabel("Firmware release date"),
 			),
 		openhab.NewChannel(idUpTime, openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicStateUpTime.Format(sn)).
+			WithStateTopic(cfg.TopicStateUpTime.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idUpTime, openhab.ItemTypeString).
 					WithLabel("Uptime [%d s]").
 					WithIcon("time"),
 			),
 		openhab.NewChannel(idMemoryUsage, openhab.ChannelTypeNumber).
-			WithStateTopic(b.config.TopicStateMemoryUsage.Format(sn)).
+			WithStateTopic(cfg.TopicStateMemoryUsage.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idMemoryUsage, openhab.ItemTypeNumber).
 					WithLabel("Memory usage [JS(human_bytes.js):%s]").
 					WithIcon("chart"),
 			),
 		openhab.NewChannel(idMemoryAvailable, openhab.ChannelTypeNumber).
-			WithStateTopic(b.config.TopicStateMemoryAvailable.Format(sn)).
+			WithStateTopic(cfg.TopicStateMemoryAvailable.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idMemoryAvailable, openhab.ItemTypeNumber).
 					WithLabel("Memory available [JS(human_bytes.js):%s]").
@@ -76,12 +77,12 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 			),
 	}
 
-	if b.config.EventsEnabled {
+	if cfg.EventsEnabled {
 		const idEvent = "Event"
 
 		channels = append(channels,
 			openhab.NewChannel(idEvent, openhab.ChannelTypeNumber).
-				WithStateTopic(b.config.TopicEvent.Format(sn)).
+				WithStateTopic(cfg.TopicEvent.Format(sn)).
 				AddItems(
 					openhab.NewItem(itemPrefix+idEvent, openhab.ItemTypeNumber).
 						WithLabel("Event [%d]").
@@ -106,21 +107,21 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 
 			channels = append(channels,
 				openhab.NewChannel(id+idHDDCapacity, openhab.ChannelTypeNumber).
-					WithStateTopic(b.config.TopicStateHDDCapacity.Format(sn, hdd.ID)).
+					WithStateTopic(cfg.TopicStateHDDCapacity.Format(sn, hdd.ID)).
 					AddItems(
 						openhab.NewItem(itemPrefix+id+idHDDCapacity, openhab.ItemTypeNumber).
 							WithLabel("HDD capacity [JS(human_bytes.js):%s]").
 							WithIcon("chart"),
 					),
 				openhab.NewChannel(id+idHDDUsage, openhab.ChannelTypeNumber).
-					WithStateTopic(b.config.TopicStateHDDUsage.Format(sn, hdd.ID)).
+					WithStateTopic(cfg.TopicStateHDDUsage.Format(sn, hdd.ID)).
 					AddItems(
 						openhab.NewItem(itemPrefix+id+idHDDUsage, openhab.ItemTypeNumber).
 							WithLabel("HDD usage [JS(human_bytes.js):%s]").
 							WithIcon("chart"),
 					),
 				openhab.NewChannel(id+idHDDFree, openhab.ChannelTypeNumber).
-					WithStateTopic(b.config.TopicStateHDDFree.Format(sn, hdd.ID)).
+					WithStateTopic(cfg.TopicStateHDDFree.Format(sn, hdd.ID)).
 					AddItems(
 						openhab.NewItem(itemPrefix+id+idHDDFree, openhab.ItemTypeNumber).
 							WithLabel("HDD free [JS(human_bytes.js):%s]").
@@ -149,49 +150,49 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 
 			channels = append(channels,
 				openhab.NewChannel(idPTZAbsolute, openhab.ChannelTypeString).
-					WithCommandTopic(b.config.TopicPTZAbsolute.Format(sn, ch.ID)).
+					WithCommandTopic(cfg.TopicPTZAbsolute.Format(sn, ch.ID)).
 					AddItems(
 						openhab.NewItem(itemPrefix+idPTZAbsolute, openhab.ItemTypeString).
 							WithLabel("Absolute [%s]").
 							WithIcon("movecontrol"),
 					),
 				openhab.NewChannel(idPTZContinuous, openhab.ChannelTypeString).
-					WithCommandTopic(b.config.TopicPTZContinuous.Format(sn, ch.ID)).
+					WithCommandTopic(cfg.TopicPTZContinuous.Format(sn, ch.ID)).
 					AddItems(
 						openhab.NewItem(itemPrefix+idPTZContinuous, openhab.ItemTypeString).
 							WithLabel("Continuous [%s]").
 							WithIcon("movecontrol"),
 					),
 				openhab.NewChannel(idPTZRelative, openhab.ChannelTypeString).
-					WithCommandTopic(b.config.TopicPTZRelative.Format(sn, ch.ID)).
+					WithCommandTopic(cfg.TopicPTZRelative.Format(sn, ch.ID)).
 					AddItems(
 						openhab.NewItem(itemPrefix+idPTZRelative, openhab.ItemTypeString).
 							WithLabel("Relative [%s]").
 							WithIcon("movecontrol"),
 					),
 				openhab.NewChannel(idPTZPreset, openhab.ChannelTypeString).
-					WithCommandTopic(b.config.TopicPTZPreset.Format(sn, ch.ID)).
+					WithCommandTopic(cfg.TopicPTZPreset.Format(sn, ch.ID)).
 					AddItems(
 						openhab.NewItem(itemPrefix+idPTZPreset, openhab.ItemTypeString).
 							WithLabel("Preset [%s]").
 							WithIcon("movecontrol"),
 					),
 				openhab.NewChannel(idPTZMomentary, openhab.ChannelTypeString).
-					WithCommandTopic(b.config.TopicPTZMomentary.Format(sn, ch.ID)).
+					WithCommandTopic(cfg.TopicPTZMomentary.Format(sn, ch.ID)).
 					AddItems(
 						openhab.NewItem(itemPrefix+idPTZMomentary, openhab.ItemTypeString).
 							WithLabel("Momentary [%d]").
 							WithIcon("movecontrol"),
 					),
 				openhab.NewChannel(idPTZElevation, openhab.ChannelTypeNumber).
-					WithStateTopic(b.config.TopicPTZStatusElevation.Format(sn, ch.ID)).
+					WithStateTopic(cfg.TopicPTZStatusElevation.Format(sn, ch.ID)).
 					AddItems(
 						openhab.NewItem(itemPrefix+idPTZElevation, openhab.ItemTypeNumber).
 							WithLabel("Elevation [%d]").
 							WithIcon("movecontrol"),
 					),
 				openhab.NewChannel(idPTZAzimuth, openhab.ChannelTypeNumber).
-					WithStateTopic(b.config.TopicPTZStatusAzimuth.Format(sn, ch.ID)).
+					WithStateTopic(cfg.TopicPTZStatusAzimuth.Format(sn, ch.ID)).
 					AddItems(
 						openhab.NewItem(itemPrefix+idPTZAzimuth, openhab.ItemTypeNumber).
 							WithLabel("Azimuth [%d]").
@@ -202,7 +203,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 			if ch.ZoomSupport {
 				channels = append(channels,
 					openhab.NewChannel(idPTZZoom, openhab.ChannelTypeNumber).
-						WithStateTopic(b.config.TopicPTZStatusZoom.Format(sn, ch.ID)).
+						WithStateTopic(cfg.TopicPTZStatusZoom.Format(sn, ch.ID)).
 						AddItems(
 							openhab.NewItem(itemPrefix+idPTZZoom, openhab.ItemTypeNumber).
 								WithLabel("Zoom [%d]").

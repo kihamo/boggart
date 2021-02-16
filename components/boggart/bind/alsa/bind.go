@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"io"
+	"os"
 	"sync"
 	"time"
 
+	"github.com/denisbrodbeck/machineid"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/flac"
 	"github.com/faiface/beep/mp3"
@@ -32,10 +34,9 @@ var (
 
 type Bind struct {
 	di.ConfigBind
+	di.MetaBind
 	di.MQTTBind
 	di.WidgetBind
-
-	config *Config
 
 	playerStatus *atomic.Int64
 	volume       *atomic.Int64
@@ -45,6 +46,31 @@ type Bind struct {
 	mutex   sync.RWMutex
 	speaker *speakerWrapper
 	stream  *streamWrapper
+}
+
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
+func (b *Bind) Run() error {
+	sn, err := machineid.ID()
+	if err != nil {
+		sn, err = os.Hostname()
+		if err != nil {
+			return err
+		}
+	}
+
+	b.Meta().SetSerialNumber(sn)
+
+	cfg := b.config()
+
+	b.done = make(chan struct{}, 1)
+	b.playerStatus.Set(StatusStopped.Int64())
+	b.volume.Set(cfg.Volume)
+	b.mute.Set(cfg.Mute)
+
+	return nil
 }
 
 func (b *Bind) Close() error {
@@ -126,7 +152,7 @@ func (b *Bind) setPlayerStatus(status Status) {
 		return
 	}
 
-	_ = b.MQTT().PublishAsync(context.Background(), b.config.TopicStateStatus, status.String())
+	_ = b.MQTT().PublishAsync(context.Background(), b.config().TopicStateStatus.Format(b.Meta().SerialNumber()), status.String())
 }
 
 func (b *Bind) PlayerStatus() Status {

@@ -8,14 +8,17 @@ import (
 
 func (b *Bind) syncPermitJoin() {
 	if sn := b.Meta().SerialNumber(); sn != "" {
-		b.MQTT().PublishAsync(context.TODO(), b.config.TopicStatePermitJoin.Format(sn), b.client.PermitJoinEnabled())
-		b.MQTT().PublishAsync(context.TODO(), b.config.TopicStatePermitJoinDuration.Format(sn), b.permitJoinDuration())
+		ctx := context.Background()
+		cfg := b.config()
+
+		b.MQTT().PublishAsync(ctx, cfg.TopicStatePermitJoin.Format(sn), b.client.PermitJoinEnabled())
+		b.MQTT().PublishAsync(ctx, cfg.TopicStatePermitJoinDuration.Format(sn), b.permitJoinDuration())
 	}
 }
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(b.config.TopicPermitJoin, 0, b.MQTT().WrapSubscribeDeviceIsOnline(
+		mqtt.NewSubscriber(b.config().TopicPermitJoin, 0, b.MQTT().WrapSubscribeDeviceIsOnline(
 			func(ctx context.Context, _ mqtt.Component, message mqtt.Message) (err error) {
 				if !b.MQTT().CheckSerialNumberInTopic(message.Topic(), -2) {
 					return nil

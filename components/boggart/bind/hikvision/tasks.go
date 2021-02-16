@@ -52,15 +52,17 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 		return err
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateModel.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.Model); e != nil {
+	cfg := b.config()
+
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateModel.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.Model); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateFirmwareVersion.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.FirmwareVersion); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateFirmwareVersion.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.FirmwareVersion); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateFirmwareReleasedDate.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.FirmwareReleasedDate); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateFirmwareReleasedDate.Format(deviceInfo.Payload.SerialNumber), deviceInfo.Payload.FirmwareReleasedDate); e != nil {
 		err = multierr.Append(err, e)
 	}
 
@@ -70,18 +72,18 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 			WithHandler(
 				b.Workers().WrapTaskHandlerIsOnline(
 					tasks.HandlerWithTimeout(
-						tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler), b.config.UpdaterTimeout,
+						tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler), cfg.UpdaterTimeout,
 					),
 				),
 			).
-			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.UpdaterInterval)),
 	)
 
 	if e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if b.config.EventsEnabled && b.config.EventsStreamingEnabled {
+	if cfg.EventsEnabled && cfg.EventsStreamingEnabled {
 		b.startAlertStreaming()
 	}
 
@@ -93,11 +95,11 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 		// создается 1 пустой элемент, поэтому быстрохак
 		if !(len(channels.Payload) == 1 && channels.Payload[0].ID == 0) {
 			e = b.MQTT().Subscribe(
-				mqtt.NewSubscriber(b.config.TopicPTZAbsolute, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTAbsolute)),
-				mqtt.NewSubscriber(b.config.TopicPTZContinuous, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTContinuous)),
-				mqtt.NewSubscriber(b.config.TopicPTZRelative, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTRelative)),
-				mqtt.NewSubscriber(b.config.TopicPTZPreset, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTPreset)),
-				mqtt.NewSubscriber(b.config.TopicPTZMomentary, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTMomentary)),
+				mqtt.NewSubscriber(cfg.TopicPTZAbsolute, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTAbsolute)),
+				mqtt.NewSubscriber(cfg.TopicPTZContinuous, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTContinuous)),
+				mqtt.NewSubscriber(cfg.TopicPTZRelative, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTRelative)),
+				mqtt.NewSubscriber(cfg.TopicPTZPreset, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTPreset)),
+				mqtt.NewSubscriber(cfg.TopicPTZMomentary, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTMomentary)),
 			)
 			if e == nil {
 				err = multierr.Append(err, e)
@@ -109,12 +111,12 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 					WithHandler(
 						b.Workers().WrapTaskHandlerIsOnline(
 							tasks.HandlerWithTimeout(
-								tasks.HandlerFuncFromShortToLong(b.taskPTZHandler), b.config.PTZTimeout,
+								tasks.HandlerFuncFromShortToLong(b.taskPTZHandler), cfg.PTZTimeout,
 							),
 						),
 					).
 					WithSchedule(
-						tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.PTZInterval),
+						tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.PTZInterval),
 					),
 			)
 			if e != nil {
@@ -151,6 +153,7 @@ func (b *Bind) taskPTZHandler(ctx context.Context) error {
 
 func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 	sn := b.Meta().SerialNumber()
+	cfg := b.config()
 
 	if status, e := b.client.System.GetStatus(system.NewGetStatusParamsWithContext(ctx), nil); e == nil {
 		memoryUsage := int64(status.Payload.MemoryList[0].MemoryUsage) * MB
@@ -160,15 +163,15 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 		metricMemoryUsage.With("serial_number", sn).Set(float64(memoryUsage))
 		metricMemoryAvailable.With("serial_number", sn).Set(float64(memoryAvailable))
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateUpTime.Format(sn), status.Payload.DeviceUpTime); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateUpTime.Format(sn), status.Payload.DeviceUpTime); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateMemoryUsage.Format(sn), memoryUsage); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateMemoryUsage.Format(sn), memoryUsage); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateMemoryAvailable.Format(sn), memoryAvailable); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateMemoryAvailable.Format(sn), memoryAvailable); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {
@@ -184,15 +187,15 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 			metricStorageUsage.With("serial_number", sn).With("name", hdd.Name).Set(float64((hdd.Capacity - hdd.FreeSpace) * MB))
 			metricStorageAvailable.With("serial_number", sn).With("name", hdd.Name).Set(float64(hdd.FreeSpace * MB))
 
-			if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateHDDCapacity.Format(sn, hdd.ID), hdd.Capacity*MB); e != nil {
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateHDDCapacity.Format(sn, hdd.ID), hdd.Capacity*MB); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateHDDUsage.Format(sn, hdd.ID), (hdd.Capacity-hdd.FreeSpace)*MB); e != nil {
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateHDDUsage.Format(sn, hdd.ID), (hdd.Capacity-hdd.FreeSpace)*MB); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateHDDFree.Format(sn, hdd.ID), hdd.FreeSpace*MB); e != nil {
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateHDDFree.Format(sn, hdd.ID), hdd.FreeSpace*MB); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}

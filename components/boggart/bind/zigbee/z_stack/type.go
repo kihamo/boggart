@@ -7,10 +7,9 @@ import (
 
 type Type struct{}
 
-func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
+func (t Type) CreateBind() boggart.Bind {
 	return &Bind{
-		config:       c.(*Config),
 		disconnected: atomic.NewBoolNull(),
 		onceClient:   &atomic.Once{},
-	}, nil
+	}
 }

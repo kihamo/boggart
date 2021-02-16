@@ -3,13 +3,13 @@ package hikvision
 import (
 	"context"
 	"io"
-	"net/url"
 	"strconv"
 	"sync"
 	"time"
 
 	"github.com/go-openapi/runtime"
 	"github.com/kihamo/boggart/components/boggart/di"
+	"github.com/kihamo/boggart/protocols/swagger"
 	"github.com/kihamo/boggart/providers/hikvision"
 	"github.com/kihamo/boggart/providers/hikvision/client/system"
 	"github.com/kihamo/boggart/providers/hikvision/models"
@@ -36,13 +36,30 @@ type Bind struct {
 
 	mutex sync.RWMutex
 
-	client *hikvision.Client
-
-	address               url.URL
+	client                *hikvision.Client
 	alertStreamingHistory map[string]time.Time
 	alertStreaming        *hikvision.AlertStreaming
+}
 
-	config *Config
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
+func (b *Bind) Run() error {
+	cfg := b.config()
+
+	password, _ := cfg.Address.User.Password()
+
+	b.client = hikvision.New(cfg.Address.Host, cfg.Address.User.Username(), password, cfg.Debug, swagger.NewLogger(
+		func(message string) {
+			b.Logger().Info(message)
+		},
+		func(message string) {
+			b.Logger().Debug(message)
+		}))
+	b.alertStreamingHistory = make(map[string]time.Time)
+
+	return nil
 }
 
 func (b *Bind) registerEvent(event *models.EventNotificationAlert) {
@@ -63,8 +80,10 @@ func (b *Bind) registerEvent(event *models.EventNotificationAlert) {
 	b.alertStreamingHistory[cacheKey] = dt
 	b.mutex.Unlock()
 
-	if !ok || dt.Sub(lastFire) > b.config.EventsIgnoreInterval {
-		if err := b.MQTT().PublishAsync(context.Background(), b.config.TopicEvent.Format(b.Meta().SerialNumber(), ch, event.EventType), event.ActivePostCount); err != nil {
+	cfg := b.config()
+
+	if !ok || dt.Sub(lastFire) > cfg.EventsIgnoreInterval {
+		if err := b.MQTT().PublishAsync(context.Background(), cfg.TopicEvent.Format(b.Meta().SerialNumber(), ch, event.EventType), event.ActivePostCount); err != nil {
 			b.Logger().Error("Send event to MQTT failed", "error", err.Error())
 		}
 	}

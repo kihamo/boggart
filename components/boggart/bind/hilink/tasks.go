@@ -69,6 +69,7 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 		return err
 	}
 
+	cfg := b.config()
 	ussdEnabled := settings.Payload.USSDEnabled > 0
 	smsEnabled := settings.Payload.SMSEnabled > 0
 
@@ -79,11 +80,11 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 				b.Workers().WrapTaskHandlerIsOnline(
 					tasks.HandlerWithTimeout(
 						tasks.HandlerFuncFromShortToLong(b.taskBalanceUpdaterHandler),
-						b.config.BalanceUpdaterTimeout,
+						cfg.BalanceUpdaterTimeout,
 					),
 				),
 			).
-			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.BalanceUpdaterInterval)),
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.BalanceUpdaterInterval)),
 		)
 
 		b.Workers().RegisterTask(tasks.NewTask().
@@ -92,11 +93,11 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 				b.Workers().WrapTaskHandlerIsOnline(
 					tasks.HandlerWithTimeout(
 						tasks.HandlerFuncFromShortToLong(b.taskLimitTrafficUpdaterHandler),
-						b.config.LimitTrafficUpdaterTimeout,
+						cfg.LimitTrafficUpdaterTimeout,
 					),
 				),
 			).
-			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.LimitTrafficUpdaterInterval)),
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.LimitTrafficUpdaterInterval)),
 		)
 	}
 
@@ -107,11 +108,11 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 				b.Workers().WrapTaskHandlerIsOnline(
 					tasks.HandlerWithTimeout(
 						tasks.HandlerFuncFromShortToLong(b.taskSMSCheckerHandler),
-						b.config.SMSCheckerTimeout,
+						cfg.SMSCheckerTimeout,
 					),
 				),
 			).
-			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.SMSCheckerInterval)),
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.SMSCheckerInterval)),
 		)
 
 		b.Workers().RegisterTask(tasks.NewTask().
@@ -121,7 +122,7 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 					tasks.HandlerFuncFromShortToLong(b.taskCleanerHandler),
 				),
 			).
-			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.CleanerInterval)),
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.CleanerInterval)),
 		)
 	}
 
@@ -131,11 +132,11 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 			b.Workers().WrapTaskHandlerIsOnline(
 				tasks.HandlerWithTimeout(
 					tasks.HandlerFuncFromShortToLong(b.taskSystemUpdaterHandler),
-					b.config.SystemUpdaterTimeout,
+					cfg.SystemUpdaterTimeout,
 				),
 			),
 		).
-		WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.SystemUpdaterInterval)),
+		WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.SystemUpdaterInterval)),
 	)
 
 	return nil
@@ -153,7 +154,7 @@ func (b *Bind) taskBalanceUpdaterHandler(ctx context.Context) error {
 
 		metricBalance.With("serial_number", sn).Set(balance)
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicBalance.Format(sn), balance); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config().TopicBalance.Format(sn), balance); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
@@ -194,15 +195,16 @@ func (b *Bind) taskSMSCheckerHandler(ctx context.Context) error {
 	}
 
 	sn := b.Meta().SerialNumber()
+	cfg := b.config()
 
 	metricSMSUnread.With("serial_number", sn).Set(float64(responseCount.Payload.LocalUnread))
 	metricSMSInbox.With("serial_number", sn).Set(float64(responseCount.Payload.LocalInbox))
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicSMSUnread.Format(sn), responseCount.Payload.LocalUnread); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicSMSUnread.Format(sn), responseCount.Payload.LocalUnread); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicSMSInbox.Format(sn), responseCount.Payload.LocalInbox); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicSMSInbox.Format(sn), responseCount.Payload.LocalInbox); e != nil {
 		err = multierr.Append(err, e)
 	}
 
@@ -230,13 +232,13 @@ func (b *Bind) taskSMSCheckerHandler(ctx context.Context) error {
 
 			isSpecial := b.checkSpecialSMS(ctx, s)
 			if !isSpecial {
-				if e = b.MQTT().PublishAsync(ctx, b.config.TopicSMS.Format(sn), payload); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, cfg.TopicSMS.Format(sn), payload); e != nil {
 					err = multierr.Append(err, e)
 					continue
 				}
 			}
 
-			if isSpecial && b.config.CleanerSpecial {
+			if isSpecial && cfg.CleanerSpecial {
 				params := sms.NewRemoveSMSParamsWithContext(ctx)
 				params.Request.Index = s.Index
 
@@ -261,6 +263,7 @@ func (b *Bind) taskSMSCheckerHandler(ctx context.Context) error {
 
 func (b *Bind) taskSystemUpdaterHandler(ctx context.Context) (err error) {
 	sn := b.Meta().SerialNumber()
+	cfg := b.config()
 
 	// status
 	if response, e := b.client.Monitoring.GetMonitoringStatus(monitoring.NewGetMonitoringStatusParamsWithContext(ctx)); e == nil {
@@ -268,7 +271,7 @@ func (b *Bind) taskSystemUpdaterHandler(ctx context.Context) (err error) {
 
 		// только с активной SIM картой
 		if response.Payload.SimStatus == 1 {
-			if e := b.MQTT().PublishAsync(ctx, b.config.TopicSignalLevel.Format(sn), response.Payload.SignalIcon); e != nil {
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicSignalLevel.Format(sn), response.Payload.SignalIcon); e != nil {
 				err = multierr.Append(err, e)
 			}
 
@@ -279,7 +282,7 @@ func (b *Bind) taskSystemUpdaterHandler(ctx context.Context) (err error) {
 				if e == nil && plmn.Payload.FullName != "" {
 					b.operator.Set(plmn.Payload.FullName)
 
-					if e := b.MQTT().PublishAsync(ctx, b.config.TopicOperator.Format(sn), plmn.Payload.FullName); e != nil {
+					if e := b.MQTT().PublishAsync(ctx, cfg.TopicOperator.Format(sn), plmn.Payload.FullName); e != nil {
 						err = multierr.Append(err, e)
 					}
 				} else {
@@ -304,7 +307,7 @@ func (b *Bind) taskSystemUpdaterHandler(ctx context.Context) (err error) {
 			if val, e := strconv.ParseInt(raw, 10, 64); e == nil {
 				metricSignalRSSI.With("serial_number", sn).Set(float64(val))
 
-				if e = b.MQTT().PublishAsync(ctx, b.config.TopicSignalRSSI.Format(sn), val); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, cfg.TopicSignalRSSI.Format(sn), val); e != nil {
 					err = multierr.Append(err, e)
 				}
 			} else {
@@ -316,7 +319,7 @@ func (b *Bind) taskSystemUpdaterHandler(ctx context.Context) (err error) {
 			if val, e := strconv.ParseInt(raw, 10, 64); e == nil {
 				metricSignalRSRP.With("serial_number", sn).Set(float64(val))
 
-				if e = b.MQTT().PublishAsync(ctx, b.config.TopicSignalRSRP.Format(sn), val); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, cfg.TopicSignalRSRP.Format(sn), val); e != nil {
 					err = multierr.Append(err, e)
 				}
 			} else {
@@ -328,7 +331,7 @@ func (b *Bind) taskSystemUpdaterHandler(ctx context.Context) (err error) {
 			if val, e := strconv.ParseInt(raw, 10, 64); e == nil {
 				metricSignalRSRQ.With("serial_number", sn).Set(float64(val))
 
-				if e = b.MQTT().PublishAsync(ctx, b.config.TopicSignalRSRQ.Format(sn), val); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, cfg.TopicSignalRSRQ.Format(sn), val); e != nil {
 					err = multierr.Append(err, e)
 				}
 			} else {
@@ -340,7 +343,7 @@ func (b *Bind) taskSystemUpdaterHandler(ctx context.Context) (err error) {
 			if val, e := strconv.ParseInt(raw, 10, 64); e == nil {
 				metricSignalSINR.With("serial_number", sn).Set(float64(val))
 
-				if e = b.MQTT().PublishAsync(ctx, b.config.TopicSignalSINR.Format(sn), val); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, cfg.TopicSignalSINR.Format(sn), val); e != nil {
 					err = multierr.Append(err, e)
 				}
 			} else {
@@ -357,15 +360,15 @@ func (b *Bind) taskSystemUpdaterHandler(ctx context.Context) (err error) {
 		metricTotalDownload.With("serial_number", sn).Set(float64(response.Payload.TotalDownload))
 		metricTotalUpload.With("serial_number", sn).Set(float64(response.Payload.TotalUpload))
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicConnectionTime.Format(sn), response.Payload.TotalConnectTime); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicConnectionTime.Format(sn), response.Payload.TotalConnectTime); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicConnectionDownload.Format(sn), response.Payload.TotalDownload); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicConnectionDownload.Format(sn), response.Payload.TotalDownload); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicConnectionUpload.Format(sn), response.Payload.TotalUpload); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicConnectionUpload.Format(sn), response.Payload.TotalUpload); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {
@@ -381,6 +384,7 @@ func (b *Bind) taskCleanerHandler(ctx context.Context) error {
 	}
 
 	var page int64 = 1
+	cfg := b.config()
 
 	for {
 		paramsList := sms.NewGetSMSListParamsWithContext(ctx).
@@ -400,7 +404,7 @@ func (b *Bind) taskCleanerHandler(ctx context.Context) error {
 		}
 
 		for _, s := range response.Payload.Messages {
-			remove := b.config.CleanerSpecial && b.checkSpecialSMS(ctx, s)
+			remove := cfg.CleanerSpecial && b.checkSpecialSMS(ctx, s)
 			if !remove {
 				d, e := time.Parse(hilink.TimeFormat, s.Date)
 
@@ -408,7 +412,7 @@ func (b *Bind) taskCleanerHandler(ctx context.Context) error {
 					continue
 				}
 
-				remove = time.Since(d) > b.config.CleanerDuration
+				remove = time.Since(d) > cfg.CleanerDuration
 			}
 
 			if remove {

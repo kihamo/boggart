@@ -28,11 +28,12 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	action := query.Get("action")
 	ctx := r.Context()
 	widget := b.Widget()
+	cfg := b.config()
 
 	vars := map[string]interface{}{
 		"action":                   action,
-		"events_enabled":           b.config.EventsEnabled,
-		"preview_refresh_interval": b.config.PreviewRefreshInterval.Seconds(),
+		"events_enabled":           cfg.EventsEnabled,
+		"preview_refresh_interval": cfg.PreviewRefreshInterval.Seconds(),
 	}
 
 	switch action {
@@ -44,7 +45,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			)
 
 			if channel := query.Get("channel"); channel == "" {
-				ch = b.config.WidgetChannel
+				ch = cfg.WidgetChannel
 			} else {
 				ch, err = strconv.ParseUint(channel, 10, 64)
 				if err != nil {
@@ -114,7 +115,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		)
 
 		if channel := query.Get("channel"); channel == "" {
-			ch = b.config.WidgetChannel
+			ch = cfg.WidgetChannel
 		} else {
 			ch, err = strconv.ParseUint(channel, 10, 64)
 			if err != nil {
@@ -186,7 +187,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 	case "notification":
-		if !b.config.EventsEnabled {
+		if !cfg.EventsEnabled {
 			widget.NotFound(w, r)
 			return
 		}
@@ -280,7 +281,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 	case "event":
-		if !b.config.EventsEnabled || !r.IsPost() {
+		if !cfg.EventsEnabled || !r.IsPost() {
 			widget.NotFound(w, r)
 			return
 		}

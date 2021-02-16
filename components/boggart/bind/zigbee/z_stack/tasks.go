@@ -47,31 +47,33 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 		return err
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicVersionTransportRevision.Format(sn), version.TransportRevision); e != nil {
+	cfg := b.config()
+
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicVersionTransportRevision.Format(sn), version.TransportRevision); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicVersionProduct.Format(sn), version.Product); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicVersionProduct.Format(sn), version.Product); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicVersionMajorRelease.Format(sn), version.MajorRelease); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicVersionMajorRelease.Format(sn), version.MajorRelease); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicVersionMinorRelease.Format(sn), version.MinorRelease); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicVersionMinorRelease.Format(sn), version.MinorRelease); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicVersionMainTrel.Format(sn), version.MainTrel); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicVersionMainTrel.Format(sn), version.MainTrel); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicVersionHardwareRevision.Format(sn), version.HardwareRevision); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicVersionHardwareRevision.Format(sn), version.HardwareRevision); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicVersionType.Format(sn), version.Type()); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicVersionType.Format(sn), version.Type()); e != nil {
 		err = multierr.Append(err, e)
 	}
 

@@ -7,8 +7,10 @@ import (
 )
 
 func (b *Bind) ReadinessProbe(ctx context.Context) (err error) {
-	if b.config.NewAPI {
-		err = b.MQTT().PublishRawWithoutCache(ctx, b.config.TopicHealthCheckRequest, 1, false, true)
+	cfg := b.config()
+
+	if cfg.NewAPI {
+		err = b.MQTT().PublishRawWithoutCache(ctx, cfg.TopicHealthCheckRequest, 1, false, true)
 		if err != nil {
 			return err
 		}
@@ -25,7 +27,7 @@ func (b *Bind) ReadinessProbe(ctx context.Context) (err error) {
 		return nil
 	}
 
-	if b.config.NewAPI {
+	if cfg.NewAPI {
 		return errors.New("health check failed")
 	}
 

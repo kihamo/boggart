@@ -25,8 +25,6 @@ type Bind struct {
 	di.WidgetBind
 	di.WorkersBind
 
-	config *Config
-
 	disconnected *atomic.BoolNull
 	client       *zstack.Client
 	connection   connection.Connection
@@ -35,11 +33,17 @@ type Bind struct {
 	done         chan struct{}
 }
 
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
 func (b *Bind) getClient() (_ *zstack.Client, err error) {
 	b.onceClient.Do(func() {
 		b.disconnected.Nil()
 
-		b.connection, err = connection.NewByDSNString(b.config.ConnectionDSN)
+		cfg := b.config()
+
+		b.connection, err = connection.NewByDSNString(cfg.ConnectionDSN)
 		if err != nil {
 			b.disconnected.True()
 		}
@@ -94,8 +98,8 @@ func (b *Bind) getClient() (_ *zstack.Client, err error) {
 		b.connection.ApplyOptions(connection.WithDumpWrite(dump("Write frame")))
 
 		opts := []zstack.Option{
-			zstack.WithChannel(b.config.Channel),
-			zstack.WithLEDEnabled(b.config.LEDEnabled),
+			zstack.WithChannel(cfg.Channel),
+			zstack.WithLEDEnabled(cfg.LEDEnabled),
 		}
 
 		b.client = zstack.New(b.connection, opts...)
@@ -105,7 +109,7 @@ func (b *Bind) getClient() (_ *zstack.Client, err error) {
 
 			err := b.client.Boot(ctx)
 
-			if err == nil && b.config.PermitJoin {
+			if err == nil && cfg.PermitJoin {
 				err = b.client.PermitJoin(ctx, b.permitJoinDuration())
 			} else {
 				err = b.client.PermitJoinDisable(ctx)
@@ -125,7 +129,7 @@ func (b *Bind) getClient() (_ *zstack.Client, err error) {
 }
 
 func (b *Bind) permitJoinDuration() uint8 {
-	duration := b.config.PermitJoinDuration / time.Second
+	duration := b.config().PermitJoinDuration / time.Second
 	if duration > 255 {
 		return 255
 	}
@@ -151,6 +155,7 @@ func (b *Bind) Run() error {
 		defer b.disconnected.True()
 
 		watcher := client.Watch()
+		cfg := b.config()
 
 		for {
 			select {
@@ -179,7 +184,7 @@ func (b *Bind) Run() error {
 
 						if sn != "" {
 							metricLinkQuality.With("serial_number", sn).With("srcaddr", sourceAddress).Set(float64(message.LinkQuality))
-							_ = b.MQTT().Publish(ctx, b.config.TopicLinkQuality.Format(sn, sourceAddress), message.LinkQuality)
+							_ = b.MQTT().Publish(ctx, cfg.TopicLinkQuality.Format(sn, sourceAddress), message.LinkQuality)
 						}
 
 						if message.Frame.Payload.Report != nil && len(*message.Frame.Payload.Report) > 0 {
@@ -195,10 +200,10 @@ func (b *Bind) Run() error {
 										percent := ToPercentageCR2032(voltage)
 
 										metricBatteryPercent.With("serial_number", sn).With("srcaddr", sourceAddress).Set(float64(percent))
-										_ = b.MQTT().Publish(ctx, b.config.TopicBatteryPercent.Format(sn, sourceAddress), percent)
+										_ = b.MQTT().Publish(ctx, cfg.TopicBatteryPercent.Format(sn, sourceAddress), percent)
 
 										metricBatteryVoltage.With("serial_number", sn).With("srcaddr", sourceAddress).Set(float64(voltage))
-										_ = b.MQTT().Publish(ctx, b.config.TopicBatteryVoltage.Format(sn, sourceAddress), voltage)
+										_ = b.MQTT().Publish(ctx, cfg.TopicBatteryVoltage.Format(sn, sourceAddress), voltage)
 									}
 								} else {
 									b.Logger().Warn("Battery element not found", "elements", len(elements))
@@ -206,18 +211,18 @@ func (b *Bind) Run() error {
 
 								// double click
 							case 32768:
-								_ = b.MQTT().PublishWithoutCache(ctx, b.config.TopicOnOff.Format(sn, sourceAddress), true)
-								_ = b.MQTT().Publish(ctx, b.config.TopicClick.Format(sn, sourceAddress), report.AttributeData)
+								_ = b.MQTT().PublishWithoutCache(ctx, cfg.TopicOnOff.Format(sn, sourceAddress), true)
+								_ = b.MQTT().Publish(ctx, cfg.TopicClick.Format(sn, sourceAddress), report.AttributeData)
 
 								// hmmm
 							default:
 								if sn != "" && report.DataType == zstack.DataTypeBoolean {
 									value := report.AttributeData.(bool)
 
-									_ = b.MQTT().PublishWithoutCache(ctx, b.config.TopicOnOff.Format(sn, sourceAddress), value)
+									_ = b.MQTT().PublishWithoutCache(ctx, cfg.TopicOnOff.Format(sn, sourceAddress), value)
 
 									if value {
-										_ = b.MQTT().Publish(ctx, b.config.TopicClick.Format(sn, sourceAddress), 1)
+										_ = b.MQTT().Publish(ctx, cfg.TopicClick.Format(sn, sourceAddress), 1)
 									}
 								}
 							}

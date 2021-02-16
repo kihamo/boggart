@@ -10,6 +10,7 @@ import (
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/di"
+	"github.com/kihamo/boggart/protocols/swagger"
 	"github.com/kihamo/boggart/providers/hilink"
 	"github.com/kihamo/boggart/providers/hilink/client/device"
 	"github.com/kihamo/boggart/providers/hilink/client/sms"
@@ -30,11 +31,32 @@ type Bind struct {
 	di.ProbesBind
 	di.WorkersBind
 
-	config                    *Config
 	client                    *hilink.Client
 	operator                  *atomic.String
 	limitInternetTrafficIndex *atomic.Int64
 	simStatus                 *atomic.Uint32
+}
+
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
+func (b *Bind) Run() error {
+	cfg := b.config()
+
+	b.operator.Set("")
+	b.limitInternetTrafficIndex.Set(0)
+	b.simStatus.Set(0)
+
+	b.client = hilink.New(cfg.Address.Host, cfg.Debug, swagger.NewLogger(
+		func(message string) {
+			b.Logger().Info(message)
+		},
+		func(message string) {
+			b.Logger().Debug(message)
+		}))
+
+	return nil
 }
 
 func (b *Bind) SMS(ctx context.Context, content string, phones ...string) error {
@@ -131,6 +153,7 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, smsItem *models.SMSListMessa
 	}
 
 	sn := b.Meta().SerialNumber()
+	cfg := b.config()
 
 	// limit traffic
 	match := op.SMSLimitTrafficRegexp.FindStringSubmatch(smsItem.Content)
@@ -157,7 +180,7 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, smsItem *models.SMSListMessa
 				value *= op.SMSLimitTrafficFactor
 
 				metricLimitInternetTraffic.With("serial_number", sn).Set(value)
-				b.MQTT().PublishAsync(ctx, b.config.TopicLimitInternetTraffic.Format(sn), uint64(value))
+				b.MQTT().PublishAsync(ctx, cfg.TopicLimitInternetTraffic.Format(sn), uint64(value))
 
 				b.limitInternetTrafficIndex.Set(smsItem.Index)
 			}
@@ -167,7 +190,7 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, smsItem *models.SMSListMessa
 	}
 
 	// special commands
-	if b.config.SMSCommandsEnabled {
+	if cfg.SMSCommandsEnabled {
 		match = cmdRegexp.FindStringSubmatch(smsItem.Content)
 		if len(match) > 0 {
 			for i, name := range cmdRegexp.SubexpNames() {
@@ -185,13 +208,13 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, smsItem *models.SMSListMessa
 					}
 
 					// нет разрешенных телефонов с которых можно принимать команды, но команда найдена
-					if len(b.config.SMSCommandsAllowedPhones) == 0 {
+					if len(cfg.SMSCommandsAllowedPhones) == 0 {
 						return true
 					}
 
 					var allowed bool
 
-					for _, phone := range b.config.SMSCommandsAllowedPhones {
+					for _, phone := range cfg.SMSCommandsAllowedPhones {
 						if strings.Compare(phone, smsItem.Phone) == 0 {
 							allowed = true
 							break
