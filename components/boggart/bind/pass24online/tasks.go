@@ -18,7 +18,7 @@ func (b *Bind) Tasks() []tasks.Task {
 					tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
 				),
 			).
-			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config().UpdaterInterval)),
 	}
 }
 
@@ -28,6 +28,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		return err
 	}
 
+	cfg := b.config()
 	feedStartDatetime := b.feedStartDatetime.Load()
 	collection := response.GetPayload().Body.Collection
 
@@ -37,7 +38,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 			continue
 		}
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicFeedEvent, collection[i].Message); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicFeedEvent.Format(cfg.Phone), collection[i].Message); e != nil {
 			err = multierr.Append(err, e)
 		}
 

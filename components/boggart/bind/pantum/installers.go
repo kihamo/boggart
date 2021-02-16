@@ -22,35 +22,36 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 	}
 
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
+	cfg := b.config()
 
 	return openhab.StepsByBind(b, nil,
 		openhab.NewChannel("ProductID", openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicProductID.Format(sn)).
+			WithStateTopic(cfg.TopicProductID.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+"ProductID", openhab.ItemTypeString).
 					WithLabel("Product ID"),
 			),
 		openhab.NewChannel("TonerRemain", openhab.ChannelTypeNumber).
-			WithStateTopic(b.config.TopicTonerRemain.Format(sn)).
+			WithStateTopic(cfg.TopicTonerRemain.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+"TonerRemain", openhab.ItemTypeNumber).
 					WithLabel("Toner remain [%d %%]").
 					WithIcon("humidity"),
 			),
 		openhab.NewChannel("PrinterStatus", openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicPrinterStatus.Format(sn)).
+			WithStateTopic(cfg.TopicPrinterStatus.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+"PrinterStatus", openhab.ItemTypeString).
 					WithLabel("Printer status"),
 			),
 		openhab.NewChannel("CartridgeStatus", openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicCartridgeStatus.Format(sn)).
+			WithStateTopic(cfg.TopicCartridgeStatus.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+"CartridgeStatus", openhab.ItemTypeString).
 					WithLabel("Cartridge status"),
 			),
 		openhab.NewChannel("DrumStatus", openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicDrumStatus.Format(sn)).
+			WithStateTopic(cfg.TopicDrumStatus.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+"DrumStatus", openhab.ItemTypeString).
 					WithLabel("Drum status"),

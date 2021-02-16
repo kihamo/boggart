@@ -17,7 +17,7 @@ func (b *Bind) Tasks() []tasks.Task {
 					tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
 				),
 			).
-			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config().UpdaterInterval)),
 	}
 }
 
@@ -28,9 +28,10 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	}
 
 	id := b.Meta().ID()
+	cfg := b.config()
 
 	metricCurrent.With("id", id).Set(response.Current.Temp)
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicCurrentTemp.Format(id), response.Current.Temp); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicCurrentTemp.Format(id), response.Current.Temp); e != nil {
 		err = multierr.Append(err, e)
 	}
 
@@ -38,32 +39,32 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		dayAsString := strconv.Itoa(i)
 
 		metricTempMin.With("id", id).With("day", dayAsString).Set(day.Temp.Min)
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicDailyTempMin.Format(id, i), day.Temp.Min); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicDailyTempMin.Format(id, i), day.Temp.Min); e != nil {
 			err = multierr.Append(err, e)
 		}
 
 		metricTempMax.With("id", id).With("day", dayAsString).Set(day.Temp.Max)
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicDailyTempMax.Format(id, i), day.Temp.Max); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicDailyTempMax.Format(id, i), day.Temp.Max); e != nil {
 			err = multierr.Append(err, e)
 		}
 
 		metricTempDay.With("id", id).With("day", dayAsString).Set(day.Temp.Day)
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicDailyTempDay.Format(id, i), day.Temp.Day); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicDailyTempDay.Format(id, i), day.Temp.Day); e != nil {
 			err = multierr.Append(err, e)
 		}
 
 		metricTempNight.With("id", id).With("day", dayAsString).Set(day.Temp.Night)
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicDailyTempNight.Format(id, i), day.Temp.Night); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicDailyTempNight.Format(id, i), day.Temp.Night); e != nil {
 			err = multierr.Append(err, e)
 		}
 
 		metricTempMorning.With("id", id).With("day", dayAsString).Set(day.Temp.Morn)
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicDailyTempMorning.Format(id, i), day.Temp.Morn); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicDailyTempMorning.Format(id, i), day.Temp.Morn); e != nil {
 			err = multierr.Append(err, e)
 		}
 
 		metricWindSpeed.With("id", id).With("day", dayAsString).Set(day.WindSpeed)
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicDailyWindSpeed.Format(id, i), day.WindSpeed); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicDailyWindSpeed.Format(id, i), day.WindSpeed); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}

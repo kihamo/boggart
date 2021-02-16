@@ -16,8 +16,19 @@ type Bind struct {
 	di.MQTTBind
 	di.ProbesBind
 
-	config   *Config
 	provider *premiergc.Client
+}
+
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
+func (b *Bind) Run() error {
+	cfg := b.config()
+
+	b.provider = premiergc.New(cfg.Login, cfg.Password, cfg.Debug)
+
+	return nil
 }
 
 func (b *Bind) Balance(ctx context.Context) (contract string, balance float64, err error) {
@@ -25,7 +36,7 @@ func (b *Bind) Balance(ctx context.Context) (contract string, balance float64, e
 	if err == nil {
 		b.Meta().SetSerialNumber(contract)
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicBalance.Format(contract), balance); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config().TopicBalance.Format(contract), balance); e != nil {
 			err = multierror.Append(err, e)
 		}
 

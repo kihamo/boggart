@@ -7,5 +7,5 @@ import (
 )
 
 func (b *Bind) ReadinessProbe(ctx context.Context) error {
-	return probes.HTTPProbe(ctx, b.config.Address.String(), nil)
+	return probes.HTTPProbe(ctx, b.config().Address.String(), nil)
 }

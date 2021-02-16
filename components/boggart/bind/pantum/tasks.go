@@ -11,6 +11,8 @@ import (
 )
 
 func (b *Bind) Tasks() []tasks.Task {
+	cfg := b.config()
+
 	return []tasks.Task{
 		tasks.NewTask().
 			WithName("updater").
@@ -18,11 +20,11 @@ func (b *Bind) Tasks() []tasks.Task {
 				b.Workers().WrapTaskHandlerIsOnline(
 					tasks.HandlerWithTimeout(
 						tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
-						b.config.UpdaterTimeout,
+						cfg.UpdaterTimeout,
 					),
 				),
 			).
-			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.UpdaterInterval)),
 	}
 }
 
@@ -49,11 +51,13 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		return nil
 	}
 
+	cfg := b.config()
+
 	var product client.ProductID
 	if value, ok := database["omProductID"]; ok {
 		product = client.ProductIDConvert(value.(string))
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicProductID.Format(sn), product.String()); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicProductID.Format(sn), product.String()); e != nil {
 			err = fmt.Errorf("send mqtt message about printer status failed: %w", err)
 		}
 	}
@@ -62,7 +66,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		if modules, ok := database["omStatusModule"]; ok {
 			status := client.PrinterStatus(flag.(string), modules.(string))
 
-			if e := b.MQTT().PublishAsync(ctx, b.config.TopicPrinterStatus.Format(sn), status); e != nil {
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicPrinterStatus.Format(sn), status); e != nil {
 				err = fmt.Errorf("send mqtt message about printer status failed: %w", err)
 			}
 		}
@@ -72,7 +76,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		if v, e := strconv.ParseUint(value.(string), 10, 64); e == nil {
 			metricTonerRemain.With("serial_number", sn).Set(float64(v))
 
-			if e := b.MQTT().PublishAsync(ctx, b.config.TopicTonerRemain.Format(sn), v); e != nil {
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicTonerRemain.Format(sn), v); e != nil {
 				err = fmt.Errorf("send mqtt message about toner remain failed: %w", err)
 			}
 		} else {
@@ -83,7 +87,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	if value, ok := database["omCartridgeStatus"]; ok {
 		status := client.CartridgeStatusConvert(value.(string))
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicCartridgeStatus.Format(sn), status.String()); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicCartridgeStatus.Format(sn), status.String()); e != nil {
 			err = fmt.Errorf("send mqtt message about cartridge status failed: %w", err)
 		}
 	}
@@ -91,7 +95,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	if value, ok := database["omDrumStatus"]; ok {
 		status := client.DrumStatusConvert(value.(string))
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicDrumStatus.Format(sn), status.String()); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicDrumStatus.Format(sn), status.String()); e != nil {
 			err = fmt.Errorf("send mqtt message about drum status failed: %w", err)
 		}
 	}

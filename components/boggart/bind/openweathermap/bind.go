@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/kihamo/boggart/components/boggart/di"
+	"github.com/kihamo/boggart/protocols/swagger"
 	"github.com/kihamo/boggart/providers/openweathermap"
 	"github.com/kihamo/boggart/providers/openweathermap/client/forecast"
 	"github.com/kihamo/boggart/providers/openweathermap/client/onecall"
@@ -22,64 +23,76 @@ type Bind struct {
 	di.WidgetBind
 	di.WorkersBind
 
-	config *Config
 	client *openweathermap.Client
 
 	locationName  string
 	locationCoord *models.Coord
 }
 
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
 func (b *Bind) Run() (err error) {
 	ctx := context.Background()
+	cfg := b.config()
+
+	b.client = openweathermap.New(cfg.APIKey, cfg.Price, cfg.Debug, swagger.NewLogger(
+		func(message string) {
+			b.Logger().Info(message)
+		},
+		func(message string) {
+			b.Logger().Debug(message)
+		}))
 
 	switch {
-	case b.config.CityID > 0:
+	case cfg.CityID > 0:
 		var response *weather.GetCurrentByCityIDOK
 
 		params := weather.NewGetCurrentByCityIDParamsWithContext(ctx).
 			WithLang(b.lang(ctx)).
-			WithUnits(&b.config.Units).
-			WithID(b.config.CityID)
+			WithUnits(&cfg.Units).
+			WithID(cfg.CityID)
 
 		response, err = b.client.Weather.GetCurrentByCityID(params, nil)
 		if err == nil {
 			b.locationName = response.Payload.Name
 			b.locationCoord = response.Payload.Coord
 		}
-	case b.config.CityName != "":
+	case cfg.CityName != "":
 		var response *weather.GetCurrentByCityNameOK
 
 		params := weather.NewGetCurrentByCityNameParamsWithContext(ctx).
 			WithLang(b.lang(ctx)).
-			WithUnits(&b.config.Units).
-			WithQ(b.config.CityName)
+			WithUnits(&cfg.Units).
+			WithQ(cfg.CityName)
 
 		response, err = b.client.Weather.GetCurrentByCityName(params, nil)
 		if err == nil {
 			b.locationName = response.Payload.Name
 			b.locationCoord = response.Payload.Coord
 		}
-	case b.config.Latitude != 0 && b.config.Longitude != 0:
+	case cfg.Latitude != 0 && cfg.Longitude != 0:
 		var response *weather.GetCurrentByGeographicCoordinatesOK
 
 		params := weather.NewGetCurrentByGeographicCoordinatesParamsWithContext(ctx).
 			WithLang(b.lang(ctx)).
-			WithUnits(&b.config.Units).
-			WithLat(b.config.Latitude).
-			WithLon(b.config.Longitude)
+			WithUnits(&cfg.Units).
+			WithLat(cfg.Latitude).
+			WithLon(cfg.Longitude)
 
 		response, err = b.client.Weather.GetCurrentByGeographicCoordinates(params, nil)
 		if err == nil {
 			b.locationName = response.Payload.Name
 			b.locationCoord = response.Payload.Coord
 		}
-	case b.config.Zip != "":
+	case cfg.Zip != "":
 		var response *weather.GetCurrentByZIPCodeOK
 
 		params := weather.NewGetCurrentByZIPCodeParamsWithContext(ctx).
 			WithLang(b.lang(ctx)).
-			WithUnits(&b.config.Units).
-			WithZip(b.config.Zip)
+			WithUnits(&cfg.Units).
+			WithZip(cfg.Zip)
 
 		response, err = b.client.Weather.GetCurrentByZIPCode(params, nil)
 		if err == nil {
@@ -114,7 +127,7 @@ func (b *Bind) Current(ctx context.Context) (current *models.Current, err error)
 
 	params := weather.NewGetCurrentByGeographicCoordinatesParamsWithContext(ctx).
 		WithLang(b.lang(ctx)).
-		WithUnits(&b.config.Units).
+		WithUnits(&b.config().Units).
 		WithLat(b.locationCoord.Lat).
 		WithLon(b.locationCoord.Lon)
 
@@ -133,7 +146,7 @@ func (b *Bind) Forecast(ctx context.Context) (current *models.Forecast, err erro
 
 	params := forecast.NewGetForecastByGeographicCoordinatesParamsWithContext(ctx).
 		WithLang(b.lang(ctx)).
-		WithUnits(&b.config.Units).
+		WithUnits(&b.config().Units).
 		WithLat(b.locationCoord.Lat).
 		WithLon(b.locationCoord.Lon)
 
@@ -152,7 +165,7 @@ func (b *Bind) OneCall(ctx context.Context, include []string) (*models.OneCall, 
 
 	params := onecall.NewGetOneCallParamsWithContext(ctx).
 		WithLang(b.lang(ctx)).
-		WithUnits(&b.config.Units).
+		WithUnits(&b.config().Units).
 		WithLat(b.locationCoord.Lat).
 		WithLon(b.locationCoord.Lon)
 

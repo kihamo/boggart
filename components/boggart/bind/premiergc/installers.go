@@ -18,7 +18,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 
 	return openhab.StepsByBind(b, nil,
 		openhab.NewChannel("Balance", openhab.ChannelTypeNumber).
-			WithStateTopic(b.config.TopicBalance).
+			WithStateTopic(b.config().TopicBalance).
 			AddItems(
 				openhab.NewItem(itemPrefix+"Balance", openhab.ItemTypeNumber).
 					WithLabel("Balance [%.2f ₽]").
