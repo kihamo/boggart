@@ -15,13 +15,15 @@ func (b *Bind) InstallersSupport() []installer.System {
 
 func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.Step, error) {
 	itemPrefix := openhab.ItemPrefixFromBindMeta(b.Meta())
+	cfg := b.config()
+	mac := cfg.MAC.String()
 
 	return openhab.StepsByBind(b, []installer.Step{
 		openhab.StepDefault(openhab.StepDefaultTransformHumanWatts),
 	},
 		openhab.NewChannel("Status", openhab.ChannelTypeSwitch).
-			WithStateTopic(b.config.TopicState).
-			WithCommandTopic(b.config.TopicSet).
+			WithStateTopic(cfg.TopicState.Format(mac)).
+			WithCommandTopic(cfg.TopicSet.Format(mac)).
 			WithOn("true").
 			WithOff("false").
 			AddItems(
@@ -29,7 +31,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 					WithLabel("Status []"),
 			),
 		openhab.NewChannel("Power", openhab.ChannelTypeNumber).
-			WithStateTopic(b.config.TopicPower).
+			WithStateTopic(cfg.TopicPower.Format(mac)).
 			AddItems(
 				openhab.NewItem(itemPrefix+"Power", openhab.ItemTypeNumber).
 					WithLabel("Power [JS(human_watts.js):%s]").

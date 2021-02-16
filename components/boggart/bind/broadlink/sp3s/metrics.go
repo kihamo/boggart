@@ -9,9 +9,9 @@ var (
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {
-	metricPower.With("serial_number", b.config.MAC.String()).Describe(ch)
+	metricPower.With("serial_number", b.config().MAC.String()).Describe(ch)
 }
 
 func (b *Bind) Collect(ch chan<- snitch.Metric) {
-	metricPower.With("serial_number", b.config.MAC.String()).Collect(ch)
+	metricPower.With("serial_number", b.config().MAC.String()).Collect(ch)
 }

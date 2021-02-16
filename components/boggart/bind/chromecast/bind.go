@@ -5,12 +5,15 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"net"
+	"strconv"
 	"strings"
 	"sync"
 
 	"github.com/barnybug/go-cast"
 	"github.com/barnybug/go-cast/controllers"
 	"github.com/barnybug/go-cast/events"
+	"github.com/barnybug/go-cast/log"
 	castnet "github.com/barnybug/go-cast/net"
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/di"
@@ -39,8 +42,7 @@ type Bind struct {
 	di.ProbesBind
 	di.WidgetBind
 
-	config *Config
-
+	address        string
 	disconnected   *atomic.BoolNull
 	volume         *atomic.Uint32Null
 	mute           *atomic.BoolNull
@@ -57,17 +59,32 @@ type Bind struct {
 	ctrlMedia      *controllers.MediaController
 }
 
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
 func (b *Bind) Run() error {
+	b.events = make(chan events.Event, 16)
 	b.disconnected.Nil()
+	b.volume.Nil()
+	b.mute.Nil()
+	b.status.Set("")
+	b.mediaContentID.Set("")
+
+	cfg := b.config()
+
+	log.Debug = cfg.Debug
+	b.address = net.JoinHostPort(cfg.Host.String(), strconv.Itoa(cfg.Port))
 
 	return nil
 }
 
 func (b *Bind) initConnect() error {
 	ctx := context.Background()
+	cfg := b.config()
 
 	conn := castnet.NewConnection()
-	if err := conn.Connect(ctx, b.config.Host.IP, b.config.Port); err != nil {
+	if err := conn.Connect(ctx, cfg.Host.IP, cfg.Port); err != nil {
 		return err
 	}
 
@@ -101,7 +118,7 @@ func (b *Bind) initConnect() error {
 }
 
 func (b *Bind) Close() (err error) {
-	ctx, cancel := context.WithTimeout(context.Background(), b.config.LivenessTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), b.config().LivenessTimeout)
 	defer cancel()
 	defer func() {
 		b.events <- eventClose{}
@@ -144,6 +161,7 @@ func (b *Bind) Close() (err error) {
 
 func (b *Bind) doEvents() {
 	ctx := context.Background()
+	cfg := b.config()
 
 	for {
 		event := <-b.events
@@ -186,9 +204,9 @@ func (b *Bind) doEvents() {
 			)
 
 			volume := uint32(math.Round(t.Level * 100))
-			_ = b.MQTT().PublishAsync(ctx, b.config.TopicStateVolume, volume)
+			_ = b.MQTT().PublishAsync(ctx, cfg.TopicStateVolume.Format(b.address), volume)
 
-			_ = b.MQTT().PublishAsync(ctx, b.config.TopicStateMute, t.Muted)
+			_ = b.MQTT().PublishAsync(ctx, cfg.TopicStateMute.Format(b.address), t.Muted)
 
 		case controllers.MediaStatus:
 			b.Logger().Debug("Event MediaStatus",
@@ -196,7 +214,7 @@ func (b *Bind) doEvents() {
 				"reason", t.IdleReason,
 			)
 
-			_ = b.MQTT().PublishAsync(ctx, b.config.TopicStateStatus, strings.ToLower(t.PlayerState))
+			_ = b.MQTT().PublishAsync(ctx, cfg.TopicStateStatus.Format(b.address), strings.ToLower(t.PlayerState))
 
 			if t.PlayerState == PlayerStateIdle && t.IdleReason == IdleReasonFinished {
 				b.mutex.RLock()
@@ -209,7 +227,7 @@ func (b *Bind) doEvents() {
 			}
 
 			if t.Media != nil {
-				_ = b.MQTT().PublishAsync(ctx, b.config.TopicStateContent, t.Media.ContentId)
+				_ = b.MQTT().PublishAsync(ctx, cfg.TopicStateContent.Format(b.address), t.Media.ContentId)
 			}
 
 		case eventClose:

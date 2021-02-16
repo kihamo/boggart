@@ -20,13 +20,16 @@ type Bind struct {
 	di.WidgetBind
 	di.WorkersBind
 
-	config                 *Config
 	components             sync.Map
 	status                 atomic.BoolNull
 	connectivitySubscriber *atomic.Bool
 
 	ip           *atomic.Value
 	ipSubscriber *atomic.Bool
+}
+
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
 }
 
 func (b *Bind) Run() error {

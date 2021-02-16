@@ -2,6 +2,7 @@ package sp3s
 
 import (
 	"context"
+	"errors"
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/di"
@@ -18,16 +19,35 @@ type Bind struct {
 	di.WidgetBind
 	di.WorkersBind
 
-	config *Config
-
 	state *atomic.BoolNull
 	power *atomic.Float32Null
 
 	provider *broadlink.SP3S
 }
 
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
 func (b *Bind) Run() error {
-	b.Meta().SetMAC(b.config.MAC.HardwareAddr)
+	cfg := b.config()
+
+	switch cfg.Model {
+	case "sp3seu":
+		b.provider = broadlink.NewSP3SEU(cfg.MAC.HardwareAddr, cfg.Host)
+
+	case "sp3sus":
+		b.provider = broadlink.NewSP3SUS(cfg.MAC.HardwareAddr, cfg.Host)
+
+	default:
+		return errors.New("unknown model " + cfg.Model)
+	}
+
+	b.provider.SetTimeout(cfg.ConnectionTimeout)
+
+	b.Meta().SetMAC(cfg.MAC.HardwareAddr)
+	b.state.Nil()
+	b.power.Nil()
 
 	return nil
 }

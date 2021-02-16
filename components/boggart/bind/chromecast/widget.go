@@ -12,7 +12,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	widget := b.Widget()
 
 	data := map[string]interface{}{
-		"url":    b.config.WidgetFileURL,
+		"url":    b.config().WidgetFileURL,
 		"volume": b.Volume(),
 	}
 

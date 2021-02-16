@@ -12,7 +12,9 @@ import (
 )
 
 func (b *Bind) Tasks() []tasks.Task {
-	if b.config.IPAddressSensorID == "" {
+	cfg := b.config()
+
+	if cfg.IPAddressSensorID == "" {
 		return nil
 	}
 
@@ -24,7 +26,7 @@ func (b *Bind) Tasks() []tasks.Task {
 					tasks.HandlerFuncFromShortToLong(b.taskImportMetricsHandler),
 				),
 			).
-			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.ImportMetricsInterval)),
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.ImportMetricsInterval)),
 	}
 }
 

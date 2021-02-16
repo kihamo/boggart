@@ -2,6 +2,7 @@ package rm
 
 import (
 	"context"
+	"errors"
 
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/broadlink"
@@ -14,9 +15,7 @@ type Bind struct {
 	di.MQTTBind
 	di.ProbesBind
 
-	config *ConfigRM
-
-	provider interface{}
+	provider broadlink.Device
 }
 
 type SupportCapture interface {
@@ -36,8 +35,27 @@ type SupportRF433Mhz interface {
 	SendRF433MhzRemoteControlCodeAsString(code string, count int) error
 }
 
-func (b *Bind) Run() error {
-	b.Meta().SetMAC(b.config.MAC.HardwareAddr)
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
 
-	return b.MQTT().PublishAsync(context.Background(), b.config.TopicCaptureState, false)
+func (b *Bind) Run() error {
+	cfg := b.config()
+
+	switch cfg.Model {
+	case "rm3mini":
+		b.provider = broadlink.NewRMMini(cfg.MAC.HardwareAddr, cfg.Host)
+
+	case "rm2proplus":
+		b.provider = broadlink.NewRM2ProPlus3(cfg.MAC.HardwareAddr, cfg.Host)
+
+	default:
+		return errors.New("unknown model " + cfg.Model)
+	}
+
+	b.provider.SetTimeout(cfg.ConnectionTimeout)
+
+	b.Meta().SetMAC(cfg.MAC.HardwareAddr)
+
+	return b.MQTT().PublishAsync(context.Background(), cfg.TopicCaptureState.Format(cfg.MAC.String()), false)
 }

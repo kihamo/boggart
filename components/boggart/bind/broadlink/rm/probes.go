@@ -7,5 +7,5 @@ import (
 )
 
 func (b *Bind) ReadinessProbe(ctx context.Context) error {
-	return probes.PingProbe(ctx, b.config.Host)
+	return probes.PingProbe(ctx, b.config().Host)
 }

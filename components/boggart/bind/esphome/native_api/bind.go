@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/golang/protobuf/proto"
@@ -28,9 +29,28 @@ type Bind struct {
 	di.WidgetBind
 	di.WorkersBind
 
-	config   *Config
 	provider *api.Client
 	ota      *esphome.OTA
+}
+
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
+func (b *Bind) Run() error {
+	cfg := b.config()
+
+	otaAddress := cfg.Address
+	if cfg.OTAPort > 0 {
+		otaAddress += strconv.FormatUint(cfg.OTAPort, 10)
+	}
+
+	b.provider = api.New(cfg.Address, cfg.Password).
+		WithClientID("Boggart bind").
+		WithDebug(cfg.Debug)
+	b.ota = esphome.NewOTA(otaAddress, cfg.OTAPassword)
+
+	return nil
 }
 
 func (b *Bind) Close() error {
@@ -115,6 +135,7 @@ func (b *Bind) syncState(ctx context.Context, messages ...proto.Message) error {
 	}
 
 	entities := make(map[uint32]api.MessageEntity)
+	cfg := b.config()
 
 	for _, message := range messages {
 		if e, ok := message.(api.MessageEntity); ok {
@@ -139,7 +160,7 @@ func (b *Bind) syncState(ctx context.Context, messages ...proto.Message) error {
 		objectID := entity.GetObjectId()
 
 		if stateName, e := api.State(entity.(proto.Message), state, false); e == nil {
-			if e = b.MQTT().PublishAsync(ctx, b.config.TopicState.Format(mac, objectID), stateName); e != nil {
+			if e = b.MQTT().PublishAsync(ctx, cfg.TopicState.Format(mac, objectID), stateName); e != nil {
 				err = multierr.Append(err, e)
 			}
 
@@ -151,42 +172,42 @@ func (b *Bind) syncState(ctx context.Context, messages ...proto.Message) error {
 					WarmWhite: uint8(st.White * 100),
 				}
 
-				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateBrightness.Format(mac, objectID), st.Brightness); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, cfg.TopicStateBrightness.Format(mac, objectID), st.Brightness); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateRed.Format(mac, objectID), color.Red); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, cfg.TopicStateRed.Format(mac, objectID), color.Red); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateGreen.Format(mac, objectID), color.Green); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, cfg.TopicStateGreen.Format(mac, objectID), color.Green); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateBlue.Format(mac, objectID), color.Blue); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, cfg.TopicStateBlue.Format(mac, objectID), color.Blue); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateWhite.Format(mac, objectID), color.WarmWhite); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, cfg.TopicStateWhite.Format(mac, objectID), color.WarmWhite); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateColorTemperature.Format(mac, objectID), uint8(st.ColorTemperature*100)); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, cfg.TopicStateColorTemperature.Format(mac, objectID), uint8(st.ColorTemperature*100)); e != nil {
 					err = multierr.Append(err, e)
 				}
 
-				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateEffect.Format(mac, objectID), st.Effect); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, cfg.TopicStateEffect.Format(mac, objectID), st.Effect); e != nil {
 					err = multierr.Append(err, e)
 				}
 
 				// in HEX
-				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateColorRGB.Format(mac, objectID), color.String()); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, cfg.TopicStateColorRGB.Format(mac, objectID), color.String()); e != nil {
 					err = multierr.Append(err, e)
 				}
 
 				// in HSV
 				h, s, v := color.HSV()
-				if e = b.MQTT().PublishAsync(ctx, b.config.TopicStateColorHSV.Format(mac, objectID), fmt.Sprintf("%d,%.2f,%.2f", h, s, v)); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, cfg.TopicStateColorHSV.Format(mac, objectID), fmt.Sprintf("%d,%.2f,%.2f", h, s, v)); e != nil {
 					err = multierr.Append(err, e)
 				}
 			}

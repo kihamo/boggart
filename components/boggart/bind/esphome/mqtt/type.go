@@ -7,27 +7,10 @@ import (
 
 type Type struct{}
 
-func (t Type) CreateBind(c interface{}) (boggart.Bind, error) {
-	config := c.(*Config)
-
-	if config.TopicLog == "" {
-		config.TopicLog = config.TopicPrefix + "/debug"
-	}
-
-	if config.TopicBirth == "" {
-		config.TopicBirth = config.TopicPrefix + "/status"
-	}
-
-	if config.TopicWill == "" {
-		config.TopicWill = config.TopicPrefix + "/status"
-	}
-
-	bind := &Bind{
-		config:                 config,
+func (t Type) CreateBind() boggart.Bind {
+	return &Bind{
 		ip:                     atomic.NewValue(),
 		ipSubscriber:           atomic.NewBool(),
 		connectivitySubscriber: atomic.NewBool(),
 	}
-
-	return bind, nil
 }

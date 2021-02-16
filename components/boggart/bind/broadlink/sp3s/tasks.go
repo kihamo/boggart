@@ -16,7 +16,7 @@ func (b *Bind) Tasks() []tasks.Task {
 					tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
 				),
 			).
-			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config().UpdaterInterval)),
 	}
 }
 
@@ -26,14 +26,17 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		return err
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicState, state); e != nil {
+	cfg := b.config()
+	mac := cfg.MAC.String()
+
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicState.Format(mac), state); e != nil {
 		err = multierr.Append(err, e)
 	}
 
 	if power, e := b.Power(); e == nil {
-		metricPower.With("serial_number", b.config.MAC.String()).Set(power)
+		metricPower.With("serial_number", cfg.MAC.String()).Set(power)
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicPower, power); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicPower.Format(mac), power); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {

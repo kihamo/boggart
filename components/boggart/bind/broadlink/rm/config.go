@@ -9,7 +9,7 @@ import (
 	"github.com/kihamo/boggart/types"
 )
 
-type ConfigRM struct {
+type Config struct {
 	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
@@ -38,7 +38,7 @@ func (t Type) ConfigDefaults() interface{} {
 	probesConfig.ReadinessPeriod = time.Second * 30
 	probesConfig.ReadinessTimeout = time.Second * 10
 
-	return &ConfigRM{
+	return &Config{
 		ProbesConfig:         probesConfig,
 		LoggerConfig:         di.LoggerConfigDefaults(),
 		CaptureDuration:      time.Second * 15,

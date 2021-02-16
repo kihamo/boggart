@@ -8,8 +8,20 @@ import (
 )
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
+	cfg := b.config()
+
+	topicBirth := cfg.TopicBirth
+	if topicBirth == "" {
+		topicBirth = cfg.TopicPrefix + "/status"
+	}
+
+	topicWill := cfg.TopicWill
+	if topicWill == "" {
+		topicWill = cfg.TopicPrefix + "/status"
+	}
+
 	subscribers := []mqtt.Subscriber{
-		mqtt.NewSubscriber(b.config.TopicDiscoveryPrefix+"/+/"+b.config.TopicPrefix+"/+/config", 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(cfg.TopicDiscoveryPrefix+"/+/"+cfg.TopicPrefix+"/+/config", 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			// компонент удаляют, поэтому пришла пустота на которую реагировать не надо
 			if len(message.Payload()) == 0 {
 				return nil
@@ -62,7 +74,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return err
 			}
 
-			if b.config.IPAddressSensorID == id && b.ipSubscriber.IsFalse() {
+			if cfg.IPAddressSensorID == id && b.ipSubscriber.IsFalse() {
 				b.MQTT().Subscribe(mqtt.NewSubscriber(component.StateTopic(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 					b.ip.Store(net.ParseIP(message.String()))
 					return nil
@@ -85,15 +97,15 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			return b.register(component)
 		}),
-		mqtt.NewSubscriber(b.config.TopicBirth, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if message.String() == b.config.BirthMessage {
+		mqtt.NewSubscriber(topicBirth, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+			if message.String() == cfg.BirthMessage {
 				b.status.True()
 			}
 
 			return nil
 		}),
-		mqtt.NewSubscriber(b.config.TopicWill, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-			if message.String() == b.config.WillMessage {
+		mqtt.NewSubscriber(topicWill, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+			if message.String() == cfg.WillMessage {
 				b.status.False()
 			}
 
