@@ -14,7 +14,7 @@ type Config struct {
 	TopicRuntimeConfig mqtt.Topic `mapstructure:"topic_runtime_config" yaml:"topic_runtime_config"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	return &Config{
 		LoggerConfig:       di.LoggerConfigDefaults(),
 		DeviceIDFile:       "/mnt/data/miio/device.uid",

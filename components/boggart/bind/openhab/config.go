@@ -17,7 +17,7 @@ type Config struct {
 	ProxyAddress string `mapstructure:"proxy_address" yaml:"proxy_address"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	probesConfig := di.ProbesConfigDefaults()
 	probesConfig.ReadinessPeriod = time.Second * 30
 	probesConfig.ReadinessTimeout = time.Second * 5

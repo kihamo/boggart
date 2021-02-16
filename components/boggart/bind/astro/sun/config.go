@@ -44,7 +44,7 @@ type Config struct {
 	TopicNightAfterDuration       mqtt.Topic `mapstructure:"topic_night_after_duration" yaml:"topic_night_after_duration"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/astro/sun/+/"
 
 	return &Config{

@@ -19,7 +19,7 @@ type Config struct {
 	TopicPromise mqtt.Topic `mapstructure:"topic_promise" yaml:"topic_promise"`
 }
 
-func (Type) Config() interface{} {
+func (Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/service/softvideo/+/"
 
 	probesConfig := di.ProbesConfigDefaults()

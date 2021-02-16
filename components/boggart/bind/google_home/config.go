@@ -15,7 +15,7 @@ type Config struct {
 	Debug   bool
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	probesConfig := di.ProbesConfigDefaults()
 	probesConfig.ReadinessPeriod = time.Second * 30
 	probesConfig.ReadinessTimeout = time.Second * 10

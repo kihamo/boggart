@@ -38,7 +38,7 @@ type Config struct {
 	TopicAction                 mqtt.Topic    `mapstructure:"topic_action" yaml:"topic_action"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/xiaomi/roborock/+/"
 
 	probesConfig := di.ProbesConfigDefaults()

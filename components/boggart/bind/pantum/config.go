@@ -24,7 +24,7 @@ type Config struct {
 	TopicDrumStatus      mqtt.Topic    `mapstructure:"topic_drum_status" yaml:"topic_drum_status"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/pantum/+/"
 
 	probesConfig := di.ProbesConfigDefaults()

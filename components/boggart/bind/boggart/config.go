@@ -15,7 +15,7 @@ type Config struct {
 	TopicShutdown      mqtt.Topic `mapstructure:"topic_shutdown" yaml:"topic_shutdown"`
 }
 
-func (Type) Config() interface{} {
+func (Type) ConfigDefaults() interface{} {
 	return &Config{
 		TopicName:     boggart.ComponentName + "/boggart/+/application/name",
 		TopicVersion:  boggart.ComponentName + "/boggart/+/application/version",

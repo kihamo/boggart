@@ -31,7 +31,7 @@ type Config struct {
 	TopicDailyWindSpeed   mqtt.Topic `mapstructure:"topic_daily_wind_speed" yaml:"topic_daily_wind_speed"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/service/openweathermap/+/"
 
 	return &Config{

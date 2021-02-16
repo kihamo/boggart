@@ -32,7 +32,7 @@ type Config struct {
 	TopicInputVolume      mqtt.Topic    `mapstructure:"topic_volume" yaml:"topic_volume"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/meter/pulsar/+/"
 
 	probesConfig := di.ProbesConfigDefaults()

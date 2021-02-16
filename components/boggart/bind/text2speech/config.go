@@ -30,7 +30,7 @@ type Config struct {
 	TopicBinary                mqtt.Topic `mapstructure:"topic_binary" yaml:"topic_binary"`
 }
 
-func (Type) Config() interface{} {
+func (Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/text2speech/+/"
 
 	cacheDir, _ := os.UserCacheDir()

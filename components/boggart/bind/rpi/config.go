@@ -23,7 +23,7 @@ type Config struct {
 	TopicSinceRebootSoftTemperatureReached mqtt.Topic    `mapstructure:"topic_since_reboot_soft_temperature_reached" yaml:"topic_since_reboot_soft_temperature_reached"`
 }
 
-func (Type) Config() interface{} {
+func (Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/rpi/+/"
 
 	return &Config{

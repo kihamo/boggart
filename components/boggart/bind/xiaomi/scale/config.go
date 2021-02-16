@@ -69,7 +69,7 @@ type Config struct {
 	TopicMetabolicAge      mqtt.Topic          `mapstructure:"topic_metabolic_age" yaml:"topic_metabolic_age"`
 }
 
-func (Type) Config() interface{} {
+func (Type) ConfigDefaults() interface{} {
 	var (
 		prefix        mqtt.Topic = boggart.ComponentName + "/xiaomi/scale/+/"
 		prefixProfile            = prefix + "+/"

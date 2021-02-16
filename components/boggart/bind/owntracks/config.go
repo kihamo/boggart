@@ -51,7 +51,7 @@ type Config struct {
 	TopicStateLocation         mqtt.Topic `mapstructure:"topic_state_location" yaml:"topic_state_location"`
 }
 
-func (Type) Config() interface{} {
+func (Type) ConfigDefaults() interface{} {
 	var (
 		prefixOT mqtt.Topic = "owntracks/+/+"
 		prefix   mqtt.Topic = boggart.ComponentName + "/owntracks/+/+/"

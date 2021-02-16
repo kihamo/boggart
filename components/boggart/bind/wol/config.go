@@ -10,7 +10,7 @@ type Config struct {
 	TopicWOLWithIPAndSubnet mqtt.Topic `mapstructure:"topic_wol_with_ip_and_subnet" yaml:"topic_wol_with_ip_and_subnet"`
 }
 
-func (Type) Config() interface{} {
+func (Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/wol/"
 
 	return &Config{

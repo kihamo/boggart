@@ -32,7 +32,7 @@ type Config struct {
 	FileAutoClean       bool `mapstructure:"file_auto_clean" yaml:"file_auto_clean"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/telegram/+/"
 
 	cacheDir, _ := os.UserCacheDir()

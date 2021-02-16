@@ -11,11 +11,34 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type BindItemsList []boggart.BindItem
+type MarshalShort interface {
+	MarshalShortYAML() (interface{}, error)
+}
+
+type MarshallerContainer struct {
+	short bool
+	value interface{}
+}
+
+func (m MarshallerContainer) MarshalYAML() (interface{}, error) {
+	if m.short {
+		if short, ok := m.value.(MarshalShort); ok {
+			return short.MarshalShortYAML()
+		}
+	}
+
+	if long, ok := m.value.(yaml.Marshaler); ok {
+		return long.MarshalYAML()
+	}
+
+	return m.value, nil
+}
+
+type BindItemsList []interface{}
 
 func (l BindItemsList) MarshalYAML() (interface{}, error) {
 	return struct {
-		Devices []boggart.BindItem
+		Devices []interface{}
 	}{
 		Devices: l,
 	}, nil
@@ -75,17 +98,39 @@ func (h *ConfigHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	enc := yaml.NewEncoder(buf)
 	defer enc.Close()
 
-	var value interface{}
+	var (
+		value interface{}
+		short bool
+	)
+
+	if val := q.Get("short"); val != "" {
+		short = true
+	}
 
 	if id != "" {
-		value = h.component.Bind(id)
+		bind := h.component.Bind(id)
 
-		if value == nil {
+		if bind == nil {
 			h.NotFound(w, r)
 			return
 		}
+
+		value = MarshallerContainer{
+			short: short,
+			value: bind,
+		}
 	} else {
-		value = BindItemsList(h.component.BindItems())
+		binds := h.component.BindItems()
+		list := make([]interface{}, 0, len(binds))
+
+		for _, bind := range binds {
+			list = append(list, MarshallerContainer{
+				short: short,
+				value: bind,
+			})
+		}
+
+		value = BindItemsList(list)
 	}
 
 	if err := enc.Encode(value); err != nil {

@@ -30,7 +30,7 @@ type Config struct {
 	TopicStatePower         mqtt.Topic `mapstructure:"topic_state_power" yaml:"topic_state_power"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/tv/+/"
 
 	probesConfig := di.ProbesConfigDefaults()

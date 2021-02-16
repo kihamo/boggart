@@ -16,7 +16,7 @@ type Config struct {
 	TopicSendMulti mqtt.Topic `mapstructure:"topic_send_multi" yaml:"topic_send_multi"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/mail/+/"
 
 	return &Config{

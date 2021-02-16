@@ -24,7 +24,7 @@ type Config struct {
 	TopicLastBill          mqtt.Topic    `mapstructure:"topic_last_bill" yaml:"topic_last_bill"`
 }
 
-func (Type) Config() interface{} {
+func (Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/service/elektroset/+/"
 
 	return &Config{

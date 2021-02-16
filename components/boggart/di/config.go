@@ -23,7 +23,7 @@ func ConfigContainerBind(bind boggart.Bind) (*ConfigContainer, bool) {
 
 func ConfigForBind(bind boggart.Bind) (interface{}, bool) {
 	if support, ok := ConfigContainerBind(bind); ok {
-		return support.Bind(), false
+		return support.Bind(), true
 	}
 
 	return nil, false

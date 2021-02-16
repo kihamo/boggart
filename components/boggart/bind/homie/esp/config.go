@@ -30,7 +30,7 @@ type Config struct {
 	TopicOTAEnabled                    mqtt.Topic `mapstructure:"topic_ota_enabled" yaml:"topic_ota_enabled"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	var (
 		prefix     mqtt.Topic = "+/+/"
 		prefixImpl            = prefix + "$implementation/"

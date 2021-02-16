@@ -36,7 +36,7 @@ type Config struct {
 	TopicHeightCurrent               mqtt.Topic    `mapstructure:"topic_height_current" yaml:"topic_height_current"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/octoprint/+/"
 
 	probesConfig := di.ProbesConfigDefaults()

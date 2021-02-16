@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"reflect"
+	"strings"
 	"sync/atomic"
 
 	"github.com/kihamo/boggart/components/boggart"
@@ -65,8 +67,50 @@ func (i *BindItem) updateStatus(status boggart.BindStatus) bool {
 	return old != value
 }
 
+func (i *BindItem) MarshalShortYAML() (interface{}, error) {
+	return i.marshalYAML(true)
+}
+
 func (i *BindItem) MarshalYAML() (interface{}, error) {
-	config, _ := di.ConfigForBind(i.bind)
+	return i.marshalYAML(false)
+}
+
+func (i *BindItem) marshalYAML(short bool) (interface{}, error) {
+	config, ok := di.ConfigForBind(i.bind)
+	if short && ok {
+		defaults := i.bindType.ConfigDefaults()
+
+		originalV := reflect.Indirect(reflect.ValueOf(config))
+		defaultsV := reflect.Indirect(reflect.ValueOf(defaults))
+
+		shortConfig := make(map[string]interface{}, defaultsV.NumField())
+
+		if defaultsV.Kind() == reflect.Struct && defaultsV.Kind() == originalV.Kind() && defaultsV.NumField() == originalV.NumField() {
+			for i := 0; i < defaultsV.NumField(); i++ {
+				originalF := originalV.Type().Field(i)
+				defaultsF := defaultsV.Type().Field(i)
+
+				if originalF.Name != defaultsF.Name {
+					continue
+				}
+
+				name := strings.ToLower(defaultsF.Name)
+				if tag := defaultsF.Tag.Get("yaml"); tag != "" {
+					name = tag
+				}
+
+				value := originalV.FieldByName(originalF.Name).Interface()
+
+				if value == defaultsV.FieldByName(defaultsF.Name).Interface() {
+					continue
+				}
+
+				shortConfig[name] = value
+			}
+		}
+
+		config = shortConfig
+	}
 
 	return BindItemYaml{
 		Type:        i.Type(),

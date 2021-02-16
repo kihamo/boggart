@@ -207,7 +207,7 @@ func (h *BindHandler) actionCreateOrUpdate(w *dashboard.Response, r *dashboard.R
 
 			if bindYAML.Type != "" {
 				if t, err := boggart.GetBindType(bindYAML.Type); err == nil {
-					bindYAML.Config = t.Config()
+					bindYAML.Config = t.ConfigDefaults()
 				} else {
 					bindYAML.Type = ""
 				}

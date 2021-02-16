@@ -18,7 +18,7 @@ type Config struct {
 	TopicFeedEvent  mqtt.Topic    `mapstructure:"topic_feed_event" yaml:"topic_feed_event"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/service/pass24online/+/"
 
 	return &Config{

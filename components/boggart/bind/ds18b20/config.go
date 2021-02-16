@@ -17,7 +17,7 @@ type Config struct {
 	TopicValue      mqtt.Topic    `mapstructure:"topic_value" yaml:"topic_value"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	probesConfig := di.ProbesConfigDefaults()
 	probesConfig.ReadinessPeriod = time.Minute
 	probesConfig.ReadinessTimeout = time.Second * 5

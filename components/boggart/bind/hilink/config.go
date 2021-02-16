@@ -48,7 +48,7 @@ type Config struct {
 	TopicConnectionUpload       mqtt.Topic    `mapstructure:"topic_connection_upload" yaml:"topic_connection_upload"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/hilink/+/"
 
 	return &Config{

@@ -23,7 +23,7 @@ type Config struct {
 	Once     bool
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	serialConfig := serial.DefaultOptions()
 
 	probesConfig := di.ProbesConfigDefaults()

@@ -22,7 +22,7 @@ type Config struct {
 	TopicCommandRun  mqtt.Topic    `mapstructure:"topic_command_run" yaml:"topic_command_run"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/ups/+/"
 
 	probesConfig := di.ProbesConfigDefaults()

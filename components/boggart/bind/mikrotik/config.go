@@ -30,7 +30,7 @@ type Config struct {
 	TopicSyslog                   mqtt.Topic        `mapstructure:"topic_syslog" yaml:"topic_syslog"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/router/+/"
 
 	probesConfig := di.ProbesConfigDefaults()

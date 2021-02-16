@@ -35,7 +35,7 @@ type Config struct {
 	PermitJoin                    bool `mapstructure:"permit_join" yaml:"permit_join"`
 }
 
-func (Type) Config() interface{} {
+func (Type) ConfigDefaults() interface{} {
 	var (
 		prefix       mqtt.Topic = boggart.ComponentName + "/zigbee/zstack/+/"
 		prefixDevice            = prefix + "+/"

@@ -28,7 +28,7 @@ type Config struct {
 	TopicFirmwareVersion mqtt.Topic    `mapstructure:"topic_firmware_version" yaml:"topic_firmware_version"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/meter/mercury/+/"
 
 	probesConfig := di.ProbesConfigDefaults()

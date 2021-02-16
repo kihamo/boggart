@@ -22,7 +22,7 @@ type Config struct {
 	ImportMetricsInterval time.Duration `mapstructure:"import_metrics_interval" yaml:"import_metrics_interval"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	probesConfig := di.ProbesConfigDefaults()
 	probesConfig.ReadinessPeriod = time.Second * 15
 	probesConfig.ReadinessTimeout = time.Second

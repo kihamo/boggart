@@ -44,7 +44,7 @@ type Config struct {
 	EventsStreamingEnabled         bool `mapstructure:"events_streaming_enabled" yaml:"events_streaming_enabled,omitempty"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/cctv/+/"
 
 	probesConfig := di.ProbesConfigDefaults()

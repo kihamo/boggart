@@ -31,7 +31,7 @@ type ConfigRM struct {
 	TopicRF433mhzCapture mqtt.Topic         `mapstructure:"topic_rf433mhz_capture" yaml:"topic_rf433mhz_capture"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/remote-control/+/"
 
 	probesConfig := di.ProbesConfigDefaults()

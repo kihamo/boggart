@@ -24,7 +24,7 @@ type Config struct {
 	TopicStateHDDUsage        mqtt.Topic    `mapstructure:"topic_state_hdd_usage" yaml:"topic_state_hdd_usage"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/cctv/+/"
 
 	return &Config{

@@ -20,7 +20,7 @@ type Config struct {
 	TopicMeterValue mqtt.Topic    `mapstructure:"topic_meter_value" yaml:"topic_meter_value"`
 }
 
-func (Type) Config() interface{} {
+func (Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/service/rkcm/+/"
 
 	return &Config{

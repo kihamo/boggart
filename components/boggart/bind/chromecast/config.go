@@ -33,7 +33,7 @@ type Config struct {
 	TopicStateContent mqtt.Topic `mapstructure:"topic_state_content" yaml:"topic_state_content"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/chromecast/+/"
 
 	probesConfig := di.ProbesConfigDefaults()

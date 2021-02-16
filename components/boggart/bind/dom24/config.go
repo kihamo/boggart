@@ -22,7 +22,7 @@ type Config struct {
 	TopicAccountBill        mqtt.Topic    `mapstructure:"topic_account_bill" yaml:"topic_account_bill"`
 }
 
-func (Type) Config() interface{} {
+func (Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/service/dom24/"
 
 	return &Config{

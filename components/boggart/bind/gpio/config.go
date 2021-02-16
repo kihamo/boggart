@@ -16,7 +16,7 @@ type Config struct {
 	TopicPinSet   mqtt.Topic `mapstructure:"topic_pin_set" yaml:"topic_pin_set"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/gpio/+"
 
 	return &Config{

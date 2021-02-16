@@ -52,12 +52,12 @@ func GetBindTypes() map[string]BindType {
 }
 
 type BindType interface {
-	Config() interface{}
+	ConfigDefaults() interface{}
 	CreateBind(config interface{}) (Bind, error)
 }
 
 func ValidateBindConfig(t BindType, config interface{}) (cfg interface{}, md *mapstructure.Metadata, err error) {
-	if prepare := t.Config(); prepare != nil {
+	if prepare := t.ConfigDefaults(); prepare != nil {
 		md = new(mapstructure.Metadata)
 
 		mapStructureDecoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{

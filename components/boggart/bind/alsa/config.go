@@ -21,7 +21,7 @@ type Config struct {
 	TopicStateMute   mqtt.Topic `mapstructure:"topic_state_mute" yaml:"topic_state_mute"`
 }
 
-func (t Type) Config() interface{} {
+func (t Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/alsa/+/"
 
 	return &Config{
