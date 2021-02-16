@@ -21,14 +21,19 @@ type Bind struct {
 	di.WidgetBind
 	di.WorkersBind
 
-	config         *Config
 	alarmStreaming *xmeye.AlertStreaming
 }
 
-func (b *Bind) client(ctx context.Context) (*xmeye.Client, error) {
-	password, _ := b.config.Address.User.Password()
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
 
-	provider, err := xmeye.New(b.config.Address.Host, b.config.Address.User.Username(), password)
+func (b *Bind) client(ctx context.Context) (*xmeye.Client, error) {
+	cfg := b.config()
+
+	password, _ := cfg.Address.User.Password()
+
+	provider, err := xmeye.New(cfg.Address.Host, cfg.Address.User.Username(), password)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +53,9 @@ func (b *Bind) startAlarmStreaming() error {
 		return err
 	}
 
-	b.alarmStreaming = client.AlarmStreaming(ctx, b.config.AlarmStreamingInterval)
+	cfg := b.config()
+
+	b.alarmStreaming = client.AlarmStreaming(ctx, cfg.AlarmStreamingInterval)
 	defer client.Close()
 
 	go func() {
@@ -60,7 +67,7 @@ func (b *Bind) startAlarmStreaming() error {
 					return
 				}
 
-				if err := b.MQTT().PublishAsync(ctx, b.config.TopicEvent.Format(b.Meta().SerialNumber(), alarm.Channel, alarm.Event), alarm.Status); err != nil {
+				if err := b.MQTT().PublishAsync(ctx, cfg.TopicEvent.Format(b.Meta().SerialNumber(), alarm.Channel, alarm.Event), alarm.Status); err != nil {
 					b.Logger().Error("Send alarm to MQTT failed", "error", err.Error())
 				}
 

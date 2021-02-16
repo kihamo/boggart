@@ -28,6 +28,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 	}
 
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
+	cfg := b.config()
 	channels := make([]*openhab.Channel, 0, 2+len(disks.Payload.Content.Disks)*3)
 
 	const (
@@ -40,13 +41,13 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 
 	channels = append(channels,
 		openhab.NewChannel(idModel, openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicStateModel.Format(sn)).
+			WithStateTopic(cfg.TopicStateModel.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idModel, openhab.ItemTypeString).
 					WithLabel("Model"),
 			),
 		openhab.NewChannel(idFirmwareVersion, openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicStateFirmwareVersion.Format(sn)).
+			WithStateTopic(cfg.TopicStateFirmwareVersion.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idFirmwareVersion, openhab.ItemTypeString).
 					WithLabel("Firmware version"),
@@ -58,21 +59,21 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 
 		channels = append(channels,
 			openhab.NewChannel(id+idHDDCapacity, openhab.ChannelTypeNumber).
-				WithStateTopic(b.config.TopicStateHDDCapacity.Format(sn, disk.SerialNum)).
+				WithStateTopic(cfg.TopicStateHDDCapacity.Format(sn, disk.SerialNum)).
 				AddItems(
 					openhab.NewItem(itemPrefix+id+idHDDCapacity, openhab.ItemTypeNumber).
 						WithLabel("HDD capacity [JS(human_bytes.js):%s]").
 						WithIcon("chart"),
 				),
 			openhab.NewChannel(id+idHDDUsage, openhab.ChannelTypeNumber).
-				WithStateTopic(b.config.TopicStateHDDUsage.Format(sn, disk.SerialNum)).
+				WithStateTopic(cfg.TopicStateHDDUsage.Format(sn, disk.SerialNum)).
 				AddItems(
 					openhab.NewItem(itemPrefix+id+idHDDUsage, openhab.ItemTypeNumber).
 						WithLabel("HDD usage [JS(human_bytes.js):%s]").
 						WithIcon("chart"),
 				),
 			openhab.NewChannel(id+idHDDFree, openhab.ChannelTypeNumber).
-				WithStateTopic(b.config.TopicStateHDDFree.Format(sn, disk.SerialNum)).
+				WithStateTopic(cfg.TopicStateHDDFree.Format(sn, disk.SerialNum)).
 				AddItems(
 					openhab.NewItem(itemPrefix+id+idHDDFree, openhab.ItemTypeNumber).
 						WithLabel("HDD free [JS(human_bytes.js):%s]").

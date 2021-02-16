@@ -26,6 +26,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 	}
 
 	itemPrefix := openhab.ItemPrefixFromBindMeta(b.Meta())
+	cfg := b.config()
 
 	const (
 		idBalance    = "Balance"
@@ -42,7 +43,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 
 		channels = append(channels,
 			openhab.NewChannel(id, openhab.ChannelTypeNumber).
-				WithStateTopic(b.config.TopicBalance.Format(account.Number)).
+				WithStateTopic(cfg.TopicBalance.Format(account.Number)).
 				AddItems(
 					openhab.NewItem(itemPrefix+id, openhab.ItemTypeNumber).
 						WithLabel("Account balance [%.2f ₽]").
@@ -56,14 +57,14 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 
 			channels = append(channels,
 				openhab.NewChannel(id+idBalance, openhab.ChannelTypeNumber).
-					WithStateTopic(b.config.TopicServiceBalance.Format(account.Number, serviceID)).
+					WithStateTopic(cfg.TopicServiceBalance.Format(account.Number, serviceID)).
 					AddItems(
 						openhab.NewItem(itemPrefix+id+idBalance, openhab.ItemTypeNumber).
 							WithLabel("Balance "+service.NMServiceType+" [%.2f ₽]").
 							WithIcon("price"),
 					),
 				openhab.NewChannel(id+idBill, openhab.ChannelTypeString).
-					WithStateTopic(b.config.TopicLastBill.Format(account.Number, serviceID)).
+					WithStateTopic(cfg.TopicLastBill.Format(account.Number, serviceID)).
 					AddItems(
 						openhab.NewItem(itemPrefix+id+idBill, openhab.ItemTypeString).
 							WithLabel("Bill "+service.NMServiceType+" [%s]").
@@ -79,14 +80,14 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 
 				channels = append(channels,
 					openhab.NewChannel(id+idMeterValue, openhab.ChannelTypeNumber).
-						WithStateTopic(b.config.TopicMeterValue.Format(account.Number, serviceID, meter)).
+						WithStateTopic(cfg.TopicMeterValue.Format(account.Number, serviceID, meter)).
 						AddItems(
 							openhab.NewItem(itemPrefix+id+idMeterValue, openhab.ItemTypeNumber).
 								WithLabel("Tariff "+meter+" value [JS(human_watts.js):%s]").
 								WithIcon("pressure"),
 						),
 					openhab.NewChannel(id+idMeterDate, openhab.ChannelTypeDateTime).
-						WithStateTopic(b.config.TopicMeterDate.Format(account.Number, serviceID, meter)).
+						WithStateTopic(cfg.TopicMeterDate.Format(account.Number, serviceID, meter)).
 						AddItems(
 							openhab.NewItem(itemPrefix+id+idMeterDate, openhab.ItemTypeDateTime).
 								WithLabel("Tariff "+meter+" date [%1$td.%1$tm.%1$tY]").

@@ -12,6 +12,8 @@ import (
 )
 
 func (b *Bind) Tasks() []tasks.Task {
+	cfg := b.config()
+
 	return []tasks.Task{
 		tasks.NewTask().
 			WithName("updater").
@@ -19,15 +21,17 @@ func (b *Bind) Tasks() []tasks.Task {
 				b.Workers().WrapTaskHandlerIsOnline(
 					tasks.HandlerWithTimeout(
 						tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
-						b.config.UpdaterTimeout,
+						cfg.UpdaterTimeout,
 					),
 				),
 			).
-			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.UpdaterInterval)),
 	}
 }
 
 func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
+	cfg := b.config()
+
 	sn := b.Meta().SerialNumber()
 	if sn == "" {
 		baseCfg, e := b.client.Information.GetBasicConfig(information.NewGetBasicConfigParamsWithContext(ctx), nil)
@@ -42,11 +46,11 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 		b.Meta().SetSerialNumber(baseCfg.Payload.Content.Sn)
 		sn = baseCfg.Payload.Content.Sn
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateModel.Format(sn), baseCfg.Payload.Content.ProductModel); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateModel.Format(sn), baseCfg.Payload.Content.ProductModel); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateFirmwareVersion.Format(sn), baseCfg.Payload.Content.SoftwareVersion); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateFirmwareVersion.Format(sn), baseCfg.Payload.Content.SoftwareVersion); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
@@ -93,15 +97,15 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 		metricStorageUsage.With("serial_number", sn).With("name", disk.SerialNum).Set(usage)
 		metricStorageAvailable.With("serial_number", sn).With("name", disk.SerialNum).Set(free)
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateHDDCapacity.Format(sn, disk.SerialNum), capacity); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateHDDCapacity.Format(sn, disk.SerialNum), capacity); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateHDDUsage.Format(sn, disk.SerialNum), usage); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateHDDUsage.Format(sn, disk.SerialNum), usage); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateHDDFree.Format(sn, disk.SerialNum), free); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateHDDFree.Format(sn, disk.SerialNum), free); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}

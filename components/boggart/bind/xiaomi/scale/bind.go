@@ -23,23 +23,37 @@ type Bind struct {
 
 	disconnected *atomic.BoolNull
 
-	config               *Config
 	provider             *scale.Client
 	currentProfile       atomic.Value
 	measureStartDatetime *atomic.Time
 }
 
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
 func (b *Bind) Run() error {
 	b.disconnected.Nil()
+	b.measureStartDatetime.Set(time.Now())
+
+	cfg := b.config()
+
 	b.notifyCurrentProfile(context.Background())
-	b.Meta().SetMAC(b.config.MAC.HardwareAddr)
+	b.Meta().SetMAC(cfg.MAC.HardwareAddr)
+
+	if len(cfg.Profiles) > 0 {
+		for name, profile := range cfg.Profiles {
+			profile.Name = name
+			profile.Age = profile.GetAge()
+		}
+	}
 
 	device, err := bluetooth.NewDevice()
 	if err != nil {
 		return err
 	}
 
-	b.provider = scale.NewClient(device, b.config.MAC.HardwareAddr, b.config.CaptureDuration, b.config.IgnoreEmptyImpedance)
+	b.provider = scale.NewClient(device, cfg.MAC.HardwareAddr, cfg.CaptureDuration, cfg.IgnoreEmptyImpedance)
 
 	return nil
 }
@@ -80,10 +94,12 @@ func (b *Bind) Profile(name string) *Profile {
 }
 
 func (b *Bind) Profiles() []*Profile {
-	profiles := make([]*Profile, 0, len(b.config.Profiles)+1)
+	cfg := b.config()
+
+	profiles := make([]*Profile, 0, len(cfg.Profiles)+1)
 	guestExist := false
 
-	for _, profile := range b.config.Profiles {
+	for _, profile := range cfg.Profiles {
 		profiles = append(profiles, profile)
 
 		if profile.Name == profileGuest.Name {

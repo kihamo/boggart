@@ -244,7 +244,7 @@ func (b *Bind) widgetActionAccounts(_ *dashboard.Response, r *dashboard.Request,
 	return map[string]interface{}{
 		"users":   users,
 		"groups":  viewGroups,
-		"current": b.config.Address.User.Username(),
+		"current": b.config().Address.User.Username(),
 	}
 }
 

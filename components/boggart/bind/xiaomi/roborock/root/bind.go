@@ -20,21 +20,29 @@ type Bind struct {
 	di.MetaBind
 	di.MQTTBind
 
-	config                 *Config
 	cacheRuntimeConfig     map[string]string
 	cacheRuntimeConfigLock sync.Mutex
 	watchFiles             map[string]func(string) error
 }
 
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
 func (b *Bind) Run() error {
-	if b.config.DeviceIDFile != "" {
-		if err := b.InitDeviceID(b.config.DeviceIDFile); err != nil {
+	b.cacheRuntimeConfig = make(map[string]string, 11)
+	b.watchFiles = make(map[string]func(string) error)
+
+	cfg := b.config()
+
+	if cfg.DeviceIDFile != "" {
+		if err := b.InitDeviceID(cfg.DeviceIDFile); err != nil {
 			return err
 		}
 	}
 
-	if b.config.RuntimeConfigFile != "" {
-		if err := b.AddWatchRuntimeConfig(b.config.RuntimeConfigFile); err != nil {
+	if cfg.RuntimeConfigFile != "" {
+		if err := b.AddWatchRuntimeConfig(cfg.RuntimeConfigFile); err != nil {
 			return err
 		}
 	}

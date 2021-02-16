@@ -14,12 +14,14 @@ var (
 )
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
+	cfg := b.config()
+
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(b.config.TopicSetFanPower, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSetFanPower)),
-		mqtt.NewSubscriber(b.config.TopicSetVolume, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSetVolume)),
-		mqtt.NewSubscriber(b.config.TopicTestVolume, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTTestVolume)),
-		mqtt.NewSubscriber(b.config.TopicFind, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTFind)),
-		mqtt.NewSubscriber(b.config.TopicAction, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTAction)),
+		mqtt.NewSubscriber(cfg.TopicSetFanPower, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSetFanPower)),
+		mqtt.NewSubscriber(cfg.TopicSetVolume, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTSetVolume)),
+		mqtt.NewSubscriber(cfg.TopicTestVolume, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTTestVolume)),
+		mqtt.NewSubscriber(cfg.TopicFind, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTFind)),
+		mqtt.NewSubscriber(cfg.TopicAction, 0, b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTAction)),
 	}
 }
 
@@ -122,11 +124,13 @@ func (b *Bind) updateState(ctx context.Context) error {
 
 	status, err := b.device.Status(ctx)
 	if err == nil {
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicState.Format(sn), status.State); e != nil {
+		cfg := b.config()
+
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicState.Format(sn), status.State); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicError.Format(sn), status.Error); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicError.Format(sn), status.Error); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
@@ -142,7 +146,7 @@ func (b *Bind) updateFanPower(ctx context.Context) error {
 
 	fan, err := b.device.FanPower(ctx)
 	if err == nil {
-		err = b.MQTT().PublishAsync(ctx, b.config.TopicFanPower.Format(sn), fan)
+		err = b.MQTT().PublishAsync(ctx, b.config().TopicFanPower.Format(sn), fan)
 	}
 
 	return err
@@ -156,7 +160,7 @@ func (b *Bind) updateVolume(ctx context.Context) error {
 
 	volume, err := b.device.SoundVolume(ctx)
 	if err == nil {
-		err = b.MQTT().PublishAsync(ctx, b.config.TopicVolume.Format(sn), volume)
+		err = b.MQTT().PublishAsync(ctx, b.config().TopicVolume.Format(sn), volume)
 	}
 
 	return err

@@ -27,12 +27,19 @@ type Bind struct {
 	di.WidgetBind
 	di.WorkersBind
 
-	config  *Config
 	client  *mosenergosbyt.Client
 	account *string
 }
 
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
 func (b *Bind) Run() error {
+	cfg := b.config()
+
+	b.client = mosenergosbyt.New(cfg.Login, cfg.Password)
+
 	accounts, err := b.client.Accounts(context.Background())
 	if err != nil {
 		return err
@@ -43,8 +50,8 @@ func (b *Bind) Run() error {
 			continue
 		}
 
-		if account.Provider.IDAbonent > 0 && ((b.config.Account == "" && b.account == nil) || b.config.Account == account.NNAccount) {
-			b.config.Account = account.NNAccount
+		if account.Provider.IDAbonent > 0 && ((cfg.Account == "" && b.account == nil) || cfg.Account == account.NNAccount) {
+			cfg.Account = account.NNAccount
 			b.account = &account.NNAccount
 
 			break

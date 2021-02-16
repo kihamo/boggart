@@ -2,6 +2,7 @@ package tvt
 
 import (
 	"github.com/kihamo/boggart/components/boggart/di"
+	"github.com/kihamo/boggart/protocols/swagger"
 	"github.com/kihamo/boggart/providers/tvt"
 )
 
@@ -14,6 +15,25 @@ type Bind struct {
 	di.ProbesBind
 	di.WorkersBind
 
-	config *Config
 	client *tvt.Client
+}
+
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
+func (b *Bind) Run() error {
+	cfg := b.config()
+
+	password, _ := cfg.Address.User.Password()
+
+	b.client = tvt.New(cfg.Address.Host, cfg.Address.User.Username(), password, cfg.Debug, swagger.NewLogger(
+		func(message string) {
+			b.Logger().Info(message)
+		},
+		func(message string) {
+			b.Logger().Debug(message)
+		}))
+
+	return nil
 }

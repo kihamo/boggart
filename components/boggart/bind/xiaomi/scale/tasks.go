@@ -17,7 +17,7 @@ func (b *Bind) Tasks() []tasks.Task {
 					tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
 				),
 			).
-			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config().UpdaterInterval)),
 	}
 }
 
@@ -28,6 +28,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	}
 
 	mac := b.Meta().MACAsString()
+	cfg := b.config()
 	profile := b.CurrentProfile()
 	measureStartDatetime := b.measureStartDatetime.Load()
 
@@ -59,15 +60,15 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		metricWeight.With("mac", mac, "profile", profile.Name).Set(measure.Weight())
 		metricImpedance.With("mac", mac, "profile", profile.Name).Set(float64(measure.Impedance()))
 
-		if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicDatetime.Format(profile.Name), measure.Datetime()); e != nil {
+		if e := b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicDatetime.Format(mac, profile.Name), measure.Datetime()); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicWeight.Format(profile.Name), measure.Weight()); e != nil {
+		if e := b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicWeight.Format(mac, profile.Name), measure.Weight()); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicImpedance.Format(profile.Name), measure.Impedance()); e != nil {
+		if e := b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicImpedance.Format(mac, profile.Name), measure.Impedance()); e != nil {
 			err = multierr.Append(err, e)
 		}
 
@@ -99,23 +100,23 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		metricWaterPercentage.With("mac", mac, "profile", profile.Name).Set(metrics.WaterPercentage())
 		metricIdealWeight.With("mac", mac, "profile", profile.Name).Set(metrics.IdealWeight())
 
-		if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicBMR.Format(profile.Name), metrics.BMR()); e != nil {
+		if e := b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicBMR.Format(mac, profile.Name), metrics.BMR()); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicBMI.Format(profile.Name), metrics.BMI()); e != nil {
+		if e := b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicBMI.Format(mac, profile.Name), metrics.BMI()); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicFatPercentage.Format(profile.Name), metrics.FatPercentage()); e != nil {
+		if e := b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicFatPercentage.Format(mac, profile.Name), metrics.FatPercentage()); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicWaterPercentage.Format(profile.Name), metrics.WaterPercentage()); e != nil {
+		if e := b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicWaterPercentage.Format(mac, profile.Name), metrics.WaterPercentage()); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicIdealWeight.Format(profile.Name), metrics.IdealWeight()); e != nil {
+		if e := b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicIdealWeight.Format(mac, profile.Name), metrics.IdealWeight()); e != nil {
 			err = multierr.Append(err, e)
 		}
 
@@ -130,35 +131,35 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 			metricBodyType.With("mac", mac, "profile", profile.Name).Set(float64(metrics.BodyType()))
 			metricMetabolicAge.With("mac", mac, "profile", profile.Name).Set(metrics.MetabolicAge())
 
-			if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicLBMCoefficient.Format(profile.Name), metrics.LBMCoefficient()); e != nil {
+			if e := b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicLBMCoefficient.Format(mac, profile.Name), metrics.LBMCoefficient()); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicBoneMass.Format(profile.Name), metrics.BoneMass()); e != nil {
+			if e := b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicBoneMass.Format(mac, profile.Name), metrics.BoneMass()); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicMuscleMass.Format(profile.Name), metrics.MuscleMass()); e != nil {
+			if e := b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicMuscleMass.Format(mac, profile.Name), metrics.MuscleMass()); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicVisceralFat.Format(profile.Name), metrics.VisceralFat()); e != nil {
+			if e := b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicVisceralFat.Format(mac, profile.Name), metrics.VisceralFat()); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicFatMassToIdeal.Format(profile.Name), metrics.FatMassToIdeal()); e != nil {
+			if e := b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicFatMassToIdeal.Format(mac, profile.Name), metrics.FatMassToIdeal()); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicProteinPercentage.Format(profile.Name), metrics.ProteinPercentage()); e != nil {
+			if e := b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicProteinPercentage.Format(mac, profile.Name), metrics.ProteinPercentage()); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicBodyType.Format(profile.Name), metrics.BodyType()); e != nil {
+			if e := b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicBodyType.Format(mac, profile.Name), metrics.BodyType()); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicMetabolicAge.Format(profile.Name), metrics.MetabolicAge()); e != nil {
+			if e := b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicMetabolicAge.Format(mac, profile.Name), metrics.MetabolicAge()); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}

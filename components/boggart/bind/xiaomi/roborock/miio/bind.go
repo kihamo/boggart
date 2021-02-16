@@ -15,8 +15,22 @@ type Bind struct {
 	di.WidgetBind
 	di.WorkersBind
 
-	config *Config
 	device *vacuum.Device
+}
+
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
+func (b *Bind) Run() error {
+	cfg := b.config()
+	b.device = vacuum.New(cfg.Host, cfg.Token)
+
+	if cfg.PacketsCounter > 0 {
+		b.device.Client().SetPacketsCounter(cfg.PacketsCounter)
+	}
+
+	return nil
 }
 
 func (b *Bind) Close() error {

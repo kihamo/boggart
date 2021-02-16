@@ -23,9 +23,10 @@ var (
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {
-	mac := b.config.MAC.HardwareAddr.String()
+	cfg := b.config()
+	mac := cfg.MAC.HardwareAddr.String()
 
-	for name := range b.config.Profiles {
+	for name := range cfg.Profiles {
 		metricWeight.With("mac", mac, "profile", name).Describe(ch)
 		metricImpedance.With("mac", mac, "profile", name).Describe(ch)
 		metricBMR.With("mac", mac, "profile", name).Describe(ch)
@@ -45,9 +46,10 @@ func (b *Bind) Describe(ch chan<- *snitch.Description) {
 }
 
 func (b *Bind) Collect(ch chan<- snitch.Metric) {
-	mac := b.config.MAC.HardwareAddr.String()
+	cfg := b.config()
+	mac := cfg.MAC.HardwareAddr.String()
 
-	for name := range b.config.Profiles {
+	for name := range cfg.Profiles {
 		metricWeight.With("mac", mac, "profile", name).Collect(ch)
 		metricImpedance.With("mac", mac, "profile", name).Collect(ch)
 		metricBMR.With("mac", mac, "profile", name).Collect(ch)

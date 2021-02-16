@@ -21,7 +21,7 @@ func (b *Bind) Tasks() []tasks.Task {
 					tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
 				),
 			).
-			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config().UpdaterInterval)),
 	}
 }
 
@@ -31,7 +31,8 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		return err
 	}
 
-	dateStart := time.Now().Add(-b.config.BalanceDetailsInterval)
+	cfg := b.config()
+	dateStart := time.Now().Add(-cfg.BalanceDetailsInterval)
 	dateEnd := time.Now()
 
 	type value struct {
@@ -49,7 +50,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 
 			metricServiceBalance.With("account", account.Number, "service", serviceID).Set(service.Balance)
 
-			if e := b.MQTT().PublishAsync(ctx, b.config.TopicServiceBalance.Format(account.Number, serviceID), service.Balance); e != nil {
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicServiceBalance.Format(account.Number, serviceID), service.Balance); e != nil {
 				err = multierr.Append(err, e)
 			}
 
@@ -106,11 +107,11 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 
 					metricMeterValue.With("account", account.Number, "service", serviceID, "tariff", v.tariff).Set(v.value)
 
-					if e := b.MQTT().PublishAsync(ctx, b.config.TopicMeterValue.Format(account.Number, serviceID, v.tariff), v.value); e != nil {
+					if e := b.MQTT().PublishAsync(ctx, cfg.TopicMeterValue.Format(account.Number, serviceID, v.tariff), v.value); e != nil {
 						err = multierr.Append(err, e)
 					}
 
-					if e := b.MQTT().PublishAsync(ctx, b.config.TopicMeterDate.Format(account.Number, serviceID, v.tariff), v.date); e != nil {
+					if e := b.MQTT().PublishAsync(ctx, cfg.TopicMeterDate.Format(account.Number, serviceID, v.tariff), v.date); e != nil {
 						err = multierr.Append(err, e)
 					}
 				}
@@ -128,7 +129,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 					})
 
 					if e == nil {
-						if e := b.MQTT().PublishAsync(ctx, b.config.TopicLastBill.Format(account.Number, serviceID), billLink); e != nil {
+						if e := b.MQTT().PublishAsync(ctx, cfg.TopicLastBill.Format(account.Number, serviceID), billLink); e != nil {
 							err = multierr.Append(err, e)
 						}
 					}
@@ -140,7 +141,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 
 		metricBalance.With("account", account.Number).Set(totalBalance)
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicBalance.Format(account.Number), totalBalance); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicBalance.Format(account.Number), totalBalance); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}

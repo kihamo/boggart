@@ -29,6 +29,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 	defer client.Close()
 
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
+	cfg := b.config()
 
 	const (
 		idEvent                = "Event"
@@ -40,32 +41,32 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 
 	channels := []*openhab.Channel{
 		openhab.NewChannel(idEvent, openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicEvent.Format(sn)).
+			WithStateTopic(cfg.TopicEvent.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idEvent, openhab.ItemTypeString).
 					WithLabel("Annotation").
 					WithIcon("text"),
 			),
 		openhab.NewChannel(idModel, openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicStateModel.Format(sn)).
+			WithStateTopic(cfg.TopicStateModel.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idModel, openhab.ItemTypeString).
 					WithLabel("Model"),
 			),
 		openhab.NewChannel(idFirmwareVersion, openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicStateFirmwareVersion.Format(sn)).
+			WithStateTopic(cfg.TopicStateFirmwareVersion.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idFirmwareVersion, openhab.ItemTypeString).
 					WithLabel("Firmware version"),
 			),
 		openhab.NewChannel(idFirmwareReleasedDate, openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicStateFirmwareReleasedDate.Format(sn)).
+			WithStateTopic(cfg.TopicStateFirmwareReleasedDate.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idFirmwareReleasedDate, openhab.ItemTypeString).
 					WithLabel("Firmware release date"),
 			),
 		openhab.NewChannel(idUpTime, openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicStateUpTime.Format(sn)).
+			WithStateTopic(cfg.TopicStateUpTime.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idUpTime, openhab.ItemTypeString).
 					WithLabel("Uptime [%d s]").
@@ -90,21 +91,21 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 
 				channels = append(channels,
 					openhab.NewChannel(id+idHDDCapacity, openhab.ChannelTypeNumber).
-						WithStateTopic(b.config.TopicStateHDDCapacity.Format(sn, p.LogicSerialNo)).
+						WithStateTopic(cfg.TopicStateHDDCapacity.Format(sn, p.LogicSerialNo)).
 						AddItems(
 							openhab.NewItem(itemPrefix+id+idHDDCapacity, openhab.ItemTypeNumber).
 								WithLabel("HDD capacity [JS(human_bytes.js):%s]").
 								WithIcon("chart"),
 						),
 					openhab.NewChannel(id+idHDDUsage, openhab.ChannelTypeNumber).
-						WithStateTopic(b.config.TopicStateHDDUsage.Format(sn, p.LogicSerialNo)).
+						WithStateTopic(cfg.TopicStateHDDUsage.Format(sn, p.LogicSerialNo)).
 						AddItems(
 							openhab.NewItem(itemPrefix+id+idHDDUsage, openhab.ItemTypeNumber).
 								WithLabel("HDD usage [JS(human_bytes.js):%s]").
 								WithIcon("chart"),
 						),
 					openhab.NewChannel(id+idHDDFree, openhab.ChannelTypeNumber).
-						WithStateTopic(b.config.TopicStateHDDFree.Format(sn, p.LogicSerialNo)).
+						WithStateTopic(cfg.TopicStateHDDFree.Format(sn, p.LogicSerialNo)).
 						AddItems(
 							openhab.NewItem(itemPrefix+id+idHDDFree, openhab.ItemTypeNumber).
 								WithLabel("HDD free [JS(human_bytes.js):%s]").

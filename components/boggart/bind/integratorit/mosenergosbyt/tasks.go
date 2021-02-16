@@ -19,7 +19,7 @@ func (b *Bind) Tasks() []tasks.Task {
 					tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
 				),
 			).
-			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config().UpdaterInterval)),
 	}
 }
 
@@ -29,12 +29,14 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		return err
 	}
 
+	cfg := b.config()
+
 	if balance, e := b.client.CurrentBalance(ctx, account.Provider.IDAbonent); e != nil {
 		err = multierr.Append(e, err)
 	} else {
 		metricBalance.With("account", account.NNAccount).Set(balance.Balance)
 
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicBalance.Format(account.NNAccount), balance.Balance); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicBalance.Format(account.NNAccount), balance.Balance); e != nil {
 			err = multierr.Append(e, err)
 		}
 
@@ -49,14 +51,14 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 
 			metricServiceBalance.With("account", account.NNAccount, "service", serviceID).Set(service.Balance)
 
-			if e := b.MQTT().PublishAsync(ctx, b.config.TopicServiceBalance.Format(account.NNAccount, serviceID), service.Balance); e != nil {
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicServiceBalance.Format(account.NNAccount, serviceID), service.Balance); e != nil {
 				err = multierr.Append(e, err)
 			}
 		}
 	}
 
 	// last bill
-	if details, e := b.client.ChargeDetail(ctx, account.Provider.IDAbonent, time.Now().Add(-b.config.BalanceDetailsInterval), time.Now()); e != nil {
+	if details, e := b.client.ChargeDetail(ctx, account.Provider.IDAbonent, time.Now().Add(-cfg.BalanceDetailsInterval), time.Now()); e != nil {
 		err = multierr.Append(e, err)
 	} else {
 		lastBillTime := time.Time{}
@@ -77,7 +79,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 			})
 
 			if e == nil {
-				if e := b.MQTT().PublishAsync(ctx, b.config.TopicLastBill.Format(account.NNAccount), billLink); e != nil {
+				if e := b.MQTT().PublishAsync(ctx, cfg.TopicLastBill.Format(account.NNAccount), billLink); e != nil {
 					err = multierr.Append(err, e)
 				}
 			}

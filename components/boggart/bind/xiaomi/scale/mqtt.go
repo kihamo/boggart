@@ -10,9 +10,12 @@ import (
 )
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
+	cfg := b.config()
+	mac := cfg.MAC.String()
+
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(b.config.TopicProfileActivate, 0, b.callbackMQTTProfileActive),
-		mqtt.NewSubscriber(b.config.TopicProfileSettings, 0, b.callbackMQTTProfileSettings),
+		mqtt.NewSubscriber(cfg.TopicProfileActivate.Format(mac), 0, b.callbackMQTTProfileActive),
+		mqtt.NewSubscriber(cfg.TopicProfileSettings.Format(mac), 0, b.callbackMQTTProfileSettings),
 	}
 }
 
@@ -50,7 +53,7 @@ func (b *Bind) callbackMQTTProfileSettings(ctx context.Context, _ mqtt.Component
 func (b *Bind) notifyCurrentProfile(ctx context.Context) error {
 	response, err := json.Marshal(b.CurrentProfile())
 	if err == nil {
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicProfile, response); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, b.config().TopicProfile, response); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}

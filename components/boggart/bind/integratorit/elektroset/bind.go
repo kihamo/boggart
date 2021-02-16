@@ -20,7 +20,19 @@ type Bind struct {
 	di.WidgetBind
 	di.WorkersBind
 
-	config      *Config
 	client      *elektroset.Client
 	metersCount *atomic.Uint32Null
+}
+
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
+func (b *Bind) Run() error {
+	cfg := b.config()
+
+	b.client = elektroset.New(cfg.Login, cfg.Password)
+	b.metersCount.Nil()
+
+	return nil
 }
