@@ -9,7 +9,7 @@ import (
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(
-			b.config.TopicShutdown,
+			b.config().TopicShutdown.Format(b.config().ApplicationName),
 			0,
 			func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 				if message.IsTrue() {

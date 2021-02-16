@@ -14,27 +14,31 @@ type Bind struct {
 	di.MQTTBind
 	di.WidgetBind
 
-	config      *Config
 	application shadow.Application
+}
+
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
 }
 
 func (b *Bind) Run() (err error) {
 	ctx := context.Background()
+	cfg := b.config()
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicName, b.config.ApplicationName); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicName.Format(cfg.ApplicationName), cfg.ApplicationName); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicVersion, b.config.ApplicationVersion); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicVersion.Format(cfg.ApplicationName), cfg.ApplicationVersion); e != nil {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicBuild, b.config.ApplicationBuild); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicBuild.Format(cfg.ApplicationName), cfg.ApplicationBuild); e != nil {
 		err = multierr.Append(err, e)
 	}
 
 	// защита на случай, если запустят с retained
-	if e := b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicShutdown, false); e != nil {
+	if e := b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicShutdown.Format(cfg.ApplicationName), false); e != nil {
 		err = multierr.Append(err, e)
 	}
 

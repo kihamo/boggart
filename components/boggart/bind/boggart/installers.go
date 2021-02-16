@@ -15,29 +15,30 @@ func (b *Bind) InstallersSupport() []installer.System {
 
 func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.Step, error) {
 	itemPrefix := openhab.ItemPrefixFromBindMeta(b.Meta())
+	cfg := b.config()
 
 	return openhab.StepsByBind(b, nil,
 		openhab.NewChannel("Name", openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicName).
+			WithStateTopic(cfg.TopicName.Format(cfg.ApplicationName)).
 			AddItems(
 				openhab.NewItem(itemPrefix+"Name", openhab.ItemTypeString).
 					WithLabel("Name"),
 			),
 		openhab.NewChannel("Version", openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicBuild).
+			WithStateTopic(cfg.TopicBuild.Format(cfg.ApplicationName)).
 			AddItems(
 				openhab.NewItem(itemPrefix+"Version", openhab.ItemTypeString).
 					WithLabel("Version"),
 			),
 		openhab.NewChannel("Build", openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicVersion).
+			WithStateTopic(cfg.TopicVersion.Format(cfg.ApplicationName)).
 			AddItems(
 				openhab.NewItem(itemPrefix+"Build", openhab.ItemTypeString).
 					WithLabel("Build"),
 			),
 		openhab.NewChannel("Shutdown", openhab.ChannelTypeSwitch).
-			WithStateTopic(b.config.TopicShutdown).
-			WithCommandTopic(b.config.TopicShutdown).
+			WithStateTopic(cfg.TopicShutdown.Format(cfg.ApplicationName)).
+			WithCommandTopic(cfg.TopicShutdown.Format(cfg.ApplicationName)).
 			WithOn("true").
 			WithOff("false").
 			AddItems(
