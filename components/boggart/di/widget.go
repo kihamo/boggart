@@ -82,6 +82,23 @@ func NewWidgetContainer(bindItem boggart.BindItem, configApp config.Component) *
 	}
 }
 
+func (c *WidgetContainer) globalVariables() map[string]interface{} {
+	vars := map[string]interface{}{
+		"Config": struct{}{},
+		"Meta":   struct{}{},
+	}
+
+	if bindSupport, ok := ConfigContainerBind(c.bindItem.Bind()); ok {
+		vars["Config"] = bindSupport.Bind()
+	}
+
+	if bindSupport, ok := MetaContainerBind(c.bindItem.Bind()); ok {
+		vars["Meta"] = bindSupport
+	}
+
+	return vars
+}
+
 func (c *WidgetContainer) Bind() boggart.Bind {
 	return c.bindItem.Bind()
 }
@@ -113,7 +130,7 @@ func (c *WidgetContainer) Render(ctx context.Context, view string, data map[stri
 		data = make(map[string]interface{}, 1)
 	}
 
-	data["Bind"] = c.bindItem
+	data["Bind"] = c.globalVariables()
 
 	c.Handler.Render(ctx, view, data)
 }
@@ -123,7 +140,7 @@ func (c *WidgetContainer) RenderLayout(ctx context.Context, view, layout string,
 		data = make(map[string]interface{}, 1)
 	}
 
-	data["Bind"] = c.bindItem
+	data["Bind"] = c.globalVariables()
 
 	c.Handler.RenderLayout(ctx, view, layout, data)
 }

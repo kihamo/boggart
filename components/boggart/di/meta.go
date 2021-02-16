@@ -87,10 +87,6 @@ func (b *MetaContainer) Tags() []string {
 	return b.bindItem.Tags()
 }
 
-func (b *MetaContainer) Config() interface{} {
-	return b.bindItem.Config()
-}
-
 func (b *MetaContainer) Status() boggart.BindStatus {
 	return b.bindItem.Status()
 }

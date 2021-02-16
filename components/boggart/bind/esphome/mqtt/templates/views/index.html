@@ -31,7 +31,7 @@
                                             </a>
                                         {{ end }}
 
-                                        {{ if $.Bind.Status.IsStatusOnline }}
+                                        {{ if $.Bind.Meta.Status.IsStatusOnline }}
                                             {{ if or (eq $component.Type.String "light") (eq $component.Type.String "switch") }}
                                                 {{ if eq (printf "%v" $component.StateFormat) "ON" }}
                                                     <a href="{{ $.Request.URL.Path }}?action=command&id={{ $component.ID }}&cmd=OFF" class="btn btn-success btn-icon btn-xs">
@@ -46,7 +46,7 @@
                                         {{ end }}
                                     {{ end }}
 
-                                    {{ if and $.Bind.Status.IsStatusOnline (eq $component.ID $.Bind.Config.IPAddressSensorID) }}
+                                    {{ if and $.Bind.Meta.Status.IsStatusOnline (eq $component.ID $.Bind.Config.IPAddressSensorID) }}
                                         <a href="http://{{ $component.State }}/" class="btn btn-info btn-icon btn-xs" target="_blank">
                                             <i class="glyphicon glyphicon-globe" title="{{ i18n "Open Web server" $ }}"></i>
                                         </a>
