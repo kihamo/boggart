@@ -45,12 +45,13 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 	}
 
 	mac := b.Meta().MACAsString()
+	cfg := b.config()
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicDeviceID.Format(mac), info.Device.ID); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicDeviceID.Format(mac), info.Device.ID); e != nil {
 		err = fmt.Errorf("send mqtt message about device id failed: %w", err)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicDeviceModelName.Format(mac), info.Device.Name); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicDeviceModelName.Format(mac), info.Device.Name); e != nil {
 		err = fmt.Errorf("send mqtt message about device model name failed: %w", err)
 	}
 

@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net"
+	"strconv"
 	"sync"
 	"sync/atomic"
 
@@ -21,14 +23,20 @@ type Bind struct {
 	di.MQTTBind
 	di.ProbesBind
 
-	config *Config
 	mutex  sync.Mutex
 	server *syslog.Server
 	addr   string
 }
 
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
 func (b *Bind) Run() error {
+	cfg := b.config()
+
 	atomic.StoreUint32(&b.status, 0)
+	b.addr = net.JoinHostPort(cfg.Hostname, strconv.FormatInt(cfg.Port, 10))
 
 	go func() {
 		atomic.StoreUint32(&b.status, 1)
@@ -36,7 +44,7 @@ func (b *Bind) Run() error {
 
 		server := syslog.NewServer()
 		server.SetFormat(syslog.Automatic)
-		server.SetTimeout(int64(b.config.Timeout.Seconds()))
+		server.SetTimeout(int64(cfg.Timeout.Seconds()))
 		server.SetHandler(b)
 
 		if err := server.ListenUDP(b.addr); err != nil {
@@ -92,11 +100,12 @@ func (b *Bind) Handle(message format.LogParts, length int64, err error) {
 	}
 
 	var fields map[string]interface{}
+	cfg := b.config()
 
-	if len(b.config.Tags) > 0 {
-		fields = make(map[string]interface{}, len(b.config.Tags))
+	if len(cfg.Tags) > 0 {
+		fields = make(map[string]interface{}, len(cfg.Tags))
 
-		for _, tag := range b.config.Tags {
+		for _, tag := range cfg.Tags {
 			if value, ok := message[tag]; ok {
 				fields[tag] = value
 			}
@@ -105,7 +114,7 @@ func (b *Bind) Handle(message format.LogParts, length int64, err error) {
 		fields = message
 	}
 
-	topic := b.config.Topic
+	topic := cfg.Topic
 	if topic == "" {
 		if val, ok := message["hostname"]; ok {
 			topic = fmt.Sprintf("%v", val)
@@ -126,5 +135,5 @@ func (b *Bind) Handle(message format.LogParts, length int64, err error) {
 		return
 	}
 
-	_ = b.MQTT().PublishAsyncWithoutCache(context.Background(), b.config.TopicMessage.Format(topic), payload)
+	_ = b.MQTT().PublishAsyncWithoutCache(context.Background(), cfg.TopicMessage.Format(topic), payload)
 }

@@ -22,6 +22,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 	}
 
 	itemPrefix := openhab.ItemPrefixFromBindMeta(b.Meta())
+	cfg := b.config()
 
 	const (
 		idPower = "Power"
@@ -32,7 +33,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 
 	return openhab.StepsByBind(b, nil,
 		openhab.NewChannel(idPower, openhab.ChannelTypeSwitch).
-			WithCommandTopic(b.config.TopicPower.Format(mac)).
+			WithCommandTopic(cfg.TopicPower.Format(mac)).
 			WithOn("true").
 			WithOff("false").
 			AddItems(
@@ -40,21 +41,21 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 					WithLabel("Power"),
 			),
 		openhab.NewChannel(idKey, openhab.ChannelTypeString).
-			WithCommandTopic(b.config.TopicKey.Format(mac)).
+			WithCommandTopic(cfg.TopicKey.Format(mac)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idKey, openhab.ItemTypeString).
 					WithLabel("Key").
 					WithIcon("network"),
 			),
 		openhab.NewChannel(idID, openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicDeviceID.Format(mac)).
+			WithStateTopic(cfg.TopicDeviceID.Format(mac)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idID, openhab.ItemTypeString).
 					WithLabel("ID").
 					WithIcon("text"),
 			),
 		openhab.NewChannel(idModel, openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicDeviceModelName.Format(mac)).
+			WithStateTopic(cfg.TopicDeviceModelName.Format(mac)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idModel, openhab.ItemTypeString).
 					WithLabel("Model").

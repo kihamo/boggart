@@ -8,16 +8,19 @@ import (
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	id := b.Meta().ID()
+	cfg := b.config()
 
 	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(b.config.TopicGenerateBinaryOptions.Format(id), 0, b.callbackMQTTGenerateOptions(true)),
-		mqtt.NewSubscriber(b.config.TopicGenerateBinaryText.Format(id), 0, b.callbackMQTTGenerateText(true)),
-		mqtt.NewSubscriber(b.config.TopicGenerateURLOptions.Format(id), 0, b.callbackMQTTGenerateOptions(false)),
-		mqtt.NewSubscriber(b.config.TopicGenerateURLText.Format(id), 0, b.callbackMQTTGenerateText(false)),
+		mqtt.NewSubscriber(cfg.TopicGenerateBinaryOptions.Format(id), 0, b.callbackMQTTGenerateOptions(true)),
+		mqtt.NewSubscriber(cfg.TopicGenerateBinaryText.Format(id), 0, b.callbackMQTTGenerateText(true)),
+		mqtt.NewSubscriber(cfg.TopicGenerateURLOptions.Format(id), 0, b.callbackMQTTGenerateOptions(false)),
+		mqtt.NewSubscriber(cfg.TopicGenerateURLText.Format(id), 0, b.callbackMQTTGenerateText(false)),
 	}
 }
 
 func (b *Bind) callbackMQTTGenerateOptions(binary bool) func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+	cfg := b.config()
+
 	return func(ctx context.Context, _ mqtt.Component, message mqtt.Message) (err error) {
 		var r struct {
 			Text     string  `json:"text"`
@@ -41,7 +44,7 @@ func (b *Bind) callbackMQTTGenerateOptions(binary bool) func(ctx context.Context
 				return err
 			}
 
-			return b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicBinary.Format(b.Meta().ID()), reader)
+			return b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicBinary.Format(b.Meta().ID()), reader)
 		}
 
 		// URL
@@ -50,11 +53,13 @@ func (b *Bind) callbackMQTTGenerateOptions(binary bool) func(ctx context.Context
 			return err
 		}
 
-		return b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicURL.Format(b.Meta().ID()), u.String())
+		return b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicURL.Format(b.Meta().ID()), u.String())
 	}
 }
 
 func (b *Bind) callbackMQTTGenerateText(binary bool) func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+	cfg := b.config()
+
 	return func(ctx context.Context, _ mqtt.Component, message mqtt.Message) (err error) {
 		// binary
 		if binary {
@@ -63,7 +68,7 @@ func (b *Bind) callbackMQTTGenerateText(binary bool) func(ctx context.Context, _
 				return err
 			}
 
-			return b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicBinary.Format(b.Meta().ID()), reader)
+			return b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicBinary.Format(b.Meta().ID()), reader)
 		}
 
 		// URL
@@ -72,6 +77,6 @@ func (b *Bind) callbackMQTTGenerateText(binary bool) func(ctx context.Context, _
 			return err
 		}
 
-		return b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicURL.Format(b.Meta().ID()), u.String())
+		return b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicURL.Format(b.Meta().ID()), u.String())
 	}
 }

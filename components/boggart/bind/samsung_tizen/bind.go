@@ -13,14 +13,21 @@ type Bind struct {
 	di.ProbesBind
 	di.WorkersBind
 
-	config *Config
 	client *tv.APIv2
 }
 
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
 func (b *Bind) Run() error {
-	if b.config.MAC != nil && b.Meta().MAC() == nil {
-		b.Meta().SetMAC(b.config.MAC.HardwareAddr)
+	cfg := b.config()
+
+	if cfg.MAC != nil && b.Meta().MAC() == nil {
+		b.Meta().SetMAC(cfg.MAC.HardwareAddr)
 	}
+
+	b.client = tv.NewAPIv2(cfg.Host)
 
 	return nil
 }

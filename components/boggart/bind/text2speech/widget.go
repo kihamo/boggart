@@ -65,7 +65,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	}
 
 	if format == "" {
-		format = b.config.Format
+		format = b.config().Format
 	}
 
 	writer := bytes.NewBuffer(nil)

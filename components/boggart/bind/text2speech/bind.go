@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/kihamo/boggart/components/boggart/di"
+	"github.com/kihamo/boggart/protocols/swagger"
 	"github.com/kihamo/boggart/providers/yandex_speechkit_cloud"
 	"github.com/kihamo/boggart/providers/yandex_speechkit_cloud/client/generate"
 )
@@ -25,7 +26,6 @@ type Bind struct {
 	di.MQTTBind
 	di.WidgetBind
 
-	config   *Config
 	provider *speechkit.Client
 }
 
@@ -60,6 +60,22 @@ func trim(message string) string {
 	message = strings.Join(strings.Fields(message), " ")
 
 	return message
+}
+
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
+func (b *Bind) Run() error {
+	b.provider = speechkit.New(b.config().Debug, swagger.NewLogger(
+		func(message string) {
+			b.Logger().Info(message)
+		},
+		func(message string) {
+			b.Logger().Debug(message)
+		}))
+
+	return nil
 }
 
 func (b *Bind) GenerateURL(ctx context.Context, text, format, quality, language, speaker, emotion string, speed float64, force bool) (*url.URL, error) {
@@ -114,15 +130,16 @@ func (b *Bind) GenerateWriter(ctx context.Context, text, format, quality, langua
 		return errors.New("text is empty")
 	}
 
+	cfg := b.config()
 	cacheKey := md5.New()
 
 	params := generate.NewGenerateParamsWithContext(ctx).
-		WithKey(b.config.Key).
+		WithKey(cfg.Key).
 		WithText(text)
 
 	format = strings.ToLower(format)
 	if format == "" {
-		format = b.config.Format
+		format = cfg.Format
 	}
 
 	switch format {
@@ -133,7 +150,7 @@ func (b *Bind) GenerateWriter(ctx context.Context, text, format, quality, langua
 	case speechkit.FormatWAV:
 		quality = strings.ToLower(quality)
 		if quality == "" {
-			quality = b.config.Quality
+			quality = cfg.Quality
 		}
 
 		switch quality {
@@ -154,7 +171,7 @@ func (b *Bind) GenerateWriter(ctx context.Context, text, format, quality, langua
 
 	language = strings.ToLower(language)
 	if language == "" {
-		language = b.config.Language
+		language = cfg.Language
 	}
 
 	switch language {
@@ -168,7 +185,7 @@ func (b *Bind) GenerateWriter(ctx context.Context, text, format, quality, langua
 
 	speaker = strings.ToLower(speaker)
 	if speaker == "" {
-		speaker = b.config.Speaker
+		speaker = cfg.Speaker
 	}
 
 	switch speaker {
@@ -182,7 +199,7 @@ func (b *Bind) GenerateWriter(ctx context.Context, text, format, quality, langua
 
 	emotion = strings.ToLower(emotion)
 	if emotion == "" {
-		emotion = b.config.Emotion
+		emotion = cfg.Emotion
 	}
 
 	switch emotion {
@@ -195,7 +212,7 @@ func (b *Bind) GenerateWriter(ctx context.Context, text, format, quality, langua
 	}
 
 	if speed == 0 {
-		speed = b.config.Speed
+		speed = cfg.Speed
 	}
 
 	if speed > 1 || speed < 0.1 {
@@ -208,10 +225,10 @@ func (b *Bind) GenerateWriter(ctx context.Context, text, format, quality, langua
 
 	var wrapBuffer io.Writer
 
-	fileName := b.config.CacheDirectory + separator + hex.EncodeToString(cacheKey.Sum(nil))
+	fileName := cfg.CacheDirectory + separator + hex.EncodeToString(cacheKey.Sum(nil))
 
 	// cache
-	if b.config.CacheEnable && !force {
+	if cfg.CacheEnable && !force {
 		if _, err := os.Stat(fileName); err == nil {
 			if f, e := os.Open(fileName); e == nil {
 				_, err = io.Copy(writer, f)
@@ -223,7 +240,7 @@ func (b *Bind) GenerateWriter(ctx context.Context, text, format, quality, langua
 		}
 	}
 
-	if b.config.CacheEnable || force {
+	if cfg.CacheEnable || force {
 		wrapBuffer = bytes.NewBuffer(nil)
 	} else {
 		wrapBuffer = writer
@@ -244,7 +261,7 @@ func (b *Bind) GenerateWriter(ctx context.Context, text, format, quality, langua
 		return err
 	}
 
-	if b.config.CacheEnable {
+	if cfg.CacheEnable {
 		f, e := os.Create(fileName)
 		if e != nil {
 			return e
