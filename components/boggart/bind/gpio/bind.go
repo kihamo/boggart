@@ -43,8 +43,8 @@ func (b *Bind) config() *Config {
 func (b *Bind) Run() error {
 	cfg := b.config()
 
-	g := gpioreg.ByName("GPIO" + strconv.FormatUint(cfg.Pin, 10))
-	if g == nil {
+	b.pin = gpioreg.ByName("GPIO" + strconv.FormatUint(cfg.Pin, 10))
+	if b.pin == nil {
 		return fmt.Errorf("GPIO %d not found", cfg.Pin)
 	}
 
