@@ -96,12 +96,15 @@ func (i *BindItem) marshalYAML(short bool) (interface{}, error) {
 
 				name := strings.ToLower(defaultsF.Name)
 				if tag := defaultsF.Tag.Get("yaml"); tag != "" {
-					name = tag
+					if val := strings.Split(tag, ",")[0]; val != "" {
+						// FIXME: inline
+						name = val
+					}
 				}
 
 				value := originalV.FieldByName(originalF.Name).Interface()
 
-				if value == defaultsV.FieldByName(defaultsF.Name).Interface() {
+				if reflect.DeepEqual(value, defaultsV.FieldByName(defaultsF.Name).Interface()) {
 					continue
 				}
 
@@ -109,7 +112,11 @@ func (i *BindItem) marshalYAML(short bool) (interface{}, error) {
 			}
 		}
 
-		config = shortConfig
+		if len(shortConfig) > 0 {
+			config = shortConfig
+		} else {
+			config = nil
+		}
 	}
 
 	return BindItemYaml{
