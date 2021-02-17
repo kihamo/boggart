@@ -38,6 +38,8 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 		return nil, err
 	}
 
+	cfg := b.config()
+
 	const (
 		idPackagesInstalledVersion = "PackagesInstalledVersion"
 		idPackagesLatestVersion    = "PackagesLatestVersion"
@@ -51,28 +53,28 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
 	channels := []*openhab.Channel{
 		openhab.NewChannel(idPackagesInstalledVersion, openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicPackagesInstalledVersion.Format(sn)).
+			WithStateTopic(cfg.TopicPackagesInstalledVersion.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idPackagesInstalledVersion, openhab.ItemTypeString).
 					WithLabel("Packages installed version").
 					WithIcon("text"),
 			),
 		openhab.NewChannel(idPackagesLatestVersion, openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicPackagesLatestVersion.Format(sn)).
+			WithStateTopic(cfg.TopicPackagesLatestVersion.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idPackagesLatestVersion, openhab.ItemTypeString).
 					WithLabel("Packages latest version").
 					WithIcon("text"),
 			),
 		openhab.NewChannel(idFirmwareInstalledVersion, openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicFirmwareInstalledVersion.Format(sn)).
+			WithStateTopic(cfg.TopicFirmwareInstalledVersion.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idFirmwareInstalledVersion, openhab.ItemTypeString).
 					WithLabel("Firmware installed version").
 					WithIcon("text"),
 			),
 		openhab.NewChannel(idFirmwareLatestVersion, openhab.ChannelTypeString).
-			WithStateTopic(b.config.TopicFirmwareLatestVersion.Format(sn)).
+			WithStateTopic(cfg.TopicFirmwareLatestVersion.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idFirmwareLatestVersion, openhab.ItemTypeString).
 					WithLabel("Firmware latest version").
@@ -94,8 +96,8 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 		case InterfaceWireless:
 			var connections map[string]string
 
-			if b.config.IgnoreUnknownMacAddress {
-				connections = b.config.MacAddressMapping
+			if cfg.IgnoreUnknownMacAddress {
+				connections = cfg.MacAddressMapping
 			} else {
 				connections = make(map[string]string)
 
@@ -105,7 +107,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 					}
 
 					mac := i.MacAddress.String()
-					if alias, ok := b.config.MacAddressMapping[mac]; ok {
+					if alias, ok := cfg.MacAddressMapping[mac]; ok {
 						connections[mac] = alias
 					} else {
 						connections[mac] = strings.ReplaceAll(mac, ":", "")
@@ -120,14 +122,14 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 			if len(connections) > 0 {
 				channels = append(channels,
 					openhab.NewChannel(id+idLastConnected, openhab.ChannelTypeString).
-						WithStateTopic(b.config.TopicInterfaceLastConnect.Format(sn, iface.Type, iface.Name)).
+						WithStateTopic(cfg.TopicInterfaceLastConnect.Format(sn, iface.Type, iface.Name)).
 						AddItems(
 							openhab.NewItem(itemPrefix+id+idLastConnected, openhab.ItemTypeString).
 								WithLabel("Last connected to "+iface.Name).
 								WithIcon("network"),
 						),
 					openhab.NewChannel(id+idLastDisconnected, openhab.ChannelTypeString).
-						WithStateTopic(b.config.TopicInterfaceLastDisconnect.Format(sn, iface.Type, iface.Name)).
+						WithStateTopic(cfg.TopicInterfaceLastDisconnect.Format(sn, iface.Type, iface.Name)).
 						AddItems(
 							openhab.NewItem(itemPrefix+id+idLastDisconnected, openhab.ItemTypeString).
 								WithLabel("Last disconnected to "+iface.Name).
@@ -141,7 +143,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 
 				channels = append(channels,
 					openhab.NewChannel(id+clientID, openhab.ChannelTypeContact).
-						WithStateTopic(b.config.TopicInterfaceConnect.Format(sn, iface.Type, iface.Name, mac)).
+						WithStateTopic(cfg.TopicInterfaceConnect.Format(sn, iface.Type, iface.Name, mac)).
 						WithOn("true").
 						WithOff("false").
 						AddItems(
@@ -164,14 +166,14 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 				lastL2TP.Do(func() {
 					channels = append(channels,
 						openhab.NewChannel(id+idLastConnected, openhab.ChannelTypeString).
-							WithStateTopic(b.config.TopicInterfaceLastConnect.Format(sn, iface.Type)).
+							WithStateTopic(cfg.TopicInterfaceLastConnect.Format(sn, iface.Type)).
 							AddItems(
 								openhab.NewItem(itemPrefix+id+idLastConnected, openhab.ItemTypeString).
 									WithLabel("Last connected to L2TP").
 									WithIcon("network"),
 							),
 						openhab.NewChannel(id+idLastDisconnected, openhab.ChannelTypeString).
-							WithStateTopic(b.config.TopicInterfaceLastDisconnect.Format(sn, iface.Type)).
+							WithStateTopic(cfg.TopicInterfaceLastDisconnect.Format(sn, iface.Type)).
 							AddItems(
 								openhab.NewItem(itemPrefix+id+idLastDisconnected, openhab.ItemTypeString).
 									WithLabel("Last disconnected to L2TP").
@@ -184,7 +186,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 
 				channels = append(channels,
 					openhab.NewChannel(id+clientID, openhab.ChannelTypeContact).
-						WithStateTopic(b.config.TopicInterfaceConnect.Format(sn, iface.Type, iface.Name, i.User)).
+						WithStateTopic(cfg.TopicInterfaceConnect.Format(sn, iface.Type, iface.Name, i.User)).
 						WithOn("true").
 						WithOff("false").
 						AddItems(

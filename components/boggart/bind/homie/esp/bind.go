@@ -25,7 +25,6 @@ type Bind struct {
 	di.ProbesBind
 	di.WidgetBind
 
-	config     *Config
 	lastUpdate *atomic.TimeNull
 
 	deviceAttributes sync.Map
@@ -42,6 +41,17 @@ type Bind struct {
 	status atomic.BoolNull
 }
 
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
+func (b *Bind) Run() error {
+	b.otaFlash = make(chan struct{}, 1)
+	b.lastUpdate.Nil()
+
+	return nil
+}
+
 func (b *Bind) updateStatus(status bool) {
 	b.status.Set(status)
 
@@ -51,15 +61,15 @@ func (b *Bind) updateStatus(status bool) {
 }
 
 func (b *Bind) Broadcast(ctx context.Context, level string, payload interface{}) error {
-	return b.MQTT().PublishRaw(ctx, b.config.TopicBroadcast.Format(level), 1, false, payload)
+	return b.MQTT().PublishRaw(ctx, b.config().TopicBroadcast.Format(b.Meta().ID(), level), 1, false, payload)
 }
 
 func (b *Bind) Restart(ctx context.Context) error {
-	return b.MQTT().PublishRaw(ctx, b.config.TopicRestart, 1, false, true)
+	return b.MQTT().PublishRaw(ctx, b.config().TopicRestart.Format(b.Meta().ID()), 1, false, true)
 }
 
 func (b *Bind) Reset(ctx context.Context) error {
-	return b.MQTT().Publish(ctx, b.config.TopicReset, true)
+	return b.MQTT().Publish(ctx, b.config().TopicReset.Format(b.Meta().ID()), true)
 }
 
 func (b *Bind) ProtocolVersion() string {

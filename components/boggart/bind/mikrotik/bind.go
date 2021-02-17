@@ -3,6 +3,7 @@ package mikrotik
 import (
 	"net/url"
 	"regexp"
+	"strings"
 	"sync"
 
 	"github.com/kihamo/boggart/atomic"
@@ -35,13 +36,12 @@ type Bind struct {
 	di.ProbesBind
 	di.WorkersBind
 
-	config   *Config
-	address  *url.URL
 	provider *mikrotik.Client
 
 	connectionsActive       sync.Map
 	connectionsZombieKiller *atomic.Once
 	connectionsFirstLoad    map[string]*atomic.Once
+	macMappingCase          map[string]string
 }
 
 type storeItem struct {
@@ -56,10 +56,37 @@ func (i storeItem) String() string {
 	return i.interfaceType + "/" + i.connectionName
 }
 
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
 func (b *Bind) Run() error {
+	cfg := b.config()
+
+	u, err := url.Parse(cfg.Address)
+	if err != nil {
+		return err
+	}
+
+	username := u.User.Username()
+	password, _ := u.User.Password()
+
+	b.provider = mikrotik.NewClient(u.Host, username, password, cfg.ClientTimeout)
+
+	b.macMappingCase = make(map[string]string, len(cfg.MacAddressMapping))
+	for mac, alias := range cfg.MacAddressMapping {
+		mac := strings.ReplaceAll(mac, "-", ":")
+		mac = strings.ToLower(mac)
+
+		b.macMappingCase[mac] = alias
+	}
+
 	for _, o := range b.connectionsFirstLoad {
 		o.Reset()
 	}
+
+	b.connectionsZombieKiller.Reset()
+	b.connectionsActive = sync.Map{}
 
 	return nil
 }

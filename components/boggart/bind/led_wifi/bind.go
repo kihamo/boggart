@@ -18,8 +18,17 @@ type Bind struct {
 	di.ProbesBind
 	di.WidgetBind
 
-	config *Config
-	bulb   *wifiled.Bulb
+	bulb *wifiled.Bulb
+}
+
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
+func (b *Bind) Run() error {
+	b.bulb = wifiled.NewBulb(b.config().Address)
+
+	return nil
 }
 
 func (b *Bind) State(ctx context.Context) error {
@@ -31,27 +40,28 @@ func (b *Bind) State(ctx context.Context) error {
 	b.Meta().SetSerialNumber(strconv.FormatUint(uint64(state.DeviceName), 10))
 
 	var mqttErr error
+	cfg := b.config()
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicStatePower, state.Power); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicStatePower.Format(cfg.Address), state.Power); e != nil {
 		mqttErr = multierror.Append(mqttErr, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateMode, state.Mode); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateMode.Format(cfg.Address), state.Mode); e != nil {
 		mqttErr = multierror.Append(mqttErr, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateSpeed, state.Speed); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateSpeed.Format(cfg.Address), state.Speed); e != nil {
 		mqttErr = multierror.Append(mqttErr, e)
 	}
 
 	// in HEX
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateColor, state.Color.String()); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateColor.Format(cfg.Address), state.Color.String()); e != nil {
 		mqttErr = multierror.Append(mqttErr, e)
 	}
 
 	// in HSV
 	h, s, v := state.Color.HSV()
-	if e := b.MQTT().PublishAsync(ctx, b.config.TopicStateColorHSV, fmt.Sprintf("%d,%.2f,%.2f", h, s, v)); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateColorHSV.Format(cfg.Address), fmt.Sprintf("%d,%.2f,%.2f", h, s, v)); e != nil {
 		mqttErr = multierror.Append(mqttErr, e)
 	}
 

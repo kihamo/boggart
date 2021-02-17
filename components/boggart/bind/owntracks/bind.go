@@ -13,8 +13,6 @@ type Bind struct {
 	di.MQTTBind
 	di.WorkersBind
 
-	config *Config
-
 	lat     *atomic.Float32Null
 	lon     *atomic.Float32Null
 	geoHash *atomic.String
@@ -27,6 +25,37 @@ type Bind struct {
 	mutex    sync.RWMutex
 	regions  map[string]Point
 	checkers map[string]*atomic.BoolNull
+}
+
+func (b *Bind) config() *Config {
+	return b.Config().Bind().(*Config)
+}
+
+func (b *Bind) Run() error {
+	b.lat.Nil()
+	b.lon.Nil()
+	b.geoHash.Set("")
+	b.conn.Set("")
+	b.acc.Nil()
+	b.alt.Nil()
+	b.batt.Nil()
+	b.vel.Nil()
+
+	b.regions = make(map[string]Point)
+	b.checkers = make(map[string]*atomic.BoolNull)
+
+	cfg := b.config()
+
+	for name, region := range cfg.Regions {
+		if region.Radius <= 0 {
+			region.Radius = cfg.PointRadius
+		}
+
+		cfg.Regions[name] = region
+		b.registerRegion(name, region)
+	}
+
+	return nil
 }
 
 func (b *Bind) validAccuracy(acc *int64, maxAccuracy int64) bool {

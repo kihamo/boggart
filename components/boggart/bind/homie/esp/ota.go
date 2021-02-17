@@ -145,7 +145,7 @@ func (b *Bind) otaDo(firmware *bytes.Buffer, timeout time.Duration) {
 		   $implementation/ota/firmware/<md5 checksum>, either as binary or
 		   as a Base64 encoded string
 	*/
-	if err := b.MQTT().PublishRaw(context.Background(), b.config.TopicOTAFirmware.Format(checkSum), 1, false, firmware.Bytes()); err != nil {
+	if err := b.MQTT().PublishRaw(context.Background(), b.config().TopicOTAFirmware.Format(b.Meta().ID(), checkSum), 1, false, firmware.Bytes()); err != nil {
 		b.otaAbort()
 	}
 }

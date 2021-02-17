@@ -49,6 +49,7 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 	}
 
 	b.Meta().SetSerialNumber(system.SerialNumber)
+	cfg := b.config()
 
 	_, err = b.Workers().RegisterTask(
 		tasks.NewTask().
@@ -58,7 +59,7 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 					tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
 				),
 			).
-			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.UpdaterInterval)),
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.UpdaterInterval)),
 	)
 	if err != nil {
 		return err
@@ -71,18 +72,18 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 				b.Workers().WrapTaskHandlerIsOnline(
 					tasks.HandlerWithTimeout(
 						tasks.HandlerFunc(b.taskInterfaceConnectionHandler),
-						b.config.ReadinessTimeout,
+						cfg.ReadinessTimeout,
 					),
 				),
 			).
-			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config.ClientsSyncInterval)),
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.ClientsSyncInterval)),
 	)
 	if err != nil {
 		return err
 	}
 
-	if b.config.TopicSyslog != "" {
-		return b.MQTT().Subscribe(mqtt.NewSubscriber(b.config.TopicSyslog, 0, b.callbackMQTTSyslog))
+	if cfg.TopicSyslog != "" {
+		return b.MQTT().Subscribe(mqtt.NewSubscriber(cfg.TopicSyslog, 0, b.callbackMQTTSyslog))
 	}
 
 	return nil
@@ -153,6 +154,7 @@ func (b *Bind) taskInterfaceConnectionHandler(ctx context.Context, meta tasks.Me
 
 	// 2. Теперь рассылаем актуальные версии в MQTT, а то, что меньше текущей версии еще и удаляем
 	sn := b.Meta().SerialNumber()
+	cfg := b.config()
 
 	b.connectionsActive.Range(func(key, value interface{}) bool {
 		item := value.(*storeItem)
@@ -174,14 +176,14 @@ func (b *Bind) taskInterfaceConnectionHandler(ctx context.Context, meta tasks.Me
 			return true
 		}
 
-		_ = b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicInterfaceConnect.Format(sn, item.interfaceType, item.interfaceName, item.connectionName), payload)
+		_ = b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicInterfaceConnect.Format(sn, item.interfaceType, item.interfaceName, item.connectionName), payload)
 
 		if payload {
-			_ = b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicInterfaceLastConnect.Format(sn, item.interfaceType, item.interfaceName), item.connectionName)
+			_ = b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicInterfaceLastConnect.Format(sn, item.interfaceType, item.interfaceName), item.connectionName)
 		} else {
 			b.connectionsActive.Delete(key)
 
-			_ = b.MQTT().PublishAsyncWithoutCache(ctx, b.config.TopicInterfaceLastDisconnect.Format(sn, item.interfaceType, item.interfaceName), item.connectionName)
+			_ = b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicInterfaceLastDisconnect.Format(sn, item.interfaceType, item.interfaceName), item.connectionName)
 		}
 
 		return true
@@ -197,7 +199,7 @@ func (b *Bind) taskInterfaceConnectionHandler(ctx context.Context, meta tasks.Me
 
 			err = b.MQTT().Subscribe(
 				mqtt.NewSubscriber(
-					b.config.TopicInterfaceConnect.Format(b.Meta().SerialNumber()),
+					cfg.TopicInterfaceConnect.Format(b.Meta().SerialNumber()),
 					0,
 					b.callbackMQTTInterfacesZombies,
 				),
@@ -261,14 +263,16 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 		err = multierr.Append(err, e)
 	}
 
+	cfg := b.config()
+
 	// check upgrade
 	if checkPackages, e := b.provider.SystemPackageUpdateCheck(ctx); e == nil {
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicPackagesInstalledVersion.Format(sn), checkPackages.InstalledVersion); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicPackagesInstalledVersion.Format(sn), checkPackages.InstalledVersion); e != nil {
 			err = multierr.Append(err, e)
 		}
 
 		if checkPackages.LatestVersion != "" {
-			if e := b.MQTT().PublishAsync(ctx, b.config.TopicPackagesLatestVersion.Format(sn), checkPackages.LatestVersion); e != nil {
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicPackagesLatestVersion.Format(sn), checkPackages.LatestVersion); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}
@@ -277,12 +281,12 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 	}
 
 	if checkRouterBoard, e := b.provider.SystemRouterBoard(ctx); e == nil {
-		if e := b.MQTT().PublishAsync(ctx, b.config.TopicFirmwareInstalledVersion.Format(sn), checkRouterBoard.CurrentFirmware); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicFirmwareInstalledVersion.Format(sn), checkRouterBoard.CurrentFirmware); e != nil {
 			err = multierr.Append(err, e)
 		}
 
 		if checkRouterBoard.UpgradeFirmware != "" {
-			if e := b.MQTT().PublishAsync(ctx, b.config.TopicFirmwareLatestVersion.Format(sn), checkRouterBoard.UpgradeFirmware); e != nil {
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicFirmwareLatestVersion.Format(sn), checkRouterBoard.UpgradeFirmware); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}

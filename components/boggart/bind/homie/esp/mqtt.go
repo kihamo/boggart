@@ -5,23 +5,26 @@ import (
 )
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
+	cfg := b.config()
+	id := b.Meta().ID()
+
 	return []mqtt.Subscriber{
 		// settings
-		mqtt.NewSubscriber(b.config.TopicSettings, 0, b.settingsSubscriber),
+		mqtt.NewSubscriber(cfg.TopicSettings, 0, b.settingsSubscriber),
 
 		// device
-		mqtt.NewSubscriber(b.config.TopicDeviceAttribute, 0, b.deviceAttributesSubscriber),
-		mqtt.NewSubscriber(b.config.TopicDeviceAttributeFirmware, 0, b.deviceFirmwareSubscriber),
-		mqtt.NewSubscriber(b.config.TopicDeviceAttributeImplementation, 0, b.deviceImplementationSubscriber),
-		mqtt.NewSubscriber(b.config.TopicDeviceAttributeStats, 0, b.deviceStatsSubscriber),
+		mqtt.NewSubscriber(cfg.TopicDeviceAttribute.Format(id), 0, b.deviceAttributesSubscriber),
+		mqtt.NewSubscriber(cfg.TopicDeviceAttributeFirmware.Format(id), 0, b.deviceFirmwareSubscriber),
+		mqtt.NewSubscriber(cfg.TopicDeviceAttributeImplementation.Format(id), 0, b.deviceImplementationSubscriber),
+		mqtt.NewSubscriber(cfg.TopicDeviceAttributeStats.Format(id), 0, b.deviceStatsSubscriber),
 
 		// nodes
-		mqtt.NewSubscriber(b.config.TopicNodeAttribute, 0, b.nodesAttributesSubscriber),
-		mqtt.NewSubscriber(b.config.TopicNodeList, 0, b.nodesSubscriber),
-		mqtt.NewSubscriber(b.config.TopicNodeProperty, 0, b.nodesPropertySubscriber),
+		mqtt.NewSubscriber(cfg.TopicNodeAttribute.Format(id), 0, b.nodesAttributesSubscriber),
+		mqtt.NewSubscriber(cfg.TopicNodeList.Format(id), 0, b.nodesSubscriber),
+		mqtt.NewSubscriber(cfg.TopicNodeProperty.Format(id), 0, b.nodesPropertySubscriber),
 
 		// ota
-		mqtt.NewSubscriber(b.config.TopicOTAStatus, 0, b.otaStatusSubscriber),
-		mqtt.NewSubscriber(b.config.TopicOTAEnabled, 0, b.otaEnabledSubscriber),
+		mqtt.NewSubscriber(cfg.TopicOTAStatus.Format(id), 0, b.otaStatusSubscriber),
+		mqtt.NewSubscriber(cfg.TopicOTAEnabled.Format(id), 0, b.otaEnabledSubscriber),
 	}
 }

@@ -57,8 +57,10 @@ func (b *Bind) callbackMQTTSyslog(ctx context.Context, _ mqtt.Component, message
 		return nil
 	}
 
+	cfg := b.config()
+
 	switch tag {
-	case b.config.SyslogTagWireless:
+	case cfg.SyslogTagWireless:
 		check := wifiClientRegexp.FindStringSubmatch(content.(string))
 		if len(check) < 4 {
 			return nil
@@ -72,7 +74,7 @@ func (b *Bind) callbackMQTTSyslog(ctx context.Context, _ mqtt.Component, message
 			return nil
 		}
 
-	case b.config.SyslogTagL2TP:
+	case cfg.SyslogTagL2TP:
 		check := vpnClientRegexp.FindStringSubmatch(content.(string))
 		if len(check) < 2 || check[2] != "in" && check[2] != "out" {
 			return nil

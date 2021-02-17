@@ -104,7 +104,7 @@ func (b *Bind) settingsSet(ctx context.Context, key string, value interface{}) (
 		return err
 	}
 
-	return b.MQTT().Publish(ctx, b.config.TopicSettingsSet, pl)
+	return b.MQTT().Publish(ctx, b.config().TopicSettingsSet.Format(b.Meta().ID()), pl)
 }
 
 func (b *Bind) settingsSubscriber(_ context.Context, _ mqtt.Component, message mqtt.Message) error {

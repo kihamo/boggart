@@ -8,7 +8,7 @@ import (
 )
 
 func (b *Bind) Tasks() []tasks.Task {
-	if !b.config.RegionsSyncEnabled {
+	if !b.config().RegionsSyncEnabled {
 		return nil
 	}
 
