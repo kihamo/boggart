@@ -10,15 +10,10 @@ import (
 )
 
 func (b *Bind) InstallersSupport() []installer.System {
-	systems := []installer.System{
+	return []installer.System{
 		installer.SystemCron,
+		installer.SystemOpenHab,
 	}
-
-	if b.Meta().SerialNumber() != "" {
-		systems = append(systems, installer.SystemOpenHab)
-	}
-
-	return systems
 }
 
 func (b *Bind) InstallerSteps(_ context.Context, system installer.System) ([]installer.Step, error) {

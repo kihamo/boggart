@@ -20,7 +20,7 @@ type Bind struct {
 	di.WorkersBind
 
 	provider        *nut.Client
-	updaterInterval *atomic.Duration
+	updaterInterval atomic.Duration
 }
 
 func (b *Bind) config() *Config {

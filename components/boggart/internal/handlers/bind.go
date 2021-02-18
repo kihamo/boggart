@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
-	"sort"
 
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
@@ -189,16 +188,7 @@ func (h *BindHandler) actionCreateOrUpdate(w *dashboard.Response, r *dashboard.R
 				bindYAML.Type = typeName
 				isAjax = true
 			} else {
-				types := make([]string, 0)
-				for typeName := range boggart.GetBindTypes() {
-					types = append(types, typeName)
-				}
-				sort.Strings(types)
-				vars["types"] = types
-
-				if len(types) > 0 {
-					bindYAML.Type = types[0]
-				}
+				vars["types"] = boggart.GetBindTypes()
 			}
 
 			if bindYAML.Type != "" {

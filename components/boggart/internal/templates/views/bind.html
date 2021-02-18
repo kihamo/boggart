@@ -13,7 +13,7 @@
                         <label for="type" class="control-label col-md-3 col-sm-3 col-xs-12">{{ i18n "Type" . }}</label>
                         <div class="col-md-6 col-sm-6 col-xs-12">
                             <select id="profile" name="profile" class="form-control select2">
-                            {{ range $name := .types }}
+                            {{ range $name, $type := .types }}
                                 <option value="{{ $name }}">{{ $name }}</option>
                             {{ end }}
                             </select>
@@ -50,20 +50,25 @@
 
     <script type="application/javascript">
         $(document).ready(function () {
-            $('#profile').change(function () {
-                var f = $('#send-yaml');
+            var
+                s = $('#profile'),
+                f = $('#send-yaml');
 
+            var load = function () {
                 $.ajax({
                     type: 'GET',
                     url: f.prop('action'),
                     data: {
-                        type: $(this).val(),
+                        type: s.val(),
                     },
                     success: function (r) {
                         $('#yaml').val(r);
                     }
                 });
-            })
+            };
+
+            s.change(load);
+            load();
         });
     </script>
 {{ end }}

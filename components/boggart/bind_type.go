@@ -10,9 +10,27 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
+type BindTypeItem struct {
+	typ     BindType
+	aliases []string
+	isAlias bool
+}
+
+func (t *BindTypeItem) Type() BindType {
+	return t.typ
+}
+
+func (t *BindTypeItem) Aliases() []string {
+	return t.aliases
+}
+
+func (t *BindTypeItem) IsAlias() bool {
+	return t.isAlias
+}
+
 var (
 	bindTypesMutex sync.RWMutex
-	bindTypes      = make(map[string]BindType)
+	bindTypes      = make(map[string]*BindTypeItem)
 )
 
 func RegisterBindType(name string, kind BindType, aliases ...string) {
@@ -23,12 +41,24 @@ func RegisterBindType(name string, kind BindType, aliases ...string) {
 		panic("Bind type name is nil")
 	}
 
-	for _, name := range append([]string{name}, aliases...) {
+	if _, dup := bindTypes[name]; dup {
+		panic("Register called twice for bind type " + name)
+	}
+
+	bindTypes[name] = &BindTypeItem{
+		typ:     kind,
+		aliases: aliases,
+	}
+
+	for _, name := range aliases {
 		if _, dup := bindTypes[name]; dup {
 			panic("Register called twice for bind type " + name)
 		}
 
-		bindTypes[name] = kind
+		bindTypes[name] = &BindTypeItem{
+			typ:     kind,
+			isAlias: true,
+		}
 	}
 }
 
@@ -41,10 +71,10 @@ func GetBindType(name string) (BindType, error) {
 		return nil, errors.New("bind type " + name + " isn't register")
 	}
 
-	return kind, nil
+	return kind.typ, nil
 }
 
-func GetBindTypes() map[string]BindType {
+func GetBindTypes() map[string]*BindTypeItem {
 	bindTypesMutex.RLock()
 	defer bindTypesMutex.RUnlock()
 

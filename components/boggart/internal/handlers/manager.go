@@ -46,6 +46,7 @@ type managerHandlerDevice struct {
 type managerHandlerTypeView struct {
 	Name     string
 	Package  string
+	Aliases  []string
 	Features []string
 }
 
@@ -71,14 +72,19 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 	if !r.IsAjax() {
 		h.typesOnce.Do(func() {
 			for name, bindType := range boggart.GetBindTypes() {
-				t := reflect.TypeOf(bindType)
+				if bindType.IsAlias() {
+					continue
+				}
+
+				t := reflect.TypeOf(bindType.Type())
 				item := managerHandlerTypeView{
 					Name:     name,
 					Package:  t.PkgPath(),
+					Aliases:  bindType.Aliases(),
 					Features: make([]string, 0),
 				}
 
-				bind := bindType.CreateBind()
+				bind := bindType.Type().CreateBind()
 
 				if _, ok := bind.(boggart.BindRunnable); ok {
 					item.Features = append(item.Features, "runnable")
@@ -114,6 +120,12 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 
 				if _, ok := bind.(di.WorkersContainerSupport); ok {
 					item.Features = append(item.Features, "workers")
+				}
+
+				if bindSupport, ok := bind.(installer.HasInstaller); ok {
+					for _, system := range bindSupport.InstallersSupport() {
+						item.Features = append(item.Features, "installer "+string(system))
+					}
 				}
 
 				h.types = append(h.types, item)

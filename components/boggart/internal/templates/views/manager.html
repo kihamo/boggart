@@ -88,6 +88,7 @@
                     <tr>
                         <th>{{ i18n "Type" . }}</th>
                         <th>{{ i18n "Package" . }}</th>
+                        <th>{{ i18n "Aliases" . }}</th>
                         <th>{{ i18n "Features" . }}</th>
                     </tr>
                     </thead>
@@ -96,6 +97,10 @@
                     <tr>
                         <td>{{ $type.Name }}</td>
                         <td>{{ $type.Package }}</td>
+                        <td>
+                            {{ range $alias := $type.Aliases }}
+                                <span class="label label-success">{{ $alias }}</span>
+                            {{ end }}
                         <td>
                             {{ range $feature := $type.Features }}
                             <span class="label label-info">{{ i18n $feature $ }}</span>
