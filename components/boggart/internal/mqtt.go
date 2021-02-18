@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
 )
@@ -15,12 +14,7 @@ var (
 	payloadDone   = []byte(`done`)
 )
 
-func (c *Component) MQTTSubscribers() []mqtt.Subscriber {
-	return []mqtt.Subscriber{
-		mqtt.NewSubscriber(mqtt.Topic(c.config.String(boggart.ConfigMQTTTopicAllBindsReload)), 0, c.callbackBindReloadInPayload),
-		mqtt.NewSubscriber(mqtt.Topic(c.config.String(boggart.ConfigMQTTTopicBindReload)), 0, c.callbackBindReloadInTopic),
-	}
-}
+// TODO: run probes of bind
 
 func (c *Component) callbackBindReloadInPayload(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 	id := message.String()
