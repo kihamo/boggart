@@ -104,6 +104,16 @@ func (c *Component) Run(a shadow.Application, _ chan<- struct{}) error {
 	c.mqtt = a.GetComponent(mqtt.ComponentName).(mqtt.Component)
 	c.mqtt.OnConnectHandlerAdd(c.mqttOnConnectHandler)
 
+	_, err := c.mqtt.Subscribe(mqtt.Topic(c.config.String(boggart.ConfigMQTTTopicAllBindsReload)), 0, c.callbackBindReloadInPayload)
+	if err != nil {
+		return err
+	}
+
+	_, err = c.mqtt.Subscribe(mqtt.Topic(c.config.String(boggart.ConfigMQTTTopicBindReload)), 0, c.callbackBindReloadInTopic)
+	if err != nil {
+		return err
+	}
+
 	if a.HasComponent(i18n.ComponentName) {
 		<-a.ReadyComponent(i18n.ComponentName)
 		c.i18n = a.GetComponent(i18n.ComponentName).(i18n.Component)
