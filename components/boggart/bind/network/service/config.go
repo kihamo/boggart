@@ -15,9 +15,7 @@ type Config struct {
 	Hostname     string `valid:"host,required"`
 	Port         int    `valid:"port,required"`
 	Retry        int
-	TopicOnline  mqtt.Topic `mapstructure:"topic_online" yaml:"topic_online"`
 	TopicLatency mqtt.Topic `mapstructure:"topic_latency" yaml:"topic_latency"`
-	TopicCheck   mqtt.Topic `mapstructure:"topic_check" yaml:"topic_check"`
 }
 
 func (t Type) ConfigDefaults() interface{} {
@@ -31,8 +29,6 @@ func (t Type) ConfigDefaults() interface{} {
 		ProbesConfig: probesConfig,
 		LoggerConfig: di.LoggerConfigDefaults(),
 		Retry:        1,
-		TopicOnline:  prefix + "online",
 		TopicLatency: prefix + "latency",
-		TopicCheck:   prefix + "check",
 	}
 }

@@ -15,9 +15,7 @@ type Config struct {
 	Hostname     string `valid:"host,required"`
 	Retry        int
 	Privileged   bool
-	TopicOnline  mqtt.Topic `mapstructure:"topic_online" yaml:"topic_online"`
 	TopicLatency mqtt.Topic `mapstructure:"topic_latency" yaml:"topic_latency"`
-	TopicCheck   mqtt.Topic `mapstructure:"topic_check" yaml:"topic_check"`
 }
 
 func (t Type) ConfigDefaults() interface{} {
@@ -32,8 +30,6 @@ func (t Type) ConfigDefaults() interface{} {
 		LoggerConfig: di.LoggerConfigDefaults(),
 		Retry:        1,
 		Privileged:   true,
-		TopicOnline:  prefix + "online",
 		TopicLatency: prefix + "latency",
-		TopicCheck:   prefix + "check",
 	}
 }

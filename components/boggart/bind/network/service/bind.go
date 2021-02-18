@@ -7,12 +7,12 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart/di"
-	"go.uber.org/multierr"
 )
 
 type Bind struct {
 	di.ConfigBind
 	di.LoggerBind
+	di.MetaBind
 	di.MetricsBind
 	di.MQTTBind
 	di.ProbesBind
@@ -58,18 +58,11 @@ func (b *Bind) Check(ctx context.Context) error {
 		}
 	}
 
-	online := err == nil
-	if e := b.MQTT().PublishAsync(ctx, cfg.TopicOnline.Format(b.address), online); e != nil {
-		err = multierr.Append(err, e)
+	if err != nil {
+		return err
 	}
 
-	if online {
-		metricLatency.With("address", b.address).Set(float64(latency))
+	metricLatency.With("address", b.address).Set(float64(latency))
 
-		if e := b.MQTT().PublishAsync(ctx, cfg.TopicLatency.Format(b.address), latency); e != nil {
-			err = multierr.Append(err, e)
-		}
-	}
-
-	return err
+	return b.MQTT().PublishAsync(ctx, cfg.TopicLatency.Format(b.Meta().ID()), latency)
 }

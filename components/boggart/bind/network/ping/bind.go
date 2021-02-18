@@ -2,15 +2,16 @@ package ping
 
 import (
 	"context"
+	"errors"
 
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/sparrc/go-ping"
-	"go.uber.org/multierr"
 )
 
 type Bind struct {
 	di.ConfigBind
 	di.LoggerBind
+	di.MetaBind
 	di.MetricsBind
 	di.MQTTBind
 	di.ProbesBind
@@ -36,26 +37,12 @@ func (b *Bind) Check(ctx context.Context) error {
 	pinger.Run()
 	stats := pinger.Statistics()
 
-	online := stats.PacketsRecv != 0
-
-	var mqttError error
-
-	if e := b.MQTT().PublishAsync(ctx, cfg.TopicOnline.Format(cfg.Hostname), online); e != nil {
-		mqttError = multierr.Append(mqttError, e)
+	if stats.PacketsRecv == 0 {
+		return errors.New("packets receive is 0")
 	}
 
-	if online {
-		latency := uint32(stats.MaxRtt.Nanoseconds() / 1e+6)
-		metricLatency.With("host", cfg.Hostname).Set(float64(latency))
+	latency := uint32(stats.MaxRtt.Nanoseconds() / 1e+6)
+	metricLatency.With("host", cfg.Hostname).Set(float64(latency))
 
-		if e := b.MQTT().PublishAsync(ctx, cfg.TopicLatency.Format(cfg.Hostname), latency); e != nil {
-			mqttError = multierr.Append(mqttError, e)
-		}
-	}
-
-	if mqttError != nil {
-		b.Logger().Error(mqttError.Error())
-	}
-
-	return err
+	return b.MQTT().PublishAsync(ctx, cfg.TopicLatency.Format(b.Meta().ID()), latency)
 }

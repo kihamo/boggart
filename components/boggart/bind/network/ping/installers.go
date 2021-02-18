@@ -1,4 +1,4 @@
-package smtp
+package ping
 
 import (
 	"context"
@@ -16,14 +16,17 @@ func (b *Bind) InstallersSupport() []installer.System {
 func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.Step, error) {
 	meta := b.Meta()
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
+	cfg := b.config()
 
-	const idSend = "SendJSON"
+	const idLatency = "Latency"
 
 	return openhab.StepsByBind(b, nil,
-		openhab.NewChannel(idSend, openhab.ChannelTypeString).
-			WithCommandTopic(b.config().TopicSend.Format(meta.ID())).
+		openhab.NewChannel(idLatency, openhab.ChannelTypeNumber).
+			WithStateTopic(cfg.TopicLatency.Format(meta.ID())).
 			AddItems(
-				openhab.NewItem(itemPrefix+idSend, openhab.ItemTypeString),
+				openhab.NewItem(itemPrefix+idLatency, openhab.ItemTypeNumber).
+					WithLabel("Host "+cfg.Hostname+" ping latency [%d ms]").
+					WithIcon("clock"),
 			),
 	)
 }
