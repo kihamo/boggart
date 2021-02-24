@@ -8,8 +8,8 @@ sudo journalctl -f -u boggart.service
 #### First
 ```
 gox -output="cmd/server/boggart" -osarch="linux/amd64" -ldflags="-X 'main.Name=Boggart Server' -X 'main.Version=`date +"%y%m%d"`' -X 'main.Build=`date +"%H%M%S"`'" ./cmd/server/
-sudo cp -f /home/kihamo/go/src/github.com/kihamo/boggart/cmd/server/boggart.service /lib/systemd/system/boggart.service
-sudo cp -f /home/kihamo/go/src/github.com/kihamo/boggart/cmd/server/boggart /usr/local/bin/boggart-server
+sudo cp -f /opt/boggart/boggart.service /lib/systemd/system/boggart.service
+sudo cp -f /opt/boggart/boggart /usr/local/bin/boggart-server
 sudo chmod +x /usr/local/bin/boggart-server
 sudo systemctl daemon-reload
 sudo systemctl enable boggart.service
@@ -18,7 +18,7 @@ sudo systemctl start boggart.service && sudo journalctl -f -u boggart.service
 #### Update
 ```
 gox -output="cmd/server/boggart" -osarch="linux/amd64" -ldflags="-X 'main.Name=Boggart Server' -X 'main.Version=`date +"%y%m%d"`' -X 'main.Build=`date +"%H%M%S"`'" ./cmd/server/
-sudo cp -f /home/kihamo/go/src/github.com/kihamo/boggart/cmd/server/boggart /usr/local/bin/boggart-server
+sudo cp -f /opt/boggart/boggart /usr/local/bin/boggart-server
 sudo chmod +x /usr/local/bin/boggart-server
 sudo systemctl restart boggart.service && sudo journalctl -f -u boggart.service
 ```
