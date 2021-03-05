@@ -48,6 +48,7 @@
 {{ define "js" }}
     {{ staticHTML (staticURL "/dashboard/assets/vendors/validator/js/validator.min.js" false) }}
 
+    {{ if .types }}
     <script type="application/javascript">
         $(document).ready(function () {
             var
@@ -71,4 +72,5 @@
             load();
         });
     </script>
+    {{ end }}
 {{ end }}
