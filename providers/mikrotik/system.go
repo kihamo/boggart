@@ -70,6 +70,40 @@ type SystemClock struct {
 	DstActive          bool   `mapstructure:"dst-active"`
 }
 
+type SystemUPS struct {
+	ID                    string `mapstructure:".id"`
+	AlarmSetting          string `mapstructure:"alarm-setting"`
+	Disabled              bool   `mapstructure:"disabled"`
+	Invalid               bool   `mapstructure:"invalid"`
+	Load                  uint   `mapstructure:"load"`
+	ManufactureDate       string `mapstructure:"manufacture-date"`
+	MinRuntime            string `mapstructure:"min-runtime"`
+	Model                 string `mapstructure:"model"`
+	Name                  string `mapstructure:"name"`
+	NominalBatteryVoltage uint   `mapstructure:"nominal-battery-voltage"`
+	OfflineTime           string `mapstructure:"offline-time"`
+	Online                bool   `mapstructure:"on-line"`
+	Port                  string `mapstructure:"port"`
+	Serial                string `mapstructure:"serial"`
+}
+
+type SystemUPSMonitor struct {
+	BatteryCharge  uint    `mapstructure:"battery-charge"`
+	BatteryVoltage float64 `mapstructure:"battery-voltage"`
+	HIDSelfTest    string  `mapstructure:"hid-self-test"`
+	LineVoltage    uint    `mapstructure:"line-voltage"`
+	Load           uint    `mapstructure:"load"`
+	LowBattery     bool    `mapstructure:"low-battery"`
+	OnBattery      bool    `mapstructure:"on-battery"`
+	Online         bool    `mapstructure:"on-line"`
+	Overload       bool    `mapstructure:"overload"`
+	ReplaceBattery bool    `mapstructure:"replace-battery"`
+	RTCRunning     bool    `mapstructure:"rtc-running"`
+	RuntimeLeft    string  `mapstructure:"runtime-left"`
+	SmartBoost     bool    `mapstructure:"smart-boost"`
+	SmartTrim      bool    `mapstructure:"smart-trim"`
+}
+
 func (c *Client) SystemHealth(ctx context.Context) (result SystemHealth, err error) {
 	var list []SystemHealth
 
@@ -155,6 +189,26 @@ func (c *Client) SystemIdentity(ctx context.Context) (result SystemIdentity, err
 	var list []SystemIdentity
 
 	err = c.doConvert(ctx, []string{"/system/identity/print"}, &list)
+	if err != nil {
+		return result, err
+	}
+
+	if len(list) == 0 {
+		return result, ErrEmptyResponse
+	}
+
+	return list[len(list)-1], nil
+}
+
+func (c *Client) SystemUPS(ctx context.Context) (result []SystemUPS, err error) {
+	err = c.doConvert(ctx, []string{"/system/ups/print"}, &result)
+	return result, err
+}
+
+func (c *Client) SystemUPSMonitor(ctx context.Context, name string) (result SystemUPSMonitor, err error) {
+	var list []SystemUPSMonitor
+
+	err = c.doConvert(ctx, []string{"/system/ups/monitor", "=numbers=" + name, "=once="}, &list)
 	if err != nil {
 		return result, err
 	}
