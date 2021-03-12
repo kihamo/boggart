@@ -73,24 +73,25 @@ type SystemClock struct {
 type SystemUPS struct {
 	ID                    string `mapstructure:".id"`
 	AlarmSetting          string `mapstructure:"alarm-setting"`
-	Disabled              bool   `mapstructure:"disabled"`
-	Invalid               bool   `mapstructure:"invalid"`
-	Load                  uint   `mapstructure:"load"`
 	ManufactureDate       string `mapstructure:"manufacture-date"`
 	MinRuntime            string `mapstructure:"min-runtime"`
 	Model                 string `mapstructure:"model"`
 	Name                  string `mapstructure:"name"`
-	NominalBatteryVoltage uint   `mapstructure:"nominal-battery-voltage"`
 	OfflineTime           string `mapstructure:"offline-time"`
-	Online                bool   `mapstructure:"on-line"`
 	Port                  string `mapstructure:"port"`
 	Serial                string `mapstructure:"serial"`
+	NominalBatteryVoltage uint   `mapstructure:"nominal-battery-voltage"`
+	Load                  uint   `mapstructure:"load"`
+	Disabled              bool   `mapstructure:"disabled"`
+	Invalid               bool   `mapstructure:"invalid"`
+	Online                bool   `mapstructure:"on-line"`
 }
 
 type SystemUPSMonitor struct {
+	HIDSelfTest    string  `mapstructure:"hid-self-test"`
+	RuntimeLeft    string  `mapstructure:"runtime-left"`
 	BatteryCharge  uint    `mapstructure:"battery-charge"`
 	BatteryVoltage float64 `mapstructure:"battery-voltage"`
-	HIDSelfTest    string  `mapstructure:"hid-self-test"`
 	LineVoltage    uint    `mapstructure:"line-voltage"`
 	Load           uint    `mapstructure:"load"`
 	LowBattery     bool    `mapstructure:"low-battery"`
@@ -99,7 +100,6 @@ type SystemUPSMonitor struct {
 	Overload       bool    `mapstructure:"overload"`
 	ReplaceBattery bool    `mapstructure:"replace-battery"`
 	RTCRunning     bool    `mapstructure:"rtc-running"`
-	RuntimeLeft    string  `mapstructure:"runtime-left"`
 	SmartBoost     bool    `mapstructure:"smart-boost"`
 	SmartTrim      bool    `mapstructure:"smart-trim"`
 }

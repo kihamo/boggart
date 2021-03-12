@@ -39,6 +39,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 	}
 
 	cfg := b.config()
+	steps := make([]installer.Step, 0, 1)
 
 	const (
 		idPackagesInstalledVersion = "PackagesInstalledVersion"
@@ -201,5 +202,79 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 		}
 	}
 
-	return openhab.StepsByBind(b, nil, channels...)
+	// UPS
+	workers := b.Workers()
+	var hasUPS bool
+
+	const (
+		idUPSBatteryVoltage = "BatteryVoltage"
+		idUPSBatteryCharge  = "BatteryCharge"
+		idUPSBatteryRuntime = "BatteryRuntime"
+		idUPSInputVoltage   = "InputVoltage"
+		idUPSLoad           = "Load"
+		idUPSStatus         = "Status"
+	)
+
+	for _, info := range workers.TasksID() {
+		taskID := workers.TaskShortName(info[1])
+
+		if !strings.HasPrefix(taskID, TaskNameUPS) {
+			continue
+		}
+
+		hasUPS = true
+		upsName := taskID[len(TaskNameUPS)+1:]
+		upsID := "UPS_" + openhab.IDNormalizeCamelCase(upsName) + "_"
+
+		channels = append(channels,
+			openhab.NewChannel(upsID+idUPSBatteryVoltage, openhab.ChannelTypeNumber).
+				WithStateTopic(cfg.TopicUPSBatteryVoltage.Format(sn, upsName)).
+				AddItems(
+					openhab.NewItem(itemPrefix+upsID+idUPSBatteryVoltage, openhab.ItemTypeNumber).
+						WithLabel("Battery voltage [%d V]").
+						WithIcon("energy"),
+				),
+			openhab.NewChannel(upsID+idUPSBatteryCharge, openhab.ChannelTypeNumber).
+				WithStateTopic(cfg.TopicUPSBatteryCharge.Format(sn, upsName)).
+				AddItems(
+					openhab.NewItem(itemPrefix+upsID+idUPSBatteryCharge, openhab.ItemTypeNumber).
+						WithLabel("Battery charge [%d %%]").
+						WithIcon("batterylevel"),
+				),
+			openhab.NewChannel(upsID+idUPSBatteryRuntime, openhab.ChannelTypeNumber).
+				WithStateTopic(cfg.TopicUPSBatteryRuntime.Format(sn, upsName)).
+				AddItems(
+					openhab.NewItem(itemPrefix+upsID+idUPSBatteryRuntime, openhab.ItemTypeNumber).
+						WithLabel("Battery runtime [JS(human_seconds.js):%s]").
+						WithIcon("time"),
+				),
+			openhab.NewChannel(upsID+idUPSInputVoltage, openhab.ChannelTypeNumber).
+				WithStateTopic(cfg.TopicUPSInputVoltage.Format(sn, upsName)).
+				AddItems(
+					openhab.NewItem(itemPrefix+upsID+idUPSInputVoltage, openhab.ItemTypeNumber).
+						WithLabel("Input voltage [%d V]").
+						WithIcon("energy"),
+				),
+			openhab.NewChannel(upsID+idUPSLoad, openhab.ChannelTypeNumber).
+				WithStateTopic(cfg.TopicUPSLoad.Format(sn, upsName)).
+				AddItems(
+					openhab.NewItem(itemPrefix+upsID+idUPSLoad, openhab.ItemTypeNumber).
+						WithLabel("Load [%d %%]").
+						WithIcon("batterylevel"),
+				),
+			openhab.NewChannel(upsID+idUPSStatus, openhab.ChannelTypeString).
+				WithStateTopic(cfg.TopicUPSStatus.Format(sn, upsName)).
+				AddItems(
+					openhab.NewItem(itemPrefix+upsID+idUPSStatus, openhab.ItemTypeString).
+						WithLabel("Status").
+						WithIcon("text"),
+				),
+		)
+	}
+
+	if hasUPS {
+		steps = append(steps, openhab.StepDefault(openhab.StepDefaultTransformHumanSeconds))
+	}
+
+	return openhab.StepsByBind(b, steps, channels...)
 }

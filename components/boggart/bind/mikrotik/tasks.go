@@ -18,6 +18,7 @@ const (
 	TaskNameSerialNumber        = "serial-number"
 	TaskNameUpdater             = "updater"
 	TaskNameInterfaceConnection = "connections"
+	TaskNameUPS                 = "ups"
 )
 
 func (b *Bind) Tasks() []tasks.Task {
@@ -80,6 +81,29 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 	)
 	if err != nil {
 		return err
+	}
+
+	// ups updater
+	if devices, err := b.provider.SystemUPS(ctx); err == nil {
+		for _, device := range devices {
+			if device.Disabled || device.Invalid {
+				continue
+			}
+
+			_, err = b.Workers().RegisterTask(
+				tasks.NewTask().
+					WithName(TaskNameUPS + "-" + device.Name).
+					WithHandler(
+						b.Workers().WrapTaskHandlerIsOnline(
+							tasks.HandlerFuncFromShortToLong(b.taskUPSHandler(device)),
+						),
+					).
+					WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.UPSInterval)),
+			)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	if cfg.TopicSyslog != "" {
@@ -354,4 +378,64 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 	}
 
 	return err
+}
+
+func (b *Bind) taskUPSHandler(device mikrotik.SystemUPS) func(context.Context) error {
+	return func(ctx context.Context) error {
+		result, err := b.provider.SystemUPSMonitor(ctx, device.Name)
+		if err != nil {
+			return err
+		}
+
+		runtimeLeft, err := time.ParseDuration(result.RuntimeLeft)
+		if err != nil {
+			return err
+		}
+
+		cfg := b.config()
+		sn := b.Meta().SerialNumber()
+
+		metricUPSBatteryVoltage.With("serial_number", sn).With("ups", device.Name).Set(result.BatteryVoltage)
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicUPSBatteryVoltage.Format(sn, device.Name), result.BatteryVoltage); e != nil {
+			err = multierr.Append(err, e)
+		}
+
+		metricUPSBatteryCharge.With("serial_number", sn).With("ups", device.Name).Set(float64(result.BatteryCharge))
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicUPSBatteryCharge.Format(sn, device.Name), result.BatteryCharge); e != nil {
+			err = multierr.Append(err, e)
+		}
+
+		metricUPSInputVoltage.With("serial_number", sn).With("ups", device.Name).Set(float64(result.LineVoltage))
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicUPSInputVoltage.Format(sn, device.Name), result.LineVoltage); e != nil {
+			err = multierr.Append(err, e)
+		}
+
+		metricUPSLoad.With("serial_number", sn).With("ups", device.Name).Set(float64(result.Load))
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicUPSLoad.Format(sn, device.Name), result.Load); e != nil {
+			err = multierr.Append(err, e)
+		}
+
+		metricUPSBatteryRuntime.With("serial_number", sn).With("ups", device.Name).Set(runtimeLeft.Seconds())
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicUPSBatteryRuntime.Format(sn, device.Name), runtimeLeft.Seconds()); e != nil {
+			err = multierr.Append(err, e)
+		}
+
+		var status string
+
+		if result.Online {
+			status = "OL"
+		} else if result.OnBattery {
+			status = "OB"
+		}
+
+		if result.LowBattery {
+			status += " LB"
+		}
+
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicUPSStatus.Format(sn, device.Name), status); e != nil {
+			err = multierr.Append(err, e)
+		}
+
+		return err
+	}
 }

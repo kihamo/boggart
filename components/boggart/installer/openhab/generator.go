@@ -18,8 +18,9 @@ const (
 	DirectoryItems     = "items/"
 	DirectoryTransform = "transform/"
 
-	StepDefaultTransformHumanBytes = DirectoryTransform + "human_bytes.js"
-	StepDefaultTransformHumanWatts = DirectoryTransform + "human_watts.js"
+	StepDefaultTransformHumanBytes   = DirectoryTransform + "human_bytes.js"
+	StepDefaultTransformHumanWatts   = DirectoryTransform + "human_watts.js"
+	StepDefaultTransformHumanSeconds = DirectoryTransform + "human_seconds.js"
 )
 
 var (
@@ -68,6 +69,64 @@ var (
     var f = Math.floor(Math.log(i) / Math.log(c));
 
     return parseFloat((i / Math.pow(c, f)).toFixed(d)) + ' ' + e[f];
+})(input);`,
+		},
+		StepDefaultTransformHumanSeconds: {
+			FilePath: StepDefaultTransformHumanSeconds,
+			Content: `(function(i) {
+    var val = parseInt(i);
+    var days = 0;
+    var hours = 0;
+    var minutes = 0;
+    var seconds = 0;
+
+    if (val >= 86400) {
+        days = Math.floor(val / 86400);
+        val = val - (days * 86400);
+    }
+    if (val >= 3600) {
+        hours = Math.floor(val / 3600);
+        val = val - (hours * 3600);
+    }
+    if (val >= 60) {
+        minutes = Math.floor(val / 60);
+        val = val - (minutes * 60);
+    }
+
+    seconds = Math.floor(val);
+
+    var stringDays = '';
+    var stringHours = '';
+    var stringMinutes = '';
+    var stringSeconds = '';
+
+    if (days === 1) {
+        stringDays = '1 day ';
+    } else if (days > 1) {
+        stringDays = days + ' days ';
+    }
+
+    if (hours === 1) {
+        stringHours = '1 hour ';
+    } else if (hours > 1) {
+        stringHours = hours + ' hours ';
+    }
+
+    if (minutes === 1) {
+        stringMinutes = '1 minute ';
+    } else if (minutes > 1) {
+        stringMinutes = minutes + ' minutes ';
+    }
+
+    if (seconds === 1) {
+        stringSeconds = '1 second';
+    } else if (seconds > 1) {
+        stringSeconds = seconds + ' seconds';
+    }
+
+    var returnString =  stringDays + stringHours + stringMinutes + stringSeconds;
+    return returnString.trim();
+
 })(input);`,
 		},
 		// TODO: human duration

@@ -17,6 +17,11 @@ var (
 	metricDiskAvailable        = snitch.NewGauge("disk_available_bytes", "Disk available in Bind router")
 	metricVoltage              = snitch.NewGauge("voltage_volt", "Voltage")
 	metricTemperature          = snitch.NewGauge("temperature_celsius", "Temperature")
+	metricUPSLoad              = snitch.NewGauge("ups_load_percent", "Load on UPS (percent of full)")
+	metricUPSInputVoltage      = snitch.NewGauge("ups_input_voltage_volts", "Input voltage volts")
+	metricUPSBatteryCharge     = snitch.NewGauge("ups_battery_charge_percent", "Battery charge (percent of full)")
+	metricUPSBatteryRuntime    = snitch.NewGauge("ups_battery_runtime_seconds", "Battery runtime seconds")
+	metricUPSBatteryVoltage    = snitch.NewGauge("ups_battery_voltage_volts", "Battery voltage volts")
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {
@@ -37,6 +42,11 @@ func (b *Bind) Describe(ch chan<- *snitch.Description) {
 	metricDiskAvailable.With("serial_number", sn).Describe(ch)
 	metricVoltage.With("serial_number", sn).Describe(ch)
 	metricTemperature.With("serial_number", sn).Describe(ch)
+	metricUPSLoad.With("serial_number", sn).Describe(ch)
+	metricUPSInputVoltage.With("serial_number", sn).Describe(ch)
+	metricUPSBatteryCharge.With("serial_number", sn).Describe(ch)
+	metricUPSBatteryRuntime.With("serial_number", sn).Describe(ch)
+	metricUPSBatteryVoltage.With("serial_number", sn).Describe(ch)
 }
 
 func (b *Bind) Collect(ch chan<- snitch.Metric) {
@@ -57,4 +67,9 @@ func (b *Bind) Collect(ch chan<- snitch.Metric) {
 	metricDiskAvailable.With("serial_number", sn).Collect(ch)
 	metricVoltage.With("serial_number", sn).Collect(ch)
 	metricTemperature.With("serial_number", sn).Collect(ch)
+	metricUPSLoad.With("serial_number", sn).Collect(ch)
+	metricUPSInputVoltage.With("serial_number", sn).Collect(ch)
+	metricUPSBatteryCharge.With("serial_number", sn).Collect(ch)
+	metricUPSBatteryRuntime.With("serial_number", sn).Collect(ch)
+	metricUPSBatteryVoltage.With("serial_number", sn).Collect(ch)
 }
