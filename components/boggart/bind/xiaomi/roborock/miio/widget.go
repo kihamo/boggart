@@ -217,6 +217,8 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 	default:
+		vars["packets_counter"] = b.device.Client().PacketsCounter()
+
 		status, err := b.device.Status(ctx)
 		if err != nil {
 			widget.FlashError(r, "Get status failed with error %v", "", err)
