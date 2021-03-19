@@ -58,7 +58,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 			WithStateTopic(cfg.TopicStateUpTime.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idUpTime, openhab.ItemTypeString).
-					WithLabel("Uptime [%d s]").
+					WithLabel("Uptime [JS(human_seconds.js):%s]").
 					WithIcon("time"),
 			),
 		openhab.NewChannel(idMemoryUsage, openhab.ChannelTypeNumber).
@@ -93,6 +93,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 
 	if storage, err := b.client.ContentManager.GetStorage(content_manager.NewGetStorageParamsWithContext(ctx), nil); err == nil {
 		const (
+			idHDDStatus   = "HDDStatus"
 			idHDDCapacity = "HDDCapacity"
 			idHDDUsage    = "HDDUsage"
 			idHDDFree     = "HDDFree"
@@ -106,6 +107,12 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 			id := openhab.IDNormalizeCamelCase(hdd.Name)
 
 			channels = append(channels,
+				openhab.NewChannel(id+idHDDStatus, openhab.ChannelTypeString).
+					WithStateTopic(cfg.TopicStateHDDStatus.Format(sn, hdd.ID)).
+					AddItems(
+						openhab.NewItem(itemPrefix+id+idHDDStatus, openhab.ItemTypeString).
+							WithLabel("HDD status"),
+					),
 				openhab.NewChannel(id+idHDDCapacity, openhab.ChannelTypeNumber).
 					WithStateTopic(cfg.TopicStateHDDCapacity.Format(sn, hdd.ID)).
 					AddItems(
@@ -216,5 +223,6 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 
 	return openhab.StepsByBind(b, []installer.Step{
 		openhab.StepDefault(openhab.StepDefaultTransformHumanBytes),
+		openhab.StepDefault(openhab.StepDefaultTransformHumanSeconds),
 	}, channels...)
 }

@@ -29,6 +29,7 @@ type Config struct {
 	TopicStateUpTime               mqtt.Topic    `mapstructure:"topic_state_up_time" yaml:"topic_state_up_time"`
 	TopicStateMemoryUsage          mqtt.Topic    `mapstructure:"topic_state_memory_usage" yaml:"topic_state_memory_usage"`
 	TopicStateMemoryAvailable      mqtt.Topic    `mapstructure:"topic_state_available" yaml:"topic_state_available"`
+	TopicStateHDDStatus            mqtt.Topic    `mapstructure:"topic_state_hdd_status" yaml:"topic_state_hdd_status"`
 	TopicStateHDDCapacity          mqtt.Topic    `mapstructure:"topic_state_hdd_capacity" yaml:"topic_state_hdd_capacity"`
 	TopicStateHDDFree              mqtt.Topic    `mapstructure:"topic_state_hdd_free" yaml:"topic_state_hdd_free"`
 	TopicStateHDDUsage             mqtt.Topic    `mapstructure:"topic_state_hdd_usage" yaml:"topic_state_hdd_usage"`
@@ -76,6 +77,7 @@ func (t Type) ConfigDefaults() interface{} {
 		TopicStateUpTime:               prefix + "state/uptime",
 		TopicStateMemoryUsage:          prefix + "state/memory/usage",
 		TopicStateMemoryAvailable:      prefix + "state/memory/available",
+		TopicStateHDDStatus:            prefix + "state/hdd/+/status",
 		TopicStateHDDCapacity:          prefix + "state/hdd/+/capacity",
 		TopicStateHDDFree:              prefix + "state/hdd/+/free",
 		TopicStateHDDUsage:             prefix + "state/hdd/+/usage",

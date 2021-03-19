@@ -187,6 +187,10 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 			metricStorageUsage.With("serial_number", sn).With("name", hdd.Name).Set(float64((hdd.Capacity - hdd.FreeSpace) * MB))
 			metricStorageAvailable.With("serial_number", sn).With("name", hdd.Name).Set(float64(hdd.FreeSpace * MB))
 
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateHDDStatus.Format(sn, hdd.ID), hdd.Status); e != nil {
+				err = multierr.Append(err, e)
+			}
+
 			if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateHDDCapacity.Format(sn, hdd.ID), hdd.Capacity*MB); e != nil {
 				err = multierr.Append(err, e)
 			}
