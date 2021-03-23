@@ -5,5 +5,7 @@ import (
 )
 
 func (b *Bind) ReadinessProbe(ctx context.Context) error {
-	return b.State(ctx)
+	_, err := b.bulb.State(ctx)
+
+	return err
 }
