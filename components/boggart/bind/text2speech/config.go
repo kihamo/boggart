@@ -26,8 +26,8 @@ type Config struct {
 	TopicGenerateBinaryText    mqtt.Topic `mapstructure:"topic_generate_binary_text" yaml:"topic_generate_binary_text"`
 	TopicGenerateURLOptions    mqtt.Topic `mapstructure:"topic_generate_url_options" yaml:"topic_generate_url_options"`
 	TopicGenerateURLText       mqtt.Topic `mapstructure:"topic_generate_url_text" yaml:"topic_generate_url_text"`
-	TopicURL                   mqtt.Topic `mapstructure:"topic_url" yaml:"topic_url"`
-	TopicBinary                mqtt.Topic `mapstructure:"topic_binary" yaml:"topic_binary"`
+	TopicResponseURL           mqtt.Topic `mapstructure:"topic_response_url" yaml:"topic_response_url"`
+	TopicResponseBinary        mqtt.Topic `mapstructure:"topic_response_binary" yaml:"topic_response_binary"`
 }
 
 func (Type) ConfigDefaults() interface{} {
@@ -60,7 +60,7 @@ func (Type) ConfigDefaults() interface{} {
 		TopicGenerateBinaryText:    prefix + "generate/binary/text",
 		TopicGenerateURLOptions:    prefix + "generate/url/options",
 		TopicGenerateURLText:       prefix + "generate/url/text",
-		TopicURL:                   prefix + "url",
-		TopicBinary:                prefix + "binary",
+		TopicResponseURL:           prefix + "url",
+		TopicResponseBinary:        prefix + "binary",
 	}
 }

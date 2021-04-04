@@ -44,7 +44,7 @@ func (b *Bind) callbackMQTTGenerateOptions(binary bool) func(ctx context.Context
 				return err
 			}
 
-			return b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicBinary.Format(b.Meta().ID()), reader)
+			return b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicResponseBinary.Format(b.Meta().ID()), reader)
 		}
 
 		// URL
@@ -53,7 +53,7 @@ func (b *Bind) callbackMQTTGenerateOptions(binary bool) func(ctx context.Context
 			return err
 		}
 
-		return b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicURL.Format(b.Meta().ID()), u.String())
+		return b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicResponseURL.Format(b.Meta().ID()), u.String())
 	}
 }
 
@@ -68,7 +68,7 @@ func (b *Bind) callbackMQTTGenerateText(binary bool) func(ctx context.Context, _
 				return err
 			}
 
-			return b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicBinary.Format(b.Meta().ID()), reader)
+			return b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicResponseBinary.Format(b.Meta().ID()), reader)
 		}
 
 		// URL
@@ -77,6 +77,6 @@ func (b *Bind) callbackMQTTGenerateText(binary bool) func(ctx context.Context, _
 			return err
 		}
 
-		return b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicURL.Format(b.Meta().ID()), u.String())
+		return b.MQTT().PublishAsyncWithoutCache(ctx, cfg.TopicResponseURL.Format(b.Meta().ID()), u.String())
 	}
 }
