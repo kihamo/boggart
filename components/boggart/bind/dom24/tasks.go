@@ -34,7 +34,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	for _, account := range accountingResponse.GetPayload().Data {
 		metricAccountBalance.With("account", account.Ident).Set(account.TotalSum)
 
-		if e := b.MQTT().PublishAsync(ctx, cfg.TopicAccountBalance.Format(account.Ident), account.TotalSum); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicAccountBalance.Format(account.Ident), account.Sum); e != nil {
 			err = multierr.Append(err, e)
 		}
 
