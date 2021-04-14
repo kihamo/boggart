@@ -20,6 +20,7 @@ type Config struct {
 	UpdaterInterval         time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 	TopicAccountBalance     mqtt.Topic    `mapstructure:"topic_account_balance" yaml:"topic_account_balance"`
 	TopicAccountBill        mqtt.Topic    `mapstructure:"topic_account_bill" yaml:"topic_account_bill"`
+	TopicMeter              mqtt.Topic    `mapstructure:"topic_meter" yaml:"topic_meter"`
 }
 
 func (Type) ConfigDefaults() interface{} {
@@ -33,5 +34,6 @@ func (Type) ConfigDefaults() interface{} {
 		UpdaterInterval:         time.Hour,
 		TopicAccountBalance:     prefix + "+/balance",
 		TopicAccountBill:        prefix + "+/bill",
+		TopicMeter:              prefix + "+/meter/+/value",
 	}
 }

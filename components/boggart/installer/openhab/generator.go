@@ -146,6 +146,10 @@ func IDNormalizeCamelCase(id string) string {
 	return id
 }
 
+func LabelEscape(label string) string {
+	return strings.ReplaceAll(label, "%", "%%")
+}
+
 func BrokerFromClientOptionsReader(ops *mqtt.ClientOptionsReader) *Broker {
 	server := ops.Servers()[0]
 	port, _ := strconv.Atoi(server.Port())

@@ -3,10 +3,12 @@ package dom24
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/kihamo/boggart/components/boggart/installer"
 	"github.com/kihamo/boggart/components/boggart/installer/openhab"
 	"github.com/kihamo/boggart/providers/dom24/client/accounting"
+	"github.com/kihamo/boggart/providers/dom24/client/meters"
 )
 
 func (b *Bind) InstallersSupport() []installer.System {
@@ -21,18 +23,24 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 		return nil, fmt.Errorf("get accounting info failed: %w", err)
 	}
 
+	metersResponse, err := b.provider.Meters.List(meters.NewListParams())
+	if err != nil {
+		return nil, fmt.Errorf("get meters list failed: %w", err)
+	}
+
 	itemPrefix := openhab.ItemPrefixFromBindMeta(b.Meta())
 	cfg := b.config()
 
 	const (
-		idBalance = "Balance"
-		idBill    = "Bill"
+		idBalance    = "Balance"
+		idBill       = "Bill"
+		idMeterValue = "Value"
 	)
 
 	channels := make([]*openhab.Channel, 0, len(accountingResponse.Payload.Data)*2)
 	var id string
 
-	for _, account := range accountingResponse.Payload.Data {
+	for _, account := range accountingResponse.GetPayload().Data {
 		id = "Account" + openhab.IDNormalizeCamelCase(account.Ident) + "_"
 
 		channels = append(channels,
@@ -49,6 +57,24 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 					openhab.NewItem(itemPrefix+id+idBill, openhab.ItemTypeString).
 						WithLabel("Bill #"+account.Ident+" [%s]").
 						WithIcon("returnpipe"),
+				),
+		)
+	}
+
+	for _, meter := range metersResponse.GetPayload().Data {
+		if meter.IsDisabled {
+			continue
+		}
+
+		id = "Account" + openhab.IDNormalizeCamelCase(meter.Ident) + "_Meter" + openhab.IDNormalizeCamelCase(meter.FactoryNumber) + "_"
+
+		channels = append(channels,
+			openhab.NewChannel(id+idMeterValue, openhab.ChannelTypeNumber).
+				WithStateTopic(cfg.TopicMeter.Format(meter.Ident, meter.FactoryNumber)).
+				AddItems(
+					openhab.NewItem(itemPrefix+id+idMeterValue, openhab.ItemTypeNumber).
+						WithLabel(meter.Name+" [%."+strconv.FormatUint(meter.NumberOfDecimalPlaces, 10)+"f "+openhab.LabelEscape(meter.Units)+"]").
+						WithIcon("heating-60"),
 				),
 		)
 	}
