@@ -1,5 +1,11 @@
 {{ define "content" }}
     {{ if .accounts }}
+        <script type="application/javascript">
+            function valueFormat(n) {
+                return new Intl.NumberFormat().format(n);
+            }
+        </script>
+
         {{ range $account := .accounts }}
         <div class="row">
             <div class="col-md-12 col-sm-12 col-xs-12">
@@ -41,23 +47,29 @@
                                         <tr>
                                             <th>{{ i18n "Date" $ }}</th>
                                             <th>{{ i18n "Period" $ }}</th>
-                                            <th>{{ i18n "Amount" $ }}</th>
+                                            <th>{{ i18n "Debit" $ }}</th>
+                                            <th>{{ i18n "Credit" $ }}</th>
                                             <th>{{ i18n "File" $ }}</th>
                                         </tr>
                                         </thead>
                                         <tbody>
+                                        {{ $debit := 0 }}
+                                        {{ $credit := 0 }}
                                         {{ range $transaction := $account.Transactions }}
                                         <tr>
                                             <td>{{ $transaction.Date }}</td>
                                             <td>{{ $transaction.Period }}</td>
-                                            <td class="{{ if $transaction.IsPayment }}text-success{{ else }}text-danger{{ end }}">
+                                            <td class="text-success">
                                                 {{ if $transaction.IsPayment }}
-                                                    <i class="fas fa-sign-out-alt" title="{{ i18n "Payment" $ }}"></i>
-                                                {{ else }}
-                                                    <i class="fas fa-sign-in-alt" title="{{ i18n "Bill" $ }}"></i>
+                                                    <script type="application/javascript">document.write(valueFormat({{ $transaction.Amount }}))</script> &#8381;
+                                                    {{ $debit = add $debit $transaction.Amount }}
                                                 {{ end }}
-
-                                                {{ $transaction.Amount }} &#8381;
+                                            </td>
+                                            <td class="text-danger">
+                                                {{ if not $transaction.IsPayment }}
+                                                    <script type="application/javascript">document.write(valueFormat({{ $transaction.Amount }}))</script> &#8381;
+                                                    {{ $credit = add $credit $transaction.Amount }}
+                                                {{ end }}
                                             </td>
                                             <td>
                                                 {{ if $transaction.FileURL }}
@@ -68,6 +80,16 @@
                                             </td>
                                         </tr>
                                         {{ end }}
+                                        <tr>
+                                            <td colspan="2" align="right">{{ i18n "Total" $ }}</td>
+                                            <td class="text-success">
+                                                <script type="application/javascript">document.write(valueFormat({{ $debit }}))</script> &#8381;
+                                            </td>
+                                            <td class="text-danger">
+                                                <script type="application/javascript">document.write(valueFormat({{ $credit }}))</script> &#8381;
+                                            </td>
+                                            <td></td>
+                                        </tr>
                                         </tbody>
                                     </table>
                                 </div>
