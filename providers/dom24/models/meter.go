@@ -41,10 +41,15 @@ type Meter struct {
 	IsDisabled bool `json:"IsDisabled,omitempty"`
 
 	// last checkup date
-	LastCheckupDate string `json:"LastCheckupDate,omitempty"`
+	// Format: date
+	LastCheckupDate custom.Date `json:"LastCheckupDate,omitempty"`
+
+	// name
+	Name string `json:"Name,omitempty"`
 
 	// next checkup date
-	NextCheckupDate string `json:"NextCheckupDate,omitempty"`
+	// Format: date
+	NextCheckupDate custom.Date `json:"NextCheckupDate,omitempty"`
 
 	// number of decimal places
 	NumberOfDecimalPlaces uint64 `json:"NumberOfDecimalPlaces,omitempty"`
@@ -121,6 +126,14 @@ type Meter struct {
 func (m *Meter) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateLastCheckupDate(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateNextCheckupDate(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateStartDate(formats); err != nil {
 		res = append(res, err)
 	}
@@ -132,6 +145,38 @@ func (m *Meter) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *Meter) validateLastCheckupDate(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.LastCheckupDate) { // not required
+		return nil
+	}
+
+	if err := m.LastCheckupDate.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("LastCheckupDate")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *Meter) validateNextCheckupDate(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.NextCheckupDate) { // not required
+		return nil
+	}
+
+	if err := m.NextCheckupDate.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("NextCheckupDate")
+		}
+		return err
+	}
+
 	return nil
 }
 
@@ -201,6 +246,9 @@ type MeterValuesItems0 struct {
 
 	// is current period
 	IsCurrentPeriod bool `json:"IsCurrentPeriod,omitempty"`
+
+	// kind
+	Kind string `json:"Kind,omitempty"`
 
 	// period
 	// Format: date

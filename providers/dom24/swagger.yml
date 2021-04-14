@@ -492,9 +492,9 @@ definitions:
       FactoryNumber:
         type: "string"
       LastCheckupDate:
-        type: "string"
+        $ref: "#/definitions/DateCustom"
       NextCheckupDate:
-        type: "string"
+        $ref: "#/definitions/DateCustom"
       RecheckInterval:
         type: "integer"
         format: "uint64"
@@ -514,6 +514,8 @@ definitions:
         type: "integer"
         format: "uint64"
       CustomName:
+        type: "string"
+      Name:
         type: "string"
       IsDisabled:
         type: "boolean"
@@ -563,6 +565,8 @@ definitions:
               $ref: "#/definitions/DateCustom"
             IsCurrentPeriod:
               type: "boolean"
+            Kind:
+              type: "string"
             Value:
               type: "number"
             ValueT2:

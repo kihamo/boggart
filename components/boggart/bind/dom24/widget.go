@@ -10,7 +10,9 @@ import (
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/providers/dom24/client/accounting"
 	"github.com/kihamo/boggart/providers/dom24/client/bill"
+	"github.com/kihamo/boggart/providers/dom24/client/meters"
 	"github.com/kihamo/boggart/providers/dom24/client/user"
+	"github.com/kihamo/boggart/providers/dom24/models"
 	"github.com/kihamo/boggart/providers/dom24/static/models"
 	"github.com/kihamo/shadow/components/dashboard"
 )
@@ -39,12 +41,11 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	ctx := r.Context()
 	widget := b.Widget()
 
-	exists := make(map[string]bool)
-	accounts := make(map[string]*widgetAccountView)
-	vars := make(map[string]interface{}, 2)
+	vars := make(map[string]interface{}, 3)
 
 	query := r.URL().Query()
 	action := query.Get("action")
+	vars["action"] = action
 
 	switch action {
 	case "bill":
@@ -82,7 +83,35 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 		return
 
+	case "meters":
+		response, err := b.provider.Meters.List(meters.NewListParamsWithContext(ctx))
+		if err != nil {
+			widget.FlashError(r, "Get meters list failed %v", "", err)
+
+			widget.Render(ctx, "widget", vars)
+			return
+		}
+
+		list := make([]*models.Meter, 0, len(response.GetPayload().Data))
+		for _, meter := range response.GetPayload().Data {
+			if meter.IsDisabled {
+				continue
+			}
+
+			if meter.NextCheckupDate.Time().IsZero() && !meter.LastCheckupDate.Time().IsZero() && meter.RecheckInterval > 0 {
+				meter.NextCheckupDate.Date = meter.LastCheckupDate.Date
+				meter.NextCheckupDate.AddDate(int(meter.RecheckInterval), 0, 0)
+			}
+
+			list = append(list, meter)
+		}
+
+		vars["meters"] = list
+
 	default:
+		exists := make(map[string]bool)
+		accounts := make(map[string]*widgetAccountView)
+
 		if v := query.Get("account"); v != "" {
 			if parts := strings.Split(v, ","); len(parts) > 0 {
 				for _, part := range parts {
@@ -97,7 +126,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		if err != nil {
 			widget.FlashError(r, "Get user info failed %v", "", err)
 
-			widget.Render(r.Context(), "widget", vars)
+			widget.Render(ctx, "widget", vars)
 			return
 		}
 
@@ -214,7 +243,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 	}
 
-	widget.Render(r.Context(), "widget", vars)
+	widget.Render(ctx, "widget", vars)
 }
 
 func (b *Bind) WidgetAssetFS() *assetfs.AssetFS {
