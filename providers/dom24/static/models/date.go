@@ -43,7 +43,3 @@ func (m *Date) UnmarshalJSON(b []byte) error {
 
 	return nil
 }
-
-func (m *Date) AddDate(years int, months int, days int) {
-	m.Date = strfmt.Date(m.Time().AddDate(years, months, days))
-}

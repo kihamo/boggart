@@ -6,16 +6,38 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/providers/dom24/client/accounting"
 	"github.com/kihamo/boggart/providers/dom24/client/bill"
 	"github.com/kihamo/boggart/providers/dom24/client/meters"
 	"github.com/kihamo/boggart/providers/dom24/client/user"
-	"github.com/kihamo/boggart/providers/dom24/models"
 	"github.com/kihamo/boggart/providers/dom24/static/models"
 	"github.com/kihamo/shadow/components/dashboard"
 )
+
+type widgetMeterView struct {
+	AccountID       string
+	Name            string
+	Address         string
+	Resource        string
+	FactoryNumber   string
+	LastCheckupDate *time.Time
+	NextCheckupDate *time.Time
+	RecheckInterval uint64
+	StartDate       *time.Time
+	StartValue      float64
+	Units           string
+	Values          []*widgetMeterValueView
+}
+
+type widgetMeterValueView struct {
+	Period time.Time
+	Value  float64
+	Delta  float64
+	Kind   string
+}
 
 type widgetAccountView struct {
 	ID             string
@@ -92,18 +114,95 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			return
 		}
 
-		list := make([]*models.Meter, 0, len(response.GetPayload().Data))
+		list := make([]*widgetMeterView, 0, len(response.GetPayload().Data))
+
 		for _, meter := range response.GetPayload().Data {
 			if meter.IsDisabled {
 				continue
 			}
 
-			if meter.NextCheckupDate.Time().IsZero() && !meter.LastCheckupDate.Time().IsZero() && meter.RecheckInterval > 0 {
-				meter.NextCheckupDate.Date = meter.LastCheckupDate.Date
-				meter.NextCheckupDate.AddDate(int(meter.RecheckInterval), 0, 0)
+			item := &widgetMeterView{
+				AccountID:       meter.Ident,
+				Name:            meter.Name,
+				Address:         meter.Address,
+				Resource:        meter.Resource,
+				FactoryNumber:   meter.FactoryNumber,
+				RecheckInterval: meter.RecheckInterval,
+				StartValue:      meter.StartValue,
+				Units:           meter.Units,
+				Values:          make([]*widgetMeterValueView, 0, len(meter.Values)),
 			}
 
-			list = append(list, meter)
+			if !meter.LastCheckupDate.Time().IsZero() {
+				t := meter.LastCheckupDate.Time()
+				item.LastCheckupDate = &t
+			}
+
+			if !meter.NextCheckupDate.Time().IsZero() {
+				t := meter.NextCheckupDate.Time()
+				item.NextCheckupDate = &t
+			} else if !meter.LastCheckupDate.Time().IsZero() && meter.RecheckInterval > 0 {
+				t := meter.LastCheckupDate.Time().AddDate(int(meter.RecheckInterval), 0, 0)
+				item.NextCheckupDate = &t
+			}
+
+			if !meter.StartDate.Time().IsZero() {
+				t := meter.StartDate.Time()
+				item.StartDate = &t
+			}
+
+			list = append(list, item)
+
+			if len(meter.Values) == 0 {
+				continue
+			}
+
+			var currentPeriod time.Time
+			prevPeriod := meter.Values[0].Period.Time()
+
+			now := time.Now()
+			nowYear, nowMonth, nowDay := now.Date()
+
+			// если текущая дата раньше, чем установленный период фиксации показаний
+			// то переключаем на предыдущий месяц, чтобы не захватывать пока еще
+			// не отчетный месяц
+			if meter.ValuesEndDay > 0 && nowDay < int(meter.ValuesEndDay) {
+				now = time.Date(nowYear, nowMonth, 1, 0, 0, 0, 0, now.Location()).Add(-time.Nanosecond)
+				nowYear, nowMonth, nowDay = now.Date()
+			}
+
+			if now.After(prevPeriod) {
+				prevPeriod = now
+			}
+
+			for _, value := range meter.Values {
+				currentPeriod = value.Period.Time()
+
+				for year := prevPeriod.Year(); year >= currentPeriod.Year(); year-- {
+					for month := prevPeriod.Month(); month > 0 && !currentPeriod.After(prevPeriod); month-- {
+						item.Values = append(item.Values, &widgetMeterValueView{
+							Period: prevPeriod,
+							Value:  value.Value,
+							Kind:   "Unknown",
+						})
+
+						prevPeriod = time.Date(year, month, 1, 0, 0, 0, 0, prevPeriod.Location()).Add(-time.Nanosecond)
+					}
+				}
+
+				last := len(item.Values) - 1
+				item.Values[last].Period = value.Period.Time()
+				item.Values[last].Kind = value.Kind
+			}
+
+			// deltas
+			for i, current := range item.Values {
+				if i == len(item.Values)-1 {
+					continue
+				}
+
+				current.Delta = current.Value - item.Values[i+1].Value
+			}
 		}
 
 		vars["meters"] = list

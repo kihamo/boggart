@@ -22,7 +22,7 @@
                                         <div class="col-md-12 col-sm-12 col-xs-12">
                                             <div class="x_panel">
                                                 <div class="x_title">
-                                                    <h2>#{{ $meter.Ident }} {{ $meter.Name }}</h2>
+                                                    <h2>#{{ $meter.AccountID }} {{ $meter.Name }}</h2>
                                                     <ul class="nav navbar-right panel_toolbox">
                                                         <li><a class="collapse-link"><i class="fas fa-chevron-up"></i></a></li>
                                                     </ul>
@@ -46,15 +46,26 @@
                                                             <div class="col-sm-4 invoice-col">
                                                                 {{ i18n "Checkup" $ }}
                                                                 <address>
-                                                                    <strong>{{ i18n "Last" $ }}:</strong> {{ $meter.LastCheckupDate }}<br />
-                                                                    <strong>{{ i18n "Next" $ }}:</strong> {{ $meter.NextCheckupDate }}<br />
-                                                                    <strong>{{ i18n "Interval" $ }}:</strong> {{ i18nPlural "%d year" "%d years" $meter.RecheckInterval $ nil nil nil $meter.RecheckInterval }}
+                                                                    {{ if $meter.LastCheckupDate }}
+                                                                        <strong>{{ i18n "Last" $ }}:</strong> {{ $meter.LastCheckupDate.Format "2006-01-02" }}<br />
+                                                                    {{ end }}
+
+                                                                    {{ if $meter.NextCheckupDate }}
+                                                                        <strong>{{ i18n "Next" $ }}:</strong> {{ $meter.NextCheckupDate.Format "2006-01-02" }}<br />
+                                                                    {{ end }}
+
+                                                                    {{ if gt $meter.RecheckInterval 0 }}
+                                                                        <strong>{{ i18n "Interval" $ }}:</strong> {{ i18nPlural "%d year" "%d years" $meter.RecheckInterval $ nil nil nil $meter.RecheckInterval }}
+                                                                    {{ end }}
                                                                 </address>
                                                             </div>
                                                             <div class="col-sm-4 invoice-col">
                                                                 {{ i18n "Start" $ }}
                                                                 <address>
-                                                                    <strong>{{ i18n "Date" $ }}:</strong> {{ $meter.StartDate }}<br />
+                                                                    {{ if $meter.StartDate }}
+                                                                        <strong>{{ i18n "Date" $ }}:</strong> {{ $meter.StartDate.Format "2006-01-02" }}<br />
+                                                                    {{ end }}
+
                                                                     <strong>{{ i18n "Value" $ }}:</strong> {{ $meter.StartValue }} {{ $meter.Units }}
                                                                 </address>
                                                             </div>
@@ -67,14 +78,18 @@
                                                                         <tr>
                                                                             <th>{{ i18n "Date" $ }}</th>
                                                                             <th>{{ i18n "Value" $ }}</th>
+                                                                            <th>{{ i18n "Delta" $ }}</th>
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
                                                                     {{ range $value := $meter.Values }}
                                                                     <tr>
-                                                                        <td>{{ $value.Period }}</td>
+                                                                        <td>{{ i18n $value.Period.Month.String $ nil "dashboard" }} {{ $value.Period.Year }}</td>
                                                                         <td align="right" class="text-{{ if eq $value.Kind "Учтено" }}success{{ else }}danger{{ end }}" title="{{ $value.Kind }}">
                                                                             <script type="application/javascript">document.write(valueFormat({{ $value.Value }}))</script> {{ $meter.Units }}
+                                                                        </td>
+                                                                        <td align="right" class="text-{{ if gt $value.Delta 0.0 }}success{{ else }}danger{{ end }}">
+                                                                            <script type="application/javascript">document.write(valueFormat({{ $value.Delta }}))</script> {{ $meter.Units }}
                                                                         </td>
                                                                     </tr>
                                                                     {{ end }}
