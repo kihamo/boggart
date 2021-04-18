@@ -58,6 +58,17 @@ const (
 	Channel20 MetricsChannel = 0x00080000 // uint32  | ч      | время нормальной работы
 )
 
+const (
+	DiagnosticsEmptyBattery uint8 = 1 << iota
+	DiagnosticsErrorReadWriteEEPROM
+	DiagnosticsResetCounters
+	DiagnosticsReserved1
+	DiagnosticsReserved2
+	DiagnosticsThermometerInBroke
+	DiagnosticsThermometerOutBroke
+	DiagnosticsNegativeTemperaturesDelta
+)
+
 type MetricsChannel int
 type SettingsParam int
 type ArchiveType int

@@ -309,6 +309,32 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			Value: durationValue,
 			Error: err,
 		}
+
+		diagnostic, err := provider.Diagnostics()
+		vars["diagnostic_battery"] = metricView{
+			Value: diagnostic.IsEmptyBattery(),
+			Error: err,
+		}
+		vars["diagnostic_eeprom"] = metricView{
+			Value: diagnostic.IsErrorReadWriteEEPROM(),
+			Error: err,
+		}
+		vars["diagnostic_counters"] = metricView{
+			Value: diagnostic.IsResetCounters(),
+			Error: err,
+		}
+		vars["diagnostic_thermometer_in"] = metricView{
+			Value: diagnostic.IsThermometerInBroke(),
+			Error: err,
+		}
+		vars["diagnostic_thermometer_out"] = metricView{
+			Value: diagnostic.IsThermometerOutBroke(),
+			Error: err,
+		}
+		vars["diagnostic_negative_delta"] = metricView{
+			Value: diagnostic.IsNegativeTemperaturesDelta(),
+			Error: err,
+		}
 	}
 
 	widget.Render(r.Context(), "widget", vars)

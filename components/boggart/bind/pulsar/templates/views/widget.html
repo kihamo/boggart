@@ -346,6 +346,63 @@
                                             <td>{{ .operating_time.Value.String }}</td>
                                         {{ end }}
                                     </tr>
+                                    <tr>
+                                        <th colspan="2" class="text-center">{{ i18n "Diagnostic" . }}</th>
+                                    </tr>
+                                    {{ if .diagnostic_battery.Error }}
+                                    <tr>
+                                        <td colspan="2" class="text-danger text-center">{{ .diagnostic_battery.Error.Error }}</td>
+                                    </tr>
+                                    {{ else }}
+                                    <tr>
+                                        <td>{{ i18n "Empty battery" . }}</td>
+                                        {{ if .diagnostic_battery.Value }}
+                                            <td class="text-danger">{{ i18n "Yes" . }}</td>
+                                        {{ else }}
+                                            <td class="text-success">{{ i18n "No" . }}</td>
+                                        {{ end }}
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "EEPROM rear/write error" . }}</td>
+                                        {{ if .diagnostic_eeprom.Value }}
+                                            <td class="text-danger">{{ i18n "Yes" . }}</td>
+                                        {{ else }}
+                                            <td class="text-success">{{ i18n "No" . }}</td>
+                                        {{ end }}
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Reset counters" . }}</td>
+                                        {{ if .diagnostic_counters.Value }}
+                                            <td class="text-danger">{{ i18n "Yes" . }}</td>
+                                        {{ else }}
+                                            <td class="text-success">{{ i18n "No" . }}</td>
+                                        {{ end }}
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Thermometer In broke" . }}</td>
+                                        {{ if .diagnostic_thermometer_in.Value }}
+                                            <td class="text-danger">{{ i18n "Yes" . }}</td>
+                                        {{ else }}
+                                            <td class="text-success">{{ i18n "No" . }}</td>
+                                        {{ end }}
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Thermometer Out broke" . }}</td>
+                                        {{ if .diagnostic_thermometer_out.Value }}
+                                            <td class="text-danger">{{ i18n "Yes" . }}</td>
+                                        {{ else }}
+                                            <td class="text-success">{{ i18n "No" . }}</td>
+                                        {{ end }}
+                                    </tr>
+                                    <tr>
+                                        <td>{{ i18n "Negative temperatures delta" . }}</td>
+                                        {{ if .diagnostic_negative_delta.Value }}
+                                            <td class="text-danger">{{ i18n "Yes" . }}</td>
+                                        {{ else }}
+                                            <td class="text-success">{{ i18n "No" . }}</td>
+                                        {{ end }}
+                                    </tr>
+                                    {{ end }}
                                 </tbody>
                             </table>
                             {{ end }}
