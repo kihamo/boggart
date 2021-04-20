@@ -63,9 +63,9 @@ func (c *Client) Auth(ctx context.Context) error {
 	return err
 }
 
-func (c *Client) Accounts(ctx context.Context) ([]Account, error) {
+func (c *Client) Houses(ctx context.Context) ([]House, error) {
 	data := make([]struct {
-		Accounts []Account `json:"houses"`
+		Houses []House `json:"houses"`
 	}, 0)
 
 	err := c.base.DoRequest(ctx, "sql", map[string]string{"query": "lka_get_houses"}, nil, &data)
@@ -73,32 +73,27 @@ func (c *Client) Accounts(ctx context.Context) ([]Account, error) {
 		return nil, err
 	}
 
-	accounts := make([]Account, 0)
+	houses := make([]House, 0)
 
 	var e error
 
 	for _, row := range data {
-		for _, account := range row.Accounts {
-			for i, service := range account.Services {
-				account.Services[i].Balance, e = strconv.ParseFloat(service.BalanceRAW, 10)
-				if e != nil {
-					err = multierr.Append(err, e)
-				}
-
-				account.Services[i].NNAccount, e = strconv.ParseUint(service.NNAccountRAW, 10, 64)
+		for _, house := range row.Houses {
+			for i, service := range house.Services {
+				house.Services[i].Balance, e = strconv.ParseFloat(service.BalanceRAW, 10)
 				if e != nil {
 					err = multierr.Append(err, e)
 				}
 			}
 
-			accounts = append(accounts, account)
+			houses = append(houses, house)
 		}
 	}
 
-	return accounts, err
+	return houses, err
 }
 
-func (c *Client) BalanceDetails(ctx context.Context, number string, provider Provider, dateStart, dateEnd time.Time) ([]BalanceDetail, error) {
+func (c *Client) BalanceDetails(ctx context.Context, accountID string, provider Provider, dateStart, dateEnd time.Time) ([]BalanceDetail, error) {
 	vlProvider, err := json.Marshal(provider)
 	if err != nil {
 		return nil, err
@@ -109,7 +104,7 @@ func (c *Client) BalanceDetails(ctx context.Context, number string, provider Pro
 	err = c.base.DoRequest(ctx, "sql", map[string]string{"query": "proxy", "plugin": "bytTmbProxy", "proxyquery": "tmb_balance_detail"}, map[string]string{
 		"dt_start":    dateStart.Format(dateFormatLayout),
 		"dt_end":      dateEnd.Format(dateFormatLayout),
-		"nn_ls":       number,
+		"nn_ls":       accountID,
 		"nm_email":    c.base.Login(),
 		"vl_provider": string(vlProvider),
 		"page":        "1",
@@ -123,7 +118,7 @@ func (c *Client) BalanceDetails(ctx context.Context, number string, provider Pro
 	return data, nil
 }
 
-func (c *Client) IndicatorInfo(ctx context.Context, number string, provider Provider) (*IndicationInfo, error) {
+func (c *Client) IndicatorInfo(ctx context.Context, accountID string, provider Provider) (*IndicationInfo, error) {
 	vlProvider, err := json.Marshal(provider)
 	if err != nil {
 		return nil, err
@@ -132,7 +127,7 @@ func (c *Client) IndicatorInfo(ctx context.Context, number string, provider Prov
 	data := make([]IndicationInfo, 0)
 
 	err = c.base.DoRequest(ctx, "sql", map[string]string{"query": "proxy", "plugin": "bytTmbProxy", "proxyquery": "tmb_info_ind"}, map[string]string{
-		"nn_ls":       number,
+		"nn_ls":       accountID,
 		"nm_email":    c.base.Login(),
 		"vl_provider": string(vlProvider),
 	}, &data)
@@ -147,7 +142,7 @@ func (c *Client) IndicatorInfo(ctx context.Context, number string, provider Prov
 	return &data[0], nil
 }
 
-func (c *Client) CurrentRate(ctx context.Context, number string, provider Provider) (*Rate, error) {
+func (c *Client) CurrentRate(ctx context.Context, houseID uint64, provider Provider) (*Rate, error) {
 	vlProvider, err := json.Marshal(provider)
 	if err != nil {
 		return nil, err
@@ -156,7 +151,7 @@ func (c *Client) CurrentRate(ctx context.Context, number string, provider Provid
 	data := make([]Rate, 0)
 
 	err = c.base.DoRequest(ctx, "sql", map[string]string{"query": "proxy", "plugin": "bytTmbProxy", "proxyquery": "tmb_current_rate"}, map[string]string{
-		"nn_ls":       number,
+		"nn_ls":       strconv.FormatUint(houseID, 10),
 		"nm_email":    c.base.Login(),
 		"vl_provider": string(vlProvider),
 	}, &data)
@@ -171,7 +166,31 @@ func (c *Client) CurrentRate(ctx context.Context, number string, provider Provid
 	return &data[0], nil
 }
 
-func (c *Client) BillFile(ctx context.Context, number string, provider Provider, period time.Time) (string, error) {
+func (c *Client) Meter(ctx context.Context, accountID string, provider Provider) (*Meter, error) {
+	vlProvider, err := json.Marshal(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	data := make([]Meter, 0)
+
+	err = c.base.DoRequest(ctx, "sql", map[string]string{"query": "proxy", "plugin": "bytTmbProxy", "proxyquery": "tmb_meter"}, map[string]string{
+		"nn_ls":       accountID,
+		"nm_email":    c.base.Login(),
+		"vl_provider": string(vlProvider),
+	}, &data)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(data) == 0 {
+		return nil, errors.New("bad response")
+	}
+
+	return &data[0], nil
+}
+
+func (c *Client) BillFile(ctx context.Context, accountID string, provider Provider, period time.Time) (string, error) {
 	vlProvider, err := json.Marshal(provider)
 	if err != nil {
 		return "", err
@@ -180,7 +199,7 @@ func (c *Client) BillFile(ctx context.Context, number string, provider Provider,
 	data := make([]BillFile, 0)
 
 	err = c.base.DoRequest(ctx, "sql", map[string]string{"query": "proxy", "plugin": "bytTmbProxy", "proxyquery": "tmb_file_bill_period"}, map[string]string{
-		"nn_ls":       number,
+		"nn_ls":       accountID,
 		"v_email":     c.base.Login(),
 		"vl_provider": string(vlProvider),
 		"dt_period":   period.Format(dateFormatLayout),

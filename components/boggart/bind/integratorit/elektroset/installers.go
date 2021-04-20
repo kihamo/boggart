@@ -2,11 +2,12 @@ package elektroset
 
 import (
 	"context"
-	"errors"
 	"strconv"
+	"time"
 
 	"github.com/kihamo/boggart/components/boggart/installer"
 	"github.com/kihamo/boggart/components/boggart/installer/openhab"
+	"github.com/kihamo/boggart/providers/integratorit/elektroset"
 )
 
 func (b *Bind) InstallersSupport() []installer.System {
@@ -16,11 +17,7 @@ func (b *Bind) InstallersSupport() []installer.System {
 }
 
 func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]installer.Step, error) {
-	if b.metersCount.IsNil() {
-		return nil, errors.New("meters counter is nil")
-	}
-
-	accounts, err := b.client.Accounts(ctx)
+	houses, err := b.Houses(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -29,68 +26,113 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 	cfg := b.config()
 
 	const (
-		idBalance    = "Balance"
-		idBill       = "Bill"
-		idMeterValue = "Value"
-		idMeterDate  = "Date"
+		idBalance      = "Balance"
+		idBill         = "Bill"
+		idMeterValue   = "Value"
+		idMeterDate    = "Date"
+		idMeterCheckup = "Checkup"
 	)
 
 	channels := make([]*openhab.Channel, 0)
-	var id string
+	var (
+		idPrefix      string
+		id            string
+		meterTariff   string
+		meterIDPrefix string
+	)
 
-	for _, account := range accounts {
-		id = "Account" + openhab.IDNormalizeCamelCase(account.Number) + "_" + idBalance
+	for _, house := range houses {
+		idPrefix = "House" + strconv.FormatUint(house.ID, 10) + "_"
+		id = idPrefix + idBalance
 
 		channels = append(channels,
 			openhab.NewChannel(id, openhab.ChannelTypeNumber).
-				WithStateTopic(cfg.TopicBalance.Format(account.Number)).
+				WithStateTopic(cfg.TopicBalance.Format(house.ID)).
 				AddItems(
 					openhab.NewItem(itemPrefix+id, openhab.ItemTypeNumber).
-						WithLabel("Account balance [%.2f ₽]").
+						WithLabel("House balance [%.2f ₽]").
 						WithIcon("price"),
 				),
 		)
 
-		for _, service := range account.Services {
+		for _, service := range house.Services {
 			serviceID := strconv.FormatUint(service.ID, 10)
-			id = "Service" + serviceID + "_"
+			id = idPrefix + "Service" + serviceID + "_"
 
 			channels = append(channels,
 				openhab.NewChannel(id+idBalance, openhab.ChannelTypeNumber).
-					WithStateTopic(cfg.TopicServiceBalance.Format(account.Number, serviceID)).
+					WithStateTopic(cfg.TopicServiceBalance.Format(house.ID, serviceID)).
 					AddItems(
 						openhab.NewItem(itemPrefix+id+idBalance, openhab.ItemTypeNumber).
-							WithLabel("Balance "+service.NMServiceType+" [%.2f ₽]").
+							WithLabel("Balance "+service.ServiceTypeName+" [%.2f ₽]").
 							WithIcon("price"),
 					),
 				openhab.NewChannel(id+idBill, openhab.ChannelTypeString).
-					WithStateTopic(cfg.TopicLastBill.Format(account.Number, serviceID)).
+					WithStateTopic(cfg.TopicLastBill.Format(house.ID, serviceID)).
 					AddItems(
 						openhab.NewItem(itemPrefix+id+idBill, openhab.ItemTypeString).
-							WithLabel("Bill "+service.NMServiceType+" [%s]").
+							WithLabel("Bill "+service.ServiceTypeName+" [%s]").
 							WithIcon("returnpipe"),
 					),
 			)
 
-			for i := uint32(0); i < b.metersCount.Load(); {
-				i++
+			details, err := b.client.BalanceDetails(ctx, service.AccountID, service.Provider, time.Now().Add(-1*time.Hour*24*31*2), time.Now())
+			if err != nil {
+				return nil, err
+			}
 
-				meter := strconv.FormatUint(uint64(i), 10)
-				id = "Service" + serviceID + "_Meter" + meter
+			meterIDPrefix = idPrefix + "Service" + serviceID + "_Meter"
+
+			channels = append(channels,
+				openhab.NewChannel(id+idMeterCheckup, openhab.ChannelTypeDateTime).
+					WithStateTopic(cfg.TopicMeterCheckupDate.Format(house.ID, serviceID)).
+					AddItems(
+						openhab.NewItem(itemPrefix+id+idMeterCheckup, openhab.ItemTypeDateTime).
+							WithLabel("Checkup date [%1$td.%1$tm.%1$tY]").
+							WithIcon("time"),
+					),
+			)
+
+			meterIDPrefix += "T"
+
+			channelsExist := make(map[string]bool, 3)
+
+			for _, balance := range details {
+				if balance.TariffPlanEntityID != elektroset.TariffPlanEntityValue {
+					continue
+				}
+
+				meterTariff = ""
+
+				switch {
+				case balance.T1Value != nil:
+					meterTariff = "1"
+				case balance.T2Value != nil:
+					meterTariff = "2"
+				case balance.T3Value != nil:
+					meterTariff = "3"
+				}
+
+				if meterTariff == "" || channelsExist[meterTariff] {
+					continue
+				}
+
+				channelsExist[meterTariff] = true
+				id = meterIDPrefix + meterTariff
 
 				channels = append(channels,
 					openhab.NewChannel(id+idMeterValue, openhab.ChannelTypeNumber).
-						WithStateTopic(cfg.TopicMeterValue.Format(account.Number, serviceID, meter)).
+						WithStateTopic(cfg.TopicMeterValue.Format(house.ID, serviceID, meterTariff)).
 						AddItems(
 							openhab.NewItem(itemPrefix+id+idMeterValue, openhab.ItemTypeNumber).
-								WithLabel("Tariff "+meter+" value [JS(human_watts.js):%s]").
+								WithLabel("Tariff "+meterTariff+" value [JS(human_watts.js):%s]").
 								WithIcon("pressure"),
 						),
 					openhab.NewChannel(id+idMeterDate, openhab.ChannelTypeDateTime).
-						WithStateTopic(cfg.TopicMeterDate.Format(account.Number, serviceID, meter)).
+						WithStateTopic(cfg.TopicMeterDate.Format(house.ID, serviceID, meterTariff)).
 						AddItems(
 							openhab.NewItem(itemPrefix+id+idMeterDate, openhab.ItemTypeDateTime).
-								WithLabel("Tariff "+meter+" date [%1$td.%1$tm.%1$tY]").
+								WithLabel("Tariff "+meterTariff+" date [%1$td.%1$tm.%1$tY]").
 								WithIcon("calendar"),
 						),
 				)

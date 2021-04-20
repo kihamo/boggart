@@ -26,7 +26,7 @@ func (b *Bind) Tasks() []tasks.Task {
 }
 
 func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
-	accounts, err := b.client.Accounts(ctx)
+	houses, err := b.Houses(ctx)
 	if err != nil {
 		return err
 	}
@@ -41,26 +41,36 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		date   time.Time
 	}
 
-	for _, account := range accounts {
+	for _, house := range houses {
 		var totalBalance float64
+		houseID := strconv.FormatUint(house.ID, 10)
 
-		for _, service := range account.Services {
+		for _, service := range house.Services {
 			totalBalance += service.Balance
 			serviceID := strconv.FormatUint(service.ID, 10)
 
-			metricServiceBalance.With("account", account.Number, "service", serviceID).Set(service.Balance)
+			metricServiceBalance.With("house", houseID, "service", serviceID).Set(service.Balance)
 
-			if e := b.MQTT().PublishAsync(ctx, cfg.TopicServiceBalance.Format(account.Number, serviceID), service.Balance); e != nil {
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicServiceBalance.Format(houseID, serviceID), service.Balance); e != nil {
+				err = multierr.Append(err, e)
+			}
+
+			// meter checkup
+			if meter, e := b.client.Meter(ctx, service.AccountID, service.Provider); e == nil {
+				if e := b.MQTT().PublishAsync(ctx, cfg.TopicMeterCheckupDate.Format(houseID, serviceID), meter.CalibrationDate.Time); e != nil {
+					err = multierr.Append(err, e)
+				}
+			} else {
 				err = multierr.Append(err, e)
 			}
 
 			// balance
-			if details, e := b.client.BalanceDetails(ctx, account.Number, service.Provider, dateStart, dateEnd); e == nil {
+			if details, e := b.client.BalanceDetails(ctx, service.AccountID, service.Provider, dateStart, dateEnd); e == nil {
 				values := make([]value, 3)
 				lastBill := time.Time{}
 
 				for _, balance := range details {
-					switch balance.KDTariffPlanEntity {
+					switch balance.TariffPlanEntityID {
 					// выставленные счета
 					case elektroset.TariffPlanEntityBill:
 						if lastBill.IsZero() || balance.DatetimeEntity.After(lastBill) {
@@ -69,26 +79,26 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 
 						// показания
 					case elektroset.TariffPlanEntityValue:
-						if v := values[0]; balance.ValueT1 != nil && (v.date.IsZero() || balance.DatetimeEntity.After(v.date)) {
+						if v := values[0]; balance.T1Value != nil && (v.date.IsZero() || balance.DatetimeEntity.After(v.date)) {
 							values[0] = value{
 								tariff: "1",
-								value:  *balance.ValueT1,
+								value:  *balance.T1Value,
 								date:   balance.DatetimeEntity.Time,
 							}
 						}
 
-						if v := values[1]; balance.ValueT2 != nil && (v.date.IsZero() || balance.DatetimeEntity.After(v.date)) {
+						if v := values[1]; balance.T2Value != nil && (v.date.IsZero() || balance.DatetimeEntity.After(v.date)) {
 							values[1] = value{
 								tariff: "2",
-								value:  *balance.ValueT2,
+								value:  *balance.T2Value,
 								date:   balance.DatetimeEntity.Time,
 							}
 						}
 
-						if v := values[2]; balance.ValueT3 != nil && (v.date.IsZero() || balance.DatetimeEntity.After(v.date)) {
+						if v := values[2]; balance.T3Value != nil && (v.date.IsZero() || balance.DatetimeEntity.After(v.date)) {
 							values[2] = value{
 								tariff: "3",
-								value:  *balance.ValueT3,
+								value:  *balance.T3Value,
 								date:   balance.DatetimeEntity.Time,
 							}
 						}
@@ -105,13 +115,13 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 					metersCount++
 					v.value *= 1000
 
-					metricMeterValue.With("account", account.Number, "service", serviceID, "tariff", v.tariff).Set(v.value)
+					metricMeterValue.With("house", houseID, "service", serviceID, "tariff", v.tariff).Set(v.value)
 
-					if e := b.MQTT().PublishAsync(ctx, cfg.TopicMeterValue.Format(account.Number, serviceID, v.tariff), v.value); e != nil {
+					if e := b.MQTT().PublishAsync(ctx, cfg.TopicMeterValue.Format(houseID, serviceID, v.tariff), v.value); e != nil {
 						err = multierr.Append(err, e)
 					}
 
-					if e := b.MQTT().PublishAsync(ctx, cfg.TopicMeterDate.Format(account.Number, serviceID, v.tariff), v.date); e != nil {
+					if e := b.MQTT().PublishAsync(ctx, cfg.TopicMeterDate.Format(houseID, serviceID, v.tariff), v.date); e != nil {
 						err = multierr.Append(err, e)
 					}
 				}
@@ -124,12 +134,12 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 					billLink, e := b.Widget().URL(map[string]string{
 						"action":   "bill",
 						"period":   lastBill.Format(layoutPeriod),
-						"account":  account.Number,
+						"account":  service.AccountID,
 						"provider": performance.UnsafeBytes2String(provider),
 					})
 
 					if e == nil {
-						if e := b.MQTT().PublishAsync(ctx, cfg.TopicLastBill.Format(account.Number, serviceID), billLink); e != nil {
+						if e := b.MQTT().PublishAsync(ctx, cfg.TopicLastBill.Format(houseID, serviceID), billLink); e != nil {
 							err = multierr.Append(err, e)
 						}
 					}
@@ -139,9 +149,9 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 			}
 		}
 
-		metricBalance.With("account", account.Number).Set(totalBalance)
+		metricBalance.With("house", houseID).Set(totalBalance)
 
-		if e := b.MQTT().PublishAsync(ctx, cfg.TopicBalance.Format(account.Number), totalBalance); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicBalance.Format(house.ID), totalBalance); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}

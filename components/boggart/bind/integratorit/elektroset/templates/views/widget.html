@@ -1,74 +1,96 @@
 {{ define "content" }}
-<script type="application/javascript">
-    function valueFormat(n) {
-        return new Intl.NumberFormat().format(n);
-    }
-</script>
-<div class="row">
-    <div class="col-md-12 col-sm-12 col-xs-12">
-        <div class="x_panel">
-            <div class="x_content">
-                <table class="table table-striped datatable dt-responsive nowrap" style="width:100%">
-                    <thead>
-                    <tr>
-                        <th>{{ i18n "Month" . }}</th>
-                        {{ if eq (index .tariffs 1) true }}<th>{{ i18n "Tariff 1 / KWh" . }}</th>{{ end }}
-                        {{ if eq (index .tariffs 2) true }}<th>{{ i18n "Tariff 2 / KWh" . }}</th>{{ end }}
-                        {{ if eq (index .tariffs 3) true }}<th>{{ i18n "Tariff 3 / KWh" . }}</th>{{ end }}
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {{ range $row := .rows }}
-                    <tr>
-                        <td>{{ i18n $row.Date.Month.String $ nil "dashboard" }} {{ $row.Date.Year }}</td>
-                        <td>
-                        {{ with $row.Values.tariff1 }}
-                            <script type="application/javascript">document.write(valueFormat({{ index . 0 }}))</script>
-                            {{ if gt (index . 2) 0.0 }}
-                                <span class="label label-danger"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script> / <script type="application/javascript">document.write(valueFormat({{ index . 2 }}))</script></span>
-                            {{ else if lt (index . 2) 0.0 }}
-                                <span class="label label-success"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script> / <script type="application/javascript">document.write(valueFormat({{ index . 2 }}))</script></span>
-                            {{ else if eq (index . 2) 0.0 }}
-                                <span class="label label-info"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script> / <script type="application/javascript">document.write(valueFormat({{ index . 2 }}))</script></span>
-                            {{ else if gt (index . 1) 0.0 }}
-                                <span class="label label-default"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script></span>
-                            {{ end }}
-                        {{ end }}
-                        </td>
-                        <td>
-                            {{ with $row.Values.tariff2 }}
-                                <script type="application/javascript">document.write(valueFormat({{ index . 0 }}))</script>
-                            {{ if gt (index . 2) 0.0 }}
-                                <span class="label label-danger"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script> / <script type="application/javascript">document.write(valueFormat({{ index . 2 }}))</script></span>
-                            {{ else if lt (index . 2) 0.0 }}
-                                <span class="label label-success"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script> / <script type="application/javascript">document.write(valueFormat({{ index . 2 }}))</script></span>
-                            {{ else if eq (index . 2) 0.0 }}
-                                <span class="label label-info"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script> / <script type="application/javascript">document.write(valueFormat({{ index . 2 }}))</script></span>
-                            {{ else if gt (index . 1) 0.0 }}
-                                <span class="label label-default"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script></span>
-                            {{ end }}
-                            {{ end }}
-                        </td>
-                        <td>
-                            {{ with $row.Values.tariff3 }}
-                                <script type="application/javascript">document.write(valueFormat({{ index . 0 }}))</script>
-                            {{ if gt (index . 2) 0.0 }}
-                                <span class="label label-danger"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script> / <script type="application/javascript">document.write(valueFormat({{ index . 2 }}))</script></span>
-                            {{ else if lt (index . 2) 0.0 }}
-                                <span class="label label-success"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script> / <script type="application/javascript">document.write(valueFormat({{ index . 2 }}))</script></span>
-                            {{ else if eq (index . 2) 0.0 }}
-                                <span class="label label-info"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script> / <script type="application/javascript">document.write(valueFormat({{ index . 2 }}))</script></span>
-                            {{ else if gt (index . 1) 0.0 }}
-                                <span class="label label-default"><script type="application/javascript">document.write(valueFormat({{ index . 1 }}))</script></span>
-                            {{ end }}
-                            {{ end }}
-                        </td>
-                    </tr>
+    <script type="application/javascript">
+        function valueFormat(n) {
+            return new Intl.NumberFormat().format(n);
+        }
+    </script>
+
+    {{ range $account := .accounts }}
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>#{{ $account.AccountID }}</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li><a class="collapse-link"><i class="fas fa-chevron-up"></i></a></li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <section class="content invoice">
+                        <div class="row invoice-info">
+                            <div class="col-sm-4 invoice-col">
+                                {{ i18n "House" $ }}
+                                <address>
+                                    <strong>{{ i18n "Name" $ }}:</strong> {{ $account.HouseName }}<br />
+                                    <strong>{{ i18n "Address" $ }}:</strong> {{ $account.HouseAddress }}
+                                </address>
+                            </div>
+                            <div class="col-sm-4 invoice-col">
+                                {{ i18n "Meter" $ }}
+                                <address>
+                                    <strong>{{ i18n "Number" $ }}:</strong> {{ $account.MeterNumber }}<br />
+                                    <strong>{{ i18n "Calibration date" $ }}:</strong> {{ $account.MeterCalibrationDate.Format "2006-01-02" }}<br />
+                                    <strong>{{ i18n "Phase" $ }}:</strong> {{ $account.MeterPhaseName }}<br />
+                                    <strong>{{ i18n "State" $ }}:</strong> {{ $account.MeterState }}<br />
+                                    <strong>{{ i18n "Model" $ }}:</strong> {{ $account.MeterModel }}<br />
+                                    <strong>{{ i18n "Rate" $ }}:</strong> {{ $account.MeterRate }}<br />
+                                    <strong>{{ i18n "Quantity" $ }}:</strong> {{ $account.MeterQuantity }}<br />
+                                </address>
+                            </div>
+                            <div class="col-sm-4 invoice-col">
+                                {{ i18n "Provider" $ }}
+                                <address>
+                                    <strong>{{ i18n "Name" $ }}:</strong> {{ $account.ProviderName }}<br />
+                                    <strong>{{ i18n "Service" $ }}:</strong> {{ $account.ServiceName }}
+                                </address>
+                            </div>
+                        </div>
+                        {{ if $account.Values }}
+                        <div class="row">
+                            <div class="table">
+                                <table class="table table-striped nowrap">
+                                    <thead>
+                                        <tr>
+                                            <th>{{ i18n "Date" $ }}</th>
+                                            {{ range $zone := $account.Zones }}
+                                                {{ if $zone }}
+                                                    <th>{{ i18n $zone $ }}</th>
+                                                {{ end }}
+                                            {{ end }}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {{ range $value := $account.Values }}
+                                    <tr>
+                                        <td>{{ $value.Date.Day }} {{ i18n $value.Date.Month.String $ nil "dashboard" }} {{ $value.Date.Year }}</td>
+                                        {{ range $i, $zone := $account.Zones }}
+                                            {{ if $zone }}
+                                                <td>
+                                                    <script type="application/javascript">document.write(valueFormat({{ index $value.Current $i }}))</script>
+                                                    {{ if gt (index $value.Trends $i) 0.0 }}
+                                                        <span class="label label-danger"><script type="application/javascript">document.write(valueFormat({{ index $value.Deltas $i }}))</script> / <script type="application/javascript">document.write(valueFormat({{ index $value.Trends $i }}))</script></span>
+                                                    {{ else if lt (index $value.Trends $i) 0.0 }}
+                                                        <span class="label label-success"><script type="application/javascript">document.write(valueFormat({{ index $value.Deltas $i }}))</script> / <script type="application/javascript">document.write(valueFormat({{ index $value.Trends $i }}))</script></span>
+                                                    {{ else if eq (index $value.Trends $i) 0.0 }}
+                                                        <span class="label label-info"><script type="application/javascript">document.write(valueFormat({{ index $value.Deltas $i }}))</script> / <script type="application/javascript">document.write(valueFormat({{ index $value.Trends $i }}))</script></span>
+                                                    {{ else if gt (index $value.Trends $i) 0.0 }}
+                                                        <span class="label label-default"><script type="application/javascript">document.write(valueFormat({{ index $value.Deltas $i }}))</script></span>
+                                                    {{ end }}
+                                                </td>
+                                            {{ end }}
+                                        {{ end }}
+                                    </tr>
+                                    {{ end }}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     {{ end }}
-                    </tbody>
-                </table>
+                    </section>
+                </div>
             </div>
         </div>
     </div>
-</div>
+    {{ end }}
 {{ end }}
