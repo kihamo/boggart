@@ -74,7 +74,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 				WithStateTopic(cfg.TopicMeterCheckupDate.Format(meter.Ident, meter.FactoryNumber)).
 				AddItems(
 					openhab.NewItem(itemPrefix+id+idMeterCheckup, openhab.ItemTypeDateTime).
-						WithLabel("Checkup date [%1$td.%1$tm.%1$tY]").
+						WithLabel(meter.Name+" checkup date [%1$td.%1$tm.%1$tY]").
 						WithIcon("time"),
 				),
 			openhab.NewChannel(id+idMeterValue, openhab.ChannelTypeNumber).
