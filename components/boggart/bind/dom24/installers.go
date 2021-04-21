@@ -32,9 +32,10 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 	cfg := b.config()
 
 	const (
-		idBalance    = "Balance"
-		idBill       = "Bill"
-		idMeterValue = "Value"
+		idBalance      = "Balance"
+		idBill         = "Bill"
+		idMeterCheckup = "Checkup"
+		idMeterValue   = "Value"
 	)
 
 	channels := make([]*openhab.Channel, 0, len(accountingResponse.Payload.Data)*2)
@@ -69,8 +70,15 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 		id = "Account" + openhab.IDNormalizeCamelCase(meter.Ident) + "_Meter" + openhab.IDNormalizeCamelCase(meter.FactoryNumber) + "_"
 
 		channels = append(channels,
+			openhab.NewChannel(id+idMeterCheckup, openhab.ChannelTypeDateTime).
+				WithStateTopic(cfg.TopicMeterCheckupDate.Format(meter.Ident, meter.FactoryNumber)).
+				AddItems(
+					openhab.NewItem(itemPrefix+id+idMeterCheckup, openhab.ItemTypeDateTime).
+						WithLabel("Checkup date [%1$td.%1$tm.%1$tY]").
+						WithIcon("time"),
+				),
 			openhab.NewChannel(id+idMeterValue, openhab.ChannelTypeNumber).
-				WithStateTopic(cfg.TopicMeter.Format(meter.Ident, meter.FactoryNumber)).
+				WithStateTopic(cfg.TopicMeterValue.Format(meter.Ident, meter.FactoryNumber)).
 				AddItems(
 					openhab.NewItem(itemPrefix+id+idMeterValue, openhab.ItemTypeNumber).
 						WithLabel(meter.Name+" [%."+strconv.FormatUint(meter.NumberOfDecimalPlaces, 10)+"f "+openhab.LabelEscape(meter.Units)+"]").

@@ -20,11 +20,12 @@ type Config struct {
 	UpdaterInterval         time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 	TopicAccountBalance     mqtt.Topic    `mapstructure:"topic_account_balance" yaml:"topic_account_balance"`
 	TopicAccountBill        mqtt.Topic    `mapstructure:"topic_account_bill" yaml:"topic_account_bill"`
-	TopicMeter              mqtt.Topic    `mapstructure:"topic_meter" yaml:"topic_meter"`
+	TopicMeterCheckupDate   mqtt.Topic    `mapstructure:"topic_meter_checkup_date" yaml:"topic_meter_checkup_date"`
+	TopicMeterValue         mqtt.Topic    `mapstructure:"topic_meter_value" yaml:"topic_meter_value"`
 }
 
 func (Type) ConfigDefaults() interface{} {
-	var prefix mqtt.Topic = boggart.ComponentName + "/service/dom24/"
+	var prefix mqtt.Topic = boggart.ComponentName + "/service/dom24/+/"
 
 	return &Config{
 		ProbesConfig:            di.ProbesConfigDefaults(),
@@ -32,8 +33,9 @@ func (Type) ConfigDefaults() interface{} {
 		AutoRegisterIfNotExists: true,
 		Debug:                   false,
 		UpdaterInterval:         time.Hour,
-		TopicAccountBalance:     prefix + "+/balance",
-		TopicAccountBill:        prefix + "+/bill",
-		TopicMeter:              prefix + "+/meter/+/value",
+		TopicAccountBalance:     prefix + "balance",
+		TopicAccountBill:        prefix + "bill",
+		TopicMeterValue:         prefix + "meter/+/value",
+		TopicMeterCheckupDate:   prefix + "meter/+/checkup",
 	}
 }

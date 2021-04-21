@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/providers/dom24/client/accounting"
@@ -69,7 +70,20 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 
 			metricMeterLastValue.With("account", meter.Ident, "factory-number", meter.FactoryNumber).Set(meter.Values[0].Value)
 
-			if e := b.MQTT().PublishAsync(ctx, cfg.TopicMeter.Format(meter.Ident, meter.FactoryNumber), meter.Values[0].Value); e != nil {
+			var checkupDate time.Time
+			if !meter.NextCheckupDate.Time().IsZero() {
+				checkupDate = meter.NextCheckupDate.Time()
+			} else if !meter.LastCheckupDate.Time().IsZero() && meter.RecheckInterval > 0 {
+				checkupDate = meter.LastCheckupDate.Time().AddDate(int(meter.RecheckInterval), 0, 0)
+			}
+
+			if !checkupDate.IsZero() {
+				if e := b.MQTT().PublishAsync(ctx, cfg.TopicMeterCheckupDate.Format(meter.Ident, meter.FactoryNumber), checkupDate); e != nil {
+					err = fmt.Errorf("publish meter checkup date failed: %w", e)
+				}
+			}
+
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicMeterValue.Format(meter.Ident, meter.FactoryNumber), meter.Values[0].Value); e != nil {
 				err = fmt.Errorf("publish meter value failed: %w", e)
 			}
 		}
