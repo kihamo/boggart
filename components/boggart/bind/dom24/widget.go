@@ -296,13 +296,13 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 				account.DebtActualDate = item.DebtActualDate
 				account.TotalAmount = item.TotalSum
 
-				for _, bill := range item.Bills {
+				for _, b := range item.Bills {
 					account.Transactions = append(account.Transactions, &widgetAccountTransactionView{
 						IsPayment: false,
-						Date:      bill.Date,
-						Period:    strings.TrimRight(bill.Period, " г."),
-						Amount:    bill.Total,
-						FileURL:   bill.FileLink,
+						Date:      b.Date,
+						Period:    strings.TrimRight(b.Period, " г."),
+						Amount:    b.Total,
+						FileURL:   b.FileLink,
 					})
 				}
 

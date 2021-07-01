@@ -2,6 +2,7 @@ package elektroset
 
 import (
 	"context"
+	"errors"
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/di"
@@ -48,7 +49,7 @@ func (b *Bind) Houses(ctx context.Context) ([]elektroset.House, error) {
 			}
 		}
 
-		return nil, nil
+		return nil, errors.New("house not found")
 	}
 
 	return houses, err
