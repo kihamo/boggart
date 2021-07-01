@@ -350,3 +350,27 @@ sudo systemctl start wol.service
 - Press the small reset button
 - Remove lead to D3
 - You *should* be able upload firmware
+
+#### UDEV static link
+```
+cat > /etc/udev/rules.d/81_pulsar.rules
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", SYMLINK+="USBpulsar", OWNER="root", GROUP="dialout"
+
+cat > /etc/udev/rules.d/82_mercury.rules
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", SYMLINK+="USBmercury", OWNER="root", GROUP="dialout"
+```
+
+Restart and check
+
+```
+sudo udevadm control --reload-rules && udevadm trigger
+```
+
+```
+ls -la /dev/*USB*
+
+crw-rw---- 1 root dialout 188, 0 июл  1 12:58 /dev/ttyUSB0
+crw-rw---- 1 root dialout 188, 1 июл  1 12:58 /dev/ttyUSB1
+lrwxrwxrwx 1 root root         7 июл  1 12:58 /dev/USBmercury -> ttyUSB1
+lrwxrwxrwx 1 root root         7 июл  1 12:58 /dev/USBpulsar -> ttyUSB0
+```
