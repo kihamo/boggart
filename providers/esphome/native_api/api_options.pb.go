@@ -5,10 +5,9 @@ package nativeapi
 
 import (
 	fmt "fmt"
-	math "math"
-
 	proto "github.com/golang/protobuf/proto"
-	descriptor "github.com/golang/protobuf/protoc-gen-go/descriptor"
+	descriptorpb "google.golang.org/protobuf/types/descriptorpb"
+	math "math"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -97,7 +96,7 @@ func (m *Void) XXX_DiscardUnknown() {
 var xxx_messageInfo_Void proto.InternalMessageInfo
 
 var E_NeedsSetupConnection = &proto.ExtensionDesc{
-	ExtendedType:  (*descriptor.MethodOptions)(nil),
+	ExtendedType:  (*descriptorpb.MethodOptions)(nil),
 	ExtensionType: (*bool)(nil),
 	Field:         1038,
 	Name:          "nativeapi.needs_setup_connection",
@@ -106,7 +105,7 @@ var E_NeedsSetupConnection = &proto.ExtensionDesc{
 }
 
 var E_NeedsAuthentication = &proto.ExtensionDesc{
-	ExtendedType:  (*descriptor.MethodOptions)(nil),
+	ExtendedType:  (*descriptorpb.MethodOptions)(nil),
 	ExtensionType: (*bool)(nil),
 	Field:         1039,
 	Name:          "nativeapi.needs_authentication",
@@ -115,7 +114,7 @@ var E_NeedsAuthentication = &proto.ExtensionDesc{
 }
 
 var E_Id = &proto.ExtensionDesc{
-	ExtendedType:  (*descriptor.MessageOptions)(nil),
+	ExtendedType:  (*descriptorpb.MessageOptions)(nil),
 	ExtensionType: (*uint32)(nil),
 	Field:         1036,
 	Name:          "nativeapi.id",
@@ -124,7 +123,7 @@ var E_Id = &proto.ExtensionDesc{
 }
 
 var E_Source = &proto.ExtensionDesc{
-	ExtendedType:  (*descriptor.MessageOptions)(nil),
+	ExtendedType:  (*descriptorpb.MessageOptions)(nil),
 	ExtensionType: (*APISourceType)(nil),
 	Field:         1037,
 	Name:          "nativeapi.source",
@@ -133,7 +132,7 @@ var E_Source = &proto.ExtensionDesc{
 }
 
 var E_Ifdef = &proto.ExtensionDesc{
-	ExtendedType:  (*descriptor.MessageOptions)(nil),
+	ExtendedType:  (*descriptorpb.MessageOptions)(nil),
 	ExtensionType: (*string)(nil),
 	Field:         1038,
 	Name:          "nativeapi.ifdef",
@@ -142,7 +141,7 @@ var E_Ifdef = &proto.ExtensionDesc{
 }
 
 var E_Log = &proto.ExtensionDesc{
-	ExtendedType:  (*descriptor.MessageOptions)(nil),
+	ExtendedType:  (*descriptorpb.MessageOptions)(nil),
 	ExtensionType: (*bool)(nil),
 	Field:         1039,
 	Name:          "nativeapi.log",
@@ -151,7 +150,7 @@ var E_Log = &proto.ExtensionDesc{
 }
 
 var E_NoDelay = &proto.ExtensionDesc{
-	ExtendedType:  (*descriptor.MessageOptions)(nil),
+	ExtendedType:  (*descriptorpb.MessageOptions)(nil),
 	ExtensionType: (*bool)(nil),
 	Field:         1040,
 	Name:          "nativeapi.no_delay",
