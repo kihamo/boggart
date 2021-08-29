@@ -1,0 +1,81 @@
+# Required packages: iot
+# Policy: read write test
+
+# options
+:local scriptName "Log2MQTTScript"
+:local scheduleName "Log2MQTTSchedule"
+:local scheduleInterval "10s"
+
+:local serialNumber [/system routerboard get value-name=serial-number]
+:local mqttBroker "shosho"
+:local mqttTopic "/test/$serialNumber/log"
+
+
+#  || topics~"system"
+:local logsFilteredBuffer [:toarray [/log find topics~"wireless"]]
+
+# проверка обязательных настроек
+:if ([:len [/system package find where name="iot" and disabled=no]] > 0) do={
+    :if ([:len [/iot mqtt brokers find name="$mqttBroker"]] > 0) do={
+        # устанавливаем шедулер, если он не был установлен
+        :if ([:len [/system scheduler find name="$scheduleName"]] = 0) do={
+          :log info "[$scriptName] Schedule $scheduleName does not exist. Creating schedule ...."
+
+          /system scheduler add name=$scheduleName interval=$scheduleInterval start-date=Aug/01/2021 start-time=startup on-event=$scriptName
+
+          :log info "[$scriptName] Schedule $scheduleName created ."
+        }
+
+        # vars
+        :local logLastTime [/system script get [find name="$scriptName"] comment]
+        :local logCurrentMessage
+        :local logCurrentTime
+        :local publishEnabled
+        :local publishCounter 0
+
+        # если прошлого запуска фактически не было (комментарий пустой) сразу разрешаем отправку
+        :if ([:len $logLastTime] = 0) do={
+          :set publishEnabled true
+        }
+
+        :foreach i in=$logsFilteredBuffer do={
+            :set logCurrentMessage [/log get $i message]
+            :set logCurrentTime [ /log get $i time ]
+
+            :if ([:len $logCurrentTime] = 8 ) do={
+                # пришло только время (сегодняшние логи) в формате 00:00:00
+                :set logCurrentTime ([:pick [/system clock get date] 0 11]." ".$logCurrentTime)
+            } else={
+                # пришла полная дата (вчерашние логи) в формате jan/01 00:00:00
+                :if ([:len $logCurrentTime] = 15 ) do={
+                    :set logCurrentTime ([:pick $logCurrentTime 0 6]."/".[:pick [/system clock get date] 7 11]." ".[:pick $logCurrentTime 7 15])
+                }
+            }
+
+            # отправка сообщения, если активирован режим отправки
+            :if ($publishEnabled = true) do={
+                /iot mqtt publish broker="$mqttBroker" topic="$mqttTopic" message="$logCurrentMessage"
+
+                :set publishCounter ($publishCounter + 1)
+            }
+
+            # если дошли до записи которую отправляли последней в прошлый раз, активируем отправку
+            # конструкция должна быть в конце итерации, чтобы не публиковать последнее отправленное сообщение
+            :if ($logCurrentTime = $logLastTime) do={
+                :set publishEnabled true
+            }
+        }
+
+        :if ([:len $logCurrentTime] > 0) do={
+            /system script set [find name="$scriptName"] comment="$logCurrentTime"
+
+            :if ([$publishCounter] > 0) do={
+                :log info "[$scriptName] Published $publishCounter messages"
+            }
+        }
+    } else={
+        :log warning "[$scriptName] MQTT broker $mqttBroker isn't install"
+    }
+} else={
+    :log warning "[$scriptName] required package iot isn't install"
+}
