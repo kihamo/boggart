@@ -8,13 +8,28 @@ import (
 	"github.com/kihamo/boggart/components/boggart/installer/openhab"
 )
 
+const (
+	SystemXiaomi installer.System = "Xiaomi"
+)
+
 func (b *Bind) InstallersSupport() []installer.System {
 	return []installer.System{
 		installer.SystemOpenHab,
+		SystemXiaomi,
 	}
 }
 
-func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.Step, error) {
+func (b *Bind) InstallerSteps(_ context.Context, system installer.System) ([]installer.Step, error) {
+	if system == SystemXiaomi {
+		return []installer.Step{{
+			Description: "Factory Reset Gen 2",
+			Content: `1. Нажимаем и держим левую и правую кнопки (локальная уборка и возврат на базу).
+2. Нажимаем кнопку сброса под крышкой (Reset) и держим 3-5 секунд.
+3. Отпускаем кнопку сброса (Reset), продолжаем держать левую и правую кнопки, пока не заморгает быстро центральная кнопка
+4. После некоторого ожидания робот заговорит на китайском.`,
+		}}, nil
+	}
+
 	meta := b.Meta()
 	sn := meta.SerialNumber()
 	if sn == "" {
