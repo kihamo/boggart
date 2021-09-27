@@ -42,7 +42,7 @@ func (b *Bind) Tasks() []tasks.Task {
 func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 	system, err := b.provider.SystemRouterBoard(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("call SystemRouterBoard failed: %w", err)
 	}
 
 	if system.SerialNumber == "" {
@@ -63,7 +63,7 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.UpdaterInterval)),
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("register task "+TaskNameUpdater+" failed: %w", err)
 	}
 
 	_, err = b.Workers().RegisterTask(
@@ -80,7 +80,7 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.ClientsSyncInterval)),
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("register task "+TaskNameInterfaceConnection+" failed: %w", err)
 	}
 
 	// ups updater
@@ -101,7 +101,7 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 					WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.UPSInterval)),
 			)
 			if err != nil {
-				return err
+				return fmt.Errorf("register task "+TaskNameUPS+"-"+device.Name+" failed: %w", err)
 			}
 		}
 	}
@@ -252,7 +252,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 				"mac", stat.MacAddress.String()).Set(float64(stat.TXByte))
 		}
 	} else if !mikrotik.IsEmptyResponse(e) {
-		err = multierr.Append(err, e)
+		err = multierr.Append(err, fmt.Errorf("call InterfaceStats failed: %w", e))
 	}
 
 	if resource, e := b.provider.SystemResource(ctx); e == nil {
@@ -262,7 +262,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 		metricStorageAvailable.With("serial_number", sn).Set(float64(resource.FreeHDDSpace))
 		metricStorageUsage.With("serial_number", sn).Set(float64(resource.TotalHDDSpace - resource.FreeHDDSpace))
 	} else if !mikrotik.IsEmptyResponse(e) {
-		err = multierr.Append(err, e)
+		err = multierr.Append(err, fmt.Errorf("call SystemResource failed: %w", e))
 	}
 
 	if disks, e := b.provider.SystemDisk(ctx); e == nil {
@@ -277,22 +277,24 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 			).Set(float64(disk.Free))
 		}
 	} else if !mikrotik.IsEmptyResponse(e) {
-		err = multierr.Append(err, e)
+		err = multierr.Append(err, fmt.Errorf("call SystemDisk failed: %w", e))
 	}
 
 	if health, e := b.provider.SystemHealth(ctx); e == nil {
 		metricVoltage.With("serial_number", sn).Set(health.Voltage)
 		metricTemperature.With("serial_number", sn).Set(float64(health.Temperature))
 	} else if !mikrotik.IsEmptyResponse(e) {
-		err = multierr.Append(err, e)
+		err = multierr.Append(err, fmt.Errorf("call SystemHealth failed: %w", e))
 	}
 
 	cfg := b.config()
 
 	// check upgrade
 	if checkPackages, e := b.provider.SystemPackageUpdateCheck(ctx); e == nil {
-		if e := b.MQTT().PublishAsync(ctx, cfg.TopicPackagesInstalledVersion.Format(sn), checkPackages.InstalledVersion); e != nil {
-			err = multierr.Append(err, e)
+		if checkPackages.InstalledVersion != "" {
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicPackagesInstalledVersion.Format(sn), checkPackages.InstalledVersion); e != nil {
+				err = multierr.Append(err, e)
+			}
 		}
 
 		if checkPackages.LatestVersion != "" {
@@ -300,8 +302,8 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 				err = multierr.Append(err, e)
 			}
 		}
-	} else {
-		err = multierr.Append(err, e)
+	} else if !mikrotik.IsEmptyResponse(e) {
+		err = multierr.Append(err, fmt.Errorf("call SystemPackageUpdateCheck failed: %w", e))
 	}
 
 	if checkRouterBoard, e := b.provider.SystemRouterBoard(ctx); e == nil {
@@ -314,67 +316,69 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 				err = multierr.Append(err, e)
 			}
 		}
-	} else {
-		err = multierr.Append(err, e)
+	} else if !mikrotik.IsEmptyResponse(e) {
+		err = multierr.Append(err, fmt.Errorf("call SystemRouterBoard failed: %w", e))
 	}
 
 	// Wifi clients
 	if clients, e := b.provider.InterfaceWirelessRegistrationTable(ctx); e == nil {
 		metricWifiClients.With("serial_number", sn).Set(float64(len(clients)))
 
-		var hasError bool
+		if len(clients) > 0 { // for 3g
+			var hasError bool
 
-		arp, e := b.provider.IPARP(ctx)
-		if e != nil && !mikrotik.IsEmptyResponse(e) {
-			err = multierr.Append(err, e)
-			hasError = true
-		}
+			arp, e := b.provider.IPARP(ctx)
+			if e != nil && !mikrotik.IsEmptyResponse(e) {
+				err = multierr.Append(err, e)
+				hasError = true
+			}
 
-		dns, e := b.provider.IPDNSStatic(ctx)
-		if e != nil && !mikrotik.IsEmptyResponse(e) {
-			err = multierr.Append(err, e)
-			hasError = true
-		}
+			dns, e := b.provider.IPDNSStatic(ctx)
+			if e != nil && !mikrotik.IsEmptyResponse(e) {
+				err = multierr.Append(err, e)
+				hasError = true
+			}
 
-		leases, e := b.provider.IPDHCPServerLease(ctx)
-		if e != nil && !mikrotik.IsEmptyResponse(e) {
-			err = multierr.Append(err, e)
-			hasError = true
-		}
+			leases, e := b.provider.IPDHCPServerLease(ctx)
+			if e != nil && !mikrotik.IsEmptyResponse(e) {
+				err = multierr.Append(err, e)
+				hasError = true
+			}
 
-		if !hasError {
-			for _, client := range clients {
-				bytes := strings.Split(client.Bytes, ",")
-				if len(bytes) != 2 {
-					continue
+			if !hasError {
+				for _, client := range clients {
+					bytes := strings.Split(client.Bytes, ",")
+					if len(bytes) != 2 {
+						continue
+					}
+
+					name := mikrotik.GetNameByMac(client.MacAddress, arp, dns, leases)
+
+					sent, e := strconv.ParseFloat(bytes[0], 64)
+					if e != nil {
+						err = multierr.Append(err, e)
+						continue
+					}
+
+					received, e := strconv.ParseFloat(bytes[1], 64)
+					if e != nil {
+						err = multierr.Append(err, e)
+						continue
+					}
+
+					metricTrafficReceivedBytes.With("serial_number", sn).With(
+						"interface", client.Interface,
+						"mac", client.MacAddress.String(),
+						"name", name).Set(received)
+					metricTrafficSentBytes.With("serial_number", sn).With(
+						"interface", client.Interface,
+						"mac", client.MacAddress.String(),
+						"name", name).Set(sent)
 				}
-
-				name := mikrotik.GetNameByMac(client.MacAddress, arp, dns, leases)
-
-				sent, e := strconv.ParseFloat(bytes[0], 64)
-				if e != nil {
-					err = multierr.Append(err, e)
-					continue
-				}
-
-				received, e := strconv.ParseFloat(bytes[1], 64)
-				if e != nil {
-					err = multierr.Append(err, e)
-					continue
-				}
-
-				metricTrafficReceivedBytes.With("serial_number", sn).With(
-					"interface", client.Interface,
-					"mac", client.MacAddress.String(),
-					"name", name).Set(received)
-				metricTrafficSentBytes.With("serial_number", sn).With(
-					"interface", client.Interface,
-					"mac", client.MacAddress.String(),
-					"name", name).Set(sent)
 			}
 		}
 	} else if !mikrotik.IsEmptyResponse(e) {
-		err = multierr.Append(err, e)
+		err = multierr.Append(err, fmt.Errorf("call InterfaceWirelessRegistrationTable failed: %w", e))
 	}
 
 	return err
