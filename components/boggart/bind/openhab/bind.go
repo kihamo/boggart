@@ -1,12 +1,13 @@
 package openhab
 
 import (
+	"context"
 	"net/http"
 	"net/http/httputil"
 
+	"github.com/deepmap/oapi-codegen/pkg/securityprovider"
 	"github.com/kihamo/boggart/components/boggart/di"
-	"github.com/kihamo/boggart/protocols/swagger"
-	"github.com/kihamo/boggart/providers/openhab"
+	"github.com/kihamo/boggart/providers/openhab3"
 	m "github.com/kihamo/shadow/components/logging/http"
 )
 
@@ -18,7 +19,7 @@ type Bind struct {
 	di.ProbesBind
 	di.WidgetBind
 
-	provider    *openhab.Client
+	provider    *openhab3.Client
 	proxy       *httputil.ReverseProxy
 	proxyServer *http.Server
 }
@@ -27,16 +28,40 @@ func (b *Bind) config() *Config {
 	return b.Config().Bind().(*Config)
 }
 
-func (b *Bind) Run() error {
+func (b *Bind) Run() (err error) {
 	cfg := b.config()
+	opts := make([]openhab3.ClientOption, 0, 2)
 
-	b.provider = openhab.New(&cfg.Address.URL, cfg.Debug, swagger.NewLogger(
-		func(message string) {
-			b.Logger().Info(message)
-		},
-		func(message string) {
-			b.Logger().Debug(message)
+	if username := cfg.Address.User.Username(); username != "" {
+		password, _ := cfg.Address.User.Password()
+		var autProvider *securityprovider.SecurityProviderApiKey
+
+		autProvider, err = securityprovider.NewSecurityProviderApiKey("header", username, password)
+		if err != nil {
+			return err
+		}
+
+		opts = append(opts, openhab3.WithRequestEditorFn(autProvider.Intercept))
+	}
+
+	if cfg.Debug {
+		opts = append(opts, openhab3.WithRequestEditorFn(func(ctx context.Context, req *http.Request) error {
+			dump, err := httputil.DumpRequestOut(req, true)
+
+			if err != nil {
+				return err
+			}
+
+			b.Logger().Debugf("\n\n%q", dump)
+
+			return nil
 		}))
+	}
+
+	b.provider, err = openhab3.NewClient(cfg.Address.URL.String()+"/rest", opts...)
+	if err != nil {
+		return err
+	}
 
 	b.proxy = httputil.NewSingleHostReverseProxy(&cfg.Address.URL)
 	director := b.proxy.Director

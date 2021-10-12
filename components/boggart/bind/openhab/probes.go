@@ -3,14 +3,25 @@ package openhab
 import (
 	"context"
 
-	"github.com/kihamo/boggart/providers/openhab/client/uuid"
+	"github.com/kihamo/boggart/providers/openhab3"
 )
 
 func (b *Bind) ReadinessProbe(ctx context.Context) error {
-	response, err := b.provider.UUID.GetInstanceUUID(uuid.NewGetInstanceUUIDParamsWithContext(ctx))
-	if err == nil {
-		b.Meta().SetSerialNumber(response.Payload)
+	resp, err := b.provider.GetUUID(ctx)
+	if err != nil {
+		return err
 	}
 
-	return err
+	if b.Meta().SerialNumber() == "" {
+		response, err := openhab3.ParseGetUUIDResponse(resp)
+		if err != nil {
+			return err
+		}
+
+		if len(response.Body) != 0 {
+			b.Meta().SetSerialNumber(string(response.Body))
+		}
+	}
+
+	return nil
 }

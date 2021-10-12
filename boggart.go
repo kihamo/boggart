@@ -1,5 +1,7 @@
 package boggart // import "github.com/kihamo/boggart"
 
+import _ "github.com/mailru/easyjson/gen"
+
 //go:generate /bin/bash -c "echo 'Run install tools'"
 ////go:generate /bin/bash -c "brew install golangci-lint"
 ////go:generate /bin/bash -c "brew install gettext"

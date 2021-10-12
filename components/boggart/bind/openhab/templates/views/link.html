@@ -3,10 +3,10 @@
     <img src="{{ .icon_url }}"/>
     {{ end }}
 
-    {{ if ne .item.Label "" }}
-        <label><a href="{{ .item.State }}">{{ .item.Label }}</a></label>
+    {{ if ne .item_label "" }}
+        <label><a href="{{ .item_state }}">{{ .item_label }}</a></label>
     {{ else }}
-        <label><a href="{{ .item.State }}">{{ .item.Name }}</a></label>
+        <label><a href="{{ .item_state }}">{{ .item_name }}</a></label>
     {{ end }}
 {{ end }}
 

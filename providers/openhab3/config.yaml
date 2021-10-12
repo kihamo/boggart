@@ -1,0 +1,8 @@
+output:
+  openhab3.go
+package: openhab3
+generate:
+  - types
+  - client
+  - skip-prune
+templates: templates/

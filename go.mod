@@ -33,7 +33,7 @@ require (
 	github.com/kihamo/shadow v0.0.0-20211011204320-f0c416369973
 	github.com/kihamo/snitch v0.0.0-20200412182537-3478a87783e1
 	github.com/llgcode/draw2d v0.0.0-20200930101115-bfaf5d914d1e
-	github.com/mailru/easyjson v0.7.6
+	github.com/mailru/easyjson v0.7.7
 	github.com/mitchellh/mapstructure v1.3.2
 	github.com/mmcloughlin/geohash v0.9.0
 	github.com/mourner/suncalc-go v0.0.0-20141021103505-77cea98fd55e

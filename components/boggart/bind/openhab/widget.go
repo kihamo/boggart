@@ -13,14 +13,14 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/mime"
-	"github.com/kihamo/boggart/providers/openhab/client/items"
-	"github.com/kihamo/boggart/providers/openhab/models"
+	"github.com/kihamo/boggart/providers/openhab3"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
 func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	q := r.URL().Query()
 	widget := b.Widget()
+	ctx := r.Context()
 
 	switch q.Get("action") {
 	case "input":
@@ -36,11 +36,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 				value = "NULL"
 			}
 
-			paramsPut := items.NewPutItemStateParams().
-				WithItemname(id).
-				WithBody(value)
-
-			_, err := b.provider.Items.PutItemState(paramsPut)
+			_, err := b.provider.UpdateItemStateWithBody(ctx, id, nil, "text/plain", strings.NewReader(value))
 			if err != nil {
 				widget.InternalError(w, r, err)
 				return
@@ -49,25 +45,30 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			return
 		}
 
-		paramsGet := items.NewGetItemDataParams().
-			WithItemname(id)
-
-		response, err := b.provider.Items.GetItemData(paramsGet)
+		resp, err := b.provider.GetItemByName(ctx, id, nil)
 		if err != nil {
 			widget.NotFound(w, r)
 			return
 		}
 
-		if response.Payload.Type == "DateTime" {
-			t, _ := time.Parse("2006-01-02T15:04:05.999Z0700", response.Payload.State)
-			response.Payload.State = t.Format("2006-01-02T15:04:05")
+		response, err := openhab3.ParseGetItemByNameResponse(resp)
+		if err != nil || response.JSON200 == nil {
+			widget.NotFound(w, r)
+			return
 		}
 
-		widget.RenderLayout(r.Context(), "input", "ui", b.initUI(map[string]interface{}{
-			"item":     response.Payload,
-			"type":     q.Get("type"),
-			"rows":     q.Get("rows"),
-			"icon_url": b.iconURL(r, response.Payload),
+		if *response.JSON200.Type == "DateTime" {
+			t, _ := time.Parse("2006-01-02T15:04:05.999Z0700", *response.JSON200.State)
+			*response.JSON200.State = t.Format("2006-01-02T15:04:05")
+		}
+
+		widget.RenderLayout(ctx, "input", "ui", b.initUI(map[string]interface{}{
+			"item_label": *response.JSON200.Label,
+			"item_type":  *response.JSON200.Type,
+			"item_state": *response.JSON200.State,
+			"type":       q.Get("type"),
+			"rows":       q.Get("rows"),
+			"icon_url":   b.iconURL(r, response.JSON200),
 		}, r))
 
 		return
@@ -79,18 +80,23 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			return
 		}
 
-		paramsGet := items.NewGetItemDataParams().
-			WithItemname(id)
-
-		response, err := b.provider.Items.GetItemData(paramsGet)
+		resp, err := b.provider.GetItemByName(ctx, id, nil)
 		if err != nil {
 			widget.NotFound(w, r)
 			return
 		}
 
-		widget.RenderLayout(r.Context(), "link", "ui", b.initUI(map[string]interface{}{
-			"item":     response.Payload,
-			"icon_url": b.iconURL(r, response.Payload),
+		response, err := openhab3.ParseGetItemByNameResponse(resp)
+		if err != nil || response.JSON200 == nil {
+			widget.NotFound(w, r)
+			return
+		}
+
+		widget.RenderLayout(ctx, "link", "ui", b.initUI(map[string]interface{}{
+			"item_label": *response.JSON200.Label,
+			"item_name":  *response.JSON200.Name,
+			"item_state": *response.JSON200.State,
+			"icon_url":   b.iconURL(r, response.JSON200),
 		}, r))
 
 		return
@@ -107,7 +113,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			if err := r.Original().ParseForm(); err == nil {
 				for key, value := range r.Original().PostForm {
 					if key == "payload" {
-						b.MQTT().PublishAsync(r.Context(), mqtt.Topic(topic), strings.Join(value, ";"))
+						b.MQTT().PublishAsync(ctx, mqtt.Topic(topic), strings.Join(value, ";"))
 						break
 					}
 				}
@@ -167,7 +173,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			}
 		}
 
-		widget.RenderLayout(r.Context(), "image", "ui", b.initUI(map[string]interface{}{
+		widget.RenderLayout(ctx, "image", "ui", b.initUI(map[string]interface{}{
 			"mime":     mimeType,
 			"base64":   base64.StdEncoding.EncodeToString(body),
 			"filename": time.Now().Format("20060102150405." + ext),
@@ -177,7 +183,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		return
 
 	case "icon":
-		req := r.Original().Clone(r.Context())
+		req := r.Original().Clone(ctx)
 		req.URL.Path = "icon/" + r.URL().Query().Get("icon")
 
 		b.proxy.ServeHTTP(w, req)
@@ -192,10 +198,10 @@ func (b *Bind) WidgetAssetFS() *assetfs.AssetFS {
 	return assetFS()
 }
 
-func (b *Bind) iconURL(r *dashboard.Request, payload *models.EnrichedItemDTO) (icon string) {
-	if payload.Category != "" {
-		icon = r.URL().Path + "/?action=icon&icon=" + payload.Category +
-			"&state=" + payload.State + "&format=svg&anyFormat=true"
+func (b *Bind) iconURL(r *dashboard.Request, payload *openhab3.EnrichedItemDTO) (icon string) {
+	if payload.Category != nil && payload.State != nil && *payload.Category != "" {
+		icon = r.URL().Path + "/?action=icon&icon=" + *payload.Category +
+			"&state=" + *payload.State + "&format=svg&anyFormat=true"
 
 		if key := r.URL().Query().Get(boggart.AccessKeyName); key != "" {
 			icon += "&" + boggart.AccessKeyName + "=" + key

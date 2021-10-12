@@ -4,11 +4,11 @@
     <img src="{{ .icon_url }}" />
     {{ end }}
 
-    {{ if ne .item.Label "" }}
-    <label for="value">{{ .item.Label }}</label>
+    {{ if ne .item_label "" }}
+    <label for="value">{{ .item_label }}</label>
     {{ end }}
 
-    {{ if and (eq .type "textarea") (ne .item.Type "DateTime") (ne .item.Type "Number") }}
+    {{ if and (eq .type "textarea") (ne .item_type "DateTime") (ne .item_type "Number") }}
         {{ if eq .style "android" }}
             <button onclick="sendValue()">{{ i18n "OK" . }}</button>
         {{ end }}
@@ -22,19 +22,19 @@
             onChange="sendValue()"
         {{ end }}
 
-            id="value" name="value">{{ if ne .item.State "NULL" }}{{ .item.State }}{{ end }}</textarea>
+            id="value" name="value">{{ if ne .item_state "NULL" }}{{ .item_state }}{{ end }}</textarea>
     {{ else }}
     <input
-        {{ if eq .item.Type "Number" }}
+        .item_type eq if {{ "Number" }}
             type="number"
-        {{ else if eq .item.Type "DateTime" }}
+        {{ else if eq .item_type "DateTime" }}
             type="datetime-local"
         {{ else }}
             type="text"
         {{ end }}
 
-        {{ if ne .item.State "NULL" }}
-            value="{{ .item.State }}"
+        {{ if ne .item_state "NULL" }}
+            value="{{ .item_state }}"
         {{ end }}
 
             id="value" name="value" onChange="sendValue()" >

@@ -307,6 +307,15 @@
                                             <td>{{ i18n "Make date" . }}</td>
                                         </tr>
                                         <tr>
+                                            <td>{{ i18n "Firmware version" . }}</td>
+                                            {{ if .version.error }}
+                                                <td class="text-danger">{{ .version.error.Error }}</td>
+                                            {{ else }}
+                                                <td>{{ .version.value  }}</td>
+                                            {{ end }}
+                                            <td>{{ i18n "Firmware version" . }}</td>
+                                        </tr>
+                                        <tr>
                                             <td>{{ i18n "Last power off" . }}</td>
                                             {{ if .last_power_off_datetime.error }}
                                                 <td class="text-danger">{{ .last_power_off_datetime.error.Error }}</td>

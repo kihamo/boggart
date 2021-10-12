@@ -327,6 +327,12 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			"error": err,
 		}
 
+		// version
+		version, _, err := provider.Version()
+		vars["version"] = map[string]interface{}{
+			"value": version,
+			"error": err,
+		}
 		// last power off
 		v, err = provider.LastPowerOffDatetime()
 		vars["last_power_off_datetime"] = map[string]interface{}{
