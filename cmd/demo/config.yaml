@@ -1,0 +1,17 @@
+devices:
+  - type: astro:sun
+    id: astro-sun-home
+    tags:
+      - demo
+      - service
+    config:
+      lat: 55.751244
+      lon: 37.618423
+      name: home
+  - type: wol
+    id: wol
+    tags:
+      - demo
+      - wol
+      - service
+    description: WAke-On-Lan manager

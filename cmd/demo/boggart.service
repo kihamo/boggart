@@ -1,0 +1,13 @@
+[Unit]
+Description=Boggart demo
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/boggart-demo
+EnvironmentFile=/opt/boggart/boggart.env
+WorkingDirectory=/opt/boggart
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
