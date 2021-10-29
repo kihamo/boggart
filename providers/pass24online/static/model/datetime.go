@@ -34,7 +34,7 @@ func (m *DateTime) Time() time.Time {
 	return time.Time(m.DateTime)
 }
 
-func (m *DateTime) Validate(formats strfmt.Registry) error {
+func (m *DateTime) Validate(_ strfmt.Registry) error {
 	return nil
 }
 
