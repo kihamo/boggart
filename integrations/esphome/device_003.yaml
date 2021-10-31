@@ -1,0 +1,50 @@
+# https://templates.blakadder.com/blitzwolf_BW-SS4.html
+# https://github.com/esphome/issues/issues/955
+
+substitutions:
+  node_name: !secret device_003_node_name
+  ip_address: !secret device_003_ip_address
+
+<<: !include ./_includes/common.yaml
+<<: !include ./_includes/wifi/home.yaml
+
+esphome:
+  name: ${node_name}
+  platform: ESP8266
+  board: esp8285
+  comment: !secret device_003_comment
+  build_path: ./builds/${node_name}
+
+<<: !include ./_includes/sensor.yaml
+<<: !include ./_includes/text_sensor.yaml
+
+switch:
+  - !include ./_includes/switch/restart.yaml
+  - !include ./_includes/switch/shutdown.yaml
+  - platform: gpio
+    pin: GPIO05
+    id: "relay"
+    name: "Power relay"
+    restore_mode: ALWAYS_ON
+    on_turn_on:
+    - switch.turn_off: led_blue
+    on_turn_off:
+    - switch.turn_on: led_blue
+  - platform: gpio
+    pin: GPIO04
+    inverted: true
+    id: "led_blue"
+    name: "LED blue"
+
+binary_sensor:
+  - !include ./_includes/binary_sensor/status.yaml
+  - platform: gpio
+    pin:
+      number: GPIO13
+      mode: INPUT_PULLUP
+      inverted: true
+    id: "button"
+    name: "Hardware button"
+    internal: true
+    on_press:
+    - switch.toggle: relay

@@ -1,0 +1,4 @@
+---
+sensor:
+- !include ./sensor/wifi_signal.yaml
+- !include ./sensor/uptime.yaml

@@ -1,0 +1,4 @@
+---
+ap:
+  ssid: ${node_name}
+  password: !secret ap_wifi_password

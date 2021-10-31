@@ -1,0 +1,11 @@
+---
+platform: wifi_info
+ip_address:
+  id: "wifi_ip_address"
+  name: "WiFi IP Address"
+ssid:
+  id: "wifi_ssid"
+  name: "WiFi SSID"
+bssid:
+  id: "wifi_bssid"
+  name: "WiFi BSSID"

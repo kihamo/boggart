@@ -1,0 +1,107 @@
+# https://templates.blakadder.com/gosund_SP1.html
+
+#  ------------------
+#  GPIO   | Component
+#  ------------------
+#  GPIO00 | None
+#  GPIO01 | Led1i
+#  GPIO02 | None
+#  GPIO03 | Button1
+#  GPIO04 | BL0937 CF
+#  GPIO05 | HLWBL CF1
+#  GPIO09 | None
+#  GPIO10 | None
+#  GPIO12 | HLWBL SELi
+#  GPIO13 | Led2i
+#  GPIO14 | Relay1
+#  GPIO15 | None
+#  GPIO16 | None
+#  FLAG   | None
+
+substitutions:
+  node_name: !secret device_001_node_name
+  ip_address: !secret device_001_ip_address
+
+<<: !include ./_includes/common.yaml
+<<: !include ./_includes/wifi/home.yaml
+
+esphome:
+  name: ${node_name}
+  platform: ESP8266
+  board: esp8285
+  comment: !secret device_001_comment
+  build_path: ./builds/${node_name}
+
+sensor:
+- !include _includes/sensor/wifi_signal.yaml
+- !include _includes/sensor/uptime.yaml
+- !include _includes/sensor/total_daily_energy.yaml
+- platform: hlw8012
+  sel_pin:
+    number: GPIO12
+    inverted: true
+  cf_pin: GPIO04
+  cf1_pin: GPIO05
+  current_resistor: 0.00290
+  voltage_divider: 940
+  current:
+    id: "amperage"
+    name: "Amperage"
+    unit_of_measurement: A
+    accuracy_decimals: 3
+  voltage:
+    id: "voltage"
+    name: "Voltage"
+    unit_of_measurement: V
+  power:
+    id: "power"
+    name: "Power in watts"
+    unit_of_measurement: W
+  change_mode_every: 4
+  update_interval: 10s
+
+<<: !include ./_includes/text_sensor.yaml
+
+switch:
+- !include ./_includes/switch/restart.yaml
+- !include ./_includes/switch/shutdown.yaml
+
+- platform: gpio
+  pin: GPIO14
+  id: "relay"
+  name: "Power relay"
+  restore_mode: ALWAYS_OFF
+  on_turn_on:
+  - switch.turn_on: led_red
+  - switch.turn_off: led_blue
+  on_turn_off:
+  - switch.turn_on: led_blue
+  - switch.turn_off: led_red
+
+- platform: gpio
+  pin: GPIO01
+  inverted: true
+  id: "led_blue"
+  name: "LED blue"
+  restore_mode: ALWAYS_ON
+- platform: gpio
+  pin: GPIO13
+  inverted: true
+  id: "led_red"
+  name: "LED red"
+  restore_mode: ALWAYS_OFF
+
+binary_sensor:
+- !include ./_includes/binary_sensor/status.yaml
+- platform: gpio
+  pin:
+    number: GPIO3
+    mode: INPUT_PULLUP
+    inverted: true
+  id: "button"
+  name: "Hardware button"
+  internal: true
+  on_press:
+    - switch.toggle: relay
+
+<<: !include ./_includes/time.yaml

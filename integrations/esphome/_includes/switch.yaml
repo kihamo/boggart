@@ -1,0 +1,4 @@
+---
+switch:
+- !include ./switch/restart.yaml
+- !include ./switch/shutdown.yaml

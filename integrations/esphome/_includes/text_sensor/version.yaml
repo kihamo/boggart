@@ -1,0 +1,4 @@
+---
+platform: version
+id: "firmware_version"
+name: "Software version"

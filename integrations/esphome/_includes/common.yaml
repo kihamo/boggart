@@ -1,0 +1,16 @@
+---
+web_server:
+  port: 80
+
+prometheus:
+
+logger:
+  level: "VERY_VERBOSE"
+  baud_rate: 0
+
+ota:
+
+mqtt:
+  broker: !secret home_mqtt_broker
+  username: !secret home_mqtt_user
+  password: !secret home_mqtt_pssword
