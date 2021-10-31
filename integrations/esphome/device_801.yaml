@@ -1,0 +1,72 @@
+substitutions:
+  node_name: !secret device_801_node_name
+  ip_address: !secret device_801_ip_address
+
+<<: !include ./_includes/common.yaml
+<<: !include ./_includes/wifi/home.yaml
+
+esphome:
+  name: ${node_name}
+  platform: ESP8266
+  board: esp01_1m
+  comment: "Sonoff Mini rev 1.2 fw v. 3.6 ESPHome"
+  build_path: ./builds/${node_name}
+
+sensor:
+- !include _includes/sensor/wifi_signal.yaml
+- !include _includes/sensor/uptime.yaml
+
+<<: !include ./_includes/text_sensor.yaml
+
+switch:
+- !include ./_includes/switch/restart.yaml
+- !include ./_includes/switch/shutdown.yaml
+- platform: gpio
+  pin: GPIO12
+  id: "relay"
+  name: "Power relay"
+  restore_mode: RESTORE_DEFAULT_OFF
+- platform: gpio
+  pin: GPIO13
+  inverted: true
+  id: "led_blue"
+  name: "LED blue"
+
+binary_sensor:
+- !include ./_includes/binary_sensor/status.yaml
+- platform: gpio
+  pin:
+    number: GPIO0
+    mode: INPUT_PULLUP
+    inverted: true
+  id: "s1"
+  name: "Press button"
+  filters:
+  - delayed_off: 10ms
+  on_press:
+  - switch.toggle:
+      id: relay
+- platform: gpio
+  pin:
+    number: GPIO4
+    mode: INPUT_PULLUP
+    inverted: true
+  id: "s2"
+  name: "Switch button"
+  on_press:
+    then:
+    #- switch.turn_off:
+    - switch.toggle:
+        id: relay
+  on_release:
+    then:
+    #- switch.turn_on:
+    - switch.toggle:
+        id: relay
+
+<<: !include ./_includes/time.yaml
+
+status_led:
+  pin:
+    number: GPIO13
+    inverted: true
