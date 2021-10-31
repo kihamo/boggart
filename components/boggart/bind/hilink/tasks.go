@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"strconv"
+	"fmt"
 	"strings"
 	"time"
 
@@ -40,7 +40,7 @@ func (b *Bind) Tasks() []tasks.Task {
 func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 	deviceInfo, err := b.client.Device.GetDeviceInformation(device.NewGetDeviceInformationParamsWithContext(ctx))
 	if err != nil {
-		return err
+		return fmt.Errorf("get device information failed: %w", err)
 	}
 
 	if deviceInfo.Payload.SerialNumber == "" {
@@ -66,7 +66,7 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 	// set settings
 	settings, err := b.client.Global.GetGlobalModuleSwitch(global.NewGetGlobalModuleSwitchParamsWithContext(ctx))
 	if err != nil {
-		return err
+		return fmt.Errorf("get global module switch failed: %w", err)
 	}
 
 	cfg := b.config()
@@ -191,7 +191,7 @@ func (b *Bind) taskSMSCheckerHandler(ctx context.Context) error {
 	responseCount, err := b.client.Sms.GetSMSCount(paramsCount)
 
 	if err != nil {
-		return err
+		return fmt.Errorf("get sms count failed: %w", err)
 	}
 
 	sn := b.Meta().SerialNumber()
@@ -218,7 +218,7 @@ func (b *Bind) taskSMSCheckerHandler(ctx context.Context) error {
 
 	responseList, e := b.client.Sms.GetSMSList(paramsList)
 	if e != nil {
-		return multierr.Append(err, e)
+		return multierr.Append(err, fmt.Errorf("get sms list failed: %w", err))
 	}
 
 	for _, s := range responseList.Payload.Messages {
@@ -291,7 +291,7 @@ func (b *Bind) taskSystemUpdaterHandler(ctx context.Context) (err error) {
 			}
 		}
 	} else {
-		err = multierr.Append(err, e)
+		err = multierr.Append(err, fmt.Errorf("get monitoring status failed: %w", e))
 	}
 
 	// все проверки ниже только с активной SIM картой
@@ -304,54 +304,54 @@ func (b *Bind) taskSystemUpdaterHandler(ctx context.Context) (err error) {
 		const dBmPostfix = "dBm"
 
 		if raw := strings.TrimRight(response.Payload.RSSI, dBmPostfix); raw != "" {
-			if val, e := strconv.ParseInt(raw, 10, 64); e == nil {
+			if val, e := parseInt(raw); e == nil {
 				metricSignalRSSI.With("serial_number", sn).Set(float64(val))
 
 				if e = b.MQTT().PublishAsync(ctx, cfg.TopicSignalRSSI.Format(sn), val); e != nil {
 					err = multierr.Append(err, e)
 				}
 			} else {
-				err = multierr.Append(err, e)
+				err = multierr.Append(err, fmt.Errorf("parse RSSI value '%s' failed: %w", raw, e))
 			}
 		}
 
 		if raw := strings.TrimRight(response.Payload.RSRP, dBmPostfix); raw != "" {
-			if val, e := strconv.ParseInt(raw, 10, 64); e == nil {
+			if val, e := parseInt(raw); e == nil {
 				metricSignalRSRP.With("serial_number", sn).Set(float64(val))
 
 				if e = b.MQTT().PublishAsync(ctx, cfg.TopicSignalRSRP.Format(sn), val); e != nil {
 					err = multierr.Append(err, e)
 				}
 			} else {
-				err = multierr.Append(err, e)
+				err = multierr.Append(err, fmt.Errorf("parse RSRP value '%s' failed: %w", raw, e))
 			}
 		}
 
 		if raw := strings.TrimRight(response.Payload.RSRQ, dBmPostfix); raw != "" {
-			if val, e := strconv.ParseInt(raw, 10, 64); e == nil {
+			if val, e := parseInt(raw); e == nil {
 				metricSignalRSRQ.With("serial_number", sn).Set(float64(val))
 
 				if e = b.MQTT().PublishAsync(ctx, cfg.TopicSignalRSRQ.Format(sn), val); e != nil {
 					err = multierr.Append(err, e)
 				}
 			} else {
-				err = multierr.Append(err, e)
+				err = multierr.Append(err, fmt.Errorf("parse RSRQ value '%s' failed: %w", raw, e))
 			}
 		}
 
 		if raw := strings.TrimRight(response.Payload.SINR, dBmPostfix); raw != "" {
-			if val, e := strconv.ParseInt(raw, 10, 64); e == nil {
+			if val, e := parseInt(raw); e == nil {
 				metricSignalSINR.With("serial_number", sn).Set(float64(val))
 
 				if e = b.MQTT().PublishAsync(ctx, cfg.TopicSignalSINR.Format(sn), val); e != nil {
 					err = multierr.Append(err, e)
 				}
 			} else {
-				err = multierr.Append(err, e)
+				err = multierr.Append(err, fmt.Errorf("parse SINR value '%s' failed: %w", raw, e))
 			}
 		}
 	} else {
-		err = multierr.Append(err, e)
+		err = multierr.Append(err, fmt.Errorf("get device signal failed: %w", e))
 	}
 
 	// traffic
@@ -372,7 +372,7 @@ func (b *Bind) taskSystemUpdaterHandler(ctx context.Context) (err error) {
 			err = multierr.Append(err, e)
 		}
 	} else {
-		err = multierr.Append(err, e)
+		err = multierr.Append(err, fmt.Errorf("get monitoring traffic statistics failed: %w", e))
 	}
 
 	return err
@@ -396,7 +396,7 @@ func (b *Bind) taskCleanerHandler(ctx context.Context) error {
 
 		response, err := b.client.Sms.GetSMSList(paramsList)
 		if err != nil {
-			return err
+			return fmt.Errorf("get sms list failed: %w", err)
 		}
 
 		if len(response.Payload.Messages) == 0 {
@@ -420,7 +420,7 @@ func (b *Bind) taskCleanerHandler(ctx context.Context) error {
 				params.Request.Index = s.Index
 
 				if _, err := b.client.Sms.RemoveSMS(params); err != nil {
-					return err
+					return fmt.Errorf("call remove sms failed: %w", err)
 				}
 
 				b.Logger().Warn("Clean sms",

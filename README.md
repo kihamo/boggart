@@ -338,11 +338,16 @@ sudo systemctl enable wol.service
 sudo systemctl start wol.service
 ```
 
-#### Wemos D1 mini
+#### Flash mode Wemos D1 mini ESP8266
 - Connect WEMOS to USB-cable
 - Place a lead between D3 and GND
 - Press the small reset button
 - Remove lead to D3
+- You *should* be able upload firmware
+
+#### Flash mode NodeMCU ESP32
+- Power ON
+- Press and keep BOOT button
 - You *should* be able upload firmware
 
 #### UDEV static link

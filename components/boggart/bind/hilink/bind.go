@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/di"
@@ -255,4 +256,12 @@ func (b *Bind) checkSpecialSMS(ctx context.Context, smsItem *models.SMSListMessa
 	}
 
 	return false
+}
+
+func parseInt(s string) (int64, error) {
+	s = strings.TrimFunc(s, func(r rune) bool {
+		return !(unicode.Is(unicode.Number, r) || unicode.Is(unicode.Pd, r))
+	})
+
+	return strconv.ParseInt(s, 10, 64)
 }
