@@ -1,0 +1,50 @@
+substitutions:
+  node_name: !secret device_008_node_name
+  ip_address: !secret device_008_ip_address
+
+<<: !include ./_includes/common.yaml
+<<: !include ./_includes/wifi/villa.yaml
+
+esphome:
+  name: ${node_name}
+  platform: ESP8266
+  board: d1_mini
+  comment: !secret device_008_comment
+  build_path: ./builds/${node_name}
+
+i2c:
+  sda: D2
+  scl: D1
+  scan: True
+  id: bus_a
+
+dallas:
+  - pin: D4
+    update_interval: 10s
+
+sensor:
+- !include _includes/sensor/wifi_signal.yaml
+- !include _includes/sensor/uptime.yaml
+- platform: bme280
+  update_interval: 10s
+  temperature:
+    id: temperature
+    name: "Temperature"
+    oversampling: 16x
+    #filters:
+    #- offset: -5.9
+  pressure:
+    id: pressure
+    name: "Pressure"
+  humidity:
+    id: humidity
+    name: "Humidity"
+  address: 0x76
+- platform: dallas
+  address: 0xE1000003AF4DC628
+  id: temperature2
+  name: "Temperature 2"
+
+<<: !include ./_includes/binary_sensor.yaml
+<<: !include ./_includes/switch.yaml
+<<: !include ./_includes/text_sensor.yaml
