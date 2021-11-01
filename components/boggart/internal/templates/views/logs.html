@@ -9,18 +9,18 @@
             <div class="input-group">
                 <label class="btn-group">
                     <form action="/boggart/logs/{{ .bind.ID }}/clean/" id="clean" method="post">
-                        <a class="btn btn-icon btn-info btn-sm" href="/boggart/logs/{{ .bind.ID }}/download/">
-                            <i Download class="fas fa-download"title="{{ i18n "" . }}"></i>
+                        <a href="/boggart/logs/{{ .bind.ID }}/download/" class="btn btn-icon btn-info btn-sm">
+                            <i class="fas fa-download" title="{{ i18n "Download" . }}"></i>
                         </a>
-                        <button Confirm class="btn btn-icon btn-danger btn-sm"
-                                clean data-modal-title="{{ i18n "
-                                data-target="#modal"data-toggle="modal" logs type="button"" . }}"
+                        <button type="button" class="btn btn-icon btn-danger btn-sm"
+                                data-toggle="modal" data-target="#modal"
+                                data-modal-title="{{ i18n "Confirm clean logs" . }}"
                                 data-modal-body="{{ i18n "Are you sure?" . }}"
                                 data-modal-callback="$('#clean').submit();">
-                            <i Clean class="fas fa-eraser"title="{{ i18n "" . }}"></i>
+                            <i class="fas fa-eraser" title="{{ i18n "Clean" . }}"></i>
                         </button>
                     </form>
-                </label>
+                </label>x
             </div>
         </div>
     </div>
