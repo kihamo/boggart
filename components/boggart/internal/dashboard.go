@@ -24,8 +24,8 @@ func (c *Component) DashboardMenu() dashboard.Menu {
 
 	return dashboard.NewMenu("Smart home").
 		WithIcon("home").
-		WithChild(dashboard.NewMenu("Manager").WithRoute(routes[8])).
-		WithChild(dashboard.NewMenu("Workers").WithRoute(routes[12])).
+		WithChild(dashboard.NewMenu("Manager").WithRoute(routes[9])).
+		WithChild(dashboard.NewMenu("Workers").WithRoute(routes[13])).
 		WithChild(dashboard.NewMenu("Config YAML").WithURL("/" + c.Name() + "/config/view"))
 }
 
@@ -35,6 +35,7 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 
 		bindHandler := handlers.NewBindHandler(c)
 		configHandler := handlers.NewConfigHandler(c)
+		logsHandler := handlers.NewLogsHandler(c)
 
 		c.routes = []dashboard.Route{
 			dashboard.RouteFromAssetFS(c),
@@ -56,7 +57,10 @@ func (c *Component) DashboardRoutes() []dashboard.Route {
 			dashboard.NewRoute("/"+c.Name()+"/installer/:id/:system/", handlers.NewInstallerHandler(c)).
 				WithMethods([]string{http.MethodGet}).
 				WithAuth(true),
-			dashboard.NewRoute("/"+c.Name()+"/logs/:id/", handlers.NewLogsHandler(c)).
+			dashboard.NewRoute("/"+c.Name()+"/logs/:id/", logsHandler).
+				WithMethods([]string{http.MethodGet}).
+				WithAuth(true),
+			dashboard.NewRoute("/"+c.Name()+"/logs/:id/:action/", logsHandler).
 				WithMethods([]string{http.MethodGet, http.MethodPost}).
 				WithAuth(true),
 			dashboard.NewRoute("/"+c.Name()+"/manager/", handlers.NewManagerHandler(c, c.tasksManager)).

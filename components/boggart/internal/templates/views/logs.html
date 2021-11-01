@@ -8,14 +8,17 @@
         <div class="form-group pull-right">
             <div class="input-group">
                 <label class="btn-group">
-                    <form action="?clean=1" method="post">
-                    <button type="submit" class="btn btn-icon btn-danger btn-sm"
-                            data-toggle="modal" data-target="#modal"
-                            data-modal-title="{{ i18n "Confirm clean logs" . }}"
-                            data-modal-body="{{ i18n "Are you sure?" . }}"
-                            data-modal-callback="action('reset');">
-                        <i class="fas fa-eraser" title="{{ i18n "Clean" . }}"></i>
-                    </button>
+                    <form action="/boggart/logs/{{ .bind.ID }}/clean/" id="clean" method="post">
+                        <a class="btn btn-icon btn-info btn-sm" href="/boggart/logs/{{ .bind.ID }}/download/">
+                            <i Download class="fas fa-download"title="{{ i18n "" . }}"></i>
+                        </a>
+                        <button Confirm class="btn btn-icon btn-danger btn-sm"
+                                clean data-modal-title="{{ i18n "
+                                data-target="#modal"data-toggle="modal" logs type="button"" . }}"
+                                data-modal-body="{{ i18n "Are you sure?" . }}"
+                                data-modal-callback="$('#clean').submit();">
+                            <i Clean class="fas fa-eraser"title="{{ i18n "" . }}"></i>
+                        </button>
                     </form>
                 </label>
             </div>
