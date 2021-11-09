@@ -1,0 +1,102 @@
+debug:
+
+substitutions:
+  node_name: !secret device_009_node_name
+  ip_address: !secret device_009_ip_address
+
+packages:
+  common: !include ./_includes/common.yaml
+  wifi: !include ./_includes/wifi/home.yaml
+  binary_sensor: !include ./_includes/binary_sensor.yaml
+  sensor: !include ./_includes/sensor.yaml
+  switch: !include ./_includes/switch.yaml
+  text_sensor: !include ./_includes/text_sensor.yaml
+  time: !include ./_includes/time.yaml
+
+esphome:
+  comment: !secret device_009_comment
+
+esp32:
+  board: wemos_d1_mini32
+
+external_components:
+  - source:
+      type: local
+      path: ./external_components
+  - source: github://oxan/esphome-stream-server
+
+uart:
+  id: uart_bus
+  baud_rate: 9600
+  data_bits: 8
+  parity: NONE
+  stop_bits: 1
+  tx_pin: GPIO17
+  rx_pin: GPIO16
+
+stream_server:
+  uart_id: uart_bus
+  port: 1234
+
+custom_component:
+  - lambda: |-
+      auto my_mercury = new Mercury(id(uart_bus), id(Volts), id(Amps), id(Watts), id(Tariff1), id(Tariff2), id(Tariff3), id(Sum_Tariff));
+      App.register_component(my_mercury);
+      return {my_mercury};
+
+sensor:
+  - platform: template
+    id: Volts
+    name: "Volts"
+    icon: "mdi:alpha-v-circle-outline"
+    unit_of_measurement: "V"
+    accuracy_decimals: 1
+    lambda: "return {};"
+
+  - platform: template
+    id: Amps
+    name: "Amps"
+    icon: "mdi:alpha-a-circle-outline"
+    unit_of_measurement: "A"
+    accuracy_decimals: 2
+    lambda: "return {};"
+
+  - platform: template
+    id: Watts
+    name: "Watts"
+    icon: "mdi:alpha-p-circle-outline"
+    unit_of_measurement: "KWt*H"
+    accuracy_decimals: 3
+    lambda: "return {};"
+
+  - platform: template
+    id: Tariff1
+    name: "Tariff1"
+    icon: "mdi:counter"
+    unit_of_measurement: "KWt"
+    accuracy_decimals: 2
+    lambda: "return {};"
+
+  - platform: template
+    id: Tariff2
+    name: "Tariff2"
+    icon: "mdi:counter"
+    unit_of_measurement: "KWt"
+    accuracy_decimals: 2
+    lambda: "return {};"
+
+  - platform: template
+    id: Tariff3
+    name: "Tariff3"
+    icon: "mdi:counter"
+    unit_of_measurement: "KWt"
+    accuracy_decimals: 2
+    lambda: "return {};"
+
+  - platform: template
+    id: Sum_Tariff
+    name: "Sum_Tariff"
+    icon: "mdi:counter"
+    unit_of_measurement: "KWt"
+    accuracy_decimals: 2
+    lambda: "return {};"

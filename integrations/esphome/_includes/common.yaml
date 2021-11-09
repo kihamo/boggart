@@ -1,4 +1,8 @@
 ---
+esphome:
+  name: ${node_name}
+  build_path: ./builds/${node_name}
+
 web_server:
   port: 80
 
