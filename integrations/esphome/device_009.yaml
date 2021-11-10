@@ -19,6 +19,9 @@ esphome:
 esp32:
   board: wemos_d1_mini32
 
+logger:
+  level: VERBOSE
+
 external_components:
   - source:
       type: local
@@ -40,6 +43,7 @@ stream_server:
 
 sensor:
   - platform: mercury1
+    address: !secret device_009_mercury_address # последние 6 цифр для модели 200
     voltage:
       name: "Voltage"
     amperage:
@@ -56,4 +60,4 @@ sensor:
       name: "Tariff 4"
     tariffs_total:
       name: "Tariffs total"
-    update_interval: 60s
+    update_interval: 30s

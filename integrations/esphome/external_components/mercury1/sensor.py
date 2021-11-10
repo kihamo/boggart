@@ -3,6 +3,7 @@ import esphome.config_validation as cv
 from esphome.components import sensor, uart
 from esphome.const import (
     CONF_ID,
+    CONF_ADDRESS,
     CONF_POWER,
     CONF_VOLTAGE,
     CONF_ENERGY,
@@ -34,6 +35,7 @@ CONFIG_SCHEMA = (
     cv.Schema(
         {
             cv.GenerateID(): cv.declare_id(Mercury1),
+            cv.Required(CONF_ADDRESS): cv.hex_uint32_t,
             cv.Optional(CONF_VOLTAGE): sensor.sensor_schema(
                 unit_of_measurement=UNIT_VOLT,
                 accuracy_decimals=1,
@@ -90,6 +92,8 @@ CONFIG_SCHEMA = (
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
+    cg.add(var.set_address(config[CONF_ADDRESS]))
+
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
 

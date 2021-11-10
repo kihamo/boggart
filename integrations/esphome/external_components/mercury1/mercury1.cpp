@@ -5,19 +5,25 @@ namespace esphome {
   namespace mercury1 {
     static const char *const TAG = "mercury1";
 
+    float Mercury1::get_setup_priority() const {
+      return setup_priority::DATA;
+    }
+
     void Mercury1::setup() {
       // Clear UART buffer
-      while (this->available())
+      while (this->available()) {
         this->read();
+      }
 
-      // TODO: generate commands for update
+      this->packet_generate(read_power_counters_request_, Command::READ_POWER_COUNTERS);
+      this->packet_generate(read_params_current_request_, Command::READ_PARAMS_CURRENT);
     }
 
     void Mercury1::loop() {
-      if (!this->available())
-        return;
 
-      int len;
+    }
+
+    void Mercury1::read_from_uart() {
       memset(this->read_buffer_, 0, MERCURY1_READ_BUFFER_SIZE);
       this->read_index_ = 0;
 
@@ -26,8 +32,9 @@ namespace esphome {
           ESP_LOGW(TAG, "Buffer overflow. Total length %d", this->read_index_);
 
           // Clear UART buffer
-          while (this->available())
+          while (this->available()) {
             this->read();
+          }
 
           break;
         }
@@ -39,26 +46,6 @@ namespace esphome {
         this->read_index_++;
       }
 
-      delay(100);
-
-      /*
-      while((len = this->available()) > 0) {
-        len = std::min(len, MERCURY1_READ_BUFFER_SIZE);
-        this->read_index_ += len;
-
-        if(this->read_index_ > MERCURY1_READ_BUFFER_SIZE) {
-          ESP_LOGW(TAG, "Buffer overflow. Total length %d", this->read_index_);
-
-          while (this->available())
-            this->read();
-
-          return;
-        }
-
-        this->read_array(this->read_buffer_, len);
-      }
-      */
-
       ESP_LOGV(TAG, "Response raw %s", hexencode(this->read_buffer_, this->read_index_).c_str());
 
       // ошибочное начало пакета
@@ -67,20 +54,18 @@ namespace esphome {
         return;
       }
 
-      if(this->read_index_ <= 7) { // включительно, чтобы пропускать пакеты на отсылку команд
+      if(this->read_index_ <= MERCURY1_READ_REQUEST_SIZE) { // включительно, чтобы пропускать пакеты на отсылку команд
         ESP_LOGD(TAG, "Skip response with length %d", this->read_index_);
         return;
       }
 
-      ESP_LOGD(TAG, "Response command %02X", this->read_buffer_[4]);
-
       switch (this->read_buffer_[4]) {
         case Command::READ_POWER_COUNTERS:
             // ADDR-CMD-count*4-CRC
-            this->T1 = this->to_double<4>(&this->read_buffer_[5], 1);
-            this->T2 = this->to_double<4>(&this->read_buffer_[9], 1);
-            this->T3 = this->to_double<4>(&this->read_buffer_[13], 1);
-            this->T4 = this->to_double<4>(&this->read_buffer_[17], 1);
+            this->T1 = this->to_double<4>(&this->read_buffer_[5], 100);
+            this->T2 = this->to_double<4>(&this->read_buffer_[9], 100);
+            this->T3 = this->to_double<4>(&this->read_buffer_[13], 100);
+            this->T4 = this->to_double<4>(&this->read_buffer_[17], 100);
             this->TTotal = this->T1 +this->T2 + this->T3 + this->T4;
 
             this->tariff1_sensor_->publish_state(this->T1);
@@ -108,11 +93,29 @@ namespace esphome {
     }
 
     void Mercury1::update() {
-        // TODO: Send update commands
+      ESP_LOGV(TAG, "Send READ_POWER_COUNTERS %s", hexencode(read_power_counters_request_, MERCURY1_READ_REQUEST_SIZE).c_str());
+      this->flush();
+      this->write_array(read_power_counters_request_, MERCURY1_READ_REQUEST_SIZE);
+      this->flush();
+
+      delay(MERCURY1_WAIT_AFTER_SEND_REQUEST);
+      this->read_from_uart();
+      delay(MERCURY1_WAIT_AFTER_READ_RESPONSE);
+
+      ESP_LOGV(TAG, "Send READ_PARAMS_CURRENT %s", hexencode(read_params_current_request_, MERCURY1_READ_REQUEST_SIZE).c_str());
+      this->flush();
+      this->write_array(read_params_current_request_, MERCURY1_READ_REQUEST_SIZE);
+      this->flush();
+      delay(MERCURY1_WAIT_AFTER_SEND_REQUEST);
+
+      this->read_from_uart();
+      delay(MERCURY1_WAIT_AFTER_READ_RESPONSE);
     }
 
     void Mercury1::dump_config() {
       ESP_LOGCONFIG(TAG, "Mercury v1:");
+      ESP_LOGCONFIG(TAG, "Address %d", this->address_);
+      LOG_UPDATE_INTERVAL(this);
       LOG_SENSOR("", "Voltage", this->voltage_sensor_);
       LOG_SENSOR("", "Amperage", this->amperage_sensor_);
       LOG_SENSOR("", "Power", this->power_sensor_);

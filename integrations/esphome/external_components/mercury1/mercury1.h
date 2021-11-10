@@ -5,15 +5,22 @@
 #include "esphome/components/sensor/sensor.h"
 
 #define MERCURY1_READ_BUFFER_SIZE 40
+#define MERCURY1_READ_REQUEST_SIZE 7
+#define MERCURY1_WAIT_AFTER_SEND_REQUEST 30
+#define MERCURY1_WAIT_AFTER_READ_RESPONSE 100
 
 namespace esphome {
   namespace mercury1 {
     class Mercury1 : public PollingComponent, public uart::UARTDevice {
       public:
-        void setup() override;
+        Mercury1() = default;
+
         void loop() override;
         void update() override;
+        void setup() override;
         void dump_config() override;
+
+        float get_setup_priority() const override;
 
         void set_voltage_sensor(sensor::Sensor *voltage_sensor) { voltage_sensor_ = voltage_sensor; }
         void set_amperage_sensor(sensor::Sensor *amperage_sensor) { amperage_sensor_ = amperage_sensor; }
@@ -24,6 +31,8 @@ namespace esphome {
         void set_tariff4_sensor(sensor::Sensor *tariff4_sensor) { tariff4_sensor_ = tariff4_sensor; }
         void set_tariffs_total_sensor(sensor::Sensor *tariffs_total_sensor) { tariffs_total_sensor_ = tariffs_total_sensor; }
 
+        void set_address(int32_t address) { address_ = address; }
+
       protected:
         sensor::Sensor *voltage_sensor_;
         sensor::Sensor *amperage_sensor_;
@@ -33,6 +42,8 @@ namespace esphome {
         sensor::Sensor *tariff3_sensor_;
         sensor::Sensor *tariff4_sensor_;
         sensor::Sensor *tariffs_total_sensor_;
+
+        uint32_t address_;
 
         uint8_t read_index_{0};
         uint8_t read_buffer_[MERCURY1_READ_BUFFER_SIZE]{};
@@ -45,11 +56,16 @@ namespace esphome {
           READ_PARAMS_CURRENT = 0x63,
         };
 
-        void packet_generate(unsigned char* packet, uint32_t serial_, unsigned char cmd) {
+        unsigned char read_power_counters_request_[MERCURY1_READ_REQUEST_SIZE];
+        unsigned char read_params_current_request_[MERCURY1_READ_REQUEST_SIZE];
+
+        void read_from_uart();
+
+        void packet_generate(unsigned char* packet, unsigned char cmd) {
           packet[0] = 0x00;
-          packet[1] = serial_ >> 16;
-          packet[2] = serial_ >> 8;
-          packet[3] = serial_;
+          packet[1] = this->address_ >> 16;
+          packet[2] = this->address_ >> 8;
+          packet[3] = this->address_;
           packet[4] = cmd;
           auto crc = this->crc16(packet, 5);
           packet[5] = crc >> 0;
