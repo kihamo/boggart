@@ -38,65 +38,22 @@ stream_server:
   uart_id: uart_bus
   port: 1234
 
-custom_component:
-  - lambda: |-
-      auto my_mercury = new Mercury(id(uart_bus), id(Volts), id(Amps), id(Watts), id(Tariff1), id(Tariff2), id(Tariff3), id(Sum_Tariff));
-      App.register_component(my_mercury);
-      return {my_mercury};
-
 sensor:
-  - platform: template
-    id: Volts
-    name: "Volts"
-    icon: "mdi:alpha-v-circle-outline"
-    unit_of_measurement: "V"
-    accuracy_decimals: 1
-    lambda: "return {};"
-
-  - platform: template
-    id: Amps
-    name: "Amps"
-    icon: "mdi:alpha-a-circle-outline"
-    unit_of_measurement: "A"
-    accuracy_decimals: 2
-    lambda: "return {};"
-
-  - platform: template
-    id: Watts
-    name: "Watts"
-    icon: "mdi:alpha-p-circle-outline"
-    unit_of_measurement: "KWt*H"
-    accuracy_decimals: 3
-    lambda: "return {};"
-
-  - platform: template
-    id: Tariff1
-    name: "Tariff1"
-    icon: "mdi:counter"
-    unit_of_measurement: "KWt"
-    accuracy_decimals: 2
-    lambda: "return {};"
-
-  - platform: template
-    id: Tariff2
-    name: "Tariff2"
-    icon: "mdi:counter"
-    unit_of_measurement: "KWt"
-    accuracy_decimals: 2
-    lambda: "return {};"
-
-  - platform: template
-    id: Tariff3
-    name: "Tariff3"
-    icon: "mdi:counter"
-    unit_of_measurement: "KWt"
-    accuracy_decimals: 2
-    lambda: "return {};"
-
-  - platform: template
-    id: Sum_Tariff
-    name: "Sum_Tariff"
-    icon: "mdi:counter"
-    unit_of_measurement: "KWt"
-    accuracy_decimals: 2
-    lambda: "return {};"
+  - platform: mercury1
+    voltage:
+      name: "Voltage"
+    amperage:
+      name: "Amperage"
+    power:
+      name: "Power"
+    tariff1:
+      name: "Tariff 1"
+    tariff2:
+      name: "Tariff 2"
+    tariff3:
+      name: "Tariff 3"
+    tariff4:
+      name: "Tariff 4"
+    tariffs_total:
+      name: "Tariffs total"
+    update_interval: 60s
