@@ -45,7 +45,6 @@ namespace esphome {
 
         uint32_t address_;
 
-        uint8_t read_index_{0};
         uint8_t read_buffer_[MERCURY1_READ_BUFFER_SIZE]{};
 
         double V, A, W;
@@ -60,6 +59,7 @@ namespace esphome {
         unsigned char read_params_current_request_[MERCURY1_READ_REQUEST_SIZE];
 
         void read_from_uart();
+        void clean_uart_buffer();
 
         void packet_generate(unsigned char* packet, unsigned char cmd) {
           packet[0] = 0x00;

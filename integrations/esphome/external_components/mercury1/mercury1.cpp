@@ -10,10 +10,7 @@ namespace esphome {
     }
 
     void Mercury1::setup() {
-      // Clear UART buffer
-      while (this->available()) {
-        this->read();
-      }
+      this->clean_uart_buffer();
 
       this->packet_generate(read_power_counters_request_, Command::READ_POWER_COUNTERS);
       this->packet_generate(read_params_current_request_, Command::READ_PARAMS_CURRENT);
@@ -24,48 +21,55 @@ namespace esphome {
     }
 
     void Mercury1::read_from_uart() {
+      // ESP_LOGV(TAG, "Read from UART start");
+
       memset(this->read_buffer_, 0, MERCURY1_READ_BUFFER_SIZE);
-      this->read_index_ = 0;
+      int offset = 0;
 
       while (this->available()) {
-        if(this->read_index_ > MERCURY1_READ_BUFFER_SIZE) {
-          ESP_LOGW(TAG, "Buffer overflow. Total length %d", this->read_index_);
+        delay(10); // FIXME: задержка не портит буфер, без задержки байты читаются рандомно
 
-          // Clear UART buffer
-          while (this->available()) {
-            this->read();
-          }
-
+        if(offset > MERCURY1_READ_BUFFER_SIZE) {
+          ESP_LOGW(TAG, "Buffer overflow");
+          this->clean_uart_buffer();
           break;
         }
 
-        uint8_t byte;
-        this->read_byte(&byte);
-
-        this->read_buffer_[this->read_index_] = byte;
-        this->read_index_++;
+        this->read_byte(&this->read_buffer_[offset]);
+        offset++;
       }
 
-      ESP_LOGV(TAG, "Response raw %s", hexencode(this->read_buffer_, this->read_index_).c_str());
+      ESP_LOGV(TAG, "Response raw %s", hexencode(this->read_buffer_, offset).c_str());
 
       // ошибочное начало пакета
       if(this->read_buffer_[0] != 0x00) { // включительно, чтобы пропускать пакеты на отсылку команд
-        ESP_LOGW(TAG, "Response first byte isn't 0x00, is %02X (raw %s)", this->read_buffer_[0], hexencode(this->read_buffer_, this->read_index_).c_str());
+        ESP_LOGW(TAG, "Response first byte isn't 0x00, is %02X (raw %s)", this->read_buffer_[0], hexencode(this->read_buffer_, offset).c_str());
         return;
       }
 
-      if(this->read_index_ <= MERCURY1_READ_REQUEST_SIZE) { // включительно, чтобы пропускать пакеты на отсылку команд
-        ESP_LOGD(TAG, "Skip response with length %d", this->read_index_);
+      // игнорируем пакеты на отсылку команд самому счетчику
+      if(offset <= MERCURY1_READ_REQUEST_SIZE) {
+        ESP_LOGD(TAG, "Skip response with length %d", offset);
         return;
       }
 
+      // игнорируем пакеты с некорректной контрольной суммой, так как в эфире бывает дичь из обрывков пакетов
+      uint16_t computed_crc = this->crc16(this->read_buffer_, offset - 2);
+      uint16_t remote_crc = uint16_t(this->read_buffer_[offset - 2]) | (uint16_t(this->read_buffer_[offset - 1]) << 8);
+
+      if (computed_crc != remote_crc) {
+        ESP_LOGW(TAG, "CRC Check failed! computed %02X != remote %02X", computed_crc, remote_crc);
+        return;
+      }
+
+      // обработка данных с валидных пакетов
       switch (this->read_buffer_[4]) {
         case Command::READ_POWER_COUNTERS:
             // ADDR-CMD-count*4-CRC
-            this->T1 = this->to_double<4>(&this->read_buffer_[5], 100);
-            this->T2 = this->to_double<4>(&this->read_buffer_[9], 100);
-            this->T3 = this->to_double<4>(&this->read_buffer_[13], 100);
-            this->T4 = this->to_double<4>(&this->read_buffer_[17], 100);
+            this->T1 = this->to_double<4>(&this->read_buffer_[5], 1);
+            this->T2 = this->to_double<4>(&this->read_buffer_[9], 1);
+            this->T3 = this->to_double<4>(&this->read_buffer_[13], 1);
+            this->T4 = this->to_double<4>(&this->read_buffer_[17], 1);
             this->TTotal = this->T1 +this->T2 + this->T3 + this->T4;
 
             this->tariff1_sensor_->publish_state(this->T1);
@@ -79,7 +83,7 @@ namespace esphome {
             // ADDR-CMD-V-I-P-CRC
             this->V = this->to_double(&this->read_buffer_[5], 10);
             this->A = this->to_double(&this->read_buffer_[7], 100);
-            this->W = this->to_double<3>(&this->read_buffer_[9], 100);
+            this->W = this->to_double<3>(&this->read_buffer_[9], 1);
 
             this->voltage_sensor_->publish_state(this->V);
             this->amperage_sensor_->publish_state(this->A);
@@ -92,23 +96,29 @@ namespace esphome {
       }
     }
 
+    void Mercury1::clean_uart_buffer() {
+      while (this->available()) {
+        this->read();
+      }
+    }
+
     void Mercury1::update() {
       ESP_LOGV(TAG, "Send READ_POWER_COUNTERS %s", hexencode(read_power_counters_request_, MERCURY1_READ_REQUEST_SIZE).c_str());
-      this->flush();
       this->write_array(read_power_counters_request_, MERCURY1_READ_REQUEST_SIZE);
-      this->flush();
 
       delay(MERCURY1_WAIT_AFTER_SEND_REQUEST);
+
       this->read_from_uart();
+
       delay(MERCURY1_WAIT_AFTER_READ_RESPONSE);
 
       ESP_LOGV(TAG, "Send READ_PARAMS_CURRENT %s", hexencode(read_params_current_request_, MERCURY1_READ_REQUEST_SIZE).c_str());
-      this->flush();
       this->write_array(read_params_current_request_, MERCURY1_READ_REQUEST_SIZE);
-      this->flush();
+
       delay(MERCURY1_WAIT_AFTER_SEND_REQUEST);
 
       this->read_from_uart();
+
       delay(MERCURY1_WAIT_AFTER_READ_RESPONSE);
     }
 
