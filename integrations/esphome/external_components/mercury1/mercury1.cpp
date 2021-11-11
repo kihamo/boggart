@@ -66,10 +66,10 @@ namespace esphome {
       switch (this->read_buffer_[4]) {
         case Command::READ_POWER_COUNTERS:
             // ADDR-CMD-count*4-CRC
-            this->T1 = this->to_double<4>(&this->read_buffer_[5], 1);
-            this->T2 = this->to_double<4>(&this->read_buffer_[9], 1);
-            this->T3 = this->to_double<4>(&this->read_buffer_[13], 1);
-            this->T4 = this->to_double<4>(&this->read_buffer_[17], 1);
+            this->T1 = this->to_long<4>(&this->read_buffer_[5]) * 10;
+            this->T2 = this->to_long<4>(&this->read_buffer_[9]) * 10;
+            this->T3 = this->to_long<4>(&this->read_buffer_[13]) * 10;
+            this->T4 = this->to_long<4>(&this->read_buffer_[17]) * 10;
             this->TTotal = this->T1 +this->T2 + this->T3 + this->T4;
 
             this->tariff1_sensor_->publish_state(this->T1);
@@ -81,9 +81,9 @@ namespace esphome {
 
         case Command::READ_PARAMS_CURRENT:
             // ADDR-CMD-V-I-P-CRC
-            this->V = this->to_double(&this->read_buffer_[5], 10);
-            this->A = this->to_double(&this->read_buffer_[7], 100);
-            this->W = this->to_double<3>(&this->read_buffer_[9], 1);
+            this->V = this->to_long(&this->read_buffer_[5]) / 10;
+            this->A = this->to_long(&this->read_buffer_[7]) / 100;
+            this->W = this->to_long<3>(&this->read_buffer_[9]);
 
             this->voltage_sensor_->publish_state(this->V);
             this->amperage_sensor_->publish_state(this->A);

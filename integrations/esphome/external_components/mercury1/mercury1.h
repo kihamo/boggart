@@ -106,11 +106,6 @@ namespace esphome {
 
           return out;
         }
-
-        template <size_t N = 2>
-        double to_double(unsigned char *inp, int del) {
-          return (double)this->to_long<N>(inp) / del;
-        }
     };
   }  // namespace mercury1
 }  // namespace esphome
