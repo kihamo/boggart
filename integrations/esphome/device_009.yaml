@@ -37,6 +37,12 @@ uart:
   tx_pin: GPIO17
   rx_pin: GPIO16
 
+i2c:
+  sda: SDA
+  scl: SCL
+  scan: True
+  id: bus_a
+
 stream_server:
   uart_id: uart_bus
   port: 1234
@@ -44,6 +50,7 @@ stream_server:
 sensor:
   - platform: mercury1
     address: !secret device_009_mercury_address # последние 6 цифр для модели 200
+    update_interval: 30s
     voltage:
       name: "Voltage"
     amperage:
@@ -60,4 +67,26 @@ sensor:
       name: "Tariff 4"
     tariffs_total:
       name: "Tariffs total"
-    update_interval: 30s
+
+  - platform: bme280
+    address: 0x76
+    update_interval: 60s
+    temperature:
+      id: temperature
+      name: "Temperature"
+      oversampling: 16x
+      filters:
+        - offset: -2.9
+    pressure:
+      id: pressure
+      name: "Pressure"
+    humidity:
+      id: humidity
+      name: "Humidity"
+
+binary_sensor:
+  - platform: gpio
+    id: "door"
+    name: "Entrance door"
+    pin:
+      number: GPIO27

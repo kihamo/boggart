@@ -2,30 +2,28 @@ substitutions:
   node_name: !secret device_006_node_name
   ip_address: !secret device_006_ip_address
 
-<<: !include ./_includes/common.yaml
-<<: !include ./_includes/wifi/home.yaml
+packages:
+  common: !include ./_includes/common.yaml
+  wifi: !include ./_includes/wifi/home.yaml
+  binary_sensor: !include ./_includes/binary_sensor.yaml
+  sensor: !include ./_includes/sensor.yaml
+  switch: !include ./_includes/switch.yaml
+  text_sensor: !include ./_includes/text_sensor.yaml
+  time: !include ./_includes/time.yaml
 
 esphome:
-  name: ${node_name}
-  platform: ESP8266
-  board: nodemcuv2
   comment: !secret device_006_comment
-  build_path: ./builds/${node_name}
+
+esp8266:
+  board: d1_mini
 
 i2c:
-  sda: D2
-  scl: D1
+  sda: SDA
+  scl: SCL
   scan: True
   id: bus_a
 
 sensor:
-  - !include _includes/sensor/wifi_signal.yaml
-  - !include _includes/sensor/uptime.yaml
-  - platform: adc
-    update_interval: 60s
-    pin: A0
-    id: "voltage"
-    name: "ADC Voltage"
   - platform: bme280
     update_interval: 60s
     temperature:
@@ -41,7 +39,3 @@ sensor:
       id: humidity
       name: "Humidity"
     address: 0x76
-
-<<: !include ./_includes/binary_sensor.yaml
-<<: !include ./_includes/switch.yaml
-<<: !include ./_includes/text_sensor.yaml
