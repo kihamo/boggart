@@ -6,7 +6,6 @@ from esphome.const import (
     CONF_ADDRESS,
     CONF_POWER,
     CONF_VOLTAGE,
-    CONF_ENERGY,
     DEVICE_CLASS_CURRENT,
     DEVICE_CLASS_ENERGY,
     DEVICE_CLASS_POWER,

@@ -6,7 +6,7 @@ substitutions:
 
 packages:
   common: !include ./_includes/common.yaml
-  wifi: !include ./_includes/wifi/home.yaml
+  wifi: !include ./_includes/wifi/fazenda.yaml
   binary_sensor: !include ./_includes/binary_sensor.yaml
   sensor: !include ./_includes/sensor.yaml
   switch: !include ./_includes/switch.yaml

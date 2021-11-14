@@ -7,4 +7,4 @@ wifi:
   use_address: ${ip_address}
   fast_connect: true # чтобы подключаться к скрытой сети, отключает предварительное сканирование
 
-captive_portal:
+# captive_portal:

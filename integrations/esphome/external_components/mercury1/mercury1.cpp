@@ -41,26 +41,26 @@ namespace esphome {
 
       ESP_LOGV(TAG, "Response raw %s", hexencode(this->read_buffer_, offset).c_str());
 
-      // ошибочное начало пакета
-      if(this->read_buffer_[0] != 0x00) { // включительно, чтобы пропускать пакеты на отсылку команд
-        ESP_LOGW(TAG, "Response first byte isn't 0x00, is %02X (raw %s)", this->read_buffer_[0], hexencode(this->read_buffer_, offset).c_str());
-        return;
-      }
-
       // игнорируем пакеты на отсылку команд самому счетчику
       if(offset <= MERCURY1_READ_REQUEST_SIZE) {
         ESP_LOGD(TAG, "Skip response with length %d", offset);
         return;
       }
 
-      // игнорируем пакеты с некорректной контрольной суммой, так как в эфире бывает дичь из обрывков пакетов
-      uint16_t computed_crc = this->crc16(this->read_buffer_, offset - 2);
-      uint16_t remote_crc = uint16_t(this->read_buffer_[offset - 2]) | (uint16_t(this->read_buffer_[offset - 1]) << 8);
-
-      if (computed_crc != remote_crc) {
-        ESP_LOGW(TAG, "CRC Check failed! computed %02X != remote %02X", computed_crc, remote_crc);
+      // проверяем что адреса запроса и ответа совпадают
+      if(memcmp(this->read_buffer_, this->address_, 4) != 0) { // включительно, чтобы пропускать пакеты на отсылку команд
+        ESP_LOGW(TAG, "Response first bytes isn't %s, is %s (raw %s)", hexencode(this->address_, 4).c_str(), hexencode(this->read_buffer_, 4).c_str(), hexencode(this->read_buffer_, offset).c_str());
         return;
       }
+
+      // игнорируем пакеты с некорректной контрольной суммой, так как в эфире бывает дичь из обрывков пакетов
+//      uint16_t computed_crc = this->crc16(this->read_buffer_, offset - 2);
+//      uint16_t remote_crc = uint16_t(this->read_buffer_[offset - 2]) | (uint16_t(this->read_buffer_[offset - 1]) << 8);
+//
+//      if (computed_crc != remote_crc) {
+//        ESP_LOGW(TAG, "CRC Check failed! computed %02X != remote %02X", computed_crc, remote_crc);
+//        return;
+//      }
 
       // обработка данных с валидных пакетов
       switch (this->read_buffer_[4]) {
@@ -124,7 +124,7 @@ namespace esphome {
 
     void Mercury1::dump_config() {
       ESP_LOGCONFIG(TAG, "Mercury v1:");
-      ESP_LOGCONFIG(TAG, "Address %d", this->address_);
+      ESP_LOGCONFIG(TAG, "  Address %d", ((uint32_t) (this->address_[3] | (this->address_[2] << 8) | (this->address_[1] << 16) | (this->address_[0] << 24))));
       LOG_UPDATE_INTERVAL(this);
       LOG_SENSOR("", "Voltage", this->voltage_sensor_);
       LOG_SENSOR("", "Amperage", this->amperage_sensor_);

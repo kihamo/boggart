@@ -31,7 +31,12 @@ namespace esphome {
         void set_tariff4_sensor(sensor::Sensor *tariff4_sensor) { tariff4_sensor_ = tariff4_sensor; }
         void set_tariffs_total_sensor(sensor::Sensor *tariffs_total_sensor) { tariffs_total_sensor_ = tariffs_total_sensor; }
 
-        void set_address(int32_t address) { address_ = address; }
+        void set_address(uint32_t address) {
+            address_[0] = address >> 24; // TODO: 0x00 для модели 200, если вбили не правильное число
+            address_[1] = address >> 16;
+            address_[2] = address >> 8;
+            address_[3] = address;
+        }
 
       protected:
         sensor::Sensor *voltage_sensor_;
@@ -43,8 +48,7 @@ namespace esphome {
         sensor::Sensor *tariff4_sensor_;
         sensor::Sensor *tariffs_total_sensor_;
 
-        uint32_t address_;
-
+        uint8_t address_[4];
         uint8_t read_buffer_[MERCURY1_READ_BUFFER_SIZE]{};
 
         double V, A, W;
@@ -62,10 +66,7 @@ namespace esphome {
         void clean_uart_buffer();
 
         void packet_generate(unsigned char* packet, unsigned char cmd) {
-          packet[0] = 0x00;
-          packet[1] = this->address_ >> 16;
-          packet[2] = this->address_ >> 8;
-          packet[3] = this->address_;
+          memcpy(packet, this->address_, sizeof(this->address_));
           packet[4] = cmd;
           auto crc = this->crc16(packet, 5);
           packet[5] = crc >> 0;
