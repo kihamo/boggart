@@ -21,8 +21,6 @@ namespace esphome {
     }
 
     void Mercury1::read_from_uart() {
-      // ESP_LOGV(TAG, "Read from UART start");
-
       memset(this->read_buffer_, 0, MERCURY1_READ_BUFFER_SIZE);
       int offset = 0;
 
@@ -47,29 +45,96 @@ namespace esphome {
         return;
       }
 
-      // проверяем что адреса запроса и ответа совпадают
-      if(memcmp(this->read_buffer_, this->address_, 4) != 0) { // включительно, чтобы пропускать пакеты на отсылку команд
-        ESP_LOGW(TAG, "Response first bytes isn't %s, is %s (raw %s)", hexencode(this->address_, 4).c_str(), hexencode(this->read_buffer_, 4).c_str(), hexencode(this->read_buffer_, offset).c_str());
-        return;
-      }
-
-      // игнорируем пакеты с некорректной контрольной суммой, так как в эфире бывает дичь из обрывков пакетов
-//      uint16_t computed_crc = this->crc16(this->read_buffer_, offset - 2);
-//      uint16_t remote_crc = uint16_t(this->read_buffer_[offset - 2]) | (uint16_t(this->read_buffer_[offset - 1]) << 8);
-//
-//      if (computed_crc != remote_crc) {
-//        ESP_LOGW(TAG, "CRC Check failed! computed %02X != remote %02X", computed_crc, remote_crc);
-//        return;
-//      }
-
       // обработка данных с валидных пакетов
-      switch (this->read_buffer_[4]) {
-        case Command::READ_POWER_COUNTERS:
-            // ADDR-CMD-count*4-CRC
-            this->T1 = this->to_long<4>(&this->read_buffer_[5]) * 10;
-            this->T2 = this->to_long<4>(&this->read_buffer_[9]) * 10;
-            this->T3 = this->to_long<4>(&this->read_buffer_[13]) * 10;
-            this->T4 = this->to_long<4>(&this->read_buffer_[17]) * 10;
+      // TODO: на 206 счетчике с таймингами что-то не то и ответы склеиваются, поэтому вычитываем все
+      uint8_t len = sizeof(this->read_buffer_);
+
+      for (uint8_t i = 0, begin = 0; i < len; begin = i) {
+        memset(this->packet_buffer_, 0, MERCURY1_READ_BUFFER_SIZE);
+
+        // --- process address ---
+        if (i + MERCURY1_FIELD_ADDRESS_LENGTH > len) { // не достаточно длины для чтения адреса
+          break;
+        }
+
+        memcpy(this->packet_buffer_, this->read_buffer_ + i, MERCURY1_FIELD_ADDRESS_LENGTH);
+
+        // проверяем что адреса запроса и ответа совпадают
+        if(memcmp(this->packet_buffer_, this->address_, MERCURY1_FIELD_ADDRESS_LENGTH) != 0) { // включительно, чтобы пропускать пакеты на отсылку команд
+          ESP_LOGW(TAG, "Response first bytes isn't %s is %s", hexencode(this->address_, MERCURY1_FIELD_ADDRESS_LENGTH).c_str(), hexencode(this->packet_buffer_, MERCURY1_FIELD_ADDRESS_LENGTH).c_str());
+          return;
+        }
+
+        // ADDR +4
+        i += MERCURY1_FIELD_ADDRESS_LENGTH;
+
+        // --- process command ---
+        if (i + MERCURY1_FIELD_COMMAND_LENGTH > len) { // не достаточно длины для чтения команды
+          break;
+        }
+
+        memcpy(this->packet_buffer_ + (i - begin), this->read_buffer_ + i, MERCURY1_FIELD_COMMAND_LENGTH);
+
+        uint8_t cmd = this->read_buffer_[i];
+        // CMD +1
+        i += MERCURY1_FIELD_COMMAND_LENGTH;
+
+        // --- process data ---
+        uint8_t data_len = 0;
+        uint8_t data_index = i;
+
+        switch (cmd) {
+            case Command::READ_POWER_COUNTERS:
+              // T1(4)-T2(4)-T3(4)-T4(4)
+              data_len = 4 * 4;
+              break;
+
+            case Command::READ_PARAMS_CURRENT:
+              // V(2)-I(2)-P(3)
+              data_len = 2 + 2 + 3;
+              break;
+        }
+
+        if (data_len == 0) {
+            ESP_LOGW(TAG, "Unknown response command 0x%02X", cmd);
+            continue;
+        }
+
+        if (i + data_len > len) { // не достаточно длины для чтения данных
+          break;
+        }
+
+        memcpy(this->packet_buffer_ + (i - begin), this->read_buffer_ + i, data_len);
+
+        // DATA
+        i += data_len;
+
+        // --- process crc ---
+        if (i + MERCURY1_FIELD_CRC_LENGTH > len) { // не достаточно длины для контрольных данных
+          break;
+        }
+
+        // игнорируем пакеты с некорректной контрольной суммой, так как в эфире бывает дичь из обрывков пакетов
+        uint16_t computed_crc = this->crc16(this->packet_buffer_, i - begin);
+        uint16_t remote_crc = uint16_t(this->read_buffer_[i]) | (uint16_t(this->read_buffer_[i+1]) << 8);
+
+        if (computed_crc != remote_crc) {
+          ESP_LOGW(TAG, "CRC Check failed! computed %02X != remote %02X", computed_crc, remote_crc);
+          return;
+        }
+
+        i += MERCURY1_FIELD_CRC_LENGTH;
+
+        // --- debug ----
+        ESP_LOGV(TAG, "Found valid packet %s", hexencode(this->packet_buffer_, i - begin).c_str());
+
+        // --- update sensors ---
+        switch (cmd) {
+          case Command::READ_POWER_COUNTERS:
+            this->T1 = this->to_long<4>(&this->read_buffer_[data_index]) * 10;
+            this->T2 = this->to_long<4>(&this->read_buffer_[data_index+4]) * 10;
+            this->T3 = this->to_long<4>(&this->read_buffer_[data_index+8]) * 10;
+            this->T4 = this->to_long<4>(&this->read_buffer_[data_index+12]) * 10;
             this->TTotal = this->T1 +this->T2 + this->T3 + this->T4;
 
             this->tariff1_sensor_->publish_state(this->T1);
@@ -79,20 +144,16 @@ namespace esphome {
             this->tariffs_total_sensor_->publish_state(this->TTotal);
           break;
 
-        case Command::READ_PARAMS_CURRENT:
-            // ADDR-CMD-V-I-P-CRC
-            this->V = this->to_long(&this->read_buffer_[5]) / 10;
-            this->A = this->to_long(&this->read_buffer_[7]) / 100;
-            this->W = this->to_long<3>(&this->read_buffer_[9]);
+          case Command::READ_PARAMS_CURRENT:
+            this->V = this->to_long(&this->read_buffer_[data_index]) / 10;
+            this->A = this->to_long(&this->read_buffer_[data_index+2]) / 100;
+            this->W = this->to_long<3>(&this->read_buffer_[data_index+4]);
 
             this->voltage_sensor_->publish_state(this->V);
             this->amperage_sensor_->publish_state(this->A);
             this->power_sensor_->publish_state(this->W);
           break;
-
-        default:
-            ESP_LOGW(TAG, "Unknown response command 0x%02X", this->read_buffer_[4]);
-          break;
+        }
       }
     }
 
@@ -105,6 +166,7 @@ namespace esphome {
     void Mercury1::update() {
       ESP_LOGV(TAG, "Send READ_POWER_COUNTERS %s", hexencode(read_power_counters_request_, MERCURY1_READ_REQUEST_SIZE).c_str());
       this->write_array(read_power_counters_request_, MERCURY1_READ_REQUEST_SIZE);
+      this->flush();
 
       delay(MERCURY1_WAIT_AFTER_SEND_REQUEST);
 
@@ -114,6 +176,7 @@ namespace esphome {
 
       ESP_LOGV(TAG, "Send READ_PARAMS_CURRENT %s", hexencode(read_params_current_request_, MERCURY1_READ_REQUEST_SIZE).c_str());
       this->write_array(read_params_current_request_, MERCURY1_READ_REQUEST_SIZE);
+      this->flush();
 
       delay(MERCURY1_WAIT_AFTER_SEND_REQUEST);
 

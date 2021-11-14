@@ -9,6 +9,10 @@
 #define MERCURY1_WAIT_AFTER_SEND_REQUEST 30
 #define MERCURY1_WAIT_AFTER_READ_RESPONSE 100
 
+#define MERCURY1_FIELD_ADDRESS_LENGTH 4
+#define MERCURY1_FIELD_COMMAND_LENGTH 1
+#define MERCURY1_FIELD_CRC_LENGTH 2
+
 namespace esphome {
   namespace mercury1 {
     class Mercury1 : public PollingComponent, public uart::UARTDevice {
@@ -48,8 +52,9 @@ namespace esphome {
         sensor::Sensor *tariff4_sensor_;
         sensor::Sensor *tariffs_total_sensor_;
 
-        uint8_t address_[4];
+        uint8_t address_[MERCURY1_FIELD_ADDRESS_LENGTH];
         uint8_t read_buffer_[MERCURY1_READ_BUFFER_SIZE]{};
+        uint8_t packet_buffer_[MERCURY1_READ_BUFFER_SIZE]{};
 
         double V, A, W;
         double T1, T2, T3, T4, TTotal;
@@ -66,9 +71,9 @@ namespace esphome {
         void clean_uart_buffer();
 
         void packet_generate(unsigned char* packet, unsigned char cmd) {
-          memcpy(packet, this->address_, sizeof(this->address_));
+          memcpy(packet, this->address_, MERCURY1_FIELD_ADDRESS_LENGTH);
           packet[4] = cmd;
-          auto crc = this->crc16(packet, 5);
+          auto crc = this->crc16(packet, MERCURY1_FIELD_ADDRESS_LENGTH + MERCURY1_FIELD_COMMAND_LENGTH);
           packet[5] = crc >> 0;
           packet[6] = crc >> 8;
         }
