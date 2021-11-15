@@ -48,15 +48,19 @@ stream_server:
   port: 1234
 
 sensor:
+  - platform: total_daily_energy
+    name: "Total Daily Energy"
+    power_id: "power"
   - platform: mercury1
-    address: !secret device_009_mercury_address # последние 6 цифр для модели 200
-    update_interval: 30s
+    address: !secret device_009_mercury_address
+    update_interval: 60s
     voltage:
       name: "Voltage"
     amperage:
       name: "Amperage"
     power:
       name: "Power"
+      id: "power"
     tariff1:
       name: "Tariff 1"
     tariff2:
