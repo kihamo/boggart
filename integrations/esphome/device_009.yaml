@@ -72,6 +72,36 @@ sensor:
     tariffs_total:
       name: "Tariffs total"
 
+  - platform: template
+    name: "Altitude"
+    lambda: |-
+      const float STANDARD_SEA_LEVEL_PRESSURE = 1013.25; //in hPa, see note
+      return ((id(temperature).state + 273.15) / 0.0065) *
+        (powf((STANDARD_SEA_LEVEL_PRESSURE / id(pressure).state), 0.190234) - 1); // in meter
+    update_interval: 60s
+    icon: 'mdi:signal'
+    unit_of_measurement: 'm'
+  - platform: template
+    name: "Absolute Humidity"
+    lambda: |-
+      const float mw = 18.01534;    // molar mass of water g/mol
+      const float r = 8.31447215;   // Universal gas constant J/mol/K
+      return (6.112 * powf(2.718281828, (17.67 * id(temperature).state) /
+        (id(temperature).state + 243.5)) * id(humidity).state * mw) /
+        ((273.15 + id(temperature).state) * r); // in grams/m^3
+    accuracy_decimals: 2
+    update_interval: 60s
+    icon: 'mdi:water'
+    unit_of_measurement: 'g/m³'
+  - platform: template
+    name: "Dew Point"
+    lambda: |-
+      return (243.04*(log(id(humidity).state/100)+((17.625*id(temperature).state)/
+      (243.04+id(temperature).state)))/(17.625-log(id(humidity).state/100)-
+      ((17.625*id(temperature).state)/(243.04+id(temperature).state))));
+    unit_of_measurement: °C
+    icon: 'mdi:thermometer-alert'
+
   - platform: bme280
     address: 0x76
     update_interval: 60s
