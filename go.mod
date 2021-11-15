@@ -64,6 +64,7 @@ require (
 	cloud.google.com/go v0.55.0 // indirect
 	cloud.google.com/go/firestore v1.2.0 // indirect
 	cloud.google.com/go/storage v1.6.0 // indirect
+	code.cloudfoundry.org/clock v1.0.0 // indirect
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/Masterminds/goutils v1.1.0 // indirect
 	github.com/Masterminds/semver/v3 v3.1.0 // indirect
@@ -80,13 +81,8 @@ require (
 	github.com/bugsnag/osext v0.0.0-20130617224835-0dd3f918b21b // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/chai2010/gettext-go v0.0.0-20200323094640-79c7d7df857f // indirect
-	github.com/cyberdelia/templates v0.0.0-20141128023046-ca7fffd4298c // indirect
 	github.com/deckarep/golang-set v1.7.1 // indirect
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
-	github.com/getkin/kin-openapi v0.61.0 // indirect
 	github.com/getsentry/sentry-go v0.10.0 // indirect
-	github.com/ghodss/yaml v1.0.0 // indirect
-	github.com/go-chi/chi/v5 v5.0.0 // indirect
 	github.com/go-openapi/analysis v0.19.10 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.19.3 // indirect
@@ -99,7 +95,6 @@ require (
 	github.com/google/go-cmp v0.4.0 // indirect
 	github.com/google/uuid v1.1.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.0.5 // indirect
-	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0 // indirect
 	github.com/hajimehoshi/go-mp3 v0.1.1 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
@@ -114,13 +109,11 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0 // indirect
 	github.com/justinas/alice v1.2.0 // indirect
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
+	github.com/kihamo/go-workers v2.1.7+incompatible // indirect
 	github.com/kihamo/gotypes v0.0.0-20161225095921-c1b2b85a41fe // indirect
-	github.com/labstack/echo/v4 v4.2.1 // indirect
-	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
 	github.com/markbates/goth v1.63.0 // indirect
-	github.com/matryer/moq v0.0.0-20190312154309-6cfb0558e1bd // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/mattn/kinako v0.0.0-20170717041458-332c0a7e205a // indirect
@@ -136,8 +129,6 @@ require (
 	github.com/rubenv/sql-migrate v0.0.0-20200212082348-64f95ea68aa3 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
-	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasttemplate v1.2.1 // indirect
 	go.mongodb.org/mongo-driver v1.3.4 // indirect
 	go.opencensus.io v0.22.3 // indirect
 	go.uber.org/atomic v1.6.0 // indirect
