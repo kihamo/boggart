@@ -50,27 +50,36 @@ stream_server:
 sensor:
   - platform: total_daily_energy
     name: "Total Daily Energy"
+    icon: "mdi:current-ac"
     power_id: "power"
   - platform: mercury1
     address: !secret device_009_mercury_address
     update_interval: 60s
     voltage:
       name: "Voltage"
+      icon: "mdi:flash"
     amperage:
       name: "Amperage"
+      icon: "mdi:flash"
     power:
       name: "Power"
       id: "power"
+      icon: "mdi:flash"
     tariff1:
       name: "Tariff 1"
+      icon: "mdi:flash"
     tariff2:
       name: "Tariff 2"
+      icon: "mdi:flash"
     tariff3:
       name: "Tariff 3"
+      icon: "mdi:flash"
     tariff4:
       name: "Tariff 4"
+      icon: "mdi:flash"
     tariffs_total:
       name: "Tariffs total"
+      icon: "mdi:flash"
 
   - platform: template
     name: "Altitude"
@@ -79,7 +88,7 @@ sensor:
       return ((id(temperature).state + 273.15) / 0.0065) *
         (powf((STANDARD_SEA_LEVEL_PRESSURE / id(pressure).state), 0.190234) - 1); // in meter
     update_interval: 60s
-    icon: 'mdi:signal'
+    icon: 'mdi:ruler'
     unit_of_measurement: 'm'
   - platform: template
     name: "Absolute Humidity"
@@ -91,7 +100,7 @@ sensor:
         ((273.15 + id(temperature).state) * r); // in grams/m^3
     accuracy_decimals: 2
     update_interval: 60s
-    icon: 'mdi:water'
+    icon: 'mdi:water-percent'
     unit_of_measurement: 'g/m³'
   - platform: template
     name: "Dew Point"
@@ -100,7 +109,7 @@ sensor:
       (243.04+id(temperature).state)))/(17.625-log(id(humidity).state/100)-
       ((17.625*id(temperature).state)/(243.04+id(temperature).state))));
     unit_of_measurement: °C
-    icon: 'mdi:thermometer-alert'
+    icon: 'mdi:temperature'
 
   - platform: bme280
     address: 0x76
@@ -108,19 +117,23 @@ sensor:
     temperature:
       id: temperature
       name: "Temperature"
+      icon: "mdi:temperature"
       oversampling: 16x
       filters:
         - offset: -2.9
     pressure:
       id: pressure
       name: "Pressure"
+      icon: "mdi:pressure"
     humidity:
       id: humidity
       name: "Humidity"
+      icon: "mdi:humidity"
 
 binary_sensor:
   - platform: gpio
     id: "door"
     name: "Entrance door"
+    icon: "mdi:door"
     pin:
       number: GPIO27

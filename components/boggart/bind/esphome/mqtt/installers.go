@@ -195,70 +195,58 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 }
 
 func OpenHabIconConverter(icon, def string) string {
-	switch icon {
-	//case "mdi:axis-arrow":
-	//case "mdi:axis-x-arrow":
-	//case "mdi:axis-y-arrow":
-	//case "mdi:axis-z-arrow":
-	//case "mdi:arrow-expand-vertical":
-	case "mdi:battery":
-		return "battery"
-	case "mdi:briefcase-download":
-		return "returnpipe"
-	case "mdi:bug":
-		return "status"
-		//case "mdi:check-circle-outline":
-		//case "mdi:chemical-weapon":
-		//case "mdi:counter":
-	case "mdi:current-ac":
-		return "line"
-	case "mdi:flash":
-		return "energy"
-	case "mdi:flask-outline":
-		return "sewerage"
-	case "mdi:flower":
-		return "lawnmower"
-	case "mdi:gas-cylinder":
-		return "gas"
-	case "mdi:gauge":
-		return "pressure"
-	case "mdi:brightness-5", "mdi:lightbulb":
-		return "light"
-		//case "mdi:magnet":
-	case "mdi:molecule-co2":
-		return "carbondioxide"
-	case "mdi:motion-sensor":
-		return "motion"
-		// case "mdi:new-box":
-		// case "mdi:percent":
-	case "mdi:restart", "mdi:power":
-		return "switch"
-		// case "mdi:pulse":
-	case "mdi:radiator":
-		return "radiator"
-		// case "mdi:rotate-right":
-	case "mdi:ruler", "mdi:scale":
-		return "niveau"
-	case "mdi:screen-rotation":
-		return "screen"
-		// case "mdi:sign-direction":
-	case "mdi:signal-distance-variant", "mdi:signal":
-		return "qualityofservice"
-	case "mdi:thermometer":
-		return "temperature"
-	case "mdi:timelapse", "mdi:timer-outline":
-		return "time"
-	case "mdi:water-percent":
-		return "humidity"
-	case "mdi:weather-sunset", "mdi:weather-sunset-down", "mdi:weather-sunset-up":
-		return "sunset"
-	case "mdi:weather-windy":
-		return "wind"
-	case "mdi:wifi":
-		return "network"
+	const MaterialDesignPrefix = "mdi:"
 
-		// OpenHab default icons
-		// https://github.com/eclipse-archived/smarthome/tree/master/extensions/ui/iconset/org.eclipse.smarthome.ui.iconset.classic/icons
+	if strings.HasPrefix(icon, MaterialDesignPrefix) {
+		icon = strings.TrimPrefix(icon, MaterialDesignPrefix)
+
+		switch icon {
+		case "briefcase-download":
+			return "returnpipe"
+		case "bug":
+			return "status"
+		case "current-ac":
+			return "line"
+		case "flash":
+			return "energy"
+		case "flask-outline":
+			return "sewerage"
+		case "flower":
+			return "lawnmower"
+		case "gas-cylinder":
+			return "gas"
+		case "gauge":
+			return "pressure"
+		case "brightness-5", "lightbulb":
+			return "light"
+		case "molecule-co2":
+			return "carbondioxide"
+		case "motion-sensor":
+			return "motion"
+		case "restart", "power":
+			return "switch"
+		case "ruler", "scale":
+			return "niveau"
+		case "screen-rotation":
+			return "screen"
+		case "signal-distance-variant", "signal":
+			return "qualityofservice"
+		case "timelapse", "timer-outline":
+			return "time"
+		case "water-percent":
+			return "humidity"
+		case "weather-sunset", "weather-sunset-down", "weather-sunset-up":
+			return "sunset"
+		case "weather-windy":
+			return "wind"
+		case "wifi":
+			return "network"
+		}
+	}
+
+	switch icon {
+	// OpenHab default icons
+	// https://github.com/eclipse-archived/smarthome/tree/master/extensions/ui/iconset/org.eclipse.smarthome.ui.iconset.classic/icons
 	case "alarm", "attic",
 
 		"baby_1", "baby_2", "baby_3", "baby_4", "baby_5", "baby_6", "bath", "battery", "battery-0", "battery-10",
