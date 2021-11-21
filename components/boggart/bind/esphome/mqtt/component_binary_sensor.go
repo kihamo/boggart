@@ -9,10 +9,6 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
-const (
-	DeviceClassConnectivity = "connectivity"
-)
-
 type ComponentBinarySensor struct {
 	*componentBase
 

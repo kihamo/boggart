@@ -1,3 +1,4 @@
 ---
 platform: status
 name: "Status"
+icon: "mdi:connection"

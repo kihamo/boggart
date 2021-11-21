@@ -9,8 +9,6 @@ type Type struct{}
 
 func (t Type) CreateBind() boggart.Bind {
 	return &Bind{
-		ip:                     atomic.NewValue(),
-		ipSubscriber:           atomic.NewBool(),
-		connectivitySubscriber: atomic.NewBool(),
+		ip: atomic.NewValue(),
 	}
 }

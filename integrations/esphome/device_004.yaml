@@ -31,6 +31,7 @@ binary_sensor:
   - platform: gpio
     id: "door"
     name: "Entrance door"
+    device_class: "door"
     pin:
       number: GPIO4
       mode: INPUT_PULLUP
@@ -53,6 +54,7 @@ sensor:
     unit_of_measurement: '°C'
     accuracy_decimals: 0
     icon: "mdi:thermometer"
+    device_class: "temperature"
 
   - platform: esp32_hall
     id: "hall"

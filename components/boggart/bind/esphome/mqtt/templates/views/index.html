@@ -18,7 +18,7 @@
                     </thead>
                     <tbody>
                         {{ range $component := .components }}
-                        <tr>
+                        <tr{{ if kindIs "invalid" $component.State }} class="danger"{{ end }}>
                             <td>{{ $component.ID }}</td>
                             <td>{{ $component.Type }}</td>
                             <td>{{ $component.EntityCategory }}</td>

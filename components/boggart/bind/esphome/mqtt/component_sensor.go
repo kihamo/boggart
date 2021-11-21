@@ -12,10 +12,11 @@ import (
 
 // https://github.com/esphome/esphome/blob/2021.11.1/esphome/components/mqtt/mqtt_sensor.cpp#L45
 type ComponentSensorData struct {
-	DeviceClass       string  `json:"device_class"`
+	DeviceClass       *string `json:"device_class,omitempty"`
 	UnitOfMeasurement *string `json:"unit_of_measurement,omitempty"`
 	ExpireAfter       *uint32 `json:"expire_after,omitempty"`
 	ForceUpdate       *bool   `json:"force_update,omitempty"`
+	StateClass        *string `json:"state_class,omitempty"`
 }
 
 type ComponentSensor struct {
@@ -76,12 +77,24 @@ func (c *ComponentSensor) SetState(message mqtt.Message) error {
 }
 
 func (c *ComponentSensor) DeviceClass() string {
-	return c.data.DeviceClass
+	if c.data.DeviceClass != nil {
+		return *c.data.DeviceClass
+	}
+
+	return ""
 }
 
 func (c *ComponentSensor) UnitOfMeasurement() string {
 	if c.data.UnitOfMeasurement != nil {
 		return *c.data.UnitOfMeasurement
+	}
+
+	return ""
+}
+
+func (c *ComponentSensor) StateClass() string {
+	if c.data.StateClass != nil {
+		return *c.data.StateClass
 	}
 
 	return ""

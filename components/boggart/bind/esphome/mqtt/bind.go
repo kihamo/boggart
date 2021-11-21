@@ -1,13 +1,11 @@
 package mqtt
 
 import (
-	"context"
 	"net"
 	"sync"
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/di"
-	"github.com/kihamo/boggart/components/mqtt"
 )
 
 type Bind struct {
@@ -20,12 +18,9 @@ type Bind struct {
 	di.WidgetBind
 	di.WorkersBind
 
-	components             sync.Map
-	status                 atomic.BoolNull
-	connectivitySubscriber *atomic.Bool
-
-	ip           *atomic.Value
-	ipSubscriber *atomic.Bool
+	components sync.Map
+	status     atomic.BoolNull
+	ip         *atomic.Value
 }
 
 func (b *Bind) config() *Config {
@@ -34,8 +29,6 @@ func (b *Bind) config() *Config {
 
 func (b *Bind) Run() error {
 	b.status.Nil()
-	b.ipSubscriber.False()
-	b.connectivitySubscriber.False()
 
 	return nil
 }
@@ -72,9 +65,20 @@ func (b *Bind) IP() net.IP {
 	return nil
 }
 
+func (b *Bind) delete(id string) {
+	if item, ok := b.components.Load(id); ok {
+		if cmp, ok := item.(Component); ok {
+			b.MQTT().Unsubscribe(cmp.Subscribers()...)
+		}
+	}
+
+	b.components.Delete(id)
+}
+
 func (b *Bind) register(component Component) (err error) {
+	// overwrite component
 	if _, ok := b.components.Load(component.UniqueID()); ok {
-		return nil
+		b.delete(component.UniqueID())
 	}
 
 	b.components.Store(component.UniqueID(), component)
@@ -83,11 +87,5 @@ func (b *Bind) register(component Component) (err error) {
 		b.Meta().SetMAC(mac)
 	}
 
-	if topic := component.StateTopic(); topic != "" {
-		b.MQTT().Subscribe(mqtt.NewSubscriber(topic, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-			return component.SetState(message)
-		}))
-	}
-
-	return err
+	return b.MQTT().Subscribe(component.Subscribers()...)
 }

@@ -1,4 +1,5 @@
 ---
 switch:
 - !include ./switch/restart.yaml
+- !include ./switch/safe_mode.yaml
 - !include ./switch/shutdown.yaml

@@ -73,26 +73,21 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return err
 			}
 
-			if cfg.IPAddressSensorID == id && b.ipSubscriber.IsFalse() {
-				b.MQTT().Subscribe(mqtt.NewSubscriber(component.StateTopic(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+			component.Subscribe(mqtt.NewSubscriber(component.StateTopic(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+				if cfg.IPAddressSensorID == id {
 					b.ip.Store(net.ParseIP(message.String()))
-					return nil
-				}))
+				}
 
-				b.ipSubscriber.True()
-			}
+				if err := component.SetState(message); err != nil {
+					return err
+				}
 
-			if cmp, ok := component.(*ComponentBinarySensor); ok && cmp.DeviceClass() == DeviceClassConnectivity && cmp.StateTopic() != "" && b.connectivitySubscriber.IsFalse() {
-				b.connectivitySubscriber.True()
-				b.MQTT().Subscribe(mqtt.NewSubscriber(component.StateTopic(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-					if err := cmp.SetState(message); err != nil {
-						return err
-					}
-
+				if cmp, ok := component.(*ComponentBinarySensor); ok && cmp.DeviceClass() == DeviceClassConnectivity && cmp.StateTopic() != "" {
 					b.status.Set(cmp.State().(bool))
-					return nil
-				}))
-			}
+				}
+
+				return nil
+			}))
 
 			return b.register(component)
 		}),

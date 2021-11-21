@@ -43,16 +43,18 @@ type componentBase struct {
 		DeviceInfo          DeviceInfo `json:"device"`
 	}
 
-	id      string
-	typ     ComponentType
-	message mqtt.Message
+	id            string
+	typ           ComponentType
+	configMessage mqtt.Message
+	subscribers   []mqtt.Subscriber
 }
 
 func newComponentBase(id string, t ComponentType, message mqtt.Message) *componentBase {
 	return &componentBase{
-		id:      id,
-		typ:     t,
-		message: message,
+		id:            id,
+		typ:           t,
+		configMessage: message,
+		subscribers:   make([]mqtt.Subscriber, 0, 3),
 	}
 }
 
@@ -85,7 +87,7 @@ func (c *componentBase) Icon() string {
 }
 
 func (c *componentBase) ConfigMessage() mqtt.Message {
-	return c.message
+	return c.configMessage
 }
 
 func (c *componentBase) StateTopic() mqtt.Topic {
@@ -106,4 +108,12 @@ func (c *componentBase) DeviceInfo() DeviceInfo {
 
 func (c *componentBase) CommandToPayload(cmd interface{}) interface{} {
 	return cmd
+}
+
+func (c *componentBase) Subscribe(subscribers ...mqtt.Subscriber) {
+	c.subscribers = append(c.subscribers, subscribers...)
+}
+
+func (c *componentBase) Subscribers() []mqtt.Subscriber {
+	return c.subscribers
 }

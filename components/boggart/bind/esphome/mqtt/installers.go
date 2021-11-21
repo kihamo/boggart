@@ -35,13 +35,16 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 				item    *openhab.Item
 			)
 
-			if cmp, ok := component.(*ComponentBinarySensor); ok && cmp.PayloadOn() != "" && cmp.PayloadOff() != "" {
+			cmp := component.(*ComponentBinarySensor)
+			defIcon := IconByDeviceClassConverter(cmp.DeviceClass(), "contact")
+
+			if cmp.PayloadOn() != "" && cmp.PayloadOff() != "" {
 				channel = openhab.NewChannel(id, openhab.ChannelTypeContact).
 					WithOn(cmp.PayloadOn()).
 					WithOff(cmp.PayloadOff())
 
 				item = openhab.NewItem(itemPrefix+id, openhab.ItemTypeContact).
-					WithIcon(OpenHabIconConverter(component.Icon(), "contact"))
+					WithIcon(OpenHabIconConverter(component.Icon(), defIcon))
 			} else if component.CommandTopic() == "" {
 				// если switch не управляемый переводим его в режим readonly
 				channel = openhab.NewChannel(id, openhab.ChannelTypeContact).
@@ -49,14 +52,14 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 					WithOff("OFF")
 
 				item = openhab.NewItem(itemPrefix+id, openhab.ItemTypeContact).
-					WithIcon(OpenHabIconConverter(component.Icon(), "contact"))
+					WithIcon(OpenHabIconConverter(component.Icon(), defIcon))
 			} else {
 				channel = openhab.NewChannel(id, openhab.ChannelTypeSwitch).
 					WithOn("ON").
 					WithOff("OFF")
 
 				item = openhab.NewItem(itemPrefix+id, openhab.ItemTypeSwitch).
-					WithIcon(OpenHabIconConverter(component.Icon(), "contact"))
+					WithIcon(OpenHabIconConverter(component.Icon(), defIcon))
 			}
 
 			channels = append(channels,
@@ -70,16 +73,15 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 
 		case ComponentTypeSensor:
 			label := strings.Title(component.Name())
+			cmp := component.(*ComponentSensor)
 
-			if cmp, ok := component.(*ComponentSensor); ok {
-				label += " [%." + strconv.FormatUint(cmp.AccuracyDecimals(), 10) + "f"
+			label += " [%." + strconv.FormatUint(cmp.AccuracyDecimals(), 10) + "f"
 
-				if unit := cmp.UnitOfMeasurement(); unit != "" {
-					label += " " + strings.ReplaceAll(unit, "%", "%%")
-				}
-
-				label += "]"
+			if unit := cmp.UnitOfMeasurement(); unit != "" {
+				label += " " + strings.ReplaceAll(unit, "%", "%%")
 			}
+
+			label += "]"
 
 			channels = append(channels,
 				openhab.NewChannel(id, openhab.ChannelTypeNumber).
@@ -88,7 +90,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 					AddItems(
 						openhab.NewItem(itemPrefix+id, openhab.ItemTypeNumber).
 							WithLabel(label).
-							WithIcon(OpenHabIconConverter(component.Icon(), "")),
+							WithIcon(OpenHabIconConverter(component.Icon(), IconByDeviceClassConverter(cmp.DeviceClass(), ""))),
 					),
 			)
 
@@ -194,6 +196,56 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 	return openhab.StepsByBind(b, nil, channels...)
 }
 
+func IconByDeviceClassConverter(class, def string) string {
+	switch class {
+	case DeviceClassBatteryCharging:
+		return "battery"
+	case DeviceClassCold:
+		return "climate-on"
+	case DeviceClassConnectivity, DeviceClassSignalStrength:
+		return "qualityofservice"
+	case DeviceClassGarageDoor:
+		return "garagedoor"
+	case DeviceClassHeat:
+		return "fire"
+	case DeviceClassMoisture:
+		return "water"
+	case DeviceClassMoving:
+		return "movecontrol"
+	case DeviceClassOpening:
+		return "contact-open"
+	case DeviceClassPlug:
+		return "poweroutlet_eu"
+	case DeviceClassProblem:
+		return "error"
+	case DeviceClassSafety:
+		return "shield"
+	case DeviceClassSound:
+		return "soundvolume"
+	case DeviceClassUpdate:
+		return "returnpipe"
+	case DeviceClassCarbonDioxide, DeviceClassCarbonMonoxide:
+		return "carbondioxide"
+	case DeviceClassCurrent, DeviceClassPower, DeviceClassVoltage:
+		return "energy"
+	case DeviceClassIlluminance:
+		return "sun"
+	case DeviceClassOzone:
+		return "wind"
+	case DeviceClassDate:
+		return "calendar"
+	case DeviceClassTimestamp:
+		return "time"
+
+	case DeviceClassDoor, DeviceClassLight, DeviceClassLock, DeviceClassMotion, DeviceClassPresence,
+		DeviceClassSmoke, DeviceClassWindow, DeviceClassEmpty, DeviceClassBattery, DeviceClassQas, DeviceClassEnergy,
+		DeviceClassHumidity, DeviceClassPressure, DeviceClassTemperature:
+		return class
+	}
+
+	return def
+}
+
 func OpenHabIconConverter(icon, def string) string {
 	const MaterialDesignPrefix = "mdi:"
 
@@ -207,6 +259,8 @@ func OpenHabIconConverter(icon, def string) string {
 			return "status"
 		case "current-ac":
 			return "line"
+		case "connection":
+			return "switch"
 		case "flash":
 			return "energy"
 		case "flask-outline":
@@ -223,13 +277,17 @@ func OpenHabIconConverter(icon, def string) string {
 			return "carbondioxide"
 		case "motion-sensor":
 			return "motion"
-		case "restart", "power":
+		case "new-box":
+			return "text"
+		case "restart", "power", "restart-alert":
 			return "switch"
+		case "power-off":
+			return "switch-off"
 		case "ruler", "scale":
 			return "niveau"
 		case "screen-rotation":
 			return "screen"
-		case "signal-distance-variant", "signal":
+		case "signal", "signal-variant", "signal-distance-variant":
 			return "qualityofservice"
 		case "timelapse", "timer-outline":
 			return "time"

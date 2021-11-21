@@ -3,3 +3,4 @@ platform: wifi_signal
 id: "wifi_state"
 name: "WiFi Signal"
 update_interval: 60s
+icon: "mdi:signal-distance-variant"
