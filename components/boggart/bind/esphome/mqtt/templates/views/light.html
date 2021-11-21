@@ -25,74 +25,103 @@
                                 <div class="">
                                     <label>
                                         <input type="checkbox" class="js-switch" name="state"
-                                               id="state" {{ if eq $state.String "ON" }} checked{{ end }} />
+                                               id="state" {{ if eq $state.State "ON" }} checked{{ end }} />
                                     </label>
                                 </div>
                             </div>
                         </div>
-                    {{ if .component.ColorModes.IsBrightness }}
+                        {{ if esphome_mqtt_is_allow_light_state_field .component.ColorModes "color-mode"  }}
+                        <div class="item form-group">
+                            <label for="color-mode" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                {{ i18n "Color mode" . }}
+                            </label>
+                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                <select id="color-mode" name="color-mode" class="form-control select2">
+                                    {{ range $mode := .component.ColorModes }}
+                                    <option value="{{ $mode }}"{{ if eq $mode (pointer $state.ColorMode) }} selected="selected"{{ end }}>{{ i18n $mode $ }}</option>
+                                    {{ end }}
+                                </select>
+                            </div>
+                        </div>
+                        {{ end }}
+                        {{ if esphome_mqtt_is_allow_light_state_field .component.ColorModes "brightness"  }}
                         <div class="item form-group">
                             <label for="brightness" class="control-label col-md-3 col-sm-3 col-xs-12">
                             {{ i18n "Brightness" . }}
                             </label>
                             <div class="col-md-6 col-sm-6 col-xs-12">
                                 <input type="range" min="0" max="255" step="1" class="form-control" id="brightness"
-                                       name="brightness" value="{{ $state.Brightness }}" />
+                                       name="brightness" value="{{ pointer $state.Brightness }}" />
                             </div>
                         </div>
-                    {{ end }}
-                    {{ if .component.ColorModes.IsRGB }}
+                        {{ end }}
+                        {{ if esphome_mqtt_is_allow_light_state_field .component.ColorModes "red"  }}
                         <div class="item form-group">
                             <label for="red" class="control-label col-md-3 col-sm-3 col-xs-12">
                             {{ i18n "Red" . }}
                             </label>
                             <div class="col-md-6 col-sm-6 col-xs-12">
                                 <input type="range" min="0" max="255" step="1" class="form-control" id="red" name="red"
-                                       value="{{ $state.Color.Red }}" />
+                                       value="{{ pointer $state.Color.Red }}" />
                             </div>
                         </div>
+                        {{ end }}
+                        {{ if esphome_mqtt_is_allow_light_state_field .component.ColorModes "green"  }}
                         <div class="item form-group">
                             <label for="green" class="control-label col-md-3 col-sm-3 col-xs-12">
                             {{ i18n "Green" . }}
                             </label>
                             <div class="col-md-6 col-sm-6 col-xs-12">
                                 <input type="range" min="0" max="255" step="1" class="form-control" id="green" name="green"
-                                       value="{{ $state.Color.Green }}" />
+                                       value="{{ pointer $state.Color.Green }}" />
                             </div>
                         </div>
+                        {{ end }}
+                        {{ if esphome_mqtt_is_allow_light_state_field .component.ColorModes "blue"  }}
                         <div class="item form-group">
                             <label for="blue" class="control-label col-md-3 col-sm-3 col-xs-12">
                             {{ i18n "Blue" . }}
                             </label>
                             <div class="col-md-6 col-sm-6 col-xs-12">
                                 <input type="range" min="0" max="255" step="1" class="form-control" id="blue" name="blue"
-                                       value="{{ $state.Color.Blue }}" />
+                                       value="{{ pointer $state.Color.Blue }}" />
                             </div>
                         </div>
-                    {{ end }}
-                    {{ if .component.ColorModes.IsWhite }}
+                        {{ end }}
+                        {{ if esphome_mqtt_is_allow_light_state_field .component.ColorModes "white"  }}
                         <div class="item form-group">
                             <label for="white" class="control-label col-md-3 col-sm-3 col-xs-12">
                             {{ i18n "White" . }}
                             </label>
                             <div class="col-md-6 col-sm-6 col-xs-12">
                                 <input type="range" min="0" max="255" step="1" class="form-control" id="white" name="white"
-                                       value="{{ $state.White }}" />
+                                       value="{{ pointer $state.Color.White }}" />
                             </div>
                         </div>
-                    {{ end }}
-                    {{ if .component.ColorModes.IsColorTemperature }}
+                        {{ end }}
+                        {{ if esphome_mqtt_is_allow_light_state_field .component.ColorModes "cold-white"  }}
+                        <div class="item form-group">
+                            <label for="cold-white" class="control-label col-md-3 col-sm-3 col-xs-12">
+                            {{ i18n "Cold white" . }}
+                            </label>
+                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                <input type="range" min="0" max="255" step="1" class="form-control" id="cold-white" name="cold-white"
+                                       value="{{ pointer $state.Color.ColdWhite }}" />
+                            </div>
+                        </div>
+                        {{ end }}
+                        {{ if esphome_mqtt_is_allow_light_state_field .component.ColorModes "color-temperature"  }}
                         <div class="item form-group">
                             <label for="color-temperature" class="control-label col-md-3 col-sm-3 col-xs-12">
                             {{ i18n "Color temperature" . }}
                             </label>
                             <div class="col-md-6 col-sm-6 col-xs-12">
                                 <input type="range" min="0" max="255" step="1" class="form-control" id="color-temperature"
-                                       name="color-temperature" value="{{ $state.ColorTemperature }}" />
+                                       name="color-temperature" value="{{ pointer $state.ColorTemperature }}" />
                             </div>
                         </div>
-                    {{ end }}
-                    {{ if and (.component.Effect) (ne (len .component.EffectList) 0) }}
+                        {{ end }}
+                        {{ if ne (len .component.EffectList) 0 }}
                         <div class="item form-group">
                             <label for="effect" class="control-label col-md-3 col-sm-3 col-xs-12">
                             {{ i18n "Effect" . }}
@@ -100,11 +129,12 @@
                             <div class="col-md-6 col-sm-6 col-xs-12">
                                 <select id="effect" name="effect" class="form-control select2">
                                 {{ range $effect := .component.EffectList }}
-                                    <option value="{{ $effect }}"{{ if eq $effect $state.Effect }} selected="selected"{{ end }}>{{ i18n $effect $ }}</option>
+                                    <option value="{{ $effect }}"{{ if eq $effect (pointer $state.Effect) }} selected="selected"{{ end }}>{{ i18n $effect $ }}</option>
                                 {{ end }}
                                 </select>
                             </div>
                         </div>
+                        {{ end }}
                         <div class="item form-group">
                             <label for="flash-length" class="control-label col-md-3 col-sm-3 col-xs-12">
                             {{ i18n "Flash duration" . }}
@@ -121,7 +151,6 @@
                                 <input type="text" class="form-control" id="transition-length" name="transition-length" value="0s" />
                             </div>
                         </div>
-                    {{ end }}
                         <div class="ln_solid"></div>
                         <div class="form-group">
                             <div class="col-md-6 col-md-offset-3">

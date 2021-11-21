@@ -96,3 +96,7 @@ type Component interface {
 	Subscribe(subscribers ...mqtt.Subscriber)
 	Subscribers() []mqtt.Subscriber
 }
+
+type HasStateRaw interface {
+	StateRaw() string
+}

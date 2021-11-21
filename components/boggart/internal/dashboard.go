@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/components/boggart"
@@ -140,10 +141,39 @@ func (c *Component) DashboardMiddleware() []func(http.Handler) http.Handler {
 }
 
 func (c *Component) DashboardTemplateFunctions() map[string]interface{} {
-	return template.FuncMap{
+	funcMap := template.FuncMap{
 		"human_bytes": templateFunctionHumanBytes,
 		"widget_url":  templateFunctionWidgetURL,
 	}
+
+	for prefix, t := range boggart.GetBindTypes() {
+		buf := strings.Builder{}
+		for i, r := range prefix {
+			switch {
+			case r == '_':
+				buf.WriteRune(r)
+			case i == 0 && !unicode.IsLetter(r):
+				buf.WriteString("_")
+			case !unicode.IsLetter(r) && !unicode.IsDigit(r):
+				buf.WriteString("_")
+			default:
+				buf.WriteRune(r)
+			}
+		}
+		prefix = buf.String()
+
+		if cmp, ok := t.Type().(dashboard.HasTemplateFunctions); ok {
+			for alias, f := range cmp.DashboardTemplateFunctions() {
+				alias = prefix + "_" + alias
+
+				if _, ok := funcMap[alias]; !ok {
+					funcMap[alias] = f
+				}
+			}
+		}
+	}
+
+	return funcMap
 }
 
 func templateFunctionHumanBytes(size interface{}) string {

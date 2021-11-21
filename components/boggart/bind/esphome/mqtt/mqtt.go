@@ -73,21 +73,23 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				return err
 			}
 
-			component.Subscribe(mqtt.NewSubscriber(component.StateTopic(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-				if cfg.IPAddressSensorID == id {
-					b.ip.Store(net.ParseIP(message.String()))
-				}
+			if t := component.StateTopic(); t != "" {
+				component.Subscribe(mqtt.NewSubscriber(component.StateTopic(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+					if cfg.IPAddressSensorID == id {
+						b.ip.Store(net.ParseIP(message.String()))
+					}
 
-				if err := component.SetState(message); err != nil {
-					return err
-				}
+					if err := component.SetState(message); err != nil {
+						return err
+					}
 
-				if cmp, ok := component.(*ComponentBinarySensor); ok && cmp.DeviceClass() == DeviceClassConnectivity && cmp.StateTopic() != "" {
-					b.status.Set(cmp.State().(bool))
-				}
+					if cmp, ok := component.(*ComponentBinarySensor); ok && cmp.DeviceClass() == DeviceClassConnectivity && cmp.StateTopic() != "" {
+						b.status.Set(cmp.State().(bool))
+					}
 
-				return nil
-			}))
+					return nil
+				}))
+			}
 
 			return b.register(component)
 		}),

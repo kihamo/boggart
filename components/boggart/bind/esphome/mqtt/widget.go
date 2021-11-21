@@ -2,7 +2,7 @@ package mqtt
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -13,9 +13,9 @@ import (
 )
 
 func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
-	q := r.URL().Query()
+	action := r.URL().Query().Get("action")
 
-	switch q.Get("action") {
+	switch action {
 	case "component":
 		b.handleComponent(w, r)
 
@@ -25,8 +25,8 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	case "delete":
 		b.handleDelete(w, r)
 
-	case "config":
-		b.handleConfig(w, r)
+	case "config", "state":
+		b.handleDump(w, r, action)
 
 	default:
 		b.handleIndex(w, r)
@@ -83,63 +83,75 @@ func (b *Bind) handleComponentLight(w http.ResponseWriter, r *dashboard.Request,
 					continue
 				}
 
-				switch key {
-				case "state":
-					command.SetState(value[0] == "on")
-				case "brightness":
-					if val, e := strconv.ParseUint(value[0], 10, 64); e == nil {
-						// command.Brightness = val
-						fmt.Println(val)
-					} else {
-						err = e
-					}
-				case "red":
-					if val, e := strconv.ParseUint(value[0], 10, 64); e == nil {
-						command.Color.Red = val
-					} else {
-						err = e
-					}
-				case "green":
-					if val, e := strconv.ParseUint(value[0], 10, 64); e == nil {
-						command.Color.Green = val
-					} else {
-						err = e
-					}
-				case "blue":
-					if val, e := strconv.ParseUint(value[0], 10, 64); e == nil {
-						command.Color.Blue = val
-					} else {
-						err = e
-					}
-				case "white":
-					if val, e := strconv.ParseUint(value[0], 10, 64); e == nil {
-						// command.White = val
-						fmt.Println(val)
-					} else {
-						err = e
-					}
-				case "color-temperature":
-					if val, e := strconv.ParseUint(value[0], 10, 64); e == nil {
-						command.ColorTemperature = val
-					} else {
-						err = e
-					}
-				case "effect":
-					command.Effect = value[0]
-				case "flash-length":
-					if val, e := time.ParseDuration(value[0]); e == nil {
-						if val > 0 {
-							command.Flash = uint64(val.Seconds())
+				if IsAllowLightStateField(component.ColorModes(), key) {
+					switch key {
+					case "state":
+						command.SetState(value[0] == "on")
+					case "color-mode":
+						command.SetColorMode(value[0])
+					case "brightness":
+						if val, e := strconv.ParseUint(value[0], 10, 64); e == nil {
+							command.SetBrightness(val)
+						} else {
+							err = e
 						}
-					} else {
-						err = e
+					case "red":
+						if val, e := strconv.ParseUint(value[0], 10, 64); e == nil {
+							command.SetRed(val)
+						} else {
+							err = e
+						}
+					case "green":
+						if val, e := strconv.ParseUint(value[0], 10, 64); e == nil {
+							command.SetGreen(val)
+						} else {
+							err = e
+						}
+					case "blue":
+						if val, e := strconv.ParseUint(value[0], 10, 64); e == nil {
+							command.SetBlue(val)
+						} else {
+							err = e
+						}
+					case "white":
+						if val, e := strconv.ParseUint(value[0], 10, 64); e == nil {
+							command.SetWhite(val)
+						} else {
+							err = e
+						}
+					case "cold-white":
+						if val, e := strconv.ParseUint(value[0], 10, 64); e == nil {
+							command.SetColdWhite(val)
+						} else {
+							err = e
+						}
+					case "color-temperature":
+						if val, e := strconv.ParseUint(value[0], 10, 64); e == nil {
+							command.SetColorTemperature(val)
+						} else {
+							err = e
+						}
+					case "effect":
+						if len(component.EffectList()) > 0 {
+							command.SetEffect(value[0])
+						} else {
+							err = errors.New("effect " + value[0] + " not exists")
+						}
+					case "flash-length":
+						if val, e := time.ParseDuration(value[0]); e == nil {
+							command.SetFlash(val)
+						} else {
+							err = e
+						}
+					case "transition-length":
+						if val, e := time.ParseDuration(value[0]); e == nil {
+							command.SetTransition(val)
+						} else {
+							err = e
+						}
 					}
-				case "transition-length":
-					if val, e := time.ParseDuration(value[0]); e == nil {
-						command.Transition = uint64(val.Seconds())
-					} else {
-						err = e
-					}
+				} else {
+					err = errors.New("field \"" + key + "\" not allowed")
 				}
 
 				if err != nil {
@@ -257,7 +269,7 @@ func (b *Bind) handleDelete(w *dashboard.Response, r *dashboard.Request) {
 	widget.Redirect(redirectURL.String(), http.StatusFound, w, r)
 }
 
-func (b *Bind) handleConfig(w *dashboard.Response, r *dashboard.Request) {
+func (b *Bind) handleDump(w *dashboard.Response, r *dashboard.Request, entity string) {
 	widget := b.Widget()
 
 	componentID := r.URL().Query().Get("id")
@@ -272,21 +284,40 @@ func (b *Bind) handleConfig(w *dashboard.Response, r *dashboard.Request) {
 		return
 	}
 
-	var v interface{}
+	var dump string
 
-	if err := component.ConfigMessage().JSONUnmarshal(&v); err != nil {
-		widget.InternalError(w, r, err)
+	switch entity {
+	case "config":
+		var v interface{}
+
+		if err := component.ConfigMessage().JSONUnmarshal(&v); err != nil {
+			widget.InternalError(w, r, err)
+			return
+		}
+
+		output, err := json.MarshalIndent(v, "", "  ")
+		if err != nil {
+			widget.InternalError(w, r, err)
+			return
+		}
+
+		dump = string(output)
+
+	case "state":
+		if cmp, ok := component.(HasStateRaw); ok {
+			dump = cmp.StateRaw()
+		} else {
+			widget.NotFound(w, r)
+			return
+		}
+
+	default:
+		widget.NotFound(w, r)
 		return
 	}
 
-	output, err := json.MarshalIndent(v, "", "  ")
-	if err != nil {
-		widget.InternalError(w, r, err)
-		return
-	}
-
-	b.Widget().RenderLayout(r.Context(), "config", "simple", map[string]interface{}{
-		"json":  string(output),
+	b.Widget().RenderLayout(r.Context(), "dump", "simple", map[string]interface{}{
+		"dump":  dump,
 		"modal": true,
 	})
 }

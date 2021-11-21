@@ -23,10 +23,18 @@
                             <td>{{ $component.Type }}</td>
                             <td>{{ $component.EntityCategory }}</td>
                             <td>{{ $component.Name }}</td>
-                            <td>{{ $component.StateFormat }}</td>
+                            <td>
+                                {{ if eq $component.Type.String "light" }}
+                                <a href="javascript:void(0)" class="btn btn-success btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Component raw state #{{ $component.ID }}" data-modal-url="{{ $.Request.URL.Path }}?action=state&id={{ $component.ID }}">
+                                    <i class="glyphicon glyphicon-saved" title="{{ i18n "Show raw state" $ }}"></i>
+                                </a>
+                                {{ end }}
+
+                                {{ $component.StateFormat }}
+                            </td>
                             <td class="btn-group text-right" role="group">
                                 <a href="javascript:void(0)" class="btn btn-success btn-icon btn-xs" data-toggle="modal" data-target="#modal" data-modal-title="Component config #{{ $component.ID }}" data-modal-url="{{ $.Request.URL.Path }}?action=config&id={{ $component.ID }}">
-                                    <i class="glyphicon glyphicon-cog" title="{{ i18n "Show config" $ }}"></i>
+                                    <i class="glyphicon glyphicon-saved" title="{{ i18n "Show config" $ }}"></i>
                                 </a>
 
                                 {{ if or (ne $component.CommandTopic.String "") (eq $component.ID $.Bind.Config.IPAddressSensorID) }}
