@@ -18,3 +18,4 @@ mqtt:
   broker: !secret home_mqtt_broker
   username: !secret home_mqtt_user
   password: !secret home_mqtt_pssword
+  use_abbreviations: false

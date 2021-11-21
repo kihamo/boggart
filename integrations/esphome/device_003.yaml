@@ -5,31 +5,31 @@ substitutions:
   node_name: !secret device_003_node_name
   ip_address: !secret device_003_ip_address
 
-<<: !include ./_includes/common.yaml
-<<: !include ./_includes/wifi/home.yaml
+packages:
+  common: !include ./_includes/common.yaml
+  wifi: !include ./_includes/wifi/home.yaml
+  binary_sensor: !include ./_includes/binary_sensor.yaml
+  sensor: !include ./_includes/sensor.yaml
+  switch: !include ./_includes/switch.yaml
+  text_sensor: !include ./_includes/text_sensor.yaml
+  time: !include ./_includes/time.yaml
 
 esphome:
-  name: ${node_name}
-  platform: ESP8266
-  board: esp8285
   comment: !secret device_003_comment
-  build_path: ./builds/${node_name}
 
-<<: !include ./_includes/sensor.yaml
-<<: !include ./_includes/text_sensor.yaml
+esp8266:
+  board: esp8285
 
 switch:
-  - !include ./_includes/switch/restart.yaml
-  - !include ./_includes/switch/shutdown.yaml
   - platform: gpio
     pin: GPIO05
     id: "relay"
     name: "Power relay"
     restore_mode: ALWAYS_ON
     on_turn_on:
-    - switch.turn_off: led_blue
+      - switch.turn_off: led_blue
     on_turn_off:
-    - switch.turn_on: led_blue
+      - switch.turn_on: led_blue
   - platform: gpio
     pin: GPIO04
     inverted: true
@@ -37,7 +37,6 @@ switch:
     name: "LED blue"
 
 binary_sensor:
-  - !include ./_includes/binary_sensor/status.yaml
   - platform: gpio
     pin:
       number: GPIO13
@@ -47,4 +46,4 @@ binary_sensor:
     name: "Hardware button"
     internal: true
     on_press:
-    - switch.toggle: relay
+      - switch.toggle: relay

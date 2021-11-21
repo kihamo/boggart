@@ -2,49 +2,49 @@ substitutions:
   node_name: !secret device_002_node_name
   ip_address: !secret device_002_ip_address
 
-<<: !include ./_includes/common.yaml
-<<: !include ./_includes/wifi/home.yaml
+packages:
+  common: !include ./_includes/common.yaml
+  wifi: !include ./_includes/wifi/home.yaml
+  binary_sensor: !include ./_includes/binary_sensor.yaml
+  sensor: !include ./_includes/sensor.yaml
+  switch: !include ./_includes/switch.yaml
+  text_sensor: !include ./_includes/text_sensor.yaml
+  time: !include ./_includes/time.yaml
 
 esphome:
-  name: ${node_name}
-  platform: ESP8266
-  board: esp01_1m
   comment: !secret device_002_comment
-  build_path: ./builds/${node_name}
   on_shutdown:
     then:
-    - output.turn_off: led_blue
-    - output.turn_off: led_green
-    - output.turn_off: led_red
-    - output.turn_off: led_white1
-    - output.turn_off: led_white2
+      - output.turn_off: led_blue
+      - output.turn_off: led_green
+      - output.turn_off: led_red
+      - output.turn_off: led_white1
+      - output.turn_off: led_white2
 
-<<: !include ./_includes/text_sensor.yaml
+esp8266:
+  board: esp01_1m
 
 binary_sensor:
-- !include _includes/binary_sensor/status.yaml
-- platform: gpio
-  id: "switcher_trash"
-  name: "Trash reed switch"
-  pin:
-    number: GPIO3
-    mode: INPUT_PULLUP
-  filters:
-    - delayed_on: 10ms
-    - delayed_off: 10ms
-  on_press:
-    - light.turn_on: light_trash
-  on_release:
-    - light.turn_off: light_trash
+  - platform: gpio
+    id: "switcher_trash"
+    name: "Trash reed switch"
+    pin:
+      number: GPIO3
+      mode: INPUT_PULLUP
+    filters:
+      - delayed_on: 10ms
+      - delayed_off: 10ms
+    on_press:
+      - light.turn_on: light_trash
+    on_release:
+      - light.turn_off: light_trash
 
 sensor:
-- !include _includes/sensor/wifi_signal.yaml
-- !include _includes/sensor/uptime.yaml
-- platform: adc
-  update_interval: 60s
-  pin: A0
-  id: "voltage"
-  name: "ADC Voltage"
+  - platform: adc
+    update_interval: 60s
+    pin: A0
+    id: "voltage"
+    name: "ADC Voltage"
 
 output:
   - platform: esp8266_pwm
@@ -80,7 +80,7 @@ light:
     output: led_blue
     default_transition_length: 0.5s
     effects:
-    - flicker:
+      - flicker:
   - platform: monochromatic
     name: "Bar light"
     id: "led_bar"
@@ -88,8 +88,6 @@ light:
     default_transition_length: 0.5s
 
 switch:
-  - !include ./_includes/switch/restart.yaml
-  - !include ./_includes/switch/shutdown.yaml
   - platform: template
     name: "Kitchen light"
     id: switcher_kitchen

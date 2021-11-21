@@ -2,66 +2,62 @@ substitutions:
   node_name: !secret device_004_node_name
   ip_address: !secret device_004_ip_address
 
-<<: !include ./_includes/common.yaml
-<<: !include ./_includes/wifi/home.yaml
+packages:
+  common: !include ./_includes/common.yaml
+  wifi: !include ./_includes/wifi/home.yaml
+  binary_sensor: !include ./_includes/binary_sensor.yaml
+  sensor: !include ./_includes/sensor.yaml
+  switch: !include ./_includes/switch.yaml
+  text_sensor: !include ./_includes/text_sensor.yaml
+  time: !include ./_includes/time.yaml
 
 esphome:
-  name: ${node_name}
-  platform: ESP32
-  board: nodemcu-32s
   comment: !secret device_004_comment
-  build_path: ./builds/${node_name}
 
-<<: !include ./_includes/switch.yaml
-<<: !include ./_includes/text_sensor.yaml
-<<: !include ./_includes/time.yaml
+esp32:
+  board: nodemcu-32s
 
 dallas:
-- pin: GPIO32
+  - pin: GPIO32
 
 binary_sensor:
-- !include ./_includes/binary_sensor/status.yaml
+  - platform: gpio
+    id: "aquastorozh_alarm"
+    name: "Aquastorozh alarm"
+    pin:
+      number: GPIO23
+      mode: INPUT_PULLUP
 
-- platform: gpio
-  id: "aquastorozh_alarm"
-  name: "Aquastorozh alarm"
-  pin:
-    number: GPIO23
-    mode: INPUT_PULLUP
+  - platform: gpio
+    id: "door"
+    name: "Entrance door"
+    pin:
+      number: GPIO4
+      mode: INPUT_PULLUP
 
-- platform: gpio
-  id: "door"
-  name: "Entrance door"
-  pin:
-    number: GPIO4
-    mode: INPUT_PULLUP
-
-- platform: template
-  id: kettle_mode
-  name: "Kettle Mode"
+  - platform: template
+    id: kettle_mode
+    name: "Kettle Mode"
 
 sensor:
-- !include ./_includes/sensor/wifi_signal.yaml
-- !include ./_includes/sensor/uptime.yaml
+  - platform: dallas
+    address: 0xA0000003AF354D28
+    name: "Water cold"
+  - platform: dallas
+    address: 0xC9000003AF6CB128
+    name: "Water hot"
 
-- platform: dallas
-  address: 0xA0000003AF354D28
-  name: "Water cold"
-- platform: dallas
-  address: 0xC9000003AF6CB128
-  name: "Water hot"
+  - platform: template
+    id: kettle_temp
+    name: "Kettle Temp"
+    unit_of_measurement: '°C'
+    accuracy_decimals: 0
+    icon: "mdi:thermometer"
 
-- platform: template
-  id: kettle_temp
-  name: "Kettle Temp"
-  unit_of_measurement: '°C'
-  accuracy_decimals: 0
-  icon: "mdi:thermometer"
-
-- platform: esp32_hall
-  id: "hall"
-  name: "ESP32 Hall Sensor"
-  update_interval: 60s
+  - platform: esp32_hall
+    id: "hall"
+    name: "ESP32 Hall Sensor"
+    update_interval: 60s
 
 #- platform: xiaomi_miscale
 #  mac_address: !secret device_004_xiaomi_miscale_mac
@@ -73,71 +69,68 @@ sensor:
 #    name: "Scale Impedance"
 
 switch:
-- !include ./_includes/switch/restart.yaml
-- !include ./_includes/switch/shutdown.yaml
+  - platform: gpio
+    id: "aquastorozh_enabled"
+    pin:
+      number: GPIO19
+      mode: OUTPUT
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      then:
+        - delay: 100ms
+        - switch.turn_off: aquastorozh_enabled
+    internal: true
+  - platform: gpio
+    id: "aquastorozh_disable"
+    pin:
+      number: GPIO21
+      mode: OUTPUT
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      then:
+        - delay: 100ms
+        - switch.turn_off: aquastorozh_disable
+    internal: true
+  - platform: template
+    id: "aquastorozh"
+    name: "Aquastorozh on/off"
+    turn_on_action:
+      - switch.turn_on: aquastorozh_enabled
+    turn_off_action:
+      - switch.turn_on: aquastorozh_disable
 
-- platform: gpio
-  id: "aquastorozh_enabled"
-  pin:
-    number: GPIO19
-    mode: OUTPUT
-  restore_mode: RESTORE_DEFAULT_OFF
-  on_turn_on:
-    then:
-    - delay: 100ms
-    - switch.turn_off: aquastorozh_enabled
-  internal: true
-- platform: gpio
-  id: "aquastorozh_disable"
-  pin:
-    number: GPIO21
-    mode: OUTPUT
-  restore_mode: RESTORE_DEFAULT_OFF
-  on_turn_on:
-    then:
-    - delay: 100ms
-    - switch.turn_off: aquastorozh_disable
-  internal: true
-- platform: template
-  id: "aquastorozh"
-  name: "Aquastorozh on/off"
-  turn_on_action:
-  - switch.turn_on: aquastorozh_enabled
-  turn_off_action:
-  - switch.turn_on: aquastorozh_disable
-
-- platform: gpio
-  id: "relay_in_1"
-  name: "Relay input 1"
-  pin:
-    number: GPIO27
-    mode: OUTPUT
-    inverted: true
-  restore_mode: RESTORE_DEFAULT_OFF
-- platform: gpio
-  id: "relay_in_2"
-  name: "Relay input 2"
-  pin:
-    number: GPIO26
-    mode: OUTPUT
-    inverted: true
-  restore_mode: RESTORE_DEFAULT_OFF
-- platform: gpio
-  id: "relay_in_3"
-  name: "Relay input 3"
-  pin:
-    number: GPIO25
-    mode: OUTPUT
-    inverted: true
-  restore_mode: RESTORE_DEFAULT_OFF
-- platform: gpio
-  id: "relay_in_4"
-  name: "Relay input 4"
-  pin:
-    number: GPIO33
-    mode: OUTPUT
-    inverted: true
-  restore_mode: RESTORE_DEFAULT_OFF
+  - platform: gpio
+    id: "relay_in_1"
+    name: "Relay input 1"
+    pin:
+      number: GPIO27
+      mode: OUTPUT
+      inverted: true
+    restore_mode: RESTORE_DEFAULT_OFF
+  - platform: gpio
+    id: "relay_in_2"
+    name: "Relay input 2"
+    pin:
+      number: GPIO26
+      mode: OUTPUT
+      inverted: true
+    restore_mode: RESTORE_DEFAULT_OFF
+  - platform: gpio
+    id: "relay_in_3"
+    name: "Relay input 3"
+    pin:
+      number: GPIO25
+      mode: OUTPUT
+      inverted: true
+    restore_mode: RESTORE_DEFAULT_OFF
+  - platform: gpio
+    id: "relay_in_4"
+    name: "Relay input 4"
+    pin:
+      number: GPIO33
+      mode: OUTPUT
+      inverted: true
+    restore_mode: RESTORE_DEFAULT_OFF
 
 #
 # BLE
