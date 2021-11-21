@@ -160,8 +160,7 @@ func (b *Bind) handleComponentLight(w http.ResponseWriter, r *dashboard.Request,
 				}
 			}
 
-			ctx := r.Context()
-			err := b.MQTT().PublishRawWithoutCache(ctx, component.CommandTopic(), 1, false, component.CommandToPayload(command))
+			err = b.MQTT().PublishRawWithoutCache(ctx, component.CommandTopic(), 1, false, component.CommandToPayload(command))
 
 			if err != nil {
 				widget.FlashError(r, err, "")
