@@ -22,16 +22,17 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 	subscribers := []mqtt.Subscriber{
 		mqtt.NewSubscriber(cfg.TopicDiscoveryPrefix+"/+/"+cfg.TopicPrefix+"/+/config", 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-			// компонент удаляют, поэтому пришла пустота на которую реагировать не надо
-			if len(message.Payload()) == 0 {
-				return nil
-			}
-
 			var component Component
 
 			parts := message.Topic().Split()
 			t := ComponentType(parts[len(parts)-4])
 			id := parts[len(parts)-2]
+
+			// компонент удаляют, поэтому пришла пустота на которую реагировать не надо
+			if len(message.Payload()) == 0 {
+				b.delete(id)
+				return nil
+			}
 
 			switch t {
 			case ComponentTypeBinarySensor:
@@ -75,6 +76,10 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			if t := component.StateTopic(); t != "" {
 				component.Subscribe(mqtt.NewSubscriber(component.StateTopic(), 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+					if len(message.Payload()) == 0 {
+						return nil
+					}
+
 					if cfg.IPAddressSensorID == id {
 						b.ip.Store(net.ParseIP(message.String()))
 					}

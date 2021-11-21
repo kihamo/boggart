@@ -20,7 +20,6 @@ type Config struct {
 	WillMessage           string        `mapstructure:"will_message" yaml:"will_message"`
 	IPAddressSensorID     string        `mapstructure:"ip_address_sensor_id" yaml:"ip_address_sensor_id"`
 	ImportMetricsInterval time.Duration `mapstructure:"import_metrics_interval" yaml:"import_metrics_interval"`
-	UseAbbreviations      bool          `mapstructure:"use_abbreviations" yaml:"use_abbreviations"`
 }
 
 func (t Type) ConfigDefaults() interface{} {
@@ -35,6 +34,5 @@ func (t Type) ConfigDefaults() interface{} {
 		BirthMessage:          "online",
 		WillMessage:           "offline",
 		ImportMetricsInterval: time.Minute,
-		UseAbbreviations:      false,
 	}
 }

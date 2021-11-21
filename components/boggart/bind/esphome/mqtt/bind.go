@@ -70,6 +70,10 @@ func (b *Bind) delete(id string) {
 		if cmp, ok := item.(Component); ok {
 			b.MQTT().Unsubscribe(cmp.Subscribers()...)
 		}
+
+		b.Logger().Debugf("Remove exist component %s", id)
+	} else {
+		b.Logger().Debugf("Remove component %s", id)
 	}
 
 	b.components.Delete(id)
@@ -82,6 +86,7 @@ func (b *Bind) register(component Component) (err error) {
 	}
 
 	b.components.Store(component.UniqueID(), component)
+	b.Logger().Debugf("Register component %s", component.UniqueID())
 
 	if mac := component.DeviceInfo().MAC(); mac != nil {
 		b.Meta().SetMAC(mac)
