@@ -30,7 +30,7 @@
                                 </div>
                             </div>
                         </div>
-                    {{ if .component.Brightness }}
+                    {{ if .component.ColorModes.IsBrightness }}
                         <div class="item form-group">
                             <label for="brightness" class="control-label col-md-3 col-sm-3 col-xs-12">
                             {{ i18n "Brightness" . }}
@@ -41,7 +41,7 @@
                             </div>
                         </div>
                     {{ end }}
-                    {{ if .component.RGB }}
+                    {{ if .component.ColorModes.IsRGB }}
                         <div class="item form-group">
                             <label for="red" class="control-label col-md-3 col-sm-3 col-xs-12">
                             {{ i18n "Red" . }}
@@ -70,7 +70,7 @@
                             </div>
                         </div>
                     {{ end }}
-                    {{ if .component.White }}
+                    {{ if .component.ColorModes.IsWhite }}
                         <div class="item form-group">
                             <label for="white" class="control-label col-md-3 col-sm-3 col-xs-12">
                             {{ i18n "White" . }}
@@ -81,7 +81,7 @@
                             </div>
                         </div>
                     {{ end }}
-                    {{ if .component.ColorTemperature }}
+                    {{ if .component.ColorModes.IsColorTemperature }}
                         <div class="item form-group">
                             <label for="color-temperature" class="control-label col-md-3 col-sm-3 col-xs-12">
                             {{ i18n "Color temperature" . }}

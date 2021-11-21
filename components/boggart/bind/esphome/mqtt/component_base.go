@@ -7,7 +7,7 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
-type Device struct {
+type DeviceInfo struct {
 	Identifiers     string `json:"identifiers"`
 	Name            string `json:"name"`
 	SoftwareVersion string `json:"sw_version"`
@@ -15,7 +15,7 @@ type Device struct {
 	Manufacturer    string `json:"manufacturer"`
 }
 
-func (d Device) MAC() (mac net.HardwareAddr) {
+func (d DeviceInfo) MAC() (mac net.HardwareAddr) {
 	id := d.Identifiers
 
 	for i := 2; i < len(id); i += 3 {
@@ -27,29 +27,32 @@ func (d Device) MAC() (mac net.HardwareAddr) {
 	return mac
 }
 
+// https://github.com/esphome/esphome/blob/2021.11.1/esphome/components/mqtt/mqtt_component.cpp#L54
 type componentBase struct {
 	data struct {
-		Icon                string     `json:"icon"`
 		Name                string     `json:"name"`
+		EnabledByDefault    bool       `json:"enabled_by_default"`
+		Icon                string     `json:"icon"`
+		EntityCategory      string     `json:"entity_category"`
 		StateTopic          mqtt.Topic `json:"state_topic"`
 		CommandTopic        mqtt.Topic `json:"command_topic"`
 		AvailabilityTopic   mqtt.Topic `json:"availability_topic"`
 		PayloadAvailable    string     `json:"payload_available"`
 		PayloadNotAvailable string     `json:"payload_not_available"`
 		UniqueID            string     `json:"unique_id"`
-		Device              Device     `json:"device"`
+		DeviceInfo          DeviceInfo `json:"device"`
 	}
 
-	id             string
-	typ            ComponentType
-	discoveryTopic mqtt.Topic
+	id      string
+	typ     ComponentType
+	message mqtt.Message
 }
 
-func newComponentBase(id string, t ComponentType, discoveryTopic mqtt.Topic) *componentBase {
+func newComponentBase(id string, t ComponentType, message mqtt.Message) *componentBase {
 	return &componentBase{
-		id:             id,
-		typ:            t,
-		discoveryTopic: discoveryTopic,
+		id:      id,
+		typ:     t,
+		message: message,
 	}
 }
 
@@ -65,10 +68,6 @@ func (c *componentBase) Type() ComponentType {
 	return c.typ
 }
 
-func (c *componentBase) DiscoveryTopic() mqtt.Topic {
-	return c.discoveryTopic
-}
-
 func (c *componentBase) UniqueID() string {
 	return c.data.UniqueID
 }
@@ -77,8 +76,16 @@ func (c *componentBase) Name() string {
 	return c.data.Name
 }
 
+func (c *componentBase) EntityCategory() string {
+	return c.data.EntityCategory
+}
+
 func (c *componentBase) Icon() string {
 	return c.data.Icon
+}
+
+func (c *componentBase) ConfigMessage() mqtt.Message {
+	return c.message
 }
 
 func (c *componentBase) StateTopic() mqtt.Topic {
@@ -93,8 +100,8 @@ func (c *componentBase) AvailabilityTopic() mqtt.Topic {
 	return c.data.AvailabilityTopic
 }
 
-func (c *componentBase) Device() Device {
-	return c.data.Device
+func (c *componentBase) DeviceInfo() DeviceInfo {
+	return c.data.DeviceInfo
 }
 
 func (c *componentBase) CommandToPayload(cmd interface{}) interface{} {

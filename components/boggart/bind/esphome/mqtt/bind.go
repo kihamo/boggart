@@ -79,7 +79,7 @@ func (b *Bind) register(component Component) (err error) {
 
 	b.components.Store(component.UniqueID(), component)
 
-	if mac := component.Device().MAC(); mac != nil {
+	if mac := component.DeviceInfo().MAC(); mac != nil {
 		b.Meta().SetMAC(mac)
 	}
 

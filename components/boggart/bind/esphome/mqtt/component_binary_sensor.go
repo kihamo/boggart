@@ -16,6 +16,7 @@ const (
 type ComponentBinarySensor struct {
 	*componentBase
 
+	// https://github.com/esphome/esphome/blob/2021.11.1/esphome/components/mqtt/mqtt_binary_sensor.cpp#L32
 	data struct {
 		DeviceClass string `json:"device_class"`
 		PayloadOn   string `json:"payload_on"`
@@ -25,9 +26,9 @@ type ComponentBinarySensor struct {
 	state *atomic.BoolNull
 }
 
-func NewComponentBinarySensor(id string, discoveryTopic mqtt.Topic) *ComponentBinarySensor {
+func NewComponentBinarySensor(id string, message mqtt.Message) *ComponentBinarySensor {
 	return &ComponentBinarySensor{
-		componentBase: newComponentBase(id, ComponentTypeBinarySensor, discoveryTopic),
+		componentBase: newComponentBase(id, ComponentTypeBinarySensor, message),
 		state:         atomic.NewBoolNull(),
 	}
 }
@@ -80,10 +81,10 @@ func (c *ComponentBinarySensor) SetState(message mqtt.Message) error {
 
 	if value {
 		c.state.True()
-		metricState.With("mac", c.Device().MAC().String()).With("component", c.ID()).Set(1)
+		metricState.With("mac", c.DeviceInfo().MAC().String()).With("component", c.ID()).Set(1)
 	} else {
 		c.state.False()
-		metricState.With("mac", c.Device().MAC().String()).With("component", c.ID()).Set(0)
+		metricState.With("mac", c.DeviceInfo().MAC().String()).With("component", c.ID()).Set(0)
 	}
 
 	return nil

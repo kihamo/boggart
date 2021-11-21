@@ -29,20 +29,19 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			var component Component
 
-			topic := message.Topic()
-			parts := topic.Split()
+			parts := message.Topic().Split()
 			t := ComponentType(parts[len(parts)-4])
 			id := parts[len(parts)-2]
 
 			switch t {
 			case ComponentTypeBinarySensor:
-				component = NewComponentBinarySensor(id, topic)
+				component = NewComponentBinarySensor(id, message)
 				// case components.ComponentTypeCover.String():
 				// 	component.Type = components.ComponentTypeCover
 				// case components.ComponentTypeFan.String():
 				// 	component.Type = components.ComponentTypeFan
 			case ComponentTypeLight:
-				component = NewComponentLight(id, topic)
+				component = NewComponentLight(id, message)
 			case ComponentTypeSensor:
 				// text_sensor прикидывается обычным sensor и их надо распознать (HA просто не поддерживает такой тип)
 				// распознование очень хрупкое и основывается на проверке признаков unit_of_measurement, expire_after и
@@ -50,16 +49,16 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				var check ComponentSensorData
 				if err := message.JSONUnmarshal(&check); err == nil {
 					if check.UnitOfMeasurement != nil || check.ExpireAfter != nil || check.ForceUpdate != nil {
-						component = NewComponentSensor(id, topic)
+						component = NewComponentSensor(id, message)
 					}
 				}
 
 				if component == nil {
-					component = NewComponentDefault(id, ComponentTypeTextSensor, topic)
+					component = NewComponentDefault(id, ComponentTypeTextSensor, message)
 				}
 
 			case ComponentTypeSwitch:
-				component = NewComponentSwitch(id, topic)
+				component = NewComponentSwitch(id, message)
 				// case components.ComponentTypeTextSensor.String():
 				// 	component.Type = components.ComponentTypeTextSensor
 				// case components.ComponentTypeCamera.String():
@@ -67,7 +66,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				// case components.ComponentTypeClimate.String():
 				// 	component.Type = components.ComponentTypeClimate
 			default:
-				component = NewComponentDefault(id, t, topic)
+				component = NewComponentDefault(id, t, message)
 			}
 
 			if err := message.JSONUnmarshal(component); err != nil {

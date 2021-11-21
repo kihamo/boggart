@@ -32,10 +32,10 @@ type Component interface {
 	State() interface{}
 	StateFormat() string
 	SetState(mqtt.Message) error
-	DiscoveryTopic() mqtt.Topic
+	ConfigMessage() mqtt.Message
 	StateTopic() mqtt.Topic
 	CommandTopic() mqtt.Topic
 	AvailabilityTopic() mqtt.Topic
-	Device() Device
+	DeviceInfo() DeviceInfo
 	CommandToPayload(cmd interface{}) interface{}
 }

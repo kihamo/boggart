@@ -139,7 +139,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 			)
 
 			if cmp, ok := component.(*ComponentLight); ok {
-				if cmp.Brightness() {
+				if cmp.ColorModes().IsBrightness() {
 					const idPostfix = "Brightness"
 
 					channels = append(channels,

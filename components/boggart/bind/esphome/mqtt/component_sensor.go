@@ -10,7 +10,9 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
+// https://github.com/esphome/esphome/blob/2021.11.1/esphome/components/mqtt/mqtt_sensor.cpp#L45
 type ComponentSensorData struct {
+	DeviceClass       string  `json:"device_class"`
 	UnitOfMeasurement *string `json:"unit_of_measurement,omitempty"`
 	ExpireAfter       *uint32 `json:"expire_after,omitempty"`
 	ForceUpdate       *bool   `json:"force_update,omitempty"`
@@ -25,9 +27,9 @@ type ComponentSensor struct {
 	accuracyDecimals *atomic.Uint64
 }
 
-func NewComponentSensor(id string, discoveryTopic mqtt.Topic) *ComponentSensor {
+func NewComponentSensor(id string, message mqtt.Message) *ComponentSensor {
 	return &ComponentSensor{
-		componentBase:    newComponentBase(id, ComponentTypeSensor, discoveryTopic),
+		componentBase:    newComponentBase(id, ComponentTypeSensor, message),
 		state:            atomic.NewFloat32Null(),
 		accuracyDecimals: atomic.NewUint64(),
 	}
@@ -68,9 +70,13 @@ func (c *ComponentSensor) SetState(message mqtt.Message) error {
 	}
 
 	c.state.Set(float32(value))
-	metricState.With("mac", c.Device().MAC().String()).With("component", c.ID()).Set(value)
+	metricState.With("mac", c.DeviceInfo().MAC().String()).With("component", c.ID()).Set(value)
 
 	return nil
+}
+
+func (c *ComponentSensor) DeviceClass() string {
+	return c.data.DeviceClass
 }
 
 func (c *ComponentSensor) UnitOfMeasurement() string {

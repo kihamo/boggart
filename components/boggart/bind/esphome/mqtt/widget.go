@@ -1,6 +1,8 @@
 package mqtt
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -22,6 +24,9 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 	case "delete":
 		b.handleDelete(w, r)
+
+	case "config":
+		b.handleConfig(w, r)
 
 	default:
 		b.handleIndex(w, r)
@@ -83,7 +88,8 @@ func (b *Bind) handleComponentLight(w http.ResponseWriter, r *dashboard.Request,
 					command.SetState(value[0] == "on")
 				case "brightness":
 					if val, e := strconv.ParseUint(value[0], 10, 64); e == nil {
-						command.Brightness = val
+						// command.Brightness = val
+						fmt.Println(val)
 					} else {
 						err = e
 					}
@@ -107,7 +113,8 @@ func (b *Bind) handleComponentLight(w http.ResponseWriter, r *dashboard.Request,
 					}
 				case "white":
 					if val, e := strconv.ParseUint(value[0], 10, 64); e == nil {
-						command.White = val
+						// command.White = val
+						fmt.Println(val)
 					} else {
 						err = e
 					}
@@ -217,7 +224,7 @@ func (b *Bind) handleDelete(w *dashboard.Response, r *dashboard.Request) {
 	ctx := r.Context()
 	var isFailed bool
 
-	if topic := component.DiscoveryTopic(); topic != "" {
+	if topic := component.ConfigMessage().Topic(); topic != "" {
 		if err := b.MQTT().Delete(ctx, topic); err != nil {
 			widget.FlashError(r, "Delete topic %v failed with error %v", "", topic, err)
 			isFailed = true
@@ -248,6 +255,40 @@ func (b *Bind) handleDelete(w *dashboard.Response, r *dashboard.Request) {
 	redirectURL.RawQuery = ""
 
 	widget.Redirect(redirectURL.String(), http.StatusFound, w, r)
+}
+
+func (b *Bind) handleConfig(w *dashboard.Response, r *dashboard.Request) {
+	widget := b.Widget()
+
+	componentID := r.URL().Query().Get("id")
+	if componentID == "" {
+		widget.NotFound(w, r)
+		return
+	}
+
+	component := b.Component(componentID)
+	if component == nil {
+		widget.NotFound(w, r)
+		return
+	}
+
+	var v interface{}
+
+	if err := component.ConfigMessage().JSONUnmarshal(&v); err != nil {
+		widget.InternalError(w, r, err)
+		return
+	}
+
+	output, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		widget.InternalError(w, r, err)
+		return
+	}
+
+	b.Widget().RenderLayout(r.Context(), "config", "simple", map[string]interface{}{
+		"json":  string(output),
+		"modal": true,
+	})
 }
 
 func (b *Bind) handleIndex(_ *dashboard.Response, r *dashboard.Request) {

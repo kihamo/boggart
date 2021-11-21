@@ -9,15 +9,16 @@ import (
 )
 
 type ComponentLightState struct {
-	Effect     string `json:"effect"`
-	State      string `json:"state"`
-	Brightness uint64 `json:"brightness"`
-	Color      struct {
+	Effect    string `json:"effect"`
+	State     string `json:"state"`
+	ColorMode string `json:"color_mode"`
+	Color     struct {
 		Red   uint64 `json:"r"`
 		Green uint64 `json:"g"`
 		Blue  uint64 `json:"b"`
+		White uint64 `json:"w"`
+		Cold  uint64 `json:"c"`
 	} `json:"color"`
-	White            uint64 `json:"white_value"`
 	ColorTemperature uint64 `json:"color_temp"`
 	Flash            uint64 `json:"flash"`
 	Transition       uint64 `json:"transition"`
@@ -35,25 +36,67 @@ func (s *ComponentLightState) SetState(state bool) {
 	}
 }
 
+type ComponentLightColorModes []string
+
+func (m ComponentLightColorModes) IsMode(mode string) bool {
+	for _, m := range []string(m) {
+		if mode == m {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (m ComponentLightColorModes) IsOnOff() bool {
+	return m.IsMode("onoff")
+}
+
+func (m ComponentLightColorModes) IsBrightness() bool {
+	return m.IsMode("brightness")
+}
+
+func (m ComponentLightColorModes) IsColorTemperature() bool {
+	return m.IsMode("color_temp")
+}
+
+func (m ComponentLightColorModes) IsColdWarmWhite() bool {
+	return m.IsMode("color_temp")
+}
+
+func (m ComponentLightColorModes) IsRGB() bool {
+	return m.IsMode("rgb")
+}
+
+func (m ComponentLightColorModes) IsRGBWhite() bool {
+	return m.IsMode("rgbw")
+}
+
+func (m ComponentLightColorModes) IsRGBColorTemperature() bool {
+	return m.IsMode("rgbw")
+}
+
+func (m ComponentLightColorModes) IsRGBColdWarmWhite() bool {
+	return m.IsMode("rgbww")
+}
+
 type ComponentLight struct {
 	*componentBase
 
+	// https://github.com/esphome/esphome/blob/2021.11.1/esphome/components/mqtt/mqtt_light.cpp#L39
 	data struct {
-		Schema           string   `json:"schema"`
-		Brightness       bool     `json:"brightness"`
-		RGB              bool     `json:"rgb"`
-		ColorTemperature bool     `json:"color_temp"`
-		White            bool     `json:"white_value"`
-		Effect           bool     `json:"effect"`
-		EffectList       []string `json:"effect_list"`
+		Schema     string                   `json:"schema"`
+		ColorModes ComponentLightColorModes `json:"supported_color_modes"`
+		Effect     bool                     `json:"effect"`
+		EffectList []string                 `json:"effect_list"`
 	}
 
 	state atomic.Value
 }
 
-func NewComponentLight(id string, discoveryTopic mqtt.Topic) *ComponentLight {
+func NewComponentLight(id string, message mqtt.Message) *ComponentLight {
 	return &ComponentLight{
-		componentBase: newComponentBase(id, ComponentTypeLight, discoveryTopic),
+		componentBase: newComponentBase(id, ComponentTypeLight, message),
 	}
 }
 
@@ -111,20 +154,8 @@ func (c *ComponentLight) Schema() string {
 	return c.data.Schema
 }
 
-func (c *ComponentLight) Brightness() bool {
-	return c.data.Brightness
-}
-
-func (c *ComponentLight) RGB() bool {
-	return c.data.RGB
-}
-
-func (c *ComponentLight) ColorTemperature() bool {
-	return c.data.ColorTemperature
-}
-
-func (c *ComponentLight) White() bool {
-	return c.data.White
+func (c *ComponentLight) ColorModes() ComponentLightColorModes {
+	return c.data.ColorModes
 }
 
 func (c *ComponentLight) Effect() bool {

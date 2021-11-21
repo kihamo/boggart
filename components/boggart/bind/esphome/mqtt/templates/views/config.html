@@ -1,0 +1,48 @@
+{{ define "content" }}
+    <style type="text/css">
+        body { background: none !important }
+    </style>
+
+    <pre style="padding: 0;" class="snippet"><code class="json" id="json">{{ .json|raw }}</code></pre>
+{{ end }}
+
+{{ define "head" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/highlightjs/css/tomorrow.min.css" false) }}
+    {{ staticHTML (staticURL "/boggart/assets/vendor/clipboard.js/css/clipboard.min.css" false) }}
+{{ end }}
+
+{{ define "js" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/highlightjs/js/highlight.pack.min.js" false) }}
+    {{ staticHTML (staticURL "/boggart/assets/vendor/clipboard.js/js/clipboard.min.js" false) }}
+
+    <script type="application/javascript">
+        var cbSuccess = function(e) {
+            e.clearSelection();
+            $(e.trigger).tooltip({
+                title: '{{ i18n "Config copied" . }}'
+            }).tooltip('show');
+        };
+
+        var cbError = function(e) {
+            e.clearSelection();
+        };
+
+        $(document).ready(function () {
+            hljs.initHighlightingOnLoad();
+
+            if(ClipboardJS.isSupported()) {
+                $('.snippet').each(function(){
+                    $(this).prepend('<button class="btn" data-placement="bottom" data-clipboard-action="copy"><img class="clippy" width="13" src="/boggart/assets/vendor/clipboard.js/images/clippy.svg" alt="{{ i18n "Copy to clipboard" . }}"></button>');
+                });
+
+                var cb = new ClipboardJS('.snippet [data-clipboard-action]', {
+                    target: function(trigger) {
+                        return trigger.nextElementSibling;
+                    }
+                });
+                cb.on('success', cbSuccess);
+                cb.on('error', cbError);
+            }
+        });
+    </script>
+{{ end }}
