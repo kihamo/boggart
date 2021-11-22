@@ -1,0 +1,173 @@
+---
+
+swagger: "2.0"
+info:
+  title: "Air Quality"
+  version: "0.23.0"
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+schemes:
+  - "https"
+host: "api.waqi.info"
+basePath: "/"
+securityDefinitions:
+  APIKeyQuery:
+    type: "apiKey"
+    in: "query"
+    name: "token"
+security:
+  - APIKeyQuery: [ ]
+paths:
+  /feed/geo:{lat};{lng}/:
+    get:
+      operationId: "getGeolocalizedFeed"
+      tags:
+        - "geolocalized"
+      parameters:
+        - name: "lat"
+          in: "path"
+          description: "Latitude"
+          required: true
+          type: "number"
+        - name: "lng"
+          in: "path"
+          description: "Longitude"
+          required: true
+          type: "number"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "object"
+            properties:
+              status:
+                type: "string"
+              data:
+                $ref: "#/definitions/Data"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Error:
+    type: "object"
+    properties:
+      status:
+        type: "string"
+      message:
+        type: "string"
+  Value:
+    type: "object"
+    properties:
+      v:
+        type: "number"
+  ForecastValue:
+    type: "object"
+    properties:
+      avg:
+        type: "number"
+      day:
+        type: "string"
+        format: "date"
+      max:
+        type: "number"
+      min:
+        type: "number"
+  Data:
+    type: "object"
+    properties:
+      aqi:
+        type: "number"
+      idx:
+        type: "number"
+      attributions:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            url:
+              type: "string"
+            name:
+              type: "string"
+            logo:
+              type: "string"
+      city:
+        type: "object"
+        properties:
+          geo:
+            type: "array"
+            items:
+              type: "number"
+          name:
+            type: "string"
+          url:
+            type: "string"
+      dominentpol:
+        type: "string"
+      iaqi:
+        type: "object"
+        properties:
+          co:
+            $ref: "#/definitions/Value"
+          h:
+            $ref: "#/definitions/Value"
+          no2:
+            $ref: "#/definitions/Value"
+          o3:
+            $ref: "#/definitions/Value"
+          p:
+            $ref: "#/definitions/Value"
+          pm10:
+            $ref: "#/definitions/Value"
+          pm25:
+            $ref: "#/definitions/Value"
+          so2:
+            $ref: "#/definitions/Value"
+          t:
+            $ref: "#/definitions/Value"
+          w:
+            $ref: "#/definitions/Value"
+          wg:
+            $ref: "#/definitions/Value"
+      time:
+        type: "object"
+        properties:
+          s:
+            type: "string"
+          tz:
+            type: "string"
+          v:
+            type: "integer"
+          iso:
+            type: "string"
+            format: "date-time"
+      forecast:
+        type: "object"
+        properties:
+          daily:
+            type: "object"
+            properties:
+              o3:
+                type: "array"
+                items:
+                  $ref: "#/definitions/ForecastValue"
+              pm10:
+                type: "array"
+                items:
+                  $ref: "#/definitions/ForecastValue"
+              pm25:
+                type: "array"
+                items:
+                  $ref: "#/definitions/ForecastValue"
+              uvi:
+                type: "array"
+                items:
+                  $ref: "#/definitions/ForecastValue"
+      debug:
+        type: "object"
+        properties:
+          sync:
+            type: "string"
+            format: "date-time"
