@@ -6,16 +6,16 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"github.com/go-openapi/strfmt"
+	strfmt "github.com/go-openapi/strfmt"
+
 	"github.com/go-openapi/swag"
 )
 
 // Value value
-//
 // swagger:model Value
 type Value struct {
 
-	// v
+	// Value
 	V float64 `json:"v,omitempty"`
 }
 

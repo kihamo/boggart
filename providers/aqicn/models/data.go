@@ -8,21 +8,21 @@ package models
 import (
 	"strconv"
 
+	strfmt "github.com/go-openapi/strfmt"
+
 	"github.com/go-openapi/errors"
-	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 )
 
 // Data data
-//
 // swagger:model Data
 type Data struct {
 
-	// aqi
+	// Real-time air quality information
 	Aqi float64 `json:"aqi,omitempty"`
 
-	// attributions
+	// EPA Attribution for the station
 	Attributions []*DataAttributionsItems0 `json:"attributions"`
 
 	// city
@@ -31,7 +31,7 @@ type Data struct {
 	// debug
 	Debug *DataDebug `json:"debug,omitempty"`
 
-	// dominentpol
+	// Dominant polutor
 	Dominentpol string `json:"dominentpol,omitempty"`
 
 	// forecast
@@ -40,7 +40,7 @@ type Data struct {
 	// iaqi
 	Iaqi *DataIaqi `json:"iaqi,omitempty"`
 
-	// idx
+	// Unique ID for the city monitoring station
 	Idx float64 `json:"idx,omitempty"`
 
 	// time
@@ -215,7 +215,6 @@ func (m *Data) UnmarshalBinary(b []byte) error {
 }
 
 // DataAttributionsItems0 data attributions items0
-//
 // swagger:model DataAttributionsItems0
 type DataAttributionsItems0 struct {
 
@@ -252,18 +251,17 @@ func (m *DataAttributionsItems0) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// DataCity data city
-//
+// DataCity Information about the monitoring station
 // swagger:model DataCity
 type DataCity struct {
 
-	// geo
+	// Latitude/Longitude of the monitoring station
 	Geo []float64 `json:"geo"`
 
-	// name
+	// Name of the monitoring station
 	Name string `json:"name,omitempty"`
 
-	// url
+	// Webpage associated to the the monitoring station
 	URL string `json:"url,omitempty"`
 }
 
@@ -291,7 +289,6 @@ func (m *DataCity) UnmarshalBinary(b []byte) error {
 }
 
 // DataDebug data debug
-//
 // swagger:model DataDebug
 type DataDebug struct {
 
@@ -345,8 +342,7 @@ func (m *DataDebug) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// DataForecast data forecast
-//
+// DataForecast Forecast data
 // swagger:model DataForecast
 type DataForecast struct {
 
@@ -404,21 +400,20 @@ func (m *DataForecast) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// DataForecastDaily data forecast daily
-//
+// DataForecastDaily Daily forecast data
 // swagger:model DataForecastDaily
 type DataForecastDaily struct {
 
-	// o3
+	// Ozone forecast
 	O3 []*ForecastValue `json:"o3"`
 
-	// pm10
+	// PM10 forecast
 	Pm10 []*ForecastValue `json:"pm10"`
 
-	// pm25
+	// PM2.5 forecast
 	Pm25 []*ForecastValue `json:"pm25"`
 
-	// uvi
+	// Ultra Violet Index forecast
 	Uvi []*ForecastValue `json:"uvi"`
 }
 
@@ -566,39 +561,41 @@ func (m *DataForecastDaily) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// DataIaqi data iaqi
-//
+// DataIaqi Measurement time information
 // swagger:model DataIaqi
 type DataIaqi struct {
 
-	// co
+	// Carbon monoxide level (CO)
 	Co *Value `json:"co,omitempty"`
 
-	// h
+	// Dew point
+	Dew *Value `json:"dew,omitempty"`
+
+	// Humidity
 	H *Value `json:"h,omitempty"`
 
-	// no2
+	// Nitrogen Dioxide level (NO2)
 	No2 *Value `json:"no2,omitempty"`
 
-	// o3
+	// Ozone level (O3)
 	O3 *Value `json:"o3,omitempty"`
 
-	// p
+	// Pressure
 	P *Value `json:"p,omitempty"`
 
-	// pm10
+	// Coarse dust particles pollution level (PM10)
 	Pm10 *Value `json:"pm10,omitempty"`
 
-	// pm25
+	// Fine particles pollution level (PM2.5)
 	Pm25 *Value `json:"pm25,omitempty"`
 
-	// so2
+	// Sulfur dioxide level (SO2)
 	So2 *Value `json:"so2,omitempty"`
 
-	// t
+	// Temperature
 	T *Value `json:"t,omitempty"`
 
-	// w
+	// Wind speed
 	W *Value `json:"w,omitempty"`
 
 	// wg
@@ -610,6 +607,10 @@ func (m *DataIaqi) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCo(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateDew(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -669,6 +670,24 @@ func (m *DataIaqi) validateCo(formats strfmt.Registry) error {
 		if err := m.Co.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("iaqi" + "." + "co")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *DataIaqi) validateDew(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Dew) { // not required
+		return nil
+	}
+
+	if m.Dew != nil {
+		if err := m.Dew.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("iaqi" + "." + "dew")
 			}
 			return err
 		}
@@ -875,8 +894,7 @@ func (m *DataIaqi) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// DataTime data time
-//
+// DataTime Measurement time information
 // swagger:model DataTime
 type DataTime struct {
 
@@ -884,10 +902,10 @@ type DataTime struct {
 	// Format: date-time
 	Iso strfmt.DateTime `json:"iso,omitempty"`
 
-	// s
+	// Local measurement time time
 	S string `json:"s,omitempty"`
 
-	// tz
+	// Station timezone
 	Tz string `json:"tz,omitempty"`
 
 	// v

@@ -6,28 +6,28 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	strfmt "github.com/go-openapi/strfmt"
+
 	"github.com/go-openapi/errors"
-	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 )
 
 // ForecastValue forecast value
-//
 // swagger:model ForecastValue
 type ForecastValue struct {
 
-	// avg
+	// Avg value
 	Avg float64 `json:"avg,omitempty"`
 
-	// day
+	// Day date
 	// Format: date
 	Day strfmt.Date `json:"day,omitempty"`
 
-	// max
+	// Max value
 	Max float64 `json:"max,omitempty"`
 
-	// min
+	// Min value
 	Min float64 `json:"min,omitempty"`
 }
 

@@ -22,9 +22,9 @@ security:
 paths:
   /feed/geo:{lat};{lng}/:
     get:
-      operationId: "getGeolocalizedFeed"
+      operationId: "getGeoLocalizedFeed"
       tags:
-        - "geolocalized"
+        - "geoLocalized"
       parameters:
         - name: "lat"
           in: "path"
@@ -63,27 +63,35 @@ definitions:
     properties:
       v:
         type: "number"
+        description: "Value"
   ForecastValue:
     type: "object"
     properties:
       avg:
         type: "number"
+        description: "Avg value"
       day:
         type: "string"
         format: "date"
+        description: "Day date"
       max:
         type: "number"
+        description: "Max value"
       min:
         type: "number"
+        description: "Min value"
   Data:
     type: "object"
     properties:
       aqi:
         type: "number"
+        description: "Real-time air quality information"
       idx:
         type: "number"
+        description: "Unique ID for the city monitoring station"
       attributions:
         type: "array"
+        description: "EPA Attribution for the station"
         items:
           type: "object"
           properties:
@@ -95,49 +103,71 @@ definitions:
               type: "string"
       city:
         type: "object"
+        description: "Information about the monitoring station"
         properties:
           geo:
             type: "array"
+            description: "Latitude/Longitude of the monitoring station"
             items:
               type: "number"
           name:
             type: "string"
+            description: "Name of the monitoring station"
           url:
             type: "string"
+            description: "Webpage associated to the the monitoring station"
       dominentpol:
         type: "string"
+        description: "Dominant polutor"
       iaqi:
         type: "object"
+        description: "Measurement time information"
         properties:
           co:
             $ref: "#/definitions/Value"
+            description: "Carbon monoxide level (CO)"
           h:
             $ref: "#/definitions/Value"
+            description: "Humidity"
           no2:
             $ref: "#/definitions/Value"
+            description: "Nitrogen Dioxide level (NO2)"
           o3:
             $ref: "#/definitions/Value"
+            description: "Ozone level (O3)"
           p:
             $ref: "#/definitions/Value"
+            description: "Pressure"
           pm10:
             $ref: "#/definitions/Value"
+            description: "Coarse dust particles pollution level (PM10)"
           pm25:
             $ref: "#/definitions/Value"
+            description: "Fine particles pollution level (PM2.5)"
           so2:
             $ref: "#/definitions/Value"
+            description: "Sulfur dioxide level (SO2)"
           t:
             $ref: "#/definitions/Value"
+            description: "Temperature"
           w:
             $ref: "#/definitions/Value"
+            description: "Wind speed"
           wg:
             $ref: "#/definitions/Value"
+          dew:
+            $ref: "#/definitions/Value"
+            description: "Dew point"
       time:
         type: "object"
+        description: "Measurement time information"
         properties:
           s:
             type: "string"
+            description: "Local measurement time time"
           tz:
             type: "string"
+            description: "Station timezone"
           v:
             type: "integer"
           iso:
@@ -145,24 +175,30 @@ definitions:
             format: "date-time"
       forecast:
         type: "object"
+        description: "Forecast data"
         properties:
           daily:
             type: "object"
+            description: "Daily forecast data"
             properties:
               o3:
                 type: "array"
+                description: "Ozone forecast"
                 items:
                   $ref: "#/definitions/ForecastValue"
               pm10:
                 type: "array"
+                description: "PM10 forecast"
                 items:
                   $ref: "#/definitions/ForecastValue"
               pm25:
                 type: "array"
+                description: "PM2.5 forecast"
                 items:
                   $ref: "#/definitions/ForecastValue"
               uvi:
                 type: "array"
+                description: "Ultra Violet Index forecast"
                 items:
                   $ref: "#/definitions/ForecastValue"
       debug:

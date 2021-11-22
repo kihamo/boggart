@@ -8,9 +8,10 @@ package client
 import (
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/strfmt"
 
-	"github.com/kihamo/boggart/providers/aqicn/client/geolocalized"
+	strfmt "github.com/go-openapi/strfmt"
+
+	"github.com/kihamo/boggart/providers/aqicn/client/geo_localized"
 )
 
 // Default air quality HTTP client.
@@ -55,7 +56,9 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *AirQuality
 
 	cli := new(AirQuality)
 	cli.Transport = transport
-	cli.Geolocalized = geolocalized.New(transport, formats)
+
+	cli.GeoLocalized = geo_localized.New(transport, formats)
+
 	return cli
 }
 
@@ -100,7 +103,7 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // AirQuality is a client for air quality
 type AirQuality struct {
-	Geolocalized geolocalized.ClientService
+	GeoLocalized *geo_localized.Client
 
 	Transport runtime.ClientTransport
 }
@@ -108,5 +111,7 @@ type AirQuality struct {
 // SetTransport changes the transport on the client and all its subresources
 func (c *AirQuality) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
-	c.Geolocalized.SetTransport(transport)
+
+	c.GeoLocalized.SetTransport(transport)
+
 }
