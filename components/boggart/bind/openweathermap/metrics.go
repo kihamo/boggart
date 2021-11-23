@@ -11,7 +11,7 @@ var (
 	metricTempDay     = snitch.NewGauge("temp_day", "Day temperature")
 	metricTempNight   = snitch.NewGauge("temp_night", "Night temperature")
 	metricTempMorning = snitch.NewGauge("temp_morning", "Morning temperature")
-	metricWindSpeed   = snitch.NewGauge("temp_wind_speed", "Wind speed")
+	metricWindSpeed   = snitch.NewGauge("wind_speed", "Wind speed")
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {
