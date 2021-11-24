@@ -21,6 +21,12 @@ type Config struct {
 	TopicCurrentHumidity    mqtt.Topic `mapstructure:"topic_current_humidity" yaml:"topic_current_humidity"`
 	TopicCurrentDewPoint    mqtt.Topic `mapstructure:"topic_current_dew_point" yaml:"topic_current_dew_point"`
 	TopicCurrentWindSpeed   mqtt.Topic `mapstructure:"topic_current_wind_speed" yaml:"topic_current_wind_speed"`
+	TopicCurrentPm25Value   mqtt.Topic `mapstructure:"topic_current_pm25_value" yaml:"topic_current_pm25_value"`
+	TopicCurrentPm10Value   mqtt.Topic `mapstructure:"topic_current_pm10_value" yaml:"topic_current_pm10_value"`
+	TopicCurrentO3Value     mqtt.Topic `mapstructure:"topic_current_o3_value" yaml:"topic_current_o3_value"`
+	TopicCurrentNO2Value    mqtt.Topic `mapstructure:"topic_current_no2_value" yaml:"topic_current_no2_value"`
+	TopicCurrentCOValue     mqtt.Topic `mapstructure:"topic_current_co_value" yaml:"topic_current_co_value"`
+	TopicCurrentSO2Value    mqtt.Topic `mapstructure:"topic_current_so2_value" yaml:"topic_current_so_value"`
 }
 
 func (t Type) ConfigDefaults() interface{} {
@@ -34,5 +40,11 @@ func (t Type) ConfigDefaults() interface{} {
 		TopicCurrentHumidity:    prefix + "current/humidity",
 		TopicCurrentDewPoint:    prefix + "current/dew-point",
 		TopicCurrentWindSpeed:   prefix + "current/wind/speed",
+		TopicCurrentPm25Value:   prefix + "current/pm25/value",
+		TopicCurrentPm10Value:   prefix + "current/pm10/value",
+		TopicCurrentO3Value:     prefix + "current/o3/value",
+		TopicCurrentNO2Value:    prefix + "current/no2/value",
+		TopicCurrentCOValue:     prefix + "current/co/value",
+		TopicCurrentSO2Value:    prefix + "current/so2/value",
 	}
 }
