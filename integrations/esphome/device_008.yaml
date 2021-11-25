@@ -37,6 +37,9 @@ sensor:
     pressure:
       id: pressure
       name: "Pressure"
+      unit_of_measurement: "mmHg"
+      filters:
+        - multiply: 0.75006375541921
     humidity:
       id: humidity
       name: "Humidity"

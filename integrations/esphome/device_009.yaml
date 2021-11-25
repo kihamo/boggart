@@ -81,15 +81,15 @@ sensor:
       name: "Tariffs total"
       icon: "mdi:flash"
 
-  - platform: template
-    name: "Altitude"
-    lambda: |-
-      const float STANDARD_SEA_LEVEL_PRESSURE = 1013.25; //in hPa, see note
-      return ((id(temperature).state + 273.15) / 0.0065) *
-        (powf((STANDARD_SEA_LEVEL_PRESSURE / id(pressure).state), 0.190234) - 1); // in meter
-    update_interval: 60s
-    icon: 'mdi:ruler'
-    unit_of_measurement: 'm'
+  #  - platform: template
+  #    name: "Altitude"
+  #    lambda: |-
+  #      const float STANDARD_SEA_LEVEL_PRESSURE = 1013.25; //in hPa, see note
+  #      return ((id(temperature).state + 273.15) / 0.0065) *
+  #        (powf((STANDARD_SEA_LEVEL_PRESSURE / id(pressure).state), 0.190234) - 1); // in meter
+  #    update_interval: 60s
+  #    icon: 'mdi:ruler'
+  #    unit_of_measurement: 'm'
   - platform: template
     name: "Absolute Humidity"
     lambda: |-
@@ -117,18 +117,18 @@ sensor:
     temperature:
       id: temperature
       name: "Temperature"
-      icon: "mdi:temperature"
       oversampling: 16x
       filters:
         - offset: -2.9
     pressure:
       id: pressure
       name: "Pressure"
-      icon: "mdi:pressure"
+      unit_of_measurement: "mmHg"
+      filters:
+        - multiply: 0.75006375541921
     humidity:
       id: humidity
       name: "Humidity"
-      icon: "mdi:humidity"
 
 binary_sensor:
   - platform: gpio
