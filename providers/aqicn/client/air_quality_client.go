@@ -11,7 +11,8 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/kihamo/boggart/providers/aqicn/client/geo_localized"
+	"github.com/kihamo/boggart/providers/aqicn/client/feed"
+	"github.com/kihamo/boggart/providers/aqicn/client/search"
 )
 
 // Default air quality HTTP client.
@@ -57,7 +58,9 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *AirQuality
 	cli := new(AirQuality)
 	cli.Transport = transport
 
-	cli.GeoLocalized = geo_localized.New(transport, formats)
+	cli.Feed = feed.New(transport, formats)
+
+	cli.Search = search.New(transport, formats)
 
 	return cli
 }
@@ -103,7 +106,9 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // AirQuality is a client for air quality
 type AirQuality struct {
-	GeoLocalized *geo_localized.Client
+	Feed *feed.Client
+
+	Search *search.Client
 
 	Transport runtime.ClientTransport
 }
@@ -112,6 +117,8 @@ type AirQuality struct {
 func (c *AirQuality) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 
-	c.GeoLocalized.SetTransport(transport)
+	c.Feed.SetTransport(transport)
+
+	c.Search.SetTransport(transport)
 
 }

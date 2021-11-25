@@ -10,7 +10,8 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
-	"github.com/go-openapi/validate"
+
+	extend "github.com/kihamo/boggart/protocols/swagger"
 )
 
 // ForecastValue forecast value
@@ -22,7 +23,7 @@ type ForecastValue struct {
 
 	// Day date
 	// Format: date
-	Day strfmt.Date `json:"day,omitempty"`
+	Day *extend.Date `json:"day,omitempty"`
 
 	// Max value
 	Max float64 `json:"max,omitempty"`
@@ -51,8 +52,13 @@ func (m *ForecastValue) validateDay(formats strfmt.Registry) error {
 		return nil
 	}
 
-	if err := validate.FormatOf("day", "body", "date", m.Day.String(), formats); err != nil {
-		return err
+	if m.Day != nil {
+		if err := m.Day.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("day")
+			}
+			return err
+		}
 	}
 
 	return nil

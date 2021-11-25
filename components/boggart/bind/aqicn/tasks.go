@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/kihamo/boggart/components/boggart/tasks"
-	"github.com/kihamo/boggart/providers/aqicn/client/geo_localized"
 	"go.uber.org/multierr"
 )
 
@@ -22,20 +21,16 @@ func (b *Bind) Tasks() []tasks.Task {
 	}
 }
 
-func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
+func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 	cfg := b.config()
 
-	params := geo_localized.NewGetGeoLocalizedFeedParamsWithContext(ctx).
-		WithLat(cfg.Latitude).
-		WithLng(cfg.Longitude)
-
-	response, err := b.client.GeoLocalized.GetGeoLocalizedFeed(params, nil)
+	feed, err := b.Feed(ctx)
 	if err != nil {
 		return err
 	}
 
 	id := b.Meta().ID()
-	current := response.GetPayload().Data.Iaqi
+	current := feed.Iaqi
 
 	const mqttErrTpl = "send mqtt message about %s failed: %w"
 

@@ -1,6 +1,8 @@
 package aqicn
 
 import (
+	"net/url"
+
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/runtime/logger"
 	"github.com/kihamo/boggart/providers/aqicn/client"
@@ -26,4 +28,12 @@ func New(token string, debug bool, logger logger.Logger) *Client {
 	}
 
 	return cl
+}
+
+func Icon(id string) *url.URL {
+	u := &url.URL{}
+	u.Host = "aqicn.org"
+	u.Path = "/images/feeds/" + id
+
+	return u
 }

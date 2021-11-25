@@ -13,7 +13,8 @@ type Config struct {
 
 	Debug                   bool
 	UpdaterInterval         time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
-	Token                   string        `mapstructure:"token" yaml:"token" valid:",required"`
+	Token                   string        `valid:",required"`
+	CityName                string        `mapstructure:"city_name" yaml:"city_name"`
 	Latitude                float64
 	Longitude               float64
 	TopicCurrentTemperature mqtt.Topic `mapstructure:"topic_current_temperature" yaml:"topic_current_temperature"`

@@ -1,0 +1,75 @@
+{{ define "content" }}
+{{ if .feed }}
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2><a href="{{ .feed.City.URL }}" target="_blank">{{ .feed.City.Name }}</a></h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                {{ if and (ne (len .feed.Attributions) 0) (index .feed.Attributions 0).Logo }}
+                <div class="row">
+                    <div class="col-sm-1">
+                        <div class="weather-icon">
+                            <img src="{{ (aqicn_icon (index .feed.Attributions 0).Logo).String }}"/>
+                        </div>
+                    </div>
+                    <div class="col-sm-11">
+                        <div class="weather-text">
+                            <h2><a href="{{ (index .feed.Attributions 0).URL }}" target="_blank">{{ (index .feed.Attributions 0).Name }}</a></h2>
+                        </div>
+                    </div>
+                </div>
+                {{ end }}
+                <div class="row">
+                    <div class="weather-text pull-right">
+                        <div class="temperature"><b>{{ i18n (.feed.Time.S.Time.Format "Monday") . }}</b>, {{ .feed.Time.S.Time.Format "15:04" }}</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="weather-text pull-left">
+                            {{ if .feed.Iaqi.T }}<i> {{ i18n "Temperature" $ }}: <strong>{{ .feed.Iaqi.T.V }}</strong></i> °C<br />{{ end }}
+                            {{ if .feed.Iaqi.P }}<i> {{ i18n "Pressure" $ }}: <strong>{{ .feed.Iaqi.P.V }}</strong></i> hPa<br />{{ end }}
+                            {{ if .feed.Iaqi.H }}<i> {{ i18n "Humidity" $ }}: <strong>{{ .feed.Iaqi.H.V }}</strong></i> %<br />{{ end }}
+                            {{ if .feed.Iaqi.Dew }}<i> {{ i18n "Dew point" $ }}: <strong>{{ .feed.Iaqi.Dew.V }}</strong></i> °C<br />{{ end }}
+                            {{ if .feed.Iaqi.W }}<i> {{ i18n "Wind speed" $ }}: <strong>{{ .feed.Iaqi.W.V }}</strong></i> m/s<br />{{ end }}
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="weather-text pull-left">
+                            {{ if .feed.Iaqi.Pm25 }}<i> {{ i18n "PM25" $ }}: <strong>{{ .feed.Iaqi.Pm25.V }}</strong></i> µg/m³<br />{{ end }}
+                            {{ if .feed.Iaqi.Pm10 }}<i> {{ i18n "PM10" $ }}: <strong>{{ .feed.Iaqi.Pm10.V }}</strong></i> µg/m³<br />{{ end }}
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="weather-text pull-left">
+                            {{ if .feed.Iaqi.O3 }}<i> {{ i18n "O3" $ }}: <strong>{{ .feed.Iaqi.O3.V }}</strong></i> ppm<br />{{ end }}
+                            {{ if .feed.Iaqi.No2 }}<i> {{ i18n "NO2" $ }}: <strong>{{ .feed.Iaqi.No2.V }}</strong></i> ppm<br />{{ end }}
+                            {{ if .feed.Iaqi.Co }}<i> {{ i18n "CO" $ }}: <strong>{{ .feed.Iaqi.Co.V }}</strong></i> ppm<br />{{ end }}
+                            {{ if .feed.Iaqi.So2 }}<i> {{ i18n "SO2" $ }}: <strong>{{ .feed.Iaqi.So2.V }}</strong></i> ppm<br />{{ end }}
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <div class="row weather-days">
+                    {{ range $i, $day := .feed.Forecast.Daily.Pm25 }}
+                        {{ if le $.current_day.Unix $day.Day.Time.Unix }}
+                        <div class="col-sm-2">
+                            <div class="daily-weather text-center">
+                                <h2 class="day">{{ $day.Day.Time.Format "02" }} {{ i18n ($day.Day.Time.Format "January") $ }}</h2>
+                                <h4 class="degrees">{{ i18n "PM25" $ }}: {{ $day.Min }} - {{ $day.Max }} ppm</h4>
+                                <h4 class="degrees">{{ i18n "PM10" $ }}: {{ (index $.feed.Forecast.Daily.Pm10 $i).Min }} - {{ (index $.feed.Forecast.Daily.Pm10 $i).Max }} ppm</h4>
+                            </div>
+                        </div>
+                        {{ end }}
+                    {{ end }}
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
+{{ end }}

@@ -9,46 +9,108 @@ import (
 	"strconv"
 
 	strfmt "github.com/go-openapi/strfmt"
+	extend "github.com/kihamo/boggart/protocols/swagger"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 )
 
-// Data data
-// swagger:model Data
-type Data struct {
+// Feed feed
+// swagger:model Feed
+type Feed struct {
+
+	// data
+	Data *FeedData `json:"data,omitempty"`
+
+	// status
+	Status string `json:"status,omitempty"`
+}
+
+// Validate validates this feed
+func (m *Feed) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateData(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *Feed) validateData(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Data) { // not required
+		return nil
+	}
+
+	if m.Data != nil {
+		if err := m.Data.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("data")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *Feed) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *Feed) UnmarshalBinary(b []byte) error {
+	var res Feed
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// FeedData feed data
+// swagger:model FeedData
+type FeedData struct {
 
 	// Real-time air quality information
 	Aqi float64 `json:"aqi,omitempty"`
 
 	// EPA Attribution for the station
-	Attributions []*DataAttributionsItems0 `json:"attributions"`
+	Attributions []*FeedDataAttributionsItems0 `json:"attributions"`
 
 	// city
-	City *DataCity `json:"city,omitempty"`
+	City *FeedDataCity `json:"city,omitempty"`
 
 	// debug
-	Debug *DataDebug `json:"debug,omitempty"`
+	Debug *FeedDataDebug `json:"debug,omitempty"`
 
 	// Dominant polutor
 	Dominentpol string `json:"dominentpol,omitempty"`
 
 	// forecast
-	Forecast *DataForecast `json:"forecast,omitempty"`
+	Forecast *FeedDataForecast `json:"forecast,omitempty"`
 
 	// iaqi
-	Iaqi *DataIaqi `json:"iaqi,omitempty"`
+	Iaqi *FeedDataIaqi `json:"iaqi,omitempty"`
 
 	// Unique ID for the city monitoring station
 	Idx float64 `json:"idx,omitempty"`
 
 	// time
-	Time *DataTime `json:"time,omitempty"`
+	Time *FeedDataTime `json:"time,omitempty"`
 }
 
-// Validate validates this data
-func (m *Data) Validate(formats strfmt.Registry) error {
+// Validate validates this feed data
+func (m *FeedData) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAttributions(formats); err != nil {
@@ -81,7 +143,7 @@ func (m *Data) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Data) validateAttributions(formats strfmt.Registry) error {
+func (m *FeedData) validateAttributions(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Attributions) { // not required
 		return nil
@@ -95,7 +157,7 @@ func (m *Data) validateAttributions(formats strfmt.Registry) error {
 		if m.Attributions[i] != nil {
 			if err := m.Attributions[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("attributions" + "." + strconv.Itoa(i))
+					return ve.ValidateName("data" + "." + "attributions" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -106,7 +168,7 @@ func (m *Data) validateAttributions(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Data) validateCity(formats strfmt.Registry) error {
+func (m *FeedData) validateCity(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.City) { // not required
 		return nil
@@ -115,7 +177,7 @@ func (m *Data) validateCity(formats strfmt.Registry) error {
 	if m.City != nil {
 		if err := m.City.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("city")
+				return ve.ValidateName("data" + "." + "city")
 			}
 			return err
 		}
@@ -124,7 +186,7 @@ func (m *Data) validateCity(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Data) validateDebug(formats strfmt.Registry) error {
+func (m *FeedData) validateDebug(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Debug) { // not required
 		return nil
@@ -133,7 +195,7 @@ func (m *Data) validateDebug(formats strfmt.Registry) error {
 	if m.Debug != nil {
 		if err := m.Debug.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("debug")
+				return ve.ValidateName("data" + "." + "debug")
 			}
 			return err
 		}
@@ -142,7 +204,7 @@ func (m *Data) validateDebug(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Data) validateForecast(formats strfmt.Registry) error {
+func (m *FeedData) validateForecast(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Forecast) { // not required
 		return nil
@@ -151,7 +213,7 @@ func (m *Data) validateForecast(formats strfmt.Registry) error {
 	if m.Forecast != nil {
 		if err := m.Forecast.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("forecast")
+				return ve.ValidateName("data" + "." + "forecast")
 			}
 			return err
 		}
@@ -160,7 +222,7 @@ func (m *Data) validateForecast(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Data) validateIaqi(formats strfmt.Registry) error {
+func (m *FeedData) validateIaqi(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Iaqi) { // not required
 		return nil
@@ -169,7 +231,7 @@ func (m *Data) validateIaqi(formats strfmt.Registry) error {
 	if m.Iaqi != nil {
 		if err := m.Iaqi.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("iaqi")
+				return ve.ValidateName("data" + "." + "iaqi")
 			}
 			return err
 		}
@@ -178,7 +240,7 @@ func (m *Data) validateIaqi(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Data) validateTime(formats strfmt.Registry) error {
+func (m *FeedData) validateTime(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Time) { // not required
 		return nil
@@ -187,7 +249,7 @@ func (m *Data) validateTime(formats strfmt.Registry) error {
 	if m.Time != nil {
 		if err := m.Time.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("time")
+				return ve.ValidateName("data" + "." + "time")
 			}
 			return err
 		}
@@ -197,7 +259,7 @@ func (m *Data) validateTime(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *Data) MarshalBinary() ([]byte, error) {
+func (m *FeedData) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -205,8 +267,8 @@ func (m *Data) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *Data) UnmarshalBinary(b []byte) error {
-	var res Data
+func (m *FeedData) UnmarshalBinary(b []byte) error {
+	var res FeedData
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -214,9 +276,9 @@ func (m *Data) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// DataAttributionsItems0 data attributions items0
-// swagger:model DataAttributionsItems0
-type DataAttributionsItems0 struct {
+// FeedDataAttributionsItems0 feed data attributions items0
+// swagger:model FeedDataAttributionsItems0
+type FeedDataAttributionsItems0 struct {
 
 	// logo
 	Logo string `json:"logo,omitempty"`
@@ -228,13 +290,13 @@ type DataAttributionsItems0 struct {
 	URL string `json:"url,omitempty"`
 }
 
-// Validate validates this data attributions items0
-func (m *DataAttributionsItems0) Validate(formats strfmt.Registry) error {
+// Validate validates this feed data attributions items0
+func (m *FeedDataAttributionsItems0) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (m *DataAttributionsItems0) MarshalBinary() ([]byte, error) {
+func (m *FeedDataAttributionsItems0) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -242,8 +304,8 @@ func (m *DataAttributionsItems0) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *DataAttributionsItems0) UnmarshalBinary(b []byte) error {
-	var res DataAttributionsItems0
+func (m *FeedDataAttributionsItems0) UnmarshalBinary(b []byte) error {
+	var res FeedDataAttributionsItems0
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -251,9 +313,9 @@ func (m *DataAttributionsItems0) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// DataCity Information about the monitoring station
-// swagger:model DataCity
-type DataCity struct {
+// FeedDataCity Information about the monitoring station
+// swagger:model FeedDataCity
+type FeedDataCity struct {
 
 	// Latitude/Longitude of the monitoring station
 	Geo []float64 `json:"geo"`
@@ -265,13 +327,13 @@ type DataCity struct {
 	URL string `json:"url,omitempty"`
 }
 
-// Validate validates this data city
-func (m *DataCity) Validate(formats strfmt.Registry) error {
+// Validate validates this feed data city
+func (m *FeedDataCity) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (m *DataCity) MarshalBinary() ([]byte, error) {
+func (m *FeedDataCity) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -279,8 +341,8 @@ func (m *DataCity) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *DataCity) UnmarshalBinary(b []byte) error {
-	var res DataCity
+func (m *FeedDataCity) UnmarshalBinary(b []byte) error {
+	var res FeedDataCity
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -288,17 +350,17 @@ func (m *DataCity) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// DataDebug data debug
-// swagger:model DataDebug
-type DataDebug struct {
+// FeedDataDebug feed data debug
+// swagger:model FeedDataDebug
+type FeedDataDebug struct {
 
 	// sync
 	// Format: date-time
 	Sync strfmt.DateTime `json:"sync,omitempty"`
 }
 
-// Validate validates this data debug
-func (m *DataDebug) Validate(formats strfmt.Registry) error {
+// Validate validates this feed data debug
+func (m *FeedDataDebug) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateSync(formats); err != nil {
@@ -311,13 +373,13 @@ func (m *DataDebug) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *DataDebug) validateSync(formats strfmt.Registry) error {
+func (m *FeedDataDebug) validateSync(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Sync) { // not required
 		return nil
 	}
 
-	if err := validate.FormatOf("debug"+"."+"sync", "body", "date-time", m.Sync.String(), formats); err != nil {
+	if err := validate.FormatOf("data"+"."+"debug"+"."+"sync", "body", "date-time", m.Sync.String(), formats); err != nil {
 		return err
 	}
 
@@ -325,7 +387,7 @@ func (m *DataDebug) validateSync(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *DataDebug) MarshalBinary() ([]byte, error) {
+func (m *FeedDataDebug) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -333,8 +395,8 @@ func (m *DataDebug) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *DataDebug) UnmarshalBinary(b []byte) error {
-	var res DataDebug
+func (m *FeedDataDebug) UnmarshalBinary(b []byte) error {
+	var res FeedDataDebug
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -342,16 +404,16 @@ func (m *DataDebug) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// DataForecast Forecast data
-// swagger:model DataForecast
-type DataForecast struct {
+// FeedDataForecast Forecast data
+// swagger:model FeedDataForecast
+type FeedDataForecast struct {
 
 	// daily
-	Daily *DataForecastDaily `json:"daily,omitempty"`
+	Daily *FeedDataForecastDaily `json:"daily,omitempty"`
 }
 
-// Validate validates this data forecast
-func (m *DataForecast) Validate(formats strfmt.Registry) error {
+// Validate validates this feed data forecast
+func (m *FeedDataForecast) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDaily(formats); err != nil {
@@ -364,7 +426,7 @@ func (m *DataForecast) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *DataForecast) validateDaily(formats strfmt.Registry) error {
+func (m *FeedDataForecast) validateDaily(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Daily) { // not required
 		return nil
@@ -373,7 +435,7 @@ func (m *DataForecast) validateDaily(formats strfmt.Registry) error {
 	if m.Daily != nil {
 		if err := m.Daily.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("forecast" + "." + "daily")
+				return ve.ValidateName("data" + "." + "forecast" + "." + "daily")
 			}
 			return err
 		}
@@ -383,7 +445,7 @@ func (m *DataForecast) validateDaily(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *DataForecast) MarshalBinary() ([]byte, error) {
+func (m *FeedDataForecast) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -391,8 +453,8 @@ func (m *DataForecast) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *DataForecast) UnmarshalBinary(b []byte) error {
-	var res DataForecast
+func (m *FeedDataForecast) UnmarshalBinary(b []byte) error {
+	var res FeedDataForecast
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -400,9 +462,9 @@ func (m *DataForecast) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// DataForecastDaily Daily forecast data
-// swagger:model DataForecastDaily
-type DataForecastDaily struct {
+// FeedDataForecastDaily Daily forecast data
+// swagger:model FeedDataForecastDaily
+type FeedDataForecastDaily struct {
 
 	// Ozone forecast
 	O3 []*ForecastValue `json:"o3"`
@@ -417,8 +479,8 @@ type DataForecastDaily struct {
 	Uvi []*ForecastValue `json:"uvi"`
 }
 
-// Validate validates this data forecast daily
-func (m *DataForecastDaily) Validate(formats strfmt.Registry) error {
+// Validate validates this feed data forecast daily
+func (m *FeedDataForecastDaily) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateO3(formats); err != nil {
@@ -443,7 +505,7 @@ func (m *DataForecastDaily) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *DataForecastDaily) validateO3(formats strfmt.Registry) error {
+func (m *FeedDataForecastDaily) validateO3(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.O3) { // not required
 		return nil
@@ -457,7 +519,7 @@ func (m *DataForecastDaily) validateO3(formats strfmt.Registry) error {
 		if m.O3[i] != nil {
 			if err := m.O3[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("forecast" + "." + "daily" + "." + "o3" + "." + strconv.Itoa(i))
+					return ve.ValidateName("data" + "." + "forecast" + "." + "daily" + "." + "o3" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -468,7 +530,7 @@ func (m *DataForecastDaily) validateO3(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *DataForecastDaily) validatePm10(formats strfmt.Registry) error {
+func (m *FeedDataForecastDaily) validatePm10(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Pm10) { // not required
 		return nil
@@ -482,7 +544,7 @@ func (m *DataForecastDaily) validatePm10(formats strfmt.Registry) error {
 		if m.Pm10[i] != nil {
 			if err := m.Pm10[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("forecast" + "." + "daily" + "." + "pm10" + "." + strconv.Itoa(i))
+					return ve.ValidateName("data" + "." + "forecast" + "." + "daily" + "." + "pm10" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -493,7 +555,7 @@ func (m *DataForecastDaily) validatePm10(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *DataForecastDaily) validatePm25(formats strfmt.Registry) error {
+func (m *FeedDataForecastDaily) validatePm25(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Pm25) { // not required
 		return nil
@@ -507,7 +569,7 @@ func (m *DataForecastDaily) validatePm25(formats strfmt.Registry) error {
 		if m.Pm25[i] != nil {
 			if err := m.Pm25[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("forecast" + "." + "daily" + "." + "pm25" + "." + strconv.Itoa(i))
+					return ve.ValidateName("data" + "." + "forecast" + "." + "daily" + "." + "pm25" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -518,7 +580,7 @@ func (m *DataForecastDaily) validatePm25(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *DataForecastDaily) validateUvi(formats strfmt.Registry) error {
+func (m *FeedDataForecastDaily) validateUvi(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Uvi) { // not required
 		return nil
@@ -532,7 +594,7 @@ func (m *DataForecastDaily) validateUvi(formats strfmt.Registry) error {
 		if m.Uvi[i] != nil {
 			if err := m.Uvi[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("forecast" + "." + "daily" + "." + "uvi" + "." + strconv.Itoa(i))
+					return ve.ValidateName("data" + "." + "forecast" + "." + "daily" + "." + "uvi" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -544,7 +606,7 @@ func (m *DataForecastDaily) validateUvi(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *DataForecastDaily) MarshalBinary() ([]byte, error) {
+func (m *FeedDataForecastDaily) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -552,8 +614,8 @@ func (m *DataForecastDaily) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *DataForecastDaily) UnmarshalBinary(b []byte) error {
-	var res DataForecastDaily
+func (m *FeedDataForecastDaily) UnmarshalBinary(b []byte) error {
+	var res FeedDataForecastDaily
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -561,9 +623,9 @@ func (m *DataForecastDaily) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// DataIaqi Measurement time information
-// swagger:model DataIaqi
-type DataIaqi struct {
+// FeedDataIaqi Measurement time information
+// swagger:model FeedDataIaqi
+type FeedDataIaqi struct {
 
 	// Carbon monoxide level (CO)
 	Co *Value `json:"co,omitempty"`
@@ -602,8 +664,8 @@ type DataIaqi struct {
 	Wg *Value `json:"wg,omitempty"`
 }
 
-// Validate validates this data iaqi
-func (m *DataIaqi) Validate(formats strfmt.Registry) error {
+// Validate validates this feed data iaqi
+func (m *FeedDataIaqi) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCo(formats); err != nil {
@@ -660,7 +722,7 @@ func (m *DataIaqi) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *DataIaqi) validateCo(formats strfmt.Registry) error {
+func (m *FeedDataIaqi) validateCo(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Co) { // not required
 		return nil
@@ -669,7 +731,7 @@ func (m *DataIaqi) validateCo(formats strfmt.Registry) error {
 	if m.Co != nil {
 		if err := m.Co.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("iaqi" + "." + "co")
+				return ve.ValidateName("data" + "." + "iaqi" + "." + "co")
 			}
 			return err
 		}
@@ -678,7 +740,7 @@ func (m *DataIaqi) validateCo(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *DataIaqi) validateDew(formats strfmt.Registry) error {
+func (m *FeedDataIaqi) validateDew(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Dew) { // not required
 		return nil
@@ -687,7 +749,7 @@ func (m *DataIaqi) validateDew(formats strfmt.Registry) error {
 	if m.Dew != nil {
 		if err := m.Dew.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("iaqi" + "." + "dew")
+				return ve.ValidateName("data" + "." + "iaqi" + "." + "dew")
 			}
 			return err
 		}
@@ -696,7 +758,7 @@ func (m *DataIaqi) validateDew(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *DataIaqi) validateH(formats strfmt.Registry) error {
+func (m *FeedDataIaqi) validateH(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.H) { // not required
 		return nil
@@ -705,7 +767,7 @@ func (m *DataIaqi) validateH(formats strfmt.Registry) error {
 	if m.H != nil {
 		if err := m.H.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("iaqi" + "." + "h")
+				return ve.ValidateName("data" + "." + "iaqi" + "." + "h")
 			}
 			return err
 		}
@@ -714,7 +776,7 @@ func (m *DataIaqi) validateH(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *DataIaqi) validateNo2(formats strfmt.Registry) error {
+func (m *FeedDataIaqi) validateNo2(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.No2) { // not required
 		return nil
@@ -723,7 +785,7 @@ func (m *DataIaqi) validateNo2(formats strfmt.Registry) error {
 	if m.No2 != nil {
 		if err := m.No2.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("iaqi" + "." + "no2")
+				return ve.ValidateName("data" + "." + "iaqi" + "." + "no2")
 			}
 			return err
 		}
@@ -732,7 +794,7 @@ func (m *DataIaqi) validateNo2(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *DataIaqi) validateO3(formats strfmt.Registry) error {
+func (m *FeedDataIaqi) validateO3(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.O3) { // not required
 		return nil
@@ -741,7 +803,7 @@ func (m *DataIaqi) validateO3(formats strfmt.Registry) error {
 	if m.O3 != nil {
 		if err := m.O3.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("iaqi" + "." + "o3")
+				return ve.ValidateName("data" + "." + "iaqi" + "." + "o3")
 			}
 			return err
 		}
@@ -750,7 +812,7 @@ func (m *DataIaqi) validateO3(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *DataIaqi) validateP(formats strfmt.Registry) error {
+func (m *FeedDataIaqi) validateP(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.P) { // not required
 		return nil
@@ -759,7 +821,7 @@ func (m *DataIaqi) validateP(formats strfmt.Registry) error {
 	if m.P != nil {
 		if err := m.P.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("iaqi" + "." + "p")
+				return ve.ValidateName("data" + "." + "iaqi" + "." + "p")
 			}
 			return err
 		}
@@ -768,7 +830,7 @@ func (m *DataIaqi) validateP(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *DataIaqi) validatePm10(formats strfmt.Registry) error {
+func (m *FeedDataIaqi) validatePm10(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Pm10) { // not required
 		return nil
@@ -777,7 +839,7 @@ func (m *DataIaqi) validatePm10(formats strfmt.Registry) error {
 	if m.Pm10 != nil {
 		if err := m.Pm10.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("iaqi" + "." + "pm10")
+				return ve.ValidateName("data" + "." + "iaqi" + "." + "pm10")
 			}
 			return err
 		}
@@ -786,7 +848,7 @@ func (m *DataIaqi) validatePm10(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *DataIaqi) validatePm25(formats strfmt.Registry) error {
+func (m *FeedDataIaqi) validatePm25(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Pm25) { // not required
 		return nil
@@ -795,7 +857,7 @@ func (m *DataIaqi) validatePm25(formats strfmt.Registry) error {
 	if m.Pm25 != nil {
 		if err := m.Pm25.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("iaqi" + "." + "pm25")
+				return ve.ValidateName("data" + "." + "iaqi" + "." + "pm25")
 			}
 			return err
 		}
@@ -804,7 +866,7 @@ func (m *DataIaqi) validatePm25(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *DataIaqi) validateSo2(formats strfmt.Registry) error {
+func (m *FeedDataIaqi) validateSo2(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.So2) { // not required
 		return nil
@@ -813,7 +875,7 @@ func (m *DataIaqi) validateSo2(formats strfmt.Registry) error {
 	if m.So2 != nil {
 		if err := m.So2.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("iaqi" + "." + "so2")
+				return ve.ValidateName("data" + "." + "iaqi" + "." + "so2")
 			}
 			return err
 		}
@@ -822,7 +884,7 @@ func (m *DataIaqi) validateSo2(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *DataIaqi) validateT(formats strfmt.Registry) error {
+func (m *FeedDataIaqi) validateT(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.T) { // not required
 		return nil
@@ -831,7 +893,7 @@ func (m *DataIaqi) validateT(formats strfmt.Registry) error {
 	if m.T != nil {
 		if err := m.T.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("iaqi" + "." + "t")
+				return ve.ValidateName("data" + "." + "iaqi" + "." + "t")
 			}
 			return err
 		}
@@ -840,7 +902,7 @@ func (m *DataIaqi) validateT(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *DataIaqi) validateW(formats strfmt.Registry) error {
+func (m *FeedDataIaqi) validateW(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.W) { // not required
 		return nil
@@ -849,7 +911,7 @@ func (m *DataIaqi) validateW(formats strfmt.Registry) error {
 	if m.W != nil {
 		if err := m.W.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("iaqi" + "." + "w")
+				return ve.ValidateName("data" + "." + "iaqi" + "." + "w")
 			}
 			return err
 		}
@@ -858,7 +920,7 @@ func (m *DataIaqi) validateW(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *DataIaqi) validateWg(formats strfmt.Registry) error {
+func (m *FeedDataIaqi) validateWg(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Wg) { // not required
 		return nil
@@ -867,7 +929,7 @@ func (m *DataIaqi) validateWg(formats strfmt.Registry) error {
 	if m.Wg != nil {
 		if err := m.Wg.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("iaqi" + "." + "wg")
+				return ve.ValidateName("data" + "." + "iaqi" + "." + "wg")
 			}
 			return err
 		}
@@ -877,7 +939,7 @@ func (m *DataIaqi) validateWg(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *DataIaqi) MarshalBinary() ([]byte, error) {
+func (m *FeedDataIaqi) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -885,8 +947,8 @@ func (m *DataIaqi) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *DataIaqi) UnmarshalBinary(b []byte) error {
-	var res DataIaqi
+func (m *FeedDataIaqi) UnmarshalBinary(b []byte) error {
+	var res FeedDataIaqi
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -894,29 +956,39 @@ func (m *DataIaqi) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// DataTime Measurement time information
-// swagger:model DataTime
-type DataTime struct {
+// FeedDataTime Measurement time information
+// swagger:model FeedDataTime
+type FeedDataTime struct {
 
 	// iso
 	// Format: date-time
 	Iso strfmt.DateTime `json:"iso,omitempty"`
 
 	// Local measurement time time
-	S string `json:"s,omitempty"`
+	// Format: date-time
+	S *extend.DateTime `json:"s,omitempty"`
 
 	// Station timezone
 	Tz string `json:"tz,omitempty"`
 
 	// v
-	V int64 `json:"v,omitempty"`
+	// Format: date-time
+	V *extend.DateTimeByTimestamp `json:"v,omitempty"`
 }
 
-// Validate validates this data time
-func (m *DataTime) Validate(formats strfmt.Registry) error {
+// Validate validates this feed data time
+func (m *FeedDataTime) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateIso(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateS(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateV(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -926,21 +998,57 @@ func (m *DataTime) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *DataTime) validateIso(formats strfmt.Registry) error {
+func (m *FeedDataTime) validateIso(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Iso) { // not required
 		return nil
 	}
 
-	if err := validate.FormatOf("time"+"."+"iso", "body", "date-time", m.Iso.String(), formats); err != nil {
+	if err := validate.FormatOf("data"+"."+"time"+"."+"iso", "body", "date-time", m.Iso.String(), formats); err != nil {
 		return err
 	}
 
 	return nil
 }
 
+func (m *FeedDataTime) validateS(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.S) { // not required
+		return nil
+	}
+
+	if m.S != nil {
+		if err := m.S.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("data" + "." + "time" + "." + "s")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *FeedDataTime) validateV(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.V) { // not required
+		return nil
+	}
+
+	if m.V != nil {
+		if err := m.V.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("data" + "." + "time" + "." + "v")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 // MarshalBinary interface implementation
-func (m *DataTime) MarshalBinary() ([]byte, error) {
+func (m *FeedDataTime) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -948,8 +1056,8 @@ func (m *DataTime) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *DataTime) UnmarshalBinary(b []byte) error {
-	var res DataTime
+func (m *FeedDataTime) UnmarshalBinary(b []byte) error {
+	var res FeedDataTime
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

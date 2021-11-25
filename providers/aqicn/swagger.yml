@@ -4,6 +4,7 @@ swagger: "2.0"
 info:
   title: "Air Quality"
   version: "0.23.0"
+  # https://aqicn.org/json-api/doc/
 consumes:
   - "application/json"
 produces:
@@ -20,11 +21,31 @@ securityDefinitions:
 security:
   - APIKeyQuery: [ ]
 paths:
+  /feed/{city}/:
+    get:
+      operationId: "getByCity"
+      tags:
+        - "feed"
+      parameters:
+        - name: "city"
+          in: "path"
+          description: "Name of the city (eg beijing), or id (eg @7397)"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Feed"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /feed/geo:{lat};{lng}/:
     get:
-      operationId: "getGeoLocalizedFeed"
+      operationId: "getByLatLng"
       tags:
-        - "geoLocalized"
+        - "feed"
       parameters:
         - name: "lat"
           in: "path"
@@ -40,17 +61,73 @@ paths:
         200:
           description: "Successful operation"
           schema:
-            type: "object"
-            properties:
-              status:
-                type: "string"
-              data:
-                $ref: "#/definitions/Data"
+            $ref: "#/definitions/Feed"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /feed/here/:
+    get:
+      operationId: "getByIP"
+      tags:
+        - "feed"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Feed"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /search/:
+    get:
+      operationId: "search"
+      tags:
+        - "search"
+      parameters:
+        - name: "keyword"
+          in: "query"
+          description: "Name of the station your are looking for (eg beijing, bulgaria, bangalore)"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Search"
         default:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
 definitions:
+  Date:
+    type: "string"
+    format: "date"
+    x-go-type:
+      import:
+        alias: "extend"
+        package: "github.com/kihamo/boggart/protocols/swagger"
+      type: "Date"
+    x-nullable: true
+  DateTime:
+    type: "string"
+    format: "date-time"
+    x-go-type:
+      import:
+        alias: "extend"
+        package: "github.com/kihamo/boggart/protocols/swagger"
+      type: "DateTime"
+    x-nullable: true
+  DateTimeUnix:
+    type: "string"
+    format: "date-time"
+    x-go-type:
+      import:
+        alias: "extend"
+        package: "github.com/kihamo/boggart/protocols/swagger"
+      type: "DateTimeByTimestamp"
+    x-nullable: true
   Error:
     type: "object"
     properties:
@@ -71,8 +148,7 @@ definitions:
         type: "number"
         description: "Avg value"
       day:
-        type: "string"
-        format: "date"
+        $ref: "#/definitions/Date"
         description: "Day date"
       max:
         type: "number"
@@ -80,130 +156,177 @@ definitions:
       min:
         type: "number"
         description: "Min value"
-  Data:
+  Feed:
     type: "object"
     properties:
-      aqi:
-        type: "number"
-        description: "Real-time air quality information"
-      idx:
-        type: "number"
-        description: "Unique ID for the city monitoring station"
-      attributions:
-        type: "array"
-        description: "EPA Attribution for the station"
-        items:
-          type: "object"
-          properties:
-            url:
-              type: "string"
-            name:
-              type: "string"
-            logo:
-              type: "string"
-      city:
-        type: "object"
-        description: "Information about the monitoring station"
-        properties:
-          geo:
-            type: "array"
-            description: "Latitude/Longitude of the monitoring station"
-            items:
-              type: "number"
-          name:
-            type: "string"
-            description: "Name of the monitoring station"
-          url:
-            type: "string"
-            description: "Webpage associated to the the monitoring station"
-      dominentpol:
+      status:
         type: "string"
-        description: "Dominant polutor"
-      iaqi:
+      data:
         type: "object"
-        description: "Measurement time information"
         properties:
-          co:
-            $ref: "#/definitions/Value"
-            description: "Carbon monoxide level (CO)"
-          h:
-            $ref: "#/definitions/Value"
-            description: "Humidity"
-          no2:
-            $ref: "#/definitions/Value"
-            description: "Nitrogen Dioxide level (NO2)"
-          o3:
-            $ref: "#/definitions/Value"
-            description: "Ozone level (O3)"
-          p:
-            $ref: "#/definitions/Value"
-            description: "Pressure"
-          pm10:
-            $ref: "#/definitions/Value"
-            description: "Coarse dust particles pollution level (PM10)"
-          pm25:
-            $ref: "#/definitions/Value"
-            description: "Fine particles pollution level (PM2.5)"
-          so2:
-            $ref: "#/definitions/Value"
-            description: "Sulfur dioxide level (SO2)"
-          t:
-            $ref: "#/definitions/Value"
-            description: "Temperature"
-          w:
-            $ref: "#/definitions/Value"
-            description: "Wind speed"
-          wg:
-            $ref: "#/definitions/Value"
-          dew:
-            $ref: "#/definitions/Value"
-            description: "Dew point"
-      time:
-        type: "object"
-        description: "Measurement time information"
-        properties:
-          s:
-            type: "string"
-            description: "Local measurement time time"
-          tz:
-            type: "string"
-            description: "Station timezone"
-          v:
-            type: "integer"
-          iso:
-            type: "string"
-            format: "date-time"
-      forecast:
-        type: "object"
-        description: "Forecast data"
-        properties:
-          daily:
+          aqi:
+            type: "number"
+            description: "Real-time air quality information"
+          idx:
+            type: "number"
+            description: "Unique ID for the city monitoring station"
+          attributions:
+            type: "array"
+            description: "EPA Attribution for the station"
+            items:
+              type: "object"
+              properties:
+                url:
+                  type: "string"
+                name:
+                  type: "string"
+                logo:
+                  type: "string"
+          city:
             type: "object"
-            description: "Daily forecast data"
+            description: "Information about the monitoring station"
             properties:
+              geo:
+                type: "array"
+                description: "Latitude/Longitude of the monitoring station"
+                items:
+                  type: "number"
+              name:
+                type: "string"
+                description: "Name of the monitoring station"
+              url:
+                type: "string"
+                description: "Webpage associated to the the monitoring station"
+          dominentpol:
+            type: "string"
+            description: "Dominant polutor"
+          iaqi:
+            type: "object"
+            description: "Measurement time information"
+            properties:
+              co:
+                $ref: "#/definitions/Value"
+                description: "Carbon monoxide level (CO)"
+              h:
+                $ref: "#/definitions/Value"
+                description: "Humidity"
+              no2:
+                $ref: "#/definitions/Value"
+                description: "Nitrogen Dioxide level (NO2)"
               o3:
-                type: "array"
-                description: "Ozone forecast"
-                items:
-                  $ref: "#/definitions/ForecastValue"
+                $ref: "#/definitions/Value"
+                description: "Ozone level (O3)"
+              p:
+                $ref: "#/definitions/Value"
+                description: "Pressure"
               pm10:
-                type: "array"
-                description: "PM10 forecast"
-                items:
-                  $ref: "#/definitions/ForecastValue"
+                $ref: "#/definitions/Value"
+                description: "Coarse dust particles pollution level (PM10)"
               pm25:
-                type: "array"
-                description: "PM2.5 forecast"
-                items:
-                  $ref: "#/definitions/ForecastValue"
-              uvi:
-                type: "array"
-                description: "Ultra Violet Index forecast"
-                items:
-                  $ref: "#/definitions/ForecastValue"
-      debug:
+                $ref: "#/definitions/Value"
+                description: "Fine particles pollution level (PM2.5)"
+              so2:
+                $ref: "#/definitions/Value"
+                description: "Sulfur dioxide level (SO2)"
+              t:
+                $ref: "#/definitions/Value"
+                description: "Temperature"
+              w:
+                $ref: "#/definitions/Value"
+                description: "Wind speed"
+              wg:
+                $ref: "#/definitions/Value"
+              dew:
+                $ref: "#/definitions/Value"
+                description: "Dew point"
+          time:
+            type: "object"
+            description: "Measurement time information"
+            properties:
+              s:
+                $ref: "#/definitions/DateTime"
+                description: "Local measurement time time"
+              tz:
+                type: "string"
+                description: "Station timezone"
+              v:
+                $ref: "#/definitions/DateTimeUnix"
+              iso:
+                type: "string"
+                format: "date-time"
+          forecast:
+            type: "object"
+            description: "Forecast data"
+            properties:
+              daily:
+                type: "object"
+                description: "Daily forecast data"
+                properties:
+                  o3:
+                    type: "array"
+                    description: "Ozone forecast"
+                    items:
+                      $ref: "#/definitions/ForecastValue"
+                  pm10:
+                    type: "array"
+                    description: "PM10 forecast"
+                    items:
+                      $ref: "#/definitions/ForecastValue"
+                  pm25:
+                    type: "array"
+                    description: "PM2.5 forecast"
+                    items:
+                      $ref: "#/definitions/ForecastValue"
+                  uvi:
+                    type: "array"
+                    description: "Ultra Violet Index forecast"
+                    items:
+                      $ref: "#/definitions/ForecastValue"
+          debug:
+            type: "object"
+            properties:
+              sync:
+                type: "string"
+                format: "date-time"
+  Search:
+    type: "object"
+    properties:
+      status:
+        type: "string"
+      data:
         type: "object"
         properties:
-          sync:
-            type: "string"
-            format: "date-time"
+          uid:
+            type: "integer"
+            description: "Unique ID for the city monitoring station"
+          aqi:
+            type: "integer"
+            description: "Real-time air quality infomrmation"
+          time:
+            type: "object"
+            properties:
+              stime:
+                $ref: "#/definitions/DateTime"
+                description: "Local measurement time time"
+              tz:
+                type: "string"
+                description: "Station timezone"
+              vtime:
+                $ref: "#/definitions/DateTimeUnix"
+          station:
+            type: "object"
+            properties:
+              name:
+                type: "string"
+                description: "Name of the monitoring station"
+              geo:
+                type: "array"
+                description: "Latitude/Longitude of the monitoring station"
+                items:
+                  type: "number"
+              url:
+                type: "string"
+                description: "Webpage associated to the the monitoring station"
+              country:
+                type: "string"
+                description: "Country of the monitoring station"
