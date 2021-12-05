@@ -114,6 +114,8 @@ namespace esphome {
           break;
         }
 
+        memcpy(this->packet_buffer_ + (i - begin), this->read_buffer_ + i, MERCURY1_FIELD_CRC_LENGTH);
+
         // игнорируем пакеты с некорректной контрольной суммой, так как в эфире бывает дичь из обрывков пакетов
         uint16_t computed_crc = this->crc16(this->packet_buffer_, i - begin);
         uint16_t remote_crc = uint16_t(this->read_buffer_[i]) | (uint16_t(this->read_buffer_[i+1]) << 8);
@@ -146,7 +148,7 @@ namespace esphome {
 
           case Command::READ_PARAMS_CURRENT:
             this->V = this->to_long(&this->read_buffer_[data_index]) / 10;
-            this->A = this->to_long(&this->read_buffer_[data_index+2]) / 100;
+            this->A = this->to_long(&this->read_buffer_[data_index+2]) / 100.0;
             this->W = this->to_long<3>(&this->read_buffer_[data_index+4]);
 
             this->voltage_sensor_->publish_state(this->V);
