@@ -52,6 +52,7 @@ sensor:
     name: "Total Daily Energy"
     icon: "mdi:current-ac"
     power_id: "power"
+    method: "trapezoid"
   - platform: mercury1
     address: !secret device_009_mercury_address
     update_interval: 60s

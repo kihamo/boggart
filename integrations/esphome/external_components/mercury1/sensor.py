@@ -38,7 +38,7 @@ CONFIG_SCHEMA = (
             cv.Required(CONF_ADDRESS): cv.hex_uint32_t,
             cv.Optional(CONF_VOLTAGE): sensor.sensor_schema(
                 unit_of_measurement=UNIT_VOLT,
-                accuracy_decimals=1,
+                accuracy_decimals=0,
                 device_class=DEVICE_CLASS_VOLTAGE,
                 state_class=STATE_CLASS_MEASUREMENT,
                 icon=ICON_FLASH,
