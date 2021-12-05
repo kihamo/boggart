@@ -125,7 +125,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 						WithStateTopic(cfg.TopicMeterValue.Format(house.ID, serviceID, meterTariff)).
 						AddItems(
 							openhab.NewItem(itemPrefix+id+idMeterValue, openhab.ItemTypeNumber).
-								WithLabel("Tariff "+meterTariff+" value [JS(human_watts.js):%s]").
+								WithLabel("Tariff "+meterTariff+" value [JS("+openhab.StepDefaultTransformHumanWatts.Base()+"):%s]").
 								WithIcon("pressure"),
 						),
 					openhab.NewChannel(id+idMeterDate, openhab.ChannelTypeDateTime).

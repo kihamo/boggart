@@ -27,6 +27,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 	cfg := b.config()
 
 	channels := make([]*openhab.Channel, 0, tariffCount+9)
+	transformHumanWatts := openhab.StepDefaultTransformHumanWatts.Base()
 
 	for i := uint64(1); i <= uint64(tariffCount); i++ {
 		index := strconv.FormatUint(i, 10)
@@ -37,7 +38,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 				WithStateTopic(cfg.TopicTariff.Format(cfg.Address, index)).
 				AddItems(
 					openhab.NewItem(itemPrefix+id, openhab.ItemTypeNumber).
-						WithLabel("Tariff "+index+" [JS(human_watts.js):%s]").
+						WithLabel("Tariff "+index+" [JS("+transformHumanWatts+"):%s]").
 						WithIcon("energy"),
 				),
 		)
@@ -74,7 +75,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 			WithStateTopic(cfg.TopicPower.Format(cfg.Address)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idPower, openhab.ItemTypeNumber).
-					WithLabel("Power [JS(human_watts.js):%s]").
+					WithLabel("Power [JS("+transformHumanWatts+"):%s]").
 					WithIcon("energy"),
 			),
 		openhab.NewChannel(idBatteryVoltage, openhab.ChannelTypeNumber).

@@ -42,12 +42,14 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 		idFirmwareVersion = "FirmwareVersion"
 	)
 
+	transformHumanWatts := openhab.StepDefaultTransformHumanWatts.Base()
+
 	channels = append(channels,
 		openhab.NewChannel(idTariff, openhab.ChannelTypeNumber).
 			WithStateTopic(cfg.TopicTariff.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idTariff, openhab.ItemTypeNumber).
-					WithLabel("Tariff [JS(human_watts.js):%s]").
+					WithLabel("Tariff [JS("+transformHumanWatts+"):%s]").
 					WithIcon("energy"),
 			),
 		openhab.NewChannel(idVoltagePhase1, openhab.ChannelTypeNumber).
@@ -103,7 +105,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 			WithStateTopic(cfg.TopicPowerPhase1.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idPowerPhase1, openhab.ItemTypeNumber).
-					WithLabel("Power phase 1 [JS(human_watts.js):%s]").
+					WithLabel("Power phase 1 [JS("+transformHumanWatts+"):%s]").
 					WithIcon("energy"),
 			),
 		openhab.NewChannel(idPowerPhase2, openhab.ChannelTypeNumber).
@@ -117,14 +119,14 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 			WithStateTopic(cfg.TopicPowerPhase3.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idPowerPhase3, openhab.ItemTypeNumber).
-					WithLabel("Power phase 3 [JS(human_watts.js):%s]").
+					WithLabel("Power phase 3 [JS("+transformHumanWatts+"):%s]").
 					WithIcon("energy"),
 			),
 		openhab.NewChannel(idPowerTotal, openhab.ChannelTypeNumber).
 			WithStateTopic(cfg.TopicPowerTotal.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idPowerTotal, openhab.ItemTypeNumber).
-					WithLabel("Power total [JS(human_watts.js):%s]").
+					WithLabel("Power total [JS("+transformHumanWatts+"):%s]").
 					WithIcon("energy"),
 			),
 		openhab.NewChannel(idMakeDate, openhab.ChannelTypeDateTime).

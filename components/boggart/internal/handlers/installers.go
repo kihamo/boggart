@@ -70,7 +70,7 @@ func (h *InstallerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request
 	}
 
 	// merge steps by file
-	stepsMerged := make(map[string]int, len(steps))
+	stepsMerged := make(map[installer.Path]int, len(steps))
 
 	for i := len(steps) - 1; i >= 0; i-- {
 		if steps[i].Content == "" {
@@ -114,7 +114,7 @@ func (h *InstallerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request
 		buf := bytes.NewBuffer(nil)
 
 		for i, step := range steps {
-			if index > -1 && i != index || step.FilePath != filePath {
+			if index > -1 && i != index || step.FilePath.String() != filePath {
 				continue
 			}
 

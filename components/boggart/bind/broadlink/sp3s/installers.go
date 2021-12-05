@@ -65,7 +65,7 @@ func main() {
 			WithStateTopic(cfg.TopicPower.Format(mac)).
 			AddItems(
 				openhab.NewItem(itemPrefix+"Power", openhab.ItemTypeNumber).
-					WithLabel("Power [JS(human_watts.js):%s]").
+					WithLabel("Power [JS("+openhab.StepDefaultTransformHumanWatts.Base()+"):%s]").
 					WithIcon("energy"),
 			),
 	)

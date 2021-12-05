@@ -39,6 +39,8 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 		idHDDFree         = "HDDFree"
 	)
 
+	transformHumanBytes := openhab.StepDefaultTransformHumanBytes.Base()
+
 	channels = append(channels,
 		openhab.NewChannel(idModel, openhab.ChannelTypeString).
 			WithStateTopic(cfg.TopicStateModel.Format(sn)).
@@ -62,21 +64,21 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 				WithStateTopic(cfg.TopicStateHDDCapacity.Format(sn, disk.SerialNum)).
 				AddItems(
 					openhab.NewItem(itemPrefix+id+idHDDCapacity, openhab.ItemTypeNumber).
-						WithLabel("HDD capacity [JS(human_bytes.js):%s]").
+						WithLabel("HDD capacity [JS("+transformHumanBytes+"):%s]").
 						WithIcon("chart"),
 				),
 			openhab.NewChannel(id+idHDDUsage, openhab.ChannelTypeNumber).
 				WithStateTopic(cfg.TopicStateHDDUsage.Format(sn, disk.SerialNum)).
 				AddItems(
 					openhab.NewItem(itemPrefix+id+idHDDUsage, openhab.ItemTypeNumber).
-						WithLabel("HDD usage [JS(human_bytes.js):%s]").
+						WithLabel("HDD usage [JS("+transformHumanBytes+"):%s]").
 						WithIcon("chart"),
 				),
 			openhab.NewChannel(id+idHDDFree, openhab.ChannelTypeNumber).
 				WithStateTopic(cfg.TopicStateHDDFree.Format(sn, disk.SerialNum)).
 				AddItems(
 					openhab.NewItem(itemPrefix+id+idHDDFree, openhab.ItemTypeNumber).
-						WithLabel("HDD free [JS(human_bytes.js):%s]").
+						WithLabel("HDD free [JS("+transformHumanBytes+"):%s]").
 						WithIcon("chart"),
 				),
 		)

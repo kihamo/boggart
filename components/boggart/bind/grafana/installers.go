@@ -17,10 +17,13 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 	meta := b.Meta()
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
 
-	const idAnnotation = "Annotation"
+	const (
+		idAnnotation                       = "Annotation"
+		transformAnnotation installer.Path = openhab.DirectoryTransform + "grafana_annotation.js"
+	)
 
 	return openhab.StepsByBind(b, []installer.Step{{
-		FilePath: "grafana_annotation.js",
+		FilePath: transformAnnotation,
 		Content: `(function(i) {
     try {
         var annotation = JSON.parse(i);
@@ -40,7 +43,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 	}},
 		openhab.NewChannel(idAnnotation, openhab.ChannelTypeString).
 			WithCommandTopic(b.config().TopicAnnotation.Format(meta.ID())).
-			WithTransformationPatternOut("JS:grafana_annotation.js").
+			WithTransformationPatternOut("JS:"+transformAnnotation.Base()).
 			AddItems(
 				openhab.NewItem(itemPrefix+idAnnotation, openhab.ItemTypeString).
 					WithLabel("Annotation").

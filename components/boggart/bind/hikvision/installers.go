@@ -35,6 +35,9 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 		idMemoryAvailable      = "MemoryAvailable"
 	)
 
+	transformHumanSeconds := openhab.StepDefaultTransformHumanSeconds.Base()
+	transformHumanBytes := openhab.StepDefaultTransformHumanBytes.Base()
+
 	channels := []*openhab.Channel{
 		openhab.NewChannel(idModel, openhab.ChannelTypeString).
 			WithStateTopic(cfg.TopicStateModel.Format(sn)).
@@ -58,21 +61,21 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 			WithStateTopic(cfg.TopicStateUpTime.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idUpTime, openhab.ItemTypeString).
-					WithLabel("Uptime [JS(human_seconds.js):%s]").
+					WithLabel("Uptime [JS(" + transformHumanSeconds + "):%s]").
 					WithIcon("time"),
 			),
 		openhab.NewChannel(idMemoryUsage, openhab.ChannelTypeNumber).
 			WithStateTopic(cfg.TopicStateMemoryUsage.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idMemoryUsage, openhab.ItemTypeNumber).
-					WithLabel("Memory usage [JS(human_bytes.js):%s]").
+					WithLabel("Memory usage [JS(" + transformHumanBytes + "):%s]").
 					WithIcon("chart"),
 			),
 		openhab.NewChannel(idMemoryAvailable, openhab.ChannelTypeNumber).
 			WithStateTopic(cfg.TopicStateMemoryAvailable.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idMemoryAvailable, openhab.ItemTypeNumber).
-					WithLabel("Memory available [JS(human_bytes.js):%s]").
+					WithLabel("Memory available [JS(" + transformHumanBytes + "):%s]").
 					WithIcon("chart"),
 			),
 	}
@@ -117,21 +120,21 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 					WithStateTopic(cfg.TopicStateHDDCapacity.Format(sn, hdd.ID)).
 					AddItems(
 						openhab.NewItem(itemPrefix+id+idHDDCapacity, openhab.ItemTypeNumber).
-							WithLabel("HDD capacity [JS(human_bytes.js):%s]").
+							WithLabel("HDD capacity [JS("+transformHumanBytes+"):%s]").
 							WithIcon("chart"),
 					),
 				openhab.NewChannel(id+idHDDUsage, openhab.ChannelTypeNumber).
 					WithStateTopic(cfg.TopicStateHDDUsage.Format(sn, hdd.ID)).
 					AddItems(
 						openhab.NewItem(itemPrefix+id+idHDDUsage, openhab.ItemTypeNumber).
-							WithLabel("HDD usage [JS(human_bytes.js):%s]").
+							WithLabel("HDD usage [JS("+transformHumanBytes+"):%s]").
 							WithIcon("chart"),
 					),
 				openhab.NewChannel(id+idHDDFree, openhab.ChannelTypeNumber).
 					WithStateTopic(cfg.TopicStateHDDFree.Format(sn, hdd.ID)).
 					AddItems(
 						openhab.NewItem(itemPrefix+id+idHDDFree, openhab.ItemTypeNumber).
-							WithLabel("HDD free [JS(human_bytes.js):%s]").
+							WithLabel("HDD free [JS("+transformHumanBytes+"):%s]").
 							WithIcon("chart"),
 					),
 			)

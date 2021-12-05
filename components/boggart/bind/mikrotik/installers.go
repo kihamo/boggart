@@ -245,7 +245,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 				WithStateTopic(cfg.TopicUPSBatteryRuntime.Format(sn, upsName)).
 				AddItems(
 					openhab.NewItem(itemPrefix+upsID+idUPSBatteryRuntime, openhab.ItemTypeNumber).
-						WithLabel("Battery runtime [JS(human_seconds.js):%s]").
+						WithLabel("Battery runtime [JS("+openhab.StepDefaultTransformHumanSeconds.Base()+"):%s]").
 						WithIcon("time"),
 				),
 			openhab.NewChannel(upsID+idUPSInputVoltage, openhab.ChannelTypeNumber).

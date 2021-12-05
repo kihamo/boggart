@@ -18,7 +18,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 	id := meta.ID()
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
 	cfg := b.config()
-	channels := make([]*openhab.Channel, 0, 11)
+	channels := make([]*openhab.Channel, 0, 12)
 
 	channels = append(channels,
 		openhab.NewChannel("CurrentTemperature", openhab.ChannelTypeNumber).
@@ -33,6 +33,14 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 			AddItems(
 				openhab.NewItem(itemPrefix+"CurrentPressure", openhab.ItemTypeNumber).
 					WithLabel("Current pressure [%.1f hPa]").
+					WithIcon("pressure"),
+			),
+		openhab.NewChannel("CurrentPressureMmHg", openhab.ChannelTypeNumber).
+			WithStateTopic(cfg.TopicCurrentPressure.Format(id)).
+			WithTransformationPattern("JS:"+openhab.StepDefaultTransformToMmHg.Base()).
+			AddItems(
+				openhab.NewItem(itemPrefix+"CurrentPressureMmHg", openhab.ItemTypeNumber).
+					WithLabel("Current pressure [%.1f mmGh]").
 					WithIcon("pressure"),
 			),
 		openhab.NewChannel("CurrentHumidity", openhab.ChannelTypeNumber).
@@ -100,5 +108,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 			),
 	)
 
-	return openhab.StepsByBind(b, nil, channels...)
+	return openhab.StepsByBind(b, []installer.Step{
+		openhab.StepDefault(openhab.StepDefaultTransformToMmHg),
+	}, channels...)
 }

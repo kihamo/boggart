@@ -18,9 +18,10 @@ const (
 	DirectoryItems     = "items/"
 	DirectoryTransform = "transform/"
 
-	StepDefaultTransformHumanBytes   = DirectoryTransform + "human_bytes.js"
-	StepDefaultTransformHumanWatts   = DirectoryTransform + "human_watts.js"
-	StepDefaultTransformHumanSeconds = DirectoryTransform + "human_seconds.js"
+	StepDefaultTransformHumanBytes   installer.Path = DirectoryTransform + "human_bytes.js"
+	StepDefaultTransformHumanWatts   installer.Path = DirectoryTransform + "human_watts.js"
+	StepDefaultTransformHumanSeconds installer.Path = DirectoryTransform + "human_seconds.js"
+	StepDefaultTransformToMmHg       installer.Path = DirectoryTransform + "to_mmhg.js"
 )
 
 var (
@@ -36,7 +37,7 @@ var (
 		"-", "_",
 	)
 
-	defaultSteps = map[string]installer.Step{
+	defaultSteps = map[installer.Path]installer.Step{
 		StepDefaultTransformHumanBytes: {
 			FilePath: StepDefaultTransformHumanBytes,
 			Content: `(function(i) {
@@ -129,6 +130,12 @@ var (
 
 })(input);`,
 		},
+		StepDefaultTransformToMmHg: {
+			FilePath: StepDefaultTransformToMmHg,
+			Content: `(function(i) {
+    return parseFloat(i) *  .75006375541921;
+})(input)`,
+		},
 		// TODO: human duration
 	}
 )
@@ -215,14 +222,14 @@ func StepsByBind(bind boggart.Bind, steps []installer.Step, channels ...*Channel
 
 	if content := thing.String(); content != "" {
 		list = append(list, installer.Step{
-			FilePath: DirectoryThings + filePrefix + ".things",
+			FilePath: installer.Path(DirectoryThings + filePrefix + ".things"),
 			Content:  content,
 		})
 	}
 
 	if content := thing.Items().String(); content != "" {
 		list = append(list, installer.Step{
-			FilePath: DirectoryItems + filePrefix + ".items",
+			FilePath: installer.Path(DirectoryItems + filePrefix + ".items"),
 			Content:  content,
 		})
 	}
@@ -292,6 +299,6 @@ func FilePrefixFromBindMeta(meta *di.MetaContainer) string {
 	return IDNormalize("bind_" + strings.ToLower(meta.Type()))
 }
 
-func StepDefault(name string) installer.Step {
+func StepDefault(name installer.Path) installer.Step {
 	return defaultSteps[name]
 }
