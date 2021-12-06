@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"net"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -27,6 +28,10 @@ func (b *Bind) config() *Config {
 func (b *Bind) Run() error {
 	cfg := b.config()
 	b.address = net.JoinHostPort(cfg.Hostname, strconv.Itoa(cfg.Port))
+	b.Meta().SetLink(&url.URL{
+		Scheme: "http",
+		Host:   b.address,
+	})
 
 	return nil
 }

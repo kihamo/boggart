@@ -57,5 +57,12 @@ func (c *Component) ConfigVariables() []config.Variable {
 				return boggart.ComponentName + "/bind/+/mac"
 			}).
 			WithEditable(true),
+		config.NewVariable(boggart.ConfigMQTTTopicBindLink, config.ValueTypeString).
+			WithGroup("MQTT topics").
+			WithUsage("Boggart MQTT topic bind external link").
+			WithDefaultFunc(func() interface{} {
+				return boggart.ComponentName + "/bind/+/link"
+			}).
+			WithEditable(true),
 	}
 }

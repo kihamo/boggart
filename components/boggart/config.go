@@ -10,4 +10,5 @@ const (
 	ConfigMQTTTopicBindReload       = ComponentName + ".mqtt-topic.bind.reload"
 	ConfigMQTTTopicBindSerialNumber = ComponentName + ".mqtt-topic.bind.serial-number"
 	ConfigMQTTTopicBindMAC          = ComponentName + ".mqtt-topic.bind.mac"
+	ConfigMQTTTopicBindLink         = ComponentName + ".mqtt-topic.bind.link"
 )

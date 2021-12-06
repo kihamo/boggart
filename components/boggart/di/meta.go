@@ -3,6 +3,7 @@ package di
 import (
 	"context"
 	"net"
+	"net/url"
 	"sync"
 	"sync/atomic"
 
@@ -51,6 +52,7 @@ type MetaContainer struct {
 
 	serialNumber atomic.Value
 	mac          atomic.Value
+	link         atomic.Value
 }
 
 func NewMetaContainer(bindItem boggart.BindItem, mqtt mqtt.Component, config config.Component) *MetaContainer {
@@ -146,6 +148,35 @@ func (b *MetaContainer) SetMACAsString(mac string) error {
 	return err
 }
 
+func (b *MetaContainer) Link() *url.URL {
+	if sn := b.link.Load(); sn != nil {
+		if link, ok := sn.(*url.URL); ok {
+			copy := &url.URL{}
+			*copy = *link
+			return copy
+		}
+	}
+
+	return nil
+}
+
+func (b *MetaContainer) SetLink(link *url.URL) {
+	if link != nil {
+		copy := &url.URL{}
+		*copy = *link
+		link = copy
+	}
+
+	b.link.Store(link)
+
+	if b.diMQTT != nil {
+		b.diMQTT.PublishAsync(context.Background(), b.MQTTTopicLink(), link)
+		return
+	}
+
+	b.mqtt.PublishAsyncWithCache(context.Background(), b.MQTTTopicLink(), 1, true, link)
+}
+
 func (b *MetaContainer) MQTTTopicStatus() mqtt.Topic {
 	return mqtt.Topic(b.config.String(boggart.ConfigMQTTTopicBindStatus)).Format(b.ID())
 }
@@ -160,4 +191,8 @@ func (b *MetaContainer) MQTTTopicSerialNumber() mqtt.Topic {
 
 func (b *MetaContainer) MQTTTopicMAC() mqtt.Topic {
 	return mqtt.Topic(b.config.String(boggart.ConfigMQTTTopicBindMAC)).Format(b.ID())
+}
+
+func (b *MetaContainer) MQTTTopicLink() mqtt.Topic {
+	return mqtt.Topic(b.config.String(boggart.ConfigMQTTTopicBindLink)).Format(b.ID())
 }

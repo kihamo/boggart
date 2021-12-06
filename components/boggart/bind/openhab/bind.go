@@ -94,6 +94,8 @@ func (b *Bind) Run() (err error) {
 		b.proxyServer = nil
 	}
 
+	b.Meta().SetLink(&cfg.Address.URL)
+
 	return nil
 }
 

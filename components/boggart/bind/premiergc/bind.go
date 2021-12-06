@@ -2,10 +2,15 @@ package premiergc
 
 import (
 	"context"
+	"net/url"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/premiergc"
+)
+
+var (
+	link, _ = url.Parse("https://my.premier-gc.ru/")
 )
 
 type Bind struct {
@@ -26,6 +31,7 @@ func (b *Bind) config() *Config {
 func (b *Bind) Run() error {
 	cfg := b.config()
 
+	b.Meta().SetLink(link)
 	b.provider = premiergc.New(cfg.Login, cfg.Password, cfg.Debug)
 
 	return nil

@@ -34,6 +34,8 @@ func (b *Bind) config() *Config {
 func (b *Bind) Run() error {
 	cfg := b.config()
 
+	b.Meta().SetLink(&cfg.CaptureURL.URL)
+
 	if cfg.SaveDirectory == "" {
 		cacheDir, _ := os.UserCacheDir()
 		if cacheDir == "" {

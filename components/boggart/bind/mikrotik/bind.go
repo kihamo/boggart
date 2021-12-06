@@ -1,7 +1,6 @@
 package mikrotik
 
 import (
-	"net/url"
 	"regexp"
 	"strings"
 	"sync"
@@ -63,15 +62,10 @@ func (b *Bind) config() *Config {
 func (b *Bind) Run() error {
 	cfg := b.config()
 
-	u, err := url.Parse(cfg.Address)
-	if err != nil {
-		return err
-	}
+	username := cfg.Address.User.Username()
+	password, _ := cfg.Address.User.Password()
 
-	username := u.User.Username()
-	password, _ := u.User.Password()
-
-	b.provider = mikrotik.NewClient(u.Host, username, password, cfg.ClientTimeout)
+	b.provider = mikrotik.NewClient(cfg.Address.Host, username, password, cfg.ClientTimeout)
 
 	b.macMappingCase = make(map[string]string, len(cfg.MacAddressMapping))
 	for mac, alias := range cfg.MacAddressMapping {

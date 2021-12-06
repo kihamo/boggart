@@ -3,6 +3,7 @@ package elektroset
 import (
 	"context"
 	"errors"
+	"net/url"
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/di"
@@ -12,6 +13,17 @@ import (
 const (
 	layoutPeriod = "2006-01-02"
 )
+
+var link *url.URL
+
+func init() {
+	l, _ := url.Parse(elektroset.BaseURL)
+
+	link = &url.URL{
+		Scheme: l.Scheme,
+		Host:   l.Host,
+	}
+}
 
 type Bind struct {
 	di.ConfigBind
@@ -36,6 +48,8 @@ func (b *Bind) Run() error {
 
 	b.client = elektroset.New(cfg.Login, cfg.Password)
 	b.metersCount.Nil()
+
+	b.Meta().SetLink(link)
 
 	return nil
 }

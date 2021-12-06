@@ -3,14 +3,27 @@ package mosenergosbyt
 import (
 	"context"
 	"errors"
+	"net/url"
 
 	"github.com/kihamo/boggart/components/boggart/di"
+	"github.com/kihamo/boggart/providers/integratorit/elektroset"
 	"github.com/kihamo/boggart/providers/integratorit/mosenergosbyt"
 )
 
 var services = map[string]string{
 	"взнос на капитальный ремонт": "10001",
 	"обращение с тко":             "10002",
+}
+
+var link *url.URL
+
+func init() {
+	l, _ := url.Parse(elektroset.BaseURL)
+
+	link = &url.URL{
+		Scheme: l.Scheme,
+		Host:   l.Host,
+	}
 }
 
 const (
@@ -57,6 +70,8 @@ func (b *Bind) Run() error {
 			break
 		}
 	}
+
+	b.Meta().SetLink(link)
 
 	return nil
 }

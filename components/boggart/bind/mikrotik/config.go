@@ -6,13 +6,14 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/types"
 )
 
 type Config struct {
 	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
-	Address                       string            `valid:"url,required"`
+	Address                       types.URL         `valid:",required"`
 	ClientTimeout                 time.Duration     `mapstructure:"client_timeout" yaml:"client_timeout"`
 	ClientsSyncInterval           time.Duration     `mapstructure:"clients_sync_interval" yaml:"clients_sync_interval"`
 	UpdaterInterval               time.Duration     `mapstructure:"updater_interval" yaml:"updater_interval"`

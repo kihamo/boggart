@@ -272,6 +272,15 @@ func (b *Bind) initBot() (*tgbotapi.BotAPI, error) {
 	}
 
 	b.Meta().SetSerialNumber(strconv.Itoa(client.Self.ID))
+
+	if client.Self.UserName != "" {
+		if link, err := url.Parse("https://t.me/" + client.Self.UserName); err == nil {
+			b.Meta().SetLink(link)
+		}
+	} else {
+		b.Meta().SetLink(nil)
+	}
+
 	client.Debug = cfg.Debug
 
 	if cfg.UpdatesEnabled {

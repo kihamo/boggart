@@ -203,6 +203,8 @@ func easyjsonEd74d837DecodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 			out.SerialNumber = string(in.String())
 		case "mac":
 			out.MAC = string(in.String())
+		case "link":
+			out.Link = string(in.String())
 		case "status":
 			out.Status = string(in.String())
 		case "metrics_descriptions_count":
@@ -311,6 +313,11 @@ func easyjsonEd74d837EncodeGithubComKihamoBoggartComponentsBoggartInternalHandle
 		const prefix string = ",\"mac\":"
 		out.RawString(prefix)
 		out.String(string(in.MAC))
+	}
+	{
+		const prefix string = ",\"link\":"
+		out.RawString(prefix)
+		out.String(string(in.Link))
 	}
 	{
 		const prefix string = ",\"status\":"

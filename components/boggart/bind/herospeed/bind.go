@@ -33,6 +33,8 @@ func (b *Bind) Run() error {
 
 	b.client = herospeed.New(cfg.Address.Hostname(), port, cfg.Address.User.Username(), password)
 
+	b.Meta().SetLink(&cfg.Address.URL)
+
 	return nil
 }
 

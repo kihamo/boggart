@@ -62,6 +62,12 @@ $(document).ready(function () {
                                 '</a>';
                         }
 
+                        if (row.link.length > 0) {
+                            content += '<a href="' + row.link + '" target="_blank" class="btn btn-info btn-icon btn-xs">' +
+                                '<i class="fas fa-globe" title="Open link"></i>' +
+                                '</a>';
+                        }
+
                         if (row.tasks && row.tasks.length > 0) {
                             var
                                 unregistered = 0,

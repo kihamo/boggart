@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -49,8 +51,33 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 		return errors.New("serial number is empty")
 	}
 
-	b.Meta().SetSerialNumber(system.SerialNumber)
+	var link *url.URL
 	cfg := b.config()
+
+	if services, err := b.provider.IPServices(ctx); err == nil {
+		for _, service := range services {
+			if service.Disabled || service.Invalid {
+				continue
+			}
+
+			if service.Name == "www-ssl" {
+				link = &url.URL{
+					Scheme: "https",
+					Host:   net.JoinHostPort(cfg.Address.Hostname(), strconv.FormatUint(service.Port, 10)),
+				}
+
+				break
+			} else if service.Name == "www" {
+				link = &url.URL{
+					Scheme: "http",
+					Host:   net.JoinHostPort(cfg.Address.Hostname(), strconv.FormatUint(service.Port, 10)),
+				}
+			}
+		}
+	}
+
+	b.Meta().SetSerialNumber(system.SerialNumber)
+	b.Meta().SetLink(link)
 
 	_, err = b.Workers().RegisterTask(
 		tasks.NewTask().

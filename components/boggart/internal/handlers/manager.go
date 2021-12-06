@@ -31,6 +31,7 @@ type managerHandlerDevice struct {
 	Description              string                     `json:"description"`
 	SerialNumber             string                     `json:"serial_number"`
 	MAC                      string                     `json:"mac"`
+	Link                     string                     `json:"link"`
 	Status                   string                     `json:"status"`
 	MetricsDescriptionsCount uint64                     `json:"metrics_descriptions_count"`
 	MetricsCollectCount      uint64                     `json:"metrics_collect_count"`
@@ -170,6 +171,10 @@ func (h *ManagerHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) 
 
 				if mac := bindSupport.MAC(); mac != nil {
 					item.MAC = mac.String()
+				}
+
+				if link := bindSupport.Link(); link != nil {
+					item.Link = link.String()
 				}
 			}
 

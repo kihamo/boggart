@@ -3,11 +3,16 @@ package dom24
 import (
 	"context"
 	"fmt"
+	"net/url"
 
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/protocols/swagger"
 	"github.com/kihamo/boggart/providers/dom24"
 	"github.com/kihamo/boggart/providers/dom24/client/user"
+)
+
+var (
+	link, _ = url.Parse("https://dom-24.net")
 )
 
 type Bind struct {
@@ -31,6 +36,7 @@ func (b *Bind) Run() error {
 	cfg := b.config()
 
 	b.Meta().SetSerialNumber(cfg.Phone)
+	b.Meta().SetLink(link)
 
 	b.provider = dom24.New(cfg.Phone, cfg.Password, cfg.Debug, swagger.NewLogger(
 		func(message string) {

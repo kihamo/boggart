@@ -3,6 +3,7 @@ package mqtt
 import (
 	"context"
 	"net"
+	"net/url"
 
 	"github.com/kihamo/boggart/components/mqtt"
 )
@@ -81,7 +82,13 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 					}
 
 					if cfg.IPAddressSensorID == id {
-						b.ip.Store(net.ParseIP(message.String()))
+						ip := net.ParseIP(message.String())
+						b.ip.Store(ip)
+
+						b.Meta().SetLink(&url.URL{
+							Scheme: "http",
+							Host:   ip.String(),
+						})
 					}
 
 					if err := component.SetState(message); err != nil {

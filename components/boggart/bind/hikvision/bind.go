@@ -59,6 +59,8 @@ func (b *Bind) Run() error {
 		}))
 	b.alertStreamingHistory = make(map[string]time.Time)
 
+	b.Meta().SetLink(&cfg.Address.URL)
+
 	return nil
 }
 

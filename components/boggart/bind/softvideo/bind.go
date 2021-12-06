@@ -2,10 +2,15 @@ package softvideo
 
 import (
 	"context"
+	"net/url"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/providers/softvideo"
+)
+
+var (
+	link, _ = url.Parse(softvideo.AccountURL)
 )
 
 type Bind struct {
@@ -27,6 +32,7 @@ func (b *Bind) Run() error {
 	cfg := b.config()
 
 	b.Meta().SetSerialNumber(cfg.Login)
+	b.Meta().SetLink(link)
 	b.provider = softvideo.New(cfg.Login, cfg.Password, cfg.Debug)
 
 	return nil

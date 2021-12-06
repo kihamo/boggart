@@ -47,6 +47,17 @@ type IPDNSStatic struct {
 	Comment  string   `mapstructure:"comment,omitempty"`
 }
 
+type IPService struct {
+	ID          string `mapstructure:".id"`
+	Name        string `mapstructure:"name"`
+	Port        uint64 `mapstructure:"port"`
+	Address     string `mapstructure:"address"`
+	Certificate string `mapstructure:"certificate"`
+	TLSVersion  string `mapstructure:"tls-version"`
+	Disabled    bool   `mapstructure:"disabled"`
+	Invalid     bool   `mapstructure:"invalid"`
+}
+
 func (c *Client) IPARP(ctx context.Context) (result []IPARP, err error) {
 	err = c.doConvert(ctx, []string{"/ip/arp/print"}, &result)
 	return result, err
@@ -59,5 +70,10 @@ func (c *Client) IPDHCPServerLease(ctx context.Context) (result []IPDHCPServerLe
 
 func (c *Client) IPDNSStatic(ctx context.Context) (result []IPDNSStatic, err error) {
 	err = c.doConvert(ctx, []string{"/ip/dns/static/print"}, &result)
+	return result, err
+}
+
+func (c *Client) IPServices(ctx context.Context) (result []IPService, err error) {
+	err = c.doConvert(ctx, []string{"/ip/service/print"}, &result)
 	return result, err
 }
