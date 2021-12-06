@@ -26,7 +26,11 @@ external_components:
   - source:
       type: local
       path: ./external_components
-  - source: github://oxan/esphome-stream-server
+#  - source: github://oxan/esphome-stream-server
+
+#stream_server:
+#  uart_id: uart_bus
+#  port: 1234
 
 uart:
   id: uart_bus
@@ -36,16 +40,19 @@ uart:
   stop_bits: 1
   tx_pin: GPIO17
   rx_pin: GPIO16
+  debug:
+    direction: BOTH
+    dummy_receiver: false
+    after:
+      bytes: 60
+    sequence:
+      - lambda: UARTDebug::log_hex(direction, bytes, ':');
 
 i2c:
   sda: SDA
   scl: SCL
   scan: True
   id: bus_a
-
-stream_server:
-  uart_id: uart_bus
-  port: 1234
 
 sensor:
   - platform: total_daily_energy

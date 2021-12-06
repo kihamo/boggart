@@ -22,38 +22,37 @@ namespace esphome {
 
     void Mercury1::read_from_uart() {
       memset(this->read_buffer_, 0, MERCURY1_READ_BUFFER_SIZE);
-      int offset = 0;
+      int response_len = 0;
 
       while (this->available()) {
         delay(10); // FIXME: задержка не портит буфер, без задержки байты читаются рандомно
 
-        if(offset > MERCURY1_READ_BUFFER_SIZE) {
+        if(response_len > MERCURY1_READ_BUFFER_SIZE) {
           ESP_LOGW(TAG, "Buffer overflow");
           this->clean_uart_buffer();
           break;
         }
 
-        this->read_byte(&this->read_buffer_[offset]);
-        offset++;
+        this->read_byte(&this->read_buffer_[response_len]);
+        response_len++;
       }
 
-      ESP_LOGV(TAG, "Response raw %s", hexencode(this->read_buffer_, offset).c_str());
+      ESP_LOGV(TAG, "Response raw %s", hexencode(this->read_buffer_, response_len).c_str());
 
       // игнорируем пакеты на отсылку команд самому счетчику
-      if(offset <= MERCURY1_READ_REQUEST_SIZE) {
-        ESP_LOGD(TAG, "Skip response with length %d", offset);
+      if(response_len <= MERCURY1_READ_REQUEST_SIZE) {
+        ESP_LOGD(TAG, "Skip response with length %d", response_len);
         return;
       }
 
       // обработка данных с валидных пакетов
       // TODO: на 206 счетчике с таймингами что-то не то и ответы склеиваются, поэтому вычитываем все
-      uint8_t len = sizeof(this->read_buffer_);
 
-      for (uint8_t i = 0, begin = 0; i < len; begin = i) {
+      for (uint8_t i = 0, begin = 0; i < response_len; begin = i) {
         memset(this->packet_buffer_, 0, MERCURY1_READ_BUFFER_SIZE);
 
         // --- process address ---
-        if (i + MERCURY1_FIELD_ADDRESS_LENGTH > len) { // не достаточно длины для чтения адреса
+        if (i + MERCURY1_FIELD_ADDRESS_LENGTH > response_len) { // не достаточно длины для чтения адреса
           break;
         }
 
@@ -69,7 +68,7 @@ namespace esphome {
         i += MERCURY1_FIELD_ADDRESS_LENGTH;
 
         // --- process command ---
-        if (i + MERCURY1_FIELD_COMMAND_LENGTH > len) { // не достаточно длины для чтения команды
+        if (i + MERCURY1_FIELD_COMMAND_LENGTH > response_len) { // не достаточно длины для чтения команды
           break;
         }
 
@@ -100,7 +99,7 @@ namespace esphome {
             continue;
         }
 
-        if (i + data_len > len) { // не достаточно длины для чтения данных
+        if (i + data_len > response_len) { // не достаточно длины для чтения данных
           break;
         }
 
@@ -110,7 +109,7 @@ namespace esphome {
         i += data_len;
 
         // --- process crc ---
-        if (i + MERCURY1_FIELD_CRC_LENGTH > len) { // не достаточно длины для контрольных данных
+        if (i + MERCURY1_FIELD_CRC_LENGTH > response_len) { // не достаточно длины для контрольных данных
           break;
         }
 
