@@ -6,7 +6,6 @@ import (
 	"net/url"
 
 	"github.com/kihamo/boggart/components/boggart/di"
-	"github.com/kihamo/boggart/providers/integratorit/elektroset"
 	"github.com/kihamo/boggart/providers/integratorit/mosenergosbyt"
 )
 
@@ -18,7 +17,7 @@ var services = map[string]string{
 var link *url.URL
 
 func init() {
-	l, _ := url.Parse(elektroset.BaseURL)
+	l, _ := url.Parse(mosenergosbyt.BaseURL)
 
 	link = &url.URL{
 		Scheme: l.Scheme,
