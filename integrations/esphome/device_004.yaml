@@ -104,6 +104,7 @@ switch:
   - platform: gpio
     id: "heating_children"
     name: "Heating children room"
+    icon: "mdi:fire"
     pin:
       number: GPIO27 # relay 1
       mode: OUTPUT
@@ -112,14 +113,16 @@ switch:
   - platform: gpio
     id: "heating_bedroom"
     name: "Heating bedroom"
+    icon: "mdi:fire"
     pin:
       number: GPIO26 # relay 2
       mode: OUTPUT
       inverted: true
     restore_mode: RESTORE_DEFAULT_OFF
   - platform: gpio
-    id: "heating_livingroom"
-    name: "Heating livingroom"
+    id: "heating_living_room"
+    name: "Heating living room"
+    icon: "mdi:fire"
     pin:
       number: GPIO25 # relay 3
       mode: OUTPUT
@@ -128,6 +131,7 @@ switch:
   - platform: gpio
     id: "relay_in_4"
     name: "Relay input 4"
+    icon: "mdi:fire"
     pin:
       number: GPIO33 # relay 4
       mode: OUTPUT
