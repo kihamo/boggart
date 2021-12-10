@@ -80,7 +80,41 @@ sensor:
       name: "Tariffs total"
       icon: "mdi:flash"
 
-#binary_sensor:
+binary_sensor:
+  - platform: gpio
+    id: "door"
+    name: "Entrance door"
+    icon: "mdi:door"
+    pin:
+      number: GPIO32
+      mode:
+        input: true
+        pullup: true
+        output: false
+        open_drain: false
+        pulldown: false
+  - platform: gpio
+    id: "window"
+    name: "Window"
+    icon: "mdi:window"
+    pin:
+      number: GPIO33
+      mode:
+        input: true
+        pullup: true
+        output: false
+        open_drain: false
+        pulldown: false
+
+  - platform: gpio
+    id: "motion"
+    name: "Motion detector"
+    device_class: "motion"
+    pin:
+      number: GPIO26
+      mode: INPUT_PULLDOWN
+#    filters:
+#      - delayed_on_off: 1000ms
 #  - platform: gpio
 #    id: "door"
 #    name: "Entrance door"

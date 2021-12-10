@@ -102,26 +102,26 @@ switch:
       - switch.turn_on: aquastorozh_disable
 
   - platform: gpio
-    id: "relay_in_1"
-    name: "Relay input 1"
+    id: "heating_children"
+    name: "Heating children room"
     pin:
-      number: GPIO27
+      number: GPIO27 # relay 1
       mode: OUTPUT
       inverted: true
     restore_mode: RESTORE_DEFAULT_OFF
   - platform: gpio
-    id: "relay_in_2"
-    name: "Relay input 2"
+    id: "heating_bedroom"
+    name: "Heating bedroom"
     pin:
-      number: GPIO26
+      number: GPIO26 # relay 2
       mode: OUTPUT
       inverted: true
     restore_mode: RESTORE_DEFAULT_OFF
   - platform: gpio
-    id: "relay_in_3"
-    name: "Relay input 3"
+    id: "heating_livingroom"
+    name: "Heating livingroom"
     pin:
-      number: GPIO25
+      number: GPIO25 # relay 3
       mode: OUTPUT
       inverted: true
     restore_mode: RESTORE_DEFAULT_OFF
@@ -129,7 +129,7 @@ switch:
     id: "relay_in_4"
     name: "Relay input 4"
     pin:
-      number: GPIO33
+      number: GPIO33 # relay 4
       mode: OUTPUT
       inverted: true
     restore_mode: RESTORE_DEFAULT_OFF
