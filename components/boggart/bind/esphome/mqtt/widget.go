@@ -257,7 +257,7 @@ func (b *Bind) handleDelete(w *dashboard.Response, r *dashboard.Request) {
 	}
 
 	if !isFailed {
-		b.delete(componentID)
+		b.delete(component.UniqueID())
 		widget.FlashSuccess(r, "Remove component %s success", "", componentID)
 	}
 
