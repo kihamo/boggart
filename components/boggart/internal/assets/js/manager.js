@@ -54,7 +54,7 @@ $(document).ready(function () {
                 {
                     data: null,
                     render: function (data, type, row) {
-                        var content = '<div class="btn-group" role="group" style="min-width:380px">';
+                        var content = '<div class="btn-group" role="group" style="min-width:400px">';
 
                         if (row.has_widget) {
                             content += '<a href="/boggart/widget/' + row.id + '/" target="_blank" class="btn btn-primary btn-icon btn-xs">' +
