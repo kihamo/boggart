@@ -84,28 +84,28 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 			WithStateTopic(cfg.TopicEnergy.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idEnergy, openhab.ItemTypeNumber).
-					WithLabel("Energy [%.2f Gcal]").
+					WithLabel("Energy [%.3f Gcal]").
 					WithIcon("heating"),
 			),
 		openhab.NewChannel(idConsumption, openhab.ChannelTypeNumber).
 			WithStateTopic(cfg.TopicConsumption.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idConsumption, openhab.ItemTypeNumber).
-					WithLabel("Consumption [%.2f m3/h]").
+					WithLabel("Consumption [%.3f m3/h]").
 					WithIcon("heating"),
 			),
 		openhab.NewChannel(idCapacity, openhab.ChannelTypeNumber).
 			WithStateTopic(cfg.TopicCapacity.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idCapacity, openhab.ItemTypeNumber).
-					WithLabel("Capacity [%.2f m3]").
+					WithLabel("Capacity [%.3f m3]").
 					WithIcon("heating"),
 			),
 		openhab.NewChannel(idPower, openhab.ChannelTypeNumber).
 			WithStateTopic(cfg.TopicPower.Format(sn)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idPower, openhab.ItemTypeNumber).
-					WithLabel("Power [%.2f Gcal/h]").
+					WithLabel("Power [%.4f Gcal/h]").
 					WithIcon("heating"),
 			),
 	)

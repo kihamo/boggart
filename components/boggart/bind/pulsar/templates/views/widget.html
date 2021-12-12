@@ -1,7 +1,13 @@
 {{ define "content" }}
 <script type="application/javascript">
-    function valueFormat(n) {
-        return new Intl.NumberFormat().format(n);
+    function valueFormat(n, options) {
+        if (typeof options === 'undefined') {
+            options = {
+                minimumFractionDigits: 3,
+            }
+        }
+
+        return new Intl.NumberFormat(undefined, options).format(n);
     }
 </script>
 <div class="row">
@@ -112,7 +118,8 @@
                                     </td>
                                     {{ if gt $.Bind.Config.InputsCount 0 }}
                                     <td>
-                                        <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse1Volume }}))</script> / {{ $stat.Pulse1 }}
+                                        <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse1Volume }}))</script> /
+                                        <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse1 }},{minimumFractionDigits:0}))</script>
                                         {{ if gt $stat.Pulse1Trend 0.0 }}
                                             <span class="label label-danger">
                                                 <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse1Delta }}))</script> /
@@ -137,7 +144,8 @@
                                     {{ end }}
                                     {{ if gt $.Bind.Config.InputsCount 1 }}
                                     <td>
-                                        <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse2Volume }}))</script> / {{ $stat.Pulse2 }}
+                                        <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse2Volume }}))</script> /
+                                        <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse2 }},{minimumFractionDigits:0}))</script>
                                         {{ if gt $stat.Pulse2Trend 0.0 }}
                                             <span class="label label-danger">
                                                 <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse2Delta }}))</script> /
@@ -162,7 +170,8 @@
                                     {{ end }}
                                     {{ if gt $.Bind.Config.InputsCount 2 }}
                                     <td>
-                                        <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse3Volume }}))</script> / {{ $stat.Pulse3 }}
+                                        <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse3Volume }}))</script> /
+                                        <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse3 }},{minimumFractionDigits:0}))</script>
                                         {{ if gt $stat.Pulse3Trend 0.0 }}
                                             <span class="label label-danger">
                                                 <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse3Delta }}))</script> /
@@ -187,7 +196,8 @@
                                     {{ end }}
                                     {{ if gt $.Bind.Config.InputsCount 3 }}
                                     <td>
-                                        <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse4Volume }}))</script> / {{ $stat.Pulse4 }}
+                                        <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse4Volume }}))</script> /
+                                        <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse4 }},{minimumFractionDigits:0}))</script>
                                         {{ if gt $stat.Pulse4Trend 0.0 }}
                                             <span class="label label-danger">
                                                 <script type="application/javascript">document.write(valueFormat({{ $stat.Pulse4Delta }}))</script> /
@@ -247,7 +257,7 @@
                                         {{ if .temperature_in.Error }}
                                             <td class="text-danger">{{ .temperature_in.Error.Error }}</td>
                                         {{ else }}
-                                            <td><script type="application/javascript">document.write(valueFormat({{ .temperature_in.Value }}))</script> {{ i18n "°C" }}</td>
+                                            <td><script type="application/javascript">document.write(valueFormat({{ .temperature_in.Value }},{minimumFractionDigits:2}))</script> {{ i18n "°C" }}</td>
                                         {{ end }}
                                     </tr>
                                     <tr>
@@ -255,7 +265,7 @@
                                         {{ if .temperature_out.Error }}
                                             <td class="text-danger">{{ .temperature_out.Error.Error }}</td>
                                         {{ else }}
-                                            <td><script type="application/javascript">document.write(valueFormat({{ .temperature_out.Value }}))</script> {{ i18n "°C" }}</td>
+                                            <td><script type="application/javascript">document.write(valueFormat({{ .temperature_out.Value }},{minimumFractionDigits:2}))</script> {{ i18n "°C" }}</td>
                                         {{ end }}
                                     </tr>
                                     <tr>
@@ -263,7 +273,7 @@
                                         {{ if .temperature_delta.Error }}
                                             <td class="text-danger">{{ .temperature_delta.Error.Error }}</td>
                                         {{ else }}
-                                            <td><script type="application/javascript">document.write(valueFormat({{ .temperature_delta.Value }}))</script> {{ i18n "°C" }}</td>
+                                            <td><script type="application/javascript">document.write(valueFormat({{ .temperature_delta.Value }},{minimumFractionDigits:2}))</script> {{ i18n "°C" }}</td>
                                         {{ end }}
                                     </tr>
                                     <tr>
@@ -271,7 +281,7 @@
                                         {{ if .power.Error }}
                                             <td class="text-danger">{{ .power.Error.Error }}</td>
                                         {{ else }}
-                                            <td><script type="application/javascript">document.write(valueFormat({{ .power.Value }}))</script> {{ i18n "Gcal/h" }}</td>
+                                            <td><script type="application/javascript">document.write(valueFormat({{ .power.Value }},{minimumFractionDigits:4}))</script> {{ i18n "Gcal/h" }}</td>
                                         {{ end }}
                                     </tr>
                                     <tr>
@@ -304,7 +314,7 @@
                                         {{ if .pusle_input_1.Error }}
                                             <td class="text-danger">{{ .pusle_input_1.Error.Error }}</td>
                                         {{ else }}
-                                            <td><script type="application/javascript">document.write(valueFormat({{ .pusle_input_1.Value }}))</script> {{ i18n "pulses" }}</td>
+                                            <td><script type="application/javascript">document.write(valueFormat({{ .pusle_input_1.Value }},{minimumFractionDigits:0}))</script> {{ i18n "pulses" }}</td>
                                         {{ end }}
                                     </tr>
                                     {{ end }}
@@ -314,7 +324,7 @@
                                         {{ if .pusle_input_2.Error }}
                                             <td class="text-danger">{{ .pusle_input_2.Error.Error }}</td>
                                         {{ else }}
-                                            <td><script type="application/javascript">document.write(valueFormat({{ .pusle_input_2.Value }}))</script> {{ i18n "pulses" }}</td>
+                                            <td><script type="application/javascript">document.write(valueFormat({{ .pusle_input_2.Value }},{minimumFractionDigits:0}))</script> {{ i18n "pulses" }}</td>
                                         {{ end }}
                                     </tr>
                                     {{ end }}
@@ -324,7 +334,7 @@
                                         {{ if .pusle_input_3.Error }}
                                             <td class="text-danger">{{ .pusle_input_3.Error.Error }}</td>
                                         {{ else }}
-                                            <td><script type="application/javascript">document.write(valueFormat({{ .pusle_input_3.Value }}))</script> {{ i18n "pulses" }}</td>
+                                            <td><script type="application/javascript">document.write(valueFormat({{ .pusle_input_3.Value }},{minimumFractionDigits:0}))</script> {{ i18n "pulses" }}</td>
                                         {{ end }}
                                     </tr>
                                     {{ end }}
@@ -334,7 +344,7 @@
                                         {{ if .pusle_input_4.Error }}
                                             <td class="text-danger">{{ .pusle_input_4.Error.Error }}</td>
                                         {{ else }}
-                                            <td><script type="application/javascript">document.write(valueFormat({{ .pusle_input_4.Value }}))</script> {{ i18n "pulses" }}</td>
+                                            <td><script type="application/javascript">document.write(valueFormat({{ .pusle_input_4.Value }},{minimumFractionDigits:0}))</script> {{ i18n "pulses" }}</td>
                                         {{ end }}
                                     </tr>
                                     {{ end }}
@@ -355,7 +365,7 @@
                                     </tr>
                                     {{ else }}
                                     <tr>
-                                        <td>{{ i18n "Empty battery" . }}</td>
+                                        <td>{{ i18n "Battery is low" . }}</td>
                                         {{ if .diagnostic_battery.Value }}
                                             <td class="text-danger">{{ i18n "Yes" . }}</td>
                                         {{ else }}

@@ -41,7 +41,7 @@ msgid "Temperature out"
 msgstr "Температура обратная"
 
 msgid "Temperature delta"
-msgstr "Перепад температу"
+msgstr "Перепад температур"
 
 msgid "Power"
 msgstr "Мощность"
