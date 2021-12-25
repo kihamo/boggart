@@ -45,6 +45,12 @@ uart:
     sequence:
       - lambda: UARTDebug::log_hex(direction, bytes, ':');
 
+i2c:
+  sda: SDA
+  scl: SCL
+  scan: false
+  id: i2c_bus
+
 sensor:
   - platform: total_daily_energy
     name: "Total Daily Energy"
@@ -80,6 +86,22 @@ sensor:
       name: "Tariffs total"
       icon: "mdi:flash"
 
+  - platform: bmp280
+    update_interval: 10s
+    temperature:
+      id: temperature
+      name: "Temperature"
+      oversampling: 16x
+#      filters:
+#        - offset: -5.9
+    pressure:
+      id: pressure
+      name: "Pressure"
+      unit_of_measurement: "mmHg"
+      filters:
+        - multiply: 0.75006375541921
+    address: 0x76
+
 binary_sensor:
   - platform: gpio
     id: "door"
@@ -107,17 +129,6 @@ binary_sensor:
         pulldown: false
 
   - platform: gpio
-    id: "motion"
-    name: "Motion detector"
+    pin: GPIO26
+    name: "PIR Motion detector"
     device_class: "motion"
-    pin:
-      number: GPIO26
-      mode: INPUT_PULLDOWN
-#    filters:
-#      - delayed_on_off: 1000ms
-#  - platform: gpio
-#    id: "door"
-#    name: "Entrance door"
-#    icon: "mdi:door"
-#    pin:
-#      number: GPIO27

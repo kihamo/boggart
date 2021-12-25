@@ -29,3 +29,12 @@ Magic :)
 - Power ON
 - Press Flash ESP in esphome-flasher
 - Power Reset button
+
+# HC-501 based on BISS0001
+# Sensitivity adjust
+Left - 
+Right - 
+
+# Time delay adjust
+Left - fast
+Right - slow
