@@ -23,15 +23,17 @@ i2c:
   scan: True
   id: bus_a
 
+dallas:
+  - pin: D4
+    update_interval: 10s
+
 sensor:
   - platform: bme280
-    update_interval: 60s
+    update_interval: 10s
     temperature:
       id: temperature
       name: "Temperature"
       oversampling: 16x
-      filters:
-        - offset: -2.9
     pressure:
       id: pressure
       name: "Pressure"
@@ -42,3 +44,7 @@ sensor:
       id: humidity
       name: "Humidity"
     address: 0x76
+  - platform: dallas
+    address: 0xE1000003AF4DC628
+    id: temperature2
+    name: "Temperature 2"
