@@ -101,12 +101,16 @@ switch:
     turn_off_action:
       - switch.turn_on: aquastorozh_disable
 
+  # GPIO27 - relay 1
+  # GPIO26 - relay 2
+  # GPIO25 - relay 3
+  # GPIO33 - relay 4
   - platform: gpio
     id: "heating_children"
     name: "Heating children room"
     icon: "mdi:fire"
     pin:
-      number: GPIO27 # relay 1
+      number: GPIO25 # relay 3
       mode: OUTPUT
       inverted: true
     restore_mode: RESTORE_DEFAULT_OFF
@@ -124,7 +128,7 @@ switch:
     name: "Heating living room"
     icon: "mdi:fire"
     pin:
-      number: GPIO25 # relay 3
+      number: GPIO27 # relay 1
       mode: OUTPUT
       inverted: true
     restore_mode: RESTORE_DEFAULT_OFF

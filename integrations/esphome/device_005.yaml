@@ -28,11 +28,6 @@ dallas:
     update_interval: 10s
 
 sensor:
-  - platform: adc
-    update_interval: 60s
-    pin: A0
-    id: "voltage"
-    name: "ADC Voltage"
   - platform: bme280
     update_interval: 10s
     temperature:
