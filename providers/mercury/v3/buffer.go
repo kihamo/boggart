@@ -22,6 +22,10 @@ func NewBuffer(data []byte) *Buffer {
 }
 
 func (b *Buffer) readUint32(data []byte) uint32 {
+	if len(data) < 3 {
+		return 0
+	}
+
 	if len(data) == 3 {
 		data = []byte{data[0], 0, data[1], data[2]}
 	}
