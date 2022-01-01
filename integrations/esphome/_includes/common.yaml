@@ -9,7 +9,7 @@ web_server:
 prometheus:
 
 logger:
-  level: "VERY_VERBOSE"
+  level: "DEBUG"
   baud_rate: 0
 
 ota:
