@@ -4,20 +4,20 @@
 #include "esphome/components/uart/uart.h"
 #include "esphome/components/sensor/sensor.h"
 
-#define MERCURY1_READ_BUFFER_SIZE 40
-#define MERCURY1_READ_REQUEST_SIZE 7
-#define MERCURY1_WAIT_AFTER_SEND_REQUEST 30
-#define MERCURY1_WAIT_AFTER_READ_RESPONSE 100
+#define MERCURY_V1_READ_BUFFER_SIZE 40
+#define MERCURY_V1_READ_REQUEST_SIZE 7
+#define MERCURY_V1_WAIT_AFTER_SEND_REQUEST 30
+#define MERCURY_V1_WAIT_AFTER_READ_RESPONSE 100
 
-#define MERCURY1_FIELD_ADDRESS_LENGTH 4
-#define MERCURY1_FIELD_COMMAND_LENGTH 1
-#define MERCURY1_FIELD_CRC_LENGTH 2
+#define MERCURY_V1_FIELD_ADDRESS_LENGTH 4
+#define MERCURY_V1_FIELD_COMMAND_LENGTH 1
+#define MERCURY_V1_FIELD_CRC_LENGTH 2
 
 namespace esphome {
-  namespace mercury1 {
-    class Mercury1 : public PollingComponent, public uart::UARTDevice {
+  namespace mercury_v1 {
+    class MercuryV1 : public PollingComponent, public uart::UARTDevice {
       public:
-        Mercury1() = default;
+        MercuryV1() = default;
 
         void loop() override;
         void update() override;
@@ -52,9 +52,9 @@ namespace esphome {
         sensor::Sensor *tariff4_sensor_;
         sensor::Sensor *tariffs_total_sensor_;
 
-        uint8_t address_[MERCURY1_FIELD_ADDRESS_LENGTH];
-        uint8_t read_buffer_[MERCURY1_READ_BUFFER_SIZE]{};
-        uint8_t packet_buffer_[MERCURY1_READ_BUFFER_SIZE]{};
+        uint8_t address_[MERCURY_V1_FIELD_ADDRESS_LENGTH];
+        uint8_t read_buffer_[MERCURY_V1_READ_BUFFER_SIZE]{};
+        uint8_t packet_buffer_[MERCURY_V1_READ_BUFFER_SIZE]{};
 
         double V, A, W;
         double T1, T2, T3, T4, TTotal;
@@ -64,16 +64,16 @@ namespace esphome {
           READ_PARAMS_CURRENT = 0x63,
         };
 
-        unsigned char read_power_counters_request_[MERCURY1_READ_REQUEST_SIZE];
-        unsigned char read_params_current_request_[MERCURY1_READ_REQUEST_SIZE];
+        unsigned char read_power_counters_request_[MERCURY_V1_READ_REQUEST_SIZE];
+        unsigned char read_params_current_request_[MERCURY_V1_READ_REQUEST_SIZE];
 
         void read_from_uart();
         void clean_uart_buffer();
 
         void packet_generate(unsigned char* packet, unsigned char cmd) {
-          memcpy(packet, this->address_, MERCURY1_FIELD_ADDRESS_LENGTH);
+          memcpy(packet, this->address_, MERCURY_V1_FIELD_ADDRESS_LENGTH);
           packet[4] = cmd;
-          auto crc = this->crc16(packet, MERCURY1_FIELD_ADDRESS_LENGTH + MERCURY1_FIELD_COMMAND_LENGTH);
+          auto crc = this->crc16(packet, MERCURY_V1_FIELD_ADDRESS_LENGTH + MERCURY_V1_FIELD_COMMAND_LENGTH);
           packet[5] = crc >> 0;
           packet[6] = crc >> 8;
         }
@@ -113,5 +113,5 @@ namespace esphome {
           return out;
         }
     };
-  }  // namespace mercury1
+  }  // namespace mercury_v1
 }  // namespace esphome

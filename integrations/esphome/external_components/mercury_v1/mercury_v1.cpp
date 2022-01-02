@@ -1,33 +1,33 @@
-#include "mercury1.h"
+#include "mercury_v1.h"
 #include "esphome/core/log.h"
 
 namespace esphome {
-  namespace mercury1 {
-    static const char *const TAG = "mercury1";
+  namespace mercury_v1 {
+    static const char *const TAG = "mercury_v1";
 
-    float Mercury1::get_setup_priority() const {
+    float MercuryV1::get_setup_priority() const {
       return setup_priority::DATA;
     }
 
-    void Mercury1::setup() {
+    void MercuryV1::setup() {
       this->clean_uart_buffer();
 
       this->packet_generate(read_power_counters_request_, Command::READ_POWER_COUNTERS);
       this->packet_generate(read_params_current_request_, Command::READ_PARAMS_CURRENT);
     }
 
-    void Mercury1::loop() {
+    void MercuryV1::loop() {
 
     }
 
-    void Mercury1::read_from_uart() {
-      memset(this->read_buffer_, 0, MERCURY1_READ_BUFFER_SIZE);
+    void MercuryV1::read_from_uart() {
+      memset(this->read_buffer_, 0, MERCURY_V1_READ_BUFFER_SIZE);
       int response_len = 0;
 
       while (this->available()) {
         delay(10); // FIXME: задержка не портит буфер, без задержки байты читаются рандомно
 
-        if(response_len > MERCURY1_READ_BUFFER_SIZE) {
+        if(response_len > MERCURY_V1_READ_BUFFER_SIZE) {
           ESP_LOGW(TAG, "Buffer overflow");
           this->clean_uart_buffer();
           break;
@@ -40,7 +40,7 @@ namespace esphome {
       ESP_LOGV(TAG, "Response raw %s", hexencode(this->read_buffer_, response_len).c_str());
 
       // игнорируем пакеты на отсылку команд самому счетчику
-      if(response_len <= MERCURY1_READ_REQUEST_SIZE) {
+      if(response_len <= MERCURY_V1_READ_REQUEST_SIZE) {
         ESP_LOGD(TAG, "Skip response with length %d", response_len);
         return;
       }
@@ -49,34 +49,34 @@ namespace esphome {
       // TODO: на 206 счетчике с таймингами что-то не то и ответы склеиваются, поэтому вычитываем все
 
       for (uint8_t i = 0, begin = 0; i < response_len; begin = i) {
-        memset(this->packet_buffer_, 0, MERCURY1_READ_BUFFER_SIZE);
+        memset(this->packet_buffer_, 0, MERCURY_V1_READ_BUFFER_SIZE);
 
         // --- process address ---
-        if (i + MERCURY1_FIELD_ADDRESS_LENGTH > response_len) { // не достаточно длины для чтения адреса
+        if (i + MERCURY_V1_FIELD_ADDRESS_LENGTH > response_len) { // не достаточно длины для чтения адреса
           break;
         }
 
-        memcpy(this->packet_buffer_, this->read_buffer_ + i, MERCURY1_FIELD_ADDRESS_LENGTH);
+        memcpy(this->packet_buffer_, this->read_buffer_ + i, MERCURY_V1_FIELD_ADDRESS_LENGTH);
 
         // проверяем что адреса запроса и ответа совпадают
-        if(memcmp(this->packet_buffer_, this->address_, MERCURY1_FIELD_ADDRESS_LENGTH) != 0) { // включительно, чтобы пропускать пакеты на отсылку команд
-          ESP_LOGW(TAG, "Response first bytes isn't %s is %s", hexencode(this->address_, MERCURY1_FIELD_ADDRESS_LENGTH).c_str(), hexencode(this->packet_buffer_, MERCURY1_FIELD_ADDRESS_LENGTH).c_str());
+        if(memcmp(this->packet_buffer_, this->address_, MERCURY_V1_FIELD_ADDRESS_LENGTH) != 0) { // включительно, чтобы пропускать пакеты на отсылку команд
+          ESP_LOGW(TAG, "Response first bytes isn't %s is %s", hexencode(this->address_, MERCURY_V1_FIELD_ADDRESS_LENGTH).c_str(), hexencode(this->packet_buffer_, MERCURY_V1_FIELD_ADDRESS_LENGTH).c_str());
           return;
         }
 
         // ADDR +4
-        i += MERCURY1_FIELD_ADDRESS_LENGTH;
+        i += MERCURY_V1_FIELD_ADDRESS_LENGTH;
 
         // --- process command ---
-        if (i + MERCURY1_FIELD_COMMAND_LENGTH > response_len) { // не достаточно длины для чтения команды
+        if (i + MERCURY_V1_FIELD_COMMAND_LENGTH > response_len) { // не достаточно длины для чтения команды
           break;
         }
 
-        memcpy(this->packet_buffer_ + (i - begin), this->read_buffer_ + i, MERCURY1_FIELD_COMMAND_LENGTH);
+        memcpy(this->packet_buffer_ + (i - begin), this->read_buffer_ + i, MERCURY_V1_FIELD_COMMAND_LENGTH);
 
         uint8_t cmd = this->read_buffer_[i];
         // CMD +1
-        i += MERCURY1_FIELD_COMMAND_LENGTH;
+        i += MERCURY_V1_FIELD_COMMAND_LENGTH;
 
         // --- process data ---
         uint8_t data_len = 0;
@@ -109,11 +109,11 @@ namespace esphome {
         i += data_len;
 
         // --- process crc ---
-        if (i + MERCURY1_FIELD_CRC_LENGTH > response_len) { // не достаточно длины для контрольных данных
+        if (i + MERCURY_V1_FIELD_CRC_LENGTH > response_len) { // не достаточно длины для контрольных данных
           break;
         }
 
-        memcpy(this->packet_buffer_ + (i - begin), this->read_buffer_ + i, MERCURY1_FIELD_CRC_LENGTH);
+        memcpy(this->packet_buffer_ + (i - begin), this->read_buffer_ + i, MERCURY_V1_FIELD_CRC_LENGTH);
 
         // игнорируем пакеты с некорректной контрольной суммой, так как в эфире бывает дичь из обрывков пакетов
         uint16_t computed_crc = this->crc16(this->packet_buffer_, i - begin);
@@ -124,7 +124,7 @@ namespace esphome {
           return;
         }
 
-        i += MERCURY1_FIELD_CRC_LENGTH;
+        i += MERCURY_V1_FIELD_CRC_LENGTH;
 
         // --- debug ----
         ESP_LOGV(TAG, "Found valid packet %s", hexencode(this->packet_buffer_, i - begin).c_str());
@@ -158,35 +158,35 @@ namespace esphome {
       }
     }
 
-    void Mercury1::clean_uart_buffer() {
+    void MercuryV1::clean_uart_buffer() {
       while (this->available()) {
         this->read();
       }
     }
 
-    void Mercury1::update() {
-      ESP_LOGV(TAG, "Send READ_POWER_COUNTERS %s", hexencode(read_power_counters_request_, MERCURY1_READ_REQUEST_SIZE).c_str());
-      this->write_array(read_power_counters_request_, MERCURY1_READ_REQUEST_SIZE);
+    void MercuryV1::update() {
+      ESP_LOGV(TAG, "Send READ_POWER_COUNTERS %s", hexencode(read_power_counters_request_, MERCURY_V1_READ_REQUEST_SIZE).c_str());
+      this->write_array(read_power_counters_request_, MERCURY_V1_READ_REQUEST_SIZE);
       this->flush();
 
-      delay(MERCURY1_WAIT_AFTER_SEND_REQUEST);
+      delay(MERCURY_V1_WAIT_AFTER_SEND_REQUEST);
 
       this->read_from_uart();
 
-      delay(MERCURY1_WAIT_AFTER_READ_RESPONSE);
+      delay(MERCURY_V1_WAIT_AFTER_READ_RESPONSE);
 
-      ESP_LOGV(TAG, "Send READ_PARAMS_CURRENT %s", hexencode(read_params_current_request_, MERCURY1_READ_REQUEST_SIZE).c_str());
-      this->write_array(read_params_current_request_, MERCURY1_READ_REQUEST_SIZE);
+      ESP_LOGV(TAG, "Send READ_PARAMS_CURRENT %s", hexencode(read_params_current_request_, MERCURY_V1_READ_REQUEST_SIZE).c_str());
+      this->write_array(read_params_current_request_, MERCURY_V1_READ_REQUEST_SIZE);
       this->flush();
 
-      delay(MERCURY1_WAIT_AFTER_SEND_REQUEST);
+      delay(MERCURY_V1_WAIT_AFTER_SEND_REQUEST);
 
       this->read_from_uart();
 
-      delay(MERCURY1_WAIT_AFTER_READ_RESPONSE);
+      delay(MERCURY_V1_WAIT_AFTER_READ_RESPONSE);
     }
 
-    void Mercury1::dump_config() {
+    void MercuryV1::dump_config() {
       ESP_LOGCONFIG(TAG, "Mercury v1:");
       ESP_LOGCONFIG(TAG, "  Address %d", ((uint32_t) (this->address_[3] | (this->address_[2] << 8) | (this->address_[1] << 16) | (this->address_[0] << 24))));
       LOG_UPDATE_INTERVAL(this);
@@ -201,5 +201,5 @@ namespace esphome {
 
       this->check_uart_settings(9600);
     }
-  }  // namespace mercury1
+  }  // namespace mercury_v1
 }  // namespace esphome

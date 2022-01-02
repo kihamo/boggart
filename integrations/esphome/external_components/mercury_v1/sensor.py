@@ -28,13 +28,13 @@ CONF_TARIFF3 = "tariff3"
 CONF_TARIFF4 = "tariff4"
 CONF_TARIFFS_TOTAL = "tariffs_total"
 
-mercury1_ns = cg.esphome_ns.namespace("mercury1")
-Mercury1 = mercury1_ns.class_("Mercury1", cg.PollingComponent, uart.UARTDevice)
+mercury_v1_ns = cg.esphome_ns.namespace("mercury_v1")
+MercuryV1 = mercury_v1_ns.class_("MercuryV1", cg.PollingComponent, uart.UARTDevice)
 
 CONFIG_SCHEMA = (
     cv.Schema(
         {
-            cv.GenerateID(): cv.declare_id(Mercury1),
+            cv.GenerateID(): cv.declare_id(MercuryV1),
             cv.Required(CONF_ADDRESS): cv.hex_uint32_t,
             cv.Optional(CONF_VOLTAGE): sensor.sensor_schema(
                 unit_of_measurement=UNIT_VOLT,

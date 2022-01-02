@@ -60,7 +60,7 @@ sensor:
     icon: "mdi:current-ac"
     power_id: "power"
     method: "trapezoid"
-  - platform: mercury1
+  - platform: mercury_v1
     address: !secret device_009_mercury_address
     update_interval: 60s
     voltage:
