@@ -72,6 +72,11 @@ const (
 	DeviceClassTimestamp                = "timestamp"                  // Datetime object or timestamp string (ISO 8601).
 	DeviceClassVolatileOrganicCompounds = "volatile_organic_compounds" // Concentration of volatile organic compounds in µg/m³.
 	DeviceClassVoltage                  = "voltage"                    // Voltage in V.
+
+	// https://developers.home-assistant.io/docs/core/entity/sensor/
+	StateClassMeasurement     = "measurement"
+	StateClassTotal           = "total"
+	StateClassTotalIncreasing = "total_increasing"
 )
 
 func (t ComponentType) String() string {

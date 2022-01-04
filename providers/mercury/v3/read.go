@@ -274,6 +274,15 @@ func (m *MercuryV3) ReadArray(arr array, mo *month, t tariff) (a1, a2, r3, r4 ui
 		code |= uint8(*mo)
 	}
 
+	/*
+		1 байт на массив и месяц распределяется так (взято из примера документации 80 05 31 00 (CRC))
+		31h
+		==
+		0011 0001 b
+			0011 == 3h За месяц
+			0001 == 1h Январь
+	*/
+
 	var response *Response
 
 	request := NewRequest().
@@ -296,7 +305,7 @@ func (m *MercuryV3) ReadArray(arr array, mo *month, t tariff) (a1, a2, r3, r4 ui
 		}
 
 		return
-	case arr == ArrayActiveEnergy && v != 12:
+	case arr == ArrayActiveEnergy && v != 12: // TODO: не правильная проверка
 		err = fmt.Errorf("response payload length must 12 bytes not %d", dataOut.Len())
 		return
 	case v != 16:

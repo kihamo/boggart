@@ -117,7 +117,7 @@ func (r *Packet) UnmarshalBinary(data []byte) (err error) {
 	// check crc
 	crc := serial.GenerateCRC16(data[:l-2])
 	if !bytes.Equal(crc, data[l-2:]) {
-		return errors.New("error CRC16 of response packet " +
+		return errors.New("wrong CRC16 of response packet " +
 			hex.EncodeToString(data) + " have " +
 			hex.EncodeToString(data[l-2:]) + " want " +
 			hex.EncodeToString(crc))

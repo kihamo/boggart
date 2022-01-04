@@ -24,6 +24,9 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 
 	itemPrefix := openhab.ItemPrefixFromBindMeta(b.Meta())
 	channels := make([]*openhab.Channel, 0, len(components))
+	steps := make([]installer.Step, 0, 1)
+
+	var addStepHumanWatts bool
 
 	for _, component := range components {
 		id := openhab.IDNormalizeCamelCase(component.ID())
@@ -75,10 +78,23 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 			label := strings.Title(component.Name())
 			cmp := component.(*ComponentSensor)
 
-			label += " [%." + strconv.FormatUint(cmp.AccuracyDecimals(), 10) + "f"
+			label += " ["
+			var ignoreUnitOfMeasurement bool
 
-			if unit := cmp.UnitOfMeasurement(); unit != "" {
-				label += " " + strings.ReplaceAll(unit, "%", "%%")
+			if cmp.DeviceClass() == DeviceClassPower && cmp.UnitOfMeasurement() == "W" {
+				label += "JS(human_watts.js):"
+				addStepHumanWatts = true
+				ignoreUnitOfMeasurement = true
+			}
+
+			if !ignoreUnitOfMeasurement {
+				label += "%." + strconv.FormatUint(cmp.AccuracyDecimals(), 10) + "f"
+
+				if unit := cmp.UnitOfMeasurement(); unit != "" {
+					label += " " + strings.ReplaceAll(unit, "%", "%%")
+				}
+			} else {
+				label += "%s"
 			}
 
 			label += "]"
@@ -193,7 +209,11 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 		}
 	}
 
-	return openhab.StepsByBind(b, nil, channels...)
+	if addStepHumanWatts {
+		steps = append(steps, openhab.StepDefault(openhab.StepDefaultTransformHumanWatts))
+	}
+
+	return openhab.StepsByBind(b, steps, channels...)
 }
 
 func IconByDeviceClassConverter(class, def string) string {
