@@ -20,14 +20,14 @@ esp32:
   board: nodemcu-32s
 
 external_components:
-#  - source:
-#      type: local
-#      path: ./external_components
-  - source: github://oxan/esphome-stream-server
+  - source:
+      type: local
+      path: ./external_components
+#  - source: github://oxan/esphome-stream-server
 
-stream_server:
-  uart_id: uart_bus
-  port: 1234
+#stream_server:
+#  uart_id: uart_bus
+#  port: 1234
 
 uart:
   id: uart_bus
@@ -55,36 +55,45 @@ sensor:
 #  - platform: total_daily_energy
 #    name: "Total Daily Energy"
 #    icon: "mdi:current-ac"
-#    power_id: "power"
+#    power_id: "tariff_1"
 #    method: "trapezoid"
-#  - platform: mercury1
+  - platform: mercury_v3
 #    address: !secret device_010_mercury_address
-#    update_interval: 60s
-#    voltage:
-#      name: "Voltage"
-#      icon: "mdi:flash"
-#    amperage:
-#      name: "Amperage"
-#      icon: "mdi:flash"
-#    power:
-#      name: "Power"
-#      id: "power"
-#      icon: "mdi:flash"
-#    tariff1:
-#      name: "Tariff 1"
-#      icon: "mdi:flash"
-#    tariff2:
-#      name: "Tariff 2"
-#      icon: "mdi:flash"
-#    tariff3:
-#      name: "Tariff 3"
-#      icon: "mdi:flash"
-#    tariff4:
-#      name: "Tariff 4"
-#      icon: "mdi:flash"
-#    tariffs_total:
-#      name: "Tariffs total"
-#      icon: "mdi:flash"
+    update_interval: 15s
+    phase_a:
+      voltage:
+        id: "phase1_voltage"
+        name: "Phase 1 voltage"
+      current:
+        id: "phase1_current"
+        name: "Phase 1 current"
+      power:
+        id: "phase1_power"
+        name: "Phase 1 power"
+    phase_b:
+      voltage:
+        id: "phase2_voltage"
+        name: "Phase 2 voltage"
+      current:
+        id: "phase2_current"
+        name: "Phase 2 current"
+      power:
+        id: "phase2_power"
+        name: "Phase 2 power"
+    phase_c:
+      voltage:
+        id: "phase3_voltage"
+        name: "Phase 3 voltage"
+      current:
+        id: "phase3_current"
+        name: "Phase 3 current"
+      power:
+        id: "phase3_power"
+        name: "Phase 3 power"
+    tariff_1:
+      id: "tariff_1"
+      name: "Tariff 1"
+      icon: "mdi:flash"
 
   - platform: bmp280
     update_interval: 10s
