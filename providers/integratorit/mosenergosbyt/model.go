@@ -1,90 +1,62 @@
 package mosenergosbyt
 
-import (
-	"github.com/kihamo/boggart/providers/integratorit/internal"
+import "time"
+
+const (
+	OwnerTypeOwner      uint8 = iota + 1 // Собственник
+	OwnerTypeOther                       // Другое
+	OwnerTypeTenant                      // Наниматель
+	OwnerTypeRegistered                  // Зарегистрированный
+	OwnerTypeResides                     // Проживает
 )
+
+// https://my.mosenergosbyt.ru/static/js/constants/ProvidersConfig.js
+const (
+	ProviderIDMosEnergoSbyt   uint8 = iota + 1 // MES_KD_PROVIDER - Мосэнергосбыт
+	ProviderIDMosOblERC                        // MOE_KD_PROVIDER
+	ProviderIDTomskEnergoSbyt                  // TMK_NRG_KD_PROVIDER - Томскэнергосбыт
+	ProviderIDTomskRTS                         // TMK_RTS_KD_PROVIDER
+	ProviderIDUfa                              // UFA_KD_PROVIDER - Уфа
+	ProviderIDTKO                              // TKO_KD_PROVIDER
+	ProviderIDVLG                              // VLG_KD_PROVIDER
+	ProviderIDOrelNGR                          // ORL_KD_PROVIDER
+	ProviderIDOrelEPD                          // ORL_EPD_KD_PROVIDER - Орел ЕПД
+	ProviderIDAlt                              // ALT_KD_PROVIDER
+	ProviderIDTmb                              // TMB_KD_PROVIDER
+	ProviderIDVld                              // VLD_KD_PROVIDER
+	ProviderIDSar                              // SAR_KD_PROVIDER
+	ProviderIDKsg                              // KSG_KD_PROVIDER
+)
+
+// https://my.mosenergosbyt.ru/static/js/constants/types/AccountTypes.js
 
 type Account struct {
 	Data struct {
-		KDAccountOwnerType uint64 `json:"kd_ls_owner_type"`
-		IDTU               uint64 `json:"id_tu"`
-		NMStreet           string `json:"nm_street"`
-		NNAccountDisp      string `json:"nn_ls_disp"`
+		OwnerType   uint8  `json:"kd_ls_owner_type"`
+		IDTU        uint64 `json:"id_tu"`
+		Street      string `json:"nm_street"`
+		DisplayName string `json:"nn_ls_disp"`
+		SNILS       string `json:"NN_SNILS"`
+		Reg         uint64 `json:"kd_reg"`
 	}
-	IDService          uint64 `json:"id_service"`
-	KDProvider         uint64 `json:"kd_provider"`
-	KDServiceType      uint64 `json:"kd_service_type"`
-	KDStatus           uint64 `json:"kd_status"`
-	NKLockMessage      string `json:"nm_lock_msg"`
-	NMAccountGroup     string `json:"nm_ls_group"`
-	NMAccountGroupFull string `json:"nm_ls_group_full"`
-	NMProvider         string `json:"nm_provider"`
-	NMType             string `json:"nm_type"`
-	NNAccount          string `json:"nn_ls"`
-	PRAccountGroupEdit bool   `json:"pr_ls_group_edit"`
-	ProviderRAW        string `json:"vl_provider"`
-	Provider           struct {
-		IDAbonent uint64 `json:"id_abonent"`
-	}
+	ServiceID     uint64 `json:"id_service"`
+	ServiceType   uint64 `json:"kd_service_type"`
+	StatusID      uint64 `json:"kd_status"`
+	LockMessage   string `json:"nm_lock_msg"`
+	Description   string `json:"nm_ls_description"`
+	TypeName      string `json:"nm_type"`
+	AccountID     string `json:"nn_ls"`
+	Group         string `json:"nm_ls_group"`
+	GroupFull     string `json:"nm_ls_group_full"`
+	GroupEditable bool   `json:"pr_ls_group_edit"`
+	ProviderID    uint8  `json:"kd_provider"`
+	ProviderName  string `json:"nm_provider"`
+	ProviderRAW   string `json:"vl_provider"`
+	Provider      map[string]interface{}
 }
 
-type Balance struct {
-	DeptPeriodBalance string  `json:"dt_period_balance"`
-	Advance           float64 `json:"sm_advance"`
-	Balance           float64 `json:"sm_balance"`
-	Charged           float64 `json:"sm_charged"`
-	Insurance         float64 `json:"sm_insurance"`
-	Payed             float64 `json:"sm_payed"`
-	Penalty           float64 `json:"sm_penalty"`
-	StartAdvance      float64 `json:"sm_start_advance"`
-	StartDebt         float64 `json:"sm_start_debt"`
-	Tovkgo            float64 `json:"sm_tovkgo"`
-	Services          []struct {
-		Service      string  `json:"nm_service"`
-		Advance      float64 `json:"sm_advance"`
-		Balance      float64 `json:"sm_balance"`
-		Charged      float64 `json:"sm_charged"`
-		Payed        float64 `json:"sm_payed"`
-		Penalty      float64 `json:"sm_penalty"`
-		StartAdvance float64 `json:"sm_start_advance"`
-		StartDebt    float64 `json:"sm_start_debt"`
-	} `json:"child"`
-}
-
-type Payment struct {
-	Date   internal.Time `json:"dt_pay"`
-	Agent  string        `json:"nm_agnt"`
-	State  string        `json:"nm_pay_state"`
-	Amount float64       `json:"sm_pay"`
-}
-
-type Charge struct {
-	Create   internal.Time `json:"dt_create"`
-	Period   internal.Date `json:"dt_period"`
-	Services []struct {
-		KDType         uint64  `json:"kd_child_type"`
-		Benefits       float64 `json:"sm_benefits"`
-		Charged        float64 `json:"sm_charged"`
-		Insurance      uint64  `json:"sm_insurance"`
-		Payed          float64 `json:"sm_payed"`
-		Penalty        float64 `json:"sm_penalty"`
-		Recalculations float64 `json:"sm_recalculations"`
-		Start          float64 `json:"sm_start"`
-		Total          float64 `json:"sm_total"`
-		Tovkgo         float64 `json:"sm_tovkgo"`
-		ReportUUID     string  `json:"vl_report_uuid"`
-		List           []struct {
-			MeasureUnit    string  `json:"nm_measure_unit"`
-			Service        string  `json:"nm_service"`
-			Benefits       float64 `json:"sm_benefits"`
-			Charged        float64 `json:"sm_charged"`
-			Payed          float64 `json:"sm_payed"`
-			Penalty        float64 `json:"sm_penalty"`
-			Recalculations float64 `json:"sm_recalculations"`
-			Start          float64 `json:"sm_start"`
-			Total          float64 `json:"sm_total"`
-			ChargedVolume  float64 `json:"vl_charged_volume"`
-			Tariff         float64 `json:"vl_tariff"`
-		} `json:"child"`
-	} `json:"child"`
+type Bill struct {
+	ID     string
+	Period time.Time
+	Amount float64
 }

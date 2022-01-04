@@ -1,16 +1,18 @@
 package mosenergosbyt
 
 import (
-	"time"
+	"errors"
 
 	"github.com/elazarl/go-bindata-assetfs"
+	"github.com/kihamo/boggart/providers/integratorit/mosenergosbyt"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
 func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	widget := b.Widget()
+	ctx := r.Context()
 
-	account, err := b.Account(r.Context())
+	account, err := b.Account(ctx)
 	if err != nil {
 		widget.NotFound(w, r)
 		return
@@ -18,24 +20,43 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 	query := r.URL().Query()
 
-	action := query.Get("action")
-	uuid := query.Get("uuid")
-
-	if action != "bill" || len(uuid) == 0 {
+	if query.Get("action") != "download" {
 		widget.NotFound(w, r)
 		return
 	}
 
-	period, err := time.Parse(layoutPeriod, query.Get("period"))
+	bills, err := b.client.Bills(ctx, account)
 	if err != nil {
+		widget.InternalError(w, r, err)
+		return
+	}
+
+	var bill *mosenergosbyt.Bill
+	if id := query.Get("bill"); id == "" && len(bills) > 0 {
+		bill = &bills[0]
+	} else {
+		for _, b := range bills {
+			if id == b.ID {
+				bill = &b
+				break
+			}
+		}
+	}
+
+	if bill == nil {
 		widget.NotFound(w, r)
 		return
 	}
 
-	w.Header().Set("Content-Disposition", "attachment; filename=\"mosenergosbyt_bill_"+period.Format("20060102")+".pdf\"")
+	w.Header().Set("Content-Disposition", "attachment; filename=\"mosenergosbyt_bill_"+bill.Period.Format("20060102")+".pdf\"")
 	w.Header().Set("Content-Type", "application/pdf")
 
-	if err := b.client.Bill(r.Context(), account.Provider.IDAbonent, uuid, period, w); err != nil {
+	if err = b.client.BillDownload(ctx, account, *bill, w); err != nil {
+		if errors.Is(err, mosenergosbyt.ErrProviderMethodNotSupported) {
+			widget.NotFound(w, r)
+			return
+		}
+
 		widget.InternalError(w, r, err)
 	}
 }

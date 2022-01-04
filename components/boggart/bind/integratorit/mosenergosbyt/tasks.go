@@ -2,9 +2,6 @@ package mosenergosbyt
 
 import (
 	"context"
-	"strconv"
-	"strings"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart/tasks"
 	"go.uber.org/multierr"
@@ -31,57 +28,45 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 
 	cfg := b.config()
 
-	if balance, e := b.client.CurrentBalance(ctx, account.Provider.IDAbonent); e != nil {
+	if balance, e := b.client.CurrentBalance(ctx, account); e != nil {
 		err = multierr.Append(e, err)
 	} else {
-		metricBalance.With("account", account.NNAccount).Set(balance.Balance)
+		metricBalance.With("account", account.AccountID).Set(balance)
 
-		if e := b.MQTT().PublishAsync(ctx, cfg.TopicBalance.Format(account.NNAccount), balance.Balance); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicBalance.Format(account.AccountID), balance); e != nil {
 			err = multierr.Append(e, err)
 		}
 
-		var serviceID string
-
-		for i, service := range balance.Services {
-			if id, ok := services[strings.ToLower(service.Service)]; ok {
-				serviceID = id
-			} else {
-				serviceID = strconv.FormatInt(int64(i), 10)
-			}
-
-			metricServiceBalance.With("account", account.NNAccount, "service", serviceID).Set(service.Balance)
-
-			if e := b.MQTT().PublishAsync(ctx, cfg.TopicServiceBalance.Format(account.NNAccount, serviceID), service.Balance); e != nil {
-				err = multierr.Append(e, err)
-			}
-		}
+		//var serviceID string
+		//
+		//for i, service := range balance.Services {
+		//	if id, ok := services[strings.ToLower(service.Service)]; ok {
+		//		serviceID = id
+		//	} else {
+		//		serviceID = strconv.FormatInt(int64(i), 10)
+		//	}
+		//
+		//	metricServiceBalance.With("account", account.AccountID, "service", serviceID).Set(service.Balance)
+		//
+		//	if e := b.MQTT().PublishAsync(ctx, cfg.TopicServiceBalance.Format(account.AccountID, serviceID), service.Balance); e != nil {
+		//		err = multierr.Append(e, err)
+		//	}
+		//}
 	}
 
 	// last bill
-	if details, e := b.client.ChargeDetail(ctx, account.Provider.IDAbonent, time.Now().Add(-cfg.BalanceDetailsInterval), time.Now()); e != nil {
+
+	if bills, e := b.client.Bills(ctx, account); e != nil {
 		err = multierr.Append(e, err)
-	} else {
-		lastBillTime := time.Time{}
-		lastBillUUID := ""
+	} else if len(bills) > 0 {
+		downloadLink, e := b.Widget().URL(map[string]string{
+			"action": "download",
+			"bill":   bills[0].ID,
+		})
 
-		for _, detail := range details {
-			if lastBillTime.IsZero() || detail.Period.After(lastBillTime) {
-				lastBillTime = detail.Period.Time
-				lastBillUUID = detail.Services[0].ReportUUID
-			}
-		}
-
-		if !lastBillTime.IsZero() {
-			billLink, e := b.Widget().URL(map[string]string{
-				"action": "bill",
-				"period": lastBillTime.Format(layoutPeriod),
-				"uuid":   lastBillUUID,
-			})
-
-			if e == nil {
-				if e := b.MQTT().PublishAsync(ctx, cfg.TopicLastBill.Format(account.NNAccount), billLink); e != nil {
-					err = multierr.Append(err, e)
-				}
+		if e == nil {
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicLastBill.Format(account.AccountID), downloadLink); e != nil {
+				err = multierr.Append(err, e)
 			}
 		}
 	}

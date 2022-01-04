@@ -73,6 +73,48 @@ func (c *Client) Session() string {
 	return c.session
 }
 
+func (c *Client) DoRequestRaw(ctx context.Context, u *url.URL, body io.Reader, writer io.Writer) error {
+	values := u.Query()
+
+	// auto login
+	if !values.Has("action") || values.Get("action") != "auth" {
+		session := c.Session()
+
+		if session == "" {
+			if err := c.auth(ctx); err != nil {
+				return err
+			}
+
+			session = c.Session()
+		}
+	}
+
+	u.RawQuery = values.Encode()
+
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, u.String(), body)
+	if err != nil {
+		return err
+	}
+
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := c.connection.Do(request)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return errors.New("response status isn't 200 OK returns " + strconv.Itoa(resp.StatusCode))
+	}
+
+	if writer != nil {
+		_, err = io.Copy(writer, resp.Body)
+	}
+
+	return err
+}
+
 func (c *Client) DoRequest(ctx context.Context, action string, query, body map[string]string, data interface{}) error {
 	values := url.Values{}
 

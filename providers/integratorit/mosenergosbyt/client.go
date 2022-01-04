@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"strconv"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -94,63 +93,64 @@ func (c *Client) Accounts(ctx context.Context) ([]Account, error) {
 	return data, nil
 }
 
-func (c *Client) CurrentBalance(ctx context.Context, abonentID uint64) (*Balance, error) {
-	var data []Balance
+func (c *Client) CurrentBalance(ctx context.Context, account *Account) (float64, error) {
+	provider, err := NewProvider(c.base, account)
+	if err != nil {
+		return 0, err
+	}
 
-	err := c.base.DoRequest(ctx, "sql", map[string]string{
-		"query": "smorodinaTransProxy",
-	}, map[string]string{
-		"plugin":      "smorodinaTransProxy",
-		"proxyquery":  "AbonentCurrentBalance",
-		"vl_provider": `{"id_abonent": ` + strconv.FormatUint(abonentID, 10) + `}`,
-	}, &data)
+	support, ok := provider.(HasSupportCurrentBalance)
+	if !ok {
+		return 0, ErrProviderMethodNotSupported
+	}
 
+	return support.CurrentBalance(ctx)
+}
+
+func (c *Client) Bills(ctx context.Context, account *Account) ([]Bill, error) {
+	provider, err := NewProvider(c.base, account)
 	if err != nil {
 		return nil, err
 	}
 
-	return &data[0], nil
+	support, ok := provider.(HasSupportBills)
+	if !ok {
+		return nil, ErrProviderMethodNotSupported
+	}
+
+	return support.Bills(ctx, time.Now().Add(-time.Hour*24*31*6), time.Now())
 }
 
-func (c *Client) Payments(ctx context.Context, abonentID uint64, dateStart, dateEnd time.Time) ([]Payment, error) {
-	var data []Payment
+func (c *Client) BillDownload(ctx context.Context, account *Account, bill Bill, writer io.Writer) error {
+	provider, err := NewProvider(c.base, account)
+	if err != nil {
+		return err
+	}
 
-	err := c.base.DoRequest(ctx, "sql", map[string]string{
-		"query": "smorodinaTransProxy",
-	}, map[string]string{
-		"plugin":      "smorodinaTransProxy",
-		"proxyquery":  "AbonentPays",
-		"vl_provider": `{"id_abonent": ` + strconv.FormatUint(abonentID, 10) + `}`,
-		"dt_st":       dateStart.Format(time.RFC3339),
-		"dt_en":       dateEnd.Format(time.RFC3339),
-	}, &data)
+	support, ok := provider.(HasSupportBills)
+	if !ok {
+		return ErrProviderMethodNotSupported
+	}
 
-	return data, err
+	return support.BillDownload(ctx, bill, writer)
 }
 
-func (c *Client) ChargeDetail(ctx context.Context, abonentID uint64, dateStart, dateEnd time.Time) ([]Charge, error) {
-	var data []Charge
+func (c *Client) IsSupportCurrentBalance(account *Account) bool {
+	provider, err := NewProvider(c.base, account)
+	if err != nil {
+		return false
+	}
 
-	err := c.base.DoRequest(ctx, "sql", map[string]string{
-		"query": "smorodinaTransProxy",
-	}, map[string]string{
-		"plugin":          "smorodinaTransProxy",
-		"proxyquery":      "AbonentChargeDetail",
-		"vl_provider":     `{"id_abonent": ` + strconv.FormatUint(abonentID, 10) + `}`,
-		"dt_period_start": dateStart.Format(time.RFC3339),
-		"dt_period_end":   dateEnd.Format(time.RFC3339),
-		"kd_tp_mode":      "1",
-	}, &data)
-
-	return data, err
+	_, ok := provider.(HasSupportCurrentBalance)
+	return ok
 }
 
-func (c *Client) Bill(ctx context.Context, abonentID uint64, billUUID string, period time.Time, writer io.Writer) error {
-	return c.base.DoRequest(ctx, "", nil, map[string]string{
-		"action":  "sql",
-		"plugin":  "smorodinaReportProxy",
-		"query":   "smorodinaProxy",
-		"rParams": "ID_ABONENT=" + strconv.Itoa(int(abonentID)) + "&DT_PERIOD=" + period.Format("02.01.2006"),
-		"rUuid":   billUUID,
-	}, writer)
+func (c *Client) IsSupportBills(account *Account) bool {
+	provider, err := NewProvider(c.base, account)
+	if err != nil {
+		return false
+	}
+
+	_, ok := provider.(HasSupportBills)
+	return ok
 }

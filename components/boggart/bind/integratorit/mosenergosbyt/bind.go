@@ -58,13 +58,9 @@ func (b *Bind) Run() error {
 	}
 
 	for _, account := range accounts {
-		if account.Provider.IDAbonent == 0 {
-			continue
-		}
-
-		if account.Provider.IDAbonent > 0 && ((cfg.Account == "" && b.account == nil) || cfg.Account == account.NNAccount) {
-			cfg.Account = account.NNAccount
-			b.account = &account.NNAccount
+		if (cfg.Account == "" && b.account == nil) || cfg.Account == account.AccountID {
+			cfg.Account = account.AccountID
+			b.account = &account.AccountID
 
 			break
 		}
@@ -83,7 +79,7 @@ func (b *Bind) Account(ctx context.Context) (*mosenergosbyt.Account, error) {
 		}
 
 		for _, account := range accounts {
-			if account.NNAccount == *b.account {
+			if account.AccountID == *b.account {
 				return &account, nil
 			}
 		}
