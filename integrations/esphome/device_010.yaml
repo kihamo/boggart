@@ -59,7 +59,7 @@ sensor:
 #    method: "trapezoid"
   - platform: mercury_v3
 #    address: !secret device_010_mercury_address
-    update_interval: 15s
+    update_interval: 60s
     phase_a:
       voltage:
         id: "phase1_voltage"
@@ -94,6 +94,9 @@ sensor:
       id: "tariff_1"
       name: "Tariff 1"
       icon: "mdi:flash"
+    power:
+      id: "power"
+      name: "Power"
 
   - platform: bmp280
     update_interval: 10s

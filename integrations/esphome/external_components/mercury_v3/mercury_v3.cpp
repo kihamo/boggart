@@ -56,6 +56,7 @@ namespace esphome {
       LOG_SENSOR("  ", "Current C", this->phase_[2].current_sensor_);
       LOG_SENSOR("  ", "Power C", this->phase_[2].power_sensor_);
       LOG_SENSOR("  ", "Tariff 1", this->tariff1_sensor_);
+      LOG_SENSOR("  ", "Power", this->power_sensor_);
 
       this->check_uart_settings(9600);
     }
@@ -124,8 +125,9 @@ namespace esphome {
             return;
         }
 
-        // сумму (первые три байта) пока игнорируем, так как в этом значении нет практического смысла
-
+        if (this->power_sensor_ != nullptr) {
+            this->power_sensor_->publish_state((float) this->to_long<2>(this->payload_, 1) / 100);
+        }
         if (this->phase_[0].power_sensor_ != nullptr) {
             this->phase_[0].power_sensor_->publish_state((float) this->to_long<2>(this->payload_, 4) / 100);
         }

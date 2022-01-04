@@ -24,13 +24,15 @@ namespace esphome {
 
         float get_setup_priority() const override;
 
-        void set_voltage_sensor(int phase, sensor::Sensor *s) { this->phase_[phase].voltage_sensor_ = s; }
-        void set_current_sensor(int phase, sensor::Sensor *s) { this->phase_[phase].current_sensor_ = s; }
-        void set_power_sensor(int phase, sensor::Sensor *s) { this->phase_[phase].power_sensor_ = s; }
+        void set_phase_voltage_sensor(int phase, sensor::Sensor *s) { this->phase_[phase].voltage_sensor_ = s; }
+        void set_phase_current_sensor(int phase, sensor::Sensor *s) { this->phase_[phase].current_sensor_ = s; }
+        void set_phase_power_sensor(int phase, sensor::Sensor *s) { this->phase_[phase].power_sensor_ = s; }
         void set_tariff1_sensor(sensor::Sensor *s) { tariff1_sensor_ = s; }
+        void set_power_sensor(sensor::Sensor *s) { power_sensor_ = s; }
 
       protected:
         sensor::Sensor *tariff1_sensor_;
+        sensor::Sensor *power_sensor_;
 
         struct MercuryV3Phase {
             sensor::Sensor *voltage_sensor_{nullptr};

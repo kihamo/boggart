@@ -69,6 +69,13 @@ CONFIG_SCHEMA = (
                 state_class=STATE_CLASS_TOTAL_INCREASING,
                 icon=ICON_FLASH,
             ),
+            cv.Optional(CONF_POWER): sensor.sensor_schema(
+                unit_of_measurement=UNIT_WATT,
+                accuracy_decimals=2,
+                device_class=DEVICE_CLASS_POWER,
+                # state_class=STATE_CLASS_TOTAL,
+                icon=ICON_FLASH,
+            ),
         }
     ).extend(cv.polling_component_schema("60s")).extend(uart.UART_DEVICE_SCHEMA)
 )
@@ -86,15 +93,20 @@ async def to_code(config):
         conf = config[phase]
         if CONF_VOLTAGE in conf:
             sens = await sensor.new_sensor(conf[CONF_VOLTAGE])
-            cg.add(var.set_voltage_sensor(i, sens))
+            cg.add(var.set_phase_voltage_sensor(i, sens))
         if CONF_CURRENT in conf:
             sens = await sensor.new_sensor(conf[CONF_CURRENT])
-            cg.add(var.set_current_sensor(i, sens))
+            cg.add(var.set_phase_current_sensor(i, sens))
         if CONF_POWER in conf:
             sens = await sensor.new_sensor(conf[CONF_POWER])
-            cg.add(var.set_power_sensor(i, sens))
+            cg.add(var.set_phase_power_sensor(i, sens))
 
     if CONF_TARIFF_1 in config:
         conf = config[CONF_TARIFF_1]
         sens = await sensor.new_sensor(conf)
         cg.add(var.set_tariff1_sensor(sens))
+
+    if CONF_POWER in config:
+        conf = config[CONF_POWER]
+        sens = await sensor.new_sensor(conf)
+        cg.add(var.set_power_sensor(sens))
