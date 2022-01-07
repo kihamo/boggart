@@ -93,15 +93,15 @@ func (c *Client) Accounts(ctx context.Context) ([]Account, error) {
 	return data, nil
 }
 
-func (c *Client) CurrentBalance(ctx context.Context, account *Account) (float64, error) {
+func (c *Client) CurrentBalance(ctx context.Context, account *Account) (*Balance, error) {
 	provider, err := NewProvider(c.base, account)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	support, ok := provider.(HasSupportCurrentBalance)
 	if !ok {
-		return 0, ErrProviderMethodNotSupported
+		return nil, ErrProviderMethodNotSupported
 	}
 
 	return support.CurrentBalance(ctx)

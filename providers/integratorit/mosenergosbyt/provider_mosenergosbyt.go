@@ -28,7 +28,7 @@ func NewProvideMosEnergoSbyt(base *internal.Client, account *Account) *ProvideMo
 	}
 }
 
-func (p *ProvideMosEnergoSbyt) CurrentBalance(ctx context.Context) (float64, error) {
+func (p *ProvideMosEnergoSbyt) CurrentBalance(ctx context.Context) (*Balance, error) {
 	var response []struct {
 		Value float64 `json:"vl_balance"`
 	}
@@ -42,14 +42,16 @@ func (p *ProvideMosEnergoSbyt) CurrentBalance(ctx context.Context) (float64, err
 	}, &response)
 
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	if len(response) == 0 {
-		return 0, errors.New("balance information not found in response")
+		return nil, errors.New("balance information not found in response")
 	}
 
-	return response[0].Value, nil
+	return &Balance{
+		Total: response[0].Value,
+	}, nil
 }
 
 func (p *ProvideMosEnergoSbyt) Bills(ctx context.Context, dateStart, dateEnd time.Time) ([]Bill, error) {

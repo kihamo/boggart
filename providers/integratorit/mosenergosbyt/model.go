@@ -55,6 +55,17 @@ type Account struct {
 	Provider      map[string]interface{}
 }
 
+type Balance struct {
+	Total    float64
+	Services []ServiceBalance
+}
+
+type ServiceBalance struct {
+	ID    string
+	Name  string
+	Total float64
+}
+
 type Bill struct {
 	ID     string
 	Period time.Time

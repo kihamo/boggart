@@ -15,7 +15,7 @@ var (
 )
 
 type HasSupportCurrentBalance interface {
-	CurrentBalance(ctx context.Context) (float64, error)
+	CurrentBalance(ctx context.Context) (*Balance, error)
 }
 
 type HasSupportBills interface {

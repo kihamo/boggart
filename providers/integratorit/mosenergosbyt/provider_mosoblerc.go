@@ -7,29 +7,85 @@ import (
 	"io"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/performance"
 	"github.com/kihamo/boggart/providers/integratorit/internal"
 )
+
+var servicesMapping = map[string]string{
+	"КАПИТАЛЬНЫЙ РЕМОНТ":        "ВЗНОС НА КАП. РЕМОНТ",
+	"ГАЗОСНАБЖЕНИЕ (ОТОПЛЕНИЕ)": "ГАЗОСНАБЖЕНИЕ",
+}
 
 type ProvideMosOblERC struct {
 	Provider
 
 	base    *internal.Client
 	account *Account
+
+	servicesOnce *atomic.Once
+	servicesList map[string]uint64
 }
 
 func NewProvideMosOblERC(base *internal.Client, account *Account) *ProvideMosOblERC {
 	return &ProvideMosOblERC{
-		base:    base,
-		account: account,
+		base:         base,
+		account:      account,
+		servicesOnce: &atomic.Once{},
+		servicesList: make(map[string]uint64, 0),
 	}
 }
 
-func (p *ProvideMosOblERC) CurrentBalance(ctx context.Context) (float64, error) {
+func (p *ProvideMosOblERC) Services(ctx context.Context) (_ map[string]uint64, err error) {
+	p.servicesOnce.Do(func() {
+		var response []struct {
+			ID   uint64 `json:"id_service"`
+			Name string `json:"nm_service"`
+		}
+
+		err = p.base.DoRequest(ctx, "sql", map[string]string{
+			"query": "smorodinaTransProxy",
+		}, map[string]string{
+			"plugin":      "smorodinaTransProxy",
+			"proxyquery":  "AbonentContractData",
+			"vl_provider": p.account.ProviderRAW,
+		}, &response)
+
+		if err != nil {
+			return
+		}
+
+		for _, item := range response {
+			// Dirty hack
+			item.Name = strings.ReplaceAll(item.Name, "(", " (")
+			item.Name = strings.ReplaceAll(item.Name, "  ", " ")
+			item.Name = strings.TrimSpace(item.Name)
+
+			if alias, ok := servicesMapping[item.Name]; ok {
+				item.Name = alias
+			}
+
+			p.servicesList[item.Name] = item.ID
+		}
+	})
+
+	if err != nil {
+		p.servicesOnce.Reset()
+	}
+
+	return p.servicesList, err
+}
+
+func (p *ProvideMosOblERC) CurrentBalance(ctx context.Context) (*Balance, error) {
 	var response []struct {
-		Value float64 `json:"sm_balance"`
+		Total float64 `json:"sm_balance"`
+		Child []struct {
+			Name  string  `json:"nm_service"`
+			Total float64 `json:"sm_balance"`
+		} `json:"child"`
 	}
 
 	err := p.base.DoRequest(ctx, "sql", map[string]string{
@@ -41,14 +97,51 @@ func (p *ProvideMosOblERC) CurrentBalance(ctx context.Context) (float64, error) 
 	}, &response)
 
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	if len(response) == 0 {
-		return 0, errors.New("balance information not found in response")
+		return nil, errors.New("balance information not found in response")
 	}
 
-	return response[0].Value, nil
+	balance := &Balance{
+		Total:    response[0].Total,
+		Services: make([]ServiceBalance, 0, len(response[0].Child)),
+	}
+
+	services, err := p.Services(ctx)
+	if err != nil {
+		return nil, errors.New("get information about services failed")
+	}
+
+	var (
+		serviceID   uint64
+		serviceName string
+	)
+
+	for _, child := range response[0].Child {
+		serviceID = 0
+		serviceName = strings.TrimSpace(child.Name)
+
+		for name, id := range services {
+			if name == serviceName {
+				serviceID = id
+				break
+			}
+		}
+
+		if serviceID == 0 {
+			return nil, errors.New("id for service " + child.Name + " not found")
+		}
+
+		balance.Services = append(balance.Services, ServiceBalance{
+			ID:    strconv.FormatUint(serviceID, 10),
+			Name:  child.Name,
+			Total: child.Total,
+		})
+	}
+
+	return balance, nil
 }
 
 func (p *ProvideMosOblERC) Bills(ctx context.Context, dateStart, dateEnd time.Time) ([]Bill, error) {

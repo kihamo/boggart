@@ -3,6 +3,7 @@ package internal
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"strconv"
 	"time"
@@ -93,6 +94,10 @@ func (m *message) Base64() ([]byte, error) {
 	_, err := base64.StdEncoding.Decode(buf, payload)
 
 	return buf, err
+}
+
+func (m *message) HEX() string {
+	return hex.EncodeToString(m.msg.Payload())
 }
 
 func (m *message) Len() int {

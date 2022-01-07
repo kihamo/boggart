@@ -31,31 +31,22 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	if balance, e := b.client.CurrentBalance(ctx, account); e != nil {
 		err = multierr.Append(e, err)
 	} else {
-		metricBalance.With("account", account.AccountID).Set(balance)
+		metricBalance.With("account", account.AccountID).Set(balance.Total)
 
-		if e := b.MQTT().PublishAsync(ctx, cfg.TopicBalance.Format(account.AccountID), balance); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicBalance.Format(account.AccountID), balance.Total); e != nil {
 			err = multierr.Append(e, err)
 		}
 
-		//var serviceID string
-		//
-		//for i, service := range balance.Services {
-		//	if id, ok := services[strings.ToLower(service.Service)]; ok {
-		//		serviceID = id
-		//	} else {
-		//		serviceID = strconv.FormatInt(int64(i), 10)
-		//	}
-		//
-		//	metricServiceBalance.With("account", account.AccountID, "service", serviceID).Set(service.Balance)
-		//
-		//	if e := b.MQTT().PublishAsync(ctx, cfg.TopicServiceBalance.Format(account.AccountID, serviceID), service.Balance); e != nil {
-		//		err = multierr.Append(e, err)
-		//	}
-		//}
+		for _, service := range balance.Services {
+			metricServiceBalance.With("account", account.AccountID, "service", service.ID).Set(service.Total)
+
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicServiceBalance.Format(account.AccountID, service.ID), service.Total); e != nil {
+				err = multierr.Append(e, err)
+			}
+		}
 	}
 
 	// last bill
-
 	if bills, e := b.client.Bills(ctx, account); e != nil {
 		err = multierr.Append(e, err)
 	} else if len(bills) > 0 {
