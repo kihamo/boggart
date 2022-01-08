@@ -75,20 +75,5 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 			))
 	}
 
-	//const idBalance        = "Balance"
-	//var serviceID string
-	//
-	//for i, service := range balance.Services {
-	//	if id, ok := services[strings.ToLower(service.Service)]; ok {
-	//		serviceID = id
-	//	} else {
-	//		serviceID = strconv.FormatInt(int64(i), 10)
-	//	}
-	//
-	//	id := openhab.IDNormalizeCamelCase("Service "+serviceID) + "_" + idBalance
-	//
-
-	//}
-
 	return openhab.StepsByBind(b, nil, channels...)
 }

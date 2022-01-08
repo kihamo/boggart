@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"unicode"
 
 	"github.com/kihamo/boggart/components/boggart/installer"
 	"github.com/kihamo/boggart/components/boggart/installer/openhab"
@@ -69,19 +70,31 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 
 		id = "Account" + openhab.IDNormalizeCamelCase(meter.Ident) + "_Meter" + openhab.IDNormalizeCamelCase(meter.FactoryNumber) + "_"
 
+		name := meter.Name
+		if name == "" && meter.CustomName != "" {
+			name = meter.CustomName
+		}
+		if name == "" && meter.Resource != "" {
+			name = meter.Resource
+		}
+
+		name_ := []rune(name)
+		name_[0] = unicode.ToUpper(name_[0])
+		name = string(name_)
+
 		channels = append(channels,
 			openhab.NewChannel(id+idMeterCheckup, openhab.ChannelTypeDateTime).
 				WithStateTopic(cfg.TopicMeterCheckupDate.Format(meter.Ident, meter.FactoryNumber)).
 				AddItems(
 					openhab.NewItem(itemPrefix+id+idMeterCheckup, openhab.ItemTypeDateTime).
-						WithLabel(meter.Name+" checkup date [%1$td.%1$tm.%1$tY]").
+						WithLabel(name+" checkup date [%1$td.%1$tm.%1$tY]").
 						WithIcon("time"),
 				),
 			openhab.NewChannel(id+idMeterValue, openhab.ChannelTypeNumber).
 				WithStateTopic(cfg.TopicMeterValue.Format(meter.Ident, meter.FactoryNumber)).
 				AddItems(
 					openhab.NewItem(itemPrefix+id+idMeterValue, openhab.ItemTypeNumber).
-						WithLabel(meter.Name+" [%."+strconv.FormatUint(meter.NumberOfDecimalPlaces, 10)+"f "+openhab.LabelEscape(meter.Units)+"]").
+						WithLabel(name+" [%."+strconv.FormatUint(meter.NumberOfDecimalPlaces, 10)+"f "+openhab.LabelEscape(meter.Units)+"]").
 						WithIcon("heating-60"),
 				),
 		)
