@@ -1,0 +1,576 @@
+---
+
+swagger: "2.0"
+info:
+  title: "SM Center"
+  version: "1"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+schemes:
+- "https"
+host: "api.sm-center.ru"
+basePath: "/"
+paths:
+  /auth/login:
+    post:
+      operationId: "login"
+      tags:
+      - "auth"
+      parameters:
+      - name: "request"
+        in: "body"
+        schema:
+          type: "object"
+          properties:
+            phone:
+              type: "string"
+            password:
+              type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: '#/definitions/Account'
+        401:
+          description: "Unauthorized"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /Config/MobileAppSettings:
+    get:
+      operationId: "mobileAppSettings"
+      tags:
+        - "config"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: '#/definitions/MobileAppSettings'
+        401:
+          description: "Unauthorized"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /Accounting/Info:
+    get:
+      operationId: "accountingInfo"
+      tags:
+      - "accounting"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "object"
+            properties:
+              Data:
+                type: "array"
+                items:
+                  $ref: "#/definitions/AccountingInfo"
+        401:
+          description: "Unauthorized"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /Meters/List:
+    get:
+      operationId: "list"
+      tags:
+      - "meters"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "object"
+            properties:
+              Data:
+                type: "array"
+                items:
+                  $ref: "#/definitions/Meter"
+        401:
+          description: "Unauthorized"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /User/Info:
+    get:
+      operationId: "userInfo"
+      tags:
+      - "user"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: '#/definitions/UserInfo'
+        401:
+          description: "Unauthorized"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /User/AddAccountByIdent:
+    post:
+      operationId: "addByIdent"
+      tags:
+      - "user"
+      parameters:
+      - name: "request"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          required:
+          - Ident
+          - Confirm
+          - PinCode
+          properties:
+            Ident:
+              type: "string"
+            Confirm:
+              type: "boolean"
+            PinCode:
+              type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: '#/definitions/Account'
+        401:
+          description: "Unauthorized"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /User/DeleteAccountByIdent:
+    post:
+      operationId: "deleteByIdent"
+      tags:
+      - "user"
+      parameters:
+      - name: "request"
+        in: "body"
+        schema:
+          type: "object"
+          properties:
+            Ident:
+              type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+        401:
+          description: "Unauthorized"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /Public/DownloadBill/{id}:
+    get:
+      operationId: "download"
+      tags:
+      - "bill"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Bill ID"
+        required: true
+        type: "integer"
+        format: "uint64"
+      - name: "inJpg"
+        in: "query"
+        description: "JPEG format or not"
+        type: "integer"
+        format: "uint64"
+      produces:
+      - 'application/pdf'
+      - 'image/jpeg'
+      - 'image/png'
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "file"
+        401:
+          description: "Unauthorized"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  DateCustom:
+    type: "string"
+    format: "date"
+    x-go-type:
+      import:
+        alias: "custom"
+        package: "github.com/kihamo/boggart/providers/smcenter/static/models"
+      type: "Date"
+  Error:
+    type: "object"
+    properties:
+      error:
+        type: "string"
+  MobileAppSettings:
+    type: "object"
+    properties:
+      showAds:
+        type: "boolean"
+      adsType:
+        type: "integer"
+      adsCodeIOS:
+        type: "string"
+      adsCodeAndroid:
+        type: "string"
+      enableOSS:
+        type: "boolean"
+      useDispatcherAuth:
+        type: "boolean"
+      color:
+        type: "string"
+      servicePercent:
+        type: "number"
+      DontShowDebt:
+        type: "boolean"
+      registerWithoutSMS:
+        type: "boolean"
+      сheckCrashSystem:
+        type: "boolean"
+      menu:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            id:
+              type: "integer"
+            name_app:
+              type: "string"
+            simple_name:
+              type: "string"
+            visible:
+              type: "integer"
+      main_name:
+        type: "string"
+      phone:
+        type: "string"
+      address:
+        type: "string"
+      appLinkIOS:
+        type: "string"
+      appLinkAndroid:
+        type: "string"
+      appIconFile:
+        type: "string"
+      siteIconFile:
+        type: "string"
+      bonusOfertaFile:
+        type: "string"
+      useBonusSystem:
+        type: "boolean"
+      chooseIdentByHouse:
+        type: "boolean"
+      startScreen:
+        type: "string"
+      language:
+        type: "string"
+      useAccountPinCode:
+        type: "boolean"
+      requireBirthDate:
+        type: "boolean"
+      disableCommentingRequests:
+        type: "boolean"
+      districtsExists:
+        type: "boolean"
+      housesExists:
+        type: "boolean"
+      streetsExists:
+        type: "boolean"
+      premisesExists:
+        type: "boolean"
+      appTheme:
+        type: "string"
+      showOurService:
+        type: "boolean"
+      blockUserAuth:
+        type: "boolean"
+      MockupCount:
+        type: "integer"
+      MockupMaxWidth:
+        type: "integer"
+      MockupMaxHeight:
+        type: "integer"
+  Account:
+    type: "object"
+    properties:
+      address:
+        type: "string"
+      login:
+        type: "string"
+      isDispatcher:
+        type: "boolean"
+      accounts:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            id:
+              type: "integer"
+              format: "uint64"
+            ident:
+              type: "string"
+            fio:
+              type: "string"
+            address:
+              type: "string"
+            company:
+              type: "string"
+            cn:
+              type: "string"
+            metersStartDay:
+              type: "integer"
+              format: "uint64"
+            metersEndDay:
+              type: "integer"
+              format: "uint64"
+            metersAccessFlag:
+              type: "boolean"
+            metersPeriodStartIsCurrent:
+              type: "boolean"
+            metersPeriodEndIsCurrent:
+              type: "boolean"
+            phone:
+              type: "string"
+      email:
+        type: "string"
+      phone:
+        type: "string"
+      fio:
+        type: "string"
+      birthday:
+        type: "string"
+      acx:
+        type: "string"
+      companyPhone:
+        type: "string"
+      accessOSS:
+        type: "boolean"
+      userSettings:
+        type: "string"
+  AccountingInfo:
+    type: "object"
+    properties:
+      AccountID:
+        type: "integer"
+        format: "uint64"
+      AccountType:
+        type: "string"
+      Address:
+        type: "string"
+      BonusBalance:
+        type: "number"
+      Comission:
+        type: "number"
+      DebtActualDate:
+        type: "string"
+      DontShowInsurance:
+        type: "boolean"
+      HouseId:
+        type: "integer"
+        format: "uint64"
+      INN:
+        type: "string"
+      Ident:
+        type: "string"
+      InsuranceSum:
+        type: "number"
+      Sum:
+        type: "number"
+      SumFine:
+        type: "number"
+      TotalSum:
+        type: "number"
+      Bills:
+        type: "array"
+        items:
+          $ref: "#/definitions/Bill"
+#      MobilePayments:
+#        type: "array"
+#        items:
+#          type: "object"
+      Payments:
+        type: "array"
+        items:
+          $ref: "#/definitions/Payment"
+#      PendingPayments:
+#        type: "array"
+#        items:
+#          type: "object"
+  Bill:
+    type: "object"
+    properties:
+      Date:
+        $ref: "#/definitions/DateCustom"
+      FileLink:
+        type: "string"
+      HasFile:
+        type: "boolean"
+      ID:
+        type: "integer"
+        format: "uint64"
+      Ident:
+        type: "string"
+      Period:
+        type: "string"
+      Total:
+        type: "number"
+  Payment:
+    type: "object"
+    properties:
+      Date:
+        $ref: "#/definitions/DateCustom"
+      Ident:
+        type: "string"
+      Period:
+        type: "string"
+      Sum:
+        type: "number"
+  UserInfo:
+    type: "object"
+    properties:
+      Accounts:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            Address:
+              type: "string"
+            Company:
+              type: "string"
+            FIO:
+              type: "string"
+            Id:
+              type: "integer"
+              format: "uint64"
+            Ident:
+              type: "string"
+      CanPay:
+        type: "boolean"
+      Email:
+        type: "string"
+      FIO:
+        type: "string"
+      Login:
+        type: "string"
+      Phone:
+        type: "string"
+  Meter:
+    type: "object"
+    properties:
+      ID:
+        type: "integer"
+        format: "uint64"
+      ident:
+        type: "string"
+      FactoryNumber:
+        type: "string"
+      LastCheckupDate:
+        $ref: "#/definitions/DateCustom"
+      NextCheckupDate:
+        $ref: "#/definitions/DateCustom"
+      RecheckInterval:
+        type: "integer"
+        format: "uint64"
+      TariffNumberInt:
+        type: "integer"
+        format: "uint64"
+      Resource:
+        type: "string"
+      Address:
+        type: "string"
+      UniqueNum:
+        type: "string"
+      NumberOfDecimalPlaces:
+        type: "integer"
+        format: "uint64"
+      NumberOfIntegerPart:
+        type: "integer"
+        format: "uint64"
+      CustomName:
+        type: "string"
+      Name:
+        type: "string"
+      IsDisabled:
+        type: "boolean"
+      Units:
+        type: "string"
+      TariffNumber:
+        type: "string" # ????
+      ValuesStartDay:
+        type: "integer"
+        format: "uint64"
+      ValuesEndDay:
+        type: "integer"
+        format: "uint64"
+      ValuesCanAdd:
+        type: "boolean"
+      ValuesPeriodStartIsCurrent:
+        type: "boolean"
+      ValuesPeriodEndIsCurrent:
+        type: "boolean"
+      AutoValueGettingOnly:
+        type: "boolean"
+      PeriodMessage:
+        type: "string"
+      Tariff1Name:
+        type: "string"
+      Tariff2Name:
+        type: "string"
+      Tariff3Name:
+        type: "string"
+      HouseId:
+        type: "integer"
+        format: "uint64"
+      StartDate:
+        $ref: "#/definitions/DateCustom"
+      StartValue:
+        type: "number"
+      StartValueT2:
+        type: "number"
+      StartValueT3:
+        type: "number"
+      Values:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            Period:
+              $ref: "#/definitions/DateCustom"
+            IsCurrentPeriod:
+              type: "boolean"
+            Kind:
+              type: "string"
+            Value:
+              type: "number"
+            ValueT2:
+              type: "number"
+            ValueT3:
+              type: "number"
