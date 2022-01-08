@@ -1,0 +1,66 @@
+substitutions:
+  node_name: !secret device_011_node_name
+  ip_address: !secret device_011_ip_address
+
+packages:
+  common: !include ./_includes/common.yaml
+  wifi: !include ./_includes/wifi/zav.yaml
+  binary_sensor: !include ./_includes/binary_sensor.yaml
+  sensor: !include ./_includes/sensor.yaml
+  switch: !include ./_includes/switch.yaml
+  text_sensor: !include ./_includes/text_sensor.yaml
+  time: !include ./_includes/time.yaml
+
+esphome:
+  comment: !secret device_011_comment
+  on_shutdown:
+    then:
+      - output.turn_off: led_blue
+      - output.turn_off: led_green
+      - output.turn_off: led_red
+      - output.turn_off: led_white1
+      - output.turn_off: led_white2
+
+esp8266:
+  board: esp01_1m
+
+sensor:
+  - platform: adc
+    update_interval: 60s
+    pin: A0
+    id: "voltage"
+    name: "ADC Voltage"
+
+output:
+  - platform: esp8266_pwm
+    pin: 12
+    frequency: 1000 Hz
+    id: "led_blue"
+  - platform: esp8266_pwm
+    pin: 13
+    frequency: 1000 Hz
+    id: "led_green"
+  - platform: esp8266_pwm
+    pin: 15
+    frequency: 1000 Hz
+    id: "led_red"
+  - platform: esp8266_pwm
+    pin: 14
+    frequency: 1000 Hz
+    id: "led_white1"
+  - platform: esp8266_pwm
+    pin: 4
+    frequency: 1000 Hz
+    id: "led_white2"
+
+light:
+  - platform: monochromatic
+    name: "Main white light"
+    id: "light_main"
+    output: "led_white1"
+  - platform: rgb
+    name: "Status RGB light"
+    id: "light_status"
+    red: "led_red"
+    green: "led_green"
+    blue: "led_blue"
