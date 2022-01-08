@@ -37,13 +37,15 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 				WithStateTopic(cfg.TopicInputPulses.Format(sn, index)).
 				AddItems(
 					openhab.NewItem(itemPrefix+idPulses, openhab.ItemTypeNumber).
-						WithLabel("Input "+index+" pulses [%d]"),
+						WithLabel("Input "+index+" pulses [%d]").
+						WithIcon("water"),
 				),
 			openhab.NewChannel(idVolume, openhab.ChannelTypeNumber).
 				WithStateTopic(cfg.TopicInputVolume.Format(sn, index)).
 				AddItems(
 					openhab.NewItem(itemPrefix+idVolume, openhab.ItemTypeNumber).
-						WithLabel("Input "+index+" volume [%.2f m3]"),
+						WithLabel("Input "+index+" volume [%.2f m3]").
+						WithIcon("water"),
 				),
 		)
 	}

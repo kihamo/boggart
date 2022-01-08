@@ -82,6 +82,14 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 		name_[0] = unicode.ToUpper(name_[0])
 		name = string(name_)
 
+		units := meter.Units
+		if units == "" {
+			switch meter.Resource {
+			case "Отопление":
+				units = "ГКал"
+			}
+		}
+
 		channels = append(channels,
 			openhab.NewChannel(id+idMeterCheckup, openhab.ChannelTypeDateTime).
 				WithStateTopic(cfg.TopicMeterCheckupDate.Format(meter.Ident, meter.FactoryNumber)).
@@ -94,7 +102,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 				WithStateTopic(cfg.TopicMeterValue.Format(meter.Ident, meter.FactoryNumber)).
 				AddItems(
 					openhab.NewItem(itemPrefix+id+idMeterValue, openhab.ItemTypeNumber).
-						WithLabel(name+" [%."+strconv.FormatUint(meter.NumberOfDecimalPlaces, 10)+"f "+openhab.LabelEscape(meter.Units)+"]").
+						WithLabel(name+" [%."+strconv.FormatUint(meter.NumberOfDecimalPlaces, 10)+"f "+openhab.LabelEscape(units)+"]").
 						WithIcon("heating-60"),
 				),
 		)
