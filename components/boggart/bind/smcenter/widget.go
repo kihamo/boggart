@@ -53,6 +53,7 @@ type widgetAccountView struct {
 
 type widgetAccountTransactionView struct {
 	IsPayment bool
+	HasFile   bool
 	Date      swagger.Date
 	Period    string
 	Amount    float64
@@ -321,6 +322,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 						Period:    strings.TrimRight(b.Period, " г."),
 						Amount:    b.Total,
 						FileURL:   b.FileLink,
+						HasFile:   b.HasFile,
 					})
 				}
 

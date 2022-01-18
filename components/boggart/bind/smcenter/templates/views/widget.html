@@ -173,7 +173,7 @@
                                                                             {{ end }}
                                                                         </td>
                                                                         <td>
-                                                                            {{ if $transaction.FileURL }}
+                                                                            {{ if and $transaction.HasFile $transaction.FileURL }}
                                                                                 <a href="{{ $transaction.FileURL }}" class="btn btn-info btn-icon btn-xs" target="_blank">
                                                                                     <i class="fas fa-download" title="{{ i18n "Download" $ }}"></i>
                                                                                 </a>
