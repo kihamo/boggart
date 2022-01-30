@@ -47,13 +47,13 @@
 
                                         {{ if $.Bind.Meta.Status.IsStatusOnline }}
                                             {{ if or (eq $component.Type.String "light") (eq $component.Type.String "switch") }}
-                                                {{ if eq (printf "%v" $component.StateFormat) "ON" }}
-                                                    <a href="{{ $.Request.URL.Path }}?action=command&id={{ $component.ID }}&cmd=OFF" class="btn btn-warning btn-icon btn-xs">
-                                                        <i class="glyphicon glyphicon-stop" title="{{ i18n "Switch off" $ }}"></i>
-                                                    </a>
-                                                {{ else }}
+                                                {{ if eq (printf "%v" $component.StateFormat) "OFF" }}
                                                     <a href="{{ $.Request.URL.Path }}?action=command&id={{ $component.ID }}&cmd=ON" class="btn btn-warning btn-icon btn-xs">
                                                         <i class="glyphicon glyphicon-play" title="{{ i18n "Turn on" $ }}"></i>
+                                                    </a>
+                                                {{ else }}
+                                                    <a href="{{ $.Request.URL.Path }}?action=command&id={{ $component.ID }}&cmd=OFF" class="btn btn-warning btn-icon btn-xs">
+                                                        <i class="glyphicon glyphicon-stop" title="{{ i18n "Switch off" $ }}"></i>
                                                     </a>
                                                 {{ end }}
                                             {{ end }}

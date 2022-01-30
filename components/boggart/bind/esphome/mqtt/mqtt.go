@@ -11,6 +11,11 @@ import (
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	cfg := b.config()
 
+	topicLog := cfg.TopicLog
+	if topicLog == "" {
+		topicLog = cfg.TopicPrefix + "/debug"
+	}
+
 	topicBirth := cfg.TopicBirth
 	if topicBirth == "" {
 		topicBirth = cfg.TopicPrefix + "/status"
@@ -105,6 +110,31 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			return b.register(component)
 		}),
+		//mqtt.NewSubscriber(topicLog, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+		//	/*
+		//		   "",    // NONE
+		//		   "E",   // ERROR
+		//		   "W",   // WARNING
+		//		   "I",   // INFO
+		//		   "C",   // CONFIG
+		//		   "D",   // DEBUG
+		//		   "V",   // VERBOSE
+		//		   "VV",  // VERY_VERBOSE
+		//
+		//			this->printf_to_buffer_("%s[%s][%s:%03u]: ", color, letter, tag, line);
+		//
+		//		[0;36m[D][sensor:113]: 'Temperature DS': Sending state 21.62500 °C with 1 decimals of accuracy[0m
+		//	*/
+		//
+		//	fmt.Println(message)
+		//	fmt.Println(message.Payload())
+		//	fmt.Println(string([]byte{27, 91, 48, 59, 51, 54}))
+		//	fmt.Println(hex.EncodeToString([]byte{27, 91, 48, 59, 51, 54}))
+		//	fmt.Println(message.HEX())
+		//	fmt.Println()
+		//
+		//	return nil
+		//}),
 		mqtt.NewSubscriber(topicBirth, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if message.String() == cfg.BirthMessage {
 				b.status.True()
