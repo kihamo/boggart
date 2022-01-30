@@ -31,9 +31,12 @@ func WidgetFromContext(c context.Context) *WidgetContainer {
 	return nil
 }
 
+type WidgetAssetFS interface {
+	WidgetAssetFS() *assetfs.AssetFS
+}
+
 type WidgetHandler interface {
 	WidgetHandler(*dashboard.Response, *dashboard.Request)
-	WidgetAssetFS() *assetfs.AssetFS
 }
 
 type WidgetContainerSupport interface {
@@ -146,7 +149,7 @@ func (c *WidgetContainer) RenderLayout(ctx context.Context, view, layout string,
 }
 
 func (c *WidgetContainer) AssetFS() *assetfs.AssetFS {
-	if w, ok := c.Bind().(WidgetHandler); ok {
+	if w, ok := c.Bind().(WidgetAssetFS); ok {
 		return w.WidgetAssetFS()
 	}
 
