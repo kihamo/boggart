@@ -8,13 +8,13 @@ package models
 import (
 	"strconv"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // ToolState tool state
+//
 // swagger:model ToolState
 type ToolState struct {
 
@@ -130,6 +130,7 @@ func (m *ToolState) UnmarshalBinary(b []byte) error {
 }
 
 // ToolStateHistoryItems0 tool state history items0
+//
 // swagger:model ToolStateHistoryItems0
 type ToolStateHistoryItems0 struct {
 

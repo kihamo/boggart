@@ -8,13 +8,13 @@ package models
 import (
 	"strconv"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // ChamberState chamber state
+//
 // swagger:model ChamberState
 type ChamberState struct {
 
@@ -105,6 +105,7 @@ func (m *ChamberState) UnmarshalBinary(b []byte) error {
 }
 
 // ChamberStateHistoryItems0 chamber state history items0
+//
 // swagger:model ChamberStateHistoryItems0
 type ChamberStateHistoryItems0 struct {
 

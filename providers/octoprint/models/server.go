@@ -10,28 +10,25 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// TemperatureData temperature data
+// Server server
 //
-// swagger:model TemperatureData
-type TemperatureData struct {
+// swagger:model Server
+type Server struct {
 
-	// actual
-	Actual float64 `json:"actual,omitempty"`
+	// safemode
+	Safemode string `json:"safemode,omitempty"`
 
-	// offset
-	Offset int64 `json:"offset,omitempty"`
-
-	// target
-	Target float64 `json:"target,omitempty"`
+	// server
+	Server string `json:"server,omitempty"`
 }
 
-// Validate validates this temperature data
-func (m *TemperatureData) Validate(formats strfmt.Registry) error {
+// Validate validates this server
+func (m *Server) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (m *TemperatureData) MarshalBinary() ([]byte, error) {
+func (m *Server) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -39,8 +36,8 @@ func (m *TemperatureData) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *TemperatureData) UnmarshalBinary(b []byte) error {
-	var res TemperatureData
+func (m *Server) UnmarshalBinary(b []byte) error {
+	var res Server
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

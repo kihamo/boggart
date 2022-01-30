@@ -8,13 +8,13 @@ package models
 import (
 	"strconv"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // PrinterState printer state
+//
 // swagger:model PrinterState
 type PrinterState struct {
 
@@ -123,6 +123,7 @@ func (m *PrinterState) UnmarshalBinary(b []byte) error {
 }
 
 // PrinterStateState printer state state
+//
 // swagger:model PrinterStateState
 type PrinterStateState struct {
 
@@ -184,6 +185,7 @@ func (m *PrinterStateState) UnmarshalBinary(b []byte) error {
 }
 
 // PrinterStateStateFlags printer state state flags
+//
 // swagger:model PrinterStateStateFlags
 type PrinterStateStateFlags struct {
 
@@ -239,6 +241,7 @@ func (m *PrinterStateStateFlags) UnmarshalBinary(b []byte) error {
 }
 
 // PrinterStateTemperature printer state temperature
+//
 // swagger:model PrinterStateTemperature
 type PrinterStateTemperature struct {
 
@@ -379,6 +382,7 @@ func (m *PrinterStateTemperature) UnmarshalBinary(b []byte) error {
 }
 
 // PrinterStateTemperatureHistoryItems0 printer state temperature history items0
+//
 // swagger:model PrinterStateTemperatureHistoryItems0
 type PrinterStateTemperatureHistoryItems0 struct {
 

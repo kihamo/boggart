@@ -6,13 +6,13 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // PluginDisplayLayerProgress plugin display layer progress
+//
 // swagger:model PluginDisplayLayerProgress
 type PluginDisplayLayerProgress struct {
 
@@ -133,6 +133,7 @@ func (m *PluginDisplayLayerProgress) UnmarshalBinary(b []byte) error {
 }
 
 // PluginDisplayLayerProgressHeight plugin display layer progress height
+//
 // swagger:model PluginDisplayLayerProgressHeight
 type PluginDisplayLayerProgressHeight struct {
 
@@ -170,6 +171,7 @@ func (m *PluginDisplayLayerProgressHeight) UnmarshalBinary(b []byte) error {
 }
 
 // PluginDisplayLayerProgressLayer plugin display layer progress layer
+//
 // swagger:model PluginDisplayLayerProgressLayer
 type PluginDisplayLayerProgressLayer struct {
 
@@ -204,6 +206,7 @@ func (m *PluginDisplayLayerProgressLayer) UnmarshalBinary(b []byte) error {
 }
 
 // PluginDisplayLayerProgressPrint plugin display layer progress print
+//
 // swagger:model PluginDisplayLayerProgressPrint
 type PluginDisplayLayerProgressPrint struct {
 

@@ -11,10 +11,9 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
-
-	strfmt "github.com/go-openapi/strfmt"
 )
 
 // SendJobCommandReader is a Reader for the SendJobCommand structure.
@@ -39,7 +38,7 @@ func (o *SendJobCommandReader) ReadResponse(response runtime.ClientResponse, con
 		return nil, result
 
 	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
+		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
 }
 
@@ -143,7 +142,7 @@ const (
 
 // prop value enum
 func (o *SendJobCommandBody) validateActionEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, sendJobCommandBodyTypeActionPropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, sendJobCommandBodyTypeActionPropEnum, true); err != nil {
 		return err
 	}
 	return nil
@@ -198,7 +197,7 @@ const (
 
 // prop value enum
 func (o *SendJobCommandBody) validateCommandEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, sendJobCommandBodyTypeCommandPropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, sendJobCommandBodyTypeCommandPropEnum, true); err != nil {
 		return err
 	}
 	return nil

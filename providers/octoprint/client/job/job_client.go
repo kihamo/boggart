@@ -9,12 +9,11 @@ import (
 	"fmt"
 
 	"github.com/go-openapi/runtime"
-
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 )
 
 // New creates a new job API client.
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *Client {
+func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
 	return &Client{transport: transport, formats: formats}
 }
 
@@ -26,8 +25,17 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientService is the interface for Client methods
+type ClientService interface {
+	GetJob(params *GetJobParams, authInfo runtime.ClientAuthInfoWriter) (*GetJobOK, error)
+
+	SendJobCommand(params *SendJobCommandParams, authInfo runtime.ClientAuthInfoWriter) (*SendJobCommandNoContent, error)
+
+	SetTransport(transport runtime.ClientTransport)
+}
+
 /*
-GetJob retrieves information about the current job
+  GetJob retrieves information about the current job
 */
 func (a *Client) GetJob(params *GetJobParams, authInfo runtime.ClientAuthInfoWriter) (*GetJobOK, error) {
 	// TODO: Validate the params before sending
@@ -62,7 +70,7 @@ func (a *Client) GetJob(params *GetJobParams, authInfo runtime.ClientAuthInfoWri
 }
 
 /*
-SendJobCommand issues a job command
+  SendJobCommand issues a job command
 */
 func (a *Client) SendJobCommand(params *SendJobCommandParams, authInfo runtime.ClientAuthInfoWriter) (*SendJobCommandNoContent, error) {
 	// TODO: Validate the params before sending

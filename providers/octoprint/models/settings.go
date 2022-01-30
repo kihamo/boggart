@@ -6,13 +6,13 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // Settings settings
+//
 // swagger:model Settings
 type Settings struct {
 
@@ -39,6 +39,9 @@ type Settings struct {
 
 	// serial
 	Serial *SettingsSerial `json:"serial,omitempty"`
+
+	// webcam
+	Webcam *SettingsWebcam `json:"webcam,omitempty"`
 }
 
 // Validate validates this settings
@@ -70,6 +73,10 @@ func (m *Settings) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateSerial(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateWebcam(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -205,6 +212,24 @@ func (m *Settings) validateSerial(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *Settings) validateWebcam(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Webcam) { // not required
+		return nil
+	}
+
+	if m.Webcam != nil {
+		if err := m.Webcam.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("webcam")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 // MarshalBinary interface implementation
 func (m *Settings) MarshalBinary() ([]byte, error) {
 	if m == nil {
@@ -224,6 +249,7 @@ func (m *Settings) UnmarshalBinary(b []byte) error {
 }
 
 // SettingsAPI settings API
+//
 // swagger:model SettingsAPI
 type SettingsAPI struct {
 
@@ -258,6 +284,7 @@ func (m *SettingsAPI) UnmarshalBinary(b []byte) error {
 }
 
 // SettingsAppearance settings appearance
+//
 // swagger:model SettingsAppearance
 type SettingsAppearance struct {
 
@@ -307,6 +334,7 @@ func (m *SettingsAppearance) UnmarshalBinary(b []byte) error {
 }
 
 // SettingsFeature settings feature
+//
 // swagger:model SettingsFeature
 type SettingsFeature struct {
 
@@ -368,6 +396,7 @@ func (m *SettingsFeature) UnmarshalBinary(b []byte) error {
 }
 
 // SettingsFolder settings folder
+//
 // swagger:model SettingsFolder
 type SettingsFolder struct {
 
@@ -411,6 +440,7 @@ func (m *SettingsFolder) UnmarshalBinary(b []byte) error {
 }
 
 // SettingsPrinter settings printer
+//
 // swagger:model SettingsPrinter
 type SettingsPrinter struct {
 
@@ -442,6 +472,7 @@ func (m *SettingsPrinter) UnmarshalBinary(b []byte) error {
 }
 
 // SettingsScripts settings scripts
+//
 // swagger:model SettingsScripts
 type SettingsScripts struct {
 
@@ -473,6 +504,7 @@ func (m *SettingsScripts) UnmarshalBinary(b []byte) error {
 }
 
 // SettingsSerial settings serial
+//
 // swagger:model SettingsSerial
 type SettingsSerial struct {
 
@@ -643,6 +675,89 @@ func (m *SettingsSerial) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (m *SettingsSerial) UnmarshalBinary(b []byte) error {
 	var res SettingsSerial
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// SettingsWebcam settings webcam
+//
+// swagger:model SettingsWebcam
+type SettingsWebcam struct {
+
+	// bitrate
+	Bitrate string `json:"bitrate,omitempty"`
+
+	// cache buster
+	CacheBuster bool `json:"cacheBuster,omitempty"`
+
+	// ffmpeg commandline
+	FfmpegCommandline string `json:"ffmpegCommandline,omitempty"`
+
+	// ffmpeg path
+	FfmpegPath string `json:"ffmpegPath,omitempty"`
+
+	// ffmpeg threads
+	FfmpegThreads int64 `json:"ffmpegThreads,omitempty"`
+
+	// ffmpeg video codec
+	FfmpegVideoCodec string `json:"ffmpegVideoCodec,omitempty"`
+
+	// flip h
+	FlipH bool `json:"flipH,omitempty"`
+
+	// flip v
+	FlipV bool `json:"flipV,omitempty"`
+
+	// rotate90
+	Rotate90 bool `json:"rotate90,omitempty"`
+
+	// snapshot ssl validation
+	SnapshotSslValidation bool `json:"snapshotSslValidation,omitempty"`
+
+	// snapshot timeout
+	SnapshotTimeout int64 `json:"snapshotTimeout,omitempty"`
+
+	// snapshot Url
+	SnapshotURL string `json:"snapshotUrl,omitempty"`
+
+	// stream ratio
+	StreamRatio string `json:"streamRatio,omitempty"`
+
+	// stream timeout
+	StreamTimeout int64 `json:"streamTimeout,omitempty"`
+
+	// stream Url
+	StreamURL string `json:"streamUrl,omitempty"`
+
+	// timelapse enabled
+	TimelapseEnabled bool `json:"timelapseEnabled,omitempty"`
+
+	// watermark
+	Watermark bool `json:"watermark,omitempty"`
+
+	// webcam enabled
+	WebcamEnabled bool `json:"webcamEnabled,omitempty"`
+}
+
+// Validate validates this settings webcam
+func (m *SettingsWebcam) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *SettingsWebcam) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *SettingsWebcam) UnmarshalBinary(b []byte) error {
+	var res SettingsWebcam
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

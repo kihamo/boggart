@@ -8,13 +8,13 @@ package models
 import (
 	"strconv"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // Languages languages
+//
 // swagger:model Languages
 type Languages struct {
 
@@ -77,6 +77,7 @@ func (m *Languages) UnmarshalBinary(b []byte) error {
 }
 
 // LanguagesLanguagePacksAnon languages language packs anon
+//
 // swagger:model LanguagesLanguagePacksAnon
 type LanguagesLanguagePacksAnon struct {
 
@@ -148,6 +149,7 @@ func (m *LanguagesLanguagePacksAnon) UnmarshalBinary(b []byte) error {
 }
 
 // LanguagesLanguagePacksAnonLanguagesItems0 languages language packs anon languages items0
+//
 // swagger:model LanguagesLanguagePacksAnonLanguagesItems0
 type LanguagesLanguagePacksAnonLanguagesItems0 struct {
 

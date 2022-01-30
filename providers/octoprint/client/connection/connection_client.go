@@ -9,12 +9,11 @@ import (
 	"fmt"
 
 	"github.com/go-openapi/runtime"
-
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 )
 
 // New creates a new connection API client.
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *Client {
+func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
 	return &Client{transport: transport, formats: formats}
 }
 
@@ -26,8 +25,17 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientService is the interface for Client methods
+type ClientService interface {
+	GetConnection(params *GetConnectionParams, authInfo runtime.ClientAuthInfoWriter) (*GetConnectionOK, error)
+
+	SendConnectionCommand(params *SendConnectionCommandParams, authInfo runtime.ClientAuthInfoWriter) (*SendConnectionCommandNoContent, error)
+
+	SetTransport(transport runtime.ClientTransport)
+}
+
 /*
-GetConnection gets connection settings
+  GetConnection gets connection settings
 */
 func (a *Client) GetConnection(params *GetConnectionParams, authInfo runtime.ClientAuthInfoWriter) (*GetConnectionOK, error) {
 	// TODO: Validate the params before sending
@@ -62,7 +70,7 @@ func (a *Client) GetConnection(params *GetConnectionParams, authInfo runtime.Cli
 }
 
 /*
-SendConnectionCommand issues a connection command
+  SendConnectionCommand issues a connection command
 */
 func (a *Client) SendConnectionCommand(params *SendConnectionCommandParams, authInfo runtime.ClientAuthInfoWriter) (*SendConnectionCommandNoContent, error) {
 	// TODO: Validate the params before sending

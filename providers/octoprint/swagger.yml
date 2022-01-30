@@ -5,11 +5,11 @@ info:
   title: "OctoPrint"
   version: "0.1.0"
 consumes:
-- "application/json"
+  - "application/json"
 produces:
-- "application/json"
+  - "application/json"
 schemes:
-- "http"
+  - "http"
 #basePath: "/api"
 securityDefinitions:
   APIKeyHeader:
@@ -21,29 +21,29 @@ securityDefinitions:
     in: query
     name: apikey
 security:
-- APIKeyHeader: []
-- APIKeyQueryParam: []
+  - APIKeyHeader: [ ]
+  - APIKeyQueryParam: [ ]
 paths:
   /api/login:
     post:
       operationId: "login"
       tags:
-      - "authorization"
+        - "authorization"
       summary: "Login"
       parameters:
-      - in: "body"
-        name: "body"
-        schema:
-          type: "object"
-          properties:
-            passive:
-              type: "boolean"
-            user:
-              type: "string"
-            pass:
-              type: "string"
-            remember:
-              type: "boolean"
+        - in: "body"
+          name: "body"
+          schema:
+            type: "object"
+            properties:
+              passive:
+                type: "boolean"
+              user:
+                type: "string"
+              pass:
+                type: "string"
+              remember:
+                type: "boolean"
       responses:
         200:
           description: "Successful login"
@@ -74,7 +74,7 @@ paths:
     post:
       operationId: "logout"
       tags:
-      - "authorization"
+        - "authorization"
       summary: "Logout"
       responses:
         204:
@@ -83,18 +83,29 @@ paths:
     get:
       operationId: "getVersion"
       tags:
-      - "version"
+        - "version"
       summary: "Version information"
       responses:
         200:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/Version"
+  /api/server:
+    get:
+      operationId: "getServer"
+      tags:
+        - "server"
+      summary: "Server information"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Server"
   /api/connection:
     get:
       operationId: "getConnection"
       tags:
-      - "connection"
+        - "connection"
       summary: "Get connection settings"
       responses:
         200:
@@ -104,30 +115,30 @@ paths:
     post:
       operationId: "sendConnectionCommand"
       tags:
-      - "connection"
+        - "connection"
       summary: "Issue a connection command"
       parameters:
-      - in: "body"
-        name: "body"
-        schema:
-          type: "object"
-          properties:
-            command:
-              type: "string"
-              enum:
-              - "connect"
-              - "disconnect"
-              - "fake_ack"
-            port:
-              type: "string"
-            baudrate:
-              type: "integer"
-            printerProfile:
-              type: "string"
-            save:
-              type: "boolean"
-            autoconnect:
-              type: "boolean"
+        - in: "body"
+          name: "body"
+          schema:
+            type: "object"
+            properties:
+              command:
+                type: "string"
+                enum:
+                  - "connect"
+                  - "disconnect"
+                  - "fake_ack"
+              port:
+                type: "string"
+              baudrate:
+                type: "integer"
+              printerProfile:
+                type: "string"
+              save:
+                type: "boolean"
+              autoconnect:
+                type: "boolean"
       responses:
         204:
           description: "Successful operation"
@@ -137,7 +148,7 @@ paths:
     get:
       operationId: "getJob"
       tags:
-      - "job"
+        - "job"
       summary: "Retrieve information about the current job"
       responses:
         200:
@@ -147,29 +158,29 @@ paths:
     post:
       operationId: "sendJobCommand"
       tags:
-      - "job"
+        - "job"
       summary: "Issue a job command"
       parameters:
-      - in: "body"
-        name: "body"
-        schema:
-          type: "object"
-          properties:
-            command:
-              type: "string"
-              enum:
-              - "start"
-              - "cancel"
-              - "restart"
-              - "pause"
-              - "resume"
-              - "toggle"
-            action:
-              type: "string"
-              enum:
-              - "pause"
-              - "resume"
-              - "toggle"
+        - in: "body"
+          name: "body"
+          schema:
+            type: "object"
+            properties:
+              command:
+                type: "string"
+                enum:
+                  - "start"
+                  - "cancel"
+                  - "restart"
+                  - "pause"
+                  - "resume"
+                  - "toggle"
+              action:
+                type: "string"
+                enum:
+                  - "pause"
+                  - "resume"
+                  - "toggle"
       responses:
         204:
           description: "Successful operation"
@@ -179,7 +190,7 @@ paths:
     get:
       operationId: "getLanguages"
       tags:
-      - "languages"
+        - "languages"
       summary: "Retrieve installed language packs"
       responses:
         200:
@@ -190,27 +201,27 @@ paths:
     get:
       operationId: "getPrinterState"
       tags:
-      - "printer"
+        - "printer"
       summary: "Retrieve the current printer state"
       parameters:
-      - name: "history"
-        in: "query"
-        description: "The printer’s temperature history by supplying"
-        required: false
-        type: "boolean"
-      - name: "limit"
-        in: "query"
-        description: "The amount of data points limited"
-        required: false
-        type: "integer"
-      - name: "exclude"
-        in: "query"
-        description: "List of attributes to not return in the response"
-        required: false
-        type: "array"
-        collectionFormat: "csv"
-        items:
-          type: "string"
+        - name: "history"
+          in: "query"
+          description: "The printer’s temperature history by supplying"
+          required: false
+          type: "boolean"
+        - name: "limit"
+          in: "query"
+          description: "The amount of data points limited"
+          required: false
+          type: "integer"
+        - name: "exclude"
+          in: "query"
+          description: "List of attributes to not return in the response"
+          required: false
+          type: "array"
+          collectionFormat: "csv"
+          items:
+            type: "string"
       responses:
         200:
           description: "Successful operation"
@@ -222,19 +233,19 @@ paths:
     get:
       operationId: "getToolState"
       tags:
-      - "printer"
+        - "printer"
       summary: "Retrieve the current tool state"
       parameters:
-      - name: "history"
-        in: "query"
-        description: "The printer’s temperature history by supplying"
-        required: false
-        type: "boolean"
-      - name: "limit"
-        in: "query"
-        description: "The amount of data points limited"
-        required: false
-        type: "integer"
+        - name: "history"
+          in: "query"
+          description: "The printer’s temperature history by supplying"
+          required: false
+          type: "boolean"
+        - name: "limit"
+          in: "query"
+          description: "The amount of data points limited"
+          required: false
+          type: "integer"
       responses:
         200:
           description: "Successful operation"
@@ -246,19 +257,19 @@ paths:
     get:
       operationId: "getBedState"
       tags:
-      - "printer"
+        - "printer"
       summary: "Retrieve the current bed state"
       parameters:
-      - name: "history"
-        in: "query"
-        description: "The printer’s temperature history by supplying"
-        required: false
-        type: "boolean"
-      - name: "limit"
-        in: "query"
-        description: "The amount of data points limited"
-        required: false
-        type: "integer"
+        - name: "history"
+          in: "query"
+          description: "The printer’s temperature history by supplying"
+          required: false
+          type: "boolean"
+        - name: "limit"
+          in: "query"
+          description: "The amount of data points limited"
+          required: false
+          type: "integer"
       responses:
         200:
           description: "Successful operation"
@@ -270,19 +281,19 @@ paths:
     get:
       operationId: "getChamberState"
       tags:
-      - "printer"
+        - "printer"
       summary: "Retrieve the current chamber state"
       parameters:
-      - name: "history"
-        in: "query"
-        description: "The printer’s temperature history by supplying"
-        required: false
-        type: "boolean"
-      - name: "limit"
-        in: "query"
-        description: "The amount of data points limited"
-        required: false
-        type: "integer"
+        - name: "history"
+          in: "query"
+          description: "The printer’s temperature history by supplying"
+          required: false
+          type: "boolean"
+        - name: "limit"
+          in: "query"
+          description: "The amount of data points limited"
+          required: false
+          type: "integer"
       responses:
         200:
           description: "Successful operation"
@@ -294,7 +305,7 @@ paths:
     get:
       operationId: "getSDState"
       tags:
-      - "printer"
+        - "printer"
       summary: "Retrieve the current SD state"
       responses:
         200:
@@ -307,7 +318,7 @@ paths:
     get:
       operationId: "getSettings"
       tags:
-      - "settings"
+        - "settings"
       summary: "Retrieve current settings"
       responses:
         200:
@@ -319,7 +330,7 @@ paths:
     get:
       operationId: "getCommands"
       tags:
-      - "system"
+        - "system"
       summary: "List all registered system commands"
       responses:
         200:
@@ -339,17 +350,17 @@ paths:
     get:
       operationId: "getCommandsBySource"
       tags:
-      - "system"
+        - "system"
       summary: "List all registered system commands for a source"
       parameters:
-      - name: "source"
-        in: "path"
-        description: "The source for which to list commands"
-        required: true
-        type: "string"
-        enum:
-        - "core"
-        - "custom"
+        - name: "source"
+          in: "path"
+          description: "The source for which to list commands"
+          required: true
+          type: "string"
+          enum:
+            - "core"
+            - "custom"
       responses:
         200:
           description: "Successful operation"
@@ -363,22 +374,22 @@ paths:
     post:
       operationId: "executeCommand"
       tags:
-      - "system"
+        - "system"
       summary: "Execute a registered system command"
       parameters:
-      - name: "source"
-        in: "path"
-        description: "The source for which to list commands"
-        required: true
-        type: "string"
-        enum:
-        - "core"
-        - "custom"
-      - name: "action"
-        in: "path"
-        description: "The identifier of the command"
-        required: true
-        type: "string"
+        - name: "source"
+          in: "path"
+          description: "The source for which to list commands"
+          required: true
+          type: "string"
+          enum:
+            - "core"
+            - "custom"
+        - name: "action"
+          in: "path"
+          description: "The identifier of the command"
+          required: true
+          type: "string"
       responses:
         204:
           description: "Successful operation"
@@ -392,11 +403,97 @@ paths:
           description: "Not found"
         500:
           description: "Internal server error"
+  /api/util/test:
+    post:
+      operationId: "utilTest"
+      tags:
+        - "util"
+      summary: "Various tests"
+      parameters:
+        - in: "body"
+          name: "body"
+          schema:
+            type: "object"
+            properties:
+              command:
+                type: "string"
+                enum:
+                  - "path"
+                  - "url"
+                  - "server"
+                  - "resolution"
+                  - "address"
+              # for command url
+              url:
+                type: "string"
+                description: "The URL to test. Mandatory"
+              method:
+                type: "string"
+                description: "The request method to use for the test. Optional, defaults to HEAD"
+              timeout:
+                type: "integer"
+                description: "A timeout for the request, in seconds. If no reply from the tested URL has been received within this time frame, the check will be considered a failure. Optional, defaults to 3 seconds"
+              validSsl:
+                type: "boolean"
+                description: "Whether to validate the SSL connection if the url happens to be an HTTPS URL or not. Optional, defaults to True"
+              status:
+                type: "string"
+                enum:
+                  - "informational"
+                  - "success"
+                  - "redirection"
+                  - "client_error"
+                  - "server_error"
+                  - "normal"
+                  - "error"
+                  - "any"
+                description: "The status code(s) or named status range(s) to test for. Can be either a single value or a list of either HTTP status codes or any of the following named status ranges:"
+              response:
+                type: "string"
+                enum:
+                  - "true"
+                  - "json"
+                  - "bytes"
+                description: "If set to either true, json or bytes, the response body and the response headers from the URL check will be returned as part of the check result as well. json will attempt to parse the response as json and return the parsed result. true or bytes will base64 encode the body and return that"
+              content_type_whitelist:
+                type: "array"
+                items:
+                  type: "string"
+                description: "Optional array of supported content types. If set and the URL returns a content type not included in this list, the test will fail. E.g. [\"image/*\", \"text/plain\"]."
+              content_type_blacklist:
+                type: "array"
+                items:
+                  type: "string"
+                description: "Optional array of unsupported content types. If set and the URL returns a content type included in this list, the test wil fail. E.g. [\"video/*\"]. Can be used together with content_type_whitelist to further limit broader content type definition, e.g. by putting image/* into the whitelist, but disallowing PNG by including image/png on the blacklist"
+              content_type_guess:
+                type: "boolean"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "object"
+            properties:
+              url:
+                type: "string"
+              status:
+                type: "integer"
+              result:
+                type: "boolean"
+              response:
+                type: "object"
+                properties:
+                  assumed_content_type:
+                    type: "string"
+                  content:
+                    type: "string"
+                    format: "byte"
+              headers:
+                type: "object"
   /plugin/DisplayLayerProgress/values:
     get:
       operationId: "displayLayerProgress"
       tags:
-      - "PluginDisplayLayerProgress"
+        - "plugin"
       summary: "Receive the layer/height and other values"
       responses:
         200:
@@ -412,6 +509,13 @@ definitions:
       server:
         type: "string"
       text:
+        type: "string"
+  Server:
+    type: "object"
+    properties:
+      server:
+        type: "string"
+      safemode:
         type: "string"
   Connection:
     type: "object"
@@ -849,6 +953,45 @@ definitions:
           triggerOkForM29:
             type: "boolean"
           waitForStart:
+            type: "boolean"
+      webcam:
+        type: "object"
+        properties:
+          bitrate:
+            type: "string"
+          cacheBuster:
+            type: "boolean"
+          ffmpegCommandline:
+            type: "string"
+          ffmpegPath:
+            type: "string"
+          ffmpegThreads:
+            type: "integer"
+          ffmpegVideoCodec:
+            type: "string"
+          flipH:
+            type: "boolean"
+          flipV:
+            type: "boolean"
+          rotate90:
+            type: "boolean"
+          snapshotSslValidation:
+            type: "boolean"
+          snapshotTimeout:
+            type: "integer"
+          snapshotUrl:
+            type: "string"
+          streamRatio:
+            type: "string"
+          streamTimeout:
+            type: "integer"
+          streamUrl:
+            type: "string"
+          timelapseEnabled:
+            type: "boolean"
+          watermark:
+            type: "boolean"
+          webcamEnabled:
             type: "boolean"
   Command:
     type: "object"

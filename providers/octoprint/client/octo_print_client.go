@@ -8,17 +8,18 @@ package client
 import (
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
-
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 
 	"github.com/kihamo/boggart/providers/octoprint/client/authorization"
 	"github.com/kihamo/boggart/providers/octoprint/client/connection"
 	"github.com/kihamo/boggart/providers/octoprint/client/job"
 	"github.com/kihamo/boggart/providers/octoprint/client/languages"
-	"github.com/kihamo/boggart/providers/octoprint/client/plugin_display_layer_progress"
+	"github.com/kihamo/boggart/providers/octoprint/client/plugin"
 	"github.com/kihamo/boggart/providers/octoprint/client/printer"
+	"github.com/kihamo/boggart/providers/octoprint/client/server"
 	"github.com/kihamo/boggart/providers/octoprint/client/settings"
 	"github.com/kihamo/boggart/providers/octoprint/client/system"
+	"github.com/kihamo/boggart/providers/octoprint/client/util"
 	"github.com/kihamo/boggart/providers/octoprint/client/version"
 )
 
@@ -64,25 +65,17 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *OctoPrint 
 
 	cli := new(OctoPrint)
 	cli.Transport = transport
-
 	cli.Authorization = authorization.New(transport, formats)
-
 	cli.Connection = connection.New(transport, formats)
-
 	cli.Job = job.New(transport, formats)
-
 	cli.Languages = languages.New(transport, formats)
-
-	cli.PluginDisplayLayerProgress = plugin_display_layer_progress.New(transport, formats)
-
+	cli.Plugin = plugin.New(transport, formats)
 	cli.Printer = printer.New(transport, formats)
-
+	cli.Server = server.New(transport, formats)
 	cli.Settings = settings.New(transport, formats)
-
 	cli.System = system.New(transport, formats)
-
+	cli.Util = util.New(transport, formats)
 	cli.Version = version.New(transport, formats)
-
 	return cli
 }
 
@@ -127,23 +120,27 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // OctoPrint is a client for octo print
 type OctoPrint struct {
-	Authorization *authorization.Client
+	Authorization authorization.ClientService
 
-	Connection *connection.Client
+	Connection connection.ClientService
 
-	Job *job.Client
+	Job job.ClientService
 
-	Languages *languages.Client
+	Languages languages.ClientService
 
-	PluginDisplayLayerProgress *plugin_display_layer_progress.Client
+	Plugin plugin.ClientService
 
-	Printer *printer.Client
+	Printer printer.ClientService
 
-	Settings *settings.Client
+	Server server.ClientService
 
-	System *system.Client
+	Settings settings.ClientService
 
-	Version *version.Client
+	System system.ClientService
+
+	Util util.ClientService
+
+	Version version.ClientService
 
 	Transport runtime.ClientTransport
 }
@@ -151,23 +148,15 @@ type OctoPrint struct {
 // SetTransport changes the transport on the client and all its subresources
 func (c *OctoPrint) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
-
 	c.Authorization.SetTransport(transport)
-
 	c.Connection.SetTransport(transport)
-
 	c.Job.SetTransport(transport)
-
 	c.Languages.SetTransport(transport)
-
-	c.PluginDisplayLayerProgress.SetTransport(transport)
-
+	c.Plugin.SetTransport(transport)
 	c.Printer.SetTransport(transport)
-
+	c.Server.SetTransport(transport)
 	c.Settings.SetTransport(transport)
-
 	c.System.SetTransport(transport)
-
+	c.Util.SetTransport(transport)
 	c.Version.SetTransport(transport)
-
 }

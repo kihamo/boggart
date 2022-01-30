@@ -8,13 +8,13 @@ package models
 import (
 	"strconv"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // Connection connection
+//
 // swagger:model Connection
 type Connection struct {
 
@@ -98,6 +98,7 @@ func (m *Connection) UnmarshalBinary(b []byte) error {
 }
 
 // ConnectionCurrent connection current
+//
 // swagger:model ConnectionCurrent
 type ConnectionCurrent struct {
 
@@ -138,6 +139,7 @@ func (m *ConnectionCurrent) UnmarshalBinary(b []byte) error {
 }
 
 // ConnectionOptions connection options
+//
 // swagger:model ConnectionOptions
 type ConnectionOptions struct {
 
@@ -221,6 +223,7 @@ func (m *ConnectionOptions) UnmarshalBinary(b []byte) error {
 }
 
 // ConnectionOptionsPrinterProfilesItems0 connection options printer profiles items0
+//
 // swagger:model ConnectionOptionsPrinterProfilesItems0
 type ConnectionOptionsPrinterProfilesItems0 struct {
 

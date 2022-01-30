@@ -6,13 +6,13 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // Job job
+//
 // swagger:model Job
 type Job struct {
 
@@ -99,6 +99,7 @@ func (m *Job) UnmarshalBinary(b []byte) error {
 }
 
 // JobJob job job
+//
 // swagger:model JobJob
 type JobJob struct {
 
@@ -191,6 +192,7 @@ func (m *JobJob) UnmarshalBinary(b []byte) error {
 }
 
 // JobJobFilament job job filament
+//
 // swagger:model JobJobFilament
 type JobJobFilament struct {
 
@@ -225,6 +227,7 @@ func (m *JobJobFilament) UnmarshalBinary(b []byte) error {
 }
 
 // JobJobFile job job file
+//
 // swagger:model JobJobFile
 type JobJobFile struct {
 
@@ -274,6 +277,7 @@ func (m *JobJobFile) UnmarshalBinary(b []byte) error {
 }
 
 // JobProgress job progress
+//
 // swagger:model JobProgress
 type JobProgress struct {
 

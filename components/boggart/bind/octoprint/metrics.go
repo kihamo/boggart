@@ -10,15 +10,15 @@ var (
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {
-	address := b.config().Address.Host
+	id := b.Meta().ID()
 
-	metricDeviceTemperatureActual.With("address", address).Describe(ch)
-	metricDeviceTemperatureTarget.With("address", address).Describe(ch)
+	metricDeviceTemperatureActual.With("id", id).Describe(ch)
+	metricDeviceTemperatureTarget.With("id", id).Describe(ch)
 }
 
 func (b *Bind) Collect(ch chan<- snitch.Metric) {
-	address := b.config().Address.Host
+	id := b.Meta().ID()
 
-	metricDeviceTemperatureActual.With("address", address).Collect(ch)
-	metricDeviceTemperatureTarget.With("address", address).Collect(ch)
+	metricDeviceTemperatureActual.With("id", id).Collect(ch)
+	metricDeviceTemperatureTarget.With("id", id).Collect(ch)
 }

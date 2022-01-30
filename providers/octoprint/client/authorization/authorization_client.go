@@ -9,12 +9,11 @@ import (
 	"fmt"
 
 	"github.com/go-openapi/runtime"
-
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 )
 
 // New creates a new authorization API client.
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *Client {
+func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
 	return &Client{transport: transport, formats: formats}
 }
 
@@ -26,8 +25,17 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientService is the interface for Client methods
+type ClientService interface {
+	Login(params *LoginParams, authInfo runtime.ClientAuthInfoWriter) (*LoginOK, error)
+
+	Logout(params *LogoutParams, authInfo runtime.ClientAuthInfoWriter) (*LogoutNoContent, error)
+
+	SetTransport(transport runtime.ClientTransport)
+}
+
 /*
-Login logins
+  Login logins
 */
 func (a *Client) Login(params *LoginParams, authInfo runtime.ClientAuthInfoWriter) (*LoginOK, error) {
 	// TODO: Validate the params before sending
@@ -62,7 +70,7 @@ func (a *Client) Login(params *LoginParams, authInfo runtime.ClientAuthInfoWrite
 }
 
 /*
-Logout logouts
+  Logout logouts
 */
 func (a *Client) Logout(params *LogoutParams, authInfo runtime.ClientAuthInfoWriter) (*LogoutNoContent, error) {
 	// TODO: Validate the params before sending

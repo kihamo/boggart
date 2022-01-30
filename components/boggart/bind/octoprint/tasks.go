@@ -6,7 +6,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/providers/octoprint/client/job"
-	"github.com/kihamo/boggart/providers/octoprint/client/plugin_display_layer_progress"
+	"github.com/kihamo/boggart/providers/octoprint/client/plugin"
 	"github.com/kihamo/boggart/providers/octoprint/client/printer"
 	"github.com/kihamo/boggart/providers/octoprint/models"
 	"go.uber.org/multierr"
@@ -120,7 +120,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	)
 
 	if state.Payload.State.Flags.Printing {
-		if progress, e := b.provider.PluginDisplayLayerProgress.DisplayLayerProgress(plugin_display_layer_progress.NewDisplayLayerProgressParamsWithContext(ctx), nil); e == nil {
+		if progress, e := b.provider.Plugin.DisplayLayerProgress(plugin.NewDisplayLayerProgressParamsWithContext(ctx), nil); e == nil {
 			if value, e := strconv.ParseUint(progress.Payload.Layer.Total, 10, 64); e == nil {
 				layerTotal = value
 			}

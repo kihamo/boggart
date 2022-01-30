@@ -9,12 +9,11 @@ import (
 	"fmt"
 
 	"github.com/go-openapi/runtime"
-
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 )
 
 // New creates a new printer API client.
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *Client {
+func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
 	return &Client{transport: transport, formats: formats}
 }
 
@@ -26,8 +25,23 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientService is the interface for Client methods
+type ClientService interface {
+	GetBedState(params *GetBedStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetBedStateOK, error)
+
+	GetChamberState(params *GetChamberStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetChamberStateOK, error)
+
+	GetPrinterState(params *GetPrinterStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetPrinterStateOK, error)
+
+	GetSDState(params *GetSDStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetSDStateOK, error)
+
+	GetToolState(params *GetToolStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetToolStateOK, error)
+
+	SetTransport(transport runtime.ClientTransport)
+}
+
 /*
-GetBedState retrieves the current bed state
+  GetBedState retrieves the current bed state
 */
 func (a *Client) GetBedState(params *GetBedStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetBedStateOK, error) {
 	// TODO: Validate the params before sending
@@ -62,7 +76,7 @@ func (a *Client) GetBedState(params *GetBedStateParams, authInfo runtime.ClientA
 }
 
 /*
-GetChamberState retrieves the current chamber state
+  GetChamberState retrieves the current chamber state
 */
 func (a *Client) GetChamberState(params *GetChamberStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetChamberStateOK, error) {
 	// TODO: Validate the params before sending
@@ -97,7 +111,7 @@ func (a *Client) GetChamberState(params *GetChamberStateParams, authInfo runtime
 }
 
 /*
-GetPrinterState retrieves the current printer state
+  GetPrinterState retrieves the current printer state
 */
 func (a *Client) GetPrinterState(params *GetPrinterStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetPrinterStateOK, error) {
 	// TODO: Validate the params before sending
@@ -132,7 +146,7 @@ func (a *Client) GetPrinterState(params *GetPrinterStateParams, authInfo runtime
 }
 
 /*
-GetSDState retrieves the current s d state
+  GetSDState retrieves the current s d state
 */
 func (a *Client) GetSDState(params *GetSDStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetSDStateOK, error) {
 	// TODO: Validate the params before sending
@@ -167,7 +181,7 @@ func (a *Client) GetSDState(params *GetSDStateParams, authInfo runtime.ClientAut
 }
 
 /*
-GetToolState retrieves the current tool state
+  GetToolState retrieves the current tool state
 */
 func (a *Client) GetToolState(params *GetToolStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetToolStateOK, error) {
 	// TODO: Validate the params before sending

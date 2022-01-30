@@ -9,12 +9,11 @@ import (
 	"fmt"
 
 	"github.com/go-openapi/runtime"
-
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 )
 
 // New creates a new system API client.
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *Client {
+func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
 	return &Client{transport: transport, formats: formats}
 }
 
@@ -26,8 +25,19 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientService is the interface for Client methods
+type ClientService interface {
+	ExecuteCommand(params *ExecuteCommandParams, authInfo runtime.ClientAuthInfoWriter) (*ExecuteCommandNoContent, error)
+
+	GetCommands(params *GetCommandsParams, authInfo runtime.ClientAuthInfoWriter) (*GetCommandsOK, error)
+
+	GetCommandsBySource(params *GetCommandsBySourceParams, authInfo runtime.ClientAuthInfoWriter) (*GetCommandsBySourceOK, error)
+
+	SetTransport(transport runtime.ClientTransport)
+}
+
 /*
-ExecuteCommand executes a registered system command
+  ExecuteCommand executes a registered system command
 */
 func (a *Client) ExecuteCommand(params *ExecuteCommandParams, authInfo runtime.ClientAuthInfoWriter) (*ExecuteCommandNoContent, error) {
 	// TODO: Validate the params before sending
@@ -62,7 +72,7 @@ func (a *Client) ExecuteCommand(params *ExecuteCommandParams, authInfo runtime.C
 }
 
 /*
-GetCommands lists all registered system commands
+  GetCommands lists all registered system commands
 */
 func (a *Client) GetCommands(params *GetCommandsParams, authInfo runtime.ClientAuthInfoWriter) (*GetCommandsOK, error) {
 	// TODO: Validate the params before sending
@@ -97,7 +107,7 @@ func (a *Client) GetCommands(params *GetCommandsParams, authInfo runtime.ClientA
 }
 
 /*
-GetCommandsBySource lists all registered system commands for a source
+  GetCommandsBySource lists all registered system commands for a source
 */
 func (a *Client) GetCommandsBySource(params *GetCommandsBySourceParams, authInfo runtime.ClientAuthInfoWriter) (*GetCommandsBySourceOK, error) {
 	// TODO: Validate the params before sending
