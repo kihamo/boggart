@@ -26,6 +26,7 @@ import (
 	_ "github.com/kihamo/boggart/components/boggart/bind/mikrotik"
 	_ "github.com/kihamo/boggart/components/boggart/bind/network"
 	_ "github.com/kihamo/boggart/components/boggart/bind/nut"
+	_ "github.com/kihamo/boggart/components/boggart/bind/octoprint"
 	_ "github.com/kihamo/boggart/components/boggart/bind/openhab"
 	_ "github.com/kihamo/boggart/components/boggart/bind/openweathermap"
 	_ "github.com/kihamo/boggart/components/boggart/bind/owntracks"
