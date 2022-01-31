@@ -16,52 +16,66 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewDisplayLayerProgressParams creates a new DisplayLayerProgressParams object
-// with the default values initialized.
+// NewDisplayLayerProgressParams creates a new DisplayLayerProgressParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewDisplayLayerProgressParams() *DisplayLayerProgressParams {
-
 	return &DisplayLayerProgressParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewDisplayLayerProgressParamsWithTimeout creates a new DisplayLayerProgressParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewDisplayLayerProgressParamsWithTimeout(timeout time.Duration) *DisplayLayerProgressParams {
-
 	return &DisplayLayerProgressParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewDisplayLayerProgressParamsWithContext creates a new DisplayLayerProgressParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewDisplayLayerProgressParamsWithContext(ctx context.Context) *DisplayLayerProgressParams {
-
 	return &DisplayLayerProgressParams{
-
 		Context: ctx,
 	}
 }
 
 // NewDisplayLayerProgressParamsWithHTTPClient creates a new DisplayLayerProgressParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewDisplayLayerProgressParamsWithHTTPClient(client *http.Client) *DisplayLayerProgressParams {
-
 	return &DisplayLayerProgressParams{
 		HTTPClient: client,
 	}
 }
 
-/*DisplayLayerProgressParams contains all the parameters to send to the API endpoint
-for the display layer progress operation typically these are written to a http.Request
+/* DisplayLayerProgressParams contains all the parameters to send to the API endpoint
+   for the display layer progress operation.
+
+   Typically these are written to a http.Request.
 */
 type DisplayLayerProgressParams struct {
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the display layer progress params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *DisplayLayerProgressParams) WithDefaults() *DisplayLayerProgressParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the display layer progress params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *DisplayLayerProgressParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the display layer progress params

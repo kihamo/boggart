@@ -25,13 +25,16 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	ExecuteCommand(params *ExecuteCommandParams, authInfo runtime.ClientAuthInfoWriter) (*ExecuteCommandNoContent, error)
+	ExecuteCommand(params *ExecuteCommandParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*ExecuteCommandNoContent, error)
 
-	GetCommands(params *GetCommandsParams, authInfo runtime.ClientAuthInfoWriter) (*GetCommandsOK, error)
+	GetCommands(params *GetCommandsParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetCommandsOK, error)
 
-	GetCommandsBySource(params *GetCommandsBySourceParams, authInfo runtime.ClientAuthInfoWriter) (*GetCommandsBySourceOK, error)
+	GetCommandsBySource(params *GetCommandsBySourceParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetCommandsBySourceOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -39,13 +42,12 @@ type ClientService interface {
 /*
   ExecuteCommand executes a registered system command
 */
-func (a *Client) ExecuteCommand(params *ExecuteCommandParams, authInfo runtime.ClientAuthInfoWriter) (*ExecuteCommandNoContent, error) {
+func (a *Client) ExecuteCommand(params *ExecuteCommandParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*ExecuteCommandNoContent, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewExecuteCommandParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "executeCommand",
 		Method:             "POST",
 		PathPattern:        "/api/system/commands/{source}/{action}",
@@ -57,7 +59,12 @@ func (a *Client) ExecuteCommand(params *ExecuteCommandParams, authInfo runtime.C
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -74,13 +81,12 @@ func (a *Client) ExecuteCommand(params *ExecuteCommandParams, authInfo runtime.C
 /*
   GetCommands lists all registered system commands
 */
-func (a *Client) GetCommands(params *GetCommandsParams, authInfo runtime.ClientAuthInfoWriter) (*GetCommandsOK, error) {
+func (a *Client) GetCommands(params *GetCommandsParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetCommandsOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetCommandsParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getCommands",
 		Method:             "GET",
 		PathPattern:        "/api/system/commands",
@@ -92,7 +98,12 @@ func (a *Client) GetCommands(params *GetCommandsParams, authInfo runtime.ClientA
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -109,13 +120,12 @@ func (a *Client) GetCommands(params *GetCommandsParams, authInfo runtime.ClientA
 /*
   GetCommandsBySource lists all registered system commands for a source
 */
-func (a *Client) GetCommandsBySource(params *GetCommandsBySourceParams, authInfo runtime.ClientAuthInfoWriter) (*GetCommandsBySourceOK, error) {
+func (a *Client) GetCommandsBySource(params *GetCommandsBySourceParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetCommandsBySourceOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetCommandsBySourceParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getCommandsBySource",
 		Method:             "GET",
 		PathPattern:        "/api/system/commands/{source}",
@@ -127,7 +137,12 @@ func (a *Client) GetCommandsBySource(params *GetCommandsBySourceParams, authInfo
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

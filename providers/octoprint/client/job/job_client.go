@@ -25,11 +25,14 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	GetJob(params *GetJobParams, authInfo runtime.ClientAuthInfoWriter) (*GetJobOK, error)
+	GetJob(params *GetJobParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetJobOK, error)
 
-	SendJobCommand(params *SendJobCommandParams, authInfo runtime.ClientAuthInfoWriter) (*SendJobCommandNoContent, error)
+	SendJobCommand(params *SendJobCommandParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SendJobCommandNoContent, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -37,13 +40,12 @@ type ClientService interface {
 /*
   GetJob retrieves information about the current job
 */
-func (a *Client) GetJob(params *GetJobParams, authInfo runtime.ClientAuthInfoWriter) (*GetJobOK, error) {
+func (a *Client) GetJob(params *GetJobParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetJobOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetJobParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getJob",
 		Method:             "GET",
 		PathPattern:        "/api/job",
@@ -55,7 +57,12 @@ func (a *Client) GetJob(params *GetJobParams, authInfo runtime.ClientAuthInfoWri
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -72,13 +79,12 @@ func (a *Client) GetJob(params *GetJobParams, authInfo runtime.ClientAuthInfoWri
 /*
   SendJobCommand issues a job command
 */
-func (a *Client) SendJobCommand(params *SendJobCommandParams, authInfo runtime.ClientAuthInfoWriter) (*SendJobCommandNoContent, error) {
+func (a *Client) SendJobCommand(params *SendJobCommandParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SendJobCommandNoContent, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewSendJobCommandParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "sendJobCommand",
 		Method:             "POST",
 		PathPattern:        "/api/job",
@@ -90,7 +96,12 @@ func (a *Client) SendJobCommand(params *SendJobCommandParams, authInfo runtime.C
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

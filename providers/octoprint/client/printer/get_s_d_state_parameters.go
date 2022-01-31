@@ -16,52 +16,66 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewGetSDStateParams creates a new GetSDStateParams object
-// with the default values initialized.
+// NewGetSDStateParams creates a new GetSDStateParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetSDStateParams() *GetSDStateParams {
-
 	return &GetSDStateParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetSDStateParamsWithTimeout creates a new GetSDStateParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetSDStateParamsWithTimeout(timeout time.Duration) *GetSDStateParams {
-
 	return &GetSDStateParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGetSDStateParamsWithContext creates a new GetSDStateParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetSDStateParamsWithContext(ctx context.Context) *GetSDStateParams {
-
 	return &GetSDStateParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGetSDStateParamsWithHTTPClient creates a new GetSDStateParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetSDStateParamsWithHTTPClient(client *http.Client) *GetSDStateParams {
-
 	return &GetSDStateParams{
 		HTTPClient: client,
 	}
 }
 
-/*GetSDStateParams contains all the parameters to send to the API endpoint
-for the get s d state operation typically these are written to a http.Request
+/* GetSDStateParams contains all the parameters to send to the API endpoint
+   for the get s d state operation.
+
+   Typically these are written to a http.Request.
 */
 type GetSDStateParams struct {
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get s d state params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetSDStateParams) WithDefaults() *GetSDStateParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get s d state params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetSDStateParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get s d state params

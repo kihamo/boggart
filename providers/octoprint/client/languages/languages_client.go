@@ -25,9 +25,12 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	GetLanguages(params *GetLanguagesParams, authInfo runtime.ClientAuthInfoWriter) (*GetLanguagesOK, error)
+	GetLanguages(params *GetLanguagesParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetLanguagesOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -35,13 +38,12 @@ type ClientService interface {
 /*
   GetLanguages retrieves installed language packs
 */
-func (a *Client) GetLanguages(params *GetLanguagesParams, authInfo runtime.ClientAuthInfoWriter) (*GetLanguagesOK, error) {
+func (a *Client) GetLanguages(params *GetLanguagesParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetLanguagesOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetLanguagesParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getLanguages",
 		Method:             "GET",
 		PathPattern:        "/api/languages",
@@ -53,7 +55,12 @@ func (a *Client) GetLanguages(params *GetLanguagesParams, authInfo runtime.Clien
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

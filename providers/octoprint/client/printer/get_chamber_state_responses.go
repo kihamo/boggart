@@ -35,7 +35,6 @@ func (o *GetChamberStateReader) ReadResponse(response runtime.ClientResponse, co
 			return nil, err
 		}
 		return nil, result
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -46,7 +45,7 @@ func NewGetChamberStateOK() *GetChamberStateOK {
 	return &GetChamberStateOK{}
 }
 
-/*GetChamberStateOK handles this case with default header values.
+/* GetChamberStateOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -57,7 +56,6 @@ type GetChamberStateOK struct {
 func (o *GetChamberStateOK) Error() string {
 	return fmt.Sprintf("[GET /api/printer/chamber][%d] getChamberStateOK  %+v", 200, o.Payload)
 }
-
 func (o *GetChamberStateOK) GetPayload() *models.ChamberState {
 	return o.Payload
 }
@@ -79,7 +77,7 @@ func NewGetChamberStateConflict() *GetChamberStateConflict {
 	return &GetChamberStateConflict{}
 }
 
-/*GetChamberStateConflict handles this case with default header values.
+/* GetChamberStateConflict describes a response with status code 409, with default header values.
 
 If the printer is not operational
 */

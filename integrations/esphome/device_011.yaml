@@ -66,7 +66,7 @@ light:
   - platform: monochromatic
     name: "Main white light"
     id: "light_main"
-    output: "led_white1"
+    output: "led_white2"
   - platform: rgb
     name: "Status RGB light"
     id: "light_status"

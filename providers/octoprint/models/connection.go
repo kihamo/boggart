@@ -6,6 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/go-openapi/errors"
@@ -44,7 +45,6 @@ func (m *Connection) Validate(formats strfmt.Registry) error {
 }
 
 func (m *Connection) validateCurrent(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Current) { // not required
 		return nil
 	}
@@ -53,6 +53,8 @@ func (m *Connection) validateCurrent(formats strfmt.Registry) error {
 		if err := m.Current.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("current")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("current")
 			}
 			return err
 		}
@@ -62,7 +64,6 @@ func (m *Connection) validateCurrent(formats strfmt.Registry) error {
 }
 
 func (m *Connection) validateOptions(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Options) { // not required
 		return nil
 	}
@@ -71,6 +72,58 @@ func (m *Connection) validateOptions(formats strfmt.Registry) error {
 		if err := m.Options.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("options")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("options")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this connection based on the context it is used
+func (m *Connection) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateCurrent(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateOptions(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *Connection) contextValidateCurrent(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Current != nil {
+		if err := m.Current.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("current")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("current")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *Connection) contextValidateOptions(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Options != nil {
+		if err := m.Options.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("options")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("options")
 			}
 			return err
 		}
@@ -117,6 +170,11 @@ type ConnectionCurrent struct {
 
 // Validate validates this connection current
 func (m *ConnectionCurrent) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this connection current based on context it is used
+func (m *ConnectionCurrent) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -180,7 +238,6 @@ func (m *ConnectionOptions) Validate(formats strfmt.Registry) error {
 }
 
 func (m *ConnectionOptions) validatePrinterProfiles(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.PrinterProfiles) { // not required
 		return nil
 	}
@@ -194,6 +251,42 @@ func (m *ConnectionOptions) validatePrinterProfiles(formats strfmt.Registry) err
 			if err := m.PrinterProfiles[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("options" + "." + "printerProfiles" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("options" + "." + "printerProfiles" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContextValidate validate this connection options based on the context it is used
+func (m *ConnectionOptions) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidatePrinterProfiles(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *ConnectionOptions) contextValidatePrinterProfiles(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.PrinterProfiles); i++ {
+
+		if m.PrinterProfiles[i] != nil {
+			if err := m.PrinterProfiles[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("options" + "." + "printerProfiles" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("options" + "." + "printerProfiles" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -236,6 +329,11 @@ type ConnectionOptionsPrinterProfilesItems0 struct {
 
 // Validate validates this connection options printer profiles items0
 func (m *ConnectionOptionsPrinterProfilesItems0) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this connection options printer profiles items0 based on context it is used
+func (m *ConnectionOptionsPrinterProfilesItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

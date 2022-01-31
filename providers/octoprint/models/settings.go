@@ -6,6 +6,9 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
+	"encoding/json"
+
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
@@ -29,7 +32,7 @@ type Settings struct {
 	Folder *SettingsFolder `json:"folder,omitempty"`
 
 	// plugins
-	Plugins map[string]interface{} `json:"plugins,omitempty"`
+	Plugins *SettingsPlugins `json:"plugins,omitempty"`
 
 	// printer
 	Printer *SettingsPrinter `json:"printer,omitempty"`
@@ -42,6 +45,154 @@ type Settings struct {
 
 	// webcam
 	Webcam *SettingsWebcam `json:"webcam,omitempty"`
+
+	// settings
+	Settings map[string]interface{} `json:"-"`
+}
+
+// UnmarshalJSON unmarshals this object with additional properties from JSON
+func (m *Settings) UnmarshalJSON(data []byte) error {
+	// stage 1, bind the properties
+	var stage1 struct {
+
+		// api
+		API *SettingsAPI `json:"api,omitempty"`
+
+		// appearance
+		Appearance *SettingsAppearance `json:"appearance,omitempty"`
+
+		// feature
+		Feature *SettingsFeature `json:"feature,omitempty"`
+
+		// folder
+		Folder *SettingsFolder `json:"folder,omitempty"`
+
+		// plugins
+		Plugins *SettingsPlugins `json:"plugins,omitempty"`
+
+		// printer
+		Printer *SettingsPrinter `json:"printer,omitempty"`
+
+		// scripts
+		Scripts *SettingsScripts `json:"scripts,omitempty"`
+
+		// serial
+		Serial *SettingsSerial `json:"serial,omitempty"`
+
+		// webcam
+		Webcam *SettingsWebcam `json:"webcam,omitempty"`
+	}
+	if err := json.Unmarshal(data, &stage1); err != nil {
+		return err
+	}
+	var rcv Settings
+
+	rcv.API = stage1.API
+	rcv.Appearance = stage1.Appearance
+	rcv.Feature = stage1.Feature
+	rcv.Folder = stage1.Folder
+	rcv.Plugins = stage1.Plugins
+	rcv.Printer = stage1.Printer
+	rcv.Scripts = stage1.Scripts
+	rcv.Serial = stage1.Serial
+	rcv.Webcam = stage1.Webcam
+	*m = rcv
+
+	// stage 2, remove properties and add to map
+	stage2 := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(data, &stage2); err != nil {
+		return err
+	}
+
+	delete(stage2, "api")
+	delete(stage2, "appearance")
+	delete(stage2, "feature")
+	delete(stage2, "folder")
+	delete(stage2, "plugins")
+	delete(stage2, "printer")
+	delete(stage2, "scripts")
+	delete(stage2, "serial")
+	delete(stage2, "webcam")
+	// stage 3, add additional properties values
+	if len(stage2) > 0 {
+		result := make(map[string]interface{})
+		for k, v := range stage2 {
+			var toadd interface{}
+			if err := json.Unmarshal(v, &toadd); err != nil {
+				return err
+			}
+			result[k] = toadd
+		}
+		m.Settings = result
+	}
+
+	return nil
+}
+
+// MarshalJSON marshals this object with additional properties into a JSON object
+func (m Settings) MarshalJSON() ([]byte, error) {
+	var stage1 struct {
+
+		// api
+		API *SettingsAPI `json:"api,omitempty"`
+
+		// appearance
+		Appearance *SettingsAppearance `json:"appearance,omitempty"`
+
+		// feature
+		Feature *SettingsFeature `json:"feature,omitempty"`
+
+		// folder
+		Folder *SettingsFolder `json:"folder,omitempty"`
+
+		// plugins
+		Plugins *SettingsPlugins `json:"plugins,omitempty"`
+
+		// printer
+		Printer *SettingsPrinter `json:"printer,omitempty"`
+
+		// scripts
+		Scripts *SettingsScripts `json:"scripts,omitempty"`
+
+		// serial
+		Serial *SettingsSerial `json:"serial,omitempty"`
+
+		// webcam
+		Webcam *SettingsWebcam `json:"webcam,omitempty"`
+	}
+
+	stage1.API = m.API
+	stage1.Appearance = m.Appearance
+	stage1.Feature = m.Feature
+	stage1.Folder = m.Folder
+	stage1.Plugins = m.Plugins
+	stage1.Printer = m.Printer
+	stage1.Scripts = m.Scripts
+	stage1.Serial = m.Serial
+	stage1.Webcam = m.Webcam
+
+	// make JSON object for known properties
+	props, err := json.Marshal(stage1)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(m.Settings) == 0 { // no additional properties
+		return props, nil
+	}
+
+	// make JSON object for the additional properties
+	additional, err := json.Marshal(m.Settings)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(props) < 3 { // "{}": only additional properties
+		return additional, nil
+	}
+
+	// concatenate the 2 objects
+	return swag.ConcatJSON(props, additional), nil
 }
 
 // Validate validates this settings
@@ -61,6 +212,10 @@ func (m *Settings) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateFolder(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validatePlugins(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -87,7 +242,6 @@ func (m *Settings) Validate(formats strfmt.Registry) error {
 }
 
 func (m *Settings) validateAPI(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.API) { // not required
 		return nil
 	}
@@ -96,6 +250,8 @@ func (m *Settings) validateAPI(formats strfmt.Registry) error {
 		if err := m.API.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("api")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("api")
 			}
 			return err
 		}
@@ -105,7 +261,6 @@ func (m *Settings) validateAPI(formats strfmt.Registry) error {
 }
 
 func (m *Settings) validateAppearance(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Appearance) { // not required
 		return nil
 	}
@@ -114,6 +269,8 @@ func (m *Settings) validateAppearance(formats strfmt.Registry) error {
 		if err := m.Appearance.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("appearance")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("appearance")
 			}
 			return err
 		}
@@ -123,7 +280,6 @@ func (m *Settings) validateAppearance(formats strfmt.Registry) error {
 }
 
 func (m *Settings) validateFeature(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Feature) { // not required
 		return nil
 	}
@@ -132,6 +288,8 @@ func (m *Settings) validateFeature(formats strfmt.Registry) error {
 		if err := m.Feature.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("feature")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("feature")
 			}
 			return err
 		}
@@ -141,7 +299,6 @@ func (m *Settings) validateFeature(formats strfmt.Registry) error {
 }
 
 func (m *Settings) validateFolder(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Folder) { // not required
 		return nil
 	}
@@ -150,6 +307,27 @@ func (m *Settings) validateFolder(formats strfmt.Registry) error {
 		if err := m.Folder.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("folder")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("folder")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *Settings) validatePlugins(formats strfmt.Registry) error {
+	if swag.IsZero(m.Plugins) { // not required
+		return nil
+	}
+
+	if m.Plugins != nil {
+		if err := m.Plugins.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("plugins")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("plugins")
 			}
 			return err
 		}
@@ -159,7 +337,6 @@ func (m *Settings) validateFolder(formats strfmt.Registry) error {
 }
 
 func (m *Settings) validatePrinter(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Printer) { // not required
 		return nil
 	}
@@ -168,6 +345,8 @@ func (m *Settings) validatePrinter(formats strfmt.Registry) error {
 		if err := m.Printer.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("printer")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("printer")
 			}
 			return err
 		}
@@ -177,7 +356,6 @@ func (m *Settings) validatePrinter(formats strfmt.Registry) error {
 }
 
 func (m *Settings) validateScripts(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Scripts) { // not required
 		return nil
 	}
@@ -186,6 +364,8 @@ func (m *Settings) validateScripts(formats strfmt.Registry) error {
 		if err := m.Scripts.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("scripts")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("scripts")
 			}
 			return err
 		}
@@ -195,7 +375,6 @@ func (m *Settings) validateScripts(formats strfmt.Registry) error {
 }
 
 func (m *Settings) validateSerial(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Serial) { // not required
 		return nil
 	}
@@ -204,6 +383,8 @@ func (m *Settings) validateSerial(formats strfmt.Registry) error {
 		if err := m.Serial.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("serial")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("serial")
 			}
 			return err
 		}
@@ -213,7 +394,6 @@ func (m *Settings) validateSerial(formats strfmt.Registry) error {
 }
 
 func (m *Settings) validateWebcam(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Webcam) { // not required
 		return nil
 	}
@@ -222,6 +402,198 @@ func (m *Settings) validateWebcam(formats strfmt.Registry) error {
 		if err := m.Webcam.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("webcam")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("webcam")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this settings based on the context it is used
+func (m *Settings) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateAPI(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateAppearance(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateFeature(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateFolder(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidatePlugins(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidatePrinter(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateScripts(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateSerial(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateWebcam(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *Settings) contextValidateAPI(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.API != nil {
+		if err := m.API.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("api")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("api")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *Settings) contextValidateAppearance(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Appearance != nil {
+		if err := m.Appearance.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("appearance")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("appearance")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *Settings) contextValidateFeature(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Feature != nil {
+		if err := m.Feature.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("feature")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("feature")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *Settings) contextValidateFolder(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Folder != nil {
+		if err := m.Folder.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("folder")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("folder")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *Settings) contextValidatePlugins(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Plugins != nil {
+		if err := m.Plugins.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("plugins")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("plugins")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *Settings) contextValidatePrinter(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Printer != nil {
+		if err := m.Printer.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("printer")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("printer")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *Settings) contextValidateScripts(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Scripts != nil {
+		if err := m.Scripts.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("scripts")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("scripts")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *Settings) contextValidateSerial(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Serial != nil {
+		if err := m.Serial.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("serial")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("serial")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *Settings) contextValidateWebcam(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Webcam != nil {
+		if err := m.Webcam.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("webcam")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("webcam")
 			}
 			return err
 		}
@@ -262,6 +634,11 @@ type SettingsAPI struct {
 
 // Validate validates this settings API
 func (m *SettingsAPI) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this settings API based on context it is used
+func (m *SettingsAPI) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -312,6 +689,11 @@ type SettingsAppearance struct {
 
 // Validate validates this settings appearance
 func (m *SettingsAppearance) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this settings appearance based on context it is used
+func (m *SettingsAppearance) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -377,6 +759,11 @@ func (m *SettingsFeature) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
+// ContextValidate validates this settings feature based on context it is used
+func (m *SettingsFeature) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
 // MarshalBinary interface implementation
 func (m *SettingsFeature) MarshalBinary() ([]byte, error) {
 	if m == nil {
@@ -421,6 +808,11 @@ func (m *SettingsFolder) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
+// ContextValidate validates this settings folder based on context it is used
+func (m *SettingsFolder) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
 // MarshalBinary interface implementation
 func (m *SettingsFolder) MarshalBinary() ([]byte, error) {
 	if m == nil {
@@ -439,6 +831,645 @@ func (m *SettingsFolder) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
+// SettingsPlugins settings plugins
+//
+// swagger:model SettingsPlugins
+type SettingsPlugins struct {
+
+	// mqtt
+	Mqtt *SettingsPluginsMqtt `json:"mqtt,omitempty"`
+
+	// settings plugins
+	SettingsPlugins map[string]interface{} `json:"-"`
+}
+
+// UnmarshalJSON unmarshals this object with additional properties from JSON
+func (m *SettingsPlugins) UnmarshalJSON(data []byte) error {
+	// stage 1, bind the properties
+	var stage1 struct {
+
+		// mqtt
+		Mqtt *SettingsPluginsMqtt `json:"mqtt,omitempty"`
+	}
+	if err := json.Unmarshal(data, &stage1); err != nil {
+		return err
+	}
+	var rcv SettingsPlugins
+
+	rcv.Mqtt = stage1.Mqtt
+	*m = rcv
+
+	// stage 2, remove properties and add to map
+	stage2 := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(data, &stage2); err != nil {
+		return err
+	}
+
+	delete(stage2, "mqtt")
+	// stage 3, add additional properties values
+	if len(stage2) > 0 {
+		result := make(map[string]interface{})
+		for k, v := range stage2 {
+			var toadd interface{}
+			if err := json.Unmarshal(v, &toadd); err != nil {
+				return err
+			}
+			result[k] = toadd
+		}
+		m.SettingsPlugins = result
+	}
+
+	return nil
+}
+
+// MarshalJSON marshals this object with additional properties into a JSON object
+func (m SettingsPlugins) MarshalJSON() ([]byte, error) {
+	var stage1 struct {
+
+		// mqtt
+		Mqtt *SettingsPluginsMqtt `json:"mqtt,omitempty"`
+	}
+
+	stage1.Mqtt = m.Mqtt
+
+	// make JSON object for known properties
+	props, err := json.Marshal(stage1)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(m.SettingsPlugins) == 0 { // no additional properties
+		return props, nil
+	}
+
+	// make JSON object for the additional properties
+	additional, err := json.Marshal(m.SettingsPlugins)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(props) < 3 { // "{}": only additional properties
+		return additional, nil
+	}
+
+	// concatenate the 2 objects
+	return swag.ConcatJSON(props, additional), nil
+}
+
+// Validate validates this settings plugins
+func (m *SettingsPlugins) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateMqtt(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *SettingsPlugins) validateMqtt(formats strfmt.Registry) error {
+	if swag.IsZero(m.Mqtt) { // not required
+		return nil
+	}
+
+	if m.Mqtt != nil {
+		if err := m.Mqtt.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("plugins" + "." + "mqtt")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("plugins" + "." + "mqtt")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this settings plugins based on the context it is used
+func (m *SettingsPlugins) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateMqtt(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *SettingsPlugins) contextValidateMqtt(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Mqtt != nil {
+		if err := m.Mqtt.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("plugins" + "." + "mqtt")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("plugins" + "." + "mqtt")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *SettingsPlugins) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *SettingsPlugins) UnmarshalBinary(b []byte) error {
+	var res SettingsPlugins
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// SettingsPluginsMqtt settings plugins mqtt
+//
+// swagger:model SettingsPluginsMqtt
+type SettingsPluginsMqtt struct {
+
+	// broker
+	Broker *SettingsPluginsMqttBroker `json:"broker,omitempty"`
+
+	// client
+	Client *SettingsPluginsMqttClient `json:"client,omitempty"`
+
+	// publish
+	Publish *SettingsPluginsMqttPublish `json:"publish,omitempty"`
+
+	// timestamp fieldname
+	TimestampFieldname string `json:"timestamp_fieldname,omitempty"`
+}
+
+// Validate validates this settings plugins mqtt
+func (m *SettingsPluginsMqtt) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateBroker(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateClient(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validatePublish(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *SettingsPluginsMqtt) validateBroker(formats strfmt.Registry) error {
+	if swag.IsZero(m.Broker) { // not required
+		return nil
+	}
+
+	if m.Broker != nil {
+		if err := m.Broker.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("plugins" + "." + "mqtt" + "." + "broker")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("plugins" + "." + "mqtt" + "." + "broker")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *SettingsPluginsMqtt) validateClient(formats strfmt.Registry) error {
+	if swag.IsZero(m.Client) { // not required
+		return nil
+	}
+
+	if m.Client != nil {
+		if err := m.Client.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("plugins" + "." + "mqtt" + "." + "client")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("plugins" + "." + "mqtt" + "." + "client")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *SettingsPluginsMqtt) validatePublish(formats strfmt.Registry) error {
+	if swag.IsZero(m.Publish) { // not required
+		return nil
+	}
+
+	if m.Publish != nil {
+		if err := m.Publish.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("plugins" + "." + "mqtt" + "." + "publish")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("plugins" + "." + "mqtt" + "." + "publish")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this settings plugins mqtt based on the context it is used
+func (m *SettingsPluginsMqtt) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateBroker(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateClient(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidatePublish(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *SettingsPluginsMqtt) contextValidateBroker(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Broker != nil {
+		if err := m.Broker.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("plugins" + "." + "mqtt" + "." + "broker")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("plugins" + "." + "mqtt" + "." + "broker")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *SettingsPluginsMqtt) contextValidateClient(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Client != nil {
+		if err := m.Client.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("plugins" + "." + "mqtt" + "." + "client")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("plugins" + "." + "mqtt" + "." + "client")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *SettingsPluginsMqtt) contextValidatePublish(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Publish != nil {
+		if err := m.Publish.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("plugins" + "." + "mqtt" + "." + "publish")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("plugins" + "." + "mqtt" + "." + "publish")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *SettingsPluginsMqtt) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *SettingsPluginsMqtt) UnmarshalBinary(b []byte) error {
+	var res SettingsPluginsMqtt
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// SettingsPluginsMqttBroker settings plugins mqtt broker
+//
+// swagger:model SettingsPluginsMqttBroker
+type SettingsPluginsMqttBroker struct {
+
+	// clean session
+	CleanSession bool `json:"clean_session,omitempty"`
+
+	// keepalive
+	Keepalive int64 `json:"keepalive,omitempty"`
+
+	// password
+	Password string `json:"password,omitempty"`
+
+	// port
+	Port int64 `json:"port,omitempty"`
+
+	// protocol
+	Protocol string `json:"protocol,omitempty"`
+
+	// retain
+	Retain bool `json:"retain,omitempty"`
+
+	// tls
+	TLS interface{} `json:"tls,omitempty"`
+
+	// tls active
+	TLSActive bool `json:"tls_active,omitempty"`
+
+	// tls insecure
+	TLSInsecure bool `json:"tls_insecure,omitempty"`
+
+	// url
+	URL string `json:"url,omitempty"`
+
+	// username
+	Username string `json:"username,omitempty"`
+}
+
+// Validate validates this settings plugins mqtt broker
+func (m *SettingsPluginsMqttBroker) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this settings plugins mqtt broker based on context it is used
+func (m *SettingsPluginsMqttBroker) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *SettingsPluginsMqttBroker) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *SettingsPluginsMqttBroker) UnmarshalBinary(b []byte) error {
+	var res SettingsPluginsMqttBroker
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// SettingsPluginsMqttClient settings plugins mqtt client
+//
+// swagger:model SettingsPluginsMqttClient
+type SettingsPluginsMqttClient struct {
+
+	// client id
+	ClientID string `json:"client_id,omitempty"`
+}
+
+// Validate validates this settings plugins mqtt client
+func (m *SettingsPluginsMqttClient) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this settings plugins mqtt client based on context it is used
+func (m *SettingsPluginsMqttClient) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *SettingsPluginsMqttClient) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *SettingsPluginsMqttClient) UnmarshalBinary(b []byte) error {
+	var res SettingsPluginsMqttClient
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// SettingsPluginsMqttPublish settings plugins mqtt publish
+//
+// swagger:model SettingsPluginsMqttPublish
+type SettingsPluginsMqttPublish struct {
+
+	// base topic
+	BaseTopic string `json:"baseTopic,omitempty"`
+
+	// event active
+	EventActive bool `json:"eventActive,omitempty"`
+
+	// event topic
+	EventTopic string `json:"eventTopic,omitempty"`
+
+	// events
+	Events *SettingsPluginsMqttPublishEvents `json:"events,omitempty"`
+
+	// lw active
+	LwActive bool `json:"lwActive,omitempty"`
+
+	// lw topic
+	LwTopic string `json:"lwTopic,omitempty"`
+
+	// printer data
+	PrinterData bool `json:"printerData,omitempty"`
+
+	// progress active
+	ProgressActive bool `json:"progressActive,omitempty"`
+
+	// progress topic
+	ProgressTopic string `json:"progressTopic,omitempty"`
+
+	// temperature active
+	TemperatureActive bool `json:"temperatureActive,omitempty"`
+
+	// temperature threshold
+	TemperatureThreshold float64 `json:"temperatureThreshold,omitempty"`
+
+	// temperature topic
+	TemperatureTopic string `json:"temperatureTopic,omitempty"`
+}
+
+// Validate validates this settings plugins mqtt publish
+func (m *SettingsPluginsMqttPublish) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateEvents(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *SettingsPluginsMqttPublish) validateEvents(formats strfmt.Registry) error {
+	if swag.IsZero(m.Events) { // not required
+		return nil
+	}
+
+	if m.Events != nil {
+		if err := m.Events.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("plugins" + "." + "mqtt" + "." + "publish" + "." + "events")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("plugins" + "." + "mqtt" + "." + "publish" + "." + "events")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this settings plugins mqtt publish based on the context it is used
+func (m *SettingsPluginsMqttPublish) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateEvents(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *SettingsPluginsMqttPublish) contextValidateEvents(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Events != nil {
+		if err := m.Events.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("plugins" + "." + "mqtt" + "." + "publish" + "." + "events")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("plugins" + "." + "mqtt" + "." + "publish" + "." + "events")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *SettingsPluginsMqttPublish) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *SettingsPluginsMqttPublish) UnmarshalBinary(b []byte) error {
+	var res SettingsPluginsMqttPublish
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// SettingsPluginsMqttPublishEvents settings plugins mqtt publish events
+//
+// swagger:model SettingsPluginsMqttPublishEvents
+type SettingsPluginsMqttPublishEvents struct {
+
+	// comm
+	Comm bool `json:"comm,omitempty"`
+
+	// files
+	Files bool `json:"files,omitempty"`
+
+	// gcode
+	Gcode bool `json:"gcode,omitempty"`
+
+	// printjob
+	Printjob bool `json:"printjob,omitempty"`
+
+	// server
+	Server bool `json:"server,omitempty"`
+
+	// settings
+	Settings bool `json:"settings,omitempty"`
+
+	// slicing
+	Slicing bool `json:"slicing,omitempty"`
+
+	// timelapse
+	Timelapse bool `json:"timelapse,omitempty"`
+
+	// unclassified
+	Unclassified bool `json:"unclassified,omitempty"`
+}
+
+// Validate validates this settings plugins mqtt publish events
+func (m *SettingsPluginsMqttPublishEvents) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this settings plugins mqtt publish events based on context it is used
+func (m *SettingsPluginsMqttPublishEvents) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *SettingsPluginsMqttPublishEvents) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *SettingsPluginsMqttPublishEvents) UnmarshalBinary(b []byte) error {
+	var res SettingsPluginsMqttPublishEvents
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
 // SettingsPrinter settings printer
 //
 // swagger:model SettingsPrinter
@@ -450,6 +1481,11 @@ type SettingsPrinter struct {
 
 // Validate validates this settings printer
 func (m *SettingsPrinter) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this settings printer based on context it is used
+func (m *SettingsPrinter) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -482,6 +1518,11 @@ type SettingsScripts struct {
 
 // Validate validates this settings scripts
 func (m *SettingsScripts) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this settings scripts based on context it is used
+func (m *SettingsScripts) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -664,6 +1705,11 @@ func (m *SettingsSerial) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
+// ContextValidate validates this settings serial based on context it is used
+func (m *SettingsSerial) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
 // MarshalBinary interface implementation
 func (m *SettingsSerial) MarshalBinary() ([]byte, error) {
 	if m == nil {
@@ -744,6 +1790,11 @@ type SettingsWebcam struct {
 
 // Validate validates this settings webcam
 func (m *SettingsWebcam) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this settings webcam based on context it is used
+func (m *SettingsWebcam) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

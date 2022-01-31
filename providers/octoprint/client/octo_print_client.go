@@ -16,7 +16,7 @@ import (
 	"github.com/kihamo/boggart/providers/octoprint/client/languages"
 	"github.com/kihamo/boggart/providers/octoprint/client/plugin"
 	"github.com/kihamo/boggart/providers/octoprint/client/printer"
-	"github.com/kihamo/boggart/providers/octoprint/client/server"
+	serverops "github.com/kihamo/boggart/providers/octoprint/client/server"
 	"github.com/kihamo/boggart/providers/octoprint/client/settings"
 	"github.com/kihamo/boggart/providers/octoprint/client/system"
 	"github.com/kihamo/boggart/providers/octoprint/client/util"
@@ -71,7 +71,7 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *OctoPrint 
 	cli.Languages = languages.New(transport, formats)
 	cli.Plugin = plugin.New(transport, formats)
 	cli.Printer = printer.New(transport, formats)
-	cli.Server = server.New(transport, formats)
+	cli.Server = serverops.New(transport, formats)
 	cli.Settings = settings.New(transport, formats)
 	cli.System = system.New(transport, formats)
 	cli.Util = util.New(transport, formats)
@@ -132,7 +132,7 @@ type OctoPrint struct {
 
 	Printer printer.ClientService
 
-	Server server.ClientService
+	Server serverops.ClientService
 
 	Settings settings.ClientService
 

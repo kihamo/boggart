@@ -25,11 +25,14 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	GetConnection(params *GetConnectionParams, authInfo runtime.ClientAuthInfoWriter) (*GetConnectionOK, error)
+	GetConnection(params *GetConnectionParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetConnectionOK, error)
 
-	SendConnectionCommand(params *SendConnectionCommandParams, authInfo runtime.ClientAuthInfoWriter) (*SendConnectionCommandNoContent, error)
+	SendConnectionCommand(params *SendConnectionCommandParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SendConnectionCommandNoContent, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -37,13 +40,12 @@ type ClientService interface {
 /*
   GetConnection gets connection settings
 */
-func (a *Client) GetConnection(params *GetConnectionParams, authInfo runtime.ClientAuthInfoWriter) (*GetConnectionOK, error) {
+func (a *Client) GetConnection(params *GetConnectionParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetConnectionOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetConnectionParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getConnection",
 		Method:             "GET",
 		PathPattern:        "/api/connection",
@@ -55,7 +57,12 @@ func (a *Client) GetConnection(params *GetConnectionParams, authInfo runtime.Cli
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -72,13 +79,12 @@ func (a *Client) GetConnection(params *GetConnectionParams, authInfo runtime.Cli
 /*
   SendConnectionCommand issues a connection command
 */
-func (a *Client) SendConnectionCommand(params *SendConnectionCommandParams, authInfo runtime.ClientAuthInfoWriter) (*SendConnectionCommandNoContent, error) {
+func (a *Client) SendConnectionCommand(params *SendConnectionCommandParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SendConnectionCommandNoContent, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewSendConnectionCommandParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "sendConnectionCommand",
 		Method:             "POST",
 		PathPattern:        "/api/connection",
@@ -90,7 +96,12 @@ func (a *Client) SendConnectionCommand(params *SendConnectionCommandParams, auth
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

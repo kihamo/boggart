@@ -17,64 +17,79 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// NewGetBedStateParams creates a new GetBedStateParams object
-// with the default values initialized.
+// NewGetBedStateParams creates a new GetBedStateParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetBedStateParams() *GetBedStateParams {
-	var ()
 	return &GetBedStateParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetBedStateParamsWithTimeout creates a new GetBedStateParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetBedStateParamsWithTimeout(timeout time.Duration) *GetBedStateParams {
-	var ()
 	return &GetBedStateParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGetBedStateParamsWithContext creates a new GetBedStateParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetBedStateParamsWithContext(ctx context.Context) *GetBedStateParams {
-	var ()
 	return &GetBedStateParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGetBedStateParamsWithHTTPClient creates a new GetBedStateParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetBedStateParamsWithHTTPClient(client *http.Client) *GetBedStateParams {
-	var ()
 	return &GetBedStateParams{
 		HTTPClient: client,
 	}
 }
 
-/*GetBedStateParams contains all the parameters to send to the API endpoint
-for the get bed state operation typically these are written to a http.Request
+/* GetBedStateParams contains all the parameters to send to the API endpoint
+   for the get bed state operation.
+
+   Typically these are written to a http.Request.
 */
 type GetBedStateParams struct {
 
-	/*History
-	  The printer’s temperature history by supplying
+	/* History.
 
+	   The printer’s temperature history by supplying
 	*/
 	History *bool
-	/*Limit
-	  The amount of data points limited
 
+	/* Limit.
+
+	   The amount of data points limited
 	*/
 	Limit *int64
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get bed state params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetBedStateParams) WithDefaults() *GetBedStateParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get bed state params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetBedStateParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get bed state params
@@ -144,32 +159,34 @@ func (o *GetBedStateParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 
 		// query param history
 		var qrHistory bool
+
 		if o.History != nil {
 			qrHistory = *o.History
 		}
 		qHistory := swag.FormatBool(qrHistory)
 		if qHistory != "" {
+
 			if err := r.SetQueryParam("history", qHistory); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Limit != nil {
 
 		// query param limit
 		var qrLimit int64
+
 		if o.Limit != nil {
 			qrLimit = *o.Limit
 		}
 		qLimit := swag.FormatInt64(qrLimit)
 		if qLimit != "" {
+
 			if err := r.SetQueryParam("limit", qLimit); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if len(res) > 0 {

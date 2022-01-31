@@ -47,7 +47,6 @@ func (o *ExecuteCommandReader) ReadResponse(response runtime.ClientResponse, con
 			return nil, err
 		}
 		return nil, result
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -58,7 +57,7 @@ func NewExecuteCommandNoContent() *ExecuteCommandNoContent {
 	return &ExecuteCommandNoContent{}
 }
 
-/*ExecuteCommandNoContent handles this case with default header values.
+/* ExecuteCommandNoContent describes a response with status code 204, with default header values.
 
 Successful operation
 */
@@ -69,7 +68,6 @@ type ExecuteCommandNoContent struct {
 func (o *ExecuteCommandNoContent) Error() string {
 	return fmt.Sprintf("[POST /api/system/commands/{source}/{action}][%d] executeCommandNoContent  %+v", 204, o.Payload)
 }
-
 func (o *ExecuteCommandNoContent) GetPayload() []*models.Command {
 	return o.Payload
 }
@@ -89,7 +87,7 @@ func NewExecuteCommandBadRequest() *ExecuteCommandBadRequest {
 	return &ExecuteCommandBadRequest{}
 }
 
-/*ExecuteCommandBadRequest handles this case with default header values.
+/* ExecuteCommandBadRequest describes a response with status code 400, with default header values.
 
 Bad request
 */
@@ -110,7 +108,7 @@ func NewExecuteCommandNotFound() *ExecuteCommandNotFound {
 	return &ExecuteCommandNotFound{}
 }
 
-/*ExecuteCommandNotFound handles this case with default header values.
+/* ExecuteCommandNotFound describes a response with status code 404, with default header values.
 
 Not found
 */
@@ -131,7 +129,7 @@ func NewExecuteCommandInternalServerError() *ExecuteCommandInternalServerError {
 	return &ExecuteCommandInternalServerError{}
 }
 
-/*ExecuteCommandInternalServerError handles this case with default header values.
+/* ExecuteCommandInternalServerError describes a response with status code 500, with default header values.
 
 Internal server error
 */

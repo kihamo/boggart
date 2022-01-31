@@ -6,6 +6,7 @@ package connection
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -36,7 +37,6 @@ func (o *SendConnectionCommandReader) ReadResponse(response runtime.ClientRespon
 			return nil, err
 		}
 		return nil, result
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -47,7 +47,7 @@ func NewSendConnectionCommandNoContent() *SendConnectionCommandNoContent {
 	return &SendConnectionCommandNoContent{}
 }
 
-/*SendConnectionCommandNoContent handles this case with default header values.
+/* SendConnectionCommandNoContent describes a response with status code 204, with default header values.
 
 Successful operation
 */
@@ -68,7 +68,7 @@ func NewSendConnectionCommandBadRequest() *SendConnectionCommandBadRequest {
 	return &SendConnectionCommandBadRequest{}
 }
 
-/*SendConnectionCommandBadRequest handles this case with default header values.
+/* SendConnectionCommandBadRequest describes a response with status code 400, with default header values.
 
 Bad request
 */
@@ -156,7 +156,6 @@ func (o *SendConnectionCommandBody) validateCommandEnum(path, location string, v
 }
 
 func (o *SendConnectionCommandBody) validateCommand(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Command) { // not required
 		return nil
 	}
@@ -166,6 +165,11 @@ func (o *SendConnectionCommandBody) validateCommand(formats strfmt.Registry) err
 		return err
 	}
 
+	return nil
+}
+
+// ContextValidate validates this send connection command body based on context it is used
+func (o *SendConnectionCommandBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

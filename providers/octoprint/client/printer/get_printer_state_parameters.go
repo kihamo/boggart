@@ -17,69 +17,85 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// NewGetPrinterStateParams creates a new GetPrinterStateParams object
-// with the default values initialized.
+// NewGetPrinterStateParams creates a new GetPrinterStateParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetPrinterStateParams() *GetPrinterStateParams {
-	var ()
 	return &GetPrinterStateParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetPrinterStateParamsWithTimeout creates a new GetPrinterStateParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetPrinterStateParamsWithTimeout(timeout time.Duration) *GetPrinterStateParams {
-	var ()
 	return &GetPrinterStateParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGetPrinterStateParamsWithContext creates a new GetPrinterStateParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetPrinterStateParamsWithContext(ctx context.Context) *GetPrinterStateParams {
-	var ()
 	return &GetPrinterStateParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGetPrinterStateParamsWithHTTPClient creates a new GetPrinterStateParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetPrinterStateParamsWithHTTPClient(client *http.Client) *GetPrinterStateParams {
-	var ()
 	return &GetPrinterStateParams{
 		HTTPClient: client,
 	}
 }
 
-/*GetPrinterStateParams contains all the parameters to send to the API endpoint
-for the get printer state operation typically these are written to a http.Request
+/* GetPrinterStateParams contains all the parameters to send to the API endpoint
+   for the get printer state operation.
+
+   Typically these are written to a http.Request.
 */
 type GetPrinterStateParams struct {
 
-	/*Exclude
-	  List of attributes to not return in the response
+	/* Exclude.
 
+	   List of attributes to not return in the response
 	*/
 	Exclude []string
-	/*History
-	  The printer’s temperature history by supplying
 
+	/* History.
+
+	   The printer’s temperature history by supplying
 	*/
 	History *bool
-	/*Limit
-	  The amount of data points limited
 
+	/* Limit.
+
+	   The amount of data points limited
 	*/
 	Limit *int64
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get printer state params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetPrinterStateParams) WithDefaults() *GetPrinterStateParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get printer state params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetPrinterStateParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get printer state params
@@ -156,48 +172,70 @@ func (o *GetPrinterStateParams) WriteToRequest(r runtime.ClientRequest, reg strf
 	}
 	var res []error
 
-	valuesExclude := o.Exclude
+	if o.Exclude != nil {
 
-	joinedExclude := swag.JoinByFormat(valuesExclude, "csv")
-	// query array param exclude
-	if err := r.SetQueryParam("exclude", joinedExclude...); err != nil {
-		return err
+		// binding items for exclude
+		joinedExclude := o.bindParamExclude(reg)
+
+		// query array param exclude
+		if err := r.SetQueryParam("exclude", joinedExclude...); err != nil {
+			return err
+		}
 	}
 
 	if o.History != nil {
 
 		// query param history
 		var qrHistory bool
+
 		if o.History != nil {
 			qrHistory = *o.History
 		}
 		qHistory := swag.FormatBool(qrHistory)
 		if qHistory != "" {
+
 			if err := r.SetQueryParam("history", qHistory); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Limit != nil {
 
 		// query param limit
 		var qrLimit int64
+
 		if o.Limit != nil {
 			qrLimit = *o.Limit
 		}
 		qLimit := swag.FormatInt64(qrLimit)
 		if qLimit != "" {
+
 			if err := r.SetQueryParam("limit", qLimit); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
 	return nil
+}
+
+// bindParamGetPrinterState binds the parameter exclude
+func (o *GetPrinterStateParams) bindParamExclude(formats strfmt.Registry) []string {
+	excludeIR := o.Exclude
+
+	var excludeIC []string
+	for _, excludeIIR := range excludeIR { // explode []string
+
+		excludeIIV := excludeIIR // string as string
+		excludeIC = append(excludeIC, excludeIIV)
+	}
+
+	// items.CollectionFormat: "csv"
+	excludeIS := swag.JoinByFormat(excludeIC, "csv")
+
+	return excludeIS
 }

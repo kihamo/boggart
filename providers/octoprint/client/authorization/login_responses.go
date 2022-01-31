@@ -6,6 +6,7 @@ package authorization
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"fmt"
 	"io"
 
@@ -40,7 +41,6 @@ func (o *LoginReader) ReadResponse(response runtime.ClientResponse, consumer run
 			return nil, err
 		}
 		return nil, result
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -51,7 +51,7 @@ func NewLoginOK() *LoginOK {
 	return &LoginOK{}
 }
 
-/*LoginOK handles this case with default header values.
+/* LoginOK describes a response with status code 200, with default header values.
 
 Successful login
 */
@@ -62,7 +62,6 @@ type LoginOK struct {
 func (o *LoginOK) Error() string {
 	return fmt.Sprintf("[POST /api/login][%d] loginOK  %+v", 200, o.Payload)
 }
-
 func (o *LoginOK) GetPayload() *LoginOKBody {
 	return o.Payload
 }
@@ -84,7 +83,7 @@ func NewLoginUnauthorized() *LoginUnauthorized {
 	return &LoginUnauthorized{}
 }
 
-/*LoginUnauthorized handles this case with default header values.
+/* LoginUnauthorized describes a response with status code 401, with default header values.
 
 Username/password mismatch or unknown user
 */
@@ -105,7 +104,7 @@ func NewLoginForbidden() *LoginForbidden {
 	return &LoginForbidden{}
 }
 
-/*LoginForbidden handles this case with default header values.
+/* LoginForbidden describes a response with status code 403, with default header values.
 
 Deactivated account
 */
@@ -141,6 +140,11 @@ type LoginBody struct {
 
 // Validate validates this login body
 func (o *LoginBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this login body based on context it is used
+func (o *LoginBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -191,6 +195,11 @@ type LoginOKBody struct {
 
 // Validate validates this login o k body
 func (o *LoginOKBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this login o k body based on context it is used
+func (o *LoginOKBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

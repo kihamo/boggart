@@ -10,7 +10,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 }
 
 func (b *Bind) handleSnapshot(w *dashboard.Response, r *dashboard.Request) {
-	settings := b.Settings()
+	settings := b.SystemSettings()
 	if settings == nil {
 		b.Widget().NotFound(w, r)
 		return

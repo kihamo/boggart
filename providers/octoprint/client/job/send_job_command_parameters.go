@@ -16,56 +16,70 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewSendJobCommandParams creates a new SendJobCommandParams object
-// with the default values initialized.
+// NewSendJobCommandParams creates a new SendJobCommandParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewSendJobCommandParams() *SendJobCommandParams {
-	var ()
 	return &SendJobCommandParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewSendJobCommandParamsWithTimeout creates a new SendJobCommandParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewSendJobCommandParamsWithTimeout(timeout time.Duration) *SendJobCommandParams {
-	var ()
 	return &SendJobCommandParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewSendJobCommandParamsWithContext creates a new SendJobCommandParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewSendJobCommandParamsWithContext(ctx context.Context) *SendJobCommandParams {
-	var ()
 	return &SendJobCommandParams{
-
 		Context: ctx,
 	}
 }
 
 // NewSendJobCommandParamsWithHTTPClient creates a new SendJobCommandParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewSendJobCommandParamsWithHTTPClient(client *http.Client) *SendJobCommandParams {
-	var ()
 	return &SendJobCommandParams{
 		HTTPClient: client,
 	}
 }
 
-/*SendJobCommandParams contains all the parameters to send to the API endpoint
-for the send job command operation typically these are written to a http.Request
+/* SendJobCommandParams contains all the parameters to send to the API endpoint
+   for the send job command operation.
+
+   Typically these are written to a http.Request.
 */
 type SendJobCommandParams struct {
 
-	/*Body*/
+	// Body.
 	Body SendJobCommandBody
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the send job command params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *SendJobCommandParams) WithDefaults() *SendJobCommandParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the send job command params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *SendJobCommandParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the send job command params
@@ -119,7 +133,6 @@ func (o *SendJobCommandParams) WriteToRequest(r runtime.ClientRequest, reg strfm
 		return err
 	}
 	var res []error
-
 	if err := r.SetBodyParam(o.Body); err != nil {
 		return err
 	}

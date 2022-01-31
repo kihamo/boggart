@@ -6,11 +6,12 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"strconv"
+	"context"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // PrinterState printer state
@@ -25,7 +26,7 @@ type PrinterState struct {
 	State *PrinterStateState `json:"state,omitempty"`
 
 	// temperature
-	Temperature *PrinterStateTemperature `json:"temperature,omitempty"`
+	Temperature map[string]TemperatureData `json:"temperature,omitempty"`
 }
 
 // Validate validates this printer state
@@ -51,7 +52,6 @@ func (m *PrinterState) Validate(formats strfmt.Registry) error {
 }
 
 func (m *PrinterState) validateSd(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Sd) { // not required
 		return nil
 	}
@@ -60,6 +60,8 @@ func (m *PrinterState) validateSd(formats strfmt.Registry) error {
 		if err := m.Sd.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("sd")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("sd")
 			}
 			return err
 		}
@@ -69,7 +71,6 @@ func (m *PrinterState) validateSd(formats strfmt.Registry) error {
 }
 
 func (m *PrinterState) validateState(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.State) { // not required
 		return nil
 	}
@@ -78,6 +79,8 @@ func (m *PrinterState) validateState(formats strfmt.Registry) error {
 		if err := m.State.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("state")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("state")
 			}
 			return err
 		}
@@ -87,18 +90,95 @@ func (m *PrinterState) validateState(formats strfmt.Registry) error {
 }
 
 func (m *PrinterState) validateTemperature(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Temperature) { // not required
 		return nil
 	}
 
-	if m.Temperature != nil {
-		if err := m.Temperature.Validate(formats); err != nil {
+	for k := range m.Temperature {
+
+		if err := validate.Required("temperature"+"."+k, "body", m.Temperature[k]); err != nil {
+			return err
+		}
+		if val, ok := m.Temperature[k]; ok {
+			if err := val.Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("temperature" + "." + k)
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("temperature" + "." + k)
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContextValidate validate this printer state based on the context it is used
+func (m *PrinterState) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateSd(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateState(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateTemperature(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *PrinterState) contextValidateSd(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Sd != nil {
+		if err := m.Sd.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("temperature")
+				return ve.ValidateName("sd")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("sd")
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *PrinterState) contextValidateState(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.State != nil {
+		if err := m.State.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("state")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("state")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *PrinterState) contextValidateTemperature(ctx context.Context, formats strfmt.Registry) error {
+
+	for k := range m.Temperature {
+
+		if val, ok := m.Temperature[k]; ok {
+			if err := val.ContextValidate(ctx, formats); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	return nil
@@ -149,7 +229,6 @@ func (m *PrinterStateState) Validate(formats strfmt.Registry) error {
 }
 
 func (m *PrinterStateState) validateFlags(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Flags) { // not required
 		return nil
 	}
@@ -158,6 +237,38 @@ func (m *PrinterStateState) validateFlags(formats strfmt.Registry) error {
 		if err := m.Flags.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("state" + "." + "flags")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("state" + "." + "flags")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this printer state state based on the context it is used
+func (m *PrinterStateState) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateFlags(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *PrinterStateState) contextValidateFlags(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Flags != nil {
+		if err := m.Flags.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("state" + "." + "flags")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("state" + "." + "flags")
 			}
 			return err
 		}
@@ -222,6 +333,11 @@ func (m *PrinterStateStateFlags) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
+// ContextValidate validates this printer state state flags based on context it is used
+func (m *PrinterStateStateFlags) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
 // MarshalBinary interface implementation
 func (m *PrinterStateStateFlags) MarshalBinary() ([]byte, error) {
 	if m == nil {
@@ -233,259 +349,6 @@ func (m *PrinterStateStateFlags) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (m *PrinterStateStateFlags) UnmarshalBinary(b []byte) error {
 	var res PrinterStateStateFlags
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*m = res
-	return nil
-}
-
-// PrinterStateTemperature printer state temperature
-//
-// swagger:model PrinterStateTemperature
-type PrinterStateTemperature struct {
-
-	// bed
-	Bed *TemperatureData `json:"bed,omitempty"`
-
-	// history
-	History []*PrinterStateTemperatureHistoryItems0 `json:"history"`
-
-	// tool0
-	Tool0 *TemperatureData `json:"tool0,omitempty"`
-
-	// tool1
-	Tool1 *TemperatureData `json:"tool1,omitempty"`
-}
-
-// Validate validates this printer state temperature
-func (m *PrinterStateTemperature) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateBed(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateHistory(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateTool0(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateTool1(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *PrinterStateTemperature) validateBed(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Bed) { // not required
-		return nil
-	}
-
-	if m.Bed != nil {
-		if err := m.Bed.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("temperature" + "." + "bed")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *PrinterStateTemperature) validateHistory(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.History) { // not required
-		return nil
-	}
-
-	for i := 0; i < len(m.History); i++ {
-		if swag.IsZero(m.History[i]) { // not required
-			continue
-		}
-
-		if m.History[i] != nil {
-			if err := m.History[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("temperature" + "." + "history" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
-	}
-
-	return nil
-}
-
-func (m *PrinterStateTemperature) validateTool0(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Tool0) { // not required
-		return nil
-	}
-
-	if m.Tool0 != nil {
-		if err := m.Tool0.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("temperature" + "." + "tool0")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *PrinterStateTemperature) validateTool1(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Tool1) { // not required
-		return nil
-	}
-
-	if m.Tool1 != nil {
-		if err := m.Tool1.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("temperature" + "." + "tool1")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (m *PrinterStateTemperature) MarshalBinary() ([]byte, error) {
-	if m == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(m)
-}
-
-// UnmarshalBinary interface implementation
-func (m *PrinterStateTemperature) UnmarshalBinary(b []byte) error {
-	var res PrinterStateTemperature
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*m = res
-	return nil
-}
-
-// PrinterStateTemperatureHistoryItems0 printer state temperature history items0
-//
-// swagger:model PrinterStateTemperatureHistoryItems0
-type PrinterStateTemperatureHistoryItems0 struct {
-
-	// bed
-	Bed *TemperatureData `json:"bed,omitempty"`
-
-	// time
-	Time int64 `json:"time,omitempty"`
-
-	// tool0
-	Tool0 *TemperatureData `json:"tool0,omitempty"`
-
-	// tool1
-	Tool1 *TemperatureData `json:"tool1,omitempty"`
-}
-
-// Validate validates this printer state temperature history items0
-func (m *PrinterStateTemperatureHistoryItems0) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateBed(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateTool0(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateTool1(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *PrinterStateTemperatureHistoryItems0) validateBed(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Bed) { // not required
-		return nil
-	}
-
-	if m.Bed != nil {
-		if err := m.Bed.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("bed")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *PrinterStateTemperatureHistoryItems0) validateTool0(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Tool0) { // not required
-		return nil
-	}
-
-	if m.Tool0 != nil {
-		if err := m.Tool0.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("tool0")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *PrinterStateTemperatureHistoryItems0) validateTool1(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Tool1) { // not required
-		return nil
-	}
-
-	if m.Tool1 != nil {
-		if err := m.Tool1.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("tool1")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (m *PrinterStateTemperatureHistoryItems0) MarshalBinary() ([]byte, error) {
-	if m == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(m)
-}
-
-// UnmarshalBinary interface implementation
-func (m *PrinterStateTemperatureHistoryItems0) UnmarshalBinary(b []byte) error {
-	var res PrinterStateTemperatureHistoryItems0
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

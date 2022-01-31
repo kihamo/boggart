@@ -35,7 +35,6 @@ func (o *GetSDStateReader) ReadResponse(response runtime.ClientResponse, consume
 			return nil, err
 		}
 		return nil, result
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -46,7 +45,7 @@ func NewGetSDStateOK() *GetSDStateOK {
 	return &GetSDStateOK{}
 }
 
-/*GetSDStateOK handles this case with default header values.
+/* GetSDStateOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -57,7 +56,6 @@ type GetSDStateOK struct {
 func (o *GetSDStateOK) Error() string {
 	return fmt.Sprintf("[GET /api/printer/sd][%d] getSDStateOK  %+v", 200, o.Payload)
 }
-
 func (o *GetSDStateOK) GetPayload() *models.SDState {
 	return o.Payload
 }
@@ -79,7 +77,7 @@ func NewGetSDStateNotFound() *GetSDStateNotFound {
 	return &GetSDStateNotFound{}
 }
 
-/*GetSDStateNotFound handles this case with default header values.
+/* GetSDStateNotFound describes a response with status code 404, with default header values.
 
 I SD support has been disabled in OctoPrint's config
 */

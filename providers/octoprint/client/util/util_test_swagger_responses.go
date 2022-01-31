@@ -6,6 +6,7 @@ package util
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -31,7 +32,6 @@ func (o *UtilTestReader) ReadResponse(response runtime.ClientResponse, consumer 
 			return nil, err
 		}
 		return result, nil
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -42,7 +42,7 @@ func NewUtilTestOK() *UtilTestOK {
 	return &UtilTestOK{}
 }
 
-/*UtilTestOK handles this case with default header values.
+/* UtilTestOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -53,7 +53,6 @@ type UtilTestOK struct {
 func (o *UtilTestOK) Error() string {
 	return fmt.Sprintf("[POST /api/util/test][%d] utilTestOK  %+v", 200, o.Payload)
 }
-
 func (o *UtilTestOK) GetPayload() *UtilTestOKBody {
 	return o.Payload
 }
@@ -170,7 +169,6 @@ func (o *UtilTestBody) validateCommandEnum(path, location string, value string) 
 }
 
 func (o *UtilTestBody) validateCommand(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Command) { // not required
 		return nil
 	}
@@ -216,7 +214,6 @@ func (o *UtilTestBody) validateResponseEnum(path, location string, value string)
 }
 
 func (o *UtilTestBody) validateResponse(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Response) { // not required
 		return nil
 	}
@@ -277,7 +274,6 @@ func (o *UtilTestBody) validateStatusEnum(path, location string, value string) e
 }
 
 func (o *UtilTestBody) validateStatus(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Status) { // not required
 		return nil
 	}
@@ -287,6 +283,11 @@ func (o *UtilTestBody) validateStatus(formats strfmt.Registry) error {
 		return err
 	}
 
+	return nil
+}
+
+// ContextValidate validates this util test body based on context it is used
+func (o *UtilTestBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -344,7 +345,6 @@ func (o *UtilTestOKBody) Validate(formats strfmt.Registry) error {
 }
 
 func (o *UtilTestOKBody) validateResponse(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Response) { // not required
 		return nil
 	}
@@ -353,6 +353,38 @@ func (o *UtilTestOKBody) validateResponse(formats strfmt.Registry) error {
 		if err := o.Response.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("utilTestOK" + "." + "response")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("utilTestOK" + "." + "response")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this util test o k body based on the context it is used
+func (o *UtilTestOKBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.contextValidateResponse(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *UtilTestOKBody) contextValidateResponse(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.Response != nil {
+		if err := o.Response.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("utilTestOK" + "." + "response")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("utilTestOK" + "." + "response")
 			}
 			return err
 		}
@@ -394,6 +426,11 @@ type UtilTestOKBodyResponse struct {
 
 // Validate validates this util test o k body response
 func (o *UtilTestOKBodyResponse) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this util test o k body response based on context it is used
+func (o *UtilTestOKBodyResponse) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

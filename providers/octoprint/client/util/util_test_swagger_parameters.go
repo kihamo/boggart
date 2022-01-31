@@ -16,56 +16,70 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewUtilTestParams creates a new UtilTestParams object
-// with the default values initialized.
+// NewUtilTestParams creates a new UtilTestParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewUtilTestParams() *UtilTestParams {
-	var ()
 	return &UtilTestParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewUtilTestParamsWithTimeout creates a new UtilTestParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewUtilTestParamsWithTimeout(timeout time.Duration) *UtilTestParams {
-	var ()
 	return &UtilTestParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewUtilTestParamsWithContext creates a new UtilTestParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewUtilTestParamsWithContext(ctx context.Context) *UtilTestParams {
-	var ()
 	return &UtilTestParams{
-
 		Context: ctx,
 	}
 }
 
 // NewUtilTestParamsWithHTTPClient creates a new UtilTestParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewUtilTestParamsWithHTTPClient(client *http.Client) *UtilTestParams {
-	var ()
 	return &UtilTestParams{
 		HTTPClient: client,
 	}
 }
 
-/*UtilTestParams contains all the parameters to send to the API endpoint
-for the util test operation typically these are written to a http.Request
+/* UtilTestParams contains all the parameters to send to the API endpoint
+   for the util test operation.
+
+   Typically these are written to a http.Request.
 */
 type UtilTestParams struct {
 
-	/*Body*/
+	// Body.
 	Body UtilTestBody
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the util test params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *UtilTestParams) WithDefaults() *UtilTestParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the util test params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *UtilTestParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the util test params
@@ -119,7 +133,6 @@ func (o *UtilTestParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regi
 		return err
 	}
 	var res []error
-
 	if err := r.SetBodyParam(o.Body); err != nil {
 		return err
 	}

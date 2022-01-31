@@ -6,6 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/go-openapi/errors"
@@ -51,7 +52,6 @@ func (m *ToolState) Validate(formats strfmt.Registry) error {
 }
 
 func (m *ToolState) validateHistory(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.History) { // not required
 		return nil
 	}
@@ -65,6 +65,8 @@ func (m *ToolState) validateHistory(formats strfmt.Registry) error {
 			if err := m.History[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("history" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("history" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -76,7 +78,6 @@ func (m *ToolState) validateHistory(formats strfmt.Registry) error {
 }
 
 func (m *ToolState) validateTool0(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Tool0) { // not required
 		return nil
 	}
@@ -85,6 +86,8 @@ func (m *ToolState) validateTool0(formats strfmt.Registry) error {
 		if err := m.Tool0.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("tool0")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("tool0")
 			}
 			return err
 		}
@@ -94,7 +97,6 @@ func (m *ToolState) validateTool0(formats strfmt.Registry) error {
 }
 
 func (m *ToolState) validateTool1(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Tool1) { // not required
 		return nil
 	}
@@ -103,6 +105,82 @@ func (m *ToolState) validateTool1(formats strfmt.Registry) error {
 		if err := m.Tool1.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("tool1")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("tool1")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this tool state based on the context it is used
+func (m *ToolState) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateHistory(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateTool0(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateTool1(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *ToolState) contextValidateHistory(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.History); i++ {
+
+		if m.History[i] != nil {
+			if err := m.History[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("history" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("history" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *ToolState) contextValidateTool0(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Tool0 != nil {
+		if err := m.Tool0.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("tool0")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("tool0")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *ToolState) contextValidateTool1(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Tool1 != nil {
+		if err := m.Tool1.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("tool1")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("tool1")
 			}
 			return err
 		}
@@ -163,7 +241,6 @@ func (m *ToolStateHistoryItems0) Validate(formats strfmt.Registry) error {
 }
 
 func (m *ToolStateHistoryItems0) validateTool0(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Tool0) { // not required
 		return nil
 	}
@@ -172,6 +249,8 @@ func (m *ToolStateHistoryItems0) validateTool0(formats strfmt.Registry) error {
 		if err := m.Tool0.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("tool0")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("tool0")
 			}
 			return err
 		}
@@ -181,7 +260,6 @@ func (m *ToolStateHistoryItems0) validateTool0(formats strfmt.Registry) error {
 }
 
 func (m *ToolStateHistoryItems0) validateTool1(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Tool1) { // not required
 		return nil
 	}
@@ -190,6 +268,58 @@ func (m *ToolStateHistoryItems0) validateTool1(formats strfmt.Registry) error {
 		if err := m.Tool1.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("tool1")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("tool1")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this tool state history items0 based on the context it is used
+func (m *ToolStateHistoryItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateTool0(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateTool1(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *ToolStateHistoryItems0) contextValidateTool0(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Tool0 != nil {
+		if err := m.Tool0.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("tool0")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("tool0")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *ToolStateHistoryItems0) contextValidateTool1(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Tool1 != nil {
+		if err := m.Tool1.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("tool1")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("tool1")
 			}
 			return err
 		}

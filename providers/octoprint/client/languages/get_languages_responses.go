@@ -29,7 +29,6 @@ func (o *GetLanguagesReader) ReadResponse(response runtime.ClientResponse, consu
 			return nil, err
 		}
 		return result, nil
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -40,7 +39,7 @@ func NewGetLanguagesOK() *GetLanguagesOK {
 	return &GetLanguagesOK{}
 }
 
-/*GetLanguagesOK handles this case with default header values.
+/* GetLanguagesOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -51,7 +50,6 @@ type GetLanguagesOK struct {
 func (o *GetLanguagesOK) Error() string {
 	return fmt.Sprintf("[GET /api/languages][%d] getLanguagesOK  %+v", 200, o.Payload)
 }
-
 func (o *GetLanguagesOK) GetPayload() *models.Languages {
 	return o.Payload
 }

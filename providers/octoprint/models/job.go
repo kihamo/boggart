@@ -6,6 +6,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
+
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
@@ -45,7 +47,6 @@ func (m *Job) Validate(formats strfmt.Registry) error {
 }
 
 func (m *Job) validateJob(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Job) { // not required
 		return nil
 	}
@@ -54,6 +55,8 @@ func (m *Job) validateJob(formats strfmt.Registry) error {
 		if err := m.Job.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("job")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("job")
 			}
 			return err
 		}
@@ -63,7 +66,6 @@ func (m *Job) validateJob(formats strfmt.Registry) error {
 }
 
 func (m *Job) validateProgress(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Progress) { // not required
 		return nil
 	}
@@ -72,6 +74,58 @@ func (m *Job) validateProgress(formats strfmt.Registry) error {
 		if err := m.Progress.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("progress")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("progress")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this job based on the context it is used
+func (m *Job) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateJob(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateProgress(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *Job) contextValidateJob(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Job != nil {
+		if err := m.Job.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("job")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("job")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *Job) contextValidateProgress(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Progress != nil {
+		if err := m.Progress.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("progress")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("progress")
 			}
 			return err
 		}
@@ -138,7 +192,6 @@ func (m *JobJob) Validate(formats strfmt.Registry) error {
 }
 
 func (m *JobJob) validateFilament(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Filament) { // not required
 		return nil
 	}
@@ -147,6 +200,8 @@ func (m *JobJob) validateFilament(formats strfmt.Registry) error {
 		if err := m.Filament.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("job" + "." + "filament")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("job" + "." + "filament")
 			}
 			return err
 		}
@@ -156,7 +211,6 @@ func (m *JobJob) validateFilament(formats strfmt.Registry) error {
 }
 
 func (m *JobJob) validateFile(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.File) { // not required
 		return nil
 	}
@@ -165,6 +219,58 @@ func (m *JobJob) validateFile(formats strfmt.Registry) error {
 		if err := m.File.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("job" + "." + "file")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("job" + "." + "file")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this job job based on the context it is used
+func (m *JobJob) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateFilament(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateFile(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *JobJob) contextValidateFilament(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Filament != nil {
+		if err := m.Filament.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("job" + "." + "filament")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("job" + "." + "filament")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *JobJob) contextValidateFile(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.File != nil {
+		if err := m.File.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("job" + "." + "file")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("job" + "." + "file")
 			}
 			return err
 		}
@@ -205,6 +311,11 @@ type JobJobFilament struct {
 
 // Validate validates this job job filament
 func (m *JobJobFilament) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this job job filament based on context it is used
+func (m *JobJobFilament) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -258,6 +369,11 @@ func (m *JobJobFile) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
+// ContextValidate validates this job job file based on context it is used
+func (m *JobJobFile) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
 // MarshalBinary interface implementation
 func (m *JobJobFile) MarshalBinary() ([]byte, error) {
 	if m == nil {
@@ -299,6 +415,11 @@ type JobProgress struct {
 
 // Validate validates this job progress
 func (m *JobProgress) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this job progress based on context it is used
+func (m *JobProgress) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

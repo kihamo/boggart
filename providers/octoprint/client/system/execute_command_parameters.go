@@ -16,64 +16,79 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewExecuteCommandParams creates a new ExecuteCommandParams object
-// with the default values initialized.
+// NewExecuteCommandParams creates a new ExecuteCommandParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewExecuteCommandParams() *ExecuteCommandParams {
-	var ()
 	return &ExecuteCommandParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewExecuteCommandParamsWithTimeout creates a new ExecuteCommandParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewExecuteCommandParamsWithTimeout(timeout time.Duration) *ExecuteCommandParams {
-	var ()
 	return &ExecuteCommandParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewExecuteCommandParamsWithContext creates a new ExecuteCommandParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewExecuteCommandParamsWithContext(ctx context.Context) *ExecuteCommandParams {
-	var ()
 	return &ExecuteCommandParams{
-
 		Context: ctx,
 	}
 }
 
 // NewExecuteCommandParamsWithHTTPClient creates a new ExecuteCommandParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewExecuteCommandParamsWithHTTPClient(client *http.Client) *ExecuteCommandParams {
-	var ()
 	return &ExecuteCommandParams{
 		HTTPClient: client,
 	}
 }
 
-/*ExecuteCommandParams contains all the parameters to send to the API endpoint
-for the execute command operation typically these are written to a http.Request
+/* ExecuteCommandParams contains all the parameters to send to the API endpoint
+   for the execute command operation.
+
+   Typically these are written to a http.Request.
 */
 type ExecuteCommandParams struct {
 
-	/*Action
-	  The identifier of the command
+	/* Action.
 
+	   The identifier of the command
 	*/
 	Action string
-	/*Source
-	  The source for which to list commands
 
+	/* Source.
+
+	   The source for which to list commands
 	*/
 	Source string
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the execute command params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *ExecuteCommandParams) WithDefaults() *ExecuteCommandParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the execute command params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *ExecuteCommandParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the execute command params

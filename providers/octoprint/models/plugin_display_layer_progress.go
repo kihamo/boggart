@@ -6,6 +6,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
+
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
@@ -61,7 +63,6 @@ func (m *PluginDisplayLayerProgress) Validate(formats strfmt.Registry) error {
 }
 
 func (m *PluginDisplayLayerProgress) validateHeight(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Height) { // not required
 		return nil
 	}
@@ -70,6 +71,8 @@ func (m *PluginDisplayLayerProgress) validateHeight(formats strfmt.Registry) err
 		if err := m.Height.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("height")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("height")
 			}
 			return err
 		}
@@ -79,7 +82,6 @@ func (m *PluginDisplayLayerProgress) validateHeight(formats strfmt.Registry) err
 }
 
 func (m *PluginDisplayLayerProgress) validateLayer(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Layer) { // not required
 		return nil
 	}
@@ -88,6 +90,8 @@ func (m *PluginDisplayLayerProgress) validateLayer(formats strfmt.Registry) erro
 		if err := m.Layer.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("layer")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("layer")
 			}
 			return err
 		}
@@ -97,7 +101,6 @@ func (m *PluginDisplayLayerProgress) validateLayer(formats strfmt.Registry) erro
 }
 
 func (m *PluginDisplayLayerProgress) validatePrint(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Print) { // not required
 		return nil
 	}
@@ -106,6 +109,78 @@ func (m *PluginDisplayLayerProgress) validatePrint(formats strfmt.Registry) erro
 		if err := m.Print.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("print")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("print")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this plugin display layer progress based on the context it is used
+func (m *PluginDisplayLayerProgress) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateHeight(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateLayer(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidatePrint(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *PluginDisplayLayerProgress) contextValidateHeight(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Height != nil {
+		if err := m.Height.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("height")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("height")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *PluginDisplayLayerProgress) contextValidateLayer(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Layer != nil {
+		if err := m.Layer.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("layer")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("layer")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *PluginDisplayLayerProgress) contextValidatePrint(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Print != nil {
+		if err := m.Print.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("print")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("print")
 			}
 			return err
 		}
@@ -152,6 +227,11 @@ func (m *PluginDisplayLayerProgressHeight) Validate(formats strfmt.Registry) err
 	return nil
 }
 
+// ContextValidate validates this plugin display layer progress height based on context it is used
+func (m *PluginDisplayLayerProgressHeight) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
 // MarshalBinary interface implementation
 func (m *PluginDisplayLayerProgressHeight) MarshalBinary() ([]byte, error) {
 	if m == nil {
@@ -184,6 +264,11 @@ type PluginDisplayLayerProgressLayer struct {
 
 // Validate validates this plugin display layer progress layer
 func (m *PluginDisplayLayerProgressLayer) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this plugin display layer progress layer based on context it is used
+func (m *PluginDisplayLayerProgressLayer) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -222,6 +307,11 @@ type PluginDisplayLayerProgressPrint struct {
 
 // Validate validates this plugin display layer progress print
 func (m *PluginDisplayLayerProgressPrint) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this plugin display layer progress print based on context it is used
+func (m *PluginDisplayLayerProgressPrint) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

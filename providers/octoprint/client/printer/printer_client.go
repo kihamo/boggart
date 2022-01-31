@@ -25,17 +25,20 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	GetBedState(params *GetBedStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetBedStateOK, error)
+	GetBedState(params *GetBedStateParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetBedStateOK, error)
 
-	GetChamberState(params *GetChamberStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetChamberStateOK, error)
+	GetChamberState(params *GetChamberStateParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetChamberStateOK, error)
 
-	GetPrinterState(params *GetPrinterStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetPrinterStateOK, error)
+	GetPrinterState(params *GetPrinterStateParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetPrinterStateOK, error)
 
-	GetSDState(params *GetSDStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetSDStateOK, error)
+	GetSDState(params *GetSDStateParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetSDStateOK, error)
 
-	GetToolState(params *GetToolStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetToolStateOK, error)
+	GetToolState(params *GetToolStateParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetToolStateOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -43,13 +46,12 @@ type ClientService interface {
 /*
   GetBedState retrieves the current bed state
 */
-func (a *Client) GetBedState(params *GetBedStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetBedStateOK, error) {
+func (a *Client) GetBedState(params *GetBedStateParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetBedStateOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetBedStateParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getBedState",
 		Method:             "GET",
 		PathPattern:        "/api/printer/bed",
@@ -61,7 +63,12 @@ func (a *Client) GetBedState(params *GetBedStateParams, authInfo runtime.ClientA
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -78,13 +85,12 @@ func (a *Client) GetBedState(params *GetBedStateParams, authInfo runtime.ClientA
 /*
   GetChamberState retrieves the current chamber state
 */
-func (a *Client) GetChamberState(params *GetChamberStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetChamberStateOK, error) {
+func (a *Client) GetChamberState(params *GetChamberStateParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetChamberStateOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetChamberStateParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getChamberState",
 		Method:             "GET",
 		PathPattern:        "/api/printer/chamber",
@@ -96,7 +102,12 @@ func (a *Client) GetChamberState(params *GetChamberStateParams, authInfo runtime
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -113,13 +124,12 @@ func (a *Client) GetChamberState(params *GetChamberStateParams, authInfo runtime
 /*
   GetPrinterState retrieves the current printer state
 */
-func (a *Client) GetPrinterState(params *GetPrinterStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetPrinterStateOK, error) {
+func (a *Client) GetPrinterState(params *GetPrinterStateParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetPrinterStateOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetPrinterStateParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getPrinterState",
 		Method:             "GET",
 		PathPattern:        "/api/printer",
@@ -131,7 +141,12 @@ func (a *Client) GetPrinterState(params *GetPrinterStateParams, authInfo runtime
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -148,13 +163,12 @@ func (a *Client) GetPrinterState(params *GetPrinterStateParams, authInfo runtime
 /*
   GetSDState retrieves the current s d state
 */
-func (a *Client) GetSDState(params *GetSDStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetSDStateOK, error) {
+func (a *Client) GetSDState(params *GetSDStateParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetSDStateOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetSDStateParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getSDState",
 		Method:             "GET",
 		PathPattern:        "/api/printer/sd",
@@ -166,7 +180,12 @@ func (a *Client) GetSDState(params *GetSDStateParams, authInfo runtime.ClientAut
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -183,13 +202,12 @@ func (a *Client) GetSDState(params *GetSDStateParams, authInfo runtime.ClientAut
 /*
   GetToolState retrieves the current tool state
 */
-func (a *Client) GetToolState(params *GetToolStateParams, authInfo runtime.ClientAuthInfoWriter) (*GetToolStateOK, error) {
+func (a *Client) GetToolState(params *GetToolStateParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetToolStateOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetToolStateParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getToolState",
 		Method:             "GET",
 		PathPattern:        "/api/printer/tool",
@@ -201,7 +219,12 @@ func (a *Client) GetToolState(params *GetToolStateParams, authInfo runtime.Clien
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

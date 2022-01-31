@@ -6,6 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/go-openapi/errors"
@@ -37,7 +38,6 @@ func (m *Languages) Validate(formats strfmt.Registry) error {
 }
 
 func (m *Languages) validateLanguagePacks(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.LanguagePacks) { // not required
 		return nil
 	}
@@ -49,6 +49,40 @@ func (m *Languages) validateLanguagePacks(formats strfmt.Registry) error {
 		}
 		if val, ok := m.LanguagePacks[k]; ok {
 			if err := val.Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("language_packs" + "." + k)
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("language_packs" + "." + k)
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContextValidate validate this languages based on the context it is used
+func (m *Languages) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateLanguagePacks(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *Languages) contextValidateLanguagePacks(ctx context.Context, formats strfmt.Registry) error {
+
+	for k := range m.LanguagePacks {
+
+		if val, ok := m.LanguagePacks[k]; ok {
+			if err := val.ContextValidate(ctx, formats); err != nil {
 				return err
 			}
 		}
@@ -106,7 +140,6 @@ func (m *LanguagesLanguagePacksAnon) Validate(formats strfmt.Registry) error {
 }
 
 func (m *LanguagesLanguagePacksAnon) validateLanguages(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Languages) { // not required
 		return nil
 	}
@@ -120,6 +153,42 @@ func (m *LanguagesLanguagePacksAnon) validateLanguages(formats strfmt.Registry) 
 			if err := m.Languages[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("languages" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("languages" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContextValidate validate this languages language packs anon based on the context it is used
+func (m *LanguagesLanguagePacksAnon) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateLanguages(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *LanguagesLanguagePacksAnon) contextValidateLanguages(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.Languages); i++ {
+
+		if m.Languages[i] != nil {
+			if err := m.Languages[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("languages" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("languages" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -171,6 +240,11 @@ type LanguagesLanguagePacksAnonLanguagesItems0 struct {
 
 // Validate validates this languages language packs anon languages items0
 func (m *LanguagesLanguagePacksAnonLanguagesItems0) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this languages language packs anon languages items0 based on context it is used
+func (m *LanguagesLanguagePacksAnonLanguagesItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

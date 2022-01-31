@@ -25,9 +25,12 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	DisplayLayerProgress(params *DisplayLayerProgressParams, authInfo runtime.ClientAuthInfoWriter) (*DisplayLayerProgressOK, error)
+	DisplayLayerProgress(params *DisplayLayerProgressParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*DisplayLayerProgressOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -35,13 +38,12 @@ type ClientService interface {
 /*
   DisplayLayerProgress receives the layer height and other values
 */
-func (a *Client) DisplayLayerProgress(params *DisplayLayerProgressParams, authInfo runtime.ClientAuthInfoWriter) (*DisplayLayerProgressOK, error) {
+func (a *Client) DisplayLayerProgress(params *DisplayLayerProgressParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*DisplayLayerProgressOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewDisplayLayerProgressParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "displayLayerProgress",
 		Method:             "GET",
 		PathPattern:        "/plugin/DisplayLayerProgress/values",
@@ -53,7 +55,12 @@ func (a *Client) DisplayLayerProgress(params *DisplayLayerProgressParams, authIn
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

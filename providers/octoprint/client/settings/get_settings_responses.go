@@ -29,7 +29,6 @@ func (o *GetSettingsReader) ReadResponse(response runtime.ClientResponse, consum
 			return nil, err
 		}
 		return result, nil
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -40,7 +39,7 @@ func NewGetSettingsOK() *GetSettingsOK {
 	return &GetSettingsOK{}
 }
 
-/*GetSettingsOK handles this case with default header values.
+/* GetSettingsOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -51,7 +50,6 @@ type GetSettingsOK struct {
 func (o *GetSettingsOK) Error() string {
 	return fmt.Sprintf("[GET /api/settings][%d] getSettingsOK  %+v", 200, o.Payload)
 }
-
 func (o *GetSettingsOK) GetPayload() *models.Settings {
 	return o.Payload
 }

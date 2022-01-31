@@ -17,64 +17,79 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// NewGetToolStateParams creates a new GetToolStateParams object
-// with the default values initialized.
+// NewGetToolStateParams creates a new GetToolStateParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetToolStateParams() *GetToolStateParams {
-	var ()
 	return &GetToolStateParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetToolStateParamsWithTimeout creates a new GetToolStateParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetToolStateParamsWithTimeout(timeout time.Duration) *GetToolStateParams {
-	var ()
 	return &GetToolStateParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGetToolStateParamsWithContext creates a new GetToolStateParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetToolStateParamsWithContext(ctx context.Context) *GetToolStateParams {
-	var ()
 	return &GetToolStateParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGetToolStateParamsWithHTTPClient creates a new GetToolStateParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetToolStateParamsWithHTTPClient(client *http.Client) *GetToolStateParams {
-	var ()
 	return &GetToolStateParams{
 		HTTPClient: client,
 	}
 }
 
-/*GetToolStateParams contains all the parameters to send to the API endpoint
-for the get tool state operation typically these are written to a http.Request
+/* GetToolStateParams contains all the parameters to send to the API endpoint
+   for the get tool state operation.
+
+   Typically these are written to a http.Request.
 */
 type GetToolStateParams struct {
 
-	/*History
-	  The printer’s temperature history by supplying
+	/* History.
 
+	   The printer’s temperature history by supplying
 	*/
 	History *bool
-	/*Limit
-	  The amount of data points limited
 
+	/* Limit.
+
+	   The amount of data points limited
 	*/
 	Limit *int64
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get tool state params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetToolStateParams) WithDefaults() *GetToolStateParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get tool state params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetToolStateParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get tool state params
@@ -144,32 +159,34 @@ func (o *GetToolStateParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 
 		// query param history
 		var qrHistory bool
+
 		if o.History != nil {
 			qrHistory = *o.History
 		}
 		qHistory := swag.FormatBool(qrHistory)
 		if qHistory != "" {
+
 			if err := r.SetQueryParam("history", qHistory); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Limit != nil {
 
 		// query param limit
 		var qrLimit int64
+
 		if o.Limit != nil {
 			qrLimit = *o.Limit
 		}
 		qLimit := swag.FormatInt64(qrLimit)
 		if qLimit != "" {
+
 			if err := r.SetQueryParam("limit", qLimit); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if len(res) > 0 {

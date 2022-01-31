@@ -6,6 +6,7 @@ package system
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"strconv"
@@ -32,7 +33,6 @@ func (o *GetCommandsReader) ReadResponse(response runtime.ClientResponse, consum
 			return nil, err
 		}
 		return result, nil
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -43,7 +43,7 @@ func NewGetCommandsOK() *GetCommandsOK {
 	return &GetCommandsOK{}
 }
 
-/*GetCommandsOK handles this case with default header values.
+/* GetCommandsOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -54,7 +54,6 @@ type GetCommandsOK struct {
 func (o *GetCommandsOK) Error() string {
 	return fmt.Sprintf("[GET /api/system/commands][%d] getCommandsOK  %+v", 200, o.Payload)
 }
-
 func (o *GetCommandsOK) GetPayload() *GetCommandsOKBody {
 	return o.Payload
 }
@@ -102,7 +101,6 @@ func (o *GetCommandsOKBody) Validate(formats strfmt.Registry) error {
 }
 
 func (o *GetCommandsOKBody) validateCore(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Core) { // not required
 		return nil
 	}
@@ -116,6 +114,8 @@ func (o *GetCommandsOKBody) validateCore(formats strfmt.Registry) error {
 			if err := o.Core[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("getCommandsOK" + "." + "core" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("getCommandsOK" + "." + "core" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -127,7 +127,6 @@ func (o *GetCommandsOKBody) validateCore(formats strfmt.Registry) error {
 }
 
 func (o *GetCommandsOKBody) validateCustom(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Custom) { // not required
 		return nil
 	}
@@ -141,6 +140,66 @@ func (o *GetCommandsOKBody) validateCustom(formats strfmt.Registry) error {
 			if err := o.Custom[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("getCommandsOK" + "." + "custom" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("getCommandsOK" + "." + "custom" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContextValidate validate this get commands o k body based on the context it is used
+func (o *GetCommandsOKBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.contextValidateCore(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.contextValidateCustom(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *GetCommandsOKBody) contextValidateCore(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(o.Core); i++ {
+
+		if o.Core[i] != nil {
+			if err := o.Core[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("getCommandsOK" + "." + "core" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("getCommandsOK" + "." + "core" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (o *GetCommandsOKBody) contextValidateCustom(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(o.Custom); i++ {
+
+		if o.Custom[i] != nil {
+			if err := o.Custom[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("getCommandsOK" + "." + "custom" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("getCommandsOK" + "." + "custom" + "." + strconv.Itoa(i))
 				}
 				return err
 			}

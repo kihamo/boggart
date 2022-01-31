@@ -35,7 +35,6 @@ func (o *GetBedStateReader) ReadResponse(response runtime.ClientResponse, consum
 			return nil, err
 		}
 		return nil, result
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -46,7 +45,7 @@ func NewGetBedStateOK() *GetBedStateOK {
 	return &GetBedStateOK{}
 }
 
-/*GetBedStateOK handles this case with default header values.
+/* GetBedStateOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -57,7 +56,6 @@ type GetBedStateOK struct {
 func (o *GetBedStateOK) Error() string {
 	return fmt.Sprintf("[GET /api/printer/bed][%d] getBedStateOK  %+v", 200, o.Payload)
 }
-
 func (o *GetBedStateOK) GetPayload() *models.BedState {
 	return o.Payload
 }
@@ -79,7 +77,7 @@ func NewGetBedStateConflict() *GetBedStateConflict {
 	return &GetBedStateConflict{}
 }
 
-/*GetBedStateConflict handles this case with default header values.
+/* GetBedStateConflict describes a response with status code 409, with default header values.
 
 If the printer is not operational
 */

@@ -17,64 +17,79 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// NewGetChamberStateParams creates a new GetChamberStateParams object
-// with the default values initialized.
+// NewGetChamberStateParams creates a new GetChamberStateParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetChamberStateParams() *GetChamberStateParams {
-	var ()
 	return &GetChamberStateParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetChamberStateParamsWithTimeout creates a new GetChamberStateParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetChamberStateParamsWithTimeout(timeout time.Duration) *GetChamberStateParams {
-	var ()
 	return &GetChamberStateParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGetChamberStateParamsWithContext creates a new GetChamberStateParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetChamberStateParamsWithContext(ctx context.Context) *GetChamberStateParams {
-	var ()
 	return &GetChamberStateParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGetChamberStateParamsWithHTTPClient creates a new GetChamberStateParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetChamberStateParamsWithHTTPClient(client *http.Client) *GetChamberStateParams {
-	var ()
 	return &GetChamberStateParams{
 		HTTPClient: client,
 	}
 }
 
-/*GetChamberStateParams contains all the parameters to send to the API endpoint
-for the get chamber state operation typically these are written to a http.Request
+/* GetChamberStateParams contains all the parameters to send to the API endpoint
+   for the get chamber state operation.
+
+   Typically these are written to a http.Request.
 */
 type GetChamberStateParams struct {
 
-	/*History
-	  The printer’s temperature history by supplying
+	/* History.
 
+	   The printer’s temperature history by supplying
 	*/
 	History *bool
-	/*Limit
-	  The amount of data points limited
 
+	/* Limit.
+
+	   The amount of data points limited
 	*/
 	Limit *int64
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get chamber state params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetChamberStateParams) WithDefaults() *GetChamberStateParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get chamber state params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetChamberStateParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get chamber state params
@@ -144,32 +159,34 @@ func (o *GetChamberStateParams) WriteToRequest(r runtime.ClientRequest, reg strf
 
 		// query param history
 		var qrHistory bool
+
 		if o.History != nil {
 			qrHistory = *o.History
 		}
 		qHistory := swag.FormatBool(qrHistory)
 		if qHistory != "" {
+
 			if err := r.SetQueryParam("history", qHistory); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Limit != nil {
 
 		// query param limit
 		var qrLimit int64
+
 		if o.Limit != nil {
 			qrLimit = *o.Limit
 		}
 		qLimit := swag.FormatInt64(qrLimit)
 		if qLimit != "" {
+
 			if err := r.SetQueryParam("limit", qLimit); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if len(res) > 0 {

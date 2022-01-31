@@ -704,26 +704,18 @@ definitions:
     properties:
       temperature:
         type: "object"
-        properties:
-          tool0:
-            $ref: "#/definitions/TemperatureData"
-          tool1:
-            $ref: "#/definitions/TemperatureData"
-          bed:
-            $ref: "#/definitions/TemperatureData"
-          history:
-            type: "array"
-            items:
-              type: "object"
-              properties:
-                time:
-                  type: "integer"
-                tool0:
-                  $ref: "#/definitions/TemperatureData"
-                tool1:
-                  $ref: "#/definitions/TemperatureData"
-                bed:
-                  $ref: "#/definitions/TemperatureData"
+        additionalProperties:
+          $ref: "#/definitions/TemperatureData"
+#        properties:
+#          history:
+#            type: "array"
+#            items:
+#              type: "object"
+#              additionalProperties:
+#                $ref: "#/definitions/TemperatureData"
+#              properties:
+#                time:
+#                  type: "integer"
       sd:
         $ref: "#/definitions/SDState"
       state:
@@ -754,6 +746,8 @@ definitions:
                 type: "boolean"
   Settings:
     type: "object"
+    additionalProperties:
+      type: "object"
     properties:
       api:
         type: "object"
@@ -821,6 +815,88 @@ definitions:
             type: "string"
       plugins:
         type: "object"
+        properties:
+          mqtt:
+            type: "object"
+            properties:
+              broker:
+                type: "object"
+                properties:
+                  clean_session:
+                    type: "boolean"
+                  keepalive:
+                    type: "integer"
+                  password:
+                    type: "string"
+                  port:
+                    type: "integer"
+                  protocol:
+                    type: "string"
+                  retain:
+                    type: "boolean"
+                  tls:
+                    type: "object"
+                  tls_active:
+                    type: "boolean"
+                  tls_insecure:
+                    type: "boolean"
+                  url:
+                    type: "string"
+                  username:
+                    type: "string"
+              client:
+                type: "object"
+                properties:
+                  client_id:
+                    type: "string"
+              publish:
+                type: "object"
+                properties:
+                  baseTopic:
+                    type: "string"
+                  eventActive:
+                    type: "boolean"
+                  eventTopic:
+                    type: "string"
+                  events:
+                    type: "object"
+                    properties:
+                      comm:
+                        type: "boolean"
+                      files:
+                        type: "boolean"
+                      gcode:
+                        type: "boolean"
+                      printjob:
+                        type: "boolean"
+                      server:
+                        type: "boolean"
+                      settings:
+                        type: "boolean"
+                      slicing:
+                        type: "boolean"
+                      timelapse:
+                        type: "boolean"
+                      unclassified:
+                        type: "boolean"
+                  lwActive:
+                    type: "boolean"
+                  lwTopic:
+                    type: "string"
+                  printerData:
+                    type: "boolean"
+                  progressActive:
+                    type: "boolean"
+                  progressTopic:
+                    type: "string"
+                  temperatureActive:
+                    type: "boolean"
+                  temperatureThreshold:
+                    type: "number"
+                  temperatureTopic:
+                    type: "string"
+              timestamp_fieldname:
+                type: "string"
         additionalProperties:
           type: "object"
       printer:

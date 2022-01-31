@@ -35,7 +35,6 @@ func (o *GetCommandsBySourceReader) ReadResponse(response runtime.ClientResponse
 			return nil, err
 		}
 		return nil, result
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -46,7 +45,7 @@ func NewGetCommandsBySourceOK() *GetCommandsBySourceOK {
 	return &GetCommandsBySourceOK{}
 }
 
-/*GetCommandsBySourceOK handles this case with default header values.
+/* GetCommandsBySourceOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -57,7 +56,6 @@ type GetCommandsBySourceOK struct {
 func (o *GetCommandsBySourceOK) Error() string {
 	return fmt.Sprintf("[GET /api/system/commands/{source}][%d] getCommandsBySourceOK  %+v", 200, o.Payload)
 }
-
 func (o *GetCommandsBySourceOK) GetPayload() []*models.Command {
 	return o.Payload
 }
@@ -77,7 +75,7 @@ func NewGetCommandsBySourceNotFound() *GetCommandsBySourceNotFound {
 	return &GetCommandsBySourceNotFound{}
 }
 
-/*GetCommandsBySourceNotFound handles this case with default header values.
+/* GetCommandsBySourceNotFound describes a response with status code 404, with default header values.
 
 Not found
 */

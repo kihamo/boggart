@@ -6,6 +6,7 @@ package job
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -36,7 +37,6 @@ func (o *SendJobCommandReader) ReadResponse(response runtime.ClientResponse, con
 			return nil, err
 		}
 		return nil, result
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -47,7 +47,7 @@ func NewSendJobCommandNoContent() *SendJobCommandNoContent {
 	return &SendJobCommandNoContent{}
 }
 
-/*SendJobCommandNoContent handles this case with default header values.
+/* SendJobCommandNoContent describes a response with status code 204, with default header values.
 
 Successful operation
 */
@@ -68,7 +68,7 @@ func NewSendJobCommandConflict() *SendJobCommandConflict {
 	return &SendJobCommandConflict{}
 }
 
-/*SendJobCommandConflict handles this case with default header values.
+/* SendJobCommandConflict describes a response with status code 409, with default header values.
 
 If the printer is not operational or the current print job state does not match the preconditions for the command
 */
@@ -149,7 +149,6 @@ func (o *SendJobCommandBody) validateActionEnum(path, location string, value str
 }
 
 func (o *SendJobCommandBody) validateAction(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Action) { // not required
 		return nil
 	}
@@ -204,7 +203,6 @@ func (o *SendJobCommandBody) validateCommandEnum(path, location string, value st
 }
 
 func (o *SendJobCommandBody) validateCommand(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Command) { // not required
 		return nil
 	}
@@ -214,6 +212,11 @@ func (o *SendJobCommandBody) validateCommand(formats strfmt.Registry) error {
 		return err
 	}
 
+	return nil
+}
+
+// ContextValidate validates this send job command body based on context it is used
+func (o *SendJobCommandBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

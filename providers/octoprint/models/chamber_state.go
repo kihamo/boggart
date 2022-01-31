@@ -6,6 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/go-openapi/errors"
@@ -44,7 +45,6 @@ func (m *ChamberState) Validate(formats strfmt.Registry) error {
 }
 
 func (m *ChamberState) validateChamber(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Chamber) { // not required
 		return nil
 	}
@@ -53,6 +53,8 @@ func (m *ChamberState) validateChamber(formats strfmt.Registry) error {
 		if err := m.Chamber.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("chamber")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("chamber")
 			}
 			return err
 		}
@@ -62,7 +64,6 @@ func (m *ChamberState) validateChamber(formats strfmt.Registry) error {
 }
 
 func (m *ChamberState) validateHistory(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.History) { // not required
 		return nil
 	}
@@ -76,6 +77,62 @@ func (m *ChamberState) validateHistory(formats strfmt.Registry) error {
 			if err := m.History[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("history" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("history" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContextValidate validate this chamber state based on the context it is used
+func (m *ChamberState) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateChamber(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateHistory(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *ChamberState) contextValidateChamber(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Chamber != nil {
+		if err := m.Chamber.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("chamber")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("chamber")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *ChamberState) contextValidateHistory(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.History); i++ {
+
+		if m.History[i] != nil {
+			if err := m.History[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("history" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("history" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -131,7 +188,6 @@ func (m *ChamberStateHistoryItems0) Validate(formats strfmt.Registry) error {
 }
 
 func (m *ChamberStateHistoryItems0) validateChamber(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Chamber) { // not required
 		return nil
 	}
@@ -140,6 +196,38 @@ func (m *ChamberStateHistoryItems0) validateChamber(formats strfmt.Registry) err
 		if err := m.Chamber.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("chamber")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("chamber")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this chamber state history items0 based on the context it is used
+func (m *ChamberStateHistoryItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateChamber(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *ChamberStateHistoryItems0) contextValidateChamber(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Chamber != nil {
+		if err := m.Chamber.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("chamber")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("chamber")
 			}
 			return err
 		}

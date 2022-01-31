@@ -29,7 +29,6 @@ func (o *GetConnectionReader) ReadResponse(response runtime.ClientResponse, cons
 			return nil, err
 		}
 		return result, nil
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -40,7 +39,7 @@ func NewGetConnectionOK() *GetConnectionOK {
 	return &GetConnectionOK{}
 }
 
-/*GetConnectionOK handles this case with default header values.
+/* GetConnectionOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -51,7 +50,6 @@ type GetConnectionOK struct {
 func (o *GetConnectionOK) Error() string {
 	return fmt.Sprintf("[GET /api/connection][%d] getConnectionOK  %+v", 200, o.Payload)
 }
-
 func (o *GetConnectionOK) GetPayload() *models.Connection {
 	return o.Payload
 }
