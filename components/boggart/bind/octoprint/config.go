@@ -13,24 +13,24 @@ type Config struct {
 	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
-	Address                     types.URL `valid:",required"`
-	APIKey                      string    `valid:",required" mapstructure:"api_key" yaml:"api_key"`
-	Debug                       bool
-	UpdaterInterval             time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
-	UpdaterTimeout              time.Duration `mapstructure:"updater_timeout" yaml:"updater_timeout"`
-	TopicState                  mqtt.Topic    `mapstructure:"topic_state" yaml:"topic_state"`
-	TopicStateTemperatureActual mqtt.Topic    `mapstructure:"topic_state_bed_temperature_actual" yaml:"topic_state_bed_temperature_actual"`
-	TopicStateTemperatureOffset mqtt.Topic    `mapstructure:"topic_state_bed_temperature_offset" yaml:"topic_state_bed_temperature_offset"`
-	TopicStateTemperatureTarget mqtt.Topic    `mapstructure:"topic_state_bed_temperature_target" yaml:"topic_state_bed_temperature_target"`
-	TopicStateJobFileName       mqtt.Topic    `mapstructure:"topic_state_job_file_name" yaml:"topic_state_job_file_name"`
-	TopicStateJobFileSize       mqtt.Topic    `mapstructure:"topic_state_job_file_size" yaml:"topic_state_job_file_size"`
-	TopicStateJobProgress       mqtt.Topic    `mapstructure:"topic_state_job_progress" yaml:"topic_state_job_progress"`
-	TopicStateJobTime           mqtt.Topic    `mapstructure:"topic_state_job_time" yaml:"topic_state_job_time"`
-	TopicStateJobTimeLeft       mqtt.Topic    `mapstructure:"topic_state_job_time_left" yaml:"topic_state_job_time_left"`
-	TopicLayerTotal             mqtt.Topic    `mapstructure:"topic_layer_total" yaml:"topic_layer_total"`
-	TopicLayerCurrent           mqtt.Topic    `mapstructure:"topic_layer_current" yaml:"topic_layer_current"`
-	TopicHeightTotal            mqtt.Topic    `mapstructure:"topic_height_total" yaml:"topic_height_total"`
-	TopicHeightCurrent          mqtt.Topic    `mapstructure:"topic_height_current" yaml:"topic_height_current"`
+	Address                types.URL `valid:",required"`
+	APIKey                 string    `valid:",required" mapstructure:"api_key" yaml:"api_key"`
+	Debug                  bool
+	UpdaterInterval        time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
+	UpdaterTimeout         time.Duration `mapstructure:"updater_timeout" yaml:"updater_timeout"`
+	TopicState             mqtt.Topic    `mapstructure:"topic_state" yaml:"topic_state"`
+	TopicTemperatureActual mqtt.Topic    `mapstructure:"topic_temperature_actual" yaml:"topic_temperature_actual"`
+	TopicTemperatureOffset mqtt.Topic    `mapstructure:"topic_temperature_offset" yaml:"topic_temperature_offset"`
+	TopicTemperatureTarget mqtt.Topic    `mapstructure:"topic_temperature_target" yaml:"topic_temperature_target"`
+	TopicJobFileName       mqtt.Topic    `mapstructure:"topic_job_file_name" yaml:"topic_job_file_name"`
+	TopicJobFileSize       mqtt.Topic    `mapstructure:"topic_job_file_size" yaml:"topic_job_file_size"`
+	TopicJobProgress       mqtt.Topic    `mapstructure:"topic_job_progress" yaml:"topic_job_progress"`
+	TopicJobTime           mqtt.Topic    `mapstructure:"topic_job_time" yaml:"topic_job_time"`
+	TopicJobTimeLeft       mqtt.Topic    `mapstructure:"topic_job_time_left" yaml:"topic_job_time_left"`
+	TopicLayerTotal        mqtt.Topic    `mapstructure:"topic_layer_total" yaml:"topic_layer_total"`
+	TopicLayerCurrent      mqtt.Topic    `mapstructure:"topic_layer_current" yaml:"topic_layer_current"`
+	TopicHeightTotal       mqtt.Topic    `mapstructure:"topic_height_total" yaml:"topic_height_total"`
+	TopicHeightCurrent     mqtt.Topic    `mapstructure:"topic_height_current" yaml:"topic_height_current"`
 }
 
 func (t Type) ConfigDefaults() interface{} {
@@ -41,22 +41,22 @@ func (t Type) ConfigDefaults() interface{} {
 	probesConfig.ReadinessTimeout = time.Second * 5
 
 	return &Config{
-		ProbesConfig:                probesConfig,
-		LoggerConfig:                di.LoggerConfigDefaults(),
-		UpdaterInterval:             time.Second * 30,
-		UpdaterTimeout:              time.Second * 5,
-		TopicState:                  prefix + "state",
-		TopicStateTemperatureActual: prefix + "state/temperature/+/actual",
-		TopicStateTemperatureOffset: prefix + "state/temperature/+/offset",
-		TopicStateTemperatureTarget: prefix + "state/temperature/+/target",
-		TopicStateJobFileName:       prefix + "state/job/file/name",
-		TopicStateJobFileSize:       prefix + "state/job/file/size",
-		TopicStateJobProgress:       prefix + "state/job/progress",
-		TopicStateJobTime:           prefix + "state/job/time",
-		TopicStateJobTimeLeft:       prefix + "state/job/time-left",
-		TopicLayerTotal:             prefix + "layer/total",
-		TopicLayerCurrent:           prefix + "layer/current",
-		TopicHeightTotal:            prefix + "height/total",
-		TopicHeightCurrent:          prefix + "height/current",
+		ProbesConfig:           probesConfig,
+		LoggerConfig:           di.LoggerConfigDefaults(),
+		UpdaterInterval:        time.Second * 30,
+		UpdaterTimeout:         time.Second * 5,
+		TopicState:             prefix + "state",
+		TopicTemperatureActual: prefix + "temperature/+/actual",
+		TopicTemperatureOffset: prefix + "temperature/+/offset",
+		TopicTemperatureTarget: prefix + "temperature/+/target",
+		TopicJobFileName:       prefix + "job/file/name",
+		TopicJobFileSize:       prefix + "job/file/size",
+		TopicJobProgress:       prefix + "job/progress",
+		TopicJobTime:           prefix + "job/time",
+		TopicJobTimeLeft:       prefix + "job/time-left",
+		TopicLayerTotal:        prefix + "layer/total",
+		TopicLayerCurrent:      prefix + "layer/current",
+		TopicHeightTotal:       prefix + "height/total",
+		TopicHeightCurrent:     prefix + "height/current",
 	}
 }

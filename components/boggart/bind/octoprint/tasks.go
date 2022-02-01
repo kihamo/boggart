@@ -3,7 +3,6 @@ package octoprint
 import (
 	"context"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart/tasks"
@@ -65,9 +64,7 @@ func (b *Bind) taskSettingsHandler(ctx context.Context) error {
 
 	// temperature
 	if b.TemperatureFromMQTT() {
-		publish := b.PluginMQTTSettings().Publish
-		topic := mqtt.Topic(publish.BaseTopic +
-			strings.Replace(publish.TemperatureTopic, "{temp}", "+", 1))
+		topic := b.TemperatureTopic()
 
 		parts := topic.Split()
 		offset := len(parts) - 1
@@ -83,6 +80,14 @@ func (b *Bind) taskSettingsHandler(ctx context.Context) error {
 			})))
 	}
 
+	// jon
+	//if b.JobFromMQTT() {
+	//	subscribers = append(subscribers, mqtt.NewSubscriber(b.JobTopic(), 0,
+	//		b.MQTT().WrapSubscribeDeviceIsOnline(func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+	//			return b.callbackMQTTJob(message)
+	//		})))
+	//}
+
 	return b.MQTT().Subscribe(subscribers...)
 }
 
@@ -94,7 +99,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		WithExclude([]string{"sd"})
 
 	if b.TemperatureFromMQTT() {
-		stateParams = stateParams.WithExclude([]string{"sd", "temperature"})
+		stateParams = stateParams.WithExclude(append(stateParams.Exclude, "temperature"))
 	}
 
 	state, err := b.provider.Printer.GetPrinterState(stateParams, nil)
@@ -117,15 +122,15 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 			metricDeviceTemperatureActual.With("id", id).With("device", device).Set(temperature.Actual)
 			metricDeviceTemperatureTarget.With("id", id).With("device", device).Set(temperature.Target)
 
-			if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateTemperatureActual.Format(id, device), temperature.Actual); e != nil {
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicTemperatureActual.Format(id, device), temperature.Actual); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateTemperatureOffset.Format(id, device), temperature.Offset); e != nil {
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicTemperatureOffset.Format(id, device), temperature.Offset); e != nil {
 				err = multierr.Append(err, e)
 			}
 
-			if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateTemperatureTarget.Format(id, device), temperature.Target); e != nil {
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicTemperatureTarget.Format(id, device), temperature.Target); e != nil {
 				err = multierr.Append(err, e)
 			}
 		}
@@ -144,25 +149,27 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	}
 
 	// Job
-	if j, e := b.provider.Job.GetJob(job.NewGetJobParamsWithContext(ctx), nil); e == nil {
-		if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateJobFileName.Format(id), j.Payload.Job.File.Name); e != nil {
-			err = multierr.Append(err, e)
-		}
+	if !b.JobFromMQTT() {
+		if j, e := b.provider.Job.GetJob(job.NewGetJobParamsWithContext(ctx), nil); e == nil {
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicJobFileName.Format(id), j.Payload.Job.File.Name); e != nil {
+				err = multierr.Append(err, e)
+			}
 
-		if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateJobFileSize.Format(id), j.Payload.Job.File.Size); e != nil {
-			err = multierr.Append(err, e)
-		}
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicJobFileSize.Format(id), j.Payload.Job.File.Size); e != nil {
+				err = multierr.Append(err, e)
+			}
 
-		if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateJobProgress.Format(id), j.Payload.Progress.Completion); e != nil {
-			err = multierr.Append(err, e)
-		}
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicJobProgress.Format(id), j.Payload.Progress.Completion); e != nil {
+				err = multierr.Append(err, e)
+			}
 
-		if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateJobTime.Format(id), j.Payload.Progress.PrintTime); e != nil {
-			err = multierr.Append(err, e)
-		}
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicJobTime.Format(id), j.Payload.Progress.PrintTime); e != nil {
+				err = multierr.Append(err, e)
+			}
 
-		if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateJobTimeLeft.Format(id), j.Payload.Progress.PrintTimeLeft); e != nil {
-			err = multierr.Append(err, e)
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicJobTimeLeft.Format(id), j.Payload.Progress.PrintTimeLeft); e != nil {
+				err = multierr.Append(err, e)
+			}
 		}
 	}
 

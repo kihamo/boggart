@@ -58,6 +58,11 @@ func (b *Bind) TemperatureFromMQTT() bool {
 	return cfg != nil && cfg.Publish.TemperatureActive
 }
 
+func (b *Bind) JobFromMQTT() bool {
+	cfg := b.PluginMQTTSettings()
+	return cfg != nil && cfg.Publish.ProgressActive && cfg.Publish.PrinterData
+}
+
 func (b *Bind) TemperatureTopic() mqtt.Topic {
 	cfg := b.PluginMQTTSettings()
 	if cfg == nil {
@@ -66,6 +71,16 @@ func (b *Bind) TemperatureTopic() mqtt.Topic {
 
 	return mqtt.Topic(cfg.Publish.BaseTopic +
 		strings.Replace(cfg.Publish.TemperatureTopic, "{temp}", "+", 1))
+}
+
+func (b *Bind) JobTopic() mqtt.Topic {
+	cfg := b.PluginMQTTSettings()
+	if cfg == nil {
+		return ""
+	}
+
+	return mqtt.Topic(cfg.Publish.BaseTopic +
+		strings.Replace(cfg.Publish.ProgressTopic, "{progress}", "printing", 1))
 }
 
 func (b *Bind) Run() error {

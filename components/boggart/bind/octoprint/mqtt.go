@@ -23,3 +23,9 @@ func (b *Bind) callbackMQTTTemperature(message mqtt.Message, offset int) error {
 
 	return nil
 }
+
+//func (b *Bind) callbackMQTTJob(message mqtt.Message) error {
+//	fmt.Println(message)
+//
+//	return nil
+//}
