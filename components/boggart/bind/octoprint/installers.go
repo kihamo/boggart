@@ -28,6 +28,10 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 		idJobProgress       = "JobProgress"
 		idJobTime           = "JobTime"
 		idJobTimeLeft       = "JobTimeLeft"
+		idLayerTotal        = "LayerTotal"
+		idLayerCurrent      = "LayerCurrent"
+		idHeightTotal       = "HeightTotal"
+		idHeightCurrent     = "HeightCurrent"
 	)
 
 	b.devicesMutex.RLock()
@@ -86,6 +90,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 	transformHumanSeconds := openhab.StepDefaultTransformHumanSeconds.Base()
 	transformHumanBytes := openhab.StepDefaultTransformHumanBytes.Base()
 
+	// Job
 	if b.JobFromMQTT() {
 		topic := b.JobTopic()
 
@@ -182,6 +187,40 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 					openhab.NewItem(itemPrefix+idJobTimeLeft, openhab.ItemTypeNumber).
 						WithLabel("Time left [JS("+transformHumanSeconds+"):%s]").
 						WithIcon("time"),
+				),
+		)
+	}
+
+	// Layer & Height
+	if b.DisplayLayerProgressEnabled() {
+		channels = append(channels,
+			openhab.NewChannel(idLayerTotal, openhab.ChannelTypeNumber).
+				WithStateTopic(cfg.TopicLayerTotal).
+				AddItems(
+					openhab.NewItem(itemPrefix+idLayerTotal, openhab.ItemTypeNumber).
+						WithLabel("Total layers [%d]").
+						WithIcon("niveau"),
+				),
+			openhab.NewChannel(idLayerCurrent, openhab.ChannelTypeNumber).
+				WithStateTopic(cfg.TopicLayerTotal).
+				AddItems(
+					openhab.NewItem(itemPrefix+idLayerCurrent, openhab.ItemTypeNumber).
+						WithLabel("Current layer [%d]").
+						WithIcon("niveau"),
+				),
+			openhab.NewChannel(idHeightTotal, openhab.ChannelTypeNumber).
+				WithStateTopic(cfg.TopicLayerTotal).
+				AddItems(
+					openhab.NewItem(itemPrefix+idHeightTotal, openhab.ItemTypeNumber).
+						WithLabel("Total height [%.2f mm]").
+						WithIcon("niveau"),
+				),
+			openhab.NewChannel(idHeightCurrent, openhab.ChannelTypeNumber).
+				WithStateTopic(cfg.TopicLayerTotal).
+				AddItems(
+					openhab.NewItem(itemPrefix+idHeightCurrent, openhab.ItemTypeNumber).
+						WithLabel("Current height [%.2f mm]").
+						WithIcon("niveau"),
 				),
 		)
 	}

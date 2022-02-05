@@ -1,6 +1,9 @@
 package octoprint
 
 import (
+	"bytes"
+
+	"github.com/disintegration/imaging"
 	"github.com/kihamo/boggart/providers/octoprint/client/util"
 	"github.com/kihamo/shadow/components/dashboard"
 )
@@ -42,6 +45,30 @@ func (b *Bind) handleSnapshot(w *dashboard.Response, r *dashboard.Request) {
 
 	snapshot := response.GetPayload().Response
 
-	w.Header().Set("Content-Type", snapshot.AssumedContentType)
-	w.Write(snapshot.Content)
+	if settings.Webcam.FlipH || settings.Webcam.FlipV || settings.Webcam.Rotate90 {
+		img, err := imaging.Decode(bytes.NewReader(snapshot.Content))
+		if err != nil {
+			b.Widget().InternalError(w, r, err)
+			return
+		}
+
+		if settings.Webcam.FlipH {
+			img = imaging.FlipH(img)
+		}
+
+		if settings.Webcam.FlipV {
+			img = imaging.FlipV(img)
+		}
+
+		if settings.Webcam.Rotate90 {
+			img = imaging.Rotate90(img)
+		}
+
+		w.Header().Set("Content-Type", snapshot.AssumedContentType)
+		imaging.Encode(w, img, imaging.JPEG)
+	} else {
+		w.Header().Set("Content-Type", snapshot.AssumedContentType)
+		w.Write(snapshot.Content)
+	}
+
 }

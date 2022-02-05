@@ -10,6 +10,7 @@ require (
 	github.com/bieber/barcode v0.0.0-20201127170204-1d90414c63eb
 	github.com/deepmap/oapi-codegen v1.8.3
 	github.com/denisbrodbeck/machineid v1.0.1
+	github.com/disintegration/imaging v1.6.2
 	github.com/eclipse/paho.mqtt.golang v1.2.1-0.20200609161119-ca94c5368c77
 	github.com/elazarl/go-bindata-assetfs v1.0.1
 	github.com/faiface/beep v1.0.2
@@ -136,7 +137,7 @@ require (
 	gocv.io/x/gocv v0.25.0 // indirect
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
 	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6 // indirect
-	golang.org/x/image v0.0.0-20190802002840-cff245a6509b // indirect
+	golang.org/x/image v0.0.0-20191009234506-e7c1f5e7dbb8 // indirect
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
 	golang.org/x/mobile v0.0.0-20190719004257-d2bd2a29d028 // indirect
 	golang.org/x/mod v0.3.0 // indirect

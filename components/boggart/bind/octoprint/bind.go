@@ -1,6 +1,7 @@
 package octoprint
 
 import (
+	"context"
 	"strings"
 	"sync"
 
@@ -8,6 +9,7 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/protocols/swagger"
 	"github.com/kihamo/boggart/providers/octoprint"
+	"github.com/kihamo/boggart/providers/octoprint/client/settings"
 	"github.com/kihamo/boggart/providers/octoprint/models"
 )
 
@@ -34,6 +36,19 @@ func (b *Bind) config() *Config {
 	return b.Config().Bind().(*Config)
 }
 
+func (b *Bind) SystemSettingsUpdate(ctx context.Context) error {
+	response, err := b.provider.Settings.GetSettings(settings.NewGetSettingsParamsWithContext(ctx), nil)
+	if err != nil {
+		return err
+	}
+
+	b.settingsMutex.Lock()
+	b.settings = response.GetPayload()
+	b.settingsMutex.Unlock()
+
+	return nil
+}
+
 func (b *Bind) SystemSettings() *models.Settings {
 	b.settingsMutex.RLock()
 	defer b.settingsMutex.RUnlock()
@@ -42,15 +57,26 @@ func (b *Bind) SystemSettings() *models.Settings {
 }
 
 func (b *Bind) PluginMQTTSettings() *models.SettingsPluginsMqtt {
-	b.settingsMutex.RLock()
-	defer b.settingsMutex.RUnlock()
+	settings := b.SystemSettings()
+	if settings == nil {
+		return nil
+	}
 
-	local := b.settings.Plugins.Mqtt
+	local := settings.Plugins.Mqtt
 	if local == nil || local.Broker == nil || local.Publish == nil || local.Publish.Events == nil || local.Broker.URL == "" {
 		return nil
 	}
 
 	return local
+}
+
+func (b *Bind) DisplayLayerProgressEnabled() bool {
+	settings := b.SystemSettings()
+	if settings == nil {
+		return false
+	}
+
+	return settings != nil
 }
 
 func (b *Bind) TemperatureFromMQTT() bool {

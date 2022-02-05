@@ -3,6 +3,7 @@ package octoprint
 import (
 	"context"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart/tasks"
@@ -10,7 +11,6 @@ import (
 	"github.com/kihamo/boggart/providers/octoprint/client/job"
 	"github.com/kihamo/boggart/providers/octoprint/client/plugin"
 	"github.com/kihamo/boggart/providers/octoprint/client/printer"
-	"github.com/kihamo/boggart/providers/octoprint/client/settings"
 	"go.uber.org/multierr"
 )
 
@@ -32,15 +32,10 @@ func (b *Bind) Tasks() []tasks.Task {
 	}
 }
 
-func (b *Bind) taskSettingsHandler(ctx context.Context) error {
-	response, err := b.provider.Settings.GetSettings(settings.NewGetSettingsParamsWithContext(ctx), nil)
-	if err != nil {
+func (b *Bind) taskSettingsHandler(ctx context.Context) (err error) {
+	if err = b.SystemSettingsUpdate(ctx); err != nil {
 		return err
 	}
-
-	b.settingsMutex.Lock()
-	b.settings = response.GetPayload()
-	b.settingsMutex.Unlock()
 
 	cfg := b.config()
 	_, err = b.Workers().RegisterTask(
@@ -60,7 +55,17 @@ func (b *Bind) taskSettingsHandler(ctx context.Context) error {
 		return err
 	}
 
-	subscribers := make([]mqtt.Subscriber, 0, 1)
+	subscribers := make([]mqtt.Subscriber, 0, 2)
+
+	if cfg := b.PluginMQTTSettings(); cfg != nil && cfg.Publish.EventActive && cfg.Publish.Events.Settings && cfg.Publish.EventTopic != "" {
+		topic := mqtt.Topic(cfg.Publish.BaseTopic +
+			strings.Replace(cfg.Publish.EventTopic, "{event}", "SettingsUpdated", 1))
+
+		subscribers = append(subscribers, mqtt.NewSubscriber(topic, 0,
+			b.MQTT().WrapSubscribeDeviceIsOnline(func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+				return b.SystemSettingsUpdate(ctx)
+			})))
+	}
 
 	// temperature
 	if b.TemperatureFromMQTT() {
@@ -79,14 +84,6 @@ func (b *Bind) taskSettingsHandler(ctx context.Context) error {
 				return b.callbackMQTTTemperature(message, offset)
 			})))
 	}
-
-	// jon
-	//if b.JobFromMQTT() {
-	//	subscribers = append(subscribers, mqtt.NewSubscriber(b.JobTopic(), 0,
-	//		b.MQTT().WrapSubscribeDeviceIsOnline(func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-	//			return b.callbackMQTTJob(message)
-	//		})))
-	//}
 
 	return b.MQTT().Subscribe(subscribers...)
 }
@@ -179,7 +176,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		heightTotal, heightCurrent float64
 	)
 
-	if state.Payload.State.Flags.Printing {
+	if b.DisplayLayerProgressEnabled() && state.Payload.State.Flags.Printing {
 		if progress, e := b.provider.Plugin.DisplayLayerProgress(plugin.NewDisplayLayerProgressParamsWithContext(ctx), nil); e == nil {
 			if value, e := strconv.ParseUint(progress.Payload.Layer.Total, 10, 64); e == nil {
 				layerTotal = value
