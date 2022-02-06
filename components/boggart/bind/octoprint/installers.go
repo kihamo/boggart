@@ -2,6 +2,7 @@ package octoprint
 
 import (
 	"context"
+	"sort"
 
 	"github.com/kihamo/boggart/components/boggart/installer"
 	"github.com/kihamo/boggart/components/boggart/installer/openhab"
@@ -35,7 +36,14 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 	)
 
 	b.devicesMutex.RLock()
+	devices := make([]string, 0, len(b.devices))
 	for device := range b.devices {
+		devices = append(devices, device)
+	}
+	b.devicesMutex.RUnlock()
+	sort.Strings(devices)
+
+	for _, device := range devices {
 		id := openhab.IDNormalizeCamelCase(device) + "_"
 
 		if b.TemperatureFromMQTT() {
@@ -85,7 +93,6 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 			)
 		}
 	}
-	b.devicesMutex.RUnlock()
 
 	transformHumanSeconds := openhab.StepDefaultTransformHumanSeconds.Base()
 	transformHumanBytes := openhab.StepDefaultTransformHumanBytes.Base()
@@ -193,30 +200,32 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 
 	// Layer & Height
 	if b.DisplayLayerProgressEnabled() {
+		id := b.Meta().ID()
+
 		channels = append(channels,
 			openhab.NewChannel(idLayerTotal, openhab.ChannelTypeNumber).
-				WithStateTopic(cfg.TopicLayerTotal).
+				WithStateTopic(cfg.TopicLayerTotal.Format(id)).
 				AddItems(
 					openhab.NewItem(itemPrefix+idLayerTotal, openhab.ItemTypeNumber).
 						WithLabel("Total layers [%d]").
 						WithIcon("niveau"),
 				),
 			openhab.NewChannel(idLayerCurrent, openhab.ChannelTypeNumber).
-				WithStateTopic(cfg.TopicLayerTotal).
+				WithStateTopic(cfg.TopicLayerCurrent.Format(id)).
 				AddItems(
 					openhab.NewItem(itemPrefix+idLayerCurrent, openhab.ItemTypeNumber).
 						WithLabel("Current layer [%d]").
 						WithIcon("niveau"),
 				),
 			openhab.NewChannel(idHeightTotal, openhab.ChannelTypeNumber).
-				WithStateTopic(cfg.TopicLayerTotal).
+				WithStateTopic(cfg.TopicHeightTotal.Format(id)).
 				AddItems(
 					openhab.NewItem(itemPrefix+idHeightTotal, openhab.ItemTypeNumber).
 						WithLabel("Total height [%.2f mm]").
 						WithIcon("niveau"),
 				),
 			openhab.NewChannel(idHeightCurrent, openhab.ChannelTypeNumber).
-				WithStateTopic(cfg.TopicLayerTotal).
+				WithStateTopic(cfg.TopicHeightCurrent.Format(id)).
 				AddItems(
 					openhab.NewItem(itemPrefix+idHeightCurrent, openhab.ItemTypeNumber).
 						WithLabel("Current height [%.2f mm]").

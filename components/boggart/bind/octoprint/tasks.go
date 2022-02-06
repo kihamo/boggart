@@ -171,47 +171,44 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	}
 
 	// Layer & Height
-	var (
-		layerTotal, layerCurrent   uint64
-		heightTotal, heightCurrent float64
-	)
-
 	if b.DisplayLayerProgressEnabled() && state.Payload.State.Flags.Printing {
 		if progress, e := b.provider.Plugin.DisplayLayerProgress(plugin.NewDisplayLayerProgressParamsWithContext(ctx), nil); e == nil {
 			if value, e := strconv.ParseUint(progress.Payload.Layer.Total, 10, 64); e == nil {
-				layerTotal = value
+				if e := b.MQTT().PublishAsync(ctx, cfg.TopicLayerTotal.Format(id), value); e != nil {
+					err = multierr.Append(err, e)
+				}
 			}
 
 			if progress.Payload.Layer.Current != "-" {
 				if value, e := strconv.ParseUint(progress.Payload.Layer.Current, 10, 64); e == nil {
-					layerCurrent = value
+					if e := b.MQTT().PublishAsync(ctx, cfg.TopicLayerCurrent.Format(id), value); e != nil {
+						err = multierr.Append(err, e)
+					}
+				}
+			} else {
+				if e := b.MQTT().PublishAsync(ctx, cfg.TopicLayerCurrent.Format(id), ""); e != nil {
+					err = multierr.Append(err, e)
 				}
 			}
 
 			if value, e := strconv.ParseFloat(progress.Payload.Height.Total, 64); e == nil {
-				heightTotal = value
+				if e := b.MQTT().PublishAsync(ctx, cfg.TopicHeightTotal.Format(id), value); e != nil {
+					err = multierr.Append(err, e)
+				}
 			}
 
-			if value, e := strconv.ParseFloat(progress.Payload.Height.Current, 64); e == nil {
-				heightCurrent = value
+			if progress.Payload.Height.Current != "-" {
+				if value, e := strconv.ParseFloat(progress.Payload.Height.Current, 64); e == nil {
+					if e := b.MQTT().PublishAsync(ctx, cfg.TopicHeightCurrent.Format(id), value); e != nil {
+						err = multierr.Append(err, e)
+					}
+				}
+			} else {
+				if e := b.MQTT().PublishAsync(ctx, cfg.TopicHeightCurrent.Format(id), ""); e != nil {
+					err = multierr.Append(err, e)
+				}
 			}
 		}
-	}
-
-	if e := b.MQTT().PublishAsync(ctx, cfg.TopicLayerTotal.Format(id), layerTotal); e != nil {
-		err = multierr.Append(err, e)
-	}
-
-	if e := b.MQTT().PublishAsync(ctx, cfg.TopicLayerCurrent.Format(id), layerCurrent); e != nil {
-		err = multierr.Append(err, e)
-	}
-
-	if e := b.MQTT().PublishAsync(ctx, cfg.TopicHeightTotal.Format(id), heightTotal); e != nil {
-		err = multierr.Append(err, e)
-	}
-
-	if e := b.MQTT().PublishAsync(ctx, cfg.TopicHeightCurrent.Format(id), heightCurrent); e != nil {
-		err = multierr.Append(err, e)
 	}
 
 	return err
