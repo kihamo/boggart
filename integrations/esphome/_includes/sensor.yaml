@@ -1,4 +1,5 @@
 ---
 sensor:
+- !include ./sensor/esp_heap_free.yaml
 - !include ./sensor/wifi_signal.yaml
 - !include ./sensor/uptime.yaml
