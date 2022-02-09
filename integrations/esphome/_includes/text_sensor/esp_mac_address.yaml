@@ -1,0 +1,7 @@
+---
+platform: template
+id: "esp_mac_address"
+name: "ESP MAC address"
+entity_category: "diagnostic"
+lambda: "return get_mac_address_pretty();"
+internal: true
