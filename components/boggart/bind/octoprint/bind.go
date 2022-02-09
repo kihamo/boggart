@@ -128,5 +128,7 @@ func (b *Bind) Run() error {
 	b.devices = make(map[string]bool, 0)
 	b.devicesMutex.Unlock()
 
+	b.Meta().SetLink(&cfg.Address.URL)
+
 	return nil
 }
