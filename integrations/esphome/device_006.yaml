@@ -48,3 +48,10 @@ sensor:
     address: 0xE1000003AF4DC628
     id: temperature2
     name: "Temperature 2"
+
+binary_sensor:
+  - platform: gpio
+    pin: D3
+    id: pir_motion_detector
+    name: "PIR Motion detector"
+    device_class: "motion"
