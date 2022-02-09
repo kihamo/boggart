@@ -1,0 +1,46 @@
+---
+# https://github.com/esp8266/Arduino/blob/master/tools/sdk/include/user_interface.h
+#    REASON_DEFAULT_RST      = 0,    /* normal startup by power on */
+#    REASON_WDT_RST          = 1,    /* hardware watch dog reset */
+#    REASON_EXCEPTION_RST    = 2,    /* exception reset, GPIO status won’t change */
+#    REASON_SOFT_WDT_RST     = 3,    /* software watch dog reset, GPIO status won’t change */
+#    REASON_SOFT_RESTART     = 4,    /* software restart ,system_restart , GPIO status won’t change */
+#    REASON_DEEP_SLEEP_AWAKE = 5,    /* wake up from deep-sleep */
+#    REASON_EXT_SYS_RST      = 6     /* external system reset */
+platform: template
+id: "esp_reset_reason"
+name: "Reset reason"
+entity_category: "diagnostic"
+lambda: |-
+  switch (ESP.getResetInfoPtr()->reason) {
+    case REASON_DEFAULT_RST:
+      return {"Power on"};
+    break;
+
+    case REASON_WDT_RST:
+      return {"Hardware watch dog"};
+    break;
+
+    case REASON_EXCEPTION_RST:
+      return {"Exception"};
+    break;
+
+    case REASON_SOFT_WDT_RST:
+      return {"Software watch dog"};
+    break;
+
+    case REASON_SOFT_RESTART:
+      return {"Software or system restart"};
+    break;
+
+    case REASON_DEEP_SLEEP_AWAKE:
+      return {"Wake up from deep-sleep"};
+    break;
+
+    case REASON_EXT_SYS_RST:
+      return {"External system"};
+    break;
+  }
+
+  return {"Unknown"};
+internal: true

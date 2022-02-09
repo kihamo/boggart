@@ -71,7 +71,7 @@ switch:
     pin: GPIO14
     id: "relay"
     name: "Power relay"
-    restore_mode: ALWAYS_OFF
+#    restore_mode: ALWAYS_OFF
     on_turn_on:
       - switch.turn_on: led_red
       - switch.turn_off: led_blue
