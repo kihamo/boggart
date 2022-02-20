@@ -4,8 +4,13 @@ import (
 	"context"
 	"net"
 	"net/url"
+	"regexp"
 
 	"github.com/kihamo/boggart/components/mqtt"
+)
+
+var (
+	reLog = regexp.MustCompile("^\\033\\[([0-1];)?3[0-9]m\\[(?P<Level>.*?)\\]\\[(?P<Tag>.*?)\\]: (?P<Message>.+)\\[0m")
 )
 
 func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
@@ -110,31 +115,33 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			return b.register(component)
 		}),
-		//mqtt.NewSubscriber(topicLog, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
-		//	/*
-		//		   "",    // NONE
-		//		   "E",   // ERROR
-		//		   "W",   // WARNING
-		//		   "I",   // INFO
-		//		   "C",   // CONFIG
-		//		   "D",   // DEBUG
-		//		   "V",   // VERBOSE
-		//		   "VV",  // VERY_VERBOSE
-		//
-		//			this->printf_to_buffer_("%s[%s][%s:%03u]: ", color, letter, tag, line);
-		//
-		//		[0;36m[D][sensor:113]: 'Temperature DS': Sending state 21.62500 °C with 1 decimals of accuracy[0m
-		//	*/
-		//
-		//	fmt.Println(message)
-		//	fmt.Println(message.Payload())
-		//	fmt.Println(string([]byte{27, 91, 48, 59, 51, 54}))
-		//	fmt.Println(hex.EncodeToString([]byte{27, 91, 48, 59, 51, 54}))
-		//	fmt.Println(message.HEX())
-		//	fmt.Println()
-		//
-		//	return nil
-		//}),
+		mqtt.NewSubscriber(topicLog, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+			parts := reLog.FindStringSubmatch(message.String())
+			if len(parts[3]) == 0 {
+				return nil
+			}
+
+			switch parts[2] {
+			case "E":
+				b.Logger().Error(parts[4], "tag", parts[3], "source", "esphome")
+			case "W":
+				b.Logger().Warn(parts[4], "tag", parts[3], "source", "esphome")
+			case "I":
+				b.Logger().Info(parts[4], "tag", parts[3], "source", "esphome")
+			case "C":
+				b.Logger().Info(parts[4], "tag", parts[3], "source", "esphome", "level", "config")
+			case "D":
+				b.Logger().Debug(parts[4], "tag", parts[3], "source", "esphome")
+			case "V":
+				b.Logger().Debug(parts[4], "tag", parts[3], "source", "esphome", "level", "verbose")
+			case "VV":
+				b.Logger().Debug(parts[4], "tag", parts[3], "source", "esphome", "level", "very_verbose")
+			default:
+				b.Logger().Debug(parts[4], "tag", parts[3], "source", "esphome", "level", "empty")
+			}
+
+			return nil
+		}),
 		mqtt.NewSubscriber(topicBirth, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			if message.String() == cfg.BirthMessage {
 				b.status.True()
