@@ -9,6 +9,10 @@ import (
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
+const (
+	SchemaJSON = "json"
+)
+
 type ComponentLightState struct {
 	State      string  `json:"state"`
 	ColorMode  *string `json:"color_mode,omitempty"` // read only

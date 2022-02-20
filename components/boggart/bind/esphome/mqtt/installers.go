@@ -30,6 +30,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 
 	for _, component := range components {
 		id := openhab.IDNormalizeCamelCase(component.ID())
+		title := strings.Title(component.Name())
 
 		switch component.Type() {
 		case ComponentTypeBinarySensor:
@@ -70,15 +71,14 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 					WithStateTopic(component.StateTopic()).
 					WithCommandTopic(component.CommandTopic()).
 					AddItems(
-						item.WithLabel(strings.Title(component.Name())),
+						item.WithLabel(title),
 					),
 			)
 
 		case ComponentTypeSensor:
-			label := strings.Title(component.Name())
 			cmp := component.(*ComponentSensor)
 
-			label += " ["
+			label := title + " ["
 			var ignoreUnitOfMeasurement bool
 
 			if cmp.DeviceClass() == DeviceClassPower && cmp.UnitOfMeasurement() == "W" {
@@ -136,11 +136,13 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 					WithOn("ON").
 					WithOff("OFF").
 					AddItems(
-						item.WithLabel(strings.Title(component.Name())),
+						item.WithLabel(title),
 					),
 			)
 
 		case ComponentTypeLight:
+			const idPostfix = "_Switch"
+
 			channels = append(channels,
 				openhab.NewChannel(id, openhab.ChannelTypeSwitch).
 					WithStateTopic(component.StateTopic()).
@@ -150,15 +152,33 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 					WithTransformationPattern("JSONPATH:$.state").
 					WithFormatBeforePublish(`{\"state\":%s}`).
 					AddItems(
-						openhab.NewItem(itemPrefix+id, openhab.ItemTypeSwitch).
-							WithLabel(strings.Title(component.Name())).
+						openhab.NewItem(itemPrefix+id+idPostfix, openhab.ItemTypeSwitch).
+							WithLabel(title).
 							WithIcon(OpenHabIconConverter(component.Icon(), "light")),
 					),
 			)
 
 			if cmp, ok := component.(*ComponentLight); ok {
-				if cmp.ColorModes().IsBrightness() {
-					const idPostfix = "Brightness"
+				if cmp.ColorModes().IsRGB() && cmp.Schema() == SchemaJSON {
+					const idPostfix = "_Color"
+
+					channels = append(channels,
+						openhab.NewChannel(id+idPostfix, openhab.ChannelTypeColor).
+							WithStateTopic(component.StateTopic()).
+							WithCommandTopic(component.CommandTopic()).
+							WithTransformationPattern("JS:ha_light_json_state.js?color_mode=rgb").
+							WithTransformationPatternOut("JS:ha_light_json_command.js?color_mode=rgb").
+							WithColorMode(openhab.ColorModeRGB).
+							AddItems(
+								openhab.NewItem(itemPrefix+id+idPostfix, openhab.ItemTypeColor).
+									WithLabel(title+" color [%s]").
+									WithIcon(OpenHabIconConverter(component.Icon(), "rgb")),
+							),
+					)
+				}
+
+				if IsAllowLightStateField(cmp.ColorModes(), "brightness") {
+					const idPostfix = "_Brightness"
 
 					channels = append(channels,
 						openhab.NewChannel(id+idPostfix, openhab.ChannelTypeDimmer).
@@ -171,7 +191,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 							WithFormatBeforePublish(`{\"brightness\":%s}`).
 							AddItems(
 								openhab.NewItem(itemPrefix+id+idPostfix, openhab.ItemTypeDimmer).
-									WithLabel(strings.Title(component.Name())+" brightness [%.0f %%]").
+									WithLabel(title+" brightness [%.0f %%]").
 									WithIcon(OpenHabIconConverter(component.Icon(), "heating-40")),
 							),
 					)
@@ -188,7 +208,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 							WithFormatBeforePublish(`{\"effect\":%s}`).
 							AddItems(
 								openhab.NewItem(itemPrefix+id+idPostfix, openhab.ItemTypeString).
-									WithLabel(strings.Title(component.Name())+" effect").
+									WithLabel(title+" effect").
 									WithIcon(OpenHabIconConverter(component.Icon(), "rgb")),
 							),
 					)
@@ -202,7 +222,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 					WithCommandTopic(component.CommandTopic()).
 					AddItems(
 						openhab.NewItem(itemPrefix+id, openhab.ItemTypeString).
-							WithLabel(strings.Title(component.Name())).
+							WithLabel(title).
 							WithIcon(OpenHabIconConverter(component.Icon(), "")),
 					),
 			)
