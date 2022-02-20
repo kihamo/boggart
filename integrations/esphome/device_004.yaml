@@ -36,9 +36,9 @@ binary_sensor:
       number: GPIO4
       mode: INPUT_PULLUP
 
-  - platform: template
-    id: kettle_mode
-    name: "Kettle Mode"
+#  - platform: template
+#    id: kettle_mode
+#    name: "Kettle Mode"
 
 sensor:
   - platform: dallas
@@ -48,13 +48,13 @@ sensor:
     address: 0xC9000003AF6CB128
     name: "Water hot"
 
-  - platform: template
-    id: kettle_temp
-    name: "Kettle Temp"
-    unit_of_measurement: '°C'
-    accuracy_decimals: 0
-    icon: "mdi:thermometer"
-    device_class: "temperature"
+#  - platform: template
+#    id: kettle_temp
+#    name: "Kettle Temp"
+#    unit_of_measurement: '°C'
+#    accuracy_decimals: 0
+#    icon: "mdi:thermometer"
+#    device_class: "temperature"
 
   - platform: esp32_hall
     id: "hall"

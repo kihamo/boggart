@@ -1,0 +1,82 @@
+debug:
+
+substitutions:
+  node_name: !secret device_012_node_name
+  ip_address: !secret device_012_ip_address
+
+packages:
+  common: !include ./_includes/common.yaml
+  wifi: !include ./_includes/wifi/redhome.yaml
+  binary_sensor: !include ./_includes/binary_sensor.yaml
+  sensor: !include ./_includes/sensor.yaml
+  switch: !include ./_includes/switch.yaml
+  text_sensor: !include ./_includes/text_sensor.yaml
+  time: !include ./_includes/time.yaml
+
+esphome:
+  comment: !secret device_012_comment
+
+esp8266:
+  board: d1_mini
+
+external_components:
+  - source:
+      type: local
+      path: ./external_components
+
+#logger:
+#  level: VERBOSE
+#  baud_rate: 115200
+
+uart:
+  id: uart_bus
+  baud_rate: 9600
+  data_bits: 8
+  parity: NONE
+  stop_bits: 1
+#  tx_pin: GPIO1
+#  rx_pin: GPIO3
+  tx_pin: D5
+  rx_pin: D6
+  debug:
+    direction: BOTH
+    dummy_receiver: false
+    after:
+      bytes: 60
+    sequence:
+      - lambda: UARTDebug::log_hex(direction, bytes, ':');
+
+sensor:
+  - platform: total_daily_energy
+    name: "Total Daily Energy"
+    icon: "mdi:current-ac"
+    power_id: "power"
+    method: "trapezoid"
+  - platform: mercury_v1
+    address: !secret device_012_mercury_address
+    update_interval: 60s
+    voltage:
+      name: "Voltage"
+      icon: "mdi:flash"
+    amperage:
+      name: "Amperage"
+      icon: "mdi:flash"
+    power:
+      name: "Power"
+      id: "power"
+      icon: "mdi:flash"
+    tariff1:
+      name: "Tariff 1"
+      icon: "mdi:flash"
+    tariff2:
+      name: "Tariff 2"
+      icon: "mdi:flash"
+    tariff3:
+      name: "Tariff 3"
+      icon: "mdi:flash"
+    tariff4:
+      name: "Tariff 4"
+      icon: "mdi:flash"
+    tariffs_total:
+      name: "Tariffs total"
+      icon: "mdi:flash"

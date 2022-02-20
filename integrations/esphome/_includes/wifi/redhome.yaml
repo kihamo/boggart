@@ -1,0 +1,10 @@
+---
+wifi:
+  <<: !include ap.yaml
+  ssid: !secret redhome_wifi_ssid
+  password: !secret redhome_wifi_pssword
+  domain: ""
+  use_address: ${ip_address}
+  fast_connect: true # чтобы подключаться к скрытой сети, отключает предварительное сканирование
+
+captive_portal:

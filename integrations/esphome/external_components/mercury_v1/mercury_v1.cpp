@@ -37,7 +37,7 @@ namespace esphome {
         response_len++;
       }
 
-      ESP_LOGV(TAG, "Response raw %s", hexencode(this->read_buffer_, response_len).c_str());
+      ESP_LOGV(TAG, "Response raw %s", format_hex_pretty(this->read_buffer_, response_len).c_str());
 
       // игнорируем пакеты на отсылку команд самому счетчику
       if(response_len <= MERCURY_V1_READ_REQUEST_SIZE) {
@@ -60,7 +60,7 @@ namespace esphome {
 
         // проверяем что адреса запроса и ответа совпадают
         if(memcmp(this->packet_buffer_, this->address_, MERCURY_V1_FIELD_ADDRESS_LENGTH) != 0) { // включительно, чтобы пропускать пакеты на отсылку команд
-          ESP_LOGW(TAG, "Response first bytes isn't %s is %s", hexencode(this->address_, MERCURY_V1_FIELD_ADDRESS_LENGTH).c_str(), hexencode(this->packet_buffer_, MERCURY_V1_FIELD_ADDRESS_LENGTH).c_str());
+          ESP_LOGW(TAG, "Response first bytes isn't %s is %s", format_hex_pretty(this->address_, MERCURY_V1_FIELD_ADDRESS_LENGTH).c_str(), format_hex_pretty(this->packet_buffer_, MERCURY_V1_FIELD_ADDRESS_LENGTH).c_str());
           return;
         }
 
@@ -127,7 +127,7 @@ namespace esphome {
         i += MERCURY_V1_FIELD_CRC_LENGTH;
 
         // --- debug ----
-        ESP_LOGV(TAG, "Found valid packet %s", hexencode(this->packet_buffer_, i - begin).c_str());
+        ESP_LOGV(TAG, "Found valid packet %s", format_hex_pretty(this->packet_buffer_, i - begin).c_str());
 
         // --- update sensors ---
         switch (cmd) {
@@ -165,7 +165,7 @@ namespace esphome {
     }
 
     void MercuryV1::update() {
-      ESP_LOGV(TAG, "Send READ_POWER_COUNTERS %s", hexencode(read_power_counters_request_, MERCURY_V1_READ_REQUEST_SIZE).c_str());
+      ESP_LOGV(TAG, "Send READ_POWER_COUNTERS %s", format_hex_pretty(read_power_counters_request_, MERCURY_V1_READ_REQUEST_SIZE).c_str());
       this->write_array(read_power_counters_request_, MERCURY_V1_READ_REQUEST_SIZE);
       this->flush();
 
@@ -175,7 +175,7 @@ namespace esphome {
 
       delay(MERCURY_V1_WAIT_AFTER_READ_RESPONSE);
 
-      ESP_LOGV(TAG, "Send READ_PARAMS_CURRENT %s", hexencode(read_params_current_request_, MERCURY_V1_READ_REQUEST_SIZE).c_str());
+      ESP_LOGV(TAG, "Send READ_PARAMS_CURRENT %s", format_hex_pretty(read_params_current_request_, MERCURY_V1_READ_REQUEST_SIZE).c_str());
       this->write_array(read_params_current_request_, MERCURY_V1_READ_REQUEST_SIZE);
       this->flush();
 
