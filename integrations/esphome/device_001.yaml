@@ -71,7 +71,6 @@ switch:
     pin: GPIO14
     id: "relay"
     name: "Power relay"
-#    restore_mode: ALWAYS_OFF
     on_turn_on:
       - switch.turn_on: led_red
       - switch.turn_off: led_blue
@@ -84,13 +83,11 @@ switch:
     inverted: true
     id: "led_blue"
     name: "LED blue"
-    restore_mode: ALWAYS_ON
   - platform: gpio
     pin: GPIO13
     inverted: true
     id: "led_red"
     name: "LED red"
-    restore_mode: ALWAYS_OFF
 
 binary_sensor:
   - platform: gpio

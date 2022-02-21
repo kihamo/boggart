@@ -1,8 +1,0 @@
----
-platform: template
-id: "esp_heap_free"
-name: "Free Heap"
-lambda: "return ESP.getFreeHeap();"
-unit_of_measurement: bytes
-accuracy_decimals: 0
-update_interval: 30s

@@ -1,0 +1,4 @@
+---
+platform: debug
+device:
+  name: "Device Info"

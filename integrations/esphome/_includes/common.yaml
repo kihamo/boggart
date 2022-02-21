@@ -10,10 +10,13 @@ web_server:
 prometheus:
 
 logger:
-  level: "DEBUG"
+  level: "INFO"
   baud_rate: 0
 
 ota:
+
+debug:
+  update_interval: 30s
 
 mqtt:
   broker: !secret home_mqtt_broker

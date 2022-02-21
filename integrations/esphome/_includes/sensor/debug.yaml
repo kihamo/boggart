@@ -1,0 +1,13 @@
+---
+platform: debug
+free:
+  id: "esp_heap_free"
+  name: "Heap Free"
+#fragmentation:
+#  name: "Heap Fragmentation"
+block:
+  id: "esp_heap_max_block"
+  name: "Heap Max Block"
+loop_time:
+  id: "esp_loop_time"
+  name: "Loop Time"
