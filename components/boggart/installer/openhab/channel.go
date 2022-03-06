@@ -18,6 +18,10 @@ const (
 	ChannelTypeImage         = "image"
 	ChannelTypeDateTime      = "datetime"
 	ChannelTypeRollerShutter = "rollershutter"
+
+	ColorModeHSB = "hsb"
+	ColorModeRGB = "rgb"
+	ColorModeXYY = "xyY"
 )
 
 type Channel struct {
