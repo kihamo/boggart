@@ -12,6 +12,7 @@ const (
 	ComponentTypeCover        ComponentType = "cover"
 	ComponentTypeFan          ComponentType = "fan"
 	ComponentTypeLight        ComponentType = "light"
+	ComponentTypeSelect       ComponentType = "select"
 	ComponentTypeSensor       ComponentType = "sensor"
 	ComponentTypeSwitch       ComponentType = "switch"
 	ComponentTypeTextSensor   ComponentType = "text_sensor"
