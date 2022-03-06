@@ -37,6 +37,10 @@ func (b *Bind) taskSettingsHandler(ctx context.Context) (err error) {
 		return err
 	}
 
+	if err = b.CommandsUpdate(ctx); err != nil {
+		return err
+	}
+
 	cfg := b.config()
 	_, err = b.Workers().RegisterTask(
 		tasks.NewTask().
@@ -83,6 +87,12 @@ func (b *Bind) taskSettingsHandler(ctx context.Context) (err error) {
 			b.MQTT().WrapSubscribeDeviceIsOnline(func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 				return b.callbackMQTTTemperature(message, offset)
 			})))
+	}
+
+	// commands
+	if len(b.Commands()) > 0 {
+		subscribers = append(subscribers, mqtt.NewSubscriber(cfg.TopicCommand.Format(b.Meta().ID()), 0,
+			b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTExecuteCommand)))
 	}
 
 	return b.MQTT().Subscribe(subscribers...)

@@ -10,6 +10,7 @@ import (
 	"github.com/kihamo/boggart/protocols/swagger"
 	"github.com/kihamo/boggart/providers/octoprint"
 	"github.com/kihamo/boggart/providers/octoprint/client/settings"
+	"github.com/kihamo/boggart/providers/octoprint/client/system"
 	"github.com/kihamo/boggart/providers/octoprint/models"
 )
 
@@ -30,6 +31,9 @@ type Bind struct {
 
 	devices      map[string]bool
 	devicesMutex sync.RWMutex
+
+	commands      []*models.Command
+	commandsMutex sync.RWMutex
 }
 
 func (b *Bind) config() *Config {
@@ -49,6 +53,19 @@ func (b *Bind) SystemSettingsUpdate(ctx context.Context) error {
 	return nil
 }
 
+func (b *Bind) CommandsUpdate(ctx context.Context) error {
+	response, err := b.provider.System.GetCommands(system.NewGetCommandsParamsWithContext(ctx), nil)
+	if err != nil {
+		return err
+	}
+
+	b.commandsMutex.Lock()
+	b.commands = append(response.GetPayload().Core, response.GetPayload().Custom...)
+	b.commandsMutex.Unlock()
+
+	return nil
+}
+
 func (b *Bind) SystemSettings() *models.Settings {
 	b.settingsMutex.RLock()
 	defer b.settingsMutex.RUnlock()
@@ -56,13 +73,20 @@ func (b *Bind) SystemSettings() *models.Settings {
 	return b.settings
 }
 
+func (b *Bind) Commands() []*models.Command {
+	b.commandsMutex.RLock()
+	defer b.commandsMutex.RUnlock()
+
+	return b.commands
+}
+
 func (b *Bind) PluginMQTTSettings() *models.SettingsPluginsMqtt {
-	settings := b.SystemSettings()
-	if settings == nil {
+	s := b.SystemSettings()
+	if s == nil {
 		return nil
 	}
 
-	local := settings.Plugins.Mqtt
+	local := s.Plugins.Mqtt
 	if local == nil || local.Broker == nil || local.Publish == nil || local.Publish.Events == nil || local.Broker.URL == "" {
 		return nil
 	}
@@ -71,12 +95,12 @@ func (b *Bind) PluginMQTTSettings() *models.SettingsPluginsMqtt {
 }
 
 func (b *Bind) DisplayLayerProgressEnabled() bool {
-	settings := b.SystemSettings()
-	if settings == nil {
+	s := b.SystemSettings()
+	if s == nil {
 		return false
 	}
 
-	return settings != nil
+	return s != nil
 }
 
 func (b *Bind) TemperatureFromMQTT() bool {

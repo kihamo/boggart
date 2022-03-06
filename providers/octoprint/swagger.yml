@@ -325,7 +325,6 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/Settings"
-
   /api/system/commands:
     get:
       operationId: "getCommands"
