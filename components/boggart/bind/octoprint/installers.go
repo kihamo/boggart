@@ -14,8 +14,10 @@ func (b *Bind) InstallersSupport() []installer.System {
 	}
 }
 
-func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]installer.Step, error) {
-	itemPrefix := openhab.ItemPrefixFromBindMeta(b.Meta())
+func (b *Bind) InstallerSteps(_ context.Context, _ installer.System) ([]installer.Step, error) {
+	meta := b.Meta()
+	bindID := meta.ID()
+	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
 	cfg := b.config()
 	channels := make([]*openhab.Channel, 0)
 
@@ -33,6 +35,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 		idLayerCurrent      = "LayerCurrent"
 		idHeightTotal       = "HeightTotal"
 		idHeightCurrent     = "HeightCurrent"
+		idCommand           = "Command"
 	)
 
 	b.devicesMutex.RLock()
@@ -44,49 +47,49 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 	sort.Strings(devices)
 
 	for _, device := range devices {
-		id := openhab.IDNormalizeCamelCase(device) + "_"
+		deviceID := openhab.IDNormalizeCamelCase(device) + "_"
 
 		if b.TemperatureFromMQTT() {
 			topic := b.TemperatureTopic().Format(device)
 
 			channels = append(channels,
-				openhab.NewChannel(id+idTemperatureActual, openhab.ChannelTypeNumber).
+				openhab.NewChannel(deviceID+idTemperatureActual, openhab.ChannelTypeNumber).
 					WithStateTopic(topic).
 					WithTransformationPattern("JSONPATH:$.actual").
 					AddItems(
-						openhab.NewItem(itemPrefix+id+idTemperatureActual, openhab.ItemTypeNumber).
+						openhab.NewItem(itemPrefix+deviceID+idTemperatureActual, openhab.ItemTypeNumber).
 							WithLabel("Temperature "+device+" actual [%.2f °C]").
 							WithIcon("temperature_cold"),
 					),
-				openhab.NewChannel(id+idTemperatureTarget, openhab.ChannelTypeNumber).
+				openhab.NewChannel(deviceID+idTemperatureTarget, openhab.ChannelTypeNumber).
 					WithStateTopic(topic).
 					WithTransformationPattern("JSONPATH:$.target").
 					AddItems(
-						openhab.NewItem(itemPrefix+id+idTemperatureTarget, openhab.ItemTypeNumber).
+						openhab.NewItem(itemPrefix+deviceID+idTemperatureTarget, openhab.ItemTypeNumber).
 							WithLabel("Temperature "+device+" target [%.2f °C]").
 							WithIcon("temperature_hot"),
 					),
 			)
 		} else {
 			channels = append(channels,
-				openhab.NewChannel(id+idTemperatureActual, openhab.ChannelTypeNumber).
-					WithStateTopic(cfg.TopicTemperatureActual.Format(device)).
+				openhab.NewChannel(deviceID+idTemperatureActual, openhab.ChannelTypeNumber).
+					WithStateTopic(cfg.TopicTemperatureActual.Format(bindID, device)).
 					AddItems(
-						openhab.NewItem(itemPrefix+id+idTemperatureActual, openhab.ItemTypeNumber).
+						openhab.NewItem(itemPrefix+deviceID+idTemperatureActual, openhab.ItemTypeNumber).
 							WithLabel("Temperature "+device+" actual [%.2f °C]").
 							WithIcon("temperature_cold"),
 					),
-				openhab.NewChannel(id+idTemperatureTarget, openhab.ChannelTypeNumber).
-					WithStateTopic(cfg.TopicTemperatureTarget.Format(device)).
+				openhab.NewChannel(deviceID+idTemperatureTarget, openhab.ChannelTypeNumber).
+					WithStateTopic(cfg.TopicTemperatureTarget.Format(bindID, device)).
 					AddItems(
-						openhab.NewItem(itemPrefix+id+idTemperatureTarget, openhab.ItemTypeNumber).
+						openhab.NewItem(itemPrefix+deviceID+idTemperatureTarget, openhab.ItemTypeNumber).
 							WithLabel("Temperature "+device+" target [%.2f °C]").
 							WithIcon("temperature_hot"),
 					),
-				openhab.NewChannel(id+idTemperatureOffset, openhab.ChannelTypeNumber).
-					WithStateTopic(cfg.TopicTemperatureOffset.Format(device)).
+				openhab.NewChannel(deviceID+idTemperatureOffset, openhab.ChannelTypeNumber).
+					WithStateTopic(cfg.TopicTemperatureOffset.Format(bindID, device)).
 					AddItems(
-						openhab.NewItem(itemPrefix+id+idTemperatureOffset, openhab.ItemTypeNumber).
+						openhab.NewItem(itemPrefix+deviceID+idTemperatureOffset, openhab.ItemTypeNumber).
 							WithLabel("Temperature "+device+" offset [%.2f °C]").
 							WithIcon("temperature"),
 					),
@@ -154,42 +157,42 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 	} else {
 		channels = append(channels,
 			openhab.NewChannel(idStatus, openhab.ChannelTypeString).
-				WithStateTopic(cfg.TopicState).
+				WithStateTopic(cfg.TopicState.Format(bindID)).
 				AddItems(
 					openhab.NewItem(itemPrefix+idStatus, openhab.ItemTypeString).
 						WithLabel("Status").
 						WithIcon("text"),
 				),
 			openhab.NewChannel(idJobFileName, openhab.ChannelTypeString).
-				WithStateTopic(cfg.TopicJobFileName).
+				WithStateTopic(cfg.TopicJobFileName.Format(bindID)).
 				AddItems(
 					openhab.NewItem(itemPrefix+idJobFileName, openhab.ItemTypeString).
 						WithLabel("File name [%s]").
 						WithIcon("text"),
 				),
 			openhab.NewChannel(idJobFileSize, openhab.ChannelTypeNumber).
-				WithStateTopic(cfg.TopicJobFileSize).
+				WithStateTopic(cfg.TopicJobFileSize.Format(bindID)).
 				AddItems(
 					openhab.NewItem(itemPrefix+idJobFileSize, openhab.ItemTypeNumber).
 						WithLabel("File size [JS("+transformHumanBytes+"):%s]").
 						WithIcon("chart"),
 				),
 			openhab.NewChannel(idJobProgress, openhab.ChannelTypeNumber).
-				WithStateTopic(cfg.TopicJobProgress).
+				WithStateTopic(cfg.TopicJobProgress.Format(bindID)).
 				AddItems(
 					openhab.NewItem(itemPrefix+idJobProgress, openhab.ItemTypeNumber).
 						WithLabel("Progress [%d %%]").
 						WithIcon("humidity"),
 				),
 			openhab.NewChannel(idJobTime, openhab.ChannelTypeNumber).
-				WithStateTopic(cfg.TopicJobTime).
+				WithStateTopic(cfg.TopicJobTime.Format(bindID)).
 				AddItems(
 					openhab.NewItem(itemPrefix+idJobTime, openhab.ItemTypeNumber).
 						WithLabel("Time [JS("+transformHumanSeconds+"):%s]").
 						WithIcon("time"),
 				),
 			openhab.NewChannel(idJobTimeLeft, openhab.ChannelTypeNumber).
-				WithStateTopic(cfg.TopicJobTimeLeft).
+				WithStateTopic(cfg.TopicJobTimeLeft.Format(bindID)).
 				AddItems(
 					openhab.NewItem(itemPrefix+idJobTimeLeft, openhab.ItemTypeNumber).
 						WithLabel("Time left [JS("+transformHumanSeconds+"):%s]").
@@ -200,36 +203,53 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 
 	// Layer & Height
 	if b.DisplayLayerProgressEnabled() {
-		id := b.Meta().ID()
-
 		channels = append(channels,
 			openhab.NewChannel(idLayerTotal, openhab.ChannelTypeNumber).
-				WithStateTopic(cfg.TopicLayerTotal.Format(id)).
+				WithStateTopic(cfg.TopicLayerTotal.Format(bindID)).
 				AddItems(
 					openhab.NewItem(itemPrefix+idLayerTotal, openhab.ItemTypeNumber).
 						WithLabel("Total layers [%d]").
 						WithIcon("niveau"),
 				),
 			openhab.NewChannel(idLayerCurrent, openhab.ChannelTypeNumber).
-				WithStateTopic(cfg.TopicLayerCurrent.Format(id)).
+				WithStateTopic(cfg.TopicLayerCurrent.Format(bindID)).
 				AddItems(
 					openhab.NewItem(itemPrefix+idLayerCurrent, openhab.ItemTypeNumber).
 						WithLabel("Current layer [%d]").
 						WithIcon("niveau"),
 				),
 			openhab.NewChannel(idHeightTotal, openhab.ChannelTypeNumber).
-				WithStateTopic(cfg.TopicHeightTotal.Format(id)).
+				WithStateTopic(cfg.TopicHeightTotal.Format(bindID)).
 				AddItems(
 					openhab.NewItem(itemPrefix+idHeightTotal, openhab.ItemTypeNumber).
 						WithLabel("Total height [%.2f mm]").
 						WithIcon("niveau"),
 				),
 			openhab.NewChannel(idHeightCurrent, openhab.ChannelTypeNumber).
-				WithStateTopic(cfg.TopicHeightCurrent.Format(id)).
+				WithStateTopic(cfg.TopicHeightCurrent.Format(bindID)).
 				AddItems(
 					openhab.NewItem(itemPrefix+idHeightCurrent, openhab.ItemTypeNumber).
 						WithLabel("Current height [%.2f mm]").
 						WithIcon("niveau"),
+				),
+		)
+	}
+
+	// Commands
+	for _, command := range b.Commands() {
+		commandID := idCommand +
+			openhab.IDNormalizeCamelCase(command.Source) + "_" +
+			openhab.IDNormalizeCamelCase(command.Action)
+
+		channels = append(channels,
+			openhab.NewChannel(commandID, openhab.ChannelTypeSwitch).
+				WithCommandTopic(cfg.TopicCommand.Format(bindID, command.Source, command.Action)).
+				WithOn("true").
+				WithOff("false").
+				WithTrigger(true).
+				AddItems(
+					openhab.NewItem(itemPrefix+commandID, openhab.ItemTypeSwitch).
+						WithLabel(command.Name),
 				),
 		)
 	}

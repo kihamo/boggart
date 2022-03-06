@@ -31,6 +31,7 @@ type Config struct {
 	TopicLayerCurrent      mqtt.Topic    `mapstructure:"topic_layer_current" yaml:"topic_layer_current"`
 	TopicHeightTotal       mqtt.Topic    `mapstructure:"topic_height_total" yaml:"topic_height_total"`
 	TopicHeightCurrent     mqtt.Topic    `mapstructure:"topic_height_current" yaml:"topic_height_current"`
+	TopicCommand           mqtt.Topic    `mapstructure:"topic_command" yaml:"topic_command"`
 }
 
 func (t Type) ConfigDefaults() interface{} {
@@ -58,5 +59,6 @@ func (t Type) ConfigDefaults() interface{} {
 		TopicLayerCurrent:      prefix + "layer/current",
 		TopicHeightTotal:       prefix + "height/total",
 		TopicHeightCurrent:     prefix + "height/current",
+		TopicCommand:           prefix + "command/+/+",
 	}
 }
