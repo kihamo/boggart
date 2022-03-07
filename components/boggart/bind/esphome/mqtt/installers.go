@@ -150,7 +150,7 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 					WithOn("ON").
 					WithOff("OFF").
 					WithTransformationPattern("JSONPATH:$.state").
-					WithFormatBeforePublish(`{\"state\":%s}`).
+					WithFormatBeforePublish(`{\"state\":\"%s\"}`).
 					AddItems(
 						openhab.NewItem(itemPrefix+id+idPostfix, openhab.ItemTypeSwitch).
 							WithLabel(title).
@@ -198,14 +198,14 @@ func (b *Bind) InstallerSteps(context.Context, installer.System) ([]installer.St
 				}
 
 				if cmp.Effect() {
-					const idPostfix = "Effect"
+					const idPostfix = "_Effect"
 
 					channels = append(channels,
 						openhab.NewChannel(id+idPostfix, openhab.ChannelTypeString).
 							WithStateTopic(component.StateTopic()).
 							WithCommandTopic(component.CommandTopic()).
 							WithTransformationPattern("JSONPATH:$.effect").
-							WithFormatBeforePublish(`{\"effect\":%s}`).
+							WithFormatBeforePublish(`{\"effect\":\"%s\"}`).
 							AddItems(
 								openhab.NewItem(itemPrefix+id+idPostfix, openhab.ItemTypeString).
 									WithLabel(title+" effect").

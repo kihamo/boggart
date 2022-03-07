@@ -245,11 +245,12 @@ func (b *Bind) InstallerSteps(_ context.Context, _ installer.System) ([]installe
 			openhab.NewChannel(commandID, openhab.ChannelTypeSwitch).
 				WithCommandTopic(cfg.TopicCommand.Format(bindID, command.Source, command.Action)).
 				WithOn("true").
-				WithOff("false").
-				WithTrigger(true).
+				WithOff("true").
 				AddItems(
 					openhab.NewItem(itemPrefix+commandID, openhab.ItemTypeSwitch).
-						WithLabel(command.Name),
+						WithLabel(command.Name+"[]").
+						WithParameter("autoupdate", "false").
+						WithIcon("text"),
 				),
 		)
 	}

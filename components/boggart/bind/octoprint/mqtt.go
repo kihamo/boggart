@@ -35,10 +35,23 @@ func (b *Bind) callbackMQTTExecuteCommand(ctx context.Context, _ mqtt.Component,
 		return errors.New("bad topic name")
 	}
 
-	params := system.NewExecuteCommandParamsWithContext(ctx).
-		WithAction(parts[len(parts)-1]).
-		WithSource(parts[len(parts)-2])
+	action := parts[len(parts)-1]
+	source := parts[len(parts)-2]
 
-	_, err := b.provider.System.ExecuteCommand(params, nil)
-	return err
+	for _, command := range b.Commands() {
+		if mqtt.NameReplace(command.Source) != source {
+			continue
+		}
+
+		if mqtt.NameReplace(command.Action) == action {
+			params := system.NewExecuteCommandParamsWithContext(ctx).
+				WithAction(command.Action).
+				WithSource(command.Source)
+
+			_, err := b.provider.System.ExecuteCommand(params, nil)
+			return err
+		}
+	}
+
+	return nil
 }
