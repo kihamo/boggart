@@ -7,6 +7,7 @@ package plugin
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
@@ -31,6 +32,8 @@ type ClientOption func(*runtime.ClientOperation)
 // ClientService is the interface for Client methods
 type ClientService interface {
 	DisplayLayerProgress(params *DisplayLayerProgressParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*DisplayLayerProgressOK, error)
+
+	ModelThumbnail(params *ModelThumbnailParams, authInfo runtime.ClientAuthInfoWriter, writer io.Writer, opts ...ClientOption) (*ModelThumbnailOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -71,6 +74,45 @@ func (a *Client) DisplayLayerProgress(params *DisplayLayerProgressParams, authIn
 	// unexpected success response
 	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
 	msg := fmt.Sprintf("unexpected success response for displayLayerProgress: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+  ModelThumbnail models thumbnail
+*/
+func (a *Client) ModelThumbnail(params *ModelThumbnailParams, authInfo runtime.ClientAuthInfoWriter, writer io.Writer, opts ...ClientOption) (*ModelThumbnailOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewModelThumbnailParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "modelThumbnail",
+		Method:             "GET",
+		PathPattern:        "/plugin/UltimakerFormatPackage/thumbnail/{name}.png",
+		ProducesMediaTypes: []string{"image/png"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &ModelThumbnailReader{formats: a.formats, writer: writer},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*ModelThumbnailOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for modelThumbnail: API contract not enforced by server. Client expected to get an error, but got: %T", result)
 	panic(msg)
 }
 

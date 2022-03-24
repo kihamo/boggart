@@ -95,6 +95,12 @@ func (b *Bind) taskSettingsHandler(ctx context.Context) (err error) {
 			b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTExecuteCommand)))
 	}
 
+	// job state
+	if b.JobFromMQTT() {
+		subscribers = append(subscribers, mqtt.NewSubscriber(b.JobTopic(), 0,
+			b.MQTT().WrapSubscribeDeviceIsOnline(b.callbackMQTTJobState)))
+	}
+
 	return b.MQTT().Subscribe(subscribers...)
 }
 
@@ -158,6 +164,10 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	// Job
 	if !b.JobFromMQTT() {
 		if j, e := b.provider.Job.GetJob(job.NewGetJobParamsWithContext(ctx), nil); e == nil {
+			b.currentJobMutex.Lock()
+			b.currentJob = j.GetPayload().Job
+			b.currentJobMutex.Unlock()
+
 			if e := b.MQTT().PublishAsync(ctx, cfg.TopicJobFileName.Format(id), j.Payload.Job.File.Name); e != nil {
 				err = multierr.Append(err, e)
 			}

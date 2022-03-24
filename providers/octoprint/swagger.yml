@@ -499,6 +499,26 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/PluginDisplayLayerProgress"
+  /plugin/UltimakerFormatPackage/thumbnail/{name}.png:
+    get:
+      operationId: "modelThumbnail"
+      tags:
+        - "plugin"
+      summary: "Model thumbnail"
+      parameters:
+        - name: "name"
+          in: "path"
+          description: "File name of current job without .gcode"
+          required: true
+          type: "string"
+      produces:
+        - image/png
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "string"
+            format: "binary"
 definitions:
   Version:
     type: "object"

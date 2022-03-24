@@ -6,6 +6,7 @@ import (
 
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/providers/octoprint/client/system"
+	"github.com/kihamo/boggart/providers/octoprint/models"
 )
 
 func (b *Bind) callbackMQTTTemperature(message mqtt.Message, offset int) error {
@@ -52,6 +53,24 @@ func (b *Bind) callbackMQTTExecuteCommand(ctx context.Context, _ mqtt.Component,
 			return err
 		}
 	}
+
+	return nil
+}
+
+func (b *Bind) callbackMQTTJobState(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
+	var job struct {
+		Data struct {
+			Job *models.JobJob `json:"job,omitempty"`
+		} `json:"printer_data,omitempty"`
+	}
+
+	if err := message.JSONUnmarshal(&job); err != nil {
+		return err
+	}
+
+	b.currentJobMutex.Lock()
+	b.currentJob = job.Data.Job
+	b.currentJobMutex.Unlock()
 
 	return nil
 }

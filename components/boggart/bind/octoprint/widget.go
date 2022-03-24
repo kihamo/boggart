@@ -2,17 +2,53 @@ package octoprint
 
 import (
 	"bytes"
+	"strings"
 
 	"github.com/disintegration/imaging"
+	"github.com/kihamo/boggart/providers/octoprint/client/plugin"
 	"github.com/kihamo/boggart/providers/octoprint/client/util"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
 func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
-	b.handleSnapshot(w, r)
+	switch r.URL().Query().Get("action") {
+	case "thumbnail":
+		b.handleModelThumbnail(w, r)
+	default:
+		b.handleWebcamSnapshot(w, r)
+	}
 }
 
-func (b *Bind) handleSnapshot(w *dashboard.Response, r *dashboard.Request) {
+func (b *Bind) handleModelThumbnail(w *dashboard.Response, r *dashboard.Request) {
+	settings := b.SystemSettings()
+	if settings == nil {
+		b.Widget().NotFound(w, r)
+		return
+	}
+
+	if _, ok := settings.Plugins.SettingsPlugins["UltimakerFormatPackage"]; !ok {
+		b.Widget().NotFound(w, r)
+		return
+	}
+
+	b.currentJobMutex.RLock()
+	if b.currentJob == nil {
+		b.currentJobMutex.RUnlock()
+		b.Widget().NotFound(w, r)
+		return
+	}
+
+	name := strings.TrimSuffix(b.currentJob.File.Name, ".gcode")
+	b.currentJobMutex.RUnlock()
+
+	_, err := b.provider.Plugin.ModelThumbnail(plugin.NewModelThumbnailParamsWithContext(r.Context()).WithName(name), nil, w)
+	if err != nil {
+		b.Widget().InternalError(w, r, err)
+		return
+	}
+}
+
+func (b *Bind) handleWebcamSnapshot(w *dashboard.Response, r *dashboard.Request) {
 	settings := b.SystemSettings()
 	if settings == nil {
 		b.Widget().NotFound(w, r)
@@ -70,5 +106,4 @@ func (b *Bind) handleSnapshot(w *dashboard.Response, r *dashboard.Request) {
 		w.Header().Set("Content-Type", snapshot.AssumedContentType)
 		w.Write(snapshot.Content)
 	}
-
 }

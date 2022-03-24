@@ -34,6 +34,9 @@ type Bind struct {
 
 	commands      []*models.Command
 	commandsMutex sync.RWMutex
+
+	currentJob      *models.JobJob
+	currentJobMutex sync.RWMutex
 }
 
 func (b *Bind) config() *Config {
@@ -100,7 +103,11 @@ func (b *Bind) DisplayLayerProgressEnabled() bool {
 		return false
 	}
 
-	return s != nil
+	if _, ok := s.Plugins.SettingsPlugins["DisplayLayerProgress"]; ok {
+		return true
+	}
+
+	return false
 }
 
 func (b *Bind) TemperatureFromMQTT() bool {
