@@ -48,6 +48,8 @@ func (b *Bind) config() *Config {
 }
 
 func (b *Bind) Run() error {
+	b.Meta().SetLink(link)
+
 	cfg := b.config()
 
 	b.client = mosenergosbyt.New(cfg.Login, cfg.Password)
@@ -65,8 +67,6 @@ func (b *Bind) Run() error {
 			break
 		}
 	}
-
-	b.Meta().SetLink(link)
 
 	return nil
 }
