@@ -35,7 +35,7 @@ func (b *Bind) Run() error {
 			b.Logger().Debug(message)
 		}))
 
-	b.Meta().SetLink(&cfg.Address.URL)
+	b.Meta().SetLinkSchemeConvert(&cfg.Address.URL)
 
 	return nil
 }

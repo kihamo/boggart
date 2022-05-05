@@ -49,7 +49,7 @@ func (b *Bind) Run() error {
 	b.limitInternetTrafficIndex.Set(0)
 	b.simStatus.Set(0)
 
-	b.Meta().SetLink(&cfg.Address.URL)
+	b.Meta().SetLinkSchemeConvert(&cfg.Address.URL)
 
 	b.client = hilink.New(cfg.Address.Host, cfg.Debug, swagger.NewLogger(
 		func(message string) {

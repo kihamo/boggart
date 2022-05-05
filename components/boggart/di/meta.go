@@ -160,6 +160,23 @@ func (b *MetaContainer) Link() *url.URL {
 	return nil
 }
 
+func (b *MetaContainer) SetLinkSchemeConvert(link *url.URL) {
+	if link != nil && (link.Scheme == "tcp" || link.Scheme == "tcp4" || link.Scheme == "tcp6") {
+		copy := &url.URL{}
+		*copy = *link
+		link = copy
+
+		switch link.Port() {
+		case "443":
+			link.Scheme = "https"
+		default:
+			link.Scheme = "http"
+		}
+	}
+
+	b.SetLink(link)
+}
+
 func (b *MetaContainer) SetLink(link *url.URL) {
 	if link != nil {
 		copy := &url.URL{}
