@@ -19,61 +19,78 @@ import (
 	"github.com/kihamo/boggart/providers/hikvision/models"
 )
 
-// NewSetImageIrCutFilterParams creates a new SetImageIrCutFilterParams object
-// with the default values initialized.
+// NewSetImageIrCutFilterParams creates a new SetImageIrCutFilterParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewSetImageIrCutFilterParams() *SetImageIrCutFilterParams {
-	var ()
 	return &SetImageIrCutFilterParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewSetImageIrCutFilterParamsWithTimeout creates a new SetImageIrCutFilterParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewSetImageIrCutFilterParamsWithTimeout(timeout time.Duration) *SetImageIrCutFilterParams {
-	var ()
 	return &SetImageIrCutFilterParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewSetImageIrCutFilterParamsWithContext creates a new SetImageIrCutFilterParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewSetImageIrCutFilterParamsWithContext(ctx context.Context) *SetImageIrCutFilterParams {
-	var ()
 	return &SetImageIrCutFilterParams{
-
 		Context: ctx,
 	}
 }
 
 // NewSetImageIrCutFilterParamsWithHTTPClient creates a new SetImageIrCutFilterParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewSetImageIrCutFilterParamsWithHTTPClient(client *http.Client) *SetImageIrCutFilterParams {
-	var ()
 	return &SetImageIrCutFilterParams{
 		HTTPClient: client,
 	}
 }
 
-/*SetImageIrCutFilterParams contains all the parameters to send to the API endpoint
-for the set image ir cut filter operation typically these are written to a http.Request
+/* SetImageIrCutFilterParams contains all the parameters to send to the API endpoint
+   for the set image ir cut filter operation.
+
+   Typically these are written to a http.Request.
 */
 type SetImageIrCutFilterParams struct {
 
-	/*IrcutFilter*/
+	// IrcutFilter.
 	IrcutFilter *models.IrcutFilter
-	/*Channel
-	  Channel ID
 
+	/* Channel.
+
+	   Channel ID
+
+	   Format: uint64
 	*/
 	Channel uint64
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the set image ir cut filter params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *SetImageIrCutFilterParams) WithDefaults() *SetImageIrCutFilterParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the set image ir cut filter params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *SetImageIrCutFilterParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the set image ir cut filter params
@@ -138,7 +155,6 @@ func (o *SetImageIrCutFilterParams) WriteToRequest(r runtime.ClientRequest, reg 
 		return err
 	}
 	var res []error
-
 	if o.IrcutFilter != nil {
 		if err := r.SetBodyParam(o.IrcutFilter); err != nil {
 			return err

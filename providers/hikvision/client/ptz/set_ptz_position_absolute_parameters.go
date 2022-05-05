@@ -19,61 +19,78 @@ import (
 	"github.com/kihamo/boggart/providers/hikvision/models"
 )
 
-// NewSetPtzPositionAbsoluteParams creates a new SetPtzPositionAbsoluteParams object
-// with the default values initialized.
+// NewSetPtzPositionAbsoluteParams creates a new SetPtzPositionAbsoluteParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewSetPtzPositionAbsoluteParams() *SetPtzPositionAbsoluteParams {
-	var ()
 	return &SetPtzPositionAbsoluteParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewSetPtzPositionAbsoluteParamsWithTimeout creates a new SetPtzPositionAbsoluteParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewSetPtzPositionAbsoluteParamsWithTimeout(timeout time.Duration) *SetPtzPositionAbsoluteParams {
-	var ()
 	return &SetPtzPositionAbsoluteParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewSetPtzPositionAbsoluteParamsWithContext creates a new SetPtzPositionAbsoluteParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewSetPtzPositionAbsoluteParamsWithContext(ctx context.Context) *SetPtzPositionAbsoluteParams {
-	var ()
 	return &SetPtzPositionAbsoluteParams{
-
 		Context: ctx,
 	}
 }
 
 // NewSetPtzPositionAbsoluteParamsWithHTTPClient creates a new SetPtzPositionAbsoluteParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewSetPtzPositionAbsoluteParamsWithHTTPClient(client *http.Client) *SetPtzPositionAbsoluteParams {
-	var ()
 	return &SetPtzPositionAbsoluteParams{
 		HTTPClient: client,
 	}
 }
 
-/*SetPtzPositionAbsoluteParams contains all the parameters to send to the API endpoint
-for the set ptz position absolute operation typically these are written to a http.Request
+/* SetPtzPositionAbsoluteParams contains all the parameters to send to the API endpoint
+   for the set ptz position absolute operation.
+
+   Typically these are written to a http.Request.
 */
 type SetPtzPositionAbsoluteParams struct {
 
-	/*PTZData*/
+	// PTZData.
 	PTZData *models.PTZData
-	/*Channel
-	  Channel ID
 
+	/* Channel.
+
+	   Channel ID
+
+	   Format: uint64
 	*/
 	Channel uint64
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the set ptz position absolute params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *SetPtzPositionAbsoluteParams) WithDefaults() *SetPtzPositionAbsoluteParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the set ptz position absolute params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *SetPtzPositionAbsoluteParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the set ptz position absolute params
@@ -138,7 +155,6 @@ func (o *SetPtzPositionAbsoluteParams) WriteToRequest(r runtime.ClientRequest, r
 		return err
 	}
 	var res []error
-
 	if o.PTZData != nil {
 		if err := r.SetBodyParam(o.PTZData); err != nil {
 			return err

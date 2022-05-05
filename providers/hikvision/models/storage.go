@@ -6,6 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"encoding/json"
 	"strconv"
 
@@ -54,7 +55,6 @@ func (m *Storage) Validate(formats strfmt.Registry) error {
 }
 
 func (m *Storage) validateHddList(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.HddList) { // not required
 		return nil
 	}
@@ -68,6 +68,8 @@ func (m *Storage) validateHddList(formats strfmt.Registry) error {
 			if err := m.HddList[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("hddList" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("hddList" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -79,7 +81,6 @@ func (m *Storage) validateHddList(formats strfmt.Registry) error {
 }
 
 func (m *Storage) validateNasList(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.NasList) { // not required
 		return nil
 	}
@@ -93,6 +94,8 @@ func (m *Storage) validateNasList(formats strfmt.Registry) error {
 			if err := m.NasList[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("nasList" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("nasList" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -136,7 +139,6 @@ func (m *Storage) validateWorkModeEnum(path, location string, value string) erro
 }
 
 func (m *Storage) validateWorkMode(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.WorkMode) { // not required
 		return nil
 	}
@@ -144,6 +146,64 @@ func (m *Storage) validateWorkMode(formats strfmt.Registry) error {
 	// value enum
 	if err := m.validateWorkModeEnum("workMode", "body", m.WorkMode); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// ContextValidate validate this storage based on the context it is used
+func (m *Storage) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateHddList(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateNasList(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *Storage) contextValidateHddList(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.HddList); i++ {
+
+		if m.HddList[i] != nil {
+			if err := m.HddList[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("hddList" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("hddList" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *Storage) contextValidateNasList(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.NasList); i++ {
+
+		if m.NasList[i] != nil {
+			if err := m.NasList[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("nasList" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("nasList" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil
@@ -248,7 +308,6 @@ func (m *StorageHddListItems0) validatePropertyEnum(path, location string, value
 }
 
 func (m *StorageHddListItems0) validateProperty(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Property) { // not required
 		return nil
 	}
@@ -258,6 +317,11 @@ func (m *StorageHddListItems0) validateProperty(formats strfmt.Registry) error {
 		return err
 	}
 
+	return nil
+}
+
+// ContextValidate validates this storage hdd list items0 based on context it is used
+func (m *StorageHddListItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -380,7 +444,6 @@ func (m *StorageNasListItems0) validateAddressingFormatTypeEnum(path, location s
 }
 
 func (m *StorageNasListItems0) validateAddressingFormatType(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.AddressingFormatType) { // not required
 		return nil
 	}
@@ -426,7 +489,6 @@ func (m *StorageNasListItems0) validatePropertyEnum(path, location string, value
 }
 
 func (m *StorageNasListItems0) validateProperty(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Property) { // not required
 		return nil
 	}
@@ -436,6 +498,11 @@ func (m *StorageNasListItems0) validateProperty(formats strfmt.Registry) error {
 		return err
 	}
 
+	return nil
+}
+
+// ContextValidate validates this storage nas list items0 based on context it is used
+func (m *StorageNasListItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

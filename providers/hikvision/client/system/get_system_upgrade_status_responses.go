@@ -29,7 +29,6 @@ func (o *GetSystemUpgradeStatusReader) ReadResponse(response runtime.ClientRespo
 			return nil, err
 		}
 		return result, nil
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -40,7 +39,7 @@ func NewGetSystemUpgradeStatusOK() *GetSystemUpgradeStatusOK {
 	return &GetSystemUpgradeStatusOK{}
 }
 
-/*GetSystemUpgradeStatusOK handles this case with default header values.
+/* GetSystemUpgradeStatusOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -51,7 +50,6 @@ type GetSystemUpgradeStatusOK struct {
 func (o *GetSystemUpgradeStatusOK) Error() string {
 	return fmt.Sprintf("[GET /System/upgradeStatus][%d] getSystemUpgradeStatusOK  %+v", 200, o.Payload)
 }
-
 func (o *GetSystemUpgradeStatusOK) GetPayload() *models.SystemUpgradeStatus {
 	return o.Payload
 }

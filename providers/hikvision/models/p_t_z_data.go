@@ -6,6 +6,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
+
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
@@ -78,7 +80,6 @@ func (m *PTZData) Validate(formats strfmt.Registry) error {
 }
 
 func (m *PTZData) validateAbsoluteHigh(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.AbsoluteHigh) { // not required
 		return nil
 	}
@@ -87,6 +88,8 @@ func (m *PTZData) validateAbsoluteHigh(formats strfmt.Registry) error {
 		if err := m.AbsoluteHigh.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("absoluteHigh")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("absoluteHigh")
 			}
 			return err
 		}
@@ -96,7 +99,6 @@ func (m *PTZData) validateAbsoluteHigh(formats strfmt.Registry) error {
 }
 
 func (m *PTZData) validateDuration(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Duration) { // not required
 		return nil
 	}
@@ -109,16 +111,15 @@ func (m *PTZData) validateDuration(formats strfmt.Registry) error {
 }
 
 func (m *PTZData) validatePan(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Pan) { // not required
 		return nil
 	}
 
-	if err := validate.MinimumInt("pan", "body", int64(*m.Pan), -100, false); err != nil {
+	if err := validate.MinimumInt("pan", "body", *m.Pan, -100, false); err != nil {
 		return err
 	}
 
-	if err := validate.MaximumInt("pan", "body", int64(*m.Pan), 100, false); err != nil {
+	if err := validate.MaximumInt("pan", "body", *m.Pan, 100, false); err != nil {
 		return err
 	}
 
@@ -126,7 +127,6 @@ func (m *PTZData) validatePan(formats strfmt.Registry) error {
 }
 
 func (m *PTZData) validateRelative(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Relative) { // not required
 		return nil
 	}
@@ -135,6 +135,8 @@ func (m *PTZData) validateRelative(formats strfmt.Registry) error {
 		if err := m.Relative.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("relative")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("relative")
 			}
 			return err
 		}
@@ -144,16 +146,15 @@ func (m *PTZData) validateRelative(formats strfmt.Registry) error {
 }
 
 func (m *PTZData) validateTilt(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Tilt) { // not required
 		return nil
 	}
 
-	if err := validate.MinimumInt("tilt", "body", int64(*m.Tilt), -100, false); err != nil {
+	if err := validate.MinimumInt("tilt", "body", *m.Tilt, -100, false); err != nil {
 		return err
 	}
 
-	if err := validate.MaximumInt("tilt", "body", int64(*m.Tilt), 100, false); err != nil {
+	if err := validate.MaximumInt("tilt", "body", *m.Tilt, 100, false); err != nil {
 		return err
 	}
 
@@ -161,17 +162,66 @@ func (m *PTZData) validateTilt(formats strfmt.Registry) error {
 }
 
 func (m *PTZData) validateZoom(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Zoom) { // not required
 		return nil
 	}
 
-	if err := validate.MinimumInt("zoom", "body", int64(*m.Zoom), -100, false); err != nil {
+	if err := validate.MinimumInt("zoom", "body", *m.Zoom, -100, false); err != nil {
 		return err
 	}
 
-	if err := validate.MaximumInt("zoom", "body", int64(*m.Zoom), 100, false); err != nil {
+	if err := validate.MaximumInt("zoom", "body", *m.Zoom, 100, false); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// ContextValidate validate this p t z data based on the context it is used
+func (m *PTZData) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateAbsoluteHigh(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateRelative(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *PTZData) contextValidateAbsoluteHigh(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.AbsoluteHigh != nil {
+		if err := m.AbsoluteHigh.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("absoluteHigh")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("absoluteHigh")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *PTZData) contextValidateRelative(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Relative != nil {
+		if err := m.Relative.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("relative")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("relative")
+			}
+			return err
+		}
 	}
 
 	return nil

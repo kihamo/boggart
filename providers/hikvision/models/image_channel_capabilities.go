@@ -6,6 +6,9 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
+
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	static "github.com/kihamo/boggart/providers/hikvision/static/models"
@@ -37,6 +40,138 @@ type ImageChannelCapabilities struct {
 
 // Validate validates this image channel capabilities
 func (m *ImageChannelCapabilities) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateImageFlipEnabled(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateImageFlipStyle(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateIrcutFilterType(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *ImageChannelCapabilities) validateImageFlipEnabled(formats strfmt.Registry) error {
+	if swag.IsZero(m.ImageFlipEnabled) { // not required
+		return nil
+	}
+
+	if err := m.ImageFlipEnabled.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("ImageFlipEnabled")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("ImageFlipEnabled")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *ImageChannelCapabilities) validateImageFlipStyle(formats strfmt.Registry) error {
+	if swag.IsZero(m.ImageFlipStyle) { // not required
+		return nil
+	}
+
+	if err := m.ImageFlipStyle.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("ImageFlipStyle")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("ImageFlipStyle")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *ImageChannelCapabilities) validateIrcutFilterType(formats strfmt.Registry) error {
+	if swag.IsZero(m.IrcutFilterType) { // not required
+		return nil
+	}
+
+	if err := m.IrcutFilterType.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("IrcutFilterType")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("IrcutFilterType")
+		}
+		return err
+	}
+
+	return nil
+}
+
+// ContextValidate validate this image channel capabilities based on the context it is used
+func (m *ImageChannelCapabilities) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateImageFlipEnabled(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateImageFlipStyle(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateIrcutFilterType(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *ImageChannelCapabilities) contextValidateImageFlipEnabled(ctx context.Context, formats strfmt.Registry) error {
+
+	if err := m.ImageFlipEnabled.ContextValidate(ctx, formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("ImageFlipEnabled")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("ImageFlipEnabled")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *ImageChannelCapabilities) contextValidateImageFlipStyle(ctx context.Context, formats strfmt.Registry) error {
+
+	if err := m.ImageFlipStyle.ContextValidate(ctx, formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("ImageFlipStyle")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("ImageFlipStyle")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *ImageChannelCapabilities) contextValidateIrcutFilterType(ctx context.Context, formats strfmt.Registry) error {
+
+	if err := m.IrcutFilterType.ContextValidate(ctx, formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("IrcutFilterType")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("IrcutFilterType")
+		}
+		return err
+	}
+
 	return nil
 }
 

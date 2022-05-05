@@ -17,59 +17,75 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// NewGetNotificationHTTPHostParams creates a new GetNotificationHTTPHostParams object
-// with the default values initialized.
+// NewGetNotificationHTTPHostParams creates a new GetNotificationHTTPHostParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetNotificationHTTPHostParams() *GetNotificationHTTPHostParams {
-	var ()
 	return &GetNotificationHTTPHostParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetNotificationHTTPHostParamsWithTimeout creates a new GetNotificationHTTPHostParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetNotificationHTTPHostParamsWithTimeout(timeout time.Duration) *GetNotificationHTTPHostParams {
-	var ()
 	return &GetNotificationHTTPHostParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGetNotificationHTTPHostParamsWithContext creates a new GetNotificationHTTPHostParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetNotificationHTTPHostParamsWithContext(ctx context.Context) *GetNotificationHTTPHostParams {
-	var ()
 	return &GetNotificationHTTPHostParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGetNotificationHTTPHostParamsWithHTTPClient creates a new GetNotificationHTTPHostParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetNotificationHTTPHostParamsWithHTTPClient(client *http.Client) *GetNotificationHTTPHostParams {
-	var ()
 	return &GetNotificationHTTPHostParams{
 		HTTPClient: client,
 	}
 }
 
-/*GetNotificationHTTPHostParams contains all the parameters to send to the API endpoint
-for the get notification Http host operation typically these are written to a http.Request
+/* GetNotificationHTTPHostParams contains all the parameters to send to the API endpoint
+   for the get notification Http host operation.
+
+   Typically these are written to a http.Request.
 */
 type GetNotificationHTTPHostParams struct {
 
-	/*HTTPHost
-	  HTTP host ID
+	/* HTTPHost.
 
+	   HTTP host ID
+
+	   Format: uint64
 	*/
 	HTTPHost uint64
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get notification Http host params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetNotificationHTTPHostParams) WithDefaults() *GetNotificationHTTPHostParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get notification Http host params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetNotificationHTTPHostParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get notification Http host params

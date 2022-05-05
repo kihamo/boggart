@@ -19,61 +19,78 @@ import (
 	"github.com/kihamo/boggart/providers/hikvision/models"
 )
 
-// NewSetImageFlipParams creates a new SetImageFlipParams object
-// with the default values initialized.
+// NewSetImageFlipParams creates a new SetImageFlipParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewSetImageFlipParams() *SetImageFlipParams {
-	var ()
 	return &SetImageFlipParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewSetImageFlipParamsWithTimeout creates a new SetImageFlipParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewSetImageFlipParamsWithTimeout(timeout time.Duration) *SetImageFlipParams {
-	var ()
 	return &SetImageFlipParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewSetImageFlipParamsWithContext creates a new SetImageFlipParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewSetImageFlipParamsWithContext(ctx context.Context) *SetImageFlipParams {
-	var ()
 	return &SetImageFlipParams{
-
 		Context: ctx,
 	}
 }
 
 // NewSetImageFlipParamsWithHTTPClient creates a new SetImageFlipParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewSetImageFlipParamsWithHTTPClient(client *http.Client) *SetImageFlipParams {
-	var ()
 	return &SetImageFlipParams{
 		HTTPClient: client,
 	}
 }
 
-/*SetImageFlipParams contains all the parameters to send to the API endpoint
-for the set image flip operation typically these are written to a http.Request
+/* SetImageFlipParams contains all the parameters to send to the API endpoint
+   for the set image flip operation.
+
+   Typically these are written to a http.Request.
 */
 type SetImageFlipParams struct {
 
-	/*ImageFlip*/
+	// ImageFlip.
 	ImageFlip *models.ImageFlip
-	/*Channel
-	  Channel ID
 
+	/* Channel.
+
+	   Channel ID
+
+	   Format: uint64
 	*/
 	Channel uint64
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the set image flip params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *SetImageFlipParams) WithDefaults() *SetImageFlipParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the set image flip params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *SetImageFlipParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the set image flip params
@@ -138,7 +155,6 @@ func (o *SetImageFlipParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 		return err
 	}
 	var res []error
-
 	if o.ImageFlip != nil {
 		if err := r.SetBodyParam(o.ImageFlip); err != nil {
 			return err

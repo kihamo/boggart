@@ -6,6 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/go-openapi/errors"
@@ -100,7 +101,6 @@ func (m *EventNotificationAlert) Validate(formats strfmt.Registry) error {
 }
 
 func (m *EventNotificationAlert) validateDateTime(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.DateTime) { // not required
 		return nil
 	}
@@ -142,7 +142,6 @@ func (m *EventNotificationAlert) validateEventStateEnum(path, location string, v
 }
 
 func (m *EventNotificationAlert) validateEventState(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.EventState) { // not required
 		return nil
 	}
@@ -239,7 +238,6 @@ func (m *EventNotificationAlert) validateEventTypeEnum(path, location string, va
 }
 
 func (m *EventNotificationAlert) validateEventType(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.EventType) { // not required
 		return nil
 	}
@@ -249,6 +247,11 @@ func (m *EventNotificationAlert) validateEventType(formats strfmt.Registry) erro
 		return err
 	}
 
+	return nil
+}
+
+// ContextValidate validates this event notification alert based on context it is used
+func (m *EventNotificationAlert) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

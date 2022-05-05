@@ -6,6 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/go-openapi/errors"
@@ -50,12 +51,11 @@ func (m *Status) Validate(formats strfmt.Registry) error {
 }
 
 func (m *Status) validateCode(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Code) { // not required
 		return nil
 	}
 
-	if err := validate.MaximumInt("code", "body", int64(m.Code), 7, false); err != nil {
+	if err := validate.MaximumUint("code", "body", m.Code, 7, false); err != nil {
 		return err
 	}
 
@@ -239,7 +239,6 @@ func (m *Status) validateSubCodeEnum(path, location string, value string) error 
 }
 
 func (m *Status) validateSubCode(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.SubCode) { // not required
 		return nil
 	}
@@ -249,6 +248,11 @@ func (m *Status) validateSubCode(formats strfmt.Registry) error {
 		return err
 	}
 
+	return nil
+}
+
+// ContextValidate validates this status based on context it is used
+func (m *Status) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

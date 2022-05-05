@@ -16,52 +16,66 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewGetPtzChannelsParams creates a new GetPtzChannelsParams object
-// with the default values initialized.
+// NewGetPtzChannelsParams creates a new GetPtzChannelsParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetPtzChannelsParams() *GetPtzChannelsParams {
-
 	return &GetPtzChannelsParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetPtzChannelsParamsWithTimeout creates a new GetPtzChannelsParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetPtzChannelsParamsWithTimeout(timeout time.Duration) *GetPtzChannelsParams {
-
 	return &GetPtzChannelsParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGetPtzChannelsParamsWithContext creates a new GetPtzChannelsParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetPtzChannelsParamsWithContext(ctx context.Context) *GetPtzChannelsParams {
-
 	return &GetPtzChannelsParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGetPtzChannelsParamsWithHTTPClient creates a new GetPtzChannelsParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetPtzChannelsParamsWithHTTPClient(client *http.Client) *GetPtzChannelsParams {
-
 	return &GetPtzChannelsParams{
 		HTTPClient: client,
 	}
 }
 
-/*GetPtzChannelsParams contains all the parameters to send to the API endpoint
-for the get ptz channels operation typically these are written to a http.Request
+/* GetPtzChannelsParams contains all the parameters to send to the API endpoint
+   for the get ptz channels operation.
+
+   Typically these are written to a http.Request.
 */
 type GetPtzChannelsParams struct {
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get ptz channels params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetPtzChannelsParams) WithDefaults() *GetPtzChannelsParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get ptz channels params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetPtzChannelsParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get ptz channels params

@@ -6,6 +6,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
+
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
@@ -44,19 +46,23 @@ func (m *PtzRelative) Validate(formats strfmt.Registry) error {
 }
 
 func (m *PtzRelative) validateZoom(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Zoom) { // not required
 		return nil
 	}
 
-	if err := validate.MinimumInt("zoom", "body", int64(*m.Zoom), -100, false); err != nil {
+	if err := validate.MinimumInt("zoom", "body", *m.Zoom, -100, false); err != nil {
 		return err
 	}
 
-	if err := validate.MaximumInt("zoom", "body", int64(*m.Zoom), 100, false); err != nil {
+	if err := validate.MaximumInt("zoom", "body", *m.Zoom, 100, false); err != nil {
 		return err
 	}
 
+	return nil
+}
+
+// ContextValidate validates this ptz relative based on context it is used
+func (m *PtzRelative) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

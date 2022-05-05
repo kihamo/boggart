@@ -29,7 +29,6 @@ func (o *SetPtzPositionRelativeReader) ReadResponse(response runtime.ClientRespo
 			return nil, err
 		}
 		return result, nil
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -40,7 +39,7 @@ func NewSetPtzPositionRelativeOK() *SetPtzPositionRelativeOK {
 	return &SetPtzPositionRelativeOK{}
 }
 
-/*SetPtzPositionRelativeOK handles this case with default header values.
+/* SetPtzPositionRelativeOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -51,7 +50,6 @@ type SetPtzPositionRelativeOK struct {
 func (o *SetPtzPositionRelativeOK) Error() string {
 	return fmt.Sprintf("[PUT /PTZCtrl/channels/{channel}/relative][%d] setPtzPositionRelativeOK  %+v", 200, o.Payload)
 }
-
 func (o *SetPtzPositionRelativeOK) GetPayload() *models.Status {
 	return o.Payload
 }

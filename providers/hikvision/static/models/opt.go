@@ -1,6 +1,8 @@
 package models
 
 import (
+	"context"
+
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
@@ -29,5 +31,9 @@ func (m *Opt) UnmarshalBinary(b []byte) error {
 
 	*m = res
 
+	return nil
+}
+
+func (m *Opt) ContextValidate(context.Context, strfmt.Registry) error {
 	return nil
 }

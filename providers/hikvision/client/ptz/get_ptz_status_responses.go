@@ -29,7 +29,6 @@ func (o *GetPtzStatusReader) ReadResponse(response runtime.ClientResponse, consu
 			return nil, err
 		}
 		return result, nil
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -40,7 +39,7 @@ func NewGetPtzStatusOK() *GetPtzStatusOK {
 	return &GetPtzStatusOK{}
 }
 
-/*GetPtzStatusOK handles this case with default header values.
+/* GetPtzStatusOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -51,7 +50,6 @@ type GetPtzStatusOK struct {
 func (o *GetPtzStatusOK) Error() string {
 	return fmt.Sprintf("[GET /PTZCtrl/channels/{channel}/status][%d] getPtzStatusOK  %+v", 200, o.Payload)
 }
-
 func (o *GetPtzStatusOK) GetPayload() *models.PTZStatus {
 	return o.Payload
 }

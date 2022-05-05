@@ -29,7 +29,6 @@ func (o *UpdateSystemFirmwareReader) ReadResponse(response runtime.ClientRespons
 			return nil, err
 		}
 		return result, nil
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -40,7 +39,7 @@ func NewUpdateSystemFirmwareOK() *UpdateSystemFirmwareOK {
 	return &UpdateSystemFirmwareOK{}
 }
 
-/*UpdateSystemFirmwareOK handles this case with default header values.
+/* UpdateSystemFirmwareOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -51,7 +50,6 @@ type UpdateSystemFirmwareOK struct {
 func (o *UpdateSystemFirmwareOK) Error() string {
 	return fmt.Sprintf("[PUT /System/updateFirmware][%d] updateSystemFirmwareOK  %+v", 200, o.Payload)
 }
-
 func (o *UpdateSystemFirmwareOK) GetPayload() *models.Status {
 	return o.Payload
 }

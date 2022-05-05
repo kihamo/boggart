@@ -6,6 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/go-openapi/errors"
@@ -73,7 +74,6 @@ func (m *SystemStatus) Validate(formats strfmt.Registry) error {
 }
 
 func (m *SystemStatus) validateCPUList(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.CPUList) { // not required
 		return nil
 	}
@@ -87,6 +87,8 @@ func (m *SystemStatus) validateCPUList(formats strfmt.Registry) error {
 			if err := m.CPUList[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("CPUList" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("CPUList" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -98,7 +100,6 @@ func (m *SystemStatus) validateCPUList(formats strfmt.Registry) error {
 }
 
 func (m *SystemStatus) validateCameraList(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.CameraList) { // not required
 		return nil
 	}
@@ -112,6 +113,8 @@ func (m *SystemStatus) validateCameraList(formats strfmt.Registry) error {
 			if err := m.CameraList[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("CameraList" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("CameraList" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -123,7 +126,6 @@ func (m *SystemStatus) validateCameraList(formats strfmt.Registry) error {
 }
 
 func (m *SystemStatus) validateDomeInfoList(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.DomeInfoList) { // not required
 		return nil
 	}
@@ -137,6 +139,8 @@ func (m *SystemStatus) validateDomeInfoList(formats strfmt.Registry) error {
 			if err := m.DomeInfoList[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("DomeInfoList" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("DomeInfoList" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -148,7 +152,6 @@ func (m *SystemStatus) validateDomeInfoList(formats strfmt.Registry) error {
 }
 
 func (m *SystemStatus) validateMemoryList(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.MemoryList) { // not required
 		return nil
 	}
@@ -162,6 +165,8 @@ func (m *SystemStatus) validateMemoryList(formats strfmt.Registry) error {
 			if err := m.MemoryList[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("MemoryList" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("MemoryList" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -173,13 +178,118 @@ func (m *SystemStatus) validateMemoryList(formats strfmt.Registry) error {
 }
 
 func (m *SystemStatus) validateCurrentDeviceTime(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.CurrentDeviceTime) { // not required
 		return nil
 	}
 
 	if err := validate.FormatOf("currentDeviceTime", "body", "date-time", m.CurrentDeviceTime.String(), formats); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// ContextValidate validate this system status based on the context it is used
+func (m *SystemStatus) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateCPUList(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateCameraList(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateDomeInfoList(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateMemoryList(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *SystemStatus) contextValidateCPUList(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.CPUList); i++ {
+
+		if m.CPUList[i] != nil {
+			if err := m.CPUList[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("CPUList" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("CPUList" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *SystemStatus) contextValidateCameraList(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.CameraList); i++ {
+
+		if m.CameraList[i] != nil {
+			if err := m.CameraList[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("CameraList" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("CameraList" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *SystemStatus) contextValidateDomeInfoList(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.DomeInfoList); i++ {
+
+		if m.DomeInfoList[i] != nil {
+			if err := m.DomeInfoList[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("DomeInfoList" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("DomeInfoList" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *SystemStatus) contextValidateMemoryList(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.MemoryList); i++ {
+
+		if m.MemoryList[i] != nil {
+			if err := m.MemoryList[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("MemoryList" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("MemoryList" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil
@@ -217,6 +327,11 @@ type SystemStatusCPUListItems0 struct {
 
 // Validate validates this system status CPU list items0
 func (m *SystemStatusCPUListItems0) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this system status CPU list items0 based on context it is used
+func (m *SystemStatusCPUListItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -279,6 +394,11 @@ func (m *SystemStatusCameraListItems0) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
+// ContextValidate validates this system status camera list items0 based on context it is used
+func (m *SystemStatusCameraListItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
 // MarshalBinary interface implementation
 func (m *SystemStatusCameraListItems0) MarshalBinary() ([]byte, error) {
 	if m == nil {
@@ -332,6 +452,11 @@ func (m *SystemStatusDomeInfoListItems0) Validate(formats strfmt.Registry) error
 	return nil
 }
 
+// ContextValidate validates this system status dome info list items0 based on context it is used
+func (m *SystemStatusDomeInfoListItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
 // MarshalBinary interface implementation
 func (m *SystemStatusDomeInfoListItems0) MarshalBinary() ([]byte, error) {
 	if m == nil {
@@ -367,6 +492,11 @@ type SystemStatusMemoryListItems0 struct {
 
 // Validate validates this system status memory list items0
 func (m *SystemStatusMemoryListItems0) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this system status memory list items0 based on context it is used
+func (m *SystemStatusMemoryListItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

@@ -26,9 +26,12 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	GetStreamingPicture(params *GetStreamingPictureParams, authInfo runtime.ClientAuthInfoWriter, writer io.Writer) (*GetStreamingPictureOK, error)
+	GetStreamingPicture(params *GetStreamingPictureParams, authInfo runtime.ClientAuthInfoWriter, writer io.Writer, opts ...ClientOption) (*GetStreamingPictureOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -36,13 +39,12 @@ type ClientService interface {
 /*
   GetStreamingPicture get streaming picture API
 */
-func (a *Client) GetStreamingPicture(params *GetStreamingPictureParams, authInfo runtime.ClientAuthInfoWriter, writer io.Writer) (*GetStreamingPictureOK, error) {
+func (a *Client) GetStreamingPicture(params *GetStreamingPictureParams, authInfo runtime.ClientAuthInfoWriter, writer io.Writer, opts ...ClientOption) (*GetStreamingPictureOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetStreamingPictureParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getStreamingPicture",
 		Method:             "GET",
 		PathPattern:        "/Streaming/channels/{channel}/picture",
@@ -54,7 +56,12 @@ func (a *Client) GetStreamingPicture(params *GetStreamingPictureParams, authInfo
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

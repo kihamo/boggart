@@ -29,7 +29,6 @@ func (o *SetImageIrCutFilterReader) ReadResponse(response runtime.ClientResponse
 			return nil, err
 		}
 		return result, nil
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -40,7 +39,7 @@ func NewSetImageIrCutFilterOK() *SetImageIrCutFilterOK {
 	return &SetImageIrCutFilterOK{}
 }
 
-/*SetImageIrCutFilterOK handles this case with default header values.
+/* SetImageIrCutFilterOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -51,7 +50,6 @@ type SetImageIrCutFilterOK struct {
 func (o *SetImageIrCutFilterOK) Error() string {
 	return fmt.Sprintf("[PUT /Image/channels/{channel}/IrcutFilter][%d] setImageIrCutFilterOK  %+v", 200, o.Payload)
 }
-
 func (o *SetImageIrCutFilterOK) GetPayload() *models.Status {
 	return o.Payload
 }

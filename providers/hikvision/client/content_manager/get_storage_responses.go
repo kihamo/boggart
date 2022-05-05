@@ -29,7 +29,6 @@ func (o *GetStorageReader) ReadResponse(response runtime.ClientResponse, consume
 			return nil, err
 		}
 		return result, nil
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -40,7 +39,7 @@ func NewGetStorageOK() *GetStorageOK {
 	return &GetStorageOK{}
 }
 
-/*GetStorageOK handles this case with default header values.
+/* GetStorageOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -51,7 +50,6 @@ type GetStorageOK struct {
 func (o *GetStorageOK) Error() string {
 	return fmt.Sprintf("[GET /ContentMgmt/Storage][%d] getStorageOK  %+v", 200, o.Payload)
 }
-
 func (o *GetStorageOK) GetPayload() *models.Storage {
 	return o.Payload
 }

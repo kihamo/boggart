@@ -19,61 +19,78 @@ import (
 	"github.com/kihamo/boggart/providers/hikvision/models"
 )
 
-// NewSetPtzPositionRelativeParams creates a new SetPtzPositionRelativeParams object
-// with the default values initialized.
+// NewSetPtzPositionRelativeParams creates a new SetPtzPositionRelativeParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewSetPtzPositionRelativeParams() *SetPtzPositionRelativeParams {
-	var ()
 	return &SetPtzPositionRelativeParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewSetPtzPositionRelativeParamsWithTimeout creates a new SetPtzPositionRelativeParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewSetPtzPositionRelativeParamsWithTimeout(timeout time.Duration) *SetPtzPositionRelativeParams {
-	var ()
 	return &SetPtzPositionRelativeParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewSetPtzPositionRelativeParamsWithContext creates a new SetPtzPositionRelativeParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewSetPtzPositionRelativeParamsWithContext(ctx context.Context) *SetPtzPositionRelativeParams {
-	var ()
 	return &SetPtzPositionRelativeParams{
-
 		Context: ctx,
 	}
 }
 
 // NewSetPtzPositionRelativeParamsWithHTTPClient creates a new SetPtzPositionRelativeParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewSetPtzPositionRelativeParamsWithHTTPClient(client *http.Client) *SetPtzPositionRelativeParams {
-	var ()
 	return &SetPtzPositionRelativeParams{
 		HTTPClient: client,
 	}
 }
 
-/*SetPtzPositionRelativeParams contains all the parameters to send to the API endpoint
-for the set ptz position relative operation typically these are written to a http.Request
+/* SetPtzPositionRelativeParams contains all the parameters to send to the API endpoint
+   for the set ptz position relative operation.
+
+   Typically these are written to a http.Request.
 */
 type SetPtzPositionRelativeParams struct {
 
-	/*PTZData*/
+	// PTZData.
 	PTZData *models.PTZData
-	/*Channel
-	  Channel ID
 
+	/* Channel.
+
+	   Channel ID
+
+	   Format: uint64
 	*/
 	Channel uint64
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the set ptz position relative params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *SetPtzPositionRelativeParams) WithDefaults() *SetPtzPositionRelativeParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the set ptz position relative params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *SetPtzPositionRelativeParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the set ptz position relative params
@@ -138,7 +155,6 @@ func (o *SetPtzPositionRelativeParams) WriteToRequest(r runtime.ClientRequest, r
 		return err
 	}
 	var res []error
-
 	if o.PTZData != nil {
 		if err := r.SetBodyParam(o.PTZData); err != nil {
 			return err

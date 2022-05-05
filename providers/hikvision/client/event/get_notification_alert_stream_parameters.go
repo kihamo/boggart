@@ -16,52 +16,66 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewGetNotificationAlertStreamParams creates a new GetNotificationAlertStreamParams object
-// with the default values initialized.
+// NewGetNotificationAlertStreamParams creates a new GetNotificationAlertStreamParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetNotificationAlertStreamParams() *GetNotificationAlertStreamParams {
-
 	return &GetNotificationAlertStreamParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetNotificationAlertStreamParamsWithTimeout creates a new GetNotificationAlertStreamParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetNotificationAlertStreamParamsWithTimeout(timeout time.Duration) *GetNotificationAlertStreamParams {
-
 	return &GetNotificationAlertStreamParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGetNotificationAlertStreamParamsWithContext creates a new GetNotificationAlertStreamParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetNotificationAlertStreamParamsWithContext(ctx context.Context) *GetNotificationAlertStreamParams {
-
 	return &GetNotificationAlertStreamParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGetNotificationAlertStreamParamsWithHTTPClient creates a new GetNotificationAlertStreamParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetNotificationAlertStreamParamsWithHTTPClient(client *http.Client) *GetNotificationAlertStreamParams {
-
 	return &GetNotificationAlertStreamParams{
 		HTTPClient: client,
 	}
 }
 
-/*GetNotificationAlertStreamParams contains all the parameters to send to the API endpoint
-for the get notification alert stream operation typically these are written to a http.Request
+/* GetNotificationAlertStreamParams contains all the parameters to send to the API endpoint
+   for the get notification alert stream operation.
+
+   Typically these are written to a http.Request.
 */
 type GetNotificationAlertStreamParams struct {
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get notification alert stream params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetNotificationAlertStreamParams) WithDefaults() *GetNotificationAlertStreamParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get notification alert stream params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetNotificationAlertStreamParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get notification alert stream params

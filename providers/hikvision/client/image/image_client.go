@@ -25,15 +25,18 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	GetImageChannelCapabilities(params *GetImageChannelCapabilitiesParams, authInfo runtime.ClientAuthInfoWriter) (*GetImageChannelCapabilitiesOK, error)
+	GetImageChannelCapabilities(params *GetImageChannelCapabilitiesParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetImageChannelCapabilitiesOK, error)
 
-	GetImageChannels(params *GetImageChannelsParams, authInfo runtime.ClientAuthInfoWriter) (*GetImageChannelsOK, error)
+	GetImageChannels(params *GetImageChannelsParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetImageChannelsOK, error)
 
-	SetImageFlip(params *SetImageFlipParams, authInfo runtime.ClientAuthInfoWriter) (*SetImageFlipOK, error)
+	SetImageFlip(params *SetImageFlipParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetImageFlipOK, error)
 
-	SetImageIrCutFilter(params *SetImageIrCutFilterParams, authInfo runtime.ClientAuthInfoWriter) (*SetImageIrCutFilterOK, error)
+	SetImageIrCutFilter(params *SetImageIrCutFilterParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetImageIrCutFilterOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -41,13 +44,12 @@ type ClientService interface {
 /*
   GetImageChannelCapabilities get image channel capabilities API
 */
-func (a *Client) GetImageChannelCapabilities(params *GetImageChannelCapabilitiesParams, authInfo runtime.ClientAuthInfoWriter) (*GetImageChannelCapabilitiesOK, error) {
+func (a *Client) GetImageChannelCapabilities(params *GetImageChannelCapabilitiesParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetImageChannelCapabilitiesOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetImageChannelCapabilitiesParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getImageChannelCapabilities",
 		Method:             "GET",
 		PathPattern:        "/Image/channels/{channel}/capabilities",
@@ -59,7 +61,12 @@ func (a *Client) GetImageChannelCapabilities(params *GetImageChannelCapabilities
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -76,13 +83,12 @@ func (a *Client) GetImageChannelCapabilities(params *GetImageChannelCapabilities
 /*
   GetImageChannels get image channels API
 */
-func (a *Client) GetImageChannels(params *GetImageChannelsParams, authInfo runtime.ClientAuthInfoWriter) (*GetImageChannelsOK, error) {
+func (a *Client) GetImageChannels(params *GetImageChannelsParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetImageChannelsOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetImageChannelsParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getImageChannels",
 		Method:             "GET",
 		PathPattern:        "/Image/channels",
@@ -94,7 +100,12 @@ func (a *Client) GetImageChannels(params *GetImageChannelsParams, authInfo runti
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -111,13 +122,12 @@ func (a *Client) GetImageChannels(params *GetImageChannelsParams, authInfo runti
 /*
   SetImageFlip set image flip API
 */
-func (a *Client) SetImageFlip(params *SetImageFlipParams, authInfo runtime.ClientAuthInfoWriter) (*SetImageFlipOK, error) {
+func (a *Client) SetImageFlip(params *SetImageFlipParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetImageFlipOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewSetImageFlipParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "setImageFlip",
 		Method:             "PUT",
 		PathPattern:        "/Image/channels/{channel}/ImageFlip",
@@ -129,7 +139,12 @@ func (a *Client) SetImageFlip(params *SetImageFlipParams, authInfo runtime.Clien
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -146,13 +161,12 @@ func (a *Client) SetImageFlip(params *SetImageFlipParams, authInfo runtime.Clien
 /*
   SetImageIrCutFilter set image ir cut filter API
 */
-func (a *Client) SetImageIrCutFilter(params *SetImageIrCutFilterParams, authInfo runtime.ClientAuthInfoWriter) (*SetImageIrCutFilterOK, error) {
+func (a *Client) SetImageIrCutFilter(params *SetImageIrCutFilterParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetImageIrCutFilterOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewSetImageIrCutFilterParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "setImageIrCutFilter",
 		Method:             "PUT",
 		PathPattern:        "/Image/channels/{channel}/IrcutFilter",
@@ -164,7 +178,12 @@ func (a *Client) SetImageIrCutFilter(params *SetImageIrCutFilterParams, authInfo
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

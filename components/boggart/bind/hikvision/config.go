@@ -43,6 +43,7 @@ type Config struct {
 	Debug                          bool
 	EventsEnabled                  bool `mapstructure:"events_enabled" yaml:"events_enabled,omitempty"`
 	EventsStreamingEnabled         bool `mapstructure:"events_streaming_enabled" yaml:"events_streaming_enabled,omitempty"`
+	VirtualHostAutoEnabled         bool `mapstructure:"virtual_host_auto_enabled" yaml:"virtual_host_auto_enabled,omitempty"`
 }
 
 func (t Type) ConfigDefaults() interface{} {

@@ -17,64 +17,83 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// NewGotoPtzPresetParams creates a new GotoPtzPresetParams object
-// with the default values initialized.
+// NewGotoPtzPresetParams creates a new GotoPtzPresetParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGotoPtzPresetParams() *GotoPtzPresetParams {
-	var ()
 	return &GotoPtzPresetParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGotoPtzPresetParamsWithTimeout creates a new GotoPtzPresetParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGotoPtzPresetParamsWithTimeout(timeout time.Duration) *GotoPtzPresetParams {
-	var ()
 	return &GotoPtzPresetParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGotoPtzPresetParamsWithContext creates a new GotoPtzPresetParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGotoPtzPresetParamsWithContext(ctx context.Context) *GotoPtzPresetParams {
-	var ()
 	return &GotoPtzPresetParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGotoPtzPresetParamsWithHTTPClient creates a new GotoPtzPresetParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGotoPtzPresetParamsWithHTTPClient(client *http.Client) *GotoPtzPresetParams {
-	var ()
 	return &GotoPtzPresetParams{
 		HTTPClient: client,
 	}
 }
 
-/*GotoPtzPresetParams contains all the parameters to send to the API endpoint
-for the goto ptz preset operation typically these are written to a http.Request
+/* GotoPtzPresetParams contains all the parameters to send to the API endpoint
+   for the goto ptz preset operation.
+
+   Typically these are written to a http.Request.
 */
 type GotoPtzPresetParams struct {
 
-	/*Channel
-	  Channel ID
+	/* Channel.
 
+	   Channel ID
+
+	   Format: uint64
 	*/
 	Channel uint64
-	/*Preset
-	  Preset ID
 
+	/* Preset.
+
+	   Preset ID
+
+	   Format: uint64
 	*/
 	Preset uint64
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the goto ptz preset params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GotoPtzPresetParams) WithDefaults() *GotoPtzPresetParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the goto ptz preset params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GotoPtzPresetParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the goto ptz preset params

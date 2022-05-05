@@ -7,6 +7,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/components/mqtt"
+	"github.com/kihamo/boggart/providers/hikvision"
 	"github.com/kihamo/boggart/providers/hikvision/client/content_manager"
 	"github.com/kihamo/boggart/providers/hikvision/client/ptz"
 	"github.com/kihamo/boggart/providers/hikvision/client/system"
@@ -14,7 +15,7 @@ import (
 )
 
 func (b *Bind) Tasks() []tasks.Task {
-	return []tasks.Task{
+	items := []tasks.Task{
 		tasks.NewTask().
 			WithName("serial-number").
 			WithHandler(
@@ -29,6 +30,26 @@ func (b *Bind) Tasks() []tasks.Task {
 				),
 			),
 	}
+
+	if b.config().VirtualHostAutoEnabled {
+		items = append(items,
+			tasks.NewTask().
+				WithName("virtual-host-auto-enabled").
+				WithHandler(
+					b.Workers().WrapTaskHandlerIsOnline(
+						tasks.HandlerFuncFromShortToLong(b.taskVirtualHostAutoEnabledHandler),
+					),
+				).
+				WithSchedule(
+					tasks.ScheduleWithSuccessLimit(
+						tasks.ScheduleWithDuration(tasks.ScheduleNow(), time.Second*30),
+						1,
+					),
+				),
+		)
+	}
+
+	return items
 }
 
 func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
@@ -126,6 +147,30 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 	}
 
 	return err
+}
+
+func (b *Bind) taskVirtualHostAutoEnabledHandler(ctx context.Context) error {
+	settings, err := b.client.System.GetSystemNetworkExtension(system.NewGetSystemNetworkExtensionParamsWithContext(ctx), nil)
+	if err != nil {
+		if status, ok := err.(*system.GetSystemNetworkExtensionDefault); ok && status.GetPayload().Code == hikvision.StatusCodeInvalidOperation {
+			return nil
+		}
+
+		return err
+	}
+
+	if settings.GetPayload().EnableVirtualHost {
+		return nil
+	}
+
+	params := system.NewSetSystemNetworkExtensionParamsWithContext(ctx)
+	params.NetworkExtension.EnableVirtualHost = true
+
+	if _, err = b.client.System.SetSystemNetworkExtension(params, nil); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (b *Bind) taskPTZHandler(ctx context.Context) error {

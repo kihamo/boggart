@@ -6,6 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"encoding/json"
 	"strconv"
 
@@ -33,6 +34,33 @@ func (m ImageChannels) Validate(formats strfmt.Registry) error {
 			if err := m[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName(strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName(strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+// ContextValidate validate this image channels based on the context it is used
+func (m ImageChannels) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	for i := 0; i < len(m); i++ {
+
+		if m[i] != nil {
+			if err := m[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName(strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName(strconv.Itoa(i))
 				}
 				return err
 			}
@@ -165,7 +193,6 @@ func (m *ImageChannelsItems0) validateImageFlipStyleEnum(path, location string, 
 }
 
 func (m *ImageChannelsItems0) validateImageFlipStyle(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.ImageFlipStyle) { // not required
 		return nil
 	}
@@ -211,7 +238,6 @@ func (m *ImageChannelsItems0) validateIrCutFilterExtNightToDayFilterLevelEnum(pa
 }
 
 func (m *ImageChannelsItems0) validateIrCutFilterExtNightToDayFilterLevel(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.IrCutFilterExtNightToDayFilterLevel) { // not required
 		return nil
 	}
@@ -263,7 +289,6 @@ func (m *ImageChannelsItems0) validateIrCutFilterExtTypeEnum(path, location stri
 }
 
 func (m *ImageChannelsItems0) validateIrCutFilterExtType(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.IrCutFilterExtType) { // not required
 		return nil
 	}
@@ -309,7 +334,6 @@ func (m *ImageChannelsItems0) validateIrcutFilterLevelEnum(path, location string
 }
 
 func (m *ImageChannelsItems0) validateIrcutFilterLevel(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.IrcutFilterLevel) { // not required
 		return nil
 	}
@@ -361,7 +385,6 @@ func (m *ImageChannelsItems0) validateIrcutFilterTypeEnum(path, location string,
 }
 
 func (m *ImageChannelsItems0) validateIrcutFilterType(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.IrcutFilterType) { // not required
 		return nil
 	}
@@ -371,6 +394,11 @@ func (m *ImageChannelsItems0) validateIrcutFilterType(formats strfmt.Registry) e
 		return err
 	}
 
+	return nil
+}
+
+// ContextValidate validates this image channels items0 based on context it is used
+func (m *ImageChannelsItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

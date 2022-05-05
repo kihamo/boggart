@@ -25,9 +25,12 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	GetStorage(params *GetStorageParams, authInfo runtime.ClientAuthInfoWriter) (*GetStorageOK, error)
+	GetStorage(params *GetStorageParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetStorageOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -35,13 +38,12 @@ type ClientService interface {
 /*
   GetStorage get storage API
 */
-func (a *Client) GetStorage(params *GetStorageParams, authInfo runtime.ClientAuthInfoWriter) (*GetStorageOK, error) {
+func (a *Client) GetStorage(params *GetStorageParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetStorageOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetStorageParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getStorage",
 		Method:             "GET",
 		PathPattern:        "/ContentMgmt/Storage",
@@ -53,7 +55,12 @@ func (a *Client) GetStorage(params *GetStorageParams, authInfo runtime.ClientAut
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

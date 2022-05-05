@@ -26,13 +26,16 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	GetNotificationAlertStream(params *GetNotificationAlertStreamParams, authInfo runtime.ClientAuthInfoWriter, writer io.Writer) (*GetNotificationAlertStreamOK, error)
+	GetNotificationAlertStream(params *GetNotificationAlertStreamParams, authInfo runtime.ClientAuthInfoWriter, writer io.Writer, opts ...ClientOption) (*GetNotificationAlertStreamOK, error)
 
-	GetNotificationHTTPHost(params *GetNotificationHTTPHostParams, authInfo runtime.ClientAuthInfoWriter) (*GetNotificationHTTPHostOK, error)
+	GetNotificationHTTPHost(params *GetNotificationHTTPHostParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetNotificationHTTPHostOK, error)
 
-	SetNotificationHTTPHost(params *SetNotificationHTTPHostParams, authInfo runtime.ClientAuthInfoWriter) (*SetNotificationHTTPHostOK, error)
+	SetNotificationHTTPHost(params *SetNotificationHTTPHostParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetNotificationHTTPHostOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -40,13 +43,12 @@ type ClientService interface {
 /*
   GetNotificationAlertStream its is used to get the event notification data stream through HTTP server push
 */
-func (a *Client) GetNotificationAlertStream(params *GetNotificationAlertStreamParams, authInfo runtime.ClientAuthInfoWriter, writer io.Writer) (*GetNotificationAlertStreamOK, error) {
+func (a *Client) GetNotificationAlertStream(params *GetNotificationAlertStreamParams, authInfo runtime.ClientAuthInfoWriter, writer io.Writer, opts ...ClientOption) (*GetNotificationAlertStreamOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetNotificationAlertStreamParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getNotificationAlertStream",
 		Method:             "GET",
 		PathPattern:        "/Event/notification/alertStream",
@@ -58,7 +60,12 @@ func (a *Client) GetNotificationAlertStream(params *GetNotificationAlertStreamPa
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -75,13 +82,12 @@ func (a *Client) GetNotificationAlertStream(params *GetNotificationAlertStreamPa
 /*
   GetNotificationHTTPHost its is used to get the configuration of a particular e mail
 */
-func (a *Client) GetNotificationHTTPHost(params *GetNotificationHTTPHostParams, authInfo runtime.ClientAuthInfoWriter) (*GetNotificationHTTPHostOK, error) {
+func (a *Client) GetNotificationHTTPHost(params *GetNotificationHTTPHostParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetNotificationHTTPHostOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetNotificationHTTPHostParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getNotificationHttpHost",
 		Method:             "GET",
 		PathPattern:        "/Event/notification/httpHosts/{httpHost}",
@@ -93,7 +99,12 @@ func (a *Client) GetNotificationHTTPHost(params *GetNotificationHTTPHostParams, 
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -110,13 +121,12 @@ func (a *Client) GetNotificationHTTPHost(params *GetNotificationHTTPHostParams, 
 /*
   SetNotificationHTTPHost its is used to get the configuration of a particular e mail
 */
-func (a *Client) SetNotificationHTTPHost(params *SetNotificationHTTPHostParams, authInfo runtime.ClientAuthInfoWriter) (*SetNotificationHTTPHostOK, error) {
+func (a *Client) SetNotificationHTTPHost(params *SetNotificationHTTPHostParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetNotificationHTTPHostOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewSetNotificationHTTPHostParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "setNotificationHttpHost",
 		Method:             "PUT",
 		PathPattern:        "/Event/notification/httpHosts/{httpHost}",
@@ -128,7 +138,12 @@ func (a *Client) SetNotificationHTTPHost(params *SetNotificationHTTPHostParams, 
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

@@ -6,6 +6,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
+
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
@@ -56,16 +58,15 @@ func (m *PtzAbsoluteHigh) Validate(formats strfmt.Registry) error {
 }
 
 func (m *PtzAbsoluteHigh) validateAzimuth(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Azimuth) { // not required
 		return nil
 	}
 
-	if err := validate.MinimumInt("azimuth", "body", int64(*m.Azimuth), 0, false); err != nil {
+	if err := validate.MinimumUint("azimuth", "body", *m.Azimuth, 0, false); err != nil {
 		return err
 	}
 
-	if err := validate.MaximumInt("azimuth", "body", int64(*m.Azimuth), 3600, false); err != nil {
+	if err := validate.MaximumUint("azimuth", "body", *m.Azimuth, 3600, false); err != nil {
 		return err
 	}
 
@@ -73,16 +74,15 @@ func (m *PtzAbsoluteHigh) validateAzimuth(formats strfmt.Registry) error {
 }
 
 func (m *PtzAbsoluteHigh) validateElevation(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Elevation) { // not required
 		return nil
 	}
 
-	if err := validate.MinimumInt("elevation", "body", int64(*m.Elevation), -900, false); err != nil {
+	if err := validate.MinimumInt("elevation", "body", *m.Elevation, -900, false); err != nil {
 		return err
 	}
 
-	if err := validate.MaximumInt("elevation", "body", int64(*m.Elevation), 2700, false); err != nil {
+	if err := validate.MaximumInt("elevation", "body", *m.Elevation, 2700, false); err != nil {
 		return err
 	}
 
@@ -90,19 +90,23 @@ func (m *PtzAbsoluteHigh) validateElevation(formats strfmt.Registry) error {
 }
 
 func (m *PtzAbsoluteHigh) validateZoom(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Zoom) { // not required
 		return nil
 	}
 
-	if err := validate.MinimumInt("zoom", "body", int64(*m.Zoom), 0, false); err != nil {
+	if err := validate.MinimumUint("zoom", "body", *m.Zoom, 0, false); err != nil {
 		return err
 	}
 
-	if err := validate.MaximumInt("zoom", "body", int64(*m.Zoom), 1000, false); err != nil {
+	if err := validate.MaximumUint("zoom", "body", *m.Zoom, 1000, false); err != nil {
 		return err
 	}
 
+	return nil
+}
+
+// ContextValidate validates this ptz absolute high based on context it is used
+func (m *PtzAbsoluteHigh) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

@@ -25,21 +25,24 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	GetPtzChannels(params *GetPtzChannelsParams, authInfo runtime.ClientAuthInfoWriter) (*GetPtzChannelsOK, error)
+	GetPtzChannels(params *GetPtzChannelsParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetPtzChannelsOK, error)
 
-	GetPtzStatus(params *GetPtzStatusParams, authInfo runtime.ClientAuthInfoWriter) (*GetPtzStatusOK, error)
+	GetPtzStatus(params *GetPtzStatusParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetPtzStatusOK, error)
 
-	GotoPtzPreset(params *GotoPtzPresetParams, authInfo runtime.ClientAuthInfoWriter) (*GotoPtzPresetOK, error)
+	GotoPtzPreset(params *GotoPtzPresetParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GotoPtzPresetOK, error)
 
-	SetPtzContinuous(params *SetPtzContinuousParams, authInfo runtime.ClientAuthInfoWriter) (*SetPtzContinuousOK, error)
+	SetPtzContinuous(params *SetPtzContinuousParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetPtzContinuousOK, error)
 
-	SetPtzMomentary(params *SetPtzMomentaryParams, authInfo runtime.ClientAuthInfoWriter) (*SetPtzMomentaryOK, error)
+	SetPtzMomentary(params *SetPtzMomentaryParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetPtzMomentaryOK, error)
 
-	SetPtzPositionAbsolute(params *SetPtzPositionAbsoluteParams, authInfo runtime.ClientAuthInfoWriter) (*SetPtzPositionAbsoluteOK, error)
+	SetPtzPositionAbsolute(params *SetPtzPositionAbsoluteParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetPtzPositionAbsoluteOK, error)
 
-	SetPtzPositionRelative(params *SetPtzPositionRelativeParams, authInfo runtime.ClientAuthInfoWriter) (*SetPtzPositionRelativeOK, error)
+	SetPtzPositionRelative(params *SetPtzPositionRelativeParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetPtzPositionRelativeOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -47,13 +50,12 @@ type ClientService interface {
 /*
   GetPtzChannels its is used to get the list of p t z channels for the device
 */
-func (a *Client) GetPtzChannels(params *GetPtzChannelsParams, authInfo runtime.ClientAuthInfoWriter) (*GetPtzChannelsOK, error) {
+func (a *Client) GetPtzChannels(params *GetPtzChannelsParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetPtzChannelsOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetPtzChannelsParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getPtzChannels",
 		Method:             "GET",
 		PathPattern:        "/PTZCtrl/channels",
@@ -65,7 +67,12 @@ func (a *Client) GetPtzChannels(params *GetPtzChannelsParams, authInfo runtime.C
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -82,13 +89,12 @@ func (a *Client) GetPtzChannels(params *GetPtzChannelsParams, authInfo runtime.C
 /*
   GetPtzStatus its is used to get currently p t z coordinate position for the device
 */
-func (a *Client) GetPtzStatus(params *GetPtzStatusParams, authInfo runtime.ClientAuthInfoWriter) (*GetPtzStatusOK, error) {
+func (a *Client) GetPtzStatus(params *GetPtzStatusParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetPtzStatusOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetPtzStatusParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getPtzStatus",
 		Method:             "GET",
 		PathPattern:        "/PTZCtrl/channels/{channel}/status",
@@ -100,7 +106,12 @@ func (a *Client) GetPtzStatus(params *GetPtzStatusParams, authInfo runtime.Clien
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -117,13 +128,12 @@ func (a *Client) GetPtzStatus(params *GetPtzStatusParams, authInfo runtime.Clien
 /*
   GotoPtzPreset its is used to move a particular p t z channel to a ID preset position for the device
 */
-func (a *Client) GotoPtzPreset(params *GotoPtzPresetParams, authInfo runtime.ClientAuthInfoWriter) (*GotoPtzPresetOK, error) {
+func (a *Client) GotoPtzPreset(params *GotoPtzPresetParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GotoPtzPresetOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGotoPtzPresetParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "gotoPtzPreset",
 		Method:             "PUT",
 		PathPattern:        "/PTZCtrl/channels/{channel}/presets/{preset}/goto",
@@ -135,7 +145,12 @@ func (a *Client) GotoPtzPreset(params *GotoPtzPresetParams, authInfo runtime.Cli
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -152,13 +167,12 @@ func (a *Client) GotoPtzPreset(params *GotoPtzPresetParams, authInfo runtime.Cli
 /*
   SetPtzContinuous its is used to control p t z move around and zoom for the device
 */
-func (a *Client) SetPtzContinuous(params *SetPtzContinuousParams, authInfo runtime.ClientAuthInfoWriter) (*SetPtzContinuousOK, error) {
+func (a *Client) SetPtzContinuous(params *SetPtzContinuousParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetPtzContinuousOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewSetPtzContinuousParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "setPtzContinuous",
 		Method:             "PUT",
 		PathPattern:        "/PTZCtrl/channels/{channel}/continuous",
@@ -170,7 +184,12 @@ func (a *Client) SetPtzContinuous(params *SetPtzContinuousParams, authInfo runti
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -187,13 +206,12 @@ func (a *Client) SetPtzContinuous(params *SetPtzContinuousParams, authInfo runti
 /*
   SetPtzMomentary its is used to control p t z move around and zoom in a period of time for the device
 */
-func (a *Client) SetPtzMomentary(params *SetPtzMomentaryParams, authInfo runtime.ClientAuthInfoWriter) (*SetPtzMomentaryOK, error) {
+func (a *Client) SetPtzMomentary(params *SetPtzMomentaryParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetPtzMomentaryOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewSetPtzMomentaryParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "setPtzMomentary",
 		Method:             "PUT",
 		PathPattern:        "/PTZCtrl/channels/{channel}/momentary",
@@ -205,7 +223,12 @@ func (a *Client) SetPtzMomentary(params *SetPtzMomentaryParams, authInfo runtime
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -222,13 +245,12 @@ func (a *Client) SetPtzMomentary(params *SetPtzMomentaryParams, authInfo runtime
 /*
   SetPtzPositionAbsolute its is used to move a particular p t z channel to a absolute position which is defined by absolute for the device
 */
-func (a *Client) SetPtzPositionAbsolute(params *SetPtzPositionAbsoluteParams, authInfo runtime.ClientAuthInfoWriter) (*SetPtzPositionAbsoluteOK, error) {
+func (a *Client) SetPtzPositionAbsolute(params *SetPtzPositionAbsoluteParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetPtzPositionAbsoluteOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewSetPtzPositionAbsoluteParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "setPtzPositionAbsolute",
 		Method:             "PUT",
 		PathPattern:        "/PTZCtrl/channels/{channel}/absolute",
@@ -240,7 +262,12 @@ func (a *Client) SetPtzPositionAbsolute(params *SetPtzPositionAbsoluteParams, au
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -257,13 +284,12 @@ func (a *Client) SetPtzPositionAbsolute(params *SetPtzPositionAbsoluteParams, au
 /*
   SetPtzPositionRelative its is used to move the position which is defined by position x position y to the screen center and relative zoom for the device
 */
-func (a *Client) SetPtzPositionRelative(params *SetPtzPositionRelativeParams, authInfo runtime.ClientAuthInfoWriter) (*SetPtzPositionRelativeOK, error) {
+func (a *Client) SetPtzPositionRelative(params *SetPtzPositionRelativeParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetPtzPositionRelativeOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewSetPtzPositionRelativeParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "setPtzPositionRelative",
 		Method:             "PUT",
 		PathPattern:        "/PTZCtrl/channels/{channel}/relative",
@@ -275,7 +301,12 @@ func (a *Client) SetPtzPositionRelative(params *SetPtzPositionRelativeParams, au
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

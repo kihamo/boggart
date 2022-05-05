@@ -25,17 +25,24 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	GetStatus(params *GetStatusParams, authInfo runtime.ClientAuthInfoWriter) (*GetStatusOK, error)
+	GetStatus(params *GetStatusParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetStatusOK, error)
 
-	GetSystemDeviceInfo(params *GetSystemDeviceInfoParams, authInfo runtime.ClientAuthInfoWriter) (*GetSystemDeviceInfoOK, error)
+	GetSystemDeviceInfo(params *GetSystemDeviceInfoParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetSystemDeviceInfoOK, error)
 
-	GetSystemUpgradeStatus(params *GetSystemUpgradeStatusParams, authInfo runtime.ClientAuthInfoWriter) (*GetSystemUpgradeStatusOK, error)
+	GetSystemNetworkExtension(params *GetSystemNetworkExtensionParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetSystemNetworkExtensionOK, error)
 
-	Reboot(params *RebootParams, authInfo runtime.ClientAuthInfoWriter) (*RebootOK, error)
+	GetSystemUpgradeStatus(params *GetSystemUpgradeStatusParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetSystemUpgradeStatusOK, error)
 
-	UpdateSystemFirmware(params *UpdateSystemFirmwareParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateSystemFirmwareOK, error)
+	Reboot(params *RebootParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*RebootOK, error)
+
+	SetSystemNetworkExtension(params *SetSystemNetworkExtensionParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetSystemNetworkExtensionOK, error)
+
+	UpdateSystemFirmware(params *UpdateSystemFirmwareParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*UpdateSystemFirmwareOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -43,13 +50,12 @@ type ClientService interface {
 /*
   GetStatus get status API
 */
-func (a *Client) GetStatus(params *GetStatusParams, authInfo runtime.ClientAuthInfoWriter) (*GetStatusOK, error) {
+func (a *Client) GetStatus(params *GetStatusParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetStatusOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetStatusParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getStatus",
 		Method:             "GET",
 		PathPattern:        "/System/status",
@@ -61,7 +67,12 @@ func (a *Client) GetStatus(params *GetStatusParams, authInfo runtime.ClientAuthI
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -78,13 +89,12 @@ func (a *Client) GetStatus(params *GetStatusParams, authInfo runtime.ClientAuthI
 /*
   GetSystemDeviceInfo get system device info API
 */
-func (a *Client) GetSystemDeviceInfo(params *GetSystemDeviceInfoParams, authInfo runtime.ClientAuthInfoWriter) (*GetSystemDeviceInfoOK, error) {
+func (a *Client) GetSystemDeviceInfo(params *GetSystemDeviceInfoParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetSystemDeviceInfoOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetSystemDeviceInfoParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getSystemDeviceInfo",
 		Method:             "GET",
 		PathPattern:        "/System/deviceInfo",
@@ -96,7 +106,12 @@ func (a *Client) GetSystemDeviceInfo(params *GetSystemDeviceInfoParams, authInfo
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -111,15 +126,52 @@ func (a *Client) GetSystemDeviceInfo(params *GetSystemDeviceInfoParams, authInfo
 }
 
 /*
+  GetSystemNetworkExtension get system network extension API
+*/
+func (a *Client) GetSystemNetworkExtension(params *GetSystemNetworkExtensionParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetSystemNetworkExtensionOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetSystemNetworkExtensionParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "getSystemNetworkExtension",
+		Method:             "GET",
+		PathPattern:        "/System/Network/extension",
+		ProducesMediaTypes: []string{"application/xml"},
+		ConsumesMediaTypes: []string{"application/xml"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GetSystemNetworkExtensionReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetSystemNetworkExtensionOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*GetSystemNetworkExtensionDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
   GetSystemUpgradeStatus get system upgrade status API
 */
-func (a *Client) GetSystemUpgradeStatus(params *GetSystemUpgradeStatusParams, authInfo runtime.ClientAuthInfoWriter) (*GetSystemUpgradeStatusOK, error) {
+func (a *Client) GetSystemUpgradeStatus(params *GetSystemUpgradeStatusParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetSystemUpgradeStatusOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetSystemUpgradeStatusParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getSystemUpgradeStatus",
 		Method:             "GET",
 		PathPattern:        "/System/upgradeStatus",
@@ -131,7 +183,12 @@ func (a *Client) GetSystemUpgradeStatus(params *GetSystemUpgradeStatusParams, au
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -148,13 +205,12 @@ func (a *Client) GetSystemUpgradeStatus(params *GetSystemUpgradeStatusParams, au
 /*
   Reboot reboot API
 */
-func (a *Client) Reboot(params *RebootParams, authInfo runtime.ClientAuthInfoWriter) (*RebootOK, error) {
+func (a *Client) Reboot(params *RebootParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*RebootOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewRebootParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "reboot",
 		Method:             "PUT",
 		PathPattern:        "/System/reboot",
@@ -166,7 +222,12 @@ func (a *Client) Reboot(params *RebootParams, authInfo runtime.ClientAuthInfoWri
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -181,15 +242,53 @@ func (a *Client) Reboot(params *RebootParams, authInfo runtime.ClientAuthInfoWri
 }
 
 /*
+  SetSystemNetworkExtension set system network extension API
+*/
+func (a *Client) SetSystemNetworkExtension(params *SetSystemNetworkExtensionParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetSystemNetworkExtensionOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewSetSystemNetworkExtensionParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "setSystemNetworkExtension",
+		Method:             "PUT",
+		PathPattern:        "/System/Network/extension",
+		ProducesMediaTypes: []string{"application/xml"},
+		ConsumesMediaTypes: []string{"application/xml"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &SetSystemNetworkExtensionReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*SetSystemNetworkExtensionOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for setSystemNetworkExtension: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
   UpdateSystemFirmware updates the firmware of the device
 */
-func (a *Client) UpdateSystemFirmware(params *UpdateSystemFirmwareParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateSystemFirmwareOK, error) {
+func (a *Client) UpdateSystemFirmware(params *UpdateSystemFirmwareParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*UpdateSystemFirmwareOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewUpdateSystemFirmwareParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "updateSystemFirmware",
 		Method:             "PUT",
 		PathPattern:        "/System/updateFirmware",
@@ -201,7 +300,12 @@ func (a *Client) UpdateSystemFirmware(params *UpdateSystemFirmwareParams, authIn
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

@@ -29,7 +29,6 @@ func (o *GetImageChannelsReader) ReadResponse(response runtime.ClientResponse, c
 			return nil, err
 		}
 		return result, nil
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -40,7 +39,7 @@ func NewGetImageChannelsOK() *GetImageChannelsOK {
 	return &GetImageChannelsOK{}
 }
 
-/*GetImageChannelsOK handles this case with default header values.
+/* GetImageChannelsOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -51,7 +50,6 @@ type GetImageChannelsOK struct {
 func (o *GetImageChannelsOK) Error() string {
 	return fmt.Sprintf("[GET /Image/channels][%d] getImageChannelsOK  %+v", 200, o.Payload)
 }
-
 func (o *GetImageChannelsOK) GetPayload() models.ImageChannels {
 	return o.Payload
 }

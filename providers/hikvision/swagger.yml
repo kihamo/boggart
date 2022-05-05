@@ -363,7 +363,35 @@ paths:
       - "system"
       responses:
         200:
-
+          description: "Successful operation"
+  /System/Network/extension:
+    get:
+      operationId: "getSystemNetworkExtension"
+      tags:
+        - "system"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/SystemNetworkExtension"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Status"
+    put:
+      operationId: "setSystemNetworkExtension"
+      tags:
+        - "system"
+      parameters:
+        - name: "networkExtension"
+          in: "body"
+          schema:
+            $ref: "#/definitions/SystemNetworkExtension"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Status"
 definitions:
   OptBoolean:
     x-go-type:
@@ -1344,3 +1372,9 @@ definitions:
         type: "integer"
         xml:
           name: "percent"
+  SystemNetworkExtension:
+    x-go-type:
+      import:
+        package: "github.com/kihamo/boggart/providers/hikvision/static/models"
+        alias: "static"
+      type: "SystemNetworkExtension"

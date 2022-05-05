@@ -29,7 +29,6 @@ func (o *SetPtzMomentaryReader) ReadResponse(response runtime.ClientResponse, co
 			return nil, err
 		}
 		return result, nil
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -40,7 +39,7 @@ func NewSetPtzMomentaryOK() *SetPtzMomentaryOK {
 	return &SetPtzMomentaryOK{}
 }
 
-/*SetPtzMomentaryOK handles this case with default header values.
+/* SetPtzMomentaryOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -51,7 +50,6 @@ type SetPtzMomentaryOK struct {
 func (o *SetPtzMomentaryOK) Error() string {
 	return fmt.Sprintf("[PUT /PTZCtrl/channels/{channel}/momentary][%d] setPtzMomentaryOK  %+v", 200, o.Payload)
 }
-
 func (o *SetPtzMomentaryOK) GetPayload() *models.Status {
 	return o.Payload
 }

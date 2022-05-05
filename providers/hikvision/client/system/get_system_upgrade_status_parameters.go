@@ -16,52 +16,66 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewGetSystemUpgradeStatusParams creates a new GetSystemUpgradeStatusParams object
-// with the default values initialized.
+// NewGetSystemUpgradeStatusParams creates a new GetSystemUpgradeStatusParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetSystemUpgradeStatusParams() *GetSystemUpgradeStatusParams {
-
 	return &GetSystemUpgradeStatusParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetSystemUpgradeStatusParamsWithTimeout creates a new GetSystemUpgradeStatusParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetSystemUpgradeStatusParamsWithTimeout(timeout time.Duration) *GetSystemUpgradeStatusParams {
-
 	return &GetSystemUpgradeStatusParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGetSystemUpgradeStatusParamsWithContext creates a new GetSystemUpgradeStatusParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetSystemUpgradeStatusParamsWithContext(ctx context.Context) *GetSystemUpgradeStatusParams {
-
 	return &GetSystemUpgradeStatusParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGetSystemUpgradeStatusParamsWithHTTPClient creates a new GetSystemUpgradeStatusParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetSystemUpgradeStatusParamsWithHTTPClient(client *http.Client) *GetSystemUpgradeStatusParams {
-
 	return &GetSystemUpgradeStatusParams{
 		HTTPClient: client,
 	}
 }
 
-/*GetSystemUpgradeStatusParams contains all the parameters to send to the API endpoint
-for the get system upgrade status operation typically these are written to a http.Request
+/* GetSystemUpgradeStatusParams contains all the parameters to send to the API endpoint
+   for the get system upgrade status operation.
+
+   Typically these are written to a http.Request.
 */
 type GetSystemUpgradeStatusParams struct {
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get system upgrade status params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetSystemUpgradeStatusParams) WithDefaults() *GetSystemUpgradeStatusParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get system upgrade status params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetSystemUpgradeStatusParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get system upgrade status params

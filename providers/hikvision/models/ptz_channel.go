@@ -6,6 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/go-openapi/errors"
@@ -141,7 +142,6 @@ func (m *PtzChannel) validateRS485FlowControlEnum(path, location string, value s
 }
 
 func (m *PtzChannel) validateRS485FlowControl(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.RS485FlowControl) { // not required
 		return nil
 	}
@@ -193,7 +193,6 @@ func (m *PtzChannel) validateRS485ParityTypeEnum(path, location string, value st
 }
 
 func (m *PtzChannel) validateRS485ParityType(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.RS485ParityType) { // not required
 		return nil
 	}
@@ -245,7 +244,6 @@ func (m *PtzChannel) validateManualControlSpeedEnum(path, location string, value
 }
 
 func (m *PtzChannel) validateManualControlSpeed(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.ManualControlSpeed) { // not required
 		return nil
 	}
@@ -255,6 +253,11 @@ func (m *PtzChannel) validateManualControlSpeed(formats strfmt.Registry) error {
 		return err
 	}
 
+	return nil
+}
+
+// ContextValidate validates this ptz channel based on context it is used
+func (m *PtzChannel) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

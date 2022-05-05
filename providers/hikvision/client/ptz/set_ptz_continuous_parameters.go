@@ -19,61 +19,78 @@ import (
 	"github.com/kihamo/boggart/providers/hikvision/models"
 )
 
-// NewSetPtzContinuousParams creates a new SetPtzContinuousParams object
-// with the default values initialized.
+// NewSetPtzContinuousParams creates a new SetPtzContinuousParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewSetPtzContinuousParams() *SetPtzContinuousParams {
-	var ()
 	return &SetPtzContinuousParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewSetPtzContinuousParamsWithTimeout creates a new SetPtzContinuousParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewSetPtzContinuousParamsWithTimeout(timeout time.Duration) *SetPtzContinuousParams {
-	var ()
 	return &SetPtzContinuousParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewSetPtzContinuousParamsWithContext creates a new SetPtzContinuousParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewSetPtzContinuousParamsWithContext(ctx context.Context) *SetPtzContinuousParams {
-	var ()
 	return &SetPtzContinuousParams{
-
 		Context: ctx,
 	}
 }
 
 // NewSetPtzContinuousParamsWithHTTPClient creates a new SetPtzContinuousParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewSetPtzContinuousParamsWithHTTPClient(client *http.Client) *SetPtzContinuousParams {
-	var ()
 	return &SetPtzContinuousParams{
 		HTTPClient: client,
 	}
 }
 
-/*SetPtzContinuousParams contains all the parameters to send to the API endpoint
-for the set ptz continuous operation typically these are written to a http.Request
+/* SetPtzContinuousParams contains all the parameters to send to the API endpoint
+   for the set ptz continuous operation.
+
+   Typically these are written to a http.Request.
 */
 type SetPtzContinuousParams struct {
 
-	/*PTZData*/
+	// PTZData.
 	PTZData *models.PTZData
-	/*Channel
-	  Channel ID
 
+	/* Channel.
+
+	   Channel ID
+
+	   Format: uint64
 	*/
 	Channel uint64
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the set ptz continuous params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *SetPtzContinuousParams) WithDefaults() *SetPtzContinuousParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the set ptz continuous params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *SetPtzContinuousParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the set ptz continuous params
@@ -138,7 +155,6 @@ func (o *SetPtzContinuousParams) WriteToRequest(r runtime.ClientRequest, reg str
 		return err
 	}
 	var res []error
-
 	if o.PTZData != nil {
 		if err := r.SetBodyParam(o.PTZData); err != nil {
 			return err

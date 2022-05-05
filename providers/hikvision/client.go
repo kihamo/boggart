@@ -20,6 +20,16 @@ import (
 	"github.com/kihamo/boggart/providers/hikvision/models"
 )
 
+const (
+	StatusCodeOK = uint64(1) + iota
+	StatusCodeDeviceBusy
+	StatusCodeDeviceError
+	StatusCodeInvalidOperation
+	StatusCodeInvalidXMLFormat
+	StatusCodeInvalidXMLContent
+	StatusCodeRebootRequired
+)
+
 type Client struct {
 	*client.HikVision
 }

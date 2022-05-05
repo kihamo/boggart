@@ -28,7 +28,6 @@ func (o *GetStreamingPictureReader) ReadResponse(response runtime.ClientResponse
 			return nil, err
 		}
 		return result, nil
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -37,11 +36,12 @@ func (o *GetStreamingPictureReader) ReadResponse(response runtime.ClientResponse
 // NewGetStreamingPictureOK creates a GetStreamingPictureOK with default headers values
 func NewGetStreamingPictureOK(writer io.Writer) *GetStreamingPictureOK {
 	return &GetStreamingPictureOK{
+
 		Payload: writer,
 	}
 }
 
-/*GetStreamingPictureOK handles this case with default header values.
+/* GetStreamingPictureOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -52,7 +52,6 @@ type GetStreamingPictureOK struct {
 func (o *GetStreamingPictureOK) Error() string {
 	return fmt.Sprintf("[GET /Streaming/channels/{channel}/picture][%d] getStreamingPictureOK  %+v", 200, o.Payload)
 }
-
 func (o *GetStreamingPictureOK) GetPayload() io.Writer {
 	return o.Payload
 }
