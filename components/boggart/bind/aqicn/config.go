@@ -27,7 +27,7 @@ type Config struct {
 	TopicCurrentO3Value     mqtt.Topic `mapstructure:"topic_current_o3_value" yaml:"topic_current_o3_value"`
 	TopicCurrentNO2Value    mqtt.Topic `mapstructure:"topic_current_no2_value" yaml:"topic_current_no2_value"`
 	TopicCurrentCOValue     mqtt.Topic `mapstructure:"topic_current_co_value" yaml:"topic_current_co_value"`
-	TopicCurrentSO2Value    mqtt.Topic `mapstructure:"topic_current_so2_value" yaml:"topic_current_so_value"`
+	TopicCurrentSO2Value    mqtt.Topic `mapstructure:"topic_current_so2_value" yaml:"topic_current_so2_value"`
 }
 
 func (t Type) ConfigDefaults() interface{} {
