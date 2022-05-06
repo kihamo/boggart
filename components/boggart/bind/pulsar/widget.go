@@ -111,7 +111,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 					row, ok := statsByDate[int(date.Unix())]
 					if ok {
 						row.Pulse1 = value
-						row.Pulse1Volume = b.inputVolume(value, cfg.Input1Offset)
+						row.Pulse1Volume = b.inputVolume(value, cfg.StartPulsesInput1, cfg.StartVolumeInput1)
 					}
 
 					date = nextData(period, date)
@@ -129,7 +129,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 					row, ok := statsByDate[int(date.Unix())]
 					if ok {
 						row.Pulse2 = value
-						row.Pulse2Volume = b.inputVolume(value, cfg.Input2Offset)
+						row.Pulse2Volume = b.inputVolume(value, cfg.StartPulsesInput2, cfg.StartVolumeInput2)
 					}
 
 					date = nextData(period, date)
@@ -147,7 +147,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 					row, ok := statsByDate[int(date.Unix())]
 					if ok {
 						row.Pulse3 = value
-						row.Pulse3Volume = b.inputVolume(value, cfg.Input3Offset)
+						row.Pulse3Volume = b.inputVolume(value, cfg.StartPulsesInput3, cfg.StartVolumeInput3)
 					}
 
 					date = nextData(period, date)
@@ -165,7 +165,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 					row, ok := statsByDate[int(date.Unix())]
 					if ok {
 						row.Pulse4 = value
-						row.Pulse4Volume = b.inputVolume(value, cfg.Input4Offset)
+						row.Pulse4Volume = b.inputVolume(value, cfg.StartPulsesInput4, cfg.StartVolumeInput4)
 					}
 
 					date = nextData(period, date)
@@ -271,11 +271,22 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		cfg := b.config()
+		var volume float32
 
 		if cfg.InputsCount > 0 {
 			floatValue, err = provider.PulseInput1()
 			vars["pusle_input_1"] = metricView{
 				Value: floatValue,
+				Error: err,
+			}
+
+			volume = 0
+			if err == nil {
+				volume = b.inputVolume(floatValue, cfg.StartPulsesInput1, cfg.StartVolumeInput1)
+			}
+
+			vars["volume_input_1"] = metricView{
+				Value: volume,
 				Error: err,
 			}
 		}
@@ -286,6 +297,16 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 				Value: floatValue,
 				Error: err,
 			}
+
+			volume = 0
+			if err == nil {
+				volume = b.inputVolume(floatValue, cfg.StartPulsesInput2, cfg.StartVolumeInput2)
+			}
+
+			vars["volume_input_2"] = metricView{
+				Value: volume,
+				Error: err,
+			}
 		}
 
 		if cfg.InputsCount > 2 {
@@ -294,12 +315,32 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 				Value: floatValue,
 				Error: err,
 			}
+
+			volume = 0
+			if err == nil {
+				volume = b.inputVolume(floatValue, cfg.StartPulsesInput3, cfg.StartVolumeInput3)
+			}
+
+			vars["volume_input_3"] = metricView{
+				Value: volume,
+				Error: err,
+			}
 		}
 
 		if cfg.InputsCount > 3 {
 			floatValue, err = provider.PulseInput4()
 			vars["pusle_input_4"] = metricView{
 				Value: floatValue,
+				Error: err,
+			}
+
+			volume = 0
+			if err == nil {
+				volume = b.inputVolume(floatValue, cfg.StartPulsesInput4, cfg.StartVolumeInput4)
+			}
+
+			vars["volume_input_4"] = metricView{
+				Value: volume,
 				Error: err,
 			}
 		}

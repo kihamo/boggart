@@ -161,7 +161,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		if current, err := provider.PulseInput1(); err == nil {
 			const input1 = "1"
 
-			volume := b.inputVolume(current, cfg.Input1Offset)
+			volume := b.inputVolume(current, cfg.StartPulsesInput1, cfg.StartVolumeInput1)
 
 			metricInputPulses.With("serial_number", sn).With("input", input1).Set(float64(current))
 			metricInputVolume.With("serial_number", sn).With("input", input1).Set(float64(volume))
@@ -182,7 +182,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		if current, err := provider.PulseInput2(); err == nil {
 			const input2 = "2"
 
-			volume := b.inputVolume(current, cfg.Input2Offset)
+			volume := b.inputVolume(current, cfg.StartPulsesInput2, cfg.StartVolumeInput2)
 
 			metricInputPulses.With("serial_number", sn).With("input", input2).Set(float64(current))
 			metricInputVolume.With("serial_number", sn).With("input", input2).Set(float64(volume))
@@ -203,7 +203,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		if current, err := provider.PulseInput3(); err == nil {
 			const input3 = "3"
 
-			volume := b.inputVolume(current, cfg.Input3Offset)
+			volume := b.inputVolume(current, cfg.StartPulsesInput3, cfg.StartVolumeInput3)
 
 			metricInputPulses.With("serial_number", sn).With("input", input3).Set(float64(current))
 			metricInputVolume.With("serial_number", sn).With("input", input3).Set(float64(volume))
@@ -224,7 +224,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		if current, err := provider.PulseInput4(); err == nil {
 			const input4 = "4"
 
-			volume := b.inputVolume(current, cfg.Input4Offset)
+			volume := b.inputVolume(current, cfg.StartPulsesInput4, cfg.StartVolumeInput4)
 
 			metricInputPulses.With("serial_number", sn).With("input", input4).Set(float64(current))
 			metricInputVolume.With("serial_number", sn).With("input", input4).Set(float64(volume))

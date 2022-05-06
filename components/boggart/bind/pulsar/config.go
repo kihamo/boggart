@@ -16,10 +16,14 @@ type Config struct {
 	Address               string
 	Location              string
 	InputsCount           int64         `mapstructure:"inputs_count" yaml:"inputs_count"`
-	Input1Offset          float32       `mapstructure:"input1_offset" yaml:"input1_offset" valid:"float"`
-	Input2Offset          float32       `mapstructure:"input2_offset" yaml:"input2_offset" valid:"float"`
-	Input3Offset          float32       `mapstructure:"input3_offset" yaml:"input3_offset" valid:"float"`
-	Input4Offset          float32       `mapstructure:"input4_offset" yaml:"input4_offset" valid:"float"`
+	StartPulsesInput1     int64         `mapstructure:"start_pulses_input_1" yaml:"start_pulses_input_1" valid:"float"`
+	StartPulsesInput2     int64         `mapstructure:"start_pulses_input_2" yaml:"start_pulses_input_2" valid:"float"`
+	StartPulsesInput3     int64         `mapstructure:"start_pulses_input_3" yaml:"start_pulses_input_3" valid:"float"`
+	StartPulsesInput4     int64         `mapstructure:"start_pulses_input_4" yaml:"start_pulses_input_4" valid:"float"`
+	StartVolumeInput1     float32       `mapstructure:"start_volume_input_1" yaml:"start_volume_input_1" valid:"float"`
+	StartVolumeInput2     float32       `mapstructure:"start_volume_input_2" yaml:"start_volume_input_2" valid:"float"`
+	StartVolumeInput3     float32       `mapstructure:"start_volume_input_3" yaml:"start_volume_input_3" valid:"float"`
+	StartVolumeInput4     float32       `mapstructure:"start_volume_input_4" yaml:"start_volume_input_4" valid:"float"`
 	UpdaterInterval       time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 	TopicTemperatureIn    mqtt.Topic    `mapstructure:"topic_temperature_in" yaml:"topic_temperature_in"`
 	TopicTemperatureOut   mqtt.Topic    `mapstructure:"topic_temperature_out" yaml:"topic_temperature_out"`

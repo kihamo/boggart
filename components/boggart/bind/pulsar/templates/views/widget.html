@@ -314,7 +314,10 @@
                                         {{ if .pusle_input_1.Error }}
                                             <td class="text-danger">{{ .pusle_input_1.Error.Error }}</td>
                                         {{ else }}
-                                            <td><script type="application/javascript">document.write(valueFormat({{ .pusle_input_1.Value }},{minimumFractionDigits:0}))</script> {{ i18n "pulses" }}</td>
+                                            <td>
+                                                <script type="application/javascript">document.write(valueFormat({{ .pusle_input_1.Value }},{minimumFractionDigits:0}))</script> {{ i18n "pulses" }}
+                                                / <script type="application/javascript">document.write(valueFormat({{ .volume_input_1.Value }},{minimumFractionDigits:2}))</script> m<sup>3</sup>
+                                            </td>
                                         {{ end }}
                                     </tr>
                                     {{ end }}
@@ -324,7 +327,10 @@
                                         {{ if .pusle_input_2.Error }}
                                             <td class="text-danger">{{ .pusle_input_2.Error.Error }}</td>
                                         {{ else }}
-                                            <td><script type="application/javascript">document.write(valueFormat({{ .pusle_input_2.Value }},{minimumFractionDigits:0}))</script> {{ i18n "pulses" }}</td>
+                                            <td>
+                                                <script type="application/javascript">document.write(valueFormat({{ .pusle_input_2.Value }},{minimumFractionDigits:0}))</script> {{ i18n "pulses" }}
+                                                / <script type="application/javascript">document.write(valueFormat({{ .volume_input_2.Value }},{minimumFractionDigits:2}))</script> m<sup>3</sup>
+                                            </td>
                                         {{ end }}
                                     </tr>
                                     {{ end }}
@@ -334,7 +340,10 @@
                                         {{ if .pusle_input_3.Error }}
                                             <td class="text-danger">{{ .pusle_input_3.Error.Error }}</td>
                                         {{ else }}
-                                            <td><script type="application/javascript">document.write(valueFormat({{ .pusle_input_3.Value }},{minimumFractionDigits:0}))</script> {{ i18n "pulses" }}</td>
+                                            <td>
+                                                <script type="application/javascript">document.write(valueFormat({{ .pusle_input_3.Value }},{minimumFractionDigits:0}))</script> {{ i18n "pulses" }}
+                                                / <script type="application/javascript">document.write(valueFormat({{ .volume_input_3.Value }},{minimumFractionDigits:2}))</script> m<sup>3</sup>
+                                            </td>
                                         {{ end }}
                                     </tr>
                                     {{ end }}
@@ -344,7 +353,10 @@
                                         {{ if .pusle_input_4.Error }}
                                             <td class="text-danger">{{ .pusle_input_4.Error.Error }}</td>
                                         {{ else }}
-                                            <td><script type="application/javascript">document.write(valueFormat({{ .pusle_input_4.Value }},{minimumFractionDigits:0}))</script> {{ i18n "pulses" }}</td>
+                                            <td>
+                                                <script type="application/javascript">document.write(valueFormat({{ .pusle_input_4.Value }},{minimumFractionDigits:0}))</script> {{ i18n "pulses" }}
+                                                / <script type="application/javascript">document.write(valueFormat({{ .volume_input_4.Value }},{minimumFractionDigits:2}))</script> m<sup>3</sup>
+                                            </td>
                                         {{ end }}
                                     </tr>
                                     {{ end }}

@@ -12,10 +12,6 @@ import (
 	"github.com/kihamo/boggart/providers/pulsar"
 )
 
-const (
-	InputScale = 1000
-)
-
 type Bind struct {
 	di.ConfigBind
 	di.LoggerBind
@@ -156,8 +152,12 @@ func (b *Bind) createProvider(address []byte) error {
 	return nil
 }
 
-func (b *Bind) inputVolume(pulses float32, offset float32) float32 {
-	return (offset*InputScale + pulses*10) / InputScale
+func (b *Bind) inputVolume(currentPulses float32, startPulses int64, startVolume float32) float32 {
+	if startPulses < 0 {
+		startPulses = 0
+	}
+
+	return (currentPulses-float32(startPulses))/100 + startVolume
 }
 
 func (b *Bind) Close() error {

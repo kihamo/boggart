@@ -13,6 +13,8 @@ import (
 const (
 	timeFormatLong  = "2006-01-02 15:04:05 -0700"
 	timeFormatShort = "2006-01-02"
+
+	emptyValue = "N/A"
 )
 
 // http://www.apcupsd.org/manual/manual.html#status-report-fields
@@ -335,7 +337,7 @@ func (c *Client) Events(ctx context.Context) ([]Event, error) {
 }
 
 func ParseString(value string) *string {
-	if value == "N/A" {
+	if value == emptyValue {
 		return nil
 	}
 
@@ -343,7 +345,7 @@ func ParseString(value string) *string {
 }
 
 func ParseUint(value string) (*uint64, error) {
-	if value == "N/A" || value == "" {
+	if value == emptyValue || value == "" {
 		return nil, nil
 	}
 
@@ -361,7 +363,7 @@ func ParseUint(value string) (*uint64, error) {
 }
 
 func ParseFloat(value string) (*float64, error) {
-	if value == "N/A" || value == "" {
+	if value == emptyValue || value == "" {
 		return nil, nil
 	}
 
@@ -379,7 +381,7 @@ func ParseFloat(value string) (*float64, error) {
 }
 
 func ParseTime(layout, value string) (*time.Time, error) {
-	if value == "N/A" || value == "" {
+	if value == emptyValue || value == "" {
 		return nil, nil
 	}
 
@@ -392,7 +394,7 @@ func ParseTime(layout, value string) (*time.Time, error) {
 }
 
 func ParseDuration(value string) (*time.Duration, error) {
-	if value == "N/A" || value == "" {
+	if value == emptyValue || value == "" {
 		return nil, nil
 	}
 
