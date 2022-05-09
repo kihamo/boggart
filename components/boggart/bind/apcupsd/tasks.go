@@ -2,7 +2,7 @@ package apcupsd
 
 import (
 	"context"
-
+	"errors"
 	"github.com/kihamo/boggart/components/boggart/tasks"
 )
 
@@ -28,6 +28,10 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	status, err := b.client.Status(ctx)
 	if err != nil {
 		return err
+	}
+
+	if status.Status.IsCommunicationLost {
+		return errors.New("communications with UPS lost")
 	}
 
 	sn := b.Meta().SerialNumber()

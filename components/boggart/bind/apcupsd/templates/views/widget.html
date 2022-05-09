@@ -135,36 +135,48 @@
                         <td>{{ i18n .status.Status.String . }}</td>
                         <td>{{ i18n "The current status of the UPS." . }}</td>
                     </tr>
+                    {{ if not (empty .status.LineVoltage) }}
                     <tr>
                         <td>{{ i18n "Line voltage" . }}</td>
                         <td><script type="application/javascript">document.write(valueFormat({{ .status.LineVoltage }},{minimumFractionDigits:0}))</script> V</td>
                         <td>{{ i18n "The current line voltage as returned by the UPS." . }}</td>
                     </tr>
+                    {{ end }}
+                    {{ if not (empty .status.LoadPercent) }}
                     <tr>
                         <td>{{ i18n "Load percent" . }}</td>
                         <td><script type="application/javascript">document.write(valueFormat({{ .status.LoadPercent }},{minimumFractionDigits:0}))</script> %</td>
                         <td>{{ i18n "The percentage of load capacity as estimated by the UPS." . }}</td>
                     </tr>
+                    {{ end }}
+                    {{ if not (empty .status.BatteryChargePercent) }}
                     <tr>
                         <td>{{ i18n "Battery charge percent" . }}</td>
                         <td><script type="application/javascript">document.write(valueFormat({{ .status.BatteryChargePercent }},{minimumFractionDigits:0}))</script> %</td>
                         <td>{{ i18n "The percentage charge on the batteries." . }}</td>
                     </tr>
+                    {{ end }}
+                    {{ if not (empty .status.TimeLeft) }}
                     <tr>
                         <td>{{ i18n "Time left" . }}</td>
                         <td>{{ .status.TimeLeft }}</td>
                         <td>{{ i18n "The remaining runtime left on batteries as estimated by the UPS." . }}</td>
                     </tr>
+                    {{ end }}
+                    {{ if not (empty .status.MinimumBatteryChargePercent) }}
                     <tr>
                         <td>{{ i18n "Minimum battery charge percent" . }}</td>
                         <td><script type="application/javascript">document.write(valueFormat({{ .status.MinimumBatteryChargePercent }},{minimumFractionDigits:0}))</script> %</td>
                         <td>{{ i18n "If the battery charge percentage (BCHARGE) drops below this value, apcupsd will shutdown your system. Value is set in the configuration file (BATTERYLEVEL)." . }}</td>
                     </tr>
+                    {{ end }}
+                    {{ if not (empty .status.MinimumTimeLeft) }}
                     <tr>
                         <td>{{ i18n "Minimum time left" . }}</td>
                         <td>{{ .status.MinimumTimeLeft }}</td>
                         <td>{{ i18n "apcupsd will shutdown your system if the remaining runtime equals or is below this point. Value is set in the configuration file (MINUTES)." . }}</td>
                     </tr>
+                    {{ end }}
                     {{ if not (empty .status.MaximumTime) }}
                     <tr>
                         <td>{{ i18n "Maximum time" . }}</td>
