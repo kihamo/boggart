@@ -35,7 +35,7 @@ func NewProvideMosOblERC(base *internal.Client, account *Account) *ProvideMosObl
 		base:         base,
 		account:      account,
 		servicesOnce: &atomic.Once{},
-		servicesList: make(map[string]uint64, 0),
+		servicesList: make(map[string]uint64),
 	}
 }
 

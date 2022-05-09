@@ -1,0 +1,512 @@
+{{ define "content" }}
+
+{{ if .status }}
+<script type="application/javascript">
+    function valueFormat(n, options) {
+        if (typeof options === 'undefined') {
+            options = {
+                minimumFractionDigits: 2,
+            }
+        }
+
+        return new Intl.NumberFormat(undefined, options).format(n);
+    }
+</script>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>{{ i18n "Battery status" . }}</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="row">
+                    <div class="col-md-6 col-sm-6 col-xs-6">
+                        <p>{{ i18n "Charged" . }}</p>
+                        <div class="progress" style="margin-bottom:0">
+                            <div class="progress-bar progress-bar-success{{ if ne (pointer .status.BatteryChargePercent) 100.0 }} progress-bar-striped active{{ end }}"
+                                 role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                                 aria-valuenow="{{ .status.BatteryChargePercent }}"
+                            style="width:{{ .status.BatteryChargePercent }}%">
+                                <span style="line-height:20px">{{ .status.BatteryChargePercent }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-sm-6 col-xs-6">
+                        <p>{{ i18n "Load" . }}</p>
+                        <div class="progress" style="margin-bottom:0">
+                            <div class="progress-bar progress-bar-warning progress-bar-striped active"
+                                 role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                                 aria-valuenow="{{ .status.LoadPercent }}"
+                            style="width:{{ .status.LoadPercent }}%">
+                            <span style="line-height:20px">{{ .status.LoadPercent }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="margin-top: 1.0em;">
+                    <div class="col-md-6 col-sm-6 col-xs-6">
+                        <p>{{ i18n "Status" . }}</p>
+                        <p><strong>{{ .status.Status }}</strong></p>
+                    </div>
+                    <div class="col-md-6 col-sm-6 col-xs-6">
+                        <p>{{ i18n "Runtime" . }}</p>
+                        <p><strong>{{ .status.TimeLeft }}</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>{{ i18n "Variables" . }}</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <table class="table table-striped dt-responsive nowrap" style="width:100%">
+                    <thead>
+                    <tr>
+                        <th>{{ i18n "Variable" . }}</th>
+                        <th>{{ i18n "Value" . }}</th>
+                        <th>{{ i18n "Description" . }}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>{{ i18n "APC" . }}</td>
+                        <td>{{ .status.APC }}</td>
+                        <td>{{ i18n "Header record indicating the STATUS format revision level, the number of records that follow the APC statement, and the number of bytes that follow the record." . }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ i18n "Date" . }}</td>
+                        <td><script type="application/javascript">document.write(dateToString('{{ .status.Date.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
+                        <td>{{ i18n "The date and time that the information was last obtained from the UPS." . }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ i18n "Hostname" . }}</td>
+                        <td>{{ .status.Hostname }}</td>
+                        <td>{{ i18n "The name of the machine that collected the UPS data." . }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ i18n "UPS name" . }}</td>
+                        <td>{{ .status.UPSName }}</td>
+                        <td>{{ i18n "The name of the UPS as stored in the EEPROM or in the UPSNAME directive in the configuration file." . }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ i18n "Version" . }}</td>
+                        <td>{{ .status.Version }}</td>
+                        <td>{{ i18n "The apcupsd release number, build date, and platform." . }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ i18n "Cable" . }}</td>
+                        <td>{{ .status.Cable }}</td>
+                        <td>{{ i18n "The cable as specified in the configuration file (UPSCABLE)." . }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ i18n "Model" . }}</td>
+                        <td>{{ .status.Model }}</td>
+                        <td>{{ i18n "The UPS model as derived from information from the UPS." . }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ i18n "UPS mode" . }}</td>
+                        <td>{{ .status.UPSMode }}</td>
+                        <td>{{ i18n "The mode in which apcupsd is operating as specified in the configuration file (UPSMODE)." . }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ i18n "Start time" . }}</td>
+                        <td><script type="application/javascript">document.write(dateToString('{{ .status.StartTime.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
+                        <td>{{ i18n "The time/date that apcupsd was started." . }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ i18n "End time" . }}</td>
+                        <td><script type="application/javascript">document.write(dateToString('{{ .status.EndAPC.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
+                        <td>{{ i18n "The time and date that the STATUS record was written." . }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ i18n "Status" . }}</td>
+                        <td>{{ i18n .status.Status.String . }}</td>
+                        <td>{{ i18n "The current status of the UPS." . }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ i18n "Line voltage" . }}</td>
+                        <td><script type="application/javascript">document.write(valueFormat({{ .status.LineVoltage }},{minimumFractionDigits:0}))</script> V</td>
+                        <td>{{ i18n "The current line voltage as returned by the UPS." . }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ i18n "Load percent" . }}</td>
+                        <td><script type="application/javascript">document.write(valueFormat({{ .status.LoadPercent }},{minimumFractionDigits:0}))</script> %</td>
+                        <td>{{ i18n "The percentage of load capacity as estimated by the UPS." . }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ i18n "Battery charge percent" . }}</td>
+                        <td><script type="application/javascript">document.write(valueFormat({{ .status.BatteryChargePercent }},{minimumFractionDigits:0}))</script> %</td>
+                        <td>{{ i18n "The percentage charge on the batteries." . }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ i18n "Time left" . }}</td>
+                        <td>{{ .status.TimeLeft }}</td>
+                        <td>{{ i18n "The remaining runtime left on batteries as estimated by the UPS." . }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ i18n "Minimum battery charge percent" . }}</td>
+                        <td><script type="application/javascript">document.write(valueFormat({{ .status.MinimumBatteryChargePercent }},{minimumFractionDigits:0}))</script> %</td>
+                        <td>{{ i18n "If the battery charge percentage (BCHARGE) drops below this value, apcupsd will shutdown your system. Value is set in the configuration file (BATTERYLEVEL)." . }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ i18n "Minimum time left" . }}</td>
+                        <td>{{ .status.MinimumTimeLeft }}</td>
+                        <td>{{ i18n "apcupsd will shutdown your system if the remaining runtime equals or is below this point. Value is set in the configuration file (MINUTES)." . }}</td>
+                    </tr>
+                    {{ if not (empty .status.MaximumTime) }}
+                    <tr>
+                        <td>{{ i18n "Maximum time" . }}</td>
+                        <td>{{ .status.MaximumTime }}</td>
+                        <td>{{ i18n "apcupsd will shutdown your system if the time on batteries exceeds this value. A value of zero disables the feature. Value is set in the configuration file (TIMEOUT)." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.MaxLineVoltage) }}
+                    <tr>
+                        <td>{{ i18n "Maximum line voltage" . }}</td>
+                        <td><script type="application/javascript">document.write(valueFormat({{ .status.MaxLineVoltage }},{minimumFractionDigits:0}))</script> V</td>
+                        <td>{{ i18n "The maximum line voltage since the UPS was started, as reported by the UPS." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.MinLineVoltage) }}
+                    <tr>
+                        <td>{{ i18n "Minimum line voltage" . }}</td>
+                        <td><script type="application/javascript">document.write(valueFormat({{ .status.MinLineVoltage }},{minimumFractionDigits:0}))</script> V</td>
+                        <td>{{ i18n "The minimum line voltage since the UPS was started, as returned by the UPS." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.OutputVoltage) }}
+                    <tr>
+                        <td>{{ i18n "Output voltage" . }}</td>
+                        <td><script type="application/javascript">document.write(valueFormat({{ .status.OutputVoltage }},{minimumFractionDigits:0}))</script> V</td>
+                        <td>{{ i18n "The voltage the UPS is supplying to your equipment." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.Sense) }}
+                    <tr>
+                        <td>{{ i18n "Sense" . }}</td>
+                        <td>{{ .status.Sense }}</td>
+                        <td>{{ i18n "The sensitivity level of the UPS to line voltage fluctuations." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.DelayWake) }}
+                    <tr>
+                        <td>{{ i18n "Delay wake" . }}</td>
+                        <td>{{ .status.DelayWake }}</td>
+                        <td>{{ i18n "The amount of time the UPS will wait before restoring power to your equipment after a power off condition when the power is restored." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.DelayShutdown) }}
+                    <tr>
+                        <td>{{ i18n "Delay shutdown" . }}</td>
+                        <td>{{ .status.DelayShutdown }}</td>
+                        <td>{{ i18n "The grace delay that the UPS gives after receiving a power down command from apcupsd before it powers off your equipment." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.DelayLowBattery) }}
+                    <tr>
+                        <td>{{ i18n "Delay low battery" . }}</td>
+                        <td>{{ .status.DelayLowBattery }}</td>
+                        <td>{{ i18n "The remaining runtime below which the UPS sends the low battery signal. At this point apcupsd will force an immediate emergency shutdown." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.LowTransferVoltage) }}
+                    <tr>
+                        <td>{{ i18n "Low transfer voltage" . }}</td>
+                        <td><script type="application/javascript">document.write(valueFormat({{ .status.LowTransferVoltage }},{minimumFractionDigits:0}))</script> V</td>
+                        <td>{{ i18n "The line voltage below which the UPS will switch to batteries." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.HighTransferVoltage) }}
+                    <tr>
+                        <td>{{ i18n "High transfer voltage" . }}</td>
+                        <td><script type="application/javascript">document.write(valueFormat({{ .status.HighTransferVoltage }},{minimumFractionDigits:0}))</script> V</td>
+                        <td>{{ i18n "The line voltage above which the UPS will switch to batteries." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.ReturnPercent) }}
+                    <tr>
+                        <td>{{ i18n "Return percent" . }}</td>
+                        <td><script type="application/javascript">document.write(valueFormat({{ .status.ReturnPercent }},{minimumFractionDigits:0}))</script> %</td>
+                        <td>{{ i18n "The percentage charge that the batteries must have after a power off condition before the UPS will restore power to your equipment." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.InternalTemp) }}
+                    <tr>
+                        <td>{{ i18n "Internal temperature" . }}</td>
+                        <td><script type="application/javascript">document.write(valueFormat({{ .status.InternalTemp }},{minimumFractionDigits:2}))</script> C</td>
+                        <td>{{ i18n "Internal UPS temperature as supplied by the UPS." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.AlarmDelay) }}
+                    <tr>
+                        <td>{{ i18n "Alarm delay" . }}</td>
+                        <td>{{ .status.AlarmDelay }}</td>
+                        <td>{{ i18n "The delay period for the UPS alarm." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.BatteryVoltage) }}
+                    <tr>
+                        <td>{{ i18n "Battery voltage" . }}</td>
+                        <td><script type="application/javascript">document.write(valueFormat({{ .status.BatteryVoltage }},{minimumFractionDigits:0}))</script> V</td>
+                        <td>{{ i18n "Battery voltage as supplied by the UPS." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.LineFrequency) }}
+                    <tr>
+                        <td>{{ i18n "Line frequency" . }}</td>
+                        <td><script type="application/javascript">document.write(valueFormat({{ .status.LineFrequency }},{minimumFractionDigits:2}))</script> Hz</td>
+                        <td>{{ i18n "Line frequency in hertz as given by the UPS." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.LastTransfer) }}
+                    <tr>
+                        <td>{{ i18n "Reason transfer" . }}</td>
+                        <td>{{ .status.LastTransfer }}</td>
+                        <td>{{ i18n "The reason for the last transfer to batteries." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.Transfers) }}
+                    <tr>
+                        <td>{{ i18n "Number of transfers" . }}</td>
+                        <td>{{ .status.Transfers }}</td>
+                        <td>{{ i18n "The number of transfers to batteries since apcupsd startup." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.XOnBattery) }}
+                    <tr>
+                        <td>{{ i18n "Last transfer date" . }}</td>
+                        <td><script type="application/javascript">document.write(dateToString('{{ .status.XOnBattery.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
+                        <td>{{ i18n "Time and date of last transfer to batteries, or N/A." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.TimeOnBattery) }}
+                    <tr>
+                        <td>{{ i18n "Time on battery" . }}</td>
+                        <td>{{ .status.TimeOnBattery }}</td>
+                        <td>{{ i18n "Time in seconds currently on batteries, or 0." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.CumulativeTimeOnBattery) }}
+                    <tr>
+                        <td>{{ i18n "Total time on battery" . }}</td>
+                        <td>{{ .status.CumulativeTimeOnBattery }}</td>
+                        <td>{{ i18n "Total (cumulative) time on batteries in seconds since apcupsd startup." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.XOffBattery) }}
+                    <tr>
+                        <td>{{ i18n "Last transfer from batteries date" . }}</td>
+                        <td><script type="application/javascript">document.write(dateToString('{{ .status.XOffBattery.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
+                        <td>{{ i18n "Time and date of last transfer from batteries, or N/A." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.SelfTest) }}
+                    <tr>
+                        <td>{{ i18n "Results of the last self test" . }}</td>
+                        <td>{{ .status.SelfTest }}</td>
+                        <td>
+                            {{ i18n "The results of the last self test, and may have the following values:" . }}
+                            <ul>
+                                <li>{{ i18n "OK: self test indicates good battery" . }}</li>
+                                <li>{{ i18n "BT: self test failed due to insufficient battery capacity" . }}</li>
+                                <li>{{ i18n "NG: self test failed due to overload" . }}</li>
+                                <li>{{ i18n "NO: No results (i.e. no self test performed in the last 5 minutes)" . }}</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.SelfTestInterval) }}
+                    <tr>
+                        <td>{{ i18n "Self test interval" . }}</td>
+                        <td>{{ .status.SelfTestInterval }}</td>
+                        <td>{{ i18n "The interval in hours between automatic self tests." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.StatusFlags) }}
+                    <tr>
+                        <td>{{ i18n "Status flag" . }}</td>
+                        <td>{{ .status.StatusFlags }}</td>
+                        <td>{{ i18n "Status flag. English version is given by STATUS." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.DipSwitch) }}
+                    <tr>
+                        <td>{{ i18n "Dip switch" . }}</td>
+                        <td>{{ .status.DipSwitch }}</td>
+                        <td>{{ i18n "The current dip switch settings on UPSes that have them." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.FaultRegister1) }}
+                    <tr>
+                        <td>{{ i18n "Fault register 1" . }}</td>
+                        <td>{{ .status.FaultRegister1 }}</td>
+                        <td>{{ i18n "The value from the UPS fault register 1." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.FaultRegister2) }}
+                    <tr>
+                        <td>{{ i18n "Fault register 2" . }}</td>
+                        <td>{{ .status.FaultRegister2 }}</td>
+                        <td>{{ i18n "The value from the UPS fault register 2." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.FaultRegister3) }}
+                    <tr>
+                        <td>{{ i18n "Fault register 3" . }}</td>
+                        <td>{{ .status.FaultRegister3 }}</td>
+                        <td>{{ i18n "The value from the UPS fault register 3." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.ManufacturedDate) }}
+                    <tr>
+                        <td>{{ i18n "Manufactured date" . }}</td>
+                        <td><script type="application/javascript">document.write(dateToString('{{ .status.ManufacturedDate.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
+                        <td>{{ i18n "The date the UPS was manufactured." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.SerialNumber) }}
+                    <tr>
+                        <td>{{ i18n "Serial number" . }}</td>
+                        <td>{{ .status.SerialNumber }}</td>
+                        <td>{{ i18n "The UPS serial number." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.BatteryDate) }}
+                    <tr>
+                        <td>{{ i18n "Battery replaced date" . }}</td>
+                        <td><script type="application/javascript">document.write(dateToString('{{ .status.BatteryDate.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
+                        <td>{{ i18n "The date that batteries were last replaced." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.NominalOutputVoltage) }}
+                    <tr>
+                        <td>{{ i18n "Nominal output voltage" . }}</td>
+                        <td><script type="application/javascript">document.write(valueFormat({{ .status.NominalOutputVoltage }},{minimumFractionDigits:0}))</script> V</td>
+                        <td>{{ i18n "The output voltage that the UPS will attempt to supply when on battery power." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.NominalInputVoltage) }}
+                    <tr>
+                        <td>{{ i18n "Nominal input voltage" . }}</td>
+                        <td><script type="application/javascript">document.write(valueFormat({{ .status.NominalInputVoltage }},{minimumFractionDigits:0}))</script> V</td>
+                        <td>{{ i18n "The input voltage that the UPS is configured to expect." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.NominalBatteryVoltage) }}
+                    <tr>
+                        <td>{{ i18n "Nominal battery voltage" . }}</td>
+                        <td><script type="application/javascript">document.write(valueFormat({{ .status.NominalBatteryVoltage }},{minimumFractionDigits:0}))</script> V</td>
+                        <td>{{ i18n "The nominal battery voltage." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.NominalPower) }}
+                    <tr>
+                        <td>{{ i18n "Nominal power" . }}</td>
+                        <td><script type="application/javascript">document.write(valueFormat({{ .status.NominalPower }},{minimumFractionDigits:0}))</script> W</td>
+                        <td>{{ i18n "The maximum power in Watts that the UPS is designed to supply." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.Humidity) }}
+                    <tr>
+                        <td>{{ i18n "Humidity" . }}</td>
+                        <td><script type="application/javascript">document.write(valueFormat({{ .status.Humidity }},{minimumFractionDigits:0}))</script> %</td>
+                        <td>{{ i18n "The humidity as measured by the UPS." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.AmbientTemperature) }}
+                    <tr>
+                        <td>{{ i18n "Ambient temperature" . }}</td>
+                        <td><script type="application/javascript">document.write(valueFormat({{ .status.AmbientTemperature }},{minimumFractionDigits:0}))</script> C</td>
+                        <td>{{ i18n "The ambient temperature as measured by the UPS." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.ExternalBatteries) }}
+                    <tr>
+                        <td>{{ i18n "External batteries" . }}</td>
+                        <td>{{ .status.ExternalBatteries }}</td>
+                        <td>{{ i18n "The number of external batteries as defined by the user. A correct number here helps the UPS compute the remaining runtime more accurately." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.BadBatteryPacks) }}
+                    <tr>
+                        <td>{{ i18n "Bad battery packs" . }}</td>
+                        <td>{{ .status.BadBatteryPacks }}</td>
+                        <td>{{ i18n "The number of bad battery packs." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.Firmware) }}
+                    <tr>
+                        <td>{{ i18n "Firmware" . }}</td>
+                        <td>{{ .status.Firmware }}</td>
+                        <td>{{ i18n "The firmware revision number as reported by the UPS." . }}</td>
+                    </tr>
+                    {{ end }}
+                    {{ if not (empty .status.APCModel) }}
+                    <tr>
+                        <td>{{ i18n "APC model" . }}</td>
+                        <td>{{ .status.APCModel }}</td>
+                        <td>{{ i18n "The old APC model identification code." . }}</td>
+                    </tr>
+                    {{ end }}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
+
+{{ if .events }}
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel collapsed">
+            <div class="x_title">
+                <h2>{{ i18n "Events" . }}</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <table class="table table-striped dt-responsive nowrap" style="width:100%">
+                    <thead>
+                    <tr>
+                        <th>{{ i18n "Date" . }}</th>
+                        <th>{{ i18n "Message" . }}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{ range $event := .events }}
+                    <tr>
+                        <td><script type="application/javascript">document.write(dateToString('{{ $event.Date.Format "2006-01-02T15:04:05-07:00" }}'))</script></td>
+                        <td>{{ $event.Message }}</td>
+                    </tr>
+                    {{ end }}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
+
+{{ end }}
+
+{{ define "js" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net/js/jquery.dataTables.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive/js/dataTables.responsive.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.min.js" false) }}
+{{ end }}

@@ -160,12 +160,12 @@ type ComponentLight struct {
 
 	// https://github.com/esphome/esphome/blob/2021.11.1/esphome/components/mqtt/mqtt_light.cpp#L39
 	data struct {
-		Schema     string                   `json:"schema"`
 		ColorMode  bool                     `json:"color_mode"`
-		ColorModes ComponentLightColorModes `json:"supported_color_modes"`
-		Brightness bool                     `json:"brightness"` // Deprecated: legacy API
-		Effect     bool                     `json:"effect"`
 		EffectList []string                 `json:"effect_list"`
+		Schema     string                   `json:"schema"`
+		Brightness bool                     `json:"brightness"` // Deprecated: legacy API
+		ColorModes ComponentLightColorModes `json:"supported_color_modes"`
+		Effect     bool                     `json:"effect"`
 	}
 
 	state    atomic.Value

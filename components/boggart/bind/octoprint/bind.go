@@ -156,7 +156,7 @@ func (b *Bind) Run() error {
 	b.settingsMutex.Unlock()
 
 	b.devicesMutex.Lock()
-	b.devices = make(map[string]bool, 0)
+	b.devices = make(map[string]bool)
 	b.devicesMutex.Unlock()
 
 	b.Meta().SetLink(&cfg.Address.URL)

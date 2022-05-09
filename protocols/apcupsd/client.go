@@ -121,66 +121,71 @@ func (c *Client) Status(ctx context.Context) (Status, error) {
 			return status, fmt.Errorf("invalid key/value pair for string '%s'", scanner.Text())
 		}
 
-		var err error
+		var (
+			err  error
+			date *time.Time
+		)
 
 		key := strings.TrimSpace(sp[0])
 		value := strings.TrimSpace(sp[1])
 
 		switch key {
 		case StatusFieldAPC:
-			status.APC = ParseString(value)
+			status.APC = *ParseString(value)
 		case StatusFieldDate:
-			status.Date, err = ParseTime(timeFormatLong, value)
-		case StatusFieldHostname:
-			status.Hostname = ParseString(value)
-		case StatusFieldUPSName:
-			status.UPSName = ParseString(value)
-		case StatusFieldVersion:
-			status.Version = ParseString(value)
-		case StatusFieldCable:
-			status.Cable = ParseString(value)
-		case StatusFieldModel:
-			status.Model = ParseString(value)
-		case StatusFieldUPSMode:
-			status.UPSMode = ParseString(value)
-		case StatusFieldStartTime:
-			status.StartTime, err = ParseTime(timeFormatLong, value)
-		case StatusFieldStatus:
-			s := ParseString(value)
-			if s != nil && *s != "" {
-				status.Status = &StatusStatus{
-					AsString: *s,
-				}
+			date, err = ParseTime(timeFormatLong, value)
 
-				for _, name := range strings.Fields(*s) {
-					switch name {
-					case StatusStatusCal:
-						status.Status.IsCal = true
-					case StatusStatusTrim:
-						status.Status.IsTrim = true
-					case StatusStatusBoost:
-						status.Status.IsBoost = true
-					case StatusStatusOnline:
-						status.Status.IsOnline = true
-					case StatusStatusOnBattery:
-						status.Status.IsOnBattery = true
-					case StatusStatusOverload:
-						status.Status.IsOverload = true
-					case StatusStatusLowBattery:
-						status.Status.IsLowBattery = true
-					case StatusStatusReplaceBattery:
-						status.Status.IsReplaceBattery = true
-					case StatusStatusNoBattery:
-						status.Status.IsNoBattery = true
-					case StatusStatusSlave:
-						status.Status.IsSlave = true
-					case StatusStatusSlaveDown:
-						status.Status.IsSlaveDown = true
-					case StatusStatusCommunicationLost:
-						status.Status.IsCommunicationLost = true
-					case StatusStatusShuttingDown:
-						status.Status.IsShuttingDown = true
-					}
+			if err == nil {
+				status.Date = *date
+			}
+		case StatusFieldHostname:
+			status.Hostname = *ParseString(value)
+		case StatusFieldUPSName:
+			status.UPSName = *ParseString(value)
+		case StatusFieldVersion:
+			status.Version = *ParseString(value)
+		case StatusFieldCable:
+			status.Cable = *ParseString(value)
+		case StatusFieldModel:
+			status.Model = *ParseString(value)
+		case StatusFieldUPSMode:
+			status.UPSMode = *ParseString(value)
+		case StatusFieldStartTime:
+			date, err = ParseTime(timeFormatLong, value)
+			if err == nil {
+				status.StartTime = *date
+			}
+		case StatusFieldStatus:
+			status.Status.AsString = *ParseString(value)
+
+			for _, name := range strings.Fields(status.Status.AsString) {
+				switch name {
+				case StatusStatusCal:
+					status.Status.IsCal = true
+				case StatusStatusTrim:
+					status.Status.IsTrim = true
+				case StatusStatusBoost:
+					status.Status.IsBoost = true
+				case StatusStatusOnline:
+					status.Status.IsOnline = true
+				case StatusStatusOnBattery:
+					status.Status.IsOnBattery = true
+				case StatusStatusOverload:
+					status.Status.IsOverload = true
+				case StatusStatusLowBattery:
+					status.Status.IsLowBattery = true
+				case StatusStatusReplaceBattery:
+					status.Status.IsReplaceBattery = true
+				case StatusStatusNoBattery:
+					status.Status.IsNoBattery = true
+				case StatusStatusSlave:
+					status.Status.IsSlave = true
+				case StatusStatusSlaveDown:
+					status.Status.IsSlaveDown = true
+				case StatusStatusCommunicationLost:
+					status.Status.IsCommunicationLost = true
+				case StatusStatusShuttingDown:
+					status.Status.IsShuttingDown = true
 				}
 			}
 
@@ -287,11 +292,14 @@ func (c *Client) Status(ctx context.Context) (Status, error) {
 		case StatusFieldAPCModel:
 			status.APCModel = ParseString(value)
 		case StatusFieldEndAPC:
-			status.EndAPC, err = ParseTime(timeFormatLong, value)
+			date, err = ParseTime(timeFormatLong, value)
+			if err == nil {
+				status.EndAPC = *date
+			}
 		}
 
 		if err != nil {
-			return status, fmt.Errorf("Failed parse %s key with error %s", key, err.Error())
+			return status, fmt.Errorf("failed parse %s key with error %s", key, err.Error())
 		}
 	}
 
@@ -310,23 +318,48 @@ func (c *Client) Events(ctx context.Context) ([]Event, error) {
 
 	events := make([]Event, 0)
 
+	var (
+		parseDate      *time.Time
+		parseFirstLine bool
+		eventDate      *time.Time
+		eventMessage   string
+	)
+
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
 		text := scanner.Text()
 
 		if len(text) < len(timeFormatLong)+2 {
-			return nil, errors.New("Event string is short")
+			return nil, errors.New("event string is short")
 		}
 
-		t, err := ParseTime(timeFormatLong, text[:len(timeFormatLong)])
-		if err != nil {
-			return nil, err
-		}
+		parseDate, err = ParseTime(timeFormatLong, text[:len(timeFormatLong)])
+		if err == nil {
+			if parseFirstLine {
+				events = append(events, Event{
+					Date:    *eventDate,
+					Message: eventMessage,
+				})
+			} else {
+				parseFirstLine = true
+			}
 
-		events = append([]Event{{
-			Date:    *t,
-			Message: text[len(timeFormatLong)+2:],
-		}}, events...)
+			eventDate = parseDate
+			eventMessage = text[len(timeFormatLong)+2:]
+		} else {
+			if !parseFirstLine {
+				return nil, err
+			}
+
+			eventMessage += " " + text
+		}
+	}
+
+	if parseFirstLine {
+		events = append(events, Event{
+			Date:    *eventDate,
+			Message: eventMessage,
+		})
 	}
 
 	if err := scanner.Err(); err != nil {

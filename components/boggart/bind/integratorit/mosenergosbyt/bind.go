@@ -9,11 +9,6 @@ import (
 	"github.com/kihamo/boggart/providers/integratorit/mosenergosbyt"
 )
 
-var services = map[string]string{
-	"взнос на капитальный ремонт": "10001",
-	"обращение с тко":             "10002",
-}
-
 var link *url.URL
 
 func init() {
@@ -24,10 +19,6 @@ func init() {
 		Host:   l.Host,
 	}
 }
-
-const (
-	layoutPeriod = "2006-01-02"
-)
 
 type Bind struct {
 	di.ConfigBind

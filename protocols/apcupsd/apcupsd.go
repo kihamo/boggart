@@ -24,21 +24,22 @@ type StatusStatus struct {
 	IsShuttingDown      bool
 }
 
-func (s *StatusStatus) String() string {
+func (s StatusStatus) String() string {
 	return s.AsString
 }
 
 type Status struct {
-	APC                         *string
-	Date                        *time.Time
-	Hostname                    *string
-	UPSName                     *string
-	Version                     *string
-	Cable                       *string
-	Model                       *string
-	UPSMode                     *string
-	StartTime                   *time.Time
-	Status                      *StatusStatus
+	APC                         string
+	Date                        time.Time
+	Hostname                    string
+	UPSName                     string
+	Version                     string
+	Cable                       string
+	Model                       string
+	UPSMode                     string
+	StartTime                   time.Time
+	EndAPC                      time.Time
+	Status                      StatusStatus
 	LineVoltage                 *float64
 	LoadPercent                 *float64
 	BatteryChargePercent        *float64
@@ -86,7 +87,6 @@ type Status struct {
 	BadBatteryPacks             *uint64
 	Firmware                    *string
 	APCModel                    *string
-	EndAPC                      *time.Time
 }
 
 type Event struct {

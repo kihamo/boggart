@@ -1,0 +1,398 @@
+msgid ""
+msgstr ""
+"Report-Msgid-Bugs-To: dev@kihamo.ru\n"
+"POT-Creation-Date: 2022-05-09 16:20+0300\n"
+"Last-Translator: Kihamo Muramodo <dev@kihamo.ru>\n"
+"Language-Team: \n"
+"Language: Russian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;"
+
+msgid "Battery status"
+msgstr "Состояние батареи"
+
+msgid "Charged"
+msgstr "Заряжено"
+
+msgid "Load"
+msgstr "Нагрузка"
+
+msgid "Status"
+msgstr "Статус"
+
+msgid "Runtime"
+msgstr "Время работы"
+
+msgid "Variables"
+msgstr "Переменные"
+
+msgid "Variable"
+msgstr "Переменная"
+
+msgid "Value"
+msgstr "Значение"
+
+msgid "Description"
+msgstr "Описание"
+
+msgid "Events"
+msgstr "События"
+
+msgid "Message"
+msgstr "Сообщение"
+
+msgid "Header record indicating the STATUS format revision level, the number of records that follow the APC statement, and the number of bytes that follow the record."
+msgstr "Заголовочная запись, указывающая версии формата STATUS, количество записей, следующих за оператором APC, и количество байтов, следующих за записью."
+
+msgid "Date"
+msgstr "Дата"
+
+msgid "The date and time that the information was last obtained from the UPS."
+msgstr "Дата и время последнего получения информации от ИБП."
+
+msgid "Hostname"
+msgstr "Имя хоста"
+
+msgid "The name of the machine that collected the UPS data."
+msgstr "Имя хоста к которому подключён ИБП."
+
+msgid "UPS name"
+msgstr "Имя ИБП"
+
+msgid "The name of the UPS as stored in the EEPROM or in the UPSNAME directive in the configuration file."
+msgstr "Имя ИБП, записанное EEPROM или заданное в поле UPSNAME файла настройки."
+
+msgid "Version"
+msgstr "Версия"
+
+msgid "The apcupsd release number, build date, and platform."
+msgstr "Версия apcupsd, дата сборки apcupsd и платформа (ОС)."
+
+msgid "Cable"
+msgstr "Кабель"
+
+msgid "The cable as specified in the configuration file (UPSCABLE)."
+msgstr "Тип кабеля, заданный в поле UPSCABLE файла настройки."
+
+msgid "Model"
+msgstr "Модель"
+
+msgid "The UPS model as derived from information from the UPS."
+msgstr "Модель ИБП, полученная на основе информации от ИБП."
+
+msgid "UPS mode"
+msgstr "Режим работы"
+
+msgid "The mode in which apcupsd is operating as specified in the configuration file (UPSMODE)."
+msgstr "Режим, в котором работает apcupsd, указанный в поле UPSMODE файла настройки."
+
+msgid "Start time"
+msgstr "Время запуска"
+
+msgid "The time/date that apcupsd was started."
+msgstr "Дата, время запуска apcupsd."
+
+msgid "End time"
+msgstr "Время фиксации"
+
+msgid "The time and date that the STATUS record was written."
+msgstr "Время и дата создания записи STATUS."
+
+msgid "The current status of the UPS."
+msgstr "Текущее состояние (статус) ИБП."
+
+msgid "Line voltage"
+msgstr "Напряжение"
+
+msgid "The current line voltage as returned by the UPS."
+msgstr "Текущее линейное напряжение, возвращаемое ИБП."
+
+msgid "Load percent"
+msgstr "Уровень нагрузки"
+
+msgid "The percentage of load capacity as estimated by the UPS."
+msgstr "Уровень нагрузки в процентах по оценке ИПБ."
+
+msgid "Battery charge percent"
+msgstr "Уровень заряда батареи"
+
+msgid "The percentage charge on the batteries."
+msgstr "Уровень заряда батареи в процентах."
+
+msgid "Time left"
+msgstr "Оставшееся время работы"
+
+msgid "The remaining runtime left on batteries as estimated by the UPS."
+msgstr "Оставшееся время работы от батареи по оценке ИБП."
+
+msgid "Minimum battery charge percent"
+msgstr "Минимальный уровень заряда батареи"
+
+msgid "If the battery charge percentage (BCHARGE) drops below this value, apcupsd will shutdown your system. Value is set in the configuration file (BATTERYLEVEL)."
+msgstr "Уровень заряда батареи (BCHARGE) опустится ниже уровня который задан в файле настройки переменной BATTERYLEVEL, то тогда будет начато выключение системы."
+
+msgid "Minimum time left"
+msgstr "Минимальное время работы"
+
+msgid "apcupsd will shutdown your system if the remaining runtime equals or is below this point. Value is set in the configuration file (MINUTES)."
+msgstr "apcupsd выключит систему, если оставшееся время работы равно или меньше этого значения. Значение задается в конфигурационном файле (MINUTES)."
+
+msgid "Maximum time"
+msgstr "Максимальное время работы"
+
+msgid "apcupsd will shutdown your system if the time on batteries exceeds this value. A value of zero disables the feature. Value is set in the configuration file (TIMEOUT)."
+msgstr "apcupsd выключит систему, если время работы от батарей превысит это значение. Нулевое значение отключает функцию. Значение задается в конфигурационном файле (TIMEOUT)."
+
+msgid "Maximum line voltage"
+msgstr "Максимальное линейное напряжение"
+
+msgid "The maximum line voltage since the UPS was started, as reported by the UPS."
+msgstr "Максимальное линейное напряжение с момента запуска ИБП, согласно отчету ИБП."
+
+msgid "Minimum line voltage"
+msgstr "Минимальное линейное напряжение"
+
+msgid "The minimum line voltage since the UPS was started, as returned by the UPS."
+msgstr "Минимальное линейное напряжение с момента запуска ИБП, согласно отчету ИБП."
+
+msgid "Output voltage"
+msgstr "Выходное напряжение"
+
+msgid "The voltage the UPS is supplying to your equipment."
+msgstr "Напряжение, которое ИБП подает на внешнее оборудование."
+
+msgid "Sense"
+msgstr "Чувствительность"
+
+msgid "The sensitivity level of the UPS to line voltage fluctuations."
+msgstr "Уровень чувствительности ИБП к колебаниям сетевого напряжения."
+
+msgid "Delay wake"
+msgstr "Задержка пробуждения"
+
+msgid "The amount of time the UPS will wait before restoring power to your equipment after a power off condition when the power is restored."
+msgstr "Время, в течение которого ИБП будет ждать, прежде чем восстановить питание внешнего оборудования после состояния отключения питания, когда питание будет восстановлено."
+
+msgid "Delay shutdown"
+msgstr "Задержка выключения"
+
+msgid "The grace delay that the UPS gives after receiving a power down command from apcupsd before it powers off your equipment."
+msgstr "Время задержки, которую ИБП дает после получения команды отключения питания от apcupsd, прежде чем он выключит внешнее оборудование."
+
+msgid "Delay low battery"
+msgstr "Задержка низкого заряда батареи"
+
+msgid "The remaining runtime below which the UPS sends the low battery signal. At this point apcupsd will force an immediate emergency shutdown."
+msgstr "Оставшееся время работы, ниже которого ИБП отправляет сигнал низкого заряда батареи. В этот момент apcupsd вызовет немедленное аварийное отключение."
+
+msgid "Low transfer voltage"
+msgstr "Низкое напряжение сети"
+
+msgid "The line voltage below which the UPS will switch to batteries."
+msgstr "Напряжение сети, ниже которого ИБП переключится на батареи."
+
+msgid "High transfer voltage"
+msgstr "Высокое напряжение сети"
+
+msgid "The line voltage above which the UPS will switch to batteries."
+msgstr "Напряжение сети, выше которого ИБП переключается на батареи."
+
+msgid "Return percentage charge"
+msgstr "Процент заряда возврата"
+
+msgid "The percentage charge that the batteries must have after a power off condition before the UPS will restore power to your equipment."
+msgstr "Процент заряда, который должен иметь аккумулятор после отключения питания, прежде чем ИБП восстановит питание внешнего оборудования."
+
+msgid "Internal temperature"
+msgstr "Внутренняя температура"
+
+msgid "Internal UPS temperature as supplied by the UPS."
+msgstr "Внутренняя температура ИБП, выдаваемая ИБП."
+
+msgid "Alarm delay"
+msgstr "Задержка аварийного сигнала"
+
+msgid "The delay period for the UPS alarm."
+msgstr "Период задержки для аварийного сигнала ИБП."
+
+msgid "Battery voltage"
+msgstr "Напряжение батареи"
+
+msgid "Battery voltage as supplied by the UPS."
+msgstr "Напряжение батареи от ИБП."
+
+msgid "Line frequency"
+msgstr "Частота сети"
+
+msgid "Line frequency in hertz as given by the UPS."
+msgstr "Частота сети в герцах, заданная ИБП."
+
+msgid "Reason transfer"
+msgstr "Причина переключения"
+
+msgid "The reason for the last transfer to batteries."
+msgstr "Причина последнего переключения на батареи."
+
+msgid "Number of transfers"
+msgstr "Количество переключений"
+
+msgid "The number of transfers to batteries since apcupsd startup."
+msgstr "Количество переключений на батареи с момента запуска apcupsd."
+
+msgid "Last transfer date"
+msgstr "Дата последнего переключения"
+
+msgid "Time and date of last transfer to batteries, or N/A."
+msgstr "Время и дата последнего переключения на батареи или N/A."
+
+msgid "Time on battery"
+msgstr "Время работы от батареи"
+
+msgid "Time in seconds currently on batteries, or 0."
+msgstr "Время в секундах, текущей работы от батарей, или 0."
+
+msgid "Total time on battery"
+msgstr "Общее время работы от батареи"
+
+msgid "Total (cumulative) time on batteries in seconds since apcupsd startup."
+msgstr "Общее (суммарное) время работы от батарей (в секундах) с времени запуска apcupsd."
+
+msgid "Last transfer from batteries date"
+msgstr "Дата последнего переключения с батареи"
+
+msgid "Time and date of last transfer from batteries, or N/A."
+msgstr "Время и дата последнего переключения с батарей или N/A."
+
+msgid "Results of the last self test"
+msgstr "Результат последнего самотестирования"
+
+msgid "The results of the last self test, and may have the following values:"
+msgstr "Результаты последнего самотестирования и могут иметь следующие значения:"
+
+msgid "OK: self test indicates good battery"
+msgstr "OK: самопроверка указывает на исправную батарею"
+
+msgid "BT: self test failed due to insufficient battery capacity"
+msgstr "BT: самопроверка не удалась из-за недостаточной емкости аккумулятора"
+
+msgid "NG: self test failed due to overload"
+msgstr "NG: самопроверка не удалась из-за перегрузки"
+
+msgid "NO: No results (i.e. no self test performed in the last 5 minutes)"
+msgstr "NO: Нет результатов (т. е. за последние 5 минут самопроверка не проводилась)"
+
+msgid "Self test interval"
+msgstr "Интервал самопроверки"
+
+msgid "The interval in hours between automatic self tests."
+msgstr "Интервал в часах между автоматическими самопроверками."
+
+msgid "Status flag"
+msgstr "Флаг состояния"
+
+msgid "Status flag. English version is given by STATUS."
+msgstr "Флаг состояния. Английская версия предоставлена STATUS."
+
+msgid "Dip switch"
+msgstr "Текущие настройки переключателей ИБП (dip switch)."
+
+msgid "The current dip switch settings on UPSes that have them."
+msgstr "Текущие настройки переключателей ИБП."
+
+msgid "Fault register 1"
+msgstr "Регистр неисправностей 1"
+
+msgid "The value from the UPS fault register 1."
+msgstr "Значение из регистра неисправностей ИБП 1."
+
+msgid "Fault register 2"
+msgstr "Регистр неисправностей 2"
+
+msgid "The value from the UPS fault register 2."
+msgstr "Значение из регистра неисправностей ИБП 2."
+
+msgid "Fault register 3"
+msgstr "Регистр неисправностей 3"
+
+msgid "The value from the UPS fault register 3."
+msgstr "Значение из регистра неисправностей ИБП 3."
+
+msgid "Manufactured date"
+msgstr "Дата изготовления"
+
+msgid "The date the UPS was manufactured."
+msgstr "Дата изготовления ИБП."
+
+msgid "Serial number"
+msgstr "Серийный номер"
+
+msgid "The UPS serial number."
+msgstr "Серийный номер ИБП."
+
+msgid "Battery replaced date"
+msgstr "Дата замены батареи"
+
+msgid "The date that batteries were last replaced."
+msgstr "Дата последней замены батарей."
+
+msgid "Nominal output voltage"
+msgstr "Выходное напряжение"
+
+msgid "The output voltage that the UPS will attempt to supply when on battery power."
+msgstr "Выходное напряжение, которое ИБП будет пытаться обеспечить при питании от батареи."
+
+msgid "Nominal input voltage"
+msgstr "Входное напряжение"
+
+msgid "The input voltage that the UPS is configured to expect."
+msgstr "Входное напряжение, на которое рассчитан ИБП."
+
+msgid "Nominal battery voltage"
+msgstr "Напряжение батареи"
+
+msgid "The nominal battery voltage."
+msgstr "Номинальное напряжение батареи."
+
+msgid "Nominal power"
+msgstr "Номинальная мощность"
+
+msgid "The maximum power in Watts that the UPS is designed to supply."
+msgstr "Максимальная мощность в ваттах, на которую рассчитан ИБП."
+
+msgid "Humidity"
+msgstr "Влажность"
+
+msgid "The humidity as measured by the UPS."
+msgstr "Влажность, измеренная ИБП."
+
+msgid "Ambient temperature"
+msgstr "Температура окружающей среды"
+
+msgid "The ambient temperature as measured by the UPS."
+msgstr "Температура окружающей среды, измеренная ИБП."
+
+msgid "External batteries"
+msgstr "Внешние батареи"
+
+msgid "The number of external batteries as defined by the user. A correct number here helps the UPS compute the remaining runtime more accurately."
+msgstr "Количество внешних батарей определяется пользователем. Правильное число помогает ИБП более точно рассчитать оставшееся время работы."
+
+msgid "Bad battery packs"
+msgstr "Неисправные батарейные блоки"
+
+msgid "The number of bad battery packs."
+msgstr "Количество неисправных батарейных блоков."
+
+msgid "Firmware"
+msgstr "Прошивка"
+
+msgid "The firmware revision number as reported by the UPS."
+msgstr "Версия прошивки, сообщаемая ИБП."
+
+msgid "APC model"
+msgstr "APC модель"
+
+msgid "The old APC model identification code."
+msgstr "Старый идентификационный код модели APC."
