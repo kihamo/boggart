@@ -180,9 +180,5 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		_ = b.MQTT().PublishAsync(ctx, b.config().TopicVariable.Format(sn, VariableFirmware), *status.Firmware)
 	}
 
-	if status.APCModel != nil {
-		_ = b.MQTT().PublishAsync(ctx, b.config().TopicVariable.Format(sn, VariableAPCModel), *status.APCModel)
-	}
-
 	return nil
 }

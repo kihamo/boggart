@@ -271,7 +271,7 @@
                     {{ if not (empty .status.BatteryVoltage) }}
                     <tr>
                         <td>{{ i18n "Battery voltage" . }}</td>
-                        <td><script type="application/javascript">document.write(valueFormat({{ .status.BatteryVoltage }},{minimumFractionDigits:0}))</script> V</td>
+                        <td><script type="application/javascript">document.write(valueFormat({{ .status.BatteryVoltage }},{minimumFractionDigits:1}))</script> V</td>
                         <td>{{ i18n "Battery voltage as supplied by the UPS." . }}</td>
                     </tr>
                     {{ end }}

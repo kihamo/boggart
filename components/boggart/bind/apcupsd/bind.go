@@ -80,7 +80,7 @@ const (
 	VariableExternalBatteries           = "battery-packs-external"
 	VariableBadBatteryPacks             = "battery-packs-bad"
 	VariableFirmware                    = "ups-firmware"
-	VariableAPCModel                    = "ups-model"
+	VariableAPCModel                    = ""
 )
 
 func (b *Bind) config() *Config {
