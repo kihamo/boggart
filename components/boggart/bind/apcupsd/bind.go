@@ -26,7 +26,7 @@ const (
 	VariableAPC                         = ""
 	VariableDate                        = ""
 	VariableHostname                    = ""
-	VariableUPSName                     = "ups-model"
+	VariableUPSName                     = ""
 	VariableVersion                     = "server-version"
 	VariableCable                       = ""
 	VariableModel                       = "ups-model"

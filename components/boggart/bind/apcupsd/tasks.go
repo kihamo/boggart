@@ -3,6 +3,7 @@ package apcupsd
 import (
 	"context"
 	"errors"
+
 	"github.com/kihamo/boggart/components/boggart/tasks"
 )
 
@@ -50,7 +51,6 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		return nil
 	}
 
-	_ = b.MQTT().PublishAsync(ctx, b.config().TopicVariable.Format(sn, VariableUPSName), status.UPSName)
 	_ = b.MQTT().PublishAsync(ctx, b.config().TopicVariable.Format(sn, VariableVersion), status.Version)
 	_ = b.MQTT().PublishAsync(ctx, b.config().TopicVariable.Format(sn, VariableModel), status.Model)
 	_ = b.MQTT().PublishAsync(ctx, b.config().TopicVariable.Format(sn, VariableStatus), status.Status)
