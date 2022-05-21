@@ -61,14 +61,15 @@ sensor:
     name: "ESP32 Hall Sensor"
     update_interval: 60s
 
-#- platform: xiaomi_miscale
-#  mac_address: !secret device_004_xiaomi_miscale_mac
-#  weight:
-#    id: "scale_weight"
-#    name: "Scale Weight"
-#  impedance:
-#    id: "scale_impedance"
-#    name: "Scale Impedance"
+#  - platform: xiaomi_miscale
+#    mac_address: !secret device_004_xiaomi_miscale_mac
+#    weight:
+#      id: "scale_weight"
+#      name: "Scale Weight"
+#    impedance:
+#      id: "scale_impedance"
+#      name: "Scale Impedance"
+#    clear_impedance: true
 
 switch:
   - platform: gpio
@@ -160,14 +161,34 @@ switch:
 #  scan_parameters:
 #    duration: 10s
 #    active: false
+#  on_ble_advertise:
+#    - then:
+#        - lambda: |-
+#            ESP_LOGD("ble_adv", "New BLE device");
+#            ESP_LOGD("ble_adv", "  address: %s", x.address_str().c_str());
+#            ESP_LOGD("ble_adv", "  name: %s", x.get_name().c_str());
+#            ESP_LOGD("ble_adv", "  Advertised service UUIDs:");
+#            for (auto uuid : x.get_service_uuids()) {
+#                ESP_LOGD("ble_adv", "    - %s", uuid.to_string().c_str());
+#            }
+#            ESP_LOGD("ble_adv", "  Advertised service data:");
+#            for (auto data : x.get_service_datas()) {
+#                ESP_LOGD("ble_adv", "    - %s: (length %i)", data.uuid.to_string().c_str(), data.data.size());
+#            }
+#            ESP_LOGD("ble_adv", "  Advertised manufacturer data:");
+#            for (auto data : x.get_manufacturer_datas()) {
+#                ESP_LOGD("ble_adv", "    - %s: (length %i)", data.uuid.to_string().c_str(), data.data.size());
+#            }
 #  on_ble_service_data_advertise:
-#  - mac_address: !secret device_004_xiaomi_kettle_mac
-#    service_uuid: FE95
-#    then:
-#    - lambda: |-
-#        id(kettle_temp).publish_state(float(x[16]));
-#        if(x[15] == 01) {
-#          id(kettle_mode).publish_state(true);
-#        } else {
-#          id(kettle_mode).publish_state(false);
-#        }
+#    - mac_address: !secret device_004_xiaomi_kettle_mac
+#      service_uuid: FE95
+#      then:
+#        - lambda: |-
+#            ESP_LOGD("ble_adv", "Response data: %s", format_hex_pretty(x).c_str());
+#
+#            id(kettle_temp).publish_state(float(x[16]));
+#            if(x[15] == 01) {
+#              id(kettle_mode).publish_state(true);
+#            } else {
+#              id(kettle_mode).publish_state(false);
+#            }
