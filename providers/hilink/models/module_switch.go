@@ -6,6 +6,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
+
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
@@ -102,6 +104,11 @@ type ModuleSwitch struct {
 
 // Validate validates this module switch
 func (m *ModuleSwitch) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this module switch based on context it is used
+func (m *ModuleSwitch) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

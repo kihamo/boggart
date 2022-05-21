@@ -46,7 +46,7 @@ func NewGetCurrentPLMNOK() *GetCurrentPLMNOK {
 	return &GetCurrentPLMNOK{}
 }
 
-/*GetCurrentPLMNOK handles this case with default header values.
+/* GetCurrentPLMNOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -57,7 +57,6 @@ type GetCurrentPLMNOK struct {
 func (o *GetCurrentPLMNOK) Error() string {
 	return fmt.Sprintf("[GET /api/net/current-plmn][%d] getCurrentPLMNOK  %+v", 200, o.Payload)
 }
-
 func (o *GetCurrentPLMNOK) GetPayload() *models.CurrentPLMN {
 	return o.Payload
 }
@@ -81,7 +80,7 @@ func NewGetCurrentPLMNDefault(code int) *GetCurrentPLMNDefault {
 	}
 }
 
-/*GetCurrentPLMNDefault handles this case with default header values.
+/* GetCurrentPLMNDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -99,7 +98,6 @@ func (o *GetCurrentPLMNDefault) Code() int {
 func (o *GetCurrentPLMNDefault) Error() string {
 	return fmt.Sprintf("[GET /api/net/current-plmn][%d] getCurrentPLMN default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *GetCurrentPLMNDefault) GetPayload() *models.Error {
 	return o.Payload
 }

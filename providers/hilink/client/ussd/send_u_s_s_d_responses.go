@@ -46,7 +46,7 @@ func NewSendUSSDOK() *SendUSSDOK {
 	return &SendUSSDOK{}
 }
 
-/*SendUSSDOK handles this case with default header values.
+/* SendUSSDOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -57,7 +57,6 @@ type SendUSSDOK struct {
 func (o *SendUSSDOK) Error() string {
 	return fmt.Sprintf("[POST /api/ussd/send][%d] sendUSSDOK  %+v", 200, o.Payload)
 }
-
 func (o *SendUSSDOK) GetPayload() *models.USSD {
 	return o.Payload
 }
@@ -81,7 +80,7 @@ func NewSendUSSDDefault(code int) *SendUSSDDefault {
 	}
 }
 
-/*SendUSSDDefault handles this case with default header values.
+/* SendUSSDDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -99,7 +98,6 @@ func (o *SendUSSDDefault) Code() int {
 func (o *SendUSSDDefault) Error() string {
 	return fmt.Sprintf("[POST /api/ussd/send][%d] sendUSSD default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *SendUSSDDefault) GetPayload() *models.Error {
 	return o.Payload
 }

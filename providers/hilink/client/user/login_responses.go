@@ -6,6 +6,7 @@ package user
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"fmt"
 	"io"
 
@@ -47,7 +48,7 @@ func NewLoginOK() *LoginOK {
 	return &LoginOK{}
 }
 
-/*LoginOK handles this case with default header values.
+/* LoginOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -58,7 +59,6 @@ type LoginOK struct {
 func (o *LoginOK) Error() string {
 	return fmt.Sprintf("[POST /api/user/login][%d] loginOK  %+v", 200, o.Payload)
 }
-
 func (o *LoginOK) GetPayload() string {
 	return o.Payload
 }
@@ -80,7 +80,7 @@ func NewLoginDefault(code int) *LoginDefault {
 	}
 }
 
-/*LoginDefault handles this case with default header values.
+/* LoginDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -98,7 +98,6 @@ func (o *LoginDefault) Code() int {
 func (o *LoginDefault) Error() string {
 	return fmt.Sprintf("[POST /api/user/login][%d] login default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *LoginDefault) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -132,6 +131,11 @@ type LoginBody struct {
 
 // Validate validates this login body
 func (o *LoginBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this login body based on context it is used
+func (o *LoginBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

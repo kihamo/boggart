@@ -16,52 +16,66 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewGetMonitoringTrafficStatisticsParams creates a new GetMonitoringTrafficStatisticsParams object
-// with the default values initialized.
+// NewGetMonitoringTrafficStatisticsParams creates a new GetMonitoringTrafficStatisticsParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetMonitoringTrafficStatisticsParams() *GetMonitoringTrafficStatisticsParams {
-
 	return &GetMonitoringTrafficStatisticsParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetMonitoringTrafficStatisticsParamsWithTimeout creates a new GetMonitoringTrafficStatisticsParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetMonitoringTrafficStatisticsParamsWithTimeout(timeout time.Duration) *GetMonitoringTrafficStatisticsParams {
-
 	return &GetMonitoringTrafficStatisticsParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGetMonitoringTrafficStatisticsParamsWithContext creates a new GetMonitoringTrafficStatisticsParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetMonitoringTrafficStatisticsParamsWithContext(ctx context.Context) *GetMonitoringTrafficStatisticsParams {
-
 	return &GetMonitoringTrafficStatisticsParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGetMonitoringTrafficStatisticsParamsWithHTTPClient creates a new GetMonitoringTrafficStatisticsParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetMonitoringTrafficStatisticsParamsWithHTTPClient(client *http.Client) *GetMonitoringTrafficStatisticsParams {
-
 	return &GetMonitoringTrafficStatisticsParams{
 		HTTPClient: client,
 	}
 }
 
-/*GetMonitoringTrafficStatisticsParams contains all the parameters to send to the API endpoint
-for the get monitoring traffic statistics operation typically these are written to a http.Request
+/* GetMonitoringTrafficStatisticsParams contains all the parameters to send to the API endpoint
+   for the get monitoring traffic statistics operation.
+
+   Typically these are written to a http.Request.
 */
 type GetMonitoringTrafficStatisticsParams struct {
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get monitoring traffic statistics params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetMonitoringTrafficStatisticsParams) WithDefaults() *GetMonitoringTrafficStatisticsParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get monitoring traffic statistics params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetMonitoringTrafficStatisticsParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get monitoring traffic statistics params

@@ -23,9 +23,12 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	GetWebServerSession(params *GetWebServerSessionParams) (*GetWebServerSessionOK, error)
+	GetWebServerSession(params *GetWebServerSessionParams, opts ...ClientOption) (*GetWebServerSessionOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -33,13 +36,12 @@ type ClientService interface {
 /*
   GetWebServerSession get web server session API
 */
-func (a *Client) GetWebServerSession(params *GetWebServerSessionParams) (*GetWebServerSessionOK, error) {
+func (a *Client) GetWebServerSession(params *GetWebServerSessionParams, opts ...ClientOption) (*GetWebServerSessionOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetWebServerSessionParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getWebServerSession",
 		Method:             "GET",
 		PathPattern:        "/api/webserver/SesTokInfo",
@@ -50,7 +52,12 @@ func (a *Client) GetWebServerSession(params *GetWebServerSessionParams) (*GetWeb
 		Reader:             &GetWebServerSessionReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

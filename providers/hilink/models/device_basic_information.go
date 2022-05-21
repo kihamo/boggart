@@ -6,6 +6,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
+
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
@@ -45,6 +47,11 @@ type DeviceBasicInformation struct {
 
 // Validate validates this device basic information
 func (m *DeviceBasicInformation) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this device basic information based on context it is used
+func (m *DeviceBasicInformation) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

@@ -18,56 +18,70 @@ import (
 	static "github.com/kihamo/boggart/providers/hilink/static/models"
 )
 
-// NewSendSMSParams creates a new SendSMSParams object
-// with the default values initialized.
+// NewSendSMSParams creates a new SendSMSParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewSendSMSParams() *SendSMSParams {
-	var ()
 	return &SendSMSParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewSendSMSParamsWithTimeout creates a new SendSMSParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewSendSMSParamsWithTimeout(timeout time.Duration) *SendSMSParams {
-	var ()
 	return &SendSMSParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewSendSMSParamsWithContext creates a new SendSMSParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewSendSMSParamsWithContext(ctx context.Context) *SendSMSParams {
-	var ()
 	return &SendSMSParams{
-
 		Context: ctx,
 	}
 }
 
 // NewSendSMSParamsWithHTTPClient creates a new SendSMSParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewSendSMSParamsWithHTTPClient(client *http.Client) *SendSMSParams {
-	var ()
 	return &SendSMSParams{
 		HTTPClient: client,
 	}
 }
 
-/*SendSMSParams contains all the parameters to send to the API endpoint
-for the send s m s operation typically these are written to a http.Request
+/* SendSMSParams contains all the parameters to send to the API endpoint
+   for the send s m s operation.
+
+   Typically these are written to a http.Request.
 */
 type SendSMSParams struct {
 
-	/*Request*/
+	// Request.
 	Request static.SMSSendRequest
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the send s m s params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *SendSMSParams) WithDefaults() *SendSMSParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the send s m s params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *SendSMSParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the send s m s params
@@ -121,7 +135,6 @@ func (o *SendSMSParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regis
 		return err
 	}
 	var res []error
-
 	if err := r.SetBodyParam(o.Request); err != nil {
 		return err
 	}

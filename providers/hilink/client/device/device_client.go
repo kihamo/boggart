@@ -23,19 +23,22 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	DeviceControl(params *DeviceControlParams) (*DeviceControlOK, error)
+	DeviceControl(params *DeviceControlParams, opts ...ClientOption) (*DeviceControlOK, error)
 
-	GetCompressLogFile(params *GetCompressLogFileParams) (*GetCompressLogFileOK, error)
+	GetCompressLogFile(params *GetCompressLogFileParams, opts ...ClientOption) (*GetCompressLogFileOK, error)
 
-	GetDeviceAutoRunVersion(params *GetDeviceAutoRunVersionParams) (*GetDeviceAutoRunVersionOK, error)
+	GetDeviceAutoRunVersion(params *GetDeviceAutoRunVersionParams, opts ...ClientOption) (*GetDeviceAutoRunVersionOK, error)
 
-	GetDeviceBasicInformation(params *GetDeviceBasicInformationParams) (*GetDeviceBasicInformationOK, error)
+	GetDeviceBasicInformation(params *GetDeviceBasicInformationParams, opts ...ClientOption) (*GetDeviceBasicInformationOK, error)
 
-	GetDeviceInformation(params *GetDeviceInformationParams) (*GetDeviceInformationOK, error)
+	GetDeviceInformation(params *GetDeviceInformationParams, opts ...ClientOption) (*GetDeviceInformationOK, error)
 
-	GetDeviceSignal(params *GetDeviceSignalParams) (*GetDeviceSignalOK, error)
+	GetDeviceSignal(params *GetDeviceSignalParams, opts ...ClientOption) (*GetDeviceSignalOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -43,13 +46,12 @@ type ClientService interface {
 /*
   DeviceControl device control API
 */
-func (a *Client) DeviceControl(params *DeviceControlParams) (*DeviceControlOK, error) {
+func (a *Client) DeviceControl(params *DeviceControlParams, opts ...ClientOption) (*DeviceControlOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewDeviceControlParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "DeviceControl",
 		Method:             "POST",
 		PathPattern:        "/api/device/control",
@@ -60,7 +62,12 @@ func (a *Client) DeviceControl(params *DeviceControlParams) (*DeviceControlOK, e
 		Reader:             &DeviceControlReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -76,13 +83,12 @@ func (a *Client) DeviceControl(params *DeviceControlParams) (*DeviceControlOK, e
 /*
   GetCompressLogFile get compress log file API
 */
-func (a *Client) GetCompressLogFile(params *GetCompressLogFileParams) (*GetCompressLogFileOK, error) {
+func (a *Client) GetCompressLogFile(params *GetCompressLogFileParams, opts ...ClientOption) (*GetCompressLogFileOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetCompressLogFileParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getCompressLogFile",
 		Method:             "GET",
 		PathPattern:        "/api/device/compresslogfile",
@@ -93,7 +99,12 @@ func (a *Client) GetCompressLogFile(params *GetCompressLogFileParams) (*GetCompr
 		Reader:             &GetCompressLogFileReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -109,13 +120,12 @@ func (a *Client) GetCompressLogFile(params *GetCompressLogFileParams) (*GetCompr
 /*
   GetDeviceAutoRunVersion get device auto run version API
 */
-func (a *Client) GetDeviceAutoRunVersion(params *GetDeviceAutoRunVersionParams) (*GetDeviceAutoRunVersionOK, error) {
+func (a *Client) GetDeviceAutoRunVersion(params *GetDeviceAutoRunVersionParams, opts ...ClientOption) (*GetDeviceAutoRunVersionOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetDeviceAutoRunVersionParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getDeviceAutoRunVersion",
 		Method:             "GET",
 		PathPattern:        "/api/device/autorun-version",
@@ -126,7 +136,12 @@ func (a *Client) GetDeviceAutoRunVersion(params *GetDeviceAutoRunVersionParams) 
 		Reader:             &GetDeviceAutoRunVersionReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -142,13 +157,12 @@ func (a *Client) GetDeviceAutoRunVersion(params *GetDeviceAutoRunVersionParams) 
 /*
   GetDeviceBasicInformation get device basic information API
 */
-func (a *Client) GetDeviceBasicInformation(params *GetDeviceBasicInformationParams) (*GetDeviceBasicInformationOK, error) {
+func (a *Client) GetDeviceBasicInformation(params *GetDeviceBasicInformationParams, opts ...ClientOption) (*GetDeviceBasicInformationOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetDeviceBasicInformationParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getDeviceBasicInformation",
 		Method:             "GET",
 		PathPattern:        "/api/device/basic_information",
@@ -159,7 +173,12 @@ func (a *Client) GetDeviceBasicInformation(params *GetDeviceBasicInformationPara
 		Reader:             &GetDeviceBasicInformationReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -175,13 +194,12 @@ func (a *Client) GetDeviceBasicInformation(params *GetDeviceBasicInformationPara
 /*
   GetDeviceInformation get device information API
 */
-func (a *Client) GetDeviceInformation(params *GetDeviceInformationParams) (*GetDeviceInformationOK, error) {
+func (a *Client) GetDeviceInformation(params *GetDeviceInformationParams, opts ...ClientOption) (*GetDeviceInformationOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetDeviceInformationParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getDeviceInformation",
 		Method:             "GET",
 		PathPattern:        "/api/device/information",
@@ -192,7 +210,12 @@ func (a *Client) GetDeviceInformation(params *GetDeviceInformationParams) (*GetD
 		Reader:             &GetDeviceInformationReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -208,13 +231,12 @@ func (a *Client) GetDeviceInformation(params *GetDeviceInformationParams) (*GetD
 /*
   GetDeviceSignal get device signal API
 */
-func (a *Client) GetDeviceSignal(params *GetDeviceSignalParams) (*GetDeviceSignalOK, error) {
+func (a *Client) GetDeviceSignal(params *GetDeviceSignalParams, opts ...ClientOption) (*GetDeviceSignalOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetDeviceSignalParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getDeviceSignal",
 		Method:             "GET",
 		PathPattern:        "/api/device/signal",
@@ -225,7 +247,12 @@ func (a *Client) GetDeviceSignal(params *GetDeviceSignalParams) (*GetDeviceSigna
 		Reader:             &GetDeviceSignalReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

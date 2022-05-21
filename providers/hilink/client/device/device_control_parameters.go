@@ -16,56 +16,70 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewDeviceControlParams creates a new DeviceControlParams object
-// with the default values initialized.
+// NewDeviceControlParams creates a new DeviceControlParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewDeviceControlParams() *DeviceControlParams {
-	var ()
 	return &DeviceControlParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewDeviceControlParamsWithTimeout creates a new DeviceControlParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewDeviceControlParamsWithTimeout(timeout time.Duration) *DeviceControlParams {
-	var ()
 	return &DeviceControlParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewDeviceControlParamsWithContext creates a new DeviceControlParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewDeviceControlParamsWithContext(ctx context.Context) *DeviceControlParams {
-	var ()
 	return &DeviceControlParams{
-
 		Context: ctx,
 	}
 }
 
 // NewDeviceControlParamsWithHTTPClient creates a new DeviceControlParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewDeviceControlParamsWithHTTPClient(client *http.Client) *DeviceControlParams {
-	var ()
 	return &DeviceControlParams{
 		HTTPClient: client,
 	}
 }
 
-/*DeviceControlParams contains all the parameters to send to the API endpoint
-for the device control operation typically these are written to a http.Request
+/* DeviceControlParams contains all the parameters to send to the API endpoint
+   for the device control operation.
+
+   Typically these are written to a http.Request.
 */
 type DeviceControlParams struct {
 
-	/*Request*/
+	// Request.
 	Request DeviceControlBody
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the device control params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *DeviceControlParams) WithDefaults() *DeviceControlParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the device control params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *DeviceControlParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the device control params
@@ -119,7 +133,6 @@ func (o *DeviceControlParams) WriteToRequest(r runtime.ClientRequest, reg strfmt
 		return err
 	}
 	var res []error
-
 	if err := r.SetBodyParam(o.Request); err != nil {
 		return err
 	}

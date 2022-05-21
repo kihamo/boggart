@@ -46,7 +46,7 @@ func NewGetDeviceSignalOK() *GetDeviceSignalOK {
 	return &GetDeviceSignalOK{}
 }
 
-/*GetDeviceSignalOK handles this case with default header values.
+/* GetDeviceSignalOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -57,7 +57,6 @@ type GetDeviceSignalOK struct {
 func (o *GetDeviceSignalOK) Error() string {
 	return fmt.Sprintf("[GET /api/device/signal][%d] getDeviceSignalOK  %+v", 200, o.Payload)
 }
-
 func (o *GetDeviceSignalOK) GetPayload() *models.DeviceSignal {
 	return o.Payload
 }
@@ -81,7 +80,7 @@ func NewGetDeviceSignalDefault(code int) *GetDeviceSignalDefault {
 	}
 }
 
-/*GetDeviceSignalDefault handles this case with default header values.
+/* GetDeviceSignalDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -99,7 +98,6 @@ func (o *GetDeviceSignalDefault) Code() int {
 func (o *GetDeviceSignalDefault) Error() string {
 	return fmt.Sprintf("[GET /api/device/signal][%d] getDeviceSignal default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *GetDeviceSignalDefault) GetPayload() *models.Error {
 	return o.Payload
 }

@@ -46,7 +46,7 @@ func NewSendSMSOK() *SendSMSOK {
 	return &SendSMSOK{}
 }
 
-/*SendSMSOK handles this case with default header values.
+/* SendSMSOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -57,7 +57,6 @@ type SendSMSOK struct {
 func (o *SendSMSOK) Error() string {
 	return fmt.Sprintf("[POST /api/sms/send-sms][%d] sendSMSOK  %+v", 200, o.Payload)
 }
-
 func (o *SendSMSOK) GetPayload() string {
 	return o.Payload
 }
@@ -79,7 +78,7 @@ func NewSendSMSDefault(code int) *SendSMSDefault {
 	}
 }
 
-/*SendSMSDefault handles this case with default header values.
+/* SendSMSDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -97,7 +96,6 @@ func (o *SendSMSDefault) Code() int {
 func (o *SendSMSDefault) Error() string {
 	return fmt.Sprintf("[POST /api/sms/send-sms][%d] sendSMS default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *SendSMSDefault) GetPayload() *models.Error {
 	return o.Payload
 }

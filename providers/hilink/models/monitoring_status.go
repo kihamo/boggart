@@ -6,6 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/go-openapi/errors"
@@ -143,7 +144,6 @@ func (m *MonitoringStatus) validateSimStatusEnum(path, location string, value in
 }
 
 func (m *MonitoringStatus) validateSimStatus(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.SimStatus) { // not required
 		return nil
 	}
@@ -153,6 +153,11 @@ func (m *MonitoringStatus) validateSimStatus(formats strfmt.Registry) error {
 		return err
 	}
 
+	return nil
+}
+
+// ContextValidate validates this monitoring status based on context it is used
+func (m *MonitoringStatus) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

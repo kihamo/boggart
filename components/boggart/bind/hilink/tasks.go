@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart/tasks"
-	"github.com/kihamo/boggart/providers/hilink"
 	"github.com/kihamo/boggart/providers/hilink/client/device"
 	"github.com/kihamo/boggart/providers/hilink/client/global"
 	"github.com/kihamo/boggart/providers/hilink/client/monitoring"
@@ -225,14 +224,14 @@ func (b *Bind) taskSMSCheckerHandler(ctx context.Context) error {
 		if s.Status != 1 {
 			payload, e := json.Marshal(s)
 
-			if err != nil {
+			if e != nil {
 				err = multierr.Append(err, e)
 				continue
 			}
 
 			isSpecial := b.checkSpecialSMS(ctx, s)
 			if !isSpecial {
-				if e = b.MQTT().PublishAsync(ctx, cfg.TopicSMS.Format(sn), payload); e != nil {
+				if e = b.MQTT().PublishAsync(ctx, cfg.TopicSMSLast.Format(sn), payload); e != nil {
 					err = multierr.Append(err, e)
 					continue
 				}
@@ -356,19 +355,31 @@ func (b *Bind) taskSystemUpdaterHandler(ctx context.Context) (err error) {
 
 	// traffic
 	if response, e := b.client.Monitoring.GetMonitoringTrafficStatistics(monitoring.NewGetMonitoringTrafficStatisticsParamsWithContext(ctx)); e == nil {
-		metricTotalConnectTime.With("serial_number", sn).Set(float64(response.Payload.TotalConnectTime))
-		metricTotalDownload.With("serial_number", sn).Set(float64(response.Payload.TotalDownload))
-		metricTotalUpload.With("serial_number", sn).Set(float64(response.Payload.TotalUpload))
+		metricMobileTotalConnectDuration.With("serial_number", sn).Set(float64(response.Payload.TotalConnectTime))
+		metricMobileTotalDownload.With("serial_number", sn).Set(float64(response.Payload.TotalDownload))
+		metricMobileTotalUpload.With("serial_number", sn).Set(float64(response.Payload.TotalUpload))
 
-		if e := b.MQTT().PublishAsync(ctx, cfg.TopicConnectionTime.Format(sn), response.Payload.TotalConnectTime); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicMobileCurrentConnectionDuration.Format(sn), response.Payload.CurrentConnectTime); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTT().PublishAsync(ctx, cfg.TopicConnectionDownload.Format(sn), response.Payload.TotalDownload); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicMobileCurrentDownload.Format(sn), response.Payload.CurrentDownload); e != nil {
 			err = multierr.Append(err, e)
 		}
 
-		if e := b.MQTT().PublishAsync(ctx, cfg.TopicConnectionUpload.Format(sn), response.Payload.TotalUpload); e != nil {
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicMobileCurrentUpload.Format(sn), response.Payload.CurrentUpload); e != nil {
+			err = multierr.Append(err, e)
+		}
+
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicMobileTotalConnectionDuration.Format(sn), response.Payload.TotalConnectTime); e != nil {
+			err = multierr.Append(err, e)
+		}
+
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicMobileTotalDownload.Format(sn), response.Payload.TotalDownload); e != nil {
+			err = multierr.Append(err, e)
+		}
+
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicMobileTotalUpload.Format(sn), response.Payload.TotalUpload); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {
@@ -405,14 +416,13 @@ func (b *Bind) taskCleanerHandler(ctx context.Context) error {
 
 		for _, s := range response.Payload.Messages {
 			remove := cfg.CleanerSpecial && b.checkSpecialSMS(ctx, s)
-			if !remove {
-				d, e := time.Parse(hilink.TimeFormat, s.Date)
 
-				if e != nil {
+			if !remove {
+				if s.Date.Time().IsZero() {
 					continue
 				}
 
-				remove = time.Since(d) > cfg.CleanerDuration
+				remove = time.Since(s.Date.Time()) > cfg.CleanerDuration
 			}
 
 			if remove {

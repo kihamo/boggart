@@ -46,7 +46,7 @@ func NewGetGlobalModuleSwitchOK() *GetGlobalModuleSwitchOK {
 	return &GetGlobalModuleSwitchOK{}
 }
 
-/*GetGlobalModuleSwitchOK handles this case with default header values.
+/* GetGlobalModuleSwitchOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -57,7 +57,6 @@ type GetGlobalModuleSwitchOK struct {
 func (o *GetGlobalModuleSwitchOK) Error() string {
 	return fmt.Sprintf("[GET /api/global/module-switch][%d] getGlobalModuleSwitchOK  %+v", 200, o.Payload)
 }
-
 func (o *GetGlobalModuleSwitchOK) GetPayload() *models.ModuleSwitch {
 	return o.Payload
 }
@@ -81,7 +80,7 @@ func NewGetGlobalModuleSwitchDefault(code int) *GetGlobalModuleSwitchDefault {
 	}
 }
 
-/*GetGlobalModuleSwitchDefault handles this case with default header values.
+/* GetGlobalModuleSwitchDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -99,7 +98,6 @@ func (o *GetGlobalModuleSwitchDefault) Code() int {
 func (o *GetGlobalModuleSwitchDefault) Error() string {
 	return fmt.Sprintf("[GET /api/global/module-switch][%d] getGlobalModuleSwitch default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *GetGlobalModuleSwitchDefault) GetPayload() *models.Error {
 	return o.Payload
 }

@@ -23,9 +23,12 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	GetGlobalModuleSwitch(params *GetGlobalModuleSwitchParams) (*GetGlobalModuleSwitchOK, error)
+	GetGlobalModuleSwitch(params *GetGlobalModuleSwitchParams, opts ...ClientOption) (*GetGlobalModuleSwitchOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -33,13 +36,12 @@ type ClientService interface {
 /*
   GetGlobalModuleSwitch get global module switch API
 */
-func (a *Client) GetGlobalModuleSwitch(params *GetGlobalModuleSwitchParams) (*GetGlobalModuleSwitchOK, error) {
+func (a *Client) GetGlobalModuleSwitch(params *GetGlobalModuleSwitchParams, opts ...ClientOption) (*GetGlobalModuleSwitchOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetGlobalModuleSwitchParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getGlobalModuleSwitch",
 		Method:             "GET",
 		PathPattern:        "/api/global/module-switch",
@@ -50,7 +52,12 @@ func (a *Client) GetGlobalModuleSwitch(params *GetGlobalModuleSwitchParams) (*Ge
 		Reader:             &GetGlobalModuleSwitchReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

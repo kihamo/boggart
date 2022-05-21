@@ -23,17 +23,20 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	GetSMSCount(params *GetSMSCountParams) (*GetSMSCountOK, error)
+	GetSMSCount(params *GetSMSCountParams, opts ...ClientOption) (*GetSMSCountOK, error)
 
-	GetSMSList(params *GetSMSListParams) (*GetSMSListOK, error)
+	GetSMSList(params *GetSMSListParams, opts ...ClientOption) (*GetSMSListOK, error)
 
-	ReadSMS(params *ReadSMSParams) (*ReadSMSOK, error)
+	ReadSMS(params *ReadSMSParams, opts ...ClientOption) (*ReadSMSOK, error)
 
-	RemoveSMS(params *RemoveSMSParams) (*RemoveSMSOK, error)
+	RemoveSMS(params *RemoveSMSParams, opts ...ClientOption) (*RemoveSMSOK, error)
 
-	SendSMS(params *SendSMSParams) (*SendSMSOK, error)
+	SendSMS(params *SendSMSParams, opts ...ClientOption) (*SendSMSOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -41,13 +44,12 @@ type ClientService interface {
 /*
   GetSMSCount get s m s count API
 */
-func (a *Client) GetSMSCount(params *GetSMSCountParams) (*GetSMSCountOK, error) {
+func (a *Client) GetSMSCount(params *GetSMSCountParams, opts ...ClientOption) (*GetSMSCountOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetSMSCountParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getSMSCount",
 		Method:             "GET",
 		PathPattern:        "/api/sms/sms-count",
@@ -58,7 +60,12 @@ func (a *Client) GetSMSCount(params *GetSMSCountParams) (*GetSMSCountOK, error) 
 		Reader:             &GetSMSCountReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -74,13 +81,12 @@ func (a *Client) GetSMSCount(params *GetSMSCountParams) (*GetSMSCountOK, error) 
 /*
   GetSMSList get s m s list API
 */
-func (a *Client) GetSMSList(params *GetSMSListParams) (*GetSMSListOK, error) {
+func (a *Client) GetSMSList(params *GetSMSListParams, opts ...ClientOption) (*GetSMSListOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetSMSListParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getSMSList",
 		Method:             "POST",
 		PathPattern:        "/api/sms/sms-list",
@@ -91,7 +97,12 @@ func (a *Client) GetSMSList(params *GetSMSListParams) (*GetSMSListOK, error) {
 		Reader:             &GetSMSListReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -107,13 +118,12 @@ func (a *Client) GetSMSList(params *GetSMSListParams) (*GetSMSListOK, error) {
 /*
   ReadSMS read s m s API
 */
-func (a *Client) ReadSMS(params *ReadSMSParams) (*ReadSMSOK, error) {
+func (a *Client) ReadSMS(params *ReadSMSParams, opts ...ClientOption) (*ReadSMSOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewReadSMSParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "readSMS",
 		Method:             "POST",
 		PathPattern:        "/api/sms/set-read",
@@ -124,7 +134,12 @@ func (a *Client) ReadSMS(params *ReadSMSParams) (*ReadSMSOK, error) {
 		Reader:             &ReadSMSReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -140,13 +155,12 @@ func (a *Client) ReadSMS(params *ReadSMSParams) (*ReadSMSOK, error) {
 /*
   RemoveSMS remove s m s API
 */
-func (a *Client) RemoveSMS(params *RemoveSMSParams) (*RemoveSMSOK, error) {
+func (a *Client) RemoveSMS(params *RemoveSMSParams, opts ...ClientOption) (*RemoveSMSOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewRemoveSMSParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "removeSMS",
 		Method:             "POST",
 		PathPattern:        "/api/sms/delete-sms",
@@ -157,7 +171,12 @@ func (a *Client) RemoveSMS(params *RemoveSMSParams) (*RemoveSMSOK, error) {
 		Reader:             &RemoveSMSReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -173,13 +192,12 @@ func (a *Client) RemoveSMS(params *RemoveSMSParams) (*RemoveSMSOK, error) {
 /*
   SendSMS send s m s API
 */
-func (a *Client) SendSMS(params *SendSMSParams) (*SendSMSOK, error) {
+func (a *Client) SendSMS(params *SendSMSParams, opts ...ClientOption) (*SendSMSOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewSendSMSParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "sendSMS",
 		Method:             "POST",
 		PathPattern:        "/api/sms/send-sms",
@@ -190,7 +208,12 @@ func (a *Client) SendSMS(params *SendSMSParams) (*SendSMSOK, error) {
 		Reader:             &SendSMSReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

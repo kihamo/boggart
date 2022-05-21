@@ -46,7 +46,7 @@ func NewGetGlobalConfigOK() *GetGlobalConfigOK {
 	return &GetGlobalConfigOK{}
 }
 
-/*GetGlobalConfigOK handles this case with default header values.
+/* GetGlobalConfigOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -57,7 +57,6 @@ type GetGlobalConfigOK struct {
 func (o *GetGlobalConfigOK) Error() string {
 	return fmt.Sprintf("[GET /config/global/config.xml][%d] getGlobalConfigOK  %+v", 200, o.Payload)
 }
-
 func (o *GetGlobalConfigOK) GetPayload() *models.GlobalConfig {
 	return o.Payload
 }
@@ -81,7 +80,7 @@ func NewGetGlobalConfigDefault(code int) *GetGlobalConfigDefault {
 	}
 }
 
-/*GetGlobalConfigDefault handles this case with default header values.
+/* GetGlobalConfigDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -99,7 +98,6 @@ func (o *GetGlobalConfigDefault) Code() int {
 func (o *GetGlobalConfigDefault) Error() string {
 	return fmt.Sprintf("[GET /config/global/config.xml][%d] getGlobalConfig default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *GetGlobalConfigDefault) GetPayload() *models.Error {
 	return o.Payload
 }

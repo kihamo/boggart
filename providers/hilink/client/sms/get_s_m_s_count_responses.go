@@ -46,7 +46,7 @@ func NewGetSMSCountOK() *GetSMSCountOK {
 	return &GetSMSCountOK{}
 }
 
-/*GetSMSCountOK handles this case with default header values.
+/* GetSMSCountOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -57,7 +57,6 @@ type GetSMSCountOK struct {
 func (o *GetSMSCountOK) Error() string {
 	return fmt.Sprintf("[GET /api/sms/sms-count][%d] getSMSCountOK  %+v", 200, o.Payload)
 }
-
 func (o *GetSMSCountOK) GetPayload() *models.SMSCount {
 	return o.Payload
 }
@@ -81,7 +80,7 @@ func NewGetSMSCountDefault(code int) *GetSMSCountDefault {
 	}
 }
 
-/*GetSMSCountDefault handles this case with default header values.
+/* GetSMSCountDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -99,7 +98,6 @@ func (o *GetSMSCountDefault) Code() int {
 func (o *GetSMSCountDefault) Error() string {
 	return fmt.Sprintf("[GET /api/sms/sms-count][%d] getSMSCount default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *GetSMSCountDefault) GetPayload() *models.Error {
 	return o.Payload
 }

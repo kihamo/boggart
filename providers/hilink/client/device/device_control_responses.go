@@ -6,6 +6,7 @@ package device
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -50,7 +51,7 @@ func NewDeviceControlOK() *DeviceControlOK {
 	return &DeviceControlOK{}
 }
 
-/*DeviceControlOK handles this case with default header values.
+/* DeviceControlOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -61,7 +62,6 @@ type DeviceControlOK struct {
 func (o *DeviceControlOK) Error() string {
 	return fmt.Sprintf("[POST /api/device/control][%d] deviceControlOK  %+v", 200, o.Payload)
 }
-
 func (o *DeviceControlOK) GetPayload() string {
 	return o.Payload
 }
@@ -83,7 +83,7 @@ func NewDeviceControlDefault(code int) *DeviceControlDefault {
 	}
 }
 
-/*DeviceControlDefault handles this case with default header values.
+/* DeviceControlDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -101,7 +101,6 @@ func (o *DeviceControlDefault) Code() int {
 func (o *DeviceControlDefault) Error() string {
 	return fmt.Sprintf("[POST /api/device/control][%d] DeviceControl default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *DeviceControlDefault) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -163,7 +162,6 @@ func (o *DeviceControlBody) validateControlEnum(path, location string, value int
 }
 
 func (o *DeviceControlBody) validateControl(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Control) { // not required
 		return nil
 	}
@@ -173,6 +171,11 @@ func (o *DeviceControlBody) validateControl(formats strfmt.Registry) error {
 		return err
 	}
 
+	return nil
+}
+
+// ContextValidate validates this device control body based on context it is used
+func (o *DeviceControlBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

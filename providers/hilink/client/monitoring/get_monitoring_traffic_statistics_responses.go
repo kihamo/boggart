@@ -46,7 +46,7 @@ func NewGetMonitoringTrafficStatisticsOK() *GetMonitoringTrafficStatisticsOK {
 	return &GetMonitoringTrafficStatisticsOK{}
 }
 
-/*GetMonitoringTrafficStatisticsOK handles this case with default header values.
+/* GetMonitoringTrafficStatisticsOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -57,7 +57,6 @@ type GetMonitoringTrafficStatisticsOK struct {
 func (o *GetMonitoringTrafficStatisticsOK) Error() string {
 	return fmt.Sprintf("[GET /api/monitoring/traffic-statistics][%d] getMonitoringTrafficStatisticsOK  %+v", 200, o.Payload)
 }
-
 func (o *GetMonitoringTrafficStatisticsOK) GetPayload() *models.MonitoringTrafficStatistics {
 	return o.Payload
 }
@@ -81,7 +80,7 @@ func NewGetMonitoringTrafficStatisticsDefault(code int) *GetMonitoringTrafficSta
 	}
 }
 
-/*GetMonitoringTrafficStatisticsDefault handles this case with default header values.
+/* GetMonitoringTrafficStatisticsDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -99,7 +98,6 @@ func (o *GetMonitoringTrafficStatisticsDefault) Code() int {
 func (o *GetMonitoringTrafficStatisticsDefault) Error() string {
 	return fmt.Sprintf("[GET /api/monitoring/traffic-statistics][%d] getMonitoringTrafficStatistics default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *GetMonitoringTrafficStatisticsDefault) GetPayload() *models.Error {
 	return o.Payload
 }

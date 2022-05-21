@@ -23,9 +23,12 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	GetCurrentPLMN(params *GetCurrentPLMNParams) (*GetCurrentPLMNOK, error)
+	GetCurrentPLMN(params *GetCurrentPLMNParams, opts ...ClientOption) (*GetCurrentPLMNOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -33,13 +36,12 @@ type ClientService interface {
 /*
   GetCurrentPLMN get current p l m n API
 */
-func (a *Client) GetCurrentPLMN(params *GetCurrentPLMNParams) (*GetCurrentPLMNOK, error) {
+func (a *Client) GetCurrentPLMN(params *GetCurrentPLMNParams, opts ...ClientOption) (*GetCurrentPLMNOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetCurrentPLMNParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getCurrentPLMN",
 		Method:             "GET",
 		PathPattern:        "/api/net/current-plmn",
@@ -50,7 +52,12 @@ func (a *Client) GetCurrentPLMN(params *GetCurrentPLMNParams) (*GetCurrentPLMNOK
 		Reader:             &GetCurrentPLMNReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

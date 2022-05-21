@@ -46,7 +46,7 @@ func NewGetCompressLogFileOK() *GetCompressLogFileOK {
 	return &GetCompressLogFileOK{}
 }
 
-/*GetCompressLogFileOK handles this case with default header values.
+/* GetCompressLogFileOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -57,7 +57,6 @@ type GetCompressLogFileOK struct {
 func (o *GetCompressLogFileOK) Error() string {
 	return fmt.Sprintf("[GET /api/device/compresslogfile][%d] getCompressLogFileOK  %+v", 200, o.Payload)
 }
-
 func (o *GetCompressLogFileOK) GetPayload() *models.DeviceCompressLogFile {
 	return o.Payload
 }
@@ -81,7 +80,7 @@ func NewGetCompressLogFileDefault(code int) *GetCompressLogFileDefault {
 	}
 }
 
-/*GetCompressLogFileDefault handles this case with default header values.
+/* GetCompressLogFileDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -99,7 +98,6 @@ func (o *GetCompressLogFileDefault) Code() int {
 func (o *GetCompressLogFileDefault) Error() string {
 	return fmt.Sprintf("[GET /api/device/compresslogfile][%d] getCompressLogFile default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *GetCompressLogFileDefault) GetPayload() *models.Error {
 	return o.Payload
 }

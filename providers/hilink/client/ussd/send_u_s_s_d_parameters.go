@@ -18,56 +18,70 @@ import (
 	"github.com/kihamo/boggart/providers/hilink/models"
 )
 
-// NewSendUSSDParams creates a new SendUSSDParams object
-// with the default values initialized.
+// NewSendUSSDParams creates a new SendUSSDParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewSendUSSDParams() *SendUSSDParams {
-	var ()
 	return &SendUSSDParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewSendUSSDParamsWithTimeout creates a new SendUSSDParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewSendUSSDParamsWithTimeout(timeout time.Duration) *SendUSSDParams {
-	var ()
 	return &SendUSSDParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewSendUSSDParamsWithContext creates a new SendUSSDParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewSendUSSDParamsWithContext(ctx context.Context) *SendUSSDParams {
-	var ()
 	return &SendUSSDParams{
-
 		Context: ctx,
 	}
 }
 
 // NewSendUSSDParamsWithHTTPClient creates a new SendUSSDParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewSendUSSDParamsWithHTTPClient(client *http.Client) *SendUSSDParams {
-	var ()
 	return &SendUSSDParams{
 		HTTPClient: client,
 	}
 }
 
-/*SendUSSDParams contains all the parameters to send to the API endpoint
-for the send u s s d operation typically these are written to a http.Request
+/* SendUSSDParams contains all the parameters to send to the API endpoint
+   for the send u s s d operation.
+
+   Typically these are written to a http.Request.
 */
 type SendUSSDParams struct {
 
-	/*Request*/
+	// Request.
 	Request *models.USSD
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the send u s s d params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *SendUSSDParams) WithDefaults() *SendUSSDParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the send u s s d params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *SendUSSDParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the send u s s d params
@@ -121,7 +135,6 @@ func (o *SendUSSDParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regi
 		return err
 	}
 	var res []error
-
 	if o.Request != nil {
 		if err := r.SetBodyParam(o.Request); err != nil {
 			return err

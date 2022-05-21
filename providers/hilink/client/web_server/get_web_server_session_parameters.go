@@ -16,52 +16,66 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewGetWebServerSessionParams creates a new GetWebServerSessionParams object
-// with the default values initialized.
+// NewGetWebServerSessionParams creates a new GetWebServerSessionParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetWebServerSessionParams() *GetWebServerSessionParams {
-
 	return &GetWebServerSessionParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetWebServerSessionParamsWithTimeout creates a new GetWebServerSessionParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetWebServerSessionParamsWithTimeout(timeout time.Duration) *GetWebServerSessionParams {
-
 	return &GetWebServerSessionParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGetWebServerSessionParamsWithContext creates a new GetWebServerSessionParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetWebServerSessionParamsWithContext(ctx context.Context) *GetWebServerSessionParams {
-
 	return &GetWebServerSessionParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGetWebServerSessionParamsWithHTTPClient creates a new GetWebServerSessionParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetWebServerSessionParamsWithHTTPClient(client *http.Client) *GetWebServerSessionParams {
-
 	return &GetWebServerSessionParams{
 		HTTPClient: client,
 	}
 }
 
-/*GetWebServerSessionParams contains all the parameters to send to the API endpoint
-for the get web server session operation typically these are written to a http.Request
+/* GetWebServerSessionParams contains all the parameters to send to the API endpoint
+   for the get web server session operation.
+
+   Typically these are written to a http.Request.
 */
 type GetWebServerSessionParams struct {
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get web server session params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetWebServerSessionParams) WithDefaults() *GetWebServerSessionParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get web server session params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetWebServerSessionParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get web server session params

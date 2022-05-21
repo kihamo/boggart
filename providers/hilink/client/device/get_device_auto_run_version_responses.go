@@ -46,7 +46,7 @@ func NewGetDeviceAutoRunVersionOK() *GetDeviceAutoRunVersionOK {
 	return &GetDeviceAutoRunVersionOK{}
 }
 
-/*GetDeviceAutoRunVersionOK handles this case with default header values.
+/* GetDeviceAutoRunVersionOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -57,7 +57,6 @@ type GetDeviceAutoRunVersionOK struct {
 func (o *GetDeviceAutoRunVersionOK) Error() string {
 	return fmt.Sprintf("[GET /api/device/autorun-version][%d] getDeviceAutoRunVersionOK  %+v", 200, o.Payload)
 }
-
 func (o *GetDeviceAutoRunVersionOK) GetPayload() *models.AutoRunVersion {
 	return o.Payload
 }
@@ -81,7 +80,7 @@ func NewGetDeviceAutoRunVersionDefault(code int) *GetDeviceAutoRunVersionDefault
 	}
 }
 
-/*GetDeviceAutoRunVersionDefault handles this case with default header values.
+/* GetDeviceAutoRunVersionDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -99,7 +98,6 @@ func (o *GetDeviceAutoRunVersionDefault) Code() int {
 func (o *GetDeviceAutoRunVersionDefault) Error() string {
 	return fmt.Sprintf("[GET /api/device/autorun-version][%d] getDeviceAutoRunVersion default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *GetDeviceAutoRunVersionDefault) GetPayload() *models.Error {
 	return o.Payload
 }

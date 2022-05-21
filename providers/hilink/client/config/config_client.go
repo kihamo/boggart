@@ -23,9 +23,12 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	GetGlobalConfig(params *GetGlobalConfigParams) (*GetGlobalConfigOK, error)
+	GetGlobalConfig(params *GetGlobalConfigParams, opts ...ClientOption) (*GetGlobalConfigOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -33,13 +36,12 @@ type ClientService interface {
 /*
   GetGlobalConfig get global config API
 */
-func (a *Client) GetGlobalConfig(params *GetGlobalConfigParams) (*GetGlobalConfigOK, error) {
+func (a *Client) GetGlobalConfig(params *GetGlobalConfigParams, opts ...ClientOption) (*GetGlobalConfigOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetGlobalConfigParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getGlobalConfig",
 		Method:             "GET",
 		PathPattern:        "/config/global/config.xml",
@@ -50,7 +52,12 @@ func (a *Client) GetGlobalConfig(params *GetGlobalConfigParams) (*GetGlobalConfi
 		Reader:             &GetGlobalConfigReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

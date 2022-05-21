@@ -16,52 +16,66 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewGetDeviceSignalParams creates a new GetDeviceSignalParams object
-// with the default values initialized.
+// NewGetDeviceSignalParams creates a new GetDeviceSignalParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetDeviceSignalParams() *GetDeviceSignalParams {
-
 	return &GetDeviceSignalParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetDeviceSignalParamsWithTimeout creates a new GetDeviceSignalParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetDeviceSignalParamsWithTimeout(timeout time.Duration) *GetDeviceSignalParams {
-
 	return &GetDeviceSignalParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGetDeviceSignalParamsWithContext creates a new GetDeviceSignalParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetDeviceSignalParamsWithContext(ctx context.Context) *GetDeviceSignalParams {
-
 	return &GetDeviceSignalParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGetDeviceSignalParamsWithHTTPClient creates a new GetDeviceSignalParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetDeviceSignalParamsWithHTTPClient(client *http.Client) *GetDeviceSignalParams {
-
 	return &GetDeviceSignalParams{
 		HTTPClient: client,
 	}
 }
 
-/*GetDeviceSignalParams contains all the parameters to send to the API endpoint
-for the get device signal operation typically these are written to a http.Request
+/* GetDeviceSignalParams contains all the parameters to send to the API endpoint
+   for the get device signal operation.
+
+   Typically these are written to a http.Request.
 */
 type GetDeviceSignalParams struct {
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get device signal params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetDeviceSignalParams) WithDefaults() *GetDeviceSignalParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get device signal params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetDeviceSignalParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get device signal params

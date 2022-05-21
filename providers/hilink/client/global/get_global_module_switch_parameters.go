@@ -16,52 +16,66 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewGetGlobalModuleSwitchParams creates a new GetGlobalModuleSwitchParams object
-// with the default values initialized.
+// NewGetGlobalModuleSwitchParams creates a new GetGlobalModuleSwitchParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetGlobalModuleSwitchParams() *GetGlobalModuleSwitchParams {
-
 	return &GetGlobalModuleSwitchParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetGlobalModuleSwitchParamsWithTimeout creates a new GetGlobalModuleSwitchParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetGlobalModuleSwitchParamsWithTimeout(timeout time.Duration) *GetGlobalModuleSwitchParams {
-
 	return &GetGlobalModuleSwitchParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGetGlobalModuleSwitchParamsWithContext creates a new GetGlobalModuleSwitchParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetGlobalModuleSwitchParamsWithContext(ctx context.Context) *GetGlobalModuleSwitchParams {
-
 	return &GetGlobalModuleSwitchParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGetGlobalModuleSwitchParamsWithHTTPClient creates a new GetGlobalModuleSwitchParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetGlobalModuleSwitchParamsWithHTTPClient(client *http.Client) *GetGlobalModuleSwitchParams {
-
 	return &GetGlobalModuleSwitchParams{
 		HTTPClient: client,
 	}
 }
 
-/*GetGlobalModuleSwitchParams contains all the parameters to send to the API endpoint
-for the get global module switch operation typically these are written to a http.Request
+/* GetGlobalModuleSwitchParams contains all the parameters to send to the API endpoint
+   for the get global module switch operation.
+
+   Typically these are written to a http.Request.
 */
 type GetGlobalModuleSwitchParams struct {
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get global module switch params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetGlobalModuleSwitchParams) WithDefaults() *GetGlobalModuleSwitchParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get global module switch params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetGlobalModuleSwitchParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get global module switch params

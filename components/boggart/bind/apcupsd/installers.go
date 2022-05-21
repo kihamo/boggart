@@ -50,7 +50,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, system installer.System) ([]i
 
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
 	cfg := b.config()
-	channels := make([]*openhab.Channel, 0, 0)
+	channels := make([]*openhab.Channel, 0, 15)
 
 	const (
 		idVersion                     = "Version"

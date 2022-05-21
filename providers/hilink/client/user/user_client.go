@@ -23,9 +23,12 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	Login(params *LoginParams) (*LoginOK, error)
+	Login(params *LoginParams, opts ...ClientOption) (*LoginOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -33,13 +36,12 @@ type ClientService interface {
 /*
   Login login API
 */
-func (a *Client) Login(params *LoginParams) (*LoginOK, error) {
+func (a *Client) Login(params *LoginParams, opts ...ClientOption) (*LoginOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewLoginParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "login",
 		Method:             "POST",
 		PathPattern:        "/api/user/login",
@@ -50,7 +52,12 @@ func (a *Client) Login(params *LoginParams) (*LoginOK, error) {
 		Reader:             &LoginReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

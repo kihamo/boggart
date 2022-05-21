@@ -16,52 +16,66 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewGetDeviceBasicInformationParams creates a new GetDeviceBasicInformationParams object
-// with the default values initialized.
+// NewGetDeviceBasicInformationParams creates a new GetDeviceBasicInformationParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetDeviceBasicInformationParams() *GetDeviceBasicInformationParams {
-
 	return &GetDeviceBasicInformationParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetDeviceBasicInformationParamsWithTimeout creates a new GetDeviceBasicInformationParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetDeviceBasicInformationParamsWithTimeout(timeout time.Duration) *GetDeviceBasicInformationParams {
-
 	return &GetDeviceBasicInformationParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGetDeviceBasicInformationParamsWithContext creates a new GetDeviceBasicInformationParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetDeviceBasicInformationParamsWithContext(ctx context.Context) *GetDeviceBasicInformationParams {
-
 	return &GetDeviceBasicInformationParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGetDeviceBasicInformationParamsWithHTTPClient creates a new GetDeviceBasicInformationParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetDeviceBasicInformationParamsWithHTTPClient(client *http.Client) *GetDeviceBasicInformationParams {
-
 	return &GetDeviceBasicInformationParams{
 		HTTPClient: client,
 	}
 }
 
-/*GetDeviceBasicInformationParams contains all the parameters to send to the API endpoint
-for the get device basic information operation typically these are written to a http.Request
+/* GetDeviceBasicInformationParams contains all the parameters to send to the API endpoint
+   for the get device basic information operation.
+
+   Typically these are written to a http.Request.
 */
 type GetDeviceBasicInformationParams struct {
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get device basic information params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetDeviceBasicInformationParams) WithDefaults() *GetDeviceBasicInformationParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get device basic information params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetDeviceBasicInformationParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get device basic information params

@@ -16,52 +16,66 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewGetSMSCountParams creates a new GetSMSCountParams object
-// with the default values initialized.
+// NewGetSMSCountParams creates a new GetSMSCountParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetSMSCountParams() *GetSMSCountParams {
-
 	return &GetSMSCountParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetSMSCountParamsWithTimeout creates a new GetSMSCountParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetSMSCountParamsWithTimeout(timeout time.Duration) *GetSMSCountParams {
-
 	return &GetSMSCountParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGetSMSCountParamsWithContext creates a new GetSMSCountParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetSMSCountParamsWithContext(ctx context.Context) *GetSMSCountParams {
-
 	return &GetSMSCountParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGetSMSCountParamsWithHTTPClient creates a new GetSMSCountParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetSMSCountParamsWithHTTPClient(client *http.Client) *GetSMSCountParams {
-
 	return &GetSMSCountParams{
 		HTTPClient: client,
 	}
 }
 
-/*GetSMSCountParams contains all the parameters to send to the API endpoint
-for the get s m s count operation typically these are written to a http.Request
+/* GetSMSCountParams contains all the parameters to send to the API endpoint
+   for the get s m s count operation.
+
+   Typically these are written to a http.Request.
 */
 type GetSMSCountParams struct {
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get s m s count params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetSMSCountParams) WithDefaults() *GetSMSCountParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get s m s count params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetSMSCountParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get s m s count params

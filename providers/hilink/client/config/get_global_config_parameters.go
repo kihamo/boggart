@@ -16,52 +16,66 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewGetGlobalConfigParams creates a new GetGlobalConfigParams object
-// with the default values initialized.
+// NewGetGlobalConfigParams creates a new GetGlobalConfigParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetGlobalConfigParams() *GetGlobalConfigParams {
-
 	return &GetGlobalConfigParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetGlobalConfigParamsWithTimeout creates a new GetGlobalConfigParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetGlobalConfigParamsWithTimeout(timeout time.Duration) *GetGlobalConfigParams {
-
 	return &GetGlobalConfigParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGetGlobalConfigParamsWithContext creates a new GetGlobalConfigParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetGlobalConfigParamsWithContext(ctx context.Context) *GetGlobalConfigParams {
-
 	return &GetGlobalConfigParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGetGlobalConfigParamsWithHTTPClient creates a new GetGlobalConfigParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetGlobalConfigParamsWithHTTPClient(client *http.Client) *GetGlobalConfigParams {
-
 	return &GetGlobalConfigParams{
 		HTTPClient: client,
 	}
 }
 
-/*GetGlobalConfigParams contains all the parameters to send to the API endpoint
-for the get global config operation typically these are written to a http.Request
+/* GetGlobalConfigParams contains all the parameters to send to the API endpoint
+   for the get global config operation.
+
+   Typically these are written to a http.Request.
 */
 type GetGlobalConfigParams struct {
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get global config params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetGlobalConfigParams) WithDefaults() *GetGlobalConfigParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get global config params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetGlobalConfigParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get global config params

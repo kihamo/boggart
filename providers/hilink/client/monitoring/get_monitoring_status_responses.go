@@ -46,7 +46,7 @@ func NewGetMonitoringStatusOK() *GetMonitoringStatusOK {
 	return &GetMonitoringStatusOK{}
 }
 
-/*GetMonitoringStatusOK handles this case with default header values.
+/* GetMonitoringStatusOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -57,7 +57,6 @@ type GetMonitoringStatusOK struct {
 func (o *GetMonitoringStatusOK) Error() string {
 	return fmt.Sprintf("[GET /api/monitoring/status][%d] getMonitoringStatusOK  %+v", 200, o.Payload)
 }
-
 func (o *GetMonitoringStatusOK) GetPayload() *models.MonitoringStatus {
 	return o.Payload
 }
@@ -81,7 +80,7 @@ func NewGetMonitoringStatusDefault(code int) *GetMonitoringStatusDefault {
 	}
 }
 
-/*GetMonitoringStatusDefault handles this case with default header values.
+/* GetMonitoringStatusDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -99,7 +98,6 @@ func (o *GetMonitoringStatusDefault) Code() int {
 func (o *GetMonitoringStatusDefault) Error() string {
 	return fmt.Sprintf("[GET /api/monitoring/status][%d] getMonitoringStatus default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *GetMonitoringStatusDefault) GetPayload() *models.Error {
 	return o.Payload
 }

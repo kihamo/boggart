@@ -23,11 +23,14 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	GetMonitoringStatus(params *GetMonitoringStatusParams) (*GetMonitoringStatusOK, error)
+	GetMonitoringStatus(params *GetMonitoringStatusParams, opts ...ClientOption) (*GetMonitoringStatusOK, error)
 
-	GetMonitoringTrafficStatistics(params *GetMonitoringTrafficStatisticsParams) (*GetMonitoringTrafficStatisticsOK, error)
+	GetMonitoringTrafficStatistics(params *GetMonitoringTrafficStatisticsParams, opts ...ClientOption) (*GetMonitoringTrafficStatisticsOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -35,13 +38,12 @@ type ClientService interface {
 /*
   GetMonitoringStatus get monitoring status API
 */
-func (a *Client) GetMonitoringStatus(params *GetMonitoringStatusParams) (*GetMonitoringStatusOK, error) {
+func (a *Client) GetMonitoringStatus(params *GetMonitoringStatusParams, opts ...ClientOption) (*GetMonitoringStatusOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetMonitoringStatusParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getMonitoringStatus",
 		Method:             "GET",
 		PathPattern:        "/api/monitoring/status",
@@ -52,7 +54,12 @@ func (a *Client) GetMonitoringStatus(params *GetMonitoringStatusParams) (*GetMon
 		Reader:             &GetMonitoringStatusReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -68,13 +75,12 @@ func (a *Client) GetMonitoringStatus(params *GetMonitoringStatusParams) (*GetMon
 /*
   GetMonitoringTrafficStatistics get monitoring traffic statistics API
 */
-func (a *Client) GetMonitoringTrafficStatistics(params *GetMonitoringTrafficStatisticsParams) (*GetMonitoringTrafficStatisticsOK, error) {
+func (a *Client) GetMonitoringTrafficStatistics(params *GetMonitoringTrafficStatisticsParams, opts ...ClientOption) (*GetMonitoringTrafficStatisticsOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetMonitoringTrafficStatisticsParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getMonitoringTrafficStatistics",
 		Method:             "GET",
 		PathPattern:        "/api/monitoring/traffic-statistics",
@@ -85,7 +91,12 @@ func (a *Client) GetMonitoringTrafficStatistics(params *GetMonitoringTrafficStat
 		Reader:             &GetMonitoringTrafficStatisticsReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

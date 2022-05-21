@@ -16,56 +16,70 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewReadSMSParams creates a new ReadSMSParams object
-// with the default values initialized.
+// NewReadSMSParams creates a new ReadSMSParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewReadSMSParams() *ReadSMSParams {
-	var ()
 	return &ReadSMSParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewReadSMSParamsWithTimeout creates a new ReadSMSParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewReadSMSParamsWithTimeout(timeout time.Duration) *ReadSMSParams {
-	var ()
 	return &ReadSMSParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewReadSMSParamsWithContext creates a new ReadSMSParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewReadSMSParamsWithContext(ctx context.Context) *ReadSMSParams {
-	var ()
 	return &ReadSMSParams{
-
 		Context: ctx,
 	}
 }
 
 // NewReadSMSParamsWithHTTPClient creates a new ReadSMSParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewReadSMSParamsWithHTTPClient(client *http.Client) *ReadSMSParams {
-	var ()
 	return &ReadSMSParams{
 		HTTPClient: client,
 	}
 }
 
-/*ReadSMSParams contains all the parameters to send to the API endpoint
-for the read s m s operation typically these are written to a http.Request
+/* ReadSMSParams contains all the parameters to send to the API endpoint
+   for the read s m s operation.
+
+   Typically these are written to a http.Request.
 */
 type ReadSMSParams struct {
 
-	/*Request*/
+	// Request.
 	Request ReadSMSBody
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the read s m s params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *ReadSMSParams) WithDefaults() *ReadSMSParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the read s m s params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *ReadSMSParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the read s m s params
@@ -119,7 +133,6 @@ func (o *ReadSMSParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regis
 		return err
 	}
 	var res []error
-
 	if err := r.SetBodyParam(o.Request); err != nil {
 		return err
 	}

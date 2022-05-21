@@ -16,52 +16,66 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewReleaseUSSDParams creates a new ReleaseUSSDParams object
-// with the default values initialized.
+// NewReleaseUSSDParams creates a new ReleaseUSSDParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewReleaseUSSDParams() *ReleaseUSSDParams {
-
 	return &ReleaseUSSDParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewReleaseUSSDParamsWithTimeout creates a new ReleaseUSSDParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewReleaseUSSDParamsWithTimeout(timeout time.Duration) *ReleaseUSSDParams {
-
 	return &ReleaseUSSDParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewReleaseUSSDParamsWithContext creates a new ReleaseUSSDParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewReleaseUSSDParamsWithContext(ctx context.Context) *ReleaseUSSDParams {
-
 	return &ReleaseUSSDParams{
-
 		Context: ctx,
 	}
 }
 
 // NewReleaseUSSDParamsWithHTTPClient creates a new ReleaseUSSDParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewReleaseUSSDParamsWithHTTPClient(client *http.Client) *ReleaseUSSDParams {
-
 	return &ReleaseUSSDParams{
 		HTTPClient: client,
 	}
 }
 
-/*ReleaseUSSDParams contains all the parameters to send to the API endpoint
-for the release u s s d operation typically these are written to a http.Request
+/* ReleaseUSSDParams contains all the parameters to send to the API endpoint
+   for the release u s s d operation.
+
+   Typically these are written to a http.Request.
 */
 type ReleaseUSSDParams struct {
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the release u s s d params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *ReleaseUSSDParams) WithDefaults() *ReleaseUSSDParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the release u s s d params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *ReleaseUSSDParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the release u s s d params

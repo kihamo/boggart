@@ -2,6 +2,7 @@ package swagger
 
 import (
 	"bytes"
+	"context"
 	"strconv"
 	"time"
 
@@ -16,7 +17,7 @@ func (m *DateTime) Time() time.Time {
 	return time.Time(m.DateTime)
 }
 
-func (m *DateTime) Validate(formats strfmt.Registry) error {
+func (m *DateTime) Validate(strfmt.Registry) error {
 	return nil
 }
 
@@ -31,6 +32,10 @@ func (m *DateTime) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+func (m *DateTime) ContextValidate(context.Context, strfmt.Registry) error {
+	return nil
+}
+
 type DateTimeByTimestamp struct {
 	strfmt.DateTime
 }
@@ -39,7 +44,7 @@ func (m *DateTimeByTimestamp) Time() time.Time {
 	return time.Time(m.DateTime)
 }
 
-func (m *DateTimeByTimestamp) Validate(formats strfmt.Registry) error {
+func (m *DateTimeByTimestamp) Validate(strfmt.Registry) error {
 	return nil
 }
 
@@ -51,5 +56,9 @@ func (m *DateTimeByTimestamp) UnmarshalJSON(b []byte) error {
 
 	m.DateTime = strfmt.DateTime(time.Unix(int64(sec), 0))
 
+	return nil
+}
+
+func (m *DateTimeByTimestamp) ContextValidate(context.Context, strfmt.Registry) error {
 	return nil
 }

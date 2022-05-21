@@ -46,7 +46,7 @@ func NewReleaseUSSDOK() *ReleaseUSSDOK {
 	return &ReleaseUSSDOK{}
 }
 
-/*ReleaseUSSDOK handles this case with default header values.
+/* ReleaseUSSDOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -57,7 +57,6 @@ type ReleaseUSSDOK struct {
 func (o *ReleaseUSSDOK) Error() string {
 	return fmt.Sprintf("[GET /api/ussd/release][%d] releaseUSSDOK  %+v", 200, o.Payload)
 }
-
 func (o *ReleaseUSSDOK) GetPayload() string {
 	return o.Payload
 }
@@ -79,7 +78,7 @@ func NewReleaseUSSDDefault(code int) *ReleaseUSSDDefault {
 	}
 }
 
-/*ReleaseUSSDDefault handles this case with default header values.
+/* ReleaseUSSDDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -97,7 +96,6 @@ func (o *ReleaseUSSDDefault) Code() int {
 func (o *ReleaseUSSDDefault) Error() string {
 	return fmt.Sprintf("[GET /api/ussd/release][%d] releaseUSSD default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *ReleaseUSSDDefault) GetPayload() *models.Error {
 	return o.Payload
 }

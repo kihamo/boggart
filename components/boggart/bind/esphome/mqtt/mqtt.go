@@ -117,6 +117,11 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 		}),
 		mqtt.NewSubscriber(topicLog, 0, func(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 			parts := reLog.FindStringSubmatch(message.String())
+			if len(parts) <= 3 {
+				b.Logger().Warn("log format error", "log", message.String())
+				return nil
+			}
+
 			if len(parts[3]) == 0 {
 				return nil
 			}

@@ -6,6 +6,7 @@ package sms
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"fmt"
 	"io"
 
@@ -47,7 +48,7 @@ func NewRemoveSMSOK() *RemoveSMSOK {
 	return &RemoveSMSOK{}
 }
 
-/*RemoveSMSOK handles this case with default header values.
+/* RemoveSMSOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -58,7 +59,6 @@ type RemoveSMSOK struct {
 func (o *RemoveSMSOK) Error() string {
 	return fmt.Sprintf("[POST /api/sms/delete-sms][%d] removeSMSOK  %+v", 200, o.Payload)
 }
-
 func (o *RemoveSMSOK) GetPayload() string {
 	return o.Payload
 }
@@ -80,7 +80,7 @@ func NewRemoveSMSDefault(code int) *RemoveSMSDefault {
 	}
 }
 
-/*RemoveSMSDefault handles this case with default header values.
+/* RemoveSMSDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -98,7 +98,6 @@ func (o *RemoveSMSDefault) Code() int {
 func (o *RemoveSMSDefault) Error() string {
 	return fmt.Sprintf("[POST /api/sms/delete-sms][%d] removeSMS default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *RemoveSMSDefault) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -126,6 +125,11 @@ type RemoveSMSBody struct {
 
 // Validate validates this remove s m s body
 func (o *RemoveSMSBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this remove s m s body based on context it is used
+func (o *RemoveSMSBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

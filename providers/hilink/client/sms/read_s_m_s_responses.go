@@ -6,6 +6,7 @@ package sms
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"fmt"
 	"io"
 
@@ -47,7 +48,7 @@ func NewReadSMSOK() *ReadSMSOK {
 	return &ReadSMSOK{}
 }
 
-/*ReadSMSOK handles this case with default header values.
+/* ReadSMSOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -58,7 +59,6 @@ type ReadSMSOK struct {
 func (o *ReadSMSOK) Error() string {
 	return fmt.Sprintf("[POST /api/sms/set-read][%d] readSMSOK  %+v", 200, o.Payload)
 }
-
 func (o *ReadSMSOK) GetPayload() string {
 	return o.Payload
 }
@@ -80,7 +80,7 @@ func NewReadSMSDefault(code int) *ReadSMSDefault {
 	}
 }
 
-/*ReadSMSDefault handles this case with default header values.
+/* ReadSMSDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -98,7 +98,6 @@ func (o *ReadSMSDefault) Code() int {
 func (o *ReadSMSDefault) Error() string {
 	return fmt.Sprintf("[POST /api/sms/set-read][%d] readSMS default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *ReadSMSDefault) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -126,6 +125,11 @@ type ReadSMSBody struct {
 
 // Validate validates this read s m s body
 func (o *ReadSMSBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this read s m s body based on context it is used
+func (o *ReadSMSBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

@@ -160,6 +160,18 @@ func (c *WorkersContainer) TaskInfoByID(id string) (tasks.Task, *tasks.Meta, err
 	return task, &meta, err
 }
 
+func (c *WorkersContainer) TaskInfoByName(name string) (tasks.Task, *tasks.Meta, error) {
+	name = c.prefixTaskName() + name
+
+	for _, item := range c.TasksID() {
+		if item[1] == name {
+			return c.TaskInfoByID(item[0])
+		}
+	}
+
+	return nil, nil, tasks.ErrTaskNotFound
+}
+
 func (c *WorkersContainer) TaskRunByID(ctx context.Context, id string) error {
 	return c.manager.Handle(ctx, id)
 }

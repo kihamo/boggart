@@ -46,7 +46,7 @@ func NewGetUSSDOK() *GetUSSDOK {
 	return &GetUSSDOK{}
 }
 
-/*GetUSSDOK handles this case with default header values.
+/* GetUSSDOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -57,7 +57,6 @@ type GetUSSDOK struct {
 func (o *GetUSSDOK) Error() string {
 	return fmt.Sprintf("[GET /api/ussd/get][%d] getUSSDOK  %+v", 200, o.Payload)
 }
-
 func (o *GetUSSDOK) GetPayload() *models.USSD {
 	return o.Payload
 }
@@ -81,7 +80,7 @@ func NewGetUSSDDefault(code int) *GetUSSDDefault {
 	}
 }
 
-/*GetUSSDDefault handles this case with default header values.
+/* GetUSSDDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -99,7 +98,6 @@ func (o *GetUSSDDefault) Code() int {
 func (o *GetUSSDDefault) Error() string {
 	return fmt.Sprintf("[GET /api/ussd/get][%d] getUSSD default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *GetUSSDDefault) GetPayload() *models.Error {
 	return o.Payload
 }

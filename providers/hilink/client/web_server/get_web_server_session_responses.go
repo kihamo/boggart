@@ -46,7 +46,7 @@ func NewGetWebServerSessionOK() *GetWebServerSessionOK {
 	return &GetWebServerSessionOK{}
 }
 
-/*GetWebServerSessionOK handles this case with default header values.
+/* GetWebServerSessionOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -57,7 +57,6 @@ type GetWebServerSessionOK struct {
 func (o *GetWebServerSessionOK) Error() string {
 	return fmt.Sprintf("[GET /api/webserver/SesTokInfo][%d] getWebServerSessionOK  %+v", 200, o.Payload)
 }
-
 func (o *GetWebServerSessionOK) GetPayload() *models.SessionToken {
 	return o.Payload
 }
@@ -81,7 +80,7 @@ func NewGetWebServerSessionDefault(code int) *GetWebServerSessionDefault {
 	}
 }
 
-/*GetWebServerSessionDefault handles this case with default header values.
+/* GetWebServerSessionDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -99,7 +98,6 @@ func (o *GetWebServerSessionDefault) Code() int {
 func (o *GetWebServerSessionDefault) Error() string {
 	return fmt.Sprintf("[GET /api/webserver/SesTokInfo][%d] getWebServerSession default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *GetWebServerSessionDefault) GetPayload() *models.Error {
 	return o.Payload
 }

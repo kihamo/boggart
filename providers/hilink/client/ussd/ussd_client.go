@@ -23,15 +23,18 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	GetUSSD(params *GetUSSDParams) (*GetUSSDOK, error)
+	GetUSSD(params *GetUSSDParams, opts ...ClientOption) (*GetUSSDOK, error)
 
-	GetUSSDStatus(params *GetUSSDStatusParams) (*GetUSSDStatusOK, error)
+	GetUSSDStatus(params *GetUSSDStatusParams, opts ...ClientOption) (*GetUSSDStatusOK, error)
 
-	ReleaseUSSD(params *ReleaseUSSDParams) (*ReleaseUSSDOK, error)
+	ReleaseUSSD(params *ReleaseUSSDParams, opts ...ClientOption) (*ReleaseUSSDOK, error)
 
-	SendUSSD(params *SendUSSDParams) (*SendUSSDOK, error)
+	SendUSSD(params *SendUSSDParams, opts ...ClientOption) (*SendUSSDOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -39,13 +42,12 @@ type ClientService interface {
 /*
   GetUSSD get u s s d API
 */
-func (a *Client) GetUSSD(params *GetUSSDParams) (*GetUSSDOK, error) {
+func (a *Client) GetUSSD(params *GetUSSDParams, opts ...ClientOption) (*GetUSSDOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetUSSDParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getUSSD",
 		Method:             "GET",
 		PathPattern:        "/api/ussd/get",
@@ -56,7 +58,12 @@ func (a *Client) GetUSSD(params *GetUSSDParams) (*GetUSSDOK, error) {
 		Reader:             &GetUSSDReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -72,13 +79,12 @@ func (a *Client) GetUSSD(params *GetUSSDParams) (*GetUSSDOK, error) {
 /*
   GetUSSDStatus get u s s d status API
 */
-func (a *Client) GetUSSDStatus(params *GetUSSDStatusParams) (*GetUSSDStatusOK, error) {
+func (a *Client) GetUSSDStatus(params *GetUSSDStatusParams, opts ...ClientOption) (*GetUSSDStatusOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetUSSDStatusParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getUSSDStatus",
 		Method:             "GET",
 		PathPattern:        "/api/ussd/status",
@@ -89,7 +95,12 @@ func (a *Client) GetUSSDStatus(params *GetUSSDStatusParams) (*GetUSSDStatusOK, e
 		Reader:             &GetUSSDStatusReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -105,13 +116,12 @@ func (a *Client) GetUSSDStatus(params *GetUSSDStatusParams) (*GetUSSDStatusOK, e
 /*
   ReleaseUSSD release u s s d API
 */
-func (a *Client) ReleaseUSSD(params *ReleaseUSSDParams) (*ReleaseUSSDOK, error) {
+func (a *Client) ReleaseUSSD(params *ReleaseUSSDParams, opts ...ClientOption) (*ReleaseUSSDOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewReleaseUSSDParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "releaseUSSD",
 		Method:             "GET",
 		PathPattern:        "/api/ussd/release",
@@ -122,7 +132,12 @@ func (a *Client) ReleaseUSSD(params *ReleaseUSSDParams) (*ReleaseUSSDOK, error) 
 		Reader:             &ReleaseUSSDReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -138,13 +153,12 @@ func (a *Client) ReleaseUSSD(params *ReleaseUSSDParams) (*ReleaseUSSDOK, error) 
 /*
   SendUSSD send u s s d API
 */
-func (a *Client) SendUSSD(params *SendUSSDParams) (*SendUSSDOK, error) {
+func (a *Client) SendUSSD(params *SendUSSDParams, opts ...ClientOption) (*SendUSSDOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewSendUSSDParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "sendUSSD",
 		Method:             "POST",
 		PathPattern:        "/api/ussd/send",
@@ -155,7 +169,12 @@ func (a *Client) SendUSSD(params *SendUSSDParams) (*SendUSSDOK, error) {
 		Reader:             &SendUSSDReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

@@ -46,7 +46,7 @@ func NewGetDeviceInformationOK() *GetDeviceInformationOK {
 	return &GetDeviceInformationOK{}
 }
 
-/*GetDeviceInformationOK handles this case with default header values.
+/* GetDeviceInformationOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -57,7 +57,6 @@ type GetDeviceInformationOK struct {
 func (o *GetDeviceInformationOK) Error() string {
 	return fmt.Sprintf("[GET /api/device/information][%d] getDeviceInformationOK  %+v", 200, o.Payload)
 }
-
 func (o *GetDeviceInformationOK) GetPayload() *models.DeviceInformation {
 	return o.Payload
 }
@@ -81,7 +80,7 @@ func NewGetDeviceInformationDefault(code int) *GetDeviceInformationDefault {
 	}
 }
 
-/*GetDeviceInformationDefault handles this case with default header values.
+/* GetDeviceInformationDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -99,7 +98,6 @@ func (o *GetDeviceInformationDefault) Code() int {
 func (o *GetDeviceInformationDefault) Error() string {
 	return fmt.Sprintf("[GET /api/device/information][%d] getDeviceInformation default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *GetDeviceInformationDefault) GetPayload() *models.Error {
 	return o.Payload
 }

@@ -16,56 +16,70 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewRemoveSMSParams creates a new RemoveSMSParams object
-// with the default values initialized.
+// NewRemoveSMSParams creates a new RemoveSMSParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewRemoveSMSParams() *RemoveSMSParams {
-	var ()
 	return &RemoveSMSParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewRemoveSMSParamsWithTimeout creates a new RemoveSMSParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewRemoveSMSParamsWithTimeout(timeout time.Duration) *RemoveSMSParams {
-	var ()
 	return &RemoveSMSParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewRemoveSMSParamsWithContext creates a new RemoveSMSParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewRemoveSMSParamsWithContext(ctx context.Context) *RemoveSMSParams {
-	var ()
 	return &RemoveSMSParams{
-
 		Context: ctx,
 	}
 }
 
 // NewRemoveSMSParamsWithHTTPClient creates a new RemoveSMSParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewRemoveSMSParamsWithHTTPClient(client *http.Client) *RemoveSMSParams {
-	var ()
 	return &RemoveSMSParams{
 		HTTPClient: client,
 	}
 }
 
-/*RemoveSMSParams contains all the parameters to send to the API endpoint
-for the remove s m s operation typically these are written to a http.Request
+/* RemoveSMSParams contains all the parameters to send to the API endpoint
+   for the remove s m s operation.
+
+   Typically these are written to a http.Request.
 */
 type RemoveSMSParams struct {
 
-	/*Request*/
+	// Request.
 	Request RemoveSMSBody
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the remove s m s params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *RemoveSMSParams) WithDefaults() *RemoveSMSParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the remove s m s params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *RemoveSMSParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the remove s m s params
@@ -119,7 +133,6 @@ func (o *RemoveSMSParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 		return err
 	}
 	var res []error
-
 	if err := r.SetBodyParam(o.Request); err != nil {
 		return err
 	}
