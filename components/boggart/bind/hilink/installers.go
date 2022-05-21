@@ -156,7 +156,8 @@ func (b *Bind) InstallerSteps(_ context.Context, s installer.System) ([]installe
 				WithStateTopic(cfg.TopicBalance.Format(sn)).
 				AddItems(
 					openhab.NewItem(itemPrefix+idBalance, openhab.ItemTypeNumber).
-						WithLabel("Balance [%.2f ₽]"),
+						WithLabel("Balance [%.2f ₽]").
+						WithIcon("price"),
 				),
 		)
 	}
@@ -185,13 +186,15 @@ func (b *Bind) InstallerSteps(_ context.Context, s installer.System) ([]installe
 					openhab.NewItem(itemPrefix+idSMSLastPhone, openhab.ItemTypeString).
 						WithLabel("Last SMS phone [JSONPATH($.Phone):%s]"),
 					openhab.NewItem(itemPrefix+idSMSLastDate, openhab.ItemTypeString).
-						WithLabel("Last SMS date [JSONPATH($.Date):%s]"), // TODO:
+						WithLabel("Last SMS date [JSONPATH($.Date):%s]"). // TODO: to datetime type
+						WithIcon("calendar"),
 				),
 			openhab.NewChannel(idLimitInternetTraffic, openhab.ChannelTypeNumber).
 				WithStateTopic(cfg.TopicLimitInternetTraffic.Format(sn)).
 				AddItems(
 					openhab.NewItem(itemPrefix+idLimitInternetTraffic, openhab.ItemTypeNumber).
-						WithLabel("Internet traffic limit [JS("+transformHumanBytes+"):%s]"),
+						WithLabel("Internet traffic limit [JS("+transformHumanBytes+"):%s]").
+						WithIcon("line"),
 				),
 		)
 	}
