@@ -7,8 +7,10 @@ web_server:
   port: 80
   include_internal: true
   # https://github.com/esphome/issues/issues/3144
-  # js_include: "./_includes/www.js"
-  # js_url: ""
+  #js_include: "./_includes/www.js"
+  #js_url: ""
+  # приводит к OOM скорее всего файл не влезает в память
+  js_url: !secret common_js_url
   version: 2
 
 prometheus:
