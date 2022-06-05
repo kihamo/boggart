@@ -2,6 +2,7 @@ package pass24online
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart/tasks"
@@ -38,7 +39,26 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 			continue
 		}
 
-		if e := b.MQTT().PublishAsync(ctx, cfg.TopicFeedEvent.Format(cfg.Phone), collection[i].Message); e != nil {
+		event := FeedEvent{
+			ModelName:   collection[i].Subject.GuestData.Model.Name,
+			PlateNumber: collection[i].Subject.GuestData.PlateNumber,
+			Message:     collection[i].Message,
+			Datetime:    dt,
+		}
+
+		if raw, ok := collection[i].EventData["status"]; ok {
+			if val, ok := raw.(json.Number); ok {
+				if name, ok := statusName[val.String()]; ok {
+					event.Status = name
+				}
+			}
+		}
+
+		if event.Status == "" {
+			event.Status = statusName["0"]
+		}
+
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicFeedEvent.Format(cfg.Phone), event); e != nil {
 			err = multierr.Append(err, e)
 		}
 
