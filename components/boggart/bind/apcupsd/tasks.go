@@ -71,8 +71,8 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	}
 
 	if status.TimeLeft != nil {
-		metricBatteryRuntime.With("serial_number", sn).Set((*status.TimeLeft).Seconds())
-		_ = b.MQTT().PublishAsync(ctx, b.config().TopicVariable.Format(sn, VariableTimeLeft), (*status.TimeLeft).Seconds())
+		metricBatteryRuntime.With("serial_number", sn).Set(status.TimeLeft.Seconds())
+		_ = b.MQTT().PublishAsync(ctx, b.config().TopicVariable.Format(sn, VariableTimeLeft), status.TimeLeft.Seconds())
 	}
 
 	if status.MinimumBatteryChargePercent != nil {
@@ -96,11 +96,11 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	}
 
 	if status.DelayShutdown != nil {
-		_ = b.MQTT().PublishAsync(ctx, b.config().TopicVariable.Format(sn, VariableDelayShutdown), (*status.DelayShutdown).Seconds())
+		_ = b.MQTT().PublishAsync(ctx, b.config().TopicVariable.Format(sn, VariableDelayShutdown), status.DelayShutdown.Seconds())
 	}
 
 	if status.DelayLowBattery != nil {
-		_ = b.MQTT().PublishAsync(ctx, b.config().TopicVariable.Format(sn, VariableDelayLowBattery), (*status.DelayLowBattery).Seconds())
+		_ = b.MQTT().PublishAsync(ctx, b.config().TopicVariable.Format(sn, VariableDelayLowBattery), status.DelayLowBattery.Seconds())
 	}
 
 	if status.LowTransferVoltage != nil {
@@ -133,7 +133,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	}
 
 	if status.SelfTestInterval != nil {
-		_ = b.MQTT().PublishAsync(ctx, b.config().TopicVariable.Format(sn, VariableSelfTestInterval), (*status.SelfTestInterval).Seconds())
+		_ = b.MQTT().PublishAsync(ctx, b.config().TopicVariable.Format(sn, VariableSelfTestInterval), status.SelfTestInterval.Seconds())
 	}
 
 	if status.ManufacturedDate != nil {

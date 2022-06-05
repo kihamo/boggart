@@ -36,7 +36,6 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 				value = "NULL"
 			}
 
-			//_, err := b.provider.UpdateItemStateWithBody(ctx, id, nil, "text/plain", strings.NewReader(value))
 			_, err := b.provider.SendItemCommandWithBody(ctx, id, "text/plain", strings.NewReader(value))
 			if err != nil {
 				widget.InternalError(w, r, err)

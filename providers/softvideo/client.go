@@ -56,13 +56,13 @@ func (c *Client) Balance(ctx context.Context) (balance, promise float64, err err
 		return -1, -1, errors.New("balance string not found in page")
 	}
 
-	balance, err = strconv.ParseFloat(submatch[1], 10)
+	balance, err = strconv.ParseFloat(submatch[1], 64)
 	if err != nil {
 		return -1, -1, err
 	}
 
 	if submatch[2] != "" {
-		promise, err = strconv.ParseFloat(submatch[2], 10)
+		promise, err = strconv.ParseFloat(submatch[2], 64)
 		if err != nil {
 			return -1, -1, err
 		}

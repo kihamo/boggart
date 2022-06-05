@@ -15,7 +15,6 @@ type Bind struct {
 	di.MetaBind
 	di.MetricsBind
 	di.MQTTBind
-	//di.ProbesBind
 	di.WidgetBind
 	di.WorkersBind
 

@@ -77,7 +77,7 @@ func New(basePath, phone, password string, debug bool, logger logger.Logger) *Cl
 				newBody       []byte
 			)
 
-			if err := json.Unmarshal(body, &errorResponse); err == nil {
+			if err = json.Unmarshal(body, &errorResponse); err == nil {
 				if errorResponse.Error != "" {
 					if b, err := json.Marshal(errorResponse); err == nil {
 						newBody = b

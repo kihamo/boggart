@@ -108,6 +108,10 @@ func (p *ProvideMosEnergoSbyt) BillDownload(ctx context.Context, bill Bill, writ
 		"vl_provider": p.account.ProviderRAW,
 	}, &response)
 
+	if err != nil {
+		return err
+	}
+
 	if len(response) == 0 {
 		return errors.New("last bill not found")
 	}

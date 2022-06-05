@@ -91,7 +91,7 @@ func (c *Component) SaveURLToFile(namespace, url string, force bool) (string, er
 		return "", nil
 	}
 
-	if _, err := io.WriteString(hasher, url); err != nil {
+	if _, err = io.WriteString(hasher, url); err != nil {
 		return "", err
 	}
 

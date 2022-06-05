@@ -66,7 +66,7 @@ func (c *Client) Balance(ctx context.Context) (contract string, balance float64,
 		return contract, balance, errors.New("balance string not found in page")
 	}
 
-	balance, err = strconv.ParseFloat(strings.ReplaceAll(submatch[1], ",", "."), 10)
+	balance, err = strconv.ParseFloat(strings.ReplaceAll(submatch[1], ",", "."), 64)
 	if err != nil {
 		return contract, balance, err
 	}

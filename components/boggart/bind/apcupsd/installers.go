@@ -184,29 +184,29 @@ func (b *Bind) InstallerSteps(ctx context.Context, system installer.System) ([]i
 		)
 	}
 
-	if status.Sense != nil {
-		// TODO:
-	}
-
-	if status.DelayShutdown != nil {
-		// TODO:
-	}
-
-	if status.DelayLowBattery != nil {
-		// TODO:
-	}
-
-	if status.LowTransferVoltage != nil {
-		// TODO:
-	}
-
-	if status.HighTransferVoltage != nil {
-		// TODO:
-	}
-
-	if status.InternalTemp != nil {
-		// TODO:
-	}
+	//if status.Sense != nil {
+	//	// TODO:
+	//}
+	//
+	//if status.DelayShutdown != nil {
+	//	// TODO:
+	//}
+	//
+	//if status.DelayLowBattery != nil {
+	//	// TODO:
+	//}
+	//
+	//if status.LowTransferVoltage != nil {
+	//	// TODO:
+	//}
+	//
+	//if status.HighTransferVoltage != nil {
+	//	// TODO:
+	//}
+	//
+	//if status.InternalTemp != nil {
+	//	// TODO:
+	//}
 
 	if status.BatteryVoltage != nil {
 		channels = append(channels,
@@ -220,9 +220,9 @@ func (b *Bind) InstallerSteps(ctx context.Context, system installer.System) ([]i
 		)
 	}
 
-	if status.LineFrequency != nil {
-		// TODO:
-	}
+	//if status.LineFrequency != nil {
+	//	// TODO:
+	//}
 
 	if status.LastTransfer != nil {
 		channels = append(channels,
@@ -235,33 +235,33 @@ func (b *Bind) InstallerSteps(ctx context.Context, system installer.System) ([]i
 		)
 	}
 
-	if status.SelfTest != nil {
-		// TODO:
-	}
-
-	if status.SelfTestInterval != nil {
-		// TODO:
-	}
-
-	if status.ManufacturedDate != nil {
-		// TODO:
-	}
-
-	if status.SerialNumber != nil {
-		// TODO:
-	}
-
-	if status.BatteryDate != nil {
-		// TODO:
-	}
-
-	if status.NominalOutputVoltage != nil {
-		// TODO:
-	}
-
-	if status.NominalInputVoltage != nil {
-		// TODO:
-	}
+	//if status.SelfTest != nil {
+	//	// TODO:
+	//}
+	//
+	//if status.SelfTestInterval != nil {
+	//	// TODO:
+	//}
+	//
+	//if status.ManufacturedDate != nil {
+	//	// TODO:
+	//}
+	//
+	//if status.SerialNumber != nil {
+	//	// TODO:
+	//}
+	//
+	//if status.BatteryDate != nil {
+	//	// TODO:
+	//}
+	//
+	//if status.NominalOutputVoltage != nil {
+	//	// TODO:
+	//}
+	//
+	//if status.NominalInputVoltage != nil {
+	//	// TODO:
+	//}
 
 	if status.NominalBatteryVoltage != nil {
 		channels = append(channels,
@@ -287,21 +287,21 @@ func (b *Bind) InstallerSteps(ctx context.Context, system installer.System) ([]i
 		)
 	}
 
-	if status.Humidity != nil {
-		// TODO:
-	}
-
-	if status.ExternalBatteries != nil {
-		// TODO:
-	}
-
-	if status.BadBatteryPacks != nil {
-		// TODO:
-	}
-
-	if status.Firmware != nil {
-		// TODO:
-	}
+	//if status.Humidity != nil {
+	//	// TODO:
+	//}
+	//
+	//if status.ExternalBatteries != nil {
+	//	// TODO:
+	//}
+	//
+	//if status.BadBatteryPacks != nil {
+	//	// TODO:
+	//}
+	//
+	//if status.Firmware != nil {
+	//	// TODO:
+	//}
 
 	return openhab.StepsByBind(b, []installer.Step{
 		openhab.StepDefault(openhab.StepDefaultTransformHumanSeconds),

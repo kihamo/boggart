@@ -179,10 +179,6 @@ func (c *Component) initClient() (err error) {
 		atomic.AddUint64(&c.lostConnections, 1)
 		c.logger.Error("Connection lost", "error", reason.Error(), "count", atomic.LoadUint64(&c.lostConnections))
 		metricConnectionLost.Inc()
-
-		//c.mutex.Lock()
-		//c.subscriptions.Init()
-		//c.mutex.Unlock()
 	})
 
 	opts.SetReconnectingHandler(func(_ m.Client, _ *m.ClientOptions) {
@@ -311,8 +307,6 @@ func (c *Component) clientSubscribe(topic mqtt.Topic, qos byte, subscription *mq
 
 			if err := subscription.Callback(ctx, c, msg); err != nil {
 				metricSubscriberCalls.With("status", "failure", "topic", topic.String()).Inc()
-
-				//tracing.SpanError(span, err)
 
 				c.logger.Error(
 					"Call MQTT subscriber failed",

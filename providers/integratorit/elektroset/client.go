@@ -80,7 +80,7 @@ func (c *Client) Houses(ctx context.Context) ([]House, error) {
 	for _, row := range data {
 		for _, house := range row.Houses {
 			for i, service := range house.Services {
-				house.Services[i].Balance, e = strconv.ParseFloat(service.BalanceRAW, 10)
+				house.Services[i].Balance, e = strconv.ParseFloat(service.BalanceRAW, 64)
 				if e != nil {
 					err = multierr.Append(err, e)
 				}

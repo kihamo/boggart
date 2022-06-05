@@ -37,7 +37,7 @@ func (r *reader) Reader(ctx context.Context) (io.Reader, error) {
 	response := bytes.NewBuffer(nil)
 
 	for {
-		if _, err := io.ReadFull(connect, lengthBuffer); err != nil {
+		if _, err = io.ReadFull(connect, lengthBuffer); err != nil {
 			return nil, err
 		}
 

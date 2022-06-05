@@ -1,25 +1,27 @@
 run:
   timeout: 5m
+  tests: false
+  skip-dirs-use-default: true
   skip-dirs:
     - test
     - tools
     - docs
     - openhab2
     - components/barcode
-  skip-dirs-use-default: true
+  skip-files:
+    - ".*\\.bindata_assetfs\\.go$"
+  allow-parallel-runners: true
 
 linters:
   enable:
+    - govet
     - bodyclose
-    - golint
-    - interfacer
     - unconvert
-    - maligned
     - unparam
     - dogsled
     - nakedret
     - prealloc
-    - scopelint
+    - exportloopref
     - gocritic
     - whitespace
     # - wsl
@@ -32,3 +34,5 @@ linters:
 linters-settings:
   maligned:
     suggest-new: true
+  govet:
+    check-shadowing: true
