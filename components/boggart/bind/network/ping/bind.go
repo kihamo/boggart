@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
+	"github.com/go-ping/ping"
 	"github.com/kihamo/boggart/components/boggart/di"
-	"github.com/sparrc/go-ping"
 )
 
 type Bind struct {

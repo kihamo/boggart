@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/sparrc/go-ping"
+	"github.com/go-ping/ping"
 )
 
 const (
