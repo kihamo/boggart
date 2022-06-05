@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"container/list"
 	"context"
+	"crypto/tls"
 	"encoding"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
@@ -193,6 +195,11 @@ func (c *Component) initClient() (err error) {
 			"qos", message.Qos(),
 			"retained", message.Retained(),
 		)
+	})
+
+	opts.SetConnectionAttemptHandler(func(broker *url.URL, tlsCfg *tls.Config) *tls.Config {
+		c.logger.Warn("Attempt connect", broker.String())
+		return tlsCfg
 	})
 
 	for _, u := range strings.Split(c.config.String(mqtt.ConfigServers), ";") {

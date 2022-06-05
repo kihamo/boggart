@@ -11,7 +11,7 @@ require (
 	github.com/deepmap/oapi-codegen v1.8.3
 	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/disintegration/imaging v1.6.2
-	github.com/eclipse/paho.mqtt.golang v1.2.1-0.20200609161119-ca94c5368c77
+	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/elazarl/go-bindata-assetfs v1.0.1
 	github.com/faiface/beep v1.0.2
 	github.com/fsnotify/fsnotify v1.5.4
