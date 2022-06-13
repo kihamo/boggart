@@ -57,5 +57,5 @@ func (b *Bind) Run() error {
 
 	b.Meta().SetMAC(cfg.MAC.HardwareAddr)
 
-	return b.MQTT().PublishAsync(context.Background(), cfg.TopicCaptureState.Format(cfg.MAC.String()), false)
+	return b.MQTT().PublishAsync(context.Background(), cfg.TopicCaptureState.Format(b.Meta().ID()), false)
 }

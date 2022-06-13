@@ -2,9 +2,11 @@ package internal
 
 import (
 	"bytes"
+	"encoding"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"strconv"
 	"time"
 
@@ -64,6 +66,14 @@ func (m *message) Ack() {
 
 func (m *message) JSONUnmarshal(v interface{}) error {
 	return json.Unmarshal(m.msg.Payload(), v)
+}
+
+func (m *message) Unmarshal(v interface{}) error {
+	if b, ok := v.(encoding.BinaryUnmarshaler); ok {
+		return b.UnmarshalBinary(m.msg.Payload())
+	}
+
+	return errors.New("binary unmarshal not support")
 }
 
 func (m *message) Bool() bool {

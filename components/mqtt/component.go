@@ -45,6 +45,7 @@ type Message interface {
 	Payload() []byte
 	Ack()
 	JSONUnmarshal(interface{}) error
+	Unmarshal(v interface{}) error
 	IsTrue() bool
 	IsFalse() bool
 	Bool() bool
