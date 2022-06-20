@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/url"
+	"strconv"
 
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/di"
@@ -56,14 +57,32 @@ func (b *Bind) Run() error {
 
 func (b *Bind) Houses(ctx context.Context) ([]elektroset.House, error) {
 	houses, err := b.client.Houses(ctx)
-	if houseID := b.config().HouseID; err == nil && houseID > 0 {
+	if err != nil {
+		return houses, err
+	}
+
+	if houseID := b.config().HouseID; houseID > 0 {
 		for _, house := range houses {
 			if house.ID == houseID {
 				return []elektroset.House{house}, nil
 			}
 		}
 
-		return nil, errors.New("house not found")
+		return nil, errors.New("house by id not found")
+	}
+
+	if accountID := b.config().AccountID; accountID > 0 {
+		id := strconv.FormatUint(accountID, 10)
+
+		for _, house := range houses {
+			for _, service := range house.Services {
+				if service.AccountID == id {
+					return []elektroset.House{house}, nil
+				}
+			}
+		}
+
+		return nil, errors.New("house by account id not found")
 	}
 
 	return houses, err
