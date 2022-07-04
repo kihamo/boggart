@@ -39,6 +39,15 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 			continue
 		}
 
+		b.feedStartDatetime.Set(dt)
+		feedStartDatetime = dt
+
+		// инвайты без инфы могут приходить
+		// &{Address:0xc0002b72c0 ClosedAt:<nil> Comment: CreatedAt:2022-06-29T09:14:22.000Z DurationType:1 ExpiresAt:2022-06-29T12:00:59.000Z FromConfidant:false GuestData:<nil> GuestType:0 ID:9299408 InviteLink:https://invite.pass24online.ru/?t=mIMv10 Object:0xc00035ec80 StartsAt:2022-06-29T09:18:00.000Z Status:25 Tenant:0xc00037c9f0 Title:Приглашение UpdatedAt:2022-07-03T18:18:55.000Z}
+		if collection[i].Subject.GuestData == nil {
+			continue
+		}
+
 		event := FeedEvent{
 			ModelName:   collection[i].Subject.GuestData.Model.Name,
 			PlateNumber: collection[i].Subject.GuestData.PlateNumber,
@@ -61,9 +70,6 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		if e := b.MQTT().PublishAsync(ctx, cfg.TopicFeedEvent.Format(cfg.Phone), event); e != nil {
 			err = multierr.Append(err, e)
 		}
-
-		b.feedStartDatetime.Set(dt)
-		feedStartDatetime = dt
 	}
 
 	// так как у нас на равенство проверка, то в следующие итерацию события так же
