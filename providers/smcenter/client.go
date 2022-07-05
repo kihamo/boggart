@@ -71,28 +71,30 @@ func New(basePath, phone, password string, debug bool, logger logger.Logger) *Cl
 
 		// эмулируем http ошибку, так как у них всегда 200 OK
 		body, err := ioutil.ReadAll(response.Body)
-		if err == nil {
-			var (
-				errorResponse models.Error
-				newBody       []byte
-			)
+		if err != nil {
+			return response, err
+		}
 
-			if err = json.Unmarshal(body, &errorResponse); err == nil {
-				if errorResponse.Error != "" {
-					if b, err := json.Marshal(errorResponse); err == nil {
-						newBody = b
-					}
+		var (
+			errorResponse models.Error
+			newBody       []byte
+		)
+
+		if err := json.Unmarshal(body, &errorResponse); err == nil {
+			if errorResponse.Error != "" {
+				if b, err := json.Marshal(errorResponse); err == nil {
+					newBody = b
 				}
 			}
+		}
 
-			if len(newBody) > 0 {
-				response.StatusCode = http.StatusBadRequest
-				response.Status = http.StatusText(http.StatusBadRequest)
-				response.Body = ioutil.NopCloser(bytes.NewReader(newBody))
-				response.ContentLength = int64(len(newBody))
-			} else {
-				response.Body = ioutil.NopCloser(bytes.NewReader(body))
-			}
+		if len(newBody) > 0 {
+			response.StatusCode = http.StatusBadRequest
+			response.Status = http.StatusText(http.StatusBadRequest)
+			response.Body = ioutil.NopCloser(bytes.NewReader(newBody))
+			response.ContentLength = int64(len(newBody))
+		} else {
+			response.Body = ioutil.NopCloser(bytes.NewReader(body))
 		}
 
 		for _, cookie := range response.Cookies() {
@@ -102,7 +104,7 @@ func New(basePath, phone, password string, debug bool, logger logger.Logger) *Cl
 			}
 		}
 
-		return response, err
+		return response, nil
 	})
 
 	transport.DefaultAuthentication = runtime.ClientAuthInfoWriterFunc(func(req runtime.ClientRequest, _ strfmt.Registry) (err error) {
