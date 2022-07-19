@@ -15,7 +15,15 @@ esphome:
   comment: !secret device_011_comment
   on_boot:
     then:
-      - light.turn_on: light_main
+      - if:
+          condition:
+            binary_sensor.is_on: "light_main_switcher"
+          then:
+            - logger.log: "turn_on"
+            - light.turn_on: light_main
+          else:
+            - logger.log: "turn_off"
+            - light.turn_off: light_main
 #      - light.turn_on:
 #          id: light_status
 #          red: 80%
@@ -32,6 +40,19 @@ esphome:
 
 esp8266:
   board: esp01_1m
+
+binary_sensor:
+  - platform: gpio
+    id: "light_main_switcher"
+    name: "Main white light switch"
+    pin:
+      number: GPIO3
+      mode: INPUT_PULLUP
+      inverted: true
+    on_press:
+      - light.turn_on: light_main
+    on_release:
+      - light.turn_off: light_main
 
 sensor:
   - platform: adc
