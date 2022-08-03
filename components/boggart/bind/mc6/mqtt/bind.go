@@ -29,6 +29,10 @@ func (b *Bind) config() *Config {
 func (b *Bind) Run() error {
 	b.key = []byte(b.config().AES256Key)
 
+	if mac := b.config().MAC.String(); mac != "" {
+		b.Meta().SetMACAsString(mac)
+	}
+
 	return nil
 }
 
