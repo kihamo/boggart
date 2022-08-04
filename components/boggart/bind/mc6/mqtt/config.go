@@ -1,8 +1,6 @@
 package mqtt
 
 import (
-	"time"
-
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
@@ -10,7 +8,6 @@ import (
 )
 
 type Config struct {
-	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
 	AES256Key              string `mapstructure:"aes256_key" yaml:"aes256_key" valid:"length(32|32),required"`
@@ -21,14 +18,9 @@ type Config struct {
 }
 
 func (t Type) ConfigDefaults() interface{} {
-	probesConfig := di.ProbesConfigDefaults()
-	probesConfig.ReadinessPeriod = time.Minute
-	probesConfig.ReadinessTimeout = time.Second * 5
-
 	var prefix mqtt.Topic = boggart.ComponentName + "/mc6/+/"
 
 	return &Config{
-		ProbesConfig:           probesConfig,
 		LoggerConfig:           di.LoggerConfigDefaults(),
 		TopicMC6Update:         "updData/+",
 		TopicMC6SetTemperature: "+",
