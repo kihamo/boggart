@@ -5,9 +5,9 @@ import (
 )
 
 var (
-	metricTemperature     = snitch.NewGauge("temperature", "Current temperature")
-	metricHoldTemperature = snitch.NewGauge("hold_temperature", "Current hold temperature")
-	metricHumidity        = snitch.NewGauge("humidity", "Current humidity")
+	metricTemperature    = snitch.NewGauge("temperature", "Current temperature")
+	metricSetTemperature = snitch.NewGauge("set_temperature", "Current setting temperature")
+	metricHumidity       = snitch.NewGauge("humidity", "Current humidity")
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {
@@ -17,7 +17,7 @@ func (b *Bind) Describe(ch chan<- *snitch.Description) {
 	}
 
 	metricTemperature.With("id", id).Describe(ch)
-	metricHoldTemperature.With("id", id).Describe(ch)
+	metricSetTemperature.With("id", id).Describe(ch)
 	metricHumidity.With("id", id).Describe(ch)
 }
 
@@ -28,6 +28,6 @@ func (b *Bind) Collect(ch chan<- snitch.Metric) {
 	}
 
 	metricTemperature.With("id", id).Collect(ch)
-	metricHoldTemperature.With("id", id).Collect(ch)
+	metricSetTemperature.With("id", id).Collect(ch)
 	metricHumidity.With("id", id).Collect(ch)
 }

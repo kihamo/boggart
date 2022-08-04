@@ -38,8 +38,8 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				metricTemperature.With("id", id).Set(float64(*update.Temperature) / 10)
 			}
 
-			if update.HoldTemperature != nil {
-				metricHoldTemperature.With("id", id).Set(float64(*update.HoldTemperature) / 10)
+			if update.SetTemperature != nil {
+				metricSetTemperature.With("id", id).Set(float64(*update.SetTemperature) / 10)
 			}
 
 			if update.Humidity != nil {
@@ -48,18 +48,22 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 			return err
 		}),
-		mqtt.NewSubscriber(cfg.TopicSetTemperature, 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+		mqtt.NewSubscriber(cfg.TopicSetTemperature.Format(id), 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			mac := b.Meta().MACAsString()
 			if mac == "" {
 				return nil
 			}
+			mac = strings.ReplaceAll(mac, ":", "")
 
-			//update := &Update{
-			//	SetTemperature: &[]int64{message.Int64()}[0],
-			//}
+			payload, err := b.GenerateUpdate(&Update{
+				SetTemperature: &[]int64{int64(message.Float64() * 10)}[0],
+			})
 
-			// return b.MQTT().Publish(ctx, cfg.TopicMC6SetTemperature.Format(mac.String(), ))
-			return nil
+			if err != nil {
+				return err
+			}
+
+			return b.MQTT().Publish(ctx, cfg.TopicMC6SetTemperature.Format(mac), payload)
 		}),
 	}
 }

@@ -1,16 +1,16 @@
 package mqtt
 
 import (
+	"bytes"
 	"crypto/aes"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 
 	"github.com/kihamo/boggart/components/boggart/di"
 )
 
-const (
-	size = 16
-)
+// https://www.devglan.com/online-tools/aes-encryption-decryption
 
 type Bind struct {
 	di.ConfigBind
@@ -36,20 +36,64 @@ func (b *Bind) Run() error {
 	return nil
 }
 
-func (b *Bind) Decrypt(payload []byte) ([]byte, error) {
-	cipher, err := aes.NewCipher(b.key)
+func (b *Bind) Decrypt(crypted []byte) ([]byte, error) {
+	if len(crypted) < 1 {
+		return nil, errors.New("wrong crypted data")
+	}
+
+	block, err := aes.NewCipher(b.key)
 	if err != nil {
 		return nil, err
 	}
 
-	decrypted := make([]byte, len(payload))
+	out := make([]byte, len(crypted))
+	dst := out
+	bs := block.BlockSize()
 
-	for bs, be := 0, size; bs < len(payload); bs, be = bs+size, be+size {
-		cipher.Decrypt(decrypted[bs:be], payload[bs:be])
+	if len(crypted)%bs != 0 {
+		return nil, errors.New("wrong crypted size")
 	}
 
-	paddingSize := int(decrypted[len(decrypted)-1])
-	return decrypted[0 : len(decrypted)-paddingSize], nil
+	for len(crypted) > 0 {
+		block.Decrypt(dst, crypted[:bs])
+		crypted = crypted[bs:]
+		dst = dst[bs:]
+	}
+
+	length := len(out)
+	unpadding := int(out[length-1])
+	return out[:(length - unpadding)], nil
+}
+
+func (b *Bind) Encrypt(uncrypted []byte) ([]byte, error) {
+	if len(uncrypted) < 1 {
+		return nil, errors.New("wrong uncrypted data")
+	}
+
+	block, err := aes.NewCipher(b.key)
+	if err != nil {
+		return nil, err
+	}
+
+	bs := block.BlockSize()
+
+	padding := bs - len(uncrypted)%bs
+	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
+	uncrypted = append(uncrypted, padtext...)
+
+	if len(uncrypted)%bs != 0 {
+		return nil, errors.New("wrong padding")
+	}
+
+	out := make([]byte, len(uncrypted))
+	dst := out
+	for len(uncrypted) > 0 {
+		block.Encrypt(dst, uncrypted[:bs])
+		uncrypted = uncrypted[bs:]
+		dst = dst[bs:]
+	}
+
+	return out, nil
 }
 
 func (b *Bind) ParseUpdate(payload []byte) (*Update, error) {
@@ -70,4 +114,23 @@ func (b *Bind) ParseUpdate(payload []byte) (*Update, error) {
 
 	err = json.Unmarshal(decrypt, update)
 	return update, err
+}
+
+func (b *Bind) GenerateUpdate(update *Update) ([]byte, error) {
+	payload, err := json.Marshal(update)
+	if err != nil {
+		return nil, err
+	}
+
+	b.Logger().Debugf("transmit %s", payload)
+
+	out, err := b.Encrypt(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	buf := make([]byte, base64.StdEncoding.EncodedLen(len(out)))
+	base64.StdEncoding.Encode(buf, out)
+
+	return buf, nil
 }

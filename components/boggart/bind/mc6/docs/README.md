@@ -1,13 +1,5 @@
 Все нижеописанное работает со стоковой прошивкой P2.31E
 
-www.brande.commc6mqtt_aes256ecb7
-192.168.70.12aes256_123456789012
-mqtt12345678.shosho.ruaes256ecb7 - 10
-mqtt12345678.shosho.ru - 22
-
-
-mqtt-fake-12.shosho.ruaes256ecb7
-
 Коды
 ====
 
