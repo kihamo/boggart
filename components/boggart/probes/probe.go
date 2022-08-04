@@ -3,6 +3,7 @@ package probes
 import (
 	"context"
 	"errors"
+	"runtime"
 	"time"
 
 	"github.com/go-ping/ping"
@@ -18,7 +19,7 @@ func PingProbe(ctx context.Context, addr string) error {
 		return err
 	}
 
-	pinger.SetPrivileged(true)
+	pinger.SetPrivileged(runtime.GOOS != "darwin")
 
 	deadline, ok := ctx.Deadline()
 	if !ok {
