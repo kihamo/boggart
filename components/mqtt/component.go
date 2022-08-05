@@ -51,6 +51,7 @@ type Message interface {
 	Bool() bool
 	Float64() float64
 	Int64() int64
+	Uint64() uint64
 	Base64() ([]byte, error)
 	HEX() string
 	Len() int

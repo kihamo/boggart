@@ -102,6 +102,11 @@ func (m *message) Int64() int64 {
 	return v
 }
 
+func (m *message) Uint64() uint64 {
+	v, _ := strconv.ParseUint(m.String(), 10, 64)
+	return v
+}
+
 func (m *message) Base64() ([]byte, error) {
 	payload := m.msg.Payload()
 

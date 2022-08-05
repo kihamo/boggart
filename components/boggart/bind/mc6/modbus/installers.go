@@ -3,8 +3,8 @@ package modbus
 import (
 	"context"
 
-	"github.com/kihamo/boggart/components/boggart/installer/openhab"
 	"github.com/kihamo/boggart/components/boggart/installer"
+	"github.com/kihamo/boggart/components/boggart/installer/openhab"
 )
 
 func (b *Bind) InstallersSupport() []installer.System {
@@ -38,6 +38,7 @@ func (b *Bind) InstallerSteps(_ context.Context, system installer.System) ([]ins
 		idRoomTemperature     = "RoomTemperature"
 		idFloorTemperature    = "FloorTemperature"
 		idHumidity            = "Humidity"
+		idSetTemperature      = "SetTemperature"
 	)
 
 	channels := []*openhab.Channel{
@@ -77,6 +78,17 @@ func (b *Bind) InstallerSteps(_ context.Context, system installer.System) ([]ins
 				openhab.NewItem(itemPrefix+idHumidity, openhab.ItemTypeNumber).
 					WithLabel("Humidity [%.1f %%]").
 					WithIcon("humidity"),
+			),
+		openhab.NewChannel(idSetTemperature, openhab.ChannelTypeNumber).
+			WithStateTopic(cfg.TopicSetTemperatureState.Format(id)).
+			WithCommandTopic(cfg.TopicSetTemperature.Format(id)).
+			WithMin(5).
+			WithMax(35).
+			WithStep(1).
+			AddItems(
+				openhab.NewItem(itemPrefix+idSetTemperature, openhab.ItemTypeDimmer).
+					WithLabel("Set temperature [%.2f °C]").
+					WithIcon("temperature"),
 			),
 	}
 

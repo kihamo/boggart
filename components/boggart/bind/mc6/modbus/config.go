@@ -4,9 +4,9 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart"
+	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/types"
-	"github.com/kihamo/boggart/components/boggart/di"
 )
 
 type Config struct {
@@ -23,6 +23,8 @@ type Config struct {
 	TopicRoomTemperature     mqtt.Topic    `mapstructure:"topic_room_temperature" yaml:"topic_room_temperature"`
 	TopicFloorTemperature    mqtt.Topic    `mapstructure:"topic_floor_temperature" yaml:"topic_floor_temperature"`
 	TopicHumidity            mqtt.Topic    `mapstructure:"topic_humidity" yaml:"topic_humidity"`
+	TopicSetTemperature      mqtt.Topic    `mapstructure:"topic_set_temperature" yaml:"topic_set_temperature"`
+	TopicSetTemperatureState mqtt.Topic    `mapstructure:"topic_set_temperature_state" yaml:"topic_set_temperature_state"`
 }
 
 func (t Type) ConfigDefaults() interface{} {
@@ -44,5 +46,7 @@ func (t Type) ConfigDefaults() interface{} {
 		TopicRoomTemperature:     prefix + "room-temperature",
 		TopicFloorTemperature:    prefix + "floor-temperature",
 		TopicHumidity:            prefix + "humidity",
+		TopicSetTemperature:      prefix + "temperature",
+		TopicSetTemperatureState: prefix + "temperature/state",
 	}
 }

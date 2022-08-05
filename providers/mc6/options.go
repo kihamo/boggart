@@ -9,7 +9,7 @@ type options struct {
 	slaveID     uint8
 	timeout     time.Duration
 	idleTimeout time.Duration
-	maxTries    int
+	maxTries    uint8
 	logger      io.Writer
 }
 
@@ -58,8 +58,12 @@ func WithIdleTimeout(timeout time.Duration) Option {
 	})
 }
 
-func WithMaxTries(tries int) Option {
+func WithMaxTries(tries uint8) Option {
 	return newFuncOption(func(o *options) {
+		if tries == 0 {
+			tries = 1
+		}
+
 		o.maxTries = tries
 	})
 }

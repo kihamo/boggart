@@ -1,6 +1,8 @@
 package mc6
 
 import (
+	"encoding/binary"
+	"fmt"
 	"io"
 	"log"
 	"net/url"
@@ -14,6 +16,7 @@ const (
 	AddressHumidity            uint16 = 2
 	AddressHeatingOutputStatus uint16 = 9
 	AddressDeviceType          uint16 = 18
+	AddressSetTemperature      uint16 = 64
 
 	DeviceTypeHotWater             uint16 = 2
 	DeviceTypeElectricHeating      uint16 = 3
@@ -21,6 +24,8 @@ const (
 	DeviceTypeFCU4                 uint16 = 5
 	DeviceTypeBase                 uint16 = 30 // базовый простой MC6-HA, без горячей воды
 	DeviceTypeElectricHeatingTimer uint16 = 31
+
+	writeResponseSuccess uint16 = 2
 )
 
 type MC6 struct {
@@ -65,13 +70,38 @@ func (m *MC6) Close() error {
 	return nil
 }
 
-func (m *MC6) Invoke(address uint16) (response []byte, err error) {
-	for trie := 1; trie <= m.options.maxTries; trie++ {
+func (m *MC6) Read(address uint16) (value uint16, err error) {
+	var response []byte
+
+	for trie := uint8(1); trie <= m.options.maxTries; trie++ {
 		response, err = m.connection.ReadHoldingRegisters(address, 1)
 		if err == nil {
-			return response, err
+			return binary.BigEndian.Uint16(response), err
 		}
 	}
 
-	return response, err
+	return value, err
+}
+
+func (m *MC6) Write(address uint16, value uint16) (err error) {
+	var response []byte
+
+	payload := make([]byte, 2)
+	binary.BigEndian.PutUint16(payload, value)
+
+	for trie := uint8(1); trie <= m.options.maxTries; trie++ {
+		response, err = m.connection.WriteMultipleRegisters(address, 2, payload)
+
+		if err == nil {
+			code := binary.BigEndian.Uint16(response)
+
+			if code == writeResponseSuccess {
+				break
+			}
+
+			err = fmt.Errorf("device return not success response %d", code)
+		}
+	}
+
+	return err
 }
