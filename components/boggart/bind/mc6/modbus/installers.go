@@ -84,10 +84,10 @@ func (b *Bind) InstallerSteps(_ context.Context, system installer.System) ([]ins
 			WithCommandTopic(cfg.TopicSetTemperature.Format(id)).
 			WithMin(5).
 			WithMax(35).
-			WithStep(1).
+			WithStep(0.5).
 			AddItems(
-				openhab.NewItem(itemPrefix+idSetTemperature, openhab.ItemTypeDimmer).
-					WithLabel("Set temperature [%.2f °C]").
+				openhab.NewItem(itemPrefix+idSetTemperature, openhab.ItemTypeNumber).
+					WithLabel("Set temperature [%.1f °C]").
 					WithIcon("temperature"),
 			),
 	}

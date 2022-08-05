@@ -16,6 +16,12 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			err := b.Provider().SetTemperature(value)
 
 			if err == nil {
+				// устанавливаемое значение всегда кратно 0.5 и округляется в меньшую сторону
+				// даже на устройстве шаг 0.5, поэтому принудительно округляем
+				val := int(value * 10)
+				val -= val % 5
+				value = float64(val) / 10
+
 				err = b.MQTT().PublishAsync(ctx, cfg.TopicSetTemperatureState.Format(id), value)
 			}
 

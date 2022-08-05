@@ -16,6 +16,7 @@ const (
 	AddressHumidity            uint16 = 2
 	AddressHeatingOutputStatus uint16 = 9
 	AddressDeviceType          uint16 = 18
+	AddressTemperatureFormat   uint16 = 60
 	AddressSetTemperature      uint16 = 64
 
 	DeviceTypeHotWater             uint16 = 2
@@ -24,6 +25,9 @@ const (
 	DeviceTypeFCU4                 uint16 = 5
 	DeviceTypeBase                 uint16 = 30 // базовый простой MC6-HA, без горячей воды
 	DeviceTypeElectricHeatingTimer uint16 = 31
+
+	TemperatureFormatCelsius    uint16 = 0
+	TemperatureFormatFahrenheit uint16 = 1
 
 	writeResponseSuccess uint16 = 2
 )
