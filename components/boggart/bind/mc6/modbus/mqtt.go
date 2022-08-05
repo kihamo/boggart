@@ -11,6 +11,16 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 	id := b.Meta().ID()
 
 	return []mqtt.Subscriber{
+		mqtt.NewSubscriber(cfg.TopicPower.Format(id), 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+			value := message.Bool()
+			err := b.Provider().Status(value)
+
+			if err == nil {
+				err = b.MQTT().PublishAsync(ctx, cfg.TopicPowerState.Format(id), value)
+			}
+
+			return err
+		}),
 		mqtt.NewSubscriber(cfg.TopicSetTemperature.Format(id), 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			value := message.Float64()
 			err := b.Provider().SetTemperature(value)
@@ -23,6 +33,26 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 				value = float64(val) / 10
 
 				err = b.MQTT().PublishAsync(ctx, cfg.TopicSetTemperatureState.Format(id), value)
+			}
+
+			return err
+		}),
+		mqtt.NewSubscriber(cfg.TopicAway.Format(id), 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+			value := message.Bool()
+			err := b.Provider().Away(value)
+
+			if err == nil {
+				err = b.MQTT().PublishAsync(ctx, cfg.TopicAwayState.Format(id), value)
+			}
+
+			return err
+		}),
+		mqtt.NewSubscriber(cfg.TopicAwayTemperature.Format(id), 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+			value := message.Uint64()
+			err := b.Provider().AwayTemperature(uint16(value))
+
+			if err == nil {
+				err = b.MQTT().PublishAsync(ctx, cfg.TopicAwayTemperatureState.Format(id), value)
 			}
 
 			return err

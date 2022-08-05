@@ -38,7 +38,10 @@ func (b *Bind) InstallerSteps(_ context.Context, system installer.System) ([]ins
 		idRoomTemperature     = "RoomTemperature"
 		idFloorTemperature    = "FloorTemperature"
 		idHumidity            = "Humidity"
+		idPower               = "Power"
 		idSetTemperature      = "SetTemperature"
+		idAway                = "Away"
+		idAwayTemperature     = "AwayTemperature"
 	)
 
 	channels := []*openhab.Channel{
@@ -79,6 +82,15 @@ func (b *Bind) InstallerSteps(_ context.Context, system installer.System) ([]ins
 					WithLabel("Humidity [%.1f %%]").
 					WithIcon("humidity"),
 			),
+		openhab.NewChannel(idPower, openhab.ChannelTypeSwitch).
+			WithStateTopic(cfg.TopicPowerState.Format(id)).
+			WithCommandTopic(cfg.TopicPower.Format(id)).
+			WithOn("true").
+			WithOff("false").
+			AddItems(
+				openhab.NewItem(itemPrefix+idPower, openhab.ItemTypeSwitch).
+					WithLabel("Power []"),
+			),
 		openhab.NewChannel(idSetTemperature, openhab.ChannelTypeNumber).
 			WithStateTopic(cfg.TopicSetTemperatureState.Format(id)).
 			WithCommandTopic(cfg.TopicSetTemperature.Format(id)).
@@ -88,6 +100,26 @@ func (b *Bind) InstallerSteps(_ context.Context, system installer.System) ([]ins
 			AddItems(
 				openhab.NewItem(itemPrefix+idSetTemperature, openhab.ItemTypeNumber).
 					WithLabel("Set temperature [%.1f °C]").
+					WithIcon("temperature"),
+			),
+		openhab.NewChannel(idAway, openhab.ChannelTypeSwitch).
+			WithStateTopic(cfg.TopicAwayState.Format(id)).
+			WithCommandTopic(cfg.TopicAway.Format(id)).
+			WithOn("true").
+			WithOff("false").
+			AddItems(
+				openhab.NewItem(itemPrefix+idAway, openhab.ItemTypeSwitch).
+					WithLabel("Away []"),
+			),
+		openhab.NewChannel(idAwayTemperature, openhab.ChannelTypeNumber).
+			WithStateTopic(cfg.TopicAwayTemperatureState.Format(id)).
+			WithCommandTopic(cfg.TopicAwayTemperature.Format(id)).
+			WithMin(5).
+			WithMax(35).
+			WithStep(1).
+			AddItems(
+				openhab.NewItem(itemPrefix+idAwayTemperature, openhab.ItemTypeNumber).
+					WithLabel("Away temperature [%d °C]").
 					WithIcon("temperature"),
 			),
 	}
