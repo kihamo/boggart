@@ -17,7 +17,8 @@ type Config struct {
 	ConnectionSlaveID        uint8         `mapstructure:"connection_slave_id" yaml:"connection_slave_id"`
 	ConnectionTimeout        time.Duration `mapstructure:"connection_timeout" yaml:"connection_timeout"`
 	ConnectionIdleTimeout    time.Duration `mapstructure:"connection_idle_timeout" yaml:"connection_idle_timeout"`
-	UpdaterInterval          time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
+	SensorUpdaterInterval    time.Duration `mapstructure:"sensor_updater_interval" yaml:"sensor_updater_interval"`
+	StatusUpdaterInterval    time.Duration `mapstructure:"status_updater_interval" yaml:"status_updater_interval"`
 	TopicDeviceType          mqtt.Topic    `mapstructure:"topic_device_type" yaml:"topic_device_type"`
 	TopicHeatingOutputStatus mqtt.Topic    `mapstructure:"topic_heating_output_status" yaml:"topic_heating_output_status"`
 	TopicRoomTemperature     mqtt.Topic    `mapstructure:"topic_room_temperature" yaml:"topic_room_temperature"`
@@ -40,7 +41,8 @@ func (t Type) ConfigDefaults() interface{} {
 		ConnectionSlaveID:        0x1,
 		ConnectionTimeout:        time.Second,
 		ConnectionIdleTimeout:    time.Minute,
-		UpdaterInterval:          time.Minute,
+		SensorUpdaterInterval:    time.Minute,
+		StatusUpdaterInterval:    time.Second * 10,
 		TopicDeviceType:          prefix + "type",
 		TopicHeatingOutputStatus: prefix + "status/output-heating",
 		TopicRoomTemperature:     prefix + "room-temperature",

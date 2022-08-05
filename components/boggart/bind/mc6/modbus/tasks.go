@@ -3,6 +3,7 @@ package modbus
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/kihamo/boggart/components/boggart/tasks"
 	"go.uber.org/multierr"
@@ -11,29 +12,74 @@ import (
 func (b *Bind) Tasks() []tasks.Task {
 	return []tasks.Task{
 		tasks.NewTask().
-			WithName("updater").
+			WithName("device-type").
 			WithHandler(
 				b.Workers().WrapTaskHandlerIsOnline(
-					tasks.HandlerFuncFromShortToLong(b.taskUpdaterHandler),
+					tasks.HandlerFuncFromShortToLong(b.taskDeviceTypeHandler),
 				),
 			).
-			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), b.config().UpdaterInterval)),
+			WithSchedule(
+				tasks.ScheduleWithSuccessLimit(
+					tasks.ScheduleWithDuration(tasks.ScheduleNow(), time.Second*30),
+					1,
+				),
+			),
 	}
 }
 
-func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
-	provider := b.Provider()
-	id := b.Meta().ID()
+func (b *Bind) taskDeviceTypeHandler(ctx context.Context) (err error) {
 	cfg := b.config()
 
-	deviceType, err := provider.DeviceType()
+	deviceType, err := b.Provider().DeviceType()
 	if err != nil {
 		return fmt.Errorf("get device type failed: %w", err)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, cfg.TopicDeviceType.Format(id), deviceType); e != nil {
+	b.deviceType.Set(uint64(deviceType))
+
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicDeviceType.Format(b.Meta().ID()), deviceType); e != nil {
 		err = multierr.Append(err, e)
 	}
+
+	_, e := b.Workers().RegisterTask(
+		tasks.NewTask().
+			WithName("status-updater").
+			WithHandler(
+				b.Workers().WrapTaskHandlerIsOnline(
+					tasks.HandlerFuncFromShortToLong(b.taskStatusUpdaterHandler),
+				),
+			).
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.StatusUpdaterInterval)),
+	)
+
+	if e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	_, e = b.Workers().RegisterTask(
+		tasks.NewTask().
+			WithName("sensor-updater").
+			WithHandler(
+				b.Workers().WrapTaskHandlerIsOnline(
+					tasks.HandlerFuncFromShortToLong(b.taskSensorUpdaterHandler),
+				),
+			).
+			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.SensorUpdaterInterval)),
+	)
+
+	if e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	return err
+}
+
+func (b *Bind) taskStatusUpdaterHandler(ctx context.Context) (err error) {
+	// TODO: check b.deviceType
+
+	provider := b.Provider()
+	id := b.Meta().ID()
+	cfg := b.config()
 
 	if val, e := provider.HeatingOutputStatus(); e == nil {
 		if e = b.MQTT().PublishAsync(ctx, cfg.TopicHeatingOutputStatus.Format(id), val); e != nil {
@@ -42,6 +88,16 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 	} else {
 		err = multierr.Append(err, fmt.Errorf("get heating output status failed: %w", e))
 	}
+
+	return err
+}
+
+func (b *Bind) taskSensorUpdaterHandler(ctx context.Context) (err error) {
+	// TODO: check b.deviceType
+
+	provider := b.Provider()
+	id := b.Meta().ID()
+	cfg := b.config()
 
 	if val, e := provider.RoomTemperature(); e == nil {
 		metricRoomTemperature.With("id", id).Set(val)

@@ -18,6 +18,8 @@ type Bind struct {
 
 	provider     *mc6.MC6
 	providerOnce *atomic.Once
+
+	deviceType *atomic.Uint64
 }
 
 func (b *Bind) config() *Config {

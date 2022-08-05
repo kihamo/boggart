@@ -10,5 +10,6 @@ type Type struct{}
 func (t Type) CreateBind() boggart.Bind {
 	return &Bind{
 		providerOnce: &atomic.Once{},
+		deviceType:   atomic.NewUint64(),
 	}
 }

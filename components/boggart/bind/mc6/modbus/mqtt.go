@@ -2,6 +2,7 @@ package modbus
 
 import (
 	"context"
+
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
