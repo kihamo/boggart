@@ -109,7 +109,8 @@ func (b *Bind) InstallerSteps(_ context.Context, system installer.System) ([]ins
 			WithOff("false").
 			AddItems(
 				openhab.NewItem(itemPrefix+idAway, openhab.ItemTypeSwitch).
-					WithLabel("Away []"),
+					WithLabel("Away []").
+					WithIcon("frontdoor"),
 			),
 		openhab.NewChannel(idAwayTemperature, openhab.ChannelTypeNumber).
 			WithStateTopic(cfg.TopicAwayTemperatureState.Format(id)).
