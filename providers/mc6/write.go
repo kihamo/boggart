@@ -4,6 +4,11 @@ import (
 	"errors"
 )
 
+// FIXME: на устройстве не срабатывает
+func (m *MC6) TemperatureFormat(format uint16) error {
+	return m.Write(AddressTemperatureFormat, format)
+}
+
 func (m *MC6) Status(flag bool) error {
 	var value uint16
 
@@ -42,4 +47,14 @@ func (m *MC6) AwayTemperature(value uint16) error {
 	}
 
 	return m.Write(AddressAwayTemperature, value)
+}
+
+func (m *MC6) HoldingTemperature(value uint16) error {
+	value *= 10
+
+	if value < 50 || value > 350 {
+		return errors.New("wrong holding temperature value 50 >= value <= 350")
+	}
+
+	return m.Write(AddressHoldingTemperature, value)
 }

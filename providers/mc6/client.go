@@ -15,12 +15,14 @@ const (
 	AddressFloorTemperature    uint16 = 1
 	AddressHumidity            uint16 = 2
 	AddressHeatingOutputStatus uint16 = 9
+	AddressHoldingFunction     uint16 = 15
 	AddressDeviceType          uint16 = 18
 	AddressTemperatureFormat   uint16 = 60
 	AddressStatus              uint16 = 61
 	AddressSetTemperature      uint16 = 64
 	AddressAway                uint16 = 65
 	AddressAwayTemperature     uint16 = 66
+	AddressHoldingTemperature  uint16 = 69
 
 	DeviceTypeHotWater             uint16 = 2
 	DeviceTypeElectricHeating      uint16 = 3

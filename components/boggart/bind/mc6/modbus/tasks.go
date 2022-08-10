@@ -35,7 +35,7 @@ func (b *Bind) taskDeviceTypeHandler(ctx context.Context) (err error) {
 		return fmt.Errorf("get device type failed: %w", err)
 	}
 
-	b.deviceType.Set(uint64(deviceType))
+	b.stateDeviceType.Set(uint32(deviceType))
 
 	if e := b.MQTT().PublishAsync(ctx, cfg.TopicDeviceType.Format(b.Meta().ID()), deviceType); e != nil {
 		err = multierr.Append(err, e)
@@ -97,6 +97,10 @@ func (b *Bind) taskDeviceTypeHandler(ctx context.Context) (err error) {
 func (b *Bind) taskSetDefaultsConfigHandler(ctx context.Context) (err error) {
 	cfg := b.config()
 
+	//if e := b.TemperatureFormat(ctx, cfg.DefaultsTemperatureFormat); e != nil {
+	//	err = multierr.Append(err, fmt.Errorf("set default temperature format failed: %w", e))
+	//}
+
 	if e := b.AwayTemperature(ctx, cfg.DefaultsAwayTemperature); e != nil {
 		err = multierr.Append(err, fmt.Errorf("set default away temperature failed: %w", e))
 	}
@@ -117,6 +121,14 @@ func (b *Bind) taskStatusUpdaterHandler(ctx context.Context) (err error) {
 		}
 	} else {
 		err = multierr.Append(err, fmt.Errorf("get heating output status failed: %w", e))
+	}
+
+	if val, e := provider.HoldingFunction(); e == nil {
+		if e = b.MQTT().PublishAsync(ctx, cfg.TopicHoldingFunction.Format(id), val); e != nil {
+			err = multierr.Append(err, e)
+		}
+	} else {
+		err = multierr.Append(err, fmt.Errorf("get holding function failed: %w", e))
 	}
 
 	return err

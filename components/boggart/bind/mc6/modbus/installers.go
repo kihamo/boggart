@@ -32,16 +32,21 @@ func (b *Bind) InstallerSteps(_ context.Context, system installer.System) ([]ins
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
 	cfg := b.config()
 
+	temperatureUnit := "°C"
+
 	const (
 		idDeviceType          = "DeviceType"
 		idHeatingOutputStatus = "HeatingOutputStatus"
+		idHoldingFunction     = "HoldingFunction"
 		idRoomTemperature     = "RoomTemperature"
 		idFloorTemperature    = "FloorTemperature"
 		idHumidity            = "Humidity"
 		idPower               = "Power"
 		idSetTemperature      = "SetTemperature"
-		idAway                = "Away"
-		idAwayTemperature     = "AwayTemperature"
+		//idTemperatureFormat   = "TemperatureFormat"
+		idAway               = "Away"
+		idAwayTemperature    = "AwayTemperature"
+		idHoldingTemperature = "HoldingTemperature"
 	)
 
 	channels := []*openhab.Channel{
@@ -61,18 +66,27 @@ func (b *Bind) InstallerSteps(_ context.Context, system installer.System) ([]ins
 					WithLabel("Heating output [%s]").
 					WithIcon("fire"),
 			),
+		openhab.NewChannel(idHoldingFunction, openhab.ChannelTypeContact).
+			WithStateTopic(cfg.TopicHoldingFunction.Format(id)).
+			WithOn("true").
+			WithOff("false").
+			AddItems(
+				openhab.NewItem(itemPrefix+idHoldingFunction, openhab.ItemTypeContact).
+					WithLabel("Holding function [%s]").
+					WithIcon("fire"),
+			),
 		openhab.NewChannel(idRoomTemperature, openhab.ChannelTypeNumber).
 			WithStateTopic(cfg.TopicRoomTemperature.Format(id)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idRoomTemperature, openhab.ItemTypeNumber).
-					WithLabel("Room temperature [%.2f °C]").
+					WithLabel("Room temperature [%.2f " + temperatureUnit + "]").
 					WithIcon("temperature"),
 			),
 		openhab.NewChannel(idFloorTemperature, openhab.ChannelTypeNumber).
 			WithStateTopic(cfg.TopicFloorTemperature.Format(id)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idFloorTemperature, openhab.ItemTypeNumber).
-					WithLabel("Floor temperature [%.2f °C]").
+					WithLabel("Floor temperature [%.2f " + temperatureUnit + "]").
 					WithIcon("temperature"),
 			),
 		openhab.NewChannel(idHumidity, openhab.ChannelTypeNumber).
@@ -99,9 +113,19 @@ func (b *Bind) InstallerSteps(_ context.Context, system installer.System) ([]ins
 			WithStep(0.5).
 			AddItems(
 				openhab.NewItem(itemPrefix+idSetTemperature, openhab.ItemTypeNumber).
-					WithLabel("Set temperature [%.1f °C]").
+					WithLabel("Set temperature [%.1f " + temperatureUnit + "]").
 					WithIcon("temperature"),
 			),
+		//openhab.NewChannel(idTemperatureFormat, openhab.ChannelTypeSwitch).
+		//	WithStateTopic(cfg.TopicTemperatureFormatState.Format(id)).
+		//	WithCommandTopic(cfg.TopicTemperatureFormat.Format(id)).
+		//	WithOn("true").
+		//	WithOff("false").
+		//	AddItems(
+		//		openhab.NewItem(itemPrefix+idTemperatureFormat, openhab.ItemTypeSwitch).
+		//			WithLabel("Format celsius []").
+		//			WithIcon("temperature"),
+		//	),
 		openhab.NewChannel(idAway, openhab.ChannelTypeSwitch).
 			WithStateTopic(cfg.TopicAwayState.Format(id)).
 			WithCommandTopic(cfg.TopicAway.Format(id)).
@@ -120,7 +144,18 @@ func (b *Bind) InstallerSteps(_ context.Context, system installer.System) ([]ins
 			WithStep(1).
 			AddItems(
 				openhab.NewItem(itemPrefix+idAwayTemperature, openhab.ItemTypeNumber).
-					WithLabel("Away temperature [%d °C]").
+					WithLabel("Away temperature [%d " + temperatureUnit + "]").
+					WithIcon("temperature"),
+			),
+		openhab.NewChannel(idHoldingTemperature, openhab.ChannelTypeNumber).
+			WithStateTopic(cfg.TopicHoldingTemperatureState.Format(id)).
+			WithCommandTopic(cfg.TopicHoldingTemperature.Format(id)).
+			WithMin(5).
+			WithMax(35).
+			WithStep(1).
+			AddItems(
+				openhab.NewItem(itemPrefix+idHoldingTemperature, openhab.ItemTypeNumber).
+					WithLabel("Holding temperature [%d " + temperatureUnit + "]").
 					WithIcon("temperature"),
 			),
 	}

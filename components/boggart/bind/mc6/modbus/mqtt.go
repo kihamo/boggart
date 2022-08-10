@@ -12,43 +12,22 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 
 	return []mqtt.Subscriber{
 		mqtt.NewSubscriber(cfg.TopicPower.Format(id), 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			value := message.Bool()
-			err := b.Provider().Status(value)
-
-			if err == nil {
-				err = b.MQTT().PublishAsync(ctx, cfg.TopicPowerState.Format(id), value)
-			}
-
-			return err
+			return b.Power(ctx, message.Bool())
 		}),
 		mqtt.NewSubscriber(cfg.TopicSetTemperature.Format(id), 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			value := message.Float64()
-			err := b.Provider().SetTemperature(value)
-
-			if err == nil {
-				// устанавливаемое значение всегда кратно 0.5 и округляется в меньшую сторону
-				// даже на устройстве шаг 0.5, поэтому принудительно округляем
-				val := int(value * 10)
-				val -= val % 5
-				value = float64(val) / 10
-
-				err = b.MQTT().PublishAsync(ctx, cfg.TopicSetTemperatureState.Format(id), value)
-			}
-
-			return err
+			return b.Provider().SetTemperature(message.Float64())
 		}),
 		mqtt.NewSubscriber(cfg.TopicAway.Format(id), 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			value := message.Bool()
-			err := b.Provider().Away(value)
-
-			if err == nil {
-				err = b.MQTT().PublishAsync(ctx, cfg.TopicAwayState.Format(id), value)
-			}
-
-			return err
+			return b.Away(ctx, message.Bool())
 		}),
+		//mqtt.NewSubscriber(cfg.TopicTemperatureFormat.Format(id), 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+		//	return b.TemperatureFormat(ctx, uint16(message.Uint64()))
+		//}),
 		mqtt.NewSubscriber(cfg.TopicAwayTemperature.Format(id), 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
 			return b.AwayTemperature(ctx, uint16(message.Uint64()))
+		}),
+		mqtt.NewSubscriber(cfg.TopicHoldingTemperature.Format(id), 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
+			return b.HoldingTemperature(ctx, uint16(message.Uint64()))
 		}),
 	}
 }
