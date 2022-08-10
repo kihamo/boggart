@@ -43,6 +43,26 @@ func (b *Bind) taskDeviceTypeHandler(ctx context.Context) (err error) {
 
 	_, e := b.Workers().RegisterTask(
 		tasks.NewTask().
+			WithName("set-defaults-config").
+			WithHandler(
+				b.Workers().WrapTaskHandlerIsOnline(
+					tasks.HandlerFuncFromShortToLong(b.taskSetDefaultsConfigHandler),
+				),
+			).
+			WithSchedule(
+				tasks.ScheduleWithSuccessLimit(
+					tasks.ScheduleWithDuration(tasks.ScheduleNow(), time.Second*30),
+					1,
+				),
+			),
+	)
+
+	if e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	_, e = b.Workers().RegisterTask(
+		tasks.NewTask().
 			WithName("status-updater").
 			WithHandler(
 				b.Workers().WrapTaskHandlerIsOnline(
@@ -69,6 +89,16 @@ func (b *Bind) taskDeviceTypeHandler(ctx context.Context) (err error) {
 
 	if e != nil {
 		err = multierr.Append(err, e)
+	}
+
+	return err
+}
+
+func (b *Bind) taskSetDefaultsConfigHandler(ctx context.Context) (err error) {
+	cfg := b.config()
+
+	if e := b.AwayTemperature(ctx, cfg.DefaultsAwayTemperature); e != nil {
+		err = multierr.Append(err, fmt.Errorf("set default away temperature failed: %w", e))
 	}
 
 	return err

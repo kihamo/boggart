@@ -48,14 +48,7 @@ func (b *Bind) MQTTSubscribers() []mqtt.Subscriber {
 			return err
 		}),
 		mqtt.NewSubscriber(cfg.TopicAwayTemperature.Format(id), 0, func(ctx context.Context, _ mqtt.Component, message mqtt.Message) error {
-			value := message.Uint64()
-			err := b.Provider().AwayTemperature(uint16(value))
-
-			if err == nil {
-				err = b.MQTT().PublishAsync(ctx, cfg.TopicAwayTemperatureState.Format(id), value)
-			}
-
-			return err
+			return b.AwayTemperature(ctx, uint16(message.Uint64()))
 		}),
 	}
 }

@@ -19,6 +19,7 @@ type Config struct {
 	ConnectionIdleTimeout     time.Duration `mapstructure:"connection_idle_timeout" yaml:"connection_idle_timeout"`
 	SensorUpdaterInterval     time.Duration `mapstructure:"sensor_updater_interval" yaml:"sensor_updater_interval"`
 	StatusUpdaterInterval     time.Duration `mapstructure:"status_updater_interval" yaml:"status_updater_interval"`
+	DefaultsAwayTemperature   uint16        `mapstructure:"defaults_away_temperature" yaml:"defaults_away_temperature" valid:"range(5|35)"`
 	TopicDeviceType           mqtt.Topic    `mapstructure:"topic_device_type" yaml:"topic_device_type"`
 	TopicHeatingOutputStatus  mqtt.Topic    `mapstructure:"topic_heating_output_status" yaml:"topic_heating_output_status"`
 	TopicRoomTemperature      mqtt.Topic    `mapstructure:"topic_room_temperature" yaml:"topic_room_temperature"`
@@ -49,6 +50,7 @@ func (t Type) ConfigDefaults() interface{} {
 		ConnectionIdleTimeout:     time.Minute,
 		SensorUpdaterInterval:     time.Minute,
 		StatusUpdaterInterval:     time.Second * 10,
+		DefaultsAwayTemperature:   7,
 		TopicDeviceType:           prefix + "type",
 		TopicHeatingOutputStatus:  prefix + "status/output-heating",
 		TopicRoomTemperature:      prefix + "room-temperature",

@@ -1,6 +1,8 @@
 package modbus
 
 import (
+	"context"
+
 	"github.com/kihamo/boggart/atomic"
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/protocols/modbus"
@@ -56,4 +58,14 @@ func (b *Bind) Close() error {
 	}
 
 	return nil
+}
+
+func (b *Bind) AwayTemperature(ctx context.Context, temperature uint16) error {
+	err := b.Provider().AwayTemperature(temperature)
+
+	if err == nil {
+		err = b.MQTT().PublishAsync(ctx, b.config().TopicAwayTemperatureState.Format(b.Meta().ID()), temperature)
+	}
+
+	return err
 }
