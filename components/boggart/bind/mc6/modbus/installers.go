@@ -38,6 +38,7 @@ func (b *Bind) InstallerSteps(_ context.Context, system installer.System) ([]ins
 		idDeviceType          = "DeviceType"
 		idHeatingOutputStatus = "HeatingOutputStatus"
 		idHoldingFunction     = "HoldingFunction"
+		idFloorOverheat       = "FloorOverheat"
 		idRoomTemperature     = "RoomTemperature"
 		idFloorTemperature    = "FloorTemperature"
 		idHumidity            = "Humidity"
@@ -74,6 +75,15 @@ func (b *Bind) InstallerSteps(_ context.Context, system installer.System) ([]ins
 				openhab.NewItem(itemPrefix+idHoldingFunction, openhab.ItemTypeContact).
 					WithLabel("Holding function [%s]").
 					WithIcon("fire"),
+			),
+		openhab.NewChannel(idFloorOverheat, openhab.ChannelTypeContact).
+			WithStateTopic(cfg.TopicFloorOverheat.Format(id)).
+			WithOn("true").
+			WithOff("false").
+			AddItems(
+				openhab.NewItem(itemPrefix+idFloorOverheat, openhab.ItemTypeContact).
+					WithLabel("Floor overheat [%s]").
+					WithIcon("siren"),
 			),
 		openhab.NewChannel(idRoomTemperature, openhab.ChannelTypeNumber).
 			WithStateTopic(cfg.TopicRoomTemperature.Format(id)).

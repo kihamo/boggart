@@ -54,8 +54,18 @@ func (m *MC6) HeatingOutputStatus() (bool, error) {
 
 	return value == 1, err
 }
+
 func (m *MC6) HoldingFunction() (bool, error) {
 	value, err := m.Read(AddressHoldingFunction)
+	if err != nil {
+		return false, err
+	}
+
+	return value == 1, err
+}
+
+func (m *MC6) FloorOverheat() (bool, error) {
+	value, err := m.Read(AddressFloorOverheat)
 	if err != nil {
 		return false, err
 	}

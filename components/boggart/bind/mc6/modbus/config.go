@@ -24,6 +24,7 @@ type Config struct {
 	TopicDeviceType              mqtt.Topic `mapstructure:"topic_device_type" yaml:"topic_device_type"`
 	TopicHeatingOutputStatus     mqtt.Topic `mapstructure:"topic_heating_output_status" yaml:"topic_heating_output_status"`
 	TopicHoldingFunction         mqtt.Topic `mapstructure:"topic_holding_function" yaml:"topic_holding_function"`
+	TopicFloorOverheat           mqtt.Topic `mapstructure:"topic_floor_overheat" yaml:"topic_floor_overheat"`
 	TopicRoomTemperature         mqtt.Topic `mapstructure:"topic_room_temperature" yaml:"topic_room_temperature"`
 	TopicFloorTemperature        mqtt.Topic `mapstructure:"topic_floor_temperature" yaml:"topic_floor_temperature"`
 	TopicHumidity                mqtt.Topic `mapstructure:"topic_humidity" yaml:"topic_humidity"`
@@ -61,6 +62,7 @@ func (t Type) ConfigDefaults() interface{} {
 		TopicDeviceType:              prefix + "type",
 		TopicHeatingOutputStatus:     prefix + "heating/state",
 		TopicHoldingFunction:         prefix + "holding/state",
+		TopicFloorOverheat:           prefix + "floor/overheat",
 		TopicRoomTemperature:         prefix + "room/temperature/state",
 		TopicFloorTemperature:        prefix + "floor/temperature/state",
 		TopicHumidity:                prefix + "humidity/state",

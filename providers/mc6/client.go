@@ -16,6 +16,7 @@ const (
 	AddressHumidity            uint16 = 2
 	AddressHeatingOutputStatus uint16 = 9
 	AddressHoldingFunction     uint16 = 15
+	AddressFloorOverheat       uint16 = 17
 	AddressDeviceType          uint16 = 18
 	AddressTemperatureFormat   uint16 = 60
 	AddressStatus              uint16 = 61
