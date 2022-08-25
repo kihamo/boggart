@@ -28,27 +28,14 @@ func (b *Bind) Tasks() []tasks.Task {
 }
 
 func (b *Bind) taskDeviceTypeHandler(ctx context.Context) (err error) {
-	cfg := b.config()
-
-	deviceType, err := b.Provider().DeviceType()
+	_, err = b.DeviceType(ctx)
 	if err != nil {
 		return fmt.Errorf("get device type failed: %w", err)
 	}
 
-	b.stateDeviceType.Set(uint32(deviceType))
-
-	if e := b.MQTT().PublishAsync(ctx, cfg.TopicDeviceType.Format(b.Meta().ID()), deviceType); e != nil {
-		err = multierr.Append(err, e)
-	}
-
+	cfg := b.config()
 	_, e := b.Workers().RegisterTask(
 		tasks.NewTask().
-			WithName("set-defaults-config").
-			WithHandler(
-				b.Workers().WrapTaskHandlerIsOnline(
-					tasks.HandlerFuncFromShortToLong(b.taskSetDefaultsConfigHandler),
-				),
-			).
 			WithSchedule(
 				tasks.ScheduleWithSuccessLimit(
 					tasks.ScheduleWithDuration(tasks.ScheduleNow(), time.Second*30),
@@ -63,10 +50,10 @@ func (b *Bind) taskDeviceTypeHandler(ctx context.Context) (err error) {
 
 	_, e = b.Workers().RegisterTask(
 		tasks.NewTask().
-			WithName("status-updater").
+			WithName("state-updater").
 			WithHandler(
 				b.Workers().WrapTaskHandlerIsOnline(
-					tasks.HandlerFuncFromShortToLong(b.taskStatusUpdaterHandler),
+					tasks.HandlerFuncFromShortToLong(b.taskStateUpdaterHandler),
 				),
 			).
 			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.StatusUpdaterInterval)),
@@ -94,28 +81,14 @@ func (b *Bind) taskDeviceTypeHandler(ctx context.Context) (err error) {
 	return err
 }
 
-func (b *Bind) taskSetDefaultsConfigHandler(ctx context.Context) (err error) {
-	cfg := b.config()
-
-	//if e := b.TemperatureFormat(ctx, cfg.DefaultsTemperatureFormat); e != nil {
-	//	err = multierr.Append(err, fmt.Errorf("set default temperature format failed: %w", e))
-	//}
-
-	if e := b.AwayTemperature(ctx, cfg.DefaultsAwayTemperature); e != nil {
-		err = multierr.Append(err, fmt.Errorf("set default away temperature failed: %w", e))
-	}
-
-	return err
-}
-
-func (b *Bind) taskStatusUpdaterHandler(ctx context.Context) (err error) {
+func (b *Bind) taskStateUpdaterHandler(ctx context.Context) (err error) {
 	// TODO: check b.deviceType
 
 	provider := b.Provider()
 	id := b.Meta().ID()
 	cfg := b.config()
 
-	if val, e := provider.HeatingOutputStatus(); e == nil {
+	if val, e := provider.HeatingOutput(); e == nil {
 		if e = b.MQTT().PublishAsync(ctx, cfg.TopicHeatingOutputStatus.Format(id), val); e != nil {
 			err = multierr.Append(err, e)
 		}
@@ -143,8 +116,6 @@ func (b *Bind) taskStatusUpdaterHandler(ctx context.Context) (err error) {
 }
 
 func (b *Bind) taskSensorUpdaterHandler(ctx context.Context) (err error) {
-	// TODO: check b.deviceType
-
 	provider := b.Provider()
 	id := b.Meta().ID()
 	cfg := b.config()

@@ -36,18 +36,17 @@ func (b *Bind) InstallerSteps(_ context.Context, system installer.System) ([]ins
 
 	const (
 		idDeviceType          = "DeviceType"
-		idHeatingOutputStatus = "HeatingOutputStatus"
+		idHeatingOutputStatus = "HeatingOutput"
 		idHoldingFunction     = "HoldingFunction"
 		idFloorOverheat       = "FloorOverheat"
 		idRoomTemperature     = "RoomTemperature"
 		idFloorTemperature    = "FloorTemperature"
 		idHumidity            = "Humidity"
 		idPower               = "Power"
-		idSetTemperature      = "SetTemperature"
-		//idTemperatureFormat   = "TemperatureFormat"
-		idAway               = "Away"
-		idAwayTemperature    = "AwayTemperature"
-		idHoldingTemperature = "HoldingTemperature"
+		idTargetTemperature   = "TargetTemperature"
+		idAway                = "Away"
+		idAwayTemperature     = "AwayTemperature"
+		idHoldingTemperature  = "HoldingTemperature"
 	)
 
 	channels := []*openhab.Channel{
@@ -115,27 +114,17 @@ func (b *Bind) InstallerSteps(_ context.Context, system installer.System) ([]ins
 				openhab.NewItem(itemPrefix+idPower, openhab.ItemTypeSwitch).
 					WithLabel("Power []"),
 			),
-		openhab.NewChannel(idSetTemperature, openhab.ChannelTypeNumber).
-			WithStateTopic(cfg.TopicSetTemperatureState.Format(id)).
-			WithCommandTopic(cfg.TopicSetTemperature.Format(id)).
+		openhab.NewChannel(idTargetTemperature, openhab.ChannelTypeNumber).
+			WithStateTopic(cfg.TopicTargetTemperatureState.Format(id)).
+			WithCommandTopic(cfg.TopicTargetTemperature.Format(id)).
 			WithMin(5).
 			WithMax(35).
 			WithStep(0.5).
 			AddItems(
-				openhab.NewItem(itemPrefix+idSetTemperature, openhab.ItemTypeNumber).
+				openhab.NewItem(itemPrefix+idTargetTemperature, openhab.ItemTypeNumber).
 					WithLabel("Set temperature [%.1f " + temperatureUnit + "]").
 					WithIcon("temperature"),
 			),
-		//openhab.NewChannel(idTemperatureFormat, openhab.ChannelTypeSwitch).
-		//	WithStateTopic(cfg.TopicTemperatureFormatState.Format(id)).
-		//	WithCommandTopic(cfg.TopicTemperatureFormat.Format(id)).
-		//	WithOn("true").
-		//	WithOff("false").
-		//	AddItems(
-		//		openhab.NewItem(itemPrefix+idTemperatureFormat, openhab.ItemTypeSwitch).
-		//			WithLabel("Format celsius []").
-		//			WithIcon("temperature"),
-		//	),
 		openhab.NewChannel(idAway, openhab.ChannelTypeSwitch).
 			WithStateTopic(cfg.TopicAwayState.Format(id)).
 			WithCommandTopic(cfg.TopicAway.Format(id)).

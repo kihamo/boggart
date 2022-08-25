@@ -2,6 +2,7 @@ package mc6
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -11,29 +12,37 @@ import (
 )
 
 const (
-	AddressRoomTemperature     uint16 = 0
-	AddressFloorTemperature    uint16 = 1
-	AddressHumidity            uint16 = 2
-	AddressHeatingOutputStatus uint16 = 9
-	AddressHoldingFunction     uint16 = 15
-	AddressFloorOverheat       uint16 = 17
-	AddressDeviceType          uint16 = 18
-	AddressTemperatureFormat   uint16 = 60
-	AddressStatus              uint16 = 61
-	AddressSetTemperature      uint16 = 64
-	AddressAway                uint16 = 65
-	AddressAwayTemperature     uint16 = 66
-	AddressHoldingTemperature  uint16 = 69
-
-	DeviceTypeHotWater             uint16 = 2
-	DeviceTypeElectricHeating      uint16 = 3
-	DeviceTypeFCU2                 uint16 = 4
-	DeviceTypeFCU4                 uint16 = 5
-	DeviceTypeBase                 uint16 = 30 // базовый простой MC6-HA, без горячей воды
-	DeviceTypeElectricHeatingTimer uint16 = 31
+	AddressRoomTemperature    uint16 = 0
+	AddressFloorTemperature   uint16 = 1
+	AddressHumidity           uint16 = 2
+	AddressHeatingValve       uint16 = 3
+	AddressCoolingValve       uint16 = 4
+	AddressHeatingOutput      uint16 = 9
+	AddressHoldingFunction    uint16 = 15
+	AddressFloorOverheat      uint16 = 17
+	AddressDeviceType         uint16 = 18
+	AddressTemperatureFormat  uint16 = 60
+	AddressStatus             uint16 = 61
+	AddressSystemMode         uint16 = 62
+	AddressFanSpeed           uint16 = 63
+	AddressTargetTemperature  uint16 = 64
+	AddressAway               uint16 = 65
+	AddressAwayTemperature    uint16 = 66
+	AddressHoldingTemperature uint16 = 69
 
 	TemperatureFormatCelsius    uint16 = 0
 	TemperatureFormatFahrenheit uint16 = 1
+
+	FanSpeedHigh   uint16 = 0
+	FanSpeedMedium uint16 = 1
+	FanSpeedLow    uint16 = 2
+	FanSpeedAuto   uint16 = 3
+
+	SystemModeHeat       uint16 = 0
+	SystemModeCool       uint16 = 1
+	SystemModeVent       uint16 = 2
+	SystemModeDehumidity uint16 = 3
+	SystemModeAuto       uint16 = 4
 
 	writeResponseSuccess uint16 = 2
 )
@@ -93,14 +102,37 @@ func (m *MC6) Read(address uint16) (value uint16, err error) {
 	return value, err
 }
 
-func (m *MC6) Write(address uint16, value uint16) (err error) {
+func (m *MC6) ReadBool(address uint16) (bool, error) {
+	value, err := m.Read(address)
+	if err != nil {
+		return false, err
+	}
+
+	return value == 1, err
+}
+
+func (m *MC6) ReadTemperature(address uint16) (float64, error) {
+	value, err := m.Read(address)
+	if err != nil {
+		return 0, err
+	}
+
+	// если датчик подключен не правильно, возвращается 999
+	if value > 500 {
+		return 0, fmt.Errorf("temperature sensor returned wrong value %d", value)
+	}
+
+	return float64(value) / 10, err
+}
+
+func (m *MC6) Write(address, quantity, value uint16) (err error) {
 	var response []byte
 
 	payload := make([]byte, 2)
 	binary.BigEndian.PutUint16(payload, value)
 
 	for trie := uint8(1); trie <= m.options.maxTries; trie++ {
-		response, err = m.connection.WriteMultipleRegisters(address, 2, payload)
+		response, err = m.connection.WriteMultipleRegisters(address, quantity, payload)
 
 		if err == nil {
 			code := binary.BigEndian.Uint16(response)
@@ -114,4 +146,32 @@ func (m *MC6) Write(address uint16, value uint16) (err error) {
 	}
 
 	return err
+}
+
+func (m *MC6) WriteBool(address uint16, flag bool) error {
+	var value uint16
+
+	if flag {
+		value = 1
+	}
+
+	return m.Write(address, 2, value)
+}
+
+func (m *MC6) WriteTemperature(address uint16, value float64) error {
+	value *= 10
+
+	if value < 50 || value > 350 {
+		return errors.New("wrong temperature value 50 >= value <= 350")
+	}
+
+	return m.Write(address, 2, uint16(value))
+}
+
+// устанавливаемое значение всегда кратно 0.5 и округляется в меньшую сторону
+// даже на устройстве шаг 0.5, поэтому принудительно округляем
+func (m *MC6) RoundTemperature(value float64) float64 {
+	val := int(value * 10)
+	val -= val % 5
+	return float64(val) / 10
 }

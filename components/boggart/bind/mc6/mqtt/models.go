@@ -7,7 +7,7 @@ type Update struct {
 	Temperature        *int64    `json:"temp,omitempty"`     // Display temperature (upload after multiplying by 10)
 	Humidity           *int64    `json:"humi,omitempty"`     // Display humidity (upload after multiplying by 10)
 	SetTemperature     *int64    `json:"settemp,omitempty"`  // Setting temperature (upload after multiplying by 10)
-	Mode               *int64    `json:"mode,omitempty"`     // Mode (1 cool, 2 heat, 3 vent, 4 auto)
+	Mode               *int64    `json:"mode,omitempty"`     // Mode (1 cool, 2 heat, 3 vent, 4 auto, 5 no program)
 	OnOff              *int64    `json:"onoff,omitempty"`    // Status 1 on, 2 off)
 	FrostTemperature   *int64    `json:"frost,omitempty"`    // Frost temperature (upload after multiplying by 10)
 	Delay              *int64    `json:"delay,omitempty"`    // Output delay time
@@ -26,4 +26,6 @@ type Update struct {
 	Program            *int64    `json:"prog,omitempty"`     // Schedule (0 none, 1 weekday/weekend, 2 7 days, 3 24 hours)
 	ProgramTemperature *struct{} `json:"temp_prog,omitempty"`
 	OnlineType         *int64    `json:"online_type,omitempty"`
+	SendTime           *int64    `json:"send_time,omitempty"` // Unixtime in milliseconds
+	Optmium            *int64    `json:"opt,omitempty"`       // Optimum (0 no, 1 yes)
 }

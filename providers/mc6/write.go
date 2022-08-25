@@ -1,60 +1,36 @@
 package mc6
 
-import (
-	"errors"
-)
-
-// FIXME: на устройстве не срабатывает
-func (m *MC6) TemperatureFormat(format uint16) error {
-	return m.Write(AddressTemperatureFormat, format)
+// FIXME:
+// HA на устройстве не срабатывает
+// FCU4 любое значение вызывает перезагрузку устройства
+func (m *MC6) SetTemperatureFormat(format uint16) error {
+	return m.Write(AddressTemperatureFormat, 2, format)
 }
 
-func (m *MC6) Status(flag bool) error {
-	var value uint16
-
-	if flag {
-		value = 1
-	}
-
-	return m.Write(AddressStatus, value)
+func (m *MC6) SetStatus(flag bool) error {
+	return m.WriteBool(AddressStatus, flag)
 }
 
-func (m *MC6) SetTemperature(value float64) error {
-	value *= 10
-
-	if value < 50 || value > 350 {
-		return errors.New("wrong temperature value 50 >= value <= 350")
-	}
-
-	return m.Write(AddressSetTemperature, uint16(value))
+func (m *MC6) SetSystemMode(value uint16) error {
+	return m.Write(AddressSystemMode, 1, value)
 }
 
-func (m *MC6) Away(flag bool) error {
-	var value uint16
-
-	if flag {
-		value = 1
-	}
-
-	return m.Write(AddressAway, value)
+func (m *MC6) SetFanSpeed(value uint16) error {
+	return m.Write(AddressFanSpeed, 1, value)
 }
 
-func (m *MC6) AwayTemperature(value uint16) error {
-	value *= 10
-
-	if value < 50 || value > 350 {
-		return errors.New("wrong away temperature value 50 >= value <= 350")
-	}
-
-	return m.Write(AddressAwayTemperature, value)
+func (m *MC6) SetTargetTemperature(value float64) error {
+	return m.WriteTemperature(AddressTargetTemperature, value)
 }
 
-func (m *MC6) HoldingTemperature(value uint16) error {
-	value *= 10
+func (m *MC6) SetAway(flag bool) error {
+	return m.WriteBool(AddressAway, flag)
+}
 
-	if value < 50 || value > 350 {
-		return errors.New("wrong holding temperature value 50 >= value <= 350")
-	}
+func (m *MC6) SetAwayTemperature(value float64) error {
+	return m.WriteTemperature(AddressAwayTemperature, value)
+}
 
-	return m.Write(AddressHoldingTemperature, value)
+func (m *MC6) SetHoldingTemperature(value float64) error {
+	return m.WriteTemperature(AddressHoldingTemperature, value)
 }

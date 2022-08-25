@@ -5,31 +5,11 @@ import (
 )
 
 func (m *MC6) RoomTemperature() (float64, error) {
-	value, err := m.Read(AddressRoomTemperature)
-	if err != nil {
-		return 0, err
-	}
-
-	// если датчик подключен не правильно, возвращается 999
-	if value > 500 {
-		return 0, fmt.Errorf("room sensor returned wrong value %d", value)
-	}
-
-	return float64(value) / 10, err
+	return m.ReadTemperature(AddressRoomTemperature)
 }
 
 func (m *MC6) FloorTemperature() (float64, error) {
-	value, err := m.Read(AddressFloorTemperature)
-	if err != nil {
-		return 0, err
-	}
-
-	// если датчик подключен не правильно, возвращается 999
-	if value > 500 {
-		return 0, fmt.Errorf("floor sensor returned wrong value %d", value)
-	}
-
-	return float64(value) / 10, err
+	return m.ReadTemperature(AddressFloorTemperature)
 }
 
 func (m *MC6) Humidity() (uint16, error) {
@@ -45,34 +25,63 @@ func (m *MC6) Humidity() (uint16, error) {
 	return value, err
 }
 
-// статус активации режима нагрева (реле замкнуто)
-func (m *MC6) HeatingOutputStatus() (bool, error) {
-	value, err := m.Read(AddressHeatingOutputStatus)
-	if err != nil {
-		return false, err
-	}
+// реле между HV - L замкнуто
+func (m *MC6) HeatingValve() (bool, error) {
+	return m.ReadBool(AddressHeatingValve)
+}
 
-	return value == 1, err
+// реле между СV - L замкнуто
+func (m *MC6) CoolingValve() (bool, error) {
+	return m.ReadBool(AddressCoolingValve)
+}
+
+// статус активации режима нагрева (реле замкнуто)
+func (m *MC6) HeatingOutput() (bool, error) {
+	return m.ReadBool(AddressHeatingOutput)
 }
 
 func (m *MC6) HoldingFunction() (bool, error) {
-	value, err := m.Read(AddressHoldingFunction)
-	if err != nil {
-		return false, err
-	}
-
-	return value == 1, err
+	return m.ReadBool(AddressHoldingFunction)
 }
 
 func (m *MC6) FloorOverheat() (bool, error) {
-	value, err := m.Read(AddressFloorOverheat)
-	if err != nil {
-		return false, err
-	}
-
-	return value == 1, err
+	return m.ReadBool(AddressFloorOverheat)
 }
 
-func (m *MC6) DeviceType() (uint16, error) {
-	return m.Read(AddressDeviceType)
+func (m *MC6) DeviceType() (Device, error) {
+	value, err := m.Read(AddressDeviceType)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return Device(value), err
+}
+
+func (m *MC6) TemperatureFormat() (uint16, error) {
+	return m.Read(AddressTemperatureFormat)
+}
+
+func (m *MC6) Status() (bool, error) {
+	return m.ReadBool(AddressStatus)
+}
+
+func (m *MC6) SystemMode() (uint16, error) {
+	return m.Read(AddressSystemMode)
+}
+
+func (m *MC6) FanSpeed() (uint16, error) {
+	return m.Read(AddressFanSpeed)
+}
+
+func (m *MC6) TargetTemperature() (float64, error) {
+	return m.ReadTemperature(AddressTargetTemperature)
+}
+
+func (m *MC6) Away() (bool, error) {
+	return m.ReadBool(AddressAwayTemperature)
+}
+
+func (m *MC6) AwayTemperature() (float64, error) {
+	return m.ReadTemperature(AddressAwayTemperature)
 }

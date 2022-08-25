@@ -7,6 +7,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/protocols/modbus"
 	"github.com/kihamo/boggart/providers/mc6"
+	"go.uber.org/multierr"
 )
 
 type Bind struct {
@@ -16,18 +17,13 @@ type Bind struct {
 	di.MetricsBind
 	di.MQTTBind
 	di.ProbesBind
+	di.WidgetBind
 	di.WorkersBind
 
 	provider     *mc6.MC6
 	providerOnce *atomic.Once
 
-	stateDeviceType *atomic.Uint32
-	statePower      *atomic.Bool
-	//stateTemperatureFormat *atomic.Uint32
-	stateSetTemperature     *atomic.Float64
-	stateAway               *atomic.Bool
-	stateAwayTemperature    *atomic.Uint32
-	stateHoldingTemperature *atomic.Uint32
+	stateDeviceType *atomic.Uint32Null
 }
 
 func (b *Bind) config() *Config {
@@ -66,80 +62,26 @@ func (b *Bind) Close() error {
 	return nil
 }
 
-func (b *Bind) Power(ctx context.Context, flag bool) error {
-	err := b.Provider().Status(flag)
-
-	if err == nil {
-		b.statePower.Set(flag)
-
-		err = b.MQTT().PublishAsync(ctx, b.config().TopicPowerState.Format(b.Meta().ID()), flag)
+func (b *Bind) DeviceType(ctx context.Context) (mc6.Device, error) {
+	if !b.stateDeviceType.IsNil() {
+		return mc6.NewDevice(uint16(b.stateDeviceType.Load())), nil
 	}
 
-	return err
+	deviceType, err := b.Provider().DeviceType()
+
+	if err == nil {
+		b.stateDeviceType.Set(uint32(deviceType))
+
+		if e := b.MQTT().PublishAsync(ctx, b.config().TopicDeviceType.Format(b.Meta().ID()), deviceType); e != nil {
+			err = multierr.Append(err, e)
+		}
+	}
+
+	return deviceType, err
 }
 
-//func (b *Bind) TemperatureFormat(ctx context.Context, format uint16) error {
-//	err := b.Provider().TemperatureFormat(format)
-//
-//	if err == nil {
-//		b.stateTemperatureFormat.Set(uint32(format))
-//
-//		err = b.MQTT().PublishAsync(ctx, b.config().TopicTemperatureFormatState.Format(b.Meta().ID()), format)
-//	}
-//
-//	return err
-//}
+func (b *Bind) notifyChangeState(ctx context.Context) error {
+	// TODO: 10 секунд задержки на переключение реле
 
-func (b *Bind) SetTemperature(ctx context.Context, temperature float64) error {
-	err := b.Provider().SetTemperature(temperature)
-
-	if err == nil {
-		// устанавливаемое значение всегда кратно 0.5 и округляется в меньшую сторону
-		// даже на устройстве шаг 0.5, поэтому принудительно округляем
-		val := int(temperature * 10)
-		val -= val % 5
-		temperature = float64(val) / 10
-
-		b.stateSetTemperature.Set(temperature)
-
-		err = b.MQTT().PublishAsync(ctx, b.config().TopicSetTemperatureState.Format(b.Meta().ID()), temperature)
-	}
-
-	return err
-}
-
-func (b *Bind) Away(ctx context.Context, flag bool) error {
-	err := b.Provider().Away(flag)
-
-	if err == nil {
-		b.stateAway.Set(flag)
-
-		err = b.MQTT().PublishAsync(ctx, b.config().TopicAwayState.Format(b.Meta().ID()), flag)
-	}
-
-	return err
-}
-
-func (b *Bind) AwayTemperature(ctx context.Context, temperature uint16) error {
-	err := b.Provider().AwayTemperature(temperature)
-
-	if err == nil {
-		b.stateAwayTemperature.Set(uint32(temperature))
-
-		err = b.MQTT().PublishAsync(ctx, b.config().TopicAwayTemperatureState.Format(b.Meta().ID()), temperature)
-	}
-
-	return err
-}
-
-func (b *Bind) HoldingTemperature(ctx context.Context, temperature uint16) error {
-	err := b.Provider().HoldingTemperature(temperature)
-
-	if err == nil {
-		b.stateHoldingTemperature.Set(uint32(temperature))
-
-		err = b.MQTT().PublishAsync(ctx, b.config().TopicHoldingTemperatureState.Format(b.Meta().ID()), temperature)
-	}
-
-	return err
+	return b.Workers().TaskRunByName(ctx, "state-updater")
 }

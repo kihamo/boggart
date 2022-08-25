@@ -1,0 +1,211 @@
+{{ define "content" }}
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>{{ i18n "MC6" . }}</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_panel">
+                <div class="x_content">
+                    <div role="tabpanel">
+                        <ul class="nav nav-tabs bar_tabs" role="tablist">
+                            <li role="presentation"{{ if eq .action "" }} class="active"{{ end }}><a href="{{ if eq .action "" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}{{ end }}">{{ i18n "Device" . }}</a></li>
+                            <li role="presentation"{{ if eq .action "sensors" }} class="active"{{ end }}><a href="{{ if eq .action "sensors" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=sensors{{ end }}">{{ i18n "Sensors" . }}</a></li>
+                            <li role="presentation"{{ if eq .action "status" }} class="active"{{ end }}><a href="{{ if eq .action "status" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=status{{ end }}">{{ i18n "Status" . }}</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div role="tabpanel" class="tab-pane fade active in">
+                                <form role="form" action="?" method="post" id="variables" data-toggle="validator">
+                                    <table class="table table-striped dt-responsive nowrap" style="width:100%">
+                                        <thead>
+                                            <tr>
+                                                <th>{{ i18n "Variable" . }}</th>
+                                                <th>{{ i18n "Value" . }}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        {{ if eq .action "sensors" }}
+                                            {{ if .room_temperature }}
+                                            <tr>
+                                                <td>{{ i18n "Room temperature" . }}</td>
+                                                {{ if .room_temperature.error }}
+                                                <td class="text-danger" colspan="3">{{ .room_temperature.error }}</td>
+                                                {{ else }}
+                                                <td>
+                                                    {{ format_float .room_temperature.value 'f' -1 64 }}
+                                                    {{ if not .temperature_format.error }}
+                                                    {{ if eq .temperature_format.value 0 }}°C{{ else }}°F{{ end }}
+                                                    {{ end }}
+                                                </td>
+                                                {{ end }}
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .floor_temperature }}
+                                            <tr>
+                                                <td>{{ i18n "Floor temperature" . }}</td>
+                                                {{ if .floor_temperature.error }}
+                                                <td class="text-danger" colspan="3">{{ .floor_temperature.error }}</td>
+                                                {{ else }}
+                                                <td>
+                                                    {{ format_float .floor_temperature.value 'f' -1 64 }}
+                                                    {{ if not .temperature_format.error }}
+                                                    {{ if eq .temperature_format.value 0 }}°C{{ else }}°F{{ end }}
+                                                    {{ end }}
+                                                </td>
+                                                {{ end }}
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .floor_overheat }}
+                                            <tr>
+                                                <td>{{ i18n "Floor overheat" . }}</td>
+                                                {{ if .floor_overheat.error }}
+                                                <td class="text-danger" colspan="3">{{ .floor_overheat.error }}</td>
+                                                {{ else }}
+                                                <td>{{ if .floor_overheat.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
+                                                {{ end }}
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .humidity }}
+                                            <tr>
+                                                <td>{{ i18n "Humidity" . }}</td>
+                                                {{ if .humidity.error }}
+                                                <td class="text-danger" colspan="3">{{ .humidity.error }}</td>
+                                                {{ else }}
+                                                <td>{{ .humidity.value }}%</td>
+                                                {{ end }}
+                                            </tr>
+                                            {{ end }}
+                                        {{ else if eq .action "status" }}
+                                            {{ if .power }}
+                                            <tr>
+                                                <td>{{ i18n "Power status" . }}</td>
+                                                {{ if .power.error }}
+                                                <td class="text-danger" colspan="3">{{ .power.error }}</td>
+                                                {{ else }}
+                                                <td>{{ if .power.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
+                                                {{ end }}
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .heating_valve }}
+                                            <tr>
+                                                <td>{{ i18n "Heating valve" . }}</td>
+                                                {{ if .heating_valve.error }}
+                                                <td class="text-danger" colspan="3">{{ .heating_valve.error }}</td>
+                                                {{ else }}
+                                                <td>{{ if .heating_valve.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
+                                                {{ end }}
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .cooling_valve }}
+                                            <tr>
+                                                <td>{{ i18n "Cooling valve" . }}</td>
+                                                {{ if .cooling_valve.error }}
+                                                <td class="text-danger" colspan="3">{{ .cooling_valve.error }}</td>
+                                                {{ else }}
+                                                <td>{{ if .cooling_valve.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
+                                                {{ end }}
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .heating_output }}
+                                            <tr>
+                                                <td>{{ i18n "Heating output" . }}</td>
+                                                {{ if .heating_output.error }}
+                                                <td class="text-danger" colspan="3">{{ .heating_output.error }}</td>
+                                                {{ else }}
+                                                <td>{{ if .heating_output.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
+                                                {{ end }}
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .holding_function }}
+                                            <tr>
+                                                <td>{{ i18n "Holding function" . }}</td>
+                                                {{ if .holding_function.error }}
+                                                <td class="text-danger" colspan="3">{{ .holding_function.error }}</td>
+                                                {{ else }}
+                                                <td>{{ if .holding_function.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
+                                                {{ end }}
+                                            </tr>
+                                            {{ end }}
+                                        {{ else }}
+                                            <tr>
+                                                <td>{{ i18n "Device type" . }}</td>
+                                                {{ if .device_type.error }}
+                                                <td class="text-danger" colspan="3">{{ .device_type.error }}</td>
+                                                {{ else }}
+                                                <td>{{ .device_type.value }}</td>
+                                                {{ end }}
+                                            </tr>
+                                            {{ if .system_mode }}
+                                            <tr>
+                                                <td>{{ i18n "System mode" . }}</td>
+                                                {{ if .system_mode.error }}
+                                                <td class="text-danger" colspan="3">{{ .system_mode.error }}</td>
+                                                {{ else }}
+                                                <td>
+                                                    {{ if eq .system_mode.value 0 }}
+                                                    {{ i18n "Heat" . }}
+                                                    {{ else if eq .system_mode.value 1 }}
+                                                    {{ i18n "Cool" . }}
+                                                    {{ else if eq .system_mode.value 2 }}
+                                                    {{ i18n "Vent" . }}
+                                                    {{ else if eq .system_mode.value 3 }}
+                                                    {{ i18n "Dehumidity" . }}
+                                                    {{ else if eq .system_mode.value 4 }}
+                                                    {{ i18n "Auto" . }}
+                                                    {{ end }}
+                                                </td>
+                                                {{ end }}
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .fan_speed }}
+                                            <tr>
+                                                <td>{{ i18n "Fan speed" . }}</td>
+                                                {{ if .fan_speed.error }}
+                                                <td class="text-danger" colspan="3">{{ .fan_speed.error }}</td>
+                                                {{ else }}
+                                                <td>
+                                                    {{ if eq .fan_speed.value 0 }}
+                                                    {{ i18n "High" . }}
+                                                    {{ else if eq .fan_speed.value 1 }}
+                                                    {{ i18n "Medium" . }}
+                                                    {{ else if eq .fan_speed.value 2 }}
+                                                    {{ i18n "Low" . }}
+                                                    {{ else if eq .fan_speed.value 3 }}
+                                                    {{ i18n "Auto" . }}
+                                                    {{ end }}
+                                                </td>
+                                                {{ end }}
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .target_temperature }}
+                                            <tr>
+                                                <td>{{ i18n "Target temperature" . }}</td>
+                                                {{ if .target_temperature.error }}
+                                                <td class="text-danger" colspan="3">{{ .target_temperature.error }}</td>
+                                                {{ else }}
+                                                <td>
+                                                    {{ format_float .target_temperature.value 'f' -1 64 }}
+                                                    {{ if not .temperature_format.error }}
+                                                    {{ if eq .temperature_format.value 0 }}°C{{ else }}°F{{ end }}
+                                                    {{ end }}
+                                                </td>
+                                                {{ end }}
+                                            </tr>
+                                            {{ end }}
+                                        {{ end }}
+                                        </tbody>
+                                    </table>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
