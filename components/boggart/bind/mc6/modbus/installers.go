@@ -52,11 +52,12 @@ func (b *Bind) InstallerSteps(ctx context.Context, system installer.System) ([]i
 		idHoldingFunction     = "HoldingFunction"
 		idFloorOverheat       = "FloorOverheat"
 		idFanSpeedNumbers     = "FanSpeedNumbers"
-
-		//idTargetTemperature  = "TargetTemperature"
-		//idAway               = "Away"
-		//idAwayTemperature    = "AwayTemperature"
-		//idHoldingTemperature = "HoldingTemperature"
+		idSystemMode          = "SystemMode"
+		idFanSpeed            = "FanSpeed"
+		idTargetTemperature   = "TargetTemperature"
+		idAway                = "Away"
+		idAwayTemperature     = "AwayTemperature"
+		idHoldingTemperature  = "HoldingTemperature"
 	)
 
 	channels := []*openhab.Channel{
@@ -67,51 +68,6 @@ func (b *Bind) InstallerSteps(ctx context.Context, system installer.System) ([]i
 					WithLabel("Device type").
 					WithIcon("text"),
 			),
-		/*
-			openhab.NewChannel(idTargetTemperature, openhab.ChannelTypeNumber).
-				WithStateTopic(cfg.TopicTargetTemperatureState.Format(id)).
-				WithCommandTopic(cfg.TopicTargetTemperature.Format(id)).
-				WithMin(5).
-				WithMax(35).
-				WithStep(0.5).
-				AddItems(
-					openhab.NewItem(itemPrefix+idTargetTemperature, openhab.ItemTypeNumber).
-						WithLabel("Set temperature [%.1f " + temperatureUnit + "]").
-						WithIcon("temperature"),
-				),
-			openhab.NewChannel(idAway, openhab.ChannelTypeSwitch).
-				WithStateTopic(cfg.TopicAwayState.Format(id)).
-				WithCommandTopic(cfg.TopicAway.Format(id)).
-				WithOn("true").
-				WithOff("false").
-				AddItems(
-					openhab.NewItem(itemPrefix+idAway, openhab.ItemTypeSwitch).
-						WithLabel("Away []").
-						WithIcon("frontdoor"),
-				),
-			openhab.NewChannel(idAwayTemperature, openhab.ChannelTypeNumber).
-				WithStateTopic(cfg.TopicAwayTemperatureState.Format(id)).
-				WithCommandTopic(cfg.TopicAwayTemperature.Format(id)).
-				WithMin(5).
-				WithMax(35).
-				WithStep(1).
-				AddItems(
-					openhab.NewItem(itemPrefix+idAwayTemperature, openhab.ItemTypeNumber).
-						WithLabel("Away temperature [%d " + temperatureUnit + "]").
-						WithIcon("temperature"),
-				),
-			openhab.NewChannel(idHoldingTemperature, openhab.ChannelTypeNumber).
-				WithStateTopic(cfg.TopicHoldingTemperatureState.Format(id)).
-				WithCommandTopic(cfg.TopicHoldingTemperature.Format(id)).
-				WithMin(5).
-				WithMax(35).
-				WithStep(1).
-				AddItems(
-					openhab.NewItem(itemPrefix+idHoldingTemperature, openhab.ItemTypeNumber).
-						WithLabel("Holding temperature [%d " + temperatureUnit + "]").
-						WithIcon("temperature"),
-				),
-		*/
 	}
 
 	if deviceType.IsSupportedRoomTemperature() {
@@ -214,6 +170,32 @@ func (b *Bind) InstallerSteps(ctx context.Context, system installer.System) ([]i
 			))
 	}
 
+	if deviceType.IsSupportedTargetTemperature() {
+		min := 5.0
+		max := 35.0
+
+		if val, e := b.Provider().TargetTemperatureMinimum(); e == nil {
+			min = float64(val)
+		}
+
+		if val, e := b.Provider().TargetTemperatureMaximum(); e == nil {
+			max = float64(val)
+		}
+
+		channels = append(channels,
+			openhab.NewChannel(idTargetTemperature, openhab.ChannelTypeNumber).
+				WithStateTopic(cfg.TopicTargetTemperatureState.Format(id)).
+				WithCommandTopic(cfg.TopicTargetTemperature.Format(id)).
+				WithMin(min).
+				WithMax(max).
+				WithStep(0.5).
+				AddItems(
+					openhab.NewItem(itemPrefix+idTargetTemperature, openhab.ItemTypeNumber).
+						WithLabel("Set temperature [%.1f "+temperatureUnit+"]").
+						WithIcon("temperature"),
+				))
+	}
+
 	if deviceType.IsSupportedStatus() {
 		channels = append(channels,
 			openhab.NewChannel(idStatus, openhab.ChannelTypeSwitch).
@@ -224,6 +206,76 @@ func (b *Bind) InstallerSteps(ctx context.Context, system installer.System) ([]i
 				AddItems(
 					openhab.NewItem(itemPrefix+idStatus, openhab.ItemTypeSwitch).
 						WithLabel("Status []"),
+				))
+	}
+
+	if deviceType.IsSupportedSystemMode() {
+		channels = append(channels,
+			openhab.NewChannel(idSystemMode, openhab.ChannelTypeNumber).
+				WithStateTopic(cfg.TopicSystemModeState.Format(id)).
+				WithCommandTopic(cfg.TopicSystemMode.Format(id)).
+				WithMin(0).
+				WithMax(4).
+				AddItems(
+					openhab.NewItem(itemPrefix+idSystemMode, openhab.ItemTypeNumber).
+						WithLabel("System mode [%s]"),
+				))
+	}
+
+	if deviceType.IsSupportedFanSpeed() {
+		channels = append(channels,
+			openhab.NewChannel(idFanSpeed, openhab.ChannelTypeNumber).
+				WithStateTopic(cfg.TopicFanSpeedState.Format(id)).
+				WithCommandTopic(cfg.TopicFanSpeed.Format(id)).
+				WithMin(0).
+				WithMax(3).
+				AddItems(
+					openhab.NewItem(itemPrefix+idFanSpeed, openhab.ItemTypeNumber).
+						WithLabel("Fan speed [%s]").
+						WithIcon("fan"),
+				))
+	}
+
+	if deviceType.IsSupportedAway() {
+		channels = append(channels,
+			openhab.NewChannel(idAway, openhab.ChannelTypeSwitch).
+				WithStateTopic(cfg.TopicAwayState.Format(id)).
+				WithCommandTopic(cfg.TopicAway.Format(id)).
+				WithOn("true").
+				WithOff("false").
+				AddItems(
+					openhab.NewItem(itemPrefix+idAway, openhab.ItemTypeSwitch).
+						WithLabel("Away []"),
+				))
+	}
+
+	if deviceType.IsSupportedAwayTemperature() {
+		channels = append(channels,
+			openhab.NewChannel(idAwayTemperature, openhab.ChannelTypeNumber).
+				WithStateTopic(cfg.TopicAwayTemperatureState.Format(id)).
+				WithCommandTopic(cfg.TopicAwayTemperature.Format(id)).
+				//WithMin(min).
+				//WithMax(max).
+				WithStep(1).
+				AddItems(
+					openhab.NewItem(itemPrefix+idAwayTemperature, openhab.ItemTypeNumber).
+						WithLabel("Away temperature [%.1f "+temperatureUnit+"]").
+						WithIcon("temperature"),
+				))
+	}
+
+	if deviceType.IsSupportedHoldingTemperature() {
+		channels = append(channels,
+			openhab.NewChannel(idHoldingTemperature, openhab.ChannelTypeNumber).
+				WithStateTopic(cfg.TopicHoldingTemperatureState.Format(id)).
+				WithCommandTopic(cfg.TopicHoldingTemperature.Format(id)).
+				//WithMin(min).
+				//WithMax(max).
+				WithStep(1).
+				AddItems(
+					openhab.NewItem(itemPrefix+idHoldingTemperature, openhab.ItemTypeNumber).
+						WithLabel("Holding temperature [%.1f "+temperatureUnit+"]").
+						WithIcon("temperature"),
 				))
 	}
 

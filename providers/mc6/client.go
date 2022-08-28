@@ -196,7 +196,7 @@ func (m *MC6) WriteBool(address uint16, flag bool) error {
 }
 
 func (m *MC6) WriteTemperature(address uint16, value float64) error {
-	value *= 10
+	value = m.RoundTemperature(value) * 10
 
 	if value < 50 || value > 350 {
 		return errors.New("wrong temperature value 50 >= value <= 350")

@@ -3,6 +3,7 @@ package modbus
 import (
 	"context"
 
+	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/components/mqtt"
 )
 
@@ -11,7 +12,10 @@ func (b *Bind) MQTTWrapSubscriberChangeState(f func(message mqtt.Message) error)
 		err := f(message)
 
 		if err == nil {
-			return b.Workers().TaskRunByName(ctx, "state-updater")
+			err = b.Workers().TaskRunByName(ctx, "state-updater")
+			if err != nil && err == tasks.ErrAlreadyRunning {
+				return nil
+			}
 		}
 
 		return err

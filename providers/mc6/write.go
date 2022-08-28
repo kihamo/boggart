@@ -27,10 +27,10 @@ func (m *MC6) SetAway(flag bool) error {
 	return m.WriteBool(AddressAway, flag)
 }
 
-func (m *MC6) SetAwayTemperature(value float64) error {
-	return m.WriteTemperature(AddressAwayTemperature, value)
+func (m *MC6) SetAwayTemperature(value uint16) error {
+	return m.WriteTemperature(AddressAwayTemperature, float64(value))
 }
 
-func (m *MC6) SetHoldingTemperature(value float64) error {
-	return m.WriteTemperature(AddressHoldingTemperature, value)
+func (m *MC6) SetHoldingTemperature(value uint16) error {
+	return m.WriteTemperature(AddressHoldingTemperature, float64(value))
 }
