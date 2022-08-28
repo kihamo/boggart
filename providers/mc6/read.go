@@ -80,6 +80,16 @@ func (m *MC6) FanSpeedNumbers() (uint16, error) {
 	return value, err
 }
 
+func (m *MC6) SystemError() (bool, error) {
+	value, err := m.ReadUint16(AddressSystemError)
+	if err != nil {
+		return false, err
+	}
+
+	// На HA возвращает 2 а не 1 в случае ошибки
+	return value > 0, err
+}
+
 // FIXME: по факту не работает, на HA всегда 80 на FCU всегда 0
 func (m *MC6) TemperatureFormat() (uint16, error) {
 	value, err := m.ReadUint16(AddressTemperatureFormat)
