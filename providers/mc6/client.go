@@ -7,31 +7,42 @@ import (
 	"io"
 	"log"
 	"net/url"
+	"time"
 
 	"github.com/goburrow/modbus"
 )
 
 const (
-	AddressRoomTemperature    uint16 = 0
-	AddressFloorTemperature   uint16 = 1
-	AddressHumidity           uint16 = 2
-	AddressHeatingValve       uint16 = 3
-	AddressCoolingValve       uint16 = 4
-	AddressHeatingOutput      uint16 = 9
-	AddressHoldingFunction    uint16 = 15
-	AddressFloorOverheat      uint16 = 17
-	AddressDeviceType         uint16 = 18
-	AddressTemperatureFormat  uint16 = 60
-	AddressStatus             uint16 = 61
-	AddressSystemMode         uint16 = 62
-	AddressFanSpeed           uint16 = 63
-	AddressTargetTemperature  uint16 = 64
-	AddressAway               uint16 = 65
-	AddressAwayTemperature    uint16 = 66
-	AddressHoldingTemperature uint16 = 69
+	AddressRoomTemperature          uint16 = 0
+	AddressFloorTemperature         uint16 = 1
+	AddressHumidity                 uint16 = 2
+	AddressHeatingValve             uint16 = 3
+	AddressCoolingValve             uint16 = 4
+	AddressHeatingOutput            uint16 = 9
+	AddressWindowsOpen              uint16 = 13
+	AddressHoldingFunction          uint16 = 15
+	AddressFloorOverheat            uint16 = 17
+	AddressDeviceType               uint16 = 18
+	AddressFanSpeedMode             uint16 = 20
+	AddressTemperatureFormat        uint16 = 60
+	AddressStatus                   uint16 = 61
+	AddressSystemMode               uint16 = 62
+	AddressFanSpeed                 uint16 = 63
+	AddressTargetTemperature        uint16 = 64
+	AddressAway                     uint16 = 65
+	AddressAwayTemperature          uint16 = 66
+	AddressHoldingTimeHi            uint16 = 67
+	AddressHoldingTimeLow           uint16 = 68
+	AddressHoldingTemperature       uint16 = 69
+	AddressTargetTemperatureMaximum uint16 = 83
+	AddressTargetTemperatureMinimum uint16 = 84
+	AddressFloorTemperatureLimit    uint16 = 85
 
 	TemperatureFormatCelsius    uint16 = 0
 	TemperatureFormatFahrenheit uint16 = 1
+
+	FanSpeedMode1 uint16 = 0
+	FanSpeedMode3 uint16 = 1
 
 	FanSpeedHigh   uint16 = 0
 	FanSpeedMedium uint16 = 1
@@ -112,17 +123,38 @@ func (m *MC6) ReadBool(address uint16) (bool, error) {
 }
 
 func (m *MC6) ReadTemperature(address uint16) (float64, error) {
+	value, err := m.ReadTemperatureUint(address)
+	if err != nil {
+		return 0, err
+	}
+
+	return float64(value), err
+}
+
+func (m *MC6) ReadTemperatureUint(address uint16) (uint16, error) {
 	value, err := m.Read(address)
 	if err != nil {
 		return 0, err
 	}
 
+	// по цельсию от 0 до 500
+	// по фарингейту от 320 до 1220
+
 	// если датчик подключен не правильно, возвращается 999
-	if value > 500 {
+	if value == 999 {
 		return 0, fmt.Errorf("temperature sensor returned wrong value %d", value)
 	}
 
-	return float64(value) / 10, err
+	return value / 10, err
+}
+
+func (m *MC6) ReadDuration(address uint16) (time.Duration, error) {
+	value, err := m.Read(address)
+	if err != nil {
+		return 0, err
+	}
+
+	return time.Duration(value) * time.Minute, err
 }
 
 func (m *MC6) Write(address, quantity, value uint16) (err error) {

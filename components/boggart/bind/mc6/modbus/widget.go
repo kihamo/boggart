@@ -7,16 +7,19 @@ import (
 
 func (b *Bind) WidgetHandler(_ *dashboard.Response, r *dashboard.Request) {
 	widget := b.Widget()
-	vars := map[string]interface{}{}
 	ctx := r.Context()
 	provider := b.Provider()
 
 	action := r.URL().Query().Get("action")
-	vars["action"] = action
 
 	deviceType, err := b.DeviceType(ctx)
 	if err != nil {
 		widget.FlashError(r, "Get device type failed with error %v", "", err)
+	}
+
+	vars := map[string]interface{}{
+		"action": action,
+		"device": deviceType,
 	}
 
 	switch action {
@@ -94,9 +97,92 @@ func (b *Bind) WidgetHandler(_ *dashboard.Response, r *dashboard.Request) {
 			}
 		}
 
+		if deviceType.IsSupportedWindowsOpen() {
+			value, err := provider.WindowsOpen()
+			vars["windows_open"] = map[string]interface{}{
+				"value": value,
+				"error": err,
+			}
+		}
+
+	case "away":
+		if deviceType.IsSupportedAway() {
+			value, err := provider.Away()
+			vars["away"] = map[string]interface{}{
+				"value": value,
+				"error": err,
+			}
+		}
+
+		if deviceType.IsSupportedTemperatureFormat() {
+			value, err := provider.TemperatureFormat()
+			vars["temperature_format"] = map[string]interface{}{
+				"value": value,
+				"error": err,
+			}
+		}
+
+		if deviceType.IsSupportedAwayTemperature() {
+			value, err := provider.AwayTemperature()
+			vars["away_temperature"] = map[string]interface{}{
+				"value": value,
+				"error": err,
+			}
+		}
+
+	case "hold":
 		if deviceType.IsSupportedHoldingFunction() {
 			value, err := provider.HoldingFunction()
 			vars["holding_function"] = map[string]interface{}{
+				"value": value,
+				"error": err,
+			}
+		}
+
+		if deviceType.IsSupportedHoldingTimeHi() {
+			value, err := provider.HoldingTimeHi()
+			vars["holding_time_hi"] = map[string]interface{}{
+				"value": value,
+				"error": err,
+			}
+		}
+
+		if deviceType.IsSupportedHoldingTimeLow() {
+			value, err := provider.HoldingTimeLow()
+			vars["holding_time_low"] = map[string]interface{}{
+				"value": value,
+				"error": err,
+			}
+		}
+
+		if deviceType.IsSupportedTemperatureFormat() {
+			value, err := provider.TemperatureFormat()
+			vars["temperature_format"] = map[string]interface{}{
+				"value": value,
+				"error": err,
+			}
+		}
+
+		if deviceType.IsSupportedHoldingTemperature() {
+			value, err := provider.HoldingTemperature()
+			vars["holding_temperature"] = map[string]interface{}{
+				"value": value,
+				"error": err,
+			}
+		}
+
+	case "fan":
+		if deviceType.IsSupportedFanSpeedMode() {
+			value, err := provider.FanSpeedMode()
+			vars["fan_speed_mode"] = map[string]interface{}{
+				"value": value,
+				"error": err,
+			}
+		}
+
+		if deviceType.IsSupportedFanSpeed() {
+			value, err := provider.FanSpeed()
+			vars["fan_speed"] = map[string]interface{}{
 				"value": value,
 				"error": err,
 			}
@@ -117,14 +203,6 @@ func (b *Bind) WidgetHandler(_ *dashboard.Response, r *dashboard.Request) {
 				}
 			}
 
-			if deviceType.IsSupportedFanSpeed() {
-				value, err := provider.FanSpeed()
-				vars["fan_speed"] = map[string]interface{}{
-					"value": value,
-					"error": err,
-				}
-			}
-
 			if deviceType.IsSupportedTemperatureFormat() {
 				value, err := provider.TemperatureFormat()
 				vars["temperature_format"] = map[string]interface{}{
@@ -136,6 +214,30 @@ func (b *Bind) WidgetHandler(_ *dashboard.Response, r *dashboard.Request) {
 			if deviceType.IsSupportedTargetTemperature() {
 				value, err := provider.TargetTemperature()
 				vars["target_temperature"] = map[string]interface{}{
+					"value": value,
+					"error": err,
+				}
+			}
+
+			if deviceType.IsSupportedTargetTemperatureMaximum() {
+				value, err := provider.TargetTemperatureMaximum()
+				vars["target_temperature_maximum"] = map[string]interface{}{
+					"value": value,
+					"error": err,
+				}
+			}
+
+			if deviceType.IsSupportedTargetTemperatureMinimum() {
+				value, err := provider.TargetTemperatureMinimum()
+				vars["target_temperature_minimum"] = map[string]interface{}{
+					"value": value,
+					"error": err,
+				}
+			}
+
+			if deviceType.IsSupportedFloorTemperatureLimit() {
+				value, err := provider.FloorTemperatureLimit()
+				vars["floor_temperature_limit"] = map[string]interface{}{
 					"value": value,
 					"error": err,
 				}

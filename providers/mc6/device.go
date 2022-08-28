@@ -41,9 +41,10 @@ func (d Device) IsElectricHeatingTimer() bool {
 
 func (d Device) IsSupported(address uint16) bool {
 	switch address {
-	case AddressRoomTemperature, AddressHumidity, AddressDeviceType, AddressTemperatureFormat, AddressStatus, AddressTargetTemperature:
+	case AddressRoomTemperature, AddressHumidity, AddressDeviceType, AddressTemperatureFormat, AddressStatus,
+		AddressTargetTemperature, AddressTargetTemperatureMaximum, AddressTargetTemperatureMinimum:
 		return true
-	case AddressFloorTemperature, AddressFloorOverheat:
+	case AddressFloorTemperature, AddressFloorOverheat, AddressFloorTemperatureLimit:
 		return d.IsHA()
 	case AddressHeatingValve:
 		return d.IsFCU4()
@@ -51,11 +52,13 @@ func (d Device) IsSupported(address uint16) bool {
 		return d.IsFCU4()
 	case AddressHeatingOutput:
 		return d.IsHA() || d.IsFCU4()
-	case AddressHoldingFunction, AddressHoldingTemperature:
-
+	case AddressWindowsOpen:
+		return d.IsHA() || d.IsFCU4()
+	case AddressHoldingFunction, AddressHoldingTimeHi, AddressHoldingTimeLow, AddressHoldingTemperature:
+		return d.IsHA()
 	case AddressSystemMode:
 		return d.IsFCU4()
-	case AddressFanSpeed:
+	case AddressFanSpeedMode, AddressFanSpeed:
 		return d.IsFCU4()
 	case AddressAway, AddressAwayTemperature:
 		return d.IsHA()
@@ -84,6 +87,10 @@ func (d Device) IsSupportedCoolingValve() bool {
 	return d.IsSupported(AddressCoolingValve)
 }
 
+func (d Device) IsSupportedWindowsOpen() bool {
+	return d.IsSupported(AddressWindowsOpen)
+}
+
 func (d Device) IsSupportedHeatingOutput() bool {
 	return d.IsSupported(AddressHeatingOutput)
 }
@@ -98,6 +105,10 @@ func (d Device) IsSupportedFloorOverheat() bool {
 
 func (d Device) IsSupportedDeviceType() bool {
 	return d.IsSupported(AddressDeviceType)
+}
+
+func (d Device) IsSupportedFanSpeedMode() bool {
+	return d.IsSupported(AddressFanSpeedMode)
 }
 
 func (d Device) IsSupportedTemperatureFormat() bool {
@@ -128,8 +139,28 @@ func (d Device) IsSupportedAwayTemperature() bool {
 	return d.IsSupported(AddressAwayTemperature)
 }
 
+func (d Device) IsSupportedHoldingTimeHi() bool {
+	return d.IsSupported(AddressHoldingTimeHi)
+}
+
+func (d Device) IsSupportedHoldingTimeLow() bool {
+	return d.IsSupported(AddressHoldingTimeLow)
+}
+
 func (d Device) IsSupportedHoldingTemperature() bool {
 	return d.IsSupported(AddressHoldingTemperature)
+}
+
+func (d Device) IsSupportedTargetTemperatureMaximum() bool {
+	return d.IsSupported(AddressTargetTemperatureMaximum)
+}
+
+func (d Device) IsSupportedTargetTemperatureMinimum() bool {
+	return d.IsSupported(AddressTargetTemperatureMinimum)
+}
+
+func (d Device) IsSupportedFloorTemperatureLimit() bool {
+	return d.IsSupported(AddressFloorTemperatureLimit)
 }
 
 func (d Device) String() string {

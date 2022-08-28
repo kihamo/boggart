@@ -2,6 +2,7 @@ package mc6
 
 import (
 	"fmt"
+	"time"
 )
 
 func (m *MC6) RoomTemperature() (float64, error) {
@@ -40,6 +41,11 @@ func (m *MC6) HeatingOutput() (bool, error) {
 	return m.ReadBool(AddressHeatingOutput)
 }
 
+// по факту не работает, всегда отдает 0 (возможно из-за невключения самой функции)
+func (m *MC6) WindowsOpen() (bool, error) {
+	return m.ReadBool(AddressWindowsOpen)
+}
+
 func (m *MC6) HoldingFunction() (bool, error) {
 	return m.ReadBool(AddressHoldingFunction)
 }
@@ -58,7 +64,19 @@ func (m *MC6) DeviceType() (Device, error) {
 	return Device(value), err
 }
 
+func (m *MC6) FanSpeedMode() (uint16, error) {
+	return m.Read(AddressFanSpeedMode)
+}
+
+// FIXME: по факту не работает, на HA всегда 80 на FCU всегда 0
 func (m *MC6) TemperatureFormat() (uint16, error) {
+	value, err := m.Read(AddressTemperatureFormat)
+
+	// HA always return 80 for C
+	if err == nil && value != 1 {
+		return 0, err
+	}
+
 	return m.Read(AddressTemperatureFormat)
 }
 
@@ -79,9 +97,33 @@ func (m *MC6) TargetTemperature() (float64, error) {
 }
 
 func (m *MC6) Away() (bool, error) {
-	return m.ReadBool(AddressAwayTemperature)
+	return m.ReadBool(AddressAway)
 }
 
-func (m *MC6) AwayTemperature() (float64, error) {
-	return m.ReadTemperature(AddressAwayTemperature)
+func (m *MC6) AwayTemperature() (uint16, error) {
+	return m.ReadTemperatureUint(AddressAwayTemperature)
+}
+
+func (m *MC6) HoldingTimeHi() (time.Duration, error) {
+	return m.ReadDuration(AddressHoldingTimeHi)
+}
+
+func (m *MC6) HoldingTimeLow() (time.Duration, error) {
+	return m.ReadDuration(AddressHoldingTimeLow)
+}
+
+func (m *MC6) HoldingTemperature() (uint16, error) {
+	return m.ReadTemperatureUint(AddressHoldingTemperature)
+}
+
+func (m *MC6) TargetTemperatureMaximum() (uint16, error) {
+	return m.ReadTemperatureUint(AddressTargetTemperatureMaximum)
+}
+
+func (m *MC6) TargetTemperatureMinimum() (uint16, error) {
+	return m.ReadTemperatureUint(AddressTargetTemperatureMinimum)
+}
+
+func (m *MC6) FloorTemperatureLimit() (uint16, error) {
+	return m.ReadTemperatureUint(AddressFloorTemperatureLimit)
 }
