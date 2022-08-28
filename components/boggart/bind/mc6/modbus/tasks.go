@@ -346,7 +346,7 @@ func (b *Bind) taskSensorUpdaterHandler(ctx context.Context) error {
 
 	if deviceType.IsSupportedFloorTemperature() {
 		if val, e := provider.FloorTemperature(); e == nil {
-			metricFlourTemperature.With("id", id).Set(val)
+			metricFloorTemperature.With("id", id).Set(val)
 
 			if e = b.MQTT().PublishAsync(ctx, cfg.TopicFloorTemperature.Format(id), val); e != nil {
 				err = multierr.Append(err, e)
