@@ -41,21 +41,22 @@ func (b *Bind) InstallerSteps(ctx context.Context, system installer.System) ([]i
 	const (
 		temperatureUnit = "°C"
 
-		idDeviceType       = "DeviceType"
-		idRoomTemperature  = "RoomTemperature"
-		idFloorTemperature = "FloorTemperature"
-		idHumidity         = "Humidity"
-		idHeatingValve     = "HeatingValve"
-		idCoolingValve     = "CoolingValve"
-		idStatus           = "Power"
-
+		idDeviceType          = "DeviceType"
+		idRoomTemperature     = "RoomTemperature"
+		idFloorTemperature    = "FloorTemperature"
+		idHumidity            = "Humidity"
+		idHeatingValve        = "HeatingValve"
+		idCoolingValve        = "CoolingValve"
+		idStatus              = "Power"
 		idHeatingOutputStatus = "HeatingOutput"
 		idHoldingFunction     = "HoldingFunction"
 		idFloorOverheat       = "FloorOverheat"
-		idTargetTemperature   = "TargetTemperature"
-		idAway                = "Away"
-		idAwayTemperature     = "AwayTemperature"
-		idHoldingTemperature  = "HoldingTemperature"
+		idFanSpeedNumbers     = "FanSpeedNumbers"
+
+		//idTargetTemperature  = "TargetTemperature"
+		//idAway               = "Away"
+		//idAwayTemperature    = "AwayTemperature"
+		//idHoldingTemperature = "HoldingTemperature"
 	)
 
 	channels := []*openhab.Channel{
@@ -67,33 +68,6 @@ func (b *Bind) InstallerSteps(ctx context.Context, system installer.System) ([]i
 					WithIcon("text"),
 			),
 		/*
-			openhab.NewChannel(idHeatingOutputStatus, openhab.ChannelTypeContact).
-				WithStateTopic(cfg.TopicHeatingOutputStatus.Format(id)).
-				WithOn("true").
-				WithOff("false").
-				AddItems(
-					openhab.NewItem(itemPrefix+idHeatingOutputStatus, openhab.ItemTypeContact).
-						WithLabel("Heating output [%s]").
-						WithIcon("fire"),
-				),
-			openhab.NewChannel(idHoldingFunction, openhab.ChannelTypeContact).
-				WithStateTopic(cfg.TopicHoldingFunction.Format(id)).
-				WithOn("true").
-				WithOff("false").
-				AddItems(
-					openhab.NewItem(itemPrefix+idHoldingFunction, openhab.ItemTypeContact).
-						WithLabel("Holding function [%s]").
-						WithIcon("fire"),
-				),
-			openhab.NewChannel(idFloorOverheat, openhab.ChannelTypeContact).
-				WithStateTopic(cfg.TopicFloorOverheat.Format(id)).
-				WithOn("true").
-				WithOff("false").
-				AddItems(
-					openhab.NewItem(itemPrefix+idFloorOverheat, openhab.ItemTypeContact).
-						WithLabel("Floor overheat [%s]").
-						WithIcon("siren"),
-				),
 			openhab.NewChannel(idTargetTemperature, openhab.ChannelTypeNumber).
 				WithStateTopic(cfg.TopicTargetTemperatureState.Format(id)).
 				WithCommandTopic(cfg.TopicTargetTemperature.Format(id)).
@@ -191,6 +165,52 @@ func (b *Bind) InstallerSteps(ctx context.Context, system installer.System) ([]i
 				openhab.NewItem(itemPrefix+idCoolingValve, openhab.ItemTypeContact).
 					WithLabel("Cooling valve [%s]").
 					WithIcon("fire"),
+			))
+	}
+
+	if deviceType.IsSupportedHeatingOutput() {
+		channels = append(channels, openhab.NewChannel(idHeatingOutputStatus, openhab.ChannelTypeContact).
+			WithStateTopic(cfg.TopicHeatingOutputStatus.Format(id)).
+			WithOn("true").
+			WithOff("false").
+			AddItems(
+				openhab.NewItem(itemPrefix+idHeatingOutputStatus, openhab.ItemTypeContact).
+					WithLabel("Heating output [%s]").
+					WithIcon("fire"),
+			))
+	}
+
+	if deviceType.IsSupportedHoldingFunction() {
+		channels = append(channels, openhab.NewChannel(idHoldingFunction, openhab.ChannelTypeContact).
+			WithStateTopic(cfg.TopicHoldingFunction.Format(id)).
+			WithOn("true").
+			WithOff("false").
+			AddItems(
+				openhab.NewItem(itemPrefix+idHoldingFunction, openhab.ItemTypeContact).
+					WithLabel("Holding function [%s]").
+					WithIcon("fire"),
+			))
+	}
+
+	if deviceType.IsSupportedFloorOverheat() {
+		channels = append(channels, openhab.NewChannel(idFloorOverheat, openhab.ChannelTypeContact).
+			WithStateTopic(cfg.TopicFloorOverheat.Format(id)).
+			WithOn("true").
+			WithOff("false").
+			AddItems(
+				openhab.NewItem(itemPrefix+idFloorOverheat, openhab.ItemTypeContact).
+					WithLabel("Floor overheat [%s]").
+					WithIcon("siren"),
+			))
+	}
+
+	if deviceType.IsSupportedFanSpeedNumbers() {
+		channels = append(channels, openhab.NewChannel(idFanSpeedNumbers, openhab.ChannelTypeNumber).
+			WithStateTopic(cfg.TopicFanSpeedNumbers.Format(id)).
+			AddItems(
+				openhab.NewItem(itemPrefix+idFanSpeedNumbers, openhab.ItemTypeNumber).
+					WithLabel("Fan speed numbers [%d]").
+					WithIcon("fan"),
 			))
 	}
 

@@ -23,7 +23,7 @@ const (
 	AddressHoldingFunction          uint16 = 15
 	AddressFloorOverheat            uint16 = 17
 	AddressDeviceType               uint16 = 18
-	AddressFanSpeedMode             uint16 = 20
+	AddressFanSpeedNumbers          uint16 = 20
 	AddressTemperatureFormat        uint16 = 60
 	AddressStatus                   uint16 = 61
 	AddressSystemMode               uint16 = 62

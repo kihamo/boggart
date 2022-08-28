@@ -172,9 +172,9 @@ func (b *Bind) WidgetHandler(_ *dashboard.Response, r *dashboard.Request) {
 		}
 
 	case "fan":
-		if deviceType.IsSupportedFanSpeedMode() {
-			value, err := provider.FanSpeedMode()
-			vars["fan_speed_mode"] = map[string]interface{}{
+		if deviceType.IsSupportedFanSpeedNumbers() {
+			value, err := provider.FanSpeedNumbers()
+			vars["fan_speed_numbers"] = map[string]interface{}{
 				"value": value,
 				"error": err,
 			}

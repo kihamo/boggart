@@ -131,29 +131,37 @@ func (b *Bind) taskStateUpdaterHandler(ctx context.Context) (err error) {
 		err = multierr.Append(err, fmt.Errorf("get cooling valve status failed: %w", e))
 	}
 
-	//if val, e := provider.HeatingOutput(); e == nil {
-	//	if e = b.MQTT().PublishAsync(ctx, cfg.TopicHeatingOutputStatus.Format(id), val); e != nil {
-	//		err = multierr.Append(err, e)
-	//	}
-	//} else {
-	//	err = multierr.Append(err, fmt.Errorf("get heating output status failed: %w", e))
-	//}
-	//
-	//if val, e := provider.HoldingFunction(); e == nil {
-	//	if e = b.MQTT().PublishAsync(ctx, cfg.TopicHoldingFunction.Format(id), val); e != nil {
-	//		err = multierr.Append(err, e)
-	//	}
-	//} else {
-	//	err = multierr.Append(err, fmt.Errorf("get holding function failed: %w", e))
-	//}
-	//
-	//if val, e := provider.FloorOverheat(); e == nil {
-	//	if e = b.MQTT().PublishAsync(ctx, cfg.TopicFloorOverheat.Format(id), val); e != nil {
-	//		err = multierr.Append(err, e)
-	//	}
-	//} else {
-	//	err = multierr.Append(err, fmt.Errorf("get floor overheat failed: %w", e))
-	//}
+	if val, e := provider.HeatingOutput(); e == nil {
+		if e = b.MQTT().PublishAsync(ctx, cfg.TopicHeatingOutputStatus.Format(id), val); e != nil {
+			err = multierr.Append(err, e)
+		}
+	} else {
+		err = multierr.Append(err, fmt.Errorf("get heating output status failed: %w", e))
+	}
+
+	if val, e := provider.HoldingFunction(); e == nil {
+		if e = b.MQTT().PublishAsync(ctx, cfg.TopicHoldingFunction.Format(id), val); e != nil {
+			err = multierr.Append(err, e)
+		}
+	} else {
+		err = multierr.Append(err, fmt.Errorf("get holding function failed: %w", e))
+	}
+
+	if val, e := provider.FloorOverheat(); e == nil {
+		if e = b.MQTT().PublishAsync(ctx, cfg.TopicFloorOverheat.Format(id), val); e != nil {
+			err = multierr.Append(err, e)
+		}
+	} else {
+		err = multierr.Append(err, fmt.Errorf("get floor overheat failed: %w", e))
+	}
+
+	if val, e := provider.FanSpeedNumbers(); e == nil {
+		if e = b.MQTT().PublishAsync(ctx, cfg.TopicFanSpeedNumbers.Format(id), val); e != nil {
+			err = multierr.Append(err, e)
+		}
+	} else {
+		err = multierr.Append(err, fmt.Errorf("get fan speed mode failed: %w", e))
+	}
 
 	return err
 }

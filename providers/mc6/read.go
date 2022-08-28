@@ -64,8 +64,19 @@ func (m *MC6) DeviceType() (Device, error) {
 	return Device(value), err
 }
 
-func (m *MC6) FanSpeedMode() (uint16, error) {
-	return m.Read(AddressFanSpeedMode)
+func (m *MC6) FanSpeedNumbers() (uint16, error) {
+	value, err := m.Read(AddressFanSpeedNumbers)
+
+	if err == nil {
+		switch value {
+		case 0:
+			return 1, nil
+		case 1:
+			return 3, nil
+		}
+	}
+
+	return value, err
 }
 
 // FIXME: по факту не работает, на HA всегда 80 на FCU всегда 0

@@ -52,14 +52,14 @@ func (d Device) IsSupported(address uint16) bool {
 	case AddressCoolingValve:
 		return d.IsFCU4()
 	case AddressHeatingOutput:
-		return d.IsHA() || d.IsFCU4()
+		return d.IsHA()
 	case AddressWindowsOpen:
 		return d.IsHA() || d.IsFCU4()
 	case AddressHoldingFunction, AddressHoldingTimeHi, AddressHoldingTimeLow, AddressHoldingTemperature:
 		return d.IsHA()
 	case AddressSystemMode:
 		return d.IsFCU4()
-	case AddressFanSpeedMode, AddressFanSpeed:
+	case AddressFanSpeedNumbers, AddressFanSpeed:
 		return d.IsFCU4()
 	case AddressAway, AddressAwayTemperature:
 		return d.IsHA()
@@ -108,8 +108,8 @@ func (d Device) IsSupportedDeviceType() bool {
 	return d.IsSupported(AddressDeviceType)
 }
 
-func (d Device) IsSupportedFanSpeedMode() bool {
-	return d.IsSupported(AddressFanSpeedMode)
+func (d Device) IsSupportedFanSpeedNumbers() bool {
+	return d.IsSupported(AddressFanSpeedNumbers)
 }
 
 func (d Device) IsSupportedTemperatureFormat() bool {

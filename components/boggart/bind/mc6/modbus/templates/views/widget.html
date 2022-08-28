@@ -212,14 +212,14 @@
                                             </tr>
                                             {{ end }}
                                         {{ else if eq .action "fan" }}
-                                            {{ if .fan_speed_mode }}
+                                            {{ if .fan_speed_numbers }}
                                             <tr>
-                                                <td>{{ i18n "Fan speed mode" . }}</td>
-                                                {{ if .fan_speed_mode.error }}
-                                                <td class="text-danger">{{ .fan_speed_mode.error }}</td>
+                                                <td>{{ i18n "Fan speed numbers" . }}</td>
+                                                {{ if .fan_speed_numbers.error }}
+                                                <td class="text-danger">{{ .fan_speed_numbers.error }}</td>
                                                 {{ else }}
                                                 <td>
-                                                    {{ if eq .fan_speed_mode.value 0 }}
+                                                    {{ if eq .fan_speed_numbers.value 0 }}
                                                     {{ i18n "1 speed" . }}
                                                     {{ else if eq .fan_speed.value 1 }}
                                                     {{ i18n "3 speed" . }}
