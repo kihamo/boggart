@@ -128,15 +128,6 @@ func (m *MC6) ReadBool(address uint16) (bool, error) {
 }
 
 func (m *MC6) ReadTemperature(address uint16) (float64, error) {
-	value, err := m.ReadTemperatureUint(address)
-	if err != nil {
-		return 0, err
-	}
-
-	return float64(value), err
-}
-
-func (m *MC6) ReadTemperatureUint(address uint16) (uint16, error) {
 	value, err := m.Read(address)
 	if err != nil {
 		return 0, err
@@ -145,12 +136,21 @@ func (m *MC6) ReadTemperatureUint(address uint16) (uint16, error) {
 	// по цельсию от 0 до 500
 	// по фарингейту от 320 до 1220
 
-	// если датчик подключен не правильно, возвращается 999
-	if value == 999 {
+	// TODO: выставить определения шкалы, чтобы валидатор корректно срабатывал
+	if value > 500 {
 		return 0, fmt.Errorf("temperature sensor returned wrong value %d", value)
 	}
 
-	return value / 10, err
+	return float64(value) / 10, err
+}
+
+func (m *MC6) ReadTemperatureUint(address uint16) (uint16, error) {
+	value, err := m.ReadTemperature(address)
+	if err != nil {
+		return 0, err
+	}
+
+	return uint16(value), err
 }
 
 func (m *MC6) ReadDuration(address uint16) (time.Duration, error) {

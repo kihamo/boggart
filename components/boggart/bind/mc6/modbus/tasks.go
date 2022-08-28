@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/kihamo/boggart/components/boggart/tasks"
+	"github.com/kihamo/boggart/components/mqtt"
 	"go.uber.org/multierr"
 )
 
@@ -27,13 +28,31 @@ func (b *Bind) Tasks() []tasks.Task {
 	}
 }
 
-func (b *Bind) taskDeviceTypeHandler(ctx context.Context) (err error) {
-	_, err = b.DeviceType(ctx)
+func (b *Bind) taskDeviceTypeHandler(ctx context.Context) error {
+	deviceType, err := b.DeviceType(ctx)
 	if err != nil {
 		return fmt.Errorf("get device type failed: %w", err)
 	}
 
 	cfg := b.config()
+
+	// mqtt sensors
+	subscribers := make([]mqtt.Subscriber, 0)
+	id := b.Meta().ID()
+
+	if deviceType.IsSupportedStatus() {
+		subscribers = append(subscribers, mqtt.NewSubscriber(cfg.TopicStatus.Format(id), 0,
+			b.MQTTWrapSubscriberChangeState(func(message mqtt.Message) error {
+				return b.Provider().SetStatus(message.Bool())
+			}),
+		))
+	}
+
+	if e := b.MQTT().Subscribe(subscribers...); e != nil {
+		err = multierr.Append(err, e)
+	}
+
+	// tasks
 	_, e := b.Workers().RegisterTask(
 		tasks.NewTask().
 			WithSchedule(
@@ -88,29 +107,53 @@ func (b *Bind) taskStateUpdaterHandler(ctx context.Context) (err error) {
 	id := b.Meta().ID()
 	cfg := b.config()
 
-	if val, e := provider.HeatingOutput(); e == nil {
-		if e = b.MQTT().PublishAsync(ctx, cfg.TopicHeatingOutputStatus.Format(id), val); e != nil {
+	if val, e := provider.Status(); e == nil {
+		if e = b.MQTT().PublishAsync(ctx, cfg.TopicStatusState.Format(id), val); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {
-		err = multierr.Append(err, fmt.Errorf("get heating output status failed: %w", e))
+		err = multierr.Append(err, fmt.Errorf("get status failed: %w", e))
 	}
 
-	if val, e := provider.HoldingFunction(); e == nil {
-		if e = b.MQTT().PublishAsync(ctx, cfg.TopicHoldingFunction.Format(id), val); e != nil {
+	if val, e := provider.HeatingValve(); e == nil {
+		if e = b.MQTT().PublishAsync(ctx, cfg.TopicHeatingValve.Format(id), val); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {
-		err = multierr.Append(err, fmt.Errorf("get holding function failed: %w", e))
+		err = multierr.Append(err, fmt.Errorf("get heating valve status failed: %w", e))
 	}
 
-	if val, e := provider.FloorOverheat(); e == nil {
-		if e = b.MQTT().PublishAsync(ctx, cfg.TopicFloorOverheat.Format(id), val); e != nil {
+	if val, e := provider.CoolingValve(); e == nil {
+		if e = b.MQTT().PublishAsync(ctx, cfg.TopicCoolingValve.Format(id), val); e != nil {
 			err = multierr.Append(err, e)
 		}
 	} else {
-		err = multierr.Append(err, fmt.Errorf("get floor overheat failed: %w", e))
+		err = multierr.Append(err, fmt.Errorf("get cooling valve status failed: %w", e))
 	}
+
+	//if val, e := provider.HeatingOutput(); e == nil {
+	//	if e = b.MQTT().PublishAsync(ctx, cfg.TopicHeatingOutputStatus.Format(id), val); e != nil {
+	//		err = multierr.Append(err, e)
+	//	}
+	//} else {
+	//	err = multierr.Append(err, fmt.Errorf("get heating output status failed: %w", e))
+	//}
+	//
+	//if val, e := provider.HoldingFunction(); e == nil {
+	//	if e = b.MQTT().PublishAsync(ctx, cfg.TopicHoldingFunction.Format(id), val); e != nil {
+	//		err = multierr.Append(err, e)
+	//	}
+	//} else {
+	//	err = multierr.Append(err, fmt.Errorf("get holding function failed: %w", e))
+	//}
+	//
+	//if val, e := provider.FloorOverheat(); e == nil {
+	//	if e = b.MQTT().PublishAsync(ctx, cfg.TopicFloorOverheat.Format(id), val); e != nil {
+	//		err = multierr.Append(err, e)
+	//	}
+	//} else {
+	//	err = multierr.Append(err, fmt.Errorf("get floor overheat failed: %w", e))
+	//}
 
 	return err
 }

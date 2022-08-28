@@ -79,9 +79,3 @@ func (b *Bind) DeviceType(ctx context.Context) (mc6.Device, error) {
 
 	return deviceType, err
 }
-
-func (b *Bind) notifyChangeState(ctx context.Context) error {
-	// TODO: 10 секунд задержки на переключение реле
-
-	return b.Workers().TaskRunByName(ctx, "state-updater")
-}
