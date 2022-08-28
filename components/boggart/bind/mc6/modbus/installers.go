@@ -76,7 +76,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, system installer.System) ([]i
 			WithStateTopic(cfg.TopicRoomTemperature.Format(id)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idRoomTemperature, openhab.ItemTypeNumber).
-					WithLabel("Room temperature [%.2f "+temperatureUnit+"]").
+					WithLabel("Room temperature [%.1f "+temperatureUnit+"]").
 					WithIcon("temperature"),
 			))
 	}
@@ -86,7 +86,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, system installer.System) ([]i
 			WithStateTopic(cfg.TopicFloorTemperature.Format(id)).
 			AddItems(
 				openhab.NewItem(itemPrefix+idFloorTemperature, openhab.ItemTypeNumber).
-					WithLabel("Floor temperature [%.2f "+temperatureUnit+"]").
+					WithLabel("Floor temperature [%.1f "+temperatureUnit+"]").
 					WithIcon("temperature"),
 			))
 	}
