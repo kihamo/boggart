@@ -116,6 +116,26 @@ func (m *MC6) HoldingTemperature() (uint16, error) {
 	return m.ReadTemperatureUint(AddressHoldingTemperature)
 }
 
+func (m *MC6) PanelLock() (bool, error) {
+	return m.ReadBool(AddressPanelLock)
+}
+
+func (m *MC6) PanelLockPin1() (uint16, error) {
+	return m.Read(AddressPanelLockPin1)
+}
+
+func (m *MC6) PanelLockPin2() (uint16, error) {
+	return m.Read(AddressPanelLockPin2)
+}
+
+func (m *MC6) PanelLockPin3() (uint16, error) {
+	return m.Read(AddressPanelLockPin3)
+}
+
+func (m *MC6) PanelLockPin4() (uint16, error) {
+	return m.Read(AddressPanelLockPin4)
+}
+
 func (m *MC6) TargetTemperatureMaximum() (uint16, error) {
 	return m.ReadTemperatureUint(AddressTargetTemperatureMaximum)
 }

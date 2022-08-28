@@ -242,6 +242,46 @@ func (b *Bind) WidgetHandler(_ *dashboard.Response, r *dashboard.Request) {
 					"error": err,
 				}
 			}
+
+			if deviceType.IsSupportedPanelLock() {
+				value, err := provider.PanelLock()
+				vars["panel_lock"] = map[string]interface{}{
+					"value": value,
+					"error": err,
+				}
+			}
+
+			if deviceType.IsSupportedPanelLockPin1() {
+				value, err := provider.PanelLockPin1()
+				vars["panel_lock_pin_1"] = map[string]interface{}{
+					"value": value,
+					"error": err,
+				}
+			}
+
+			if deviceType.IsSupportedPanelLockPin2() {
+				value, err := provider.PanelLockPin2()
+				vars["panel_lock_pin_2"] = map[string]interface{}{
+					"value": value,
+					"error": err,
+				}
+			}
+
+			if deviceType.IsSupportedPanelLockPin3() {
+				value, err := provider.PanelLockPin3()
+				vars["panel_lock_pin_3"] = map[string]interface{}{
+					"value": value,
+					"error": err,
+				}
+			}
+
+			if deviceType.IsSupportedPanelLockPin4() {
+				value, err := provider.PanelLockPin4()
+				vars["panel_lock_pin_4"] = map[string]interface{}{
+					"value": value,
+					"error": err,
+				}
+			}
 		}
 	}
 

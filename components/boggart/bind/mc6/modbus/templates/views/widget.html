@@ -42,7 +42,7 @@
                                             <tr>
                                                 <td>{{ i18n "Room temperature" . }}</td>
                                                 {{ if .room_temperature.error }}
-                                                <td class="text-danger" colspan="3">{{ .room_temperature.error }}</td>
+                                                <td class="text-danger">{{ .room_temperature.error }}</td>
                                                 {{ else }}
                                                 <td>
                                                     {{ format_float .room_temperature.value 'f' -1 64 }}
@@ -57,7 +57,7 @@
                                             <tr>
                                                 <td>{{ i18n "Floor temperature" . }}</td>
                                                 {{ if .floor_temperature.error }}
-                                                <td class="text-danger" colspan="3">{{ .floor_temperature.error }}</td>
+                                                <td class="text-danger">{{ .floor_temperature.error }}</td>
                                                 {{ else }}
                                                 <td>
                                                     {{ format_float .floor_temperature.value 'f' -1 64 }}
@@ -72,7 +72,7 @@
                                             <tr>
                                                 <td>{{ i18n "Floor overheat" . }}</td>
                                                 {{ if .floor_overheat.error }}
-                                                <td class="text-danger" colspan="3">{{ .floor_overheat.error }}</td>
+                                                <td class="text-danger">{{ .floor_overheat.error }}</td>
                                                 {{ else }}
                                                 <td>{{ if .floor_overheat.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
                                                 {{ end }}
@@ -82,7 +82,7 @@
                                             <tr>
                                                 <td>{{ i18n "Humidity" . }}</td>
                                                 {{ if .humidity.error }}
-                                                <td class="text-danger" colspan="3">{{ .humidity.error }}</td>
+                                                <td class="text-danger">{{ .humidity.error }}</td>
                                                 {{ else }}
                                                 <td>{{ .humidity.value }}%</td>
                                                 {{ end }}
@@ -93,7 +93,7 @@
                                             <tr>
                                                 <td>{{ i18n "Power status" . }}</td>
                                                 {{ if .power.error }}
-                                                <td class="text-danger" colspan="3">{{ .power.error }}</td>
+                                                <td class="text-danger">{{ .power.error }}</td>
                                                 {{ else }}
                                                 <td>{{ if .power.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
                                                 {{ end }}
@@ -103,7 +103,7 @@
                                             <tr>
                                                 <td>{{ i18n "Heating valve" . }}</td>
                                                 {{ if .heating_valve.error }}
-                                                <td class="text-danger" colspan="3">{{ .heating_valve.error }}</td>
+                                                <td class="text-danger">{{ .heating_valve.error }}</td>
                                                 {{ else }}
                                                 <td>{{ if .heating_valve.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
                                                 {{ end }}
@@ -113,7 +113,7 @@
                                             <tr>
                                                 <td>{{ i18n "Cooling valve" . }}</td>
                                                 {{ if .cooling_valve.error }}
-                                                <td class="text-danger" colspan="3">{{ .cooling_valve.error }}</td>
+                                                <td class="text-danger">{{ .cooling_valve.error }}</td>
                                                 {{ else }}
                                                 <td>{{ if .cooling_valve.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
                                                 {{ end }}
@@ -123,7 +123,7 @@
                                             <tr>
                                                 <td>{{ i18n "Heating output" . }}</td>
                                                 {{ if .heating_output.error }}
-                                                <td class="text-danger" colspan="3">{{ .heating_output.error }}</td>
+                                                <td class="text-danger">{{ .heating_output.error }}</td>
                                                 {{ else }}
                                                 <td>{{ if .heating_output.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
                                                 {{ end }}
@@ -133,7 +133,7 @@
                                             <tr>
                                                 <td>{{ i18n "Windows open function" . }}</td>
                                                 {{ if .windows_open.error }}
-                                                <td class="text-danger" colspan="3">{{ .windows_open.error }}</td>
+                                                <td class="text-danger">{{ .windows_open.error }}</td>
                                                 {{ else }}
                                                 <td>{{ if .windows_open.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
                                                 {{ end }}
@@ -144,7 +144,7 @@
                                             <tr>
                                                 <td>{{ i18n "Away" . }}</td>
                                                 {{ if .away.error }}
-                                                <td class="text-danger" colspan="3">{{ .away.error }}</td>
+                                                <td class="text-danger">{{ .away.error }}</td>
                                                 {{ else }}
                                                 <td>{{ if .away.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
                                                 {{ end }}
@@ -154,7 +154,7 @@
                                             <tr>
                                                 <td>{{ i18n "Away temperature" . }}</td>
                                                 {{ if .away_temperature.error }}
-                                                <td class="text-danger" colspan="3">{{ .away_temperature.error }}</td>
+                                                <td class="text-danger">{{ .away_temperature.error }}</td>
                                                 {{ else }}
                                                 <td>
                                                     {{ .away_temperature.value }}
@@ -170,7 +170,7 @@
                                             <tr>
                                                 <td>{{ i18n "Holding function" . }}</td>
                                                 {{ if .holding_function.error }}
-                                                <td class="text-danger" colspan="3">{{ .holding_function.error }}</td>
+                                                <td class="text-danger">{{ .holding_function.error }}</td>
                                                 {{ else }}
                                                 <td>{{ if .holding_function.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
                                                 {{ end }}
@@ -180,7 +180,7 @@
                                             <tr>
                                                 <td>{{ i18n "Holding time hi" . }}</td>
                                                 {{ if .holding_time_hi.error }}
-                                                <td class="text-danger" colspan="3">{{ .holding_time_hi.error }}</td>
+                                                <td class="text-danger">{{ .holding_time_hi.error }}</td>
                                                 {{ else }}
                                                 <td>{{ .holding_time_hi.value }}</td>
                                                 {{ end }}
@@ -190,7 +190,7 @@
                                             <tr>
                                                 <td>{{ i18n "Holding time low" . }}</td>
                                                 {{ if .holding_time_low.error }}
-                                                <td class="text-danger" colspan="3">{{ .holding_time_low.error }}</td>
+                                                <td class="text-danger">{{ .holding_time_low.error }}</td>
                                                 {{ else }}
                                                 <td>{{ .holding_time_low.value }}</td>
                                                 {{ end }}
@@ -200,7 +200,7 @@
                                             <tr>
                                                 <td>{{ i18n "Holding temperature" . }}</td>
                                                 {{ if .holding_temperature.error }}
-                                                <td class="text-danger" colspan="3">{{ .holding_temperature.error }}</td>
+                                                <td class="text-danger">{{ .holding_temperature.error }}</td>
                                                 {{ else }}
                                                 <td>
                                                     {{ .holding_temperature.value }}
@@ -216,7 +216,7 @@
                                             <tr>
                                                 <td>{{ i18n "Fan speed mode" . }}</td>
                                                 {{ if .fan_speed_mode.error }}
-                                                <td class="text-danger" colspan="3">{{ .fan_speed_mode.error }}</td>
+                                                <td class="text-danger">{{ .fan_speed_mode.error }}</td>
                                                 {{ else }}
                                                 <td>
                                                     {{ if eq .fan_speed_mode.value 0 }}
@@ -232,7 +232,7 @@
                                             <tr>
                                                 <td>{{ i18n "Fan speed" . }}</td>
                                                 {{ if .fan_speed.error }}
-                                                <td class="text-danger" colspan="3">{{ .fan_speed.error }}</td>
+                                                <td class="text-danger">{{ .fan_speed.error }}</td>
                                                 {{ else }}
                                                 <td>
                                                     {{ if eq .fan_speed.value 0 }}
@@ -252,7 +252,7 @@
                                             <tr>
                                                 <td>{{ i18n "Device type" . }}</td>
                                                 {{ if .device_type.error }}
-                                                <td class="text-danger" colspan="3">{{ .device_type.error }}</td>
+                                                <td class="text-danger">{{ .device_type.error }}</td>
                                                 {{ else }}
                                                 <td>{{ .device_type.value }}</td>
                                                 {{ end }}
@@ -261,7 +261,7 @@
                                             <tr>
                                                 <td>{{ i18n "System mode" . }}</td>
                                                 {{ if .system_mode.error }}
-                                                <td class="text-danger" colspan="3">{{ .system_mode.error }}</td>
+                                                <td class="text-danger">{{ .system_mode.error }}</td>
                                                 {{ else }}
                                                 <td>
                                                     {{ if eq .system_mode.value 0 }}
@@ -283,7 +283,7 @@
                                             <tr>
                                                 <td>{{ i18n "Target temperature" . }}</td>
                                                 {{ if .target_temperature.error }}
-                                                <td class="text-danger" colspan="3">{{ .target_temperature.error }}</td>
+                                                <td class="text-danger">{{ .target_temperature.error }}</td>
                                                 {{ else }}
                                                 <td>
                                                     {{ format_float .target_temperature.value 'f' -1 64 }}
@@ -298,7 +298,7 @@
                                             <tr>
                                                 <td>{{ i18n "Target temperature maximum" . }}</td>
                                                 {{ if .target_temperature_maximum.error }}
-                                                <td class="text-danger" colspan="3">{{ .target_temperature_maximum.error }}</td>
+                                                <td class="text-danger">{{ .target_temperature_maximum.error }}</td>
                                                 {{ else }}
                                                 <td>
                                                     {{ .target_temperature_maximum.value }}
@@ -313,7 +313,7 @@
                                             <tr>
                                                 <td>{{ i18n "Target temperature minimum" . }}</td>
                                                 {{ if .target_temperature_minimum.error }}
-                                                <td class="text-danger" colspan="3">{{ .target_temperature_minimum.error }}</td>
+                                                <td class="text-danger">{{ .target_temperature_minimum.error }}</td>
                                                 {{ else }}
                                                 <td>
                                                     {{ .target_temperature_minimum.value }}
@@ -328,7 +328,7 @@
                                             <tr>
                                                 <td>{{ i18n "Floor temperature limit" . }}</td>
                                                 {{ if .floor_temperature_limit.error }}
-                                                <td class="text-danger" colspan="3">{{ .floor_temperature_limit.error }}</td>
+                                                <td class="text-danger">{{ .floor_temperature_limit.error }}</td>
                                                 {{ else }}
                                                 <td>
                                                     {{ .floor_temperature_limit.value }}
@@ -337,6 +337,46 @@
                                                     {{ end }}
                                                 </td>
                                                 {{ end }}
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .panel_lock }}
+                                            <tr>
+                                                <td>{{ i18n "Panel lock" . }}</td>
+                                                {{ if .panel_lock.error }}
+                                                <td class="text-danger">{{ .panel_lock.error }}</td>
+                                                {{ else }}
+                                                <td>{{ if .panel_lock.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
+                                                {{ end }}
+                                            </tr>
+                                            {{ end }}
+                                            {{ if and .panel_lock_pin_1 .panel_lock_pin_2 .panel_lock_pin_3 .panel_lock_pin_4 }}
+                                            <tr>
+                                                <td>{{ i18n "Panel PIN code" . }}</td>
+                                                <td>
+                                                    {{ if .panel_lock_pin_1.error }}
+                                                    <span class="text-danger">{{ .panel_lock_pin_1.error }}</span>
+                                                    {{ else }}
+                                                    {{ .panel_lock_pin_1.value }}
+                                                    {{ end }}
+
+                                                    {{ if .panel_lock_pin_2.error }}
+                                                    <span class="text-danger">{{ .panel_lock_pin_2.error }}</span>
+                                                    {{ else }}
+                                                    {{ .panel_lock_pin_2.value }}
+                                                    {{ end }}
+
+                                                    {{ if .panel_lock_pin_3.error }}
+                                                    <span class="text-danger">{{ .panel_lock_pin_3.error }}</span>
+                                                    {{ else }}
+                                                    {{ .panel_lock_pin_3.value }}
+                                                    {{ end }}
+
+                                                    {{ if .panel_lock_pin_4.error }}
+                                                    <span class="text-danger">{{ .panel_lock_pin_4.error }}</span>
+                                                    {{ else }}
+                                                    {{ .panel_lock_pin_4.value }}
+                                                    {{ end }}
+                                                </td>
                                             </tr>
                                             {{ end }}
                                         {{ end }}

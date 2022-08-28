@@ -34,6 +34,11 @@ const (
 	AddressHoldingTimeHi            uint16 = 67
 	AddressHoldingTimeLow           uint16 = 68
 	AddressHoldingTemperature       uint16 = 69
+	AddressPanelLock                uint16 = 78
+	AddressPanelLockPin1            uint16 = 79
+	AddressPanelLockPin2            uint16 = 80
+	AddressPanelLockPin3            uint16 = 81
+	AddressPanelLockPin4            uint16 = 82
 	AddressTargetTemperatureMaximum uint16 = 83
 	AddressTargetTemperatureMinimum uint16 = 84
 	AddressFloorTemperatureLimit    uint16 = 85

@@ -42,7 +42,8 @@ func (d Device) IsElectricHeatingTimer() bool {
 func (d Device) IsSupported(address uint16) bool {
 	switch address {
 	case AddressRoomTemperature, AddressHumidity, AddressDeviceType, AddressTemperatureFormat, AddressStatus,
-		AddressTargetTemperature, AddressTargetTemperatureMaximum, AddressTargetTemperatureMinimum:
+		AddressTargetTemperature, AddressTargetTemperatureMaximum, AddressTargetTemperatureMinimum,
+		AddressPanelLock, AddressPanelLockPin1, AddressPanelLockPin2, AddressPanelLockPin3, AddressPanelLockPin4:
 		return true
 	case AddressFloorTemperature, AddressFloorOverheat, AddressFloorTemperatureLimit:
 		return d.IsHA()
@@ -149,6 +150,26 @@ func (d Device) IsSupportedHoldingTimeLow() bool {
 
 func (d Device) IsSupportedHoldingTemperature() bool {
 	return d.IsSupported(AddressHoldingTemperature)
+}
+
+func (d Device) IsSupportedPanelLock() bool {
+	return d.IsSupported(AddressPanelLock)
+}
+
+func (d Device) IsSupportedPanelLockPin1() bool {
+	return d.IsSupported(AddressPanelLockPin1)
+}
+
+func (d Device) IsSupportedPanelLockPin2() bool {
+	return d.IsSupported(AddressPanelLockPin2)
+}
+
+func (d Device) IsSupportedPanelLockPin3() bool {
+	return d.IsSupported(AddressPanelLockPin3)
+}
+
+func (d Device) IsSupportedPanelLockPin4() bool {
+	return d.IsSupported(AddressPanelLockPin4)
 }
 
 func (d Device) IsSupportedTargetTemperatureMaximum() bool {
