@@ -139,22 +139,6 @@ func (b *Bind) WidgetHandler(_ *dashboard.Response, r *dashboard.Request) {
 			}
 		}
 
-		if deviceType.IsSupportedHoldingTimeHi() {
-			value, err := provider.HoldingTimeHi()
-			vars["holding_time_hi"] = map[string]interface{}{
-				"value": value,
-				"error": err,
-			}
-		}
-
-		if deviceType.IsSupportedHoldingTimeLow() {
-			value, err := provider.HoldingTimeLow()
-			vars["holding_time_low"] = map[string]interface{}{
-				"value": value,
-				"error": err,
-			}
-		}
-
 		if deviceType.IsSupportedTemperatureFormat() {
 			value, err := provider.TemperatureFormat()
 			vars["temperature_format"] = map[string]interface{}{
@@ -163,11 +147,31 @@ func (b *Bind) WidgetHandler(_ *dashboard.Response, r *dashboard.Request) {
 			}
 		}
 
-		if deviceType.IsSupportedHoldingTemperature() {
-			value, err := provider.HoldingTemperature()
+		if deviceType.IsSupportedHoldingTemperatureAndTime() {
+			temperature, t, err := provider.HoldingTemperatureAndTime()
 			vars["holding_temperature"] = map[string]interface{}{
-				"value": value,
+				"value": temperature,
 				"error": err,
+			}
+			vars["holding_time"] = map[string]interface{}{
+				"value": t,
+				"error": err,
+			}
+		} else {
+			if deviceType.IsSupportedHoldingTemperature() {
+				value, err := provider.HoldingTemperature()
+				vars["holding_temperature"] = map[string]interface{}{
+					"value": value,
+					"error": err,
+				}
+			}
+
+			if deviceType.IsSupportedHoldingTime() {
+				value, err := provider.HoldingTime()
+				vars["holding_time"] = map[string]interface{}{
+					"value": value,
+					"error": err,
+				}
 			}
 		}
 

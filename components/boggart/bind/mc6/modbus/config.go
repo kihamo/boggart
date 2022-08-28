@@ -41,6 +41,8 @@ type Config struct {
 	TopicAwayState               mqtt.Topic    `mapstructure:"topic_away_state" yaml:"topic_away_state"`
 	TopicAwayTemperature         mqtt.Topic    `mapstructure:"topic_away_temperature" yaml:"topic_away_temperature"`
 	TopicAwayTemperatureState    mqtt.Topic    `mapstructure:"topic_away_temperature_state" yaml:"topic_away_temperature_state"`
+	TopicHoldingTime             mqtt.Topic    `mapstructure:"topic_holding_time" yaml:"topic_holding_time"`
+	TopicHoldingTimeState        mqtt.Topic    `mapstructure:"topic_holding_time_state" yaml:"topic_holding_time_state"`
 	TopicHoldingTemperature      mqtt.Topic    `mapstructure:"topic_holding_temperature" yaml:"topic_holding_temperature"`
 	TopicHoldingTemperatureState mqtt.Topic    `mapstructure:"topic_holding_temperature_state" yaml:"topic_holding_temperature_state"`
 }
@@ -83,6 +85,8 @@ func (t Type) ConfigDefaults() interface{} {
 		TopicAwayState:               prefix + "away/state",
 		TopicAwayTemperature:         prefix + "temperature/away",
 		TopicAwayTemperatureState:    prefix + "temperature/away/state",
+		TopicHoldingTime:             prefix + "time/holding",
+		TopicHoldingTimeState:        prefix + "time/holding/state",
 		TopicHoldingTemperature:      prefix + "temperature/holding",
 		TopicHoldingTemperatureState: prefix + "temperature/holding/state",
 	}

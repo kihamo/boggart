@@ -88,6 +88,14 @@ func (b *Bind) taskDeviceTypeHandler(ctx context.Context) error {
 		))
 	}
 
+	if deviceType.IsSupportedHoldingTemperatureAndTime() {
+		subscribers = append(subscribers, mqtt.NewSubscriber(cfg.TopicHoldingTime.Format(id), 0,
+			b.MQTTWrapSubscriberChangeState(func(message mqtt.Message) error {
+				return b.Provider().SetHoldingTime(time.Duration(message.Uint64()) * time.Minute)
+			}),
+		))
+	}
+
 	if deviceType.IsSupportedHoldingTemperature() {
 		subscribers = append(subscribers, mqtt.NewSubscriber(cfg.TopicHoldingTemperature.Format(id), 0,
 			b.MQTTWrapSubscriberChangeState(func(message mqtt.Message) error {
@@ -278,13 +286,36 @@ func (b *Bind) taskStateUpdaterHandler(ctx context.Context) error {
 		}
 	}
 
-	if deviceType.IsSupportedHoldingTemperature() {
-		if val, e := provider.HoldingTemperature(); e == nil {
-			if e = b.MQTT().PublishAsync(ctx, cfg.TopicHoldingTemperatureState.Format(id), val); e != nil {
+	if deviceType.IsSupportedHoldingTemperatureAndTime() {
+		if temp, tm, e := provider.HoldingTemperatureAndTime(); e == nil {
+			if e = b.MQTT().PublishAsync(ctx, cfg.TopicHoldingTemperatureState.Format(id), temp); e != nil {
+				err = multierr.Append(err, e)
+			}
+			if e = b.MQTT().PublishAsync(ctx, cfg.TopicHoldingTimeState.Format(id), tm.Minutes()); e != nil {
 				err = multierr.Append(err, e)
 			}
 		} else {
-			err = multierr.Append(err, fmt.Errorf("get holding temperature state failed: %w", e))
+			err = multierr.Append(err, fmt.Errorf("get holding temperature and time state failed: %w", e))
+		}
+	} else {
+		if deviceType.IsSupportedHoldingTime() {
+			if val, e := provider.HoldingTime(); e == nil {
+				if e = b.MQTT().PublishAsync(ctx, cfg.TopicHoldingTimeState.Format(id), val.Minutes()); e != nil {
+					err = multierr.Append(err, e)
+				}
+			} else {
+				err = multierr.Append(err, fmt.Errorf("get holding time state failed: %w", e))
+			}
+		}
+
+		if deviceType.IsSupportedHoldingTemperature() {
+			if val, e := provider.HoldingTemperature(); e == nil {
+				if e = b.MQTT().PublishAsync(ctx, cfg.TopicHoldingTemperatureState.Format(id), val); e != nil {
+					err = multierr.Append(err, e)
+				}
+			} else {
+				err = multierr.Append(err, fmt.Errorf("get holding temperature state failed: %w", e))
+			}
 		}
 	}
 

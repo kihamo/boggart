@@ -176,26 +176,6 @@
                                                 {{ end }}
                                             </tr>
                                             {{ end }}
-                                            {{ if .holding_time_hi }}
-                                            <tr>
-                                                <td>{{ i18n "Holding time hi" . }}</td>
-                                                {{ if .holding_time_hi.error }}
-                                                <td class="text-danger">{{ .holding_time_hi.error }}</td>
-                                                {{ else }}
-                                                <td>{{ .holding_time_hi.value }}</td>
-                                                {{ end }}
-                                            </tr>
-                                            {{ end }}
-                                            {{ if .holding_time_low }}
-                                            <tr>
-                                                <td>{{ i18n "Holding time low" . }}</td>
-                                                {{ if .holding_time_low.error }}
-                                                <td class="text-danger">{{ .holding_time_low.error }}</td>
-                                                {{ else }}
-                                                <td>{{ .holding_time_low.value }}</td>
-                                                {{ end }}
-                                            </tr>
-                                            {{ end }}
                                             {{ if .holding_temperature }}
                                             <tr>
                                                 <td>{{ i18n "Holding temperature" . }}</td>
@@ -208,6 +188,16 @@
                                                     {{ if eq .temperature_format.value 0 }}°C{{ else }}°F{{ end }}
                                                     {{ end }}
                                                 </td>
+                                                {{ end }}
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .holding_time }}
+                                            <tr>
+                                                <td>{{ i18n "Holding time" . }}</td>
+                                                {{ if .holding_time.error }}
+                                                <td class="text-danger">{{ .holding_time.error }}</td>
+                                                {{ else }}
+                                                <td>{{ .holding_time.value }}</td>
                                                 {{ end }}
                                             </tr>
                                             {{ end }}

@@ -1,6 +1,7 @@
 package mc6
 
 import (
+	"encoding/binary"
 	"fmt"
 	"time"
 )
@@ -14,7 +15,7 @@ func (m *MC6) FloorTemperature() (float64, error) {
 }
 
 func (m *MC6) Humidity() (uint16, error) {
-	value, err := m.Read(AddressHumidity)
+	value, err := m.ReadUint16(AddressHumidity)
 	if err != nil {
 		return 0, err
 	}
@@ -55,7 +56,7 @@ func (m *MC6) FloorOverheat() (bool, error) {
 }
 
 func (m *MC6) DeviceType() (Device, error) {
-	value, err := m.Read(AddressDeviceType)
+	value, err := m.ReadUint16(AddressDeviceType)
 
 	if err != nil {
 		return 0, err
@@ -65,7 +66,7 @@ func (m *MC6) DeviceType() (Device, error) {
 }
 
 func (m *MC6) FanSpeedNumbers() (uint16, error) {
-	value, err := m.Read(AddressFanSpeedNumbers)
+	value, err := m.ReadUint16(AddressFanSpeedNumbers)
 
 	if err == nil {
 		switch value {
@@ -81,14 +82,14 @@ func (m *MC6) FanSpeedNumbers() (uint16, error) {
 
 // FIXME: по факту не работает, на HA всегда 80 на FCU всегда 0
 func (m *MC6) TemperatureFormat() (uint16, error) {
-	value, err := m.Read(AddressTemperatureFormat)
+	value, err := m.ReadUint16(AddressTemperatureFormat)
 
 	// HA always return 80 for C
 	if err == nil && value != 1 {
 		return 0, err
 	}
 
-	return m.Read(AddressTemperatureFormat)
+	return value, err
 }
 
 func (m *MC6) Status() (bool, error) {
@@ -96,11 +97,11 @@ func (m *MC6) Status() (bool, error) {
 }
 
 func (m *MC6) SystemMode() (uint16, error) {
-	return m.Read(AddressSystemMode)
+	return m.ReadUint16(AddressSystemMode)
 }
 
 func (m *MC6) FanSpeed() (uint16, error) {
-	return m.Read(AddressFanSpeed)
+	return m.ReadUint16(AddressFanSpeed)
 }
 
 func (m *MC6) TargetTemperature() (float64, error) {
@@ -115,12 +116,22 @@ func (m *MC6) AwayTemperature() (uint16, error) {
 	return m.ReadTemperatureUint(AddressAwayTemperature)
 }
 
-func (m *MC6) HoldingTimeHi() (time.Duration, error) {
-	return m.ReadDuration(AddressHoldingTimeHi)
+func (m *MC6) HoldingTime() (time.Duration, error) {
+	return m.ReadDuration(AddressHoldingTime)
 }
 
-func (m *MC6) HoldingTimeLow() (time.Duration, error) {
-	return m.ReadDuration(AddressHoldingTimeLow)
+func (m *MC6) HoldingTemperatureAndTime() (float64, time.Duration, error) {
+	response, err := m.Read(AddressHoldingTemperatureAndTime, 2)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	tim := time.Duration(binary.BigEndian.Uint16(response[:2])) * time.Minute
+	temperature := float64(binary.BigEndian.Uint16(response[2:])) / 10
+
+	// TODO: validate temperature value
+
+	return temperature, tim, err
 }
 
 func (m *MC6) HoldingTemperature() (uint16, error) {
@@ -132,19 +143,19 @@ func (m *MC6) PanelLock() (bool, error) {
 }
 
 func (m *MC6) PanelLockPin1() (uint16, error) {
-	return m.Read(AddressPanelLockPin1)
+	return m.ReadUint16(AddressPanelLockPin1)
 }
 
 func (m *MC6) PanelLockPin2() (uint16, error) {
-	return m.Read(AddressPanelLockPin2)
+	return m.ReadUint16(AddressPanelLockPin2)
 }
 
 func (m *MC6) PanelLockPin3() (uint16, error) {
-	return m.Read(AddressPanelLockPin3)
+	return m.ReadUint16(AddressPanelLockPin3)
 }
 
 func (m *MC6) PanelLockPin4() (uint16, error) {
-	return m.Read(AddressPanelLockPin4)
+	return m.ReadUint16(AddressPanelLockPin4)
 }
 
 func (m *MC6) TargetTemperatureMaximum() (uint16, error) {

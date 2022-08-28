@@ -57,6 +57,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, system installer.System) ([]i
 		idTargetTemperature   = "TargetTemperature"
 		idAway                = "Away"
 		idAwayTemperature     = "AwayTemperature"
+		idHoldingTime         = "HoldingTime"
 		idHoldingTemperature  = "HoldingTemperature"
 	)
 
@@ -254,8 +255,8 @@ func (b *Bind) InstallerSteps(ctx context.Context, system installer.System) ([]i
 			openhab.NewChannel(idAwayTemperature, openhab.ChannelTypeNumber).
 				WithStateTopic(cfg.TopicAwayTemperatureState.Format(id)).
 				WithCommandTopic(cfg.TopicAwayTemperature.Format(id)).
-				//WithMin(min).
-				//WithMax(max).
+				WithMin(7).
+				WithMax(35).
 				WithStep(1).
 				AddItems(
 					openhab.NewItem(itemPrefix+idAwayTemperature, openhab.ItemTypeNumber).
@@ -264,13 +265,27 @@ func (b *Bind) InstallerSteps(ctx context.Context, system installer.System) ([]i
 				))
 	}
 
-	if deviceType.IsSupportedHoldingTemperature() {
+	if deviceType.IsSupportedHoldingTemperatureAndTime() || deviceType.IsSupportedHoldingTemperatureAndTime() {
+		channels = append(channels,
+			openhab.NewChannel(idHoldingTime, openhab.ChannelTypeNumber).
+				WithStateTopic(cfg.TopicHoldingTimeState.Format(id)).
+				WithCommandTopic(cfg.TopicHoldingTime.Format(id)).
+				WithMax(1439).
+				WithStep(1).
+				AddItems(
+					openhab.NewItem(itemPrefix+idHoldingTime, openhab.ItemTypeNumber).
+						WithLabel("Holding time [%d minutes]").
+						WithIcon("time"),
+				))
+	}
+
+	if deviceType.IsSupportedHoldingTemperatureAndTime() || deviceType.IsSupportedHoldingTemperature() {
 		channels = append(channels,
 			openhab.NewChannel(idHoldingTemperature, openhab.ChannelTypeNumber).
 				WithStateTopic(cfg.TopicHoldingTemperatureState.Format(id)).
 				WithCommandTopic(cfg.TopicHoldingTemperature.Format(id)).
-				//WithMin(min).
-				//WithMax(max).
+				WithMin(5).
+				WithMax(40).
 				WithStep(1).
 				AddItems(
 					openhab.NewItem(itemPrefix+idHoldingTemperature, openhab.ItemTypeNumber).

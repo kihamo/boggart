@@ -55,7 +55,7 @@ func (d Device) IsSupported(address uint16) bool {
 		return d.IsHA()
 	case AddressWindowsOpen:
 		return d.IsHA() || d.IsFCU4()
-	case AddressHoldingFunction, AddressHoldingTimeHi, AddressHoldingTimeLow, AddressHoldingTemperature:
+	case AddressHoldingFunction, AddressHoldingTime, AddressHoldingTemperatureAndTime, AddressHoldingTemperature:
 		return d.IsHA()
 	case AddressSystemMode:
 		return d.IsFCU4()
@@ -140,12 +140,12 @@ func (d Device) IsSupportedAwayTemperature() bool {
 	return d.IsSupported(AddressAwayTemperature)
 }
 
-func (d Device) IsSupportedHoldingTimeHi() bool {
-	return d.IsSupported(AddressHoldingTimeHi)
+func (d Device) IsSupportedHoldingTime() bool {
+	return d.IsSupported(AddressHoldingTime)
 }
 
-func (d Device) IsSupportedHoldingTimeLow() bool {
-	return d.IsSupported(AddressHoldingTimeLow)
+func (d Device) IsSupportedHoldingTemperatureAndTime() bool {
+	return d.IsSupported(AddressHoldingTemperatureAndTime)
 }
 
 func (d Device) IsSupportedHoldingTemperature() bool {

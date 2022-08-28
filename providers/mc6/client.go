@@ -13,35 +13,35 @@ import (
 )
 
 const (
-	AddressRoomTemperature          uint16 = 0
-	AddressFloorTemperature         uint16 = 1
-	AddressHumidity                 uint16 = 2
-	AddressHeatingValve             uint16 = 3
-	AddressCoolingValve             uint16 = 4
-	AddressHeatingOutput            uint16 = 9
-	AddressWindowsOpen              uint16 = 13
-	AddressHoldingFunction          uint16 = 15
-	AddressFloorOverheat            uint16 = 17
-	AddressDeviceType               uint16 = 18
-	AddressFanSpeedNumbers          uint16 = 20
-	AddressTemperatureFormat        uint16 = 60
-	AddressStatus                   uint16 = 61
-	AddressSystemMode               uint16 = 62
-	AddressFanSpeed                 uint16 = 63
-	AddressTargetTemperature        uint16 = 64
-	AddressAway                     uint16 = 65
-	AddressAwayTemperature          uint16 = 66
-	AddressHoldingTimeHi            uint16 = 67
-	AddressHoldingTimeLow           uint16 = 68
-	AddressHoldingTemperature       uint16 = 69
-	AddressPanelLock                uint16 = 78
-	AddressPanelLockPin1            uint16 = 79
-	AddressPanelLockPin2            uint16 = 80
-	AddressPanelLockPin3            uint16 = 81
-	AddressPanelLockPin4            uint16 = 82
-	AddressTargetTemperatureMaximum uint16 = 83
-	AddressTargetTemperatureMinimum uint16 = 84
-	AddressFloorTemperatureLimit    uint16 = 85
+	AddressRoomTemperature           uint16 = 0
+	AddressFloorTemperature          uint16 = 1
+	AddressHumidity                  uint16 = 2
+	AddressHeatingValve              uint16 = 3
+	AddressCoolingValve              uint16 = 4
+	AddressHeatingOutput             uint16 = 9
+	AddressWindowsOpen               uint16 = 13
+	AddressHoldingFunction           uint16 = 15
+	AddressFloorOverheat             uint16 = 17
+	AddressDeviceType                uint16 = 18
+	AddressFanSpeedNumbers           uint16 = 20
+	AddressTemperatureFormat         uint16 = 60
+	AddressStatus                    uint16 = 61
+	AddressSystemMode                uint16 = 62
+	AddressFanSpeed                  uint16 = 63
+	AddressTargetTemperature         uint16 = 64
+	AddressAway                      uint16 = 65
+	AddressAwayTemperature           uint16 = 66
+	AddressHoldingTime               uint16 = 67
+	AddressHoldingTemperatureAndTime uint16 = 68
+	AddressHoldingTemperature        uint16 = 69
+	AddressPanelLock                 uint16 = 78
+	AddressPanelLockPin1             uint16 = 79
+	AddressPanelLockPin2             uint16 = 80
+	AddressPanelLockPin3             uint16 = 81
+	AddressPanelLockPin4             uint16 = 82
+	AddressTargetTemperatureMaximum  uint16 = 83
+	AddressTargetTemperatureMinimum  uint16 = 84
+	AddressFloorTemperatureLimit     uint16 = 85
 
 	TemperatureFormatCelsius    uint16 = 0
 	TemperatureFormatFahrenheit uint16 = 1
@@ -105,30 +105,37 @@ func (m *MC6) Close() error {
 	return nil
 }
 
-func (m *MC6) Read(address uint16) (value uint16, err error) {
-	var response []byte
-
+func (m *MC6) Read(address, quantity uint16) (response []byte, err error) {
 	for trie := uint8(1); trie <= m.options.maxTries; trie++ {
-		response, err = m.connection.ReadHoldingRegisters(address, 1)
+		response, err = m.connection.ReadHoldingRegisters(address, quantity)
 		if err == nil {
-			return binary.BigEndian.Uint16(response), err
+			break
 		}
+	}
+
+	return response, err
+}
+
+func (m *MC6) ReadUint16(address uint16) (value uint16, err error) {
+	response, err := m.Read(address, 1)
+	if err == nil {
+		return binary.BigEndian.Uint16(response), err
 	}
 
 	return value, err
 }
 
 func (m *MC6) ReadBool(address uint16) (bool, error) {
-	value, err := m.Read(address)
+	response, err := m.Read(address, 1)
 	if err != nil {
 		return false, err
 	}
 
-	return value == 1, err
+	return response[1] == 1, err
 }
 
 func (m *MC6) ReadTemperature(address uint16) (float64, error) {
-	value, err := m.Read(address)
+	value, err := m.ReadUint16(address)
 	if err != nil {
 		return 0, err
 	}
@@ -154,7 +161,7 @@ func (m *MC6) ReadTemperatureUint(address uint16) (uint16, error) {
 }
 
 func (m *MC6) ReadDuration(address uint16) (time.Duration, error) {
-	value, err := m.Read(address)
+	value, err := m.ReadUint16(address)
 	if err != nil {
 		return 0, err
 	}
@@ -162,11 +169,8 @@ func (m *MC6) ReadDuration(address uint16) (time.Duration, error) {
 	return time.Duration(value) * time.Minute, err
 }
 
-func (m *MC6) Write(address, quantity, value uint16) (err error) {
+func (m *MC6) Write(address, quantity uint16, payload []byte) (err error) {
 	var response []byte
-
-	payload := make([]byte, 2)
-	binary.BigEndian.PutUint16(payload, value)
 
 	for trie := uint8(1); trie <= m.options.maxTries; trie++ {
 		response, err = m.connection.WriteMultipleRegisters(address, quantity, payload)
@@ -185,6 +189,20 @@ func (m *MC6) Write(address, quantity, value uint16) (err error) {
 	return err
 }
 
+func (m *MC6) WriteUint16(address, value uint16) error {
+	payload := make([]byte, 2)
+	binary.BigEndian.PutUint16(payload, value)
+
+	return m.Write(address, 2, payload)
+}
+
+func (m *MC6) WriteUint32(address uint16, value uint32) error {
+	payload := make([]byte, 4)
+	binary.BigEndian.PutUint32(payload, value)
+
+	return m.Write(address, 2, payload)
+}
+
 func (m *MC6) WriteBool(address uint16, flag bool) error {
 	var value uint16
 
@@ -192,7 +210,7 @@ func (m *MC6) WriteBool(address uint16, flag bool) error {
 		value = 1
 	}
 
-	return m.Write(address, 2, value)
+	return m.WriteUint16(address, value)
 }
 
 func (m *MC6) WriteTemperature(address uint16, value float64) error {
@@ -202,7 +220,7 @@ func (m *MC6) WriteTemperature(address uint16, value float64) error {
 		return errors.New("wrong temperature value 50 >= value <= 350")
 	}
 
-	return m.Write(address, 2, uint16(value))
+	return m.WriteUint16(address, uint16(value))
 }
 
 // устанавливаемое значение всегда кратно 0.5 и округляется в меньшую сторону
