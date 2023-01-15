@@ -3,6 +3,7 @@ package modbus
 import (
 	"context"
 	"fmt"
+	"net"
 
 	"github.com/kihamo/boggart/components/boggart/installer"
 	"github.com/kihamo/boggart/components/boggart/installer/openhab"
@@ -16,7 +17,14 @@ func (b *Bind) InstallersSupport() []installer.System {
 }
 
 func (b *Bind) InstallerSteps(ctx context.Context, system installer.System) ([]installer.Step, error) {
+	cfg := b.config()
+
 	if system == installer.SystemDevice {
+		var exampleIP string
+		if val := net.ParseIP(cfg.DSN.Hostname()); val != nil {
+			exampleIP = " (current is " + val.String() + ")"
+		}
+
 		return []installer.Step{{
 			Description: "Activate Modbus over TCP",
 			Content: `1. Click Setup in menu
@@ -25,6 +33,13 @@ func (b *Bind) InstallerSteps(ctx context.Context, system installer.System) ([]i
 4. Wifi Modbus TCP
 5. Click Next button
 6. Click Exit button and device reload`,
+		}, {
+			Description: "Set IP address (DHCP not supported)",
+			Content: `1. Click Setup in menu
+2. Select Network settings item
+3. Select 01. Network settings item
+4. Change Gateway, Net Mask and IP` + exampleIP + ` fields
+5. Exit to main menu and reload device`,
 		}}, nil
 	}
 
@@ -36,7 +51,6 @@ func (b *Bind) InstallerSteps(ctx context.Context, system installer.System) ([]i
 	meta := b.Meta()
 	id := meta.ID()
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
-	cfg := b.config()
 
 	const (
 		temperatureUnit = "°C"
