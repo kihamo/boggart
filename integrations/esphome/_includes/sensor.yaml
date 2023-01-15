@@ -1,5 +1,5 @@
 ---
 sensor:
-- !include ./sensor/debug.yaml
+# - !include ./sensor/debug.yaml
 - !include ./sensor/wifi_signal.yaml
 - !include ./sensor/uptime.yaml

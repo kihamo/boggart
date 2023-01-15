@@ -17,8 +17,8 @@ logger:
 
 ota:
 
-debug:
-  update_interval: 30s
+#debug:
+#  update_interval: 30s
 
 mqtt:
   broker: !secret home_mqtt_broker

@@ -1,5 +1,3 @@
-debug:
-
 substitutions:
   node_name: !secret device_012_node_name
   ip_address: !secret device_012_ip_address
