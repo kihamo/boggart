@@ -70,6 +70,7 @@ func (c *Client) WithTimeout(timeout time.Duration) *Client {
 
 func (c *Client) Do(request *http.Request) (*http.Response, error) {
 	const UserAgentHeader = "User-Agent"
+	const CookieHeader = "Cookie"
 
 	c.mutex.RLock()
 	if agent := request.Header.Get(UserAgentHeader); agent == "" {
@@ -79,15 +80,27 @@ func (c *Client) Do(request *http.Request) (*http.Response, error) {
 	conn := c.connection
 	c.mutex.RUnlock()
 
-	// для дампа, внутри склиент сам эти куки добавит
-	for _, cookie := range conn.Jar.Cookies(request.URL) {
-		request.AddCookie(cookie)
-	}
-
 	debug := atomic.LoadUint64(&c.debug)
 
 	if debug == 1 {
+		// для дампа, внутри клиент сам эти куки добавит, но это так же пораждает
+		// проблемы дублирования кук в конечно запросе, поэтому после добавления и
+		// дампа куки надо удалить из запроса
+		prevCookies := request.Header.Get(CookieHeader)
+
+		for _, cookie := range conn.Jar.Cookies(request.URL) {
+			request.AddCookie(cookie)
+		}
+
 		dump, err := httputil.DumpRequestOut(request, true)
+
+		// восстанавливаем исходные куки
+		if prevCookies != "" {
+			request.Header.Set(CookieHeader, prevCookies)
+		} else {
+			request.Header.Del(CookieHeader)
+		}
+
 		if err != nil {
 			return nil, err
 		}
