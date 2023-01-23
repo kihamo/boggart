@@ -96,7 +96,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 
 		var fileExt string
 
-		contentType := b.Meta().BindType().(Type).BillContentType
+		contentType := b.config().ProviderBillContentType
 		if contentType != "" {
 			w.Header().Set("Content-Type", contentType)
 

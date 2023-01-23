@@ -29,15 +29,11 @@ func (b *Bind) config() *Config {
 
 func (b *Bind) Run() error {
 	cfg := b.config()
-	t := b.Meta().BindType().(Type)
 
 	b.Meta().SetSerialNumber(cfg.Phone)
+	b.Meta().SetLink(&cfg.ProviderLink.URL)
 
-	if t.Link != nil {
-		b.Meta().SetLink(t.Link)
-	}
-
-	b.provider = smcenter.New(t.BaseURL, cfg.Phone, cfg.Password, cfg.Debug, swagger.NewLoggerWithCutSize(
+	b.provider = smcenter.New(cfg.ProviderBaseURL, cfg.Phone, cfg.Password, cfg.Debug, swagger.NewLoggerWithCutSize(
 		func(message string) {
 			b.Logger().Info(message)
 		},
