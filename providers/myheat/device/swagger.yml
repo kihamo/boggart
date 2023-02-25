@@ -1,0 +1,284 @@
+---
+
+swagger: "2.0"
+info:
+  title: "My Heat"
+  version: "0.1.0"
+consumes:
+- "application/json"
+produces:
+- "text/json"
+schemes:
+- "http"
+basePath: "/api"
+securityDefinitions:
+  basicAuth:
+    type: "basic"
+security:
+  - basicAuth: []
+paths:
+  /getState:
+    get:
+      operationId: "getState"
+      tags:
+      - "state"
+      summary: "Get state about device"
+      responses:
+        200:
+          description: "Successful login"
+          schema:
+            $ref: "#/definitions/State"
+  /getObjState:
+    get:
+      operationId: "getObjState"
+      tags:
+      - "state"
+      summary: "Get object state"
+      responses:
+        200:
+          description: "Successful login"
+          schema:
+            $ref: "#/definitions/StateObject"
+  /setObjState:
+    post:
+      operationId: "setObjState"
+      tags:
+      - "state"
+      summary: "Set object state"
+      parameters:
+        - name: "request"
+          in: "body"
+          schema:
+            allOf:
+              - $ref: "#/definitions/SetStateSecurityRequest"
+              - $ref: "#/definitions/SetStateHeatingModeRequest"
+              - $ref: "#/definitions/SetStateEnvironmentRequest"
+              - $ref: "#/definitions/SetStateEngineeringRequest"
+      responses:
+        200:
+          description: "Successful login"
+          schema:
+            $ref: "#/definitions/Status"
+  /getSensors:
+    get:
+      operationId: "getSensors"
+      tags:
+        - "sensors"
+      summary: "Get sensors state"
+      responses:
+        200:
+          description: "Successful login"
+          schema:
+            $ref: "#/definitions/Sensors"
+definitions:
+  BooleanAsString:
+    type: "string"
+    x-go-type:
+      import:
+        alias: "extend"
+        package: "github.com/kihamo/boggart/protocols/swagger"
+      type: "BooleanAsString"
+    x-nullable: false
+  Status:
+    type: "object"
+    properties:
+      status:
+        type: "integer"
+        # 1 - ok
+        # other - not ok
+  SetStateSecurityRequest:
+    type: "object"
+    properties:
+      action:
+        type: "string"
+        enum:
+          - "armSecurity"    # активация режима охраны
+          - "disarmSecurity" # деактивация режима охраны
+  SetStateHeatingModeRequest:
+    type: "object"
+    properties:
+      action:
+        type: "string"
+        enum:
+          - "setHeatingMode"
+      mode:
+        type: "integer"
+        description: "mode ID"
+      schedule:
+        type: "integer"
+        description: "schedule ID or -1"
+  SetStateEnvironmentRequest:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      target:
+        type: "string"
+        enum:
+          - "env" # раздел Среды
+      value:
+        type: "integer"
+      curve:
+        type: "integer"
+        description: "for env target only"
+  SetStateEngineeringRequest:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      target:
+        type: "string"
+        enum:
+          - "eng" # раздел Инженерное оборудование
+      value:
+        type: "integer"
+  State:
+    type: "object"
+    properties:
+      gsmBalance:
+        type: "string"
+        format: "float64"
+      gsmCarrier:
+        type: "string"
+      gsmRssi:
+        type: "string"
+        format: "float64"
+      inet:
+        $ref: "#/definitions/BooleanAsString"
+      regkey:
+        type: "string"
+      serial:
+        type: "string"
+      status:
+        type: "integer"
+      wifiSsid:
+        type: "string"
+  StateObject:
+    type: "object"
+    properties:
+      deviceFlags:
+        type: "integer"
+      deviceSeverity:
+        type: "integer"
+        description: "device severity level"
+        #  0 -
+        #  1 - Норма
+        # 32 - Предупреждение
+        # 64 - Критический
+      simSignal:
+        type: "integer"
+      simBalance:
+        type: "number"
+        format: "float64"
+      hMode:
+        type: "integer"
+        description: "heating mode"
+      hModes:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            i:
+              type: "integer"
+              description: "id"
+            "n":
+              type: "string"
+              description: "name"
+      securityArmed:
+        type: "boolean"
+        description: "Security mode enabled or disabled. Activate in control panel"
+        x-nullable: true
+      alarms:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            i:
+              type: "integer"
+              description: "id"
+            "n":
+              type: "string"
+              description: "name"
+            "t":
+              type: "integer"
+              description: "object type"
+            f:
+              type: "integer"
+            sev:
+              type: "integer"
+              description: "device severity level"
+              enum:
+                -  1 # норма
+                - 32 # предупреждение
+                - 64 # кретический
+            # st -> findValById
+            # s  -> findValById
+      scheds:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            i:
+              type: "integer"
+              description: "id"
+            "n":
+              type: "string"
+              description: "name"
+  Sensors:
+    type: "array"
+    items:
+      type: "object"
+      properties:
+        hwId:
+          type: "string"
+        id:
+          type: "integer"
+        name:
+          type: "string"
+        type:
+          type: "integer"
+          # Зональное управление Environment 101 <= e && e <= 199
+          #   101 - Температура помещения
+          #   102 - Контур отопления
+          #   103 - Контур ГВС
+          #   105 - Сауна
+          #   106 - Бассейн
+          #   107 - Теплый пол
+          #   108 - Смесительный узел
+          #   109 - Влажность помещения
+          #   110 - Уличная температура
+          #   112 - Произвольная температура
+          #   114 - Вентиляция
+          #   115 - Прямой контур
+          # Инженерное оборудование Engineering 302 === e || 305 <= e && e <= 330 --- исполнительные механизмы (D Output)
+          #   302 - Насос
+          #   303 - Котел
+          #   305 - Клапан 2-ходовой
+          #   306 - Произвольный механизм
+          #   307 - Печь
+          #   308 - Клапан 3-ходовой
+          #   309 - Клапан 4-ходовой
+          #   310 - Сирена
+          #   311 - Кран перекрытия воды
+          # Сигнализация Alarm 901 <= e && e <= 999
+          #   901 - Протечка воды
+          #   902 - Пожарная тревога
+          #   903 - Охранная тревога
+          #   904 - Утечка газа (метан)
+          #   905 - Концентрация CO
+          #   906 - Произвольная тревога
+          # Датчики 201 <= e && e <= 299
+          #   201 - Проводной датчик температуры
+          #   205 - Дискретный вход
+          # isObjDiscreteSensor 204 === e || 205 === e || 207 === e || 210 === e || 211 === e || 212 === e || 213 == e
+          #   204 -
+          #   205 - Дискретный вход
+          #   207 -
+          #   210 -
+          #   211 -
+          #   212 -
+          #   213 -
+          # Котлы Heater 303 == e
+        value:
+          type: "number"
+          format: "float64"
