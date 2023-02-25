@@ -86,12 +86,13 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 
 	if v := stateObjResponse.Payload.SecurityArmed; v != nil {
 		channels = append(channels,
-			openhab.NewChannel(idSensorSecurityArmed, openhab.ChannelTypeContact).
+			openhab.NewChannel(idSensorSecurityArmed, openhab.ChannelTypeSwitch).
 				WithStateTopic(cfg.TopicSecurityArmedState.Format(sn)).
+				WithCommandTopic(cfg.TopicSecurityArmed.Format(sn)).
 				WithOn("true").
 				WithOff("false").
 				AddItems(
-					openhab.NewItem(itemPrefix+idSensorSecurityArmed, openhab.ItemTypeContact).
+					openhab.NewItem(itemPrefix+idSensorSecurityArmed, openhab.ItemTypeSwitch).
 						WithLabel("Security armed").
 						WithIcon("shield"),
 				),
