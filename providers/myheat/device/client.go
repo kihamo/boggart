@@ -1,10 +1,9 @@
 package device
 
 import (
-	"fmt"
-	"github.com/go-openapi/runtime"
 	"net"
 
+	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/runtime/logger"
 	"github.com/kihamo/boggart/providers/myheat/device/client"
@@ -29,9 +28,6 @@ func New(address string, debug bool, logger logger.Logger) *Client {
 
 	if rt, ok := cl.Transport.(*httptransport.Runtime); ok {
 		rt.DefaultAuthentication = httptransport.BasicAuth(DefaultUsername, DefaultPassword)
-
-		fmt.Println(rt.Consumers)
-		fmt.Println(rt.Producers)
 
 		rt.Consumers["text/json"] = runtime.JSONConsumer()
 		rt.Producers["text/json"] = runtime.JSONProducer()

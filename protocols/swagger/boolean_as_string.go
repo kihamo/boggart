@@ -2,10 +2,11 @@ package swagger
 
 import (
 	"context"
-	"github.com/go-openapi/strfmt"
-	"github.com/kihamo/boggart/performance"
 	"strconv"
 	"strings"
+
+	"github.com/go-openapi/strfmt"
+	"github.com/kihamo/boggart/performance"
 )
 
 var replacerBooleanAsStringCleanValue = strings.NewReplacer(

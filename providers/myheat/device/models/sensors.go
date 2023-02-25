@@ -17,7 +17,7 @@ import (
 // Sensors sensors
 //
 // swagger:model Sensors
-type Sensors []*SensorsItems0
+type Sensors []*Sensor
 
 // Validate validates this sensors
 func (m Sensors) Validate(formats strfmt.Registry) error {
@@ -69,54 +69,5 @@ func (m Sensors) ContextValidate(ctx context.Context, formats strfmt.Registry) e
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-// SensorsItems0 sensors items0
-//
-// swagger:model SensorsItems0
-type SensorsItems0 struct {
-
-	// hw Id
-	HwID string `json:"hwId,omitempty"`
-
-	// id
-	ID int64 `json:"id,omitempty"`
-
-	// name
-	Name string `json:"name,omitempty"`
-
-	// type
-	Type int64 `json:"type,omitempty"`
-
-	// value
-	Value float64 `json:"value,omitempty"`
-}
-
-// Validate validates this sensors items0
-func (m *SensorsItems0) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// ContextValidate validates this sensors items0 based on context it is used
-func (m *SensorsItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (m *SensorsItems0) MarshalBinary() ([]byte, error) {
-	if m == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(m)
-}
-
-// UnmarshalBinary interface implementation
-func (m *SensorsItems0) UnmarshalBinary(b []byte) error {
-	var res SensorsItems0
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*m = res
 	return nil
 }
