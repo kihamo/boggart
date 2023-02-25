@@ -8,6 +8,7 @@ import (
 	"github.com/kihamo/boggart/components/boggart/installer"
 	"github.com/kihamo/boggart/components/boggart/installer/openhab"
 	"github.com/kihamo/boggart/providers/myheat/device/client/sensors"
+	"github.com/kihamo/boggart/providers/myheat/device/client/state"
 )
 
 func (b *Bind) InstallersSupport() []installer.System {
@@ -28,12 +29,18 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 		return nil, err
 	}
 
+	stateObjResponse, err := b.client.State.GetObjState(state.NewGetObjStateParamsWithContext(ctx), nil)
+	if err != nil {
+		return nil, err
+	}
+
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
 	cfg := b.config()
 	channels := make([]*openhab.Channel, 0, len(sensorsResponse.GetPayload()))
 
 	const (
-		idSensor = "Sensor"
+		idSensor              = "Sensor"
+		idSensorSecurityArmed = "SecurityArmed"
 	)
 
 	for _, sensor := range sensorsResponse.GetPayload() {
@@ -73,6 +80,20 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 					),
 			)
 		}
+	}
+
+	if v := stateObjResponse.Payload.SecurityArmed; v != nil {
+		channels = append(channels,
+			openhab.NewChannel(idSensorSecurityArmed, openhab.ChannelTypeContact).
+				WithStateTopic(cfg.TopicSecurityArmedState.Format(sn)).
+				WithOn("true").
+				WithOff("false").
+				AddItems(
+					openhab.NewItem(itemPrefix+idSensorSecurityArmed, openhab.ItemTypeContact).
+						WithLabel("Security armed").
+						WithIcon("shield"),
+				),
+		)
 	}
 
 	return openhab.StepsByBind(b, nil, channels...)
