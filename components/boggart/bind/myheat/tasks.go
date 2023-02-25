@@ -89,6 +89,20 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 			}
 		}
 
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicAlarmPowerSupply.Format(sn), 2&stateObjResponse.Payload.DeviceFlags != 0); e != nil {
+			err = multierr.Append(err, fmt.Errorf("publish alarm power supply return error: %w", e))
+		}
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicAlarmReplaceBattery.Format(sn), 4&stateObjResponse.Payload.DeviceFlags != 0); e != nil {
+			err = multierr.Append(err, fmt.Errorf("publish alarm replace battery return error: %w", e))
+		}
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicAlarmGSMBalance.Format(sn), 16&stateObjResponse.Payload.DeviceFlags != 0); e != nil {
+			err = multierr.Append(err, fmt.Errorf("publish alarm GSM balance return error: %w", e))
+		}
+
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicDeviceSeverity.Format(sn), stateObjResponse.Payload.DeviceSeverity); e != nil {
+			err = multierr.Append(err, fmt.Errorf("publish device severity return error: %w", e))
+		}
+
 		if e := b.MQTT().PublishAsync(ctx, cfg.TopicGSMSignalLevel.Format(sn), stateObjResponse.Payload.SimSignal); e != nil {
 			err = multierr.Append(err, fmt.Errorf("publish GSM signal return error: %w", e))
 		}
