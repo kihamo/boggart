@@ -88,6 +88,14 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 				err = multierr.Append(err, fmt.Errorf("publish security armed state return error: %w", e))
 			}
 		}
+
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicGSMSignalLevel.Format(sn), stateObjResponse.Payload.SimSignal); e != nil {
+			err = multierr.Append(err, fmt.Errorf("publish GSM signal return error: %w", e))
+		}
+
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicGSMBalance.Format(sn), stateObjResponse.Payload.SimBalance); e != nil {
+			err = multierr.Append(err, fmt.Errorf("publish GSM balance return error: %w", e))
+		}
 	} else {
 		err = multierr.Append(err, fmt.Errorf("get object state failed: %w", e))
 	}

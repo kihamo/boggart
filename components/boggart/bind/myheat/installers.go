@@ -36,11 +36,13 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
 	cfg := b.config()
-	channels := make([]*openhab.Channel, 0, len(sensorsResponse.GetPayload()))
+	channels := make([]*openhab.Channel, 0, len(sensorsResponse.GetPayload())+1+2)
 
 	const (
-		idSensor              = "Sensor"
-		idSensorSecurityArmed = "SecurityArmed"
+		idSensor               = "Sensor"
+		idSensorSecurityArmed  = "SecurityArmed"
+		idSensorGSMSignalLevel = "GSMSignalLevel"
+		idSensorGSMBalance     = "GSMBalance"
 	)
 
 	for _, sensor := range sensorsResponse.GetPayload() {
@@ -95,6 +97,23 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 				),
 		)
 	}
+
+	channels = append(channels,
+		openhab.NewChannel(idSensorGSMSignalLevel, openhab.ChannelTypeNumber).
+			WithStateTopic(cfg.TopicGSMSignalLevel.Format(sn)).
+			AddItems(
+				openhab.NewItem(itemPrefix+idSensorGSMSignalLevel, openhab.ItemTypeNumber).
+					WithLabel("GSM signal level").
+					WithIcon("qualityofservice"),
+			),
+		openhab.NewChannel(idSensorGSMBalance, openhab.ChannelTypeNumber).
+			WithStateTopic(cfg.TopicGSMBalance.Format(sn)).
+			AddItems(
+				openhab.NewItem(itemPrefix+idSensorGSMBalance, openhab.ItemTypeNumber).
+					WithLabel("GSM balance [%.2f ₽]").
+					WithIcon("price"),
+			),
+	)
 
 	return openhab.StepsByBind(b, nil, channels...)
 }
