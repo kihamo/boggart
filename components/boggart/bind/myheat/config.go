@@ -18,6 +18,7 @@ type Config struct {
 	TopicAlarmPowerSupply    mqtt.Topic    `mapstructure:"topic_alarm_power_supply" yaml:"topic_alarm_power_supply"`
 	TopicAlarmReplaceBattery mqtt.Topic    `mapstructure:"topic_alarm_replace_battery" yaml:"topic_alarm_replace_battery"`
 	TopicAlarmGSMBalance     mqtt.Topic    `mapstructure:"topic_alarm_gsm_balance" yaml:"topic_alarm_gsm_balance"`
+	TopicInternetConnected   mqtt.Topic    `mapstructure:"topic_internet_connected" yaml:"topic_internet_connected"`
 	TopicDeviceSeverity      mqtt.Topic    `mapstructure:"topic_device_severity" yaml:"topic_device_severity"`
 	TopicGSMSignalLevel      mqtt.Topic    `mapstructure:"topic_gsm_signal_level" yaml:"topic_gsm_signal_level"`
 	TopicGSMBalance          mqtt.Topic    `mapstructure:"topic_gsm_balance" yaml:"topic_gsm_balance"`
@@ -38,6 +39,7 @@ func (t Type) ConfigDefaults() interface{} {
 		TopicAlarmPowerSupply:    prefix + "alarm/power-supply",
 		TopicAlarmReplaceBattery: prefix + "alarm/replace-battery",
 		TopicAlarmGSMBalance:     prefix + "alarm/gsm-balance",
+		TopicInternetConnected:   prefix + "device/internet",
 		TopicDeviceSeverity:      prefix + "device/severity",
 		TopicGSMSignalLevel:      prefix + "gsm/signal",
 		TopicGSMBalance:          prefix + "gsm/balance",

@@ -131,7 +131,7 @@ definitions:
         enum:
           - "eng" # раздел Инженерное оборудование
       value:
-        type: "integer"
+        type: "integer" # 0 - выкл, 1 - вкл, -16777216 - авто
   State:
     type: "object"
     properties:

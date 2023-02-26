@@ -36,20 +36,21 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
 	cfg := b.config()
-	channels := make([]*openhab.Channel, 0, len(sensorsResponse.GetPayload())+1+6)
+	channels := make([]*openhab.Channel, 0, len(sensorsResponse.Payload)+1+7)
 
 	const (
-		idSensor                    = "Sensor"
-		idSensorSecurityArmed       = "SecurityArmed"
-		idSensorDeviceSeverity      = "DeviceSeverity"
-		idSensorGSMSignalLevel      = "GSMSignalLevel"
-		idSensorGSMBalance          = "GSMBalance"
-		idSensorAlarmPowerSupply    = "AlarmPowerSupply"
-		idSensorAlarmReplaceBattery = "AlarmReplaceBattery"
-		idSensorAlarmGSMBalance     = "AlarmGSMBalance"
+		idSensor              = "Sensor"
+		idSecurityArmed       = "SecurityArmed"
+		idDeviceSeverity      = "DeviceSeverity"
+		idInternetConnected   = "InternetConnected"
+		idGSMSignalLevel      = "GSMSignalLevel"
+		idGSMBalance          = "GSMBalance"
+		idAlarmPowerSupply    = "AlarmPowerSupply"
+		idAlarmReplaceBattery = "AlarmReplaceBattery"
+		idAlarmGSMBalance     = "AlarmGSMBalance"
 	)
 
-	for _, sensor := range sensorsResponse.GetPayload() {
+	for _, sensor := range sensorsResponse.Payload {
 		id := strconv.FormatInt(sensor.ID, 10)
 
 		switch sensor.Type {
@@ -90,13 +91,13 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 
 	if v := stateObjResponse.Payload.SecurityArmed; v != nil {
 		channels = append(channels,
-			openhab.NewChannel(idSensorSecurityArmed, openhab.ChannelTypeSwitch).
+			openhab.NewChannel(idSecurityArmed, openhab.ChannelTypeSwitch).
 				WithStateTopic(cfg.TopicSecurityArmedState.Format(sn)).
 				WithCommandTopic(cfg.TopicSecurityArmed.Format(sn)).
 				WithOn("true").
 				WithOff("false").
 				AddItems(
-					openhab.NewItem(itemPrefix+idSensorSecurityArmed, openhab.ItemTypeSwitch).
+					openhab.NewItem(itemPrefix+idSecurityArmed, openhab.ItemTypeSwitch).
 						WithLabel("Security armed").
 						WithIcon("shield"),
 				),
@@ -104,51 +105,60 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 	}
 
 	channels = append(channels,
-		openhab.NewChannel(idSensorDeviceSeverity, openhab.ChannelTypeNumber).
+		openhab.NewChannel(idDeviceSeverity, openhab.ChannelTypeNumber).
 			WithStateTopic(cfg.TopicDeviceSeverity.Format(sn)).
 			AddItems(
-				openhab.NewItem(itemPrefix+idSensorDeviceSeverity, openhab.ItemTypeNumber).
+				openhab.NewItem(itemPrefix+idDeviceSeverity, openhab.ItemTypeNumber).
 					WithLabel("Device severity").
 					WithIcon("error"),
 			),
-		openhab.NewChannel(idSensorGSMSignalLevel, openhab.ChannelTypeNumber).
+		openhab.NewChannel(idInternetConnected, openhab.ChannelTypeContact).
+			WithStateTopic(cfg.TopicInternetConnected.Format(sn)).
+			WithOn("true").
+			WithOff("false").
+			AddItems(
+				openhab.NewItem(itemPrefix+idInternetConnected, openhab.ItemTypeSwitch).
+					WithLabel("Internet connected [%s]").
+					WithIcon("network"),
+			),
+		openhab.NewChannel(idGSMSignalLevel, openhab.ChannelTypeNumber).
 			WithStateTopic(cfg.TopicGSMSignalLevel.Format(sn)).
 			AddItems(
-				openhab.NewItem(itemPrefix+idSensorGSMSignalLevel, openhab.ItemTypeNumber).
+				openhab.NewItem(itemPrefix+idGSMSignalLevel, openhab.ItemTypeNumber).
 					WithLabel("GSM signal level").
 					WithIcon("qualityofservice"),
 			),
-		openhab.NewChannel(idSensorGSMBalance, openhab.ChannelTypeNumber).
+		openhab.NewChannel(idGSMBalance, openhab.ChannelTypeNumber).
 			WithStateTopic(cfg.TopicGSMBalance.Format(sn)).
 			AddItems(
-				openhab.NewItem(itemPrefix+idSensorGSMBalance, openhab.ItemTypeNumber).
+				openhab.NewItem(itemPrefix+idGSMBalance, openhab.ItemTypeNumber).
 					WithLabel("GSM balance [%.2f ₽]").
 					WithIcon("price"),
 			),
-		openhab.NewChannel(idSensorAlarmPowerSupply, openhab.ChannelTypeContact).
+		openhab.NewChannel(idAlarmPowerSupply, openhab.ChannelTypeContact).
 			WithStateTopic(cfg.TopicAlarmPowerSupply.Format(sn)).
 			WithOn("true").
 			WithOff("false").
 			AddItems(
-				openhab.NewItem(itemPrefix+idSensorAlarmPowerSupply, openhab.ItemTypeSwitch).
+				openhab.NewItem(itemPrefix+idAlarmPowerSupply, openhab.ItemTypeSwitch).
 					WithLabel("Alarm power supply [%s]").
 					WithIcon("siren"),
 			),
-		openhab.NewChannel(idSensorAlarmReplaceBattery, openhab.ChannelTypeContact).
+		openhab.NewChannel(idAlarmReplaceBattery, openhab.ChannelTypeContact).
 			WithStateTopic(cfg.TopicAlarmReplaceBattery.Format(sn)).
 			WithOn("true").
 			WithOff("false").
 			AddItems(
-				openhab.NewItem(itemPrefix+idSensorAlarmReplaceBattery, openhab.ItemTypeSwitch).
+				openhab.NewItem(itemPrefix+idAlarmReplaceBattery, openhab.ItemTypeSwitch).
 					WithLabel("Alarm replace battery [%s]").
 					WithIcon("siren"),
 			),
-		openhab.NewChannel(idSensorAlarmGSMBalance, openhab.ChannelTypeContact).
+		openhab.NewChannel(idAlarmGSMBalance, openhab.ChannelTypeContact).
 			WithStateTopic(cfg.TopicAlarmGSMBalance.Format(sn)).
 			WithOn("true").
 			WithOff("false").
 			AddItems(
-				openhab.NewItem(itemPrefix+idSensorAlarmGSMBalance, openhab.ItemTypeSwitch).
+				openhab.NewItem(itemPrefix+idAlarmGSMBalance, openhab.ItemTypeSwitch).
 					WithLabel("Alarm GSM balance [%s]").
 					WithIcon("siren"),
 			),

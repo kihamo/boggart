@@ -2,9 +2,7 @@ package myheat
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"time"
 
 	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/providers/myheat/device/client/sensors"
@@ -13,43 +11,13 @@ import (
 )
 
 const (
-	TaskNameSerialNumber = "serial-number"
-	TaskNameUpdater      = "updater"
+	TaskNameUpdater = "updater"
 )
 
 func (b *Bind) Tasks() []tasks.Task {
-	return []tasks.Task{
-		tasks.NewTask().
-			WithName(TaskNameSerialNumber).
-			WithHandler(
-				b.Workers().WrapTaskHandlerIsOnline(
-					tasks.HandlerFuncFromShortToLong(b.taskSerialNumberHandler),
-				),
-			).
-			WithSchedule(
-				tasks.ScheduleWithSuccessLimit(
-					tasks.ScheduleWithDuration(tasks.ScheduleNow(), time.Second*30),
-					1,
-				),
-			),
-	}
-}
-
-func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
-	response, err := b.client.State.GetState(state.NewGetStateParamsWithContext(ctx), nil)
-	if err != nil {
-		return err
-	}
-
-	if sn := response.GetPayload().Serial; sn == "" {
-		return errors.New("device returns empty serial number")
-	} else {
-		b.Meta().SetSerialNumber(sn)
-	}
-
 	cfg := b.config()
 
-	_, err = b.Workers().RegisterTask(
+	return []tasks.Task{
 		tasks.NewTask().
 			WithName(TaskNameUpdater).
 			WithHandler(
@@ -61,18 +29,32 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 				),
 			).
 			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.UpdaterInterval)),
-	)
-
-	return err
+	}
 }
 
 func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 	cfg := b.config()
 	sn := b.Meta().SerialNumber()
 
+	// устройство
+	deviceResponse, e := b.client.State.GetState(state.NewGetStateParamsWithContext(ctx), nil)
+	if e == nil {
+		if sn == "" && deviceResponse.Payload.Serial != "" {
+			b.Meta().SetSerialNumber(deviceResponse.Payload.Serial)
+			sn = deviceResponse.Payload.Serial
+		}
+
+		if e := b.MQTT().PublishAsync(ctx, cfg.TopicInternetConnected.Format(sn), deviceResponse.Payload.Inet); e != nil {
+			err = multierr.Append(err, fmt.Errorf("publish internet connected return error: %w", e))
+		}
+	} else {
+		err = multierr.Append(err, fmt.Errorf("get sensor state failed: %w", e))
+	}
+
+	// сенсоры
 	sensorsResponse, e := b.client.Sensors.GetSensors(sensors.NewGetSensorsParamsWithContext(ctx), nil)
 	if e == nil {
-		for _, sensor := range sensorsResponse.GetPayload() {
+		for _, sensor := range sensorsResponse.Payload {
 			if e := b.MQTT().PublishAsync(ctx, cfg.TopicSensorValue.Format(sn, sensor.ID), sensor.Value); e != nil {
 				err = multierr.Append(err, fmt.Errorf("publish value for sensor %d return error: %w", sensor.ID, e))
 			}
@@ -81,6 +63,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 		err = multierr.Append(err, fmt.Errorf("get sensor state failed: %w", e))
 	}
 
+	// основные статусы
 	stateObjResponse, e := b.client.State.GetObjState(state.NewGetObjStateParamsWithContext(ctx), nil)
 	if e == nil {
 		if v := stateObjResponse.Payload.SecurityArmed; v != nil {
