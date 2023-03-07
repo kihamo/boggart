@@ -22,6 +22,8 @@ require (
 	github.com/go-openapi/strfmt v0.21.1
 	github.com/go-openapi/swag v0.19.15
 	github.com/go-openapi/validate v0.20.3
+	github.com/go-ping/ping v1.1.0
+	github.com/goburrow/modbus v0.1.0
 	github.com/goburrow/serial v0.1.0
 	github.com/golang/protobuf v1.4.2
 	github.com/gorilla/websocket v1.5.0
@@ -35,6 +37,7 @@ require (
 	github.com/kihamo/snitch v0.0.0-20200412182537-3478a87783e1
 	github.com/llgcode/draw2d v0.0.0-20200930101115-bfaf5d914d1e
 	github.com/mailru/easyjson v0.7.7
+	github.com/mergermarket/go-pkcs7 v0.0.0-20170926155232-153b18ea13c9
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/mmcloughlin/geohash v0.10.0
 	github.com/mourner/suncalc-go v0.0.0-20141021103505-77cea98fd55e
@@ -64,9 +67,8 @@ require (
 	cloud.google.com/go v0.55.0 // indirect
 	cloud.google.com/go/firestore v1.2.0 // indirect
 	cloud.google.com/go/storage v1.6.0 // indirect
-	code.cloudfoundry.org/clock v1.0.0 // indirect
 	github.com/BurntSushi/toml v0.3.1 // indirect
-	github.com/Masterminds/goutils v1.1.0 // indirect
+	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.1.0 // indirect
 	github.com/Masterminds/sprig/v3 v3.1.0 // indirect
 	github.com/Masterminds/squirrel v1.2.0 // indirect
@@ -88,9 +90,7 @@ require (
 	github.com/go-openapi/jsonreference v0.19.6 // indirect
 	github.com/go-openapi/loads v0.21.0 // indirect
 	github.com/go-openapi/spec v0.20.4 // indirect
-	github.com/go-ping/ping v1.1.0 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
-	github.com/goburrow/modbus v0.1.0 // indirect
 	github.com/gogo/protobuf v1.3.1 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
@@ -111,7 +111,6 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0 // indirect
 	github.com/justinas/alice v1.2.0 // indirect
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
-	github.com/kihamo/go-workers v2.1.7+incompatible // indirect
 	github.com/kihamo/gotypes v0.0.0-20161225095921-c1b2b85a41fe // indirect
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
