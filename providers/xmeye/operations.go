@@ -41,8 +41,6 @@ func (c *Client) LogExport(ctx context.Context) (io.Reader, error) {
 	return packet.payload, err
 }
 
-// FIXME: после reboot через ручку странное поведение, девайс не перезагружается
-// команды принимает, но не отвечает на них
 func (c *Client) Reboot(ctx context.Context) error {
 	_, err := c.Call(ctx, CmdSysManagerRequest, map[string]interface{}{
 		"Name":      "OPMachine",
