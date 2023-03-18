@@ -55,6 +55,7 @@ const (
 	CmdUpgradeInfoRequest           uint16 = 1525
 	CmdConfigExportRequest          uint16 = 1542
 	CmdLogExportRequest             uint16 = 1544
+	CmdSnapshot                     uint16 = 1560
 )
 
 type Client struct {
