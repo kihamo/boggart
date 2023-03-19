@@ -1,0 +1,235 @@
+{{ define "page" }}
+    <form role="form" action="?action=system" method="post" id="settings" data-toggle="validator">
+        <table class="table dt-responsive nowrap" style="width:100%">
+            <thead>
+            <tr>
+                <th class="md-col-1">{{ i18n "Option" . }}</th>
+                <th>{{ i18n "Value" . }}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{ if .system_info }}
+            <tr>
+                <td>{{ i18n "Serial number" . }}</td>
+                <td>{{ .system_info.SerialNo }}</td>
+            </tr>
+            <tr>
+                <td>{{ i18n "Uptime" . }}</td>
+                <td>{{ .system_info.DeviceRunTime }} {{ i18n "minutes" . }}</td>
+            </tr>
+            <tr>
+                <td>{{ i18n "Software version" . }}</td>
+                <td>{{ .system_info.SoftWareVersion }}</td>
+            </tr>
+            <tr>
+                <td>{{ i18n "Hardware" . }}</td>
+                <td>{{ .system_info.HardWare }}</td>
+            </tr>
+            <tr>
+                <td>{{ i18n "Hardware version" . }}</td>
+                <td>{{ .system_info.HardWareVersion }}</td>
+            </tr>
+            <tr>
+                <td>{{ i18n "Encrypt version" . }}</td>
+                <td>{{ .system_info.EncryptVersion }}</td>
+            </tr>
+            <tr>
+                <td>{{ i18n "Build time" . }}</td>
+                <td>
+                    <script type="application/javascript">document.write(dateToString('{{ .system_info.BuildTime.Format "2006-01-02T15:04:05-07:00" }}'))</script>
+                </td>
+            </tr>
+            <tr>
+                <td>{{ i18n "Update time" . }}</td>
+                <td>
+                    <script type="application/javascript">document.write(dateToString('{{ .system_info.UpdataTime.Format "2006-01-02T15:04:05-07:00" }}'))</script>
+                </td>
+            </tr>
+            <tr>
+                <td>{{ i18n "Alarm in channel" . }}</td>
+                <td>{{ .system_info.AlarmInChannel }}</td>
+            </tr>
+            <tr>
+                <td>{{ i18n "Alarm out channel" . }}</td>
+                <td>{{ .system_info.AlarmOutChannel }}</td>
+            </tr>
+            <tr>
+                <td>{{ i18n "Talk in channel" . }}</td>
+                <td>{{ .system_info.TalkInChannel }}</td>
+            </tr>
+            <tr>
+                <td>{{ i18n "Talk out channel" . }}</td>
+                <td>{{ .system_info.TalkOutChannel }}</td>
+            </tr>
+            <tr>
+                <td>{{ i18n "Video in channel" . }}</td>
+                <td>{{ .system_info.VideoInChannel }}</td>
+            </tr>
+            <tr>
+                <td>{{ i18n "Video out channel" . }}</td>
+                <td>{{ .system_info.VideoOutChannel }}</td>
+            </tr>
+            <tr>
+                <td>{{ i18n "Audio in channel" . }}</td>
+                <td>{{ .system_info.AudioInChannel }}</td>
+            </tr>
+            <tr>
+                <td>{{ i18n "Dig channel" . }}</td>
+                <td>{{ .system_info.DigChannel }}</td>
+            </tr>
+            <tr>
+                <td>{{ i18n "Extra channel" . }}</td>
+                <td>{{ .system_info.ExtraChannel }}</td>
+            </tr>
+            {{ end }}
+
+            {{ if .time_current }}
+            <tr>
+                <td rowspan="2">{{ i18n "Time" . }}</td>
+                <td>
+                    <div class="col-xs-4">
+                        <input type="text" class="form-control" name="time-current" value="{{ .time_current.Format "2006.01.02 15:04:06" }}" id="time-current" readonly/>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="col-xs-4">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="time" value="{{ .time_current.Format "2006.01.02 15:04:06" }}" id="time"/>
+                            <span class="input-group-btn">
+                                <button class="btn btn-info" type="button" id="time-now">{{ i18n "Now" . }}</button>
+                            </span>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {{ else }}
+            <tr>
+                <td>{{ i18n "Time" . }}</td>
+                <td>
+                    <div class="col-xs-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="time" value="{{ .time_current.Format "2006.01.02 15:04:06" }}" id="time"/>
+                            <span class="input-group-btn">
+                                <button class="btn btn-info" type="button" id="time-now">{{ i18n "Now" . }}</button>
+                            </span>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {{ end }}
+            </tbody>
+        </table>
+    </form>
+
+    {{ if .storage_info }}
+    <div class="x_title">
+        <h2>{{ i18n "Storage" . }}</h2>
+        <div class="clearfix"></div>
+    </div>
+    <table class="table dt-responsive nowrap" style="width:100%">
+        <thead>
+        <tr>
+            <th class="md-col-1">{{ i18n "Part number" . }}</th>
+            <th>{{ i18n "Remain space" . }}</th>
+            <th>{{ i18n "Total space" . }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{ range $storage := .storage_info }}
+            {{ range $partition := $storage.Partition }}
+            <tr>
+                <td>{{ $storage.PartNumber }}</td>
+                <td>{{ human_bytes $partition.RemainSpace.Uint32 }}</td>
+                <td>{{ human_bytes $partition.TotalSpace.Uint32 }}</td>
+            </tr>
+            {{ end }}
+        {{ end }}
+        </tbody>
+    </table>
+    {{ end }}
+
+    {{ if .channels }}
+    <div class="x_title">
+        <h2>{{ i18n "Channels" . }}</h2>
+        <div class="clearfix"></div>
+    </div>
+    <table class="table dt-responsive nowrap" style="width:100%">
+        <thead>
+        <tr>
+            <th class="md-col-1">{{ i18n "Channel" . }}</th>
+            <th>{{ i18n "Title" . }}</th>
+            <th>{{ i18n "Bitrate" . }}</th>
+            <th>{{ i18n "Record" . }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{ range $channel := .channels }}
+        <tr>
+            <td>{{ $channel.Number }}</td>
+            <td>{{ $channel.Title }}</td>
+            <td>{{ $channel.Bitrate }} {{ i18n "bits/second" $ }}</td>
+            <td>{{ if $channel.Record }}{{ i18n "recording" $ }}{{ end }}</td>
+        </tr>
+        {{ end }}
+        </tbody>
+    </table>
+    {{ end }}
+{{ end }}
+
+{{ define "head" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/bootstrap-daterangepicker/css/daterangepicker.min.css" false) }}
+{{ end }}
+
+{{ define "js" }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/moment/js/moment.min.js" false) }}
+    {{ staticHTML (staticURL "/dashboard/assets/vendors/bootstrap-daterangepicker/js/daterangepicker.min.js" false) }}
+
+    <script type="application/javascript">
+        function setTime(t) {
+            $.ajax({
+                type: 'POST',
+                url: $('#settings').prop('action'),
+                data: {
+                    time: t
+                },
+                success: function (r) {
+                    if (r.result === 'failed') {
+                        new PNotify({
+                            title: 'Error',
+                            text: r.message,
+                            type: 'error',
+                            hide: false,
+                            styling: 'bootstrap3'
+                        });
+                    } else if (r.message !== 'undefined') {
+                        new PNotify({
+                            title: 'Success',
+                            text: r.message,
+                            type: 'success',
+                            hide: false,
+                            styling: 'bootstrap3'
+                        });
+                    }
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            $('#time').daterangepicker({
+                singleDatePicker: true,
+                applyButtonClasses: 'btn-success',
+                locale: {
+                    format: 'YYYY.MM.DD HH:mm:ss'
+                }
+            }, function(start) {
+                setTime(moment(start).format('YYYY.MM.DD HH:mm:ss'))
+            });
+
+            $('#time-now').click(function () {
+                setTime('now')
+            })
+        });
+    </script>
+{{ end }}

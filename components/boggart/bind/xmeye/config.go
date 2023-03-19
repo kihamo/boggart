@@ -18,6 +18,9 @@ type Config struct {
 	UpdaterTimeout                 time.Duration `mapstructure:"updater_timeout" yaml:"updater_timeout"`
 	AlarmStreamingEnabled          bool          `mapstructure:"alarm_streaming_enabled" yaml:"alarm_streaming_enabled,omitempty"`
 	AlarmStreamingInterval         time.Duration `mapstructure:"alarm_streaming_interval" yaml:"alarm_streaming_interval"`
+	PreviewRefreshInterval         time.Duration `mapstructure:"preview_refresh_interval" yaml:"preview_refresh_interval,omitempty"`
+	PreviewUseRTSP                 bool          `mapstructure:"preview_use_rtsp" yaml:"preview_use_rtsp,omitempty"`
+	WidgetChannel                  uint64        `mapstructure:"widget_channel" yaml:"widget_channel,omitempty"`
 	TopicEvent                     mqtt.Topic    `mapstructure:"topic_event" yaml:"topic_event"`
 	TopicStateModel                mqtt.Topic    `mapstructure:"topic_state_model" yaml:"topic_state_model"`
 	TopicStateFirmwareVersion      mqtt.Topic    `mapstructure:"topic_state_firmware_release_version" yaml:"topic_state_firmware_release_version"`
@@ -37,6 +40,9 @@ func (t Type) ConfigDefaults() interface{} {
 		UpdaterInterval:                time.Minute,
 		UpdaterTimeout:                 time.Second * 30,
 		AlarmStreamingInterval:         time.Second * 5,
+		WidgetChannel:                  0,
+		PreviewRefreshInterval:         time.Second * 5,
+		PreviewUseRTSP:                 false,
 		TopicEvent:                     prefix + "+",
 		TopicStateModel:                prefix + "state/model",
 		TopicStateFirmwareVersion:      prefix + "state/firmware/version",

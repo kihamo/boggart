@@ -5,6 +5,7 @@ import (
 	"io"
 	"math"
 	"net"
+	"net/url"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -14,8 +15,9 @@ import (
 )
 
 const (
-	DefaultTimeout = time.Second
-	DefaultPort    = 34567
+	DefaultTimeout  = time.Second * 10
+	DefaultPort     = 34567
+	DefaultRTSPPort = 554
 
 	defaultPayloadBuffer = 1024
 
@@ -55,6 +57,7 @@ const (
 	CmdUpgradeInfoRequest           uint16 = 1525
 	CmdConfigExportRequest          uint16 = 1542
 	CmdLogExportRequest             uint16 = 1544
+	CmdNetSnapshotRequest           uint16 = 1560
 )
 
 type Client struct {
@@ -66,6 +69,7 @@ type Client struct {
 	password []byte
 
 	dsn        string
+	rtspURL    *url.URL
 	connection *connection
 
 	mutex sync.RWMutex
@@ -73,14 +77,28 @@ type Client struct {
 }
 
 func New(host, username, password string) (*Client, error) {
-	if _, _, err := net.SplitHostPort(host); err != nil {
-		host = host + ":" + strconv.Itoa(DefaultPort)
+	port := strconv.Itoa(DefaultPort)
+
+	if h, p, err := net.SplitHostPort(host); err == nil {
+		host = h
+		port = p
 	}
 
+	timeout := DefaultTimeout.String()
+
 	client := &Client{
-		username:     username,
-		password:     []byte(password),
-		dsn:          "tcp://" + host + "?read-timeout=10s&write-timeout=10s&dial-timeout=10s&once=true",
+		username: username,
+		password: []byte(password),
+		dsn:      "tcp://" + net.JoinHostPort(host, port) + "?read-timeout=" + timeout + "&write-timeout=" + timeout + "&dial-timeout=" + timeout + "&once=true",
+		rtspURL: &url.URL{
+			Scheme: "rtsp",
+			Host:   net.JoinHostPort(host, strconv.Itoa(DefaultRTSPPort)),
+			RawQuery: url.Values{
+				"user":     []string{username},
+				"password": []string{password},
+				"stream":   []string{"0.sdp"},
+			}.Encode(),
+		},
 		extraChannel: math.MaxUint64,
 	}
 

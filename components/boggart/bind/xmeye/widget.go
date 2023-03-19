@@ -76,18 +76,25 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		b.widgetActionDownload(w, r, client)
 		return
 
-	default:
+	case "preview":
+		b.widgetActionPreview(w, r, client)
+		return
+
+	case "system":
 		if r.IsPost() {
-			b.widgetActionDefaultPost(w, r, client)
+			b.widgetActionSystemPost(w, r, client)
 			return
 		}
 
-		vars = b.widgetActionDefault(w, r, client)
+		vars = b.widgetActionSystem(w, r, client)
+
+	default:
 		action = "default"
+
+		vars = b.widgetActionDefault(w, r, client)
 	}
 
 	vars["action"] = action
-
 	widget.RenderLayout(ctx, action, "widget", vars)
 }
 
@@ -96,6 +103,14 @@ func (b *Bind) WidgetAssetFS() *assetfs.AssetFS {
 }
 
 func (b *Bind) widgetActionDefault(_ *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
+	cfg := b.config()
+
+	return map[string]interface{}{
+		"preview_refresh_interval": cfg.PreviewRefreshInterval.Seconds(),
+	}
+}
+
+func (b *Bind) widgetActionSystem(_ *dashboard.Response, r *dashboard.Request, client *xmeye.Client) map[string]interface{} {
 	ctx := r.Context()
 	widget := b.Widget()
 
@@ -168,7 +183,7 @@ func (b *Bind) widgetActionDefault(_ *dashboard.Response, r *dashboard.Request, 
 	}
 }
 
-func (b *Bind) widgetActionDefaultPost(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) {
+func (b *Bind) widgetActionSystemPost(w *dashboard.Response, r *dashboard.Request, client *xmeye.Client) {
 	ctx := r.Context()
 
 	err := r.Original().ParseForm()
@@ -687,5 +702,49 @@ func (b *Bind) widgetActionDownload(w http.ResponseWriter, r *dashboard.Request,
 	}
 
 	w.Header().Set("Content-Disposition", "attachment; filename=\""+filename+"\"")
+	_, _ = io.Copy(w, reader)
+}
+
+func (b *Bind) widgetActionPreview(w http.ResponseWriter, r *dashboard.Request, client *xmeye.Client) {
+	var (
+		ch  uint64
+		err error
+	)
+
+	query := r.URL().Query()
+	ctx := r.Context()
+	widget := b.Widget()
+	cfg := b.config()
+
+	if channel := query.Get("channel"); channel == "" {
+		ch = cfg.WidgetChannel
+	} else {
+		ch, err = strconv.ParseUint(channel, 10, 64)
+		if err != nil {
+			widget.NotFound(w, r)
+			return
+		}
+	}
+
+	var reader io.Reader
+	if cfg.PreviewUseRTSP {
+		reader, err = client.SnapshotRTSP(ctx, ch)
+	} else {
+		reader, err = client.Snapshot(ctx, ch)
+	}
+
+	if err != nil {
+		widget.InternalError(w, r, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "image/jpeg")
+
+	if download := query.Get("download"); download != "" {
+		filename := b.Meta().ID() + time.Now().Format("_20060102150405.jpg")
+
+		w.Header().Set("Content-Disposition", "attachment; filename=\""+filename+"\"")
+	}
+
 	_, _ = io.Copy(w, reader)
 }

@@ -24,7 +24,8 @@
             <div class="x_content">
                 <div role="tabpanel">
                     <ul class="nav nav-tabs bar_tabs" role="tablist">
-                        <li role="presentation"{{ if eq .action "default" }} class="active"{{ end }}><a href="{{ if eq .action "default" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}{{ end }}">{{ i18n "System" . }}</a></li>
+                        <li role="presentation"{{ if eq .action "default" }} class="active"{{ end }}><a href="{{ if eq .action "default" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}{{ end }}">{{ i18n "Preview" . }}</a></li>
+                        <li role="presentation"{{ if eq .action "system" }} class="active"{{ end }}><a href="{{ if eq .action "system" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=system{{ end }}">{{ i18n "System" . }}</a></li>
                         <li role="presentation"{{ if eq .action "logs" }} class="active"{{ end }}><a href="{{ if eq .action "logs" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=logs{{ end }}">{{ i18n "Logs" . }}</a></li>
                         <li role="presentation"{{ if eq .action "files" }} class="active"{{ end }}><a href="{{ if eq .action "files" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=files{{ end }}">{{ i18n "Files" . }}</a></li>
                         <li role="presentation"{{ if eq .action "accounts" }} class="active"{{ end }}><a href="{{ if eq .action "accounts" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=accounts{{ end }}">{{ i18n "Accounts" . }}</a></li>
