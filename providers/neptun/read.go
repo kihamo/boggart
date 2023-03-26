@@ -1,61 +1,68 @@
 package neptun
 
-import (
-	"encoding/binary"
-	"fmt"
-)
-
 func (n *Neptun) ModuleConfiguration() (*ModuleConfiguration, error) {
-	response, err := n.client.Read(AddressModuleConfiguration, 1)
+	value, err := n.client.ReadHoldingRegistersUint16(AddressModuleConfiguration)
 
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Println(response)
-
 	return &ModuleConfiguration{
-		value: binary.BigEndian.Uint16(response),
+		value: value,
 	}, err
 }
 
-func (n *Neptun) InputLines12Configuration() (err error) {
-	response, err := n.client.Read(AddressInputLines12Configuration, 1)
-
-	if err != nil {
-		return err
+func (n *Neptun) InputLinesConfiguration() (l1, l2, l3, l4 *InputLinesConfiguration, err error) {
+	response, err := n.client.ReadHoldingRegisters(AddressInputLines12Configuration, 1)
+	if err == nil {
+		l1 = &InputLinesConfiguration{
+			value: response[0],
+		}
+		l2 = &InputLinesConfiguration{
+			value: response[1],
+		}
 	}
 
-	fmt.Println(response)
-
-	return err
-}
-
-func (n *Neptun) InputLinesStatus() (l1, l2, l3, l4 bool, err error) {
-	response, err := n.client.Read(AddressInputLinesStatus, 1)
-
+	response, err = n.client.ReadHoldingRegisters(AddressInputLines34Configuration, 1)
 	if err == nil {
-		l1 = response[0] != 0 // TODO:
-
-		return l1, l2, l3, l4, err
+		l3 = &InputLinesConfiguration{
+			value: response[0],
+		}
+		l4 = &InputLinesConfiguration{
+			value: response[1],
+		}
 	}
 
 	return l1, l2, l3, l4, err
 }
 
-func (n *Neptun) EventsRelayConfiguration() (close, alarm uint8, err error) {
-	response, err := n.client.Read(AddressEventsRelayConfiguration, 1)
+func (n *Neptun) InputLinesStatus() (l1, l2, l3, l4 bool, err error) {
+	value, err := n.client.ReadHoldingRegistersUint16(AddressInputLinesStatus)
 
 	if err == nil {
-		close = response[0]
-		alarm = response[1]
+		l1 = value&0 != 0
+		l2 = value&1 != 0
+		l3 = value&3 != 0
+		l4 = value&4 != 0
 	}
 
-	return close, alarm, err
+	return l1, l2, l3, l4, err
+}
+
+func (n *Neptun) EventsRelayConfiguration() (*EventsRelayConfiguration, error) {
+	value, err := n.client.ReadHoldingRegistersUint16(AddressEventsRelayConfiguration)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &EventsRelayConfiguration{
+		value: value,
+	}, err
 }
 
 func (n *Neptun) SlaveIDAndBaudRate() (slaveId uint8, baudRate int, err error) {
-	response, err := n.client.Read(AddressSlaveIDAndBaudRate, 1)
+	response, err := n.client.ReadHoldingRegisters(AddressSlaveIDAndBaudRate, 1)
 
 	if err != nil {
 		return slaveId, baudRate, err
@@ -91,18 +98,6 @@ func (n *Neptun) SlaveIDAndBaudRate() (slaveId uint8, baudRate int, err error) {
 	return slaveId, baudRate, err
 }
 
-func (n *Neptun) Counter1Value() error {
-	high, err := n.client.Read(AddressCounter1ValueHigh, 1)
-	if err != nil {
-		return err
-	}
-
-	low, err := n.client.Read(AddressCounter1ValueHigh, 1)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(high, low)
-
-	return nil
+func (n *Neptun) WirelessSensorCount() (uint16, error) {
+	return n.client.ReadHoldingRegistersUint16(AddressWirelessSensorCount)
 }

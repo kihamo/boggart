@@ -13,15 +13,7 @@ const (
 	AddressInputLinesStatus          uint16 = 3
 	AddressEventsRelayConfiguration  uint16 = 4
 	AddressSlaveIDAndBaudRate        uint16 = 5
-	AddressCounter1ValueHigh         uint16 = 107
-	AddressCounter1ValueLow          uint16 = 108
-)
-
-const (
-	EventsRelaySwitchNo = uint8(iota)
-	EventsRelaySwitchFirstGroup
-	EventsRelaySwitchSecondGroup
-	EventsRelaySwitchAllGroups
+	AddressWirelessSensorCount       uint16 = 6
 )
 
 type Neptun struct {

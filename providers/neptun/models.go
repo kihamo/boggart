@@ -1,7 +1,11 @@
 package neptun
 
+import (
+	"fmt"
+)
+
 const (
-	moduleConfigurationFloorWashing uint16 = 1 << iota // w
+	moduleConfigurationFloorWashing uint16 = 1 << iota
 	moduleConfigurationFirstGroupAlert
 	moduleConfigurationSecondGroupAlert
 	moduleConfigurationWirelessSensorLowBattery
@@ -9,11 +13,11 @@ const (
 	moduleConfigurationFirstGroupTapClosing
 	moduleConfigurationSecondGroupTapClosing
 	moduleConfigurationWirelessSensorPairingMode
-	moduleConfigurationFirstGroupTapState      // w
-	moduleConfigurationSecondGroupTapState     // w
-	moduleConfigurationTwoGroupsMode           // w
-	moduleConfigurationTapsClosingOnSensorLoss // w
-	moduleConfigurationKeyboardLock            // w
+	moduleConfigurationFirstGroupTapState
+	moduleConfigurationSecondGroupTapState
+	moduleConfigurationTwoGroupsMode
+	moduleConfigurationTapsClosingOnSensorLoss
+	moduleConfigurationKeyboardLock
 )
 
 type ModuleConfiguration struct {
@@ -36,6 +40,30 @@ func (c *ModuleConfiguration) SetFloorWashing(value bool) {
 	}
 }
 
+func (c *ModuleConfiguration) FirstGroupAlert() bool {
+	return c.value&moduleConfigurationFirstGroupAlert != 0
+}
+
+func (c *ModuleConfiguration) SecondGroupAlert() bool {
+	return c.value&moduleConfigurationSecondGroupAlert != 0
+}
+
+func (c *ModuleConfiguration) WirelessSensorLowBattery() bool {
+	return c.value&moduleConfigurationWirelessSensorLowBattery != 0
+}
+
+func (c *ModuleConfiguration) WirelessSensorLoss() bool {
+	return c.value&moduleConfigurationWirelessSensorLoss != 0
+}
+
+func (c *ModuleConfiguration) FirstGroupTapClosing() bool {
+	return c.value&moduleConfigurationFirstGroupTapClosing != 0
+}
+
+func (c *ModuleConfiguration) SecondGroupTapClosing() bool {
+	return c.value&moduleConfigurationSecondGroupTapClosing != 0
+}
+
 func (c *ModuleConfiguration) WirelessSensorPairingMode() bool {
 	return c.value&moduleConfigurationWirelessSensorPairingMode != 0
 }
@@ -48,7 +76,7 @@ func (c *ModuleConfiguration) SetWirelessSensorPairingMode(value bool) {
 	}
 }
 
-func (c *ModuleConfiguration) FirsGroupTapState() bool {
+func (c *ModuleConfiguration) FirstGroupTapState() bool {
 	return c.value&moduleConfigurationFirstGroupTapState != 0
 }
 
@@ -106,4 +134,104 @@ func (c *ModuleConfiguration) SetKeyboardLock(value bool) {
 	} else {
 		c.value &= ^moduleConfigurationKeyboardLock
 	}
+}
+
+const (
+	inputLinesConfigurationTapFirstGroup uint8 = 1 + iota
+	inputLinesConfigurationTapSecondGroup
+	inputLinesConfigurationTapTwoGroup
+	inputLinesConfigurationType
+)
+
+type InputLinesConfiguration struct {
+	value uint8
+}
+
+func (i *InputLinesConfiguration) Value() uint8 {
+	return i.value
+}
+
+func (i *InputLinesConfiguration) TapFirstGroup() bool {
+	return i.value&inputLinesConfigurationTapFirstGroup != 0
+}
+
+func (i *InputLinesConfiguration) TapSecondGroup() bool {
+	return i.value&inputLinesConfigurationTapSecondGroup != 0
+}
+
+func (i *InputLinesConfiguration) TapTwoGroup() bool {
+	fmt.Printf("%16b %16b ----\n", i.value, i.value&inputLinesConfigurationTapTwoGroup)
+
+	return i.value&inputLinesConfigurationTapTwoGroup == 0b11
+}
+
+func (i *InputLinesConfiguration) Button() bool {
+	return i.value&inputLinesConfigurationType != 0
+}
+
+func (i *InputLinesConfiguration) SetButton() {
+	i.value |= inputLinesConfigurationType
+}
+
+func (i *InputLinesConfiguration) Sensor() bool {
+	return i.value&inputLinesConfigurationType == 0
+}
+
+func (i *InputLinesConfiguration) SetSensor() {
+	i.value &= ^inputLinesConfigurationType
+}
+
+const (
+	TapSwitchNoSwitch uint8 = iota
+	TapSwitchFirstGroup
+	TapSwitchSecondGroup
+	TapSwitchTwoGroups
+)
+
+type EventsRelayConfiguration struct {
+	value uint16
+}
+
+func (e *EventsRelayConfiguration) Value() uint16 {
+	return e.value
+}
+
+func (e *EventsRelayConfiguration) TapSwitchOnClosing() uint8 {
+	return uint8(e.value >> 2)
+}
+
+func (e *EventsRelayConfiguration) TapSwitchOnClosingNoSwitch() bool {
+	return e.TapSwitchOnClosing() == TapSwitchNoSwitch
+}
+
+func (e *EventsRelayConfiguration) TapSwitchOnClosingFirstGroup() bool {
+	return e.TapSwitchOnClosing() == TapSwitchFirstGroup
+}
+
+func (e *EventsRelayConfiguration) TapSwitchOnClosingSecondGroup() bool {
+	return e.TapSwitchOnClosing() == TapSwitchSecondGroup
+}
+
+func (e *EventsRelayConfiguration) TapSwitchOnClosingTwoGroups() bool {
+	return e.TapSwitchOnClosing() == TapSwitchTwoGroups
+}
+
+func (e *EventsRelayConfiguration) TapSwitchOnAlert() uint8 {
+	return uint8(e.value &^ 0b1100)
+}
+
+func (e *EventsRelayConfiguration) TapSwitchOnAlertNoSwitch() bool {
+	return e.TapSwitchOnAlert() == TapSwitchNoSwitch
+}
+
+func (e *EventsRelayConfiguration) TapSwitchOnAlertFirstGroup() bool {
+	return e.TapSwitchOnAlert() == TapSwitchFirstGroup
+}
+
+func (e *EventsRelayConfiguration) TapSwitchOnAlertSecondGroup() bool {
+	return e.TapSwitchOnAlert() == TapSwitchSecondGroup
+}
+
+func (e *EventsRelayConfiguration) TapSwitchOnAlertTwoGroups() bool {
+	return e.TapSwitchOnAlert() == TapSwitchTwoGroups
 }

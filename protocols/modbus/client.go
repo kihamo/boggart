@@ -83,9 +83,9 @@ func (c *Client) Close() error {
 	return nil
 }
 
-func (c *Client) Read(address, quantity uint16) (response []byte, err error) {
+func (c *Client) CallWithTriesLimit(f func() ([]byte, error)) (response []byte, err error) {
 	for trie := uint8(1); trie <= c.options.maxTries; trie++ {
-		response, err = c.ReadHoldingRegisters(address, quantity)
+		response, err = f()
 		if err == nil {
 			break
 		}
@@ -94,45 +94,32 @@ func (c *Client) Read(address, quantity uint16) (response []byte, err error) {
 	return response, err
 }
 
-func (c *Client) ReadUint16(address uint16) (value uint16, err error) {
-	response, err := c.Read(address, 1)
+func (c *Client) ReadHoldingRegisters(address, quantity uint16) ([]byte, error) {
+	return c.CallWithTriesLimit(func() ([]byte, error) {
+		return c.Client.ReadHoldingRegisters(address, quantity)
+	})
+}
+
+func (c *Client) WriteMultipleRegisters(address, quantity uint16, payload []byte) ([]byte, error) {
+	return c.CallWithTriesLimit(func() ([]byte, error) {
+		return c.Client.WriteMultipleRegisters(address, quantity, payload)
+	})
+}
+
+func (c *Client) ReadHoldingRegistersUint8(address uint16) (value uint8, err error) {
+	response, err := c.ReadHoldingRegisters(address, 1)
 	if err == nil {
-		return binary.BigEndian.Uint16(response), err
+		return response[0], err
 	}
 
 	return value, err
 }
 
-func (c *Client) Write(address, quantity uint16, payload []byte) (err error) {
-	var response []byte
-
-	for trie := uint8(1); trie <= c.options.maxTries; trie++ {
-		response, err = c.WriteMultipleRegisters(address, quantity, payload)
-
-		if err == nil {
-			_ = binary.BigEndian.Uint16(response)
-
-			//if code == writeResponseSuccess {
-			//	break
-			//}
-			//
-			//err = fmt.Errorf("device return not success response %d", code)
-		}
+func (c *Client) ReadHoldingRegistersUint16(address uint16) (value uint16, err error) {
+	response, err := c.ReadHoldingRegisters(address, 1)
+	if err == nil {
+		return binary.BigEndian.Uint16(response), err
 	}
 
-	return err
-}
-
-func (c *Client) WriteUint16(address, value uint16) error {
-	payload := make([]byte, 2)
-	binary.BigEndian.PutUint16(payload, value)
-
-	return c.Write(address, 2, payload)
-}
-
-func (c *Client) WriteUint32(address uint16, value uint32) error {
-	payload := make([]byte, 4)
-	binary.BigEndian.PutUint32(payload, value)
-
-	return c.Write(address, 2, payload)
+	return value, err
 }
