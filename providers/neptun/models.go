@@ -200,6 +200,10 @@ func (e *EventsRelayConfiguration) TapSwitchOnClosing() uint8 {
 	return uint8(e.value >> 2)
 }
 
+func (e *EventsRelayConfiguration) SetTapSwitchOnClosing(value uint8) {
+	e.value = uint16((value << 2) | e.TapSwitchOnAlert())
+}
+
 func (e *EventsRelayConfiguration) TapSwitchOnClosingNoSwitch() bool {
 	return e.TapSwitchOnClosing() == TapSwitchNoSwitch
 }
@@ -218,6 +222,10 @@ func (e *EventsRelayConfiguration) TapSwitchOnClosingTwoGroups() bool {
 
 func (e *EventsRelayConfiguration) TapSwitchOnAlert() uint8 {
 	return uint8(e.value &^ 0b1100)
+}
+
+func (e *EventsRelayConfiguration) SetTapSwitchOnAlert(value uint8) {
+	e.value = uint16(e.TapSwitchOnClosing()<<2 | value)
 }
 
 func (e *EventsRelayConfiguration) TapSwitchOnAlertNoSwitch() bool {
