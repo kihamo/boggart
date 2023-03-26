@@ -14,6 +14,14 @@ const (
 	AddressEventsRelayConfiguration  uint16 = 4
 	AddressSlaveIDAndBaudRate        uint16 = 5
 	AddressWirelessSensorCount       uint16 = 6
+	Counter1Slot1Configuration       uint16 = 123
+	Counter2Slot1Configuration       uint16 = 124
+	Counter1Slot2Configuration       uint16 = 125
+	Counter2Slot2Configuration       uint16 = 126
+	Counter1Slot3Configuration       uint16 = 127
+	Counter2Slot3Configuration       uint16 = 128
+	Counter1Slot4Configuration       uint16 = 129
+	Counter2Slot4Configuration       uint16 = 130
 )
 
 type Neptun struct {

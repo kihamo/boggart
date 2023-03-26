@@ -235,3 +235,27 @@ func (e *EventsRelayConfiguration) TapSwitchOnAlertSecondGroup() bool {
 func (e *EventsRelayConfiguration) TapSwitchOnAlertTwoGroups() bool {
 	return e.TapSwitchOnAlert() == TapSwitchTwoGroups
 }
+
+type CounterConfiguration struct {
+	value uint16
+}
+
+func (c *CounterConfiguration) Value() uint16 {
+	return c.value
+}
+
+func (c *CounterConfiguration) Enabled() bool {
+	return c.value&0b1 != 0
+}
+
+func (c *CounterConfiguration) Type() uint16 {
+	return c.value & 0b10
+}
+
+func (c *CounterConfiguration) Error() uint8 {
+	return uint8((c.value &^ 0b111111110011) >> 2)
+}
+
+func (c *CounterConfiguration) Step() uint8 {
+	return uint8(c.value >> 8)
+}

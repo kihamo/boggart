@@ -1,5 +1,9 @@
 package neptun
 
+import (
+	"errors"
+)
+
 func (n *Neptun) ModuleConfiguration() (*ModuleConfiguration, error) {
 	value, err := n.client.ReadHoldingRegistersUint16(AddressModuleConfiguration)
 
@@ -100,4 +104,56 @@ func (n *Neptun) SlaveIDAndBaudRate() (slaveId uint8, baudRate int, err error) {
 
 func (n *Neptun) WirelessSensorCount() (uint16, error) {
 	return n.client.ReadHoldingRegistersUint16(AddressWirelessSensorCount)
+}
+
+func (n *Neptun) CounterConfiguration(counter, slot int) (*CounterConfiguration, error) {
+	if counter < 1 || counter > 2 {
+		return nil, errors.New("wrong counter number, only between 1 and 2")
+	}
+
+	if slot < 1 || slot > 4 {
+		return nil, errors.New("wrong slot number, only between 1 and 4")
+	}
+
+	var address uint16
+
+	switch slot {
+	case 1:
+		if counter == 1 {
+			address = Counter1Slot1Configuration
+		} else {
+			address = Counter2Slot1Configuration
+		}
+
+	case 2:
+		if counter == 1 {
+			address = Counter1Slot2Configuration
+		} else {
+			address = Counter2Slot2Configuration
+		}
+
+	case 3:
+		if counter == 1 {
+			address = Counter1Slot3Configuration
+		} else {
+			address = Counter2Slot3Configuration
+		}
+
+	case 4:
+		if counter == 1 {
+			address = Counter1Slot4Configuration
+		} else {
+			address = Counter2Slot4Configuration
+		}
+	}
+
+	value, err := n.client.ReadHoldingRegistersUint16(address)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &CounterConfiguration{
+		value: value,
+	}, err
 }
