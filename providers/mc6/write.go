@@ -1,6 +1,8 @@
 package mc6
 
-import "time"
+import (
+	"time"
+)
 
 // FIXME:
 // HA на устройстве не срабатывает

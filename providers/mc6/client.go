@@ -4,12 +4,10 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"io"
-	"log"
 	"net/url"
 	"time"
 
-	"github.com/goburrow/modbus"
+	"github.com/kihamo/boggart/protocols/modbus"
 )
 
 const (
@@ -65,78 +63,23 @@ const (
 )
 
 type MC6 struct {
-	handler    modbus.ClientHandler
-	connection modbus.Client
-	options    options
+	client *modbus.Client
 }
 
-func New(address *url.URL, opts ...Option) *MC6 {
-	m := &MC6{
-		options: defaultOptions(),
+func New(address *url.URL, opts ...modbus.Option) *MC6 {
+	address.Scheme = "tcp"
+
+	return &MC6{
+		client: modbus.NewClient(address, opts...),
 	}
-
-	for _, opt := range opts {
-		opt.apply(&m.options)
-	}
-
-	switch address.Scheme {
-	default:
-		handler := modbus.NewTCPClientHandler(address.Host)
-		handler.SlaveId = m.options.slaveID
-		handler.Timeout = m.options.timeout
-		handler.IdleTimeout = m.options.idleTimeout
-
-		if m.options.logger != nil {
-			handler.Logger = log.New(m.options.logger, "", 0)
-		}
-
-		m.handler = handler
-	}
-
-	m.connection = modbus.NewClient(m.handler)
-
-	return m
 }
 
 func (m *MC6) Close() error {
-	if closer, ok := m.handler.(io.Closer); ok {
-		return closer.Close()
-	}
-
-	return nil
-}
-
-func (m *MC6) Read(address, quantity uint16) (response []byte, err error) {
-	for trie := uint8(1); trie <= m.options.maxTries; trie++ {
-		response, err = m.connection.ReadHoldingRegisters(address, quantity)
-		if err == nil {
-			break
-		}
-	}
-
-	return response, err
-}
-
-func (m *MC6) ReadUint16(address uint16) (value uint16, err error) {
-	response, err := m.Read(address, 1)
-	if err == nil {
-		return binary.BigEndian.Uint16(response), err
-	}
-
-	return value, err
-}
-
-func (m *MC6) ReadBool(address uint16) (bool, error) {
-	response, err := m.Read(address, 1)
-	if err != nil {
-		return false, err
-	}
-
-	return response[1] == 1, err
+	return m.client.Close()
 }
 
 func (m *MC6) ReadTemperature(address uint16) (float64, error) {
-	value, err := m.ReadUint16(address)
+	value, err := m.client.ReadHoldingRegistersUint16(address)
 	if err != nil {
 		return 0, err
 	}
@@ -162,7 +105,7 @@ func (m *MC6) ReadTemperatureUint(address uint16) (uint16, error) {
 }
 
 func (m *MC6) ReadDuration(address uint16) (time.Duration, error) {
-	value, err := m.ReadUint16(address)
+	value, err := m.client.ReadHoldingRegistersUint16(address)
 	if err != nil {
 		return 0, err
 	}
@@ -171,18 +114,12 @@ func (m *MC6) ReadDuration(address uint16) (time.Duration, error) {
 }
 
 func (m *MC6) Write(address, quantity uint16, payload []byte) (err error) {
-	var response []byte
+	response, err := m.client.WriteMultipleRegisters(address, quantity, payload)
 
-	for trie := uint8(1); trie <= m.options.maxTries; trie++ {
-		response, err = m.connection.WriteMultipleRegisters(address, quantity, payload)
+	if err == nil {
+		code := binary.BigEndian.Uint16(response)
 
-		if err == nil {
-			code := binary.BigEndian.Uint16(response)
-
-			if code == writeResponseSuccess {
-				break
-			}
-
+		if code != writeResponseSuccess {
 			err = fmt.Errorf("device return not success response %d", code)
 		}
 	}

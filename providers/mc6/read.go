@@ -15,7 +15,7 @@ func (m *MC6) FloorTemperature() (float64, error) {
 }
 
 func (m *MC6) Humidity() (uint16, error) {
-	value, err := m.ReadUint16(AddressHumidity)
+	value, err := m.client.ReadHoldingRegistersUint16(AddressHumidity)
 	if err != nil {
 		return 0, err
 	}
@@ -29,34 +29,34 @@ func (m *MC6) Humidity() (uint16, error) {
 
 // реле между HV - L замкнуто
 func (m *MC6) HeatingValve() (bool, error) {
-	return m.ReadBool(AddressHeatingValve)
+	return m.client.ReadHoldingRegistersBool(AddressHeatingValve)
 }
 
 // реле между СV - L замкнуто
 func (m *MC6) CoolingValve() (bool, error) {
-	return m.ReadBool(AddressCoolingValve)
+	return m.client.ReadHoldingRegistersBool(AddressCoolingValve)
 }
 
 // статус активации режима нагрева (реле замкнуто)
 func (m *MC6) HeatingOutput() (bool, error) {
-	return m.ReadBool(AddressHeatingOutput)
+	return m.client.ReadHoldingRegistersBool(AddressHeatingOutput)
 }
 
 // по факту не работает, всегда отдает 0 (возможно из-за невключения самой функции)
 func (m *MC6) WindowsOpen() (bool, error) {
-	return m.ReadBool(AddressWindowsOpen)
+	return m.client.ReadHoldingRegistersBool(AddressWindowsOpen)
 }
 
 func (m *MC6) HoldingFunction() (bool, error) {
-	return m.ReadBool(AddressHoldingFunction)
+	return m.client.ReadHoldingRegistersBool(AddressHoldingFunction)
 }
 
 func (m *MC6) FloorOverheat() (bool, error) {
-	return m.ReadBool(AddressFloorOverheat)
+	return m.client.ReadHoldingRegistersBool(AddressFloorOverheat)
 }
 
 func (m *MC6) DeviceType() (Device, error) {
-	value, err := m.ReadUint16(AddressDeviceType)
+	value, err := m.client.ReadHoldingRegistersUint16(AddressDeviceType)
 
 	if err != nil {
 		return 0, err
@@ -66,7 +66,7 @@ func (m *MC6) DeviceType() (Device, error) {
 }
 
 func (m *MC6) FanSpeedNumbers() (uint16, error) {
-	value, err := m.ReadUint16(AddressFanSpeedNumbers)
+	value, err := m.client.ReadHoldingRegistersUint16(AddressFanSpeedNumbers)
 
 	if err == nil {
 		switch value {
@@ -81,7 +81,7 @@ func (m *MC6) FanSpeedNumbers() (uint16, error) {
 }
 
 func (m *MC6) SystemError() (bool, error) {
-	value, err := m.ReadUint16(AddressSystemError)
+	value, err := m.client.ReadHoldingRegistersUint16(AddressSystemError)
 	if err != nil {
 		return false, err
 	}
@@ -92,7 +92,7 @@ func (m *MC6) SystemError() (bool, error) {
 
 // FIXME: по факту не работает, на HA всегда 80 на FCU всегда 0
 func (m *MC6) TemperatureFormat() (uint16, error) {
-	value, err := m.ReadUint16(AddressTemperatureFormat)
+	value, err := m.client.ReadHoldingRegistersUint16(AddressTemperatureFormat)
 
 	// HA always return 80 for C
 	if err == nil && value != 1 {
@@ -103,15 +103,15 @@ func (m *MC6) TemperatureFormat() (uint16, error) {
 }
 
 func (m *MC6) Status() (bool, error) {
-	return m.ReadBool(AddressStatus)
+	return m.client.ReadHoldingRegistersBool(AddressStatus)
 }
 
 func (m *MC6) SystemMode() (uint16, error) {
-	return m.ReadUint16(AddressSystemMode)
+	return m.client.ReadHoldingRegistersUint16(AddressSystemMode)
 }
 
 func (m *MC6) FanSpeed() (uint16, error) {
-	return m.ReadUint16(AddressFanSpeed)
+	return m.client.ReadHoldingRegistersUint16(AddressFanSpeed)
 }
 
 func (m *MC6) TargetTemperature() (float64, error) {
@@ -119,7 +119,7 @@ func (m *MC6) TargetTemperature() (float64, error) {
 }
 
 func (m *MC6) Away() (bool, error) {
-	return m.ReadBool(AddressAway)
+	return m.client.ReadHoldingRegistersBool(AddressAway)
 }
 
 func (m *MC6) AwayTemperature() (uint16, error) {
@@ -131,7 +131,7 @@ func (m *MC6) HoldingTime() (time.Duration, error) {
 }
 
 func (m *MC6) HoldingTemperatureAndTime() (float64, time.Duration, error) {
-	response, err := m.Read(AddressHoldingTemperatureAndTime, 2)
+	response, err := m.client.ReadHoldingRegisters(AddressHoldingTemperatureAndTime, 2)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -149,23 +149,23 @@ func (m *MC6) HoldingTemperature() (uint16, error) {
 }
 
 func (m *MC6) PanelLock() (bool, error) {
-	return m.ReadBool(AddressPanelLock)
+	return m.client.ReadHoldingRegistersBool(AddressPanelLock)
 }
 
 func (m *MC6) PanelLockPin1() (uint16, error) {
-	return m.ReadUint16(AddressPanelLockPin1)
+	return m.client.ReadHoldingRegistersUint16(AddressPanelLockPin1)
 }
 
 func (m *MC6) PanelLockPin2() (uint16, error) {
-	return m.ReadUint16(AddressPanelLockPin2)
+	return m.client.ReadHoldingRegistersUint16(AddressPanelLockPin2)
 }
 
 func (m *MC6) PanelLockPin3() (uint16, error) {
-	return m.ReadUint16(AddressPanelLockPin3)
+	return m.client.ReadHoldingRegistersUint16(AddressPanelLockPin3)
 }
 
 func (m *MC6) PanelLockPin4() (uint16, error) {
-	return m.ReadUint16(AddressPanelLockPin4)
+	return m.client.ReadHoldingRegistersUint16(AddressPanelLockPin4)
 }
 
 func (m *MC6) TargetTemperatureMaximum() (uint16, error) {

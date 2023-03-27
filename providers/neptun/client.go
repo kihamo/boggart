@@ -55,3 +55,7 @@ func New(address *url.URL, opts ...modbus.Option) *Neptun {
 		client: modbus.NewClient(address, opts...),
 	}
 }
+
+func (n *Neptun) Close() error {
+	return n.client.Close()
+}

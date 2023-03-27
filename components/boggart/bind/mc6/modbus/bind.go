@@ -42,10 +42,10 @@ func (b *Bind) Provider() (provider *mc6.MC6) {
 
 		b.provider = mc6.New(
 			&b.config().DSN.URL,
-			mc6.WithSlaveID(cfg.ConnectionSlaveID),
-			mc6.WithTimeout(cfg.ConnectionTimeout),
-			mc6.WithIdleTimeout(cfg.ConnectionIdleTimeout),
-			mc6.WithLogger(modbus.NewLogger(func(s string) {
+			modbus.WithSlaveID(cfg.ConnectionSlaveID),
+			modbus.WithTimeout(cfg.ConnectionTimeout),
+			modbus.WithIdleTimeout(cfg.ConnectionIdleTimeout),
+			modbus.WithLogger(modbus.NewLogger(func(s string) {
 				b.Logger().Debug(s)
 			})),
 		)

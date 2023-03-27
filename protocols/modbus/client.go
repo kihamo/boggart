@@ -118,6 +118,15 @@ func (c *Client) ReadHoldingRegistersUint16(address uint16) (value uint16, err e
 	return value, err
 }
 
+func (c *Client) ReadHoldingRegistersBool(address uint16) (value bool, err error) {
+	response, err := c.ReadHoldingRegisters(address, 1)
+	if err == nil {
+		return response[1] == 1, err
+	}
+
+	return value, err
+}
+
 func (c *Client) WriteSingleRegister(address, payload uint16) ([]byte, error) {
 	return c.CallWithTriesLimit(func() ([]byte, error) {
 		return c.Client.WriteSingleRegister(address, payload)
