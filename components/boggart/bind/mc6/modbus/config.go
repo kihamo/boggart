@@ -55,14 +55,13 @@ func (t Type) ConfigDefaults() interface{} {
 	var prefix mqtt.Topic = boggart.ComponentName + "/mc6/+/"
 
 	return &Config{
-		ProbesConfig:          probesConfig,
-		LoggerConfig:          di.LoggerConfigDefaults(),
-		ConnectionSlaveID:     0x1,
-		ConnectionTimeout:     time.Second,
-		ConnectionIdleTimeout: time.Minute,
-		SensorUpdaterInterval: time.Minute,
-		StatusUpdaterInterval: time.Second * 30,
-
+		ProbesConfig:                 probesConfig,
+		LoggerConfig:                 di.LoggerConfigDefaults(),
+		ConnectionSlaveID:            0x1,
+		ConnectionTimeout:            time.Second,
+		ConnectionIdleTimeout:        time.Minute,
+		SensorUpdaterInterval:        time.Minute,
+		StatusUpdaterInterval:        time.Second * 30,
 		TopicDeviceType:              prefix + "type",
 		TopicRoomTemperature:         prefix + "temperature/room/state",
 		TopicFloorTemperature:        prefix + "temperature/floor/state",

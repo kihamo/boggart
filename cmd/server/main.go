@@ -27,6 +27,7 @@ import (
 	_ "github.com/kihamo/boggart/components/boggart/bind/mercury"
 	_ "github.com/kihamo/boggart/components/boggart/bind/mikrotik"
 	_ "github.com/kihamo/boggart/components/boggart/bind/myheat"
+	_ "github.com/kihamo/boggart/components/boggart/bind/neptun"
 	_ "github.com/kihamo/boggart/components/boggart/bind/network"
 	_ "github.com/kihamo/boggart/components/boggart/bind/nut"
 	_ "github.com/kihamo/boggart/components/boggart/bind/octoprint"

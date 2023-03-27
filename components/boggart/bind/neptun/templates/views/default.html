@@ -1,0 +1,66 @@
+{{ define "page" }}
+<form role="form" action="?" method="post" id="settings" data-toggle="validator">
+    <table class="table dt-responsive nowrap" style="width:100%">
+        <thead>
+        <tr>
+            <th class="md-col-1">{{ i18n "Option" . }}</th>
+            <th>{{ i18n "Value" . }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>{{ i18n "Floor washing" . }}</td>
+            <td>{{ if .floor_washing }}{{ i18n "yes" . }}{{ else }}{{ i18n "no" . }}{{ end }}</td>
+        </tr>
+        <tr>
+            <td>{{ i18n "First group alert" . }}</td>
+            <td>{{ if .first_group_alert }}{{ i18n "yes" . }}{{ else }}{{ i18n "no" . }}{{ end }}</td>
+        </tr>
+        <tr>
+            <td>{{ i18n "Second group alert" . }}</td>
+            <td>{{ if .second_group_alert }}{{ i18n "yes" . }}{{ else }}{{ i18n "no" . }}{{ end }}</td>
+        </tr>
+        <tr>
+            <td>{{ i18n "Wireless sensor low battery" . }}</td>
+            <td>{{ if .wireless_sensor_low_battery }}{{ i18n "yes" . }}{{ else }}{{ i18n "no" . }}{{ end }}</td>
+        </tr>
+        <tr>
+            <td>{{ i18n "Wireless sensor loss" . }}</td>
+            <td>{{ if .wireless_sensor_loss }}{{ i18n "yes" . }}{{ else }}{{ i18n "no" . }}{{ end }}</td>
+        </tr>
+        <tr>
+            <td>{{ i18n "First group tap closing" . }}</td>
+            <td>{{ if .first_group_tap_closing }}{{ i18n "yes" . }}{{ else }}{{ i18n "no" . }}{{ end }}</td>
+        </tr>
+        <tr>
+            <td>{{ i18n "Second group tap closing" . }}</td>
+            <td>{{ if .second_group_tap_closing }}{{ i18n "yes" . }}{{ else }}{{ i18n "no" . }}{{ end }}</td>
+        </tr>
+        <tr>
+            <td>{{ i18n "Wireless sensor pairing mode" . }}</td>
+            <td>{{ if .wireless_sensor_pairing_mode }}{{ i18n "yes" . }}{{ else }}{{ i18n "no" . }}{{ end }}</td>
+        </tr>
+        <tr>
+            <td>{{ i18n "First group tap state" . }}</td>
+            <td>{{ if .first_group_tap_state }}{{ i18n "yes" . }}{{ else }}{{ i18n "no" . }}{{ end }}</td>
+        </tr>
+        <tr>
+            <td>{{ i18n "Second group tap state" . }}</td>
+            <td>{{ if .second_group_tap_state }}{{ i18n "yes" . }}{{ else }}{{ i18n "no" . }}{{ end }}</td>
+        </tr>
+        <tr>
+            <td>{{ i18n "Two groups mode" . }}</td>
+            <td>{{ if .two_groups_mode }}{{ i18n "yes" . }}{{ else }}{{ i18n "no" . }}{{ end }}</td>
+        </tr>
+        <tr>
+            <td>{{ i18n "Taps closing on sensor loss" . }}</td>
+            <td>{{ if .taps_closing_on_sensor_loss }}{{ i18n "yes" . }}{{ else }}{{ i18n "no" . }}{{ end }}</td>
+        </tr>
+        <tr>
+            <td>{{ i18n "Keyboard lock" . }}</td>
+            <td>{{ if .keyboard_lock }}{{ i18n "yes" . }}{{ else }}{{ i18n "no" . }}{{ end }}</td>
+        </tr>
+        </tbody>
+    </table>
+</form>
+{{ end }}
