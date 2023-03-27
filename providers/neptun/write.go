@@ -5,6 +5,16 @@ func (n *Neptun) SetModuleConfiguration(cfg *ModuleConfiguration) (err error) {
 	return err
 }
 
+func (n *Neptun) SetInputLinesConfiguration(l1, l2, l3, l4 *InputLinesConfiguration) (err error) {
+	_, err = n.client.WriteSingleRegisterUint16Bytes(AddressInputLines12Configuration, []byte{l1.Value(), l2.Value()})
+	if err != nil {
+		return err
+	}
+
+	_, err = n.client.WriteSingleRegisterUint16Bytes(AddressInputLines34Configuration, []byte{l3.Value(), l4.Value()})
+	return err
+}
+
 func (n *Neptun) SetEventsRelayConfiguration(cfg *EventsRelayConfiguration) (err error) {
 	_, err = n.client.WriteSingleRegister(AddressEventsRelayConfiguration, cfg.value)
 	return err

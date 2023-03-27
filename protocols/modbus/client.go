@@ -100,12 +100,6 @@ func (c *Client) ReadHoldingRegisters(address, quantity uint16) ([]byte, error) 
 	})
 }
 
-func (c *Client) WriteMultipleRegisters(address, quantity uint16, payload []byte) ([]byte, error) {
-	return c.CallWithTriesLimit(func() ([]byte, error) {
-		return c.Client.WriteMultipleRegisters(address, quantity, payload)
-	})
-}
-
 func (c *Client) ReadHoldingRegistersUint8(address uint16) (value uint8, err error) {
 	response, err := c.ReadHoldingRegisters(address, 1)
 	if err == nil {
@@ -122,4 +116,20 @@ func (c *Client) ReadHoldingRegistersUint16(address uint16) (value uint16, err e
 	}
 
 	return value, err
+}
+
+func (c *Client) WriteSingleRegister(address, payload uint16) ([]byte, error) {
+	return c.CallWithTriesLimit(func() ([]byte, error) {
+		return c.Client.WriteSingleRegister(address, payload)
+	})
+}
+
+func (c *Client) WriteSingleRegisterUint16Bytes(address uint16, payload []byte) ([]byte, error) {
+	return c.WriteSingleRegister(address, binary.BigEndian.Uint16(payload))
+}
+
+func (c *Client) WriteMultipleRegisters(address, quantity uint16, payload []byte) ([]byte, error) {
+	return c.CallWithTriesLimit(func() ([]byte, error) {
+		return c.Client.WriteMultipleRegisters(address, quantity, payload)
+	})
 }

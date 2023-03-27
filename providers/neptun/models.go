@@ -1,9 +1,5 @@
 package neptun
 
-import (
-	"fmt"
-)
-
 const (
 	moduleConfigurationFloorWashing uint16 = 1 << iota
 	moduleConfigurationFirstGroupAlert
@@ -151,6 +147,14 @@ func (i *InputLinesConfiguration) Value() uint8 {
 	return i.value
 }
 
+func (i *InputLinesConfiguration) Tap() uint8 {
+	return i.value &^ 0b1100
+}
+
+func (i *InputLinesConfiguration) SetTap(value uint8) {
+	i.value = (i.Type() << 2) | value
+}
+
 func (i *InputLinesConfiguration) TapFirstGroup() bool {
 	return i.value&inputLinesConfigurationTapFirstGroup != 0
 }
@@ -160,9 +164,15 @@ func (i *InputLinesConfiguration) TapSecondGroup() bool {
 }
 
 func (i *InputLinesConfiguration) TapTwoGroup() bool {
-	fmt.Printf("%16b %16b ----\n", i.value, i.value&inputLinesConfigurationTapTwoGroup)
-
 	return i.value&inputLinesConfigurationTapTwoGroup == 0b11
+}
+
+func (i *InputLinesConfiguration) Type() uint8 {
+	return i.value >> 2
+}
+
+func (i *InputLinesConfiguration) SetType(value uint8) {
+	i.value = (value << 2) | i.Tap()
 }
 
 func (i *InputLinesConfiguration) Button() bool {
