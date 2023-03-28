@@ -2,6 +2,7 @@ package tplink
 
 import (
 	"context"
+
 	"github.com/kihamo/boggart/providers/tplink/internal"
 )
 

@@ -16,14 +16,15 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"github.com/kihamo/boggart/atomic"
-	"github.com/kihamo/boggart/performance"
-	connection "github.com/kihamo/boggart/protocols/http"
 	"net"
 	"net/http"
 	"net/url"
 	"strconv"
 	"sync"
+
+	"github.com/kihamo/boggart/atomic"
+	"github.com/kihamo/boggart/performance"
+	connection "github.com/kihamo/boggart/protocols/http"
 )
 
 const (
