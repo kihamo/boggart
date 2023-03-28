@@ -1,6 +1,7 @@
 package neptun
 
 import (
+	"errors"
 	"net/url"
 
 	"github.com/kihamo/boggart/protocols/modbus"
@@ -58,4 +59,54 @@ func New(address *url.URL, opts ...modbus.Option) *Neptun {
 
 func (n *Neptun) Close() error {
 	return n.client.Close()
+}
+
+func (n *Neptun) counterAddresses(counter, slot int) (addressHigh uint16, addressLow uint16, _ error) {
+	if counter < 1 || counter > 2 {
+		return 0, 0, errors.New("wrong counter number, only between 1 and 2")
+	}
+
+	if slot < 1 || slot > 4 {
+		return 0, 0, errors.New("wrong slot number, only between 1 and 4")
+	}
+
+	switch slot {
+	case 1:
+		if counter == 1 {
+			addressHigh = Counter1Slot1HighValue
+			addressLow = Counter1Slot1LowValue
+		} else {
+			addressHigh = Counter2Slot1HighValue
+			addressLow = Counter2Slot1LowValue
+		}
+
+	case 2:
+		if counter == 1 {
+			addressHigh = Counter1Slot2HighValue
+			addressLow = Counter1Slot2LowValue
+		} else {
+			addressHigh = Counter2Slot2HighValue
+			addressLow = Counter2Slot2LowValue
+		}
+
+	case 3:
+		if counter == 1 {
+			addressHigh = Counter1Slot3HighValue
+			addressLow = Counter1Slot3LowValue
+		} else {
+			addressHigh = Counter2Slot3HighValue
+			addressLow = Counter2Slot3LowValue
+		}
+
+	case 4:
+		if counter == 1 {
+			addressHigh = Counter1Slot4HighValue
+			addressLow = Counter1Slot4LowValue
+		} else {
+			addressHigh = Counter2Slot4HighValue
+			addressLow = Counter2Slot4LowValue
+		}
+	}
+
+	return addressHigh, addressLow, nil
 }

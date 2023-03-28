@@ -107,52 +107,9 @@ func (n *Neptun) WirelessSensorCount() (uint16, error) {
 }
 
 func (n *Neptun) CounterValue(counter, slot int) (uint16, uint16, error) {
-	if counter < 1 || counter > 2 {
-		return 0, 0, errors.New("wrong counter number, only between 1 and 2")
-	}
-
-	if slot < 1 || slot > 4 {
-		return 0, 0, errors.New("wrong slot number, only between 1 and 4")
-	}
-
-	var addressHigh, addressLow uint16
-
-	switch slot {
-	case 1:
-		if counter == 1 {
-			addressHigh = Counter1Slot1HighValue
-			addressLow = Counter1Slot1LowValue
-		} else {
-			addressHigh = Counter2Slot1HighValue
-			addressLow = Counter2Slot1LowValue
-		}
-
-	case 2:
-		if counter == 1 {
-			addressHigh = Counter1Slot2HighValue
-			addressLow = Counter1Slot2LowValue
-		} else {
-			addressHigh = Counter2Slot2HighValue
-			addressLow = Counter2Slot2LowValue
-		}
-
-	case 3:
-		if counter == 1 {
-			addressHigh = Counter1Slot3HighValue
-			addressLow = Counter1Slot3LowValue
-		} else {
-			addressHigh = Counter2Slot3HighValue
-			addressLow = Counter2Slot3LowValue
-		}
-
-	case 4:
-		if counter == 1 {
-			addressHigh = Counter1Slot4HighValue
-			addressLow = Counter1Slot4LowValue
-		} else {
-			addressHigh = Counter2Slot4HighValue
-			addressLow = Counter2Slot4LowValue
-		}
+	addressHigh, addressLow, err := n.counterAddresses(counter, slot)
+	if err != nil {
+		return 0, 0, err
 	}
 
 	valueHigh, err := n.client.ReadHoldingRegistersUint16(addressHigh)

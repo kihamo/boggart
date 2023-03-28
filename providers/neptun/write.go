@@ -19,3 +19,18 @@ func (n *Neptun) SetEventsRelayConfiguration(cfg *EventsRelayConfiguration) (err
 	_, err = n.client.WriteSingleRegister(AddressEventsRelayConfiguration, cfg.value)
 	return err
 }
+
+func (n *Neptun) SetCounterValue(counter, slot int, valueHigh, valueLow uint16) error {
+	addressHigh, addressLow, err := n.counterAddresses(counter, slot)
+	if err != nil {
+		return err
+	}
+
+	_, err = n.client.WriteSingleRegister(addressHigh, valueHigh)
+	if err != nil {
+		return err
+	}
+
+	_, err = n.client.WriteSingleRegister(addressLow, valueLow)
+	return err
+}
