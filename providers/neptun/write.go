@@ -20,6 +20,16 @@ func (n *Neptun) SetEventsRelayConfiguration(cfg *EventsRelayConfiguration) (err
 	return err
 }
 
+func (n *Neptun) SetWirelessSensorConfiguration(number int, eventAffectedGroup uint) (err error) {
+	address, err := n.wirelessSensorConfigurationAddress(number)
+	if err != nil {
+		return err
+	}
+
+	_, err = n.client.WriteSingleRegister(address, uint16(eventAffectedGroup))
+	return err
+}
+
 func (n *Neptun) SetCounterValue(counter, slot int, valueHigh, valueLow uint16) error {
 	addressHigh, addressLow, err := n.counterValueAddresses(counter, slot)
 	if err != nil {

@@ -90,6 +90,20 @@ func (n *Neptun) WirelessSensorCount() (uint16, error) {
 	return n.client.ReadHoldingRegistersUint16(AddressWirelessSensorCount)
 }
 
+func (n *Neptun) WirelessSensorConfiguration(number int) (uint, error) {
+	address, err := n.wirelessSensorConfigurationAddress(number)
+	if err != nil {
+		return 0, err
+	}
+
+	value, err := n.client.ReadHoldingRegistersUint8(address)
+	if err != nil {
+		return 0, err
+	}
+
+	return uint(value), err
+}
+
 func (n *Neptun) WirelessSensorStatus(number int) (*WirelessSensorStatus, error) {
 	address, err := n.wirelessSensorStatusAddress(number)
 	if err != nil {
