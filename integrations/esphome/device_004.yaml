@@ -71,9 +71,28 @@ sensor:
 #      name: "Scale Impedance"
 #    clear_impedance: true
 
+#  - platform: pvvx_mithermometer
+#    mac_address: !secret device_004_xiaomi_temperature_mac
+#    temperature:
+#      id: "thermometer_temperature"
+#      name: "PVVX Temperature"
+#    humidity:
+#      id: "thermometer_humidity"
+#      name: "PVVX Humidity"
+#    battery_level:
+#      id: "thermometer_battery_level"
+#      name: "PVVX Battery-Level"
+#    battery_voltage:
+#      id: "thermometer_battery_voltage"
+#      name: "PVVX Battery-Voltage"
+#    signal_strength:
+#      id: "thermometer_signal_strength"
+#      name: "PVVX Signal"
+
 switch:
   - platform: gpio
     id: "aquastorozh_enabled"
+    name: "Aquastorozh enable"
     pin:
       number: GPIO19
       mode: OUTPUT
@@ -85,6 +104,7 @@ switch:
     internal: true
   - platform: gpio
     id: "aquastorozh_disable"
+    name: "Aquastorozh disable"
     pin:
       number: GPIO21
       mode: OUTPUT
@@ -159,8 +179,10 @@ switch:
 
 #esp32_ble_tracker:
 #  scan_parameters:
-#    duration: 10s
+#    interval: 5s
+#    window: 5s
 #    active: false
+#    duration: 10s
 #  on_ble_advertise:
 #    - then:
 #        - lambda: |-

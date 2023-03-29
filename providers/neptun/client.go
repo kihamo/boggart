@@ -61,7 +61,7 @@ func (n *Neptun) Close() error {
 	return n.client.Close()
 }
 
-func (n *Neptun) counterAddresses(counter, slot int) (addressHigh uint16, addressLow uint16, _ error) {
+func (n *Neptun) counterValueAddresses(counter, slot int) (addressHigh, addressLow uint16, _ error) {
 	if counter < 1 || counter > 2 {
 		return 0, 0, errors.New("wrong counter number, only between 1 and 2")
 	}
@@ -109,4 +109,46 @@ func (n *Neptun) counterAddresses(counter, slot int) (addressHigh uint16, addres
 	}
 
 	return addressHigh, addressLow, nil
+}
+
+func (n *Neptun) counterConfigurationAddress(counter, slot int) (address uint16, _ error) {
+	if counter < 1 || counter > 2 {
+		return 0, errors.New("wrong counter number, only between 1 and 2")
+	}
+
+	if slot < 1 || slot > 4 {
+		return 0, errors.New("wrong slot number, only between 1 and 4")
+	}
+
+	switch slot {
+	case 1:
+		if counter == 1 {
+			address = Counter1Slot1Configuration
+		} else {
+			address = Counter2Slot1Configuration
+		}
+
+	case 2:
+		if counter == 1 {
+			address = Counter1Slot2Configuration
+		} else {
+			address = Counter2Slot2Configuration
+		}
+
+	case 3:
+		if counter == 1 {
+			address = Counter1Slot3Configuration
+		} else {
+			address = Counter2Slot3Configuration
+		}
+
+	case 4:
+		if counter == 1 {
+			address = Counter1Slot4Configuration
+		} else {
+			address = Counter2Slot4Configuration
+		}
+	}
+
+	return address, nil
 }

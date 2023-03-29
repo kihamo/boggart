@@ -1,9 +1,5 @@
 package neptun
 
-import (
-	"errors"
-)
-
 func (n *Neptun) ModuleConfiguration() (*ModuleConfiguration, error) {
 	value, err := n.client.ReadHoldingRegistersUint16(AddressModuleConfiguration)
 
@@ -11,30 +7,20 @@ func (n *Neptun) ModuleConfiguration() (*ModuleConfiguration, error) {
 		return nil, err
 	}
 
-	return &ModuleConfiguration{
-		value: value,
-	}, err
+	return NewModuleConfiguration(uint(value)), err
 }
 
 func (n *Neptun) InputLinesConfiguration() (l1, l2, l3, l4 *InputLinesConfiguration, err error) {
 	response, err := n.client.ReadHoldingRegisters(AddressInputLines12Configuration, 1)
 	if err == nil {
-		l1 = &InputLinesConfiguration{
-			value: response[0],
-		}
-		l2 = &InputLinesConfiguration{
-			value: response[1],
-		}
+		l1 = NewInputLinesConfiguration(uint(response[0]))
+		l2 = NewInputLinesConfiguration(uint(response[1]))
 	}
 
 	response, err = n.client.ReadHoldingRegisters(AddressInputLines34Configuration, 1)
 	if err == nil {
-		l3 = &InputLinesConfiguration{
-			value: response[0],
-		}
-		l4 = &InputLinesConfiguration{
-			value: response[1],
-		}
+		l3 = NewInputLinesConfiguration(uint(response[0]))
+		l4 = NewInputLinesConfiguration(uint(response[1]))
 	}
 
 	return l1, l2, l3, l4, err
@@ -60,9 +46,7 @@ func (n *Neptun) EventsRelayConfiguration() (*EventsRelayConfiguration, error) {
 		return nil, err
 	}
 
-	return &EventsRelayConfiguration{
-		value: value,
-	}, err
+	return NewEventsRelayConfiguration(uint(value)), err
 }
 
 func (n *Neptun) SlaveIDAndBaudRate() (slaveId uint8, baudRate int, err error) {
@@ -107,7 +91,7 @@ func (n *Neptun) WirelessSensorCount() (uint16, error) {
 }
 
 func (n *Neptun) CounterValue(counter, slot int) (uint16, uint16, error) {
-	addressHigh, addressLow, err := n.counterAddresses(counter, slot)
+	addressHigh, addressLow, err := n.counterValueAddresses(counter, slot)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -126,44 +110,11 @@ func (n *Neptun) CounterValue(counter, slot int) (uint16, uint16, error) {
 }
 
 func (n *Neptun) CounterConfiguration(counter, slot int) (*CounterConfiguration, error) {
-	if counter < 1 || counter > 2 {
-		return nil, errors.New("wrong counter number, only between 1 and 2")
-	}
-
-	if slot < 1 || slot > 4 {
-		return nil, errors.New("wrong slot number, only between 1 and 4")
-	}
-
 	var address uint16
 
-	switch slot {
-	case 1:
-		if counter == 1 {
-			address = Counter1Slot1Configuration
-		} else {
-			address = Counter2Slot1Configuration
-		}
-
-	case 2:
-		if counter == 1 {
-			address = Counter1Slot2Configuration
-		} else {
-			address = Counter2Slot2Configuration
-		}
-
-	case 3:
-		if counter == 1 {
-			address = Counter1Slot3Configuration
-		} else {
-			address = Counter2Slot3Configuration
-		}
-
-	case 4:
-		if counter == 1 {
-			address = Counter1Slot4Configuration
-		} else {
-			address = Counter2Slot4Configuration
-		}
+	address, err := n.counterConfigurationAddress(counter, slot)
+	if err != nil {
+		return nil, err
 	}
 
 	value, err := n.client.ReadHoldingRegistersUint16(address)
@@ -172,7 +123,5 @@ func (n *Neptun) CounterConfiguration(counter, slot int) (*CounterConfiguration,
 		return nil, err
 	}
 
-	return &CounterConfiguration{
-		value: value,
-	}, err
+	return NewCounterConfiguration(uint(value)), err
 }
