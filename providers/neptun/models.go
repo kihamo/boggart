@@ -334,6 +334,44 @@ func (e *EventsRelayConfiguration) TapSwitchOnAlertTwoGroups() bool {
 	return e.TapSwitchOnAlert() == TapSwitchTwoGroups
 }
 
+type WirelessSensorStatus struct {
+	alert        bool
+	lowBattery   bool
+	missed       bool
+	link         uint
+	batteryLevel uint
+}
+
+func NewWirelessSensorStatus(value uint) *WirelessSensorStatus {
+	return &WirelessSensorStatus{
+		alert:        value&0b1 != 0,
+		lowBattery:   value&0b10 != 0,
+		missed:       value&0b100 != 0,
+		link:         value & 0b111000,
+		batteryLevel: value & 0b1111111100000000,
+	}
+}
+
+func (s *WirelessSensorStatus) Alert() bool {
+	return s.alert
+}
+
+func (s *WirelessSensorStatus) LowBattery() bool {
+	return s.lowBattery
+}
+
+func (s *WirelessSensorStatus) Missed() bool {
+	return s.missed
+}
+
+func (s *WirelessSensorStatus) Link() uint {
+	return s.link
+}
+
+func (s *WirelessSensorStatus) BatteryLevel() uint {
+	return s.batteryLevel
+}
+
 const (
 	CounterTypeBasic uint = iota
 	CounterTypeNamur
