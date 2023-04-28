@@ -21,7 +21,7 @@ func init() {
 		BillContentType: "image/png",
 	})
 
-	link, _ = url.Parse("https://api.sm-center.ru")
+	link, _ = url.Parse("https://gkh-center.ru/vremya")
 	boggart.RegisterBindType("smcenter:hashdomru", Type{
 		Link:            link,
 		BaseURL:         "/vremya/",
