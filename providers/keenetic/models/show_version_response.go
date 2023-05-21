@@ -12,10 +12,10 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// VersionResponse version response
+// ShowVersionResponse show version response
 //
-// swagger:model VersionResponse
-type VersionResponse struct {
+// swagger:model ShowVersionResponse
+type ShowVersionResponse struct {
 
 	// arch
 	Arch string `json:"arch,omitempty"`
@@ -30,18 +30,18 @@ type VersionResponse struct {
 	Title string `json:"title,omitempty"`
 }
 
-// Validate validates this version response
-func (m *VersionResponse) Validate(formats strfmt.Registry) error {
+// Validate validates this show version response
+func (m *ShowVersionResponse) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-// ContextValidate validates this version response based on context it is used
-func (m *VersionResponse) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+// ContextValidate validates this show version response based on context it is used
+func (m *ShowVersionResponse) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (m *VersionResponse) MarshalBinary() ([]byte, error) {
+func (m *ShowVersionResponse) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -49,8 +49,8 @@ func (m *VersionResponse) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *VersionResponse) UnmarshalBinary(b []byte) error {
-	var res VersionResponse
+func (m *ShowVersionResponse) UnmarshalBinary(b []byte) error {
+	var res ShowVersionResponse
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

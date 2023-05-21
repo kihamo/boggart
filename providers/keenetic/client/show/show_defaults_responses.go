@@ -15,22 +15,22 @@ import (
 	"github.com/kihamo/boggart/providers/keenetic/models"
 )
 
-// ShowVersionReader is a Reader for the ShowVersion structure.
-type ShowVersionReader struct {
+// ShowDefaultsReader is a Reader for the ShowDefaults structure.
+type ShowDefaultsReader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *ShowVersionReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *ShowDefaultsReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 	case 200:
-		result := NewShowVersionOK()
+		result := NewShowDefaultsOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
 		return result, nil
 	case 401:
-		result := NewShowVersionUnauthorized()
+		result := NewShowDefaultsUnauthorized()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -40,29 +40,29 @@ func (o *ShowVersionReader) ReadResponse(response runtime.ClientResponse, consum
 	}
 }
 
-// NewShowVersionOK creates a ShowVersionOK with default headers values
-func NewShowVersionOK() *ShowVersionOK {
-	return &ShowVersionOK{}
+// NewShowDefaultsOK creates a ShowDefaultsOK with default headers values
+func NewShowDefaultsOK() *ShowDefaultsOK {
+	return &ShowDefaultsOK{}
 }
 
-/* ShowVersionOK describes a response with status code 200, with default header values.
+/* ShowDefaultsOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
-type ShowVersionOK struct {
-	Payload *models.ShowVersionResponse
+type ShowDefaultsOK struct {
+	Payload *models.ShowDefaultsResponse
 }
 
-func (o *ShowVersionOK) Error() string {
-	return fmt.Sprintf("[GET /rci/show/version][%d] showVersionOK  %+v", 200, o.Payload)
+func (o *ShowDefaultsOK) Error() string {
+	return fmt.Sprintf("[GET /rci/show/defaults][%d] showDefaultsOK  %+v", 200, o.Payload)
 }
-func (o *ShowVersionOK) GetPayload() *models.ShowVersionResponse {
+func (o *ShowDefaultsOK) GetPayload() *models.ShowDefaultsResponse {
 	return o.Payload
 }
 
-func (o *ShowVersionOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *ShowDefaultsOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.ShowVersionResponse)
+	o.Payload = new(models.ShowDefaultsResponse)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -72,26 +72,26 @@ func (o *ShowVersionOK) readResponse(response runtime.ClientResponse, consumer r
 	return nil
 }
 
-// NewShowVersionUnauthorized creates a ShowVersionUnauthorized with default headers values
-func NewShowVersionUnauthorized() *ShowVersionUnauthorized {
-	return &ShowVersionUnauthorized{}
+// NewShowDefaultsUnauthorized creates a ShowDefaultsUnauthorized with default headers values
+func NewShowDefaultsUnauthorized() *ShowDefaultsUnauthorized {
+	return &ShowDefaultsUnauthorized{}
 }
 
-/* ShowVersionUnauthorized describes a response with status code 401, with default header values.
+/* ShowDefaultsUnauthorized describes a response with status code 401, with default header values.
 
 Unauthorized operation
 */
-type ShowVersionUnauthorized struct {
+type ShowDefaultsUnauthorized struct {
 	WWWAuthenticate string
 	XNDMChallenge   string
 	XNDMRealm       string
 }
 
-func (o *ShowVersionUnauthorized) Error() string {
-	return fmt.Sprintf("[GET /rci/show/version][%d] showVersionUnauthorized ", 401)
+func (o *ShowDefaultsUnauthorized) Error() string {
+	return fmt.Sprintf("[GET /rci/show/defaults][%d] showDefaultsUnauthorized ", 401)
 }
 
-func (o *ShowVersionUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *ShowDefaultsUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	// hydrates response header WWW-Authenticate
 	hdrWWWAuthenticate := response.GetHeader("WWW-Authenticate")

@@ -38,6 +38,18 @@ paths:
       responses:
         200:
           description: "Successful operation"
+  /rci/show/defaults:
+    get:
+      operationId: "showDefaults"
+      tags:
+        - "show"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/ShowDefaultsResponse"
+        401:
+          $ref: "#/responses/Unauthorized"
   /rci/show/version:
     get:
       operationId: "showVersion"
@@ -47,7 +59,7 @@ paths:
         200:
           description: "Successful operation"
           schema:
-            $ref: "#/definitions/VersionResponse"
+            $ref: "#/definitions/ShowVersionResponse"
         401:
           $ref: "#/responses/Unauthorized"
 
@@ -69,7 +81,39 @@ definitions:
       continued:
         type: "boolean"
 
-  VersionResponse:
+  ShowDefaultsResponse:
+    type: "object"
+    properties:
+      servicetag:
+        type: "string"
+      servicehost:
+        type: "string"
+      servicepass:
+        type: "string"
+      wlanssid:
+        type: "string"
+      wlankey:
+        type: "string"
+      wlanwps:
+        type: "string"
+      country:
+        type: "string"
+      ndmhwid:
+        type: "string"
+      product:
+        type: "string"
+      ctrlsum:
+        type: "string"
+      serial:
+        type: "string"
+      signature:
+        type: "string"
+      integrity:
+        type: "string"
+      locked:
+        type: "boolean"
+
+  ShowVersionResponse:
     type: "object"
     properties:
       release:
