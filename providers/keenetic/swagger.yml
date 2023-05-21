@@ -50,6 +50,18 @@ paths:
             $ref: "#/definitions/ShowDefaultsResponse"
         401:
           $ref: "#/responses/Unauthorized"
+  /rci/show/system:
+    get:
+      operationId: "showSystem"
+      tags:
+        - "show"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/ShowSystemResponse"
+        401:
+          $ref: "#/responses/Unauthorized"
   /rci/show/version:
     get:
       operationId: "showVersion"
@@ -75,6 +87,15 @@ responses:
         type: "string"
 
 definitions:
+  IntegerAsString:
+    type: "integer"
+    x-go-type:
+      import:
+        alias: "extend"
+        package: "github.com/kihamo/boggart/protocols/swagger"
+      type: "IntegerAsString"
+    x-nullable: false
+
   ContinuedResponse:
     type: "object"
     properties:
@@ -112,6 +133,34 @@ definitions:
         type: "string"
       locked:
         type: "boolean"
+
+  ShowSystemResponse:
+    type: "object"
+    properties:
+      hostname:
+        type: "string"
+      domainname:
+        type: "string"
+      cpuload:
+        type: "integer"
+      memory:
+        type: "string"
+      swap:
+        type: "string"
+      memtotal:
+        type: "integer"
+      memfree:
+        type: "integer"
+      membuffers:
+        type: "integer"
+      memcache:
+        type: "integer"
+      swaptotal:
+        type: "integer"
+      swapfree:
+        type: "integer"
+      uptime:
+        $ref: "#/definitions/IntegerAsString"
 
   ShowVersionResponse:
     type: "object"
