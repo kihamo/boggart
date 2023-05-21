@@ -1,0 +1,82 @@
+---
+swagger: "2.0"
+info:
+  title: "Keenetic"
+  version: "3.9.5"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+schemes:
+- "http"
+basePath: "/"
+paths:
+  /auth:
+    get:
+      operationId: "getAuth"
+      tags:
+        - "user"
+      responses:
+        200:
+          description: "Successful operation"
+        401:
+          $ref: "#/responses/Unauthorized"
+    post:
+      operationId: "postAuth"
+      tags:
+        - "user"
+      parameters:
+        - name: "request"
+          in: "body"
+          schema:
+            type: "object"
+            properties:
+              login:
+                type: "string"
+              password:
+                type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+  /rci/show/version:
+    get:
+      operationId: "showVersion"
+      tags:
+        - "show"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/VersionResponse"
+        401:
+          $ref: "#/responses/Unauthorized"
+
+responses:
+  Unauthorized:
+    description: "Unauthorized operation"
+    headers:
+      WWW-Authenticate:
+        type: "string"
+      X-NDM-Challenge:
+        type: "string"
+      X-NDM-Realm:
+        type: "string"
+
+definitions:
+  ContinuedResponse:
+    type: "object"
+    properties:
+      continued:
+        type: "boolean"
+
+  VersionResponse:
+    type: "object"
+    properties:
+      release:
+        type: "string"
+      sandbox:
+        type: "string"
+      title:
+        type: "string"
+      arch:
+        type: "string"
