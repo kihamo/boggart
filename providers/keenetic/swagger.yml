@@ -50,6 +50,18 @@ paths:
             $ref: "#/definitions/ShowDefaultsResponse"
         401:
           $ref: "#/responses/Unauthorized"
+  /rci/show/ip/hotspot:
+    get:
+      operationId: "showIPHotspot"
+      tags:
+        - "show"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/ShowIPHotspotResponse"
+        401:
+          $ref: "#/responses/Unauthorized"
   /rci/show/system:
     get:
       operationId: "showSystem"
@@ -133,6 +145,102 @@ definitions:
         type: "string"
       locked:
         type: "boolean"
+
+  ShowIPHotspotResponse:
+    type: "object"
+    properties:
+      host:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            mac:
+              type: "string"
+            via:
+              type: "string"
+            ip:
+              type: "string"
+            hostname:
+              type: "string"
+            name:
+              type: "string"
+            interface:
+              type: "object"
+              properties:
+                id:
+                  type: "string"
+                name:
+                  type: "string"
+                description:
+                  type: "string"
+            dhcp:
+              type: "object"
+              properties:
+                static:
+                  type: "boolean"
+            registered:
+              type: "boolean"
+            access:
+              type: "string"
+            schedule:
+              type: "string"
+            priority:
+              type: "integer"
+            active:
+              type: "boolean"
+            rxbytes:
+              type: "integer"
+            txbytes:
+              type: "integer"
+            first-seen:
+              type: "integer"
+            last-seen:
+              type: "integer"
+            link:
+              type: "string"
+            ssid:
+              type: "string"
+            ap:
+              type: "string"
+            authenticated:
+              type: "boolean"
+            txrate:
+              type: "integer"
+            uptime:
+              type: "integer"
+            ht:
+              type: "integer"
+            mode:
+              type: "string"
+            gi:
+              type: "integer"
+            rssi:
+              type: "integer"
+            mcs:
+              type: "integer"
+            txss:
+              type: "integer"
+            ebf:
+              type: "boolean"
+            dl-mu:
+              type: "boolean"
+            _11:
+              type: "array"
+              items:
+                type: "string"
+            security:
+              type: "string"
+            traffic-shape:
+              type: "object"
+              properties:
+                rx:
+                  type: "integer"
+                tx:
+                  type: "integer"
+                mode:
+                  type: "string"
+                schedule:
+                  type: "string"
 
   ShowSystemResponse:
     type: "object"
