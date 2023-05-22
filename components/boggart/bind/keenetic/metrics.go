@@ -6,6 +6,7 @@ import (
 
 var (
 	metricUpTime          = snitch.NewGauge("uptime_seconds", "Uptime in seconds")
+	metricWifiClients     = snitch.NewGauge("wifi_clients_total", "Bind wifi clients online")
 	metricCPULoad         = snitch.NewGauge("cpu_load_percent", "CPU load in percents")
 	metricMemoryUsage     = snitch.NewGauge("memory_usage_bytes", "Memory usage in bytes")
 	metricMemoryAvailable = snitch.NewGauge("memory_available_bytes", "Memory available in bytes")
@@ -18,6 +19,7 @@ func (b *Bind) Describe(ch chan<- *snitch.Description) {
 	}
 
 	metricUpTime.With("serial_number", sn).Describe(ch)
+	metricWifiClients.With("serial_number", sn).Describe(ch)
 	metricCPULoad.With("serial_number", sn).Describe(ch)
 	metricMemoryUsage.With("serial_number", sn).Describe(ch)
 	metricMemoryAvailable.With("serial_number", sn).Describe(ch)
@@ -30,6 +32,7 @@ func (b *Bind) Collect(ch chan<- snitch.Metric) {
 	}
 
 	metricUpTime.With("serial_number", sn).Collect(ch)
+	metricWifiClients.With("serial_number", sn).Collect(ch)
 	metricCPULoad.With("serial_number", sn).Collect(ch)
 	metricMemoryUsage.With("serial_number", sn).Collect(ch)
 	metricMemoryAvailable.With("serial_number", sn).Collect(ch)

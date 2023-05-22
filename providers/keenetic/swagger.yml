@@ -198,6 +198,29 @@ definitions:
               type: "integer"
             link:
               type: "string"
+            traffic-shape:
+              type: "object"
+              properties:
+                rx:
+                  type: "integer"
+                tx:
+                  type: "integer"
+                mode:
+                  type: "string"
+                schedule:
+                  type: "string"
+
+            # ethernet
+            auto-negotiation:
+              type: "boolean"
+            speed:
+              type: "integer"
+            duplex:
+              type: "boolean"
+            port:
+              type: "string"
+
+            # wifi
             ssid:
               type: "string"
             ap:
@@ -230,17 +253,6 @@ definitions:
                 type: "string"
             security:
               type: "string"
-            traffic-shape:
-              type: "object"
-              properties:
-                rx:
-                  type: "integer"
-                tx:
-                  type: "integer"
-                mode:
-                  type: "string"
-                schedule:
-                  type: "string"
 
   ShowSystemResponse:
     type: "object"

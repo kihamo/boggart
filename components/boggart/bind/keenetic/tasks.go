@@ -72,5 +72,20 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 		err = multierr.Append(err, fmt.Errorf("get system info failed: %w", err))
 	}
 
+	hotspot, err := b.client.Show.ShowIPHotspot(show.NewShowIPHotspotParamsWithContext(ctx))
+	if err == nil {
+		var wifiClients int
+
+		for _, host := range hotspot.Payload.Host {
+			if host.Active && host.Ssid != "" {
+				wifiClients++
+			}
+		}
+
+		metricWifiClients.With("serial_number", sn).Set(float64(wifiClients))
+	} else {
+		err = multierr.Append(err, fmt.Errorf("get IP hostpot failed: %w", err))
+	}
+
 	return err
 }

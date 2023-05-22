@@ -135,11 +135,17 @@ type ShowIPHotspotResponseHostItems0 struct {
 	// authenticated
 	Authenticated bool `json:"authenticated,omitempty"`
 
+	// auto negotiation
+	AutoNegotiation bool `json:"auto-negotiation,omitempty"`
+
 	// dhcp
 	Dhcp *ShowIPHotspotResponseHostItems0Dhcp `json:"dhcp,omitempty"`
 
 	// dl mu
 	DlMu bool `json:"dl-mu,omitempty"`
+
+	// duplex
+	Duplex bool `json:"duplex,omitempty"`
 
 	// ebf
 	Ebf bool `json:"ebf,omitempty"`
@@ -180,6 +186,9 @@ type ShowIPHotspotResponseHostItems0 struct {
 	// name
 	Name string `json:"name,omitempty"`
 
+	// port
+	Port string `json:"port,omitempty"`
+
 	// priority
 	Priority int64 `json:"priority,omitempty"`
 
@@ -197,6 +206,9 @@ type ShowIPHotspotResponseHostItems0 struct {
 
 	// security
 	Security string `json:"security,omitempty"`
+
+	// speed
+	Speed int64 `json:"speed,omitempty"`
 
 	// ssid
 	Ssid string `json:"ssid,omitempty"`
