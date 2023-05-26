@@ -525,7 +525,7 @@ func (m *ShowIPHotspotResponseHostItems0Interface) UnmarshalBinary(b []byte) err
 	return nil
 }
 
-// ShowIPHotspotResponseHostItems0Mws show IP hotspot response host items0 mws
+// ShowIPHotspotResponseHostItems0Mws Mesh Wi-Fi System
 //
 // swagger:model ShowIPHotspotResponseHostItems0Mws
 type ShowIPHotspotResponseHostItems0Mws struct {

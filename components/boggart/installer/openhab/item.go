@@ -43,6 +43,7 @@ type Item struct {
 	groups     []string
 	tags       []string
 	parameters *Parameters
+	profile    *Parameters
 }
 
 func NewItem(name, typ string) *Item {
@@ -50,6 +51,7 @@ func NewItem(name, typ string) *Item {
 		name:       name,
 		typ:        typ,
 		parameters: newParameters(),
+		profile:    newParameters(),
 		groups:     make([]string, 0),
 		tags:       make([]string, 0),
 	}
@@ -92,6 +94,23 @@ func (i *Item) WithParameter(key string, value interface{}) *Item {
 	return i
 }
 
+func (i *Item) WithProfile(profile string, parameters ...string) *Item {
+	i.profile.Set("profile", profile)
+
+	l := len(parameters)
+	if l > 0 {
+		if l%2 != 0 {
+			parameters = append(parameters, "")
+		}
+
+		for v := 1; v < len(parameters); v += 2 {
+			i.profile.Set(parameters[v-1], parameters[v])
+		}
+	}
+
+	return i
+}
+
 func (i *Item) String() string {
 	s := i.typ + " " + i.name
 
@@ -113,7 +132,15 @@ func (i *Item) String() string {
 
 	if i.parameters != nil {
 		if params := i.parameters.String(); params != "" {
-			s += " {" + params + "}"
+			s += " {" + params
+
+			if i.profile != nil {
+				if profile := i.profile.String(); profile != "" {
+					s += " [" + profile + "]"
+				}
+			}
+
+			s += "}"
 		}
 	}
 

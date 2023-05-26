@@ -26,45 +26,71 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 	itemPrefix := openhab.ItemPrefixFromBindMeta(meta)
 
 	const (
-		idHotspotConnectLast       = "HotspotConnect_Last"
-		idHotspotConnectRegistered = "HotspotConnect_"
-		idHostMAC                  = "MAC"
-		idHostIP                   = "IP"
-		idHostName                 = "Name"
-		idHostActive               = "Active"
-		idHostUplink               = "Uplink"
-		idHostRegistered           = "Registered"
+		idHotspotConnectLastState      = "HotspotConnect_Last"
+		idHotspotConnectLastActive     = "HotspotConnect_Last_Active"
+		idHotspotConnectLastUplink     = "HotspotConnect_Last_Uplink"
+		idHotspotConnectLastRegistered = "HotspotConnect_Last_Registered"
+		idHotspotConnectRegistered     = "HotspotConnect_"
+		idHostMAC                      = "MAC"
+		idHostIP                       = "IP"
+		idHostName                     = "Name"
+		idHostActive                   = "Active"
+		idHostUplink                   = "Uplink"
+		idHostRegistered               = "Registered"
 	)
 
-	channelId := idHotspotConnectLast
 	subItemPrefix := itemPrefix + "Last_"
 
 	channels := []*openhab.Channel{
-		openhab.NewChannel(channelId, openhab.ChannelTypeString).
+		openhab.NewChannel(idHotspotConnectLastState, openhab.ChannelTypeString).
 			WithStateTopic(cfg.TopicHotspotState.Format(sn)).
 			AddItems(
 				openhab.NewItem(subItemPrefix+idHostMAC, openhab.ItemTypeString).
-					WithLabel("MAC address [JSONPATH($.mac):%s]").
+					WithLabel("MAC address").
+					WithProfile("transform:JSONPATH", "function", "$.mac").
 					WithIcon("text"),
 				openhab.NewItem(subItemPrefix+idHostIP, openhab.ItemTypeString).
-					WithLabel("IP address [JSONPATH($.ip):%s]").
+					WithLabel("IP address").
+					WithProfile("transform:JSONPATH", "function", "$.ip").
 					WithIcon("text"),
 				openhab.NewItem(subItemPrefix+idHostName, openhab.ItemTypeString).
-					WithLabel("Name [JSONPATH($.name):%s]").
+					WithLabel("Name").
+					WithProfile("transform:JSONPATH", "function", "$.name").
 					WithIcon("text"),
+			),
+		openhab.NewChannel(idHotspotConnectLastActive, openhab.ChannelTypeContact).
+			WithStateTopic(cfg.TopicHotspotState.Format(sn)).
+			WithTransformationPattern("JSONPATH:$.active").
+			WithOn("true").
+			WithOff("false").
+			AddItems(
 				openhab.NewItem(subItemPrefix+idHostActive, openhab.ItemTypeContact).
 					WithLabel("Active").
 					WithIcon("text"),
+			),
+		openhab.NewChannel(idHotspotConnectLastUplink, openhab.ChannelTypeContact).
+			WithStateTopic(cfg.TopicHotspotState.Format(sn)).
+			WithTransformationPattern("JSONPATH:$.uplink").
+			WithOn("true").
+			WithOff("false").
+			AddItems(
 				openhab.NewItem(subItemPrefix+idHostUplink, openhab.ItemTypeContact).
 					WithLabel("Uplink").
 					WithIcon("text"),
+			),
+		openhab.NewChannel(idHotspotConnectLastRegistered, openhab.ChannelTypeContact).
+			WithStateTopic(cfg.TopicHotspotState.Format(sn)).
+			WithTransformationPattern("JSONPATH:$.registered").
+			WithOn("true").
+			WithOff("false").
+			AddItems(
 				openhab.NewItem(subItemPrefix+idHostRegistered, openhab.ItemTypeContact).
 					WithLabel("Registered").
 					WithIcon("text"),
 			),
 	}
 
-	var macNormalize string
+	var channelId, macNormalize string
 
 	b.hotspotConnections.Range(func(key, value interface{}) bool {
 		si := value.(*storeItem)
@@ -78,24 +104,48 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 		channelId = idHotspotConnectRegistered + macNormalize
 
 		channels = append(channels,
-			openhab.NewChannel(channelId, openhab.ChannelTypeString).
+			openhab.NewChannel(channelId+"_State", openhab.ChannelTypeString).
 				WithStateTopic(cfg.TopicHotspotState.Format(sn, si.ID())).
 				AddItems(
 					openhab.NewItem(subItemPrefix+idHostMAC, openhab.ItemTypeString).
-						WithLabel("MAC address [JSONPATH($.mac):%s]").
+						WithLabel("MAC address").
+						WithProfile("transform:JSONPATH", "function", "$.mac").
 						WithIcon("text"),
 					openhab.NewItem(subItemPrefix+idHostIP, openhab.ItemTypeString).
-						WithLabel("IP address [JSONPATH($.ip):%s]").
+						WithLabel("IP address").
+						WithProfile("transform:JSONPATH", "function", "$.ip").
 						WithIcon("text"),
 					openhab.NewItem(subItemPrefix+idHostName, openhab.ItemTypeString).
-						WithLabel("Name [JSONPATH($.name):%s]").
+						WithLabel("Name").
+						WithProfile("transform:JSONPATH", "function", "$.name").
 						WithIcon("text"),
+				),
+			openhab.NewChannel(channelId+"_Active", openhab.ChannelTypeContact).
+				WithStateTopic(cfg.TopicHotspotState.Format(sn, si.ID())).
+				WithTransformationPattern("JSONPATH:$.active").
+				WithOn("true").
+				WithOff("false").
+				AddItems(
 					openhab.NewItem(subItemPrefix+idHostActive, openhab.ItemTypeContact).
 						WithLabel("Active").
 						WithIcon("text"),
+				),
+			openhab.NewChannel(channelId+"_Uplink", openhab.ChannelTypeContact).
+				WithStateTopic(cfg.TopicHotspotState.Format(sn, si.ID())).
+				WithTransformationPattern("JSONPATH:$.uplink").
+				WithOn("true").
+				WithOff("false").
+				AddItems(
 					openhab.NewItem(subItemPrefix+idHostUplink, openhab.ItemTypeContact).
 						WithLabel("Uplink").
 						WithIcon("text"),
+				),
+			openhab.NewChannel(channelId+"_Registered", openhab.ChannelTypeContact).
+				WithStateTopic(cfg.TopicHotspotState.Format(sn, si.ID())).
+				WithTransformationPattern("JSONPATH:$.registered").
+				WithOn("true").
+				WithOff("false").
+				AddItems(
 					openhab.NewItem(subItemPrefix+idHostRegistered, openhab.ItemTypeContact).
 						WithLabel("Registered").
 						WithIcon("text"),
