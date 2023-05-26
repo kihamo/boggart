@@ -44,7 +44,7 @@ func (i storeItem) MarshalBinary() (data []byte, err error) {
 		IP         string `json:"ip"`
 		Name       string `json:"name"`
 		Active     bool   `json:"active"`
-		Link       bool   `json:"link"`
+		Uplink     bool   `json:"uplink"`
 		Registered bool   `json:"registered"`
 	}
 
@@ -53,7 +53,7 @@ func (i storeItem) MarshalBinary() (data []byte, err error) {
 		IP:         i.host.IP,
 		Name:       i.host.Name,
 		Active:     i.host.Active,
-		Link:       i.host.Link == "up",
+		Uplink:     i.host.Link == "up",
 		Registered: i.host.Registered,
 	})
 }

@@ -104,9 +104,6 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 }
 
 func (b *Bind) taskHotspotSyncHandler(ctx context.Context, meta tasks.Meta, _ tasks.Task) (err error) {
-
-	fmt.Println("Sync start")
-
 	hotspot, err := b.client.Show.ShowIPHotspot(show.NewShowIPHotspotParamsWithContext(ctx))
 	if err != nil {
 		return fmt.Errorf("get IP hostpot failed: %w", err)
