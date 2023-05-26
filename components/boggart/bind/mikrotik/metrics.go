@@ -5,9 +5,9 @@ import (
 )
 
 var (
-	metricTrafficReceivedBytes = snitch.NewGauge("traffic_received_bytes", "Bind traffic received bytes")
-	metricTrafficSentBytes     = snitch.NewGauge("traffic_sent_bytes", "Bind traffic sent bytes")
-	metricWifiClients          = snitch.NewGauge("wifi_clients_total", "Bind wifi clients online")
+	metricTrafficReceivedBytes = snitch.NewGauge("traffic_received_bytes", "Traffic received bytes")
+	metricTrafficSentBytes     = snitch.NewGauge("traffic_sent_bytes", "Traffic sent bytes")
+	metricWifiClients          = snitch.NewGauge("wifi_clients_total", "Wifi clients online")
 	metricCPULoad              = snitch.NewGauge("cpu_load_percent", "CPU load in percents")
 	metricMemoryUsage          = snitch.NewGauge("memory_usage_bytes", "Memory usage in bytes")
 	metricMemoryAvailable      = snitch.NewGauge("memory_available_bytes", "Memory available in bytes")

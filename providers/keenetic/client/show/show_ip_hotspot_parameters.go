@@ -58,6 +58,13 @@ func NewShowIPHotspotParamsWithHTTPClient(client *http.Client) *ShowIPHotspotPar
    Typically these are written to a http.Request.
 */
 type ShowIPHotspotParams struct {
+
+	/* Mac.
+
+	   Filter by mac
+	*/
+	Mac *string
+
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -111,6 +118,17 @@ func (o *ShowIPHotspotParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithMac adds the mac to the show IP hotspot params
+func (o *ShowIPHotspotParams) WithMac(mac *string) *ShowIPHotspotParams {
+	o.SetMac(mac)
+	return o
+}
+
+// SetMac adds the mac to the show IP hotspot params
+func (o *ShowIPHotspotParams) SetMac(mac *string) {
+	o.Mac = mac
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *ShowIPHotspotParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -118,6 +136,23 @@ func (o *ShowIPHotspotParams) WriteToRequest(r runtime.ClientRequest, reg strfmt
 		return err
 	}
 	var res []error
+
+	if o.Mac != nil {
+
+		// query param mac
+		var qrMac string
+
+		if o.Mac != nil {
+			qrMac = *o.Mac
+		}
+		qMac := qrMac
+		if qMac != "" {
+
+			if err := r.SetQueryParam("mac", qMac); err != nil {
+				return err
+			}
+		}
+	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

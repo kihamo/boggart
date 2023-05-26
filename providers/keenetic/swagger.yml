@@ -55,6 +55,11 @@ paths:
       operationId: "showIPHotspot"
       tags:
         - "show"
+      parameters:
+        - name: "mac"
+          in: "query"
+          description: "Filter by mac"
+          type: "string"
       responses:
         200:
           description: "Successful operation"

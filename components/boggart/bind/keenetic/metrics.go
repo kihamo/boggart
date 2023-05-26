@@ -6,7 +6,7 @@ import (
 
 var (
 	metricUpTime          = snitch.NewGauge("uptime_seconds", "Uptime in seconds")
-	metricWifiClients     = snitch.NewGauge("wifi_clients_total", "Bind wifi clients online")
+	metricWifiClients     = snitch.NewGauge("wifi_clients_total", "Wifi clients online")
 	metricCPULoad         = snitch.NewGauge("cpu_load_percent", "CPU load in percents")
 	metricMemoryUsage     = snitch.NewGauge("memory_usage_bytes", "Memory usage in bytes")
 	metricMemoryAvailable = snitch.NewGauge("memory_available_bytes", "Memory available in bytes")
