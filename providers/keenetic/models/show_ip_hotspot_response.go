@@ -183,6 +183,9 @@ type ShowIPHotspotResponseHostItems0 struct {
 	// mode
 	Mode string `json:"mode,omitempty"`
 
+	// mws
+	Mws *ShowIPHotspotResponseHostItems0Mws `json:"mws,omitempty"`
+
 	// name
 	Name string `json:"name,omitempty"`
 
@@ -244,6 +247,10 @@ func (m *ShowIPHotspotResponseHostItems0) Validate(formats strfmt.Registry) erro
 		res = append(res, err)
 	}
 
+	if err := m.validateMws(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateTrafficShape(formats); err != nil {
 		res = append(res, err)
 	}
@@ -292,6 +299,25 @@ func (m *ShowIPHotspotResponseHostItems0) validateInterface(formats strfmt.Regis
 	return nil
 }
 
+func (m *ShowIPHotspotResponseHostItems0) validateMws(formats strfmt.Registry) error {
+	if swag.IsZero(m.Mws) { // not required
+		return nil
+	}
+
+	if m.Mws != nil {
+		if err := m.Mws.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("mws")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("mws")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (m *ShowIPHotspotResponseHostItems0) validateTrafficShape(formats strfmt.Registry) error {
 	if swag.IsZero(m.TrafficShape) { // not required
 		return nil
@@ -320,6 +346,10 @@ func (m *ShowIPHotspotResponseHostItems0) ContextValidate(ctx context.Context, f
 	}
 
 	if err := m.contextValidateInterface(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateMws(ctx, formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -357,6 +387,22 @@ func (m *ShowIPHotspotResponseHostItems0) contextValidateInterface(ctx context.C
 				return ve.ValidateName("interface")
 			} else if ce, ok := err.(*errors.CompositeError); ok {
 				return ce.ValidateName("interface")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *ShowIPHotspotResponseHostItems0) contextValidateMws(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Mws != nil {
+		if err := m.Mws.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("mws")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("mws")
 			}
 			return err
 		}
@@ -472,6 +518,85 @@ func (m *ShowIPHotspotResponseHostItems0Interface) MarshalBinary() ([]byte, erro
 // UnmarshalBinary interface implementation
 func (m *ShowIPHotspotResponseHostItems0Interface) UnmarshalBinary(b []byte) error {
 	var res ShowIPHotspotResponseHostItems0Interface
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// ShowIPHotspotResponseHostItems0Mws show IP hotspot response host items0 mws
+//
+// swagger:model ShowIPHotspotResponseHostItems0Mws
+type ShowIPHotspotResponseHostItems0Mws struct {
+
+	// 11
+	Nr11 []string `json:"_11"`
+
+	// ap
+	Ap string `json:"ap,omitempty"`
+
+	// authenticated
+	Authenticated bool `json:"authenticated,omitempty"`
+
+	// cid
+	Cid string `json:"cid,omitempty"`
+
+	// dl mu
+	DlMu bool `json:"dl-mu,omitempty"`
+
+	// ebf
+	Ebf bool `json:"ebf,omitempty"`
+
+	// gi
+	Gi int64 `json:"gi,omitempty"`
+
+	// ht
+	Ht int64 `json:"ht,omitempty"`
+
+	// mcs
+	Mcs int64 `json:"mcs,omitempty"`
+
+	// mode
+	Mode string `json:"mode,omitempty"`
+
+	// rssi
+	Rssi int64 `json:"rssi,omitempty"`
+
+	// security
+	Security string `json:"security,omitempty"`
+
+	// txrate
+	Txrate int64 `json:"txrate,omitempty"`
+
+	// txss
+	Txss int64 `json:"txss,omitempty"`
+
+	// uptime
+	Uptime int64 `json:"uptime,omitempty"`
+}
+
+// Validate validates this show IP hotspot response host items0 mws
+func (m *ShowIPHotspotResponseHostItems0Mws) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this show IP hotspot response host items0 mws based on context it is used
+func (m *ShowIPHotspotResponseHostItems0Mws) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *ShowIPHotspotResponseHostItems0Mws) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *ShowIPHotspotResponseHostItems0Mws) UnmarshalBinary(b []byte) error {
+	var res ShowIPHotspotResponseHostItems0Mws
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

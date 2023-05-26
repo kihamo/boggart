@@ -44,13 +44,13 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 			WithStateTopic(cfg.TopicHotspotState.Format(sn)).
 			AddItems(
 				openhab.NewItem(subItemPrefix+idHostMAC, openhab.ItemTypeString).
-					WithLabel("MAC address").
+					WithLabel("MAC address [JSONPATH($.mac):%s]").
 					WithIcon("text"),
 				openhab.NewItem(subItemPrefix+idHostIP, openhab.ItemTypeString).
-					WithLabel("IP address").
+					WithLabel("IP address [JSONPATH($.ip):%s]").
 					WithIcon("text"),
 				openhab.NewItem(subItemPrefix+idHostName, openhab.ItemTypeString).
-					WithLabel("Name").
+					WithLabel("Name [JSONPATH($.name):%s]").
 					WithIcon("text"),
 				openhab.NewItem(subItemPrefix+idHostActive, openhab.ItemTypeContact).
 					WithLabel("Active").
@@ -82,13 +82,13 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 				WithStateTopic(cfg.TopicHotspotState.Format(sn, si.ID())).
 				AddItems(
 					openhab.NewItem(subItemPrefix+idHostMAC, openhab.ItemTypeString).
-						WithLabel("MAC address").
+						WithLabel("MAC address [JSONPATH($.mac):%s]").
 						WithIcon("text"),
 					openhab.NewItem(subItemPrefix+idHostIP, openhab.ItemTypeString).
-						WithLabel("IP address").
+						WithLabel("IP address [JSONPATH($.ip):%s]").
 						WithIcon("text"),
 					openhab.NewItem(subItemPrefix+idHostName, openhab.ItemTypeString).
-						WithLabel("Name").
+						WithLabel("Name [JSONPATH($.name):%s]").
 						WithIcon("text"),
 					openhab.NewItem(subItemPrefix+idHostActive, openhab.ItemTypeContact).
 						WithLabel("Active").

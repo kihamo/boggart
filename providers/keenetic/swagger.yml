@@ -203,6 +203,42 @@ definitions:
               type: "integer"
             link:
               type: "string"
+            mws:
+              type: "object"
+              description: "Mesh Wi-Fi System"
+              properties:
+                cid:
+                  type: "string"
+                ap:
+                  type: "string"
+                authenticated:
+                  type: "boolean"
+                txrate:
+                  type: "integer"
+                uptime:
+                  type: "integer"
+                ht:
+                  type: "integer"
+                mode:
+                  type: "string"
+                gi:
+                  type: "integer"
+                rssi:
+                  type: "integer"
+                mcs:
+                  type: "integer"
+                txss:
+                  type: "integer"
+                ebf:
+                  type: "boolean"
+                dl-mu:
+                  type: "boolean"
+                _11:
+                  type: "array"
+                  items:
+                    type: "string"
+                security:
+                  type: "string"
             traffic-shape:
               type: "object"
               properties:
