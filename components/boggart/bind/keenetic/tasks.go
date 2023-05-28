@@ -134,8 +134,16 @@ func (b *Bind) taskHotspotSyncHandler(ctx context.Context, meta tasks.Meta, _ ta
 
 		b.hotspotConnections.Store(item.ID(), item)
 
-		if host.Active && host.Ssid != "" {
-			wifiClients++
+		if host.Active {
+			if host.Ssid != "" {
+				wifiClients++
+
+				if host.Txrate > 0 {
+					metricHostSpeed.With("serial_number", sn).With("mac", host.Mac).Set(float64(host.Txrate))
+				}
+			} else if host.Speed > 0 {
+				metricHostSpeed.With("serial_number", sn).With("mac", host.Mac).Set(float64(host.Speed))
+			}
 		}
 	}
 

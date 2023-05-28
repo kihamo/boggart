@@ -548,28 +548,28 @@ type ShowIPHotspotResponseHostItems0Mws struct {
 	// ebf
 	Ebf bool `json:"ebf,omitempty"`
 
-	// gi
+	// защитный интервал
 	Gi int64 `json:"gi,omitempty"`
 
-	// ht
+	// ширина канала
 	Ht int64 `json:"ht,omitempty"`
 
-	// mcs
+	// индекс модуляции и схемы кодирования
 	Mcs int64 `json:"mcs,omitempty"`
 
 	// mode
 	Mode string `json:"mode,omitempty"`
 
-	// rssi
+	// уровень сигнала; показатель уровня мощности принимаемого сигнала; чем выше это число, или чем оно менее отрицательное, тем мощнее сигнал
 	Rssi int64 `json:"rssi,omitempty"`
 
 	// security
 	Security string `json:"security,omitempty"`
 
-	// txrate
+	// TX rate in Mbit/sec
 	Txrate int64 `json:"txrate,omitempty"`
 
-	// txss
+	// пространственный поток
 	Txss int64 `json:"txss,omitempty"`
 
 	// uptime

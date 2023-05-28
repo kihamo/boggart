@@ -46,16 +46,25 @@ func (i storeItem) MarshalBinary() (data []byte, err error) {
 		Active     bool   `json:"active"`
 		Uplink     bool   `json:"uplink"`
 		Registered bool   `json:"registered"`
+		Speed      int64  `json:"speed"`
 	}
 
-	return json.Marshal(&payload{
+	p := &payload{
 		MAC:        i.host.Mac,
 		IP:         i.host.IP,
 		Name:       i.host.Name,
 		Active:     i.host.Active,
 		Uplink:     i.host.Link == "up",
 		Registered: i.host.Registered,
-	})
+	}
+
+	if i.host.Ssid != "" {
+		p.Speed = i.host.Txrate
+	} else {
+		p.Speed = i.host.Speed
+	}
+
+	return json.Marshal(p)
 }
 
 func (b *Bind) config() *Config {

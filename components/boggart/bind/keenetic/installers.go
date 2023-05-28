@@ -37,6 +37,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 		idHostActive                   = "Active"
 		idHostUplink                   = "Uplink"
 		idHostRegistered               = "Registered"
+		idHostSpeed                    = "Speed"
 	)
 
 	subItemPrefix := itemPrefix + "Last_"
@@ -120,7 +121,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 						WithProfile("transform:JSONPATH", "function", "$.name").
 						WithIcon("text"),
 				),
-			openhab.NewChannel(channelId+"_Active", openhab.ChannelTypeContact).
+			openhab.NewChannel(channelId+"_"+idHostActive, openhab.ChannelTypeContact).
 				WithStateTopic(cfg.TopicHotspotState.Format(sn, si.ID())).
 				WithTransformationPattern("JSONPATH:$.active").
 				WithOn("true").
@@ -128,9 +129,9 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 				AddItems(
 					openhab.NewItem(subItemPrefix+idHostActive, openhab.ItemTypeContact).
 						WithLabel("Active").
-						WithIcon("text"),
+						WithIcon("siren"),
 				),
-			openhab.NewChannel(channelId+"_Uplink", openhab.ChannelTypeContact).
+			openhab.NewChannel(channelId+"_"+idHostUplink, openhab.ChannelTypeContact).
 				WithStateTopic(cfg.TopicHotspotState.Format(sn, si.ID())).
 				WithTransformationPattern("JSONPATH:$.uplink").
 				WithOn("true").
@@ -138,9 +139,9 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 				AddItems(
 					openhab.NewItem(subItemPrefix+idHostUplink, openhab.ItemTypeContact).
 						WithLabel("Uplink").
-						WithIcon("text"),
+						WithIcon("network"),
 				),
-			openhab.NewChannel(channelId+"_Registered", openhab.ChannelTypeContact).
+			openhab.NewChannel(channelId+"_"+idHostRegistered, openhab.ChannelTypeContact).
 				WithStateTopic(cfg.TopicHotspotState.Format(sn, si.ID())).
 				WithTransformationPattern("JSONPATH:$.registered").
 				WithOn("true").
@@ -148,7 +149,15 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 				AddItems(
 					openhab.NewItem(subItemPrefix+idHostRegistered, openhab.ItemTypeContact).
 						WithLabel("Registered").
-						WithIcon("text"),
+						WithIcon("keyring"),
+				),
+			openhab.NewChannel(channelId+"_"+idHostSpeed, openhab.ChannelTypeNumber).
+				WithStateTopic(cfg.TopicHotspotState.Format(sn, si.ID())).
+				WithTransformationPattern("JSONPATH:$.speed").
+				AddItems(
+					openhab.NewItem(subItemPrefix+idHostSpeed, openhab.ItemTypeNumber).
+						WithLabel("Host speed [%d Mbit/sec]").
+						WithIcon("returnpipe"),
 				),
 		)
 

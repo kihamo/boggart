@@ -10,6 +10,7 @@ var (
 	metricCPULoad         = snitch.NewGauge("cpu_load_percent", "CPU load in percents")
 	metricMemoryUsage     = snitch.NewGauge("memory_usage_bytes", "Memory usage in bytes")
 	metricMemoryAvailable = snitch.NewGauge("memory_available_bytes", "Memory available in bytes")
+	metricHostSpeed       = snitch.NewGauge("host_speed", "Host speed in Mbit/sec")
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {
@@ -23,6 +24,7 @@ func (b *Bind) Describe(ch chan<- *snitch.Description) {
 	metricCPULoad.With("serial_number", sn).Describe(ch)
 	metricMemoryUsage.With("serial_number", sn).Describe(ch)
 	metricMemoryAvailable.With("serial_number", sn).Describe(ch)
+	metricHostSpeed.With("serial_number", sn).Describe(ch)
 }
 
 func (b *Bind) Collect(ch chan<- snitch.Metric) {
@@ -36,4 +38,5 @@ func (b *Bind) Collect(ch chan<- snitch.Metric) {
 	metricCPULoad.With("serial_number", sn).Collect(ch)
 	metricMemoryUsage.With("serial_number", sn).Collect(ch)
 	metricMemoryAvailable.With("serial_number", sn).Collect(ch)
+	metricHostSpeed.With("serial_number", sn).Collect(ch)
 }

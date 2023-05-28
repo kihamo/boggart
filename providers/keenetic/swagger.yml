@@ -215,20 +215,26 @@ definitions:
                   type: "boolean"
                 txrate:
                   type: "integer"
+                  description: "TX rate in Mbit/sec"
                 uptime:
                   type: "integer"
                 ht:
                   type: "integer"
+                  description: "ширина канала"
                 mode:
                   type: "string"
                 gi:
                   type: "integer"
+                  description: "защитный интервал"
                 rssi:
                   type: "integer"
+                  description: "уровень сигнала; показатель уровня мощности принимаемого сигнала; чем выше это число, или чем оно менее отрицательное, тем мощнее сигнал"
                 mcs:
                   type: "integer"
+                  description: "индекс модуляции и схемы кодирования"
                 txss:
                   type: "integer"
+                  description: "пространственный поток"
                 ebf:
                   type: "boolean"
                 dl-mu:
