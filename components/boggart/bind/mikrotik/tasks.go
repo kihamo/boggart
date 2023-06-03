@@ -51,10 +51,11 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 		return errors.New("serial number is empty")
 	}
 
-	var link *url.URL
 	cfg := b.config()
 
-	if services, err := b.provider.IPServices(ctx); err == nil {
+	if services, e := b.provider.IPServices(ctx); e == nil {
+		var link *url.URL
+
 		for _, service := range services {
 			if service.Disabled || service.Invalid {
 				continue
@@ -72,12 +73,17 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 					Scheme: "http",
 					Host:   net.JoinHostPort(cfg.Address.Hostname(), strconv.FormatUint(service.Port, 10)),
 				}
+
+				break
 			}
+		}
+
+		if link != nil {
+			b.Meta().SetLink(link)
 		}
 	}
 
 	b.Meta().SetSerialNumber(system.SerialNumber)
-	b.Meta().SetLink(link)
 
 	_, err = b.Workers().RegisterTask(
 		tasks.NewTask().

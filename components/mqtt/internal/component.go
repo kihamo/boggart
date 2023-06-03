@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/url"
 	"reflect"
 	"strconv"
@@ -350,6 +349,20 @@ func (c *Component) doPublish(_ context.Context, topic mqtt.Topic, qos byte, ret
 		return errors.New("topic " + topic.String() + " isn't valid for publish")
 	}
 
+	logQOS := strconv.Itoa(int(qos))
+	logRetained := strconv.FormatBool(retained)
+
+	defer func() {
+		if r := recover(); r != nil {
+			c.logger.Panic(
+				"Publish MQTT topic panic",
+				"topic", topic,
+				"qos", logQOS,
+				"retained", logRetained,
+			)
+		}
+	}()
+
 	payloadConverted := c.convertPayload(payload)
 
 	if cache && !c.config.Bool(mqtt.ConfigPayloadCacheEnabled) {
@@ -362,9 +375,6 @@ func (c *Component) doPublish(_ context.Context, topic mqtt.Topic, qos byte, ret
 	} else {
 		logPayload = performance.UnsafeBytes2String(payloadConverted)
 	}
-
-	logQOS := strconv.Itoa(int(qos))
-	logRetained := strconv.FormatBool(retained)
 
 	client := c.Client()
 	if client != nil {
@@ -654,7 +664,7 @@ func (c *Component) convertPayload(payload interface{}) []byte {
 	case bytes.Buffer:
 		return value.Bytes()
 	case io.Reader:
-		if b, err := ioutil.ReadAll(value); err == nil {
+		if b, err := io.ReadAll(value); err == nil {
 			return b
 		}
 

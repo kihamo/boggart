@@ -47,6 +47,8 @@ func NewClient(address, username, password string, timeout time.Duration) *Clien
 }
 
 func (c *Client) connect() (err error) {
+	atomic.StoreUint64(&c.connected, 0)
+
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
@@ -56,8 +58,9 @@ func (c *Client) connect() (err error) {
 	}
 
 	if c.dialer.Timeout > 0 {
-		if err := c.conn.SetDeadline(time.Now().Add(c.dialer.Timeout)); err != nil {
-			return err
+		if e := c.conn.SetDeadline(time.Now().Add(c.dialer.Timeout)); e != nil {
+			c.conn.Close()
+			return e
 		}
 	}
 
