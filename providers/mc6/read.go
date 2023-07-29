@@ -6,10 +6,17 @@ import (
 	"time"
 )
 
+// показания второго датчика (правый верхний угол на экране меньшими цифрами)
+// может быть только датчиком пола (floor probe)
 func (m *MC6) RoomTemperature() (float64, error) {
 	return m.ReadTemperature(AddressRoomTemperature)
 }
 
+// показания первого датчика (в центре экрана большими цифрами)
+// может быть одним из:
+// - встроенный датчик
+// - доп. датчик воздуха (remote air probe)
+// - только датчик пола (floor probe)
 func (m *MC6) FloorTemperature() (float64, error) {
 	return m.ReadTemperature(AddressFloorTemperature)
 }
