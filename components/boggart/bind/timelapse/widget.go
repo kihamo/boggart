@@ -49,12 +49,11 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 		}
 
 		to := time.Now()
-
-		var from *time.Time
+		from := time.Date(to.Year(), to.Month(), to.Day(), 0, 0, 0, 0, to.Location())
 
 		if queryTime := q.Get("from"); queryTime != "" {
 			if tm, err := time.Parse(time.RFC3339, queryTime); err == nil {
-				from = &tm
+				from = tm
 			} else {
 				widget.FlashError(r, "Parse date from failed with error %v", "", err)
 			}
@@ -68,7 +67,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			}
 		}
 
-		if files, err := b.Files(from, &to); err == nil {
+		if files, err := b.Files(&from, &to); err == nil {
 			filesTotal := len(files)
 			cfg := b.config()
 
@@ -100,11 +99,6 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			vars["size_total"] = sizeTotal
 			vars["page"] = page
 			vars["pages"] = pagesTotal
-
-			if from == nil && filesTotal > 0 {
-				tm := files[filesTotal-1].ModTime()
-				from = &tm
-			}
 		} else {
 			widget.FlashError(r, "Get files failed with error %v", "", err)
 		}

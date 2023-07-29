@@ -1,6 +1,6 @@
 module github.com/kihamo/boggart
 
-go 1.17
+go 1.18
 
 require (
 	firebase.google.com/go v3.12.0+incompatible

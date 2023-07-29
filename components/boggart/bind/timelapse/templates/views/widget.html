@@ -41,10 +41,10 @@
                         {{ range $file := .files }}
                         <div class="col-sm-6 col-md-4">
                             <div class="thumbnail">
-                                <img style="width: 100%; display: block;" src="?action=thumbnail&file={{ $file.Name }}" alt="image" />
+                                <img style="width: 100%; display: block;" src="?action=thumbnail&file={{ timelapse_file_id $file }}" alt="image" />
                                 <div class="caption text-center">
                                     <h3>{{ $file.Name }}</h3>
-                                    <p><a href="?action=download&file={{ $file.Name }}" class="btn btn-primary" role="button">{{ i18n "Download %s" $ nil nil nil (human_bytes $file.Size) }}</a></p>
+                                    <p><a href="?action=download&file={{ timelapse_file_id $file }}" class="btn btn-primary" role="button">{{ i18n "Download %s" $ nil nil nil (human_bytes $file.Size) }}</a></p>
                                 </div>
                             </div>
                         </div>

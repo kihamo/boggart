@@ -7,6 +7,7 @@ import (
 	"mime"
 	"net/http"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -14,6 +15,10 @@ import (
 	"github.com/kihamo/boggart/components/boggart"
 	"github.com/kihamo/boggart/components/boggart/di"
 	protocol "github.com/kihamo/boggart/protocols/http"
+)
+
+const (
+	SubDirectoryNameLayout = "2006-01-02"
 )
 
 type Bind struct {
@@ -45,7 +50,7 @@ func (b *Bind) Run() error {
 		if cacheDir != "" {
 			cacheDirBind := cacheDir + string(os.PathSeparator) + boggart.ComponentName + "_timelapse"
 
-			err := os.Mkdir(cacheDirBind, cfg.SaveDirectoryMode.FileMode)
+			err := os.Mkdir(cacheDirBind, cfg.DirectoryPerm.FileMode)
 
 			if err == nil {
 				b.Logger().Info("Cache dir created", "path", cacheDirBind)
@@ -103,9 +108,15 @@ func (b *Bind) Capture(ctx context.Context, writer io.Writer) error {
 		}
 	}
 
-	fileName := cfg.SaveDirectory + string(os.PathSeparator) + time.Now().Format(cfg.FileNameFormat) + ext
+	subDirectory := filepath.Join(b.config().SaveDirectory, time.Now().Format(SubDirectoryNameLayout))
+	fileName := filepath.Join(subDirectory, time.Now().Format(cfg.FileNameFormat)+ext)
 
-	fd, err := os.OpenFile(fileName, os.O_CREATE|os.O_EXCL|os.O_WRONLY, cfg.FileMode.FileMode)
+	// create sub directory
+	if err = os.Mkdir(subDirectory, cfg.DirectoryPerm.FileMode); err != nil && !os.IsExist(err) {
+		return err
+	}
+
+	fd, err := os.OpenFile(fileName, os.O_CREATE|os.O_EXCL|os.O_WRONLY, cfg.FilePerm.FileMode)
 	if err != nil {
 		return err
 	}
@@ -125,30 +136,76 @@ func (b *Bind) Capture(ctx context.Context, writer io.Writer) error {
 }
 
 func (b *Bind) Files(from, to *time.Time) ([]os.FileInfo, error) {
-	dir, err := os.Open(b.config().SaveDirectory)
+	saveDirectory := b.config().SaveDirectory
+
+	entries, err := os.ReadDir(saveDirectory)
 	if err != nil {
 		return nil, err
 	}
-	defer dir.Close()
 
-	files, err := dir.Readdir(-1)
-	if err == nil {
-		for i := len(files) - 1; i >= 0; i-- {
-			if files[i].IsDir() || files[i].Size() == 0 ||
-				(from != nil && files[i].ModTime().Before(*from)) ||
-				(to != nil && files[i].ModTime().After(*to)) {
-				files = append(files[:i], files[i+1:]...)
+	var result = make([]os.FileInfo, 0)
+
+	// reverse sorting
+	for i := len(entries) - 1; i >= 0; i-- {
+		if !entries[i].IsDir() {
+			continue
+		}
+
+		// filter by directory name
+		if from != nil || to != nil {
+			ctime, err := time.Parse(SubDirectoryNameLayout, entries[i].Name())
+			if err != nil {
+				continue
+			}
+
+			if from != nil && from.After(time.Date(ctime.Year(), ctime.Month(), ctime.Day(), from.Hour(), from.Minute(), from.Second(), from.Nanosecond(), from.Location())) {
+				continue
+			}
+
+			if to != nil && to.Before(time.Date(ctime.Year(), ctime.Month(), ctime.Day(), to.Hour(), to.Minute(), to.Second(), to.Nanosecond(), to.Location())) {
+				continue
 			}
 		}
+
+		dir, err := os.Open(filepath.Join(saveDirectory, entries[i].Name()))
+		if err != nil {
+			return nil, err
+		}
+
+		files, err := dir.Readdir(-1)
+		if err != nil {
+			dir.Close()
+			return nil, err
+		}
+
+		for _, file := range files {
+			// simple filter
+			if file.IsDir() || file.Size() == 0 {
+				continue
+			}
+
+			// by change time
+			if from != nil && from.After(file.ModTime()) {
+				continue
+			}
+
+			if to != nil && to.Before(file.ModTime()) {
+				continue
+			}
+
+			result = append(result, file)
+		}
+
+		dir.Close()
 	}
 
-	sort.Slice(files, func(i, j int) bool { return files[i].Name() > files[j].Name() })
+	sort.Slice(result, func(i, j int) bool { return result[i].Name() > result[j].Name() })
 
-	return files, err
+	return result, err
 }
 
 func (b *Bind) Load(filename string, writer io.Writer) error {
-	filename = b.config().SaveDirectory + string(os.PathSeparator) + filename
+	filename = filepath.Join(b.config().SaveDirectory, filename)
 	f, err := os.Open(filename)
 	if err != nil {
 		return err
