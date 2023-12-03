@@ -2,6 +2,7 @@
 # http://psenyukov.ru/%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B0-sonoff-nspanel-%D0%B2-esphome-%D0%B8-%D1%83%D0%BF%D1%80%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5-%D1%83%D1%81%D1%82%D1%80%D0%BE%D0%B9%D1%81%D1%82/
 # https://github.com/marcfager/nspanel-mf/blob/main/esphome/nspanel-mf.yaml
 # https://github.com/esphome/issues/issues/2423
+# https://github.com/esphome/issues/issues/5161
 
 #  Device Model:     NX4832F035_011C
 #  Firmware Version: 51
@@ -10,152 +11,85 @@
 #  Wake On Touch:    True
 #  Wake Up Page :       4
 
-debug:
+# update 2023-12-03
+#
+# 0. Отключить питание
+# 1. Подключить пины на плане
+#    GND-GND
+#    RX - TX
+#    TX - RX
+#    3.3 - 3.3
+#    IO0 - замкнуть на GND на самой плате (короткие коннекторы 8 штук)
+#    5 - 5 (подпаянный) ???
+# 2. Прошить свежий ESPHome командой esphome run device_014.yaml
+# 3. Если постоянно перезагружается после прошивки, значит питания не достаточно 3.3в
+#    для запуска wifi, нужно подключить 5в
+# 4.
+
+#debug:
 
 substitutions:
   node_name: !secret device_014_node_name
   ip_address: !secret device_014_ip_address
 
+  device_name: !secret device_014_node_name
+  nextion_update_url: !secret device_014_nextion_update_url
+  wifi_ssid: !secret home_wifi_ssid
+  wifi_password: !secret home_wifi_pssword
+
+wifi:
+  use_address: ${ip_address}
+  fast_connect: true # чтобы подключаться к скрытой сети, отключает предварительное сканирование
+
 packages:
+  remote_package:
+    url: https://github.com/Blackymas/NSPanel_HA_Blueprint
+    ref: dev
+    files:
+      - nspanel_esphome.yaml # Core package
+      # - nspanel_esphome_advanced.yaml # activate advanced (legacy) elements - can be useful for troubleshooting
+      # - nspanel_esphome_addon_climate_cool.yaml # activate for local climate (cooling) control
+      # - nspanel_esphome_addon_climate_heat.yaml # activate for local climate (heater) control
+    refresh: 300s
   common: !include ./_includes/common.yaml
-  wifi: !include ./_includes/wifi/home.yaml
-  binary_sensor: !include ./_includes/binary_sensor.yaml
-  sensor: !include ./_includes/sensor.yaml
-  switch: !include ./_includes/switch.yaml
-  text_sensor: !include ./_includes/text_sensor.yaml
-  time: !include ./_includes/time.yaml
+#  binary_sensor: !include ./_includes/binary_sensor.yaml
+#  sensor: !include ./_includes/sensor.yaml
+#  switch: !include ./_includes/switch.yaml
+#  text_sensor: !include ./_includes/text_sensor.yaml
+#  time: !include ./_includes/time.yaml
+
+
+#button:
+#  - id: !extend my_id
+#    name: Overriden name
+
+
+#esp32:
+#  framework:
+#    type: esp-idf
 
 esphome:
   comment: !secret device_014_comment
-
-esp32:
-  board: esp32dev
-
-logger:
-  level: "DEBUG"
-  baud_rate: 0
-
-#api:
-#  services:
-#    - service: upload_tft
-#      then:
-#        - lambda: 'id(display_nextion)->upload_tft();'
-
-uart:
-  tx_pin: 16
-  rx_pin: 17
-  baud_rate: 115200
-  id: tf_uart
+  platformio_options:
+    # крайне важный параметр, так как где1-то в обновлениях все по умолчанию стало 460800
+    # а устройство это не поддерживает
+    upload_speed: 115200
 
 #external_components:
-#  - source: github://pr#2956
+#  - source: github://pr#5825
 #    components: [nextion]
-#    refresh: 1h
+#    refresh: 1s
 
-# speaker
-output:
-  - platform: ledc
-    id: buzzer_out
-    pin:
-      number: 21
-rtttl:
-  id: buzzer
-  output: buzzer_out
 
-button:
-  - platform: template
-    name: TFT Upload
-    device_class: update
-    on_press:
-      - lambda: 'id(display_nextion).upload_tft();'
+#logger:
+#  level: DEBUG
+#  baud_rate: 115200
 
-# Binary sensors
-binary_sensor:
-  # Left button below the display
-  - platform: gpio
-    id: button_left
-    name: Left Button
-    pin:
-      number: 14
-      inverted: true
-    on_click:
-      - switch.toggle: relay_left
-
-  # Right button below the display
-  - platform: gpio
-    id: button_right
-    name: Right Button
-    pin:
-      number: 27
-      inverted: true
-    on_click:
-      - switch.toggle: relay_right
-
-switch:
-  # Physical relay 1
-  - platform: gpio
-    id: relay_left
-    name: Relay left
-    pin:
-      number: 22
-
-  # Physical relay 2
-  - platform: gpio
-    id: relay_right
-    name: Relay right
-    pin:
-      number: 19
-
-  # Turn screen power on/off. Easy way to configure the screen power control, but this should not be used from HA, as all components must be re-initialized afterwards. For lights, names of lights etc. this practically means that the state must change once to happen.
-  - platform: gpio
-    name: Screen Power
-    id: screen_power
-    entity_category: config
-    pin:
-      number: 4
-      inverted: true
-    restore_mode: ALWAYS_ON
-
-sensor:
-  # Internal temperature sensor, adc value
-  - platform: adc
-    id: ntc_source
-    name: NTC sensor
-    pin: 38
-    update_interval: 10s
-    attenuation: 11db
-
-  # Internal temperature sensor, adc reading converted to resistance (calculation)
-  - platform: resistance
-    id: resistance_sensor
-    name: NTC resistance sensor
-    sensor: ntc_source
-    configuration: DOWNSTREAM
-    resistor: 11.2kOhm
-
-  # Internal temperature sensor, resistance to temperature (calculation)
-  - platform: ntc
-    id: temperature
-    name: Temperature
-    sensor: resistance_sensor
-    calibration:
-      b_constant: 3950
-      reference_temperature: 25°C
-      reference_resistance: 10kOhm
-
-display:
-  - platform: nextion
-    id: display_nextion
-    uart_id: tf_uart
-    tft_url: !secret device_014_nextion_update_url
-#    update_interval: 60s
-#    auto_wake_on_touch: true
-#    wake_up_page: 4
-#    on_setup:
-#      then:
-#         Enable 1 light page (up to 4 available)
-#        - lambda: id(display_nextion).send_command_printf("Lights.pages.val=1");
-#        - lambda: id(display_nextion).send_command_printf("page 4");
-#        - switch.template.publish:
-#            id: nextion_init
-#            state: on
+time:
+  - id: !extend time_provider
+    on_time:
+      - seconds: /3
+        then:
+          - lambda: |-
+              ESP_LOGD("DEBUG", "disp1->is_detected(): %s", disp1->is_detected() ? "True" : "False");
+              ESP_LOGD("DEBUG", "disp1->is_setup(): %s", disp1->is_setup() ? "True" : "False");
