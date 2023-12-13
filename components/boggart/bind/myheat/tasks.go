@@ -3,6 +3,7 @@ package myheat
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/providers/myheat/device/client/sensors"
@@ -55,6 +56,8 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 	sensorsResponse, e := b.client.Sensors.GetSensors(sensors.NewGetSensorsParamsWithContext(ctx), nil)
 	if e == nil {
 		for _, sensor := range sensorsResponse.Payload {
+			metricSensorValue.With("serial_number", sn).With("id", strconv.FormatInt(sensor.ID, 10)).Set(sensor.Value)
+
 			if e := b.MQTT().PublishAsync(ctx, cfg.TopicSensorValue.Format(sn, sensor.ID), sensor.Value); e != nil {
 				err = multierr.Append(err, fmt.Errorf("publish value for sensor %d return error: %w", sensor.ID, e))
 			}
