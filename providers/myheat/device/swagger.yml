@@ -70,6 +70,22 @@ paths:
           description: "Successful login"
           schema:
             $ref: "#/definitions/Sensors"
+  /updateSensor:
+    post:
+      operationId: "updateSensor"
+      tags:
+        - "sensors"
+      summary: "Update sensor name"
+      parameters:
+        - name: "request"
+          in: "body"
+          schema:
+            $ref: "#/definitions/UpdateSensorRequest"
+      responses:
+        200:
+          description: "Successful login"
+          schema:
+            $ref: "#/definitions/Status"
 definitions:
   BooleanAsString:
     type: "string"
@@ -79,6 +95,145 @@ definitions:
         package: "github.com/kihamo/boggart/protocols/swagger"
       type: "BooleanAsString"
     x-nullable: false
+  DictionaryItem:
+    type: "object"
+    properties:
+      i:
+        x-go-name: "ID"
+        type: "integer"
+        description: "id"
+      "n":
+        x-go-name: "Name"
+        type: "string"
+        description: "name"
+  Device:
+    type: "object"
+    properties:
+      i:
+        x-go-name: "ID"
+        type: "integer"
+        description: "id"
+      "n":
+        x-go-name: "Name"
+        type: "string"
+        description: "name"
+      "t":
+        x-go-name: "Type"
+        type: "integer"
+        description: "object type"
+      f:
+        type: "integer"
+      sev:
+        x-go-name: "SeverityLevel"
+        type: "integer"
+        description: "device severity level"
+        enum:
+          - 1 # норма
+          - 32 # предупреждение
+          - 64 # кретический
+      s: #findValById
+        x-go-name: "State"
+        description: "state"
+        type: "object"
+        additionalProperties:
+          type: "string"
+      ##### Зональное управление / Контур ГВС (103)
+      # 1 Текущая температура
+      # 4 Установлена таргетная температура Да/Нет
+      #
+      ##### Котлы / Котел (303)
+      #   1 Всегда -16777216
+      #   4 Всегда -16777216
+      # 100 Температура подающей линии
+      # 101 Обратная линия
+      # 103 Температура контура ГВС
+      # 109 Давление в бар
+      # 110 Модуляция горелки
+      # 120 Общее время работы (горения)
+      st:
+        x-go-name: "Settings"
+        description: "Settings"
+        type: "object"
+        additionalProperties:
+          type: "number"
+      # Поле st оно же настройки устройств, можно определить через верстку виджетов в разделе
+      # Настройки устройства > Расширенные настройки и открыть объект для редактирования
+      #
+      ##### Котлы / Котел (303)
+      #   45 Гистерезис включения котлов, управляемых в режиме термостата
+      #   46 Гистерезис выключения котлов, управляемых в режиме термостата
+      #   56 Задержка формирования предупреждения о возможной ошибке на котле.
+      # 2202 Модель
+      # 2207 Тип топлива
+      # 3005 Мин. критическое давление, бар
+      # 3011 Максимальное целевое значение
+      # 3039 Смещение температуры отопления / Используется для определения температуры отопления для нагрева по формуле: <целевая температура> + <смещение>
+      # 3043 Время пост-циркуляции насоса
+      # 3044 Время циркуляции насоса при переключении
+      # 3045 Время пре-циркуляции насоса
+      # 3070 Задать максимальное целевое значение
+      # 3072 Комментарии
+      # 3100 Инвертировать работу реле - при запросе отопления реле будет разомкнуто, в противном случае замкнуто.
+      # 3114 Настроить включение по расписанию
+      # 3115 Выберите интервалы времени, когда требуется включение оборудования
+      # 3117 Доступно в системах умного дома
+      # 3122 Макс. критическое давление, бар
+      # 3138 Использовать уличный датчик котла для определения уличной температуры
+      # 3149 Ограничить максимальную мощность котла
+      # 3150 Максимальная мощность котла
+      # 3151 Отображение элемента
+      #
+      ##### Инженерное оборудование / Насос (302)
+      # 3043 Время пост-циркуляции насоса
+      # 3097 Периодичность включения защиты от закисания
+      # 3099 Включить защиту от закисания
+      # 3114 Настроить включение по расписанию
+      # 3115 Выберите интервалы времени, когда требуется включение оборудования
+      # 3117 Доступно в системах умного дома / Установите флажок, для возможности отображения и управления данной зоной при помощи сторонних сервисов
+      # 3151 Отображение элемента / Установите флажок, если хотите, чтобы элемент отображался на панели управления. Если вы хотите чтобы он был скрыт, снимите флажок.
+      #
+      ##### Зональное управление / Контур ГВС (103)
+      # 3008 ???? Таргетное значение температуры
+      # 3011 Максимальное целевое значение
+      # 3012 Минимальное целевое значение
+      # 3026 Контроль зоны
+      # 3072 Комментарии
+      # 3117 Доступно в системах умного дома
+      # 3151 Отображение элемента
+      #
+      ##### Зональное управление / Температура помещения (101)
+      # 3004 Максимальное критическое значение
+      # 3006 Минимальное критическое значение
+      # 3007 Гистерезис выключения в режиме защиты от замерзания
+      # 3009 Гистерезис выключения
+      # 3010 Гистерезис включения
+      # 3011 Максимальное целевое значение
+      # 3012 Минимальное целевое значение
+      # 3019 Температура контура отопления для нагрева
+      # 3023 Интервал включения
+      # 3024 Продолжительность работы
+      # 3025 Периодическое включение
+      # 3026 Контроль зоны
+      # 3029 Действие при пропадании всех датчиков
+      # 3030 Температура замерзания
+      # 3046 Задать определенную целевую температуру контуру отопления для прогрева данной зоны.
+      # 3058 Правило вычисления значения
+      # 3068 Влияет на целевую температуру котлов
+      # 3071 Отапливается с помощью
+      # 3072 Комментарии
+      # 3073 Минимальная уличная температура
+      # 3074 Интервал включения при минимальной температуре
+      # 3075 Продолжительность работы при минимальной температуре
+      # 3076 Максимальная уличная температура
+      # 3077 Интервал включения при максимальной температуре
+      # 3078 Продолжительность работы при максимальной температуре
+      # 3080 Наружняя температура, при превышении которой зона не будет запрашивать отопление в случае пропадания всех датчиков
+      # 3104 Отключать при нагреве бойлера ГВС (приоритет бойлера).
+      # 3106 Режим нагрева
+      # 3117 Доступно в системах умного дома
+      # 3121 Включить отопление при запросе от
+      # 3127 Управление охлаждением
+      # 3151 Отображение элемента
   Status:
     type: "object"
     properties:
@@ -132,6 +287,13 @@ definitions:
           - "eng" # раздел Инженерное оборудование
       value:
         type: "integer" # 0 - выкл, 1 - вкл, -16777216 - авто
+  UpdateSensorRequest:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      name:
+        type: "string"
   State:
     type: "object"
     properties:
@@ -165,65 +327,49 @@ definitions:
         #  1 - Норма
         # 32 - Предупреждение
         # 64 - Критический
+      hMode:
+        x-go-name: "HeatMode"
+        type: "integer"
+        description: "heating mode"
+      securityArmed:
+        type: "boolean"
+        description: "Security mode enabled or disabled. Activate in control panel"
+        x-nullable: true
       simSignal:
         type: "integer"
       simBalance:
         type: "number"
         format: "float64"
-      hMode:
-        type: "integer"
-        description: "heating mode"
-      hModes:
-        type: "array"
-        items:
-          type: "object"
-          properties:
-            i:
-              type: "integer"
-              description: "id"
-            "n":
-              type: "string"
-              description: "name"
-      securityArmed:
-        type: "boolean"
-        description: "Security mode enabled or disabled. Activate in control panel"
-        x-nullable: true
       alarms:
         type: "array"
         items:
-          type: "object"
-          properties:
-            i:
-              type: "integer"
-              description: "id"
-            "n":
-              type: "string"
-              description: "name"
-            "t":
-              type: "integer"
-              description: "object type"
-            f:
-              type: "integer"
-            sev:
-              type: "integer"
-              description: "device severity level"
-              enum:
-                -  1 # норма
-                - 32 # предупреждение
-                - 64 # кретический
-            # st -> findValById
-            # s  -> findValById
-      scheds:
+          $ref: "#/definitions/Device"
+      # curves
+      engs:
+        description: "Engineering equipment"
+        x-go-name: "EngineeringEquipment"
         type: "array"
         items:
-          type: "object"
-          properties:
-            i:
-              type: "integer"
-              description: "id"
-            "n":
-              type: "string"
-              description: "name"
+          $ref: "#/definitions/Device"
+      envs:
+        x-go-name: "Environments"
+        type: "array"
+        items:
+          $ref: "#/definitions/Device"
+      hModes:
+        x-go-name: "HeatModes"
+        type: "array"
+        items:
+          $ref: "#/definitions/DictionaryItem"
+      heaters:
+        type: "array"
+        items:
+          $ref: "#/definitions/Device"
+      scheds:
+        x-go-name: "Schedules"
+        type: "array"
+        items:
+          $ref: "#/definitions/DictionaryItem"
   Sensors:
     type: "array"
     items:
@@ -232,6 +378,7 @@ definitions:
     type: "object"
     properties:
       hwId:
+        x-go-name: "HardwareID"
         type: "string"
       id:
         type: "integer"
@@ -284,3 +431,5 @@ definitions:
       value:
         type: "number"
         format: "float64"
+
+# null это -16777216

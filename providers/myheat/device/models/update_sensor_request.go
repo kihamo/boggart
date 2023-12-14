@@ -12,39 +12,30 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// Sensor sensor
+// UpdateSensorRequest update sensor request
 //
-// swagger:model Sensor
-type Sensor struct {
-
-	// hardware ID
-	HardwareID string `json:"hwId,omitempty"`
+// swagger:model UpdateSensorRequest
+type UpdateSensorRequest struct {
 
 	// id
 	ID int64 `json:"id,omitempty"`
 
 	// name
 	Name string `json:"name,omitempty"`
-
-	// type
-	Type int64 `json:"type,omitempty"`
-
-	// value
-	Value float64 `json:"value,omitempty"`
 }
 
-// Validate validates this sensor
-func (m *Sensor) Validate(formats strfmt.Registry) error {
+// Validate validates this update sensor request
+func (m *UpdateSensorRequest) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-// ContextValidate validates this sensor based on context it is used
-func (m *Sensor) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+// ContextValidate validates this update sensor request based on context it is used
+func (m *UpdateSensorRequest) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (m *Sensor) MarshalBinary() ([]byte, error) {
+func (m *UpdateSensorRequest) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -52,8 +43,8 @@ func (m *Sensor) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *Sensor) UnmarshalBinary(b []byte) error {
-	var res Sensor
+func (m *UpdateSensorRequest) UnmarshalBinary(b []byte) error {
+	var res UpdateSensorRequest
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
