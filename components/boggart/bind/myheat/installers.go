@@ -5,6 +5,8 @@ import (
 	"errors"
 	"strconv"
 
+	"github.com/kihamo/boggart/providers/myheat"
+
 	"github.com/kihamo/boggart/components/boggart/installer"
 	"github.com/kihamo/boggart/components/boggart/installer/openhab"
 	"github.com/kihamo/boggart/providers/myheat/device/client/sensors"
@@ -39,15 +41,17 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 	channels := make([]*openhab.Channel, 0, len(sensorsResponse.Payload)+1+7)
 
 	const (
-		idSensor              = "Sensor"
-		idSecurityArmed       = "SecurityArmed"
-		idDeviceSeverity      = "DeviceSeverity"
-		idInternetConnected   = "InternetConnected"
-		idGSMSignalLevel      = "GSMSignalLevel"
-		idGSMBalance          = "GSMBalance"
-		idAlarmPowerSupply    = "AlarmPowerSupply"
-		idAlarmReplaceBattery = "AlarmReplaceBattery"
-		idAlarmGSMBalance     = "AlarmGSMBalance"
+		idSensor                       = "Sensor"
+		idSecurityArmed                = "SecurityArmed"
+		idDeviceSeverity               = "DeviceSeverity"
+		idInternetConnected            = "InternetConnected"
+		idGSMSignalLevel               = "GSMSignalLevel"
+		idGSMBalance                   = "GSMBalance"
+		idAlarmPowerSupply             = "AlarmPowerSupply"
+		idAlarmReplaceBattery          = "AlarmReplaceBattery"
+		idAlarmGSMBalance              = "AlarmGSMBalance"
+		idHeaterHeatingFlowTemperature = "HeaterHeatingFlowTemperature"
+		idHeaterHeatingCircuitPressure = "HeaterHeatingCircuitPressure"
 	)
 
 	for _, sensor := range sensorsResponse.Payload {
@@ -84,6 +88,34 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 						openhab.NewItem(itemPrefix+idSensor+id, openhab.ItemTypeNumber).
 							WithLabel(sensor.Name).
 							WithIcon("chart"),
+					),
+			)
+		}
+	}
+
+	for _, heater := range stateObjResponse.Payload.Heaters {
+		id := strconv.FormatInt(heater.ID, 10)
+
+		if _, ok := heater.State[myheat.HeaterHeatingFlowTemperatureCelsius]; ok {
+			channels = append(channels,
+				openhab.NewChannel(idHeaterHeatingFlowTemperature+id, openhab.ChannelTypeNumber).
+					WithStateTopic(cfg.TopicHeaterHeatingFlowTemperature.Format(sn, heater.ID)).
+					AddItems(
+						openhab.NewItem(itemPrefix+idHeaterHeatingFlowTemperature+id, openhab.ItemTypeNumber).
+							WithLabel(heater.Name+" heating flow [%.2f °C]").
+							WithIcon("temperature"),
+					),
+			)
+		}
+
+		if _, ok := heater.State[myheat.HeaterHeatingCircuitPressureBar]; ok {
+			channels = append(channels,
+				openhab.NewChannel(idHeaterHeatingCircuitPressure+id, openhab.ChannelTypeNumber).
+					WithStateTopic(cfg.TopicHeaterHeatingCircuitPressure.Format(sn, heater.ID)).
+					AddItems(
+						openhab.NewItem(itemPrefix+idHeaterHeatingCircuitPressure+id, openhab.ItemTypeNumber).
+							WithLabel(heater.Name+" heating circuit pressure [%.2f bar]").
+							WithIcon("pressure"),
 					),
 			)
 		}

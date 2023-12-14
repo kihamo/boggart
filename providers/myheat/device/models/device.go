@@ -27,14 +27,14 @@ type Device struct {
 	Name string `json:"n,omitempty"`
 
 	// Settings
-	Settings map[string]float64 `json:"st,omitempty"`
+	Settings map[string]string `json:"s,omitempty"`
 
 	// device severity level
 	// Enum: [1 32 64]
 	SeverityLevel int64 `json:"sev,omitempty"`
 
 	// state
-	State map[string]string `json:"s,omitempty"`
+	State map[string]float64 `json:"st,omitempty"`
 
 	// object type
 	Type int64 `json:"t,omitempty"`

@@ -132,8 +132,8 @@ definitions:
           - 32 # предупреждение
           - 64 # кретический
       s: #findValById
-        x-go-name: "State"
-        description: "state"
+        x-go-name: "Settings"
+        description: "Settings"
         type: "object"
         additionalProperties:
           type: "string"
@@ -151,8 +151,8 @@ definitions:
       # 110 Модуляция горелки
       # 120 Общее время работы (горения)
       st:
-        x-go-name: "Settings"
-        description: "Settings"
+        x-go-name: "State"
+        description: "state"
         type: "object"
         additionalProperties:
           type: "number"

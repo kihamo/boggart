@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/kihamo/boggart/providers/myheat"
+
 	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/providers/myheat/device/client/sensors"
 	"github.com/kihamo/boggart/providers/myheat/device/client/state"
@@ -69,6 +71,27 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 	// основные статусы
 	stateObjResponse, e := b.client.State.GetObjState(state.NewGetObjStateParamsWithContext(ctx), nil)
 	if e == nil {
+		// heaters
+		for _, heater := range stateObjResponse.Payload.Heaters {
+			heaterID := strconv.FormatInt(heater.ID, 10)
+
+			if v, ok := heater.State[myheat.HeaterHeatingFlowTemperatureCelsius]; ok {
+				metricHeaterHeatingFlowTemperatureCelsius.With("serial_number", sn).With("id", heaterID).Set(v)
+
+				if e := b.MQTT().PublishAsync(ctx, cfg.TopicHeaterHeatingFlowTemperature.Format(sn, heaterID), v); e != nil {
+					err = multierr.Append(err, fmt.Errorf("publish value for heater %d return error: %w", heaterID, e))
+				}
+			}
+
+			if v, ok := heater.State[myheat.HeaterHeatingCircuitPressureBar]; ok {
+				metricHeaterHeatingCircuitPressureBar.With("serial_number", sn).With("id", heaterID).Set(v)
+
+				if e := b.MQTT().PublishAsync(ctx, cfg.TopicHeaterHeatingCircuitPressure.Format(sn, heaterID), v); e != nil {
+					err = multierr.Append(err, fmt.Errorf("publish value for heater %d return error: %w", heaterID, e))
+				}
+			}
+		}
+
 		if v := stateObjResponse.Payload.SecurityArmed; v != nil {
 			if e := b.MQTT().PublishAsync(ctx, cfg.TopicSecurityArmedState.Format(sn), v); e != nil {
 				err = multierr.Append(err, fmt.Errorf("publish security armed state return error: %w", e))
