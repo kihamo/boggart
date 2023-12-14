@@ -6,6 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/go-openapi/errors"
@@ -86,7 +87,6 @@ func (m *AccountingInfo) Validate(formats strfmt.Registry) error {
 }
 
 func (m *AccountingInfo) validateBills(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Bills) { // not required
 		return nil
 	}
@@ -100,6 +100,8 @@ func (m *AccountingInfo) validateBills(formats strfmt.Registry) error {
 			if err := m.Bills[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("Bills" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("Bills" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -111,7 +113,6 @@ func (m *AccountingInfo) validateBills(formats strfmt.Registry) error {
 }
 
 func (m *AccountingInfo) validatePayments(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Payments) { // not required
 		return nil
 	}
@@ -125,6 +126,66 @@ func (m *AccountingInfo) validatePayments(formats strfmt.Registry) error {
 			if err := m.Payments[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("Payments" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("Payments" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContextValidate validate this accounting info based on the context it is used
+func (m *AccountingInfo) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateBills(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidatePayments(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *AccountingInfo) contextValidateBills(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.Bills); i++ {
+
+		if m.Bills[i] != nil {
+			if err := m.Bills[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("Bills" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("Bills" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *AccountingInfo) contextValidatePayments(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.Payments); i++ {
+
+		if m.Payments[i] != nil {
+			if err := m.Payments[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("Payments" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("Payments" + "." + strconv.Itoa(i))
 				}
 				return err
 			}

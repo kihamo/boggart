@@ -16,56 +16,70 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewDeleteByIdentParams creates a new DeleteByIdentParams object
-// with the default values initialized.
+// NewDeleteByIdentParams creates a new DeleteByIdentParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewDeleteByIdentParams() *DeleteByIdentParams {
-	var ()
 	return &DeleteByIdentParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewDeleteByIdentParamsWithTimeout creates a new DeleteByIdentParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewDeleteByIdentParamsWithTimeout(timeout time.Duration) *DeleteByIdentParams {
-	var ()
 	return &DeleteByIdentParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewDeleteByIdentParamsWithContext creates a new DeleteByIdentParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewDeleteByIdentParamsWithContext(ctx context.Context) *DeleteByIdentParams {
-	var ()
 	return &DeleteByIdentParams{
-
 		Context: ctx,
 	}
 }
 
 // NewDeleteByIdentParamsWithHTTPClient creates a new DeleteByIdentParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewDeleteByIdentParamsWithHTTPClient(client *http.Client) *DeleteByIdentParams {
-	var ()
 	return &DeleteByIdentParams{
 		HTTPClient: client,
 	}
 }
 
-/*DeleteByIdentParams contains all the parameters to send to the API endpoint
-for the delete by ident operation typically these are written to a http.Request
+/* DeleteByIdentParams contains all the parameters to send to the API endpoint
+   for the delete by ident operation.
+
+   Typically these are written to a http.Request.
 */
 type DeleteByIdentParams struct {
 
-	/*Request*/
+	// Request.
 	Request DeleteByIdentBody
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the delete by ident params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *DeleteByIdentParams) WithDefaults() *DeleteByIdentParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the delete by ident params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *DeleteByIdentParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the delete by ident params
@@ -119,7 +133,6 @@ func (o *DeleteByIdentParams) WriteToRequest(r runtime.ClientRequest, reg strfmt
 		return err
 	}
 	var res []error
-
 	if err := r.SetBodyParam(o.Request); err != nil {
 		return err
 	}

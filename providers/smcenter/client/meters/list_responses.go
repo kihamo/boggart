@@ -6,6 +6,7 @@ package meters
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"strconv"
@@ -55,7 +56,7 @@ func NewListOK() *ListOK {
 	return &ListOK{}
 }
 
-/*ListOK handles this case with default header values.
+/* ListOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -66,7 +67,6 @@ type ListOK struct {
 func (o *ListOK) Error() string {
 	return fmt.Sprintf("[GET /Meters/List][%d] listOK  %+v", 200, o.Payload)
 }
-
 func (o *ListOK) GetPayload() *ListOKBody {
 	return o.Payload
 }
@@ -88,7 +88,7 @@ func NewListUnauthorized() *ListUnauthorized {
 	return &ListUnauthorized{}
 }
 
-/*ListUnauthorized handles this case with default header values.
+/* ListUnauthorized describes a response with status code 401, with default header values.
 
 Unauthorized
 */
@@ -99,7 +99,6 @@ type ListUnauthorized struct {
 func (o *ListUnauthorized) Error() string {
 	return fmt.Sprintf("[GET /Meters/List][%d] listUnauthorized  %+v", 401, o.Payload)
 }
-
 func (o *ListUnauthorized) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -123,7 +122,7 @@ func NewListDefault(code int) *ListDefault {
 	}
 }
 
-/*ListDefault handles this case with default header values.
+/* ListDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -141,7 +140,6 @@ func (o *ListDefault) Code() int {
 func (o *ListDefault) Error() string {
 	return fmt.Sprintf("[GET /Meters/List][%d] list default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *ListDefault) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -182,7 +180,6 @@ func (o *ListOKBody) Validate(formats strfmt.Registry) error {
 }
 
 func (o *ListOKBody) validateData(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Data) { // not required
 		return nil
 	}
@@ -196,6 +193,42 @@ func (o *ListOKBody) validateData(formats strfmt.Registry) error {
 			if err := o.Data[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("listOK" + "." + "Data" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("listOK" + "." + "Data" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContextValidate validate this list o k body based on the context it is used
+func (o *ListOKBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.contextValidateData(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *ListOKBody) contextValidateData(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(o.Data); i++ {
+
+		if o.Data[i] != nil {
+			if err := o.Data[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("listOK" + "." + "Data" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("listOK" + "." + "Data" + "." + strconv.Itoa(i))
 				}
 				return err
 			}

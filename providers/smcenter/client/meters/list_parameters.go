@@ -16,52 +16,66 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewListParams creates a new ListParams object
-// with the default values initialized.
+// NewListParams creates a new ListParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewListParams() *ListParams {
-
 	return &ListParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewListParamsWithTimeout creates a new ListParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewListParamsWithTimeout(timeout time.Duration) *ListParams {
-
 	return &ListParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewListParamsWithContext creates a new ListParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewListParamsWithContext(ctx context.Context) *ListParams {
-
 	return &ListParams{
-
 		Context: ctx,
 	}
 }
 
 // NewListParamsWithHTTPClient creates a new ListParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewListParamsWithHTTPClient(client *http.Client) *ListParams {
-
 	return &ListParams{
 		HTTPClient: client,
 	}
 }
 
-/*ListParams contains all the parameters to send to the API endpoint
-for the list operation typically these are written to a http.Request
+/* ListParams contains all the parameters to send to the API endpoint
+   for the list operation.
+
+   Typically these are written to a http.Request.
 */
 type ListParams struct {
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the list params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *ListParams) WithDefaults() *ListParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the list params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *ListParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the list params

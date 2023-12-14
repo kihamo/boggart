@@ -2,6 +2,7 @@ package swagger
 
 import (
 	"bytes"
+	"context"
 	"time"
 
 	"github.com/go-openapi/strfmt"
@@ -25,7 +26,11 @@ func (m *Date) Time() time.Time {
 	return time.Time(m.Date)
 }
 
-func (m *Date) Validate(formats strfmt.Registry) error {
+func (m *Date) Validate(strfmt.Registry) error {
+	return nil
+}
+
+func (m *Date) ContextValidate(context.Context, strfmt.Registry) error {
 	return nil
 }
 

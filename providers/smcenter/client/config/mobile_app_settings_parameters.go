@@ -16,52 +16,66 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewMobileAppSettingsParams creates a new MobileAppSettingsParams object
-// with the default values initialized.
+// NewMobileAppSettingsParams creates a new MobileAppSettingsParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewMobileAppSettingsParams() *MobileAppSettingsParams {
-
 	return &MobileAppSettingsParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewMobileAppSettingsParamsWithTimeout creates a new MobileAppSettingsParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewMobileAppSettingsParamsWithTimeout(timeout time.Duration) *MobileAppSettingsParams {
-
 	return &MobileAppSettingsParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewMobileAppSettingsParamsWithContext creates a new MobileAppSettingsParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewMobileAppSettingsParamsWithContext(ctx context.Context) *MobileAppSettingsParams {
-
 	return &MobileAppSettingsParams{
-
 		Context: ctx,
 	}
 }
 
 // NewMobileAppSettingsParamsWithHTTPClient creates a new MobileAppSettingsParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewMobileAppSettingsParamsWithHTTPClient(client *http.Client) *MobileAppSettingsParams {
-
 	return &MobileAppSettingsParams{
 		HTTPClient: client,
 	}
 }
 
-/*MobileAppSettingsParams contains all the parameters to send to the API endpoint
-for the mobile app settings operation typically these are written to a http.Request
+/* MobileAppSettingsParams contains all the parameters to send to the API endpoint
+   for the mobile app settings operation.
+
+   Typically these are written to a http.Request.
 */
 type MobileAppSettingsParams struct {
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the mobile app settings params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *MobileAppSettingsParams) WithDefaults() *MobileAppSettingsParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the mobile app settings params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *MobileAppSettingsParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the mobile app settings params

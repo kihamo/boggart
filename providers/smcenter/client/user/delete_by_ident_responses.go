@@ -6,6 +6,7 @@ package user
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"fmt"
 	"io"
 
@@ -53,7 +54,7 @@ func NewDeleteByIdentOK() *DeleteByIdentOK {
 	return &DeleteByIdentOK{}
 }
 
-/*DeleteByIdentOK handles this case with default header values.
+/* DeleteByIdentOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -74,7 +75,7 @@ func NewDeleteByIdentUnauthorized() *DeleteByIdentUnauthorized {
 	return &DeleteByIdentUnauthorized{}
 }
 
-/*DeleteByIdentUnauthorized handles this case with default header values.
+/* DeleteByIdentUnauthorized describes a response with status code 401, with default header values.
 
 Unauthorized
 */
@@ -85,7 +86,6 @@ type DeleteByIdentUnauthorized struct {
 func (o *DeleteByIdentUnauthorized) Error() string {
 	return fmt.Sprintf("[POST /User/DeleteAccountByIdent][%d] deleteByIdentUnauthorized  %+v", 401, o.Payload)
 }
-
 func (o *DeleteByIdentUnauthorized) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -109,7 +109,7 @@ func NewDeleteByIdentDefault(code int) *DeleteByIdentDefault {
 	}
 }
 
-/*DeleteByIdentDefault handles this case with default header values.
+/* DeleteByIdentDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -127,7 +127,6 @@ func (o *DeleteByIdentDefault) Code() int {
 func (o *DeleteByIdentDefault) Error() string {
 	return fmt.Sprintf("[POST /User/DeleteAccountByIdent][%d] deleteByIdent default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *DeleteByIdentDefault) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -155,6 +154,11 @@ type DeleteByIdentBody struct {
 
 // Validate validates this delete by ident body
 func (o *DeleteByIdentBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this delete by ident body based on context it is used
+func (o *DeleteByIdentBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

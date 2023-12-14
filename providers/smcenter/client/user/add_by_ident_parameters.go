@@ -16,56 +16,70 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewAddByIdentParams creates a new AddByIdentParams object
-// with the default values initialized.
+// NewAddByIdentParams creates a new AddByIdentParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewAddByIdentParams() *AddByIdentParams {
-	var ()
 	return &AddByIdentParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewAddByIdentParamsWithTimeout creates a new AddByIdentParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewAddByIdentParamsWithTimeout(timeout time.Duration) *AddByIdentParams {
-	var ()
 	return &AddByIdentParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewAddByIdentParamsWithContext creates a new AddByIdentParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewAddByIdentParamsWithContext(ctx context.Context) *AddByIdentParams {
-	var ()
 	return &AddByIdentParams{
-
 		Context: ctx,
 	}
 }
 
 // NewAddByIdentParamsWithHTTPClient creates a new AddByIdentParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewAddByIdentParamsWithHTTPClient(client *http.Client) *AddByIdentParams {
-	var ()
 	return &AddByIdentParams{
 		HTTPClient: client,
 	}
 }
 
-/*AddByIdentParams contains all the parameters to send to the API endpoint
-for the add by ident operation typically these are written to a http.Request
+/* AddByIdentParams contains all the parameters to send to the API endpoint
+   for the add by ident operation.
+
+   Typically these are written to a http.Request.
 */
 type AddByIdentParams struct {
 
-	/*Request*/
+	// Request.
 	Request AddByIdentBody
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the add by ident params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *AddByIdentParams) WithDefaults() *AddByIdentParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the add by ident params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *AddByIdentParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the add by ident params
@@ -119,7 +133,6 @@ func (o *AddByIdentParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Re
 		return err
 	}
 	var res []error
-
 	if err := r.SetBodyParam(o.Request); err != nil {
 		return err
 	}

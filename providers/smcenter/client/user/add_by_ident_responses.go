@@ -6,6 +6,7 @@ package user
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"fmt"
 	"io"
 
@@ -55,7 +56,7 @@ func NewAddByIdentOK() *AddByIdentOK {
 	return &AddByIdentOK{}
 }
 
-/*AddByIdentOK handles this case with default header values.
+/* AddByIdentOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -66,7 +67,6 @@ type AddByIdentOK struct {
 func (o *AddByIdentOK) Error() string {
 	return fmt.Sprintf("[POST /User/AddAccountByIdent][%d] addByIdentOK  %+v", 200, o.Payload)
 }
-
 func (o *AddByIdentOK) GetPayload() *models.Account {
 	return o.Payload
 }
@@ -88,7 +88,7 @@ func NewAddByIdentUnauthorized() *AddByIdentUnauthorized {
 	return &AddByIdentUnauthorized{}
 }
 
-/*AddByIdentUnauthorized handles this case with default header values.
+/* AddByIdentUnauthorized describes a response with status code 401, with default header values.
 
 Unauthorized
 */
@@ -99,7 +99,6 @@ type AddByIdentUnauthorized struct {
 func (o *AddByIdentUnauthorized) Error() string {
 	return fmt.Sprintf("[POST /User/AddAccountByIdent][%d] addByIdentUnauthorized  %+v", 401, o.Payload)
 }
-
 func (o *AddByIdentUnauthorized) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -123,7 +122,7 @@ func NewAddByIdentDefault(code int) *AddByIdentDefault {
 	}
 }
 
-/*AddByIdentDefault handles this case with default header values.
+/* AddByIdentDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -141,7 +140,6 @@ func (o *AddByIdentDefault) Code() int {
 func (o *AddByIdentDefault) Error() string {
 	return fmt.Sprintf("[POST /User/AddAccountByIdent][%d] addByIdent default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *AddByIdentDefault) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -222,6 +220,11 @@ func (o *AddByIdentBody) validatePinCode(formats strfmt.Registry) error {
 		return err
 	}
 
+	return nil
+}
+
+// ContextValidate validates this add by ident body based on context it is used
+func (o *AddByIdentBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

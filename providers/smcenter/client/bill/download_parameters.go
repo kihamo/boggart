@@ -17,64 +17,83 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// NewDownloadParams creates a new DownloadParams object
-// with the default values initialized.
+// NewDownloadParams creates a new DownloadParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewDownloadParams() *DownloadParams {
-	var ()
 	return &DownloadParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewDownloadParamsWithTimeout creates a new DownloadParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewDownloadParamsWithTimeout(timeout time.Duration) *DownloadParams {
-	var ()
 	return &DownloadParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewDownloadParamsWithContext creates a new DownloadParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewDownloadParamsWithContext(ctx context.Context) *DownloadParams {
-	var ()
 	return &DownloadParams{
-
 		Context: ctx,
 	}
 }
 
 // NewDownloadParamsWithHTTPClient creates a new DownloadParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewDownloadParamsWithHTTPClient(client *http.Client) *DownloadParams {
-	var ()
 	return &DownloadParams{
 		HTTPClient: client,
 	}
 }
 
-/*DownloadParams contains all the parameters to send to the API endpoint
-for the download operation typically these are written to a http.Request
+/* DownloadParams contains all the parameters to send to the API endpoint
+   for the download operation.
+
+   Typically these are written to a http.Request.
 */
 type DownloadParams struct {
 
-	/*ID
-	  Bill ID
+	/* ID.
 
+	   Bill ID
+
+	   Format: uint64
 	*/
 	ID uint64
-	/*InJpg
-	  JPEG format or not
 
+	/* InJpg.
+
+	   JPEG format or not
+
+	   Format: uint64
 	*/
 	InJpg *uint64
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the download params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *DownloadParams) WithDefaults() *DownloadParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the download params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *DownloadParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the download params
@@ -149,16 +168,17 @@ func (o *DownloadParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regi
 
 		// query param inJpg
 		var qrInJpg uint64
+
 		if o.InJpg != nil {
 			qrInJpg = *o.InJpg
 		}
 		qInJpg := swag.FormatUint64(qrInJpg)
 		if qInJpg != "" {
+
 			if err := r.SetQueryParam("inJpg", qInJpg); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if len(res) > 0 {

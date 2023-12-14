@@ -52,7 +52,7 @@ func NewUserInfoOK() *UserInfoOK {
 	return &UserInfoOK{}
 }
 
-/*UserInfoOK handles this case with default header values.
+/* UserInfoOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -63,7 +63,6 @@ type UserInfoOK struct {
 func (o *UserInfoOK) Error() string {
 	return fmt.Sprintf("[GET /User/Info][%d] userInfoOK  %+v", 200, o.Payload)
 }
-
 func (o *UserInfoOK) GetPayload() *models.UserInfo {
 	return o.Payload
 }
@@ -85,7 +84,7 @@ func NewUserInfoUnauthorized() *UserInfoUnauthorized {
 	return &UserInfoUnauthorized{}
 }
 
-/*UserInfoUnauthorized handles this case with default header values.
+/* UserInfoUnauthorized describes a response with status code 401, with default header values.
 
 Unauthorized
 */
@@ -96,7 +95,6 @@ type UserInfoUnauthorized struct {
 func (o *UserInfoUnauthorized) Error() string {
 	return fmt.Sprintf("[GET /User/Info][%d] userInfoUnauthorized  %+v", 401, o.Payload)
 }
-
 func (o *UserInfoUnauthorized) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -120,7 +118,7 @@ func NewUserInfoDefault(code int) *UserInfoDefault {
 	}
 }
 
-/*UserInfoDefault handles this case with default header values.
+/* UserInfoDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -138,7 +136,6 @@ func (o *UserInfoDefault) Code() int {
 func (o *UserInfoDefault) Error() string {
 	return fmt.Sprintf("[GET /User/Info][%d] userInfo default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *UserInfoDefault) GetPayload() *models.Error {
 	return o.Payload
 }

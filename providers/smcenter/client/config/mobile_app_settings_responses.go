@@ -52,7 +52,7 @@ func NewMobileAppSettingsOK() *MobileAppSettingsOK {
 	return &MobileAppSettingsOK{}
 }
 
-/*MobileAppSettingsOK handles this case with default header values.
+/* MobileAppSettingsOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -63,7 +63,6 @@ type MobileAppSettingsOK struct {
 func (o *MobileAppSettingsOK) Error() string {
 	return fmt.Sprintf("[GET /Config/MobileAppSettings][%d] mobileAppSettingsOK  %+v", 200, o.Payload)
 }
-
 func (o *MobileAppSettingsOK) GetPayload() *models.MobileAppSettings {
 	return o.Payload
 }
@@ -85,7 +84,7 @@ func NewMobileAppSettingsUnauthorized() *MobileAppSettingsUnauthorized {
 	return &MobileAppSettingsUnauthorized{}
 }
 
-/*MobileAppSettingsUnauthorized handles this case with default header values.
+/* MobileAppSettingsUnauthorized describes a response with status code 401, with default header values.
 
 Unauthorized
 */
@@ -96,7 +95,6 @@ type MobileAppSettingsUnauthorized struct {
 func (o *MobileAppSettingsUnauthorized) Error() string {
 	return fmt.Sprintf("[GET /Config/MobileAppSettings][%d] mobileAppSettingsUnauthorized  %+v", 401, o.Payload)
 }
-
 func (o *MobileAppSettingsUnauthorized) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -120,7 +118,7 @@ func NewMobileAppSettingsDefault(code int) *MobileAppSettingsDefault {
 	}
 }
 
-/*MobileAppSettingsDefault handles this case with default header values.
+/* MobileAppSettingsDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -138,7 +136,6 @@ func (o *MobileAppSettingsDefault) Code() int {
 func (o *MobileAppSettingsDefault) Error() string {
 	return fmt.Sprintf("[GET /Config/MobileAppSettings][%d] mobileAppSettings default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *MobileAppSettingsDefault) GetPayload() *models.Error {
 	return o.Payload
 }

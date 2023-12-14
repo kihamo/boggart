@@ -13,7 +13,7 @@ schemes:
 host: "api.sm-center.ru"
 basePath: "/"
 paths:
-  /auth/login:
+  /auth/Login:
     post:
       operationId: "login"
       tags:

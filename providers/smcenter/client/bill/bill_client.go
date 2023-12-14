@@ -25,9 +25,12 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	Download(params *DownloadParams, writer io.Writer) (*DownloadOK, error)
+	Download(params *DownloadParams, writer io.Writer, opts ...ClientOption) (*DownloadOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -35,13 +38,12 @@ type ClientService interface {
 /*
   Download download API
 */
-func (a *Client) Download(params *DownloadParams, writer io.Writer) (*DownloadOK, error) {
+func (a *Client) Download(params *DownloadParams, writer io.Writer, opts ...ClientOption) (*DownloadOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewDownloadParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "download",
 		Method:             "GET",
 		PathPattern:        "/Public/DownloadBill/{id}",
@@ -52,7 +54,12 @@ func (a *Client) Download(params *DownloadParams, writer io.Writer) (*DownloadOK
 		Reader:             &DownloadReader{formats: a.formats, writer: writer},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

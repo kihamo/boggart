@@ -6,6 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/go-openapi/errors"
@@ -149,7 +150,6 @@ func (m *Meter) Validate(formats strfmt.Registry) error {
 }
 
 func (m *Meter) validateLastCheckupDate(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.LastCheckupDate) { // not required
 		return nil
 	}
@@ -157,6 +157,8 @@ func (m *Meter) validateLastCheckupDate(formats strfmt.Registry) error {
 	if err := m.LastCheckupDate.Validate(formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
 			return ve.ValidateName("LastCheckupDate")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("LastCheckupDate")
 		}
 		return err
 	}
@@ -165,7 +167,6 @@ func (m *Meter) validateLastCheckupDate(formats strfmt.Registry) error {
 }
 
 func (m *Meter) validateNextCheckupDate(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.NextCheckupDate) { // not required
 		return nil
 	}
@@ -173,6 +174,8 @@ func (m *Meter) validateNextCheckupDate(formats strfmt.Registry) error {
 	if err := m.NextCheckupDate.Validate(formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
 			return ve.ValidateName("NextCheckupDate")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("NextCheckupDate")
 		}
 		return err
 	}
@@ -181,7 +184,6 @@ func (m *Meter) validateNextCheckupDate(formats strfmt.Registry) error {
 }
 
 func (m *Meter) validateStartDate(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.StartDate) { // not required
 		return nil
 	}
@@ -189,6 +191,8 @@ func (m *Meter) validateStartDate(formats strfmt.Registry) error {
 	if err := m.StartDate.Validate(formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
 			return ve.ValidateName("StartDate")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("StartDate")
 		}
 		return err
 	}
@@ -197,7 +201,6 @@ func (m *Meter) validateStartDate(formats strfmt.Registry) error {
 }
 
 func (m *Meter) validateValues(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Values) { // not required
 		return nil
 	}
@@ -211,6 +214,96 @@ func (m *Meter) validateValues(formats strfmt.Registry) error {
 			if err := m.Values[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("Values" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("Values" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContextValidate validate this meter based on the context it is used
+func (m *Meter) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateLastCheckupDate(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateNextCheckupDate(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateStartDate(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateValues(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *Meter) contextValidateLastCheckupDate(ctx context.Context, formats strfmt.Registry) error {
+
+	if err := m.LastCheckupDate.ContextValidate(ctx, formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("LastCheckupDate")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("LastCheckupDate")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *Meter) contextValidateNextCheckupDate(ctx context.Context, formats strfmt.Registry) error {
+
+	if err := m.NextCheckupDate.ContextValidate(ctx, formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("NextCheckupDate")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("NextCheckupDate")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *Meter) contextValidateStartDate(ctx context.Context, formats strfmt.Registry) error {
+
+	if err := m.StartDate.ContextValidate(ctx, formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("StartDate")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("StartDate")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *Meter) contextValidateValues(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.Values); i++ {
+
+		if m.Values[i] != nil {
+			if err := m.Values[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("Values" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("Values" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -279,7 +372,6 @@ func (m *MeterValuesItems0) Validate(formats strfmt.Registry) error {
 }
 
 func (m *MeterValuesItems0) validatePeriod(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Period) { // not required
 		return nil
 	}
@@ -287,6 +379,36 @@ func (m *MeterValuesItems0) validatePeriod(formats strfmt.Registry) error {
 	if err := m.Period.Validate(formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
 			return ve.ValidateName("Period")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("Period")
+		}
+		return err
+	}
+
+	return nil
+}
+
+// ContextValidate validate this meter values items0 based on the context it is used
+func (m *MeterValuesItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidatePeriod(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *MeterValuesItems0) contextValidatePeriod(ctx context.Context, formats strfmt.Registry) error {
+
+	if err := m.Period.ContextValidate(ctx, formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("Period")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("Period")
 		}
 		return err
 	}

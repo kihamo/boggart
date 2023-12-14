@@ -23,9 +23,12 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	List(params *ListParams) (*ListOK, error)
+	List(params *ListParams, opts ...ClientOption) (*ListOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -33,13 +36,12 @@ type ClientService interface {
 /*
   List list API
 */
-func (a *Client) List(params *ListParams) (*ListOK, error) {
+func (a *Client) List(params *ListParams, opts ...ClientOption) (*ListOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewListParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "list",
 		Method:             "GET",
 		PathPattern:        "/Meters/List",
@@ -50,7 +52,12 @@ func (a *Client) List(params *ListParams) (*ListOK, error) {
 		Reader:             &ListReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

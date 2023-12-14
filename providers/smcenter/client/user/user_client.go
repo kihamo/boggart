@@ -23,13 +23,16 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	AddByIdent(params *AddByIdentParams) (*AddByIdentOK, error)
+	AddByIdent(params *AddByIdentParams, opts ...ClientOption) (*AddByIdentOK, error)
 
-	DeleteByIdent(params *DeleteByIdentParams) (*DeleteByIdentOK, error)
+	DeleteByIdent(params *DeleteByIdentParams, opts ...ClientOption) (*DeleteByIdentOK, error)
 
-	UserInfo(params *UserInfoParams) (*UserInfoOK, error)
+	UserInfo(params *UserInfoParams, opts ...ClientOption) (*UserInfoOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -37,13 +40,12 @@ type ClientService interface {
 /*
   AddByIdent add by ident API
 */
-func (a *Client) AddByIdent(params *AddByIdentParams) (*AddByIdentOK, error) {
+func (a *Client) AddByIdent(params *AddByIdentParams, opts ...ClientOption) (*AddByIdentOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewAddByIdentParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "addByIdent",
 		Method:             "POST",
 		PathPattern:        "/User/AddAccountByIdent",
@@ -54,7 +56,12 @@ func (a *Client) AddByIdent(params *AddByIdentParams) (*AddByIdentOK, error) {
 		Reader:             &AddByIdentReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -70,13 +77,12 @@ func (a *Client) AddByIdent(params *AddByIdentParams) (*AddByIdentOK, error) {
 /*
   DeleteByIdent delete by ident API
 */
-func (a *Client) DeleteByIdent(params *DeleteByIdentParams) (*DeleteByIdentOK, error) {
+func (a *Client) DeleteByIdent(params *DeleteByIdentParams, opts ...ClientOption) (*DeleteByIdentOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewDeleteByIdentParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "deleteByIdent",
 		Method:             "POST",
 		PathPattern:        "/User/DeleteAccountByIdent",
@@ -87,7 +93,12 @@ func (a *Client) DeleteByIdent(params *DeleteByIdentParams) (*DeleteByIdentOK, e
 		Reader:             &DeleteByIdentReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -103,13 +114,12 @@ func (a *Client) DeleteByIdent(params *DeleteByIdentParams) (*DeleteByIdentOK, e
 /*
   UserInfo user info API
 */
-func (a *Client) UserInfo(params *UserInfoParams) (*UserInfoOK, error) {
+func (a *Client) UserInfo(params *UserInfoParams, opts ...ClientOption) (*UserInfoOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewUserInfoParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "userInfo",
 		Method:             "GET",
 		PathPattern:        "/User/Info",
@@ -120,7 +130,12 @@ func (a *Client) UserInfo(params *UserInfoParams) (*UserInfoOK, error) {
 		Reader:             &UserInfoReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

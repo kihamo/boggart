@@ -6,6 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/go-openapi/errors"
@@ -145,7 +146,6 @@ func (m *MobileAppSettings) Validate(formats strfmt.Registry) error {
 }
 
 func (m *MobileAppSettings) validateMenu(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Menu) { // not required
 		return nil
 	}
@@ -159,6 +159,42 @@ func (m *MobileAppSettings) validateMenu(formats strfmt.Registry) error {
 			if err := m.Menu[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("menu" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("menu" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContextValidate validate this mobile app settings based on the context it is used
+func (m *MobileAppSettings) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateMenu(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *MobileAppSettings) contextValidateMenu(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.Menu); i++ {
+
+		if m.Menu[i] != nil {
+			if err := m.Menu[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("menu" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("menu" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -207,6 +243,11 @@ type MobileAppSettingsMenuItems0 struct {
 
 // Validate validates this mobile app settings menu items0
 func (m *MobileAppSettingsMenuItems0) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this mobile app settings menu items0 based on context it is used
+func (m *MobileAppSettingsMenuItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

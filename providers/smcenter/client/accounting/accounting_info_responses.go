@@ -6,6 +6,7 @@ package accounting
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"strconv"
@@ -55,7 +56,7 @@ func NewAccountingInfoOK() *AccountingInfoOK {
 	return &AccountingInfoOK{}
 }
 
-/*AccountingInfoOK handles this case with default header values.
+/* AccountingInfoOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -66,7 +67,6 @@ type AccountingInfoOK struct {
 func (o *AccountingInfoOK) Error() string {
 	return fmt.Sprintf("[GET /Accounting/Info][%d] accountingInfoOK  %+v", 200, o.Payload)
 }
-
 func (o *AccountingInfoOK) GetPayload() *AccountingInfoOKBody {
 	return o.Payload
 }
@@ -88,7 +88,7 @@ func NewAccountingInfoUnauthorized() *AccountingInfoUnauthorized {
 	return &AccountingInfoUnauthorized{}
 }
 
-/*AccountingInfoUnauthorized handles this case with default header values.
+/* AccountingInfoUnauthorized describes a response with status code 401, with default header values.
 
 Unauthorized
 */
@@ -99,7 +99,6 @@ type AccountingInfoUnauthorized struct {
 func (o *AccountingInfoUnauthorized) Error() string {
 	return fmt.Sprintf("[GET /Accounting/Info][%d] accountingInfoUnauthorized  %+v", 401, o.Payload)
 }
-
 func (o *AccountingInfoUnauthorized) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -123,7 +122,7 @@ func NewAccountingInfoDefault(code int) *AccountingInfoDefault {
 	}
 }
 
-/*AccountingInfoDefault handles this case with default header values.
+/* AccountingInfoDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -141,7 +140,6 @@ func (o *AccountingInfoDefault) Code() int {
 func (o *AccountingInfoDefault) Error() string {
 	return fmt.Sprintf("[GET /Accounting/Info][%d] accountingInfo default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *AccountingInfoDefault) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -182,7 +180,6 @@ func (o *AccountingInfoOKBody) Validate(formats strfmt.Registry) error {
 }
 
 func (o *AccountingInfoOKBody) validateData(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Data) { // not required
 		return nil
 	}
@@ -196,6 +193,42 @@ func (o *AccountingInfoOKBody) validateData(formats strfmt.Registry) error {
 			if err := o.Data[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("accountingInfoOK" + "." + "Data" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("accountingInfoOK" + "." + "Data" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContextValidate validate this accounting info o k body based on the context it is used
+func (o *AccountingInfoOKBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.contextValidateData(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *AccountingInfoOKBody) contextValidateData(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(o.Data); i++ {
+
+		if o.Data[i] != nil {
+			if err := o.Data[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("accountingInfoOK" + "." + "Data" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("accountingInfoOK" + "." + "Data" + "." + strconv.Itoa(i))
 				}
 				return err
 			}

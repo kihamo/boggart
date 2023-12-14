@@ -16,52 +16,66 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewAccountingInfoParams creates a new AccountingInfoParams object
-// with the default values initialized.
+// NewAccountingInfoParams creates a new AccountingInfoParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewAccountingInfoParams() *AccountingInfoParams {
-
 	return &AccountingInfoParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewAccountingInfoParamsWithTimeout creates a new AccountingInfoParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewAccountingInfoParamsWithTimeout(timeout time.Duration) *AccountingInfoParams {
-
 	return &AccountingInfoParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewAccountingInfoParamsWithContext creates a new AccountingInfoParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewAccountingInfoParamsWithContext(ctx context.Context) *AccountingInfoParams {
-
 	return &AccountingInfoParams{
-
 		Context: ctx,
 	}
 }
 
 // NewAccountingInfoParamsWithHTTPClient creates a new AccountingInfoParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewAccountingInfoParamsWithHTTPClient(client *http.Client) *AccountingInfoParams {
-
 	return &AccountingInfoParams{
 		HTTPClient: client,
 	}
 }
 
-/*AccountingInfoParams contains all the parameters to send to the API endpoint
-for the accounting info operation typically these are written to a http.Request
+/* AccountingInfoParams contains all the parameters to send to the API endpoint
+   for the accounting info operation.
+
+   Typically these are written to a http.Request.
 */
 type AccountingInfoParams struct {
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the accounting info params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *AccountingInfoParams) WithDefaults() *AccountingInfoParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the accounting info params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *AccountingInfoParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the accounting info params

@@ -51,11 +51,12 @@ func (o *DownloadReader) ReadResponse(response runtime.ClientResponse, consumer 
 // NewDownloadOK creates a DownloadOK with default headers values
 func NewDownloadOK(writer io.Writer) *DownloadOK {
 	return &DownloadOK{
+
 		Payload: writer,
 	}
 }
 
-/*DownloadOK handles this case with default header values.
+/* DownloadOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -66,7 +67,6 @@ type DownloadOK struct {
 func (o *DownloadOK) Error() string {
 	return fmt.Sprintf("[GET /Public/DownloadBill/{id}][%d] downloadOK  %+v", 200, o.Payload)
 }
-
 func (o *DownloadOK) GetPayload() io.Writer {
 	return o.Payload
 }
@@ -86,7 +86,7 @@ func NewDownloadUnauthorized() *DownloadUnauthorized {
 	return &DownloadUnauthorized{}
 }
 
-/*DownloadUnauthorized handles this case with default header values.
+/* DownloadUnauthorized describes a response with status code 401, with default header values.
 
 Unauthorized
 */
@@ -97,7 +97,6 @@ type DownloadUnauthorized struct {
 func (o *DownloadUnauthorized) Error() string {
 	return fmt.Sprintf("[GET /Public/DownloadBill/{id}][%d] downloadUnauthorized  %+v", 401, o.Payload)
 }
-
 func (o *DownloadUnauthorized) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -121,7 +120,7 @@ func NewDownloadDefault(code int) *DownloadDefault {
 	}
 }
 
-/*DownloadDefault handles this case with default header values.
+/* DownloadDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -139,7 +138,6 @@ func (o *DownloadDefault) Code() int {
 func (o *DownloadDefault) Error() string {
 	return fmt.Sprintf("[GET /Public/DownloadBill/{id}][%d] download default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *DownloadDefault) GetPayload() *models.Error {
 	return o.Payload
 }

@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"sync"
 	"time"
@@ -54,9 +55,31 @@ func New(basePath, phone, password string, debug bool, logger logger.Logger) *Cl
 		request.Header.Set("User-Agent", headerUserAgentValue)
 		request.Header[headerClient] = []string{headerClientValue}
 
+		if debug && logger != nil {
+			if b, e := httputil.DumpRequestOut(request, true); e == nil {
+				logger.Debugf("%s\n", string(b))
+			}
+		}
+
 		response, err = originTransport.RoundTrip(request)
 		if err != nil {
 			return response, err
+		}
+
+		if debug {
+			ct := response.Header.Get(runtime.HeaderContentType)
+			if ct == "" {
+				ct = cl.Transport.(*httptransport.Runtime).DefaultMediaType
+			}
+
+			printBody := true
+			if ct == runtime.DefaultMime {
+				printBody = false
+			}
+
+			if b, e := httputil.DumpResponse(response, printBody); e == nil {
+				logger.Debugf("%s\n", string(b))
+			}
 		}
 
 		if response.StatusCode == http.StatusUnauthorized {
@@ -70,7 +93,7 @@ func New(basePath, phone, password string, debug bool, logger logger.Logger) *Cl
 		}
 
 		// эмулируем http ошибку, так как у них всегда 200 OK
-		body, err := ioutil.ReadAll(response.Body)
+		body, err := io.ReadAll(response.Body)
 		if err != nil {
 			return response, err
 		}
@@ -91,10 +114,10 @@ func New(basePath, phone, password string, debug bool, logger logger.Logger) *Cl
 		if len(newBody) > 0 {
 			response.StatusCode = http.StatusBadRequest
 			response.Status = http.StatusText(http.StatusBadRequest)
-			response.Body = ioutil.NopCloser(bytes.NewReader(newBody))
+			response.Body = io.NopCloser(bytes.NewReader(newBody))
 			response.ContentLength = int64(len(newBody))
 		} else {
-			response.Body = ioutil.NopCloser(bytes.NewReader(body))
+			response.Body = io.NopCloser(bytes.NewReader(body))
 		}
 
 		for _, cookie := range response.Cookies() {
@@ -110,13 +133,14 @@ func New(basePath, phone, password string, debug bool, logger logger.Logger) *Cl
 	transport.DefaultAuthentication = runtime.ClientAuthInfoWriterFunc(func(req runtime.ClientRequest, _ strfmt.Registry) (err error) {
 		token := cl.token()
 
-		if token == "" && req.GetPath() != "/auth/login" {
+		if token == "" && req.GetPath() != "/auth/Login" {
 			params := auth.NewLoginParams()
 			params.Request.Phone = phone
 			params.Request.Password = password
 
-			if _, err := cl.SMCenter.Auth.Login(params); err == nil {
-				token = cl.token()
+			response, e := cl.SMCenter.Auth.Login(params)
+			if e == nil {
+				token = response.GetPayload().Acx
 			}
 		}
 
@@ -141,7 +165,8 @@ func New(basePath, phone, password string, debug bool, logger logger.Logger) *Cl
 		swagger.SetLogger(transport, logger)
 	}
 
-	swagger.SetDebug(transport, debug)
+	// при дебаге мы в своей обертке все логируем
+	//swagger.SetDebug(transport, debug)
 
 	return cl
 }
