@@ -25,6 +25,7 @@ type Config struct {
 	TopicSecurityArmed                mqtt.Topic    `mapstructure:"topic_security_armed" yaml:"topic_security_armed"`
 	TopicSecurityArmedState           mqtt.Topic    `mapstructure:"topic_security_armed_state" yaml:"topic_security_armed_state"`
 	TopicSensorValue                  mqtt.Topic    `mapstructure:"topic_sensor_value" yaml:"topic_sensor_value"`
+	TopicEnvironmentStateTemperature  mqtt.Topic    `mapstructure:"topic_environment_state_temperature" yaml:"topic_environment_state_temperature"`
 	TopicHeaterHeatingFlowTemperature mqtt.Topic    `mapstructure:"topic_heater_heating_flow_temperature" yaml:"topic_heater_heating_flow_temperature"`
 	TopicHeaterHeatingCircuitPressure mqtt.Topic    `mapstructure:"topic_heater_heating_circuit_pressure" yaml:"topic_heater_heating_circuit_pressure"`
 	UpdaterInterval                   time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
@@ -48,6 +49,7 @@ func (t Type) ConfigDefaults() interface{} {
 		TopicSecurityArmed:                prefix + "security",
 		TopicSecurityArmedState:           prefix + "security/state",
 		TopicSensorValue:                  prefix + "sensor/+/value",
+		TopicEnvironmentStateTemperature:  prefix + "environment/+/state",
 		TopicHeaterHeatingFlowTemperature: prefix + "heater/+/heating-flow-temperature",
 		TopicHeaterHeatingCircuitPressure: prefix + "heater/+/heating-circuit-pressure",
 	}

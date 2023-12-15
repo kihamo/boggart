@@ -50,6 +50,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 		idAlarmPowerSupply             = "AlarmPowerSupply"
 		idAlarmReplaceBattery          = "AlarmReplaceBattery"
 		idAlarmGSMBalance              = "AlarmGSMBalance"
+		idEnvironmentStateTemperature  = "EnvironmentStateTemperature"
 		idHeaterHeatingFlowTemperature = "HeaterHeatingFlowTemperature"
 		idHeaterHeatingCircuitPressure = "HeaterHeatingCircuitPressure"
 	)
@@ -116,6 +117,22 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 						openhab.NewItem(itemPrefix+idHeaterHeatingCircuitPressure+id, openhab.ItemTypeNumber).
 							WithLabel(heater.Name+" heating circuit pressure [%.2f bar]").
 							WithIcon("pressure"),
+					),
+			)
+		}
+	}
+
+	for _, env := range stateObjResponse.Payload.Environments {
+		id := strconv.FormatInt(env.ID, 10)
+
+		if _, ok := env.State[myheat.EnvironmentStateTemperatureValue]; ok {
+			channels = append(channels,
+				openhab.NewChannel(idEnvironmentStateTemperature+id, openhab.ChannelTypeNumber).
+					WithStateTopic(cfg.TopicEnvironmentStateTemperature.Format(sn, env.ID)).
+					AddItems(
+						openhab.NewItem(itemPrefix+idEnvironmentStateTemperature+id, openhab.ItemTypeNumber).
+							WithLabel(env.Name+" state [%.2f °C]").
+							WithIcon("temperature"),
 					),
 			)
 		}

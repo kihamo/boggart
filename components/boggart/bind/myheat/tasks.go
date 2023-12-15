@@ -92,6 +92,33 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 			}
 		}
 
+		for _, env := range stateObjResponse.Payload.Environments {
+			v, ok := env.State[myheat.EnvironmentStateTemperatureValue]
+			if !ok {
+				continue
+			}
+
+			envID := strconv.FormatInt(env.ID, 10)
+
+			metricEnvironmentStateTemperatureCelsius.With("serial_number", sn).With("id", envID).Set(v)
+
+			if e := b.MQTT().PublishAsync(ctx, cfg.TopicEnvironmentStateTemperature.Format(sn, envID), v); e != nil {
+				err = multierr.Append(err, fmt.Errorf("publish value for environment %d return error: %w", envID, e))
+			}
+
+			// TODO: mqtt
+
+			// зона должна контроллироваться, иначе не возможно установить таргетное значение
+			//if v, ok := env.State[myheat.SettingsZoneControlled]; !ok || v != 1 {
+			//	continue
+			//}
+
+			// таргетное значение установлено явно, а не выключено, хоть и контроллируется
+			//if v, ok := env.State[myheat.EnvironmentSetTargetTemperature]; !ok || v != 1 {
+			//	continue
+			//}
+		}
+
 		if v := stateObjResponse.Payload.SecurityArmed; v != nil {
 			if e := b.MQTT().PublishAsync(ctx, cfg.TopicSecurityArmedState.Format(sn), v); e != nil {
 				err = multierr.Append(err, fmt.Errorf("publish security armed state return error: %w", e))
