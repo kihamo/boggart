@@ -41,18 +41,19 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 	channels := make([]*openhab.Channel, 0, len(sensorsResponse.Payload)+1+7)
 
 	const (
-		idSensor                       = "Sensor"
-		idSecurityArmed                = "SecurityArmed"
-		idDeviceSeverity               = "DeviceSeverity"
-		idInternetConnected            = "InternetConnected"
-		idGSMSignalLevel               = "GSMSignalLevel"
-		idGSMBalance                   = "GSMBalance"
-		idAlarmPowerSupply             = "AlarmPowerSupply"
-		idAlarmReplaceBattery          = "AlarmReplaceBattery"
-		idAlarmGSMBalance              = "AlarmGSMBalance"
-		idEnvironmentStateTemperature  = "EnvironmentStateTemperature"
-		idHeaterHeatingFlowTemperature = "HeaterHeatingFlowTemperature"
-		idHeaterHeatingCircuitPressure = "HeaterHeatingCircuitPressure"
+		idSensor                         = "Sensor"
+		idSecurityArmed                  = "SecurityArmed"
+		idDeviceSeverity                 = "DeviceSeverity"
+		idInternetConnected              = "InternetConnected"
+		idGSMSignalLevel                 = "GSMSignalLevel"
+		idGSMBalance                     = "GSMBalance"
+		idAlarmPowerSupply               = "AlarmPowerSupply"
+		idAlarmReplaceBattery            = "AlarmReplaceBattery"
+		idAlarmGSMBalance                = "AlarmGSMBalance"
+		idEnvironmentStateTemperature    = "EnvironmentStateTemperature"
+		idHeaterHeatingFeedTemperature   = "HeaterHeatingFeedTemperature"
+		idHeaterHeatingReturnTemperature = "HeaterHeatingReturnTemperature"
+		idHeaterHeatingCircuitPressure   = "HeaterHeatingCircuitPressure"
 	)
 
 	for _, sensor := range sensorsResponse.Payload {
@@ -97,13 +98,25 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 	for _, heater := range stateObjResponse.Payload.Heaters {
 		id := strconv.FormatInt(heater.ID, 10)
 
-		if _, ok := heater.State[myheat.HeaterHeatingFlowTemperatureCelsius]; ok {
+		if _, ok := heater.State[myheat.HeaterHeatingFeedTemperatureCelsius]; ok {
 			channels = append(channels,
-				openhab.NewChannel(idHeaterHeatingFlowTemperature+id, openhab.ChannelTypeNumber).
-					WithStateTopic(cfg.TopicHeaterHeatingFlowTemperature.Format(sn, heater.ID)).
+				openhab.NewChannel(idHeaterHeatingFeedTemperature+id, openhab.ChannelTypeNumber).
+					WithStateTopic(cfg.TopicHeaterHeatingFeedTemperature.Format(sn, heater.ID)).
 					AddItems(
-						openhab.NewItem(itemPrefix+idHeaterHeatingFlowTemperature+id, openhab.ItemTypeNumber).
-							WithLabel(heater.Name+" heating flow [%.2f °C]").
+						openhab.NewItem(itemPrefix+idHeaterHeatingFeedTemperature+id, openhab.ItemTypeNumber).
+							WithLabel(heater.Name+" heating feed [%.2f °C]").
+							WithIcon("temperature"),
+					),
+			)
+		}
+
+		if _, ok := heater.State[myheat.HeaterHeatingReturnTemperatureCelsius]; ok {
+			channels = append(channels,
+				openhab.NewChannel(idHeaterHeatingReturnTemperature+id, openhab.ChannelTypeNumber).
+					WithStateTopic(cfg.TopicHeaterHeatingReturnTemperature.Format(sn, heater.ID)).
+					AddItems(
+						openhab.NewItem(itemPrefix+idHeaterHeatingReturnTemperature+id, openhab.ItemTypeNumber).
+							WithLabel(heater.Name+" heating return [%.2f °C]").
 							WithIcon("temperature"),
 					),
 			)

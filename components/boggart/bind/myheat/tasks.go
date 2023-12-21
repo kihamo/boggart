@@ -75,10 +75,18 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 		for _, heater := range stateObjResponse.Payload.Heaters {
 			heaterID := strconv.FormatInt(heater.ID, 10)
 
-			if v, ok := heater.State[myheat.HeaterHeatingFlowTemperatureCelsius]; ok {
-				metricHeaterHeatingFlowTemperatureCelsius.With("serial_number", sn).With("id", heaterID).Set(v)
+			if v, ok := heater.State[myheat.HeaterHeatingFeedTemperatureCelsius]; ok {
+				metricHeaterHeatingFeedTemperatureCelsius.With("serial_number", sn).With("id", heaterID).Set(v)
 
-				if e := b.MQTT().PublishAsync(ctx, cfg.TopicHeaterHeatingFlowTemperature.Format(sn, heaterID), v); e != nil {
+				if e := b.MQTT().PublishAsync(ctx, cfg.TopicHeaterHeatingFeedTemperature.Format(sn, heaterID), v); e != nil {
+					err = multierr.Append(err, fmt.Errorf("publish value for heater %d return error: %w", heaterID, e))
+				}
+			}
+
+			if v, ok := heater.State[myheat.HeaterHeatingReturnTemperatureCelsius]; ok {
+				metricHeaterHeatingReturnTemperatureCelsius.With("serial_number", sn).With("id", heaterID).Set(v)
+
+				if e := b.MQTT().PublishAsync(ctx, cfg.TopicHeaterHeatingReturnTemperature.Format(sn, heaterID), v); e != nil {
 					err = multierr.Append(err, fmt.Errorf("publish value for heater %d return error: %w", heaterID, e))
 				}
 			}
