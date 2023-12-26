@@ -9,7 +9,7 @@ import (
 	"github.com/kihamo/boggart/performance"
 )
 
-var replacerBooleanAsStringCleanValue = strings.NewReplacer(
+var replacerAsStringCleanValue = strings.NewReplacer(
 	`"`, "",
 )
 
@@ -20,7 +20,7 @@ func (m *BooleanAsString) Validate(strfmt.Registry) error {
 }
 
 func (m *BooleanAsString) UnmarshalJSON(b []byte) error {
-	val, err := strconv.ParseBool(replacerBooleanAsStringCleanValue.Replace(performance.UnsafeBytes2String(b)))
+	val, err := strconv.ParseBool(replacerAsStringCleanValue.Replace(performance.UnsafeBytes2String(b)))
 	if err != nil {
 		return err
 	}
@@ -31,4 +31,8 @@ func (m *BooleanAsString) UnmarshalJSON(b []byte) error {
 
 func (m *BooleanAsString) ContextValidate(context.Context, strfmt.Registry) error {
 	return nil
+}
+
+func (m *BooleanAsString) Value() bool {
+	return bool(*m)
 }

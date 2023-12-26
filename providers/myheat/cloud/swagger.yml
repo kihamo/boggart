@@ -1,0 +1,448 @@
+---
+
+swagger: "2.0"
+info:
+  title: "My Heat Cloud"
+  version: "0.1.0"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+schemes:
+- "https"
+host: "my.myheat.net"
+basePath: "/api/"
+security: []
+# если указать basePath = "/api/request/" не срабатывает восстановление слешаа (искать по слову reinstateSlash)
+# а разработчики в myheat с тонкой душевной организацией и на отсутствующий слеш возвращают ошибку 4
+paths:
+  /request/?getDevices:
+    post:
+      operationId: "getDevices"
+      summary: "Запрос списка контроллеров, подключенных к вашему аккаунту"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            type: "object"
+            properties:
+              data:
+                $ref: '#/definitions/ResponseDevices'
+              error:
+                type: "integer"
+              refreshPage:
+                type: "boolean"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /request/?getDeviceInfo:
+    post:
+      operationId: "getDeviceInfo"
+      summary: "Запрос состояния контроллера и его объектов"
+      parameters:
+        - name: "request"
+          in: "body"
+          required: true
+          schema:
+            type: "object"
+            required:
+              - "deviceId"
+            properties:
+              deviceId:
+                type: "integer"
+                x-nullable: false
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            type: "object"
+            properties:
+              data:
+                $ref: '#/definitions/ResponseDeviceInfo'
+              error:
+                type: "integer"
+              refreshPage:
+                type: "boolean"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /request/?setEnvGoal:
+    post:
+      operationId: "setEnvGoal"
+      summary: "Установка целевого значения для среды (помещение, контур и т.д.)"
+      parameters:
+        - name: "request"
+          in: "body"
+          required: true
+          schema:
+            type: "object"
+            required:
+              - "deviceId"
+              - "objId"
+            properties:
+              deviceId:
+                type: "integer"
+                x-nullable: false
+                description: "Идентификатора контроллера"
+              objId:
+                type: "integer"
+                x-nullable: false
+                description: "Идентификатор среды"
+              goal:
+                type: "integer"
+                description: "целевое значение (если значение не указано, либо при указании значения, меньшего чем -
+999, цель и погодозависимая кривая у среды сбрасывается)."
+              changeMode:
+                type: "integer"
+                enum:
+                  - 0
+                  - 1
+                description: "Возможные значения:
+a. 0 – если в данный момент активен режим отопления, то режим будет сброшен. Система перейдет в состояние «Режим не выбран».
+b. значение не указано – аналогично значению «0».
+c. 1 – если в данный момент активен режим отопления, то в данный режим будут внесены
+соответствующие изменения (то есть – будет изменено целевое значение среды)."
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /request/?setEnvCurve:
+    post:
+      operationId: "setEnvCurve"
+      summary: "Установка погодозависимой кривой (пза) для среды (контуры, смесительный узел)"
+      parameters:
+        - name: "request"
+          in: "body"
+          required: true
+          schema:
+            type: "object"
+            required:
+              - "deviceId"
+              - "objId"
+            properties:
+              deviceId:
+                type: "integer"
+                x-nullable: false
+                description: "Идентификатора контроллера"
+              objId:
+                type: "integer"
+                x-nullable: false
+                description: "Идентификатор среды"
+              curve:
+                type: "integer"
+                description: "Идентификатор погодозависимой кривой (если значение не указано, либо при указании
+значения 0 и меньших значений, цель и погодозависимая кривая у среды сбрасывается)"
+              changeMode:
+                type: "integer"
+                enum:
+                  - 0
+                  - 1
+                description: "Возможные значения:
+a. 0 – если в данный момент активен режим отопления, то режим будет сброшен. Система перейдет в состояние «Режим не выбран».
+b. значение не указано – аналогично значению «0».
+c. 1 – если в данный момент активен режим отопления, то в данный режим будут внесены
+соответствующие изменения (то есть – будет изменено целевое значение среды)."
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /request/?setEngGoal:
+    post:
+      operationId: "setEngGoal"
+      summary: "Установка режима работы инженерного оборудования"
+      parameters:
+        - name: "request"
+          in: "body"
+          required: true
+          schema:
+            type: "object"
+            required:
+              - "deviceId"
+              - "objId"
+            properties:
+              deviceId:
+                type: "integer"
+                x-nullable: false
+                description: "Идентификатора контроллера"
+              objId:
+                type: "integer"
+                x-nullable: false
+                description: "Идентификатор инженерного оборудования"
+              goal:
+                type: "integer"
+                description: "Возможные значения:
+a. -1 (или любое отрицательное число) – автоматический режим
+b. 0 – принудительно выключено
+c. 1 – принудительно включено"
+              changeMode:
+                type: "integer"
+                enum:
+                  - 0
+                  - 1
+                description: "Возможные значения:
+a. 0 – если в данный момент активен режим отопления, то режим будет сброшен. Система перейдет в состояние «Режим не выбран».
+b. значение не указано – аналогично значению «0».
+c. 1 – если в данный момент активен режим отопления, то в данный режим будут внесены
+соответствующие изменения (то есть – будет изменено целевое значение среды)."
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /request/?setHeatingMode:
+    post:
+      operationId: "setHeatingMode"
+      summary: "Установка режима отопления или расписания"
+      parameters:
+        - name: "request"
+          in: "body"
+          required: true
+          schema:
+            type: "object"
+            required:
+              - "deviceId"
+              - "objId"
+            properties:
+              deviceId:
+                type: "integer"
+                x-nullable: false
+                description: "Идентификатора контроллера"
+              objId:
+                type: "integer"
+                x-nullable: false
+                description: "Идентификатор инженерного оборудования"
+              modelId:
+                type: "integer"
+                description: "Идентификатор режима отопления"
+              scheduleId:
+                type: "integer"
+                description: "Идентификатор расписания"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /request/?setSecurityMode:
+    post:
+      operationId: "setSecurityMode"
+      summary: "Снятие с охраны / постановка на охрану"
+      parameters:
+        - name: "request"
+          in: "body"
+          required: true
+          schema:
+            type: "object"
+            required:
+              - "deviceId"
+              - "objId"
+              - "mode"
+            properties:
+              deviceId:
+                type: "integer"
+                x-nullable: false
+                description: "Идентификатора контроллера"
+              objId:
+                type: "integer"
+                x-nullable: false
+                description: "Идентификатор инженерного оборудования"
+              model:
+                type: "integer"
+                x-nullable: false
+                enum:
+                  - 0
+                  - 1
+                description: "возможные значения:
+a. 0 – снять с охраны
+b. 1 – поставить на охрану"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+
+definitions:
+  FloatAsString:
+    type: "number"
+    x-go-type:
+      import:
+        alias: "extend"
+        package: "github.com/kihamo/boggart/protocols/swagger"
+      type: "FloatAsString"
+    x-nullable: false
+
+  Error:
+    type: "object"
+    properties:
+      err:
+        x-go-name: "Error"
+        type: "integer"
+        #     0 -- запрос завершился успешно
+        #     4 -- любая не понятная ситуация
+        # 99999 -- на несуществующий экшен (или параметров входящих не хватает)
+      refreshPage:
+        type: "boolean"
+  ResponseDevices:
+    type: "object"
+    properties:
+      devices:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            id:
+              type: "integer"
+            name:
+              type: "string"
+            city:
+              type: "string"
+              description: "Название населенного пункта"
+            severity:
+              type: "integer"
+              enum:
+                - 0
+                - 1
+                - 32
+                - 64
+              description: "Общий статус системы (включая статусы всех объектов)"
+            severityDesc:
+              type: "string"
+              description: "Текстовое описание статуса"
+  ResponseDeviceInfo:
+    type: "object"
+    properties:
+      heaters:
+        type: "array"
+        description: "Котлы"
+        items:
+          type: "object"
+          properties:
+            id:
+              type: "integer"
+            name:
+              type: "string"
+            disabled:
+              type: "boolean"
+              description: "Признак того, что котел отключен в системе MY HEAT"
+            flowTemp:
+              type: "number"
+              description: "Температура подачи котла"
+            returnTemp:
+              type: "number"
+              description: "Температура обратки котла"
+            pressure:
+              type: "number"
+              description: "Давление"
+            targetTemp:
+              type: "number"
+              description: "Текущее целевое значение в контуре отопления (когда котел не горит, либо не
+запроса отопления от сред, может быть равно 0)"
+            burnerWater:
+              type: "boolean"
+              description: "Признак того, что горелка активна – котел греет систему отопления"
+            burnerHeating:
+              type: "boolean"
+              description: "Признак того, что горелка активна – котел греет ГВС"
+            modulation:
+              type: "integer"
+              description: "Модуляция горелки котла в % (степень открытия газового клапана)"
+      envs:
+        type: "array"
+        x-go-name: "Environments"
+        description: "Среды (помещения, контуры отопления, смесительные контуры, бойлеры, контуры ГВС и т.д.)"
+        items:
+          type: "object"
+          properties:
+            id:
+              type: "integer"
+            type:
+              type: "string"
+            name:
+              type: "string"
+            value:
+              type: "number"
+              description: "Текущее значение (температура)"
+            target:
+              type: "integer"
+              description: "Текущее целевое значение"
+            demand:
+              type: "boolean"
+              description: "Признак того, что среда требует нагрева, т.е. дает запрос отопления котлу"
+            severity:
+              type: "integer"
+              description: "Общий статус объекта"
+            severityDesc:
+              type: "string"
+              description: "Текстовое описание статуса"
+      engs:
+        type: "array"
+        x-go-name: "EngineeringEquipment"
+        description: "Инженерное оборудование (насосы, клапаны, печи и т.д.)"
+        items:
+          type: "object"
+          properties:
+            id:
+              type: "integer"
+            type:
+              type: "string"
+            name:
+              type: "string"
+            turnedOn:
+              type: "boolean"
+              description: "Признак того, что оборудование включено (открыто в случае клапана)"
+            severity:
+              type: "integer"
+              description: "Общий статус объекта"
+            severityDesc:
+              type: "string"
+              description: "Текстовое описание статуса"
+      alarms:
+        type: "array"
+        description: "Сигналы тревоги (протечки воды, пожарные, охранные, учетка газа и т.д.)"
+        items:
+          type: "object"
+      dataActual:
+        type: "boolean"
+        description: "true, если данные от контроллера актуальны (т.е. обновлены не позднее, чем 20 минут
+назад)"
+      severity:
+        type: "integer"
+        enum:
+          - 0
+          - 1
+          - 32
+          - 64
+        description: "Общий статус системы (включая статусы всех объектов)"
+      severityDesc:
+        type: "string"
+        description: "Текстовое описание статуса"
+      weatherTemp:
+        $ref: "#/definitions/FloatAsString"
+        description: "Уличная температура"
+      city:
+        type: "string"
+        description: "Название населенного пункта"
+

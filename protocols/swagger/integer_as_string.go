@@ -3,14 +3,9 @@ package swagger
 import (
 	"context"
 	"strconv"
-	"strings"
 
 	"github.com/go-openapi/strfmt"
 	"github.com/kihamo/boggart/performance"
-)
-
-var replacerIntegerAsStringCleanValue = strings.NewReplacer(
-	`"`, "",
 )
 
 type IntegerAsString int64
@@ -20,7 +15,7 @@ func (m *IntegerAsString) Validate(strfmt.Registry) error {
 }
 
 func (m *IntegerAsString) UnmarshalJSON(b []byte) error {
-	val, err := strconv.ParseInt(replacerIntegerAsStringCleanValue.Replace(performance.UnsafeBytes2String(b)), 10, 64)
+	val, err := strconv.ParseInt(replacerAsStringCleanValue.Replace(performance.UnsafeBytes2String(b)), 10, 64)
 	if err != nil {
 		return err
 	}
@@ -31,4 +26,8 @@ func (m *IntegerAsString) UnmarshalJSON(b []byte) error {
 
 func (m *IntegerAsString) ContextValidate(context.Context, strfmt.Registry) error {
 	return nil
+}
+
+func (m *IntegerAsString) Value() int64 {
+	return int64(*m)
 }
