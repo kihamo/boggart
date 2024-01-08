@@ -45,7 +45,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 		return nil
 	}
 
-	files, err := b.Files(nil, nil)
+	files, err := b.Files(nil, nil, false)
 	if err != nil {
 		return err
 	}

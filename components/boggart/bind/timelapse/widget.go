@@ -23,6 +23,14 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	switch q.Get("action") {
 	case "thumbnail", "download":
 		filename := q.Get("file")
+
+		// если файл не указан берем последний снимок
+		if filename == "" {
+			if result, err := b.Files(nil, nil, true); err == nil && len(result) > 0 {
+				filename = FileID(result[0])
+			}
+		}
+
 		m, buf, err := b.loadFile(ctx, filename)
 
 		if err != nil {
@@ -67,7 +75,7 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 			}
 		}
 
-		if files, err := b.Files(&from, &to); err == nil {
+		if files, err := b.Files(&from, &to, false); err == nil {
 			filesTotal := len(files)
 			cfg := b.config()
 

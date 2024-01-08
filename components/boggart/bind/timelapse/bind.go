@@ -135,7 +135,7 @@ func (b *Bind) Capture(ctx context.Context, writer io.Writer) error {
 	return err
 }
 
-func (b *Bind) Files(from, to *time.Time) ([]os.FileInfo, error) {
+func (b *Bind) Files(from, to *time.Time, last bool) ([]os.FileInfo, error) {
 	saveDirectory := b.config().SaveDirectory
 
 	entries, err := os.ReadDir(saveDirectory)
@@ -197,9 +197,21 @@ func (b *Bind) Files(from, to *time.Time) ([]os.FileInfo, error) {
 		}
 
 		dir.Close()
+
+		if last {
+			break
+		}
 	}
 
 	sort.Slice(result, func(i, j int) bool { return result[i].Name() > result[j].Name() })
+
+	if last {
+		if len(result) > 0 {
+			result = []os.FileInfo{result[0]}
+		} else {
+			result = make([]os.FileInfo, 0)
+		}
+	}
 
 	return result, err
 }
