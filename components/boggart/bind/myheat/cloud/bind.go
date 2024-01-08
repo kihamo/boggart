@@ -1,9 +1,9 @@
-package myheat
+package cloud
 
 import (
 	"github.com/kihamo/boggart/components/boggart/di"
 	"github.com/kihamo/boggart/protocols/swagger"
-	"github.com/kihamo/boggart/providers/myheat/device"
+	"github.com/kihamo/boggart/providers/myheat/cloud"
 )
 
 type Bind struct {
@@ -11,11 +11,9 @@ type Bind struct {
 	di.LoggerBind
 	di.MetaBind
 	di.MetricsBind
-	di.MQTTBind
-	di.ProbesBind
 	di.WorkersBind
 
-	client *device.Client
+	client *cloud.Client
 }
 
 func (b *Bind) config() *Config {
@@ -25,7 +23,7 @@ func (b *Bind) config() *Config {
 func (b *Bind) Run() error {
 	cfg := b.config()
 
-	b.client = device.New(cfg.Address.Hostname(), cfg.Debug, swagger.NewLogger(
+	b.client = cloud.New(cfg.Login, cfg.ApiKey, cfg.Debug, swagger.NewLogger(
 		func(message string) {
 			b.Logger().Info(message)
 		},
@@ -33,7 +31,7 @@ func (b *Bind) Run() error {
 			b.Logger().Debug(message)
 		}))
 
-	b.Meta().SetLinkSchemeConvert(&cfg.Address.URL)
+	b.Meta().SetLink(&cfg.ProviderLink.URL)
 
 	return nil
 }

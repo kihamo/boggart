@@ -1,4 +1,4 @@
-package myheat
+package device
 
 import (
 	"time"
