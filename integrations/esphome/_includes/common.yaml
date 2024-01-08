@@ -23,5 +23,5 @@ ota:
 mqtt:
   broker: !secret home_mqtt_broker
   username: !secret home_mqtt_user
-  password: !secret home_mqtt_pssword
+  password: !secret home_mqtt_password
   use_abbreviations: false
