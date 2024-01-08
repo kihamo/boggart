@@ -61,7 +61,7 @@ type SystemInfo struct {
 	BuildTime       Time
 	UpdataTime      Time
 	UpdataType      Uint32
-	DeviceRunTime   Uint32
+	DeviceRunTime   Duration
 	EncryptVersion  string
 	HardWare        string
 	HardWareVersion string

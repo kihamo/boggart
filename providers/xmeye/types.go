@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/kihamo/boggart/performance"
 )
 
 var (
@@ -64,4 +66,26 @@ func (t Uint32) GoString() string {
 
 func (t Uint32) Uint32() uint32 {
 	return uint32(t)
+}
+
+var replacerAsStringCleanValue = strings.NewReplacer(
+	`"`, "",
+	`0x`, "",
+)
+
+type Duration struct {
+	time.Duration
+}
+
+func (d *Duration) UnmarshalJSON(b []byte) (err error) {
+	val, err := strconv.ParseUint(replacerAsStringCleanValue.Replace(performance.UnsafeBytes2String(b)), 16, 64)
+	if err != nil {
+		return err
+	}
+
+	time.Second.String()
+
+	d.Duration = time.Duration(val) * time.Minute
+
+	return err
 }

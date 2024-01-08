@@ -12,7 +12,7 @@ import (
 )
 
 func (b *Bind) Tasks() []tasks.Task {
-	return []tasks.Task{
+	items := []tasks.Task{
 		tasks.NewTask().
 			WithName("serial-number").
 			WithHandler(
@@ -27,6 +27,31 @@ func (b *Bind) Tasks() []tasks.Task {
 				),
 			),
 	}
+
+	cfg := b.config()
+
+	if cfg.DatetimeAutoSyncEnabled {
+		var schedule tasks.Schedule
+
+		if cfg.DatetimeAutoSyncInterval < time.Second {
+			schedule = tasks.ScheduleWithSuccessLimit(tasks.ScheduleWithDuration(tasks.ScheduleNow(), time.Second), 1)
+		} else {
+			schedule = tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.DatetimeAutoSyncInterval)
+		}
+
+		items = append(items,
+			tasks.NewTask().
+				WithName("datetime-auto-sync").
+				WithHandler(
+					b.Workers().WrapTaskHandlerIsOnline(
+						tasks.HandlerFuncFromShortToLong(b.taskDatetimeAutoSyncHandler),
+					),
+				).
+				WithSchedule(schedule),
+		)
+	}
+
+	return items
 }
 
 func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
@@ -102,7 +127,7 @@ func (b *Bind) taskSerialNumberHandler(ctx context.Context) error {
 		err = multierr.Append(err, e)
 	}
 
-	if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateUpTime.Format(info.SerialNo), time.Duration(info.DeviceRunTime)*time.Minute); e != nil {
+	if e := b.MQTT().PublishAsync(ctx, cfg.TopicStateUpTime.Format(info.SerialNo), info.DeviceRunTime.Minutes()); e != nil {
 		err = multierr.Append(err, e)
 	}
 
@@ -144,4 +169,14 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) error {
 	}
 
 	return err
+}
+
+func (b *Bind) taskDatetimeAutoSyncHandler(ctx context.Context) error {
+	client, err := b.client(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	return client.OPTimeSetting(ctx, time.Now())
 }

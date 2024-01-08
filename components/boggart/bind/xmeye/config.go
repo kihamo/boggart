@@ -21,6 +21,8 @@ type Config struct {
 	PreviewRefreshInterval         time.Duration `mapstructure:"preview_refresh_interval" yaml:"preview_refresh_interval,omitempty"`
 	PreviewUseRTSP                 bool          `mapstructure:"preview_use_rtsp" yaml:"preview_use_rtsp,omitempty"`
 	WidgetChannel                  uint64        `mapstructure:"widget_channel" yaml:"widget_channel,omitempty"`
+	DatetimeAutoSyncEnabled        bool          `mapstructure:"datetime_auto_sync_enabled" yaml:"datetime_auto_sync_enabled,omitempty"`
+	DatetimeAutoSyncInterval       time.Duration `mapstructure:"datetime_auto_sync_interval" yaml:"datetime_auto_sync_interval,omitempty"`
 	TopicEvent                     mqtt.Topic    `mapstructure:"topic_event" yaml:"topic_event"`
 	TopicStateModel                mqtt.Topic    `mapstructure:"topic_state_model" yaml:"topic_state_model"`
 	TopicStateFirmwareVersion      mqtt.Topic    `mapstructure:"topic_state_firmware_release_version" yaml:"topic_state_firmware_release_version"`
@@ -32,7 +34,7 @@ type Config struct {
 }
 
 func (t Type) ConfigDefaults() interface{} {
-	var prefix mqtt.Topic = boggart.ComponentName + "/cctv/+/"
+	var prefix mqtt.Topic = boggart.ComponentName + "/cctv/+/"XM
 
 	return &Config{
 		ProbesConfig:                   di.ProbesConfigDefaults(),
@@ -43,6 +45,7 @@ func (t Type) ConfigDefaults() interface{} {
 		WidgetChannel:                  0,
 		PreviewRefreshInterval:         time.Second * 5,
 		PreviewUseRTSP:                 false,
+		DatetimeAutoSyncInterval:       time.Hour,
 		TopicEvent:                     prefix + "+",
 		TopicStateModel:                prefix + "state/model",
 		TopicStateFirmwareVersion:      prefix + "state/firmware/version",
