@@ -14,6 +14,7 @@ type Config struct {
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
 	Address                        types.URL     `valid:",required"`
+	SystemTimeNTPAddress           types.URL     `mapstructure:"system_time_ntp_address" yaml:"system_time_ntp_address,omitempty"`
 	TopicPTZAbsolute               mqtt.Topic    `mapstructure:"topic_ptz_absolute" yaml:"topic_ptz_absolute"`
 	TopicPTZContinuous             mqtt.Topic    `mapstructure:"topic_ptz_continuous" yaml:"topic_ptz_continuous"`
 	TopicPTZRelative               mqtt.Topic    `mapstructure:"topic_ptz_relative" yaml:"topic_ptz_relative"`
@@ -44,6 +45,7 @@ type Config struct {
 	EventsEnabled                  bool `mapstructure:"events_enabled" yaml:"events_enabled,omitempty"`
 	EventsStreamingEnabled         bool `mapstructure:"events_streaming_enabled" yaml:"events_streaming_enabled,omitempty"`
 	VirtualHostAutoEnabled         bool `mapstructure:"virtual_host_auto_enabled" yaml:"virtual_host_auto_enabled,omitempty"`
+	SystemTimeNTPAutoEnabled       bool `mapstructure:"system_time_ntp_auto_enabled" yaml:"system_time_ntp_auto_enabled,omitempty"`
 }
 
 func (t Type) ConfigDefaults() interface{} {
@@ -54,6 +56,7 @@ func (t Type) ConfigDefaults() interface{} {
 	probesConfig.ReadinessTimeout = time.Second * 5
 
 	return &Config{
+		SystemTimeNTPAddress:           defaultNTPServer,
 		ProbesConfig:                   probesConfig,
 		LoggerConfig:                   di.LoggerConfigDefaults(),
 		UpdaterInterval:                time.Minute,

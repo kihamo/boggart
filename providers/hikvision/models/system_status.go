@@ -220,6 +220,11 @@ func (m *SystemStatus) contextValidateCPUList(ctx context.Context, formats strfm
 	for i := 0; i < len(m.CPUList); i++ {
 
 		if m.CPUList[i] != nil {
+
+			if swag.IsZero(m.CPUList[i]) { // not required
+				return nil
+			}
+
 			if err := m.CPUList[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("CPUList" + "." + strconv.Itoa(i))
@@ -240,6 +245,11 @@ func (m *SystemStatus) contextValidateCameraList(ctx context.Context, formats st
 	for i := 0; i < len(m.CameraList); i++ {
 
 		if m.CameraList[i] != nil {
+
+			if swag.IsZero(m.CameraList[i]) { // not required
+				return nil
+			}
+
 			if err := m.CameraList[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("CameraList" + "." + strconv.Itoa(i))
@@ -260,6 +270,11 @@ func (m *SystemStatus) contextValidateDomeInfoList(ctx context.Context, formats 
 	for i := 0; i < len(m.DomeInfoList); i++ {
 
 		if m.DomeInfoList[i] != nil {
+
+			if swag.IsZero(m.DomeInfoList[i]) { // not required
+				return nil
+			}
+
 			if err := m.DomeInfoList[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("DomeInfoList" + "." + strconv.Itoa(i))
@@ -280,6 +295,11 @@ func (m *SystemStatus) contextValidateMemoryList(ctx context.Context, formats st
 	for i := 0; i < len(m.MemoryList); i++ {
 
 		if m.MemoryList[i] != nil {
+
+			if swag.IsZero(m.MemoryList[i]) { // not required
+				return nil
+			}
+
 			if err := m.MemoryList[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("MemoryList" + "." + strconv.Itoa(i))

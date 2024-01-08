@@ -30,7 +30,7 @@ func (o *GotoPtzPresetReader) ReadResponse(response runtime.ClientResponse, cons
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[PUT /PTZCtrl/channels/{channel}/presets/{preset}/goto] gotoPtzPreset", response, response.Code())
 	}
 }
 
@@ -39,7 +39,8 @@ func NewGotoPtzPresetOK() *GotoPtzPresetOK {
 	return &GotoPtzPresetOK{}
 }
 
-/* GotoPtzPresetOK describes a response with status code 200, with default header values.
+/*
+GotoPtzPresetOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -47,9 +48,44 @@ type GotoPtzPresetOK struct {
 	Payload *models.Status
 }
 
+// IsSuccess returns true when this goto ptz preset o k response has a 2xx status code
+func (o *GotoPtzPresetOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this goto ptz preset o k response has a 3xx status code
+func (o *GotoPtzPresetOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this goto ptz preset o k response has a 4xx status code
+func (o *GotoPtzPresetOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this goto ptz preset o k response has a 5xx status code
+func (o *GotoPtzPresetOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this goto ptz preset o k response a status code equal to that given
+func (o *GotoPtzPresetOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the goto ptz preset o k response
+func (o *GotoPtzPresetOK) Code() int {
+	return 200
+}
+
 func (o *GotoPtzPresetOK) Error() string {
 	return fmt.Sprintf("[PUT /PTZCtrl/channels/{channel}/presets/{preset}/goto][%d] gotoPtzPresetOK  %+v", 200, o.Payload)
 }
+
+func (o *GotoPtzPresetOK) String() string {
+	return fmt.Sprintf("[PUT /PTZCtrl/channels/{channel}/presets/{preset}/goto][%d] gotoPtzPresetOK  %+v", 200, o.Payload)
+}
+
 func (o *GotoPtzPresetOK) GetPayload() *models.Status {
 	return o.Payload
 }

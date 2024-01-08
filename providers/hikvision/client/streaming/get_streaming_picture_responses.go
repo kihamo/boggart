@@ -29,7 +29,7 @@ func (o *GetStreamingPictureReader) ReadResponse(response runtime.ClientResponse
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /Streaming/channels/{channel}/picture] getStreamingPicture", response, response.Code())
 	}
 }
 
@@ -41,7 +41,8 @@ func NewGetStreamingPictureOK(writer io.Writer) *GetStreamingPictureOK {
 	}
 }
 
-/* GetStreamingPictureOK describes a response with status code 200, with default header values.
+/*
+GetStreamingPictureOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -49,9 +50,44 @@ type GetStreamingPictureOK struct {
 	Payload io.Writer
 }
 
+// IsSuccess returns true when this get streaming picture o k response has a 2xx status code
+func (o *GetStreamingPictureOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get streaming picture o k response has a 3xx status code
+func (o *GetStreamingPictureOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get streaming picture o k response has a 4xx status code
+func (o *GetStreamingPictureOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get streaming picture o k response has a 5xx status code
+func (o *GetStreamingPictureOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get streaming picture o k response a status code equal to that given
+func (o *GetStreamingPictureOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get streaming picture o k response
+func (o *GetStreamingPictureOK) Code() int {
+	return 200
+}
+
 func (o *GetStreamingPictureOK) Error() string {
 	return fmt.Sprintf("[GET /Streaming/channels/{channel}/picture][%d] getStreamingPictureOK  %+v", 200, o.Payload)
 }
+
+func (o *GetStreamingPictureOK) String() string {
+	return fmt.Sprintf("[GET /Streaming/channels/{channel}/picture][%d] getStreamingPictureOK  %+v", 200, o.Payload)
+}
+
 func (o *GetStreamingPictureOK) GetPayload() io.Writer {
 	return o.Payload
 }

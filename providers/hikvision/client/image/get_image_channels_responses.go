@@ -30,7 +30,7 @@ func (o *GetImageChannelsReader) ReadResponse(response runtime.ClientResponse, c
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /Image/channels] getImageChannels", response, response.Code())
 	}
 }
 
@@ -39,7 +39,8 @@ func NewGetImageChannelsOK() *GetImageChannelsOK {
 	return &GetImageChannelsOK{}
 }
 
-/* GetImageChannelsOK describes a response with status code 200, with default header values.
+/*
+GetImageChannelsOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -47,9 +48,44 @@ type GetImageChannelsOK struct {
 	Payload models.ImageChannels
 }
 
+// IsSuccess returns true when this get image channels o k response has a 2xx status code
+func (o *GetImageChannelsOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get image channels o k response has a 3xx status code
+func (o *GetImageChannelsOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get image channels o k response has a 4xx status code
+func (o *GetImageChannelsOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get image channels o k response has a 5xx status code
+func (o *GetImageChannelsOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get image channels o k response a status code equal to that given
+func (o *GetImageChannelsOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get image channels o k response
+func (o *GetImageChannelsOK) Code() int {
+	return 200
+}
+
 func (o *GetImageChannelsOK) Error() string {
 	return fmt.Sprintf("[GET /Image/channels][%d] getImageChannelsOK  %+v", 200, o.Payload)
 }
+
+func (o *GetImageChannelsOK) String() string {
+	return fmt.Sprintf("[GET /Image/channels][%d] getImageChannelsOK  %+v", 200, o.Payload)
+}
+
 func (o *GetImageChannelsOK) GetPayload() models.ImageChannels {
 	return o.Payload
 }

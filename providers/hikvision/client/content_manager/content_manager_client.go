@@ -36,7 +36,7 @@ type ClientService interface {
 }
 
 /*
-  GetStorage get storage API
+GetStorage get storage API
 */
 func (a *Client) GetStorage(params *GetStorageParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetStorageOK, error) {
 	// TODO: Validate the params before sending

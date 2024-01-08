@@ -30,7 +30,7 @@ func (o *SetPtzPositionRelativeReader) ReadResponse(response runtime.ClientRespo
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[PUT /PTZCtrl/channels/{channel}/relative] setPtzPositionRelative", response, response.Code())
 	}
 }
 
@@ -39,7 +39,8 @@ func NewSetPtzPositionRelativeOK() *SetPtzPositionRelativeOK {
 	return &SetPtzPositionRelativeOK{}
 }
 
-/* SetPtzPositionRelativeOK describes a response with status code 200, with default header values.
+/*
+SetPtzPositionRelativeOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -47,9 +48,44 @@ type SetPtzPositionRelativeOK struct {
 	Payload *models.Status
 }
 
+// IsSuccess returns true when this set ptz position relative o k response has a 2xx status code
+func (o *SetPtzPositionRelativeOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this set ptz position relative o k response has a 3xx status code
+func (o *SetPtzPositionRelativeOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this set ptz position relative o k response has a 4xx status code
+func (o *SetPtzPositionRelativeOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this set ptz position relative o k response has a 5xx status code
+func (o *SetPtzPositionRelativeOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this set ptz position relative o k response a status code equal to that given
+func (o *SetPtzPositionRelativeOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the set ptz position relative o k response
+func (o *SetPtzPositionRelativeOK) Code() int {
+	return 200
+}
+
 func (o *SetPtzPositionRelativeOK) Error() string {
 	return fmt.Sprintf("[PUT /PTZCtrl/channels/{channel}/relative][%d] setPtzPositionRelativeOK  %+v", 200, o.Payload)
 }
+
+func (o *SetPtzPositionRelativeOK) String() string {
+	return fmt.Sprintf("[PUT /PTZCtrl/channels/{channel}/relative][%d] setPtzPositionRelativeOK  %+v", 200, o.Payload)
+}
+
 func (o *SetPtzPositionRelativeOK) GetPayload() *models.Status {
 	return o.Payload
 }

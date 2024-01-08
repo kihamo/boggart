@@ -55,10 +55,12 @@ func NewSetPtzPositionAbsoluteParamsWithHTTPClient(client *http.Client) *SetPtzP
 	}
 }
 
-/* SetPtzPositionAbsoluteParams contains all the parameters to send to the API endpoint
-   for the set ptz position absolute operation.
+/*
+SetPtzPositionAbsoluteParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the set ptz position absolute operation.
+
+	Typically these are written to a http.Request.
 */
 type SetPtzPositionAbsoluteParams struct {
 

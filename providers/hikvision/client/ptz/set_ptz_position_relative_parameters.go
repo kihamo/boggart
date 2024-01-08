@@ -55,10 +55,12 @@ func NewSetPtzPositionRelativeParamsWithHTTPClient(client *http.Client) *SetPtzP
 	}
 }
 
-/* SetPtzPositionRelativeParams contains all the parameters to send to the API endpoint
-   for the set ptz position relative operation.
+/*
+SetPtzPositionRelativeParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the set ptz position relative operation.
+
+	Typically these are written to a http.Request.
 */
 type SetPtzPositionRelativeParams struct {
 

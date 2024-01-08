@@ -30,7 +30,7 @@ func (o *GetSystemDeviceInfoReader) ReadResponse(response runtime.ClientResponse
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /System/deviceInfo] getSystemDeviceInfo", response, response.Code())
 	}
 }
 
@@ -39,7 +39,8 @@ func NewGetSystemDeviceInfoOK() *GetSystemDeviceInfoOK {
 	return &GetSystemDeviceInfoOK{}
 }
 
-/* GetSystemDeviceInfoOK describes a response with status code 200, with default header values.
+/*
+GetSystemDeviceInfoOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -47,9 +48,44 @@ type GetSystemDeviceInfoOK struct {
 	Payload *models.SystemDeviceInfo
 }
 
+// IsSuccess returns true when this get system device info o k response has a 2xx status code
+func (o *GetSystemDeviceInfoOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get system device info o k response has a 3xx status code
+func (o *GetSystemDeviceInfoOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get system device info o k response has a 4xx status code
+func (o *GetSystemDeviceInfoOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get system device info o k response has a 5xx status code
+func (o *GetSystemDeviceInfoOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get system device info o k response a status code equal to that given
+func (o *GetSystemDeviceInfoOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get system device info o k response
+func (o *GetSystemDeviceInfoOK) Code() int {
+	return 200
+}
+
 func (o *GetSystemDeviceInfoOK) Error() string {
 	return fmt.Sprintf("[GET /System/deviceInfo][%d] getSystemDeviceInfoOK  %+v", 200, o.Payload)
 }
+
+func (o *GetSystemDeviceInfoOK) String() string {
+	return fmt.Sprintf("[GET /System/deviceInfo][%d] getSystemDeviceInfoOK  %+v", 200, o.Payload)
+}
+
 func (o *GetSystemDeviceInfoOK) GetPayload() *models.SystemDeviceInfo {
 	return o.Payload
 }

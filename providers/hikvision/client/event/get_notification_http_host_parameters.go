@@ -53,10 +53,12 @@ func NewGetNotificationHTTPHostParamsWithHTTPClient(client *http.Client) *GetNot
 	}
 }
 
-/* GetNotificationHTTPHostParams contains all the parameters to send to the API endpoint
-   for the get notification Http host operation.
+/*
+GetNotificationHTTPHostParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get notification Http host operation.
+
+	Typically these are written to a http.Request.
 */
 type GetNotificationHTTPHostParams struct {
 

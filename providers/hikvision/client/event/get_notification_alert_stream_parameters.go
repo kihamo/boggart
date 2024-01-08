@@ -52,10 +52,12 @@ func NewGetNotificationAlertStreamParamsWithHTTPClient(client *http.Client) *Get
 	}
 }
 
-/* GetNotificationAlertStreamParams contains all the parameters to send to the API endpoint
-   for the get notification alert stream operation.
+/*
+GetNotificationAlertStreamParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get notification alert stream operation.
+
+	Typically these are written to a http.Request.
 */
 type GetNotificationAlertStreamParams struct {
 	timeout    time.Duration

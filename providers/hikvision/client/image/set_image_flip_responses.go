@@ -30,7 +30,7 @@ func (o *SetImageFlipReader) ReadResponse(response runtime.ClientResponse, consu
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[PUT /Image/channels/{channel}/ImageFlip] setImageFlip", response, response.Code())
 	}
 }
 
@@ -39,7 +39,8 @@ func NewSetImageFlipOK() *SetImageFlipOK {
 	return &SetImageFlipOK{}
 }
 
-/* SetImageFlipOK describes a response with status code 200, with default header values.
+/*
+SetImageFlipOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -47,9 +48,44 @@ type SetImageFlipOK struct {
 	Payload *models.Status
 }
 
+// IsSuccess returns true when this set image flip o k response has a 2xx status code
+func (o *SetImageFlipOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this set image flip o k response has a 3xx status code
+func (o *SetImageFlipOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this set image flip o k response has a 4xx status code
+func (o *SetImageFlipOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this set image flip o k response has a 5xx status code
+func (o *SetImageFlipOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this set image flip o k response a status code equal to that given
+func (o *SetImageFlipOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the set image flip o k response
+func (o *SetImageFlipOK) Code() int {
+	return 200
+}
+
 func (o *SetImageFlipOK) Error() string {
 	return fmt.Sprintf("[PUT /Image/channels/{channel}/ImageFlip][%d] setImageFlipOK  %+v", 200, o.Payload)
 }
+
+func (o *SetImageFlipOK) String() string {
+	return fmt.Sprintf("[PUT /Image/channels/{channel}/ImageFlip][%d] setImageFlipOK  %+v", 200, o.Payload)
+}
+
 func (o *SetImageFlipOK) GetPayload() *models.Status {
 	return o.Payload
 }

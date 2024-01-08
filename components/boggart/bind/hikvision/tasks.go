@@ -3,7 +3,11 @@ package hikvision
 import (
 	"context"
 	"errors"
+	"net"
+	"strconv"
 	"time"
+
+	"github.com/kihamo/boggart/providers/hikvision/models"
 
 	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/components/mqtt"
@@ -38,6 +42,24 @@ func (b *Bind) Tasks() []tasks.Task {
 				WithHandler(
 					b.Workers().WrapTaskHandlerIsOnline(
 						tasks.HandlerFuncFromShortToLong(b.taskVirtualHostAutoEnabledHandler),
+					),
+				).
+				WithSchedule(
+					tasks.ScheduleWithSuccessLimit(
+						tasks.ScheduleWithDuration(tasks.ScheduleNow(), time.Second*30),
+						1,
+					),
+				),
+		)
+	}
+
+	if b.config().SystemTimeNTPAutoEnabled {
+		items = append(items,
+			tasks.NewTask().
+				WithName("system-time-ntp-auto-enabled").
+				WithHandler(
+					b.Workers().WrapTaskHandlerIsOnline(
+						tasks.HandlerFuncFromShortToLong(b.taskSystemTimeNTPAutoEnabledHandler),
 					),
 				).
 				WithSchedule(
@@ -168,6 +190,102 @@ func (b *Bind) taskVirtualHostAutoEnabledHandler(ctx context.Context) error {
 
 	if _, err = b.client.System.SetSystemNetworkExtension(params, nil); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (b *Bind) taskSystemTimeNTPAutoEnabledHandler(ctx context.Context) error {
+	settings, err := b.client.System.GetTime(system.NewGetTimeParamsWithContext(ctx), nil)
+	if err != nil {
+		return err
+	}
+
+	// check NTP address
+	servers, err := b.client.System.GetNtpServers(system.NewGetNtpServersParamsWithContext(ctx), nil)
+	if err != nil {
+		return err
+	}
+
+	var ntpServer *models.NTPServer
+
+	cfgNTP := b.config().SystemTimeNTPAddress
+	ip := net.ParseIP(cfgNTP.Hostname())
+
+	if len(servers.GetPayload()) > 0 {
+		server := servers.GetPayload()[0]
+
+		if port, err := strconv.ParseUint(cfgNTP.Port(), 10, 64); err == nil && port != server.PortNo {
+			ntpServer = server
+			ntpServer.PortNo = port
+		}
+
+		if ip == nil {
+			// check as hostname
+			if server.AddressingFormatType != models.NTPServerAddressingFormatTypeHostname || server.HostName == nil || *server.HostName != cfgNTP.Hostname() {
+				ntpServer = server
+
+				ntpServer.AddressingFormatType = models.NTPServerAddressingFormatTypeHostname
+				ntpServer.HostName = &[]string{cfgNTP.Hostname()}[0]
+				ntpServer.IPAddress = nil
+				ntpServer.IPV6Address = nil
+			}
+		} else if ip.To4() != nil {
+			// check as ip v4
+			if server.AddressingFormatType != models.NTPServerAddressingFormatTypeIpaddress || server.IPAddress == nil || *server.IPAddress != ip.String() {
+				ntpServer = server
+
+				ntpServer.AddressingFormatType = models.NTPServerAddressingFormatTypeIpaddress
+				ntpServer.HostName = nil
+				ntpServer.IPAddress = &[]string{ip.String()}[0]
+				ntpServer.IPV6Address = nil
+			}
+		} else {
+			// check as ip v6
+			if server.AddressingFormatType != models.NTPServerAddressingFormatTypeIpaddress || server.IPV6Address == nil || *server.IPV6Address != ip.String() {
+				ntpServer = server
+
+				ntpServer.AddressingFormatType = models.NTPServerAddressingFormatTypeIpaddress
+				ntpServer.HostName = nil
+				ntpServer.IPAddress = nil
+				ntpServer.IPV6Address = &[]string{ip.String()}[0]
+			}
+		}
+	} else {
+		ntpServer = &models.NTPServer{}
+
+		if ip == nil {
+			ntpServer.AddressingFormatType = models.NTPServerAddressingFormatTypeHostname
+			ntpServer.HostName = &[]string{cfgNTP.Hostname()}[0]
+		} else if ip.To4() != nil {
+			ntpServer.AddressingFormatType = models.NTPServerAddressingFormatTypeIpaddress
+			ntpServer.IPAddress = &[]string{ip.String()}[0]
+		} else {
+			ntpServer.AddressingFormatType = models.NTPServerAddressingFormatTypeIpaddress
+			ntpServer.IPV6Address = &[]string{ip.String()}[0]
+		}
+	}
+
+	if ntpServer != nil {
+		params := system.NewSetNtpServerParamsWithContext(ctx).WithID(ntpServer.ID)
+		params.NTPServer = ntpServer
+
+		if _, err = b.client.System.SetNtpServer(params, nil); err != nil {
+			return err
+		}
+	}
+
+	// check NTP is set
+	if settings.GetPayload().TimeMode == models.SystemTimeTimeModeNTP {
+		return nil
+	} else {
+		params := system.NewSetTimeParamsWithContext(ctx)
+		params.Time = settings.GetPayload()
+		params.Time.TimeMode = models.SystemTimeTimeModeNTP
+
+		if _, err = b.client.System.SetTime(params, nil); err != nil {
+			return err
+		}
 	}
 
 	return nil

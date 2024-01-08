@@ -30,7 +30,7 @@ func (o *SetPtzMomentaryReader) ReadResponse(response runtime.ClientResponse, co
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[PUT /PTZCtrl/channels/{channel}/momentary] setPtzMomentary", response, response.Code())
 	}
 }
 
@@ -39,7 +39,8 @@ func NewSetPtzMomentaryOK() *SetPtzMomentaryOK {
 	return &SetPtzMomentaryOK{}
 }
 
-/* SetPtzMomentaryOK describes a response with status code 200, with default header values.
+/*
+SetPtzMomentaryOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -47,9 +48,44 @@ type SetPtzMomentaryOK struct {
 	Payload *models.Status
 }
 
+// IsSuccess returns true when this set ptz momentary o k response has a 2xx status code
+func (o *SetPtzMomentaryOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this set ptz momentary o k response has a 3xx status code
+func (o *SetPtzMomentaryOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this set ptz momentary o k response has a 4xx status code
+func (o *SetPtzMomentaryOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this set ptz momentary o k response has a 5xx status code
+func (o *SetPtzMomentaryOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this set ptz momentary o k response a status code equal to that given
+func (o *SetPtzMomentaryOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the set ptz momentary o k response
+func (o *SetPtzMomentaryOK) Code() int {
+	return 200
+}
+
 func (o *SetPtzMomentaryOK) Error() string {
 	return fmt.Sprintf("[PUT /PTZCtrl/channels/{channel}/momentary][%d] setPtzMomentaryOK  %+v", 200, o.Payload)
 }
+
+func (o *SetPtzMomentaryOK) String() string {
+	return fmt.Sprintf("[PUT /PTZCtrl/channels/{channel}/momentary][%d] setPtzMomentaryOK  %+v", 200, o.Payload)
+}
+
 func (o *SetPtzMomentaryOK) GetPayload() *models.Status {
 	return o.Payload
 }

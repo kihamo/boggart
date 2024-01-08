@@ -37,7 +37,7 @@ type ClientService interface {
 }
 
 /*
-  GetStreamingPicture get streaming picture API
+GetStreamingPicture get streaming picture API
 */
 func (a *Client) GetStreamingPicture(params *GetStreamingPictureParams, authInfo runtime.ClientAuthInfoWriter, writer io.Writer, opts ...ClientOption) (*GetStreamingPictureOK, error) {
 	// TODO: Validate the params before sending

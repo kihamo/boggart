@@ -41,7 +41,7 @@ type ClientService interface {
 }
 
 /*
-  GetNotificationAlertStream its is used to get the event notification data stream through HTTP server push
+GetNotificationAlertStream its is used to get the event notification data stream through HTTP server push
 */
 func (a *Client) GetNotificationAlertStream(params *GetNotificationAlertStreamParams, authInfo runtime.ClientAuthInfoWriter, writer io.Writer, opts ...ClientOption) (*GetNotificationAlertStreamOK, error) {
 	// TODO: Validate the params before sending
@@ -80,7 +80,7 @@ func (a *Client) GetNotificationAlertStream(params *GetNotificationAlertStreamPa
 }
 
 /*
-  GetNotificationHTTPHost its is used to get the configuration of a particular e mail
+GetNotificationHTTPHost its is used to get the configuration of a particular e mail
 */
 func (a *Client) GetNotificationHTTPHost(params *GetNotificationHTTPHostParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetNotificationHTTPHostOK, error) {
 	// TODO: Validate the params before sending
@@ -119,7 +119,7 @@ func (a *Client) GetNotificationHTTPHost(params *GetNotificationHTTPHostParams, 
 }
 
 /*
-  SetNotificationHTTPHost its is used to get the configuration of a particular e mail
+SetNotificationHTTPHost its is used to get the configuration of a particular e mail
 */
 func (a *Client) SetNotificationHTTPHost(params *SetNotificationHTTPHostParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetNotificationHTTPHostOK, error) {
 	// TODO: Validate the params before sending

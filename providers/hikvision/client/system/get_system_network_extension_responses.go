@@ -47,7 +47,8 @@ func NewGetSystemNetworkExtensionOK() *GetSystemNetworkExtensionOK {
 	return &GetSystemNetworkExtensionOK{}
 }
 
-/* GetSystemNetworkExtensionOK describes a response with status code 200, with default header values.
+/*
+GetSystemNetworkExtensionOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -55,9 +56,44 @@ type GetSystemNetworkExtensionOK struct {
 	Payload static.SystemNetworkExtension
 }
 
+// IsSuccess returns true when this get system network extension o k response has a 2xx status code
+func (o *GetSystemNetworkExtensionOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get system network extension o k response has a 3xx status code
+func (o *GetSystemNetworkExtensionOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get system network extension o k response has a 4xx status code
+func (o *GetSystemNetworkExtensionOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get system network extension o k response has a 5xx status code
+func (o *GetSystemNetworkExtensionOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get system network extension o k response a status code equal to that given
+func (o *GetSystemNetworkExtensionOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get system network extension o k response
+func (o *GetSystemNetworkExtensionOK) Code() int {
+	return 200
+}
+
 func (o *GetSystemNetworkExtensionOK) Error() string {
 	return fmt.Sprintf("[GET /System/Network/extension][%d] getSystemNetworkExtensionOK  %+v", 200, o.Payload)
 }
+
+func (o *GetSystemNetworkExtensionOK) String() string {
+	return fmt.Sprintf("[GET /System/Network/extension][%d] getSystemNetworkExtensionOK  %+v", 200, o.Payload)
+}
+
 func (o *GetSystemNetworkExtensionOK) GetPayload() static.SystemNetworkExtension {
 	return o.Payload
 }
@@ -79,7 +115,8 @@ func NewGetSystemNetworkExtensionDefault(code int) *GetSystemNetworkExtensionDef
 	}
 }
 
-/* GetSystemNetworkExtensionDefault describes a response with status code -1, with default header values.
+/*
+GetSystemNetworkExtensionDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -87,6 +124,31 @@ type GetSystemNetworkExtensionDefault struct {
 	_statusCode int
 
 	Payload *models.Status
+}
+
+// IsSuccess returns true when this get system network extension default response has a 2xx status code
+func (o *GetSystemNetworkExtensionDefault) IsSuccess() bool {
+	return o._statusCode/100 == 2
+}
+
+// IsRedirect returns true when this get system network extension default response has a 3xx status code
+func (o *GetSystemNetworkExtensionDefault) IsRedirect() bool {
+	return o._statusCode/100 == 3
+}
+
+// IsClientError returns true when this get system network extension default response has a 4xx status code
+func (o *GetSystemNetworkExtensionDefault) IsClientError() bool {
+	return o._statusCode/100 == 4
+}
+
+// IsServerError returns true when this get system network extension default response has a 5xx status code
+func (o *GetSystemNetworkExtensionDefault) IsServerError() bool {
+	return o._statusCode/100 == 5
+}
+
+// IsCode returns true when this get system network extension default response a status code equal to that given
+func (o *GetSystemNetworkExtensionDefault) IsCode(code int) bool {
+	return o._statusCode == code
 }
 
 // Code gets the status code for the get system network extension default response
@@ -97,6 +159,11 @@ func (o *GetSystemNetworkExtensionDefault) Code() int {
 func (o *GetSystemNetworkExtensionDefault) Error() string {
 	return fmt.Sprintf("[GET /System/Network/extension][%d] getSystemNetworkExtension default  %+v", o._statusCode, o.Payload)
 }
+
+func (o *GetSystemNetworkExtensionDefault) String() string {
+	return fmt.Sprintf("[GET /System/Network/extension][%d] getSystemNetworkExtension default  %+v", o._statusCode, o.Payload)
+}
+
 func (o *GetSystemNetworkExtensionDefault) GetPayload() *models.Status {
 	return o.Payload
 }

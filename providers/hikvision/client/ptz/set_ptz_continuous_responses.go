@@ -30,7 +30,7 @@ func (o *SetPtzContinuousReader) ReadResponse(response runtime.ClientResponse, c
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[PUT /PTZCtrl/channels/{channel}/continuous] setPtzContinuous", response, response.Code())
 	}
 }
 
@@ -39,7 +39,8 @@ func NewSetPtzContinuousOK() *SetPtzContinuousOK {
 	return &SetPtzContinuousOK{}
 }
 
-/* SetPtzContinuousOK describes a response with status code 200, with default header values.
+/*
+SetPtzContinuousOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -47,9 +48,44 @@ type SetPtzContinuousOK struct {
 	Payload *models.Status
 }
 
+// IsSuccess returns true when this set ptz continuous o k response has a 2xx status code
+func (o *SetPtzContinuousOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this set ptz continuous o k response has a 3xx status code
+func (o *SetPtzContinuousOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this set ptz continuous o k response has a 4xx status code
+func (o *SetPtzContinuousOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this set ptz continuous o k response has a 5xx status code
+func (o *SetPtzContinuousOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this set ptz continuous o k response a status code equal to that given
+func (o *SetPtzContinuousOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the set ptz continuous o k response
+func (o *SetPtzContinuousOK) Code() int {
+	return 200
+}
+
 func (o *SetPtzContinuousOK) Error() string {
 	return fmt.Sprintf("[PUT /PTZCtrl/channels/{channel}/continuous][%d] setPtzContinuousOK  %+v", 200, o.Payload)
 }
+
+func (o *SetPtzContinuousOK) String() string {
+	return fmt.Sprintf("[PUT /PTZCtrl/channels/{channel}/continuous][%d] setPtzContinuousOK  %+v", 200, o.Payload)
+}
+
 func (o *SetPtzContinuousOK) GetPayload() *models.Status {
 	return o.Payload
 }

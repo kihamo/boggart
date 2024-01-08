@@ -52,10 +52,12 @@ func NewRebootParamsWithHTTPClient(client *http.Client) *RebootParams {
 	}
 }
 
-/* RebootParams contains all the parameters to send to the API endpoint
-   for the reboot operation.
+/*
+RebootParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the reboot operation.
+
+	Typically these are written to a http.Request.
 */
 type RebootParams struct {
 	timeout    time.Duration

@@ -30,7 +30,7 @@ func (o *GetSystemUpgradeStatusReader) ReadResponse(response runtime.ClientRespo
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /System/upgradeStatus] getSystemUpgradeStatus", response, response.Code())
 	}
 }
 
@@ -39,7 +39,8 @@ func NewGetSystemUpgradeStatusOK() *GetSystemUpgradeStatusOK {
 	return &GetSystemUpgradeStatusOK{}
 }
 
-/* GetSystemUpgradeStatusOK describes a response with status code 200, with default header values.
+/*
+GetSystemUpgradeStatusOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -47,9 +48,44 @@ type GetSystemUpgradeStatusOK struct {
 	Payload *models.SystemUpgradeStatus
 }
 
+// IsSuccess returns true when this get system upgrade status o k response has a 2xx status code
+func (o *GetSystemUpgradeStatusOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get system upgrade status o k response has a 3xx status code
+func (o *GetSystemUpgradeStatusOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get system upgrade status o k response has a 4xx status code
+func (o *GetSystemUpgradeStatusOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get system upgrade status o k response has a 5xx status code
+func (o *GetSystemUpgradeStatusOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get system upgrade status o k response a status code equal to that given
+func (o *GetSystemUpgradeStatusOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get system upgrade status o k response
+func (o *GetSystemUpgradeStatusOK) Code() int {
+	return 200
+}
+
 func (o *GetSystemUpgradeStatusOK) Error() string {
 	return fmt.Sprintf("[GET /System/upgradeStatus][%d] getSystemUpgradeStatusOK  %+v", 200, o.Payload)
 }
+
+func (o *GetSystemUpgradeStatusOK) String() string {
+	return fmt.Sprintf("[GET /System/upgradeStatus][%d] getSystemUpgradeStatusOK  %+v", 200, o.Payload)
+}
+
 func (o *GetSystemUpgradeStatusOK) GetPayload() *models.SystemUpgradeStatus {
 	return o.Payload
 }

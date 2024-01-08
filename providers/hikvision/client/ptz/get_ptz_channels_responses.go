@@ -30,7 +30,7 @@ func (o *GetPtzChannelsReader) ReadResponse(response runtime.ClientResponse, con
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /PTZCtrl/channels] getPtzChannels", response, response.Code())
 	}
 }
 
@@ -39,7 +39,8 @@ func NewGetPtzChannelsOK() *GetPtzChannelsOK {
 	return &GetPtzChannelsOK{}
 }
 
-/* GetPtzChannelsOK describes a response with status code 200, with default header values.
+/*
+GetPtzChannelsOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -47,9 +48,44 @@ type GetPtzChannelsOK struct {
 	Payload models.PtzChannels
 }
 
+// IsSuccess returns true when this get ptz channels o k response has a 2xx status code
+func (o *GetPtzChannelsOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get ptz channels o k response has a 3xx status code
+func (o *GetPtzChannelsOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get ptz channels o k response has a 4xx status code
+func (o *GetPtzChannelsOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get ptz channels o k response has a 5xx status code
+func (o *GetPtzChannelsOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get ptz channels o k response a status code equal to that given
+func (o *GetPtzChannelsOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get ptz channels o k response
+func (o *GetPtzChannelsOK) Code() int {
+	return 200
+}
+
 func (o *GetPtzChannelsOK) Error() string {
 	return fmt.Sprintf("[GET /PTZCtrl/channels][%d] getPtzChannelsOK  %+v", 200, o.Payload)
 }
+
+func (o *GetPtzChannelsOK) String() string {
+	return fmt.Sprintf("[GET /PTZCtrl/channels][%d] getPtzChannelsOK  %+v", 200, o.Payload)
+}
+
 func (o *GetPtzChannelsOK) GetPayload() models.PtzChannels {
 	return o.Payload
 }

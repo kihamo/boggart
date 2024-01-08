@@ -55,10 +55,12 @@ func NewSetPtzContinuousParamsWithHTTPClient(client *http.Client) *SetPtzContinu
 	}
 }
 
-/* SetPtzContinuousParams contains all the parameters to send to the API endpoint
-   for the set ptz continuous operation.
+/*
+SetPtzContinuousParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the set ptz continuous operation.
+
+	Typically these are written to a http.Request.
 */
 type SetPtzContinuousParams struct {
 

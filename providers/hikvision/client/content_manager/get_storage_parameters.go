@@ -52,10 +52,12 @@ func NewGetStorageParamsWithHTTPClient(client *http.Client) *GetStorageParams {
 	}
 }
 
-/* GetStorageParams contains all the parameters to send to the API endpoint
-   for the get storage operation.
+/*
+GetStorageParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get storage operation.
+
+	Typically these are written to a http.Request.
 */
 type GetStorageParams struct {
 	timeout    time.Duration

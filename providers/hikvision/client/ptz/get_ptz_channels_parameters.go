@@ -52,10 +52,12 @@ func NewGetPtzChannelsParamsWithHTTPClient(client *http.Client) *GetPtzChannelsP
 	}
 }
 
-/* GetPtzChannelsParams contains all the parameters to send to the API endpoint
-   for the get ptz channels operation.
+/*
+GetPtzChannelsParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get ptz channels operation.
+
+	Typically these are written to a http.Request.
 */
 type GetPtzChannelsParams struct {
 	timeout    time.Duration

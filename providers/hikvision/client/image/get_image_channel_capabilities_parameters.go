@@ -53,10 +53,12 @@ func NewGetImageChannelCapabilitiesParamsWithHTTPClient(client *http.Client) *Ge
 	}
 }
 
-/* GetImageChannelCapabilitiesParams contains all the parameters to send to the API endpoint
-   for the get image channel capabilities operation.
+/*
+GetImageChannelCapabilitiesParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get image channel capabilities operation.
+
+	Typically these are written to a http.Request.
 */
 type GetImageChannelCapabilitiesParams struct {
 

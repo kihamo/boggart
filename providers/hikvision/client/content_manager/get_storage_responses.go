@@ -30,7 +30,7 @@ func (o *GetStorageReader) ReadResponse(response runtime.ClientResponse, consume
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /ContentMgmt/Storage] getStorage", response, response.Code())
 	}
 }
 
@@ -39,7 +39,8 @@ func NewGetStorageOK() *GetStorageOK {
 	return &GetStorageOK{}
 }
 
-/* GetStorageOK describes a response with status code 200, with default header values.
+/*
+GetStorageOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -47,9 +48,44 @@ type GetStorageOK struct {
 	Payload *models.Storage
 }
 
+// IsSuccess returns true when this get storage o k response has a 2xx status code
+func (o *GetStorageOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get storage o k response has a 3xx status code
+func (o *GetStorageOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get storage o k response has a 4xx status code
+func (o *GetStorageOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get storage o k response has a 5xx status code
+func (o *GetStorageOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get storage o k response a status code equal to that given
+func (o *GetStorageOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get storage o k response
+func (o *GetStorageOK) Code() int {
+	return 200
+}
+
 func (o *GetStorageOK) Error() string {
 	return fmt.Sprintf("[GET /ContentMgmt/Storage][%d] getStorageOK  %+v", 200, o.Payload)
 }
+
+func (o *GetStorageOK) String() string {
+	return fmt.Sprintf("[GET /ContentMgmt/Storage][%d] getStorageOK  %+v", 200, o.Payload)
+}
+
 func (o *GetStorageOK) GetPayload() *models.Storage {
 	return o.Payload
 }

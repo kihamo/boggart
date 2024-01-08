@@ -135,6 +135,10 @@ func (m *ImageChannelCapabilities) ContextValidate(ctx context.Context, formats 
 
 func (m *ImageChannelCapabilities) contextValidateImageFlipEnabled(ctx context.Context, formats strfmt.Registry) error {
 
+	if swag.IsZero(m.ImageFlipEnabled) { // not required
+		return nil
+	}
+
 	if err := m.ImageFlipEnabled.ContextValidate(ctx, formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
 			return ve.ValidateName("ImageFlipEnabled")
@@ -149,6 +153,10 @@ func (m *ImageChannelCapabilities) contextValidateImageFlipEnabled(ctx context.C
 
 func (m *ImageChannelCapabilities) contextValidateImageFlipStyle(ctx context.Context, formats strfmt.Registry) error {
 
+	if swag.IsZero(m.ImageFlipStyle) { // not required
+		return nil
+	}
+
 	if err := m.ImageFlipStyle.ContextValidate(ctx, formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
 			return ve.ValidateName("ImageFlipStyle")
@@ -162,6 +170,10 @@ func (m *ImageChannelCapabilities) contextValidateImageFlipStyle(ctx context.Con
 }
 
 func (m *ImageChannelCapabilities) contextValidateIrcutFilterType(ctx context.Context, formats strfmt.Registry) error {
+
+	if swag.IsZero(m.IrcutFilterType) { // not required
+		return nil
+	}
 
 	if err := m.IrcutFilterType.ContextValidate(ctx, formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {

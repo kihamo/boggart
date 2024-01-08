@@ -55,10 +55,12 @@ func NewSetImageFlipParamsWithHTTPClient(client *http.Client) *SetImageFlipParam
 	}
 }
 
-/* SetImageFlipParams contains all the parameters to send to the API endpoint
-   for the set image flip operation.
+/*
+SetImageFlipParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the set image flip operation.
+
+	Typically these are written to a http.Request.
 */
 type SetImageFlipParams struct {
 

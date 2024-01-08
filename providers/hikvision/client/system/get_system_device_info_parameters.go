@@ -52,10 +52,12 @@ func NewGetSystemDeviceInfoParamsWithHTTPClient(client *http.Client) *GetSystemD
 	}
 }
 
-/* GetSystemDeviceInfoParams contains all the parameters to send to the API endpoint
-   for the get system device info operation.
+/*
+GetSystemDeviceInfoParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get system device info operation.
+
+	Typically these are written to a http.Request.
 */
 type GetSystemDeviceInfoParams struct {
 	timeout    time.Duration

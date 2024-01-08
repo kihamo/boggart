@@ -30,7 +30,7 @@ func (o *UpdateSystemFirmwareReader) ReadResponse(response runtime.ClientRespons
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[PUT /System/updateFirmware] updateSystemFirmware", response, response.Code())
 	}
 }
 
@@ -39,7 +39,8 @@ func NewUpdateSystemFirmwareOK() *UpdateSystemFirmwareOK {
 	return &UpdateSystemFirmwareOK{}
 }
 
-/* UpdateSystemFirmwareOK describes a response with status code 200, with default header values.
+/*
+UpdateSystemFirmwareOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -47,9 +48,44 @@ type UpdateSystemFirmwareOK struct {
 	Payload *models.Status
 }
 
+// IsSuccess returns true when this update system firmware o k response has a 2xx status code
+func (o *UpdateSystemFirmwareOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this update system firmware o k response has a 3xx status code
+func (o *UpdateSystemFirmwareOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this update system firmware o k response has a 4xx status code
+func (o *UpdateSystemFirmwareOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this update system firmware o k response has a 5xx status code
+func (o *UpdateSystemFirmwareOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this update system firmware o k response a status code equal to that given
+func (o *UpdateSystemFirmwareOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the update system firmware o k response
+func (o *UpdateSystemFirmwareOK) Code() int {
+	return 200
+}
+
 func (o *UpdateSystemFirmwareOK) Error() string {
 	return fmt.Sprintf("[PUT /System/updateFirmware][%d] updateSystemFirmwareOK  %+v", 200, o.Payload)
 }
+
+func (o *UpdateSystemFirmwareOK) String() string {
+	return fmt.Sprintf("[PUT /System/updateFirmware][%d] updateSystemFirmwareOK  %+v", 200, o.Payload)
+}
+
 func (o *UpdateSystemFirmwareOK) GetPayload() *models.Status {
 	return o.Payload
 }

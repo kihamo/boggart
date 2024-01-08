@@ -53,10 +53,12 @@ func NewGotoPtzPresetParamsWithHTTPClient(client *http.Client) *GotoPtzPresetPar
 	}
 }
 
-/* GotoPtzPresetParams contains all the parameters to send to the API endpoint
-   for the goto ptz preset operation.
+/*
+GotoPtzPresetParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the goto ptz preset operation.
+
+	Typically these are written to a http.Request.
 */
 type GotoPtzPresetParams struct {
 

@@ -52,10 +52,12 @@ func NewGetSystemUpgradeStatusParamsWithHTTPClient(client *http.Client) *GetSyst
 	}
 }
 
-/* GetSystemUpgradeStatusParams contains all the parameters to send to the API endpoint
-   for the get system upgrade status operation.
+/*
+GetSystemUpgradeStatusParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get system upgrade status operation.
+
+	Typically these are written to a http.Request.
 */
 type GetSystemUpgradeStatusParams struct {
 	timeout    time.Duration

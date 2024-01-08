@@ -29,7 +29,7 @@ func (o *GetNotificationAlertStreamReader) ReadResponse(response runtime.ClientR
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /Event/notification/alertStream] getNotificationAlertStream", response, response.Code())
 	}
 }
 
@@ -41,7 +41,8 @@ func NewGetNotificationAlertStreamOK(writer io.Writer) *GetNotificationAlertStre
 	}
 }
 
-/* GetNotificationAlertStreamOK describes a response with status code 200, with default header values.
+/*
+GetNotificationAlertStreamOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -49,9 +50,44 @@ type GetNotificationAlertStreamOK struct {
 	Payload io.Writer
 }
 
+// IsSuccess returns true when this get notification alert stream o k response has a 2xx status code
+func (o *GetNotificationAlertStreamOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get notification alert stream o k response has a 3xx status code
+func (o *GetNotificationAlertStreamOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get notification alert stream o k response has a 4xx status code
+func (o *GetNotificationAlertStreamOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get notification alert stream o k response has a 5xx status code
+func (o *GetNotificationAlertStreamOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get notification alert stream o k response a status code equal to that given
+func (o *GetNotificationAlertStreamOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get notification alert stream o k response
+func (o *GetNotificationAlertStreamOK) Code() int {
+	return 200
+}
+
 func (o *GetNotificationAlertStreamOK) Error() string {
 	return fmt.Sprintf("[GET /Event/notification/alertStream][%d] getNotificationAlertStreamOK  %+v", 200, o.Payload)
 }
+
+func (o *GetNotificationAlertStreamOK) String() string {
+	return fmt.Sprintf("[GET /Event/notification/alertStream][%d] getNotificationAlertStreamOK  %+v", 200, o.Payload)
+}
+
 func (o *GetNotificationAlertStreamOK) GetPayload() io.Writer {
 	return o.Payload
 }

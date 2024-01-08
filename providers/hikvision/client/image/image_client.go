@@ -42,7 +42,7 @@ type ClientService interface {
 }
 
 /*
-  GetImageChannelCapabilities get image channel capabilities API
+GetImageChannelCapabilities get image channel capabilities API
 */
 func (a *Client) GetImageChannelCapabilities(params *GetImageChannelCapabilitiesParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetImageChannelCapabilitiesOK, error) {
 	// TODO: Validate the params before sending
@@ -81,7 +81,7 @@ func (a *Client) GetImageChannelCapabilities(params *GetImageChannelCapabilities
 }
 
 /*
-  GetImageChannels get image channels API
+GetImageChannels get image channels API
 */
 func (a *Client) GetImageChannels(params *GetImageChannelsParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetImageChannelsOK, error) {
 	// TODO: Validate the params before sending
@@ -120,7 +120,7 @@ func (a *Client) GetImageChannels(params *GetImageChannelsParams, authInfo runti
 }
 
 /*
-  SetImageFlip set image flip API
+SetImageFlip set image flip API
 */
 func (a *Client) SetImageFlip(params *SetImageFlipParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetImageFlipOK, error) {
 	// TODO: Validate the params before sending
@@ -159,7 +159,7 @@ func (a *Client) SetImageFlip(params *SetImageFlipParams, authInfo runtime.Clien
 }
 
 /*
-  SetImageIrCutFilter set image ir cut filter API
+SetImageIrCutFilter set image ir cut filter API
 */
 func (a *Client) SetImageIrCutFilter(params *SetImageIrCutFilterParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetImageIrCutFilterOK, error) {
 	// TODO: Validate the params before sending

@@ -52,10 +52,12 @@ func NewGetImageChannelsParamsWithHTTPClient(client *http.Client) *GetImageChann
 	}
 }
 
-/* GetImageChannelsParams contains all the parameters to send to the API endpoint
-   for the get image channels operation.
+/*
+GetImageChannelsParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get image channels operation.
+
+	Typically these are written to a http.Request.
 */
 type GetImageChannelsParams struct {
 	timeout    time.Duration

@@ -174,6 +174,11 @@ func (m *Storage) contextValidateHddList(ctx context.Context, formats strfmt.Reg
 	for i := 0; i < len(m.HddList); i++ {
 
 		if m.HddList[i] != nil {
+
+			if swag.IsZero(m.HddList[i]) { // not required
+				return nil
+			}
+
 			if err := m.HddList[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("hddList" + "." + strconv.Itoa(i))
@@ -194,6 +199,11 @@ func (m *Storage) contextValidateNasList(ctx context.Context, formats strfmt.Reg
 	for i := 0; i < len(m.NasList); i++ {
 
 		if m.NasList[i] != nil {
+
+			if swag.IsZero(m.NasList[i]) { // not required
+				return nil
+			}
+
 			if err := m.NasList[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("nasList" + "." + strconv.Itoa(i))

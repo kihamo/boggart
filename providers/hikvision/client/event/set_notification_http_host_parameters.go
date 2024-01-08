@@ -55,10 +55,12 @@ func NewSetNotificationHTTPHostParamsWithHTTPClient(client *http.Client) *SetNot
 	}
 }
 
-/* SetNotificationHTTPHostParams contains all the parameters to send to the API endpoint
-   for the set notification Http host operation.
+/*
+SetNotificationHTTPHostParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the set notification Http host operation.
+
+	Typically these are written to a http.Request.
 */
 type SetNotificationHTTPHostParams struct {
 

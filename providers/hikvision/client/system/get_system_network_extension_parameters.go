@@ -52,10 +52,12 @@ func NewGetSystemNetworkExtensionParamsWithHTTPClient(client *http.Client) *GetS
 	}
 }
 
-/* GetSystemNetworkExtensionParams contains all the parameters to send to the API endpoint
-   for the get system network extension operation.
+/*
+GetSystemNetworkExtensionParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get system network extension operation.
+
+	Typically these are written to a http.Request.
 */
 type GetSystemNetworkExtensionParams struct {
 	timeout    time.Duration

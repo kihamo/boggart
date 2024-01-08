@@ -54,10 +54,12 @@ func NewSetSystemNetworkExtensionParamsWithHTTPClient(client *http.Client) *SetS
 	}
 }
 
-/* SetSystemNetworkExtensionParams contains all the parameters to send to the API endpoint
-   for the set system network extension operation.
+/*
+SetSystemNetworkExtensionParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the set system network extension operation.
+
+	Typically these are written to a http.Request.
 */
 type SetSystemNetworkExtensionParams struct {
 

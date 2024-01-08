@@ -27,7 +27,7 @@ func (o *RebootReader) ReadResponse(response runtime.ClientResponse, consumer ru
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[PUT /System/reboot] reboot", response, response.Code())
 	}
 }
 
@@ -36,14 +36,49 @@ func NewRebootOK() *RebootOK {
 	return &RebootOK{}
 }
 
-/* RebootOK describes a response with status code 200, with default header values.
+/*
+RebootOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
 type RebootOK struct {
 }
 
+// IsSuccess returns true when this reboot o k response has a 2xx status code
+func (o *RebootOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this reboot o k response has a 3xx status code
+func (o *RebootOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this reboot o k response has a 4xx status code
+func (o *RebootOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this reboot o k response has a 5xx status code
+func (o *RebootOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this reboot o k response a status code equal to that given
+func (o *RebootOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the reboot o k response
+func (o *RebootOK) Code() int {
+	return 200
+}
+
 func (o *RebootOK) Error() string {
+	return fmt.Sprintf("[PUT /System/reboot][%d] rebootOK ", 200)
+}
+
+func (o *RebootOK) String() string {
 	return fmt.Sprintf("[PUT /System/reboot][%d] rebootOK ", 200)
 }
 

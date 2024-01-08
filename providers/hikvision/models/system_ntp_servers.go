@@ -14,13 +14,13 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// PtzChannels ptz channels
+// SystemNtpServers system ntp servers
 //
-// swagger:model PtzChannels
-type PtzChannels []*PtzChannel
+// swagger:model SystemNtpServers
+type SystemNtpServers []*NTPServer
 
-// Validate validates this ptz channels
-func (m PtzChannels) Validate(formats strfmt.Registry) error {
+// Validate validates this system ntp servers
+func (m SystemNtpServers) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	for i := 0; i < len(m); i++ {
@@ -47,8 +47,8 @@ func (m PtzChannels) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-// ContextValidate validate this ptz channels based on the context it is used
-func (m PtzChannels) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+// ContextValidate validate this system ntp servers based on the context it is used
+func (m SystemNtpServers) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	var res []error
 
 	for i := 0; i < len(m); i++ {

@@ -30,7 +30,7 @@ func (o *SetPtzPositionAbsoluteReader) ReadResponse(response runtime.ClientRespo
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[PUT /PTZCtrl/channels/{channel}/absolute] setPtzPositionAbsolute", response, response.Code())
 	}
 }
 
@@ -39,7 +39,8 @@ func NewSetPtzPositionAbsoluteOK() *SetPtzPositionAbsoluteOK {
 	return &SetPtzPositionAbsoluteOK{}
 }
 
-/* SetPtzPositionAbsoluteOK describes a response with status code 200, with default header values.
+/*
+SetPtzPositionAbsoluteOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -47,9 +48,44 @@ type SetPtzPositionAbsoluteOK struct {
 	Payload *models.Status
 }
 
+// IsSuccess returns true when this set ptz position absolute o k response has a 2xx status code
+func (o *SetPtzPositionAbsoluteOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this set ptz position absolute o k response has a 3xx status code
+func (o *SetPtzPositionAbsoluteOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this set ptz position absolute o k response has a 4xx status code
+func (o *SetPtzPositionAbsoluteOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this set ptz position absolute o k response has a 5xx status code
+func (o *SetPtzPositionAbsoluteOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this set ptz position absolute o k response a status code equal to that given
+func (o *SetPtzPositionAbsoluteOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the set ptz position absolute o k response
+func (o *SetPtzPositionAbsoluteOK) Code() int {
+	return 200
+}
+
 func (o *SetPtzPositionAbsoluteOK) Error() string {
 	return fmt.Sprintf("[PUT /PTZCtrl/channels/{channel}/absolute][%d] setPtzPositionAbsoluteOK  %+v", 200, o.Payload)
 }
+
+func (o *SetPtzPositionAbsoluteOK) String() string {
+	return fmt.Sprintf("[PUT /PTZCtrl/channels/{channel}/absolute][%d] setPtzPositionAbsoluteOK  %+v", 200, o.Payload)
+}
+
 func (o *SetPtzPositionAbsoluteOK) GetPayload() *models.Status {
 	return o.Payload
 }

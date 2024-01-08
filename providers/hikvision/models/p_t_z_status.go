@@ -72,6 +72,11 @@ func (m *PTZStatus) ContextValidate(ctx context.Context, formats strfmt.Registry
 func (m *PTZStatus) contextValidateAbsoluteHigh(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.AbsoluteHigh != nil {
+
+		if swag.IsZero(m.AbsoluteHigh) { // not required
+			return nil
+		}
+
 		if err := m.AbsoluteHigh.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("absoluteHigh")
