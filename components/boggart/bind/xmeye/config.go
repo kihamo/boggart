@@ -34,7 +34,7 @@ type Config struct {
 }
 
 func (t Type) ConfigDefaults() interface{} {
-	var prefix mqtt.Topic = boggart.ComponentName + "/cctv/+/"XM
+	var prefix mqtt.Topic = boggart.ComponentName + "/cctv/+/"
 
 	return &Config{
 		ProbesConfig:                   di.ProbesConfigDefaults(),
