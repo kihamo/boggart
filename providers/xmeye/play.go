@@ -33,12 +33,18 @@ func (c *Client) PlayStream(ctx context.Context, begin, end time.Time, name stri
 		"Name":      "OPPlayBack",
 		"SessionID": c.connection.SessionIDAsString(),
 		"OPPlayBack": map[string]interface{}{
-			"Action":    "Claim",
-			"StartTime": begin.Format(TimeLayout),
-			"EndTime":   end.Format(TimeLayout),
+			"Action":     "Claim",
+			"StartTime":  begin.Format(TimeLayout),
+			"EndTime":    end.Format(TimeLayout),
+			"StreamType": 0,
 			"Parameter": map[string]interface{}{
 				"FileName":  name,
 				"TransMode": "TCP",
+				// more fields https://github.com/sahujaunpuri/XMCamera-AndroidTV-Demo/blob/b830496cc59d5e50105dfa99250e5e1cb324b28f/app/src/main/java/com/lib/sdk/bean/OPPlayBackBean.java#L19
+				"PlayMode":                 "ByName",
+				"Value":                    0,
+				"IntelligentPlayBackEvent": "",
+				"IntelligentPlayBackSpeed": 0,
 			},
 		},
 	})

@@ -220,6 +220,11 @@ func (b *Bind) taskSystemTimeNTPAutoEnabledHandler(ctx context.Context) error {
 			ntpServer.PortNo = port
 		}
 
+		if interval := b.config().SystemTimeNTPSynchronizeInterval; interval != server.SynchronizeInterval {
+			ntpServer = server
+			ntpServer.SynchronizeInterval = interval
+		}
+
 		if ip == nil {
 			// check as hostname
 			if server.AddressingFormatType != models.NTPServerAddressingFormatTypeHostname || server.HostName == nil || *server.HostName != cfgNTP.Hostname() {
@@ -252,7 +257,9 @@ func (b *Bind) taskSystemTimeNTPAutoEnabledHandler(ctx context.Context) error {
 			}
 		}
 	} else {
-		ntpServer = &models.NTPServer{}
+		ntpServer = &models.NTPServer{
+			SynchronizeInterval: b.config().SystemTimeNTPSynchronizeInterval,
+		}
 
 		if ip == nil {
 			ntpServer.AddressingFormatType = models.NTPServerAddressingFormatTypeHostname
