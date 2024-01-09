@@ -22,25 +22,25 @@ type NTPServer struct {
 
 	// addressing format type
 	// Enum: [ipaddress hostname]
-	AddressingFormatType string `json:"addressingFormatType,omitempty" xml:"NTPServer>addressingFormatType,omitempty"`
+	AddressingFormatType string `json:"addressingFormatType,omitempty" xml:"addressingFormatType,omitempty"`
 
 	// host name
-	HostName *string `json:"hostName,omitempty" xml:"NTPServer>hostName,omitempty"`
+	HostName *string `json:"hostName,omitempty" xml:"hostName,omitempty"`
 
 	// id
-	ID uint64 `json:"id,omitempty" xml:"NTPServer>id,omitempty"`
+	ID uint64 `json:"id,omitempty" xml:"id,omitempty"`
 
 	// ip address
-	IPAddress *string `json:"ipAddress,omitempty" xml:"NTPServer>ipAddress,omitempty"`
+	IPAddress *string `json:"ipAddress,omitempty" xml:"ipAddress,omitempty"`
 
 	// ipv6 address
-	IPV6Address *string `json:"ipv6Address,omitempty" xml:"NTPServer>ipv6Address,omitempty"`
+	IPV6Address *string `json:"ipv6Address,omitempty" xml:"ipv6Address,omitempty"`
 
 	// port no
-	PortNo uint64 `json:"portNo,omitempty" xml:"NTPServer>portNo,omitempty"`
+	PortNo uint64 `json:"portNo,omitempty" xml:"portNo,omitempty"`
 
 	// synchronize interval
-	SynchronizeInterval uint64 `json:"synchronizeInterval,omitempty" xml:"NTPServer>synchronizeInterval,omitempty"`
+	SynchronizeInterval uint64 `json:"synchronizeInterval,omitempty" xml:"synchronizeInterval,omitempty"`
 }
 
 // Validate validates this n t p server

@@ -213,47 +213,60 @@ func (b *Bind) taskSystemTimeNTPAutoEnabledHandler(ctx context.Context) error {
 	ip := net.ParseIP(cfgNTP.Hostname())
 
 	if len(servers.GetPayload()) > 0 {
+		var needCreate bool
 		server := servers.GetPayload()[0]
 
 		if port, err := strconv.ParseUint(cfgNTP.Port(), 10, 64); err == nil && port != server.PortNo {
-			ntpServer = server
-			ntpServer.PortNo = port
+			needCreate = true
+			server.PortNo = port
 		}
 
 		if interval := b.config().SystemTimeNTPSynchronizeInterval; interval != server.SynchronizeInterval {
-			ntpServer = server
-			ntpServer.SynchronizeInterval = interval
+			needCreate = true
+			server.SynchronizeInterval = interval
 		}
 
 		if ip == nil {
 			// check as hostname
 			if server.AddressingFormatType != models.NTPServerAddressingFormatTypeHostname || server.HostName == nil || *server.HostName != cfgNTP.Hostname() {
-				ntpServer = server
+				needCreate = true
 
-				ntpServer.AddressingFormatType = models.NTPServerAddressingFormatTypeHostname
-				ntpServer.HostName = &[]string{cfgNTP.Hostname()}[0]
-				ntpServer.IPAddress = nil
-				ntpServer.IPV6Address = nil
+				server.AddressingFormatType = models.NTPServerAddressingFormatTypeHostname
+				server.HostName = &[]string{cfgNTP.Hostname()}[0]
+				server.IPAddress = nil
+				server.IPV6Address = nil
 			}
 		} else if ip.To4() != nil {
 			// check as ip v4
 			if server.AddressingFormatType != models.NTPServerAddressingFormatTypeIpaddress || server.IPAddress == nil || *server.IPAddress != ip.String() {
-				ntpServer = server
+				needCreate = true
 
-				ntpServer.AddressingFormatType = models.NTPServerAddressingFormatTypeIpaddress
-				ntpServer.HostName = nil
-				ntpServer.IPAddress = &[]string{ip.String()}[0]
-				ntpServer.IPV6Address = nil
+				server.AddressingFormatType = models.NTPServerAddressingFormatTypeIpaddress
+				server.HostName = nil
+				server.IPAddress = &[]string{ip.String()}[0]
+				server.IPV6Address = nil
 			}
 		} else {
 			// check as ip v6
 			if server.AddressingFormatType != models.NTPServerAddressingFormatTypeIpaddress || server.IPV6Address == nil || *server.IPV6Address != ip.String() {
-				ntpServer = server
+				needCreate = true
 
-				ntpServer.AddressingFormatType = models.NTPServerAddressingFormatTypeIpaddress
-				ntpServer.HostName = nil
-				ntpServer.IPAddress = nil
-				ntpServer.IPV6Address = &[]string{ip.String()}[0]
+				server.AddressingFormatType = models.NTPServerAddressingFormatTypeIpaddress
+				server.HostName = nil
+				server.IPAddress = nil
+				server.IPV6Address = &[]string{ip.String()}[0]
+			}
+		}
+
+		if needCreate {
+			ntpServer = &models.NTPServer{
+				AddressingFormatType: server.AddressingFormatType,
+				HostName:             server.HostName,
+				ID:                   server.ID,
+				IPAddress:            server.IPAddress,
+				IPV6Address:          server.IPV6Address,
+				PortNo:               server.PortNo,
+				SynchronizeInterval:  server.SynchronizeInterval,
 			}
 		}
 	} else {

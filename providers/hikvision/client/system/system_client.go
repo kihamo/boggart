@@ -46,8 +46,6 @@ type ClientService interface {
 
 	SetNtpServer(params *SetNtpServerParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetNtpServerOK, error)
 
-	SetNtpServers(params *SetNtpServersParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetNtpServersOK, error)
-
 	SetSystemNetworkExtension(params *SetSystemNetworkExtensionParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetSystemNetworkExtensionOK, error)
 
 	SetTime(params *SetTimeParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetTimeOK, error)
@@ -252,7 +250,7 @@ func (a *Client) GetSystemUpgradeStatus(params *GetSystemUpgradeStatusParams, au
 }
 
 /*
-GetTime get time API
+GetTime Get the device time information.
 */
 func (a *Client) GetTime(params *GetTimeParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetTimeOK, error) {
 	// TODO: Validate the params before sending
@@ -369,45 +367,6 @@ func (a *Client) SetNtpServer(params *SetNtpServerParams, authInfo runtime.Clien
 }
 
 /*
-SetNtpServers set ntp servers API
-*/
-func (a *Client) SetNtpServers(params *SetNtpServersParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetNtpServersOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewSetNtpServersParams()
-	}
-	op := &runtime.ClientOperation{
-		ID:                 "setNtpServers",
-		Method:             "PUT",
-		PathPattern:        "/System/time/NtpServers",
-		ProducesMediaTypes: []string{"application/xml"},
-		ConsumesMediaTypes: []string{"application/xml"},
-		Schemes:            []string{"http"},
-		Params:             params,
-		Reader:             &SetNtpServersReader{formats: a.formats},
-		AuthInfo:           authInfo,
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	}
-	for _, opt := range opts {
-		opt(op)
-	}
-
-	result, err := a.transport.Submit(op)
-	if err != nil {
-		return nil, err
-	}
-	success, ok := result.(*SetNtpServersOK)
-	if ok {
-		return success, nil
-	}
-	// unexpected success response
-	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
-	msg := fmt.Sprintf("unexpected success response for setNtpServers: API contract not enforced by server. Client expected to get an error, but got: %T", result)
-	panic(msg)
-}
-
-/*
 SetSystemNetworkExtension set system network extension API
 */
 func (a *Client) SetSystemNetworkExtension(params *SetSystemNetworkExtensionParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetSystemNetworkExtensionOK, error) {
@@ -447,7 +406,7 @@ func (a *Client) SetSystemNetworkExtension(params *SetSystemNetworkExtensionPara
 }
 
 /*
-SetTime set time API
+SetTime Udpate the device time information.
 */
 func (a *Client) SetTime(params *SetTimeParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetTimeOK, error) {
 	// TODO: Validate the params before sending

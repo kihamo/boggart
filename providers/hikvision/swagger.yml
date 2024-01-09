@@ -363,20 +363,6 @@ paths:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/SystemNtpServers"
-    put:
-      operationId: "setNtpServers"
-      tags:
-        - "system"
-      parameters:
-        - name: "NTPServerList"
-          in: "body"
-          schema:
-            $ref: "#/definitions/SystemNtpServers"
-      responses:
-        200:
-          description: "Successful operation"
-          schema:
-            $ref: "#/definitions/Status"
   /System/time/ntpServers/{id}:
     put:
       operationId: "setNtpServer"
@@ -1457,8 +1443,48 @@ definitions:
     type: "array"
     xml:
       name: "NTPServerList"
+      wrapped: true
     items:
-      $ref: "#/definitions/NTPServer"
+      # https://github.com/go-swagger/go-swagger/issues/183
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "uint64"
+          xml:
+            name: "NTPServer>id"
+        addressingFormatType:
+          type: "string"
+          enum:
+            - "ipaddress"
+            - "hostname"
+          xml:
+            name: "NTPServer>addressingFormatType"
+        hostName:
+          type: "string"
+          x-nullable: true
+          xml:
+            name: "NTPServer>hostName"
+        ipAddress:
+          type: "string"
+          x-nullable: true
+          xml:
+            name: "NTPServer>ipAddress"
+        ipv6Address:
+          type: "string"
+          x-nullable: true
+          xml:
+            name: "NTPServer>ipv6Address"
+        portNo:
+          type: "integer"
+          format: "uint64"
+          xml:
+            name: "NTPServer>portNo"
+        synchronizeInterval:
+          type: "integer"
+          format: "uint64"
+          xml:
+            name: "NTPServer>synchronizeInterval"
   NTPServer:
     type: "object"
     properties:
@@ -1466,39 +1492,39 @@ definitions:
         type: "integer"
         format: "uint64"
         xml:
-          name: "NTPServer>id"
+          name: "id"
       addressingFormatType:
         type: "string"
         enum:
           - "ipaddress"
           - "hostname"
         xml:
-          name: "NTPServer>addressingFormatType"
+          name: "addressingFormatType"
       hostName:
         type: "string"
         x-nullable: true
         xml:
-          name: "NTPServer>hostName"
+          name: "hostName"
       ipAddress:
         type: "string"
         x-nullable: true
         xml:
-          name: "NTPServer>ipAddress"
+          name: "ipAddress"
       ipv6Address:
         type: "string"
         x-nullable: true
         xml:
-          name: "NTPServer>ipv6Address"
+          name: "ipv6Address"
       portNo:
         type: "integer"
         format: "uint64"
         xml:
-          name: "NTPServer>portNo"
+          name: "portNo"
       synchronizeInterval:
         type: "integer"
         format: "uint64"
         xml:
-          name: "NTPServer>synchronizeInterval"
+          name: "synchronizeInterval"
   SystemUpgradeStatus:
     type: "object"
     properties:
