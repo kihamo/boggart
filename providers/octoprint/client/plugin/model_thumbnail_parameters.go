@@ -52,10 +52,12 @@ func NewModelThumbnailParamsWithHTTPClient(client *http.Client) *ModelThumbnailP
 	}
 }
 
-/* ModelThumbnailParams contains all the parameters to send to the API endpoint
-   for the model thumbnail operation.
+/*
+ModelThumbnailParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the model thumbnail operation.
+
+	Typically these are written to a http.Request.
 */
 type ModelThumbnailParams struct {
 

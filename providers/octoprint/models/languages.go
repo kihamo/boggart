@@ -184,6 +184,11 @@ func (m *LanguagesLanguagePacksAnon) contextValidateLanguages(ctx context.Contex
 	for i := 0; i < len(m.Languages); i++ {
 
 		if m.Languages[i] != nil {
+
+			if swag.IsZero(m.Languages[i]) { // not required
+				return nil
+			}
+
 			if err := m.Languages[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("languages" + "." + strconv.Itoa(i))

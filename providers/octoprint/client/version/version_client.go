@@ -36,7 +36,7 @@ type ClientService interface {
 }
 
 /*
-  GetVersion versions information
+GetVersion versions information
 */
 func (a *Client) GetVersion(params *GetVersionParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetVersionOK, error) {
 	// TODO: Validate the params before sending

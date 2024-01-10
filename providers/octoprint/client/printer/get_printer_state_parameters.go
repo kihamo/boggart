@@ -53,10 +53,12 @@ func NewGetPrinterStateParamsWithHTTPClient(client *http.Client) *GetPrinterStat
 	}
 }
 
-/* GetPrinterStateParams contains all the parameters to send to the API endpoint
-   for the get printer state operation.
+/*
+GetPrinterStateParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get printer state operation.
+
+	Typically these are written to a http.Request.
 */
 type GetPrinterStateParams struct {
 

@@ -30,7 +30,7 @@ func (o *GetServerReader) ReadResponse(response runtime.ClientResponse, consumer
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /api/server] getServer", response, response.Code())
 	}
 }
 
@@ -39,7 +39,8 @@ func NewGetServerOK() *GetServerOK {
 	return &GetServerOK{}
 }
 
-/* GetServerOK describes a response with status code 200, with default header values.
+/*
+GetServerOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -47,9 +48,44 @@ type GetServerOK struct {
 	Payload *models.Server
 }
 
+// IsSuccess returns true when this get server o k response has a 2xx status code
+func (o *GetServerOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get server o k response has a 3xx status code
+func (o *GetServerOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get server o k response has a 4xx status code
+func (o *GetServerOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get server o k response has a 5xx status code
+func (o *GetServerOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get server o k response a status code equal to that given
+func (o *GetServerOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get server o k response
+func (o *GetServerOK) Code() int {
+	return 200
+}
+
 func (o *GetServerOK) Error() string {
 	return fmt.Sprintf("[GET /api/server][%d] getServerOK  %+v", 200, o.Payload)
 }
+
+func (o *GetServerOK) String() string {
+	return fmt.Sprintf("[GET /api/server][%d] getServerOK  %+v", 200, o.Payload)
+}
+
 func (o *GetServerOK) GetPayload() *models.Server {
 	return o.Payload
 }

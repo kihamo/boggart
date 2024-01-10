@@ -36,7 +36,7 @@ func (o *GetSDStateReader) ReadResponse(response runtime.ClientResponse, consume
 		}
 		return nil, result
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /api/printer/sd] getSDState", response, response.Code())
 	}
 }
 
@@ -45,7 +45,8 @@ func NewGetSDStateOK() *GetSDStateOK {
 	return &GetSDStateOK{}
 }
 
-/* GetSDStateOK describes a response with status code 200, with default header values.
+/*
+GetSDStateOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -53,9 +54,44 @@ type GetSDStateOK struct {
 	Payload *models.SDState
 }
 
+// IsSuccess returns true when this get s d state o k response has a 2xx status code
+func (o *GetSDStateOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get s d state o k response has a 3xx status code
+func (o *GetSDStateOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get s d state o k response has a 4xx status code
+func (o *GetSDStateOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get s d state o k response has a 5xx status code
+func (o *GetSDStateOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get s d state o k response a status code equal to that given
+func (o *GetSDStateOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get s d state o k response
+func (o *GetSDStateOK) Code() int {
+	return 200
+}
+
 func (o *GetSDStateOK) Error() string {
 	return fmt.Sprintf("[GET /api/printer/sd][%d] getSDStateOK  %+v", 200, o.Payload)
 }
+
+func (o *GetSDStateOK) String() string {
+	return fmt.Sprintf("[GET /api/printer/sd][%d] getSDStateOK  %+v", 200, o.Payload)
+}
+
 func (o *GetSDStateOK) GetPayload() *models.SDState {
 	return o.Payload
 }
@@ -77,14 +113,49 @@ func NewGetSDStateNotFound() *GetSDStateNotFound {
 	return &GetSDStateNotFound{}
 }
 
-/* GetSDStateNotFound describes a response with status code 404, with default header values.
+/*
+GetSDStateNotFound describes a response with status code 404, with default header values.
 
 I SD support has been disabled in OctoPrint's config
 */
 type GetSDStateNotFound struct {
 }
 
+// IsSuccess returns true when this get s d state not found response has a 2xx status code
+func (o *GetSDStateNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this get s d state not found response has a 3xx status code
+func (o *GetSDStateNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get s d state not found response has a 4xx status code
+func (o *GetSDStateNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this get s d state not found response has a 5xx status code
+func (o *GetSDStateNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get s d state not found response a status code equal to that given
+func (o *GetSDStateNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the get s d state not found response
+func (o *GetSDStateNotFound) Code() int {
+	return 404
+}
+
 func (o *GetSDStateNotFound) Error() string {
+	return fmt.Sprintf("[GET /api/printer/sd][%d] getSDStateNotFound ", 404)
+}
+
+func (o *GetSDStateNotFound) String() string {
 	return fmt.Sprintf("[GET /api/printer/sd][%d] getSDStateNotFound ", 404)
 }
 

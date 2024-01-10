@@ -52,10 +52,12 @@ func NewGetJobParamsWithHTTPClient(client *http.Client) *GetJobParams {
 	}
 }
 
-/* GetJobParams contains all the parameters to send to the API endpoint
-   for the get job operation.
+/*
+GetJobParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get job operation.
+
+	Typically these are written to a http.Request.
 */
 type GetJobParams struct {
 	timeout    time.Duration

@@ -38,7 +38,7 @@ type ClientService interface {
 }
 
 /*
-  GetConnection gets connection settings
+GetConnection gets connection settings
 */
 func (a *Client) GetConnection(params *GetConnectionParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetConnectionOK, error) {
 	// TODO: Validate the params before sending
@@ -77,7 +77,7 @@ func (a *Client) GetConnection(params *GetConnectionParams, authInfo runtime.Cli
 }
 
 /*
-  SendConnectionCommand issues a connection command
+SendConnectionCommand issues a connection command
 */
 func (a *Client) SendConnectionCommand(params *SendConnectionCommandParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SendConnectionCommandNoContent, error) {
 	// TODO: Validate the params before sending

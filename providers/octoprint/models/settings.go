@@ -461,6 +461,11 @@ func (m *Settings) ContextValidate(ctx context.Context, formats strfmt.Registry)
 func (m *Settings) contextValidateAPI(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.API != nil {
+
+		if swag.IsZero(m.API) { // not required
+			return nil
+		}
+
 		if err := m.API.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("api")
@@ -477,6 +482,11 @@ func (m *Settings) contextValidateAPI(ctx context.Context, formats strfmt.Regist
 func (m *Settings) contextValidateAppearance(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Appearance != nil {
+
+		if swag.IsZero(m.Appearance) { // not required
+			return nil
+		}
+
 		if err := m.Appearance.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("appearance")
@@ -493,6 +503,11 @@ func (m *Settings) contextValidateAppearance(ctx context.Context, formats strfmt
 func (m *Settings) contextValidateFeature(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Feature != nil {
+
+		if swag.IsZero(m.Feature) { // not required
+			return nil
+		}
+
 		if err := m.Feature.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("feature")
@@ -509,6 +524,11 @@ func (m *Settings) contextValidateFeature(ctx context.Context, formats strfmt.Re
 func (m *Settings) contextValidateFolder(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Folder != nil {
+
+		if swag.IsZero(m.Folder) { // not required
+			return nil
+		}
+
 		if err := m.Folder.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("folder")
@@ -525,6 +545,11 @@ func (m *Settings) contextValidateFolder(ctx context.Context, formats strfmt.Reg
 func (m *Settings) contextValidatePlugins(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Plugins != nil {
+
+		if swag.IsZero(m.Plugins) { // not required
+			return nil
+		}
+
 		if err := m.Plugins.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("plugins")
@@ -541,6 +566,11 @@ func (m *Settings) contextValidatePlugins(ctx context.Context, formats strfmt.Re
 func (m *Settings) contextValidatePrinter(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Printer != nil {
+
+		if swag.IsZero(m.Printer) { // not required
+			return nil
+		}
+
 		if err := m.Printer.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("printer")
@@ -557,6 +587,11 @@ func (m *Settings) contextValidatePrinter(ctx context.Context, formats strfmt.Re
 func (m *Settings) contextValidateScripts(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Scripts != nil {
+
+		if swag.IsZero(m.Scripts) { // not required
+			return nil
+		}
+
 		if err := m.Scripts.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("scripts")
@@ -573,6 +608,11 @@ func (m *Settings) contextValidateScripts(ctx context.Context, formats strfmt.Re
 func (m *Settings) contextValidateSerial(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Serial != nil {
+
+		if swag.IsZero(m.Serial) { // not required
+			return nil
+		}
+
 		if err := m.Serial.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("serial")
@@ -589,6 +629,11 @@ func (m *Settings) contextValidateSerial(ctx context.Context, formats strfmt.Reg
 func (m *Settings) contextValidateWebcam(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Webcam != nil {
+
+		if swag.IsZero(m.Webcam) { // not required
+			return nil
+		}
+
 		if err := m.Webcam.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("webcam")
@@ -966,6 +1011,11 @@ func (m *SettingsPlugins) ContextValidate(ctx context.Context, formats strfmt.Re
 func (m *SettingsPlugins) contextValidateMqtt(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Mqtt != nil {
+
+		if swag.IsZero(m.Mqtt) { // not required
+			return nil
+		}
+
 		if err := m.Mqtt.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("plugins" + "." + "mqtt")
@@ -1119,6 +1169,11 @@ func (m *SettingsPluginsMqtt) ContextValidate(ctx context.Context, formats strfm
 func (m *SettingsPluginsMqtt) contextValidateBroker(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Broker != nil {
+
+		if swag.IsZero(m.Broker) { // not required
+			return nil
+		}
+
 		if err := m.Broker.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("plugins" + "." + "mqtt" + "." + "broker")
@@ -1135,6 +1190,11 @@ func (m *SettingsPluginsMqtt) contextValidateBroker(ctx context.Context, formats
 func (m *SettingsPluginsMqtt) contextValidateClient(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Client != nil {
+
+		if swag.IsZero(m.Client) { // not required
+			return nil
+		}
+
 		if err := m.Client.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("plugins" + "." + "mqtt" + "." + "client")
@@ -1151,6 +1211,11 @@ func (m *SettingsPluginsMqtt) contextValidateClient(ctx context.Context, formats
 func (m *SettingsPluginsMqtt) contextValidatePublish(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Publish != nil {
+
+		if swag.IsZero(m.Publish) { // not required
+			return nil
+		}
+
 		if err := m.Publish.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("plugins" + "." + "mqtt" + "." + "publish")
@@ -1378,6 +1443,11 @@ func (m *SettingsPluginsMqttPublish) ContextValidate(ctx context.Context, format
 func (m *SettingsPluginsMqttPublish) contextValidateEvents(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Events != nil {
+
+		if swag.IsZero(m.Events) { // not required
+			return nil
+		}
+
 		if err := m.Events.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("plugins" + "." + "mqtt" + "." + "publish" + "." + "events")

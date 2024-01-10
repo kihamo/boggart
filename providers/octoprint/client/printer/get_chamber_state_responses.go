@@ -36,7 +36,7 @@ func (o *GetChamberStateReader) ReadResponse(response runtime.ClientResponse, co
 		}
 		return nil, result
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /api/printer/chamber] getChamberState", response, response.Code())
 	}
 }
 
@@ -45,7 +45,8 @@ func NewGetChamberStateOK() *GetChamberStateOK {
 	return &GetChamberStateOK{}
 }
 
-/* GetChamberStateOK describes a response with status code 200, with default header values.
+/*
+GetChamberStateOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -53,9 +54,44 @@ type GetChamberStateOK struct {
 	Payload *models.ChamberState
 }
 
+// IsSuccess returns true when this get chamber state o k response has a 2xx status code
+func (o *GetChamberStateOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get chamber state o k response has a 3xx status code
+func (o *GetChamberStateOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get chamber state o k response has a 4xx status code
+func (o *GetChamberStateOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get chamber state o k response has a 5xx status code
+func (o *GetChamberStateOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get chamber state o k response a status code equal to that given
+func (o *GetChamberStateOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get chamber state o k response
+func (o *GetChamberStateOK) Code() int {
+	return 200
+}
+
 func (o *GetChamberStateOK) Error() string {
 	return fmt.Sprintf("[GET /api/printer/chamber][%d] getChamberStateOK  %+v", 200, o.Payload)
 }
+
+func (o *GetChamberStateOK) String() string {
+	return fmt.Sprintf("[GET /api/printer/chamber][%d] getChamberStateOK  %+v", 200, o.Payload)
+}
+
 func (o *GetChamberStateOK) GetPayload() *models.ChamberState {
 	return o.Payload
 }
@@ -77,14 +113,49 @@ func NewGetChamberStateConflict() *GetChamberStateConflict {
 	return &GetChamberStateConflict{}
 }
 
-/* GetChamberStateConflict describes a response with status code 409, with default header values.
+/*
+GetChamberStateConflict describes a response with status code 409, with default header values.
 
 If the printer is not operational
 */
 type GetChamberStateConflict struct {
 }
 
+// IsSuccess returns true when this get chamber state conflict response has a 2xx status code
+func (o *GetChamberStateConflict) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this get chamber state conflict response has a 3xx status code
+func (o *GetChamberStateConflict) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get chamber state conflict response has a 4xx status code
+func (o *GetChamberStateConflict) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this get chamber state conflict response has a 5xx status code
+func (o *GetChamberStateConflict) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get chamber state conflict response a status code equal to that given
+func (o *GetChamberStateConflict) IsCode(code int) bool {
+	return code == 409
+}
+
+// Code gets the status code for the get chamber state conflict response
+func (o *GetChamberStateConflict) Code() int {
+	return 409
+}
+
 func (o *GetChamberStateConflict) Error() string {
+	return fmt.Sprintf("[GET /api/printer/chamber][%d] getChamberStateConflict ", 409)
+}
+
+func (o *GetChamberStateConflict) String() string {
 	return fmt.Sprintf("[GET /api/printer/chamber][%d] getChamberStateConflict ", 409)
 }
 

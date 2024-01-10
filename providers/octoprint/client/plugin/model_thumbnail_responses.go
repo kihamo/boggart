@@ -29,7 +29,7 @@ func (o *ModelThumbnailReader) ReadResponse(response runtime.ClientResponse, con
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /plugin/UltimakerFormatPackage/thumbnail/{name}.png] modelThumbnail", response, response.Code())
 	}
 }
 
@@ -41,7 +41,8 @@ func NewModelThumbnailOK(writer io.Writer) *ModelThumbnailOK {
 	}
 }
 
-/* ModelThumbnailOK describes a response with status code 200, with default header values.
+/*
+ModelThumbnailOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -49,9 +50,44 @@ type ModelThumbnailOK struct {
 	Payload io.Writer
 }
 
+// IsSuccess returns true when this model thumbnail o k response has a 2xx status code
+func (o *ModelThumbnailOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this model thumbnail o k response has a 3xx status code
+func (o *ModelThumbnailOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this model thumbnail o k response has a 4xx status code
+func (o *ModelThumbnailOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this model thumbnail o k response has a 5xx status code
+func (o *ModelThumbnailOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this model thumbnail o k response a status code equal to that given
+func (o *ModelThumbnailOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the model thumbnail o k response
+func (o *ModelThumbnailOK) Code() int {
+	return 200
+}
+
 func (o *ModelThumbnailOK) Error() string {
 	return fmt.Sprintf("[GET /plugin/UltimakerFormatPackage/thumbnail/{name}.png][%d] modelThumbnailOK  %+v", 200, o.Payload)
 }
+
+func (o *ModelThumbnailOK) String() string {
+	return fmt.Sprintf("[GET /plugin/UltimakerFormatPackage/thumbnail/{name}.png][%d] modelThumbnailOK  %+v", 200, o.Payload)
+}
+
 func (o *ModelThumbnailOK) GetPayload() io.Writer {
 	return o.Payload
 }

@@ -38,7 +38,7 @@ type ClientService interface {
 }
 
 /*
-  GetJob retrieves information about the current job
+GetJob retrieves information about the current job
 */
 func (a *Client) GetJob(params *GetJobParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetJobOK, error) {
 	// TODO: Validate the params before sending
@@ -77,7 +77,7 @@ func (a *Client) GetJob(params *GetJobParams, authInfo runtime.ClientAuthInfoWri
 }
 
 /*
-  SendJobCommand issues a job command
+SendJobCommand issues a job command
 */
 func (a *Client) SendJobCommand(params *SendJobCommandParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SendJobCommandNoContent, error) {
 	// TODO: Validate the params before sending

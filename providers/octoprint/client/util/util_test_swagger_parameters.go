@@ -52,10 +52,12 @@ func NewUtilTestParamsWithHTTPClient(client *http.Client) *UtilTestParams {
 	}
 }
 
-/* UtilTestParams contains all the parameters to send to the API endpoint
-   for the util test operation.
+/*
+UtilTestParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the util test operation.
+
+	Typically these are written to a http.Request.
 */
 type UtilTestParams struct {
 

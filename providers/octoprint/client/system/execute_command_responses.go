@@ -48,7 +48,7 @@ func (o *ExecuteCommandReader) ReadResponse(response runtime.ClientResponse, con
 		}
 		return nil, result
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[POST /api/system/commands/{source}/{action}] executeCommand", response, response.Code())
 	}
 }
 
@@ -57,7 +57,8 @@ func NewExecuteCommandNoContent() *ExecuteCommandNoContent {
 	return &ExecuteCommandNoContent{}
 }
 
-/* ExecuteCommandNoContent describes a response with status code 204, with default header values.
+/*
+ExecuteCommandNoContent describes a response with status code 204, with default header values.
 
 Successful operation
 */
@@ -65,9 +66,44 @@ type ExecuteCommandNoContent struct {
 	Payload []*models.Command
 }
 
+// IsSuccess returns true when this execute command no content response has a 2xx status code
+func (o *ExecuteCommandNoContent) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this execute command no content response has a 3xx status code
+func (o *ExecuteCommandNoContent) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this execute command no content response has a 4xx status code
+func (o *ExecuteCommandNoContent) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this execute command no content response has a 5xx status code
+func (o *ExecuteCommandNoContent) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this execute command no content response a status code equal to that given
+func (o *ExecuteCommandNoContent) IsCode(code int) bool {
+	return code == 204
+}
+
+// Code gets the status code for the execute command no content response
+func (o *ExecuteCommandNoContent) Code() int {
+	return 204
+}
+
 func (o *ExecuteCommandNoContent) Error() string {
 	return fmt.Sprintf("[POST /api/system/commands/{source}/{action}][%d] executeCommandNoContent  %+v", 204, o.Payload)
 }
+
+func (o *ExecuteCommandNoContent) String() string {
+	return fmt.Sprintf("[POST /api/system/commands/{source}/{action}][%d] executeCommandNoContent  %+v", 204, o.Payload)
+}
+
 func (o *ExecuteCommandNoContent) GetPayload() []*models.Command {
 	return o.Payload
 }
@@ -87,14 +123,49 @@ func NewExecuteCommandBadRequest() *ExecuteCommandBadRequest {
 	return &ExecuteCommandBadRequest{}
 }
 
-/* ExecuteCommandBadRequest describes a response with status code 400, with default header values.
+/*
+ExecuteCommandBadRequest describes a response with status code 400, with default header values.
 
 Bad request
 */
 type ExecuteCommandBadRequest struct {
 }
 
+// IsSuccess returns true when this execute command bad request response has a 2xx status code
+func (o *ExecuteCommandBadRequest) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this execute command bad request response has a 3xx status code
+func (o *ExecuteCommandBadRequest) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this execute command bad request response has a 4xx status code
+func (o *ExecuteCommandBadRequest) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this execute command bad request response has a 5xx status code
+func (o *ExecuteCommandBadRequest) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this execute command bad request response a status code equal to that given
+func (o *ExecuteCommandBadRequest) IsCode(code int) bool {
+	return code == 400
+}
+
+// Code gets the status code for the execute command bad request response
+func (o *ExecuteCommandBadRequest) Code() int {
+	return 400
+}
+
 func (o *ExecuteCommandBadRequest) Error() string {
+	return fmt.Sprintf("[POST /api/system/commands/{source}/{action}][%d] executeCommandBadRequest ", 400)
+}
+
+func (o *ExecuteCommandBadRequest) String() string {
 	return fmt.Sprintf("[POST /api/system/commands/{source}/{action}][%d] executeCommandBadRequest ", 400)
 }
 
@@ -108,14 +179,49 @@ func NewExecuteCommandNotFound() *ExecuteCommandNotFound {
 	return &ExecuteCommandNotFound{}
 }
 
-/* ExecuteCommandNotFound describes a response with status code 404, with default header values.
+/*
+ExecuteCommandNotFound describes a response with status code 404, with default header values.
 
 Not found
 */
 type ExecuteCommandNotFound struct {
 }
 
+// IsSuccess returns true when this execute command not found response has a 2xx status code
+func (o *ExecuteCommandNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this execute command not found response has a 3xx status code
+func (o *ExecuteCommandNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this execute command not found response has a 4xx status code
+func (o *ExecuteCommandNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this execute command not found response has a 5xx status code
+func (o *ExecuteCommandNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this execute command not found response a status code equal to that given
+func (o *ExecuteCommandNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the execute command not found response
+func (o *ExecuteCommandNotFound) Code() int {
+	return 404
+}
+
 func (o *ExecuteCommandNotFound) Error() string {
+	return fmt.Sprintf("[POST /api/system/commands/{source}/{action}][%d] executeCommandNotFound ", 404)
+}
+
+func (o *ExecuteCommandNotFound) String() string {
 	return fmt.Sprintf("[POST /api/system/commands/{source}/{action}][%d] executeCommandNotFound ", 404)
 }
 
@@ -129,14 +235,49 @@ func NewExecuteCommandInternalServerError() *ExecuteCommandInternalServerError {
 	return &ExecuteCommandInternalServerError{}
 }
 
-/* ExecuteCommandInternalServerError describes a response with status code 500, with default header values.
+/*
+ExecuteCommandInternalServerError describes a response with status code 500, with default header values.
 
 Internal server error
 */
 type ExecuteCommandInternalServerError struct {
 }
 
+// IsSuccess returns true when this execute command internal server error response has a 2xx status code
+func (o *ExecuteCommandInternalServerError) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this execute command internal server error response has a 3xx status code
+func (o *ExecuteCommandInternalServerError) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this execute command internal server error response has a 4xx status code
+func (o *ExecuteCommandInternalServerError) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this execute command internal server error response has a 5xx status code
+func (o *ExecuteCommandInternalServerError) IsServerError() bool {
+	return true
+}
+
+// IsCode returns true when this execute command internal server error response a status code equal to that given
+func (o *ExecuteCommandInternalServerError) IsCode(code int) bool {
+	return code == 500
+}
+
+// Code gets the status code for the execute command internal server error response
+func (o *ExecuteCommandInternalServerError) Code() int {
+	return 500
+}
+
 func (o *ExecuteCommandInternalServerError) Error() string {
+	return fmt.Sprintf("[POST /api/system/commands/{source}/{action}][%d] executeCommandInternalServerError ", 500)
+}
+
+func (o *ExecuteCommandInternalServerError) String() string {
 	return fmt.Sprintf("[POST /api/system/commands/{source}/{action}][%d] executeCommandInternalServerError ", 500)
 }
 

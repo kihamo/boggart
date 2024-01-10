@@ -38,7 +38,7 @@ func (o *SendConnectionCommandReader) ReadResponse(response runtime.ClientRespon
 		}
 		return nil, result
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[POST /api/connection] sendConnectionCommand", response, response.Code())
 	}
 }
 
@@ -47,14 +47,49 @@ func NewSendConnectionCommandNoContent() *SendConnectionCommandNoContent {
 	return &SendConnectionCommandNoContent{}
 }
 
-/* SendConnectionCommandNoContent describes a response with status code 204, with default header values.
+/*
+SendConnectionCommandNoContent describes a response with status code 204, with default header values.
 
 Successful operation
 */
 type SendConnectionCommandNoContent struct {
 }
 
+// IsSuccess returns true when this send connection command no content response has a 2xx status code
+func (o *SendConnectionCommandNoContent) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this send connection command no content response has a 3xx status code
+func (o *SendConnectionCommandNoContent) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this send connection command no content response has a 4xx status code
+func (o *SendConnectionCommandNoContent) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this send connection command no content response has a 5xx status code
+func (o *SendConnectionCommandNoContent) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this send connection command no content response a status code equal to that given
+func (o *SendConnectionCommandNoContent) IsCode(code int) bool {
+	return code == 204
+}
+
+// Code gets the status code for the send connection command no content response
+func (o *SendConnectionCommandNoContent) Code() int {
+	return 204
+}
+
 func (o *SendConnectionCommandNoContent) Error() string {
+	return fmt.Sprintf("[POST /api/connection][%d] sendConnectionCommandNoContent ", 204)
+}
+
+func (o *SendConnectionCommandNoContent) String() string {
 	return fmt.Sprintf("[POST /api/connection][%d] sendConnectionCommandNoContent ", 204)
 }
 
@@ -68,14 +103,49 @@ func NewSendConnectionCommandBadRequest() *SendConnectionCommandBadRequest {
 	return &SendConnectionCommandBadRequest{}
 }
 
-/* SendConnectionCommandBadRequest describes a response with status code 400, with default header values.
+/*
+SendConnectionCommandBadRequest describes a response with status code 400, with default header values.
 
 Bad request
 */
 type SendConnectionCommandBadRequest struct {
 }
 
+// IsSuccess returns true when this send connection command bad request response has a 2xx status code
+func (o *SendConnectionCommandBadRequest) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this send connection command bad request response has a 3xx status code
+func (o *SendConnectionCommandBadRequest) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this send connection command bad request response has a 4xx status code
+func (o *SendConnectionCommandBadRequest) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this send connection command bad request response has a 5xx status code
+func (o *SendConnectionCommandBadRequest) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this send connection command bad request response a status code equal to that given
+func (o *SendConnectionCommandBadRequest) IsCode(code int) bool {
+	return code == 400
+}
+
+// Code gets the status code for the send connection command bad request response
+func (o *SendConnectionCommandBadRequest) Code() int {
+	return 400
+}
+
 func (o *SendConnectionCommandBadRequest) Error() string {
+	return fmt.Sprintf("[POST /api/connection][%d] sendConnectionCommandBadRequest ", 400)
+}
+
+func (o *SendConnectionCommandBadRequest) String() string {
 	return fmt.Sprintf("[POST /api/connection][%d] sendConnectionCommandBadRequest ", 400)
 }
 
@@ -84,7 +154,8 @@ func (o *SendConnectionCommandBadRequest) readResponse(response runtime.ClientRe
 	return nil
 }
 
-/*SendConnectionCommandBody send connection command body
+/*
+SendConnectionCommandBody send connection command body
 swagger:model SendConnectionCommandBody
 */
 type SendConnectionCommandBody struct {

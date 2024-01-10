@@ -144,6 +144,11 @@ func (m *PluginDisplayLayerProgress) ContextValidate(ctx context.Context, format
 func (m *PluginDisplayLayerProgress) contextValidateHeight(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Height != nil {
+
+		if swag.IsZero(m.Height) { // not required
+			return nil
+		}
+
 		if err := m.Height.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("height")
@@ -160,6 +165,11 @@ func (m *PluginDisplayLayerProgress) contextValidateHeight(ctx context.Context, 
 func (m *PluginDisplayLayerProgress) contextValidateLayer(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Layer != nil {
+
+		if swag.IsZero(m.Layer) { // not required
+			return nil
+		}
+
 		if err := m.Layer.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("layer")
@@ -176,6 +186,11 @@ func (m *PluginDisplayLayerProgress) contextValidateLayer(ctx context.Context, f
 func (m *PluginDisplayLayerProgress) contextValidatePrint(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Print != nil {
+
+		if swag.IsZero(m.Print) { // not required
+			return nil
+		}
+
 		if err := m.Print.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("print")

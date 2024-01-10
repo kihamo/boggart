@@ -142,6 +142,11 @@ func (m *ToolState) contextValidateHistory(ctx context.Context, formats strfmt.R
 	for i := 0; i < len(m.History); i++ {
 
 		if m.History[i] != nil {
+
+			if swag.IsZero(m.History[i]) { // not required
+				return nil
+			}
+
 			if err := m.History[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("history" + "." + strconv.Itoa(i))
@@ -160,6 +165,11 @@ func (m *ToolState) contextValidateHistory(ctx context.Context, formats strfmt.R
 func (m *ToolState) contextValidateTool0(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Tool0 != nil {
+
+		if swag.IsZero(m.Tool0) { // not required
+			return nil
+		}
+
 		if err := m.Tool0.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("tool0")
@@ -176,6 +186,11 @@ func (m *ToolState) contextValidateTool0(ctx context.Context, formats strfmt.Reg
 func (m *ToolState) contextValidateTool1(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Tool1 != nil {
+
+		if swag.IsZero(m.Tool1) { // not required
+			return nil
+		}
+
 		if err := m.Tool1.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("tool1")
@@ -299,6 +314,11 @@ func (m *ToolStateHistoryItems0) ContextValidate(ctx context.Context, formats st
 func (m *ToolStateHistoryItems0) contextValidateTool0(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Tool0 != nil {
+
+		if swag.IsZero(m.Tool0) { // not required
+			return nil
+		}
+
 		if err := m.Tool0.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("tool0")
@@ -315,6 +335,11 @@ func (m *ToolStateHistoryItems0) contextValidateTool0(ctx context.Context, forma
 func (m *ToolStateHistoryItems0) contextValidateTool1(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Tool1 != nil {
+
+		if swag.IsZero(m.Tool1) { // not required
+			return nil
+		}
+
 		if err := m.Tool1.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("tool1")

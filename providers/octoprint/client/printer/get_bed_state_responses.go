@@ -36,7 +36,7 @@ func (o *GetBedStateReader) ReadResponse(response runtime.ClientResponse, consum
 		}
 		return nil, result
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /api/printer/bed] getBedState", response, response.Code())
 	}
 }
 
@@ -45,7 +45,8 @@ func NewGetBedStateOK() *GetBedStateOK {
 	return &GetBedStateOK{}
 }
 
-/* GetBedStateOK describes a response with status code 200, with default header values.
+/*
+GetBedStateOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -53,9 +54,44 @@ type GetBedStateOK struct {
 	Payload *models.BedState
 }
 
+// IsSuccess returns true when this get bed state o k response has a 2xx status code
+func (o *GetBedStateOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get bed state o k response has a 3xx status code
+func (o *GetBedStateOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get bed state o k response has a 4xx status code
+func (o *GetBedStateOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get bed state o k response has a 5xx status code
+func (o *GetBedStateOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get bed state o k response a status code equal to that given
+func (o *GetBedStateOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get bed state o k response
+func (o *GetBedStateOK) Code() int {
+	return 200
+}
+
 func (o *GetBedStateOK) Error() string {
 	return fmt.Sprintf("[GET /api/printer/bed][%d] getBedStateOK  %+v", 200, o.Payload)
 }
+
+func (o *GetBedStateOK) String() string {
+	return fmt.Sprintf("[GET /api/printer/bed][%d] getBedStateOK  %+v", 200, o.Payload)
+}
+
 func (o *GetBedStateOK) GetPayload() *models.BedState {
 	return o.Payload
 }
@@ -77,14 +113,49 @@ func NewGetBedStateConflict() *GetBedStateConflict {
 	return &GetBedStateConflict{}
 }
 
-/* GetBedStateConflict describes a response with status code 409, with default header values.
+/*
+GetBedStateConflict describes a response with status code 409, with default header values.
 
 If the printer is not operational
 */
 type GetBedStateConflict struct {
 }
 
+// IsSuccess returns true when this get bed state conflict response has a 2xx status code
+func (o *GetBedStateConflict) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this get bed state conflict response has a 3xx status code
+func (o *GetBedStateConflict) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get bed state conflict response has a 4xx status code
+func (o *GetBedStateConflict) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this get bed state conflict response has a 5xx status code
+func (o *GetBedStateConflict) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get bed state conflict response a status code equal to that given
+func (o *GetBedStateConflict) IsCode(code int) bool {
+	return code == 409
+}
+
+// Code gets the status code for the get bed state conflict response
+func (o *GetBedStateConflict) Code() int {
+	return 409
+}
+
 func (o *GetBedStateConflict) Error() string {
+	return fmt.Sprintf("[GET /api/printer/bed][%d] getBedStateConflict ", 409)
+}
+
+func (o *GetBedStateConflict) String() string {
 	return fmt.Sprintf("[GET /api/printer/bed][%d] getBedStateConflict ", 409)
 }
 

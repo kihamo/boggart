@@ -38,7 +38,7 @@ func (o *SendJobCommandReader) ReadResponse(response runtime.ClientResponse, con
 		}
 		return nil, result
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[POST /api/job] sendJobCommand", response, response.Code())
 	}
 }
 
@@ -47,14 +47,49 @@ func NewSendJobCommandNoContent() *SendJobCommandNoContent {
 	return &SendJobCommandNoContent{}
 }
 
-/* SendJobCommandNoContent describes a response with status code 204, with default header values.
+/*
+SendJobCommandNoContent describes a response with status code 204, with default header values.
 
 Successful operation
 */
 type SendJobCommandNoContent struct {
 }
 
+// IsSuccess returns true when this send job command no content response has a 2xx status code
+func (o *SendJobCommandNoContent) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this send job command no content response has a 3xx status code
+func (o *SendJobCommandNoContent) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this send job command no content response has a 4xx status code
+func (o *SendJobCommandNoContent) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this send job command no content response has a 5xx status code
+func (o *SendJobCommandNoContent) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this send job command no content response a status code equal to that given
+func (o *SendJobCommandNoContent) IsCode(code int) bool {
+	return code == 204
+}
+
+// Code gets the status code for the send job command no content response
+func (o *SendJobCommandNoContent) Code() int {
+	return 204
+}
+
 func (o *SendJobCommandNoContent) Error() string {
+	return fmt.Sprintf("[POST /api/job][%d] sendJobCommandNoContent ", 204)
+}
+
+func (o *SendJobCommandNoContent) String() string {
 	return fmt.Sprintf("[POST /api/job][%d] sendJobCommandNoContent ", 204)
 }
 
@@ -68,14 +103,49 @@ func NewSendJobCommandConflict() *SendJobCommandConflict {
 	return &SendJobCommandConflict{}
 }
 
-/* SendJobCommandConflict describes a response with status code 409, with default header values.
+/*
+SendJobCommandConflict describes a response with status code 409, with default header values.
 
 If the printer is not operational or the current print job state does not match the preconditions for the command
 */
 type SendJobCommandConflict struct {
 }
 
+// IsSuccess returns true when this send job command conflict response has a 2xx status code
+func (o *SendJobCommandConflict) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this send job command conflict response has a 3xx status code
+func (o *SendJobCommandConflict) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this send job command conflict response has a 4xx status code
+func (o *SendJobCommandConflict) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this send job command conflict response has a 5xx status code
+func (o *SendJobCommandConflict) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this send job command conflict response a status code equal to that given
+func (o *SendJobCommandConflict) IsCode(code int) bool {
+	return code == 409
+}
+
+// Code gets the status code for the send job command conflict response
+func (o *SendJobCommandConflict) Code() int {
+	return 409
+}
+
 func (o *SendJobCommandConflict) Error() string {
+	return fmt.Sprintf("[POST /api/job][%d] sendJobCommandConflict ", 409)
+}
+
+func (o *SendJobCommandConflict) String() string {
 	return fmt.Sprintf("[POST /api/job][%d] sendJobCommandConflict ", 409)
 }
 
@@ -84,7 +154,8 @@ func (o *SendJobCommandConflict) readResponse(response runtime.ClientResponse, c
 	return nil
 }
 
-/*SendJobCommandBody send job command body
+/*
+SendJobCommandBody send job command body
 swagger:model SendJobCommandBody
 */
 type SendJobCommandBody struct {

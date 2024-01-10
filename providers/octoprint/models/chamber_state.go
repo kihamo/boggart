@@ -110,6 +110,11 @@ func (m *ChamberState) ContextValidate(ctx context.Context, formats strfmt.Regis
 func (m *ChamberState) contextValidateChamber(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Chamber != nil {
+
+		if swag.IsZero(m.Chamber) { // not required
+			return nil
+		}
+
 		if err := m.Chamber.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("chamber")
@@ -128,6 +133,11 @@ func (m *ChamberState) contextValidateHistory(ctx context.Context, formats strfm
 	for i := 0; i < len(m.History); i++ {
 
 		if m.History[i] != nil {
+
+			if swag.IsZero(m.History[i]) { // not required
+				return nil
+			}
+
 			if err := m.History[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("history" + "." + strconv.Itoa(i))
@@ -223,6 +233,11 @@ func (m *ChamberStateHistoryItems0) ContextValidate(ctx context.Context, formats
 func (m *ChamberStateHistoryItems0) contextValidateChamber(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Chamber != nil {
+
+		if swag.IsZero(m.Chamber) { // not required
+			return nil
+		}
+
 		if err := m.Chamber.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("chamber")

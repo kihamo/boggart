@@ -40,7 +40,7 @@ type ClientService interface {
 }
 
 /*
-  ExecuteCommand executes a registered system command
+ExecuteCommand executes a registered system command
 */
 func (a *Client) ExecuteCommand(params *ExecuteCommandParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*ExecuteCommandNoContent, error) {
 	// TODO: Validate the params before sending
@@ -79,7 +79,7 @@ func (a *Client) ExecuteCommand(params *ExecuteCommandParams, authInfo runtime.C
 }
 
 /*
-  GetCommands lists all registered system commands
+GetCommands lists all registered system commands
 */
 func (a *Client) GetCommands(params *GetCommandsParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetCommandsOK, error) {
 	// TODO: Validate the params before sending
@@ -118,7 +118,7 @@ func (a *Client) GetCommands(params *GetCommandsParams, authInfo runtime.ClientA
 }
 
 /*
-  GetCommandsBySource lists all registered system commands for a source
+GetCommandsBySource lists all registered system commands for a source
 */
 func (a *Client) GetCommandsBySource(params *GetCommandsBySourceParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetCommandsBySourceOK, error) {
 	// TODO: Validate the params before sending

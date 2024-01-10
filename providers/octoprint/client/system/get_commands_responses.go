@@ -33,8 +33,14 @@ func (o *GetCommandsReader) ReadResponse(response runtime.ClientResponse, consum
 			return nil, err
 		}
 		return result, nil
+	case 404:
+		result := NewGetCommandsNotFound()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /api/system/commands] getCommands", response, response.Code())
 	}
 }
 
@@ -43,7 +49,8 @@ func NewGetCommandsOK() *GetCommandsOK {
 	return &GetCommandsOK{}
 }
 
-/* GetCommandsOK describes a response with status code 200, with default header values.
+/*
+GetCommandsOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -51,9 +58,44 @@ type GetCommandsOK struct {
 	Payload *GetCommandsOKBody
 }
 
+// IsSuccess returns true when this get commands o k response has a 2xx status code
+func (o *GetCommandsOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get commands o k response has a 3xx status code
+func (o *GetCommandsOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get commands o k response has a 4xx status code
+func (o *GetCommandsOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get commands o k response has a 5xx status code
+func (o *GetCommandsOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get commands o k response a status code equal to that given
+func (o *GetCommandsOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get commands o k response
+func (o *GetCommandsOK) Code() int {
+	return 200
+}
+
 func (o *GetCommandsOK) Error() string {
 	return fmt.Sprintf("[GET /api/system/commands][%d] getCommandsOK  %+v", 200, o.Payload)
 }
+
+func (o *GetCommandsOK) String() string {
+	return fmt.Sprintf("[GET /api/system/commands][%d] getCommandsOK  %+v", 200, o.Payload)
+}
+
 func (o *GetCommandsOK) GetPayload() *GetCommandsOKBody {
 	return o.Payload
 }
@@ -70,7 +112,64 @@ func (o *GetCommandsOK) readResponse(response runtime.ClientResponse, consumer r
 	return nil
 }
 
-/*GetCommandsOKBody get commands o k body
+// NewGetCommandsNotFound creates a GetCommandsNotFound with default headers values
+func NewGetCommandsNotFound() *GetCommandsNotFound {
+	return &GetCommandsNotFound{}
+}
+
+/*
+GetCommandsNotFound describes a response with status code 404, with default header values.
+
+If a source other than core or custom is specified
+*/
+type GetCommandsNotFound struct {
+}
+
+// IsSuccess returns true when this get commands not found response has a 2xx status code
+func (o *GetCommandsNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this get commands not found response has a 3xx status code
+func (o *GetCommandsNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get commands not found response has a 4xx status code
+func (o *GetCommandsNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this get commands not found response has a 5xx status code
+func (o *GetCommandsNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get commands not found response a status code equal to that given
+func (o *GetCommandsNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the get commands not found response
+func (o *GetCommandsNotFound) Code() int {
+	return 404
+}
+
+func (o *GetCommandsNotFound) Error() string {
+	return fmt.Sprintf("[GET /api/system/commands][%d] getCommandsNotFound ", 404)
+}
+
+func (o *GetCommandsNotFound) String() string {
+	return fmt.Sprintf("[GET /api/system/commands][%d] getCommandsNotFound ", 404)
+}
+
+func (o *GetCommandsNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	return nil
+}
+
+/*
+GetCommandsOKBody get commands o k body
 swagger:model GetCommandsOKBody
 */
 type GetCommandsOKBody struct {
@@ -175,6 +274,11 @@ func (o *GetCommandsOKBody) contextValidateCore(ctx context.Context, formats str
 	for i := 0; i < len(o.Core); i++ {
 
 		if o.Core[i] != nil {
+
+			if swag.IsZero(o.Core[i]) { // not required
+				return nil
+			}
+
 			if err := o.Core[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("getCommandsOK" + "." + "core" + "." + strconv.Itoa(i))
@@ -195,6 +299,11 @@ func (o *GetCommandsOKBody) contextValidateCustom(ctx context.Context, formats s
 	for i := 0; i < len(o.Custom); i++ {
 
 		if o.Custom[i] != nil {
+
+			if swag.IsZero(o.Custom[i]) { // not required
+				return nil
+			}
+
 			if err := o.Custom[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("getCommandsOK" + "." + "custom" + "." + strconv.Itoa(i))

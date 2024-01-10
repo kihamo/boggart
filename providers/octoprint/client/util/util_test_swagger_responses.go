@@ -33,7 +33,7 @@ func (o *UtilTestReader) ReadResponse(response runtime.ClientResponse, consumer 
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[POST /api/util/test] utilTest", response, response.Code())
 	}
 }
 
@@ -42,7 +42,8 @@ func NewUtilTestOK() *UtilTestOK {
 	return &UtilTestOK{}
 }
 
-/* UtilTestOK describes a response with status code 200, with default header values.
+/*
+UtilTestOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -50,9 +51,44 @@ type UtilTestOK struct {
 	Payload *UtilTestOKBody
 }
 
+// IsSuccess returns true when this util test o k response has a 2xx status code
+func (o *UtilTestOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this util test o k response has a 3xx status code
+func (o *UtilTestOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this util test o k response has a 4xx status code
+func (o *UtilTestOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this util test o k response has a 5xx status code
+func (o *UtilTestOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this util test o k response a status code equal to that given
+func (o *UtilTestOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the util test o k response
+func (o *UtilTestOK) Code() int {
+	return 200
+}
+
 func (o *UtilTestOK) Error() string {
 	return fmt.Sprintf("[POST /api/util/test][%d] utilTestOK  %+v", 200, o.Payload)
 }
+
+func (o *UtilTestOK) String() string {
+	return fmt.Sprintf("[POST /api/util/test][%d] utilTestOK  %+v", 200, o.Payload)
+}
+
 func (o *UtilTestOK) GetPayload() *UtilTestOKBody {
 	return o.Payload
 }
@@ -69,7 +105,8 @@ func (o *UtilTestOK) readResponse(response runtime.ClientResponse, consumer runt
 	return nil
 }
 
-/*UtilTestBody util test body
+/*
+UtilTestBody util test body
 swagger:model UtilTestBody
 */
 type UtilTestBody struct {
@@ -309,7 +346,8 @@ func (o *UtilTestBody) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-/*UtilTestOKBody util test o k body
+/*
+UtilTestOKBody util test o k body
 swagger:model UtilTestOKBody
 */
 type UtilTestOKBody struct {
@@ -380,6 +418,11 @@ func (o *UtilTestOKBody) ContextValidate(ctx context.Context, formats strfmt.Reg
 func (o *UtilTestOKBody) contextValidateResponse(ctx context.Context, formats strfmt.Registry) error {
 
 	if o.Response != nil {
+
+		if swag.IsZero(o.Response) { // not required
+			return nil
+		}
+
 		if err := o.Response.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("utilTestOK" + "." + "response")
@@ -411,7 +454,8 @@ func (o *UtilTestOKBody) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-/*UtilTestOKBodyResponse util test o k body response
+/*
+UtilTestOKBodyResponse util test o k body response
 swagger:model UtilTestOKBodyResponse
 */
 type UtilTestOKBodyResponse struct {

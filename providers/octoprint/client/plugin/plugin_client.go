@@ -39,7 +39,7 @@ type ClientService interface {
 }
 
 /*
-  DisplayLayerProgress receives the layer height and other values
+DisplayLayerProgress receives the layer height and other values
 */
 func (a *Client) DisplayLayerProgress(params *DisplayLayerProgressParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*DisplayLayerProgressOK, error) {
 	// TODO: Validate the params before sending
@@ -78,7 +78,7 @@ func (a *Client) DisplayLayerProgress(params *DisplayLayerProgressParams, authIn
 }
 
 /*
-  ModelThumbnail models thumbnail
+ModelThumbnail models thumbnail
 */
 func (a *Client) ModelThumbnail(params *ModelThumbnailParams, authInfo runtime.ClientAuthInfoWriter, writer io.Writer, opts ...ClientOption) (*ModelThumbnailOK, error) {
 	// TODO: Validate the params before sending

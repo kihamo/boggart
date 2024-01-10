@@ -30,7 +30,7 @@ func (o *DisplayLayerProgressReader) ReadResponse(response runtime.ClientRespons
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /plugin/DisplayLayerProgress/values] displayLayerProgress", response, response.Code())
 	}
 }
 
@@ -39,7 +39,8 @@ func NewDisplayLayerProgressOK() *DisplayLayerProgressOK {
 	return &DisplayLayerProgressOK{}
 }
 
-/* DisplayLayerProgressOK describes a response with status code 200, with default header values.
+/*
+DisplayLayerProgressOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -47,9 +48,44 @@ type DisplayLayerProgressOK struct {
 	Payload *models.PluginDisplayLayerProgress
 }
 
+// IsSuccess returns true when this display layer progress o k response has a 2xx status code
+func (o *DisplayLayerProgressOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this display layer progress o k response has a 3xx status code
+func (o *DisplayLayerProgressOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this display layer progress o k response has a 4xx status code
+func (o *DisplayLayerProgressOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this display layer progress o k response has a 5xx status code
+func (o *DisplayLayerProgressOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this display layer progress o k response a status code equal to that given
+func (o *DisplayLayerProgressOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the display layer progress o k response
+func (o *DisplayLayerProgressOK) Code() int {
+	return 200
+}
+
 func (o *DisplayLayerProgressOK) Error() string {
 	return fmt.Sprintf("[GET /plugin/DisplayLayerProgress/values][%d] displayLayerProgressOK  %+v", 200, o.Payload)
 }
+
+func (o *DisplayLayerProgressOK) String() string {
+	return fmt.Sprintf("[GET /plugin/DisplayLayerProgress/values][%d] displayLayerProgressOK  %+v", 200, o.Payload)
+}
+
 func (o *DisplayLayerProgressOK) GetPayload() *models.PluginDisplayLayerProgress {
 	return o.Payload
 }

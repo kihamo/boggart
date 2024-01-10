@@ -36,7 +36,7 @@ func (o *GetToolStateReader) ReadResponse(response runtime.ClientResponse, consu
 		}
 		return nil, result
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /api/printer/tool] getToolState", response, response.Code())
 	}
 }
 
@@ -45,7 +45,8 @@ func NewGetToolStateOK() *GetToolStateOK {
 	return &GetToolStateOK{}
 }
 
-/* GetToolStateOK describes a response with status code 200, with default header values.
+/*
+GetToolStateOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -53,9 +54,44 @@ type GetToolStateOK struct {
 	Payload *models.ToolState
 }
 
+// IsSuccess returns true when this get tool state o k response has a 2xx status code
+func (o *GetToolStateOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get tool state o k response has a 3xx status code
+func (o *GetToolStateOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get tool state o k response has a 4xx status code
+func (o *GetToolStateOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get tool state o k response has a 5xx status code
+func (o *GetToolStateOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get tool state o k response a status code equal to that given
+func (o *GetToolStateOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get tool state o k response
+func (o *GetToolStateOK) Code() int {
+	return 200
+}
+
 func (o *GetToolStateOK) Error() string {
 	return fmt.Sprintf("[GET /api/printer/tool][%d] getToolStateOK  %+v", 200, o.Payload)
 }
+
+func (o *GetToolStateOK) String() string {
+	return fmt.Sprintf("[GET /api/printer/tool][%d] getToolStateOK  %+v", 200, o.Payload)
+}
+
 func (o *GetToolStateOK) GetPayload() *models.ToolState {
 	return o.Payload
 }
@@ -77,14 +113,49 @@ func NewGetToolStateConflict() *GetToolStateConflict {
 	return &GetToolStateConflict{}
 }
 
-/* GetToolStateConflict describes a response with status code 409, with default header values.
+/*
+GetToolStateConflict describes a response with status code 409, with default header values.
 
 If the printer is not operational
 */
 type GetToolStateConflict struct {
 }
 
+// IsSuccess returns true when this get tool state conflict response has a 2xx status code
+func (o *GetToolStateConflict) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this get tool state conflict response has a 3xx status code
+func (o *GetToolStateConflict) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get tool state conflict response has a 4xx status code
+func (o *GetToolStateConflict) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this get tool state conflict response has a 5xx status code
+func (o *GetToolStateConflict) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get tool state conflict response a status code equal to that given
+func (o *GetToolStateConflict) IsCode(code int) bool {
+	return code == 409
+}
+
+// Code gets the status code for the get tool state conflict response
+func (o *GetToolStateConflict) Code() int {
+	return 409
+}
+
 func (o *GetToolStateConflict) Error() string {
+	return fmt.Sprintf("[GET /api/printer/tool][%d] getToolStateConflict ", 409)
+}
+
+func (o *GetToolStateConflict) String() string {
 	return fmt.Sprintf("[GET /api/printer/tool][%d] getToolStateConflict ", 409)
 }
 

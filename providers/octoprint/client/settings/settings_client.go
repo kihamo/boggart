@@ -36,7 +36,7 @@ type ClientService interface {
 }
 
 /*
-  GetSettings retrieves current settings
+GetSettings retrieves current settings
 */
 func (a *Client) GetSettings(params *GetSettingsParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetSettingsOK, error) {
 	// TODO: Validate the params before sending

@@ -345,6 +345,8 @@ paths:
                 type: "array"
                 items:
                   $ref: "#/definitions/Command"
+        404:
+          description: "If a source other than core or custom is specified"
   /api/system/commands/{source}:
     get:
       operationId: "getCommandsBySource"

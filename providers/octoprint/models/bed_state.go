@@ -110,6 +110,11 @@ func (m *BedState) ContextValidate(ctx context.Context, formats strfmt.Registry)
 func (m *BedState) contextValidateBed(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Bed != nil {
+
+		if swag.IsZero(m.Bed) { // not required
+			return nil
+		}
+
 		if err := m.Bed.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("bed")
@@ -128,6 +133,11 @@ func (m *BedState) contextValidateHistory(ctx context.Context, formats strfmt.Re
 	for i := 0; i < len(m.History); i++ {
 
 		if m.History[i] != nil {
+
+			if swag.IsZero(m.History[i]) { // not required
+				return nil
+			}
+
 			if err := m.History[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("history" + "." + strconv.Itoa(i))
@@ -223,6 +233,11 @@ func (m *BedStateHistoryItems0) ContextValidate(ctx context.Context, formats str
 func (m *BedStateHistoryItems0) contextValidateBed(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Bed != nil {
+
+		if swag.IsZero(m.Bed) { // not required
+			return nil
+		}
+
 		if err := m.Bed.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("bed")

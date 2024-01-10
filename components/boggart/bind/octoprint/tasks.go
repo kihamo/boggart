@@ -11,6 +11,7 @@ import (
 	"github.com/kihamo/boggart/providers/octoprint/client/job"
 	"github.com/kihamo/boggart/providers/octoprint/client/plugin"
 	"github.com/kihamo/boggart/providers/octoprint/client/printer"
+	"github.com/kihamo/boggart/providers/octoprint/client/system"
 	"go.uber.org/multierr"
 )
 
@@ -37,8 +38,11 @@ func (b *Bind) taskSettingsHandler(ctx context.Context) (err error) {
 		return err
 	}
 
-	if err = b.CommandsUpdate(ctx); err != nil {
-		return err
+	if e := b.CommandsUpdate(ctx); e != nil {
+		// отсутствует в эмуляторе от moonraker, поэтому делаю не блокирующим этапом
+		if _, ok := e.(*system.GetCommandsNotFound); !ok {
+			return e
+		}
 	}
 
 	cfg := b.config()

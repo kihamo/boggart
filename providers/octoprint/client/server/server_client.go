@@ -36,7 +36,7 @@ type ClientService interface {
 }
 
 /*
-  GetServer servers information
+GetServer servers information
 */
 func (a *Client) GetServer(params *GetServerParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetServerOK, error) {
 	// TODO: Validate the params before sending

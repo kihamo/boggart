@@ -52,10 +52,12 @@ func NewSendJobCommandParamsWithHTTPClient(client *http.Client) *SendJobCommandP
 	}
 }
 
-/* SendJobCommandParams contains all the parameters to send to the API endpoint
-   for the send job command operation.
+/*
+SendJobCommandParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the send job command operation.
+
+	Typically these are written to a http.Request.
 */
 type SendJobCommandParams struct {
 

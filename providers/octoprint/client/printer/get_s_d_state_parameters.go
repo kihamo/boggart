@@ -52,10 +52,12 @@ func NewGetSDStateParamsWithHTTPClient(client *http.Client) *GetSDStateParams {
 	}
 }
 
-/* GetSDStateParams contains all the parameters to send to the API endpoint
-   for the get s d state operation.
+/*
+GetSDStateParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get s d state operation.
+
+	Typically these are written to a http.Request.
 */
 type GetSDStateParams struct {
 	timeout    time.Duration

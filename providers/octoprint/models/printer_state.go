@@ -140,6 +140,11 @@ func (m *PrinterState) ContextValidate(ctx context.Context, formats strfmt.Regis
 func (m *PrinterState) contextValidateSd(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Sd != nil {
+
+		if swag.IsZero(m.Sd) { // not required
+			return nil
+		}
+
 		if err := m.Sd.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("sd")
@@ -156,6 +161,11 @@ func (m *PrinterState) contextValidateSd(ctx context.Context, formats strfmt.Reg
 func (m *PrinterState) contextValidateState(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.State != nil {
+
+		if swag.IsZero(m.State) { // not required
+			return nil
+		}
+
 		if err := m.State.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("state")
@@ -264,6 +274,11 @@ func (m *PrinterStateState) ContextValidate(ctx context.Context, formats strfmt.
 func (m *PrinterStateState) contextValidateFlags(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Flags != nil {
+
+		if swag.IsZero(m.Flags) { // not required
+			return nil
+		}
+
 		if err := m.Flags.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("state" + "." + "flags")

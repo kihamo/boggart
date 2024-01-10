@@ -30,7 +30,7 @@ func (o *GetLanguagesReader) ReadResponse(response runtime.ClientResponse, consu
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /api/languages] getLanguages", response, response.Code())
 	}
 }
 
@@ -39,7 +39,8 @@ func NewGetLanguagesOK() *GetLanguagesOK {
 	return &GetLanguagesOK{}
 }
 
-/* GetLanguagesOK describes a response with status code 200, with default header values.
+/*
+GetLanguagesOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -47,9 +48,44 @@ type GetLanguagesOK struct {
 	Payload *models.Languages
 }
 
+// IsSuccess returns true when this get languages o k response has a 2xx status code
+func (o *GetLanguagesOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get languages o k response has a 3xx status code
+func (o *GetLanguagesOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get languages o k response has a 4xx status code
+func (o *GetLanguagesOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get languages o k response has a 5xx status code
+func (o *GetLanguagesOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get languages o k response a status code equal to that given
+func (o *GetLanguagesOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get languages o k response
+func (o *GetLanguagesOK) Code() int {
+	return 200
+}
+
 func (o *GetLanguagesOK) Error() string {
 	return fmt.Sprintf("[GET /api/languages][%d] getLanguagesOK  %+v", 200, o.Payload)
 }
+
+func (o *GetLanguagesOK) String() string {
+	return fmt.Sprintf("[GET /api/languages][%d] getLanguagesOK  %+v", 200, o.Payload)
+}
+
 func (o *GetLanguagesOK) GetPayload() *models.Languages {
 	return o.Payload
 }

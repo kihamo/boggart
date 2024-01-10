@@ -53,10 +53,12 @@ func NewGetBedStateParamsWithHTTPClient(client *http.Client) *GetBedStateParams 
 	}
 }
 
-/* GetBedStateParams contains all the parameters to send to the API endpoint
-   for the get bed state operation.
+/*
+GetBedStateParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get bed state operation.
+
+	Typically these are written to a http.Request.
 */
 type GetBedStateParams struct {
 

@@ -36,7 +36,7 @@ type ClientService interface {
 }
 
 /*
-  GetLanguages retrieves installed language packs
+GetLanguages retrieves installed language packs
 */
 func (a *Client) GetLanguages(params *GetLanguagesParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetLanguagesOK, error) {
 	// TODO: Validate the params before sending

@@ -36,7 +36,7 @@ type ClientService interface {
 }
 
 /*
-  UtilTest various tests
+UtilTest various tests
 */
 func (a *Client) UtilTest(params *UtilTestParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*UtilTestOK, error) {
 	// TODO: Validate the params before sending

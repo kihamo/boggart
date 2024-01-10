@@ -52,10 +52,12 @@ func NewDisplayLayerProgressParamsWithHTTPClient(client *http.Client) *DisplayLa
 	}
 }
 
-/* DisplayLayerProgressParams contains all the parameters to send to the API endpoint
-   for the display layer progress operation.
+/*
+DisplayLayerProgressParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the display layer progress operation.
+
+	Typically these are written to a http.Request.
 */
 type DisplayLayerProgressParams struct {
 	timeout    time.Duration

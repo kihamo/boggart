@@ -105,6 +105,11 @@ func (m *Job) ContextValidate(ctx context.Context, formats strfmt.Registry) erro
 func (m *Job) contextValidateJob(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Job != nil {
+
+		if swag.IsZero(m.Job) { // not required
+			return nil
+		}
+
 		if err := m.Job.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("job")
@@ -121,6 +126,11 @@ func (m *Job) contextValidateJob(ctx context.Context, formats strfmt.Registry) e
 func (m *Job) contextValidateProgress(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Progress != nil {
+
+		if swag.IsZero(m.Progress) { // not required
+			return nil
+		}
+
 		if err := m.Progress.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("progress")
@@ -250,6 +260,11 @@ func (m *JobJob) ContextValidate(ctx context.Context, formats strfmt.Registry) e
 func (m *JobJob) contextValidateFilament(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Filament != nil {
+
+		if swag.IsZero(m.Filament) { // not required
+			return nil
+		}
+
 		if err := m.Filament.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("job" + "." + "filament")
@@ -266,6 +281,11 @@ func (m *JobJob) contextValidateFilament(ctx context.Context, formats strfmt.Reg
 func (m *JobJob) contextValidateFile(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.File != nil {
+
+		if swag.IsZero(m.File) { // not required
+			return nil
+		}
+
 		if err := m.File.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("job" + "." + "file")

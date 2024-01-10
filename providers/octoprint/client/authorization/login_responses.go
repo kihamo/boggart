@@ -42,7 +42,7 @@ func (o *LoginReader) ReadResponse(response runtime.ClientResponse, consumer run
 		}
 		return nil, result
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[POST /api/login] login", response, response.Code())
 	}
 }
 
@@ -51,7 +51,8 @@ func NewLoginOK() *LoginOK {
 	return &LoginOK{}
 }
 
-/* LoginOK describes a response with status code 200, with default header values.
+/*
+LoginOK describes a response with status code 200, with default header values.
 
 Successful login
 */
@@ -59,9 +60,44 @@ type LoginOK struct {
 	Payload *LoginOKBody
 }
 
+// IsSuccess returns true when this login o k response has a 2xx status code
+func (o *LoginOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this login o k response has a 3xx status code
+func (o *LoginOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this login o k response has a 4xx status code
+func (o *LoginOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this login o k response has a 5xx status code
+func (o *LoginOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this login o k response a status code equal to that given
+func (o *LoginOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the login o k response
+func (o *LoginOK) Code() int {
+	return 200
+}
+
 func (o *LoginOK) Error() string {
 	return fmt.Sprintf("[POST /api/login][%d] loginOK  %+v", 200, o.Payload)
 }
+
+func (o *LoginOK) String() string {
+	return fmt.Sprintf("[POST /api/login][%d] loginOK  %+v", 200, o.Payload)
+}
+
 func (o *LoginOK) GetPayload() *LoginOKBody {
 	return o.Payload
 }
@@ -83,14 +119,49 @@ func NewLoginUnauthorized() *LoginUnauthorized {
 	return &LoginUnauthorized{}
 }
 
-/* LoginUnauthorized describes a response with status code 401, with default header values.
+/*
+LoginUnauthorized describes a response with status code 401, with default header values.
 
 Username/password mismatch or unknown user
 */
 type LoginUnauthorized struct {
 }
 
+// IsSuccess returns true when this login unauthorized response has a 2xx status code
+func (o *LoginUnauthorized) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this login unauthorized response has a 3xx status code
+func (o *LoginUnauthorized) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this login unauthorized response has a 4xx status code
+func (o *LoginUnauthorized) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this login unauthorized response has a 5xx status code
+func (o *LoginUnauthorized) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this login unauthorized response a status code equal to that given
+func (o *LoginUnauthorized) IsCode(code int) bool {
+	return code == 401
+}
+
+// Code gets the status code for the login unauthorized response
+func (o *LoginUnauthorized) Code() int {
+	return 401
+}
+
 func (o *LoginUnauthorized) Error() string {
+	return fmt.Sprintf("[POST /api/login][%d] loginUnauthorized ", 401)
+}
+
+func (o *LoginUnauthorized) String() string {
 	return fmt.Sprintf("[POST /api/login][%d] loginUnauthorized ", 401)
 }
 
@@ -104,14 +175,49 @@ func NewLoginForbidden() *LoginForbidden {
 	return &LoginForbidden{}
 }
 
-/* LoginForbidden describes a response with status code 403, with default header values.
+/*
+LoginForbidden describes a response with status code 403, with default header values.
 
 Deactivated account
 */
 type LoginForbidden struct {
 }
 
+// IsSuccess returns true when this login forbidden response has a 2xx status code
+func (o *LoginForbidden) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this login forbidden response has a 3xx status code
+func (o *LoginForbidden) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this login forbidden response has a 4xx status code
+func (o *LoginForbidden) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this login forbidden response has a 5xx status code
+func (o *LoginForbidden) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this login forbidden response a status code equal to that given
+func (o *LoginForbidden) IsCode(code int) bool {
+	return code == 403
+}
+
+// Code gets the status code for the login forbidden response
+func (o *LoginForbidden) Code() int {
+	return 403
+}
+
 func (o *LoginForbidden) Error() string {
+	return fmt.Sprintf("[POST /api/login][%d] loginForbidden ", 403)
+}
+
+func (o *LoginForbidden) String() string {
 	return fmt.Sprintf("[POST /api/login][%d] loginForbidden ", 403)
 }
 
@@ -120,7 +226,8 @@ func (o *LoginForbidden) readResponse(response runtime.ClientResponse, consumer 
 	return nil
 }
 
-/*LoginBody login body
+/*
+LoginBody login body
 swagger:model LoginBody
 */
 type LoginBody struct {
@@ -166,7 +273,8 @@ func (o *LoginBody) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-/*LoginOKBody login o k body
+/*
+LoginOKBody login o k body
 swagger:model LoginOKBody
 */
 type LoginOKBody struct {

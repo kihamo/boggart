@@ -103,6 +103,11 @@ func (m *Connection) ContextValidate(ctx context.Context, formats strfmt.Registr
 func (m *Connection) contextValidateCurrent(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Current != nil {
+
+		if swag.IsZero(m.Current) { // not required
+			return nil
+		}
+
 		if err := m.Current.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("current")
@@ -119,6 +124,11 @@ func (m *Connection) contextValidateCurrent(ctx context.Context, formats strfmt.
 func (m *Connection) contextValidateOptions(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Options != nil {
+
+		if swag.IsZero(m.Options) { // not required
+			return nil
+		}
+
 		if err := m.Options.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("options")
@@ -282,6 +292,11 @@ func (m *ConnectionOptions) contextValidatePrinterProfiles(ctx context.Context, 
 	for i := 0; i < len(m.PrinterProfiles); i++ {
 
 		if m.PrinterProfiles[i] != nil {
+
+			if swag.IsZero(m.PrinterProfiles[i]) { // not required
+				return nil
+			}
+
 			if err := m.PrinterProfiles[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("options" + "." + "printerProfiles" + "." + strconv.Itoa(i))

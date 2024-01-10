@@ -36,7 +36,7 @@ func (o *GetPrinterStateReader) ReadResponse(response runtime.ClientResponse, co
 		}
 		return nil, result
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /api/printer] getPrinterState", response, response.Code())
 	}
 }
 
@@ -45,7 +45,8 @@ func NewGetPrinterStateOK() *GetPrinterStateOK {
 	return &GetPrinterStateOK{}
 }
 
-/* GetPrinterStateOK describes a response with status code 200, with default header values.
+/*
+GetPrinterStateOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -53,9 +54,44 @@ type GetPrinterStateOK struct {
 	Payload *models.PrinterState
 }
 
+// IsSuccess returns true when this get printer state o k response has a 2xx status code
+func (o *GetPrinterStateOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get printer state o k response has a 3xx status code
+func (o *GetPrinterStateOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get printer state o k response has a 4xx status code
+func (o *GetPrinterStateOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get printer state o k response has a 5xx status code
+func (o *GetPrinterStateOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get printer state o k response a status code equal to that given
+func (o *GetPrinterStateOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get printer state o k response
+func (o *GetPrinterStateOK) Code() int {
+	return 200
+}
+
 func (o *GetPrinterStateOK) Error() string {
 	return fmt.Sprintf("[GET /api/printer][%d] getPrinterStateOK  %+v", 200, o.Payload)
 }
+
+func (o *GetPrinterStateOK) String() string {
+	return fmt.Sprintf("[GET /api/printer][%d] getPrinterStateOK  %+v", 200, o.Payload)
+}
+
 func (o *GetPrinterStateOK) GetPayload() *models.PrinterState {
 	return o.Payload
 }
@@ -77,14 +113,49 @@ func NewGetPrinterStateConflict() *GetPrinterStateConflict {
 	return &GetPrinterStateConflict{}
 }
 
-/* GetPrinterStateConflict describes a response with status code 409, with default header values.
+/*
+GetPrinterStateConflict describes a response with status code 409, with default header values.
 
 If the printer is not operational
 */
 type GetPrinterStateConflict struct {
 }
 
+// IsSuccess returns true when this get printer state conflict response has a 2xx status code
+func (o *GetPrinterStateConflict) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this get printer state conflict response has a 3xx status code
+func (o *GetPrinterStateConflict) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get printer state conflict response has a 4xx status code
+func (o *GetPrinterStateConflict) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this get printer state conflict response has a 5xx status code
+func (o *GetPrinterStateConflict) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get printer state conflict response a status code equal to that given
+func (o *GetPrinterStateConflict) IsCode(code int) bool {
+	return code == 409
+}
+
+// Code gets the status code for the get printer state conflict response
+func (o *GetPrinterStateConflict) Code() int {
+	return 409
+}
+
 func (o *GetPrinterStateConflict) Error() string {
+	return fmt.Sprintf("[GET /api/printer][%d] getPrinterStateConflict ", 409)
+}
+
+func (o *GetPrinterStateConflict) String() string {
 	return fmt.Sprintf("[GET /api/printer][%d] getPrinterStateConflict ", 409)
 }
 

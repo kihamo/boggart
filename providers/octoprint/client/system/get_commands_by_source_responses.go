@@ -36,7 +36,7 @@ func (o *GetCommandsBySourceReader) ReadResponse(response runtime.ClientResponse
 		}
 		return nil, result
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /api/system/commands/{source}] getCommandsBySource", response, response.Code())
 	}
 }
 
@@ -45,7 +45,8 @@ func NewGetCommandsBySourceOK() *GetCommandsBySourceOK {
 	return &GetCommandsBySourceOK{}
 }
 
-/* GetCommandsBySourceOK describes a response with status code 200, with default header values.
+/*
+GetCommandsBySourceOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -53,9 +54,44 @@ type GetCommandsBySourceOK struct {
 	Payload []*models.Command
 }
 
+// IsSuccess returns true when this get commands by source o k response has a 2xx status code
+func (o *GetCommandsBySourceOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get commands by source o k response has a 3xx status code
+func (o *GetCommandsBySourceOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get commands by source o k response has a 4xx status code
+func (o *GetCommandsBySourceOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get commands by source o k response has a 5xx status code
+func (o *GetCommandsBySourceOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get commands by source o k response a status code equal to that given
+func (o *GetCommandsBySourceOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get commands by source o k response
+func (o *GetCommandsBySourceOK) Code() int {
+	return 200
+}
+
 func (o *GetCommandsBySourceOK) Error() string {
 	return fmt.Sprintf("[GET /api/system/commands/{source}][%d] getCommandsBySourceOK  %+v", 200, o.Payload)
 }
+
+func (o *GetCommandsBySourceOK) String() string {
+	return fmt.Sprintf("[GET /api/system/commands/{source}][%d] getCommandsBySourceOK  %+v", 200, o.Payload)
+}
+
 func (o *GetCommandsBySourceOK) GetPayload() []*models.Command {
 	return o.Payload
 }
@@ -75,14 +111,49 @@ func NewGetCommandsBySourceNotFound() *GetCommandsBySourceNotFound {
 	return &GetCommandsBySourceNotFound{}
 }
 
-/* GetCommandsBySourceNotFound describes a response with status code 404, with default header values.
+/*
+GetCommandsBySourceNotFound describes a response with status code 404, with default header values.
 
 Not found
 */
 type GetCommandsBySourceNotFound struct {
 }
 
+// IsSuccess returns true when this get commands by source not found response has a 2xx status code
+func (o *GetCommandsBySourceNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this get commands by source not found response has a 3xx status code
+func (o *GetCommandsBySourceNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get commands by source not found response has a 4xx status code
+func (o *GetCommandsBySourceNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this get commands by source not found response has a 5xx status code
+func (o *GetCommandsBySourceNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get commands by source not found response a status code equal to that given
+func (o *GetCommandsBySourceNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the get commands by source not found response
+func (o *GetCommandsBySourceNotFound) Code() int {
+	return 404
+}
+
 func (o *GetCommandsBySourceNotFound) Error() string {
+	return fmt.Sprintf("[GET /api/system/commands/{source}][%d] getCommandsBySourceNotFound ", 404)
+}
+
+func (o *GetCommandsBySourceNotFound) String() string {
 	return fmt.Sprintf("[GET /api/system/commands/{source}][%d] getCommandsBySourceNotFound ", 404)
 }
 
