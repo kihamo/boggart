@@ -158,7 +158,7 @@ namespace esphome {
     }
 
     void MercuryV3::uart_tx(const uint8_t *data, size_t len) {
-        // ESP_LOGV(TAG, "UART TX size %d payload %s", len, hexencode(data, len).c_str());
+        ESP_LOGV(TAG, "UART TX size %d payload %s", len, format_hex_pretty(data, len).c_str());
 
         // clean uart buffer
         while (this->available()) {
@@ -178,10 +178,14 @@ namespace esphome {
           this->response_.push_back(byte);
         }
 
-        this->payload_.assign(this->response_.begin() + 1, this->response_.end() - 2);
+         ESP_LOGV(TAG, "UART RX size %d payload %s", this->response_.size(), format_hex_pretty(this->payload_.data(), this->payload_.size()).c_str());
 
-        // ESP_LOGV(TAG, "UART RX %s", hexencode(this->response_.data(), this->response_.size()).c_str());
-        // ESP_LOGV(TAG, "UART RX payload %s", hexencode(this->payload_.data(), this->payload_.size()).c_str());
+        if (this->payload_.size() < MERCURY_V3_FIELD_ADDRESS_LENGTH + MERCURY_V3_FIELD_COMMAND_LENGTH + MERCURY_V3_FIELD_CRC_LENGTH) {
+            ESP_LOGW(TAG, "Payload is shot have %d want %d", this->response_.size(), MERCURY_V3_FIELD_ADDRESS_LENGTH + MERCURY_V3_FIELD_COMMAND_LENGTH + MERCURY_V3_FIELD_CRC_LENGTH);
+            return false;
+        }
+
+        this->payload_.assign(this->response_.begin() + MERCURY_V3_FIELD_ADDRESS_LENGTH, this->response_.end() - MERCURY_V3_FIELD_CRC_LENGTH);
 
         // check address byte
         auto address = *this->response_.begin();
@@ -191,9 +195,9 @@ namespace esphome {
         }
 
         // check checksum
-        auto payload_crc = std::vector<uint8_t>(this->response_.begin(), this->response_.end() - 2);
+        auto payload_crc = std::vector<uint8_t>(this->response_.begin(), this->response_.end() - MERCURY_V3_FIELD_CRC_LENGTH);
         uint16_t computed_crc = this->crc16(payload_crc.data(), payload_crc.size());
-        uint16_t remote_crc = uint16_t(this->response_[this->response_.size() - 2]) | (uint16_t(this->response_[this->response_.size() - 1]) << 8);
+        uint16_t remote_crc = uint16_t(this->response_[this->response_.size() - MERCURY_V3_FIELD_CRC_LENGTH]) | (uint16_t(this->response_[this->response_.size() - MERCURY_V3_FIELD_ADDRESS_LENGTH]) << 8);
 
         if (computed_crc != remote_crc) {
             ESP_LOGW(TAG, "CRC16 check failed! computed %02X != remote %02X", computed_crc, remote_crc);

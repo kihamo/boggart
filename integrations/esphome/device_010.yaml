@@ -4,7 +4,8 @@ substitutions:
 
 packages:
   common: !include ./_includes/common.yaml
-  wifi: !include ./_includes/wifi/villa.yaml
+  #wifi: !include ./_includes/wifi/villa.yaml
+  wifi: !include ./_includes/wifi/home.yaml
   binary_sensor: !include ./_includes/binary_sensor.yaml
   sensor: !include ./_includes/sensor.yaml
   switch: !include ./_includes/switch.yaml
@@ -13,9 +14,24 @@ packages:
 
 esphome:
   comment: !secret device_010_comment
+#  platformio_options:
+#    upload_speed: 460800
+#    board_build.f_cpu: 80000000L
 
 esp32:
   board: nodemcu-32s
+
+api:
+  reboot_timeout: 0s
+
+debug:
+
+logger:
+  level: DEBUG
+  baud_rate: 115200
+
+mqtt:
+  log_topic: null
 
 external_components:
   - source:
@@ -48,6 +64,13 @@ i2c:
   scl: SCL
   scan: false
   id: i2c_bus
+
+text_sensor:
+  - platform: debug
+    device:
+      name: "Device Info"
+    reset_reason:
+      name: "Reset Reason"
 
 sensor:
   - platform: total_daily_energy

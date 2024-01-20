@@ -11,6 +11,10 @@
 
 #define MERCURY_V3_CHANNEL_OPEN_TIMEOUT 200000
 
+#define MERCURY_V3_FIELD_ADDRESS_LENGTH 1
+#define MERCURY_V3_FIELD_COMMAND_LENGTH 1 // min 1 max 16
+#define MERCURY_V3_FIELD_CRC_LENGTH 2
+
 namespace esphome {
   namespace mercury_v3 {
     class MercuryV3 : public PollingComponent, public uart::UARTDevice {
