@@ -13,8 +13,8 @@ type Config struct {
 
 	ProviderLink    types.URL `mapstructure:"provider_link" yaml:"provider_link"  valid:"required"`
 	Login           string    `valid:",required"`
-	ApiKey          string    `mapstructure:"api_key" mapstructure:"api_key" valid:",required"`
-	DeviceID        int64     `mapstructure:"device_id" mapstructure:"device_id"`
+	ApiKey          string    `mapstructure:"api_key" yaml:"api_key" valid:",required"`
+	DeviceID        int64     `mapstructure:"device_id" yaml:"device_id"`
 	Debug           bool
 	UpdaterInterval time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 	UpdaterTimeout  time.Duration `mapstructure:"updater_timeout" yaml:"updater_timeout"`
