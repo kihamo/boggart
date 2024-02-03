@@ -1,0 +1,102 @@
+# https://templates.blakadder.com/gosund_SP1.html
+
+#  ------------------
+#  GPIO   | Component
+#  ------------------
+#  GPIO00 | None
+#  GPIO01 | Led1i
+#  GPIO02 | None
+#  GPIO03 | Button1
+#  GPIO04 | BL0937 CF
+#  GPIO05 | HLWBL CF1
+#  GPIO09 | None
+#  GPIO10 | None
+#  GPIO12 | HLWBL SELi
+#  GPIO13 | Led2i
+#  GPIO14 | Relay1
+#  GPIO15 | None
+#  GPIO16 | None
+#  FLAG   | None
+
+substitutions:
+  node_name: !secret device_018_node_name
+  ip_address: !secret device_018_ip_address
+
+packages:
+  common: !include ./_includes/common.yaml
+  wifi: !include ./_includes/wifi/villa_boiler.yaml
+  binary_sensor: !include ./_includes/binary_sensor.yaml
+  sensor: !include ./_includes/sensor.yaml
+  switch: !include ./_includes/switch.yaml
+  text_sensor: !include ./_includes/text_sensor.yaml
+  time: !include ./_includes/time.yaml
+
+esphome:
+  comment: !secret device_018_comment
+
+esp8266:
+  board: esp8285
+
+sensor:
+  - platform: hlw8012
+    sel_pin:
+      number: GPIO12
+      inverted: true
+    cf_pin: GPIO04
+    cf1_pin: GPIO05
+    current_resistor: 0.00290
+    voltage_divider: 940
+    current:
+      id: "amperage"
+      name: "Amperage"
+      unit_of_measurement: A
+      accuracy_decimals: 3
+    voltage:
+      id: "voltage"
+      name: "Voltage"
+      unit_of_measurement: V
+    power:
+      id: "power"
+      name: "Power in watts"
+      unit_of_measurement: W
+    change_mode_every: 4
+    update_interval: 10s
+  - platform: total_daily_energy
+    name: "Total Daily Energy"
+    icon: "mdi:current-ac"
+    power_id: "power"
+
+switch:
+  - platform: gpio
+    pin: GPIO14
+    id: "relay"
+    name: "Power relay"
+    on_turn_on:
+      - switch.turn_on: led_red
+      - switch.turn_off: led_blue
+    on_turn_off:
+      - switch.turn_on: led_blue
+      - switch.turn_off: led_red
+
+  - platform: gpio
+    pin: GPIO01
+    inverted: true
+    id: "led_blue"
+    name: "LED blue"
+  - platform: gpio
+    pin: GPIO13
+    inverted: true
+    id: "led_red"
+    name: "LED red"
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO3
+      mode: INPUT_PULLUP
+      inverted: true
+    id: "button"
+    name: "Hardware button"
+    internal: true
+    on_press:
+      - switch.toggle: relay
