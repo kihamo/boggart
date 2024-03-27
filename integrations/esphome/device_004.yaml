@@ -99,7 +99,10 @@ switch:
     restore_mode: RESTORE_DEFAULT_OFF
     on_turn_on:
       then:
-        - delay: 100ms
+        - switch.template.publish:
+            id: aquastorozh
+            state: ON
+        - delay: 300ms
         - switch.turn_off: aquastorozh_enabled
     internal: true
   - platform: gpio
@@ -111,7 +114,10 @@ switch:
     restore_mode: RESTORE_DEFAULT_OFF
     on_turn_on:
       then:
-        - delay: 100ms
+        - switch.template.publish:
+            id: aquastorozh
+            state: OFF
+        - delay: 300ms
         - switch.turn_off: aquastorozh_disable
     internal: true
   - platform: template

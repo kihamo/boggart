@@ -28,7 +28,7 @@ dallas:
     update_interval: 10s
 
 sensor:
-  - platform: bme280
+  - platform: bme280_i2c
     update_interval: 10s
     temperature:
       id: temperature

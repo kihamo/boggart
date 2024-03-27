@@ -16,6 +16,9 @@ packages:
 esphome:
   comment: !secret device_009_comment
 
+mqtt:
+  broker: !secret fazenda_mqtt_broker
+
 esp32:
   board: wemos_d1_mini32
 
@@ -119,7 +122,7 @@ sensor:
     unit_of_measurement: °C
     icon: 'mdi:temperature'
 
-  - platform: bme280
+  - platform: bme280_i2c
     address: 0x76
     update_interval: 60s
     temperature:
