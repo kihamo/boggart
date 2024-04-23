@@ -32,31 +32,49 @@ switch:
     id: "relay"
     name: "Power relay"
     on_turn_off:
-      - switch.turn_on: "led_red"
+      - light.turn_on: "led_red"
     on_turn_on:
-      - switch.turn_off: "led_red"
+      - light.turn_off: "led_red"
     restore_mode: RESTORE_DEFAULT_ON
 
-  - platform: gpio
-    pin: P9
-    id: "led_red"
-    name: "LED red"
-
 sensor:
+  # https://github.com/Liionboy/esphome_beken_yaml/blob/874bf31d59f741cd6ef2e6c88810322cd54e2910/esphome_beken_device/smart-socket-dededeman.yaml
+  # https://github.com/muhlba91/homelab-esphome-firmware/blob/ed7d66f78978af8c80037a994d70c793c07db146/config/shelly/plug/shelly-plug-tech-hub.conf.yml#L143
   - platform: hlw8012
     model: BL0937
     sel_pin:
       number: P26
       inverted: true
-    cf_pin: P24
-    cf1_pin: P6
+    cf_pin:
+      number: P24
+      inverted: true
+    cf1_pin:
+      number: P6
+      inverted: true
+    current:
+      id: "amperage"
+      name: "Amperage"
+      unit_of_measurement: A
+      accuracy_decimals: 3
+#      filters:
+#        - multiply: 0.3100151976971161
+    voltage:
+      id: "voltage"
+      name: "Voltage"
+      unit_of_measurement: V
     power:
       id: "power"
       name: "Power in watts"
       unit_of_measurement: W
       accuracy_decimals: 4
-    change_mode_every: 4
-    update_interval: 10s
+#      filters:
+#        - calibrate_linear:
+#            - 0.0 -> 0.0
+#            - ${power_cal_meas} -> ${power_cal_real}
+    change_mode_every: 2
+#    voltage_divider: 778
+#    current_resistor: 0.001008755324183625
+    update_interval: 5s
   - platform: total_daily_energy
     name: "Total Daily Energy"
     icon: "mdi:current-ac"
@@ -67,8 +85,20 @@ binary_sensor:
     pin:
       number: P7
       inverted: true
+      mode: INPUT_PULLUP
     id: "button"
     name: "Hardware button"
     internal: true
     on_press:
       - switch.toggle: relay
+
+light:
+  - platform: status_led
+    pin: P9
+    id: "led_red"
+    name: "LED red"
+
+text_sensor:
+  - platform: libretiny
+    version:
+      name: LibreTiny Version
