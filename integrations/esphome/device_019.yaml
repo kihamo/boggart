@@ -1,0 +1,74 @@
+# SNW-2SR waterproof lug
+#
+# P7  -- physical button
+# P8  -- blue led & relay ?
+# P9  -- red led
+#
+# BL0937 power meter
+# https://www.belling.com.cn/media/file_object/bel_product/BL0937/datasheet/BL0937_V1.02_en.pdf
+# P26 -- SEL
+# P24 -- CF1
+# P6  -- CF
+
+substitutions:
+  node_name: !secret device_019_node_name
+  ip_address: !secret device_019_ip_address
+
+packages:
+  common: !include ./_includes/common.yaml
+  wifi: !include ./_includes/wifi/home.yaml
+  binary_sensor: !include ./_includes/binary_sensor.yaml
+  sensor: !include ./_includes/sensor.yaml
+  switch: !include ./_includes/switch.yaml
+  text_sensor: !include ./_includes/text_sensor.yaml
+  time: !include ./_includes/time.yaml
+
+bk72xx:
+  board: cb3s
+
+switch:
+  - platform: gpio
+    pin: P8
+    id: "relay"
+    name: "Power relay"
+    on_turn_off:
+      - switch.turn_on: "led_red"
+    on_turn_on:
+      - switch.turn_off: "led_red"
+    restore_mode: RESTORE_DEFAULT_ON
+
+  - platform: gpio
+    pin: P9
+    id: "led_red"
+    name: "LED red"
+
+sensor:
+  - platform: hlw8012
+    model: BL0937
+    sel_pin:
+      number: P26
+      inverted: true
+    cf_pin: P24
+    cf1_pin: P6
+    power:
+      id: "power"
+      name: "Power in watts"
+      unit_of_measurement: W
+      accuracy_decimals: 4
+    change_mode_every: 4
+    update_interval: 10s
+  - platform: total_daily_energy
+    name: "Total Daily Energy"
+    icon: "mdi:current-ac"
+    power_id: "power"
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: P7
+      inverted: true
+    id: "button"
+    name: "Hardware button"
+    internal: true
+    on_press:
+      - switch.toggle: relay
