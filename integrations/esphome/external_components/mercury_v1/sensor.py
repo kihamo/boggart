@@ -11,10 +11,12 @@ from esphome.const import (
     DEVICE_CLASS_POWER,
     DEVICE_CLASS_VOLTAGE,
     ICON_FLASH,
+    ICON_CURRENT_AC,
     STATE_CLASS_MEASUREMENT,
     STATE_CLASS_TOTAL_INCREASING,
     UNIT_VOLT,
     UNIT_AMPERE,
+    UNIT_HERTZ,
     UNIT_WATT,
     UNIT_WATT_HOURS,
 )
@@ -22,6 +24,7 @@ from esphome.const import (
 DEPENDENCIES = ["uart"]
 
 CONF_AMPERAGE = "amperage"
+CONF_FREQUENCY = "frequency"
 CONF_TARIFF1 = "tariff1"
 CONF_TARIFF2 = "tariff2"
 CONF_TARIFF3 = "tariff3"
@@ -56,6 +59,13 @@ CONFIG_SCHEMA = (
                 device_class=DEVICE_CLASS_POWER,
                 state_class=STATE_CLASS_MEASUREMENT,
                 icon=ICON_FLASH,
+            ),
+            cv.Optional(CONF_FREQUENCY): sensor.sensor_schema(
+                unit_of_measurement=UNIT_HERTZ,
+                accuracy_decimals=2,
+                device_class=DEVICE_CLASS_ENERGY,
+                state_class=STATE_CLASS_MEASUREMENT,
+                icon=ICON_CURRENT_AC,
             ),
             cv.Optional(CONF_TARIFF1): sensor.sensor_schema(
                 unit_of_measurement=UNIT_WATT_HOURS,
@@ -117,6 +127,10 @@ async def to_code(config):
         conf = config[CONF_POWER]
         sens = await sensor.new_sensor(conf)
         cg.add(var.set_power_sensor(sens))
+    if CONF_FREQUENCY in config:
+        conf = config[CONF_FREQUENCY]
+        sens = await sensor.new_sensor(conf)
+        cg.add(var.set_frequency_sensor(sens))
     if CONF_TARIFF1 in config:
         conf = config[CONF_TARIFF1]
         sens = await sensor.new_sensor(conf)

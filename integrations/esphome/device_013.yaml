@@ -16,6 +16,7 @@ esphome:
 
 mqtt:
   broker: !secret fazenda_mqtt_broker
+#  log_topic: null
 
 esp8266:
   board: d1_mini
@@ -28,6 +29,10 @@ external_components:
 #logger:
 #  level: VERBOSE
 #  baud_rate: 115200
+#  logs:
+#    json: DEBUG
+#    mqtt: DEBUG
+#    sensor: DEBUG
 
 uart:
   id: uart_bus
@@ -64,6 +69,8 @@ sensor:
       name: "Power"
       id: "power"
       icon: "mdi:flash"
+    frequency:
+      name: "Frequency"
     tariff1:
       name: "Tariff 1"
       icon: "mdi:flash"

@@ -14,6 +14,7 @@ namespace esphome {
 
       this->packet_generate(read_power_counters_request_, Command::READ_POWER_COUNTERS);
       this->packet_generate(read_params_current_request_, Command::READ_PARAMS_CURRENT);
+      this->packet_generate(read_additional_params_request_, Command::READ_ADDITIONAL_PARAMS);
     }
 
     void MercuryV1::loop() {
@@ -92,6 +93,11 @@ namespace esphome {
               // V(2)-I(2)-P(3)
               data_len = 2 + 2 + 3;
               break;
+
+            case Command::READ_ADDITIONAL_PARAMS:
+              // freq(2)-tarif(1)-FL(1)-F1(6)
+              data_len = 2 + 1 + 1 + 6;
+              break;
         }
 
         if (data_len == 0) {
@@ -154,6 +160,12 @@ namespace esphome {
             this->amperage_sensor_->publish_state(this->A);
             this->power_sensor_->publish_state(this->W);
           break;
+
+          case Command::READ_ADDITIONAL_PARAMS:
+           this->F = this->to_long(&this->read_buffer_[data_index]) / 100.0;
+
+           this->frequency_sensor_->publish_state(this->F);
+          break;
         }
       }
     }
@@ -184,6 +196,16 @@ namespace esphome {
       this->read_from_uart();
 
       delay(MERCURY_V1_WAIT_AFTER_READ_RESPONSE);
+
+      ESP_LOGV(TAG, "Send READ_ADDITIONAL_PARAMS %s", format_hex_pretty(read_additional_params_request_, MERCURY_V1_READ_REQUEST_SIZE).c_str());
+      this->write_array(read_additional_params_request_, MERCURY_V1_READ_REQUEST_SIZE);
+      this->flush();
+
+      delay(MERCURY_V1_WAIT_AFTER_SEND_REQUEST);
+
+      this->read_from_uart();
+
+      delay(MERCURY_V1_WAIT_AFTER_READ_RESPONSE);
     }
 
     void MercuryV1::dump_config() {
@@ -193,6 +215,7 @@ namespace esphome {
       LOG_SENSOR("", "Voltage", this->voltage_sensor_);
       LOG_SENSOR("", "Amperage", this->amperage_sensor_);
       LOG_SENSOR("", "Power", this->power_sensor_);
+      LOG_SENSOR("", "Frequency", this->frequency_sensor_);
       LOG_SENSOR("", "Tariff 1", this->tariff1_sensor_);
       LOG_SENSOR("", "Tariff 2", this->tariff2_sensor_);
       LOG_SENSOR("", "Tariff 3", this->tariff3_sensor_);

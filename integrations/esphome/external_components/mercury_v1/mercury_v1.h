@@ -29,6 +29,7 @@ namespace esphome {
         void set_voltage_sensor(sensor::Sensor *voltage_sensor) { voltage_sensor_ = voltage_sensor; }
         void set_amperage_sensor(sensor::Sensor *amperage_sensor) { amperage_sensor_ = amperage_sensor; }
         void set_power_sensor(sensor::Sensor *power_sensor) { power_sensor_ = power_sensor; }
+        void set_frequency_sensor(sensor::Sensor *frequency_sensor) { frequency_sensor_ = frequency_sensor; }
         void set_tariff1_sensor(sensor::Sensor *tariff1_sensor) { tariff1_sensor_ = tariff1_sensor; }
         void set_tariff2_sensor(sensor::Sensor *tariff2_sensor) { tariff2_sensor_ = tariff2_sensor; }
         void set_tariff3_sensor(sensor::Sensor *tariff3_sensor) { tariff3_sensor_ = tariff3_sensor; }
@@ -46,6 +47,7 @@ namespace esphome {
         sensor::Sensor *voltage_sensor_;
         sensor::Sensor *amperage_sensor_;
         sensor::Sensor *power_sensor_;
+        sensor::Sensor *frequency_sensor_;
         sensor::Sensor *tariff1_sensor_;
         sensor::Sensor *tariff2_sensor_;
         sensor::Sensor *tariff3_sensor_;
@@ -56,16 +58,18 @@ namespace esphome {
         uint8_t read_buffer_[MERCURY_V1_READ_BUFFER_SIZE]{};
         uint8_t packet_buffer_[MERCURY_V1_READ_BUFFER_SIZE]{};
 
-        double V, A, W;
+        double V, A, W, F;
         double T1, T2, T3, T4, TTotal;
 
         enum Command : uint8_t {
           READ_POWER_COUNTERS = 0x27,
           READ_PARAMS_CURRENT = 0x63,
+          READ_ADDITIONAL_PARAMS = 0x81,
         };
 
         unsigned char read_power_counters_request_[MERCURY_V1_READ_REQUEST_SIZE];
         unsigned char read_params_current_request_[MERCURY_V1_READ_REQUEST_SIZE];
+        unsigned char read_additional_params_request_[MERCURY_V1_READ_REQUEST_SIZE];
 
         void read_from_uart();
         void clean_uart_buffer();

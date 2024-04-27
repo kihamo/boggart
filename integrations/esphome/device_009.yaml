@@ -76,6 +76,9 @@ sensor:
       name: "Power"
       id: "power"
       icon: "mdi:flash"
+    frequency:
+      name: "Frequency"
+      icon: "mdi:flash"
     tariff1:
       name: "Tariff 1"
       icon: "mdi:flash"
