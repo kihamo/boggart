@@ -1,0 +1,80 @@
+# Socket SWP86-01OG-Black
+# https://github.com/libretiny-eu/libretiny/issues/279
+#
+# P6 -- button
+# P7 -- relay switch
+
+substitutions:
+  node_name: !secret device_020_node_name
+  ip_address: !secret device_020_ip_address
+
+packages:
+  common: !include ./_includes/common.yaml
+  wifi: !include ./_includes/wifi/home.yaml
+  binary_sensor: !include ./_includes/binary_sensor.yaml
+  sensor: !include ./_includes/sensor.yaml
+  switch: !include ./_includes/switch.yaml
+  text_sensor: !include ./_includes/text_sensor.yaml
+  time: !include ./_includes/time.yaml
+
+esphome:
+  comment: !secret device_020_comment
+
+bk72xx:
+  board: cb2s
+
+text_sensor:
+  - platform: libretiny
+    version:
+      name: LibreTiny Version
+
+switch:
+  - platform: gpio
+    pin: P7
+    id: "relay"
+    name: "Power relay"
+    restore_mode: RESTORE_DEFAULT_ON
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: P6
+      mode: INPUT_PULLDOWN
+    id: "button"
+    name: "Hardware button"
+    internal: true
+    on_press:
+      - switch.toggle: "relay"
+
+sensor:
+  - platform: hlw8012
+    model: BL0937
+    sel_pin:
+      number: P8
+      inverted: true
+    cf_pin:
+      number: P24
+      inverted: true
+    cf1_pin:
+      number: P26
+      inverted: true
+    current:
+      id: "amperage"
+      name: "Amperage"
+      unit_of_measurement: A
+      accuracy_decimals: 3
+    voltage:
+      id: "voltage"
+      name: "Voltage"
+      unit_of_measurement: V
+    power:
+      id: "power"
+      name: "Power in watts"
+      unit_of_measurement: W
+      accuracy_decimals: 4
+    change_mode_every: 2
+    update_interval: 5s
+#  - platform: total_daily_energy
+#    name: "Total Daily Energy"
+#    icon: "mdi:current-ac"
+#    power_id: "power"

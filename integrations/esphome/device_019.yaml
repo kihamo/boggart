@@ -23,6 +23,9 @@ packages:
   text_sensor: !include ./_includes/text_sensor.yaml
   time: !include ./_includes/time.yaml
 
+esphome:
+  comment: !secret device_019_comment
+
 bk72xx:
   board: cb3s
 
