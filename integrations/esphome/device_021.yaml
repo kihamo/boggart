@@ -1,0 +1,8 @@
+substitutions:
+  node_name: !secret device_021_node_name
+  ip_address: !secret device_021_ip_address
+
+<<: !include ./device_020.yaml
+
+esphome:
+  comment: !secret device_021_comment
