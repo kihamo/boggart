@@ -1,8 +1,14 @@
 # Socket SWP86-01OG-Black
 # https://github.com/libretiny-eu/libretiny/issues/279
 #
-# P6 -- button
-# P7 -- relay switch
+# P6  -- button
+# P7  -- relay switch
+# P23 -- pin ADC, green led
+#
+# BL0937
+# P8  -- SEL
+# P24 -- CF
+# P26 -- CF1
 
 substitutions:
   node_name: !secret device_020_node_name
@@ -28,11 +34,22 @@ text_sensor:
     version:
       name: LibreTiny Version
 
+light:
+  - platform: status_led
+    pin: P23
+    id: "led_green"
+    name: "LED green"
+    restore_mode: RESTORE_DEFAULT_ON
+
 switch:
   - platform: gpio
     pin: P7
     id: "relay"
     name: "Power relay"
+    on_turn_off:
+      - light.turn_on: "led_green"
+    on_turn_on:
+      - light.turn_off: "led_green"
     restore_mode: RESTORE_DEFAULT_ON
 
 binary_sensor:
