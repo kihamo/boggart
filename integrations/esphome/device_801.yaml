@@ -26,11 +26,6 @@ switch:
   id: "relay"
   name: "Power relay"
   restore_mode: RESTORE_DEFAULT_OFF
-- platform: gpio
-  pin: GPIO13
-  inverted: true
-  id: "led_blue"
-  name: "LED blue"
 
 binary_sensor:
 - !include ./_includes/binary_sensor/status.yaml

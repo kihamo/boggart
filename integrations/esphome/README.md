@@ -8,7 +8,7 @@ docker run --rm -p 6052:6052 -p 6123:6123 -v "${PWD}":/config -e ESPHOME_DASHBOA
 cd /Users/kihamo/go/src/github.com/kihamo/boggart/integrations/esphome
 pip install esphome --upgrade
 # pip install platformio --upgrade
-esphome dashboard ./
+esphome dashboard --open-ui ./ -e ESPHOME_DASHBOARD_USE_PING=true ./
 ```
 
 # Wemos D1 mini ESP8266

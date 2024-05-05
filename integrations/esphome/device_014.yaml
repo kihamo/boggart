@@ -35,7 +35,7 @@ substitutions:
   device_name: !secret device_014_node_name
   nextion_update_url: !secret device_014_nextion_update_url
   wifi_ssid: !secret home_wifi_ssid
-  wifi_password: !secret home_wifi_pssword
+  wifi_password: !secret home_wifi_password
 
 wifi:
   use_address: ${ip_address}
