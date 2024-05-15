@@ -9,7 +9,7 @@ import (
 )
 
 /*
-	Чтение группового адреса счетчика
+Чтение группового адреса счетчика
 
 	CMD: 20h
 	Request: ADDR-CMD-CRC
@@ -25,7 +25,7 @@ func (m *MercuryV1) AddressGroup() (address uint32, err error) {
 }
 
 /*
-	Чтение внутренних часов и календаря счетчика
+Чтение внутренних часов и календаря счетчика
 
 	CMD: 21h
 	Request: ADDR-CMD-CRC
@@ -41,7 +41,7 @@ func (m *MercuryV1) Datetime() (date time.Time, err error) {
 }
 
 /*
-	Чтение лимита мощности
+Чтение лимита мощности
 
 	CMD: 22h
 	Request: ADDR-CMD-CRC
@@ -57,7 +57,7 @@ func (m *MercuryV1) PowerMaximum() (maximum uint64, err error) {
 }
 
 /*
-	Чтение лимита энергии за месяц
+Чтение лимита энергии за месяц
 
 	CMD: 23h
 	Request: ADDR-CMD-CRC
@@ -73,7 +73,7 @@ func (m *MercuryV1) EnergyMaximum() (maximum uint64, err error) {
 }
 
 /*
-	Чтение флага сезонного времени
+Чтение флага сезонного времени
 
 	CMD: 24h
 	Request: ADDR-CMD-CRC
@@ -89,7 +89,7 @@ func (m *MercuryV1) DaylightSavingTime() (flag bool, err error) {
 }
 
 /*
-	Чтение величины коррекции времени
+Чтение величины коррекции времени
 
 	CMD: 25h
 	Request: ADDR-CMD-CRC
@@ -108,7 +108,7 @@ func (m *MercuryV1) TimeCorrection() (duration time.Duration, err error) {
 }
 
 /*
-	Чтение текущей мощности в нагрузке
+Чтение текущей мощности в нагрузке
 
 	CMD: 26h
 	Request: ADDR-CMD-CRC
@@ -124,7 +124,7 @@ func (m *MercuryV1) PowerCurrent() (power uint64, err error) {
 }
 
 /*
-	Чтение содержимого тарифных аккумуляторов активной энергии
+Чтение содержимого тарифных аккумуляторов активной энергии
 
 	CMD: 27h
 	Request: ADDR-CMD-CRC
@@ -142,7 +142,7 @@ func (m *MercuryV1) PowerCounters() (values *TariffValues, err error) {
 }
 
 /*
-	Чтение содержимого тарифных аккумуляторов активной энергии
+Чтение содержимого тарифных аккумуляторов активной энергии
 
 	CMD: 28h
 	Request: ADDR-CMD-CRC
@@ -164,7 +164,7 @@ func (m *MercuryV1) Version() (version string, date time.Time, err error) {
 }
 
 /*
-	Чтение напряжения на литиевой батарее
+Чтение напряжения на литиевой батарее
 
 	CMD: 29h
 	Request: ADDR-CMD-CRC
@@ -180,7 +180,7 @@ func (m *MercuryV1) BatteryVoltage() (voltage float64, err error) {
 }
 
 /*
-	Чтение режима индикации
+Чтение режима индикации
 
 	CMD: 2Ah
 	Request: ADDR-CMD-CRC
@@ -196,7 +196,7 @@ func (m *MercuryV1) DisplayMode() (mode *DisplayMode, err error) {
 }
 
 /*
-	Чтение времени последнего отключения напряжения
+Чтение времени последнего отключения напряжения
 
 	CMD: 2Bh
 	Request: ADDR-CMD-CRC
@@ -212,7 +212,7 @@ func (m *MercuryV1) LastPowerOffDatetime() (date time.Time, err error) {
 }
 
 /*
-	Чтение времени последнего включения напряжения
+Чтение времени последнего включения напряжения
 
 	CMD: 2Ch
 	Request: ADDR-CMD-CRC
@@ -228,7 +228,7 @@ func (m *MercuryV1) LastPowerOnDatetime() (date time.Time, err error) {
 }
 
 /*
-	Чтение количества действующих тарифов
+Чтение количества действующих тарифов
 
 	CMD: 2Dh
 	Request: ADDR-CMD-CRC
@@ -250,7 +250,7 @@ func (m *MercuryV1) OptocouplerFunction() (count uint8, err error) {
 }
 
 /*
-	Чтение количества действующих тарифов
+Чтение количества действующих тарифов
 
 	CMD: 2Eh
 	Request: ADDR-CMD-CRC
@@ -266,7 +266,7 @@ func (m *MercuryV1) TariffCount() (count uint8, err error) {
 }
 
 /*
-	Чтение серийного номера
+Чтение серийного номера
 
 	CMD: 2Fh
 	Request: ADDR-CMD-CRC
@@ -282,7 +282,7 @@ func (m *MercuryV1) SerialNumber() (sn uint32, err error) {
 }
 
 /*
-	Чтение таблицы праздничных дней
+Чтение таблицы праздничных дней
 
 	CMD: 30h
 	Request: ADDR-CMD-ii1-CRC
@@ -321,7 +321,7 @@ func (m *MercuryV1) Holidays() ([]time.Time, error) {
 }
 
 /*
-	Чтение таблицы переключений тарифных зон
+Чтение таблицы переключений тарифных зон
 
 	CMD: 31h
 	Request: ADDR-CMD-ii2-CRC
@@ -377,7 +377,7 @@ func (m *MercuryV1) ReadTariffZoneChangedByMonth(month time.Month) ([][]uint8, e
 }
 
 /*
-	Чтение месячных срезов
+Чтение месячных срезов
 
 	CMD: 32h
 	Request: ADDR-CMD-ii3-CRC
@@ -417,7 +417,7 @@ func (m *MercuryV1) MonthlyStatByMonth(month time.Month) (*TariffValues, error) 
 }
 
 /*
-	Чтение максимумов
+Чтение максимумов
 
 	CMD: 33h
 	Request: ADDR-CMD-ii4-CRC
@@ -466,7 +466,7 @@ func (m *MercuryV1) MaximumVoltage() (voltage uint64, maxDate time.Time, voltage
 }
 
 /*
-	Чтение буфера событий вкл/выкл
+Чтение буфера событий вкл/выкл
 
 	CMD: 34h
 	Request: ADDR-CMD-ii5-CRC
@@ -495,7 +495,7 @@ func (m *MercuryV1) EventsPowerOnOff(index uint8) (event bool, t time.Time, err 
 }
 
 /*
-	Чтение буфера событий отк/закр
+Чтение буфера событий отк/закр
 
 	CMD: 35h
 	Request: ADDR-CMD-ii5-CRC
@@ -524,13 +524,13 @@ func (m *MercuryV1) EventsOpenClose(index uint8) (event bool, t time.Time, err e
 }
 
 /*
-	Чтение буфера событий параметризации
+Чтение буфера событий параметризации
 
 	CMD: 36h
 	Request: ADDR-CMD-ii5-CRC
 	Response: ADDR-CMD-event3-CRC
 
-	event3: ev3-ev4-ev5-ev6-ev7-dd-mon-yy
+event3: ev3-ev4-ev5-ev6-ev7-dd-mon-yy
 */
 func (m *MercuryV1) EventsParameters(index uint8) (t time.Time, err error) {
 	if index > MaxEventsIndex {
@@ -553,7 +553,7 @@ func (m *MercuryV1) EventsParameters(index uint8) (t time.Time, err error) {
 }
 
 /*
-	Чтение буфера событий реле
+Чтение буфера событий реле
 
 	CMD: 3Аh
 	Request: ADDR-CMD-ii5-CRC
@@ -583,7 +583,7 @@ func (m *MercuryV1) EventsRelay(index uint8) (tariff uint8, err error) {
 }
 
 /*
-	Чтение тарифа
+Чтение тарифа
 
 	CMD: 60h
 	Request: ADDR-CMD-CRC
@@ -599,7 +599,7 @@ func (m *MercuryV1) CurrentTariff() (tariff uint8, err error) {
 }
 
 /*
-	Чтение времени последнего вскрытия крышки счётчика
+Чтение времени последнего вскрытия крышки счётчика
 
 	CMD: 61h
 	Request: ADDR-CMD-CRC
@@ -615,7 +615,7 @@ func (m *MercuryV1) LastOpenCap() (date time.Time, err error) {
 }
 
 /*
-	Чтение времени последнего закрытия крышки счётчика
+Чтение времени последнего закрытия крышки счётчика
 
 	CMD: 62h
 	Request: ADDR-CMD-CRC
@@ -631,7 +631,7 @@ func (m *MercuryV1) LastCloseCap() (date time.Time, err error) {
 }
 
 /*
-	Чтение значений U,I,P
+Чтение значений U,I,P
 
 	CMD: 63h
 	Request: ADDR-CMD-CRC
@@ -651,7 +651,7 @@ func (m *MercuryV1) UIPCurrent() (voltage uint64, amperage float64, power uint64
 }
 
 /*
-	Чтение слова исполнения
+Чтение слова исполнения
 
 	CMD: 65h
 	Request: ADDR-CMD-CRC
@@ -672,7 +672,7 @@ func (m *MercuryV1) Model() (twoSensors, relay bool, err error) {
 }
 
 /*
-	Чтение даты изготовления
+Чтение даты изготовления
 
 	CMD: 66h
 	Request: ADDR-CMD-CRC
@@ -688,7 +688,7 @@ func (m *MercuryV1) MakeDate() (date time.Time, err error) {
 }
 
 /*
-	Чтение времени индикации
+Чтение времени индикации
 
 	CMD: 67h
 	Request: ADDR-CMD-CRC
@@ -710,7 +710,7 @@ func (m *MercuryV1) DisplayTime() (values *TariffValues, err error) {
 }
 
 /*
-	Чтение времени наработки
+Чтение времени наработки
 
 	CMD: 68h
 	Request: ADDR-CMD-CRC
@@ -731,7 +731,7 @@ func (m *MercuryV1) EnergyLimitMode() (step uint8, without time.Duration, err er
 }
 
 /*
-	Чтение времени наработки
+Чтение времени наработки
 
 	CMD: 69h
 	Request: ADDR-CMD-CRC
@@ -750,7 +750,7 @@ func (m *MercuryV1) WorkingTime() (under, without time.Duration, err error) {
 }
 
 /*
-	Чтение режима доп. индикации
+Чтение режима доп. индикации
 
 	CMD: 6Bh
 	Request: ADDR-CMD-CRC
@@ -769,7 +769,7 @@ func (m *MercuryV1) DisplayModeExt() (mode *DisplayModeExt, timed uint8, err err
 }
 
 /*
-	Чтение времени последней парам. счётчика
+Чтение времени последней парам. счётчика
 
 	CMD: 6Bh
 	Request: ADDR-CMD-CRC
@@ -785,7 +785,7 @@ func (m *MercuryV1) ParamLastChange() (datetime time.Time, err error) {
 }
 
 /*
-	Чтение режима управления реле
+Чтение режима управления реле
 
 	CMD: 6Dh
 	Request: ADDR-CMD-CRC
@@ -810,7 +810,7 @@ func (m *MercuryV1) RelayMode() (byLimits, buttonEmulation, enabled bool, err er
 }
 
 /*
-	Чтение потарифных лимитов Энергии (остатки)
+Чтение потарифных лимитов Энергии (остатки)
 
 	CMD: 6Eh
 	Request: ADDR-CMD-CRC
@@ -837,7 +837,7 @@ func (m *MercuryV1) PowerLimits() (values *TariffValues, flag1, flag2, flag3, fl
 }
 
 /*
-	Чтение флага разрешения индикации под батарейкой
+Чтение флага разрешения индикации под батарейкой
 
 	CMD: 6Fh
 	Request: ADDR-CMD-CRC
@@ -850,4 +850,27 @@ func (m *MercuryV1) AllowIndicationUnderBattery() (flag bool, err error) {
 	}
 
 	return flag, err
+}
+
+/*
+Чтение доп. па- раметров сети (частота) и теку- щего тарифа
+
+	CMD: 81h
+	Request: ADDR-CMD-CRC
+	Response: ADDR-CMD-freq-tarif-FL-F1-CRC
+*/
+func (m *MercuryV1) AdditionalParameters() (freq uint16, tariff, fl uint8, err error) {
+	response, err := m.Invoke(NewPacket().WithCommand(CommandReadAdditionalParameters))
+
+	if err == nil {
+		dataOut := response.PayloadAsBuffer()
+
+		freq = dataOut.ReadUint16()
+		tariff = dataOut.ReadUint8()
+		fl = dataOut.ReadUint8()
+
+		// f1 6 байт -- резерв
+	}
+
+	return freq, tariff, fl, err
 }
