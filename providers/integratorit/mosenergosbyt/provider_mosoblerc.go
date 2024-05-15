@@ -114,6 +114,19 @@ func (p *ProvideMosOblERC) CurrentBalance(ctx context.Context) (*Balance, error)
 		return nil, errors.New("get information about services failed")
 	}
 
+	// Встречаются опечатки в services, где точка на конце, а в балансах без точки
+	// Например, в сервисах "ОТОПЛЕНИЕ КПУ." в балансах "ОТОПЛЕНИЕ КПУ"
+	// поэтому нужно выполнить очистку
+	var nameCleared string
+	for name, id := range services {
+		nameCleared = strings.Trim(strings.TrimSpace(name), ".")
+
+		if name != nameCleared {
+			services[nameCleared] = id
+			delete(services, name)
+		}
+	}
+
 	var (
 		serviceID   uint64
 		serviceName string
