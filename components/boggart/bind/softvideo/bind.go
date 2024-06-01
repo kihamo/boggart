@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	link, _ = url.Parse(softvideo.AccountURL)
+	link, _ = url.Parse(softvideo.BaseURL)
 )
 
 type Bind struct {

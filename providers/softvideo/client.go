@@ -10,11 +10,13 @@ import (
 )
 
 const (
-	AccountURL = "https://user.softvideo.ru/"
+	BaseURL  = "https://user.softvideo.ru/"
+	LoginURL = BaseURL + "login"
 )
 
 var (
-	balanceRegexp = regexp.MustCompile(`(?:badge-success|badge-important|badge-warning)">([\d.-]+)(?:[\s(]+([+\-\d]+)[\s)]+)*[^<]*</span>`)
+	loginFormTokenRegexp = regexp.MustCompile(`"_token".*?value="(\S+?)"`)
+	balanceRegexp        = regexp.MustCompile(`panel-right__balance[^\d]+<span[^\d]+([^\s]+)`)
 )
 
 type Client struct {
@@ -36,37 +38,44 @@ func (c *Client) AccountID() string {
 }
 
 func (c *Client) Balance(ctx context.Context) (balance, promise float64, err error) {
-	_, err = c.connection.Get(ctx, AccountURL)
+	responseLoginForm, err := c.connection.Get(ctx, BaseURL)
 	if err != nil {
 		return -1, -1, err
 	}
 
-	response, err := c.connection.Post(ctx, AccountURL, map[string]string{
-		"bootstrap[username]": c.login,
-		"bootstrap[password]": c.password,
-		"bootstrap[send]:":    "<i class=\"icon-ok\"></i>",
+	s := loginFormTokenRegexp.FindStringSubmatch(http.BodyFromResponse(responseLoginForm))
+	if len(s) != 2 {
+		return -1, -1, errors.New("login form not found")
+	}
+
+	responseBalancePage, err := c.connection.Post(ctx, LoginURL, map[string]string{
+		"type":     "contract",
+		"_token":   s[1],
+		"contract": c.login,
+		"password": c.password,
 	})
 
 	if err != nil {
 		return -1, -1, err
 	}
 
-	submatch := balanceRegexp.FindStringSubmatch(http.BodyFromResponse(response))
-	if len(submatch) != 3 {
-		return -1, -1, errors.New("balance string not found in page")
+	s = balanceRegexp.FindStringSubmatch(http.BodyFromResponse(responseBalancePage))
+	if len(s) != 2 {
+		return -1, -1, errors.New("balance string not found")
 	}
 
-	balance, err = strconv.ParseFloat(submatch[1], 64)
+	balance, err = strconv.ParseFloat(s[1], 64)
 	if err != nil {
 		return -1, -1, err
 	}
 
-	if submatch[2] != "" {
-		promise, err = strconv.ParseFloat(submatch[2], 64)
-		if err != nil {
-			return -1, -1, err
-		}
-	}
+	// TODO: проверить доверительный платеж
+	//if submatch[2] != "" {
+	//	promise, err = strconv.ParseFloat(submatch[2], 64)
+	//	if err != nil {
+	//		return -1, -1, err
+	//	}
+	//}
 
 	return balance, promise, nil
 }
