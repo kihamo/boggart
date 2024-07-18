@@ -22,9 +22,14 @@ external_components:
       type: local
       path: ./external_components
 
-#logger:
-#  level: VERBOSE
-#  baud_rate: 115200
+debug:
+
+logger:
+  level: DEBUG
+  baud_rate: 115200
+  logs:
+    mqtt: DEBUG
+    sensor: WARN
 
 uart:
   id: uart_bus
