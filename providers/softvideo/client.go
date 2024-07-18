@@ -43,23 +43,27 @@ func (c *Client) Balance(ctx context.Context) (balance, promise float64, err err
 		return -1, -1, err
 	}
 
-	s := loginFormTokenRegexp.FindStringSubmatch(http.BodyFromResponse(responseLoginForm))
-	if len(s) != 2 {
-		return -1, -1, errors.New("login form not found")
+	pageBodyAsString := http.BodyFromResponse(responseLoginForm)
+
+	// если обнаружили форму авторизации, то проводим ее, форма прекращает появляться на
+	// втором запросе так как срабатывают куки и сразу появляется форма личного кабинета
+	s := loginFormTokenRegexp.FindStringSubmatch(pageBodyAsString)
+	if len(s) == 2 {
+		responseBalancePage, err := c.connection.Post(ctx, LoginURL, map[string]string{
+			"type":     "contract",
+			"_token":   s[1],
+			"contract": c.login,
+			"password": c.password,
+		})
+
+		if err != nil {
+			return -1, -1, err
+		}
+
+		pageBodyAsString = http.BodyFromResponse(responseBalancePage)
 	}
 
-	responseBalancePage, err := c.connection.Post(ctx, LoginURL, map[string]string{
-		"type":     "contract",
-		"_token":   s[1],
-		"contract": c.login,
-		"password": c.password,
-	})
-
-	if err != nil {
-		return -1, -1, err
-	}
-
-	s = balanceRegexp.FindStringSubmatch(http.BodyFromResponse(responseBalancePage))
+	s = balanceRegexp.FindStringSubmatch(pageBodyAsString)
 	if len(s) != 2 {
 		return -1, -1, errors.New("balance string not found")
 	}
