@@ -1,4 +1,6 @@
 .idea
+.vscode
+boggart.code-workspace
 *.log
 vendor/*
 /openhab2
