@@ -7,18 +7,19 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/kihamo/boggart/providers/hikvision/models"
-
 	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/components/mqtt"
 	"github.com/kihamo/boggart/providers/hikvision"
 	"github.com/kihamo/boggart/providers/hikvision/client/content_manager"
 	"github.com/kihamo/boggart/providers/hikvision/client/ptz"
 	"github.com/kihamo/boggart/providers/hikvision/client/system"
+	"github.com/kihamo/boggart/providers/hikvision/models"
 	"go.uber.org/multierr"
 )
 
 func (b *Bind) Tasks() []tasks.Task {
+	cfg := b.config()
+
 	items := []tasks.Task{
 		tasks.NewTask().
 			WithName("serial-number").
@@ -35,25 +36,30 @@ func (b *Bind) Tasks() []tasks.Task {
 			),
 	}
 
-	if b.config().VirtualHostAutoEnabled {
-		items = append(items,
-			tasks.NewTask().
-				WithName("virtual-host-auto-enabled").
-				WithHandler(
-					b.Workers().WrapTaskHandlerIsOnline(
-						tasks.HandlerFuncFromShortToLong(b.taskVirtualHostAutoEnabledHandler),
-					),
-				).
-				WithSchedule(
-					tasks.ScheduleWithSuccessLimit(
-						tasks.ScheduleWithDuration(tasks.ScheduleNow(), time.Second*30),
-						1,
-					),
+	if cfg.VirtualHostAutoEnabled {
+		item := tasks.NewTask().
+			WithName("virtual-host-auto-enabled").
+			WithHandler(
+				b.Workers().WrapTaskHandlerIsOnline(
+					tasks.HandlerFuncFromShortToLong(b.taskVirtualHostAutoEnabledHandler),
 				),
-		)
+			)
+
+		if cfg.VirtualHostAutoCycle {
+			item.WithSchedule(
+				tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.VirtualHostAutoCycleInterval),
+			)
+		} else {
+			item.WithSchedule(tasks.ScheduleWithSuccessLimit(
+				tasks.ScheduleWithDuration(tasks.ScheduleNow(), time.Second*30),
+				1,
+			))
+		}
+
+		items = append(items, item)
 	}
 
-	if b.config().SystemTimeNTPAutoEnabled {
+	if cfg.SystemTimeNTPAutoEnabled {
 		items = append(items,
 			tasks.NewTask().
 				WithName("system-time-ntp-auto-enabled").

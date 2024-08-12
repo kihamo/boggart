@@ -40,12 +40,14 @@ type Config struct {
 	PTZTimeout                       time.Duration `mapstructure:"ptz_timeout" yaml:"ptz_timeout"`
 	EventsIgnoreInterval             time.Duration `mapstructure:"events_ignore_interval" yaml:"events_ignore_interval,omitempty"`
 	PreviewRefreshInterval           time.Duration `mapstructure:"preview_refresh_interval" yaml:"preview_refresh_interval,omitempty"`
+	VirtualHostAutoCycleInterval     time.Duration `mapstructure:"virtual_host_auto_cycle_interval" yaml:"virtual_host_auto_cycle_interval,omitempty"`
 	WidgetChannel                    uint64        `mapstructure:"widget_channel" yaml:"widget_channel,omitempty"`
 	SystemTimeNTPSynchronizeInterval uint64        `mapstructure:"system_time_ntp_synchronize_interval" yaml:"system_time_ntp_synchronize_interval,omitempty"`
 	Debug                            bool
 	EventsEnabled                    bool `mapstructure:"events_enabled" yaml:"events_enabled,omitempty"`
 	EventsStreamingEnabled           bool `mapstructure:"events_streaming_enabled" yaml:"events_streaming_enabled,omitempty"`
 	VirtualHostAutoEnabled           bool `mapstructure:"virtual_host_auto_enabled" yaml:"virtual_host_auto_enabled,omitempty"`
+	VirtualHostAutoCycle             bool `mapstructure:"virtual_host_auto_cycle" yaml:"virtual_host_auto_cycle,omitempty"`
 	SystemTimeNTPAutoEnabled         bool `mapstructure:"system_time_ntp_auto_enabled" yaml:"system_time_ntp_auto_enabled,omitempty"`
 }
 
@@ -68,6 +70,7 @@ func (t Type) ConfigDefaults() interface{} {
 		EventsIgnoreInterval:             time.Second * 5,
 		WidgetChannel:                    101,
 		PreviewRefreshInterval:           time.Second * 5,
+		VirtualHostAutoCycleInterval:     time.Hour,
 		TopicPTZAbsolute:                 prefix + "ptz/+/absolute",
 		TopicPTZContinuous:               prefix + "ptz/+/continuous",
 		TopicPTZRelative:                 prefix + "ptz/+/relative",
