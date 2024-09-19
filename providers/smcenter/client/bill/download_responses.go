@@ -56,7 +56,8 @@ func NewDownloadOK(writer io.Writer) *DownloadOK {
 	}
 }
 
-/* DownloadOK describes a response with status code 200, with default header values.
+/*
+DownloadOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -64,9 +65,44 @@ type DownloadOK struct {
 	Payload io.Writer
 }
 
+// IsSuccess returns true when this download o k response has a 2xx status code
+func (o *DownloadOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this download o k response has a 3xx status code
+func (o *DownloadOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this download o k response has a 4xx status code
+func (o *DownloadOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this download o k response has a 5xx status code
+func (o *DownloadOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this download o k response a status code equal to that given
+func (o *DownloadOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the download o k response
+func (o *DownloadOK) Code() int {
+	return 200
+}
+
 func (o *DownloadOK) Error() string {
 	return fmt.Sprintf("[GET /Public/DownloadBill/{id}][%d] downloadOK  %+v", 200, o.Payload)
 }
+
+func (o *DownloadOK) String() string {
+	return fmt.Sprintf("[GET /Public/DownloadBill/{id}][%d] downloadOK  %+v", 200, o.Payload)
+}
+
 func (o *DownloadOK) GetPayload() io.Writer {
 	return o.Payload
 }
@@ -86,7 +122,8 @@ func NewDownloadUnauthorized() *DownloadUnauthorized {
 	return &DownloadUnauthorized{}
 }
 
-/* DownloadUnauthorized describes a response with status code 401, with default header values.
+/*
+DownloadUnauthorized describes a response with status code 401, with default header values.
 
 Unauthorized
 */
@@ -94,9 +131,44 @@ type DownloadUnauthorized struct {
 	Payload *models.Error
 }
 
+// IsSuccess returns true when this download unauthorized response has a 2xx status code
+func (o *DownloadUnauthorized) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this download unauthorized response has a 3xx status code
+func (o *DownloadUnauthorized) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this download unauthorized response has a 4xx status code
+func (o *DownloadUnauthorized) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this download unauthorized response has a 5xx status code
+func (o *DownloadUnauthorized) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this download unauthorized response a status code equal to that given
+func (o *DownloadUnauthorized) IsCode(code int) bool {
+	return code == 401
+}
+
+// Code gets the status code for the download unauthorized response
+func (o *DownloadUnauthorized) Code() int {
+	return 401
+}
+
 func (o *DownloadUnauthorized) Error() string {
 	return fmt.Sprintf("[GET /Public/DownloadBill/{id}][%d] downloadUnauthorized  %+v", 401, o.Payload)
 }
+
+func (o *DownloadUnauthorized) String() string {
+	return fmt.Sprintf("[GET /Public/DownloadBill/{id}][%d] downloadUnauthorized  %+v", 401, o.Payload)
+}
+
 func (o *DownloadUnauthorized) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -120,7 +192,8 @@ func NewDownloadDefault(code int) *DownloadDefault {
 	}
 }
 
-/* DownloadDefault describes a response with status code -1, with default header values.
+/*
+DownloadDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -128,6 +201,31 @@ type DownloadDefault struct {
 	_statusCode int
 
 	Payload *models.Error
+}
+
+// IsSuccess returns true when this download default response has a 2xx status code
+func (o *DownloadDefault) IsSuccess() bool {
+	return o._statusCode/100 == 2
+}
+
+// IsRedirect returns true when this download default response has a 3xx status code
+func (o *DownloadDefault) IsRedirect() bool {
+	return o._statusCode/100 == 3
+}
+
+// IsClientError returns true when this download default response has a 4xx status code
+func (o *DownloadDefault) IsClientError() bool {
+	return o._statusCode/100 == 4
+}
+
+// IsServerError returns true when this download default response has a 5xx status code
+func (o *DownloadDefault) IsServerError() bool {
+	return o._statusCode/100 == 5
+}
+
+// IsCode returns true when this download default response a status code equal to that given
+func (o *DownloadDefault) IsCode(code int) bool {
+	return o._statusCode == code
 }
 
 // Code gets the status code for the download default response
@@ -138,6 +236,11 @@ func (o *DownloadDefault) Code() int {
 func (o *DownloadDefault) Error() string {
 	return fmt.Sprintf("[GET /Public/DownloadBill/{id}][%d] download default  %+v", o._statusCode, o.Payload)
 }
+
+func (o *DownloadDefault) String() string {
+	return fmt.Sprintf("[GET /Public/DownloadBill/{id}][%d] download default  %+v", o._statusCode, o.Payload)
+}
+
 func (o *DownloadDefault) GetPayload() *models.Error {
 	return o.Payload
 }

@@ -254,6 +254,10 @@ func (m *Meter) ContextValidate(ctx context.Context, formats strfmt.Registry) er
 
 func (m *Meter) contextValidateLastCheckupDate(ctx context.Context, formats strfmt.Registry) error {
 
+	if swag.IsZero(m.LastCheckupDate) { // not required
+		return nil
+	}
+
 	if err := m.LastCheckupDate.ContextValidate(ctx, formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
 			return ve.ValidateName("LastCheckupDate")
@@ -268,6 +272,10 @@ func (m *Meter) contextValidateLastCheckupDate(ctx context.Context, formats strf
 
 func (m *Meter) contextValidateNextCheckupDate(ctx context.Context, formats strfmt.Registry) error {
 
+	if swag.IsZero(m.NextCheckupDate) { // not required
+		return nil
+	}
+
 	if err := m.NextCheckupDate.ContextValidate(ctx, formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
 			return ve.ValidateName("NextCheckupDate")
@@ -281,6 +289,10 @@ func (m *Meter) contextValidateNextCheckupDate(ctx context.Context, formats strf
 }
 
 func (m *Meter) contextValidateStartDate(ctx context.Context, formats strfmt.Registry) error {
+
+	if swag.IsZero(m.StartDate) { // not required
+		return nil
+	}
 
 	if err := m.StartDate.ContextValidate(ctx, formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
@@ -299,6 +311,11 @@ func (m *Meter) contextValidateValues(ctx context.Context, formats strfmt.Regist
 	for i := 0; i < len(m.Values); i++ {
 
 		if m.Values[i] != nil {
+
+			if swag.IsZero(m.Values[i]) { // not required
+				return nil
+			}
+
 			if err := m.Values[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("Values" + "." + strconv.Itoa(i))
@@ -403,6 +420,10 @@ func (m *MeterValuesItems0) ContextValidate(ctx context.Context, formats strfmt.
 }
 
 func (m *MeterValuesItems0) contextValidatePeriod(ctx context.Context, formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Period) { // not required
+		return nil
+	}
 
 	if err := m.Period.ContextValidate(ctx, formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {

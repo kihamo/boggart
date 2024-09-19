@@ -182,6 +182,84 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: '#/definitions/Error'
+  /Requests/List:
+    get:
+      operationId: "getRequestList"
+      tags:
+      - "requests"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "object"
+            properties:
+              Requests:
+                type: "array"
+                items:
+                  $ref: "#/definitions/Request"
+        401:
+          description: "Unauthorized"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  
+  /Requests/Details/{id}:
+    get:
+      operationId: "getRequestDetails"
+      tags:
+      - "requests"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Request ID"
+        required: true
+        type: "integer"
+        format: "uint64"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/RequestDetail"
+        401:
+          description: "Unauthorized"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /Requests/AddMessage:
+    post:
+      operationId: "addRequestMessage"
+      tags:
+      - "requests"
+      parameters:
+      - name: "payload"
+        in: "body"
+        schema:
+          type: "object"
+          properties: 
+            RequestId:
+              type: "integer"
+              format: "uint64"
+            Text:
+              type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/OperationResult"
+        401:
+          description: "Unauthorized"
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
   /Public/DownloadBill/{id}:
     get:
       operationId: "download"
@@ -228,6 +306,13 @@ definitions:
   Error:
     type: "object"
     properties:
+      error:
+        type: "string"
+  OperationResult:
+    type: "object"
+    properties:
+      isSucceed:
+        type: "boolean"
       error:
         type: "string"
   MobileAppSettings:
@@ -574,3 +659,46 @@ definitions:
               type: "number"
             ValueT3:
               type: "number"
+  Request:
+    type: "object"
+    properties:
+      ID:
+        type: "integer"
+        format: "uint64"
+      Text:
+        type: "string"
+      Status:
+        type: "string"
+      IsPerformed:
+        type: "boolean"
+      IsClosed:
+        type: "boolean"
+  RequestDetail:
+    properties:
+      ID:
+        type: "integer"
+        format: "uint64"
+      Name:
+        type: "string"
+      Messages:
+        type: "array"
+        items:
+          properties:
+            Added:
+              type: "string"
+            AuthorName:
+              type: "string"
+            Text:
+              type: "string"
+      Status:
+        type: "string"
+      StatusID:
+        type: "integer"
+        format: "uint64"
+        # 3 - направлена исполнителю
+        # 5 - выполнена
+      IsPerformed: # выполнена, статус 5
+        type: "boolean"
+      IsClosed:
+        type: "boolean"
+      

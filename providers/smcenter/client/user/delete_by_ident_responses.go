@@ -54,14 +54,49 @@ func NewDeleteByIdentOK() *DeleteByIdentOK {
 	return &DeleteByIdentOK{}
 }
 
-/* DeleteByIdentOK describes a response with status code 200, with default header values.
+/*
+DeleteByIdentOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
 type DeleteByIdentOK struct {
 }
 
+// IsSuccess returns true when this delete by ident o k response has a 2xx status code
+func (o *DeleteByIdentOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this delete by ident o k response has a 3xx status code
+func (o *DeleteByIdentOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this delete by ident o k response has a 4xx status code
+func (o *DeleteByIdentOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this delete by ident o k response has a 5xx status code
+func (o *DeleteByIdentOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this delete by ident o k response a status code equal to that given
+func (o *DeleteByIdentOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the delete by ident o k response
+func (o *DeleteByIdentOK) Code() int {
+	return 200
+}
+
 func (o *DeleteByIdentOK) Error() string {
+	return fmt.Sprintf("[POST /User/DeleteAccountByIdent][%d] deleteByIdentOK ", 200)
+}
+
+func (o *DeleteByIdentOK) String() string {
 	return fmt.Sprintf("[POST /User/DeleteAccountByIdent][%d] deleteByIdentOK ", 200)
 }
 
@@ -75,7 +110,8 @@ func NewDeleteByIdentUnauthorized() *DeleteByIdentUnauthorized {
 	return &DeleteByIdentUnauthorized{}
 }
 
-/* DeleteByIdentUnauthorized describes a response with status code 401, with default header values.
+/*
+DeleteByIdentUnauthorized describes a response with status code 401, with default header values.
 
 Unauthorized
 */
@@ -83,9 +119,44 @@ type DeleteByIdentUnauthorized struct {
 	Payload *models.Error
 }
 
+// IsSuccess returns true when this delete by ident unauthorized response has a 2xx status code
+func (o *DeleteByIdentUnauthorized) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this delete by ident unauthorized response has a 3xx status code
+func (o *DeleteByIdentUnauthorized) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this delete by ident unauthorized response has a 4xx status code
+func (o *DeleteByIdentUnauthorized) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this delete by ident unauthorized response has a 5xx status code
+func (o *DeleteByIdentUnauthorized) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this delete by ident unauthorized response a status code equal to that given
+func (o *DeleteByIdentUnauthorized) IsCode(code int) bool {
+	return code == 401
+}
+
+// Code gets the status code for the delete by ident unauthorized response
+func (o *DeleteByIdentUnauthorized) Code() int {
+	return 401
+}
+
 func (o *DeleteByIdentUnauthorized) Error() string {
 	return fmt.Sprintf("[POST /User/DeleteAccountByIdent][%d] deleteByIdentUnauthorized  %+v", 401, o.Payload)
 }
+
+func (o *DeleteByIdentUnauthorized) String() string {
+	return fmt.Sprintf("[POST /User/DeleteAccountByIdent][%d] deleteByIdentUnauthorized  %+v", 401, o.Payload)
+}
+
 func (o *DeleteByIdentUnauthorized) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -109,7 +180,8 @@ func NewDeleteByIdentDefault(code int) *DeleteByIdentDefault {
 	}
 }
 
-/* DeleteByIdentDefault describes a response with status code -1, with default header values.
+/*
+DeleteByIdentDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -117,6 +189,31 @@ type DeleteByIdentDefault struct {
 	_statusCode int
 
 	Payload *models.Error
+}
+
+// IsSuccess returns true when this delete by ident default response has a 2xx status code
+func (o *DeleteByIdentDefault) IsSuccess() bool {
+	return o._statusCode/100 == 2
+}
+
+// IsRedirect returns true when this delete by ident default response has a 3xx status code
+func (o *DeleteByIdentDefault) IsRedirect() bool {
+	return o._statusCode/100 == 3
+}
+
+// IsClientError returns true when this delete by ident default response has a 4xx status code
+func (o *DeleteByIdentDefault) IsClientError() bool {
+	return o._statusCode/100 == 4
+}
+
+// IsServerError returns true when this delete by ident default response has a 5xx status code
+func (o *DeleteByIdentDefault) IsServerError() bool {
+	return o._statusCode/100 == 5
+}
+
+// IsCode returns true when this delete by ident default response a status code equal to that given
+func (o *DeleteByIdentDefault) IsCode(code int) bool {
+	return o._statusCode == code
 }
 
 // Code gets the status code for the delete by ident default response
@@ -127,6 +224,11 @@ func (o *DeleteByIdentDefault) Code() int {
 func (o *DeleteByIdentDefault) Error() string {
 	return fmt.Sprintf("[POST /User/DeleteAccountByIdent][%d] deleteByIdent default  %+v", o._statusCode, o.Payload)
 }
+
+func (o *DeleteByIdentDefault) String() string {
+	return fmt.Sprintf("[POST /User/DeleteAccountByIdent][%d] deleteByIdent default  %+v", o._statusCode, o.Payload)
+}
+
 func (o *DeleteByIdentDefault) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -143,7 +245,8 @@ func (o *DeleteByIdentDefault) readResponse(response runtime.ClientResponse, con
 	return nil
 }
 
-/*DeleteByIdentBody delete by ident body
+/*
+DeleteByIdentBody delete by ident body
 swagger:model DeleteByIdentBody
 */
 type DeleteByIdentBody struct {

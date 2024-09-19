@@ -54,7 +54,8 @@ func NewLoginOK() *LoginOK {
 	return &LoginOK{}
 }
 
-/* LoginOK describes a response with status code 200, with default header values.
+/*
+LoginOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -62,9 +63,44 @@ type LoginOK struct {
 	Payload *models.Account
 }
 
+// IsSuccess returns true when this login o k response has a 2xx status code
+func (o *LoginOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this login o k response has a 3xx status code
+func (o *LoginOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this login o k response has a 4xx status code
+func (o *LoginOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this login o k response has a 5xx status code
+func (o *LoginOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this login o k response a status code equal to that given
+func (o *LoginOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the login o k response
+func (o *LoginOK) Code() int {
+	return 200
+}
+
 func (o *LoginOK) Error() string {
 	return fmt.Sprintf("[POST /auth/Login][%d] loginOK  %+v", 200, o.Payload)
 }
+
+func (o *LoginOK) String() string {
+	return fmt.Sprintf("[POST /auth/Login][%d] loginOK  %+v", 200, o.Payload)
+}
+
 func (o *LoginOK) GetPayload() *models.Account {
 	return o.Payload
 }
@@ -86,7 +122,8 @@ func NewLoginUnauthorized() *LoginUnauthorized {
 	return &LoginUnauthorized{}
 }
 
-/* LoginUnauthorized describes a response with status code 401, with default header values.
+/*
+LoginUnauthorized describes a response with status code 401, with default header values.
 
 Unauthorized
 */
@@ -94,9 +131,44 @@ type LoginUnauthorized struct {
 	Payload *models.Error
 }
 
+// IsSuccess returns true when this login unauthorized response has a 2xx status code
+func (o *LoginUnauthorized) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this login unauthorized response has a 3xx status code
+func (o *LoginUnauthorized) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this login unauthorized response has a 4xx status code
+func (o *LoginUnauthorized) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this login unauthorized response has a 5xx status code
+func (o *LoginUnauthorized) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this login unauthorized response a status code equal to that given
+func (o *LoginUnauthorized) IsCode(code int) bool {
+	return code == 401
+}
+
+// Code gets the status code for the login unauthorized response
+func (o *LoginUnauthorized) Code() int {
+	return 401
+}
+
 func (o *LoginUnauthorized) Error() string {
 	return fmt.Sprintf("[POST /auth/Login][%d] loginUnauthorized  %+v", 401, o.Payload)
 }
+
+func (o *LoginUnauthorized) String() string {
+	return fmt.Sprintf("[POST /auth/Login][%d] loginUnauthorized  %+v", 401, o.Payload)
+}
+
 func (o *LoginUnauthorized) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -120,7 +192,8 @@ func NewLoginDefault(code int) *LoginDefault {
 	}
 }
 
-/* LoginDefault describes a response with status code -1, with default header values.
+/*
+LoginDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -128,6 +201,31 @@ type LoginDefault struct {
 	_statusCode int
 
 	Payload *models.Error
+}
+
+// IsSuccess returns true when this login default response has a 2xx status code
+func (o *LoginDefault) IsSuccess() bool {
+	return o._statusCode/100 == 2
+}
+
+// IsRedirect returns true when this login default response has a 3xx status code
+func (o *LoginDefault) IsRedirect() bool {
+	return o._statusCode/100 == 3
+}
+
+// IsClientError returns true when this login default response has a 4xx status code
+func (o *LoginDefault) IsClientError() bool {
+	return o._statusCode/100 == 4
+}
+
+// IsServerError returns true when this login default response has a 5xx status code
+func (o *LoginDefault) IsServerError() bool {
+	return o._statusCode/100 == 5
+}
+
+// IsCode returns true when this login default response a status code equal to that given
+func (o *LoginDefault) IsCode(code int) bool {
+	return o._statusCode == code
 }
 
 // Code gets the status code for the login default response
@@ -138,6 +236,11 @@ func (o *LoginDefault) Code() int {
 func (o *LoginDefault) Error() string {
 	return fmt.Sprintf("[POST /auth/Login][%d] login default  %+v", o._statusCode, o.Payload)
 }
+
+func (o *LoginDefault) String() string {
+	return fmt.Sprintf("[POST /auth/Login][%d] login default  %+v", o._statusCode, o.Payload)
+}
+
 func (o *LoginDefault) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -154,7 +257,8 @@ func (o *LoginDefault) readResponse(response runtime.ClientResponse, consumer ru
 	return nil
 }
 
-/*LoginBody login body
+/*
+LoginBody login body
 swagger:model LoginBody
 */
 type LoginBody struct {

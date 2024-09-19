@@ -161,6 +161,11 @@ func (m *AccountingInfo) contextValidateBills(ctx context.Context, formats strfm
 	for i := 0; i < len(m.Bills); i++ {
 
 		if m.Bills[i] != nil {
+
+			if swag.IsZero(m.Bills[i]) { // not required
+				return nil
+			}
+
 			if err := m.Bills[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("Bills" + "." + strconv.Itoa(i))
@@ -181,6 +186,11 @@ func (m *AccountingInfo) contextValidatePayments(ctx context.Context, formats st
 	for i := 0; i < len(m.Payments); i++ {
 
 		if m.Payments[i] != nil {
+
+			if swag.IsZero(m.Payments[i]) { // not required
+				return nil
+			}
+
 			if err := m.Payments[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("Payments" + "." + strconv.Itoa(i))

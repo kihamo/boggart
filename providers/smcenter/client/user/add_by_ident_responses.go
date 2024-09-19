@@ -56,7 +56,8 @@ func NewAddByIdentOK() *AddByIdentOK {
 	return &AddByIdentOK{}
 }
 
-/* AddByIdentOK describes a response with status code 200, with default header values.
+/*
+AddByIdentOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -64,9 +65,44 @@ type AddByIdentOK struct {
 	Payload *models.Account
 }
 
+// IsSuccess returns true when this add by ident o k response has a 2xx status code
+func (o *AddByIdentOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this add by ident o k response has a 3xx status code
+func (o *AddByIdentOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this add by ident o k response has a 4xx status code
+func (o *AddByIdentOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this add by ident o k response has a 5xx status code
+func (o *AddByIdentOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this add by ident o k response a status code equal to that given
+func (o *AddByIdentOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the add by ident o k response
+func (o *AddByIdentOK) Code() int {
+	return 200
+}
+
 func (o *AddByIdentOK) Error() string {
 	return fmt.Sprintf("[POST /User/AddAccountByIdent][%d] addByIdentOK  %+v", 200, o.Payload)
 }
+
+func (o *AddByIdentOK) String() string {
+	return fmt.Sprintf("[POST /User/AddAccountByIdent][%d] addByIdentOK  %+v", 200, o.Payload)
+}
+
 func (o *AddByIdentOK) GetPayload() *models.Account {
 	return o.Payload
 }
@@ -88,7 +124,8 @@ func NewAddByIdentUnauthorized() *AddByIdentUnauthorized {
 	return &AddByIdentUnauthorized{}
 }
 
-/* AddByIdentUnauthorized describes a response with status code 401, with default header values.
+/*
+AddByIdentUnauthorized describes a response with status code 401, with default header values.
 
 Unauthorized
 */
@@ -96,9 +133,44 @@ type AddByIdentUnauthorized struct {
 	Payload *models.Error
 }
 
+// IsSuccess returns true when this add by ident unauthorized response has a 2xx status code
+func (o *AddByIdentUnauthorized) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this add by ident unauthorized response has a 3xx status code
+func (o *AddByIdentUnauthorized) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this add by ident unauthorized response has a 4xx status code
+func (o *AddByIdentUnauthorized) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this add by ident unauthorized response has a 5xx status code
+func (o *AddByIdentUnauthorized) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this add by ident unauthorized response a status code equal to that given
+func (o *AddByIdentUnauthorized) IsCode(code int) bool {
+	return code == 401
+}
+
+// Code gets the status code for the add by ident unauthorized response
+func (o *AddByIdentUnauthorized) Code() int {
+	return 401
+}
+
 func (o *AddByIdentUnauthorized) Error() string {
 	return fmt.Sprintf("[POST /User/AddAccountByIdent][%d] addByIdentUnauthorized  %+v", 401, o.Payload)
 }
+
+func (o *AddByIdentUnauthorized) String() string {
+	return fmt.Sprintf("[POST /User/AddAccountByIdent][%d] addByIdentUnauthorized  %+v", 401, o.Payload)
+}
+
 func (o *AddByIdentUnauthorized) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -122,7 +194,8 @@ func NewAddByIdentDefault(code int) *AddByIdentDefault {
 	}
 }
 
-/* AddByIdentDefault describes a response with status code -1, with default header values.
+/*
+AddByIdentDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -130,6 +203,31 @@ type AddByIdentDefault struct {
 	_statusCode int
 
 	Payload *models.Error
+}
+
+// IsSuccess returns true when this add by ident default response has a 2xx status code
+func (o *AddByIdentDefault) IsSuccess() bool {
+	return o._statusCode/100 == 2
+}
+
+// IsRedirect returns true when this add by ident default response has a 3xx status code
+func (o *AddByIdentDefault) IsRedirect() bool {
+	return o._statusCode/100 == 3
+}
+
+// IsClientError returns true when this add by ident default response has a 4xx status code
+func (o *AddByIdentDefault) IsClientError() bool {
+	return o._statusCode/100 == 4
+}
+
+// IsServerError returns true when this add by ident default response has a 5xx status code
+func (o *AddByIdentDefault) IsServerError() bool {
+	return o._statusCode/100 == 5
+}
+
+// IsCode returns true when this add by ident default response a status code equal to that given
+func (o *AddByIdentDefault) IsCode(code int) bool {
+	return o._statusCode == code
 }
 
 // Code gets the status code for the add by ident default response
@@ -140,6 +238,11 @@ func (o *AddByIdentDefault) Code() int {
 func (o *AddByIdentDefault) Error() string {
 	return fmt.Sprintf("[POST /User/AddAccountByIdent][%d] addByIdent default  %+v", o._statusCode, o.Payload)
 }
+
+func (o *AddByIdentDefault) String() string {
+	return fmt.Sprintf("[POST /User/AddAccountByIdent][%d] addByIdent default  %+v", o._statusCode, o.Payload)
+}
+
 func (o *AddByIdentDefault) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -156,7 +259,8 @@ func (o *AddByIdentDefault) readResponse(response runtime.ClientResponse, consum
 	return nil
 }
 
-/*AddByIdentBody add by ident body
+/*
+AddByIdentBody add by ident body
 swagger:model AddByIdentBody
 */
 type AddByIdentBody struct {

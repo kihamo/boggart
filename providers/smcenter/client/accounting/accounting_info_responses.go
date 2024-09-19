@@ -56,7 +56,8 @@ func NewAccountingInfoOK() *AccountingInfoOK {
 	return &AccountingInfoOK{}
 }
 
-/* AccountingInfoOK describes a response with status code 200, with default header values.
+/*
+AccountingInfoOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -64,9 +65,44 @@ type AccountingInfoOK struct {
 	Payload *AccountingInfoOKBody
 }
 
+// IsSuccess returns true when this accounting info o k response has a 2xx status code
+func (o *AccountingInfoOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this accounting info o k response has a 3xx status code
+func (o *AccountingInfoOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this accounting info o k response has a 4xx status code
+func (o *AccountingInfoOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this accounting info o k response has a 5xx status code
+func (o *AccountingInfoOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this accounting info o k response a status code equal to that given
+func (o *AccountingInfoOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the accounting info o k response
+func (o *AccountingInfoOK) Code() int {
+	return 200
+}
+
 func (o *AccountingInfoOK) Error() string {
 	return fmt.Sprintf("[GET /Accounting/Info][%d] accountingInfoOK  %+v", 200, o.Payload)
 }
+
+func (o *AccountingInfoOK) String() string {
+	return fmt.Sprintf("[GET /Accounting/Info][%d] accountingInfoOK  %+v", 200, o.Payload)
+}
+
 func (o *AccountingInfoOK) GetPayload() *AccountingInfoOKBody {
 	return o.Payload
 }
@@ -88,7 +124,8 @@ func NewAccountingInfoUnauthorized() *AccountingInfoUnauthorized {
 	return &AccountingInfoUnauthorized{}
 }
 
-/* AccountingInfoUnauthorized describes a response with status code 401, with default header values.
+/*
+AccountingInfoUnauthorized describes a response with status code 401, with default header values.
 
 Unauthorized
 */
@@ -96,9 +133,44 @@ type AccountingInfoUnauthorized struct {
 	Payload *models.Error
 }
 
+// IsSuccess returns true when this accounting info unauthorized response has a 2xx status code
+func (o *AccountingInfoUnauthorized) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this accounting info unauthorized response has a 3xx status code
+func (o *AccountingInfoUnauthorized) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this accounting info unauthorized response has a 4xx status code
+func (o *AccountingInfoUnauthorized) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this accounting info unauthorized response has a 5xx status code
+func (o *AccountingInfoUnauthorized) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this accounting info unauthorized response a status code equal to that given
+func (o *AccountingInfoUnauthorized) IsCode(code int) bool {
+	return code == 401
+}
+
+// Code gets the status code for the accounting info unauthorized response
+func (o *AccountingInfoUnauthorized) Code() int {
+	return 401
+}
+
 func (o *AccountingInfoUnauthorized) Error() string {
 	return fmt.Sprintf("[GET /Accounting/Info][%d] accountingInfoUnauthorized  %+v", 401, o.Payload)
 }
+
+func (o *AccountingInfoUnauthorized) String() string {
+	return fmt.Sprintf("[GET /Accounting/Info][%d] accountingInfoUnauthorized  %+v", 401, o.Payload)
+}
+
 func (o *AccountingInfoUnauthorized) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -122,7 +194,8 @@ func NewAccountingInfoDefault(code int) *AccountingInfoDefault {
 	}
 }
 
-/* AccountingInfoDefault describes a response with status code -1, with default header values.
+/*
+AccountingInfoDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -130,6 +203,31 @@ type AccountingInfoDefault struct {
 	_statusCode int
 
 	Payload *models.Error
+}
+
+// IsSuccess returns true when this accounting info default response has a 2xx status code
+func (o *AccountingInfoDefault) IsSuccess() bool {
+	return o._statusCode/100 == 2
+}
+
+// IsRedirect returns true when this accounting info default response has a 3xx status code
+func (o *AccountingInfoDefault) IsRedirect() bool {
+	return o._statusCode/100 == 3
+}
+
+// IsClientError returns true when this accounting info default response has a 4xx status code
+func (o *AccountingInfoDefault) IsClientError() bool {
+	return o._statusCode/100 == 4
+}
+
+// IsServerError returns true when this accounting info default response has a 5xx status code
+func (o *AccountingInfoDefault) IsServerError() bool {
+	return o._statusCode/100 == 5
+}
+
+// IsCode returns true when this accounting info default response a status code equal to that given
+func (o *AccountingInfoDefault) IsCode(code int) bool {
+	return o._statusCode == code
 }
 
 // Code gets the status code for the accounting info default response
@@ -140,6 +238,11 @@ func (o *AccountingInfoDefault) Code() int {
 func (o *AccountingInfoDefault) Error() string {
 	return fmt.Sprintf("[GET /Accounting/Info][%d] accountingInfo default  %+v", o._statusCode, o.Payload)
 }
+
+func (o *AccountingInfoDefault) String() string {
+	return fmt.Sprintf("[GET /Accounting/Info][%d] accountingInfo default  %+v", o._statusCode, o.Payload)
+}
+
 func (o *AccountingInfoDefault) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -156,7 +259,8 @@ func (o *AccountingInfoDefault) readResponse(response runtime.ClientResponse, co
 	return nil
 }
 
-/*AccountingInfoOKBody accounting info o k body
+/*
+AccountingInfoOKBody accounting info o k body
 swagger:model AccountingInfoOKBody
 */
 type AccountingInfoOKBody struct {
@@ -224,6 +328,11 @@ func (o *AccountingInfoOKBody) contextValidateData(ctx context.Context, formats 
 	for i := 0; i < len(o.Data); i++ {
 
 		if o.Data[i] != nil {
+
+			if swag.IsZero(o.Data[i]) { // not required
+				return nil
+			}
+
 			if err := o.Data[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("accountingInfoOK" + "." + "Data" + "." + strconv.Itoa(i))

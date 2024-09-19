@@ -56,7 +56,8 @@ func NewListOK() *ListOK {
 	return &ListOK{}
 }
 
-/* ListOK describes a response with status code 200, with default header values.
+/*
+ListOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -64,9 +65,44 @@ type ListOK struct {
 	Payload *ListOKBody
 }
 
+// IsSuccess returns true when this list o k response has a 2xx status code
+func (o *ListOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this list o k response has a 3xx status code
+func (o *ListOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this list o k response has a 4xx status code
+func (o *ListOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this list o k response has a 5xx status code
+func (o *ListOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this list o k response a status code equal to that given
+func (o *ListOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the list o k response
+func (o *ListOK) Code() int {
+	return 200
+}
+
 func (o *ListOK) Error() string {
 	return fmt.Sprintf("[GET /Meters/List][%d] listOK  %+v", 200, o.Payload)
 }
+
+func (o *ListOK) String() string {
+	return fmt.Sprintf("[GET /Meters/List][%d] listOK  %+v", 200, o.Payload)
+}
+
 func (o *ListOK) GetPayload() *ListOKBody {
 	return o.Payload
 }
@@ -88,7 +124,8 @@ func NewListUnauthorized() *ListUnauthorized {
 	return &ListUnauthorized{}
 }
 
-/* ListUnauthorized describes a response with status code 401, with default header values.
+/*
+ListUnauthorized describes a response with status code 401, with default header values.
 
 Unauthorized
 */
@@ -96,9 +133,44 @@ type ListUnauthorized struct {
 	Payload *models.Error
 }
 
+// IsSuccess returns true when this list unauthorized response has a 2xx status code
+func (o *ListUnauthorized) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this list unauthorized response has a 3xx status code
+func (o *ListUnauthorized) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this list unauthorized response has a 4xx status code
+func (o *ListUnauthorized) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this list unauthorized response has a 5xx status code
+func (o *ListUnauthorized) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this list unauthorized response a status code equal to that given
+func (o *ListUnauthorized) IsCode(code int) bool {
+	return code == 401
+}
+
+// Code gets the status code for the list unauthorized response
+func (o *ListUnauthorized) Code() int {
+	return 401
+}
+
 func (o *ListUnauthorized) Error() string {
 	return fmt.Sprintf("[GET /Meters/List][%d] listUnauthorized  %+v", 401, o.Payload)
 }
+
+func (o *ListUnauthorized) String() string {
+	return fmt.Sprintf("[GET /Meters/List][%d] listUnauthorized  %+v", 401, o.Payload)
+}
+
 func (o *ListUnauthorized) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -122,7 +194,8 @@ func NewListDefault(code int) *ListDefault {
 	}
 }
 
-/* ListDefault describes a response with status code -1, with default header values.
+/*
+ListDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -130,6 +203,31 @@ type ListDefault struct {
 	_statusCode int
 
 	Payload *models.Error
+}
+
+// IsSuccess returns true when this list default response has a 2xx status code
+func (o *ListDefault) IsSuccess() bool {
+	return o._statusCode/100 == 2
+}
+
+// IsRedirect returns true when this list default response has a 3xx status code
+func (o *ListDefault) IsRedirect() bool {
+	return o._statusCode/100 == 3
+}
+
+// IsClientError returns true when this list default response has a 4xx status code
+func (o *ListDefault) IsClientError() bool {
+	return o._statusCode/100 == 4
+}
+
+// IsServerError returns true when this list default response has a 5xx status code
+func (o *ListDefault) IsServerError() bool {
+	return o._statusCode/100 == 5
+}
+
+// IsCode returns true when this list default response a status code equal to that given
+func (o *ListDefault) IsCode(code int) bool {
+	return o._statusCode == code
 }
 
 // Code gets the status code for the list default response
@@ -140,6 +238,11 @@ func (o *ListDefault) Code() int {
 func (o *ListDefault) Error() string {
 	return fmt.Sprintf("[GET /Meters/List][%d] list default  %+v", o._statusCode, o.Payload)
 }
+
+func (o *ListDefault) String() string {
+	return fmt.Sprintf("[GET /Meters/List][%d] list default  %+v", o._statusCode, o.Payload)
+}
+
 func (o *ListDefault) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -156,7 +259,8 @@ func (o *ListDefault) readResponse(response runtime.ClientResponse, consumer run
 	return nil
 }
 
-/*ListOKBody list o k body
+/*
+ListOKBody list o k body
 swagger:model ListOKBody
 */
 type ListOKBody struct {
@@ -224,6 +328,11 @@ func (o *ListOKBody) contextValidateData(ctx context.Context, formats strfmt.Reg
 	for i := 0; i < len(o.Data); i++ {
 
 		if o.Data[i] != nil {
+
+			if swag.IsZero(o.Data[i]) { // not required
+				return nil
+			}
+
 			if err := o.Data[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("listOK" + "." + "Data" + "." + strconv.Itoa(i))

@@ -53,10 +53,12 @@ func NewDownloadParamsWithHTTPClient(client *http.Client) *DownloadParams {
 	}
 }
 
-/* DownloadParams contains all the parameters to send to the API endpoint
-   for the download operation.
+/*
+DownloadParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the download operation.
+
+	Typically these are written to a http.Request.
 */
 type DownloadParams struct {
 

@@ -52,10 +52,12 @@ func NewAccountingInfoParamsWithHTTPClient(client *http.Client) *AccountingInfoP
 	}
 }
 
-/* AccountingInfoParams contains all the parameters to send to the API endpoint
-   for the accounting info operation.
+/*
+AccountingInfoParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the accounting info operation.
+
+	Typically these are written to a http.Request.
 */
 type AccountingInfoParams struct {
 	timeout    time.Duration

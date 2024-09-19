@@ -52,10 +52,12 @@ func NewMobileAppSettingsParamsWithHTTPClient(client *http.Client) *MobileAppSet
 	}
 }
 
-/* MobileAppSettingsParams contains all the parameters to send to the API endpoint
-   for the mobile app settings operation.
+/*
+MobileAppSettingsParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the mobile app settings operation.
+
+	Typically these are written to a http.Request.
 */
 type MobileAppSettingsParams struct {
 	timeout    time.Duration

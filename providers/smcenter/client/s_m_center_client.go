@@ -15,6 +15,7 @@ import (
 	"github.com/kihamo/boggart/providers/smcenter/client/bill"
 	"github.com/kihamo/boggart/providers/smcenter/client/config"
 	"github.com/kihamo/boggart/providers/smcenter/client/meters"
+	"github.com/kihamo/boggart/providers/smcenter/client/requests"
 	"github.com/kihamo/boggart/providers/smcenter/client/user"
 )
 
@@ -65,6 +66,7 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *SMCenter {
 	cli.Bill = bill.New(transport, formats)
 	cli.Config = config.New(transport, formats)
 	cli.Meters = meters.New(transport, formats)
+	cli.Requests = requests.New(transport, formats)
 	cli.User = user.New(transport, formats)
 	return cli
 }
@@ -120,6 +122,8 @@ type SMCenter struct {
 
 	Meters meters.ClientService
 
+	Requests requests.ClientService
+
 	User user.ClientService
 
 	Transport runtime.ClientTransport
@@ -133,5 +137,6 @@ func (c *SMCenter) SetTransport(transport runtime.ClientTransport) {
 	c.Bill.SetTransport(transport)
 	c.Config.SetTransport(transport)
 	c.Meters.SetTransport(transport)
+	c.Requests.SetTransport(transport)
 	c.User.SetTransport(transport)
 }

@@ -89,6 +89,10 @@ func (m *Bill) ContextValidate(ctx context.Context, formats strfmt.Registry) err
 
 func (m *Bill) contextValidateDate(ctx context.Context, formats strfmt.Registry) error {
 
+	if swag.IsZero(m.Date) { // not required
+		return nil
+	}
+
 	if err := m.Date.ContextValidate(ctx, formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
 			return ve.ValidateName("Date")

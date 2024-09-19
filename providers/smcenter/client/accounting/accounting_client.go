@@ -34,7 +34,7 @@ type ClientService interface {
 }
 
 /*
-  AccountingInfo accounting info API
+AccountingInfo accounting info API
 */
 func (a *Client) AccountingInfo(params *AccountingInfoParams, opts ...ClientOption) (*AccountingInfoOK, error) {
 	// TODO: Validate the params before sending

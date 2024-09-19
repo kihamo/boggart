@@ -36,7 +36,7 @@ type ClientService interface {
 }
 
 /*
-  Download download API
+Download download API
 */
 func (a *Client) Download(params *DownloadParams, writer io.Writer, opts ...ClientOption) (*DownloadOK, error) {
 	// TODO: Validate the params before sending

@@ -52,7 +52,8 @@ func NewMobileAppSettingsOK() *MobileAppSettingsOK {
 	return &MobileAppSettingsOK{}
 }
 
-/* MobileAppSettingsOK describes a response with status code 200, with default header values.
+/*
+MobileAppSettingsOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -60,9 +61,44 @@ type MobileAppSettingsOK struct {
 	Payload *models.MobileAppSettings
 }
 
+// IsSuccess returns true when this mobile app settings o k response has a 2xx status code
+func (o *MobileAppSettingsOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this mobile app settings o k response has a 3xx status code
+func (o *MobileAppSettingsOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this mobile app settings o k response has a 4xx status code
+func (o *MobileAppSettingsOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this mobile app settings o k response has a 5xx status code
+func (o *MobileAppSettingsOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this mobile app settings o k response a status code equal to that given
+func (o *MobileAppSettingsOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the mobile app settings o k response
+func (o *MobileAppSettingsOK) Code() int {
+	return 200
+}
+
 func (o *MobileAppSettingsOK) Error() string {
 	return fmt.Sprintf("[GET /Config/MobileAppSettings][%d] mobileAppSettingsOK  %+v", 200, o.Payload)
 }
+
+func (o *MobileAppSettingsOK) String() string {
+	return fmt.Sprintf("[GET /Config/MobileAppSettings][%d] mobileAppSettingsOK  %+v", 200, o.Payload)
+}
+
 func (o *MobileAppSettingsOK) GetPayload() *models.MobileAppSettings {
 	return o.Payload
 }
@@ -84,7 +120,8 @@ func NewMobileAppSettingsUnauthorized() *MobileAppSettingsUnauthorized {
 	return &MobileAppSettingsUnauthorized{}
 }
 
-/* MobileAppSettingsUnauthorized describes a response with status code 401, with default header values.
+/*
+MobileAppSettingsUnauthorized describes a response with status code 401, with default header values.
 
 Unauthorized
 */
@@ -92,9 +129,44 @@ type MobileAppSettingsUnauthorized struct {
 	Payload *models.Error
 }
 
+// IsSuccess returns true when this mobile app settings unauthorized response has a 2xx status code
+func (o *MobileAppSettingsUnauthorized) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this mobile app settings unauthorized response has a 3xx status code
+func (o *MobileAppSettingsUnauthorized) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this mobile app settings unauthorized response has a 4xx status code
+func (o *MobileAppSettingsUnauthorized) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this mobile app settings unauthorized response has a 5xx status code
+func (o *MobileAppSettingsUnauthorized) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this mobile app settings unauthorized response a status code equal to that given
+func (o *MobileAppSettingsUnauthorized) IsCode(code int) bool {
+	return code == 401
+}
+
+// Code gets the status code for the mobile app settings unauthorized response
+func (o *MobileAppSettingsUnauthorized) Code() int {
+	return 401
+}
+
 func (o *MobileAppSettingsUnauthorized) Error() string {
 	return fmt.Sprintf("[GET /Config/MobileAppSettings][%d] mobileAppSettingsUnauthorized  %+v", 401, o.Payload)
 }
+
+func (o *MobileAppSettingsUnauthorized) String() string {
+	return fmt.Sprintf("[GET /Config/MobileAppSettings][%d] mobileAppSettingsUnauthorized  %+v", 401, o.Payload)
+}
+
 func (o *MobileAppSettingsUnauthorized) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -118,7 +190,8 @@ func NewMobileAppSettingsDefault(code int) *MobileAppSettingsDefault {
 	}
 }
 
-/* MobileAppSettingsDefault describes a response with status code -1, with default header values.
+/*
+MobileAppSettingsDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -126,6 +199,31 @@ type MobileAppSettingsDefault struct {
 	_statusCode int
 
 	Payload *models.Error
+}
+
+// IsSuccess returns true when this mobile app settings default response has a 2xx status code
+func (o *MobileAppSettingsDefault) IsSuccess() bool {
+	return o._statusCode/100 == 2
+}
+
+// IsRedirect returns true when this mobile app settings default response has a 3xx status code
+func (o *MobileAppSettingsDefault) IsRedirect() bool {
+	return o._statusCode/100 == 3
+}
+
+// IsClientError returns true when this mobile app settings default response has a 4xx status code
+func (o *MobileAppSettingsDefault) IsClientError() bool {
+	return o._statusCode/100 == 4
+}
+
+// IsServerError returns true when this mobile app settings default response has a 5xx status code
+func (o *MobileAppSettingsDefault) IsServerError() bool {
+	return o._statusCode/100 == 5
+}
+
+// IsCode returns true when this mobile app settings default response a status code equal to that given
+func (o *MobileAppSettingsDefault) IsCode(code int) bool {
+	return o._statusCode == code
 }
 
 // Code gets the status code for the mobile app settings default response
@@ -136,6 +234,11 @@ func (o *MobileAppSettingsDefault) Code() int {
 func (o *MobileAppSettingsDefault) Error() string {
 	return fmt.Sprintf("[GET /Config/MobileAppSettings][%d] mobileAppSettings default  %+v", o._statusCode, o.Payload)
 }
+
+func (o *MobileAppSettingsDefault) String() string {
+	return fmt.Sprintf("[GET /Config/MobileAppSettings][%d] mobileAppSettings default  %+v", o._statusCode, o.Payload)
+}
+
 func (o *MobileAppSettingsDefault) GetPayload() *models.Error {
 	return o.Payload
 }

@@ -190,6 +190,11 @@ func (m *MobileAppSettings) contextValidateMenu(ctx context.Context, formats str
 	for i := 0; i < len(m.Menu); i++ {
 
 		if m.Menu[i] != nil {
+
+			if swag.IsZero(m.Menu[i]) { // not required
+				return nil
+			}
+
 			if err := m.Menu[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("menu" + "." + strconv.Itoa(i))

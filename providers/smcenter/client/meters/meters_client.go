@@ -34,7 +34,7 @@ type ClientService interface {
 }
 
 /*
-  List list API
+List list API
 */
 func (a *Client) List(params *ListParams, opts ...ClientOption) (*ListOK, error) {
 	// TODO: Validate the params before sending

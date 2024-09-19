@@ -52,10 +52,12 @@ func NewUserInfoParamsWithHTTPClient(client *http.Client) *UserInfoParams {
 	}
 }
 
-/* UserInfoParams contains all the parameters to send to the API endpoint
-   for the user info operation.
+/*
+UserInfoParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the user info operation.
+
+	Typically these are written to a http.Request.
 */
 type UserInfoParams struct {
 	timeout    time.Duration

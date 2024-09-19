@@ -34,7 +34,7 @@ type ClientService interface {
 }
 
 /*
-  MobileAppSettings mobile app settings API
+MobileAppSettings mobile app settings API
 */
 func (a *Client) MobileAppSettings(params *MobileAppSettingsParams, opts ...ClientOption) (*MobileAppSettingsOK, error) {
 	// TODO: Validate the params before sending

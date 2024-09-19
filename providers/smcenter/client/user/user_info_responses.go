@@ -52,7 +52,8 @@ func NewUserInfoOK() *UserInfoOK {
 	return &UserInfoOK{}
 }
 
-/* UserInfoOK describes a response with status code 200, with default header values.
+/*
+UserInfoOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -60,9 +61,44 @@ type UserInfoOK struct {
 	Payload *models.UserInfo
 }
 
+// IsSuccess returns true when this user info o k response has a 2xx status code
+func (o *UserInfoOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this user info o k response has a 3xx status code
+func (o *UserInfoOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this user info o k response has a 4xx status code
+func (o *UserInfoOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this user info o k response has a 5xx status code
+func (o *UserInfoOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this user info o k response a status code equal to that given
+func (o *UserInfoOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the user info o k response
+func (o *UserInfoOK) Code() int {
+	return 200
+}
+
 func (o *UserInfoOK) Error() string {
 	return fmt.Sprintf("[GET /User/Info][%d] userInfoOK  %+v", 200, o.Payload)
 }
+
+func (o *UserInfoOK) String() string {
+	return fmt.Sprintf("[GET /User/Info][%d] userInfoOK  %+v", 200, o.Payload)
+}
+
 func (o *UserInfoOK) GetPayload() *models.UserInfo {
 	return o.Payload
 }
@@ -84,7 +120,8 @@ func NewUserInfoUnauthorized() *UserInfoUnauthorized {
 	return &UserInfoUnauthorized{}
 }
 
-/* UserInfoUnauthorized describes a response with status code 401, with default header values.
+/*
+UserInfoUnauthorized describes a response with status code 401, with default header values.
 
 Unauthorized
 */
@@ -92,9 +129,44 @@ type UserInfoUnauthorized struct {
 	Payload *models.Error
 }
 
+// IsSuccess returns true when this user info unauthorized response has a 2xx status code
+func (o *UserInfoUnauthorized) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this user info unauthorized response has a 3xx status code
+func (o *UserInfoUnauthorized) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this user info unauthorized response has a 4xx status code
+func (o *UserInfoUnauthorized) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this user info unauthorized response has a 5xx status code
+func (o *UserInfoUnauthorized) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this user info unauthorized response a status code equal to that given
+func (o *UserInfoUnauthorized) IsCode(code int) bool {
+	return code == 401
+}
+
+// Code gets the status code for the user info unauthorized response
+func (o *UserInfoUnauthorized) Code() int {
+	return 401
+}
+
 func (o *UserInfoUnauthorized) Error() string {
 	return fmt.Sprintf("[GET /User/Info][%d] userInfoUnauthorized  %+v", 401, o.Payload)
 }
+
+func (o *UserInfoUnauthorized) String() string {
+	return fmt.Sprintf("[GET /User/Info][%d] userInfoUnauthorized  %+v", 401, o.Payload)
+}
+
 func (o *UserInfoUnauthorized) GetPayload() *models.Error {
 	return o.Payload
 }
@@ -118,7 +190,8 @@ func NewUserInfoDefault(code int) *UserInfoDefault {
 	}
 }
 
-/* UserInfoDefault describes a response with status code -1, with default header values.
+/*
+UserInfoDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -126,6 +199,31 @@ type UserInfoDefault struct {
 	_statusCode int
 
 	Payload *models.Error
+}
+
+// IsSuccess returns true when this user info default response has a 2xx status code
+func (o *UserInfoDefault) IsSuccess() bool {
+	return o._statusCode/100 == 2
+}
+
+// IsRedirect returns true when this user info default response has a 3xx status code
+func (o *UserInfoDefault) IsRedirect() bool {
+	return o._statusCode/100 == 3
+}
+
+// IsClientError returns true when this user info default response has a 4xx status code
+func (o *UserInfoDefault) IsClientError() bool {
+	return o._statusCode/100 == 4
+}
+
+// IsServerError returns true when this user info default response has a 5xx status code
+func (o *UserInfoDefault) IsServerError() bool {
+	return o._statusCode/100 == 5
+}
+
+// IsCode returns true when this user info default response a status code equal to that given
+func (o *UserInfoDefault) IsCode(code int) bool {
+	return o._statusCode == code
 }
 
 // Code gets the status code for the user info default response
@@ -136,6 +234,11 @@ func (o *UserInfoDefault) Code() int {
 func (o *UserInfoDefault) Error() string {
 	return fmt.Sprintf("[GET /User/Info][%d] userInfo default  %+v", o._statusCode, o.Payload)
 }
+
+func (o *UserInfoDefault) String() string {
+	return fmt.Sprintf("[GET /User/Info][%d] userInfo default  %+v", o._statusCode, o.Payload)
+}
+
 func (o *UserInfoDefault) GetPayload() *models.Error {
 	return o.Payload
 }
