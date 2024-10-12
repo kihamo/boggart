@@ -15,10 +15,10 @@ import (
 	"github.com/kihamo/boggart/providers/integratorit/internal"
 )
 
-var servicesMapping = map[string]string{
-	"КАПИТАЛЬНЫЙ РЕМОНТ":        "ВЗНОС НА КАП. РЕМОНТ",
-	"ГАЗОСНАБЖЕНИЕ (ОТОПЛЕНИЕ)": "ГАЗОСНАБЖЕНИЕ",
-}
+// var servicesMapping = map[string]string{
+// 	"КАПИТАЛЬНЫЙ РЕМОНТ":        "ВЗНОС НА КАПИТАЛЬНЫЙ РЕМОНТ",
+// 	"ГАЗОСНАБЖЕНИЕ (ОТОПЛЕНИЕ)": "ГАЗОСНАБЖЕНИЕ",
+// }
 
 type ProvideMosOblERC struct {
 	Provider
@@ -64,9 +64,9 @@ func (p *ProvideMosOblERC) Services(ctx context.Context) (_ map[string]uint64, e
 			item.Name = strings.ReplaceAll(item.Name, "  ", " ")
 			item.Name = strings.TrimSpace(item.Name)
 
-			if alias, ok := servicesMapping[item.Name]; ok {
-				item.Name = alias
-			}
+			// if alias, ok := servicesMapping[item.Name]; ok {
+			// 	item.Name = alias
+			// }
 
 			p.servicesList[item.Name] = item.ID
 		}
@@ -143,15 +143,15 @@ func (p *ProvideMosOblERC) CurrentBalance(ctx context.Context) (*Balance, error)
 			}
 		}
 
-		if serviceID == 0 {
-			return nil, errors.New("id for service " + child.Name + " not found")
-		}
+		if serviceID != 0 {
+			// return nil, errors.New("id for service " + child.Name + " not found")
 
-		balance.Services = append(balance.Services, ServiceBalance{
-			ID:    strconv.FormatUint(serviceID, 10),
-			Name:  child.Name,
-			Total: child.Total,
-		})
+			balance.Services = append(balance.Services, ServiceBalance{
+				ID:    strconv.FormatUint(serviceID, 10),
+				Name:  child.Name,
+				Total: child.Total,
+			})
+		}
 	}
 
 	return balance, nil

@@ -149,6 +149,9 @@ type RequestDetailMessagesItems0 struct {
 	// author name
 	AuthorName string `json:"AuthorName,omitempty"`
 
+	// ID
+	ID uint64 `json:"ID,omitempty"`
+
 	// text
 	Text string `json:"Text,omitempty"`
 }

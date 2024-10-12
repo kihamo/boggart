@@ -684,6 +684,9 @@ definitions:
         type: "array"
         items:
           properties:
+            ID:
+              type: "integer"
+              format: "uint64"
             Added:
               type: "string"
             AuthorName:
@@ -697,6 +700,7 @@ definitions:
         format: "uint64"
         # 3 - направлена исполнителю
         # 5 - выполнена
+        # 9 - переоткрыта
       IsPerformed: # выполнена, статус 5
         type: "boolean"
       IsClosed:
