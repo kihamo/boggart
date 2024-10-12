@@ -1,6 +1,6 @@
 substitutions:
-  node_name: !secret device_801_node_name
-  ip_address: !secret device_801_ip_address
+  node_name: !secret device_803_node_name
+  ip_address: !secret device_803_ip_address
 
 packages:
   common: !include ./_includes/common.yaml
@@ -12,16 +12,18 @@ packages:
   time: !include ./_includes/time.yaml
 
 esphome:
-  comment: !secret device_801_comment
+  comment: !secret device_803_comment
 
-esp8266:
-  board: esp8285
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
 
 switch:
   - platform: gpio
     name: "Relay switch"
     icon: "mdi:lightbulb_outline"
-    pin: GPIO12
+    pin: GPIO26
     id: relay_1
     restore_mode: RESTORE_DEFAULT_OFF
 
@@ -38,8 +40,8 @@ binary_sensor:
           id: relay_1
 
   - platform: gpio
-    name: "s2 external switch input"
-    pin: GPIO04
+    name: "s1 external switch input"
+    pin: GPIO27
     id: switch_1
     on_press:
       then:
@@ -52,21 +54,20 @@ binary_sensor:
 
 status_led:
   pin:
-    number: GPIO13
+    number: GPIO19
     inverted: true
     allow_other_uses: true
 
 output:
-  - platform: esp8266_pwm
+  - platform: gpio
     id: blue_led
     pin:
-      number: GPIO13
+      number: GPIO19
       allow_other_uses: true
     inverted: true
 
 light:
-  # the 4 lines below define the Blue LED light on Sonoff Mini, to expose in HomeAssistant remove line "internal: true"
-  - platform: monochromatic
+  - platform: binary
     name: "Blue LED"
     output: blue_led
     internal: true

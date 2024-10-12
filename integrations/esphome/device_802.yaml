@@ -1,0 +1,39 @@
+debug:
+
+substitutions:
+  node_name: !secret device_802_node_name
+  ip_address: !secret device_802_ip_address
+
+packages:
+  common: !include ./_includes/common.yaml
+  wifi: !include ./_includes/wifi/home.yaml
+  binary_sensor: !include ./_includes/binary_sensor.yaml
+  sensor: !include ./_includes/sensor.yaml
+  switch: !include ./_includes/switch.yaml
+  text_sensor: !include ./_includes/text_sensor.yaml
+  time: !include ./_includes/time.yaml
+
+esp8266:
+  board: d1_mini
+
+logger:
+  level: DEBUG
+  baud_rate: 115200
+
+mqtt:
+  log_topic: null
+
+light:
+  - platform: neopixelbus
+    num_leds: 300
+    variant: WS2813
+    pin: GPIO15
+    name: "NeoPixel Light"
+    effects:
+      - addressable_rainbow:
+      - addressable_color_wipe:
+      - addressable_scan:
+      - addressable_twinkle:
+      - addressable_random_twinkle:
+      - addressable_fireworks:
+      - addressable_flicker:
