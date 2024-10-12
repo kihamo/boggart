@@ -1,6 +1,7 @@
 package models
 
 import (
+	"context"
 	"strconv"
 	"time"
 
@@ -16,6 +17,10 @@ func (m *DateTime) Time() time.Time {
 }
 
 func (m *DateTime) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+func (m *DateTime) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

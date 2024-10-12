@@ -52,7 +52,8 @@ func NewGetForecastByGeographicCoordinatesOK() *GetForecastByGeographicCoordinat
 	return &GetForecastByGeographicCoordinatesOK{}
 }
 
-/*GetForecastByGeographicCoordinatesOK handles this case with default header values.
+/*
+GetForecastByGeographicCoordinatesOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -60,7 +61,41 @@ type GetForecastByGeographicCoordinatesOK struct {
 	Payload *models.Forecast
 }
 
+// IsSuccess returns true when this get forecast by geographic coordinates o k response has a 2xx status code
+func (o *GetForecastByGeographicCoordinatesOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get forecast by geographic coordinates o k response has a 3xx status code
+func (o *GetForecastByGeographicCoordinatesOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get forecast by geographic coordinates o k response has a 4xx status code
+func (o *GetForecastByGeographicCoordinatesOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get forecast by geographic coordinates o k response has a 5xx status code
+func (o *GetForecastByGeographicCoordinatesOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get forecast by geographic coordinates o k response a status code equal to that given
+func (o *GetForecastByGeographicCoordinatesOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get forecast by geographic coordinates o k response
+func (o *GetForecastByGeographicCoordinatesOK) Code() int {
+	return 200
+}
+
 func (o *GetForecastByGeographicCoordinatesOK) Error() string {
+	return fmt.Sprintf("[GET /data/2.5/forecast?lat={lat}&lon={lon}][%d] getForecastByGeographicCoordinatesOK  %+v", 200, o.Payload)
+}
+
+func (o *GetForecastByGeographicCoordinatesOK) String() string {
 	return fmt.Sprintf("[GET /data/2.5/forecast?lat={lat}&lon={lon}][%d] getForecastByGeographicCoordinatesOK  %+v", 200, o.Payload)
 }
 
@@ -85,7 +120,8 @@ func NewGetForecastByGeographicCoordinatesTooManyRequests() *GetForecastByGeogra
 	return &GetForecastByGeographicCoordinatesTooManyRequests{}
 }
 
-/*GetForecastByGeographicCoordinatesTooManyRequests handles this case with default header values.
+/*
+GetForecastByGeographicCoordinatesTooManyRequests describes a response with status code 429, with default header values.
 
 Account is blocked
 */
@@ -93,7 +129,41 @@ type GetForecastByGeographicCoordinatesTooManyRequests struct {
 	Payload *models.Error
 }
 
+// IsSuccess returns true when this get forecast by geographic coordinates too many requests response has a 2xx status code
+func (o *GetForecastByGeographicCoordinatesTooManyRequests) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this get forecast by geographic coordinates too many requests response has a 3xx status code
+func (o *GetForecastByGeographicCoordinatesTooManyRequests) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get forecast by geographic coordinates too many requests response has a 4xx status code
+func (o *GetForecastByGeographicCoordinatesTooManyRequests) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this get forecast by geographic coordinates too many requests response has a 5xx status code
+func (o *GetForecastByGeographicCoordinatesTooManyRequests) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get forecast by geographic coordinates too many requests response a status code equal to that given
+func (o *GetForecastByGeographicCoordinatesTooManyRequests) IsCode(code int) bool {
+	return code == 429
+}
+
+// Code gets the status code for the get forecast by geographic coordinates too many requests response
+func (o *GetForecastByGeographicCoordinatesTooManyRequests) Code() int {
+	return 429
+}
+
 func (o *GetForecastByGeographicCoordinatesTooManyRequests) Error() string {
+	return fmt.Sprintf("[GET /data/2.5/forecast?lat={lat}&lon={lon}][%d] getForecastByGeographicCoordinatesTooManyRequests  %+v", 429, o.Payload)
+}
+
+func (o *GetForecastByGeographicCoordinatesTooManyRequests) String() string {
 	return fmt.Sprintf("[GET /data/2.5/forecast?lat={lat}&lon={lon}][%d] getForecastByGeographicCoordinatesTooManyRequests  %+v", 429, o.Payload)
 }
 
@@ -120,7 +190,8 @@ func NewGetForecastByGeographicCoordinatesDefault(code int) *GetForecastByGeogra
 	}
 }
 
-/*GetForecastByGeographicCoordinatesDefault handles this case with default header values.
+/*
+GetForecastByGeographicCoordinatesDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -130,12 +201,41 @@ type GetForecastByGeographicCoordinatesDefault struct {
 	Payload *models.Error
 }
 
+// IsSuccess returns true when this get forecast by geographic coordinates default response has a 2xx status code
+func (o *GetForecastByGeographicCoordinatesDefault) IsSuccess() bool {
+	return o._statusCode/100 == 2
+}
+
+// IsRedirect returns true when this get forecast by geographic coordinates default response has a 3xx status code
+func (o *GetForecastByGeographicCoordinatesDefault) IsRedirect() bool {
+	return o._statusCode/100 == 3
+}
+
+// IsClientError returns true when this get forecast by geographic coordinates default response has a 4xx status code
+func (o *GetForecastByGeographicCoordinatesDefault) IsClientError() bool {
+	return o._statusCode/100 == 4
+}
+
+// IsServerError returns true when this get forecast by geographic coordinates default response has a 5xx status code
+func (o *GetForecastByGeographicCoordinatesDefault) IsServerError() bool {
+	return o._statusCode/100 == 5
+}
+
+// IsCode returns true when this get forecast by geographic coordinates default response a status code equal to that given
+func (o *GetForecastByGeographicCoordinatesDefault) IsCode(code int) bool {
+	return o._statusCode == code
+}
+
 // Code gets the status code for the get forecast by geographic coordinates default response
 func (o *GetForecastByGeographicCoordinatesDefault) Code() int {
 	return o._statusCode
 }
 
 func (o *GetForecastByGeographicCoordinatesDefault) Error() string {
+	return fmt.Sprintf("[GET /data/2.5/forecast?lat={lat}&lon={lon}][%d] getForecastByGeographicCoordinates default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *GetForecastByGeographicCoordinatesDefault) String() string {
 	return fmt.Sprintf("[GET /data/2.5/forecast?lat={lat}&lon={lon}][%d] getForecastByGeographicCoordinates default  %+v", o._statusCode, o.Payload)
 }
 

@@ -17,74 +17,95 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// NewGetForecastByZIPCodeParams creates a new GetForecastByZIPCodeParams object
-// with the default values initialized.
+// NewGetForecastByZIPCodeParams creates a new GetForecastByZIPCodeParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetForecastByZIPCodeParams() *GetForecastByZIPCodeParams {
-	var ()
 	return &GetForecastByZIPCodeParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetForecastByZIPCodeParamsWithTimeout creates a new GetForecastByZIPCodeParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetForecastByZIPCodeParamsWithTimeout(timeout time.Duration) *GetForecastByZIPCodeParams {
-	var ()
 	return &GetForecastByZIPCodeParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGetForecastByZIPCodeParamsWithContext creates a new GetForecastByZIPCodeParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetForecastByZIPCodeParamsWithContext(ctx context.Context) *GetForecastByZIPCodeParams {
-	var ()
 	return &GetForecastByZIPCodeParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGetForecastByZIPCodeParamsWithHTTPClient creates a new GetForecastByZIPCodeParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetForecastByZIPCodeParamsWithHTTPClient(client *http.Client) *GetForecastByZIPCodeParams {
-	var ()
 	return &GetForecastByZIPCodeParams{
 		HTTPClient: client,
 	}
 }
 
-/*GetForecastByZIPCodeParams contains all the parameters to send to the API endpoint
-for the get forecast by z IP code operation typically these are written to a http.Request
+/*
+GetForecastByZIPCodeParams contains all the parameters to send to the API endpoint
+
+	for the get forecast by z IP code operation.
+
+	Typically these are written to a http.Request.
 */
 type GetForecastByZIPCodeParams struct {
 
-	/*Cnt
-	  To limit number of listed cities please setup 'cnt' parameter that specifies the number of lines returned
+	/* Cnt.
 
+	   To limit number of listed cities please setup 'cnt' parameter that specifies the number of lines returned
+
+	   Format: uint64
 	*/
 	Cnt *uint64
-	/*Lang
-	  Multilingual support
 
+	/* Lang.
+
+	   Multilingual support
 	*/
 	Lang *string
-	/*Units
-	  Standard, metric, and imperial units are available
 
+	/* Units.
+
+	   Standard, metric, and imperial units are available
 	*/
 	Units *string
-	/*Zip
-	  ZIP code
 
+	/* Zip.
+
+	   ZIP code
 	*/
 	Zip string
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get forecast by z IP code params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetForecastByZIPCodeParams) WithDefaults() *GetForecastByZIPCodeParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get forecast by z IP code params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetForecastByZIPCodeParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get forecast by z IP code params
@@ -176,54 +197,58 @@ func (o *GetForecastByZIPCodeParams) WriteToRequest(r runtime.ClientRequest, reg
 
 		// query param cnt
 		var qrCnt uint64
+
 		if o.Cnt != nil {
 			qrCnt = *o.Cnt
 		}
 		qCnt := swag.FormatUint64(qrCnt)
 		if qCnt != "" {
+
 			if err := r.SetQueryParam("cnt", qCnt); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Lang != nil {
 
 		// query param lang
 		var qrLang string
+
 		if o.Lang != nil {
 			qrLang = *o.Lang
 		}
 		qLang := qrLang
 		if qLang != "" {
+
 			if err := r.SetQueryParam("lang", qLang); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Units != nil {
 
 		// query param units
 		var qrUnits string
+
 		if o.Units != nil {
 			qrUnits = *o.Units
 		}
 		qUnits := qrUnits
 		if qUnits != "" {
+
 			if err := r.SetQueryParam("units", qUnits); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	// query param zip
 	qrZip := o.Zip
 	qZip := qrZip
 	if qZip != "" {
+
 		if err := r.SetQueryParam("zip", qZip); err != nil {
 			return err
 		}

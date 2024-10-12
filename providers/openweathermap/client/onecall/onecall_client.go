@@ -23,25 +23,27 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	GetOneCall(params *GetOneCallParams, authInfo runtime.ClientAuthInfoWriter) (*GetOneCallOK, error)
+	GetOneCall(params *GetOneCallParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetOneCallOK, error)
 
-	GetOneCallTimeMachine(params *GetOneCallTimeMachineParams, authInfo runtime.ClientAuthInfoWriter) (*GetOneCallTimeMachineOK, error)
+	GetOneCallTimeMachine(params *GetOneCallTimeMachineParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetOneCallTimeMachineOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
 
 /*
-  GetOneCall get one call API
+GetOneCall get one call API
 */
-func (a *Client) GetOneCall(params *GetOneCallParams, authInfo runtime.ClientAuthInfoWriter) (*GetOneCallOK, error) {
+func (a *Client) GetOneCall(params *GetOneCallParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetOneCallOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetOneCallParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getOneCall",
 		Method:             "GET",
 		PathPattern:        "/data/2.5/onecall?lat={lat}&lon={lon}",
@@ -53,7 +55,12 @@ func (a *Client) GetOneCall(params *GetOneCallParams, authInfo runtime.ClientAut
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -67,15 +74,14 @@ func (a *Client) GetOneCall(params *GetOneCallParams, authInfo runtime.ClientAut
 }
 
 /*
-  GetOneCallTimeMachine get one call time machine API
+GetOneCallTimeMachine get one call time machine API
 */
-func (a *Client) GetOneCallTimeMachine(params *GetOneCallTimeMachineParams, authInfo runtime.ClientAuthInfoWriter) (*GetOneCallTimeMachineOK, error) {
+func (a *Client) GetOneCallTimeMachine(params *GetOneCallTimeMachineParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetOneCallTimeMachineOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetOneCallTimeMachineParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getOneCallTimeMachine",
 		Method:             "GET",
 		PathPattern:        "/data/2.5/onecall/timemachine?lat={lat}&lon={lon}",
@@ -87,7 +93,12 @@ func (a *Client) GetOneCallTimeMachine(params *GetOneCallTimeMachineParams, auth
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

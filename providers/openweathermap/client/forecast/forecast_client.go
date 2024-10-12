@@ -23,29 +23,31 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	GetForecastByCityID(params *GetForecastByCityIDParams, authInfo runtime.ClientAuthInfoWriter) (*GetForecastByCityIDOK, error)
+	GetForecastByCityID(params *GetForecastByCityIDParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetForecastByCityIDOK, error)
 
-	GetForecastByCityName(params *GetForecastByCityNameParams, authInfo runtime.ClientAuthInfoWriter) (*GetForecastByCityNameOK, error)
+	GetForecastByCityName(params *GetForecastByCityNameParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetForecastByCityNameOK, error)
 
-	GetForecastByGeographicCoordinates(params *GetForecastByGeographicCoordinatesParams, authInfo runtime.ClientAuthInfoWriter) (*GetForecastByGeographicCoordinatesOK, error)
+	GetForecastByGeographicCoordinates(params *GetForecastByGeographicCoordinatesParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetForecastByGeographicCoordinatesOK, error)
 
-	GetForecastByZIPCode(params *GetForecastByZIPCodeParams, authInfo runtime.ClientAuthInfoWriter) (*GetForecastByZIPCodeOK, error)
+	GetForecastByZIPCode(params *GetForecastByZIPCodeParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetForecastByZIPCodeOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
 
 /*
-  GetForecastByCityID get forecast by city ID API
+GetForecastByCityID get forecast by city ID API
 */
-func (a *Client) GetForecastByCityID(params *GetForecastByCityIDParams, authInfo runtime.ClientAuthInfoWriter) (*GetForecastByCityIDOK, error) {
+func (a *Client) GetForecastByCityID(params *GetForecastByCityIDParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetForecastByCityIDOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetForecastByCityIDParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getForecastByCityID",
 		Method:             "GET",
 		PathPattern:        "/data/2.5/forecast?id={id}",
@@ -57,7 +59,12 @@ func (a *Client) GetForecastByCityID(params *GetForecastByCityIDParams, authInfo
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -71,15 +78,14 @@ func (a *Client) GetForecastByCityID(params *GetForecastByCityIDParams, authInfo
 }
 
 /*
-  GetForecastByCityName get forecast by city name API
+GetForecastByCityName get forecast by city name API
 */
-func (a *Client) GetForecastByCityName(params *GetForecastByCityNameParams, authInfo runtime.ClientAuthInfoWriter) (*GetForecastByCityNameOK, error) {
+func (a *Client) GetForecastByCityName(params *GetForecastByCityNameParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetForecastByCityNameOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetForecastByCityNameParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getForecastByCityName",
 		Method:             "GET",
 		PathPattern:        "/data/2.5/forecast?q={q}",
@@ -91,7 +97,12 @@ func (a *Client) GetForecastByCityName(params *GetForecastByCityNameParams, auth
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -105,15 +116,14 @@ func (a *Client) GetForecastByCityName(params *GetForecastByCityNameParams, auth
 }
 
 /*
-  GetForecastByGeographicCoordinates get forecast by geographic coordinates API
+GetForecastByGeographicCoordinates get forecast by geographic coordinates API
 */
-func (a *Client) GetForecastByGeographicCoordinates(params *GetForecastByGeographicCoordinatesParams, authInfo runtime.ClientAuthInfoWriter) (*GetForecastByGeographicCoordinatesOK, error) {
+func (a *Client) GetForecastByGeographicCoordinates(params *GetForecastByGeographicCoordinatesParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetForecastByGeographicCoordinatesOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetForecastByGeographicCoordinatesParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getForecastByGeographicCoordinates",
 		Method:             "GET",
 		PathPattern:        "/data/2.5/forecast?lat={lat}&lon={lon}",
@@ -125,7 +135,12 @@ func (a *Client) GetForecastByGeographicCoordinates(params *GetForecastByGeograp
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -139,15 +154,14 @@ func (a *Client) GetForecastByGeographicCoordinates(params *GetForecastByGeograp
 }
 
 /*
-  GetForecastByZIPCode get forecast by z IP code API
+GetForecastByZIPCode get forecast by z IP code API
 */
-func (a *Client) GetForecastByZIPCode(params *GetForecastByZIPCodeParams, authInfo runtime.ClientAuthInfoWriter) (*GetForecastByZIPCodeOK, error) {
+func (a *Client) GetForecastByZIPCode(params *GetForecastByZIPCodeParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetForecastByZIPCodeOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetForecastByZIPCodeParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getForecastByZIPCode",
 		Method:             "GET",
 		PathPattern:        "/data/2.5/forecast?zip={zip}",
@@ -159,7 +173,12 @@ func (a *Client) GetForecastByZIPCode(params *GetForecastByZIPCodeParams, authIn
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

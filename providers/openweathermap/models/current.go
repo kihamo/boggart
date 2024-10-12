@@ -6,6 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/go-openapi/errors"
@@ -55,6 +56,9 @@ type Current struct {
 
 	// timezone
 	Timezone uint64 `json:"timezone,omitempty"`
+
+	// visibility
+	Visibility uint64 `json:"visibility,omitempty"`
 
 	// weather
 	Weather []*Weather `json:"weather"`
@@ -110,7 +114,6 @@ func (m *Current) Validate(formats strfmt.Registry) error {
 }
 
 func (m *Current) validateClouds(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Clouds) { // not required
 		return nil
 	}
@@ -119,6 +122,8 @@ func (m *Current) validateClouds(formats strfmt.Registry) error {
 		if err := m.Clouds.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("clouds")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("clouds")
 			}
 			return err
 		}
@@ -128,7 +133,6 @@ func (m *Current) validateClouds(formats strfmt.Registry) error {
 }
 
 func (m *Current) validateCoord(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Coord) { // not required
 		return nil
 	}
@@ -137,6 +141,8 @@ func (m *Current) validateCoord(formats strfmt.Registry) error {
 		if err := m.Coord.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("coord")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("coord")
 			}
 			return err
 		}
@@ -146,7 +152,6 @@ func (m *Current) validateCoord(formats strfmt.Registry) error {
 }
 
 func (m *Current) validateDt(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Dt) { // not required
 		return nil
 	}
@@ -154,6 +159,8 @@ func (m *Current) validateDt(formats strfmt.Registry) error {
 	if err := m.Dt.Validate(formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
 			return ve.ValidateName("dt")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("dt")
 		}
 		return err
 	}
@@ -162,7 +169,6 @@ func (m *Current) validateDt(formats strfmt.Registry) error {
 }
 
 func (m *Current) validateMain(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Main) { // not required
 		return nil
 	}
@@ -171,6 +177,8 @@ func (m *Current) validateMain(formats strfmt.Registry) error {
 		if err := m.Main.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("main")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("main")
 			}
 			return err
 		}
@@ -180,7 +188,6 @@ func (m *Current) validateMain(formats strfmt.Registry) error {
 }
 
 func (m *Current) validateRain(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Rain) { // not required
 		return nil
 	}
@@ -189,6 +196,8 @@ func (m *Current) validateRain(formats strfmt.Registry) error {
 		if err := m.Rain.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("rain")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("rain")
 			}
 			return err
 		}
@@ -198,7 +207,6 @@ func (m *Current) validateRain(formats strfmt.Registry) error {
 }
 
 func (m *Current) validateSnow(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Snow) { // not required
 		return nil
 	}
@@ -207,6 +215,8 @@ func (m *Current) validateSnow(formats strfmt.Registry) error {
 		if err := m.Snow.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("snow")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("snow")
 			}
 			return err
 		}
@@ -216,7 +226,6 @@ func (m *Current) validateSnow(formats strfmt.Registry) error {
 }
 
 func (m *Current) validateSys(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Sys) { // not required
 		return nil
 	}
@@ -225,6 +234,8 @@ func (m *Current) validateSys(formats strfmt.Registry) error {
 		if err := m.Sys.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("sys")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("sys")
 			}
 			return err
 		}
@@ -234,7 +245,6 @@ func (m *Current) validateSys(formats strfmt.Registry) error {
 }
 
 func (m *Current) validateWeather(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Weather) { // not required
 		return nil
 	}
@@ -248,6 +258,8 @@ func (m *Current) validateWeather(formats strfmt.Registry) error {
 			if err := m.Weather[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("weather" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("weather" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -259,7 +271,6 @@ func (m *Current) validateWeather(formats strfmt.Registry) error {
 }
 
 func (m *Current) validateWind(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Wind) { // not required
 		return nil
 	}
@@ -268,6 +279,244 @@ func (m *Current) validateWind(formats strfmt.Registry) error {
 		if err := m.Wind.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("wind")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("wind")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this current based on the context it is used
+func (m *Current) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateClouds(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateCoord(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateDt(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateMain(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateRain(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateSnow(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateSys(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateWeather(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateWind(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *Current) contextValidateClouds(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Clouds != nil {
+
+		if swag.IsZero(m.Clouds) { // not required
+			return nil
+		}
+
+		if err := m.Clouds.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("clouds")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("clouds")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *Current) contextValidateCoord(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Coord != nil {
+
+		if swag.IsZero(m.Coord) { // not required
+			return nil
+		}
+
+		if err := m.Coord.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("coord")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("coord")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *Current) contextValidateDt(ctx context.Context, formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Dt) { // not required
+		return nil
+	}
+
+	if err := m.Dt.ContextValidate(ctx, formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("dt")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("dt")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *Current) contextValidateMain(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Main != nil {
+
+		if swag.IsZero(m.Main) { // not required
+			return nil
+		}
+
+		if err := m.Main.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("main")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("main")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *Current) contextValidateRain(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Rain != nil {
+
+		if swag.IsZero(m.Rain) { // not required
+			return nil
+		}
+
+		if err := m.Rain.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("rain")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("rain")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *Current) contextValidateSnow(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Snow != nil {
+
+		if swag.IsZero(m.Snow) { // not required
+			return nil
+		}
+
+		if err := m.Snow.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("snow")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("snow")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *Current) contextValidateSys(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Sys != nil {
+
+		if swag.IsZero(m.Sys) { // not required
+			return nil
+		}
+
+		if err := m.Sys.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("sys")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("sys")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *Current) contextValidateWeather(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.Weather); i++ {
+
+		if m.Weather[i] != nil {
+
+			if swag.IsZero(m.Weather[i]) { // not required
+				return nil
+			}
+
+			if err := m.Weather[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("weather" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("weather" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *Current) contextValidateWind(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Wind != nil {
+
+		if swag.IsZero(m.Wind) { // not required
+			return nil
+		}
+
+		if err := m.Wind.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("wind")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("wind")
 			}
 			return err
 		}
@@ -336,7 +585,6 @@ func (m *CurrentSys) Validate(formats strfmt.Registry) error {
 }
 
 func (m *CurrentSys) validateSunrise(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Sunrise) { // not required
 		return nil
 	}
@@ -344,6 +592,8 @@ func (m *CurrentSys) validateSunrise(formats strfmt.Registry) error {
 	if err := m.Sunrise.Validate(formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
 			return ve.ValidateName("sys" + "." + "sunrise")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("sys" + "." + "sunrise")
 		}
 		return err
 	}
@@ -352,7 +602,6 @@ func (m *CurrentSys) validateSunrise(formats strfmt.Registry) error {
 }
 
 func (m *CurrentSys) validateSunset(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Sunset) { // not required
 		return nil
 	}
@@ -360,6 +609,62 @@ func (m *CurrentSys) validateSunset(formats strfmt.Registry) error {
 	if err := m.Sunset.Validate(formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
 			return ve.ValidateName("sys" + "." + "sunset")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("sys" + "." + "sunset")
+		}
+		return err
+	}
+
+	return nil
+}
+
+// ContextValidate validate this current sys based on the context it is used
+func (m *CurrentSys) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateSunrise(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateSunset(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *CurrentSys) contextValidateSunrise(ctx context.Context, formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Sunrise) { // not required
+		return nil
+	}
+
+	if err := m.Sunrise.ContextValidate(ctx, formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("sys" + "." + "sunrise")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("sys" + "." + "sunrise")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *CurrentSys) contextValidateSunset(ctx context.Context, formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Sunset) { // not required
+		return nil
+	}
+
+	if err := m.Sunset.ContextValidate(ctx, formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("sys" + "." + "sunset")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("sys" + "." + "sunset")
 		}
 		return err
 	}

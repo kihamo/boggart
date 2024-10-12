@@ -17,79 +17,99 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// NewGetOneCallParams creates a new GetOneCallParams object
-// with the default values initialized.
+// NewGetOneCallParams creates a new GetOneCallParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetOneCallParams() *GetOneCallParams {
-	var ()
 	return &GetOneCallParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetOneCallParamsWithTimeout creates a new GetOneCallParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetOneCallParamsWithTimeout(timeout time.Duration) *GetOneCallParams {
-	var ()
 	return &GetOneCallParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGetOneCallParamsWithContext creates a new GetOneCallParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetOneCallParamsWithContext(ctx context.Context) *GetOneCallParams {
-	var ()
 	return &GetOneCallParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGetOneCallParamsWithHTTPClient creates a new GetOneCallParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetOneCallParamsWithHTTPClient(client *http.Client) *GetOneCallParams {
-	var ()
 	return &GetOneCallParams{
 		HTTPClient: client,
 	}
 }
 
-/*GetOneCallParams contains all the parameters to send to the API endpoint
-for the get one call operation typically these are written to a http.Request
+/*
+GetOneCallParams contains all the parameters to send to the API endpoint
+
+	for the get one call operation.
+
+	Typically these are written to a http.Request.
 */
 type GetOneCallParams struct {
 
-	/*Exclude
-	  Exclude some parts of the weather data from the API response. It should be a comma-delimited list (without spaces)
+	/* Exclude.
 
+	   Exclude some parts of the weather data from the API response. It should be a comma-delimited list (without spaces)
 	*/
 	Exclude []string
-	/*Lang
-	  Multilingual support
 
+	/* Lang.
+
+	   Multilingual support
 	*/
 	Lang *string
-	/*Lat
-	  Coordinates of the location of your interest
 
+	/* Lat.
+
+	   Coordinates of the location of your interest
 	*/
 	Lat float64
-	/*Lon
-	  Coordinates of the location of your interest
 
+	/* Lon.
+
+	   Coordinates of the location of your interest
 	*/
 	Lon float64
-	/*Units
-	  Standard, metric, and imperial units are available
 
+	/* Units.
+
+	   Standard, metric, and imperial units are available
 	*/
 	Units *string
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get one call params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetOneCallParams) WithDefaults() *GetOneCallParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get one call params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetOneCallParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get one call params
@@ -188,34 +208,39 @@ func (o *GetOneCallParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Re
 	}
 	var res []error
 
-	valuesExclude := o.Exclude
+	if o.Exclude != nil {
 
-	joinedExclude := swag.JoinByFormat(valuesExclude, "")
-	// query array param exclude
-	if err := r.SetQueryParam("exclude", joinedExclude...); err != nil {
-		return err
+		// binding items for exclude
+		joinedExclude := o.bindParamExclude(reg)
+
+		// query array param exclude
+		if err := r.SetQueryParam("exclude", joinedExclude...); err != nil {
+			return err
+		}
 	}
 
 	if o.Lang != nil {
 
 		// query param lang
 		var qrLang string
+
 		if o.Lang != nil {
 			qrLang = *o.Lang
 		}
 		qLang := qrLang
 		if qLang != "" {
+
 			if err := r.SetQueryParam("lang", qLang); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	// query param lat
 	qrLat := o.Lat
 	qLat := swag.FormatFloat64(qrLat)
 	if qLat != "" {
+
 		if err := r.SetQueryParam("lat", qLat); err != nil {
 			return err
 		}
@@ -225,6 +250,7 @@ func (o *GetOneCallParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Re
 	qrLon := o.Lon
 	qLon := swag.FormatFloat64(qrLon)
 	if qLon != "" {
+
 		if err := r.SetQueryParam("lon", qLon); err != nil {
 			return err
 		}
@@ -234,20 +260,38 @@ func (o *GetOneCallParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Re
 
 		// query param units
 		var qrUnits string
+
 		if o.Units != nil {
 			qrUnits = *o.Units
 		}
 		qUnits := qrUnits
 		if qUnits != "" {
+
 			if err := r.SetQueryParam("units", qUnits); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
 	return nil
+}
+
+// bindParamGetOneCall binds the parameter exclude
+func (o *GetOneCallParams) bindParamExclude(formats strfmt.Registry) []string {
+	excludeIR := o.Exclude
+
+	var excludeIC []string
+	for _, excludeIIR := range excludeIR { // explode []string
+
+		excludeIIV := excludeIIR // string as string
+		excludeIC = append(excludeIC, excludeIIV)
+	}
+
+	// items.CollectionFormat: ""
+	excludeIS := swag.JoinByFormat(excludeIC, "")
+
+	return excludeIS
 }

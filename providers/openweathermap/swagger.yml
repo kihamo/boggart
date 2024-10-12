@@ -473,6 +473,9 @@ definitions:
         type: "string"
       main:
         $ref: '#/definitions/Main'
+      visibility:
+        type: "integer"
+        format: "uint64"
       wind:
         $ref: '#/definitions/Wind'
       clouds:

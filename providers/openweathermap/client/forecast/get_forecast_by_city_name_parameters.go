@@ -17,74 +17,95 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// NewGetForecastByCityNameParams creates a new GetForecastByCityNameParams object
-// with the default values initialized.
+// NewGetForecastByCityNameParams creates a new GetForecastByCityNameParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetForecastByCityNameParams() *GetForecastByCityNameParams {
-	var ()
 	return &GetForecastByCityNameParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetForecastByCityNameParamsWithTimeout creates a new GetForecastByCityNameParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetForecastByCityNameParamsWithTimeout(timeout time.Duration) *GetForecastByCityNameParams {
-	var ()
 	return &GetForecastByCityNameParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGetForecastByCityNameParamsWithContext creates a new GetForecastByCityNameParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetForecastByCityNameParamsWithContext(ctx context.Context) *GetForecastByCityNameParams {
-	var ()
 	return &GetForecastByCityNameParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGetForecastByCityNameParamsWithHTTPClient creates a new GetForecastByCityNameParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetForecastByCityNameParamsWithHTTPClient(client *http.Client) *GetForecastByCityNameParams {
-	var ()
 	return &GetForecastByCityNameParams{
 		HTTPClient: client,
 	}
 }
 
-/*GetForecastByCityNameParams contains all the parameters to send to the API endpoint
-for the get forecast by city name operation typically these are written to a http.Request
+/*
+GetForecastByCityNameParams contains all the parameters to send to the API endpoint
+
+	for the get forecast by city name operation.
+
+	Typically these are written to a http.Request.
 */
 type GetForecastByCityNameParams struct {
 
-	/*Cnt
-	  To limit number of listed cities please setup 'cnt' parameter that specifies the number of lines returned
+	/* Cnt.
 
+	   To limit number of listed cities please setup 'cnt' parameter that specifies the number of lines returned
+
+	   Format: uint64
 	*/
 	Cnt *uint64
-	/*Lang
-	  Multilingual support
 
+	/* Lang.
+
+	   Multilingual support
 	*/
 	Lang *string
-	/*Q
-	  City name, state code and country code divided by comma, use ISO 3166 country code
 
+	/* Q.
+
+	   City name, state code and country code divided by comma, use ISO 3166 country code
 	*/
 	Q string
-	/*Units
-	  Standard, metric, and imperial units are available
 
+	/* Units.
+
+	   Standard, metric, and imperial units are available
 	*/
 	Units *string
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get forecast by city name params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetForecastByCityNameParams) WithDefaults() *GetForecastByCityNameParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get forecast by city name params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetForecastByCityNameParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get forecast by city name params
@@ -176,38 +197,41 @@ func (o *GetForecastByCityNameParams) WriteToRequest(r runtime.ClientRequest, re
 
 		// query param cnt
 		var qrCnt uint64
+
 		if o.Cnt != nil {
 			qrCnt = *o.Cnt
 		}
 		qCnt := swag.FormatUint64(qrCnt)
 		if qCnt != "" {
+
 			if err := r.SetQueryParam("cnt", qCnt); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Lang != nil {
 
 		// query param lang
 		var qrLang string
+
 		if o.Lang != nil {
 			qrLang = *o.Lang
 		}
 		qLang := qrLang
 		if qLang != "" {
+
 			if err := r.SetQueryParam("lang", qLang); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	// query param q
 	qrQ := o.Q
 	qQ := qrQ
 	if qQ != "" {
+
 		if err := r.SetQueryParam("q", qQ); err != nil {
 			return err
 		}
@@ -217,16 +241,17 @@ func (o *GetForecastByCityNameParams) WriteToRequest(r runtime.ClientRequest, re
 
 		// query param units
 		var qrUnits string
+
 		if o.Units != nil {
 			qrUnits = *o.Units
 		}
 		qUnits := qrUnits
 		if qUnits != "" {
+
 			if err := r.SetQueryParam("units", qUnits); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if len(res) > 0 {

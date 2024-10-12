@@ -52,7 +52,8 @@ func NewGetForecastByZIPCodeOK() *GetForecastByZIPCodeOK {
 	return &GetForecastByZIPCodeOK{}
 }
 
-/*GetForecastByZIPCodeOK handles this case with default header values.
+/*
+GetForecastByZIPCodeOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -60,7 +61,41 @@ type GetForecastByZIPCodeOK struct {
 	Payload *models.Forecast
 }
 
+// IsSuccess returns true when this get forecast by z Ip code o k response has a 2xx status code
+func (o *GetForecastByZIPCodeOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get forecast by z Ip code o k response has a 3xx status code
+func (o *GetForecastByZIPCodeOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get forecast by z Ip code o k response has a 4xx status code
+func (o *GetForecastByZIPCodeOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get forecast by z Ip code o k response has a 5xx status code
+func (o *GetForecastByZIPCodeOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get forecast by z Ip code o k response a status code equal to that given
+func (o *GetForecastByZIPCodeOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get forecast by z Ip code o k response
+func (o *GetForecastByZIPCodeOK) Code() int {
+	return 200
+}
+
 func (o *GetForecastByZIPCodeOK) Error() string {
+	return fmt.Sprintf("[GET /data/2.5/forecast?zip={zip}][%d] getForecastByZIpCodeOK  %+v", 200, o.Payload)
+}
+
+func (o *GetForecastByZIPCodeOK) String() string {
 	return fmt.Sprintf("[GET /data/2.5/forecast?zip={zip}][%d] getForecastByZIpCodeOK  %+v", 200, o.Payload)
 }
 
@@ -85,7 +120,8 @@ func NewGetForecastByZIPCodeTooManyRequests() *GetForecastByZIPCodeTooManyReques
 	return &GetForecastByZIPCodeTooManyRequests{}
 }
 
-/*GetForecastByZIPCodeTooManyRequests handles this case with default header values.
+/*
+GetForecastByZIPCodeTooManyRequests describes a response with status code 429, with default header values.
 
 Account is blocked
 */
@@ -93,7 +129,41 @@ type GetForecastByZIPCodeTooManyRequests struct {
 	Payload *models.Error
 }
 
+// IsSuccess returns true when this get forecast by z Ip code too many requests response has a 2xx status code
+func (o *GetForecastByZIPCodeTooManyRequests) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this get forecast by z Ip code too many requests response has a 3xx status code
+func (o *GetForecastByZIPCodeTooManyRequests) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get forecast by z Ip code too many requests response has a 4xx status code
+func (o *GetForecastByZIPCodeTooManyRequests) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this get forecast by z Ip code too many requests response has a 5xx status code
+func (o *GetForecastByZIPCodeTooManyRequests) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get forecast by z Ip code too many requests response a status code equal to that given
+func (o *GetForecastByZIPCodeTooManyRequests) IsCode(code int) bool {
+	return code == 429
+}
+
+// Code gets the status code for the get forecast by z Ip code too many requests response
+func (o *GetForecastByZIPCodeTooManyRequests) Code() int {
+	return 429
+}
+
 func (o *GetForecastByZIPCodeTooManyRequests) Error() string {
+	return fmt.Sprintf("[GET /data/2.5/forecast?zip={zip}][%d] getForecastByZIpCodeTooManyRequests  %+v", 429, o.Payload)
+}
+
+func (o *GetForecastByZIPCodeTooManyRequests) String() string {
 	return fmt.Sprintf("[GET /data/2.5/forecast?zip={zip}][%d] getForecastByZIpCodeTooManyRequests  %+v", 429, o.Payload)
 }
 
@@ -120,7 +190,8 @@ func NewGetForecastByZIPCodeDefault(code int) *GetForecastByZIPCodeDefault {
 	}
 }
 
-/*GetForecastByZIPCodeDefault handles this case with default header values.
+/*
+GetForecastByZIPCodeDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -130,12 +201,41 @@ type GetForecastByZIPCodeDefault struct {
 	Payload *models.Error
 }
 
+// IsSuccess returns true when this get forecast by z IP code default response has a 2xx status code
+func (o *GetForecastByZIPCodeDefault) IsSuccess() bool {
+	return o._statusCode/100 == 2
+}
+
+// IsRedirect returns true when this get forecast by z IP code default response has a 3xx status code
+func (o *GetForecastByZIPCodeDefault) IsRedirect() bool {
+	return o._statusCode/100 == 3
+}
+
+// IsClientError returns true when this get forecast by z IP code default response has a 4xx status code
+func (o *GetForecastByZIPCodeDefault) IsClientError() bool {
+	return o._statusCode/100 == 4
+}
+
+// IsServerError returns true when this get forecast by z IP code default response has a 5xx status code
+func (o *GetForecastByZIPCodeDefault) IsServerError() bool {
+	return o._statusCode/100 == 5
+}
+
+// IsCode returns true when this get forecast by z IP code default response a status code equal to that given
+func (o *GetForecastByZIPCodeDefault) IsCode(code int) bool {
+	return o._statusCode == code
+}
+
 // Code gets the status code for the get forecast by z IP code default response
 func (o *GetForecastByZIPCodeDefault) Code() int {
 	return o._statusCode
 }
 
 func (o *GetForecastByZIPCodeDefault) Error() string {
+	return fmt.Sprintf("[GET /data/2.5/forecast?zip={zip}][%d] getForecastByZIPCode default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *GetForecastByZIPCodeDefault) String() string {
 	return fmt.Sprintf("[GET /data/2.5/forecast?zip={zip}][%d] getForecastByZIPCode default  %+v", o._statusCode, o.Payload)
 }
 

@@ -52,7 +52,8 @@ func NewGetCurrentByCityIDOK() *GetCurrentByCityIDOK {
 	return &GetCurrentByCityIDOK{}
 }
 
-/*GetCurrentByCityIDOK handles this case with default header values.
+/*
+GetCurrentByCityIDOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -60,7 +61,41 @@ type GetCurrentByCityIDOK struct {
 	Payload *models.Current
 }
 
+// IsSuccess returns true when this get current by city Id o k response has a 2xx status code
+func (o *GetCurrentByCityIDOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get current by city Id o k response has a 3xx status code
+func (o *GetCurrentByCityIDOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get current by city Id o k response has a 4xx status code
+func (o *GetCurrentByCityIDOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get current by city Id o k response has a 5xx status code
+func (o *GetCurrentByCityIDOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get current by city Id o k response a status code equal to that given
+func (o *GetCurrentByCityIDOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get current by city Id o k response
+func (o *GetCurrentByCityIDOK) Code() int {
+	return 200
+}
+
 func (o *GetCurrentByCityIDOK) Error() string {
+	return fmt.Sprintf("[GET /data/2.5/weather?id={id}][%d] getCurrentByCityIdOK  %+v", 200, o.Payload)
+}
+
+func (o *GetCurrentByCityIDOK) String() string {
 	return fmt.Sprintf("[GET /data/2.5/weather?id={id}][%d] getCurrentByCityIdOK  %+v", 200, o.Payload)
 }
 
@@ -85,7 +120,8 @@ func NewGetCurrentByCityIDTooManyRequests() *GetCurrentByCityIDTooManyRequests {
 	return &GetCurrentByCityIDTooManyRequests{}
 }
 
-/*GetCurrentByCityIDTooManyRequests handles this case with default header values.
+/*
+GetCurrentByCityIDTooManyRequests describes a response with status code 429, with default header values.
 
 Account is blocked
 */
@@ -93,7 +129,41 @@ type GetCurrentByCityIDTooManyRequests struct {
 	Payload *models.Error
 }
 
+// IsSuccess returns true when this get current by city Id too many requests response has a 2xx status code
+func (o *GetCurrentByCityIDTooManyRequests) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this get current by city Id too many requests response has a 3xx status code
+func (o *GetCurrentByCityIDTooManyRequests) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get current by city Id too many requests response has a 4xx status code
+func (o *GetCurrentByCityIDTooManyRequests) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this get current by city Id too many requests response has a 5xx status code
+func (o *GetCurrentByCityIDTooManyRequests) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get current by city Id too many requests response a status code equal to that given
+func (o *GetCurrentByCityIDTooManyRequests) IsCode(code int) bool {
+	return code == 429
+}
+
+// Code gets the status code for the get current by city Id too many requests response
+func (o *GetCurrentByCityIDTooManyRequests) Code() int {
+	return 429
+}
+
 func (o *GetCurrentByCityIDTooManyRequests) Error() string {
+	return fmt.Sprintf("[GET /data/2.5/weather?id={id}][%d] getCurrentByCityIdTooManyRequests  %+v", 429, o.Payload)
+}
+
+func (o *GetCurrentByCityIDTooManyRequests) String() string {
 	return fmt.Sprintf("[GET /data/2.5/weather?id={id}][%d] getCurrentByCityIdTooManyRequests  %+v", 429, o.Payload)
 }
 
@@ -120,7 +190,8 @@ func NewGetCurrentByCityIDDefault(code int) *GetCurrentByCityIDDefault {
 	}
 }
 
-/*GetCurrentByCityIDDefault handles this case with default header values.
+/*
+GetCurrentByCityIDDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -130,12 +201,41 @@ type GetCurrentByCityIDDefault struct {
 	Payload *models.Error
 }
 
+// IsSuccess returns true when this get current by city ID default response has a 2xx status code
+func (o *GetCurrentByCityIDDefault) IsSuccess() bool {
+	return o._statusCode/100 == 2
+}
+
+// IsRedirect returns true when this get current by city ID default response has a 3xx status code
+func (o *GetCurrentByCityIDDefault) IsRedirect() bool {
+	return o._statusCode/100 == 3
+}
+
+// IsClientError returns true when this get current by city ID default response has a 4xx status code
+func (o *GetCurrentByCityIDDefault) IsClientError() bool {
+	return o._statusCode/100 == 4
+}
+
+// IsServerError returns true when this get current by city ID default response has a 5xx status code
+func (o *GetCurrentByCityIDDefault) IsServerError() bool {
+	return o._statusCode/100 == 5
+}
+
+// IsCode returns true when this get current by city ID default response a status code equal to that given
+func (o *GetCurrentByCityIDDefault) IsCode(code int) bool {
+	return o._statusCode == code
+}
+
 // Code gets the status code for the get current by city ID default response
 func (o *GetCurrentByCityIDDefault) Code() int {
 	return o._statusCode
 }
 
 func (o *GetCurrentByCityIDDefault) Error() string {
+	return fmt.Sprintf("[GET /data/2.5/weather?id={id}][%d] getCurrentByCityID default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *GetCurrentByCityIDDefault) String() string {
 	return fmt.Sprintf("[GET /data/2.5/weather?id={id}][%d] getCurrentByCityID default  %+v", o._statusCode, o.Payload)
 }
 

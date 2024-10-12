@@ -17,79 +17,101 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// NewGetForecastByGeographicCoordinatesParams creates a new GetForecastByGeographicCoordinatesParams object
-// with the default values initialized.
+// NewGetForecastByGeographicCoordinatesParams creates a new GetForecastByGeographicCoordinatesParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetForecastByGeographicCoordinatesParams() *GetForecastByGeographicCoordinatesParams {
-	var ()
 	return &GetForecastByGeographicCoordinatesParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetForecastByGeographicCoordinatesParamsWithTimeout creates a new GetForecastByGeographicCoordinatesParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetForecastByGeographicCoordinatesParamsWithTimeout(timeout time.Duration) *GetForecastByGeographicCoordinatesParams {
-	var ()
 	return &GetForecastByGeographicCoordinatesParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGetForecastByGeographicCoordinatesParamsWithContext creates a new GetForecastByGeographicCoordinatesParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetForecastByGeographicCoordinatesParamsWithContext(ctx context.Context) *GetForecastByGeographicCoordinatesParams {
-	var ()
 	return &GetForecastByGeographicCoordinatesParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGetForecastByGeographicCoordinatesParamsWithHTTPClient creates a new GetForecastByGeographicCoordinatesParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetForecastByGeographicCoordinatesParamsWithHTTPClient(client *http.Client) *GetForecastByGeographicCoordinatesParams {
-	var ()
 	return &GetForecastByGeographicCoordinatesParams{
 		HTTPClient: client,
 	}
 }
 
-/*GetForecastByGeographicCoordinatesParams contains all the parameters to send to the API endpoint
-for the get forecast by geographic coordinates operation typically these are written to a http.Request
+/*
+GetForecastByGeographicCoordinatesParams contains all the parameters to send to the API endpoint
+
+	for the get forecast by geographic coordinates operation.
+
+	Typically these are written to a http.Request.
 */
 type GetForecastByGeographicCoordinatesParams struct {
 
-	/*Cnt
-	  To limit number of listed cities please setup 'cnt' parameter that specifies the number of lines returned
+	/* Cnt.
 
+	   To limit number of listed cities please setup 'cnt' parameter that specifies the number of lines returned
+
+	   Format: uint64
 	*/
 	Cnt *uint64
-	/*Lang
-	  Multilingual support
 
+	/* Lang.
+
+	   Multilingual support
 	*/
 	Lang *string
-	/*Lat
-	  Coordinates of the location of your interest
 
+	/* Lat.
+
+	   Coordinates of the location of your interest
 	*/
 	Lat float64
-	/*Lon
-	  Coordinates of the location of your interest
 
+	/* Lon.
+
+	   Coordinates of the location of your interest
 	*/
 	Lon float64
-	/*Units
-	  Standard, metric, and imperial units are available
 
+	/* Units.
+
+	   Standard, metric, and imperial units are available
 	*/
 	Units *string
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get forecast by geographic coordinates params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetForecastByGeographicCoordinatesParams) WithDefaults() *GetForecastByGeographicCoordinatesParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get forecast by geographic coordinates params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetForecastByGeographicCoordinatesParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get forecast by geographic coordinates params
@@ -192,38 +214,41 @@ func (o *GetForecastByGeographicCoordinatesParams) WriteToRequest(r runtime.Clie
 
 		// query param cnt
 		var qrCnt uint64
+
 		if o.Cnt != nil {
 			qrCnt = *o.Cnt
 		}
 		qCnt := swag.FormatUint64(qrCnt)
 		if qCnt != "" {
+
 			if err := r.SetQueryParam("cnt", qCnt); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Lang != nil {
 
 		// query param lang
 		var qrLang string
+
 		if o.Lang != nil {
 			qrLang = *o.Lang
 		}
 		qLang := qrLang
 		if qLang != "" {
+
 			if err := r.SetQueryParam("lang", qLang); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	// query param lat
 	qrLat := o.Lat
 	qLat := swag.FormatFloat64(qrLat)
 	if qLat != "" {
+
 		if err := r.SetQueryParam("lat", qLat); err != nil {
 			return err
 		}
@@ -233,6 +258,7 @@ func (o *GetForecastByGeographicCoordinatesParams) WriteToRequest(r runtime.Clie
 	qrLon := o.Lon
 	qLon := swag.FormatFloat64(qrLon)
 	if qLon != "" {
+
 		if err := r.SetQueryParam("lon", qLon); err != nil {
 			return err
 		}
@@ -242,16 +268,17 @@ func (o *GetForecastByGeographicCoordinatesParams) WriteToRequest(r runtime.Clie
 
 		// query param units
 		var qrUnits string
+
 		if o.Units != nil {
 			qrUnits = *o.Units
 		}
 		qUnits := qrUnits
 		if qUnits != "" {
+
 			if err := r.SetQueryParam("units", qUnits); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if len(res) > 0 {

@@ -52,7 +52,8 @@ func NewGetOneCallOK() *GetOneCallOK {
 	return &GetOneCallOK{}
 }
 
-/*GetOneCallOK handles this case with default header values.
+/*
+GetOneCallOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -60,7 +61,41 @@ type GetOneCallOK struct {
 	Payload *models.OneCall
 }
 
+// IsSuccess returns true when this get one call o k response has a 2xx status code
+func (o *GetOneCallOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get one call o k response has a 3xx status code
+func (o *GetOneCallOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get one call o k response has a 4xx status code
+func (o *GetOneCallOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get one call o k response has a 5xx status code
+func (o *GetOneCallOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get one call o k response a status code equal to that given
+func (o *GetOneCallOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get one call o k response
+func (o *GetOneCallOK) Code() int {
+	return 200
+}
+
 func (o *GetOneCallOK) Error() string {
+	return fmt.Sprintf("[GET /data/2.5/onecall?lat={lat}&lon={lon}][%d] getOneCallOK  %+v", 200, o.Payload)
+}
+
+func (o *GetOneCallOK) String() string {
 	return fmt.Sprintf("[GET /data/2.5/onecall?lat={lat}&lon={lon}][%d] getOneCallOK  %+v", 200, o.Payload)
 }
 
@@ -85,7 +120,8 @@ func NewGetOneCallTooManyRequests() *GetOneCallTooManyRequests {
 	return &GetOneCallTooManyRequests{}
 }
 
-/*GetOneCallTooManyRequests handles this case with default header values.
+/*
+GetOneCallTooManyRequests describes a response with status code 429, with default header values.
 
 Account is blocked
 */
@@ -93,7 +129,41 @@ type GetOneCallTooManyRequests struct {
 	Payload *models.Error
 }
 
+// IsSuccess returns true when this get one call too many requests response has a 2xx status code
+func (o *GetOneCallTooManyRequests) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this get one call too many requests response has a 3xx status code
+func (o *GetOneCallTooManyRequests) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get one call too many requests response has a 4xx status code
+func (o *GetOneCallTooManyRequests) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this get one call too many requests response has a 5xx status code
+func (o *GetOneCallTooManyRequests) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get one call too many requests response a status code equal to that given
+func (o *GetOneCallTooManyRequests) IsCode(code int) bool {
+	return code == 429
+}
+
+// Code gets the status code for the get one call too many requests response
+func (o *GetOneCallTooManyRequests) Code() int {
+	return 429
+}
+
 func (o *GetOneCallTooManyRequests) Error() string {
+	return fmt.Sprintf("[GET /data/2.5/onecall?lat={lat}&lon={lon}][%d] getOneCallTooManyRequests  %+v", 429, o.Payload)
+}
+
+func (o *GetOneCallTooManyRequests) String() string {
 	return fmt.Sprintf("[GET /data/2.5/onecall?lat={lat}&lon={lon}][%d] getOneCallTooManyRequests  %+v", 429, o.Payload)
 }
 
@@ -120,7 +190,8 @@ func NewGetOneCallDefault(code int) *GetOneCallDefault {
 	}
 }
 
-/*GetOneCallDefault handles this case with default header values.
+/*
+GetOneCallDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -130,12 +201,41 @@ type GetOneCallDefault struct {
 	Payload *models.Error
 }
 
+// IsSuccess returns true when this get one call default response has a 2xx status code
+func (o *GetOneCallDefault) IsSuccess() bool {
+	return o._statusCode/100 == 2
+}
+
+// IsRedirect returns true when this get one call default response has a 3xx status code
+func (o *GetOneCallDefault) IsRedirect() bool {
+	return o._statusCode/100 == 3
+}
+
+// IsClientError returns true when this get one call default response has a 4xx status code
+func (o *GetOneCallDefault) IsClientError() bool {
+	return o._statusCode/100 == 4
+}
+
+// IsServerError returns true when this get one call default response has a 5xx status code
+func (o *GetOneCallDefault) IsServerError() bool {
+	return o._statusCode/100 == 5
+}
+
+// IsCode returns true when this get one call default response a status code equal to that given
+func (o *GetOneCallDefault) IsCode(code int) bool {
+	return o._statusCode == code
+}
+
 // Code gets the status code for the get one call default response
 func (o *GetOneCallDefault) Code() int {
 	return o._statusCode
 }
 
 func (o *GetOneCallDefault) Error() string {
+	return fmt.Sprintf("[GET /data/2.5/onecall?lat={lat}&lon={lon}][%d] getOneCall default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *GetOneCallDefault) String() string {
 	return fmt.Sprintf("[GET /data/2.5/onecall?lat={lat}&lon={lon}][%d] getOneCall default  %+v", o._statusCode, o.Payload)
 }
 

@@ -6,6 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/go-openapi/errors"
@@ -54,7 +55,6 @@ func (m *Forecast) Validate(formats strfmt.Registry) error {
 }
 
 func (m *Forecast) validateCity(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.City) { // not required
 		return nil
 	}
@@ -63,6 +63,8 @@ func (m *Forecast) validateCity(formats strfmt.Registry) error {
 		if err := m.City.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("city")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("city")
 			}
 			return err
 		}
@@ -72,7 +74,6 @@ func (m *Forecast) validateCity(formats strfmt.Registry) error {
 }
 
 func (m *Forecast) validateList(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.List) { // not required
 		return nil
 	}
@@ -86,6 +87,72 @@ func (m *Forecast) validateList(formats strfmt.Registry) error {
 			if err := m.List[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("list" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("list" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContextValidate validate this forecast based on the context it is used
+func (m *Forecast) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateCity(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateList(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *Forecast) contextValidateCity(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.City != nil {
+
+		if swag.IsZero(m.City) { // not required
+			return nil
+		}
+
+		if err := m.City.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("city")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("city")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *Forecast) contextValidateList(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.List); i++ {
+
+		if m.List[i] != nil {
+
+			if swag.IsZero(m.List[i]) { // not required
+				return nil
+			}
+
+			if err := m.List[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("list" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("list" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -169,7 +236,6 @@ func (m *ForecastCity) Validate(formats strfmt.Registry) error {
 }
 
 func (m *ForecastCity) validateCoord(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Coord) { // not required
 		return nil
 	}
@@ -178,6 +244,8 @@ func (m *ForecastCity) validateCoord(formats strfmt.Registry) error {
 		if err := m.Coord.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("city" + "." + "coord")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("city" + "." + "coord")
 			}
 			return err
 		}
@@ -187,7 +255,6 @@ func (m *ForecastCity) validateCoord(formats strfmt.Registry) error {
 }
 
 func (m *ForecastCity) validateSunrise(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Sunrise) { // not required
 		return nil
 	}
@@ -195,6 +262,8 @@ func (m *ForecastCity) validateSunrise(formats strfmt.Registry) error {
 	if err := m.Sunrise.Validate(formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
 			return ve.ValidateName("city" + "." + "sunrise")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("city" + "." + "sunrise")
 		}
 		return err
 	}
@@ -203,7 +272,6 @@ func (m *ForecastCity) validateSunrise(formats strfmt.Registry) error {
 }
 
 func (m *ForecastCity) validateSunset(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Sunset) { // not required
 		return nil
 	}
@@ -211,6 +279,87 @@ func (m *ForecastCity) validateSunset(formats strfmt.Registry) error {
 	if err := m.Sunset.Validate(formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
 			return ve.ValidateName("city" + "." + "sunset")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("city" + "." + "sunset")
+		}
+		return err
+	}
+
+	return nil
+}
+
+// ContextValidate validate this forecast city based on the context it is used
+func (m *ForecastCity) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateCoord(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateSunrise(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateSunset(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *ForecastCity) contextValidateCoord(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Coord != nil {
+
+		if swag.IsZero(m.Coord) { // not required
+			return nil
+		}
+
+		if err := m.Coord.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("city" + "." + "coord")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("city" + "." + "coord")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *ForecastCity) contextValidateSunrise(ctx context.Context, formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Sunrise) { // not required
+		return nil
+	}
+
+	if err := m.Sunrise.ContextValidate(ctx, formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("city" + "." + "sunrise")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("city" + "." + "sunrise")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *ForecastCity) contextValidateSunset(ctx context.Context, formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Sunset) { // not required
+		return nil
+	}
+
+	if err := m.Sunset.ContextValidate(ctx, formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("city" + "." + "sunset")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("city" + "." + "sunset")
 		}
 		return err
 	}

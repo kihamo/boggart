@@ -6,6 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/go-openapi/errors"
@@ -57,7 +58,6 @@ func (m *OneCallTimeMachine) Validate(formats strfmt.Registry) error {
 }
 
 func (m *OneCallTimeMachine) validateCurrent(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Current) { // not required
 		return nil
 	}
@@ -66,6 +66,8 @@ func (m *OneCallTimeMachine) validateCurrent(formats strfmt.Registry) error {
 		if err := m.Current.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("current")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("current")
 			}
 			return err
 		}
@@ -75,7 +77,6 @@ func (m *OneCallTimeMachine) validateCurrent(formats strfmt.Registry) error {
 }
 
 func (m *OneCallTimeMachine) validateHourly(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Hourly) { // not required
 		return nil
 	}
@@ -89,6 +90,72 @@ func (m *OneCallTimeMachine) validateHourly(formats strfmt.Registry) error {
 			if err := m.Hourly[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("hourly" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("hourly" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContextValidate validate this one call time machine based on the context it is used
+func (m *OneCallTimeMachine) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateCurrent(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateHourly(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *OneCallTimeMachine) contextValidateCurrent(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Current != nil {
+
+		if swag.IsZero(m.Current) { // not required
+			return nil
+		}
+
+		if err := m.Current.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("current")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("current")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *OneCallTimeMachine) contextValidateHourly(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.Hourly); i++ {
+
+		if m.Hourly[i] != nil {
+
+			if swag.IsZero(m.Hourly[i]) { // not required
+				return nil
+			}
+
+			if err := m.Hourly[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("hourly" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("hourly" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -204,7 +271,6 @@ func (m *OneCallTimeMachineCurrent) Validate(formats strfmt.Registry) error {
 }
 
 func (m *OneCallTimeMachineCurrent) validateDt(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Dt) { // not required
 		return nil
 	}
@@ -212,6 +278,8 @@ func (m *OneCallTimeMachineCurrent) validateDt(formats strfmt.Registry) error {
 	if err := m.Dt.Validate(formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
 			return ve.ValidateName("current" + "." + "dt")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("current" + "." + "dt")
 		}
 		return err
 	}
@@ -220,7 +288,6 @@ func (m *OneCallTimeMachineCurrent) validateDt(formats strfmt.Registry) error {
 }
 
 func (m *OneCallTimeMachineCurrent) validateSunrise(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Sunrise) { // not required
 		return nil
 	}
@@ -228,6 +295,8 @@ func (m *OneCallTimeMachineCurrent) validateSunrise(formats strfmt.Registry) err
 	if err := m.Sunrise.Validate(formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
 			return ve.ValidateName("current" + "." + "sunrise")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("current" + "." + "sunrise")
 		}
 		return err
 	}
@@ -236,7 +305,6 @@ func (m *OneCallTimeMachineCurrent) validateSunrise(formats strfmt.Registry) err
 }
 
 func (m *OneCallTimeMachineCurrent) validateSunset(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Sunset) { // not required
 		return nil
 	}
@@ -244,6 +312,8 @@ func (m *OneCallTimeMachineCurrent) validateSunset(formats strfmt.Registry) erro
 	if err := m.Sunset.Validate(formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
 			return ve.ValidateName("current" + "." + "sunset")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("current" + "." + "sunset")
 		}
 		return err
 	}
@@ -252,7 +322,6 @@ func (m *OneCallTimeMachineCurrent) validateSunset(formats strfmt.Registry) erro
 }
 
 func (m *OneCallTimeMachineCurrent) validateWeather(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Weather) { // not required
 		return nil
 	}
@@ -266,6 +335,113 @@ func (m *OneCallTimeMachineCurrent) validateWeather(formats strfmt.Registry) err
 			if err := m.Weather[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("current" + "." + "weather" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("current" + "." + "weather" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContextValidate validate this one call time machine current based on the context it is used
+func (m *OneCallTimeMachineCurrent) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateDt(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateSunrise(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateSunset(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateWeather(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *OneCallTimeMachineCurrent) contextValidateDt(ctx context.Context, formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Dt) { // not required
+		return nil
+	}
+
+	if err := m.Dt.ContextValidate(ctx, formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("current" + "." + "dt")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("current" + "." + "dt")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *OneCallTimeMachineCurrent) contextValidateSunrise(ctx context.Context, formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Sunrise) { // not required
+		return nil
+	}
+
+	if err := m.Sunrise.ContextValidate(ctx, formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("current" + "." + "sunrise")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("current" + "." + "sunrise")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *OneCallTimeMachineCurrent) contextValidateSunset(ctx context.Context, formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Sunset) { // not required
+		return nil
+	}
+
+	if err := m.Sunset.ContextValidate(ctx, formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("current" + "." + "sunset")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("current" + "." + "sunset")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *OneCallTimeMachineCurrent) contextValidateWeather(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.Weather); i++ {
+
+		if m.Weather[i] != nil {
+
+			if swag.IsZero(m.Weather[i]) { // not required
+				return nil
+			}
+
+			if err := m.Weather[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("current" + "." + "weather" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("current" + "." + "weather" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -370,7 +546,6 @@ func (m *OneCallTimeMachineHourlyItems0) Validate(formats strfmt.Registry) error
 }
 
 func (m *OneCallTimeMachineHourlyItems0) validateDt(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Dt) { // not required
 		return nil
 	}
@@ -378,6 +553,8 @@ func (m *OneCallTimeMachineHourlyItems0) validateDt(formats strfmt.Registry) err
 	if err := m.Dt.Validate(formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
 			return ve.ValidateName("dt")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("dt")
 		}
 		return err
 	}
@@ -386,7 +563,6 @@ func (m *OneCallTimeMachineHourlyItems0) validateDt(formats strfmt.Registry) err
 }
 
 func (m *OneCallTimeMachineHourlyItems0) validateRain(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Rain) { // not required
 		return nil
 	}
@@ -395,6 +571,8 @@ func (m *OneCallTimeMachineHourlyItems0) validateRain(formats strfmt.Registry) e
 		if err := m.Rain.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("rain")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("rain")
 			}
 			return err
 		}
@@ -404,7 +582,6 @@ func (m *OneCallTimeMachineHourlyItems0) validateRain(formats strfmt.Registry) e
 }
 
 func (m *OneCallTimeMachineHourlyItems0) validateSnow(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Snow) { // not required
 		return nil
 	}
@@ -413,6 +590,8 @@ func (m *OneCallTimeMachineHourlyItems0) validateSnow(formats strfmt.Registry) e
 		if err := m.Snow.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("snow")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("snow")
 			}
 			return err
 		}
@@ -422,7 +601,6 @@ func (m *OneCallTimeMachineHourlyItems0) validateSnow(formats strfmt.Registry) e
 }
 
 func (m *OneCallTimeMachineHourlyItems0) validateWeather(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Weather) { // not required
 		return nil
 	}
@@ -436,6 +614,119 @@ func (m *OneCallTimeMachineHourlyItems0) validateWeather(formats strfmt.Registry
 			if err := m.Weather[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("weather" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("weather" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContextValidate validate this one call time machine hourly items0 based on the context it is used
+func (m *OneCallTimeMachineHourlyItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateDt(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateRain(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateSnow(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateWeather(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *OneCallTimeMachineHourlyItems0) contextValidateDt(ctx context.Context, formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Dt) { // not required
+		return nil
+	}
+
+	if err := m.Dt.ContextValidate(ctx, formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("dt")
+		} else if ce, ok := err.(*errors.CompositeError); ok {
+			return ce.ValidateName("dt")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *OneCallTimeMachineHourlyItems0) contextValidateRain(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Rain != nil {
+
+		if swag.IsZero(m.Rain) { // not required
+			return nil
+		}
+
+		if err := m.Rain.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("rain")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("rain")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *OneCallTimeMachineHourlyItems0) contextValidateSnow(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Snow != nil {
+
+		if swag.IsZero(m.Snow) { // not required
+			return nil
+		}
+
+		if err := m.Snow.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("snow")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("snow")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *OneCallTimeMachineHourlyItems0) contextValidateWeather(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.Weather); i++ {
+
+		if m.Weather[i] != nil {
+
+			if swag.IsZero(m.Weather[i]) { // not required
+				return nil
+			}
+
+			if err := m.Weather[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("weather" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("weather" + "." + strconv.Itoa(i))
 				}
 				return err
 			}

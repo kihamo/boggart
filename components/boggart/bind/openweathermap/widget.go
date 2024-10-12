@@ -1,7 +1,7 @@
 package openweathermap
 
 import (
-	"github.com/elazarl/go-bindata-assetfs"
+	assetfs "github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/providers/openweathermap"
 	"github.com/kihamo/shadow/components/dashboard"
 )
@@ -9,12 +9,15 @@ import (
 func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	widget := b.Widget()
 	ctx := r.Context()
+
+	b.locationMutex.RLock()
 	vars := map[string]interface{}{
 		"icon":          openweathermap.Icon,
 		"location_name": b.locationName,
 	}
+	b.locationMutex.RUnlock()
 
-	response, err := b.OneCall(ctx, []string{"current", "daily"})
+	response, err := b.OneCallMigrate(ctx)
 	if err != nil {
 		widget.FlashError(r, "One call failed with error %v", "", err)
 	} else {

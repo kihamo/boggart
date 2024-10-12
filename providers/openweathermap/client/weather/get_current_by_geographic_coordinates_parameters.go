@@ -17,74 +17,93 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// NewGetCurrentByGeographicCoordinatesParams creates a new GetCurrentByGeographicCoordinatesParams object
-// with the default values initialized.
+// NewGetCurrentByGeographicCoordinatesParams creates a new GetCurrentByGeographicCoordinatesParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetCurrentByGeographicCoordinatesParams() *GetCurrentByGeographicCoordinatesParams {
-	var ()
 	return &GetCurrentByGeographicCoordinatesParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetCurrentByGeographicCoordinatesParamsWithTimeout creates a new GetCurrentByGeographicCoordinatesParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetCurrentByGeographicCoordinatesParamsWithTimeout(timeout time.Duration) *GetCurrentByGeographicCoordinatesParams {
-	var ()
 	return &GetCurrentByGeographicCoordinatesParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGetCurrentByGeographicCoordinatesParamsWithContext creates a new GetCurrentByGeographicCoordinatesParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetCurrentByGeographicCoordinatesParamsWithContext(ctx context.Context) *GetCurrentByGeographicCoordinatesParams {
-	var ()
 	return &GetCurrentByGeographicCoordinatesParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGetCurrentByGeographicCoordinatesParamsWithHTTPClient creates a new GetCurrentByGeographicCoordinatesParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetCurrentByGeographicCoordinatesParamsWithHTTPClient(client *http.Client) *GetCurrentByGeographicCoordinatesParams {
-	var ()
 	return &GetCurrentByGeographicCoordinatesParams{
 		HTTPClient: client,
 	}
 }
 
-/*GetCurrentByGeographicCoordinatesParams contains all the parameters to send to the API endpoint
-for the get current by geographic coordinates operation typically these are written to a http.Request
+/*
+GetCurrentByGeographicCoordinatesParams contains all the parameters to send to the API endpoint
+
+	for the get current by geographic coordinates operation.
+
+	Typically these are written to a http.Request.
 */
 type GetCurrentByGeographicCoordinatesParams struct {
 
-	/*Lang
-	  Multilingual support
+	/* Lang.
 
+	   Multilingual support
 	*/
 	Lang *string
-	/*Lat
-	  Coordinates of the location of your interest
 
+	/* Lat.
+
+	   Coordinates of the location of your interest
 	*/
 	Lat float64
-	/*Lon
-	  Coordinates of the location of your interest
 
+	/* Lon.
+
+	   Coordinates of the location of your interest
 	*/
 	Lon float64
-	/*Units
-	  Standard, metric, and imperial units are available
 
+	/* Units.
+
+	   Standard, metric, and imperial units are available
 	*/
 	Units *string
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get current by geographic coordinates params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetCurrentByGeographicCoordinatesParams) WithDefaults() *GetCurrentByGeographicCoordinatesParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get current by geographic coordinates params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetCurrentByGeographicCoordinatesParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get current by geographic coordinates params
@@ -176,22 +195,24 @@ func (o *GetCurrentByGeographicCoordinatesParams) WriteToRequest(r runtime.Clien
 
 		// query param lang
 		var qrLang string
+
 		if o.Lang != nil {
 			qrLang = *o.Lang
 		}
 		qLang := qrLang
 		if qLang != "" {
+
 			if err := r.SetQueryParam("lang", qLang); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	// query param lat
 	qrLat := o.Lat
 	qLat := swag.FormatFloat64(qrLat)
 	if qLat != "" {
+
 		if err := r.SetQueryParam("lat", qLat); err != nil {
 			return err
 		}
@@ -201,6 +222,7 @@ func (o *GetCurrentByGeographicCoordinatesParams) WriteToRequest(r runtime.Clien
 	qrLon := o.Lon
 	qLon := swag.FormatFloat64(qrLon)
 	if qLon != "" {
+
 		if err := r.SetQueryParam("lon", qLon); err != nil {
 			return err
 		}
@@ -210,16 +232,17 @@ func (o *GetCurrentByGeographicCoordinatesParams) WriteToRequest(r runtime.Clien
 
 		// query param units
 		var qrUnits string
+
 		if o.Units != nil {
 			qrUnits = *o.Units
 		}
 		qUnits := qrUnits
 		if qUnits != "" {
+
 			if err := r.SetQueryParam("units", qUnits); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if len(res) > 0 {

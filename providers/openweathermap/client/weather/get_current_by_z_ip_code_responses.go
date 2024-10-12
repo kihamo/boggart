@@ -52,7 +52,8 @@ func NewGetCurrentByZIPCodeOK() *GetCurrentByZIPCodeOK {
 	return &GetCurrentByZIPCodeOK{}
 }
 
-/*GetCurrentByZIPCodeOK handles this case with default header values.
+/*
+GetCurrentByZIPCodeOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -60,7 +61,41 @@ type GetCurrentByZIPCodeOK struct {
 	Payload *models.Current
 }
 
+// IsSuccess returns true when this get current by z Ip code o k response has a 2xx status code
+func (o *GetCurrentByZIPCodeOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get current by z Ip code o k response has a 3xx status code
+func (o *GetCurrentByZIPCodeOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get current by z Ip code o k response has a 4xx status code
+func (o *GetCurrentByZIPCodeOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get current by z Ip code o k response has a 5xx status code
+func (o *GetCurrentByZIPCodeOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get current by z Ip code o k response a status code equal to that given
+func (o *GetCurrentByZIPCodeOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get current by z Ip code o k response
+func (o *GetCurrentByZIPCodeOK) Code() int {
+	return 200
+}
+
 func (o *GetCurrentByZIPCodeOK) Error() string {
+	return fmt.Sprintf("[GET /data/2.5/weather?zip={zip}][%d] getCurrentByZIpCodeOK  %+v", 200, o.Payload)
+}
+
+func (o *GetCurrentByZIPCodeOK) String() string {
 	return fmt.Sprintf("[GET /data/2.5/weather?zip={zip}][%d] getCurrentByZIpCodeOK  %+v", 200, o.Payload)
 }
 
@@ -85,7 +120,8 @@ func NewGetCurrentByZIPCodeTooManyRequests() *GetCurrentByZIPCodeTooManyRequests
 	return &GetCurrentByZIPCodeTooManyRequests{}
 }
 
-/*GetCurrentByZIPCodeTooManyRequests handles this case with default header values.
+/*
+GetCurrentByZIPCodeTooManyRequests describes a response with status code 429, with default header values.
 
 Account is blocked
 */
@@ -93,7 +129,41 @@ type GetCurrentByZIPCodeTooManyRequests struct {
 	Payload *models.Error
 }
 
+// IsSuccess returns true when this get current by z Ip code too many requests response has a 2xx status code
+func (o *GetCurrentByZIPCodeTooManyRequests) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this get current by z Ip code too many requests response has a 3xx status code
+func (o *GetCurrentByZIPCodeTooManyRequests) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get current by z Ip code too many requests response has a 4xx status code
+func (o *GetCurrentByZIPCodeTooManyRequests) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this get current by z Ip code too many requests response has a 5xx status code
+func (o *GetCurrentByZIPCodeTooManyRequests) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get current by z Ip code too many requests response a status code equal to that given
+func (o *GetCurrentByZIPCodeTooManyRequests) IsCode(code int) bool {
+	return code == 429
+}
+
+// Code gets the status code for the get current by z Ip code too many requests response
+func (o *GetCurrentByZIPCodeTooManyRequests) Code() int {
+	return 429
+}
+
 func (o *GetCurrentByZIPCodeTooManyRequests) Error() string {
+	return fmt.Sprintf("[GET /data/2.5/weather?zip={zip}][%d] getCurrentByZIpCodeTooManyRequests  %+v", 429, o.Payload)
+}
+
+func (o *GetCurrentByZIPCodeTooManyRequests) String() string {
 	return fmt.Sprintf("[GET /data/2.5/weather?zip={zip}][%d] getCurrentByZIpCodeTooManyRequests  %+v", 429, o.Payload)
 }
 
@@ -120,7 +190,8 @@ func NewGetCurrentByZIPCodeDefault(code int) *GetCurrentByZIPCodeDefault {
 	}
 }
 
-/*GetCurrentByZIPCodeDefault handles this case with default header values.
+/*
+GetCurrentByZIPCodeDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -130,12 +201,41 @@ type GetCurrentByZIPCodeDefault struct {
 	Payload *models.Error
 }
 
+// IsSuccess returns true when this get current by z IP code default response has a 2xx status code
+func (o *GetCurrentByZIPCodeDefault) IsSuccess() bool {
+	return o._statusCode/100 == 2
+}
+
+// IsRedirect returns true when this get current by z IP code default response has a 3xx status code
+func (o *GetCurrentByZIPCodeDefault) IsRedirect() bool {
+	return o._statusCode/100 == 3
+}
+
+// IsClientError returns true when this get current by z IP code default response has a 4xx status code
+func (o *GetCurrentByZIPCodeDefault) IsClientError() bool {
+	return o._statusCode/100 == 4
+}
+
+// IsServerError returns true when this get current by z IP code default response has a 5xx status code
+func (o *GetCurrentByZIPCodeDefault) IsServerError() bool {
+	return o._statusCode/100 == 5
+}
+
+// IsCode returns true when this get current by z IP code default response a status code equal to that given
+func (o *GetCurrentByZIPCodeDefault) IsCode(code int) bool {
+	return o._statusCode == code
+}
+
 // Code gets the status code for the get current by z IP code default response
 func (o *GetCurrentByZIPCodeDefault) Code() int {
 	return o._statusCode
 }
 
 func (o *GetCurrentByZIPCodeDefault) Error() string {
+	return fmt.Sprintf("[GET /data/2.5/weather?zip={zip}][%d] getCurrentByZIPCode default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *GetCurrentByZIPCodeDefault) String() string {
 	return fmt.Sprintf("[GET /data/2.5/weather?zip={zip}][%d] getCurrentByZIPCode default  %+v", o._statusCode, o.Payload)
 }
 

@@ -6,6 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/go-openapi/errors"
@@ -73,7 +74,6 @@ func (m *Weather) validateIDEnum(path, location string, value uint64) error {
 }
 
 func (m *Weather) validateID(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.ID) { // not required
 		return nil
 	}
@@ -131,7 +131,6 @@ func (m *Weather) validateMainEnum(path, location string, value string) error {
 }
 
 func (m *Weather) validateMain(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Main) { // not required
 		return nil
 	}
@@ -141,6 +140,11 @@ func (m *Weather) validateMain(formats strfmt.Registry) error {
 		return err
 	}
 
+	return nil
+}
+
+// ContextValidate validates this weather based on context it is used
+func (m *Weather) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

@@ -23,29 +23,31 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	GetCurrentByCityID(params *GetCurrentByCityIDParams, authInfo runtime.ClientAuthInfoWriter) (*GetCurrentByCityIDOK, error)
+	GetCurrentByCityID(params *GetCurrentByCityIDParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetCurrentByCityIDOK, error)
 
-	GetCurrentByCityName(params *GetCurrentByCityNameParams, authInfo runtime.ClientAuthInfoWriter) (*GetCurrentByCityNameOK, error)
+	GetCurrentByCityName(params *GetCurrentByCityNameParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetCurrentByCityNameOK, error)
 
-	GetCurrentByGeographicCoordinates(params *GetCurrentByGeographicCoordinatesParams, authInfo runtime.ClientAuthInfoWriter) (*GetCurrentByGeographicCoordinatesOK, error)
+	GetCurrentByGeographicCoordinates(params *GetCurrentByGeographicCoordinatesParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetCurrentByGeographicCoordinatesOK, error)
 
-	GetCurrentByZIPCode(params *GetCurrentByZIPCodeParams, authInfo runtime.ClientAuthInfoWriter) (*GetCurrentByZIPCodeOK, error)
+	GetCurrentByZIPCode(params *GetCurrentByZIPCodeParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetCurrentByZIPCodeOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
 
 /*
-  GetCurrentByCityID get current by city ID API
+GetCurrentByCityID get current by city ID API
 */
-func (a *Client) GetCurrentByCityID(params *GetCurrentByCityIDParams, authInfo runtime.ClientAuthInfoWriter) (*GetCurrentByCityIDOK, error) {
+func (a *Client) GetCurrentByCityID(params *GetCurrentByCityIDParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetCurrentByCityIDOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetCurrentByCityIDParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getCurrentByCityID",
 		Method:             "GET",
 		PathPattern:        "/data/2.5/weather?id={id}",
@@ -57,7 +59,12 @@ func (a *Client) GetCurrentByCityID(params *GetCurrentByCityIDParams, authInfo r
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -71,15 +78,14 @@ func (a *Client) GetCurrentByCityID(params *GetCurrentByCityIDParams, authInfo r
 }
 
 /*
-  GetCurrentByCityName get current by city name API
+GetCurrentByCityName get current by city name API
 */
-func (a *Client) GetCurrentByCityName(params *GetCurrentByCityNameParams, authInfo runtime.ClientAuthInfoWriter) (*GetCurrentByCityNameOK, error) {
+func (a *Client) GetCurrentByCityName(params *GetCurrentByCityNameParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetCurrentByCityNameOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetCurrentByCityNameParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getCurrentByCityName",
 		Method:             "GET",
 		PathPattern:        "/data/2.5/weather?q={q}",
@@ -91,7 +97,12 @@ func (a *Client) GetCurrentByCityName(params *GetCurrentByCityNameParams, authIn
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -105,15 +116,14 @@ func (a *Client) GetCurrentByCityName(params *GetCurrentByCityNameParams, authIn
 }
 
 /*
-  GetCurrentByGeographicCoordinates get current by geographic coordinates API
+GetCurrentByGeographicCoordinates get current by geographic coordinates API
 */
-func (a *Client) GetCurrentByGeographicCoordinates(params *GetCurrentByGeographicCoordinatesParams, authInfo runtime.ClientAuthInfoWriter) (*GetCurrentByGeographicCoordinatesOK, error) {
+func (a *Client) GetCurrentByGeographicCoordinates(params *GetCurrentByGeographicCoordinatesParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetCurrentByGeographicCoordinatesOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetCurrentByGeographicCoordinatesParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getCurrentByGeographicCoordinates",
 		Method:             "GET",
 		PathPattern:        "/data/2.5/weather?lat={lat}&lon={lon}",
@@ -125,7 +135,12 @@ func (a *Client) GetCurrentByGeographicCoordinates(params *GetCurrentByGeographi
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -139,15 +154,14 @@ func (a *Client) GetCurrentByGeographicCoordinates(params *GetCurrentByGeographi
 }
 
 /*
-  GetCurrentByZIPCode get current by z IP code API
+GetCurrentByZIPCode get current by z IP code API
 */
-func (a *Client) GetCurrentByZIPCode(params *GetCurrentByZIPCodeParams, authInfo runtime.ClientAuthInfoWriter) (*GetCurrentByZIPCodeOK, error) {
+func (a *Client) GetCurrentByZIPCode(params *GetCurrentByZIPCodeParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetCurrentByZIPCodeOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetCurrentByZIPCodeParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "getCurrentByZIPCode",
 		Method:             "GET",
 		PathPattern:        "/data/2.5/weather?zip={zip}",
@@ -159,7 +173,12 @@ func (a *Client) GetCurrentByZIPCode(params *GetCurrentByZIPCodeParams, authInfo
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
