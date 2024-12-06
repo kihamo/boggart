@@ -36,17 +36,24 @@ func New(address *url.URL, debug bool, logger logger.Logger) *Client {
 		Wiim: client.NewHTTPClientWithConfig(nil, cfg),
 	}
 
-	if rt, ok := cl.Transport.(*httptransport.Runtime); ok {
-		rt.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
-		rt.Consumers["text/html"] = runtime.JSONConsumer()
-
-		if logger != nil {
-			rt.SetLogger(logger)
-		}
-
-		rt.SetDebug(debug)
+	rt, ok := cl.Transport.(*httptransport.Runtime)
+	if !ok {
+		return cl
 	}
+
+	rt.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+	rt.Consumers["text/html"] = runtime.JSONConsumer()
+
+	if logger != nil {
+		rt.SetLogger(logger)
+	}
+
+	rt.SetDebug(debug)
+
+	cl.SetTransport(&transport{
+		proxied: cl.Transport,
+	})
 
 	return cl
 }

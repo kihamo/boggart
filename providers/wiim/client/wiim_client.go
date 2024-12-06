@@ -9,7 +9,10 @@ import (
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
-	"github.com/kihamo/boggart/providers/wiim/client/operations"
+
+	"github.com/kihamo/boggart/providers/wiim/client/device"
+	"github.com/kihamo/boggart/providers/wiim/client/eq"
+	"github.com/kihamo/boggart/providers/wiim/client/networking"
 )
 
 // Default wiim HTTP client.
@@ -54,7 +57,9 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Wiim {
 
 	cli := new(Wiim)
 	cli.Transport = transport
-	cli.Operations = operations.New(transport, formats)
+	cli.Device = device.New(transport, formats)
+	cli.Eq = eq.New(transport, formats)
+	cli.Networking = networking.New(transport, formats)
 	return cli
 }
 
@@ -99,7 +104,11 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // Wiim is a client for wiim
 type Wiim struct {
-	Operations operations.ClientService
+	Device device.ClientService
+
+	Eq eq.ClientService
+
+	Networking networking.ClientService
 
 	Transport runtime.ClientTransport
 }
@@ -107,5 +116,7 @@ type Wiim struct {
 // SetTransport changes the transport on the client and all its subresources
 func (c *Wiim) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
-	c.Operations.SetTransport(transport)
+	c.Device.SetTransport(transport)
+	c.Eq.SetTransport(transport)
+	c.Networking.SetTransport(transport)
 }

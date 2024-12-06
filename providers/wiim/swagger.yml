@@ -14,6 +14,8 @@ paths:
   /httpapi.asp?command=getStatusEx:
     get:
       operationId: "getStatusEx"
+      tags:
+        - "device"
       description: "Retrieves detailed informations about a connected device."
       responses:
         200:
@@ -24,6 +26,8 @@ paths:
   /httpapi.asp?command=wlanGetConnectState:
     get:
       operationId: "wlanGetConnectState"
+      tags:
+        - "networking"
       description: "This command will return the status of the WiFi connection. The possible return values are as follows."
       responses:
         200:
@@ -40,9 +44,33 @@ paths:
               - "FAIL"     # Connect fail
               - "OK"       # connected
  
+  /httpapi.asp?command=EQOn:
+    get:
+      operationId: "EQOn"
+      tags:
+        - "eq"
+      description: "Turn on the EQ"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: "#/definitions/OperationResult"
+  /httpapi.asp?command=EQOff:
+    get:
+      operationId: "EQOff"
+      tags:
+        - "eq"
+      description: "Turn off the EQ setting"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: "#/definitions/OperationResult"
   /httpapi.asp?command=EQGetList:
     get:
       operationId: "EQGetList"
+      tags:
+        - "eq"
       description: "Check all the possible EQ settings"
       responses:
         200:
@@ -51,6 +79,23 @@ paths:
             type: "array"
             items: 
               type: "string"
+  /httpapi.asp?command=EQLoad:{name}:
+    get:
+      operationId: "EQLoad"
+      tags:
+        - "eq"
+      description: "Set the specific EQ with name"
+      parameters:
+        - name: "name"
+          in: "path"
+          description: "the one of the name in the list returned by EQGetList, i.e., EQLoad:Flat"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: "#/definitions/EQLoad"
 
 definitions:
   BooleanAsString:
@@ -89,6 +134,14 @@ definitions:
       type: "MAC"
     x-nullable: false
 
+  OperationResult:
+    type: "object"
+    properties:
+      status:
+        type: "string"
+        enum:
+          - "OK"
+          - "Failed"
 
   StatusEx:
     type: "object"
@@ -409,3 +462,40 @@ definitions:
         description: "The device UPnP and Airplay friendly name"
       GroupName:
         type: "string"
+
+  EQLoad:
+    type: "object"
+    properties:
+      EQBand:
+        type: "array"
+        items: 
+          type: "object"
+          properties: 
+            index:
+              type: "integer"
+            param_name:
+              type: "string"
+            value:
+              type: "number"
+      EQStat:
+        type: "string"
+        enum:
+          - "On"
+          - "Off"
+      Name:
+        type: "string"
+      pluginURI:
+        type: "string"
+      source_name:
+        type: "string"
+        enum:
+          - line-in
+          - bluetooth
+          - optical
+          - udisk
+          - wifi
+      status:
+        type: "string"
+        enum:
+          - "OK"
+          - "Failed"
