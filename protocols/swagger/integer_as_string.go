@@ -15,7 +15,7 @@ func (m *IntegerAsString) Validate(strfmt.Registry) error {
 }
 
 func (m *IntegerAsString) UnmarshalJSON(b []byte) error {
-	val, err := strconv.ParseInt(replacerAsStringCleanValue.Replace(performance.UnsafeBytes2String(b)), 10, 64)
+	val, err := strconv.ParseInt(replacerAsStringCleanValue.Replace(performance.UnsafeBytes2String(b)), 0, 64)
 	if err != nil {
 		return err
 	}
