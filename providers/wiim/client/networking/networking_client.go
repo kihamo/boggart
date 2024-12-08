@@ -47,7 +47,7 @@ func (a *Client) WlanGetConnectState(params *WlanGetConnectStateParams, opts ...
 		ID:                 "wlanGetConnectState",
 		Method:             "GET",
 		PathPattern:        "/httpapi.asp?command=wlanGetConnectState",
-		ProducesMediaTypes: []string{"text/html"},
+		ProducesMediaTypes: []string{"text/plain"},
 		ConsumesMediaTypes: []string{"text/html"},
 		Schemes:            []string{"https"},
 		Params:             params,

@@ -13,6 +13,8 @@ import (
 	"github.com/kihamo/boggart/providers/wiim/client/device"
 	"github.com/kihamo/boggart/providers/wiim/client/eq"
 	"github.com/kihamo/boggart/providers/wiim/client/networking"
+	"github.com/kihamo/boggart/providers/wiim/client/playback"
+	"github.com/kihamo/boggart/providers/wiim/client/presets"
 )
 
 // Default wiim HTTP client.
@@ -60,6 +62,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Wiim {
 	cli.Device = device.New(transport, formats)
 	cli.Eq = eq.New(transport, formats)
 	cli.Networking = networking.New(transport, formats)
+	cli.Playback = playback.New(transport, formats)
+	cli.Presets = presets.New(transport, formats)
 	return cli
 }
 
@@ -110,6 +114,10 @@ type Wiim struct {
 
 	Networking networking.ClientService
 
+	Playback playback.ClientService
+
+	Presets presets.ClientService
+
 	Transport runtime.ClientTransport
 }
 
@@ -119,4 +127,6 @@ func (c *Wiim) SetTransport(transport runtime.ClientTransport) {
 	c.Device.SetTransport(transport)
 	c.Eq.SetTransport(transport)
 	c.Networking.SetTransport(transport)
+	c.Playback.SetTransport(transport)
+	c.Presets.SetTransport(transport)
 }

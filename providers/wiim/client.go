@@ -44,6 +44,7 @@ func New(address *url.URL, debug bool, logger logger.Logger) *Client {
 	rt.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	rt.Consumers["text/html"] = runtime.JSONConsumer()
+	rt.Consumers["text/plain"] = runtime.TextConsumer()
 
 	if logger != nil {
 		rt.SetLogger(logger)
@@ -52,8 +53,12 @@ func New(address *url.URL, debug bool, logger logger.Logger) *Client {
 	rt.SetDebug(debug)
 
 	cl.SetTransport(&transport{
-		proxied: cl.Transport,
+		proxied: rt,
 	})
+
+	rt.Transport = &roundTripper{
+		proxied: rt.Transport,
+	}
 
 	return cl
 }

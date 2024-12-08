@@ -30,9 +30,51 @@ type ClientOption func(*runtime.ClientOperation)
 
 // ClientService is the interface for Client methods
 type ClientService interface {
+	GetShutdown(params *GetShutdownParams, opts ...ClientOption) (*GetShutdownOK, error)
+
 	GetStatusEx(params *GetStatusExParams, opts ...ClientOption) (*GetStatusExOK, error)
 
+	SetShutdown(params *SetShutdownParams, opts ...ClientOption) (*SetShutdownOK, error)
+
 	SetTransport(transport runtime.ClientTransport)
+}
+
+/*
+GetShutdown Get the shutdown timer
+*/
+func (a *Client) GetShutdown(params *GetShutdownParams, opts ...ClientOption) (*GetShutdownOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetShutdownParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "getShutdown",
+		Method:             "GET",
+		PathPattern:        "/httpapi.asp?command=getShutdown",
+		ProducesMediaTypes: []string{"text/html"},
+		ConsumesMediaTypes: []string{"text/html"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &GetShutdownReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetShutdownOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getShutdown: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -70,6 +112,44 @@ func (a *Client) GetStatusEx(params *GetStatusExParams, opts ...ClientOption) (*
 	// unexpected success response
 	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
 	msg := fmt.Sprintf("unexpected success response for getStatusEx: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+SetShutdown Shutdown device in seconds
+*/
+func (a *Client) SetShutdown(params *SetShutdownParams, opts ...ClientOption) (*SetShutdownOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewSetShutdownParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "setShutdown",
+		Method:             "GET",
+		PathPattern:        "/httpapi.asp?command=setShutdown:{seconds}",
+		ProducesMediaTypes: []string{"text/plain"},
+		ConsumesMediaTypes: []string{"text/html"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &SetShutdownReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*SetShutdownOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for setShutdown: API contract not enforced by server. Client expected to get an error, but got: %T", result)
 	panic(msg)
 }
 

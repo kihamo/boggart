@@ -95,3 +95,24 @@ func (r *reguestFake) GetBodyParam() interface{} {
 func (r *reguestFake) GetFileParam() map[string][]runtime.NamedReadCloser {
 	return nil
 }
+
+type roundTripper struct {
+	proxied http.RoundTripper
+}
+
+func (rt *roundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	resp, err := rt.proxied.RoundTrip(req)
+	if err != nil {
+		return resp, err
+	}
+
+	/*
+		очередной хак, потому как в ответе под text/html есть как json так и plain text
+		в данном случае ориентируемся на описание и swagger и подменяем у ответа сontent-type
+	*/
+	if a := req.Header.Get("Accept"); resp.Header.Get("Content-Type") != a {
+		resp.Header.Set("Content-Type", a)
+	}
+
+	return resp, err
+}

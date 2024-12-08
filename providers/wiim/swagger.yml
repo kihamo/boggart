@@ -29,6 +29,8 @@ paths:
       tags:
         - "networking"
       description: "This command will return the status of the WiFi connection. The possible return values are as follows."
+      produces:
+        - text/plain
       responses:
         200:
           description: >
@@ -44,6 +46,40 @@ paths:
               - "FAIL"     # Connect fail
               - "OK"       # connected
  
+  /httpapi.asp?command=getShutdown:
+    get:
+      operationId: "getShutdown"
+      tags:
+        - "device"
+      description: "Get the shutdown timer"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            type: "integer"
+            description: "Return the seconds"
+  /httpapi.asp?command=setShutdown:{seconds}:
+    get:
+      operationId: "setShutdown"
+      tags:
+        - "device"
+      description: "Shutdown device in seconds"
+      parameters:
+        - name: "seconds"
+          in: "path"
+          description: >
+            0: shutdown immediately
+            -1: cancel the previous shutdown timer
+          required: true
+          type: "integer"
+      produces:
+        - "text/plain"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: "#/definitions/OperationResultPlainText"
+
   /httpapi.asp?command=EQOn:
     get:
       operationId: "EQOn"
@@ -97,6 +133,256 @@ paths:
           schema:
             $ref: "#/definitions/EQLoad"
 
+  /httpapi.asp?command=getPlayerStatus:
+    get:
+      operationId: "getPlayerStatus"
+      tags:
+        - "playback"
+      description: "Get the playback status"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: "#/definitions/PlayerStatus"
+  /httpapi.asp?command=setPlayerCmd:play:{url}:
+    get:
+      operationId: "setPlayerCmd"
+      tags:
+        - "playback"
+      description: "Play Instruction for any valid audio file or stream specified as a URL."
+      parameters:
+        - name: "url"
+          in: "path"
+          description: >
+            A complete URL for an audio source on the internet or addressable local device
+            http://89.223.45.5:8000/progressive-flac example audio file
+            http://stream.live.vc.bbcmedia.co.uk/bbc_6music example radio station file
+          required: true
+          type: "string"
+      produces:
+        - "text/plain"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: "#/definitions/OperationResultPlainText"
+  /httpapi.asp?command=setPlayerCmd:hex_playlist:{url}:{index}:
+    get:
+      operationId: "setPlayerCmdPlaylist"
+      tags:
+        - "playback"
+      description: "Play the URl from m3u or ASX playlist"
+      parameters:
+        - name: "url"
+          in: "path"
+          description: "Is the m3u or ASX playlist link and should be hexed"
+          required: true
+          type: "string"
+        - name: "index"
+          in: "path"
+          description: "Is the start index"
+          required: true
+          type: "integer"
+      produces:
+        - "text/plain"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: "#/definitions/OperationResultPlainText"
+  /httpapi.asp?command=setPlayerCmd:switchmode:{mode}:
+    get:
+      operationId: "setPlayerCmdSwitchMode"
+      tags:
+        - "playback"
+      description: "Selects the Audio Source of the Device. The available audio sources for each device will depend on the installed hardware."
+      parameters:
+        - name: "mode"
+          in: "path"
+          description: >
+            The audio source that has to be switched
+            wifi: wifi mode
+            line-in: line analogue input
+            bluetooth: bluetooth mode
+            optical: optical digital input
+            udisk: UDisk mode
+          required: true
+          type: "string"
+          enum:
+            - "wifi"
+            - "line-in"
+            - "bluetooth"
+            - "optical"
+            - "udisk"
+      produces:
+        - "text/plain"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: "#/definitions/OperationResultPlainText"
+  /httpapi.asp?command=setPlayerCmd:{control}:
+    get:
+      operationId: "setPlayerCmdControl"
+      tags:
+        - "playback"
+      description: "Control the current playback"
+      parameters:
+        - name: "control"
+          in: "path"
+          description: >
+            onepause	Toggle Play/Pause
+            stop	Stop current playback and removes slected source from device
+            prev	Play previous song in playlist
+            next	Play next song in playlist
+            pause	Pause current playback
+            resume	Resume playback from last position, if it is paused
+          required: true
+          type: "string"
+          enum:
+            - "onepause"
+            - "stop"
+            - "prev"
+            - "next"
+            - "pause"
+            - "resume"
+      produces:
+        - "text/plain"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: "#/definitions/OperationResultPlainText"
+  /httpapi.asp?command=setPlayerCmd:seek:{position}:
+    get:
+      operationId: "setPlayerCmdSeek"
+      tags:
+        - "playback"
+      description: "Seek with seconds for current playback, have no use when playing radio link."
+      parameters:
+        - name: "position"
+          in: "path"
+          description: "Position to seek to in seconds"
+          required: true
+          type: "integer"
+      produces:
+        - "text/plain"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: "#/definitions/OperationResultPlainText"
+  /httpapi.asp?command=setPlayerCmd:mute:{mute}:
+    get:
+      operationId: "setPlayerCmdMute"
+      tags:
+        - "playback"
+      description: "Toggle mute for the device"
+      parameters:
+        - name: "mute"
+          in: "path"
+          description: >
+            Set the mute mode
+            0: Not muted
+            1: Muted
+          required: true
+          type: "integer"
+          minimum: 0
+          maximum: 1
+      produces:
+        - "text/plain"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: "#/definitions/OperationResultPlainText"
+  /httpapi.asp?command=setPlayerCmd:loopmode:{mode}:
+    get:
+      operationId: "setPlayerCmdLoopmode"
+      tags:
+        - "playback"
+      description: "Set shuffle and repeat mode"
+      parameters:
+        - name: "mode"
+          in: "path"
+          description: >
+            Activates a combination of Shuffle and Repeat modes
+            0: Shuffle disabled, Repeat enabled - loop
+            1: Shuffle disabled, Repeat enabled - loop once
+            2: Shuffle enabled, Repeat enabled - loop
+            3: Shuffle enabled, Repeat disabled
+            4: Shuffle disabled, Repeat disabled
+            5: Shuffle enabled, Repeat enabled - loop once
+          required: true
+          type: "integer"
+          minimum: 0
+          maximum: 5
+      produces:
+        - "text/plain"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: "#/definitions/OperationResultPlainText"
+  /httpapi.asp?command=setPlayerCmd:vol{volume}:
+    get:
+      operationId: "setPlayerCmdVolume"
+      tags:
+        - "playback"
+      description: "Set system volume"
+      parameters:
+        - name: "volume"
+          in: "path"
+          description: >
+            Adjust volume for current device
+            :vol: direct volue, value range is 0-100
+            --: Decrease by 2
+            %2b%2b: Increase by 2
+          required: true
+          type: "string"
+      produces:
+        - "text/plain"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: "#/definitions/OperationResultPlainText"
+
+  /httpapi.asp?command=MCUKeyShortClick:{number}:
+    get:
+      operationId: "MCUKeyShortClick"
+      tags:
+        - "presets"
+      description: "Play Instruction for one of the Programmable Presets"
+      parameters:
+        - name: "number"
+          in: "path"
+          description: >
+            The numeric value of the required Preset
+            Value range is from 0 - 12
+          required: true
+          type: "integer"
+          maximum: 12
+          minimum: 1
+      produces:
+        - "text/plain"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: "#/definitions/OperationResultPlainText"
+  /httpapi.asp?command=getPresetInfo:
+    get:
+      operationId: "getPresetInfo"
+      tags:
+        - "presets"
+      description: "Get presets list"
+      responses:
+        200:
+          description: "Successful"
+          schema:
+            $ref: "#/definitions/PresetInfo"
+
 definitions:
   BooleanAsString:
     type: "string"
@@ -142,6 +428,12 @@ definitions:
         enum:
           - "OK"
           - "Failed"
+
+  OperationResultPlainText:
+    type: "string"
+    enum:
+      - "FAIL"     # Connect fail
+      - "OK"       # connected
 
   StatusEx:
     type: "object"
@@ -499,3 +791,130 @@ definitions:
         enum:
           - "OK"
           - "Failed"
+
+  PlayerStatus:
+    type: "object"
+    properties:
+      type:
+        $ref: "#/definitions/IntegerAsString"
+        description: >
+          0: Main or standalone device
+          1: Device is a Multiroom Guest
+      ch:
+        $ref: "#/definitions/IntegerAsString"
+        description: >
+          Active channel(s)
+          0: Stereo
+          1: Left
+          2: Right
+      mode:
+        $ref: "#/definitions/IntegerAsString"
+        description: >
+          Playback mode
+          0: Idling
+          1: airplay streaming
+          2: DLNA streaming
+          10: Playing network content, e.g. vTuner, Home Media Share, Amazon Music, Deezer, etc.
+          11: playing UDISK(Local USB disk on Arylic Device)
+          20: playback start by HTTPAPI
+          31: Spotify Connect streaming
+          40: Line-In input mode
+          41: Bluetooth input mode
+          43: Optical input mode
+          47: Line-In #2 input mode
+          51: USBDAC input mode
+          99: The Device is a Guest in a Multiroom Zone
+      loop:
+        $ref: "#/definitions/IntegerAsString"
+        description: >
+          Is a Combination of SHUFFLE and REPEAT modes
+          0: SHUFFLE: disabled REPEAT: enabled - loop
+          1: SHUFFLE: disabled REPEAT: enabled - loop once
+          2: SHUFFLE: enabled REPEAT: enabled - loop
+          3: SHUFFLE: enabled REPEAT: disabled
+          4: SHUFFLE: disabled REPEAT: disabled
+          5: SHUFFLE: enabled REPEAT: enabled - loop once
+      eq:
+        $ref: "#/definitions/IntegerAsString"
+        description: "	The current Equalizer setting"
+      vendor: # not in docs
+        type: "string"
+      status:
+        type: "string"
+        description: >
+          Device status
+          stop: no audio selected
+          play: playing audio
+          load: load ??
+          pause: audio paused
+      curpos:
+        $ref: "#/definitions/IntegerAsString"
+        description: "Current playing position (in ms)"
+      offset_pts:
+        $ref: "#/definitions/IntegerAsString"
+      totlen:
+        $ref: "#/definitions/IntegerAsString"
+        description: "Current track length (in ms)"
+      Title:
+        $ref: "#/definitions/HEXString"
+        description: "[hexed string] of the track title"
+      Artist:
+        $ref: "#/definitions/HEXString"
+        description: "[hexed string] of the artist"
+      Album:
+        $ref: "#/definitions/HEXString"
+        description: "[hexed string] of the album"
+      alarmflag:
+        $ref: "#/definitions/IntegerAsString"
+      plicount:
+        $ref: "#/definitions/IntegerAsString"
+        description: "The total number of tracks in the playlist"
+      plicurr:
+        $ref: "#/definitions/IntegerAsString"
+        description: "Index of current track in playlist"
+      vol:
+        $ref: "#/definitions/IntegerAsString"
+        description: >
+          Current volume
+          Value range is from 0 - 100. So can be considered a linear percentage (0% to 100%)
+      mute:
+        $ref: "#/definitions/BooleanAsString"
+        description: >
+          The mute status
+          0: Not muted
+          1: Muted
+
+  PresetInfo:
+    type: "object"
+    properties:
+      preset_num:
+        type: "integer"
+      preset_list:
+        type: "array"
+        items: 
+          type: "object"
+          properties: 
+            name:
+              type: "string"
+              description: "Playlist name"
+            number:
+              $ref: "#/definitions/IntegerAsString"
+              description: "Preset index (Start from 1)"
+              minimum: 1
+            picurl:
+              type: "string"
+              description: "Cover picture url"
+            preset_list:
+              type: "string"
+              description: "Preset list information"
+            preset_num:
+              $ref: "#/definitions/IntegerAsString"
+              description: "Total number of Presets"
+            source:
+              type: "string"
+              description: "Music source"
+            url:
+              type: "string"
+              description: "Play url"
+            
+            
