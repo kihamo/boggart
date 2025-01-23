@@ -112,7 +112,11 @@ func (c *Client) doConvert(ctx context.Context, sentence []string, result interf
 	}
 
 	if !deadline.IsZero() {
-		if err := c.conn.SetDeadline(deadline); err != nil {
+		c.mutex.Lock()
+		err := c.conn.SetDeadline(deadline)
+		c.mutex.Unlock()
+
+		if err != nil {
 			return err
 		}
 	}
