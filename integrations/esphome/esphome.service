@@ -1,0 +1,14 @@
+[Unit]
+Description=ESPHome dashboard
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/kihamo/go/src/github.com/kihamo/boggart/integrations/esphome/venv/bin/python /home/kihamo/go/src/github.com/kihamo/boggart/integrations/esphome/venv/bin/esphome dashboard ./
+WorkingDirectory=/home/kihamo/go/src/github.com/kihamo/boggart/integrations/esphome
+Restart=always
+User=root
+Environment="PATH=/home/kihamo/go/src/github.com/kihamo/boggart/integrations/esphome/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/local/go/bin"
+
+[Install]
+WantedBy=multi-user.target

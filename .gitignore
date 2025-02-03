@@ -9,3 +9,4 @@ components/openhab/swagger.json
 cmd/test
 test
 .DS_Store
+integrations/esphome/venv/
