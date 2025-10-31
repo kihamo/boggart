@@ -1,5 +1,17 @@
 ---
 sensor:
-# - !include ./sensor/debug.yaml
-- !include ./sensor/wifi_signal.yaml
-- !include ./sensor/uptime.yaml
+  - platform: wifi_signal
+    id: wifi_signal_db
+    name: WiFi Signal
+    update_interval: 60s
+    icon: mdi:signal-distance-variant
+  - platform: copy
+    source_id: wifi_signal_db
+    name: WiFi Signal Percent
+    filters: 
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: Signal %
+    entity_category: diagnostic
+    device_class: ''
+  - platform: uptime
+    name: "Uptime"

@@ -8,7 +8,8 @@ ExecStart=/home/kihamo/go/src/github.com/kihamo/boggart/integrations/esphome/ven
 WorkingDirectory=/home/kihamo/go/src/github.com/kihamo/boggart/integrations/esphome
 Restart=always
 User=root
-Environment="PATH=/home/kihamo/go/src/github.com/kihamo/boggart/integrations/esphome/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/local/go/bin;ESPHOME_DASHBOARD_USE_PING=true"
+Environment="PATH=/home/kihamo/go/src/github.com/kihamo/boggart/integrations/esphome/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/local/go/bin"
+Environment="ESPHOME_DASHBOARD_USE_PING=true"
 
 [Install]
 WantedBy=multi-user.target

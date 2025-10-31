@@ -2,3 +2,9 @@
 platform: debug
 device:
   name: "Device Info"
+  web_server:
+    sorting_group_id: diagnostic
+reset_reason:
+  name: "Reset reason"
+  web_server:
+    sorting_group_id: diagnostic

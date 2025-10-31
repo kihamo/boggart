@@ -6,8 +6,16 @@ esphome:
 web_server:
   port: 80
   include_internal: true
-  local: true
-  version: 2
+  local: false
+  version: 3
+  js_url: "https://esphome.shosho.ru/v3/www.js"
+  sorting_groups:
+    - id: diagnostic
+      name: "Diagnostic"
+      sorting_weight: 100
+    - id: esp_settings
+      name: "Esp Settings"
+      sorting_weight: 101
 
 prometheus:
 
@@ -16,7 +24,8 @@ logger:
   baud_rate: 0
 
 ota:
-  platform: esphome
+  - platform: esphome
+  - platform: web_server
 
 #debug:
 #  update_interval: 30s

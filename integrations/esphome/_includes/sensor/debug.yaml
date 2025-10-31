@@ -1,13 +1,55 @@
----
-platform: debug
-free:
-  id: "esp_heap_free"
-  name: "Heap Free"
-#fragmentation:
-#  name: "Heap Fragmentation"
-block:
-  id: "esp_heap_max_block"
-  name: "Heap Max Block"
-loop_time:
-  id: "esp_loop_time"
-  name: "Loop Time"
+  - platform: debug
+    free:
+      id: "esp_heap_free"
+      name: "Heap Free"
+      web_server:
+        sorting_group_id: esp_settings
+    #fragmentation:
+    #  name: "Heap Fragmentation"
+    block:
+      id: "esp_heap_max_block"
+      name: "Heap Max Block"
+      web_server:
+        sorting_group_id: esp_settings
+    loop_time:
+      id: "esp_loop_time"
+      name: "Loop Time"
+      web_server:
+        sorting_group_id: esp_settings
+
+#  - platform: template
+#    name: "Free Heap"
+#    lambda: |-
+#      return heap_caps_get_free_size(MALLOC_CAP_INTERNAL);
+#    unit_of_measurement: "bytes"
+#    update_interval: 10s
+#    web_server:
+#      sorting_group_id: esp_settings
+
+#  - platform: template
+#    name: "RAM"
+#    lambda: |-
+#      float total = heap_caps_get_total_size(MALLOC_CAP_INTERNAL);
+#      float free = heap_caps_get_free_size(MALLOC_CAP_INTERNAL);
+#      return int(((total - free) / total) * 100);
+#    update_interval: 1min
+#    unit_of_measurement: "%"
+#    accuracy_decimals: 0
+#    icon: "mdi:memory"
+#    web_server:
+#      sorting_group_id: esp_settings
+#      sorting_weight: 16
+
+  - platform: template
+    name: "Flash"
+    lambda: |-
+      size_t total = ESP.getFlashChipSize();
+      size_t used = total - ESP.getFreeSketchSpace();
+      return int((used * 100) / total);
+    update_interval: 60s
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    icon: "mdi:memory"
+    web_server:
+      sorting_group_id: esp_settings
+

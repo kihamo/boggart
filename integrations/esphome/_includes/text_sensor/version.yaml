@@ -2,3 +2,5 @@
 platform: version
 id: "firmware_version"
 name: "Software version"
+web_server:
+  sorting_group_id: diagnostic
