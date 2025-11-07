@@ -1,4 +1,0 @@
----
-platform: sntp
-id: "timer"
-timezone: "Europe/Moscow"

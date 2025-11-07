@@ -197,15 +197,15 @@ namespace esphome {
 
       delay(MERCURY_V1_WAIT_AFTER_READ_RESPONSE);
 
-      ESP_LOGV(TAG, "Send READ_ADDITIONAL_PARAMS %s", format_hex_pretty(read_additional_params_request_, MERCURY_V1_READ_REQUEST_SIZE).c_str());
-      this->write_array(read_additional_params_request_, MERCURY_V1_READ_REQUEST_SIZE);
-      this->flush();
+      // ESP_LOGV(TAG, "Send READ_ADDITIONAL_PARAMS %s", format_hex_pretty(read_additional_params_request_, MERCURY_V1_READ_REQUEST_SIZE).c_str());
+      // this->write_array(read_additional_params_request_, MERCURY_V1_READ_REQUEST_SIZE);
+      // this->flush();
 
-      delay(MERCURY_V1_WAIT_AFTER_SEND_REQUEST);
+      // delay(MERCURY_V1_WAIT_AFTER_SEND_REQUEST);
 
-      this->read_from_uart();
+      // this->read_from_uart();
 
-      delay(MERCURY_V1_WAIT_AFTER_READ_RESPONSE);
+      // delay(MERCURY_V1_WAIT_AFTER_READ_RESPONSE);
     }
 
     void MercuryV1::dump_config() {

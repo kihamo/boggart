@@ -1,5 +1,0 @@
----
-platform: uptime
-name: "Uptime"
-web_server:
-  sorting_group_id: diagnostic
