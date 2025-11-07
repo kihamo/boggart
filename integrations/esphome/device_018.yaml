@@ -20,11 +20,11 @@
 
 substitutions:
   node_name: !secret device_018_node_name
-  ip_address: !secret device_018_ip_address
+  ip_address: !secret device_018_ip_address 
 
 packages:
   common: !include ./_includes/common.yaml
-  wifi: !include ./_includes/wifi/villa_boiler.yaml
+  wifi: !include ./_includes/wifi/villa_blackrock.yaml
   binary_sensor: !include ./_includes/binary_sensor.yaml
   sensor: !include ./_includes/sensor.yaml
   switch: !include ./_includes/switch.yaml

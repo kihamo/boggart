@@ -1,5 +1,8 @@
 ---
 switch:
-- !include ./switch/restart.yaml
-- !include ./switch/safe_mode.yaml
-- !include ./switch/shutdown.yaml
+- platform: restart
+  name: "Restart"
+- platform: safe_mode
+  name: "Restart Safe Mode"
+- platform: shutdown
+  name: "Shutdown"

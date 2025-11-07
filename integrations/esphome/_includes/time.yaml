@@ -1,3 +1,11 @@
 ---
 time:
-- !include ./time/sntp.yaml
+- platform: sntp
+  id: "timer"
+  timezone: "Europe/Moscow"
+  servers:
+   - ntp1.vniiftri.ru
+   - ntp2.vniiftri.ru
+   - ntp3.vniiftri.ru 
+#   - ntp4.vniiftri.ru
+#   - ntp5.vniiftri.ru

@@ -1,0 +1,198 @@
+substitutions:
+  node_name: !secret device_6803_node_name
+  ip_address: !secret device_6803_ip_address
+
+packages:
+  common: !include ./_includes/common.yaml
+  wifi: !include ./_includes/wifi/villa_blackrock.yaml
+  binary_sensor: !include ./_includes/binary_sensor.yaml
+  sensor: !include ./_includes/sensor.yaml
+  switch: !include ./_includes/switch.yaml
+  text_sensor: !include ./_includes/text_sensor.yaml
+  time: !include ./_includes/time.yaml
+
+esphome:
+  comment: !secret device_6803_comment
+
+web_server:
+    sorting_groups:
+    - id: inputs_di
+      name: "Digital inputs"
+      sorting_weight: -1
+    - id: outputs_relayes
+      name: "Relayes"
+      sorting_weight: -2
+
+esp32:
+  board: esp32dev
+
+uart:
+  - id: rs485
+    tx_pin: GPIO27
+    rx_pin: GPIO14
+    baud_rate: 9600
+  - id: rs232
+    tx_pin: GPIO17
+    rx_pin: GPIO16
+    baud_rate: 9600
+
+spi:
+  clk_pin: GPIO18
+  mosi_pin: GPIO23
+  miso_pin: GPIO19
+  # cs pin: GPIO5
+
+i2c:
+  sda: GPIO4
+  scl:
+    number: GPIO15
+    ignore_strapping_warning: true
+
+pcf8574:
+  - id: inputs
+    address: 0x22
+  - id: outputs
+    address: 0x24
+
+binary_sensor:
+#  - platform: gpio
+#    name: "Input free 1"
+#    id: in_1
+#    pin:
+#      pcf8574: inputs
+#      number: 0
+#      mode: INPUT
+#      inverted: true
+#    web_server:
+#      sorting_group_id: inputs_di
+#  - platform: gpio
+#    name: "Input free 2"
+#    id: in_2
+#    pin:
+#      pcf8574: inputs
+#      number: 1
+#      mode: INPUT
+#      inverted: true
+#    web_server:
+#      sorting_group_id: inputs_di
+  - platform: gpio
+    name: "Close indicator" # NC / orange-white + blue
+    id: in_cl_l
+    pin:
+      pcf8574: inputs
+      number: 2
+      mode: INPUT
+      inverted: false
+    web_server:
+      sorting_group_id: inputs_di
+      sorting_weight: 10
+  - platform: gpio
+    name: "Open indicator" # NC / orange-white + orange
+    id: in_op_l
+    pin:
+      pcf8574: inputs
+      number: 3
+      mode: INPUT
+      inverted: false
+    web_server:
+      sorting_group_id: inputs_di
+      sorting_weight: 30
+  - platform: gpio
+    name: "Stop up" # NO / brown + white
+    id: in_stop_up
+    pin:
+      pcf8574: inputs
+      number: 4
+      mode: INPUT
+      inverted: true
+    web_server:
+      sorting_group_id: inputs_di
+      sorting_weight: 40
+  - platform: gpio
+    name: "Stop down" # NO / brown + white
+    id: in_stop_down
+    pin:
+      pcf8574: inputs
+      number: 5
+      mode: INPUT
+      inverted: true
+    web_server:
+      sorting_group_id: inputs_di
+      sorting_weight: 20
+
+switch:
+#  - platform: gpio
+#    name: "Relay free 1"
+#    id: relay_1
+#    pin:
+#      pcf8574: outputs
+#      number: 0
+#      mode: OUTPUT
+#      inverted: true
+#    web_server:
+#      sorting_group_id: outputs_relayes
+#  - platform: gpio
+#    name: "Relay free 2"
+#    id: relay_2
+#    pin:
+#      pcf8574: outputs
+#      number: 1
+#      mode: OUTPUT
+#      inverted: true
+#    web_server:
+#      sorting_group_id: outputs_relayes
+#  - platform: gpio
+#    name: "Relay free 3"
+#    id: relay_3
+#    pin:
+#      pcf8574: outputs
+#      number: 2
+#      mode: OUTPUT
+#      inverted: true
+#    web_server:
+#      sorting_group_id: outputs_relayes
+  - platform: gpio
+    name: "Stop" # NC / brown-white + brown
+    id: relay_stop
+    pin:
+      pcf8574: outputs
+      number: 3
+      mode: OUTPUT
+      inverted: true
+    on_turn_on:
+      then:
+        - delay: 300ms
+        - switch.turn_off: relay_stop
+    web_server:
+      sorting_group_id: outputs_relayes
+      sorting_weight: 30
+  - platform: gpio
+    name: "Close" # NO / green + brown
+    id: relay_cl
+    pin:
+      pcf8574: outputs
+      number: 4
+      mode: OUTPUT
+      inverted: true
+    on_turn_on:
+      then:
+        - delay: 300ms
+        - switch.turn_off: relay_cl
+    web_server:
+      sorting_group_id: outputs_relayes
+      sorting_weight: 20
+  - platform: gpio
+    name: "Open - SBS" # NO / green-white + brown
+    id: relay_op
+    pin:
+      pcf8574: outputs
+      number: 5
+      mode: OUTPUT
+      inverted: true
+    on_turn_on:
+      then:
+        - delay: 300ms
+        - switch.turn_off: relay_op
+    web_server:
+      sorting_group_id: outputs_relayes
+      sorting_weight: 10

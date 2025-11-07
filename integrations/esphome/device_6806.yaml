@@ -1,0 +1,76 @@
+# https://devices.esphome.io/devices/Sonoff-MiniR4-Extreme
+# на RX и TX можно вешать кнопки, реагирует правильно
+# прошивка -- только через USB стик, питание внешнее не подключать, 3.3 достаточно
+# перед включение, нужно зажать кнопку на корпусе
+# после прошивки от стика не запустится, нужно отсоединить от стика и запитать от сети, вместе нельзя (испортит стик)
+
+substitutions:
+  node_name: !secret device_6806_node_name
+  ip_address: !secret device_6806_ip_address
+
+packages:
+  common: !include ./_includes/common.yaml
+  wifi: !include ./_includes/wifi/villa_blackrock.yaml
+  binary_sensor: !include ./_includes/binary_sensor.yaml
+  sensor: !include ./_includes/sensor.yaml
+  switch: !include ./_includes/switch.yaml
+  text_sensor: !include ./_includes/text_sensor.yaml
+  time: !include ./_includes/time.yaml
+
+esphome:
+  comment: !secret device_6806_comment
+
+esp32:
+  board: esp32dev
+
+switch:
+  - platform: gpio
+    name: "Relay switch"
+    icon: "mdi:lightbulb_outline"
+    pin: GPIO26
+    id: relay_1
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      - mqtt.publish:
+          topic: "blackrock-kitchen-light/switch/relay_switch/command"
+          payload: "ON"
+    on_turn_off:
+      - mqtt.publish:
+          topic: "blackrock-kitchen-light/switch/relay_switch/command"
+          payload: "OFF"
+
+binary_sensor:
+  - platform: gpio
+    name: "Wall button" # red line, solder
+    pin:
+      number: GPIO03
+      mode:
+        input: true
+        pullup: true
+    id: button_wall
+    filters:
+      - invert:
+      - delayed_off: 50ms
+    on_press:
+      - switch.toggle: relay_1
+
+  - platform: gpio
+    name: "Kitchen button" # s2
+    pin:
+      number: GPIO27
+      mode:
+        input: true
+        pullup: true
+    id: button_kitchen
+    filters:
+      - invert:
+      - delayed_off: 50ms
+    on_press:
+      - switch.toggle: relay_1
+    on_release:
+      - switch.toggle: relay_1
+
+#status_led:
+#  pin:
+#    number: GPIO19
+#    inverted: true

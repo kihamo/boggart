@@ -1,8 +1,4 @@
 ---
 wifi:
-  <<: !include ap.yaml
   ssid: !secret villa_wifi_ssid
   password: !secret villa_wifi_password
-  domain: ""
-  use_address: ${ip_address}
-  fast_connect: true # чтобы подключаться к скрытой сети, отключает предварительное сканирование

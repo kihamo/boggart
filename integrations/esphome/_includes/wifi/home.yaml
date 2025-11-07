@@ -1,10 +1,4 @@
 ---
 wifi:
-  <<: !include ap.yaml
   ssid: !secret home_wifi_ssid
   password: !secret home_wifi_password
-  domain: ""
-  use_address: ${ip_address}
-  fast_connect: true # чтобы подключаться к скрытой сети, отключает предварительное сканирование
-
-captive_portal:

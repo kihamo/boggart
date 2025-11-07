@@ -16,9 +16,12 @@ esphome:
 
 esp32:
   board: nodemcu-32s
+  framework: 
+    type: esp-idf
 
-dallas:
-  - pin: GPIO32
+one_wire:
+  - platform: gpio
+    pin: GPIO32
 
 binary_sensor:
   - platform: gpio
@@ -41,10 +44,10 @@ binary_sensor:
 #    name: "Kettle Mode"
 
 sensor:
-  - platform: dallas
+  - platform: dallas_temp
     address: 0xA0000003AF354D28
     name: "Water cold"
-  - platform: dallas
+  - platform: dallas_temp
     address: 0xC9000003AF6CB128
     name: "Water hot"
 
@@ -55,11 +58,6 @@ sensor:
 #    accuracy_decimals: 0
 #    icon: "mdi:thermometer"
 #    device_class: "temperature"
-
-  - platform: esp32_hall
-    id: "hall"
-    name: "ESP32 Hall Sensor"
-    update_interval: 60s
 
 #  - platform: xiaomi_miscale
 #    mac_address: !secret device_004_xiaomi_miscale_mac

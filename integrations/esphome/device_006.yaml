@@ -23,9 +23,9 @@ i2c:
   scan: True
   id: bus_a
 
-dallas:
-  - pin: D4
-    update_interval: 10s
+one_wire:
+  - platform: gpio
+    pin: D4
 
 sensor:
   - platform: bme280_i2c
@@ -44,7 +44,7 @@ sensor:
       id: humidity
       name: "Humidity"
     address: 0x76
-  - platform: dallas
+  - platform: dallas_temp
     address: 0xE1000003AF4DC628
     id: temperature2
     name: "Temperature 2"

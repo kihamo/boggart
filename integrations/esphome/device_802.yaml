@@ -3,10 +3,13 @@ debug:
 substitutions:
   node_name: !secret device_802_node_name
   ip_address: !secret device_802_ip_address
+  leds_by_step: "30"
+  num_leds: "900"
+  led_id: "leds"
 
 packages:
   common: !include ./_includes/common.yaml
-  wifi: !include ./_includes/wifi/home.yaml
+  wifi: !include ./_includes/wifi/villa_blackrock.yaml
   binary_sensor: !include ./_includes/binary_sensor.yaml
   sensor: !include ./_includes/sensor.yaml
   switch: !include ./_includes/switch.yaml
@@ -25,10 +28,11 @@ mqtt:
 
 light:
   - platform: neopixelbus
-    num_leds: 300
-    variant: WS2813
+    num_leds: ${num_leds}
+    variant: 800kbps
     pin: GPIO15
     name: "NeoPixel Light"
+    id: ${led_id}
     effects:
       - addressable_rainbow:
       - addressable_color_wipe:
@@ -37,3 +41,38 @@ light:
       - addressable_random_twinkle:
       - addressable_fireworks:
       - addressable_flicker:
+      - addressable_lambda:
+          name: "By step"
+          update_interval: 1s
+          lambda: |-
+            static int led_index_begin = 0;
+            static int led_index_end = ${leds_by_step} - 1;
+            static int direction = 1;
+
+            if (initial_run) {
+              it.all() = Color::BLACK;
+              id(${led_id}).turn_on().set_brightness(1.0).perform();
+
+              led_index_begin = 0;
+              led_index_end = ${leds_by_step} - 1;
+            }
+
+            it.range(led_index_begin, led_index_end) = direction > 0 ? Color::WHITE : Color::BLACK;
+
+            led_index_begin += (${leds_by_step} - 1) * direction;
+            led_index_end += (${leds_by_step} - 1) * direction;
+
+            ESP_LOGW("effect", "Next step %i %i %i", led_index_begin, led_index_end, it.size());
+
+            if ((led_index_end > it.size() && (led_index_end - it.size() > ${leds_by_step})) || led_index_begin < 0) {
+              direction *= -1;
+
+              ESP_LOGW("effect", "Change direction %i", direction);
+
+              if (direction > 0) {
+                ESP_LOGW("effect", "Complete");
+
+                auto call = id(${led_id}).turn_off();
+                call.perform();
+              }
+            }

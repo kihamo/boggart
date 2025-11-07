@@ -1,0 +1,30 @@
+substitutions:
+  node_name: !secret device_999_node_name
+  ip_address: !secret device_999_ip_address
+
+packages:
+  common: !include ./_includes/common.yaml
+  wifi: !include ./_includes/wifi/home.yaml
+  binary_sensor: !include ./_includes/binary_sensor.yaml
+  sensor: !include ./_includes/sensor.yaml
+  switch: !include ./_includes/switch.yaml
+  text_sensor: !include ./_includes/text_sensor.yaml
+  time: !include ./_includes/time.yaml
+
+esphome:
+  comment: !secret device_999_comment
+
+bk72xx:
+  board: generic-bk7231t-qfn32-tuya
+
+#esp8266:
+#  board: esp01_1m
+
+debug:
+
+logger:
+  level: DEBUG
+  baud_rate: 115200
+  logs:
+    mqtt: DEBUG
+    sensor: WARN

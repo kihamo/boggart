@@ -1,5 +1,47 @@
 ---
 text_sensor:
-# - !include ./text_sensor/debug.yaml
-- !include ./text_sensor/version.yaml
-- !include ./text_sensor/wifi_info.yaml
+# - platform: debug
+#   device:
+#     name: "Device Info"
+#     web_server:
+#       sorting_group_id: diagnostic
+#   reset_reason:
+#     name: "Reset reason"
+#     web_server:
+#       sorting_group_id: diagnostic
+  - platform: version
+    id: "firmware_version"
+    name: "Software version"
+    web_server:
+      sorting_group_id: diagnostic
+  - platform: wifi_info
+    ip_address:
+      id: "wifi_ip_address"
+      name: "WiFi IP Address"
+      web_server:
+        sorting_group_id: diagnostic
+    ssid:
+      id: "wifi_ssid"
+      name: "WiFi SSID"
+      web_server:
+        sorting_group_id: diagnostic
+    bssid:
+      id: "wifi_bssid"
+      name: "WiFi BSSID"
+      web_server:
+        sorting_group_id: diagnostic
+    mac_address:
+      id: "wifi_mac"
+      name: "ESP Mac Wifi Address"
+      web_server:
+        sorting_group_id: diagnostic
+    scan_results:
+      id: "wifi_scan_results"
+      name: "ESP Latest Scan Results"
+      web_server:
+        sorting_group_id: diagnostic
+    dns_address:
+      id: "wifi_dns_address"
+      name: "ESP DNS Address"
+      web_server:
+        sorting_group_id: diagnostic

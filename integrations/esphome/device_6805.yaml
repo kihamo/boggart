@@ -1,0 +1,86 @@
+substitutions:
+  node_name: !secret device_6805_node_name
+  ip_address: !secret device_6805_ip_address
+
+packages:
+  common: !include ./_includes/common.yaml
+  wifi: !include ./_includes/wifi/villa_blackrock.yaml
+  binary_sensor: !include ./_includes/binary_sensor.yaml
+  sensor: !include ./_includes/sensor.yaml
+  switch: !include ./_includes/switch.yaml
+  text_sensor: !include ./_includes/text_sensor.yaml
+  time: !include ./_includes/time.yaml
+
+esphome:
+  comment: !secret device_6805_comment
+
+esp8266:
+  board: esp8285
+
+switch:
+  - platform: gpio
+    name: "Relay switch"
+    icon: "mdi:lightbulb_outline"
+    pin: GPIO12
+    id: relay_1
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      - mqtt.publish:
+          topic: "blackrock-wall-3d/switch/relay_switch/command"
+          payload: "ON"
+    on_turn_off:
+      - mqtt.publish:
+          topic: "blackrock-wall-3d/switch/relay_switch/command"
+          payload: "OFF"
+
+binary_sensor:
+#  - platform: gpio
+#    name: "wall button RED"
+#    pin:
+#      number: GPIO00
+#      inverted: true
+#      mode:
+#        input: true
+#        pullup: true
+#    id: button_wall
+#    filters:
+#      - invert:
+#      - delayed_off: 100ms
+#    on_press:
+#      - switch.toggle:
+#          id: relay_1
+
+  - platform: gpio
+    name: "Kitchen button"
+    pin:
+      number: GPIO04
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+    id: button_kitchen
+    filters:
+      - invert:
+      - delayed_off: 100ms
+    on_press:
+      - switch.toggle: relay_1
+
+status_led:
+  pin:
+    number: GPIO13
+    inverted: true
+    allow_other_uses: true
+
+output:
+  - platform: esp8266_pwm
+    id: blue_led
+    pin:
+      number: GPIO13
+      allow_other_uses: true
+    inverted: true
+
+light:
+  - platform: monochromatic
+    name: "Blue LED"
+    output: blue_led
+    internal: true
