@@ -1,6 +1,6 @@
 substitutions:
-  node_name: !secret device_6808_node_name
-  ip_address: !secret device_6808_ip_address
+  node_name: !secret device_6811_node_name
+  ip_address: !secret device_6811_ip_address
 
 packages:
   common: !include ./_includes/common.yaml
@@ -12,7 +12,7 @@ packages:
   time: !include ./_includes/time.yaml
 
 esphome:
-  comment: !secret device_6808_comment
+  comment: !secret device_6811_comment
 
 esp32:
   board: esp32dev
@@ -23,7 +23,7 @@ switch:
   - platform: gpio
     name: "Relay switch"
     icon: "mdi:lightbulb_outline"
-    pin: GPIO26
+    pin: GPIO12
     id: relay_1
     restore_mode: RESTORE_DEFAULT_OFF
 

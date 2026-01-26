@@ -25,6 +25,8 @@ web_server:
 
 esp32:
   board: esp32dev
+  framework:
+    type: esp-idf
 
 uart:
   - id: rs485

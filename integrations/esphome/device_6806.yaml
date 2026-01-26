@@ -22,6 +22,8 @@ esphome:
 
 esp32:
   board: esp32dev
+  framework:
+    type: esp-idf
 
 switch:
   - platform: gpio
@@ -34,9 +36,15 @@ switch:
       - mqtt.publish:
           topic: "blackrock-kitchen-light/switch/relay_switch/command"
           payload: "ON"
+      - mqtt.publish:
+          topic: "blackrock-newyeartree-plug/switch/relay_switch/command"
+          payload: "ON"
     on_turn_off:
       - mqtt.publish:
           topic: "blackrock-kitchen-light/switch/relay_switch/command"
+          payload: "OFF"
+      - mqtt.publish:
+          topic: "blackrock-newyeartree-plug/switch/relay_switch/command"
           payload: "OFF"
 
 binary_sensor:

@@ -1,6 +1,6 @@
 substitutions:
-  node_name: !secret device_6808_node_name
-  ip_address: !secret device_6808_ip_address
+  node_name: !secret device_6812_node_name
+  ip_address: !secret device_6812_ip_address
 
 packages:
   common: !include ./_includes/common.yaml
@@ -12,7 +12,7 @@ packages:
   time: !include ./_includes/time.yaml
 
 esphome:
-  comment: !secret device_6808_comment
+  comment: !secret device_6812_comment
 
 esp32:
   board: esp32dev
