@@ -111,20 +111,6 @@ func (b *Bind) taskDeviceTypeHandler(ctx context.Context) error {
 	// tasks
 	_, e := b.Workers().RegisterTask(
 		tasks.NewTask().
-			WithSchedule(
-				tasks.ScheduleWithSuccessLimit(
-					tasks.ScheduleWithDuration(tasks.ScheduleNow(), time.Second*30),
-					1,
-				),
-			),
-	)
-
-	if e != nil {
-		err = multierr.Append(err, e)
-	}
-
-	_, e = b.Workers().RegisterTask(
-		tasks.NewTask().
 			WithName("state-updater").
 			WithHandler(
 				b.Workers().WrapTaskHandlerIsOnline(
@@ -258,6 +244,8 @@ func (b *Bind) taskStateUpdaterHandler(ctx context.Context) error {
 
 	if deviceType.IsSupportedTargetTemperature() {
 		if val, e := provider.TargetTemperature(); e == nil {
+			metricTargetTemperature.With("id", id).Set(val)
+
 			if e = b.MQTT().PublishAsync(ctx, cfg.TopicTargetTemperatureState.Format(id), val); e != nil {
 				err = multierr.Append(err, e)
 			}
