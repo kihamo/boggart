@@ -72,6 +72,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 
 			metricHeaterHeatingFeedTemperatureCelsius.With("device", deviceIdAsString, "id", idAsString).Set(heater.FlowTemp)
 			metricHeaterHeatingReturnTemperatureCelsius.With("device", deviceIdAsString, "id", idAsString).Set(heater.ReturnTemp)
+			metricHeaterHeatingTargetTemperatureCelsius.With("device", deviceIdAsString, "id", idAsString).Set(heater.TargetTemp)
 			metricHeaterHeatingCircuitPressureBar.With("device", deviceIdAsString, "id", idAsString).Set(heater.Pressure)
 			metricHeaterModulationPercent.With("device", deviceIdAsString, "id", idAsString).Set(float64(heater.Modulation))
 		}
@@ -80,6 +81,8 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 			idAsString = strconv.FormatInt(env.ID, 10)
 
 			metricEnvironmentStateTemperatureCelsius.With("device", deviceIdAsString, "id", idAsString).Set(env.Value)
+			// TODO: сделать корректную обработку null значения (когда контур отключен)
+			metricEnvironmentTargetTemperatureCelsius.With("device", deviceIdAsString, "id", idAsString).Set(float64(env.Target))
 		}
 	}
 
