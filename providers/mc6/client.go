@@ -16,13 +16,24 @@ const (
 	AddressHumidity                  uint16 = 2
 	AddressHeatingValve              uint16 = 3
 	AddressCoolingValve              uint16 = 4
+	AddressValve                     uint16 = 5
+	AddressFanHigh                   uint16 = 6
+	AddressFanMedium                 uint16 = 7
+	AddressFanLow                    uint16 = 8
 	AddressHeatingOutput             uint16 = 9
+	AddressHeat                      uint16 = 10
+	AddressHotWater                  uint16 = 11
+	AddressTouchLock                 uint16 = 12
 	AddressWindowsOpen               uint16 = 13
+	AddressHolidayFunction           uint16 = 14
 	AddressHoldingFunction           uint16 = 15
+	AddressBoostFunction             uint16 = 16
 	AddressFloorOverheat             uint16 = 17
 	AddressDeviceType                uint16 = 18
+	AddressAuxiliaryHeat             uint16 = 19
 	AddressFanSpeedNumbers           uint16 = 20
 	AddressSystemError               uint16 = 21
+
 	AddressTemperatureFormat         uint16 = 60
 	AddressStatus                    uint16 = 61
 	AddressSystemMode                uint16 = 62
@@ -33,6 +44,14 @@ const (
 	AddressHoldingTime               uint16 = 67
 	AddressHoldingTemperatureAndTime uint16 = 68
 	AddressHoldingTemperature        uint16 = 69
+	AddressHolidayStartTimeHigh      uint16 = 70
+        AddressHolidayStartTimeLow       uint16 = 71
+	AddressHolidayEndTimeHigh        uint16 = 72
+        AddressHolidayEndTimeLow         uint16 = 73
+	AddressOptimumStart              uint16 = 74
+	AddressBoostEndTimeHigh          uint16 = 75
+	AddressBoostEndTimeLow           uint16 = 76
+	AddressBoost                     uint16 = 77
 	AddressPanelLock                 uint16 = 78
 	AddressPanelLockPin1             uint16 = 79
 	AddressPanelLockPin2             uint16 = 80
@@ -41,6 +60,7 @@ const (
 	AddressTargetTemperatureMaximum  uint16 = 83
 	AddressTargetTemperatureMinimum  uint16 = 84
 	AddressFloorTemperatureLimit     uint16 = 85
+	AddressScheduleMode              uint16 = 86
 
 	TemperatureFormatCelsius    uint16 = 0
 	TemperatureFormatFahrenheit uint16 = 1
