@@ -1,17 +1,16 @@
-debug:
-
 substitutions:
   node_name: !secret device_009_node_name
   ip_address: !secret device_009_ip_address
 
 packages:
-  common: !include ./_includes/common.yaml
-  wifi: !include ./_includes/wifi/fazenda.yaml
-  binary_sensor: !include ./_includes/binary_sensor.yaml
-  sensor: !include ./_includes/sensor.yaml
-  switch: !include ./_includes/switch.yaml
-  text_sensor: !include ./_includes/text_sensor.yaml
-  time: !include ./_includes/time.yaml
+  - !include ./_includes/common.yaml
+  - !include ./_includes/wifi.yaml
+  - !include ./_includes/wifi/fazenda.yaml
+  - !include ./_includes/binary_sensor.yaml
+  - !include ./_includes/sensor.yaml
+  - !include ./_includes/switch.yaml
+  - !include ./_includes/text_sensor.yaml
+  - !include ./_includes/time.yaml
 
 esphome:
   comment: !secret device_009_comment
@@ -21,9 +20,8 @@ mqtt:
 
 esp32:
   board: wemos_d1_mini32
-
-logger:
-  level: VERBOSE
+  framework:
+    type: esp-idf
 
 external_components:
   - source:

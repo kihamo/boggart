@@ -36,15 +36,3 @@ mqtt:
   password: !secret home_mqtt_password
   use_abbreviations: false
   keepalive: 60s
-
-wifi:
-  ap:
-    ssid: ${node_name}
-    password: !secret ap_wifi_password
-  domain: ""
-  use_address: ${ip_address}
-  fast_connect: true # чтобы подключаться к скрытой сети, отключает предварительное сканирование
-  reboot_timeout: 0s
-  min_auth_mode: WPA2
-
-captive_portal:

@@ -1,0 +1,259 @@
+substitutions:
+  node_name: !secret device_6814_node_name
+  ip_address: !secret device_6814_ip_address
+
+packages:
+  - !include ./_includes/common.yaml
+  - !include ./_includes/ethernet.yaml
+  - !include ./_includes/binary_sensor.yaml
+  - !include ./_includes/sensor.yaml
+  - !include ./_includes/switch.yaml
+  - !include ./_includes/text_sensor.yaml
+  - !include ./_includes/time.yaml
+  - !include ./_includes/debug.yaml
+
+esphome:
+  comment: !secret device_6814_comment
+
+web_server:
+    sorting_groups:
+    - id: inputs_di
+      name: "Digital inputs"
+      sorting_weight: -1
+    - id: outputs_relayes
+      name: "Relayes"
+      sorting_weight: -2
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+ethernet:
+  type: LAN8720
+  mdc_pin: GPIO23
+  mdio_pin: GPIO18
+  clk:
+    pin: GPIO17
+    mode: CLK_OUT
+  phy_addr: 0
+
+i2c:
+  sda: GPIO4
+  scl:
+    number: GPIO05
+    ignore_strapping_warning: true
+
+#######################################################################################
+#
+# RF 433mhz receiver configuration
+#
+  
+# remote_receiver:
+#  pin:
+#    number: 2
+#    inverted: true
+#  dump: rc_switch
+#  # Settings to optimize recognition of RF devices
+#  tolerance: 50%
+#  filter: 250us
+#  idle: 4ms
+#  buffer_size: 2kb
+  
+  # RF 433mhz transmitter configuration
+# remote_transmitter:
+#  pin: 15
+#  carrier_duty_percent: 100%
+
+pcf8574:
+  - id: inputs
+    address: 0x22
+  - id: outputs
+    address: 0x24
+
+binary_sensor:
+  - platform: gpio
+    id: input_0
+    pin:
+      pcf8574: inputs
+      number: 0
+      mode: INPUT
+      inverted: true
+    web_server:
+      sorting_group_id: inputs_di
+      sorting_weight: 10
+
+  - platform: gpio
+    id: input_1
+    pin:
+      pcf8574: inputs
+      number: 1
+      mode: INPUT
+      inverted: true
+    web_server:
+      sorting_group_id: inputs_di
+      sorting_weight: 11
+
+  - platform: gpio
+    id: input_2
+    pin:
+      pcf8574: inputs
+      number: 2
+      mode: INPUT
+      inverted: true
+    web_server:
+      sorting_group_id: inputs_di
+      sorting_weight: 12
+
+  - platform: gpio
+    id: input_3
+    pin:
+      pcf8574: inputs
+      number: 3
+      mode: INPUT
+      inverted: true
+    web_server:
+      sorting_group_id: inputs_di
+      sorting_weight: 13
+
+  - platform: gpio
+    id: input_4
+    pin:
+      pcf8574: inputs
+      number: 4
+      mode: INPUT
+      inverted: true
+    web_server:
+      sorting_group_id: inputs_di
+      sorting_weight: 14
+
+  - platform: gpio
+    id: input_5
+    pin:
+      pcf8574: inputs
+      number: 5
+      mode: INPUT
+      inverted: true
+    web_server:
+      sorting_group_id: inputs_di
+      sorting_weight: 15
+
+  - platform: gpio
+    id: input_6
+    pin:
+      pcf8574: inputs
+      number: 6
+      mode: INPUT
+      inverted: true
+    web_server:
+      sorting_group_id: inputs_di
+      sorting_weight: 16
+
+  - platform: gpio
+    id: input_7
+    pin:
+      pcf8574: inputs
+      number: 7
+      mode: INPUT
+      inverted: true
+    web_server:
+      sorting_group_id: inputs_di
+      sorting_weight: 17
+
+switch:
+  - platform: gpio
+    id: relay_0
+    name: "Relay 0"
+    icon: "mdi:gate"
+    pin:
+      pcf8574: outputs
+      number: 0
+      mode: OUTPUT
+      inverted: false
+    web_server:
+      sorting_group_id: outputs_relayes
+      sorting_weight: 20
+
+  - platform: gpio
+    id: relay_1
+    name: "Relay 1"
+    pin:
+      pcf8574: outputs
+      number: 1
+      mode: OUTPUT
+      inverted: true
+    web_server:
+      sorting_group_id: outputs_relayes
+      sorting_weight: 21
+
+  - platform: gpio
+    name: "Relay 2"
+    id: relay_2
+    pin:
+      pcf8574: outputs
+      number: 2
+      mode: OUTPUT
+      inverted: true
+    web_server:
+      sorting_group_id: outputs_relayes
+      sorting_weight: 22
+
+  - platform: gpio
+    name: "Relay 3"
+    id: relay_3
+    pin:
+      pcf8574: outputs
+      number: 3
+      mode: OUTPUT
+      inverted: true
+    web_server:
+      sorting_group_id: outputs_relayes
+      sorting_weight: 23
+
+  - platform: gpio
+    name: "Relay 4"
+    id: relay_4
+    pin:
+      pcf8574: outputs
+      number: 4
+      mode: OUTPUT
+      inverted: true
+    web_server:
+      sorting_group_id: outputs_relayes
+      sorting_weight: 24
+
+  - platform: gpio
+    name: "Relay 5"
+    id: relay_5
+    pin:
+      pcf8574: outputs
+      number: 5
+      mode: OUTPUT
+      inverted: true
+    web_server:
+      sorting_group_id: outputs_relayes
+      sorting_weight: 25
+
+  - platform: gpio
+    name: "Relay 6"
+    id: relay_6
+    pin:
+      pcf8574: outputs
+      number: 6
+      mode: OUTPUT
+      inverted: true
+    web_server:
+      sorting_group_id: outputs_relayes
+      sorting_weight: 26
+
+  - platform: gpio
+    name: "Relay 7"
+    id: relay_7
+    pin:
+      pcf8574: outputs
+      number: 7
+      mode: OUTPUT
+      inverted: true
+    web_server:
+      sorting_group_id: outputs_relayes
+      sorting_weight: 27

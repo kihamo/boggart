@@ -3,13 +3,14 @@ substitutions:
   ip_address: !secret device_007_ip_address
 
 packages:
-  common: !include ./_includes/common.yaml
-  wifi: !include ./_includes/wifi/home.yaml
-  binary_sensor: !include ./_includes/binary_sensor.yaml
-  sensor: !include ./_includes/sensor.yaml
-  switch: !include ./_includes/switch.yaml
-  text_sensor: !include ./_includes/text_sensor.yaml
-  time: !include ./_includes/time.yaml
+  - !include ./_includes/common.yaml
+  - !include ./_includes/wifi.yaml
+  - !include ./_includes/wifi/home.yaml
+  - !include ./_includes/binary_sensor.yaml
+  - !include ./_includes/sensor.yaml
+  - !include ./_includes/switch.yaml
+  - !include ./_includes/text_sensor.yaml
+  - !include ./_includes/time.yaml
 
 esphome:
   comment: !secret device_007_comment

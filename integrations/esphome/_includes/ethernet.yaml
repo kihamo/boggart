@@ -1,0 +1,21 @@
+---
+ethernet:
+  domain: ""
+  use_address: ${ip_address}
+
+text_sensor:
+  - platform: ethernet_info
+    ip_address:
+      name: "Ethernet IP Address"
+      web_server:
+        sorting_group_id: diagnostic
+    dns_address:
+      id: "ethernet_dns_address"
+      name: "ESP DNS Address"
+      web_server:
+        sorting_group_id: diagnostic
+    mac_address:
+      id: "ethernet_mac_address"
+      name: "ESP Mac Ethernet Address"
+      web_server:
+        sorting_group_id: diagnostic

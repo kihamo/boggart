@@ -1,0 +1,20 @@
+---
+debug:
+
+logger:
+  level: DEBUG
+  baud_rate: 115200
+  logs:
+    mqtt: DEBUG
+    sensor: WARN
+
+text_sensor:
+ - platform: debug
+   device:
+     name: "Device Info"
+     web_server:
+       sorting_group_id: diagnostic
+   reset_reason:
+     name: "Reset reason"
+     web_server:
+       sorting_group_id: diagnostic
