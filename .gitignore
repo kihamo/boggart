@@ -10,3 +10,5 @@ cmd/test
 test
 .DS_Store
 integrations/esphome/venv/
+cmd/*.env
+cmd/*.yaml

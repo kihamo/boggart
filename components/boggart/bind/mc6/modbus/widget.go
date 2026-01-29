@@ -1,8 +1,11 @@
 package modbus
 
 import (
-	"github.com/elazarl/go-bindata-assetfs"
+	assetfs "github.com/elazarl/go-bindata-assetfs"
+
 	"github.com/kihamo/shadow/components/dashboard"
+
+	"github.com/kihamo/boggart/providers/mc6"
 )
 
 func (b *Bind) WidgetHandler(_ *dashboard.Response, r *dashboard.Request) {
@@ -24,269 +27,117 @@ func (b *Bind) WidgetHandler(_ *dashboard.Response, r *dashboard.Request) {
 
 	switch action {
 	case "sensors":
-		if deviceType.IsSupportedTemperatureFormat() {
-			value, err := provider.TemperatureFormat()
-			vars["temperature_format"] = map[string]interface{}{
-				"value": value,
-				"error": err,
+		if deviceType.IsSupported(mc6.AddressTemperatureFormat) {
+			if value, err := provider.TemperatureFormat(); err != nil {
+				widget.FlashError(r, "Get temperature format failed with error %v", "", err)
+			} else {
+				vars["temperature_format"] = value
 			}
 		}
 
-		if deviceType.IsSupportedRoomTemperature() {
-			value, err := provider.RoomTemperature()
-			vars["room_temperature"] = map[string]interface{}{
-				"value": value,
-				"error": err,
+		registers, err := provider.ReadAsMap(mc6.AddressRoomTemperature, 3)
+		if err != nil {
+			widget.FlashError(r, "Get sensors value failed with error %v", "", err)
+		} else {
+			if k := mc6.AddressRoomTemperature; deviceType.IsSupported(k) {
+				vars["room_temperature"] = registers[k].Temperature()
 			}
-		}
 
-		if deviceType.IsSupportedFloorTemperature() {
-			value, err := provider.FloorTemperature()
-			vars["floor_temperature"] = map[string]interface{}{
-				"value": value,
-				"error": err,
+			if k := mc6.AddressFloorTemperature; deviceType.IsSupported(k) {
+				vars["floor_temperature"] = registers[k].Temperature()
 			}
-		}
 
-		if deviceType.IsSupportedFloorOverheat() {
-			value, err := provider.FloorOverheat()
-			vars["floor_overheat"] = map[string]interface{}{
-				"value": value,
-				"error": err,
-			}
-		}
-
-		if deviceType.IsSupportedHumidity() {
-			value, err := provider.Humidity()
-			vars["humidity"] = map[string]interface{}{
-				"value": value,
-				"error": err,
+			if k := mc6.AddressHumidity; deviceType.IsSupported(k) {
+				vars["humidity"] = registers[k].Uint()
 			}
 		}
 
 	case "status":
-		if deviceType.IsSupportedStatus() {
-			value, err := provider.Status()
-			vars["power"] = map[string]interface{}{
-				"value": value,
-				"error": err,
+		registers, err := provider.ReadAsMap(mc6.AddressHeatingValve, 19)
+		if err != nil {
+			widget.FlashError(r, "Get statuses failed with error %v", "", err)
+		} else {
+			if k := mc6.AddressHeatingValve; deviceType.IsSupported(k) {
+				vars["heating_valve"] = registers[k].Bool()
 			}
-		}
 
-		if deviceType.IsSupportedHeatingValve() {
-			value, err := provider.HeatingValve()
-			vars["heating_valve"] = map[string]interface{}{
-				"value": value,
-				"error": err,
+			if k := mc6.AddressCoolingValve; deviceType.IsSupported(k) {
+				vars["cooling_valve"] = registers[k].Bool()
 			}
-		}
 
-		if deviceType.IsSupportedCoolingValve() {
-			value, err := provider.CoolingValve()
-			vars["cooling_valve"] = map[string]interface{}{
-				"value": value,
-				"error": err,
+			if k := mc6.AddressValve; deviceType.IsSupported(k) {
+				vars["valve"] = registers[k].Bool()
 			}
-		}
 
-		if deviceType.IsSupportedHeatingOutput() {
-			value, err := provider.HeatingOutput()
-			vars["heating_output"] = map[string]interface{}{
-				"value": value,
-				"error": err,
+			if k := mc6.AddressFanHigh; deviceType.IsSupported(k) {
+				vars["fan_high"] = registers[k].Bool()
 			}
-		}
 
-		if deviceType.IsSupportedWindowsOpen() {
-			value, err := provider.WindowsOpen()
-			vars["windows_open"] = map[string]interface{}{
-				"value": value,
-				"error": err,
+			if k := mc6.AddressFanMedium; deviceType.IsSupported(k) {
+				vars["fan_medium"] = registers[k].Bool()
+			}
+
+			if k := mc6.AddressFanLow; deviceType.IsSupported(k) {
+				vars["fan_low"] = registers[k].Bool()
+			}
+
+			if k := mc6.AddressHeatingOutput; deviceType.IsSupported(k) {
+				vars["heating_output"] = registers[k].Bool()
+			}
+
+			if k := mc6.AddressHeat; deviceType.IsSupported(k) {
+				vars["heat"] = registers[k].Bool()
+			}
+
+			if k := mc6.AddressHotWater; deviceType.IsSupported(k) {
+				vars["hot_water"] = registers[k].Bool()
+			}
+
+			if k := mc6.AddressTouchLock; deviceType.IsSupported(k) {
+				vars["touch_lock"] = registers[k].Bool()
+			}
+
+			if k := mc6.AddressWindowsOpen; deviceType.IsSupported(k) {
+				vars["windows_open"] = registers[k].Bool()
+			}
+
+			if k := mc6.AddressHolidayFunction; deviceType.IsSupported(k) {
+				vars["holiday_function"] = registers[k].Bool()
+			}
+
+			if k := mc6.AddressHoldingFunction; deviceType.IsSupported(k) {
+				vars["holding_function"] = registers[k].Bool()
+			}
+
+			if k := mc6.AddressBoostFunction; deviceType.IsSupported(k) {
+				vars["boost_function"] = registers[k].Bool()
+			}
+
+			if k := mc6.AddressFloorOverheat; deviceType.IsSupported(k) {
+				vars["floor_overheat"] = registers[k].Bool()
+			}
+
+			if k := mc6.AddressAuxiliaryHeat; deviceType.IsSupported(k) {
+				vars["auxiliary_heat"] = registers[k].Bool()
+			}
+
+			if k := mc6.AddressFanSpeedNumbers; deviceType.IsSupported(k) {
+				vars["fan_speed_numbers"] = registers[k].Uint()
+			}
+
+			if k := mc6.AddressSystemError; deviceType.IsSupported(k) {
+				vars["system_error"] = registers[k].Uint()
 			}
 		}
 
 	case "away":
-		if deviceType.IsSupportedAway() {
-			value, err := provider.Away()
-			vars["away"] = map[string]interface{}{
-				"value": value,
-				"error": err,
-			}
-		}
-
-		if deviceType.IsSupportedTemperatureFormat() {
-			value, err := provider.TemperatureFormat()
-			vars["temperature_format"] = map[string]interface{}{
-				"value": value,
-				"error": err,
-			}
-		}
-
-		if deviceType.IsSupportedAwayTemperature() {
-			value, err := provider.AwayTemperature()
-			vars["away_temperature"] = map[string]interface{}{
-				"value": value,
-				"error": err,
-			}
-		}
 
 	case "hold":
-		if deviceType.IsSupportedHoldingFunction() {
-			value, err := provider.HoldingFunction()
-			vars["holding_function"] = map[string]interface{}{
-				"value": value,
-				"error": err,
-			}
-		}
-
-		if deviceType.IsSupportedTemperatureFormat() {
-			value, err := provider.TemperatureFormat()
-			vars["temperature_format"] = map[string]interface{}{
-				"value": value,
-				"error": err,
-			}
-		}
-
-		if deviceType.IsSupportedHoldingTemperatureAndTime() {
-			temperature, t, err := provider.HoldingTemperatureAndTime()
-			vars["holding_temperature"] = map[string]interface{}{
-				"value": temperature,
-				"error": err,
-			}
-			vars["holding_time"] = map[string]interface{}{
-				"value": t,
-				"error": err,
-			}
-		} else {
-			if deviceType.IsSupportedHoldingTemperature() {
-				value, err := provider.HoldingTemperature()
-				vars["holding_temperature"] = map[string]interface{}{
-					"value": value,
-					"error": err,
-				}
-			}
-
-			if deviceType.IsSupportedHoldingTime() {
-				value, err := provider.HoldingTime()
-				vars["holding_time"] = map[string]interface{}{
-					"value": value,
-					"error": err,
-				}
-			}
-		}
 
 	case "fan":
-		if deviceType.IsSupportedFanSpeedNumbers() {
-			value, err := provider.FanSpeedNumbers()
-			vars["fan_speed_numbers"] = map[string]interface{}{
-				"value": value,
-				"error": err,
-			}
-		}
-
-		if deviceType.IsSupportedFanSpeed() {
-			value, err := provider.FanSpeed()
-			vars["fan_speed"] = map[string]interface{}{
-				"value": value,
-				"error": err,
-			}
-		}
 
 	default:
-		if err == nil {
-			vars["device_type"] = map[string]interface{}{
-				"value": deviceType,
-				"error": err,
-			}
 
-			if deviceType.IsSupportedSystemMode() {
-				value, err := provider.SystemMode()
-				vars["system_mode"] = map[string]interface{}{
-					"value": value,
-					"error": err,
-				}
-			}
-
-			if deviceType.IsSupportedTemperatureFormat() {
-				value, err := provider.TemperatureFormat()
-				vars["temperature_format"] = map[string]interface{}{
-					"value": value,
-					"error": err,
-				}
-			}
-
-			if deviceType.IsSupportedTargetTemperature() {
-				value, err := provider.TargetTemperature()
-				vars["target_temperature"] = map[string]interface{}{
-					"value": value,
-					"error": err,
-				}
-			}
-
-			if deviceType.IsSupportedTargetTemperatureMaximum() {
-				value, err := provider.TargetTemperatureMaximum()
-				vars["target_temperature_maximum"] = map[string]interface{}{
-					"value": value,
-					"error": err,
-				}
-			}
-
-			if deviceType.IsSupportedTargetTemperatureMinimum() {
-				value, err := provider.TargetTemperatureMinimum()
-				vars["target_temperature_minimum"] = map[string]interface{}{
-					"value": value,
-					"error": err,
-				}
-			}
-
-			if deviceType.IsSupportedFloorTemperatureLimit() {
-				value, err := provider.FloorTemperatureLimit()
-				vars["floor_temperature_limit"] = map[string]interface{}{
-					"value": value,
-					"error": err,
-				}
-			}
-
-			if deviceType.IsSupportedPanelLock() {
-				value, err := provider.PanelLock()
-				vars["panel_lock"] = map[string]interface{}{
-					"value": value,
-					"error": err,
-				}
-			}
-
-			if deviceType.IsSupportedPanelLockPin1() {
-				value, err := provider.PanelLockPin1()
-				vars["panel_lock_pin_1"] = map[string]interface{}{
-					"value": value,
-					"error": err,
-				}
-			}
-
-			if deviceType.IsSupportedPanelLockPin2() {
-				value, err := provider.PanelLockPin2()
-				vars["panel_lock_pin_2"] = map[string]interface{}{
-					"value": value,
-					"error": err,
-				}
-			}
-
-			if deviceType.IsSupportedPanelLockPin3() {
-				value, err := provider.PanelLockPin3()
-				vars["panel_lock_pin_3"] = map[string]interface{}{
-					"value": value,
-					"error": err,
-				}
-			}
-
-			if deviceType.IsSupportedPanelLockPin4() {
-				value, err := provider.PanelLockPin4()
-				vars["panel_lock_pin_4"] = map[string]interface{}{
-					"value": value,
-					"error": err,
-				}
-			}
-		}
 	}
 
 	widget.Render(ctx, "widget", vars)

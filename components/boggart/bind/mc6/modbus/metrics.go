@@ -5,10 +5,10 @@ import (
 )
 
 var (
-	metricRoomTemperature  = snitch.NewGauge("room_temperature", "Current room temperature")
-	metricFloorTemperature = snitch.NewGauge("flour_temperature", "Current floor temperature")
+	metricRoomTemperature   = snitch.NewGauge("room_temperature", "Current room temperature")
+	metricFloorTemperature  = snitch.NewGauge("flour_temperature", "Current floor temperature")
 	metricTargetTemperature = snitch.NewGauge("target_temperature", "Target temperature")
-	metricHumidity         = snitch.NewGauge("humidity", "Current humidity")
+	metricHumidity          = snitch.NewGauge("humidity", "Current humidity")
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {

@@ -19,5 +19,5 @@ func (v value) Bool() bool {
 }
 
 func (v value) Uint() uint {
-	return uint(value)
+	return uint(v)
 }

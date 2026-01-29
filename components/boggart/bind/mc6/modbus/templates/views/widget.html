@@ -38,337 +38,144 @@
                                         </thead>
                                         <tbody>
                                         {{ if eq .action "sensors" }}
-                                            {{ if .room_temperature }}
+                                            {{ if .device.IsSupportedRoomTemperature }}
                                             <tr>
                                                 <td>{{ i18n "Room temperature" . }}</td>
-                                                {{ if .room_temperature.error }}
-                                                <td class="text-danger">{{ .room_temperature.error }}</td>
-                                                {{ else }}
-                                                <td>
-                                                    {{ format_float .room_temperature.value 'f' -1 64 }}
-                                                    {{ if not .temperature_format.error }}
-                                                    {{ if eq .temperature_format.value 0 }}°C{{ else }}°F{{ end }}
-                                                    {{ end }}
-                                                </td>
-                                                {{ end }}
+                                                <td>{{ format_float .room_temperature 'f' -1 64 }}{{ if .temperature_format }}°F{{ else }}°C{{ end }}</td>
                                             </tr>
                                             {{ end }}
-                                            {{ if .floor_temperature }}
+                                            {{ if .device.IsSupportedFloorTemperature }}
                                             <tr>
                                                 <td>{{ i18n "Floor temperature" . }}</td>
-                                                {{ if .floor_temperature.error }}
-                                                <td class="text-danger">{{ .floor_temperature.error }}</td>
-                                                {{ else }}
-                                                <td>
-                                                    {{ format_float .floor_temperature.value 'f' -1 64 }}
-                                                    {{ if not .temperature_format.error }}
-                                                    {{ if eq .temperature_format.value 0 }}°C{{ else }}°F{{ end }}
-                                                    {{ end }}
-                                                </td>
-                                                {{ end }}
+                                                <td>{{ format_float .floor_temperature 'f' -1 64 }}{{ if .temperature_format }}°F{{ else }}°C{{ end }}</td>
                                             </tr>
                                             {{ end }}
-                                            {{ if .floor_overheat }}
-                                            <tr>
-                                                <td>{{ i18n "Floor overheat" . }}</td>
-                                                {{ if .floor_overheat.error }}
-                                                <td class="text-danger">{{ .floor_overheat.error }}</td>
-                                                {{ else }}
-                                                <td>{{ if .floor_overheat.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
-                                                {{ end }}
-                                            </tr>
-                                            {{ end }}
-                                            {{ if .humidity }}
+                                            {{ if .device.IsSupportedHumidity }}
                                             <tr>
                                                 <td>{{ i18n "Humidity" . }}</td>
-                                                {{ if .humidity.error }}
-                                                <td class="text-danger">{{ .humidity.error }}</td>
-                                                {{ else }}
-                                                <td>{{ .humidity.value }}%</td>
-                                                {{ end }}
+                                                <td>{{ .humidity }}%</td>
                                             </tr>
                                             {{ end }}
                                         {{ else if eq .action "status" }}
-                                            {{ if .power }}
+                                            {{ if .device.IsSupportedHeatingValve }}
                                             <tr>
-                                                <td>{{ i18n "Power status" . }}</td>
-                                                {{ if .power.error }}
-                                                <td class="text-danger">{{ .power.error }}</td>
-                                                {{ else }}
-                                                <td>{{ if .power.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
-                                                {{ end }}
+                                                <td>{{ i18n "4FCU Heating valve status" . }}</td>
+                                                <td>{{ if .heating_valve }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
                                             </tr>
                                             {{ end }}
-                                            {{ if .heating_valve }}
+                                            {{ if .device.IsSupportedCoolingValve }}
                                             <tr>
-                                                <td>{{ i18n "Heating valve" . }}</td>
-                                                {{ if .heating_valve.error }}
-                                                <td class="text-danger">{{ .heating_valve.error }}</td>
-                                                {{ else }}
-                                                <td>{{ if .heating_valve.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
-                                                {{ end }}
+                                                <td>{{ i18n "4FCU Cooling valve status" . }}</td>
+                                                <td>{{ if .cooling_valve }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
                                             </tr>
                                             {{ end }}
-                                            {{ if .cooling_valve }}
+                                            {{ if .device.IsSupportedValve }}
                                             <tr>
-                                                <td>{{ i18n "Cooling valve" . }}</td>
-                                                {{ if .cooling_valve.error }}
-                                                <td class="text-danger">{{ .cooling_valve.error }}</td>
-                                                {{ else }}
-                                                <td>{{ if .cooling_valve.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
-                                                {{ end }}
+                                                <td>{{ i18n "2FCU Valve status" . }}</td>
+                                                <td>{{ if .valve }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
                                             </tr>
                                             {{ end }}
-                                            {{ if .heating_output }}
+                                            {{ if .device.IsSupportedFanHigh }}
                                             <tr>
-                                                <td>{{ i18n "Heating output" . }}</td>
-                                                {{ if .heating_output.error }}
-                                                <td class="text-danger">{{ .heating_output.error }}</td>
-                                                {{ else }}
-                                                <td>{{ if .heating_output.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
-                                                {{ end }}
+                                                <td>{{ i18n "High fan status" . }}</td>
+                                                <td>{{ if .fan_high }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
                                             </tr>
                                             {{ end }}
-                                            {{ if .windows_open }}
+                                            {{ if .device.IsSupportedFanMedium }}
+                                            <tr>
+                                                <td>{{ i18n "Medium fan status" . }}</td>
+                                                <td>{{ if .fan_medium }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .device.IsSupportedFanLow }}
+                                            <tr>
+                                                <td>{{ i18n "Low fan status" . }}</td>
+                                                <td>{{ if .fan_low }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .device.IsSupportedHeatingOutput }}
+                                            <tr>
+                                                <td>{{ i18n "Heating output status" . }}</td>
+                                                <td>{{ if .heating_output }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .device.IsSupportedHeat }}
+                                            <tr>
+                                                <td>{{ i18n "HW Heat status" . }}</td>
+                                                <td>{{ if .heat }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .device.IsSupportedHotWater }}
+                                            <tr>
+                                                <td>{{ i18n "Hw Hotwater status" . }}</td>
+                                                <td>{{ if .hot_water }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .device.IsSupportedTouchLock }}
+                                            <tr>
+                                                <td>{{ i18n "Touch lock" . }}</td>
+                                                <td>{{ if .touch_lock }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .device.IsSupportedWindowsOpen }}
                                             <tr>
                                                 <td>{{ i18n "Windows open function" . }}</td>
-                                                {{ if .windows_open.error }}
-                                                <td class="text-danger">{{ .windows_open.error }}</td>
-                                                {{ else }}
-                                                <td>{{ if .windows_open.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
-                                                {{ end }}
+                                                <td>{{ if .windows_open }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .device.IsSupportedHolidayFunction }}
+                                            <tr>
+                                                <td>{{ i18n "Holiday funcion" . }}</td>
+                                                <td>{{ if .holiday_function }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .device.IsSupportedHoldingFunction }}
+                                            <tr>
+                                                <td>{{ i18n "Holding funcion" . }}</td>
+                                                <td>{{ if .holding_function }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .device.IsSupportedBoostFunction }}
+                                            <tr>
+                                                <td>{{ i18n "Boost funcion" . }}</td>
+                                                <td>{{ if .boost_function }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .device.IsSupportedFloorOverheat }}
+                                            <tr>
+                                                <td>{{ i18n "Floor overheat" . }}</td>
+                                                <td>{{ if .floor_overheat }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .device.IsSupportedAuxiliaryHeat }}
+                                            <tr>
+                                                <td>{{ i18n "Auxiliary heat" . }}</td>
+                                                <td>{{ if .auxiliary_heat }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .device.IsSupportedFanSpeedNumbers }}
+                                            <tr>
+                                                <td>{{ i18n "Fan speed" . }}</td>
+                                                <td>{{ if .fan_speed_numbers }}{{ i18n "3 speed" . }}{{ else }}{{ i18n "1 speed" . }}{{ end }}</td>
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .device.IsSupportedSystemError }}
+                                            <tr>
+                                                <td>{{ i18n "System error" . }}</td>
+                                                <td>{{ if .system_error }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
                                             </tr>
                                             {{ end }}
                                         {{ else if eq .action "away" }}
-                                            {{ if .away }}
-                                            <tr>
-                                                <td>{{ i18n "Away" . }}</td>
-                                                {{ if .away.error }}
-                                                <td class="text-danger">{{ .away.error }}</td>
-                                                {{ else }}
-                                                <td>{{ if .away.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
-                                                {{ end }}
-                                            </tr>
-                                            {{ end }}
-                                            {{ if .away_temperature }}
-                                            <tr>
-                                                <td>{{ i18n "Away temperature" . }}</td>
-                                                {{ if .away_temperature.error }}
-                                                <td class="text-danger">{{ .away_temperature.error }}</td>
-                                                {{ else }}
-                                                <td>
-                                                    {{ .away_temperature.value }}
-                                                    {{ if not .temperature_format.error }}
-                                                    {{ if eq .temperature_format.value 0 }}°C{{ else }}°F{{ end }}
-                                                    {{ end }}
-                                                </td>
-                                                {{ end }}
-                                            </tr>
-                                            {{ end }}
+                                            
                                         {{ else if eq .action "hold" }}
-                                            {{ if .holding_function }}
-                                            <tr>
-                                                <td>{{ i18n "Holding function" . }}</td>
-                                                {{ if .holding_function.error }}
-                                                <td class="text-danger">{{ .holding_function.error }}</td>
-                                                {{ else }}
-                                                <td>{{ if .holding_function.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
-                                                {{ end }}
-                                            </tr>
-                                            {{ end }}
-                                            {{ if .holding_temperature }}
-                                            <tr>
-                                                <td>{{ i18n "Holding temperature" . }}</td>
-                                                {{ if .holding_temperature.error }}
-                                                <td class="text-danger">{{ .holding_temperature.error }}</td>
-                                                {{ else }}
-                                                <td>
-                                                    {{ .holding_temperature.value }}
-                                                    {{ if not .temperature_format.error }}
-                                                    {{ if eq .temperature_format.value 0 }}°C{{ else }}°F{{ end }}
-                                                    {{ end }}
-                                                </td>
-                                                {{ end }}
-                                            </tr>
-                                            {{ end }}
-                                            {{ if .holding_time }}
-                                            <tr>
-                                                <td>{{ i18n "Holding time" . }}</td>
-                                                {{ if .holding_time.error }}
-                                                <td class="text-danger">{{ .holding_time.error }}</td>
-                                                {{ else }}
-                                                <td>{{ .holding_time.value }}</td>
-                                                {{ end }}
-                                            </tr>
-                                            {{ end }}
+                                            
                                         {{ else if eq .action "fan" }}
-                                            {{ if .fan_speed_numbers }}
-                                            <tr>
-                                                <td>{{ i18n "Fan speed numbers" . }}</td>
-                                                {{ if .fan_speed_numbers.error }}
-                                                <td class="text-danger">{{ .fan_speed_numbers.error }}</td>
-                                                {{ else }}
-                                                <td>
-                                                    {{ if eq .fan_speed_numbers.value 0 }}
-                                                    {{ i18n "1 speed" . }}
-                                                    {{ else if eq .fan_speed.value 1 }}
-                                                    {{ i18n "3 speed" . }}
-                                                    {{ end }}
-                                                </td>
-                                                {{ end }}
-                                            </tr>
-                                            {{ end }}
-                                            {{ if .fan_speed }}
-                                            <tr>
-                                                <td>{{ i18n "Fan speed" . }}</td>
-                                                {{ if .fan_speed.error }}
-                                                <td class="text-danger">{{ .fan_speed.error }}</td>
-                                                {{ else }}
-                                                <td>
-                                                    {{ if eq .fan_speed.value 0 }}
-                                                    {{ i18n "High" . }}
-                                                    {{ else if eq .fan_speed.value 1 }}
-                                                    {{ i18n "Medium" . }}
-                                                    {{ else if eq .fan_speed.value 2 }}
-                                                    {{ i18n "Low" . }}
-                                                    {{ else if eq .fan_speed.value 3 }}
-                                                    {{ i18n "Auto" . }}
-                                                    {{ end }}
-                                                </td>
-                                                {{ end }}
-                                            </tr>
-                                            {{ end }}
+                                            
                                         {{ else }}
                                             <tr>
                                                 <td>{{ i18n "Device type" . }}</td>
-                                                {{ if .device_type.error }}
-                                                <td class="text-danger">{{ .device_type.error }}</td>
-                                                {{ else }}
-                                                <td>{{ .device_type.value }}</td>
-                                                {{ end }}
+                                                <td>{{ .device }}</td>
                                             </tr>
-                                            {{ if .system_mode }}
-                                            <tr>
-                                                <td>{{ i18n "System mode" . }}</td>
-                                                {{ if .system_mode.error }}
-                                                <td class="text-danger">{{ .system_mode.error }}</td>
-                                                {{ else }}
-                                                <td>
-                                                    {{ if eq .system_mode.value 0 }}
-                                                    {{ i18n "Heat" . }}
-                                                    {{ else if eq .system_mode.value 1 }}
-                                                    {{ i18n "Cool" . }}
-                                                    {{ else if eq .system_mode.value 2 }}
-                                                    {{ i18n "Vent" . }}
-                                                    {{ else if eq .system_mode.value 3 }}
-                                                    {{ i18n "Dehumidity" . }}
-                                                    {{ else if eq .system_mode.value 4 }}
-                                                    {{ i18n "Auto" . }}
-                                                    {{ end }}
-                                                </td>
-                                                {{ end }}
-                                            </tr>
-                                            {{ end }}
-                                            {{ if .target_temperature }}
-                                            <tr>
-                                                <td>{{ i18n "Target temperature" . }}</td>
-                                                {{ if .target_temperature.error }}
-                                                <td class="text-danger">{{ .target_temperature.error }}</td>
-                                                {{ else }}
-                                                <td>
-                                                    {{ format_float .target_temperature.value 'f' -1 64 }}
-                                                    {{ if not .temperature_format.error }}
-                                                    {{ if eq .temperature_format.value 0 }}°C{{ else }}°F{{ end }}
-                                                    {{ end }}
-                                                </td>
-                                                {{ end }}
-                                            </tr>
-                                            {{ end }}
-                                            {{ if .target_temperature_maximum }}
-                                            <tr>
-                                                <td>{{ i18n "Target temperature maximum" . }}</td>
-                                                {{ if .target_temperature_maximum.error }}
-                                                <td class="text-danger">{{ .target_temperature_maximum.error }}</td>
-                                                {{ else }}
-                                                <td>
-                                                    {{ .target_temperature_maximum.value }}
-                                                    {{ if not .temperature_format.error }}
-                                                    {{ if eq .temperature_format.value 0 }}°C{{ else }}°F{{ end }}
-                                                    {{ end }}
-                                                </td>
-                                                {{ end }}
-                                            </tr>
-                                            {{ end }}
-                                            {{ if .target_temperature_minimum }}
-                                            <tr>
-                                                <td>{{ i18n "Target temperature minimum" . }}</td>
-                                                {{ if .target_temperature_minimum.error }}
-                                                <td class="text-danger">{{ .target_temperature_minimum.error }}</td>
-                                                {{ else }}
-                                                <td>
-                                                    {{ .target_temperature_minimum.value }}
-                                                    {{ if not .temperature_format.error }}
-                                                    {{ if eq .temperature_format.value 0 }}°C{{ else }}°F{{ end }}
-                                                    {{ end }}
-                                                </td>
-                                                {{ end }}
-                                            </tr>
-                                            {{ end }}
-                                            {{ if .floor_temperature_limit }}
-                                            <tr>
-                                                <td>{{ i18n "Floor temperature limit" . }}</td>
-                                                {{ if .floor_temperature_limit.error }}
-                                                <td class="text-danger">{{ .floor_temperature_limit.error }}</td>
-                                                {{ else }}
-                                                <td>
-                                                    {{ .floor_temperature_limit.value }}
-                                                    {{ if not .temperature_format.error }}
-                                                    {{ if eq .temperature_format.value 0 }}°C{{ else }}°F{{ end }}
-                                                    {{ end }}
-                                                </td>
-                                                {{ end }}
-                                            </tr>
-                                            {{ end }}
-                                            {{ if .panel_lock }}
-                                            <tr>
-                                                <td>{{ i18n "Panel lock" . }}</td>
-                                                {{ if .panel_lock.error }}
-                                                <td class="text-danger">{{ .panel_lock.error }}</td>
-                                                {{ else }}
-                                                <td>{{ if .panel_lock.value }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
-                                                {{ end }}
-                                            </tr>
-                                            {{ end }}
-                                            {{ if and .panel_lock_pin_1 .panel_lock_pin_2 .panel_lock_pin_3 .panel_lock_pin_4 }}
-                                            <tr>
-                                                <td>{{ i18n "Panel PIN code" . }}</td>
-                                                <td>
-                                                    {{ if .panel_lock_pin_1.error }}
-                                                    <span class="text-danger">{{ .panel_lock_pin_1.error }}</span>
-                                                    {{ else }}
-                                                    {{ .panel_lock_pin_1.value }}
-                                                    {{ end }}
-
-                                                    {{ if .panel_lock_pin_2.error }}
-                                                    <span class="text-danger">{{ .panel_lock_pin_2.error }}</span>
-                                                    {{ else }}
-                                                    {{ .panel_lock_pin_2.value }}
-                                                    {{ end }}
-
-                                                    {{ if .panel_lock_pin_3.error }}
-                                                    <span class="text-danger">{{ .panel_lock_pin_3.error }}</span>
-                                                    {{ else }}
-                                                    {{ .panel_lock_pin_3.value }}
-                                                    {{ end }}
-
-                                                    {{ if .panel_lock_pin_4.error }}
-                                                    <span class="text-danger">{{ .panel_lock_pin_4.error }}</span>
-                                                    {{ else }}
-                                                    {{ .panel_lock_pin_4.value }}
-                                                    {{ end }}
-                                                </td>
-                                            </tr>
-                                            {{ end }}
                                         {{ end }}
                                         </tbody>
                                     </table>

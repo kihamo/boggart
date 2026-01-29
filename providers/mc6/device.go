@@ -41,28 +41,22 @@ func (d Device) IsElectricHeatingTimer() bool {
 
 func (d Device) IsSupported(address uint16) bool {
 	switch address {
-	case AddressRoomTemperature, AddressHumidity, AddressDeviceType, AddressTemperatureFormat, AddressStatus,
-		AddressTargetTemperature, AddressTargetTemperatureMaximum, AddressTargetTemperatureMinimum,
-		AddressPanelLock, AddressPanelLockPin1, AddressPanelLockPin2, AddressPanelLockPin3, AddressPanelLockPin4:
+	case AddressRoomTemperature, AddressHumidity, AddressTouchLock, AddressWindowsOpen, AddressHolidayFunction,
+		AddressHoldingFunction, AddressBoostFunction, AddressDeviceType, AddressSystemError, AddressTemperatureFormat,
+		AddressStatus, AddressSystemMode, AddressTargetTemperature, AddressAway, AddressAwayTemperature, AddressHoldingTime,
+		AddressHoldingTemperatureAndTime, AddressHoldingTemperature, AddressHolidayStartTimeHigh, AddressHolidayStartTimeLow,
+		AddressHolidayEndTimeHigh, AddressHolidayEndTimeLow, AddressBoostEndTimeHigh, AddressBoostEndTimeLow, AddressBoost,
+		AddressPanelLock, AddressPanelLockPin1, AddressPanelLockPin2, AddressPanelLockPin3, AddressPanelLockPin4,
+		AddressTargetTemperatureMaximum, AddressTargetTemperatureMinimum, AddressScheduleMode:
 		return true
-	case AddressFloorTemperature, AddressFloorOverheat, AddressFloorTemperatureLimit:
+	case AddressFloorTemperature, AddressHeatingOutput, AddressFloorOverheat, AddressFloorTemperatureLimit:
 		return d.IsHA()
-	case AddressHeatingValve:
+	case AddressHeatingValve, AddressCoolingValve, AddressFanHigh, AddressFanMedium, AddressFanLow, AddressFanSpeedNumbers,
+		AddressFanSpeed:
 		return d.IsFCU4()
-	case AddressCoolingValve:
-		return d.IsFCU4()
-	case AddressHeatingOutput:
-		return d.IsHA()
-	case AddressWindowsOpen:
-		return d.IsHA() || d.IsFCU4()
-	case AddressHoldingFunction, AddressHoldingTime, AddressHoldingTemperatureAndTime, AddressHoldingTemperature:
-		return d.IsHA()
-	case AddressSystemMode:
-		return d.IsFCU4()
-	case AddressFanSpeedNumbers, AddressFanSpeed:
-		return d.IsFCU4()
-	case AddressAway, AddressAwayTemperature:
-		return d.IsHA()
+
+	case AddressValve, AddressHeat, AddressHotWater, AddressAuxiliaryHeat, AddressOptimumStart:
+		return true // ????
 	}
 
 	return false
@@ -88,16 +82,52 @@ func (d Device) IsSupportedCoolingValve() bool {
 	return d.IsSupported(AddressCoolingValve)
 }
 
-func (d Device) IsSupportedWindowsOpen() bool {
-	return d.IsSupported(AddressWindowsOpen)
+func (d Device) IsSupportedValve() bool {
+	return d.IsSupported(AddressValve)
+}
+
+func (d Device) IsSupportedFanHigh() bool {
+	return d.IsSupported(AddressFanHigh)
+}
+
+func (d Device) IsSupportedFanMedium() bool {
+	return d.IsSupported(AddressFanMedium)
+}
+
+func (d Device) IsSupportedFanLow() bool {
+	return d.IsSupported(AddressFanLow)
 }
 
 func (d Device) IsSupportedHeatingOutput() bool {
 	return d.IsSupported(AddressHeatingOutput)
 }
 
+func (d Device) IsSupportedHeat() bool {
+	return d.IsSupported(AddressHeat)
+}
+
+func (d Device) IsSupportedHotWater() bool {
+	return d.IsSupported(AddressHotWater)
+}
+
+func (d Device) IsSupportedTouchLock() bool {
+	return d.IsSupported(AddressTouchLock)
+}
+
+func (d Device) IsSupportedWindowsOpen() bool {
+	return d.IsSupported(AddressWindowsOpen)
+}
+
+func (d Device) IsSupportedHolidayFunction() bool {
+	return d.IsSupported(AddressHolidayFunction)
+}
+
 func (d Device) IsSupportedHoldingFunction() bool {
 	return d.IsSupported(AddressHoldingFunction)
+}
+
+func (d Device) IsSupportedBoostFunction() bool {
+	return d.IsSupported(AddressBoostFunction)
 }
 
 func (d Device) IsSupportedFloorOverheat() bool {
@@ -108,8 +138,16 @@ func (d Device) IsSupportedDeviceType() bool {
 	return d.IsSupported(AddressDeviceType)
 }
 
+func (d Device) IsSupportedAuxiliaryHeat() bool {
+	return d.IsSupported(AddressAuxiliaryHeat)
+}
+
 func (d Device) IsSupportedFanSpeedNumbers() bool {
 	return d.IsSupported(AddressFanSpeedNumbers)
+}
+
+func (d Device) IsSupportedSystemError() bool {
+	return d.IsSupported(AddressSystemError)
 }
 
 func (d Device) IsSupportedTemperatureFormat() bool {
@@ -152,6 +190,38 @@ func (d Device) IsSupportedHoldingTemperature() bool {
 	return d.IsSupported(AddressHoldingTemperature)
 }
 
+func (d Device) IsSupportedHolidayStartTimeHigh() bool {
+	return d.IsSupported(AddressHolidayStartTimeHigh)
+}
+
+func (d Device) IsSupportedHolidayStartTimeLow() bool {
+	return d.IsSupported(AddressHolidayStartTimeLow)
+}
+
+func (d Device) IsSupportedHolidayEndTimeHigh() bool {
+	return d.IsSupported(AddressHolidayEndTimeHigh)
+}
+
+func (d Device) IsSupportedHolidayEndTimeLow() bool {
+	return d.IsSupported(AddressHolidayEndTimeLow)
+}
+
+func (d Device) IsSupportedOptimumStart() bool {
+	return d.IsSupported(AddressOptimumStart)
+}
+
+func (d Device) IsSupportedBoostEndTimeHigh() bool {
+	return d.IsSupported(AddressBoostEndTimeHigh)
+}
+
+func (d Device) IsSupportedBoostEndTimeLow() bool {
+	return d.IsSupported(AddressBoostEndTimeLow)
+}
+
+func (d Device) IsSupportedHBoost() bool {
+	return d.IsSupported(AddressBoost)
+}
+
 func (d Device) IsSupportedPanelLock() bool {
 	return d.IsSupported(AddressPanelLock)
 }
@@ -182,6 +252,10 @@ func (d Device) IsSupportedTargetTemperatureMinimum() bool {
 
 func (d Device) IsSupportedFloorTemperatureLimit() bool {
 	return d.IsSupported(AddressFloorTemperatureLimit)
+}
+
+func (d Device) IsSupportedScheduleMode() bool {
+	return d.IsSupported(AddressScheduleMode)
 }
 
 func (d Device) String() string {
