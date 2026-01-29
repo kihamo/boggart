@@ -30,7 +30,7 @@ func (b *Bind) InstallerSteps(ctx context.Context, system installer.System) ([]i
 			Content: `1. Click Setup in menu
 2. Select Screen Lock item
 3. Enter pin 3036 and click lock icon
-4. Wifi Modbus TCP
+4. Setn Wifi Modbus TCP (activated read only registers) and Modbus RTU 485 (activated read and write registers)
 5. Click Next button
 6. Click Exit button and device reload`,
 		}, {
